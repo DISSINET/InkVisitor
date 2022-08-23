@@ -1,7 +1,7 @@
 import { IDbModel, UnknownObject, fillFlatObject } from "@models/common";
-import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
+import { r as rethink, Connection, WriteResult, RDatum } from "rethinkdb-ts";
 import { IRelation } from "@shared/types";
-import { RelationEnums, UserEnums } from "@shared/enums";
+import { DbEnums, RelationEnums, UserEnums } from "@shared/enums";
 import { EnumValidators } from "@shared/enums";
 import { InternalServerError } from "@shared/types/errors";
 import User from "@models/user/user";
@@ -82,6 +82,12 @@ export default class Relation implements IRelation, IDbModel {
     return user.role !== UserEnums.Role.Viewer;
   }
 
+  /**
+   * Searched for relation by id
+   * @param req 
+   * @param id 
+   * @returns relation model or null if not found
+   */
   static async getById(req: IRequest, id: string): Promise<Relation | null> {
     const data = await rethink
       .table(Relation.table)
@@ -89,5 +95,22 @@ export default class Relation implements IRelation, IDbModel {
       .run(req.db.connection);
 
     return data ? new Relation(data) : null;
+  }
+
+  /**
+   * Searches for relation assigned for entityId, filtered by optional relation type
+   * @param req 
+   * @param entityId 
+   * @param relType 
+   * @returns array of relation models
+   */
+  static async getForEntity(req: IRequest, entityId: string, relType?: RelationEnums.Type): Promise<Relation[]> {
+    const data = await rethink
+      .table(Relation.table)
+      .getAll(entityId, { index: DbEnums.Indexes.RelationsEntityIds })
+      .filter(relType ? { type: relType } : {})
+      .run(req.db.connection);
+
+    return data ? data.map(d => new Relation(d)) : [];
   }
 }

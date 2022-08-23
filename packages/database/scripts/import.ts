@@ -11,7 +11,7 @@ import {
   DbSchema,
   TableSchema,
 } from "./import-utils";
-import { auditsIndexes, entitiesIndexes } from "./indexes";
+import { auditsIndexes, entitiesIndexes, relationsIndexes } from "./indexes";
 
 const [datasetId, env] = parseArgs();
 const envData = require("dotenv").config({ path: `env/.env.${env}` }).parsed;
@@ -35,12 +35,12 @@ const datasets: Record<string, DbSchema> = {
     aclPermissions: {
       tableName: "acl_permissions",
       data: require("../datasets/default/acl_permissions.json"),
-      transform: function () {},
+      transform: function () { },
     },
     entities: {
       tableName: "entities",
       data: require("../datasets/all/entities.json"),
-      transform: function () {},
+      transform: function () { },
       indexes: entitiesIndexes,
     },
     audits: {
@@ -57,8 +57,8 @@ const datasets: Record<string, DbSchema> = {
     relations: {
       tableName: "relations",
       data: require("../datasets/all/relations.json"),
-      transform: function () {},
-      indexes: auditsIndexes,
+      transform: function () { },
+      indexes: relationsIndexes,
     },
   },
   empty: {
@@ -75,12 +75,12 @@ const datasets: Record<string, DbSchema> = {
     aclPermissions: {
       tableName: "acl_permissions",
       data: require("../datasets/default/acl_permissions.json"),
-      transform: function () {},
+      transform: function () { },
     },
     entities: {
       tableName: "entities",
       data: require("../datasets/empty/entities.json"),
-      transform: function () {},
+      transform: function () { },
       indexes: entitiesIndexes,
     },
     audits: {
@@ -97,8 +97,8 @@ const datasets: Record<string, DbSchema> = {
     relations: {
       tableName: "relations",
       data: require("../datasets/empty/relations.json"),
-      transform: function () {},
-      indexes: auditsIndexes,
+      transform: function () { },
+      indexes: relationsIndexes,
     },
   },
   allparsed: {
@@ -115,12 +115,12 @@ const datasets: Record<string, DbSchema> = {
     aclPermissions: {
       tableName: "acl_permissions",
       data: require("../datasets/default/acl_permissions.json"),
-      transform: function () {},
+      transform: function () { },
     },
     entities: {
       tableName: "entities",
       data: require("../datasets/all-parsed/entities.json"),
-      transform: function () {},
+      transform: function () { },
       indexes: entitiesIndexes,
     },
     audits: {
@@ -137,8 +137,8 @@ const datasets: Record<string, DbSchema> = {
     relations: {
       tableName: "relations",
       data: require("../datasets/empty/relations.json"),
-      transform: function () {},
-      indexes: auditsIndexes,
+      transform: function () { },
+      indexes: relationsIndexes,
     },
   },
 };
