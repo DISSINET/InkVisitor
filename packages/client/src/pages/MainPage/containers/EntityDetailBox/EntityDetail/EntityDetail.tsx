@@ -455,8 +455,8 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
   }, [error]);
 
   const usedInPages = useMemo(() => {
-    if (entity && entity.usedInStatement) {
-      return Math.ceil(entity.usedInStatement.length / statementsPerPage);
+    if (entity && entity.usedInStatements) {
+      return Math.ceil(entity.usedInStatements.length / statementsPerPage);
     } else {
       return 0;
     }
@@ -468,7 +468,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
 
   const mayBeRemoved = useMemo(() => {
     return (
-      entity && entity.usedInStatement && entity.usedInStatement.length === 0
+      entity && entity.usedInStatements && entity.usedInStatements.length === 0
     );
   }, [entity]);
 
@@ -1293,7 +1293,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
                 <EntityDetailStatementsTable
                   title={{ singular: "Statement", plural: "Statements" }}
                   entities={entity.entities}
-                  useCases={entity.usedInStatement}
+                  useCases={entity.usedInStatements}
                   key="Statement"
                 />
               )}
