@@ -401,7 +401,7 @@ class Statement extends Entity implements IStatement {
   getEntitiesIds(): string[] {
     const entitiesIds: Record<string, null> = {};
 
-    // get ids from Entity.props ( + childs)
+    // get ids from Entity.props ( + childs) and references
     new Entity({}).getEntitiesIds.call(this).forEach((element) => {
       entitiesIds[element] = null;
     });
@@ -416,9 +416,13 @@ class Statement extends Entity implements IStatement {
       }
     });
 
-    // get ids from Statement.data.actants, Statement.data.actants.props ( + childs)
+    // get ids from Statement.data.actants, Statement.data.actants[].props ( + childs), 
+    // Statement.data.actants[].classifications, Statement.data.actants[].identifications
     this.data.actants.forEach((a) => {
       entitiesIds[a.entityId] = null;
+      a.classifications.forEach(ca => entitiesIds[ca.entityId] = null);
+      a.identifications.forEach(ci => entitiesIds[ci.entityId] = null);
+
       Entity.extractIdsFromProps(a.props).forEach((element) => {
         entitiesIds[element] = null;
       });
@@ -427,12 +431,6 @@ class Statement extends Entity implements IStatement {
     if (this.data.territory) {
       entitiesIds[this.data.territory.territoryId] = null;
     }
-
-    Entity.extractIdsFromReferences(this.references).forEach((element) => {
-      if (element) {
-        entitiesIds[element] = null;
-      }
-    });
 
     this.data.tags.forEach((t) => (entitiesIds[t] = null));
 
@@ -553,6 +551,23 @@ class Statement extends Entity implements IStatement {
         return a.data.territory.order - b.data.territory.order;
       }
     });
+  }
+
+  /**
+   * finds statements that are using provided entityId in their 
+   * data.actants[].classifications or data.actants[].ident
+   * @param db 
+   * @param entityId 
+   * @returns 
+   */
+  static async findByDataActantsCI(
+    db: Connection | undefined,
+    entityId: string
+  ): Promise<IStatement[]> {
+    return await rethink
+      .table(Entity.table)
+      .getAll(entityId, { index: DbEnums.Indexes.StatementActantsCI })
+      .run(db);
   }
 
   /**
