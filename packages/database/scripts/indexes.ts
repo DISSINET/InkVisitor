@@ -64,6 +64,24 @@ const entitiesIndexes: ((table: RTable) => any)[] = [
       }
     ),
   (table: RTable) => table.indexCreate(DbEnums.Indexes.EntityUsedTemplate),
+  (table: RTable) =>
+    table.indexCreate(
+      DbEnums.Indexes.StatementActantsCI,
+      function (row: RDatum) {
+        return row("data")("actants").concatMap(function (a: RDatum) {
+          return r.branch(a.hasFields("classifications"), a("classifications").map(function (cRow: RDatum) {
+            return cRow("entityId");
+          }), []).add(
+            r.branch(a.hasFields("identifications"), a("identifications").map(function (iRow: RDatum) {
+              return iRow("entityId");
+            }), []) as any
+          )
+        }).distinct();
+      },
+      {
+        multi: true,
+      }
+    ),
 ];
 
 const auditsIndexes: ((table: RTable) => any)[] = [
