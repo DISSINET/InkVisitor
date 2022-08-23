@@ -6,7 +6,7 @@ import { FaPlus } from "react-icons/fa";
 import {
   StyledListHeaderColumn,
   StyledReferencesList,
-} from "./EntityReferenceInputStyles";
+} from "./EntityReferenceTableStyles";
 import { EntityReferenceTableRow } from "./EntityReferenceTableRow";
 
 interface EntityReferenceTable {

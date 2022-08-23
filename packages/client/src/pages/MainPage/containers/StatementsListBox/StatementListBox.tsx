@@ -369,8 +369,8 @@ export const StatementListBox: React.FC = () => {
         Cell: ({ row }: Cell) => {
           const subjectIds: string[] = row.values.data?.actants
             ? row.values.data.actants
-              .filter((a: any) => a.position === "s")
-              .map((a: any) => a.actant)
+                .filter((a: any) => a.position === "s")
+                .map((a: any) => a.entityId)
             : [];
 
           const subjectObjects = subjectIds.map(
@@ -416,7 +416,7 @@ export const StatementListBox: React.FC = () => {
         Header: "Actions",
         Cell: ({ row }: Cell) => {
           const actionIds = row.values.data?.actions
-            ? row.values.data.actions.map((a: any) => a.action)
+            ? row.values.data.actions.map((a: any) => a.actionId)
             : [];
 
           const actionObjects: IAction[] = actionIds.map(
@@ -463,8 +463,8 @@ export const StatementListBox: React.FC = () => {
         Cell: ({ row }: Cell) => {
           const actantIds = row.values.data?.actants
             ? row.values.data.actants
-              .filter((a: any) => a.position !== "s")
-              .map((a: any) => a.actant)
+                .filter((a: any) => a.position !== "s")
+                .map((a: any) => a.entityId)
             : [];
           const isOversized = actantIds.length > 4;
 
@@ -665,10 +665,11 @@ export const StatementListBox: React.FC = () => {
 
       <Submit
         title="Delete statement"
-        text={`Do you really want to delete statement [${statementToDelete?.label
-          ? statementToDelete.label
-          : statementToDelete?.id
-          }]?`}
+        text={`Do you really want to delete statement [${
+          statementToDelete?.label
+            ? statementToDelete.label
+            : statementToDelete?.id
+        }]?`}
         show={showSubmit}
         onCancel={() => {
           setShowSubmit(false);

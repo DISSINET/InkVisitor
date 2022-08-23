@@ -22,7 +22,13 @@ import {
   MultiInput,
 } from "components";
 import { EntitySuggester, EntityTag } from "components/advanced";
-import { CProp, CStatementActant, CStatementAction } from "constructors";
+import {
+  CClassification,
+  CIdentification,
+  CProp,
+  CStatementActant,
+  CStatementAction,
+} from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
 import { FaUnlink } from "react-icons/fa";
@@ -129,7 +135,9 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     ["territoryActants", statement.data.territory?.territoryId],
     async () => {
       if (statement.data.territory?.territoryId) {
-        const res = await api.entityIdsInTerritory(statement.data.territory.territoryId);
+        const res = await api.entityIdsInTerritory(
+          statement.data.territory.territoryId
+        );
         return res.data;
       } else {
         return [];
@@ -290,7 +298,8 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
     [...newStatementData.actants, ...newStatementData.actions].forEach(
       (actant: IStatementActant | IStatementAction) => {
-        const actantId = "entityId" in actant ? actant.entityId : actant.actionId;
+        const actantId =
+          "entityId" in actant ? actant.entityId : actant.actionId;
         // adding 1st level prop
         if (actantId === originId) {
           actant.props = [...actant.props, newProp];
@@ -316,6 +325,32 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         });
       }
     );
+
+    updateStatementDataMutation.mutate(newStatementData);
+  };
+
+  const addClassification = (originId: string) => {
+    const newClassification = CClassification();
+    const newStatementData = { ...statement.data };
+
+    [...newStatementData.actants].forEach((actant: IStatementActant) => {
+      if (actant.entityId === originId) {
+        actant.classifications = [...actant.classifications, newClassification];
+      }
+    });
+
+    updateStatementDataMutation.mutate(newStatementData);
+  };
+
+  const addIdentification = (originId: string) => {
+    const newIdentification = CIdentification();
+    const newStatementData = { ...statement.data };
+
+    [...newStatementData.actants].forEach((actant: IStatementActant) => {
+      if (actant.entityId === originId) {
+        actant.identifications = [...actant.identifications, newIdentification];
+      }
+    });
 
     updateStatementDataMutation.mutate(newStatementData);
   };
@@ -572,7 +607,6 @@ export const StatementEditor: React.FC<StatementEditor> = ({
               <StatementEditorActionTable
                 userCanEdit={userCanEdit}
                 statement={statement}
-                statementId={statementId}
                 updateActionsMutation={updateStatementDataMutation}
                 addProp={addProp}
                 updateProp={updateProp}
@@ -607,7 +641,6 @@ export const StatementEditor: React.FC<StatementEditor> = ({
               <StatementEditorActantTable
                 statement={statement}
                 userCanEdit={userCanEdit}
-                statementId={statementId}
                 classEntitiesActant={classesActants}
                 updateStatementDataMutation={updateStatementDataMutation}
                 addProp={addProp}
@@ -615,6 +648,8 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 removeProp={removeProp}
                 movePropToIndex={movePropToIndex}
                 territoryParentId={statementTerritoryId}
+                addClassification={addClassification}
+                addIdentification={addIdentification}
               />
             </StyledEditorActantTableWrapper>
             {userCanEdit && (
