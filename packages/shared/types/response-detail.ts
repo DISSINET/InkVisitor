@@ -44,11 +44,12 @@ export interface IResponseUsedInStatementIdentification {
   statementId: string;
   actantEntityId: string;
   relationEntityId: string;
-  data: IStatementClassification;
+  data: IStatementIdentification;
 }
+
 export interface IResponseUsedInStatementClassification {
   statementId: string;
   actantEntityId: string;
   relationEntityId: string;
-  data: IStatementIdentification; // this is a duplicate in some values, but probably the cleanest possible way
+  data: IStatementClassification; // this is a duplicate in some values, but probably the cleanest possible way
 }
