@@ -70,4 +70,8 @@ const auditsIndexes: ((table: RTable) => any)[] = [
   (table: RTable) => table.indexCreate(DbEnums.Indexes.AuditEntityId),
 ];
 
-export { entitiesIndexes, auditsIndexes };
+const relationsIndexes: ((table: RTable) => any)[] = [
+  (table: RTable) => table.indexCreate(DbEnums.Indexes.RelationsEntityIds, { multi: true }),
+];
+
+export { entitiesIndexes, auditsIndexes, relationsIndexes };

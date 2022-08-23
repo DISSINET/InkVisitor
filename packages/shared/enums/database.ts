@@ -6,5 +6,6 @@ export namespace DbEnums {
         AuditEntityId = "entityId",
         EntityUsedTemplate = "usedTemplate",
         PropsRecursive = "props.recursive",
+        RelationsEntityIds = "entityIds"
     }
 }
