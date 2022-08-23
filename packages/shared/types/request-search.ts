@@ -2,12 +2,13 @@
  * Deprecated
  */
 
-import { EntityClass, isValidEntityClass } from "../enums";
+import { EntityEnums } from "../enums";
+import { EnumValidators } from "../enums/validators";
 import { BadParams } from "./errors";
 
 export interface IRequestSearch {
-  class?: EntityClass;
-  excluded?: EntityClass[];
+  class?: EntityEnums.Class;
+  excluded?: EntityEnums.Class[];
   label?: string;
   entityIds?: string[];
   cooccurrenceId?: string;
@@ -16,15 +17,15 @@ export interface IRequestSearch {
 }
 
 export class RequestSearch {
-  class?: EntityClass;
+  class?: EntityEnums.Class;
   label?: string;
   entityIds?: string[];
   cooccurrenceId?: string;
-  excluded?: EntityClass[];
+  excluded?: EntityEnums.Class[];
   onlyTemplates?: boolean;
   usedTemplate?: string;
 
-  constructor(requestData: IRequestSearch & { excluded?: EntityClass[] }) {
+  constructor(requestData: IRequestSearch & { excluded?: EntityEnums.Class[] }) {
     this.class = requestData.class;
     this.label = requestData.label;
     this.cooccurrenceId =
@@ -47,7 +48,7 @@ export class RequestSearch {
   }
 
   validate(): Error | void {
-    if (this.class && !isValidEntityClass(this.class)) {
+    if (this.class && !EnumValidators.IsValidEntityClass(this.class)) {
       return new BadParams("invalid 'class' value");
     }
 

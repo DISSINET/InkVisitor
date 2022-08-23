@@ -1,9 +1,9 @@
 import { IEntity } from ".";
-import { EntityClass, EntityLogicalType } from "../enums";
+import { EntityEnums } from "../enums";
 
 export interface IEvent extends IEntity {
-  class: EntityClass.Event;
+  class: EntityEnums.Class.Event;
   data: {
-    logicalType: EntityLogicalType;
+    logicalType: EntityEnums.LogicalType;
   };
 }

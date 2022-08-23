@@ -1,7 +1,7 @@
-import { UserRole } from "./../enums";
+import { UserEnums } from "./../enums";
 
 export class RequestPermissionUpdate {
   controller?: string;
   method?: string;
-  roles?: UserRole[];
+  roles?: UserEnums.Role[];
 }

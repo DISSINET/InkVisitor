@@ -1,4 +1,4 @@
-import { EntityClass } from "@shared/enums";
+import { EntityEnums } from "@shared/enums";
 import { IResponseStatement } from "@shared/types";
 import {
   IStatementActant,
@@ -79,7 +79,7 @@ export const StatementEditorActantClassifications: React.FC<
                   </StyledTagWrapper>
                 ) : (
                   <EntitySuggester
-                    categoryTypes={[EntityClass.Concept]}
+                    categoryTypes={[EntityEnums.Class.Concept]}
                     onSelected={(newSelectedId: string) => {
                       const newClassifications: IStatementClassification[] =
                         classifications.map((c) =>
@@ -128,7 +128,7 @@ export const StatementEditorActantClassifications: React.FC<
                         ),
                       });
                     }}
-                    classEntitiesActant={[EntityClass.Concept]}
+                    classEntitiesActant={[EntityEnums.Class.Concept]}
                     loading={updateStatementDataMutation.isLoading}
                     isInsideTemplate={isInsideTemplate}
                     territoryParentId={territoryParentId}

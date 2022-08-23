@@ -1,4 +1,4 @@
-import { UserRoleMode } from "@shared/enums";
+import { UserEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
 import { Button } from "components";
 import React, { useRef, useState } from "react";
@@ -16,7 +16,7 @@ import {
 
 interface TerritoryTreeContextMenu {
   territoryActant: IEntity;
-  right: UserRoleMode;
+  right: UserEnums.RoleMode;
   empty: boolean;
   onMenuOpen: () => void;
   onMenuClose: () => void;
@@ -85,7 +85,7 @@ export const TerritoryTreeContextMenu: React.FC<TerritoryTreeContextMenu> = ({
             height={currentPosition.height}
             style={animatedMount}
           >
-            {right !== UserRoleMode.Read && (
+            {right !== UserEnums.RoleMode.Read && (
               <Button
                 key="add"
                 tooltip="add child territory"
@@ -133,20 +133,20 @@ export const TerritoryTreeContextMenu: React.FC<TerritoryTreeContextMenu> = ({
                 onMenuClose();
               }}
             />
-            {((right === UserRoleMode.Admin && empty) ||
-              (right === UserRoleMode.Write && empty)) && (
-              <Button
-                key="delete"
-                tooltip="delete territory"
-                icon={<FaTrashAlt size={14} />}
-                color="danger"
-                onClick={() => {
-                  setShowSubmit(true);
-                  setShowMenu(false);
-                  onMenuClose();
-                }}
-              />
-            )}
+            {((right === UserEnums.RoleMode.Admin && empty) ||
+              (right === UserEnums.RoleMode.Write && empty)) && (
+                <Button
+                  key="delete"
+                  tooltip="delete territory"
+                  icon={<FaTrashAlt size={14} />}
+                  color="danger"
+                  onClick={() => {
+                    setShowSubmit(true);
+                    setShowMenu(false);
+                    onMenuClose();
+                  }}
+                />
+              )}
           </StyledContextButtonGroup>
         )}
       </StyledWrapper>

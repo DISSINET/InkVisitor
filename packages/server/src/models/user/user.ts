@@ -12,7 +12,7 @@ import {
   fillFlatObject,
   UnknownObject,
 } from "@models/common";
-import { UserRole, UserRoleMode } from "@shared/enums";
+import { UserEnums } from "@shared/enums";
 import { ModelNotValidError } from "@shared/types/errors";
 import { generateRandomString, generateUuid, hashPassword } from "@common/auth";
 import { regExpEscape } from "@common/functions";
@@ -20,7 +20,7 @@ import { nonenumerable } from "@common/decorators";
 
 export class UserRight implements IUserRight {
   territory = "";
-  mode: UserRoleMode = UserRoleMode.Read;
+  mode: UserEnums.RoleMode = UserEnums.RoleMode.Read;
 
   constructor(data: IUserRight) {
     this.territory = data.territory;
@@ -110,7 +110,7 @@ export default class User implements IDbModel, IUser {
   password: string = "";
 
   name: string = "";
-  role: UserRole = UserRole.Viewer;
+  role: UserEnums.Role = UserEnums.Role.Viewer;
   active: boolean = false;
   options: UserOptions = new UserOptions({});
   bookmarks: BookmarkFolder[] = [];

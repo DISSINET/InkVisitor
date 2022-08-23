@@ -1,4 +1,4 @@
-import { EntityClass, UserRole } from "@shared/enums";
+import { EntityEnums, UserEnums } from "@shared/enums";
 import { IOption } from "@shared/types";
 import api from "api";
 import {
@@ -54,7 +54,7 @@ export const SuggesterCreateModal: React.FC<SuggesterCreateModal> = ({
   const [detail, setDetail] = useState<string>("");
   const [territoryId, setTerritoryId] = useState<string>("");
 
-  const userRole = localStorage.getItem("userrole") as UserRole;
+  const userRole = localStorage.getItem("userrole") as UserEnums.Role;
 
   const handleCreateActant = () => {
     onCreate({
@@ -94,7 +94,7 @@ export const SuggesterCreateModal: React.FC<SuggesterCreateModal> = ({
         } else if (
           selectedCategory.value === "T" &&
           !territoryId &&
-          userRole !== UserRole.Admin
+          userRole !== UserEnums.Role.Admin
         ) {
           toast.warning("Parent territory is required!");
         } else {
@@ -145,49 +145,49 @@ export const SuggesterCreateModal: React.FC<SuggesterCreateModal> = ({
             {/* Suggester territory */}
             {(selectedCategory.value === "T" ||
               selectedCategory.value === "S") && (
-              <>
-                <ModalInputLabel>
-                  {selectedCategory === "T"
-                    ? "Parent territory: "
-                    : "Territory: "}
-                </ModalInputLabel>
-                <ModalInputWrap>
-                  {territory ? (
-                    <Tag
-                      propId={territory.id}
-                      label={territory.label}
-                      entityClass={territory.class}
-                      tooltipPosition={"left center"}
-                      button={
-                        <Button
-                          key="d"
-                          icon={<FaUnlink />}
-                          color="danger"
-                          inverted={true}
-                          tooltip="unlink actant"
-                          onClick={() => {
-                            setTerritoryId("");
-                          }}
-                        />
-                      }
-                    />
-                  ) : (
-                    <EntitySuggester
-                      disableTemplatesAccept
-                      filterEditorRights
-                      inputWidth={96}
-                      disableCreate
-                      categoryTypes={[EntityClass.Territory]}
-                      onSelected={(newSelectedId: string) => {
-                        setTerritoryId(newSelectedId);
-                      }}
-                    />
-                  )}
-                </ModalInputWrap>
-              </>
-            )}
+                <>
+                  <ModalInputLabel>
+                    {selectedCategory === "T"
+                      ? "Parent territory: "
+                      : "Territory: "}
+                  </ModalInputLabel>
+                  <ModalInputWrap>
+                    {territory ? (
+                      <Tag
+                        propId={territory.id}
+                        label={territory.label}
+                        entityClass={territory.class}
+                        tooltipPosition={"left center"}
+                        button={
+                          <Button
+                            key="d"
+                            icon={<FaUnlink />}
+                            color="danger"
+                            inverted={true}
+                            tooltip="unlink actant"
+                            onClick={() => {
+                              setTerritoryId("");
+                            }}
+                          />
+                        }
+                      />
+                    ) : (
+                      <EntitySuggester
+                        disableTemplatesAccept
+                        filterEditorRights
+                        inputWidth={96}
+                        disableCreate
+                        categoryTypes={[EntityEnums.Class.Territory]}
+                        onSelected={(newSelectedId: string) => {
+                          setTerritoryId(newSelectedId);
+                        }}
+                      />
+                    )}
+                  </ModalInputWrap>
+                </>
+              )}
           </ModalInputForm>
-          {userRole === UserRole.Admin && (
+          {userRole === UserEnums.Role.Admin && (
             <>
               {selectedCategory.value === "T" && !territoryId ? (
                 <StyledNote>
@@ -224,7 +224,7 @@ export const SuggesterCreateModal: React.FC<SuggesterCreateModal> = ({
               } else if (
                 selectedCategory.value === "T" &&
                 !territoryId &&
-                userRole !== UserRole.Admin
+                userRole !== UserEnums.Role.Admin
               ) {
                 toast.warning("Parent territory is required!");
               } else {

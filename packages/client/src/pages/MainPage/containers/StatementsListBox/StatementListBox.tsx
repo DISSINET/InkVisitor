@@ -1,4 +1,4 @@
-import { Order, UserRole, UserRoleMode } from "@shared/enums";
+import { EntityEnums, UserEnums } from "@shared/enums";
 import {
   IAction,
   IEntity,
@@ -44,11 +44,11 @@ import {
 const initialData: {
   statements: (IResponseStatement & { audit?: IResponseAudit })[];
   entities: { [key: string]: IEntity };
-  right: UserRoleMode;
+  right: UserEnums.RoleMode;
 } = {
   statements: [],
   entities: {},
-  right: UserRoleMode.Read,
+  right: UserEnums.RoleMode.Read,
 };
 
 export const StatementListBox: React.FC = () => {
@@ -159,7 +159,7 @@ export const StatementListBox: React.FC = () => {
 
     const duplicatedStatement = DStatement(
       newStatementObject as IStatement,
-      localStorage.getItem("userrole") as UserRole
+      localStorage.getItem("userrole") as UserEnums.Role
     );
     duplicateStatementMutation.mutate(duplicatedStatement);
   };
@@ -218,11 +218,11 @@ export const StatementListBox: React.FC = () => {
 
     if (index + 1 > statements.length) {
       // last one
-      newOrder = Order.Last;
+      newOrder = EntityEnums.Order.Last;
     } else {
       if (index < 1 && statements[0].data.territory) {
         // first one
-        newOrder = Order.First;
+        newOrder = EntityEnums.Order.First;
       } else if (
         statements[index - 1].data.territory &&
         statements[index].data.territory
@@ -247,7 +247,7 @@ export const StatementListBox: React.FC = () => {
 
     if (newOrder) {
       const newStatement: IStatement = CStatement(
-        localStorage.getItem("userrole") as UserRole,
+        localStorage.getItem("userrole") as UserEnums.Role,
         territoryId
       );
       (
@@ -532,7 +532,7 @@ export const StatementListBox: React.FC = () => {
         Cell: ({ row }: Cell) => {
           return (
             <ButtonGroup>
-              {data?.right !== UserRoleMode.Read && (
+              {data?.right !== UserEnums.RoleMode.Read && (
                 <StatementListContextMenu
                   buttons={[
                     <Button

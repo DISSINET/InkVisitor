@@ -1,5 +1,5 @@
 import { Request } from "express";
-import { EntityClass } from "@shared/enums";
+import { EntityEnums } from "@shared/enums";
 import { IEntity, RequestSearch } from "@shared/types";
 import { regExpEscape } from "@common/functions";
 import Entity from "./entity";
@@ -49,7 +49,7 @@ export class SearchQuery {
    * @param entityClass
    * @returns
    */
-  whereClass(entityClass: EntityClass): SearchQuery {
+  whereClass(entityClass: EntityEnums.Class): SearchQuery {
     this.query = this.query.filter({
       class: entityClass,
     });
@@ -62,7 +62,7 @@ export class SearchQuery {
    * @param entityClass
    * @returns
    */
-  whereNotClass(entityClass: EntityClass[]): SearchQuery {
+  whereNotClass(entityClass: EntityEnums.Class[]): SearchQuery {
     this.query = this.query.filter(function (row: RDatum) {
       return r.and.apply(
         r,

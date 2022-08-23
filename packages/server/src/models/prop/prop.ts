@@ -1,13 +1,4 @@
-import {
-  Certainty,
-  Elvl,
-  Logic,
-  Mood,
-  MoodVariant,
-  Operator,
-  Partitivity,
-  Virtuality,
-} from "@shared/enums";
+import { EntityEnums } from "@shared/enums";
 import { IProp } from "@shared/types";
 import { IPropSpec } from "@shared/types/prop";
 import {
@@ -19,10 +10,10 @@ import {
 
 export class PropSpec implements IPropSpec, IModel {
   entityId: string = "";
-  elvl: Elvl = Elvl.Textual;
-  logic: Logic = Logic.Positive;
-  virtuality: Virtuality = Virtuality.Reality;
-  partitivity: Partitivity = Partitivity.Unison;
+  elvl: EntityEnums.Elvl = EntityEnums.Elvl.Textual;
+  logic: EntityEnums.Logic = EntityEnums.Logic.Positive;
+  virtuality: EntityEnums.Virtuality = EntityEnums.Virtuality.Reality;
+  partitivity: EntityEnums.Partitivity = EntityEnums.Partitivity.Unison;
 
   constructor(data: UnknownObject) {
     if (!data) {
@@ -39,12 +30,12 @@ export class PropSpec implements IPropSpec, IModel {
 
 export default class Prop implements IProp, IModel {
   id = "";
-  elvl: Elvl = Elvl.Textual;
-  certainty: Certainty = Certainty.Empty;
-  logic: Logic = Logic.Positive;
-  mood: Mood[] = [];
-  moodvariant: MoodVariant = MoodVariant.Realis;
-  bundleOperator: Operator = Operator.And;
+  elvl: EntityEnums.Elvl = EntityEnums.Elvl.Textual;
+  certainty: EntityEnums.Certainty = EntityEnums.Certainty.Empty;
+  logic: EntityEnums.Logic = EntityEnums.Logic.Positive;
+  mood: EntityEnums.Mood[] = [];
+  moodvariant: EntityEnums.MoodVariant = EntityEnums.MoodVariant.Realis;
+  bundleOperator: EntityEnums.Operator = EntityEnums.Operator.And;
   bundleStart: boolean = false;
   bundleEnd: boolean = false;
 

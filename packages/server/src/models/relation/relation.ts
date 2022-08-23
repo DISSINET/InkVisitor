@@ -1,7 +1,8 @@
 import { IDbModel, UnknownObject, fillFlatObject } from "@models/common";
 import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
 import { IRelation } from "@shared/types";
-import { isValidRelationType, RelationType, UserRole } from "@shared/enums";
+import { RelationEnums, UserEnums } from "@shared/enums";
+import { EnumValidators } from "@shared/enums";
 import { InternalServerError } from "@shared/types/errors";
 import User from "@models/user/user";
 import { IRequest } from "src/custom.request";
@@ -10,7 +11,7 @@ export default class Relation implements IRelation, IDbModel {
   static table = "relations";
 
   id: string = "";
-  type: RelationType = RelationType.Unknown;
+  type: RelationEnums.Type = RelationEnums.Type.Unknown;
   entityIds: string[] = [];
 
   constructor(data: UnknownObject) {
@@ -62,7 +63,7 @@ export default class Relation implements IRelation, IDbModel {
   }
 
   isValid(): boolean {
-    return isValidRelationType(this.type);
+    return EnumValidators.IsValidRelationType(this.type);
   }
 
   canBeViewedByUser(user: User): boolean {
@@ -70,15 +71,15 @@ export default class Relation implements IRelation, IDbModel {
   }
 
   canBeCreatedByUser(user: User): boolean {
-    return user.role !== UserRole.Viewer;
+    return user.role !== UserEnums.Role.Viewer;
   }
 
   canBeEditedByUser(user: User): boolean {
-    return user.role !== UserRole.Viewer;
+    return user.role !== UserEnums.Role.Viewer;
   }
 
   canBeDeletedByUser(user: User): boolean {
-    return user.role !== UserRole.Viewer;
+    return user.role !== UserEnums.Role.Viewer;
   }
 
   static async getById(req: IRequest, id: string): Promise<Relation | null> {

@@ -1,8 +1,8 @@
-import { EntityClass } from "../enums";
+import { EntityEnums } from "../enums";
 import { IEntity } from "./entity";
 
 export interface IResource extends IEntity {
-  class: EntityClass.Resource;
+  class: EntityEnums.Class.Resource;
   data: {
     url: string;
     partValueLabel: string;

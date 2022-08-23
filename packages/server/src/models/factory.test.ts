@@ -1,4 +1,4 @@
-import { EntityClass } from "@shared/enums";
+import { EntityEnums } from "@shared/enums";
 import "ts-jest";
 import { getEntityClass } from "./factory";
 import "ts-jest";
@@ -6,7 +6,7 @@ import "ts-jest";
 describe("Factory test", function () {
   describe("known types", () => {
     it("should return implementation", () => {
-      for (const aType of Object.values(EntityClass)) {
+      for (const aType of Object.values(EntityEnums.Class)) {
         expect(getEntityClass({ class: aType })).not.toBeNull();
       }
     });

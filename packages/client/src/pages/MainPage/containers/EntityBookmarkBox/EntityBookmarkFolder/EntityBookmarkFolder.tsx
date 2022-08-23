@@ -1,4 +1,4 @@
-import { EntityClass } from "@shared/enums";
+import { EntityEnums } from "@shared/enums";
 import { IBookmarkFolder, IResponseBookmarkFolder } from "@shared/types";
 import api from "api";
 import { ButtonGroup, Button, Tooltip } from "components";
@@ -29,17 +29,17 @@ import {
 } from "./EntityBookmarkFolderStyles";
 
 const bookmarkEntities = [
-  EntityClass.Action,
-  EntityClass.Person,
-  EntityClass.Group,
-  EntityClass.Object,
-  EntityClass.Concept,
-  EntityClass.Location,
-  EntityClass.Value,
-  EntityClass.Event,
-  EntityClass.Statement,
-  EntityClass.Territory,
-  EntityClass.Resource,
+  EntityEnums.Class.Action,
+  EntityEnums.Class.Person,
+  EntityEnums.Class.Group,
+  EntityEnums.Class.Object,
+  EntityEnums.Class.Concept,
+  EntityEnums.Class.Location,
+  EntityEnums.Class.Value,
+  EntityEnums.Class.Event,
+  EntityEnums.Class.Statement,
+  EntityEnums.Class.Territory,
+  EntityEnums.Class.Resource,
 ];
 
 interface EntityBookmarkFolder {

@@ -1,20 +1,5 @@
-import {
-  EntityStatus,
-  EntityClass,
-  Certainty,
-  Elvl,
-  EntityLogicalType,
-  Language,
-  Logic,
-  Mood,
-  MoodVariant,
-  Operator,
-  Partitivity,
-  Virtuality,
-  ExtendedEntityClass,
-  EntityExtension,
-} from "@shared/enums";
-import { IEntity, IStatementActant, IStatementAction } from "@shared/types";
+import { EntityEnums } from "@shared/enums";
+import { IEntity } from "@shared/types";
 
 export const Colors = [
   "black",
@@ -40,62 +25,62 @@ export const Colors = [
 ];
 
 interface IEntityColor {
-  entityClass: ExtendedEntityClass;
+  entityClass: EntityEnums.ExtendedClass;
   color: typeof Colors[number];
 }
 
 // Use for colors, for dropdowns use entity.ts dictionary
 export const EntityColors: { [key: string]: IEntityColor } = {
   T: {
-    entityClass: EntityClass.Territory,
+    entityClass: EntityEnums.Class.Territory,
     color: "entityT",
   },
   R: {
-    entityClass: EntityClass.Resource,
+    entityClass: EntityEnums.Class.Resource,
     color: "entityR",
   },
   A: {
-    entityClass: EntityClass.Action,
+    entityClass: EntityEnums.Class.Action,
     color: "entityA",
   },
   S: {
-    entityClass: EntityClass.Statement,
+    entityClass: EntityEnums.Class.Statement,
     color: "entityS",
   },
   C: {
-    entityClass: EntityClass.Concept,
+    entityClass: EntityEnums.Class.Concept,
     color: "entityC",
   },
   E: {
-    entityClass: EntityClass.Event,
+    entityClass: EntityEnums.Class.Event,
     color: "entityE",
   },
   G: {
-    entityClass: EntityClass.Group,
+    entityClass: EntityEnums.Class.Group,
     color: "entityG",
   },
   L: {
-    entityClass: EntityClass.Location,
+    entityClass: EntityEnums.Class.Location,
     color: "entityL",
   },
   O: {
-    entityClass: EntityClass.Object,
+    entityClass: EntityEnums.Class.Object,
     color: "entityO",
   },
   P: {
-    entityClass: EntityClass.Person,
+    entityClass: EntityEnums.Class.Person,
     color: "entityP",
   },
   V: {
-    entityClass: EntityClass.Value,
+    entityClass: EntityEnums.Class.Value,
     color: "entityV",
   },
   X: {
-    entityClass: EntityExtension.Empty,
+    entityClass: EntityEnums.Extension.Empty,
     color: "white",
   },
   all: {
-    entityClass: EntityExtension.Any,
+    entityClass: EntityEnums.Extension.Any,
     color: "white",
   },
 };
@@ -128,7 +113,7 @@ export type DragItem = {
 };
 export interface EntityDragItem extends DragItem {
   entity: IEntity | false;
-  entityClass: ExtendedEntityClass;
+  entityClass: EntityEnums.ExtendedClass;
   isTemplate: boolean;
   isDiscouraged: boolean;
 }
@@ -168,9 +153,9 @@ export interface IRequestSearchEntity {
   label?: string; // regex, should also work from the middle...
   detail?: string; // also regex
   notes?: string; // is the text used within any note
-  status?: EntityStatus; // izy
-  language?: Language; //izy
-  logicalType?: EntityLogicalType;
+  status?: EntityEnums.Status; // izy
+  language?: EntityEnums.Language; //izy
+  logicalType?: EntityEnums.LogicalType;
   hasProps?: IEntityHasProps[]; //this should be checked within meta props and within all statements where the entity is used as the prop origin
   usedInTerritories?: IEntityUsedInTerritory[]; // this is probably little bit complicated
   usedInStatements?: IEntityUsedInStatementWith[]; // and this is supposed to be complicated as well
@@ -250,14 +235,14 @@ export type PropAttributeFilter = {
 
 export interface AttributeData {
   // id: string;
-  certainty?: Certainty;
-  elvl?: Elvl;
-  logic?: Logic;
-  mood?: Mood[];
-  moodvariant?: MoodVariant;
-  virtuality?: Virtuality;
-  partitivity?: Partitivity;
-  bundleOperator?: Operator;
+  certainty?: EntityEnums.Certainty;
+  elvl?: EntityEnums.Elvl;
+  logic?: EntityEnums.Logic;
+  mood?: EntityEnums.Mood[];
+  moodvariant?: EntityEnums.MoodVariant;
+  virtuality?: EntityEnums.Virtuality;
+  partitivity?: EntityEnums.Partitivity;
+  bundleOperator?: EntityEnums.Operator;
   bundleStart?: boolean;
   bundleEnd?: boolean;
 }
@@ -267,19 +252,19 @@ export interface PropAttributeGroupDataObject {
   value: AttributeData;
 }
 
-export const classesPropType = [EntityClass.Concept];
+export const classesPropType = [EntityEnums.Class.Concept];
 export const classesPropValue = [
-  EntityClass.Action,
-  EntityClass.Person,
-  EntityClass.Group,
-  EntityClass.Object,
-  EntityClass.Concept,
-  EntityClass.Location,
-  EntityClass.Value,
-  EntityClass.Event,
-  EntityClass.Statement,
-  EntityClass.Territory,
-  EntityClass.Resource,
+  EntityEnums.Class.Action,
+  EntityEnums.Class.Person,
+  EntityEnums.Class.Group,
+  EntityEnums.Class.Object,
+  EntityEnums.Class.Concept,
+  EntityEnums.Class.Location,
+  EntityEnums.Class.Value,
+  EntityEnums.Class.Event,
+  EntityEnums.Class.Statement,
+  EntityEnums.Class.Territory,
+  EntityEnums.Class.Resource,
 ];
 
 export interface EntitySuggestion {
@@ -288,7 +273,7 @@ export interface EntitySuggestion {
 }
 export interface SuggesterItemToCreate {
   label: string;
-  entityClass: EntityClass;
+  entityClass: EntityEnums.Class;
   detail?: string;
   territoryId?: string;
 }

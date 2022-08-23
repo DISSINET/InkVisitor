@@ -1,5 +1,5 @@
-import { EntityClass } from "@shared/enums";
-import { IResponseStatement, IStatementActant } from "@shared/types";
+import { EntityEnums } from "@shared/enums";
+import { IEntity, IResponseStatement, IStatementActant } from "@shared/types";
 import update from "immutability-helper";
 import React, { useCallback, useMemo, useState } from "react";
 import { UseMutationResult } from "react-query";
@@ -9,7 +9,7 @@ import { StatementEditorActantTableRow } from "./StatementEditorActantTableRow";
 interface StatementEditorActantTable {
   statement: IResponseStatement;
   userCanEdit?: boolean;
-  classEntitiesActant: EntityClass[];
+  classEntitiesActant: EntityEnums.Class[];
   updateStatementDataMutation: UseMutationResult<any, unknown, object, unknown>;
   addProp: (originId: string) => void;
   updateProp: (propId: string, changes: any) => void;

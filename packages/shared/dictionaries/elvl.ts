@@ -1,18 +1,18 @@
-import { Elvl } from "../enums";
+import { EntityEnums } from "../enums";
 
 export const elvlDict = [
   {
-    value: Elvl.Textual,
+    value: EntityEnums.Elvl.Textual,
     label: "textual",
     info: "translates what is explicitly in the text",
   },
   {
-    value: Elvl.Interpretive,
+    value: EntityEnums.Elvl.Interpretive,
     label: "interpretive",
     info: "interpretation of what is explicitly in the text",
   },
   {
-    value: Elvl.Inferential,
+    value: EntityEnums.Elvl.Inferential,
     label: "inferential",
     info: "inferred from the text",
   },

@@ -1,4 +1,4 @@
-import { EntityClass } from "@shared/enums";
+import { EntityEnums } from "@shared/enums";
 import { IProp, IResponseStatement } from "@shared/types";
 import { AttributeIcon, Button, ButtonGroup } from "components";
 import { EntitySuggester, EntityTag } from "components/advanced";
@@ -144,7 +144,7 @@ export const StatementEditorActionTableRow: React.FC<
             });
           }}
           openDetailOnCreate
-          categoryTypes={[EntityClass.Action]}
+          categoryTypes={[EntityEnums.Class.Action]}
           excludedEntities={excludedSuggesterEntities}
           placeholder={"add new action"}
           isInsideTemplate={isInsideTemplate}
@@ -186,7 +186,7 @@ export const StatementEditorActionTableRow: React.FC<
               updateAction(sAction.id, { actionId: newId });
             }}
             userCanEdit={userCanEdit}
-            classEntitiesActant={[EntityClass.Action]}
+            classEntitiesActant={[EntityEnums.Class.Action]}
             loading={updateActionsMutation.isLoading}
             isInsideTemplate={isInsideTemplate}
             territoryParentId={territoryParentId}

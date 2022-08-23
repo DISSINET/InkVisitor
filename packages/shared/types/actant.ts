@@ -1,14 +1,14 @@
 import { IProp } from ".";
-import { EntityStatus, EntityClass, Language } from "../enums";
+import { EntityEnums } from "../enums";
 
 export interface IActant {
   id: string;
-  class: EntityClass;
+  class: EntityEnums.Class;
   data: any;
   label: string;
   detail: string;
-  status: EntityStatus;
-  language: Language;
+  status: EntityEnums.Status;
+  language: EntityEnums.Language;
   notes: string[];
   props: IProp[];
 }

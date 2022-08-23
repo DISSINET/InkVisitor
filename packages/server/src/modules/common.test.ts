@@ -10,17 +10,7 @@ import {
   deleteEntities,
   deleteRelations,
 } from "@service/shorthands";
-import {
-  Certainty,
-  Elvl,
-  EntityClass,
-  EntityStatus,
-  Language,
-  Logic,
-  Mood,
-  MoodVariant,
-  Operator,
-} from "@shared/enums";
+import { EntityEnums } from "@shared/enums";
 import { IResponseGeneric, IStatement, IStatementAction } from "@shared/types";
 import { CustomError } from "@shared/types/errors";
 import { ITerritory } from "@shared/types/index";
@@ -67,17 +57,17 @@ function getRandomFromArray<T>(input: T[]): T {
 
 export function getITerritoryMock(): ITerritory {
   const fullData: ITerritory = {
-    status: EntityStatus.Approved,
+    status: EntityEnums.Status.Approved,
     id: "id",
     detail: "detail",
-    language: Language.Latin,
+    language: EntityEnums.Language.Latin,
     notes: [],
     label: "label",
     data: {
       parent: false,
     },
     props: [],
-    class: EntityClass.Territory,
+    class: EntityEnums.Class.Territory,
     references: [],
   };
 
@@ -89,20 +79,20 @@ export function getIStatementActionMock(): IStatementAction {
     actionId: "action",
     bundleEnd: false,
     bundleStart: false,
-    certainty: Certainty.Empty,
-    elvl: Elvl.Inferential,
+    certainty: EntityEnums.Certainty.Empty,
+    elvl: EntityEnums.Elvl.Inferential,
     id: "action",
-    logic: Logic.Positive,
-    mood: [Mood.Ability],
-    moodvariant: MoodVariant.Irrealis,
-    bundleOperator: Operator.And,
+    logic: EntityEnums.Logic.Positive,
+    mood: [EntityEnums.Mood.Ability],
+    moodvariant: EntityEnums.MoodVariant.Irrealis,
+    bundleOperator: EntityEnums.Operator.And,
   } as IStatementAction;
 }
 
 export function getIStatementMock(): IStatement {
   const fullData: IStatement = {
     id: "id",
-    class: EntityClass.Statement,
+    class: EntityEnums.Class.Statement,
     label: "label",
     data: {
       actions: [],
@@ -116,9 +106,9 @@ export function getIStatementMock(): IStatement {
     },
     props: [],
     detail: "",
-    language: Language.Czech,
+    language: EntityEnums.Language.Czech,
     notes: [],
-    status: EntityStatus.Approved,
+    status: EntityEnums.Status.Approved,
     references: [],
   };
   return fullData;

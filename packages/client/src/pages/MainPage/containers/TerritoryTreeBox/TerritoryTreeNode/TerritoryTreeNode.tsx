@@ -1,4 +1,4 @@
-import { UserRoleMode } from "@shared/enums";
+import { UserEnums } from "@shared/enums";
 import {
   IEntity,
   IResponseTreeTerritoryComponent,
@@ -43,7 +43,7 @@ interface TerritoryTreeNode {
   index?: number;
   moveFn?: (dragIndex: number, hoverIndex: number) => void;
   empty?: boolean;
-  right: UserRoleMode;
+  right: UserEnums.RoleMode;
   storedTerritories: string[];
   updateUserMutation: UseMutationResult<void, unknown, object, unknown>;
 }
@@ -82,7 +82,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
   });
 
   const symbolColor = useMemo(() => {
-    return right === UserRoleMode.Read
+    return right === UserEnums.RoleMode.Read
       ? theme.color.gray[600]
       : theme.color.gray[800];
   }, [right]);
@@ -217,7 +217,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
     if (
       draggedTerritory.parentId &&
       draggedTerritory.parentId !==
-        (territory.data.parent as IParentTerritory).territoryId &&
+      (territory.data.parent as IParentTerritory).territoryId &&
       draggedTerritory.parentId !== propId
     ) {
       if (draggedTerritory.lvl && draggedTerritory.lvl > lvl) {

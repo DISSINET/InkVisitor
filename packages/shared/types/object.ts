@@ -1,9 +1,9 @@
 import { IEntity } from ".";
-import { EntityClass, EntityLogicalType } from "../enums";
+import { EntityEnums } from "../enums";
 
 export interface IObject extends IEntity {
-  class: EntityClass.Object;
+  class: EntityEnums.Class.Object;
   data: {
-    logicalType: EntityLogicalType;
+    logicalType: EntityEnums.LogicalType;
   };
 }

@@ -10,7 +10,7 @@ import {
   partitivityDict,
   virtualityDict,
 } from "@shared/dictionaries";
-import { EntityClass } from "@shared/enums";
+import { EntityEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
 import {
   Button,
@@ -56,10 +56,10 @@ interface AttributesGroupEditor {
   setModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
   statementId: string;
   propTypeActant?: IEntity;
-  classesPropType: EntityClass[];
+  classesPropType: EntityEnums.Class[];
   propValueActant?: IEntity;
-  classesPropValue: EntityClass[];
-  excludedSuggesterEntities: EntityClass[];
+  classesPropValue: EntityEnums.Class[];
+  excludedSuggesterEntities: EntityEnums.Class[];
   data: PropAttributeGroupDataObject;
   handleUpdate: (data: PropAttributeGroupDataObject) => void;
   updateProp: (propId: string, changes: any) => void;
@@ -288,7 +288,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
         />
         <ModalContent>
           <StyledGridColumns>
-            <StyledColumnWrap color={EntityColors[EntityClass.Statement].color}>
+            <StyledColumnWrap color={EntityColors[EntityEnums.Class.Statement].color}>
               <StyledColumnHeading>Statement</StyledColumnHeading>
 
               <AttributesForm

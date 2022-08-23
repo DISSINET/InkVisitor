@@ -1,4 +1,4 @@
-import { EntityClass, UserRoleMode } from "@shared/enums";
+import { EntityEnums, UserEnums } from "@shared/enums";
 import {
   IEntity,
   IOption,
@@ -63,29 +63,29 @@ import {
 } from "./../StatementEditorBoxStyles";
 
 const classesActants = [
-  EntityClass.Statement,
-  EntityClass.Action,
-  EntityClass.Territory,
-  EntityClass.Resource,
-  EntityClass.Person,
-  EntityClass.Group,
-  EntityClass.Object,
-  EntityClass.Concept,
-  EntityClass.Location,
-  EntityClass.Value,
-  EntityClass.Event,
+  EntityEnums.Class.Statement,
+  EntityEnums.Class.Action,
+  EntityEnums.Class.Territory,
+  EntityEnums.Class.Resource,
+  EntityEnums.Class.Person,
+  EntityEnums.Class.Group,
+  EntityEnums.Class.Object,
+  EntityEnums.Class.Concept,
+  EntityEnums.Class.Location,
+  EntityEnums.Class.Value,
+  EntityEnums.Class.Event,
 ];
 const classesTags = [
-  EntityClass.Action,
-  EntityClass.Territory,
-  EntityClass.Resource,
-  EntityClass.Person,
-  EntityClass.Group,
-  EntityClass.Object,
-  EntityClass.Concept,
-  EntityClass.Location,
-  EntityClass.Value,
-  EntityClass.Event,
+  EntityEnums.Class.Action,
+  EntityEnums.Class.Territory,
+  EntityEnums.Class.Resource,
+  EntityEnums.Class.Person,
+  EntityEnums.Class.Group,
+  EntityEnums.Class.Object,
+  EntityEnums.Class.Concept,
+  EntityEnums.Class.Location,
+  EntityEnums.Class.Value,
+  EntityEnums.Class.Event,
 ];
 
 interface StatementEditor {
@@ -199,7 +199,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     async () => {
       const res = await api.entitiesSearch({
         onlyTemplates: true,
-        class: EntityClass.Statement,
+        class: EntityEnums.Class.Statement,
       });
 
       const templates = res.data;
@@ -268,8 +268,8 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
   const userCanEdit: boolean = useMemo(() => {
     return (
-      statement.right === UserRoleMode.Admin ||
-      statement.right === UserRoleMode.Write
+      statement.right === UserEnums.RoleMode.Admin ||
+      statement.right === UserEnums.RoleMode.Write
     );
   }, [statement]);
 
@@ -546,7 +546,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
               filterEditorRights
               inputWidth={96}
               disableCreate
-              categoryTypes={[EntityClass.Territory]}
+              categoryTypes={[EntityEnums.Class.Territory]}
               onSelected={(newSelectedId: string) => {
                 moveStatementMutation.mutate(newSelectedId);
               }}
@@ -623,7 +623,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 onSelected={(newSelectedId: string) => {
                   addAction(newSelectedId);
                 }}
-                categoryTypes={[EntityClass.Action]}
+                categoryTypes={[EntityEnums.Class.Action]}
                 excludedEntities={excludedSuggesterEntities}
                 placeholder={"add new action"}
                 isInsideTemplate={statement.isTemplate}

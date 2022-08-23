@@ -10,7 +10,7 @@ import { asyncRouteHandler } from "..";
 import { IResponseGeneric, IResponseTree, ITerritory } from "@shared/types";
 import Territory from "@models/territory/territory";
 import { IParentTerritory } from "@shared/types/territory";
-import { EntityClass } from "@shared/enums";
+import { EntityEnums } from "@shared/enums";
 import treeCache, { TreeCreator } from "@service/treeCache";
 
 export default Router()
@@ -36,7 +36,7 @@ export default Router()
         request.db,
         territoryId
       );
-      if (!territoryData || territoryData.class !== EntityClass.Territory) {
+      if (!territoryData || territoryData.class !== EntityEnums.Class.Territory) {
         throw new TerritoryDoesNotExits(
           `territory ${territoryId} does not exist`,
           territoryId
@@ -54,7 +54,7 @@ export default Router()
 
       // check parent territory
       const parent = await findEntityById<ITerritory>(request.db, parentId);
-      if (!parent || parent.class !== EntityClass.Territory) {
+      if (!parent || parent.class !== EntityEnums.Class.Territory) {
         throw new TerritoryDoesNotExits(
           `parent territory ${parentId} does not exist`,
           parentId

@@ -290,7 +290,7 @@ describe("Territory - test getClosestRight", function () {
     it("should return the right object", async (done) => {
       const territory = new Territory({ id: "this" });
       const right = new UserRight({
-        mode: UserRoleMode.Admin,
+        mode: UserEnums.RoleMode.Admin,
         territory: "this",
       });
       expect(territory.getClosestRight([right])).toEqual(right);
@@ -302,7 +302,7 @@ describe("Territory - test getClosestRight", function () {
     it("should return the same right object as was defined for the parent", async (done) => {
       const territory = new Territory({ id: "thisthat" });
       const right = new UserRight({
-        mode: UserRoleMode.Admin,
+        mode: UserEnums.RoleMode.Admin,
         territory: "this",
       });
       expect(territory.getClosestRight([right])).toEqual(right);
@@ -314,7 +314,7 @@ describe("Territory - test getClosestRight", function () {
     it("should return undefined", async (done) => {
       const territory = new Territory({ id: "that" });
       const right = new UserRight({
-        mode: UserRoleMode.Admin,
+        mode: UserEnums.RoleMode.Admin,
         territory: "this",
       });
       expect(territory.getClosestRight([right])).toEqual(undefined);

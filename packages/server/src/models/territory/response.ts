@@ -1,5 +1,5 @@
 import { Request } from "express";
-import { UserRoleMode } from "@shared/enums";
+import { UserEnums } from "@shared/enums";
 import { IEntity, IResponseStatement, IResponseTerritory } from "@shared/types";
 import Territory from "./territory";
 import Statement from "@models/statement/statement";
@@ -9,7 +9,7 @@ import Entity from "@models/entity/entity";
 export class ResponseTerritory extends Territory implements IResponseTerritory {
   statements: IResponseStatement[];
   entities: { [key: string]: IEntity };
-  right: UserRoleMode = UserRoleMode.Read;
+  right: UserEnums.RoleMode = UserEnums.RoleMode.Read;
 
   constructor(entity: IEntity) {
     super({});

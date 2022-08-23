@@ -1,4 +1,4 @@
-import { EntityClass } from "@shared/enums";
+import { EntityEnums } from "@shared/enums";
 import { IResponseStatement } from "@shared/types";
 import {
   IStatementActant,
@@ -26,7 +26,7 @@ interface StatementEditorActantIdentifications {
   territoryParentId?: string;
   updateStatementDataMutation: UseMutationResult<any, unknown, object, unknown>;
   sActant: IStatementActant;
-  classEntitiesActant: EntityClass[];
+  classEntitiesActant: EntityEnums.Class[];
 }
 export const StatementEditorActantIdentifications: React.FC<
   StatementEditorActantIdentifications
@@ -131,7 +131,7 @@ export const StatementEditorActantIdentifications: React.FC<
                           ),
                         });
                       }}
-                      classEntitiesActant={[EntityClass.Concept]}
+                      classEntitiesActant={[EntityEnums.Class.Concept]}
                       loading={updateStatementDataMutation.isLoading}
                       isInsideTemplate={isInsideTemplate}
                       territoryParentId={territoryParentId}

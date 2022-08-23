@@ -3,10 +3,10 @@
  */
 
 import { IEntity } from ".";
-import { UserRoleMode } from "../enums";
+import { UserEnums } from "../enums";
 
 export interface IResponseEntity extends IEntity {
   // usedCount?: number;
   // usedIn?: IStatement[];
-  right?: UserRoleMode;
+  right?: UserEnums.RoleMode;
 }

@@ -1,5 +1,5 @@
 import { actantPositionDict } from "@shared/dictionaries";
-import { EntityClass, Position } from "@shared/enums";
+import { EntityEnums } from "@shared/enums";
 import {
   IEntity,
   IProp,
@@ -55,7 +55,7 @@ interface StatementEditorActantTableRow {
   removeProp: (propId: string) => void;
   movePropToIndex: (propId: string, oldIndex: number, newIndex: number) => void;
   statement: IResponseStatement;
-  classEntitiesActant: EntityClass[];
+  classEntitiesActant: EntityEnums.Class[];
   updateStatementDataMutation: UseMutationResult<any, unknown, object, unknown>;
   territoryParentId?: string;
   addClassification: (originId: string) => void;
@@ -189,45 +189,54 @@ export const StatementEditorActantTableRow: React.FC<
         disabled={!userCanEdit}
         options={[
           {
-            longValue: actantPositionDict[Position.Subject].label,
-            shortValue: actantPositionDict[Position.Subject].value,
+            longValue: actantPositionDict[EntityEnums.Position.Subject].label,
+            shortValue: actantPositionDict[EntityEnums.Position.Subject].value,
             onClick: () =>
               updateActant(sActant.id, {
-                position: actantPositionDict[Position.Subject].value,
-              }),
-            selected:
-              sActant.position == actantPositionDict[Position.Subject].value,
-          },
-          {
-            longValue: actantPositionDict[Position.Actant1].label,
-            shortValue: actantPositionDict[Position.Actant1].value,
-            onClick: () =>
-              updateActant(sActant.id, {
-                position: actantPositionDict[Position.Actant1].value,
-              }),
-            selected:
-              sActant.position == actantPositionDict[Position.Actant1].value,
-          },
-          {
-            longValue: actantPositionDict[Position.Actant2].label,
-            shortValue: actantPositionDict[Position.Actant2].value,
-            onClick: () =>
-              updateActant(sActant.id, {
-                position: actantPositionDict[Position.Actant2].value,
-              }),
-            selected:
-              sActant.position == actantPositionDict[Position.Actant2].value,
-          },
-          {
-            longValue: actantPositionDict[Position.PseudoActant].label,
-            shortValue: actantPositionDict[Position.PseudoActant].value,
-            onClick: () =>
-              updateActant(sActant.id, {
-                position: actantPositionDict[Position.PseudoActant].value,
+                position:
+                  actantPositionDict[EntityEnums.Position.Subject].value,
               }),
             selected:
               sActant.position ==
-              actantPositionDict[Position.PseudoActant].value,
+              actantPositionDict[EntityEnums.Position.Subject].value,
+          },
+          {
+            longValue: actantPositionDict[EntityEnums.Position.Actant1].label,
+            shortValue: actantPositionDict[EntityEnums.Position.Actant1].value,
+            onClick: () =>
+              updateActant(sActant.id, {
+                position:
+                  actantPositionDict[EntityEnums.Position.Actant1].value,
+              }),
+            selected:
+              sActant.position ==
+              actantPositionDict[EntityEnums.Position.Actant1].value,
+          },
+          {
+            longValue: actantPositionDict[EntityEnums.Position.Actant2].label,
+            shortValue: actantPositionDict[EntityEnums.Position.Actant2].value,
+            onClick: () =>
+              updateActant(sActant.id, {
+                position:
+                  actantPositionDict[EntityEnums.Position.Actant2].value,
+              }),
+            selected:
+              sActant.position ==
+              actantPositionDict[EntityEnums.Position.Actant2].value,
+          },
+          {
+            longValue:
+              actantPositionDict[EntityEnums.Position.PseudoActant].label,
+            shortValue:
+              actantPositionDict[EntityEnums.Position.PseudoActant].value,
+            onClick: () =>
+              updateActant(sActant.id, {
+                position:
+                  actantPositionDict[EntityEnums.Position.PseudoActant].value,
+              }),
+            selected:
+              sActant.position ==
+              actantPositionDict[EntityEnums.Position.PseudoActant].value,
           },
         ]}
       />
