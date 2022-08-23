@@ -202,23 +202,19 @@ export const PropGroup: React.FC<PropGroup> = ({
   );
 
   return props.length > 0 ? (
-    <tr>
-      <td colSpan={4}>
-        <React.Fragment key={originId}>
-          <StyledGrid>
-            {/* Header */}
-            <StyledListHeaderColumn leftMargin>Type</StyledListHeaderColumn>
-            <StyledListHeaderColumn>Value</StyledListHeaderColumn>
-            <StyledListHeaderColumn></StyledListHeaderColumn>
-          </StyledGrid>
-          {/* Rows */}
-          <FirstLevelPropGroup
-            props={props}
-            renderFirsLevelPropRow={renderFirsLevelPropRow}
-          />
-        </React.Fragment>
-      </td>
-    </tr>
+    <React.Fragment key={originId}>
+      <StyledGrid>
+        {/* Header */}
+        <StyledListHeaderColumn leftMargin>Type</StyledListHeaderColumn>
+        <StyledListHeaderColumn>Value</StyledListHeaderColumn>
+        <StyledListHeaderColumn></StyledListHeaderColumn>
+      </StyledGrid>
+      {/* Rows */}
+      <FirstLevelPropGroup
+        props={props}
+        renderFirsLevelPropRow={renderFirsLevelPropRow}
+      />
+    </React.Fragment>
   ) : (
     <tr />
   );

@@ -174,7 +174,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
                     updateProp(prop.id, {
                       type: {
                         ...prop.type,
-                        ...{ id: "" },
+                        ...{ entityId: "" },
                       },
                     });
                   }}
@@ -188,7 +188,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
                 updateProp(prop.id, {
                   type: {
                     ...prop.type,
-                    ...{ id: newSelectedId },
+                    ...{ entityId: newSelectedId },
                   },
                 });
               }}
@@ -233,7 +233,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
                     updateProp(prop.id, {
                       value: {
                         ...prop.value,
-                        ...{ id: "" },
+                        ...{ entityId: "" },
                       },
                     });
                   }}
@@ -247,7 +247,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
                 updateProp(prop.id, {
                   value: {
                     ...prop.type,
-                    ...{ id: newSelectedId },
+                    ...{ entityId: newSelectedId },
                   },
                 });
               }}

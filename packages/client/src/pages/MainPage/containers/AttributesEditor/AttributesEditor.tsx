@@ -42,7 +42,7 @@ interface AttributesEditor {
   entity?: IEntity;
   data: AttributeData;
   handleUpdate: (
-    data: AttributeData | { actant: string } | { action: string }
+    data: AttributeData | { actantId: string } | { actionId: string }
   ) => void;
   updateActantId?: (newId: string) => void;
   classEntitiesActant?: EntityEnums.Class[];

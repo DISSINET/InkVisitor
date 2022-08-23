@@ -277,3 +277,12 @@ export interface SuggesterItemToCreate {
   detail?: string;
   territoryId?: string;
 }
+
+export interface FilteredActantObject {
+  id: number;
+  data: { actant?: IEntity; sActant: IStatementActant };
+}
+export interface FilteredActionObject {
+  id: number;
+  data: { action?: IEntity; sAction: IStatementAction };
+}
