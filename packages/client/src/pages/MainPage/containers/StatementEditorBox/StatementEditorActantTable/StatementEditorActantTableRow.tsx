@@ -406,8 +406,13 @@ export const StatementEditorActantTableRow: React.FC<
     [statement]
   );
 
+  const { classifications, identifications } = filteredActant.data.sActant;
+
   return (
-    <StyledRow key={index}>
+    <StyledRow
+      key={index}
+      marginBottom={classifications.length > 0 || identifications.length > 0}
+    >
       <StyledGrid ref={dropRef} style={{ opacity }}>
         {userCanEdit && (
           <StyledGridColumn ref={dragRef} style={{ cursor: "move" }}>

@@ -1,5 +1,5 @@
 import { EntityEnums } from "@shared/enums";
-import { IEntity } from "@shared/types";
+import { IEntity, IStatementActant, IStatementAction } from "@shared/types";
 
 export const Colors = [
   "black",
