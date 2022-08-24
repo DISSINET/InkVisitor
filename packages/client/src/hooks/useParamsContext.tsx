@@ -1,3 +1,4 @@
+import api from "api";
 import React, {
   createContext,
   ReactElement,
@@ -5,6 +6,7 @@ import React, {
   useEffect,
   useState,
 } from "react";
+import { useQuery } from "react-query";
 import { useHistory, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 import { maxTabCount } from "Theme/constants";
@@ -79,19 +81,35 @@ export const SearchParamsProvider = ({
     return detailId.length > 0 ? detailId.split(arrJoinChar) : [];
   };
 
+  const { data } = useQuery(
+    ["detail-tab-entities", getDetailIdArray()],
+    async () => {
+      const res = await api.entitiesSearch({ entityIds: getDetailIdArray() });
+      return res.data;
+    },
+    {
+      enabled: api.isLoggedIn() && getDetailIdArray().length > 9,
+    }
+  );
+
   const appendDetailId = (id: string) => {
     const detailIdArray = getDetailIdArray();
     if (!detailIdArray.includes(id)) {
+      const newDetailIdArray = [];
       if (detailIdArray.length < maxTabCount) {
-        const newDetailIdArray = [...detailIdArray, id];
-        setDetailId(newDetailIdArray.join(arrJoinChar));
-        setSelectedDetailId(id);
+        newDetailIdArray.push([...detailIdArray, id]);
       } else {
-        toast.info("Maximum tab count reached");
+        newDetailIdArray.push([
+          ...detailIdArray.splice(1, detailIdArray.length),
+          id,
+        ]);
+        toast.info(
+          `Tab [${data ? data[0].label : detailIdArray}] canceled from detail`
+        );
       }
-    } else {
-      setSelectedDetailId(id);
+      setDetailId(newDetailIdArray.join(arrJoinChar));
     }
+    setSelectedDetailId(id);
   };
 
   const removeDetailId = (id: string) => {
