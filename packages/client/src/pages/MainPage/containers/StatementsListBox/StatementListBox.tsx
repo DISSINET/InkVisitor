@@ -138,6 +138,8 @@ export const StatementListBox: React.FC = () => {
 
   const removeStatementMutation = useMutation(
     async (sId: string) => {
+      if (statementId === sId) {
+      }
       await api.entityDelete(sId);
     },
     {

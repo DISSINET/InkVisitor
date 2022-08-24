@@ -109,7 +109,8 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
     useState<boolean>(false);
 
   const [showRemoveSubmit, setShowRemoveSubmit] = useState(false);
-  const [selectedEntityType, setSelectedEntityType] = useState<EntityEnums.Class>();
+  const [selectedEntityType, setSelectedEntityType] =
+    useState<EntityEnums.Class>();
   const [showTypeSubmit, setShowTypeSubmit] = useState(false);
   const [usedInPage, setUsedInPage] = useState<number>(0);
   const statementsPerPage = 20;
@@ -167,7 +168,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
       },
     ];
 
-    if (entity && templates) {
+    if (entity !== undefined && templates) {
       templates
         .filter((template) => template.id !== entity.id)
         .forEach((template) => {
@@ -197,12 +198,13 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
 
   // refetch audit when statement changes
   useEffect(() => {
-    // FIX: move to specific changes
-    queryClient.invalidateQueries("audit");
+    if (entity !== undefined) {
+      queryClient.invalidateQueries("audit");
+    }
   }, [entity]);
 
   useEffect(() => {
-    if (entity) {
+    if (entity !== undefined) {
       setSelectedEntityType(entity.class);
     }
   }, []);
@@ -315,7 +317,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
   // adding only second or third level
   // function adding the first level prop is in the button
   const addMetaProp = (originId: string) => {
-    if (entity) {
+    if (entity !== undefined) {
       const newProp = CMetaProp();
       const newProps = [...entity.props];
 
@@ -340,7 +342,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
   };
 
   const updateProp = (propId: string, changes: any) => {
-    if (entity) {
+    if (entity !== undefined) {
       const newProps = [...entity.props];
 
       newProps.forEach((prop1, pi1) => {
@@ -374,7 +376,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
   };
 
   const removeProp = (propId: string) => {
-    if (entity) {
+    if (entity !== undefined) {
       const newProps = [...entity.props].filter(
         (prop, pi) => prop.id !== propId
       );
@@ -437,7 +439,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
     oldIndex: number,
     newIndex: number
   ) => {
-    if (entity) {
+    if (entity !== undefined) {
       const newProps = [...entity.props];
       changeOrder(propId, newProps, oldIndex, newIndex);
 
@@ -455,7 +457,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
   }, [error]);
 
   const usedInPages = useMemo(() => {
-    if (entity && entity.usedInStatements) {
+    if (entity !== undefined && entity.usedInStatements) {
       return Math.ceil(entity.usedInStatements.length / statementsPerPage);
     } else {
       return 0;
@@ -765,7 +767,8 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
                           )}
                           onChange={(newValue: any) => {
                             updateEntityMutation.mutate({
-                              language: newValue.value || EntityEnums.Language.Empty,
+                              language:
+                                newValue.value || EntityEnums.Language.Empty,
                             });
                           }}
                         />
@@ -877,8 +880,8 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
                                     entities: {
                                       s: newValue
                                         ? (newValue as string[]).map(
-                                          (v: any) => v.value
-                                        )
+                                            (v: any) => v.value
+                                          )
                                         : [],
                                       a1: entity.data.entities.a1,
                                       a2: entity.data.entities.a2,
@@ -949,8 +952,8 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
                                     entities: {
                                       a1: newValue
                                         ? (newValue as string[]).map(
-                                          (v: any) => v.value
-                                        )
+                                            (v: any) => v.value
+                                          )
                                         : [],
                                       s: entity.data.entities.s,
                                       a2: entity.data.entities.a2,
@@ -1023,8 +1026,8 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
                                     entities: {
                                       a2: newValue
                                         ? (newValue as string[]).map(
-                                          (v: any) => v.value
-                                        )
+                                            (v: any) => v.value
+                                          )
                                         : [],
                                       s: entity.data.entities.s,
                                       a1: entity.data.entities.a1,
@@ -1204,40 +1207,36 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
                 Meta properties
               </StyledDetailSectionHeader>
               <StyledDetailSectionContent firstSection>
-                <table>
-                  <tbody>
-                    <PropGroup
-                      boxEntity={entity}
-                      originId={entity.id}
-                      entities={entity.entities}
-                      props={entity.props}
-                      territoryId={territoryId}
-                      updateProp={updateProp}
-                      removeProp={removeProp}
-                      addProp={addMetaProp}
-                      userCanEdit={userCanEdit}
-                      openDetailOnCreate={false}
-                      movePropToIndex={(propId, oldIndex, newIndex) => {
-                        movePropToIndex(propId, oldIndex, newIndex);
-                      }}
-                      category={DraggedPropRowCategory.META_PROP}
-                      disabledAttributes={
-                        {
-                          statement: [
-                            "elvl",
-                            "moodvariant",
-                            "mood",
-                            "bundleOperator",
-                          ],
-                          type: ["elvl", "logic", "virtuality", "partitivity"],
-                          value: ["elvl", "logic", "virtuality", "partitivity"],
-                        } as PropAttributeFilter
-                      }
-                      isInsideTemplate={entity.isTemplate || false}
-                      territoryParentId={getTerritoryId(entity)}
-                    />
-                  </tbody>
-                </table>
+                <PropGroup
+                  boxEntity={entity}
+                  originId={entity.id}
+                  entities={entity.entities}
+                  props={entity.props}
+                  territoryId={territoryId}
+                  updateProp={updateProp}
+                  removeProp={removeProp}
+                  addProp={addMetaProp}
+                  userCanEdit={userCanEdit}
+                  openDetailOnCreate={false}
+                  movePropToIndex={(propId, oldIndex, newIndex) => {
+                    movePropToIndex(propId, oldIndex, newIndex);
+                  }}
+                  category={DraggedPropRowCategory.META_PROP}
+                  disabledAttributes={
+                    {
+                      statement: [
+                        "elvl",
+                        "moodvariant",
+                        "mood",
+                        "bundleOperator",
+                      ],
+                      type: ["elvl", "logic", "virtuality", "partitivity"],
+                      value: ["elvl", "logic", "virtuality", "partitivity"],
+                    } as PropAttributeFilter
+                  }
+                  isInsideTemplate={entity.isTemplate || false}
+                  territoryParentId={getTerritoryId(entity)}
+                />
                 {userCanEdit && (
                   <Button
                     color="primary"
@@ -1344,8 +1343,9 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
       />
       <Submit
         title="Change entity type"
-        text={`Changing entity type to: [${selectedEntityType ? entitiesDictKeys[selectedEntityType].label : ""
-          }]. You may loose some values. Do you want to continue?`}
+        text={`Changing entity type to: [${
+          selectedEntityType ? entitiesDictKeys[selectedEntityType].label : ""
+        }]. You may loose some values. Do you want to continue?`}
         submitLabel="Continue"
         onSubmit={() => {
           if (selectedEntityType) {
