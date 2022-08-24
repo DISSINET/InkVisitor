@@ -82,16 +82,19 @@ export const SearchParamsProvider = ({
   const appendDetailId = (id: string) => {
     const detailIdArray = getDetailIdArray();
     if (!detailIdArray.includes(id)) {
+      const newDetailIdArray = [];
       if (detailIdArray.length < maxTabCount) {
-        const newDetailIdArray = [...detailIdArray, id];
-        setDetailId(newDetailIdArray.join(arrJoinChar));
-        setSelectedDetailId(id);
+        newDetailIdArray.push([...detailIdArray, id]);
       } else {
-        toast.info("Maximum tab count reached");
+        newDetailIdArray.push([
+          ...detailIdArray.splice(1, detailIdArray.length),
+          id,
+        ]);
+        toast.info(`Tab [${detailIdArray}] canceled from detail`);
       }
-    } else {
-      setSelectedDetailId(id);
+      setDetailId(newDetailIdArray.join(arrJoinChar));
     }
+    setSelectedDetailId(id);
   };
 
   const removeDetailId = (id: string) => {
