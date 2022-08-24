@@ -1,8 +1,4 @@
-import {
-  EntityEnums,
-  RelationEnums,
-  UserEnums,
-} from "@shared/enums";
+import { EntityEnums, RelationEnums, UserEnums } from "@shared/enums";
 import {
   IBookmarkFolder,
   IEntity,
@@ -57,21 +53,21 @@ export const CProp = (): IProp => ({
 export const CClassification = (): IStatementClassification => ({
   id: uuidv4(),
   entityId: "",
-  elvl: Elvl.Textual,
-  logic: Logic.Positive,
-  certainty: Certainty.Empty,
-  mood: [Mood.Indication],
-  moodvariant: MoodVariant.Realis,
+  elvl: EntityEnums.Elvl.Textual,
+  logic: EntityEnums.Logic.Positive,
+  certainty: EntityEnums.Certainty.Empty,
+  mood: [EntityEnums.Mood.Indication],
+  moodvariant: EntityEnums.MoodVariant.Realis,
 });
 
 export const CIdentification = (): IStatementIdentification => ({
   id: uuidv4(),
   entityId: "",
-  elvl: Elvl.Textual,
-  logic: Logic.Positive,
-  certainty: Certainty.Empty,
-  mood: [Mood.Indication],
-  moodvariant: MoodVariant.Realis,
+  elvl: EntityEnums.Elvl.Textual,
+  logic: EntityEnums.Logic.Positive,
+  certainty: EntityEnums.Certainty.Empty,
+  mood: [EntityEnums.Mood.Indication],
+  moodvariant: EntityEnums.MoodVariant.Realis,
 });
 
 export const CMetaProp = (): IProp => ({
@@ -281,7 +277,9 @@ export const CTerritoryActant = (
     parent: { territoryId: parentId, order: parentOrder },
   },
   status:
-    userRole === UserEnums.Role.Admin ? EntityEnums.Status.Approved : EntityEnums.Status.Pending,
+    userRole === UserEnums.Role.Admin
+      ? EntityEnums.Status.Approved
+      : EntityEnums.Status.Pending,
 
   props: [],
   references: [],

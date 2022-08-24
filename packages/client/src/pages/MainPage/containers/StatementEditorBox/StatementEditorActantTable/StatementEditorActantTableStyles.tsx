@@ -1,7 +1,10 @@
 import styled from "styled-components";
 
-export const StyledRow = styled.div`
-  margin-bottom: 1rem;
+interface StyledRow {
+  marginBottom?: boolean;
+}
+export const StyledRow = styled.div<StyledRow>`
+  margin-bottom: ${({ marginBottom }) => (marginBottom ? "1rem" : "")};
 `;
 interface StyledGrid {
   tempDisabled?: boolean;
