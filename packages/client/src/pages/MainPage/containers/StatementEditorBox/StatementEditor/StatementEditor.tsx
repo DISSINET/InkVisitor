@@ -613,6 +613,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 removeProp={removeProp}
                 movePropToIndex={movePropToIndex}
                 territoryParentId={statementTerritoryId}
+                territoryActants={territoryActants}
               />
             </StyledEditorActantTableWrapper>
 
@@ -650,6 +651,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 territoryParentId={statementTerritoryId}
                 addClassification={addClassification}
                 addIdentification={addIdentification}
+                territoryActants={territoryActants}
               />
             </StyledEditorActantTableWrapper>
             {userCanEdit && (
