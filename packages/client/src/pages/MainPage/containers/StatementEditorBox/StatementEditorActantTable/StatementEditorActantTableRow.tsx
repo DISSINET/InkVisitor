@@ -35,8 +35,8 @@ import {
 import { dndHoverFn } from "utils";
 import AttributesEditor from "../../AttributesEditor/AttributesEditor";
 import { PropGroup } from "../../PropGroup/PropGroup";
-import { StatementEditorActantClassifications } from "./StatementEditorActantClassifications/StatementEditorActantClassifications";
-import { StatementEditorActantIdentifications } from "./StatementEditorActantIdentifications/StatementEditorActantIdentifications";
+import { StatementEditorActantClassification } from "./StatementEditorActantClassification/StatementEditorActantClassification";
+import { StatementEditorActantIdentification } from "./StatementEditorActantIdentification/StatementEditorActantIdentification";
 import {
   StyledCI,
   StyledCIHeading,
@@ -449,7 +449,7 @@ export const StatementEditorActantTableRow: React.FC<
               <StyledCIHeading>Classifications:</StyledCIHeading>
               {classifications.length > 0 &&
                 classifications.map((classification, key) => (
-                  <StatementEditorActantClassifications
+                  <StatementEditorActantClassification
                     key={key}
                     classifications={classifications}
                     classification={classification}
@@ -470,7 +470,7 @@ export const StatementEditorActantTableRow: React.FC<
               <StyledCIHeading>Identifications:</StyledCIHeading>
               {identifications.length > 0 &&
                 identifications.map((identification, key) => (
-                  <StatementEditorActantIdentifications
+                  <StatementEditorActantIdentification
                     key={key}
                     identification={identification}
                     identifications={identifications}
