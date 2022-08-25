@@ -15,7 +15,7 @@ import {
   StyledTagWrapper,
 } from "../StatementEditorActantTableStyles";
 
-interface StatementEditorActantIdentifications {
+interface StatementEditorActantIdentification {
   identifications: IStatementIdentification[];
   identification: IStatementIdentification;
   updateActant: (statementActantId: string, changes: any) => void;
@@ -28,8 +28,8 @@ interface StatementEditorActantIdentifications {
   classEntitiesActant: EntityEnums.Class[];
   territoryActants?: string[];
 }
-export const StatementEditorActantIdentifications: React.FC<
-  StatementEditorActantIdentifications
+export const StatementEditorActantIdentification: React.FC<
+  StatementEditorActantIdentification
 > = ({
   identifications,
   identification,

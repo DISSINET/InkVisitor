@@ -15,7 +15,7 @@ import {
   StyledTagWrapper,
 } from "../StatementEditorActantTableStyles";
 
-interface StatementEditorActantClassifications {
+interface StatementEditorActantClassification {
   classifications: IStatementClassification[];
   classification: IStatementClassification;
   updateActant: (statementActantId: string, changes: any) => void;
@@ -27,8 +27,8 @@ interface StatementEditorActantClassifications {
   sActant: IStatementActant;
   territoryActants?: string[];
 }
-export const StatementEditorActantClassifications: React.FC<
-  StatementEditorActantClassifications
+export const StatementEditorActantClassification: React.FC<
+  StatementEditorActantClassification
 > = ({
   classifications,
   classification,
