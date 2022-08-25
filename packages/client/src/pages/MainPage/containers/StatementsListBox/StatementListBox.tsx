@@ -647,14 +647,13 @@ export const StatementListBox: React.FC = () => {
           isFavorited={isFavorited}
         />
       )}
-
       {statements && audits && (
         <StyledTableWrapper id="Statements-box-table">
           <StatementListTable
             moveEndRow={moveEndRow}
             data={statements.map((st) => ({
               ...st,
-              audit: audits.find((a) => a.entity === st.id),
+              audit: audits.find((a) => a.entityId === st.id),
             }))}
             columns={columns}
             handleRowClick={(rowId: string) => {

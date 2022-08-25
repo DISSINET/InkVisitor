@@ -8,8 +8,8 @@ import { StyledTable, StyledTh, StyledTHead } from "./StatementListTableStyles";
 interface StatementListTable {
   data: IResponseStatement[];
   columns: Column<{}>[];
-  handleRowClick?: Function;
-  moveEndRow: Function;
+  handleRowClick?: (rowId: string) => void;
+  moveEndRow: (statementToMove: IStatement, index: number) => Promise<void>;
   entities: { [key: string]: IEntity };
 }
 export const StatementListTable: React.FC<StatementListTable> = ({
@@ -91,9 +91,9 @@ export const StatementListTable: React.FC<StatementListTable> = ({
               row={row}
               moveRow={moveRow}
               moveEndRow={moveEndRow}
-              {...row.getRowProps()}
               visibleColumns={visibleColumns}
               entities={entities}
+              {...row.getRowProps()}
             />
           );
         })}
