@@ -637,6 +637,19 @@ export const StatementListBox: React.FC = () => {
     }
   );
 
+  const tableData: (IResponseStatement & {
+    audit: IResponseAudit | undefined;
+  })[] = useMemo(() => {
+    if (statements && audits) {
+      return statements.map((st) => ({
+        ...st,
+        audit: audits.find((a) => a.entityId === st.id),
+      }));
+    } else {
+      return [];
+    }
+  }, [statements, audits]);
+
   return (
     <>
       {data && (
@@ -647,15 +660,11 @@ export const StatementListBox: React.FC = () => {
           isFavorited={isFavorited}
         />
       )}
-
       {statements && audits && (
         <StyledTableWrapper id="Statements-box-table">
           <StatementListTable
             moveEndRow={moveEndRow}
-            data={statements.map((st) => ({
-              ...st,
-              audit: audits.find((a) => a.entity === st.id),
-            }))}
+            data={tableData}
             columns={columns}
             handleRowClick={(rowId: string) => {
               setStatementId(rowId);
