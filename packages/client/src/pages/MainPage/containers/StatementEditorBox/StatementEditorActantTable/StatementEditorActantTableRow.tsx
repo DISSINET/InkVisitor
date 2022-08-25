@@ -38,6 +38,8 @@ import { PropGroup } from "../../PropGroup/PropGroup";
 import { StatementEditorActantClassifications } from "./StatementEditorActantClassifications/StatementEditorActantClassifications";
 import { StatementEditorActantIdentifications } from "./StatementEditorActantIdentifications/StatementEditorActantIdentifications";
 import {
+  StyledCI,
+  StyledCIHeading,
   StyledGrid,
   StyledGridColumn,
   StyledRow,
@@ -60,6 +62,7 @@ interface StatementEditorActantTableRow {
   territoryParentId?: string;
   addClassification: (originId: string) => void;
   addIdentification: (originId: string) => void;
+  territoryActants?: string[];
 }
 
 export const StatementEditorActantTableRow: React.FC<
@@ -80,6 +83,7 @@ export const StatementEditorActantTableRow: React.FC<
   territoryParentId,
   addClassification,
   addIdentification,
+  territoryActants,
 }) => {
   const isInsideTemplate = statement.isTemplate || false;
   const { statementId, territoryId } = useSearchParams();
@@ -177,6 +181,7 @@ export const StatementEditorActantTableRow: React.FC<
           excludedEntities={excludedSuggesterEntities}
           isInsideTemplate={isInsideTemplate}
           territoryParentId={territoryParentId}
+          territoryActants={territoryActants}
         />
       )
     );
@@ -439,27 +444,49 @@ export const StatementEditorActantTableRow: React.FC<
         draggedActantRow.category === DraggedPropRowCategory.ACTANT
       ) && (
         <>
-          <StatementEditorActantClassifications
-            classifications={filteredActant.data.sActant.classifications}
-            sActant={filteredActant.data.sActant}
-            statement={statement}
-            territoryParentId={territoryParentId}
-            isInsideTemplate={isInsideTemplate}
-            updateActant={updateActant}
-            updateStatementDataMutation={updateStatementDataMutation}
-            userCanEdit={userCanEdit}
-          />
-          <StatementEditorActantIdentifications
-            identifications={filteredActant.data.sActant.identifications}
-            sActant={filteredActant.data.sActant}
-            statement={statement}
-            territoryParentId={territoryParentId}
-            isInsideTemplate={isInsideTemplate}
-            updateActant={updateActant}
-            updateStatementDataMutation={updateStatementDataMutation}
-            userCanEdit={userCanEdit}
-            classEntitiesActant={classEntitiesActant}
-          />
+          {classifications.length > 0 && (
+            <StyledCI>
+              <StyledCIHeading>Classifications:</StyledCIHeading>
+              {classifications.length > 0 &&
+                classifications.map((classification, key) => (
+                  <StatementEditorActantClassifications
+                    key={key}
+                    classifications={classifications}
+                    classification={classification}
+                    sActant={filteredActant.data.sActant}
+                    statement={statement}
+                    territoryParentId={territoryParentId}
+                    isInsideTemplate={isInsideTemplate}
+                    updateActant={updateActant}
+                    updateStatementDataMutation={updateStatementDataMutation}
+                    userCanEdit={userCanEdit}
+                    territoryActants={territoryActants}
+                  />
+                ))}
+            </StyledCI>
+          )}
+          {identifications.length > 0 && (
+            <StyledCI>
+              <StyledCIHeading>Identifications:</StyledCIHeading>
+              {identifications.length > 0 &&
+                identifications.map((identification, key) => (
+                  <StatementEditorActantIdentifications
+                    key={key}
+                    identification={identification}
+                    identifications={identifications}
+                    sActant={filteredActant.data.sActant}
+                    statement={statement}
+                    territoryParentId={territoryParentId}
+                    isInsideTemplate={isInsideTemplate}
+                    updateActant={updateActant}
+                    updateStatementDataMutation={updateStatementDataMutation}
+                    userCanEdit={userCanEdit}
+                    classEntitiesActant={classEntitiesActant}
+                    territoryActants={territoryActants}
+                  />
+                ))}
+            </StyledCI>
+          )}
         </>
       )}
     </StyledRow>

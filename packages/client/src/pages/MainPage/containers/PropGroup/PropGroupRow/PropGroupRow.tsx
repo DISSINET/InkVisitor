@@ -242,7 +242,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
             />
           ) : (
             <EntitySuggester
-              territoryActants={[]}
+              territoryActants={territoryActants}
               onSelected={(newSelectedId: string) => {
                 updateProp(prop.id, {
                   value: {

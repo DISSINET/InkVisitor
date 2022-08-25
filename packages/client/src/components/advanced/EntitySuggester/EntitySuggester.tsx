@@ -1,7 +1,4 @@
-import {
-  EntityEnums,
-  UserEnums,
-} from "@shared/enums";
+import { EntityEnums, UserEnums } from "@shared/enums";
 import { IEntity, IOption, IStatement, ITerritory } from "@shared/types";
 import api from "api";
 import { Suggester } from "components";
@@ -260,7 +257,9 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
       !categoryTypes.includes(hoverredCategory) ||
       (disableTemplatesAccept && newHoverred.isTemplate) ||
       newHoverred.isDiscouraged ||
-      (newHoverred.entityClass === EntityEnums.Class.Territory && !territoryParentId)
+      (newHoverred.isTemplate &&
+        newHoverred.entityClass === EntityEnums.Class.Territory &&
+        !territoryParentId)
     ) {
       setIsWrongDropCategory(true);
     } else {

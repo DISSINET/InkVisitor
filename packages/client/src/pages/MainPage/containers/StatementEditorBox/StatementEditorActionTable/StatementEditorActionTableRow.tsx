@@ -43,6 +43,7 @@ interface StatementEditorActionTableRow {
   movePropToIndex: (propId: string, oldIndex: number, newIndex: number) => void;
   updateActionsMutation: UseMutationResult<any, unknown, object, unknown>;
   territoryParentId?: string;
+  territoryActants?: string[];
 }
 
 export const StatementEditorActionTableRow: React.FC<
@@ -60,6 +61,7 @@ export const StatementEditorActionTableRow: React.FC<
   movePropToIndex,
   updateActionsMutation,
   territoryParentId,
+  territoryActants,
 }) => {
   const isInsideTemplate = statement.isTemplate || false;
   const { statementId, territoryId } = useSearchParams();
@@ -149,6 +151,7 @@ export const StatementEditorActionTableRow: React.FC<
           placeholder={"add new action"}
           isInsideTemplate={isInsideTemplate}
           territoryParentId={territoryParentId}
+          territoryActants={territoryActants}
         />
       )
     );
