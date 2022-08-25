@@ -142,7 +142,7 @@ export const StatementEditorActionTableRow: React.FC<
         <EntitySuggester
           onSelected={(newSelectedId: string) => {
             updateAction(sAction.id, {
-              action: newSelectedId,
+              actionId: newSelectedId,
             });
           }}
           openDetailOnCreate
