@@ -5,14 +5,12 @@ import {
   IStatementIdentification,
 } from "@shared/types/statement";
 import { AttributeIcon, Button, ButtonGroup } from "components";
-import { EntityTag, EntitySuggester } from "components/advanced";
+import { EntitySuggester, EntityTag } from "components/advanced";
 import AttributesEditor from "pages/MainPage/containers/AttributesEditor/AttributesEditor";
 import React, { useState } from "react";
-import { FaUnlink, FaTrashAlt } from "react-icons/fa";
+import { FaTrashAlt, FaUnlink } from "react-icons/fa";
 import { UseMutationResult } from "react-query";
 import {
-  StyledCI,
-  StyledCIHeading,
   StyledCIGrid,
   StyledTagWrapper,
 } from "../StatementEditorActantTableStyles";
@@ -28,6 +26,7 @@ interface StatementEditorActantIdentifications {
   updateStatementDataMutation: UseMutationResult<any, unknown, object, unknown>;
   sActant: IStatementActant;
   classEntitiesActant: EntityEnums.Class[];
+  territoryActants?: string[];
 }
 export const StatementEditorActantIdentifications: React.FC<
   StatementEditorActantIdentifications
@@ -42,6 +41,7 @@ export const StatementEditorActantIdentifications: React.FC<
   updateStatementDataMutation,
   sActant,
   classEntitiesActant,
+  territoryActants,
 }) => {
   const [identificationModalOpen, setIdentificationModalOpen] = useState(false);
   const entity = statement.entities[identification.entityId];
@@ -92,6 +92,7 @@ export const StatementEditorActantIdentifications: React.FC<
             }}
             openDetailOnCreate
             isInsideTemplate={isInsideTemplate}
+            territoryActants={territoryActants}
           />
         )}
         <ButtonGroup style={{ marginLeft: "1rem" }}>

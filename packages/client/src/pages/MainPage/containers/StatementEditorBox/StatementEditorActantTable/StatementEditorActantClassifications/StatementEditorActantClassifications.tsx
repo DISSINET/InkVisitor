@@ -11,9 +11,7 @@ import React, { useState } from "react";
 import { FaTrashAlt, FaUnlink } from "react-icons/fa";
 import { UseMutationResult } from "react-query";
 import {
-  StyledCI,
   StyledCIGrid,
-  StyledCIHeading,
   StyledTagWrapper,
 } from "../StatementEditorActantTableStyles";
 
@@ -27,6 +25,7 @@ interface StatementEditorActantClassifications {
   territoryParentId?: string;
   updateStatementDataMutation: UseMutationResult<any, unknown, object, unknown>;
   sActant: IStatementActant;
+  territoryActants?: string[];
 }
 export const StatementEditorActantClassifications: React.FC<
   StatementEditorActantClassifications
@@ -40,6 +39,7 @@ export const StatementEditorActantClassifications: React.FC<
   isInsideTemplate,
   territoryParentId,
   updateStatementDataMutation,
+  territoryActants,
 }) => {
   const entity = statement.entities[classification.entityId];
   const [classificationModalOpen, setClassificationModalOpen] = useState(false);
@@ -90,6 +90,7 @@ export const StatementEditorActantClassifications: React.FC<
             }}
             openDetailOnCreate
             isInsideTemplate={isInsideTemplate}
+            territoryActants={territoryActants}
           />
         )}
         <ButtonGroup style={{ marginLeft: "1rem" }}>

@@ -18,6 +18,7 @@ interface StatementEditorActantTable {
   territoryParentId?: string;
   addClassification: (originId: string) => void;
   addIdentification: (originId: string) => void;
+  territoryActants?: string[];
 }
 export const StatementEditorActantTable: React.FC<
   StatementEditorActantTable
@@ -33,6 +34,7 @@ export const StatementEditorActantTable: React.FC<
   territoryParentId,
   addClassification,
   addIdentification,
+  territoryActants,
 }) => {
   const [filteredActants, setFilteredActants] = useState<
     FilteredActantObject[]
@@ -96,6 +98,7 @@ export const StatementEditorActantTable: React.FC<
               territoryParentId={territoryParentId}
               addClassification={addClassification}
               addIdentification={addIdentification}
+              territoryActants={territoryActants}
             />
           );
         })}
