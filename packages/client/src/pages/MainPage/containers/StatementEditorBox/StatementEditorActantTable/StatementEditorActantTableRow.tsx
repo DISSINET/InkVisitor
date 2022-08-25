@@ -38,6 +38,8 @@ import { PropGroup } from "../../PropGroup/PropGroup";
 import { StatementEditorActantClassifications } from "./StatementEditorActantClassifications/StatementEditorActantClassifications";
 import { StatementEditorActantIdentifications } from "./StatementEditorActantIdentifications/StatementEditorActantIdentifications";
 import {
+  StyledCI,
+  StyledCIHeading,
   StyledGrid,
   StyledGridColumn,
   StyledRow,
@@ -439,27 +441,47 @@ export const StatementEditorActantTableRow: React.FC<
         draggedActantRow.category === DraggedPropRowCategory.ACTANT
       ) && (
         <>
-          <StatementEditorActantClassifications
-            classifications={filteredActant.data.sActant.classifications}
-            sActant={filteredActant.data.sActant}
-            statement={statement}
-            territoryParentId={territoryParentId}
-            isInsideTemplate={isInsideTemplate}
-            updateActant={updateActant}
-            updateStatementDataMutation={updateStatementDataMutation}
-            userCanEdit={userCanEdit}
-          />
-          <StatementEditorActantIdentifications
-            identifications={filteredActant.data.sActant.identifications}
-            sActant={filteredActant.data.sActant}
-            statement={statement}
-            territoryParentId={territoryParentId}
-            isInsideTemplate={isInsideTemplate}
-            updateActant={updateActant}
-            updateStatementDataMutation={updateStatementDataMutation}
-            userCanEdit={userCanEdit}
-            classEntitiesActant={classEntitiesActant}
-          />
+          {classifications.length > 0 && (
+            <StyledCI>
+              <StyledCIHeading>Classifications:</StyledCIHeading>
+              {classifications.length > 0 &&
+                classifications.map((classification, key) => (
+                  <StatementEditorActantClassifications
+                    key={key}
+                    classifications={classifications}
+                    classification={classification}
+                    sActant={filteredActant.data.sActant}
+                    statement={statement}
+                    territoryParentId={territoryParentId}
+                    isInsideTemplate={isInsideTemplate}
+                    updateActant={updateActant}
+                    updateStatementDataMutation={updateStatementDataMutation}
+                    userCanEdit={userCanEdit}
+                  />
+                ))}
+            </StyledCI>
+          )}
+          {identifications.length > 0 && (
+            <StyledCI>
+              <StyledCIHeading>Identifications:</StyledCIHeading>
+              {identifications.length > 0 &&
+                identifications.map((identification, key) => (
+                  <StatementEditorActantIdentifications
+                    key={key}
+                    identification={identification}
+                    identifications={identifications}
+                    sActant={filteredActant.data.sActant}
+                    statement={statement}
+                    territoryParentId={territoryParentId}
+                    isInsideTemplate={isInsideTemplate}
+                    updateActant={updateActant}
+                    updateStatementDataMutation={updateStatementDataMutation}
+                    userCanEdit={userCanEdit}
+                    classEntitiesActant={classEntitiesActant}
+                  />
+                ))}
+            </StyledCI>
+          )}
         </>
       )}
     </StyledRow>
