@@ -26,6 +26,7 @@ import {
   IRelationSynonym,
   IRelationTroponym,
 } from "./relation";
+import { EntityTooltip } from "./entity-tooltip"
 import {
   IResponseDetail,
   IResponseUsedInMetaProp,
@@ -90,6 +91,7 @@ export type {
   IRelationSuperclass,
   IRelationSynonym,
   IRelationTroponym,
+  EntityTooltip,
   IStatementData,
   IStatementAction,
   IStatementActant,
