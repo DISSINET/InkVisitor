@@ -46,6 +46,7 @@ describe("Relations create", function () {
 
       const newRelation = new Relation({
         type: RelationEnums.Type.Superclass,
+        entityIds: ["1"],
       });
 
       await request(app)
@@ -67,6 +68,7 @@ describe("Relations create", function () {
 
       const prepared = new Relation({
         type: RelationEnums.Type.Superclass,
+        entityIds: ["1"]
       });
 
       await prepared.save(db.connection);
@@ -74,6 +76,7 @@ describe("Relations create", function () {
       const newRelation = new Relation({
         id: prepared.id,
         type: RelationEnums.Type.Superclass,
+        entityIds: ["1"]
       });
 
       await request(app)

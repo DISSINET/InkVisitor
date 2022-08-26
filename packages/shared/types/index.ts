@@ -13,7 +13,7 @@ import { IProp } from "./prop";
 import { RequestPermissionUpdate } from "./request-permission";
 import { RequestSearch } from "./request-search";
 import { IResource } from "./resource";
-import { RelationTypes } from "./relation";
+import { Relation } from "./relation";
 import { EntityTooltip } from "./entity-tooltip"
 import {
   IResponseDetail,
@@ -68,7 +68,7 @@ export type {
   ILabel,
   IOption,
   IProp,
-  RelationTypes as Relation,
+  Relation,
   EntityTooltip,
   IStatementData,
   IStatementAction,

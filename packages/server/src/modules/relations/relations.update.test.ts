@@ -81,6 +81,7 @@ describe("Relations update", function () {
       const changeTypeTo: RelationEnums.Type = RelationEnums.Type.Antonym;
       const relationEntry = new Relation({
         type: RelationEnums.Type.Superclass,
+        entityIds: ["1"]
       });
 
       await relationEntry.save(db.connection);

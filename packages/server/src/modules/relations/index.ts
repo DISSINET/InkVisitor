@@ -20,9 +20,7 @@ export default Router()
         throw new ModelNotValidError("");
       }
 
-      const user = request.getUserOrFail();
-
-      if (!model.canBeCreatedByUser(user)) {
+      if (!model.canBeCreatedByUser(request.getUserOrFail())) {
         throw new PermissionDeniedError("entity cannot be created");
       }
 
@@ -59,7 +57,7 @@ export default Router()
         throw RelationDoesNotExist.forId(id);
       }
 
-      const model = new Relation({ ...data, id });
+      const model = new Relation({ ...existing, ...data });
       if (!model.isValid()) {
         throw new ModelNotValidError("");
       }

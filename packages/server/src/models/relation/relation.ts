@@ -10,16 +10,18 @@ import { IRequest } from "src/custom.request";
 export default class Relation implements RelationTypes.IModel, IDbModel {
   static table = "relations";
 
-  id: string = "";
-  type: RelationEnums.Type = RelationEnums.Type.Unknown;
-  entityIds: string[] = [];
+  id: string;
+  type: RelationEnums.Type;
+  entityIds: string[];
 
   constructor(data: UnknownObject) {
     if (!data) {
-      return;
+      data = {};
     }
 
-    fillFlatObject(this, { ...data, data: undefined });
+    this.id = data.id
+    this.type = data.type;
+    this.entityIds = data.entityIds;
   }
 
   async save(db: Connection | undefined): Promise<WriteResult> {
@@ -62,8 +64,28 @@ export default class Relation implements RelationTypes.IModel, IDbModel {
     return result;
   }
 
+  /**
+   * Test validity of the model
+   * @returns 
+   */
   isValid(): boolean {
-    return EnumValidators.IsValidRelationType(this.type);
+    if (typeof this.id !== "string" && this.id !== undefined) {
+      return false;
+    }
+
+    if (!EnumValidators.IsValidRelationType(this.type)) {
+      return false;
+    }
+
+    if (this.entityIds === undefined) {
+      return false;
+    }
+
+    if (this.entityIds.constructor.name !== "Array" || !this.entityIds.length || !this.entityIds.reduce((acc, cur) => acc && typeof cur === 'string', true)) {
+      return false;
+    }
+
+    return true;
   }
 
   canBeViewedByUser(user: User): boolean {
