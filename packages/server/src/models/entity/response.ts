@@ -2,7 +2,7 @@ import { EntityEnums, UserEnums } from "@shared/enums";
 import {
   IEntity,
   IProp,
-  Relation,
+  Relation as RelationTypes,
   IResponseDetail,
   IResponseEntity,
   IResponseUsedInMetaProp,
@@ -55,7 +55,7 @@ export class ResponseEntityDetail
   usedInStatementIdentifications: IResponseUsedInStatementIdentification[];
   usedInStatementClassifications: IResponseUsedInStatementClassification[];
 
-  relations: Relation.IModel[] = [];
+  relations: RelationTypes.IModel[] = [];
 
   // map of entity ids that should be populated in subsequent methods and used in fetching
   // real entities in populateEntitiesMap method

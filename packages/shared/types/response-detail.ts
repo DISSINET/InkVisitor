@@ -15,8 +15,8 @@ export interface IResponseDetail extends IResponseEntity {
   usedInStatementProps: IResponseUsedInStatementProps[]; // all statements, where the detail id is used in props
   usedInMetaProps: IResponseUsedInMetaProp<EntityEnums.UsedInPosition>[]; // all entities, where the detail id is used in props (entity.props[])
 
-  usedInStatementIdentifications: IResponseUsedInStatementIdentification[];
-  usedInStatementClassifications: IResponseUsedInStatementClassification[];
+  usedInStatementIdentifications: IResponseUsedInStatementIdentification[]; // statement.data.actants[].identifications + from usedInStatements field if actant.entityId = detailId
+  usedInStatementClassifications: IResponseUsedInStatementClassification[]; // statement.data.actants[].classifications + from usedInStatements field if actant.entityId = detailId
 
   usedAsTemplate?: string[];
   relations: IRelation[];
