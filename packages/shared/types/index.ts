@@ -13,19 +13,7 @@ import { IProp } from "./prop";
 import { RequestPermissionUpdate } from "./request-permission";
 import { RequestSearch } from "./request-search";
 import { IResource } from "./resource";
-import {
-  IRelation,
-  IRelationActionEventEquivalent,
-  IRelationAntonym,
-  IRelationClassification,
-  IRelationIdentification,
-  IRelationPropertyReciprocal,
-  IRelationRelated,
-  IRelationSubjectActantReciprocal,
-  IRelationSuperclass,
-  IRelationSynonym,
-  IRelationTroponym,
-} from "./relation";
+import { RelationTypes } from "./relation";
 import { EntityTooltip } from "./entity-tooltip"
 import {
   IResponseDetail,
@@ -80,17 +68,7 @@ export type {
   ILabel,
   IOption,
   IProp,
-  IRelation,
-  IRelationActionEventEquivalent,
-  IRelationAntonym,
-  IRelationClassification,
-  IRelationIdentification,
-  IRelationPropertyReciprocal,
-  IRelationRelated,
-  IRelationSubjectActantReciprocal,
-  IRelationSuperclass,
-  IRelationSynonym,
-  IRelationTroponym,
+  RelationTypes as Relation,
   EntityTooltip,
   IStatementData,
   IStatementAction,

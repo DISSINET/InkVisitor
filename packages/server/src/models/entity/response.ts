@@ -1,9 +1,8 @@
-import { Request } from "express";
 import { EntityEnums, UserEnums } from "@shared/enums";
 import {
   IEntity,
   IProp,
-  IRelation,
+  Relation,
   IResponseDetail,
   IResponseEntity,
   IResponseUsedInMetaProp,
@@ -56,7 +55,7 @@ export class ResponseEntityDetail
   usedInStatementIdentifications: IResponseUsedInStatementIdentification[];
   usedInStatementClassifications: IResponseUsedInStatementClassification[];
 
-  relations: IRelation[] = [];
+  relations: Relation.IModel[] = [];
 
   // map of entity ids that should be populated in subsequent methods and used in fetching
   // real entities in populateEntitiesMap method
