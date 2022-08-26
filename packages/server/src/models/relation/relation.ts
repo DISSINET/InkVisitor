@@ -1,13 +1,13 @@
 import { IDbModel, UnknownObject, fillFlatObject } from "@models/common";
 import { r as rethink, Connection, WriteResult, RDatum } from "rethinkdb-ts";
-import { IRelation } from "@shared/types";
+import { Relation as RelationTypes } from "@shared/types";
 import { DbEnums, RelationEnums, UserEnums } from "@shared/enums";
 import { EnumValidators } from "@shared/enums";
 import { InternalServerError } from "@shared/types/errors";
 import User from "@models/user/user";
 import { IRequest } from "src/custom.request";
 
-export default class Relation implements IRelation, IDbModel {
+export default class Relation implements RelationTypes.IModel, IDbModel {
   static table = "relations";
 
   id: string = "";
