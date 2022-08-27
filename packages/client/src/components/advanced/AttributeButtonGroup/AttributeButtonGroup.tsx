@@ -6,7 +6,7 @@ interface AttributeButtonGroup {
   options: {
     longValue: string;
     shortValue: string;
-    onClick: Function;
+    onClick: () => void;
     selected: boolean;
   }[];
   disabled?: boolean;

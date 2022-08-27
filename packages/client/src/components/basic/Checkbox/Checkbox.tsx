@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react";
 import { StyledCheckbox } from "./CheckboxStyles";
 
 interface Checkbox {
-  value?: boolean;
-  onChangeFn: Function;
+  value: boolean;
+  onChangeFn: (value: boolean) => void;
   label?: string;
   id?: string;
   disabled?: boolean;

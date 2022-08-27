@@ -869,7 +869,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
                                 )
                               )}
                             width="full"
-                            noOptionsMessage={() => "no entity"}
+                            noOptionsMessage={"no entity"}
                             placeholder={"no entity"}
                             onChange={(newValue: any) => {
                               const oldData = { ...entity.data };
