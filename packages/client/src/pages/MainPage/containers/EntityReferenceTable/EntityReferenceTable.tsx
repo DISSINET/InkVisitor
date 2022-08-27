@@ -86,7 +86,6 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
                 reference={reference}
                 resource={resourceEntity}
                 value={valueEntity}
-                onChange={() => {}}
                 disabled={disabled}
                 handleRemove={handleRemove}
                 handleChangeResource={handleChangeResource}

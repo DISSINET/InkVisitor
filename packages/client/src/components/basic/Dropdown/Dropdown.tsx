@@ -32,11 +32,8 @@ interface Dropdown {
   disabled?: boolean;
   hideSelectedOptions?: boolean;
   noDropDownIndicator?: boolean;
-  formatOptionLabel?: Function;
-  isOptionSelected?: Function;
-  getOptionLabel?: Function;
   placeholder?: string;
-  noOptionsMessage?: Function;
+  noOptionsMessage?: string;
   isClearable?: boolean;
   isMulti?: boolean;
   entityDropdown?: boolean;
@@ -53,13 +50,10 @@ export const Dropdown: React.FC<Dropdown> = ({
   onChange,
   components = undefined,
   width,
-  isOptionSelected,
-  getOptionLabel,
-  formatOptionLabel,
   hideSelectedOptions = false,
   noDropDownIndicator = false,
   placeholder = "select..",
-  noOptionsMessage = () => "no option selected",
+  noOptionsMessage = "no option selected",
   isClearable = false,
   isMulti = false,
   disabled = false,
@@ -94,7 +88,7 @@ export const Dropdown: React.FC<Dropdown> = ({
         className="react-select-container"
         classNamePrefix="react-select"
         placeholder={placeholder}
-        noOptionsMessage={noOptionsMessage}
+        noOptionsMessage={() => noOptionsMessage}
         isClearable={isClearable}
         captureMenuScroll={false}
         components={{
@@ -106,9 +100,6 @@ export const Dropdown: React.FC<Dropdown> = ({
           DropdownIndicator,
         }}
         isSearchable={!disableTyping}
-        {...(getOptionLabel ? { getOptionLabel: getOptionLabel } : {})}
-        {...(formatOptionLabel ? { formatOptionLabel: formatOptionLabel } : {})}
-        {...(isOptionSelected ? { isOptionSelected: isOptionSelected } : {})}
         value={displayValue}
         styles={{
           dropdownIndicator: () => {

@@ -9,7 +9,7 @@ import {
   Wrapper,
 } from "./InputStyles";
 
-interface InputProps {
+interface Input {
   label?: string;
   value?: string;
   inverted?: boolean;
@@ -19,8 +19,8 @@ interface InputProps {
   rows?: number;
   cols?: number;
   width?: number | "full";
-  onChangeFn: Function;
-  onEnterPressFn?: Function;
+  onChangeFn: (value: string) => void;
+  onEnterPressFn?: () => void;
   onFocus?: () => void;
   onBlur?: () => void;
   placeholder?: string;
@@ -31,7 +31,7 @@ interface InputProps {
   noBorder?: boolean;
 }
 
-export const Input: React.FC<InputProps> = ({
+export const Input: React.FC<Input> = ({
   label = "",
   inverted = false,
   suggester = false,

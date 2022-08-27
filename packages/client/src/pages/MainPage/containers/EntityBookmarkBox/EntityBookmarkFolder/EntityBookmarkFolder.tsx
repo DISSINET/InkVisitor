@@ -98,7 +98,7 @@ export const EntityBookmarkFolder: React.FC<EntityBookmarkFolder> = ({
     }
   };
 
-  const removeBookmark = async (folderId: string, bookmarkId: string) => {
+  const removeBookmark = (folderId: string, bookmarkId: string) => {
     const newBookmarks: IBookmarkFolder[] | false = getBookmarksCopy();
     if (newBookmarks) {
       const folder = newBookmarks.find((b) => b.id === folderId);

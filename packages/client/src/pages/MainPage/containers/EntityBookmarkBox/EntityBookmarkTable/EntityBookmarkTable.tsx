@@ -11,7 +11,7 @@ import { StyledTable, StyledTagWrap } from "./EntityBookmarkTableStyles";
 interface EntityBookmarkTable {
   folder: IResponseBookmarkFolder;
   updateFolderEntitys: any;
-  removeBookmark: Function;
+  removeBookmark: (folderId: string, bookmarkId: string) => void;
 }
 export const EntityBookmarkTable: React.FC<EntityBookmarkTable> = ({
   folder,
