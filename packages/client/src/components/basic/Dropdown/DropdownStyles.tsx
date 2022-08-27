@@ -1,6 +1,5 @@
 import { FaChevronDown } from "react-icons/fa";
 import Select from "react-select";
-import { ValueContainer } from "react-select/src/components/containers";
 import styled from "styled-components";
 
 const getWidth = (width?: number | "full") => {
@@ -50,7 +49,7 @@ export const StyledSelect = styled(Select)`
       entityDropdown && suggester ? theme.color["gray"][200] : ""};
     :hover {
       border-color: ${({ theme }) => theme.color["info"]};
-      border-width: 1.5px;
+      border-width: 1px;
     }
   }
   .react-select__control--is-disabled {
@@ -71,7 +70,7 @@ export const StyledSelect = styled(Select)`
 
     outline: 0;
     border-color: ${({ theme }) => theme.color["info"]};
-    border-width: 1.5px;
+    border-width: 1px;
   }
   .react-select__value-container {
     height: 100%;
