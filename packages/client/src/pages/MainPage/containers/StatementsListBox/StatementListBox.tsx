@@ -260,6 +260,7 @@ export const StatementListBox: React.FC = () => {
     }
   };
 
+  // TODO: change to mutation! Also clean unused vars
   const moveEndRow = async (statementToMove: IStatement, index: number) => {
     // return if order don't change
 
@@ -317,30 +318,6 @@ export const StatementListBox: React.FC = () => {
           showOnly="entity"
           tooltipPosition="bottom center"
         />
-      )
-    );
-  };
-
-  const renderListActantLong = (
-    actantObject: IEntity,
-    key: number,
-    attributes?: boolean,
-    statement?: IResponseStatement
-  ) => {
-    return (
-      actantObject && (
-        <div key={key}>
-          <div style={{ marginTop: "4px", display: "flex" }}>
-            <EntityTag
-              key={key}
-              entity={actantObject}
-              tooltipPosition="bottom center"
-            />
-          </div>
-          <div>
-            {/* {statement ? renderPropGroup(actantObject.id, statement) : ""} */}
-          </div>
-        </div>
       )
     );
   };
@@ -618,6 +595,7 @@ export const StatementListBox: React.FC = () => {
     ];
   }, [data, statementId, rowsExpanded]);
 
+  // TODO: check what's up! if needed wrap to useMemo
   statements.sort((a, b) =>
     a.data.territory && b.data.territory
       ? a.data.territory.order > b.data.territory.order

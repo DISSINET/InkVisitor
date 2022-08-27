@@ -16,7 +16,6 @@ interface EntityReferenceTableRow {
   reference: IReference;
   resource: IEntity | undefined;
   value: IEntity | undefined;
-  onChange: Function;
   disabled?: boolean;
   handleRemove: (refId: string) => void;
   handleChangeResource: (refId: string, newResource: string) => void;
@@ -30,7 +29,6 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
   reference,
   resource,
   value,
-  onChange,
   disabled = true,
   handleRemove,
   handleChangeResource,
