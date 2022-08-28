@@ -36,9 +36,18 @@ Make sure to have appropriate `.env.<env>` file accessible.
 1. Build the server app.
 2. Use provided script in root directory `./deploy-backend-<env>.sh`. This script will copy the `dist` directory to target, run `npm install` and start the app with `pm2` library.
 
-## Postman
+## API docs
+
+### Postman
 
 Please refer to exported [postman collection](./postman/inkvisitor_api.postman_collection.json) file to explore the api and available endpoints.
+
+### Swagger
+
+- generate swagger file wihch `yarn swagger`. A `swagger.json` file will be generated in server directory
+- provide path to this file in `.env` file using `SWAGGER_FILE` env variable
+- start the server ie. `yarn start:development`
+- visit `http://localhost:3000/api-docs` (or otherwise configured host/port)
 
 ## Authorization
 
