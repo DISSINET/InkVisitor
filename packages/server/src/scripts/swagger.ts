@@ -42,6 +42,51 @@ const options = {
             "controller", "route", "roles"
           ]
         },
+        IAudit: {
+          type: "object",
+          properties: {
+            id: {
+              type: "string",
+            },
+            entityId: {
+              type: "string",
+            },
+            user: {
+              type: "string"
+            },
+            date: {
+              type: "string",
+              format: "date",
+              example: "2019-05-17"
+            },
+            changes: {
+              type: "object",
+            }
+          },
+          required: [
+            "id", "entityId", "user", "date", "changes"
+          ]
+        },
+        IResponseAudit: {
+          type: "object",
+          properties: {
+            entityId: {
+              type: "string",
+            },
+            last: {
+              type: "array",
+              items: {
+                $ref: "#/components/schemas/IAudit"
+              }
+            },
+            first: {
+              $ref: "#/components/schemas/IAudit"
+            }
+          },
+          required: [
+            "entityId", "last"
+          ]
+        },
         IResponseGeneric: {
           type: "object",
           properties: {

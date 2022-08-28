@@ -8,7 +8,6 @@ import Statement from "@models/statement/statement";
 
 export const getAuditByEntityId = asyncRouteHandler<IResponseAudit>(
   async (request: Request) => {
-    console.log("wat");
     const entityId = request.params.entityId;
 
     if (!entityId) {
@@ -35,29 +34,54 @@ export const getAuditByEntityId = asyncRouteHandler<IResponseAudit>(
   }
 );
 
-export default Router().get(
-  "/",
-  asyncRouteHandler<IResponseAudit[]>(async (request: Request) => {
-    const territoryId = (request.query.forTerritory as string) || "";
-    if (!territoryId) {
-      throw new BadParams("forTerritory has to be set");
-    }
-
-    const statements: IStatement[] = await Statement.findStatementsInTerritory(
-      request.db.connection,
-      territoryId
-    );
-
-    const out: IResponseAudit[] = [];
-    for (const statementData of statements) {
-      const response = new ResponseAudit(statementData.id);
-      await response.getLastNForEntity(request.db.connection);
-      if (response.last.length) {
-        await response.getFirstForEntity(request.db.connection);
+export default Router()
+  /**
+   * @openapi
+   * /audits/:
+   *   get:
+   *     description: Delete an acl entry
+   *     tags:
+   *       - audits
+   *     parameters:
+   *       - in: query
+   *         name: forTerritory
+   *         schema:
+   *           type: string
+   *         required: true
+   *         description: ID of territory for which we want to find statements with audit entries        
+   *     responses:
+   *       200:
+   *         description: Returns list of IResponseAudit entries
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: array
+   *               items:
+   *                 $ref: "#/components/schemas/IResponseAudit"
+   */
+  .get(
+    "/",
+    asyncRouteHandler<IResponseAudit[]>(async (request: Request) => {
+      const territoryId = (request.query.forTerritory as string) || "";
+      if (!territoryId) {
+        throw new BadParams("forTerritory has to be set");
       }
-      out.push(response);
-    }
 
-    return out;
-  })
-);
+      const statements: IStatement[] = await Statement.findStatementsInTerritory(
+        request.db.connection,
+        territoryId
+      );
+
+      const out: IResponseAudit[] = [];
+      for (const statementData of statements) {
+        const response = new ResponseAudit(statementData.id);
+        await response.getLastNForEntity(request.db.connection);
+        if (response.last.length) {
+          await response.getFirstForEntity(request.db.connection);
+        }
+        out.push(response);
+      }
+
+      return out;
+    })
+  );
