@@ -10,6 +10,17 @@ import { IResponseGeneric, IResponsePermission } from "@shared/types";
 import AclPermission from "@models/acl/acl_permission";
 
 export default Router()
+  /**
+   * @openapi
+   * /:
+   *   get:
+   *     description: Returns list of all acl entries
+   *     tag:
+   *       acls
+   *     responses:
+   *       200:
+   *         description: Returns list of acl entries
+   */
   .get(
     "/",
     asyncRouteHandler<IResponsePermission[]>(async (request: Request) => {
@@ -19,6 +30,37 @@ export default Router()
       return permissionsData;
     })
   )
+  /**
+   * @openapi
+   * /:
+   *   put:
+   *     description: Update an existing acl entry
+   *     tag:
+   *       acls
+   *     parameters:
+   *       - in: path
+   *         name: permissionId
+   *         schema:
+   *           type: string
+   *         required: true
+   *         description: ID of the acl entry
+   *       - in: body
+   *         name: body
+   *         description: Acl object
+   *         required: true
+   *         schema:
+   *           $ref: "#/definitions/Acl"
+   *     consumes:
+   *       application/json
+   *     produces:
+   *       application/json
+   *
+   *     responses:
+   *       200:
+   *         description: Returns generic response
+   *         schema:
+   *           $ref: "#/definitions/IResponseGeneric"
+   */
   .put(
     "/:permissionId",
     asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
