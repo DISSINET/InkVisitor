@@ -12,14 +12,20 @@ import AclPermission from "@models/acl/acl_permission";
 export default Router()
   /**
    * @openapi
-   * /:
+   * /acls/:
    *   get:
    *     description: Returns list of all acl entries
-   *     tag:
-   *       acls
+   *     tags:
+   *       - acls
    *     responses:
    *       200:
    *         description: Returns list of acl entries
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: array
+   *               items: 
+   *                 $ref: "#/components/schemas/IResponseGeneric"
    */
   .get(
     "/",
@@ -32,11 +38,11 @@ export default Router()
   )
   /**
    * @openapi
-   * /:
+   * /acls/{permissionId}:
    *   put:
    *     description: Update an existing acl entry
-   *     tag:
-   *       acls
+   *     tags:
+   *       - acls
    *     parameters:
    *       - in: path
    *         name: permissionId
@@ -44,22 +50,20 @@ export default Router()
    *           type: string
    *         required: true
    *         description: ID of the acl entry
-   *       - in: body
-   *         name: body
-   *         description: Acl object
-   *         required: true
-   *         schema:
-   *           $ref: "#/definitions/Acl"
-   *     consumes:
-   *       application/json
-   *     produces:
-   *       application/json
-   *
+   *     requestBody:
+   *       description: Acl object
+   *       content: 
+   *         application/json:
+   *           schema:
+   *             allOf:
+   *               - $ref: "#/components/schemas/Acl"               
    *     responses:
    *       200:
    *         description: Returns generic response
-   *         schema:
-   *           $ref: "#/definitions/IResponseGeneric"
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/IResponseGeneric"
    */
   .put(
     "/:permissionId",
@@ -109,6 +113,28 @@ export default Router()
       }
     })
   )
+  /**
+   * @openapi
+   * /acls/{permissionId}:
+   *   delete:
+   *     description: Delete an acl entry
+   *     tags:
+   *       - acls
+   *     parameters:
+   *       - in: path
+   *         name: permissionId
+   *         schema:
+   *           type: string
+   *         required: true
+   *         description: ID of the acl entry             
+   *     responses:
+   *       200:
+   *         description: Returns generic response
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/IResponseGeneric"
+   */
   .delete(
     "/:permissionId",
     asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
