@@ -19,8 +19,10 @@ import profilerMiddleware from "@middlewares/profiler";
 import errorsMiddleware, { catchAll } from "@middlewares/errors";
 import { validateJwt } from "@common/auth";
 import compression from "compression";
+import * as swaggerUi from "swagger-ui-express";
 
 import "@models/events/register";
+import { readFileSync } from "fs";
 
 const server = express();
 
@@ -52,10 +54,22 @@ if (process.env.NODE_ENV === "production") {
   server.use(helmet());
 }
 
+// Health route
 server.get("/health", function (req, res) {
   console.log("health route");
   res.send("ok");
 });
+
+// Swagger UI
+if (!!process.env.SWAGGER_FILE) {
+  const swaggerFileData = readFileSync(process.env.SWAGGER_FILE)
+  if (!swaggerFileData) {
+    throw new Error(`Cannot load swagger file from '${process.env.SWAGGER_FILE}'`)
+  }
+  console.info(`[Server] serving swagger file from '${process.env.SWAGGER_FILE}'`)
+  server.use('/api-docs', swaggerUi.serve);
+  server.get('/api-docs', swaggerUi.setup(JSON.parse(swaggerFileData.toString())));
+}
 
 server.use(profilerMiddleware);
 
