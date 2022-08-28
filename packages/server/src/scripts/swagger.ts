@@ -17,62 +17,53 @@ const options = {
           scheme: 'bearer',
           bearerFormat: 'JWT',
         }
+      },
+      schemas: {
+        Acl: {
+          type: "object",
+          properties: {
+            id: {
+              type: "string",
+            },
+            controller: {
+              type: "string"
+            },
+            route: {
+              type: "string",
+            },
+            roles: {
+              type: "array",
+              items: {
+                type: "string"
+              }
+            }
+          },
+          required: [
+            "controller", "route", "roles"
+          ]
+        },
+        IResponseGeneric: {
+          type: "object",
+          properties: {
+            result: {
+              type: "boolean",
+            },
+            error: {
+              type: "string"
+            },
+            message: {
+              type: "string"
+            }
+          },
+          required: [
+            "result"
+          ]
+        }
       }
     },
     security: [{
       bearerAuth: []
     }],
-    "definitions": {
-      "ApiResponse": {
-        "type": "object",
-        "properties": {
-          "code": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "type": {
-            "type": "string"
-          },
-          "message": {
-            "type": "string"
-          }
-        }
-      },
-      "Acl": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-          },
-          "controller": {
-            "type": "string"
-          },
-          "route": {
-            "type": "string",
-          },
-          "roles": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "IResponseGeneric": {
-        "type": "object",
-        "properties": {
-          "result": {
-            "type": "boolean",
-          },
-          "error": {
-            "type": "string"
-          },
-          "message": {
-            "type": "string"
-          }
-        }
-      }
-    },
   },
   apis: ['./src/modules/**/index.ts'],
 };
