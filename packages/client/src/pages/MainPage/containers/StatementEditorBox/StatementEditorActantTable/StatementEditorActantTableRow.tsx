@@ -157,7 +157,7 @@ export const StatementEditorActantTableRow: React.FC<
                 tooltip="unlink actant"
                 icon={<FaUnlink />}
                 color="plain"
-                inverted={true}
+                inverted
                 onClick={() => {
                   updateActant(sActant.id, {
                     entityId: "",
@@ -260,7 +260,8 @@ export const StatementEditorActantTableRow: React.FC<
       sActant: IStatementActant;
     } = filteredActant.data;
 
-    const propOriginId = filteredActant.data.sActant.entityId;
+    const { entityId: propOriginId, id: propRowId } = sActant;
+
     return (
       <ButtonGroup noMarginRight height={19}>
         {sActant && (
@@ -297,7 +298,7 @@ export const StatementEditorActantTableRow: React.FC<
             key="d"
             icon={<FaTrashAlt />}
             color="plain"
-            inverted={true}
+            inverted
             tooltip="remove actant row"
             onClick={() => {
               removeActant(filteredActant.data.sActant.id);
@@ -309,10 +310,10 @@ export const StatementEditorActantTableRow: React.FC<
             key="a"
             icon={<FaPlus />}
             color="plain"
-            inverted={true}
+            inverted
             tooltip="add new prop"
             onClick={() => {
-              addProp(propOriginId);
+              addProp(propRowId);
             }}
           />
         )}
@@ -322,10 +323,10 @@ export const StatementEditorActantTableRow: React.FC<
             icon={<FaPlus />}
             label="c"
             color="plain"
-            inverted={true}
+            inverted
             tooltip="add classification"
             onClick={() => {
-              addClassification(propOriginId);
+              addClassification(propRowId);
             }}
           />
         )}
@@ -335,10 +336,10 @@ export const StatementEditorActantTableRow: React.FC<
             icon={<FaPlus />}
             label="i"
             color="plain"
-            inverted={true}
+            inverted
             tooltip="add identification"
             onClick={() => {
-              addIdentification(propOriginId);
+              addIdentification(propRowId);
             }}
           />
         )}
@@ -347,7 +348,7 @@ export const StatementEditorActantTableRow: React.FC<
             key="neg"
             tooltip="Negative logic"
             color="success"
-            inverted={true}
+            inverted
             noBorder
             icon={<AttributeIcon attributeName={"negation"} />}
             onClick={() => setActantAttributesModalOpen(true)}
@@ -358,7 +359,7 @@ export const StatementEditorActantTableRow: React.FC<
             key="oper"
             tooltip="Logical operator type"
             color="success"
-            inverted={true}
+            inverted
             noBorder
             icon={sActant.bundleOperator}
             onClick={() => setActantAttributesModalOpen(true)}

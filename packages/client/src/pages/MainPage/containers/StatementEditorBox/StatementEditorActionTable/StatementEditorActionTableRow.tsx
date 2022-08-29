@@ -161,7 +161,7 @@ export const StatementEditorActionTableRow: React.FC<
 
   const renderButtonsCell = () => {
     const { action, sAction } = filteredAction.data;
-    const propOriginId = filteredAction.data.sAction.actionId;
+    const { actionId: propOriginId, id: rowId } = sAction;
 
     return (
       <ButtonGroup noMarginRight>
@@ -215,7 +215,7 @@ export const StatementEditorActionTableRow: React.FC<
             inverted={true}
             tooltip="add new prop"
             onClick={() => {
-              addProp(propOriginId);
+              addProp(rowId);
             }}
           />
         )}

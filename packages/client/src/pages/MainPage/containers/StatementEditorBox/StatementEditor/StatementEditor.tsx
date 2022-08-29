@@ -292,21 +292,21 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   };
 
   // Props handling
-  const addProp = (originId: string) => {
+  const addProp = (rowId: string) => {
     const newProp = CProp();
     const newStatementData = { ...statement.data };
 
     [...newStatementData.actants, ...newStatementData.actions].forEach(
       (actant: IStatementActant | IStatementAction) => {
-        const actantId =
-          "entityId" in actant ? actant.entityId : actant.actionId;
+        // const actantId =
+        // "id" in actant ? actant.id : actant.id;
         // adding 1st level prop
-        if (actantId === originId) {
+        if (actant.id === rowId) {
           actant.props = [...actant.props, newProp];
         }
         // adding 2nd level prop
         actant.props.forEach((prop1, pi1) => {
-          if (prop1.id == originId) {
+          if (prop1.id == rowId) {
             actant.props[pi1].children = [
               ...actant.props[pi1].children,
               newProp,
@@ -315,7 +315,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
           // adding 3rd level prop
           actant.props[pi1].children.forEach((prop2, pi2) => {
-            if (prop2.id == originId) {
+            if (prop2.id == rowId) {
               actant.props[pi1].children[pi2].children = [
                 ...actant.props[pi1].children[pi2].children,
                 newProp,
@@ -329,12 +329,12 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     updateStatementDataMutation.mutate(newStatementData);
   };
 
-  const addClassification = (originId: string) => {
+  const addClassification = (rowId: string) => {
     const newClassification = CClassification();
     const newStatementData = { ...statement.data };
 
     [...newStatementData.actants].forEach((actant: IStatementActant) => {
-      if (actant.entityId === originId) {
+      if (actant.id === rowId) {
         actant.classifications = [...actant.classifications, newClassification];
       }
     });
@@ -342,12 +342,12 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     updateStatementDataMutation.mutate(newStatementData);
   };
 
-  const addIdentification = (originId: string) => {
+  const addIdentification = (rowId: string) => {
     const newIdentification = CIdentification();
     const newStatementData = { ...statement.data };
 
     [...newStatementData.actants].forEach((actant: IStatementActant) => {
-      if (actant.entityId === originId) {
+      if (actant.id === rowId) {
         actant.identifications = [...actant.identifications, newIdentification];
       }
     });
