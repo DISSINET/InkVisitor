@@ -482,6 +482,41 @@ const options = {
             }
           ]
         },
+        IResponseTree: {
+          type: "object",
+          properties: {
+            territory: {
+              $ref: "#/components/schemas/ITerritory"
+            },
+            path: {
+              type: "array",
+              items: {
+                type: "string"
+              }
+            },
+            statementsCount: {
+              type: "integer",
+            },
+            lvl: {
+              type: "integer",
+            },
+            children: {
+
+            },
+            roles: {
+              type: "array",
+              items: {
+                $ref: "#/components/schemas/IResponseTree"
+              }
+            },
+            empty: {
+              type: "boolean"
+            },
+            right: {
+              $ref: "#/components/schemas/UserEnumsRoleMode"
+            }
+          }
+        },
         IResponseTerritory: {
           allOf: [
             {

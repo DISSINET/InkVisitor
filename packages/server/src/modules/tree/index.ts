@@ -14,12 +14,62 @@ import { EntityEnums } from "@shared/enums";
 import treeCache, { TreeCreator } from "@service/treeCache";
 
 export default Router()
+  /**
+   * @openapi
+   * /tree:
+   *   get:
+   *     description: Returns available territories tree
+   *     tags:
+   *       - tree
+   *     responses:
+   *       200:
+   *         description: Returns IResponseTree object
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: array
+   *               items: 
+   *                 $ref: "#/components/schemas/IResponseTree"
+   */
   .get(
     "/",
     asyncRouteHandler<IResponseTree>(async (request: Request) => {
       return treeCache.forUser(request.getUserOrFail());
     })
   )
+  /**
+   * @openapi
+   * /tree/{territoryId}/position:
+   *   patch:
+   *     description: Updates the position of child territory
+   *     tags:
+   *       - tree
+   *     parameters:
+   *       - in: path
+   *         name: territoryId
+   *         schema:
+   *           type: string
+   *         required: true
+   *         description: ID of the territory entry
+   *     requestBody:
+   *       description: Position data
+   *       content: 
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             properties:
+   *               parentId: 
+   *                 type: string
+   *               newIndex:
+   *                 type: integer
+   *     responses:
+   *       200:
+   *         description: Returns generic response
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/IResponseGeneric"
+   */
   .patch(
     "/:territoryId/position",
     asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
