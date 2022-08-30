@@ -109,6 +109,15 @@ export default Router()
    *     description: Returns list of filtered entity entries
    *     tags:
    *       - entities
+   *     parameters:
+   *       - in: query
+   *         name: search params
+   *         schema:
+   *           $ref: "#/components/schemas/IRequestSearch"
+   *         required: true
+   *         description: search options for the query
+   *         style: form
+   *         explode: true
    *     responses:
    *       200:
    *         description: Returns list of entity entries

@@ -42,7 +42,7 @@ const options = {
             "controller", "route", "roles"
           ]
         },
-        IEntity: {
+        IEntityCommon: {
           type: "object",
           properties: {
             id: {
@@ -51,14 +51,8 @@ const options = {
             legacyId: {
               type: "string",
             },
-            class: {
-              $ref: "#/components/schemas/EntityEnumsClass"
-            },
             status: {
               $ref: "#/components/schemas/EntityEnumsStatus"
-            },
-            data: {
-              type: "object"
             },
             label: {
               type: "string"
@@ -98,13 +92,387 @@ const options = {
             }
           },
           required: [
-            "id", "legacyId", "class", "status", "data", "label", "detail", "language", "notes", "props", "references"
+          ]
+        },
+        IAction: {
+          allOf: [
+            {
+              $ref: "#/components/schemas/IEntityCommon"
+            },
+            {
+              type: "object",
+              properties: {
+                class: {
+                  type: "string",
+                  enum: ["A"]
+                },
+                data: {
+                  type: "object",
+                  properties: {
+                    valencies: {
+                      type: "object",
+                      properties: {
+                        s: {
+                          type: "string"
+                        },
+                        a1: {
+                          type: "string"
+                        },
+                        a2: {
+                          type: "string"
+                        }
+                      }
+                    },
+                    entities: {
+                      type: "object",
+                      properties: {
+                        s: {
+                          type: "array",
+                          items: {
+                            type: "string"
+                          }
+                        },
+                        a1: {
+                          type: "array",
+                          items: {
+                            type: "string"
+                          }
+                        },
+                        a2: {
+                          type: "array",
+                          items: {
+                            type: "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+          ],
+        },
+        ITerritory: {
+          allOf: [
+            {
+              $ref: "#/components/schemas/IEntityCommon"
+            },
+            {
+              type: "object",
+              properties: {
+                class: {
+                  type: "string",
+                  enum: ["T"]
+                },
+                data: {
+                  type: "object",
+                  properties: {
+                    territoryId: {
+                      type: "string"
+                    },
+                    order: {
+                      type: "integer"
+                    }
+                  }
+                }
+              }
+            },
+          ],
+        },
+        IStatement: {
+          allOf: [
+            {
+              $ref: "#/components/schemas/IEntityCommon"
+            },
+            {
+              type: "object",
+              properties: {
+                class: {
+                  type: "string",
+                  enum: ["S"]
+                },
+                data: {
+                  $ref: "#/components/schemas/IStatementData"
+                }
+              }
+            },
+          ],
+        },
+        IStatementData: {
+          type: "object",
+          properties: {
+            text: {
+              type: "string"
+            },
+            territory: {
+              type: "object",
+              properties: {
+                territoryId: {
+                  type: "string",
+                },
+                order: {
+                  type: "integer"
+                }
+              }
+            },
+            actions: {
+              type: "array",
+              items: {
+                type: "object"
+              }
+            },
+            actants: {
+              type: "array",
+              items: {
+                type: "object"
+              }
+            },
+            tags: {
+              type: "array",
+              items: {
+                type: "string"
+              }
+            }
+          }
+        },
+        IResource: {
+          allOf: [
+            {
+              $ref: "#/components/schemas/IEntityCommon"
+            },
+            {
+              type: "object",
+              properties: {
+                class: {
+                  type: "string",
+                  enum: ["R"]
+                },
+                data: {
+                  type: "object",
+                  properties: {
+                    url: {
+                      type: "string"
+                    },
+                    partValueLabel: {
+                      type: "string"
+                    },
+                    partValueBaseURL: {
+                      type: "string"
+                    }
+                  }
+                }
+              }
+            },
+          ],
+        },
+        IPerson: {
+          allOf: [
+            {
+              $ref: "#/components/schemas/IEntityCommon"
+            },
+            {
+              type: "object",
+              properties: {
+                class: {
+                  type: "string",
+                  enum: ["P"]
+                },
+                data: {
+                  type: "object",
+                  properties: {
+                    logicalType: {
+                      $ref: "#/components/schemas/EntityEnumsLogicalType"
+                    }
+                  }
+                }
+              }
+            },
+          ],
+        },
+        IGroup: {
+          allOf: [
+            {
+              $ref: "#/components/schemas/IEntityCommon"
+            },
+            {
+              type: "object",
+              properties: {
+                class: {
+                  type: "string",
+                  enum: ["G"]
+                },
+                data: {
+                  type: "object",
+                  properties: {
+                    logicalType: {
+                      $ref: "#/components/schemas/EntityEnumsLogicalType"
+                    }
+                  }
+                }
+              }
+            },
+          ],
+        },
+        IObject: {
+          allOf: [
+            {
+              $ref: "#/components/schemas/IEntityCommon"
+            },
+            {
+              type: "object",
+              properties: {
+                class: {
+                  type: "string",
+                  enum: ["O"]
+                },
+                data: {
+                  type: "object",
+                  properties: {
+                    logicalType: {
+                      $ref: "#/components/schemas/EntityEnumsLogicalType"
+                    }
+                  }
+                }
+              }
+            },
+          ],
+        },
+        IConcept: {
+          allOf: [
+            {
+              $ref: "#/components/schemas/IEntityCommon"
+            },
+            {
+              type: "object",
+              properties: {
+                class: {
+                  type: "string",
+                  enum: ["C"]
+                },
+                data: {
+                  type: "object"
+                }
+              }
+            },
+          ],
+        },
+        ILocation: {
+          allOf: [
+            {
+              $ref: "#/components/schemas/IEntityCommon"
+            },
+            {
+              type: "object",
+              properties: {
+                class: {
+                  type: "string",
+                  enum: ["L"]
+                },
+                data: {
+                  type: "object",
+                  properties: {
+                    logicalType: {
+                      $ref: "#/components/schemas/EntityEnumsLogicalType"
+                    }
+                  }
+                }
+              }
+            },
+          ],
+        },
+        IValue: {
+          allOf: [
+            {
+              $ref: "#/components/schemas/IEntityCommon"
+            },
+            {
+              type: "object",
+              properties: {
+                class: {
+                  type: "string",
+                  enum: ["V"]
+                },
+                data: {
+                  type: "object",
+                  properties: {
+                    logicalType: {
+                      $ref: "#/components/schemas/EntityEnumsLogicalType"
+                    }
+                  }
+                }
+              }
+            },
+          ],
+        },
+        IEvent: {
+          allOf: [
+            {
+              $ref: "#/components/schemas/IEntityCommon"
+            },
+            {
+              type: "object",
+              properties: {
+                class: {
+                  type: "string",
+                  enum: ["E"]
+                },
+                data: {
+                  type: "object",
+                  properties: {
+                    logicalType: {
+                      $ref: "#/components/schemas/EntityEnumsLogicalType"
+                    }
+                  }
+                }
+              }
+            },
+          ],
+        },
+        IEntity: {
+          oneOf: [
+            {
+              $ref: "#/components/schemas/IAction"
+            },
+            {
+              $ref: "#/components/schemas/ITerritory"
+            },
+            {
+              $ref: "#/components/schemas/IStatement"
+            },
+            {
+              $ref: "#/components/schemas/IResource"
+            },
+            {
+              $ref: "#/components/schemas/IPerson"
+            },
+            {
+              $ref: "#/components/schemas/IGroup"
+            },
+            {
+              $ref: "#/components/schemas/IObject"
+            },
+            {
+              $ref: "#/components/schemas/IConcept"
+            },
+            {
+              $ref: "#/components/schemas/ILocation"
+            },
+            {
+              $ref: "#/components/schemas/IValue"
+            },
+            {
+              $ref: "#/components/schemas/IEvent"
+            }
           ]
         },
         IResponseEntity: {
           allOf: [
             {
-              $ref: "#/components/schemas/IEntity"
+              oneOf: [
+                {
+                  $ref: "#/components/schemas/IEntityCommon"
+                }
+              ]
             },
             {
               type: "object",
@@ -113,6 +481,24 @@ const options = {
                   $ref: "#/components/schemas/UserEnumsRoleMode"
                 }
               },
+            }
+          ]
+        },
+        IResponseStatement: {
+          allOf: [
+            {
+              $ref: "#/components/schemas/IStatement"
+            },
+            {
+              type: "object",
+              properties: {
+                entities: {
+                  type: "object",
+                },
+                right: {
+                  $ref: "#/components/schemas/UserEnumsRoleMode"
+                }
+              }
             }
           ]
         },
@@ -344,6 +730,38 @@ const options = {
           required: [
             "result"
           ]
+        },
+        IRequestSearch: {
+          type: "object",
+          properties: {
+            class: {
+              $ref: "#/components/schemas/EntityEnumsClass"
+            },
+            excludes: {
+              type: "array",
+              items: {
+                $ref: "#/components/schemas/EntityEnumsClass"
+              }
+            },
+            label: {
+              type: "string"
+            },
+            entityIds: {
+              type: "array",
+              items: {
+                type: "string"
+              }
+            },
+            cooccurrenceId: {
+              type: "string"
+            },
+            onlyTemplates: {
+              type: "boolean"
+            },
+            usedTemplate: {
+              type: "string"
+            }
+          }
         },
         EntityEnumsClass: {
           type: "string",
