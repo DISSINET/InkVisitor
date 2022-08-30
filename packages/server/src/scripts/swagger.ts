@@ -10,6 +10,12 @@ const options = {
       title: 'InkVisitor',
       version: '1.3.0',
     },
+    servers: [
+      {
+        url: "http://api.example.com/v1",
+        description: "localhost"
+      },
+    ],
     components: {
       securitySchemes: {
         bearerAuth: {
