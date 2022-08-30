@@ -11,6 +11,28 @@ import { Request, Router } from "express";
 import { asyncRouteHandler } from "../index";
 
 export default Router()
+  /**
+   * @openapi
+   * /relations/:
+   *   post:
+   *     description: Create a new relation entry
+   *     tags:
+   *       - relations
+   *     requestBody:
+   *       description: Relation object
+   *       content: 
+   *         application/json:
+   *           schema:
+   *             allOf:
+   *               - $ref: "#/components/schemas/RelationIModel"               
+   *     responses:
+   *       200:
+   *         description: Returns generic response
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/IResponseGeneric"
+   */
   .post(
     "/",
     asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
@@ -42,6 +64,35 @@ export default Router()
       }
     })
   )
+  /**
+   * @openapi
+   * /relations/{relationId}:
+   *   put:
+   *     description: Update an existing relation entry
+   *     tags:
+   *       - relations
+   *     parameters:
+   *       - in: path
+   *         name: relationId
+   *         schema:
+   *           type: string
+   *         required: true
+   *         description: ID of the relation entry
+   *     requestBody:
+   *       description: Relation object
+   *       content: 
+   *         application/json:
+   *           schema:
+   *             allOf:
+   *               - $ref: "#/components/schemas/RelationIModel"               
+   *     responses:
+   *       200:
+   *         description: Returns generic response
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/IResponseGeneric"
+   */
   .put(
     "/:relationId?",
     asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
@@ -77,6 +128,28 @@ export default Router()
       }
     })
   )
+  /**
+   * @openapi
+   * /relations/{relationId}:
+   *   delete:
+   *     description: Delete a relation entry
+   *     tags:
+   *       - relations
+   *     parameters:
+   *       - in: path
+   *         name: relationId
+   *         schema:
+   *           type: string
+   *         required: true
+   *         description: ID of the relation entry             
+   *     responses:
+   *       200:
+   *         description: Returns generic response
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/IResponseGeneric"
+   */
   .delete(
     "/:relationId",
     asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
