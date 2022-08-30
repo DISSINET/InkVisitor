@@ -185,6 +185,12 @@ const options = {
             type: {
               $ref: "#/components/schemas/RelationEnumsType"
             },
+            entityIds: {
+              type: "array",
+              items: {
+                type: "string"
+              }
+            }
           }
         },
         IAudit: {
