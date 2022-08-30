@@ -29,6 +29,35 @@ import { ResponseUser } from "@models/user/response";
 import { domainName, hostUrl } from "@common/functions";
 
 export default Router()
+  /**
+   * @openapi
+   * /users/:
+   *   post:
+   *     description: Attempts to signin
+   *     tags:
+   *       - users
+   *     requestBody:
+   *       description: Login credentials
+   *       content: 
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             properties:
+   *               username: 
+   *                 type: string
+   *               password:
+   *                 type: string           
+   *     responses:
+   *       200:
+   *         description: Returns generic response
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 token: 
+   *                   type: string
+   */
   .post(
     "/signin",
     asyncRouteHandler<unknown>(async (request: Request) => {
@@ -57,6 +86,23 @@ export default Router()
       };
     })
   )
+  /**
+   * @openapi
+   * /users/administration:
+   *   get:
+   *     description: Attempts to signin
+   *     tags:
+   *       - users
+   *     responses:
+   *       200:
+   *         description: Returns object containing users
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: array
+   *               items: 
+   *                 $ref: "#/components/schemas/IResponseAdministration"
+   */
   .get(
     "/administration",
     asyncRouteHandler<IResponseAdministration>(async (request: Request) => {
@@ -73,6 +119,28 @@ export default Router()
       return out;
     })
   )
+  /**
+   * @openapi
+   * /users/{userId}:
+   *   get:
+   *     description: Returns user entry
+   *     tags:
+   *       - users
+   *     parameters:
+   *       - in: path
+   *         name: userId
+   *         schema:
+   *           type: string
+   *         required: true
+   *         description: ID of the user entry
+   *     responses:
+   *       200:
+   *         description: Returns IResponseUser object
+   *         content:
+   *           application/json:
+   *             schema:
+  *                 $ref: "#/components/schemas/IResponseUser"
+   */
   .get(
     "/:userId",
     asyncRouteHandler<IResponseUser>(async (request: Request) => {
@@ -93,6 +161,30 @@ export default Router()
       return response;
     })
   )
+  /**
+   * @openapi
+   * /users:
+   *   get:
+   *     description: Returns list of user entries
+   *     tags:
+   *       - users
+   *     parameters:
+   *       - in: query
+   *         name: label
+   *         schema:
+   *           type: string
+   *         required: true
+   *         description: label filter
+   *     responses:
+   *       200:
+   *         description: Returns list of IUser objects
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: array
+   *               items: 
+   *                 $ref: "#/components/schemas/IUser"
+   */
   .get(
     "/",
     asyncRouteHandler<IUser[]>(async (request: Request) => {
@@ -106,6 +198,27 @@ export default Router()
       return await User.findUsersByLabel(request.db.connection, label);
     })
   )
+  /**
+   * @openapi
+   * /users:
+   *   post:
+   *     description: Create a new user entry
+   *     tags:
+   *       - users
+   *     requestBody:
+   *       description: User object
+   *       content: 
+   *         application/json:
+   *           schema:
+   *             $ref: "#/components/schemas/IUser"               
+   *     responses:
+   *       200:
+   *         description: Returns generic response
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/IResponseGeneric"
+   */
   .post(
     "/",
     asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
@@ -148,6 +261,34 @@ export default Router()
       }
     })
   )
+  /**
+   * @openapi
+   * /users/{userId}:
+   *   put:
+   *     description: Update an existing user entry
+   *     tags:
+   *       - users
+   *     parameters:
+   *       - in: path
+   *         name: userId
+   *         schema:
+   *           type: string
+   *         required: true
+   *         description: ID of the user entry
+   *     requestBody:
+   *       description: User object
+   *       content: 
+   *         application/json:
+   *           schema:
+   *             $ref: "#/components/schemas/IUser"               
+   *     responses:
+   *       200:
+   *         description: Returns generic response
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/IResponseGeneric"
+   */
   .put(
     "/:userId",
     asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
@@ -182,6 +323,28 @@ export default Router()
       }
     })
   )
+  /**
+   * @openapi
+   * /users/{userId}:
+   *   delete:
+   *     description: Removes the user entry
+   *     tags:
+   *       - users
+   *     parameters:
+   *       - in: path
+   *         name: userId
+   *         schema:
+   *           type: string
+   *         required: true
+   *         description: ID of the user entry
+   *     responses:
+   *       200:
+   *         description: Returns IResponseGeneric object
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/IResponseGeneric"
+   */
   .delete(
     "/:userId",
     asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
@@ -214,6 +377,28 @@ export default Router()
       }
     })
   )
+  /**
+   * @openapi
+   * /users/active:
+   *   patch:
+   *     description: Validates the activation hash and switch user to active state
+   *     tags:
+   *       - users
+   *     parameters:
+   *       - in: query
+   *         name: hash
+   *         schema:
+   *           type: string
+   *         required: true
+   *         description: Hash for identyfing the user for which this activation should be done
+   *     responses:
+   *       200:
+   *         description: Returns IResponseGeneric object
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/IResponseGeneric"
+   */
   .patch(
     "/active",
     asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
@@ -243,6 +428,39 @@ export default Router()
       };
     })
   )
+  /**
+   * @openapi
+   * /users/password:
+   *   patch:
+   *     description: Validates the password request change and updates the password for user
+   *     tags:
+   *       - users
+   *     parameters:
+   *       - in: query
+   *         name: hash
+   *         schema:
+   *           type: string
+   *         required: true
+   *         description: Hash for identyfing the user who requested the password update
+   *     requestBody:
+   *       description: Passwords
+   *       content: 
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             properties:
+   *               password: 
+   *                 type: string
+   *               passwordRepeat:
+   *                 type: string   
+   *     responses:
+   *       200:
+   *         description: Returns IResponseGeneric object
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/IResponseGeneric"
+   */
   .patch(
     "/password",
     asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
@@ -280,6 +498,30 @@ export default Router()
       };
     })
   )
+  /**
+   * @openapi
+   * /users/{userId}}/bookmarks:
+   *   get:
+   *     description: Returns list of bookmark folder entries for user
+   *     tags:
+   *       - users
+   *     parameters:
+   *       - in: path
+   *         name: userId
+   *         schema:
+   *           type: string
+   *         required: true
+   *         description: ID of the user entry
+   *     responses:
+   *       200:
+   *         description: Returns list of IResponseBookmarkFolder object
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: array
+   *               items: 
+   *                 $ref: "#/components/schemas/IResponseBookmarkFolder"
+   */
   .get(
     "/:userId/bookmarks",
     asyncRouteHandler<IResponseBookmarkFolder[]>(async (request: Request) => {
@@ -310,6 +552,28 @@ export default Router()
       return response.bookmarks;
     })
   )
+  /**
+   * @openapi
+   * /users/{userId}}/password:
+   *   patch:
+   *     description: Prepares the user to reset the password by setting hash + sending email
+   *     tags:
+   *       - users
+   *     parameters:
+   *       - in: path
+   *         name: userId
+   *         schema:
+   *           type: string
+   *         required: true
+   *         description: ID of the user entry
+   *     responses:
+   *       200:
+   *         description: Returns IResponseGeneric object
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/IResponseGeneric"
+   */
   .patch(
     "/:userId/password",
     asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
@@ -356,6 +620,28 @@ export default Router()
       };
     })
   )
+  /**
+   * @openapi
+   * /users/me/emails/test:
+   *   get:
+   *     description: Sends test email
+   *     tags:
+   *       - users
+   *     parameters:
+   *       - in: query
+   *         name: email
+   *         schema:
+   *           type: string
+   *         required: true
+   *         description: email address
+   *     responses:
+   *       200:
+   *         description: Returns IResponseGeneric object
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/IResponseGeneric"
+   */
   .get(
     "/me/emails/test",
     asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
@@ -377,6 +663,21 @@ export default Router()
       };
     })
   )
+  /**
+   * @openapi
+   * /users/me:
+   *   get:
+   *     description: Returns user detail for current user
+   *     tags:
+   *       - users
+   *     responses:
+   *       200:
+   *         description: Returns IResponseUser object
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/IResponseUser"
+   */
   .get(
     "/me",
     asyncRouteHandler<IResponseUser>(async (request: Request) => {

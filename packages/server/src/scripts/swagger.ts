@@ -463,6 +463,108 @@ const options = {
             }
           ]
         },
+        IResponseBookmarkFolder: {
+          type: "object",
+          properties: {
+            id: {
+              type: "string"
+            },
+            name: {
+              type: "string"
+            },
+            entities: {
+              type: "array",
+              items: {
+                $ref: "#/components/schemas/IEntity"
+              }
+            }
+          }
+        },
+        IUser: {
+          type: "object",
+          properties: {
+            id: {
+              type: "string"
+            },
+            email: {
+              type: "string"
+            },
+            name: {
+              type: "string"
+            },
+            password: {
+              type: "string"
+            },
+            role: {
+              $ref: "#/components/schemas/UserEnumsRole"
+            },
+            options: {
+              type: "object",
+              properties: {
+                defaultTerritory: {
+                  type: "string"
+                },
+                defaultLanguage: {
+                  type: "string"
+                },
+                searchLanguages: {
+                  type: "array",
+                  items: {
+                    type: "string"
+                  }
+                }
+              }
+            },
+            bookmarks: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  id: {
+                    type: "string"
+                  },
+                  name: {
+                    type: "string"
+                  },
+                  entityIds: {
+                    type: "array",
+                    items: {
+                      type: "string"
+                    }
+                  }
+                }
+              }
+            },
+            storedTerritories: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  territoryId: {
+                    type: "string"
+                  },
+                }
+              }
+            },
+            rights: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  territory: {
+                    type: "string"
+                  },
+                  mode: {
+                    $ref: "#/components/schemas/UserEnumsRoleMode"
+                  }
+                }
+              }
+            },
+            active: {
+              type: "boolean"
+            }
+          }
+        },
         IResponseEntity: {
           allOf: [
             {
@@ -501,9 +603,6 @@ const options = {
               type: "integer",
             },
             children: {
-
-            },
-            roles: {
               type: "array",
               items: {
                 $ref: "#/components/schemas/IResponseTree"
@@ -514,6 +613,110 @@ const options = {
             },
             right: {
               $ref: "#/components/schemas/UserEnumsRoleMode"
+            }
+          }
+        },
+        IResponseUser: {
+          type: "object",
+          properties: {
+            id: {
+              type: "string"
+            },
+            email: {
+              type: "string"
+            },
+            name: {
+              type: "string"
+            },
+            role: {
+              $ref: "#/components/schemas/UserEnumsRole"
+            },
+            options: {
+              type: "object",
+              properties: {
+                defaultTerritory: {
+                  type: "string"
+                },
+                defaultLanguage: {
+                  type: "string"
+                },
+                searchLanguages: {
+                  type: "array",
+                  items: {
+                    type: "string"
+                  }
+                }
+              }
+            },
+            rights: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  territory: {
+                    type: "string"
+                  },
+                  mode: {
+                    $ref: "#/components/schemas/UserEnumsRoleMode"
+                  }
+                }
+              }
+            },
+            active: {
+              type: "boolean"
+            },
+            bookmarks: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  id: {
+                    type: "string"
+                  },
+                  name: {
+                    type: "string"
+                  },
+                  entities: {
+                    type: "array",
+                    items: {
+                      $ref: "#/components/schemas/IEntity"
+                    }
+                  }
+                }
+              }
+            },
+            storedTerritories: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  territory: {
+                    $ref: "#/components/schemas/IResponseEntity"
+                  },
+                }
+              }
+            },
+            territoryRights: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  territory: {
+                    $ref: "#/components/schemas/IResponseEntity"
+                  },
+                }
+              }
+            }
+          }
+        },
+        IResponseAdministration: {
+          type: "object",
+          properties: {
+            users: {
+              type: "array",
+              items: {
+                $ref: "#/components/schemas/IResponseUser"
+              }
             }
           }
         },
@@ -896,6 +1099,10 @@ const options = {
         EntityEnumsOrder: {
           type: "integer",
           enum: [-9999, 9999]
+        },
+        UserEnumsRole: {
+          type: "string",
+          enum: ["admin", "editor", "viewer"]
         },
         UserEnumsRoleMode: {
           type: "string",
