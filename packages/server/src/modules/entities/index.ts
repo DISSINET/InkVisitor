@@ -44,9 +44,7 @@ export default Router()
    *         content:
    *           application/json:
    *             schema:
-   *               type: array
-   *               items: 
-   *                 $ref: "#/components/schemas/IResponseEntity"
+   *               $ref: "#/components/schemas/IResponseEntity"
    */
   .get(
     "/:entityId",
@@ -97,9 +95,7 @@ export default Router()
    *         content:
    *           application/json:
    *             schema:
-   *               type: array
-   *               items: 
-   *                 $ref: "#/components/schemas/IResponseAudit"
+   *               $ref: "#/components/schemas/IResponseAudit"
    */
   .get("/:entityId/audits", getAuditByEntityId)
   /**
