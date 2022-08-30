@@ -2,7 +2,7 @@
  * Very extensive object showing all the details about one actant
  */
 
-import { IEntity, IRelation, IResponseEntity, IStatement } from ".";
+import { IEntity, Relation, IResponseEntity, IStatement } from ".";
 import { EntityEnums } from "../enums";
 import {
   IStatementClassification,
@@ -19,7 +19,7 @@ export interface IResponseDetail extends IResponseEntity {
   usedInStatementClassifications: IResponseUsedInStatementClassification[]; // statement.data.actants[].classifications + from usedInStatements field if actant.entityId = detailId
 
   usedAsTemplate?: string[];
-  relations: IRelation[];
+  relations: Relation.IModel[];
 }
 
 export interface IResponseUsedInStatement<PositionEnum> {

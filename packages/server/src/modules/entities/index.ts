@@ -24,6 +24,30 @@ import { IRequestSearch } from "@shared/types/request-search";
 import { getAuditByEntityId } from "@modules/audits";
 
 export default Router()
+  /**
+   * @openapi
+   * /entities/{entityId}:
+   *   get:
+   *     description: Returns entity entry
+   *     tags:
+   *       - entities
+   *     parameters:
+   *       - in: path
+   *         name: entityId
+   *         schema:
+   *           type: string
+   *         required: true
+   *         description: ID of the entity entry
+   *     responses:
+   *       200:
+   *         description: Returns IResponseEntity object for entity entry
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: array
+   *               items: 
+   *                 $ref: "#/components/schemas/IResponseEntity"
+   */
   .get(
     "/:entityId",
     asyncRouteHandler<IResponseEntity>(async (request: Request) => {
@@ -53,7 +77,48 @@ export default Router()
       return response;
     })
   )
+  /**
+   * @openapi
+   * /entities/{entityId}/audits:
+   *   get:
+   *     description: Returns audit data for entity
+   *     tags:
+   *       - entities
+   *     parameters:
+   *       - in: path
+   *         name: entityId
+   *         schema:
+   *           type: string
+   *         required: true
+   *         description: ID of the entity entry
+   *     responses:
+   *       200:
+   *         description: Returns ResponseAudit object
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: array
+   *               items: 
+   *                 $ref: "#/components/schemas/IResponseAudit"
+   */
   .get("/:entityId/audits", getAuditByEntityId)
+  /**
+   * @openapi
+   * /entities/:
+   *   get:
+   *     description: Returns list of filtered entity entries
+   *     tags:
+   *       - entities
+   *     responses:
+   *       200:
+   *         description: Returns list of entity entries
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: array
+   *               items: 
+   *                 $ref: "#/components/schemas/IResponseEntity"
+   */
   .get(
     "/",
     asyncRouteHandler<IResponseEntity[]>(async (httpRequest: Request) => {
@@ -71,6 +136,28 @@ export default Router()
       return await response.prepare(httpRequest);
     })
   )
+  /**
+   * @openapi
+   * /entities/:
+   *   post:
+   *     description: Create a new entity entry
+   *     tags:
+   *       - entities
+   *     requestBody:
+   *       description: Entity object
+   *       content: 
+   *         application/json:
+   *           schema:
+   *             allOf:
+   *               - $ref: "#/components/schemas/IEntity"               
+   *     responses:
+   *       200:
+   *         description: Returns generic response
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/IResponseGeneric"
+   */
   .post(
     "/",
     asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
@@ -110,6 +197,35 @@ export default Router()
       }
     })
   )
+  /**
+   * @openapi
+   * /entities/{entityId}:
+   *   put:
+   *     description: Update an existing entity entry
+   *     tags:
+   *       - entities
+   *     parameters:
+   *       - in: path
+   *         name: entityId
+   *         schema:
+   *           type: string
+   *         required: true
+   *         description: ID of the entity entry
+   *     requestBody:
+   *       description: Entity object
+   *       content: 
+   *         application/json:
+   *           schema:
+   *             allOf:
+   *               - $ref: "#/components/schemas/IEntity"               
+   *     responses:
+   *       200:
+   *         description: Returns generic response
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/IResponseGeneric"
+   */
   .put(
     "/:entityId",
     asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
@@ -165,6 +281,28 @@ export default Router()
       }
     })
   )
+  /**
+   * @openapi
+   * /entities/{entityId}:
+   *   delete:
+   *     description: Delete an entity entry
+   *     tags:
+   *       - entities
+   *     parameters:
+   *       - in: path
+   *         name: entityId
+   *         schema:
+   *           type: string
+   *         required: true
+   *         description: ID of the entity entry             
+   *     responses:
+   *       200:
+   *         description: Returns generic response
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/IResponseGeneric"
+   */
   .delete(
     "/:entityId",
     asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
@@ -206,6 +344,30 @@ export default Router()
       }
     })
   )
+  /**
+   * @openapi
+   * /entities/{entityId}/detail:
+   *   get:
+   *     description: Returns detail for entity entry
+   *     tags:
+   *       - entities
+   *     parameters:
+   *       - in: path
+   *         name: entityId
+   *         schema:
+   *           type: string
+   *         required: true
+   *         description: ID of the entity entry
+   *     responses:
+   *       200:
+   *         description: Returns IResponseDetail object for entity entry
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: array
+   *               items: 
+   *                 $ref: "#/components/schemas/IResponseDetail"
+   */
   .get(
     "/:entityId/detail",
     asyncRouteHandler<IResponseDetail>(async (request: Request) => {
