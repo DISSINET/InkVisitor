@@ -13,6 +13,28 @@ import { Request, Router } from "express";
 import { asyncRouteHandler } from "..";
 
 export default Router()
+  /**
+   * @openapi
+   * /territories/{territoryId}:
+   *   get:
+   *     description: Returns detail for territory entry
+   *     tags:
+   *       - territories
+   *     parameters:
+   *       - in: path
+   *         name: territoryId
+   *         schema:
+   *           type: string
+   *         required: true
+   *         description: ID of the territory entry
+   *     responses:
+   *       200:
+   *         description: Returns IResponseTerritory object
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/IResponseTerritory"
+   */
   .get(
     "/:territoryId",
     asyncRouteHandler<IResponseTerritory>(async (request: Request) => {
@@ -46,6 +68,30 @@ export default Router()
       return response;
     })
   )
+  /**
+   * @openapi
+   * /territories/{territoryId}/entities:
+   *   get:
+   *     description: Returns entities associated with territory's statements
+   *     tags:
+   *       - territories
+   *     parameters:
+   *       - in: path
+   *         name: territoryId
+   *         schema:
+   *           type: string
+   *         required: true
+   *         description: ID of the territory entry
+   *     responses:
+   *       200:
+   *         description: Returns list of ids
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: array
+   *               items:
+   *                 type: string
+   */
   .get(
     "/:territoryId/entities",
     asyncRouteHandler<string[]>(async (request: Request) => {

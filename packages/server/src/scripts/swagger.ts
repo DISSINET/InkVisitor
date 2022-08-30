@@ -91,8 +91,6 @@ const options = {
               type: "object"
             }
           },
-          required: [
-          ]
         },
         IAction: {
           allOf: [
@@ -477,6 +475,35 @@ const options = {
             {
               type: "object",
               properties: {
+                right: {
+                  $ref: "#/components/schemas/UserEnumsRoleMode"
+                }
+              },
+            }
+          ]
+        },
+        IResponseTerritory: {
+          allOf: [
+            {
+              oneOf: [
+                {
+                  $ref: "#/components/schemas/ITerritory"
+                }
+              ]
+            },
+            {
+              type: "object",
+              properties: {
+                statements: {
+                  type: "array",
+                  items: {
+                    $ref: "#/components/schemas/IResponseStatement"
+                  }
+                },
+                entities: {
+                  type: "object",
+                  description: "{ [key: string]: IEntity }"
+                },
                 right: {
                   $ref: "#/components/schemas/UserEnumsRoleMode"
                 }
