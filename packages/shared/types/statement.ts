@@ -4,13 +4,7 @@ import {
 } from "../enums";
 
 export interface IStatement extends IEntity {
-  id: string;
   class: EntityEnums.Class.Statement;
-  label: string;
-  detail: string;
-  language: EntityEnums.Language;
-  props: IProp[];
-  notes: string[];
   data: IStatementData;
 }
 
