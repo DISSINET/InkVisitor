@@ -4,6 +4,7 @@ import { Tag } from "components";
 import React, { ReactNode } from "react";
 import { PopupPosition } from "reactjs-popup/dist/types";
 import { DragItem } from "types";
+import { getEntityLabel } from "utils";
 
 interface EntityTag {
   entity: IEntity;
@@ -52,7 +53,7 @@ export const EntityTag: React.FC<EntityTag> = ({
   return (
     <Tag
       propId={entity.id}
-      label={entity.label || entity.data.text || "no label"}
+      label={getEntityLabel(entity)}
       labelItalic={entity.label === ""}
       status={entity.status}
       ltype={entity?.data?.logicalType ?? "1"}

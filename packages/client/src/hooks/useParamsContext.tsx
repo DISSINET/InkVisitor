@@ -10,6 +10,7 @@ import { useQuery } from "react-query";
 import { useHistory, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 import { maxTabCount } from "Theme/constants";
+import { getEntityLabel } from "utils";
 
 const UNINITIALISED = (): void => {
   throw `function uninitialised`;
@@ -104,7 +105,9 @@ export const SearchParamsProvider = ({
           id,
         ]);
         toast.info(
-          `Tab [${data ? data[0].label : detailIdArray}] canceled from detail`
+          `Tab [${
+            data ? getEntityLabel(data[0]) : detailIdArray
+          }] canceled from detail`
         );
       }
       setDetailId(newDetailIdArray.join(arrJoinChar));
