@@ -3,21 +3,18 @@ import { EntityEnums, UserEnums } from "../enums";
 
 export namespace EntityTooltip {
   export interface IResponse extends IResponseEntity {
-    // usedCount?: number;
-    // usedIn?: IStatement[];
-    right?: UserEnums.RoleMode;
     entities: { [key: string]: IEntity }; //  all entities mentioned in relations
 
     // C, A
-    superclassTrees: IResponseSuperclassTree[];
+    superclassTrees: ISuperclassTree[];
     // C
-    synonymClouds: IResponseSynonymCloud[];
-    troponymClouds: IResponseTroponymCloud[];
-    superordinateLocationTrees: IResponseSuperordinateLocationTree[];
-    identifications: IResponseIdentifications[];
+    synonymClouds: ISynonymCloud[];
+    troponymClouds: ITroponymCloud[];
+    superordinateLocationTrees: ISuperordinateLocationTree[];
+    identifications: IIdentifications[];
   }
 
-  export type IResponseIdentification = {
+  export type IIdentification = {
     entityId: string;
     logic: EntityEnums.Logic;
     certainty: EntityEnums.Certainty;
@@ -32,22 +29,22 @@ export namespace EntityTooltip {
   // but also O:icecream -> C:icecrean -> C:cold thing -> C:everything,
   // and also O:icecream -> C:grocery store products -> C:everyhing,
   // in that case, I propose, the output will be {O:icecream: [C: icecream], C:icecream: [C:sweet, C:cold thing, C:grocery store product], C:sweet: ...}
-  export type IResponseSuperclassTree = { [key: string]: string[] };
+  export type ISuperclassTree = { [key: string]: string[] };
 
-  // This should work the same way as IResponseSuperclassTree but only for L and relation of type SuperordinateLocation
-  export type IResponseSuperordinateLocationTree = string[];
+  // This should work the same way as ISuperclassTree but only for L and relation of type SuperordinateLocation
+  export type ISuperordinateLocationTree = string[];
 
   // only for C and A
   // this is much simpler - its only about IRelationSynonym relation "clouds" where entityId is within `entityIds`
   // e.g., for A:breakfasting - [A:eating, A:swallowing, A:consume, A:having dinner], [A:morning activity, A:waking up]
-  export type IResponseSynonymCloud = string[];
+  export type ISynonymCloud = string[];
 
   // only for A
-  // I am not very much familiar what is this but this should work the same as IResponseSynonymCloud
-  export type IResponseTroponymCloud = string[];
+  // I am not very much familiar what is this but this should work the same as ISynonymCloud
+  export type ITroponymCloud = string[];
 
   // for all entity classes
   // this is basicaly a list of all Identification relations found for this entity,
   // returning everything, no matter what position is the entity, the entityId parameter in the model is the other entity id
-  export type IResponseIdentifications = IResponseIdentification[];
+  export type IIdentifications = IIdentification[];
 }

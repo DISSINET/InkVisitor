@@ -9,6 +9,7 @@ import {
   IResponseDetail,
   IResponseGeneric,
   RequestSearch,
+  EntityTooltip,
 } from "@shared/types";
 import {
   EntityDoesNotExist,
@@ -22,6 +23,7 @@ import { asyncRouteHandler } from "../index";
 import { ResponseSearch } from "@models/entity/response-search";
 import { IRequestSearch } from "@shared/types/request-search";
 import { getAuditByEntityId } from "@modules/audits";
+import { ResponseTooltip } from "@models/entity/response-tooltip";
 
 export default Router()
   /**
@@ -397,6 +399,58 @@ export default Router()
       }
 
       const response = new ResponseEntityDetail(entity);
+
+      await response.prepare(request);
+
+      return response;
+    })
+  )
+  /**
+   * @openapi
+   * /entities/{entityId}/tooltip:
+   *   get:
+   *     description: Returns tooltip detail for entity entry
+   *     tags:
+   *       - entities
+   *     parameters:
+   *       - in: path
+   *         name: entityId
+   *         schema:
+   *           type: string
+   *         required: true
+   *         description: ID of the entity entry
+   *     responses:
+   *       200:
+   *         description: Returns EntityTooltipIResponse object for entity entry
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/EntityTooltipIResponse"
+   */
+  .get(
+    "/:entityId/tooltip",
+    asyncRouteHandler<EntityTooltip.IResponse>(async (request: Request) => {
+      const entityId = request.params.entityId;
+
+      if (!entityId) {
+        throw new BadParams("entity id has to be set");
+      }
+
+      const entityData = await findEntityById(request.db, entityId);
+      if (!entityData) {
+        throw new EntityDoesNotExist(
+          `entity ${entityId} was not found`,
+          entityId
+        );
+      }
+
+      const entity = getEntityClass({ ...entityData });
+
+      if (!entity.canBeViewedByUser(request.getUserOrFail())) {
+        throw new PermissionDeniedError(`cannot view entity ${entityId}`);
+      }
+
+      const response = new ResponseTooltip(entity);
 
       await response.prepare(request);
 
