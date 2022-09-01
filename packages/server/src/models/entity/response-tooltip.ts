@@ -40,61 +40,50 @@ export class ResponseTooltip extends ResponseEntity implements EntityTooltip.IRe
   async prepare(request: IRequest) {
     super.prepare(request)
 
-    await this.fillSuperclassTrees(request)
+    const rootSuperclass = await this.getSuperclasses(request.db.connection, this.id, this.class);
+    this.superclassTrees = rootSuperclass.subtrees;
 
     this.entities = await this.populateEntitiesMap(request.db.connection)
   }
 
   /**
-   * populates the superclassTrees field by searching in relations collection
-   * @param request 
+   * recursively search for superclasses
+   * @param conn 
    */
-  async fillSuperclassTrees(request: IRequest) {
-    switch (this.class) {
+  async getSuperclasses(conn: Connection, parentId: string, asClass: EntityEnums.Class): Promise<EntityTooltip.ISuperclassTree> {
+    const out: EntityTooltip.ISuperclassTree = {
+      rootId: parentId,
+      subtrees: [],
+    }
+
+    let relations: Relation[] = [];
+
+    switch (asClass) {
       case EntityEnums.Class.Concept, EntityEnums.Class.Action:
-        const sRoots = await Relation.getForEntity(request.db.connection, this.id, RelationEnums.Type.Superclass, 0);
-        for (const root of sRoots) {
-          const tree: EntityTooltip.ISuperclassTree = { [root.entityIds[1]]: [] };
-          const childs = await Relation.getForEntity(request.db.connection, root.entityIds[1], RelationEnums.Type.Superclass, 0);
-
-          // store sorted unique list of ids
-          tree[root.entityIds[1]] = childs
-            .reduce((acc: any, child: Relation) => {
-              acc[child.entityIds[1]] = 1;
-              return acc;
-            }, {} as Record<string, undefined>).keys().sort();
-
-          this.superclassTrees.push(tree);
-        }
+        relations = await Relation.getForEntity(conn, parentId, RelationEnums.Type.Superclass, 0);
         break;
       case EntityEnums.Class.Person, EntityEnums.Class.Location, EntityEnums.Class.Object,
         EntityEnums.Class.Group, EntityEnums.Class.Event, EntityEnums.Class.Statement,
         EntityEnums.Class.Territory, EntityEnums.Class.Resource:
-        const cRoots = await Relation.getForEntity(request.db.connection, this.id, RelationEnums.Type.Classification, 0);
-        for (const root of cRoots) {
-          const tree: EntityTooltip.ISuperclassTree = { [root.entityIds[1]]: [] };
-          const childs = await Relation.getForEntity(request.db.connection, root.entityIds[1], RelationEnums.Type.Classification, 0);
 
-          // store sorted unique list of ids
-          tree[root.entityIds[1]] = childs
-            .reduce((acc: any, child: Relation) => {
-              acc[child.entityIds[1]] = 1;
-              return acc;
-            }, {} as Record<string, undefined>).keys().sort();
-
-          this.superclassTrees.push(tree);
-        }
+        relations = await Relation.getForEntity(conn, parentId, RelationEnums.Type.Classification, 0);
+        break;
+      default:
         break;
     }
 
-    // prepare entity Ids for entities map
-    for (const root of this.superclassTrees) {
-      for (const childKey in root) {
-        this.postponedEntities[childKey] = undefined;
-        for (const childVal of root[childKey]) {
-          this.postponedEntities[childVal] = undefined;
-        }
-      }
+    // make unique and sorted list of ids
+    const subrootIds = [...new Set(relations.map(r => r.entityIds[1]))].sort();
+
+    for (const subparentId of subrootIds) {
+      out.subtrees.push(await this.getSuperclasses(conn, subparentId, EntityEnums.Class.Concept))
     }
+
+    // add ids to postponedEntities map
+    for (const id of subrootIds) {
+      this.postponedEntities[id] = undefined;
+    }
+
+    return out
   }
 }
