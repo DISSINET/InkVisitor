@@ -10,7 +10,7 @@ import {
 } from "./statement";
 
 export interface IResponseDetail extends IResponseEntity {
-  entities: { [key: string]: IEntity }; // all entities from IStatement and entityIds...
+  entities: Record<string, IEntity>; // all entities from IStatement and entityIds...
   usedInStatements: IResponseUsedInStatement<EntityEnums.UsedInPosition>[]; // all statements, where the detail id is used as an actant, action, or tag
   usedInStatementProps: IResponseUsedInStatementProps[]; // all statements, where the detail id is used in props
   usedInMetaProps: IResponseUsedInMetaProp<EntityEnums.UsedInPosition>[]; // all entities, where the detail id is used in props (entity.props[])
