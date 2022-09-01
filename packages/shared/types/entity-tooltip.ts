@@ -3,7 +3,7 @@ import { EntityEnums, UserEnums } from "../enums";
 
 export namespace EntityTooltip {
   export interface IResponse extends IResponseEntity {
-    entities: { [key: string]: IEntity }; //  all entities mentioned in relations
+    entities: Record<string, IEntity>; //  all entities mentioned in relations
 
     // C, A
     superclassTrees: ISuperclassTree[];
@@ -22,8 +22,8 @@ export namespace EntityTooltip {
 
   // these are full of entity ids
 
-  // for C, A: Find all IRelationSuperclass relations, where the entity is at the 1st position and then repeat the same with the entity on the 2nd position, return the chain of entity ids
-  // for PLOGESTR: Find all  IRelationClassification relations, where the entity is at the 1st position, and take the C at the second position as the first element of the chain. Then repeat the procedure mentioned above for the C
+  // for C, A: Find all ISuperclass relations, where the entity is at the 1st position and then repeat the same with the entity on the 2nd position, return the chain of entity ids
+  // for PLOGESTR: Find all  IClassification relations, where the entity is at the 1st position, and take the C at the second position as the first element of the chain. Then repeat the procedure mentioned above for the C
   // this is not a tree! branches are dividing and merging on both sides, it is more a graph
   // e.g, O:icecream -> C:icecream -> C:sweet -> C:food -> C: everything,
   // but also O:icecream -> C:icecrean -> C:cold thing -> C:everything,

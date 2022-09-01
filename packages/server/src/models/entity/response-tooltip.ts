@@ -20,13 +20,18 @@ import Relation from "@models/relation/relation";
 import { RelationEnums } from "@shared/enums";
 
 export class ResponseTooltip extends ResponseEntity implements EntityTooltip.IResponse {
-  entities: { [key: string]: IEntity } = {};
+  entities: Record<string, IEntity> = {};
 
   superclassTrees: EntityTooltip.ISuperclassTree[] = [];
   synonymClouds: EntityTooltip.ISynonymCloud[] = [];
   troponymClouds: EntityTooltip.ITroponymCloud[] = [];
   superordinateLocationTrees: EntityTooltip.ISuperordinateLocationTree[] = [];
   identifications: EntityTooltip.IIdentifications[] = [];
+
+  // map of entity ids that should be populated in subsequent methods and used in fetching
+  // real entities in populateEntitiesMap method
+  @nonenumerable
+  postponedEntities: Record<string, undefined> = {};
 
   /**
    * Loads additional fields to satisfy the EntityTooltip.IResponse interface
@@ -37,8 +42,13 @@ export class ResponseTooltip extends ResponseEntity implements EntityTooltip.IRe
 
     await this.fillSuperclassTrees(request)
 
+    this.entities = await this.populateEntitiesMap(request.db.connection)
   }
 
+  /**
+   * populates the superclassTrees field by searching in relations collection
+   * @param request 
+   */
   async fillSuperclassTrees(request: IRequest) {
     switch (this.class) {
       case EntityEnums.Class.Concept, EntityEnums.Class.Action:
@@ -46,7 +56,13 @@ export class ResponseTooltip extends ResponseEntity implements EntityTooltip.IRe
         for (const root of sRoots) {
           const tree: EntityTooltip.ISuperclassTree = { [root.entityIds[1]]: [] };
           const childs = await Relation.getForEntity(request.db.connection, root.entityIds[1], RelationEnums.Type.Superclass, 0);
-          tree[root.entityIds[1]] = childs.map(ch => ch.entityIds[1])
+
+          // store sorted unique list of ids
+          tree[root.entityIds[1]] = childs
+            .reduce((acc: any, child: Relation) => {
+              acc[child.entityIds[1]] = 1;
+              return acc;
+            }, {} as Record<string, undefined>).keys().sort();
 
           this.superclassTrees.push(tree);
         }
@@ -58,11 +74,27 @@ export class ResponseTooltip extends ResponseEntity implements EntityTooltip.IRe
         for (const root of cRoots) {
           const tree: EntityTooltip.ISuperclassTree = { [root.entityIds[1]]: [] };
           const childs = await Relation.getForEntity(request.db.connection, root.entityIds[1], RelationEnums.Type.Classification, 0);
-          tree[root.entityIds[1]] = childs.map(ch => ch.entityIds[1])
+
+          // store sorted unique list of ids
+          tree[root.entityIds[1]] = childs
+            .reduce((acc: any, child: Relation) => {
+              acc[child.entityIds[1]] = 1;
+              return acc;
+            }, {} as Record<string, undefined>).keys().sort();
 
           this.superclassTrees.push(tree);
         }
         break;
+    }
+
+    // prepare entity Ids for entities map
+    for (const root of this.superclassTrees) {
+      for (const childKey in root) {
+        this.postponedEntities[childKey] = undefined;
+        for (const childVal of root[childKey]) {
+          this.postponedEntities[childVal] = undefined;
+        }
+      }
     }
   }
 }
