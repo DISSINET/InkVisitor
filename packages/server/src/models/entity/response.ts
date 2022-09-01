@@ -25,29 +25,52 @@ export class ResponseEntity extends Entity implements IResponseEntity {
   @nonenumerable
   originalEntity: Entity;
 
+  // map of entity ids that should be populated in subsequent methods and used in fetching
+  // real entities in populateEntitiesMap method
+  // used in derived classes
+  @nonenumerable
+  postponedEntities: Record<string, undefined> = {};
+
   right: UserEnums.RoleMode = UserEnums.RoleMode.Read;
 
   constructor(entity: Entity) {
-    super({});
-    for (const key of Object.keys(entity)) {
-      (this as any)[key] = (entity as any)[key];
-    }
+    super(JSON.parse(JSON.stringify(entity)));
+
+    // entity is base class, we need correct implementation to use overridden methods
     this.originalEntity = entity;
   }
 
   /**
    * Loads additional fields to satisfy the IResponseDetail interface
-   * @param req
+   * @param request
    */
   async prepare(request: IRequest) {
     this.right = this.originalEntity.getUserRoleMode(request.getUserOrFail());
+  }
+
+  /**
+ * gathered ids from previous calls should be used to populate entities map
+ * @param conn
+ */
+  async populateEntitiesMap(conn: Connection): Promise<Record<string, IEntity>> {
+    const entities: Record<string, IEntity> = {};
+
+    const additionalEntities = await Entity.findEntitiesByIds(
+      conn,
+      Object.keys(this.postponedEntities)
+    );
+    for (const entity of additionalEntities) {
+      entities[entity.id] = entity;
+    }
+
+    return entities;
   }
 }
 
 export class ResponseEntityDetail
   extends ResponseEntity
   implements IResponseDetail {
-  entities: { [key: string]: IEntity };
+  entities: Record<string, IEntity>;
   usedInStatements: IResponseUsedInStatement<EntityEnums.UsedInPosition>[];
   usedInStatementProps: IResponseUsedInStatementProps[];
   usedInMetaProps: IResponseUsedInMetaProp<EntityEnums.UsedInPosition>[];
@@ -56,11 +79,6 @@ export class ResponseEntityDetail
   usedInStatementClassifications: IResponseUsedInStatementClassification[];
 
   relations: RelationTypes.IModel[] = [];
-
-  // map of entity ids that should be populated in subsequent methods and used in fetching
-  // real entities in populateEntitiesMap method
-  @nonenumerable
-  postponedEntities: Record<string, undefined> = {};
 
   constructor(entity: Entity) {
     super(entity);
@@ -106,7 +124,7 @@ export class ResponseEntityDetail
       await Statement.findByDataActantsCI(conn, this.id)
     );
 
-    await this.populateEntitiesMap(conn);
+    this.entities = await this.populateEntitiesMap(conn);
 
     await this.processTemplateData(conn);
   }
@@ -195,20 +213,6 @@ export class ResponseEntityDetail
     this.usedAsTemplate = casts.map((c) => c.id);
 
     casts.forEach((c) => (this.entities[c.id] = c));
-  }
-
-  /**
-   * gathered ids from previous calls should be used to populate entities map
-   * @param conn
-   */
-  async populateEntitiesMap(conn: Connection): Promise<void> {
-    const additionalEntities = await Entity.findEntitiesByIds(
-      conn,
-      Object.keys(this.postponedEntities)
-    );
-    for (const entity of additionalEntities) {
-      this.entities[entity.id] = entity;
-    }
   }
 
   /**
