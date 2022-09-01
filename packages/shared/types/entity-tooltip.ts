@@ -8,8 +8,8 @@ export namespace EntityTooltip {
     // C, A
     superclassTrees: ISuperclassTree[];
     // C
-    synonymClouds: ISynonymCloud[];
-    troponymClouds: ITroponymCloud[];
+    synonymCloud?: ISynonymCloud;
+    troponymCloud?: ITroponymCloud;
     superordinateLocationTrees: ISuperordinateLocationTree[];
     identifications: IIdentifications[];
   }
@@ -29,7 +29,10 @@ export namespace EntityTooltip {
   // but also O:icecream -> C:icecrean -> C:cold thing -> C:everything,
   // and also O:icecream -> C:grocery store products -> C:everyhing,
   // in that case, I propose, the output will be {O:icecream: [C: icecream], C:icecream: [C:sweet, C:cold thing, C:grocery store product], C:sweet: ...}
-  export type ISuperclassTree = { [key: string]: string[] };
+  export type ISuperclassTree = {
+    rootId: string,
+    trees: ISuperclassTree[]
+  };
 
   // This should work the same way as ISuperclassTree but only for L and relation of type SuperordinateLocation
   export type ISuperordinateLocationTree = string[];
