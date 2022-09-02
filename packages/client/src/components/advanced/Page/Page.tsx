@@ -79,7 +79,6 @@ export const Page: React.FC<Page> = ({ children }) => {
   return (
     <StyledPage layoutWidth={layoutWidth}>
       <Header
-        height={heightHeader}
         paddingY={0}
         paddingX={10}
         color={

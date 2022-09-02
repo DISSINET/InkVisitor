@@ -67,7 +67,7 @@ export const App: React.FC = () => {
 
   const isLoggedIn = api.isLoggedIn();
 
-  const [debouncedWidth, debouncedHeight] = useDebounce(useWindowSize(), 500);
+  const [debouncedWidth, debouncedHeight] = useDebounce(useWindowSize(), 50);
 
   useEffect(() => {
     if (debouncedHeight > 0) {
