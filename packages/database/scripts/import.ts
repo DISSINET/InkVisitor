@@ -181,24 +181,28 @@ const importData = async () => {
     output: process.stdout,
   });
 
-  rl.question(`Using db ${config.db}. Continue? y/n\n`, async (result) => {
-    if (result.toLowerCase() !== "y") {
-      process.exit(0);
-    }
+  return new Promise((resolve, reject) => {
+    rl.question(`Using db ${config.db}. Continue? y/n\n`, async (result) => {
+      rl.close();
 
-    rl.close();
+      if (result.toLowerCase() !== "y") {
+        return resolve(undefined);
+      }
 
-    const conn = await prepareDbConnection(config);
+      const conn = await prepareDbConnection(config);
 
-    console.log(`***importing dataset ${datasetId}***\n`);
+      console.log(`***importing dataset ${datasetId}***\n`);
 
-    for (const tableConfig of Object.values(config.tables)) {
-      await importTable(tableConfig, conn);
-    }
+      for (const tableConfig of Object.values(config.tables)) {
+        await importTable(tableConfig, conn);
+      }
 
-    console.log("Closing connection");
-    await conn.close({ noreplyWait: true });
-  });
+      console.log("Closing connection");
+      await conn.close({ noreplyWait: true });
+
+      resolve(undefined)
+    });
+  })
 };
 
 (async () => {
@@ -209,11 +213,11 @@ const importData = async () => {
     });
 
     rl.question("Using the tunnel. Continue? y/n\n", function (result) {
+      rl.close();
+
       if (result.toLowerCase() !== "y") {
         process.exit(0);
       }
-
-      rl.close();
 
       const tnl = tunnel(
         {
@@ -227,7 +231,7 @@ const importData = async () => {
           try {
             await importData();
           } catch (e) {
-            console.warn(e);
+            console.warn(`Encountered error in importData: ${e}`);
           } finally {
             await srv.close();
           }
