@@ -23,10 +23,10 @@ export class ResponseTooltip extends ResponseEntity implements EntityTooltip.IRe
   entities: Record<string, IEntity> = {};
 
   superclassTrees: EntityTooltip.ISuperclassTree[] = [];
-  synonymClouds: EntityTooltip.ISynonymCloud[] = [];
-  troponymClouds: EntityTooltip.ITroponymCloud[] = [];
+  synonymCloud?: EntityTooltip.ISynonymCloud;
+  troponymCloud?: EntityTooltip.ITroponymCloud;
   superordinateLocationTrees: EntityTooltip.ISuperordinateLocationTree[] = [];
-  identifications: EntityTooltip.IIdentifications[] = [];
+  identifications: EntityTooltip.IIdentifications = [];
 
   // map of entity ids that should be populated in subsequent methods and used in fetching
   // real entities in populateEntitiesMap method
