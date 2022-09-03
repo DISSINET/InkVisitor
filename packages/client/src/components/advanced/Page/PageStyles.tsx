@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import { heightHeader, heightFooter } from "Theme/constants";
 
 interface StyledPage {
   layoutWidth: number;
@@ -15,7 +16,10 @@ interface StyledPageContent {
 }
 export const StyledPageContent = styled.div<StyledPageContent>`
   width: 100%;
-  height: ${({ height }) => (height > 0 ? height : "100%")};
+  height: ${({ height }) =>
+    height > 0
+      ? height
+      : `calc(100% - ${(heightHeader + heightFooter) / 10}rem)`};
   overflow: hidden;
   display: flex;
   position: relative;
