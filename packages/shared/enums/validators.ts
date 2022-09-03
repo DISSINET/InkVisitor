@@ -46,4 +46,23 @@ export namespace EnumValidators {
       ].indexOf(input) !== -1
     );
   }
+
+  /**
+   * Validates EntityEnums.Certainty value
+   * @param input 
+   * @returns 
+   */
+  export function IsValidEntityCertainty(input: EntityEnums.Certainty): boolean {
+    return (
+      [
+        EntityEnums.Certainty.AlmostCertain,
+        EntityEnums.Certainty.Certain,
+        EntityEnums.Certainty.Dubious,
+        EntityEnums.Certainty.Empty,
+        EntityEnums.Certainty.False,
+        EntityEnums.Certainty.Possible,
+        EntityEnums.Certainty.Probable,
+      ].indexOf(input) !== -1
+    );
+  }
 }
