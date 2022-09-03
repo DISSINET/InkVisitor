@@ -1,8 +1,8 @@
+<p align="center" width="100%" style="background: white; padding-top:5px;">
+    <img width="50%" src="./logo/logo-full.png" style="background: transparent;">
+</p>
+
 [![deploy staging](https://github.com/DISSINET/InkVisitor/actions/workflows/dev.yml/badge.svg?branch=dev)](https://github.com/DISSINET/InkVisitor/actions/workflows/dev.yml)
-
-# InkVisitor
-
-## Deployment
 
 ## Description
 
