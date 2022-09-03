@@ -9,6 +9,7 @@ import { IRequest } from "src/custom.request";
 import { ResponseEntity } from "./response";
 import Relation from "@models/relation/relation";
 import { RelationEnums } from "@shared/enums";
+import { Relation as RelationTypes } from "@shared/types";
 
 export class ResponseTooltip extends ResponseEntity implements EntityTooltip.IResponse {
   entities: Record<string, IEntity> = {};
@@ -52,8 +53,8 @@ export class ResponseTooltip extends ResponseEntity implements EntityTooltip.IRe
    */
   async getSynonymCloud(conn: Connection): Promise<EntityTooltip.ISynonymCloud | undefined> {
     if (this.class === EntityEnums.Class.Concept || this.class === EntityEnums.Class.Action) {
-      const relations = await Relation.getForEntity(conn, this.id, RelationEnums.Type.Synonym);
-      return relations.reduce((acc: string[], cur: Relation) => acc.concat(cur.entityIds), [])
+      const synonyms = await Relation.getForEntity<RelationTypes.ISynonym>(conn, this.id, RelationEnums.Type.Synonym);
+      return synonyms.reduce((acc, cur) => acc.concat(cur.entityIds), [] as string[])
     }
 
     return undefined;
@@ -66,8 +67,8 @@ export class ResponseTooltip extends ResponseEntity implements EntityTooltip.IRe
    */
   async getTroponymCloud(conn: Connection): Promise<EntityTooltip.ISynonymCloud | undefined> {
     if (this.class === EntityEnums.Class.Action) {
-      const relations = await Relation.getForEntity(conn, this.id, RelationEnums.Type.Troponym);
-      return relations.reduce((acc: string[], cur: Relation) => acc.concat(cur.entityIds), [])
+      const troponyms = await Relation.getForEntity<RelationTypes.ITroponym>(conn, this.id, RelationEnums.Type.Troponym);
+      return troponyms.reduce((acc, cur) => acc.concat(cur.entityIds), [] as string[])
     }
 
     return undefined;
@@ -80,12 +81,11 @@ export class ResponseTooltip extends ResponseEntity implements EntityTooltip.IRe
  */
   async getIdentifications(conn: Connection): Promise<EntityTooltip.IIdentification[]> {
     const out: EntityTooltip.IIdentification[] = [];
-    const relations = await Relation.getForEntity(conn, this.id, RelationEnums.Type.Synonym);
-    //return relations.reduce((acc: string[], cur: Relation) => acc.concat(cur.entityIds), [])
+    const identifications = await Relation.getForEntity<RelationTypes.IIdentification>(conn, this.id, RelationEnums.Type.Identification);
 
-    for (const relation of relations) {
+    for (const relation of identifications) {
       out.push({
-        certainty: EntityEnums.Certainty.AlmostCertain,
+        certainty: relation.certainty,
         entityId: relation.entityIds[0] === this.id ? relation.entityIds[1] : relation.entityIds[0],
       })
     }
@@ -103,14 +103,14 @@ export class ResponseTooltip extends ResponseEntity implements EntityTooltip.IRe
       subtrees: [],
     }
 
-    let relations: Relation[] = [];
+    let locations: RelationTypes.ISuperordinateLocation[] = [];
 
     if (this.class === EntityEnums.Class.Location) {
-      relations = await Relation.getForEntity(conn, parentId, RelationEnums.Type.SuperordinateLocation, 0);
+      locations = await Relation.getForEntity<RelationTypes.ISuperordinateLocation>(conn, parentId, RelationEnums.Type.SuperordinateLocation, 0);
     }
 
     // make unique and sorted list of ids
-    const subrootIds = [...new Set(relations.map(r => r.entityIds[1]))].sort();
+    const subrootIds = [...new Set(locations.map(r => r.entityIds[1]))].sort();
 
     for (const subparentId of subrootIds) {
       out.subtrees.push(await this.getSuperordinateLocationTree(conn, subparentId))
@@ -134,16 +134,16 @@ export class ResponseTooltip extends ResponseEntity implements EntityTooltip.IRe
       subtrees: [],
     }
 
-    let relations: Relation[] = [];
+    let relations: RelationTypes.IModel[] = [];
 
     switch (asClass) {
       case EntityEnums.Class.Concept, EntityEnums.Class.Action:
-        relations = await Relation.getForEntity(conn, parentId, RelationEnums.Type.Superclass, 0);
+        relations = await Relation.getForEntity<RelationTypes.IModel>(conn, parentId, RelationEnums.Type.Superclass, 0);
         break;
       case EntityEnums.Class.Person, EntityEnums.Class.Location, EntityEnums.Class.Object,
         EntityEnums.Class.Group, EntityEnums.Class.Event, EntityEnums.Class.Statement,
         EntityEnums.Class.Territory, EntityEnums.Class.Resource:
-        relations = await Relation.getForEntity(conn, parentId, RelationEnums.Type.Classification, 0);
+        relations = await Relation.getForEntity<RelationTypes.IModel>(conn, parentId, RelationEnums.Type.Classification, 0);
         break;
       default:
         break;
