@@ -99,7 +99,7 @@ export class ResponseTooltip extends ResponseEntity implements EntityTooltip.IRe
    */
   async getSuperordinateLocationTree(conn: Connection, parentId: string): Promise<EntityTooltip.ISuperordinateLocationTree> {
     const out: EntityTooltip.ISuperordinateLocationTree = {
-      rootId: parentId,
+      entityId: parentId,
       subtrees: [],
     }
 
@@ -130,7 +130,7 @@ export class ResponseTooltip extends ResponseEntity implements EntityTooltip.IRe
    */
   async getSuperclassTrees(conn: Connection, parentId: string, asClass: EntityEnums.Class): Promise<EntityTooltip.ISuperclassTree> {
     const out: EntityTooltip.ISuperclassTree = {
-      rootId: parentId,
+      entityId: parentId,
       subtrees: [],
     }
 
