@@ -125,20 +125,18 @@ export default class Relation implements RelationTypes.IModel, IDbModel {
    * @param entityId 
    * @param relType 
    * @param position - position in entityIds
-   * @returns array of relation models
+   * @returns array of relation interfaces
    */
-  static async getForEntity(db: Connection, entityId: string, relType?: RelationEnums.Type, position?: number): Promise<Relation[]> {
-    const raw = await rethink
+  static async getForEntity<T extends RelationTypes.IModel>(db: Connection, entityId: string, relType?: RelationEnums.Type, position?: number): Promise<T[]> {
+    const items: T[] = await rethink
       .table(Relation.table)
       .getAll(entityId, { index: DbEnums.Indexes.RelationsEntityIds })
       .filter(relType ? { type: relType } : {})
-      .run(db);
-
-    const entries: Relation[] = raw ? raw.map(d => new Relation(d)) : [];
+      .run(db)
 
     if (position) {
-      return entries.filter(d => d.entityIds[position] === entityId)
+      return items.filter(d => d.entityIds[position] === entityId)
     }
-    return entries;
+    return items;
   }
 }
