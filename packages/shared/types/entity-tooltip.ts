@@ -11,12 +11,11 @@ export namespace EntityTooltip {
     synonymCloud?: ISynonymCloud;
     troponymCloud?: ITroponymCloud;
     superordinateLocationTrees: ISuperordinateLocationTree[];
-    identifications: IIdentifications[];
+    identifications: IIdentifications;
   }
 
   export type IIdentification = {
     entityId: string;
-    logic: EntityEnums.Logic;
     certainty: EntityEnums.Certainty;
   };
 
@@ -31,11 +30,11 @@ export namespace EntityTooltip {
   // in that case, I propose, the output will be {O:icecream: [C: icecream], C:icecream: [C:sweet, C:cold thing, C:grocery store product], C:sweet: ...}
   export type ISuperclassTree = {
     rootId: string,
-    trees: ISuperclassTree[]
+    subtrees: ISuperclassTree[]
   };
 
   // This should work the same way as ISuperclassTree but only for L and relation of type SuperordinateLocation
-  export type ISuperordinateLocationTree = string[];
+  export type ISuperordinateLocationTree = ISuperclassTree;
 
   // only for C and A
   // this is much simpler - its only about IRelationSynonym relation "clouds" where entityId is within `entityIds`
