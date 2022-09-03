@@ -1,5 +1,10 @@
 import { EntityEnums } from "@shared/enums";
-import { IEntity, IResponseTree, IStatement } from "@shared/types";
+import {
+  IEntity,
+  IResponseEntity,
+  IResponseTree,
+  IStatement,
+} from "@shared/types";
 import { DropTargetMonitor, XYCoord } from "react-dnd";
 import { DragItem } from "types";
 
@@ -131,3 +136,6 @@ export const dndHoverFn = (
   moveProp(dragIndex, hoverIndex);
   item.index = hoverIndex;
 };
+
+export const getEntityLabel = (entity?: IResponseEntity) =>
+  entity?.label || entity?.data.text || "no label";

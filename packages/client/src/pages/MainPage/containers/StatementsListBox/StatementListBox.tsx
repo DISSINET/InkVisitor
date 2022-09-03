@@ -260,26 +260,26 @@ export const StatementListBox: React.FC = () => {
     }
   };
 
-  // TODO: change to mutation! Also clean unused vars
+  const actantsUpdateMutation = useMutation(
+    async (statementObject: { statementId: string; data: {} }) =>
+      await api.entityUpdate(statementObject.statementId, {
+        data: statementObject.data,
+      }),
+    {
+      onSuccess: (data, variables) => {
+        queryClient.invalidateQueries("territory");
+      },
+      onError: () => {
+        toast.error(`Error: Statement order not changed!`);
+      },
+    }
+  );
+
   const moveEndRow = async (statementToMove: IStatement, index: number) => {
-    // return if order don't change
-
     if (statementToMove.data.territory && statements[index].data.territory) {
-      if (
-        statementToMove.data.territory.order !==
-        statements[index].data.territory?.order
-      ) {
-        // whether row is moving top-bottom direction
-        const topDown =
-          statementToMove.data.territory.order <
-          (
-            statements[index].data.territory as {
-              territoryId: string;
-              order: number;
-            }
-          ).order;
+      const { order: thisOrder, territoryId } = statementToMove.data.territory;
 
-        const thisOrder = statementToMove.data.territory.order;
+      if (thisOrder !== statements[index].data.territory?.order) {
         let allOrders: number[] = statements.map((s) =>
           s.data.territory ? s.data.territory.order : 0
         );
@@ -296,15 +296,15 @@ export const StatementListBox: React.FC = () => {
           allOrders[index] = (allOrders[index - 1] + allOrders[index + 1]) / 2;
         }
 
-        const res = await api.entityUpdate(statementToMove.id, {
+        actantsUpdateMutation.mutate({
+          statementId: statementToMove.id,
           data: {
             territory: {
-              territoryId: statementToMove.data.territory.territoryId,
+              territoryId: territoryId,
               order: allOrders[index],
             },
           },
         });
-        queryClient.invalidateQueries("territory");
       }
     }
   };
