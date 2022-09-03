@@ -1,8 +1,8 @@
+[![deploy staging](https://github.com/DISSINET/InkVisitor/actions/workflows/dev.yml/badge.svg?branch=dev)](https://github.com/DISSINET/InkVisitor/actions/workflows/dev.yml)
+
 # InkVisitor
 
 ## Deployment
-
-[![deploy staging](https://github.com/DISSINET/InkVisitor/actions/workflows/dev.yml/badge.svg?branch=dev)](https://github.com/DISSINET/InkVisitor/actions/workflows/dev.yml)
 
 ## Description
 
@@ -109,95 +109,9 @@ Make sure the ports required by each application are not blocked. Required ports
 
 Setup for additional system specific features (reverse proxies etc) are beyond the scope of this readme.
 
-## Authentication Example
+## Wiki
 
-```shell
-curl --request GET \
-  --url http://localhost:3000/api/v1/actants \
-  --header 'authorization: Bearer {TOKEN}'
-```
-
-## Data structure
-
-### Collections
-
-### Endpoints
-
-#### /users
-
-- **POST** /getMore {IFilterUsers} => IResponseUser[]
-- **GET** /:id => IResponseUser
-- **PUT** /:id {changes}
-- **DELETE** /:id
-- **POST** /:id {UserI}
-
-#### /actants
-
-- **POST** /getMore {IFilterActants} => IResponseActant[]
-- **GET** /:id => IResponseActant
-- **PUT** /:id {changes} =>
-- **DELETE** /:id =>
-- **POST** /:id {ActantI} =>
-
-#### /actions
-
-- **POST** /getMore {IFilterActions} => IResponseAction[]
-- **GET** /:id => IResponseAction
-- **PUT** /:id {changes} =>
-- **DELETE** /:id =>
-- **POST** /:id {IAction} =>
-
-#### /tree (Tree container)
-
-- **GET** /
-  {}
-  => IResponseTree
-  _returns the structure of all territories_
-
-- **POST** /moveTerritory
-  {moveId: string; parentId: string; beforeId: string; afterId: string}
-  =>
-  _move territory to a new / same parent between beforeId and afterId_
-
-#### /territory (List container)
-
-- **GET** /:id
-  {}
-  => IResponseTerritory
-  _returns all statements and actants for selected territory_
-
-- **POST** /moveStatement
-  {moveId: string; beforeId: string; afterId: string}
-  =>
-  _move statement within the territory - between beforeId and afterId_
-
-#### /statement (Editor container)
-
-- **GET** /:id
-  {}
-  => IResponseStatement
-  _get everything of the statement_
-
-#### /administration (Administration container)
-
-- **GET** /:id
-  {}
-  => IResponseAdministration
-  _administration purposes_
-
-#### /bookmarks (Bookmarks container)
-
-- **GET** /:id
-  {}
-  => IResponseBookmarks
-  _get all bookmarks of a user_
-
-#### /detail (Detail container)
-
-- **GET** /:id
-  {}
-  => IResponseDetail
-  _get everything of the actant_
+For more in-depth description for models etc, please visit our [wiki page](https://github.com/DISSINET/InkVisitor/wiki)
 
 ## ACL - access control list
 
