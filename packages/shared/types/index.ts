@@ -14,7 +14,7 @@ import { RequestPermissionUpdate } from "./request-permission";
 import { RequestSearch } from "./request-search";
 import { IResource } from "./resource";
 import { Relation } from "./relation";
-import { EntityTooltip } from "./entity-tooltip"
+import { EntityTooltip } from "./entity-tooltip";
 import {
   IResponseDetail,
   IResponseUsedInMetaProp,

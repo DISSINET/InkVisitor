@@ -4,12 +4,13 @@ import {
   IEntity,
   IProp,
   IReference,
-  IRelationIdentification,
+  Relation,
   IStatement,
   IStatementActant,
   IStatementAction,
   ITerritory,
 } from "@shared/types";
+
 import {
   IStatementClassification,
   IStatementIdentification,
@@ -322,7 +323,7 @@ export const CReference = (
 export const CRelationIdentity = (
   entity1: string = "",
   entity2: string = ""
-): IRelationIdentification => ({
+): Relation.IIdentification => ({
   id: uuidv4(),
   entityIds: [entity1, entity2],
   type: RelationEnums.Type.Identification,
