@@ -1,0 +1,1435 @@
+[
+  {
+    "id": "s1",
+    "class": "S",
+    "label": "",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {
+      "text": "Minda, the priest of the great Cat lord, and son of saint Tiger, told someone on the street that...",
+      "territory": {
+        "territoryId": "t1",
+        "order": 1
+      },
+      "tags": [],
+
+      "actions": [
+        {
+          "id": "s1_a1",
+          "actionId": "a1",
+          "certainty": "1",
+          "elvl": "1",
+          "logic": "1",
+          "mood": [],
+          "moodvariant": "1",
+          "bundleOperator": "a",
+          "bundleStart": false,
+          "bundleEnd": false,
+          "props": [
+            {
+              "id": "s1_a1_p1",
+              "elvl": "1",
+              "certainty": "1",
+              "logic": "1",
+              "mood": [],
+              "moodvariant": "1",
+              "bundleOperator": "a",
+              "bundleStart": false,
+              "bundleEnd": false,
+              "children": [],
+
+              "type": {
+                "entityId": "c80",
+                "elvl": "1",
+                "logic": "1",
+                "virtuality": "1",
+                "partitivity": "1"
+              },
+              "value": {
+                "entityId": "l11",
+                "elvl": "1",
+                "logic": "1",
+                "virtuality": "1",
+                "partitivity": "1"
+              }
+            }
+          ]
+        }
+      ],
+      "actants": [
+        {
+          "id": "s1_a2",
+          "entityId": "p1",
+          "position": "s",
+          "elvl": "1",
+          "logic": "1",
+          "virtuality": "1",
+          "partitivity": "1",
+          "bundleOperator": "a",
+          "bundleStart": false,
+          "bundleEnd": false,
+          "props": [
+            {
+              "id": "s1_a2_p1",
+              "elvl": "1",
+              "certainty": "1",
+              "logic": "1",
+              "mood": [],
+              "moodvariant": "1",
+              "bundleOperator": "a",
+              "bundleStart": false,
+              "bundleEnd": false,
+              "children": [],
+
+              "type": {
+                "entityId": "c3",
+                "elvl": "1",
+                "logic": "1",
+                "virtuality": "1",
+                "partitivity": "1"
+              },
+              "value": {
+                "entityId": "c2",
+                "elvl": "1",
+                "logic": "1",
+                "virtuality": "1",
+                "partitivity": "1"
+              }
+            },
+            {
+              "id": "s1_a2_p2",
+              "elvl": "1",
+              "certainty": "1",
+              "logic": "1",
+              "mood": [],
+              "moodvariant": "1",
+              "bundleOperator": "a",
+              "bundleStart": false,
+              "bundleEnd": false,
+              "children": [],
+
+              "type": {
+                "entityId": "c71",
+                "elvl": "1",
+                "logic": "1",
+                "virtuality": "1",
+                "partitivity": "1"
+              },
+              "value": {
+                "entityId": "p11",
+                "elvl": "1",
+                "logic": "1",
+                "virtuality": "1",
+                "partitivity": "1"
+              }
+            }
+          ],
+          "classifications": [],
+          "identifications": []
+        },
+
+        {
+          "id": "s1_a3",
+          "entityId": "p2",
+          "position": "a1",
+          "elvl": "1",
+          "logic": "1",
+          "virtuality": "1",
+          "partitivity": "1",
+          "bundleOperator": "a",
+          "bundleStart": false,
+          "bundleEnd": false,
+          "props": [],
+          "classifications": [],
+          "identifications": []
+        },
+        {
+          "id": "s1_a4",
+          "entityId": "s2",
+          "position": "a2",
+          "elvl": "1",
+          "logic": "1",
+          "virtuality": "1",
+          "partitivity": "1",
+          "bundleOperator": "a",
+          "bundleStart": false,
+          "bundleEnd": false,
+          "props": [],
+          "classifications": [],
+          "identifications": []
+        },
+        {
+          "id": "s1_a5",
+          "entityId": "s3",
+          "position": "a2",
+          "elvl": "1",
+          "logic": "1",
+          "virtuality": "1",
+          "partitivity": "1",
+          "bundleOperator": "a",
+          "bundleStart": false,
+          "bundleEnd": false,
+          "props": [],
+          "classifications": [],
+          "identifications": []
+        }
+      ]
+    }
+  },
+
+  {
+    "id": "s2",
+    "class": "S",
+    "label": "",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {
+      "text": "...his dog (probably a pug) is possessed by evil...",
+      "territory": {
+        "territoryId": "t1",
+        "order": 2
+      },
+      "tags": [],
+      "actions": [
+        {
+          "id": "s2_a1",
+          "actionId": "a2",
+          "certainty": "1",
+          "elvl": "1",
+          "logic": "1",
+          "mood": [],
+          "moodvariant": "1",
+          "bundleOperator": "a",
+          "bundleStart": false,
+          "bundleEnd": false,
+          "props": []
+        }
+      ],
+      "actants": [
+        {
+          "id": "s2_a2",
+          "entityId": "o1",
+          "position": "s",
+          "elvl": "1",
+          "logic": "1",
+          "virtuality": "1",
+          "partitivity": "1",
+          "bundleOperator": "a",
+          "bundleStart": false,
+          "bundleEnd": false,
+          "props": [],
+          "classifications": [
+            {
+              "id": "s2_a2_i1",
+              "entityId": "c211",
+              "elvl": "1",
+              "logic": "1",
+              "certainty": "3",
+              "mood": [],
+              "moodvariant": "1"
+            }
+          ],
+          "identifications": []
+        },
+        {
+          "id": "s2_a3",
+          "entityId": "c41",
+          "position": "a1",
+          "elvl": "1",
+          "logic": "1",
+          "virtuality": "1",
+          "partitivity": "1",
+          "bundleOperator": "a",
+          "bundleStart": false,
+          "bundleEnd": false,
+          "props": [],
+          "classifications": [],
+          "identifications": []
+        }
+      ]
+    }
+  },
+  {
+    "id": "s3",
+    "class": "S",
+    "label": "",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {
+      "text": "...and should be sacrificed.",
+      "territory": {
+        "territoryId": "t1",
+        "order": 3
+      },
+      "actions": [
+        {
+          "id": "s3_a1",
+          "actionId": "a3",
+          "certainty": "1",
+          "elvl": "1",
+          "logic": "1",
+          "mood": [],
+          "moodvariant": "1",
+          "bundleOperator": "a",
+          "bundleStart": false,
+          "bundleEnd": false,
+          "props": []
+        }
+      ],
+      "actants": [
+        {
+          "id": "s3_a2",
+          "entityId": "o1",
+          "position": "s",
+          "elvl": "1",
+          "logic": "1",
+          "virtuality": "1",
+          "partitivity": "1",
+          "bundleOperator": "a",
+          "bundleStart": false,
+          "bundleEnd": false,
+          "props": [],
+          "classifications": [],
+          "identifications": []
+        }
+      ],
+      "tags": []
+    }
+  },
+  {
+    "id": "s4",
+    "class": "S",
+    "label": "",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {
+      "text": "This sacrify ceremony will take place at the sanctuary of the Mauw mountain temple.",
+      "territory": {
+        "territoryId": "t1",
+        "order": 3
+      },
+      "actions": [
+        {
+          "id": "s4_a1",
+          "actionId": "a4",
+          "certainty": "1",
+          "elvl": "1",
+          "logic": "1",
+          "mood": [],
+          "moodvariant": "1",
+          "bundleOperator": "a",
+          "bundleStart": false,
+          "bundleEnd": false,
+          "props": []
+        }
+      ],
+      "actants": [
+        {
+          "id": "s4_a2",
+          "entityId": "e1",
+          "position": "s",
+          "elvl": "1",
+          "logic": "1",
+          "virtuality": "1",
+          "partitivity": "1",
+          "bundleOperator": "a",
+          "bundleStart": false,
+          "bundleEnd": false,
+          "props": [],
+          "classifications": [],
+          "identifications": []
+        },
+        {
+          "id": "s4_a3",
+          "entityId": "l2",
+          "position": "a1",
+          "elvl": "1",
+          "logic": "1",
+          "virtuality": "1",
+          "partitivity": "1",
+          "bundleOperator": "a",
+          "bundleStart": false,
+          "bundleEnd": false,
+          "props": [
+            {
+              "id": "s4_a3_p1",
+              "elvl": "1",
+              "certainty": "1",
+              "logic": "1",
+              "mood": [],
+              "moodvariant": "1",
+              "bundleOperator": "a",
+              "bundleStart": false,
+              "bundleEnd": false,
+              "children": [],
+
+              "type": {
+                "entityId": "c80",
+                "elvl": "1",
+                "logic": "1",
+                "virtuality": "1",
+                "partitivity": "1"
+              },
+              "value": {
+                "entityId": "l5",
+                "elvl": "1",
+                "logic": "1",
+                "virtuality": "1",
+                "partitivity": "1"
+              }
+            }
+          ],
+          "classifications": [],
+          "identifications": []
+        }
+      ],
+      "tags": []
+    }
+  },
+  {
+    "id": "a1",
+    "class": "A",
+    "label": "told",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {
+      "valencies": {
+        "s": "",
+        "a1": "",
+        "a2": ""
+      },
+      "entities": {
+        "s": [],
+        "a1": [],
+        "a2": []
+      }
+    }
+  },
+  {
+    "id": "a11",
+    "class": "A",
+    "label": "listen",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {
+      "valencies": {
+        "s": "",
+        "a1": "",
+        "a2": ""
+      },
+      "entities": {
+        "s": [],
+        "a1": [],
+        "a2": []
+      }
+    }
+  },
+  {
+    "id": "a2",
+    "class": "A",
+    "label": "is possessed",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {
+      "valencies": {
+        "s": "",
+        "a1": "",
+        "a2": ""
+      },
+      "entities": {
+        "s": [],
+        "a1": [],
+        "a2": []
+      }
+    }
+  },
+  {
+    "id": "a3",
+    "class": "A",
+    "label": "sacrifice",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {
+      "valencies": {
+        "s": "",
+        "a1": "",
+        "a2": ""
+      },
+      "entities": {
+        "s": [],
+        "a1": [],
+        "a2": []
+      }
+    }
+  },
+  {
+    "id": "a31",
+    "class": "A",
+    "label": "kill",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {
+      "valencies": {
+        "s": "",
+        "a1": "",
+        "a2": ""
+      },
+      "entities": {
+        "s": [],
+        "a1": [],
+        "a2": []
+      }
+    }
+  },
+  {
+    "id": "a32",
+    "class": "A",
+    "label": "murder",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {
+      "valencies": {
+        "s": "",
+        "a1": "",
+        "a2": ""
+      },
+      "entities": {
+        "s": [],
+        "a1": [],
+        "a2": []
+      }
+    }
+  },
+  {
+    "id": "a33",
+    "class": "A",
+    "label": "die",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {
+      "valencies": {
+        "s": "",
+        "a1": "",
+        "a2": ""
+      },
+      "entities": {
+        "s": [],
+        "a1": [],
+        "a2": []
+      }
+    }
+  },
+  {
+    "id": "a34",
+    "class": "A",
+    "label": "being sacrificed",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {
+      "valencies": {
+        "s": "",
+        "a1": "",
+        "a2": ""
+      },
+      "entities": {
+        "s": [],
+        "a1": [],
+        "a2": []
+      }
+    }
+  },
+  {
+    "id": "a4",
+    "class": "A",
+    "label": "take place",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {
+      "valencies": {
+        "s": "",
+        "a1": "",
+        "a2": ""
+      },
+      "entities": {
+        "s": [],
+        "a1": [],
+        "a2": []
+      }
+    }
+  },
+
+  {
+    "id": "t1",
+    "class": "T",
+    "label": "priest Minda and their stories",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {
+      "parent": false
+    }
+  },
+
+  {
+    "id": "p1",
+    "class": "P",
+    "label": "Minda, the priest",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {
+      "logicalType": "1"
+    }
+  },
+  {
+    "id": "p11",
+    "class": "P",
+    "label": "saint Tiger",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {
+      "logicalType": "1"
+    }
+  },
+  {
+    "id": "p12",
+    "class": "P",
+    "label": "another priest, mentioned in a different T",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {
+      "logicalType": "1"
+    }
+  },
+  {
+    "id": "p2",
+    "class": "P",
+    "label": "someone",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {
+      "logicalType": "1"
+    }
+  },
+
+  {
+    "id": "o1",
+    "class": "O",
+    "label": "a dog",
+    "detail": "probably a pug",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {
+      "logicalType": "1"
+    }
+  },
+
+  {
+    "id": "l1",
+    "class": "L",
+    "label": "Brno",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {
+      "logicalType": "1"
+    }
+  },
+  {
+    "id": "l2",
+    "class": "L",
+    "label": "sanctuary of the temple of cat god",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {
+      "logicalType": "1"
+    }
+  },
+  {
+    "id": "l3",
+    "class": "L",
+    "label": "temple of cat god",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {
+      "logicalType": "1"
+    }
+  },
+  {
+    "id": "l4",
+    "class": "L",
+    "label": "cat town",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {
+      "logicalType": "1"
+    }
+  },
+  {
+    "id": "l5",
+    "class": "L",
+    "label": "Mauw mountain",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {
+      "logicalType": "1"
+    }
+  },
+  {
+    "id": "l6",
+    "class": "L",
+    "label": "Moravia",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {
+      "logicalType": "1"
+    }
+  },
+  {
+    "id": "l7",
+    "class": "L",
+    "label": "Cat kingdom",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {
+      "logicalType": "1"
+    }
+  },
+  {
+    "id": "l8",
+    "class": "L",
+    "label": "Czechia",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {
+      "logicalType": "1"
+    }
+  },
+  {
+    "id": "l9",
+    "class": "L",
+    "label": "Europe",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {
+      "logicalType": "1"
+    }
+  },
+  {
+    "id": "l10",
+    "class": "L",
+    "label": "South Moravia region",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {
+      "logicalType": "1"
+    }
+  },
+  {
+    "id": "l11",
+    "class": "L",
+    "label": "street",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {
+      "logicalType": "1"
+    }
+  },
+  {
+    "id": "e1",
+    "class": "E",
+    "label": "a sacrificy of pug",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {
+      "logicalType": "1"
+    }
+  },
+
+  {
+    "id": "c1",
+    "class": "C",
+    "label": "everyhing",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {}
+  },
+  {
+    "id": "c2",
+    "class": "C",
+    "label": "priest",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {}
+  },
+  {
+    "id": "c3",
+    "class": "C",
+    "label": "occupation",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {}
+  },
+
+  {
+    "id": "c301",
+    "class": "C",
+    "label": "unemployment",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {}
+  },
+  {
+    "id": "c4",
+    "class": "C",
+    "label": "city",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {}
+  },
+  {
+    "id": "c401",
+    "class": "C",
+    "label": "village",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {}
+  },
+  {
+    "id": "c402",
+    "class": "C",
+    "label": "region",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {}
+  },
+  {
+    "id": "c403",
+    "class": "C",
+    "label": "country",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {}
+  },
+  {
+    "id": "c404",
+    "class": "C",
+    "label": "geographical localization",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {}
+  },
+  {
+    "id": "c5",
+    "class": "C",
+    "label": "mountain",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {}
+  },
+  {
+    "id": "c501",
+    "class": "C",
+    "label": "hill",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {}
+  },
+  {
+    "id": "c502",
+    "class": "C",
+    "label": "cliff",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {}
+  },
+  {
+    "id": "c503",
+    "class": "C",
+    "label": "mount",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {}
+  },
+  {
+    "id": "c504",
+    "class": "C",
+    "label": "valley",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {}
+  },
+  {
+    "id": "c6",
+    "class": "C",
+    "label": "kingdom",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {}
+  },
+  {
+    "id": "c211",
+    "class": "C",
+    "label": "pug",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {}
+  },
+  {
+    "id": "c212",
+    "class": "C",
+    "label": "dog",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {}
+  },
+  {
+    "id": "c213",
+    "class": "C",
+    "label": "doggie",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {}
+  },
+  {
+    "id": "c214",
+    "class": "C",
+    "label": "hund",
+    "detail": "",
+    "status": "1",
+    "language": "de",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {}
+  },
+  {
+    "id": "c215",
+    "class": "C",
+    "label": "dog owner",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {}
+  },
+  {
+    "id": "c22",
+    "class": "C",
+    "label": "manmal",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {}
+  },
+  {
+    "id": "c23",
+    "class": "C",
+    "label": "animal",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {}
+  },
+  {
+    "id": "c24",
+    "class": "C",
+    "label": "living being",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {}
+  },
+  {
+    "id": "c31",
+    "class": "C",
+    "label": "sacrifice",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {}
+  },
+  {
+    "id": "c32",
+    "class": "C",
+    "label": "religious act",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {}
+  },
+  {
+    "id": "c33",
+    "class": "C",
+    "label": "event",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {}
+  },
+  {
+    "id": "c41",
+    "class": "C",
+    "label": "evil",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {}
+  },
+  {
+    "id": "c42",
+    "class": "C",
+    "label": "religious character",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {}
+  },
+
+  {
+    "id": "c44",
+    "class": "C",
+    "label": "morality metaphor",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {}
+  },
+  {
+    "id": "c45",
+    "class": "C",
+    "label": "force",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {}
+  },
+  {
+    "id": "c46",
+    "class": "C",
+    "label": "abstract things",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {}
+  },
+  {
+    "id": "c51",
+    "class": "C",
+    "label": "temple sanctuary",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {}
+  },
+  {
+    "id": "c52",
+    "class": "C",
+    "label": "temple gate",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {}
+  },
+  {
+    "id": "c521",
+    "class": "C",
+    "label": "gate",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {}
+  },
+  {
+    "id": "c522",
+    "class": "C",
+    "label": "religious building",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {}
+  },
+  {
+    "id": "c523",
+    "class": "C",
+    "label": "building",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {}
+  },
+  {
+    "id": "c524",
+    "class": "C",
+    "label": "sacred place",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {}
+  },
+  {
+    "id": "c53",
+    "class": "C",
+    "label": "temple tower",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {}
+  },
+  {
+    "id": "c54",
+    "class": "C",
+    "label": "temple garden",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {}
+  },
+  {
+    "id": "c55",
+    "class": "C",
+    "label": "temple walls",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {}
+  },
+  {
+    "id": "c56",
+    "class": "C",
+    "label": "temple",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {}
+  },
+  {
+    "id": "c57",
+    "class": "C",
+    "label": "temple complex",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {}
+  },
+  {
+    "id": "c60",
+    "class": "C",
+    "label": "south of",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {}
+  },
+  {
+    "id": "c61",
+    "class": "C",
+    "label": "north of",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {}
+  },
+  {
+    "id": "c70",
+    "class": "C",
+    "label": "father of",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {}
+  },
+  {
+    "id": "c71",
+    "class": "C",
+    "label": "son of",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {}
+  },
+  {
+    "id": "c80",
+    "class": "C",
+    "label": "localization",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {}
+  }
+]
