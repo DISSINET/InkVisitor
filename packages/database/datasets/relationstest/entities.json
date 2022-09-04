@@ -15,6 +15,8 @@
         "territoryId": "t1",
         "order": 1
       },
+      "tags": [],
+
       "actions": [
         {
           "id": "s1_a1",
@@ -124,58 +126,58 @@
                 "virtuality": "1",
                 "partitivity": "1"
               }
-            },
-            {
-              "id": "s1_a3",
-              "entityId": "p2",
-              "position": "a1",
-              "elvl": "1",
-              "logic": "1",
-              "virtuality": "1",
-              "partitivity": "1",
-              "bundleOperator": "a",
-              "bundleStart": false,
-              "bundleEnd": false,
-              "props": [],
-              "classifications": [],
-              "identifications": []
-            },
-            {
-              "id": "s1_a4",
-              "entityId": "s2",
-              "position": "a2",
-              "elvl": "1",
-              "logic": "1",
-              "virtuality": "1",
-              "partitivity": "1",
-              "bundleOperator": "a",
-              "bundleStart": false,
-              "bundleEnd": false,
-              "props": [],
-              "classifications": [],
-              "identifications": []
-            },
-            {
-              "id": "s1_a5",
-              "entityId": "s3",
-              "position": "a2",
-              "elvl": "1",
-              "logic": "1",
-              "virtuality": "1",
-              "partitivity": "1",
-              "bundleOperator": "a",
-              "bundleStart": false,
-              "bundleEnd": false,
-              "props": [],
-              "classifications": [],
-              "identifications": []
             }
           ],
           "classifications": [],
           "identifications": []
+        },
+
+        {
+          "id": "s1_a3",
+          "entityId": "p2",
+          "position": "a1",
+          "elvl": "1",
+          "logic": "1",
+          "virtuality": "1",
+          "partitivity": "1",
+          "bundleOperator": "a",
+          "bundleStart": false,
+          "bundleEnd": false,
+          "props": [],
+          "classifications": [],
+          "identifications": []
+        },
+        {
+          "id": "s1_a4",
+          "entityId": "s2",
+          "position": "a2",
+          "elvl": "1",
+          "logic": "1",
+          "virtuality": "1",
+          "partitivity": "1",
+          "bundleOperator": "a",
+          "bundleStart": false,
+          "bundleEnd": false,
+          "props": [],
+          "classifications": [],
+          "identifications": []
+        },
+        {
+          "id": "s1_a5",
+          "entityId": "s3",
+          "position": "a2",
+          "elvl": "1",
+          "logic": "1",
+          "virtuality": "1",
+          "partitivity": "1",
+          "bundleOperator": "a",
+          "bundleStart": false,
+          "bundleEnd": false,
+          "props": [],
+          "classifications": [],
+          "identifications": []
         }
-      ],
-      "tags": []
+      ]
     }
   },
 
@@ -195,6 +197,7 @@
         "territoryId": "t1",
         "order": 2
       },
+      "tags": [],
       "actions": [
         {
           "id": "s2_a1",
@@ -251,8 +254,7 @@
           "classifications": [],
           "identifications": []
         }
-      ],
-      "tags": []
+      ]
     }
   },
   {
