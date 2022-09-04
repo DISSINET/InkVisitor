@@ -35,12 +35,12 @@ const datasets: Record<string, DbSchema> = {
     aclPermissions: {
       tableName: "acl_permissions",
       data: require("../datasets/default/acl_permissions.json"),
-      transform: function () { },
+      transform: function () {},
     },
     entities: {
       tableName: "entities",
       data: require("../datasets/all/entities.json"),
-      transform: function () { },
+      transform: function () {},
       indexes: entitiesIndexes,
     },
     audits: {
@@ -57,7 +57,7 @@ const datasets: Record<string, DbSchema> = {
     relations: {
       tableName: "relations",
       data: require("../datasets/all/relations.json"),
-      transform: function () { },
+      transform: function () {},
       indexes: relationsIndexes,
     },
   },
@@ -75,12 +75,12 @@ const datasets: Record<string, DbSchema> = {
     aclPermissions: {
       tableName: "acl_permissions",
       data: require("../datasets/default/acl_permissions.json"),
-      transform: function () { },
+      transform: function () {},
     },
     entities: {
       tableName: "entities",
       data: require("../datasets/empty/entities.json"),
-      transform: function () { },
+      transform: function () {},
       indexes: entitiesIndexes,
     },
     audits: {
@@ -97,7 +97,7 @@ const datasets: Record<string, DbSchema> = {
     relations: {
       tableName: "relations",
       data: require("../datasets/empty/relations.json"),
-      transform: function () { },
+      transform: function () {},
       indexes: relationsIndexes,
     },
   },
@@ -115,12 +115,12 @@ const datasets: Record<string, DbSchema> = {
     aclPermissions: {
       tableName: "acl_permissions",
       data: require("../datasets/default/acl_permissions.json"),
-      transform: function () { },
+      transform: function () {},
     },
     entities: {
       tableName: "entities",
       data: require("../datasets/all-parsed/entities.json"),
-      transform: function () { },
+      transform: function () {},
       indexes: entitiesIndexes,
     },
     audits: {
@@ -137,7 +137,47 @@ const datasets: Record<string, DbSchema> = {
     relations: {
       tableName: "relations",
       data: require("../datasets/empty/relations.json"),
-      transform: function () { },
+      transform: function () {},
+      indexes: relationsIndexes,
+    },
+  },
+  relationstest: {
+    users: {
+      tableName: "users",
+      data: require("../datasets/default/users.json"),
+      transform: function () {
+        this.data = this.data.map((user: IUser) => {
+          user.password = hashPassword(user.password ? user.password : "");
+          return user;
+        });
+      },
+    },
+    aclPermissions: {
+      tableName: "acl_permissions",
+      data: require("../datasets/default/acl_permissions.json"),
+      transform: function () {},
+    },
+    entities: {
+      tableName: "entities",
+      data: require("../datasets/relationstest/entities.json"),
+      transform: function () {},
+      indexes: entitiesIndexes,
+    },
+    audits: {
+      tableName: "audits",
+      data: require("../datasets/empty/audits.json"),
+      transform: function () {
+        this.data = this.data.map((audit: IAudit) => {
+          audit.date = new Date(audit.date);
+          return audit;
+        });
+      },
+      indexes: auditsIndexes,
+    },
+    relations: {
+      tableName: "relations",
+      data: require("../datasets/relationstest/relations.json"),
+      transform: function () {},
       indexes: relationsIndexes,
     },
   },
