@@ -139,6 +139,8 @@ export class ResponseEntityDetail
       await Statement.findByDataActantsCI(conn, this.id)
     );
 
+    this.relations = await Relation.getForEntity<RelationTypes.IModel>(conn, this.id);
+
     this.entities = await this.populateEntitiesMap(conn);
 
     await this.processTemplateData(conn);
