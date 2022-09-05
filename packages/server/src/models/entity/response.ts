@@ -20,6 +20,7 @@ import {
 } from "@shared/types/response-detail";
 import { IRequest } from "src/custom_typings/request";
 import { IStatementClassification, IStatementIdentification } from "@shared/types/statement";
+import Relation from "@models/relation/relation";
 
 export class ResponseEntity extends Entity implements IResponseEntity {
   @nonenumerable
@@ -29,7 +30,7 @@ export class ResponseEntity extends Entity implements IResponseEntity {
   // real entities in populateEntitiesMap method
   // used in derived classes
   @nonenumerable
-  postponedEntities: Record<string, undefined> = {};
+  linkedEntitiesIds: Record<string, undefined> = {};
 
   right: UserEnums.RoleMode = UserEnums.RoleMode.Read;
 
@@ -57,13 +58,31 @@ export class ResponseEntity extends Entity implements IResponseEntity {
 
     const additionalEntities = await Entity.findEntitiesByIds(
       conn,
-      Object.keys(this.postponedEntities)
+      Object.keys(this.linkedEntitiesIds)
     );
     for (const entity of additionalEntities) {
       entities[entity.id] = entity;
     }
 
     return entities;
+  }
+
+  /**
+   * populated linked entities map with either single id or list of ids
+   * @param idOrIds 
+   */
+  addLinkedEntities(idOrIds: undefined | string | string[]) {
+    if (!idOrIds) {
+      return
+    }
+
+    if (typeof idOrIds === "object") {
+      for (const id of idOrIds) {
+        this.addLinkedEntities(id)
+      }
+    } else {
+      this.linkedEntitiesIds[idOrIds] = undefined;
+    }
   }
 }
 
@@ -89,9 +108,7 @@ export class ResponseEntityDetail
     this.usedInStatementClassifications = [];
     this.usedInStatementIdentifications = [];
 
-    for (const key of this.originalEntity.getEntitiesIds()) {
-      this.postponedEntities[key] = undefined;
-    }
+    this.addLinkedEntities(this.originalEntity.getEntitiesIds());
   }
 
   /**
@@ -116,11 +133,9 @@ export class ResponseEntityDetail
       await Statement.findByDataPropsId(conn, this.id)
     );
 
-    if (this.usedTemplate) {
-      this.postponedEntities[this.usedTemplate] = undefined;
-    }
+    this.addLinkedEntities(this.usedAsTemplate)
 
-    await this.populateRelations(
+    await this.populateInStatementsRelations(
       await Statement.findByDataActantsCI(conn, this.id)
     );
 
@@ -135,14 +150,14 @@ export class ResponseEntityDetail
    * entries in usedInStatements field
    * @param statements 
    */
-  async populateRelations(statements: IStatement[]): Promise<void> {
+  async populateInStatementsRelations(statements: IStatement[]): Promise<void> {
     for (const statement of statements) {
       for (const actant of statement.data.actants) {
         if (actant.classifications) {
           for (const classData of actant.classifications) {
             if (classData.entityId === this.id) {
               this.addToClassifications(statement.id, actant.entityId, this.id, classData)
-              this.postponedEntities[statement.id] = undefined;
+              this.addLinkedEntities(statement.id);
             }
           }
         }
@@ -151,7 +166,7 @@ export class ResponseEntityDetail
           for (const identification of actant.identifications) {
             if (identification.entityId === this.id) {
               this.addToIdentifications(statement.id, actant.entityId, this.id, identification)
-              this.postponedEntities[statement.id] = undefined;
+              this.addLinkedEntities(statement.id);
             }
           }
         }
@@ -256,9 +271,7 @@ export class ResponseEntityDetail
       valueId,
       typeId,
     });
-    this.postponedEntities[originId] = undefined;
-    this.postponedEntities[valueId] = undefined;
-    this.postponedEntities[typeId] = undefined;
+    this.addLinkedEntities([originId, valueId, typeId]);
   }
 
   /**
@@ -299,12 +312,8 @@ export class ResponseEntityDetail
     });
 
     this.entities[statement.id] = statement;
-    statement.data.actants.forEach((actant) => {
-      this.postponedEntities[actant.entityId] = undefined;
-    });
-    statement.data.actions.forEach((action) => {
-      this.postponedEntities[action.actionId] = undefined;
-    });
+    this.addLinkedEntities(statement.data.actants.map(a => a.entityId))
+    this.addLinkedEntities(statement.data.actions.map(a => a.actionId))
   }
 
   /**
@@ -382,9 +391,6 @@ export class ResponseEntityDetail
       valueId,
     });
 
-    this.postponedEntities[statementId] = undefined;
-    this.postponedEntities[originId] = undefined;
-    this.postponedEntities[valueId] = undefined;
-    this.postponedEntities[typeId] = undefined;
+    this.addLinkedEntities([statementId, originId, valueId, typeId])
   }
 }
