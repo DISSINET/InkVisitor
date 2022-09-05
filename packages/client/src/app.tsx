@@ -107,7 +107,7 @@ export const App: React.FC = () => {
       const thirdPanel = Math.floor(
         layoutWidth -
           (onePercent *
-            (separatorPercentPosition - percentPanelWidths[3]) *
+            (separatorPercentPosition + percentPanelWidths[3]) *
             10) /
             10
       );
