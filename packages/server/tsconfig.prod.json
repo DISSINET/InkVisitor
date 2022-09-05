@@ -9,6 +9,10 @@
   "ts-node": {
     "files": true
   },
-  "files": ["./src/custom.request.d.ts"],
-  "exclude": ["spec", "src/**/*.test.ts", "src/public/"]
+  "files": [
+    "./src/custom_typings/request.d.ts"
+  ],
+  "exclude": [
+    "src/**/*.test.ts",
+  ]
 }

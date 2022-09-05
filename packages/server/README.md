@@ -31,11 +31,6 @@ Build transpiles typescript files to javascript.
 
 Make sure to have appropriate `.env.<env>` file accessible.
 
-## Deploy
-
-1. Build the server app.
-2. Use provided script in root directory `./deploy-backend-<env>.sh`. This script will copy the `dist` directory to target, run `npm install` and start the app with `pm2` library.
-
 ## API docs
 
 ### Postman

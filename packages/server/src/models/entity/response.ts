@@ -18,7 +18,7 @@ import {
   IResponseUsedInStatementIdentification,
   IResponseUsedInStatementProps,
 } from "@shared/types/response-detail";
-import { IRequest } from "src/custom.request";
+import { IRequest } from "src/custom_typings/request";
 import { IStatementClassification, IStatementIdentification } from "@shared/types/statement";
 
 export class ResponseEntity extends Entity implements IResponseEntity {

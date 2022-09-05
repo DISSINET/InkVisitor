@@ -15,7 +15,7 @@ import { IResponseGeneric, IStatement, IStatementAction } from "@shared/types";
 import { CustomError } from "@shared/types/errors";
 import { ITerritory } from "@shared/types/index";
 import { errorTypes } from "@shared/types/response-generic";
-import { IRequest } from "src/custom.request";
+import { IRequest } from "src/custom_typings/request";
 import "ts-jest";
 
 describe("common", function () {

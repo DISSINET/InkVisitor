@@ -12,7 +12,7 @@ import {
   IUserRight,
 } from "@shared/types";
 import { nonenumerable } from "@common/decorators";
-import { IRequest } from "src/custom.request";
+import { IRequest } from "src/custom_typings/request";
 import { InternalServerError } from "@shared/types/errors";
 
 export class ResponseUser implements IResponseUser {

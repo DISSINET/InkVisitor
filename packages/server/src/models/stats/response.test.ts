@@ -3,7 +3,7 @@ import { ResponseStats } from "./response";
 import Acl from "@middlewares/acl";
 import { Db } from "@service/RethinkDB";
 import User from "@models/user/user";
-import { IRequest } from "src/custom.request";
+import { IRequest } from "src/custom_typings/request";
 
 describe("test ResponseStats.prepare", function () {
   describe("empty test", () => {

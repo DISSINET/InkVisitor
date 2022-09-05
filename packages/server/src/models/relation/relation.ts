@@ -5,7 +5,7 @@ import { DbEnums, RelationEnums, UserEnums } from "@shared/enums";
 import { EnumValidators } from "@shared/enums";
 import { InternalServerError } from "@shared/types/errors";
 import User from "@models/user/user";
-import { IRequest } from "src/custom.request";
+import { IRequest } from "src/custom_typings/request";
 
 export default class Relation implements RelationTypes.IModel, IDbModel {
   static table = "relations";

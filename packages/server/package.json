@@ -1,5 +1,5 @@
 {
-  "name": "server",
+  "name": "inkvisitor-server",
   "version": "0.1.0",
   "scripts": {
     "lint": "tslint --project \"tsconfig.json\"",
@@ -12,7 +12,8 @@
   },
   "nodemonConfig": {
     "watch": [
-      "src"
+      "src",
+      "../shared"
     ],
     "ext": "ts, html",
     "ignore": [
@@ -80,7 +81,6 @@
     "jasmine": "^3.5.0",
     "jest": "^26.6.3",
     "nodemon": "^2.0.4",
-    "pm2": "^4.5.0",
     "rsync": "^0.6.1",
     "supertest": "^4.0.2",
     "swagger-jsdoc": "^6.2.5",
