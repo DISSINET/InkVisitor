@@ -1,5 +1,5 @@
 import api from "api";
-import { Header, MemoizedFooter, Toast } from "components";
+import { Header, Loader, MemoizedFooter, Toast } from "components";
 import {
   LeftHeader,
   MemoizedLoginModal,
@@ -31,7 +31,6 @@ export const Page: React.FC<Page> = ({ children }) => {
   const layoutWidth: number = useAppSelector(
     (state) => state.layout.layoutWidth
   );
-
   const contentHeight: number = useAppSelector(
     (state) => state.layout.contentHeight
   );
@@ -80,7 +79,6 @@ export const Page: React.FC<Page> = ({ children }) => {
   return (
     <StyledPage layoutWidth={layoutWidth}>
       <Header
-        height={heightHeader}
         paddingY={0}
         paddingX={10}
         color={
@@ -103,7 +101,13 @@ export const Page: React.FC<Page> = ({ children }) => {
         }
       />
 
-      <StyledPageContent height={contentHeight}>{children}</StyledPageContent>
+      {contentHeight > 0 ? (
+        <StyledPageContent height={contentHeight}>{children}</StyledPageContent>
+      ) : (
+        <StyledPageContent height={0}>
+          <Loader show />
+        </StyledPageContent>
+      )}
 
       <MemoizedFooter height={heightFooter} />
 

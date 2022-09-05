@@ -1,34 +1,44 @@
 import { IResponseEntity } from "@shared/types";
 import { EntityTag } from "components/advanced";
 import React, { useMemo } from "react";
+import { config, useSpring } from "react-spring";
 import { areEqual, FixedSizeList as List } from "react-window";
-import { scrollOverscanCount } from "Theme/constants";
+import { scrollOverscanCount, springConfig } from "Theme/constants";
 import { StyledResultItem } from "../EntitySearchBoxStyles";
-import { StyledRow } from "./EntitySearchResultsStyles";
+import {
+  StyledResultsAnimatedWrap,
+  StyledRow,
+} from "./EntitySearchResultsStyles";
 
 interface EntitySearchResults {
   results?: IResponseEntity[];
-  height?: number;
+  height: number;
 }
 export const EntitySearchResults: React.FC<EntitySearchResults> = ({
   results,
-  height = 180,
+  height,
 }) => {
   const data = useMemo(() => (results ? results : []), [results]);
+  const animatedHeight = useSpring({
+    height: `${height / 10}rem`,
+    config: { tension: 195, friction: 20, mass: 1, clamp: true },
+  });
 
   return (
     <>
       {results?.length && (
-        <List
-          height={height}
-          itemCount={results.length}
-          itemData={data}
-          itemSize={25}
-          width="100%"
-          overscanCount={scrollOverscanCount}
-        >
-          {MemoizedRow}
-        </List>
+        <StyledResultsAnimatedWrap style={animatedHeight}>
+          <List
+            height={height}
+            itemCount={results.length}
+            itemData={data}
+            itemSize={25}
+            width="100%"
+            overscanCount={scrollOverscanCount}
+          >
+            {MemoizedRow}
+          </List>
+        </StyledResultsAnimatedWrap>
       )}
     </>
   );

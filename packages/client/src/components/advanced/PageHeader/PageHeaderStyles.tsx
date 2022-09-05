@@ -40,3 +40,9 @@ export const StyledUser = styled.div`
   align-items: center;
   margin-right: ${({ theme }) => theme.space[4]};
 `;
+export const StyledLoaderWrap = styled.div`
+  height: 1rem;
+  width: 1rem;
+  position: relative;
+  margin-right: 2rem;
+`;
