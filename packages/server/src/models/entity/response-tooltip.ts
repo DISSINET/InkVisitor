@@ -5,7 +5,7 @@ import {
 } from "@shared/types";
 import { nonenumerable } from "@common/decorators";
 import { Connection } from "rethinkdb-ts";
-import { IRequest } from "src/custom.request";
+import { IRequest } from "src/custom_typings/request";
 import { ResponseEntity } from "./response";
 import Relation from "@models/relation/relation";
 import { RelationEnums } from "@shared/enums";

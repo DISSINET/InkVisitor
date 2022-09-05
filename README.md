@@ -97,7 +97,7 @@ For standalone deployment of each package, please refer to respective `README.md
 3. Prepare `.env` files for servers listed under `env_file` sections. Check server's [README.md](./packages/server/README.md) and [example.env](./packages/server/env/example.env) files.
 4. Prepare `.env` files for clients identified by `ENV` variable under `build -> args` section. Check server's [README.md](./packages/server/README.md) files and [example.env](./packages/server/env/example.env) files.
 4. Run the database - either as a service or containerized using `docker-compose up -d database`
-5. Build app image (will be done also in next step if not available) `docker-compose build-inkvisitor` (or `inkvisitor-<env>`)
+5. Build app image (will be done also in next step if not available) `docker-compose build inkvisitor` (or `inkvisitor-<env>`)
 6. Run the containerized app `docker-compose up inkvisitor` (or `inkvisitor-<env>`)
 
 ### Firewall

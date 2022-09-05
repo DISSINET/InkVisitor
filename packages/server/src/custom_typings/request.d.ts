@@ -1,6 +1,6 @@
 import { Db } from "@service/RethinkDB";
-import Acl from "./middlewares/acl";
-import { IUser } from "../../shared/types";
+import Acl from "../middlewares/acl";
+import { IUser } from "../../../shared/types";
 import User from "@models/user/user";
 
 export interface IRequest {
@@ -14,6 +14,6 @@ export interface IRequest {
 
 declare global {
   namespace Express {
-    export interface Request extends IRequest {}
+    export interface Request extends IRequest { }
   }
 }
