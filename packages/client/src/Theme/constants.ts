@@ -14,8 +14,6 @@ export const heightFooter = 30;
 
 export const minLayoutWidth = 1440;
 export const layoutWidthBreakpoint = 1400;
-// INIT PANEL WIDTHS
-export const initPanelWidths = [200, 570, 800, 350];
 // MORE PANEL WIDTHS
 export const collapsedPanelWidth = 31;
 export const secondPanelMinWidth = 430;

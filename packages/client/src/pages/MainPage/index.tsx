@@ -2,7 +2,7 @@ import { Box, Button, Panel } from "components";
 import { PanelSeparator } from "components/advanced";
 import { useSearchParams } from "hooks";
 import ScrollHandler from "hooks/ScrollHandler";
-import React from "react";
+import React, { useMemo } from "react";
 import { BiHide, BiShow } from "react-icons/bi";
 import { IoMdClose } from "react-icons/io";
 import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
@@ -144,91 +144,105 @@ const MainPage: React.FC<MainPage> = ({}) => {
       <ScrollHandler />
       {separatorXPosition > 0 && <PanelSeparator />}
       {/* FIRST PANEL */}
-      <Panel width={firstPanelExpanded ? panelWidths[0] : collapsedPanelWidth}>
-        <Box
-          height={contentHeight}
-          label="Territories"
-          isExpanded={firstPanelExpanded}
-          button={[firstPanelButton()]}
-          noPadding
+      {panelWidths[0] > 0 && (
+        <Panel
+          width={firstPanelExpanded ? panelWidths[0] : collapsedPanelWidth}
         >
-          <MemoizedTerritoryTreeBox />
-        </Box>
-      </Panel>
-      {/* SECOND PANEL */}
-      <Panel
-        width={
-          firstPanelExpanded
-            ? panelWidths[1]
-            : panelWidths[1] + panelWidths[0] - collapsedPanelWidth
-        }
-      >
-        <Box
-          height={detailIdArray.length ? contentHeight / 2 - 20 : contentHeight}
-          label="Statements"
-        >
-          <MemoizedStatementListBox />
-        </Box>
-        {(selectedDetailId || detailIdArray.length > 0) && (
           <Box
-            height={contentHeight / 2 + 20}
-            label="Detail"
-            button={[
-              <Button
-                inverted
-                icon={<IoMdClose />}
-                onClick={() => {
-                  clearAllDetailIds();
-                }}
-              />,
-            ]}
+            height={contentHeight}
+            label="Territories"
+            isExpanded={firstPanelExpanded}
+            button={[firstPanelButton()]}
+            noPadding
           >
-            <MemoizedEntityDetailBox />
+            <MemoizedTerritoryTreeBox />
           </Box>
-        )}
-      </Panel>
+        </Panel>
+      )}
+      {/* SECOND PANEL */}
+      {panelWidths[1] > 0 && (
+        <Panel
+          width={
+            firstPanelExpanded
+              ? panelWidths[1]
+              : panelWidths[1] + panelWidths[0] - collapsedPanelWidth
+          }
+        >
+          <Box
+            height={
+              detailIdArray.length ? contentHeight / 2 - 20 : contentHeight
+            }
+            label="Statements"
+          >
+            <MemoizedStatementListBox />
+          </Box>
+          {(selectedDetailId || detailIdArray.length > 0) && (
+            <Box
+              height={contentHeight / 2 + 20}
+              label="Detail"
+              button={[
+                <Button
+                  inverted
+                  icon={<IoMdClose />}
+                  onClick={() => {
+                    clearAllDetailIds();
+                  }}
+                />,
+              ]}
+            >
+              <MemoizedEntityDetailBox />
+            </Box>
+          )}
+        </Panel>
+      )}
       {/* THIRD PANEL */}
-      <Panel
-        width={
-          fourthPanelExpanded
-            ? panelWidths[2]
-            : panelWidths[2] + panelWidths[3] - collapsedPanelWidth
-        }
-      >
-        <Box height={contentHeight} label="Editor">
-          <MemoizedStatementEditorBox />
-        </Box>
-      </Panel>
+      {panelWidths[2] > 0 && (
+        <Panel
+          width={
+            fourthPanelExpanded
+              ? panelWidths[2]
+              : panelWidths[2] + panelWidths[3] - collapsedPanelWidth
+          }
+        >
+          <Box height={contentHeight} label="Editor">
+            <MemoizedStatementEditorBox />
+          </Box>
+        </Panel>
+      )}
       {/* FOURTH PANEL */}
-      <Panel width={fourthPanelExpanded ? panelWidths[3] : collapsedPanelWidth}>
-        <Box
-          height={getFourthPanelBoxHeight("search")}
-          label="Search"
-          color="white"
-          isExpanded={fourthPanelExpanded}
-          button={[hideBoxButton("search"), hideFourthPanelButton()]}
+      {panelWidths[3] > 0 && (
+        <Panel
+          width={fourthPanelExpanded ? panelWidths[3] : collapsedPanelWidth}
         >
-          <MemoizedEntitySearchBox />
-        </Box>
-        <Box
-          height={getFourthPanelBoxHeight("bookmarks")}
-          label="Bookmarks"
-          color="white"
-          isExpanded={fourthPanelExpanded}
-          button={[hideBoxButton("bookmarks"), hideFourthPanelButton()]}
-        >
-          <MemoizedEntityBookmarkBox />
-        </Box>
-        <Box
-          height={getFourthPanelBoxHeight("templates")}
-          label="Templates"
-          color="white"
-          isExpanded={fourthPanelExpanded}
-          button={[hideBoxButton("templates"), hideFourthPanelButton()]}
-        >
-          <MemoizedTemplateListBox />
-        </Box>
-      </Panel>
+          <Box
+            height={getFourthPanelBoxHeight("search")}
+            label="Search"
+            color="white"
+            isExpanded={fourthPanelExpanded}
+            button={[hideBoxButton("search"), hideFourthPanelButton()]}
+          >
+            <MemoizedEntitySearchBox />
+          </Box>
+          <Box
+            height={getFourthPanelBoxHeight("bookmarks")}
+            label="Bookmarks"
+            color="white"
+            isExpanded={fourthPanelExpanded}
+            button={[hideBoxButton("bookmarks"), hideFourthPanelButton()]}
+          >
+            <MemoizedEntityBookmarkBox />
+          </Box>
+          <Box
+            height={getFourthPanelBoxHeight("templates")}
+            label="Templates"
+            color="white"
+            isExpanded={fourthPanelExpanded}
+            button={[hideBoxButton("templates"), hideFourthPanelButton()]}
+          >
+            <MemoizedTemplateListBox />
+          </Box>
+        </Panel>
+      )}
     </>
   );
 };

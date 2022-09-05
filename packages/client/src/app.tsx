@@ -1,8 +1,8 @@
-import React, { Profiler, useEffect } from "react";
+import React, { useEffect } from "react";
 import { Helmet } from "react-helmet";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { ReactQueryDevtools } from "react-query/devtools";
-import { BrowserRouter, Route, Switch, useLocation } from "react-router-dom";
+import { BrowserRouter, Route, Switch } from "react-router-dom";
 import { useAppDispatch } from "redux/hooks";
 import { ThemeProvider } from "styled-components";
 
@@ -13,7 +13,11 @@ import ActivatePage from "pages/Activate";
 import PasswordResetPage from "pages/PasswordReset";
 import UsersPage from "pages/Users";
 
+import { Page } from "components/advanced";
+import { useDebounce } from "hooks";
 import NotFoundPage from "pages/NotFound";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
 import { setContentHeight } from "redux/features/layout/contentHeightSlice";
 import { setLayoutWidth } from "redux/features/layout/layoutWidthSlice";
 import { setPanelWidths } from "redux/features/layout/panelWidthsSlice";
@@ -30,9 +34,6 @@ import GlobalStyle from "Theme/global";
 import AclPage from "./pages/Acl";
 import MainPage from "./pages/MainPage";
 import theme from "./Theme/theme";
-import { DndProvider } from "react-dnd";
-import { HTML5Backend } from "react-dnd-html5-backend";
-import { Page } from "components/advanced";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -66,19 +67,21 @@ export const App: React.FC = () => {
 
   const isLoggedIn = api.isLoggedIn();
 
-  const [width, height] = useWindowSize();
+  const [debouncedWidth, debouncedHeight] = useDebounce(useWindowSize(), 50);
 
   useEffect(() => {
-    if (height > 0) {
-      const heightContent = height - heightHeader - heightFooter;
+    if (debouncedHeight > 0) {
+      const heightContent = debouncedHeight - heightHeader - heightFooter;
       dispatch(setContentHeight(heightContent));
     }
-  }, [height]);
+  }, [debouncedHeight]);
 
   useEffect(() => {
-    if (width > 0) {
+    if (debouncedWidth > 0) {
       const layoutWidth =
-        width < layoutWidthBreakpoint ? minLayoutWidth : width;
+        debouncedWidth < layoutWidthBreakpoint
+          ? minLayoutWidth
+          : debouncedWidth;
       dispatch(setLayoutWidth(layoutWidth));
       const onePercent = layoutWidth / 100;
 
@@ -104,7 +107,7 @@ export const App: React.FC = () => {
       const thirdPanel = Math.floor(
         layoutWidth -
           (onePercent *
-            (separatorPercentPosition - percentPanelWidths[3]) *
+            (separatorPercentPosition + percentPanelWidths[3]) *
             10) /
             10
       );
@@ -115,7 +118,7 @@ export const App: React.FC = () => {
       dispatch(setPanelWidths(panels));
       dispatch(setSeparatorXPosition(panels[0] + panels[1]));
     }
-  }, [width]);
+  }, [debouncedWidth]);
 
   return (
     <>
