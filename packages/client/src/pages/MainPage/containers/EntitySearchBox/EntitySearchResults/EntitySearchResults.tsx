@@ -21,7 +21,7 @@ export const EntitySearchResults: React.FC<EntitySearchResults> = ({
   const data = useMemo(() => (results ? results : []), [results]);
   const animatedHeight = useSpring({
     height: `${height / 10}rem`,
-    config: springConfig.panelExpand,
+    config: { tension: 195, friction: 20, mass: 1, clamp: true },
   });
 
   return (
