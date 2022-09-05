@@ -20,11 +20,6 @@ export class ResponseTooltip extends ResponseEntity implements EntityTooltip.IRe
   superordinateLocationTrees: EntityTooltip.ISuperordinateLocationTree[] = [];
   identifications: EntityTooltip.IIdentifications = [];
 
-  // map of entity ids that should be populated in subsequent methods and used in fetching
-  // real entities in populateEntitiesMap method
-  @nonenumerable
-  postponedEntities: Record<string, undefined> = {};
-
   /**
    * Loads additional fields to satisfy the EntityTooltip.IResponse interface
    * @param request
@@ -116,10 +111,7 @@ export class ResponseTooltip extends ResponseEntity implements EntityTooltip.IRe
       out.subtrees.push(await this.getSuperordinateLocationTree(conn, subparentId))
     }
 
-    // add ids to postponedEntities map
-    for (const id of subrootIds) {
-      this.postponedEntities[id] = undefined;
-    }
+    this.addLinkedEntities(subrootIds)
 
     return out
   }
@@ -156,10 +148,7 @@ export class ResponseTooltip extends ResponseEntity implements EntityTooltip.IRe
       out.subtrees.push(await this.getSuperclassTrees(conn, subparentId, EntityEnums.Class.Concept))
     }
 
-    // add ids to postponedEntities map
-    for (const id of subrootIds) {
-      this.postponedEntities[id] = undefined;
-    }
+    this.addLinkedEntities(subrootIds)
 
     return out
   }

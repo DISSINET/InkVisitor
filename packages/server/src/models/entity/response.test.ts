@@ -54,7 +54,7 @@ describe("test ResponseEntityDetail.walkEntityProps", function () {
     });
 
     it("should add to postponedEntities map", () => {
-      const keys = Object.keys(response.postponedEntities);
+      const keys = Object.keys(response.linkedEntitiesIds);
       expect(keys).toEqual([prop.type.entityId]);
     });
   });
