@@ -3,9 +3,11 @@ import { EntityEnums } from "../enums";
 
 export interface ITerritory extends IEntity {
   class: EntityEnums.Class.Territory;
-  data: {
-    parent: IParentTerritory | false;
-  };
+  data: ITerritoryData;
+}
+
+export interface ITerritoryData {
+  parent: IParentTerritory | false;
 }
 
 export interface IParentTerritory {

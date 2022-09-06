@@ -1,9 +1,9 @@
 import Entity from "@models/entity/entity";
 import { fillFlatObject, IModel, UnknownObject } from "@models/common";
 import { EntityEnums } from "@shared/enums";
-import { IObject } from "@shared/types";
+import { IObject, IObjectData } from "@shared/types";
 
-class ObjectData implements IModel {
+class ObjectData implements IObjectData, IModel {
   logicalType: EntityEnums.LogicalType = EntityEnums.LogicalType.Definite;
 
   constructor(data: UnknownObject) {

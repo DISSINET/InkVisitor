@@ -2,9 +2,9 @@ import { fillFlatObject, UnknownObject, IModel } from "@models/common";
 import { EntityEnums } from "@shared/enums";
 import Entity from "@models/entity/entity";
 import { IAction } from "@shared/types";
-import { ActionEntity, ActionValency } from "@shared/types/action";
+import { ActionEntity, ActionValency, IActionData } from "@shared/types/action";
 
-class ActionData implements IModel {
+class ActionData implements IActionData, IModel {
   valencies: ActionValency = {
     a1: "",
     a2: "",

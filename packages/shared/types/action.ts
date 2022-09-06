@@ -4,10 +4,12 @@ import { IEntity } from "./entity";
 // TODO
 export interface IAction extends IEntity {
   class: EntityEnums.Class.Action;
-  data: {
-    valencies: ActionValency;
-    entities: ActionEntity;
-  };
+  data: IActionData;
+}
+
+export interface IActionData {
+  valencies: ActionValency;
+  entities: ActionEntity;
 }
 
 export interface ActionValency {

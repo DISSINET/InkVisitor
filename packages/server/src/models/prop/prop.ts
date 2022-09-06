@@ -1,6 +1,6 @@
 import { EntityEnums } from "@shared/enums";
 import { IProp } from "@shared/types";
-import { IPropSpec } from "@shared/types/prop";
+import { IPropSpec } from "@shared/types";
 import {
   fillArray,
   fillFlatObject,
@@ -30,7 +30,7 @@ export class PropSpec implements IPropSpec, IModel {
 
 export default class Prop implements IProp, IModel {
   id = "";
-  elvl: EntityEnums.Elvl = EntityEnums.Elvl.Textual;
+  elvl: EntityEnums.Elvl = EntityEnums.Elvl.Textual
   certainty: EntityEnums.Certainty = EntityEnums.Certainty.Empty;
   logic: EntityEnums.Logic = EntityEnums.Logic.Positive;
   mood: EntityEnums.Mood[] = [];

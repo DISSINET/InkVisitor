@@ -86,9 +86,7 @@ export class ResponseEntity extends Entity implements IResponseEntity {
   }
 }
 
-export class ResponseEntityDetail
-  extends ResponseEntity
-  implements IResponseDetail {
+export class ResponseEntityDetail extends ResponseEntity implements IResponseDetail {
   entities: Record<string, IEntity>;
   usedInStatements: IResponseUsedInStatement<EntityEnums.UsedInPosition>[];
   usedInStatementProps: IResponseUsedInStatementProps[];

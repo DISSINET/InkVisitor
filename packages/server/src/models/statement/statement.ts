@@ -24,7 +24,7 @@ import User from "@models/user/user";
 import { EventMapSingle, EventTypes } from "@models/events/types";
 import treeCache from "@service/treeCache";
 import Prop from "@models/prop/prop";
-import { IStatementClassification } from "@shared/types/statement";
+import { IStatementClassification, IStatementDataTerritory } from "@shared/types/statement";
 
 export class StatementClassification implements IStatementClassification {
   id: string = "";
@@ -98,9 +98,9 @@ export class StatementActant implements IStatementActant, IModel {
   }
 }
 
-export class StatementTerritory {
   territoryId = "";
   order = -1;
+export class StatementTerritory implements IStatementDataTerritory {
 
   constructor(data: UnknownObject) {
     if (!data) {
@@ -160,7 +160,7 @@ export class StatementAction implements IStatementAction {
   }
 }
 
-export class StatementData implements IModel, IStatementData {
+export class StatementData implements IStatementData, IModel {
   text = "";
   territory?= new StatementTerritory({});
   actions: StatementAction[] = [];
