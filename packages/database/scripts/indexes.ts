@@ -36,6 +36,56 @@ const entitiesIndexes: ((table: RTable) => any)[] = [
         .distinct(),
       { multi: true }
     ),
+  (table: RTable) =>
+    table.indexCreate(
+      DbEnums.Indexes.StatementDataProps,
+      function (row: RDatum) {
+        return (row("data")("actions").concatMap((action: RDatum) => {
+          return action("props").concatMap((ch1: RDatum) => {
+            return r
+              .expr([ch1("value")("entityId"), ch1("type")("entityId")])
+              .add(
+                ch1("children").concatMap((ch2: RDatum) =>
+                  r
+                    .expr([
+                      ch2("value")("entityId"),
+                      ch2("type")("entityId"),
+                    ])
+                    .add(
+                      ch2("children").concatMap((ch3: RDatum) => [
+                        ch3("value")("entityId"),
+                        ch3("type")("entityId"),
+                      ]) as RValue
+                    )
+                ) as RValue
+              )
+          });
+        }).add(
+          row("data")("actants").concatMap((action: RDatum) => {
+            return action("props").concatMap((ch1: RDatum) => {
+              return r
+                .expr([ch1("value")("entityId"), ch1("type")("entityId")])
+                .add(
+                  ch1("children").concatMap((ch2: RDatum) =>
+                    r
+                      .expr([
+                        ch2("value")("entityId"),
+                        ch2("type")("entityId"),
+                      ])
+                      .add(
+                        ch2("children").concatMap((ch3: RDatum) => [
+                          ch3("value")("entityId"),
+                          ch3("type")("entityId"),
+                        ]) as RValue
+                      )
+                  ) as RValue
+                )
+            });
+          }) as any
+        ) as any).distinct()
+      },
+      { multi: true }
+    ),
   (table: RTable) => table.indexCreate(DbEnums.Indexes.Class),
   (table: RTable) =>
     table.indexCreate(

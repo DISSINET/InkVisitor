@@ -604,70 +604,18 @@ class Statement extends Entity implements IStatement {
     db: Connection | undefined,
     entityId: string
   ): Promise<IStatement[]> {
-    const statements = await rethink
+    const statements: IStatement[] = await rethink
       .table(Entity.table)
+      .getAll(entityId, { index: DbEnums.Indexes.StatementDataProps })
       .filter({
         class: EntityEnums.Class.Statement,
       })
-      .filter((row: RDatum) => {
-        return rethink.or(
-          row("data")("actions").contains((action: RDatum) =>
-            action("props").contains((entry: RDatum) =>
-              rethink.or(
-                entry("value")("entityId").eq(entityId),
-                entry("type")("entityId").eq(entityId),
-                entry("children").contains((ch1: RDatum) =>
-                  rethink.or(
-                    ch1("value")("entityId").eq(entityId),
-                    ch1("type")("entityId").eq(entityId),
-                    ch1("children").contains((ch2: RDatum) =>
-                      rethink.or(
-                        ch2("value")("entityId").eq(entityId),
-                        ch2("type")("entityId").eq(entityId),
-                        ch2("children").contains((ch3: RDatum) =>
-                          rethink.or(
-                            ch3("value")("entityId").eq(entityId),
-                            ch3("type")("entityId").eq(entityId)
-                          )
-                        )
-                      )
-                    )
-                  )
-                )
-              )
-            )
-          ),
-          row("data")("actants").contains((actant: RDatum) =>
-            actant("props").contains((prop: RDatum) =>
-              rethink.or(
-                prop("value")("entityId").eq(entityId),
-                prop("type")("entityId").eq(entityId),
-                prop("children").contains((ch1: RDatum) =>
-                  rethink.or(
-                    ch1("value")("entityId").eq(entityId),
-                    ch1("type")("entityId").eq(entityId),
-                    ch1("children").contains((ch2: RDatum) =>
-                      rethink.or(
-                        ch2("value")("entityId").eq(entityId),
-                        ch2("type")("entityId").eq(entityId),
-                        ch2("children").contains((ch3: RDatum) =>
-                          rethink.or(
-                            ch3("value")("entityId").eq(entityId),
-                            ch3("type")("entityId").eq(entityId)
-                          )
-                        )
-                      )
-                    )
-                  )
-                )
-              )
-            )
-          )
-        );
-      })
       .run(db);
 
+    // sort by order ASC
     return statements.sort((a, b) => {
+      if (!a.data.territory) { return -1 };
+      if (!b.data.territory) { return 0 };
       return a.data.territory.order - b.data.territory.order;
     });
   }
