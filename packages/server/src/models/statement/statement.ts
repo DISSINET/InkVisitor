@@ -600,39 +600,6 @@ class Statement extends Entity implements IStatement {
     });
   }
 
-  /**
-   * finds statements that are linked via data.actants array to wanted actant
-   * id and are linked to the root territory
-   * @param db db connection
-   * @param actantId id of the actant
-   * @returns list of statement objects sorted by territory order
-   */
-  static async findMetaStatements(
-    db: Connection | undefined,
-    actantId: string
-  ): Promise<Statement[]> {
-    const statements = await rethink
-      .table(Entity.table)
-      .filter({
-        class: EntityEnums.Class.Statement,
-      })
-      .filter((row: RDatum) => {
-        return rethink.and(
-          row("data")("actants").contains((entry: RDatum) =>
-            entry("entityId").eq(actantId)
-          ),
-          row("data")("territory")("territoryId").eq("T0")
-        );
-      })
-      .run(db);
-
-    return statements
-      .sort((a, b) => {
-        return a.data.territory.order - b.data.territory.order;
-      })
-      .map((s) => new Statement({ ...s }));
-  }
-
   static events: EventMapSingle = {
     [EventTypes.BEFORE_ENTITY_DELETE]: async (
       db: Connection,
