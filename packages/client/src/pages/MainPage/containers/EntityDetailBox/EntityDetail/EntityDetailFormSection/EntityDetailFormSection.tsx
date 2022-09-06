@@ -27,10 +27,8 @@ import {
   StyledDetailContentRow,
   StyledDetailContentRowLabel,
   StyledDetailContentRowValue,
-  StyledDetailForm,
-} from "../../EntityDetailBoxStyles";
-import {
   StyledDetailContentRowValueID,
+  StyledDetailForm,
   StyledFormWrapper,
 } from "../EntityDetailStyles";
 

@@ -1,14 +1,6 @@
-import {
-  actantLogicalTypeDict,
-  entitiesDict,
-  entitiesDictKeys,
-  entityStatusDict,
-  languageDict,
-} from "@shared/dictionaries";
-import { allEntities } from "@shared/dictionaries/entity";
+import { entitiesDictKeys } from "@shared/dictionaries";
 import { EntityEnums, UserEnums } from "@shared/enums";
 import {
-  IAction,
   IEntity,
   IOption,
   IProp,
@@ -16,24 +8,14 @@ import {
   IResponseDetail,
 } from "@shared/types";
 import api from "api";
-import {
-  Button,
-  Dropdown,
-  Input,
-  Loader,
-  MultiInput,
-  Submit,
-  TypeBar,
-} from "components";
-import { AttributeButtonGroup, EntityTag } from "components/advanced";
+import { Button, Loader, Submit } from "components";
+import { EntityTag } from "components/advanced";
 import { CMetaProp } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
-import { FaPlus, FaRegCopy } from "react-icons/fa";
+import { FaPlus } from "react-icons/fa";
 import { useMutation, useQuery, useQueryClient } from "react-query";
-import { OptionTypeBase, ValueType } from "react-select";
 import { toast } from "react-toastify";
-import { rootTerritoryId } from "Theme/constants";
 import {
   DraggedPropRowCategory,
   DropdownItem,
@@ -43,31 +25,24 @@ import { AuditTable } from "../../AuditTable/AuditTable";
 import { EntityReferenceTable } from "../../EntityReferenceTable/EntityReferenceTable";
 import { JSONExplorer } from "../../JSONExplorer/JSONExplorer";
 import { PropGroup } from "../../PropGroup/PropGroup";
-import { ApplyTemplateModal } from "../ApplyTemplateModal/ApplyTemplateModal";
-import {
-  StyledDetailContentRow,
-  StyledDetailContentRowLabel,
-  StyledDetailContentRowValue,
-  StyledDetailForm,
-} from "../EntityDetailBoxStyles";
-import { EntityDetailCreateTemplateModal } from "../EntityDetailCreateTemplateModal/EntityDetailCreateTemplateModal";
-import { EntityDetailHeaderRow } from "../EntityDetailHeaderRow/EntityDetailHeaderRow";
-import { EntityDetailMetaPropsTable } from "../EntityDetailUsedInTable/EntityDetailMetaPropsTable/EntityDetailMetaPropsTable";
-import { EntityDetailStatementPropsTable } from "../EntityDetailUsedInTable/EntityDetailStatementPropsTable/EntityDetailStatementPropsTable";
-import { EntityDetailStatementsTable } from "../EntityDetailUsedInTable/EntityDetailStatementsTable/EntityDetailStatementsTable";
+import { ApplyTemplateModal } from "./ApplyTemplateModal/ApplyTemplateModal";
+import { EntityDetailCreateTemplateModal } from "./EntityDetailCreateTemplateModal/EntityDetailCreateTemplateModal";
 import { EntityDetailFormSection } from "./EntityDetailFormSection/EntityDetailFormSection";
+import { EntityDetailHeaderRow } from "./EntityDetailHeaderRow/EntityDetailHeaderRow";
+import { EntityDetailRelationsSection } from "./EntityDetailRelationsSection/EntityDetailRelationsSection";
 import {
-  StyledDetailContentRowValueID,
   StyledDetailSection,
   StyledDetailSectionContent,
   StyledDetailSectionContentUsedIn,
   StyledDetailSectionEntityList,
   StyledDetailSectionHeader,
   StyledDetailWrapper,
-  StyledFormWrapper,
   StyledUsedAsHeading,
   StyledUsedAsTitle,
 } from "./EntityDetailStyles";
+import { EntityDetailMetaPropsTable } from "./EntityDetailUsedInTable/EntityDetailMetaPropsTable/EntityDetailMetaPropsTable";
+import { EntityDetailStatementPropsTable } from "./EntityDetailUsedInTable/EntityDetailStatementPropsTable/EntityDetailStatementPropsTable";
+import { EntityDetailStatementsTable } from "./EntityDetailUsedInTable/EntityDetailStatementsTable/EntityDetailStatementsTable";
 
 const allowedEntityChangeClasses = [
   EntityEnums.Class.Value,
@@ -532,6 +507,13 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
                   templateOptions={templateOptions}
                   updateEntityMutation={updateEntityMutation}
                 />
+              </StyledDetailSectionContent>
+            </StyledDetailSection>
+
+            <StyledDetailSection>
+              <StyledDetailSectionHeader>Relations</StyledDetailSectionHeader>
+              <StyledDetailSectionContent>
+                <EntityDetailRelationsSection />
               </StyledDetailSectionContent>
             </StyledDetailSection>
 
