@@ -508,12 +508,12 @@ class Statement extends Entity implements IStatement {
 
   /**
    * finds statements which are linked to different entity
-   * in other words, find statements which store passed entity id in on of their possible fields
+   * in other words, find statements which store passed entity id in one of their possible fields
    * @param db db connection
    * @param entityId id of the entity
    * @returns list of statements data
    */
-  static async findByDataEntityId(
+  static async getLinkedEntities(
     db: Connection | undefined,
     entityId: string
   ): Promise<IStatement[]> {
@@ -556,11 +556,11 @@ class Statement extends Entity implements IStatement {
    * @param entityId id of the entity
    * @returns list of statements ids
    */
-  static async findIdsByDataEntityId(
+  static async getActantsIdsFromLinkedEntities(
     db: Connection | undefined,
     entityId: string
   ): Promise<string[]> {
-    const statements = await Statement.findByDataEntityId(db, entityId);
+    const statements = await Statement.getLinkedEntities(db, entityId);
 
     const entityIds: string[] = [];
 
