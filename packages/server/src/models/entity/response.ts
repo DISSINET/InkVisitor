@@ -124,7 +124,7 @@ export class ResponseEntityDetail extends ResponseEntity implements IResponseDet
     }
 
     this.walkStatementsDataEntities(
-      await Statement.findByDataEntityId(conn, this.id)
+      await Statement.getLinkedEntities(conn, this.id)
     );
 
     this.walkStatementsDataProps(

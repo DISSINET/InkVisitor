@@ -29,8 +29,8 @@ export class SearchQuery {
    * @param cooccurrenceId
    * @returns
    */
-  async getAssociatedEntityIds(cooccurrenceId: string): Promise<string[]> {
-    const associatedEntityIds = await Statement.findIdsByDataEntityId(
+  async getCooccurredEntitiesIds(cooccurrenceId: string): Promise<string[]> {
+    const associatedEntityIds = await Statement.getActantsIdsFromLinkedEntities(
       this.connection,
       cooccurrenceId
     );
@@ -208,7 +208,7 @@ export class SearchQuery {
     }
 
     if (req.cooccurrenceId) {
-      const assocEntityIds = await this.getAssociatedEntityIds(
+      const assocEntityIds = await this.getCooccurredEntitiesIds(
         req.cooccurrenceId
       );
       if (!req.entityIds) {
