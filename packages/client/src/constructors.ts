@@ -4,7 +4,7 @@ import {
   IEntity,
   IProp,
   IReference,
-  Relation,
+  IRelation,
   IStatement,
   IStatementActant,
   IStatementAction,
@@ -323,7 +323,7 @@ export const CReference = (
 export const CRelationIdentity = (
   entity1: string = "",
   entity2: string = ""
-): Relation.IIdentification => ({
+): IRelation.IIdentification => ({
   id: uuidv4(),
   entityIds: [entity1, entity2],
   type: RelationEnums.Type.Identification,
