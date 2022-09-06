@@ -20,7 +20,7 @@ export default class Entity implements IEntity, IDbModel {
   static table = "entities";
 
   id: string = "";
-  legacyId: string = "";
+  legacyId?: string;
   class: EntityEnums.Class = EntityEnums.Class.Person;
   status: EntityEnums.Status = EntityEnums.Status.Approved;
   data: any = {};
@@ -31,13 +31,9 @@ export default class Entity implements IEntity, IDbModel {
   props: IProp[] = [];
   references: IReference[] = [];
 
-  isTemplate: boolean = false;
-  usedTemplate: string = "";
-  templateData: object = {};
-
-  usedIn: IStatement[] = [];
-  right: UserEnums.RoleMode = UserEnums.RoleMode.Read;
-
+  isTemplate?: boolean;
+  usedTemplate?: string;
+  templateData?: object;
 
   constructor(data: Partial<IEntity>) {
     fillFlatObject(this, { ...data, data: undefined });
