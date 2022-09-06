@@ -1,6 +1,6 @@
 import Acl from "@middlewares/acl";
 import "@models/events/register";
-import Statement from "@models/statement/statement";
+import Statement, { StatementData } from "@models/statement/statement";
 import Territory from "@models/territory/territory";
 import User from "@models/user/user";
 import { Db } from "@service/RethinkDB";

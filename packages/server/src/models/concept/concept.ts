@@ -16,14 +16,9 @@ class Concept extends Entity implements IConcept {
   class: EntityEnums.Class.Concept = EntityEnums.Class.Concept; // just default
   data: ConceptData;
 
-  constructor(data: UnknownObject) {
+  constructor(data: Partial<IConcept>) {
     super(data);
-
-    if (!data) {
-      data = {};
-    }
-
-    this.data = new ConceptData({} as UnknownObject);
+    this.data = new ConceptData(data.data);
   }
 
   isValid(): boolean {

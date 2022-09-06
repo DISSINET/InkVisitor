@@ -38,11 +38,8 @@ export default class Entity implements IEntity, IDbModel {
   usedIn: IStatement[] = [];
   right: UserEnums.RoleMode = UserEnums.RoleMode.Read;
 
-  constructor(data: UnknownObject) {
-    if (!data) {
-      return;
-    }
 
+  constructor(data: Partial<IEntity>) {
     fillFlatObject(this, { ...data, data: undefined });
     fillArray(this.references, Object, data.references);
     fillArray(this.notes, String, data.notes);

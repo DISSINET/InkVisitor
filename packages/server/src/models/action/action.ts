@@ -17,7 +17,7 @@ class ActionData implements IActionData, IModel {
   };
   status: EntityEnums.Status = EntityEnums.Status.Pending;
 
-  constructor(data: UnknownObject) {
+  constructor(data: Partial<IActionData>) {
     if (!data) {
       return;
     }
@@ -37,14 +37,9 @@ class Action extends Entity implements IAction {
   class: EntityEnums.Class.Action = EntityEnums.Class.Action; // just default
   data: ActionData;
 
-  constructor(data: UnknownObject) {
+  constructor(data: Partial<IAction>) {
     super(data);
-
-    if (!data) {
-      data = {};
-    }
-
-    this.data = new ActionData(data.data as UnknownObject);
+    this.data = new ActionData(data.data || {});
   }
 
   isValid(): boolean {

@@ -37,11 +37,7 @@ export class UserOptions implements IUserOptions {
   defaultLanguage: string = "";
   searchLanguages: string[] = [];
 
-  constructor(data: UnknownObject) {
-    if (!data) {
-      return;
-    }
-
+  constructor(data: Partial<IUserOptions>) {
     fillFlatObject(this, data);
     fillArray(this.searchLanguages, String, data.searchLanguages);
   }
@@ -60,11 +56,7 @@ export class BookmarkFolder implements IBookmarkFolder {
   name: string = "";
   entityIds: string[] = [];
 
-  constructor(data: UnknownObject) {
-    if (!data) {
-      return;
-    }
-
+  constructor(data: Partial<IBookmarkFolder>) {
     fillFlatObject(this, data);
     fillArray(this.entityIds, String, data.entityIds);
   }
@@ -87,14 +79,10 @@ export class BookmarkFolder implements IBookmarkFolder {
 }
 
 export class StoredTerritory implements IStoredTerritory {
-  territoryId: string = "";
+  territoryId: string;
 
-  constructor(data: UnknownObject) {
-    if (!data) {
-      return;
-    }
-
-    fillFlatObject(this, data);
+  constructor(data: Partial<IStoredTerritory>) {
+    this.territoryId = data.territoryId as string;
   }
 
   isValid(): boolean {
@@ -121,11 +109,7 @@ export default class User implements IUser, IDbModel {
 
   static table = "users";
 
-  constructor(data: Record<string, any>) {
-    if (!data) {
-      return;
-    }
-
+  constructor(data: Partial<IUser>) {
     fillFlatObject(this, data);
     this.options = new UserOptions(data.options as IUserOptions);
     fillArray<IBookmarkFolder>(this.bookmarks, BookmarkFolder, data.bookmarks);

@@ -6,11 +6,7 @@ import { IObject, IObjectData } from "@shared/types";
 class ObjectData implements IObjectData, IModel {
   logicalType: EntityEnums.LogicalType = EntityEnums.LogicalType.Definite;
 
-  constructor(data: UnknownObject) {
-    if (!data) {
-      return;
-    }
-
+  constructor(data: Partial<IObjectData>) {
     fillFlatObject(this, data);
   }
 
@@ -23,14 +19,9 @@ class ObjectEntity extends Entity implements IObject {
   class: EntityEnums.Class.Object = EntityEnums.Class.Object; // just default
   data: ObjectData;
 
-  constructor(data: UnknownObject) {
+  constructor(data: Partial<IObject>) {
     super(data);
-
-    if (!data) {
-      data = {};
-    }
-
-    this.data = new ObjectData(data.data as UnknownObject);
+    this.data = new ObjectData(data.data || {});
   }
 
   isValid(): boolean {

@@ -6,11 +6,7 @@ import { ILocation, ILocationData } from "@shared/types";
 class LocationData implements ILocationData, IModel {
   logicalType: EntityEnums.LogicalType = EntityEnums.LogicalType.Definite;
 
-  constructor(data: UnknownObject) {
-    if (!data) {
-      return;
-    }
-
+  constructor(data: Partial<ILocationData>) {
     fillFlatObject(this, data);
   }
 
@@ -23,14 +19,9 @@ class Location extends Entity implements ILocation {
   class: EntityEnums.Class.Location = EntityEnums.Class.Location; // just default
   data: LocationData;
 
-  constructor(data: UnknownObject) {
+  constructor(data: Partial<ILocation>) {
     super(data);
-
-    if (!data) {
-      data = {};
-    }
-
-    this.data = new LocationData(data.data as UnknownObject);
+    this.data = new LocationData(data.data || {});
   }
 
   isValid(): boolean {

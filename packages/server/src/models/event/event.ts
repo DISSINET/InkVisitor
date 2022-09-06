@@ -6,11 +6,7 @@ import { IEvent, IEventData } from "@shared/types";
 class EventData implements IEventData, IModel {
   logicalType: EntityEnums.LogicalType = EntityEnums.LogicalType.Definite;
 
-  constructor(data: UnknownObject) {
-    if (!data) {
-      return;
-    }
-
+  constructor(data: Partial<IEventData>) {
     fillFlatObject(this, data);
   }
 
@@ -23,14 +19,9 @@ class Event extends Entity implements IEvent {
   class: EntityEnums.Class.Event = EntityEnums.Class.Event; // just default
   data: EventData;
 
-  constructor(data: UnknownObject) {
+  constructor(data: Partial<IEvent>) {
     super(data);
-
-    if (!data) {
-      data = {};
-    }
-
-    this.data = new EventData(data.data as UnknownObject);
+    this.data = new EventData(data.data || {});
   }
 
   isValid(): boolean {

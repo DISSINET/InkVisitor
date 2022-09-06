@@ -1,5 +1,5 @@
 import Entity from "@models/entity/entity";
-import { fillFlatObject, IModel, UnknownObject } from "@models/common";
+import { fillFlatObject, IModel } from "@models/common";
 import { EntityEnums } from "@shared/enums";
 import { IValue, IValueData } from "@shared/types";
 
@@ -19,14 +19,9 @@ class Value extends Entity implements IValue {
   class: EntityEnums.Class.Value = EntityEnums.Class.Value; // just default
   data: ValueData;
 
-  constructor(data: UnknownObject) {
+  constructor(data: Partial<IValue>) {
     super(data);
-
-    if (!data) {
-      data = {};
-    }
-
-    this.data = new ValueData(data.data as UnknownObject);
+    this.data = new ValueData(data.data || {});
   }
 
   isValid(): boolean {
