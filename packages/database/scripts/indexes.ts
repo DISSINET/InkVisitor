@@ -96,7 +96,7 @@ const entitiesIndexes: ((table: RTable) => any)[] = [
     table.indexCreate(
       DbEnums.Indexes.StatementEntities,
       function (row: RDatum) {
-        return row("data")("actions")
+        return (row("data")("actions")
           .map(function (a: RDatum) {
             return a("actionId");
           })
@@ -106,8 +106,9 @@ const entitiesIndexes: ((table: RTable) => any)[] = [
             }) as any,
             row("data")("tags").map(function (t: RDatum) {
               return t;
-            }) as any
-          );
+            }) as any,
+            r.branch(row("data").hasFields("territory"), [row("data")("territory")("territoryId")], [])
+          ) as any).distinct();
       },
       {
         multi: true,

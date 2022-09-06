@@ -56,7 +56,7 @@ function getRandomFromArray<T>(input: T[]): T {
 }
 
 export function getITerritoryMock(): ITerritory {
-  const fullData: ITerritory = {
+  return {
     status: EntityEnums.Status.Approved,
     id: "id",
     detail: "detail",
@@ -70,8 +70,6 @@ export function getITerritoryMock(): ITerritory {
     class: EntityEnums.Class.Territory,
     references: [],
   };
-
-  return fullData;
 }
 
 export function getIStatementActionMock(): IStatementAction {
@@ -86,11 +84,12 @@ export function getIStatementActionMock(): IStatementAction {
     mood: [EntityEnums.Mood.Ability],
     moodvariant: EntityEnums.MoodVariant.Irrealis,
     bundleOperator: EntityEnums.Operator.And,
-  } as IStatementAction;
+    props: [],
+  }
 }
 
 export function getIStatementMock(): IStatement {
-  const fullData: IStatement = {
+  return {
     id: "id",
     class: EntityEnums.Class.Statement,
     label: "label",
@@ -111,7 +110,6 @@ export function getIStatementMock(): IStatement {
     status: EntityEnums.Status.Approved,
     references: [],
   };
-  return fullData;
 }
 
 export async function createMockTree(
@@ -127,7 +125,7 @@ export async function createMockTree(
       id: `lvl1-1-${randSuffix}`,
       data: {
         parent: {
-          id: `root-${randSuffix}`,
+          territoryId: `root-${randSuffix}`,
           order: 1,
         },
       },
@@ -136,7 +134,7 @@ export async function createMockTree(
       id: `lvl1-2-${randSuffix}`,
       data: {
         parent: {
-          id: `root-${randSuffix}`,
+          territoryId: `root-${randSuffix}`,
           order: 2,
         },
       },
@@ -160,17 +158,16 @@ export async function createMockStatements(
 
   // create statements with territory id set
   for (let i = 0; i < 3; i++) {
-    out.push(
-      new Statement({
-        id: `statement-${i}-${randSuffix}`,
-        data: {
-          territory: {
-            id: chosenTerritory,
-            order: i + 1,
-          },
-        },
-      })
-    );
+    const stat = new Statement({
+      id: `statement-${i}-${randSuffix}`,
+    })
+    stat.data = new StatementData({
+      territory: {
+        territoryId: chosenTerritory,
+        order: i + 1,
+      },
+    });
+    out.push(stat);
   }
 
   for (const ter of out) {

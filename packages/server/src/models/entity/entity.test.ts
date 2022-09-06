@@ -1,7 +1,7 @@
 import "ts-jest";
 import { Db } from "@service/RethinkDB";
 import Entity from "./entity";
-import Statement from "@models/statement/statement";
+import Statement, { StatementActant, StatementAction, StatementTerritory } from "@models/statement/statement";
 import { clean } from "@modules/common.test";
 import { findEntityById } from "@service/shorthands";
 import { IStatement } from "@shared/types";
@@ -29,15 +29,10 @@ describe("test Entity.delete", function () {
 
       const entity = new Entity({});
       await entity.save(db.connection);
-      const statement = new Statement({
-        data: {
-          actants: [
-            {
-              actant: entity.id,
-            },
-          ],
-        },
-      });
+      const statement = new Statement({})
+      statement.data.actants.push(new StatementActant({
+        entityId: entity.id,
+      }));
       await statement.save(db.connection);
 
       await entity.delete(db.connection);
@@ -63,28 +58,21 @@ describe("test Entity.delete", function () {
       await db.initDb();
       const entity = new Entity({});
       await entity.save(db.connection);
-      statementViaActants = new Statement({
-        data: {
-          actants: [
-            {
-              actant: entity.id,
-            },
-          ],
-        },
-      });
+
+      statementViaActants = new Statement({});
+      statementViaActants.data.actants.push(new StatementActant({
+        entityId: entity.id,
+      }));
       await statementViaActants.save(db.connection);
-      statementViaActions = new Statement({
-        data: {
-          actions: [
-            {
-              action: entity.id,
-            },
-          ],
-        },
-      });
+
+      statementViaActions = new Statement({});
+      statementViaActions.data.actions.push(new StatementAction({
+        actionId: entity.id,
+      }));
       await statementViaActions.save(db.connection);
       await entity.delete(db.connection);
     });
+
     afterAll(async () => await clean(db));
 
     it("should correctly remove actant from actants array for the first statement", async () => {
@@ -115,24 +103,18 @@ describe("test Entity.update", function () {
       const db = new Db();
       await db.initDb();
 
-      const entity = new Statement({
-        data: {
-          territory: {
-            id: "territoryId",
-            order: 2,
-          },
-          actants: [
-            {
-              id: "1",
-            },
-            {
-              id: "2",
-            },
-          ],
-          text: "jea",
-          tags: ["origtag1", "origtag2"],
-        },
-      });
+      const entity = new Statement({})
+      entity.data.tags = ["origtag1", "origtag2"]
+      entity.data.text = "jea"
+      entity.data.territory = new StatementTerritory({
+        id: "territoryId",
+        order: 2,
+      })
+      entity.data.actants = [
+        new StatementActant({ id: "1" }),
+        new StatementActant({ id: "2" })
+      ];
+
       await entity.save(db.connection);
 
       const entityRef = new Statement({ id: entity.id });

@@ -49,7 +49,7 @@ class Territory extends Entity implements ITerritory {
   data: TerritoryData;
 
   @nonenumerable
-  _siblings: Record<number, ITerritory> = {};
+  _siblings?: Record<number, ITerritory>;
 
   constructor(data: Partial<ITerritory>) {
     super(data);
@@ -104,6 +104,7 @@ class Territory extends Entity implements ITerritory {
   ): Promise<WriteResult> {
     if (updateData["data"] && (updateData["data"] as any)["parent"]) {
       const parentData = (updateData["data"] as any)["parent"];
+
       let parentId: string;
       if (parentData.territoryId) {
         parentId = parentData.territoryId;
@@ -111,6 +112,10 @@ class Territory extends Entity implements ITerritory {
         parentId = this.data.parent.territoryId;
       } else {
         throw new InternalServerError("parent for category must be set");
+      }
+
+      if (!this._siblings) {
+        this._siblings = await new Territory({ id: parentId }).findChilds(db);
       }
 
       this.data.parent = new TerritoryParent({
