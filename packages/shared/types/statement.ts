@@ -10,13 +10,15 @@ export interface IStatement extends IEntity {
 
 export interface IStatementData {
   text: string;
-  territory?: {
-    territoryId: string;
-    order: number;
-  };
+  territory?: IStatementDataTerritory;
   actions: IStatementAction[];
   actants: IStatementActant[];
   tags: string[]; // ids of IEntity;
+}
+
+export interface IStatementDataTerritory {
+  territoryId: string;
+  order: number;
 }
 
 export interface IStatementAction {

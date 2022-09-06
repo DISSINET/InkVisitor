@@ -102,7 +102,7 @@ export class StoredTerritory implements IStoredTerritory {
   }
 }
 
-export default class User implements IDbModel, IUser {
+export default class User implements IUser, IDbModel {
   id: string = "";
   email: string = "";
 
@@ -127,7 +127,7 @@ export default class User implements IDbModel, IUser {
     }
 
     fillFlatObject(this, data);
-    this.options = new UserOptions(data.options);
+    this.options = new UserOptions(data.options as IUserOptions);
     fillArray<IBookmarkFolder>(this.bookmarks, BookmarkFolder, data.bookmarks);
     fillArray(this.storedTerritories, StoredTerritory, data.storedTerritories);
     fillArray<IUserRight>(this.rights, UserRight, data.rights);

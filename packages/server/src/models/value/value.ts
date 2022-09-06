@@ -1,17 +1,13 @@
 import Entity from "@models/entity/entity";
 import { fillFlatObject, IModel, UnknownObject } from "@models/common";
 import { EntityEnums } from "@shared/enums";
-import { IValue } from "@shared/types";
+import { IValue, IValueData } from "@shared/types";
 
-class ValueData implements IModel {
-  logicalType: EntityEnums.LogicalType = EntityEnums.LogicalType.Definite;
+class ValueData implements IValueData, IModel {
+  logicalType: EntityEnums.LogicalType;
 
-  constructor(data: UnknownObject) {
-    if (!data) {
-      return;
-    }
-
-    fillFlatObject(this, data);
+  constructor(data: Partial<IValueData>) {
+    this.logicalType = data.logicalType as EntityEnums.LogicalType
   }
 
   isValid(): boolean {

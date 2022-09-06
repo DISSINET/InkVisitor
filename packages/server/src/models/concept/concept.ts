@@ -4,13 +4,7 @@ import Entity from "@models/entity/entity";
 import { IConcept } from "@shared/types";
 
 class ConceptData implements IModel {
-  status: EntityEnums.Status = EntityEnums.Status.Pending;
   constructor(data: UnknownObject) {
-    if (!data) {
-      return;
-    }
-
-    // TODO: If admin ? model.status = EntityEnums.Status.Approved : model.status = EntityEnums.Status.Pending
   }
 
   isValid(): boolean {

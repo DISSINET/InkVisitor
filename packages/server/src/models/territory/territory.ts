@@ -1,5 +1,5 @@
 import { EntityEnums, UserEnums } from "@shared/enums";
-import { ITerritory, IParentTerritory } from "@shared/types/territory";
+import { ITerritory, IParentTerritory, ITerritoryData } from "@shared/types";
 import { r as rethink, Connection, WriteResult, RDatum } from "rethinkdb-ts";
 import { fillFlatObject, UnknownObject, IModel } from "@models/common";
 import Entity from "@models/entity/entity";
@@ -29,7 +29,7 @@ export class TerritoryParent implements IParentTerritory, IModel {
   }
 }
 
-export class TerritoryData implements IModel {
+export class TerritoryData implements ITerritoryData, IModel {
   parent: TerritoryParent | false = false;
 
   constructor(data: UnknownObject) {

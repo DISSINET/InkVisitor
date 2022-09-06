@@ -1,9 +1,9 @@
 import { fillFlatObject, UnknownObject, IModel } from "@models/common";
 import { EntityEnums } from "@shared/enums";
-import { IResource } from "@shared/types/resource";
+import { IResource, IResourceData } from "@shared/types/resource";
 import Entity from "@models/entity/entity";
 
-class ResourceData implements IModel {
+class ResourceData implements IResourceData, IModel {
   url: string = "";
   partValueLabel: string = "";
   partValueBaseURL: string = "";
