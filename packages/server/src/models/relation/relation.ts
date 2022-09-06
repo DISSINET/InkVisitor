@@ -1,5 +1,5 @@
-import { IDbModel, UnknownObject, fillFlatObject } from "@models/common";
-import { r as rethink, Connection, WriteResult, RDatum } from "rethinkdb-ts";
+import { IDbModel } from "@models/common";
+import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
 import { Relation as RelationTypes } from "@shared/types";
 import { DbEnums, RelationEnums, UserEnums } from "@shared/enums";
 import { EnumValidators } from "@shared/enums";
@@ -14,14 +14,10 @@ export default class Relation implements RelationTypes.IModel, IDbModel {
   type: RelationEnums.Type;
   entityIds: string[];
 
-  constructor(data: UnknownObject) {
-    if (!data) {
-      data = {};
-    }
-
-    this.id = data.id
-    this.type = data.type;
-    this.entityIds = data.entityIds;
+  constructor(data: Partial<RelationTypes.IModel>) {
+    this.id = data.id || "";
+    this.type = data.type as RelationEnums.Type;
+    this.entityIds = data.entityIds || [];
   }
 
   async save(db: Connection | undefined): Promise<WriteResult> {

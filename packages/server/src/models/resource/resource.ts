@@ -8,11 +8,7 @@ class ResourceData implements IResourceData, IModel {
   partValueLabel: string = "";
   partValueBaseURL: string = "";
 
-  constructor(data: UnknownObject) {
-    if (!data) {
-      return;
-    }
-
+  constructor(data: Partial<IResourceData>) {
     fillFlatObject(this, data);
   }
 
@@ -25,14 +21,9 @@ class Resource extends Entity implements IResource {
   class: EntityEnums.Class.Resource = EntityEnums.Class.Resource;
   data: ResourceData;
 
-  constructor(data: UnknownObject) {
+  constructor(data: Partial<IResource>) {
     super(data);
-
-    if (!data) {
-      data = {};
-    }
-
-    this.data = new ResourceData(data.data as UnknownObject);
+    this.data = new ResourceData(data.data || {});
   }
 
   isValid(): boolean {

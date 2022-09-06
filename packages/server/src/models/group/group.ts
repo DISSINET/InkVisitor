@@ -6,11 +6,7 @@ import { IGroup, IGroupData } from "@shared/types";
 class GroupData implements IGroupData, IModel {
   logicalType: EntityEnums.LogicalType = EntityEnums.LogicalType.Definite;
 
-  constructor(data: UnknownObject) {
-    if (!data) {
-      return;
-    }
-
+  constructor(data: Partial<IGroupData>) {
     fillFlatObject(this, data);
   }
 
@@ -23,14 +19,9 @@ class Group extends Entity implements IGroup {
   class: EntityEnums.Class.Group = EntityEnums.Class.Group; // just default
   data: GroupData;
 
-  constructor(data: UnknownObject) {
+  constructor(data: Partial<IGroup>) {
     super(data);
-
-    if (!data) {
-      data = {};
-    }
-
-    this.data = new GroupData(data.data as UnknownObject);
+    this.data = new GroupData(data.data || {});
   }
 
   isValid(): boolean {

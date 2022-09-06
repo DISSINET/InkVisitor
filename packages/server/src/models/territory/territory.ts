@@ -9,15 +9,12 @@ import treeCache from "@service/treeCache";
 import { nonenumerable } from "@common/decorators";
 
 export class TerritoryParent implements IParentTerritory, IModel {
-  territoryId = "";
-  order = -1;
+  territoryId: string;
+  order: number;
 
-  constructor(data: UnknownObject) {
-    if (!data) {
-      return;
-    }
-
-    fillFlatObject(this, data as Record<string, unknown>);
+  constructor(data: Partial<IParentTerritory>) {
+    this.territoryId = data.territoryId as string;
+    this.order = data.order !== undefined ? data.order : -1
   }
 
   isValid(): boolean {
@@ -32,14 +29,9 @@ export class TerritoryParent implements IParentTerritory, IModel {
 export class TerritoryData implements ITerritoryData, IModel {
   parent: TerritoryParent | false = false;
 
-  constructor(data: UnknownObject) {
-    if (!data) {
-      return;
-    }
-    fillFlatObject(this, data);
-
+  constructor(data: Partial<ITerritoryData>) {
     if (data.parent) {
-      this.parent = new TerritoryParent(data.parent as UnknownObject);
+      this.parent = new TerritoryParent(data.parent || {});
     }
   }
 
@@ -59,14 +51,9 @@ class Territory extends Entity implements ITerritory {
   @nonenumerable
   _siblings: Record<number, ITerritory> = {};
 
-  constructor(data: UnknownObject) {
+  constructor(data: Partial<ITerritory>) {
     super(data);
-
-    if (!data) {
-      data = {};
-    }
-
-    this.data = new TerritoryData(data.data as UnknownObject);
+    this.data = new TerritoryData(data.data || {});
   }
 
   isValid(): boolean {

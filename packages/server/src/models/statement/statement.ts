@@ -8,7 +8,6 @@ import {
 import {
   fillFlatObject,
   fillArray,
-  UnknownObject,
   IModel,
 } from "@models/common";
 import {
@@ -35,7 +34,7 @@ export class StatementClassification implements IStatementClassification {
   mood: EntityEnums.Mood[] = [];
   moodvariant: EntityEnums.MoodVariant = EntityEnums.MoodVariant.Irrealis;
 
-  constructor(data: UnknownObject) {
+  constructor(data: Partial<IStatementClassification>) {
     if (!data) {
       return;
     }
@@ -53,7 +52,7 @@ export class StatementIdentification implements IStatementClassification {
   mood: EntityEnums.Mood[] = [];
   moodvariant: EntityEnums.MoodVariant = EntityEnums.MoodVariant.Irrealis;
 
-  constructor(data: UnknownObject) {
+  constructor(data: Partial<IStatementClassification>) {
     if (!data) {
       return;
     }
@@ -78,13 +77,7 @@ export class StatementActant implements IStatementActant, IModel {
   classifications: StatementClassification[] = [];
   identifications: StatementIdentification[] = [];
 
-  constructor(data: UnknownObject) {
-    if (!data) {
-      return;
-    }
-
-    // TODO: If admin ? model.status = EntityEnums.Status.Approved : model.status = EntityEnums.Status.Pending
-
+  constructor(data: Partial<IStatementActant>) {
     fillFlatObject(this, data);
     fillArray<Prop>(this.props, Prop, data.props);
   }
@@ -98,15 +91,13 @@ export class StatementActant implements IStatementActant, IModel {
   }
 }
 
-  territoryId = "";
-  order = -1;
 export class StatementTerritory implements IStatementDataTerritory {
+  territoryId: string;
+  order: number;
 
-  constructor(data: UnknownObject) {
-    if (!data) {
-      return;
-    }
-    fillFlatObject(this, data);
+  constructor(data: Partial<IStatementDataTerritory>) {
+    this.territoryId = data.territoryId as string;
+    this.order = data.order !== undefined ? data.order : -1
   }
 
   /**
@@ -137,10 +128,7 @@ export class StatementAction implements IStatementAction {
   bundleEnd: boolean = false;
   props: Prop[] = [];
 
-  constructor(data: UnknownObject) {
-    if (!data) {
-      return;
-    }
+  constructor(data: Partial<IStatementAction>) {
     fillFlatObject(this, data);
     fillArray(this.mood, String, data.mood);
     fillArray<Prop>(this.props, Prop, data.props);
@@ -162,27 +150,24 @@ export class StatementAction implements IStatementAction {
 
 export class StatementData implements IStatementData, IModel {
   text = "";
-  territory?= new StatementTerritory({});
+  territory?: StatementTerritory;
   actions: StatementAction[] = [];
   actants: StatementActant[] = [];
   tags: string[] = [];
 
-  constructor(data: UnknownObject) {
+  constructor(data: Partial<IStatementData>) {
     if (!data) {
       return;
     }
 
     fillFlatObject(this, data);
     if (data.territory) {
-      this.territory = new StatementTerritory(data.territory as UnknownObject);
-    } else {
-      delete this.territory;
+      this.territory = new StatementTerritory(data.territory || {});
     }
+
     fillArray<StatementAction>(this.actions, StatementAction, data.actions);
     fillArray<StatementActant>(this.actants, StatementActant, data.actants);
 
-    if (data.territory) {
-    }
     // fill array uses constructors - which string[] cannot use (will create an
     // object instead of string type)
     if (data.tags) {
@@ -215,14 +200,9 @@ class Statement extends Entity implements IStatement {
   class: EntityEnums.Class.Statement = EntityEnums.Class.Statement;
   data: StatementData;
 
-  constructor(data: UnknownObject) {
+  constructor(data: Partial<IStatement>) {
     super(data);
-
-    if (!data) {
-      data = {};
-    }
-
-    this.data = new StatementData(data.data as UnknownObject);
+    this.data = new StatementData(data.data || {});
   }
 
   /**
@@ -491,7 +471,7 @@ class Statement extends Entity implements IStatement {
   static getEntitiesIdsForMany(statements: IStatement[]): string[] {
     const entityIds: Record<string, null> = {}; // unique check
 
-    const stModel = new Statement(undefined);
+    const stModel = new Statement({});
     for (const statement of statements) {
       stModel.getEntitiesIds
         .call(statement)

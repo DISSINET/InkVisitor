@@ -5,7 +5,6 @@ import {
   fillArray,
   fillFlatObject,
   IModel,
-  UnknownObject,
 } from "@models/common";
 
 export class PropSpec implements IPropSpec, IModel {
@@ -15,12 +14,8 @@ export class PropSpec implements IPropSpec, IModel {
   virtuality: EntityEnums.Virtuality = EntityEnums.Virtuality.Reality;
   partitivity: EntityEnums.Partitivity = EntityEnums.Partitivity.Unison;
 
-  constructor(data: UnknownObject) {
-    if (!data) {
-      return;
-    }
-
-    fillFlatObject(this, data);
+  constructor(data: Partial<IPropSpec>) {
+    fillFlatObject(this, data)
   }
 
   isValid(): boolean {
@@ -41,19 +36,15 @@ export default class Prop implements IProp, IModel {
 
   children: Prop[] = [];
 
-  type: PropSpec = new PropSpec({});
-  value: PropSpec = new PropSpec({});
+  type: PropSpec;
+  value: PropSpec;
 
-  constructor(data: UnknownObject) {
-    if (!data) {
-      return;
-    }
-
+  constructor(data: Partial<IProp>) {
     fillFlatObject(this, data);
     fillArray(this.mood, String, data.mood);
 
-    this.type = new PropSpec(data.type);
-    this.value = new PropSpec(data.value);
+    this.type = new PropSpec(data.type || {});
+    this.value = new PropSpec(data.value || {});
 
     fillArray<Prop>(this.children, Prop, data.children);
   }
