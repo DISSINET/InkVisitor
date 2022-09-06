@@ -107,7 +107,7 @@ export class StatementTerritory implements IStatementDataTerritory {
   isValid(): boolean {
     // order is optional, it will be fixed in underlaying call to
     // Entity.determineOrder
-    if (this.territoryId === "") {
+    if (!this.territoryId) {
       return false;
     }
 
@@ -121,7 +121,7 @@ export class StatementAction implements IStatementAction {
   elvl: EntityEnums.Elvl = EntityEnums.Elvl.Textual;
   certainty: EntityEnums.Certainty = EntityEnums.Certainty.Empty;
   logic: EntityEnums.Logic = EntityEnums.Logic.Positive;
-  mood: EntityEnums.Mood[] = [EntityEnums.Mood.Indication];
+  mood: EntityEnums.Mood[] = [];
   moodvariant: EntityEnums.MoodVariant = EntityEnums.MoodVariant.Realis;
   bundleOperator: EntityEnums.Operator = EntityEnums.Operator.And;
   bundleStart: boolean = false;
