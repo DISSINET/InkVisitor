@@ -4,6 +4,7 @@ export namespace DbEnums {
         StatementTerritory = "statement_territory",
         StatementEntities = "statement_entities",
         StatementActantsCI = "statement_actants_CI",
+        StatementDataProps = "statement.data_props_recursive",
         AuditEntityId = "entityId",
         EntityUsedTemplate = "usedTemplate",
         PropsRecursive = "props.recursive",

@@ -180065,7 +180065,94 @@
           "bundleOperator": "a",
           "bundleStart": false,
           "bundleEnd": false,
-          "props": []
+          "props": [
+            {
+              "id": "2ed004d1-9e73-41f2-98c1-b3372eab44db",
+              "elvl": "1",
+              "certainty": "0",
+              "logic": "1",
+              "mood": [
+                "1"
+              ],
+              "moodvariant": "1",
+              "bundleOperator": "a",
+              "bundleStart": false,
+              "bundleEnd": false,
+              "children": [
+                {
+                  "id": "2ed004d1-9e73-41f2-98c1-b3372eab44db-2",
+                  "elvl": "1",
+                  "certainty": "0",
+                  "logic": "1",
+                  "mood": [
+                    "1"
+                  ],
+                  "moodvariant": "1",
+                  "bundleOperator": "a",
+                  "bundleStart": false,
+                  "bundleEnd": false,
+                  "children": [
+                    {
+                      "id": "2ed004d1-9e73-41f2-98c1-b3372eab44db-3",
+                      "elvl": "1",
+                      "certainty": "0",
+                      "logic": "1",
+                      "mood": [
+                        "1"
+                      ],
+                      "moodvariant": "1",
+                      "bundleOperator": "a",
+                      "bundleStart": false,
+                      "bundleEnd": false,
+                      "children": [],
+                      "type": {
+                        "entityId": "R0010_C0352",
+                        "elvl": "1",
+                        "logic": "1",
+                        "virtuality": "1",
+                        "partitivity": "1"
+                      },
+                      "value": {
+                        "entityId": "R0007_L0052 #L0053",
+                        "elvl": "1",
+                        "logic": "1",
+                        "virtuality": "1",
+                        "partitivity": "1"
+                      }
+                    }
+                  ],
+                  "type": {
+                    "entityId": "R0010_C0352",
+                    "elvl": "1",
+                    "logic": "1",
+                    "virtuality": "1",
+                    "partitivity": "1"
+                  },
+                  "value": {
+                    "entityId": "R0007_L0052 #L0053",
+                    "elvl": "1",
+                    "logic": "1",
+                    "virtuality": "1",
+                    "partitivity": "1"
+                  }
+                }
+              ],
+              "type": {
+                "entityId": "R0010_C0352",
+                "elvl": "1",
+                "logic": "1",
+                "virtuality": "1",
+                "partitivity": "1"
+              },
+              "value": {
+                "entityId": "R0007_L0052 #L0053",
+                "elvl": "1",
+                "logic": "1",
+                "virtuality": "1",
+                "partitivity": "1"
+              }
+            }
+          ]
         }
       ],
       "territory": {
@@ -180086,7 +180173,36 @@
           "bundleOperator": "a",
           "bundleStart": false,
           "bundleEnd": false,
-          "props": []
+          "props": [
+            {
+              "id": "2ed004d1-9e73-41f2-98c1-b3372eab44db-3",
+              "elvl": "1",
+              "certainty": "0",
+              "logic": "1",
+              "mood": [
+                "1"
+              ],
+              "moodvariant": "1",
+              "bundleOperator": "a",
+              "bundleStart": false,
+              "bundleEnd": false,
+              "children": [],
+              "type": {
+                "entityId": "R0010_C0352",
+                "elvl": "1",
+                "logic": "1",
+                "virtuality": "1",
+                "partitivity": "1"
+              },
+              "value": {
+                "entityId": "R0007_L0052 #L0053",
+                "elvl": "1",
+                "logic": "1",
+                "virtuality": "1",
+                "partitivity": "1"
+              }
+            }
+          ]
         },
         {
           "id": "e511dfc2-0c99-4992-9391-7f614877410a",
@@ -180127,14 +180243,14 @@
               "bundleEnd": false,
               "children": [],
               "type": {
-                "id": "R0010_C0352",
+                "entityId": "R0010_C0352",
                 "elvl": "1",
                 "logic": "1",
                 "virtuality": "1",
                 "partitivity": "1"
               },
               "value": {
-                "id": "R0007_L0052 #L0053",
+                "entityId": "R0007_L0052 #L0053",
                 "elvl": "1",
                 "logic": "1",
                 "virtuality": "1",
@@ -180234,7 +180350,36 @@
           "bundleOperator": "a",
           "bundleStart": false,
           "bundleEnd": false,
-          "props": []
+          "props": [
+            {
+              "id": "2ed004d1-9e73-41f2-98c1-b3372eab44db-3",
+              "elvl": "1",
+              "certainty": "0",
+              "logic": "1",
+              "mood": [
+                "1"
+              ],
+              "moodvariant": "1",
+              "bundleOperator": "a",
+              "bundleStart": false,
+              "bundleEnd": false,
+              "children": [],
+              "type": {
+                "entityId": "R0010_C0352",
+                "elvl": "1",
+                "logic": "1",
+                "virtuality": "1",
+                "partitivity": "1"
+              },
+              "value": {
+                "entityId": "R0007_L0052 #L0053",
+                "elvl": "1",
+                "logic": "1",
+                "virtuality": "1",
+                "partitivity": "1"
+              }
+            }
+          ]
         },
         {
           "id": "4899b72e-2c98-4d20-91bc-aafe23607226",
