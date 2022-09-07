@@ -35,11 +35,6 @@ export class SearchQuery {
       cooccurrenceId
     );
 
-    // entity id provided, but not found within statements - end now
-    if (!associatedEntityIds.length) {
-      return [];
-    }
-
     // filter out duplicates
     return [...new Set(associatedEntityIds)];
   }
