@@ -41,7 +41,7 @@ export const Box: React.FC<BoxProps> = ({
     contentBackgroundColor: isExpanded
       ? theme.color["gray"]["200"]
       : theme.color["gray"]["300"],
-    height: `${height / 10}rem`,
+    boxHeight: `${height / 10}rem`,
     onRest: () => {
       isExpanded ? setShowContentLabel(false) : setHideContent(true);
     },
@@ -52,7 +52,10 @@ export const Box: React.FC<BoxProps> = ({
   });
 
   return (
-    <StyledBox style={{ height: animatedExpand.height }} height={height}>
+    <StyledBox
+      style={{ height: animatedExpand.boxHeight as any }}
+      height={height}
+    >
       <StyledHead $isExpanded={isExpanded} color={color} $noPadding={noPadding}>
         {!hideContent && (
           <animated.div style={animatedExpand}>{label}</animated.div>

@@ -91,7 +91,9 @@ export namespace Relation {
     attributes: [],
   };
   RelationRules[RelationEnums.Type.SuperordinateLocation] = {
-    allowedEntitiesPattern: [[EntityEnums.Class.Location, EntityEnums.Class.Location]],
+    allowedEntitiesPattern: [
+      [EntityEnums.Class.Location, EntityEnums.Class.Location],
+    ],
     allowedSameEntityClassesOnly: true,
     asymmetrical: true,
     multiple: true,
@@ -100,7 +102,10 @@ export namespace Relation {
     attributes: [],
   };
   RelationRules[RelationEnums.Type.Synonym] = {
-    allowedEntitiesPattern: [[EntityEnums.Class.Action], [EntityEnums.Class.Concept]],
+    allowedEntitiesPattern: [
+      [EntityEnums.Class.Action],
+      [EntityEnums.Class.Concept],
+    ],
     allowedSameEntityClassesOnly: false,
     asymmetrical: false,
     multiple: true,
@@ -130,7 +135,9 @@ export namespace Relation {
     attributes: [],
   };
   RelationRules[RelationEnums.Type.PropertyReciprocal] = {
-    allowedEntitiesPattern: [[EntityEnums.Class.Concept, EntityEnums.Class.Concept]],
+    allowedEntitiesPattern: [
+      [EntityEnums.Class.Concept, EntityEnums.Class.Concept],
+    ],
     allowedSameEntityClassesOnly: true,
     asymmetrical: false,
     multiple: false,
@@ -139,7 +146,9 @@ export namespace Relation {
     attributes: [],
   };
   RelationRules[RelationEnums.Type.SubjectActantReciprocal] = {
-    allowedEntitiesPattern: [[EntityEnums.Class.Action, EntityEnums.Class.Action]],
+    allowedEntitiesPattern: [
+      [EntityEnums.Class.Action, EntityEnums.Class.Action],
+    ],
     allowedSameEntityClassesOnly: true,
     asymmetrical: false,
     multiple: false,
@@ -198,7 +207,9 @@ export namespace Relation {
   };
 
   RelationRules[RelationEnums.Type.Holonymy] = {
-    allowedEntitiesPattern: [[EntityEnums.Class.Concept, EntityEnums.Class.Concept]],
+    allowedEntitiesPattern: [
+      [EntityEnums.Class.Concept, EntityEnums.Class.Concept],
+    ],
     allowedSameEntityClassesOnly: true,
     asymmetrical: true,
     multiple: true,
@@ -208,7 +219,9 @@ export namespace Relation {
   };
 
   RelationRules[RelationEnums.Type.Implication] = {
-    allowedEntitiesPattern: [[EntityEnums.Class.Action, EntityEnums.Class.Action]],
+    allowedEntitiesPattern: [
+      [EntityEnums.Class.Action, EntityEnums.Class.Action],
+    ],
     allowedSameEntityClassesOnly: true,
     asymmetrical: true,
     multiple: true,
