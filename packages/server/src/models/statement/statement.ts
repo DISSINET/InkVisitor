@@ -31,15 +31,12 @@ export class StatementClassification implements IStatementClassification {
   elvl: EntityEnums.Elvl = EntityEnums.Elvl.Textual;
   logic: EntityEnums.Logic = EntityEnums.Logic.Positive;
   certainty: EntityEnums.Certainty = EntityEnums.Certainty.AlmostCertain;
-  mood: EntityEnums.Mood[] = [];
+  mood: EntityEnums.Mood[];
   moodvariant: EntityEnums.MoodVariant = EntityEnums.MoodVariant.Irrealis;
 
   constructor(data: Partial<IStatementClassification>) {
-    if (!data) {
-      return;
-    }
-
     fillFlatObject(this, data);
+    this.mood = data.mood ? data.mood : []
   }
 }
 
@@ -80,6 +77,8 @@ export class StatementActant implements IStatementActant, IModel {
   constructor(data: Partial<IStatementActant>) {
     fillFlatObject(this, data);
     fillArray<Prop>(this.props, Prop, data.props);
+    fillArray<StatementClassification>(this.classifications, StatementClassification, data.classifications)
+    fillArray<StatementIdentification>(this.identifications, StatementIdentification, data.identifications)
   }
 
   /**
@@ -156,10 +155,6 @@ export class StatementData implements IStatementData, IModel {
   tags: string[] = [];
 
   constructor(data: Partial<IStatementData>) {
-    if (!data) {
-      return;
-    }
-
     fillFlatObject(this, data);
     if (data.territory) {
       this.territory = new StatementTerritory(data.territory || {});
