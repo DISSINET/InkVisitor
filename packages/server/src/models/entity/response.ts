@@ -90,7 +90,7 @@ export class ResponseEntityDetail extends ResponseEntity implements IResponseDet
   entities: Record<string, IEntity>;
   usedInStatements: IResponseUsedInStatement<EntityEnums.UsedInPosition>[];
   usedInStatementProps: IResponseUsedInStatementProps[];
-  usedInMetaProps: IResponseUsedInMetaProp<EntityEnums.UsedInPosition>[];
+  usedInMetaProps: IResponseUsedInMetaProp[];
   usedAsTemplate?: string[] | undefined;
   usedInStatementIdentifications: IResponseUsedInStatementIdentification[];
   usedInStatementClassifications: IResponseUsedInStatementClassification[];
