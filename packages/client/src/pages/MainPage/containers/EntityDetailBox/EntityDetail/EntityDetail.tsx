@@ -513,7 +513,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
             <StyledDetailSection>
               <StyledDetailSectionHeader>Relations</StyledDetailSectionHeader>
               <StyledDetailSectionContent>
-                <EntityDetailRelationsSection />
+                <EntityDetailRelationsSection entity={entity} />
               </StyledDetailSectionContent>
             </StyledDetailSection>
 

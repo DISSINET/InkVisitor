@@ -76,7 +76,7 @@ export namespace Relation {
     attributes: any[];
   };
 
-  const RelationRules: { [key: string]: RelationRule } = {};
+  export const RelationRules: { [key: string]: RelationRule } = {};
 
   RelationRules[RelationEnums.Type.Superclass] = {
     allowedEntitiesPattern: [
@@ -108,7 +108,7 @@ export namespace Relation {
     ],
     allowedSameEntityClassesOnly: false,
     asymmetrical: false,
-    multiple: true,
+    multiple: false,
     cloudType: true,
     treeType: false,
     attributes: [],
@@ -129,7 +129,7 @@ export namespace Relation {
     allowedEntitiesPattern: [[EntityEnums.Class.Action]],
     allowedSameEntityClassesOnly: true,
     asymmetrical: false,
-    multiple: true,
+    multiple: false,
     cloudType: true,
     treeType: false,
     attributes: [],
@@ -201,7 +201,7 @@ export namespace Relation {
     allowedSameEntityClassesOnly: false,
     asymmetrical: false,
     multiple: true,
-    cloudType: true,
+    cloudType: false,
     treeType: false,
     attributes: [EntityEnums.Certainty],
   };

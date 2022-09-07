@@ -1,93 +1,63 @@
 import { EntityEnums, RelationEnums } from "@shared/enums";
-import React from "react";
+import { IResponseDetail } from "@shared/types";
+import { Relation } from "@shared/types/relation";
+import api from "api";
+import React, { useEffect, useState } from "react";
+import { v4 as uuidv4 } from "uuid";
 
-const attributeTypes = {
-  [RelationEnums.Type.Superclass]: {
-    entityClasses: [EntityEnums.Class.Concept, EntityEnums.Class.Action],
-    multi: true,
-  },
-  [RelationEnums.Type.Synonym]: {
-    entityClasses: [EntityEnums.Class.Concept, EntityEnums.Class.Action],
-    multi: false,
-  },
-  [RelationEnums.Type.Antonym]: {
-    entityClasses: [EntityEnums.Class.Concept, EntityEnums.Class.Action],
-    multi: true,
-  },
-  [RelationEnums.Type.PropertyReciprocal]: {
-    entityClasses: [EntityEnums.Class.Concept],
-    multi: false,
-  },
-  [RelationEnums.Type.ActionEventEquivalent]: {
-    entityClasses: [EntityEnums.Class.Concept, EntityEnums.Class.Action],
-    multi: false,
-  },
-  [RelationEnums.Type.Related]: {
-    entityClasses: [
-      EntityEnums.Class.Concept,
-      EntityEnums.Class.Action,
-      EntityEnums.Class.Location,
-      EntityEnums.Class.Person,
-      EntityEnums.Class.Object,
-      EntityEnums.Class.Group,
-      EntityEnums.Class.Event,
-      EntityEnums.Class.Statement,
-      EntityEnums.Class.Territory,
-      EntityEnums.Class.Resource,
-    ],
-    multi: true,
-  },
-  [RelationEnums.Type.Holonymy]: {
-    entityClasses: [EntityEnums.Class.Concept],
-    multi: true,
-  },
-  [RelationEnums.Type.Troponym]: {
-    entityClasses: [EntityEnums.Class.Action],
-    multi: false,
-  },
-  [RelationEnums.Type.SubjectActantReciprocal]: {
-    entityClasses: [EntityEnums.Class.Action],
-    multi: false,
-  },
-  [RelationEnums.Type.Implication]: {
-    entityClasses: [EntityEnums.Class.Action],
-    multi: true,
-  },
-  [RelationEnums.Type.SuperordinateLocation]: {
-    entityClasses: [EntityEnums.Class.Location],
-    multi: true,
-  },
-  [RelationEnums.Type.Classification]: {
-    entityClasses: [
-      EntityEnums.Class.Location,
-      EntityEnums.Class.Person,
-      EntityEnums.Class.Object,
-      EntityEnums.Class.Group,
-      EntityEnums.Class.Event,
-      EntityEnums.Class.Statement,
-      EntityEnums.Class.Territory,
-      EntityEnums.Class.Resource,
-    ],
-    multi: true,
-  },
-  [RelationEnums.Type.Identification]: {
-    entityClasses: [
-      EntityEnums.Class.Location,
-      EntityEnums.Class.Person,
-      EntityEnums.Class.Object,
-      EntityEnums.Class.Group,
-      EntityEnums.Class.Event,
-      EntityEnums.Class.Statement,
-      EntityEnums.Class.Territory,
-      EntityEnums.Class.Resource,
-    ],
-    multi: true,
-  },
-};
-
-interface EntityDetailRelationsSection {}
+const restrictedIClasses = [
+  EntityEnums.Class.Action,
+  EntityEnums.Class.Concept,
+];
+interface EntityDetailRelationsSection {
+  entity: IResponseDetail;
+}
 export const EntityDetailRelationsSection: React.FC<
   EntityDetailRelationsSection
-> = ({}) => {
-  return <>Ahoj</>;
+> = ({ entity }) => {
+  const [filteredRelationRules, setFilteredRelationRules] = useState<string[]>(
+    []
+  );
+
+  // useEffect(() => {
+  //   const newRelation: Relation.IModel = {
+  //     id: uuidv4(),
+  //     type: RelationEnums.Type.Related,
+  //     entityIds: [entity.id, ""],
+  //   };
+  //   api.relationCreate(newRelation);
+  // }, []);
+
+  useEffect(() => {
+    const relationRules = Object.keys(Relation.RelationRules);
+    const filteredRules = relationRules.filter((rule) => {
+      if (
+        !Relation.RelationRules[rule].allowedEntitiesPattern.length &&
+        !(
+          rule === RelationEnums.Type.Identification &&
+          restrictedIClasses.includes(entity.class)
+        )
+      ) {
+        return rule;
+      } else if (
+        Relation.RelationRules[rule].allowedEntitiesPattern.some(
+          (pair) => pair[0] === entity.class
+        )
+      ) {
+        return rule;
+      }
+    });
+
+    setFilteredRelationRules(filteredRules);
+  }, [entity]);
+
+  const { relations } = entity;
+
+  return (
+    <>
+      {filteredRelationRules.map((relationRule, key) => (
+        <div key={key}>{relationRule}</div>
+      ))}
+    </>
+  );
 };
