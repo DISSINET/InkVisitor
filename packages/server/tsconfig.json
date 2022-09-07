@@ -47,6 +47,9 @@
     "src/custom_typings/request.d.ts"
   ],
   "include": [
-    "src/**/*.ts",
+    "src/**/*.ts"
   ],
+  "exclude": [
+    "src/public/"
+  ]
 }
