@@ -16,44 +16,41 @@ import {
 import Prop, { PropSpec } from "@models/prop/prop";
 
 const fillStatementProps = function (
-  container: StatementActant | StatementAction
+  container: StatementActant | StatementAction,
+  id: string,
 ): void {
   // children lvl 1
-  container.props[0].children.push(new Prop({}));
-  container.props[0].children[0].type = new PropSpec({});
-  container.props[0].children[0].value = new PropSpec({});
+  container.props[0].children.push(new Prop({ id: `${id}.props[0].children[0].id` }));
+  container.props[0].children[0].type = new PropSpec({ entityId: `${id}.props[0].children[0].type.entityId` });
+  container.props[0].children[0].value = new PropSpec({ entityId: `${id}.props[0].children[0].value.entityId` });
 
   // children lvl 2
-  container.props[0].children[0].children.push(new Prop({}));
-  container.props[0].children[0].children[0].type = new PropSpec({});
-  container.props[0].children[0].children[0].value = new PropSpec({});
+  container.props[0].children[0].children.push(new Prop({ id: `${id}.props[0].children[0].children[0].id` }));
+  container.props[0].children[0].children[0].type = new PropSpec({ entityId: `${id}.props[0].children[0].children[0].type.entityId` });
+  container.props[0].children[0].children[0].value = new PropSpec({ entityId: `${id}.props[0].children[0].children[0].value.entityId` });
   // children lvl 3
-  container.props[0].children[0].children[0].children.push(new Prop({}));
-  container.props[0].children[0].children[0].children[0].type = new PropSpec(
-    {}
-  );
-  container.props[0].children[0].children[0].children[0].value = new PropSpec(
-    {}
-  );
+  container.props[0].children[0].children[0].children.push(new Prop({ id: `${id}.props[0].children[0].children[0].children[0].id` }));
+  container.props[0].children[0].children[0].children[0].type = new PropSpec({ entityId: `${id}.props[0].children[0].children[0].children[0].type.entityId` });
+  container.props[0].children[0].children[0].children[0].value = new PropSpec({ entityId: `${id}.props[0].children[0].children[0].children[0].value.entityId` });
 };
 
 export const prepareStatement = (): [string, Statement] => {
-  const detailId = Math.random().toFixed();
+  const id = Math.random().toString();
 
-  const st1 = new Statement({});
-  st1.data.actants.push(new StatementActant({}));
-  st1.data.actants[0].props.push(new Prop({}));
-  st1.data.actants[0].props.push(new Prop({}));
+  const st1 = new Statement({ id });
+  st1.data.actants.push(new StatementActant({ id: `${id}-data-actants[0].id`, entityId: `${id}-data-actants[0].entityId` }));
+  st1.data.actants[0].props.push(new Prop({ id: `${id}-data-actants[0].props[0].id` }));
+  st1.data.actants[0].props.push(new Prop({ id: `${id}-data-actants[0].props[1].id` }));
 
-  fillStatementProps(st1.data.actants[0]);
+  fillStatementProps(st1.data.actants[0], `${id}-data-actants[0]`);
 
-  st1.data.actions.push(new StatementAction({}));
-  st1.data.actions[0].props.push(new Prop({}));
-  st1.data.actions[0].props.push(new Prop({}));
+  st1.data.actions.push(new StatementAction({ id: `${id}-data-actions[0].id`, actionId: `${id}-data-actions[0].actionId` }));
+  st1.data.actions[0].props.push(new Prop({ id: `${id}-data-actions[0].props[0].id` }));
+  st1.data.actions[0].props.push(new Prop({ id: `${id}-data-actions[0].props[1].id` }));
 
-  fillStatementProps(st1.data.actions[0]);
+  fillStatementProps(st1.data.actions[0], `${id}-data-actions[0]`);
 
-  return [detailId, st1];
+  return [id, st1];
 };
 
 describe("models/statement", function () {

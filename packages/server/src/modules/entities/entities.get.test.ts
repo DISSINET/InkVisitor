@@ -4,7 +4,7 @@ import request from "supertest";
 import { supertestConfig } from "..";
 import { apiPath } from "@common/constants";
 import app from "../../Server";
-import Statement from "@models/statement/statement";
+import Statement, { StatementData, StatementTerritory } from "@models/statement/statement";
 import { Db } from "@service/RethinkDB";
 
 describe("Entities get method", function () {
@@ -36,11 +36,11 @@ describe("Entities get method", function () {
       const statementRandomId = Math.random().toString();
       const entityData = new Statement({
         id: statementRandomId,
-        data: {
-          territory: {
-            id: "not relevant",
-          },
-        },
+        data: new StatementData({
+          territory: new StatementTerritory({
+            territoryId: "not relevant",
+          }),
+        }),
       });
 
       await entityData.save(db.connection);

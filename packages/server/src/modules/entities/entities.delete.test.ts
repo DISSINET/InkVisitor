@@ -65,7 +65,7 @@ describe("Entities delete", function () {
       const root = new Territory({});
       await root.save(db.connection);
       const leaf = new Territory({
-        data: { parent: { id: root.id, order: -1 } },
+        data: { parent: { territoryId: root.id, order: -1 } },
       });
       await leaf.save(db.connection);
 
