@@ -14,7 +14,7 @@ import {
   RequestPermissionUpdate,
   IStatement,
   ITerritory,
-  IRelation,
+  Relation,
 } from "@shared/types";
 import * as errors from "@shared/types/errors";
 import { IRequestSearch } from "@shared/types/request-search";
@@ -572,7 +572,7 @@ class Api {
   }
 
   async relationCreate(
-    newRelation: IRelation
+    newRelation: Relation.IModel
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
       const response = await this.connection.post(
