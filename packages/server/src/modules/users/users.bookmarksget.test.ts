@@ -5,7 +5,7 @@ import { apiPath } from "@common/constants";
 import app from "../../Server";
 import { createEntity } from "@service/shorthands";
 import { Db } from "@service/RethinkDB";
-import Statement from "@models/statement/statement";
+import Statement, { StatementData, StatementTerritory } from "@models/statement/statement";
 import { supertestConfig } from "..";
 import User from "@models/user/user";
 import { IBookmarkFolder } from "@shared/types";
@@ -51,7 +51,10 @@ describe("Users bookmarksGet", function () {
 
       await createEntity(
         db,
-        new Statement({ id: testId, data: { territory: { id: "any" } } })
+        new Statement({
+          id: testId,
+          data: new StatementData({ territory: new StatementTerritory({ territoryId: "any" }) })
+        })
       );
 
       const user = new User({

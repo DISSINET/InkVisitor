@@ -71,11 +71,11 @@ describe("Entities search (params)", function () {
     statement.id = `${statement.label}-${statement.id}`;
 
     statement.data.actants = [
-      new StatementActant({ id: entity.id, actant: entity.id }),
-      new StatementActant({ id: linkedEntity.id, actant: linkedEntity.id }),
+      new StatementActant({ id: entity.id, entityId: entity.id }),
+      new StatementActant({ id: linkedEntity.id, entityId: linkedEntity.id }),
     ];
     statement.data.actions = [
-      new StatementAction({ id: action.id, action: action.id }),
+      new StatementAction({ id: action.id, actionId: action.id }),
     ];
 
     beforeAll(async () => {

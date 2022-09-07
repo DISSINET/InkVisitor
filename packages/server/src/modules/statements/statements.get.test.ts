@@ -6,7 +6,7 @@ import { apiPath } from "@common/constants";
 import app from "../../Server";
 import { Db } from "@service/RethinkDB";
 import { createEntity } from "@service/shorthands";
-import Statement from "@models/statement/statement";
+import Statement, { StatementData, StatementTerritory } from "@models/statement/statement";
 
 const testValidStatement = (res: any) => {
   expect(res.body).toBeTruthy();
@@ -50,7 +50,10 @@ describe("Statements get", function () {
       const randomId = Math.random().toString();
       await createEntity(
         db,
-        new Statement({ id: randomId, data: { territory: { id: "2" } } })
+        new Statement({
+          id: randomId,
+          data: new StatementData({ territory: new StatementTerritory({ territoryId: "2" }) })
+        })
       );
       await request(app)
         .get(`${apiPath}/statements/${randomId}`)

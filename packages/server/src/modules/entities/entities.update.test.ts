@@ -7,7 +7,7 @@ import { supertestConfig } from "..";
 import { Db } from "@service/RethinkDB";
 import { findEntityById } from "@service/shorthands";
 import { IEntity } from "@shared/types";
-import Statement from "@models/statement/statement";
+import Statement, { StatementData, StatementTerritory } from "@models/statement/statement";
 import { successfulGenericResponse } from "@modules/common.test";
 
 describe("Entities update", function () {
@@ -43,9 +43,9 @@ describe("Entities update", function () {
       const statementData = new Statement({
         id: testId,
         label: "",
-        data: {
-          territory: { id: testId + "ter" },
-        },
+        data: new StatementData({
+          territory: new StatementTerritory({ territoryId: testId + "ter" }),
+        }),
       });
       await statementData.save(db.connection);
 

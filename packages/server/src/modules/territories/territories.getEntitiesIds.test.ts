@@ -27,7 +27,7 @@ describe("Territories getEntityIds", () => {
 
   describe("one territory, two linked statement via territory.id and tags at once", () => {
     it("should return empty array", async (done) => {
-      const territory = new Territory(undefined);
+      const territory = new Territory({});
       await territory.save(db.connection);
 
       // statements linked by tag/reference and territory - 3 linked actants

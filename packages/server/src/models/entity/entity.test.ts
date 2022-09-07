@@ -9,16 +9,16 @@ import Prop from "@models/prop/prop";
 import { EntityEnums } from "@shared/enums";
 
 export const prepareEntity = (): [string, Entity] => {
-  const entityId = Math.random().toString();
+  const id = Math.random().toString();
 
-  const ent = new Entity({ id: entityId });
-  ent.props.push(new Prop({}));
+  const ent = new Entity({ id });
+  ent.props.push(new Prop({ id: `${id}-props[0].id` }));
 
-  ent.props[0].children.push(new Prop({}));
-  ent.props[0].children[0].children.push(new Prop({}));
-  ent.props[0].children[0].children[0].children.push(new Prop({}));
+  ent.props[0].children.push(new Prop({ id: `${id}-props[0].children[0].id` }));
+  ent.props[0].children[0].children.push(new Prop({ id: `${id}-props[0].children[0].children[0].id` }));
+  ent.props[0].children[0].children[0].children.push(new Prop({ id: `${id}-props[0].children[0].children[0].children[0].id` }));
 
-  return [entityId, ent];
+  return [id, ent];
 };
 
 describe("test Entity.delete", function () {
@@ -107,7 +107,7 @@ describe("test Entity.update", function () {
       entity.data.tags = ["origtag1", "origtag2"]
       entity.data.text = "jea"
       entity.data.territory = new StatementTerritory({
-        id: "territoryId",
+        territoryId: "territoryId",
         order: 2,
       })
       entity.data.actants = [
