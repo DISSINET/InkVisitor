@@ -13,7 +13,7 @@ export interface IResponseDetail extends IResponseEntity {
   entities: Record<string, IEntity>; // all entities from IStatement and entityIds...
   usedInStatements: IResponseUsedInStatement<EntityEnums.UsedInPosition>[]; // all statements, where the detail id is used as an actant, action, or tag
   usedInStatementProps: IResponseUsedInStatementProps[]; // all statements, where the detail id is used in props
-  usedInMetaProps: IResponseUsedInMetaProp<EntityEnums.UsedInPosition>[]; // all entities, where the detail id is used in props (entity.props[])
+  usedInMetaProps: IResponseUsedInMetaProp[]; // all entities, where the detail id is used in props (entity.props[])
 
   usedInStatementIdentifications: IResponseUsedInStatementIdentification[]; // statement.data.actants[].identifications + from usedInStatements field if actant.entityId = detailId
   usedInStatementClassifications: IResponseUsedInStatementClassification[]; // statement.data.actants[].classifications + from usedInStatements field if actant.entityId = detailId
@@ -33,8 +33,8 @@ export interface IResponseUsedInStatementProps {
   valueId: string;
   originId: string; // what entity is the detail id used for
 }
-// TODO: clear position
-export interface IResponseUsedInMetaProp<PositionEnum> {
+
+export interface IResponseUsedInMetaProp {
   typeId: string;
   valueId: string;
   originId: string; // what entity is the detail id used for
