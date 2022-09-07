@@ -153,38 +153,33 @@ export class ResponseEntityDetail extends ResponseEntity implements IResponseDet
   async populateInStatementsRelations(statements: IStatement[]): Promise<void> {
     for (const statement of statements) {
       for (const actant of statement.data.actants) {
-        if (actant.classifications) {
-          for (const classData of actant.classifications) {
-            if (classData.entityId === this.id) {
-              this.addToClassifications(statement.id, actant.entityId, this.id, classData)
-              this.addLinkedEntities(statement.id);
-            }
+        for (const classData of actant.classifications || []) {
+          if (classData.entityId === this.id) {
+            this.addToClassifications(statement.id, actant.entityId, this.id, classData)
           }
         }
 
-        if (actant.identifications) {
-          for (const identification of actant.identifications) {
-            if (identification.entityId === this.id) {
-              this.addToIdentifications(statement.id, actant.entityId, this.id, identification)
-              this.addLinkedEntities(statement.id);
-            }
+        for (const identification of actant.identifications || []) {
+          if (identification.entityId === this.id) {
+            this.addToIdentifications(statement.id, actant.entityId, this.id, identification)
           }
         }
       }
     }
 
-    this.usedInStatements
-      .filter(us => us.position === EntityEnums.UsedInPosition.Actant)
-      .forEach(us => {
-        us.statement.data.actants.filter(a => a.entityId === this.id).forEach(a => {
-          if (a.classifications) {
-            a.classifications.forEach(c => this.addToClassifications(us.statement.id, this.id, this.id, c))
-          }
-          if (a.identifications) {
-            a.identifications?.forEach(i => this.addToIdentifications(us.statement.id, this.id, this.id, i))
-          }
-        })
-      })
+    // add Cs/Is, that are in actant object, that has the same ID as this entity
+    const usedAsActants = this.usedInStatements.filter(us => us.position === EntityEnums.UsedInPosition.Actant)
+    for (const usedAsActant of usedAsActants) {
+      const actants = usedAsActant.statement.data.actants.filter(a => a.entityId === this.id)
+      for (const actant of actants) {
+        actant.classifications?.forEach(c => this.addToClassifications(usedAsActant.statement.id, this.id, this.id, c))
+        actant.identifications?.forEach(i => this.addToIdentifications(usedAsActant.statement.id, this.id, this.id, i))
+      }
+    }
+
+    this.usedInStatementClassifications.forEach(c => this.addLinkedEntities(c.statementId))
+    this.usedInStatementIdentifications.forEach(c => this.addLinkedEntities(c.statementId))
+
   }
 
   /**
