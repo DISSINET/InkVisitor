@@ -120,7 +120,7 @@ export class ResponseEntityDetail extends ResponseEntity implements IResponseDet
 
     // find entities in which at least one props reference equals this.id
     for (const entity of await Entity.findUsedInProps(conn, this.id)) {
-      this.walkEntityProps(entity, entity.props);
+      this.walkEntityProps(entity.id, entity.props);
     }
 
     this.walkStatementsDataEntities(
@@ -235,27 +235,19 @@ export class ResponseEntityDetail extends ResponseEntity implements IResponseDet
    * @param actant
    * @param props
    */
-  walkEntityProps(actant: IEntity, props: IProp[]) {
-    // if actant is linked to this detail entity - should be pushed to entities map
-    let actantValid = false;
-
+  walkEntityProps(originId: string, props: IProp[]) {
     for (const prop of props) {
       if (prop.type.entityId === this.id || prop.value.entityId === this.id) {
         this.addUsedInMetaProp(
-          actant.id,
+          originId,
           prop.value.entityId,
           prop.type.entityId
         );
-        actantValid = true;
       }
 
       if (prop.children.length) {
-        this.walkEntityProps(actant, prop.children);
+        this.walkEntityProps(originId, prop.children);
       }
-    }
-
-    if (actantValid) {
-      this.entities[actant.id] = actant;
     }
   }
 
@@ -266,11 +258,13 @@ export class ResponseEntityDetail extends ResponseEntity implements IResponseDet
    * @param typeId
    */
   addUsedInMetaProp(originId: string, valueId: string, typeId: string) {
-    this.usedInMetaProps.push({
-      originId,
-      valueId,
-      typeId,
-    });
+    if (!this.usedInMetaProps.find(u => u.originId === originId && u.valueId === valueId && u.typeId === typeId)) {
+      this.usedInMetaProps.push({
+        originId,
+        valueId,
+        typeId,
+      });
+    }
     this.addLinkedEntities([originId, valueId, typeId]);
   }
 
@@ -311,7 +305,7 @@ export class ResponseEntityDetail extends ResponseEntity implements IResponseDet
       position,
     });
 
-    this.entities[statement.id] = statement;
+    this.addLinkedEntities(statement.id)
     this.addLinkedEntities(statement.data.actants.map(a => a.entityId))
     this.addLinkedEntities(statement.data.actions.map(a => a.actionId))
   }
