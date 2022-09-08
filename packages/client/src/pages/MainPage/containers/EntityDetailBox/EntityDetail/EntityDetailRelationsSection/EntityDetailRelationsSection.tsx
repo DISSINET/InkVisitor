@@ -4,6 +4,8 @@ import { Relation } from "@shared/types/relation";
 import api from "api";
 import React, { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
+import { StyledDetailForm } from "../EntityDetailStyles";
+import { EntityDetailRelationTypeBlock } from "./EntityDetailRelationTypeBlock/EntityDetailRelationTypeBlock";
 
 const restrictedIClasses = [
   EntityEnums.Class.Action,
@@ -15,22 +17,22 @@ interface EntityDetailRelationsSection {
 export const EntityDetailRelationsSection: React.FC<
   EntityDetailRelationsSection
 > = ({ entity }) => {
-  const [filteredRelationRules, setFilteredRelationRules] = useState<string[]>(
+  const [filteredRelationTypes, setFilteredRelationTypes] = useState<string[]>(
     []
   );
 
   // useEffect(() => {
   //   const newRelation: Relation.IModel = {
   //     id: uuidv4(),
-  //     type: RelationEnums.Type.Related,
-  //     entityIds: [entity.id, ""],
+  //     type: RelationEnums.Type.Classification,
+  //     entityIds: [entity.id, "T1"],
   //   };
   //   api.relationCreate(newRelation);
   // }, []);
 
   useEffect(() => {
     const relationRules = Object.keys(Relation.RelationRules);
-    const filteredRules = relationRules.filter((rule) => {
+    const filteredTypes = relationRules.filter((rule) => {
       if (
         !Relation.RelationRules[rule].allowedEntitiesPattern.length &&
         !(
@@ -48,16 +50,25 @@ export const EntityDetailRelationsSection: React.FC<
       }
     });
 
-    setFilteredRelationRules(filteredRules);
+    setFilteredRelationTypes(filteredTypes);
   }, [entity]);
 
   const { relations } = entity;
 
   return (
-    <>
-      {filteredRelationRules.map((relationRule, key) => (
-        <div key={key}>{relationRule}</div>
-      ))}
-    </>
+    <StyledDetailForm>
+      {filteredRelationTypes.map((relationType, key) => {
+        const filteredRelations = relations.filter(
+          (r) => r.type === relationType
+        );
+        return (
+          <EntityDetailRelationTypeBlock
+            relationType={relationType}
+            relations={filteredRelations}
+            key={key}
+          />
+        );
+      })}
+    </StyledDetailForm>
   );
 };
