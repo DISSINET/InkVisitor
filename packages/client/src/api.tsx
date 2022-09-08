@@ -562,7 +562,7 @@ class Api {
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
       const response = await this.connection.put(
-        `/relations/update/${relationId}`,
+        `/relations/${relationId}`,
         changes
       );
       return response;
@@ -576,7 +576,7 @@ class Api {
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
       const response = await this.connection.post(
-        `/relations/create`,
+        `/relations`,
         newRelation
       );
       return response;
@@ -590,7 +590,7 @@ class Api {
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
       const response = await this.connection.delete(
-        `/relations/delete/${relationId}`
+        `/relations/${relationId}`
       );
       return response;
     } catch (err: any | AxiosError) {
