@@ -168,17 +168,18 @@ const MainPage: React.FC<MainPage> = ({}) => {
               : panelWidths[1] + panelWidths[0] - collapsedPanelWidth
           }
         >
-          <Box
+          {/* <Box
             height={
               detailIdArray.length ? contentHeight / 2 - 20 : contentHeight
             }
             label="Statements"
           >
             <MemoizedStatementListBox />
-          </Box>
+          </Box> */}
           {(selectedDetailId || detailIdArray.length > 0) && (
             <Box
-              height={contentHeight / 2 + 20}
+              // height={contentHeight / 2 + 20}
+              height={contentHeight}
               label="Detail"
               button={[
                 <Button

@@ -1,4 +1,4 @@
-import { RelationEnums } from "@shared/enums";
+import { IResponseEntity } from "@shared/types";
 import { Relation } from "@shared/types/relation";
 import { EntityTag } from "components/advanced";
 import React from "react";
@@ -9,14 +9,15 @@ import {
 } from "../../EntityDetailStyles";
 import { StyledRelation } from "./EntityDetailRelationTypeBlockStyles";
 
+// relations for one type
 interface EntityDetailRelationTypeBlock {
-  // one type relations
   relations: Relation.IModel[];
   relationType: string;
+  entities: IResponseEntity[] | undefined;
 }
 export const EntityDetailRelationTypeBlock: React.FC<
   EntityDetailRelationTypeBlock
-> = ({ relations, relationType }) => {
+> = ({ relations, relationType, entities }) => {
   return (
     <>
       <StyledDetailContentRow>
@@ -25,12 +26,15 @@ export const EntityDetailRelationTypeBlock: React.FC<
         </StyledDetailContentRowLabel>
         <StyledDetailContentRowValue>
           {relations.map((relation, key) => (
-            <StyledRelation>
-              {relation.entityIds.map(
-                (entityId) =>
-                  // <EntityTag entity={} />
-                  entityId
-              )}
+            <StyledRelation key={key}>
+              {relation.entityIds.map((entityId, key) => {
+                const entity = entities?.find((e) => e.id === entityId);
+                return (
+                  <React.Fragment key={key}>
+                    {entity && <EntityTag entity={entity} />}
+                  </React.Fragment>
+                );
+              })}
             </StyledRelation>
           ))}
         </StyledDetailContentRowValue>

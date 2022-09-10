@@ -153,7 +153,7 @@ export namespace Relation {
     attributes: [],
   };
   RelationRules[RelationEnums.Type.SubjectActantReciprocal] = {
-    label: "Subject Actant Reciprocal",
+    label: "Subject/Actant1 Reciprocal",
     allowedEntitiesPattern: [
       [EntityEnums.Class.Action, EntityEnums.Class.Action],
     ],
@@ -165,7 +165,7 @@ export namespace Relation {
     attributes: [],
   };
   RelationRules[RelationEnums.Type.ActionEventEquivalent] = {
-    label: "Action Event Equivalent",
+    label: "Action/Event Equivalent",
     allowedEntitiesPattern: [
       [EntityEnums.Class.Action, EntityEnums.Class.Concept],
       [EntityEnums.Class.Concept, EntityEnums.Class.Action],
