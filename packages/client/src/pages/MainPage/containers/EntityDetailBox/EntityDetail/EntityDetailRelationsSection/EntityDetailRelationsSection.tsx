@@ -3,7 +3,7 @@ import { IResponseDetail } from "@shared/types";
 import { Relation } from "@shared/types/relation";
 import api from "api";
 import React, { useEffect, useState } from "react";
-import { useQuery, useMutation } from "react-query";
+import { useQuery, useMutation, useQueryClient } from "react-query";
 import { v4 as uuidv4 } from "uuid";
 import { StyledDetailForm } from "../EntityDetailStyles";
 import { EntityDetailRelationTypeBlock } from "./EntityDetailRelationTypeBlock/EntityDetailRelationTypeBlock";
@@ -18,6 +18,7 @@ interface EntityDetailRelationsSection {
 export const EntityDetailRelationsSection: React.FC<
   EntityDetailRelationsSection
 > = ({ entity }) => {
+  const queryClient = useQueryClient();
   const [filteredRelationTypes, setFilteredRelationTypes] = useState<string[]>(
     []
   );
@@ -25,14 +26,10 @@ export const EntityDetailRelationsSection: React.FC<
   // useEffect(() => {
   //   const newRelation: Relation.IModel = {
   //     id: uuidv4(),
-  //     type: RelationEnums.Type.Classification,
+  //     type: RelationEnums.Type.Identification,
   //     entityIds: [entity.id, "T1"],
   //   };
-  //   api.relationCreate(newRelation);
-  // }, []);
-
-  // useEffect(() => {
-  //   api.relationDelete("0c499bec-0b72-4e0e-96cd-4f4c32a2c2c0");
+  //   relationCreateMutation.mutate(newRelation);
   // }, []);
 
   const relationCreateMutation = useMutation(
@@ -41,6 +38,7 @@ export const EntityDetailRelationsSection: React.FC<
     {
       onSuccess: (data, variables) => {
         // TODO
+        queryClient.invalidateQueries("entity");
       },
     }
   );
@@ -54,6 +52,7 @@ export const EntityDetailRelationsSection: React.FC<
     {
       onSuccess: (data, variables) => {
         // TODO
+        queryClient.invalidateQueries("entity");
       },
     }
   );
@@ -62,6 +61,7 @@ export const EntityDetailRelationsSection: React.FC<
     {
       onSuccess: (data, variables) => {
         // TODO
+        queryClient.invalidateQueries("entity");
       },
     }
   );
@@ -117,6 +117,9 @@ export const EntityDetailRelationsSection: React.FC<
             entities={entities}
             relationType={relationType}
             relations={filteredRelations}
+            relationCreateMutation={relationCreateMutation}
+            relationUpdateMutation={relationUpdateMutation}
+            relationDeleteMutation={relationDeleteMutation}
           />
         );
       })}
