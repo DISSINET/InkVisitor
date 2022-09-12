@@ -64,6 +64,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
   entity,
 }) => {
   const getCategoryTypes = (): EntityEnums.ExtendedClass[] | undefined => {
+    // TODO: solve for assymetrical! (from another side)
     const entitiesPattern =
       Relation.RelationRules[relationType].allowedEntitiesPattern;
     if (entitiesPattern.length > 0) {
@@ -168,16 +169,13 @@ export const EntityDetailRelationTypeBlock: React.FC<
               getCategoryTypes() ||
               ([EntityEnums.Extension.Empty] as [EntityEnums.ExtendedClass])
             }
-            onSelected={
-              // TODO: add to cloudType / create new relation when multi
-              (selectedId: string) => {
-                if (isCloudType) {
-                  handleCloudSelected(selectedId);
-                } else {
-                  handleMultiSelected(selectedId);
-                }
+            onSelected={(selectedId: string) => {
+              if (isCloudType) {
+                handleCloudSelected(selectedId);
+              } else {
+                handleMultiSelected(selectedId);
               }
-            }
+            }}
           />
         </StyledDetailContentRowValue>
       </StyledDetailContentRow>

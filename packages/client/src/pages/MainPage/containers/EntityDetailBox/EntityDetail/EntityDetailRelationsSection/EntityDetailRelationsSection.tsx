@@ -3,8 +3,7 @@ import { IResponseDetail } from "@shared/types";
 import { Relation } from "@shared/types/relation";
 import api from "api";
 import React, { useEffect, useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "react-query";
-import { v4 as uuidv4 } from "uuid";
+import { useMutation, useQuery, useQueryClient } from "react-query";
 import { StyledDetailForm } from "../EntityDetailStyles";
 import { EntityDetailRelationTypeBlock } from "./EntityDetailRelationTypeBlock/EntityDetailRelationTypeBlock";
 
@@ -22,15 +21,6 @@ export const EntityDetailRelationsSection: React.FC<
   const [filteredRelationTypes, setFilteredRelationTypes] = useState<string[]>(
     []
   );
-
-  // useEffect(() => {
-  //   const newRelation: Relation.IModel = {
-  //     id: uuidv4(),
-  //     type: RelationEnums.Type.Identification,
-  //     entityIds: [entity.id, "T1"],
-  //   };
-  //   relationCreateMutation.mutate(newRelation);
-  // }, []);
 
   const relationCreateMutation = useMutation(
     async (newRelation: Relation.IModel) =>
@@ -78,8 +68,16 @@ export const EntityDetailRelationsSection: React.FC<
       ) {
         return rule;
       } else if (
+        !Relation.RelationRules[rule].asymmetrical &&
         Relation.RelationRules[rule].allowedEntitiesPattern.some(
           (pair) => pair[0] === entity.class
+        )
+      ) {
+        return rule;
+      } else if (
+        Relation.RelationRules[rule].asymmetrical &&
+        Relation.RelationRules[rule].allowedEntitiesPattern.some((pair) =>
+          pair.includes(entity.class)
         )
       ) {
         return rule;
