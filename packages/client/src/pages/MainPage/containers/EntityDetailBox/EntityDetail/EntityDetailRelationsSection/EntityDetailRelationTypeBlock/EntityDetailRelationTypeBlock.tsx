@@ -81,8 +81,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
   };
 
   const handleCloudSelected = (selectedId: string) => {
-    if (relations[0]?.entityIds.length > 0) {
-      console.log("here");
+    if (relations[0]?.entityIds?.length > 0) {
       const changes = { entityIds: [...relations[0].entityIds, selectedId] };
       relationUpdateMutation.mutate({
         relationId: relations[0].id,
@@ -98,6 +97,22 @@ export const EntityDetailRelationTypeBlock: React.FC<
     }
   };
 
+  const handleCloudRemove = (entityId: string) => {
+    if (relations[0]?.entityIds?.length > 2) {
+      const newEntityIds = relations[0].entityIds.filter(
+        (eId) => eId !== entityId
+      );
+      relationUpdateMutation.mutate({
+        relationId: relations[0].id,
+        changes: { entityIds: newEntityIds },
+      });
+    } else {
+      relationDeleteMutation.mutate(relations[0].id);
+    }
+  };
+
+  const handleMultiRemove = () => {};
+
   const handleMultiSelected = (selectedId: string) => {
     // relationCreateMutation.mutate()
   };
@@ -112,12 +127,12 @@ export const EntityDetailRelationTypeBlock: React.FC<
           {relations.map((relation, key) => (
             <StyledRelation key={key}>
               {relation.entityIds.map((entityId, key) => {
-                const entity = entities?.find((e) => e.id === entityId);
+                const relationEntity = entities?.find((e) => e.id === entityId);
                 return (
                   <React.Fragment key={key}>
-                    {entity && (
+                    {relationEntity && relationEntity.id !== entity.id && (
                       <EntityTag
-                        entity={entity}
+                        entity={relationEntity}
                         button={
                           <Button
                             key="d"
@@ -127,7 +142,12 @@ export const EntityDetailRelationTypeBlock: React.FC<
                             tooltip="unlink"
                             onClick={() => {
                               // TODO: unlink for coudType (removeRelation if empty)
-                              // removeRelation for multiple
+                              if (isCloudType) {
+                                handleCloudRemove(relationEntity.id);
+                              } else {
+                                // removeRelation for multiple
+                                handleMultiRemove();
+                              }
                             }}
                           />
                         }
@@ -136,10 +156,6 @@ export const EntityDetailRelationTypeBlock: React.FC<
                   </React.Fragment>
                 );
               })}
-              <Button
-                label="Remove relation"
-                onClick={() => relationDeleteMutation.mutate(relation.id)}
-              />
             </StyledRelation>
           ))}
           <EntitySuggester
