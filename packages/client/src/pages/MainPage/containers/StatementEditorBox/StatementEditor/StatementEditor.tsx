@@ -709,7 +709,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                             tooltip="unlink actant from tags"
                             icon={<FaUnlink />}
                             color="plain"
-                            inverted={true}
+                            inverted
                             onClick={() => {
                               removeTag(tag);
                             }}

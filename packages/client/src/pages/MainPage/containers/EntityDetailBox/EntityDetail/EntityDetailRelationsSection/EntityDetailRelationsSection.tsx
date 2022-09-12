@@ -101,7 +101,7 @@ export const EntityDetailRelationsSection: React.FC<
       return res.data;
     },
     {
-      enabled: api.isLoggedIn(),
+      enabled: api.isLoggedIn() && noDuplicates.length > 0,
     }
   );
 
@@ -111,15 +111,20 @@ export const EntityDetailRelationsSection: React.FC<
         const filteredRelations = relations.filter(
           (r) => r.type === relationType
         );
+        const isCloudType = Relation.RelationRules[relationType].cloudType;
+        const isMultiple = Relation.RelationRules[relationType].multiple;
         return (
           <EntityDetailRelationTypeBlock
             key={key}
             entities={entities}
             relationType={relationType}
             relations={filteredRelations}
+            isCloudType={isCloudType}
+            isMultiple={isMultiple}
             relationCreateMutation={relationCreateMutation}
             relationUpdateMutation={relationUpdateMutation}
             relationDeleteMutation={relationDeleteMutation}
+            entity={entity}
           />
         );
       })}

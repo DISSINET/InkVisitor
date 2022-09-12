@@ -94,7 +94,10 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
       const newRights: IUserRight[] = [
         ...oldUser.rights.filter((right) => right.territory !== territoryId),
       ];
-      newRights.push({ territory: territoryId, mode: mode as UserEnums.RoleMode });
+      newRights.push({
+        territory: territoryId,
+        mode: mode as UserEnums.RoleMode,
+      });
       userMutation.mutate({ id: userId, rights: newRights });
     }
   };
@@ -266,7 +269,7 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
                                   tooltip="remove territory from rights"
                                   icon={<FaUnlink />}
                                   color="plain"
-                                  inverted={true}
+                                  inverted
                                   onClick={() => {
                                     removeRightFromUser(
                                       userId,
@@ -344,7 +347,7 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
                                     tooltip="remove territory from rights"
                                     icon={<FaUnlink />}
                                     color="plain"
-                                    inverted={true}
+                                    inverted
                                     onClick={() => {
                                       removeRightFromUser(
                                         userId,
@@ -486,8 +489,9 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
 
       <Submit
         title={`Delete User ${removingUser ? removingUser.name : ""}`}
-        text={`Do you really want do delete User ${removingUser ? removingUser.name : ""
-          }?`}
+        text={`Do you really want do delete User ${
+          removingUser ? removingUser.name : ""
+        }?`}
         show={removingUser != false}
         onSubmit={() => {
           removeUser();

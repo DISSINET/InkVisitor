@@ -59,7 +59,7 @@ export const StatementEditorActantClassification: React.FC<
                     tooltip="unlink classification"
                     icon={<FaUnlink />}
                     color="plain"
-                    inverted={true}
+                    inverted
                     onClick={() => {
                       updateActant(sActant.id, {
                         classifications: classifications.map((c) =>
@@ -134,7 +134,7 @@ export const StatementEditorActantClassification: React.FC<
               key="d"
               icon={<FaTrashAlt />}
               color="plain"
-              inverted={true}
+              inverted
               tooltip="remove classification row"
               onClick={() => {
                 updateActant(sActant.id, {
@@ -150,7 +150,7 @@ export const StatementEditorActantClassification: React.FC<
               key="neg"
               tooltip="Negative logic"
               color="success"
-              inverted={true}
+              inverted
               noBorder
               icon={<AttributeIcon attributeName={"negation"} />}
               onClick={() => setClassificationModalOpen(true)}
