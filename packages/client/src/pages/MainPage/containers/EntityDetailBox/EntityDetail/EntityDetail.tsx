@@ -539,40 +539,36 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
                 Meta properties
               </StyledDetailSectionHeader>
               <StyledDetailSectionContent firstSection>
-                <table>
-                  <tbody>
-                    <PropGroup
-                      boxEntity={entity}
-                      originId={entity.id}
-                      entities={entity.entities}
-                      props={entity.props}
-                      territoryId={territoryId}
-                      updateProp={updateProp}
-                      removeProp={removeProp}
-                      addProp={addMetaProp}
-                      userCanEdit={userCanEdit}
-                      openDetailOnCreate={false}
-                      movePropToIndex={(propId, oldIndex, newIndex) => {
-                        movePropToIndex(propId, oldIndex, newIndex);
-                      }}
-                      category={DraggedPropRowCategory.META_PROP}
-                      disabledAttributes={
-                        {
-                          statement: [
-                            "elvl",
-                            "moodvariant",
-                            "mood",
-                            "bundleOperator",
-                          ],
-                          type: ["elvl", "logic", "virtuality", "partitivity"],
-                          value: ["elvl", "logic", "virtuality", "partitivity"],
-                        } as PropAttributeFilter
-                      }
-                      isInsideTemplate={entity.isTemplate || false}
-                      territoryParentId={getTerritoryId(entity)}
-                    />
-                  </tbody>
-                </table>
+                <PropGroup
+                  boxEntity={entity}
+                  originId={entity.id}
+                  entities={entity.entities}
+                  props={entity.props}
+                  territoryId={territoryId}
+                  updateProp={updateProp}
+                  removeProp={removeProp}
+                  addProp={addMetaProp}
+                  userCanEdit={userCanEdit}
+                  openDetailOnCreate={false}
+                  movePropToIndex={(propId, oldIndex, newIndex) => {
+                    movePropToIndex(propId, oldIndex, newIndex);
+                  }}
+                  category={DraggedPropRowCategory.META_PROP}
+                  disabledAttributes={
+                    {
+                      statement: [
+                        "elvl",
+                        "moodvariant",
+                        "mood",
+                        "bundleOperator",
+                      ],
+                      type: ["elvl", "logic", "virtuality", "partitivity"],
+                      value: ["elvl", "logic", "virtuality", "partitivity"],
+                    } as PropAttributeFilter
+                  }
+                  isInsideTemplate={entity.isTemplate || false}
+                  territoryParentId={getTerritoryId(entity)}
+                />
                 {userCanEdit && (
                   <Button
                     color="primary"
