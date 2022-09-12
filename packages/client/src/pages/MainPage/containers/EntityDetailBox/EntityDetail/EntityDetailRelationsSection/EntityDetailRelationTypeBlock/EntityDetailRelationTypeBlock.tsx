@@ -111,10 +111,17 @@ export const EntityDetailRelationTypeBlock: React.FC<
     }
   };
 
-  const handleMultiRemove = () => {};
+  const handleMultiRemove = (relationId: string) => {
+    relationDeleteMutation.mutate(relationId);
+  };
 
   const handleMultiSelected = (selectedId: string) => {
-    // relationCreateMutation.mutate()
+    const newRelation: Relation.IModel = {
+      id: uuidv4(),
+      entityIds: [entity.id, selectedId],
+      type: relationType as RelationEnums.Type,
+    };
+    relationCreateMutation.mutate(newRelation);
   };
 
   return (
@@ -141,12 +148,10 @@ export const EntityDetailRelationTypeBlock: React.FC<
                             inverted
                             tooltip="unlink"
                             onClick={() => {
-                              // TODO: unlink for coudType (removeRelation if empty)
                               if (isCloudType) {
                                 handleCloudRemove(relationEntity.id);
                               } else {
-                                // removeRelation for multiple
-                                handleMultiRemove();
+                                handleMultiRemove(relation.id);
                               }
                             }}
                           />
@@ -169,7 +174,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
                 if (isCloudType) {
                   handleCloudSelected(selectedId);
                 } else {
-                  console.log("multiple type");
+                  handleMultiSelected(selectedId);
                 }
               }
             }
