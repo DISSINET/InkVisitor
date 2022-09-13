@@ -6,7 +6,7 @@ import {
 } from "@shared/types";
 import { Relation } from "@shared/types/relation";
 import { AxiosResponse } from "axios";
-import { Button } from "components";
+import { Button, Dropdown } from "components";
 import { EntitySuggester, EntityTag } from "components/advanced";
 import React from "react";
 import { UseMutationResult } from "react-query";
@@ -19,7 +19,7 @@ import {
   StyledEntityWrapper,
   StyledRelation,
 } from "./EntityDetailRelationTypeBlockStyles";
-import { entitiesDict } from "@shared/dictionaries";
+import { certaintyDict, entitiesDict } from "@shared/dictionaries";
 import { v4 as uuidv4 } from "uuid";
 import { FaUnlink } from "react-icons/fa";
 
@@ -189,6 +189,21 @@ export const EntityDetailRelationTypeBlock: React.FC<
                   </React.Fragment>
                 );
               })}
+              {relationType === RelationEnums.Type.Identification && (
+                <Dropdown
+                  width={180}
+                  options={certaintyDict}
+                  value={{
+                    value: (relation as Relation.IIdentification).certainty,
+                  }}
+                  onChange={(newValue: any) => {
+                    relationUpdateMutation.mutate({
+                      relationId: relation.id,
+                      changes: { certainty: newValue.value as string },
+                    });
+                  }}
+                />
+              )}
             </StyledRelation>
           ))}
           <EntitySuggester
