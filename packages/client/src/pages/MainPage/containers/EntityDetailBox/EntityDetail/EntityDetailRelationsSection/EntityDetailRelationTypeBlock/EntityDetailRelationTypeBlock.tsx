@@ -67,19 +67,41 @@ export const EntityDetailRelationTypeBlock: React.FC<
   entity,
 }) => {
   const getCategoryTypes = (): EntityEnums.ExtendedClass[] | undefined => {
-    // TODO: solve for assymetrical! (from another side)
+    // TODO: solve for asymetrical! (from another side)
     const entitiesPattern =
       Relation.RelationRules[relationType].allowedEntitiesPattern;
+
     if (entitiesPattern.length > 0) {
       if (isCloudType) {
         return entitiesPattern.flat(1);
-      } else {
+      } else if (!Relation.RelationRules[relationType].asymmetrical) {
+        // Symetrical
+        // TODO: probably change to filter - works only for first found relationship
         const pair = entitiesPattern.find((array) => array[0] === entity.class);
         if (pair) {
           return [pair[1]];
         }
+      } else {
+        // Asymetrical
+        let collectedEntities: EntityEnums.Class[] = [];
+        const leftSide = entitiesPattern.filter(
+          (array) => array[0] === entity.class
+        );
+        if (leftSide.length > 0) {
+          const collectedLeft = leftSide.map((r) => r[1]);
+          collectedEntities.push(...collectedLeft);
+        }
+        const rightSide = entitiesPattern.filter(
+          (array) => array[1] === entity.class
+        );
+        if (rightSide.length > 0) {
+          const collectedRight = rightSide.map((r) => r[0]);
+          collectedEntities.push(...collectedRight);
+        }
+        return collectedEntities;
       }
     } else {
+      // Multiple
       return entitiesDict.map((e) => e.value as EntityEnums.Class);
     }
   };
