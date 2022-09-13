@@ -67,7 +67,6 @@ export const EntityDetailRelationTypeBlock: React.FC<
   entity,
 }) => {
   const getCategoryTypes = (): EntityEnums.ExtendedClass[] | undefined => {
-    // TODO: solve for asymetrical! (from another side)
     const entitiesPattern =
       Relation.RelationRules[relationType].allowedEntitiesPattern;
 
@@ -76,10 +75,11 @@ export const EntityDetailRelationTypeBlock: React.FC<
         return entitiesPattern.flat(1);
       } else if (!Relation.RelationRules[relationType].asymmetrical) {
         // Symetrical
-        // TODO: probably change to filter - works only for first found relationship
-        const pair = entitiesPattern.find((array) => array[0] === entity.class);
-        if (pair) {
-          return [pair[1]];
+        const pairs = entitiesPattern.filter(
+          (array) => array[0] === entity.class
+        );
+        if (pairs.length > 0) {
+          return [...new Set(pairs.map((pair) => pair[1]))];
         }
       } else {
         // Asymetrical
@@ -98,7 +98,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
           const collectedRight = rightSide.map((r) => r[0]);
           collectedEntities.push(...collectedRight);
         }
-        return collectedEntities;
+        return [...new Set(collectedEntities)];
       }
     } else {
       // Multiple
