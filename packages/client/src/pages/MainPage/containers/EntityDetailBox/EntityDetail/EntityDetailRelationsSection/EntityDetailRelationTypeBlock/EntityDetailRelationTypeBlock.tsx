@@ -189,12 +189,18 @@ export const EntityDetailRelationTypeBlock: React.FC<
                   </React.Fragment>
                 );
               })}
+              {/* TODO: Make universal!!! */}
               {relationType === RelationEnums.Type.Identification && (
                 <Dropdown
-                  width={180}
+                  width={140}
                   options={certaintyDict}
                   value={{
                     value: (relation as Relation.IIdentification).certainty,
+                    label: certaintyDict.find(
+                      (c) =>
+                        c.value ===
+                        (relation as Relation.IIdentification).certainty
+                    )?.label,
                   }}
                   onChange={(newValue: any) => {
                     relationUpdateMutation.mutate({
