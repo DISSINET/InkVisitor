@@ -67,36 +67,36 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
 
   return (
     <React.Fragment>
-      <StyledReferencesList>
-        {references && references.length > 0 && (
+      {references && references.length > 0 && (
+        <StyledReferencesList>
           <React.Fragment>
             <StyledListHeaderColumn>Resource</StyledListHeaderColumn>
             <StyledListHeaderColumn>Part</StyledListHeaderColumn>
             <StyledListHeaderColumn></StyledListHeaderColumn>
           </React.Fragment>
-        )}
 
-        {references &&
-          references.map((reference: IReference, ri: number) => {
-            const resourceEntity = entities[reference.resource];
-            const valueEntity = entities[reference.value];
-            return (
-              <EntityReferenceTableRow
-                key={ri}
-                reference={reference}
-                resource={resourceEntity}
-                value={valueEntity}
-                disabled={disabled}
-                handleRemove={handleRemove}
-                handleChangeResource={handleChangeResource}
-                handleChangeValue={handleChangeValue}
-                openDetailOnCreate={openDetailOnCreate}
-                isInsideTemplate={isInsideTemplate}
-                territoryParentId={territoryParentId}
-              />
-            );
-          })}
-      </StyledReferencesList>
+          {references &&
+            references.map((reference: IReference, ri: number) => {
+              const resourceEntity = entities[reference.resource];
+              const valueEntity = entities[reference.value];
+              return (
+                <EntityReferenceTableRow
+                  key={ri}
+                  reference={reference}
+                  resource={resourceEntity}
+                  value={valueEntity}
+                  disabled={disabled}
+                  handleRemove={handleRemove}
+                  handleChangeResource={handleChangeResource}
+                  handleChangeValue={handleChangeValue}
+                  openDetailOnCreate={openDetailOnCreate}
+                  isInsideTemplate={isInsideTemplate}
+                  territoryParentId={territoryParentId}
+                />
+              );
+            })}
+        </StyledReferencesList>
+      )}
       {!disabled && (
         <Button
           icon={<FaPlus />}

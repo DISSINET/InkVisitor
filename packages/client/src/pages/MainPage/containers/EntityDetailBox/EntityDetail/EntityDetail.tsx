@@ -538,7 +538,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
               <StyledDetailSectionHeader>
                 Meta properties
               </StyledDetailSectionHeader>
-              <StyledDetailSectionContent firstSection>
+              <StyledDetailSectionContent>
                 <PropGroup
                   boxEntity={entity}
                   originId={entity.id}
