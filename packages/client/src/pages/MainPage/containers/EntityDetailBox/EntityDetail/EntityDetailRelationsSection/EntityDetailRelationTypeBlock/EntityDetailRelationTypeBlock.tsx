@@ -15,7 +15,10 @@ import {
   StyledDetailContentRowLabel,
   StyledDetailContentRowValue,
 } from "../../EntityDetailStyles";
-import { StyledRelation } from "./EntityDetailRelationTypeBlockStyles";
+import {
+  StyledEntityWrapper,
+  StyledRelation,
+} from "./EntityDetailRelationTypeBlockStyles";
 import { entitiesDict } from "@shared/dictionaries";
 import { v4 as uuidv4 } from "uuid";
 import { FaUnlink } from "react-icons/fa";
@@ -139,25 +142,27 @@ export const EntityDetailRelationTypeBlock: React.FC<
                 return (
                   <React.Fragment key={key}>
                     {relationEntity && relationEntity.id !== entity.id && (
-                      <EntityTag
-                        entity={relationEntity}
-                        button={
-                          <Button
-                            key="d"
-                            icon={<FaUnlink />}
-                            color="plain"
-                            inverted
-                            tooltip="unlink"
-                            onClick={() => {
-                              if (isCloudType) {
-                                handleCloudRemove(relationEntity.id);
-                              } else {
-                                handleMultiRemove(relation.id);
-                              }
-                            }}
-                          />
-                        }
-                      />
+                      <StyledEntityWrapper>
+                        <EntityTag
+                          entity={relationEntity}
+                          button={
+                            <Button
+                              key="d"
+                              icon={<FaUnlink />}
+                              color="plain"
+                              inverted
+                              tooltip="unlink"
+                              onClick={() => {
+                                if (isCloudType) {
+                                  handleCloudRemove(relationEntity.id);
+                                } else {
+                                  handleMultiRemove(relation.id);
+                                }
+                              }}
+                            />
+                          }
+                        />
+                      </StyledEntityWrapper>
                     )}
                   </React.Fragment>
                 );
