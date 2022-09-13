@@ -176,6 +176,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
                 handleMultiSelected(selectedId);
               }
             }}
+            excludedActantIds={[entity.id]}
           />
         </StyledDetailContentRowValue>
       </StyledDetailContentRow>
