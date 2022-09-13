@@ -20,6 +20,8 @@ export namespace EnumValidators {
         RelationEnums.Type.Related,
         RelationEnums.Type.Classification,
         RelationEnums.Type.Identification,
+        RelationEnums.Type.Holonymy,
+        RelationEnums.Type.Implication,
       ].indexOf(input) !== -1
     );
   }
