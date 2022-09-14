@@ -8,7 +8,7 @@ import { Relation } from "@shared/types/relation";
 import { AxiosResponse } from "axios";
 import { Button, Dropdown } from "components";
 import { EntitySuggester, EntityTag } from "components/advanced";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { UseMutationResult } from "react-query";
 import {
   StyledDetailContentRow,
@@ -150,6 +150,15 @@ export const EntityDetailRelationTypeBlock: React.FC<
     relationCreateMutation.mutate(newRelation);
   };
 
+  const [usedEntityIds, setusedEntityIds] = useState<string[]>([]);
+
+  useEffect(() => {
+    const entityIds = relations
+      .map((relation) => relation.entityIds.map((entityId) => entityId))
+      .flat(1);
+    setusedEntityIds([...new Set(entityIds)]);
+  }, [entities, relations]);
+
   return (
     <>
       <StyledDetailContentRow>
@@ -225,7 +234,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
                 handleMultiSelected(selectedId);
               }
             }}
-            excludedActantIds={[entity.id]}
+            excludedActantIds={usedEntityIds}
           />
         </StyledDetailContentRowValue>
       </StyledDetailContentRow>

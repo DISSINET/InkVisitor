@@ -200,7 +200,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
                     statementListOpened ? (
                       <BsSquare />
                     ) : (
-                      <BsSquareHalf style={{ transform: "rotate(-90deg)" }} />
+                      <BsSquareHalf style={{ transform: "rotate(90deg)" }} />
                     )
                   }
                   onClick={() => {
