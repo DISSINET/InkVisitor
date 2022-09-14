@@ -4,11 +4,13 @@ import { useSearchParams } from "hooks";
 import ScrollHandler from "hooks/ScrollHandler";
 import React, { useMemo } from "react";
 import { BiHide, BiShow } from "react-icons/bi";
+import { BsSquare, BsSquareHalf } from "react-icons/bs";
 import { IoMdClose } from "react-icons/io";
 import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
 import { setFirstPanelExpanded } from "redux/features/layout/firstPanelExpandedSlice";
 import { setFourthPanelBoxesOpened } from "redux/features/layout/fourthPanelBoxesOpenedSlice";
 import { setFourthPanelExpanded } from "redux/features/layout/fourthPanelExpandedSlice";
+import { setStatementListOpened } from "redux/features/layout/statementListOpenedSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { collapsedPanelWidth, hiddenBoxHeight } from "Theme/constants";
 import { MemoizedEntityBookmarkBox } from "./containers/EntityBookmarkBox/EntityBookmarkBox";
@@ -47,6 +49,9 @@ const MainPage: React.FC<MainPage> = ({}) => {
   );
   const separatorXPosition: number = useAppSelector(
     (state) => state.layout.separatorXPosition
+  );
+  const statementListOpened: boolean = useAppSelector(
+    (state) => state.layout.statementListOpened
   );
 
   const firstPanelButton = () => (
@@ -168,20 +173,43 @@ const MainPage: React.FC<MainPage> = ({}) => {
               : panelWidths[1] + panelWidths[0] - collapsedPanelWidth
           }
         >
-          {/* <Box
+          <Box
             height={
-              detailIdArray.length ? contentHeight / 2 - 20 : contentHeight
+              detailIdArray.length
+                ? statementListOpened
+                  ? contentHeight / 2 - 20
+                  : hiddenBoxHeight
+                : contentHeight
             }
             label="Statements"
           >
             <MemoizedStatementListBox />
-          </Box> */}
+          </Box>
           {(selectedDetailId || detailIdArray.length > 0) && (
             <Box
-              // height={contentHeight / 2 + 20}
-              height={contentHeight}
+              height={
+                statementListOpened
+                  ? contentHeight / 2 + 20
+                  : contentHeight - hiddenBoxHeight
+              }
               label="Detail"
               button={[
+                <Button
+                  inverted
+                  icon={
+                    statementListOpened ? (
+                      <BsSquare />
+                    ) : (
+                      <BsSquareHalf style={{ transform: "rotate(-90deg)" }} />
+                    )
+                  }
+                  onClick={() => {
+                    statementListOpened
+                      ? localStorage.setItem("statementListOpened", "false")
+                      : localStorage.setItem("statementListOpened", "true");
+                    dispatch(setStatementListOpened(!statementListOpened));
+                  }}
+                />,
                 <Button
                   inverted
                   icon={<IoMdClose />}
