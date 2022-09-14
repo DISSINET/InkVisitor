@@ -189,10 +189,11 @@ export const EntityDetailRelationTypeBlock: React.FC<
                   </React.Fragment>
                 );
               })}
-              {/* TODO: Make universal!!! */}
+              {/* TODO: Make universal */}
               {relationType === RelationEnums.Type.Identification && (
                 <Dropdown
                   width={140}
+                  placeholder="certainty"
                   options={certaintyDict}
                   value={{
                     value: (relation as Relation.IIdentification).certainty,
