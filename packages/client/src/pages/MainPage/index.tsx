@@ -2,9 +2,9 @@ import { Box, Button, Panel } from "components";
 import { PanelSeparator } from "components/advanced";
 import { useSearchParams } from "hooks";
 import ScrollHandler from "hooks/ScrollHandler";
-import React, { useMemo } from "react";
+import React from "react";
 import { BiHide, BiShow } from "react-icons/bi";
-import { BsSquare, BsSquareHalf } from "react-icons/bs";
+import { BsSquareFill, BsSquareHalf } from "react-icons/bs";
 import { IoMdClose } from "react-icons/io";
 import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
 import { setFirstPanelExpanded } from "redux/features/layout/firstPanelExpandedSlice";
@@ -198,9 +198,9 @@ const MainPage: React.FC<MainPage> = ({}) => {
                   inverted
                   icon={
                     statementListOpened ? (
-                      <BsSquare />
-                    ) : (
                       <BsSquareHalf style={{ transform: "rotate(90deg)" }} />
+                    ) : (
+                      <BsSquareFill />
                     )
                   }
                   onClick={() => {

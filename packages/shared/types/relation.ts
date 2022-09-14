@@ -110,7 +110,7 @@ export namespace Relation {
       [EntityEnums.Class.Action],
       [EntityEnums.Class.Concept],
     ],
-    allowedSameEntityClassesOnly: false,
+    allowedSameEntityClassesOnly: true,
     asymmetrical: false,
     multiple: false,
     cloudType: true,
