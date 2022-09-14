@@ -40,6 +40,19 @@ export default class Entity implements IEntity, IDbModel {
     fillArray(this.references, Object, data.references);
     fillArray(this.notes, String, data.notes);
     fillArray(this.props, Object, data.props);
+
+    if (data.legacyId !== undefined) {
+      this.legacyId = data.legacyId;
+    }
+    if (data.isTemplate !== undefined) {
+      this.isTemplate = data.isTemplate;
+    }
+    if (data.usedTemplate !== undefined) {
+      this.usedTemplate = data.usedTemplate;
+    }
+    if (data.templateData !== undefined) {
+      this.templateData = data.templateData;
+    }
   }
 
   async save(db: Connection | undefined): Promise<WriteResult> {
