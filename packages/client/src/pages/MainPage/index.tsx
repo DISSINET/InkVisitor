@@ -115,7 +115,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
           <Button
             key={boxToHide}
             inverted
-            icon={isThisBoxHidden ? <BiHide /> : <BiShow />}
+            icon={isThisBoxHidden ? <BiShow /> : <BiHide />}
             onClick={() => handleHideBoxButtonClick(boxToHide, isThisBoxHidden)}
           />
         )}
@@ -200,9 +200,9 @@ const MainPage: React.FC<MainPage> = ({}) => {
                   inverted
                   icon={
                     statementListOpened ? (
-                      <BsSquareHalf style={{ transform: "rotate(90deg)" }} />
-                    ) : (
                       <BsSquareFill />
+                    ) : (
+                      <BsSquareHalf style={{ transform: "rotate(90deg)" }} />
                     )
                   }
                   onClick={() => {
