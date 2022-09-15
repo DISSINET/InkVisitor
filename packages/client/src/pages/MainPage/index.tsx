@@ -174,6 +174,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
           }
         >
           <Box
+            borderColor="white"
             height={
               detailIdArray.length
                 ? statementListOpened
@@ -187,6 +188,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
           </Box>
           {(selectedDetailId || detailIdArray.length > 0) && (
             <Box
+              borderColor="white"
               height={
                 statementListOpened
                   ? contentHeight / 2 + 20
@@ -233,7 +235,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
               : panelWidths[2] + panelWidths[3] - collapsedPanelWidth
           }
         >
-          <Box height={contentHeight} label="Editor">
+          <Box borderColor="white" height={contentHeight} label="Editor">
             <MemoizedStatementEditorBox />
           </Box>
         </Panel>
