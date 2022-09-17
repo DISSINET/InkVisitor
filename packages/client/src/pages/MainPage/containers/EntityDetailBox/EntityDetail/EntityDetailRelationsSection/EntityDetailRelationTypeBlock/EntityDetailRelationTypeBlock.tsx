@@ -163,7 +163,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
     setusedEntityIds([...new Set(entityIds)]);
   }, [entities, relations]);
 
-  const renderRelation = (relation: Relation.IModel, key: number) => (
+  const renderNonCloudRelation = (relation: Relation.IModel, key: number) => (
     <StyledRelation key={key}>
       {relation.entityIds.map((entityId, key) => {
         const relationEntity = entities?.find((e) => e.id === entityId);
@@ -174,20 +174,24 @@ export const EntityDetailRelationTypeBlock: React.FC<
                 <EntityTag
                   entity={relationEntity}
                   button={
-                    <Button
-                      key="d"
-                      icon={<FaUnlink />}
-                      color="plain"
-                      inverted
-                      tooltip="unlink"
-                      onClick={() => {
-                        if (isCloudType) {
-                          handleCloudRemove(relationEntity.id);
-                        } else {
-                          handleMultiRemove(relation.id);
-                        }
-                      }}
-                    />
+                    (Relation.RelationRules[relationType].asymmetrical &&
+                      key > 0) ||
+                    (!Relation.RelationRules[relationType].asymmetrical && (
+                      <Button
+                        key="d"
+                        icon={<FaUnlink />}
+                        color="plain"
+                        inverted
+                        tooltip="unlink"
+                        onClick={() => {
+                          if (isCloudType) {
+                            handleCloudRemove(relationEntity.id);
+                          } else {
+                            handleMultiRemove(relation.id);
+                          }
+                        }}
+                      />
+                    ))
                   }
                 />
               </StyledEntityWrapper>
@@ -228,9 +232,9 @@ export const EntityDetailRelationTypeBlock: React.FC<
         <StyledDetailContentRowValue>
           {relations.map((relation, key) =>
             isCloudType ? (
-              <Cloud key={key}>{renderRelation(relation, key)}</Cloud>
+              <Cloud key={key}>{renderNonCloudRelation(relation, key)}</Cloud>
             ) : (
-              renderRelation(relation, key)
+              renderNonCloudRelation(relation, key)
             )
           )}
           <EntitySuggester
