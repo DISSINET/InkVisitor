@@ -6,7 +6,7 @@ import {
 } from "@shared/types";
 import { Relation } from "@shared/types/relation";
 import { AxiosResponse } from "axios";
-import { Button, Dropdown } from "components";
+import { Button, Cloud, Dropdown } from "components";
 import { EntitySuggester, EntityTag } from "components/advanced";
 import React, { useEffect, useState } from "react";
 import { UseMutationResult } from "react-query";
@@ -163,7 +163,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
     setusedEntityIds([...new Set(entityIds)]);
   }, [entities, relations]);
 
-  const renderRelation = (relation: Relation.IModel, key: number) => {
+  const renderRelation = (relation: Relation.IModel, key: number) => (
     <StyledRelation key={key}>
       {relation.entityIds.map((entityId, key) => {
         const relationEntity = entities?.find((e) => e.id === entityId);
@@ -216,8 +216,8 @@ export const EntityDetailRelationTypeBlock: React.FC<
           }}
         />
       )}
-    </StyledRelation>;
-  };
+    </StyledRelation>
+  );
 
   return (
     <>
@@ -226,7 +226,13 @@ export const EntityDetailRelationTypeBlock: React.FC<
           {Relation.RelationRules[relationType].label}
         </StyledDetailContentRowLabel>
         <StyledDetailContentRowValue>
-          {relations.map((relation, key) => renderRelation(relation, key))}
+          {relations.map((relation, key) =>
+            isCloudType ? (
+              <Cloud key={key}>{renderRelation(relation, key)}</Cloud>
+            ) : (
+              renderRelation(relation, key)
+            )
+          )}
           <EntitySuggester
             categoryTypes={
               getCategoryTypes() ||
