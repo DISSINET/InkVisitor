@@ -73,7 +73,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
     if (entitiesPattern.length > 0) {
       if (isCloudType) {
         if (Relation.RelationRules[relationType].allowedSameEntityClassesOnly) {
-            return [entity.class];
+          return [entity.class];
         } else {
           return entitiesPattern.flat(1);
         }
@@ -163,6 +163,62 @@ export const EntityDetailRelationTypeBlock: React.FC<
     setusedEntityIds([...new Set(entityIds)]);
   }, [entities, relations]);
 
+  const renderRelation = (relation: Relation.IModel, key: number) => {
+    <StyledRelation key={key}>
+      {relation.entityIds.map((entityId, key) => {
+        const relationEntity = entities?.find((e) => e.id === entityId);
+        return (
+          <React.Fragment key={key}>
+            {relationEntity && relationEntity.id !== entity.id && (
+              <StyledEntityWrapper>
+                <EntityTag
+                  entity={relationEntity}
+                  button={
+                    <Button
+                      key="d"
+                      icon={<FaUnlink />}
+                      color="plain"
+                      inverted
+                      tooltip="unlink"
+                      onClick={() => {
+                        if (isCloudType) {
+                          handleCloudRemove(relationEntity.id);
+                        } else {
+                          handleMultiRemove(relation.id);
+                        }
+                      }}
+                    />
+                  }
+                />
+              </StyledEntityWrapper>
+            )}
+          </React.Fragment>
+        );
+      })}
+      {/* TODO: Make universal */}
+      {relationType === RelationEnums.Type.Identification && (
+        <Dropdown
+          width={140}
+          placeholder="certainty"
+          options={certaintyDict}
+          value={{
+            value: (relation as Relation.IIdentification).certainty,
+            label: certaintyDict.find(
+              (c) =>
+                c.value === (relation as Relation.IIdentification).certainty
+            )?.label,
+          }}
+          onChange={(newValue: any) => {
+            relationUpdateMutation.mutate({
+              relationId: relation.id,
+              changes: { certainty: newValue.value as string },
+            });
+          }}
+        />
+      )}
+    </StyledRelation>;
+  };
+
   return (
     <>
       <StyledDetailContentRow>
@@ -170,62 +226,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
           {Relation.RelationRules[relationType].label}
         </StyledDetailContentRowLabel>
         <StyledDetailContentRowValue>
-          {relations.map((relation, key) => (
-            <StyledRelation key={key}>
-              {relation.entityIds.map((entityId, key) => {
-                const relationEntity = entities?.find((e) => e.id === entityId);
-                return (
-                  <React.Fragment key={key}>
-                    {relationEntity && relationEntity.id !== entity.id && (
-                      <StyledEntityWrapper>
-                        <EntityTag
-                          entity={relationEntity}
-                          button={
-                            <Button
-                              key="d"
-                              icon={<FaUnlink />}
-                              color="plain"
-                              inverted
-                              tooltip="unlink"
-                              onClick={() => {
-                                if (isCloudType) {
-                                  handleCloudRemove(relationEntity.id);
-                                } else {
-                                  handleMultiRemove(relation.id);
-                                }
-                              }}
-                            />
-                          }
-                        />
-                      </StyledEntityWrapper>
-                    )}
-                  </React.Fragment>
-                );
-              })}
-              {/* TODO: Make universal */}
-              {relationType === RelationEnums.Type.Identification && (
-                <Dropdown
-                  width={140}
-                  placeholder="certainty"
-                  options={certaintyDict}
-                  value={{
-                    value: (relation as Relation.IIdentification).certainty,
-                    label: certaintyDict.find(
-                      (c) =>
-                        c.value ===
-                        (relation as Relation.IIdentification).certainty
-                    )?.label,
-                  }}
-                  onChange={(newValue: any) => {
-                    relationUpdateMutation.mutate({
-                      relationId: relation.id,
-                      changes: { certainty: newValue.value as string },
-                    });
-                  }}
-                />
-              )}
-            </StyledRelation>
-          ))}
+          {relations.map((relation, key) => renderRelation(relation, key))}
           <EntitySuggester
             categoryTypes={
               getCategoryTypes() ||

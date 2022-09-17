@@ -59,7 +59,7 @@ export const Box: React.FC<BoxProps> = ({
       height={height}
     >
       <StyledHead
-        borderColor={borderColor}
+        $borderColor={borderColor}
         $isExpanded={isExpanded}
         color={color}
         $noPadding={noPadding}
@@ -79,7 +79,7 @@ export const Box: React.FC<BoxProps> = ({
       </StyledHead>
       <StyledContent
         color={color}
-        borderColor={borderColor}
+        $borderColor={borderColor}
         $noPadding={noPadding}
         $isExpanded={isExpanded}
         style={{

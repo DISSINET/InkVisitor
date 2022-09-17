@@ -1,5 +1,6 @@
 import { AttributeButtonGroup } from "./AttributeButtonGroup/AttributeButtonGroup";
 import { EmptyTag } from "./EmptyTag/EmptyTag";
+import { EntityCloud } from "./EntityCloud/EntityCloud";
 import { EntitySuggester } from "./EntitySuggester/EntitySuggester";
 import { EntityTag } from "./EntityTag/EntityTag";
 import { LoginModal, MemoizedLoginModal } from "./LoginModal/LoginModal";
@@ -11,6 +12,7 @@ import { UserCustomizationModal } from "./UserCustomizationModal/UserCustomizati
 export {
   AttributeButtonGroup,
   EmptyTag,
+  EntityCloud,
   EntitySuggester,
   EntityTag,
   LoginModal,
