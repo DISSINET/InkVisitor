@@ -174,24 +174,26 @@ export const EntityDetailRelationTypeBlock: React.FC<
                 <EntityTag
                   entity={relationEntity}
                   button={
-                    (Relation.RelationRules[relationType].asymmetrical &&
+                    (!isCloudType &&
+                      Relation.RelationRules[relationType].asymmetrical &&
                       key > 0) ||
-                    (!Relation.RelationRules[relationType].asymmetrical && (
-                      <Button
-                        key="d"
-                        icon={<FaUnlink />}
-                        color="plain"
-                        inverted
-                        tooltip="unlink"
-                        onClick={() => {
-                          if (isCloudType) {
-                            handleCloudRemove(relationEntity.id);
-                          } else {
-                            handleMultiRemove(relation.id);
-                          }
-                        }}
-                      />
-                    ))
+                    (!isCloudType &&
+                      !Relation.RelationRules[relationType].asymmetrical && (
+                        <Button
+                          key="d"
+                          icon={<FaUnlink />}
+                          color="plain"
+                          inverted
+                          tooltip="unlink"
+                          onClick={() => {
+                            if (isCloudType) {
+                              handleCloudRemove(relationEntity.id);
+                            } else {
+                              handleMultiRemove(relation.id);
+                            }
+                          }}
+                        />
+                      ))
                   }
                 />
               </StyledEntityWrapper>
@@ -232,25 +234,34 @@ export const EntityDetailRelationTypeBlock: React.FC<
         <StyledDetailContentRowValue>
           {relations.map((relation, key) =>
             isCloudType ? (
-              <Cloud key={key}>{renderNonCloudRelation(relation, key)}</Cloud>
+              <Cloud
+                key={key}
+                onUnlink={() => console.log("unlink from cloud")}
+              >
+                {renderNonCloudRelation(relation, key)}
+              </Cloud>
             ) : (
               renderNonCloudRelation(relation, key)
             )
           )}
-          <EntitySuggester
-            categoryTypes={
-              getCategoryTypes() ||
-              ([EntityEnums.Extension.Empty] as [EntityEnums.ExtendedClass])
-            }
-            onSelected={(selectedId: string) => {
-              if (isCloudType) {
-                handleCloudSelected(selectedId);
-              } else {
-                handleMultiSelected(selectedId);
-              }
-            }}
-            excludedActantIds={usedEntityIds}
-          />
+          {!(isCloudType && relations.length > 0) && (
+            <div style={{ marginTop: "0.3rem" }}>
+              <EntitySuggester
+                categoryTypes={
+                  getCategoryTypes() ||
+                  ([EntityEnums.Extension.Empty] as [EntityEnums.ExtendedClass])
+                }
+                onSelected={(selectedId: string) => {
+                  if (isCloudType) {
+                    handleCloudSelected(selectedId);
+                  } else {
+                    handleMultiSelected(selectedId);
+                  }
+                }}
+                excludedActantIds={usedEntityIds}
+              />
+            </div>
+          )}
         </StyledDetailContentRowValue>
       </StyledDetailContentRow>
     </>
