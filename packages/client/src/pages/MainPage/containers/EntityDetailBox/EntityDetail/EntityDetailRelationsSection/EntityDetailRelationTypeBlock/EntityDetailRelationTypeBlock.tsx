@@ -72,7 +72,11 @@ export const EntityDetailRelationTypeBlock: React.FC<
 
     if (entitiesPattern.length > 0) {
       if (isCloudType) {
-        return entitiesPattern.flat(1);
+        if (Relation.RelationRules[relationType].allowedSameEntityClassesOnly) {
+            return [entity.class];
+        } else {
+          return entitiesPattern.flat(1);
+        }
       } else if (!Relation.RelationRules[relationType].asymmetrical) {
         // Symetrical
         const pairs = entitiesPattern.filter(
