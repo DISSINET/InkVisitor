@@ -16,6 +16,7 @@ import {
   StyledDetailContentRowValue,
 } from "../../EntityDetailStyles";
 import {
+  StyledCloudEntityWrapper,
   StyledEntityWrapper,
   StyledRelation,
 } from "./EntityDetailRelationTypeBlockStyles";
@@ -170,9 +171,9 @@ export const EntityDetailRelationTypeBlock: React.FC<
         return (
           <React.Fragment key={key}>
             {relationEntity && relationEntity.id !== entity.id && (
-              <StyledEntityWrapper>
+              <StyledCloudEntityWrapper>
                 <EntityTag entity={relationEntity} />
-              </StyledEntityWrapper>
+              </StyledCloudEntityWrapper>
             )}
           </React.Fragment>
         );
@@ -249,7 +250,6 @@ export const EntityDetailRelationTypeBlock: React.FC<
                 key={key}
                 onUnlink={() => console.log("unlink from cloud")}
               >
-                {/* {renderNonCloudRelation(relation, key)} */}
                 {renderCloudRelation(relation, key)}
               </Cloud>
             ) : (
