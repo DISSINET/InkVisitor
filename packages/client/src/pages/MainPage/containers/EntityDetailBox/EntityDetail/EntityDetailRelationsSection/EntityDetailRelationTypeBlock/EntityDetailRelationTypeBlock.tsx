@@ -262,7 +262,8 @@ export const EntityDetailRelationTypeBlock: React.FC<
                 }
                 onSelected={(selectedId: string) => {
                   if (isCloudType) {
-                    handleCloudSelected(selectedId);
+                    // TODO: new BE function to adding to cloud
+                    // handleCloudSelected(selectedId);
                   } else {
                     handleMultiSelected(selectedId);
                   }
