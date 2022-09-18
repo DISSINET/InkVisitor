@@ -253,7 +253,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
               renderNonCloudRelation(relation, key)
             )
           )}
-          {!(isCloudType && relations.length > 0) && (
+          {!isCloudType && (
             <div style={{ marginTop: "0.3rem" }}>
               <EntitySuggester
                 categoryTypes={
