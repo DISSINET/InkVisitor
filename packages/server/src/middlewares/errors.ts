@@ -23,7 +23,7 @@ export default function errorsMiddleware(
 ): void {
   // should expect customized errors, unknown unhandled errors, or errors thrown from some lib
   const isCustomError = typeof (err as CustomError).statusCode === "function";
-
+  console.log("original err", err)
   if (!isCustomError) {
     if (err instanceof JwtUnauthorizedError) {
       // customized unauthorized error
@@ -34,6 +34,7 @@ export default function errorsMiddleware(
       err = internalServerError;
     }
   } else if ((err as CustomError).shouldLog()) {
+    console.trace();
     logger.error(`${(err as CustomError).name}: ${(err as CustomError).log}`);
   }
 
@@ -43,6 +44,8 @@ export default function errorsMiddleware(
     error: err.constructor.name as errorTypes,
     message: err.message,
   };
+
+  console.trace();
 
   res.status((err as CustomError).statusCode()).json(genericResponse);
 }
