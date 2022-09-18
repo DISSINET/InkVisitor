@@ -15,14 +15,14 @@ export class CustomError extends Error {
   //public name: string = ""; // Stands for class name, replaces default 'Error' string from parent constructor
   //public message: string = ""; // this is what will be printed in output - public text, some error classes have overriden message attr
 
-  constructor(message?: string) {
+  constructor(message?: string, loggableMessage?: string) {
     super(message);
-    this.log = message || "";
     this.name = this.constructor.name; // so the value would be taken from the constructor - not the default Error
     this.title = (this.constructor as any).title;
     if (!message) {
       this.message = (this.constructor as any).message;
     }
+    this.log = loggableMessage || message || "";
   }
 
   statusCode(): number {
