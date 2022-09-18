@@ -217,6 +217,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
                   icon={<IoMdClose />}
                   onClick={() => {
                     clearAllDetailIds();
+                    dispatch(setStatementListOpened(true));
                   }}
                 />,
               ]}

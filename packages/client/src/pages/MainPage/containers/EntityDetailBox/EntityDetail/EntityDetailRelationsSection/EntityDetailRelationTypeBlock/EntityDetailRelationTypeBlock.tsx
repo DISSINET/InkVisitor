@@ -128,10 +128,10 @@ export const EntityDetailRelationTypeBlock: React.FC<
     }
   };
 
-  const handleCloudRemove = (entityId: string) => {
+  const handleCloudRemove = () => {
     if (relations[0]?.entityIds?.length > 2) {
       const newEntityIds = relations[0].entityIds.filter(
-        (eId) => eId !== entityId
+        (eId) => eId !== entity.id
       );
       relationUpdateMutation.mutate({
         relationId: relations[0].id,
@@ -246,10 +246,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
         <StyledDetailContentRowValue>
           {relations.map((relation, key) =>
             isCloudType ? (
-              <Cloud
-                key={key}
-                onUnlink={() => console.log("unlink from cloud")}
-              >
+              <Cloud key={key} onUnlink={() => handleCloudRemove()}>
                 {renderCloudRelation(relation, key)}
               </Cloud>
             ) : (
