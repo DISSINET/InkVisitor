@@ -18,6 +18,7 @@ import {
 import {
   StyledCloudEntityWrapper,
   StyledEntityWrapper,
+  StyledGrid,
   StyledRelation,
 } from "./EntityDetailRelationTypeBlockStyles";
 import { certaintyDict, entitiesDict } from "@shared/dictionaries";
@@ -67,18 +68,19 @@ export const EntityDetailRelationTypeBlock: React.FC<
   isMultiple,
   entity,
 }) => {
+  const relationRule = Relation.RelationRules[relationType];
+
   const getCategoryTypes = (): EntityEnums.ExtendedClass[] | undefined => {
-    const entitiesPattern =
-      Relation.RelationRules[relationType].allowedEntitiesPattern;
+    const entitiesPattern = relationRule.allowedEntitiesPattern;
 
     if (entitiesPattern.length > 0) {
       if (isCloudType) {
-        if (Relation.RelationRules[relationType].allowedSameEntityClassesOnly) {
+        if (relationRule.allowedSameEntityClassesOnly) {
           return [entity.class];
         } else {
           return entitiesPattern.flat(1);
         }
-      } else if (!Relation.RelationRules[relationType].asymmetrical) {
+      } else if (!relationRule.asymmetrical) {
         // Symetrical
         const pairs = entitiesPattern.filter(
           (array) => array[0] === entity.class
@@ -182,66 +184,70 @@ export const EntityDetailRelationTypeBlock: React.FC<
   );
 
   const unlinkButtonEnabled = (key: number) =>
-    !Relation.RelationRules[relationType].asymmetrical ||
-    (Relation.RelationRules[relationType].asymmetrical && key > 0);
+    !relationRule.asymmetrical || (relationRule.asymmetrical && key > 0);
 
   const renderNonCloudRelation = (relation: Relation.IModel, key: number) => (
-    <StyledRelation key={key}>
-      {relation.entityIds.map((entityId, key) => {
-        const relationEntity = entities?.find((e) => e.id === entityId);
-        return (
-          <React.Fragment key={key}>
-            {relationEntity && relationEntity.id !== entity.id && (
-              <StyledEntityWrapper>
-                <EntityTag
-                  entity={relationEntity}
-                  button={
-                    unlinkButtonEnabled(key) && (
-                      <Button
-                        key="d"
-                        icon={<FaUnlink />}
-                        color="plain"
-                        inverted
-                        tooltip="unlink"
-                        onClick={() => handleMultiRemove(relation.id)}
-                      />
-                    )
-                  }
-                />
-              </StyledEntityWrapper>
-            )}
-          </React.Fragment>
-        );
-      })}
+    <StyledGrid hasAttribute={relationRule.attributes.length > 0}>
+      <StyledRelation key={key}>
+        {relation.entityIds.map((entityId, key) => {
+          const relationEntity = entities?.find((e) => e.id === entityId);
+          return (
+            <React.Fragment key={key}>
+              {relationEntity && relationEntity.id !== entity.id && (
+                <StyledEntityWrapper key={key}>
+                  <EntityTag
+                    fullWidth
+                    entity={relationEntity}
+                    button={
+                      unlinkButtonEnabled(key) && (
+                        <Button
+                          key="d"
+                          icon={<FaUnlink />}
+                          color="plain"
+                          inverted
+                          tooltip="unlink"
+                          onClick={() => handleMultiRemove(relation.id)}
+                        />
+                      )
+                    }
+                  />
+                </StyledEntityWrapper>
+              )}
+            </React.Fragment>
+          );
+        })}
+      </StyledRelation>
       {/* TODO: Make universal */}
       {relationType === RelationEnums.Type.Identification && (
-        <Dropdown
-          width={140}
-          placeholder="certainty"
-          options={certaintyDict}
-          value={{
-            value: (relation as Relation.IIdentification).certainty,
-            label: certaintyDict.find(
-              (c) =>
-                c.value === (relation as Relation.IIdentification).certainty
-            )?.label,
-          }}
-          onChange={(newValue: any) => {
-            relationUpdateMutation.mutate({
-              relationId: relation.id,
-              changes: { certainty: newValue.value as string },
-            });
-          }}
-        />
+        <div>
+          <Dropdown
+            width={140}
+            placeholder="certainty"
+            options={certaintyDict}
+            value={{
+              value: (relation as Relation.IIdentification).certainty,
+              label: certaintyDict.find(
+                (c) =>
+                  c.value === (relation as Relation.IIdentification).certainty
+              )?.label,
+            }}
+            onChange={(newValue: any) => {
+              relationUpdateMutation.mutate({
+                relationId: relation.id,
+                changes: { certainty: newValue.value as string },
+              });
+            }}
+          />
+        </div>
       )}
-    </StyledRelation>
+    </StyledGrid>
   );
 
   return (
     <>
       <StyledDetailContentRow>
         <StyledDetailContentRowLabel>
-          {Relation.RelationRules[relationType].label}
+          {relationRule.label}
         </StyledDetailContentRowLabel>
         <StyledDetailContentRowValue>
           {relations.map((relation, key) =>
