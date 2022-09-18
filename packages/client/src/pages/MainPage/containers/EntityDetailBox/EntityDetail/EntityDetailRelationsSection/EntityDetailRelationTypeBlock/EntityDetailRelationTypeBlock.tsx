@@ -154,14 +154,35 @@ export const EntityDetailRelationTypeBlock: React.FC<
     relationCreateMutation.mutate(newRelation);
   };
 
-  const [usedEntityIds, setusedEntityIds] = useState<string[]>([]);
+  const [usedEntityIds, setUsedEntityIds] = useState<string[]>([]);
 
   useEffect(() => {
     const entityIds = relations
       .map((relation) => relation.entityIds.map((entityId) => entityId))
       .flat(1);
-    setusedEntityIds([...new Set(entityIds)]);
+    setUsedEntityIds([...new Set(entityIds)]);
   }, [entities, relations]);
+
+  const renderCloudRelation = (relation: Relation.IModel, key: number) => (
+    <StyledRelation key={key}>
+      {relation.entityIds.map((entityId, key) => {
+        const relationEntity = entities?.find((e) => e.id === entityId);
+        return (
+          <React.Fragment key={key}>
+            {relationEntity && relationEntity.id !== entity.id && (
+              <StyledEntityWrapper>
+                <EntityTag entity={relationEntity} />
+              </StyledEntityWrapper>
+            )}
+          </React.Fragment>
+        );
+      })}
+    </StyledRelation>
+  );
+
+  const unlinkButtonEnabled = (key: number) =>
+    !Relation.RelationRules[relationType].asymmetrical ||
+    (Relation.RelationRules[relationType].asymmetrical && key > 0);
 
   const renderNonCloudRelation = (relation: Relation.IModel, key: number) => (
     <StyledRelation key={key}>
@@ -174,26 +195,16 @@ export const EntityDetailRelationTypeBlock: React.FC<
                 <EntityTag
                   entity={relationEntity}
                   button={
-                    (!isCloudType &&
-                      Relation.RelationRules[relationType].asymmetrical &&
-                      key > 0) ||
-                    (!isCloudType &&
-                      !Relation.RelationRules[relationType].asymmetrical && (
-                        <Button
-                          key="d"
-                          icon={<FaUnlink />}
-                          color="plain"
-                          inverted
-                          tooltip="unlink"
-                          onClick={() => {
-                            if (isCloudType) {
-                              handleCloudRemove(relationEntity.id);
-                            } else {
-                              handleMultiRemove(relation.id);
-                            }
-                          }}
-                        />
-                      ))
+                    unlinkButtonEnabled(key) && (
+                      <Button
+                        key="d"
+                        icon={<FaUnlink />}
+                        color="plain"
+                        inverted
+                        tooltip="unlink"
+                        onClick={() => handleMultiRemove(relation.id)}
+                      />
+                    )
                   }
                 />
               </StyledEntityWrapper>
@@ -238,7 +249,8 @@ export const EntityDetailRelationTypeBlock: React.FC<
                 key={key}
                 onUnlink={() => console.log("unlink from cloud")}
               >
-                {renderNonCloudRelation(relation, key)}
+                {/* {renderNonCloudRelation(relation, key)} */}
+                {renderCloudRelation(relation, key)}
               </Cloud>
             ) : (
               renderNonCloudRelation(relation, key)
