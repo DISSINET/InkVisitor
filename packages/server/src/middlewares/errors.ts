@@ -34,7 +34,7 @@ export default function errorsMiddleware(
       err = internalServerError;
     }
   } else if ((err as CustomError).shouldLog()) {
-    logger.warn(`${(err as CustomError).name}: ${(err as CustomError).log}`);
+    logger.error(`${(err as CustomError).name}: ${(err as CustomError).log}`);
   }
 
   // in any case, the error should be wrapper in IResponseGeneric
