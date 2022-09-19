@@ -121,7 +121,7 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
             key="edit"
             icon={<FaEdit size={14} />}
             tooltip="open statement in editor"
-            inverted={true}
+            inverted
             color="primary"
             label="open"
             onClick={() => {

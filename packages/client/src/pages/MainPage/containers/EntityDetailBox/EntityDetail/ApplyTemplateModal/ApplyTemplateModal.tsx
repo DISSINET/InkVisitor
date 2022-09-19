@@ -13,7 +13,7 @@ import { EntityTag } from "components/advanced";
 import React from "react";
 import { UseMutationResult } from "react-query";
 import { toast } from "react-toastify";
-import { StyledContent } from "../../EntityBookmarkBox/EntityBookmarkBoxStyles";
+import { StyledContent } from "../../../EntityBookmarkBox/EntityBookmarkBoxStyles";
 
 interface ApplyTemplateModal {
   showModal: boolean;

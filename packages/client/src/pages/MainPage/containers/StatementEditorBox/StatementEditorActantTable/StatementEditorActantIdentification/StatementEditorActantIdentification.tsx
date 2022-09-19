@@ -61,7 +61,7 @@ export const StatementEditorActantIdentification: React.FC<
                     tooltip="unlink identification"
                     icon={<FaUnlink />}
                     color="plain"
-                    inverted={true}
+                    inverted
                     onClick={() => {
                       updateActant(sActant.id, {
                         identifications: identifications.map((c) =>
@@ -136,7 +136,7 @@ export const StatementEditorActantIdentification: React.FC<
               key="d"
               icon={<FaTrashAlt />}
               color="plain"
-              inverted={true}
+              inverted
               tooltip="remove identification row"
               onClick={() => {
                 updateActant(sActant.id, {
@@ -152,7 +152,7 @@ export const StatementEditorActantIdentification: React.FC<
               key="neg"
               tooltip="Negative logic"
               color="success"
-              inverted={true}
+              inverted
               noBorder
               icon={<AttributeIcon attributeName={"negation"} />}
               onClick={() => setIdentificationModalOpen(true)}

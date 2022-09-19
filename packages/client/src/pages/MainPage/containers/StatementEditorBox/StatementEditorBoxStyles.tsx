@@ -36,6 +36,7 @@ interface StyledEditorSection {
   firstSection?: boolean;
   lastSection?: boolean;
   metaSection?: boolean;
+  marginRight?: boolean;
 }
 export const StyledEditorSection = styled.div<StyledEditorSection>`
   position: relative;
@@ -53,6 +54,7 @@ export const StyledEditorSection = styled.div<StyledEditorSection>`
   border-bottom-style: solid;
   margin: ${({ theme, firstSection = false }) =>
     firstSection ? "0 0 0 0.7rem" : "0.2rem 0 0 2rem"};
+  margin-right: ${({ marginRight }) => (marginRight ? "0.5rem" : "")};
   :hover {
     background-color: ${({ theme }) => theme.color["gray"][100]};
   }

@@ -60,7 +60,7 @@ export const StatementListBreadcrumbItem: React.FC<
                 <Button
                   icon={<BsArrow90DegLeft />}
                   color="plain"
-                  inverted={true}
+                  inverted
                   tooltip="go to territory"
                   onClick={() => {
                     dispatch(setTreeInitialized(false));

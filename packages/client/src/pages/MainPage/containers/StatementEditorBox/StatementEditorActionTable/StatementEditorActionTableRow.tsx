@@ -200,7 +200,7 @@ export const StatementEditorActionTableRow: React.FC<
             key="d"
             icon={<FaTrashAlt />}
             color="plain"
-            inverted={true}
+            inverted
             tooltip="remove action row"
             onClick={() => {
               removeAction(filteredAction.data.sAction.id);
@@ -212,7 +212,7 @@ export const StatementEditorActionTableRow: React.FC<
             key="a"
             icon={<FaPlus />}
             color="plain"
-            inverted={true}
+            inverted
             tooltip="add new prop"
             onClick={() => {
               addProp(rowId);
@@ -224,7 +224,7 @@ export const StatementEditorActionTableRow: React.FC<
             key="neg"
             tooltip="Negative logic"
             color="success"
-            inverted={true}
+            inverted
             noBorder
             icon={<AttributeIcon attributeName={"negation"} />}
             onClick={() => setModalOpen(true)}
@@ -235,7 +235,7 @@ export const StatementEditorActionTableRow: React.FC<
             key="oper"
             tooltip="Logical operator type"
             color="success"
-            inverted={true}
+            inverted
             noBorder
             icon={sAction.bundleOperator}
             onClick={() => setModalOpen(true)}

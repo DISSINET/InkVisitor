@@ -145,47 +145,47 @@ export const SuggesterCreateModal: React.FC<SuggesterCreateModal> = ({
             {/* Suggester territory */}
             {(selectedCategory.value === "T" ||
               selectedCategory.value === "S") && (
-                <>
-                  <ModalInputLabel>
-                    {selectedCategory === "T"
-                      ? "Parent territory: "
-                      : "Territory: "}
-                  </ModalInputLabel>
-                  <ModalInputWrap>
-                    {territory ? (
-                      <Tag
-                        propId={territory.id}
-                        label={territory.label}
-                        entityClass={territory.class}
-                        tooltipPosition={"left center"}
-                        button={
-                          <Button
-                            key="d"
-                            icon={<FaUnlink />}
-                            color="danger"
-                            inverted={true}
-                            tooltip="unlink actant"
-                            onClick={() => {
-                              setTerritoryId("");
-                            }}
-                          />
-                        }
-                      />
-                    ) : (
-                      <EntitySuggester
-                        disableTemplatesAccept
-                        filterEditorRights
-                        inputWidth={96}
-                        disableCreate
-                        categoryTypes={[EntityEnums.Class.Territory]}
-                        onSelected={(newSelectedId: string) => {
-                          setTerritoryId(newSelectedId);
-                        }}
-                      />
-                    )}
-                  </ModalInputWrap>
-                </>
-              )}
+              <>
+                <ModalInputLabel>
+                  {selectedCategory === "T"
+                    ? "Parent territory: "
+                    : "Territory: "}
+                </ModalInputLabel>
+                <ModalInputWrap>
+                  {territory ? (
+                    <Tag
+                      propId={territory.id}
+                      label={territory.label}
+                      entityClass={territory.class}
+                      tooltipPosition={"left center"}
+                      button={
+                        <Button
+                          key="d"
+                          icon={<FaUnlink />}
+                          color="danger"
+                          inverted
+                          tooltip="unlink actant"
+                          onClick={() => {
+                            setTerritoryId("");
+                          }}
+                        />
+                      }
+                    />
+                  ) : (
+                    <EntitySuggester
+                      disableTemplatesAccept
+                      filterEditorRights
+                      inputWidth={96}
+                      disableCreate
+                      categoryTypes={[EntityEnums.Class.Territory]}
+                      onSelected={(newSelectedId: string) => {
+                        setTerritoryId(newSelectedId);
+                      }}
+                    />
+                  )}
+                </ModalInputWrap>
+              </>
+            )}
           </ModalInputForm>
           {userRole === UserEnums.Role.Admin && (
             <>

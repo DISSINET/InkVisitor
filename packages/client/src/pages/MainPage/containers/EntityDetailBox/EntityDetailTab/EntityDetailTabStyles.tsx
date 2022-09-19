@@ -21,15 +21,16 @@ export const StyledTab = styled.div<StyledTab>`
   border-bottom: ${({ isSelected }) => (isSelected ? "none" : "")};
 
   width: 100%;
-  /* min-width: 10rem; */
-  /* height: 100%; */
   overflow: hidden;
 `;
 interface StyledLabel {
   isItalic?: boolean;
+  isSelected?: boolean;
 }
 export const StyledLabel = styled.div<StyledLabel>`
   font-size: ${({ theme }) => theme.fontSize["xs"]};
+  color: ${({ theme, isSelected }) =>
+    isSelected ? "" : theme.color["gray"][700]};
   padding: ${({ theme }) => theme.space[1]};
   display: inline-block;
   overflow: hidden;
@@ -40,11 +41,8 @@ export const StyledLabel = styled.div<StyledLabel>`
   height: 100%;
   font-style: ${({ isItalic }) => (isItalic ? "italic" : "")};
 `;
-// TODO: hover circle
-interface StyledClose {
-  isHovered?: boolean;
-}
-export const StyledClose = styled.span<StyledClose>`
+
+export const StyledClose = styled.span`
   display: flex;
   align-items: center;
   height: 100%;

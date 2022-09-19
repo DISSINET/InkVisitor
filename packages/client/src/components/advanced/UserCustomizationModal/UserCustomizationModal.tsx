@@ -39,14 +39,14 @@ interface DataObject {
     value: EntityEnums.Language;
   } | null;
   searchLanguages:
-  | (
-    | {
-      label: string;
-      value: EntityEnums.Language;
-    }
-    | undefined
-  )[]
-  | null;
+    | (
+        | {
+            label: string;
+            value: EntityEnums.Language;
+          }
+        | undefined
+      )[]
+    | null;
   defaultTerritory: string | null;
 }
 interface UserCustomizationModal {
@@ -55,7 +55,7 @@ interface UserCustomizationModal {
 }
 export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
   user,
-  onClose = () => { },
+  onClose = () => {},
 }) => {
   const { options, name, email, role, rights } = useMemo(() => user, [user]);
 
@@ -126,7 +126,8 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
         name: data.name,
         email: data.email,
         options: {
-          defaultLanguage: data.defaultLanguage?.value || EntityEnums.Language.Empty,
+          defaultLanguage:
+            data.defaultLanguage?.value || EntityEnums.Language.Empty,
           searchLanguages: data.searchLanguages?.map((sL) => sL?.value),
           defaultTerritory: data.defaultTerritory,
         },
@@ -210,7 +211,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                       key="d"
                       icon={<FaUnlink />}
                       color="danger"
-                      inverted={true}
+                      inverted
                       tooltip="unlink actant"
                       onClick={() => {
                         handleChange("defaultTerritory", "");
@@ -247,19 +248,19 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                       longValue: userRoleDict[0].label,
                       shortValue: userRoleDict[0].label,
                       selected: role === userRoleDict[0].value,
-                      onClick: () => { },
+                      onClick: () => {},
                     },
                     {
                       longValue: userRoleDict[1].label,
                       shortValue: userRoleDict[1].label,
                       selected: role === userRoleDict[1].value,
-                      onClick: () => { },
+                      onClick: () => {},
                     },
                     {
                       longValue: userRoleDict[2].label,
                       shortValue: userRoleDict[2].label,
                       selected: role === userRoleDict[2].value,
-                      onClick: () => { },
+                      onClick: () => {},
                     },
                   ]}
                 />
@@ -270,8 +271,8 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
               <StyledRightsWrap>
                 {role !== UserEnums.Role.Admin
                   ? readRights.map((right, key) => (
-                    <UserRightItem key={key} territoryId={right.territory} />
-                  ))
+                      <UserRightItem key={key} territoryId={right.territory} />
+                    ))
                   : "all"}
               </StyledRightsWrap>
             </StyledUserRightItem>
@@ -280,8 +281,8 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
               <StyledRightsWrap>
                 {role !== UserEnums.Role.Admin
                   ? writeRights.map((right, key) => (
-                    <UserRightItem key={key} territoryId={right.territory} />
-                  ))
+                      <UserRightItem key={key} territoryId={right.territory} />
+                    ))
                   : "all"}
               </StyledRightsWrap>
             </StyledUserRightItem>

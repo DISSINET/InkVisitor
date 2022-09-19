@@ -25,8 +25,8 @@ import {
 import { TemplateListCreateModal } from "./TemplateListCreateModal/TemplateListCreateModal";
 import { TemplateListRemoveModal } from "./TemplateListRemoveModal/TemplateListRemoveModal";
 
-interface TemplateListBox { }
-export const TemplateListBox: React.FC<TemplateListBox> = ({ }) => {
+interface TemplateListBox {}
+export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
   // FILTER;
   const allEntityOption = { value: "all", label: "all" };
   const allEntityOptions = [allEntityOption, ...entitiesDict] as any;
@@ -165,7 +165,7 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({ }) => {
                         tooltip="remove template"
                         icon={<FaTrash />}
                         color="plain"
-                        inverted={true}
+                        inverted
                         onClick={() => {
                           handleAskRemoveTemplate(templateEntity.id);
                         }}
