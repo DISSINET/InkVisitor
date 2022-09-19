@@ -32,7 +32,7 @@ export namespace Relation {
     entityIds: [string, string];
   }
   export interface ISubjectActantReciprocal extends IModel {
-    type: RelationEnums.Type.SubjectActantReciprocal;
+    type: RelationEnums.Type.SubjectActant1Reciprocal;
     entityIds: [string, string];
   }
   export interface IActionEventEquivalent extends IModel {
@@ -152,7 +152,7 @@ export namespace Relation {
     treeType: false,
     attributes: [],
   };
-  RelationRules[RelationEnums.Type.SubjectActantReciprocal] = {
+  RelationRules[RelationEnums.Type.SubjectActant1Reciprocal] = {
     label: "Subject/Actant1 Reciprocal",
     allowedEntitiesPattern: [
       [EntityEnums.Class.Action, EntityEnums.Class.Action],

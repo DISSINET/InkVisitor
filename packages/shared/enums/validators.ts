@@ -3,8 +3,8 @@ import { EntityEnums, RelationEnums } from ".";
 export namespace EnumValidators {
   /**
    * Validates RelationEnums.Type value
-   * @param input 
-   * @returns 
+   * @param input
+   * @returns
    */
   export function IsValidRelationType(input: RelationEnums.Type): boolean {
     return (
@@ -15,7 +15,7 @@ export namespace EnumValidators {
         RelationEnums.Type.Antonym,
         RelationEnums.Type.Troponym,
         RelationEnums.Type.PropertyReciprocal,
-        RelationEnums.Type.SubjectActantReciprocal,
+        RelationEnums.Type.SubjectActant1Reciprocal,
         RelationEnums.Type.ActionEventEquivalent,
         RelationEnums.Type.Related,
         RelationEnums.Type.Classification,
@@ -28,8 +28,8 @@ export namespace EnumValidators {
 
   /**
    * Validates EntityEnums.Class value
-   * @param input 
-   * @returns 
+   * @param input
+   * @returns
    */
   export function IsValidEntityClass(input: EntityEnums.Class): boolean {
     return (
@@ -51,10 +51,12 @@ export namespace EnumValidators {
 
   /**
    * Validates EntityEnums.Certainty value
-   * @param input 
-   * @returns 
+   * @param input
+   * @returns
    */
-  export function IsValidEntityCertainty(input: EntityEnums.Certainty): boolean {
+  export function IsValidEntityCertainty(
+    input: EntityEnums.Certainty
+  ): boolean {
     return (
       [
         EntityEnums.Certainty.AlmostCertain,
