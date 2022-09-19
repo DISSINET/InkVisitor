@@ -19,6 +19,7 @@ export class ResponseTooltip extends ResponseEntity implements EntityTooltip.IRe
   troponymCloud?: EntityTooltip.ITroponymCloud;
   superordinateLocationTrees: EntityTooltip.ISuperordinateLocationTree[] = [];
   identifications: EntityTooltip.IIdentifications = [];
+  actionEventEquivalent: EntityTooltip.ActionEventNode = { entityId: "", subtrees: [] }
 
   /**
    * Loads additional fields to satisfy the EntityTooltip.IResponse interface

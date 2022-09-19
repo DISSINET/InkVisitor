@@ -12,12 +12,15 @@ export namespace EntityTooltip {
     troponymCloud?: ITroponymCloud;
     superordinateLocationTrees: ISuperordinateLocationTree[];
     identifications: IIdentifications;
+    actionEventEquivalent: ActionEventNode;
   }
 
   export type IIdentification = {
     entityId: string;
     certainty: EntityEnums.Certainty;
   };
+
+  export type ActionEventNode = ISuperclassTree;
 
   // these are full of entity ids
 
