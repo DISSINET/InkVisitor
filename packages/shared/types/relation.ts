@@ -168,7 +168,6 @@ export namespace Relation {
     label: "Action/Event Equivalent",
     allowedEntitiesPattern: [
       [EntityEnums.Class.Action, EntityEnums.Class.Concept],
-      [EntityEnums.Class.Concept, EntityEnums.Class.Action],
     ],
     allowedSameEntityClassesOnly: false,
     asymmetrical: false,
