@@ -149,12 +149,24 @@ export const EntityDetailRelationTypeBlock: React.FC<
   };
 
   const handleMultiSelected = (selectedId: string) => {
-    const newRelation: Relation.IModel = {
-      id: uuidv4(),
-      entityIds: [entity.id, selectedId],
-      type: relationType as RelationEnums.Type,
-    };
-    relationCreateMutation.mutate(newRelation);
+    if (relationType === RelationEnums.Type.Identification) {
+      // FIX: certainty not working on create request
+      const newRelation: Relation.IIdentification = {
+        id: uuidv4(),
+        entityIds: [entity.id, selectedId],
+        type: RelationEnums.Type.Identification,
+        certainty: EntityEnums.Certainty.Certain,
+      };
+      console.log(newRelation);
+      relationCreateMutation.mutate(newRelation);
+    } else {
+      const newRelation: Relation.IModel = {
+        id: uuidv4(),
+        entityIds: [entity.id, selectedId],
+        type: relationType as RelationEnums.Type,
+      };
+      relationCreateMutation.mutate(newRelation);
+    }
   };
 
   const [usedEntityIds, setUsedEntityIds] = useState<string[]>([]);
@@ -187,7 +199,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
     !relationRule.asymmetrical || (relationRule.asymmetrical && key > 0);
 
   const renderNonCloudRelation = (relation: Relation.IModel, key: number) => (
-    <StyledGrid hasAttribute={relationRule.attributes.length > 0}>
+    <StyledGrid key={key} hasAttribute={relationRule.attributes.length > 0}>
       <StyledRelation key={key}>
         {relation.entityIds.map((entityId, key) => {
           const relationEntity = entities?.find((e) => e.id === entityId);
@@ -259,7 +271,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
               renderNonCloudRelation(relation, key)
             )
           )}
-          {!isCloudType && (
+          {!isCloudType && (isMultiple || relations.length < 1) && (
             <div style={{ marginTop: "0.3rem" }}>
               <EntitySuggester
                 categoryTypes={
