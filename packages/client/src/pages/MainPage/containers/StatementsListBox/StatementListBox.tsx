@@ -58,6 +58,9 @@ export const StatementListBox: React.FC = () => {
   const rowsExpanded: { [key: string]: boolean } = useAppSelector(
     (state) => state.statementList.rowsExpanded
   );
+  const statementListOpened: boolean = useAppSelector(
+    (state) => state.layout.statementListOpened
+  );
 
   const {
     territoryId,
@@ -72,26 +75,26 @@ export const StatementListBox: React.FC = () => {
   const [statementToDelete, setStatementToDelete] = useState<IStatement>();
 
   const { status, data, error, isFetching } = useQuery(
-    ["territory", "statement-list", territoryId],
+    ["territory", "statement-list", territoryId, statementListOpened],
     async () => {
       const res = await api.territoryGet(territoryId);
       return res.data;
     },
     {
-      enabled: !!territoryId && api.isLoggedIn(),
+      enabled: !!territoryId && api.isLoggedIn() && statementListOpened,
     }
   );
 
   const { statements, entities } = data || initialData;
 
   const { data: audits, isFetching: isFetchingAudits } = useQuery(
-    ["territory", "statement-list", "audits", territoryId],
+    ["territory", "statement-list", "audits", territoryId, statementListOpened],
     async () => {
       const res = await api.auditsForStatements(territoryId);
       return res.data;
     },
     {
-      enabled: !!territoryId && api.isLoggedIn(),
+      enabled: !!territoryId && api.isLoggedIn() && statementListOpened,
     }
   );
 

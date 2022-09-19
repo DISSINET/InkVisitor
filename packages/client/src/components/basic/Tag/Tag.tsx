@@ -83,7 +83,7 @@ export const Tag: React.FC<TagProps> = ({
   disableTooltip = false,
   disableDoubleClick = false,
   disableDrag = false,
-  updateOrderFn = () => { },
+  updateOrderFn = () => {},
   statementsCount,
   isFavorited = false,
   isTemplate = false,

@@ -611,6 +611,21 @@
   },
 
   {
+    "id": "T0",
+    "class": "T",
+    "data": {
+      "parent": false
+    },
+    "label": "root",
+    "detail": "",
+    "status": "1",
+    "language": "lat",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "isTemplate": false
+  },
+  {
     "id": "t1",
     "class": "T",
     "label": "priest Minda and their stories",
@@ -621,7 +636,10 @@
     "props": [],
     "references": [],
     "data": {
-      "parent": false
+      "parent": {
+        "territoryId": "T0",
+        "order": 2
+      }
     }
   },
 

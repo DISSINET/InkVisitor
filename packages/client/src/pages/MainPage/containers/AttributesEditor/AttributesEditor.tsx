@@ -63,7 +63,7 @@ const AttributesEditor: React.FC<AttributesEditor> = ({
   entity,
   data,
   handleUpdate,
-  updateActantId = () => { },
+  updateActantId = () => {},
   classEntitiesActant = [],
   loading,
   disabledAttributes = [] as PropAttributeName[],
@@ -166,7 +166,7 @@ const AttributesEditor: React.FC<AttributesEditor> = ({
               key="settings"
               disabled={disabledOpenModal}
               icon={<MdSettings />}
-              inverted={true}
+              inverted
               color="plain"
               onClick={() => setModalOpen(true)}
             />
@@ -217,7 +217,7 @@ const AttributesEditor: React.FC<AttributesEditor> = ({
                         tooltip="unlink actant"
                         icon={<FaUnlink />}
                         color="plain"
-                        inverted={true}
+                        inverted
                         onClick={() => {
                           updateActantId("");
                         }}
@@ -249,7 +249,7 @@ const AttributesEditor: React.FC<AttributesEditor> = ({
             <Button
               key="cancel"
               label="Cancel"
-              inverted={true}
+              inverted
               color="primary"
               onClick={() => {
                 handleCancelClick();

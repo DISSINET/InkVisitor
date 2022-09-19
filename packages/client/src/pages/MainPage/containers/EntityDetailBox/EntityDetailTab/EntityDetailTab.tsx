@@ -26,6 +26,7 @@ export const EntityDetailTab: React.FC<EntityDetailTab> = ({
     <StyledTab isSelected={isSelected}>
       <Tooltip label={getEntityLabel(entity)}>
         <StyledLabel
+          isSelected={isSelected}
           isItalic={
             entity?.class === EntityEnums.Class.Statement && !entity?.label
           }
@@ -36,6 +37,7 @@ export const EntityDetailTab: React.FC<EntityDetailTab> = ({
               entityLetter={entity?.class}
               isTemplate={entity.isTemplate}
               noMargin
+              dimColor={!isSelected}
             />
           )}
           {!entity ? "..." : getEntityLabel(entity)}

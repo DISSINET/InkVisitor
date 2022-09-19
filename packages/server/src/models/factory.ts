@@ -16,10 +16,10 @@ import Event from "./event/event";
 import Relation from "./relation/relation";
 
 /**
- * attempts to create new Entity instance depending on the type value 
+ * attempts to create new Entity instance depending on the type value
  * throws an error in case of a mismatched data/type
- * @param data 
- * @returns 
+ * @param data
+ * @returns
  */
 export function getEntityClass(data: UnknownObject): Entity {
   if (!data || typeof data !== "object" || Object.keys(data).length === 0) {
@@ -55,10 +55,10 @@ export function getEntityClass(data: UnknownObject): Entity {
 }
 
 /**
- * attempts to create new instance depending on the type value 
+ * attempts to create new instance depending on the type value
  * throws an error in case of a mismatched data/type
- * @param data 
- * @returns 
+ * @param data
+ * @returns
  */
 export function getRelationClass(data: UnknownObject): Relation {
   if (!data || typeof data !== "object" || Object.keys(data).length === 0) {
@@ -73,14 +73,14 @@ export function getRelationClass(data: UnknownObject): Relation {
     case RelationEnums.Type.Implication:
     case RelationEnums.Type.PropertyReciprocal:
     case RelationEnums.Type.Related:
-    case RelationEnums.Type.SubjectActantReciprocal:
+    case RelationEnums.Type.SubjectActant1Reciprocal:
     case RelationEnums.Type.Superclass:
     case RelationEnums.Type.SuperordinateLocation:
     case RelationEnums.Type.Synonym:
     case RelationEnums.Type.Troponym:
       return new Relation(data);
     case RelationEnums.Type.Identification:
-      return new Relation(data)
+      return new Relation(data);
     default:
       throw new ModelNotValidError("unknown class for relation");
   }

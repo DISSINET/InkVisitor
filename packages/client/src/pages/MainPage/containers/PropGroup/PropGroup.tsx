@@ -7,12 +7,7 @@ import {
 import api from "api";
 import React, { useCallback } from "react";
 import { useQuery } from "react-query";
-import {
-  PropAttributeFilter,
-  PropAttributeName,
-  DraggedPropRowCategory,
-  ItemTypes,
-} from "types";
+import { DraggedPropRowCategory, ItemTypes, PropAttributeFilter } from "types";
 import { FirstLevelPropGroup } from "./FirstLevelPropGroup/FirstLevelPropGroup";
 import { PropGroupRow } from "./PropGroupRow/PropGroupRow";
 import { StyledGrid, StyledListHeaderColumn } from "./PropGroupStyles";
@@ -201,21 +196,23 @@ export const PropGroup: React.FC<PropGroup> = ({
     [entities, boxEntity]
   );
 
-  return props.length > 0 ? (
-    <React.Fragment key={originId}>
-      <StyledGrid>
-        {/* Header */}
-        <StyledListHeaderColumn leftMargin>Type</StyledListHeaderColumn>
-        <StyledListHeaderColumn>Value</StyledListHeaderColumn>
-        <StyledListHeaderColumn></StyledListHeaderColumn>
-      </StyledGrid>
-      {/* Rows */}
-      <FirstLevelPropGroup
-        props={props}
-        renderFirsLevelPropRow={renderFirsLevelPropRow}
-      />
-    </React.Fragment>
-  ) : (
-    <tr />
+  return (
+    <>
+      {props.length > 0 && (
+        <React.Fragment key={originId}>
+          <StyledGrid>
+            {/* Header */}
+            <StyledListHeaderColumn leftMargin>Type</StyledListHeaderColumn>
+            <StyledListHeaderColumn>Value</StyledListHeaderColumn>
+            <StyledListHeaderColumn></StyledListHeaderColumn>
+          </StyledGrid>
+          {/* Rows */}
+          <FirstLevelPropGroup
+            props={props}
+            renderFirsLevelPropRow={renderFirsLevelPropRow}
+          />
+        </React.Fragment>
+      )}
+    </>
   );
 };

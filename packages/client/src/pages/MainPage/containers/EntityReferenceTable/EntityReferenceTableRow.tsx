@@ -52,7 +52,7 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
                     key="d"
                     tooltip="unlink resource"
                     icon={<FaUnlink />}
-                    inverted={true}
+                    inverted
                     color="plain"
                     onClick={() => {
                       handleChangeResource(reference.id, "");
@@ -98,7 +98,7 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
                     key="d"
                     tooltip="unlink resource"
                     icon={<FaUnlink />}
-                    inverted={true}
+                    inverted
                     color="plain"
                     onClick={() => {
                       handleChangeValue(reference.id, "");
@@ -133,7 +133,7 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
             <Button
               key="url"
               tooltip={""}
-              inverted={true}
+              inverted
               icon={<FaExternalLinkAlt />}
               color="plain"
               onClick={() => {
@@ -148,7 +148,7 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
             <Button
               key="delete"
               tooltip="remove reference row"
-              inverted={true}
+              inverted
               icon={<FaTrashAlt />}
               color="plain"
               onClick={() => {

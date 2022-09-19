@@ -32,7 +32,7 @@ export namespace Relation {
     entityIds: [string, string];
   }
   export interface ISubjectActantReciprocal extends IModel {
-    type: RelationEnums.Type.SubjectActantReciprocal;
+    type: RelationEnums.Type.SubjectActant1Reciprocal;
     entityIds: [string, string];
   }
   export interface IActionEventEquivalent extends IModel {
@@ -67,6 +67,7 @@ export namespace Relation {
    */
 
   type RelationRule = {
+    label: string;
     allowedEntitiesPattern: EntityEnums.Class[][];
     allowedSameEntityClassesOnly: boolean;
     asymmetrical: boolean;
@@ -76,9 +77,10 @@ export namespace Relation {
     attributes: any[];
   };
 
-  const RelationRules: { [key: string]: RelationRule } = {};
+  export const RelationRules: { [key: string]: RelationRule } = {};
 
   RelationRules[RelationEnums.Type.Superclass] = {
+    label: "Superclass",
     allowedEntitiesPattern: [
       [EntityEnums.Class.Action, EntityEnums.Class.Action],
       [EntityEnums.Class.Concept, EntityEnums.Class.Concept],
@@ -91,7 +93,10 @@ export namespace Relation {
     attributes: [],
   };
   RelationRules[RelationEnums.Type.SuperordinateLocation] = {
-    allowedEntitiesPattern: [[EntityEnums.Class.Location, EntityEnums.Class.Location]],
+    label: "Superordinate Location",
+    allowedEntitiesPattern: [
+      [EntityEnums.Class.Location, EntityEnums.Class.Location],
+    ],
     allowedSameEntityClassesOnly: true,
     asymmetrical: true,
     multiple: true,
@@ -100,15 +105,20 @@ export namespace Relation {
     attributes: [],
   };
   RelationRules[RelationEnums.Type.Synonym] = {
-    allowedEntitiesPattern: [[EntityEnums.Class.Action], [EntityEnums.Class.Concept]],
-    allowedSameEntityClassesOnly: false,
+    label: "Synonym",
+    allowedEntitiesPattern: [
+      [EntityEnums.Class.Action],
+      [EntityEnums.Class.Concept],
+    ],
+    allowedSameEntityClassesOnly: true,
     asymmetrical: false,
-    multiple: true,
+    multiple: false,
     cloudType: true,
     treeType: false,
     attributes: [],
   };
   RelationRules[RelationEnums.Type.Antonym] = {
+    label: "Antonym",
     allowedEntitiesPattern: [
       [EntityEnums.Class.Action, EntityEnums.Class.Action],
       [EntityEnums.Class.Concept, EntityEnums.Class.Concept],
@@ -121,16 +131,20 @@ export namespace Relation {
     attributes: [],
   };
   RelationRules[RelationEnums.Type.Troponym] = {
+    label: "Troponym",
     allowedEntitiesPattern: [[EntityEnums.Class.Action]],
     allowedSameEntityClassesOnly: true,
     asymmetrical: false,
-    multiple: true,
+    multiple: false,
     cloudType: true,
     treeType: false,
     attributes: [],
   };
   RelationRules[RelationEnums.Type.PropertyReciprocal] = {
-    allowedEntitiesPattern: [[EntityEnums.Class.Concept, EntityEnums.Class.Concept]],
+    label: "Property Reciprocal",
+    allowedEntitiesPattern: [
+      [EntityEnums.Class.Concept, EntityEnums.Class.Concept],
+    ],
     allowedSameEntityClassesOnly: true,
     asymmetrical: false,
     multiple: false,
@@ -138,8 +152,11 @@ export namespace Relation {
     treeType: false,
     attributes: [],
   };
-  RelationRules[RelationEnums.Type.SubjectActantReciprocal] = {
-    allowedEntitiesPattern: [[EntityEnums.Class.Action, EntityEnums.Class.Action]],
+  RelationRules[RelationEnums.Type.SubjectActant1Reciprocal] = {
+    label: "Subject/Actant1 Reciprocal",
+    allowedEntitiesPattern: [
+      [EntityEnums.Class.Action, EntityEnums.Class.Action],
+    ],
     allowedSameEntityClassesOnly: true,
     asymmetrical: false,
     multiple: false,
@@ -148,6 +165,7 @@ export namespace Relation {
     attributes: [],
   };
   RelationRules[RelationEnums.Type.ActionEventEquivalent] = {
+    label: "Action/Event Equivalent",
     allowedEntitiesPattern: [
       [EntityEnums.Class.Action, EntityEnums.Class.Concept],
       [EntityEnums.Class.Concept, EntityEnums.Class.Action],
@@ -160,6 +178,7 @@ export namespace Relation {
     attributes: [],
   };
   RelationRules[RelationEnums.Type.Related] = {
+    label: "Related",
     allowedEntitiesPattern: [], // any combination is allowed
     allowedSameEntityClassesOnly: false,
     asymmetrical: false,
@@ -169,6 +188,7 @@ export namespace Relation {
     attributes: [],
   };
   RelationRules[RelationEnums.Type.Classification] = {
+    label: "Classification",
     allowedEntitiesPattern: [
       [EntityEnums.Class.Person, EntityEnums.Class.Concept],
       [EntityEnums.Class.Location, EntityEnums.Class.Concept],
@@ -188,17 +208,21 @@ export namespace Relation {
   };
 
   RelationRules[RelationEnums.Type.Identification] = {
+    label: "Identification",
     allowedEntitiesPattern: [], // any combination is allowed
     allowedSameEntityClassesOnly: false,
     asymmetrical: false,
     multiple: true,
-    cloudType: true,
+    cloudType: false,
     treeType: false,
     attributes: [EntityEnums.Certainty],
   };
 
   RelationRules[RelationEnums.Type.Holonymy] = {
-    allowedEntitiesPattern: [[EntityEnums.Class.Concept, EntityEnums.Class.Concept]],
+    label: "Holonymy",
+    allowedEntitiesPattern: [
+      [EntityEnums.Class.Concept, EntityEnums.Class.Concept],
+    ],
     allowedSameEntityClassesOnly: true,
     asymmetrical: true,
     multiple: true,
@@ -208,7 +232,10 @@ export namespace Relation {
   };
 
   RelationRules[RelationEnums.Type.Implication] = {
-    allowedEntitiesPattern: [[EntityEnums.Class.Action, EntityEnums.Class.Action]],
+    label: "Implication",
+    allowedEntitiesPattern: [
+      [EntityEnums.Class.Action, EntityEnums.Class.Action],
+    ],
     allowedSameEntityClassesOnly: true,
     asymmetrical: true,
     multiple: true,

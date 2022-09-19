@@ -574,28 +574,28 @@ export const StatementEditor: React.FC<StatementEditor> = ({
             </StyledEditorContentRow>
           </StyledEditorTemplateSection>
         )}
-        <StyledEditorSection firstSection key="editor-section-summary">
+        <StyledEditorSection
+          firstSection
+          key="editor-section-summary"
+          marginRight
+        >
           <StyledEditorSectionContent firstSection>
-            <div>
-              <div>
-                <Input
-                  disabled={!userCanEdit}
-                  type="textarea"
-                  width="full"
-                  noBorder
-                  placeholder="Insert statement text here"
-                  onChangeFn={(newValue: string) => {
-                    if (newValue !== statement.data.text) {
-                      const newData = {
-                        text: newValue,
-                      };
-                      updateStatementDataMutation.mutate(newData);
-                    }
-                  }}
-                  value={statement.data.text}
-                />
-              </div>
-            </div>
+            <Input
+              disabled={!userCanEdit}
+              type="textarea"
+              width="full"
+              noBorder
+              placeholder="Insert statement text here"
+              onChangeFn={(newValue: string) => {
+                if (newValue !== statement.data.text) {
+                  const newData = {
+                    text: newValue,
+                  };
+                  updateStatementDataMutation.mutate(newData);
+                }
+              }}
+              value={statement.data.text}
+            />
           </StyledEditorSectionContent>
         </StyledEditorSection>
 
@@ -709,7 +709,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                             tooltip="unlink actant from tags"
                             icon={<FaUnlink />}
                             color="plain"
-                            inverted={true}
+                            inverted
                             onClick={() => {
                               removeTag(tag);
                             }}
