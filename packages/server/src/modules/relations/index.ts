@@ -37,6 +37,8 @@ export default Router()
   .post(
     "/",
     asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
+      await request.db.lock();
+
       const model = getRelationClass(request.body);
 
       if (!model.isValid()) {
