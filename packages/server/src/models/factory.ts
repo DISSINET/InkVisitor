@@ -65,7 +65,7 @@ export function getRelationClass(data: UnknownObject): Relation {
     throw new ModelNotValidError("bad input data for relation factory");
   }
 
-  switch (data.class as RelationEnums.Type) {
+  switch (data.type as RelationEnums.Type) {
     case RelationEnums.Type.ActionEventEquivalent:
     case RelationEnums.Type.Antonym:
     case RelationEnums.Type.Classification:

@@ -9,6 +9,7 @@ import {
 import Relation from "@models/relation/relation";
 import { Request, Router } from "express";
 import { asyncRouteHandler } from "../index";
+import { getRelationClass } from "@models/factory";
 
 export default Router()
   /**
@@ -36,7 +37,7 @@ export default Router()
   .post(
     "/",
     asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
-      const model = new Relation(request.body as Record<string, unknown>);
+      const model = getRelationClass(request.body);
 
       if (!model.isValid()) {
         throw new ModelNotValidError("");
