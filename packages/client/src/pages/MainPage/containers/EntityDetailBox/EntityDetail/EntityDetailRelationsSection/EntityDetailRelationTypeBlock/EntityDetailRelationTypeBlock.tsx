@@ -9,7 +9,7 @@ import { AxiosResponse } from "axios";
 import { Button, Cloud, Dropdown } from "components";
 import { EntitySuggester, EntityTag } from "components/advanced";
 import React, { useEffect, useState } from "react";
-import { UseMutationResult } from "react-query";
+import { UseMutationResult, useQuery } from "react-query";
 import {
   StyledDetailContentRow,
   StyledDetailContentRowLabel,
@@ -24,6 +24,7 @@ import {
 import { certaintyDict, entitiesDict } from "@shared/dictionaries";
 import { v4 as uuidv4 } from "uuid";
 import { FaUnlink } from "react-icons/fa";
+import api from "api";
 
 // relations for one type
 interface EntityDetailRelationTypeBlock {
@@ -113,23 +114,6 @@ export const EntityDetailRelationTypeBlock: React.FC<
     }
   };
 
-  const handleCloudSelected = (selectedId: string) => {
-    if (relations[0]?.entityIds?.length > 0) {
-      const changes = { entityIds: [...relations[0].entityIds, selectedId] };
-      relationUpdateMutation.mutate({
-        relationId: relations[0].id,
-        changes: changes,
-      });
-    } else {
-      const newRelation: Relation.IModel = {
-        id: uuidv4(),
-        entityIds: [entity.id, selectedId],
-        type: relationType as RelationEnums.Type,
-      };
-      relationCreateMutation.mutate(newRelation);
-    }
-  };
-
   const handleCloudRemove = () => {
     if (relations[0]?.entityIds?.length > 2) {
       const newEntityIds = relations[0].entityIds.filter(
@@ -157,7 +141,6 @@ export const EntityDetailRelationTypeBlock: React.FC<
         type: RelationEnums.Type.Identification,
         certainty: EntityEnums.Certainty.Certain,
       };
-      console.log(newRelation);
       relationCreateMutation.mutate(newRelation);
     } else {
       const newRelation: Relation.IModel = {
@@ -255,6 +238,49 @@ export const EntityDetailRelationTypeBlock: React.FC<
     </StyledGrid>
   );
 
+  const [tempEntityId, setTempEntityId] = useState<string | false>(false);
+
+  const { data: entityTemp } = useQuery(
+    ["relation-entity-temp", tempEntityId],
+    async () => {
+      if (tempEntityId) {
+        const res = await api.detailGet(tempEntityId);
+        return res.data;
+      }
+    },
+    {
+      enabled: api.isLoggedIn() && !!tempEntityId,
+    }
+  );
+
+  useEffect(() => {
+    if (entityTemp) {
+      const selectedEntityRelation = entityTemp.relations.find(
+        (r) => r.type === relationType
+      );
+      console.log(selectedEntityRelation);
+      if (selectedEntityRelation) {
+        // update existing relation
+        const changes = {
+          entityIds: [...selectedEntityRelation.entityIds, entity.id],
+        };
+        console.log(changes);
+        relationUpdateMutation.mutate({
+          relationId: selectedEntityRelation.id,
+          changes: changes,
+        });
+      } else {
+        // Create new relation (cloud init)
+        const newRelation: Relation.IModel = {
+          id: uuidv4(),
+          entityIds: [entity.id, entityTemp.id],
+          type: relationType as RelationEnums.Type,
+        };
+        relationCreateMutation.mutate(newRelation);
+      }
+    }
+  }, [entityTemp]);
+
   return (
     <>
       <StyledDetailContentRow>
@@ -271,7 +297,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
               renderNonCloudRelation(relation, key)
             )
           )}
-          {!isCloudType && (isMultiple || relations.length < 1) && (
+          {(isMultiple || relations.length < 1) && (
             <div style={{ marginTop: "0.3rem" }}>
               <EntitySuggester
                 categoryTypes={
@@ -282,6 +308,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
                   if (isCloudType) {
                     // TODO: new BE function to adding to cloud
                     // handleCloudSelected(selectedId);
+                    setTempEntityId(selectedId);
                   } else {
                     handleMultiSelected(selectedId);
                   }
