@@ -55,6 +55,8 @@ interface EntityDetailRelationTypeBlock {
   isCloudType: boolean;
   isMultiple: boolean;
   entity: IResponseDetail;
+  // cloudEntityTemp?: IResponseDetail;
+  // setTempEntityId: React.Dispatch<React.SetStateAction<string | false>>;
 }
 export const EntityDetailRelationTypeBlock: React.FC<
   EntityDetailRelationTypeBlock
@@ -68,6 +70,8 @@ export const EntityDetailRelationTypeBlock: React.FC<
   isCloudType,
   isMultiple,
   entity,
+  // cloudEntityTemp,
+  // setTempEntityId,
 }) => {
   const relationRule = Relation.RelationRules[relationType];
 
@@ -238,48 +242,48 @@ export const EntityDetailRelationTypeBlock: React.FC<
     </StyledGrid>
   );
 
-  const [tempEntityId, setTempEntityId] = useState<string | false>(false);
+  const [tempCloudEntityId, setTempCloudEntityId] = useState<string | false>(
+    false
+  );
 
-  const { data: entityTemp } = useQuery(
-    ["relation-entity-temp", tempEntityId],
+  const {} = useQuery(
+    ["relation-entity-temp", tempCloudEntityId],
     async () => {
-      if (tempEntityId) {
-        const res = await api.detailGet(tempEntityId);
-        return res.data;
+      if (tempCloudEntityId) {
+        const res = await api.detailGet(tempCloudEntityId);
+        if (res.data) {
+          addToCloud(res.data);
+        }
       }
     },
     {
-      enabled: api.isLoggedIn() && !!tempEntityId,
+      enabled: api.isLoggedIn() && !!tempCloudEntityId,
     }
   );
 
-  useEffect(() => {
-    if (entityTemp) {
-      const selectedEntityRelation = entityTemp.relations.find(
-        (r) => r.type === relationType
-      );
-      console.log(selectedEntityRelation);
-      if (selectedEntityRelation) {
-        // update existing relation
-        const changes = {
-          entityIds: [...selectedEntityRelation.entityIds, entity.id],
-        };
-        console.log(changes);
-        relationUpdateMutation.mutate({
-          relationId: selectedEntityRelation.id,
-          changes: changes,
-        });
-      } else {
-        // Create new relation (cloud init)
-        const newRelation: Relation.IModel = {
-          id: uuidv4(),
-          entityIds: [entity.id, entityTemp.id],
-          type: relationType as RelationEnums.Type,
-        };
-        relationCreateMutation.mutate(newRelation);
-      }
+  const addToCloud = (cloudEntity: IResponseDetail) => {
+    const selectedEntityRelation = cloudEntity.relations.find(
+      (r) => r.type === relationType
+    );
+    if (selectedEntityRelation) {
+      // update existing relation
+      const changes = {
+        entityIds: [...selectedEntityRelation.entityIds, entity.id],
+      };
+      relationUpdateMutation.mutate({
+        relationId: selectedEntityRelation.id,
+        changes: changes,
+      });
+    } else {
+      // Create new relation (cloud init)
+      const newRelation: Relation.IModel = {
+        id: uuidv4(),
+        entityIds: [entity.id, cloudEntity.id],
+        type: relationType as RelationEnums.Type,
+      };
+      relationCreateMutation.mutate(newRelation);
     }
-  }, [entityTemp]);
+  };
 
   return (
     <>
@@ -308,7 +312,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
                   if (isCloudType) {
                     // TODO: new BE function to adding to cloud
                     // handleCloudSelected(selectedId);
-                    setTempEntityId(selectedId);
+                    setTempCloudEntityId(selectedId);
                   } else {
                     handleMultiSelected(selectedId);
                   }
