@@ -45,7 +45,7 @@ export class ResponseEntity extends Entity implements IResponseEntity {
    * Loads additional fields to satisfy the IResponseDetail interface
    * @param request
    */
-  async prepare(request: IRequest) {
+  prepare(request: IRequest) {
     this.right = this.originalEntity.getUserRoleMode(request.getUserOrFail());
   }
 
