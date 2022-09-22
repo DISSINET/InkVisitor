@@ -1,3 +1,6 @@
+/**
+ * Mutex class implements locking mechanism to enable mutual exclusion while accessing database collections
+ */
 export class Mutex {
     private activeLock?: Awaiter;
     private queue: Awaiter[] = [];
@@ -70,6 +73,10 @@ export class Mutex {
     }
 }
 
+/**
+ * Structure for holding callbacks - their invocations result in either locking or failing.
+ * In both cases, the calls should remove the instance from queue.
+ */
 export class Awaiter {
     onSuccess: (value: unknown) => void = () => { }
     onError: (reason?: any) => void = () => { }
