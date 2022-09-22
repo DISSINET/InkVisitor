@@ -253,6 +253,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
         const res = await api.detailGet(tempCloudEntityId);
         if (res.data) {
           addToCloud(res.data);
+          setTempCloudEntityId(false);
         }
       }
     },
