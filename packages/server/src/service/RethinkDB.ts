@@ -1,5 +1,6 @@
 import { Connection, r as rethink } from "rethinkdb-ts";
 import { Request, Response } from "express";
+import { Mutex, Awaiter } from "./mutex"
 
 export const rethinkConfig = {
   db: process.env.DB_NAME,
@@ -8,19 +9,11 @@ export const rethinkConfig = {
   password: process.env.DB_AUTH,
 };
 
-let locked: boolean = false;
-const queue: awaiter[] = [];
-
-interface awaiter {
-  onSuccess: (value: unknown) => void
-  onError: (reason?: any) => void,
-  index?: number;
-}
-
 export class Db {
-  connection: Connection = {} as Connection;
-  isLocker: boolean = false;
-  lockAwaiter?: awaiter;
+  static mutex = new Mutex();
+
+  connection: Connection = {} as Connection; // wrapped db sonnection
+  lockInstance?: Awaiter;
 
   constructor() {
     if (!rethinkConfig.db || !rethinkConfig.host || !rethinkConfig.port) {
@@ -28,34 +21,9 @@ export class Db {
     }
   }
 
-  async lock() {
-    if (locked) {
-      await this.waitForUnlock();
-    }
-    this.isLocker = true;
-    locked = true;
-  }
-
-  unlock() {
-    while (queue.length) {
-      const awaitingCbs = queue.shift()
-      if (awaitingCbs) {
-        if (awaitingCbs.index === undefined) {
-          continue;
-        }
-        awaitingCbs.index = undefined;
-        awaitingCbs.onSuccess(null);
-      }
-    }
-
-    locked = false;
-  }
-
-  async waitForUnlock(): Promise<void> {
-    await new Promise((resolve, reject) => {
-      this.lockAwaiter = { onSuccess: resolve, onError: reject, index: queue.length };
-      queue.push(this.lockAwaiter);
-    })
+  async lock(): Promise<void> {
+    this.lockInstance = new Awaiter();
+    await Db.mutex.lock(this.lockInstance)
   }
 
   async initDb(): Promise<void> {
@@ -66,12 +34,10 @@ export class Db {
   }
 
   async close() {
-    if (this.lockAwaiter && this.lockAwaiter.index !== undefined) {
-      queue.splice(this.lockAwaiter.index, 1)
+    if (this.lockInstance) {
+      Db.mutex.unlock(this.lockInstance);
     }
-    if (this.isLocker) {
-      this.unlock();
-    }
+
     if (this.connection) {
       await this.connection.close({ noreplyWait: true });
     }
