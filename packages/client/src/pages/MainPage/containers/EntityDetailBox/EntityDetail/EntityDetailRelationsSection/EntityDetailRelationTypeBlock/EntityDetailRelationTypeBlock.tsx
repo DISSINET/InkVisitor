@@ -161,25 +161,32 @@ export const EntityDetailRelationTypeBlock: React.FC<
   useEffect(() => {
     const entityIds = relations
       .map((relation) => relation.entityIds.map((entityId) => entityId))
-      .flat(1);
+      .flat(1)
+      .concat(entity.id);
     setUsedEntityIds([...new Set(entityIds)]);
   }, [entities, relations]);
 
   const renderCloudRelation = (relation: Relation.IModel, key: number) => (
-    <StyledRelation key={key}>
-      {relation.entityIds.map((entityId, key) => {
-        const relationEntity = entities?.find((e) => e.id === entityId);
-        return (
-          <React.Fragment key={key}>
-            {relationEntity && relationEntity.id !== entity.id && (
-              <StyledCloudEntityWrapper>
-                <EntityTag entity={relationEntity} />
-              </StyledCloudEntityWrapper>
-            )}
-          </React.Fragment>
-        );
-      })}
-    </StyledRelation>
+    <React.Fragment key={key}>
+      {relation.entityIds.length > 0 && (
+        <Cloud onUnlink={() => handleCloudRemove()}>
+          <StyledRelation>
+            {relation.entityIds.map((entityId, key) => {
+              const relationEntity = entities?.find((e) => e.id === entityId);
+              return (
+                <React.Fragment key={key}>
+                  {relationEntity && relationEntity.id !== entity.id && (
+                    <StyledCloudEntityWrapper>
+                      <EntityTag entity={relationEntity} />
+                    </StyledCloudEntityWrapper>
+                  )}
+                </React.Fragment>
+              );
+            })}
+          </StyledRelation>
+        </Cloud>
+      )}
+    </React.Fragment>
   );
 
   const unlinkButtonEnabled = (key: number) =>
@@ -294,13 +301,9 @@ export const EntityDetailRelationTypeBlock: React.FC<
         </StyledDetailContentRowLabel>
         <StyledDetailContentRowValue>
           {relations.map((relation, key) =>
-            isCloudType ? (
-              <Cloud key={key} onUnlink={() => handleCloudRemove()}>
-                {renderCloudRelation(relation, key)}
-              </Cloud>
-            ) : (
-              renderNonCloudRelation(relation, key)
-            )
+            isCloudType
+              ? renderCloudRelation(relation, key)
+              : renderNonCloudRelation(relation, key)
           )}
           {(isMultiple || relations.length < 1) && (
             <div style={{ marginTop: "0.3rem" }}>
@@ -311,8 +314,6 @@ export const EntityDetailRelationTypeBlock: React.FC<
                 }
                 onSelected={(selectedId: string) => {
                   if (isCloudType) {
-                    // TODO: new BE function to adding to cloud
-                    // handleCloudSelected(selectedId);
                     setTempCloudEntityId(selectedId);
                   } else {
                     handleMultiSelected(selectedId);
