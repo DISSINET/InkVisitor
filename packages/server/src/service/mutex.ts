@@ -3,6 +3,22 @@ export class Mutex {
     private queue: Awaiter[] = [];
 
     /**
+     * Returns number of waiting items
+     * @returns
+     */
+    len(): number {
+        return this.queue.length
+    }
+
+    /**
+     * Predicate for testing if the mutex is locked
+     * @returns 
+     */
+    isLocked(): boolean {
+        return !!this.activeLock
+    }
+
+    /**
      * Acquire lock - immediately if currently no lock exists or wait until freed
      * @returns 
      */
