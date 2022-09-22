@@ -9,7 +9,9 @@ export default async function dbMiddleware(
   await createConnection(req);
 
   res.on('close', function () {
-    req.db.mutex.onError(new Error("client closed the connection"));
+    if (req.db.lockInstance) {
+      req.db.lockInstance.onError(new Error("client closed the connection"));
+    }
     closeConnection(req);
   });
 
