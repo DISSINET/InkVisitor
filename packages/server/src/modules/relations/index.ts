@@ -10,6 +10,7 @@ import Relation from "@models/relation/relation";
 import { Request, Router } from "express";
 import { asyncRouteHandler } from "../index";
 import { getRelationClass } from "@models/factory";
+import { mergeDeep } from "@common/functions";
 
 export default Router()
   /**
@@ -109,7 +110,12 @@ export default Router()
         throw RelationDoesNotExist.forId(id);
       }
 
-      const model = new Relation({ ...existing, ...data });
+      const model = getRelationClass({
+        ...mergeDeep(existing, data),
+        class: existing.type,
+        id: id,
+      });
+
       if (!model.isValid()) {
         throw new ModelNotValidError("");
       }
