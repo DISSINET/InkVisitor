@@ -29,6 +29,7 @@ import { Checkbox } from "./basic/Checkbox/Checkbox";
 import { Table } from "./basic/Table/Table";
 import { TypeBar } from "./basic/TypeBar/TypeBar";
 import { Cloud } from "./basic/Cloud/Cloud";
+import { LetterIcon } from "./basic/LetterIcon/LetterIcon";
 
 export {
   AttributeIcon,
@@ -49,6 +50,7 @@ export {
   Suggester,
   Dropdown,
   Toast,
+  LetterIcon,
   Modal,
   ModalCard,
   ModalHeader,
