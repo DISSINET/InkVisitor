@@ -126,16 +126,16 @@ export class ResponseTooltip extends ResponseEntity implements EntityTooltip.IRe
       subtrees: [],
     }
 
-    let relations: RelationTypes.IModel[] = [];
+    let relations: RelationTypes.IRelation[] = [];
 
     switch (asClass) {
       case EntityEnums.Class.Concept, EntityEnums.Class.Action:
-        relations = await Relation.getForEntity<RelationTypes.IModel>(conn, parentId, RelationEnums.Type.Superclass, 0);
+        relations = await Relation.getForEntity<RelationTypes.IRelation>(conn, parentId, RelationEnums.Type.Superclass, 0);
         break;
       case EntityEnums.Class.Person, EntityEnums.Class.Location, EntityEnums.Class.Object,
         EntityEnums.Class.Group, EntityEnums.Class.Event, EntityEnums.Class.Statement,
         EntityEnums.Class.Territory, EntityEnums.Class.Resource:
-        relations = await Relation.getForEntity<RelationTypes.IModel>(conn, parentId, RelationEnums.Type.Classification, 0);
+        relations = await Relation.getForEntity<RelationTypes.IRelation>(conn, parentId, RelationEnums.Type.Classification, 0);
         break;
       default:
         break;
