@@ -1,4 +1,4 @@
-import { IDbModel } from "@models/common";
+import { IDbModel, IModel } from "@models/common";
 import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
 import { Relation as RelationTypes } from "@shared/types";
 import { DbEnums, RelationEnums, UserEnums } from "@shared/enums";
@@ -7,14 +7,19 @@ import { InternalServerError } from "@shared/types/errors";
 import User from "@models/user/user";
 import { IRequest } from "src/custom_typings/request";
 
-export default class Relation implements RelationTypes.IModel, IDbModel {
+export interface IRelationModel extends RelationTypes.IRelation, IDbModel {
+  beforeSave(request: IRequest): Promise<void>
+  afterSave(request: IRequest): Promise<void>
+}
+
+export default class Relation implements IRelationModel {
   static table = "relations";
 
   id: string;
   type: RelationEnums.Type;
   entityIds: string[];
 
-  constructor(data: Partial<RelationTypes.IModel>) {
+  constructor(data: Partial<RelationTypes.IRelation>) {
     this.id = data.id || "";
     this.type = data.type as RelationEnums.Type;
     this.entityIds = data.entityIds || [];
@@ -123,7 +128,7 @@ export default class Relation implements RelationTypes.IModel, IDbModel {
    * @param position - position in entityIds
    * @returns array of relation interfaces
    */
-  static async getForEntity<T extends RelationTypes.IModel>(db: Connection, entityId: string, relType?: RelationEnums.Type, position?: number): Promise<T[]> {
+  static async getForEntity<T extends RelationTypes.IRelation>(db: Connection, entityId: string, relType?: RelationEnums.Type, position?: number): Promise<T[]> {
     const items: T[] = await rethink
       .table(Relation.table)
       .getAll(entityId, { index: DbEnums.Indexes.RelationsEntityIds })

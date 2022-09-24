@@ -1,63 +1,63 @@
 import { EntityEnums, RelationEnums } from "../enums";
 
 export namespace Relation {
-  export interface IModel {
+  export interface IRelation {
     id: string;
     type: RelationEnums.Type;
     entityIds: string[];
   }
 
-  export interface ISuperclass extends IModel {
+  export interface ISuperclass extends IRelation {
     type: RelationEnums.Type.Superclass;
     entityIds: [string, string];
   }
-  export interface ISuperordinateLocation extends IModel {
+  export interface ISuperordinateLocation extends IRelation {
     type: RelationEnums.Type.SuperordinateLocation;
     entityIds: [string, string];
   }
-  export interface ISynonym extends IModel {
+  export interface ISynonym extends IRelation {
     type: RelationEnums.Type.Synonym;
     entityIds: string[];
   }
-  export interface IAntonym extends IModel {
+  export interface IAntonym extends IRelation {
     type: RelationEnums.Type.Antonym;
     entityIds: [string, string];
   }
-  export interface ITroponym extends IModel {
+  export interface ITroponym extends IRelation {
     type: RelationEnums.Type.Troponym;
     entityIds: string[];
   }
-  export interface IPropertyReciprocal extends IModel {
+  export interface IPropertyReciprocal extends IRelation {
     type: RelationEnums.Type.PropertyReciprocal;
     entityIds: [string, string];
   }
-  export interface ISubjectActantReciprocal extends IModel {
+  export interface ISubjectActantReciprocal extends IRelation {
     type: RelationEnums.Type.SubjectActant1Reciprocal;
     entityIds: [string, string];
   }
-  export interface IActionEventEquivalent extends IModel {
+  export interface IActionEventEquivalent extends IRelation {
     type: RelationEnums.Type.ActionEventEquivalent;
     entityIds: [string, string];
   }
-  export interface IRelated extends IModel {
+  export interface IRelated extends IRelation {
     type: RelationEnums.Type.Related;
     entityIds: [string, string];
   }
-  export interface IClassification extends IModel {
+  export interface IClassification extends IRelation {
     type: RelationEnums.Type.Classification;
     entityIds: [string, string];
   }
-  export interface IIdentification extends IModel {
+  export interface IIdentification extends IRelation {
     type: RelationEnums.Type.Identification;
     certainty: EntityEnums.Certainty;
     entityIds: [string, string];
   }
 
-  export interface IHolonymy extends IModel {
+  export interface IHolonymy extends IRelation {
     type: RelationEnums.Type.Holonymy;
     entityIds: [string, string];
   }
-  export interface IImplication extends IModel {
+  export interface IImplication extends IRelation {
     type: RelationEnums.Type.Holonymy;
     entityIds: [string, string];
   }

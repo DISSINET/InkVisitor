@@ -100,7 +100,7 @@ export class ResponseEntityDetail extends ResponseEntity implements IResponseDet
   usedInStatementIdentifications: IResponseUsedInStatementIdentification[];
   usedInStatementClassifications: IResponseUsedInStatementClassification[];
 
-  relations: RelationTypes.IModel[] = [];
+  relations: RelationTypes.IRelation[] = [];
 
   constructor(entity: Entity) {
     super(entity);
@@ -142,7 +142,7 @@ export class ResponseEntityDetail extends ResponseEntity implements IResponseDet
       await Statement.findByDataActantsCI(conn, this.id)
     );
 
-    this.relations = await Relation.getForEntity<RelationTypes.IModel>(conn, this.id);
+    this.relations = await Relation.getForEntity<RelationTypes.IRelation>(conn, this.id);
 
     this.entities = await this.populateEntitiesMap(conn);
 
