@@ -1,4 +1,3 @@
-import { Db } from "@service/RethinkDB";
 import { Connection, WriteResult } from "rethinkdb-ts";
 
 type GenericObject = { [key: string]: any };

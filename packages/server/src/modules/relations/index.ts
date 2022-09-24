@@ -48,6 +48,8 @@ export default Router()
         throw new PermissionDeniedError("entity cannot be created");
       }
 
+      await request.db.lock();
+
       const result = await model.save(request.db.connection);
 
       if (
@@ -104,6 +106,8 @@ export default Router()
       if (!id || !data || Object.keys(data).length === 0) {
         throw new BadParams("relation id and data have to be set");
       }
+
+      await request.db.lock();
 
       const existing = await Relation.getById(request, id);
       if (!existing) {
@@ -165,6 +169,8 @@ export default Router()
       if (!id) {
         throw new BadParams("relation id has to be set");
       }
+
+      await request.db.lock();
 
       const existing = await Relation.getById(request, id);
       if (!existing) {

@@ -233,6 +233,8 @@ export default Router()
         throw new ModelNotValidError("invalid model");
       }
 
+      await request.db.lock();
+
       const hash = user.generateHash();
       const result = await user.save(request.db.connection);
 
