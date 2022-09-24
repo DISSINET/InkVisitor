@@ -23,9 +23,6 @@ import { IStatementClassification, IStatementIdentification } from "@shared/type
 import Relation from "@models/relation/relation";
 
 export class ResponseEntity extends Entity implements IResponseEntity {
-  @nonenumerable
-  originalEntity: Entity;
-
   // map of entity ids that should be populated in subsequent methods and used in fetching
   // real entities in populateEntitiesMap method
   // used in derived classes
@@ -35,10 +32,18 @@ export class ResponseEntity extends Entity implements IResponseEntity {
   right: UserEnums.RoleMode = UserEnums.RoleMode.Read;
 
   constructor(entity: Entity) {
-    super(JSON.parse(JSON.stringify(entity)));
+    super({});
 
-    // entity is base class, we need correct implementation to use overridden methods
-    this.originalEntity = entity;
+    // using proxy to use the original entity - not the parent class which is used only to 
+    // satisfy the interface
+    return new Proxy(this, {
+      get(target, prop, receiver) {
+        if (entity.hasOwnProperty(prop) || typeof (entity as any)[prop] === "function") {
+          return (entity as any)[prop];
+        }
+        return (target as any)[prop as any] as any;
+      }
+    })
   }
 
   /**
@@ -46,7 +51,7 @@ export class ResponseEntity extends Entity implements IResponseEntity {
    * @param request
    */
   prepare(request: IRequest) {
-    this.right = this.originalEntity.getUserRoleMode(request.getUserOrFail());
+    this.right = this.getUserRoleMode(request.getUserOrFail());
   }
 
   /**
@@ -106,7 +111,7 @@ export class ResponseEntityDetail extends ResponseEntity implements IResponseDet
     this.usedInStatementClassifications = [];
     this.usedInStatementIdentifications = [];
 
-    this.addLinkedEntities(this.originalEntity.getEntitiesIds());
+    this.addLinkedEntities(this.getEntitiesIds());
   }
 
   /**

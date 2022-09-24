@@ -382,7 +382,7 @@ class Statement extends Entity implements IStatement {
     });
 
     //  get ids from Statement.data.actions, Statement.data.actions.props ( + childs)
-    this.data.actions.forEach((a) => {
+    this.data.actions?.forEach((a) => {
       entitiesIds[a.actionId] = null;
       if (a.props) {
         Entity.extractIdsFromProps(a.props).forEach((element) => {
@@ -393,10 +393,10 @@ class Statement extends Entity implements IStatement {
 
     // get ids from Statement.data.actants, Statement.data.actants[].props ( + childs), 
     // Statement.data.actants[].classifications, Statement.data.actants[].identifications
-    this.data.actants.forEach((a) => {
+    this.data.actants?.forEach((a) => {
       entitiesIds[a.entityId] = null;
-      a.classifications.forEach(ca => entitiesIds[ca.entityId] = null);
-      a.identifications.forEach(ci => entitiesIds[ci.entityId] = null);
+      a.classifications?.forEach(ca => entitiesIds[ca.entityId] = null);
+      a.identifications?.forEach(ci => entitiesIds[ci.entityId] = null);
 
       Entity.extractIdsFromProps(a.props).forEach((element) => {
         entitiesIds[element] = null;

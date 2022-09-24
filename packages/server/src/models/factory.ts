@@ -14,6 +14,7 @@ import Location from "./location/location";
 import Value from "./value/value";
 import Event from "./event/event";
 import Relation from "./relation/relation";
+import Identification from "./relation/identification";
 
 /**
  * attempts to create new Entity instance depending on the type value
@@ -80,7 +81,7 @@ export function getRelationClass(data: UnknownObject): Relation {
     case RelationEnums.Type.Troponym:
       return new Relation(data);
     case RelationEnums.Type.Identification:
-      return new Relation(data);
+      return new Identification(data);
     default:
       throw new ModelNotValidError("unknown class for relation");
   }
