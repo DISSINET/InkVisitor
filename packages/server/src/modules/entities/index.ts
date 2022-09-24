@@ -174,11 +174,11 @@ export default Router()
         throw new ModelNotValidError("");
       }
 
-      const user = request.getUserOrFail();
-
-      if (!model.canBeCreatedByUser(user)) {
+      if (!model.canBeCreatedByUser(request.getUserOrFail())) {
         throw new PermissionDeniedError("entity cannot be created");
       }
+
+      await request.db.lock();
 
       const result = await model.save(request.db.connection);
 
@@ -192,7 +192,7 @@ export default Router()
       if (result.inserted === 1) {
         await Audit.createNew(
           request.db.connection,
-          user,
+          request.getUserOrFail(),
           model.id,
           request.body
         );
@@ -243,6 +243,8 @@ export default Router()
       if (!entityId || !entityData || Object.keys(entityData).length === 0) {
         throw new BadParams("entity id and data have to be set");
       }
+
+      await request.db.lock();
 
       // entityId must be already in the db
       const existingEntity = await findEntityById(request.db, entityId);
@@ -318,6 +320,8 @@ export default Router()
       if (!entityId) {
         throw new BadParams("entity id has to be set");
       }
+
+      await request.db.lock();
 
       // entityId must be already in the db
       const existingEntity = await findEntityById(request.db, entityId);
