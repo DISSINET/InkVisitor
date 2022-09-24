@@ -10,6 +10,7 @@ import { asyncRouteHandler } from "..";
 import { IResponseStatement, IStatement } from "@shared/types";
 import Statement from "@models/statement/statement";
 import { ResponseStatement } from "@models/statement/response";
+import { EntityEnums } from "@shared/enums";
 
 export default Router()
   /**
@@ -47,7 +48,8 @@ export default Router()
         request.db,
         statementId
       );
-      if (!statementData) {
+
+      if (!statementData || statementData.class !== EntityEnums.Class.Statement) {
         throw new StatementDoesNotExits(
           `statement ${statementId} was not found`,
           statementId

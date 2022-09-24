@@ -1,6 +1,6 @@
 import { Request } from "express";
 import { UserEnums } from "@shared/enums";
-import { IEntity, IResponseStatement } from "@shared/types";
+import { IEntity, IResponseStatement, IStatement } from "@shared/types";
 import { Connection } from "rethinkdb-ts";
 import Statement from "./statement";
 
@@ -8,12 +8,8 @@ export class ResponseStatement extends Statement implements IResponseStatement {
   entities: { [key: string]: IEntity };
   right: UserEnums.RoleMode = UserEnums.RoleMode.Read;
 
-  constructor(entity: IEntity) {
-    super({});
-    for (const key of Object.keys(entity)) {
-      (this as any)[key] = (entity as any)[key];
-    }
-
+  constructor(entity: IStatement) {
+    super(entity);
     this.entities = {};
   }
 

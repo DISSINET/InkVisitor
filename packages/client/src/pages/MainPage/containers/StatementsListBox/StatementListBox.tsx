@@ -30,6 +30,7 @@ import {
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { Cell, Column } from "react-table";
 import { toast } from "react-toastify";
+import { setStatementListOpened } from "redux/features/layout/statementListOpenedSlice";
 import { setRowsExpanded } from "redux/features/statementList/rowsExpandedSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { StatementListContextMenu } from "./StatementListContextMenu/StatementListContextMenu";
@@ -70,6 +71,12 @@ export const StatementListBox: React.FC = () => {
     detailIdArray,
     removeDetailId,
   } = useSearchParams();
+
+  useEffect(() => {
+    if (!detailIdArray.length && !statementListOpened) {
+      dispatch(setStatementListOpened(true));
+    }
+  }, [detailIdArray, statementListOpened]);
 
   const [showSubmit, setShowSubmit] = useState(false);
   const [statementToDelete, setStatementToDelete] = useState<IStatement>();

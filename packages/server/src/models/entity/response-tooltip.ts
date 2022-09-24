@@ -3,7 +3,6 @@ import {
   IEntity,
   EntityTooltip,
 } from "@shared/types";
-import { nonenumerable } from "@common/decorators";
 import { Connection } from "rethinkdb-ts";
 import { IRequest } from "src/custom_typings/request";
 import { ResponseEntity } from "./response";
