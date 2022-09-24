@@ -143,7 +143,8 @@ export default Router()
       }
 
       await model.beforeSave(request);
-      const result = await model.update(request.db.connection, data);
+
+      const result = await model.update(request.db.connection, { ...data, entityIds: model.entityIds });
 
       if (result.replaced || result.unchanged) {
         await model.afterSave(request);
