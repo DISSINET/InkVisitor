@@ -37,8 +37,6 @@ export default Router()
   .post(
     "/",
     asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
-      await request.db.lock();
-
       const model = getRelationClass(request.body);
 
       if (!model.isValid()) {
@@ -48,6 +46,8 @@ export default Router()
       if (!model.canBeCreatedByUser(request.getUserOrFail())) {
         throw new PermissionDeniedError("entity cannot be created");
       }
+
+      await request.db.lock();
 
       const result = await model.save(request.db.connection);
 
@@ -106,6 +106,8 @@ export default Router()
         throw new BadParams("relation id and data have to be set");
       }
 
+      await request.db.lock();
+
       const existing = await Relation.getById(request, id);
       if (!existing) {
         throw RelationDoesNotExist.forId(id);
@@ -161,6 +163,8 @@ export default Router()
       if (!id) {
         throw new BadParams("relation id has to be set");
       }
+
+      await request.db.lock();
 
       const existing = await Relation.getById(request, id);
       if (!existing) {
