@@ -81,6 +81,8 @@ export default Router()
         throw new BadParams("moveId/parentId/newIndex has be set");
       }
 
+      await request.db.lock();
+
       // check child territory
       const territoryData = await findEntityById<ITerritory>(
         request.db,
