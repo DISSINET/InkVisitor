@@ -291,8 +291,7 @@ export default class Entity implements IEntity, IDbModel {
   }
 
   async getEntities(db: Connection): Promise<IEntity[]> {
-    const entities = Entity.findEntitiesByIds(db, this.getEntitiesIds());
-    return entities;
+    return Entity.findEntitiesByIds(db, this.getEntitiesIds());
   }
 
   /**

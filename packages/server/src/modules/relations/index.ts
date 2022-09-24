@@ -11,6 +11,7 @@ import { Request, Router } from "express";
 import { asyncRouteHandler } from "../index";
 import { getRelationClass } from "@models/factory";
 import { mergeDeep } from "@common/functions";
+import Entity from "@models/entity/entity";
 
 export default Router()
   /**
@@ -44,11 +45,16 @@ export default Router()
         throw new ModelNotValidError("");
       }
 
+      await request.db.lock();
+
+      const entities = await Entity.findEntitiesByIds(request.db.connection, model.entityIds)
+      if (entities.length !== model.entityIds.length) {
+        throw new ModelNotValidError("entity(ies) not found");
+      }
+
       if (!model.canBeCreatedByUser(request.getUserOrFail())) {
         throw new PermissionDeniedError("entity cannot be created");
       }
-
-      await request.db.lock();
 
       const result = await model.save(request.db.connection);
 
@@ -122,6 +128,11 @@ export default Router()
 
       if (!model.isValid()) {
         throw new ModelNotValidError("");
+      }
+
+      const entities = await Entity.findEntitiesByIds(request.db.connection, model.entityIds)
+      if (entities.length !== model.entityIds.length) {
+        throw new ModelNotValidError("entity(ies) not found");
       }
 
       if (!model.canBeEditedByUser(request.getUserOrFail())) {
