@@ -25,6 +25,14 @@ export default class Relation implements IRelationModel {
     this.entityIds = data.entityIds || [];
   }
 
+  async afterSave(request: IRequest): Promise<void> {
+
+  }
+
+  async beforeSave(request: IRequest): Promise<void> {
+
+  }
+
   async save(db: Connection | undefined): Promise<WriteResult> {
     const result = await rethink
       .table(Relation.table)
@@ -139,5 +147,19 @@ export default class Relation implements IRelationModel {
       return items.filter(d => d.entityIds[position] === entityId)
     }
     return items;
+  }
+
+  /**
+   * Removes multiple relation entries
+   * @param request 
+   * @param ids 
+   * @returns 
+   */
+  static async deleteMany(request: IRequest, ids: string[]): Promise<WriteResult> {
+    return rethink
+      .table(Relation.table)
+      .getAll.apply(undefined, ids)
+      .delete()
+      .run(request.db.connection);
   }
 }

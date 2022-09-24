@@ -56,6 +56,7 @@ export default Router()
         throw new PermissionDeniedError("entity cannot be created");
       }
 
+      await model.beforeSave(request);
       const result = await model.save(request.db.connection);
 
       if (
@@ -64,6 +65,8 @@ export default Router()
       ) {
         throw new ModelNotValidError("id already exists");
       }
+
+      await model.afterSave(request);
 
       if (result.inserted === 1) {
         return {
@@ -139,9 +142,12 @@ export default Router()
         throw new PermissionDeniedError("relation cannot be saved");
       }
 
+      await model.beforeSave(request);
       const result = await model.update(request.db.connection, data);
 
       if (result.replaced || result.unchanged) {
+        await model.afterSave(request);
+
         return {
           result: true,
         };
