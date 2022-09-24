@@ -77,7 +77,7 @@ export default class Relation implements RelationTypes.IModel, IDbModel {
       return false;
     }
 
-    if (this.entityIds.constructor.name !== "Array" || !this.entityIds.length || !this.entityIds.reduce((acc, cur) => acc && typeof cur === 'string', true)) {
+    if (this.entityIds.constructor.name !== "Array" || this.entityIds.length < 2 || !this.entityIds.reduce((acc, cur) => acc && typeof cur === 'string', true)) {
       return false;
     }
 
