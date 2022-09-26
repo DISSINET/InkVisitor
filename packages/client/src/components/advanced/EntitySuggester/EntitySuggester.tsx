@@ -59,7 +59,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
   const [selectedCategory, setSelectedCategory] = useState<any>();
   const [allCategories, setAllCategories] = useState<IOption[]>();
 
-  const { appendDetailId } = useSearchParams();
+  const { appendDetailId, setSelectedDetailId } = useSearchParams();
   const userRole = localStorage.getItem("userrole");
 
   // Suggesions query
@@ -157,6 +157,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
         handleClean();
         if (openDetailOnCreate) {
           appendDetailId(variables.id);
+          setSelectedDetailId(variables.id);
         }
       },
     }
