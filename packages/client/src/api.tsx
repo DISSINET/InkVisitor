@@ -572,13 +572,10 @@ class Api {
   }
 
   async relationCreate(
-    newRelation: Relation.IModel
+    newRelation: Relation.IRelation
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
-      const response = await this.connection.post(
-        `/relations`,
-        newRelation
-      );
+      const response = await this.connection.post(`/relations`, newRelation);
       return response;
     } catch (err: any | AxiosError) {
       throw { ...err.response.data };
@@ -589,9 +586,7 @@ class Api {
     relationId: string
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
-      const response = await this.connection.delete(
-        `/relations/${relationId}`
-      );
+      const response = await this.connection.delete(`/relations/${relationId}`);
       return response;
     } catch (err: any | AxiosError) {
       throw { ...err.response.data };

@@ -23,7 +23,7 @@ export const EntityDetailRelationsSection: React.FC<
   );
 
   const relationCreateMutation = useMutation(
-    async (newRelation: Relation.IModel) =>
+    async (newRelation: Relation.IRelation) =>
       await api.relationCreate(newRelation),
     {
       onSuccess: (data, variables) => {
