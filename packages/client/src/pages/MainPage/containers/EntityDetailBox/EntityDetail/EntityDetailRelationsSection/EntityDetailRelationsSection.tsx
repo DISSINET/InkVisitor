@@ -23,15 +23,12 @@ export const EntityDetailRelationsSection: React.FC<
   );
 
   const relationCreateMutation = useMutation(
-    async (newRelation: Relation.IModel) =>
+    async (newRelation: Relation.IRelation) =>
       await api.relationCreate(newRelation),
     {
       onSuccess: (data, variables) => {
         // TODO
         queryClient.invalidateQueries("entity");
-        // if (tempEntityId) {
-        //   setTempEntityId(false);
-        // }
       },
     }
   );
@@ -46,9 +43,6 @@ export const EntityDetailRelationsSection: React.FC<
       onSuccess: (data, variables) => {
         // TODO
         queryClient.invalidateQueries("entity");
-        // if (tempEntityId) {
-        //   setTempEntityId(false);
-        // }
       },
     }
   );
