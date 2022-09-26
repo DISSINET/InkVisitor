@@ -217,7 +217,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
           localStorage.getItem("userrole") as UserEnums.Role,
           true
         );
-        newTerritory.data.parent.id = territoryParentId;
+        newTerritory.data.parent.territoryId = territoryParentId;
         actantsCreateMutation.mutate(newTerritory);
       }
     } else {

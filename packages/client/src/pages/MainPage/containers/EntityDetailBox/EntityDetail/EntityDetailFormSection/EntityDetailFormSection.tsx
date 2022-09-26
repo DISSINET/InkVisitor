@@ -199,10 +199,16 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
               </StyledDetailContentRowLabel>
               <StyledDetailContentRowValue>
                 <EntityTag
-                  entity={entity.entities[entity.data.parent.id]}
-                  disableDoubleClick={entity.data.parent.id === rootTerritoryId}
-                  disableDrag={entity.data.parent.id === rootTerritoryId}
-                  disableTooltip={entity.data.parent.id === rootTerritoryId}
+                  entity={entity.entities[entity.data.parent.territoryId]}
+                  disableDoubleClick={
+                    entity.data.parent.territoryId === rootTerritoryId
+                  }
+                  disableDrag={
+                    entity.data.parent.territoryId === rootTerritoryId
+                  }
+                  disableTooltip={
+                    entity.data.parent.territoryId === rootTerritoryId
+                  }
                 />
               </StyledDetailContentRowValue>
             </StyledDetailContentRow>
