@@ -29,9 +29,6 @@ export const EntityDetailRelationsSection: React.FC<
       onSuccess: (data, variables) => {
         // TODO
         queryClient.invalidateQueries("entity");
-        // if (tempEntityId) {
-        //   setTempEntityId(false);
-        // }
       },
     }
   );
@@ -46,9 +43,6 @@ export const EntityDetailRelationsSection: React.FC<
       onSuccess: (data, variables) => {
         // TODO
         queryClient.invalidateQueries("entity");
-        // if (tempEntityId) {
-        //   setTempEntityId(false);
-        // }
       },
     }
   );

@@ -24,6 +24,7 @@ export const EntityDetailStatementPropsTable: React.FC<
 
   const data = useMemo(() => (useCases ? useCases : []), [useCases]);
 
+  // TODO: utilise
   const renderEntityTag = (entity: IEntity) => {
     return (
       <StyledTableTextGridCell>
