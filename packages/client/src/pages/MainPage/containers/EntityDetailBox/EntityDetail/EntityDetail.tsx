@@ -40,6 +40,8 @@ import {
   StyledUsedAsHeading,
   StyledUsedAsTitle,
 } from "./EntityDetailStyles";
+import { EntityDetailClassificationTable } from "./EntityDetailUsedInTable/EntityDetailClassificationTable/EntityDetailClassificationTable";
+import { EntityDetailIdentificationTable } from "./EntityDetailUsedInTable/EntityDetailIdentificationTable/EntityDetailIdentificationTable";
 import { EntityDetailMetaPropsTable } from "./EntityDetailUsedInTable/EntityDetailMetaPropsTable/EntityDetailMetaPropsTable";
 import { EntityDetailStatementPropsTable } from "./EntityDetailUsedInTable/EntityDetailStatementPropsTable/EntityDetailStatementPropsTable";
 import { EntityDetailStatementsTable } from "./EntityDetailUsedInTable/EntityDetailStatementsTable/EntityDetailStatementsTable";
@@ -639,6 +641,32 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
                   entities={entity.entities}
                   useCases={entity.usedInStatementProps}
                   key="StatementProp"
+                />
+              )}
+
+              {/* usedIn statement identification */}
+              {!entity.isTemplate && (
+                <EntityDetailIdentificationTable
+                  title={{
+                    singular: "Statement Identification",
+                    plural: "Statement Identifications",
+                  }}
+                  entities={entity.entities}
+                  useCases={entity.usedInStatementIdentifications}
+                  key="StatementIdentification"
+                />
+              )}
+
+              {/* usedIn statement identification */}
+              {!entity.isTemplate && (
+                <EntityDetailClassificationTable
+                  title={{
+                    singular: "Statement Classification",
+                    plural: "Statement Classifications",
+                  }}
+                  entities={entity.entities}
+                  useCases={entity.usedInStatementClassifications}
+                  key="StatementClassification"
                 />
               )}
             </StyledDetailSection>

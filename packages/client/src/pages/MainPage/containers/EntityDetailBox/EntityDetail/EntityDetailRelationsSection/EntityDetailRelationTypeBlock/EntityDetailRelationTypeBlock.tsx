@@ -28,13 +28,13 @@ import api from "api";
 
 // relations for one type
 interface EntityDetailRelationTypeBlock {
-  relations: Relation.IModel[];
+  relations: Relation.IRelation[];
   relationType: string;
   entities: IResponseEntity[] | undefined;
   relationCreateMutation: UseMutationResult<
     AxiosResponse<IResponseGeneric>,
     unknown,
-    Relation.IModel,
+    Relation.IRelation,
     unknown
   >;
   relationUpdateMutation: UseMutationResult<
@@ -147,7 +147,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
       };
       relationCreateMutation.mutate(newRelation);
     } else {
-      const newRelation: Relation.IModel = {
+      const newRelation: Relation.IRelation = {
         id: uuidv4(),
         entityIds: [entity.id, selectedId],
         type: relationType as RelationEnums.Type,
@@ -166,7 +166,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
     setUsedEntityIds([...new Set(entityIds)]);
   }, [entities, relations]);
 
-  const renderCloudRelation = (relation: Relation.IModel, key: number) => (
+  const renderCloudRelation = (relation: Relation.IRelation, key: number) => (
     <React.Fragment key={key}>
       {relation.entityIds.length > 0 && (
         <Cloud onUnlink={() => handleCloudRemove()}>
@@ -192,7 +192,10 @@ export const EntityDetailRelationTypeBlock: React.FC<
   const unlinkButtonEnabled = (key: number) =>
     !relationRule.asymmetrical || (relationRule.asymmetrical && key > 0);
 
-  const renderNonCloudRelation = (relation: Relation.IModel, key: number) => (
+  const renderNonCloudRelation = (
+    relation: Relation.IRelation,
+    key: number
+  ) => (
     <StyledGrid key={key} hasAttribute={relationRule.attributes.length > 0}>
       <StyledRelation key={key}>
         {relation.entityIds.map((entityId, key) => {
@@ -284,7 +287,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
       });
     } else {
       // Create new relation (cloud init)
-      const newRelation: Relation.IModel = {
+      const newRelation: Relation.IRelation = {
         id: uuidv4(),
         entityIds: [entity.id, cloudEntity.id],
         type: relationType as RelationEnums.Type,
