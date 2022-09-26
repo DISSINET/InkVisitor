@@ -253,7 +253,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     error: territoryError,
     isFetching: isFetchingTerritory,
   } = useQuery(
-    ["territory", statementTerritoryId],
+    ["territory", "statement-editor", statementTerritoryId],
     async () => {
       const res = await api.entitiesGet(statementTerritoryId as string);
       return res.data;
@@ -264,7 +264,8 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   );
 
   //TODO recurse to get all parents
-  const territoryPath = territoryData && Array(territoryData.data?.parent?.id);
+  const territoryPath =
+    territoryData && Array(territoryData.data?.parent?.territoryId);
 
   const userCanEdit: boolean = useMemo(() => {
     return (

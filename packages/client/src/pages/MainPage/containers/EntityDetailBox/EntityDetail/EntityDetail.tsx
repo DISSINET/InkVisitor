@@ -456,7 +456,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
     return (
       entity.class === EntityEnums.Class.Territory &&
       entity.data.parent &&
-      Object.keys(entity.entities).includes(entity.data.parent.id)
+      Object.keys(entity.entities).includes(entity.data.parent.territoryId)
     );
   };
 
@@ -470,7 +470,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
 
   const getTerritoryId = (entity: IResponseDetail) => {
     if (isTerritoryWithParent(entity)) {
-      return entity.entities[entity.data.parent.id].id;
+      return entity.entities[entity.data.parent.territoryId].id;
     } else if (isStatementWithTerritory(entity)) {
       return entity.entities[entity.data.territory.id].id;
     } else {
