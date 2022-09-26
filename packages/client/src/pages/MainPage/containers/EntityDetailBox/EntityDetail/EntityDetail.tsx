@@ -652,7 +652,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
                     plural: "Statement Identifications",
                   }}
                   entities={entity.entities}
-                  // useCases={entity.usedInStatementProps}
+                  useCases={entity.usedInStatementIdentifications}
                   key="StatementIdentification"
                 />
               )}
@@ -665,8 +665,8 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
                     plural: "Statement Classifications",
                   }}
                   entities={entity.entities}
-                  // useCases={entity.usedInStatementProps}
-                  key="StatementIdentification"
+                  useCases={entity.usedInStatementClassifications}
+                  key="StatementClassification"
                 />
               )}
             </StyledDetailSection>

@@ -58,19 +58,21 @@ export const EntityDetailClassificationTable: React.FC<
         Header: "Actant",
         accesor: "data",
         Cell: ({ row }: Cell) => {
-          // const useCase = row.original as IResponseUsedInStatementProps;
-          // const entityId = useCase.originId;
-          // const entity = entityId ? entities[entityId] : false;
-          // return <>{entity && renderEntityTag(entity)}</>;
+          const useCase =
+            row.original as IResponseUsedInStatementClassification;
+          const entityId = useCase.actantEntityId;
+          const entity = entityId ? entities[entityId] : false;
+          return <>{entity && renderEntityTag(entity)}</>;
         },
       },
       {
         Header: "Identification",
         Cell: ({ row }: Cell) => {
-          // const useCase = row.original as IResponseUsedInStatementProps;
-          // const entityId = useCase.typeId;
-          // const entity = entityId ? entities[entityId] : false;
-          // return <>{entity && renderEntityTag(entity)}</>;
+          const useCase =
+            row.original as IResponseUsedInStatementClassification;
+          const entityId = useCase.relationEntityId;
+          const entity = entityId ? entities[entityId] : false;
+          return <>{entity && renderEntityTag(entity)}</>;
         },
       },
     ],
@@ -84,8 +86,6 @@ export const EntityDetailClassificationTable: React.FC<
         data={data}
         entityTitle={title}
         perPage={perPage}
-        firstColumnMinWidth
-        lastColumnMinWidth
       />
     </>
   );
