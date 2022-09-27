@@ -13,7 +13,9 @@ export const StyledEntityWrapper = styled.div`
   margin-bottom: ${({ theme }) => theme.space[1]};
 `;
 export const StyledCloudEntityWrapper = styled.div`
-  display: flex;
+  display: inline-flex;
+  overflow: hidden;
+  max-width: 100%;
   margin: ${({ theme }) => theme.space[1]};
 `;
 interface StyledGrid {

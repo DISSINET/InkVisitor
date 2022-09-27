@@ -167,7 +167,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
   }, [entities, relations]);
 
   const renderCloudRelation = (relation: Relation.IRelation, key: number) => (
-    <React.Fragment key={key}>
+    <StyledGrid key={key}>
       {relation.entityIds.length > 0 && (
         <Cloud onUnlink={() => handleCloudRemove()}>
           <StyledRelation>
@@ -177,7 +177,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
                 <React.Fragment key={key}>
                   {relationEntity && relationEntity.id !== entity.id && (
                     <StyledCloudEntityWrapper>
-                      <EntityTag entity={relationEntity} />
+                      <EntityTag fullWidth entity={relationEntity} />
                     </StyledCloudEntityWrapper>
                   )}
                 </React.Fragment>
@@ -186,7 +186,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
           </StyledRelation>
         </Cloud>
       )}
-    </React.Fragment>
+    </StyledGrid>
   );
 
   const unlinkButtonEnabled = (key: number) =>
