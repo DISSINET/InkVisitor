@@ -403,6 +403,72 @@
     }
   },
   {
+    "id": "s5",
+    "class": "S",
+    "label": "",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {
+      "text": "A pug drinks coffee in the DISSINET office.",
+      "territory": {
+        "territoryId": "t1",
+        "order": 3
+      },
+      "actions": [
+        {
+          "id": "s5_a1",
+          "actionId": "a4",
+          "certainty": "1",
+          "elvl": "1",
+          "logic": "1",
+          "mood": [],
+          "moodvariant": "1",
+          "bundleOperator": "a",
+          "bundleStart": false,
+          "bundleEnd": false,
+          "props": []
+        }
+      ],
+      "actants": [
+        {
+          "id": "s5_a2",
+          "entityId": "o1",
+          "position": "s",
+          "elvl": "1",
+          "logic": "1",
+          "virtuality": "1",
+          "partitivity": "1",
+          "bundleOperator": "a",
+          "bundleStart": false,
+          "bundleEnd": false,
+          "props": [],
+          "classifications": [],
+          "identifications": []
+        },
+        {
+          "id": "s5_a3",
+          "entityId": "l1200",
+          "position": "a2",
+          "elvl": "1",
+          "logic": "1",
+          "virtuality": "1",
+          "partitivity": "1",
+          "bundleOperator": "a",
+          "bundleStart": false,
+          "bundleEnd": false,
+          "props": [],
+          "classifications": [],
+          "identifications": []
+        }
+      ],
+      "tags": []
+    }
+  },
+  {
     "id": "a1",
     "class": "A",
     "label": "told",
@@ -590,6 +656,213 @@
     "id": "a4",
     "class": "A",
     "label": "take place",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {
+      "valencies": {
+        "s": "",
+        "a1": "",
+        "a2": ""
+      },
+      "entities": {
+        "s": [],
+        "a1": [],
+        "a2": []
+      }
+    }
+  },
+  {
+    "id": "a5",
+    "class": "A",
+    "label": "drink coffee",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {
+      "valencies": {
+        "s": "",
+        "a1": "",
+        "a2": ""
+      },
+      "entities": {
+        "s": [],
+        "a1": [],
+        "a2": []
+      }
+    }
+  },
+  {
+    "id": "a501",
+    "class": "A",
+    "label": "drink beverage",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {
+      "valencies": {
+        "s": "",
+        "a1": "",
+        "a2": ""
+      },
+      "entities": {
+        "s": [],
+        "a1": [],
+        "a2": []
+      }
+    }
+  },
+  {
+    "id": "a502",
+    "class": "A",
+    "label": "consume",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {
+      "valencies": {
+        "s": "",
+        "a1": "",
+        "a2": ""
+      },
+      "entities": {
+        "s": [],
+        "a1": [],
+        "a2": []
+      }
+    }
+  },
+  {
+    "id": "a503",
+    "class": "A",
+    "label": "have fun",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {
+      "valencies": {
+        "s": "",
+        "a1": "",
+        "a2": ""
+      },
+      "entities": {
+        "s": [],
+        "a1": [],
+        "a2": []
+      }
+    }
+  },
+  {
+    "id": "a504",
+    "class": "A",
+    "label": "entertain or relax",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {
+      "valencies": {
+        "s": "",
+        "a1": "",
+        "a2": ""
+      },
+      "entities": {
+        "s": [],
+        "a1": [],
+        "a2": []
+      }
+    }
+  },
+  {
+    "id": "a505",
+    "class": "A",
+    "label": "have coffee",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {
+      "valencies": {
+        "s": "",
+        "a1": "",
+        "a2": ""
+      },
+      "entities": {
+        "s": [],
+        "a1": [],
+        "a2": []
+      }
+    }
+  },
+  {
+    "id": "a506",
+    "class": "A",
+    "label": "take coffee",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {
+      "valencies": {
+        "s": "",
+        "a1": "",
+        "a2": ""
+      },
+      "entities": {
+        "s": [],
+        "a1": [],
+        "a2": []
+      }
+    }
+  },
+  {
+    "id": "a507",
+    "class": "A",
+    "label": "sip coffee from a cup",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {
+      "valencies": {
+        "s": "",
+        "a1": "",
+        "a2": ""
+      },
+      "entities": {
+        "s": [],
+        "a1": [],
+        "a2": []
+      }
+    }
+  },
+  {
+    "id": "a508",
+    "class": "A",
+    "label": "have a coffee as a first thing in the morning",
     "detail": "",
     "status": "1",
     "language": "eng",
@@ -869,6 +1142,120 @@
       "logicalType": "1"
     }
   },
+
+  {
+    "id": "l1200",
+    "class": "L",
+    "label": "DISSINET office",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {
+      "logicalType": "1"
+    }
+  },
+  {
+    "id": "l1201",
+    "class": "L",
+    "label": "Arne Novaka street",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {
+      "logicalType": "1"
+    }
+  },
+  {
+    "id": "l1202",
+    "class": "L",
+    "label": "The location of the Battle for ERC",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {
+      "logicalType": "1"
+    }
+  },
+  {
+    "id": "l1203",
+    "class": "L",
+    "label": "Veveří fantasy kingdom",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {
+      "logicalType": "1"
+    }
+  },
+  {
+    "id": "l1204",
+    "class": "L",
+    "label": "A favorite neighborhood of David",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {
+      "logicalType": "1"
+    }
+  },
+  {
+    "id": "l1205",
+    "class": "L",
+    "label": "EXPRO office",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {
+      "logicalType": "1"
+    }
+  },
+  {
+    "id": "l1206",
+    "class": "L",
+    "label": "a room in Faculty of Arts",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {
+      "logicalType": "1"
+    }
+  },
+  {
+    "id": "l1207",
+    "class": "L",
+    "label": "Davids office",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {
+      "logicalType": "1"
+    }
+  },
+
   {
     "id": "e1",
     "class": "E",
@@ -1069,6 +1456,42 @@
     "id": "c211",
     "class": "C",
     "label": "pug",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {}
+  },
+  {
+    "id": "c211a",
+    "class": "C",
+    "label": "mops",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {}
+  },
+  {
+    "id": "c211b",
+    "class": "C",
+    "label": "carlin",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {}
+  },
+  {
+    "id": "c211c",
+    "class": "C",
+    "label": "carlino",
     "detail": "",
     "status": "1",
     "language": "eng",
@@ -1442,6 +1865,235 @@
     "id": "c80",
     "class": "C",
     "label": "localization",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {}
+  },
+
+  {
+    "id": "c901",
+    "class": "C",
+    "label": "having coffee",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {}
+  },
+  {
+    "id": "c902",
+    "class": "C",
+    "label": "drinking",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {}
+  },
+  {
+    "id": "c903",
+    "class": "C",
+    "label": "consumation",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {}
+  },
+  {
+    "id": "c904",
+    "class": "C",
+    "label": "coffein intake",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {}
+  },
+  {
+    "id": "c905",
+    "class": "C",
+    "label": "energy gain",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {}
+  },
+  {
+    "id": "c906",
+    "class": "C",
+    "label": "energetic transmission",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {}
+  },
+  {
+    "id": "c907",
+    "class": "C",
+    "label": "relaxation",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {}
+  },
+  {
+    "id": "c908",
+    "class": "C",
+    "label": "entertainment",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {}
+  },
+  {
+    "id": "c1000",
+    "class": "C",
+    "label": "nickname",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {}
+  },
+  {
+    "id": "c1001",
+    "class": "C",
+    "label": "name",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {}
+  },
+  {
+    "id": "c1002",
+    "class": "C",
+    "label": "symbol",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {}
+  },
+  {
+    "id": "c1003",
+    "class": "C",
+    "label": "religious symbol",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {}
+  },
+  {
+    "id": "c1101",
+    "class": "C",
+    "label": "office",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {}
+  },
+  {
+    "id": "c1102",
+    "class": "C",
+    "label": "room",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {}
+  },
+  {
+    "id": "c1103",
+    "class": "C",
+    "label": "study room",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {}
+  },
+  {
+    "id": "c1104",
+    "class": "C",
+    "label": "university section",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {}
+  },
+  {
+    "id": "c1105",
+    "class": "C",
+    "label": "workshop place",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {}
+  },
+  {
+    "id": "c1106",
+    "class": "C",
+    "label": "work-related place",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {}
+  },
+  {
+    "id": "c1107",
+    "class": "C",
+    "label": "event location",
     "detail": "",
     "status": "1",
     "language": "eng",
