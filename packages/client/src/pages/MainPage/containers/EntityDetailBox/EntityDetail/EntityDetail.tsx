@@ -21,6 +21,7 @@ import {
   DropdownItem,
   PropAttributeFilter,
 } from "types";
+import { getEntityLabel } from "utils";
 import { AuditTable } from "../../AuditTable/AuditTable";
 import { EntityReferenceTable } from "../../EntityReferenceTable/EntityReferenceTable";
 import { JSONExplorer } from "../../JSONExplorer/JSONExplorer";
@@ -148,7 +149,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
         .forEach((template) => {
           options.push({
             value: template.id,
-            label: template.label,
+            label: getEntityLabel(template),
           });
         });
     }

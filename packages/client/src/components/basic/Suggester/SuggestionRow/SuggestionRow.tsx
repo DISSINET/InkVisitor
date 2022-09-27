@@ -53,6 +53,7 @@ const EntityRow: React.FC<EntityRow> = ({ data, index, style }) => {
   const territoryWithoutParent =
     entity.class === EntityEnums.Class.Territory && !territoryParentId;
 
+  const iconStyle = { marginLeft: "0.5rem", cursor: "pointer" };
   const renderIcons = () => {
     if (!entity.isTemplate) {
       return (
@@ -62,7 +63,7 @@ const EntityRow: React.FC<EntityRow> = ({ data, index, style }) => {
             // onPick nonTemplate entity
             onPick(entity);
           }}
-          style={{ marginLeft: "0.5rem", cursor: "pointer" }}
+          style={iconStyle}
         />
       );
     } else if (entity.isTemplate && !isInsideTemplate) {
@@ -75,7 +76,7 @@ const EntityRow: React.FC<EntityRow> = ({ data, index, style }) => {
                 // onPick template inside nonTemplate
                 onPick(entity, true);
               }}
-              style={{ marginLeft: "0.5rem", cursor: "pointer" }}
+              style={iconStyle}
             />
           )}
         </>
@@ -90,7 +91,7 @@ const EntityRow: React.FC<EntityRow> = ({ data, index, style }) => {
                 // onPick duplicate template to entity
                 onPick(entity, true);
               }}
-              style={{ marginLeft: "0.5rem", cursor: "pointer" }}
+              style={iconStyle}
             />
           )}
           <ImInsertTemplate
@@ -99,7 +100,7 @@ const EntityRow: React.FC<EntityRow> = ({ data, index, style }) => {
               // onPick template entity
               onPick(entity);
             }}
-            style={{ marginLeft: "0.5rem", cursor: "pointer" }}
+            style={iconStyle}
           />
         </div>
       );

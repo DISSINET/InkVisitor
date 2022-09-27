@@ -138,7 +138,6 @@ export const EntityDetailRelationTypeBlock: React.FC<
 
   const handleMultiSelected = (selectedId: string) => {
     if (relationType === RelationEnums.Type.Identification) {
-      // FIX: certainty not working on create request
       const newRelation: Relation.IIdentification = {
         id: uuidv4(),
         entityIds: [entity.id, selectedId],
@@ -166,7 +165,10 @@ export const EntityDetailRelationTypeBlock: React.FC<
     setUsedEntityIds([...new Set(entityIds)]);
   }, [entities, relations]);
 
-  const renderCloudRelation = (relation: Relation.IRelation, key: number) => (
+  const renderCloudRelation = (
+    relation: Relation.IRelation,
+    key: number
+  ): React.ReactElement => (
     <StyledGrid key={key}>
       {relation.entityIds.length > 0 && (
         <Cloud onUnlink={() => handleCloudRemove()}>
@@ -195,7 +197,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
   const renderNonCloudRelation = (
     relation: Relation.IRelation,
     key: number
-  ) => (
+  ): React.ReactElement => (
     <StyledGrid key={key} hasAttribute={relationRule.attributes.length > 0}>
       <StyledRelation key={key}>
         {relation.entityIds.map((entityId, key) => {
