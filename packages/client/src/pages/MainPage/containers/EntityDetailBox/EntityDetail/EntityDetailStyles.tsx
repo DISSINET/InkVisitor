@@ -118,6 +118,9 @@ export const StyledDetailContentRowLabel = styled.div`
 export const StyledDetailContentRowValue = styled.div`
   float: right;
 `;
+export const StyledRelativePosition = styled.div`
+  position: relative;
+`;
 
 export const StyledDetailForm = styled.div`
   display: table;

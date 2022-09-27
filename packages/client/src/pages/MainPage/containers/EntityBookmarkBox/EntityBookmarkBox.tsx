@@ -8,7 +8,6 @@ import {
   Button,
   ButtonGroup,
   Input,
-  LetterIcon,
   Loader,
   Modal,
   ModalContent,
@@ -200,7 +199,6 @@ export const EntityBookmarkBox: React.FC = () => {
           onClick={() => clickNewBookmarFolderkHandle()}
         />
       </StyledHeader>
-      <LetterIcon letter="A" />
       {bookmarkFolders && (
         <StyledFolderList>
           {bookmarkFolders.map(

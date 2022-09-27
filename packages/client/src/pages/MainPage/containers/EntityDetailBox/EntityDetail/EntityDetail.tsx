@@ -21,6 +21,7 @@ import {
   DropdownItem,
   PropAttributeFilter,
 } from "types";
+import { getEntityLabel, getShortLabelByLetterCount } from "utils";
 import { AuditTable } from "../../AuditTable/AuditTable";
 import { EntityReferenceTable } from "../../EntityReferenceTable/EntityReferenceTable";
 import { JSONExplorer } from "../../JSONExplorer/JSONExplorer";
@@ -146,9 +147,13 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
       templates
         .filter((template) => template.id !== entity.id)
         .forEach((template) => {
+          const maxLetterCount = 200;
           options.push({
             value: template.id,
-            label: template.label,
+            label: getShortLabelByLetterCount(
+              getEntityLabel(template),
+              maxLetterCount
+            ),
           });
         });
     }
