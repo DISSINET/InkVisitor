@@ -30,6 +30,7 @@ import {
   StyledDetailContentRowValueID,
   StyledDetailForm,
   StyledFormWrapper,
+  StyledRelativePosition,
 } from "../EntityDetailStyles";
 
 interface EntityDetailFormSection {
@@ -100,7 +101,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                 Entity Type
               </StyledDetailContentRowLabel>
               <StyledDetailContentRowValue>
-                <div style={{ position: "relative" }}>
+                <StyledRelativePosition>
                   <Dropdown
                     value={{
                       label: entitiesDictKeys[entity.class].label,
@@ -120,7 +121,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                     disableTyping
                   />
                   <TypeBar entityLetter={entity.class} />
-                </div>
+                </StyledRelativePosition>
               </StyledDetailContentRowValue>
             </StyledDetailContentRow>
           )}

@@ -201,7 +201,7 @@ export const StyledEditorContentRowValueID = styled.div`
 export const StyledEditorTemplateSection = styled.div`
   display: table;
   width: 100%;
-  padding-right: ${({ theme }) => theme.space[6]};
+  margin-bottom: ${({ theme }) => theme.space[1]};
   ${StyledEditorContentRow} {
     display: table-row;
     width: 100%;

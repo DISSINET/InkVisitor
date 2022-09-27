@@ -139,3 +139,11 @@ export const dndHoverFn = (
 
 export const getEntityLabel = (entity?: IResponseEntity) =>
   entity?.label || entity?.data.text || "no label";
+
+export const getShortLabelByLetterCount = (
+  label: string,
+  maxLetterCount: number
+) => {
+  const isOversized = label.length > maxLetterCount;
+  return isOversized ? label.slice(0, 200).concat("...") : label;
+};
