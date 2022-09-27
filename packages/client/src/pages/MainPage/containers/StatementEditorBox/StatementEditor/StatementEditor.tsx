@@ -36,7 +36,7 @@ import { UseMutationResult, useQuery, useQueryClient } from "react-query";
 import { toast } from "react-toastify";
 import { excludedSuggesterEntities } from "Theme/constants";
 import { DropdownItem } from "types";
-import { getEntityLabel } from "utils";
+import { getEntityLabel, getShortLabelByLetterCount } from "utils";
 import { AuditTable } from "../../AuditTable/AuditTable";
 import { StyledContent } from "../../EntityBookmarkBox/EntityBookmarkBoxStyles";
 import { EntityReferenceTable } from "../../EntityReferenceTable/EntityReferenceTable";
@@ -222,9 +222,14 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
     if (templates) {
       templates.forEach((template) => {
+        const maxLetterCount = 200;
+
         options.push({
           value: template.id,
-          label: getEntityLabel(template),
+          label: getShortLabelByLetterCount(
+            getEntityLabel(template),
+            maxLetterCount
+          ),
         });
       });
     }
