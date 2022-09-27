@@ -37,12 +37,15 @@ export class ResponseEntity extends Entity implements IResponseEntity {
     // using proxy to use the original entity - not the parent class which is used only to 
     // satisfy the interface
     return new Proxy(this, {
+      ownKeys(target) {
+        return [...new Set(Reflect.ownKeys(entity).concat(Object.keys(target)))];
+      },
+      getOwnPropertyDescriptor(target, prop) {
+        return Object.getOwnPropertyDescriptor(entity, prop) || Object.getOwnPropertyDescriptor(target, prop)
+      },
       get(target, prop, receiver) {
-        if (entity.hasOwnProperty(prop) || typeof (entity as any)[prop] === "function") {
-          return (entity as any)[prop];
-        }
-        return (target as any)[prop as any] as any;
-      }
+        return (entity as any)[prop] || (target as any)[prop as any] as any;
+      },
     })
   }
 
