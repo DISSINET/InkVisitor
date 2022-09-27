@@ -5,9 +5,14 @@ export const StyledCloud = styled.div`
   border-radius: 1rem;
   padding: 0.5rem;
   border: 1px dashed black;
+  display: inline-flex;
+  overflow: hidden;
+  max-width: 100%;
 `;
 export const StyledCloudWrap = styled.div`
-  display: flex;
+  display: inline-flex;
+  overflow: hidden;
+  max-width: 100%;
   align-items: center;
 `;
 export const StyledButtonWrap = styled.div`
