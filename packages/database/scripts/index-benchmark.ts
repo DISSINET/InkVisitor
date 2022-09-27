@@ -66,11 +66,11 @@ const testActantsActant = async () => {
     .filter({ class: EntityEnums.Class.Statement })
     .run(conn);
 
-  const exampleActantsActant = (example as any)[0].data.actants[0].actant;
+  const exampleActantsActant = (example as any)[0].data.actants[0].entityId;
 
   const foundInIndex = await r
     .table(indexedTable)
-    .getAll(exampleActantsActant, { index: "data.actants.actant" })
+    .getAll(exampleActantsActant, { index: "data.actants.entityId" })
     .run(conn);
 
   let end = performance.now();
@@ -85,7 +85,7 @@ const testActantsActant = async () => {
     .table(indexedTable)
     .filter(function (user: any) {
       return user("data")("actants").contains((labelObj: any) =>
-        labelObj("actant").eq(exampleActantsActant)
+        labelObj("entityId").eq(exampleActantsActant)
       );
     })
     .run(conn);
@@ -106,20 +106,20 @@ const findUsedInProps = async (
     .filter((row: RDatum) => {
       return row("props").contains((entry: RDatum) =>
         r.or(
-          entry("value")("id").eq(entityId),
-          entry("type")("id").eq(entityId),
+          entry("value")("entityId").eq(entityId),
+          entry("type")("entityId").eq(entityId),
           entry("children").contains((ch1: RDatum) =>
             r.or(
-              ch1("value")("id").eq(entityId),
-              ch1("type")("id").eq(entityId),
+              ch1("value")("entityId").eq(entityId),
+              ch1("type")("entityId").eq(entityId),
               ch1("children").contains((ch2: RDatum) =>
                 r.or(
-                  ch2("value")("id").eq(entityId),
-                  ch2("type")("id").eq(entityId),
+                  ch2("value")("entityId").eq(entityId),
+                  ch2("type")("entityId").eq(entityId),
                   ch2("children").contains((ch3: RDatum) =>
                     r.or(
-                      ch3("value")("id").eq(entityId),
-                      ch3("type")("id").eq(entityId)
+                      ch3("value")("entityId").eq(entityId),
+                      ch3("type")("entityId").eq(entityId)
                     )
                   )
                 )
@@ -144,7 +144,7 @@ const testPropsRecursive = async () => {
     (e: any) => !!e.props.length && !!e.props[0].children.length
   );
 
-  const exampleId = exampleObject.props[0].children[0].type.id;
+  const exampleId = exampleObject.props[0].children[0].type.entityId;
   console.log(exampleId);
 
   let start = performance.now();
@@ -176,7 +176,7 @@ const testParentId = async () => {
 
   await r
     .table(indexedTable)
-    .getAll("parent5005", { index: "data.parent.id" })
+    .getAll("parent5005", { index: "data.parent.territoryId" })
     .run(conn);
 
   let end = performance.now();
@@ -191,7 +191,7 @@ const testParentId = async () => {
     .filter(function (territory: any) {
       return r.and(
         territory("data")("parent").typeOf().eq("OBJECT"),
-        territory("data")("parent")("id").eq("parent5005")
+        territory("data")("parent")("territoryId").eq("parent5005")
       );
     })
     .run(conn);
@@ -226,12 +226,12 @@ const testActantOrActionStatement = async () => {
       const tests = [];
       tests.push(
         row("data")("actants").contains((actantObj: RDatum) =>
-          actantObj("actant").eq("actant4")
+          actantObj("entityId").eq("actant4")
         )
       );
       tests.push(
         row("data")("actions").contains((actionObj: RDatum) =>
-          actionObj("action").eq("action4")
+          actionObj("actionId").eq("action4")
         )
       );
 
@@ -277,10 +277,10 @@ const testTerritoryId = async () => {
     .run(conn);
 
   const exampleObject = (example as any).find(
-    (e: any) => !!e.data.territory.id
+    (e: any) => !!e.data.territory.territoryId
   );
 
-  const exampleId = exampleObject.data.territory.id;
+  const exampleId = exampleObject.data.territory.territoryId;
 
   let start = performance.now();
 
@@ -302,7 +302,7 @@ const testTerritoryId = async () => {
   found = await r
     .table(indexedTable)
     .filter((entry: RDatum) => {
-      return entry("data")("territory")("id").eq(exampleId);
+      return entry("data")("territory")("territoryId").eq(exampleId);
     })
     .run(conn);
 
@@ -322,10 +322,10 @@ const findUsedInDataEntities = async (
     .filter((row: RDatum) => {
       return r.or(
         row("data")("actions").contains((entry: RDatum) =>
-          entry("action").eq(entityId)
+          entry("actionId").eq(entityId)
         ),
         row("data")("actants").contains((entry: RDatum) =>
-          entry("actant").eq(entityId)
+          entry("entityId").eq(entityId)
         ),
         row("data")("tags").contains(entityId)
       );
@@ -345,7 +345,7 @@ const testStatementEntities = async () => {
     (e: any) => e.data.actants.length > 0
   );
 
-  const exampleId = exampleObject.data.actants[0].actant;
+  const exampleId = exampleObject.data.actants[0].entityId;
 
   let start = performance.now();
 
