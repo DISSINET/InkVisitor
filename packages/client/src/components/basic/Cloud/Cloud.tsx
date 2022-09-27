@@ -9,9 +9,9 @@ interface Cloud {
 }
 export const Cloud: React.FC<Cloud> = ({ children, onUnlink }) => {
   return (
-    <StyledCloudWrap style={{ display: "flex", alignItems: "center" }}>
+    <StyledCloudWrap>
       <StyledCloud>{children}</StyledCloud>
-      <StyledButtonWrap style={{ marginLeft: "0.3rem" }}>
+      <StyledButtonWrap>
         <Button
           tooltip="unlink from cloud"
           icon={<FaUnlink />}

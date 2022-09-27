@@ -10,7 +10,9 @@ export const StyledCloud = styled.div`
   max-width: 100%;
 `;
 export const StyledCloudWrap = styled.div`
-  display: flex;
+  display: inline-flex;
+  overflow: hidden;
+  max-width: 100%;
   align-items: center;
 `;
 export const StyledButtonWrap = styled.div`
