@@ -24,39 +24,23 @@ export function fillFlatObject<T>(
   if (!source) {
     return;
   }
+  const target = (ctx as Record<string, unknown>);
+
   for (const key of Object.keys(source)) {
-    const wantedType = typeof (ctx as Record<string, unknown>)[key];
-    if (wantedType === "undefined") {
-      continue;
+    const descriptor = Object.getOwnPropertyDescriptor(ctx, key);
+    if (!descriptor || !descriptor.writable) {
+      continue
     }
 
-    if (
-      ((ctx as Record<string, unknown>)[key] as any).constructor.name === "Date"
-    ) {
-      (ctx as Record<string, unknown>)[key] = source[key];
-      continue;
-    }
-
-    if (wantedType === "object") {
-      // only flat object's props
-      continue;
-    }
-
+    const wantedType = typeof target[key];
     const gotType = typeof source[key];
 
-    if (
-      gotType === "object" &&
-      wantedType === "boolean" &&
-      (ctx as Record<string, unknown>)[key] === false
-    ) {
+    if ((wantedType === "object" || wantedType !== gotType) && wantedType !== "undefined") {
+      // only flat object's props && types must match
       continue;
     }
 
-    if (wantedType !== gotType) {
-      continue;
-    }
-
-    (ctx as Record<string, unknown>)[key] = source[key];
+    target[key] = source[key];
   }
 }
 

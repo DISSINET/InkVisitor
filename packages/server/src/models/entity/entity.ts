@@ -20,39 +20,26 @@ export default class Entity implements IEntity, IDbModel {
   static table = "entities";
 
   id: string = "";
-  legacyId?: string;
-  class: EntityEnums.Class = EntityEnums.Class.Person;
-  status: EntityEnums.Status = EntityEnums.Status.Approved;
+  class: EntityEnums.Class = "" as EntityEnums.Class;
+  status: EntityEnums.Status = "" as EntityEnums.Status;
   data: any = {};
   label: string = "";
   detail: string = "";
-  language: EntityEnums.Language = EntityEnums.Language.Latin;
+  language: EntityEnums.Language = "" as EntityEnums.Language;
   notes: string[] = [];
   props: IProp[] = [];
   references: IReference[] = [];
 
-  isTemplate?: boolean;
-  usedTemplate?: string;
-  templateData?: object;
+  legacyId?: string = undefined;
+  isTemplate?: boolean = undefined;
+  usedTemplate?: string = undefined;
+  templateData?: object = undefined;
 
   constructor(data: Partial<IEntity>) {
     fillFlatObject(this, { ...data, data: undefined });
     fillArray(this.references, Object, data.references);
     fillArray(this.notes, String, data.notes);
     fillArray(this.props, Object, data.props);
-
-    if (data.legacyId !== undefined) {
-      this.legacyId = data.legacyId;
-    }
-    if (data.isTemplate !== undefined) {
-      this.isTemplate = data.isTemplate;
-    }
-    if (data.usedTemplate !== undefined) {
-      this.usedTemplate = data.usedTemplate;
-    }
-    if (data.templateData !== undefined) {
-      this.templateData = data.templateData;
-    }
   }
 
   async save(db: Connection | undefined): Promise<WriteResult> {
