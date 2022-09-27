@@ -6,3 +6,10 @@ export const StyledCloud = styled.div`
   padding: 0.5rem;
   border: 1px dashed black;
 `;
+export const StyledCloudWrap = styled.div`
+  display: flex;
+  align-items: center;
+`;
+export const StyledButtonWrap = styled.div`
+  margin-left: ${({ theme }) => theme.space[2]};
+`;

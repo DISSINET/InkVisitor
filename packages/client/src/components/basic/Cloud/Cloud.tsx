@@ -1,7 +1,7 @@
 import { Button } from "components";
 import React, { ReactElement } from "react";
 import { FaUnlink } from "react-icons/fa";
-import { StyledCloud } from "./CloudStyles";
+import { StyledButtonWrap, StyledCloud, StyledCloudWrap } from "./CloudStyles";
 
 interface Cloud {
   children: ReactElement;
@@ -9,15 +9,15 @@ interface Cloud {
 }
 export const Cloud: React.FC<Cloud> = ({ children, onUnlink }) => {
   return (
-    <div style={{ display: "flex", alignItems: "center" }}>
+    <StyledCloudWrap style={{ display: "flex", alignItems: "center" }}>
       <StyledCloud>{children}</StyledCloud>
-      <div style={{ marginLeft: "0.3rem" }}>
+      <StyledButtonWrap style={{ marginLeft: "0.3rem" }}>
         <Button
           tooltip="unlink from cloud"
           icon={<FaUnlink />}
           onClick={onUnlink}
         />
-      </div>
-    </div>
+      </StyledButtonWrap>
+    </StyledCloudWrap>
   );
 };
