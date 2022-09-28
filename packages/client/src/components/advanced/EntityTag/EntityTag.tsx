@@ -1,7 +1,9 @@
 import { EntityEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
+import api from "api";
 import { Tag } from "components";
 import React, { ReactNode } from "react";
+import { useQuery } from "react-query";
 import { PopupPosition } from "reactjs-popup/dist/types";
 import { DragItem } from "types";
 import { getEntityLabel } from "utils";
@@ -49,6 +51,25 @@ export const EntityTag: React.FC<EntityTag> = ({
   isFavorited,
 }) => {
   const classId = entity.class;
+
+  // for testing
+  if (entity.id === "c211" || entity.id === "l1200") {
+    const { data: tooltipData } = useQuery(
+      ["tooltip", entity.id],
+      async () => {
+        const res = await api.tooltipGet(entity.id);
+        return res.data;
+      },
+      {
+        enabled: api.isLoggedIn(),
+      }
+    );
+
+    if (tooltipData) {
+      console.log(tooltipData);
+      console.log(tooltipData.superclassTrees);
+    }
+  }
 
   return (
     <Tag

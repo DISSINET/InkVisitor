@@ -66,7 +66,7 @@ export const EntityDetailClassificationTable: React.FC<
         },
       },
       {
-        Header: "Identification",
+        Header: "Classification",
         Cell: ({ row }: Cell) => {
           const useCase =
             row.original as IResponseUsedInStatementClassification;
