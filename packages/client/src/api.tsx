@@ -462,7 +462,9 @@ class Api {
    * Tooltips
    */
 
-  async tooltipGet(entityId: string): Promise<AxiosResponse<IResponseEntity>> {
+  async tooltipGet(
+    entityId: string
+  ): Promise<AxiosResponse<EntityTooltip.IResponse>> {
     try {
       const response = await this.connection.get(
         `/entities/${entityId}/tooltip`
