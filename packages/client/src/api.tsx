@@ -15,6 +15,7 @@ import {
   IStatement,
   ITerritory,
   Relation,
+  EntityTooltip,
 } from "@shared/types";
 import * as errors from "@shared/types/errors";
 import { IRequestSearch } from "@shared/types/request-search";
@@ -450,6 +451,21 @@ class Api {
     try {
       const response = await this.connection.get(
         `/territories/${territoryId}/entities`
+      );
+      return response;
+    } catch (err: any | AxiosError) {
+      throw { ...err.response.data };
+    }
+  }
+
+  /**
+   * Tooltips
+   */
+
+  async tooltipGet(entityId: string): Promise<AxiosResponse<IResponseEntity>> {
+    try {
+      const response = await this.connection.get(
+        `/entities/${entityId}/tooltip`
       );
       return response;
     } catch (err: any | AxiosError) {
