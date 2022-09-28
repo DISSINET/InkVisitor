@@ -9,8 +9,7 @@ import { Relation as RelationTypes } from "@shared/types";
 
 export class ResponseTooltip
   extends ResponseEntity
-  implements EntityTooltip.IResponse
-{
+  implements EntityTooltip.IResponse {
   entities: Record<string, IEntity> = {};
 
   superclassTrees: EntityTooltip.ISuperclassTree[] = [];
@@ -18,10 +17,7 @@ export class ResponseTooltip
   troponymCloud?: EntityTooltip.ITroponymCloud;
   superordinateLocationTrees: EntityTooltip.ISuperordinateLocationTree[] = [];
   identifications: EntityTooltip.IIdentifications = [];
-  actionEventEquivalent: EntityTooltip.ActionEventNode = {
-    entityId: "",
-    subtrees: [],
-  };
+  actionEventEquivalent: EntityTooltip.ActionEventNode = [];
 
   /**
    * Loads additional fields to satisfy the EntityTooltip.IResponse interface
@@ -29,6 +25,13 @@ export class ResponseTooltip
    */
   async prepare(request: IRequest) {
     super.prepare(request);
+
+    const rootActionEventEquivalent = await this.getActionEventNodes(
+      request.db.connection,
+      this.id,
+      this.class
+    )
+    this.actionEventEquivalent = rootActionEventEquivalent.subtrees
 
     const rootSuperclass = await this.getSuperclassTrees(
       request.db.connection,
@@ -171,6 +174,64 @@ export class ResponseTooltip
   }
 
   /**
+   * recursively search for action event trees
+   * @param conn
+   */
+  async getActionEventNodes(
+    conn: Connection,
+    parentId: string,
+    asClass: EntityEnums.Class
+  ): Promise<EntityTooltip.ISuperclassTree> {
+    const out: EntityTooltip.ISuperclassTree = {
+      entityId: parentId,
+      subtrees: [],
+    };
+
+    let relations: RelationTypes.IRelation[] = [];
+
+    switch (asClass) {
+      case EntityEnums.Class.Action:
+        relations = await Relation.getForEntity<RelationTypes.IActionEventEquivalent>(
+          conn,
+          parentId,
+          RelationEnums.Type.ActionEventEquivalent,
+          0
+        );
+        break;
+      case EntityEnums.Class.Concept:
+        relations = await Relation.getForEntity<RelationTypes.ISuperclass>(
+          conn,
+          parentId,
+          RelationEnums.Type.Superclass,
+          0
+        );
+        break;
+      default:
+        break;
+    }
+
+    // make unique and sorted list of ids
+    const subrootIds = [
+      ...new Set(relations.map((r) => r.entityIds[1])),
+    ].sort();
+
+    for (const subparentId of subrootIds) {
+      out.subtrees.push(
+        await this.getSuperclassTrees(
+          conn,
+          subparentId,
+          EntityEnums.Class.Concept
+        )
+      );
+    }
+
+    this.addLinkedEntities(subrootIds);
+
+    return out;
+  }
+
+
+  /**
    * recursively search for superclass relations
    * @param conn
    */
@@ -187,23 +248,24 @@ export class ResponseTooltip
     let relations: RelationTypes.IRelation[] = [];
 
     switch (asClass) {
-      case (EntityEnums.Class.Concept, EntityEnums.Class.Action):
-        relations = await Relation.getForEntity<RelationTypes.IClassification>(
+      case EntityEnums.Class.Concept:
+      case EntityEnums.Class.Action:
+        relations = await Relation.getForEntity<RelationTypes.ISuperclass>(
           conn,
           parentId,
           RelationEnums.Type.Superclass,
           0
         );
         break;
-      case (EntityEnums.Class.Person,
-      EntityEnums.Class.Location,
-      EntityEnums.Class.Object,
-      EntityEnums.Class.Group,
-      EntityEnums.Class.Event,
-      EntityEnums.Class.Statement,
-      EntityEnums.Class.Territory,
-      EntityEnums.Class.Resource):
-        relations = await Relation.getForEntity<RelationTypes.IRelation>(
+      case EntityEnums.Class.Person:
+      case EntityEnums.Class.Location:
+      case EntityEnums.Class.Object:
+      case EntityEnums.Class.Group:
+      case EntityEnums.Class.Event:
+      case EntityEnums.Class.Statement:
+      case EntityEnums.Class.Territory:
+      case EntityEnums.Class.Resource:
+        relations = await Relation.getForEntity<RelationTypes.IClassification>(
           conn,
           parentId,
           RelationEnums.Type.Classification,
