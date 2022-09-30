@@ -26,6 +26,7 @@ interface Tooltip {
   attributes?: ReactElement;
   items?: ReactElement[] | ReactElement;
   color?: typeof Colors[number];
+  // TODO: change to EntityTooltip component
   tagTooltip?: boolean;
   noArrow?: boolean;
   disabled?: boolean;

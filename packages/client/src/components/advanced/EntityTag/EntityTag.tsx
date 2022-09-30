@@ -16,7 +16,6 @@ interface EntityTag {
   showOnly?: "entity" | "label";
   fullWidth?: boolean;
   button?: ReactNode;
-  propId?: string;
   index?: number;
   moveFn?: (dragIndex: number, hoverIndex: number) => void;
   isSelected?: boolean;

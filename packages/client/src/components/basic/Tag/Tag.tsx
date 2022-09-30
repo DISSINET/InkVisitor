@@ -80,6 +80,7 @@ export const Tag: React.FC<TagProps> = ({
   index = -1,
   moveFn,
   tooltipPosition = "right top",
+  // TODO: move tooltip to EntityTag
   disableTooltip = false,
   disableDoubleClick = false,
   disableDrag = false,
