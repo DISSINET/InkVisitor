@@ -2,6 +2,7 @@ import { EntityEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
 import api from "api";
 import { Tag, Tooltip } from "components";
+import { StyledTooltipSeparator } from "components/basic/Tooltip/TooltipStyles";
 import React, { ReactNode } from "react";
 import { useQuery } from "react-query";
 import { PopupPosition } from "reactjs-popup/dist/types";
@@ -71,45 +72,42 @@ export const EntityTag: React.FC<EntityTag> = ({
   }
 
   return (
-    // <Tooltip
-    //   label={getEntityLabel(entity)}
-    //   detail={entity.detail}
-    //   text={tooltipText}
-    //   disabled={disableTooltip}
-    //   position={tooltipPosition}
-    //   tagTooltip
-    //   itemsCount={statementsCount}
-    // >
-    <Tag
-      propId={entity.id}
+    <Tooltip
       label={getEntityLabel(entity)}
-      labelItalic={entity.label === ""}
-      status={entity.status}
-      ltype={entity?.data?.logicalType ?? "1"}
-      isTemplate={entity.isTemplate}
-      isDiscouraged={entity.status === EntityEnums.Status.Discouraged}
-      entity={entity}
-      showOnly={showOnly}
-      button={button}
-      moveFn={moveFn}
-      entityClass={classId}
-      mode={mode}
-      borderStyle="solid"
-      invertedLabel={isSelected}
-      index={index}
-      disableDoubleClick={disableDoubleClick}
-      disableDrag={disableDrag}
-      updateOrderFn={updateOrderFn}
-      parentId={parentId}
-      lvl={lvl}
-      fullWidth={fullWidth}
-      isFavorited={isFavorited}
-      tooltipDetail={entity.detail}
-      tooltipText={tooltipText}
-      disableTooltip={disableTooltip}
-      tooltipPosition={tooltipPosition}
-      statementsCount={statementsCount}
-    />
-    //  </Tooltip>
+      detail={entity.detail}
+      text={tooltipText}
+      disabled={disableTooltip}
+      position={tooltipPosition}
+      tagTooltip
+      itemsCount={statementsCount}
+    >
+      <StyledTooltipSeparator>
+        <Tag
+          propId={entity.id}
+          label={getEntityLabel(entity)}
+          labelItalic={entity.label === ""}
+          status={entity.status}
+          ltype={entity?.data?.logicalType ?? "1"}
+          isTemplate={entity.isTemplate}
+          isDiscouraged={entity.status === EntityEnums.Status.Discouraged}
+          entity={entity}
+          showOnly={showOnly}
+          button={button}
+          moveFn={moveFn}
+          entityClass={classId}
+          mode={mode}
+          borderStyle="solid"
+          invertedLabel={isSelected}
+          index={index}
+          disableDoubleClick={disableDoubleClick}
+          disableDrag={disableDrag}
+          updateOrderFn={updateOrderFn}
+          parentId={parentId}
+          lvl={lvl}
+          fullWidth={fullWidth}
+          isFavorited={isFavorited}
+        />
+      </StyledTooltipSeparator>
+    </Tooltip>
   );
 };

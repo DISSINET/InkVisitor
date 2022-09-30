@@ -1,6 +1,5 @@
 import { EntityEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
-import { Tooltip } from "components";
 import { useSearchParams } from "hooks";
 import React, { ReactNode, useEffect, useMemo, useRef } from "react";
 import {
@@ -9,7 +8,6 @@ import {
   useDrag,
   useDrop,
 } from "react-dnd";
-import { PopupPosition } from "reactjs-popup/dist/types";
 import { setDraggedTerritory } from "redux/features/territoryTree/draggedTerritorySlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import {
@@ -24,7 +22,6 @@ import {
   StyledEntityTag,
   StyledLabel,
   StyledTagWrapper,
-  StyledTooltipSeparator,
 } from "./TagStyles";
 
 interface TagProps {
@@ -32,13 +29,6 @@ interface TagProps {
   parentId?: string;
   label?: string;
   labelItalic?: boolean;
-
-  // tooltip
-  tooltipDetail?: string;
-  tooltipText?: string;
-  disableTooltip?: boolean;
-  tooltipPosition?: PopupPosition | PopupPosition[];
-  statementsCount?: number;
 
   entityClass?: EntityEnums.ExtendedClass;
   status?: string;
@@ -87,12 +77,6 @@ export const Tag: React.FC<TagProps> = ({
   isTemplate = false,
   isDiscouraged = false,
   lvl,
-  // tooltip
-  tooltipDetail,
-  tooltipText,
-  tooltipPosition = "right top",
-  disableTooltip = false,
-  statementsCount,
 }) => {
   const { appendDetailId } = useSearchParams();
   const dispatch = useAppDispatch();
@@ -210,29 +194,17 @@ export const Tag: React.FC<TagProps> = ({
 
   return (
     <>
-      <Tooltip
-        label={label}
-        detail={tooltipDetail}
-        text={tooltipText}
-        disabled={disableTooltip}
-        position={tooltipPosition}
-        tagTooltip
-        itemsCount={statementsCount}
+      <StyledTagWrapper
+        ref={ref}
+        dragDisabled={!canDrag}
+        status={status}
+        ltype={ltype}
+        borderStyle={borderStyle}
+        onClick={(e: React.MouseEvent) => e.stopPropagation()}
+        onDoubleClick={(e: React.MouseEvent) => onDoubleClick(e)}
       >
-        <StyledTooltipSeparator>
-          <StyledTagWrapper
-            ref={ref}
-            dragDisabled={!canDrag}
-            status={status}
-            ltype={ltype}
-            borderStyle={borderStyle}
-            onClick={(e: React.MouseEvent) => e.stopPropagation()}
-            onDoubleClick={(e: React.MouseEvent) => onDoubleClick(e)}
-          >
-            {showOnly ? <>{getShortTag()}</> : <>{getFullTag()}</>}
-          </StyledTagWrapper>
-        </StyledTooltipSeparator>
-      </Tooltip>
+        {showOnly ? <>{getShortTag()}</> : <>{getFullTag()}</>}
+      </StyledTagWrapper>
     </>
   );
 };
