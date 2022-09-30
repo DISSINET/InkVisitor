@@ -1,7 +1,7 @@
 import { EntityEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
 import api from "api";
-import { Tag } from "components";
+import { Tag, Tooltip } from "components";
 import React, { ReactNode } from "react";
 import { useQuery } from "react-query";
 import { PopupPosition } from "reactjs-popup/dist/types";
@@ -71,17 +71,24 @@ export const EntityTag: React.FC<EntityTag> = ({
   }
 
   return (
+    // <Tooltip
+    //   label={getEntityLabel(entity)}
+    //   detail={entity.detail}
+    //   text={tooltipText}
+    //   disabled={disableTooltip}
+    //   position={tooltipPosition}
+    //   tagTooltip
+    //   itemsCount={statementsCount}
+    // >
     <Tag
       propId={entity.id}
       label={getEntityLabel(entity)}
       labelItalic={entity.label === ""}
       status={entity.status}
       ltype={entity?.data?.logicalType ?? "1"}
-      tooltipDetail={entity.detail}
       isTemplate={entity.isTemplate}
       isDiscouraged={entity.status === EntityEnums.Status.Discouraged}
       entity={entity}
-      tooltipText={tooltipText}
       showOnly={showOnly}
       button={button}
       moveFn={moveFn}
@@ -90,16 +97,19 @@ export const EntityTag: React.FC<EntityTag> = ({
       borderStyle="solid"
       invertedLabel={isSelected}
       index={index}
-      disableTooltip={disableTooltip}
       disableDoubleClick={disableDoubleClick}
       disableDrag={disableDrag}
-      tooltipPosition={tooltipPosition}
       updateOrderFn={updateOrderFn}
       parentId={parentId}
       lvl={lvl}
       fullWidth={fullWidth}
       isFavorited={isFavorited}
+      tooltipDetail={entity.detail}
+      tooltipText={tooltipText}
+      disableTooltip={disableTooltip}
+      tooltipPosition={tooltipPosition}
       statementsCount={statementsCount}
     />
+    //  </Tooltip>
   );
 };

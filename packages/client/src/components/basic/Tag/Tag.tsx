@@ -32,8 +32,14 @@ interface TagProps {
   parentId?: string;
   label?: string;
   labelItalic?: boolean;
+
+  // tooltip
   tooltipDetail?: string;
   tooltipText?: string;
+  disableTooltip?: boolean;
+  tooltipPosition?: PopupPosition | PopupPosition[];
+  statementsCount?: number;
+
   entityClass?: EntityEnums.ExtendedClass;
   status?: string;
   ltype?: string;
@@ -47,13 +53,10 @@ interface TagProps {
   fullWidth?: boolean;
   index?: number;
   moveFn?: (dragIndex: number, hoverIndex: number) => void;
-  disableTooltip?: boolean;
   disableDoubleClick?: boolean;
   disableDrag?: boolean;
-  tooltipPosition?: PopupPosition | PopupPosition[];
   updateOrderFn?: (item: EntityDragItem) => void;
   lvl?: number;
-  statementsCount?: number;
   isFavorited?: boolean;
   isTemplate?: boolean;
   isDiscouraged?: boolean;
@@ -65,8 +68,6 @@ export const Tag: React.FC<TagProps> = ({
   parentId,
   label = "",
   labelItalic = false,
-  tooltipDetail,
-  tooltipText,
   entityClass = EntityEnums.Extension.Empty,
   status = "1",
   ltype = "1",
@@ -79,17 +80,19 @@ export const Tag: React.FC<TagProps> = ({
   fullWidth = false,
   index = -1,
   moveFn,
-  tooltipPosition = "right top",
-  // TODO: move tooltip to EntityTag
-  disableTooltip = false,
   disableDoubleClick = false,
   disableDrag = false,
   updateOrderFn = () => {},
-  statementsCount,
   isFavorited = false,
   isTemplate = false,
   isDiscouraged = false,
   lvl,
+  // tooltip
+  tooltipDetail,
+  tooltipText,
+  tooltipPosition = "right top",
+  disableTooltip = false,
+  statementsCount,
 }) => {
   const { appendDetailId } = useSearchParams();
   const dispatch = useAppDispatch();
@@ -163,11 +166,56 @@ export const Tag: React.FC<TagProps> = ({
 
   const getShortTag = () => {
     return (
+      <>
+        {showOnly === "entity" ? (
+          <>{renderEntityTag()}</>
+        ) : (
+          <>
+            <StyledLabel
+              invertedLabel={invertedLabel}
+              status={status}
+              borderStyle={borderStyle}
+              fullWidth={fullWidth}
+              isFavorited={isFavorited}
+              labelOnly
+              isItalic={labelItalic}
+            >
+              {label}
+            </StyledLabel>
+          </>
+        )}
+        {button && renderButton()}
+      </>
+    );
+  };
+
+  const getFullTag = () => {
+    return (
+      <>
+        {renderEntityTag()}
+        <StyledLabel
+          invertedLabel={invertedLabel}
+          status={status}
+          borderStyle={borderStyle}
+          fullWidth={fullWidth}
+          isFavorited={isFavorited}
+          isItalic={labelItalic}
+        >
+          {label}
+        </StyledLabel>
+        {button && renderButton()}
+      </>
+    );
+  };
+
+  return (
+    <>
       <Tooltip
-        position={tooltipPosition}
         label={label}
         detail={tooltipDetail}
         text={tooltipText}
+        disabled={disableTooltip}
+        position={tooltipPosition}
         tagTooltip
         itemsCount={statementsCount}
       >
@@ -181,74 +229,10 @@ export const Tag: React.FC<TagProps> = ({
             onClick={(e: React.MouseEvent) => e.stopPropagation()}
             onDoubleClick={(e: React.MouseEvent) => onDoubleClick(e)}
           >
-            {showOnly === "entity" ? (
-              <>{renderEntityTag()}</>
-            ) : (
-              <>
-                <StyledLabel
-                  invertedLabel={invertedLabel}
-                  status={status}
-                  borderStyle={borderStyle}
-                  fullWidth={fullWidth}
-                  isFavorited={isFavorited}
-                  labelOnly
-                  isItalic={labelItalic}
-                >
-                  {label}
-                </StyledLabel>
-              </>
-            )}
-            {button && renderButton()}
+            {showOnly ? <>{getShortTag()}</> : <>{getFullTag()}</>}
           </StyledTagWrapper>
         </StyledTooltipSeparator>
       </Tooltip>
-    );
-  };
-
-  return (
-    <>
-      {showOnly ? (
-        <>{getShortTag()}</>
-      ) : (
-        <>
-          <Tooltip
-            label={label}
-            detail={tooltipDetail}
-            text={tooltipText}
-            disabled={disableTooltip}
-            position={tooltipPosition}
-            tagTooltip
-            itemsCount={statementsCount}
-          >
-            <StyledTooltipSeparator>
-              <StyledTagWrapper
-                ref={ref}
-                dragDisabled={!canDrag}
-                borderStyle={borderStyle}
-                status={status}
-                ltype={ltype}
-                onClick={(e: React.MouseEvent) => e.stopPropagation()}
-                onDoubleClick={(e: React.MouseEvent) => onDoubleClick(e)}
-              >
-                {renderEntityTag()}
-
-                <StyledLabel
-                  invertedLabel={invertedLabel}
-                  status={status}
-                  borderStyle={borderStyle}
-                  fullWidth={fullWidth}
-                  isFavorited={isFavorited}
-                  isItalic={labelItalic}
-                >
-                  {label}
-                </StyledLabel>
-
-                {button && renderButton()}
-              </StyledTagWrapper>
-            </StyledTooltipSeparator>
-          </Tooltip>
-        </>
-      )}
     </>
   );
 };
