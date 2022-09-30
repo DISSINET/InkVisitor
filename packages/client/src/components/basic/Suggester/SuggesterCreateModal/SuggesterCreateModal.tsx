@@ -16,7 +16,7 @@ import {
   Tag,
   TypeBar,
 } from "components";
-import { EntitySuggester } from "components/advanced";
+import { EntitySuggester, EntityTag } from "components/advanced";
 import React, { useEffect, useState } from "react";
 import { FaUnlink } from "react-icons/fa";
 import { useQuery } from "react-query";
@@ -153,10 +153,8 @@ export const SuggesterCreateModal: React.FC<SuggesterCreateModal> = ({
                 </ModalInputLabel>
                 <ModalInputWrap>
                   {territory ? (
-                    <Tag
-                      propId={territory.id}
-                      label={territory.label}
-                      entityClass={territory.class}
+                    <EntityTag
+                      entity={territory}
                       tooltipPosition={"left center"}
                       button={
                         <Button
