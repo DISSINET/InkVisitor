@@ -116,7 +116,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                       );
                       setShowTypeSubmit(true);
                     }}
-                    width={76}
+                    width={200}
                     entityDropdown
                     disableTyping
                   />
