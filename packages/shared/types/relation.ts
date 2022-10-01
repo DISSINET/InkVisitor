@@ -190,6 +190,7 @@ export namespace Relation {
     label: "Classification",
     allowedEntitiesPattern: [
       [EntityEnums.Class.Person, EntityEnums.Class.Concept],
+      [EntityEnums.Class.Being, EntityEnums.Class.Concept],
       [EntityEnums.Class.Location, EntityEnums.Class.Concept],
       [EntityEnums.Class.Object, EntityEnums.Class.Concept],
       [EntityEnums.Class.Group, EntityEnums.Class.Concept],
