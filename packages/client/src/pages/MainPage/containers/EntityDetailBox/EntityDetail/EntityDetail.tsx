@@ -50,6 +50,7 @@ import { EntityDetailStatementsTable } from "./EntityDetailUsedInTable/EntityDet
 const allowedEntityChangeClasses = [
   EntityEnums.Class.Value,
   EntityEnums.Class.Person,
+  EntityEnums.Class.Being,
   EntityEnums.Class.Event,
   EntityEnums.Class.Group,
   EntityEnums.Class.Location,
@@ -86,7 +87,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
 
   const [createTemplateModal, setCreateTemplateModal] =
     useState<boolean>(false);
-  const [showRemoveSubmit, setShowRemoveSubmit] = useState(false);
+  const [showRemoveSubmit, setShowRemoveSubmit] = useState<boolean>(false);
   const [selectedEntityType, setSelectedEntityType] =
     useState<EntityEnums.Class>();
   const [showTypeSubmit, setShowTypeSubmit] = useState(false);
@@ -94,6 +95,10 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
   const [templateToApply, setTemplateToApply] = useState<IEntity | false>(
     false
   );
+
+  const selectedEntityTypeLabel: string = useMemo(() => {
+    return selectedEntityType ? entitiesDictKeys[selectedEntityType].label : "";
+  }, [selectedEntityType]);
 
   const handleAskForTemplateApply = (templateOptionToApply: IOption) => {
     if (templates) {
@@ -708,9 +713,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
       />
       <Submit
         title="Change entity type"
-        text={`Changing entity type to: [${
-          selectedEntityType ? entitiesDictKeys[selectedEntityType].label : ""
-        }]. You may loose some values. Do you want to continue?`}
+        text={`Changing entity type to: [${selectedEntityTypeLabel}]. You may loose some values. Do you want to continue?`}
         submitLabel="Continue"
         onSubmit={() => {
           if (selectedEntityType) {

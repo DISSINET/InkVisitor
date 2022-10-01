@@ -31,6 +31,7 @@ import {
 const bookmarkEntities = [
   EntityEnums.Class.Action,
   EntityEnums.Class.Person,
+  EntityEnums.Class.Being,
   EntityEnums.Class.Group,
   EntityEnums.Class.Object,
   EntityEnums.Class.Concept,

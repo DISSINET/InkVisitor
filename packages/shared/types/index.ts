@@ -12,12 +12,13 @@ import { IGroup, IGroupData } from "./group";
 import { ILocation, ILocationData } from "./location";
 import { IObject, IObjectData } from "./object";
 import { IPerson, IPersonData } from "./person";
+import { IBeing, IBeingData } from "./being";
 import {
   IStatement,
   IStatementActant,
   IStatementAction,
   IStatementData,
-  IStatementDataTerritory
+  IStatementDataTerritory,
 } from "./statement";
 import { ITerritory, ITerritoryData, IParentTerritory } from "./territory";
 
@@ -73,6 +74,8 @@ export type {
   IResourceData,
   IPerson,
   IPersonData,
+  IBeing,
+  IBeingData,
   IGroup,
   IGroupData,
   IObject,

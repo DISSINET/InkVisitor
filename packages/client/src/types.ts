@@ -71,6 +71,10 @@ export const EntityColors: { [key: string]: IEntityColor } = {
     entityClass: EntityEnums.Class.Person,
     color: "entityP",
   },
+  B: {
+    entityClass: EntityEnums.Class.Being,
+    color: "entityB",
+  },
   V: {
     entityClass: EntityEnums.Class.Value,
     color: "entityV",
@@ -256,6 +260,7 @@ export const classesPropType = [EntityEnums.Class.Concept];
 export const classesPropValue = [
   EntityEnums.Class.Action,
   EntityEnums.Class.Person,
+  EntityEnums.Class.Being,
   EntityEnums.Class.Group,
   EntityEnums.Class.Object,
   EntityEnums.Class.Concept,
