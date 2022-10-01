@@ -8,6 +8,7 @@ import Action from "./action/action";
 import Entity from "./entity/entity";
 import Concept from "./concept/concept";
 import Person from "./person/person";
+import Being from "./being/being";
 import Group from "./group/group";
 import ObjectEntity from "./object/object";
 import Location from "./location/location";
@@ -36,6 +37,8 @@ export function getEntityClass(data: UnknownObject): Entity {
       return new Statement(data);
     case EntityEnums.Class.Person:
       return new Person(data);
+    case EntityEnums.Class.Being:
+      return new Being(data);
     case EntityEnums.Class.Group:
       return new Group(data);
     case EntityEnums.Class.Object:
@@ -85,7 +88,7 @@ export function getRelationClass(data: UnknownObject): Relation {
     case RelationEnums.Type.Synonym:
       return new Synonym(data);
     case RelationEnums.Type.Troponym:
-      return new Troponym(data)
+      return new Troponym(data);
     default:
       throw new ModelNotValidError("unknown class for relation");
   }

@@ -33,6 +33,11 @@ export const entitiesDictKeys = {
     label: "Person",
     info: "",
   },
+  B: {
+    value: EntityEnums.Class.Being,
+    label: "Living Being",
+    info: "",
+  },
   G: {
     value: EntityEnums.Class.Group,
     label: "Group",
