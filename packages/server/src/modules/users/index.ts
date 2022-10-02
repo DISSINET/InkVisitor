@@ -615,19 +615,18 @@ export default Router()
         throw new UserDoesNotExits(`user ${userId} was not found`, userId);
       }
 
-      const raw = user.generatePassword();
+      const hash = user.generateHash();
 
       const result = await user.update(request.db.connection, {
-        password: user.password,
+        hash,
       });
 
       if (!result.replaced && !result.unchanged) {
         throw new InternalServerError(`cannot update user ${userId}`);
       }
 
-      console.log(`Password reset for ${user.email}: ${raw}`);
+      console.log(`Admin Password reset request for ${user.email}. Hash = ${hash}`);
 
-      const hash = "123";
       try {
         await mailer.sendTemplate(
           user.email,
