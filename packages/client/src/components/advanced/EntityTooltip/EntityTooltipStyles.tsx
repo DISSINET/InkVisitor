@@ -25,3 +25,17 @@ export const StyledTooltipSeparator = styled.div`
   display: inline-flex;
   overflow: hidden;
 `;
+export const StyledLoaderWrap = styled.div`
+  position: relative;
+  height: 3rem;
+`;
+
+export const StyledRelations = styled.div`
+  display: grid;
+  grid-template-columns: auto auto;
+  margin-top: 1rem;
+`;
+export const StyledRelationTypeBlock = styled.div`
+  display: flex;
+  flex-direction: column;
+`;

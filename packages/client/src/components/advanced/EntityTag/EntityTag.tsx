@@ -55,15 +55,13 @@ export const EntityTag: React.FC<EntityTag> = ({
 
   return (
     <EntityTooltip
-      position={tooltipPosition}
+      entityId={entity.id}
       label={getEntityLabel(entity)}
       detail={entity.detail}
       text={tooltipText}
       itemsCount={statementsCount}
-      entityId={entity.id}
+      position={tooltipPosition}
       disabled={disableTooltip}
-      onOpen={() => setTooltipOpened(true)}
-      onClose={() => setTooltipOpened(false)}
     >
       <Tag
         propId={entity.id}
