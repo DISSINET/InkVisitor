@@ -10,7 +10,7 @@ services:
         max-size: "10m"
         max-file: "2"
     volumes:
-      - ./database:/data
+      - ./database_data:/data
     networks:
       - inkvisitor
     ports:
