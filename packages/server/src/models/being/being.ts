@@ -4,7 +4,7 @@ import { EntityEnums } from "@shared/enums";
 import { IBeing, IBeingData } from "@shared/types";
 
 class BeingData implements IBeingData, IModel {
-  logicalType: EntityEnums.LogicalType = EntityEnums.LogicalType.Definite;
+  logicalType: EntityEnums.LogicalType = "" as EntityEnums.LogicalType;
 
   constructor(data: Partial<IBeingData>) {
     fillFlatObject(this, data);

@@ -1,5 +1,5 @@
 import Entity from "@models/entity/entity";
-import { fillFlatObject, IModel } from "@models/common";
+import { IModel } from "@models/common";
 import { EntityEnums } from "@shared/enums";
 import { IValue, IValueData } from "@shared/types";
 

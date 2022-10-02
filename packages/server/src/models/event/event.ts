@@ -4,7 +4,7 @@ import { EntityEnums } from "@shared/enums";
 import { IEvent, IEventData } from "@shared/types";
 
 class EventData implements IEventData, IModel {
-  logicalType: EntityEnums.LogicalType = EntityEnums.LogicalType.Definite;
+  logicalType: EntityEnums.LogicalType = "" as EntityEnums.LogicalType;
 
   constructor(data: Partial<IEventData>) {
     fillFlatObject(this, data);

@@ -4,7 +4,7 @@ import { EntityEnums } from "@shared/enums";
 import { ILocation, ILocationData } from "@shared/types";
 
 class LocationData implements ILocationData, IModel {
-  logicalType: EntityEnums.LogicalType = EntityEnums.LogicalType.Definite;
+  logicalType: EntityEnums.LogicalType = "" as EntityEnums.LogicalType;
 
   constructor(data: Partial<ILocationData>) {
     fillFlatObject(this, data);

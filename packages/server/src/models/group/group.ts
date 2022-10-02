@@ -4,7 +4,7 @@ import { EntityEnums } from "@shared/enums";
 import { IGroup, IGroupData } from "@shared/types";
 
 class GroupData implements IGroupData, IModel {
-  logicalType: EntityEnums.LogicalType = EntityEnums.LogicalType.Definite;
+  logicalType: EntityEnums.LogicalType = "" as EntityEnums.LogicalType;
 
   constructor(data: Partial<IGroupData>) {
     fillFlatObject(this, data);
