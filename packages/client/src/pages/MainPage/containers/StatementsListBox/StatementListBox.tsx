@@ -383,7 +383,8 @@ export const StatementListBox: React.FC = () => {
                     position="right center"
                     color="success"
                     noArrow
-                    items={
+                    tagGroup
+                    content={
                       <TagGroup>
                         {definedSubjects
                           .slice(2)
@@ -429,7 +430,8 @@ export const StatementListBox: React.FC = () => {
                     position="right center"
                     color="success"
                     noArrow
-                    items={
+                    tagGroup
+                    content={
                       <TagGroup>
                         {definedActions
                           .slice(2)
@@ -477,7 +479,8 @@ export const StatementListBox: React.FC = () => {
                     position="right center"
                     color="success"
                     noArrow
-                    items={
+                    tagGroup
+                    content={
                       <TagGroup>
                         {actantObjects
                           .slice(4)

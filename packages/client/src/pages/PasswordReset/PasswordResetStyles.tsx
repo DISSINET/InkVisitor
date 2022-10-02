@@ -33,3 +33,9 @@ export const StyledFaLock = styled(FaLock)`
   margin-right: ${({ theme }) => theme.space[2]};
   color: ${({ theme }) => theme.color["primary"]};
 `;
+export const StyledDescription = styled.div`
+  color: ${({ theme }) => theme.color["primary"]};
+  font-weight: ${({ theme }) => theme.fontWeight["normal"]};
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
+  margin-bottom: 0.5rem;
+`;

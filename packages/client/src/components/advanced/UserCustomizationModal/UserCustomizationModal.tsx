@@ -16,7 +16,11 @@ import {
   ModalInputWrap,
   Tag,
 } from "components";
-import { AttributeButtonGroup, EntitySuggester } from "components/advanced";
+import {
+  AttributeButtonGroup,
+  EntitySuggester,
+  EntityTag,
+} from "components/advanced";
 import React, { useMemo, useState } from "react";
 import { FaUnlink } from "react-icons/fa";
 import { useMutation, useQuery, useQueryClient } from "react-query";
@@ -201,10 +205,8 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
             <ModalInputLabel>{"default territory"}</ModalInputLabel>
             <ModalInputWrap width={165}>
               {territory ? (
-                <Tag
-                  propId={territory.id}
-                  label={territory.label}
-                  entityClass={territory.class}
+                <EntityTag
+                  entity={territory}
                   tooltipPosition={"left center"}
                   button={
                     <Button

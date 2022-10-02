@@ -60,12 +60,7 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
   return (
     <StyledActantHeaderRow>
       <StyledTagWrap>
-        <EntityTag
-          entity={entity}
-          propId={entity.id}
-          tooltipText={entity.data.text}
-          fullWidth
-        />
+        <EntityTag entity={entity} tooltipText={entity.data.text} fullWidth />
       </StyledTagWrap>
       <ButtonGroup style={{ marginTop: "1rem" }}>
         {entity.class !== EntityEnums.Class.Statement && userCanEdit && (
