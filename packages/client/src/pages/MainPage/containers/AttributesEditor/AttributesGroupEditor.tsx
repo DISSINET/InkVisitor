@@ -235,7 +235,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
     <div>
       <Tooltip
         position="top right"
-        attributes={
+        content={
           <StyledTooltipGrid>
             <div>
               <StyledTooltipHeading>Statement</StyledTooltipHeading>
@@ -288,7 +288,9 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
         />
         <ModalContent>
           <StyledGridColumns>
-            <StyledColumnWrap color={EntityColors[EntityEnums.Class.Statement].color}>
+            <StyledColumnWrap
+              color={EntityColors[EntityEnums.Class.Statement].color}
+            >
               <StyledColumnHeading>Statement</StyledColumnHeading>
 
               <AttributesForm

@@ -19,32 +19,28 @@ interface Tooltip {
   // settings
   position?: PopupPosition | PopupPosition[];
   on?: EventType | EventType[];
-  noArrow?: boolean;
   color?: typeof Colors[number];
+  noArrow?: boolean;
   disabled?: boolean;
   offsetX?: number;
   offsetY?: number;
-
-  // TODO: remove - old tooltip
-  attributes?: ReactElement;
-  items?: ReactElement[] | ReactElement;
   //
+  tagGroup?: boolean;
 }
 export const Tooltip: React.FC<Tooltip> = ({
   children,
-  position = ["bottom center", "right center", "top center"],
-  on = ["hover", "focus"],
   label = "",
   content,
 
+  position = ["bottom center", "right center", "top center"],
+  on = ["hover", "focus"],
   color = "black",
   disabled = false,
   offsetX,
   offsetY,
-  // custom tooltip
-  attributes,
-  items,
   noArrow = false,
+
+  tagGroup = false,
 }) => {
   return (
     <StyledPopup
@@ -66,11 +62,9 @@ export const Tooltip: React.FC<Tooltip> = ({
             </StyledRow>
           </StyledContentWrap>
         )}
-        {content && <>{content}</>}
-
-        {/* TODO: remove */}
-        {attributes && <StyledContentWrap>{attributes}</StyledContentWrap>}
-        {items && <StyledItemsWrap>{items}</StyledItemsWrap>}
+        {content && (
+          <StyledContentWrap tagGroup={tagGroup}>{content}</StyledContentWrap>
+        )}
       </div>
     </StyledPopup>
   );

@@ -52,7 +52,7 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
   const renderContent = () => (
     <>
       {(text || detail || label) && (
-        <StyledContentWrap>
+        <>
           <StyledRow>
             <StyledIconWrap>
               <AiOutlineTag />
@@ -82,7 +82,7 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
               <StyledDetail>{itemsCount}</StyledDetail>
             </StyledRow>
           )}
-        </StyledContentWrap>
+        </>
       )}
     </>
   );

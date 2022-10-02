@@ -94,7 +94,7 @@ const AttributesEditor: React.FC<AttributesEditor> = ({
   };
 
   const getTooltipAttributes = () => (
-    <>
+    <div>
       <TooltipAttributeRow
         key="elvl"
         attributeName="elvl"
@@ -155,12 +155,12 @@ const AttributesEditor: React.FC<AttributesEditor> = ({
         value={data.certainty}
         items={certaintyDict}
       />
-    </>
+    </div>
   );
   return (
     <>
       <div>
-        <Tooltip attributes={<div>{getTooltipAttributes()}</div>}>
+        <Tooltip content={getTooltipAttributes()}>
           <div>
             <Button
               key="settings"

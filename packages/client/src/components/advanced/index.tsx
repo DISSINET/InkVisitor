@@ -1,5 +1,4 @@
 import { AttributeButtonGroup } from "./AttributeButtonGroup/AttributeButtonGroup";
-import { CustomTooltip } from "./CustomTooltip/CustomTooltip";
 import { EmptyTag } from "./EmptyTag/EmptyTag";
 import { EntitySuggester } from "./EntitySuggester/EntitySuggester";
 import { EntityTag } from "./EntityTag/EntityTag";
@@ -12,7 +11,6 @@ import { UserCustomizationModal } from "./UserCustomizationModal/UserCustomizati
 
 export {
   AttributeButtonGroup,
-  CustomTooltip,
   EmptyTag,
   EntitySuggester,
   EntityTag,

@@ -29,8 +29,12 @@ export const StyledPopup = styled(Popup)<StyledPopup>`
   }
 `;
 
-export const StyledContentWrap = styled.div`
-  margin: ${({ theme }) => `${theme.space[2]} ${theme.space[3]}`};
+interface StyledContentWrap {
+  tagGroup?: boolean;
+}
+export const StyledContentWrap = styled.div<StyledContentWrap>`
+  margin: ${({ theme, tagGroup }) =>
+    `${theme.space[2]} ${tagGroup ? theme.space[2] : theme.space[3]}`};
 `;
 
 export const StyledRow = styled.div`

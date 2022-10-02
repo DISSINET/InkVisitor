@@ -95,7 +95,8 @@ export const EntityDetailStatementsTable: React.FC<
                   position="right center"
                   color="success"
                   noArrow
-                  items={
+                  tagGroup
+                  content={
                     <TagGroup>
                       {subjectObjects
                         .slice(2)
@@ -138,7 +139,8 @@ export const EntityDetailStatementsTable: React.FC<
                     position="right center"
                     color="success"
                     noArrow
-                    items={
+                    tagGroup
+                    content={
                       <TagGroup>
                         {actionObjects
                           .slice(2)
@@ -185,7 +187,8 @@ export const EntityDetailStatementsTable: React.FC<
                   position="right center"
                   color="success"
                   noArrow
-                  items={
+                  tagGroup
+                  content={
                     <TagGroup>
                       {actantObjects
                         .slice(4)
