@@ -1,13 +1,14 @@
 import { EntityEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
 import api from "api";
-import { Tag, Tooltip } from "components";
-import { StyledTooltipSeparator } from "components/basic/Tooltip/TooltipStyles";
+import { Tag } from "components";
+import { EntityTooltip } from "components/advanced";
 import React, { ReactNode } from "react";
 import { useQuery } from "react-query";
 import { PopupPosition } from "reactjs-popup/dist/types";
 import { DragItem } from "types";
 import { getEntityLabel } from "utils";
+import { StyledTooltipSeparator } from "../EntityTooltip/EntityTooltipStyles";
 
 interface EntityTag {
   entity: IEntity;
@@ -72,14 +73,13 @@ export const EntityTag: React.FC<EntityTag> = ({
   }
 
   return (
-    <Tooltip
+    <EntityTooltip
+      position={tooltipPosition}
       label={getEntityLabel(entity)}
       detail={entity.detail}
       text={tooltipText}
-      disabled={disableTooltip}
-      position={tooltipPosition}
-      tagTooltip
       itemsCount={statementsCount}
+      disabled={disableTooltip}
     >
       <StyledTooltipSeparator>
         <Tag
@@ -108,6 +108,6 @@ export const EntityTag: React.FC<EntityTag> = ({
           isFavorited={isFavorited}
         />
       </StyledTooltipSeparator>
-    </Tooltip>
+    </EntityTooltip>
   );
 };

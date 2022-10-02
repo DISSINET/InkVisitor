@@ -1,14 +1,8 @@
 import React, { ReactElement } from "react";
-import { AiOutlineTag } from "react-icons/ai";
-import { BiCommentDetail } from "react-icons/bi";
-import { BsCardText } from "react-icons/bs";
-import { ImListNumbered } from "react-icons/im";
 import { EventType, PopupPosition } from "reactjs-popup/dist/types";
 import { Colors } from "types";
 import {
   StyledContentWrap,
-  StyledDetail,
-  StyledIconWrap,
   StyledItemsWrap,
   StyledLabel,
   StyledPopup,
@@ -19,36 +13,47 @@ interface Tooltip {
   children: ReactElement;
   position?: PopupPosition | PopupPosition[];
   on?: EventType | EventType[];
-  label?: string;
-  detail?: string;
-  text?: string;
-  itemsCount?: number;
-  attributes?: ReactElement;
-  items?: ReactElement[] | ReactElement;
-  color?: typeof Colors[number];
-  // TODO: change to EntityTooltip component
-  tagTooltip?: boolean;
   noArrow?: boolean;
+  color?: typeof Colors[number];
   disabled?: boolean;
   offsetX?: number;
   offsetY?: number;
+  // simple tooltip
+  label?: string;
+  content?: ReactElement[] | ReactElement;
+
+  // entityTooltip
+  tagTooltip?: boolean;
+  detail?: string;
+  text?: string;
+  itemsCount?: number;
+
+  // custom tooltip
+  attributes?: ReactElement;
+  items?: ReactElement[] | ReactElement;
+  //
 }
 export const Tooltip: React.FC<Tooltip> = ({
   children,
   position = ["bottom center", "right center", "top center"],
   on = ["hover", "focus"],
   label = "",
-  detail,
-  text,
-  attributes,
-  itemsCount,
-  tagTooltip = false,
-  disabled = false,
-  noArrow = false,
-  items,
+  content,
+
   color = "black",
+  disabled = false,
   offsetX,
   offsetY,
+  // custom tooltip
+  attributes,
+  items,
+  noArrow = false,
+  // entityTooltip
+  detail,
+  text,
+  itemsCount,
+  // TODO: remove
+  tagTooltip = false,
 }) => {
   return (
     <StyledPopup
@@ -63,8 +68,16 @@ export const Tooltip: React.FC<Tooltip> = ({
       offsetY={offsetY}
     >
       <div>
-        {attributes && <StyledContentWrap>{attributes}</StyledContentWrap>}
-        {(tagTooltip || text || detail || label) && (
+        {label && (
+          <StyledContentWrap>
+            <StyledRow>
+              <StyledLabel>{label}</StyledLabel>
+            </StyledRow>
+          </StyledContentWrap>
+        )}
+        {content && <>{content}</>}
+
+        {/* {(tagTooltip || text || detail || label) && (
           <StyledContentWrap>
             <StyledRow>
               {tagTooltip && (
@@ -99,7 +112,9 @@ export const Tooltip: React.FC<Tooltip> = ({
               </StyledRow>
             )}
           </StyledContentWrap>
-        )}
+        )} */}
+
+        {attributes && <StyledContentWrap>{attributes}</StyledContentWrap>}
         {items && <StyledItemsWrap>{items}</StyledItemsWrap>}
       </div>
     </StyledPopup>
