@@ -216,7 +216,7 @@
       "actants": [
         {
           "id": "s2_a2",
-          "entityId": "o1",
+          "entityId": "b1",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -291,7 +291,7 @@
       "actants": [
         {
           "id": "s3_a2",
-          "entityId": "o1",
+          "entityId": "b1",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -327,7 +327,7 @@
       "actions": [
         {
           "id": "s4_a1",
-          "actionId": "a4",
+          "actionId": "a5",
           "certainty": "1",
           "elvl": "1",
           "logic": "1",
@@ -436,7 +436,7 @@
       "actants": [
         {
           "id": "s5_a2",
-          "entityId": "o1",
+          "entityId": "b1",
           "position": "s",
           "elvl": "1",
           "logic": "1",
@@ -974,8 +974,8 @@
   },
 
   {
-    "id": "o1",
-    "class": "O",
+    "id": "b1",
+    "class": "B",
     "label": "a dog",
     "detail": "probably a pug",
     "status": "1",

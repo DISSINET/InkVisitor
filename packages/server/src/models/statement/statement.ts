@@ -209,7 +209,7 @@ class Statement extends Entity implements IStatement {
       return false;
     }
 
-    return this.data.isValid();
+    return super.isValid() && this.data.isValid();
   }
 
   canBeEditedByUser(user: User): boolean {

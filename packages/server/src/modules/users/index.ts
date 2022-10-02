@@ -121,6 +121,31 @@ export default Router()
   )
   /**
    * @openapi
+   * /users/me:
+   *   get:
+   *     description: Returns user detail for current user
+   *     tags:
+   *       - users
+   *     responses:
+   *       200:
+   *         description: Returns IResponseUser object
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/IResponseUser"
+   */
+  .get(
+    "/me",
+    asyncRouteHandler<IResponseUser>(async (request: Request) => {
+      const user = request.getUserOrFail();
+      const response = new ResponseUser(user);
+      await response.unwindAll(request);
+
+      return response;
+    })
+  )
+  /**
+   * @openapi
    * /users/{userId}:
    *   get:
    *     description: Returns user entry
@@ -663,30 +688,5 @@ export default Router()
         result: true,
         message: `Test email sent to ${email}`,
       };
-    })
-  )
-  /**
-   * @openapi
-   * /users/me:
-   *   get:
-   *     description: Returns user detail for current user
-   *     tags:
-   *       - users
-   *     responses:
-   *       200:
-   *         description: Returns IResponseUser object
-   *         content:
-   *           application/json:
-   *             schema:
-   *               $ref: "#/components/schemas/IResponseUser"
-   */
-  .get(
-    "/me",
-    asyncRouteHandler<IResponseUser>(async (request: Request) => {
-      const user = request.getUserOrFail();
-      const response = new ResponseUser(user);
-      await response.unwindAll(request);
-
-      return response;
     })
   );

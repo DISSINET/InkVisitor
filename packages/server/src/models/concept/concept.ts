@@ -22,13 +22,11 @@ class Concept extends Entity implements IConcept {
   }
 
   isValid(): boolean {
-    const alloweedClasses = [EntityEnums.Class.Concept];
-
-    if (alloweedClasses.indexOf(this.class) === -1) {
+    if (this.class !== EntityEnums.Class.Concept) {
       return false;
     }
 
-    return this.data.isValid();
+    return super.isValid() && this.data.isValid();
   }
 }
 

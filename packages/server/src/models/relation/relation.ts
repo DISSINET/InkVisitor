@@ -143,7 +143,7 @@ export default class Relation implements IRelationModel {
       .filter(relType ? { type: relType } : {})
       .run(db)
 
-    if (position) {
+    if (position !== undefined) {
       return items.filter(d => d.entityIds[position] === entityId)
     }
     return items;

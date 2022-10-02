@@ -221,6 +221,7 @@ export const EntitySearchBox: React.FC = () => {
             EntityEnums.Class.Territory,
             EntityEnums.Class.Resource,
             EntityEnums.Class.Person,
+            EntityEnums.Class.Being,
             EntityEnums.Class.Group,
             EntityEnums.Class.Object,
             EntityEnums.Class.Concept,

@@ -39,7 +39,7 @@ export class UserOptions implements IUserOptions {
 
   constructor(data: Partial<IUserOptions>) {
     fillFlatObject(this, data);
-    fillArray(this.searchLanguages, String, data.searchLanguages);
+    fillArray(this.searchLanguages, String, data?.searchLanguages || []);
   }
 
   isValid(): boolean {

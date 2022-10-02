@@ -29,7 +29,7 @@ class Location extends Entity implements ILocation {
       return false;
     }
 
-    return this.data.isValid();
+    return super.isValid() && this.data.isValid();
   }
 }
 

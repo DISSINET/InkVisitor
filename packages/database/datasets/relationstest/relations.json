@@ -330,7 +330,7 @@
   },
   {
     "type": "AEE",
-    "entityIds": ["c5", "a901"]
+    "entityIds": ["a5", "c901"]
   },
 
   {
@@ -345,10 +345,6 @@
   {
     "type": "C",
     "entityIds": ["p1", "c2"]
-  },
-  {
-    "type": "C",
-    "entityIds": ["o1", "c211"]
   },
   {
     "type": "C",

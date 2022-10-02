@@ -39,6 +39,7 @@ export namespace EnumValidators {
         EntityEnums.Class.Statement,
         EntityEnums.Class.Resource,
         EntityEnums.Class.Person,
+        EntityEnums.Class.Being,
         EntityEnums.Class.Group,
         EntityEnums.Class.Object,
         EntityEnums.Class.Concept,

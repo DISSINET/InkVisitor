@@ -1,8 +1,5 @@
 import { EntityEnums } from "@shared/enums";
-import {
-  IEntity,
-  EntityTooltip,
-} from "@shared/types";
+import { IEntity, EntityTooltip } from "@shared/types";
 import { Connection } from "rethinkdb-ts";
 import { IRequest } from "src/custom_typings/request";
 import { ResponseEntity } from "./response";
@@ -10,7 +7,9 @@ import Relation from "@models/relation/relation";
 import { RelationEnums } from "@shared/enums";
 import { Relation as RelationTypes } from "@shared/types";
 
-export class ResponseTooltip extends ResponseEntity implements EntityTooltip.IResponse {
+export class ResponseTooltip
+  extends ResponseEntity
+  implements EntityTooltip.IResponse {
   entities: Record<string, IEntity> = {};
 
   superclassTrees: EntityTooltip.ISuperclassTree[] = [];
@@ -18,38 +17,64 @@ export class ResponseTooltip extends ResponseEntity implements EntityTooltip.IRe
   troponymCloud?: EntityTooltip.ITroponymCloud;
   superordinateLocationTrees: EntityTooltip.ISuperordinateLocationTree[] = [];
   identifications: EntityTooltip.IIdentifications = [];
-  actionEventEquivalent: EntityTooltip.ActionEventNode = { entityId: "", subtrees: [] }
+  actionEventEquivalent: EntityTooltip.ActionEventNode = [];
 
   /**
    * Loads additional fields to satisfy the EntityTooltip.IResponse interface
    * @param request
    */
   async prepare(request: IRequest) {
-    super.prepare(request)
+    super.prepare(request);
 
-    const rootSuperclass = await this.getSuperclassTrees(request.db.connection, this.id, this.class);
+    const rootActionEventEquivalent = await this.getActionEventNodes(
+      request.db.connection,
+      this.id,
+      this.class
+    )
+    this.actionEventEquivalent = rootActionEventEquivalent.subtrees
+
+    const rootSuperclass = await this.getSuperclassTrees(
+      request.db.connection,
+      this.id,
+      this.class
+    );
     this.superclassTrees = rootSuperclass.subtrees;
 
-    this.synonymCloud = await this.getSynonymCloud(request.db.connection)
-    this.troponymCloud = await this.getTroponymCloud(request.db.connection)
+    this.synonymCloud = await this.getSynonymCloud(request.db.connection);
+    this.troponymCloud = await this.getTroponymCloud(request.db.connection);
 
-    const superordinateTree = await this.getSuperordinateLocationTree(request.db.connection, this.id)
+    const superordinateTree = await this.getSuperordinateLocationTree(
+      request.db.connection,
+      this.id
+    );
     this.superordinateLocationTrees = superordinateTree.subtrees;
 
     this.identifications = await this.getIdentifications(request.db.connection);
 
-    this.entities = await this.populateEntitiesMap(request.db.connection)
+    this.entities = await this.populateEntitiesMap(request.db.connection);
   }
 
   /**
    * returns synonym cloud in the form of list containing grouped entity ids
-   * @param conn 
-   * @returns 
+   * @param conn
+   * @returns
    */
-  async getSynonymCloud(conn: Connection): Promise<EntityTooltip.ISynonymCloud | undefined> {
-    if (this.class === EntityEnums.Class.Concept || this.class === EntityEnums.Class.Action) {
-      const synonyms = await Relation.getForEntity<RelationTypes.ISynonym>(conn, this.id, RelationEnums.Type.Synonym);
-      return synonyms.reduce((acc, cur) => acc.concat(cur.entityIds), [] as string[])
+  async getSynonymCloud(
+    conn: Connection
+  ): Promise<EntityTooltip.ISynonymCloud | undefined> {
+    if (
+      this.class === EntityEnums.Class.Concept ||
+      this.class === EntityEnums.Class.Action
+    ) {
+      const synonyms = await Relation.getForEntity<RelationTypes.ISynonym>(
+        conn,
+        this.id,
+        RelationEnums.Type.Synonym
+      );
+      return synonyms.reduce(
+        (acc, cur) => acc.concat(cur.entityIds),
+        [] as string[]
+      );
     }
 
     return undefined;
@@ -57,99 +82,217 @@ export class ResponseTooltip extends ResponseEntity implements EntityTooltip.IRe
 
   /**
    * returns troponym cloud in the form of list containing grouped entity ids
-   * @param conn 
-   * @returns 
+   * @param conn
+   * @returns
    */
-  async getTroponymCloud(conn: Connection): Promise<EntityTooltip.ISynonymCloud | undefined> {
+  async getTroponymCloud(
+    conn: Connection
+  ): Promise<EntityTooltip.ISynonymCloud | undefined> {
     if (this.class === EntityEnums.Class.Action) {
-      const troponyms = await Relation.getForEntity<RelationTypes.ITroponym>(conn, this.id, RelationEnums.Type.Troponym);
-      return troponyms.reduce((acc, cur) => acc.concat(cur.entityIds), [] as string[])
+      const troponyms = await Relation.getForEntity<RelationTypes.ITroponym>(
+        conn,
+        this.id,
+        RelationEnums.Type.Troponym
+      );
+      return troponyms.reduce(
+        (acc, cur) => acc.concat(cur.entityIds),
+        [] as string[]
+      );
     }
 
     return undefined;
   }
 
   /**
- * returns synonym cloud in the form of list containing grouped entity ids
- * @param conn 
- * @returns 
- */
-  async getIdentifications(conn: Connection): Promise<EntityTooltip.IIdentification[]> {
+   * returns synonym cloud in the form of list containing grouped entity ids
+   * @param conn
+   * @returns
+   */
+  async getIdentifications(
+    conn: Connection
+  ): Promise<EntityTooltip.IIdentification[]> {
     const out: EntityTooltip.IIdentification[] = [];
-    const identifications = await Relation.getForEntity<RelationTypes.IIdentification>(conn, this.id, RelationEnums.Type.Identification);
+    const identifications =
+      await Relation.getForEntity<RelationTypes.IIdentification>(
+        conn,
+        this.id,
+        RelationEnums.Type.Identification
+      );
 
     for (const relation of identifications) {
       out.push({
         certainty: relation.certainty,
-        entityId: relation.entityIds[0] === this.id ? relation.entityIds[1] : relation.entityIds[0],
-      })
+        entityId:
+          relation.entityIds[0] === this.id
+            ? relation.entityIds[1]
+            : relation.entityIds[0],
+      });
     }
 
-    return out
+    return out;
   }
 
   /**
    * recursively search for superordinate location relations
-   * @param conn 
+   * @param conn
    */
-  async getSuperordinateLocationTree(conn: Connection, parentId: string): Promise<EntityTooltip.ISuperordinateLocationTree> {
+  async getSuperordinateLocationTree(
+    conn: Connection,
+    parentId: string
+  ): Promise<EntityTooltip.ISuperordinateLocationTree> {
     const out: EntityTooltip.ISuperordinateLocationTree = {
       entityId: parentId,
       subtrees: [],
-    }
+    };
 
     let locations: RelationTypes.ISuperordinateLocation[] = [];
 
     if (this.class === EntityEnums.Class.Location) {
-      locations = await Relation.getForEntity<RelationTypes.ISuperordinateLocation>(conn, parentId, RelationEnums.Type.SuperordinateLocation, 0);
+      locations =
+        await Relation.getForEntity<RelationTypes.ISuperordinateLocation>(
+          conn,
+          parentId,
+          RelationEnums.Type.SuperordinateLocation,
+          0
+        );
     }
 
     // make unique and sorted list of ids
-    const subrootIds = [...new Set(locations.map(r => r.entityIds[1]))].sort();
+    const subrootIds = [
+      ...new Set(locations.map((r) => r.entityIds[1])),
+    ].sort();
 
     for (const subparentId of subrootIds) {
-      out.subtrees.push(await this.getSuperordinateLocationTree(conn, subparentId))
+      out.subtrees.push(
+        await this.getSuperordinateLocationTree(conn, subparentId)
+      );
     }
 
-    this.addLinkedEntities(subrootIds)
+    this.addLinkedEntities(subrootIds);
 
-    return out
+    return out;
   }
 
   /**
-   * recursively search for superclass relations
-   * @param conn 
+   * recursively search for action event trees
+   * @param conn
    */
-  async getSuperclassTrees(conn: Connection, parentId: string, asClass: EntityEnums.Class): Promise<EntityTooltip.ISuperclassTree> {
+  async getActionEventNodes(
+    conn: Connection,
+    parentId: string,
+    asClass: EntityEnums.Class
+  ): Promise<EntityTooltip.ISuperclassTree> {
     const out: EntityTooltip.ISuperclassTree = {
       entityId: parentId,
       subtrees: [],
-    }
+    };
 
     let relations: RelationTypes.IRelation[] = [];
 
     switch (asClass) {
-      case EntityEnums.Class.Concept, EntityEnums.Class.Action:
-        relations = await Relation.getForEntity<RelationTypes.IRelation>(conn, parentId, RelationEnums.Type.Superclass, 0);
+      case EntityEnums.Class.Action:
+        relations = await Relation.getForEntity<RelationTypes.IActionEventEquivalent>(
+          conn,
+          parentId,
+          RelationEnums.Type.ActionEventEquivalent,
+          0
+        );
         break;
-      case EntityEnums.Class.Person, EntityEnums.Class.Location, EntityEnums.Class.Object,
-        EntityEnums.Class.Group, EntityEnums.Class.Event, EntityEnums.Class.Statement,
-        EntityEnums.Class.Territory, EntityEnums.Class.Resource:
-        relations = await Relation.getForEntity<RelationTypes.IRelation>(conn, parentId, RelationEnums.Type.Classification, 0);
+      case EntityEnums.Class.Concept:
+        relations = await Relation.getForEntity<RelationTypes.ISuperclass>(
+          conn,
+          parentId,
+          RelationEnums.Type.Superclass,
+          0
+        );
         break;
       default:
         break;
     }
 
     // make unique and sorted list of ids
-    const subrootIds = [...new Set(relations.map(r => r.entityIds[1]))].sort();
+    const subrootIds = [
+      ...new Set(relations.map((r) => r.entityIds[1])),
+    ].sort();
 
     for (const subparentId of subrootIds) {
-      out.subtrees.push(await this.getSuperclassTrees(conn, subparentId, EntityEnums.Class.Concept))
+      out.subtrees.push(
+        await this.getSuperclassTrees(
+          conn,
+          subparentId,
+          EntityEnums.Class.Concept
+        )
+      );
     }
 
-    this.addLinkedEntities(subrootIds)
+    this.addLinkedEntities(subrootIds);
 
-    return out
+    return out;
+  }
+
+
+  /**
+   * recursively search for superclass relations
+   * @param conn
+   */
+  async getSuperclassTrees(
+    conn: Connection,
+    parentId: string,
+    asClass: EntityEnums.Class
+  ): Promise<EntityTooltip.ISuperclassTree> {
+    const out: EntityTooltip.ISuperclassTree = {
+      entityId: parentId,
+      subtrees: [],
+    };
+
+    let relations: RelationTypes.IRelation[] = [];
+
+    switch (asClass) {
+      case EntityEnums.Class.Concept:
+      case EntityEnums.Class.Action:
+        relations = await Relation.getForEntity<RelationTypes.ISuperclass>(
+          conn,
+          parentId,
+          RelationEnums.Type.Superclass,
+          0
+        );
+        break;
+      case EntityEnums.Class.Person:
+      case EntityEnums.Class.Location:
+      case EntityEnums.Class.Object:
+      case EntityEnums.Class.Group:
+      case EntityEnums.Class.Event:
+      case EntityEnums.Class.Statement:
+      case EntityEnums.Class.Territory:
+      case EntityEnums.Class.Resource:
+        relations = await Relation.getForEntity<RelationTypes.IClassification>(
+          conn,
+          parentId,
+          RelationEnums.Type.Classification,
+          0
+        );
+        break;
+      default:
+        break;
+    }
+
+    // make unique and sorted list of ids
+    const subrootIds = [
+      ...new Set(relations.map((r) => r.entityIds[1])),
+    ].sort();
+
+    for (const subparentId of subrootIds) {
+      out.subtrees.push(
+        await this.getSuperclassTrees(
+          conn,
+          subparentId,
+          EntityEnums.Class.Concept
+        )
+      );
+    }
+
+    this.addLinkedEntities(subrootIds);
+
+    return out;
   }
 }

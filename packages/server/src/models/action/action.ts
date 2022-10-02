@@ -47,7 +47,7 @@ class Action extends Entity implements IAction {
       return false;
     }
 
-    return this.data.isValid();
+    return super.isValid() && this.data.isValid();
   }
 }
 

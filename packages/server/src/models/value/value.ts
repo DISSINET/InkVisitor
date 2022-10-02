@@ -29,7 +29,7 @@ class Value extends Entity implements IValue {
       return false;
     }
 
-    return this.data.isValid();
+    return super.isValid() && this.data.isValid();
   }
 }
 

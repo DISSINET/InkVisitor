@@ -20,7 +20,8 @@ export namespace EntityTooltip {
     certainty: EntityEnums.Certainty;
   };
 
-  export type ActionEventNode = ISuperclassTree;
+  // for A -> first find AEE relation with ID on first position, then continue as C and find all superclass relations on the first position
+  export type ActionEventNode = ISuperclassTree[];
 
   // these are full of entity ids
 
