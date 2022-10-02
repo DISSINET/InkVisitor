@@ -32,10 +32,18 @@ export const StyledLoaderWrap = styled.div`
 
 export const StyledRelations = styled.div`
   display: grid;
-  grid-template-columns: auto auto;
+  grid-template-columns: auto 1fr;
   margin-top: 1rem;
+  border: 1px dotted white;
 `;
 export const StyledRelationTypeBlock = styled.div`
   display: flex;
   flex-direction: column;
+  margin-left: ${({ theme }) => theme.space[2]};
+  border: 1px dashed blue;
+`;
+export const StyledLetterIconWrap = styled.div`
+  display: grid;
+  justify-content: center;
+  border: 1px dashed pink;
 `;

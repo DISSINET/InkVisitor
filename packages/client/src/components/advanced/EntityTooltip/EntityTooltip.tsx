@@ -12,6 +12,7 @@ import {
   StyledDetail,
   StyledIconWrap,
   StyledLabel,
+  StyledLetterIconWrap,
   StyledLoaderWrap,
   StyledRelations,
   StyledRelationTypeBlock,
@@ -20,6 +21,7 @@ import {
 } from "./EntityTooltipStyles";
 import { EntityTooltip as EntityTooltipNamespace } from "@shared/types";
 import { RelationEnums } from "@shared/enums";
+import { certaintyDict } from "@shared/dictionaries";
 
 interface EntityTooltip {
   // trigger
@@ -74,11 +76,6 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
     }
   );
 
-  if (tooltipData) {
-    console.log(tooltipData);
-    console.log(tooltipData.superclassTrees);
-  }
-
   const renderEntityInfo = () => (
     <>
       {(text || detail || label) && (
@@ -126,15 +123,18 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
       synonymCloud,
       troponymCloud,
     } = tooltipData;
+
     return (
       <StyledRelations>
         {/* actionEventEquivalent - Node */}
         {actionEventEquivalent.length > 0 && (
           <>
-            <LetterIcon
-              color="white"
-              letter={RelationEnums.Type.ActionEventEquivalent}
-            />
+            <StyledLetterIconWrap>
+              <LetterIcon
+                color="white"
+                letter={RelationEnums.Type.ActionEventEquivalent}
+              />
+            </StyledLetterIconWrap>
             <StyledRelationTypeBlock>
               {"actionEventEquivalent"}
             </StyledRelationTypeBlock>
@@ -143,19 +143,31 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
         {/* identifications - [] */}
         {identifications.length > 0 && (
           <>
-            <LetterIcon
-              color="white"
-              letter={RelationEnums.Type.Identification}
-            />
+            <StyledLetterIconWrap>
+              <LetterIcon
+                color="white"
+                letter={RelationEnums.Type.Identification}
+              />
+            </StyledLetterIconWrap>
             <StyledRelationTypeBlock>
-              {"Identifications"}
+              {identifications.map((identification, key) => {
+                // TODO: show class in text
+                return `${identification.entityId} ([EClass] ${
+                  certaintyDict[identification.certainty].label
+                })${key !== identifications.length - 1 ? ", " : ""}`;
+              })}
             </StyledRelationTypeBlock>
           </>
         )}
         {/* superclassTrees - Node */}
         {superclassTrees.length > 0 && (
           <>
-            <LetterIcon color="white" letter={RelationEnums.Type.Superclass} />
+            <StyledLetterIconWrap>
+              <LetterIcon
+                color="white"
+                letter={RelationEnums.Type.Superclass}
+              />
+            </StyledLetterIconWrap>
             <StyledRelationTypeBlock>
               {"superclassTrees"}
             </StyledRelationTypeBlock>
@@ -164,10 +176,12 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
         {/* superordinateLocationTrees - Node */}
         {superordinateLocationTrees.length > 0 && (
           <>
-            <LetterIcon
-              color="white"
-              letter={RelationEnums.Type.SuperordinateLocation}
-            />
+            <StyledLetterIconWrap>
+              <LetterIcon
+                color="white"
+                letter={RelationEnums.Type.SuperordinateLocation}
+              />
+            </StyledLetterIconWrap>
             <StyledRelationTypeBlock>
               {"superordinateLocationTrees"}
             </StyledRelationTypeBlock>
@@ -176,15 +190,31 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
         {/* synonymCloud - string[] */}
         {synonymCloud && synonymCloud.length > 0 && (
           <>
-            <LetterIcon color="white" letter={RelationEnums.Type.Synonym} />
-            <StyledRelationTypeBlock>{"synonymCloud"}</StyledRelationTypeBlock>
+            <StyledLetterIconWrap>
+              <LetterIcon color="white" letter={RelationEnums.Type.Synonym} />
+            </StyledLetterIconWrap>
+            <StyledRelationTypeBlock>
+              {synonymCloud.map((synonym, key) => {
+                return `${synonym}${
+                  key !== synonymCloud.length - 1 ? ", " : ""
+                }`;
+              })}
+            </StyledRelationTypeBlock>
           </>
         )}
         {/* troponymCloud - Node */}
         {troponymCloud && troponymCloud.length > 0 && (
           <>
-            <LetterIcon color="white" letter={RelationEnums.Type.Troponym} />
-            <StyledRelationTypeBlock>{"troponymCloud"}</StyledRelationTypeBlock>
+            <StyledLetterIconWrap>
+              <LetterIcon color="white" letter={RelationEnums.Type.Troponym} />
+            </StyledLetterIconWrap>
+            <StyledRelationTypeBlock>
+              {troponymCloud.map((troponym, key) => {
+                return `${troponym}${
+                  key !== troponymCloud.length - 1 ? ", " : ""
+                }`;
+              })}
+            </StyledRelationTypeBlock>
           </>
         )}
       </StyledRelations>
