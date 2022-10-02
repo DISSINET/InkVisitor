@@ -29,7 +29,7 @@ class Event extends Entity implements IEvent {
       return false;
     }
 
-    return this.data.isValid();
+    return super.isValid() && this.data.isValid();
   }
 }
 
