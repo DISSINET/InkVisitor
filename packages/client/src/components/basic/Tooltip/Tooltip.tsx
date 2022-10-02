@@ -1,14 +1,8 @@
 import React, { ReactElement } from "react";
-import { AiOutlineTag } from "react-icons/ai";
-import { BiCommentDetail } from "react-icons/bi";
-import { BsCardText } from "react-icons/bs";
-import { ImListNumbered } from "react-icons/im";
 import { EventType, PopupPosition } from "reactjs-popup/dist/types";
 import { Colors } from "types";
 import {
   StyledContentWrap,
-  StyledDetail,
-  StyledIconWrap,
   StyledItemsWrap,
   StyledLabel,
   StyledPopup,
@@ -16,38 +10,37 @@ import {
 } from "./TooltipStyles";
 
 interface Tooltip {
+  // trigger
   children: ReactElement;
+  // simple tooltip
+  label?: string;
+  // tooltips with custom content
+  content?: ReactElement[] | ReactElement;
+  // settings
   position?: PopupPosition | PopupPosition[];
   on?: EventType | EventType[];
-  label?: string;
-  detail?: string;
-  text?: string;
-  itemsCount?: number;
-  attributes?: ReactElement;
-  items?: ReactElement[] | ReactElement;
   color?: typeof Colors[number];
-  tagTooltip?: boolean;
   noArrow?: boolean;
   disabled?: boolean;
   offsetX?: number;
   offsetY?: number;
+  //
+  tagGroup?: boolean;
 }
 export const Tooltip: React.FC<Tooltip> = ({
   children,
+  label = "",
+  content,
+
   position = ["bottom center", "right center", "top center"],
   on = ["hover", "focus"],
-  label = "",
-  detail,
-  text,
-  attributes,
-  itemsCount,
-  tagTooltip = false,
-  disabled = false,
-  noArrow = false,
-  items,
   color = "black",
+  disabled = false,
   offsetX,
   offsetY,
+  noArrow = false,
+
+  tagGroup = false,
 }) => {
   return (
     <StyledPopup
@@ -62,44 +55,16 @@ export const Tooltip: React.FC<Tooltip> = ({
       offsetY={offsetY}
     >
       <div>
-        {attributes && <StyledContentWrap>{attributes}</StyledContentWrap>}
-        {(tagTooltip || text || detail || label) && (
+        {label && (
           <StyledContentWrap>
             <StyledRow>
-              {tagTooltip && (
-                <StyledIconWrap>
-                  <AiOutlineTag />
-                </StyledIconWrap>
-              )}
               <StyledLabel>{label}</StyledLabel>
             </StyledRow>
-            {text && (
-              <StyledRow>
-                <StyledIconWrap>{<BsCardText />}</StyledIconWrap>
-                <StyledDetail>{text}</StyledDetail>
-              </StyledRow>
-            )}
-            {(tagTooltip || detail) && (
-              <StyledRow>
-                {tagTooltip && (
-                  <StyledIconWrap>
-                    <BiCommentDetail />
-                  </StyledIconWrap>
-                )}
-                <StyledDetail>{detail}</StyledDetail>
-              </StyledRow>
-            )}
-            {itemsCount !== undefined && (
-              <StyledRow>
-                <StyledIconWrap>
-                  <ImListNumbered />
-                </StyledIconWrap>
-                <StyledDetail>{itemsCount}</StyledDetail>
-              </StyledRow>
-            )}
           </StyledContentWrap>
         )}
-        {items && <StyledItemsWrap>{items}</StyledItemsWrap>}
+        {content && (
+          <StyledContentWrap tagGroup={tagGroup}>{content}</StyledContentWrap>
+        )}
       </div>
     </StyledPopup>
   );

@@ -2,6 +2,7 @@ import { EntityEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
 import api from "api";
 import { Tag } from "components";
+import { EntityTooltip } from "components/advanced";
 import React, { ReactNode } from "react";
 import { useQuery } from "react-query";
 import { PopupPosition } from "reactjs-popup/dist/types";
@@ -16,7 +17,6 @@ interface EntityTag {
   showOnly?: "entity" | "label";
   fullWidth?: boolean;
   button?: ReactNode;
-  propId?: string;
   index?: number;
   moveFn?: (dragIndex: number, hoverIndex: number) => void;
   isSelected?: boolean;
@@ -72,35 +72,39 @@ export const EntityTag: React.FC<EntityTag> = ({
   }
 
   return (
-    <Tag
-      propId={entity.id}
+    <EntityTooltip
+      position={tooltipPosition}
       label={getEntityLabel(entity)}
-      labelItalic={entity.label === ""}
-      status={entity.status}
-      ltype={entity?.data?.logicalType ?? "1"}
-      tooltipDetail={entity.detail}
-      isTemplate={entity.isTemplate}
-      isDiscouraged={entity.status === EntityEnums.Status.Discouraged}
-      entity={entity}
-      tooltipText={tooltipText}
-      showOnly={showOnly}
-      button={button}
-      moveFn={moveFn}
-      entityClass={classId}
-      mode={mode}
-      borderStyle="solid"
-      invertedLabel={isSelected}
-      index={index}
-      disableTooltip={disableTooltip}
-      disableDoubleClick={disableDoubleClick}
-      disableDrag={disableDrag}
-      tooltipPosition={tooltipPosition}
-      updateOrderFn={updateOrderFn}
-      parentId={parentId}
-      lvl={lvl}
-      fullWidth={fullWidth}
-      isFavorited={isFavorited}
-      statementsCount={statementsCount}
-    />
+      detail={entity.detail}
+      text={tooltipText}
+      itemsCount={statementsCount}
+      disabled={disableTooltip}
+    >
+      <Tag
+        propId={entity.id}
+        label={getEntityLabel(entity)}
+        labelItalic={entity.label === ""}
+        status={entity.status}
+        ltype={entity?.data?.logicalType ?? "1"}
+        isTemplate={entity.isTemplate}
+        isDiscouraged={entity.status === EntityEnums.Status.Discouraged}
+        entity={entity}
+        showOnly={showOnly}
+        button={button}
+        moveFn={moveFn}
+        entityClass={classId}
+        mode={mode}
+        borderStyle="solid"
+        invertedLabel={isSelected}
+        index={index}
+        disableDoubleClick={disableDoubleClick}
+        disableDrag={disableDrag}
+        updateOrderFn={updateOrderFn}
+        parentId={parentId}
+        lvl={lvl}
+        fullWidth={fullWidth}
+        isFavorited={isFavorited}
+      />
+    </EntityTooltip>
   );
 };

@@ -16,6 +16,7 @@ import { EntitySuggestion } from "types";
 import { IEntity } from "@shared/types";
 import { ImInsertTemplate } from "react-icons/im";
 import { BiDuplicate } from "react-icons/bi";
+import { EntityTag } from "components/advanced";
 
 export const createItemData = memoize(
   (
@@ -120,16 +121,7 @@ const EntityRow: React.FC<EntityRow> = ({ data, index, style }) => {
       </StyledSuggestionLineActions>
       <StyledSuggestionLineTag isSelected={selected === index}>
         <StyledTagWrapper>
-          <Tag
-            fullWidth
-            propId={entity.id}
-            label={entity.label}
-            status={entity.status}
-            ltype={entity.data.logicalType}
-            tooltipDetail={entity.detail}
-            entityClass={entity.class}
-            isTemplate={entity.isTemplate}
-          />
+          <EntityTag fullWidth entity={entity} />
         </StyledTagWrapper>
       </StyledSuggestionLineTag>
       <StyledSuggestionLineIcons isSelected={selected === index}>

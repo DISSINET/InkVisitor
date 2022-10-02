@@ -4,6 +4,7 @@ import React, {
   ReactElement,
   useContext,
   useEffect,
+  useMemo,
   useState,
 } from "react";
 import { useQuery } from "react-query";
@@ -163,21 +164,27 @@ export const SearchParamsProvider = ({
     setTerritoryId("");
   };
 
+  const hasSearchParams = useMemo(
+    () => parsedParamsSearch?.hash?.length > 0,
+    [parsedParamsSearch]
+  );
+
   useEffect(() => {
     // Change from the inside of the app to this state
-    territoryId
-      ? params.set("territory", territoryId)
-      : params.delete("territory");
-    statementId
-      ? params.set("statement", statementId)
-      : params.delete("statement");
+    if (!hasSearchParams) {
+      territoryId
+        ? params.set("territory", territoryId)
+        : params.delete("territory");
+      statementId
+        ? params.set("statement", statementId)
+        : params.delete("statement");
 
-    selectedDetailId
-      ? params.set("selectedDetail", selectedDetailId)
-      : params.delete("selectedDetail");
-    detailId ? params.set("detail", detailId) : params.delete("detail");
-
-    handleHistoryPush();
+      selectedDetailId
+        ? params.set("selectedDetail", selectedDetailId)
+        : params.delete("selectedDetail");
+      detailId ? params.set("detail", detailId) : params.delete("detail");
+      handleHistoryPush();
+    }
   }, [territoryId, statementId, selectedDetailId, detailId]);
 
   const handleLocationChange = (location: any) => {
@@ -204,7 +211,7 @@ export const SearchParamsProvider = ({
   useEffect(() => {
     // Should be only change from the url => add state to switch of listener
     // this condition is for redirect - don't use our lifecycle when params are set by search query (?)
-    if (!parsedParamsSearch.hash) {
+    if (!hasSearchParams) {
       return history.listen((location: any) => {
         setDisablePush(true);
         handleLocationChange(location);

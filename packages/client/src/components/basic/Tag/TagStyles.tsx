@@ -87,10 +87,6 @@ export const ButtonWrapper = styled.div<ButtonWrapper>`
   }
 `;
 
-export const StyledTooltipSeparator = styled.div`
-  display: inline-flex;
-  overflow: hidden;
-`;
 export const StyledItalic = styled.i`
   font-size: ${({ theme }) => theme.fontSize["xxs"]};
 `;
