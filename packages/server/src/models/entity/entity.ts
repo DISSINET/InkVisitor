@@ -21,7 +21,7 @@ export default class Entity implements IEntity, IDbModel {
 
   id: string = "";
   class: EntityEnums.Class = "" as EntityEnums.Class;
-  status: EntityEnums.Status = "" as EntityEnums.Status;
+  status: EntityEnums.Status = EntityEnums.Status.Pending;
   data: any = {};
   label: string = "";
   detail: string = "";
