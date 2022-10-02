@@ -29,7 +29,7 @@ class ObjectEntity extends Entity implements IObject {
       return false;
     }
 
-    return this.data.isValid();
+    return super.isValid() && this.data.isValid();
   }
 }
 

@@ -16,7 +16,7 @@ class BeingData implements IBeingData, IModel {
 }
 
 class Being extends Entity implements IBeing {
-  class: EntityEnums.Class.Being = EntityEnums.Class.Being; // just default
+  class: EntityEnums.Class.Being = EntityEnums.Class.Being;
   data: BeingData;
 
   constructor(data: Partial<IBeing>) {
@@ -29,7 +29,7 @@ class Being extends Entity implements IBeing {
       return false;
     }
 
-    return this.data.isValid();
+    return super.isValid() && this.data.isValid();
   }
 }
 

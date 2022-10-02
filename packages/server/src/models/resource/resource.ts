@@ -31,7 +31,7 @@ class Resource extends Entity implements IResource {
       return false;
     }
 
-    return this.data.isValid();
+    return super.isValid() && this.data.isValid();
   }
 }
 

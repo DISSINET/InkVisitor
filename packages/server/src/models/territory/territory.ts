@@ -61,7 +61,7 @@ class Territory extends Entity implements ITerritory {
       return false;
     }
 
-    return this.data.isValid();
+    return super.isValid() && this.data.isValid();
   }
 
   setSiblings(childsMap: Record<number, ITerritory>) {
