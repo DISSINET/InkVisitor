@@ -4,14 +4,13 @@ import { AiOutlineTag } from "react-icons/ai";
 import { BiCommentDetail } from "react-icons/bi";
 import { BsCardText } from "react-icons/bs";
 import { ImListNumbered } from "react-icons/im";
-import { PopupPosition, EventType } from "reactjs-popup/dist/types";
+import { EventType, PopupPosition } from "reactjs-popup/dist/types";
 import { Colors } from "types";
 import {
-  StyledContentWrap,
-  StyledRow,
+  StyledDetail,
   StyledIconWrap,
   StyledLabel,
-  StyledDetail,
+  StyledRow,
   StyledTooltipSeparator,
 } from "./EntityTooltipStyles";
 
@@ -19,6 +18,7 @@ interface EntityTooltip {
   // trigger
   children: ReactElement;
   // entity
+  entityId: string;
   label?: string;
   detail?: string;
   text?: string;
@@ -31,11 +31,14 @@ interface EntityTooltip {
   disabled?: boolean;
   offsetX?: number;
   offsetY?: number;
+  onOpen?: () => void;
+  onClose?: () => void;
 }
 export const EntityTooltip: React.FC<EntityTooltip> = ({
   // trigger
   children,
   // entity
+  entityId,
   label,
   detail,
   text,
@@ -48,6 +51,8 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
   disabled,
   offsetX,
   offsetY,
+  onOpen,
+  onClose,
 }) => {
   const renderContent = () => (
     <>
@@ -97,6 +102,8 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
       disabled={disabled}
       offsetX={offsetX}
       offsetY={offsetY}
+      onOpen={onOpen}
+      onClose={onClose}
     >
       <StyledTooltipSeparator>{children}</StyledTooltipSeparator>
     </Tooltip>

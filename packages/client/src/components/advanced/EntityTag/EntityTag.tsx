@@ -3,7 +3,7 @@ import { IEntity } from "@shared/types";
 import api from "api";
 import { Tag } from "components";
 import { EntityTooltip } from "components/advanced";
-import React, { ReactNode } from "react";
+import React, { ReactNode, useState } from "react";
 import { useQuery } from "react-query";
 import { PopupPosition } from "reactjs-popup/dist/types";
 import { DragItem } from "types";
@@ -51,6 +51,7 @@ export const EntityTag: React.FC<EntityTag> = ({
   isFavorited,
 }) => {
   const classId = entity.class;
+  const [tooltipOpened, setTooltipOpened] = useState(false);
 
   return (
     <EntityTooltip
@@ -59,7 +60,10 @@ export const EntityTag: React.FC<EntityTag> = ({
       detail={entity.detail}
       text={tooltipText}
       itemsCount={statementsCount}
+      entityId={entity.id}
       disabled={disableTooltip}
+      onOpen={() => setTooltipOpened(true)}
+      onClose={() => setTooltipOpened(false)}
     >
       <Tag
         propId={entity.id}

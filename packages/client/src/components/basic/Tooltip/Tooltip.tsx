@@ -24,6 +24,8 @@ interface Tooltip {
   disabled?: boolean;
   offsetX?: number;
   offsetY?: number;
+  onOpen?: () => void;
+  onClose?: () => void;
   //
   tagGroup?: boolean;
 }
@@ -39,6 +41,8 @@ export const Tooltip: React.FC<Tooltip> = ({
   offsetX,
   offsetY,
   noArrow = false,
+  onOpen,
+  onClose,
 
   tagGroup = false,
 }) => {
@@ -53,6 +57,8 @@ export const Tooltip: React.FC<Tooltip> = ({
       arrow={!noArrow}
       offsetX={offsetX}
       offsetY={offsetY}
+      onOpen={onOpen}
+      onClose={onClose}
     >
       <div>
         {label && (
