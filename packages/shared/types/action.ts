@@ -8,17 +8,17 @@ export interface IAction extends IEntity {
 }
 
 export interface IActionData {
-  valencies: ActionValency;
-  entities: ActionEntity;
+  valencies: IActionValency;
+  entities: IActionEntity;
 }
 
-export interface ActionValency {
+export interface IActionValency {
   s: string;
   a1: string;
   a2: string;
 }
 
-export interface ActionEntity {
+export interface IActionEntity {
   s: string[];
   a1: string[];
   a2: string[];

@@ -70,4 +70,20 @@ export namespace EnumValidators {
       ].indexOf(input) !== -1
     );
   }
+
+  /**
+ * Validates EntityEnums.Status value
+ * @param input
+ * @returns
+ */
+  export function IsValidEntityStatus(input: EntityEnums.Status): boolean {
+    return (
+      [
+        EntityEnums.Status.Approved,
+        EntityEnums.Status.Discouraged,
+        EntityEnums.Status.Pending,
+        EntityEnums.Status.Warning,
+      ].indexOf(input) !== -1
+    );
+  }
 }

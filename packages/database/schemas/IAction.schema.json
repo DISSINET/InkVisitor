@@ -4,7 +4,7 @@
     "additionalProperties": false,
     "defaultProperties": [],
     "definitions": {
-        "ActionEntity": {
+        "IActionEntity": {
             "additionalProperties": false,
             "defaultProperties": [],
             "properties": {
@@ -34,7 +34,7 @@
             ],
             "type": "object"
         },
-        "ActionValency": {
+        "IActionValency": {
             "additionalProperties": false,
             "defaultProperties": [],
             "properties": {
@@ -288,10 +288,10 @@
             "defaultProperties": [],
             "properties": {
                 "entities": {
-                    "$ref": "IAction#/definitions/ActionEntity"
+                    "$ref": "IAction#/definitions/IActionEntity"
                 },
                 "valencies": {
-                    "$ref": "IAction#/definitions/ActionValency"
+                    "$ref": "IAction#/definitions/IActionValency"
                 }
             },
             "required": [
@@ -362,4 +362,3 @@
     ],
     "type": "object"
 }
-

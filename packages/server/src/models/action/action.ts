@@ -1,30 +1,32 @@
-import { fillFlatObject, UnknownObject, IModel } from "@models/common";
-import { EntityEnums } from "@shared/enums";
+import { IModel } from "@models/common";
+import { EntityEnums, EnumValidators } from "@shared/enums";
 import Entity from "@models/entity/entity";
 import { IAction } from "@shared/types";
-import { ActionEntity, ActionValency, IActionData } from "@shared/types/action";
+import { IActionEntity, IActionValency, IActionData } from "@shared/types/action";
 
 class ActionData implements IActionData, IModel {
-  valencies: ActionValency = {
-    a1: "",
-    a2: "",
-    s: "",
-  };
-  entities: ActionEntity = {
-    a1: [],
-    a2: [],
-    s: [],
-  };
+  valencies: IActionValency;
+  entities: IActionEntity
   status: EntityEnums.Status = EntityEnums.Status.Pending;
 
   constructor(data: Partial<IActionData>) {
-    fillFlatObject(this.valencies, data.valencies as any);
-    if (data.entities) {
-      this.entities = data.entities as any;
-    }
+    this.valencies = data.valencies as IActionValency;
+    this.entities = data.entities as IActionEntity;
   }
 
   isValid(): boolean {
+    if (!this.valencies || !this.valencies.a1 || !this.valencies.a2 || !this.valencies.s) {
+      return false
+    }
+
+    if (!this.entities || !this.entities.a1 || !this.entities.a2 || !this.entities.s) {
+      return false;
+    }
+
+    if (!EnumValidators.IsValidEntityStatus(this.status)) {
+      return false;
+    }
+
     return true;
   }
 }
