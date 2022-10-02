@@ -29,7 +29,7 @@ class Group extends Entity implements IGroup {
       return false;
     }
 
-    return this.data.isValid();
+    return super.isValid() && this.data.isValid();
   }
 }
 

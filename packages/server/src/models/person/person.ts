@@ -29,7 +29,7 @@ class Person extends Entity implements IPerson {
       return false;
     }
 
-    return this.data.isValid();
+    return super.isValid() && this.data.isValid();
   }
 }
 
