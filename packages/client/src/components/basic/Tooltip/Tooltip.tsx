@@ -10,7 +10,13 @@ import {
 } from "./TooltipStyles";
 
 interface Tooltip {
+  // trigger
   children: ReactElement;
+  // simple tooltip
+  label?: string;
+  // tooltips with custom content
+  content?: ReactElement[] | ReactElement;
+  // settings
   position?: PopupPosition | PopupPosition[];
   on?: EventType | EventType[];
   noArrow?: boolean;
@@ -18,17 +24,8 @@ interface Tooltip {
   disabled?: boolean;
   offsetX?: number;
   offsetY?: number;
-  // simple tooltip
-  label?: string;
-  content?: ReactElement[] | ReactElement;
 
-  // entityTooltip
-  tagTooltip?: boolean;
-  detail?: string;
-  text?: string;
-  itemsCount?: number;
-
-  // custom tooltip
+  // TODO: remove - old tooltip
   attributes?: ReactElement;
   items?: ReactElement[] | ReactElement;
   //
@@ -48,12 +45,6 @@ export const Tooltip: React.FC<Tooltip> = ({
   attributes,
   items,
   noArrow = false,
-  // entityTooltip
-  detail,
-  text,
-  itemsCount,
-  // TODO: remove
-  tagTooltip = false,
 }) => {
   return (
     <StyledPopup
@@ -77,43 +68,7 @@ export const Tooltip: React.FC<Tooltip> = ({
         )}
         {content && <>{content}</>}
 
-        {/* {(tagTooltip || text || detail || label) && (
-          <StyledContentWrap>
-            <StyledRow>
-              {tagTooltip && (
-                <StyledIconWrap>
-                  <AiOutlineTag />
-                </StyledIconWrap>
-              )}
-              <StyledLabel>{label}</StyledLabel>
-            </StyledRow>
-            {text && (
-              <StyledRow>
-                <StyledIconWrap>{<BsCardText />}</StyledIconWrap>
-                <StyledDetail>{text}</StyledDetail>
-              </StyledRow>
-            )}
-            {(tagTooltip || detail) && (
-              <StyledRow>
-                {tagTooltip && (
-                  <StyledIconWrap>
-                    <BiCommentDetail />
-                  </StyledIconWrap>
-                )}
-                <StyledDetail>{detail}</StyledDetail>
-              </StyledRow>
-            )}
-            {itemsCount !== undefined && (
-              <StyledRow>
-                <StyledIconWrap>
-                  <ImListNumbered />
-                </StyledIconWrap>
-                <StyledDetail>{itemsCount}</StyledDetail>
-              </StyledRow>
-            )}
-          </StyledContentWrap>
-        )} */}
-
+        {/* TODO: remove */}
         {attributes && <StyledContentWrap>{attributes}</StyledContentWrap>}
         {items && <StyledItemsWrap>{items}</StyledItemsWrap>}
       </div>

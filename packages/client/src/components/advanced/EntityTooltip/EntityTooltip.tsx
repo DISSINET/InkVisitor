@@ -18,12 +18,12 @@ import {
 interface EntityTooltip {
   // trigger
   children: ReactElement;
-  // entity attributes
+  // entity
   label?: string;
   detail?: string;
   text?: string;
   itemsCount?: number;
-  // tooltip settings
+  // settings
   position?: PopupPosition | PopupPosition[];
   on?: EventType | EventType[];
   noArrow?: boolean;
@@ -33,11 +33,21 @@ interface EntityTooltip {
   offsetY?: number;
 }
 export const EntityTooltip: React.FC<EntityTooltip> = ({
+  // trigger
+  children,
+  // entity
   label,
   detail,
   text,
   itemsCount,
-  children,
+  // settings
+  position,
+  on,
+  noArrow,
+  color,
+  disabled,
+  offsetX,
+  offsetY,
 }) => {
   const renderContent = () => (
     <>
@@ -78,10 +88,17 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
   );
 
   return (
-    <Tooltip content={renderContent()}>
-      {/* <StyledTooltipSeparator> */}
-      {children}
-      {/* </StyledTooltipSeparator> */}
+    <Tooltip
+      content={renderContent()}
+      position={position}
+      on={on}
+      noArrow={noArrow}
+      color={color}
+      disabled={disabled}
+      offsetX={offsetX}
+      offsetY={offsetY}
+    >
+      <StyledTooltipSeparator>{children}</StyledTooltipSeparator>
     </Tooltip>
   );
 };

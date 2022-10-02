@@ -8,7 +8,6 @@ import { useQuery } from "react-query";
 import { PopupPosition } from "reactjs-popup/dist/types";
 import { DragItem } from "types";
 import { getEntityLabel } from "utils";
-import { StyledTooltipSeparator } from "../EntityTooltip/EntityTooltipStyles";
 
 interface EntityTag {
   entity: IEntity;
@@ -81,33 +80,31 @@ export const EntityTag: React.FC<EntityTag> = ({
       itemsCount={statementsCount}
       disabled={disableTooltip}
     >
-      <StyledTooltipSeparator>
-        <Tag
-          propId={entity.id}
-          label={getEntityLabel(entity)}
-          labelItalic={entity.label === ""}
-          status={entity.status}
-          ltype={entity?.data?.logicalType ?? "1"}
-          isTemplate={entity.isTemplate}
-          isDiscouraged={entity.status === EntityEnums.Status.Discouraged}
-          entity={entity}
-          showOnly={showOnly}
-          button={button}
-          moveFn={moveFn}
-          entityClass={classId}
-          mode={mode}
-          borderStyle="solid"
-          invertedLabel={isSelected}
-          index={index}
-          disableDoubleClick={disableDoubleClick}
-          disableDrag={disableDrag}
-          updateOrderFn={updateOrderFn}
-          parentId={parentId}
-          lvl={lvl}
-          fullWidth={fullWidth}
-          isFavorited={isFavorited}
-        />
-      </StyledTooltipSeparator>
+      <Tag
+        propId={entity.id}
+        label={getEntityLabel(entity)}
+        labelItalic={entity.label === ""}
+        status={entity.status}
+        ltype={entity?.data?.logicalType ?? "1"}
+        isTemplate={entity.isTemplate}
+        isDiscouraged={entity.status === EntityEnums.Status.Discouraged}
+        entity={entity}
+        showOnly={showOnly}
+        button={button}
+        moveFn={moveFn}
+        entityClass={classId}
+        mode={mode}
+        borderStyle="solid"
+        invertedLabel={isSelected}
+        index={index}
+        disableDoubleClick={disableDoubleClick}
+        disableDrag={disableDrag}
+        updateOrderFn={updateOrderFn}
+        parentId={parentId}
+        lvl={lvl}
+        fullWidth={fullWidth}
+        isFavorited={isFavorited}
+      />
     </EntityTooltip>
   );
 };
