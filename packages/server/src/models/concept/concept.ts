@@ -13,7 +13,7 @@ class ConceptData implements IModel {
 }
 
 class Concept extends Entity implements IConcept {
-  class: EntityEnums.Class.Concept = EntityEnums.Class.Concept; // just default
+  class: EntityEnums.Class.Concept = EntityEnums.Class.Concept;
   data: ConceptData;
 
   constructor(data: Partial<IConcept>) {

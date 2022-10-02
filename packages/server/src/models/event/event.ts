@@ -16,7 +16,7 @@ class EventData implements IEventData, IModel {
 }
 
 class Event extends Entity implements IEvent {
-  class: EntityEnums.Class.Event = EntityEnums.Class.Event; // just default
+  class: EntityEnums.Class.Event = EntityEnums.Class.Event;
   data: EventData;
 
   constructor(data: Partial<IEvent>) {

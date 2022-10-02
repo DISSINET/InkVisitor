@@ -34,7 +34,7 @@ class ActionData implements IActionData, IModel {
 }
 
 class Action extends Entity implements IAction {
-  class: EntityEnums.Class.Action = EntityEnums.Class.Action; // just default
+  class: EntityEnums.Class.Action = EntityEnums.Class.Action;
   data: ActionData;
 
   constructor(data: Partial<IAction>) {

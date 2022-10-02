@@ -16,7 +16,7 @@ class PersonData implements IPersonData, IModel {
 }
 
 class Person extends Entity implements IPerson {
-  class: EntityEnums.Class.Person = EntityEnums.Class.Person; // just default
+  class: EntityEnums.Class.Person = EntityEnums.Class.Person;
   data: PersonData;
 
   constructor(data: Partial<IPerson>) {

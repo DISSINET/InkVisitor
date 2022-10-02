@@ -16,7 +16,7 @@ class LocationData implements ILocationData, IModel {
 }
 
 class Location extends Entity implements ILocation {
-  class: EntityEnums.Class.Location = EntityEnums.Class.Location; // just default
+  class: EntityEnums.Class.Location = EntityEnums.Class.Location;
   data: LocationData;
 
   constructor(data: Partial<ILocation>) {

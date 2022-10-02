@@ -16,7 +16,7 @@ class ValueData implements IValueData, IModel {
 }
 
 class Value extends Entity implements IValue {
-  class: EntityEnums.Class.Value = EntityEnums.Class.Value; // just default
+  class: EntityEnums.Class.Value = EntityEnums.Class.Value;
   data: ValueData;
 
   constructor(data: Partial<IValue>) {

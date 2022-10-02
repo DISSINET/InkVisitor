@@ -16,7 +16,7 @@ class GroupData implements IGroupData, IModel {
 }
 
 class Group extends Entity implements IGroup {
-  class: EntityEnums.Class.Group = EntityEnums.Class.Group; // just default
+  class: EntityEnums.Class.Group = EntityEnums.Class.Group;
   data: GroupData;
 
   constructor(data: Partial<IGroup>) {

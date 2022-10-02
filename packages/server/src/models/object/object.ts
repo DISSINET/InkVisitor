@@ -16,7 +16,7 @@ class ObjectData implements IObjectData, IModel {
 }
 
 class ObjectEntity extends Entity implements IObject {
-  class: EntityEnums.Class.Object = EntityEnums.Class.Object; // just default
+  class: EntityEnums.Class.Object = EntityEnums.Class.Object;
   data: ObjectData;
 
   constructor(data: Partial<IObject>) {
