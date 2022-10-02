@@ -35,7 +35,7 @@ export function fillFlatObject<T>(
     const wantedType = typeof target[key];
     const gotType = typeof source[key];
 
-    if ((wantedType === "object" || wantedType !== gotType) && wantedType !== "undefined") {
+    if (wantedType === "object" || (wantedType !== gotType && wantedType !== "undefined")) {
       // only flat object's props && types must match
       continue;
     }
