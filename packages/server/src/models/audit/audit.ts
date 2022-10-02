@@ -1,4 +1,4 @@
-import { IDbModel, UnknownObject, fillFlatObject } from "@models/common";
+import { IDbModel, fillFlatObject } from "@models/common";
 import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
 import { IAudit } from "@shared/types";
 import { InternalServerError } from "@shared/types/errors";
@@ -11,13 +11,9 @@ export default class Audit implements IAudit, IDbModel {
   entityId: string = "";
   user: string = "";
   date: Date = new Date();
-  changes: object = {};
+  changes: object;
 
-  constructor(data: UnknownObject) {
-    if (!data) {
-      return;
-    }
-
+  constructor(data: Partial<Audit>) {
     fillFlatObject(this, { ...data });
     this.changes = data.changes as object;
   }

@@ -18,10 +18,6 @@ class ActionData implements IActionData, IModel {
   status: EntityEnums.Status = EntityEnums.Status.Pending;
 
   constructor(data: Partial<IActionData>) {
-    if (!data) {
-      return;
-    }
-
     fillFlatObject(this.valencies, data.valencies as any);
     if (data.entities) {
       this.entities = data.entities as any;

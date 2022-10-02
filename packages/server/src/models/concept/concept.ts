@@ -4,7 +4,7 @@ import Entity from "@models/entity/entity";
 import { IConcept } from "@shared/types";
 
 class ConceptData implements IModel {
-  constructor(data: UnknownObject) {
+  constructor(data: Partial<ConceptData>) {
   }
 
   isValid(): boolean {
@@ -18,7 +18,7 @@ class Concept extends Entity implements IConcept {
 
   constructor(data: Partial<IConcept>) {
     super(data);
-    this.data = new ConceptData(data.data);
+    this.data = new ConceptData(data.data || {});
   }
 
   isValid(): boolean {
