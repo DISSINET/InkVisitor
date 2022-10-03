@@ -19,7 +19,7 @@ export default class AclPermission implements IDbModel, IResponsePermission {
     this.route = data.route;
     this.method = data.method;
     this.roles = data.roles;
-    this.public = false;
+    this.public = !!data.public;
   }
 
   async save(dbInstance: Connection | undefined): Promise<WriteResult> {
