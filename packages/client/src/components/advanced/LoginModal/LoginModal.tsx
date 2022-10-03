@@ -1,6 +1,7 @@
 import api from "api";
 import { Button, Input, Modal } from "components";
 import React, { useState } from "react";
+import { Redirect } from "react-router";
 import { toast } from "react-toastify";
 import { setUsername } from "redux/features/usernameSlice";
 import { useAppDispatch } from "redux/hooks";
@@ -17,6 +18,7 @@ export const LoginModal: React.FC = () => {
   const dispatch = useAppDispatch();
   const [usernameLocal, setUsernameLocal] = useState("");
   const [password, setPassword] = useState("");
+  const [redirectToMain, setRedirectToMain] = useState(false);
 
   const handleLogIn = async () => {
     if (usernameLocal.length === 0) {
@@ -29,13 +31,14 @@ export const LoginModal: React.FC = () => {
     }
     const res = await api.signIn(usernameLocal, password);
     if (res.token) {
-      dispatch(setUsername(usernameLocal));
+      await dispatch(setUsername(usernameLocal));
+      setRedirectToMain(true);
     } else {
       toast.error("Wrong attempt!");
     }
   };
 
-  return (
+  return redirectToMain ? <Redirect to="/" /> : (
     <Modal showModal disableBgClick width="thin" onEnterPress={handleLogIn}>
       <StyledContentWrap>
         <StyledHeading>{"Log In"}</StyledHeading>
