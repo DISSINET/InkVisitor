@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { Helmet } from "react-helmet";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { ReactQueryDevtools } from "react-query/devtools";
-import { BrowserRouter, Route, Switch } from "react-router-dom";
+import { BrowserRouter, Redirect, Route, Switch } from "react-router-dom";
 import { useAppDispatch } from "redux/hooks";
 import { ThemeProvider } from "styled-components";
 
@@ -11,6 +11,7 @@ import { SearchParamsProvider } from "hooks/useParamsContext";
 import { useWindowSize } from "hooks/useWindowSize";
 import ActivatePage from "pages/Activate";
 import PasswordResetPage from "pages/PasswordReset";
+import LoginPage from "pages/Login";
 import UsersPage from "pages/Users";
 
 import { Page } from "components/advanced";
@@ -62,10 +63,32 @@ const clockPerformance = (
   });
 };
 
+export const PublicPath = (props: any) => {
+  const Component = props.children;
+
+  return !api.isLoggedIn() ? <Route
+    path={props.path}
+    render={props.render}
+    exact={props.exact}
+  >
+    <Component props />
+  </Route> : <Redirect to="/" />;
+}
+
+export const ProtectedPath = (props: any) => {
+  const Component = props.children;
+
+  return api.isLoggedIn() ? <Route
+    path={props.path}
+    render={props.render}
+    exact={props.exact}
+  >
+    <Component props />
+  </Route> : <Redirect to="/login" />;
+}
+
 export const App: React.FC = () => {
   const dispatch = useAppDispatch();
-
-  const isLoggedIn = api.isLoggedIn();
 
   const [debouncedWidth, debouncedHeight] = useDebounce(useWindowSize(), 50);
 
@@ -102,14 +125,14 @@ export const App: React.FC = () => {
         Math.floor(onePercent * percentPanelWidths[0] * 10) / 10;
       const secondPanel = Math.floor(
         (onePercent * (separatorPercentPosition - percentPanelWidths[0]) * 10) /
-          10
+        10
       );
       const thirdPanel = Math.floor(
         layoutWidth -
-          (onePercent *
-            (separatorPercentPosition + percentPanelWidths[3]) *
-            10) /
-            10
+        (onePercent *
+          (separatorPercentPosition + percentPanelWidths[3]) *
+          10) /
+        10
       );
       const fourthPanel =
         Math.floor(onePercent * percentPanelWidths[3] * 10) / 10;
@@ -135,30 +158,30 @@ export const App: React.FC = () => {
               <SearchParamsProvider>
                 <Page>
                   <Switch>
-                    <Route
+                    <PublicPath
+                      path="/login"
+                      children={LoginPage}
+                    />
+                    <PublicPath
+                      path="/activate"
+                      children={ActivatePage}
+                    />
+                    <PublicPath
+                      path="/password_reset"
+                      children={PasswordResetPage}
+                    />
+                    <ProtectedPath
                       path="/"
                       exact
-                      render={(props) => <MainPage {...props} />}
+                      children={MainPage}
                     />
-                    {isLoggedIn && (
-                      <Route
-                        path="/acl"
-                        render={(props) => <AclPage {...props} />}
-                      />
-                    )}
-                    {isLoggedIn && (
-                      <Route
-                        path="/users"
-                        render={(props) => <UsersPage {...props} />}
-                      />
-                    )}
-                    <Route
-                      path="/activate"
-                      render={(props) => <ActivatePage {...props} />}
+                    <ProtectedPath
+                      path="/acl"
+                      children={AclPage}
                     />
-                    <Route
-                      path="/password_reset"
-                      render={(props) => <PasswordResetPage {...props} />}
+                    <ProtectedPath
+                      path="/users"
+                      children={UsersPage}
                     />
                     <Route path="*" component={NotFoundPage} />
                   </Switch>
