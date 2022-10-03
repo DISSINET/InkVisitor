@@ -124,7 +124,6 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
       troponymCloud,
       entities,
     } = tooltipData;
-    console.log(tooltipData.entities);
 
     return (
       <StyledRelations>
@@ -155,9 +154,13 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
               {identifications.map((identification, key) => {
                 const entity = entities[identification.entityId];
                 // TODO: show class in text
-                return `${identification.entityId} ([EClass] ${
-                  certaintyDict[identification.certainty].label
-                })${key !== identifications.length - 1 ? ", " : ""}`;
+                return (
+                  <React.Fragment key={key}>
+                    {`${entity.label} (${entity.class} ${
+                      certaintyDict[identification.certainty].label
+                    })${key !== identifications.length - 1 ? ", " : ""}`}
+                  </React.Fragment>
+                );
               })}
             </StyledRelationTypeBlock>
           </>
@@ -175,7 +178,7 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
               <div style={{ display: "flex", flexDirection: "column" }}>
                 {superclassTrees.map((superclass, key) => {
                   const entity = entities[superclass.entityId];
-                  return <div>{/* level 1 one instance */}</div>;
+                  return <div key={key}>{/* level 1 one instance */}</div>;
                 })}
               </div>
             </StyledRelationTypeBlock>
@@ -206,7 +209,9 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
                 const entity = entities[synonym];
                 return (
                   <React.Fragment key={key}>
-                    {`${synonym}${key !== synonymCloud.length - 1 ? ", " : ""}`}
+                    {`${entity.label}${
+                      key !== synonymCloud.length - 1 ? ", " : ""
+                    }`}
                   </React.Fragment>
                 );
               })}
