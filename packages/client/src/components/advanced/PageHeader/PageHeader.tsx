@@ -15,15 +15,15 @@ import { heightHeader } from "Theme/constants";
 import LogoInkvisitor from "assets/logos/inkvisitor-full.svg";
 import { toast } from "react-toastify";
 import { useHistory, useLocation } from "react-router";
+import { UserEnums } from "@shared/enums";
 
-export const LeftHeader = React.memo(({}) => {
+export const LeftHeader = React.memo(({ }) => {
   const env = (process.env.ROOT_URL || "").replace(/apps\/inkvisitor[-]?/, "");
   const versionText = `v. ${packageJson.version} 
-  ${
-    ["production", ""].indexOf(env) === -1
+  ${["production", ""].indexOf(env) === -1
       ? `| ${env} | built: ${process.env.BUILD_TIMESTAMP}`
       : ""
-  }`;
+    }`;
 
   return (
     <StyledHeader>
@@ -109,7 +109,7 @@ export const RightHeader: React.FC<RightHeaderProps> = React.memo(
         )}
         <ButtonGroup>
           {pages
-            .filter((p) => !p.admin || userRole === "admin")
+            .filter((p) => !p.admin || userRole === UserEnums.Role.Admin)
             .filter((p) => location.pathname !== p.href)
             .map((p, key) => (
               <Button
