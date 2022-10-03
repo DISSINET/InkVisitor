@@ -1,6 +1,6 @@
 import api from "api";
 import { LetterIcon, Loader, Tooltip } from "components";
-import React, { ReactElement, useState } from "react";
+import React, { ReactElement, useEffect, useState } from "react";
 import { AiOutlineTag } from "react-icons/ai";
 import { BiCommentDetail } from "react-icons/bi";
 import { BsCardText } from "react-icons/bs";
@@ -122,7 +122,9 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
       superordinateLocationTrees,
       synonymCloud,
       troponymCloud,
+      entities,
     } = tooltipData;
+    console.log(tooltipData.entities);
 
     return (
       <StyledRelations>
@@ -151,6 +153,7 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
             </StyledLetterIconWrap>
             <StyledRelationTypeBlock>
               {identifications.map((identification, key) => {
+                const entity = entities[identification.entityId];
                 // TODO: show class in text
                 return `${identification.entityId} ([EClass] ${
                   certaintyDict[identification.certainty].label
@@ -169,7 +172,12 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
               />
             </StyledLetterIconWrap>
             <StyledRelationTypeBlock>
-              {"superclassTrees"}
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                {superclassTrees.map((superclass, key) => {
+                  const entity = entities[superclass.entityId];
+                  return <div>{/* level 1 one instance */}</div>;
+                })}
+              </div>
             </StyledRelationTypeBlock>
           </>
         )}
@@ -195,9 +203,12 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
             </StyledLetterIconWrap>
             <StyledRelationTypeBlock>
               {synonymCloud.map((synonym, key) => {
-                return `${synonym}${
-                  key !== synonymCloud.length - 1 ? ", " : ""
-                }`;
+                const entity = entities[synonym];
+                return (
+                  <React.Fragment key={key}>
+                    {`${synonym}${key !== synonymCloud.length - 1 ? ", " : ""}`}
+                  </React.Fragment>
+                );
               })}
             </StyledRelationTypeBlock>
           </>
