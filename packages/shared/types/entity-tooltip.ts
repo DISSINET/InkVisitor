@@ -9,7 +9,6 @@ export namespace EntityTooltip {
     superclassTrees: ISuperclassTree[];
     // C
     synonymCloud?: ISynonymCloud;
-    troponymCloud?: ITroponymCloud;
     superordinateLocationTrees: ISuperordinateLocationTree[];
     identifications: IIdentifications;
     actionEventEquivalent: ActionEventNode;
@@ -44,10 +43,6 @@ export namespace EntityTooltip {
   // this is much simpler - its only about IRelationSynonym relation "clouds" where entityId is within `entityIds`
   // e.g., for A:breakfasting - [A:eating, A:swallowing, A:consume, A:having dinner], [A:morning activity, A:waking up]
   export type ISynonymCloud = string[];
-
-  // only for A
-  // I am not very much familiar what is this but this should work the same as ISynonymCloud
-  export type ITroponymCloud = string[];
 
   // for all entity classes
   // this is basicaly a list of all Identification relations found for this entity,

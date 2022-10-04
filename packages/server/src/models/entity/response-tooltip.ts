@@ -14,7 +14,6 @@ export class ResponseTooltip
 
   superclassTrees: EntityTooltip.ISuperclassTree[] = [];
   synonymCloud?: EntityTooltip.ISynonymCloud;
-  troponymCloud?: EntityTooltip.ITroponymCloud;
   superordinateLocationTrees: EntityTooltip.ISuperordinateLocationTree[] = [];
   identifications: EntityTooltip.IIdentifications = [];
   actionEventEquivalent: EntityTooltip.ActionEventNode = [];
@@ -41,7 +40,6 @@ export class ResponseTooltip
     this.superclassTrees = rootSuperclass.subtrees;
 
     this.synonymCloud = await this.getSynonymCloud(request.db.connection);
-    this.troponymCloud = await this.getTroponymCloud(request.db.connection);
 
     const superordinateTree = await this.getSuperordinateLocationTree(
       request.db.connection,
@@ -75,34 +73,6 @@ export class ResponseTooltip
       );
 
       out = synonyms.reduce(
-        (acc, cur) => acc.concat(cur.entityIds),
-        [] as string[]
-      );
-
-      this.addLinkedEntities(out);
-    }
-
-    return out;
-  }
-
-  /**
-   * returns troponym cloud in the form of list containing grouped entity ids
-   * @param conn
-   * @returns
-   */
-  async getTroponymCloud(
-    conn: Connection
-  ): Promise<EntityTooltip.ISynonymCloud | undefined> {
-    let out: EntityTooltip.ISynonymCloud | undefined;
-
-    if (this.class === EntityEnums.Class.Action) {
-      const troponyms = await Relation.getForEntity<RelationTypes.ITroponym>(
-        conn,
-        this.id,
-        RelationEnums.Type.Troponym
-      );
-
-      out = troponyms.reduce(
         (acc, cur) => acc.concat(cur.entityIds),
         [] as string[]
       );
