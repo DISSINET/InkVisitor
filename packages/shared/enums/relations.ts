@@ -11,7 +11,7 @@ export namespace RelationEnums {
     Related = "REL",
     Classification = "CLA",
     Identification = "IDE",
-    Holonymy = "HOL",
+    Holonym = "HOL",
     Implication = "IMP",
     SubjectSemantics = "SUS",
     Actant1Semantics = "A1S",
