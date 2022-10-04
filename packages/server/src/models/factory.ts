@@ -74,7 +74,7 @@ export function getRelationClass(data: UnknownObject): Relation {
     case RelationEnums.Type.ActionEventEquivalent:
     case RelationEnums.Type.Antonym:
     case RelationEnums.Type.Classification:
-    case RelationEnums.Type.Holonymy:
+    case RelationEnums.Type.Holonym:
     case RelationEnums.Type.Implication:
     case RelationEnums.Type.PropertyReciprocal:
     case RelationEnums.Type.Related:

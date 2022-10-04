@@ -49,12 +49,12 @@ export namespace Relation {
     entityIds: [string, string];
   }
 
-  export interface IHolonymy extends IRelation {
-    type: RelationEnums.Type.Holonymy;
+  export interface IHolonym extends IRelation {
+    type: RelationEnums.Type.Holonym;
     entityIds: [string, string];
   }
   export interface IImplication extends IRelation {
-    type: RelationEnums.Type.Holonymy;
+    type: RelationEnums.Type.Holonym;
     entityIds: [string, string];
   }
   export interface ISubjectSemantics extends IRelation {
@@ -216,8 +216,8 @@ export namespace Relation {
     attributes: [EntityEnums.Certainty],
   };
 
-  RelationRules[RelationEnums.Type.Holonymy] = {
-    label: "Holonymy",
+  RelationRules[RelationEnums.Type.Holonym] = {
+    label: "Holonym",
     allowedEntitiesPattern: [
       [EntityEnums.Class.Concept, EntityEnums.Class.Concept],
     ],
