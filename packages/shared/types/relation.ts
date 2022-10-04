@@ -57,6 +57,18 @@ export namespace Relation {
     type: RelationEnums.Type.Holonymy;
     entityIds: [string, string];
   }
+  export interface ISubjectSemantics extends IRelation {
+    type: RelationEnums.Type.SubjectSemantics;
+    entityIds: [string, string];
+  }
+  export interface IActant1Semantics extends IRelation {
+    type: RelationEnums.Type.Actant1Semantics;
+    entityIds: [string, string];
+  }
+  export interface IActant2Semantics extends IRelation {
+    type: RelationEnums.Type.Actant2Semantics;
+    entityIds: [string, string];
+  }
 
   /**
    * Relation Rules
@@ -227,6 +239,42 @@ export namespace Relation {
     multiple: true,
     cloudType: false,
     treeType: true,
+    attributes: [],
+  };
+  RelationRules[RelationEnums.Type.SubjectSemantics] = {
+    label: "Subject Semantics",
+    allowedEntitiesPattern: [
+      [EntityEnums.Class.Action, EntityEnums.Class.Concept],
+    ],
+    allowedSameEntityClassesOnly: false,
+    asymmetrical: true,
+    multiple: true,
+    cloudType: false,
+    treeType: false,
+    attributes: [],
+  };
+  RelationRules[RelationEnums.Type.Actant1Semantics] = {
+    label: "Actant1 Semantics",
+    allowedEntitiesPattern: [
+      [EntityEnums.Class.Action, EntityEnums.Class.Concept],
+    ],
+    allowedSameEntityClassesOnly: false,
+    asymmetrical: true,
+    multiple: true,
+    cloudType: false,
+    treeType: false,
+    attributes: [],
+  };
+  RelationRules[RelationEnums.Type.Actant2Semantics] = {
+    label: "Actant2 Semantics",
+    allowedEntitiesPattern: [
+      [EntityEnums.Class.Action, EntityEnums.Class.Concept],
+    ],
+    allowedSameEntityClassesOnly: false,
+    asymmetrical: true,
+    multiple: true,
+    cloudType: false,
+    treeType: false,
     attributes: [],
   };
 }
