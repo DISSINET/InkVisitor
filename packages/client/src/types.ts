@@ -259,7 +259,6 @@ export interface PropAttributeGroupDataObject {
 // CAPGBOLESTRV
 export const classesEditorActants = [
   EntityEnums.Class.Concept,
-  EntityEnums.Class.Action,
   EntityEnums.Class.Person,
   EntityEnums.Class.Group,
   EntityEnums.Class.Being,
