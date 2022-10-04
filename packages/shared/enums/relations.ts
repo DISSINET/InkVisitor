@@ -5,7 +5,6 @@ export namespace RelationEnums {
     SuperordinateLocation = "SOL",
     Synonym = "S",
     Antonym = "A",
-    Troponym = "T",
     PropertyReciprocal = "PR",
     SubjectActant1Reciprocal = "SAR",
     ActionEventEquivalent = "AEE",

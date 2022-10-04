@@ -23,10 +23,6 @@ export namespace Relation {
     type: RelationEnums.Type.Antonym;
     entityIds: [string, string];
   }
-  export interface ITroponym extends IRelation {
-    type: RelationEnums.Type.Troponym;
-    entityIds: string[];
-  }
   export interface IPropertyReciprocal extends IRelation {
     type: RelationEnums.Type.PropertyReciprocal;
     entityIds: [string, string];
@@ -127,16 +123,6 @@ export namespace Relation {
     asymmetrical: false,
     multiple: true,
     cloudType: false,
-    treeType: false,
-    attributes: [],
-  };
-  RelationRules[RelationEnums.Type.Troponym] = {
-    label: "Troponym",
-    allowedEntitiesPattern: [[EntityEnums.Class.Action]],
-    allowedSameEntityClassesOnly: true,
-    asymmetrical: false,
-    multiple: false,
-    cloudType: true,
     treeType: false,
     attributes: [],
   };
