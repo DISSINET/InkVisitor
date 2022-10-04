@@ -71,17 +71,18 @@ export const entitiesDictKeys = {
 };
 
 export const classesAll = [
+  EntityEnums.Class.Concept,
   EntityEnums.Class.Action,
   EntityEnums.Class.Person,
   EntityEnums.Class.Group,
+  EntityEnums.Class.Being,
   EntityEnums.Class.Object,
-  EntityEnums.Class.Concept,
   EntityEnums.Class.Location,
-  EntityEnums.Class.Value,
   EntityEnums.Class.Event,
   EntityEnums.Class.Statement,
   EntityEnums.Class.Territory,
   EntityEnums.Class.Resource,
+  EntityEnums.Class.Value,
 ];
 
 export const entitiesDict: DropdownItem[] = classesAll.map(
