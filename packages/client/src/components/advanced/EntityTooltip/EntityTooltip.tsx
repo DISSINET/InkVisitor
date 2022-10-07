@@ -10,14 +10,18 @@ import { EventType, PopupPosition } from "reactjs-popup/dist/types";
 import { Colors } from "types";
 import {
   StyledDetail,
+  StyledFlexColumn,
+  StyledFlexRow,
   StyledIconWrap,
   StyledLabel,
   StyledLetterIconWrap,
   StyledLoaderWrap,
   StyledRelations,
   StyledRelationTypeBlock,
+  StyledRelationTypeTreeBlock,
   StyledRow,
   StyledTooltipSeparator,
+  StyledTreeBlock,
 } from "./EntityTooltipStyles";
 import { EntityTooltip as EntityTooltipNamespace } from "@shared/types";
 import { RelationEnums } from "@shared/enums";
@@ -121,7 +125,6 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
       superclassTrees,
       superordinateLocationTrees,
       synonymCloud,
-      troponymCloud,
       entities,
     } = tooltipData;
 
@@ -156,9 +159,11 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
                 // TODO: show class in text
                 return (
                   <React.Fragment key={key}>
-                    {`${entity.label} (${entity.class} ${
-                      certaintyDict[identification.certainty].label
-                    })${key !== identifications.length - 1 ? ", " : ""}`}
+                    {`${entity.label} (`}
+                    {/* <div style={{ textTransform: "uppercase" }}> */}
+                    {certaintyDict[identification.certainty].label}
+                    {/* </div> */}
+                    {`)${key !== identifications.length - 1 ? ", " : ""}`}
                   </React.Fragment>
                 );
               })}
@@ -174,14 +179,43 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
                 letter={RelationEnums.Type.Superclass}
               />
             </StyledLetterIconWrap>
-            <StyledRelationTypeBlock>
-              <div style={{ display: "flex", flexDirection: "column" }}>
-                {superclassTrees.map((superclass, key) => {
-                  const entity = entities[superclass.entityId];
-                  return <div key={key}>{/* level 1 one instance */}</div>;
-                })}
-              </div>
-            </StyledRelationTypeBlock>
+            <StyledRelationTypeTreeBlock>
+              {superclassTrees.map((superclass, key) => {
+                const entity = entities[superclass.entityId];
+                const { subtrees } = superclass;
+                console.log(superclassTrees);
+                return (
+                  <StyledFlexRow key={key}>
+                    {/* First level */}
+                    <StyledTreeBlock>{entity.label}</StyledTreeBlock>
+                    <StyledFlexColumn>
+                      {subtrees.map((subtree, key) => {
+                        const entity = entities[subtree.entityId];
+                        return (
+                          <StyledFlexRow key={key}>
+                            {/* Second level */}
+                            <StyledTreeBlock>{entity.label}</StyledTreeBlock>
+                            <StyledFlexColumn>
+                              {subtree.subtrees.map((subtree, key) => {
+                                const entity = entities[subtree.entityId];
+                                return (
+                                  <StyledFlexRow key={key}>
+                                    {/* third level */}
+                                    <StyledTreeBlock>
+                                      {entity.label}
+                                    </StyledTreeBlock>
+                                  </StyledFlexRow>
+                                );
+                              })}
+                            </StyledFlexColumn>
+                          </StyledFlexRow>
+                        );
+                      })}
+                    </StyledFlexColumn>
+                  </StyledFlexRow>
+                );
+              })}
+            </StyledRelationTypeTreeBlock>
           </>
         )}
         {/* superordinateLocationTrees - Node */}
@@ -218,21 +252,7 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
             </StyledRelationTypeBlock>
           </>
         )}
-        {/* troponymCloud - Node */}
-        {troponymCloud && troponymCloud.length > 0 && (
-          <>
-            <StyledLetterIconWrap>
-              <LetterIcon color="white" letter={RelationEnums.Type.Troponym} />
-            </StyledLetterIconWrap>
-            <StyledRelationTypeBlock>
-              {troponymCloud.map((troponym, key) => {
-                return `${troponym}${
-                  key !== troponymCloud.length - 1 ? ", " : ""
-                }`;
-              })}
-            </StyledRelationTypeBlock>
-          </>
-        )}
+        {/* TODO: add new relations */}
       </StyledRelations>
     );
   };

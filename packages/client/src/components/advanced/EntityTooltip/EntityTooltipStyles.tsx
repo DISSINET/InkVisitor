@@ -43,6 +43,30 @@ export const StyledRelationTypeBlock = styled.div`
   margin-bottom: ${({ theme }) => theme.space[5]};
   /* border: 1px dashed blue; */
 `;
+export const StyledRelationTypeTreeBlock = styled.div`
+  display: flex;
+  flex-direction: column;
+  margin-left: ${({ theme }) => theme.space[2]};
+  margin-bottom: ${({ theme }) => theme.space[5]};
+  border: 1px dashed hotpink;
+  width: 30rem;
+`;
+export const StyledTreeBlock = styled.div`
+  border-bottom: 1px solid white;
+  margin-right: 2rem;
+  /* width: 100%; */
+`;
+export const StyledFlexColumn = styled.div`
+  display: flex;
+  flex-direction: column;
+  /* TODO: solve thirds */
+`;
+export const StyledFlexRow = styled.div`
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+`;
+
 export const StyledLetterIconWrap = styled.div`
   display: grid;
   justify-content: center;
