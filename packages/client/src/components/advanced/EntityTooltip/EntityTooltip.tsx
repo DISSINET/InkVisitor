@@ -12,6 +12,8 @@ import {
   StyledDetail,
   StyledFlexColumn,
   StyledFlexRow,
+  StyledGridRowHalf,
+  StyledGridRowThird,
   StyledIconWrap,
   StyledLabel,
   StyledLetterIconWrap,
@@ -179,40 +181,37 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
                 letter={RelationEnums.Type.Superclass}
               />
             </StyledLetterIconWrap>
+            {/* Render tree table */}
             <StyledRelationTypeTreeBlock>
               {superclassTrees.map((superclass, key) => {
                 const entity = entities[superclass.entityId];
-                const { subtrees } = superclass;
-                console.log(superclassTrees);
                 return (
-                  <StyledFlexRow key={key}>
+                  <StyledGridRowThird key={key}>
                     {/* First level */}
                     <StyledTreeBlock>{entity.label}</StyledTreeBlock>
                     <StyledFlexColumn>
-                      {subtrees.map((subtree, key) => {
+                      {superclass.subtrees.map((subtree, key) => {
                         const entity = entities[subtree.entityId];
                         return (
-                          <StyledFlexRow key={key}>
+                          <StyledGridRowHalf key={key}>
                             {/* Second level */}
                             <StyledTreeBlock>{entity.label}</StyledTreeBlock>
                             <StyledFlexColumn>
                               {subtree.subtrees.map((subtree, key) => {
                                 const entity = entities[subtree.entityId];
+                                /* third level */
                                 return (
-                                  <StyledFlexRow key={key}>
-                                    {/* third level */}
-                                    <StyledTreeBlock>
-                                      {entity.label}
-                                    </StyledTreeBlock>
-                                  </StyledFlexRow>
+                                  <StyledTreeBlock>
+                                    {entity.label}
+                                  </StyledTreeBlock>
                                 );
                               })}
                             </StyledFlexColumn>
-                          </StyledFlexRow>
+                          </StyledGridRowHalf>
                         );
                       })}
                     </StyledFlexColumn>
-                  </StyledFlexRow>
+                  </StyledGridRowThird>
                 );
               })}
             </StyledRelationTypeTreeBlock>

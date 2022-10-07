@@ -48,13 +48,12 @@ export const StyledRelationTypeTreeBlock = styled.div`
   flex-direction: column;
   margin-left: ${({ theme }) => theme.space[2]};
   margin-bottom: ${({ theme }) => theme.space[5]};
-  border: 1px dashed hotpink;
+  border: 1px dashed white;
   width: 30rem;
 `;
 export const StyledTreeBlock = styled.div`
   border-bottom: 1px solid white;
-  margin-right: 2rem;
-  /* width: 100%; */
+  width: 100%;
 `;
 export const StyledFlexColumn = styled.div`
   display: flex;
@@ -64,6 +63,16 @@ export const StyledFlexColumn = styled.div`
 export const StyledFlexRow = styled.div`
   display: flex;
   flex-direction: row;
+  width: 100%;
+`;
+export const StyledGridRowThird = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  width: 100%;
+`;
+export const StyledGridRowHalf = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   width: 100%;
 `;
 
