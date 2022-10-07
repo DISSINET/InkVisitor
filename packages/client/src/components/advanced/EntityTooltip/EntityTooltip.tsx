@@ -190,26 +190,34 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
                     {/* First level */}
                     <StyledTreeBlock>{entity.label}</StyledTreeBlock>
                     <StyledFlexColumn>
-                      {superclass.subtrees.map((subtree, key) => {
-                        const entity = entities[subtree.entityId];
-                        return (
-                          <StyledGridRowHalf key={key}>
-                            {/* Second level */}
-                            <StyledTreeBlock>{entity.label}</StyledTreeBlock>
-                            <StyledFlexColumn>
-                              {subtree.subtrees.map((subtree, key) => {
-                                const entity = entities[subtree.entityId];
-                                /* third level */
-                                return (
-                                  <StyledTreeBlock>
-                                    {entity.label}
-                                  </StyledTreeBlock>
-                                );
-                              })}
-                            </StyledFlexColumn>
-                          </StyledGridRowHalf>
-                        );
-                      })}
+                      {superclass.subtrees.length > 0 ? (
+                        superclass.subtrees.map((subtree, key) => {
+                          const entity = entities[subtree.entityId];
+                          return (
+                            <StyledGridRowHalf key={key}>
+                              {/* Second level */}
+                              <StyledTreeBlock>{entity.label}</StyledTreeBlock>
+                              <StyledFlexColumn>
+                                {subtree.subtrees.length > 0 ? (
+                                  subtree.subtrees.map((subtree, key) => {
+                                    const entity = entities[subtree.entityId];
+                                    /* third level */
+                                    return (
+                                      <StyledTreeBlock>
+                                        {entity.label}
+                                      </StyledTreeBlock>
+                                    );
+                                  })
+                                ) : (
+                                  <StyledTreeBlock />
+                                )}
+                              </StyledFlexColumn>
+                            </StyledGridRowHalf>
+                          );
+                        })
+                      ) : (
+                        <StyledTreeBlock />
+                      )}
                     </StyledFlexColumn>
                   </StyledGridRowThird>
                 );

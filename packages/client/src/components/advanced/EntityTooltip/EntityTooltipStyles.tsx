@@ -54,6 +54,7 @@ export const StyledRelationTypeTreeBlock = styled.div`
 export const StyledTreeBlock = styled.div`
   border-bottom: 1px solid white;
   width: 100%;
+  height: 100%;
 `;
 export const StyledFlexColumn = styled.div`
   display: flex;
