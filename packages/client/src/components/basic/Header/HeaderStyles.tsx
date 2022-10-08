@@ -12,14 +12,13 @@ interface StyledHeader {
 export const StyledHeader = styled.div<StyledHeader>`
   height: ${({ height }) => (height ? `${height / 10}rem` : "auto")};
   padding: ${({ paddingX, paddingY }) =>
-    `${paddingY || paddingY === 0 ? `${paddingY / 10}rem` : space10} ${
-      paddingX || paddingX === 0 ? `${paddingX / 10}rem` : space3
+    `${paddingY || paddingY === 0 ? `${paddingY / 10}rem` : space10} ${paddingX || paddingX === 0 ? `${paddingX / 10}rem` : space3
     }`};
   width: ${({ layoutWidth }) => (layoutWidth > 0 ? layoutWidth : "100%")};
   background-color: ${({ theme, bgColor }) => theme.color[bgColor]};
   color: ${({ theme }) => theme.color["white"]};
   display: flex;
-  overflow-y: hidden;
+  position: relative;
 `;
 
 export const TextLeft = styled.div`
