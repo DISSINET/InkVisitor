@@ -46,3 +46,21 @@ export const StyledLoaderWrap = styled.div`
   position: relative;
   margin-right: 2rem;
 `;
+
+export const StyledMenuGroup = styled.div`
+  position: absolute;
+  top: 100%;
+  right:0;
+  min-width: 200px;
+  z-index: 10;
+  border-left: ${({ theme }) => '1px solid ' + theme.color["primary"]};
+  border-bottom: ${({ theme }) => '1px solid ' + theme.color["primary"]};
+
+  button {
+    border: 0;
+  }
+  button:hover {
+    background-color: ${({ theme }) => theme.color["white"]};
+    color: ${({ theme }) => theme.color["primary"]};
+  }
+`;

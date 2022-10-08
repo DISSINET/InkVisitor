@@ -19,7 +19,7 @@ interface ButtonProps {
   fullWidth?: boolean;
 }
 
-export const Button: React.FC<ButtonProps> = ({
+export const Button: React.FC<ButtonProps & { innerRef?: React.MutableRefObject<HTMLButtonElement> }> = ({
   tooltip,
   label = "",
   icon,
@@ -33,11 +33,13 @@ export const Button: React.FC<ButtonProps> = ({
   onClick = () => {
     // do nothing
   },
+  innerRef,
   fullWidth = false,
 }) => {
   const renderButton = () => {
     return (
       <StyledButton
+        ref={innerRef as React.RefObject<HTMLButtonElement>}
         onClick={onClick}
         hasIcon={icon && true}
         color={color}
