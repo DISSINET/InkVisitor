@@ -85,7 +85,7 @@ class Acl {
     }
 
     // allow admin for any route
-    if (req.getUserOrFail().role !== UserEnums.Role.Admin) {
+    if (req.getUserOrFail().role === UserEnums.Role.Admin) {
       return null;
     }
 
