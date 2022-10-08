@@ -11,7 +11,7 @@ export interface IRequest {
   };
   getUserOrFail(): User;
   baseUrl: string;
-  route: any;
+  route: { path: string };
   method: string;
 }
 

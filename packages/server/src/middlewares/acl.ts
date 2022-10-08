@@ -39,9 +39,9 @@ class Acl {
    */
   private async getPermissions(req: IRequest): Promise<AclPermission[]> {
     const controller = req.baseUrl.split("/").pop() || "";
-    const routeParts = req.route.path.split("/");
-    const route = routeParts[0] == "" ? routeParts[1] : routeParts[0];
+    const route = req.route.path.split("/").filter(part => !!part).join("/")
     const method = req.method as HttpMethods;
+
     const permissions = await AclPermission.findByRoute(
       req.db.connection,
       controller,
