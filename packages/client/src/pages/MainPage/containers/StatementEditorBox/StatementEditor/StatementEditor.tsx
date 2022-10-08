@@ -35,7 +35,7 @@ import { FaUnlink } from "react-icons/fa";
 import { UseMutationResult, useQuery, useQueryClient } from "react-query";
 import { toast } from "react-toastify";
 import { excludedSuggesterEntities } from "Theme/constants";
-import { DropdownItem } from "types";
+import { classesEditorActants, classesEditorTags, DropdownItem } from "types";
 import { getEntityLabel, getShortLabelByLetterCount } from "utils";
 import { AuditTable } from "../../AuditTable/AuditTable";
 import { StyledContent } from "../../EntityBookmarkBox/EntityBookmarkBoxStyles";
@@ -62,34 +62,6 @@ import {
   StyledTagsList,
   StyledTagsListItem,
 } from "./../StatementEditorBoxStyles";
-
-const classesActants = [
-  EntityEnums.Class.Statement,
-  EntityEnums.Class.Action,
-  EntityEnums.Class.Territory,
-  EntityEnums.Class.Resource,
-  EntityEnums.Class.Person,
-  EntityEnums.Class.Being,
-  EntityEnums.Class.Group,
-  EntityEnums.Class.Object,
-  EntityEnums.Class.Concept,
-  EntityEnums.Class.Location,
-  EntityEnums.Class.Value,
-  EntityEnums.Class.Event,
-];
-const classesTags = [
-  EntityEnums.Class.Action,
-  EntityEnums.Class.Territory,
-  EntityEnums.Class.Resource,
-  EntityEnums.Class.Person,
-  EntityEnums.Class.Being,
-  EntityEnums.Class.Group,
-  EntityEnums.Class.Object,
-  EntityEnums.Class.Concept,
-  EntityEnums.Class.Location,
-  EntityEnums.Class.Value,
-  EntityEnums.Class.Event,
-];
 
 interface StatementEditor {
   statement: IResponseStatement;
@@ -651,7 +623,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
               <StatementEditorActantTable
                 statement={statement}
                 userCanEdit={userCanEdit}
-                classEntitiesActant={classesActants}
+                classEntitiesActant={classesEditorActants}
                 updateStatementDataMutation={updateStatementDataMutation}
                 addProp={addProp}
                 updateProp={updateProp}
@@ -670,7 +642,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 onSelected={(newSelectedId: string) => {
                   addActant(newSelectedId);
                 }}
-                categoryTypes={classesActants}
+                categoryTypes={classesEditorActants}
                 placeholder={"add new actant"}
                 excludedEntities={excludedSuggesterEntities}
                 isInsideTemplate={statement.isTemplate}
@@ -741,7 +713,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                     toast.info("Tag already added!");
                   }
                 }}
-                categoryTypes={classesTags}
+                categoryTypes={classesEditorTags}
                 placeholder={"add new tag"}
                 excludedEntities={excludedSuggesterEntities}
                 excludedActantIds={statement.data.tags}
