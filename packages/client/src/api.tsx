@@ -109,7 +109,7 @@ class Api {
 
   showErrorToast(err: any) {
     const hydratedError = errors.getErrorByCode(
-      this.responseToError(err.response.data)
+      this.responseToError(err.response?.data)
     );
 
     toast.error(
