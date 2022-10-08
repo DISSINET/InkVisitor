@@ -1,6 +1,6 @@
 [
   {
-    "controller": "acl",
+    "controller": "acls",
     "route": "",
     "method": "GET",
     "roles": [
@@ -8,7 +8,7 @@
     ]
   },
   {
-    "controller": "acl",
+    "controller": "acls",
     "route": ":permissionId",
     "method": "PUT",
     "roles": [
@@ -16,7 +16,7 @@
     ]
   },
   {
-    "controller": "acl",
+    "controller": "acls",
     "route": ":permissionId",
     "method": "DELETE",
     "roles": [
