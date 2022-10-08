@@ -117,7 +117,6 @@ export const Page: React.FC<Page> = ({ children }) => {
           onClose={() => setUserCustomizationOpen(false)}
         />
       )}
-      {!isLoggedIn && <MemoizedLoginModal />}
       <Toast />
     </StyledPage>
   );

@@ -13,7 +13,6 @@ export namespace EnumValidators {
         RelationEnums.Type.SuperordinateLocation,
         RelationEnums.Type.Synonym,
         RelationEnums.Type.Antonym,
-        RelationEnums.Type.Troponym,
         RelationEnums.Type.PropertyReciprocal,
         RelationEnums.Type.SubjectActant1Reciprocal,
         RelationEnums.Type.ActionEventEquivalent,

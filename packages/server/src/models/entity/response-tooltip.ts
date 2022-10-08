@@ -14,7 +14,6 @@ export class ResponseTooltip
 
   superclassTrees: EntityTooltip.ISuperclassTree[] = [];
   synonymCloud?: EntityTooltip.ISynonymCloud;
-  troponymCloud?: EntityTooltip.ITroponymCloud;
   superordinateLocationTrees: EntityTooltip.ISuperordinateLocationTree[] = [];
   identifications: EntityTooltip.IIdentifications = [];
   actionEventEquivalent: EntityTooltip.ActionEventNode = [];
@@ -41,7 +40,6 @@ export class ResponseTooltip
     this.superclassTrees = rootSuperclass.subtrees;
 
     this.synonymCloud = await this.getSynonymCloud(request.db.connection);
-    this.troponymCloud = await this.getTroponymCloud(request.db.connection);
 
     const superordinateTree = await this.getSuperordinateLocationTree(
       request.db.connection,
@@ -62,6 +60,8 @@ export class ResponseTooltip
   async getSynonymCloud(
     conn: Connection
   ): Promise<EntityTooltip.ISynonymCloud | undefined> {
+    let out: EntityTooltip.ISynonymCloud | undefined;
+
     if (
       this.class === EntityEnums.Class.Concept ||
       this.class === EntityEnums.Class.Action
@@ -71,36 +71,16 @@ export class ResponseTooltip
         this.id,
         RelationEnums.Type.Synonym
       );
-      return synonyms.reduce(
+
+      out = synonyms.reduce(
         (acc, cur) => acc.concat(cur.entityIds),
         [] as string[]
       );
+
+      this.addLinkedEntities(out);
     }
 
-    return undefined;
-  }
-
-  /**
-   * returns troponym cloud in the form of list containing grouped entity ids
-   * @param conn
-   * @returns
-   */
-  async getTroponymCloud(
-    conn: Connection
-  ): Promise<EntityTooltip.ISynonymCloud | undefined> {
-    if (this.class === EntityEnums.Class.Action) {
-      const troponyms = await Relation.getForEntity<RelationTypes.ITroponym>(
-        conn,
-        this.id,
-        RelationEnums.Type.Troponym
-      );
-      return troponyms.reduce(
-        (acc, cur) => acc.concat(cur.entityIds),
-        [] as string[]
-      );
-    }
-
-    return undefined;
+    return out;
   }
 
   /**
@@ -112,6 +92,7 @@ export class ResponseTooltip
     conn: Connection
   ): Promise<EntityTooltip.IIdentification[]> {
     const out: EntityTooltip.IIdentification[] = [];
+
     const identifications =
       await Relation.getForEntity<RelationTypes.IIdentification>(
         conn,
@@ -128,6 +109,8 @@ export class ResponseTooltip
             : relation.entityIds[0],
       });
     }
+
+    this.addLinkedEntities(out.map(o => o.entityId));
 
     return out;
   }

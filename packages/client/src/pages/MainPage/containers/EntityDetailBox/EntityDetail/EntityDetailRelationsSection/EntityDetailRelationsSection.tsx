@@ -76,8 +76,8 @@ export const EntityDetailRelationsSection: React.FC<
         return rule;
       } else if (
         Relation.RelationRules[rule].asymmetrical &&
-        Relation.RelationRules[rule].allowedEntitiesPattern.some((pair) =>
-          pair.includes(entity.class)
+        Relation.RelationRules[rule].allowedEntitiesPattern.some(
+          (pair) => pair[0] === entity.class
         )
       ) {
         return rule;

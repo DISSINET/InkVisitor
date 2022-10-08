@@ -103,13 +103,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
           const collectedLeft = leftSide.map((r) => r[1]);
           collectedEntities.push(...collectedLeft);
         }
-        const rightSide = entitiesPattern.filter(
-          (array) => array[1] === entity.class
-        );
-        if (rightSide.length > 0) {
-          const collectedRight = rightSide.map((r) => r[0]);
-          collectedEntities.push(...collectedRight);
-        }
+
         return [...new Set(collectedEntities)];
       }
     } else {

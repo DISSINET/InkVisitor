@@ -217,7 +217,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
     if (
       draggedTerritory.parentId &&
       draggedTerritory.parentId !==
-      (territory.data.parent as IParentTerritory).territoryId &&
+        (territory.data.parent as IParentTerritory).territoryId &&
       draggedTerritory.parentId !== propId
     ) {
       if (draggedTerritory.lvl && draggedTerritory.lvl > lvl) {
@@ -282,7 +282,6 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
                     parentId={parent.territoryId}
                     lvl={lvl}
                     isSelected={isSelected}
-                    propId={propId}
                     index={index}
                     fullWidth
                     moveFn={moveFn}

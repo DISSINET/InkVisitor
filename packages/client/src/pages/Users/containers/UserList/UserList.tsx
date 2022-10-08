@@ -125,10 +125,10 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
         Cell: ({ row }: Cell) => {
           const { name, email, role } = row.original as any;
           let icon = <RiUserSearchFill />;
-          if (role === "admin") {
+          if (role === UserEnums.Role.Admin) {
             icon = <RiUserStarFill />;
           }
-          if (role === "editor") {
+          if (role === UserEnums.Role.Editor) {
             icon = <RiUserSettingsFill />;
           }
           return (
@@ -489,9 +489,8 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
 
       <Submit
         title={`Delete User ${removingUser ? removingUser.name : ""}`}
-        text={`Do you really want do delete User ${
-          removingUser ? removingUser.name : ""
-        }?`}
+        text={`Do you really want do delete User ${removingUser ? removingUser.name : ""
+          }?`}
         show={removingUser != false}
         onSubmit={() => {
           removeUser();

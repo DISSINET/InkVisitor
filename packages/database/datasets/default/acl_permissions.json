@@ -1,122 +1,272 @@
 [
   {
-    "controller": "acl",
-    "route": "index",
-    "roles": ["admin"]
+    "controller": "acls",
+    "route": "",
+    "method": "GET",
+    "roles": [
+      "admin"
+    ]
   },
   {
-    "controller": "acl",
-    "route": "update",
-    "roles": ["admin"]
+    "controller": "acls",
+    "route": ":permissionId",
+    "method": "PUT",
+    "roles": [
+      "admin"
+    ]
   },
   {
-    "controller": "acl",
-    "route": "delete",
-    "roles": ["admin"]
+    "controller": "acls",
+    "route": ":permissionId",
+    "method": "DELETE",
+    "roles": [
+      "admin"
+    ]
   },
   {
     "controller": "statements",
-    "route": "get",
-    "roles": ["*"]
+    "route": ":statementId",
+    "method": "GET",
+    "roles": [
+      "*"
+    ]
   },
   {
     "controller": "territories",
-    "route": "get",
-    "roles": ["*"]
+    "route": ":territoryId",
+    "method": "GET",
+    "roles": [
+      "*"
+    ]
   },
   {
     "controller": "territories",
-    "route": "getEntityIds",
-    "roles": ["*"]
+    "route": ":territoryId/entities",
+    "method": "GET",
+    "roles": [
+      "*"
+    ]
   },
   {
     "controller": "tree",
-    "route": "get",
-    "roles": ["*"]
+    "route": "",
+    "method": "GET",
+    "roles": [
+      "*"
+    ]
   },
   {
     "controller": "tree",
-    "route": "moveTerritory",
-    "roles": ["admin", "editor"]
+    "route": "/:territoryId/position",
+    "method": "PATCH",
+    "roles": [
+      "admin",
+      "editor"
+    ]
   },
   {
     "controller": "users",
     "route": "signin",
-    "roles": ["*"]
+    "method": "POST",
+    "roles": [],
+    "public": true
+  },
+  {
+    "controller": "users",
+    "route": "administration",
+    "method": "GET",
+    "roles": [
+      "admin"
+    ]
+  },
+  {
+    "controller": "users",
+    "route": "me",
+    "method": "GET",
+    "roles": [
+      "*"
+    ]
+  },
+  {
+    "controller": "users",
+    "route": ":userId",
+    "method": "GET",
+    "roles": [
+      "*"
+    ]
+  },
+  {
+    "controller": "users",
+    "route": "",
+    "method": "GET",
+    "roles": [
+      "admin"
+    ]
+  },
+  {
+    "controller": "users",
+    "route": "",
+    "method": "POST",
+    "roles": [
+      "admin"
+    ]
+  },
+  {
+    "controller": "users",
+    "route": ":userId",
+    "method": "PUT",
+    "roles": [
+      "*"
+    ]
+  },
+  {
+    "controller": "users",
+    "route": ":userId",
+    "method": "DELETE",
+    "roles": [
+      "admin"
+    ]
   },
   {
     "controller": "users",
     "route": "active",
-    "roles": ["*"]
+    "method": "PATCH",
+    "roles": [],
+    "public": true
   },
   {
     "controller": "users",
     "route": "password",
-    "roles": ["*"]
+    "method": "PATCH",
+    "roles": [],
+    "public": true
   },
   {
     "controller": "users",
-    "route": "bookmarksGet",
-    "roles": ["*"]
+    "route": ":userId/bookmarks",
+    "method": "GET",
+    "roles": [
+      "*"
+    ]
   },
   {
     "controller": "users",
-    "route": "bookmarks",
-    "roles": ["*"]
-  },
-  {
-    "controller": "users",
-    "route": "get",
-    "roles": ["*"]
-  },
-  {
-    "controller": "users",
-    "route": "update",
-    "roles": ["*"]
+    "route": ":userId/password",
+    "method": "PATCH",
+    "roles": [
+      "*"
+    ]
   },
   {
     "controller": "users",
     "route": "/me/emails/test",
-    "roles": ["admin"]
+    "method": "GET",
+    "roles": [
+      "admin"
+    ]
   },
   {
     "controller": "entities",
-    "route": "create",
-    "roles": ["*"]
+    "route": ":entityId",
+    "method": "GET",
+    "roles": [
+      "*"
+    ]
   },
   {
     "controller": "entities",
-    "route": "update",
-    "roles": ["*"]
+    "route": ":entityId/audits",
+    "method": "GET",
+    "roles": [
+      "*"
+    ]
   },
   {
     "controller": "entities",
-    "route": "delete",
-    "roles": ["*"]
+    "route": "",
+    "method": "GET",
+    "roles": [
+      "*"
+    ]
   },
   {
     "controller": "entities",
-    "route": "detail",
-    "roles": ["*"]
+    "route": "",
+    "method": "POST",
+    "roles": [
+      "*"
+    ]
   },
   {
     "controller": "entities",
-    "route": "search",
-    "roles": ["*"]
+    "route": ":entityId",
+    "method": "PUT",
+    "roles": [
+      "*"
+    ]
+  },
+  {
+    "controller": "entities",
+    "route": ":entityId",
+    "method": "DELETE",
+    "roles": [
+      "*"
+    ]
+  },
+  {
+    "controller": "entities",
+    "route": ":entityId/detail",
+    "method": "GET",
+    "roles": [
+      "*"
+    ]
+  },
+  {
+    "controller": "entities",
+    "route": ":entityId/tooltip",
+    "method": "GET",
+    "roles": [
+      "*"
+    ]
   },
   {
     "controller": "audits",
     "route": "",
-    "roles": ["*"]
+    "method": "GET",
+    "roles": [
+      "*"
+    ]
   },
   {
     "controller": "stats",
     "route": "",
-    "roles": ["*"]
+    "method": "GET",
+    "roles": [
+      "admin"
+    ]
   },
   {
-    "controller": "entities",
+    "controller": "relations",
     "route": "",
-    "roles": ["*"]
+    "method": "POST",
+    "roles": [
+      "*"
+    ]
+  },
+  {
+    "controller": "relations",
+    "route": "",
+    "method": "PUT",
+    "roles": [
+      "*"
+    ]
+  },
+  {
+    "controller": "relations",
+    "route": "",
+    "method": "DELETE",
+    "roles": [
+      "*"
+    ]
   }
 ]

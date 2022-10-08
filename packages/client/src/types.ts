@@ -256,20 +256,47 @@ export interface PropAttributeGroupDataObject {
   value: AttributeData;
 }
 
-export const classesPropType = [EntityEnums.Class.Concept];
-export const classesPropValue = [
-  EntityEnums.Class.Action,
-  EntityEnums.Class.Person,
-  EntityEnums.Class.Being,
-  EntityEnums.Class.Group,
-  EntityEnums.Class.Object,
+// CAPGBOLESTRV
+export const classesEditorActants = [
   EntityEnums.Class.Concept,
+  EntityEnums.Class.Person,
+  EntityEnums.Class.Group,
+  EntityEnums.Class.Being,
+  EntityEnums.Class.Object,
   EntityEnums.Class.Location,
-  EntityEnums.Class.Value,
   EntityEnums.Class.Event,
   EntityEnums.Class.Statement,
   EntityEnums.Class.Territory,
   EntityEnums.Class.Resource,
+  EntityEnums.Class.Value,
+];
+export const classesEditorTags = [
+  EntityEnums.Class.Concept,
+  EntityEnums.Class.Action,
+  EntityEnums.Class.Person,
+  EntityEnums.Class.Group,
+  EntityEnums.Class.Being,
+  EntityEnums.Class.Object,
+  EntityEnums.Class.Location,
+  EntityEnums.Class.Event,
+  EntityEnums.Class.Territory,
+  EntityEnums.Class.Resource,
+  EntityEnums.Class.Value,
+];
+export const classesPropType = [EntityEnums.Class.Concept];
+export const classesPropValue = [
+  EntityEnums.Class.Concept,
+  EntityEnums.Class.Action,
+  EntityEnums.Class.Person,
+  EntityEnums.Class.Group,
+  EntityEnums.Class.Being,
+  EntityEnums.Class.Object,
+  EntityEnums.Class.Location,
+  EntityEnums.Class.Event,
+  EntityEnums.Class.Statement,
+  EntityEnums.Class.Territory,
+  EntityEnums.Class.Resource,
+  EntityEnums.Class.Value,
 ];
 
 export interface EntitySuggestion {
