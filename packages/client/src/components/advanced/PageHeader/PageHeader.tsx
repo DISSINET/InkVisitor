@@ -1,31 +1,34 @@
-import { Button, ButtonGroup, Loader } from "components";
-import React, { useState, useRef, useEffect } from "react";
+import { UserEnums } from "@shared/enums";
+import LogoInkvisitor from "assets/logos/inkvisitor-full.svg";
+import { Button, Loader } from "components";
+import React, { useEffect, useRef, useState } from "react";
+import { BiLogOut } from "react-icons/bi";
+import { FaBars, FaBookOpen, FaKey, FaUsers } from "react-icons/fa";
+import { useHistory, useLocation } from "react-router";
+import { toast } from "react-toastify";
+import { heightHeader } from "Theme/constants";
+import packageJson from "../../../../package.json";
 import {
   StyledFaUserAlt,
   StyledHeader,
   StyledHeaderLogo,
   StyledHeaderTag,
+  StyledMenuGroup,
+  StyledMenuItem,
+  StyledRightHeader,
   StyledText,
   StyledUser,
-  StyledRightHeader,
   StyledUsername,
-  StyledMenuGroup
 } from "./PageHeaderStyles";
-import packageJson from "../../../../package.json";
-import { heightHeader } from "Theme/constants";
-import LogoInkvisitor from "assets/logos/inkvisitor-full.svg";
-import { toast } from "react-toastify";
-import { useHistory, useLocation } from "react-router";
-import { UserEnums } from "@shared/enums";
-import { FaBars } from "react-icons/fa";
 
-export const LeftHeader = React.memo(({ }) => {
+export const LeftHeader = React.memo(({}) => {
   const env = (process.env.ROOT_URL || "").replace(/apps\/inkvisitor[-]?/, "");
   const versionText = `v. ${packageJson.version} 
-  ${["production", ""].indexOf(env) === -1
+  ${
+    ["production", ""].indexOf(env) === -1
       ? `| ${env} | built: ${process.env.BUILD_TIMESTAMP}`
       : ""
-    }`;
+  }`;
 
   return (
     <StyledHeader>
@@ -59,6 +62,7 @@ interface IPage {
   color: "info" | "success" | "danger" | "warning";
   href: string;
   admin?: boolean;
+  icon?: React.ReactElement;
 }
 
 const pages: IPage[] = [
@@ -68,6 +72,7 @@ const pages: IPage[] = [
     color: "info",
     href: "/",
     admin: false,
+    icon: <FaBookOpen />,
   },
   {
     id: "acl",
@@ -75,6 +80,7 @@ const pages: IPage[] = [
     color: "info",
     href: "/acl",
     admin: true,
+    icon: <FaKey />,
   },
   {
     id: "users",
@@ -82,12 +88,12 @@ const pages: IPage[] = [
     color: "info",
     href: "/users",
     admin: true,
+    icon: <FaUsers />,
   },
 ];
 
 export const RightHeader: React.FC<RightHeaderProps> = React.memo(
   ({ setUserCustomizationOpen, handleLogOut, userName, userRole }) => {
-
     const history = useHistory();
     const location = useLocation();
     const [menuOpen, setMenuOpen] = useState<boolean>(false);
@@ -96,16 +102,21 @@ export const RightHeader: React.FC<RightHeaderProps> = React.memo(
     const menuToggleRef = useRef() as React.MutableRefObject<HTMLButtonElement>;
 
     const handleClick = (e: any) => {
-      console.log(menuToggleRef)
-      if (menuRef.current && !(menuRef.current as any).contains(e.target) && menuToggleRef.current && !(menuToggleRef.current as any).contains(e.target)) {
+      console.log(menuToggleRef);
+      if (
+        menuRef.current &&
+        !(menuRef.current as any).contains(e.target) &&
+        menuToggleRef.current &&
+        !(menuToggleRef.current as any).contains(e.target)
+      ) {
         setMenuOpen(false);
       }
     };
 
     useEffect(() => {
-      document.addEventListener('click', handleClick, true);
+      document.addEventListener("click", handleClick, true);
 
-      return () => document.removeEventListener('click', handleClick, true);
+      return () => document.removeEventListener("click", handleClick, true);
     }, []);
 
     return (
@@ -133,32 +144,46 @@ export const RightHeader: React.FC<RightHeaderProps> = React.memo(
             <Loader size={10} show />
           </div>
         )}
-        <Button innerRef={menuToggleRef} icon={<FaBars style={{ transition: "transform 0.1s", transform: menuOpen ? "rotate(90deg)" : "" }} />} onClick={() => setMenuOpen(!menuOpen)} label="Menu" />
-        {
-          menuOpen && <StyledMenuGroup><ButtonGroup ref={menuRef} column={true} noMarginRight={true}>
+        <Button
+          innerRef={menuToggleRef}
+          icon={
+            <FaBars
+              style={{
+                transition: "transform 0.1s",
+                transform: menuOpen ? "rotate(90deg)" : "",
+              }}
+            />
+          }
+          onClick={() => setMenuOpen(!menuOpen)}
+          label="Menu"
+        />
+        {menuOpen && (
+          <StyledMenuGroup>
             {pages
               .filter((p) => !p.admin || userRole === UserEnums.Role.Admin)
               .filter((p) => location.pathname !== p.href)
               .map((p, key) => (
-                <Button
+                <StyledMenuItem
                   key={key}
-                  label={p.label}
+                  color="primary"
                   onClick={() => {
                     history.push({
                       pathname: p.href,
                     });
                   }}
-                />
+                >
+                  {p.icon || null}
+                  {p.label}
+                </StyledMenuItem>
               ))}
-            <Button
-              label="Log Out"
-              color="danger"
-              onClick={() => handleLogOut()}
-            />
-          </ButtonGroup>
+            <hr />
+            <StyledMenuItem color="danger" onClick={() => handleLogOut()}>
+              <BiLogOut />
+              Log out
+            </StyledMenuItem>
           </StyledMenuGroup>
-        }
-      </StyledRightHeader >
+        )}
+      </StyledRightHeader>
     );
   }
 );

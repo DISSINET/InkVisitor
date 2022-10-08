@@ -1,5 +1,6 @@
 import { FaUserAlt } from "react-icons/fa";
 import styled from "styled-components";
+import { heightHeader } from "Theme/constants";
 
 interface StyledHeaderLogo {
   height: number;
@@ -49,18 +50,32 @@ export const StyledLoaderWrap = styled.div`
 
 export const StyledMenuGroup = styled.div`
   position: absolute;
-  top: 100%;
-  right:0;
+  right: ${({ theme }) => theme.space[1]};
+  margin-top: ${({ theme }) => theme.space[1]};
+  top: ${({ theme }) => heightHeader};
+
   min-width: 200px;
   z-index: 10;
-  border-left: ${({ theme }) => '1px solid ' + theme.color["primary"]};
-  border-bottom: ${({ theme }) => '1px solid ' + theme.color["primary"]};
 
-  button {
-    border: 0;
+  border: ${({ theme }) => "3px solid " + theme.color["primary"]};
+
+  box-shadow: ${({ theme }) => "-5px 5px 5px " + theme.color["black"]};
+  border-radius: ${({ theme }) => theme.space[2]};
+`;
+
+interface StyledMenuItem {
+  color: string;
+}
+export const StyledMenuItem = styled.div<StyledMenuItem>`
+  padding: ${({ theme }) => theme.space[3]};
+  color: ${({ theme, color }) => theme.color[color]};
+  background-color: ${({ theme }) => theme.color["white"]};
+  :hover {
+    background-color: ${({ color, theme }) => theme.color[color]};
+    color: ${({ theme }) => theme.color["white"]};
   }
-  button:hover {
-    background-color: ${({ theme }) => theme.color["white"]};
-    color: ${({ theme }) => theme.color["primary"]};
+  svg {
+    margin-right: ${({ theme }) => theme.space[2]};
+    vertical-align: middle;
   }
 `;
