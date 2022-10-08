@@ -17,12 +17,22 @@ files_and_classes = [
     {'file': input_path + 'types/territory.ts', 'class': 'ITerritory'},
     {'file': input_path + 'types/resource.ts', 'class': 'IResource'},
     {'file': input_path + 'types/reference.ts', 'class': 'IReference'},
+   # {'file': input_path + 'types/relation.ts', 'class': 'Relation.IModel'},
+    {'file': input_path + 'types/relation.ts', 'class': 'Relation.IIdentification'},
+    {'file': input_path + 'types/relation.ts', 'class': 'Relation.IClassification'},
     {'file': input_path + 'types/prop.ts', 'class': 'IProp'},
     {'file': input_path + 'types/value.ts', 'class': 'IValue'},
     {'file': input_path + 'types/action.ts', 'class': 'IAction'},
     {'file': input_path + 'types/user.ts', 'class': 'IUser'},
     {'file': input_path + 'types/audit.ts', 'class': 'IAudit'},
+    {'file': input_path + 'types/person.ts', 'class': 'IPerson'},
 
+]
+
+files_and_classes = [
+#  {'file': input_path + 'types/relation.ts', 'class': 'Relation.IModel'},
+  {'file': input_path + 'types/actant.ts', 'class': 'IActant'},
+  {'file': input_path + 'types/relation.ts', 'class': 'Relation.IClassification'},
 ]
 
 for case in files_and_classes:
