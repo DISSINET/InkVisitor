@@ -2,25 +2,23 @@ import api from "api";
 import { Header, Loader, MemoizedFooter, Toast } from "components";
 import {
   LeftHeader,
-  MemoizedLoginModal,
   RightHeader,
   UserCustomizationModal,
 } from "components/advanced";
 import { useSearchParams } from "hooks";
 import React, { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "react-query";
-import { useLocation } from "react-router";
+import { useLocation, useHistory } from "react-router";
 import { toast } from "react-toastify";
 import { setUsername } from "redux/features/usernameSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { heightFooter, heightHeader } from "Theme/constants";
+import { heightFooter } from "Theme/constants";
 import { StyledPageContent, StyledPage } from "./PageStyles";
 
 interface Page {
   children?: React.ReactNode;
 }
 export const Page: React.FC<Page> = ({ children }) => {
-  const isLoggedIn = api.isLoggedIn();
   const dispatch = useAppDispatch();
   const queryClient = useQueryClient();
   const username: string = useAppSelector((state) => state.username);
@@ -41,6 +39,8 @@ export const Page: React.FC<Page> = ({ children }) => {
   );
 
   const location = useLocation();
+  const history = useHistory();
+
   const disableRightHeader: boolean =
     location.pathname !== "/users" &&
     location.pathname !== "/acl" &&
@@ -71,6 +71,8 @@ export const Page: React.FC<Page> = ({ children }) => {
       toast.success("You've been successfully logged out!");
       //
       cleanAllParams();
+
+      history.push("/");
     },
   });
 
