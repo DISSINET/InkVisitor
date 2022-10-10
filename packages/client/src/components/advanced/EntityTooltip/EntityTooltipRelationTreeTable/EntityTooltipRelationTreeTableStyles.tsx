@@ -20,11 +20,14 @@ export const StyledRelationTypeTreeBlock = styled.div<StyledRelationTypeTreeBloc
   flex-direction: column;
   margin-left: ${({ theme }) => theme.space[2]};
   margin-bottom: ${({ theme }) => theme.space[5]};
-  border: 1px dashed white;
+  border: 1px solid;
+  border-color: ${({ theme }) => theme.color["white"]};
   width: ${({ depth }) => getBlockWidth(depth)};
 `;
 export const StyledTreeBlock = styled.div`
-  border-bottom: 1px solid white;
+  border-bottom: 1px solid;
+  border-color: ${({ theme }) => theme.color["white"]};
+  padding: ${({ theme }) => theme.space[1]};
   width: 100%;
   height: 100%;
 `;
