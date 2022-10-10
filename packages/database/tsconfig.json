@@ -14,10 +14,11 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "paths": {
-      "@shared/*": ["./../shared/*"]
+      "@shared/*": ["./../shared/*"],
+      "tslib" : ["./node_modules/tslib/tslib.d.ts"]
     },
     "types": ["node"],
     "typeRoots": ["node_modules/@types"]
   },
-  "include": ["./scripts/**/*", "./datasets/**/*.ts"]
+  "include": ["./types/**/*", "./scripts/**/*", "./datasets/**/*.ts"]
 }
