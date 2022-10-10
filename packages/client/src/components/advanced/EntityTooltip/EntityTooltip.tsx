@@ -137,7 +137,10 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
               />
             </StyledLetterIconWrap>
             <StyledRelationTypeBlock>
-              {"actionEventEquivalent"}
+              <EntityTooltipRelationTreeTable
+                relationTreeArray={actionEventEquivalent}
+                entities={entities}
+              />
             </StyledRelationTypeBlock>
           </>
         )}
@@ -193,7 +196,10 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
               />
             </StyledLetterIconWrap>
             <StyledRelationTypeBlock>
-              {"superordinateLocationTrees"}
+              <EntityTooltipRelationTreeTable
+                relationTreeArray={superordinateLocationTrees}
+                entities={entities}
+              />
             </StyledRelationTypeBlock>
           </>
         )}
