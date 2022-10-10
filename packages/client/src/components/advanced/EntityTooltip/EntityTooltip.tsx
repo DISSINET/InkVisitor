@@ -66,7 +66,7 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
 }) => {
   const [tooltipOpened, setTooltipOpened] = useState(false);
 
-  const { data: tooltipData } = useQuery(
+  const { data: tooltipData, isFetching } = useQuery(
     ["tooltip", entityId, tooltipOpened],
     async () => {
       const res = await api.tooltipGet(entityId);
@@ -235,7 +235,7 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
         renderRelations(tooltipData)
       ) : (
         <StyledLoaderWrap>
-          <Loader size={10} inverted />
+          <Loader size={16} inverted show />
         </StyledLoaderWrap>
       )}
     </>

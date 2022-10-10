@@ -59,6 +59,7 @@ export const Tooltip: React.FC<Tooltip> = ({
       offsetY={offsetY}
       onOpen={onOpen}
       onClose={onClose}
+      repositionOnResize
     >
       <div>
         {label && (
