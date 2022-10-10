@@ -1,6 +1,9 @@
+import { certaintyDict } from "@shared/dictionaries";
+import { RelationEnums } from "@shared/enums";
+import { EntityTooltip as EntityTooltipNamespace } from "@shared/types";
 import api from "api";
 import { LetterIcon, Loader, Tooltip } from "components";
-import React, { ReactElement, useEffect, useState } from "react";
+import React, { ReactElement, useState } from "react";
 import { AiOutlineTag } from "react-icons/ai";
 import { BiCommentDetail } from "react-icons/bi";
 import { BsCardText } from "react-icons/bs";
@@ -8,27 +11,18 @@ import { ImListNumbered } from "react-icons/im";
 import { useQuery } from "react-query";
 import { EventType, PopupPosition } from "reactjs-popup/dist/types";
 import { Colors } from "types";
+import { EntityTooltipRelationTreeTable } from "./EntityTooltipRelationTreeTable/EntityTooltipRelationTreeTable";
 import {
   StyledDetail,
-  StyledFlexColumn,
-  StyledFlexRow,
-  StyledGridRowHalf,
-  StyledGridRowThird,
   StyledIconWrap,
   StyledLabel,
   StyledLetterIconWrap,
   StyledLoaderWrap,
   StyledRelations,
   StyledRelationTypeBlock,
-  StyledRelationTypeTreeBlock,
   StyledRow,
   StyledTooltipSeparator,
-  StyledTreeBlock,
 } from "./EntityTooltipStyles";
-import { EntityTooltip as EntityTooltipNamespace } from "@shared/types";
-import { RelationEnums } from "@shared/enums";
-import { certaintyDict } from "@shared/dictionaries";
-import { getRelationTreeDepth } from "utils";
 
 interface EntityTooltip {
   // trigger
@@ -183,49 +177,10 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
               />
             </StyledLetterIconWrap>
             {/* Render tree table */}
-            <StyledRelationTypeTreeBlock
-              depth={getRelationTreeDepth(superclassTrees) - 1}
-            >
-              {superclassTrees.map((superclass, key) => {
-                const entity = entities[superclass.entityId];
-                return (
-                  <StyledGridRowThird key={key}>
-                    {/* First level */}
-                    <StyledTreeBlock>{entity.label}</StyledTreeBlock>
-                    <StyledFlexColumn>
-                      {superclass.subtrees.length > 0 ? (
-                        superclass.subtrees.map((subtree, key) => {
-                          const entity = entities[subtree.entityId];
-                          return (
-                            <StyledGridRowHalf key={key}>
-                              {/* Second level */}
-                              <StyledTreeBlock>{entity.label}</StyledTreeBlock>
-                              <StyledFlexColumn>
-                                {subtree.subtrees.length > 0 ? (
-                                  subtree.subtrees.map((subtree, key) => {
-                                    const entity = entities[subtree.entityId];
-                                    /* third level */
-                                    return (
-                                      <StyledTreeBlock key={key}>
-                                        {entity.label}
-                                      </StyledTreeBlock>
-                                    );
-                                  })
-                                ) : (
-                                  <StyledTreeBlock />
-                                )}
-                              </StyledFlexColumn>
-                            </StyledGridRowHalf>
-                          );
-                        })
-                      ) : (
-                        <StyledTreeBlock />
-                      )}
-                    </StyledFlexColumn>
-                  </StyledGridRowThird>
-                );
-              })}
-            </StyledRelationTypeTreeBlock>
+            <EntityTooltipRelationTreeTable
+              relationTreeArray={superclassTrees}
+              entities={entities}
+            />
           </>
         )}
         {/* superordinateLocationTrees - Node */}
