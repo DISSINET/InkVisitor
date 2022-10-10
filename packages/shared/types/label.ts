@@ -1,4 +1,4 @@
-import { EntityEnums } from "./../enums";
+import { EntityEnums } from "@shared/enums";
 
 export interface ILabel {
   id: string;
