@@ -28,6 +28,7 @@ import {
 import { EntityTooltip as EntityTooltipNamespace } from "@shared/types";
 import { RelationEnums } from "@shared/enums";
 import { certaintyDict } from "@shared/dictionaries";
+import { getRelationTreeDepth } from "utils";
 
 interface EntityTooltip {
   // trigger
@@ -182,7 +183,9 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
               />
             </StyledLetterIconWrap>
             {/* Render tree table */}
-            <StyledRelationTypeTreeBlock>
+            <StyledRelationTypeTreeBlock
+              depth={getRelationTreeDepth(superclassTrees) - 1}
+            >
               {superclassTrees.map((superclass, key) => {
                 const entity = entities[superclass.entityId];
                 return (
@@ -203,7 +206,7 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
                                     const entity = entities[subtree.entityId];
                                     /* third level */
                                     return (
-                                      <StyledTreeBlock>
+                                      <StyledTreeBlock key={key}>
                                         {entity.label}
                                       </StyledTreeBlock>
                                     );

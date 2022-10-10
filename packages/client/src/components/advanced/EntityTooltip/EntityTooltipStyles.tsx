@@ -43,13 +43,28 @@ export const StyledRelationTypeBlock = styled.div`
   margin-bottom: ${({ theme }) => theme.space[5]};
   /* border: 1px dashed blue; */
 `;
-export const StyledRelationTypeTreeBlock = styled.div`
+const getBlockWidth = (depth?: number) => {
+  switch (depth) {
+    case 1:
+      return "10rem";
+    case 2:
+      return "20rem";
+    case 3:
+      return "30rem";
+    default:
+      return "30rem";
+  }
+};
+interface StyledRelationTypeTreeBlock {
+  depth?: number;
+}
+export const StyledRelationTypeTreeBlock = styled.div<StyledRelationTypeTreeBlock>`
   display: flex;
   flex-direction: column;
   margin-left: ${({ theme }) => theme.space[2]};
   margin-bottom: ${({ theme }) => theme.space[5]};
   border: 1px dashed white;
-  width: 30rem;
+  width: ${({ depth }) => getBlockWidth(depth)};
 `;
 export const StyledTreeBlock = styled.div`
   border-bottom: 1px solid white;
