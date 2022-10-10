@@ -16,14 +16,13 @@ interface EntityTooltipRelationTreeTable {
 export const EntityTooltipRelationTreeTable: React.FC<
   EntityTooltipRelationTreeTable
 > = ({ relationTreeArray, entities }) => {
+  const treeDepth = getRelationTreeDepth(relationTreeArray) - 1;
   return (
-    <StyledRelationTypeTreeBlock
-      depth={getRelationTreeDepth(relationTreeArray) - 1}
-    >
+    <StyledRelationTypeTreeBlock depth={treeDepth}>
       {relationTreeArray.map((superclass, key) => {
         const entity = entities[superclass.entityId];
         return (
-          <StyledGridRowThird key={key}>
+          <StyledGridRowThird key={key} onlyTwoLevels={treeDepth === 2}>
             {/* First level */}
             <StyledTreeBlock>{entity.label}</StyledTreeBlock>
             <StyledFlexColumn>
