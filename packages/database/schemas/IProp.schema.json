@@ -1,184 +1,183 @@
 {
-    "$id": "IProp",
-    "$ref": "IProp#/definitions/IProp",
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "definitions": {
-        "Certainty": {
-            "enum": [
-                "0",
-                "1",
-                "2",
-                "3",
-                "4",
-                "5",
-                "6"
-            ],
-            "type": "string"
+  "$ref": "#/definitions/IProp",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "EntityEnums.Certainty": {
+      "enum": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6"
+      ],
+      "type": "string"
+    },
+    "EntityEnums.Elvl": {
+      "enum": [
+        "1",
+        "2",
+        "3"
+      ],
+      "type": "string"
+    },
+    "EntityEnums.Logic": {
+      "enum": [
+        "1",
+        "2"
+      ],
+      "type": "string"
+    },
+    "EntityEnums.Mood": {
+      "enum": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12",
+        "13"
+      ],
+      "type": "string"
+    },
+    "EntityEnums.MoodVariant": {
+      "enum": [
+        "1",
+        "2",
+        "3"
+      ],
+      "type": "string"
+    },
+    "EntityEnums.Operator": {
+      "enum": [
+        "x",
+        "a",
+        "o",
+        ">",
+        ">=",
+        "=",
+        "<=",
+        "<"
+      ],
+      "type": "string"
+    },
+    "EntityEnums.Partitivity": {
+      "enum": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5"
+      ],
+      "type": "string"
+    },
+    "EntityEnums.Virtuality": {
+      "enum": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6"
+      ],
+      "type": "string"
+    },
+    "IProp": {
+      "additionalProperties": false,
+      "properties": {
+        "bundleEnd": {
+          "type": "boolean"
         },
-        "Elvl": {
-            "enum": [
-                "1",
-                "2",
-                "3"
-            ],
-            "type": "string"
+        "bundleOperator": {
+          "$ref": "#/definitions/EntityEnums.Operator"
         },
-        "IProp": {
-            "additionalProperties": false,
-            "defaultProperties": [],
-            "properties": {
-                "bundleEnd": {
-                    "type": "boolean"
-                },
-                "bundleOperator": {
-                    "$ref": "IProp#/definitions/Operator"
-                },
-                "bundleStart": {
-                    "type": "boolean"
-                },
-                "certainty": {
-                    "$ref": "IProp#/definitions/Certainty"
-                },
-                "children": {
-                    "items": {
-                        "$ref": "IProp#/definitions/IProp"
-                    },
-                    "type": "array"
-                },
-                "elvl": {
-                    "$ref": "IProp#/definitions/Elvl"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "logic": {
-                    "$ref": "IProp#/definitions/Logic"
-                },
-                "mood": {
-                    "items": {
-                        "enum": [
-                            "1",
-                            "10",
-                            "11",
-                            "12",
-                            "13",
-                            "2",
-                            "3",
-                            "4",
-                            "5",
-                            "6",
-                            "7",
-                            "8",
-                            "9"
-                        ],
-                        "type": "string"
-                    },
-                    "type": "array"
-                },
-                "moodvariant": {
-                    "$ref": "IProp#/definitions/MoodVariant"
-                },
-                "type": {
-                    "$ref": "IProp#/definitions/IPropSpec"
-                },
-                "value": {
-                    "$ref": "IProp#/definitions/IPropSpec"
-                }
-            },
-            "required": [
-                "bundleEnd",
-                "bundleOperator",
-                "bundleStart",
-                "certainty",
-                "children",
-                "elvl",
-                "id",
-                "logic",
-                "mood",
-                "moodvariant",
-                "type",
-                "value"
-            ],
-            "type": "object"
+        "bundleStart": {
+          "type": "boolean"
         },
-        "IPropSpec": {
-            "additionalProperties": false,
-            "defaultProperties": [],
-            "properties": {
-                "elvl": {
-                    "$ref": "IProp#/definitions/Elvl"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "logic": {
-                    "$ref": "IProp#/definitions/Logic"
-                },
-                "partitivity": {
-                    "$ref": "IProp#/definitions/Partitivity"
-                },
-                "virtuality": {
-                    "$ref": "IProp#/definitions/Virtuality"
-                }
-            },
-            "required": [
-                "elvl",
-                "id",
-                "logic",
-                "partitivity",
-                "virtuality"
-            ],
-            "type": "object"
+        "certainty": {
+          "$ref": "#/definitions/EntityEnums.Certainty"
         },
-        "Logic": {
-            "enum": [
-                "1",
-                "2"
-            ],
-            "type": "string"
+        "children": {
+          "items": {
+            "$ref": "#/definitions/IProp"
+          },
+          "type": "array"
         },
-        "MoodVariant": {
-            "enum": [
-                "1",
-                "2",
-                "3"
-            ],
-            "type": "string"
+        "elvl": {
+          "$ref": "#/definitions/EntityEnums.Elvl"
         },
-        "Operator": {
-            "enum": [
-                "<",
-                "<=",
-                "=",
-                ">",
-                ">=",
-                "a",
-                "o",
-                "x"
-            ],
-            "type": "string"
+        "id": {
+          "type": "string"
         },
-        "Partitivity": {
-            "enum": [
-                "1",
-                "2",
-                "3",
-                "4",
-                "5"
-            ],
-            "type": "string"
+        "logic": {
+          "$ref": "#/definitions/EntityEnums.Logic"
         },
-        "Virtuality": {
-            "enum": [
-                "1",
-                "2",
-                "3",
-                "4",
-                "5",
-                "6"
-            ],
-            "type": "string"
+        "mood": {
+          "items": {
+            "$ref": "#/definitions/EntityEnums.Mood"
+          },
+          "type": "array"
+        },
+        "moodvariant": {
+          "$ref": "#/definitions/EntityEnums.MoodVariant"
+        },
+        "type": {
+          "$ref": "#/definitions/IPropSpec"
+        },
+        "value": {
+          "$ref": "#/definitions/IPropSpec"
         }
+      },
+      "required": [
+        "id",
+        "elvl",
+        "certainty",
+        "logic",
+        "mood",
+        "moodvariant",
+        "bundleOperator",
+        "bundleStart",
+        "bundleEnd",
+        "children",
+        "type",
+        "value"
+      ],
+      "type": "object"
+    },
+    "IPropSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "elvl": {
+          "$ref": "#/definitions/EntityEnums.Elvl"
+        },
+        "entityId": {
+          "type": "string"
+        },
+        "logic": {
+          "$ref": "#/definitions/EntityEnums.Logic"
+        },
+        "partitivity": {
+          "$ref": "#/definitions/EntityEnums.Partitivity"
+        },
+        "virtuality": {
+          "$ref": "#/definitions/EntityEnums.Virtuality"
+        }
+      },
+      "required": [
+        "entityId",
+        "elvl",
+        "logic",
+        "virtuality",
+        "partitivity"
+      ],
+      "type": "object"
     }
+  }
 }
-

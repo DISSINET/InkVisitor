@@ -1,35 +1,35 @@
 {
-    "$id": "IAudit",
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "additionalProperties": false,
-    "defaultProperties": [],
-    "properties": {
+  "$ref": "#/definitions/IAudit",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "IAudit": {
+      "additionalProperties": false,
+      "properties": {
         "changes": {
-            "additionalProperties": true,
-            "properties": {},
-            "type": "object"
+          "type": "object"
         },
         "date": {
-            "format": "date-time",
-            "type": "string"
+          "format": "date-time",
+          "type": "string"
         },
         "entityId": {
-            "type": "string"
+          "type": "string"
         },
         "id": {
-            "type": "string"
+          "type": "string"
         },
         "user": {
-            "type": "string"
+          "type": "string"
         }
-    },
-    "required": [
-        "changes",
-        "date",
-        "entityId",
+      },
+      "required": [
         "id",
-        "user"
-    ],
-    "type": "object"
+        "entityId",
+        "user",
+        "date",
+        "changes"
+      ],
+      "type": "object"
+    }
+  }
 }
-
