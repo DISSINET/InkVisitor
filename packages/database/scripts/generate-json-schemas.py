@@ -6,7 +6,7 @@ import os
 # TO RUN from ./scripts
 # ..\node_modules\.bin\ts-json-schema-generator --path ../../shared/types/actant.ts --tsconfig ../tsconfig.json --type IActant --out ../schemas/IActant.schema.json
 command_base = '..\\node_modules\\.bin\\ts-json-schema-generator'
-params = '--tsconfig ../tsconfig.json' # --required --noExtraProps --defaultProps
+params = '--tsconfig ../tsconfig-es2015.json' # --required --noExtraProps --defaultProps
 input_path = '--path ../../shared/'
 output_path = '../schemas/'
 
