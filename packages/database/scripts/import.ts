@@ -136,7 +136,7 @@ const datasets: Record<string, DbSchema> = {
     },
     relations: {
       tableName: "relations",
-      data: require("../datasets/all-parsed/audits.json"),
+      data: require("../datasets/all-parsed/relations.json"),
       transform: function () {},
       indexes: relationsIndexes,
     },
