@@ -166,7 +166,67 @@
       "searchLanguages": []
     },
     "bookmarks": null,
-    "role": "admin",
+    "role": "editor",
+    "rights": [
+      {
+        "territory": "T0",
+        "mode": "admin"
+      }
+    ]
+  },
+  {
+    "id": "104",
+    "name": "JanKral",
+    "email": "jan.kral@phil.muni.cz",
+    "password": "test123",
+    "active": true,
+    "options": {
+      "defaultTerritory": "",
+      "defaultLanguage": "",
+      "searchLanguages": []
+    },
+    "bookmarks": null,
+    "role": "editor",
+    "rights": [
+      {
+        "territory": "T0",
+        "mode": "admin"
+      }
+    ]
+  },
+  {
+    "id": "105",
+    "name": "ReimaValimaki",
+    "email": "reima@email.domain",
+    "password": "test123",
+    "active": true,
+    "options": {
+      "defaultTerritory": "",
+      "defaultLanguage": "",
+      "searchLanguages": []
+    },
+    "bookmarks": null,
+    "role": "editor",
+    "rights": [
+      {
+        "territory": "T0",
+        "mode": "admin"
+      }
+    ]
+  },
+  {
+    "id": "106",
+    "name": "LidiaHW",
+    "email": "lidia@email.domain",
+    "password": "test123",
+    "active": true,
+    "options": {
+      "defaultTerritory": "",
+      "defaultLanguage": "",
+      "searchLanguages": []
+    },
+    "bookmarks": null,
+    "role": "editor",
     "rights": [
       {
         "territory": "T0",

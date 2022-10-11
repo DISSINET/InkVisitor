@@ -1,5 +1,5 @@
 {
-  "$ref": "#/definitions/IEvent",
+  "$ref": "#/definitions/IPerson",
   "$schema": "http://json-schema.org/draft-07/schema#",
   "definitions": {
     "EntityEnums.Certainty": {
@@ -121,15 +121,15 @@
       ],
       "type": "string"
     },
-    "IEvent": {
+    "IPerson": {
       "additionalProperties": false,
       "properties": {
         "class": {
-          "const": "E",
+          "const": "P",
           "type": "string"
         },
         "data": {
-          "$ref": "#/definitions/IEventData"
+          "$ref": "#/definitions/IPersonData"
         },
         "detail": {
           "type": "string"
@@ -191,7 +191,7 @@
       ],
       "type": "object"
     },
-    "IEventData": {
+    "IPersonData": {
       "additionalProperties": false,
       "properties": {
         "logicalType": {

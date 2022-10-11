@@ -1,8 +1,13 @@
 import os
 
-command_base = 'typescript-json-schema'
-params = '--required --noExtraProps --defaultProps'
-input_path = '../../shared/'
+# command_base = 'typescript-json-schema'
+
+
+# TO RUN from ./scripts
+# ..\node_modules\.bin\ts-json-schema-generator --path ../../shared/types/actant.ts --tsconfig ../tsconfig.json --type IActant --out ../schemas/IActant.schema.json
+command_base = '..\\node_modules\\.bin\\ts-json-schema-generator'
+params = '--tsconfig ../tsconfig.json' # --required --noExtraProps --defaultProps
+input_path = '--path ../../shared/'
 output_path = '../schemas/'
 
 files_and_classes = [
@@ -29,13 +34,14 @@ files_and_classes = [
 
 ]
 
-files_and_classes = [
+#files_and_classes = [
 #  {'file': input_path + 'types/relation.ts', 'class': 'Relation.IModel'},
-  {'file': input_path + 'types/actant.ts', 'class': 'IActant'},
-  {'file': input_path + 'types/relation.ts', 'class': 'Relation.IClassification'},
-]
+#  {'file': input_path + 'types/actant.ts', 'class': 'IActant'},
+#  {'file': input_path + 'types/relation.ts', 'class': 'Relation.IClassification'},
+#]
 
 for case in files_and_classes:
-    command = command_base + " " + case['file'] + " " + case['class'] + " " + params + " --id " + case['class'] + " --out " + output_path+case['class'] + '.schema.json'
+    # command = command_base + " " + case['file'] + " " + case['class'] + " " + params + " --id " + case['class'] + " --out " + output_path+case['class'] + '.schema.json'
+    command = command_base + " " + case['file'] + " " + case['class'] + " " + params + " --type " + case['class'] + " --out " + output_path+case['class'] + '.schema.json'
     print(command)
     os.system(command)
