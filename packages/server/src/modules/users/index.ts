@@ -31,7 +31,7 @@ import { domainName, hostUrl } from "@common/functions";
 export default Router()
   /**
    * @openapi
-   * /users/:
+   * /users/signin:
    *   post:
    *     description: Attempts to signin
    *     tags:

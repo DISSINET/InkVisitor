@@ -10,6 +10,9 @@ export interface IRequest {
     user: IUser;
   };
   getUserOrFail(): User;
+  baseUrl: string;
+  route: { path: string };
+  method: string;
 }
 
 declare global {
