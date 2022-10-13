@@ -138,6 +138,18 @@ export namespace Relation {
     treeType: false,
     attributes: [],
   };
+  RelationRules[RelationEnums.Type.Holonym] = {
+    label: "Holonym",
+    allowedEntitiesPattern: [
+      [EntityEnums.Class.Concept, EntityEnums.Class.Concept],
+    ],
+    allowedSameEntityClassesOnly: true,
+    asymmetrical: true,
+    multiple: true,
+    cloudType: false,
+    treeType: true,
+    attributes: [],
+  };
   RelationRules[RelationEnums.Type.PropertyReciprocal] = {
     label: "Property Reciprocal",
     allowedEntitiesPattern: [
@@ -194,7 +206,6 @@ export namespace Relation {
     treeType: true,
     attributes: [],
   };
-
   RelationRules[RelationEnums.Type.Identification] = {
     label: "Identification",
     allowedEntitiesPattern: [], // any combination is allowed
@@ -205,20 +216,6 @@ export namespace Relation {
     treeType: false,
     attributes: [EntityEnums.Certainty],
   };
-
-  RelationRules[RelationEnums.Type.Holonym] = {
-    label: "Holonym",
-    allowedEntitiesPattern: [
-      [EntityEnums.Class.Concept, EntityEnums.Class.Concept],
-    ],
-    allowedSameEntityClassesOnly: true,
-    asymmetrical: true,
-    multiple: true,
-    cloudType: false,
-    treeType: true,
-    attributes: [],
-  };
-
   RelationRules[RelationEnums.Type.Implication] = {
     label: "Implication",
     allowedEntitiesPattern: [
