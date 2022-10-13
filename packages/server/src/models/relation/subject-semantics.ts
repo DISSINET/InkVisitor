@@ -6,21 +6,9 @@ export default class SubjectSemantics extends Relation implements RelationTypes.
   type: RelationEnums.Type.SubjectSemantics;
   entityIds: [string, string];
 
-  constructor(data: Partial<RelationTypes.IIdentification>) {
+  constructor(data: Partial<RelationTypes.ISubjectSemantics>) {
     super(data);
     this.entityIds = data.entityIds as [string, string];
     this.type = RelationEnums.Type.SubjectSemantics;
-  }
-
-  /**
-   * Test validity of the model
-   * @returns 
-   */
-  isValid(): boolean {
-    if (!super.isValid()) {
-      return false;
-    }
-
-    return true;
   }
 }
