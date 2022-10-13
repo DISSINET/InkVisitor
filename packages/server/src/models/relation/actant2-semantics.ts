@@ -6,21 +6,9 @@ export default class Actant2Semantics extends Relation implements RelationTypes.
   type: RelationEnums.Type.Actant2Semantics;
   entityIds: [string, string];
 
-  constructor(data: Partial<RelationTypes.IIdentification>) {
+  constructor(data: Partial<RelationTypes.IActant2Semantics>) {
     super(data);
     this.entityIds = data.entityIds as [string, string];
     this.type = RelationEnums.Type.Actant2Semantics;
-  }
-
-  /**
-   * Test validity of the model
-   * @returns 
-   */
-  isValid(): boolean {
-    if (!super.isValid()) {
-      return false;
-    }
-
-    return true;
   }
 }
