@@ -27,7 +27,7 @@ export namespace Relation {
     type: RelationEnums.Type.PropertyReciprocal;
     entityIds: [string, string];
   }
-  export interface ISubjectActantReciprocal extends IRelation {
+  export interface ISubjectActant1Reciprocal extends IRelation {
     type: RelationEnums.Type.SubjectActant1Reciprocal;
     entityIds: [string, string];
   }
@@ -54,7 +54,7 @@ export namespace Relation {
     entityIds: [string, string];
   }
   export interface IImplication extends IRelation {
-    type: RelationEnums.Type.Holonym;
+    type: RelationEnums.Type.Implication;
     entityIds: [string, string];
   }
   export interface ISubjectSemantics extends IRelation {
