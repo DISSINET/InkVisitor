@@ -17,6 +17,9 @@ import Event from "./event/event";
 import Relation from "./relation/relation";
 import Identification from "./relation/identification";
 import Synonym from "./relation/synonym";
+import SubjectSemantics from "./relation/subject-semantics";
+import Actant1Semantics from "./relation/actant1-semantics";
+import Actant2Semantics from "./relation/actant2-semantics";
 
 /**
  * attempts to create new Entity instance depending on the type value
@@ -86,6 +89,12 @@ export function getRelationClass(data: UnknownObject): Relation {
       return new Identification(data);
     case RelationEnums.Type.Synonym:
       return new Synonym(data);
+    case RelationEnums.Type.SubjectSemantics:
+      return new SubjectSemantics(data);
+    case RelationEnums.Type.Actant1Semantics:
+      return new Actant1Semantics(data);
+    case RelationEnums.Type.Actant2Semantics:
+      return new Actant2Semantics(data);
     default:
       throw new ModelNotValidError("unknown class for relation");
   }
