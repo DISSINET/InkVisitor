@@ -87,6 +87,7 @@ export namespace Relation {
 
   export const RelationRules: { [key: string]: RelationRule } = {};
 
+  // Order of objects equals order of relations in detail
   RelationRules[RelationEnums.Type.Superclass] = {
     label: "Superclass",
     allowedEntitiesPattern: [
