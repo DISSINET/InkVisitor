@@ -21,6 +21,9 @@ export namespace EnumValidators {
         RelationEnums.Type.Identification,
         RelationEnums.Type.Holonym,
         RelationEnums.Type.Implication,
+        RelationEnums.Type.SubjectSemantics,
+        RelationEnums.Type.Actant1Semantics,
+        RelationEnums.Type.Actant2Semantics,
       ].indexOf(input) !== -1
     );
   }
