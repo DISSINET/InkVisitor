@@ -17,18 +17,6 @@ export default class Synonym extends Relation implements RelationTypes.ISynonym 
     this.type = RelationEnums.Type.Synonym;
   }
 
-  /**
-   * Test validity of the model
-   * @returns 
-   */
-  isValid(): boolean {
-    if (!super.isValid()) {
-      return false;
-    }
-
-    return true;
-  }
-
   async findSiblings(request: IRequest, type: RelationEnums.Type): Promise<void> {
     let toInclude: string[] = this.entityIds;
     this.siblingRelations = [];
