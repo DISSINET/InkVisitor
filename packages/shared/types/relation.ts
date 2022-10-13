@@ -174,16 +174,6 @@ export namespace Relation {
     treeType: false,
     attributes: [],
   };
-  RelationRules[RelationEnums.Type.Related] = {
-    label: "Related",
-    allowedEntitiesPattern: [], // any combination is allowed
-    allowedSameEntityClassesOnly: false,
-    asymmetrical: false,
-    multiple: true,
-    cloudType: false,
-    treeType: false,
-    attributes: [],
-  };
   RelationRules[RelationEnums.Type.Classification] = {
     label: "Classification",
     allowedEntitiesPattern: [
@@ -272,6 +262,16 @@ export namespace Relation {
     ],
     allowedSameEntityClassesOnly: false,
     asymmetrical: true,
+    multiple: true,
+    cloudType: false,
+    treeType: false,
+    attributes: [],
+  };
+  RelationRules[RelationEnums.Type.Related] = {
+    label: "Related",
+    allowedEntitiesPattern: [], // any combination is allowed
+    allowedSameEntityClassesOnly: false,
+    asymmetrical: false,
     multiple: true,
     cloudType: false,
     treeType: false,
