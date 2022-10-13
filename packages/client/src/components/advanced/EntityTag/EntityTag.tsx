@@ -51,7 +51,7 @@ export const EntityTag: React.FC<EntityTag> = ({
   isFavorited,
 }) => {
   const classId = entity.class;
-  const [tooltipOpened, setTooltipOpened] = useState(false);
+  const [tagHovered, setTagHovered] = useState(false);
 
   return (
     <EntityTooltip
@@ -62,6 +62,7 @@ export const EntityTag: React.FC<EntityTag> = ({
       itemsCount={statementsCount}
       position={tooltipPosition}
       disabled={disableTooltip}
+      tagHovered={tagHovered}
     >
       <Tag
         propId={entity.id}
@@ -87,6 +88,8 @@ export const EntityTag: React.FC<EntityTag> = ({
         lvl={lvl}
         fullWidth={fullWidth}
         isFavorited={isFavorited}
+        onMouseOver={() => setTagHovered(true)}
+        onMouseOut={() => setTagHovered(false)}
       />
     </EntityTooltip>
   );

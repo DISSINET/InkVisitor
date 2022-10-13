@@ -51,6 +51,9 @@ interface TagProps {
   isTemplate?: boolean;
   isDiscouraged?: boolean;
   disabled?: boolean;
+
+  onMouseOver?: React.MouseEventHandler<HTMLDivElement>;
+  onMouseOut?: React.MouseEventHandler<HTMLDivElement>;
 }
 
 export const Tag: React.FC<TagProps> = ({
@@ -77,6 +80,9 @@ export const Tag: React.FC<TagProps> = ({
   isTemplate = false,
   isDiscouraged = false,
   lvl,
+
+  onMouseOver,
+  onMouseOut,
 }) => {
   const { appendDetailId } = useSearchParams();
   const dispatch = useAppDispatch();
@@ -202,6 +208,8 @@ export const Tag: React.FC<TagProps> = ({
         borderStyle={borderStyle}
         onClick={(e: React.MouseEvent) => e.stopPropagation()}
         onDoubleClick={(e: React.MouseEvent) => onDoubleClick(e)}
+        onMouseOver={onMouseOver}
+        onMouseOut={onMouseOut}
       >
         {showOnly ? <>{getShortTag()}</> : <>{getFullTag()}</>}
       </StyledTagWrapper>

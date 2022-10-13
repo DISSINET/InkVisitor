@@ -2,7 +2,7 @@ import { certaintyDict } from "@shared/dictionaries";
 import { RelationEnums } from "@shared/enums";
 import { EntityTooltip as EntityTooltipNamespace } from "@shared/types";
 import api from "api";
-import { LetterIcon, Loader, Tooltip } from "components";
+import { LetterIcon, Tooltip } from "components";
 import React, { ReactElement, useState } from "react";
 import { AiOutlineTag } from "react-icons/ai";
 import { BiCommentDetail } from "react-icons/bi";
@@ -17,7 +17,6 @@ import {
   StyledIconWrap,
   StyledLabel,
   StyledLetterIconWrap,
-  StyledLoaderWrap,
   StyledRelations,
   StyledRelationTypeBlock,
   StyledRow,
@@ -41,8 +40,8 @@ interface EntityTooltip {
   disabled?: boolean;
   offsetX?: number;
   offsetY?: number;
-  onOpen?: () => void;
-  onClose?: () => void;
+
+  tagHovered: boolean;
 }
 export const EntityTooltip: React.FC<EntityTooltip> = ({
   // trigger
@@ -61,19 +60,19 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
   disabled,
   offsetX,
   offsetY,
-  onOpen,
-  onClose,
+
+  tagHovered,
 }) => {
   const [tooltipOpened, setTooltipOpened] = useState(false);
 
   const { data: tooltipData, isFetching } = useQuery(
-    ["tooltip", entityId, tooltipOpened],
+    ["tooltip", entityId, tagHovered],
     async () => {
       const res = await api.tooltipGet(entityId);
       return res.data;
     },
     {
-      enabled: api.isLoggedIn() && !!entityId && tooltipOpened,
+      enabled: api.isLoggedIn() && !!entityId && tagHovered,
     }
   );
 
@@ -125,119 +124,127 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
       entities,
     } = tooltipData;
 
+    const hasRelations =
+      actionEventEquivalent.length > 0 ||
+      identifications.length > 0 ||
+      superclassTrees.length > 0 ||
+      superordinateLocationTrees.length > 0 ||
+      (synonymCloud && synonymCloud.length > 0);
+
     return (
-      <StyledRelations>
-        {/* actionEventEquivalent - Node */}
-        {actionEventEquivalent.length > 0 && (
-          <>
-            <StyledLetterIconWrap>
-              <LetterIcon
-                color="white"
-                letter={RelationEnums.Type.ActionEventEquivalent}
-              />
-            </StyledLetterIconWrap>
-            <StyledRelationTypeBlock>
-              <EntityTooltipRelationTreeTable
-                relationTreeArray={actionEventEquivalent}
-                entities={entities}
-              />
-            </StyledRelationTypeBlock>
-          </>
+      <>
+        {hasRelations && (
+          <StyledRelations>
+            {/* actionEventEquivalent - Node */}
+            {actionEventEquivalent.length > 0 && (
+              <>
+                <StyledLetterIconWrap>
+                  <LetterIcon
+                    color="white"
+                    letter={RelationEnums.Type.ActionEventEquivalent}
+                  />
+                </StyledLetterIconWrap>
+                <StyledRelationTypeBlock>
+                  <EntityTooltipRelationTreeTable
+                    relationTreeArray={actionEventEquivalent}
+                    entities={entities}
+                  />
+                </StyledRelationTypeBlock>
+              </>
+            )}
+            {/* identifications - [] */}
+            {identifications.length > 0 && (
+              <>
+                <StyledLetterIconWrap>
+                  <LetterIcon
+                    color="white"
+                    letter={RelationEnums.Type.Identification}
+                  />
+                </StyledLetterIconWrap>
+                <StyledRelationTypeBlock>
+                  {identifications.map((identification, key) => {
+                    const entity = entities[identification.entityId];
+                    // TODO: show class in text
+                    return (
+                      <React.Fragment key={key}>
+                        {`${entity.label} (`}
+                        {/* <div style={{ textTransform: "uppercase" }}> */}
+                        {certaintyDict[identification.certainty].label}
+                        {/* </div> */}
+                        {`)${key !== identifications.length - 1 ? ", " : ""}`}
+                      </React.Fragment>
+                    );
+                  })}
+                </StyledRelationTypeBlock>
+              </>
+            )}
+            {/* superclassTrees - Node */}
+            {superclassTrees.length > 0 && (
+              <>
+                <StyledLetterIconWrap>
+                  <LetterIcon
+                    color="white"
+                    letter={RelationEnums.Type.Superclass}
+                  />
+                </StyledLetterIconWrap>
+                {/* Render tree table */}
+                <EntityTooltipRelationTreeTable
+                  relationTreeArray={superclassTrees}
+                  entities={entities}
+                />
+              </>
+            )}
+            {/* superordinateLocationTrees - Node */}
+            {superordinateLocationTrees.length > 0 && (
+              <>
+                <StyledLetterIconWrap>
+                  <LetterIcon
+                    color="white"
+                    letter={RelationEnums.Type.SuperordinateLocation}
+                  />
+                </StyledLetterIconWrap>
+                <StyledRelationTypeBlock>
+                  <EntityTooltipRelationTreeTable
+                    relationTreeArray={superordinateLocationTrees}
+                    entities={entities}
+                  />
+                </StyledRelationTypeBlock>
+              </>
+            )}
+            {/* synonymCloud - string[] */}
+            {synonymCloud && synonymCloud.length > 0 && (
+              <>
+                <StyledLetterIconWrap>
+                  <LetterIcon
+                    color="white"
+                    letter={RelationEnums.Type.Synonym}
+                  />
+                </StyledLetterIconWrap>
+                <StyledRelationTypeBlock>
+                  {synonymCloud.map((synonym, key) => {
+                    const entity = entities[synonym];
+                    return (
+                      <React.Fragment key={key}>
+                        {`${entity.label}${
+                          key !== synonymCloud.length - 1 ? ", " : ""
+                        }`}
+                      </React.Fragment>
+                    );
+                  })}
+                </StyledRelationTypeBlock>
+              </>
+            )}
+            {/* TODO: add new relations */}
+          </StyledRelations>
         )}
-        {/* identifications - [] */}
-        {identifications.length > 0 && (
-          <>
-            <StyledLetterIconWrap>
-              <LetterIcon
-                color="white"
-                letter={RelationEnums.Type.Identification}
-              />
-            </StyledLetterIconWrap>
-            <StyledRelationTypeBlock>
-              {identifications.map((identification, key) => {
-                const entity = entities[identification.entityId];
-                // TODO: show class in text
-                return (
-                  <React.Fragment key={key}>
-                    {`${entity.label} (`}
-                    {/* <div style={{ textTransform: "uppercase" }}> */}
-                    {certaintyDict[identification.certainty].label}
-                    {/* </div> */}
-                    {`)${key !== identifications.length - 1 ? ", " : ""}`}
-                  </React.Fragment>
-                );
-              })}
-            </StyledRelationTypeBlock>
-          </>
-        )}
-        {/* superclassTrees - Node */}
-        {superclassTrees.length > 0 && (
-          <>
-            <StyledLetterIconWrap>
-              <LetterIcon
-                color="white"
-                letter={RelationEnums.Type.Superclass}
-              />
-            </StyledLetterIconWrap>
-            {/* Render tree table */}
-            <EntityTooltipRelationTreeTable
-              relationTreeArray={superclassTrees}
-              entities={entities}
-            />
-          </>
-        )}
-        {/* superordinateLocationTrees - Node */}
-        {superordinateLocationTrees.length > 0 && (
-          <>
-            <StyledLetterIconWrap>
-              <LetterIcon
-                color="white"
-                letter={RelationEnums.Type.SuperordinateLocation}
-              />
-            </StyledLetterIconWrap>
-            <StyledRelationTypeBlock>
-              <EntityTooltipRelationTreeTable
-                relationTreeArray={superordinateLocationTrees}
-                entities={entities}
-              />
-            </StyledRelationTypeBlock>
-          </>
-        )}
-        {/* synonymCloud - string[] */}
-        {synonymCloud && synonymCloud.length > 0 && (
-          <>
-            <StyledLetterIconWrap>
-              <LetterIcon color="white" letter={RelationEnums.Type.Synonym} />
-            </StyledLetterIconWrap>
-            <StyledRelationTypeBlock>
-              {synonymCloud.map((synonym, key) => {
-                const entity = entities[synonym];
-                return (
-                  <React.Fragment key={key}>
-                    {`${entity.label}${
-                      key !== synonymCloud.length - 1 ? ", " : ""
-                    }`}
-                  </React.Fragment>
-                );
-              })}
-            </StyledRelationTypeBlock>
-          </>
-        )}
-        {/* TODO: add new relations */}
-      </StyledRelations>
+      </>
     );
   };
 
   const renderContent = () => (
     <>
       {renderEntityInfo()}
-      {tooltipData ? (
-        renderRelations(tooltipData)
-      ) : (
-        <StyledLoaderWrap>
-          <Loader size={16} inverted show />
-        </StyledLoaderWrap>
-      )}
+      {tooltipData && renderRelations(tooltipData)}
     </>
   );
 
@@ -251,8 +258,6 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
       disabled={disabled}
       offsetX={offsetX}
       offsetY={offsetY}
-      onOpen={() => setTooltipOpened(true)}
-      onClose={() => setTooltipOpened(false)}
     >
       <StyledTooltipSeparator>{children}</StyledTooltipSeparator>
     </Tooltip>
