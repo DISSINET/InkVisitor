@@ -21,7 +21,11 @@ import {
   ModalInputForm,
   MultiInput,
 } from "components";
-import { EntitySuggester, EntityTag } from "components/advanced";
+import {
+  BreadcrumbItem,
+  EntitySuggester,
+  EntityTag,
+} from "components/advanced";
 import {
   CClassification,
   CIdentification,
@@ -41,7 +45,6 @@ import { AuditTable } from "../../AuditTable/AuditTable";
 import { StyledContent } from "../../EntityBookmarkBox/EntityBookmarkBoxStyles";
 import { EntityReferenceTable } from "../../EntityReferenceTable/EntityReferenceTable";
 import { JSONExplorer } from "../../JSONExplorer/JSONExplorer";
-import { StatementListBreadcrumbItem } from "../../StatementsListBox/StatementListHeader/StatementListBreadcrumbItem/StatementListBreadcrumbItem";
 import { StatementEditorActantTable } from "../StatementEditorActantTable/StatementEditorActantTable";
 import { StatementEditorActionTable } from "../StatementEditorActionTable/StatementEditorActionTable";
 import {
@@ -508,13 +511,13 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 territoryPath.map((territory: string, key: number) => {
                   return (
                     <React.Fragment key={key}>
-                      <StatementListBreadcrumbItem territoryId={territory} />
+                      <BreadcrumbItem territoryId={territory} />
                     </React.Fragment>
                   );
                 })}
               {territoryData && (
                 <React.Fragment key={territoryData.id}>
-                  <StatementListBreadcrumbItem
+                  <BreadcrumbItem
                     territoryId={territoryData.id}
                     territoryData={territoryData}
                   />

@@ -1,4 +1,5 @@
 import { AttributeButtonGroup } from "./AttributeButtonGroup/AttributeButtonGroup";
+import { BreadcrumbItem } from "./BreadcrumbItem/BreadcrumbItem";
 import { EmptyTag } from "./EmptyTag/EmptyTag";
 import { EntitySuggester } from "./EntitySuggester/EntitySuggester";
 import { EntityTag } from "./EntityTag/EntityTag";
@@ -11,6 +12,7 @@ import { UserCustomizationModal } from "./UserCustomizationModal/UserCustomizati
 
 export {
   AttributeButtonGroup,
+  BreadcrumbItem,
   EmptyTag,
   EntitySuggester,
   EntityTag,

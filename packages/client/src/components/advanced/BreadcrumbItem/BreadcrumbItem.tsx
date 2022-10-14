@@ -10,10 +10,11 @@ import { useQuery } from "react-query";
 import { setTreeInitialized } from "redux/features/territoryTree/treeInitializeSlice";
 import { useAppDispatch } from "redux/hooks";
 import { rootTerritoryId } from "Theme/constants";
-import { StyledItemBox } from "./StatementListBreadcrumbItemStyles";
+import { StyledItemBox } from "./BreadcrumbItemStyles";
 
-interface StatementListBreadcrumbItem {
+interface BreadcrumbItem {
   territoryId: string;
+  // If the territory is in URL, territory data needs to BE send!!!
   territoryData?: IResponseTerritory;
 }
 const initialData: IEntity = {
@@ -28,19 +29,15 @@ const initialData: IEntity = {
   props: [],
   notes: [],
 };
-export const StatementListBreadcrumbItem: React.FC<
-  StatementListBreadcrumbItem
-> = ({ territoryId, territoryData }) => {
+export const BreadcrumbItem: React.FC<BreadcrumbItem> = ({
+  territoryId,
+  territoryData,
+}) => {
   const { setTerritoryId, territoryId: paramsTerritoryId } = useSearchParams();
 
   const dispatch = useAppDispatch();
 
-  const {
-    status: territoryStatus,
-    data,
-    error: territoryError,
-    isFetching,
-  } = useQuery(
+  const { status, data, error, isFetching } = useQuery(
     ["territory", territoryId],
     async () => {
       const res = await api.territoryGet(territoryId);

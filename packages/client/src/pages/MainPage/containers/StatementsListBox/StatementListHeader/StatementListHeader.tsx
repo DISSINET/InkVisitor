@@ -7,16 +7,15 @@ import {
 } from "@shared/types";
 import { AxiosResponse } from "axios";
 import { Button, ButtonGroup } from "components";
-import { EntitySuggester } from "components/advanced";
+import { BreadcrumbItem, EntitySuggester } from "components/advanced";
 import { CStatement } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
 import { FaPlus, FaRecycle } from "react-icons/fa";
-import { UseMutationResult, useQuery, useQueryClient } from "react-query";
+import { UseMutationResult, useQueryClient } from "react-query";
 import { useAppSelector } from "redux/hooks";
 import theme from "Theme/theme";
 import { collectTerritoryChildren, searchTree } from "utils";
-import { StatementListBreadcrumbItem } from "./StatementListBreadcrumbItem/StatementListBreadcrumbItem";
 import {
   StyledButtons,
   StyledFaStar,
@@ -116,15 +115,12 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
           selectedTerritoryPath.map((territoryId: string, key: number) => {
             return (
               <React.Fragment key={key}>
-                <StatementListBreadcrumbItem territoryId={territoryId} />
+                <BreadcrumbItem territoryId={territoryId} />
               </React.Fragment>
             );
           })}
         <React.Fragment key="this-territory">
-          <StatementListBreadcrumbItem
-            territoryId={territoryId}
-            territoryData={data}
-          />
+          <BreadcrumbItem territoryId={territoryId} territoryData={data} />
         </React.Fragment>
       </StyledHeaderBreadcrumbRow>
       <StyledHeaderRow>
