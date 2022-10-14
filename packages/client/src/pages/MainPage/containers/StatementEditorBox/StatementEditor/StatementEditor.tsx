@@ -21,7 +21,11 @@ import {
   ModalInputForm,
   MultiInput,
 } from "components";
-import { EntitySuggester, EntityTag } from "components/advanced";
+import {
+  BreadcrumbItem,
+  EntitySuggester,
+  EntityTag,
+} from "components/advanced";
 import {
   CClassification,
   CIdentification,
@@ -41,7 +45,6 @@ import { AuditTable } from "../../AuditTable/AuditTable";
 import { StyledContent } from "../../EntityBookmarkBox/EntityBookmarkBoxStyles";
 import { EntityReferenceTable } from "../../EntityReferenceTable/EntityReferenceTable";
 import { JSONExplorer } from "../../JSONExplorer/JSONExplorer";
-import { StatementListBreadcrumbItem } from "../../StatementsListBox/StatementListHeader/StatementListBreadcrumbItem/StatementListBreadcrumbItem";
 import { StatementEditorActantTable } from "../StatementEditorActantTable/StatementEditorActantTable";
 import { StatementEditorActionTable } from "../StatementEditorActionTable/StatementEditorActionTable";
 import {
@@ -235,7 +238,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   } = useQuery(
     ["territory", "statement-editor", statementTerritoryId],
     async () => {
-      const res = await api.entitiesGet(statementTerritoryId as string);
+      const res = await api.territoryGet(statementTerritoryId as string);
       return res.data;
     },
     {
@@ -245,7 +248,9 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
   //TODO recurse to get all parents
   const territoryPath =
-    territoryData && Array(territoryData.data?.parent?.territoryId);
+    territoryData &&
+    territoryData.data?.parent &&
+    Array(territoryData.data?.parent?.territoryId);
 
   const userCanEdit: boolean = useMemo(() => {
     return (
@@ -506,13 +511,16 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 territoryPath.map((territory: string, key: number) => {
                   return (
                     <React.Fragment key={key}>
-                      <StatementListBreadcrumbItem territoryId={territory} />
+                      <BreadcrumbItem territoryId={territory} />
                     </React.Fragment>
                   );
                 })}
               {territoryData && (
                 <React.Fragment key={territoryData.id}>
-                  <StatementListBreadcrumbItem territoryId={territoryData.id} />
+                  <BreadcrumbItem
+                    territoryId={territoryData.id}
+                    territoryData={territoryData}
+                  />
                 </React.Fragment>
               )}
               <Loader size={20} show={isFetchingTerritory} />
