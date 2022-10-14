@@ -15,7 +15,7 @@
           "type": "string"
         },
         "type": {
-          "const": "S",
+          "const": "SYN",
           "type": "string"
         }
       },
