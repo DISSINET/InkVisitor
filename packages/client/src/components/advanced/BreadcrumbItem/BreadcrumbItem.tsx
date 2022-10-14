@@ -1,5 +1,5 @@
 import { EntityEnums } from "@shared/enums";
-import { IEntity } from "@shared/types";
+import { IEntity, IResponseTerritory } from "@shared/types";
 import api from "api";
 import { Button, Loader } from "components";
 import { EntityTag } from "components/advanced";
@@ -10,10 +10,12 @@ import { useQuery } from "react-query";
 import { setTreeInitialized } from "redux/features/territoryTree/treeInitializeSlice";
 import { useAppDispatch } from "redux/hooks";
 import { rootTerritoryId } from "Theme/constants";
-import { StyledItemBox } from "./StatementListBreadcrumbItemStyles";
+import { StyledItemBox } from "./BreadcrumbItemStyles";
 
-interface StatementListBreadcrumbItem {
+interface BreadcrumbItem {
   territoryId: string;
+  // If the territory is in params (territory), territory data needs to be added to props!!!
+  territoryData?: IResponseTerritory;
 }
 const initialData: IEntity = {
   id: "",
@@ -27,25 +29,24 @@ const initialData: IEntity = {
   props: [],
   notes: [],
 };
-export const StatementListBreadcrumbItem: React.FC<
-  StatementListBreadcrumbItem
-> = ({ territoryId }) => {
+export const BreadcrumbItem: React.FC<BreadcrumbItem> = ({
+  territoryId,
+  territoryData,
+}) => {
   const { setTerritoryId, territoryId: paramsTerritoryId } = useSearchParams();
 
   const dispatch = useAppDispatch();
 
-  const {
-    status: territoryStatus,
-    data: territoryData,
-    error: territoryError,
-    isFetching: territoryIsFetching,
-  } = useQuery(
+  const { status, data, error, isFetching } = useQuery(
     ["territory", territoryId],
     async () => {
       const res = await api.territoryGet(territoryId);
       return res.data;
     },
-    { enabled: !!territoryId && api.isLoggedIn() }
+    {
+      enabled:
+        !!territoryId && api.isLoggedIn() && paramsTerritoryId !== territoryId,
+    }
   );
 
   return (
@@ -54,7 +55,7 @@ export const StatementListBreadcrumbItem: React.FC<
         <StyledItemBox>
           <BsArrowRightShort />
           <EntityTag
-            entity={territoryData ? territoryData : initialData}
+            entity={territoryData || data || initialData}
             button={
               paramsTerritoryId !== territoryId && (
                 <Button
@@ -70,7 +71,7 @@ export const StatementListBreadcrumbItem: React.FC<
               )
             }
           />
-          <Loader show={territoryIsFetching && !territoryData} size={18} />
+          <Loader show={isFetching} size={18} />
         </StyledItemBox>
       )}
     </>
