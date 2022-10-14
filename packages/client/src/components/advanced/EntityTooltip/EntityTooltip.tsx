@@ -63,8 +63,6 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
 
   tagHovered,
 }) => {
-  const [tooltipOpened, setTooltipOpened] = useState(false);
-
   const { data: tooltipData, isFetching } = useQuery(
     ["tooltip", entityId, tagHovered],
     async () => {
@@ -144,12 +142,10 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
                     letter={RelationEnums.Type.ActionEventEquivalent}
                   />
                 </StyledLetterIconWrap>
-                <StyledRelationTypeBlock>
-                  <EntityTooltipRelationTreeTable
-                    relationTreeArray={actionEventEquivalent}
-                    entities={entities}
-                  />
-                </StyledRelationTypeBlock>
+                <EntityTooltipRelationTreeTable
+                  relationTreeArray={actionEventEquivalent}
+                  entities={entities}
+                />
               </>
             )}
             {/* identifications - [] */}
@@ -203,12 +199,10 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
                     letter={RelationEnums.Type.SuperordinateLocation}
                   />
                 </StyledLetterIconWrap>
-                <StyledRelationTypeBlock>
-                  <EntityTooltipRelationTreeTable
-                    relationTreeArray={superordinateLocationTrees}
-                    entities={entities}
-                  />
-                </StyledRelationTypeBlock>
+                <EntityTooltipRelationTreeTable
+                  relationTreeArray={superordinateLocationTrees}
+                  entities={entities}
+                />
               </>
             )}
             {/* synonymCloud - string[] */}
