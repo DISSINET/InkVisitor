@@ -25,7 +25,17 @@ files_and_classes = [
    # {'file': input_path + 'types/relation.ts', 'class': 'Relation.IModel'},
     {'file': input_path + 'types/relation.ts', 'class': 'Relation.IIdentification'},
     {'file': input_path + 'types/relation.ts', 'class': 'Relation.IClassification'},
-    {'file': input_path + 'types/prop.ts', 'class': 'IProp'},
+    {'file': input_path + 'types/relation.ts', 'class': 'Relation.IImplication'},
+   {'file': input_path + 'types/relation.ts', 'class': 'Relation.ISynonym'},
+   {'file': input_path + 'types/relation.ts', 'class': 'Relation.IAntonym'},
+    {'file': input_path + 'types/relation.ts', 'class': 'Relation.IRelated'},
+    {'file': input_path + 'types/relation.ts', 'class': 'Relation.IActionEventEquivalent'},
+    {'file': input_path + 'types/relation.ts', 'class': 'Relation.ISubjectActant1Reciprocal'},
+    {'file': input_path + 'types/relation.ts', 'class': 'Relation.ISuperordinateLocation'},
+    {'file': input_path + 'types/relation.ts', 'class': 'Relation.IPropertyReciprocal'},
+    {'file': input_path + 'types/relation.ts', 'class': 'Relation.ISuperclass'},
+    {'file': input_path + 'types/relation.ts', 'class': 'Relation.IHolonymy'},
+  {'file': input_path + 'types/prop.ts', 'class': 'IProp'},
     {'file': input_path + 'types/value.ts', 'class': 'IValue'},
     {'file': input_path + 'types/action.ts', 'class': 'IAction'},
     {'file': input_path + 'types/user.ts', 'class': 'IUser'},
@@ -34,11 +44,13 @@ files_and_classes = [
 
 ]
 
-#files_and_classes = [
+files_and_classes = [
 #  {'file': input_path + 'types/relation.ts', 'class': 'Relation.IModel'},
 #  {'file': input_path + 'types/actant.ts', 'class': 'IActant'},
 #  {'file': input_path + 'types/relation.ts', 'class': 'Relation.IClassification'},
-#]
+  {'file': input_path + 'types/relation.ts', 'class': 'Relation.ISubjectActant1Reciprocal'},
+{'file': input_path + 'types/relation.ts', 'class': 'Relation.ISuperordinateLocation'},
+]
 
 for case in files_and_classes:
     # command = command_base + " " + case['file'] + " " + case['class'] + " " + params + " --id " + case['class'] + " --out " + output_path+case['class'] + '.schema.json'
