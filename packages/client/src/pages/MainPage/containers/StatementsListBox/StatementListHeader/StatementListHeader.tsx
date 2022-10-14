@@ -121,7 +121,10 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
             );
           })}
         <React.Fragment key="this-territory">
-          <StatementListBreadcrumbItem territoryId={territoryId} />
+          <StatementListBreadcrumbItem
+            territoryId={territoryId}
+            territoryData={data}
+          />
         </React.Fragment>
       </StyledHeaderBreadcrumbRow>
       <StyledHeaderRow>

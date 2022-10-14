@@ -1,5 +1,5 @@
 import { EntityEnums } from "@shared/enums";
-import { IEntity } from "@shared/types";
+import { IEntity, IResponseTerritory } from "@shared/types";
 import api from "api";
 import { Button, Loader } from "components";
 import { EntityTag } from "components/advanced";
@@ -14,6 +14,7 @@ import { StyledItemBox } from "./StatementListBreadcrumbItemStyles";
 
 interface StatementListBreadcrumbItem {
   territoryId: string;
+  territoryData?: IResponseTerritory;
 }
 const initialData: IEntity = {
   id: "",
@@ -29,23 +30,26 @@ const initialData: IEntity = {
 };
 export const StatementListBreadcrumbItem: React.FC<
   StatementListBreadcrumbItem
-> = ({ territoryId }) => {
+> = ({ territoryId, territoryData }) => {
   const { setTerritoryId, territoryId: paramsTerritoryId } = useSearchParams();
 
   const dispatch = useAppDispatch();
 
   const {
     status: territoryStatus,
-    data: territoryData,
+    data,
     error: territoryError,
-    isFetching: territoryIsFetching,
+    isFetching,
   } = useQuery(
     ["territory", territoryId],
     async () => {
       const res = await api.territoryGet(territoryId);
       return res.data;
     },
-    { enabled: !!territoryId && api.isLoggedIn() }
+    {
+      enabled:
+        !!territoryId && api.isLoggedIn() && paramsTerritoryId !== territoryId,
+    }
   );
 
   return (
@@ -54,7 +58,7 @@ export const StatementListBreadcrumbItem: React.FC<
         <StyledItemBox>
           <BsArrowRightShort />
           <EntityTag
-            entity={territoryData ? territoryData : initialData}
+            entity={territoryData || data || initialData}
             button={
               paramsTerritoryId !== territoryId && (
                 <Button
@@ -70,7 +74,7 @@ export const StatementListBreadcrumbItem: React.FC<
               )
             }
           />
-          <Loader show={territoryIsFetching && !territoryData} size={18} />
+          <Loader show={isFetching && !(data || territoryData)} size={18} />
         </StyledItemBox>
       )}
     </>

@@ -235,7 +235,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   } = useQuery(
     ["territory", "statement-editor", statementTerritoryId],
     async () => {
-      const res = await api.entitiesGet(statementTerritoryId as string);
+      const res = await api.territoryGet(statementTerritoryId as string);
       return res.data;
     },
     {
@@ -245,7 +245,9 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
   //TODO recurse to get all parents
   const territoryPath =
-    territoryData && Array(territoryData.data?.parent?.territoryId);
+    territoryData &&
+    territoryData.data?.parent &&
+    Array(territoryData.data?.parent?.territoryId);
 
   const userCanEdit: boolean = useMemo(() => {
     return (
@@ -512,7 +514,10 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 })}
               {territoryData && (
                 <React.Fragment key={territoryData.id}>
-                  <StatementListBreadcrumbItem territoryId={territoryData.id} />
+                  <StatementListBreadcrumbItem
+                    territoryId={territoryData.id}
+                    territoryData={territoryData}
+                  />
                 </React.Fragment>
               )}
               <Loader size={20} show={isFetchingTerritory} />
