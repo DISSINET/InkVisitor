@@ -235,6 +235,7 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
     );
   };
 
+  // TODO: tweak lifecycle - consistency when mouse out
   const renderContent = () => (
     <>
       {renderEntityInfo()}
