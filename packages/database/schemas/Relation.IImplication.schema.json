@@ -1,25 +1,10 @@
 {
-  "$ref": "#/definitions/Relation.IIdentification",
+  "$ref": "#/definitions/Relation.IImplication",
   "$schema": "http://json-schema.org/draft-07/schema#",
   "definitions": {
-    "EntityEnums.Certainty": {
-      "enum": [
-        "0",
-        "1",
-        "2",
-        "3",
-        "4",
-        "5",
-        "6"
-      ],
-      "type": "string"
-    },
-    "Relation.IIdentification": {
+    "Relation.IImplication": {
       "additionalProperties": false,
       "properties": {
-        "certainty": {
-          "$ref": "#/definitions/EntityEnums.Certainty"
-        },
         "entityIds": {
           "items": {
             "type": "string"
@@ -32,12 +17,11 @@
           "type": "string"
         },
         "type": {
-          "const": "IDE",
+          "const": "IMP",
           "type": "string"
         }
       },
       "required": [
-        "certainty",
         "entityIds",
         "id",
         "type"

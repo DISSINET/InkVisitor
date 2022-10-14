@@ -17,7 +17,7 @@
           "type": "string"
         },
         "type": {
-          "const": "C",
+          "const": "CLA",
           "type": "string"
         }
       },
