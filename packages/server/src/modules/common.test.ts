@@ -33,6 +33,9 @@ export const newMockRequest = (db: Db): IRequest => {
     getUserOrFail: () => {
       return new User({});
     },
+    baseUrl: "",
+    method: "GET",
+    route: { path: "/" }
   };
 };
 

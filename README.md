@@ -36,6 +36,7 @@ The other Entity types covered in the data model are:
 - **Concept**
 - **Person**
 - **Group**
+- **Being** (typically, animal)
 - **(Physical) Object**
 - **Location**
 - **Event**
