@@ -28,6 +28,7 @@
     "readline-sync": "^1.4.10",
     "rethinkdb": "^2.4.2",
     "rethinkdb-ts": "^2.4.18",
+    "ts-json-schema-generator": "^1.1.2",
     "ts-node": "^10.2.1",
     "tslib": "^2.4.0",
     "tunnel-ssh": "^4.1.4",
