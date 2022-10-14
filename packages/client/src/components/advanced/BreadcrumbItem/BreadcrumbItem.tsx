@@ -14,7 +14,7 @@ import { StyledItemBox } from "./BreadcrumbItemStyles";
 
 interface BreadcrumbItem {
   territoryId: string;
-  // If the territory is in URL, territory data needs to BE send!!!
+  // If the territory is in params (territory), territory data needs to be added to props!!!
   territoryData?: IResponseTerritory;
 }
 const initialData: IEntity = {
@@ -71,7 +71,7 @@ export const BreadcrumbItem: React.FC<BreadcrumbItem> = ({
               )
             }
           />
-          <Loader show={isFetching && !(data || territoryData)} size={18} />
+          <Loader show={isFetching} size={18} />
         </StyledItemBox>
       )}
     </>
