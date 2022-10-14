@@ -31,6 +31,7 @@ import {
   StyledDetailForm,
   StyledFormWrapper,
   StyledRelativePosition,
+  StyledTagWrap,
 } from "../EntityDetailStyles";
 
 interface EntityDetailFormSection {
@@ -199,18 +200,21 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                 Parent Territory
               </StyledDetailContentRowLabel>
               <StyledDetailContentRowValue>
-                <EntityTag
-                  entity={entity.entities[entity.data.parent.territoryId]}
-                  disableDoubleClick={
-                    entity.data.parent.territoryId === rootTerritoryId
-                  }
-                  disableDrag={
-                    entity.data.parent.territoryId === rootTerritoryId
-                  }
-                  disableTooltip={
-                    entity.data.parent.territoryId === rootTerritoryId
-                  }
-                />
+                <StyledTagWrap>
+                  <EntityTag
+                    fullWidth
+                    entity={entity.entities[entity.data.parent.territoryId]}
+                    disableDoubleClick={
+                      entity.data.parent.territoryId === rootTerritoryId
+                    }
+                    disableDrag={
+                      entity.data.parent.territoryId === rootTerritoryId
+                    }
+                    disableTooltip={
+                      entity.data.parent.territoryId === rootTerritoryId
+                    }
+                  />
+                </StyledTagWrap>
               </StyledDetailContentRowValue>
             </StyledDetailContentRow>
           )}
