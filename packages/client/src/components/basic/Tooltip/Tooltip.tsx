@@ -26,6 +26,7 @@ interface Tooltip {
   offsetY?: number;
   //
   tagGroup?: boolean;
+  onClose?: () => void;
 }
 export const Tooltip: React.FC<Tooltip> = ({
   children,
@@ -41,6 +42,7 @@ export const Tooltip: React.FC<Tooltip> = ({
   noArrow = false,
 
   tagGroup = false,
+  onClose,
 }) => {
   return (
     <StyledPopup
@@ -53,7 +55,8 @@ export const Tooltip: React.FC<Tooltip> = ({
       arrow={!noArrow}
       offsetX={offsetX}
       offsetY={offsetY}
-      repositionOnResize
+      onClose={onClose}
+      keepTooltipInside
     >
       <div>
         {label && (

@@ -63,10 +63,15 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
 
   tagHovered,
 }) => {
-  const { data: tooltipData, isFetching } = useQuery(
+  const [tooltipData, setTooltipData] = useState<
+    EntityTooltipNamespace.IResponse | false
+  >(false);
+
+  const { data, isFetching, isSuccess } = useQuery(
     ["tooltip", entityId, tagHovered],
     async () => {
       const res = await api.tooltipGet(entityId);
+      setTooltipData(res.data);
       return res.data;
     },
     {
@@ -163,9 +168,9 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
                     // TODO: show class in text
                     return (
                       <React.Fragment key={key}>
-                        {`${entity.label} (`}
+                        {`${entity?.label} (`}
                         {/* <div style={{ textTransform: "uppercase" }}> */}
-                        {certaintyDict[identification.certainty].label}
+                        {certaintyDict[identification.certainty]?.label}
                         {/* </div> */}
                         {`)${key !== identifications.length - 1 ? ", " : ""}`}
                       </React.Fragment>
@@ -219,7 +224,7 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
                     const entity = entities[synonym];
                     return (
                       <React.Fragment key={key}>
-                        {`${entity.label}${
+                        {`${entity?.label}${
                           key !== synonymCloud.length - 1 ? ", " : ""
                         }`}
                       </React.Fragment>
@@ -235,7 +240,7 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
     );
   };
 
-  // TODO: tweak lifecycle - consistency when mouse out
+  // TODO: tweak lifecycle - consistency when loading (check arrow)
   const renderContent = () => (
     <>
       {renderEntityInfo()}
@@ -253,6 +258,7 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
       disabled={disabled}
       offsetX={offsetX}
       offsetY={offsetY}
+      onClose={() => setTooltipData(false)}
     >
       <StyledTooltipSeparator>{children}</StyledTooltipSeparator>
     </Tooltip>
