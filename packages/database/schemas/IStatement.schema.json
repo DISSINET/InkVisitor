@@ -1,479 +1,293 @@
 {
-    "$id": "IStatement",
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "additionalProperties": false,
-    "defaultProperties": [],
-    "definitions": {
-        "Certainty": {
-            "enum": [
-                "0",
-                "1",
-                "2",
-                "3",
-                "4",
-                "5",
-                "6"
-            ],
-            "type": "string"
-        },
-        "Elvl": {
-            "enum": [
-                "1",
-                "2",
-                "3"
-            ],
-            "type": "string"
-        },
-        "EntityStatus": {
-            "enum": [
-                "0",
-                "1",
-                "2",
-                "3"
-            ],
-            "type": "string"
-        },
-        "IProp": {
-            "additionalProperties": false,
-            "defaultProperties": [],
-            "properties": {
-                "bundleEnd": {
-                    "type": "boolean"
-                },
-                "bundleOperator": {
-                    "$ref": "IStatement#/definitions/Operator"
-                },
-                "bundleStart": {
-                    "type": "boolean"
-                },
-                "certainty": {
-                    "$ref": "IStatement#/definitions/Certainty"
-                },
-                "children": {
-                    "items": {
-                        "$ref": "IStatement#/definitions/IProp"
-                    },
-                    "type": "array"
-                },
-                "elvl": {
-                    "$ref": "IStatement#/definitions/Elvl"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "logic": {
-                    "$ref": "IStatement#/definitions/Logic"
-                },
-                "mood": {
-                    "items": {
-                        "enum": [
-                            "1",
-                            "10",
-                            "11",
-                            "12",
-                            "13",
-                            "2",
-                            "3",
-                            "4",
-                            "5",
-                            "6",
-                            "7",
-                            "8",
-                            "9"
-                        ],
-                        "type": "string"
-                    },
-                    "type": "array"
-                },
-                "moodvariant": {
-                    "$ref": "IStatement#/definitions/MoodVariant"
-                },
-                "type": {
-                    "$ref": "IStatement#/definitions/IPropSpec"
-                },
-                "value": {
-                    "$ref": "IStatement#/definitions/IPropSpec"
-                }
-            },
-            "required": [
-                "bundleEnd",
-                "bundleOperator",
-                "bundleStart",
-                "certainty",
-                "children",
-                "elvl",
-                "id",
-                "logic",
-                "mood",
-                "moodvariant",
-                "type",
-                "value"
-            ],
-            "type": "object"
-        },
-        "IPropSpec": {
-            "additionalProperties": false,
-            "defaultProperties": [],
-            "properties": {
-                "elvl": {
-                    "$ref": "IStatement#/definitions/Elvl"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "logic": {
-                    "$ref": "IStatement#/definitions/Logic"
-                },
-                "partitivity": {
-                    "$ref": "IStatement#/definitions/Partitivity"
-                },
-                "virtuality": {
-                    "$ref": "IStatement#/definitions/Virtuality"
-                }
-            },
-            "required": [
-                "elvl",
-                "id",
-                "logic",
-                "partitivity",
-                "virtuality"
-            ],
-            "type": "object"
-        },
-        "IReference": {
-            "additionalProperties": false,
-            "defaultProperties": [],
-            "properties": {
-                "id": {
-                    "type": "string"
-                },
-                "resource": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "id",
-                "resource",
-                "value"
-            ],
-            "type": "object"
-        },
-        "IStatementActant": {
-            "additionalProperties": false,
-            "defaultProperties": [],
-            "properties": {
-                "actant": {
-                    "type": "string"
-                },
-                "bundleEnd": {
-                    "type": "boolean"
-                },
-                "bundleOperator": {
-                    "$ref": "IStatement#/definitions/Operator"
-                },
-                "bundleStart": {
-                    "type": "boolean"
-                },
-                "elvl": {
-                    "$ref": "IStatement#/definitions/Elvl"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "logic": {
-                    "$ref": "IStatement#/definitions/Logic"
-                },
-                "partitivity": {
-                    "$ref": "IStatement#/definitions/Partitivity"
-                },
-                "position": {
-                    "$ref": "IStatement#/definitions/Position"
-                },
-                "props": {
-                    "items": {
-                        "$ref": "IStatement#/definitions/IProp"
-                    },
-                    "type": "array"
-                },
-                "virtuality": {
-                    "$ref": "IStatement#/definitions/Virtuality"
-                }
-            },
-            "required": [
-                "actant",
-                "bundleEnd",
-                "bundleOperator",
-                "bundleStart",
-                "elvl",
-                "id",
-                "logic",
-                "partitivity",
-                "position",
-                "props",
-                "virtuality"
-            ],
-            "type": "object"
-        },
-        "IStatementAction": {
-            "additionalProperties": false,
-            "defaultProperties": [],
-            "properties": {
-                "action": {
-                    "type": "string"
-                },
-                "bundleEnd": {
-                    "type": "boolean"
-                },
-                "bundleOperator": {
-                    "$ref": "IStatement#/definitions/Operator"
-                },
-                "bundleStart": {
-                    "type": "boolean"
-                },
-                "certainty": {
-                    "$ref": "IStatement#/definitions/Certainty"
-                },
-                "elvl": {
-                    "$ref": "IStatement#/definitions/Elvl"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "logic": {
-                    "$ref": "IStatement#/definitions/Logic"
-                },
-                "mood": {
-                    "items": {
-                        "enum": [
-                            "1",
-                            "10",
-                            "11",
-                            "12",
-                            "13",
-                            "2",
-                            "3",
-                            "4",
-                            "5",
-                            "6",
-                            "7",
-                            "8",
-                            "9"
-                        ],
-                        "type": "string"
-                    },
-                    "type": "array"
-                },
-                "moodvariant": {
-                    "$ref": "IStatement#/definitions/MoodVariant"
-                },
-                "props": {
-                    "items": {
-                        "$ref": "IStatement#/definitions/IProp"
-                    },
-                    "type": "array"
-                }
-            },
-            "required": [
-                "action",
-                "bundleEnd",
-                "bundleOperator",
-                "bundleStart",
-                "certainty",
-                "elvl",
-                "id",
-                "logic",
-                "mood",
-                "moodvariant",
-                "props"
-            ],
-            "type": "object"
-        },
-        "IStatementData": {
-            "additionalProperties": false,
-            "defaultProperties": [],
-            "properties": {
-                "actants": {
-                    "items": {
-                        "$ref": "IStatement#/definitions/IStatementActant"
-                    },
-                    "type": "array"
-                },
-                "actions": {
-                    "items": {
-                        "$ref": "IStatement#/definitions/IStatementAction"
-                    },
-                    "type": "array"
-                },
-                "tags": {
-                    "items": {
-                        "type": "string"
-                    },
-                    "type": "array"
-                },
-                "territory": {
-                    "additionalProperties": false,
-                    "defaultProperties": [],
-                    "properties": {
-                        "id": {
-                            "type": "string"
-                        },
-                        "order": {
-                            "type": "number"
-                        }
-                    },
-                    "required": [
-                        "id",
-                        "order"
-                    ],
-                    "type": "object"
-                },
-                "text": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "actants",
-                "actions",
-                "tags",
-                "text"
-            ],
-            "type": "object"
-        },
-        "Language": {
-            "enum": [
-                "",
-                "ces",
-                "deu",
-                "eng",
-                "enm",
-                "fra",
-                "ita",
-                "lat",
-                "oci"
-            ],
-            "type": "string"
-        },
-        "Logic": {
-            "enum": [
-                "1",
-                "2"
-            ],
-            "type": "string"
-        },
-        "MoodVariant": {
-            "enum": [
-                "1",
-                "2",
-                "3"
-            ],
-            "type": "string"
-        },
-        "Operator": {
-            "enum": [
-                "<",
-                "<=",
-                "=",
-                ">",
-                ">=",
-                "a",
-                "o",
-                "x"
-            ],
-            "type": "string"
-        },
-        "Partitivity": {
-            "enum": [
-                "1",
-                "2",
-                "3",
-                "4",
-                "5"
-            ],
-            "type": "string"
-        },
-        "Position": {
-            "enum": [
-                "a1",
-                "a2",
-                "p",
-                "s"
-            ],
-            "type": "string"
-        },
-        "Virtuality": {
-            "enum": [
-                "1",
-                "2",
-                "3",
-                "4",
-                "5",
-                "6"
-            ],
-            "type": "string"
-        }
+  "$ref": "#/definitions/IStatement",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "EntityEnums.Certainty": {
+      "enum": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6"
+      ],
+      "type": "string"
     },
-    "properties": {
-        "class": {
-            "enum": [
-                "S"
-            ],
-            "type": "string"
+    "EntityEnums.Elvl": {
+      "enum": [
+        "1",
+        "2",
+        "3"
+      ],
+      "type": "string"
+    },
+    "EntityEnums.Language": {
+      "enum": [
+        "",
+        "lat",
+        "eng",
+        "enm",
+        "oci",
+        "ces",
+        "ita",
+        "fra",
+        "deu"
+      ],
+      "type": "string"
+    },
+    "EntityEnums.Logic": {
+      "enum": [
+        "1",
+        "2"
+      ],
+      "type": "string"
+    },
+    "EntityEnums.Mood": {
+      "enum": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12",
+        "13"
+      ],
+      "type": "string"
+    },
+    "EntityEnums.MoodVariant": {
+      "enum": [
+        "1",
+        "2",
+        "3"
+      ],
+      "type": "string"
+    },
+    "EntityEnums.Operator": {
+      "enum": [
+        "x",
+        "a",
+        "o",
+        ">",
+        ">=",
+        "=",
+        "<=",
+        "<"
+      ],
+      "type": "string"
+    },
+    "EntityEnums.Partitivity": {
+      "enum": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5"
+      ],
+      "type": "string"
+    },
+    "EntityEnums.Position": {
+      "enum": [
+        "s",
+        "a1",
+        "a2",
+        "pa"
+      ],
+      "type": "string"
+    },
+    "EntityEnums.Status": {
+      "enum": [
+        "0",
+        "1",
+        "2",
+        "3"
+      ],
+      "type": "string"
+    },
+    "EntityEnums.Virtuality": {
+      "enum": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6"
+      ],
+      "type": "string"
+    },
+    "IProp": {
+      "additionalProperties": false,
+      "properties": {
+        "bundleEnd": {
+          "type": "boolean"
         },
-        "data": {
-            "$ref": "IStatement#/definitions/IStatementData"
+        "bundleOperator": {
+          "$ref": "#/definitions/EntityEnums.Operator"
         },
-        "detail": {
-            "type": "string"
+        "bundleStart": {
+          "type": "boolean"
+        },
+        "certainty": {
+          "$ref": "#/definitions/EntityEnums.Certainty"
+        },
+        "children": {
+          "items": {
+            "$ref": "#/definitions/IProp"
+          },
+          "type": "array"
+        },
+        "elvl": {
+          "$ref": "#/definitions/EntityEnums.Elvl"
         },
         "id": {
-            "type": "string"
+          "type": "string"
+        },
+        "logic": {
+          "$ref": "#/definitions/EntityEnums.Logic"
+        },
+        "mood": {
+          "items": {
+            "$ref": "#/definitions/EntityEnums.Mood"
+          },
+          "type": "array"
+        },
+        "moodvariant": {
+          "$ref": "#/definitions/EntityEnums.MoodVariant"
+        },
+        "type": {
+          "$ref": "#/definitions/IPropSpec"
+        },
+        "value": {
+          "$ref": "#/definitions/IPropSpec"
+        }
+      },
+      "required": [
+        "id",
+        "elvl",
+        "certainty",
+        "logic",
+        "mood",
+        "moodvariant",
+        "bundleOperator",
+        "bundleStart",
+        "bundleEnd",
+        "children",
+        "type",
+        "value"
+      ],
+      "type": "object"
+    },
+    "IPropSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "elvl": {
+          "$ref": "#/definitions/EntityEnums.Elvl"
+        },
+        "entityId": {
+          "type": "string"
+        },
+        "logic": {
+          "$ref": "#/definitions/EntityEnums.Logic"
+        },
+        "partitivity": {
+          "$ref": "#/definitions/EntityEnums.Partitivity"
+        },
+        "virtuality": {
+          "$ref": "#/definitions/EntityEnums.Virtuality"
+        }
+      },
+      "required": [
+        "entityId",
+        "elvl",
+        "logic",
+        "virtuality",
+        "partitivity"
+      ],
+      "type": "object"
+    },
+    "IReference": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "resource": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "resource",
+        "value"
+      ],
+      "type": "object"
+    },
+    "IStatement": {
+      "additionalProperties": false,
+      "properties": {
+        "class": {
+          "const": "S",
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/definitions/IStatementData"
+        },
+        "detail": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
         },
         "isTemplate": {
-            "type": "boolean"
+          "type": "boolean"
         },
         "label": {
-            "type": "string"
+          "type": "string"
         },
         "language": {
-            "$ref": "IStatement#/definitions/Language"
+          "$ref": "#/definitions/EntityEnums.Language"
         },
         "legacyId": {
-            "type": "string"
+          "type": "string"
         },
         "notes": {
-            "items": {
-                "type": "string"
-            },
-            "type": "array"
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
         },
         "props": {
-            "items": {
-                "$ref": "IStatement#/definitions/IProp"
-            },
-            "type": "array"
+          "items": {
+            "$ref": "#/definitions/IProp"
+          },
+          "type": "array"
         },
         "references": {
-            "items": {
-                "$ref": "IStatement#/definitions/IReference"
-            },
-            "type": "array"
+          "items": {
+            "$ref": "#/definitions/IReference"
+          },
+          "type": "array"
         },
         "status": {
-            "$ref": "IStatement#/definitions/EntityStatus"
+          "$ref": "#/definitions/EntityEnums.Status"
         },
         "templateData": {
-            "additionalProperties": true,
-            "properties": {},
-            "type": "object"
+          "type": "object"
         },
         "usedTemplate": {
-            "type": "boolean"
+          "type": "string"
         }
-    },
-    "required": [
+      },
+      "required": [
         "class",
         "data",
         "detail",
@@ -484,7 +298,265 @@
         "props",
         "references",
         "status"
-    ],
-    "type": "object"
+      ],
+      "type": "object"
+    },
+    "IStatementActant": {
+      "additionalProperties": false,
+      "properties": {
+        "bundleEnd": {
+          "type": "boolean"
+        },
+        "bundleOperator": {
+          "$ref": "#/definitions/EntityEnums.Operator"
+        },
+        "bundleStart": {
+          "type": "boolean"
+        },
+        "classifications": {
+          "items": {
+            "$ref": "#/definitions/IStatementClassification"
+          },
+          "type": "array"
+        },
+        "elvl": {
+          "$ref": "#/definitions/EntityEnums.Elvl"
+        },
+        "entityId": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "identifications": {
+          "items": {
+            "$ref": "#/definitions/IStatementIdentification"
+          },
+          "type": "array"
+        },
+        "logic": {
+          "$ref": "#/definitions/EntityEnums.Logic"
+        },
+        "partitivity": {
+          "$ref": "#/definitions/EntityEnums.Partitivity"
+        },
+        "position": {
+          "$ref": "#/definitions/EntityEnums.Position"
+        },
+        "props": {
+          "items": {
+            "$ref": "#/definitions/IProp"
+          },
+          "type": "array"
+        },
+        "virtuality": {
+          "$ref": "#/definitions/EntityEnums.Virtuality"
+        }
+      },
+      "required": [
+        "id",
+        "entityId",
+        "position",
+        "elvl",
+        "logic",
+        "virtuality",
+        "partitivity",
+        "bundleOperator",
+        "bundleStart",
+        "bundleEnd",
+        "props",
+        "classifications",
+        "identifications"
+      ],
+      "type": "object"
+    },
+    "IStatementAction": {
+      "additionalProperties": false,
+      "properties": {
+        "actionId": {
+          "type": "string"
+        },
+        "bundleEnd": {
+          "type": "boolean"
+        },
+        "bundleOperator": {
+          "$ref": "#/definitions/EntityEnums.Operator"
+        },
+        "bundleStart": {
+          "type": "boolean"
+        },
+        "certainty": {
+          "$ref": "#/definitions/EntityEnums.Certainty"
+        },
+        "elvl": {
+          "$ref": "#/definitions/EntityEnums.Elvl"
+        },
+        "id": {
+          "type": "string"
+        },
+        "logic": {
+          "$ref": "#/definitions/EntityEnums.Logic"
+        },
+        "mood": {
+          "items": {
+            "$ref": "#/definitions/EntityEnums.Mood"
+          },
+          "type": "array"
+        },
+        "moodvariant": {
+          "$ref": "#/definitions/EntityEnums.MoodVariant"
+        },
+        "props": {
+          "items": {
+            "$ref": "#/definitions/IProp"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "actionId",
+        "elvl",
+        "certainty",
+        "logic",
+        "mood",
+        "moodvariant",
+        "bundleOperator",
+        "bundleStart",
+        "bundleEnd",
+        "props"
+      ],
+      "type": "object"
+    },
+    "IStatementClassification": {
+      "additionalProperties": false,
+      "properties": {
+        "certainty": {
+          "$ref": "#/definitions/EntityEnums.Certainty"
+        },
+        "elvl": {
+          "$ref": "#/definitions/EntityEnums.Elvl"
+        },
+        "entityId": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "logic": {
+          "$ref": "#/definitions/EntityEnums.Logic"
+        },
+        "mood": {
+          "items": {
+            "$ref": "#/definitions/EntityEnums.Mood"
+          },
+          "type": "array"
+        },
+        "moodvariant": {
+          "$ref": "#/definitions/EntityEnums.MoodVariant"
+        }
+      },
+      "required": [
+        "id",
+        "entityId",
+        "elvl",
+        "logic",
+        "certainty",
+        "mood",
+        "moodvariant"
+      ],
+      "type": "object"
+    },
+    "IStatementData": {
+      "additionalProperties": false,
+      "properties": {
+        "actants": {
+          "items": {
+            "$ref": "#/definitions/IStatementActant"
+          },
+          "type": "array"
+        },
+        "actions": {
+          "items": {
+            "$ref": "#/definitions/IStatementAction"
+          },
+          "type": "array"
+        },
+        "tags": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "territory": {
+          "$ref": "#/definitions/IStatementDataTerritory"
+        },
+        "text": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "text",
+        "actions",
+        "actants",
+        "tags"
+      ],
+      "type": "object"
+    },
+    "IStatementDataTerritory": {
+      "additionalProperties": false,
+      "properties": {
+        "order": {
+          "type": "number"
+        },
+        "territoryId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "territoryId",
+        "order"
+      ],
+      "type": "object"
+    },
+    "IStatementIdentification": {
+      "additionalProperties": false,
+      "properties": {
+        "certainty": {
+          "$ref": "#/definitions/EntityEnums.Certainty"
+        },
+        "elvl": {
+          "$ref": "#/definitions/EntityEnums.Elvl"
+        },
+        "entityId": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "logic": {
+          "$ref": "#/definitions/EntityEnums.Logic"
+        },
+        "mood": {
+          "items": {
+            "$ref": "#/definitions/EntityEnums.Mood"
+          },
+          "type": "array"
+        },
+        "moodvariant": {
+          "$ref": "#/definitions/EntityEnums.MoodVariant"
+        }
+      },
+      "required": [
+        "id",
+        "entityId",
+        "elvl",
+        "logic",
+        "certainty",
+        "mood",
+        "moodvariant"
+      ],
+      "type": "object"
+    }
+  }
 }
-
