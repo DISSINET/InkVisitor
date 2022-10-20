@@ -126,24 +126,28 @@ const MainPage: React.FC<MainPage> = ({}) => {
   // TODO: use percentage heights in getHeight fn
   // percentage when three panels opened
   const fourthPanelBoxesHeightThirds = {
-    search: 37,
-    bookmarks: 30,
+    search: 40,
+    bookmarks: 27,
     templates: 33,
   };
 
   const getFourthPanelBoxHeight = (box: FourthPanelBoxes): number => {
+    const onePercent = contentHeight / 100;
+
     const isThisBoxHidden = !fourthPanelBoxesOpened[box];
     const openBoxesCount = Object.values(fourthPanelBoxesOpened).filter(
       (b) => b === true
     );
 
     if (!fourthPanelExpanded) {
+      // Hidden panel state
       return contentHeight / 3;
     } else if (isThisBoxHidden) {
       return hiddenBoxHeight;
     } else {
       if (openBoxesCount.length === 3) {
-        return contentHeight / 3;
+        return fourthPanelBoxesHeightThirds[box] * onePercent;
+        // return contentHeight / 3;
       } else if (openBoxesCount.length === 2) {
         return (contentHeight - hiddenBoxHeight) / 2;
       } else {
