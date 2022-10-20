@@ -1,9 +1,8 @@
-import React, { ReactElement } from "react";
+import React, { ReactElement, useState } from "react";
 import { EventType, PopupPosition } from "reactjs-popup/dist/types";
 import { Colors } from "types";
 import {
   StyledContentWrap,
-  StyledItemsWrap,
   StyledLabel,
   StyledPopup,
   StyledRow,
@@ -26,6 +25,7 @@ interface Tooltip {
   offsetY?: number;
   //
   tagGroup?: boolean;
+  onOpen?: () => void;
   onClose?: () => void;
 }
 export const Tooltip: React.FC<Tooltip> = ({
@@ -42,6 +42,7 @@ export const Tooltip: React.FC<Tooltip> = ({
   noArrow = false,
 
   tagGroup = false,
+  onOpen,
   onClose,
 }) => {
   return (
@@ -55,7 +56,8 @@ export const Tooltip: React.FC<Tooltip> = ({
       arrow={!noArrow}
       offsetX={offsetX}
       offsetY={offsetY}
-      onClose={onClose}
+      onOpen={() => onOpen}
+      onClose={() => onClose}
       keepTooltipInside
     >
       <div>
