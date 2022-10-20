@@ -74,10 +74,10 @@ export const StyledLabel = styled.div<StyledLabel>`
     fullWidth ? "100%" : theme.space[52]};
 `;
 
-interface ButtonWrapper {
+interface StyledButtonWrapper {
   status: string;
 }
-export const ButtonWrapper = styled.div<ButtonWrapper>`
+export const StyledButtonWrapper = styled.div<StyledButtonWrapper>`
   display: flex;
   button {
     border-width: 0;

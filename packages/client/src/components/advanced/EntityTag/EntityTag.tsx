@@ -1,10 +1,8 @@
 import { EntityEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
-import api from "api";
 import { Tag } from "components";
 import { EntityTooltip } from "components/advanced";
 import React, { ReactNode, useState } from "react";
-import { useQuery } from "react-query";
 import { PopupPosition } from "reactjs-popup/dist/types";
 import { DragItem } from "types";
 import { getEntityLabel } from "utils";
@@ -52,6 +50,7 @@ export const EntityTag: React.FC<EntityTag> = ({
 }) => {
   const classId = entity.class;
   const [tagHovered, setTagHovered] = useState(false);
+  const [buttonHovered, setButtonHovered] = useState(false);
 
   return (
     <EntityTooltip
@@ -61,7 +60,7 @@ export const EntityTag: React.FC<EntityTag> = ({
       text={tooltipText}
       itemsCount={statementsCount}
       position={tooltipPosition}
-      disabled={disableTooltip}
+      disabled={disableTooltip || buttonHovered}
       tagHovered={tagHovered}
     >
       <Tag
@@ -90,6 +89,8 @@ export const EntityTag: React.FC<EntityTag> = ({
         isFavorited={isFavorited}
         onMouseOver={() => setTagHovered(true)}
         onMouseOut={() => setTagHovered(false)}
+        onButtonOver={() => setButtonHovered(true)}
+        onButtonOut={() => setButtonHovered(false)}
       />
     </EntityTooltip>
   );

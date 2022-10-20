@@ -18,7 +18,7 @@ import {
 } from "types";
 import { dndHoverFn } from "utils";
 import {
-  ButtonWrapper,
+  StyledButtonWrapper,
   StyledEntityTag,
   StyledLabel,
   StyledTagWrapper,
@@ -54,6 +54,8 @@ interface TagProps {
 
   onMouseOver?: React.MouseEventHandler<HTMLDivElement>;
   onMouseOut?: React.MouseEventHandler<HTMLDivElement>;
+  onButtonOver?: React.MouseEventHandler<HTMLDivElement>;
+  onButtonOut?: React.MouseEventHandler<HTMLDivElement>;
 }
 
 export const Tag: React.FC<TagProps> = ({
@@ -83,6 +85,8 @@ export const Tag: React.FC<TagProps> = ({
 
   onMouseOver,
   onMouseOut,
+  onButtonOver,
+  onButtonOut,
 }) => {
   const { appendDetailId } = useSearchParams();
   const dispatch = useAppDispatch();
@@ -144,7 +148,13 @@ export const Tag: React.FC<TagProps> = ({
     </StyledEntityTag>
   );
   const renderButton = () => (
-    <ButtonWrapper status={status}>{button}</ButtonWrapper>
+    <StyledButtonWrapper
+      status={status}
+      onMouseOver={onButtonOver}
+      onMouseOut={onButtonOut}
+    >
+      {button}
+    </StyledButtonWrapper>
   );
 
   const onDoubleClick = (e: React.MouseEvent) => {
