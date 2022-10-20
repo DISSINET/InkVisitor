@@ -102,7 +102,7 @@ export const RightHeader: React.FC<RightHeaderProps> = React.memo(
     const menuToggleRef = useRef() as React.MutableRefObject<HTMLButtonElement>;
 
     const handleClick = (e: any) => {
-      console.log(menuToggleRef);
+      // console.log(menuToggleRef);
       if (
         menuRef.current &&
         !(menuRef.current as any).contains(e.target) &&
