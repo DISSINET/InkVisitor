@@ -52,25 +52,6 @@ export const EntityTag: React.FC<EntityTag> = ({
 }) => {
   const classId = entity.class;
 
-  // for testing
-  if (entity.id === "c211" || entity.id === "l1200") {
-    const { data: tooltipData } = useQuery(
-      ["tooltip", entity.id],
-      async () => {
-        const res = await api.tooltipGet(entity.id);
-        return res.data;
-      },
-      {
-        enabled: api.isLoggedIn(),
-      }
-    );
-
-    if (tooltipData) {
-      console.log(tooltipData);
-      console.log(tooltipData.superclassTrees);
-    }
-  }
-
   return (
     <EntityTooltip
       position={tooltipPosition}
