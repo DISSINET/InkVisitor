@@ -12,7 +12,11 @@ import { setFourthPanelBoxesOpened } from "redux/features/layout/fourthPanelBoxe
 import { setFourthPanelExpanded } from "redux/features/layout/fourthPanelExpandedSlice";
 import { setStatementListOpened } from "redux/features/layout/statementListOpenedSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { collapsedPanelWidth, hiddenBoxHeight } from "Theme/constants";
+import {
+  collapsedPanelWidth,
+  fourthPanelBoxesHeightThirds,
+  hiddenBoxHeight,
+} from "Theme/constants";
 import { MemoizedEntityBookmarkBox } from "./containers/EntityBookmarkBox/EntityBookmarkBox";
 import { MemoizedEntityDetailBox } from "./containers/EntityDetailBox/EntityDetailBox";
 import { MemoizedEntitySearchBox } from "./containers/EntitySearchBox/EntitySearchBox";
@@ -123,14 +127,6 @@ const MainPage: React.FC<MainPage> = ({}) => {
     );
   };
 
-  // TODO: use percentage heights in getHeight fn
-  // percentage when three panels opened
-  const fourthPanelBoxesHeightThirds = {
-    search: 40,
-    bookmarks: 27,
-    templates: 33,
-  };
-
   const getFourthPanelBoxHeight = (box: FourthPanelBoxes): number => {
     const onePercent = contentHeight / 100;
 
@@ -147,7 +143,6 @@ const MainPage: React.FC<MainPage> = ({}) => {
     } else {
       if (openBoxesCount.length === 3) {
         return fourthPanelBoxesHeightThirds[box] * onePercent;
-        // return contentHeight / 3;
       } else if (openBoxesCount.length === 2) {
         return (contentHeight - hiddenBoxHeight) / 2;
       } else {
