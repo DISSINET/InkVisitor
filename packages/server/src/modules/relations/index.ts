@@ -47,8 +47,8 @@ export default Router()
 
       await request.db.lock();
 
-      const entities = await Entity.findEntitiesByIds(request.db.connection, model.entityIds)
-      if (entities.length !== model.entityIds.length) {
+      model.entities = await Entity.findEntitiesByIds(request.db.connection, model.entityIds)
+      if (model.entities.length !== model.entityIds.length) {
         throw new ModelNotValidError("entity(ies) not found");
       }
 
