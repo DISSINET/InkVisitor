@@ -1,11 +1,13 @@
 import { IDbModel, IModel } from "@models/common";
 import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
-import { Relation as RelationTypes } from "@shared/types";
-import { DbEnums, RelationEnums, UserEnums } from "@shared/enums";
+import { IEntity, Relation as RelationTypes } from "@shared/types";
+import { DbEnums, EntityEnums, RelationEnums, UserEnums } from "@shared/enums";
 import { EnumValidators } from "@shared/enums";
-import { InternalServerError } from "@shared/types/errors";
+import { InternalServerError, ModelNotValidError } from "@shared/types/errors";
 import User from "@models/user/user";
 import { IRequest } from "src/custom_typings/request";
+import { nonenumerable } from "@common/decorators";
+import Entity from "@models/entity/entity";
 
 export interface IRelationModel extends RelationTypes.IRelation, IDbModel {
   beforeSave(request: IRequest): Promise<void>
@@ -19,10 +21,27 @@ export default class Relation implements IRelationModel {
   type: RelationEnums.Type;
   entityIds: string[];
 
+  @nonenumerable
+  entities?: IEntity[]; // holds preloaded entities for checks
+
   constructor(data: Partial<RelationTypes.IRelation>) {
     this.id = data.id || "";
     this.type = data.type as RelationEnums.Type;
     this.entityIds = data.entityIds || [];
+  }
+
+  /**
+  * areEntitiesValid checks if entities have acceptable classes
+  * @returns 
+  */
+  areEntitiesValid(): Error | null {
+    for (const entity of this.entities || []) {
+      if (Object.values(EntityEnums.Class).indexOf(entity.class) === -1) {
+        return new ModelNotValidError(`Entity '${entity.id}' does not have valid class`);
+      }
+    }
+
+    return null;
   }
 
   async afterSave(request: IRequest): Promise<void> {
@@ -30,7 +49,14 @@ export default class Relation implements IRelationModel {
   }
 
   async beforeSave(request: IRequest): Promise<void> {
+    if (!this.entities) {
+      this.entities = await Entity.findEntitiesByIds(request.db.connection, this.entityIds)
+    }
 
+    const err = this.areEntitiesValid();
+    if (err) {
+      throw err;
+    }
   }
 
   async save(db: Connection | undefined): Promise<WriteResult> {
@@ -78,19 +104,22 @@ export default class Relation implements IRelationModel {
    * @returns 
    */
   isValid(): boolean {
+    // is must be string or undefined
     if (typeof this.id !== "string" && this.id !== undefined) {
       return false;
     }
 
+    // default test for relation type
     if (!EnumValidators.IsValidRelationType(this.type)) {
       return false;
     }
 
-    if (this.entityIds === undefined) {
-      return false;
-    }
-
-    if (this.entityIds.constructor.name !== "Array" || this.entityIds.length < 2 || !this.entityIds.reduce((acc, cur) => acc && typeof cur === 'string', true)) {
+    // entityIds must be [] with at least 2 strings
+    if (this.entityIds === undefined ||
+      this.entityIds.constructor.name !== "Array" ||
+      this.entityIds.length < 2 ||
+      !this.entityIds.reduce((acc, eId) => acc && typeof eId === 'string', true)
+    ) {
       return false;
     }
 
