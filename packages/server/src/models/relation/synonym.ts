@@ -54,6 +54,7 @@ export default class Synonym extends Relation implements RelationTypes.ISynonym 
       if (!this.hasEntityCorrectClass(entityId, [EntityEnums.Class.Action, EntityEnums.Class.Concept])) {
         return new ModelNotValidError(`Entity '${entityId}' mush have class '${EntityEnums.Class.Action}' or '${EntityEnums.Class.Concept}'`)
       }
+      
       if (prevClass === undefined) {
         prevClass = entity.class;
       }
