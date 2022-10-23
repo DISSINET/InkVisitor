@@ -21,14 +21,9 @@ export default class Identification extends Relation implements RelationTypes.II
   * @returns 
   */
   areEntitiesValid(): Error | null {
-    if (this.entityIds.length !== 2) {
-      return new ModelNotValidError("# of entities should be 2");
-    }
-
-    for (let i = 0; i < this.entityIds.length; i++) {
-      const entityClass = this.entities?.find(e => e.id === this.entityIds[i])?.class || "" as EntityEnums.Class;
-      if (EntityEnums.PLOGESTRB.indexOf(entityClass) === -1) {
-        return new ModelNotValidError(`#${i} entity should be of class 'PLOGESTRB'`);
+    for (const entityId of this.entityIds) {
+      if (!this.hasEntityCorrectClass(entityId, EntityEnums.PLOGESTRB)) {
+        return new ModelNotValidError(`Entity '${entityId}' does not have valid class`);
       }
     }
 
@@ -41,6 +36,10 @@ export default class Identification extends Relation implements RelationTypes.II
    */
   isValid(): boolean {
     if (!super.isValid()) {
+      return false;
+    }
+
+    if (this.entityIds.length !== 2) {
       return false;
     }
 

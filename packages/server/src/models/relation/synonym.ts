@@ -3,7 +3,7 @@ import Relation from "./relation";
 import { Relation as RelationTypes } from "@shared/types";
 import { IRequest } from "src/custom_typings/request";
 import { nonenumerable } from "@common/decorators";
-import { ModelNotValidError } from "@shared/types/errors";
+import { InternalServerError, ModelNotValidError } from "@shared/types/errors";
 import Entity from "@models/entity/entity";
 
 export default class Synonym extends Relation implements RelationTypes.ISynonym {
@@ -45,10 +45,16 @@ export default class Synonym extends Relation implements RelationTypes.ISynonym 
   */
   areEntitiesValid(): Error | null {
     let prevClass: EntityEnums.Class | undefined;
-    for (const entity of this.entities || []) {
-      if ([EntityEnums.Class.Action, EntityEnums.Class.Concept].indexOf(entity.class) === -1) {
-        return new ModelNotValidError(`Only entity classes '${EntityEnums.Class.Action}' and '${EntityEnums.Class.Concept}' are valid`)
+    for (const entityId of this.entityIds) {
+      const entity = this.entities?.find(e => e.id === entityId);
+      if (!entity) {
+        throw new InternalServerError('', `cannot check entity's class - not preloaded`);
       }
+
+      if (!this.hasEntityCorrectClass(entityId, [EntityEnums.Class.Action, EntityEnums.Class.Concept])) {
+        return new ModelNotValidError(`Entity '${entityId}' mush have class '${EntityEnums.Class.Action}' or '${EntityEnums.Class.Concept}'`)
+      }
+      
       if (prevClass === undefined) {
         prevClass = entity.class;
       }
@@ -70,8 +76,8 @@ export default class Synonym extends Relation implements RelationTypes.ISynonym 
    * @param request 
    */
   async beforeSave(request: IRequest): Promise<void> {
-    await super.beforeSave(request);
     await this.findSiblings(request, RelationEnums.Type.Synonym);
+    await super.beforeSave(request);
   }
 
   /**
