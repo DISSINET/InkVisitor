@@ -70,8 +70,8 @@ export default class Synonym extends Relation implements RelationTypes.ISynonym 
    * @param request 
    */
   async beforeSave(request: IRequest): Promise<void> {
-    await super.beforeSave(request);
     await this.findSiblings(request, RelationEnums.Type.Synonym);
+    await super.beforeSave(request);
   }
 
   /**
