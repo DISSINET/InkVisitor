@@ -1,8 +1,10 @@
-import { RelationEnums } from "@shared/enums";
+import { EntityEnums, RelationEnums } from "@shared/enums";
 import Relation from "./relation";
 import { Relation as RelationTypes } from "@shared/types";
 import { IRequest } from "src/custom_typings/request";
 import { nonenumerable } from "@common/decorators";
+import { ModelNotValidError } from "@shared/types/errors";
+import Entity from "@models/entity/entity";
 
 export default class Synonym extends Relation implements RelationTypes.ISynonym {
   type: RelationEnums.Type.Synonym;
@@ -38,6 +40,28 @@ export default class Synonym extends Relation implements RelationTypes.ISynonym 
   }
 
   /**
+  * areEntitiesValid checks if entities have acceptable classes
+  * @returns 
+  */
+  areEntitiesValid(): Error | null {
+    let prevClass: EntityEnums.Class | undefined;
+    for (const entity of this.entities || []) {
+      if ([EntityEnums.Class.Action, EntityEnums.Class.Concept].indexOf(entity.class) === -1) {
+        return new ModelNotValidError(`Only entity classes '${EntityEnums.Class.Action}' and '${EntityEnums.Class.Concept}' are valid`)
+      }
+      if (prevClass === undefined) {
+        prevClass = entity.class;
+      }
+
+      if (prevClass !== entity.class) {
+        return new ModelNotValidError("Entities must have equal classes")
+      }
+    }
+
+    return null;
+  }
+
+  /**
    * called before save operation - in synonyms, that would cover transitive dependency if relations:
    * A + B => synonym 1
    * B + C => synonym 2
@@ -46,7 +70,8 @@ export default class Synonym extends Relation implements RelationTypes.ISynonym 
    * @param request 
    */
   async beforeSave(request: IRequest): Promise<void> {
-    this.findSiblings(request, RelationEnums.Type.Synonym)
+    await super.beforeSave(request);
+    await this.findSiblings(request, RelationEnums.Type.Synonym);
   }
 
   /**

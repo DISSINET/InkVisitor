@@ -48,6 +48,10 @@ export default class Relation implements IRelationModel {
 
   }
 
+  /**
+   * use this method for doing asynchronous operation before save/create is called
+   * @param request 
+   */
   async beforeSave(request: IRequest): Promise<void> {
     if (!this.entities) {
       this.entities = await Entity.findEntitiesByIds(request.db.connection, this.entityIds)
