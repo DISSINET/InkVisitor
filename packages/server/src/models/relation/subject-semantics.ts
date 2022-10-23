@@ -18,18 +18,30 @@ export default class SubjectSemantics extends Relation implements RelationTypes.
   * @returns 
   */
   areEntitiesValid(): Error | null {
-    if (this.entityIds.length !== 2) {
-      return new ModelNotValidError("# of entities should be 2");
-    }
-
-    if (this.entities?.find(e => e.id === this.entityIds[0])?.class !== EntityEnums.Class.Action) {
+    if (!this.hasEntityCorrectClass(this.entityIds[0], [EntityEnums.Class.Action])) {
       return new ModelNotValidError(`First entity should of class '${EntityEnums.Class.Action}'`);
     }
 
-    if (this.entities?.find(e => e.id === this.entityIds[1])?.class !== EntityEnums.Class.Concept) {
+    if (!this.hasEntityCorrectClass(this.entityIds[1], [EntityEnums.Class.Concept])) {
       return new ModelNotValidError(`Second entity should of class '${EntityEnums.Class.Concept}'`);
     }
 
     return null;
+  }
+
+  /**
+   * Test validity of the model
+   * @returns 
+   */
+  isValid(): boolean {
+    if (!super.isValid()) {
+      return false;
+    }
+
+    if (this.entityIds.length !== 2) {
+      return false;
+    }
+
+    return true;
   }
 }

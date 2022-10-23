@@ -31,13 +31,28 @@ export default class Relation implements IRelationModel {
   }
 
   /**
+   * Shorthand for testing if entity linked to this relation if of required class.
+   * Throws an InternalServerError in case the entity is not preloaded - entities should be already loaded before calling this method
+   * @param entityId 
+   * @param acceptableClasses 
+   */
+  hasEntityCorrectClass(entityId: string, acceptableClasses: EntityEnums.Class[]): boolean {
+    const loadedEntity = this.entities?.find(e => e.id === entityId);
+    if (!loadedEntity) {
+      throw new InternalServerError('', `cannot check entity's class - not preloaded`);
+    }
+
+    return acceptableClasses.indexOf(loadedEntity.class) !== -1;
+  }
+
+  /**
   * areEntitiesValid checks if entities have acceptable classes
   * @returns 
   */
   areEntitiesValid(): Error | null {
-    for (const entity of this.entities || []) {
-      if (Object.values(EntityEnums.Class).indexOf(entity.class) === -1) {
-        return new ModelNotValidError(`Entity '${entity.id}' does not have valid class`);
+    for (const entityId of this.entityIds) {
+      if (!this.hasEntityCorrectClass(entityId, Object.values(EntityEnums.Class))) {
+        return new ModelNotValidError(`Entity '${entityId}' does not have valid class`);
       }
     }
 
