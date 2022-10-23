@@ -403,6 +403,15 @@ export default class Relation implements IRelationModel {
     return items;
   }
 
+  static async getByType<T extends RelationTypes.IRelation>(db: Connection, relType: RelationEnums.Type): Promise<T[]> {
+    const items: T[] = await rethink
+      .table(Relation.table)
+      .filter({ type: relType })
+      .run(db)
+
+    return items;
+  }
+
   /**
    * searches for relations with specific entity id and returns both relation ids and connected entity ids
    * @param request IRequest
