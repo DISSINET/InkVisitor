@@ -49,7 +49,7 @@ export default class Relation implements IRelationModel {
   }
 
   /**
-   * use this method for doing asynchronous operation before save/create is called
+   * use this method for doing asynchronous operation/checks before save/create is called
    * @param request 
    */
   async beforeSave(request: IRequest): Promise<void> {
