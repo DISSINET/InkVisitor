@@ -108,6 +108,9 @@ export const StyledSelect = styled(Select)`
     width: 100%;
     transform: translate(0, -6px);
   }
+  .react-select__menu-list {
+    max-height: 18rem;
+  }
   .react-select__option {
     margin: 0;
     padding: ${({ entityDropdown }) => (entityDropdown ? "2px" : "")};
