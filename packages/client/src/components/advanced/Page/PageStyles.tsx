@@ -22,6 +22,8 @@ export const StyledPageContent = styled.div<StyledPageContent>`
       : `calc(100% - ${(heightHeader + heightFooter) / 10}rem)`};
   overflow: hidden;
   display: flex;
+  /* flex-wrap: wrap; */
+  overflow: scroll;
   position: relative;
   background-color: ${({ theme }) => theme.color["gray"]["200"]};
 `;

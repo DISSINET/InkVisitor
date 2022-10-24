@@ -156,7 +156,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
       <ScrollHandler />
       {separatorXPosition > 0 && <PanelSeparator />}
       {/* FIRST PANEL */}
-      {panelWidths[0] > 0 && (
+      <div style={{ display: "flex", flexDirection: "row", width: "100%" }}>
         <Panel
           width={firstPanelExpanded ? panelWidths[0] : collapsedPanelWidth}
         >
@@ -170,9 +170,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
             <MemoizedTerritoryTreeBox />
           </Box>
         </Panel>
-      )}
-      {/* SECOND PANEL */}
-      {panelWidths[1] > 0 && (
+        {/* SECOND PANEL */}
         <Panel
           width={
             firstPanelExpanded
@@ -233,9 +231,9 @@ const MainPage: React.FC<MainPage> = ({}) => {
             </Box>
           )}
         </Panel>
-      )}
+      </div>
       {/* THIRD PANEL */}
-      {panelWidths[2] > 0 && (
+      <div style={{ display: "flex", flexDirection: "row" }}>
         <Panel
           width={
             fourthPanelExpanded
@@ -247,9 +245,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
             <MemoizedStatementEditorBox />
           </Box>
         </Panel>
-      )}
-      {/* FOURTH PANEL */}
-      {panelWidths[3] > 0 && (
+        {/* FOURTH PANEL */}
         <Panel
           width={fourthPanelExpanded ? panelWidths[3] : collapsedPanelWidth}
         >
@@ -281,7 +277,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
             <MemoizedTemplateListBox />
           </Box>
         </Panel>
-      )}
+      </div>
     </>
   );
 };
