@@ -181,7 +181,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
     </StyledGrid>
   );
 
-  const unlinkButtonEnabled = (key: number) =>
+  const shouldBeRendered = (key: number) =>
     !relationRule.asymmetrical || (relationRule.asymmetrical && key > 0);
 
   const renderNonCloudRelation = (
@@ -194,13 +194,14 @@ export const EntityDetailRelationTypeBlock: React.FC<
           const relationEntity = entities?.find((e) => e.id === entityId);
           return (
             <React.Fragment key={key}>
-              {relationEntity && relationEntity.id !== entity.id && (
-                <StyledEntityWrapper key={key}>
-                  <EntityTag
-                    fullWidth
-                    entity={relationEntity}
-                    button={
-                      unlinkButtonEnabled(key) && (
+              {relationEntity &&
+                relationEntity.id !== entity.id &&
+                shouldBeRendered(key) && (
+                  <StyledEntityWrapper key={key}>
+                    <EntityTag
+                      fullWidth
+                      entity={relationEntity}
+                      button={
                         <Button
                           key="d"
                           icon={<FaUnlink />}
@@ -209,11 +210,10 @@ export const EntityDetailRelationTypeBlock: React.FC<
                           tooltip="unlink"
                           onClick={() => handleMultiRemove(relation.id)}
                         />
-                      )
-                    }
-                  />
-                </StyledEntityWrapper>
-              )}
+                      }
+                    />
+                  </StyledEntityWrapper>
+                )}
             </React.Fragment>
           );
         })}
