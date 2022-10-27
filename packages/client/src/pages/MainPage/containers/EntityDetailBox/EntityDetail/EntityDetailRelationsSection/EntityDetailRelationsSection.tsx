@@ -89,6 +89,7 @@ export const EntityDetailRelationsSection: React.FC<
 
   const { relations } = entity;
 
+  // TODO: move to useMemo!
   const allEntityIds = relations.map((r) => r.entityIds).flat(1);
   const noDuplicates = [...new Set(allEntityIds)].filter((id) => id.length > 0);
 
