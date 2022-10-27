@@ -113,5 +113,6 @@ export type {
   IResponseGeneric,
   IResponsePermission,
   IResponseStats,
+  EntityTooltip,
 };
-export { RequestSearch, RequestPermissionUpdate, Relation, EntityTooltip };
+export { RequestSearch, RequestPermissionUpdate, Relation };

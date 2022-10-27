@@ -71,7 +71,6 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
     ["tooltip", entityId, tagHovered],
     async () => {
       const res = await api.tooltipGet(entityId);
-      // setTimeout(() => setTooltipData(res.data), 500);
       setTooltipData(res.data);
       return res.data;
     },
