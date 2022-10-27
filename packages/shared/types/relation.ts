@@ -84,7 +84,7 @@ export namespace Relation {
    * Relation Rules
    */
 
-  type RelationRule = {
+  export type RelationRule = {
     label: string;
     allowedEntitiesPattern: EntityEnums.Class[][];
     allowedSameEntityClassesOnly: boolean;
