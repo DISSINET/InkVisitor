@@ -13,8 +13,12 @@ export const LetterIcon: React.FC<LetterIcon> = ({
   size = 16,
 }) => {
   return (
-    <StyledCircle color={color} size={size}>
-      <StyledLetter size={size}>{letter}</StyledLetter>
-    </StyledCircle>
+    <div>
+      <StyledCircle color={color} size={size}>
+        <StyledLetter size={size} color={color}>
+          {letter}
+        </StyledLetter>
+      </StyledCircle>
+    </div>
   );
 };
