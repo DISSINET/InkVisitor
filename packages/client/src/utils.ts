@@ -6,8 +6,8 @@ import {
   IResponseEntity,
   IResponseTree,
   IStatement,
+  Relation,
 } from "@shared/types";
-import { Relation } from "@shared/types/relation";
 import { DropTargetMonitor, XYCoord } from "react-dnd";
 import { restrictedIDEClasses } from "Theme/constants";
 import { EntityDragItem } from "types";

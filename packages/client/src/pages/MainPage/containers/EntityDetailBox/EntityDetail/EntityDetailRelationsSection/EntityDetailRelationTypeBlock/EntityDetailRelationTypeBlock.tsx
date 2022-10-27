@@ -3,8 +3,8 @@ import {
   IResponseDetail,
   IResponseEntity,
   IResponseGeneric,
+  Relation,
 } from "@shared/types";
-import { Relation } from "@shared/types/relation";
 import { AxiosResponse } from "axios";
 import { Button, Cloud, Dropdown } from "components";
 import { EntitySuggester, EntityTag } from "components/advanced";

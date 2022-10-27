@@ -1,10 +1,7 @@
-import { EntityEnums, RelationEnums } from "@shared/enums";
-import { IResponseDetail } from "@shared/types";
-import { Relation } from "@shared/types/relation";
+import { IResponseDetail, Relation } from "@shared/types";
 import api from "api";
 import React, { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "react-query";
-import { restrictedIDEClasses } from "Theme/constants";
 import { getEntityRelationRules } from "utils";
 import { StyledDetailForm } from "../EntityDetailStyles";
 import { EntityDetailRelationTypeBlock } from "./EntityDetailRelationTypeBlock/EntityDetailRelationTypeBlock";
