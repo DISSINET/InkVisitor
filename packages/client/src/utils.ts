@@ -2,7 +2,6 @@ import { EntityEnums, RelationEnums } from "@shared/enums";
 import {
   EntityTooltip,
   IEntity,
-  IResponseDetail,
   IResponseEntity,
   IResponseTree,
   IStatement,
@@ -10,7 +9,11 @@ import {
 } from "@shared/types";
 import { DropTargetMonitor, XYCoord } from "react-dnd";
 import { restrictedIDEClasses } from "Theme/constants";
+<<<<<<< HEAD
 import { EntityDragItem } from "types";
+=======
+import { DragItem } from "types";
+>>>>>>> 4dcad6ba (simplify utils for getting relation rules)
 
 // TODO: not used, references not in statement data interface
 export const findPositionInStatement = (
@@ -167,27 +170,21 @@ export const getRelationTreeDepth = (
   );
 };
 
-export const getEntityRelationRules = (entity: IResponseDetail) => {
-  return Relation.RelationRulesArray.filter((rule) => {
+// TODO: last two conditions can be merged into one
+export const getEntityRelationRules = (entityClass: EntityEnums.Class) => {
+  const relationRulesArray = Object.keys(Relation.RelationRules);
+  return relationRulesArray.filter((rule) => {
     if (
       !Relation.RelationRules[rule].allowedEntitiesPattern.length &&
       !(
         rule === RelationEnums.Type.Identification &&
-        restrictedIDEClasses.includes(entity.class)
+        restrictedIDEClasses.includes(entityClass)
       )
     ) {
       return rule;
     } else if (
-      !Relation.RelationRules[rule].asymmetrical &&
       Relation.RelationRules[rule].allowedEntitiesPattern.some(
-        (pair) => pair[0] === entity.class
-      )
-    ) {
-      return rule;
-    } else if (
-      Relation.RelationRules[rule].asymmetrical &&
-      Relation.RelationRules[rule].allowedEntitiesPattern.some(
-        (pair) => pair[0] === entity.class
+        (pair) => pair[0] === entityClass
       )
     ) {
       return rule;

@@ -71,6 +71,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
 }) => {
   const relationRule = Relation.RelationRules[relationType];
 
+  // For suggester
   const getCategoryTypes = (): EntityEnums.ExtendedClass[] | undefined => {
     const entitiesPattern = relationRule.allowedEntitiesPattern;
 

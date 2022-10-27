@@ -48,6 +48,7 @@ import { EntityDetailIdentificationTable } from "./EntityDetailUsedInTable/Entit
 import { EntityDetailMetaPropsTable } from "./EntityDetailUsedInTable/EntityDetailMetaPropsTable/EntityDetailMetaPropsTable";
 import { EntityDetailStatementPropsTable } from "./EntityDetailUsedInTable/EntityDetailStatementPropsTable/EntityDetailStatementPropsTable";
 import { EntityDetailStatementsTable } from "./EntityDetailUsedInTable/EntityDetailStatementsTable/EntityDetailStatementsTable";
+import { EntityDetailUsedInRelations } from "./EntityDetailUsedInTable/EntityDetailUsedInRelations/EntityDetailUsedInRelations";
 
 const allowedEntityChangeClasses = [
   EntityEnums.Class.Value,
@@ -670,7 +671,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
                 />
               )}
 
-              {/* usedIn statement identification */}
+              {/* usedIn statement classification */}
               {!entity.isTemplate && (
                 <EntityDetailClassificationTable
                   title={{
@@ -685,7 +686,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
 
               {/* Used in relations */}
               {/* TODO: assymetrical inverted relations */}
-
+              <EntityDetailUsedInRelations entity={entity} />
             </StyledDetailSection>
 
             {/* Audits */}

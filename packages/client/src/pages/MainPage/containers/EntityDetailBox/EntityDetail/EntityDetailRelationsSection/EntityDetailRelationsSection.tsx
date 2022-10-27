@@ -52,7 +52,7 @@ export const EntityDetailRelationsSection: React.FC<
   );
 
   useEffect(() => {
-    const filteredTypes = getEntityRelationRules(entity);
+    const filteredTypes = getEntityRelationRules(entity.class);
     setFilteredRelationTypes(filteredTypes);
   }, [entity]);
 
