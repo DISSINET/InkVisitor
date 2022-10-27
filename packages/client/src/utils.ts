@@ -1,13 +1,16 @@
-import { EntityEnums } from "@shared/enums";
+import { EntityEnums, RelationEnums } from "@shared/enums";
 import {
   EntityTooltip,
   IEntity,
+  IResponseDetail,
   IResponseEntity,
   IResponseTree,
   IStatement,
 } from "@shared/types";
+import { Relation } from "@shared/types/relation";
 import { DropTargetMonitor, XYCoord } from "react-dnd";
-import { DragItem, EntityDragItem } from "types";
+import { restrictedIDEClasses } from "Theme/constants";
+import { EntityDragItem } from "types";
 
 // TODO: not used, references not in statement data interface
 export const findPositionInStatement = (
@@ -162,4 +165,32 @@ export const getRelationTreeDepth = (
       ...array.map(({ subtrees = [] }) => getRelationTreeDepth(subtrees))
     )
   );
+};
+
+export const getEntityRelationRules = (entity: IResponseDetail) => {
+  return Relation.RelationRulesArray.filter((rule) => {
+    if (
+      !Relation.RelationRules[rule].allowedEntitiesPattern.length &&
+      !(
+        rule === RelationEnums.Type.Identification &&
+        restrictedIDEClasses.includes(entity.class)
+      )
+    ) {
+      return rule;
+    } else if (
+      !Relation.RelationRules[rule].asymmetrical &&
+      Relation.RelationRules[rule].allowedEntitiesPattern.some(
+        (pair) => pair[0] === entity.class
+      )
+    ) {
+      return rule;
+    } else if (
+      Relation.RelationRules[rule].asymmetrical &&
+      Relation.RelationRules[rule].allowedEntitiesPattern.some(
+        (pair) => pair[0] === entity.class
+      )
+    ) {
+      return rule;
+    }
+  });
 };

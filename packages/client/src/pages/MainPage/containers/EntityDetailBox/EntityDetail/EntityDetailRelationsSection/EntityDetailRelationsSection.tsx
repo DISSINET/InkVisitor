@@ -4,13 +4,11 @@ import { Relation } from "@shared/types/relation";
 import api from "api";
 import React, { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "react-query";
+import { restrictedIDEClasses } from "Theme/constants";
+import { getEntityRelationRules } from "utils";
 import { StyledDetailForm } from "../EntityDetailStyles";
 import { EntityDetailRelationTypeBlock } from "./EntityDetailRelationTypeBlock/EntityDetailRelationTypeBlock";
 
-const restrictedIClasses = [
-  EntityEnums.Class.Action,
-  EntityEnums.Class.Concept,
-];
 interface EntityDetailRelationsSection {
   entity: IResponseDetail;
 }
@@ -57,33 +55,7 @@ export const EntityDetailRelationsSection: React.FC<
   );
 
   useEffect(() => {
-    const relationRules = Object.keys(Relation.RelationRules);
-    const filteredTypes = relationRules.filter((rule) => {
-      if (
-        !Relation.RelationRules[rule].allowedEntitiesPattern.length &&
-        !(
-          rule === RelationEnums.Type.Identification &&
-          restrictedIClasses.includes(entity.class)
-        )
-      ) {
-        return rule;
-      } else if (
-        !Relation.RelationRules[rule].asymmetrical &&
-        Relation.RelationRules[rule].allowedEntitiesPattern.some(
-          (pair) => pair[0] === entity.class
-        )
-      ) {
-        return rule;
-      } else if (
-        Relation.RelationRules[rule].asymmetrical &&
-        Relation.RelationRules[rule].allowedEntitiesPattern.some(
-          (pair) => pair[0] === entity.class
-        )
-      ) {
-        return rule;
-      }
-    });
-
+    const filteredTypes = getEntityRelationRules(entity);
     setFilteredRelationTypes(filteredTypes);
   }, [entity]);
 

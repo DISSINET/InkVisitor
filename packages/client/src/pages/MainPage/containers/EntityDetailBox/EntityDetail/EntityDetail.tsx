@@ -682,6 +682,10 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
                   key="StatementClassification"
                 />
               )}
+
+              {/* Used in relations */}
+              {/* TODO: assymetrical inverted relations */}
+
             </StyledDetailSection>
 
             {/* Audits */}
