@@ -1,4 +1,6 @@
+import { DotLoader } from "react-spinners";
 import styled from "styled-components";
+import { Colors } from "types";
 
 interface StyledLoaderWrap {
   show: boolean;

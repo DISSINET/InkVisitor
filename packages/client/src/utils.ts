@@ -1,5 +1,6 @@
 import { EntityEnums } from "@shared/enums";
 import {
+  EntityTooltip,
   IEntity,
   IResponseEntity,
   IResponseTree,
@@ -146,4 +147,17 @@ export const getShortLabelByLetterCount = (
 ) => {
   const isOversized = label.length > maxLetterCount;
   return isOversized ? label.slice(0, 200).concat("...") : label;
+};
+
+// Returns one more level, because there's always empty subtree array on the deepest level
+export const getRelationTreeDepth = (
+  array: EntityTooltip.ISuperclassTree[]
+): number => {
+  return (
+    1 +
+    Math.max(
+      0,
+      ...array.map(({ subtrees = [] }) => getRelationTreeDepth(subtrees))
+    )
+  );
 };
