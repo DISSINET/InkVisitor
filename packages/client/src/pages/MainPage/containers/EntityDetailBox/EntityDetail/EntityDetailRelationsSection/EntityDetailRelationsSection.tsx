@@ -66,6 +66,7 @@ export const EntityDetailRelationsSection: React.FC<
     ["relation-entities", noDuplicates],
     async () => {
       const res = await api.entitiesSearch({ entityIds: noDuplicates });
+      // TODO: set to redux
       return res.data;
     },
     {

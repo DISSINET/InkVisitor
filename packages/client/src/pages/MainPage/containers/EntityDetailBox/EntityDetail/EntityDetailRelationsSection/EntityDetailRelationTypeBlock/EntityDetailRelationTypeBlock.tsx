@@ -30,7 +30,7 @@ import api from "api";
 interface EntityDetailRelationTypeBlock {
   relations: Relation.IRelation[];
   relationType: string;
-  entities: IResponseEntity[] | undefined;
+  entities?: IResponseEntity[];
   relationCreateMutation: UseMutationResult<
     AxiosResponse<IResponseGeneric>,
     unknown,
