@@ -2,7 +2,7 @@ import { IResponseDetail, Relation } from "@shared/types";
 import api from "api";
 import React, { useEffect, useState } from "react";
 import { useQuery } from "react-query";
-import { getEntityRelationRules } from "utils";
+import { getRelationInvertedRules } from "utils";
 import { EntityDetailUsedInRelation } from "./EntityDetailUsedInRelation/EntityDetailUsedInRelation";
 
 interface EntityDetailUsedInRelations {
@@ -18,7 +18,7 @@ export const EntityDetailUsedInRelations: React.FC<
   const { relations } = entity;
 
   useEffect(() => {
-    const filteredTypes = getEntityRelationRules(entity.class);
+    const filteredTypes = getRelationInvertedRules(entity.class);
     setFilteredRelationTypes(filteredTypes);
   }, [entity]);
 

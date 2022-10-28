@@ -9,11 +9,7 @@ import {
 } from "@shared/types";
 import { DropTargetMonitor, XYCoord } from "react-dnd";
 import { restrictedIDEClasses } from "Theme/constants";
-<<<<<<< HEAD
 import { EntityDragItem } from "types";
-=======
-import { DragItem } from "types";
->>>>>>> 4dcad6ba (simplify utils for getting relation rules)
 
 // TODO: not used, references not in statement data interface
 export const findPositionInStatement = (
@@ -170,7 +166,6 @@ export const getRelationTreeDepth = (
   );
 };
 
-// TODO: last two conditions can be merged into one
 export const getEntityRelationRules = (entityClass: EntityEnums.Class) => {
   const relationRulesArray = Object.keys(Relation.RelationRules);
   return relationRulesArray.filter((rule) => {
@@ -185,6 +180,20 @@ export const getEntityRelationRules = (entityClass: EntityEnums.Class) => {
     } else if (
       Relation.RelationRules[rule].allowedEntitiesPattern.some(
         (pair) => pair[0] === entityClass
+      )
+    ) {
+      return rule;
+    }
+  });
+};
+
+export const getRelationInvertedRules = (entityClass: EntityEnums.Class) => {
+  const relationRulesArray = Object.keys(Relation.RelationRules);
+  return relationRulesArray.filter((rule) => {
+    if (
+      Relation.RelationRules[rule].asymmetrical &&
+      Relation.RelationRules[rule].allowedEntitiesPattern.some(
+        (pair) => pair[1] === entityClass
       )
     ) {
       return rule;
