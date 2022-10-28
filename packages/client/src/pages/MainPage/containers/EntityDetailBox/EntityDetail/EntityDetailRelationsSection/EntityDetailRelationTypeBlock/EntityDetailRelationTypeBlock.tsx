@@ -55,8 +55,6 @@ interface EntityDetailRelationTypeBlock {
   isCloudType: boolean;
   isMultiple: boolean;
   entity: IResponseDetail;
-  // cloudEntityTemp?: IResponseDetail;
-  // setTempEntityId: React.Dispatch<React.SetStateAction<string | false>>;
 }
 export const EntityDetailRelationTypeBlock: React.FC<
   EntityDetailRelationTypeBlock
@@ -70,8 +68,6 @@ export const EntityDetailRelationTypeBlock: React.FC<
   isCloudType,
   isMultiple,
   entity,
-  // cloudEntityTemp,
-  // setTempEntityId,
 }) => {
   const relationRule = Relation.RelationRules[relationType];
 

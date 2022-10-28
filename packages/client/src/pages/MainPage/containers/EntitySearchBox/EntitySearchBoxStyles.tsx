@@ -5,6 +5,7 @@ export const StyledBoxContent = styled.div`
   flex-direction: column;
   height: 100%;
   background-color: ${({ theme }) => theme.color["white"]};
+  overflow: auto;
 `;
 export const StyledRow = styled.div`
   position: relative;

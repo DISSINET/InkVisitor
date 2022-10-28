@@ -18,7 +18,7 @@ import {
 } from "types";
 import { dndHoverFn } from "utils";
 import {
-  ButtonWrapper,
+  StyledButtonWrapper,
   StyledEntityTag,
   StyledLabel,
   StyledTagWrapper,
@@ -51,6 +51,11 @@ interface TagProps {
   isTemplate?: boolean;
   isDiscouraged?: boolean;
   disabled?: boolean;
+
+  onMouseOver?: React.MouseEventHandler<HTMLDivElement>;
+  onMouseOut?: React.MouseEventHandler<HTMLDivElement>;
+  onButtonOver?: React.MouseEventHandler<HTMLDivElement>;
+  onButtonOut?: React.MouseEventHandler<HTMLDivElement>;
 }
 
 export const Tag: React.FC<TagProps> = ({
@@ -77,6 +82,11 @@ export const Tag: React.FC<TagProps> = ({
   isTemplate = false,
   isDiscouraged = false,
   lvl,
+
+  onMouseOver,
+  onMouseOut,
+  onButtonOver,
+  onButtonOut,
 }) => {
   const { appendDetailId } = useSearchParams();
   const dispatch = useAppDispatch();
@@ -138,7 +148,13 @@ export const Tag: React.FC<TagProps> = ({
     </StyledEntityTag>
   );
   const renderButton = () => (
-    <ButtonWrapper status={status}>{button}</ButtonWrapper>
+    <StyledButtonWrapper
+      status={status}
+      onMouseOver={onButtonOver}
+      onMouseOut={onButtonOut}
+    >
+      {button}
+    </StyledButtonWrapper>
   );
 
   const onDoubleClick = (e: React.MouseEvent) => {
@@ -202,6 +218,8 @@ export const Tag: React.FC<TagProps> = ({
         borderStyle={borderStyle}
         onClick={(e: React.MouseEvent) => e.stopPropagation()}
         onDoubleClick={(e: React.MouseEvent) => onDoubleClick(e)}
+        onMouseOver={onMouseOver}
+        onMouseOut={onMouseOut}
       >
         {showOnly ? <>{getShortTag()}</> : <>{getFullTag()}</>}
       </StyledTagWrapper>
