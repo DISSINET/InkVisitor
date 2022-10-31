@@ -7,6 +7,8 @@ import Relation from "@models/relation/relation";
 import { RelationEnums } from "@shared/enums";
 import { Relation as RelationTypes } from "@shared/types";
 
+const MAX_NEST_LVL = 3;
+
 export class ResponseTooltip
   extends ResponseEntity
   implements EntityTooltip.IResponse {
@@ -163,7 +165,8 @@ export class ResponseTooltip
   async getActionEventNodes(
     conn: Connection,
     parentId: string,
-    asClass: EntityEnums.Class
+    asClass: EntityEnums.Class,
+    nestLvl: number = 0,
   ): Promise<EntityTooltip.ISuperclassTree> {
     const out: EntityTooltip.ISuperclassTree = {
       entityId: parentId,
@@ -208,7 +211,8 @@ export class ResponseTooltip
         await this.getSuperclassTrees(
           conn,
           subparentId,
-          EntityEnums.Class.Concept
+          EntityEnums.Class.Concept,
+          nestLvl + 1,
         )
       );
     }
@@ -226,12 +230,17 @@ export class ResponseTooltip
   async getSuperclassTrees(
     conn: Connection,
     parentId: string,
-    asClass: EntityEnums.Class
+    asClass: EntityEnums.Class,
+    nestLvl: number = 0,
   ): Promise<EntityTooltip.ISuperclassTree> {
     const out: EntityTooltip.ISuperclassTree = {
       entityId: parentId,
       subtrees: [],
     };
+
+    if (nestLvl > MAX_NEST_LVL) {
+      return out;
+    }
 
     let relations: RelationTypes.IRelation[] = [];
 
@@ -274,7 +283,8 @@ export class ResponseTooltip
         await this.getSuperclassTrees(
           conn,
           subparentId,
-          EntityEnums.Class.Concept
+          EntityEnums.Class.Concept,
+          nestLvl + 1,
         )
       );
     }
