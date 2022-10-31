@@ -28,13 +28,13 @@ export const StyledTooltipSeparator = styled.div`
 export const StyledRelations = styled.div`
   display: grid;
   grid-template-columns: auto 1fr;
+  row-gap: ${({ theme }) => theme.space[5]};
   margin-top: 1rem;
 `;
 export const StyledRelationTypeBlock = styled.div`
   display: flex;
   flex-direction: column;
   margin-left: ${({ theme }) => theme.space[2]};
-  margin-bottom: ${({ theme }) => theme.space[5]};
 `;
 
 export const StyledLetterIconWrap = styled.div`
