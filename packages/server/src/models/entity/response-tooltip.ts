@@ -170,6 +170,11 @@ export class ResponseTooltip
       subtrees: [],
     };
 
+    // only for actions
+    if (this.class !== EntityEnums.Class.Action) {
+      return out;
+    }
+
     let relations: RelationTypes.IRelation[] = [];
 
     switch (asClass) {
