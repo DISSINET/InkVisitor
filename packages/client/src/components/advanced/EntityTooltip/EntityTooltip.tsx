@@ -174,9 +174,7 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
                       return (
                         <React.Fragment key={key}>
                           {`${entity?.label} (`}
-                          {/* <div style={{ textTransform: "uppercase" }}> */}
                           {certaintyDict[identification.certainty]?.label}
-                          {/* </div> */}
                           {`)${key !== identifications.length - 1 ? ", " : ""}`}
                         </React.Fragment>
                       );
