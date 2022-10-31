@@ -156,132 +156,120 @@ const MainPage: React.FC<MainPage> = ({}) => {
       <ScrollHandler />
       {separatorXPosition > 0 && <PanelSeparator />}
       {/* FIRST PANEL */}
-      {panelWidths[0] > 0 && (
-        <Panel
-          width={firstPanelExpanded ? panelWidths[0] : collapsedPanelWidth}
+      <Panel width={firstPanelExpanded ? panelWidths[0] : collapsedPanelWidth}>
+        <Box
+          height={contentHeight}
+          label="Territories"
+          isExpanded={firstPanelExpanded}
+          button={[firstPanelButton()]}
+          noPadding
         >
-          <Box
-            height={contentHeight}
-            label="Territories"
-            isExpanded={firstPanelExpanded}
-            button={[firstPanelButton()]}
-            noPadding
-          >
-            <MemoizedTerritoryTreeBox />
-          </Box>
-        </Panel>
-      )}
+          <MemoizedTerritoryTreeBox />
+        </Box>
+      </Panel>
       {/* SECOND PANEL */}
-      {panelWidths[1] > 0 && (
-        <Panel
-          width={
-            firstPanelExpanded
-              ? panelWidths[1]
-              : panelWidths[1] + panelWidths[0] - collapsedPanelWidth
+      <Panel
+        width={
+          firstPanelExpanded
+            ? panelWidths[1]
+            : panelWidths[1] + panelWidths[0] - collapsedPanelWidth
+        }
+      >
+        <Box
+          borderColor="white"
+          height={
+            detailIdArray.length
+              ? statementListOpened
+                ? contentHeight / 2 - 20
+                : hiddenBoxHeight
+              : contentHeight
           }
+          label="Statements"
         >
+          <MemoizedStatementListBox />
+        </Box>
+        {(selectedDetailId || detailIdArray.length > 0) && (
           <Box
             borderColor="white"
             height={
-              detailIdArray.length
-                ? statementListOpened
-                  ? contentHeight / 2 - 20
-                  : hiddenBoxHeight
-                : contentHeight
+              statementListOpened
+                ? contentHeight / 2 + 20
+                : contentHeight - hiddenBoxHeight
             }
-            label="Statements"
+            label="Detail"
+            button={[
+              <Button
+                inverted
+                icon={
+                  statementListOpened ? (
+                    <BsSquareFill />
+                  ) : (
+                    <BsSquareHalf style={{ transform: "rotate(90deg)" }} />
+                  )
+                }
+                onClick={() => {
+                  statementListOpened
+                    ? localStorage.setItem("statementListOpened", "false")
+                    : localStorage.setItem("statementListOpened", "true");
+                  dispatch(setStatementListOpened(!statementListOpened));
+                }}
+              />,
+              <Button
+                inverted
+                icon={<IoMdClose />}
+                onClick={() => {
+                  clearAllDetailIds();
+                  dispatch(setStatementListOpened(true));
+                }}
+              />,
+            ]}
           >
-            <MemoizedStatementListBox />
+            <MemoizedEntityDetailBox />
           </Box>
-          {(selectedDetailId || detailIdArray.length > 0) && (
-            <Box
-              borderColor="white"
-              height={
-                statementListOpened
-                  ? contentHeight / 2 + 20
-                  : contentHeight - hiddenBoxHeight
-              }
-              label="Detail"
-              button={[
-                <Button
-                  inverted
-                  icon={
-                    statementListOpened ? (
-                      <BsSquareFill />
-                    ) : (
-                      <BsSquareHalf style={{ transform: "rotate(90deg)" }} />
-                    )
-                  }
-                  onClick={() => {
-                    statementListOpened
-                      ? localStorage.setItem("statementListOpened", "false")
-                      : localStorage.setItem("statementListOpened", "true");
-                    dispatch(setStatementListOpened(!statementListOpened));
-                  }}
-                />,
-                <Button
-                  inverted
-                  icon={<IoMdClose />}
-                  onClick={() => {
-                    clearAllDetailIds();
-                    dispatch(setStatementListOpened(true));
-                  }}
-                />,
-              ]}
-            >
-              <MemoizedEntityDetailBox />
-            </Box>
-          )}
-        </Panel>
-      )}
+        )}
+      </Panel>
       {/* THIRD PANEL */}
-      {panelWidths[2] > 0 && (
-        <Panel
-          width={
-            fourthPanelExpanded
-              ? panelWidths[2]
-              : panelWidths[2] + panelWidths[3] - collapsedPanelWidth
-          }
-        >
-          <Box borderColor="white" height={contentHeight} label="Editor">
-            <MemoizedStatementEditorBox />
-          </Box>
-        </Panel>
-      )}
+      <Panel
+        width={
+          fourthPanelExpanded
+            ? panelWidths[2]
+            : panelWidths[2] + panelWidths[3] - collapsedPanelWidth
+        }
+      >
+        <Box borderColor="white" height={contentHeight} label="Editor">
+          <MemoizedStatementEditorBox />
+        </Box>
+      </Panel>
       {/* FOURTH PANEL */}
-      {panelWidths[3] > 0 && (
-        <Panel
-          width={fourthPanelExpanded ? panelWidths[3] : collapsedPanelWidth}
+      <Panel width={fourthPanelExpanded ? panelWidths[3] : collapsedPanelWidth}>
+        <Box
+          height={getFourthPanelBoxHeight("search")}
+          label="Search"
+          color="white"
+          isExpanded={fourthPanelExpanded}
+          button={[hideBoxButton("search"), hideFourthPanelButton()]}
         >
-          <Box
-            height={getFourthPanelBoxHeight("search")}
-            label="Search"
-            color="white"
-            isExpanded={fourthPanelExpanded}
-            button={[hideBoxButton("search"), hideFourthPanelButton()]}
-          >
-            <MemoizedEntitySearchBox />
-          </Box>
-          <Box
-            height={getFourthPanelBoxHeight("bookmarks")}
-            label="Bookmarks"
-            color="white"
-            isExpanded={fourthPanelExpanded}
-            button={[hideBoxButton("bookmarks"), hideFourthPanelButton()]}
-          >
-            <MemoizedEntityBookmarkBox />
-          </Box>
-          <Box
-            height={getFourthPanelBoxHeight("templates")}
-            label="Templates"
-            color="white"
-            isExpanded={fourthPanelExpanded}
-            button={[hideBoxButton("templates"), hideFourthPanelButton()]}
-          >
-            <MemoizedTemplateListBox />
-          </Box>
-        </Panel>
-      )}
+          <MemoizedEntitySearchBox />
+        </Box>
+        <Box
+          height={getFourthPanelBoxHeight("bookmarks")}
+          label="Bookmarks"
+          color="white"
+          isExpanded={fourthPanelExpanded}
+          button={[hideBoxButton("bookmarks"), hideFourthPanelButton()]}
+        >
+          <MemoizedEntityBookmarkBox />
+        </Box>
+        <Box
+          height={getFourthPanelBoxHeight("templates")}
+          label="Templates"
+          color="white"
+          isExpanded={fourthPanelExpanded}
+          button={[hideBoxButton("templates"), hideFourthPanelButton()]}
+        >
+          <MemoizedTemplateListBox />
+        </Box>
+      </Panel>
     </>
   );
 };
