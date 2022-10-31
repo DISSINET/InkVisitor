@@ -203,7 +203,6 @@ export const DEntity = (
         : EntityEnums.Status.Pending,
   };
   if (entity.class === EntityEnums.Class.Territory) {
-    entity.data.parent = {};
   }
 
   if (entity.isTemplate) {

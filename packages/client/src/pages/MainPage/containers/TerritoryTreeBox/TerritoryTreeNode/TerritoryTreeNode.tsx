@@ -289,6 +289,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
                     statementsCount={statementsCount}
                     isFavorited={isFavorited}
                     showOnly="label"
+                    tooltipPosition="right center"
                   />
                 </animated.div>
                 <TerritoryTreeContextMenu
