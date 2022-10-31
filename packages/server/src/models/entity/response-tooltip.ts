@@ -173,11 +173,6 @@ export class ResponseTooltip
       subtrees: [],
     };
 
-    // only for actions
-    if (this.class !== EntityEnums.Class.Action) {
-      return out;
-    }
-
     let relations: RelationTypes.IRelation[] = [];
 
     switch (asClass) {
@@ -186,14 +181,6 @@ export class ResponseTooltip
           conn,
           parentId,
           RelationEnums.Type.ActionEventEquivalent,
-          0
-        );
-        break;
-      case EntityEnums.Class.Concept:
-        relations = await Relation.getForEntity<RelationTypes.ISuperclass>(
-          conn,
-          parentId,
-          RelationEnums.Type.Superclass,
           0
         );
         break;
