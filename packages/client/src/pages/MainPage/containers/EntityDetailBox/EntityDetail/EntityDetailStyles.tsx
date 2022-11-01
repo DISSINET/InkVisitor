@@ -146,3 +146,9 @@ export const StyledDetailForm = styled.div`
     }
   }
 `;
+
+export const StyledTagWrap = styled.div`
+  display: grid;
+  overflow: hidden;
+  max-width: 100%;
+`;

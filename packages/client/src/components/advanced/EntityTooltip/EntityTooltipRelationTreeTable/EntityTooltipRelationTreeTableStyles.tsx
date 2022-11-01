@@ -19,7 +19,6 @@ export const StyledRelationTypeTreeBlock = styled.div<StyledRelationTypeTreeBloc
   display: flex;
   flex-direction: column;
   margin-left: ${({ theme }) => theme.space[2]};
-  margin-bottom: ${({ theme }) => theme.space[5]};
   border: 1px solid;
   border-color: ${({ theme }) => theme.color["white"]};
   width: ${({ depth }) => getBlockWidth(depth)};
