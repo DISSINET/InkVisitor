@@ -66,26 +66,26 @@ const clockPerformance = (
 export const PublicPath = (props: any) => {
   const Component = props.children;
 
-  return !api.isLoggedIn() ? <Route
-    path={props.path}
-    render={props.render}
-    exact={props.exact}
-  >
-    <Component props />
-  </Route> : <Redirect to="/" />;
-}
+  return !api.isLoggedIn() ? (
+    <Route path={props.path} render={props.render} exact={props.exact}>
+      <Component props />
+    </Route>
+  ) : (
+    <Redirect to="/" />
+  );
+};
 
 export const ProtectedPath = (props: any) => {
   const Component = props.children;
 
-  return api.isLoggedIn() ? <Route
-    path={props.path}
-    render={props.render}
-    exact={props.exact}
-  >
-    <Component props />
-  </Route> : <Redirect to="/login" />;
-}
+  return api.isLoggedIn() ? (
+    <Route path={props.path} render={props.render} exact={props.exact}>
+      <Component props />
+    </Route>
+  ) : (
+    <Redirect to="/login" />
+  );
+};
 
 export const App: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -101,10 +101,11 @@ export const App: React.FC = () => {
 
   useEffect(() => {
     if (debouncedWidth > 0) {
-      const layoutWidth =
-        debouncedWidth < layoutWidthBreakpoint
-          ? minLayoutWidth
-          : debouncedWidth;
+      // const layoutWidth =
+      //   debouncedWidth < layoutWidthBreakpoint
+      //     ? minLayoutWidth
+      //     : debouncedWidth;
+      const layoutWidth = debouncedWidth;
       dispatch(setLayoutWidth(layoutWidth));
       const onePercent = layoutWidth / 100;
 
@@ -125,14 +126,14 @@ export const App: React.FC = () => {
         Math.floor(onePercent * percentPanelWidths[0] * 10) / 10;
       const secondPanel = Math.floor(
         (onePercent * (separatorPercentPosition - percentPanelWidths[0]) * 10) /
-        10
+          10
       );
       const thirdPanel = Math.floor(
         layoutWidth -
-        (onePercent *
-          (separatorPercentPosition + percentPanelWidths[3]) *
-          10) /
-        10
+          (onePercent *
+            (separatorPercentPosition + percentPanelWidths[3]) *
+            10) /
+            10
       );
       const fourthPanel =
         Math.floor(onePercent * percentPanelWidths[3] * 10) / 10;
@@ -158,31 +159,15 @@ export const App: React.FC = () => {
               <SearchParamsProvider>
                 <Page>
                   <Switch>
-                    <PublicPath
-                      path="/login"
-                      children={LoginPage}
-                    />
-                    <PublicPath
-                      path="/activate"
-                      children={ActivatePage}
-                    />
+                    <PublicPath path="/login" children={LoginPage} />
+                    <PublicPath path="/activate" children={ActivatePage} />
                     <PublicPath
                       path="/password_reset"
                       children={PasswordResetPage}
                     />
-                    <ProtectedPath
-                      path="/"
-                      exact
-                      children={MainPage}
-                    />
-                    <ProtectedPath
-                      path="/acl"
-                      children={AclPage}
-                    />
-                    <ProtectedPath
-                      path="/users"
-                      children={UsersPage}
-                    />
+                    <ProtectedPath path="/" exact children={MainPage} />
+                    <ProtectedPath path="/acl" children={AclPage} />
+                    <ProtectedPath path="/users" children={UsersPage} />
                     <Route path="*" component={NotFoundPage} />
                   </Switch>
                 </Page>
