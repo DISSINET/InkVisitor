@@ -319,7 +319,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
           childTerritories.map(
             (child: IResponseTreeTerritoryComponent, key: number) => (
               <TerritoryTreeNode
-                key={`${key}_${child.territory.id}`}
+                key={key}
                 index={key}
                 propId={child.territory.id}
                 territory={child.territory}
