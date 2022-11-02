@@ -7,7 +7,7 @@ import {
   IStatement,
 } from "@shared/types";
 import { DropTargetMonitor, XYCoord } from "react-dnd";
-import { DragItem } from "types";
+import { DragItem, EntityDragItem } from "types";
 
 // TODO: not used, references not in statement data interface
 export const findPositionInStatement = (
@@ -104,15 +104,16 @@ export const collectTerritoryChildren = (
 };
 
 export const dndHoverFn = (
-  item: DragItem,
+  item: EntityDragItem,
   index: number,
   monitor: DropTargetMonitor,
   ref: React.RefObject<HTMLDivElement>,
-  moveProp: (dragIndex: number, hoverIndex: number) => void
+  moveFn: (dragIndex: number, hoverIndex: number) => void
 ) => {
   if (!ref.current) {
     return;
   }
+
   const dragIndex: number = item.index;
   const hoverIndex: number | undefined = index;
 
@@ -134,7 +135,8 @@ export const dndHoverFn = (
   if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) {
     return;
   }
-  moveProp(dragIndex, hoverIndex);
+
+  moveFn(dragIndex, hoverIndex);
   item.index = hoverIndex;
 };
 

@@ -202,9 +202,6 @@ export const DEntity = (
         ? EntityEnums.Status.Approved
         : EntityEnums.Status.Pending,
   };
-  if (entity.class === EntityEnums.Class.Territory) {
-  }
-
   if (entity.isTemplate) {
     duplicatedEntity.isTemplate = templateToEntity ? false : true;
   }
