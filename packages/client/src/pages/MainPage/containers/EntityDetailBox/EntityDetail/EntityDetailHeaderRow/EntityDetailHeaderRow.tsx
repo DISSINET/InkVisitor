@@ -42,6 +42,9 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
         appendDetailId(variables.id);
         toast.info(`Entity duplicated!`);
         queryClient.invalidateQueries("templates");
+        if (variables.class === EntityEnums.Class.Territory) {
+          queryClient.invalidateQueries("tree");
+        }
       },
       onError: () => {
         toast.error(`Error: Entity not duplicated!`);

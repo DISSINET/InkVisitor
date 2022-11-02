@@ -4,7 +4,7 @@ import { Tag } from "components";
 import { EntityTooltip } from "components/advanced";
 import React, { ReactNode, useState } from "react";
 import { PopupPosition } from "reactjs-popup/dist/types";
-import { DragItem } from "types";
+import { DragItem, EntityDragItem } from "types";
 import { getEntityLabel } from "utils";
 
 interface EntityTag {
@@ -22,7 +22,7 @@ interface EntityTag {
   disableDoubleClick?: boolean;
   disableDrag?: boolean;
   tooltipPosition?: PopupPosition | PopupPosition[];
-  updateOrderFn?: (item: DragItem) => void;
+  updateOrderFn?: (item: EntityDragItem) => void;
   lvl?: number;
   statementsCount?: number;
   isFavorited?: boolean;
