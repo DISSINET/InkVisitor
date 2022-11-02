@@ -237,20 +237,17 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
   }, [draggedTerritory]);
 
   // TODO: move to useCallback with all dependencies!
-  const renderTerritoryTag = (
-    territoryActant: IEntity,
-    id: string,
-    hasChildren: boolean
-  ) => {
-    const parent = territory.data.parent as IParentTerritory;
-    const isFavorited = storedTerritories?.includes(territoryActant.id);
+  const renderTerritoryTag = (hasChildren: boolean) => {
+    const { id, data } = territory;
+    const parent = data.parent as IParentTerritory;
+    const isFavorited = storedTerritories?.includes(id);
 
     return (
       <>
         {id !== rootTerritoryId && (
           <>
             {!tempDisabled ? (
-              <StyledTerritoryTagWrap id={`territory${territory.id}`}>
+              <StyledTerritoryTagWrap id={`territory${id}`}>
                 <StyledIconWrap>
                   {hasChildren ? (
                     <>{getArrowIcon(id)}</>
@@ -278,7 +275,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
                 </StyledIconWrap>
                 <animated.div style={animatedStyle}>
                   <EntityTag
-                    entity={territoryActant}
+                    entity={territory}
                     parentId={parent.territoryId}
                     lvl={lvl}
                     isSelected={isSelected}
@@ -293,7 +290,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
                   />
                 </animated.div>
                 <TerritoryTreeContextMenu
-                  territoryActant={territoryActant}
+                  territoryActant={territory}
                   onMenuOpen={() => setContextMenuOpen(true)}
                   onMenuClose={() => setContextMenuOpen(false)}
                   right={right}
@@ -314,7 +311,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
 
   return (
     <>
-      {renderTerritoryTag(territory, territory.id, children.length > 0)}
+      {renderTerritoryTag(children.length > 0)}
 
       <StyledChildrenWrap noIndent={lvl === 0}>
         {!hideChildTerritories &&
