@@ -1,9 +1,11 @@
 import { AttributeButtonGroup } from "./AttributeButtonGroup/AttributeButtonGroup";
+import { AuditTable } from "./AuditTable/AuditTable";
 import { BreadcrumbItem } from "./BreadcrumbItem/BreadcrumbItem";
 import { EmptyTag } from "./EmptyTag/EmptyTag";
 import { EntitySuggester } from "./EntitySuggester/EntitySuggester";
 import { EntityTag } from "./EntityTag/EntityTag";
 import { EntityTooltip } from "./EntityTooltip/EntityTooltip";
+import { JSONExplorer } from "./JSONExplorer/JSONExplorer";
 import { LoginModal, MemoizedLoginModal } from "./LoginModal/LoginModal";
 import { Page } from "./Page/Page";
 import { LeftHeader, RightHeader } from "./PageHeader/PageHeader";
@@ -12,11 +14,13 @@ import { UserCustomizationModal } from "./UserCustomizationModal/UserCustomizati
 
 export {
   AttributeButtonGroup,
+  AuditTable,
   BreadcrumbItem,
   EmptyTag,
   EntitySuggester,
   EntityTag,
   EntityTooltip,
+  JSONExplorer,
   LoginModal,
   MemoizedLoginModal,
   Page,

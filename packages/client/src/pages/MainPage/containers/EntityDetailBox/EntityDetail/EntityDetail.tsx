@@ -9,7 +9,7 @@ import {
 } from "@shared/types";
 import api from "api";
 import { Button, Loader, Submit } from "components";
-import { EntityTag } from "components/advanced";
+import { AuditTable, EntityTag, JSONExplorer } from "components/advanced";
 import { CMetaProp } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
@@ -22,9 +22,7 @@ import {
   PropAttributeFilter,
 } from "types";
 import { getEntityLabel, getShortLabelByLetterCount } from "utils";
-import { AuditTable } from "../../AuditTable/AuditTable";
 import { EntityReferenceTable } from "../../EntityReferenceTable/EntityReferenceTable";
-import { JSONExplorer } from "../../JSONExplorer/JSONExplorer";
 import { PropGroup } from "../../PropGroup/PropGroup";
 import { ApplyTemplateModal } from "./ApplyTemplateModal/ApplyTemplateModal";
 import { EntityDetailCreateTemplateModal } from "./EntityDetailCreateTemplateModal/EntityDetailCreateTemplateModal";

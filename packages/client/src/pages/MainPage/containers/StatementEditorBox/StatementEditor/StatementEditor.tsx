@@ -22,9 +22,11 @@ import {
   MultiInput,
 } from "components";
 import {
+  AuditTable,
   BreadcrumbItem,
   EntitySuggester,
   EntityTag,
+  JSONExplorer,
 } from "components/advanced";
 import {
   CClassification,
@@ -41,10 +43,7 @@ import { toast } from "react-toastify";
 import { excludedSuggesterEntities } from "Theme/constants";
 import { classesEditorActants, classesEditorTags, DropdownItem } from "types";
 import { getEntityLabel, getShortLabelByLetterCount } from "utils";
-import { AuditTable } from "../../AuditTable/AuditTable";
-import { StyledContent } from "../../EntityBookmarkBox/EntityBookmarkBoxStyles";
 import { EntityReferenceTable } from "../../EntityReferenceTable/EntityReferenceTable";
-import { JSONExplorer } from "../../JSONExplorer/JSONExplorer";
 import { StatementEditorActantTable } from "../StatementEditorActantTable/StatementEditorActantTable";
 import { StatementEditorActionTable } from "../StatementEditorActionTable/StatementEditorActionTable";
 import {
