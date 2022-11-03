@@ -775,15 +775,15 @@ export const StatementEditor: React.FC<StatementEditor> = ({
           setApplyTemplateModal(false);
         }}
       >
-        <ModalHeader title="Create Template" />
+        <ModalHeader title="Apply Template" />
         <ModalContent>
-          <StyledContent>
-            <ModalInputForm>{`Apply template?`}</ModalInputForm>
-            <div>
-              {templateToApply && <EntityTag entity={templateToApply} />}
-            </div>
-            {/* here goes the info about template #951 */}
-          </StyledContent>
+          <ModalInputForm>{`Apply template?`}</ModalInputForm>
+          <div style={{ marginLeft: "0.5rem" }}>
+            {templateToApply && (
+              <EntityTag disableDrag entity={templateToApply} />
+            )}
+          </div>
+          {/* here goes the info about template #951 */}
         </ModalContent>
         <ModalFooter>
           <ButtonGroup>

@@ -13,7 +13,6 @@ import { EntityTag } from "components/advanced";
 import React from "react";
 import { UseMutationResult } from "react-query";
 import { toast } from "react-toastify";
-import { StyledContent } from "../../../EntityBookmarkBox/EntityBookmarkBoxStyles";
 
 interface ApplyTemplateModal {
   showModal: boolean;
@@ -70,13 +69,15 @@ export const ApplyTemplateModal: React.FC<ApplyTemplateModal> = ({
         setApplyTemplateModal(false);
       }}
     >
-      <ModalHeader title="Create Template" />
+      <ModalHeader title="Apply Template" />
       <ModalContent>
-        <StyledContent>
-          <ModalInputForm>{`Apply template?`}</ModalInputForm>
-          <div>{templateToApply && <EntityTag entity={templateToApply} />}</div>
-          {/* here goes the info about template #951 */}
-        </StyledContent>
+        <ModalInputForm>{`Apply template?`}</ModalInputForm>
+        <div style={{ marginLeft: "0.5rem" }}>
+          {templateToApply && (
+            <EntityTag disableDrag entity={templateToApply} />
+          )}
+        </div>
+        {/* here goes the info about template #951 */}
       </ModalContent>
       <ModalFooter>
         <ButtonGroup>

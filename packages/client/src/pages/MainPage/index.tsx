@@ -182,9 +182,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
           button={[firstPanelButton()]}
           noPadding
         >
-          <Profiler id="ahoj" onRender={clockPerformance}>
-            <MemoizedTerritoryTreeBox />
-          </Profiler>
+          <MemoizedTerritoryTreeBox />
         </Box>
       </Panel>
       {/* SECOND PANEL */}
