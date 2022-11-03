@@ -2,7 +2,7 @@ import { Box, Button, Panel } from "components";
 import { PanelSeparator } from "components/advanced";
 import { useSearchParams } from "hooks";
 import ScrollHandler from "hooks/ScrollHandler";
-import React from "react";
+import React, { Profiler } from "react";
 import { BiHide, BiShow } from "react-icons/bi";
 import { BsSquareFill, BsSquareHalf } from "react-icons/bs";
 import { IoMdClose } from "react-icons/io";
@@ -151,6 +151,24 @@ const MainPage: React.FC<MainPage> = ({}) => {
     }
   };
 
+  const clockPerformance = (
+    profilerId: any,
+    mode: any,
+    actualTime: any,
+    baseTime: any,
+    startTime: any,
+    commitTime: any
+  ) => {
+    console.log({
+      profilerId,
+      mode,
+      actualTime,
+      baseTime,
+      startTime,
+      commitTime,
+    });
+  };
+
   return (
     <>
       <ScrollHandler />
@@ -164,7 +182,9 @@ const MainPage: React.FC<MainPage> = ({}) => {
           button={[firstPanelButton()]}
           noPadding
         >
-          <MemoizedTerritoryTreeBox />
+          <Profiler id="ahoj" onRender={clockPerformance}>
+            <MemoizedTerritoryTreeBox />
+          </Profiler>
         </Box>
       </Panel>
       {/* SECOND PANEL */}

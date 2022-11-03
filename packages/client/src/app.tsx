@@ -10,8 +10,8 @@ import api from "api";
 import { SearchParamsProvider } from "hooks/useParamsContext";
 import { useWindowSize } from "hooks/useWindowSize";
 import ActivatePage from "pages/Activate";
-import PasswordResetPage from "pages/PasswordReset";
 import LoginPage from "pages/Login";
+import PasswordResetPage from "pages/PasswordReset";
 import UsersPage from "pages/Users";
 
 import { Page } from "components/advanced";
@@ -26,8 +26,6 @@ import { setSeparatorXPosition } from "redux/features/layout/separatorXPositionS
 import {
   heightFooter,
   heightHeader,
-  layoutWidthBreakpoint,
-  minLayoutWidth,
   percentPanelWidths,
   separatorXPercentPosition,
 } from "Theme/constants";
