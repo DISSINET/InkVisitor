@@ -763,6 +763,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         </StyledEditorSection>
       </div>
 
+      {/* TODO: use component */}
       <Modal
         showModal={applyTemplateModal}
         width="thin"

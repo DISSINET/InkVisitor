@@ -1,3 +1,4 @@
+import { ApplyTemplateModal } from "./ApplyTemplateModal/ApplyTemplateModal";
 import { AttributeButtonGroup } from "./AttributeButtonGroup/AttributeButtonGroup";
 import { AuditTable } from "./AuditTable/AuditTable";
 import { BreadcrumbItem } from "./BreadcrumbItem/BreadcrumbItem";
@@ -13,6 +14,7 @@ import { PanelSeparator } from "./PanelSeparator/PanelSeparator";
 import { UserCustomizationModal } from "./UserCustomizationModal/UserCustomizationModal";
 
 export {
+  ApplyTemplateModal,
   AttributeButtonGroup,
   AuditTable,
   BreadcrumbItem,
