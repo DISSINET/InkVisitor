@@ -31,7 +31,7 @@ export class StatementClassification implements IStatementClassification {
   elvl: EntityEnums.Elvl = EntityEnums.Elvl.Textual;
   logic: EntityEnums.Logic = EntityEnums.Logic.Positive;
   certainty: EntityEnums.Certainty = EntityEnums.Certainty.AlmostCertain;
-  mood: EntityEnums.Mood[];
+  mood: EntityEnums.Mood[] = [EntityEnums.Mood.Indication];
   moodvariant: EntityEnums.MoodVariant = EntityEnums.MoodVariant.Irrealis;
 
   constructor(data: Partial<IStatementClassification>) {
@@ -46,7 +46,7 @@ export class StatementIdentification implements IStatementClassification {
   elvl: EntityEnums.Elvl = EntityEnums.Elvl.Textual;
   logic: EntityEnums.Logic = EntityEnums.Logic.Positive;
   certainty: EntityEnums.Certainty = EntityEnums.Certainty.AlmostCertain;
-  mood: EntityEnums.Mood[] = [];
+  mood: EntityEnums.Mood[] = [EntityEnums.Mood.Indication];
   moodvariant: EntityEnums.MoodVariant = EntityEnums.MoodVariant.Irrealis;
 
   constructor(data: Partial<IStatementClassification>) {
@@ -120,7 +120,7 @@ export class StatementAction implements IStatementAction {
   elvl: EntityEnums.Elvl = EntityEnums.Elvl.Textual;
   certainty: EntityEnums.Certainty = EntityEnums.Certainty.Empty;
   logic: EntityEnums.Logic = EntityEnums.Logic.Positive;
-  mood: EntityEnums.Mood[] = [];
+  mood: EntityEnums.Mood[] = [EntityEnums.Mood.Indication];
   moodvariant: EntityEnums.MoodVariant = EntityEnums.MoodVariant.Realis;
   bundleOperator: EntityEnums.Operator = EntityEnums.Operator.And;
   bundleStart: boolean = false;
