@@ -8,20 +8,9 @@ import {
   IStatementAction,
 } from "@shared/types";
 import api from "api";
+import { Button, Dropdown, Input, Loader, MultiInput } from "components";
 import {
-  Button,
-  ButtonGroup,
-  Dropdown,
-  Input,
-  Loader,
-  Modal,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalInputForm,
-  MultiInput,
-} from "components";
-import {
+  ApplyTemplateModal,
   AuditTable,
   BreadcrumbItem,
   EntitySuggester,
@@ -127,7 +116,8 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   );
 
   // TEMPLATES
-  const [applyTemplateModal, setApplyTemplateModal] = useState<boolean>(false);
+  const [showApplyTemplateModal, setShowApplyTemplateModal] =
+    useState<boolean>(false);
   const [templateToApply, setTemplateToApply] = useState<IEntity | false>(
     false
   );
@@ -140,30 +130,9 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
       if (templateThatIsGoingToBeApplied) {
         setTemplateToApply(templateThatIsGoingToBeApplied);
-        setApplyTemplateModal(true);
+        setShowApplyTemplateModal(true);
       }
     }
-  };
-
-  const handleApplyTemplate = () => {
-    if (templateToApply && statement) {
-      // TODO #952 handle conflicts in Templates application
-      const entityAfterTemplateApplied = {
-        ...{
-          data: templateToApply.data,
-          notes: templateToApply.notes,
-          props: templateToApply.props,
-          references: templateToApply.references,
-          usedTemplate: templateToApply.id,
-        },
-      };
-
-      toast.info(
-        `Template ${templateToApply.label} applied to Statement ${statement.label}`
-      );
-      updateStatementMutation.mutate(entityAfterTemplateApplied);
-    }
-    setTemplateToApply(false);
   };
 
   const {
@@ -763,51 +732,14 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         </StyledEditorSection>
       </div>
 
-      {/* TODO: use component */}
-      <Modal
-        showModal={applyTemplateModal}
-        width="thin"
-        onEnterPress={() => {
-          setApplyTemplateModal(false);
-          handleApplyTemplate();
-        }}
-        onClose={() => {
-          setApplyTemplateModal(false);
-        }}
-      >
-        <ModalHeader title="Apply Template" />
-        <ModalContent>
-          <ModalInputForm>{`Apply template?`}</ModalInputForm>
-          <div style={{ marginLeft: "0.5rem" }}>
-            {templateToApply && (
-              <EntityTag disableDrag entity={templateToApply} />
-            )}
-          </div>
-          {/* here goes the info about template #951 */}
-        </ModalContent>
-        <ModalFooter>
-          <ButtonGroup>
-            <Button
-              key="cancel"
-              label="Cancel"
-              color="greyer"
-              inverted
-              onClick={() => {
-                setApplyTemplateModal(false);
-              }}
-            />
-            <Button
-              key="submit"
-              label="Apply"
-              color="info"
-              onClick={() => {
-                setApplyTemplateModal(false);
-                handleApplyTemplate();
-              }}
-            />
-          </ButtonGroup>
-        </ModalFooter>
-      </Modal>
+      <ApplyTemplateModal
+        showModal={showApplyTemplateModal}
+        setShowApplyTemplateModal={setShowApplyTemplateModal}
+        updateEntityMutation={updateStatementMutation}
+        templateToApply={templateToApply}
+        setTemplateToApply={setTemplateToApply}
+        entity={statement}
+      />
     </>
   );
 };

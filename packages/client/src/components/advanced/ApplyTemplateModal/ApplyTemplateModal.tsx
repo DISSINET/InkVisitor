@@ -16,10 +16,11 @@ import { toast } from "react-toastify";
 
 interface ApplyTemplateModal {
   showModal: boolean;
-  setApplyTemplateModal: React.Dispatch<React.SetStateAction<boolean>>;
+  setShowApplyTemplateModal: React.Dispatch<React.SetStateAction<boolean>>;
   entity?: IEntity;
+  // TODO: check consistency of mutations from different containers
   updateEntityMutation: UseMutationResult<
-    AxiosResponse<IResponseGeneric>,
+    void | AxiosResponse<IResponseGeneric>,
     unknown,
     any,
     unknown
@@ -29,7 +30,7 @@ interface ApplyTemplateModal {
 }
 export const ApplyTemplateModal: React.FC<ApplyTemplateModal> = ({
   showModal,
-  setApplyTemplateModal,
+  setShowApplyTemplateModal,
   entity,
   updateEntityMutation,
   templateToApply,
@@ -62,11 +63,11 @@ export const ApplyTemplateModal: React.FC<ApplyTemplateModal> = ({
       showModal={showModal}
       width="thin"
       onEnterPress={() => {
-        setApplyTemplateModal(false);
+        setShowApplyTemplateModal(false);
         handleApplyTemplate();
       }}
       onClose={() => {
-        setApplyTemplateModal(false);
+        setShowApplyTemplateModal(false);
       }}
     >
       <ModalHeader title="Apply Template" />
@@ -87,7 +88,7 @@ export const ApplyTemplateModal: React.FC<ApplyTemplateModal> = ({
             color="greyer"
             inverted
             onClick={() => {
-              setApplyTemplateModal(false);
+              setShowApplyTemplateModal(false);
             }}
           />
           <Button
@@ -95,7 +96,7 @@ export const ApplyTemplateModal: React.FC<ApplyTemplateModal> = ({
             label="Apply"
             color="info"
             onClick={() => {
-              setApplyTemplateModal(false);
+              setShowApplyTemplateModal(false);
               handleApplyTemplate();
             }}
           />
