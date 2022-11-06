@@ -191,8 +191,7 @@ export default Router()
 
       if (result.inserted === 1) {
         await Audit.createNew(
-          request.db.connection,
-          request.getUserOrFail(),
+          request,
           model.id,
           request.body
         );
@@ -275,12 +274,7 @@ export default Router()
       const result = await model.update(request.db.connection, entityData);
 
       if (result.replaced || result.unchanged) {
-        await Audit.createNew(
-          request.db.connection,
-          request.getUserOrFail(),
-          entityId,
-          entityData
-        );
+        await Audit.createNew(request, entityId, entityData);
 
         return {
           result: true,
