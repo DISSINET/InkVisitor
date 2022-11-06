@@ -14,7 +14,6 @@ import {
   getIStatementMock,
 } from "@modules/common.test";
 import Prop, { PropSpec } from "@models/prop/prop";
-import { IProp } from "@shared/types";
 
 const fillStatementProps = function (
   container: StatementActant | StatementAction,
@@ -29,6 +28,7 @@ const fillStatementProps = function (
   container.props[0].children[0].children.push(new Prop({ id: `${id}.props[0].children[0].children[0].id` }));
   container.props[0].children[0].children[0].type = new PropSpec({ entityId: `${id}.props[0].children[0].children[0].type.entityId` });
   container.props[0].children[0].children[0].value = new PropSpec({ entityId: `${id}.props[0].children[0].children[0].value.entityId` });
+
   // children lvl 3
   container.props[0].children[0].children[0].children.push(new Prop({ id: `${id}.props[0].children[0].children[0].children[0].id` }));
   container.props[0].children[0].children[0].children[0].type = new PropSpec({ entityId: `${id}.props[0].children[0].children[0].children[0].type.entityId` });
