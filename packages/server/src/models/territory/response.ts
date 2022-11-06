@@ -1,4 +1,3 @@
-import { Request } from "express";
 import { UserEnums } from "@shared/enums";
 import { IEntity, IResponseStatement, IResponseTerritory, ITerritory } from "@shared/types";
 import Territory from "./territory";

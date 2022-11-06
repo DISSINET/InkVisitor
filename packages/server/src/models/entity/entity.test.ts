@@ -168,7 +168,7 @@ describe("test Entity.determineOrder", function () {
       siblings[i] = true;
     }
 
-    it("should choose slightly bigger decimal number than originally wanted idnex", () => {
+    it("should choose slightly bigger decimal number than originally wanted index", () => {
       expect(Entity.determineOrder(takenIndex, siblings)).toBe(
         takenIndex + 0.5
       );

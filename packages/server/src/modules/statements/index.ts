@@ -1,4 +1,3 @@
-import { Request } from "express";
 import { Router } from "express";
 import { findEntityById } from "@service/shorthands";
 import {
@@ -11,6 +10,7 @@ import { IResponseStatement, IStatement } from "@shared/types";
 import Statement from "@models/statement/statement";
 import { ResponseStatement } from "@models/statement/response";
 import { EntityEnums } from "@shared/enums";
+import { IRequest } from "src/custom_typings/request";
 
 export default Router()
   /**
@@ -37,7 +37,7 @@ export default Router()
    */
   .get(
     "/:statementId",
-    asyncRouteHandler<IResponseStatement>(async (request: Request) => {
+    asyncRouteHandler<IResponseStatement>(async (request: IRequest) => {
       const statementId = request.params.statementId;
 
       if (!statementId) {

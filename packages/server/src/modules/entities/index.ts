@@ -18,12 +18,13 @@ import {
   ModelNotValidError,
   PermissionDeniedError,
 } from "@shared/types/errors";
-import { Request, Router } from "express";
+import { Router } from "express";
 import { asyncRouteHandler } from "../index";
 import { ResponseSearch } from "@models/entity/response-search";
 import { IRequestSearch } from "@shared/types/request-search";
 import { getAuditByEntityId } from "@modules/audits";
 import { ResponseTooltip } from "@models/entity/response-tooltip";
+import { IRequest } from "src/custom_typings/request";
 
 export default Router()
   /**
@@ -50,7 +51,7 @@ export default Router()
    */
   .get(
     "/:entityId",
-    asyncRouteHandler<IResponseEntity>(async (request: Request) => {
+    asyncRouteHandler<IResponseEntity>(async (request: IRequest) => {
       const entityId = request.params.entityId;
 
       if (!entityId) {
@@ -128,7 +129,7 @@ export default Router()
    */
   .get(
     "/",
-    asyncRouteHandler<IResponseEntity[]>(async (httpRequest: Request) => {
+    asyncRouteHandler<IResponseEntity[]>(async (httpRequest: IRequest) => {
       const req = new RequestSearch(httpRequest.query as IRequestSearch);
       if (req.label && req.label.length < 2) {
         return [];
@@ -167,7 +168,7 @@ export default Router()
    */
   .post(
     "/",
-    asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
+    asyncRouteHandler<IResponseGeneric>(async (request: IRequest) => {
       const model = getEntityClass(request.body as Record<string, unknown>);
 
       if (!model.isValid()) {
@@ -234,7 +235,7 @@ export default Router()
    */
   .put(
     "/:entityId",
-    asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
+    asyncRouteHandler<IResponseGeneric>(async (request: IRequest) => {
       const entityId = request.params.entityId;
       const entityData = request.body as Record<string, unknown>;
 
@@ -308,7 +309,7 @@ export default Router()
    */
   .delete(
     "/:entityId",
-    asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
+    asyncRouteHandler<IResponseGeneric>(async (request: IRequest) => {
       const entityId = request.params.entityId;
 
       if (!entityId) {
@@ -375,7 +376,7 @@ export default Router()
    */
   .get(
     "/:entityId/detail",
-    asyncRouteHandler<IResponseDetail>(async (request: Request) => {
+    asyncRouteHandler<IResponseDetail>(async (request: IRequest) => {
       const entityId = request.params.entityId;
 
       if (!entityId) {
@@ -427,7 +428,7 @@ export default Router()
    */
   .get(
     "/:entityId/tooltip",
-    asyncRouteHandler<EntityTooltip.IResponse>(async (request: Request) => {
+    asyncRouteHandler<EntityTooltip.IResponse>(async (request: IRequest) => {
       const entityId = request.params.entityId;
 
       if (!entityId) {
