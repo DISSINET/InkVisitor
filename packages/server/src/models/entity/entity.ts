@@ -7,13 +7,9 @@ import {
 import { r as rethink, Connection, WriteResult, RDatum } from "rethinkdb-ts";
 import { IStatement, IEntity, IProp, IReference } from "@shared/types";
 import {
-  DbIndex,
-  EntityClass,
-  EntityStatus,
-  Language,
-  Order,
-  UserRole,
-  UserRoleMode,
+  DbEnums,
+  EntityEnums,
+  UserEnums,
 } from "@shared/enums";
 import { InternalServerError } from "@shared/types/errors";
 import User from "@models/user/user";
@@ -24,33 +20,39 @@ export default class Entity implements IEntity, IDbModel {
   static table = "entities";
 
   id: string = "";
-  legacyId: string = "";
-  class: EntityClass = EntityClass.Person;
-  status: EntityStatus = EntityStatus.Approved;
+  legacyId?: string;
+  class: EntityEnums.Class = EntityEnums.Class.Person;
+  status: EntityEnums.Status = EntityEnums.Status.Approved;
   data: any = {};
   label: string = "";
   detail: string = "";
-  language: Language = Language.Latin;
+  language: EntityEnums.Language = EntityEnums.Language.Latin;
   notes: string[] = [];
   props: IProp[] = [];
   references: IReference[] = [];
 
-  isTemplate: boolean = false;
-  usedTemplate: string = "";
-  templateData: object = {};
+  isTemplate?: boolean;
+  usedTemplate?: string;
+  templateData?: object;
 
-  usedIn: IStatement[] = [];
-  right: UserRoleMode = UserRoleMode.Read;
-
-  constructor(data: UnknownObject) {
-    if (!data) {
-      return;
-    }
-
+  constructor(data: Partial<IEntity>) {
     fillFlatObject(this, { ...data, data: undefined });
     fillArray(this.references, Object, data.references);
     fillArray(this.notes, String, data.notes);
     fillArray(this.props, Object, data.props);
+
+    if (data.legacyId !== undefined) {
+      this.legacyId = data.legacyId;
+    }
+    if (data.isTemplate !== undefined) {
+      this.isTemplate = data.isTemplate;
+    }
+    if (data.usedTemplate !== undefined) {
+      this.usedTemplate = data.usedTemplate;
+    }
+    if (data.templateData !== undefined) {
+      this.templateData = data.templateData;
+    }
   }
 
   async save(db: Connection | undefined): Promise<WriteResult> {
@@ -110,7 +112,7 @@ export default class Entity implements IEntity, IDbModel {
   }
 
   canBeEditedByUser(user: User): boolean {
-    return user.role !== UserRole.Viewer;
+    return user.role !== UserEnums.Role.Viewer;
   }
 
   canBeDeletedByUser(user: User): boolean {
@@ -124,16 +126,16 @@ export default class Entity implements IEntity, IDbModel {
    * @param user
    * @returns
    */
-  getUserRoleMode(user: User): UserRoleMode {
-    if (user.role === UserRole.Admin) {
-      return UserRoleMode.Admin;
+  getUserRoleMode(user: User): UserEnums.RoleMode {
+    if (user.role === UserEnums.Role.Admin) {
+      return UserEnums.RoleMode.Admin;
     }
 
     if (this.canBeEditedByUser(user)) {
-      return UserRoleMode.Write;
+      return UserEnums.RoleMode.Write;
     }
 
-    return UserRoleMode.Read;
+    return UserEnums.RoleMode.Read;
   }
 
   static async findUsedInProps(
@@ -145,20 +147,20 @@ export default class Entity implements IEntity, IDbModel {
       .filter((row: RDatum) => {
         return row("props").contains((entry: RDatum) =>
           rethink.or(
-            entry("value")("id").eq(entityId),
-            entry("type")("id").eq(entityId),
+            entry("value")("entityId").eq(entityId),
+            entry("type")("entityId").eq(entityId),
             entry("children").contains((ch1: RDatum) =>
               rethink.or(
-                ch1("value")("id").eq(entityId),
-                ch1("type")("id").eq(entityId),
+                ch1("value")("entityId").eq(entityId),
+                ch1("type")("entityId").eq(entityId),
                 ch1("children").contains((ch2: RDatum) =>
                   rethink.or(
-                    ch2("value")("id").eq(entityId),
-                    ch2("type")("id").eq(entityId),
+                    ch2("value")("entityId").eq(entityId),
+                    ch2("type")("entityId").eq(entityId),
                     ch2("children").contains((ch3: RDatum) =>
                       rethink.or(
-                        ch3("value")("id").eq(entityId),
-                        ch3("type")("id").eq(entityId)
+                        ch3("value")("entityId").eq(entityId),
+                        ch3("type")("entityId").eq(entityId)
                       )
                     )
                   )
@@ -185,12 +187,12 @@ export default class Entity implements IEntity, IDbModel {
 
     if (want === undefined) {
       // if want is not provided, use Last position by default
-      want = Order.Last;
+      want = EntityEnums.Order.Last;
     }
 
-    if (want === Order.Last) {
+    if (want === EntityEnums.Order.Last) {
       return sortedOrders[sortedOrders.length - 1] + 1;
-    } else if (want === Order.First) {
+    } else if (want === EntityEnums.Order.First) {
       return sortedOrders[0] - 1;
     }
 
@@ -265,10 +267,10 @@ export default class Entity implements IEntity, IDbModel {
     let out: string[] = [];
     for (const prop of props) {
       if (prop.type) {
-        out.push(prop.type.id);
+        out.push(prop.type.entityId);
       }
       if (prop.value) {
-        out.push(prop.value.id);
+        out.push(prop.value.entityId);
       }
 
       out = out.concat(Entity.extractIdsFromProps(prop.children));
@@ -289,8 +291,7 @@ export default class Entity implements IEntity, IDbModel {
   }
 
   async getEntities(db: Connection): Promise<IEntity[]> {
-    const entities = Entity.findEntitiesByIds(db, this.getEntitiesIds());
-    return entities;
+    return Entity.findEntitiesByIds(db, this.getEntitiesIds());
   }
 
   /**
@@ -301,7 +302,7 @@ export default class Entity implements IEntity, IDbModel {
   async findFromTemplate(db: Connection): Promise<IEntity[]> {
     const data = await rethink
       .table(Entity.table)
-      .getAll(this.id, { index: DbIndex.EntityUsedTemplate })
+      .getAll(this.id, { index: DbEnums.Indexes.EntityUsedTemplate })
       .run(db);
 
     return data;

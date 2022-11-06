@@ -15,14 +15,14 @@ export class CustomError extends Error {
   //public name: string = ""; // Stands for class name, replaces default 'Error' string from parent constructor
   //public message: string = ""; // this is what will be printed in output - public text, some error classes have overriden message attr
 
-  constructor(message?: string) {
+  constructor(message?: string, loggableMessage?: string) {
     super(message);
-    this.log = message || "";
     this.name = this.constructor.name; // so the value would be taken from the constructor - not the default Error
     this.title = (this.constructor as any).title;
     if (!message) {
       this.message = (this.constructor as any).message;
     }
+    this.log = loggableMessage || message || "";
   }
 
   statusCode(): number {
@@ -61,7 +61,6 @@ class ModelNotValidError extends CustomError {
   public static code = 400;
   public static title = "Model not valid";
   public static message = "Invalid request data";
-  loggable = true;
 }
 
 /**
@@ -190,7 +189,7 @@ class TerritoriesBrokenError extends CustomError {
 }
 
 /**
- * TerrytoryInvalidMove will be thrown during tree/moveTerritory request, while violating some constraint
+ * TerrytoryInvalidMove will be thrown during tree/id/position request, while violating some constraint
  */
 class TerrytoryInvalidMove extends CustomError {
   public static code = 500;
@@ -247,7 +246,22 @@ class EmailError extends CustomError {
 
   constructor(m: string, internalMessage: string) {
     super(m);
-    this.log = internalMessage;;
+    this.log = internalMessage;
+  }
+}
+
+/**
+ * RelationDoesNotExist will be thrown when attempting to remove/update the relation entry, which does not exist
+ */
+class RelationDoesNotExist extends CustomError {
+  public static code = 400;
+  public static title = "Cannot get Relation entry";
+  public static message = "Relation $1 does not exist";
+
+  static forId(id: string): RelationDoesNotExist {
+    return new RelationDoesNotExist(
+      RelationDoesNotExist.message.replace("$1", id)
+    );
   }
 }
 
@@ -280,6 +294,7 @@ const allErrors: Record<string, any> = {
   TerrytoryInvalidMove,
   StatementInvalidMove,
   EmailError,
+  RelationDoesNotExist,
 };
 
 export interface IErrorSignature {
@@ -313,4 +328,5 @@ export {
   TerrytoryInvalidMove,
   StatementInvalidMove,
   EmailError,
+  RelationDoesNotExist,
 };

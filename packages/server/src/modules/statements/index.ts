@@ -10,36 +10,61 @@ import { asyncRouteHandler } from "..";
 import { IResponseStatement, IStatement } from "@shared/types";
 import Statement from "@models/statement/statement";
 import { ResponseStatement } from "@models/statement/response";
+import { EntityEnums } from "@shared/enums";
 
-export default Router().get(
-  "/get/:statementId?",
-  asyncRouteHandler<IResponseStatement>(async (request: Request) => {
-    const statementId = request.params.statementId;
+export default Router()
+  /**
+   * @openapi
+   * /statements/{statementId}/:
+   *   get:
+   *     description: Returns detail for statement-entity object
+   *     tags:
+   *       - entities
+   *     parameters:
+   *       - in: path
+   *         name: statementId
+   *         schema:
+   *           type: string
+   *         required: true
+   *         description: ID of the statement-entity entry
+   *     responses:
+   *       200:
+   *         description: Returns a IResponseStatement object
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/IResponseStatement"
+   */
+  .get(
+    "/:statementId",
+    asyncRouteHandler<IResponseStatement>(async (request: Request) => {
+      const statementId = request.params.statementId;
 
-    if (!statementId) {
-      throw new BadParams("statement id has to be set");
-    }
+      if (!statementId) {
+        throw new BadParams("statement id has to be set");
+      }
 
-    const statementData = await findEntityById<IStatement>(
-      request.db,
-      statementId
-    );
-    if (!statementData) {
-      throw new StatementDoesNotExits(
-        `statement ${statementId} was not found`,
+      const statementData = await findEntityById<IStatement>(
+        request.db,
         statementId
       );
-    }
 
-    const statementModel = new Statement({ ...statementData });
+      if (!statementData || statementData.class !== EntityEnums.Class.Statement) {
+        throw new StatementDoesNotExits(
+          `statement ${statementId} was not found`,
+          statementId
+        );
+      }
 
-    if (!statementModel.canBeViewedByUser(request.getUserOrFail())) {
-      throw new PermissionDeniedError("statement cannot be accessed");
-    }
+      const statementModel = new Statement({ ...statementData });
 
-    const response = new ResponseStatement(statementData);
-    await response.prepare(request);
+      if (!statementModel.canBeViewedByUser(request.getUserOrFail())) {
+        throw new PermissionDeniedError("statement cannot be accessed");
+      }
 
-    return response;
-  })
-);
+      const response = new ResponseStatement(statementData);
+      await response.prepare(request);
+
+      return response;
+    })
+  );

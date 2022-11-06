@@ -3,7 +3,7 @@ import { StatementActant, StatementAction } from "@models/statement/statement";
 import { testErroneousResponse } from "@modules/common.test";
 import { Db } from "@service/RethinkDB";
 import { deleteEntities } from "@service/shorthands";
-import { EntityClass } from "@shared/enums";
+import { EntityEnums } from "@shared/enums";
 import { BadParams } from "@shared/types/errors";
 import { prepareEntity } from "@models/entity/entity.test";
 import request, { Response } from "supertest";
@@ -27,7 +27,7 @@ describe("Entities search (requests)", function () {
     it("should return a BadParams error wrapped in IResponseGeneric", (done) => {
       return request(app)
         .post(`${apiPath}/entities/search`)
-        .send({ class: EntityClass.Concept })
+        .send({ class: EntityEnums.Class.Concept })
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(testErroneousResponse.bind(undefined, new BadParams("")))
@@ -55,12 +55,12 @@ describe("Entities search (params)", function () {
     const [, entity] = prepareEntity();
     entity.label = "entity";
     entity.id = `${entity.label}-${entity.id}`;
-    entity.class = EntityClass.Person;
+    entity.class = EntityEnums.Class.Person;
 
     const [, linkedEntity] = prepareEntity();
     linkedEntity.label = "linked-entity";
     linkedEntity.id = `${linkedEntity.label}-${linkedEntity.id}`;
-    linkedEntity.class = EntityClass.Concept;
+    linkedEntity.class = EntityEnums.Class.Concept;
 
     const [, action] = prepareEntity();
     action.label = "action";
@@ -71,11 +71,11 @@ describe("Entities search (params)", function () {
     statement.id = `${statement.label}-${statement.id}`;
 
     statement.data.actants = [
-      new StatementActant({ id: entity.id, actant: entity.id }),
-      new StatementActant({ id: linkedEntity.id, actant: linkedEntity.id }),
+      new StatementActant({ id: entity.id, entityId: entity.id }),
+      new StatementActant({ id: linkedEntity.id, entityId: linkedEntity.id }),
     ];
     statement.data.actions = [
-      new StatementAction({ id: action.id, action: action.id }),
+      new StatementAction({ id: action.id, actionId: action.id }),
     ];
 
     beforeAll(async () => {

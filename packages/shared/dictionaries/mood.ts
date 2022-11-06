@@ -1,68 +1,68 @@
-import { Mood } from "../enums";
+import { EntityEnums } from "../enums";
 
 export const moodDict = [
   {
-    value: Mood.Indication,
+    value: EntityEnums.Mood.Indication,
     label: "indication",
     info: "",
   },
   {
-    value: Mood.Question,
+    value: EntityEnums.Mood.Question,
     label: "question",
     info: "",
   },
   {
-    value: Mood.Condition,
+    value: EntityEnums.Mood.Condition,
     label: "condition",
     info: "",
   },
   {
-    value: Mood.Possibility,
+    value: EntityEnums.Mood.Possibility,
     label: "possibility",
     info: "",
   },
   {
-    value: Mood.Probability,
+    value: EntityEnums.Mood.Probability,
     label: "probability",
     info: "",
   },
   {
-    value: Mood.Certitude,
+    value: EntityEnums.Mood.Certitude,
     label: "certitude",
     info: "",
   },
   {
-    value: Mood.Wish,
+    value: EntityEnums.Mood.Wish,
     label: "wish",
     info: "",
   },
   {
-    value: Mood.Order,
+    value: EntityEnums.Mood.Order,
     label: "order",
     info: "",
   },
   {
-    value: Mood.Licence,
+    value: EntityEnums.Mood.Licence,
     label: "licence",
     info: "",
   },
   {
-    value: Mood.Ability,
+    value: EntityEnums.Mood.Ability,
     label: "ability",
     info: "",
   },
   {
-    value: Mood.Belief,
+    value: EntityEnums.Mood.Belief,
     label: "belief",
     info: "",
   },
   {
-    value: Mood.Allegation,
+    value: EntityEnums.Mood.Allegation,
     label: "allegation",
     info: "",
   },
   {
-    value: Mood.Semblance,
+    value: EntityEnums.Mood.Semblance,
     label: "semblance",
     info: "",
   },

@@ -1,0 +1,32 @@
+{
+  "$ref": "#/definitions/Relation.IActant2Semantics",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "Relation.IActant2Semantics": {
+      "additionalProperties": false,
+      "properties": {
+        "entityIds": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 2,
+          "minItems": 2,
+          "type": "array"
+        },
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "const": "A2S",
+          "type": "string"
+        }
+      },
+      "required": [
+        "entityIds",
+        "id",
+        "type"
+      ],
+      "type": "object"
+    }
+  }
+}

@@ -5,6 +5,7 @@ export const StyledBoxContent = styled.div`
   flex-direction: column;
   height: 100%;
   background-color: ${({ theme }) => theme.color["white"]};
+  overflow: auto;
 `;
 export const StyledRow = styled.div`
   position: relative;
@@ -28,7 +29,7 @@ export const StyledResultsWrapper = styled.div`
   height: 100%;
   max-height: 100%;
   max-width: 100%;
-  overflow-y: scroll;
+  overflow-y: hidden;
   position: relative;
 `;
 export const StyledResults = styled.div`

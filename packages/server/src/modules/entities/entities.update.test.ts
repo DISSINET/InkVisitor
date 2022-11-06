@@ -7,14 +7,14 @@ import { supertestConfig } from "..";
 import { Db } from "@service/RethinkDB";
 import { findEntityById } from "@service/shorthands";
 import { IEntity } from "@shared/types";
-import Statement from "@models/statement/statement";
+import Statement, { StatementData, StatementTerritory } from "@models/statement/statement";
 import { successfulGenericResponse } from "@modules/common.test";
 
 describe("Entities update", function () {
   describe("empty data", () => {
     it("should return a BadParams error wrapped in IResponseGeneric", (done) => {
       return request(app)
-        .put(`${apiPath}/entities/update/1`)
+        .put(`${apiPath}/entities/1`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(testErroneousResponse.bind(undefined, new BadParams("")))
@@ -24,7 +24,7 @@ describe("Entities update", function () {
   describe("faulty data ", () => {
     it("should return an EntityDoesNotExist error wrapped in IResponseGeneric", (done) => {
       return request(app)
-        .put(`${apiPath}/entities/update/1`)
+        .put(`${apiPath}/entities/1`)
         .send({ test: "" })
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
@@ -43,14 +43,14 @@ describe("Entities update", function () {
       const statementData = new Statement({
         id: testId,
         label: "",
-        data: {
-          territory: { id: testId + "ter" },
-        },
+        data: new StatementData({
+          territory: new StatementTerritory({ territoryId: testId + "ter" }),
+        }),
       });
       await statementData.save(db.connection);
 
       await request(app)
-        .put(`${apiPath}/entities/update/${testId}`)
+        .put(`${apiPath}/entities/${testId}`)
         .send({ label: changeLabelTo })
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)

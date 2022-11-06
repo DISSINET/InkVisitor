@@ -1,24 +1,5 @@
-import { Db } from "@service/RethinkDB";
 import "ts-jest";
-import { fillArray, fillFlatObject, IRequestContext } from "./common";
-import User from "./user/user";
-
-export class MockRequestContext implements IRequestContext {
-  db: Db;
-  user?: User;
-
-  constructor(db: Db, user?: User) {
-    this.db = db;
-    this.user = user;
-  }
-
-  getUserOrFail(): User {
-    if (!this.user) {
-      throw new Error("user field empty");
-    }
-    return this.user;
-  }
-}
+import { fillArray, fillFlatObject } from "./common";
 
 class CustomClass {
   somevar = "initial";

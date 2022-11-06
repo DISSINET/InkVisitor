@@ -8,23 +8,9 @@ import {
   partitivityDict,
   virtualityDict,
 } from "@shared/dictionaries";
-import {
-  Certainty,
-  Elvl,
-  Logic,
-  Mood,
-  MoodVariant,
-  Operator,
-  Partitivity,
-  Virtuality,
-} from "@shared/enums";
+import { EntityEnums } from "@shared/enums";
 import React from "react";
-import {
-  AttributeData,
-  PropAttributeGroup,
-  PropAttributeName,
-  PropAttributeFilter,
-} from "types";
+import { AttributeData, PropAttributeGroup, PropAttributeName } from "types";
 import { AttributeRow } from "./AttributeRow/AttributeRow";
 import { StyledAttributeTable } from "./AttributesEditorStyles";
 import { CheckboxRow } from "./CheckboxRow/CheckboxRow";
@@ -49,14 +35,14 @@ export const AttributesForm: React.FC<AttributesForm> = ({
   const handleDataChange = (
     attributeName: PropAttributeName,
     newValue:
-      | Certainty
-      | Elvl
-      | Logic
-      | Mood[]
-      | MoodVariant
-      | Virtuality
-      | Partitivity
-      | Operator
+      | EntityEnums.Certainty
+      | EntityEnums.Elvl
+      | EntityEnums.Logic
+      | EntityEnums.Mood[]
+      | EntityEnums.MoodVariant
+      | EntityEnums.Virtuality
+      | EntityEnums.Partitivity
+      | EntityEnums.Operator
       | boolean,
     groupName?: PropAttributeGroup
   ) => {
@@ -64,25 +50,25 @@ export const AttributesForm: React.FC<AttributesForm> = ({
 
     switch (attributeName) {
       case "logic":
-        newModalData["logic"] = newValue as Logic;
+        newModalData["logic"] = newValue as EntityEnums.Logic;
         break;
       case "elvl":
-        newModalData["elvl"] = newValue as Elvl;
+        newModalData["elvl"] = newValue as EntityEnums.Elvl;
         break;
       case "mood":
-        newModalData["mood"] = newValue as Mood[];
+        newModalData["mood"] = newValue as EntityEnums.Mood[];
         break;
       case "moodvariant":
-        newModalData["moodvariant"] = newValue as MoodVariant;
+        newModalData["moodvariant"] = newValue as EntityEnums.MoodVariant;
         break;
       case "virtuality":
-        newModalData["virtuality"] = newValue as Virtuality;
+        newModalData["virtuality"] = newValue as EntityEnums.Virtuality;
         break;
       case "partitivity":
-        newModalData["partitivity"] = newValue as Partitivity;
+        newModalData["partitivity"] = newValue as EntityEnums.Partitivity;
         break;
       case "bundleOperator":
-        newModalData["bundleOperator"] = newValue as Operator;
+        newModalData["bundleOperator"] = newValue as EntityEnums.Operator;
         break;
       case "bundleStart":
         newModalData["bundleStart"] = newValue as boolean;
@@ -91,7 +77,7 @@ export const AttributesForm: React.FC<AttributesForm> = ({
         newModalData["bundleEnd"] = newValue as boolean;
         break;
       case "certainty":
-        newModalData["certainty"] = newValue as Certainty;
+        newModalData["certainty"] = newValue as EntityEnums.Certainty;
         break;
     }
     setNewModalData(newModalData, groupName);
@@ -108,7 +94,7 @@ export const AttributesForm: React.FC<AttributesForm> = ({
           items={elvlDict}
           label="Epistemic level"
           onChangeFn={(newValue: string | string[]) => {
-            handleDataChange("elvl", newValue as Elvl, groupName);
+            handleDataChange("elvl", newValue as EntityEnums.Elvl, groupName);
           }}
           attributeName="elvl"
         />
@@ -123,7 +109,7 @@ export const AttributesForm: React.FC<AttributesForm> = ({
           label="Logic"
           attributeName="logic"
           onChangeFn={(newValue: string | string[]) => {
-            handleDataChange("logic", newValue as Logic, groupName);
+            handleDataChange("logic", newValue as EntityEnums.Logic, groupName);
           }}
         />
       )}
@@ -133,12 +119,12 @@ export const AttributesForm: React.FC<AttributesForm> = ({
             disabledAllAttributes || disabledAttributes.includes("mood")
           }
           value={modalData.mood}
-          multi={true}
+          multi
           items={moodDict}
           label="Mood"
           attributeName="mood"
           onChangeFn={(newValue: string | string[]) => {
-            handleDataChange("mood", newValue as Mood[], groupName);
+            handleDataChange("mood", newValue as EntityEnums.Mood[], groupName);
           }}
         />
       )}
@@ -152,7 +138,11 @@ export const AttributesForm: React.FC<AttributesForm> = ({
           label="Mood Variant"
           attributeName="moodvariant"
           onChangeFn={(newValue: string | string[]) => {
-            handleDataChange("moodvariant", newValue as MoodVariant, groupName);
+            handleDataChange(
+              "moodvariant",
+              newValue as EntityEnums.MoodVariant,
+              groupName
+            );
           }}
         />
       )}
@@ -166,7 +156,11 @@ export const AttributesForm: React.FC<AttributesForm> = ({
           label="Virtuality"
           attributeName="virtuality"
           onChangeFn={(newValue: string | string[]) => {
-            handleDataChange("virtuality", newValue as Virtuality, groupName);
+            handleDataChange(
+              "virtuality",
+              newValue as EntityEnums.Virtuality,
+              groupName
+            );
           }}
         />
       )}
@@ -180,7 +174,11 @@ export const AttributesForm: React.FC<AttributesForm> = ({
           label="Partitivity"
           attributeName="partitivity"
           onChangeFn={(newValue: string | string[]) => {
-            handleDataChange("partitivity", newValue as Partitivity, groupName);
+            handleDataChange(
+              "partitivity",
+              newValue as EntityEnums.Partitivity,
+              groupName
+            );
           }}
         />
       )}
@@ -195,7 +193,11 @@ export const AttributesForm: React.FC<AttributesForm> = ({
           label="Logical Operator"
           attributeName="bundleOperator"
           onChangeFn={(newValue: string | string[]) => {
-            handleDataChange("bundleOperator", newValue as Operator, groupName);
+            handleDataChange(
+              "bundleOperator",
+              newValue as EntityEnums.Operator,
+              groupName
+            );
           }}
         />
       )}
@@ -235,7 +237,11 @@ export const AttributesForm: React.FC<AttributesForm> = ({
           label="Certainty"
           attributeName="certainty"
           onChangeFn={(newValue: string | string[]) => {
-            handleDataChange("certainty", newValue as Certainty, groupName);
+            handleDataChange(
+              "certainty",
+              newValue as EntityEnums.Certainty,
+              groupName
+            );
           }}
         ></AttributeRow>
       )}

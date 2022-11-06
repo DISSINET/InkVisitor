@@ -1,24 +1,26 @@
 {
-    "$id": "IReference",
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "additionalProperties": false,
-    "defaultProperties": [],
-    "properties": {
+  "$ref": "#/definitions/IReference",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "IReference": {
+      "additionalProperties": false,
+      "properties": {
         "id": {
-            "type": "string"
+          "type": "string"
         },
         "resource": {
-            "type": "string"
+          "type": "string"
         },
         "value": {
-            "type": "string"
+          "type": "string"
         }
-    },
-    "required": [
+      },
+      "required": [
         "id",
         "resource",
         "value"
-    ],
-    "type": "object"
+      ],
+      "type": "object"
+    }
+  }
 }
-

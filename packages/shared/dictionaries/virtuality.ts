@@ -1,33 +1,33 @@
-import { Virtuality } from "../enums";
+import { EntityEnums } from "../enums";
 
 export const virtualityDict = [
   {
-    value: Virtuality.Reality,
+    value: EntityEnums.Virtuality.Reality,
     label: "reality",
     info: "",
   },
   {
-    value: Virtuality.Possibility,
+    value: EntityEnums.Virtuality.Possibility,
     label: "possibility",
     info: "",
   },
   {
-    value: Virtuality.Probability,
+    value: EntityEnums.Virtuality.Probability,
     label: "probability",
     info: "",
   },
   {
-    value: Virtuality.Certitude,
+    value: EntityEnums.Virtuality.Certitude,
     label: "certitude",
     info: "",
   },
   {
-    value: Virtuality.Allegation,
+    value: EntityEnums.Virtuality.Allegation,
     label: "allegation",
     info: "",
   },
   {
-    value: Virtuality.Semblance,
+    value: EntityEnums.Virtuality.Semblance,
     label: "semblance",
     info: "",
   },

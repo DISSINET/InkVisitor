@@ -1,5 +1,5 @@
 import { actantPositionDict } from "@shared/dictionaries";
-import { Position } from "@shared/enums";
+import { EntityEnums } from "@shared/enums";
 import {
   IEntity,
   IProp,
@@ -7,10 +7,9 @@ import {
   IStatementActant,
   IStatementAction,
 } from "@shared/types";
-import { EmptyTag } from "pages/MainPage/containers";
+import { EmptyTag, EntityTag } from "components/advanced";
 import React from "react";
 import { ColumnInstance, Row } from "react-table";
-import { EntityTag } from "../../../EntityTag/EntityTag";
 import { StatementListRowExpandedPropGroup } from "./StatementListRowExpandedPropGroup";
 import {
   StyledActantWithPropsWrap,
@@ -52,7 +51,7 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
         {resourceEntity ? (
           <StyledReferenceColumn marginRight>
             <EntityTag
-              actant={resourceEntity}
+              entity={resourceEntity}
               tooltipPosition="bottom center"
               fullWidth
             />
@@ -65,7 +64,7 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
         {valueEntity ? (
           <StyledReferenceColumn>
             <EntityTag
-              actant={valueEntity}
+              entity={valueEntity}
               tooltipPosition="bottom center"
               fullWidth
             />
@@ -84,7 +83,7 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
         {actantId && (
           <StyledActantWrap key={key}>
             <EntityTag
-              actant={entities[actantId]}
+              entity={entities[actantId]}
               tooltipPosition="bottom center"
               fullWidth
             />
@@ -175,7 +174,7 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
       // ACTIONS
       const actionObjects = actions.map(
         (sAction: IStatementAction, key: number) => {
-          const action = entities[sAction.action];
+          const action = entities[sAction.actionId];
           return { key, data: { sAction, action } };
         }
       );
@@ -184,7 +183,7 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
       const subjectObjects = actants
         .filter((a: IStatementActant) => a.position === "s")
         .map((sSubject: IStatementActant, key) => {
-          const subject = entities[sSubject.actant];
+          const subject = entities[sSubject.entityId];
           return { key, data: { sSubject, subject } };
         });
 
@@ -192,7 +191,7 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
       const actantObjects = actants
         .filter((a: IStatementActant) => a.position !== "s")
         .map((sActant: IStatementActant, key: number) => {
-          const actant = entities[sActant.actant];
+          const actant = entities[sActant.entityId];
           return {
             key,
             data: {
@@ -235,7 +234,7 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
                     actant.data.subject,
                     actant.data.sSubject,
                     key,
-                    actantPositionDict[Position.Subject].label
+                    actantPositionDict[EntityEnums.Position.Subject].label
                   )}
                 </StyledPropRow>
               ))}

@@ -3,19 +3,7 @@ var { v4 } = require("uuid");
 var fs = require("fs");
 
 import {
-  EntityClass,
-  EntityStatus,
-  Certainty,
-  Elvl,
-  Position,
-  Logic,
-  Mood,
-  MoodVariant,
-  Virtuality,
-  Partitivity,
-  Operator,
-  EntityLogicalType,
-  Language,
+  EntityEnums,
 } from "../../shared/enums";
 import {
   IAction,
@@ -69,7 +57,7 @@ const loadStatementsTables = async (next: Function) => {
             if (part === "NULL") {
               out.push("NULL");
             } else {
-              Object.values(EntityClass).forEach((type) => {
+              Object.values(EntityEnums.Class).forEach((type) => {
                 if (part.includes(type)) {
                   out.push(type);
                 }
@@ -83,7 +71,7 @@ const loadStatementsTables = async (next: Function) => {
 
       const newAction: IAction = {
         id: action.id,
-        class: EntityClass.Action,
+        class: EntityEnums.Class.Action,
         data: {
           valencies: {
             s: action.subject_valency,
@@ -97,10 +85,10 @@ const loadStatementsTables = async (next: Function) => {
           },
         },
         status: statusOption
-          ? (statusOption.value as EntityStatus)
-          : EntityStatus.Pending,
+          ? (statusOption.value as EntityEnums.Status)
+          : EntityEnums.Status.Pending,
         language:
-          action.language === "English" ? Language.English : Language.Latin,
+          action.language === "English" ? EntityEnums.Language.English : EntityEnums.Language.Latin,
         notes: action.note ? [action.note] : [],
         label: action.label,
         detail: action.detail_incl_valency,
@@ -125,7 +113,7 @@ const loadStatementsTables = async (next: Function) => {
       text: {
         id: string;
         label: string;
-        language: Language;
+        language: EntityEnums.Language;
         detail: string;
         note: string;
       },
@@ -180,7 +168,7 @@ const loadStatementsTables = async (next: Function) => {
   tableManuscripts.forEach((manuscript: { id: string; label: string }) => {
     // parse as objects #629
     //addResourceActant(manuscript.id, manuscript.label);
-    addEntity(manuscript.id, manuscript.label, EntityClass.Object);
+    addEntity(manuscript.id, manuscript.label, EntityEnums.Class.Object);
   });
 
   const tableResources: IRowResources[] = await loadSheet({
@@ -238,10 +226,10 @@ const loadStatementsTables = async (next: Function) => {
 
   const conceptsData = conceptSheet
     ? await loadSheet({
-        spread: conceptSheet.spread,
-        sheet: conceptSheet.sheet,
-        headerRow: 4,
-      })
+      spread: conceptSheet.spread,
+      sheet: conceptSheet.sheet,
+      headerRow: 4,
+    })
     : [];
 
   type IConceptRow = {
@@ -334,7 +322,7 @@ const loadStatementsTables = async (next: Function) => {
         addEntity(
           entitySheet.id + "_" + entityRow.id,
           entityRow.label,
-          entitySheet.entityType as EntityClass
+          entitySheet.entityType as EntityEnums.Class
         );
 
         parseEntityPropsInRow(entityRow);
@@ -397,37 +385,37 @@ const loadStatementsTables = async (next: Function) => {
         addEntity(
           value1Id,
           statement.primary_reference_part,
-          EntityClass.Value
+          EntityEnums.Class.Value
         );
         addEntity(
           value2Id,
           statement.secondary_reference_part,
-          EntityClass.Value
+          EntityEnums.Class.Value
         );
 
         // parse the statement id but keep the order somehow sorted
         const mainStatement: IStatement = {
           id: v4(),
-          class: EntityClass.Statement,
+          class: EntityEnums.Class.Statement,
           props: [],
           data: {
             actions: [
               {
                 id: v4(),
-                action: statement.id_action_or_relation,
-                elvl: Elvl.Textual,
-                certainty: Certainty.Empty,
-                logic: Logic.Positive,
-                mood: [Mood.Indication],
-                moodvariant: MoodVariant.Realis,
-                bundleOperator: Operator.And,
+                actionId: statement.id_action_or_relation,
+                elvl: EntityEnums.Elvl.Textual,
+                certainty: EntityEnums.Certainty.Empty,
+                logic: EntityEnums.Logic.Positive,
+                mood: [EntityEnums.Mood.Indication],
+                moodvariant: EntityEnums.MoodVariant.Realis,
+                bundleOperator: EntityEnums.Operator.And,
                 bundleStart: false,
                 bundleEnd: false,
                 props: [],
               },
             ],
             territory: {
-              id: statement.text_part_id,
+              territoryId: statement.text_part_id,
               order: si,
             },
             tags: statement.tags_id.split(" #").filter((t: string) => t),
@@ -449,8 +437,8 @@ const loadStatementsTables = async (next: Function) => {
           notes: [],
           label: statement.id,
           detail: "",
-          language: Language.Latin,
-          status: EntityStatus.Approved,
+          language: EntityEnums.Language.Latin,
+          status: EntityEnums.Status.Approved,
           isTemplate: false,
         };
 
@@ -462,7 +450,7 @@ const loadStatementsTables = async (next: Function) => {
         //subject
         processActant(
           mainStatement,
-          Position.Subject,
+          EntityEnums.Position.Subject,
           statement.id_subject,
           statement.subject_property_type_id,
           statement.subject_property_value_id,
@@ -472,7 +460,7 @@ const loadStatementsTables = async (next: Function) => {
         // actant1
         processActant(
           mainStatement,
-          Position.Actant1,
+          EntityEnums.Position.Actant1,
           statement.id_actant1,
           statement.actant1_property_type_id,
           statement.actant1_property_value_id,
@@ -482,7 +470,7 @@ const loadStatementsTables = async (next: Function) => {
         // actant2
         processActant(
           mainStatement,
-          Position.Actant2,
+          EntityEnums.Position.Actant2,
           statement.id_actant2,
           statement.actant2_property_type_id,
           statement.actant2_property_value_id,
@@ -526,29 +514,29 @@ const loadStatementsTables = async (next: Function) => {
 
           mainStatement.data.actions[0].props.push({
             id: v4(),
-            elvl: Elvl.Textual,
-            certainty: Certainty.Empty,
-            logic: Logic.Positive,
-            mood: [Mood.Indication],
-            moodvariant: MoodVariant.Realis,
-            bundleOperator: Operator.And,
+            elvl: EntityEnums.Elvl.Textual,
+            certainty: EntityEnums.Certainty.Empty,
+            logic: EntityEnums.Logic.Positive,
+            mood: [EntityEnums.Mood.Indication],
+            moodvariant: EntityEnums.MoodVariant.Realis,
+            bundleOperator: EntityEnums.Operator.And,
             bundleStart: false,
             bundleEnd: false,
 
             children: [],
             type: {
-              id: propActant1Id,
-              elvl: Elvl.Textual,
-              logic: Logic.Positive,
-              virtuality: Virtuality.Reality,
-              partitivity: Partitivity.Unison,
+              entityId: propActant1Id,
+              elvl: EntityEnums.Elvl.Textual,
+              logic: EntityEnums.Logic.Positive,
+              virtuality: EntityEnums.Virtuality.Reality,
+              partitivity: EntityEnums.Partitivity.Unison,
             },
             value: {
-              id: propActant2Id,
-              elvl: Elvl.Textual,
-              logic: Logic.Positive,
-              virtuality: Virtuality.Reality,
-              partitivity: Partitivity.Unison,
+              entityId: propActant2Id,
+              elvl: EntityEnums.Elvl.Textual,
+              logic: EntityEnums.Logic.Positive,
+              virtuality: EntityEnums.Virtuality.Reality,
+              partitivity: EntityEnums.Partitivity.Unison,
             },
           });
         }
@@ -587,25 +575,25 @@ const checkValidId = (idValue: string) => {
 /***
  * TODO: logical type
  */
-const addEntity = (id: string, label: string, type: EntityClass) => {
+const addEntity = (id: string, label: string, type: EntityEnums.Class) => {
   const newEntity: IEntity | IEntity = {
     id,
     class: type,
     data:
-      type === EntityClass.Concept
+      type === EntityEnums.Class.Concept
         ? {
-            status: EntityStatus.Approved,
-          }
+          status: EntityEnums.Status.Approved,
+        }
         : {
-            logicalType: EntityLogicalType.Definite,
-          },
+          logicalType: EntityEnums.LogicalType.Definite,
+        },
     label: label,
     detail: "",
-    language: Language.Latin,
+    language: EntityEnums.Language.Latin,
     notes: [],
     props: [],
     references: [],
-    status: EntityStatus.Approved,
+    status: EntityEnums.Status.Approved,
     isTemplate: false,
   };
   if (id) {
@@ -625,18 +613,18 @@ const addTerritoryEntity = (
     if (!entities.some((a) => a.id == id)) {
       const newTerritory: ITerritory = {
         id,
-        class: EntityClass.Territory,
+        class: EntityEnums.Class.Territory,
         data: {
           parent: parentId
             ? {
-                id: parentId,
-                order: order,
-              }
+              territoryId: parentId,
+              order: order,
+            }
             : false,
         },
         label: label.trim(),
         detail: detail,
-        status: EntityStatus.Approved,
+        status: EntityEnums.Status.Approved,
         // @ts-ignore
         language: Language[language] as Language,
         notes: notes,
@@ -653,7 +641,7 @@ const addResourceActant = (id: string, label: string) => {
   if (id) {
     const newResource: IResource = {
       id,
-      class: EntityClass.Resource,
+      class: EntityEnums.Class.Resource,
       data: {
         url: "",
         partValueLabel: "",
@@ -661,10 +649,10 @@ const addResourceActant = (id: string, label: string) => {
       },
       label: label.trim(),
       detail: "",
-      language: Language.Latin,
+      language: EntityEnums.Language.Latin,
       notes: [],
       props: [],
-      status: EntityStatus.Approved,
+      status: EntityEnums.Status.Approved,
       references: [],
       isTemplate: false,
     };
@@ -702,7 +690,7 @@ const parseEntityPropsInRow = (row: any) => {
           const valueId = v4();
 
           // add actant
-          addEntity(valueId, value, EntityClass.Value);
+          addEntity(valueId, value, EntityEnums.Class.Value);
 
           // add statement
           // createEmptyPropStatement(
@@ -731,27 +719,27 @@ const createEmptyPropStatement = (
   if (idSubject && idActant1 && idActant2) {
     const newEmptyStatement: IStatement = {
       id: v4(),
-      class: EntityClass.Statement,
+      class: EntityEnums.Class.Statement,
       props: [],
       label: "",
       data: {
         actions: [
           {
             id: v4(),
-            action: "A0093",
-            certainty: Certainty.Empty,
-            elvl: Elvl.Textual,
-            logic: Logic.Positive,
-            mood: [Mood.Indication],
-            moodvariant: MoodVariant.Realis,
-            bundleOperator: Operator.And,
+            actionId: "A0093",
+            certainty: EntityEnums.Certainty.Empty,
+            elvl: EntityEnums.Elvl.Textual,
+            logic: EntityEnums.Logic.Positive,
+            mood: [EntityEnums.Mood.Indication],
+            moodvariant: EntityEnums.MoodVariant.Realis,
+            bundleOperator: EntityEnums.Operator.And,
             bundleStart: false,
             bundleEnd: false,
             props: [],
           },
         ],
         territory: {
-          id: territory,
+          territoryId: territory,
           order: order,
         },
         tags: [],
@@ -759,49 +747,55 @@ const createEmptyPropStatement = (
         actants: [
           {
             id: v4(),
-            actant: idSubject,
-            position: Position.Subject,
-            elvl: Elvl.Inferential,
-            logic: Logic.Positive,
-            virtuality: Virtuality.Reality,
-            partitivity: Partitivity.Unison,
-            bundleOperator: Operator.And,
+            entityId: idSubject,
+            position: EntityEnums.Position.Subject,
+            elvl: EntityEnums.Elvl.Inferential,
+            logic: EntityEnums.Logic.Positive,
+            virtuality: EntityEnums.Virtuality.Reality,
+            partitivity: EntityEnums.Partitivity.Unison,
+            bundleOperator: EntityEnums.Operator.And,
             bundleStart: false,
             bundleEnd: false,
             props: [],
+            classifications: [],
+            identifications: [],
           },
           {
             id: v4(),
-            actant: idActant1,
-            position: Position.Actant1,
-            elvl: Elvl.Inferential,
-            logic: Logic.Positive,
-            virtuality: Virtuality.Reality,
-            partitivity: Partitivity.Unison,
-            bundleOperator: Operator.And,
+            entityId: idActant1,
+            position: EntityEnums.Position.Actant1,
+            elvl: EntityEnums.Elvl.Inferential,
+            logic: EntityEnums.Logic.Positive,
+            virtuality: EntityEnums.Virtuality.Reality,
+            partitivity: EntityEnums.Partitivity.Unison,
+            bundleOperator: EntityEnums.Operator.And,
             bundleStart: false,
             bundleEnd: false,
             props: [],
+            classifications: [],
+            identifications: [],
           },
           {
             id: v4(),
-            actant: idActant2,
-            position: Position.Actant2,
-            elvl: Elvl.Inferential,
-            logic: Logic.Positive,
-            virtuality: Virtuality.Reality,
-            partitivity: Partitivity.Unison,
-            bundleOperator: Operator.And,
+            entityId: idActant2,
+            position: EntityEnums.Position.Actant2,
+            elvl: EntityEnums.Elvl.Inferential,
+            logic: EntityEnums.Logic.Positive,
+            virtuality: EntityEnums.Virtuality.Reality,
+            partitivity: EntityEnums.Partitivity.Unison,
+            bundleOperator: EntityEnums.Operator.And,
             bundleStart: false,
             bundleEnd: false,
             props: [],
+            classifications: [],
+            identifications: [],
           },
         ],
       },
       detail: "",
-      language: Language.Latin,
+      language: EntityEnums.Language.Latin,
       notes: [],
-      status: EntityStatus.Approved,
+      status: EntityEnums.Status.Approved,
       references: [],
       isTemplate: false,
     };
@@ -861,58 +855,58 @@ const processLocation = (
             .replace(">", "");
           statement.data.actions[0].props.push({
             id: v4(),
-            certainty: Certainty.Empty,
-            elvl: Elvl.Textual,
-            logic: Logic.Positive,
-            mood: [Mood.Indication],
-            moodvariant: MoodVariant.Realis,
-            bundleOperator: Operator.And,
+            certainty: EntityEnums.Certainty.Empty,
+            elvl: EntityEnums.Elvl.Textual,
+            logic: EntityEnums.Logic.Positive,
+            mood: [EntityEnums.Mood.Indication],
+            moodvariant: EntityEnums.MoodVariant.Realis,
+            bundleOperator: EntityEnums.Operator.And,
             bundleStart: false,
             bundleEnd: false,
 
             children: [],
 
             type: {
-              id: sameLocationType,
-              elvl: Elvl.Textual,
-              logic: Logic.Positive,
-              virtuality: Virtuality.Reality,
-              partitivity: Partitivity.Unison,
+              entityId: sameLocationType,
+              elvl: EntityEnums.Elvl.Textual,
+              logic: EntityEnums.Logic.Positive,
+              virtuality: EntityEnums.Virtuality.Reality,
+              partitivity: EntityEnums.Partitivity.Unison,
             },
             value: {
-              id: statementLocationId,
-              elvl: Elvl.Textual,
-              logic: Logic.Positive,
-              virtuality: Virtuality.Reality,
-              partitivity: Partitivity.Unison,
+              entityId: statementLocationId,
+              elvl: EntityEnums.Elvl.Textual,
+              logic: EntityEnums.Logic.Positive,
+              virtuality: EntityEnums.Virtuality.Reality,
+              partitivity: EntityEnums.Partitivity.Unison,
             },
           });
         } else {
           statement.data.actions[0].props.push({
             id: v4(),
-            elvl: Elvl.Textual,
-            certainty: Certainty.Empty,
-            logic: Logic.Positive,
-            mood: [Mood.Indication],
-            moodvariant: MoodVariant.Realis,
-            bundleOperator: Operator.And,
+            elvl: EntityEnums.Elvl.Textual,
+            certainty: EntityEnums.Certainty.Empty,
+            logic: EntityEnums.Logic.Positive,
+            mood: [EntityEnums.Mood.Indication],
+            moodvariant: EntityEnums.MoodVariant.Realis,
+            bundleOperator: EntityEnums.Operator.And,
             bundleStart: false,
             bundleEnd: false,
 
             children: [],
             type: {
-              id: locationType.concept,
-              elvl: Elvl.Textual,
-              logic: Logic.Positive,
-              virtuality: Virtuality.Reality,
-              partitivity: Partitivity.Unison,
+              entityId: locationType.concept,
+              elvl: EntityEnums.Elvl.Textual,
+              logic: EntityEnums.Logic.Positive,
+              virtuality: EntityEnums.Virtuality.Reality,
+              partitivity: EntityEnums.Partitivity.Unison,
             },
             value: {
-              id: locationIdValue,
-              elvl: Elvl.Textual,
-              logic: Logic.Positive,
-              virtuality: Virtuality.Reality,
-              partitivity: Partitivity.Unison,
+              entityId: locationIdValue,
+              elvl: EntityEnums.Elvl.Textual,
+              logic: EntityEnums.Logic.Positive,
+              virtuality: EntityEnums.Virtuality.Reality,
+              partitivity: EntityEnums.Partitivity.Unison,
             },
           });
         }
@@ -923,7 +917,7 @@ const processLocation = (
 
 const processActant = (
   statement: IStatement,
-  position: Position,
+  position: EntityEnums.Position,
   actantIdValues: string,
   propActant1Value: string,
   propActant2Value: string,
@@ -933,9 +927,9 @@ const processActant = (
     actantIdValues.split(" #").forEach((actantIdValue: string) => {
       // asign elvl and certainty
 
-      let elvl: Elvl = actantIdValue.includes("[")
-        ? Elvl["Interpretive"]
-        : Elvl.Textual;
+      let elvl: EntityEnums.Elvl = actantIdValue.includes("[")
+        ? EntityEnums.Elvl.Interpretive
+        : EntityEnums.Elvl.Textual;
 
       // remove brackets
       const actantIdClean: string = actantIdValue
@@ -951,16 +945,18 @@ const processActant = (
 
       const actant: IStatementActant = {
         id: statementActantId,
-        actant: actantId,
+        entityId: actantId,
         position: position,
         elvl: elvl,
-        logic: Logic.Positive,
-        virtuality: Virtuality.Reality,
-        partitivity: Partitivity.Unison,
-        bundleOperator: Operator.And,
+        logic: EntityEnums.Logic.Positive,
+        virtuality: EntityEnums.Virtuality.Reality,
+        partitivity: EntityEnums.Partitivity.Unison,
+        bundleOperator: EntityEnums.Operator.And,
         bundleStart: false,
         bundleEnd: false,
         props: [],
+        classifications: [],
+        identifications: [],
       };
 
       // create a prop if there is one
@@ -980,30 +976,30 @@ const processActant = (
          */
         actant.props.push({
           id: v4(),
-          elvl: Elvl.Textual,
-          certainty: Certainty.Empty,
-          logic: Logic.Positive,
-          mood: [Mood.Indication],
-          moodvariant: MoodVariant.Realis,
-          bundleOperator: Operator.And,
+          elvl: EntityEnums.Elvl.Textual,
+          certainty: EntityEnums.Certainty.Empty,
+          logic: EntityEnums.Logic.Positive,
+          mood: [EntityEnums.Mood.Indication],
+          moodvariant: EntityEnums.MoodVariant.Realis,
+          bundleOperator: EntityEnums.Operator.And,
           bundleStart: false,
           bundleEnd: false,
 
           children: [],
 
           type: {
-            id: propActant1Id,
-            elvl: Elvl.Textual,
-            logic: Logic.Positive,
-            virtuality: Virtuality.Reality,
-            partitivity: Partitivity.Unison,
+            entityId: propActant1Id,
+            elvl: EntityEnums.Elvl.Textual,
+            logic: EntityEnums.Logic.Positive,
+            virtuality: EntityEnums.Virtuality.Reality,
+            partitivity: EntityEnums.Partitivity.Unison,
           },
           value: {
-            id: propActant2Id,
-            elvl: Elvl.Textual,
-            logic: Logic.Positive,
-            virtuality: Virtuality.Reality,
-            partitivity: Partitivity.Unison,
+            entityId: propActant2Id,
+            elvl: EntityEnums.Elvl.Textual,
+            logic: EntityEnums.Logic.Positive,
+            virtuality: EntityEnums.Virtuality.Reality,
+            partitivity: EntityEnums.Partitivity.Unison,
           },
         });
       }
@@ -1021,7 +1017,7 @@ const createNewActantIfNeeded = (actantValue: string) => {
     const newActantLabel: string = actantValue.split("~")[2];
 
     if (["P", "G", "O", "C", "L", "V", "E"].indexOf(newActantType) > -1)
-      addEntity(newActantId, newActantLabel, newActantType as EntityClass);
+      addEntity(newActantId, newActantLabel, newActantType as EntityEnums.Class);
 
     return newActantId;
   } else {

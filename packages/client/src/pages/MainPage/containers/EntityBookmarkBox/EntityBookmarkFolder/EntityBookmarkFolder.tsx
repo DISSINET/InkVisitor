@@ -1,7 +1,8 @@
-import { EntityClass } from "@shared/enums";
+import { EntityEnums } from "@shared/enums";
 import { IBookmarkFolder, IResponseBookmarkFolder } from "@shared/types";
 import api from "api";
 import { ButtonGroup, Button, Tooltip } from "components";
+import { EntitySuggester } from "components/advanced";
 import React, { useState } from "react";
 import { useDrop, DragObjectWithType, DropTargetMonitor } from "react-dnd";
 import {
@@ -14,7 +15,6 @@ import {
 } from "react-icons/fa";
 import { useMutation, useQueryClient } from "react-query";
 import { DragItem, ItemTypes } from "types";
-import { EntitySuggester } from "../../EntitySuggester/EntitySuggester";
 import { EntityBookmarkTable } from "../EntityBookmarkTable/EntityBookmarkTable";
 import {
   StyledFolderContent,
@@ -29,17 +29,18 @@ import {
 } from "./EntityBookmarkFolderStyles";
 
 const bookmarkEntities = [
-  EntityClass.Action,
-  EntityClass.Person,
-  EntityClass.Group,
-  EntityClass.Object,
-  EntityClass.Concept,
-  EntityClass.Location,
-  EntityClass.Value,
-  EntityClass.Event,
-  EntityClass.Statement,
-  EntityClass.Territory,
-  EntityClass.Resource,
+  EntityEnums.Class.Action,
+  EntityEnums.Class.Person,
+  EntityEnums.Class.Being,
+  EntityEnums.Class.Group,
+  EntityEnums.Class.Object,
+  EntityEnums.Class.Concept,
+  EntityEnums.Class.Location,
+  EntityEnums.Class.Value,
+  EntityEnums.Class.Event,
+  EntityEnums.Class.Statement,
+  EntityEnums.Class.Territory,
+  EntityEnums.Class.Resource,
 ];
 
 interface EntityBookmarkFolder {
@@ -76,7 +77,7 @@ export const EntityBookmarkFolder: React.FC<EntityBookmarkFolder> = ({
 
   const changeBookmarksMutation = useMutation(
     async (newBookmarks: IBookmarkFolder[]) =>
-      await api.usersUpdate(false, { bookmarks: newBookmarks }),
+      await api.usersUpdate("me", { bookmarks: newBookmarks }),
     {
       onSuccess: () => {
         queryClient.invalidateQueries(["bookmarks"]);
@@ -98,7 +99,7 @@ export const EntityBookmarkFolder: React.FC<EntityBookmarkFolder> = ({
     }
   };
 
-  const removeBookmark = async (folderId: string, bookmarkId: string) => {
+  const removeBookmark = (folderId: string, bookmarkId: string) => {
     const newBookmarks: IBookmarkFolder[] | false = getBookmarksCopy();
     if (newBookmarks) {
       const folder = newBookmarks.find((b) => b.id === folderId);
@@ -219,6 +220,7 @@ export const EntityBookmarkFolder: React.FC<EntityBookmarkFolder> = ({
           </StyledFolderContentTags>
           <StyledFolderSuggester>
             <EntitySuggester
+              disableDuplicate
               openDetailOnCreate
               onSelected={(bookmarkId: string) => {
                 addBookmark(bookmarkFolder.id, bookmarkId);

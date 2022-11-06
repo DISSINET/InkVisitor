@@ -1,43 +1,42 @@
 import Statement from "@models/statement/statement";
 import { ResponseTerritory } from "@models/territory/response";
 import Territory from "@models/territory/territory";
-import { findEntityById, getEntitiesDataByClass } from "@service/shorthands";
-import { EntityClass } from "@shared/enums";
-import {
-  IResponseGeneric,
-  IResponseTerritory,
-  IStatement,
-  ITerritory,
-} from "@shared/types";
+import { findEntityById } from "@service/shorthands";
+import { EntityEnums } from "@shared/enums";
+import { IResponseTerritory, IStatement, ITerritory } from "@shared/types";
 import {
   BadParams,
   PermissionDeniedError,
-  StatementDoesNotExits,
-  StatementInvalidMove,
   TerritoryDoesNotExits,
 } from "@shared/types/errors";
 import { Request, Router } from "express";
 import { asyncRouteHandler } from "..";
 
-function insertIStatementToChilds(
-  array: IStatement[],
-  onIndex: number,
-  item: IStatement
-): IStatement[] {
-  return [...array.slice(0, onIndex), item, ...array.slice(onIndex)];
-}
-
-const sortStatements = (terA: IStatement, terB: IStatement): number => {
-  if (terA.data.territory && terB.data.territory) {
-    return terA.data.territory.order - terB.data.territory.order;
-  } else {
-    return 0;
-  }
-};
-
 export default Router()
+  /**
+   * @openapi
+   * /territories/{territoryId}:
+   *   get:
+   *     description: Returns detail for territory entry
+   *     tags:
+   *       - territories
+   *     parameters:
+   *       - in: path
+   *         name: territoryId
+   *         schema:
+   *           type: string
+   *         required: true
+   *         description: ID of the territory entry
+   *     responses:
+   *       200:
+   *         description: Returns IResponseTerritory object
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/IResponseTerritory"
+   */
   .get(
-    "/get/:territoryId?",
+    "/:territoryId",
     asyncRouteHandler<IResponseTerritory>(async (request: Request) => {
       const territoryId = request.params.territoryId;
       if (!territoryId) {
@@ -48,7 +47,7 @@ export default Router()
         request.db,
         territoryId
       );
-      if (!territory || territory.class !== EntityClass.Territory) {
+      if (!territory || territory.class !== EntityEnums.Class.Territory) {
         throw new TerritoryDoesNotExits(
           `territory ${territoryId} was not found`,
           territoryId
@@ -69,8 +68,32 @@ export default Router()
       return response;
     })
   )
+  /**
+   * @openapi
+   * /territories/{territoryId}/entities:
+   *   get:
+   *     description: Returns entities associated with territory's statements
+   *     tags:
+   *       - territories
+   *     parameters:
+   *       - in: path
+   *         name: territoryId
+   *         schema:
+   *           type: string
+   *         required: true
+   *         description: ID of the territory entry
+   *     responses:
+   *       200:
+   *         description: Returns list of ids
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: array
+   *               items:
+   *                 type: string
+   */
   .get(
-    "/getEntityIds/:territoryId?",
+    "/:territoryId/entities",
     asyncRouteHandler<string[]>(async (request: Request) => {
       const territoryId = request.params.territoryId;
       if (!territoryId) {
@@ -81,7 +104,7 @@ export default Router()
         request.db,
         territoryId
       );
-      if (!territory || territory.class !== EntityClass.Territory) {
+      if (!territory || territory.class !== EntityEnums.Class.Territory) {
         throw new TerritoryDoesNotExits(
           `territory ${territoryId} was not found`,
           territoryId
@@ -95,95 +118,5 @@ export default Router()
         );
 
       return Statement.getEntitiesIdsForMany(dependentStatements);
-    })
-  )
-  .post(
-    "/moveStatement",
-
-    //@ts-ignore
-    asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
-      const moveId = request.body.moveId;
-      const newIndex = request.body.newIndex;
-
-      if (!moveId || newIndex === undefined) {
-        throw new BadParams("moveId/newIndex has be set");
-      }
-
-      const statement: IStatement = await findEntityById<IStatement>(
-        request.db,
-        moveId
-      );
-
-      if (!statement.data.territory) {
-        throw new StatementDoesNotExits(
-          `statement ${moveId} has no territory`,
-          moveId
-        );
-      }
-
-      if (!statement) {
-        throw new StatementDoesNotExits(
-          `statement ${moveId} does not exist`,
-          moveId
-        );
-      }
-
-      const territory: ITerritory = await findEntityById<ITerritory>(
-        request.db,
-        statement.data.territory.id
-      );
-      if (!territory) {
-        throw new TerritoryDoesNotExits(
-          `territory ${statement.data.territory.id} does not exist`,
-          statement.data.territory.id
-        );
-      }
-
-      const out: IResponseGeneric = {
-        result: true,
-      };
-
-      let statementsForTerritory = (
-        await getEntitiesDataByClass<IStatement>(
-          request.db,
-          EntityClass.Statement
-        )
-      )
-        .filter((s) => s.data.territory && s.data.territory.id === territory.id)
-        .sort(sortStatements);
-      if (newIndex < 0 || newIndex > statementsForTerritory.length) {
-        throw new StatementInvalidMove(
-          "cannot move statement to invalid index"
-        );
-      }
-
-      const currentIndex = statementsForTerritory.findIndex(
-        (s) => s.id === moveId
-      );
-      if (currentIndex === -1) {
-        // statement is not present in the array
-        throw new StatementInvalidMove("statement not present in the array");
-      }
-      if (currentIndex === newIndex) {
-        throw new StatementInvalidMove("already on the position");
-      }
-      statementsForTerritory.splice(currentIndex, 1);
-
-      statementsForTerritory = insertIStatementToChilds(
-        statementsForTerritory,
-        newIndex,
-        statement
-      );
-
-      for (let i = 0; i < statementsForTerritory.length; i++) {
-        const statement = new Statement({ ...statementsForTerritory[i] });
-        if (statement.data.territory) {
-          statement.data.territory.order = i + 1;
-        }
-        await statement.update(request.db.connection, {
-          data: statement.data,
-        });
-        return out;
-      }
     })
   );

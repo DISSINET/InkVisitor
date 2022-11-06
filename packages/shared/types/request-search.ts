@@ -2,33 +2,38 @@
  * Deprecated
  */
 
-import { EntityClass, isValidEntityClass } from "../enums";
+import { EntityEnums } from "../enums";
+import { EnumValidators } from "../enums/validators";
 import { BadParams } from "./errors";
 
 export interface IRequestSearch {
-  class?: EntityClass;
-  excluded?: EntityClass[];
+  class?: EntityEnums.Class;
+  excluded?: EntityEnums.Class[];
   label?: string;
+  entityIds?: string[];
   cooccurrenceId?: string;
   onlyTemplates?: boolean;
   usedTemplate?: string;
 }
 
 export class RequestSearch {
-  class?: EntityClass;
+  class?: EntityEnums.Class;
   label?: string;
+  entityIds?: string[];
   cooccurrenceId?: string;
-  excluded?: EntityClass[];
+  excluded?: EntityEnums.Class[];
   onlyTemplates?: boolean;
   usedTemplate?: string;
 
-  constructor(requestData: IRequestSearch & { excluded?: EntityClass[] }) {
+  constructor(requestData: IRequestSearch & { excluded?: EntityEnums.Class[] }) {
     this.class = requestData.class;
     this.label = requestData.label;
     this.cooccurrenceId =
       requestData.cooccurrenceId ||
       (requestData as any).relatedEntityId ||
       false;
+
+    this.entityIds = requestData.entityIds || [];
 
     if (requestData.excluded) {
       if (requestData.excluded.constructor.name === "String") {
@@ -43,7 +48,7 @@ export class RequestSearch {
   }
 
   validate(): Error | void {
-    if (this.class && !isValidEntityClass(this.class)) {
+    if (this.class && !EnumValidators.IsValidEntityClass(this.class)) {
       return new BadParams("invalid 'class' value");
     }
 
@@ -51,10 +56,11 @@ export class RequestSearch {
       !this.label &&
       !this.class &&
       !this.onlyTemplates &&
-      !this.usedTemplate
+      !this.usedTemplate &&
+      (typeof this.entityIds !== "object" || !this.entityIds.length)
     ) {
       return new BadParams(
-        "label, class, onlyTemplates or usedTemplate has to be set"
+        "label, class, onlyTemplates, usedTemplate or entityIds field has to be set"
       );
     }
 

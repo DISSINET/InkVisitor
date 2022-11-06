@@ -1,17 +1,13 @@
 import Entity from "@models/entity/entity";
-import { fillFlatObject, IModel, UnknownObject } from "@models/common";
-import { EntityClass, EntityLogicalType } from "@shared/enums";
-import { IValue } from "@shared/types";
+import { fillFlatObject, IModel } from "@models/common";
+import { EntityEnums } from "@shared/enums";
+import { IValue, IValueData } from "@shared/types";
 
-class ValueData implements IModel {
-  logicalType: EntityLogicalType = EntityLogicalType.Definite;
+class ValueData implements IValueData, IModel {
+  logicalType: EntityEnums.LogicalType;
 
-  constructor(data: UnknownObject) {
-    if (!data) {
-      return;
-    }
-
-    fillFlatObject(this, data);
+  constructor(data: Partial<IValueData>) {
+    this.logicalType = data.logicalType as EntityEnums.LogicalType
   }
 
   isValid(): boolean {
@@ -20,25 +16,20 @@ class ValueData implements IModel {
 }
 
 class Value extends Entity implements IValue {
-  class: EntityClass.Value = EntityClass.Value; // just default
+  class: EntityEnums.Class.Value = EntityEnums.Class.Value; // just default
   data: ValueData;
 
-  constructor(data: UnknownObject) {
+  constructor(data: Partial<IValue>) {
     super(data);
-
-    if (!data) {
-      data = {};
-    }
-
-    this.data = new ValueData(data.data as UnknownObject);
+    this.data = new ValueData(data.data || {});
   }
 
   isValid(): boolean {
-    if (this.class !== EntityClass.Value) {
+    if (this.class !== EntityEnums.Class.Value) {
       return false;
     }
 
-    return this.data.isValid();
+    return super.isValid() && this.data.isValid();
   }
 }
 

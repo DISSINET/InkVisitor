@@ -1,9 +1,11 @@
 import { IEntity } from ".";
-import { EntityClass, EntityLogicalType } from "../enums";
+import { EntityEnums } from "../enums";
 
 export interface ILocation extends IEntity {
-  class: EntityClass.Location;
-  data: {
-    logicalType: EntityLogicalType;
-  };
+  class: EntityEnums.Class.Location;
+  data: ILocationData;
+}
+
+export interface ILocationData {
+  logicalType: EntityEnums.LogicalType;
 }

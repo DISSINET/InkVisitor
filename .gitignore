@@ -43,3 +43,7 @@ import/~$actants.xlsx
 
 .idea
 /packages/database/scripts/DDDproject-cd7d53f52e07.json
+
+database_data
+
+swagger.json

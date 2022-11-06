@@ -6,7 +6,6 @@ export const StyledHeader = styled.div`
   flex-direction: column;
   width: 100%;
   padding: ${({ theme }) => theme.space[3]};
-  background: ${({ theme }) => theme.color["gray"][200]};
 `;
 export const StyledHeaderBreadcrumbRow = styled.div`
   display: flex;

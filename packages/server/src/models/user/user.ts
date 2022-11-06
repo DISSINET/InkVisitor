@@ -12,15 +12,15 @@ import {
   fillFlatObject,
   UnknownObject,
 } from "@models/common";
-import { UserRole, UserRoleMode } from "@shared/enums";
+import { UserEnums } from "@shared/enums";
 import { ModelNotValidError } from "@shared/types/errors";
-import { generateRandomString, hashPassword } from "@common/auth";
+import { generateRandomString, generateUuid, hashPassword } from "@common/auth";
 import { regExpEscape } from "@common/functions";
 import { nonenumerable } from "@common/decorators";
 
 export class UserRight implements IUserRight {
   territory = "";
-  mode: UserRoleMode = UserRoleMode.Read;
+  mode: UserEnums.RoleMode = UserEnums.RoleMode.Read;
 
   constructor(data: IUserRight) {
     this.territory = data.territory;
@@ -37,13 +37,9 @@ export class UserOptions implements IUserOptions {
   defaultLanguage: string = "";
   searchLanguages: string[] = [];
 
-  constructor(data: UnknownObject) {
-    if (!data) {
-      return;
-    }
-
+  constructor(data: Partial<IUserOptions>) {
     fillFlatObject(this, data);
-    fillArray(this.searchLanguages, String, data.searchLanguages);
+    fillArray(this.searchLanguages, String, data?.searchLanguages || []);
   }
 
   isValid(): boolean {
@@ -60,11 +56,7 @@ export class BookmarkFolder implements IBookmarkFolder {
   name: string = "";
   entityIds: string[] = [];
 
-  constructor(data: UnknownObject) {
-    if (!data) {
-      return;
-    }
-
+  constructor(data: Partial<IBookmarkFolder>) {
     fillFlatObject(this, data);
     fillArray(this.entityIds, String, data.entityIds);
   }
@@ -87,14 +79,10 @@ export class BookmarkFolder implements IBookmarkFolder {
 }
 
 export class StoredTerritory implements IStoredTerritory {
-  territoryId: string = "";
+  territoryId: string;
 
-  constructor(data: UnknownObject) {
-    if (!data) {
-      return;
-    }
-
-    fillFlatObject(this, data);
+  constructor(data: Partial<IStoredTerritory>) {
+    this.territoryId = data.territoryId as string;
   }
 
   isValid(): boolean {
@@ -102,7 +90,7 @@ export class StoredTerritory implements IStoredTerritory {
   }
 }
 
-export default class User implements IDbModel, IUser {
+export default class User implements IUser, IDbModel {
   id: string = "";
   email: string = "";
 
@@ -110,22 +98,20 @@ export default class User implements IDbModel, IUser {
   password: string = "";
 
   name: string = "";
-  role: UserRole = UserRole.Viewer;
+  role: UserEnums.Role = UserEnums.Role.Viewer;
   active: boolean = false;
   options: UserOptions = new UserOptions({});
   bookmarks: BookmarkFolder[] = [];
   storedTerritories: StoredTerritory[] = [];
   rights: UserRight[] = [];
 
+  hash?: string = "";
+
   static table = "users";
 
-  constructor(data: Record<string, any>) {
-    if (!data) {
-      return;
-    }
-
+  constructor(data: Partial<IUser>) {
     fillFlatObject(this, data);
-    this.options = new UserOptions(data.options);
+    this.options = new UserOptions(data.options as IUserOptions);
     fillArray<IBookmarkFolder>(this.bookmarks, BookmarkFolder, data.bookmarks);
     fillArray(this.storedTerritories, StoredTerritory, data.storedTerritories);
     fillArray<IUserRight>(this.rights, UserRight, data.rights);
@@ -191,6 +177,12 @@ export default class User implements IDbModel, IUser {
     return raw;
   }
 
+  generateHash(): string {
+    // should be unique - time based uuid
+    this.hash = generateUuid();
+    return this.hash;
+  }
+
   static async getUser(
     dbInstance: Connection | undefined,
     id: string
@@ -199,6 +191,20 @@ export default class User implements IDbModel, IUser {
     if (data) {
       delete data.password;
       return new User(data);
+    }
+    return null;
+  }
+
+  static async getUserByHash(
+    dbInstance: Connection | undefined,
+    hash: string
+  ): Promise<User | null> {
+    const data = await rethink
+      .table(User.table)
+      .filter({ hash })
+      .run(dbInstance);
+    if (data && data.length) {
+      return new User(data[0]);
     }
     return null;
   }

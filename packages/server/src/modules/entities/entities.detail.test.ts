@@ -5,13 +5,13 @@ import { supertestConfig } from "..";
 import { apiPath } from "@common/constants";
 import app from "../../Server";
 import { Db } from "@service/RethinkDB";
-import Statement from "@models/statement/statement";
+import Statement, { StatementData, StatementTerritory } from "@models/statement/statement";
 
 describe("Entities detail", function () {
   describe("Empty param", () => {
     it("should return a BadParams error wrapped in IResponseGeneric", (done) => {
       return request(app)
-        .get(`${apiPath}/entities/detail`)
+        .get(`${apiPath}/entities//detail`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect(testErroneousResponse.bind(undefined, new BadParams("")))
         .then(() => done());
@@ -20,7 +20,7 @@ describe("Entities detail", function () {
   describe("Wrong param", () => {
     it("should return a EntityDoesNotExist error wrapped in IResponseGeneric", (done) => {
       return request(app)
-        .get(`${apiPath}/entities/detail/123`)
+        .get(`${apiPath}/entities/123/detail`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect(
           testErroneousResponse.bind(undefined, new EntityDoesNotExist("", ""))
@@ -36,17 +36,17 @@ describe("Entities detail", function () {
       const statementRandomId = Math.random().toString();
       const entityData = new Statement({
         id: statementRandomId,
-        data: {
-          territory: {
-            id: "not relevant",
-          },
-        },
+        data: new StatementData({
+          territory: new StatementTerritory({
+            territoryId: "not relevant",
+          }),
+        }),
       });
 
       await entityData.save(db.connection);
 
       await request(app)
-        .get(`${apiPath}/entities/detail/${statementRandomId}`)
+        .get(`${apiPath}/entities/${statementRandomId}/detail`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect(200)
         .expect((res) => {

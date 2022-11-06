@@ -1,35 +1,21 @@
-import {
-  Certainty,
-  Elvl,
-  Logic,
-  Mood,
-  MoodVariant,
-  Operator,
-  Partitivity,
-  Virtuality,
-} from "@shared/enums";
+import { EntityEnums } from "@shared/enums";
 import { IProp } from "@shared/types";
-import { IPropSpec } from "@shared/types/prop";
+import { IPropSpec } from "@shared/types";
 import {
   fillArray,
   fillFlatObject,
   IModel,
-  UnknownObject,
 } from "@models/common";
 
 export class PropSpec implements IPropSpec, IModel {
-  id: string = "";
-  elvl: Elvl = Elvl.Textual;
-  logic: Logic = Logic.Positive;
-  virtuality: Virtuality = Virtuality.Reality;
-  partitivity: Partitivity = Partitivity.Unison;
+  entityId: string = "";
+  elvl: EntityEnums.Elvl = EntityEnums.Elvl.Textual;
+  logic: EntityEnums.Logic = EntityEnums.Logic.Positive;
+  virtuality: EntityEnums.Virtuality = EntityEnums.Virtuality.Reality;
+  partitivity: EntityEnums.Partitivity = EntityEnums.Partitivity.Unison;
 
-  constructor(data: UnknownObject) {
-    if (!data) {
-      return;
-    }
-
-    fillFlatObject(this, data);
+  constructor(data: Partial<IPropSpec>) {
+    fillFlatObject(this, data)
   }
 
   isValid(): boolean {
@@ -39,30 +25,26 @@ export class PropSpec implements IPropSpec, IModel {
 
 export default class Prop implements IProp, IModel {
   id = "";
-  elvl: Elvl = Elvl.Textual;
-  certainty: Certainty = Certainty.Empty;
-  logic: Logic = Logic.Positive;
-  mood: Mood[] = [];
-  moodvariant: MoodVariant = MoodVariant.Realis;
-  bundleOperator: Operator = Operator.And;
+  elvl: EntityEnums.Elvl = EntityEnums.Elvl.Textual
+  certainty: EntityEnums.Certainty = EntityEnums.Certainty.Empty;
+  logic: EntityEnums.Logic = EntityEnums.Logic.Positive;
+  mood: EntityEnums.Mood[] = [];
+  moodvariant: EntityEnums.MoodVariant = EntityEnums.MoodVariant.Realis;
+  bundleOperator: EntityEnums.Operator = EntityEnums.Operator.And;
   bundleStart: boolean = false;
   bundleEnd: boolean = false;
 
   children: Prop[] = [];
 
-  type: PropSpec = new PropSpec({});
-  value: PropSpec = new PropSpec({});
+  type: PropSpec;
+  value: PropSpec;
 
-  constructor(data: UnknownObject) {
-    if (!data) {
-      return;
-    }
-
+  constructor(data: Partial<IProp>) {
     fillFlatObject(this, data);
     fillArray(this.mood, String, data.mood);
 
-    this.type = new PropSpec(data.type);
-    this.value = new PropSpec(data.value);
+    this.type = new PropSpec(data.type || {});
+    this.value = new PropSpec(data.value || {});
 
     fillArray<Prop>(this.children, Prop, data.children);
   }

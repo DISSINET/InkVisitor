@@ -3,6 +3,7 @@ import styled from "styled-components";
 export const StyledBoxContent = styled.div`
   display: flex;
   flex-direction: column;
+  overflow: auto;
   height: 100%;
   background-color: ${({ theme }) => theme.color["white"]};
 `;
@@ -10,13 +11,7 @@ export const StyledBoxContent = styled.div`
 export const StyledTemplateSection = styled.div`
   position: relative;
   padding: ${({ theme }) => theme.space[6]};
-  border-bottom-width: ${({ theme }) => theme.borderWidth[1]};
-  border-bottom-color: ${({ theme }) => theme.color["gray"][500]};
   background-color: ${({ theme }) => theme.color["white"]};
-  border-bottom-style: solid;
-  :hover {
-    background-color: ${({ theme }) => theme.color["gray"][100]};
-  }
 `;
 export const StyledTemplateSectionHeader = styled.div`
   font-weight: ${({ theme }) => theme.fontWeight.regular};
@@ -30,8 +25,15 @@ export const StyledTemplateSectionHeader = styled.div`
 `;
 
 export const StyledTemplateSectionList = styled.div`
+  position: relative;
+  min-height: 5rem;
+  width: 100%;
+  overflow: hidden;
+  display: inline-flex;
+  flex-wrap: wrap;
+
   > div {
-    padding: ${({ theme }) => theme.space["1"]};
+    padding: ${({ theme }) => theme.space[1]};
   }
 `;
 
@@ -59,4 +61,9 @@ export const StyledTemplateFilter = styled.div`
     width: 100%;
     padding: ${({ theme }) => theme.space[2]};
   }
+`;
+
+export const StyledModalContent = styled.div`
+  display: flex;
+  flex-direction: column;
 `;

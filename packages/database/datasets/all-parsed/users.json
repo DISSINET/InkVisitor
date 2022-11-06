@@ -96,8 +96,8 @@
   },
   {
     "id": "100",
-    "name": "David",
-    "email": "david.zbiral@phil.muni.cz",
+    "name": "David Zbíral",
+    "email": "david.zbiral@mail.muni.cz",
     "password": "test123",
     "active": true,
     "options": {
@@ -116,8 +116,8 @@
   },
   {
     "id": "101",
-    "name": "Robert",
-    "email": "robert.shaw@phil.muni.cz",
+    "name": "Robert Shaw",
+    "email": "robert.shaw@mail.muni.cz",
     "password": "test123",
     "active": true,
     "options": {
@@ -136,8 +136,8 @@
   },
   {
     "id": "102",
-    "name": "Davor",
-    "email": "davor.salihovic@phil.muni.cz",
+    "name": "Davor Salihović",
+    "email": "davor.salihovic@mail.muni.cz",
     "password": "test123",
     "active": true,
     "options": {
@@ -156,8 +156,8 @@
   },
   {
     "id": "103",
-    "name": "Katia",
-    "email": "katia.riccardo@phil.muni.cz",
+    "name": "Katia Riccardo",
+    "email": "katia.riccardo@mail.muni.cz",
     "password": "test123",
     "active": true,
     "options": {
@@ -166,7 +166,87 @@
       "searchLanguages": []
     },
     "bookmarks": null,
-    "role": "admin",
+    "role": "editor",
+    "rights": [
+      {
+        "territory": "T0",
+        "mode": "admin"
+      }
+    ]
+  },
+  {
+    "id": "104",
+    "name": "Jan Král",
+    "email": "kral.jan@mail.muni.cz",
+    "password": "test123",
+    "active": true,
+    "options": {
+      "defaultTerritory": "",
+      "defaultLanguage": "",
+      "searchLanguages": []
+    },
+    "bookmarks": null,
+    "role": "editor",
+    "rights": [
+      {
+        "territory": "T0",
+        "mode": "admin"
+      }
+    ]
+  },
+  {
+    "id": "105",
+    "name": "Reima Välimäki",
+    "email": "reima.valimaki@gmail.com",
+    "password": "test123",
+    "active": true,
+    "options": {
+      "defaultTerritory": "",
+      "defaultLanguage": "",
+      "searchLanguages": []
+    },
+    "bookmarks": null,
+    "role": "editor",
+    "rights": [
+      {
+        "territory": "T0",
+        "mode": "admin"
+      }
+    ]
+  },
+  {
+    "id": "106",
+    "name": "Lidia Hinz-Wieczorek",
+    "email": "lidhin93@gmail.com",
+    "password": "test123",
+    "active": true,
+    "options": {
+      "defaultTerritory": "",
+      "defaultLanguage": "",
+      "searchLanguages": []
+    },
+    "bookmarks": null,
+    "role": "editor",
+    "rights": [
+      {
+        "territory": "T0",
+        "mode": "admin"
+      }
+    ]
+  },
+   {
+    "id": "107",
+    "name": "Larissa de Freitas Lyth",
+    "email": "larissa.lyth@mail.muni.cz",
+    "password": "test123",
+    "active": true,
+    "options": {
+      "defaultTerritory": "",
+      "defaultLanguage": "",
+      "searchLanguages": []
+    },
+    "bookmarks": null,
+    "role": "editor",
     "rights": [
       {
         "territory": "T0",

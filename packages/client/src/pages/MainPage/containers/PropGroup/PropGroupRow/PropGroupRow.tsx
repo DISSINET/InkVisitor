@@ -1,5 +1,6 @@
 import { IEntity, IProp } from "@shared/types";
 import { AttributeIcon, Button } from "components";
+import { EntitySuggester, EntityTag } from "components/advanced";
 import React, { useEffect, useRef, useState } from "react";
 import {
   DragSourceMonitor,
@@ -12,17 +13,16 @@ import { setDraggedPropRow } from "redux/features/rowDnd/draggedPropRowSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { excludedSuggesterEntities } from "Theme/constants";
 import {
-  PropAttributeFilter,
-  PropAttributeGroupDataObject,
   classesPropType,
   classesPropValue,
   DraggedPropRowCategory,
   DraggedPropRowItem,
   DragItem,
   ItemTypes,
+  PropAttributeFilter,
+  PropAttributeGroupDataObject,
 } from "types";
 import { dndHoverFn } from "utils";
-import { EntitySuggester, EntityTag } from "../..";
 import { AttributesGroupEditor } from "../../AttributesEditor/AttributesGroupEditor";
 import {
   StyledFaGripVertical,
@@ -53,6 +53,8 @@ interface PropGroupRow {
   category: DraggedPropRowCategory;
 
   disabledAttributes?: PropAttributeFilter;
+  isInsideTemplate: boolean;
+  territoryParentId?: string;
 }
 
 export const PropGroupRow: React.FC<PropGroupRow> = ({
@@ -73,9 +75,11 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
   itemType,
   category,
   disabledAttributes = {} as PropAttributeFilter,
+  isInsideTemplate = false,
+  territoryParentId,
 }) => {
-  const propTypeEntity: IEntity = entities[prop.type.id];
-  const propValueEntity: IEntity = entities[prop.value.id];
+  const propTypeEntity: IEntity = entities[prop.type.entityId];
+  const propValueEntity: IEntity = entities[prop.value.entityId];
 
   const draggedPropRow: DraggedPropRowItem = useAppSelector(
     (state) => state.rowDnd.draggedPropRow
@@ -156,7 +160,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
           </div>
           {propTypeEntity ? (
             <EntityTag
-              actant={propTypeEntity}
+              entity={propTypeEntity}
               fullWidth
               tooltipPosition="right center"
               button={
@@ -170,7 +174,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
                     updateProp(prop.id, {
                       type: {
                         ...prop.type,
-                        ...{ id: "" },
+                        ...{ entityId: "" },
                       },
                     });
                   }}
@@ -184,7 +188,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
                 updateProp(prop.id, {
                   type: {
                     ...prop.type,
-                    ...{ id: newSelectedId },
+                    ...{ entityId: newSelectedId },
                   },
                 });
               }}
@@ -192,6 +196,8 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
               categoryTypes={classesPropType}
               inputWidth={90}
               excludedEntities={excludedSuggesterEntities}
+              isInsideTemplate={isInsideTemplate}
+              territoryParentId={territoryParentId}
             />
           )}
           <StyledPropButtonGroup>
@@ -213,7 +219,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
         <StyledPropLineColumn isTag={propValueEntity ? true : false}>
           {propValueEntity ? (
             <EntityTag
-              actant={propValueEntity}
+              entity={propValueEntity}
               fullWidth
               tooltipPosition="right center"
               button={
@@ -227,7 +233,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
                     updateProp(prop.id, {
                       value: {
                         ...prop.value,
-                        ...{ id: "" },
+                        ...{ entityId: "" },
                       },
                     });
                   }}
@@ -236,12 +242,12 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
             />
           ) : (
             <EntitySuggester
-              territoryActants={[]}
+              territoryActants={territoryActants}
               onSelected={(newSelectedId: string) => {
                 updateProp(prop.id, {
                   value: {
                     ...prop.type,
-                    ...{ id: newSelectedId },
+                    ...{ entityId: newSelectedId },
                   },
                 });
               }}
@@ -249,6 +255,8 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
               categoryTypes={classesPropValue}
               inputWidth={90}
               excludedEntities={excludedSuggesterEntities}
+              isInsideTemplate={isInsideTemplate}
+              territoryParentId={territoryParentId}
             />
           )}
           <StyledPropButtonGroup>
@@ -316,6 +324,8 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
                 updateProp(prop.id, statementPropObject);
               }}
               userCanEdit={userCanEdit}
+              isInsideTemplate={isInsideTemplate}
+              territoryParentId={territoryParentId}
             />
 
             {(level === 1 || level === 2) && (

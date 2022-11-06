@@ -1,13 +1,13 @@
 import { r as rethink, RDatum, WriteResult } from "rethinkdb-ts";
-import { IUser } from "@shared/types/user";
 import { IEntity } from "@shared/types";
 import { Db } from "./RethinkDB";
-import { IAction, IStatement, ITerritory } from "@shared/types";
 import { IDbModel } from "@models/common";
 import { ModelNotValidError } from "@shared/types/errors";
-import { DbIndex, EntityClass } from "@shared/enums";
+import { DbEnums, EntityEnums } from "@shared/enums";
 import Entity from "@models/entity/entity";
 import User from "@models/user/user";
+import Relation from "@models/relation/relation";
+import Audit from "@models/audit/audit";
 
 export async function deleteUser(db: Db, userId: string): Promise<WriteResult> {
   return rethink.table(User.table).get(userId).delete().run(db.connection);
@@ -15,11 +15,11 @@ export async function deleteUser(db: Db, userId: string): Promise<WriteResult> {
 
 export async function getEntitiesDataByClass<T>(
   db: Db,
-  entityClass: EntityClass
+  entityClass: EntityEnums.Class
 ): Promise<T[]> {
   return rethink
     .table(Entity.table)
-    .getAll(entityClass, { index: DbIndex.Class })
+    .getAll(entityClass, { index: DbEnums.Indexes.Class })
     .run(db.connection);
 }
 
@@ -43,4 +43,12 @@ export async function createEntity(
 
 export async function deleteEntities(db: Db): Promise<WriteResult> {
   return rethink.table(Entity.table).delete().run(db.connection);
+}
+
+export async function deleteAudits(db: Db): Promise<WriteResult> {
+  return rethink.table(Audit.table).delete().run(db.connection);
+}
+
+export async function deleteRelations(db: Db): Promise<WriteResult> {
+  return rethink.table(Relation.table).delete().run(db.connection);
 }

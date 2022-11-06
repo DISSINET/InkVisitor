@@ -25,7 +25,7 @@ describe("Test unknown route", function () {
 describe("Test unauthorized request", function () {
   it("should return an unauthorizedError wrapped in IResponeGeneric response", async (done) => {
     await request(app)
-      .get(`${apiPath}/users/get/122322`)
+      .get(`${apiPath}/users/122322`)
       .expect(unauthorizedError.statusCode())
       .expect({
         result: false,
