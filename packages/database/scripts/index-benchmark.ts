@@ -1,26 +1,10 @@
-import { IUser } from "../../shared/types/user";
 const { performance } = require("perf_hooks");
 import {
-  IAction,
   IEntity,
-  IResource,
-  IStatement,
-  ITerritory,
 } from "../../shared/types";
 import {
-  EntityStatus,
-  EntityClass,
-  Certainty,
-  Elvl,
-  Language,
-  Logic,
-  Mood,
-  MoodVariant,
-  Operator,
-  Partitivity,
-  Position,
-  Virtuality,
-  DbIndex,
+  EntityEnums,
+  DbEnums,
 } from "../../shared/enums";
 const fs = require("fs");
 import { Connection, r, RDatum, WriteResult } from "rethinkdb-ts";
@@ -52,12 +36,11 @@ const testClass = async () => {
   let start = performance.now();
   let items = await r
     .table(indexedTable)
-    .getAll(EntityClass.Territory, { index: DbIndex.Class })
+    .getAll(EntityEnums.Class.Territory, { index: DbEnums.Indexes.Class })
     .run(conn);
   let end = performance.now();
   console.log(
-    `testClass(${indexedTable}) took ${end - start} milliseconds. Found ${
-      (items as any).length
+    `testClass(${indexedTable}) took ${end - start} milliseconds. Found ${(items as any).length
     } items.`
   );
 
@@ -65,13 +48,12 @@ const testClass = async () => {
   items = await r
     .table(indexedTable)
     .filter({
-      class: EntityClass.Territory,
+      class: EntityEnums.Class.Territory,
     })
     .run(conn);
   end = performance.now();
   console.log(
-    `testClass(${indexedTable}) took ${end - start} milliseconds. Found ${
-      (items as any).length
+    `testClass(${indexedTable}) took ${end - start} milliseconds. Found ${(items as any).length
     } items.`
   );
 };
@@ -81,20 +63,19 @@ const testActantsActant = async () => {
 
   const example = await r
     .table(indexedTable)
-    .filter({ class: EntityClass.Statement })
+    .filter({ class: EntityEnums.Class.Statement })
     .run(conn);
 
-  const exampleActantsActant = (example as any)[0].data.actants[0].actant;
+  const exampleActantsActant = (example as any)[0].data.actants[0].entityId;
 
   const foundInIndex = await r
     .table(indexedTable)
-    .getAll(exampleActantsActant, { index: "data.actants.actant" })
+    .getAll(exampleActantsActant, { index: "data.actants.entityId" })
     .run(conn);
 
   let end = performance.now();
   console.log(
-    `Indexed took ${end - start} milliseconds. Found ${
-      foundInIndex ? (foundInIndex as any[]).length : 0
+    `Indexed took ${end - start} milliseconds. Found ${foundInIndex ? (foundInIndex as any[]).length : 0
     } items`
   );
 
@@ -104,15 +85,14 @@ const testActantsActant = async () => {
     .table(indexedTable)
     .filter(function (user: any) {
       return user("data")("actants").contains((labelObj: any) =>
-        labelObj("actant").eq(exampleActantsActant)
+        labelObj("entityId").eq(exampleActantsActant)
       );
     })
     .run(conn);
 
   end = performance.now();
   console.log(
-    `Unindexed took ${end - start} milliseconds. Found ${
-      foundInNotIndex ? (foundInNotIndex as any[]).length : 0
+    `Unindexed took ${end - start} milliseconds. Found ${foundInNotIndex ? (foundInNotIndex as any[]).length : 0
     } items`
   );
 };
@@ -126,20 +106,20 @@ const findUsedInProps = async (
     .filter((row: RDatum) => {
       return row("props").contains((entry: RDatum) =>
         r.or(
-          entry("value")("id").eq(entityId),
-          entry("type")("id").eq(entityId),
+          entry("value")("entityId").eq(entityId),
+          entry("type")("entityId").eq(entityId),
           entry("children").contains((ch1: RDatum) =>
             r.or(
-              ch1("value")("id").eq(entityId),
-              ch1("type")("id").eq(entityId),
+              ch1("value")("entityId").eq(entityId),
+              ch1("type")("entityId").eq(entityId),
               ch1("children").contains((ch2: RDatum) =>
                 r.or(
-                  ch2("value")("id").eq(entityId),
-                  ch2("type")("id").eq(entityId),
+                  ch2("value")("entityId").eq(entityId),
+                  ch2("type")("entityId").eq(entityId),
                   ch2("children").contains((ch3: RDatum) =>
                     r.or(
-                      ch3("value")("id").eq(entityId),
-                      ch3("type")("id").eq(entityId)
+                      ch3("value")("entityId").eq(entityId),
+                      ch3("type")("entityId").eq(entityId)
                     )
                   )
                 )
@@ -157,14 +137,14 @@ const findUsedInProps = async (
 const testPropsRecursive = async () => {
   const example = await r
     .table(indexedTable)
-    .filter({ class: EntityClass.Statement })
+    .filter({ class: EntityEnums.Class.Statement })
     .run(conn);
 
   const exampleObject = (example as any).find(
     (e: any) => !!e.props.length && !!e.props[0].children.length
   );
 
-  const exampleId = exampleObject.props[0].children[0].type.id;
+  const exampleId = exampleObject.props[0].children[0].type.entityId;
   console.log(exampleId);
 
   let start = performance.now();
@@ -176,8 +156,7 @@ const testPropsRecursive = async () => {
 
   let end = performance.now();
   console.log(
-    `Indexed took ${end - start} milliseconds. Found ${
-      foundInIndex ? (foundInIndex as any[]).length : 0
+    `Indexed took ${end - start} milliseconds. Found ${foundInIndex ? (foundInIndex as any[]).length : 0
     } items`
   );
 
@@ -187,8 +166,7 @@ const testPropsRecursive = async () => {
 
   end = performance.now();
   console.log(
-    `Unindexed took ${end - start} milliseconds. Found ${
-      foundInNotIndex ? (foundInNotIndex as any[]).length : 0
+    `Unindexed took ${end - start} milliseconds. Found ${foundInNotIndex ? (foundInNotIndex as any[]).length : 0
     } items`
   );
 };
@@ -198,7 +176,7 @@ const testParentId = async () => {
 
   await r
     .table(indexedTable)
-    .getAll("parent5005", { index: "data.parent.id" })
+    .getAll("parent5005", { index: "data.parent.territoryId" })
     .run(conn);
 
   let end = performance.now();
@@ -213,7 +191,7 @@ const testParentId = async () => {
     .filter(function (territory: any) {
       return r.and(
         territory("data")("parent").typeOf().eq("OBJECT"),
-        territory("data")("parent")("id").eq("parent5005")
+        territory("data")("parent")("territoryId").eq("parent5005")
       );
     })
     .run(conn);
@@ -236,8 +214,7 @@ const testActantOrActionStatement = async () => {
 
   let end = performance.now();
   console.log(
-    `testActantOrActionStatement(${indexedTable}) took ${
-      end - start
+    `testActantOrActionStatement(${indexedTable}) took ${end - start
     } milliseconds.`
   );
 
@@ -249,12 +226,12 @@ const testActantOrActionStatement = async () => {
       const tests = [];
       tests.push(
         row("data")("actants").contains((actantObj: RDatum) =>
-          actantObj("actant").eq("actant4")
+          actantObj("entityId").eq("actant4")
         )
       );
       tests.push(
         row("data")("actions").contains((actionObj: RDatum) =>
-          actionObj("action").eq("action4")
+          actionObj("actionId").eq("action4")
         )
       );
 
@@ -264,8 +241,7 @@ const testActantOrActionStatement = async () => {
 
   end = performance.now();
   console.log(
-    `testActantOrActionStatement(${indexedTable}) took ${
-      end - start
+    `testActantOrActionStatement(${indexedTable}) took ${end - start
     } milliseconds.`
   );
 };
@@ -279,8 +255,7 @@ const testPrimaryKey = async () => {
 
   let end = performance.now();
   console.log(
-    `testPrimaryKey(${indexedTable}) took ${end - start} milliseconds. Found ${
-      found ? 1 : 0
+    `testPrimaryKey(${indexedTable}) took ${end - start} milliseconds. Found ${found ? 1 : 0
     } items.`
   );
 
@@ -290,8 +265,7 @@ const testPrimaryKey = async () => {
 
   end = performance.now();
   console.log(
-    `testPrimaryKey(${indexedTable}) took ${end - start} milliseconds. Found ${
-      (found as any).length
+    `testPrimaryKey(${indexedTable}) took ${end - start} milliseconds. Found ${(found as any).length
     } items.`
   );
 };
@@ -299,26 +273,25 @@ const testPrimaryKey = async () => {
 const testTerritoryId = async () => {
   const example = await r
     .table(indexedTable)
-    .filter({ class: EntityClass.Statement })
+    .filter({ class: EntityEnums.Class.Statement })
     .run(conn);
 
   const exampleObject = (example as any).find(
-    (e: any) => !!e.data.territory.id
+    (e: any) => !!e.data.territory.territoryId
   );
 
-  const exampleId = exampleObject.data.territory.id;
+  const exampleId = exampleObject.data.territory.territoryId;
 
   let start = performance.now();
 
   let found = await r
     .table(indexedTable)
-    .getAll(exampleId, { index: DbIndex.StatementTerritory })
+    .getAll(exampleId, { index: DbEnums.Indexes.StatementTerritory })
     .run(conn);
 
   let end = performance.now();
   console.log(
-    `testTerritoryId(${indexedTable}) took ${end - start} milliseconds. Found ${
-      (found as any).length
+    `testTerritoryId(${indexedTable}) took ${end - start} milliseconds. Found ${(found as any).length
     } items.`
   );
 
@@ -329,14 +302,13 @@ const testTerritoryId = async () => {
   found = await r
     .table(indexedTable)
     .filter((entry: RDatum) => {
-      return entry("data")("territory")("id").eq(exampleId);
+      return entry("data")("territory")("territoryId").eq(exampleId);
     })
     .run(conn);
 
   end = performance.now();
   console.log(
-    `testTerritoryId(${indexedTable}) took ${end - start} milliseconds. Found ${
-      (found as any).length
+    `testTerritoryId(${indexedTable}) took ${end - start} milliseconds. Found ${(found as any).length
     } items.`
   );
 };
@@ -350,10 +322,10 @@ const findUsedInDataEntities = async (
     .filter((row: RDatum) => {
       return r.or(
         row("data")("actions").contains((entry: RDatum) =>
-          entry("action").eq(entityId)
+          entry("actionId").eq(entityId)
         ),
         row("data")("actants").contains((entry: RDatum) =>
-          entry("actant").eq(entityId)
+          entry("entityId").eq(entityId)
         ),
         row("data")("tags").contains(entityId)
       );
@@ -366,26 +338,25 @@ const findUsedInDataEntities = async (
 const testStatementEntities = async () => {
   const example = await r
     .table(indexedTable)
-    .filter({ class: EntityClass.Statement })
+    .filter({ class: EntityEnums.Class.Statement })
     .run(conn);
 
   const exampleObject = (example as any).find(
     (e: any) => e.data.actants.length > 0
   );
 
-  const exampleId = exampleObject.data.actants[0].actant;
+  const exampleId = exampleObject.data.actants[0].entityId;
 
   let start = performance.now();
 
   let found = await r
     .table(indexedTable)
-    .getAll(exampleId, { index: DbIndex.StatementEntities })
+    .getAll(exampleId, { index: DbEnums.Indexes.StatementEntities })
     .run(conn);
 
   let end = performance.now();
   console.log(
-    `testStatementEntities(${indexedTable}) took ${
-      end - start
+    `testStatementEntities(${indexedTable}) took ${end - start
     } milliseconds. Found ${(found as any).length} items.`
   );
 
@@ -395,8 +366,7 @@ const testStatementEntities = async () => {
 
   end = performance.now();
   console.log(
-    `testStatementEntities(${indexedTable}) took ${
-      end - start
+    `testStatementEntities(${indexedTable}) took ${end - start
     } milliseconds. Found ${(foundInNotIndex as any).length} items.`
   );
 };

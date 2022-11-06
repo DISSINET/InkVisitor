@@ -1,52 +1,64 @@
 import { IResponseEntity } from "@shared/types";
-import { Table } from "components";
+import { EntityTag } from "components/advanced";
 import React, { useMemo } from "react";
-import { Cell, Column } from "react-table";
-import { EntityTag } from "../../EntityTag/EntityTag";
-import { StyledResultItem, StyledResults } from "../EntitySearchBoxStyles";
+import { config, useSpring } from "react-spring";
+import { areEqual, FixedSizeList as List } from "react-window";
+import { scrollOverscanCount, springConfig } from "Theme/constants";
+import { StyledResultItem } from "../EntitySearchBoxStyles";
+import {
+  StyledResultsAnimatedWrap,
+  StyledRow,
+} from "./EntitySearchResultsStyles";
 
 interface EntitySearchResults {
   results?: IResponseEntity[];
+  height: number;
 }
 export const EntitySearchResults: React.FC<EntitySearchResults> = ({
   results,
+  height,
 }) => {
   const data = useMemo(() => (results ? results : []), [results]);
-
-  const columns: Column<{}>[] = React.useMemo(
-    () => [
-      {
-        Header: "entity",
-        accesor: "data",
-        Cell: ({ row }: Cell) => {
-          const entity = row.original as IResponseEntity;
-          return (
-            <div style={{ display: "grid" }}>
-              <StyledResultItem>
-                <EntityTag
-                  actant={entity}
-                  tooltipPosition="left center"
-                  fullWidth
-                />
-              </StyledResultItem>
-            </div>
-          );
-        },
-      },
-    ],
-    []
-  );
+  const animatedHeight = useSpring({
+    height: `${height / 10}rem`,
+    config: { tension: 195, friction: 20, mass: 1, clamp: true },
+  });
 
   return (
-    <StyledResults>
-      <Table
-        entityTitle={{ singular: "Result", plural: "Results" }}
-        columns={columns}
-        data={data}
-        perPage={10}
-        disableHeader
-        noBorder
-      />
-    </StyledResults>
+    <>
+      {results?.length && (
+        <StyledResultsAnimatedWrap style={animatedHeight}>
+          <List
+            height={height}
+            itemCount={results.length}
+            itemData={data}
+            itemSize={25}
+            width="100%"
+            overscanCount={scrollOverscanCount}
+          >
+            {MemoizedRow}
+          </List>
+        </StyledResultsAnimatedWrap>
+      )}
+    </>
   );
 };
+
+interface Row {
+  data: IResponseEntity[];
+  index: number;
+  style: any;
+}
+const Row: React.FC<Row> = ({ data, index, style }) => {
+  const entity = data[index];
+
+  return (
+    <StyledRow style={style}>
+      <StyledResultItem>
+        <EntityTag entity={entity} tooltipPosition="left center" fullWidth />
+      </StyledResultItem>
+    </StyledRow>
+  );
+};
+
+export const MemoizedRow = React.memo(Row, areEqual);

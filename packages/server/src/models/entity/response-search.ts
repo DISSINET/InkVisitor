@@ -1,6 +1,6 @@
 import { Request } from "express";
-import { EntityClass } from "@shared/enums";
-import { IEntity, IResponseSearch, RequestSearch } from "@shared/types";
+import { EntityEnums } from "@shared/enums";
+import { IEntity, RequestSearch } from "@shared/types";
 import { regExpEscape } from "@common/functions";
 import Entity from "./entity";
 import Statement from "@models/statement/statement";
@@ -12,6 +12,9 @@ import { getEntityClass } from "@models/factory";
  * SearchQuery is customized builder for search queries, allowing to build query by chaining prepared filters
  */
 export class SearchQuery {
+  usedLabel?: string; // used for additional sorting
+  retainedIdsOrder?: string[]; // used for additional sorting - to respect provided entityIds
+
   connection: Connection;
   query: RTable<any>;
 
@@ -26,16 +29,11 @@ export class SearchQuery {
    * @param cooccurrenceId
    * @returns
    */
-  async getAssociatedEntityIds(cooccurrenceId: string): Promise<string[]> {
-    const associatedEntityIds = await Statement.findIdsByDataEntityId(
+  async getCooccurredEntitiesIds(cooccurrenceId: string): Promise<string[]> {
+    const associatedEntityIds = await Statement.getActantsIdsFromLinkedEntities(
       this.connection,
       cooccurrenceId
     );
-
-    // entity id provided, but not found within statements - end now
-    if (!associatedEntityIds.length) {
-      return [];
-    }
 
     // filter out duplicates
     return [...new Set(associatedEntityIds)];
@@ -46,7 +44,7 @@ export class SearchQuery {
    * @param entityClass
    * @returns
    */
-  whereClass(entityClass: EntityClass): SearchQuery {
+  whereClass(entityClass: EntityEnums.Class): SearchQuery {
     this.query = this.query.filter({
       class: entityClass,
     });
@@ -59,7 +57,7 @@ export class SearchQuery {
    * @param entityClass
    * @returns
    */
-  whereNotClass(entityClass: EntityClass[]): SearchQuery {
+  whereNotClass(entityClass: EntityEnums.Class[]): SearchQuery {
     this.query = this.query.filter(function (row: RDatum) {
       return r.and.apply(
         r,
@@ -116,6 +114,8 @@ export class SearchQuery {
       rightWildcard = "";
       label = label.slice(0, -1);
     }
+
+    this.usedLabel = label;
 
     // escape problematic chars - messes with regexp search
     label = regExpEscape(label.toLowerCase());
@@ -198,11 +198,22 @@ export class SearchQuery {
    * @param req
    */
   async fromRequest(req: RequestSearch): Promise<void> {
+    if (req.entityIds?.length) {
+      this.retainedIdsOrder = req.entityIds;
+    }
+
     if (req.cooccurrenceId) {
-      const assocEntityIds = await this.getAssociatedEntityIds(
+      const assocEntityIds = await this.getCooccurredEntitiesIds(
         req.cooccurrenceId
       );
-      this.whereEntityIds(assocEntityIds);
+      if (!req.entityIds) {
+        req.entityIds = [];
+      }
+      req.entityIds = req.entityIds.concat(assocEntityIds);
+    }
+
+    if (req.entityIds?.length) {
+      this.whereEntityIds(req.entityIds);
     }
 
     if (req.class) {
@@ -237,34 +248,131 @@ export class SearchQuery {
 
 export class ResponseSearch {
   request: RequestSearch;
-  responses: IResponseSearch[];
 
   constructor(request: RequestSearch) {
     this.request = request;
-    this.responses = [];
   }
 
   /**
    * Prepares asynchronously results data
    * @param db
    */
-  async prepare(httpRequest: Request): Promise<void> {
+  async prepare(httpRequest: Request): Promise<ResponseEntity[]> {
     const query = new SearchQuery(httpRequest.db.connection);
     await query.fromRequest(this.request);
-    const entities = await query.do();
+    let entities = await query.do();
 
+    if (query.retainedIdsOrder) {
+      entities = sortByRequiredOrder(entities, query.retainedIdsOrder);
+    } else {
+      entities = sortByWordMatch(sortByLength(entities), query.usedLabel);
+    }
+
+    let out: ResponseEntity[] = [];
     for (const entityData of entities) {
       const response = new ResponseEntity(getEntityClass(entityData));
       await response.prepare(httpRequest);
-      this.responses.push(response);
+      out.push(response);
+    }
+
+    return out;
+  }
+}
+
+/**
+ * DEPRECATED
+ * Sort retrieved entities by label distance or length of the entity label.
+ * In case of empty label only the latter will be used (distance will be 0).
+ * @param entities original unsorted entities
+ * @param label original wanted label
+ * @returns sorted entities list
+ */
+export function sort(entities: IEntity[], label: string = ""): IEntity[] {
+  const indexMap: Record<number, IEntity[]> = {};
+
+  // sort by distance from the start
+  entities.forEach((e) => {
+    let index = e.label.indexOf(label);
+    if (index === -1) {
+      index = 99999;
+    }
+    if (!indexMap[index]) {
+      indexMap[index] = [];
+    }
+    indexMap[index].push(e);
+  });
+
+  let out: IEntity[] = [];
+  const sortedDistances = Object.keys(indexMap)
+    .map((d) => parseInt(d))
+    .sort((a, b) => a - b);
+
+  for (const key of sortedDistances) {
+    indexMap[key].sort((a, b) => a.label.length - b.label.length);
+    out = out.concat(indexMap[key]);
+  }
+
+  return out;
+}
+
+/**
+ * Sort entities by length
+ * @param entities original unsorted entities
+ * @returns sorted entities list
+ */
+export function sortByLength(entities: IEntity[]) {
+  return entities.sort((a, b) => a.label.length - b.label.length);
+}
+
+/**
+ * Prioritize entities with exact word-match
+ * @param entities original unsorted entities
+ * @param usedLabel original label
+ * @returns sorted entities list
+ */
+export function sortByWordMatch(
+  entities: IEntity[],
+  usedLabel: string = ""
+): IEntity[] {
+  if (!usedLabel) {
+    return entities;
+  }
+
+  let sortedExact: IEntity[] = [];
+  let sortedSubstring: IEntity[] = [];
+
+  for (const entity of entities) {
+    if (
+      entity.label
+        .toLowerCase()
+        .match(/[\w]+/g)
+        ?.indexOf(usedLabel.toLowerCase()) !== -1
+    ) {
+      sortedExact.push(entity);
+    } else {
+      sortedSubstring.push(entity);
     }
   }
 
-  /**
-   *
-   * @returns returns prepares list of search entities
-   */
-  getResults(): IResponseSearch[] {
-    return this.responses;
+  return sortedExact.concat(sortedSubstring);
+}
+
+/**
+ * Returns entities in wanted order, ignoring ids not in the wanted list
+ * @param entities original unsorted entities
+ * @param wantedOrder list of ids
+ * @returns sorted entities list
+ */
+export function sortByRequiredOrder(
+  entities: IEntity[],
+  wantedOrder: string[]
+): IEntity[] {
+  const newList: IEntity[] = [];
+  for (const id of wantedOrder) {
+    const found = entities.find((e) => e.id === id);
+    if (found) {
+      newList.push(found);
+    }
   }
+  return newList;
 }

@@ -1,8 +1,8 @@
-# InkVisitor
+<p align="center" width="100%" style="background: white; padding-top:5px;">
+    <img width="50%" src="./logo/logo-full.png" style="background: transparent;">
+</p>
 
-## Deployment 
-
-[![deploy staging](https://github.com/DISSINET/InkVisitor/actions/workflows/merge_to_master.yml/badge.svg?branch=dev)](https://github.com/DISSINET/InkVisitor/actions/workflows/merge_to_master.yml)
+[![deploy staging](https://github.com/DISSINET/InkVisitor/actions/workflows/dev.yml/badge.svg?branch=dev)](https://github.com/DISSINET/InkVisitor/actions/workflows/dev.yml)
 
 ## Description
 
@@ -36,6 +36,7 @@ The other Entity types covered in the data model are:
 - **Concept**
 - **Person**
 - **Group**
+- **Being** (typically, animal)
 - **(Physical) Object**
 - **Location**
 - **Event**
@@ -68,139 +69,50 @@ Only admin and editor with edit rights in the parent **Territory** (T) may edit,
 
 To administrate the users rights, admin roles may acces the **administration window**, where they can append new territories to editors and viewers. They can also create new users, change roles, see passwords or delete users. Admin role is not possible to be assigned or deleted through this environment.
 
-## Development
+## Packages
+
+#### Database
+
+For more information see [client package](./packages/client)
 
 ### Server
 
-- `cd ./packages/server`
-- `npm install`
-- `npm run start:dev`
+For more information see [server package](./packages/server)
 
-### Database
+#### Database
 
-- run docker -`docker-compose up` | `-docker-compose down` | `docker-compose up -d` ...
-- import data
-  - `cd ./packages/database`
-  - (`npm install`)
-  - `npm run import-local` to import datasets to the local database (`.env.devel`)
-  - `npm run import-remote` to import datasets to the remote database (`.env.prod`) (`import-remote-sandbox` and `import-remote-staging`, and `import-remote-importdata` for specific deploys)
+For more information see [database package](./packages/database)
 
-### Client
+#### Shared
 
-- `cd packages/client`
-- (`npm install`)
-- `npm start`
-
-#### Storybook
-
-- `cd packages/client`
-- (`npm install`)
-- `npm run storybook`
+Package containing typescript definitions, types and enums, that should be available to both client & server.
 
 ## Deploy
 
-- `npm run build` - builds and deploys the server
-- go to ssh and `cd var/www/html/inkvisitor/server`
-- `npm install`
-- `npm run start:prod`
-- `npm run stop:prod` to stop the process
-- #`npm start` to test
-- #`podman build --no-cache -t inkvisitor-server .`
-- #(`podman run -p 3000:3000 --network="host" inkvisitor-server`)
-- #`rm -rf inkvisitor-server.tar`
-- #`podman save -o inkvisitor-server.tar --format oci-archive inkvisitor-server`
-- copy to server
-- #`podman load -i inkvisitor-server.tar`
+For standalone deployment of each package, please refer to respective `README.md` files. No matter the approach, the database should be started first.
 
-## Authentication Example
+### Docker
 
-```shell
-curl --request GET \
-  --url http://localhost:3000/api/v1/actants \
-  --header 'authorization: Bearer {TOKEN}'
-```
+1. Install [docker](https://docs.docker.com/get-docker/).
+2. Install [docker-compose tool](https://docs.docker.com/compose/install/)
+3. Prepare `.env` files for servers listed under `env_file` sections. Check server's [README.md](./packages/server/README.md) and [example.env](./packages/server/env/example.env) files.
+4. Prepare `.env` files for clients identified by `ENV` variable under `build -> args` section. Check server's [README.md](./packages/server/README.md) files and [example.env](./packages/server/env/example.env) files.
+4. Run the database - either as a service or containerized using `docker-compose up -d database`
+5. Build app image (will be done also in next step if not available) `docker-compose build inkvisitor` (or `inkvisitor-<env>`)
+6. Run the containerized app `docker-compose up inkvisitor` (or `inkvisitor-<env>`)
 
-## Data structure
+### Firewall
 
-### Collections
+Make sure the ports required by each application are not blocked. Required ports are listed in [docker-compose.yml](./docker-compose.yml). Examples:
 
-### Endpoints
+1. [ufw](https://help.ubuntu.com/community/UFW): `ufw allow <port>`
+2. [firewalld](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/security_guide/sec-using_firewalls): `firewall-cmd --zone=public --permanent --add-port=<port>/tcp`
 
-#### /users
+Setup for additional system specific features (reverse proxies etc) are beyond the scope of this readme.
 
-- **POST** /getMore {IFilterUsers} => IResponseUser[]
-- **GET** /:id => IResponseUser
-- **PUT** /:id {changes}
-- **DELETE** /:id
-- **POST** /:id {UserI}
+## Wiki
 
-#### /actants
-
-- **POST** /getMore {IFilterActants} => IResponseActant[]
-- **GET** /:id => IResponseActant
-- **PUT** /:id {changes} =>
-- **DELETE** /:id =>
-- **POST** /:id {ActantI} =>
-
-#### /actions
-
-- **POST** /getMore {IFilterActions} => IResponseAction[]
-- **GET** /:id => IResponseAction
-- **PUT** /:id {changes} =>
-- **DELETE** /:id =>
-- **POST** /:id {IAction} =>
-
-#### /tree (Tree container)
-
-- **GET** /
-  {}
-  => IResponseTree
-  _returns the structure of all territories_
-
-- **POST** /moveTerritory
-  {moveId: string; parentId: string; beforeId: string; afterId: string}
-  =>
-  _move territory to a new / same parent between beforeId and afterId_
-
-#### /territory (List container)
-
-- **GET** /:id
-  {}
-  => IResponseTerritory
-  _returns all statements and actants for selected territory_
-
-- **POST** /moveStatement
-  {moveId: string; beforeId: string; afterId: string}
-  =>
-  _move statement within the territory - between beforeId and afterId_
-
-#### /statement (Editor container)
-
-- **GET** /:id
-  {}
-  => IResponseStatement
-  _get everything of the statement_
-
-#### /administration (Administration container)
-
-- **GET** /:id
-  {}
-  => IResponseAdministration
-  _administration purposes_
-
-#### /bookmarks (Bookmarks container)
-
-- **GET** /:id
-  {}
-  => IResponseBookmarks
-  _get all bookmarks of a user_
-
-#### /detail (Detail container)
-
-- **GET** /:id
-  {}
-  => IResponseDetail
-  _get everything of the actant_
+For more in-depth description for models etc, please visit our [wiki page](https://github.com/DISSINET/InkVisitor/wiki)
 
 ## ACL - access control list
 

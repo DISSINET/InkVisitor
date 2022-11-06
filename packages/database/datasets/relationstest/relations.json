@@ -1,0 +1,455 @@
+[
+  {
+    "type": "SCL",
+    "entityIds": ["c2", "c3"]
+  },
+  {
+    "type": "SCL",
+    "entityIds": ["c3", "c1"]
+  },
+  {
+    "type": "SCL",
+    "entityIds": ["c301", "c1"]
+  },
+  {
+    "type": "SCL",
+    "entityIds": ["c404", "c1"]
+  },
+  {
+    "type": "SCL",
+    "entityIds": ["c401", "c404"]
+  },
+  {
+    "type": "SCL",
+    "entityIds": ["c402", "c404"]
+  },
+  {
+    "type": "SCL",
+    "entityIds": ["c403", "c404"]
+  },
+  {
+    "type": "SCL",
+    "entityIds": ["c5", "c404"]
+  },
+  {
+    "type": "SCL",
+    "entityIds": ["c6", "c404"]
+  },
+  {
+    "type": "SCL",
+    "entityIds": ["c211", "c212"]
+  },
+  {
+    "type": "SCL",
+    "entityIds": ["c212", "c22"]
+  },
+  {
+    "type": "SCL",
+    "entityIds": ["c22", "c23"]
+  },
+  {
+    "type": "SCL",
+    "entityIds": ["c23", "c24"]
+  },
+  {
+    "type": "SCL",
+    "entityIds": ["c24", "c1"]
+  },
+  {
+    "type": "SCL",
+    "entityIds": ["c31", "c32"]
+  },
+  {
+    "type": "SCL",
+    "entityIds": ["c32", "c33"]
+  },
+  {
+    "type": "SCL",
+    "entityIds": ["c41", "c42"]
+  },
+  {
+    "type": "SCL",
+    "entityIds": ["c41", "c44"]
+  },
+  {
+    "type": "SCL",
+    "entityIds": ["c41", "c45"]
+  },
+  {
+    "type": "SCL",
+    "entityIds": ["c41", "c46"]
+  },
+  {
+    "type": "SCL",
+    "entityIds": ["c46", "c1"]
+  },
+  {
+    "type": "SCL",
+    "entityIds": ["c45", "c1"]
+  },
+  {
+    "type": "SCL",
+    "entityIds": ["c44", "c1"]
+  },
+  {
+    "type": "SCL",
+    "entityIds": ["c52", "c521"]
+  },
+  {
+    "type": "SCL",
+    "entityIds": ["c521", "c522"]
+  },
+  {
+    "type": "SCL",
+    "entityIds": ["c53", "c522"]
+  },
+  {
+    "type": "SCL",
+    "entityIds": ["c55", "c522"]
+  },
+  {
+    "type": "SCL",
+    "entityIds": ["c56", "c522"]
+  },
+  {
+    "type": "SCL",
+    "entityIds": ["c522", "c523"]
+  },
+  {
+    "type": "SCL",
+    "entityIds": ["c522", "c524"]
+  },
+  {
+    "type": "SCL",
+    "entityIds": ["c524", "c1"]
+  },
+  {
+    "type": "SCL",
+    "entityIds": ["c523", "c1"]
+  },
+  {
+    "type": "SCL",
+    "entityIds": ["a5", "a501"]
+  },
+  {
+    "type": "SCL",
+    "entityIds": ["a501", "a502"]
+  },
+  {
+    "type": "SCL",
+    "entityIds": ["a5", "a503"]
+  },
+  {
+    "type": "SCL",
+    "entityIds": ["a503", "a504"]
+  },
+  {
+    "type": "SCL",
+    "entityIds": ["c901", "c902"]
+  },
+  {
+    "type": "SCL",
+    "entityIds": ["c902", "c903"]
+  },
+  {
+    "type": "SCL",
+    "entityIds": ["c901", "c904"]
+  },
+  {
+    "type": "SCL",
+    "entityIds": ["c904", "c905"]
+  },
+  {
+    "type": "SCL",
+    "entityIds": ["c905", "c906"]
+  },
+  {
+    "type": "SCL",
+    "entityIds": ["c901", "c907"]
+  },
+  {
+    "type": "SCL",
+    "entityIds": ["c907", "c905"]
+  },
+  {
+    "type": "SCL",
+    "entityIds": ["c901", "c908"]
+  },
+  {
+    "type": "SCL",
+    "entityIds": ["c211", "c1000"]
+  },
+  {
+    "type": "SCL",
+    "entityIds": ["c1000", "c1001"]
+  },
+  {
+    "type": "SCL",
+    "entityIds": ["c1001", "c1002"]
+  },
+  {
+    "type": "SCL",
+    "entityIds": ["c212", "c1003"]
+  },
+  {
+    "type": "SCL",
+    "entityIds": ["c1003", "c1002"]
+  },
+
+  {
+    "type": "SCL",
+    "entityIds": ["c1101", "c1102"]
+  },
+  {
+    "type": "SCL",
+    "entityIds": ["c1102", "c523"]
+  },
+  {
+    "type": "SCL",
+    "entityIds": ["c1103", "c1104"]
+  },
+  {
+    "type": "SCL",
+    "entityIds": ["c1105", "c1106"]
+  },
+  {
+    "type": "SCL",
+    "entityIds": ["c1105", "c1107"]
+  },
+
+  {
+    "type": "SOL",
+    "entityIds": ["l1", "l6"]
+  },
+  {
+    "type": "SOL",
+    "entityIds": ["l1", "l6"]
+  },
+  {
+    "type": "SOL",
+    "entityIds": ["l1", "l10"]
+  },
+  {
+    "type": "SOL",
+    "entityIds": ["l1", "l8"]
+  },
+  {
+    "type": "SOL",
+    "entityIds": ["l6", "l9"]
+  },
+  {
+    "type": "SOL",
+    "entityIds": ["l10", "l8"]
+  },
+  {
+    "type": "SOL",
+    "entityIds": ["l8", "l9"]
+  },
+
+  {
+    "type": "SOL",
+    "entityIds": ["l1200", "l1201"]
+  },
+  {
+    "type": "SOL",
+    "entityIds": ["l1201", "l1202"]
+  },
+  {
+    "type": "SOL",
+    "entityIds": ["l1201", "l1204"]
+  },
+  {
+    "type": "SOL",
+    "entityIds": ["l1204", "l1"]
+  },
+  {
+    "type": "SOL",
+    "entityIds": ["l1202", "l1203"]
+  },
+
+  {
+    "type": "SYN",
+    "entityIds": ["c212", "c213", "c214"]
+  },
+  {
+    "type": "SYN",
+    "entityIds": ["c211", "c211a", "c211b", "c211c"]
+  },
+  {
+    "type": "SYN",
+    "entityIds": ["c5", "c501", "c502", "c503"]
+  },
+  {
+    "type": "SYN",
+    "entityIds": ["a5", "c505", "c506"]
+  },
+
+  {
+    "type": "ANT",
+    "entityIds": ["c3", "c301"]
+  },
+  {
+    "type": "ANT",
+    "entityIds": ["c4", "c401"]
+  },
+  {
+    "type": "ANT",
+    "entityIds": ["c5", "c504"]
+  },
+
+  {
+    "type": "PRR",
+    "entityIds": ["c60", "c61"]
+  },
+  {
+    "type": "PRR",
+    "entityIds": ["c70", "c71"]
+  },
+
+  {
+    "type": "SAR",
+    "entityIds": ["a3", "a34"]
+  },
+  {
+    "type": "SAR",
+    "entityIds": ["a1", "a11"]
+  },
+
+  {
+    "type": "AEE",
+    "entityIds": ["a3", "c31"]
+  },
+  {
+    "type": "AEE",
+    "entityIds": ["a5", "c901"]
+  },
+
+  {
+    "type": "REL",
+    "entityIds": ["a3", "c56"]
+  },
+  {
+    "type": "REL",
+    "entityIds": ["c212", "c215"]
+  },
+
+  {
+    "type": "CLA",
+    "entityIds": ["p1", "c2"]
+  },
+  {
+    "type": "CLA",
+    "entityIds": ["l1", "c4"]
+  },
+  {
+    "type": "CLA",
+    "entityIds": ["l1", "c4"]
+  },
+  {
+    "type": "CLA",
+    "entityIds": ["l2", "c51"]
+  },
+  {
+    "type": "CLA",
+    "entityIds": ["l3", "c56"]
+  },
+  {
+    "type": "CLA",
+    "entityIds": ["l4", "c4"]
+  },
+  {
+    "type": "CLA",
+    "entityIds": ["l5", "c5"]
+  },
+  {
+    "type": "CLA",
+    "entityIds": ["l6", "c402"]
+  },
+  {
+    "type": "CLA",
+    "entityIds": ["l7", "c402"]
+  },
+  {
+    "type": "CLA",
+    "entityIds": ["l8", "c402"]
+  },
+  {
+    "type": "CLA",
+    "entityIds": ["l8", "c403"]
+  },
+  {
+    "type": "CLA",
+    "entityIds": ["l9", "c402"]
+  },
+  {
+    "type": "CLA",
+    "entityIds": ["l10", "c402"]
+  },
+  {
+    "type": "CLA",
+    "entityIds": ["e1", "c31"]
+  },
+  {
+    "type": "CLA",
+    "entityIds": ["l1200", "c1101"]
+  },
+  {
+    "type": "CLA",
+    "entityIds": ["l1200", "c1103"]
+  },
+  {
+    "type": "CLA",
+    "entityIds": ["l1200", "c1105"]
+  },
+
+  {
+    "type": "IDE",
+    "entityIds": ["p1", "p12"],
+    "certainty": "2"
+  },
+
+  {
+    "type": "IDE",
+    "entityIds": ["l1200", "l1205"],
+    "certainty": "5"
+  },
+  {
+    "type": "IDE",
+    "entityIds": ["l1200", "l1206"],
+    "certainty": "3"
+  },
+  {
+    "type": "IDE",
+    "entityIds": ["l1200", "l1207"],
+    "certainty": "1"
+  },
+
+  {
+    "type": "HOL",
+    "entityIds": ["c51", "56"]
+  },
+  {
+    "type": "HOL",
+    "entityIds": ["c52", "56"]
+  },
+  {
+    "type": "HOL",
+    "entityIds": ["c53", "56"]
+  },
+  {
+    "type": "HOL",
+    "entityIds": ["c54", "57"]
+  },
+  {
+    "type": "HOL",
+    "entityIds": ["c55", "57"]
+  },
+  {
+    "type": "HOL",
+    "entityIds": ["c56", "57"]
+  },
+  {
+    "type": "IMP",
+    "entityIds": ["a3", "a33"]
+  }
+]

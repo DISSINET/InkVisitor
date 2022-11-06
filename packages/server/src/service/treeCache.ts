@@ -2,7 +2,7 @@ import Territory from "@models/territory/territory";
 import User, { UserRight } from "@models/user/user";
 import { Db } from "@service/RethinkDB";
 import { getEntitiesDataByClass } from "@service/shorthands";
-import { EntityClass, UserRoleMode } from "@shared/enums";
+import { EntityEnums, UserEnums } from "@shared/enums";
 import { IResponseTree, IStatement, ITerritory } from "@shared/types";
 import { TerritoriesBrokenError } from "@shared/types/errors";
 
@@ -29,7 +29,7 @@ export class TreeCreator {
       }
 
       const parentId: string = territory.data.parent
-        ? territory.data.parent.id
+        ? territory.data.parent.territoryId
         : "";
       if (!this.parentMap[parentId]) {
         this.parentMap[parentId] = [];
@@ -76,7 +76,7 @@ export class TreeCreator {
       children: childs,
       path: parents,
       empty: childsAreEmpty && !noOfStatements,
-      right: UserRoleMode.Read,
+      right: UserEnums.RoleMode.Read,
     };
 
     this.fullTree = this.idMap[subtreeRoot.id];
@@ -124,12 +124,12 @@ export class TreeCreator {
 
   static async countStatements(db: Db): Promise<Record<string, number>> {
     const statements = (
-      await getEntitiesDataByClass<IStatement>(db, EntityClass.Statement)
-    ).filter((s) => s.data.territory && s.data.territory.id);
+      await getEntitiesDataByClass<IStatement>(db, EntityEnums.Class.Statement)
+    ).filter((s) => s.data.territory && s.data.territory.territoryId);
     const statementsCountMap: Record<string, number> = {}; // key is territoryid
     for (const statement of statements) {
       if (statement.data.territory) {
-        const terId = statement.data.territory.id;
+        const terId = statement.data.territory.territoryId;
         if (!statementsCountMap[terId]) {
           statementsCountMap[terId] = 0;
         }
@@ -158,12 +158,13 @@ class TreeCache {
     await db.initDb();
 
     const [territoriesData, statementsCountMap] = await Promise.all([
-      getEntitiesDataByClass<ITerritory>(db, EntityClass.Territory),
+      getEntitiesDataByClass<ITerritory>(db, EntityEnums.Class.Territory),
       TreeCreator.countStatements(db),
     ]);
 
     newTree.createParentMap(
       territoriesData
+        .filter((td) => !td.isTemplate)
         .sort(TreeCreator.sortTerritories)
         .map((td) => new Territory({ ...td }))
     );
@@ -182,7 +183,7 @@ class TreeCache {
         children: [],
         lvl: 0,
         path: [],
-        right: UserRoleMode.Read,
+        right: UserEnums.RoleMode.Read,
         statementsCount: 0,
         territory: new Territory({}),
         empty: true,

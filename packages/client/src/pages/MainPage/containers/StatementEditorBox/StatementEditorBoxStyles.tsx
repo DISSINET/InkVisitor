@@ -36,6 +36,7 @@ interface StyledEditorSection {
   firstSection?: boolean;
   lastSection?: boolean;
   metaSection?: boolean;
+  marginRight?: boolean;
 }
 export const StyledEditorSection = styled.div<StyledEditorSection>`
   position: relative;
@@ -53,6 +54,7 @@ export const StyledEditorSection = styled.div<StyledEditorSection>`
   border-bottom-style: solid;
   margin: ${({ theme, firstSection = false }) =>
     firstSection ? "0 0 0 0.7rem" : "0.2rem 0 0 2rem"};
+  margin-right: ${({ marginRight }) => (marginRight ? "0.5rem" : "")};
   :hover {
     background-color: ${({ theme }) => theme.color["gray"][100]};
   }
@@ -99,30 +101,6 @@ export const StyledPropsActantList = styled(StyledGrid)<StyledPropsActantList>`
   padding-left: ${({ theme }) => theme.space[10]};
   padding-bottom: ${({ theme }) => theme.space[10]};
   width: 100%;
-`;
-
-interface StyledPropButtonGroup {
-  leftMargin?: boolean;
-  rightMargin?: boolean;
-  border?: boolean;
-  round?: boolean;
-  width?: number;
-}
-export const StyledPropButtonGroup = styled.div<StyledPropButtonGroup>`
-  margin-left: ${({ theme, leftMargin }) =>
-    leftMargin ? theme.space[3] : theme.space[0]};
-  margin-right: ${({ theme, rightMargin }) =>
-    rightMargin ? theme.space[3] : theme.space[0]};
-  vertical-align: middle;
-  display: inline-flex;
-  border-radius: ${({ round }) => (round ? "8px" : "0")};
-  border: ${({ border }) => (border ? "1px" : 0)} solid
-    ${({ theme }) => theme.color["gray"][600]};
-
-  button:disabled,
-  button[disabled] {
-    //background-color: ${({ theme }) => theme.color["gray"][1000]};
-  }
 `;
 
 interface StyledPropLineColumn {
@@ -173,6 +151,7 @@ export const StyledBreadcrumbWrap = styled.div`
   flex-wrap: wrap;
   min-height: 2rem;
   position: relative;
+  margin-top: ${({ theme }) => theme.space[2]};
 `;
 
 export const StyledEditorStatementInfo = styled.div`
@@ -181,12 +160,21 @@ export const StyledEditorStatementInfo = styled.div`
   align-items: center;
   overflow: hidden;
   max-width: 100%;
+`;
+
+export const StyledHeaderTagWrap = styled.div`
+  display: inline-flex;
+  overflow: hidden;
+  margin-right: ${({ theme }) => theme.space[3]};
   margin-bottom: ${({ theme }) => theme.space[2]};
 `;
 export const StyledEditorStatementInfoLabel = styled.div`
   display: flex;
   align-items: center;
   margin-right: ${({ theme }) => theme.space[1]};
+  margin-bottom: ${({ theme }) => theme.space[2]};
+`;
+export const StyledEditorHeaderInputWrap = styled.div`
   margin-bottom: ${({ theme }) => theme.space[2]};
 `;
 
@@ -213,7 +201,7 @@ export const StyledEditorContentRowValueID = styled.div`
 export const StyledEditorTemplateSection = styled.div`
   display: table;
   width: 100%;
-  padding-right: ${({ theme }) => theme.space[6]};
+  margin-bottom: ${({ theme }) => theme.space[1]};
   ${StyledEditorContentRow} {
     display: table-row;
     width: 100%;
@@ -232,13 +220,4 @@ export const StyledEditorTemplateSection = styled.div`
       padding: ${({ theme }) => theme.space[2]};
     }
   }
-`;
-export const StyledHeaderTagWrap = styled.div`
-  display: inline-flex;
-  overflow: hidden;
-  margin-bottom: ${({ theme }) => theme.space[2]};
-  margin-right: ${({ theme }) => theme.space[3]};
-`;
-export const StyledEditorHeaderInputWrap = styled.div`
-  margin-bottom: ${({ theme }) => theme.space[2]};
 `;

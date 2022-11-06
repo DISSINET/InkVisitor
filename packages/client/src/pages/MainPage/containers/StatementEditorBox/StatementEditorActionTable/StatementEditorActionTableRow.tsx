@@ -1,8 +1,9 @@
-import { EntityClass } from "@shared/enums";
+import { EntityEnums } from "@shared/enums";
 import { IProp, IResponseStatement } from "@shared/types";
 import { AttributeIcon, Button, ButtonGroup } from "components";
+import { EntitySuggester, EntityTag } from "components/advanced";
 import { useSearchParams } from "hooks";
-import React, { useCallback, useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   DragSourceMonitor,
   DropTargetMonitor,
@@ -11,7 +12,6 @@ import {
 } from "react-dnd";
 import { FaGripVertical, FaPlus, FaTrashAlt, FaUnlink } from "react-icons/fa";
 import { UseMutationResult } from "react-query";
-import { ColumnInstance } from "react-table";
 import { setDraggedActantRow } from "redux/features/rowDnd/draggedActantRowSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { excludedSuggesterEntities } from "Theme/constants";
@@ -19,16 +19,19 @@ import {
   DraggedActantRowItem,
   DraggedPropRowCategory,
   DragItem,
+  FilteredActionObject,
   ItemTypes,
 } from "types";
 import { dndHoverFn } from "utils";
-import { EntitySuggester, EntityTag } from "../..";
 import AttributesEditor from "../../AttributesEditor/AttributesEditor";
 import { PropGroup } from "../../PropGroup/PropGroup";
-import { StyledTd, StyledTr } from "./StatementEditorActionTableStyles";
+import {
+  StyledGrid,
+  StyledGridColumn,
+} from "./StatementEditorActionTableStyles";
 
 interface StatementEditorActionTableRow {
-  row: any;
+  filteredAction: FilteredActionObject;
   index: number;
   moveRow: (dragIndex: number, hoverIndex: number) => void;
   statement: IResponseStatement;
@@ -38,15 +41,15 @@ interface StatementEditorActionTableRow {
   updateProp: (propId: string, changes: any) => void;
   removeProp: (propId: string) => void;
   movePropToIndex: (propId: string, oldIndex: number, newIndex: number) => void;
-  handleClick: Function;
-  visibleColumns: ColumnInstance<{}>[];
   updateActionsMutation: UseMutationResult<any, unknown, object, unknown>;
+  territoryParentId?: string;
+  territoryActants?: string[];
 }
 
 export const StatementEditorActionTableRow: React.FC<
   StatementEditorActionTableRow
 > = ({
-  row,
+  filteredAction,
   index,
   moveRow,
   statement,
@@ -57,9 +60,10 @@ export const StatementEditorActionTableRow: React.FC<
   removeProp,
   movePropToIndex,
   updateActionsMutation,
-  handleClick = () => {},
-  visibleColumns,
+  territoryParentId,
+  territoryActants,
 }) => {
+  const isInsideTemplate = statement.isTemplate || false;
   const { statementId, territoryId } = useSearchParams();
 
   const dropRef = useRef<HTMLTableRowElement>(null);
@@ -92,7 +96,11 @@ export const StatementEditorActionTableRow: React.FC<
   });
 
   const [{ isDragging }, drag, preview] = useDrag({
-    item: { type: ItemTypes.ACTION_ROW, index, id: row.values.id },
+    item: {
+      type: ItemTypes.ACTION_ROW,
+      index,
+      id: filteredAction.id.toString(),
+    },
     collect: (monitor: DragSourceMonitor) => ({
       isDragging: monitor.isDragging(),
     }),
@@ -107,11 +115,11 @@ export const StatementEditorActionTableRow: React.FC<
   drag(dragRef);
 
   const renderActionCell = () => {
-    const { action, sAction } = row.values.data;
+    const { action, sAction } = filteredAction.data;
     return action ? (
       <EntityTag
-        // fullWidth
-        actant={action}
+        fullWidth
+        entity={action}
         button={
           userCanEdit && (
             <Button
@@ -122,7 +130,7 @@ export const StatementEditorActionTableRow: React.FC<
               color="plain"
               onClick={() => {
                 updateAction(sAction.id, {
-                  action: "",
+                  actionId: "",
                 });
               }}
             />
@@ -134,28 +142,35 @@ export const StatementEditorActionTableRow: React.FC<
         <EntitySuggester
           onSelected={(newSelectedId: string) => {
             updateAction(sAction.id, {
-              action: newSelectedId,
+              actionId: newSelectedId,
             });
           }}
           openDetailOnCreate
-          categoryTypes={[EntityClass.Action]}
+          categoryTypes={[EntityEnums.Class.Action]}
           excludedEntities={excludedSuggesterEntities}
           placeholder={"add new action"}
+          isInsideTemplate={isInsideTemplate}
+          territoryParentId={territoryParentId}
+          territoryActants={territoryActants}
         />
       )
     );
   };
 
+  const [modalOpen, setModalOpen] = useState<boolean>(false);
+
   const renderButtonsCell = () => {
-    const { action, sAction } = row.values.data;
-    const propOriginId = row.values.data.sAction.action;
+    const { action, sAction } = filteredAction.data;
+    const { actionId: propOriginId, id: rowId } = sAction;
 
     return (
       <ButtonGroup noMarginRight>
         {sAction && (
           <AttributesEditor
+            modalOpen={modalOpen}
+            setModalOpen={setModalOpen}
             modalTitle={`Action attribute`}
-            actant={action}
+            entity={action}
             disabledAllAttributes={!userCanEdit}
             data={{
               elvl: sAction.elvl,
@@ -171,11 +186,13 @@ export const StatementEditorActionTableRow: React.FC<
               updateAction(sAction.id, newData);
             }}
             updateActantId={(newId: string) => {
-              updateAction(sAction.id, { action: newId });
+              updateAction(sAction.id, { actionId: newId });
             }}
             userCanEdit={userCanEdit}
-            classEntitiesActant={[EntityClass.Action]}
+            classEntitiesActant={[EntityEnums.Class.Action]}
             loading={updateActionsMutation.isLoading}
+            isInsideTemplate={isInsideTemplate}
+            territoryParentId={territoryParentId}
           />
         )}
         {userCanEdit && (
@@ -183,10 +200,10 @@ export const StatementEditorActionTableRow: React.FC<
             key="d"
             icon={<FaTrashAlt />}
             color="plain"
-            inverted={true}
+            inverted
             tooltip="remove action row"
             onClick={() => {
-              removeAction(row.values.data.sAction.id);
+              removeAction(filteredAction.data.sAction.id);
             }}
           />
         )}
@@ -195,10 +212,10 @@ export const StatementEditorActionTableRow: React.FC<
             key="a"
             icon={<FaPlus />}
             color="plain"
-            inverted={true}
+            inverted
             tooltip="add new prop"
             onClick={() => {
-              addProp(propOriginId);
+              addProp(rowId);
             }}
           />
         )}
@@ -207,9 +224,10 @@ export const StatementEditorActionTableRow: React.FC<
             key="neg"
             tooltip="Negative logic"
             color="success"
-            inverted={true}
+            inverted
             noBorder
             icon={<AttributeIcon attributeName={"negation"} />}
+            onClick={() => setModalOpen(true)}
           />
         )}
         {sAction.bundleOperator && (
@@ -217,9 +235,10 @@ export const StatementEditorActionTableRow: React.FC<
             key="oper"
             tooltip="Logical operator type"
             color="success"
-            inverted={true}
+            inverted
             noBorder
             icon={sAction.bundleOperator}
+            onClick={() => setModalOpen(true)}
           />
         )}
       </ButtonGroup>
@@ -260,6 +279,8 @@ export const StatementEditorActionTableRow: React.FC<
             userCanEdit={userCanEdit}
             openDetailOnCreate={false}
             category={category}
+            isInsideTemplate={isInsideTemplate}
+            territoryParentId={territoryParentId}
           />
         );
       }
@@ -269,31 +290,23 @@ export const StatementEditorActionTableRow: React.FC<
 
   return (
     <React.Fragment key={index}>
-      <StyledTr
-        ref={dropRef}
-        opacity={opacity}
-        isOdd={Boolean(index % 2)}
-        isSelected={row.values.id === statementId}
-        onClick={() => {
-          handleClick(row.values.id);
-        }}
-      >
+      <StyledGrid ref={dropRef} style={{ opacity }}>
         {userCanEdit && (
-          <td ref={dragRef} style={{ cursor: "move" }}>
+          <StyledGridColumn ref={dragRef} style={{ cursor: "move" }}>
             <FaGripVertical />
-          </td>
+          </StyledGridColumn>
         )}
-        <StyledTd>{renderActionCell()}</StyledTd>
-        <StyledTd>{renderButtonsCell()}</StyledTd>
-      </StyledTr>
+        <StyledGridColumn>{renderActionCell()}</StyledGridColumn>
+        <StyledGridColumn>{renderButtonsCell()}</StyledGridColumn>
+      </StyledGrid>
 
       {!(
         draggedActantRow.category &&
         draggedActantRow.category === DraggedPropRowCategory.ACTION
       ) &&
         renderPropGroup(
-          row.values.data.sAction.action,
-          row.values.data.sAction.props,
+          filteredAction.data.sAction.actionId,
+          filteredAction.data.sAction.props,
           DraggedPropRowCategory.ACTION
         )}
     </React.Fragment>

@@ -51,7 +51,7 @@ export default {
 
     staging: "#911111",
     "data-import": "#99004C",
-    development: "#00994C",
+    development: "#6174C2",
     sandbox: "#CB6E17",
 
     entityC: "#83BCB6",
@@ -60,6 +60,7 @@ export default {
     entityL: "#88D27A",
     entityO: "#F29C97",
     entityP: "#F8BE78",
+    entityB: "#ffed6f",
     entityR: "#9ECAE9",
     // vyssi kategorie
     entityS: "#ff93ac",

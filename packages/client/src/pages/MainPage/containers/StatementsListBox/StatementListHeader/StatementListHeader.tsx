@@ -1,22 +1,21 @@
-import { EntityClass, UserRole, UserRoleMode } from "@shared/enums";
+import { EntityEnums, UserEnums } from "@shared/enums";
 import {
   IResponseGeneric,
   IResponseTerritory,
+  IResponseTree,
   IStatement,
 } from "@shared/types";
-import api from "api";
 import { AxiosResponse } from "axios";
 import { Button, ButtonGroup } from "components";
+import { BreadcrumbItem, EntitySuggester } from "components/advanced";
 import { CStatement } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
 import { FaPlus, FaRecycle } from "react-icons/fa";
-import { UseMutationResult, useQuery, useQueryClient } from "react-query";
+import { UseMutationResult, useQueryClient } from "react-query";
 import { useAppSelector } from "redux/hooks";
 import theme from "Theme/theme";
 import { collectTerritoryChildren, searchTree } from "utils";
-import { EntitySuggester } from "../..";
-import { StatementListBreadcrumbItem } from "./StatementListBreadcrumbItem/StatementListBreadcrumbItem";
 import {
   StyledButtons,
   StyledFaStar,
@@ -52,31 +51,18 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
   const queryClient = useQueryClient();
   const { territoryId } = useSearchParams();
 
-  const {
-    status,
-    data: treeData,
-    error,
-    isFetching,
-  } = useQuery(
-    ["tree"],
-    async () => {
-      const res = await api.treeGet();
-      return res.data;
-    },
-    { enabled: api.isLoggedIn() }
-  );
+  const treeData: IResponseTree | undefined = queryClient.getQueryData("tree");
 
   const [excludedMoveTerritories, setExcludedMoveTerritories] = useState<
     string[]
   >([territoryId]);
 
   useEffect(() => {
-    //const toExclude = [territoryId];
     const toExclude = [territoryId];
     if (treeData) {
       const currentTerritory = searchTree(treeData, territoryId);
       if (currentTerritory?.territory.data.parent) {
-        toExclude.push(currentTerritory.territory.data.parent.id);
+        toExclude.push(currentTerritory.territory.data.parent.territoryId);
       }
       if (currentTerritory) {
         const childArr = collectTerritoryChildren(currentTerritory);
@@ -95,7 +81,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
 
   const handleCreateStatement = () => {
     const newStatement: IStatement = CStatement(
-      localStorage.getItem("userrole") as UserRole,
+      localStorage.getItem("userrole") as UserEnums.Role,
       territoryId
     );
     const { statements } = data;
@@ -126,15 +112,15 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
     <StyledHeader>
       <StyledHeaderBreadcrumbRow>
         {selectedTerritoryPath &&
-          selectedTerritoryPath.map((territory: string, key: number) => {
+          selectedTerritoryPath.map((territoryId: string, key: number) => {
             return (
               <React.Fragment key={key}>
-                <StatementListBreadcrumbItem territoryId={territory} />
+                <BreadcrumbItem territoryId={territoryId} />
               </React.Fragment>
             );
           })}
         <React.Fragment key="this-territory">
-          <StatementListBreadcrumbItem territoryId={territoryId} />
+          <BreadcrumbItem territoryId={territoryId} territoryData={data} />
         </React.Fragment>
       </StyledHeaderBreadcrumbRow>
       <StyledHeaderRow>
@@ -149,7 +135,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
         {territoryId && (
           <StyledButtons>
             <ButtonGroup marginBottom>
-              {data.right !== UserRoleMode.Read && (
+              {data.right !== UserEnums.RoleMode.Read && (
                 <Button
                   key="add"
                   icon={<FaPlus size={14} />}
@@ -182,10 +168,11 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
         {"Move to parent:\xa0"}
         <div>
           <EntitySuggester
+            disableTemplatesAccept
             filterEditorRights
             inputWidth={96}
             disableCreate
-            categoryTypes={[EntityClass.Territory]}
+            categoryTypes={[EntityEnums.Class.Territory]}
             onSelected={(newSelectedId: string) => {
               moveTerritoryMutation.mutate(newSelectedId);
             }}

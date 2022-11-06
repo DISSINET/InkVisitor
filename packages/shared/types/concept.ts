@@ -1,7 +1,7 @@
-import { EntityStatus, EntityClass, Language } from "../enums";
+import { EntityEnums } from "../enums";
 import { IEntity } from "./entity";
 
 export interface IConcept extends IEntity {
-  class: EntityClass.Concept;
+  class: EntityEnums.Class.Concept;
   data: {};
 }

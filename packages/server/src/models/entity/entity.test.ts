@@ -1,24 +1,24 @@
 import "ts-jest";
 import { Db } from "@service/RethinkDB";
 import Entity from "./entity";
-import Statement from "@models/statement/statement";
+import Statement, { StatementActant, StatementAction, StatementTerritory } from "@models/statement/statement";
 import { clean } from "@modules/common.test";
 import { findEntityById } from "@service/shorthands";
 import { IStatement } from "@shared/types";
 import Prop from "@models/prop/prop";
-import { Order } from "@shared/enums";
+import { EntityEnums } from "@shared/enums";
 
 export const prepareEntity = (): [string, Entity] => {
-  const entityId = Math.random().toString();
+  const id = Math.random().toString();
 
-  const ent = new Entity({ id: entityId });
-  ent.props.push(new Prop({}));
+  const ent = new Entity({ id });
+  ent.props.push(new Prop({ id: `${id}-props[0].id` }));
 
-  ent.props[0].children.push(new Prop({}));
-  ent.props[0].children[0].children.push(new Prop({}));
-  ent.props[0].children[0].children[0].children.push(new Prop({}));
+  ent.props[0].children.push(new Prop({ id: `${id}-props[0].children[0].id` }));
+  ent.props[0].children[0].children.push(new Prop({ id: `${id}-props[0].children[0].children[0].id` }));
+  ent.props[0].children[0].children[0].children.push(new Prop({ id: `${id}-props[0].children[0].children[0].children[0].id` }));
 
-  return [entityId, ent];
+  return [id, ent];
 };
 
 describe("test Entity.delete", function () {
@@ -29,15 +29,10 @@ describe("test Entity.delete", function () {
 
       const entity = new Entity({});
       await entity.save(db.connection);
-      const statement = new Statement({
-        data: {
-          actants: [
-            {
-              actant: entity.id,
-            },
-          ],
-        },
-      });
+      const statement = new Statement({})
+      statement.data.actants.push(new StatementActant({
+        entityId: entity.id,
+      }));
       await statement.save(db.connection);
 
       await entity.delete(db.connection);
@@ -63,28 +58,21 @@ describe("test Entity.delete", function () {
       await db.initDb();
       const entity = new Entity({});
       await entity.save(db.connection);
-      statementViaActants = new Statement({
-        data: {
-          actants: [
-            {
-              actant: entity.id,
-            },
-          ],
-        },
-      });
+
+      statementViaActants = new Statement({});
+      statementViaActants.data.actants.push(new StatementActant({
+        entityId: entity.id,
+      }));
       await statementViaActants.save(db.connection);
-      statementViaActions = new Statement({
-        data: {
-          actions: [
-            {
-              action: entity.id,
-            },
-          ],
-        },
-      });
+
+      statementViaActions = new Statement({});
+      statementViaActions.data.actions.push(new StatementAction({
+        actionId: entity.id,
+      }));
       await statementViaActions.save(db.connection);
       await entity.delete(db.connection);
     });
+
     afterAll(async () => await clean(db));
 
     it("should correctly remove actant from actants array for the first statement", async () => {
@@ -115,24 +103,18 @@ describe("test Entity.update", function () {
       const db = new Db();
       await db.initDb();
 
-      const entity = new Statement({
-        data: {
-          territory: {
-            id: "territoryId",
-            order: 2,
-          },
-          actants: [
-            {
-              id: "1",
-            },
-            {
-              id: "2",
-            },
-          ],
-          text: "jea",
-          tags: ["origtag1", "origtag2"],
-        },
-      });
+      const entity = new Statement({})
+      entity.data.tags = ["origtag1", "origtag2"]
+      entity.data.text = "jea"
+      entity.data.territory = new StatementTerritory({
+        territoryId: "territoryId",
+        order: 2,
+      })
+      entity.data.actants = [
+        new StatementActant({ id: "1" }),
+        new StatementActant({ id: "2" })
+      ];
+
       await entity.save(db.connection);
 
       const entityRef = new Statement({ id: entity.id });
@@ -155,8 +137,8 @@ describe("test Entity.update", function () {
       // new value
       expect(existingEntityData.data.text).toEqual(newTextValue);
       //  territory data from the save call
-      expect(existingEntityData.data.territory?.id).toEqual(
-        entity.data.territory?.id
+      expect(existingEntityData.data.territory?.territoryId).toEqual(
+        entity.data.territory?.territoryId
       );
       // actants field should be replaced
       expect(existingEntityData.data.actants).toHaveLength(1);
@@ -204,7 +186,7 @@ describe("test Entity.determineOrder", function () {
   });
 
   describe("when wanting last position", () => {
-    const wantedIndex = Order.Last;
+    const wantedIndex = EntityEnums.Order.Last;
     const siblings: Record<number, unknown> = { [-1]: true, 0: true, 1: true };
     const values = Object.keys(siblings)
       .map((v) => parseInt(v))
@@ -221,11 +203,11 @@ describe("test Entity.determineOrder", function () {
 describe("test Entity.getEntitiesIds", function () {
   describe("one id used repeatedly", function () {
     const [id, instance] = prepareEntity();
-    instance.props[0].value.id = id;
-    instance.props[0].type.id = id;
-    instance.props[0].children[0].value.id = id;
-    instance.props[0].children[0].children[0].type.id = id;
-    instance.props[0].children[0].children[0].children[0].value.id = id;
+    instance.props[0].value.entityId = id;
+    instance.props[0].type.entityId = id;
+    instance.props[0].children[0].value.entityId = id;
+    instance.props[0].children[0].children[0].type.entityId = id;
+    instance.props[0].children[0].children[0].children[0].value.entityId = id;
 
     const idList = instance.getEntitiesIds();
     it("should return only one element", () => {
@@ -237,11 +219,11 @@ describe("test Entity.getEntitiesIds", function () {
     const [id, instance] = prepareEntity();
     const id2 = id + "2";
 
-    instance.props[0].value.id = id;
-    instance.props[0].type.id = id2;
-    instance.props[0].children[0].value.id = id;
-    instance.props[0].children[0].children[0].type.id = id2;
-    instance.props[0].children[0].children[0].children[0].value.id = id2;
+    instance.props[0].value.entityId = id;
+    instance.props[0].type.entityId = id2;
+    instance.props[0].children[0].value.entityId = id;
+    instance.props[0].children[0].children[0].type.entityId = id2;
+    instance.props[0].children[0].children[0].children[0].value.entityId = id2;
 
     const idList = instance.getEntitiesIds();
     it("should return both elements", () => {

@@ -1,31 +1,42 @@
-import React, { SetStateAction, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 
-import { MdSettings } from "react-icons/md";
-import { EntityClass } from "@shared/enums";
 import {
-  Tooltip,
+  certaintyDict,
+  elvlDict,
+  logicDict,
+  moodDict,
+  moodVariantsDict,
+  operatorDict,
+  partitivityDict,
+  virtualityDict,
+} from "@shared/dictionaries";
+import { EntityEnums } from "@shared/enums";
+import { IEntity } from "@shared/types";
+import {
   Button,
-  Modal,
-  ModalHeader,
-  ModalContent,
-  ModalFooter,
   ButtonGroup,
   Loader,
+  Modal,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  Tooltip,
 } from "components";
+import { EntitySuggester, EntityTag } from "components/advanced";
+import { FaUnlink } from "react-icons/fa";
+import { MdSettings } from "react-icons/md";
+import {
+  AttributeData,
+  EntityColors,
+  PropAttributeFilter,
+  PropAttributeGroup,
+  PropAttributeGroupDataObject,
+  PropAttributeName,
+} from "types";
 import {
   StyledAttributeModalHeaderIcon,
   StyledAttributeModalHeaderWrapper,
 } from "./AttributesEditorStyles";
-import { TooltipAttributeRow } from "./TooltipAttributeRow/TooltipAttributeRow";
-import { TooltipBooleanRow } from "./TooltipBooleanRow/TooltipBooleanRow";
-import {
-  AttributeData,
-  PropAttributeFilter,
-  PropAttributeGroupDataObject,
-  PropAttributeName,
-  Entities,
-  PropAttributeGroup,
-} from "types";
 import { AttributesForm } from "./AttributesForm";
 import {
   StyledColumnHeading,
@@ -36,19 +47,8 @@ import {
   StyledTooltipGrid,
   StyledTooltipHeading,
 } from "./AttributesGroupEditorStyles";
-import {
-  elvlDict,
-  logicDict,
-  moodDict,
-  moodVariantsDict,
-  virtualityDict,
-  partitivityDict,
-  operatorDict,
-  certaintyDict,
-} from "@shared/dictionaries";
-import { IEntity } from "@shared/types";
-import { EntitySuggester, EntityTag } from "..";
-import { FaUnlink } from "react-icons/fa";
+import { TooltipAttributeRow } from "./TooltipAttributeRow/TooltipAttributeRow";
+import { TooltipBooleanRow } from "./TooltipBooleanRow/TooltipBooleanRow";
 
 interface AttributesGroupEditor {
   modalTitle: string;
@@ -56,10 +56,10 @@ interface AttributesGroupEditor {
   setModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
   statementId: string;
   propTypeActant?: IEntity;
-  classesPropType: EntityClass[];
+  classesPropType: EntityEnums.Class[];
   propValueActant?: IEntity;
-  classesPropValue: EntityClass[];
-  excludedSuggesterEntities: EntityClass[];
+  classesPropValue: EntityEnums.Class[];
+  excludedSuggesterEntities: EntityEnums.Class[];
   data: PropAttributeGroupDataObject;
   handleUpdate: (data: PropAttributeGroupDataObject) => void;
   updateProp: (propId: string, changes: any) => void;
@@ -68,6 +68,8 @@ interface AttributesGroupEditor {
   disabledAllAttributes?: boolean;
   disabledOpenModal?: boolean;
   userCanEdit?: boolean;
+  isInsideTemplate: boolean;
+  territoryParentId?: string;
 }
 
 export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
@@ -88,6 +90,8 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
   disabledOpenModal = false,
   statementId,
   userCanEdit,
+  isInsideTemplate = false,
+  territoryParentId,
 }) => {
   const [modalData, setModalData] =
     useState<PropAttributeGroupDataObject>(data);
@@ -231,7 +235,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
     <div>
       <Tooltip
         position="top right"
-        attributes={
+        content={
           <StyledTooltipGrid>
             <div>
               <StyledTooltipHeading>Statement</StyledTooltipHeading>
@@ -284,7 +288,9 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
         />
         <ModalContent>
           <StyledGridColumns>
-            <StyledColumnWrap color={Entities[EntityClass.Statement].color}>
+            <StyledColumnWrap
+              color={EntityColors[EntityEnums.Class.Statement].color}
+            >
               <StyledColumnHeading>Statement</StyledColumnHeading>
 
               <AttributesForm
@@ -297,7 +303,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
             <StyledColumnWrap
               color={
                 propTypeActant
-                  ? Entities[propTypeActant.class].color
+                  ? EntityColors[propTypeActant.class].color
                   : undefined
               }
             >
@@ -312,7 +318,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
               {propTypeActant ? (
                 <StyledEntityWrap>
                   <EntityTag
-                    actant={propTypeActant}
+                    entity={propTypeActant}
                     fullWidth
                     button={
                       <Button
@@ -350,6 +356,8 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
                       categoryTypes={classesPropType}
                       inputWidth={"full"}
                       excludedEntities={excludedSuggesterEntities}
+                      isInsideTemplate={isInsideTemplate}
+                      territoryParentId={territoryParentId}
                     />
                   </StyledSuggesterWrap>
                 )
@@ -358,7 +366,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
             <StyledColumnWrap
               color={
                 propValueActant
-                  ? Entities[propValueActant.class].color
+                  ? EntityColors[propValueActant.class].color
                   : undefined
               }
             >
@@ -372,7 +380,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
               {propValueActant ? (
                 <StyledEntityWrap>
                   <EntityTag
-                    actant={propValueActant}
+                    entity={propValueActant}
                     fullWidth
                     tooltipPosition="left center"
                     button={
@@ -411,6 +419,8 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
                       categoryTypes={classesPropValue}
                       inputWidth={"full"}
                       excludedEntities={excludedSuggesterEntities}
+                      isInsideTemplate={isInsideTemplate}
+                      territoryParentId={territoryParentId}
                     />
                   </StyledSuggesterWrap>
                 )

@@ -8,9 +8,12 @@ export default async function dbMiddleware(
 ): Promise<void> {
   await createConnection(req);
 
-  next();
-
-  res.once("finish", () => {
+  res.on('close', function () {
+    if (req.db.lockInstance) {
+      req.db.lockInstance.onError(new Error("client closed the connection"));
+    }
     closeConnection(req);
   });
+
+  next();
 }

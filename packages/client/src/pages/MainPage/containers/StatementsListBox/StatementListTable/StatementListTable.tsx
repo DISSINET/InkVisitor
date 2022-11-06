@@ -1,4 +1,9 @@
-import { IEntity, IResponseStatement, IStatement } from "@shared/types";
+import {
+  IEntity,
+  IResponseAudit,
+  IResponseStatement,
+  IStatement,
+} from "@shared/types";
 import update from "immutability-helper";
 import React, { useCallback, useEffect, useState } from "react";
 import { Column, Row, useExpanded, useTable } from "react-table";
@@ -6,10 +11,12 @@ import { StatementListRow } from "./StatementListRow";
 import { StyledTable, StyledTh, StyledTHead } from "./StatementListTableStyles";
 
 interface StatementListTable {
-  data: IResponseStatement[];
+  data: (IResponseStatement & {
+    audit: IResponseAudit | undefined;
+  })[];
   columns: Column<{}>[];
-  handleRowClick?: Function;
-  moveEndRow: Function;
+  handleRowClick?: (rowId: string) => void;
+  moveEndRow: (statementToMove: IStatement, index: number) => Promise<void>;
   entities: { [key: string]: IEntity };
 }
 export const StatementListTable: React.FC<StatementListTable> = ({
@@ -91,9 +98,9 @@ export const StatementListTable: React.FC<StatementListTable> = ({
               row={row}
               moveRow={moveRow}
               moveEndRow={moveEndRow}
-              {...row.getRowProps()}
               visibleColumns={visibleColumns}
               entities={entities}
+              {...row.getRowProps()}
             />
           );
         })}

@@ -1,16 +1,12 @@
 import Entity from "@models/entity/entity";
 import { fillFlatObject, IModel, UnknownObject } from "@models/common";
-import { EntityClass, EntityLogicalType } from "@shared/enums";
-import { IObject } from "@shared/types";
+import { EntityEnums } from "@shared/enums";
+import { IObject, IObjectData } from "@shared/types";
 
-class ObjectData implements IModel {
-  logicalType: EntityLogicalType = EntityLogicalType.Definite;
+class ObjectData implements IObjectData, IModel {
+  logicalType: EntityEnums.LogicalType = EntityEnums.LogicalType.Definite;
 
-  constructor(data: UnknownObject) {
-    if (!data) {
-      return;
-    }
-
+  constructor(data: Partial<IObjectData>) {
     fillFlatObject(this, data);
   }
 
@@ -20,25 +16,20 @@ class ObjectData implements IModel {
 }
 
 class ObjectEntity extends Entity implements IObject {
-  class: EntityClass.Object = EntityClass.Object; // just default
+  class: EntityEnums.Class.Object = EntityEnums.Class.Object; // just default
   data: ObjectData;
 
-  constructor(data: UnknownObject) {
+  constructor(data: Partial<IObject>) {
     super(data);
-
-    if (!data) {
-      data = {};
-    }
-
-    this.data = new ObjectData(data.data as UnknownObject);
+    this.data = new ObjectData(data.data || {});
   }
 
   isValid(): boolean {
-    if (this.class !== EntityClass.Object) {
+    if (this.class !== EntityEnums.Class.Object) {
       return false;
     }
 
-    return this.data.isValid();
+    return super.isValid() && this.data.isValid();
   }
 }
 

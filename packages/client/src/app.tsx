@@ -1,17 +1,31 @@
-import api from "api";
-import { SearchParamsProvider } from "hooks/useParamsContext";
-import { useWindowSize } from "hooks/useWindowSize";
-import React, { useEffect, Profiler } from "react";
+import React, { useEffect } from "react";
 import { Helmet } from "react-helmet";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { ReactQueryDevtools } from "react-query/devtools";
-import { BrowserRouter, Route, Switch } from "react-router-dom";
+import { BrowserRouter, Redirect, Route, Switch } from "react-router-dom";
+import { useAppDispatch } from "redux/hooks";
+import { ThemeProvider } from "styled-components";
+
+import api from "api";
+import { SearchParamsProvider } from "hooks/useParamsContext";
+import { useWindowSize } from "hooks/useWindowSize";
+import ActivatePage from "pages/Activate";
+import PasswordResetPage from "pages/PasswordReset";
+import LoginPage from "pages/Login";
+import UsersPage from "pages/Users";
+
+import { Page } from "components/advanced";
+import { useDebounce } from "hooks";
+import NotFoundPage from "pages/NotFound";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
+import { setContentHeight } from "redux/features/layout/contentHeightSlice";
 import { setLayoutWidth } from "redux/features/layout/layoutWidthSlice";
 import { setPanelWidths } from "redux/features/layout/panelWidthsSlice";
 import { setSeparatorXPosition } from "redux/features/layout/separatorXPositionSlice";
-import { useAppDispatch } from "redux/hooks";
-import { ThemeProvider } from "styled-components";
 import {
+  heightFooter,
+  heightHeader,
   layoutWidthBreakpoint,
   minLayoutWidth,
   percentPanelWidths,
@@ -39,26 +53,59 @@ const clockPerformance = (
   startTime: any,
   commitTime: any
 ) => {
-  // console.log({
-  //   profilerId,
-  //   mode,
-  //   actualTime,
-  //   baseTime,
-  //   startTime,
-  //   commitTime,
-  // });
+  console.log({
+    profilerId,
+    mode,
+    actualTime,
+    baseTime,
+    startTime,
+    commitTime,
+  });
+};
+
+export const PublicPath = (props: any) => {
+  const Component = props.children;
+
+  return !api.isLoggedIn() ? (
+    <Route path={props.path} render={props.render} exact={props.exact}>
+      <Component props />
+    </Route>
+  ) : (
+    <Redirect to="/" />
+  );
+};
+
+export const ProtectedPath = (props: any) => {
+  const Component = props.children;
+
+  return api.isLoggedIn() ? (
+    <Route path={props.path} render={props.render} exact={props.exact}>
+      <Component props />
+    </Route>
+  ) : (
+    <Redirect to="/login" />
+  );
 };
 
 export const App: React.FC = () => {
-  const [width, height] = useWindowSize();
   const dispatch = useAppDispatch();
 
-  useEffect(() => {}, []);
+  const [debouncedWidth, debouncedHeight] = useDebounce(useWindowSize(), 50);
 
   useEffect(() => {
-    if (width > 0 && height > 0) {
-      const layoutWidth =
-        width < layoutWidthBreakpoint ? minLayoutWidth : width;
+    if (debouncedHeight > 0) {
+      const heightContent = debouncedHeight - heightHeader - heightFooter;
+      dispatch(setContentHeight(heightContent));
+    }
+  }, [debouncedHeight]);
+
+  useEffect(() => {
+    if (debouncedWidth > 0) {
+      // const layoutWidth =
+      //   debouncedWidth < layoutWidthBreakpoint
+      //     ? minLayoutWidth
+      //     : debouncedWidth;
+      const layoutWidth = debouncedWidth;
       dispatch(setLayoutWidth(layoutWidth));
       const onePercent = layoutWidth / 100;
 
@@ -84,22 +131,18 @@ export const App: React.FC = () => {
       const thirdPanel = Math.floor(
         layoutWidth -
           (onePercent *
-            (separatorPercentPosition - percentPanelWidths[3]) *
+            (separatorPercentPosition + percentPanelWidths[3]) *
             10) /
             10
       );
       const fourthPanel =
         Math.floor(onePercent * percentPanelWidths[3] * 10) / 10;
 
-      // const panels = percentPanelWidths.map(
-      //   (percentPanelWidth) =>
-      //     Math.floor(onePercent * percentPanelWidth * 10) / 10
-      // );
       const panels = [firstPanel, secondPanel, thirdPanel, fourthPanel];
       dispatch(setPanelWidths(panels));
       dispatch(setSeparatorXPosition(panels[0] + panels[1]));
     }
-  }, [width]);
+  }, [debouncedWidth]);
 
   return (
     <>
@@ -111,30 +154,26 @@ export const App: React.FC = () => {
         <GlobalStyle />
         <QueryClientProvider client={queryClient}>
           <ReactQueryDevtools initialIsOpen={false} />
-          <BrowserRouter basename={process.env.ROOT_URL}>
-            <SearchParamsProvider>
-              <Switch>
-                <Route
-                  path="/"
-                  exact
-                  render={(props) => (
-                    <Profiler id="test" onRender={clockPerformance}>
-                      <MainPage {...props} size={[width, height]} />
-                    </Profiler>
-                  )}
-                />
-                {api.isLoggedIn() ? (
-                  <Route
-                    path="/acl"
-                    exact
-                    render={(props) => (
-                      <AclPage {...props} size={[width, height]} />
-                    )}
-                  />
-                ) : null}
-              </Switch>
-            </SearchParamsProvider>
-          </BrowserRouter>
+          <DndProvider backend={HTML5Backend}>
+            <BrowserRouter basename={process.env.ROOT_URL}>
+              <SearchParamsProvider>
+                <Page>
+                  <Switch>
+                    <PublicPath path="/login" children={LoginPage} />
+                    <PublicPath path="/activate" children={ActivatePage} />
+                    <PublicPath
+                      path="/password_reset"
+                      children={PasswordResetPage}
+                    />
+                    <ProtectedPath path="/" exact children={MainPage} />
+                    <ProtectedPath path="/acl" children={AclPage} />
+                    <ProtectedPath path="/users" children={UsersPage} />
+                    <Route path="*" component={NotFoundPage} />
+                  </Switch>
+                </Page>
+              </SearchParamsProvider>
+            </BrowserRouter>
+          </DndProvider>
         </QueryClientProvider>
       </ThemeProvider>
     </>
