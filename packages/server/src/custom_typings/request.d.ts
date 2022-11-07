@@ -13,6 +13,9 @@ export interface IRequest {
   baseUrl: string;
   route: { path: string };
   method: string;
+  params: Record<string, any>;
+  body: Record<string, any>;
+  query: Record<string, any>;
 }
 
 declare global {

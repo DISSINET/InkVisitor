@@ -1,13 +1,14 @@
 import { asyncRouteHandler } from "../index";
-import { Router, Request } from "express";
+import { Router } from "express";
 import { findEntityById } from "@service/shorthands";
 import { BadParams, AuditsDoNotExist } from "@shared/types/errors";
 import { IResponseAudit, IStatement } from "@shared/types";
 import { ResponseAudit } from "@models/audit/response";
 import Statement from "@models/statement/statement";
+import { IRequest } from "src/custom_typings/request";
 
 export const getAuditByEntityId = asyncRouteHandler<IResponseAudit>(
-  async (request: Request) => {
+  async (request: IRequest) => {
     const entityId = request.params.entityId;
 
     if (!entityId) {
@@ -61,7 +62,7 @@ export default Router()
    */
   .get(
     "/",
-    asyncRouteHandler<IResponseAudit[]>(async (request: Request) => {
+    asyncRouteHandler<IResponseAudit[]>(async (request: IRequest) => {
       const territoryId = (request.query.forTerritory as string) || "";
       if (!territoryId) {
         throw new BadParams("forTerritory has to be set");

@@ -1,5 +1,5 @@
 import { asyncRouteHandler } from "../index";
-import { Router, Request } from "express";
+import { Router } from "express";
 import {
   BadParams,
   ModelNotValidError,
@@ -8,6 +8,7 @@ import {
 } from "@shared/types/errors";
 import { IResponseGeneric, IResponsePermission } from "@shared/types";
 import AclPermission from "@models/acl/acl_permission";
+import { IRequest } from "src/custom_typings/request";
 
 export default Router()
   /**
@@ -29,7 +30,7 @@ export default Router()
    */
   .get(
     "/",
-    asyncRouteHandler<IResponsePermission[]>(async (request: Request) => {
+    asyncRouteHandler<IResponsePermission[]>(async (request: IRequest) => {
       const permissionsData = await AclPermission.fetchAll(
         request.db.connection
       );
@@ -67,7 +68,7 @@ export default Router()
    */
   .put(
     "/:permissionId",
-    asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
+    asyncRouteHandler<IResponseGeneric>(async (request: IRequest) => {
       const permissionId = request.params.permissionId;
       const permissionData = request.body as Record<string, unknown>;
 
@@ -137,7 +138,7 @@ export default Router()
    */
   .delete(
     "/:permissionId",
-    asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
+    asyncRouteHandler<IResponseGeneric>(async (request: IRequest) => {
       const permissionId = request.params.permissionId;
 
       if (!permissionId) {

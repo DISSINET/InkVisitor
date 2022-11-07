@@ -1,4 +1,3 @@
-import { Request } from "express";
 import { EntityEnums } from "@shared/enums";
 import { IEntity, RequestSearch } from "@shared/types";
 import { regExpEscape } from "@common/functions";
@@ -7,6 +6,7 @@ import Statement from "@models/statement/statement";
 import { Connection, r, RDatum, RTable } from "rethinkdb-ts";
 import { ResponseEntity } from "./response";
 import { getEntityClass } from "@models/factory";
+import { IRequest } from "src/custom_typings/request";
 
 /**
  * SearchQuery is customized builder for search queries, allowing to build query by chaining prepared filters
@@ -257,7 +257,7 @@ export class ResponseSearch {
    * Prepares asynchronously results data
    * @param db
    */
-  async prepare(httpRequest: Request): Promise<ResponseEntity[]> {
+  async prepare(httpRequest: IRequest): Promise<ResponseEntity[]> {
     const query = new SearchQuery(httpRequest.db.connection);
     await query.fromRequest(this.request);
     let entities = await query.do();

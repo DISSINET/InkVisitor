@@ -6,11 +6,12 @@ import { prepareEntity } from "@models/entity/entity.test";
 import Entity from "@models/entity/entity";
 import { IRequest } from "src/custom_typings/request";
 import { ModelNotValidError } from "@shared/types/errors";
+import { RelationEnums } from "@shared/enums";
 
-export const prepareRelation = (): [string, Relation] => {
+export const prepareRelation = (type: RelationEnums.Type): [string, Relation] => {
   const id = Math.random().toString();
 
-  const ent = new Relation({ id });
+  const ent = new Relation({ id, type });
 
   return [id, ent];
 };

@@ -28,7 +28,7 @@ export default class Prop implements IProp, IModel {
   elvl: EntityEnums.Elvl = EntityEnums.Elvl.Textual
   certainty: EntityEnums.Certainty = EntityEnums.Certainty.Empty;
   logic: EntityEnums.Logic = EntityEnums.Logic.Positive;
-  mood: EntityEnums.Mood[] = [];
+  mood: EntityEnums.Mood[] = [EntityEnums.Mood.Indication];
   moodvariant: EntityEnums.MoodVariant = EntityEnums.MoodVariant.Realis;
   bundleOperator: EntityEnums.Operator = EntityEnums.Operator.And;
   bundleStart: boolean = false;

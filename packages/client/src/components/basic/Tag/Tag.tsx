@@ -99,6 +99,7 @@ export const Tag: React.FC<TagProps> = ({
   const [, drop] = useDrop({
     accept: ItemTypes.TAG,
     hover(item: EntityDragItem, monitor: DropTargetMonitor) {
+      // TODO: debounce?
       if (moveFn && draggedTerritory && draggedTerritory.lvl === lvl) {
         dndHoverFn(item, index, monitor, ref, moveFn);
       }

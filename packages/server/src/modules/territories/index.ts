@@ -9,7 +9,8 @@ import {
   PermissionDeniedError,
   TerritoryDoesNotExits,
 } from "@shared/types/errors";
-import { Request, Router } from "express";
+import { Router } from "express";
+import { IRequest } from "src/custom_typings/request";
 import { asyncRouteHandler } from "..";
 
 export default Router()
@@ -37,7 +38,7 @@ export default Router()
    */
   .get(
     "/:territoryId",
-    asyncRouteHandler<IResponseTerritory>(async (request: Request) => {
+    asyncRouteHandler<IResponseTerritory>(async (request: IRequest) => {
       const territoryId = request.params.territoryId;
       if (!territoryId) {
         throw new BadParams("territoryId has to be set");
@@ -94,7 +95,7 @@ export default Router()
    */
   .get(
     "/:territoryId/entities",
-    asyncRouteHandler<string[]>(async (request: Request) => {
+    asyncRouteHandler<string[]>(async (request: IRequest) => {
       const territoryId = request.params.territoryId;
       if (!territoryId) {
         throw new BadParams("territoryId has to be set");
