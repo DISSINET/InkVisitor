@@ -1,4 +1,3 @@
-import { Request } from "express";
 import { Router } from "express";
 import { IUser } from "@shared/types/user";
 import User from "@models/user/user";
@@ -27,6 +26,7 @@ import mailer, {
 } from "@service/mailer";
 import { ResponseUser } from "@models/user/response";
 import { domainName, hostUrl } from "@common/functions";
+import { IRequest } from "src/custom_typings/request";
 
 export default Router()
   /**
@@ -60,7 +60,7 @@ export default Router()
    */
   .post(
     "/signin",
-    asyncRouteHandler<unknown>(async (request: Request) => {
+    asyncRouteHandler<unknown>(async (request: IRequest) => {
       const name = request.body.username;
       const rawPassword = request.body.password;
 
@@ -105,7 +105,7 @@ export default Router()
    */
   .get(
     "/administration",
-    asyncRouteHandler<IResponseAdministration>(async (request: Request) => {
+    asyncRouteHandler<IResponseAdministration>(async (request: IRequest) => {
       const out: IResponseAdministration = {
         users: [],
       };
@@ -136,7 +136,7 @@ export default Router()
    */
   .get(
     "/me",
-    asyncRouteHandler<IResponseUser>(async (request: Request) => {
+    asyncRouteHandler<IResponseUser>(async (request: IRequest) => {
       const user = request.getUserOrFail();
       const response = new ResponseUser(user);
       await response.unwindAll(request);
@@ -168,7 +168,7 @@ export default Router()
    */
   .get(
     "/:userId",
-    asyncRouteHandler<IResponseUser>(async (request: Request) => {
+    asyncRouteHandler<IResponseUser>(async (request: IRequest) => {
       const userId = request.params.userId;
 
       if (!userId) {
@@ -212,7 +212,7 @@ export default Router()
    */
   .get(
     "/",
-    asyncRouteHandler<IUser[]>(async (request: Request) => {
+    asyncRouteHandler<IUser[]>(async (request: IRequest) => {
       const label = (request.query.label as string) || "";
 
       if (!label) {
@@ -246,7 +246,7 @@ export default Router()
    */
   .post(
     "/",
-    asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
+    asyncRouteHandler<IResponseGeneric>(async (request: IRequest) => {
       const userData = request.body as IUser;
 
       // force empty password + inactive status
@@ -318,7 +318,7 @@ export default Router()
    */
   .put(
     "/:userId",
-    asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
+    asyncRouteHandler<IResponseGeneric>(async (request: IRequest) => {
       const userId =
         request.params.userId !== "me"
           ? request.params.userId
@@ -374,7 +374,7 @@ export default Router()
    */
   .delete(
     "/:userId",
-    asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
+    asyncRouteHandler<IResponseGeneric>(async (request: IRequest) => {
       const userId = request.params.userId;
 
       if (!userId) {
@@ -428,7 +428,7 @@ export default Router()
    */
   .patch(
     "/active",
-    asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
+    asyncRouteHandler<IResponseGeneric>(async (request: IRequest) => {
       const hash = (request.query.hash as string) || "";
       if (!hash) {
         throw new BadParams("hash is required");
@@ -490,7 +490,7 @@ export default Router()
    */
   .patch(
     "/password",
-    asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
+    asyncRouteHandler<IResponseGeneric>(async (request: IRequest) => {
       const hash = (request.query.hash as string) || "";
       if (!hash) {
         throw new BadParams("hash is required");
@@ -551,7 +551,7 @@ export default Router()
    */
   .get(
     "/:userId/bookmarks",
-    asyncRouteHandler<IResponseBookmarkFolder[]>(async (request: Request) => {
+    asyncRouteHandler<IResponseBookmarkFolder[]>(async (request: IRequest) => {
       if (!(request as any).user) {
         throw new BadParams("not logged");
       }
@@ -603,7 +603,7 @@ export default Router()
    */
   .patch(
     "/:userId/password",
-    asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
+    asyncRouteHandler<IResponseGeneric>(async (request: IRequest) => {
       const userId = request.params.userId;
 
       if (!userId) {
@@ -670,7 +670,7 @@ export default Router()
    */
   .get(
     "/me/emails/test",
-    asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
+    asyncRouteHandler<IResponseGeneric>(async (request: IRequest) => {
       const user = request.getUserOrFail();
       const email = request.query.email as string;
       if (!email) {
