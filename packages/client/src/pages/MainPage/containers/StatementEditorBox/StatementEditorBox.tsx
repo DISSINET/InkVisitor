@@ -80,7 +80,12 @@ export const StatementEditorBox: React.FC = () => {
   const moveStatementMutation = useMutation(
     async (newTerritoryId: string) => {
       await api.entityUpdate(statementId, {
-        data: { territory: { id: newTerritoryId, order: EntityEnums.Order.First } },
+        data: {
+          territory: {
+            territoryId: newTerritoryId,
+            order: EntityEnums.Order.First,
+          },
+        },
       });
     },
     {

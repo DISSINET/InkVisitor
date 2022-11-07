@@ -7,11 +7,12 @@ import {
   RelationDoesNotExist,
 } from "@shared/types/errors";
 import Relation from "@models/relation/relation";
-import { Request, Router } from "express";
+import { Router } from "express";
 import { asyncRouteHandler } from "../index";
 import { getRelationClass } from "@models/factory";
 import { mergeDeep } from "@common/functions";
 import Entity from "@models/entity/entity";
+import { IRequest } from "src/custom_typings/request";
 
 export default Router()
   /**
@@ -38,7 +39,7 @@ export default Router()
    */
   .post(
     "/",
-    asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
+    asyncRouteHandler<IResponseGeneric>(async (request: IRequest) => {
       const model = getRelationClass(request.body);
 
       if (!model.isValid()) {
@@ -108,7 +109,7 @@ export default Router()
    */
   .put(
     "/:relationId?",
-    asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
+    asyncRouteHandler<IResponseGeneric>(async (request: IRequest) => {
       const id = request.params.relationId;
       const data = request.body as Record<string, unknown>;
 
@@ -181,7 +182,7 @@ export default Router()
    */
   .delete(
     "/:relationId",
-    asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
+    asyncRouteHandler<IResponseGeneric>(async (request: IRequest) => {
       const id = request.params.relationId;
 
       if (!id) {

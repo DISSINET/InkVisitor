@@ -1,4 +1,4 @@
-import { Router, Request } from "express";
+import { Router } from "express";
 import { findEntityById } from "@service/shorthands";
 import {
   BadParams,
@@ -12,6 +12,7 @@ import Territory from "@models/territory/territory";
 import { IParentTerritory } from "@shared/types/territory";
 import { EntityEnums } from "@shared/enums";
 import treeCache, { TreeCreator } from "@service/treeCache";
+import { IRequest } from "src/custom_typings/request";
 
 export default Router()
   /**
@@ -33,7 +34,7 @@ export default Router()
    */
   .get(
     "/",
-    asyncRouteHandler<IResponseTree>(async (request: Request) => {
+    asyncRouteHandler<IResponseTree>(async (request: IRequest) => {
       return treeCache.forUser(request.getUserOrFail());
     })
   )
@@ -72,10 +73,10 @@ export default Router()
    */
   .patch(
     "/:territoryId/position",
-    asyncRouteHandler<IResponseGeneric>(async (request: Request) => {
-      const territoryId = request.params.territoryId;
-      const parentId = request.body.parentId;
-      const newIndex = request.body.newIndex;
+    asyncRouteHandler<IResponseGeneric>(async (request: IRequest) => {
+      const territoryId = request.params.territoryId as string;
+      const parentId = request.body.parentId as string;
+      const newIndex = request.body.newIndex as number;
 
       if (!territoryId || !parentId || newIndex === undefined) {
         throw new BadParams("moveId/parentId/newIndex has be set");

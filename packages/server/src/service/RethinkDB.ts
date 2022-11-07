@@ -1,6 +1,7 @@
 import { Connection, r as rethink } from "rethinkdb-ts";
-import { Request, Response } from "express";
+import { Response } from "express";
 import { Mutex, Awaiter } from "./mutex"
+import { IRequest } from "src/custom_typings/request";
 
 export const rethinkConfig = {
   db: process.env.DB_NAME,
@@ -72,7 +73,7 @@ export function handleErrorMiddleware(response: Response) {
 /*
  * Open RethinkDB connection and store in `request.rethink`.
  */
-export const createConnection = async (request: Request): Promise<void> => {
+export const createConnection = async (request: IRequest): Promise<void> => {
   request.db = new Db();
   await request.db.initDb();
 };
@@ -80,7 +81,7 @@ export const createConnection = async (request: Request): Promise<void> => {
 /*
  * Close the RethinkDB connection stored in `request.rethink`.
  */
-export const closeConnection = async (request: Request): Promise<void> => {
+export const closeConnection = async (request: IRequest): Promise<void> => {
   if (request.db) {
     await request.db.close();
   }

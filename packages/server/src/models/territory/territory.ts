@@ -111,18 +111,19 @@ class Territory extends Entity implements ITerritory {
       } else if (this.data.parent) {
         parentId = this.data.parent.territoryId;
       } else {
-        throw new InternalServerError("parent for category must be set");
+        throw new InternalServerError("parent for territory must be set");
       }
 
       if (!this._siblings) {
         this._siblings = await new Territory({ id: parentId }).findChilds(db);
       }
 
+      parentData.order = Entity.determineOrder(parentData.order, this._siblings);
+
       this.data.parent = new TerritoryParent({
         territoryId: parentId,
-        order: Entity.determineOrder(parentData.order, this._siblings),
+        order: parentData.order,
       });
-      parentData.order = this.data.parent.order;
     }
 
     const result = await rethink
