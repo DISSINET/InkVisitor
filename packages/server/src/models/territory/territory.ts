@@ -1,7 +1,7 @@
 import { EntityEnums, UserEnums } from "@shared/enums";
 import { ITerritory, IParentTerritory, ITerritoryData } from "@shared/types";
 import { r as rethink, Connection, WriteResult, RDatum } from "rethinkdb-ts";
-import { fillFlatObject, UnknownObject, IModel } from "@models/common";
+import { IModel, determineOrder } from "@models/common";
 import Entity from "@models/entity/entity";
 import { InternalServerError, InvalidDeleteError } from "@shared/types/errors";
 import User from "@models/user/user";
@@ -14,7 +14,7 @@ export class TerritoryParent implements IParentTerritory, IModel {
 
   constructor(data: Partial<IParentTerritory>) {
     this.territoryId = data.territoryId as string;
-    this.order = data.order !== undefined ? data.order : -1
+    this.order = data.order !== undefined ? data.order : -1;
   }
 
   isValid(): boolean {
@@ -78,7 +78,7 @@ class Territory extends Entity implements ITerritory {
       );
 
       const wantedOrder = this.data.parent.order;
-      this.data.parent.order = Entity.determineOrder(wantedOrder, childs);
+      this.data.parent.order = determineOrder(wantedOrder, childs);
     } else if (this.id !== "T0" && !this.isTemplate) {
       return {
         deleted: 0,
@@ -118,7 +118,7 @@ class Territory extends Entity implements ITerritory {
         this._siblings = await new Territory({ id: parentId }).findChilds(db);
       }
 
-      parentData.order = Entity.determineOrder(parentData.order, this._siblings);
+      parentData.order = determineOrder(parentData.order, this._siblings);
 
       this.data.parent = new TerritoryParent({
         territoryId: parentId,
