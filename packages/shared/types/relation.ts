@@ -5,6 +5,7 @@ export namespace Relation {
     id: string;
     type: RelationEnums.Type;
     entityIds: string[];
+    order?: number;
   }
 
   export interface ISuperclass extends IRelation {
@@ -44,7 +45,7 @@ export namespace Relation {
   export interface IClassification extends IRelation {
     type: RelationEnums.Type.Classification;
     entityIds: [string, string];
-    order: number
+    order: number;
   }
   export interface IIdentification extends IRelation {
     type: RelationEnums.Type.Identification;
@@ -55,12 +56,12 @@ export namespace Relation {
   export interface IHolonym extends IRelation {
     type: RelationEnums.Type.Holonym;
     entityIds: [string, string];
-    order: number
+    order: number;
   }
   export interface IImplication extends IRelation {
     type: RelationEnums.Type.Implication;
     entityIds: [string, string];
-    order: number
+    order: number;
   }
   export interface ISubjectSemantics extends IRelation {
     type: RelationEnums.Type.SubjectSemantics;
@@ -70,12 +71,12 @@ export namespace Relation {
   export interface IActant1Semantics extends IRelation {
     type: RelationEnums.Type.Actant1Semantics;
     entityIds: [string, string];
-    order: number
+    order: number;
   }
   export interface IActant2Semantics extends IRelation {
     type: RelationEnums.Type.Actant2Semantics;
     entityIds: [string, string];
-    order: number
+    order: number;
   }
 
   /**
@@ -94,7 +95,7 @@ export namespace Relation {
     order: boolean;
   };
 
-  export const RelationRules: { [key: string]: RelationRule } = {};
+  export const RelationRules: { [key: string]: RelationRule; } = {};
 
   // Order of objects equals order of relations in detail
   RelationRules[RelationEnums.Type.Superclass] = {
