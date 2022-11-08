@@ -25,6 +25,7 @@ export namespace Relation {
   export interface IAntonym extends IRelation {
     type: RelationEnums.Type.Antonym;
     entityIds: [string, string];
+    order: number;
   }
   export interface IPropertyReciprocal extends IRelation {
     type: RelationEnums.Type.PropertyReciprocal;
@@ -41,6 +42,7 @@ export namespace Relation {
   export interface IRelated extends IRelation {
     type: RelationEnums.Type.Related;
     entityIds: [string, string];
+    order: number;
   }
   export interface IClassification extends IRelation {
     type: RelationEnums.Type.Classification;
@@ -151,7 +153,7 @@ export namespace Relation {
     cloudType: false,
     treeType: false,
     attributes: [],
-    order: false
+    order: true
   };
   RelationRules[RelationEnums.Type.Holonym] = {
     label: "Holonym",
@@ -298,6 +300,6 @@ export namespace Relation {
     cloudType: false,
     treeType: false,
     attributes: [],
-    order: false
+    order: true
   };
 }
