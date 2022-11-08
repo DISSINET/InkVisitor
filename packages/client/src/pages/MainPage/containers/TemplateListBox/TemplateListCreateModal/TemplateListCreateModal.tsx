@@ -139,7 +139,7 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
               onChange={(option: ValueType<OptionTypeBase, any>) => {
                 setCreateModalEntityClass(option as DropdownItem);
               }}
-              width={80}
+              width={100}
               entityDropdown
               disableTyping
               autoFocus
