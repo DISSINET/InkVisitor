@@ -19,7 +19,7 @@ import { EntityTag } from "components/advanced";
 import { CStatement, DStatement } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
-import { BsArrowDown, BsArrowUp } from "react-icons/bs";
+import { BsArrowDown, BsArrowUp, BsInfoCircle } from "react-icons/bs";
 import {
   FaChevronCircleDown,
   FaChevronCircleUp,
@@ -38,6 +38,7 @@ import { StatementListHeader } from "./StatementListHeader/StatementListHeader";
 import { StatementListTable } from "./StatementListTable/StatementListTable";
 import {
   StyledDots,
+  StyledEmptyState,
   StyledTableWrapper,
   StyledText,
 } from "./StatementLitBoxStyles";
@@ -651,7 +652,7 @@ export const StatementListBox: React.FC = () => {
           isFavorited={isFavorited}
         />
       )}
-      {statements && audits && (
+      {statements && audits ? (
         <StyledTableWrapper id="Statements-box-table">
           <StatementListTable
             moveEndRow={moveEndRow}
@@ -663,6 +664,15 @@ export const StatementListBox: React.FC = () => {
             entities={entities}
           />
         </StyledTableWrapper>
+      ) : (
+        <>
+          <StyledEmptyState>
+            <BsInfoCircle size="23" />
+          </StyledEmptyState>
+          <StyledEmptyState>
+            {"No territory selected yet. Pick one from the territory tree"}
+          </StyledEmptyState>
+        </>
       )}
 
       <Submit

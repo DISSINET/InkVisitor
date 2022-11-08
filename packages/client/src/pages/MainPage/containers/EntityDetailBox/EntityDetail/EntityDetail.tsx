@@ -9,7 +9,12 @@ import {
 } from "@shared/types";
 import api from "api";
 import { Button, Loader, Submit } from "components";
-import { EntityTag } from "components/advanced";
+import {
+  ApplyTemplateModal,
+  AuditTable,
+  EntityTag,
+  JSONExplorer,
+} from "components/advanced";
 import { CMetaProp } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
@@ -22,11 +27,8 @@ import {
   PropAttributeFilter,
 } from "types";
 import { getEntityLabel, getShortLabelByLetterCount } from "utils";
-import { AuditTable } from "../../AuditTable/AuditTable";
 import { EntityReferenceTable } from "../../EntityReferenceTable/EntityReferenceTable";
-import { JSONExplorer } from "../../JSONExplorer/JSONExplorer";
 import { PropGroup } from "../../PropGroup/PropGroup";
-import { ApplyTemplateModal } from "./ApplyTemplateModal/ApplyTemplateModal";
 import { EntityDetailCreateTemplateModal } from "./EntityDetailCreateTemplateModal/EntityDetailCreateTemplateModal";
 import { EntityDetailFormSection } from "./EntityDetailFormSection/EntityDetailFormSection";
 import { EntityDetailHeaderRow } from "./EntityDetailHeaderRow/EntityDetailHeaderRow";
@@ -91,7 +93,8 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
   const [selectedEntityType, setSelectedEntityType] =
     useState<EntityEnums.Class>();
   const [showTypeSubmit, setShowTypeSubmit] = useState(false);
-  const [applyTemplateModal, setApplyTemplateModal] = useState<boolean>(false);
+  const [showApplyTemplateModal, setShowApplyTemplateModal] =
+    useState<boolean>(false);
   const [templateToApply, setTemplateToApply] = useState<IEntity | false>(
     false
   );
@@ -108,7 +111,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
 
       if (templateThatIsGoingToBeApplied) {
         setTemplateToApply(templateThatIsGoingToBeApplied);
-        setApplyTemplateModal(true);
+        setShowApplyTemplateModal(true);
       }
     }
   };
@@ -733,9 +736,9 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
       />
 
       <ApplyTemplateModal
-        showModal={applyTemplateModal}
+        showModal={showApplyTemplateModal}
         entity={entity}
-        setApplyTemplateModal={setApplyTemplateModal}
+        setShowApplyTemplateModal={setShowApplyTemplateModal}
         updateEntityMutation={updateEntityMutation}
         templateToApply={templateToApply}
         setTemplateToApply={setTemplateToApply}

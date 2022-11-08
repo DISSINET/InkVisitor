@@ -104,7 +104,7 @@ export const collectTerritoryChildren = (
 };
 
 export const dndHoverFn = (
-  item: EntityDragItem,
+  item: EntityDragItem | DragItem,
   index: number,
   monitor: DropTargetMonitor,
   ref: React.RefObject<HTMLDivElement>,
