@@ -5,18 +5,16 @@ export namespace Relation {
     id: string;
     type: RelationEnums.Type;
     entityIds: string[];
-    order?: number;
+    order: number;
   }
 
   export interface ISuperclass extends IRelation {
     type: RelationEnums.Type.Superclass;
     entityIds: [string, string];
-    order: number;
   }
   export interface ISuperordinateLocation extends IRelation {
     type: RelationEnums.Type.SuperordinateLocation;
     entityIds: [string, string];
-    order: number;
   }
   export interface ISynonym extends IRelation {
     type: RelationEnums.Type.Synonym;
@@ -25,7 +23,6 @@ export namespace Relation {
   export interface IAntonym extends IRelation {
     type: RelationEnums.Type.Antonym;
     entityIds: [string, string];
-    order: number;
   }
   export interface IPropertyReciprocal extends IRelation {
     type: RelationEnums.Type.PropertyReciprocal;
@@ -42,43 +39,35 @@ export namespace Relation {
   export interface IRelated extends IRelation {
     type: RelationEnums.Type.Related;
     entityIds: [string, string];
-    order: number;
   }
   export interface IClassification extends IRelation {
     type: RelationEnums.Type.Classification;
     entityIds: [string, string];
-    order: number;
   }
   export interface IIdentification extends IRelation {
     type: RelationEnums.Type.Identification;
     certainty: EntityEnums.Certainty;
     entityIds: [string, string];
   }
-
   export interface IHolonym extends IRelation {
     type: RelationEnums.Type.Holonym;
     entityIds: [string, string];
-    order: number;
   }
   export interface IImplication extends IRelation {
     type: RelationEnums.Type.Implication;
     entityIds: [string, string];
-    order: number;
   }
   export interface ISubjectSemantics extends IRelation {
     type: RelationEnums.Type.SubjectSemantics;
     entityIds: [string, string];
-    order: number;
   }
   export interface IActant1Semantics extends IRelation {
     type: RelationEnums.Type.Actant1Semantics;
     entityIds: [string, string];
-    order: number;
   }
   export interface IActant2Semantics extends IRelation {
     type: RelationEnums.Type.Actant2Semantics;
     entityIds: [string, string];
-    order: number;
   }
 
   /**
