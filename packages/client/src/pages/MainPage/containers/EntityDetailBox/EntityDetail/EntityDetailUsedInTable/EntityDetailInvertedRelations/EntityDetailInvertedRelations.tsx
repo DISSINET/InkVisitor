@@ -40,7 +40,7 @@ export const EntityDetailInvertedRelations: React.FC<
     <div>
       {filteredRelationTypes.map((relationType, key) => {
         const filteredRelations = relations.filter(
-          (r) => r.type === relationType
+          (r) => r.type === relationType && r.entityIds[0] !== entity.id
         );
         const relationRule: Relation.RelationRule =
           Relation.RelationRules[relationType];
@@ -51,7 +51,6 @@ export const EntityDetailInvertedRelations: React.FC<
           <EntityDetailInvertedRelation
             key={key}
             entity={entity}
-            // relationType={relationType}
             relationRule={relationRule}
             relations={filteredRelations}
             entities={entities}

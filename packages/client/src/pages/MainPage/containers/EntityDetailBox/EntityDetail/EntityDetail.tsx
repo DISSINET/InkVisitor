@@ -534,8 +534,10 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
               </StyledDetailSectionContent>
 
               {/* Inverted relations */}
-              <StyledDetailSectionHeader>Inverted</StyledDetailSectionHeader>
-              <EntityDetailInvertedRelations entity={entity} />
+              <StyledDetailSectionHeader>Inversed</StyledDetailSectionHeader>
+              <StyledDetailSectionContent>
+                <EntityDetailInvertedRelations entity={entity} />
+              </StyledDetailSectionContent>
             </StyledDetailSection>
 
             {/* reference section */}

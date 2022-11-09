@@ -1,16 +1,13 @@
-import {
-  IResponseDetail,
-  Relation,
-  IEntity,
-  IResponseEntity,
-} from "@shared/types";
+import { IResponseDetail, IResponseEntity, Relation } from "@shared/types";
 import { EntityTag } from "components/advanced";
 import React from "react";
-import { StyledHeading } from "./EntityDetailInvertedRelationStyles";
+import {
+  StyledHeading,
+  StyledTagWrapper,
+} from "./EntityDetailInvertedRelationStyles";
 
 interface EntityDetailInvertedRelation {
   entity: IResponseDetail;
-  // relationType: string;
   relationRule: Relation.RelationRule;
   relations: Relation.IRelation[];
   entities?: IResponseEntity[];
@@ -27,7 +24,11 @@ export const EntityDetailInvertedRelation: React.FC<
         );
         if (relation.entityIds[0] === entity.id || !relationEntity) return;
 
-        return <EntityTag key={key} entity={relationEntity} />;
+        return (
+          <StyledTagWrapper>
+            <EntityTag key={key} entity={relationEntity} />
+          </StyledTagWrapper>
+        );
       })}
     </div>
   );
