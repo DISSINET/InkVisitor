@@ -6,17 +6,17 @@ import {
 } from "@shared/types";
 import { EntityTag } from "components/advanced";
 import React from "react";
-import { StyledHeading } from "./EntityDetailUsedInRelationStyles";
+import { StyledHeading } from "./EntityDetailInvertedRelationStyles";
 
-interface EntityDetailUsedInRelation {
+interface EntityDetailInvertedRelation {
   entity: IResponseDetail;
   // relationType: string;
   relationRule: Relation.RelationRule;
   relations: Relation.IRelation[];
   entities?: IResponseEntity[];
 }
-export const EntityDetailUsedInRelation: React.FC<
-  EntityDetailUsedInRelation
+export const EntityDetailInvertedRelation: React.FC<
+  EntityDetailInvertedRelation
 > = ({ entity, relationRule, relations, entities }) => {
   return (
     <div>

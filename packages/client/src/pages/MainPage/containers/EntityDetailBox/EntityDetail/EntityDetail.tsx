@@ -45,10 +45,10 @@ import {
 } from "./EntityDetailStyles";
 import { EntityDetailClassificationTable } from "./EntityDetailUsedInTable/EntityDetailClassificationTable/EntityDetailClassificationTable";
 import { EntityDetailIdentificationTable } from "./EntityDetailUsedInTable/EntityDetailIdentificationTable/EntityDetailIdentificationTable";
+import { EntityDetailInvertedRelations } from "./EntityDetailUsedInTable/EntityDetailInvertedRelations/EntityDetailInvertedRelations";
 import { EntityDetailMetaPropsTable } from "./EntityDetailUsedInTable/EntityDetailMetaPropsTable/EntityDetailMetaPropsTable";
 import { EntityDetailStatementPropsTable } from "./EntityDetailUsedInTable/EntityDetailStatementPropsTable/EntityDetailStatementPropsTable";
 import { EntityDetailStatementsTable } from "./EntityDetailUsedInTable/EntityDetailStatementsTable/EntityDetailStatementsTable";
-import { EntityDetailUsedInRelations } from "./EntityDetailUsedInTable/EntityDetailUsedInRelations/EntityDetailUsedInRelations";
 
 const allowedEntityChangeClasses = [
   EntityEnums.Class.Value,
@@ -685,8 +685,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
               )}
 
               {/* Used in relations */}
-              {/* TODO: assymetrical inverted relations */}
-              <EntityDetailUsedInRelations entity={entity} />
+              <EntityDetailInvertedRelations entity={entity} />
             </StyledDetailSection>
 
             {/* Audits */}

@@ -3,13 +3,13 @@ import api from "api";
 import React, { useEffect, useState } from "react";
 import { useQuery } from "react-query";
 import { getRelationInvertedRules } from "utils";
-import { EntityDetailUsedInRelation } from "./EntityDetailUsedInRelation/EntityDetailUsedInRelation";
+import { EntityDetailInvertedRelation } from "./EntityDetailInvertedRelation/EntityDetailInvertedRelation";
 
-interface EntityDetailUsedInRelations {
+interface EntityDetailInvertedRelations {
   entity: IResponseDetail;
 }
-export const EntityDetailUsedInRelations: React.FC<
-  EntityDetailUsedInRelations
+export const EntityDetailInvertedRelations: React.FC<
+  EntityDetailInvertedRelations
 > = ({ entity }) => {
   const [filteredRelationTypes, setFilteredRelationTypes] = useState<string[]>(
     []
@@ -48,7 +48,7 @@ export const EntityDetailUsedInRelations: React.FC<
 
         if (!relationRule.asymmetrical) return;
         return (
-          <EntityDetailUsedInRelation
+          <EntityDetailInvertedRelation
             key={key}
             entity={entity}
             // relationType={relationType}
