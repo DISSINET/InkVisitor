@@ -38,7 +38,6 @@ export const EntityDetailInvertedRelations: React.FC<
 
   return (
     <div>
-      Used In Relations
       {filteredRelationTypes.map((relationType, key) => {
         const filteredRelations = relations.filter(
           (r) => r.type === relationType
@@ -46,7 +45,8 @@ export const EntityDetailInvertedRelations: React.FC<
         const relationRule: Relation.RelationRule =
           Relation.RelationRules[relationType];
 
-        if (!relationRule.asymmetrical) return;
+        if (!relationRule.asymmetrical || !filteredRelations.length) return;
+
         return (
           <EntityDetailInvertedRelation
             key={key}

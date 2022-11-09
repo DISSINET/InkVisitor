@@ -526,11 +526,16 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
               </StyledDetailSectionContent>
             </StyledDetailSection>
 
+            {/* Relations */}
             <StyledDetailSection>
               <StyledDetailSectionHeader>Relations</StyledDetailSectionHeader>
               <StyledDetailSectionContent>
                 <EntityDetailRelationsSection entity={entity} />
               </StyledDetailSectionContent>
+
+              {/* Inverted relations */}
+              <StyledDetailSectionHeader>Inverted</StyledDetailSectionHeader>
+              <EntityDetailInvertedRelations entity={entity} />
             </StyledDetailSection>
 
             {/* reference section */}
@@ -683,9 +688,6 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
                   key="StatementClassification"
                 />
               )}
-
-              {/* Used in relations */}
-              <EntityDetailInvertedRelations entity={entity} />
             </StyledDetailSection>
 
             {/* Audits */}
