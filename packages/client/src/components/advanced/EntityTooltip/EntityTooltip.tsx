@@ -225,6 +225,8 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
                   <StyledRelationTypeBlock>
                     {synonymCloud.map((synonym, key) => {
                       const entity = entities[synonym];
+                      if (entityId === entity.id) return;
+
                       return (
                         <React.Fragment key={key}>
                           {`${entity?.label}${
