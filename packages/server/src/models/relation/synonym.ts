@@ -25,18 +25,18 @@ export default class Synonym extends Relation implements RelationTypes.ISynonym 
 
 
     for (const entityId of this.entityIds) {
-      const relations = await Relation.getForEntity(request.db.connection, entityId, type)
+      const relations = await Relation.getForEntity(request.db.connection, entityId, type);
       for (const relation of relations) {
         if (this.id !== relation.id) {
-          this.siblingRelations.push(relation.id)
+          this.siblingRelations.push(relation.id);
         }
 
-        toInclude = toInclude.concat(relation.entityIds)
+        toInclude = toInclude.concat(relation.entityIds);
       }
     }
 
-    this.siblingRelations = [...new Set(this.siblingRelations)].sort()
-    this.entityIds = [...new Set(toInclude)].sort()
+    this.siblingRelations = [...new Set(this.siblingRelations)].sort();
+    this.entityIds = [...new Set(toInclude)].sort();
   }
 
   /**
@@ -52,15 +52,15 @@ export default class Synonym extends Relation implements RelationTypes.ISynonym 
       }
 
       if (!this.hasEntityCorrectClass(entityId, [EntityEnums.Class.Action, EntityEnums.Class.Concept])) {
-        return new ModelNotValidError(`Entity '${entityId}' mush have class '${EntityEnums.Class.Action}' or '${EntityEnums.Class.Concept}'`)
+        return new ModelNotValidError(`Entity '${entityId}' mush have class '${EntityEnums.Class.Action}' or '${EntityEnums.Class.Concept}'`);
       }
-      
+
       if (prevClass === undefined) {
         prevClass = entity.class;
       }
 
       if (prevClass !== entity.class) {
-        return new ModelNotValidError("Entities must have equal classes")
+        return new ModelNotValidError("Entities must have equal classes");
       }
     }
 
@@ -86,7 +86,7 @@ export default class Synonym extends Relation implements RelationTypes.ISynonym 
    */
   async afterSave(request: IRequest): Promise<void> {
     if (this.siblingRelations) {
-      await Relation.deleteMany(request, this.siblingRelations)
+      await Relation.deleteMany(request, this.siblingRelations);
     }
   }
 }

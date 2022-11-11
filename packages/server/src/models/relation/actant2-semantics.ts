@@ -6,11 +6,13 @@ import { ModelNotValidError } from "@shared/types/errors";
 export default class Actant2Semantics extends Relation implements RelationTypes.IActant2Semantics {
   type: RelationEnums.Type.Actant2Semantics;
   entityIds: [string, string];
+  order: number;
 
   constructor(data: Partial<RelationTypes.IActant2Semantics>) {
     super(data);
     this.entityIds = data.entityIds as [string, string];
     this.type = RelationEnums.Type.Actant2Semantics;
+    this.order = data.order || EntityEnums.Order.Last;
   }
 
   /**

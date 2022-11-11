@@ -6,11 +6,13 @@ import { ModelNotValidError } from "@shared/types/errors";
 export default class SubjectSemantics extends Relation implements RelationTypes.ISubjectSemantics {
   type: RelationEnums.Type.SubjectSemantics;
   entityIds: [string, string];
+  order: number;
 
   constructor(data: Partial<RelationTypes.ISubjectSemantics>) {
     super(data);
     this.entityIds = data.entityIds as [string, string];
     this.type = RelationEnums.Type.SubjectSemantics;
+    this.order = data.order || EntityEnums.Order.Last;
   }
 
   /**

@@ -20,7 +20,7 @@ export default class Relation implements IRelationModel {
   id: string;
   type: RelationEnums.Type;
   entityIds: string[];
-  order: number;
+  order?: number;
 
   @nonenumerable
   entities?: IEntity[]; // holds preloaded entities for checks
@@ -29,7 +29,7 @@ export default class Relation implements IRelationModel {
     this.id = data.id || "";
     this.type = data.type as RelationEnums.Type;
     this.entityIds = data.entityIds || [];
-    this.order = data.order || EntityEnums.Order.Last;
+    this.order = data.order;
   }
 
   /**
@@ -156,6 +156,12 @@ export default class Relation implements IRelationModel {
       !this.entityIds.reduce((acc, eId) => acc && typeof eId === 'string', true)
     ) {
       return false;
+    }
+
+    if (this.order !== undefined) {
+      if (typeof this.order !== "number") {
+        return false;
+      }
     }
 
     return true;
