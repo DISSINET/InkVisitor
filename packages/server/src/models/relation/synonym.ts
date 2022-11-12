@@ -4,7 +4,6 @@ import { Relation as RelationTypes } from "@shared/types";
 import { IRequest } from "src/custom_typings/request";
 import { nonenumerable } from "@common/decorators";
 import { InternalServerError, ModelNotValidError } from "@shared/types/errors";
-import Entity from "@models/entity/entity";
 
 export default class Synonym extends Relation implements RelationTypes.ISynonym {
   type: RelationEnums.Type.Synonym;

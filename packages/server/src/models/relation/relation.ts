@@ -79,8 +79,16 @@ export default class Relation implements IRelationModel {
       throw err;
     }
 
-    const siblings = await this.getSiblings(request.db.connection);
-    this.order = determineOrder(this.order, siblings.map(s => s.order !== undefined));
+    if (typeof this.order === "number") {
+      const siblings = await this.getSiblings(request.db.connection);
+      const mapped = siblings.reduce((acc, cur) => {
+        if (cur.order !== undefined) {
+          acc[cur.order] = true;
+        }
+        return acc;
+      }, {} as Record<number, unknown>);
+      this.order = determineOrder(this.order, mapped);
+    }
   }
 
   /**
