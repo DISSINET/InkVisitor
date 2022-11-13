@@ -127,7 +127,7 @@ export namespace EntityEnums {
     LessOrEqual = "<=",
     Less = "<",
   }
-
+  // ISO 639-2 codes
   export enum Language {
     Empty = "",
     Latin = "lat",
@@ -138,6 +138,8 @@ export namespace EntityEnums {
     Italian = "ita",
     French = "fra",
     German = "deu",
+    Spanish = "spa",
+    Hungarian = "hun",
   }
 
   export enum ResourceType {
