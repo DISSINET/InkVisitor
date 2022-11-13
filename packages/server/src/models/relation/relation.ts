@@ -1,4 +1,4 @@
-import { IDbModel, IModel } from "@models/common";
+import { determineOrder, IDbModel, IModel } from "@models/common";
 import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
 import { IEntity, Relation as RelationTypes } from "@shared/types";
 import { DbEnums, EntityEnums, RelationEnums, UserEnums } from "@shared/enums";
@@ -10,8 +10,8 @@ import { nonenumerable } from "@common/decorators";
 import Entity from "@models/entity/entity";
 
 export interface IRelationModel extends RelationTypes.IRelation, IDbModel {
-  beforeSave(request: IRequest): Promise<void>
-  afterSave(request: IRequest): Promise<void>
+  beforeSave(request: IRequest): Promise<void>;
+  afterSave(request: IRequest): Promise<void>;
 }
 
 export default class Relation implements IRelationModel {
@@ -20,6 +20,7 @@ export default class Relation implements IRelationModel {
   id: string;
   type: RelationEnums.Type;
   entityIds: string[];
+  order?: number;
 
   @nonenumerable
   entities?: IEntity[]; // holds preloaded entities for checks
@@ -28,6 +29,7 @@ export default class Relation implements IRelationModel {
     this.id = data.id || "";
     this.type = data.type as RelationEnums.Type;
     this.entityIds = data.entityIds || [];
+    this.order = data.order;
   }
 
   /**
@@ -69,13 +71,34 @@ export default class Relation implements IRelationModel {
    */
   async beforeSave(request: IRequest): Promise<void> {
     if (!this.entities) {
-      this.entities = await Entity.findEntitiesByIds(request.db.connection, this.entityIds)
+      this.entities = await Entity.findEntitiesByIds(request.db.connection, this.entityIds);
     }
 
     const err = this.areEntitiesValid();
     if (err) {
       throw err;
     }
+
+    if (typeof this.order === "number") {
+      const siblings = await this.getSiblings(request.db.connection);
+      const mapped = siblings.reduce((acc, cur) => {
+        if (cur.order !== undefined) {
+          acc[cur.order] = true;
+        }
+        return acc;
+      }, {} as Record<number, unknown>);
+      this.order = determineOrder(this.order, mapped);
+    }
+  }
+
+  /**
+   * returns list of relations with the same main entityId (minut this entity)
+   * @param db database connection
+   * @returns  list of relations
+   */
+  async getSiblings(db: Connection): Promise<RelationTypes.IRelation[]> {
+    const childs = await Relation.getForEntity(db, this.entityIds[0], this.type);
+    return childs.filter(ch => ch.id !== this.id);
   }
 
   async save(db: Connection | undefined): Promise<WriteResult> {
@@ -91,7 +114,8 @@ export default class Relation implements IRelationModel {
     return result;
   }
 
-  update(
+
+  async update(
     db: Connection | undefined,
     updateData: Record<string, unknown>
   ): Promise<WriteResult> {
@@ -142,6 +166,12 @@ export default class Relation implements IRelationModel {
       return false;
     }
 
+    if (this.order !== undefined) {
+      if (typeof this.order !== "number") {
+        return false;
+      }
+    }
+
     return true;
   }
 
@@ -189,10 +219,10 @@ export default class Relation implements IRelationModel {
       .table(Relation.table)
       .getAll(entityId, { index: DbEnums.Indexes.RelationsEntityIds })
       .filter(relType ? { type: relType } : {})
-      .run(db)
+      .run(db);
 
     if (position !== undefined) {
-      return items.filter(d => d.entityIds[position] === entityId)
+      return items.filter(d => d.entityIds[position] === entityId);
     }
     return items;
   }

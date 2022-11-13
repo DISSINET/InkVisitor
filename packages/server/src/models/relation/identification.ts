@@ -44,7 +44,7 @@ export default class Identification extends Relation implements RelationTypes.II
     }
 
     if (!EnumValidators.IsValidEntityCertainty(this.certainty)) {
-      return false
+      return false;
     }
 
     return true;
