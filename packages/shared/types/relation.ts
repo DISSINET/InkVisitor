@@ -5,15 +5,18 @@ export namespace Relation {
     id: string;
     type: RelationEnums.Type;
     entityIds: string[];
+    order?: number;
   }
 
   export interface ISuperclass extends IRelation {
     type: RelationEnums.Type.Superclass;
     entityIds: [string, string];
+    order: number;
   }
   export interface ISuperordinateLocation extends IRelation {
     type: RelationEnums.Type.SuperordinateLocation;
     entityIds: [string, string];
+    order: number;
   }
   export interface ISynonym extends IRelation {
     type: RelationEnums.Type.Synonym;
@@ -22,6 +25,7 @@ export namespace Relation {
   export interface IAntonym extends IRelation {
     type: RelationEnums.Type.Antonym;
     entityIds: [string, string];
+    order: number;
   }
   export interface IPropertyReciprocal extends IRelation {
     type: RelationEnums.Type.PropertyReciprocal;
@@ -38,36 +42,42 @@ export namespace Relation {
   export interface IRelated extends IRelation {
     type: RelationEnums.Type.Related;
     entityIds: [string, string];
+    order: number;
   }
   export interface IClassification extends IRelation {
     type: RelationEnums.Type.Classification;
     entityIds: [string, string];
+    order: number;
   }
   export interface IIdentification extends IRelation {
     type: RelationEnums.Type.Identification;
     certainty: EntityEnums.Certainty;
     entityIds: [string, string];
   }
-
   export interface IHolonym extends IRelation {
     type: RelationEnums.Type.Holonym;
     entityIds: [string, string];
+    order: number;
   }
   export interface IImplication extends IRelation {
     type: RelationEnums.Type.Implication;
     entityIds: [string, string];
+    order: number;
   }
   export interface ISubjectSemantics extends IRelation {
     type: RelationEnums.Type.SubjectSemantics;
     entityIds: [string, string];
+    order: number;
   }
   export interface IActant1Semantics extends IRelation {
     type: RelationEnums.Type.Actant1Semantics;
     entityIds: [string, string];
+    order: number;
   }
   export interface IActant2Semantics extends IRelation {
     type: RelationEnums.Type.Actant2Semantics;
     entityIds: [string, string];
+    order: number;
   }
 
   /**
@@ -83,9 +93,10 @@ export namespace Relation {
     cloudType: boolean;
     treeType: boolean;
     attributes: any[];
+    order: boolean;
   };
 
-  export const RelationRules: { [key: string]: RelationRule } = {};
+  export const RelationRules: { [key: string]: RelationRule; } = {};
 
   // Order of objects equals order of relations in detail
   RelationRules[RelationEnums.Type.Superclass] = {
@@ -100,6 +111,7 @@ export namespace Relation {
     cloudType: false,
     treeType: true,
     attributes: [],
+    order: true
   };
   RelationRules[RelationEnums.Type.SuperordinateLocation] = {
     label: "Superordinate Location",
@@ -112,6 +124,7 @@ export namespace Relation {
     cloudType: false,
     treeType: true,
     attributes: [],
+    order: true
   };
   RelationRules[RelationEnums.Type.Synonym] = {
     label: "Synonym",
@@ -125,6 +138,7 @@ export namespace Relation {
     cloudType: true,
     treeType: false,
     attributes: [],
+    order: false
   };
   RelationRules[RelationEnums.Type.Antonym] = {
     label: "Antonym",
@@ -138,6 +152,7 @@ export namespace Relation {
     cloudType: false,
     treeType: false,
     attributes: [],
+    order: true
   };
   RelationRules[RelationEnums.Type.Holonym] = {
     label: "Holonym",
@@ -150,6 +165,7 @@ export namespace Relation {
     cloudType: false,
     treeType: true,
     attributes: [],
+    order: true
   };
   RelationRules[RelationEnums.Type.PropertyReciprocal] = {
     label: "Property Reciprocal",
@@ -162,6 +178,7 @@ export namespace Relation {
     cloudType: false,
     treeType: false,
     attributes: [],
+    order: false
   };
   RelationRules[RelationEnums.Type.SubjectActant1Reciprocal] = {
     label: "Subject/Actant1 Reciprocal",
@@ -174,6 +191,7 @@ export namespace Relation {
     cloudType: false,
     treeType: false,
     attributes: [],
+    order: false
   };
   RelationRules[RelationEnums.Type.ActionEventEquivalent] = {
     label: "Action/Event Equivalent",
@@ -186,6 +204,7 @@ export namespace Relation {
     cloudType: false,
     treeType: false,
     attributes: [],
+    order: false
   };
   RelationRules[RelationEnums.Type.Classification] = {
     label: "Classification",
@@ -206,6 +225,7 @@ export namespace Relation {
     cloudType: false,
     treeType: true,
     attributes: [],
+    order: true
   };
   RelationRules[RelationEnums.Type.Identification] = {
     label: "Identification",
@@ -216,6 +236,7 @@ export namespace Relation {
     cloudType: false,
     treeType: false,
     attributes: [EntityEnums.Certainty],
+    order: true
   };
   RelationRules[RelationEnums.Type.Implication] = {
     label: "Implication",
@@ -228,6 +249,7 @@ export namespace Relation {
     cloudType: false,
     treeType: true,
     attributes: [],
+    order: true
   };
   RelationRules[RelationEnums.Type.SubjectSemantics] = {
     label: "Subject Semantics",
@@ -240,6 +262,7 @@ export namespace Relation {
     cloudType: false,
     treeType: false,
     attributes: [],
+    order: true
   };
   RelationRules[RelationEnums.Type.Actant1Semantics] = {
     label: "Actant1 Semantics",
@@ -252,6 +275,7 @@ export namespace Relation {
     cloudType: false,
     treeType: false,
     attributes: [],
+    order: true
   };
   RelationRules[RelationEnums.Type.Actant2Semantics] = {
     label: "Actant2 Semantics",
@@ -264,6 +288,7 @@ export namespace Relation {
     cloudType: false,
     treeType: false,
     attributes: [],
+    order: true
   };
   RelationRules[RelationEnums.Type.Related] = {
     label: "Related",
@@ -274,5 +299,6 @@ export namespace Relation {
     cloudType: false,
     treeType: false,
     attributes: [],
+    order: true
   };
 }

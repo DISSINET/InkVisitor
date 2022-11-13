@@ -48,7 +48,7 @@ export default Router()
 
       await request.db.lock();
 
-      model.entities = await Entity.findEntitiesByIds(request.db.connection, model.entityIds)
+      model.entities = await Entity.findEntitiesByIds(request.db.connection, model.entityIds);
       if (model.entities.length !== model.entityIds.length) {
         throw new ModelNotValidError("entity(ies) not found");
       }
@@ -134,7 +134,7 @@ export default Router()
         throw new ModelNotValidError("");
       }
 
-      const entities = await Entity.findEntitiesByIds(request.db.connection, model.entityIds)
+      const entities = await Entity.findEntitiesByIds(request.db.connection, model.entityIds);
       if (entities.length !== model.entityIds.length) {
         throw new ModelNotValidError("entity(ies) not found");
       }
@@ -144,8 +144,12 @@ export default Router()
       }
 
       await model.beforeSave(request);
+      const updateData: { [key: string]: unknown; } = { ...data, entityIds: model.entityIds };
+      if (model.order !== undefined) {
+        updateData.order = model.order;
+      }
 
-      const result = await model.update(request.db.connection, { ...data, entityIds: model.entityIds });
+      const result = await model.update(request.db.connection, updateData);
 
       if (result.replaced || result.unchanged) {
         await model.afterSave(request);
