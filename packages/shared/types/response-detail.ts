@@ -3,7 +3,7 @@
  */
 
 import { IEntity, Relation, IResponseEntity, IStatement } from ".";
-import { EntityEnums } from "../enums";
+import { EntityEnums, RelationEnums } from "../enums";
 import {
   IStatementClassification,
   IStatementIdentification,
@@ -19,8 +19,44 @@ export interface IResponseDetail extends IResponseEntity {
   usedInStatementClassifications: IResponseUsedInStatementClassification[]; // statement.data.actants[].classifications + from usedInStatements field if actant.entityId = detailId
 
   usedAsTemplate?: string[];
-  relations: Relation.IRelation[];
+  
+  relations: {
+    [RelationEnums.Type.Superclass]: IResponseDetailRelationType<RelationEnums.Type.Superclass>,
+    [RelationEnums.Type.SuperordinateLocation]: IResponseDetailRelationType<RelationEnums.Type.SuperordinateLocation>,
+    [RelationEnums.Type.Synonym]: IResponseDetailRelationType<RelationEnums.Type.Synonym>,
+    [RelationEnums.Type.Antonym]: IResponseDetailRelationType<RelationEnums.Type.Antonym>,
+    [RelationEnums.Type.Holonym]: IResponseDetailRelationType<RelationEnums.Type.Holonym>,
+    [RelationEnums.Type.PropertyReciprocal]: IResponseDetailRelationType<RelationEnums.Type.PropertyReciprocal>,
+    [RelationEnums.Type.SubjectActant1Reciprocal]: IResponseDetailRelationType<RelationEnums.Type.SubjectActant1Reciprocal>,
+    [RelationEnums.Type.ActionEventEquivalent]: IResponseDetailRelationType<RelationEnums.Type.ActionEventEquivalent>,
+    [RelationEnums.Type.Classification]: IResponseDetailRelationType<RelationEnums.Type.Classification>,
+    [RelationEnums.Type.Identification]: IResponseDetailRelationType<RelationEnums.Type.Identification>,
+    [RelationEnums.Type.Implication]: IResponseDetailRelationType<RelationEnums.Type.Implication>,
+    [RelationEnums.Type.SubjectSemantics]: IResponseDetailRelationType<RelationEnums.Type.SubjectSemantics>,
+    [RelationEnums.Type.Actant1Semantics]: IResponseDetailRelationType<RelationEnums.Type.Actant1Semantics>,
+    [RelationEnums.Type.Actant2Semantics]: IResponseDetailRelationType<RelationEnums.Type.Actant2Semantics>,
+    [RelationEnums.Type.Related]: IResponseDetailRelationType<RelationEnums.Type.Related>,
+  };
 }
+
+
+//1st solutions
+// export interface IResponseDetailRelationType<T> {
+//   list: Relation.IRelation[];
+//   inversedList?: Relation.IRelation[];
+//   trees?: IRelationConnection<T>[]
+// }
+
+//2nd solutions
+export interface IResponseDetailRelationType<T> {
+  connections: IRelationConnection<T>[];
+  iConnections?: IRelationConnection<T>[];
+}
+
+export interface IRelationConnection<T> extends Relation.IRelation {
+  subtrees?: IRelationConnection<T>[]
+}
+
 
 export interface IResponseUsedInStatement<PositionEnum> {
   statement: IStatement;

@@ -7,7 +7,7 @@ export namespace EntityTooltip {
 
     // C, A
     superclassTrees: ISuperclassTree[];
-    // C
+    // C, A
     synonymCloud?: ISynonymCloud;
     superordinateLocationTrees: ISuperordinateLocationTree[];
     identifications: IIdentifications;

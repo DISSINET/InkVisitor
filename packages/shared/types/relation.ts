@@ -86,7 +86,7 @@ export namespace Relation {
 
   export type RelationRule = {
     label: string;
-    inverseLabel: string;
+    inverseLabel: false | string;
     allowedEntitiesPattern: EntityEnums.Class[][];
     allowedSameEntityClassesOnly: boolean;
     asymmetrical: boolean;
@@ -131,7 +131,7 @@ export namespace Relation {
   };
   RelationRules[RelationEnums.Type.Synonym] = {
     label: "Synonym",
-    inverseLabel: "",
+    inverseLabel: false,
     allowedEntitiesPattern: [
       [EntityEnums.Class.Action],
       [EntityEnums.Class.Concept],
@@ -146,7 +146,7 @@ export namespace Relation {
   };
   RelationRules[RelationEnums.Type.Antonym] = {
     label: "Antonym",
-    inverseLabel: "",
+    inverseLabel: false,
     allowedEntitiesPattern: [
       [EntityEnums.Class.Action, EntityEnums.Class.Action],
       [EntityEnums.Class.Concept, EntityEnums.Class.Concept],
@@ -175,7 +175,7 @@ export namespace Relation {
   };
   RelationRules[RelationEnums.Type.PropertyReciprocal] = {
     label: "Property Reciprocal",
-    inverseLabel: "",
+    inverseLabel: false,
     allowedEntitiesPattern: [
       [EntityEnums.Class.Concept, EntityEnums.Class.Concept],
     ],
@@ -189,7 +189,7 @@ export namespace Relation {
   };
   RelationRules[RelationEnums.Type.SubjectActant1Reciprocal] = {
     label: "Subject/Actant1 Reciprocal",
-    inverseLabel: "",
+    inverseLabel: false,
     allowedEntitiesPattern: [
       [EntityEnums.Class.Action, EntityEnums.Class.Action],
     ],
@@ -203,7 +203,7 @@ export namespace Relation {
   };
   RelationRules[RelationEnums.Type.ActionEventEquivalent] = {
     label: "Action/Event Equivalent",
-    inverseLabel: "",
+    inverseLabel: false,
     allowedEntitiesPattern: [
       [EntityEnums.Class.Action, EntityEnums.Class.Concept],
     ],
@@ -239,7 +239,7 @@ export namespace Relation {
   };
   RelationRules[RelationEnums.Type.Identification] = {
     label: "Identification",
-    inverseLabel: "",
+    inverseLabel: false,
     allowedEntitiesPattern: [], // any combination is allowed
     allowedSameEntityClassesOnly: false,
     asymmetrical: false,
@@ -279,7 +279,7 @@ export namespace Relation {
   };
   RelationRules[RelationEnums.Type.Actant1Semantics] = {
     label: "Actant1 Semantics",
-    inverseLabel: "Used as Actant 1 Semantics",
+    inverseLabel: "Used as Actant1 semantics",
     allowedEntitiesPattern: [
       [EntityEnums.Class.Action, EntityEnums.Class.Concept],
     ],
@@ -293,7 +293,7 @@ export namespace Relation {
   };
   RelationRules[RelationEnums.Type.Actant2Semantics] = {
     label: "Actant2 Semantics",
-    inverseLabel: "Used as Actant 2 Semantics",
+    inverseLabel: "Used as Actant2 semantics",
     allowedEntitiesPattern: [
       [EntityEnums.Class.Action, EntityEnums.Class.Concept],
     ],
@@ -307,7 +307,7 @@ export namespace Relation {
   };
   RelationRules[RelationEnums.Type.Related] = {
     label: "Related",
-    inverseLabel: "",
+    inverseLabel: false,
     allowedEntitiesPattern: [], // any combination is allowed
     allowedSameEntityClassesOnly: false,
     asymmetrical: false,
