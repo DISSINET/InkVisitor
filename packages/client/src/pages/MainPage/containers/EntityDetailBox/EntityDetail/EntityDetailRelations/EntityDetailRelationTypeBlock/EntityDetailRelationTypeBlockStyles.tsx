@@ -40,3 +40,10 @@ export const StyledLabel = styled.div`
   color: ${({ theme }) => theme.color["info"]};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
 `;
+export const StyledRelationValues = styled.div`
+  margin-left: ${({ theme }) => theme.space[12]};
+`;
+export const StyledSuggesterWrapper = styled.div`
+  margin-top: ${({ theme }) => theme.space[1]};
+  margin-left: ${({ theme }) => theme.space[2]};
+`;

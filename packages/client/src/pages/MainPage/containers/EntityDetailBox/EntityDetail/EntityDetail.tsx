@@ -534,7 +534,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
               </StyledDetailSectionContent>
 
               {/* Inverted relations */}
-              <StyledDetailSectionHeader>
+              <StyledDetailSectionHeader style={{ marginTop: "2rem" }}>
                 Inverse relations
               </StyledDetailSectionHeader>
               <StyledDetailSectionContent>

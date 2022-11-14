@@ -1,3 +1,4 @@
+import { certaintyDict, entitiesDict } from "@shared/dictionaries";
 import { EntityEnums, RelationEnums } from "@shared/enums";
 import {
   IResponseDetail,
@@ -5,16 +6,16 @@ import {
   IResponseGeneric,
   Relation,
 } from "@shared/types";
+import api from "api";
 import { AxiosResponse } from "axios";
 import { Button, Cloud, Dropdown, LetterIcon } from "components";
 import { EntitySuggester, EntityTag } from "components/advanced";
 import React, { useEffect, useState } from "react";
+import { FaUnlink } from "react-icons/fa";
+import { TbArrowNarrowRight, TbArrowsHorizontal } from "react-icons/tb";
 import { UseMutationResult, useQuery } from "react-query";
-import {
-  StyledDetailContentRow,
-  StyledDetailContentRowLabel,
-  StyledDetailContentRowValue,
-} from "../../EntityDetailStyles";
+import theme from "Theme/theme";
+import { v4 as uuidv4 } from "uuid";
 import {
   StyledCloudEntityWrapper,
   StyledEntityWrapper,
@@ -23,12 +24,9 @@ import {
   StyledLabelSuggester,
   StyledRelation,
   StyledRelationType,
+  StyledRelationValues,
+  StyledSuggesterWrapper,
 } from "./EntityDetailRelationTypeBlockStyles";
-import { certaintyDict, entitiesDict } from "@shared/dictionaries";
-import { v4 as uuidv4 } from "uuid";
-import { FaUnlink } from "react-icons/fa";
-import api from "api";
-import { TbArrowNarrowRight, TbArrowsHorizontal } from "react-icons/tb";
 
 // relations for one type
 interface EntityDetailRelationTypeBlock {
@@ -297,13 +295,16 @@ export const EntityDetailRelationTypeBlock: React.FC<
     <>
       <StyledRelationType>
         <LetterIcon letter={relationType} color="info" />
-        <TbArrowsHorizontal />
-        {/* <TbArrowNarrowRight /> */}
+        {relationRule.inverseLabel.length ? (
+          <TbArrowsHorizontal color={theme.color["info"]} />
+        ) : (
+          <TbArrowNarrowRight color={theme.color["info"]} />
+        )}
       </StyledRelationType>
       <StyledLabelSuggester>
         <StyledLabel>{relationRule.label}</StyledLabel>
         {(isMultiple || relations.length < 1) && (
-          <div style={{ marginTop: "0.3rem", marginLeft: "0.5rem" }}>
+          <StyledSuggesterWrapper>
             <EntitySuggester
               categoryTypes={
                 getCategoryTypes() ||
@@ -318,16 +319,16 @@ export const EntityDetailRelationTypeBlock: React.FC<
               }}
               excludedActantIds={usedEntityIds}
             />
-          </div>
+          </StyledSuggesterWrapper>
         )}
       </StyledLabelSuggester>
-      <div>
+      <StyledRelationValues>
         {relations.map((relation, key) =>
           isCloudType
             ? renderCloudRelation(relation, key)
             : renderNonCloudRelation(relation, key)
         )}
-      </div>
+      </StyledRelationValues>
     </>
   );
 };
