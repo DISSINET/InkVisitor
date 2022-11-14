@@ -58,7 +58,6 @@ export const EntityDetailRelationsSection: React.FC<
 
   const { relations } = entity;
 
-  // TODO: move to useMemo!
   const allEntityIds = relations.map((r) => r.entityIds).flat(1);
   const noDuplicates = [...new Set(allEntityIds)].filter((id) => id.length > 0);
 
@@ -66,7 +65,6 @@ export const EntityDetailRelationsSection: React.FC<
     ["relation-entities", noDuplicates],
     async () => {
       const res = await api.entitiesSearch({ entityIds: noDuplicates });
-      // TODO: set to redux
       return res.data;
     },
     {

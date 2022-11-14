@@ -27,3 +27,12 @@ export const StyledGrid = styled.div<StyledGrid>`
       hasAttribute ? "14rem" : ""};
   max-width: 100%;
 `;
+export const StyledRelationType = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+export const StyledRelationTypeBlock = styled.div`
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  grid-gap: ${({ theme }) => theme.space[2]};
+`;

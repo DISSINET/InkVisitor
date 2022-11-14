@@ -6,7 +6,7 @@ import {
   Relation,
 } from "@shared/types";
 import { AxiosResponse } from "axios";
-import { Button, Cloud, Dropdown } from "components";
+import { Button, Cloud, Dropdown, LetterIcon } from "components";
 import { EntitySuggester, EntityTag } from "components/advanced";
 import React, { useEffect, useState } from "react";
 import { UseMutationResult, useQuery } from "react-query";
@@ -20,11 +20,13 @@ import {
   StyledEntityWrapper,
   StyledGrid,
   StyledRelation,
+  StyledRelationType,
 } from "./EntityDetailRelationTypeBlockStyles";
 import { certaintyDict, entitiesDict } from "@shared/dictionaries";
 import { v4 as uuidv4 } from "uuid";
 import { FaUnlink } from "react-icons/fa";
 import api from "api";
+import { TbArrowNarrowRight, TbArrowsHorizontal } from "react-icons/tb";
 
 // relations for one type
 interface EntityDetailRelationTypeBlock {
@@ -291,36 +293,41 @@ export const EntityDetailRelationTypeBlock: React.FC<
 
   return (
     <>
-      <StyledDetailContentRow>
-        <StyledDetailContentRowLabel>
-          {relationRule.label}
-        </StyledDetailContentRowLabel>
-        <StyledDetailContentRowValue>
-          {relations.map((relation, key) =>
-            isCloudType
-              ? renderCloudRelation(relation, key)
-              : renderNonCloudRelation(relation, key)
-          )}
-          {(isMultiple || relations.length < 1) && (
-            <div style={{ marginTop: "0.3rem" }}>
-              <EntitySuggester
-                categoryTypes={
-                  getCategoryTypes() ||
-                  ([EntityEnums.Extension.Empty] as [EntityEnums.ExtendedClass])
+      {/* <StyledDetailContentRow> */}
+      <StyledRelationType>
+        <LetterIcon letter={relationType} color="info" />
+        <TbArrowsHorizontal />
+        <TbArrowNarrowRight />
+      </StyledRelationType>
+      <StyledDetailContentRowLabel>
+        {relationRule.label}
+      </StyledDetailContentRowLabel>
+      <StyledDetailContentRowValue>
+        {relations.map((relation, key) =>
+          isCloudType
+            ? renderCloudRelation(relation, key)
+            : renderNonCloudRelation(relation, key)
+        )}
+        {(isMultiple || relations.length < 1) && (
+          <div style={{ marginTop: "0.3rem" }}>
+            <EntitySuggester
+              categoryTypes={
+                getCategoryTypes() ||
+                ([EntityEnums.Extension.Empty] as [EntityEnums.ExtendedClass])
+              }
+              onSelected={(selectedId: string) => {
+                if (isCloudType) {
+                  setTempCloudEntityId(selectedId);
+                } else {
+                  handleMultiSelected(selectedId);
                 }
-                onSelected={(selectedId: string) => {
-                  if (isCloudType) {
-                    setTempCloudEntityId(selectedId);
-                  } else {
-                    handleMultiSelected(selectedId);
-                  }
-                }}
-                excludedActantIds={usedEntityIds}
-              />
-            </div>
-          )}
-        </StyledDetailContentRowValue>
-      </StyledDetailContentRow>
+              }}
+              excludedActantIds={usedEntityIds}
+            />
+          </div>
+        )}
+      </StyledDetailContentRowValue>
+      {/* </StyledDetailContentRow> */}
     </>
   );
 };
