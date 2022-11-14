@@ -45,7 +45,7 @@ import {
 } from "./EntityDetailStyles";
 import { EntityDetailClassificationTable } from "./EntityDetailUsedInTable/EntityDetailClassificationTable/EntityDetailClassificationTable";
 import { EntityDetailIdentificationTable } from "./EntityDetailUsedInTable/EntityDetailIdentificationTable/EntityDetailIdentificationTable";
-import { EntityDetailInverseRelations } from "./EntityDetailInverseRelations/EntityDetailInverseRelations";
+import { EntityDetailInverseRelations } from "./EntityDetailRelations/EntityDetailInverseRelations/EntityDetailInverseRelations";
 import { EntityDetailMetaPropsTable } from "./EntityDetailUsedInTable/EntityDetailMetaPropsTable/EntityDetailMetaPropsTable";
 import { EntityDetailStatementPropsTable } from "./EntityDetailUsedInTable/EntityDetailStatementPropsTable/EntityDetailStatementPropsTable";
 import { EntityDetailStatementsTable } from "./EntityDetailUsedInTable/EntityDetailStatementsTable/EntityDetailStatementsTable";
@@ -531,14 +531,6 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
               <StyledDetailSectionHeader>Relations</StyledDetailSectionHeader>
               <StyledDetailSectionContent>
                 <EntityDetailRelations entity={entity} />
-              </StyledDetailSectionContent>
-
-              {/* Inverted relations */}
-              <StyledDetailSectionHeader style={{ marginTop: "2rem" }}>
-                Inverse relations
-              </StyledDetailSectionHeader>
-              <StyledDetailSectionContent>
-                <EntityDetailInverseRelations entity={entity} />
               </StyledDetailSectionContent>
             </StyledDetailSection>
 
