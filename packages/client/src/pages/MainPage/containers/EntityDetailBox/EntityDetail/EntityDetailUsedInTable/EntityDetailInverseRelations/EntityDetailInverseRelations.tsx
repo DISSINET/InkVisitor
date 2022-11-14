@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useQuery } from "react-query";
 import { getRelationInvertedRules } from "utils";
 import { EntityDetailInverseRelation } from "./EntityDetailInverseRelation/EntityDetailInverseRelation";
+import { StyledInverseRelations } from "./EntityDetailInverseRelationsStyles";
 
 interface EntityDetailInverseRelations {
   entity: IResponseDetail;
@@ -37,7 +38,7 @@ export const EntityDetailInverseRelations: React.FC<
   );
 
   return (
-    <div>
+    <StyledInverseRelations>
       {filteredRelationTypes.map((relationType, key) => {
         const filteredRelations = relations.filter(
           (r) => r.type === relationType && r.entityIds[0] !== entity.id
@@ -58,6 +59,6 @@ export const EntityDetailInverseRelations: React.FC<
           />
         );
       })}
-    </div>
+    </StyledInverseRelations>
   );
 };

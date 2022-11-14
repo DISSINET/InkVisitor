@@ -239,7 +239,7 @@ export namespace Relation {
   };
   RelationRules[RelationEnums.Type.Identification] = {
     label: "Identification",
-    inverseLabel: "Used as Implication",
+    inverseLabel: "",
     allowedEntitiesPattern: [], // any combination is allowed
     allowedSameEntityClassesOnly: false,
     asymmetrical: false,
@@ -251,7 +251,7 @@ export namespace Relation {
   };
   RelationRules[RelationEnums.Type.Implication] = {
     label: "Implication",
-    inverseLabel: "",
+    inverseLabel: "Used as Implication",
     allowedEntitiesPattern: [
       [EntityEnums.Class.Action, EntityEnums.Class.Action],
     ],
