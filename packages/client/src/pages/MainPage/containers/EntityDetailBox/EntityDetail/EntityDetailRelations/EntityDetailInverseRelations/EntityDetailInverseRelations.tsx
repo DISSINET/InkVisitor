@@ -3,6 +3,10 @@ import api from "api";
 import React, { useEffect, useState } from "react";
 import { useQuery } from "react-query";
 import { getRelationInvertedRules } from "utils";
+import {
+  StyledDetailSectionHeader,
+  StyledDetailSectionContent,
+} from "../../EntityDetailStyles";
 import { EntityDetailInverseRelation } from "./EntityDetailInverseRelation/EntityDetailInverseRelation";
 import { StyledInverseRelations } from "./EntityDetailInverseRelationsStyles";
 
@@ -38,27 +42,38 @@ export const EntityDetailInverseRelations: React.FC<
   );
 
   return (
-    <StyledInverseRelations>
-      {filteredRelationTypes.map((relationType, key) => {
-        const filteredRelations = relations.filter(
-          (r) => r.type === relationType && r.entityIds[0] !== entity.id
-        );
-        const relationRule: Relation.RelationRule =
-          Relation.RelationRules[relationType];
+    <>
+      {filteredRelationTypes.length > 0 && (
+        <>
+          <StyledDetailSectionHeader secondary>
+            Inverse relations
+          </StyledDetailSectionHeader>
+          <StyledDetailSectionContent>
+            <StyledInverseRelations>
+              {filteredRelationTypes.map((relationType, key) => {
+                const filteredRelations = relations.filter(
+                  (r) => r.type === relationType && r.entityIds[0] !== entity.id
+                );
+                const relationRule: Relation.RelationRule =
+                  Relation.RelationRules[relationType];
 
-        if (!relationRule.asymmetrical) return;
+                if (!relationRule.asymmetrical) return;
 
-        return (
-          <EntityDetailInverseRelation
-            key={key}
-            entity={entity}
-            relationRule={relationRule}
-            relationType={relationType}
-            relations={filteredRelations}
-            entities={entities}
-          />
-        );
-      })}
-    </StyledInverseRelations>
+                return (
+                  <EntityDetailInverseRelation
+                    key={key}
+                    entity={entity}
+                    relationRule={relationRule}
+                    relationType={relationType}
+                    relations={filteredRelations}
+                    entities={entities}
+                  />
+                );
+              })}
+            </StyledInverseRelations>
+          </StyledDetailSectionContent>
+        </>
+      )}
+    </>
   );
 };
