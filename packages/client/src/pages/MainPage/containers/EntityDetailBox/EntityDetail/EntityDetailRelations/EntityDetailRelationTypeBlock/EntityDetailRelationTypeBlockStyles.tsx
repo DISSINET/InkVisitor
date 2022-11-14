@@ -30,9 +30,13 @@ export const StyledGrid = styled.div<StyledGrid>`
 export const StyledRelationType = styled.div`
   display: flex;
   flex-direction: column;
+  align-items: center;
 `;
-export const StyledRelationTypeBlock = styled.div`
-  display: grid;
-  grid-template-columns: auto auto 1fr;
-  grid-gap: ${({ theme }) => theme.space[2]};
+export const StyledLabelSuggester = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+export const StyledLabel = styled.div`
+  color: ${({ theme }) => theme.color["info"]};
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
 `;

@@ -19,6 +19,8 @@ import {
   StyledCloudEntityWrapper,
   StyledEntityWrapper,
   StyledGrid,
+  StyledLabel,
+  StyledLabelSuggester,
   StyledRelation,
   StyledRelationType,
 } from "./EntityDetailRelationTypeBlockStyles";
@@ -293,23 +295,15 @@ export const EntityDetailRelationTypeBlock: React.FC<
 
   return (
     <>
-      {/* <StyledDetailContentRow> */}
       <StyledRelationType>
         <LetterIcon letter={relationType} color="info" />
         <TbArrowsHorizontal />
-        <TbArrowNarrowRight />
+        {/* <TbArrowNarrowRight /> */}
       </StyledRelationType>
-      <StyledDetailContentRowLabel>
-        {relationRule.label}
-      </StyledDetailContentRowLabel>
-      <StyledDetailContentRowValue>
-        {relations.map((relation, key) =>
-          isCloudType
-            ? renderCloudRelation(relation, key)
-            : renderNonCloudRelation(relation, key)
-        )}
+      <StyledLabelSuggester>
+        <StyledLabel>{relationRule.label}</StyledLabel>
         {(isMultiple || relations.length < 1) && (
-          <div style={{ marginTop: "0.3rem" }}>
+          <div style={{ marginTop: "0.3rem", marginLeft: "0.5rem" }}>
             <EntitySuggester
               categoryTypes={
                 getCategoryTypes() ||
@@ -326,8 +320,14 @@ export const EntityDetailRelationTypeBlock: React.FC<
             />
           </div>
         )}
-      </StyledDetailContentRowValue>
-      {/* </StyledDetailContentRow> */}
+      </StyledLabelSuggester>
+      <div>
+        {relations.map((relation, key) =>
+          isCloudType
+            ? renderCloudRelation(relation, key)
+            : renderNonCloudRelation(relation, key)
+        )}
+      </div>
     </>
   );
 };

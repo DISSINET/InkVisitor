@@ -4,14 +4,15 @@ import React, { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { getEntityRelationRules } from "utils";
 import { StyledDetailForm } from "../EntityDetailStyles";
+import { StyledRelationsGrid } from "./EntityDetailRelationsStyles";
 import { EntityDetailRelationTypeBlock } from "./EntityDetailRelationTypeBlock/EntityDetailRelationTypeBlock";
 
-interface EntityDetailRelationsSection {
+interface EntityDetailRelations {
   entity: IResponseDetail;
 }
-export const EntityDetailRelationsSection: React.FC<
-  EntityDetailRelationsSection
-> = ({ entity }) => {
+export const EntityDetailRelations: React.FC<EntityDetailRelations> = ({
+  entity,
+}) => {
   const queryClient = useQueryClient();
   const [filteredRelationTypes, setFilteredRelationTypes] = useState<string[]>(
     []
@@ -73,7 +74,7 @@ export const EntityDetailRelationsSection: React.FC<
   );
 
   return (
-    <StyledDetailForm>
+    <StyledRelationsGrid>
       {filteredRelationTypes.map((relationType, key) => {
         const filteredRelations = relations.filter(
           (r) => r.type === relationType
@@ -95,6 +96,6 @@ export const EntityDetailRelationsSection: React.FC<
           />
         );
       })}
-    </StyledDetailForm>
+    </StyledRelationsGrid>
   );
 };
