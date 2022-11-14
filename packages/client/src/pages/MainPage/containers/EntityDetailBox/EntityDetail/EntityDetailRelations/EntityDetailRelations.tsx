@@ -1,22 +1,18 @@
-import { EntityEnums, RelationEnums } from "@shared/enums";
-import { IResponseDetail } from "@shared/types";
-import { Relation } from "@shared/types/relation";
+import { IResponseDetail, Relation } from "@shared/types";
 import api from "api";
 import React, { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "react-query";
+import { getEntityRelationRules } from "utils";
 import { StyledDetailForm } from "../EntityDetailStyles";
+import { StyledRelationsGrid } from "./EntityDetailRelationsStyles";
 import { EntityDetailRelationTypeBlock } from "./EntityDetailRelationTypeBlock/EntityDetailRelationTypeBlock";
 
-const restrictedIClasses = [
-  EntityEnums.Class.Action,
-  EntityEnums.Class.Concept,
-];
-interface EntityDetailRelationsSection {
+interface EntityDetailRelations {
   entity: IResponseDetail;
 }
-export const EntityDetailRelationsSection: React.FC<
-  EntityDetailRelationsSection
-> = ({ entity }) => {
+export const EntityDetailRelations: React.FC<EntityDetailRelations> = ({
+  entity,
+}) => {
   const queryClient = useQueryClient();
   const [filteredRelationTypes, setFilteredRelationTypes] = useState<string[]>(
     []
@@ -57,39 +53,12 @@ export const EntityDetailRelationsSection: React.FC<
   );
 
   useEffect(() => {
-    const relationRules = Object.keys(Relation.RelationRules);
-    const filteredTypes = relationRules.filter((rule) => {
-      if (
-        !Relation.RelationRules[rule].allowedEntitiesPattern.length &&
-        !(
-          rule === RelationEnums.Type.Identification &&
-          restrictedIClasses.includes(entity.class)
-        )
-      ) {
-        return rule;
-      } else if (
-        !Relation.RelationRules[rule].asymmetrical &&
-        Relation.RelationRules[rule].allowedEntitiesPattern.some(
-          (pair) => pair[0] === entity.class
-        )
-      ) {
-        return rule;
-      } else if (
-        Relation.RelationRules[rule].asymmetrical &&
-        Relation.RelationRules[rule].allowedEntitiesPattern.some(
-          (pair) => pair[0] === entity.class
-        )
-      ) {
-        return rule;
-      }
-    });
-
+    const filteredTypes = getEntityRelationRules(entity.class);
     setFilteredRelationTypes(filteredTypes);
   }, [entity]);
 
   const { relations } = entity;
 
-  // TODO: move to useMemo!
   const allEntityIds = relations.map((r) => r.entityIds).flat(1);
   const noDuplicates = [...new Set(allEntityIds)].filter((id) => id.length > 0);
 
@@ -105,7 +74,7 @@ export const EntityDetailRelationsSection: React.FC<
   );
 
   return (
-    <StyledDetailForm>
+    <StyledRelationsGrid>
       {filteredRelationTypes.map((relationType, key) => {
         const filteredRelations = relations.filter(
           (r) => r.type === relationType
@@ -127,6 +96,6 @@ export const EntityDetailRelationsSection: React.FC<
           />
         );
       })}
-    </StyledDetailForm>
+    </StyledRelationsGrid>
   );
 };

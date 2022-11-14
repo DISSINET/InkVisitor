@@ -1,36 +1,38 @@
+import { certaintyDict, entitiesDict } from "@shared/dictionaries";
 import { EntityEnums, RelationEnums } from "@shared/enums";
 import {
   IResponseDetail,
   IResponseEntity,
   IResponseGeneric,
+  Relation,
 } from "@shared/types";
-import { Relation } from "@shared/types/relation";
+import api from "api";
 import { AxiosResponse } from "axios";
-import { Button, Cloud, Dropdown } from "components";
+import { Button, Cloud, Dropdown, LetterIcon } from "components";
 import { EntitySuggester, EntityTag } from "components/advanced";
 import React, { useEffect, useState } from "react";
+import { FaUnlink } from "react-icons/fa";
+import { TbArrowNarrowRight, TbArrowsHorizontal } from "react-icons/tb";
 import { UseMutationResult, useQuery } from "react-query";
-import {
-  StyledDetailContentRow,
-  StyledDetailContentRowLabel,
-  StyledDetailContentRowValue,
-} from "../../EntityDetailStyles";
+import theme from "Theme/theme";
+import { v4 as uuidv4 } from "uuid";
 import {
   StyledCloudEntityWrapper,
   StyledEntityWrapper,
   StyledGrid,
+  StyledLabel,
+  StyledLabelSuggester,
   StyledRelation,
+  StyledRelationType,
+  StyledRelationValues,
+  StyledSuggesterWrapper,
 } from "./EntityDetailRelationTypeBlockStyles";
-import { certaintyDict, entitiesDict } from "@shared/dictionaries";
-import { v4 as uuidv4 } from "uuid";
-import { FaUnlink } from "react-icons/fa";
-import api from "api";
 
 // relations for one type
 interface EntityDetailRelationTypeBlock {
   relations: Relation.IRelation[];
   relationType: string;
-  entities: IResponseEntity[] | undefined;
+  entities?: IResponseEntity[];
   relationCreateMutation: UseMutationResult<
     AxiosResponse<IResponseGeneric>,
     unknown,
@@ -71,6 +73,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
 }) => {
   const relationRule = Relation.RelationRules[relationType];
 
+  // For suggester
   const getCategoryTypes = (): EntityEnums.ExtendedClass[] | undefined => {
     const entitiesPattern = relationRule.allowedEntitiesPattern;
 
@@ -181,7 +184,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
     </StyledGrid>
   );
 
-  const unlinkButtonEnabled = (key: number) =>
+  const shouldBeRendered = (key: number) =>
     !relationRule.asymmetrical || (relationRule.asymmetrical && key > 0);
 
   const renderNonCloudRelation = (
@@ -194,13 +197,14 @@ export const EntityDetailRelationTypeBlock: React.FC<
           const relationEntity = entities?.find((e) => e.id === entityId);
           return (
             <React.Fragment key={key}>
-              {relationEntity && relationEntity.id !== entity.id && (
-                <StyledEntityWrapper key={key}>
-                  <EntityTag
-                    fullWidth
-                    entity={relationEntity}
-                    button={
-                      unlinkButtonEnabled(key) && (
+              {relationEntity &&
+                relationEntity.id !== entity.id &&
+                shouldBeRendered(key) && (
+                  <StyledEntityWrapper key={key}>
+                    <EntityTag
+                      fullWidth
+                      entity={relationEntity}
+                      button={
                         <Button
                           key="d"
                           icon={<FaUnlink />}
@@ -209,11 +213,10 @@ export const EntityDetailRelationTypeBlock: React.FC<
                           tooltip="unlink"
                           onClick={() => handleMultiRemove(relation.id)}
                         />
-                      )
-                    }
-                  />
-                </StyledEntityWrapper>
-              )}
+                      }
+                    />
+                  </StyledEntityWrapper>
+                )}
             </React.Fragment>
           );
         })}
@@ -290,36 +293,42 @@ export const EntityDetailRelationTypeBlock: React.FC<
 
   return (
     <>
-      <StyledDetailContentRow>
-        <StyledDetailContentRowLabel>
-          {relationRule.label}
-        </StyledDetailContentRowLabel>
-        <StyledDetailContentRowValue>
-          {relations.map((relation, key) =>
-            isCloudType
-              ? renderCloudRelation(relation, key)
-              : renderNonCloudRelation(relation, key)
-          )}
-          {(isMultiple || relations.length < 1) && (
-            <div style={{ marginTop: "0.3rem" }}>
-              <EntitySuggester
-                categoryTypes={
-                  getCategoryTypes() ||
-                  ([EntityEnums.Extension.Empty] as [EntityEnums.ExtendedClass])
+      <StyledRelationType>
+        <LetterIcon letter={relationType} color="info" />
+        {relationRule.inverseLabel.length ? (
+          <TbArrowsHorizontal color={theme.color["info"]} />
+        ) : (
+          <TbArrowNarrowRight color={theme.color["info"]} />
+        )}
+      </StyledRelationType>
+      <StyledLabelSuggester>
+        <StyledLabel>{relationRule.label}</StyledLabel>
+        {(isMultiple || relations.length < 1) && (
+          <StyledSuggesterWrapper>
+            <EntitySuggester
+              categoryTypes={
+                getCategoryTypes() ||
+                ([EntityEnums.Extension.Empty] as [EntityEnums.ExtendedClass])
+              }
+              onSelected={(selectedId: string) => {
+                if (isCloudType) {
+                  setTempCloudEntityId(selectedId);
+                } else {
+                  handleMultiSelected(selectedId);
                 }
-                onSelected={(selectedId: string) => {
-                  if (isCloudType) {
-                    setTempCloudEntityId(selectedId);
-                  } else {
-                    handleMultiSelected(selectedId);
-                  }
-                }}
-                excludedActantIds={usedEntityIds}
-              />
-            </div>
-          )}
-        </StyledDetailContentRowValue>
-      </StyledDetailContentRow>
+              }}
+              excludedActantIds={usedEntityIds}
+            />
+          </StyledSuggesterWrapper>
+        )}
+      </StyledLabelSuggester>
+      <StyledRelationValues>
+        {relations.map((relation, key) =>
+          isCloudType
+            ? renderCloudRelation(relation, key)
+            : renderNonCloudRelation(relation, key)
+        )}
+      </StyledRelationValues>
     </>
   );
 };

@@ -32,7 +32,7 @@ import { PropGroup } from "../../PropGroup/PropGroup";
 import { EntityDetailCreateTemplateModal } from "./EntityDetailCreateTemplateModal/EntityDetailCreateTemplateModal";
 import { EntityDetailFormSection } from "./EntityDetailFormSection/EntityDetailFormSection";
 import { EntityDetailHeaderRow } from "./EntityDetailHeaderRow/EntityDetailHeaderRow";
-import { EntityDetailRelationsSection } from "./EntityDetailRelationsSection/EntityDetailRelationsSection";
+import { EntityDetailRelations } from "./EntityDetailRelations/EntityDetailRelations";
 import {
   StyledDetailSection,
   StyledDetailSectionContent,
@@ -45,6 +45,7 @@ import {
 } from "./EntityDetailStyles";
 import { EntityDetailClassificationTable } from "./EntityDetailUsedInTable/EntityDetailClassificationTable/EntityDetailClassificationTable";
 import { EntityDetailIdentificationTable } from "./EntityDetailUsedInTable/EntityDetailIdentificationTable/EntityDetailIdentificationTable";
+import { EntityDetailInverseRelations } from "./EntityDetailInverseRelations/EntityDetailInverseRelations";
 import { EntityDetailMetaPropsTable } from "./EntityDetailUsedInTable/EntityDetailMetaPropsTable/EntityDetailMetaPropsTable";
 import { EntityDetailStatementPropsTable } from "./EntityDetailUsedInTable/EntityDetailStatementPropsTable/EntityDetailStatementPropsTable";
 import { EntityDetailStatementsTable } from "./EntityDetailUsedInTable/EntityDetailStatementsTable/EntityDetailStatementsTable";
@@ -525,10 +526,19 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
               </StyledDetailSectionContent>
             </StyledDetailSection>
 
+            {/* Relations */}
             <StyledDetailSection>
               <StyledDetailSectionHeader>Relations</StyledDetailSectionHeader>
               <StyledDetailSectionContent>
-                <EntityDetailRelationsSection entity={entity} />
+                <EntityDetailRelations entity={entity} />
+              </StyledDetailSectionContent>
+
+              {/* Inverted relations */}
+              <StyledDetailSectionHeader style={{ marginTop: "2rem" }}>
+                Inverse relations
+              </StyledDetailSectionHeader>
+              <StyledDetailSectionContent>
+                <EntityDetailInverseRelations entity={entity} />
               </StyledDetailSectionContent>
             </StyledDetailSection>
 
@@ -670,7 +680,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
                 />
               )}
 
-              {/* usedIn statement identification */}
+              {/* usedIn statement classification */}
               {!entity.isTemplate && (
                 <EntityDetailClassificationTable
                   title={{
