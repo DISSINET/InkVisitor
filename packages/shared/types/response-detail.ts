@@ -19,23 +19,23 @@ export interface IResponseDetail extends IResponseEntity {
   usedInStatementClassifications: IResponseUsedInStatementClassification[]; // statement.data.actants[].classifications + from usedInStatements field if actant.entityId = detailId
 
   usedAsTemplate?: string[];
-  
+
   relations: {
-    [RelationEnums.Type.Superclass]: IResponseDetailRelationType<RelationEnums.Type.Superclass>,
-    [RelationEnums.Type.SuperordinateLocation]: IResponseDetailRelationType<RelationEnums.Type.SuperordinateLocation>,
-    [RelationEnums.Type.Synonym]: IResponseDetailRelationType<RelationEnums.Type.Synonym>,
-    [RelationEnums.Type.Antonym]: IResponseDetailRelationType<RelationEnums.Type.Antonym>,
-    [RelationEnums.Type.Holonym]: IResponseDetailRelationType<RelationEnums.Type.Holonym>,
-    [RelationEnums.Type.PropertyReciprocal]: IResponseDetailRelationType<RelationEnums.Type.PropertyReciprocal>,
-    [RelationEnums.Type.SubjectActant1Reciprocal]: IResponseDetailRelationType<RelationEnums.Type.SubjectActant1Reciprocal>,
-    [RelationEnums.Type.ActionEventEquivalent]: IResponseDetailRelationType<RelationEnums.Type.ActionEventEquivalent>,
-    [RelationEnums.Type.Classification]: IResponseDetailRelationType<RelationEnums.Type.Classification>,
-    [RelationEnums.Type.Identification]: IResponseDetailRelationType<RelationEnums.Type.Identification>,
-    [RelationEnums.Type.Implication]: IResponseDetailRelationType<RelationEnums.Type.Implication>,
-    [RelationEnums.Type.SubjectSemantics]: IResponseDetailRelationType<RelationEnums.Type.SubjectSemantics>,
-    [RelationEnums.Type.Actant1Semantics]: IResponseDetailRelationType<RelationEnums.Type.Actant1Semantics>,
-    [RelationEnums.Type.Actant2Semantics]: IResponseDetailRelationType<RelationEnums.Type.Actant2Semantics>,
-    [RelationEnums.Type.Related]: IResponseDetailRelationType<RelationEnums.Type.Related>,
+    [RelationEnums.Type.Superclass]?: IResponseDetailRelationType<Relation.ISuperclass>,
+    [RelationEnums.Type.SuperordinateLocation]?: IResponseDetailRelationType<Relation.ISuperordinateLocation>,
+    [RelationEnums.Type.Synonym]?: IResponseDetailRelationType<Relation.ISynonym>,
+    [RelationEnums.Type.Antonym]?: IResponseDetailRelationType<Relation.IAntonym>,
+    [RelationEnums.Type.Holonym]?: IResponseDetailRelationType<Relation.IHolonym>,
+    [RelationEnums.Type.PropertyReciprocal]?: IResponseDetailRelationType<Relation.IPropertyReciprocal>,
+    [RelationEnums.Type.SubjectActant1Reciprocal]?: IResponseDetailRelationType<Relation.ISubjectActant1Reciprocal>,
+    [RelationEnums.Type.ActionEventEquivalent]?: IResponseDetailRelationType<Relation.IActionEventEquivalent>,
+    [RelationEnums.Type.Classification]?: IResponseDetailRelationType<Relation.IClassification>,
+    [RelationEnums.Type.Identification]?: IResponseDetailRelationType<Relation.IIdentification>,
+    [RelationEnums.Type.Implication]?: IResponseDetailRelationType<Relation.IImplication>,
+    [RelationEnums.Type.SubjectSemantics]?: IResponseDetailRelationType<Relation.ISubjectSemantics>,
+    [RelationEnums.Type.Actant1Semantics]?: IResponseDetailRelationType<Relation.IActant1Semantics>,
+    [RelationEnums.Type.Actant2Semantics]?: IResponseDetailRelationType<Relation.IActant2Semantics>,
+    [RelationEnums.Type.Related]?: IResponseDetailRelationType<Relation.IRelated>,
   };
 }
 
@@ -48,15 +48,20 @@ export interface IResponseDetail extends IResponseEntity {
 // }
 
 //2nd solutions
-export interface IResponseDetailRelationType<T> {
+export interface IResponseDetailRelationType<T extends Relation.IRelation> {
   connections: IRelationConnection<T>[];
   iConnections?: IRelationConnection<T>[];
 }
+interface g {
+  ds: String;
+}
+interface ttt<T extends {}> extends { ds: String } {
 
-export interface IRelationConnection<T> extends Relation.IRelation {
-  subtrees?: IRelationConnection<T>[]
 }
 
+export type IRelationConnection<T extends Relation.IRelation> = T & {
+  subtrees?: IRelationConnection<T>[];
+};
 
 export interface IResponseUsedInStatement<PositionEnum> {
   statement: IStatement;
