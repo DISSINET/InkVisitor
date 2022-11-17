@@ -609,7 +609,6 @@ export const StatementListBox: React.FC = () => {
     ];
   }, [data, statementId, rowsExpanded]);
 
-  // TODO: check what's up! if needed wrap to useMemo
   statements.sort((a, b) =>
     a.data.territory && b.data.territory
       ? a.data.territory.order > b.data.territory.order
