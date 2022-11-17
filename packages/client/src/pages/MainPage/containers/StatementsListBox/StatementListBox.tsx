@@ -609,7 +609,6 @@ export const StatementListBox: React.FC = () => {
     ];
   }, [data, statementId, rowsExpanded]);
 
-  // TODO: check what's up! if needed wrap to useMemo
   statements.sort((a, b) =>
     a.data.territory && b.data.territory
       ? a.data.territory.order > b.data.territory.order
@@ -666,12 +665,16 @@ export const StatementListBox: React.FC = () => {
         </StyledTableWrapper>
       ) : (
         <>
-          <StyledEmptyState>
-            <BsInfoCircle size="23" />
-          </StyledEmptyState>
-          <StyledEmptyState>
-            {"No territory selected yet. Pick one from the territory tree"}
-          </StyledEmptyState>
+          {!territoryId && (
+            <>
+              <StyledEmptyState>
+                <BsInfoCircle size="23" />
+              </StyledEmptyState>
+              <StyledEmptyState>
+                {"No territory selected yet. Pick one from the territory tree"}
+              </StyledEmptyState>
+            </>
+          )}
         </>
       )}
 
