@@ -666,12 +666,16 @@ export const StatementListBox: React.FC = () => {
         </StyledTableWrapper>
       ) : (
         <>
-          <StyledEmptyState>
-            <BsInfoCircle size="23" />
-          </StyledEmptyState>
-          <StyledEmptyState>
-            {"No territory selected yet. Pick one from the territory tree"}
-          </StyledEmptyState>
+          {!territoryId && (
+            <>
+              <StyledEmptyState>
+                <BsInfoCircle size="23" />
+              </StyledEmptyState>
+              <StyledEmptyState>
+                {"No territory selected yet. Pick one from the territory tree"}
+              </StyledEmptyState>
+            </>
+          )}
         </>
       )}
 
