@@ -52,12 +52,6 @@ export interface IResponseDetailRelationType<T extends Relation.IRelation> {
   connections: IRelationConnection<T>[];
   iConnections?: IRelationConnection<T>[];
 }
-interface g {
-  ds: String;
-}
-interface ttt<T extends {}> extends { ds: String } {
-
-}
 
 export type IRelationConnection<T extends Relation.IRelation> = T & {
   subtrees?: IRelationConnection<T>[];

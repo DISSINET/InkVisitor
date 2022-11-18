@@ -1,4 +1,4 @@
-import { EntityEnums, UserEnums } from "@shared/enums";
+import { EntityEnums, RelationEnums, UserEnums } from "@shared/enums";
 import {
   IEntity,
   IProp,
@@ -14,6 +14,7 @@ import Statement from "@models/statement/statement";
 import { nonenumerable } from "@common/decorators";
 import { Connection } from "rethinkdb-ts";
 import {
+  IResponseDetailRelationType,
   IResponseUsedInStatementClassification,
   IResponseUsedInStatementIdentification,
   IResponseUsedInStatementProps,
@@ -115,7 +116,23 @@ export class ResponseEntityDetail
   usedInStatementIdentifications: IResponseUsedInStatementIdentification[];
   usedInStatementClassifications: IResponseUsedInStatementClassification[];
 
-  relations: RelationTypes.IRelation[] = [];
+  relations: {
+    [RelationEnums.Type.Superclass]?: IResponseDetailRelationType<RelationTypes.ISuperclass>,
+    [RelationEnums.Type.SuperordinateLocation]?: IResponseDetailRelationType<RelationTypes.ISuperordinateLocation>,
+    [RelationEnums.Type.Synonym]?: IResponseDetailRelationType<RelationTypes.ISynonym>,
+    [RelationEnums.Type.Antonym]?: IResponseDetailRelationType<RelationTypes.IAntonym>,
+    [RelationEnums.Type.Holonym]?: IResponseDetailRelationType<RelationTypes.IHolonym>,
+    [RelationEnums.Type.PropertyReciprocal]?: IResponseDetailRelationType<RelationTypes.IPropertyReciprocal>,
+    [RelationEnums.Type.SubjectActant1Reciprocal]?: IResponseDetailRelationType<RelationTypes.ISubjectActant1Reciprocal>,
+    [RelationEnums.Type.ActionEventEquivalent]?: IResponseDetailRelationType<RelationTypes.IActionEventEquivalent>,
+    [RelationEnums.Type.Classification]?: IResponseDetailRelationType<RelationTypes.IClassification>,
+    [RelationEnums.Type.Identification]?: IResponseDetailRelationType<RelationTypes.IIdentification>,
+    [RelationEnums.Type.Implication]?: IResponseDetailRelationType<RelationTypes.IImplication>,
+    [RelationEnums.Type.SubjectSemantics]?: IResponseDetailRelationType<RelationTypes.ISubjectSemantics>,
+    [RelationEnums.Type.Actant1Semantics]?: IResponseDetailRelationType<RelationTypes.IActant1Semantics>,
+    [RelationEnums.Type.Actant2Semantics]?: IResponseDetailRelationType<RelationTypes.IActant2Semantics>,
+    [RelationEnums.Type.Related]?: IResponseDetailRelationType<RelationTypes.IRelated>,
+  };
 
   constructor(entity: Entity) {
     super(entity);
