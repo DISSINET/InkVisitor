@@ -4,12 +4,21 @@ import { IResponseEntity, IResponseGeneric, Relation } from "@shared/types";
 import { AxiosResponse } from "axios";
 import { Button, Dropdown } from "components";
 import { EntityTag } from "components/advanced";
-import React from "react";
-import { FaUnlink } from "react-icons/fa";
+import React, { useRef } from "react";
+import {
+  DragSourceMonitor,
+  DropTargetMonitor,
+  useDrag,
+  useDrop,
+} from "react-dnd";
+import { FaGripVertical, FaUnlink } from "react-icons/fa";
 import { UseMutationResult } from "react-query";
+import { DragItem, ItemTypes } from "types";
+import { dndHoverFn } from "utils";
 import {
   StyledEntityWrapper,
   StyledGrid,
+  StyledGridColumn,
   StyledRelation,
 } from "../EntityDetailRelationTypeBlockStyles";
 
@@ -34,6 +43,10 @@ interface EntityDetailRelationRow {
     string,
     unknown
   >;
+
+  isMultiple: boolean;
+  moveRow: (dragIndex: number, hoverIndex: number) => void;
+  index: number;
 }
 export const EntityDetailRelationRow: React.FC<EntityDetailRelationRow> = ({
   relation,
@@ -43,7 +56,14 @@ export const EntityDetailRelationRow: React.FC<EntityDetailRelationRow> = ({
   entities,
   relationUpdateMutation,
   relationDeleteMutation,
+
+  isMultiple,
+  moveRow,
+  index,
 }) => {
+  const dropRef = useRef<HTMLTableRowElement>(null);
+  const dragRef = useRef<HTMLTableCellElement>(null);
+
   const handleMultiRemove = (relationId: string) => {
     relationDeleteMutation.mutate(relationId);
   };
@@ -73,20 +93,61 @@ export const EntityDetailRelationRow: React.FC<EntityDetailRelationRow> = ({
     </div>
   );
 
+  const [, drop] = useDrop({
+    accept: ItemTypes.ACTION_ROW,
+    hover(item: DragItem, monitor: DropTargetMonitor) {
+      dndHoverFn(item, index, monitor, dropRef, moveRow);
+    },
+  });
+
+  const [{ isDragging }, drag, preview] = useDrag({
+    item: {
+      type: ItemTypes.ACTION_ROW,
+      index,
+      id: relation.id.toString(),
+    },
+    collect: (monitor: DragSourceMonitor) => ({
+      isDragging: monitor.isDragging(),
+    }),
+    end: (item: DragItem | undefined, monitor: DragSourceMonitor) => {
+      // TODO: api call
+      // if (item) updateOrderFn();
+    },
+  });
+
+  const opacity = isDragging ? 0.2 : 1;
+
+  preview(drop(dropRef));
+  drag(dragRef);
+
   return (
-    <StyledGrid hasAttribute={relationRule.attributes.length > 0}>
-      <StyledRelation>
-        {relation.entityIds.map((relationEntityId, key) => {
-          const relationEntity = entities?.find(
-            (e) => e.id === relationEntityId
-          );
-          return (
-            <React.Fragment key={key}>
-              {relationEntity &&
-                relationEntity.id !== entityId &&
-                shouldBeRendered(key) && (
-                  <StyledEntityWrapper key={key}>
-                    {/* <FaGripVertical /> */}
+    <StyledGrid
+      ref={dropRef}
+      style={{ opacity }}
+      hasAttribute={relationRule.attributes.length > 0}
+      isMultiple={isMultiple}
+    >
+      {relation.entityIds.map((relationEntityId, key) => {
+        const relationEntity = entities?.find((e) => e.id === relationEntityId);
+        return (
+          <React.Fragment key={key}>
+            {relationEntity &&
+              relationEntity.id !== entityId &&
+              shouldBeRendered(key) && (
+                <>
+                  {isMultiple ? (
+                    <StyledGridColumn
+                      ref={dragRef}
+                      style={{
+                        cursor: "move",
+                      }}
+                    >
+                      <FaGripVertical />
+                    </StyledGridColumn>
+                  ) : (
+                    <div />
+                  )}
+                  <StyledGridColumn key={key}>
                     <EntityTag
                       fullWidth
                       entity={relationEntity}
@@ -101,12 +162,12 @@ export const EntityDetailRelationRow: React.FC<EntityDetailRelationRow> = ({
                         />
                       }
                     />
-                  </StyledEntityWrapper>
-                )}
-            </React.Fragment>
-          );
-        })}
-      </StyledRelation>
+                  </StyledGridColumn>
+                </>
+              )}
+          </React.Fragment>
+        );
+      })}
 
       {/* Certainty (Identification) */}
       {relationType === RelationEnums.Type.Identification &&

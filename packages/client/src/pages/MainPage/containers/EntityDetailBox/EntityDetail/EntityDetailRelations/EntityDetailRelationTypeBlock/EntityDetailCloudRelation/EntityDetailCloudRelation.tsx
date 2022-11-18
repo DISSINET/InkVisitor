@@ -54,7 +54,7 @@ export const EntityDetailCloudRelation: React.FC<EntityDetailCloudRelation> = ({
   };
 
   return (
-    <StyledGrid>
+    <div style={{ display: "grid" }}>
       {relation.entityIds.length > 0 && (
         <Cloud onUnlink={() => handleCloudRemove()}>
           <StyledRelation>
@@ -75,6 +75,6 @@ export const EntityDetailCloudRelation: React.FC<EntityDetailCloudRelation> = ({
           </StyledRelation>
         </Cloud>
       )}
-    </StyledGrid>
+    </div>
   );
 };

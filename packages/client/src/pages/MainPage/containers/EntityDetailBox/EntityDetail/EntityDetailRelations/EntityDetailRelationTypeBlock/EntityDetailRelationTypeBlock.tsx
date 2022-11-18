@@ -10,7 +10,8 @@ import api from "api";
 import { AxiosResponse } from "axios";
 import { LetterIcon } from "components";
 import { EntitySuggester } from "components/advanced";
-import React, { useEffect, useState } from "react";
+import update from "immutability-helper";
+import React, { useCallback, useEffect, useState } from "react";
 import { TbArrowNarrowRight, TbArrowsHorizontal } from "react-icons/tb";
 import { UseMutationResult, useQuery } from "react-query";
 import theme from "Theme/theme";
@@ -179,6 +180,23 @@ export const EntityDetailRelationTypeBlock: React.FC<EntityDetailRelationTypeBlo
       }
     };
 
+    const [currentRelations, setCurrentRelations] = useState(relations);
+
+    const moveRow = useCallback(
+      (dragIndex: number, hoverIndex: number) => {
+        const dragRecord = currentRelations[dragIndex];
+        setCurrentRelations(
+          update(currentRelations, {
+            $splice: [
+              [dragIndex, 1],
+              [hoverIndex, 0, dragRecord],
+            ],
+          })
+        );
+      },
+      [currentRelations]
+    );
+
     return (
       <>
         {/* Type column */}
@@ -214,47 +232,33 @@ export const EntityDetailRelationTypeBlock: React.FC<EntityDetailRelationTypeBlo
         </StyledLabelSuggester>
         {/* Values column */}
         <StyledRelationValues>
-          {isMultiple
-            ? relations
-                .sort((a, b) =>
-                  a.order && b.order ? (a.order > b.order ? -1 : 1) : 0
-                )
-                .map((relation, key) => (
-                  <EntityDetailRelationRow
-                    key={key}
-                    relation={relation}
-                    entities={entities}
-                    entityId={entity.id}
-                    relationRule={relationRule}
-                    relationType={relationType as RelationEnums.Type}
-                    relationUpdateMutation={relationUpdateMutation}
-                    relationDeleteMutation={relationDeleteMutation}
-                  />
-                ))
-            : relations.map((relation, key) =>
-                isCloudType ? (
-                  <EntityDetailCloudRelation
-                    key={key}
-                    relation={relation}
-                    entityId={entity.id}
-                    relations={relations}
-                    entities={entities}
-                    relationUpdateMutation={relationUpdateMutation}
-                    relationDeleteMutation={relationDeleteMutation}
-                  />
-                ) : (
-                  <EntityDetailRelationRow
-                    key={key}
-                    relation={relation}
-                    entities={entities}
-                    entityId={entity.id}
-                    relationRule={relationRule}
-                    relationType={relationType as RelationEnums.Type}
-                    relationUpdateMutation={relationUpdateMutation}
-                    relationDeleteMutation={relationDeleteMutation}
-                  />
-                )
-              )}
+          {currentRelations.map((relation, key) =>
+            isCloudType ? (
+              <EntityDetailCloudRelation
+                key={key}
+                relation={relation}
+                entityId={entity.id}
+                relations={relations}
+                entities={entities}
+                relationUpdateMutation={relationUpdateMutation}
+                relationDeleteMutation={relationDeleteMutation}
+              />
+            ) : (
+              <EntityDetailRelationRow
+                key={key}
+                index={key}
+                relation={relation}
+                entities={entities}
+                entityId={entity.id}
+                relationRule={relationRule}
+                relationType={relationType as RelationEnums.Type}
+                relationUpdateMutation={relationUpdateMutation}
+                relationDeleteMutation={relationDeleteMutation}
+                isMultiple={isMultiple}
+                moveRow={moveRow}
+              />
+            )
+          )}
         </StyledRelationValues>
       </>
     );
