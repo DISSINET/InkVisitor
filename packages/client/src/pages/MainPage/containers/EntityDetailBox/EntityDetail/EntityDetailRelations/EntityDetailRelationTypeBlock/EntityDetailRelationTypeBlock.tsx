@@ -16,6 +16,7 @@ import { TbArrowNarrowRight, TbArrowsHorizontal } from "react-icons/tb";
 import { UseMutationResult, useQuery } from "react-query";
 import theme from "Theme/theme";
 import { v4 as uuidv4 } from "uuid";
+import { EntityDetailCloudRelation } from "./EntityDetailCloudRelation";
 import {
   StyledCloudEntityWrapper,
   StyledEntityWrapper,
@@ -110,20 +111,6 @@ export const EntityDetailRelationTypeBlock: React.FC<EntityDetailRelationTypeBlo
       }
     };
 
-    const handleCloudRemove = () => {
-      if (relations[0]?.entityIds?.length > 2) {
-        const newEntityIds = relations[0].entityIds.filter(
-          (eId) => eId !== entity.id
-        );
-        relationUpdateMutation.mutate({
-          relationId: relations[0].id,
-          changes: { entityIds: newEntityIds },
-        });
-      } else {
-        relationDeleteMutation.mutate(relations[0].id);
-      }
-    };
-
     const handleMultiRemove = (relationId: string) => {
       relationDeleteMutation.mutate(relationId);
     };
@@ -157,34 +144,31 @@ export const EntityDetailRelationTypeBlock: React.FC<EntityDetailRelationTypeBlo
       setUsedEntityIds([...new Set(entityIds)]);
     }, [entities, relations]);
 
-    const renderCloudRelation = (
-      relation: Relation.IRelation,
-      key: number
-    ): React.ReactElement => (
-      <StyledGrid key={key}>
-        {relation.entityIds.length > 0 && (
-          <Cloud onUnlink={() => handleCloudRemove()}>
-            <StyledRelation>
-              {relation.entityIds.map((entityId, key) => {
-                const relationEntity = entities?.find((e) => e.id === entityId);
-                return (
-                  <React.Fragment key={key}>
-                    {relationEntity && relationEntity.id !== entity.id && (
-                      <StyledCloudEntityWrapper>
-                        <EntityTag fullWidth entity={relationEntity} />
-                      </StyledCloudEntityWrapper>
-                    )}
-                  </React.Fragment>
-                );
-              })}
-            </StyledRelation>
-          </Cloud>
-        )}
-      </StyledGrid>
-    );
-
     const shouldBeRendered = (key: number) =>
       !relationRule.asymmetrical || (relationRule.asymmetrical && key > 0);
+
+    const renderCertainty = (relation: Relation.IRelation) => (
+      <div>
+        <Dropdown
+          width={140}
+          placeholder="certainty"
+          options={certaintyDict}
+          value={{
+            value: (relation as Relation.IIdentification).certainty,
+            label: certaintyDict.find(
+              (c) =>
+                c.value === (relation as Relation.IIdentification).certainty
+            )?.label,
+          }}
+          onChange={(newValue: any) => {
+            relationUpdateMutation.mutate({
+              relationId: relation.id,
+              changes: { certainty: newValue.value as string },
+            });
+          }}
+        />
+      </div>
+    );
 
     const renderNonCloudRelation = (
       relation: Relation.IRelation,
@@ -200,7 +184,7 @@ export const EntityDetailRelationTypeBlock: React.FC<EntityDetailRelationTypeBlo
                   relationEntity.id !== entity.id &&
                   shouldBeRendered(key) && (
                     <StyledEntityWrapper key={key}>
-                      <FaGripVertical />
+                      {/* <FaGripVertical /> */}
                       <EntityTag
                         fullWidth
                         entity={relationEntity}
@@ -222,30 +206,9 @@ export const EntityDetailRelationTypeBlock: React.FC<EntityDetailRelationTypeBlo
           })}
         </StyledRelation>
 
-        {/* TODO: Make universal */}
         {/* Certainty (Identification) */}
-        {relationType === RelationEnums.Type.Identification && (
-          <div>
-            <Dropdown
-              width={140}
-              placeholder="certainty"
-              options={certaintyDict}
-              value={{
-                value: (relation as Relation.IIdentification).certainty,
-                label: certaintyDict.find(
-                  (c) =>
-                    c.value === (relation as Relation.IIdentification).certainty
-                )?.label,
-              }}
-              onChange={(newValue: any) => {
-                relationUpdateMutation.mutate({
-                  relationId: relation.id,
-                  changes: { certainty: newValue.value as string },
-                });
-              }}
-            />
-          </div>
-        )}
+        {relationType === RelationEnums.Type.Identification &&
+          renderCertainty(relation)}
       </StyledGrid>
     );
 
@@ -334,9 +297,19 @@ export const EntityDetailRelationTypeBlock: React.FC<EntityDetailRelationTypeBlo
                 )
                 .map((relation, key) => renderNonCloudRelation(relation, key))
             : relations.map((relation, key) =>
-                isCloudType
-                  ? renderCloudRelation(relation, key)
-                  : renderNonCloudRelation(relation, key)
+                isCloudType ? (
+                  <EntityDetailCloudRelation
+                    key={key}
+                    relation={relation}
+                    entityId={entity.id}
+                    relations={relations}
+                    entities={entities}
+                    relationUpdateMutation={relationUpdateMutation}
+                    relationDeleteMutation={relationDeleteMutation}
+                  />
+                ) : (
+                  renderNonCloudRelation(relation, key)
+                )
               )}
         </StyledRelationValues>
       </>
