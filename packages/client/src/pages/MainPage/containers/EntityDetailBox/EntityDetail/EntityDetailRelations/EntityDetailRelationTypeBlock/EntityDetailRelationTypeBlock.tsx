@@ -1,4 +1,4 @@
-import { certaintyDict, entitiesDict } from "@shared/dictionaries";
+import { entitiesDict } from "@shared/dictionaries";
 import { EntityEnums, RelationEnums } from "@shared/enums";
 import {
   IResponseDetail,
@@ -8,22 +8,18 @@ import {
 } from "@shared/types";
 import api from "api";
 import { AxiosResponse } from "axios";
-import { Button, Cloud, Dropdown, LetterIcon } from "components";
-import { EntitySuggester, EntityTag } from "components/advanced";
+import { LetterIcon } from "components";
+import { EntitySuggester } from "components/advanced";
 import React, { useEffect, useState } from "react";
-import { FaGripVertical, FaUnlink } from "react-icons/fa";
 import { TbArrowNarrowRight, TbArrowsHorizontal } from "react-icons/tb";
 import { UseMutationResult, useQuery } from "react-query";
 import theme from "Theme/theme";
 import { v4 as uuidv4 } from "uuid";
-import { EntityDetailCloudRelation } from "./EntityDetailCloudRelation";
+import { EntityDetailCloudRelation } from "./EntityDetailCloudRelation/EntityDetailCloudRelation";
+import { EntityDetailRelationRow } from "./EntityDetailRelationRow/EntityDetailRelationRow";
 import {
-  StyledCloudEntityWrapper,
-  StyledEntityWrapper,
-  StyledGrid,
   StyledLabel,
   StyledLabelSuggester,
-  StyledRelation,
   StyledRelationType,
   StyledRelationValues,
   StyledSuggesterWrapper,
@@ -111,10 +107,6 @@ export const EntityDetailRelationTypeBlock: React.FC<EntityDetailRelationTypeBlo
       }
     };
 
-    const handleMultiRemove = (relationId: string) => {
-      relationDeleteMutation.mutate(relationId);
-    };
-
     const handleMultiSelected = (selectedId: string) => {
       if (relationType === RelationEnums.Type.Identification) {
         const newRelation: Relation.IIdentification = {
@@ -143,74 +135,6 @@ export const EntityDetailRelationTypeBlock: React.FC<EntityDetailRelationTypeBlo
         .concat(entity.id);
       setUsedEntityIds([...new Set(entityIds)]);
     }, [entities, relations]);
-
-    const shouldBeRendered = (key: number) =>
-      !relationRule.asymmetrical || (relationRule.asymmetrical && key > 0);
-
-    const renderCertainty = (relation: Relation.IRelation) => (
-      <div>
-        <Dropdown
-          width={140}
-          placeholder="certainty"
-          options={certaintyDict}
-          value={{
-            value: (relation as Relation.IIdentification).certainty,
-            label: certaintyDict.find(
-              (c) =>
-                c.value === (relation as Relation.IIdentification).certainty
-            )?.label,
-          }}
-          onChange={(newValue: any) => {
-            relationUpdateMutation.mutate({
-              relationId: relation.id,
-              changes: { certainty: newValue.value as string },
-            });
-          }}
-        />
-      </div>
-    );
-
-    const renderNonCloudRelation = (
-      relation: Relation.IRelation,
-      key: number
-    ): React.ReactElement => (
-      <StyledGrid key={key} hasAttribute={relationRule.attributes.length > 0}>
-        <StyledRelation>
-          {relation.entityIds.map((entityId, key) => {
-            const relationEntity = entities?.find((e) => e.id === entityId);
-            return (
-              <React.Fragment key={key}>
-                {relationEntity &&
-                  relationEntity.id !== entity.id &&
-                  shouldBeRendered(key) && (
-                    <StyledEntityWrapper key={key}>
-                      {/* <FaGripVertical /> */}
-                      <EntityTag
-                        fullWidth
-                        entity={relationEntity}
-                        button={
-                          <Button
-                            key="d"
-                            icon={<FaUnlink />}
-                            color="plain"
-                            inverted
-                            tooltip="unlink"
-                            onClick={() => handleMultiRemove(relation.id)}
-                          />
-                        }
-                      />
-                    </StyledEntityWrapper>
-                  )}
-              </React.Fragment>
-            );
-          })}
-        </StyledRelation>
-
-        {/* Certainty (Identification) */}
-        {relationType === RelationEnums.Type.Identification &&
-          renderCertainty(relation)}
-      </StyledGrid>
-    );
 
     const [tempCloudEntityId, setTempCloudEntityId] =
       useState<string | false>(false);
@@ -295,7 +219,18 @@ export const EntityDetailRelationTypeBlock: React.FC<EntityDetailRelationTypeBlo
                 .sort((a, b) =>
                   a.order && b.order ? (a.order > b.order ? -1 : 1) : 0
                 )
-                .map((relation, key) => renderNonCloudRelation(relation, key))
+                .map((relation, key) => (
+                  <EntityDetailRelationRow
+                    key={key}
+                    relation={relation}
+                    entities={entities}
+                    entityId={entity.id}
+                    relationRule={relationRule}
+                    relationType={relationType as RelationEnums.Type}
+                    relationUpdateMutation={relationUpdateMutation}
+                    relationDeleteMutation={relationDeleteMutation}
+                  />
+                ))
             : relations.map((relation, key) =>
                 isCloudType ? (
                   <EntityDetailCloudRelation
@@ -308,7 +243,16 @@ export const EntityDetailRelationTypeBlock: React.FC<EntityDetailRelationTypeBlo
                     relationDeleteMutation={relationDeleteMutation}
                   />
                 ) : (
-                  renderNonCloudRelation(relation, key)
+                  <EntityDetailRelationRow
+                    key={key}
+                    relation={relation}
+                    entities={entities}
+                    entityId={entity.id}
+                    relationRule={relationRule}
+                    relationType={relationType as RelationEnums.Type}
+                    relationUpdateMutation={relationUpdateMutation}
+                    relationDeleteMutation={relationDeleteMutation}
+                  />
                 )
               )}
         </StyledRelationValues>

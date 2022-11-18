@@ -8,7 +8,7 @@ import {
   StyledCloudEntityWrapper,
   StyledGrid,
   StyledRelation,
-} from "./EntityDetailRelationTypeBlockStyles";
+} from "../EntityDetailRelationTypeBlockStyles";
 
 interface EntityDetailCloudRelation {
   relation: Relation.IRelation;
