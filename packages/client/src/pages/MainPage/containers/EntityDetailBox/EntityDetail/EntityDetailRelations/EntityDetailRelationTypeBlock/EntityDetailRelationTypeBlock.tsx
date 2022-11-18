@@ -11,7 +11,7 @@ import { AxiosResponse } from "axios";
 import { Button, Cloud, Dropdown, LetterIcon } from "components";
 import { EntitySuggester, EntityTag } from "components/advanced";
 import React, { useEffect, useState } from "react";
-import { FaUnlink } from "react-icons/fa";
+import { FaGripVertical, FaUnlink } from "react-icons/fa";
 import { TbArrowNarrowRight, TbArrowsHorizontal } from "react-icons/tb";
 import { UseMutationResult, useQuery } from "react-query";
 import theme from "Theme/theme";
@@ -200,6 +200,7 @@ export const EntityDetailRelationTypeBlock: React.FC<EntityDetailRelationTypeBlo
                   relationEntity.id !== entity.id &&
                   shouldBeRendered(key) && (
                     <StyledEntityWrapper key={key}>
+                      <FaGripVertical />
                       <EntityTag
                         fullWidth
                         entity={relationEntity}
