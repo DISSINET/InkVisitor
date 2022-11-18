@@ -16,10 +16,8 @@ import { UseMutationResult } from "react-query";
 import { DragItem, ItemTypes } from "types";
 import { dndHoverFn } from "utils";
 import {
-  StyledEntityWrapper,
   StyledGrid,
   StyledGridColumn,
-  StyledRelation,
 } from "../EntityDetailRelationTypeBlockStyles";
 
 interface EntityDetailRelationRow {
@@ -111,7 +109,11 @@ export const EntityDetailRelationRow: React.FC<EntityDetailRelationRow> = ({
     }),
     end: (item: DragItem | undefined, monitor: DragSourceMonitor) => {
       // TODO: api call
-      // if (item) updateOrderFn();
+      // if (item)
+      // relationUpdateMutation.mutate({
+      //   relationId: relation.id,
+      //   changes: { order: 0 },
+      // });
     },
   });
 

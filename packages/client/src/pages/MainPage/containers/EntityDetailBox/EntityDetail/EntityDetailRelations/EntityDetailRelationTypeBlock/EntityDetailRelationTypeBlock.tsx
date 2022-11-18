@@ -180,7 +180,13 @@ export const EntityDetailRelationTypeBlock: React.FC<EntityDetailRelationTypeBlo
       }
     };
 
-    const [currentRelations, setCurrentRelations] = useState(relations);
+    useEffect(() => {
+      setCurrentRelations(relations);
+    }, [relations]);
+
+    const [currentRelations, setCurrentRelations] = useState<
+      Relation.IRelation[]
+    >([]);
 
     const moveRow = useCallback(
       (dragIndex: number, hoverIndex: number) => {
