@@ -80,6 +80,33 @@ export namespace Relation {
     order: number;
   }
 
+  export interface IDetailType<T extends IRelation> {
+    connections: IConnection<T>[];
+    iConnections?: IConnection<T>[];
+  }
+
+  export type IConnection<T extends IRelation> = T & {
+    subtrees?: IConnection<T>[];
+  };
+
+  export interface IUsedRelations {
+    [RelationEnums.Type.Superclass]?: IDetailType<ISuperclass>,
+    [RelationEnums.Type.SuperordinateLocation]?: IDetailType<ISuperordinateLocation>,
+    [RelationEnums.Type.Synonym]?: IDetailType<ISynonym>,
+    [RelationEnums.Type.Antonym]?: IDetailType<IAntonym>,
+    [RelationEnums.Type.Holonym]?: IDetailType<IHolonym>,
+    [RelationEnums.Type.PropertyReciprocal]?: IDetailType<IPropertyReciprocal>,
+    [RelationEnums.Type.SubjectActant1Reciprocal]?: IDetailType<ISubjectActant1Reciprocal>,
+    [RelationEnums.Type.ActionEventEquivalent]?: IDetailType<IActionEventEquivalent>,
+    [RelationEnums.Type.Classification]?: IDetailType<IClassification>,
+    [RelationEnums.Type.Identification]?: IDetailType<IIdentification>,
+    [RelationEnums.Type.Implication]?: IDetailType<IImplication>,
+    [RelationEnums.Type.SubjectSemantics]?: IDetailType<ISubjectSemantics>,
+    [RelationEnums.Type.Actant1Semantics]?: IDetailType<IActant1Semantics>,
+    [RelationEnums.Type.Actant2Semantics]?: IDetailType<IActant2Semantics>,
+    [RelationEnums.Type.Related]?: IDetailType<IRelated>,
+  };
+
   /**
    * Relation Rules
    */
@@ -97,7 +124,13 @@ export namespace Relation {
     order: boolean;
   };
 
+<<<<<<< HEAD
   export const RelationRules: { [key: string]: RelationRule } = {};
+=======
+  export const RelationRules: { [key: string]: RelationRule; } = {
+
+  };
+>>>>>>> c61c541c (add IUsedRelations interface + implementation)
 
   // Order of objects equals order of relations in detail
   RelationRules[RelationEnums.Type.Superclass] = {

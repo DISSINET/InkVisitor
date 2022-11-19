@@ -1,10 +1,7 @@
-import { EntityEnums } from "@shared/enums";
 import { IEntity, EntityTooltip } from "@shared/types";
-import { Connection } from "rethinkdb-ts";
 import { IRequest } from "src/custom_typings/request";
 import { ResponseEntity } from "./response";
 import { getActionEventNodes, getEntityIdsFromTree, getIdentifications, getSuperclassTrees, getSuperordinateLocationTree, getSynonymCloud } from "@models/relation/functions";
-
 
 export class ResponseTooltip
   extends ResponseEntity

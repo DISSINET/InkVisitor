@@ -1,4 +1,4 @@
-import { EntityEnums, RelationEnums, UserEnums } from "@shared/enums";
+import { EntityEnums, UserEnums } from "@shared/enums";
 import {
   IEntity,
   IProp,
@@ -14,7 +14,6 @@ import Statement from "@models/statement/statement";
 import { nonenumerable } from "@common/decorators";
 import { Connection } from "rethinkdb-ts";
 import {
-  IResponseDetailRelationType,
   IResponseUsedInStatementClassification,
   IResponseUsedInStatementIdentification,
   IResponseUsedInStatementProps,
@@ -25,6 +24,7 @@ import {
   IStatementIdentification,
 } from "@shared/types/statement";
 import Relation from "@models/relation/relation";
+import { UsedRelations } from "@models/relation/relations";
 
 export class ResponseEntity extends Entity implements IResponseEntity {
   // map of entity ids that should be populated in subsequent methods and used in fetching
@@ -116,23 +116,7 @@ export class ResponseEntityDetail
   usedInStatementIdentifications: IResponseUsedInStatementIdentification[];
   usedInStatementClassifications: IResponseUsedInStatementClassification[];
 
-  relations: {
-    [RelationEnums.Type.Superclass]?: IResponseDetailRelationType<RelationTypes.ISuperclass>,
-    [RelationEnums.Type.SuperordinateLocation]?: IResponseDetailRelationType<RelationTypes.ISuperordinateLocation>,
-    [RelationEnums.Type.Synonym]?: IResponseDetailRelationType<RelationTypes.ISynonym>,
-    [RelationEnums.Type.Antonym]?: IResponseDetailRelationType<RelationTypes.IAntonym>,
-    [RelationEnums.Type.Holonym]?: IResponseDetailRelationType<RelationTypes.IHolonym>,
-    [RelationEnums.Type.PropertyReciprocal]?: IResponseDetailRelationType<RelationTypes.IPropertyReciprocal>,
-    [RelationEnums.Type.SubjectActant1Reciprocal]?: IResponseDetailRelationType<RelationTypes.ISubjectActant1Reciprocal>,
-    [RelationEnums.Type.ActionEventEquivalent]?: IResponseDetailRelationType<RelationTypes.IActionEventEquivalent>,
-    [RelationEnums.Type.Classification]?: IResponseDetailRelationType<RelationTypes.IClassification>,
-    [RelationEnums.Type.Identification]?: IResponseDetailRelationType<RelationTypes.IIdentification>,
-    [RelationEnums.Type.Implication]?: IResponseDetailRelationType<RelationTypes.IImplication>,
-    [RelationEnums.Type.SubjectSemantics]?: IResponseDetailRelationType<RelationTypes.ISubjectSemantics>,
-    [RelationEnums.Type.Actant1Semantics]?: IResponseDetailRelationType<RelationTypes.IActant1Semantics>,
-    [RelationEnums.Type.Actant2Semantics]?: IResponseDetailRelationType<RelationTypes.IActant2Semantics>,
-    [RelationEnums.Type.Related]?: IResponseDetailRelationType<RelationTypes.IRelated>,
-  };
+  relations: UsedRelations;
 
   constructor(entity: Entity) {
     super(entity);
@@ -142,6 +126,7 @@ export class ResponseEntityDetail
     this.usedInMetaProps = [];
     this.usedInStatementClassifications = [];
     this.usedInStatementIdentifications = [];
+    this.relations = new UsedRelations();
 
     this.addLinkedEntities(this.getEntitiesIds());
   }
@@ -173,6 +158,7 @@ export class ResponseEntityDetail
     await this.populateInStatementsRelations(
       await Statement.findByDataActantsCI(conn, this.id)
     );
+
 
     this.relations = await Relation.getForEntity<RelationTypes.IRelation>(
       conn,
