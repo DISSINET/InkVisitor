@@ -20,35 +20,24 @@ export const getActionEventNodes = async (
         subtrees: [],
     };
 
-    let relations: RelationTypes.IRelation[] = [];
+    if (asClass === EntityEnums.Class.Action) {
+        const relations: RelationTypes.IActionEventEquivalent[] = await Relation.getForEntity(conn, parentId, RelationEnums.Type.ActionEventEquivalent, 0);
 
-    switch (asClass) {
-        case EntityEnums.Class.Action:
-            relations = await Relation.getForEntity<RelationTypes.IActionEventEquivalent>(
-                conn,
-                parentId,
-                RelationEnums.Type.ActionEventEquivalent,
-                0
+        // make unique and sorted list of ids
+        const subrootIds = [
+            ...new Set(relations.map((r) => r.entityIds[1])),
+        ].sort();
+
+        for (const subparentId of subrootIds) {
+            out.subtrees.push(
+                await getSuperclassTrees(
+                    conn,
+                    subparentId,
+                    EntityEnums.Class.Concept,
+                    nestLvl + 1,
+                )
             );
-            break;
-        default:
-            break;
-    }
-
-    // make unique and sorted list of ids
-    const subrootIds = [
-        ...new Set(relations.map((r) => r.entityIds[1])),
-    ].sort();
-
-    for (const subparentId of subrootIds) {
-        out.subtrees.push(
-            await getSuperclassTrees(
-                conn,
-                subparentId,
-                EntityEnums.Class.Concept,
-                nestLvl + 1,
-            )
-        );
+        }
     }
 
     return out;
@@ -75,33 +64,10 @@ export const getSuperclassTrees = async (
 
     let relations: RelationTypes.IRelation[] = [];
 
-    switch (asClass) {
-        case EntityEnums.Class.Concept:
-        case EntityEnums.Class.Action:
-            relations = await Relation.getForEntity<RelationTypes.ISuperclass>(
-                conn,
-                parentId,
-                RelationEnums.Type.Superclass,
-                0
-            );
-            break;
-        case EntityEnums.Class.Person:
-        case EntityEnums.Class.Location:
-        case EntityEnums.Class.Object:
-        case EntityEnums.Class.Group:
-        case EntityEnums.Class.Event:
-        case EntityEnums.Class.Statement:
-        case EntityEnums.Class.Territory:
-        case EntityEnums.Class.Resource:
-            relations = await Relation.getForEntity<RelationTypes.IClassification>(
-                conn,
-                parentId,
-                RelationEnums.Type.Classification,
-                0
-            );
-            break;
-        default:
-            break;
+    if ([EntityEnums.Class.Concept, EntityEnums.Class.Action].indexOf(asClass) !== -1) {
+        relations = await Relation.getForEntity(conn, parentId, RelationEnums.Type.Superclass, 0);
+    } else if (EntityEnums.PLOGESTR.indexOf(asClass) !== -1) {
+        relations = await Relation.getForEntity(conn, parentId, RelationEnums.Type.Classification, 0);
     }
 
     // make unique and sorted list of ids
@@ -120,8 +86,6 @@ export const getSuperclassTrees = async (
         );
     }
 
-    this.addLinkedEntities(subrootIds);
-
     return out;
 };
 
@@ -137,15 +101,8 @@ export const getSynonymCloud = async (
 ): Promise<EntityTooltip.ISynonymCloud | undefined> => {
     let out: EntityTooltip.ISynonymCloud | undefined;
 
-    if (
-        asClass === EntityEnums.Class.Concept ||
-        asClass === EntityEnums.Class.Action
-    ) {
-        const synonyms = await Relation.getForEntity<RelationTypes.ISynonym>(
-            conn,
-            entityId,
-            RelationEnums.Type.Synonym
-        );
+    if (asClass === EntityEnums.Class.Concept || asClass === EntityEnums.Class.Action) {
+        const synonyms = await Relation.getForEntity<RelationTypes.ISynonym>(conn, entityId, RelationEnums.Type.Synonym);
 
         out = synonyms.reduce(
             (acc, cur) => acc.concat(cur.entityIds),
@@ -155,8 +112,6 @@ export const getSynonymCloud = async (
 
     return out;
 };
-
-
 
 /**
  * returns synonym cloud in the form of list containing grouped entity ids
@@ -169,12 +124,7 @@ export const getIdentifications = async (
 ): Promise<EntityTooltip.IIdentification[]> => {
     const out: EntityTooltip.IIdentification[] = [];
 
-    const identifications =
-        await Relation.getForEntity<RelationTypes.IIdentification>(
-            conn,
-            entityId,
-            RelationEnums.Type.Identification
-        );
+    const identifications = await Relation.getForEntity<RelationTypes.IIdentification>(conn, entityId, RelationEnums.Type.Identification);
 
     for (const relation of identifications) {
         out.push({
@@ -185,8 +135,6 @@ export const getIdentifications = async (
                     : relation.entityIds[0],
         });
     }
-
-    addLinkedEntities(out.map(o => o.entityId));
 
     return out;
 };
@@ -205,27 +153,20 @@ export const getSuperordinateLocationTree = async (
         subtrees: [],
     };
 
-    let locations: RelationTypes.ISuperordinateLocation[] = [];
-
     if (asClass === EntityEnums.Class.Location) {
-        locations =
-            await Relation.getForEntity<RelationTypes.ISuperordinateLocation>(
-                conn,
-                parentId,
-                RelationEnums.Type.SuperordinateLocation,
-                0
+        const locations: RelationTypes.ISuperordinateLocation[] =
+            await Relation.getForEntity(conn, parentId, RelationEnums.Type.SuperordinateLocation, 0);
+
+        // make unique and sorted list of ids
+        const subrootIds = [
+            ...new Set(locations.map((r) => r.entityIds[1])),
+        ].sort();
+
+        for (const subparentId of subrootIds) {
+            out.subtrees.push(
+                await getSuperordinateLocationTree(conn, asClass, subparentId)
             );
-    }
-
-    // make unique and sorted list of ids
-    const subrootIds = [
-        ...new Set(locations.map((r) => r.entityIds[1])),
-    ].sort();
-
-    for (const subparentId of subrootIds) {
-        out.subtrees.push(
-            await getSuperordinateLocationTree(conn, asClass, subparentId)
-        );
+        }
     }
 
     return out;
