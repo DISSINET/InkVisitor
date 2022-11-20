@@ -330,3 +330,17 @@ export const getPropertyReciprocalForwardConnections = async (
 
     return out;
 };
+
+export const getSubjectActant1ReciprocalForwardConnections = async (
+    conn: Connection,
+    entityId: string,
+    asClass: EntityEnums.Class,
+): Promise<RelationTypes.IConnection<RelationTypes.ISubjectActant1Reciprocal>[]> => {
+    let out: RelationTypes.IConnection<RelationTypes.ISubjectActant1Reciprocal>[] = [];
+
+    if (asClass === EntityEnums.Class.Action) {
+        out = await Relation.getForEntity<RelationTypes.ISubjectActant1Reciprocal>(conn, entityId, RelationEnums.Type.SubjectActant1Reciprocal);
+    }
+
+    return out;
+};

@@ -3,7 +3,7 @@ import { EntityEnums, RelationEnums } from "@shared/enums";
 import { Relation as RelationTypes } from "@shared/types";
 import { Connection } from "rethinkdb-ts";
 import { IRequest } from "src/custom_typings/request";
-import { getAntonymForwardConnections, getHolonymForwardConnections, getPropertyReciprocalForwardConnections, getSuperclassForwardConnections, getSuperclassInverseConnections, getSuperclassTrees, getSuperordinateLocationForwardConnections, getSuperordinateLocationInverseConnections, getSynonymForwardConnections } from "./functions";
+import { getAntonymForwardConnections, getHolonymForwardConnections, getPropertyReciprocalForwardConnections, getSubjectActant1ReciprocalForwardConnections, getSuperclassForwardConnections, getSuperclassInverseConnections, getSuperclassTrees, getSuperordinateLocationForwardConnections, getSuperordinateLocationInverseConnections, getSynonymForwardConnections } from "./functions";
 import Relation from './relation';
 
 type ISuperclass = RelationTypes.ISuperclass;
@@ -88,6 +88,13 @@ export class UsedRelations implements RelationTypes.IUsedRelations {
         };
     }
 
+
+    async prepareSubjectActant1Reciprocals(dbConn: Connection): Promise<void> {
+        this[RelationEnums.Type.SubjectActant1Reciprocal] = {
+            connections: await getSubjectActant1ReciprocalForwardConnections(dbConn, this.entityId, this.entityClass),
+        };
+    }
+
     async prepareAll(req: IRequest): Promise<void> {
         await this.prepareSuperclasses(req.db.connection);
         await this.prepareSuperordinateLocations(req.db.connection);
@@ -95,5 +102,6 @@ export class UsedRelations implements RelationTypes.IUsedRelations {
         await this.prepareAntonyms(req.db.connection);
         await this.prepareHolonyms(req.db.connection);
         await this.preparePropertyReciprocals(req.db.connection);
+        await this.prepareSubjectActant1Reciprocals(req.db.connection);
     }
 }
