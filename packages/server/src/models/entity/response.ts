@@ -160,10 +160,7 @@ export class ResponseEntityDetail
     );
 
 
-    this.relations = await Relation.getForEntity<RelationTypes.IRelation>(
-      conn,
-      this.id
-    );
+    await this.relations.prepareAll(req);
 
     this.entities = await this.populateEntitiesMap(conn);
 

@@ -1,4 +1,3 @@
-import Entity from "@models/entity/entity";
 import { EntityEnums, RelationEnums } from "@shared/enums";
 import { EntityTooltip, Relation as RelationTypes } from "@shared/types";
 import { Connection } from "rethinkdb-ts";
@@ -222,10 +221,13 @@ export const getSuperclassForwardConnections = async (
 export const getSuperclassInverseConnections = async (
     conn: Connection,
     parentId: string,
+    asClass: EntityEnums.Class,
 ): Promise<RelationTypes.ISuperclass[]> => {
-    const out: RelationTypes.ISuperclass[] = await Relation.getForEntity(conn, parentId, RelationEnums.Type.Superclass, 1);
+    let out: RelationTypes.ISuperclass[] = [];
 
-    // TODO only A/C classes allowed here ... 
+    if (asClass === EntityEnums.Class.Action || asClass === EntityEnums.Class.Concept) {
+        out = await Relation.getForEntity(conn, parentId, RelationEnums.Type.Superclass, 1);
+    }
 
     // sort by order
     out.sort((a, b) => (a.order === undefined ? EntityEnums.Order.Last : a.order) - (b.order === undefined ? EntityEnums.Order.Last : b.order));
@@ -258,7 +260,7 @@ export const getSuperordinateLocationForwardConnections = async (
                 subtrees: [],
             };
 
-            connection.subtrees = await getSuperordinateLocationForwardConnections(conn, subparentId, EntityEnums.Class.Concept, nestLvl + 1);
+            connection.subtrees = await getSuperordinateLocationForwardConnections(conn, subparentId, asClass, nestLvl + 1);
         }
     }
 
@@ -268,8 +270,13 @@ export const getSuperordinateLocationForwardConnections = async (
 export const getSuperordinateLocationInverseConnections = async (
     conn: Connection,
     parentId: string,
+    asClass: EntityEnums.Class,
 ): Promise<RelationTypes.ISuperordinateLocation[]> => {
-    const out: RelationTypes.ISuperordinateLocation[] = await Relation.getForEntity(conn, parentId, RelationEnums.Type.SuperordinateLocation, 1);
+    let out: RelationTypes.ISuperordinateLocation[] = [];
+
+    if (asClass === EntityEnums.Class.Location) {
+        out = await Relation.getForEntity(conn, parentId, RelationEnums.Type.SuperordinateLocation, 1);
+    }
 
     // sort by order
     out.sort((a, b) => (a.order === undefined ? EntityEnums.Order.Last : a.order) - (b.order === undefined ? EntityEnums.Order.Last : b.order));
@@ -285,7 +292,12 @@ export const getSynonymForwardConnections = async (
     let out: RelationTypes.IConnection<RelationTypes.ISynonym>[] = [];
 
     if (asClass === EntityEnums.Class.Concept || asClass === EntityEnums.Class.Action) {
-        out = await Relation.getForEntity<RelationTypes.ISynonym>(conn, entityId, RelationEnums.Type.Synonym);
+        out = await Relation.getForEntity(conn, entityId, RelationEnums.Type.Synonym);
+        const mapped: Record<string, RelationTypes.IConnection<RelationTypes.ISynonym>> = {};
+        for (const relation of out) {
+            mapped[relation.id] = relation;
+        }
+        out = Object.values(mapped);
     }
 
     return out;
@@ -294,13 +306,11 @@ export const getSynonymForwardConnections = async (
 export const getAntonymForwardConnections = async (
     conn: Connection,
     entityId: string,
-    asClass: EntityEnums.Class,
 ): Promise<RelationTypes.IConnection<RelationTypes.IAntonym>[]> => {
-    let out: RelationTypes.IConnection<RelationTypes.IAntonym>[] = [];
+    const out: RelationTypes.IConnection<RelationTypes.IAntonym>[] = await Relation.getForEntity<RelationTypes.IAntonym>(conn, entityId, RelationEnums.Type.Antonym, 0);
 
-    if (asClass === EntityEnums.Class.Action || asClass === EntityEnums.Class.Concept) {
-        out = await Relation.getForEntity<RelationTypes.IAntonym>(conn, entityId, RelationEnums.Type.Antonym);
-    }
+    // sort by order
+    out.sort((a, b) => (a.order === undefined ? EntityEnums.Order.Last : a.order) - (b.order === undefined ? EntityEnums.Order.Last : b.order));
 
     return out;
 };
@@ -313,8 +323,28 @@ export const getHolonymForwardConnections = async (
     let out: RelationTypes.IConnection<RelationTypes.IHolonym>[] = [];
 
     if (asClass === EntityEnums.Class.Concept) {
-        out = await Relation.getForEntity<RelationTypes.IHolonym>(conn, entityId, RelationEnums.Type.Holonym);
+        out = await Relation.getForEntity<RelationTypes.IHolonym>(conn, entityId, RelationEnums.Type.Holonym, 0);
     }
+
+    // sort by order
+    out.sort((a, b) => (a.order === undefined ? EntityEnums.Order.Last : a.order) - (b.order === undefined ? EntityEnums.Order.Last : b.order));
+
+    return out;
+};
+
+export const getHolonymInverseConnections = async (
+    conn: Connection,
+    entityId: string,
+    asClass: EntityEnums.Class,
+): Promise<RelationTypes.IConnection<RelationTypes.IHolonym>[]> => {
+    let out: RelationTypes.IConnection<RelationTypes.IHolonym>[] = [];
+
+    if (asClass === EntityEnums.Class.Concept) {
+        out = await Relation.getForEntity<RelationTypes.IHolonym>(conn, entityId, RelationEnums.Type.Holonym, 1);
+    }
+
+    // sort by order
+    out.sort((a, b) => (a.order === undefined ? EntityEnums.Order.Last : a.order) - (b.order === undefined ? EntityEnums.Order.Last : b.order));
 
     return out;
 };
@@ -341,7 +371,7 @@ export const getSubjectActant1ReciprocalForwardConnections = async (
     let out: RelationTypes.IConnection<RelationTypes.ISubjectActant1Reciprocal>[] = [];
 
     if (asClass === EntityEnums.Class.Action) {
-        out = await Relation.getForEntity<RelationTypes.ISubjectActant1Reciprocal>(conn, entityId, RelationEnums.Type.SubjectActant1Reciprocal);
+        out = await Relation.getForEntity<RelationTypes.ISubjectActant1Reciprocal>(conn, entityId, RelationEnums.Type.SubjectActant1Reciprocal, 0);
     }
 
     return out;
@@ -361,12 +391,9 @@ export const getActionEventEquivalentForwardConnections = async (
 
     let relations: RelationTypes.IRelation[] = [];
 
-    if (EntityEnums.Class.Action === asClass) {
+    if (asClass === EntityEnums.Class.Action || asClass === EntityEnums.Class.Concept) {
         relations = await Relation.getForEntity(conn, entityId, RelationEnums.Type.ActionEventEquivalent, 0);
     }
-
-    // sort by order
-    relations.sort((a, b) => (a.order === undefined ? EntityEnums.Order.Last : a.order) - (b.order === undefined ? EntityEnums.Order.Last : b.order));
 
     for (const relation of relations) {
         const subparentId = relation.entityIds[1];
@@ -384,13 +411,13 @@ export const getActionEventEquivalentForwardConnections = async (
 export const getActionEventEquivalentInverseConnections = async (
     conn: Connection,
     parentId: string,
+    asClass: EntityEnums.Class
 ): Promise<RelationTypes.IActionEventEquivalent[]> => {
-    const out: RelationTypes.IActionEventEquivalent[] = await Relation.getForEntity(conn, parentId, RelationEnums.Type.ActionEventEquivalent, 1);
+    let out: RelationTypes.IActionEventEquivalent[] = [];
 
-    // TODO only A classes allowed here ... 
-
-    // sort by order
-    out.sort((a, b) => (a.order === undefined ? EntityEnums.Order.Last : a.order) - (b.order === undefined ? EntityEnums.Order.Last : b.order));
+    if (asClass === EntityEnums.Class.Action) {
+        out = await Relation.getForEntity(conn, parentId, RelationEnums.Type.ActionEventEquivalent, 1);
+    }
 
     return out;
 };
@@ -463,9 +490,6 @@ export const getIdentificationForwardConnections = async (
         thresholdReached = true;
     }
 
-    // sort by order
-    relations.sort((a, b) => (a.order === undefined ? EntityEnums.Order.Last : a.order) - (b.order === undefined ? EntityEnums.Order.Last : b.order));
-
     for (const relation of relations) {
         const subparentId = relation.entityIds[1];
         const connection: RelationTypes.IConnection<RelationTypes.IIdentification> = {
@@ -491,7 +515,7 @@ export const getImplicationForwardConnections = async (
     let out: RelationTypes.IImplication[] = [];
 
     if (asClass === EntityEnums.Class.Action) {
-        out = await Relation.getForEntity(conn, entityId, RelationEnums.Type.Implication);
+        out = await Relation.getForEntity(conn, entityId, RelationEnums.Type.Implication, 0);
     }
 
     // sort by order
@@ -525,7 +549,7 @@ export const getSubjectSemanticsForwardConnections = async (
     let out: RelationTypes.ISubjectSemantics[] = [];
 
     if (asClass === EntityEnums.Class.Concept) {
-        out = await Relation.getForEntity(conn, entityId, RelationEnums.Type.Implication);
+        out = await Relation.getForEntity(conn, entityId, RelationEnums.Type.Implication, 0);
     }
 
     // sort by order
