@@ -482,3 +482,37 @@ export const getIdentificationForwardConnections = async (
 
     return relations;
 };
+
+export const getImplicationForwardConnections = async (
+    conn: Connection,
+    entityId: string,
+    asClass: EntityEnums.Class
+): Promise<RelationTypes.IConnection<RelationTypes.IImplication>[]> => {
+    let out: RelationTypes.IImplication[] = [];
+
+    if (asClass === EntityEnums.Class.Action) {
+        out = await Relation.getForEntity(conn, entityId, RelationEnums.Type.Implication);
+    }
+
+    // sort by order
+    out.sort((a, b) => (a.order === undefined ? EntityEnums.Order.Last : a.order) - (b.order === undefined ? EntityEnums.Order.Last : b.order));
+
+    return out;
+};
+
+export const getImplicationInverseConnections = async (
+    conn: Connection,
+    parentId: string,
+    asClass: EntityEnums.Class
+): Promise<RelationTypes.IImplication[]> => {
+    let out: RelationTypes.IImplication[] = [];
+
+    if (asClass === EntityEnums.Class.Action) {
+        out = await Relation.getForEntity(conn, parentId, RelationEnums.Type.Implication, 1);
+    }
+
+    // sort by order
+    out.sort((a, b) => (a.order === undefined ? EntityEnums.Order.Last : a.order) - (b.order === undefined ? EntityEnums.Order.Last : b.order));
+
+    return out;
+};

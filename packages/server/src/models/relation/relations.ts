@@ -3,7 +3,7 @@ import { EntityEnums, RelationEnums } from "@shared/enums";
 import { Relation as RelationTypes } from "@shared/types";
 import { Connection } from "rethinkdb-ts";
 import { IRequest } from "src/custom_typings/request";
-import { getActionEventEquivalentForwardConnections, getActionEventEquivalentInverseConnections, getAntonymForwardConnections, getClassificationForwardConnections, getClassificationInverseConnections, getHolonymForwardConnections, getIdentificationForwardConnections, getIdentificationInverseConnections, getPropertyReciprocalForwardConnections, getSubjectActant1ReciprocalForwardConnections, getSuperclassForwardConnections, getSuperclassInverseConnections, getSuperclassTrees, getSuperordinateLocationForwardConnections, getSuperordinateLocationInverseConnections, getSynonymForwardConnections } from "./functions";
+import { getActionEventEquivalentForwardConnections, getActionEventEquivalentInverseConnections, getAntonymForwardConnections, getClassificationForwardConnections, getClassificationInverseConnections, getHolonymForwardConnections, getIdentificationForwardConnections, getIdentificationInverseConnections, getImplicationForwardConnections, getImplicationInverseConnections, getPropertyReciprocalForwardConnections, getSubjectActant1ReciprocalForwardConnections, getSuperclassForwardConnections, getSuperclassInverseConnections, getSuperclassTrees, getSuperordinateLocationForwardConnections, getSuperordinateLocationInverseConnections, getSynonymForwardConnections } from "./functions";
 import Relation from './relation';
 
 type ISuperclass = RelationTypes.ISuperclass;
@@ -113,6 +113,15 @@ export class UsedRelations implements RelationTypes.IUsedRelations {
         };
     }
 
+    async prepareImplications(dbConn: Connection): Promise<void> {
+        this[RelationEnums.Type.Implication] = {
+            connections: await getImplicationForwardConnections(dbConn, this.entityId, this.entityClass),
+            iConnections: await getImplicationInverseConnections(dbConn, this.entityId, this.entityClass),
+        };
+    }
+        };
+    }
+
     async prepareAll(req: IRequest): Promise<void> {
         await this.prepareSuperclasses(req.db.connection);
         await this.prepareSuperordinateLocations(req.db.connection);
@@ -124,5 +133,6 @@ export class UsedRelations implements RelationTypes.IUsedRelations {
         await this.prepareActionEventEquivalents(req.db.connection);
         await this.prepareClassifications(req.db.connection);
         await this.prepareIdentifications(req.db.connection);
+        await this.prepareImplications(req.db.connection);
     }
 }
