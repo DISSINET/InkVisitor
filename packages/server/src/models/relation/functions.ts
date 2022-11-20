@@ -619,3 +619,15 @@ export const getActant2SemanticsInverseConnections = async (
 
     return out;
 };
+
+export const getRelatedForwardConnections = async (
+    conn: Connection,
+    parentId: string,
+): Promise<RelationTypes.IRelated[]> => {
+    const out: RelationTypes.IRelated[] = await Relation.getForEntity(conn, parentId, RelationEnums.Type.Related, 0);
+
+    // sort by order
+    out.sort((a, b) => (a.order === undefined ? EntityEnums.Order.Last : a.order) - (b.order === undefined ? EntityEnums.Order.Last : b.order));
+
+    return out;
+};
