@@ -516,3 +516,37 @@ export const getImplicationInverseConnections = async (
 
     return out;
 };
+
+export const getSubjectSemanticsForwardConnections = async (
+    conn: Connection,
+    entityId: string,
+    asClass: EntityEnums.Class
+): Promise<RelationTypes.IConnection<RelationTypes.ISubjectSemantics>[]> => {
+    let out: RelationTypes.ISubjectSemantics[] = [];
+
+    if (asClass === EntityEnums.Class.Concept) {
+        out = await Relation.getForEntity(conn, entityId, RelationEnums.Type.Implication);
+    }
+
+    // sort by order
+    out.sort((a, b) => (a.order === undefined ? EntityEnums.Order.Last : a.order) - (b.order === undefined ? EntityEnums.Order.Last : b.order));
+
+    return out;
+};
+
+export const getSubjectSemanticsInverseConnections = async (
+    conn: Connection,
+    parentId: string,
+    asClass: EntityEnums.Class
+): Promise<RelationTypes.ISubjectSemantics[]> => {
+    let out: RelationTypes.ISubjectSemantics[] = [];
+
+    if (asClass === EntityEnums.Class.Action) {
+        out = await Relation.getForEntity(conn, parentId, RelationEnums.Type.SubjectSemantics, 1);
+    }
+
+    // sort by order
+    out.sort((a, b) => (a.order === undefined ? EntityEnums.Order.Last : a.order) - (b.order === undefined ? EntityEnums.Order.Last : b.order));
+
+    return out;
+};
