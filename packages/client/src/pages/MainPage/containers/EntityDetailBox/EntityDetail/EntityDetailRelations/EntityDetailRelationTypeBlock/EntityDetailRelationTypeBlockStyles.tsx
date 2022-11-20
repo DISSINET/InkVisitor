@@ -27,3 +27,23 @@ export const StyledGrid = styled.div<StyledGrid>`
       hasAttribute ? "14rem" : ""};
   max-width: 100%;
 `;
+export const StyledRelationType = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+export const StyledLabelSuggester = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+export const StyledLabel = styled.div`
+  color: ${({ theme }) => theme.color["info"]};
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+`;
+export const StyledRelationValues = styled.div`
+  margin-left: ${({ theme }) => theme.space[12]};
+`;
+export const StyledSuggesterWrapper = styled.div`
+  margin-top: ${({ theme }) => theme.space[1]};
+  margin-left: ${({ theme }) => theme.space[2]};
+`;

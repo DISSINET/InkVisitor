@@ -18,6 +18,7 @@ import {
   DraggedPropRowCategory,
   DraggedPropRowItem,
   DragItem,
+  EntityDragItem,
   ItemTypes,
   PropAttributeFilter,
   PropAttributeGroupDataObject,

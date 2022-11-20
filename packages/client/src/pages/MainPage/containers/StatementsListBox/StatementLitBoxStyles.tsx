@@ -34,3 +34,11 @@ export const StyledTableWrapper = styled.div`
   flex-direction: column;
   overflow: auto;
 `;
+export const StyledEmptyState = styled.div`
+  padding: ${({ theme }) => theme.space[3]};
+  color: ${({ theme }) => theme.color["gray"][600]};
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
+  display: flex;
+  align-self: center;
+  align-items: center;
+`;

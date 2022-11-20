@@ -30,12 +30,16 @@ export const newMockRequest = (db: Db): IRequest => {
   return {
     acl: new Acl(),
     db: db,
+    user: undefined,
     getUserOrFail: () => {
       return new User({});
     },
     baseUrl: "",
     method: "GET",
-    route: { path: "/" }
+    route: { path: "/" },
+    params: {},
+    body: {},
+    query: {},
   };
 };
 
@@ -88,7 +92,7 @@ export function getIStatementActionMock(): IStatementAction {
     moodvariant: EntityEnums.MoodVariant.Irrealis,
     bundleOperator: EntityEnums.Operator.And,
     props: [],
-  }
+  };
 }
 
 export function getIStatementMock(): IStatement {
@@ -163,7 +167,7 @@ export async function createMockStatements(
   for (let i = 0; i < 3; i++) {
     const stat = new Statement({
       id: `statement-${i}-${randSuffix}`,
-    })
+    });
     stat.data = new StatementData({
       territory: {
         territoryId: chosenTerritory,

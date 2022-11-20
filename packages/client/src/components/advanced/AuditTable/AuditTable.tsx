@@ -13,7 +13,7 @@ import {
 } from "./AuditTableStyles";
 
 export const AuditTable: React.FC<IResponseAudit> = ({
-  entity,
+  entityId,
   last,
   first,
 }) => {

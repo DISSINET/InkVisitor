@@ -9,6 +9,7 @@ import {
   fillFlatObject,
   fillArray,
   IModel,
+  determineOrder,
 } from "@models/common";
 import {
   EntityEnums,
@@ -36,7 +37,7 @@ export class StatementClassification implements IStatementClassification {
 
   constructor(data: Partial<IStatementClassification>) {
     fillFlatObject(this, data);
-    this.mood = data.mood ? data.mood : []
+    this.mood = data.mood ? data.mood : [];
   }
 }
 
@@ -77,8 +78,8 @@ export class StatementActant implements IStatementActant, IModel {
   constructor(data: Partial<IStatementActant>) {
     fillFlatObject(this, data);
     fillArray<Prop>(this.props, Prop, data.props);
-    fillArray<StatementClassification>(this.classifications, StatementClassification, data.classifications)
-    fillArray<StatementIdentification>(this.identifications, StatementIdentification, data.identifications)
+    fillArray<StatementClassification>(this.classifications, StatementClassification, data.classifications);
+    fillArray<StatementIdentification>(this.identifications, StatementIdentification, data.identifications);
   }
 
   /**
@@ -96,7 +97,7 @@ export class StatementTerritory implements IStatementDataTerritory {
 
   constructor(data: Partial<IStatementDataTerritory>) {
     this.territoryId = data.territoryId as string;
-    this.order = data.order !== undefined ? data.order : -1
+    this.order = data.order !== undefined ? data.order : -1;
   }
 
   /**
@@ -276,7 +277,7 @@ class Statement extends Entity implements IStatement {
   async save(db: Connection | undefined): Promise<WriteResult> {
     const siblings = await this.findTerritorySiblings(db);
     if (this.data.territory) {
-      this.data.territory.order = Entity.determineOrder(
+      this.data.territory.order = determineOrder(
         this.data.territory.order,
         siblings
       );
@@ -316,7 +317,7 @@ class Statement extends Entity implements IStatement {
       const wantedOrder = territoryData.order;
 
       const siblings = await this.findTerritorySiblings(db);
-      this.data.territory.order = Entity.determineOrder(wantedOrder, siblings);
+      this.data.territory.order = determineOrder(wantedOrder, siblings);
       territoryData.order = this.data.territory.order;
     }
 
@@ -589,8 +590,8 @@ class Statement extends Entity implements IStatement {
 
     // sort by order ASC
     return statements.sort((a, b) => {
-      if (!a.data.territory) { return -1 };
-      if (!b.data.territory) { return 0 };
+      if (!a.data.territory) { return -1; };
+      if (!b.data.territory) { return 0; };
       return a.data.territory.order - b.data.territory.order;
     });
   }

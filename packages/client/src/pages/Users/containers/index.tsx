@@ -1,3 +1,3 @@
-import { UserList } from "../../Users/containers/UserList/UserList";
+import { UserList } from "./UserList/UserList";
 
 export { UserList };

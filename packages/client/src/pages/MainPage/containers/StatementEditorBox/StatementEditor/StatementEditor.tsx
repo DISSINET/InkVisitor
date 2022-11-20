@@ -8,23 +8,14 @@ import {
   IStatementAction,
 } from "@shared/types";
 import api from "api";
+import { Button, Dropdown, Input, Loader, MultiInput } from "components";
 import {
-  Button,
-  ButtonGroup,
-  Dropdown,
-  Input,
-  Loader,
-  Modal,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalInputForm,
-  MultiInput,
-} from "components";
-import {
+  ApplyTemplateModal,
+  AuditTable,
   BreadcrumbItem,
   EntitySuggester,
   EntityTag,
+  JSONExplorer,
 } from "components/advanced";
 import {
   CClassification,
@@ -41,10 +32,7 @@ import { toast } from "react-toastify";
 import { excludedSuggesterEntities } from "Theme/constants";
 import { classesEditorActants, classesEditorTags, DropdownItem } from "types";
 import { getEntityLabel, getShortLabelByLetterCount } from "utils";
-import { AuditTable } from "../../AuditTable/AuditTable";
-import { StyledContent } from "../../EntityBookmarkBox/EntityBookmarkBoxStyles";
 import { EntityReferenceTable } from "../../EntityReferenceTable/EntityReferenceTable";
-import { JSONExplorer } from "../../JSONExplorer/JSONExplorer";
 import { StatementEditorActantTable } from "../StatementEditorActantTable/StatementEditorActantTable";
 import { StatementEditorActionTable } from "../StatementEditorActionTable/StatementEditorActionTable";
 import {
@@ -128,7 +116,8 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   );
 
   // TEMPLATES
-  const [applyTemplateModal, setApplyTemplateModal] = useState<boolean>(false);
+  const [showApplyTemplateModal, setShowApplyTemplateModal] =
+    useState<boolean>(false);
   const [templateToApply, setTemplateToApply] = useState<IEntity | false>(
     false
   );
@@ -141,30 +130,9 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
       if (templateThatIsGoingToBeApplied) {
         setTemplateToApply(templateThatIsGoingToBeApplied);
-        setApplyTemplateModal(true);
+        setShowApplyTemplateModal(true);
       }
     }
-  };
-
-  const handleApplyTemplate = () => {
-    if (templateToApply && statement) {
-      // TODO #952 handle conflicts in Templates application
-      const entityAfterTemplateApplied = {
-        ...{
-          data: templateToApply.data,
-          notes: templateToApply.notes,
-          props: templateToApply.props,
-          references: templateToApply.references,
-          usedTemplate: templateToApply.id,
-        },
-      };
-
-      toast.info(
-        `Template ${templateToApply.label} applied to Statement ${statement.label}`
-      );
-      updateStatementMutation.mutate(entityAfterTemplateApplied);
-    }
-    setTemplateToApply(false);
   };
 
   const {
@@ -764,50 +732,14 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         </StyledEditorSection>
       </div>
 
-      <Modal
-        showModal={applyTemplateModal}
-        width="thin"
-        onEnterPress={() => {
-          setApplyTemplateModal(false);
-          handleApplyTemplate();
-        }}
-        onClose={() => {
-          setApplyTemplateModal(false);
-        }}
-      >
-        <ModalHeader title="Create Template" />
-        <ModalContent>
-          <StyledContent>
-            <ModalInputForm>{`Apply template?`}</ModalInputForm>
-            <div>
-              {templateToApply && <EntityTag entity={templateToApply} />}
-            </div>
-            {/* here goes the info about template #951 */}
-          </StyledContent>
-        </ModalContent>
-        <ModalFooter>
-          <ButtonGroup>
-            <Button
-              key="cancel"
-              label="Cancel"
-              color="greyer"
-              inverted
-              onClick={() => {
-                setApplyTemplateModal(false);
-              }}
-            />
-            <Button
-              key="submit"
-              label="Apply"
-              color="info"
-              onClick={() => {
-                setApplyTemplateModal(false);
-                handleApplyTemplate();
-              }}
-            />
-          </ButtonGroup>
-        </ModalFooter>
-      </Modal>
+      <ApplyTemplateModal
+        showModal={showApplyTemplateModal}
+        setShowApplyTemplateModal={setShowApplyTemplateModal}
+        updateEntityMutation={updateStatementMutation}
+        templateToApply={templateToApply}
+        setTemplateToApply={setTemplateToApply}
+        entity={statement}
+      />
     </>
   );
 };
