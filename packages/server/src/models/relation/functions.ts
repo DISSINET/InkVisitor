@@ -394,3 +394,47 @@ export const getActionEventEquivalentInverseConnections = async (
 
     return out;
 };
+
+export const getClassificationForwardConnections = async (
+    conn: Connection,
+    entityId: string,
+    asClass: EntityEnums.Class,
+    nestLvl: number = 0,
+): Promise<RelationTypes.IConnection<RelationTypes.IClassification, RelationTypes.ISuperclass>[]> => {
+    let relations: RelationTypes.IConnection<RelationTypes.IClassification, RelationTypes.ISuperclass>[] = [];
+
+    if (nestLvl > MAX_NEST_LVL) {
+        return relations;
+    }
+
+    if (asClass === EntityEnums.Class.Concept) {
+        relations = await Relation.getForEntity(conn, entityId, RelationEnums.Type.Classification, 0);
+    }
+
+    // sort by order
+    relations.sort((a, b) => (a.order === undefined ? EntityEnums.Order.Last : a.order) - (b.order === undefined ? EntityEnums.Order.Last : b.order));
+
+    for (const relation of relations) {
+        const subparentId = relation.entityIds[1];
+        const connection: RelationTypes.IConnection<RelationTypes.IClassification, RelationTypes.ISuperclass> = {
+            ...relation,
+            subtrees: [],
+        };
+
+        connection.subtrees = await getSuperclassForwardConnections(conn, subparentId, EntityEnums.Class.Concept, nestLvl + 1);
+    }
+
+    return relations;
+};
+
+export const getClassificationInverseConnections = async (
+    conn: Connection,
+    parentId: string,
+): Promise<RelationTypes.IClassification[]> => {
+    const out: RelationTypes.IClassification[] = await Relation.getForEntity(conn, parentId, RelationEnums.Type.Classification, 1);
+
+    // sort by order
+    out.sort((a, b) => (a.order === undefined ? EntityEnums.Order.Last : a.order) - (b.order === undefined ? EntityEnums.Order.Last : b.order));
+
+    return out;
+};
