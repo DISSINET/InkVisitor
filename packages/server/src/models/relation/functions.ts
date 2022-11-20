@@ -279,11 +279,25 @@ export const getSynonymForwardConnections = async (
     conn: Connection,
     entityId: string,
     asClass: EntityEnums.Class,
-    nestLvl: number = 0): Promise<RelationTypes.IConnection<RelationTypes.ISynonym>[]> => {
+): Promise<RelationTypes.IConnection<RelationTypes.ISynonym>[]> => {
     let out: RelationTypes.IConnection<RelationTypes.ISynonym>[] = [];
 
     if (asClass === EntityEnums.Class.Concept || asClass === EntityEnums.Class.Action) {
         out = await Relation.getForEntity<RelationTypes.ISynonym>(conn, entityId, RelationEnums.Type.Synonym);
+    }
+
+    return out;
+};
+
+export const getAntonymForwardConnections = async (
+    conn: Connection,
+    entityId: string,
+    asClass: EntityEnums.Class,
+): Promise<RelationTypes.IConnection<RelationTypes.IAntonym>[]> => {
+    let out: RelationTypes.IConnection<RelationTypes.IAntonym>[] = [];
+
+    if (asClass === EntityEnums.Class.Action || asClass === EntityEnums.Class.Concept) {
+        out = await Relation.getForEntity<RelationTypes.IAntonym>(conn, entityId, RelationEnums.Type.Antonym);
     }
 
     return out;
