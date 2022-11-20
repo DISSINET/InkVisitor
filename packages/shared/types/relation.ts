@@ -82,7 +82,7 @@ export namespace Relation {
 
   export interface IDetailType<T extends IRelation> {
     connections: IConnection<T>[];
-    iConnections?: IConnection<T>[];
+    iConnections?: T[];
   }
 
   export type IConnection<T extends IRelation> = T & {

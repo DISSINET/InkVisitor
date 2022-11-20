@@ -90,54 +90,6 @@ export const getSuperclassTrees = async (
     return out;
 };
 
-export const getSuperclassForwardConnections = async (
-    conn: Connection,
-    parentId: string,
-    asClass: EntityEnums.Class,
-    nestLvl: number = 0,
-): Promise<RelationTypes.IConnection<RelationTypes.ISuperclass>[]> => {
-    const out: RelationTypes.IConnection<RelationTypes.ISuperclass>[] = [];
-
-    if (nestLvl > MAX_NEST_LVL) {
-        return out;
-    }
-
-    let relations: RelationTypes.IRelation[] = [];
-
-    if ([EntityEnums.Class.Concept, EntityEnums.Class.Action].indexOf(asClass) !== -1) {
-        relations = await Relation.getForEntity(conn, parentId, RelationEnums.Type.Superclass, 0);
-    } else if (EntityEnums.PLOGESTR.indexOf(asClass) !== -1) {
-        relations = await Relation.getForEntity(conn, parentId, RelationEnums.Type.Classification, 0);
-    }
-
-    // sort by order
-    relations.sort((a, b) => (a.order === undefined ? EntityEnums.Order.Last : a.order) - (b.order === undefined ? EntityEnums.Order.Last : b.order));
-
-    for (const relation of relations) {
-        const subparentId = relation.entityIds[1];
-        const connection: RelationTypes.IConnection<RelationTypes.ISuperclass> = {
-            ...relation as RelationTypes.ISuperclass,
-            subtrees: [],
-        };
-
-        connection.subtrees = await getSuperclassForwardConnections(conn, subparentId, EntityEnums.Class.Concept, nestLvl + 1);
-    }
-
-    return out;
-};
-
-export const getSuperclassInverseConnections = async (
-    conn: Connection,
-    parentId: string,
-): Promise<RelationTypes.ISuperclass[]> => {
-    const out: RelationTypes.ISuperclass[] = await Relation.getForEntity(conn, parentId, RelationEnums.Type.Superclass, 1);
-
-    // sort by order
-    out.sort((a, b) => (a.order === undefined ? EntityEnums.Order.Last : a.order) - (b.order === undefined ? EntityEnums.Order.Last : b.order));
-
-    return out;
-};
-
 /**
 * returns synonym cloud in the form of list containing grouped entity ids
 * @param conn
@@ -227,6 +179,98 @@ export const getEntityIdsFromTree = (tree: EntityTooltip.ISuperordinateLocationT
     for (const subtree of tree.subtrees) {
         out.push(...getEntityIdsFromTree(subtree));
     }
+
+    return out;
+};
+
+export const getSuperclassForwardConnections = async (
+    conn: Connection,
+    parentId: string,
+    asClass: EntityEnums.Class,
+    nestLvl: number = 0,
+): Promise<RelationTypes.IConnection<RelationTypes.ISuperclass>[]> => {
+    const out: RelationTypes.IConnection<RelationTypes.ISuperclass>[] = [];
+
+    if (nestLvl > MAX_NEST_LVL) {
+        return out;
+    }
+
+    let relations: RelationTypes.IRelation[] = [];
+
+    if ([EntityEnums.Class.Concept, EntityEnums.Class.Action].indexOf(asClass) !== -1) {
+        relations = await Relation.getForEntity(conn, parentId, RelationEnums.Type.Superclass, 0);
+    } else if (EntityEnums.PLOGESTR.indexOf(asClass) !== -1) {
+        relations = await Relation.getForEntity(conn, parentId, RelationEnums.Type.Classification, 0);
+    }
+
+    // sort by order
+    relations.sort((a, b) => (a.order === undefined ? EntityEnums.Order.Last : a.order) - (b.order === undefined ? EntityEnums.Order.Last : b.order));
+
+    for (const relation of relations) {
+        const subparentId = relation.entityIds[1];
+        const connection: RelationTypes.IConnection<RelationTypes.ISuperclass> = {
+            ...relation as RelationTypes.ISuperclass,
+            subtrees: [],
+        };
+
+        connection.subtrees = await getSuperclassForwardConnections(conn, subparentId, EntityEnums.Class.Concept, nestLvl + 1);
+    }
+
+    return out;
+};
+
+export const getSuperclassInverseConnections = async (
+    conn: Connection,
+    parentId: string,
+): Promise<RelationTypes.ISuperclass[]> => {
+    const out: RelationTypes.ISuperclass[] = await Relation.getForEntity(conn, parentId, RelationEnums.Type.Superclass, 1);
+
+    // sort by order
+    out.sort((a, b) => (a.order === undefined ? EntityEnums.Order.Last : a.order) - (b.order === undefined ? EntityEnums.Order.Last : b.order));
+
+    return out;
+};
+
+export const getSuperordinateLocationForwardConnections = async (
+    conn: Connection,
+    parentId: string,
+    asClass: EntityEnums.Class,
+    nestLvl: number = 0): Promise<RelationTypes.IConnection<RelationTypes.ISuperordinateLocation>[]> => {
+    const out: RelationTypes.IConnection<RelationTypes.ISuperordinateLocation>[] = [];
+
+    if (nestLvl > MAX_NEST_LVL) {
+        return out;
+    }
+
+    if (asClass === EntityEnums.Class.Location) {
+        const relations: RelationTypes.ISuperordinateLocation[] =
+            await Relation.getForEntity(conn, parentId, RelationEnums.Type.SuperordinateLocation, 0);
+
+        // sort by order
+        relations.sort((a, b) => (a.order === undefined ? EntityEnums.Order.Last : a.order) - (b.order === undefined ? EntityEnums.Order.Last : b.order));
+
+        for (const relation of relations) {
+            const subparentId = relation.entityIds[1];
+            const connection: RelationTypes.IConnection<RelationTypes.ISuperordinateLocation> = {
+                ...relation,
+                subtrees: [],
+            };
+
+            connection.subtrees = await getSuperordinateLocationForwardConnections(conn, subparentId, EntityEnums.Class.Concept, nestLvl + 1);
+        }
+    }
+
+    return out;
+};
+
+export const getSuperordinateLocationInverseConnections = async (
+    conn: Connection,
+    parentId: string,
+): Promise<RelationTypes.ISuperordinateLocation[]> => {
+    const out: RelationTypes.ISuperordinateLocation[] = await Relation.getForEntity(conn, parentId, RelationEnums.Type.SuperordinateLocation, 1);
+
+    // sort by order
+    out.sort((a, b) => (a.order === undefined ? EntityEnums.Order.Last : a.order) - (b.order === undefined ? EntityEnums.Order.Last : b.order));
 
     return out;
 };
