@@ -302,3 +302,17 @@ export const getAntonymForwardConnections = async (
 
     return out;
 };
+
+export const getHolonymForwardConnections = async (
+    conn: Connection,
+    entityId: string,
+    asClass: EntityEnums.Class,
+): Promise<RelationTypes.IConnection<RelationTypes.IHolonym>[]> => {
+    let out: RelationTypes.IConnection<RelationTypes.IHolonym>[] = [];
+
+    if (asClass === EntityEnums.Class.Concept) {
+        out = await Relation.getForEntity<RelationTypes.IHolonym>(conn, entityId, RelationEnums.Type.Holonym);
+    }
+
+    return out;
+};
