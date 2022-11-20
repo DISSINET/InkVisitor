@@ -550,3 +550,72 @@ export const getSubjectSemanticsInverseConnections = async (
 
     return out;
 };
+
+
+export const getActant1SemanticsForwardConnections = async (
+    conn: Connection,
+    entityId: string,
+    asClass: EntityEnums.Class
+): Promise<RelationTypes.IConnection<RelationTypes.IActant1Semantics>[]> => {
+    let out: RelationTypes.IActant1Semantics[] = [];
+
+    if (asClass === EntityEnums.Class.Concept) {
+        out = await Relation.getForEntity(conn, entityId, RelationEnums.Type.Actant1Semantics, 0);
+    }
+
+    // sort by order
+    out.sort((a, b) => (a.order === undefined ? EntityEnums.Order.Last : a.order) - (b.order === undefined ? EntityEnums.Order.Last : b.order));
+
+    return out;
+};
+
+export const getActant1SemanticsInverseConnections = async (
+    conn: Connection,
+    parentId: string,
+    asClass: EntityEnums.Class
+): Promise<RelationTypes.IActant1Semantics[]> => {
+    let out: RelationTypes.IActant1Semantics[] = [];
+
+    if (asClass === EntityEnums.Class.Action) {
+        out = await Relation.getForEntity(conn, parentId, RelationEnums.Type.Actant1Semantics, 1);
+    }
+
+    // sort by order
+    out.sort((a, b) => (a.order === undefined ? EntityEnums.Order.Last : a.order) - (b.order === undefined ? EntityEnums.Order.Last : b.order));
+
+    return out;
+};
+
+export const getActant2SemanticsForwardConnections = async (
+    conn: Connection,
+    entityId: string,
+    asClass: EntityEnums.Class
+): Promise<RelationTypes.IConnection<RelationTypes.IActant2Semantics>[]> => {
+    let out: RelationTypes.IActant2Semantics[] = [];
+
+    if (asClass === EntityEnums.Class.Concept) {
+        out = await Relation.getForEntity(conn, entityId, RelationEnums.Type.Actant2Semantics, 0);
+    }
+
+    // sort by order
+    out.sort((a, b) => (a.order === undefined ? EntityEnums.Order.Last : a.order) - (b.order === undefined ? EntityEnums.Order.Last : b.order));
+
+    return out;
+};
+
+export const getActant2SemanticsInverseConnections = async (
+    conn: Connection,
+    parentId: string,
+    asClass: EntityEnums.Class
+): Promise<RelationTypes.IActant2Semantics[]> => {
+    let out: RelationTypes.IActant2Semantics[] = [];
+
+    if (asClass === EntityEnums.Class.Action) {
+        out = await Relation.getForEntity(conn, parentId, RelationEnums.Type.Actant2Semantics, 1);
+    }
+
+    // sort by order
+    out.sort((a, b) => (a.order === undefined ? EntityEnums.Order.Last : a.order) - (b.order === undefined ? EntityEnums.Order.Last : b.order));
+
+    return out;
+};
