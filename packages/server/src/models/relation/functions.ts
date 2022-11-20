@@ -225,6 +225,8 @@ export const getSuperclassInverseConnections = async (
 ): Promise<RelationTypes.ISuperclass[]> => {
     const out: RelationTypes.ISuperclass[] = await Relation.getForEntity(conn, parentId, RelationEnums.Type.Superclass, 1);
 
+    // TODO only A/C classes allowed here ... 
+
     // sort by order
     out.sort((a, b) => (a.order === undefined ? EntityEnums.Order.Last : a.order) - (b.order === undefined ? EntityEnums.Order.Last : b.order));
 
@@ -341,6 +343,54 @@ export const getSubjectActant1ReciprocalForwardConnections = async (
     if (asClass === EntityEnums.Class.Action) {
         out = await Relation.getForEntity<RelationTypes.ISubjectActant1Reciprocal>(conn, entityId, RelationEnums.Type.SubjectActant1Reciprocal);
     }
+
+    return out;
+};
+
+export const getActionEventEquivalentForwardConnections = async (
+    conn: Connection,
+    entityId: string,
+    asClass: EntityEnums.Class,
+    nestLvl: number = 0,
+): Promise<RelationTypes.IConnection<RelationTypes.IActionEventEquivalent, RelationTypes.ISuperclass>[]> => {
+    const out: RelationTypes.IConnection<RelationTypes.IActionEventEquivalent, RelationTypes.ISuperclass>[] = [];
+
+    if (nestLvl > MAX_NEST_LVL) {
+        return out;
+    }
+
+    let relations: RelationTypes.IRelation[] = [];
+
+    if (EntityEnums.Class.Action === asClass) {
+        relations = await Relation.getForEntity(conn, entityId, RelationEnums.Type.ActionEventEquivalent, 0);
+    }
+
+    // sort by order
+    relations.sort((a, b) => (a.order === undefined ? EntityEnums.Order.Last : a.order) - (b.order === undefined ? EntityEnums.Order.Last : b.order));
+
+    for (const relation of relations) {
+        const subparentId = relation.entityIds[1];
+        const connection: RelationTypes.IConnection<RelationTypes.IActionEventEquivalent, RelationTypes.ISuperclass> = {
+            ...relation as RelationTypes.IActionEventEquivalent,
+            subtrees: [],
+        };
+
+        connection.subtrees = await getSuperclassForwardConnections(conn, subparentId, EntityEnums.Class.Concept, nestLvl + 1);
+    }
+
+    return out;
+};
+
+export const getActionEventEquivalentInverseConnections = async (
+    conn: Connection,
+    parentId: string,
+): Promise<RelationTypes.IActionEventEquivalent[]> => {
+    const out: RelationTypes.IActionEventEquivalent[] = await Relation.getForEntity(conn, parentId, RelationEnums.Type.ActionEventEquivalent, 1);
+
+    // TODO only A classes allowed here ... 
+
+    // sort by order
+    out.sort((a, b) => (a.order === undefined ? EntityEnums.Order.Last : a.order) - (b.order === undefined ? EntityEnums.Order.Last : b.order));
 
     return out;
 };

@@ -3,7 +3,7 @@ import { EntityEnums, RelationEnums } from "@shared/enums";
 import { Relation as RelationTypes } from "@shared/types";
 import { Connection } from "rethinkdb-ts";
 import { IRequest } from "src/custom_typings/request";
-import { getAntonymForwardConnections, getHolonymForwardConnections, getPropertyReciprocalForwardConnections, getSubjectActant1ReciprocalForwardConnections, getSuperclassForwardConnections, getSuperclassInverseConnections, getSuperclassTrees, getSuperordinateLocationForwardConnections, getSuperordinateLocationInverseConnections, getSynonymForwardConnections } from "./functions";
+import { getActionEventEquivalentForwardConnections, getActionEventEquivalentInverseConnections, getAntonymForwardConnections, getHolonymForwardConnections, getPropertyReciprocalForwardConnections, getSubjectActant1ReciprocalForwardConnections, getSuperclassForwardConnections, getSuperclassInverseConnections, getSuperclassTrees, getSuperordinateLocationForwardConnections, getSuperordinateLocationInverseConnections, getSynonymForwardConnections } from "./functions";
 import Relation from './relation';
 
 type ISuperclass = RelationTypes.ISuperclass;
@@ -35,7 +35,7 @@ export class UsedRelations implements RelationTypes.IUsedRelations {
     [RelationEnums.Type.Holonym]?: RelationTypes.IDetailType<IHolonym>;
     [RelationEnums.Type.PropertyReciprocal]?: RelationTypes.IDetailType<IPropertyReciprocal>;
     [RelationEnums.Type.SubjectActant1Reciprocal]?: RelationTypes.IDetailType<ISubjectActant1Reciprocal>;
-    [RelationEnums.Type.ActionEventEquivalent]?: RelationTypes.IDetailType<IActionEventEquivalent>;
+    [RelationEnums.Type.ActionEventEquivalent]?: RelationTypes.IDetailType<IActionEventEquivalent, ISuperclass>;
     [RelationEnums.Type.Classification]?: RelationTypes.IDetailType<IClassification>;
     [RelationEnums.Type.Identification]?: RelationTypes.IDetailType<IIdentification>;
     [RelationEnums.Type.Implication]?: RelationTypes.IDetailType<IImplication>;
@@ -93,6 +93,13 @@ export class UsedRelations implements RelationTypes.IUsedRelations {
         };
     }
 
+    async prepareActionEventEquivalents(dbConn: Connection): Promise<void> {
+        this[RelationEnums.Type.ActionEventEquivalent] = {
+            connections: await getActionEventEquivalentForwardConnections(dbConn, this.entityId, this.entityClass),
+            iConnections: await getActionEventEquivalentInverseConnections(dbConn, this.entityId)
+        };
+    }
+
     async prepareAll(req: IRequest): Promise<void> {
         await this.prepareSuperclasses(req.db.connection);
         await this.prepareSuperordinateLocations(req.db.connection);
@@ -101,5 +108,6 @@ export class UsedRelations implements RelationTypes.IUsedRelations {
         await this.prepareHolonyms(req.db.connection);
         await this.preparePropertyReciprocals(req.db.connection);
         await this.prepareSubjectActant1Reciprocals(req.db.connection);
+        await this.prepareActionEventEquivalents(req.db.connection);
     }
 }
