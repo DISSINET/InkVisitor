@@ -1,6 +1,10 @@
 import { nonenumerable } from "@common/decorators";
 import { EntityEnums, RelationEnums } from "@shared/enums";
 import { Relation as RelationTypes } from "@shared/types";
+import { Connection } from "rethinkdb-ts";
+import { IRequest } from "src/custom_typings/request";
+import { getSuperclassForwardConnections, getSuperclassInverseConnections, getSuperclassTrees } from "./functions";
+import Relation from './relation';
 
 type ISuperclass = RelationTypes.ISuperclass;
 type ISuperordinateLocation = RelationTypes.ISuperordinateLocation;
@@ -45,7 +49,14 @@ export class UsedRelations implements RelationTypes.IUsedRelations {
         this.entityClass = forEntityClass;
     }
 
-    async prepareAll(): Promise<void> {
+    async prepareSuperclasses(dbConn: Connection): Promise<void> {
+        this[RelationEnums.Type.Superclass] = {
+            connections: await getSuperclassForwardConnections(dbConn, this.entityId, this.entityClass),
+            iConnections: await getSuperclassInverseConnections(dbConn, this.entityId)
+        };
+    }
 
+    async prepareAll(req: IRequest): Promise<void> {
+        await this.prepareSuperclasses(req.db.connection);
     }
 }

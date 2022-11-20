@@ -126,7 +126,7 @@ export class ResponseEntityDetail
     this.usedInMetaProps = [];
     this.usedInStatementClassifications = [];
     this.usedInStatementIdentifications = [];
-    this.relations = new UsedRelations();
+    this.relations = new UsedRelations(entity.id, entity.class);
 
     this.addLinkedEntities(this.getEntitiesIds());
   }
