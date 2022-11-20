@@ -274,3 +274,17 @@ export const getSuperordinateLocationInverseConnections = async (
 
     return out;
 };
+
+export const getSynonymForwardConnections = async (
+    conn: Connection,
+    entityId: string,
+    asClass: EntityEnums.Class,
+    nestLvl: number = 0): Promise<RelationTypes.IConnection<RelationTypes.ISynonym>[]> => {
+    let out: RelationTypes.IConnection<RelationTypes.ISynonym>[] = [];
+
+    if (asClass === EntityEnums.Class.Concept || asClass === EntityEnums.Class.Action) {
+        out = await Relation.getForEntity<RelationTypes.ISynonym>(conn, entityId, RelationEnums.Type.Synonym);
+    }
+
+    return out;
+};
