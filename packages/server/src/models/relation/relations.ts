@@ -75,7 +75,6 @@ export class UsedRelations implements RelationTypes.IUsedRelations {
         };
     }
 
-
     async prepareHolonyms(dbConn: Connection): Promise<void> {
         this[RelationEnums.Type.Holonym] = {
             connections: await getHolonymForwardConnections(dbConn, this.entityId, this.entityClass),
@@ -87,7 +86,6 @@ export class UsedRelations implements RelationTypes.IUsedRelations {
             connections: await getPropertyReciprocalForwardConnections(dbConn, this.entityId, this.entityClass),
         };
     }
-
 
     async prepareSubjectActant1Reciprocals(dbConn: Connection): Promise<void> {
         this[RelationEnums.Type.SubjectActant1Reciprocal] = {

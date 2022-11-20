@@ -80,13 +80,13 @@ export namespace Relation {
     order: number;
   }
 
-  export interface IDetailType<T extends IRelation> {
-    connections: IConnection<T>[];
+  export interface IDetailType<T extends IRelation, T2 extends IRelation = T> {
+    connections: IConnection<T, T2>[];
     iConnections?: T[];
   }
 
-  export type IConnection<T extends IRelation> = T & {
-    subtrees?: IConnection<T>[];
+  export type IConnection<T extends IRelation, T2 extends IRelation = T> = T & {
+    subtrees?: IConnection<T2, T2>[];
   };
 
   export interface IUsedRelations {
@@ -99,8 +99,10 @@ export namespace Relation {
     [RelationEnums.Type.PropertyReciprocal]?: IDetailType<IPropertyReciprocal>;
     [RelationEnums.Type
       .SubjectActant1Reciprocal]?: IDetailType<ISubjectActant1Reciprocal>;
-    [RelationEnums.Type
-      .ActionEventEquivalent]?: IDetailType<IActionEventEquivalent>;
+    [RelationEnums.Type.ActionEventEquivalent]?: IDetailType<
+      IActionEventEquivalent,
+      ISuperclass
+    >;
     [RelationEnums.Type.Classification]?: IDetailType<IClassification>;
     [RelationEnums.Type.Identification]?: IDetailType<IIdentification>;
     [RelationEnums.Type.Implication]?: IDetailType<IImplication>;
