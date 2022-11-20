@@ -316,3 +316,17 @@ export const getHolonymForwardConnections = async (
 
     return out;
 };
+
+export const getPropertyReciprocalForwardConnections = async (
+    conn: Connection,
+    entityId: string,
+    asClass: EntityEnums.Class,
+): Promise<RelationTypes.IConnection<RelationTypes.IPropertyReciprocal>[]> => {
+    let out: RelationTypes.IConnection<RelationTypes.IPropertyReciprocal>[] = [];
+
+    if (asClass === EntityEnums.Class.Concept) {
+        out = await Relation.getForEntity<RelationTypes.IPropertyReciprocal>(conn, entityId, RelationEnums.Type.PropertyReciprocal);
+    }
+
+    return out;
+};
