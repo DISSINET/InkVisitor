@@ -13,6 +13,8 @@ export const Cloud: React.FC<Cloud> = ({ children, onUnlink }) => {
       <StyledCloud>{children}</StyledCloud>
       <StyledButtonWrap>
         <Button
+          color="plain"
+          inverted
           tooltip="unlink from cloud"
           icon={<FaUnlink />}
           onClick={onUnlink}

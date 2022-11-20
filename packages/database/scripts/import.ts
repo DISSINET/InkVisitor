@@ -1,6 +1,7 @@
 import { IUser } from "../../shared/types/user";
 import { hashPassword } from "../../server/src/common/auth";
 import { IAudit } from "../../shared/types";
+import { Relation } from "../../shared/types/relation";
 import { r, RConnectionOptions, Connection } from "rethinkdb-ts";
 import tunnel from "tunnel-ssh";
 import { Server } from "net";
@@ -57,7 +58,14 @@ const datasets: Record<string, DbSchema> = {
     relations: {
       tableName: "relations",
       data: require("../datasets/all/relations.json"),
-      transform: function () {},
+      transform: function () {
+        this.data = this.data.map((relation: Relation.IRelation) => {
+          if (!relation.order) {
+            relation.order = 1;
+          };
+          return relation
+        })
+      },
       indexes: relationsIndexes,
     },
   },
@@ -137,7 +145,14 @@ const datasets: Record<string, DbSchema> = {
     relations: {
       tableName: "relations",
       data: require("../datasets/all-parsed/relations.json"),
-      transform: function () {},
+      transform: function () {
+        this.data = this.data.map((relation: Relation.IRelation) => {
+          if (!relation.order) {
+            relation.order = 1;
+          };
+          return relation
+        })
+      },
       indexes: relationsIndexes,
     },
   },
@@ -177,7 +192,14 @@ const datasets: Record<string, DbSchema> = {
     relations: {
       tableName: "relations",
       data: require("../datasets/relationstest/relations.json"),
-      transform: function () {},
+      transform: function () {
+        this.data = this.data.map((relation: Relation.IRelation) => {
+          if (!relation.order) {
+            relation.order = 1;
+          };
+          return relation
+        })
+      },
       indexes: relationsIndexes,
     },
   },

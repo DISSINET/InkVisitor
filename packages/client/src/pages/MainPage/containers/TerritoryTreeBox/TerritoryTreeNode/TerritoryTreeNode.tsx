@@ -1,9 +1,5 @@
 import { UserEnums } from "@shared/enums";
-import {
-  IEntity,
-  IResponseTreeTerritoryComponent,
-  ITerritory,
-} from "@shared/types";
+import { IResponseTreeTerritoryComponent, ITerritory } from "@shared/types";
 import { IParentTerritory } from "@shared/types/territory";
 import api from "api";
 import { EntityTag } from "components/advanced";
@@ -22,7 +18,7 @@ import { setTreeInitialized } from "redux/features/territoryTree/treeInitializeS
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { rootTerritoryId } from "Theme/constants";
 import theme from "Theme/theme";
-import { DraggedTerritoryItem, DragItem, EntityDragItem } from "types";
+import { DraggedTerritoryItem, EntityDragItem } from "types";
 import { TerritoryTreeContextMenu } from "../TerritoryTreeContextMenu/TerritoryTreeContextMenu";
 import {
   StyledChildrenWrap,
@@ -143,7 +139,8 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
     setIsExpanded(!isExpanded);
   };
 
-  const getArrowIcon = (id: string) => {
+  const renderArrowIcon = () => {
+    const { id } = territory;
     if (!empty) {
       // filled
       return (
@@ -236,8 +233,8 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
     }
   }, [draggedTerritory]);
 
-  // TODO: move to useCallback with all dependencies!
-  const renderTerritoryTag = (hasChildren: boolean) => {
+  const renderTreeNode = () => {
+    const hasChildren = children.length > 0;
     const { id, data } = territory;
     const parent = data.parent as IParentTerritory;
     const isFavorited = storedTerritories?.includes(id);
@@ -250,7 +247,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
               <StyledTerritoryTagWrap id={`territory${id}`}>
                 <StyledIconWrap>
                   {hasChildren ? (
-                    <>{getArrowIcon(id)}</>
+                    <>{renderArrowIcon()}</>
                   ) : (
                     <>
                       {statementsCount > 0 ? (
@@ -311,7 +308,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
 
   return (
     <>
-      {renderTerritoryTag(children.length > 0)}
+      {renderTreeNode()}
 
       <StyledChildrenWrap noIndent={lvl === 0}>
         {!hideChildTerritories &&

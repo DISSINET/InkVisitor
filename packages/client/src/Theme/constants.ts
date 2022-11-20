@@ -6,6 +6,10 @@ export const wildCardChar = "*";
 
 export const rootTerritoryId = "T0";
 export const excludedSuggesterEntities = [EntityEnums.Class.Value];
+export const restrictedIDEClasses = [
+  EntityEnums.Class.Action,
+  EntityEnums.Class.Concept,
+];
 export const scrollOverscanCount = 10;
 
 // layout

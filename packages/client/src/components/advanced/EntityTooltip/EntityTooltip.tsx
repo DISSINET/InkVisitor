@@ -71,7 +71,6 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
     ["tooltip", entityId, tagHovered],
     async () => {
       const res = await api.tooltipGet(entityId);
-      // setTimeout(() => setTooltipData(res.data), 500);
       setTooltipData(res.data);
       return res.data;
     },
@@ -225,6 +224,8 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
                   <StyledRelationTypeBlock>
                     {synonymCloud.map((synonym, key) => {
                       const entity = entities[synonym];
+                      if (entityId === entity.id) return;
+
                       return (
                         <React.Fragment key={key}>
                           {`${entity?.label}${

@@ -91,8 +91,6 @@ export type {
   IOption,
   IProp,
   IPropSpec,
-  Relation,
-  EntityTooltip,
   IReference,
   IUser,
   IUserOptions,
@@ -115,5 +113,6 @@ export type {
   IResponseGeneric,
   IResponsePermission,
   IResponseStats,
+  EntityTooltip,
 };
-export { RequestSearch, RequestPermissionUpdate };
+export { RequestSearch, RequestPermissionUpdate, Relation };

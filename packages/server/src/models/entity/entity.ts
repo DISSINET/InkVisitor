@@ -1,11 +1,10 @@
 import {
   IDbModel,
-  UnknownObject,
   fillFlatObject,
   fillArray,
 } from "@models/common";
 import { r as rethink, Connection, WriteResult, RDatum } from "rethinkdb-ts";
-import { IStatement, IEntity, IProp, IReference } from "@shared/types";
+import { IEntity, IProp, IReference } from "@shared/types";
 import {
   DbEnums,
   EntityEnums,
@@ -173,62 +172,6 @@ export default class Entity implements IEntity, IDbModel {
       .run(db);
 
     return entries;
-  }
-
-  static determineOrder(want: number, sibl: Record<number, unknown>): number {
-    const sortedOrders: number[] = Object.keys(sibl)
-      .map((k) => parseFloat(k))
-      .sort((a, b) => a - b);
-
-    if (!sortedOrders.length) {
-      // no sibling - use default position 0
-      return 0;
-    }
-
-    if (want === undefined) {
-      // if want is not provided, use Last position by default
-      want = EntityEnums.Order.Last;
-    }
-
-    if (want === EntityEnums.Order.Last) {
-      return sortedOrders[sortedOrders.length - 1] + 1;
-    } else if (want === EntityEnums.Order.First) {
-      return sortedOrders[0] - 1;
-    }
-
-    let out = -1;
-
-    if (sibl[want]) {
-      // if there is a conflict - wanted order value already exists
-      for (let i = 0; i < sortedOrders.length; i++) {
-        if (sortedOrders[i] === want) {
-          if (sortedOrders.length === i + 1) {
-            // conflict occured on the biggest number - use closest bigger free integer
-            const ceiled = Math.ceil(sortedOrders[i]);
-            out = ceiled === sortedOrders[i] ? ceiled + 1 : ceiled;
-            break;
-          }
-
-          // new number would be somewhere behind the wanted position(i) and before
-          // the next position(i+1)
-          out = sortedOrders[i] + (sortedOrders[i + 1] - sortedOrders[i]) / 2;
-          if (!sibl[Math.round(out)]) {
-            out = Math.round(out);
-          }
-
-          break;
-        }
-      }
-    } else {
-      // all good
-      out = want;
-      // less than zero -> zero optional fix
-      if (out < 0 && (sortedOrders.length === 0 || sortedOrders[0] > 0)) {
-        out = 0;
-      }
-    }
-
-    return out;
   }
 
   /**

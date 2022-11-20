@@ -24,11 +24,11 @@ describe("test Actant2Semantics.beforeSave", function () {
     await entity2.save(db.connection);
     entities.push(entity2);
     request = newMockRequest(db);
-  })
+  });
 
   afterAll(async () => {
     await db.close();
-  })
+  });
 
   test("ok relation", async () => {
     const okRelation = new Actant2Semantics({ entityIds: [entities[0].id, entities[1].id] });
@@ -40,5 +40,5 @@ describe("test Actant2Semantics.beforeSave", function () {
     const badRelation = new Actant2Semantics({ entityIds: [entities[1].id, entities[0].id] });
 
     await expect(badRelation.beforeSave(request)).rejects.toBeInstanceOf(ModelNotValidError);
-  })
+  });
 });

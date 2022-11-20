@@ -20,6 +20,13 @@ import Synonym from "./relation/synonym";
 import SubjectSemantics from "./relation/subject-semantics";
 import Actant1Semantics from "./relation/actant1-semantics";
 import Actant2Semantics from "./relation/actant2-semantics";
+import Antonym from "./relation/antonym";
+import Classification from "./relation/classification";
+import Holonym from "./relation/holonym";
+import Implication from "./relation/implication";
+import Related from "./relation/related";
+import Superclass from "./relation/superclass";
+import SuperordinateLocation from "./relation/superordinate-location";
 
 /**
  * attempts to create new Entity instance depending on the type value
@@ -74,17 +81,20 @@ export function getRelationClass(data: UnknownObject): Relation {
   }
 
   switch (data.type as RelationEnums.Type) {
-    case RelationEnums.Type.ActionEventEquivalent:
     case RelationEnums.Type.Antonym:
+      return new Antonym(data);
     case RelationEnums.Type.Classification:
+      return new Classification(data);
     case RelationEnums.Type.Holonym:
+      return new Holonym(data);
     case RelationEnums.Type.Implication:
-    case RelationEnums.Type.PropertyReciprocal:
+      return new Implication(data);
     case RelationEnums.Type.Related:
-    case RelationEnums.Type.SubjectActant1Reciprocal:
+      return new Related(data);
     case RelationEnums.Type.Superclass:
+      return new Superclass(data);
     case RelationEnums.Type.SuperordinateLocation:
-      return new Relation(data);
+      return new SuperordinateLocation(data);
     case RelationEnums.Type.Identification:
       return new Identification(data);
     case RelationEnums.Type.Synonym:
@@ -95,6 +105,10 @@ export function getRelationClass(data: UnknownObject): Relation {
       return new Actant1Semantics(data);
     case RelationEnums.Type.Actant2Semantics:
       return new Actant2Semantics(data);
+    case RelationEnums.Type.ActionEventEquivalent:
+    case RelationEnums.Type.PropertyReciprocal:
+    case RelationEnums.Type.SubjectActant1Reciprocal:
+      return new Relation(data);
     default:
       throw new ModelNotValidError("unknown class for relation");
   }
