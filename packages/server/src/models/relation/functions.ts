@@ -438,3 +438,47 @@ export const getClassificationInverseConnections = async (
 
     return out;
 };
+
+
+export const getIdentificationForwardConnections = async (
+    conn: Connection,
+    entityId: string,
+    requiredCertainty: EntityEnums.Certainty,
+    nestLvl: number = 0,
+): Promise<RelationTypes.IConnection<RelationTypes.IIdentification>[]> => {
+    let relations: RelationTypes.IConnection<RelationTypes.IIdentification>[] = [];
+
+    if (nestLvl > MAX_NEST_LVL) {
+        return relations;
+    }
+
+    relations = await Relation.getForEntity(conn, entityId, RelationEnums.Type.Identification, 0);
+    let thresholdReached = false;
+
+    if (requiredCertainty !== EntityEnums.Certainty.Empty) {
+        // if non-empty certainty, then some lvl of certainty needs to be respected
+        relations = relations.filter(r => r.certainty === EntityEnums.Certainty.Certain);
+    } else {
+        // empty certainty will end the search below
+        thresholdReached = true;
+    }
+
+    // sort by order
+    relations.sort((a, b) => (a.order === undefined ? EntityEnums.Order.Last : a.order) - (b.order === undefined ? EntityEnums.Order.Last : b.order));
+
+    for (const relation of relations) {
+        const subparentId = relation.entityIds[1];
+        const connection: RelationTypes.IConnection<RelationTypes.IIdentification> = {
+            ...relation,
+            subtrees: [],
+        };
+
+        if (!thresholdReached) {
+            // either continue with Certain or use Empty
+            const nextThreshold = relation.certainty === EntityEnums.Certainty.Certain ? EntityEnums.Certainty.Certain : EntityEnums.Certainty.Empty;
+            connection.subtrees = await getIdentificationForwardConnections(conn, subparentId, nextThreshold, nestLvl + 1);
+        }
+    }
+
+    return relations;
+};
