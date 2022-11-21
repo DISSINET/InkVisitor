@@ -14,6 +14,7 @@ import update from "immutability-helper";
 import React, { useCallback, useEffect, useState } from "react";
 import { TbArrowNarrowRight, TbArrowsHorizontal } from "react-icons/tb";
 import { UseMutationResult, useQuery } from "react-query";
+import { restrictedIDEClasses } from "Theme/constants";
 import theme from "Theme/theme";
 import { v4 as uuidv4 } from "uuid";
 import { EntityDetailCloudRelation } from "./EntityDetailCloudRelation/EntityDetailCloudRelation";
@@ -104,7 +105,14 @@ export const EntityDetailRelationTypeBlock: React.FC<EntityDetailRelationTypeBlo
         }
       } else {
         // Multiple
-        return entitiesDict.map((e) => e.value as EntityEnums.Class);
+        const allEntities = entitiesDict.map(
+          (e) => e.value as EntityEnums.Class
+        );
+        if (relationType === RelationEnums.Type.Identification) {
+          return allEntities.filter((e) => !restrictedIDEClasses.includes(e));
+        } else {
+          return allEntities;
+        }
       }
     };
 

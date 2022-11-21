@@ -109,11 +109,13 @@ export const EntityDetailRelationRow: React.FC<EntityDetailRelationRow> = ({
     }),
     end: (item: DragItem | undefined, monitor: DragSourceMonitor) => {
       // TODO: api call
-      // if (item)
-      // relationUpdateMutation.mutate({
-      //   relationId: relation.id,
-      //   changes: { order: 0 },
-      // });
+      if (item) {
+        console.log(item.index);
+        relationUpdateMutation.mutate({
+          relationId: relation.id,
+          changes: { order: item.index },
+        });
+      }
     },
   });
 

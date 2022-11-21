@@ -9,7 +9,7 @@ import {
 } from "@shared/types";
 import { DropTargetMonitor, XYCoord } from "react-dnd";
 import { restrictedIDEClasses } from "Theme/constants";
-import { EntityDragItem } from "types";
+import { DragItem, EntityDragItem } from "types";
 
 // TODO: not used, references not in statement data interface
 export const findPositionInStatement = (
