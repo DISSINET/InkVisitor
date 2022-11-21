@@ -98,6 +98,40 @@ export const EntityDetailRelationRow: React.FC<EntityDetailRelationRow> = ({
     },
   });
 
+  // const moveEndRow = async (statementToMove: IStatement, index: number) => {
+  //   if (statementToMove.data.territory && statements[index].data.territory) {
+  //     const { order: thisOrder, territoryId } = statementToMove.data.territory;
+
+  //     if (thisOrder !== statements[index].data.territory?.order) {
+  //       let allOrders: number[] = statements.map((s) =>
+  //         s.data.territory ? s.data.territory.order : 0
+  //       );
+  //       allOrders.sort((a, b) => (a && b ? (a > b ? 1 : -1) : 0));
+
+  //       allOrders = allOrders.filter((o) => o !== thisOrder);
+  //       allOrders.splice(index, 0, thisOrder);
+
+  //       if (index === 0) {
+  //         allOrders[index] = allOrders[1] - 1;
+  //       } else if (index === allOrders.length - 1) {
+  //         allOrders[index] = allOrders[index - 1] + 1;
+  //       } else {
+  //         allOrders[index] = (allOrders[index - 1] + allOrders[index + 1]) / 2;
+  //       }
+
+  //       actantsUpdateMutation.mutate({
+  //         statementId: statementToMove.id,
+  //         data: {
+  //           territory: {
+  //             territoryId: territoryId,
+  //             order: allOrders[index],
+  //           },
+  //         },
+  //       });
+  //     }
+  //   }
+  // };
+
   const [{ isDragging }, drag, preview] = useDrag({
     item: {
       type: ItemTypes.ACTION_ROW,
@@ -108,12 +142,12 @@ export const EntityDetailRelationRow: React.FC<EntityDetailRelationRow> = ({
       isDragging: monitor.isDragging(),
     }),
     end: (item: DragItem | undefined, monitor: DragSourceMonitor) => {
-      // TODO: api call
-      if (item) {
+      // TODO: calculate order
+      if (item && item.index !== index) {
         console.log(item.index);
         relationUpdateMutation.mutate({
           relationId: relation.id,
-          changes: { order: item.index },
+          changes: { order: item.index + 0.5 },
         });
       }
     },
