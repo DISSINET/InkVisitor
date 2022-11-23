@@ -1,6 +1,6 @@
 import { EntityEnums } from "@shared/enums";
 import { Tooltip } from "components";
-import React, { MouseEventHandler } from "react";
+import React, { MouseEventHandler, useState } from "react";
 import { Colors } from "types";
 import { StyledButton, StyledButtonLabel } from "./ButtonStyles";
 
@@ -19,7 +19,9 @@ interface ButtonProps {
   fullWidth?: boolean;
 }
 
-export const Button: React.FC<ButtonProps & { innerRef?: React.MutableRefObject<HTMLButtonElement> }> = ({
+export const Button: React.FC<
+  ButtonProps & { innerRef?: React.MutableRefObject<HTMLButtonElement> }
+> = ({
   tooltip,
   label = "",
   icon,
@@ -36,6 +38,9 @@ export const Button: React.FC<ButtonProps & { innerRef?: React.MutableRefObject<
   innerRef,
   fullWidth = false,
 }) => {
+  const [referenceElement, setReferenceElement] = useState(null);
+  const [showTooltip, setShowTooltip] = useState(false);
+
   const renderButton = () => {
     return (
       <StyledButton
@@ -50,6 +55,8 @@ export const Button: React.FC<ButtonProps & { innerRef?: React.MutableRefObject<
         radiusRight={radiusRight}
         fullWidth={fullWidth}
         disabled={disabled}
+        onMouseOver={() => setShowTooltip(true)}
+        onMouseOut={() => setShowTooltip(false)}
       >
         {icon}
         {label && (
