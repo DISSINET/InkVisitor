@@ -8,11 +8,13 @@ export const StyledPopperContainer = styled(animated.div)`
   color: white;
   padding: 10px 18px;
   text-align: center;
+  z-index: 1000;
 
   #arrow {
     position: absolute;
     width: 10px;
     height: 10px;
+    z-index: 1000;
     &:after {
       content: "";
       background-color: black;

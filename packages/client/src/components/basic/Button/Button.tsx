@@ -1,5 +1,5 @@
 import { EntityEnums } from "@shared/enums";
-import { Tooltip } from "components";
+import { Tooltip, TooltipNew } from "components";
 import React, { MouseEventHandler, useState } from "react";
 import { Colors } from "types";
 import { StyledButton, StyledButtonLabel } from "./ButtonStyles";
@@ -38,13 +38,14 @@ export const Button: React.FC<
   innerRef,
   fullWidth = false,
 }) => {
-  const [referenceElement, setReferenceElement] = useState(null);
+  const [referenceElement, setReferenceElement] =
+    useState<HTMLButtonElement | null>(null);
   const [showTooltip, setShowTooltip] = useState(false);
 
   const renderButton = () => {
     return (
       <StyledButton
-        ref={innerRef as React.RefObject<HTMLButtonElement>}
+        ref={setReferenceElement}
         onClick={onClick}
         hasIcon={icon && true}
         color={color}
@@ -66,7 +67,14 @@ export const Button: React.FC<
     );
   };
   return tooltip ? (
-    <Tooltip label={tooltip}>{renderButton()}</Tooltip>
+    <>
+      {renderButton()}
+      <TooltipNew
+        text={tooltip}
+        visible={showTooltip}
+        referenceElement={referenceElement}
+      />
+    </>
   ) : (
     renderButton()
   );
