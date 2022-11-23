@@ -12,7 +12,7 @@ export default class Actant1Semantics extends Relation implements RelationTypes.
     super(data);
     this.entityIds = data.entityIds as [string, string];
     this.type = RelationEnums.Type.Actant1Semantics;
-    this.order = data.order || EntityEnums.Order.Last;
+    this.order = data.order === undefined ? EntityEnums.Order.Last : data.order;
   }
 
   /**
