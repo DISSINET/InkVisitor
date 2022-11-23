@@ -79,13 +79,18 @@ export const EntityDetailRelations: React.FC<EntityDetailRelations> = ({
         {filteredRelationTypes.map((relationType, key) => {
           const isCloudType = Relation.RelationRules[relationType].cloudType;
           const isMultiple = Relation.RelationRules[relationType].multiple;
+          // TODO: check if type has order to enable ordering
 
           const filteredRelations = relations.filter(
             (r) => r.type === relationType
           );
           const sortedRelations = isMultiple
             ? filteredRelations.sort((a, b) =>
-                a.order && b.order ? (a.order > b.order ? -1 : 1) : 0
+                a.order !== undefined && b.order !== undefined
+                  ? a.order > b.order
+                    ? 1
+                    : -1
+                  : 0
               )
             : filteredRelations;
 
