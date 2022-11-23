@@ -210,6 +210,27 @@ export const EntityDetailRelationTypeBlock: React.FC<EntityDetailRelationTypeBlo
       },
       [currentRelations]
     );
+    const updateOrderFn = (relationId: string, newOrder: number) => {
+      console.log(newOrder);
+      if (newOrder === 0) {
+        console.log(currentRelations[0].order && currentRelations[0].order - 1);
+        const finalOrder = currentRelations[0].order
+          ? currentRelations[0].order - 1
+          : EntityEnums.Order.First;
+        relationUpdateMutation.mutate({
+          relationId: relationId,
+          changes: { order: finalOrder },
+        });
+      } else {
+        const finalOrder = currentRelations[newOrder - 1].order
+          ? currentRelations[newOrder - 1].order
+          : EntityEnums.Order.Last;
+        relationUpdateMutation.mutate({
+          relationId: relationId,
+          changes: { order: finalOrder },
+        });
+      }
+    };
 
     return (
       <>
@@ -270,6 +291,7 @@ export const EntityDetailRelationTypeBlock: React.FC<EntityDetailRelationTypeBlo
                 relationDeleteMutation={relationDeleteMutation}
                 isMultiple={isMultiple}
                 moveRow={moveRow}
+                updateOrderFn={updateOrderFn}
               />
             )
           )}

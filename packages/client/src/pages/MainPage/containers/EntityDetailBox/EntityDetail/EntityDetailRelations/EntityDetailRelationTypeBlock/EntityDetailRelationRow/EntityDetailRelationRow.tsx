@@ -45,6 +45,7 @@ interface EntityDetailRelationRow {
   isMultiple: boolean;
   moveRow: (dragIndex: number, hoverIndex: number) => void;
   index: number;
+  updateOrderFn: (relationId: string, newOrder: number) => void;
 }
 export const EntityDetailRelationRow: React.FC<EntityDetailRelationRow> = ({
   relation,
@@ -58,6 +59,7 @@ export const EntityDetailRelationRow: React.FC<EntityDetailRelationRow> = ({
   isMultiple,
   moveRow,
   index,
+  updateOrderFn,
 }) => {
   const dropRef = useRef<HTMLTableRowElement>(null);
   const dragRef = useRef<HTMLTableCellElement>(null);
@@ -92,7 +94,7 @@ export const EntityDetailRelationRow: React.FC<EntityDetailRelationRow> = ({
   );
 
   const [, drop] = useDrop({
-    accept: ItemTypes.ACTION_ROW,
+    accept: ItemTypes.MULTI_RELATION,
     hover(item: DragItem, monitor: DropTargetMonitor) {
       dndHoverFn(item, index, monitor, dropRef, moveRow);
     },
@@ -134,7 +136,7 @@ export const EntityDetailRelationRow: React.FC<EntityDetailRelationRow> = ({
 
   const [{ isDragging }, drag, preview] = useDrag({
     item: {
-      type: ItemTypes.ACTION_ROW,
+      type: ItemTypes.MULTI_RELATION,
       index,
       id: relation.id.toString(),
     },
@@ -142,13 +144,8 @@ export const EntityDetailRelationRow: React.FC<EntityDetailRelationRow> = ({
       isDragging: monitor.isDragging(),
     }),
     end: (item: DragItem | undefined, monitor: DragSourceMonitor) => {
-      // TODO: calculate order
       if (item && item.index !== index) {
-        console.log(item.index);
-        relationUpdateMutation.mutate({
-          relationId: relation.id,
-          changes: { order: item.index + 0.5 },
-        });
+        updateOrderFn(relation.id, item.index);
       }
     },
   });
