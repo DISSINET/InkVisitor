@@ -1,14 +1,21 @@
 import { animated } from "react-spring";
 import styled from "styled-components";
+import { Colors } from "types";
 
-export const StyledPopperContainer = styled(animated.div)`
+interface StyledPopperContainer {
+  color: typeof Colors[number];
+}
+export const StyledPopperContainer = styled(
+  animated.div
+)<StyledPopperContainer>`
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
   border-radius: 6px;
-  background-color: black;
-  color: white;
+  background-color: ${({ theme, color }) => theme.color[color]};
+  color: ${({ theme }) => theme.color["white"]};
   padding: 10px 18px;
   text-align: center;
   z-index: 1000;
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
 
   #arrow {
     position: absolute;

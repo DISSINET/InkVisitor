@@ -2,6 +2,7 @@ import { VirtualElement } from "@popperjs/core";
 import React, { useEffect, useState } from "react";
 import { usePopper } from "react-popper";
 import { useSpring } from "react-spring";
+import { Colors } from "types";
 import {
   StyledPopperContainer,
   StyledTooltipContent,
@@ -11,11 +12,13 @@ interface TooltipNew {
   text: string;
   visible: boolean;
   referenceElement?: Element | VirtualElement | null;
+  color?: typeof Colors[number];
 }
 export const TooltipNew: React.FC<TooltipNew> = ({
   text = "tooltip text",
   visible = false,
   referenceElement,
+  color = "black",
 }) => {
   const [popperElement, setPopperElement] =
     useState<HTMLDivElement | null>(null);
@@ -64,6 +67,7 @@ export const TooltipNew: React.FC<TooltipNew> = ({
         <StyledPopperContainer
           ref={setPopperElement}
           style={{ ...styles.popper, ...animatedTooltip }}
+          color={color}
           {...attributes.popper}
         >
           <div ref={setArrowElement} style={styles.arrow} id="arrow" />
