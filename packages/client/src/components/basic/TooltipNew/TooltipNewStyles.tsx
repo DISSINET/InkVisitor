@@ -2,20 +2,18 @@ import { animated } from "react-spring";
 import styled from "styled-components";
 import { Colors } from "types";
 
-interface StyledPopperContainer {
+interface StyledContainer {
   color: typeof Colors[number];
 }
-export const StyledPopperContainer = styled(
-  animated.div
-)<StyledPopperContainer>`
+export const StyledContainer = styled(animated.div)<StyledContainer>`
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
   border-radius: 6px;
   background-color: ${({ theme, color }) => theme.color[color]};
   color: ${({ theme }) => theme.color["white"]};
-  padding: 10px 18px;
+  padding: ${({ theme }) => `10px`};
   text-align: center;
   z-index: 1000;
-  font-size: ${({ theme }) => theme.fontSize["sm"]};
+  font-size: ${({ theme }) => theme.fontSize["xxs"]};
 
   #arrow {
     position: absolute;
@@ -59,6 +57,7 @@ export const StyledPopperContainer = styled(
   }
 `;
 
-export const StyledTooltipContent = styled.div`
+export const StyledContent = styled.div`
   display: flex;
+  font-weight: ${({ theme }) => theme.fontWeight["bold"]};
 `;

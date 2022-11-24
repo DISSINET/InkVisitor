@@ -1,24 +1,46 @@
-import { VirtualElement } from "@popperjs/core";
-import React, { useEffect, useState } from "react";
+import {
+  AutoPlacement,
+  BasePlacement,
+  Placement,
+  VariationPlacement,
+  VirtualElement,
+} from "@popperjs/core";
+import React, { ReactElement, useEffect, useState } from "react";
 import { usePopper } from "react-popper";
 import { useSpring } from "react-spring";
 import { Colors } from "types";
-import {
-  StyledPopperContainer,
-  StyledTooltipContent,
-} from "./TooltipNewStyles";
+import { StyledContainer, StyledContent } from "./TooltipNewStyles";
 
 interface TooltipNew {
-  text: string;
   visible: boolean;
+
+  text: string;
+  content?: ReactElement[] | ReactElement;
+  tagGroup?: boolean;
+
   referenceElement?: Element | VirtualElement | null;
+  noArrow?: boolean;
+  // style
   color?: typeof Colors[number];
+  position?: AutoPlacement | BasePlacement | VariationPlacement;
+  offsetX?: number;
+  offsetY?: number;
 }
 export const TooltipNew: React.FC<TooltipNew> = ({
-  text = "tooltip text",
   visible = false,
+
+  text = "tooltip text",
+  content,
+  tagGroup = false,
+
   referenceElement,
+  noArrow = false,
+
+  // style
   color = "black",
+  position = "bottom",
+  offsetX = 0,
+  offsetY = 10,
 }) => {
   const [popperElement, setPopperElement] =
     useState<HTMLDivElement | null>(null);
@@ -27,19 +49,20 @@ export const TooltipNew: React.FC<TooltipNew> = ({
     referenceElement,
     popperElement,
     {
-      placement: "bottom",
+      placement: position,
       modifiers: [
         { name: "arrow", options: { element: arrowElement } },
         {
           name: "offset",
           options: {
-            offset: [0, 10],
+            offset: [offsetX, offsetY],
           },
         },
         {
           name: "flip",
           options: {
-            fallbackPlacements: ["top", "right", "left", "bottom"],
+            fallbackPlacements: ["auto"],
+            // fallbackPlacements: ["top", "right", "left", "bottom"],
           },
         },
       ],
@@ -64,15 +87,17 @@ export const TooltipNew: React.FC<TooltipNew> = ({
   return (
     <>
       {visible && (
-        <StyledPopperContainer
+        <StyledContainer
           ref={setPopperElement}
           style={{ ...styles.popper, ...animatedTooltip }}
           color={color}
           {...attributes.popper}
         >
-          <div ref={setArrowElement} style={styles.arrow} id="arrow" />
-          <StyledTooltipContent>{text}</StyledTooltipContent>
-        </StyledPopperContainer>
+          {!noArrow && (
+            <div ref={setArrowElement} style={styles.arrow} id="arrow" />
+          )}
+          <StyledContent>{text}</StyledContent>
+        </StyledContainer>
       )}
     </>
   );

@@ -63,9 +63,8 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
 
   tagHovered,
 }) => {
-  const [tooltipData, setTooltipData] = useState<
-    EntityTooltipNamespace.IResponse | false
-  >(false);
+  const [tooltipData, setTooltipData] =
+    useState<EntityTooltipNamespace.IResponse | false>(false);
 
   const { data, isFetching, isSuccess } = useQuery(
     ["tooltip", entityId, tagHovered],
