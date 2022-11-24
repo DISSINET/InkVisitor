@@ -231,41 +231,35 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
     disabledAttributes.statement as PropAttributeName[];
   const dissabledType = disabledAttributes.type as PropAttributeName[];
   const dissabledValue = disabledAttributes.value as PropAttributeName[];
+
+  const getTooltipContent = () => (
+    <StyledTooltipGrid>
+      <div>
+        <StyledTooltipHeading>Statement</StyledTooltipHeading>
+        {getTooltipColumn(modalData.statement, disabledAttributes.statement)}
+      </div>
+      <div>
+        <StyledTooltipHeading>Type</StyledTooltipHeading>
+        {getTooltipColumn(modalData.type, disabledAttributes.type)}
+      </div>
+      <div>
+        <StyledTooltipHeading>Value</StyledTooltipHeading>
+        {getTooltipColumn(modalData.value, disabledAttributes.value)}
+      </div>
+    </StyledTooltipGrid>
+  );
+
   return (
     <div>
-      <Tooltip
-        position="top right"
-        content={
-          <StyledTooltipGrid>
-            <div>
-              <StyledTooltipHeading>Statement</StyledTooltipHeading>
-              {getTooltipColumn(
-                modalData.statement,
-                disabledAttributes.statement
-              )}
-            </div>
-            <div>
-              <StyledTooltipHeading>Type</StyledTooltipHeading>
-              {getTooltipColumn(modalData.type, disabledAttributes.type)}
-            </div>
-            <div>
-              <StyledTooltipHeading>Value</StyledTooltipHeading>
-              {getTooltipColumn(modalData.value, disabledAttributes.value)}
-            </div>
-          </StyledTooltipGrid>
-        }
-      >
-        <div>
-          <Button
-            key="settings"
-            disabled={disabledOpenModal}
-            icon={<MdSettings />}
-            inverted
-            color="plain"
-            onClick={() => setModalOpen(true)}
-          />
-        </div>
-      </Tooltip>
+      <Button
+        key="settings"
+        disabled={disabledOpenModal}
+        icon={<MdSettings />}
+        inverted
+        color="plain"
+        onClick={() => setModalOpen(true)}
+        tooltipContent={getTooltipContent()}
+      />
 
       <Modal
         key="edit-modal"

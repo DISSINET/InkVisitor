@@ -100,16 +100,18 @@ export const TooltipNew: React.FC<TooltipNew> = ({
           {!noArrow && (
             <div ref={setArrowElement} style={styles.arrow} id="arrow" />
           )}
-          {label && (
-            <StyledContent>
-              <StyledRow>
-                <StyledLabel>{label}</StyledLabel>
-              </StyledRow>
-            </StyledContent>
-          )}
-          {content && (
-            <StyledContent tagGroup={tagGroup}>{content}</StyledContent>
-          )}
+          <div>
+            {label && (
+              <StyledContent>
+                <StyledRow>
+                  <StyledLabel>{label}</StyledLabel>
+                </StyledRow>
+              </StyledContent>
+            )}
+            {content && (
+              <StyledContent tagGroup={tagGroup}>{content}</StyledContent>
+            )}
+          </div>
         </StyledContainer>
       )}
     </>
