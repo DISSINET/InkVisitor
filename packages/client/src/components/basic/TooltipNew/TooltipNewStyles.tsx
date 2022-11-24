@@ -7,13 +7,18 @@ interface StyledContainer {
 }
 export const StyledContainer = styled(animated.div)<StyledContainer>`
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
-  border-radius: 6px;
+  border-radius: ${({ theme }) => theme.borderRadius["sm"]};
   background-color: ${({ theme, color }) => theme.color[color]};
   color: ${({ theme }) => theme.color["white"]};
-  padding: ${({ theme }) => `10px`};
   text-align: center;
   z-index: 1000;
   font-size: ${({ theme }) => theme.fontSize["xxs"]};
+  min-width: ${({ theme }) => theme.space[8]};
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  max-width: 40rem;
 
   #arrow {
     position: absolute;
@@ -57,7 +62,21 @@ export const StyledContainer = styled(animated.div)<StyledContainer>`
   }
 `;
 
-export const StyledContent = styled.div`
+interface StyledContent {
+  tagGroup?: boolean;
+}
+export const StyledContent = styled.div<StyledContent>`
   display: flex;
+  margin: ${({ theme, tagGroup }) =>
+    `${theme.space[2]} ${tagGroup ? theme.space[2] : theme.space[3]}`};
   font-weight: ${({ theme }) => theme.fontWeight["bold"]};
+`;
+
+export const StyledRow = styled.div`
+  display: flex;
+`;
+export const StyledLabel = styled.p`
+  max-width: 35rem;
+  font-weight: ${({ theme }) => theme.fontWeight["bold"]};
+  word-wrap: break-word;
 `;

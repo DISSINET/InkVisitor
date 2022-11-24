@@ -45,6 +45,3 @@ export const StyledLabel = styled.p`
   font-weight: ${({ theme }) => theme.fontWeight["bold"]};
   word-wrap: break-word;
 `;
-export const StyledItemsWrap = styled.div`
-  margin: ${({ theme }) => theme.space[2]};
-`;

@@ -70,7 +70,7 @@ export const Button: React.FC<
     <>
       {renderButton()}
       <TooltipNew
-        text={tooltip}
+        label={tooltip}
         visible={showTooltip}
         referenceElement={referenceElement}
       />

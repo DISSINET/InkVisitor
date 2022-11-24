@@ -1,7 +1,6 @@
 import {
   AutoPlacement,
   BasePlacement,
-  Placement,
   VariationPlacement,
   VirtualElement,
 } from "@popperjs/core";
@@ -9,12 +8,17 @@ import React, { ReactElement, useEffect, useState } from "react";
 import { usePopper } from "react-popper";
 import { useSpring } from "react-spring";
 import { Colors } from "types";
-import { StyledContainer, StyledContent } from "./TooltipNewStyles";
+import {
+  StyledContainer,
+  StyledContent,
+  StyledLabel,
+  StyledRow,
+} from "./TooltipNewStyles";
 
 interface TooltipNew {
   visible: boolean;
 
-  text: string;
+  label: string;
   content?: ReactElement[] | ReactElement;
   tagGroup?: boolean;
 
@@ -29,7 +33,7 @@ interface TooltipNew {
 export const TooltipNew: React.FC<TooltipNew> = ({
   visible = false,
 
-  text = "tooltip text",
+  label = "tooltip label",
   content,
   tagGroup = false,
 
@@ -82,7 +86,7 @@ export const TooltipNew: React.FC<TooltipNew> = ({
     if (visible) {
       update();
     }
-  }, [update, visible, text]);
+  }, [update, visible, label]);
 
   return (
     <>
@@ -96,7 +100,16 @@ export const TooltipNew: React.FC<TooltipNew> = ({
           {!noArrow && (
             <div ref={setArrowElement} style={styles.arrow} id="arrow" />
           )}
-          <StyledContent>{text}</StyledContent>
+          {label && (
+            <StyledContent>
+              <StyledRow>
+                <StyledLabel>{label}</StyledLabel>
+              </StyledRow>
+            </StyledContent>
+          )}
+          {content && (
+            <StyledContent tagGroup={tagGroup}>{content}</StyledContent>
+          )}
         </StyledContainer>
       )}
     </>
