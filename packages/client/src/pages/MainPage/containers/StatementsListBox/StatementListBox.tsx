@@ -14,6 +14,7 @@ import {
   Submit,
   TagGroup,
   Tooltip,
+  TooltipNew,
 } from "components";
 import { EntityTag } from "components/advanced";
 import { CStatement, DStatement } from "constructors";
@@ -327,7 +328,7 @@ export const StatementListBox: React.FC = () => {
           key={key}
           entity={actantObject}
           showOnly="entity"
-          tooltipPosition="bottom center"
+          tooltipPosition="bottom"
         />
       )
     );
@@ -416,6 +417,10 @@ export const StatementListBox: React.FC = () => {
 
           const definedActions = actionObjects.filter((a) => a !== undefined);
 
+          const [showTooltip, setShowTooltip] = useState(false);
+          const [referenceElement, setReferenceElement] =
+            useState<HTMLDivElement | null>(null);
+
           if (definedActions) {
             const isOversized = actionIds.length > 2;
             return (
@@ -426,24 +431,35 @@ export const StatementListBox: React.FC = () => {
                     renderListActant(action, key)
                   )}
                 {isOversized && (
-                  <Tooltip
-                    offsetX={-14}
-                    position="right center"
-                    color="success"
-                    noArrow
-                    tagGroup
-                    content={
-                      <TagGroup>
-                        {definedActions
-                          .slice(2)
-                          .map((action: IAction, key: number) =>
-                            renderListActant(action, key)
-                          )}
-                      </TagGroup>
-                    }
-                  >
-                    <StyledDots>{"..."}</StyledDots>
-                  </Tooltip>
+                  <>
+                    <TooltipNew
+                      visible={showTooltip}
+                      referenceElement={referenceElement}
+                      // offsetX={-14}
+                      offsetY={-14}
+                      position="right"
+                      color="success"
+                      noArrow
+                      tagGroup
+                      content={
+                        <TagGroup
+                        //  onMouseOut={() => setShowTooltip(false)}
+                        >
+                          {definedActions
+                            .slice(2)
+                            .map((action: IAction, key: number) =>
+                              renderListActant(action, key)
+                            )}
+                        </TagGroup>
+                      }
+                    ></TooltipNew>
+                    <StyledDots
+                      ref={setReferenceElement}
+                      onMouseOver={() => setShowTooltip(true)}
+                    >
+                      {"..."}
+                    </StyledDots>
+                  </>
                 )}
               </TagGroup>
             );

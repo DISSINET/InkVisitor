@@ -21,7 +21,7 @@ export const StyledItemsWrap = styled.div`
   margin: ${({ theme }) => theme.space[2]};
 `;
 // For EntityTags
-export const StyledTooltipSeparator = styled.div`
+export const StyledTooltipTrigger = styled.div`
   display: inline-flex;
   overflow: hidden;
 `;

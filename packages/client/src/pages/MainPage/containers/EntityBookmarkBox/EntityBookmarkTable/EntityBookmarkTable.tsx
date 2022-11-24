@@ -40,7 +40,7 @@ export const EntityBookmarkTable: React.FC<EntityBookmarkTable> = ({
             <StyledTagWrap>
               <EntityTag
                 entity={entity as IEntity}
-                tooltipPosition="left center"
+                tooltipPosition="left"
                 fullWidth
                 button={
                   <Button

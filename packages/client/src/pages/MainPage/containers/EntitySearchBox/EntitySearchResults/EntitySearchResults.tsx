@@ -55,7 +55,7 @@ const Row: React.FC<Row> = ({ data, index, style }) => {
   return (
     <StyledRow style={style}>
       <StyledResultItem>
-        <EntityTag entity={entity} tooltipPosition="left center" fullWidth />
+        <EntityTag entity={entity} tooltipPosition="left" fullWidth />
       </StyledResultItem>
     </StyledRow>
   );

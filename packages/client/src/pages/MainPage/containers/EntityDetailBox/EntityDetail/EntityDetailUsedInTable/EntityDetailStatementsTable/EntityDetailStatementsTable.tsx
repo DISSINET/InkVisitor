@@ -36,7 +36,7 @@ export const EntityDetailStatementsTable: React.FC<EntityDetailStatementsTable> 
             key={key}
             entity={actantObject}
             showOnly="entity"
-            tooltipPosition="right center"
+            tooltipPosition="right"
           />
         )
       );

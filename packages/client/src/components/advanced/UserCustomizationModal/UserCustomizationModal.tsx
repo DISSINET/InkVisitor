@@ -207,7 +207,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
               {territory ? (
                 <EntityTag
                   entity={territory}
-                  tooltipPosition={"left center"}
+                  tooltipPosition="left"
                   button={
                     <Button
                       key="d"

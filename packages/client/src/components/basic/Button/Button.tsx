@@ -70,13 +70,13 @@ export const Button: React.FC<
   };
   return tooltipLabel || tooltipContent ? (
     <>
-      {renderButton()}
       <TooltipNew
         label={tooltipLabel}
         content={tooltipContent}
         visible={showTooltip}
         referenceElement={referenceElement}
       />
+      {renderButton()}
     </>
   ) : (
     renderButton()

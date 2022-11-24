@@ -658,7 +658,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                       <EntityTag
                         entity={tagActant}
                         fullWidth
-                        tooltipPosition="left top"
+                        tooltipPosition="left"
                         button={
                           <Button
                             key="d"

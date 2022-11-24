@@ -1,7 +1,7 @@
 import { EntityEnums } from "@shared/enums";
 import { IResponseEntity } from "@shared/types";
-import { Tooltip, TypeBar } from "components";
-import React, { MouseEventHandler } from "react";
+import { TooltipNew, TypeBar } from "components";
+import React, { MouseEventHandler, useState } from "react";
 import { getEntityLabel } from "utils";
 import {
   StyledCgClose,
@@ -22,9 +22,18 @@ export const EntityDetailTab: React.FC<EntityDetailTab> = ({
   onClose,
   isSelected = false,
 }) => {
+  const [referenceElement, setReferenceElement] =
+    useState<HTMLDivElement | null>(null);
+  const [showTooltip, setShowTooltip] = useState(false);
+
   return (
-    <StyledTab isSelected={isSelected}>
-      <Tooltip label={getEntityLabel(entity)}>
+    <>
+      <StyledTab
+        isSelected={isSelected}
+        ref={setReferenceElement}
+        onMouseOver={() => setShowTooltip(true)}
+        onMouseOut={() => setShowTooltip(false)}
+      >
         <StyledLabel
           isSelected={isSelected}
           isItalic={
@@ -42,10 +51,17 @@ export const EntityDetailTab: React.FC<EntityDetailTab> = ({
           )}
           {!entity ? "..." : getEntityLabel(entity)}
         </StyledLabel>
-      </Tooltip>
-      <StyledClose onClick={onClose}>
-        <StyledCgClose size={13} strokeWidth={0.5} />
-      </StyledClose>
-    </StyledTab>
+
+        <StyledClose onClick={onClose}>
+          <StyledCgClose size={13} strokeWidth={0.5} />
+        </StyledClose>
+      </StyledTab>
+
+      <TooltipNew
+        visible={showTooltip}
+        referenceElement={referenceElement}
+        label={getEntityLabel(entity)}
+      />
+    </>
   );
 };

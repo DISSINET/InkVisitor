@@ -163,7 +163,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
             <EntityTag
               entity={propTypeEntity}
               fullWidth
-              tooltipPosition="right center"
+              tooltipPosition="right"
               button={
                 <Button
                   key="d"
@@ -222,7 +222,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
             <EntityTag
               entity={propValueEntity}
               fullWidth
-              tooltipPosition="right center"
+              tooltipPosition="right"
               button={
                 <Button
                   key="d"

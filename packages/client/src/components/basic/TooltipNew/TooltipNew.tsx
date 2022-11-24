@@ -29,6 +29,8 @@ interface TooltipNew {
   position?: AutoPlacement | BasePlacement | VariationPlacement;
   offsetX?: number;
   offsetY?: number;
+
+  disabled?: boolean;
 }
 export const TooltipNew: React.FC<TooltipNew> = ({
   visible = false,
@@ -45,6 +47,8 @@ export const TooltipNew: React.FC<TooltipNew> = ({
   position = "bottom",
   offsetX = 0,
   offsetY = 8,
+
+  disabled,
 }) => {
   const [popperElement, setPopperElement] =
     useState<HTMLDivElement | null>(null);
@@ -64,9 +68,9 @@ export const TooltipNew: React.FC<TooltipNew> = ({
         },
         {
           name: "flip",
+          enabled: true,
           options: {
             fallbackPlacements: ["auto"],
-            // fallbackPlacements: ["top", "right", "left", "bottom"],
           },
         },
       ],
@@ -90,7 +94,7 @@ export const TooltipNew: React.FC<TooltipNew> = ({
 
   return (
     <>
-      {visible && (
+      {!disabled && visible && (
         <StyledContainer
           ref={setPopperElement}
           style={{ ...styles.popper, ...animatedTooltip }}

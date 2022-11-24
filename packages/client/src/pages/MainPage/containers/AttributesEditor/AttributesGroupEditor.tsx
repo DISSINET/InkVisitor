@@ -227,11 +227,6 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
     );
   };
 
-  const dissabledStatement =
-    disabledAttributes.statement as PropAttributeName[];
-  const dissabledType = disabledAttributes.type as PropAttributeName[];
-  const dissabledValue = disabledAttributes.value as PropAttributeName[];
-
   const getTooltipContent = () => (
     <StyledTooltipGrid>
       <div>
@@ -248,6 +243,11 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
       </div>
     </StyledTooltipGrid>
   );
+
+  const dissabledStatement =
+    disabledAttributes.statement as PropAttributeName[];
+  const dissabledType = disabledAttributes.type as PropAttributeName[];
+  const dissabledValue = disabledAttributes.value as PropAttributeName[];
 
   return (
     <div>
@@ -376,7 +376,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
                   <EntityTag
                     entity={propValueActant}
                     fullWidth
-                    tooltipPosition="left center"
+                    tooltipPosition="left"
                     button={
                       <Button
                         key="d"

@@ -1,15 +1,16 @@
+import { Placement } from "@popperjs/core";
 import { certaintyDict } from "@shared/dictionaries";
 import { RelationEnums } from "@shared/enums";
 import { EntityTooltip as EntityTooltipNamespace } from "@shared/types";
 import api from "api";
-import { LetterIcon, Tooltip } from "components";
-import React, { ReactElement, useEffect, useMemo, useState } from "react";
+import { LetterIcon, TooltipNew } from "components";
+import React, { ReactElement, useMemo, useState } from "react";
 import { AiOutlineTag } from "react-icons/ai";
 import { BiCommentDetail } from "react-icons/bi";
 import { BsCardText } from "react-icons/bs";
 import { ImListNumbered } from "react-icons/im";
 import { useQuery } from "react-query";
-import { EventType, PopupPosition } from "reactjs-popup/dist/types";
+import { PopupPosition } from "reactjs-popup/dist/types";
 import { Colors } from "types";
 import { EntityTooltipRelationTreeTable } from "./EntityTooltipRelationTreeTable/EntityTooltipRelationTreeTable";
 import {
@@ -20,7 +21,7 @@ import {
   StyledRelations,
   StyledRelationTypeBlock,
   StyledRow,
-  StyledTooltipSeparator,
+  StyledTooltipTrigger,
 } from "./EntityTooltipStyles";
 
 interface EntityTooltip {
@@ -33,13 +34,13 @@ interface EntityTooltip {
   text?: string;
   itemsCount?: number;
   // settings
-  position?: PopupPosition | PopupPosition[];
-  on?: EventType | EventType[];
-  noArrow?: boolean;
+  position?: Placement;
+  // on?: EventType | EventType[];
+  // noArrow?: boolean;
   color?: typeof Colors[number];
   disabled?: boolean;
-  offsetX?: number;
-  offsetY?: number;
+  // offsetX?: number;
+  // offsetY?: number;
 
   tagHovered: boolean;
 }
@@ -54,12 +55,8 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
   itemsCount,
   // settings
   position,
-  on,
-  noArrow,
   color,
   disabled,
-  offsetX,
-  offsetY,
 
   tagHovered,
 }) => {
@@ -255,19 +252,30 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
     [tooltipData]
   );
 
+  const [referenceElement, setReferenceElement] =
+    useState<HTMLDivElement | null>(null);
+  const [showTooltip, setShowTooltip] = useState(false);
+
   return (
-    <Tooltip
-      content={renderContent}
-      position={position}
-      on={on}
-      noArrow={noArrow}
-      color={color}
-      disabled={disabled}
-      offsetX={offsetX}
-      offsetY={offsetY}
-      onClose={() => setTooltipData(false)}
-    >
-      <StyledTooltipSeparator>{children}</StyledTooltipSeparator>
-    </Tooltip>
+    <>
+      <TooltipNew
+        visible={showTooltip}
+        referenceElement={referenceElement}
+        content={renderContent}
+        position={position}
+        color={color}
+        disabled={disabled}
+      />
+      <StyledTooltipTrigger
+        ref={setReferenceElement}
+        onMouseOver={() => setShowTooltip(true)}
+        onMouseOut={() => {
+          setShowTooltip(false);
+          setTooltipData(false);
+        }}
+      >
+        {children}
+      </StyledTooltipTrigger>
+    </>
   );
 };

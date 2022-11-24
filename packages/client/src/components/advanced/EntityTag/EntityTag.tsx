@@ -1,3 +1,4 @@
+import { Placement } from "@popperjs/core";
 import { EntityEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
 import { Tag } from "components";
@@ -21,7 +22,7 @@ interface EntityTag {
   disableTooltip?: boolean;
   disableDoubleClick?: boolean;
   disableDrag?: boolean;
-  tooltipPosition?: PopupPosition | PopupPosition[];
+  tooltipPosition?: Placement;
   updateOrderFn?: (item: EntityDragItem) => void;
   lvl?: number;
   statementsCount?: number;
