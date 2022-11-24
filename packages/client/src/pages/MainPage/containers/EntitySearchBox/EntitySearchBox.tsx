@@ -252,7 +252,7 @@ export const EntitySearchBox: React.FC = () => {
                   icon={<FaUnlink />}
                   color="danger"
                   inverted
-                  tooltip="unlink entity"
+                  tooltipLabel="unlink entity"
                   onClick={() => {
                     handleChange({ cooccurrenceId: "" });
                   }}

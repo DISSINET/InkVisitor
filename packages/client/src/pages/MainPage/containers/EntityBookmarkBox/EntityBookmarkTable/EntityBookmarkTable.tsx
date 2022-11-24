@@ -48,7 +48,7 @@ export const EntityBookmarkTable: React.FC<EntityBookmarkTable> = ({
                     icon={<FaUnlink />}
                     color="plain"
                     inverted
-                    tooltip="unlink entity"
+                    tooltipLabel="unlink entity"
                     onClick={() => {
                       removeBookmark(folder.id, entity.id);
                     }}

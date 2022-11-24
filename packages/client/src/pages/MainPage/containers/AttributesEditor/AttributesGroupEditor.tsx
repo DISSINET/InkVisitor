@@ -326,7 +326,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
                         icon={<FaUnlink />}
                         color="plain"
                         inverted
-                        tooltip="unlink actant"
+                        tooltipLabel="unlink actant"
                         onClick={() => {
                           updateProp(statementId, {
                             type: {
@@ -387,7 +387,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
                       <Button
                         key="d"
                         icon={<FaUnlink />}
-                        tooltip="unlink actant"
+                        tooltipLabel="unlink actant"
                         color="plain"
                         inverted
                         onClick={() => {

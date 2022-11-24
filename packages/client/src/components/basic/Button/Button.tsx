@@ -1,11 +1,12 @@
 import { EntityEnums } from "@shared/enums";
 import { Tooltip, TooltipNew } from "components";
-import React, { MouseEventHandler, useState } from "react";
+import React, { MouseEventHandler, ReactElement, useState } from "react";
 import { Colors } from "types";
 import { StyledButton, StyledButtonLabel } from "./ButtonStyles";
 
 interface ButtonProps {
-  tooltip?: string;
+  tooltipLabel?: string;
+  tooltipContent?: ReactElement[] | ReactElement;
   label?: string;
   icon?: JSX.Element | EntityEnums.Operator;
   inverted?: boolean;
@@ -22,7 +23,8 @@ interface ButtonProps {
 export const Button: React.FC<
   ButtonProps & { innerRef?: React.MutableRefObject<HTMLButtonElement> }
 > = ({
-  tooltip,
+  tooltipLabel,
+  tooltipContent,
   label = "",
   icon,
   inverted = false,
@@ -66,11 +68,12 @@ export const Button: React.FC<
       </StyledButton>
     );
   };
-  return tooltip ? (
+  return tooltipLabel || tooltipContent ? (
     <>
       {renderButton()}
       <TooltipNew
-        label={tooltip}
+        label={tooltipLabel}
+        content={tooltipContent}
         visible={showTooltip}
         referenceElement={referenceElement}
       />

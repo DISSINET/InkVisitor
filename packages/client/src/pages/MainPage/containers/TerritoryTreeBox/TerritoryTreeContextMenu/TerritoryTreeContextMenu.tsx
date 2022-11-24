@@ -88,7 +88,7 @@ export const TerritoryTreeContextMenu: React.FC<TerritoryTreeContextMenu> = ({
             {right !== UserEnums.RoleMode.Read && (
               <Button
                 key="add"
-                tooltip="add child territory"
+                tooltipLabel="add child territory"
                 icon={<FaPlus size={14} />}
                 color="info"
                 onClick={() => {
@@ -101,7 +101,7 @@ export const TerritoryTreeContextMenu: React.FC<TerritoryTreeContextMenu> = ({
             )}
             <Button
               key="favorites"
-              tooltip={
+              tooltipLabel={
                 isFavorited ? "remove from favorites" : "add to favorites"
               }
               icon={<FaStar size={14} />}
@@ -137,7 +137,7 @@ export const TerritoryTreeContextMenu: React.FC<TerritoryTreeContextMenu> = ({
               (right === UserEnums.RoleMode.Write && empty)) && (
                 <Button
                   key="delete"
-                  tooltip="delete territory"
+                  tooltipLabel="delete territory"
                   icon={<FaTrashAlt size={14} />}
                   color="danger"
                   onClick={() => {

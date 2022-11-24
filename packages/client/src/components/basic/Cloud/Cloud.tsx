@@ -15,7 +15,7 @@ export const Cloud: React.FC<Cloud> = ({ children, onUnlink }) => {
         <Button
           color="plain"
           inverted
-          tooltip="unlink from cloud"
+          tooltipLabel="unlink from cloud"
           icon={<FaUnlink />}
           onClick={onUnlink}
         />

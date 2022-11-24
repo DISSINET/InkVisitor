@@ -532,7 +532,7 @@ export const StatementListBox: React.FC = () => {
                       key="r"
                       icon={<FaTrashAlt size={14} />}
                       color="danger"
-                      tooltip="delete"
+                      tooltipLabel="delete"
                       onClick={() => {
                         setStatementToDelete(
                           row.original as IResponseStatement
@@ -544,7 +544,7 @@ export const StatementListBox: React.FC = () => {
                       key="d"
                       icon={<FaClone size={14} />}
                       color="warning"
-                      tooltip="duplicate"
+                      tooltipLabel="duplicate"
                       onClick={() => {
                         duplicateStatement(row.original as IResponseStatement);
                       }}
@@ -557,7 +557,7 @@ export const StatementListBox: React.FC = () => {
                           <BsArrowUp size={14} />
                         </>
                       }
-                      tooltip="add new statement before"
+                      tooltipLabel="add new statement before"
                       color="info"
                       onClick={() => {
                         addStatementAtCertainIndex(row.index);
@@ -571,7 +571,7 @@ export const StatementListBox: React.FC = () => {
                           <BsArrowDown size={14} />
                         </>
                       }
-                      tooltip="add new statement after"
+                      tooltipLabel="add new statement after"
                       color="success"
                       onClick={() => {
                         addStatementAtCertainIndex(row.index + 1);

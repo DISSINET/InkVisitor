@@ -71,7 +71,7 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
             icon={<FaClone size={14} />}
             color="primary"
             label="duplicate"
-            tooltip="duplicate entity"
+            tooltipLabel="duplicate entity"
             inverted
             onClick={() => {
               duplicateEntity(entity);
@@ -83,7 +83,7 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
             color="primary"
             icon={<FaTrashAlt />}
             label="remove"
-            tooltip="remove entity"
+            tooltipLabel="remove entity"
             inverted
             onClick={() => {
               setShowRemoveSubmit(true);
@@ -94,7 +94,7 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
           <Button
             key="template"
             icon={<GrClone size={14} />}
-            tooltip="create template from entity"
+            tooltipLabel="create template from entity"
             inverted
             color="primary"
             label="Create template"
@@ -106,7 +106,7 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
         <Button
           key="refresh"
           icon={<FaRecycle size={14} />}
-          tooltip="refresh data"
+          tooltipLabel="refresh data"
           inverted
           color="primary"
           label="refresh"
@@ -118,7 +118,7 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
           <Button
             key="edit"
             icon={<FaEdit size={14} />}
-            tooltip="open statement in editor"
+            tooltipLabel="open statement in editor"
             inverted
             color="primary"
             label="open"

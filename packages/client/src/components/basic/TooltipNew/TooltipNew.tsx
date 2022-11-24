@@ -18,11 +18,11 @@ import {
 interface TooltipNew {
   visible: boolean;
 
-  label: string;
+  label?: string;
   content?: ReactElement[] | ReactElement;
   tagGroup?: boolean;
 
-  referenceElement?: Element | VirtualElement | null;
+  referenceElement: Element | VirtualElement | null;
   noArrow?: boolean;
   // style
   color?: typeof Colors[number];
@@ -33,7 +33,7 @@ interface TooltipNew {
 export const TooltipNew: React.FC<TooltipNew> = ({
   visible = false,
 
-  label = "tooltip label",
+  label = "",
   content,
   tagGroup = false,
 
@@ -44,7 +44,7 @@ export const TooltipNew: React.FC<TooltipNew> = ({
   color = "black",
   position = "bottom",
   offsetX = 0,
-  offsetY = 10,
+  offsetY = 8,
 }) => {
   const [popperElement, setPopperElement] =
     useState<HTMLDivElement | null>(null);

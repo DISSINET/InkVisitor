@@ -161,7 +161,7 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
                     tooltipPosition="left center"
                     button={
                       <Button
-                        tooltip="remove template"
+                        tooltipLabel="remove template"
                         icon={<FaTrash />}
                         color="plain"
                         inverted

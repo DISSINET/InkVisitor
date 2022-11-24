@@ -96,9 +96,8 @@ export const Suggester: React.FC<Suggester> = ({
 
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showTemplateModal, setShowTemplateModal] = useState(false);
-  const [tempDropItem, setTempDropItem] = useState<EntityDragItem | false>(
-    false
-  );
+  const [tempDropItem, setTempDropItem] =
+    useState<EntityDragItem | false>(false);
 
   useKeypress(
     "Escape",
@@ -146,7 +145,8 @@ export const Suggester: React.FC<Suggester> = ({
       } else {
         onCreate({
           label: typed,
-          entityClass: entitiesDictKeys[category.value as EntityEnums.Class].value,
+          entityClass:
+            entitiesDictKeys[category.value as EntityEnums.Class].value,
         });
       }
     } else if (selected > -1) {
@@ -179,7 +179,8 @@ export const Suggester: React.FC<Suggester> = ({
       } else {
         onCreate({
           label: typed,
-          entityClass: entitiesDictKeys[category.value as EntityEnums.Class].value,
+          entityClass:
+            entitiesDictKeys[category.value as EntityEnums.Class].value,
         });
       }
     } else {
@@ -260,7 +261,7 @@ export const Suggester: React.FC<Suggester> = ({
             <StyledSuggesterButton>
               <Button
                 icon={<FaPlus style={{ fontSize: "16px", padding: "2px" }} />}
-                tooltip="create new actant"
+                tooltipLabel="create new actant"
                 color="primary"
                 inverted={selected !== -1}
                 onClick={() => {

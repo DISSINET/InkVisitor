@@ -162,7 +162,7 @@ export const SuggesterCreateModal: React.FC<SuggesterCreateModal> = ({
                           icon={<FaUnlink />}
                           color="danger"
                           inverted
-                          tooltip="unlink actant"
+                          tooltipLabel="unlink actant"
                           onClick={() => {
                             setTerritoryId("");
                           }}

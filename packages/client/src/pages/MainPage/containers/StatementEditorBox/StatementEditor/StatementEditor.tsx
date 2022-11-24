@@ -118,9 +118,8 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   // TEMPLATES
   const [showApplyTemplateModal, setShowApplyTemplateModal] =
     useState<boolean>(false);
-  const [templateToApply, setTemplateToApply] = useState<IEntity | false>(
-    false
-  );
+  const [templateToApply, setTemplateToApply] =
+    useState<IEntity | false>(false);
 
   const handleAskForTemplateApply = (templateOptionToApply: IOption) => {
     if (templates) {
@@ -663,7 +662,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                         button={
                           <Button
                             key="d"
-                            tooltip="unlink actant from tags"
+                            tooltipLabel="unlink actant from tags"
                             icon={<FaUnlink />}
                             color="plain"
                             inverted

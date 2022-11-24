@@ -67,7 +67,7 @@ export const UsersUtils: React.FC<UsersUtils> = React.memo(({}) => {
         <Button
           key="add"
           label="new user"
-          tooltip="create user"
+          tooltipLabel="create user"
           disabled={!(validNewUserEmail() && validNewUserName)}
           icon={<FaPlus size={14} />}
           color="primary"
@@ -88,7 +88,7 @@ export const UsersUtils: React.FC<UsersUtils> = React.memo(({}) => {
             }}
           />
           <Button
-            tooltip="Test email will be sent to your email"
+            tooltipLabel="Test email will be sent to your email"
             color="primary"
             label="test email"
             onClick={() =>

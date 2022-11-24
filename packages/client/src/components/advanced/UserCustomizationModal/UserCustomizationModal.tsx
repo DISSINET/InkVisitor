@@ -214,7 +214,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                       icon={<FaUnlink />}
                       color="danger"
                       inverted
-                      tooltip="unlink actant"
+                      tooltipLabel="unlink actant"
                       onClick={() => {
                         handleChange("defaultTerritory", "");
                       }}
