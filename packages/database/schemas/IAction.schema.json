@@ -81,7 +81,9 @@
         "ces",
         "ita",
         "fra",
-        "deu"
+        "deu",
+        "spa",
+        "hun"
       ],
       "type": "string"
     },

@@ -31,6 +31,9 @@
         "id": {
           "type": "string"
         },
+        "order": {
+          "type": "number"
+        },
         "type": {
           "const": "IDE",
           "type": "string"
