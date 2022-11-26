@@ -210,14 +210,8 @@ export const EntityDetailRelationTypeBlock: React.FC<EntityDetailRelationTypeBlo
       },
       [currentRelations]
     );
-    const updateOrderFn = (relationId: string, newOrder: number) => {
-      console.log(currentRelations);
-      console.log(
-        relations[0].order !== undefined
-          ? relations[0].order - 1
-          : EntityEnums.Order.First
-      );
 
+    const updateOrderFn = (relationId: string, newOrder: number) => {
       if (newOrder === 0) {
         const finalOrder =
           relations[0].order !== undefined

@@ -100,52 +100,18 @@ export const EntityDetailRelationRow: React.FC<EntityDetailRelationRow> = ({
     },
   });
 
-  // const moveEndRow = async (statementToMove: IStatement, index: number) => {
-  //   if (statementToMove.data.territory && statements[index].data.territory) {
-  //     const { order: thisOrder, territoryId } = statementToMove.data.territory;
-
-  //     if (thisOrder !== statements[index].data.territory?.order) {
-  //       let allOrders: number[] = statements.map((s) =>
-  //         s.data.territory ? s.data.territory.order : 0
-  //       );
-  //       allOrders.sort((a, b) => (a && b ? (a > b ? 1 : -1) : 0));
-
-  //       allOrders = allOrders.filter((o) => o !== thisOrder);
-  //       allOrders.splice(index, 0, thisOrder);
-
-  //       if (index === 0) {
-  //         allOrders[index] = allOrders[1] - 1;
-  //       } else if (index === allOrders.length - 1) {
-  //         allOrders[index] = allOrders[index - 1] + 1;
-  //       } else {
-  //         allOrders[index] = (allOrders[index - 1] + allOrders[index + 1]) / 2;
-  //       }
-
-  //       actantsUpdateMutation.mutate({
-  //         statementId: statementToMove.id,
-  //         data: {
-  //           territory: {
-  //             territoryId: territoryId,
-  //             order: allOrders[index],
-  //           },
-  //         },
-  //       });
-  //     }
-  //   }
-  // };
-
   const [{ isDragging }, drag, preview] = useDrag({
     item: {
       type: ItemTypes.MULTI_RELATION,
       index,
-      id: relation.id.toString(),
+      id: relation.id,
     },
     collect: (monitor: DragSourceMonitor) => ({
       isDragging: monitor.isDragging(),
     }),
     end: (item: DragItem | undefined, monitor: DragSourceMonitor) => {
       if (item && item.index !== index) {
-        updateOrderFn(relation.id, item.index);
+        updateOrderFn(item.id, item.index);
       }
     },
   });
