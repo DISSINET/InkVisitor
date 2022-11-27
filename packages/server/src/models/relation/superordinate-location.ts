@@ -11,6 +11,6 @@ export default class SuperordinateLocation extends Relation implements RelationT
     super(data);
     this.entityIds = data.entityIds as [string, string];
     this.type = RelationEnums.Type.SuperordinateLocation;
-    this.order = data.order || EntityEnums.Order.Last;
+    this.order = data.order === undefined ? EntityEnums.Order.Last : data.order;
   }
 }

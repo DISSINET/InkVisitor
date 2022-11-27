@@ -20,12 +20,20 @@ export const StyledCloudEntityWrapper = styled.div`
 `;
 interface StyledGrid {
   hasAttribute?: boolean;
+  isMultiple: boolean;
 }
 export const StyledGrid = styled.div<StyledGrid>`
   display: grid;
-  grid-template-columns: auto ${({ hasAttribute }) =>
-      hasAttribute ? "14rem" : ""};
+  grid-template-columns: ${({ hasAttribute, isMultiple }) =>
+    `${isMultiple ? "2rem" : ""} auto ${hasAttribute ? "14rem" : ""}`};
   max-width: 100%;
+  align-items: center;
+  width: fit-content;
+`;
+export const StyledGridColumn = styled.div`
+  margin: ${({ theme }) => theme.space[1]};
+  display: grid;
+  align-items: center;
 `;
 export const StyledRelationType = styled.div`
   display: flex;

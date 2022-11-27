@@ -60,9 +60,8 @@ export const EntityDetailInverseRelations: React.FC<EntityDetailInverseRelations
                 if (!relationRule.asymmetrical) return;
 
                 return (
-                  <StyledInverseRelationRow>
+                  <StyledInverseRelationRow key={key}>
                     <EntityDetailInverseRelation
-                      key={key}
                       entity={entity}
                       relationRule={relationRule}
                       relationType={relationType}
