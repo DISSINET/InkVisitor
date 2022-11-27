@@ -212,25 +212,30 @@ export const EntityDetailRelationTypeBlock: React.FC<EntityDetailRelationTypeBlo
     );
 
     const updateOrderFn = (relationId: string, newOrder: number) => {
+      let allOrders: number[] = relations.map((relation, key) =>
+        relation.order !== undefined ? relation.order : 0
+      );
+      let finalOrder: number = 0;
+
+      const currentRelation = relations.find(
+        (relation) => relation.id === relationId
+      );
+
       if (newOrder === 0) {
-        const finalOrder =
-          relations[0].order !== undefined
-            ? relations[0].order - 1
-            : EntityEnums.Order.First;
-        relationUpdateMutation.mutate({
-          relationId: relationId,
-          changes: { order: finalOrder },
-        });
+        finalOrder = allOrders[0] - 1;
+      } else if (newOrder === relations.length - 1) {
+        finalOrder = allOrders[newOrder - 1] + 1;
       } else {
-        const finalOrder =
-          relations[newOrder - 1].order !== undefined
-            ? relations[newOrder - 1].order
-            : EntityEnums.Order.Last;
-        relationUpdateMutation.mutate({
-          relationId: relationId,
-          changes: { order: finalOrder },
-        });
+        if (currentRelation?.order === allOrders[newOrder - 1]) {
+          finalOrder = allOrders[newOrder];
+        } else {
+          finalOrder = allOrders[newOrder - 1];
+        }
       }
+      relationUpdateMutation.mutate({
+        relationId: relationId,
+        changes: { order: finalOrder },
+      });
     };
 
     return (
