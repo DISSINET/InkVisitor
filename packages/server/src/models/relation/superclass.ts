@@ -12,7 +12,7 @@ export default class Superclass extends Relation implements RelationTypes.ISuper
     super(data);
     this.entityIds = data.entityIds as [string, string];
     this.type = RelationEnums.Type.Superclass;
-    this.order = data.order || EntityEnums.Order.Last;
+    this.order = data.order === undefined ? EntityEnums.Order.Last : data.order;
   }
 
   /**

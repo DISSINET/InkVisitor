@@ -1,4 +1,4 @@
-import { certaintyDict, entitiesDict } from "@shared/dictionaries";
+import { entitiesDict } from "@shared/dictionaries";
 import { EntityEnums, RelationEnums } from "@shared/enums";
 import {
   IResponseDetail,
@@ -8,21 +8,20 @@ import {
 } from "@shared/types";
 import api from "api";
 import { AxiosResponse } from "axios";
-import { Button, Cloud, Dropdown, LetterIcon } from "components";
-import { EntitySuggester, EntityTag } from "components/advanced";
-import React, { useEffect, useState } from "react";
-import { FaUnlink } from "react-icons/fa";
+import { LetterIcon } from "components";
+import { EntitySuggester } from "components/advanced";
+import update from "immutability-helper";
+import React, { useCallback, useEffect, useState } from "react";
 import { TbArrowNarrowRight, TbArrowsHorizontal } from "react-icons/tb";
 import { UseMutationResult, useQuery } from "react-query";
+import { restrictedIDEClasses } from "Theme/constants";
 import theme from "Theme/theme";
 import { v4 as uuidv4 } from "uuid";
+import { EntityDetailCloudRelation } from "./EntityDetailCloudRelation/EntityDetailCloudRelation";
+import { EntityDetailRelationRow } from "./EntityDetailRelationRow/EntityDetailRelationRow";
 import {
-  StyledCloudEntityWrapper,
-  StyledEntityWrapper,
-  StyledGrid,
   StyledLabel,
   StyledLabelSuggester,
-  StyledRelation,
   StyledRelationType,
   StyledRelationValues,
   StyledSuggesterWrapper,
@@ -106,26 +105,15 @@ export const EntityDetailRelationTypeBlock: React.FC<EntityDetailRelationTypeBlo
         }
       } else {
         // Multiple
-        return entitiesDict.map((e) => e.value as EntityEnums.Class);
-      }
-    };
-
-    const handleCloudRemove = () => {
-      if (relations[0]?.entityIds?.length > 2) {
-        const newEntityIds = relations[0].entityIds.filter(
-          (eId) => eId !== entity.id
+        const allEntities = entitiesDict.map(
+          (e) => e.value as EntityEnums.Class
         );
-        relationUpdateMutation.mutate({
-          relationId: relations[0].id,
-          changes: { entityIds: newEntityIds },
-        });
-      } else {
-        relationDeleteMutation.mutate(relations[0].id);
+        if (relationType === RelationEnums.Type.Identification) {
+          return allEntities.filter((e) => !restrictedIDEClasses.includes(e));
+        } else {
+          return allEntities;
+        }
       }
-    };
-
-    const handleMultiRemove = (relationId: string) => {
-      relationDeleteMutation.mutate(relationId);
     };
 
     const handleMultiSelected = (selectedId: string) => {
@@ -156,97 +144,6 @@ export const EntityDetailRelationTypeBlock: React.FC<EntityDetailRelationTypeBlo
         .concat(entity.id);
       setUsedEntityIds([...new Set(entityIds)]);
     }, [entities, relations]);
-
-    const renderCloudRelation = (
-      relation: Relation.IRelation,
-      key: number
-    ): React.ReactElement => (
-      <StyledGrid key={key}>
-        {relation.entityIds.length > 0 && (
-          <Cloud onUnlink={() => handleCloudRemove()}>
-            <StyledRelation>
-              {relation.entityIds.map((entityId, key) => {
-                const relationEntity = entities?.find((e) => e.id === entityId);
-                return (
-                  <React.Fragment key={key}>
-                    {relationEntity && relationEntity.id !== entity.id && (
-                      <StyledCloudEntityWrapper>
-                        <EntityTag fullWidth entity={relationEntity} />
-                      </StyledCloudEntityWrapper>
-                    )}
-                  </React.Fragment>
-                );
-              })}
-            </StyledRelation>
-          </Cloud>
-        )}
-      </StyledGrid>
-    );
-
-    const shouldBeRendered = (key: number) =>
-      !relationRule.asymmetrical || (relationRule.asymmetrical && key > 0);
-
-    const renderNonCloudRelation = (
-      relation: Relation.IRelation,
-      key: number
-    ): React.ReactElement => (
-      <StyledGrid key={key} hasAttribute={relationRule.attributes.length > 0}>
-        <StyledRelation>
-          {relation.entityIds.map((entityId, key) => {
-            const relationEntity = entities?.find((e) => e.id === entityId);
-            return (
-              <React.Fragment key={key}>
-                {relationEntity &&
-                  relationEntity.id !== entity.id &&
-                  shouldBeRendered(key) && (
-                    <StyledEntityWrapper key={key}>
-                      <EntityTag
-                        fullWidth
-                        entity={relationEntity}
-                        button={
-                          <Button
-                            key="d"
-                            icon={<FaUnlink />}
-                            color="plain"
-                            inverted
-                            tooltip="unlink"
-                            onClick={() => handleMultiRemove(relation.id)}
-                          />
-                        }
-                      />
-                    </StyledEntityWrapper>
-                  )}
-              </React.Fragment>
-            );
-          })}
-        </StyledRelation>
-
-        {/* TODO: Make universal */}
-        {/* Certainty (Identification) */}
-        {relationType === RelationEnums.Type.Identification && (
-          <div>
-            <Dropdown
-              width={140}
-              placeholder="certainty"
-              options={certaintyDict}
-              value={{
-                value: (relation as Relation.IIdentification).certainty,
-                label: certaintyDict.find(
-                  (c) =>
-                    c.value === (relation as Relation.IIdentification).certainty
-                )?.label,
-              }}
-              onChange={(newValue: any) => {
-                relationUpdateMutation.mutate({
-                  relationId: relation.id,
-                  changes: { certainty: newValue.value as string },
-                });
-              }}
-            />
-          </div>
-        )}
-      </StyledGrid>
-    );
 
     const [tempCloudEntityId, setTempCloudEntityId] =
       useState<string | false>(false);
@@ -291,6 +188,56 @@ export const EntityDetailRelationTypeBlock: React.FC<EntityDetailRelationTypeBlo
       }
     };
 
+    useEffect(() => {
+      setCurrentRelations(relations);
+    }, [relations]);
+
+    const [currentRelations, setCurrentRelations] = useState<
+      Relation.IRelation[]
+    >([]);
+
+    const moveRow = useCallback(
+      (dragIndex: number, hoverIndex: number) => {
+        const dragRecord = currentRelations[dragIndex];
+        setCurrentRelations(
+          update(currentRelations, {
+            $splice: [
+              [dragIndex, 1],
+              [hoverIndex, 0, dragRecord],
+            ],
+          })
+        );
+      },
+      [currentRelations]
+    );
+
+    const updateOrderFn = (relationId: string, newOrder: number) => {
+      let allOrders: number[] = relations.map((relation, key) =>
+        relation.order !== undefined ? relation.order : 0
+      );
+      let finalOrder: number = 0;
+
+      const currentRelation = relations.find(
+        (relation) => relation.id === relationId
+      );
+
+      if (newOrder === 0) {
+        finalOrder = allOrders[0] - 1;
+      } else if (newOrder === relations.length - 1) {
+        finalOrder = allOrders[newOrder - 1] + 1;
+      } else {
+        if (currentRelation?.order === allOrders[newOrder - 1]) {
+          finalOrder = allOrders[newOrder];
+        } else {
+          finalOrder = allOrders[newOrder - 1];
+        }
+      }
+      relationUpdateMutation.mutate({
+        relationId: relationId,
+        changes: { order: finalOrder },
+      });
+    };
+
     return (
       <>
         {/* Type column */}
@@ -326,17 +273,34 @@ export const EntityDetailRelationTypeBlock: React.FC<EntityDetailRelationTypeBlo
         </StyledLabelSuggester>
         {/* Values column */}
         <StyledRelationValues>
-          {isMultiple
-            ? relations
-                .sort((a, b) =>
-                  a.order && b.order ? (a.order > b.order ? -1 : 1) : 0
-                )
-                .map((relation, key) => renderNonCloudRelation(relation, key))
-            : relations.map((relation, key) =>
-                isCloudType
-                  ? renderCloudRelation(relation, key)
-                  : renderNonCloudRelation(relation, key)
-              )}
+          {currentRelations.map((relation, key) =>
+            isCloudType ? (
+              <EntityDetailCloudRelation
+                key={key}
+                relation={relation}
+                entityId={entity.id}
+                relations={relations}
+                entities={entities}
+                relationUpdateMutation={relationUpdateMutation}
+                relationDeleteMutation={relationDeleteMutation}
+              />
+            ) : (
+              <EntityDetailRelationRow
+                key={key}
+                index={key}
+                relation={relation}
+                entities={entities}
+                entityId={entity.id}
+                relationRule={relationRule}
+                relationType={relationType as RelationEnums.Type}
+                relationUpdateMutation={relationUpdateMutation}
+                relationDeleteMutation={relationDeleteMutation}
+                isMultiple={isMultiple}
+                moveRow={moveRow}
+                updateOrderFn={updateOrderFn}
+              />
+            )
+          )}
         </StyledRelationValues>
       </>
     );
