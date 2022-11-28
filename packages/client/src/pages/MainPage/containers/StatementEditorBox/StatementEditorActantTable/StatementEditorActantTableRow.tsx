@@ -65,431 +65,433 @@ interface StatementEditorActantTableRow {
   territoryActants?: string[];
 }
 
-export const StatementEditorActantTableRow: React.FC<
-  StatementEditorActantTableRow
-> = ({
-  filteredActant,
-  index,
-  moveRow,
-  statement,
-  userCanEdit = false,
-  updateOrderFn,
-  classEntitiesActant,
-  updateStatementDataMutation,
-  addProp,
-  updateProp,
-  removeProp,
-  movePropToIndex,
-  territoryParentId,
-  addClassification,
-  addIdentification,
-  territoryActants,
-}) => {
-  const isInsideTemplate = statement.isTemplate || false;
-  const { statementId, territoryId } = useSearchParams();
+export const StatementEditorActantTableRow: React.FC<StatementEditorActantTableRow> =
+  ({
+    filteredActant,
+    index,
+    moveRow,
+    statement,
+    userCanEdit = false,
+    updateOrderFn,
+    classEntitiesActant,
+    updateStatementDataMutation,
+    addProp,
+    updateProp,
+    removeProp,
+    movePropToIndex,
+    territoryParentId,
+    addClassification,
+    addIdentification,
+    territoryActants,
+  }) => {
+    const isInsideTemplate = statement.isTemplate || false;
+    const { statementId, territoryId } = useSearchParams();
 
-  const dropRef = useRef<HTMLTableRowElement>(null);
-  const dragRef = useRef<HTMLTableDataCellElement>(null);
+    const dropRef = useRef<HTMLTableRowElement>(null);
+    const dragRef = useRef<HTMLTableCellElement>(null);
 
-  const [, drop] = useDrop({
-    accept: ItemTypes.ACTANT_ROW,
-    hover(item: DragItem, monitor: DropTargetMonitor) {
-      dndHoverFn(item, index, monitor, dropRef, moveRow);
-    },
-  });
+    const [, drop] = useDrop({
+      accept: ItemTypes.ACTANT_ROW,
+      hover(item: DragItem, monitor: DropTargetMonitor) {
+        dndHoverFn(item, index, monitor, dropRef, moveRow);
+      },
+    });
 
-  const [{ isDragging }, drag, preview] = useDrag({
-    item: {
-      type: ItemTypes.ACTANT_ROW,
-      index,
-      id: filteredActant.id.toString(),
-    },
-    collect: (monitor: DragSourceMonitor) => ({
-      isDragging: monitor.isDragging(),
-    }),
-    end: (item: DragItem | undefined, monitor: DragSourceMonitor) => {
-      if (item) updateOrderFn();
-    },
-  });
+    const [{ isDragging }, drag, preview] = useDrag({
+      item: {
+        type: ItemTypes.ACTANT_ROW,
+        index,
+        id: filteredActant.id.toString(),
+      },
+      collect: (monitor: DragSourceMonitor) => ({
+        isDragging: monitor.isDragging(),
+      }),
+      end: (item: DragItem | undefined, monitor: DragSourceMonitor) => {
+        if (item) updateOrderFn();
+      },
+    });
 
-  const opacity = isDragging ? 0.2 : 1;
+    const opacity = isDragging ? 0.2 : 1;
 
-  preview(drop(dropRef));
-  drag(dragRef);
+    preview(drop(dropRef));
+    drag(dragRef);
 
-  const updateActant = (statementActantId: string, changes: any) => {
-    if (statement && statementActantId) {
-      const updatedActants = statement.data.actants.map((a) =>
-        a.id === statementActantId ? { ...a, ...changes } : a
-      );
-      const newData = { actants: updatedActants };
-      updateStatementDataMutation.mutate(newData);
-    }
-  };
-
-  const removeActant = (statementActantId: string) => {
-    if (statement) {
-      const updatedActants = statement.data.actants.filter(
-        (a) => a.id !== statementActantId
-      );
-      const newData = { actants: updatedActants };
-      updateStatementDataMutation.mutate(newData);
-    }
-  };
-
-  const renderActantCell = () => {
-    const {
-      actant,
-      sActant,
-    }: {
-      actant?: IEntity;
-      sActant: IStatementActant;
-    } = filteredActant.data;
-    return actant ? (
-      <StyledTagWrapper>
-        <EntityTag
-          entity={actant}
-          fullWidth
-          button={
-            userCanEdit && (
-              <Button
-                key="d"
-                tooltip="unlink actant"
-                icon={<FaUnlink />}
-                color="plain"
-                inverted
-                onClick={() => {
-                  updateActant(sActant.id, {
-                    entityId: "",
-                  });
-                }}
-              />
-            )
-          }
-        />
-      </StyledTagWrapper>
-    ) : (
-      userCanEdit && (
-        <EntitySuggester
-          onSelected={(newSelectedId: string) => {
-            updateActant(sActant.id, {
-              entityId: newSelectedId,
-            });
-          }}
-          categoryTypes={classEntitiesActant}
-          openDetailOnCreate
-          excludedEntities={excludedSuggesterEntities}
-          isInsideTemplate={isInsideTemplate}
-          territoryParentId={territoryParentId}
-          territoryActants={territoryActants}
-        />
-      )
-    );
-  };
-
-  const renderPositionCell = () => {
-    const { sActant } = filteredActant.data;
-    return (
-      <AttributeButtonGroup
-        disabled={!userCanEdit}
-        options={[
-          {
-            longValue: actantPositionDict[EntityEnums.Position.Subject].label,
-            shortValue: actantPositionDict[EntityEnums.Position.Subject].value,
-            onClick: () =>
-              updateActant(sActant.id, {
-                position:
-                  actantPositionDict[EntityEnums.Position.Subject].value,
-              }),
-            selected:
-              sActant.position ==
-              actantPositionDict[EntityEnums.Position.Subject].value,
-          },
-          {
-            longValue: actantPositionDict[EntityEnums.Position.Actant1].label,
-            shortValue: actantPositionDict[EntityEnums.Position.Actant1].value,
-            onClick: () =>
-              updateActant(sActant.id, {
-                position:
-                  actantPositionDict[EntityEnums.Position.Actant1].value,
-              }),
-            selected:
-              sActant.position ==
-              actantPositionDict[EntityEnums.Position.Actant1].value,
-          },
-          {
-            longValue: actantPositionDict[EntityEnums.Position.Actant2].label,
-            shortValue: actantPositionDict[EntityEnums.Position.Actant2].value,
-            onClick: () =>
-              updateActant(sActant.id, {
-                position:
-                  actantPositionDict[EntityEnums.Position.Actant2].value,
-              }),
-            selected:
-              sActant.position ==
-              actantPositionDict[EntityEnums.Position.Actant2].value,
-          },
-          {
-            longValue:
-              actantPositionDict[EntityEnums.Position.PseudoActant].label,
-            shortValue:
-              actantPositionDict[EntityEnums.Position.PseudoActant].value,
-            onClick: () =>
-              updateActant(sActant.id, {
-                position:
-                  actantPositionDict[EntityEnums.Position.PseudoActant].value,
-              }),
-            selected:
-              sActant.position ==
-              actantPositionDict[EntityEnums.Position.PseudoActant].value,
-          },
-        ]}
-      />
-    );
-  };
-
-  const [actantAttributesModalOpen, setActantAttributesModalOpen] =
-    useState<boolean>(false);
-
-  const renderAttributesCell = () => {
-    const {
-      actant,
-      sActant,
-    }: {
-      actant?: IEntity;
-      sActant: IStatementActant;
-    } = filteredActant.data;
-
-    const { entityId: propOriginId, id: propRowId } = sActant;
-
-    return (
-      <ButtonGroup noMarginRight height={19}>
-        {sActant && (
-          <AttributesEditor
-            modalOpen={actantAttributesModalOpen}
-            setModalOpen={setActantAttributesModalOpen}
-            modalTitle={`Actant involvement`}
-            entity={actant}
-            disabledAllAttributes={!userCanEdit}
-            userCanEdit={userCanEdit}
-            data={{
-              elvl: sActant.elvl,
-              logic: sActant.logic,
-              virtuality: sActant.virtuality,
-              partitivity: sActant.partitivity,
-              bundleOperator: sActant.bundleOperator,
-              bundleStart: sActant.bundleStart,
-              bundleEnd: sActant.bundleEnd,
-            }}
-            handleUpdate={(newData) => {
-              updateActant(sActant.id, newData);
-            }}
-            updateActantId={(newId: string) => {
-              updateActant(sActant.id, { entityId: newId });
-            }}
-            classEntitiesActant={classEntitiesActant}
-            loading={updateStatementDataMutation.isLoading}
-            isInsideTemplate={isInsideTemplate}
-            territoryParentId={territoryParentId}
-          />
-        )}
-        {userCanEdit && (
-          <Button
-            key="d"
-            icon={<FaTrashAlt />}
-            color="plain"
-            inverted
-            tooltip="remove actant row"
-            onClick={() => {
-              removeActant(filteredActant.data.sActant.id);
-            }}
-          />
-        )}
-        {userCanEdit && (
-          <Button
-            key="a"
-            icon={<FaPlus />}
-            color="plain"
-            inverted
-            tooltip="add new prop"
-            onClick={() => {
-              addProp(propRowId);
-            }}
-          />
-        )}
-        {userCanEdit && (
-          <Button
-            key="c"
-            icon={<FaPlus />}
-            label="c"
-            color="plain"
-            inverted
-            tooltip="add classification"
-            onClick={() => {
-              addClassification(propRowId);
-            }}
-          />
-        )}
-        {userCanEdit && (
-          <Button
-            key="i"
-            icon={<FaPlus />}
-            label="i"
-            color="plain"
-            inverted
-            tooltip="add identification"
-            onClick={() => {
-              addIdentification(propRowId);
-            }}
-          />
-        )}
-        {sActant.logic == "2" && (
-          <Button
-            key="neg"
-            tooltip="Negative logic"
-            color="success"
-            inverted
-            noBorder
-            icon={<AttributeIcon attributeName={"negation"} />}
-            onClick={() => setActantAttributesModalOpen(true)}
-          />
-        )}
-        {sActant.bundleOperator && (
-          <Button
-            key="oper"
-            tooltip="Logical operator type"
-            color="success"
-            inverted
-            noBorder
-            icon={sActant.bundleOperator}
-            onClick={() => setActantAttributesModalOpen(true)}
-          />
-        )}
-      </ButtonGroup>
-    );
-  };
-
-  const dispatch = useAppDispatch();
-  const draggedActantRow: DraggedActantRowItem = useAppSelector(
-    (state) => state.rowDnd.draggedActantRow
-  );
-
-  useEffect(() => {
-    if (isDragging) {
-      dispatch(
-        setDraggedActantRow({ category: DraggedPropRowCategory.ACTANT })
-      );
-    } else {
-      dispatch(setDraggedActantRow({}));
-    }
-  }, [isDragging]);
-
-  const renderPropGroup = useCallback(
-    (originId: string, props: IProp[], category: DraggedPropRowCategory) => {
-      const originActant = statement.entities[originId];
-
-      if (props.length > 0) {
-        return (
-          <PropGroup
-            boxEntity={statement}
-            originId={originActant ? originActant.id : ""}
-            entities={statement.entities}
-            props={props}
-            territoryId={territoryId}
-            updateProp={updateProp}
-            removeProp={removeProp}
-            addProp={addProp}
-            movePropToIndex={movePropToIndex}
-            userCanEdit={userCanEdit}
-            openDetailOnCreate={false}
-            category={category}
-            isInsideTemplate={isInsideTemplate}
-            territoryParentId={territoryParentId}
-          />
+    const updateActant = (statementActantId: string, changes: any) => {
+      if (statement && statementActantId) {
+        const updatedActants = statement.data.actants.map((a) =>
+          a.id === statementActantId ? { ...a, ...changes } : a
         );
+        const newData = { actants: updatedActants };
+        updateStatementDataMutation.mutate(newData);
       }
-    },
-    [statement]
-  );
+    };
 
-  const { classifications, identifications } = filteredActant.data.sActant;
+    const removeActant = (statementActantId: string) => {
+      if (statement) {
+        const updatedActants = statement.data.actants.filter(
+          (a) => a.id !== statementActantId
+        );
+        const newData = { actants: updatedActants };
+        updateStatementDataMutation.mutate(newData);
+      }
+    };
 
-  return (
-    <StyledRow
-      key={index}
-      marginBottom={classifications.length > 0 || identifications.length > 0}
-    >
-      <StyledGrid ref={dropRef} style={{ opacity }}>
-        {userCanEdit && (
-          <StyledGridColumn ref={dragRef} style={{ cursor: "move" }}>
-            <FaGripVertical />
-          </StyledGridColumn>
-        )}
-        <StyledGridColumn>{renderActantCell()}</StyledGridColumn>
-        <StyledGridColumn>{renderPositionCell()}</StyledGridColumn>
-        <StyledGridColumn>{renderAttributesCell()}</StyledGridColumn>
-      </StyledGrid>
+    const renderActantCell = () => {
+      const {
+        actant,
+        sActant,
+      }: {
+        actant?: IEntity;
+        sActant: IStatementActant;
+      } = filteredActant.data;
+      return actant ? (
+        <StyledTagWrapper>
+          <EntityTag
+            entity={actant}
+            fullWidth
+            button={
+              userCanEdit && (
+                <Button
+                  key="d"
+                  tooltip="unlink actant"
+                  icon={<FaUnlink />}
+                  color="plain"
+                  inverted
+                  onClick={() => {
+                    updateActant(sActant.id, {
+                      entityId: "",
+                    });
+                  }}
+                />
+              )
+            }
+          />
+        </StyledTagWrapper>
+      ) : (
+        userCanEdit && (
+          <EntitySuggester
+            onSelected={(newSelectedId: string) => {
+              updateActant(sActant.id, {
+                entityId: newSelectedId,
+              });
+            }}
+            categoryTypes={classEntitiesActant}
+            openDetailOnCreate
+            excludedEntities={excludedSuggesterEntities}
+            isInsideTemplate={isInsideTemplate}
+            territoryParentId={territoryParentId}
+            territoryActants={territoryActants}
+          />
+        )
+      );
+    };
 
-      {!(
-        draggedActantRow.category &&
-        draggedActantRow.category === DraggedPropRowCategory.ACTANT
-      ) &&
-        renderPropGroup(
-          filteredActant.data.sActant.entityId,
-          filteredActant.data.sActant.props,
-          DraggedPropRowCategory.ACTANT
-        )}
+    const renderPositionCell = () => {
+      const { sActant } = filteredActant.data;
+      return (
+        <AttributeButtonGroup
+          disabled={!userCanEdit}
+          options={[
+            {
+              longValue: actantPositionDict[EntityEnums.Position.Subject].label,
+              shortValue:
+                actantPositionDict[EntityEnums.Position.Subject].value,
+              onClick: () =>
+                updateActant(sActant.id, {
+                  position:
+                    actantPositionDict[EntityEnums.Position.Subject].value,
+                }),
+              selected:
+                sActant.position ==
+                actantPositionDict[EntityEnums.Position.Subject].value,
+            },
+            {
+              longValue: actantPositionDict[EntityEnums.Position.Actant1].label,
+              shortValue:
+                actantPositionDict[EntityEnums.Position.Actant1].value,
+              onClick: () =>
+                updateActant(sActant.id, {
+                  position:
+                    actantPositionDict[EntityEnums.Position.Actant1].value,
+                }),
+              selected:
+                sActant.position ==
+                actantPositionDict[EntityEnums.Position.Actant1].value,
+            },
+            {
+              longValue: actantPositionDict[EntityEnums.Position.Actant2].label,
+              shortValue:
+                actantPositionDict[EntityEnums.Position.Actant2].value,
+              onClick: () =>
+                updateActant(sActant.id, {
+                  position:
+                    actantPositionDict[EntityEnums.Position.Actant2].value,
+                }),
+              selected:
+                sActant.position ==
+                actantPositionDict[EntityEnums.Position.Actant2].value,
+            },
+            {
+              longValue:
+                actantPositionDict[EntityEnums.Position.PseudoActant].label,
+              shortValue:
+                actantPositionDict[EntityEnums.Position.PseudoActant].value,
+              onClick: () =>
+                updateActant(sActant.id, {
+                  position:
+                    actantPositionDict[EntityEnums.Position.PseudoActant].value,
+                }),
+              selected:
+                sActant.position ==
+                actantPositionDict[EntityEnums.Position.PseudoActant].value,
+            },
+          ]}
+        />
+      );
+    };
 
-      {!(
-        draggedActantRow.category &&
-        draggedActantRow.category === DraggedPropRowCategory.ACTANT
-      ) && (
-        <>
-          {classifications.length > 0 && (
-            <StyledCI>
-              <StyledCIHeading>Classifications:</StyledCIHeading>
-              {classifications.length > 0 &&
-                classifications.map((classification, key) => (
-                  <StatementEditorActantClassification
-                    key={key}
-                    classifications={classifications}
-                    classification={classification}
-                    sActant={filteredActant.data.sActant}
-                    statement={statement}
-                    territoryParentId={territoryParentId}
-                    isInsideTemplate={isInsideTemplate}
-                    updateActant={updateActant}
-                    updateStatementDataMutation={updateStatementDataMutation}
-                    userCanEdit={userCanEdit}
-                    territoryActants={territoryActants}
-                  />
-                ))}
-            </StyledCI>
+    const [actantAttributesModalOpen, setActantAttributesModalOpen] =
+      useState<boolean>(false);
+
+    const renderAttributesCell = () => {
+      const {
+        actant,
+        sActant,
+      }: {
+        actant?: IEntity;
+        sActant: IStatementActant;
+      } = filteredActant.data;
+
+      const { entityId: propOriginId, id: propRowId } = sActant;
+
+      return (
+        <ButtonGroup noMarginRight height={19}>
+          {sActant && (
+            <AttributesEditor
+              modalOpen={actantAttributesModalOpen}
+              setModalOpen={setActantAttributesModalOpen}
+              modalTitle={`Actant involvement`}
+              entity={actant}
+              disabledAllAttributes={!userCanEdit}
+              userCanEdit={userCanEdit}
+              data={{
+                elvl: sActant.elvl,
+                logic: sActant.logic,
+                virtuality: sActant.virtuality,
+                partitivity: sActant.partitivity,
+                bundleOperator: sActant.bundleOperator,
+                bundleStart: sActant.bundleStart,
+                bundleEnd: sActant.bundleEnd,
+              }}
+              handleUpdate={(newData) => {
+                updateActant(sActant.id, newData);
+              }}
+              updateActantId={(newId: string) => {
+                updateActant(sActant.id, { entityId: newId });
+              }}
+              classEntitiesActant={classEntitiesActant}
+              loading={updateStatementDataMutation.isLoading}
+              isInsideTemplate={isInsideTemplate}
+              territoryParentId={territoryParentId}
+            />
           )}
-          {identifications.length > 0 && (
-            <StyledCI>
-              <StyledCIHeading>Identifications:</StyledCIHeading>
-              {identifications.length > 0 &&
-                identifications.map((identification, key) => (
-                  <StatementEditorActantIdentification
-                    key={key}
-                    identification={identification}
-                    identifications={identifications}
-                    sActant={filteredActant.data.sActant}
-                    statement={statement}
-                    territoryParentId={territoryParentId}
-                    isInsideTemplate={isInsideTemplate}
-                    updateActant={updateActant}
-                    updateStatementDataMutation={updateStatementDataMutation}
-                    userCanEdit={userCanEdit}
-                    classEntitiesActant={classEntitiesActant}
-                    territoryActants={territoryActants}
-                  />
-                ))}
-            </StyledCI>
+          {userCanEdit && (
+            <Button
+              key="d"
+              icon={<FaTrashAlt />}
+              color="plain"
+              inverted
+              tooltip="remove actant row"
+              onClick={() => {
+                removeActant(filteredActant.data.sActant.id);
+              }}
+            />
           )}
-        </>
-      )}
-    </StyledRow>
-  );
-};
+          {userCanEdit && (
+            <Button
+              key="a"
+              icon={<FaPlus />}
+              color="plain"
+              inverted
+              tooltip="add new prop"
+              onClick={() => {
+                addProp(propRowId);
+              }}
+            />
+          )}
+          {userCanEdit && (
+            <Button
+              key="c"
+              icon={<FaPlus />}
+              label="c"
+              color="plain"
+              inverted
+              tooltip="add classification"
+              onClick={() => {
+                addClassification(propRowId);
+              }}
+            />
+          )}
+          {userCanEdit && (
+            <Button
+              key="i"
+              icon={<FaPlus />}
+              label="i"
+              color="plain"
+              inverted
+              tooltip="add identification"
+              onClick={() => {
+                addIdentification(propRowId);
+              }}
+            />
+          )}
+          {sActant.logic == "2" && (
+            <Button
+              key="neg"
+              tooltip="Negative logic"
+              color="success"
+              inverted
+              noBorder
+              icon={<AttributeIcon attributeName={"negation"} />}
+              onClick={() => setActantAttributesModalOpen(true)}
+            />
+          )}
+          {sActant.bundleOperator && (
+            <Button
+              key="oper"
+              tooltip="Logical operator type"
+              color="success"
+              inverted
+              noBorder
+              icon={sActant.bundleOperator}
+              onClick={() => setActantAttributesModalOpen(true)}
+            />
+          )}
+        </ButtonGroup>
+      );
+    };
+
+    const dispatch = useAppDispatch();
+    const draggedActantRow: DraggedActantRowItem = useAppSelector(
+      (state) => state.rowDnd.draggedActantRow
+    );
+
+    useEffect(() => {
+      if (isDragging) {
+        dispatch(
+          setDraggedActantRow({ category: DraggedPropRowCategory.ACTANT })
+        );
+      } else {
+        dispatch(setDraggedActantRow({}));
+      }
+    }, [isDragging]);
+
+    const renderPropGroup = useCallback(
+      (originId: string, props: IProp[], category: DraggedPropRowCategory) => {
+        const originActant = statement.entities[originId];
+
+        if (props.length > 0) {
+          return (
+            <PropGroup
+              boxEntity={statement}
+              originId={originActant ? originActant.id : ""}
+              entities={statement.entities}
+              props={props}
+              territoryId={territoryId}
+              updateProp={updateProp}
+              removeProp={removeProp}
+              addProp={addProp}
+              movePropToIndex={movePropToIndex}
+              userCanEdit={userCanEdit}
+              openDetailOnCreate={false}
+              category={category}
+              isInsideTemplate={isInsideTemplate}
+              territoryParentId={territoryParentId}
+            />
+          );
+        }
+      },
+      [statement]
+    );
+
+    const { classifications, identifications } = filteredActant.data.sActant;
+
+    return (
+      <StyledRow
+        key={index}
+        marginBottom={classifications.length > 0 || identifications.length > 0}
+      >
+        <StyledGrid ref={dropRef} style={{ opacity }}>
+          {userCanEdit && (
+            <StyledGridColumn ref={dragRef} style={{ cursor: "move" }}>
+              <FaGripVertical />
+            </StyledGridColumn>
+          )}
+          <StyledGridColumn>{renderActantCell()}</StyledGridColumn>
+          <StyledGridColumn>{renderPositionCell()}</StyledGridColumn>
+          <StyledGridColumn>{renderAttributesCell()}</StyledGridColumn>
+        </StyledGrid>
+
+        {!(
+          draggedActantRow.category &&
+          draggedActantRow.category === DraggedPropRowCategory.ACTANT
+        ) &&
+          renderPropGroup(
+            filteredActant.data.sActant.entityId,
+            filteredActant.data.sActant.props,
+            DraggedPropRowCategory.ACTANT
+          )}
+
+        {!(
+          draggedActantRow.category &&
+          draggedActantRow.category === DraggedPropRowCategory.ACTANT
+        ) && (
+          <>
+            {classifications.length > 0 && (
+              <StyledCI>
+                <StyledCIHeading>Classifications:</StyledCIHeading>
+                {classifications.length > 0 &&
+                  classifications.map((classification, key) => (
+                    <StatementEditorActantClassification
+                      key={key}
+                      classifications={classifications}
+                      classification={classification}
+                      sActant={filteredActant.data.sActant}
+                      statement={statement}
+                      territoryParentId={territoryParentId}
+                      isInsideTemplate={isInsideTemplate}
+                      updateActant={updateActant}
+                      updateStatementDataMutation={updateStatementDataMutation}
+                      userCanEdit={userCanEdit}
+                      territoryActants={territoryActants}
+                    />
+                  ))}
+              </StyledCI>
+            )}
+            {identifications.length > 0 && (
+              <StyledCI>
+                <StyledCIHeading>Identifications:</StyledCIHeading>
+                {identifications.length > 0 &&
+                  identifications.map((identification, key) => (
+                    <StatementEditorActantIdentification
+                      key={key}
+                      identification={identification}
+                      identifications={identifications}
+                      sActant={filteredActant.data.sActant}
+                      statement={statement}
+                      territoryParentId={territoryParentId}
+                      isInsideTemplate={isInsideTemplate}
+                      updateActant={updateActant}
+                      updateStatementDataMutation={updateStatementDataMutation}
+                      userCanEdit={userCanEdit}
+                      classEntitiesActant={classEntitiesActant}
+                      territoryActants={territoryActants}
+                    />
+                  ))}
+              </StyledCI>
+            )}
+          </>
+        )}
+      </StyledRow>
+    );
+  };
