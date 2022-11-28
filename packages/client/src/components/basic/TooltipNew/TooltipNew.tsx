@@ -31,6 +31,7 @@ interface TooltipNew {
   offsetY?: number;
 
   disabled?: boolean;
+  onMouseOut?: React.MouseEventHandler<HTMLDivElement>;
 }
 export const TooltipNew: React.FC<TooltipNew> = ({
   visible = false,
@@ -49,11 +50,12 @@ export const TooltipNew: React.FC<TooltipNew> = ({
   offsetY = 7,
 
   disabled,
+  onMouseOut,
 }) => {
   const [popperElement, setPopperElement] =
     useState<HTMLDivElement | null>(null);
   const [arrowElement, setArrowElement] = useState<HTMLDivElement | null>(null);
-  const { styles, attributes, update, state } = usePopper(
+  const { styles, attributes, update, state, forceUpdate } = usePopper(
     referenceElement,
     popperElement,
     {
@@ -90,7 +92,7 @@ export const TooltipNew: React.FC<TooltipNew> = ({
     if (visible) {
       update();
     }
-  }, [update, visible, label]);
+  }, [update, visible, label, content]);
 
   return (
     <>
@@ -99,6 +101,8 @@ export const TooltipNew: React.FC<TooltipNew> = ({
           ref={setPopperElement}
           style={{ ...styles.popper, ...animatedTooltip }}
           color={color}
+          onMouseOut={onMouseOut}
+          arrowoffset={-offsetY}
           {...attributes.popper}
         >
           {!noArrow && (

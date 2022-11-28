@@ -424,12 +424,14 @@ export const StatementListBox: React.FC = () => {
           if (definedActions) {
             const isOversized = actionIds.length > 2;
             return (
-              <TagGroup>
-                {definedActions
-                  .slice(0, 2)
-                  .map((action: IAction, key: number) =>
-                    renderListActant(action, key)
-                  )}
+              <div style={{ display: "flex" }}>
+                <TagGroup>
+                  {definedActions
+                    .slice(0, 2)
+                    .map((action: IAction, key: number) =>
+                      renderListActant(action, key)
+                    )}
+                </TagGroup>
                 {isOversized && (
                   <>
                     <TooltipNew
@@ -440,8 +442,12 @@ export const StatementListBox: React.FC = () => {
                       color="success"
                       noArrow
                       tagGroup
+                      onMouseOut={() => {
+                        console.log("oversized mouse out");
+                        setShowTooltip(false);
+                      }}
                       content={
-                        <TagGroup onMouseOut={() => setShowTooltip(false)}>
+                        <TagGroup>
                           {definedActions
                             .slice(2)
                             .map((action: IAction, key: number) =>
@@ -449,16 +455,20 @@ export const StatementListBox: React.FC = () => {
                             )}
                         </TagGroup>
                       }
-                    ></TooltipNew>
+                    />
                     <StyledDots
                       ref={setReferenceElement}
-                      onMouseOver={() => setShowTooltip(true)}
+                      style={{ border: "1px dashed hotpink" }}
+                      onMouseOver={() => {
+                        console.log("oversized mouse over");
+                        setShowTooltip(true);
+                      }}
                     >
                       {"..."}
                     </StyledDots>
                   </>
                 )}
-              </TagGroup>
+              </div>
             );
           }
         },

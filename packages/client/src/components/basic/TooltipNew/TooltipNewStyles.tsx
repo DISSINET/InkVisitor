@@ -4,6 +4,7 @@ import { Colors } from "types";
 
 interface StyledContainer {
   color: typeof Colors[number];
+  arrowoffset: number;
 }
 export const StyledContainer = styled(animated.div)<StyledContainer>`
   color: ${({ theme }) => theme.color["white"]};
@@ -19,6 +20,8 @@ export const StyledContainer = styled(animated.div)<StyledContainer>`
   justify-content: center;
   align-items: center;
   max-width: 40rem;
+
+  border: 2px dotted black;
 
   #arrow {
     position: absolute;
@@ -37,25 +40,25 @@ export const StyledContainer = styled(animated.div)<StyledContainer>`
   }
 
   &[data-popper-placement^="bottom"] > #arrow {
-    top: -5px;
+    top: ${({ arrowoffset }) => `${arrowoffset}px`};
     :after {
       box-shadow: -1px -1px 1px rgba(0, 0, 0, 0.1);
     }
   }
   &[data-popper-placement^="top"] > #arrow {
-    bottom: -5px;
+    bottom: ${({ arrowoffset }) => `${arrowoffset}px`};
     :after {
       box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.1);
     }
   }
   &[data-popper-placement^="left"] > #arrow {
-    right: -5px;
+    right: ${({ arrowoffset }) => `${arrowoffset}px`};
     :after {
       box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.1);
     }
   }
   &[data-popper-placement^="right"] > #arrow {
-    left: -5px;
+    left: ${({ arrowoffset }) => `${arrowoffset}px`};
     :after {
       box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.1);
     }
