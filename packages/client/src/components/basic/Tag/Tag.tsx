@@ -160,7 +160,6 @@ export const Tag: React.FC<TagProps> = ({
 
   const onDoubleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    e.nativeEvent.stopImmediatePropagation();
 
     !disableDoubleClick && appendDetailId(propId);
   };

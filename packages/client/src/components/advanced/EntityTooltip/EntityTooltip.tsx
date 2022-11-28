@@ -4,13 +4,12 @@ import { RelationEnums } from "@shared/enums";
 import { EntityTooltip as EntityTooltipNamespace } from "@shared/types";
 import api from "api";
 import { LetterIcon, TooltipNew } from "components";
-import React, { ReactElement, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { AiOutlineTag } from "react-icons/ai";
 import { BiCommentDetail } from "react-icons/bi";
 import { BsCardText } from "react-icons/bs";
 import { ImListNumbered } from "react-icons/im";
 import { useQuery } from "react-query";
-import { PopupPosition } from "reactjs-popup/dist/types";
 import { Colors } from "types";
 import { EntityTooltipRelationTreeTable } from "./EntityTooltipRelationTreeTable/EntityTooltipRelationTreeTable";
 import {
@@ -21,12 +20,12 @@ import {
   StyledRelations,
   StyledRelationTypeBlock,
   StyledRow,
-  StyledTooltipTrigger,
 } from "./EntityTooltipStyles";
 
 interface EntityTooltip {
   // trigger
-  children: ReactElement;
+  // children: ReactElement;
+
   // entity
   entityId: string;
   label?: string;
@@ -39,14 +38,12 @@ interface EntityTooltip {
   // noArrow?: boolean;
   color?: typeof Colors[number];
   disabled?: boolean;
-  // offsetX?: number;
-  // offsetY?: number;
 
   tagHovered: boolean;
+
+  referenceElement: HTMLDivElement | null;
 }
 export const EntityTooltip: React.FC<EntityTooltip> = ({
-  // trigger
-  children,
   // entity
   entityId,
   label,
@@ -59,6 +56,8 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
   disabled,
 
   tagHovered,
+  //
+  referenceElement,
 }) => {
   const [tooltipData, setTooltipData] =
     useState<EntityTooltipNamespace.IResponse | false>(false);
@@ -252,9 +251,11 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
     [tooltipData]
   );
 
-  const [referenceElement, setReferenceElement] =
-    useState<HTMLDivElement | null>(null);
   const [showTooltip, setShowTooltip] = useState(false);
+
+  useEffect(() => {
+    setShowTooltip(true);
+  }, []);
 
   return (
     <>
@@ -266,16 +267,6 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
         color={color}
         disabled={disabled}
       />
-      <StyledTooltipTrigger
-        ref={setReferenceElement}
-        onMouseOver={() => setShowTooltip(true)}
-        onMouseOut={() => {
-          setShowTooltip(false);
-          setTooltipData(false);
-        }}
-      >
-        {children}
-      </StyledTooltipTrigger>
     </>
   );
 };
