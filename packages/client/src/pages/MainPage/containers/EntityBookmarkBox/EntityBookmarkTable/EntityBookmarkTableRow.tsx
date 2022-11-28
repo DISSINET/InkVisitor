@@ -30,7 +30,7 @@ export const EntityBookmarkTableRow: React.FC<EntityBookmarkTableRow> = ({
   visibleColumns,
 }) => {
   const dropRef = useRef<HTMLTableRowElement>(null);
-  const dragRef = useRef<HTMLTableDataCellElement>(null);
+  const dragRef = useRef<HTMLTableCellElement>(null);
 
   const [, drop] = useDrop({
     accept: ItemTypes.ENTITY_ROW,

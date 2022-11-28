@@ -75,7 +75,7 @@ export const StatementListRow: React.FC<StatementListRow> = ({
   }, [audit]);
 
   const dropRef = useRef<HTMLTableRowElement>(null);
-  const dragRef = useRef<HTMLTableDataCellElement>(null);
+  const dragRef = useRef<HTMLTableCellElement>(null);
 
   const [, drop] = useDrop({
     accept: ItemTypes.STATEMENT_ROW,
