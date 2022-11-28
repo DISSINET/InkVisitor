@@ -207,6 +207,7 @@ export const Tag: React.FC<TagProps> = ({
   return (
     <>
       <StyledTagWrapper
+        className="tag"
         ref={ref}
         dragDisabled={!canDrag}
         status={status}

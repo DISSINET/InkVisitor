@@ -435,16 +435,13 @@ export const StatementListBox: React.FC = () => {
                     <TooltipNew
                       visible={showTooltip}
                       referenceElement={referenceElement}
-                      // offsetX={-14}
                       offsetY={-14}
                       position="right"
                       color="success"
                       noArrow
                       tagGroup
                       content={
-                        <TagGroup
-                        //  onMouseOut={() => setShowTooltip(false)}
-                        >
+                        <TagGroup onMouseOut={() => setShowTooltip(false)}>
                           {definedActions
                             .slice(2)
                             .map((action: IAction, key: number) =>
