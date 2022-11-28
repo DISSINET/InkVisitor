@@ -23,9 +23,6 @@ import {
 } from "./EntityTooltipStyles";
 
 interface EntityTooltip {
-  // trigger
-  // children: ReactElement;
-
   // entity
   entityId: string;
   label?: string;
@@ -254,8 +251,12 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
   const [showTooltip, setShowTooltip] = useState(false);
 
   useEffect(() => {
-    setShowTooltip(true);
-  }, []);
+    if (!disabled) {
+      setShowTooltip(true);
+    } else {
+      setShowTooltip(false);
+    }
+  }, [disabled]);
 
   return (
     <>
@@ -265,7 +266,6 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
         content={renderContent}
         position={position}
         color={color}
-        disabled={disabled}
       />
     </>
   );

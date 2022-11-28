@@ -4,8 +4,7 @@ import { IEntity } from "@shared/types";
 import { Tag } from "components";
 import { EntityTooltip } from "components/advanced";
 import React, { ReactNode, useState } from "react";
-import { PopupPosition } from "reactjs-popup/dist/types";
-import { DragItem, EntityDragItem } from "types";
+import { EntityDragItem } from "types";
 import { getEntityLabel } from "utils";
 
 interface EntityTag {
@@ -58,7 +57,7 @@ export const EntityTag: React.FC<EntityTag> = ({
 
   return (
     <>
-      {tagHovered && (
+      {tagHovered && !disableTooltip && (
         <EntityTooltip
           entityId={entity.id}
           label={getEntityLabel(entity)}
