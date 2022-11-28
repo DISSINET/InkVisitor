@@ -50,11 +50,11 @@ export const EntityTag: React.FC<EntityTag> = ({
   isFavorited,
 }) => {
   const classId = entity.class;
-  const [tagHovered, setTagHovered] = useState(false);
   const [buttonHovered, setButtonHovered] = useState(false);
 
   const [referenceElement, setReferenceElement] =
     useState<HTMLDivElement | null>(null);
+  const [tagHovered, setTagHovered] = useState(false);
 
   return (
     <>
@@ -74,6 +74,8 @@ export const EntityTag: React.FC<EntityTag> = ({
       <div
         style={{ display: "inline-flex", overflow: "hidden" }}
         ref={setReferenceElement}
+        onMouseEnter={() => setTagHovered(true)}
+        onMouseLeave={() => setTagHovered(false)}
       >
         <Tag
           propId={entity.id}
@@ -99,8 +101,6 @@ export const EntityTag: React.FC<EntityTag> = ({
           lvl={lvl}
           fullWidth={fullWidth}
           isFavorited={isFavorited}
-          onMouseOver={() => setTagHovered(true)}
-          onMouseOut={() => setTagHovered(false)}
           onButtonOver={() => setButtonHovered(true)}
           onButtonOut={() => setButtonHovered(false)}
         />

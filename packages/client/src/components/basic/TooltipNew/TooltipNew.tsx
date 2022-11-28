@@ -46,7 +46,7 @@ export const TooltipNew: React.FC<TooltipNew> = ({
   color = "black",
   position = "bottom",
   offsetX = 0,
-  offsetY = 8,
+  offsetY = 7,
 
   disabled,
 }) => {

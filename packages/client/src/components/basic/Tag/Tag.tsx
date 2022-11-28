@@ -52,8 +52,6 @@ interface TagProps {
   isDiscouraged?: boolean;
   disabled?: boolean;
 
-  onMouseOver?: React.MouseEventHandler<HTMLDivElement>;
-  onMouseOut?: React.MouseEventHandler<HTMLDivElement>;
   onButtonOver?: React.MouseEventHandler<HTMLDivElement>;
   onButtonOut?: React.MouseEventHandler<HTMLDivElement>;
 }
@@ -83,8 +81,6 @@ export const Tag: React.FC<TagProps> = ({
   isDiscouraged = false,
   lvl,
 
-  onMouseOver,
-  onMouseOut,
   onButtonOver,
   onButtonOut,
 }) => {
@@ -218,8 +214,6 @@ export const Tag: React.FC<TagProps> = ({
         borderStyle={borderStyle}
         onClick={(e: React.MouseEvent) => e.stopPropagation()}
         onDoubleClick={(e: React.MouseEvent) => onDoubleClick(e)}
-        onMouseOver={onMouseOver}
-        onMouseOut={onMouseOut}
       >
         {showOnly ? <>{getShortTag()}</> : <>{getFullTag()}</>}
       </StyledTagWrapper>
