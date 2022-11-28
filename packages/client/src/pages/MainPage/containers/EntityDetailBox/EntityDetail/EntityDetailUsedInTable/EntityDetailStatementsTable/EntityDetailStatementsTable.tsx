@@ -29,19 +29,6 @@ export const EntityDetailStatementsTable: React.FC<EntityDetailStatementsTable> 
 
     const data = useMemo(() => (useCases ? useCases : []), [useCases]);
 
-    const renderListActant = (actantObject: IEntity, key: number) => {
-      return (
-        actantObject && (
-          <EntityTag
-            key={key}
-            entity={actantObject}
-            showOnly="entity"
-            tooltipPosition="right"
-          />
-        )
-      );
-    };
-
     const columns: Column<{}>[] = React.useMemo(
       () => [
         {
@@ -79,36 +66,14 @@ export const EntityDetailStatementsTable: React.FC<EntityDetailStatementsTable> 
               return entities[actantId];
             });
 
-            const isOversized = subjectIds.length > 2;
-
             return (
-              <TagGroup>
-                {subjectObjects
-                  .slice(0, 2)
-                  .map((subjectObject: IEntity, key: number) =>
-                    renderListActant(subjectObject, key)
-                  )}
-                {isOversized && (
-                  <Tooltip
-                    offsetX={-14}
-                    position="right center"
-                    color="success"
-                    noArrow
-                    tagGroup
-                    content={
-                      <TagGroup>
-                        {subjectObjects
-                          .slice(2)
-                          .map((subjectObject: IEntity, key: number) =>
-                            renderListActant(subjectObject, key)
-                          )}
-                      </TagGroup>
-                    }
-                  >
-                    <StyledDots>{"..."}</StyledDots>
-                  </Tooltip>
+              <>
+                {subjectObjects ? (
+                  <TagGroup definedEntities={subjectObjects} />
+                ) : (
+                  <div />
                 )}
-              </TagGroup>
+              </>
             );
           },
         },
@@ -123,40 +88,15 @@ export const EntityDetailStatementsTable: React.FC<EntityDetailStatementsTable> 
               return entities[actionId];
             });
 
-            if (actionObjects) {
-              const isOversized = actionIds.length > 2;
-              return (
-                <TagGroup>
-                  {actionObjects
-                    .slice(0, 2)
-                    .map((action: IEntity, key: number) =>
-                      renderListActant(action, key)
-                    )}
-                  {isOversized && (
-                    <Tooltip
-                      offsetX={-14}
-                      position="right center"
-                      color="success"
-                      noArrow
-                      tagGroup
-                      content={
-                        <TagGroup>
-                          {actionObjects
-                            .slice(2)
-                            .map((action: IEntity, key: number) =>
-                              renderListActant(action, key)
-                            )}
-                        </TagGroup>
-                      }
-                    >
-                      <StyledDots>{"..."}</StyledDots>
-                    </Tooltip>
-                  )}
-                </TagGroup>
-              );
-            } else {
-              return <div />;
-            }
+            return (
+              <>
+                {actionObjects ? (
+                  <TagGroup definedEntities={actionObjects} />
+                ) : (
+                  <div />
+                )}
+              </>
+            );
           },
         },
         {
@@ -168,39 +108,19 @@ export const EntityDetailStatementsTable: React.FC<EntityDetailStatementsTable> 
             const actantIds = useCase.statement.data.actants
               .filter((a: IStatementActant) => a.position !== "s")
               .map((a: IStatementActant) => a.entityId);
-            const isOversized = actantIds.length > 4;
 
             const actantObjects = actantIds.map((actantId: string) => {
               return entities[actantId];
             });
+
             return (
-              <TagGroup>
-                {actantObjects
-                  .slice(0, 4)
-                  .map((actantObject: IEntity, key: number) =>
-                    renderListActant(actantObject, key)
-                  )}
-                {isOversized && (
-                  <Tooltip
-                    offsetX={-14}
-                    position="right center"
-                    color="success"
-                    noArrow
-                    tagGroup
-                    content={
-                      <TagGroup>
-                        {actantObjects
-                          .slice(4)
-                          .map((actantObject: IEntity, key: number) =>
-                            renderListActant(actantObject, key)
-                          )}
-                      </TagGroup>
-                    }
-                  >
-                    <StyledDots>{"..."}</StyledDots>
-                  </Tooltip>
+              <>
+                {actantObjects ? (
+                  <TagGroup definedEntities={actantObjects} oversizeLimit={4} />
+                ) : (
+                  <div />
                 )}
-              </TagGroup>
+              </>
             );
           },
         },
