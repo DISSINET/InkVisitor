@@ -4,7 +4,13 @@ import {
   VariationPlacement,
   VirtualElement,
 } from "@popperjs/core";
-import React, { ReactElement, useEffect, useState } from "react";
+import React, {
+  MouseEvent,
+  MouseEventHandler,
+  ReactElement,
+  useEffect,
+  useState,
+} from "react";
 import { usePopper } from "react-popper";
 import { useSpring } from "react-spring";
 import { Colors } from "types";
@@ -16,41 +22,45 @@ import {
 } from "./TooltipNewStyles";
 
 interface TooltipNew {
+  // for debugging
+  instanceName: string;
+  // essential
   visible: boolean;
-
+  referenceElement: Element | VirtualElement | null;
+  // content
   label?: string;
   content?: ReactElement[] | ReactElement;
   tagGroup?: boolean;
-
-  referenceElement: Element | VirtualElement | null;
-  noArrow?: boolean;
   // style
   color?: typeof Colors[number];
   position?: AutoPlacement | BasePlacement | VariationPlacement;
+  noArrow?: boolean;
   offsetX?: number;
   offsetY?: number;
 
   disabled?: boolean;
-  onMouseOut?: React.MouseEventHandler<HTMLDivElement>;
+  disableAutoPosition?: boolean;
+  onMouseOut?: () => void;
 }
 export const TooltipNew: React.FC<TooltipNew> = ({
+  instanceName,
+  // essential
   visible = false,
-
+  referenceElement,
+  // content
   label = "",
   content,
   tagGroup = false,
-
-  referenceElement,
-  noArrow = false,
-
   // style
   color = "black",
   position = "bottom",
+  noArrow = false,
   offsetX = 0,
   offsetY = 7,
 
-  disabled,
-  onMouseOut,
+  disabled = false,
+  disableAutoPosition = false,
+  onMouseOut = () => console.log("default"),
 }) => {
   const [popperElement, setPopperElement] =
     useState<HTMLDivElement | null>(null);
@@ -70,7 +80,7 @@ export const TooltipNew: React.FC<TooltipNew> = ({
         },
         {
           name: "flip",
-          enabled: true,
+          enabled: !disableAutoPosition,
           options: {
             fallbackPlacements: ["auto"],
           },
@@ -84,6 +94,10 @@ export const TooltipNew: React.FC<TooltipNew> = ({
     config: { mass: 2, friction: 2, tension: 100, clamp: true },
   });
 
+  useEffect(() => {
+    if (visible) console.log(instanceName);
+  }, [visible]);
+
   // Needed for state update
   useEffect(() => {
     if (!update) {
@@ -94,15 +108,28 @@ export const TooltipNew: React.FC<TooltipNew> = ({
     }
   }, [update, visible, label, content]);
 
+  const [showTooltip, setShowTooltip] = useState(false);
+  useEffect(() => {
+    visible ? setShowTooltip(true) : setShowTooltip(false);
+  }, [visible]);
+
+  const [tooltipHovered, setTooltipHovered] = useState(false);
+
   return (
     <>
-      {!disabled && visible && (
+      {!disabled && (showTooltip || tooltipHovered) && (
         <StyledContainer
           ref={setPopperElement}
           style={{ ...styles.popper, ...animatedTooltip }}
           color={color}
-          onMouseOut={onMouseOut}
+          onMouseLeave={() => {
+            onMouseOut();
+            setTooltipHovered(false);
+          }}
           arrowoffset={-offsetY}
+          onMouseEnter={() => {
+            setTooltipHovered(true);
+          }}
           {...attributes.popper}
         >
           {!noArrow && (

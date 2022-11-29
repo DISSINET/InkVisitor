@@ -38,6 +38,7 @@ export const TagGroup: React.FC<TagGroup> = ({
       {isOversized && (
         <>
           <TooltipNew
+            instanceName="tagGroup-dots-tooltip"
             visible={showTooltip}
             referenceElement={referenceElement}
             offsetY={-14}
@@ -46,7 +47,6 @@ export const TagGroup: React.FC<TagGroup> = ({
             noArrow
             tagGroup
             onMouseOut={() => {
-              console.log("oversized mouse out");
               setShowTooltip(false);
             }}
             content={
@@ -61,9 +61,7 @@ export const TagGroup: React.FC<TagGroup> = ({
           />
           <StyledDots
             ref={setReferenceElement}
-            style={{ border: "1px dashed hotpink" }}
             onMouseOver={() => {
-              console.log("oversized mouse over");
               setShowTooltip(true);
             }}
           >

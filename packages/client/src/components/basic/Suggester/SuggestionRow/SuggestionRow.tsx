@@ -121,7 +121,7 @@ const EntityRow: React.FC<EntityRow> = ({ data, index, style }) => {
       </StyledSuggestionLineActions>
       <StyledSuggestionLineTag isSelected={selected === index}>
         <StyledTagWrapper>
-          <EntityTag fullWidth entity={entity} />
+          <EntityTag fullWidth entity={entity} tooltipPosition="right" />
         </StyledTagWrapper>
       </StyledSuggestionLineTag>
       <StyledSuggestionLineIcons isSelected={selected === index}>

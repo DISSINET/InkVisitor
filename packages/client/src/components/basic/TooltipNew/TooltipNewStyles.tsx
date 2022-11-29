@@ -21,6 +21,8 @@ export const StyledContainer = styled(animated.div)<StyledContainer>`
   align-items: center;
   max-width: 40rem;
 
+  cursor: crosshair;
+
   border: 2px dotted black;
 
   #arrow {
