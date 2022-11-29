@@ -20,9 +20,7 @@ interface ButtonProps {
   fullWidth?: boolean;
 }
 
-export const Button: React.FC<
-  ButtonProps & { innerRef?: React.MutableRefObject<HTMLButtonElement> }
-> = ({
+export const Button: React.FC<ButtonProps> = ({
   tooltipLabel,
   tooltipContent,
   label = "",
@@ -37,7 +35,6 @@ export const Button: React.FC<
   onClick = () => {
     // do nothing
   },
-  innerRef,
   fullWidth = false,
 }) => {
   const [referenceElement, setReferenceElement] =
@@ -58,8 +55,8 @@ export const Button: React.FC<
         radiusRight={radiusRight}
         fullWidth={fullWidth}
         disabled={disabled}
-        onMouseOver={() => setShowTooltip(true)}
-        onMouseOut={() => setShowTooltip(false)}
+        onMouseEnter={() => setShowTooltip(true)}
+        onMouseLeave={() => setShowTooltip(false)}
       >
         {icon}
         {label && (
