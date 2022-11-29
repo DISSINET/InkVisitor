@@ -80,8 +80,15 @@ export const TooltipNew: React.FC<TooltipNew> = ({
     }
   );
 
+  const [showTooltip, setShowTooltip] = useState(false);
+  useEffect(() => {
+    visible ? setShowTooltip(true) : setShowTooltip(false);
+  }, [visible]);
+
+  const [tooltipHovered, setTooltipHovered] = useState(false);
+
   const animatedTooltip = useSpring({
-    opacity: visible ? 1 : 0,
+    opacity: showTooltip ? 1 : 0,
     config: { mass: 2, friction: 2, tension: 100, clamp: true },
   });
 
@@ -94,13 +101,6 @@ export const TooltipNew: React.FC<TooltipNew> = ({
       update();
     }
   }, [update, visible, label, content]);
-
-  const [showTooltip, setShowTooltip] = useState(false);
-  useEffect(() => {
-    visible ? setShowTooltip(true) : setShowTooltip(false);
-  }, [visible]);
-
-  const [tooltipHovered, setTooltipHovered] = useState(false);
 
   return (
     <>

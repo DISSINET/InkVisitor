@@ -52,8 +52,9 @@ interface TagProps {
   isDiscouraged?: boolean;
   disabled?: boolean;
 
-  onButtonOver?: React.MouseEventHandler<HTMLDivElement>;
-  onButtonOut?: React.MouseEventHandler<HTMLDivElement>;
+  onButtonOver?: () => void;
+  onButtonOut?: () => void;
+  onBtnClick?: () => void;
 }
 
 export const Tag: React.FC<TagProps> = ({
@@ -83,6 +84,7 @@ export const Tag: React.FC<TagProps> = ({
 
   onButtonOver,
   onButtonOut,
+  onBtnClick,
 }) => {
   const { appendDetailId } = useSearchParams();
   const dispatch = useAppDispatch();
@@ -144,11 +146,13 @@ export const Tag: React.FC<TagProps> = ({
       {entityClass}
     </StyledEntityTag>
   );
+
   const renderButton = () => (
     <StyledButtonWrapper
       status={status}
-      onMouseOver={onButtonOver}
-      onMouseOut={onButtonOut}
+      onMouseEnter={onButtonOver}
+      onMouseLeave={onButtonOut}
+      onClick={onBtnClick}
     >
       {button}
     </StyledButtonWrapper>

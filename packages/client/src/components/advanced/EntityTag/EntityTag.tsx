@@ -3,7 +3,7 @@ import { EntityEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
 import { Tag } from "components";
 import { EntityTooltip } from "components/advanced";
-import React, { ReactNode, useState } from "react";
+import React, { ReactNode, useEffect, useState } from "react";
 import { EntityDragItem } from "types";
 import { getEntityLabel } from "utils";
 
@@ -35,7 +35,7 @@ export const EntityTag: React.FC<EntityTag> = ({
   showOnly,
   fullWidth,
   mode,
-  button,
+  button = false,
   index,
   moveFn,
   isSelected,
@@ -71,7 +71,7 @@ export const EntityTag: React.FC<EntityTag> = ({
             text={tooltipText}
             itemsCount={statementsCount}
             position={tooltipPosition}
-            disabled={disableTooltip || buttonHovered}
+            disabled={button ? buttonHovered : false}
             tagHovered={tagHovered}
             referenceElement={referenceElement}
           />
@@ -102,6 +102,10 @@ export const EntityTag: React.FC<EntityTag> = ({
           isFavorited={isFavorited}
           onButtonOver={() => setButtonHovered(true)}
           onButtonOut={() => setButtonHovered(false)}
+          onBtnClick={() => {
+            setButtonHovered(false);
+            setTagHovered(false);
+          }}
         />
       </div>
     </>
