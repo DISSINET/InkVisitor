@@ -16,6 +16,9 @@
         "id": {
           "type": "string"
         },
+        "order": {
+          "type": "number"
+        },
         "type": {
           "const": "A1S",
           "type": "string"
@@ -24,6 +27,7 @@
       "required": [
         "entityIds",
         "id",
+        "order",
         "type"
       ],
       "type": "object"

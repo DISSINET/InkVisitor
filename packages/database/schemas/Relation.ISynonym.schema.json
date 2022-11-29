@@ -14,6 +14,9 @@
         "id": {
           "type": "string"
         },
+        "order": {
+          "type": "number"
+        },
         "type": {
           "const": "SYN",
           "type": "string"
