@@ -162,8 +162,8 @@ export const EntityBookmarkFolder: React.FC<EntityBookmarkFolder> = ({
           handleClickFolder(bookmarkFolder.id);
         }}
         ref={setReferenceElement}
-        onMouseOver={() => setShowTooltip(true)}
-        onMouseOut={() => setShowTooltip(false)}
+        onMouseEnter={() => setShowTooltip(true)}
+        onMouseLeave={() => setShowTooltip(false)}
       >
         <StyledFolderWrapperOpenArea>
           <StyledIconWrap>

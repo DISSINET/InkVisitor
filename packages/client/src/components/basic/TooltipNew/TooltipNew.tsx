@@ -32,7 +32,7 @@ interface TooltipNew {
 
   disabled?: boolean;
   disableAutoPosition?: boolean;
-  onMouseOut?: () => void;
+  onMouseLeave?: () => void;
 }
 export const TooltipNew: React.FC<TooltipNew> = ({
   // essential
@@ -51,7 +51,7 @@ export const TooltipNew: React.FC<TooltipNew> = ({
 
   disabled = false,
   disableAutoPosition = false,
-  onMouseOut = () => {},
+  onMouseLeave = () => {},
 }) => {
   const [popperElement, setPopperElement] =
     useState<HTMLDivElement | null>(null);
@@ -110,7 +110,7 @@ export const TooltipNew: React.FC<TooltipNew> = ({
           style={{ ...styles.popper, ...animatedTooltip }}
           color={color}
           onMouseLeave={() => {
-            onMouseOut();
+            onMouseLeave();
             setTooltipHovered(false);
           }}
           arrowoffset={-offsetY}

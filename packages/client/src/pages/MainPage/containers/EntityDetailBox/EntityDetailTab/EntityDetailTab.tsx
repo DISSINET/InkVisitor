@@ -31,8 +31,8 @@ export const EntityDetailTab: React.FC<EntityDetailTab> = ({
       <StyledTab
         isSelected={isSelected}
         ref={setReferenceElement}
-        onMouseOver={() => setShowTooltip(true)}
-        onMouseOut={() => setShowTooltip(false)}
+        onMouseEnter={() => setShowTooltip(true)}
+        onMouseLeave={() => setShowTooltip(false)}
       >
         <StyledLabel
           isSelected={isSelected}

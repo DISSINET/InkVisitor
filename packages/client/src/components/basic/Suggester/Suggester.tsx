@@ -278,8 +278,8 @@ export const Suggester: React.FC<Suggester> = ({
 
         {((isFocused || isHovered) && suggestions.length) || isFetching ? (
           <StyledSuggesterList
-            onMouseOver={() => setIsHovered(true)}
-            onMouseOut={() => setIsHovered(false)}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
           >
             <StyledRelativePosition>
               {renderEntitySuggestions()}

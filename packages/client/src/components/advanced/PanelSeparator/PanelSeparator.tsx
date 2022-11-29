@@ -26,9 +26,8 @@ export const PanelSeparator: React.FC<PanelSeparator> = ({}) => {
   const LEFT_SIDE_MIN_WIDTH = secondPanelMinWidth + panelWidths[0];
   const LEFT_SIDE_MAX_WIDTH = layoutWidth - panelWidths[3] - thirdPanelMinWidth;
 
-  const [separatorXTempPosition, setSeparatorXTempPosition] = useState<
-    undefined | number
-  >(undefined);
+  const [separatorXTempPosition, setSeparatorXTempPosition] =
+    useState<undefined | number>(undefined);
   const [leftWidth, setLeftWidth] = useState<number>(separatorXPosition);
   const [dragging, setDragging] = useState(false);
   const [hovered, setHovered] = useState(false);
@@ -111,8 +110,8 @@ export const PanelSeparator: React.FC<PanelSeparator> = ({}) => {
   return (
     <StyledPanelSeparator
       onMouseDown={onMouseDown}
-      onMouseOver={() => setHovered(true)}
-      onMouseOut={() => setHovered(false)}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
       style={animatedSeparator}
       $show={hovered || dragging}
     />

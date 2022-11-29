@@ -45,7 +45,7 @@ export const TagGroup: React.FC<TagGroup> = ({
             color="success"
             noArrow
             tagGroup
-            onMouseOut={() => {
+            onMouseLeave={() => {
               setShowTooltip(false);
             }}
             content={
@@ -60,7 +60,7 @@ export const TagGroup: React.FC<TagGroup> = ({
           />
           <StyledDots
             ref={setReferenceElement}
-            onMouseOver={() => {
+            onMouseEnter={() => {
               setShowTooltip(true);
             }}
           >
