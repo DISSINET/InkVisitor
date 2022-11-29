@@ -58,7 +58,6 @@ export const EntityDetailTab: React.FC<EntityDetailTab> = ({
       </StyledTab>
 
       <TooltipNew
-        instanceName="tab-tooltip"
         visible={showTooltip}
         referenceElement={referenceElement}
         label={getEntityLabel(entity)}

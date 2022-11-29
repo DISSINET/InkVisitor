@@ -38,7 +38,6 @@ export const TagGroup: React.FC<TagGroup> = ({
       {isOversized && (
         <>
           <TooltipNew
-            instanceName="tagGroup-dots-tooltip"
             visible={showTooltip}
             referenceElement={referenceElement}
             offsetY={-14}

@@ -212,7 +212,6 @@ export const EntityBookmarkFolder: React.FC<EntityBookmarkFolder> = ({
         </StyledFolderHeaderButtons>
       </StyledFolderHeader>
       <TooltipNew
-        instanceName="bookmarkFolder-tooltip"
         visible={showTooltip}
         referenceElement={referenceElement}
         label={bookmarkFolder.name}

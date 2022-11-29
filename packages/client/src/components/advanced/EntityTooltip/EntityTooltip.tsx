@@ -261,7 +261,6 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
   return (
     <>
       <TooltipNew
-        instanceName="entity-tooltip"
         visible={showTooltip}
         referenceElement={referenceElement}
         content={renderContent}

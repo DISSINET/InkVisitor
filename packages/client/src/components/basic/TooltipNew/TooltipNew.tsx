@@ -4,13 +4,7 @@ import {
   VariationPlacement,
   VirtualElement,
 } from "@popperjs/core";
-import React, {
-  MouseEvent,
-  MouseEventHandler,
-  ReactElement,
-  useEffect,
-  useState,
-} from "react";
+import React, { ReactElement, useEffect, useState } from "react";
 import { usePopper } from "react-popper";
 import { useSpring } from "react-spring";
 import { Colors } from "types";
@@ -22,8 +16,6 @@ import {
 } from "./TooltipNewStyles";
 
 interface TooltipNew {
-  // for debugging
-  instanceName: string;
   // essential
   visible: boolean;
   referenceElement: Element | VirtualElement | null;
@@ -43,7 +35,6 @@ interface TooltipNew {
   onMouseOut?: () => void;
 }
 export const TooltipNew: React.FC<TooltipNew> = ({
-  instanceName,
   // essential
   visible = false,
   referenceElement,
@@ -60,7 +51,7 @@ export const TooltipNew: React.FC<TooltipNew> = ({
 
   disabled = false,
   disableAutoPosition = false,
-  onMouseOut = () => console.log("default"),
+  onMouseOut = () => {},
 }) => {
   const [popperElement, setPopperElement] =
     useState<HTMLDivElement | null>(null);
@@ -93,10 +84,6 @@ export const TooltipNew: React.FC<TooltipNew> = ({
     opacity: visible ? 1 : 0,
     config: { mass: 2, friction: 2, tension: 100, clamp: true },
   });
-
-  useEffect(() => {
-    if (visible) console.log(instanceName);
-  }, [visible]);
 
   // Needed for state update
   useEffect(() => {

@@ -71,7 +71,6 @@ export const Button: React.FC<
   return tooltipLabel || tooltipContent ? (
     <>
       <TooltipNew
-        instanceName="button-tooltip"
         label={tooltipLabel}
         content={tooltipContent}
         visible={showTooltip}
