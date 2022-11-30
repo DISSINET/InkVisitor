@@ -9,6 +9,7 @@ import { usePopper } from "react-popper";
 import { useSpring } from "react-spring";
 import { Colors } from "types";
 import {
+  StyledArrow,
   StyledContainer,
   StyledContent,
   StyledLabel,
@@ -120,18 +121,24 @@ export const TooltipNew: React.FC<TooltipNew> = ({
           {...attributes.popper}
         >
           {!noArrow && (
-            <div ref={setArrowElement} style={styles.arrow} id="arrow" />
+            <StyledArrow
+              id="arrow"
+              ref={setArrowElement}
+              style={styles.arrow}
+            />
           )}
           <div>
             {label && (
-              <StyledContent>
+              <StyledContent color={color}>
                 <StyledRow>
                   <StyledLabel>{label}</StyledLabel>
                 </StyledRow>
               </StyledContent>
             )}
             {content && (
-              <StyledContent tagGroup={tagGroup}>{content}</StyledContent>
+              <StyledContent color={color} tagGroup={tagGroup}>
+                {content}
+              </StyledContent>
             )}
           </div>
         </StyledContainer>

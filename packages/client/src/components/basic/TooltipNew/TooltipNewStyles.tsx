@@ -14,59 +14,56 @@ export const StyledContainer = styled(animated.div)<StyledContainer>`
 
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
   border-radius: ${({ theme }) => theme.borderRadius["sm"]};
-  z-index: 1000;
+  z-index: 888;
 
   display: flex;
   justify-content: center;
   align-items: center;
   max-width: 40rem;
 
-  border: 2px dotted black;
-
-  #arrow {
-    position: absolute;
-    width: 10px;
-    height: 10px;
-    z-index: 1000;
-    &:after {
-      content: "";
-      background-color: black;
-      position: absolute;
-      left: 0;
-      transform: rotate(45deg);
-      width: 10px;
-      height: 10px;
-    }
-  }
-
   &[data-popper-placement^="bottom"] > #arrow {
-    top: ${({ arrowoffset }) => `${arrowoffset}px`};
+    top: ${({ arrowoffset }) => `${arrowoffset + 2}px`};
     :after {
       box-shadow: -1px -1px 1px rgba(0, 0, 0, 0.1);
     }
   }
   &[data-popper-placement^="top"] > #arrow {
-    bottom: ${({ arrowoffset }) => `${arrowoffset}px`};
+    bottom: ${({ arrowoffset }) => `${arrowoffset + 2}px`};
     :after {
       box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.1);
     }
   }
   &[data-popper-placement^="left"] > #arrow {
-    right: ${({ arrowoffset }) => `${arrowoffset}px`};
+    right: ${({ arrowoffset }) => `${arrowoffset + 2}px`};
     :after {
       box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.1);
     }
   }
   &[data-popper-placement^="right"] > #arrow {
-    left: ${({ arrowoffset }) => `${arrowoffset}px`};
+    left: ${({ arrowoffset }) => `${arrowoffset + 2}px`};
     :after {
       box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.1);
     }
   }
 `;
+export const StyledArrow = styled.div`
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  &:after {
+    content: "";
+    background-color: black;
+    position: absolute;
+    left: 0;
+    transform: rotate(45deg);
+    width: 10px;
+    height: 10px;
+  }
+`;
 
 interface StyledContent {
   tagGroup?: boolean;
+  color: typeof Colors[number];
 }
 export const StyledContent = styled.div<StyledContent>`
   margin: ${({ theme, tagGroup }) =>

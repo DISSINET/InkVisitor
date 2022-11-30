@@ -26,6 +26,7 @@ export const StyledRelations = styled.div`
   grid-template-columns: auto 1fr;
   row-gap: ${({ theme }) => theme.space[5]};
   margin-top: 1rem;
+  padding-bottom: ${({ theme }) => theme.space[1]};
 `;
 export const StyledRelationTypeBlock = styled.div`
   display: flex;
