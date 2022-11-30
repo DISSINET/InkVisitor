@@ -244,6 +244,7 @@ export const Suggester: React.FC<Suggester> = ({
             width={inputWidth}
             onFocus={() => setIsFocused(true)}
             onBlur={() => {
+              // Comment this for debug
               setIsFocused(false);
               setSelected(-1);
             }}
@@ -282,7 +283,9 @@ export const Suggester: React.FC<Suggester> = ({
             onMouseLeave={() => setIsHovered(false)}
           >
             <StyledRelativePosition>
+              {/* TODO: try to map suggestions in normal way */}
               {renderEntitySuggestions()}
+
               <Loader size={30} show={isFetching} />
             </StyledRelativePosition>
             <SuggesterKeyPress

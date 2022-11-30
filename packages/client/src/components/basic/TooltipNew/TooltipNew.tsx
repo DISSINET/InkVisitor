@@ -5,6 +5,7 @@ import {
   VirtualElement,
 } from "@popperjs/core";
 import React, { ReactElement, useEffect, useState } from "react";
+import ReactDOM from "react-dom";
 import { usePopper } from "react-popper";
 import { useSpring } from "react-spring";
 import { Colors } from "types";
@@ -106,42 +107,47 @@ export const TooltipNew: React.FC<TooltipNew> = ({
   return (
     <>
       {!disabled && (showTooltip || tooltipHovered) && (
-        <StyledContainer
-          ref={setPopperElement}
-          style={{ ...styles.popper, ...animatedTooltip }}
-          color={color}
-          onMouseLeave={() => {
-            onMouseLeave();
-            setTooltipHovered(false);
-          }}
-          arrowoffset={-offsetY}
-          onMouseEnter={() => {
-            setTooltipHovered(true);
-          }}
-          {...attributes.popper}
-        >
-          {!noArrow && (
-            <StyledArrow
-              id="arrow"
-              ref={setArrowElement}
-              style={styles.arrow}
-            />
+        <>
+          {ReactDOM.createPortal(
+            <StyledContainer
+              ref={setPopperElement}
+              style={{ ...styles.popper, ...animatedTooltip }}
+              color={color}
+              onMouseLeave={() => {
+                onMouseLeave();
+                setTooltipHovered(false);
+              }}
+              arrowoffset={-offsetY}
+              onMouseEnter={() => {
+                setTooltipHovered(true);
+              }}
+              {...attributes.popper}
+            >
+              {!noArrow && (
+                <StyledArrow
+                  id="arrow"
+                  ref={setArrowElement}
+                  style={styles.arrow}
+                />
+              )}
+              <div>
+                {label && (
+                  <StyledContent color={color}>
+                    <StyledRow>
+                      <StyledLabel>{label}</StyledLabel>
+                    </StyledRow>
+                  </StyledContent>
+                )}
+                {content && (
+                  <StyledContent color={color} tagGroup={tagGroup}>
+                    {content}
+                  </StyledContent>
+                )}
+              </div>
+            </StyledContainer>,
+            document.getElementById("page")!
           )}
-          <div>
-            {label && (
-              <StyledContent color={color}>
-                <StyledRow>
-                  <StyledLabel>{label}</StyledLabel>
-                </StyledRow>
-              </StyledContent>
-            )}
-            {content && (
-              <StyledContent color={color} tagGroup={tagGroup}>
-                {content}
-              </StyledContent>
-            )}
-          </div>
-        </StyledContainer>
+        </>
       )}
     </>
   );

@@ -104,9 +104,11 @@ export const Page: React.FC<Page> = ({ children }) => {
       />
 
       {contentHeight > 0 ? (
-        <StyledPageContent height={contentHeight}>{children}</StyledPageContent>
+        <StyledPageContent id="page" height={contentHeight}>
+          {children}
+        </StyledPageContent>
       ) : (
-        <StyledPageContent height={0}>
+        <StyledPageContent id="page" height={0}>
           <Loader show />
         </StyledPageContent>
       )}
