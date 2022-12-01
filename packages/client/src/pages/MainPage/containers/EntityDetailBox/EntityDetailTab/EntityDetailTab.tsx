@@ -1,6 +1,6 @@
 import { EntityEnums } from "@shared/enums";
 import { IResponseEntity } from "@shared/types";
-import { TooltipNew, TypeBar } from "components";
+import { Tooltip, TypeBar } from "components";
 import React, { MouseEventHandler, useState } from "react";
 import { getEntityLabel } from "utils";
 import {
@@ -57,7 +57,7 @@ export const EntityDetailTab: React.FC<EntityDetailTab> = ({
         </StyledClose>
       </StyledTab>
 
-      <TooltipNew
+      <Tooltip
         visible={showTooltip}
         referenceElement={referenceElement}
         label={getEntityLabel(entity)}

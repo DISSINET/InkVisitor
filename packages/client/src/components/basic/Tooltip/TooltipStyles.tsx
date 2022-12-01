@@ -1,39 +1,71 @@
+import { animated } from "react-spring";
 import styled from "styled-components";
-import Popup from "reactjs-popup";
 import { Colors } from "types";
 
-interface StyledPopup {
+interface StyledContainer {
   color: typeof Colors[number];
+  arrowoffset: number;
 }
-export const StyledPopup = styled(Popup)<StyledPopup>`
-  &-content {
-    color: ${({ theme }) => theme.color["white"]};
-    background-color: ${({ theme, color }) => theme.color[color]};
-    min-width: ${({ theme }) => theme.space[8]};
-    font-size: ${({ theme }) => theme.fontSize["xxs"]};
+export const StyledContainer = styled(animated.div)<StyledContainer>`
+  color: ${({ theme }) => theme.color["white"]};
+  background-color: ${({ theme, color }) => theme.color[color]};
+  min-width: ${({ theme }) => theme.space[8]};
+  font-size: ${({ theme }) => theme.fontSize["xxs"]};
 
-    border-radius: ${({ theme }) => theme.borderRadius["sm"]};
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+  border-radius: ${({ theme }) => theme.borderRadius["sm"]};
+  z-index: 888;
 
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    max-width: 40rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  max-width: 40rem;
+
+  &[data-popper-placement^="bottom"] > #arrow {
+    top: ${({ arrowoffset }) => `${arrowoffset + 2}px`};
+    :after {
+      box-shadow: -1px -1px 1px rgba(0, 0, 0, 0.1);
+    }
   }
-  &-arrow {
-    color: ${({ theme, color }) => theme.color[color]};
+  &[data-popper-placement^="top"] > #arrow {
+    bottom: ${({ arrowoffset }) => `${arrowoffset + 2}px`};
+    :after {
+      box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.1);
+    }
   }
-  [role="tooltip"]&-content {
+  &[data-popper-placement^="left"] > #arrow {
+    right: ${({ arrowoffset }) => `${arrowoffset + 2}px`};
+    :after {
+      box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.1);
+    }
   }
-  &-overlay {
+  &[data-popper-placement^="right"] > #arrow {
+    left: ${({ arrowoffset }) => `${arrowoffset + 2}px`};
+    :after {
+      box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.1);
+    }
   }
-  [data-popup="tooltip"]&-overlay {
+`;
+export const StyledArrow = styled.div`
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  &:after {
+    content: "";
+    background-color: black;
+    position: absolute;
+    left: 0;
+    transform: rotate(45deg);
+    width: 10px;
+    height: 10px;
   }
 `;
 
-interface StyledContentWrap {
+interface StyledContent {
   tagGroup?: boolean;
+  color: typeof Colors[number];
 }
-export const StyledContentWrap = styled.div<StyledContentWrap>`
+export const StyledContent = styled.div<StyledContent>`
   margin: ${({ theme, tagGroup }) =>
     `${theme.space[2]} ${tagGroup ? theme.space[2] : theme.space[3]}`};
 `;

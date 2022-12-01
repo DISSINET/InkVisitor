@@ -19,7 +19,7 @@ import {
   ModalFooter,
   ModalHeader,
   Tooltip,
-  TooltipNew,
+  Tooltip,
 } from "components";
 import { EntitySuggester, EntityTag } from "components/advanced";
 import React, { useMemo, useState } from "react";

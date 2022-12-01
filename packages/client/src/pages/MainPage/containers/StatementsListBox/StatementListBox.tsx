@@ -7,15 +7,7 @@ import {
   IStatement,
 } from "@shared/types";
 import api from "api";
-import {
-  Button,
-  ButtonGroup,
-  Loader,
-  Submit,
-  TagGroup,
-  Tooltip,
-  TooltipNew,
-} from "components";
+import { Button, ButtonGroup, Loader, Submit, TagGroup } from "components";
 import { EntityTag } from "components/advanced";
 import { CStatement, DStatement } from "constructors";
 import { useSearchParams } from "hooks";
@@ -38,7 +30,6 @@ import { StatementListContextMenu } from "./StatementListContextMenu/StatementLi
 import { StatementListHeader } from "./StatementListHeader/StatementListHeader";
 import { StatementListTable } from "./StatementListTable/StatementListTable";
 import {
-  StyledDots,
   StyledEmptyState,
   StyledTableWrapper,
   StyledText,
