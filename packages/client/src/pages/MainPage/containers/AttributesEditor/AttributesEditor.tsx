@@ -19,6 +19,7 @@ import {
   ModalFooter,
   ModalHeader,
   Tooltip,
+  TooltipNew,
 } from "components";
 import { EntitySuggester, EntityTag } from "components/advanced";
 import React, { useMemo, useState } from "react";
@@ -157,21 +158,19 @@ const AttributesEditor: React.FC<AttributesEditor> = ({
       />
     </div>
   );
+
   return (
     <>
       <div>
-        <Tooltip content={getTooltipAttributes()}>
-          <div>
-            <Button
-              key="settings"
-              disabled={disabledOpenModal}
-              icon={<MdSettings />}
-              inverted
-              color="plain"
-              onClick={() => setModalOpen(true)}
-            />
-          </div>
-        </Tooltip>
+        <Button
+          key="settings"
+          disabled={disabledOpenModal}
+          icon={<MdSettings />}
+          inverted
+          color="plain"
+          onClick={() => setModalOpen(true)}
+          tooltipContent={getTooltipAttributes()}
+        />
       </div>
 
       <Modal
@@ -214,7 +213,7 @@ const AttributesEditor: React.FC<AttributesEditor> = ({
                     userCanEdit && (
                       <Button
                         key="d"
-                        tooltip="unlink actant"
+                        tooltipLabel="unlink actant"
                         icon={<FaUnlink />}
                         color="plain"
                         inverted

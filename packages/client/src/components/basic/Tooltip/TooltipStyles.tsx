@@ -7,12 +7,13 @@ interface StyledPopup {
 }
 export const StyledPopup = styled(Popup)<StyledPopup>`
   &-content {
-    background-color: ${({ theme, color }) => theme.color[color]};
-
     color: ${({ theme }) => theme.color["white"]};
-    border-radius: ${({ theme }) => theme.borderRadius["sm"]};
-    font-size: ${({ theme }) => theme.fontSize["xxs"]};
+    background-color: ${({ theme, color }) => theme.color[color]};
     min-width: ${({ theme }) => theme.space[8]};
+    font-size: ${({ theme }) => theme.fontSize["xxs"]};
+
+    border-radius: ${({ theme }) => theme.borderRadius["sm"]};
+
     display: flex;
     justify-content: center;
     align-items: center;
@@ -44,7 +45,4 @@ export const StyledLabel = styled.p`
   max-width: 35rem;
   font-weight: ${({ theme }) => theme.fontWeight["bold"]};
   word-wrap: break-word;
-`;
-export const StyledItemsWrap = styled.div`
-  margin: ${({ theme }) => theme.space[2]};
 `;

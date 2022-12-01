@@ -139,7 +139,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
                 <Button
                   key="add"
                   icon={<FaPlus size={14} />}
-                  tooltip="add new statement at the end of the list"
+                  tooltipLabel="add new statement at the end of the list"
                   color="primary"
                   label="new statement"
                   onClick={() => {
@@ -150,7 +150,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
               <Button
                 key="refresh"
                 icon={<FaRecycle size={14} />}
-                tooltip="refresh data"
+                tooltipLabel="refresh data"
                 inverted
                 color="primary"
                 label="refresh"

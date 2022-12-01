@@ -1,15 +1,15 @@
+import { Placement } from "@popperjs/core";
 import { certaintyDict } from "@shared/dictionaries";
 import { RelationEnums } from "@shared/enums";
 import { EntityTooltip as EntityTooltipNamespace } from "@shared/types";
 import api from "api";
-import { LetterIcon, Tooltip } from "components";
-import React, { ReactElement, useEffect, useMemo, useState } from "react";
+import { LetterIcon, TooltipNew } from "components";
+import React, { useEffect, useMemo, useState } from "react";
 import { AiOutlineTag } from "react-icons/ai";
 import { BiCommentDetail } from "react-icons/bi";
 import { BsCardText } from "react-icons/bs";
 import { ImListNumbered } from "react-icons/im";
 import { useQuery } from "react-query";
-import { EventType, PopupPosition } from "reactjs-popup/dist/types";
 import { Colors } from "types";
 import { EntityTooltipRelationTreeTable } from "./EntityTooltipRelationTreeTable/EntityTooltipRelationTreeTable";
 import {
@@ -20,12 +20,9 @@ import {
   StyledRelations,
   StyledRelationTypeBlock,
   StyledRow,
-  StyledTooltipSeparator,
 } from "./EntityTooltipStyles";
 
 interface EntityTooltip {
-  // trigger
-  children: ReactElement;
   // entity
   entityId: string;
   label?: string;
@@ -33,19 +30,17 @@ interface EntityTooltip {
   text?: string;
   itemsCount?: number;
   // settings
-  position?: PopupPosition | PopupPosition[];
-  on?: EventType | EventType[];
-  noArrow?: boolean;
+  position?: Placement;
+  // on?: EventType | EventType[];
+  // noArrow?: boolean;
   color?: typeof Colors[number];
   disabled?: boolean;
-  offsetX?: number;
-  offsetY?: number;
 
   tagHovered: boolean;
+
+  referenceElement: HTMLDivElement | null;
 }
 export const EntityTooltip: React.FC<EntityTooltip> = ({
-  // trigger
-  children,
   // entity
   entityId,
   label,
@@ -54,18 +49,15 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
   itemsCount,
   // settings
   position,
-  on,
-  noArrow,
   color,
   disabled,
-  offsetX,
-  offsetY,
 
   tagHovered,
+  //
+  referenceElement,
 }) => {
-  const [tooltipData, setTooltipData] = useState<
-    EntityTooltipNamespace.IResponse | false
-  >(false);
+  const [tooltipData, setTooltipData] =
+    useState<EntityTooltipNamespace.IResponse | false>(false);
 
   const { data, isFetching, isSuccess } = useQuery(
     ["tooltip", entityId, tagHovered],
@@ -256,19 +248,25 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
     [tooltipData]
   );
 
+  const [showTooltip, setShowTooltip] = useState(false);
+
+  useEffect(() => {
+    if (!disabled) {
+      setShowTooltip(true);
+    } else {
+      setShowTooltip(false);
+    }
+  }, [disabled]);
+
   return (
-    <Tooltip
-      content={renderContent}
-      position={position}
-      on={on}
-      noArrow={noArrow}
-      color={color}
-      disabled={disabled}
-      offsetX={offsetX}
-      offsetY={offsetY}
-      onClose={() => setTooltipData(false)}
-    >
-      <StyledTooltipSeparator>{children}</StyledTooltipSeparator>
-    </Tooltip>
+    <>
+      <TooltipNew
+        visible={showTooltip}
+        referenceElement={referenceElement}
+        content={renderContent}
+        position={position}
+        color={color}
+      />
+    </>
   );
 };

@@ -227,45 +227,39 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
     );
   };
 
+  const getTooltipContent = () => (
+    <StyledTooltipGrid>
+      <div>
+        <StyledTooltipHeading>Statement</StyledTooltipHeading>
+        {getTooltipColumn(modalData.statement, disabledAttributes.statement)}
+      </div>
+      <div>
+        <StyledTooltipHeading>Type</StyledTooltipHeading>
+        {getTooltipColumn(modalData.type, disabledAttributes.type)}
+      </div>
+      <div>
+        <StyledTooltipHeading>Value</StyledTooltipHeading>
+        {getTooltipColumn(modalData.value, disabledAttributes.value)}
+      </div>
+    </StyledTooltipGrid>
+  );
+
   const dissabledStatement =
     disabledAttributes.statement as PropAttributeName[];
   const dissabledType = disabledAttributes.type as PropAttributeName[];
   const dissabledValue = disabledAttributes.value as PropAttributeName[];
+
   return (
     <div>
-      <Tooltip
-        position="top right"
-        content={
-          <StyledTooltipGrid>
-            <div>
-              <StyledTooltipHeading>Statement</StyledTooltipHeading>
-              {getTooltipColumn(
-                modalData.statement,
-                disabledAttributes.statement
-              )}
-            </div>
-            <div>
-              <StyledTooltipHeading>Type</StyledTooltipHeading>
-              {getTooltipColumn(modalData.type, disabledAttributes.type)}
-            </div>
-            <div>
-              <StyledTooltipHeading>Value</StyledTooltipHeading>
-              {getTooltipColumn(modalData.value, disabledAttributes.value)}
-            </div>
-          </StyledTooltipGrid>
-        }
-      >
-        <div>
-          <Button
-            key="settings"
-            disabled={disabledOpenModal}
-            icon={<MdSettings />}
-            inverted
-            color="plain"
-            onClick={() => setModalOpen(true)}
-          />
-        </div>
-      </Tooltip>
+      <Button
+        key="settings"
+        disabled={disabledOpenModal}
+        icon={<MdSettings />}
+        inverted
+        color="plain"
+        onClick={() => setModalOpen(true)}
+        tooltipContent={getTooltipContent()}
+      />
 
       <Modal
         key="edit-modal"
@@ -326,7 +320,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
                         icon={<FaUnlink />}
                         color="plain"
                         inverted
-                        tooltip="unlink actant"
+                        tooltipLabel="unlink actant"
                         onClick={() => {
                           updateProp(statementId, {
                             type: {
@@ -382,12 +376,12 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
                   <EntityTag
                     entity={propValueActant}
                     fullWidth
-                    tooltipPosition="left center"
+                    tooltipPosition="left"
                     button={
                       <Button
                         key="d"
                         icon={<FaUnlink />}
-                        tooltip="unlink actant"
+                        tooltipLabel="unlink actant"
                         color="plain"
                         inverted
                         onClick={() => {

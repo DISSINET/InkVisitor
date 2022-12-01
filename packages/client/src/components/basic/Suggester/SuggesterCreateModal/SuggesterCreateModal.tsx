@@ -155,14 +155,14 @@ export const SuggesterCreateModal: React.FC<SuggesterCreateModal> = ({
                   {territory ? (
                     <EntityTag
                       entity={territory}
-                      tooltipPosition={"left center"}
+                      tooltipPosition="left"
                       button={
                         <Button
                           key="d"
                           icon={<FaUnlink />}
                           color="danger"
                           inverted
-                          tooltip="unlink actant"
+                          tooltipLabel="unlink actant"
                           onClick={() => {
                             setTerritoryId("");
                           }}

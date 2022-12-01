@@ -153,7 +153,7 @@ export const StatementEditorActantTableRow: React.FC<StatementEditorActantTableR
               userCanEdit && (
                 <Button
                   key="d"
-                  tooltip="unlink actant"
+                  tooltipLabel="unlink actant"
                   icon={<FaUnlink />}
                   color="plain"
                   inverted
@@ -301,7 +301,7 @@ export const StatementEditorActantTableRow: React.FC<StatementEditorActantTableR
               icon={<FaTrashAlt />}
               color="plain"
               inverted
-              tooltip="remove actant row"
+              tooltipLabel="remove actant row"
               onClick={() => {
                 removeActant(filteredActant.data.sActant.id);
               }}
@@ -313,7 +313,7 @@ export const StatementEditorActantTableRow: React.FC<StatementEditorActantTableR
               icon={<FaPlus />}
               color="plain"
               inverted
-              tooltip="add new prop"
+              tooltipLabel="add new prop"
               onClick={() => {
                 addProp(propRowId);
               }}
@@ -326,7 +326,7 @@ export const StatementEditorActantTableRow: React.FC<StatementEditorActantTableR
               label="c"
               color="plain"
               inverted
-              tooltip="add classification"
+              tooltipLabel="add classification"
               onClick={() => {
                 addClassification(propRowId);
               }}
@@ -339,7 +339,7 @@ export const StatementEditorActantTableRow: React.FC<StatementEditorActantTableR
               label="i"
               color="plain"
               inverted
-              tooltip="add identification"
+              tooltipLabel="add identification"
               onClick={() => {
                 addIdentification(propRowId);
               }}
@@ -348,7 +348,7 @@ export const StatementEditorActantTableRow: React.FC<StatementEditorActantTableR
           {sActant.logic == "2" && (
             <Button
               key="neg"
-              tooltip="Negative logic"
+              tooltipLabel="Negative logic"
               color="success"
               inverted
               noBorder
@@ -359,7 +359,7 @@ export const StatementEditorActantTableRow: React.FC<StatementEditorActantTableR
           {sActant.bundleOperator && (
             <Button
               key="oper"
-              tooltip="Logical operator type"
+              tooltipLabel="Logical operator type"
               color="success"
               inverted
               noBorder

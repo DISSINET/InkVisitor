@@ -266,7 +266,7 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
                               button={
                                 <Button
                                   key="d"
-                                  tooltip="remove territory from rights"
+                                  tooltipLabel="remove territory from rights"
                                   icon={<FaUnlink />}
                                   color="plain"
                                   inverted
@@ -344,7 +344,7 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
                                 button={
                                   <Button
                                     key="d"
-                                    tooltip="remove territory from rights"
+                                    tooltipLabel="remove territory from rights"
                                     icon={<FaUnlink />}
                                     color="plain"
                                     inverted
@@ -400,7 +400,7 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
                 key="r"
                 icon={<FaTrashAlt size={14} />}
                 color="danger"
-                tooltip="delete"
+                tooltipLabel="delete"
                 disabled={userId === localStorage.getItem("userid")}
                 onClick={() => {
                   setRemovingUserId(userId);
@@ -408,7 +408,7 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
               />
               <Button
                 icon={<FaKey size={14} />}
-                tooltip="reset password"
+                tooltipLabel="reset password"
                 color="warning"
                 onClick={() => {
                   api
@@ -421,7 +421,7 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
                   active ? <FaToggleOn size={14} /> : <FaToggleOff size={14} />
                 }
                 color={active ? "success" : "danger"}
-                tooltip={active ? "set inactive" : "set active"}
+                tooltipLabel={active ? "set inactive" : "set active"}
                 onClick={() => {
                   userMutation.mutate({
                     id: userId,
@@ -489,8 +489,9 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
 
       <Submit
         title={`Delete User ${removingUser ? removingUser.name : ""}`}
-        text={`Do you really want do delete User ${removingUser ? removingUser.name : ""
-          }?`}
+        text={`Do you really want do delete User ${
+          removingUser ? removingUser.name : ""
+        }?`}
         show={removingUser != false}
         onSubmit={() => {
           removeUser();
