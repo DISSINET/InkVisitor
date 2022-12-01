@@ -97,26 +97,6 @@ export const RightHeader: React.FC<RightHeaderProps> = React.memo(
     const history = useHistory();
     const location = useLocation();
     const [menuOpen, setMenuOpen] = useState<boolean>(false);
-    const menuRef = useRef(null);
-
-    const menuToggleRef = useRef() as React.MutableRefObject<HTMLButtonElement>;
-
-    const handleClick = (e: any) => {
-      if (
-        menuRef.current &&
-        !(menuRef.current as any).contains(e.target) &&
-        menuToggleRef.current &&
-        !(menuToggleRef.current as any).contains(e.target)
-      ) {
-        setMenuOpen(false);
-      }
-    };
-
-    useEffect(() => {
-      document.addEventListener("click", handleClick, true);
-
-      return () => document.removeEventListener("click", handleClick, true);
-    }, []);
 
     return (
       <StyledRightHeader>
@@ -144,7 +124,6 @@ export const RightHeader: React.FC<RightHeaderProps> = React.memo(
           </div>
         )}
         <Button
-          innerRef={menuToggleRef}
           icon={
             <FaBars
               style={{

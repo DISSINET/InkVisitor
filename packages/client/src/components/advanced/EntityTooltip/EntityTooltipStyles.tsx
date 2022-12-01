@@ -20,16 +20,13 @@ export const StyledIconWrap = styled.span`
 export const StyledItemsWrap = styled.div`
   margin: ${({ theme }) => theme.space[2]};
 `;
-// For EntityTags
-export const StyledTooltipSeparator = styled.div`
-  display: inline-flex;
-  overflow: hidden;
-`;
+
 export const StyledRelations = styled.div`
   display: grid;
   grid-template-columns: auto 1fr;
   row-gap: ${({ theme }) => theme.space[5]};
   margin-top: 1rem;
+  padding-bottom: ${({ theme }) => theme.space[1]};
 `;
 export const StyledRelationTypeBlock = styled.div`
   display: flex;

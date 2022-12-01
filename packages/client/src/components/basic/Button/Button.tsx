@@ -1,11 +1,12 @@
 import { EntityEnums } from "@shared/enums";
-import { Tooltip } from "components";
-import React, { MouseEventHandler } from "react";
+import { Tooltip, TooltipNew } from "components";
+import React, { MouseEventHandler, ReactElement, useState } from "react";
 import { Colors } from "types";
 import { StyledButton, StyledButtonLabel } from "./ButtonStyles";
 
 interface ButtonProps {
-  tooltip?: string;
+  tooltipLabel?: string;
+  tooltipContent?: ReactElement[] | ReactElement;
   label?: string;
   icon?: JSX.Element | EntityEnums.Operator;
   inverted?: boolean;
@@ -19,8 +20,9 @@ interface ButtonProps {
   fullWidth?: boolean;
 }
 
-export const Button: React.FC<ButtonProps & { innerRef?: React.MutableRefObject<HTMLButtonElement> }> = ({
-  tooltip,
+export const Button: React.FC<ButtonProps> = ({
+  tooltipLabel,
+  tooltipContent,
   label = "",
   icon,
   inverted = false,
@@ -33,13 +35,16 @@ export const Button: React.FC<ButtonProps & { innerRef?: React.MutableRefObject<
   onClick = () => {
     // do nothing
   },
-  innerRef,
   fullWidth = false,
 }) => {
+  const [referenceElement, setReferenceElement] =
+    useState<HTMLButtonElement | null>(null);
+  const [showTooltip, setShowTooltip] = useState(false);
+
   const renderButton = () => {
     return (
       <StyledButton
-        ref={innerRef as React.RefObject<HTMLButtonElement>}
+        ref={setReferenceElement}
         onClick={onClick}
         hasIcon={icon && true}
         color={color}
@@ -50,6 +55,8 @@ export const Button: React.FC<ButtonProps & { innerRef?: React.MutableRefObject<
         radiusRight={radiusRight}
         fullWidth={fullWidth}
         disabled={disabled}
+        onMouseEnter={() => setShowTooltip(true)}
+        onMouseLeave={() => setShowTooltip(false)}
       >
         {icon}
         {label && (
@@ -58,8 +65,16 @@ export const Button: React.FC<ButtonProps & { innerRef?: React.MutableRefObject<
       </StyledButton>
     );
   };
-  return tooltip ? (
-    <Tooltip label={tooltip}>{renderButton()}</Tooltip>
+  return tooltipLabel || tooltipContent ? (
+    <>
+      <TooltipNew
+        label={tooltipLabel}
+        content={tooltipContent}
+        visible={showTooltip}
+        referenceElement={referenceElement}
+      />
+      {renderButton()}
+    </>
   ) : (
     renderButton()
   );

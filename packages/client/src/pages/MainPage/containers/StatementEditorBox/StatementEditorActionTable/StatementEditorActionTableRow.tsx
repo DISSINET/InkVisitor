@@ -123,7 +123,7 @@ export const StatementEditorActionTableRow: React.FC<StatementEditorActionTableR
             userCanEdit && (
               <Button
                 key="d"
-                tooltip="unlink action"
+                tooltipLabel="unlink action"
                 icon={<FaUnlink />}
                 inverted
                 color="plain"
@@ -200,7 +200,7 @@ export const StatementEditorActionTableRow: React.FC<StatementEditorActionTableR
               icon={<FaTrashAlt />}
               color="plain"
               inverted
-              tooltip="remove action row"
+              tooltipLabel="remove action row"
               onClick={() => {
                 removeAction(filteredAction.data.sAction.id);
               }}
@@ -212,7 +212,7 @@ export const StatementEditorActionTableRow: React.FC<StatementEditorActionTableR
               icon={<FaPlus />}
               color="plain"
               inverted
-              tooltip="add new prop"
+              tooltipLabel="add new prop"
               onClick={() => {
                 addProp(rowId);
               }}
@@ -221,7 +221,7 @@ export const StatementEditorActionTableRow: React.FC<StatementEditorActionTableR
           {sAction.logic == "2" && (
             <Button
               key="neg"
-              tooltip="Negative logic"
+              tooltipLabel="Negative logic"
               color="success"
               inverted
               noBorder
@@ -232,7 +232,7 @@ export const StatementEditorActionTableRow: React.FC<StatementEditorActionTableR
           {sAction.bundleOperator && (
             <Button
               key="oper"
-              tooltip="Logical operator type"
+              tooltipLabel="Logical operator type"
               color="success"
               inverted
               noBorder

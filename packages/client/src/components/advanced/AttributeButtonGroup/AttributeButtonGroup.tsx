@@ -37,7 +37,7 @@ export const AttributeButtonGroup: React.FC<AttributeButtonGroup> = ({
           <Button
             key={oi}
             label={option.selected ? option.longValue : option.shortValue}
-            tooltip={option.longValue}
+            tooltipLabel={option.longValue}
             noBorder
             inverted
             color={option.selected ? "primary" : "greyer"}

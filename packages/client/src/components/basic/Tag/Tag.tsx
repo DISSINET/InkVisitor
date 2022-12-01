@@ -52,10 +52,9 @@ interface TagProps {
   isDiscouraged?: boolean;
   disabled?: boolean;
 
-  onMouseOver?: React.MouseEventHandler<HTMLDivElement>;
-  onMouseOut?: React.MouseEventHandler<HTMLDivElement>;
-  onButtonOver?: React.MouseEventHandler<HTMLDivElement>;
-  onButtonOut?: React.MouseEventHandler<HTMLDivElement>;
+  onButtonOver?: () => void;
+  onButtonOut?: () => void;
+  onBtnClick?: () => void;
 }
 
 export const Tag: React.FC<TagProps> = ({
@@ -83,10 +82,9 @@ export const Tag: React.FC<TagProps> = ({
   isDiscouraged = false,
   lvl,
 
-  onMouseOver,
-  onMouseOut,
   onButtonOver,
   onButtonOut,
+  onBtnClick,
 }) => {
   const { appendDetailId } = useSearchParams();
   const dispatch = useAppDispatch();
@@ -148,11 +146,13 @@ export const Tag: React.FC<TagProps> = ({
       {entityClass}
     </StyledEntityTag>
   );
+
   const renderButton = () => (
     <StyledButtonWrapper
       status={status}
-      onMouseOver={onButtonOver}
-      onMouseOut={onButtonOut}
+      onMouseEnter={onButtonOver}
+      onMouseLeave={onButtonOut}
+      onClick={onBtnClick}
     >
       {button}
     </StyledButtonWrapper>
@@ -160,7 +160,6 @@ export const Tag: React.FC<TagProps> = ({
 
   const onDoubleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    e.nativeEvent.stopImmediatePropagation();
 
     !disableDoubleClick && appendDetailId(propId);
   };
@@ -212,6 +211,7 @@ export const Tag: React.FC<TagProps> = ({
   return (
     <>
       <StyledTagWrapper
+        className="tag"
         ref={ref}
         dragDisabled={!canDrag}
         status={status}
@@ -219,8 +219,6 @@ export const Tag: React.FC<TagProps> = ({
         borderStyle={borderStyle}
         onClick={(e: React.MouseEvent) => e.stopPropagation()}
         onDoubleClick={(e: React.MouseEvent) => onDoubleClick(e)}
-        onMouseOver={onMouseOver}
-        onMouseOut={onMouseOut}
       >
         {showOnly ? <>{getShortTag()}</> : <>{getFullTag()}</>}
       </StyledTagWrapper>

@@ -158,10 +158,10 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
                   <EntityTag
                     entity={templateEntity}
                     fullWidth
-                    tooltipPosition="left center"
+                    tooltipPosition="left"
                     button={
                       <Button
-                        tooltip="remove template"
+                        tooltipLabel="remove template"
                         icon={<FaTrash />}
                         color="plain"
                         inverted

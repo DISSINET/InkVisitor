@@ -96,9 +96,8 @@ export const Suggester: React.FC<Suggester> = ({
 
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showTemplateModal, setShowTemplateModal] = useState(false);
-  const [tempDropItem, setTempDropItem] = useState<EntityDragItem | false>(
-    false
-  );
+  const [tempDropItem, setTempDropItem] =
+    useState<EntityDragItem | false>(false);
 
   useKeypress(
     "Escape",
@@ -146,7 +145,8 @@ export const Suggester: React.FC<Suggester> = ({
       } else {
         onCreate({
           label: typed,
-          entityClass: entitiesDictKeys[category.value as EntityEnums.Class].value,
+          entityClass:
+            entitiesDictKeys[category.value as EntityEnums.Class].value,
         });
       }
     } else if (selected > -1) {
@@ -179,7 +179,8 @@ export const Suggester: React.FC<Suggester> = ({
       } else {
         onCreate({
           label: typed,
-          entityClass: entitiesDictKeys[category.value as EntityEnums.Class].value,
+          entityClass:
+            entitiesDictKeys[category.value as EntityEnums.Class].value,
         });
       }
     } else {
@@ -226,7 +227,7 @@ export const Suggester: React.FC<Suggester> = ({
             entityDropdown
             onFocus={() => {
               setSelected(-1);
-              // setIsFocused(true);
+              setIsFocused(true);
             }}
             onBlur={() => setIsFocused(false)}
             disableTyping
@@ -243,6 +244,7 @@ export const Suggester: React.FC<Suggester> = ({
             width={inputWidth}
             onFocus={() => setIsFocused(true)}
             onBlur={() => {
+              // Comment this for debug
               setIsFocused(false);
               setSelected(-1);
             }}
@@ -260,7 +262,7 @@ export const Suggester: React.FC<Suggester> = ({
             <StyledSuggesterButton>
               <Button
                 icon={<FaPlus style={{ fontSize: "16px", padding: "2px" }} />}
-                tooltip="create new actant"
+                tooltipLabel="create new actant"
                 color="primary"
                 inverted={selected !== -1}
                 onClick={() => {
@@ -277,11 +279,13 @@ export const Suggester: React.FC<Suggester> = ({
 
         {((isFocused || isHovered) && suggestions.length) || isFetching ? (
           <StyledSuggesterList
-            onMouseOver={() => setIsHovered(true)}
-            onMouseOut={() => setIsHovered(false)}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
           >
             <StyledRelativePosition>
+              {/* TODO: try to map suggestions in normal way */}
               {renderEntitySuggestions()}
+
               <Loader size={30} show={isFetching} />
             </StyledRelativePosition>
             <SuggesterKeyPress

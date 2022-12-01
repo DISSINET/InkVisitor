@@ -82,7 +82,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                 {entity.id}
                 <Button
                   inverted
-                  tooltip="copy ID"
+                  tooltipLabel="copy ID"
                   color="primary"
                   label=""
                   icon={<FaRegCopy />}

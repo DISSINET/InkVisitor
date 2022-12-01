@@ -1,7 +1,6 @@
 import styled from "styled-components";
 
 interface StyledTagWrapper {
-  hasMarginRight?: boolean;
   borderStyle: "solid" | "dashed" | "dotted";
   status: string;
   ltype: string;
@@ -14,8 +13,6 @@ export const StyledTagWrapper = styled.div<StyledTagWrapper>`
   border-style: ${({ borderStyle }) => borderStyle};
   border-color: ${({ theme, status }) => theme.color[status]};
   border-radius: ${({ theme }) => theme.borderRadius["sm"]};
-  margin-right: ${({ theme, hasMarginRight }) =>
-    hasMarginRight && theme.space[1]};
   cursor: ${({ dragDisabled }) => (dragDisabled ? "default" : "move")};
   border-style: ${({ theme, ltype }) =>
     "solid solid solid " + theme.borderStyle[ltype]};

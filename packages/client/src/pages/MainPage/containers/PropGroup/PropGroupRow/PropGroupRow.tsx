@@ -163,14 +163,14 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
             <EntityTag
               entity={propTypeEntity}
               fullWidth
-              tooltipPosition="right center"
+              tooltipPosition="right"
               button={
                 <Button
                   key="d"
                   icon={<FaUnlink />}
                   color="plain"
                   inverted
-                  tooltip="unlink actant"
+                  tooltipLabel="unlink actant"
                   onClick={() => {
                     updateProp(prop.id, {
                       type: {
@@ -205,7 +205,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
             {prop.type.logic == "2" ? (
               <Button
                 key="neg"
-                tooltip="Negative logic"
+                tooltipLabel="Negative logic"
                 color="success"
                 inverted
                 noBorder
@@ -222,12 +222,12 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
             <EntityTag
               entity={propValueEntity}
               fullWidth
-              tooltipPosition="right center"
+              tooltipPosition="right"
               button={
                 <Button
                   key="d"
                   icon={<FaUnlink />}
-                  tooltip="unlink actant"
+                  tooltipLabel="unlink actant"
                   color="plain"
                   inverted
                   onClick={() => {
@@ -264,7 +264,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
             {prop.value.logic == "2" ? (
               <Button
                 key="neg"
-                tooltip="Negative logic"
+                tooltipLabel="Negative logic"
                 color="success"
                 inverted
                 noBorder
@@ -333,7 +333,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
               <Button
                 key="add"
                 icon={<FaPlus />}
-                tooltip="add child prop"
+                tooltipLabel="add child prop"
                 color="plain"
                 inverted
                 onClick={() => {
@@ -344,7 +344,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
             <Button
               key="delete"
               icon={<FaTrashAlt />}
-              tooltip="remove prop row"
+              tooltipLabel="remove prop row"
               color="plain"
               inverted
               onClick={() => {
@@ -354,7 +354,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
             {prop.logic == "2" ? (
               <Button
                 key="neg"
-                tooltip="Negative logic"
+                tooltipLabel="Negative logic"
                 color="success"
                 inverted
                 noBorder
@@ -367,7 +367,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
             {prop.bundleOperator ? (
               <Button
                 key="oper"
-                tooltip="Logical operator type"
+                tooltipLabel="Logical operator type"
                 color="success"
                 inverted
                 noBorder

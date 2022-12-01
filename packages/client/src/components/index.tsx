@@ -30,6 +30,7 @@ import { Table } from "./basic/Table/Table";
 import { TypeBar } from "./basic/TypeBar/TypeBar";
 import { Cloud } from "./basic/Cloud/Cloud";
 import { LetterIcon } from "./basic/LetterIcon/LetterIcon";
+import { TooltipNew } from "./basic/TooltipNew/TooltipNew";
 
 export {
   AttributeIcon,
@@ -63,4 +64,5 @@ export {
   Submit,
   TypeBar,
   Tooltip,
+  TooltipNew,
 };

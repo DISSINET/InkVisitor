@@ -158,7 +158,7 @@ export const EntityDetailRelationRow: React.FC<EntityDetailRelationRow> = ({
                           icon={<FaUnlink />}
                           color="plain"
                           inverted
-                          tooltip="unlink"
+                          tooltipLabel="unlink"
                           onClick={() => handleMultiRemove(relation.id)}
                         />
                       }

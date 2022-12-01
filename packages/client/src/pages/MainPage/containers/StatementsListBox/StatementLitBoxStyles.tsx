@@ -1,8 +1,9 @@
 import styled from "styled-components";
 
-export const StyledDots = styled.div`
+export const StyledDots = styled.p`
   display: flex;
   align-items: flex-end;
+  margin-left: ${({ theme }) => theme.space[1]};
   cursor: default;
 `;
 
