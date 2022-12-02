@@ -1,7 +1,7 @@
 import { EntityEnums } from "@shared/enums";
 import { IBookmarkFolder, IResponseBookmarkFolder } from "@shared/types";
 import api from "api";
-import { Button, ButtonGroup, TooltipNew } from "components";
+import { Button, ButtonGroup, Tooltip } from "components";
 import { EntitySuggester } from "components/advanced";
 import React, { useState } from "react";
 import { DragObjectWithType, DropTargetMonitor, useDrop } from "react-dnd";
@@ -211,7 +211,7 @@ export const EntityBookmarkFolder: React.FC<EntityBookmarkFolder> = ({
           </ButtonGroup>
         </StyledFolderHeaderButtons>
       </StyledFolderHeader>
-      <TooltipNew
+      <Tooltip
         visible={showTooltip}
         referenceElement={referenceElement}
         label={bookmarkFolder.name}

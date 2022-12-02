@@ -1,5 +1,5 @@
 import { EntityEnums } from "@shared/enums";
-import { Tooltip, TooltipNew } from "components";
+import { Tooltip, Tooltip } from "components";
 import React, { MouseEventHandler, ReactElement, useState } from "react";
 import { Colors } from "types";
 import { StyledButton, StyledButtonLabel } from "./ButtonStyles";
@@ -67,7 +67,7 @@ export const Button: React.FC<ButtonProps> = ({
   };
   return tooltipLabel || tooltipContent ? (
     <>
-      <TooltipNew
+      <Tooltip
         label={tooltipLabel}
         content={tooltipContent}
         visible={showTooltip}
