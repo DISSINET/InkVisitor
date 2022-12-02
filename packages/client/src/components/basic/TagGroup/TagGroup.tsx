@@ -1,5 +1,5 @@
 import { IEntity } from "@shared/types";
-import { TooltipNew } from "components";
+import { Tooltip } from "components";
 import { EntityTag } from "components/advanced";
 import { StyledDots } from "pages/MainPage/containers/StatementsListBox/StatementLitBoxStyles";
 import React, { useState } from "react";
@@ -37,7 +37,7 @@ export const TagGroup: React.FC<TagGroup> = ({
       </StyledTagGroup>
       {isOversized && (
         <>
-          <TooltipNew
+          <Tooltip
             visible={showTooltip}
             referenceElement={referenceElement}
             offsetY={-14}

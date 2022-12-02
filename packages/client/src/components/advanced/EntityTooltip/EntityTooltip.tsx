@@ -3,7 +3,7 @@ import { certaintyDict } from "@shared/dictionaries";
 import { RelationEnums } from "@shared/enums";
 import { EntityTooltip as EntityTooltipNamespace } from "@shared/types";
 import api from "api";
-import { LetterIcon, TooltipNew } from "components";
+import { LetterIcon, Tooltip } from "components";
 import React, { useEffect, useMemo, useState } from "react";
 import { AiOutlineTag } from "react-icons/ai";
 import { BiCommentDetail } from "react-icons/bi";
@@ -31,8 +31,6 @@ interface EntityTooltip {
   itemsCount?: number;
   // settings
   position?: Placement;
-  // on?: EventType | EventType[];
-  // noArrow?: boolean;
   color?: typeof Colors[number];
   disabled?: boolean;
 
@@ -237,7 +235,6 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
     }
   }, [tooltipData]);
 
-  // TODO: tweak lifecycle - consistency when loading (check arrow)
   const renderContent = useMemo(
     () => (
       <>
@@ -260,7 +257,7 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
 
   return (
     <>
-      <TooltipNew
+      <Tooltip
         visible={showTooltip}
         referenceElement={referenceElement}
         content={renderContent}

@@ -1,77 +1,154 @@
-import React, { ReactElement } from "react";
-import { EventType, PopupPosition } from "reactjs-popup/dist/types";
+import {
+  AutoPlacement,
+  BasePlacement,
+  VariationPlacement,
+  VirtualElement,
+} from "@popperjs/core";
+import React, { ReactElement, useEffect, useState } from "react";
+import ReactDOM from "react-dom";
+import { usePopper } from "react-popper";
+import { useSpring } from "react-spring";
 import { Colors } from "types";
 import {
-  StyledContentWrap,
+  StyledArrow,
+  StyledContainer,
+  StyledContent,
   StyledLabel,
-  StyledPopup,
   StyledRow,
 } from "./TooltipStyles";
 
 interface Tooltip {
-  // trigger
-  children: ReactElement;
-  // simple tooltip
+  // essential
+  visible: boolean;
+  referenceElement: Element | VirtualElement | null;
+  // content
   label?: string;
-  // tooltips with custom content
   content?: ReactElement[] | ReactElement;
-  // settings
-  position?: PopupPosition | PopupPosition[];
-  on?: EventType | EventType[];
+  tagGroup?: boolean;
+  // style
   color?: typeof Colors[number];
+  position?: AutoPlacement | BasePlacement | VariationPlacement;
   noArrow?: boolean;
-  disabled?: boolean;
   offsetX?: number;
   offsetY?: number;
-  //
-  tagGroup?: boolean;
-  onOpen?: () => void;
-  onClose?: () => void;
+
+  disabled?: boolean;
+  disableAutoPosition?: boolean;
+  onMouseLeave?: () => void;
 }
 export const Tooltip: React.FC<Tooltip> = ({
-  children,
+  // essential
+  visible = false,
+  referenceElement,
+  // content
   label = "",
   content,
-
-  position = ["bottom center", "right center", "top center"],
-  on = ["hover", "focus"],
-  color = "black",
-  disabled = false,
-  offsetX,
-  offsetY,
-  noArrow = false,
-
   tagGroup = false,
-  onOpen,
-  onClose,
+  // style
+  color = "black",
+  position = "bottom",
+  noArrow = false,
+  offsetX = 0,
+  offsetY = 7,
+
+  disabled = false,
+  disableAutoPosition = false,
+  onMouseLeave = () => {},
 }) => {
+  const [popperElement, setPopperElement] =
+    useState<HTMLDivElement | null>(null);
+  const [arrowElement, setArrowElement] = useState<HTMLDivElement | null>(null);
+  const { styles, attributes, update, state, forceUpdate } = usePopper(
+    referenceElement,
+    popperElement,
+    {
+      placement: position,
+      modifiers: [
+        { name: "arrow", options: { element: arrowElement } },
+        {
+          name: "offset",
+          options: {
+            offset: [offsetX, offsetY],
+          },
+        },
+        {
+          name: "flip",
+          enabled: !disableAutoPosition,
+          options: {
+            fallbackPlacements: ["auto"],
+          },
+        },
+      ],
+    }
+  );
+
+  const [showTooltip, setShowTooltip] = useState(false);
+  useEffect(() => {
+    visible ? setShowTooltip(true) : setShowTooltip(false);
+  }, [visible]);
+
+  const [tooltipHovered, setTooltipHovered] = useState(false);
+
+  const animatedTooltip = useSpring({
+    opacity: showTooltip ? 1 : 0,
+    config: { mass: 2, friction: 2, tension: 100, clamp: true },
+  });
+
+  // Needed for state update
+  useEffect(() => {
+    if (!update) {
+      return;
+    }
+    if (visible) {
+      update();
+    }
+  }, [update, visible, label, content]);
+
   return (
-    <StyledPopup
-      trigger={children}
-      mouseLeaveDelay={0}
-      position={position}
-      on={on}
-      disabled={disabled}
-      color={color}
-      arrow={!noArrow}
-      offsetX={offsetX}
-      offsetY={offsetY}
-      onOpen={() => onOpen}
-      onClose={() => onClose}
-      keepTooltipInside
-    >
-      <div>
-        {label && (
-          <StyledContentWrap>
-            <StyledRow>
-              <StyledLabel>{label}</StyledLabel>
-            </StyledRow>
-          </StyledContentWrap>
-        )}
-        {content && (
-          <StyledContentWrap tagGroup={tagGroup}>{content}</StyledContentWrap>
-        )}
-      </div>
-    </StyledPopup>
+    <>
+      {!disabled && (showTooltip || tooltipHovered) && (
+        <>
+          {ReactDOM.createPortal(
+            <StyledContainer
+              ref={setPopperElement}
+              style={{ ...styles.popper, ...animatedTooltip }}
+              color={color}
+              onMouseLeave={() => {
+                onMouseLeave();
+                setTooltipHovered(false);
+              }}
+              arrowoffset={-offsetY}
+              onMouseEnter={() => {
+                setTooltipHovered(true);
+              }}
+              {...attributes.popper}
+            >
+              {!noArrow && (
+                <StyledArrow
+                  id="arrow"
+                  ref={setArrowElement}
+                  style={styles.arrow}
+                />
+              )}
+              <div>
+                {label && (
+                  <StyledContent color={color}>
+                    <StyledRow>
+                      <StyledLabel>{label}</StyledLabel>
+                    </StyledRow>
+                  </StyledContent>
+                )}
+                {content && (
+                  <StyledContent color={color} tagGroup={tagGroup}>
+                    {content}
+                  </StyledContent>
+                )}
+              </div>
+            </StyledContainer>,
+            document.getElementById("page")!
+          )}
+        </>
+      )}
+    </>
   );
 };

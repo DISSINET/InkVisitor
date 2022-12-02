@@ -23,14 +23,13 @@ import { Suggester } from "./basic/Suggester/Suggester";
 import { Tag } from "./basic/Tag/Tag";
 import { TagGroup } from "./basic/TagGroup/TagGroup";
 import { Toast } from "./basic/Toast/Toast";
-import { Tooltip } from "./basic/Tooltip/Tooltip";
 import { AttributeIcon } from "./basic/AttributeIcon/AttributeIcon";
 import { Checkbox } from "./basic/Checkbox/Checkbox";
 import { Table } from "./basic/Table/Table";
 import { TypeBar } from "./basic/TypeBar/TypeBar";
 import { Cloud } from "./basic/Cloud/Cloud";
 import { LetterIcon } from "./basic/LetterIcon/LetterIcon";
-import { TooltipNew } from "./basic/TooltipNew/TooltipNew";
+import { Tooltip } from "./basic/Tooltip/Tooltip";
 
 export {
   AttributeIcon,
@@ -64,5 +63,4 @@ export {
   Submit,
   TypeBar,
   Tooltip,
-  TooltipNew,
 };
