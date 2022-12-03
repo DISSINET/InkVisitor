@@ -20,12 +20,12 @@ export const StyledCloudEntityWrapper = styled.div`
 `;
 interface StyledGrid {
   hasAttribute?: boolean;
-  isMultiple: boolean;
+  hasOrder: boolean;
 }
 export const StyledGrid = styled.div<StyledGrid>`
   display: grid;
-  grid-template-columns: ${({ hasAttribute, isMultiple }) =>
-    `${isMultiple ? "2rem" : ""} auto ${hasAttribute ? "14rem" : ""}`};
+  grid-template-columns: ${({ hasAttribute, hasOrder }) =>
+    `${hasOrder ? "2rem" : ""} auto ${hasAttribute ? "14rem" : ""}`};
   max-width: 100%;
   align-items: center;
   width: fit-content;

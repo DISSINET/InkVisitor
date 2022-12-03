@@ -43,6 +43,7 @@ interface EntityDetailRelationRow {
   >;
 
   isMultiple: boolean;
+  hasOrder: boolean;
   moveRow: (dragIndex: number, hoverIndex: number) => void;
   index: number;
   updateOrderFn: (relationId: string, newOrder: number) => void;
@@ -57,6 +58,7 @@ export const EntityDetailRelationRow: React.FC<EntityDetailRelationRow> = ({
   relationDeleteMutation,
 
   isMultiple,
+  hasOrder,
   moveRow,
   index,
   updateOrderFn,
@@ -126,7 +128,7 @@ export const EntityDetailRelationRow: React.FC<EntityDetailRelationRow> = ({
       ref={dropRef}
       style={{ opacity }}
       hasAttribute={relationRule.attributes.length > 0}
-      isMultiple={isMultiple}
+      hasOrder={hasOrder}
     >
       {relation.entityIds.map((relationEntityId, key) => {
         const relationEntity = entities?.find((e) => e.id === relationEntityId);
@@ -136,7 +138,7 @@ export const EntityDetailRelationRow: React.FC<EntityDetailRelationRow> = ({
               relationEntity.id !== entityId &&
               shouldBeRendered(key) && (
                 <>
-                  {isMultiple ? (
+                  {hasOrder && (
                     <StyledGridColumn
                       ref={dragRef}
                       style={{
@@ -145,8 +147,6 @@ export const EntityDetailRelationRow: React.FC<EntityDetailRelationRow> = ({
                     >
                       <FaGripVertical />
                     </StyledGridColumn>
-                  ) : (
-                    <div />
                   )}
                   <StyledGridColumn key={key}>
                     <EntityTag
