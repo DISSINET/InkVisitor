@@ -12,9 +12,9 @@ export const StyledBox = styled(animated.div)<StyledBox>`
 `;
 
 interface StyledHead {
-  color: string;
-  $noPadding: boolean;
-  $isExpanded: boolean;
+  color?: string;
+  $noPadding?: boolean;
+  $isExpanded?: boolean;
 }
 export const StyledHead = styled(animated.div)<StyledHead>`
   height: 3.2rem;
