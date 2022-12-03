@@ -8,7 +8,7 @@
    version="1.1"
    id="svg6189"
    inkscape:version="1.2.1 (9c6d41e410, 2022-07-14)"
-   sodipodi:docname="inkvisitor-full.svg"
+   sodipodi:docname="inkvisitor.svg"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
@@ -28,8 +28,8 @@
      fit-margin-right="0"
      fit-margin-bottom="0"
      inkscape:zoom="2.8441856"
-     inkscape:cx="328.03766"
-     inkscape:cy="76.120208"
+     inkscape:cx="303.77764"
+     inkscape:cy="75.417018"
      inkscape:window-width="2560"
      inkscape:window-height="1366"
      inkscape:window-x="1147"
@@ -92,31 +92,14 @@
       </g>
     </g>
     <text
-       style="font-variant:normal;font-weight:bold;font-size:14.1111px;font-family:Caladea;-inkscape-font-specification:Caladea-Bold;writing-mode:lr-tb;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.352778"
+       style="font-variant:normal;font-weight:bold;font-size:21.1667px;font-family:Caladea;-inkscape-font-specification:Caladea-Bold;writing-mode:lr-tb;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.352778"
        id="text522-6"
        x="64.463676"
-       y="89.720451"><tspan
+       y="98.245758"><tspan
          x="64.463676"
          sodipodi:role="line"
          id="tspan520-5"
-         style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-size:14.1111px;font-family:Texturina;-inkscape-font-specification:'Texturina, Medium';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#ffffff;stroke-width:0.352778"
-         y="89.720451">InkVisitor</tspan></text>
-    <text
-       style="font-variant:normal;font-weight:bold;font-size:4.93889px;line-height:1;font-family:Caladea;-inkscape-font-specification:Caladea-Bold;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;white-space:pre;inline-size:103.51;display:inline;fill:#9ecae9;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.352778"
-       id="text522-6-3"
-       x="65.347366"
-       y="94.785927"
-       xml:space="preserve"
-       transform="translate(-0.11401141,0.11398866)"><tspan
-         x="65.347366"
-         y="94.785927"
-         id="tspan600"><tspan
-           style="font-weight:500;font-family:Texturina;-inkscape-font-specification:'Texturina, Medium';baseline-shift:baseline"
-           id="tspan598">An advanced research environment for linked </tspan></tspan><tspan
-         x="65.347366"
-         y="99.961523"
-         id="tspan604"><tspan
-           style="font-weight:500;font-family:Texturina;-inkscape-font-specification:'Texturina, Medium';baseline-shift:baseline"
-           id="tspan602">data in humanities and the social sciences</tspan></tspan></text>
+         style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-size:21.1667px;font-family:Texturina;-inkscape-font-specification:'Texturina, Medium';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#ffffff;stroke-width:0.352778"
+         y="98.245758">InkVisitor</tspan></text>
   </g>
 </svg>
