@@ -23,7 +23,6 @@ import {
   IStatementClassification,
   IStatementIdentification,
 } from "@shared/types/statement";
-import Relation from "@models/relation/relation";
 import { UsedRelations } from "@models/relation/relations";
 
 export class ResponseEntity extends Entity implements IResponseEntity {

@@ -1,7 +1,9 @@
 import { IEntity, EntityTooltip } from "@shared/types";
 import { IRequest } from "src/custom_typings/request";
 import { ResponseEntity } from "./response";
+import Entity from './entity';
 import { getActionEventNodes, getEntityIdsFromTree, getIdentifications, getSuperclassTrees, getSuperordinateLocationTree, getSynonymCloud } from "@models/relation/functions";
+import { UsedRelations } from "@models/relation/relations";
 
 export class ResponseTooltip
   extends ResponseEntity
@@ -14,12 +16,21 @@ export class ResponseTooltip
   identifications: EntityTooltip.IIdentifications = [];
   actionEventEquivalent: EntityTooltip.ActionEventNode = [];
 
+  relations: UsedRelations;
+
+  constructor(entity: Entity) {
+    super(entity);
+    this.relations = new UsedRelations(entity.id, entity.class);
+    this.relations.maxListLen = 10;
+  }
   /**
    * Loads additional fields to satisfy the EntityTooltip.IResponse interface
    * @param request
    */
   async prepare(request: IRequest) {
     super.prepare(request);
+
+    await this.relations.prepareAll(request);
 
     const rootActionEventEquivalent = await getActionEventNodes(
       request.db.connection,

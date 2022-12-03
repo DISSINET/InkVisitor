@@ -1,5 +1,6 @@
 import { IEntity, IResponseEntity } from ".";
-import { EntityEnums } from "../enums";
+import { EntityEnums, RelationEnums } from "../enums";
+import { Relation as RelationTypes } from "./relation";
 
 export namespace EntityTooltip {
   export interface IResponse extends IResponseEntity {
@@ -12,6 +13,8 @@ export namespace EntityTooltip {
     superordinateLocationTrees: ISuperordinateLocationTree[];
     identifications: IIdentifications;
     actionEventEquivalent: ActionEventNode;
+
+    relations: RelationTypes.IUsedRelations;
   }
 
   export type IIdentification = {

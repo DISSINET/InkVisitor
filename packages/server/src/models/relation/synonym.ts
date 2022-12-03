@@ -4,6 +4,7 @@ import { Relation as RelationTypes } from "@shared/types";
 import { IRequest } from "src/custom_typings/request";
 import { nonenumerable } from "@common/decorators";
 import { InternalServerError, ModelNotValidError } from "@shared/types/errors";
+import { Connection } from "rethinkdb-ts";
 
 export default class Synonym extends Relation implements RelationTypes.ISynonym {
   type: RelationEnums.Type.Synonym;
@@ -88,4 +89,33 @@ export default class Synonym extends Relation implements RelationTypes.ISynonym 
       await Relation.deleteMany(request, this.siblingRelations);
     }
   }
+
+  static async getSynonymForwardConnections (
+    conn: Connection,
+    entityId: string,
+    asClass: EntityEnums.Class
+  ): Promise<RelationTypes.IConnection<RelationTypes.ISynonym>[]> {
+    let out: RelationTypes.IConnection<RelationTypes.ISynonym>[] = [];
+  
+    if (
+      asClass === EntityEnums.Class.Concept ||
+      asClass === EntityEnums.Class.Action
+    ) {
+      out = await Relation.getForEntity(
+        conn,
+        entityId,
+        RelationEnums.Type.Synonym
+      );
+      const mapped: Record<
+        string,
+        RelationTypes.IConnection<RelationTypes.ISynonym>
+      > = {};
+      for (const relation of out) {
+        mapped[relation.id] = relation;
+      }
+      out = Object.values(mapped);
+    }
+  
+    return out;
+  };
 }
