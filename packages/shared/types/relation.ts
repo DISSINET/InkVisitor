@@ -90,7 +90,6 @@ export namespace Relation {
   };
 
   export interface IUsedRelations {
-<<<<<<< HEAD
     [RelationEnums.Type.Superclass]?: IDetailType<ISuperclass>;
     [RelationEnums.Type
       .SuperordinateLocation]?: IDetailType<ISuperordinateLocation>;
@@ -112,24 +111,6 @@ export namespace Relation {
     [RelationEnums.Type.Actant2Semantics]?: IDetailType<IActant2Semantics>;
     [RelationEnums.Type.Related]?: IDetailType<IRelated>;
   }
-=======
-    [RelationEnums.Type.Superclass]?: IDetailType<ISuperclass>,
-    [RelationEnums.Type.SuperordinateLocation]?: IDetailType<ISuperordinateLocation>,
-    [RelationEnums.Type.Synonym]?: IDetailType<ISynonym>,
-    [RelationEnums.Type.Antonym]?: IDetailType<IAntonym>,
-    [RelationEnums.Type.Holonym]?: IDetailType<IHolonym>,
-    [RelationEnums.Type.PropertyReciprocal]?: IDetailType<IPropertyReciprocal>,
-    [RelationEnums.Type.SubjectActant1Reciprocal]?: IDetailType<ISubjectActant1Reciprocal>,
-    [RelationEnums.Type.ActionEventEquivalent]?: IDetailType<IActionEventEquivalent, ISuperclass>,
-    [RelationEnums.Type.Classification]?: IDetailType<IClassification, ISuperclass>,
-    [RelationEnums.Type.Identification]?: IDetailType<IIdentification>,
-    [RelationEnums.Type.Implication]?: IDetailType<IImplication>,
-    [RelationEnums.Type.SubjectSemantics]?: IDetailType<ISubjectSemantics>,
-    [RelationEnums.Type.Actant1Semantics]?: IDetailType<IActant1Semantics>,
-    [RelationEnums.Type.Actant2Semantics]?: IDetailType<IActant2Semantics>,
-    [RelationEnums.Type.Related]?: IDetailType<IRelated>,
-  };
->>>>>>> f704542b (prepare classification connections)
 
   /**
    * Relation Rules
