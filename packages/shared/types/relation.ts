@@ -247,7 +247,7 @@ export namespace Relation {
     cloudType: false,
     treeType: false,
     attributes: [EntityEnums.Certainty],
-    order: true,
+    order: false,
   };
   RelationRules[RelationEnums.Type.Implication] = {
     label: "Implication",
