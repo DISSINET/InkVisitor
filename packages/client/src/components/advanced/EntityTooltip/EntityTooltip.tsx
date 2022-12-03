@@ -160,13 +160,13 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
                     {identifications.map((identification, key) => {
                       const entity = entities[identification.entityId];
                       // TODO: show class in text
-                      return (
+                      return entity ? (
                         <React.Fragment key={key}>
                           {`${entity?.label} (`}
                           {certaintyDict[identification.certainty]?.label}
                           {`)${key !== identifications.length - 1 ? ", " : ""}`}
                         </React.Fragment>
-                      );
+                      ) : null;
                     })}
                   </StyledRelationTypeBlock>
                 </>
@@ -214,7 +214,7 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
                   <StyledRelationTypeBlock>
                     {synonymCloud.map((synonym, key) => {
                       const entity = entities[synonym];
-                      if (entityId === entity.id) return;
+                      if (!entity || entityId === entity.id) return;
 
                       return (
                         <React.Fragment key={key}>
