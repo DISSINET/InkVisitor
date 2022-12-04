@@ -1,4 +1,4 @@
-import { EntityEnums, UserEnums } from "@shared/enums";
+import { EntityEnums, RelationEnums, UserEnums } from "@shared/enums";
 import {
   IEntity,
   IProp,
@@ -159,7 +159,7 @@ export class ResponseEntityDetail
     );
 
 
-    await this.relations.prepareAll(req);
+    await this.relations.prepare(req, RelationEnums.AllTypes);
 
     this.entities = await this.populateEntitiesMap(conn);
 

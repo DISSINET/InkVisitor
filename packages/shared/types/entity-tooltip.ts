@@ -5,16 +5,7 @@ import { Relation as RelationTypes } from "./relation";
 export namespace EntityTooltip {
   export interface IResponse extends IResponseEntity {
     entities: Record<string, IEntity>; //  all entities mentioned in relations
-
-    // C, A
-    superclassTrees: ISuperclassTree[];
-    // C, A
-    synonymCloud?: ISynonymCloud;
-    superordinateLocationTrees: ISuperordinateLocationTree[];
-    identifications: IIdentifications;
-    actionEventEquivalent: ActionEventNode;
-
-    relations: RelationTypes.IUsedRelations;
+     relations: RelationTypes.IUsedRelations;
   }
 
   export type IIdentification = {

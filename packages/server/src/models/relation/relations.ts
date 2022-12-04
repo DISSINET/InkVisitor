@@ -165,21 +165,94 @@ export class UsedRelations implements RelationTypes.IUsedRelations {
         };
     }
 
-    async prepareAll(req: IRequest): Promise<void> {
-        await this.prepareSuperclasses(req.db.connection);
-        await this.prepareSuperordinateLocations(req.db.connection);
-        await this.prepareSynonyms(req.db.connection);
-        await this.prepareAntonyms(req.db.connection);
-        await this.prepareHolonyms(req.db.connection);
-        await this.preparePropertyReciprocals(req.db.connection);
-        await this.prepareSubjectActant1Reciprocals(req.db.connection);
-        await this.prepareActionEventEquivalents(req.db.connection);
-        await this.prepareClassifications(req.db.connection);
-        await this.prepareIdentifications(req.db.connection);
-        await this.prepareImplications(req.db.connection);
-        await this.prepareSubjectSemantics(req.db.connection);
-        await this.prepareActant1Semantics(req.db.connection);
-        await this.prepareActant2Semantics(req.db.connection);
-        await this.prepareRelateds(req.db.connection);
+    async prepare(req: IRequest, types: RelationEnums.Type[]): Promise<void> {
+        if (types.indexOf(RelationEnums.Type.Superclass) != -1) {
+            await this.prepareSuperclasses(req.db.connection);
+        }
+
+        if (types.indexOf(RelationEnums.Type.SuperordinateLocation) != -1) {
+            await this.prepareSuperordinateLocations(req.db.connection);
+        }
+        
+        if (types.indexOf(RelationEnums.Type.Synonym) != -1) {
+            await this.prepareSynonyms(req.db.connection);
+        }
+
+        if (types.indexOf(RelationEnums.Type.Antonym) != -1) {
+            await this.prepareAntonyms(req.db.connection);
+        }
+
+        if (types.indexOf(RelationEnums.Type.Holonym) != -1) {
+            await this.prepareHolonyms(req.db.connection);
+        }
+
+        if (types.indexOf(RelationEnums.Type.PropertyReciprocal) != -1) {
+            await this.preparePropertyReciprocals(req.db.connection);
+        }
+
+        if (types.indexOf(RelationEnums.Type.SubjectActant1Reciprocal) != -1) {
+            await this.prepareSubjectActant1Reciprocals(req.db.connection);
+        }
+
+        if (types.indexOf(RelationEnums.Type.ActionEventEquivalent) != -1) {
+            await this.prepareActionEventEquivalents(req.db.connection);
+        }
+
+        if (types.indexOf(RelationEnums.Type.Classification) != -1) {
+            await this.prepareClassifications(req.db.connection);
+        }
+
+        if (types.indexOf(RelationEnums.Type.Identification) != -1) {
+            await this.prepareIdentifications(req.db.connection);
+        }
+
+        if (types.indexOf(RelationEnums.Type.Implication) != -1) {
+            await this.prepareImplications(req.db.connection);
+        }
+
+        if (types.indexOf(RelationEnums.Type.SubjectSemantics) != -1) {
+            await this.prepareSubjectSemantics(req.db.connection);
+        }
+
+        if (types.indexOf(RelationEnums.Type.Actant1Semantics) != -1) {
+            await this.prepareActant1Semantics(req.db.connection);
+        }
+
+        if (types.indexOf(RelationEnums.Type.Actant2Semantics) != -1) {
+            await this.prepareActant2Semantics(req.db.connection);
+        }
+
+        if (types.indexOf(RelationEnums.Type.Related) != -1) {
+            await this.prepareRelateds(req.db.connection);
+        }
+    }
+
+    getEntityIdsFromType(relationType: Exclude<RelationEnums.Type, RelationEnums.Type.Unknown>): string[] {
+        let out: string[] = [];
+
+        const rel = this[relationType];
+        if (rel) {
+            for (const con of rel.connections) {
+                out = out.concat(this.getEntityIdsFromConnection(con))
+            }
+            if (rel.iConnections) {
+                for (const con of rel.iConnections) {
+                    out = out.concat(this.getEntityIdsFromConnection(con))
+                }
+            }
+        }
+
+        return out;
+    }
+
+    getEntityIdsFromConnection(con: RelationTypes.IConnection<any, any>): string[] {
+        let out = [...con.entityIds];
+        if (con.subtrees) {
+            for (const subtree of con.subtrees) {
+                out = out.concat(this.getEntityIdsFromConnection(subtree))
+            }
+        }
+
+        return out;
     }
 }
