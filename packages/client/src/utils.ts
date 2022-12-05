@@ -167,10 +167,9 @@ export const getRelationTreeDepth = (
 };
 
 export const getEntityRelationRules = (entityClass: EntityEnums.Class) => {
-  const relationRulesArray = Object.keys(Relation.RelationRules);
-  return relationRulesArray.filter((rule) => {
+  return RelationEnums.AllTypes.filter((rule) => {
     if (
-      !Relation.RelationRules[rule].allowedEntitiesPattern.length &&
+      !Relation.RelationRules[rule]?.allowedEntitiesPattern.length &&
       !(
         rule === RelationEnums.Type.Identification &&
         restrictedIDEClasses.includes(entityClass)
@@ -178,7 +177,7 @@ export const getEntityRelationRules = (entityClass: EntityEnums.Class) => {
     ) {
       return rule;
     } else if (
-      Relation.RelationRules[rule].allowedEntitiesPattern.some(
+      Relation.RelationRules[rule]?.allowedEntitiesPattern.some(
         (pair) => pair[0] === entityClass
       )
     ) {
@@ -188,11 +187,10 @@ export const getEntityRelationRules = (entityClass: EntityEnums.Class) => {
 };
 
 export const getRelationInvertedRules = (entityClass: EntityEnums.Class) => {
-  const relationRulesArray = Object.keys(Relation.RelationRules);
-  return relationRulesArray.filter((rule) => {
+  return RelationEnums.AllTypes.filter((rule) => {
     if (
-      Relation.RelationRules[rule].asymmetrical &&
-      Relation.RelationRules[rule].allowedEntitiesPattern.some(
+      Relation.RelationRules[rule]?.asymmetrical &&
+      Relation.RelationRules[rule]?.allowedEntitiesPattern.some(
         (pair) => pair[1] === entityClass
       )
     ) {

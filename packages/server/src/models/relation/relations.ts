@@ -351,9 +351,7 @@ export class UsedRelations implements RelationTypes.IUsedRelations {
     }
   }
 
-  getEntityIdsFromType(
-    relationType: Exclude<RelationEnums.Type, RelationEnums.Type.Unknown>
-  ): string[] {
+  getEntityIdsFromType(relationType: RelationEnums.Type): string[] {
     let out: string[] = [];
 
     const rel = this[relationType];

@@ -1,8 +1,8 @@
 import { entitiesDict } from "@shared/dictionaries";
 import { EntityEnums, RelationEnums } from "@shared/enums";
 import {
+  IEntity,
   IResponseDetail,
-  IResponseEntity,
   IResponseGeneric,
   Relation,
 } from "@shared/types";
@@ -29,9 +29,9 @@ import {
 
 // relations for one type
 interface EntityDetailRelationTypeBlock {
-  relations: Relation.IRelation[];
-  relationType: string;
-  entities?: IResponseEntity[];
+  relations?: Relation.IRelation[];
+  relationType: RelationEnums.Type;
+  entities: Record<string, IEntity>;
   relationCreateMutation: UseMutationResult<
     AxiosResponse<IResponseGeneric>,
     unknown,
@@ -61,7 +61,7 @@ interface EntityDetailRelationTypeBlock {
 export const EntityDetailRelationTypeBlock: React.FC<
   EntityDetailRelationTypeBlock
 > = ({
-  relations,
+  relations = [],
   relationType,
   entities,
   relationCreateMutation,
@@ -72,7 +72,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
   hasOrder,
   entity,
 }) => {
-  const relationRule = Relation.RelationRules[relationType];
+  const relationRule = Relation.RelationRules[relationType]!;
 
   // For suggester
   const getCategoryTypes = (): EntityEnums.ExtendedClass[] | undefined => {
@@ -167,9 +167,10 @@ export const EntityDetailRelationTypeBlock: React.FC<
   );
 
   const addToCloud = (cloudEntity: IResponseDetail) => {
-    const selectedEntityRelation = cloudEntity.relations.find(
-      (r) => r.type === relationType
-    );
+    const selectedEntityRelation =
+      cloudEntity.relations[relationType]?.connections;
+    console.log(selectedEntityRelation);
+
     if (selectedEntityRelation) {
       // update existing relation
       const changes = {
@@ -245,7 +246,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
       {/* Type column */}
       <StyledRelationType>
         <LetterIcon letter={relationType} color="info" />
-        {relationRule.inverseLabel.length ? (
+        {relationRule.inverseLabel ? (
           <TbArrowsHorizontal color={theme.color["info"]} />
         ) : (
           <TbArrowNarrowRight color={theme.color["info"]} />
@@ -294,10 +295,9 @@ export const EntityDetailRelationTypeBlock: React.FC<
               entities={entities}
               entityId={entity.id}
               relationRule={relationRule}
-              relationType={relationType as RelationEnums.Type}
+              relationType={relationType}
               relationUpdateMutation={relationUpdateMutation}
               relationDeleteMutation={relationDeleteMutation}
-              isMultiple={isMultiple}
               hasOrder={hasOrder}
               moveRow={moveRow}
               updateOrderFn={updateOrderFn}

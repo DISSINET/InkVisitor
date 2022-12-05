@@ -1,6 +1,5 @@
 export namespace RelationEnums {
   export enum Type {
-    Unknown = "",
     Superclass = "SCL",
     SuperordinateLocation = "SOL",
     Synonym = "SYN",
@@ -20,19 +19,19 @@ export namespace RelationEnums {
 
   export const AllTypes: Type[] = [
     Type.Superclass,
-    Type.SuperordinateLocation, 
-    Type.Synonym, 
-    Type.Antonym, 
-    Type.Holonym, 
-    Type.PropertyReciprocal, 
-    Type.SubjectActant1Reciprocal, 
-    Type.ActionEventEquivalent, 
-    Type.Related, 
-    Type.Classification, 
-    Type.Identification, 
+    Type.SuperordinateLocation,
+    Type.Synonym,
+    Type.Antonym,
+    Type.Holonym,
+    Type.PropertyReciprocal,
+    Type.SubjectActant1Reciprocal,
+    Type.ActionEventEquivalent,
+    Type.Related,
+    Type.Classification,
+    Type.Identification,
     Type.Implication,
-    Type.SubjectSemantics, 
-    Type.Actant1Semantics, 
-    Type.Actant2Semantics
-  ]
+    Type.SubjectSemantics,
+    Type.Actant1Semantics,
+    Type.Actant2Semantics,
+  ];
 }
