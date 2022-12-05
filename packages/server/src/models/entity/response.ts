@@ -160,6 +160,11 @@ export class ResponseEntityDetail
 
 
     await this.relations.prepare(req, RelationEnums.AllTypes);
+    for (const type of RelationEnums.AllTypes) {
+      this.addLinkedEntities(
+        this.relations.getEntityIdsFromType(type)
+      );
+    }
 
     this.entities = await this.populateEntitiesMap(conn);
 
