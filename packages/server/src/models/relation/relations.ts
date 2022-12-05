@@ -60,7 +60,7 @@ export class UsedRelations implements RelationTypes.IUsedRelations {
   >;
   [RelationEnums.Type.Classification]?: RelationTypes.IDetailType<
     IClassification,
-    IClassification
+    ISuperclass
   >;
   [RelationEnums.Type
     .Identification]?: RelationTypes.IDetailType<IIdentification>;

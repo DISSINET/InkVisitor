@@ -18,7 +18,7 @@ export class ResponseTooltip
     this.relations = new UsedRelations(entity.id, entity.class);
     this.relations.maxListLen = 10;
   }
-  
+
   /**
    * Loads additional fields to satisfy the EntityTooltip.IResponse interface
    * @param request
@@ -27,12 +27,12 @@ export class ResponseTooltip
     super.prepare(request);
 
     await this.relations.prepare(request, [
-      RelationEnums.Type.Superclass, 
-      RelationEnums.Type.SuperordinateLocation, 
-      RelationEnums.Type.Synonym, 
+      RelationEnums.Type.Superclass,
+      RelationEnums.Type.SuperordinateLocation,
+      RelationEnums.Type.Synonym,
       RelationEnums.Type.ActionEventEquivalent,
       RelationEnums.Type.Classification,
-      RelationEnums.Type.Identification, 
+      RelationEnums.Type.Identification,
     ]);
 
     this.addLinkedEntities(this.relations.getEntityIdsFromType(RelationEnums.Type.Superclass));
