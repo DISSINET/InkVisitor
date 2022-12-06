@@ -298,7 +298,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
               relationType={relationType}
               relationUpdateMutation={relationUpdateMutation}
               relationDeleteMutation={relationDeleteMutation}
-              hasOrder={hasOrder}
+              hasOrder={hasOrder && currentRelations.length > 1}
               moveRow={moveRow}
               updateOrderFn={updateOrderFn}
             />
