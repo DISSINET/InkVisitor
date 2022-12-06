@@ -174,10 +174,10 @@ export const EntityDetailRelationTypeBlock: React.FC<
     if (selectedEntityRelation?.length) {
       // update existing relation
       const changes = {
-        entityIds: [...selectedEntityRelation.entityIds, entity.id],
+        entityIds: [...selectedEntityRelation[0].entityIds, entity.id],
       };
       relationUpdateMutation.mutate({
-        relationId: selectedEntityRelation.id,
+        relationId: selectedEntityRelation[0].id,
         changes: changes,
       });
     } else {
