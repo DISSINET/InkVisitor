@@ -98,7 +98,7 @@ export const EntityDetailRelations: React.FC<EntityDetailRelations> = ({
         })}
       </StyledRelationsGrid>
       {/* Inverse relations */}
-      {/* <EntityDetailInverseRelations entity={entity} /> */}
+      <EntityDetailInverseRelations entity={entity} />
     </>
   );
 };

@@ -1,4 +1,9 @@
-import { IResponseDetail, IResponseEntity, Relation } from "@shared/types";
+import {
+  IEntity,
+  IResponseDetail,
+  IResponseEntity,
+  Relation,
+} from "@shared/types";
 import { LetterIcon } from "components";
 import { EntityTag } from "components/advanced";
 import React from "react";
@@ -12,8 +17,8 @@ interface EntityDetailInverseRelation {
   entity: IResponseDetail;
   relationRule: Relation.RelationRule;
   relationType: string;
-  relations: Relation.IRelation[];
-  entities?: IResponseEntity[];
+  relations?: Relation.IRelation[];
+  entities: Record<string, IEntity>;
 }
 export const EntityDetailInverseRelation: React.FC<
   EntityDetailInverseRelation
@@ -28,10 +33,9 @@ export const EntityDetailInverseRelation: React.FC<
         <LetterIcon letter={relationType} color="info" />
       </StyledHeading>
       <StyledInverseRelationGroup>
-        {relations.map((relation, key) => {
-          const relationEntity = entities?.find(
-            (e) => e.id === relation.entityIds[0]
-          );
+        {relations?.map((relation, key) => {
+          const relationEntity = entities[relation.entityIds[0]];
+
           if (relation.entityIds[0] === entity.id || !relationEntity) return;
 
           return (

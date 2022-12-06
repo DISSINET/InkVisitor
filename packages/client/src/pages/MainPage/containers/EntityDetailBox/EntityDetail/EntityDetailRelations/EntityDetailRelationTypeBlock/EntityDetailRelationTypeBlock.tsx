@@ -146,10 +146,10 @@ export const EntityDetailRelationTypeBlock: React.FC<
     setUsedEntityIds([...new Set(entityIds)]);
   }, [entities, relations]);
 
+  // TODO: Lift cloud handling to EntityDetailRelations
   const [tempCloudEntityId, setTempCloudEntityId] = useState<string | false>(
     false
   );
-
   const { isLoading, isFetching } = useQuery(
     ["relation-entity-temp", tempCloudEntityId],
     async () => {
@@ -165,7 +165,6 @@ export const EntityDetailRelationTypeBlock: React.FC<
       enabled: api.isLoggedIn() && !!tempCloudEntityId,
     }
   );
-
   const addToCloud = (cloudEntity: IResponseDetail) => {
     const selectedEntityRelation =
       cloudEntity.relations[relationType]?.connections;
