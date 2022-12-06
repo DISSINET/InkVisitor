@@ -129,10 +129,7 @@ export const EntityDetailRelationRow: React.FC<EntityDetailRelationRow> = ({
       hasOrder={hasOrder}
     >
       {relation.entityIds.map((relationEntityId, key) => {
-        // console.log(relationEntityId);
-        // console.log(entities);
         const relationEntity = entities[relationEntityId];
-        // console.log(relationEntity);
         return (
           <React.Fragment key={key}>
             {relationEntity &&

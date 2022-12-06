@@ -150,7 +150,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
     false
   );
 
-  const {} = useQuery(
+  const { isLoading, isFetching } = useQuery(
     ["relation-entity-temp", tempCloudEntityId],
     async () => {
       if (tempCloudEntityId) {
@@ -169,9 +169,9 @@ export const EntityDetailRelationTypeBlock: React.FC<
   const addToCloud = (cloudEntity: IResponseDetail) => {
     const selectedEntityRelation =
       cloudEntity.relations[relationType]?.connections;
-    console.log(selectedEntityRelation);
+    // console.log(cloudEntity);
 
-    if (selectedEntityRelation) {
+    if (selectedEntityRelation?.length) {
       // update existing relation
       const changes = {
         entityIds: [...selectedEntityRelation.entityIds, entity.id],

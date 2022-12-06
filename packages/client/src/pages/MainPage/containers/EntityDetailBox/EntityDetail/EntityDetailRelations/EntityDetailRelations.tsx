@@ -59,7 +59,6 @@ export const EntityDetailRelations: React.FC<EntityDetailRelations> = ({
   }, [entity]);
 
   const { relations, entities } = entity;
-  console.log(entities);
 
   return (
     <>
