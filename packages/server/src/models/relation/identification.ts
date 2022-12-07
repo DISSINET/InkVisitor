@@ -59,11 +59,11 @@ export default class Identification extends Relation implements RelationTypes.II
     nestLvl: number
   ): Promise<RelationTypes.IConnection<RelationTypes.IIdentification>[]> {
     const out: RelationTypes.IConnection<RelationTypes.IIdentification>[] = [];
-  
+
     if (nestLvl > maxNestLvl) {
       return out;
     }
-  
+
     let relations: RelationTypes.IIdentification[] = await Relation.getForEntity(
       conn,
       entityId,
@@ -71,7 +71,7 @@ export default class Identification extends Relation implements RelationTypes.II
       0
     );
     let thresholdReached = false;
-  
+
     if (requiredCertainty !== EntityEnums.Certainty.Empty) {
       // if non-empty certainty, then some lvl of certainty needs to be respected
       relations = relations.filter(
@@ -81,15 +81,15 @@ export default class Identification extends Relation implements RelationTypes.II
       // empty certainty will end the search below
       thresholdReached = true;
     }
-  
+
     for (const relation of relations) {
       const subparentId = relation.entityIds[1];
       const connection: RelationTypes.IConnection<RelationTypes.IIdentification> =
-        {
-          ...relation,
-          subtrees: [],
-        };
-  
+      {
+        ...relation,
+        subtrees: [],
+      };
+
       if (!thresholdReached) {
         // either continue with Certain or use Empty
         const nextThreshold =
@@ -104,11 +104,11 @@ export default class Identification extends Relation implements RelationTypes.II
           nestLvl + 1
         );
       }
-  
+
       out.push(connection);
     }
-  
+
     return out;
   };
-  
+
 }
