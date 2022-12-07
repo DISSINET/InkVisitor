@@ -34,4 +34,13 @@ export namespace RelationEnums {
     Type.Actant1Semantics,
     Type.Actant2Semantics,
   ];
+
+  export const TooltipTypes: Type[] = [
+    Type.ActionEventEquivalent,
+    Type.Classification,
+    Type.Identification,
+    Type.Superclass,
+    Type.SuperordinateLocation,
+    Type.Synonym,
+  ];
 }

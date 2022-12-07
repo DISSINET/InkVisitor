@@ -63,9 +63,10 @@ export const EntityTag: React.FC<EntityTag> = ({
         onMouseEnter={() => setTagHovered(true)}
         onMouseLeave={() => setTagHovered(false)}
       >
-        {/* {tagHovered && !disableTooltip && (
+        {tagHovered && !disableTooltip && (
           <EntityTooltip
             entityId={entity.id}
+            entityClass={entity.class}
             label={getEntityLabel(entity)}
             detail={entity.detail}
             text={tooltipText}
@@ -75,7 +76,7 @@ export const EntityTag: React.FC<EntityTag> = ({
             tagHovered={tagHovered}
             referenceElement={referenceElement}
           />
-        )} */}
+        )}
         <Tag
           propId={entity.id}
           label={getEntityLabel(entity)}

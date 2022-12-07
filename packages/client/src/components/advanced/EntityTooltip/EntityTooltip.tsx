@@ -1,6 +1,6 @@
 import { Placement } from "@popperjs/core";
 import { certaintyDict } from "@shared/dictionaries";
-import { RelationEnums } from "@shared/enums";
+import { EntityEnums, RelationEnums } from "@shared/enums";
 import { EntityTooltip as EntityTooltipNamespace } from "@shared/types";
 import api from "api";
 import { LetterIcon, Tooltip } from "components";
@@ -25,6 +25,7 @@ import {
 interface EntityTooltip {
   // entity
   entityId: string;
+  entityClass: EntityEnums.Class;
   label?: string;
   detail?: string;
   text?: string;
@@ -41,6 +42,7 @@ interface EntityTooltip {
 export const EntityTooltip: React.FC<EntityTooltip> = ({
   // entity
   entityId,
+  entityClass,
   label,
   detail,
   text,
@@ -54,8 +56,9 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
   //
   referenceElement,
 }) => {
-  const [tooltipData, setTooltipData] =
-    useState<EntityTooltipNamespace.IResponse | false>(false);
+  const [tooltipData, setTooltipData] = useState<
+    EntityTooltipNamespace.IResponse | false
+  >(false);
 
   const { data, isFetching, isSuccess } = useQuery(
     ["tooltip", entityId, tagHovered],
@@ -112,126 +115,147 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
 
   const renderRelations = useMemo(() => {
     if (tooltipData) {
-      const {
-        actionEventEquivalent,
-        identifications,
-        superclassTrees,
-        superordinateLocationTrees,
-        synonymCloud,
-        entities,
-      } = tooltipData;
+      const { relations, entities } = tooltipData;
 
-      const hasRelations =
-        actionEventEquivalent.length > 0 ||
-        identifications.length > 0 ||
-        superclassTrees.length > 0 ||
-        superordinateLocationTrees.length > 0 ||
-        (synonymCloud && synonymCloud.length > 0);
+      const { AEE, CLA, IDE, SCL, SOL, SYN } = relations;
+
+      const relationsCount: number[] = RelationEnums.TooltipTypes.map((t) =>
+        relations[t]?.connections ? relations[t]!.connections.length : 0
+      );
+      const hasRelations = relationsCount.some((count) => count > 0);
+      // TODO: filter relations related to entity type
+      // => some relations has non related connections in data-import
+      console.log(relations);
+      console.log(relationsCount);
+      console.log(hasRelations);
 
       return (
         <>
           {hasRelations && (
             <StyledRelations>
               {/* actionEventEquivalent - Node */}
-              {actionEventEquivalent.length > 0 && (
-                <>
-                  <StyledLetterIconWrap>
-                    <LetterIcon
-                      color="white"
-                      letter={RelationEnums.Type.ActionEventEquivalent}
-                    />
-                  </StyledLetterIconWrap>
-                  <EntityTooltipRelationTreeTable
-                    relationTreeArray={actionEventEquivalent}
-                    entities={entities}
-                  />
-                </>
-              )}
-              {/* identifications - [] */}
-              {identifications.length > 0 && (
-                <>
-                  <StyledLetterIconWrap>
-                    <LetterIcon
-                      color="white"
-                      letter={RelationEnums.Type.Identification}
-                    />
-                  </StyledLetterIconWrap>
-                  <StyledRelationTypeBlock>
-                    {identifications.map((identification, key) => {
-                      const entity = entities[identification.entityId];
-                      // TODO: show class in text
-                      return entity ? (
-                        <React.Fragment key={key}>
-                          {`${entity?.label} (`}
-                          {certaintyDict[identification.certainty]?.label}
-                          {`)${key !== identifications.length - 1 ? ", " : ""}`}
-                        </React.Fragment>
-                      ) : null;
-                    })}
-                  </StyledRelationTypeBlock>
-                </>
-              )}
-              {/* superclassTrees - Node */}
-              {superclassTrees.length > 0 && (
-                <>
-                  <StyledLetterIconWrap>
-                    <LetterIcon
-                      color="white"
-                      letter={RelationEnums.Type.Superclass}
-                    />
-                  </StyledLetterIconWrap>
-                  {/* Render tree table */}
-                  <EntityTooltipRelationTreeTable
-                    relationTreeArray={superclassTrees}
-                    entities={entities}
-                  />
-                </>
-              )}
-              {/* superordinateLocationTrees - Node */}
-              {superordinateLocationTrees.length > 0 && (
-                <>
-                  <StyledLetterIconWrap>
-                    <LetterIcon
-                      color="white"
-                      letter={RelationEnums.Type.SuperordinateLocation}
-                    />
-                  </StyledLetterIconWrap>
-                  <EntityTooltipRelationTreeTable
-                    relationTreeArray={superordinateLocationTrees}
-                    entities={entities}
-                  />
-                </>
-              )}
-              {/* synonymCloud - string[] */}
-              {synonymCloud && synonymCloud.length > 0 && (
-                <>
-                  <StyledLetterIconWrap>
-                    <LetterIcon
-                      color="white"
-                      letter={RelationEnums.Type.Synonym}
-                    />
-                  </StyledLetterIconWrap>
-                  <StyledRelationTypeBlock>
-                    {synonymCloud.map((synonym, key) => {
-                      const entity = entities[synonym];
-                      if (!entity || entityId === entity.id) return;
-
-                      return (
-                        <React.Fragment key={key}>
-                          {`${entity?.label}${
-                            key !== synonymCloud.length - 1 ? ", " : ""
-                          }`}
-                        </React.Fragment>
-                      );
-                    })}
-                  </StyledRelationTypeBlock>
-                </>
-              )}
-              {/* TODO: add new relations */}
+              {/* {AEE?.connections.length! > 0 && (
+                 <>
+                   <StyledLetterIconWrap>
+                     <LetterIcon
+                       color="white"
+                       letter={RelationEnums.Type.ActionEventEquivalent}
+                     />
+                   </StyledLetterIconWrap>
+                   <EntityTooltipRelationTreeTable
+                     relationTreeArray={AEE?.connections[0]}
+                     entities={entities}
+                   />
+                 </>
+               )} */}
             </StyledRelations>
           )}
         </>
       );
+      // return (
+      //   <>
+      //     {hasRelations && (
+      //       <StyledRelations>
+      //         {/* actionEventEquivalent - Node */}
+      //         {actionEventEquivalent.length > 0 && (
+      //           <>
+      //             <StyledLetterIconWrap>
+      //               <LetterIcon
+      //                 color="white"
+      //                 letter={RelationEnums.Type.ActionEventEquivalent}
+      //               />
+      //             </StyledLetterIconWrap>
+      //             <EntityTooltipRelationTreeTable
+      //               relationTreeArray={actionEventEquivalent}
+      //               entities={entities}
+      //             />
+      //           </>
+      //         )}
+      //         {/* identifications - [] */}
+      //         {identifications.length > 0 && (
+      //           <>
+      //             <StyledLetterIconWrap>
+      //               <LetterIcon
+      //                 color="white"
+      //                 letter={RelationEnums.Type.Identification}
+      //               />
+      //             </StyledLetterIconWrap>
+      //             <StyledRelationTypeBlock>
+      //               {identifications.map((identification, key) => {
+      //                 const entity = entities[identification.entityId];
+      //                 // TODO: show class in text
+      //                 return entity ? (
+      //                   <React.Fragment key={key}>
+      //                     {`${entity?.label} (`}
+      //                     {certaintyDict[identification.certainty]?.label}
+      //                     {`)${key !== identifications.length - 1 ? ", " : ""}`}
+      //                   </React.Fragment>
+      //                 ) : null;
+      //               })}
+      //             </StyledRelationTypeBlock>
+      //           </>
+      //         )}
+      //         {/* superclassTrees - Node */}
+      //         {superclassTrees.length > 0 && (
+      //           <>
+      //             <StyledLetterIconWrap>
+      //               <LetterIcon
+      //                 color="white"
+      //                 letter={RelationEnums.Type.Superclass}
+      //               />
+      //             </StyledLetterIconWrap>
+      //             {/* Render tree table */}
+      //             <EntityTooltipRelationTreeTable
+      //               relationTreeArray={superclassTrees}
+      //               entities={entities}
+      //             />
+      //           </>
+      //         )}
+      //         {/* superordinateLocationTrees - Node */}
+      //         {superordinateLocationTrees.length > 0 && (
+      //           <>
+      //             <StyledLetterIconWrap>
+      //               <LetterIcon
+      //                 color="white"
+      //                 letter={RelationEnums.Type.SuperordinateLocation}
+      //               />
+      //             </StyledLetterIconWrap>
+      //             <EntityTooltipRelationTreeTable
+      //               relationTreeArray={superordinateLocationTrees}
+      //               entities={entities}
+      //             />
+      //           </>
+      //         )}
+      //         {/* synonymCloud - string[] */}
+      //         {synonymCloud && synonymCloud.length > 0 && (
+      //           <>
+      //             <StyledLetterIconWrap>
+      //               <LetterIcon
+      //                 color="white"
+      //                 letter={RelationEnums.Type.Synonym}
+      //               />
+      //             </StyledLetterIconWrap>
+      //             <StyledRelationTypeBlock>
+      //               {synonymCloud.map((synonym, key) => {
+      //                 const entity = entities[synonym];
+      //                 if (!entity || entityId === entity.id) return;
+
+      //                 return (
+      //                   <React.Fragment key={key}>
+      //                     {`${entity?.label}${
+      //                       key !== synonymCloud.length - 1 ? ", " : ""
+      //                     }`}
+      //                   </React.Fragment>
+      //                 );
+      //               })}
+      //             </StyledRelationTypeBlock>
+      //           </>
+      //         )}
+      //         {/* TODO: add new relations */}
+      //       </StyledRelations>
+      //     )}
+      //   </>
+      // );
     }
   }, [tooltipData]);
 
