@@ -15,9 +15,6 @@ export const EntityDetailRelations: React.FC<EntityDetailRelations> = ({
   entity,
 }) => {
   const queryClient = useQueryClient();
-  const [filteredRelationTypes, setFilteredRelationTypes] = useState<
-    RelationEnums.Type[]
-  >([]);
 
   const relationCreateMutation = useMutation(
     async (newRelation: Relation.IRelation) =>
@@ -52,6 +49,10 @@ export const EntityDetailRelations: React.FC<EntityDetailRelations> = ({
       },
     }
   );
+
+  const [filteredRelationTypes, setFilteredRelationTypes] = useState<
+    RelationEnums.Type[]
+  >([]);
 
   useEffect(() => {
     const filteredTypes = getEntityRelationRules(entity.class);

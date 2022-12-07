@@ -1,7 +1,11 @@
 import { Placement } from "@popperjs/core";
 import { certaintyDict } from "@shared/dictionaries";
 import { EntityEnums, RelationEnums } from "@shared/enums";
-import { EntityTooltip as EntityTooltipNamespace } from "@shared/types";
+import {
+  EntityTooltip as EntityTooltipNamespace,
+  IEntity,
+  Relation,
+} from "@shared/types";
 import api from "api";
 import { LetterIcon, Tooltip } from "components";
 import React, { useEffect, useMemo, useState } from "react";
@@ -11,6 +15,7 @@ import { BsCardText } from "react-icons/bs";
 import { ImListNumbered } from "react-icons/im";
 import { useQuery } from "react-query";
 import { Colors } from "types";
+import { getEntityRelationRules } from "utils";
 import { EntityTooltipRelationTreeTable } from "./EntityTooltipRelationTreeTable/EntityTooltipRelationTreeTable";
 import {
   StyledDetail,
@@ -113,27 +118,87 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
     [text, detail, label, itemsCount]
   );
 
+  const renderCloudRelations = (
+    entities: Record<string, IEntity>,
+    cloudRelationIds?: string[]
+  ) => {
+    return (
+      <>
+        {cloudRelationIds && (
+          <StyledRelationTypeBlock>
+            {cloudRelationIds.map((cloudEntityId, key) => {
+              const entity = entities[cloudEntityId];
+              if (!entity || entityId === entity.id) return;
+
+              return (
+                <React.Fragment key={key}>
+                  {`${entity?.label}${
+                    key !== cloudRelationIds.length! - 1 ? ", " : ""
+                  }`}
+                </React.Fragment>
+              );
+            })}
+          </StyledRelationTypeBlock>
+        )}
+      </>
+    );
+  };
+
   const renderRelations = useMemo(() => {
     if (tooltipData) {
-      const { relations, entities } = tooltipData;
+      const { relations, entities } = tooltipData || {};
 
       const { AEE, CLA, IDE, SCL, SOL, SYN } = relations;
 
-      const relationsCount: number[] = RelationEnums.TooltipTypes.map((t) =>
+      const filteredTypes = getEntityRelationRules(
+        entityClass,
+        RelationEnums.TooltipTypes
+      );
+
+      const relationsCount: number[] = filteredTypes.map((t) =>
         relations[t]?.connections ? relations[t]!.connections.length : 0
       );
       const hasRelations = relationsCount.some((count) => count > 0);
-      // TODO: filter relations related to entity type
+      // TODO: filter relations related to entity class
       // => some relations has non related connections in data-import
-      console.log(relations);
       console.log(relationsCount);
-      console.log(hasRelations);
+      console.log(relations);
+
+      console.log(filteredTypes);
 
       return (
         <>
           {hasRelations && (
             <StyledRelations>
-              {/* actionEventEquivalent - Node */}
+              {filteredTypes.map((relationType, key) => {
+                const hasConnection =
+                  relations[relationType]?.connections &&
+                  relations[relationType]?.connections?.length! > 0;
+
+                const relationRule: Relation.RelationRule =
+                  Relation.RelationRules[relationType]!;
+
+                return (
+                  <React.Fragment key={key}>
+                    {hasConnection && (
+                      <>
+                        <StyledLetterIconWrap>
+                          <LetterIcon color="white" letter={relationType} />
+                        </StyledLetterIconWrap>
+                        {relationRule.cloudType ? (
+                          renderCloudRelations(
+                            entities,
+                            relations[relationType]?.connections[0]?.entityIds
+                          )
+                        ) : (
+                          // TODO: tree / multiple
+                          <div />
+                        )}
+                      </>
+                    )}
+                  </React.Fragment>
+                );
+              })}
               {/* {AEE?.connections.length! > 0 && (
                  <>
                    <StyledLetterIconWrap>

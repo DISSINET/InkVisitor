@@ -166,8 +166,12 @@ export const getRelationTreeDepth = (
   );
 };
 
-export const getEntityRelationRules = (entityClass: EntityEnums.Class) => {
-  return RelationEnums.AllTypes.filter((rule) => {
+export const getEntityRelationRules = (
+  entityClass: EntityEnums.Class,
+  relationTypes?: RelationEnums.Type[]
+) => {
+  const typesToFilter = relationTypes ? relationTypes : RelationEnums.AllTypes;
+  return typesToFilter.filter((rule) => {
     if (
       !Relation.RelationRules[rule]?.allowedEntitiesPattern.length &&
       !(
@@ -186,7 +190,11 @@ export const getEntityRelationRules = (entityClass: EntityEnums.Class) => {
   });
 };
 
-export const getRelationInvertedRules = (entityClass: EntityEnums.Class) => {
+export const getRelationInvertedRules = (
+  entityClass: EntityEnums.Class,
+  relationTypes?: RelationEnums.Type[]
+) => {
+  const typesToFilter = relationTypes ? relationTypes : RelationEnums.AllTypes;
   return RelationEnums.AllTypes.filter((rule) => {
     if (
       Relation.RelationRules[rule]?.asymmetrical &&
