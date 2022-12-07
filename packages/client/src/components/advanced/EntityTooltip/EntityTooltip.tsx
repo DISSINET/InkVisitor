@@ -163,7 +163,6 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
       // => some relations has non related connections in data-import
       console.log(relationsCount);
       console.log(relations);
-
       console.log(filteredTypes);
 
       return (
@@ -173,7 +172,7 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
               {filteredTypes.map((relationType, key) => {
                 const hasConnection =
                   relations[relationType]?.connections &&
-                  relations[relationType]?.connections?.length! > 0;
+                  relations[relationType]?.connections.length! > 0;
 
                 const relationRule: Relation.RelationRule =
                   Relation.RelationRules[relationType]!;
@@ -191,8 +190,15 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
                             relations[relationType]?.connections[0]?.entityIds
                           )
                         ) : (
-                          // TODO: tree / multiple
-                          <div />
+                          <>
+                            {relationRule.treeType ? (
+                              // Tree type
+                              <div />
+                            ) : (
+                              // Multiple - Identification with certainty / classification
+                              <div />
+                            )}
+                          </>
                         )}
                       </>
                     )}
