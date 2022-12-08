@@ -150,7 +150,7 @@ export const getShortLabelByLetterCount = (
   maxLetterCount: number
 ) => {
   const isOversized = label.length > maxLetterCount;
-  return isOversized ? label.slice(0, 200).concat("...") : label;
+  return isOversized ? label.slice(0, maxLetterCount).concat("...") : label;
 };
 
 // Returns one more level, because there's always empty subtree array on the deepest level

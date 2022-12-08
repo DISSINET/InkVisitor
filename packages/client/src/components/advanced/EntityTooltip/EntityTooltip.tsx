@@ -15,7 +15,7 @@ import { BsCardText } from "react-icons/bs";
 import { ImListNumbered } from "react-icons/im";
 import { useQuery } from "react-query";
 import { Colors } from "types";
-import { getEntityRelationRules } from "utils";
+import { getEntityRelationRules, getShortLabelByLetterCount } from "utils";
 import { EntityTooltipRelationTreeTable } from "./EntityTooltipRelationTreeTable/EntityTooltipRelationTreeTable";
 import {
   StyledDetail,
@@ -170,9 +170,10 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
           {hasRelations && (
             <StyledRelations>
               {filteredTypes.map((relationType, key) => {
+                const currentRelations = relations[relationType]?.connections;
+
                 const hasConnection =
-                  relations[relationType]?.connections &&
-                  relations[relationType]?.connections.length! > 0;
+                  currentRelations && currentRelations.length! > 0;
 
                 const relationRule: Relation.RelationRule =
                   Relation.RelationRules[relationType]!;
@@ -187,40 +188,38 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
                         {relationRule.cloudType ? (
                           renderCloudRelations(
                             entities,
-                            relations[relationType]?.connections[0]?.entityIds
+                            currentRelations[0]?.entityIds
                           )
                         ) : (
                           <>
                             {relationRule.treeType ? (
                               // TODO: Tree type
-                              //   <EntityTooltipRelationTreeTable
-                              //   relationTreeArray={AEE?.connections[0]}
-                              //   entities={entities}
-                              //   />
-                              <div>tree type</div>
+                              <EntityTooltipRelationTreeTable
+                                relationTreeArray={currentRelations}
+                                entities={entities}
+                              />
                             ) : (
+                              // <div>tree type</div>
                               // Multiple - Identification with certainty / classification
                               <StyledRelationTypeBlock>
-                                {relations[relationType]?.connections &&
-                                  relations[relationType]?.connections.map(
-                                    (connection, key) => {
-                                      const entity =
-                                        entities[connection.entityIds[1]];
+                                {currentRelations &&
+                                  currentRelations.map((connection, key) => {
+                                    const entity =
+                                      entities[connection.entityIds[1]];
 
-                                      return (
-                                        <React.Fragment key={key}>
-                                          {`${entity?.label}${
-                                            key !==
-                                            relations[relationType]?.connections
-                                              .length! -
-                                              1
-                                              ? ", "
-                                              : ""
-                                          }`}
-                                        </React.Fragment>
-                                      );
-                                    }
-                                  )}
+                                    return (
+                                      <React.Fragment key={key}>
+                                        {`${getShortLabelByLetterCount(
+                                          entity?.label,
+                                          40
+                                        )}${
+                                          key !== currentRelations.length! - 1
+                                            ? ", "
+                                            : ""
+                                        }`}
+                                      </React.Fragment>
+                                    );
+                                  })}
                               </StyledRelationTypeBlock>
                             )}
                           </>
