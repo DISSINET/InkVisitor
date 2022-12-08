@@ -161,9 +161,9 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
       const hasRelations = relationsCount.some((count) => count > 0);
       // TODO: filter relations related to entity class
       // => some relations has non related connections in data-import
-      console.log(relationsCount);
-      console.log(relations);
-      console.log(filteredTypes);
+      // console.log(relationsCount);
+      // console.log(relations);
+      // console.log(filteredTypes);
 
       return (
         <>
@@ -193,26 +193,33 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
                         ) : (
                           <>
                             {relationRule.treeType ? (
-                              // TODO: Tree type
                               <EntityTooltipRelationTreeTable
                                 relationTreeArray={currentRelations}
                                 entities={entities}
                               />
                             ) : (
-                              // <div>tree type</div>
                               // Multiple - Identification with certainty / classification
                               <StyledRelationTypeBlock>
                                 {currentRelations &&
                                   currentRelations.map((connection, key) => {
                                     const entity =
                                       entities[connection.entityIds[1]];
+                                    const certainty = (
+                                      connection as Relation.IConnection<Relation.IIdentification>
+                                    ).certainty;
 
                                     return (
                                       <React.Fragment key={key}>
                                         {`${getShortLabelByLetterCount(
                                           entity?.label,
                                           40
-                                        )}${
+                                        )}
+                                        ${
+                                          certainty
+                                            ? ` (${certaintyDict[certainty]?.label})`
+                                            : ""
+                                        }
+                                        ${
                                           key !== currentRelations.length! - 1
                                             ? ", "
                                             : ""

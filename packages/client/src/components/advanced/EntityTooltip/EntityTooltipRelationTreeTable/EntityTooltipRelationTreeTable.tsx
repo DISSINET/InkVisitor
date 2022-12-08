@@ -1,17 +1,16 @@
-import { EntityTooltip, IEntity, Relation } from "@shared/types";
+import { IEntity, Relation } from "@shared/types";
 import React from "react";
 import { getRelationTreeDepth } from "utils";
 import {
-  StyledRelationTypeTreeBlock,
-  StyledGridRowThird,
-  StyledTreeBlock,
   StyledFlexColumn,
   StyledGridRowHalf,
+  StyledGridRowThird,
+  StyledRelationTypeTreeBlock,
+  StyledTreeBlock,
 } from "./EntityTooltipRelationTreeTableStyles";
 
 interface EntityTooltipRelationTreeTable {
-  // relationTreeArray: EntityTooltip.ISuperclassTree[];
-  relationTreeArray: Relation.IConnection<any>[];
+  relationTreeArray: Relation.IConnection<any>;
   entities: Record<string, IEntity>;
 }
 export const EntityTooltipRelationTreeTable: React.FC<
