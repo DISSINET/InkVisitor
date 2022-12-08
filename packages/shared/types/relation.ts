@@ -247,7 +247,7 @@ export namespace Relation {
     asymmetrical: false,
     multiple: false,
     cloudType: false,
-    treeType: false,
+    treeType: true,
     attributes: [],
     order: false,
   };

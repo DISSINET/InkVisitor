@@ -192,11 +192,36 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
                         ) : (
                           <>
                             {relationRule.treeType ? (
-                              // Tree type
-                              <div />
+                              // TODO: Tree type
+                              //   <EntityTooltipRelationTreeTable
+                              //   relationTreeArray={AEE?.connections[0]}
+                              //   entities={entities}
+                              //   />
+                              <div>tree type</div>
                             ) : (
                               // Multiple - Identification with certainty / classification
-                              <div />
+                              <StyledRelationTypeBlock>
+                                {relations[relationType]?.connections &&
+                                  relations[relationType]?.connections.map(
+                                    (connection, key) => {
+                                      const entity =
+                                        entities[connection.entityIds[1]];
+
+                                      return (
+                                        <React.Fragment key={key}>
+                                          {`${entity?.label}${
+                                            key !==
+                                            relations[relationType]?.connections
+                                              .length! -
+                                              1
+                                              ? ", "
+                                              : ""
+                                          }`}
+                                        </React.Fragment>
+                                      );
+                                    }
+                                  )}
+                              </StyledRelationTypeBlock>
                             )}
                           </>
                         )}
