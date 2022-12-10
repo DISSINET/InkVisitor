@@ -35,6 +35,8 @@ export const fourthPanelBoxesHeightThirds = {
 
 export const maxTabCount = 10;
 
+export const tooltipLabelSeparator = " • ";
+
 // animations
 export const springConfig: { [key: string]: {} } = {
   panelExpand: { tension: 195, friction: 31 },
