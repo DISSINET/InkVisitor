@@ -210,20 +210,16 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
 
                                     return (
                                       <React.Fragment key={key}>
-                                        {`${getShortLabelByLetterCount(
+                                        {getShortLabelByLetterCount(
                                           entity?.label,
                                           40
                                         )}
-                                        ${
-                                          certainty
-                                            ? ` (${certaintyDict[certainty]?.label})`
-                                            : ""
-                                        }
-                                        ${
-                                          key !== currentRelations.length! - 1
-                                            ? ", "
-                                            : ""
-                                        }`}
+                                        {certainty
+                                          ? ` (${certaintyDict[certainty]?.label})`
+                                          : ""}
+                                        {key !== currentRelations.length! - 1
+                                          ? ", "
+                                          : ""}
                                       </React.Fragment>
                                     );
                                   })}

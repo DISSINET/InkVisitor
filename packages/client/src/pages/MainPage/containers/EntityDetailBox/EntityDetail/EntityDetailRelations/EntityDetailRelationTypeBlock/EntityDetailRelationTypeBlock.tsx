@@ -130,7 +130,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
       const newRelation: Relation.IRelation = {
         id: uuidv4(),
         entityIds: [entity.id, selectedId],
-        type: relationType as RelationEnums.Type,
+        type: relationType,
       };
       relationCreateMutation.mutate(newRelation);
     }

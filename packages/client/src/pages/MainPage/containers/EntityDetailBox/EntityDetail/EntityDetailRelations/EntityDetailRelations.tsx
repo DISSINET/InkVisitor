@@ -21,7 +21,6 @@ export const EntityDetailRelations: React.FC<EntityDetailRelations> = ({
       await api.relationCreate(newRelation),
     {
       onSuccess: (data, variables) => {
-        // TODO
         queryClient.invalidateQueries("entity");
       },
     }
@@ -35,7 +34,6 @@ export const EntityDetailRelations: React.FC<EntityDetailRelations> = ({
       ),
     {
       onSuccess: (data, variables) => {
-        // TODO
         queryClient.invalidateQueries("entity");
       },
     }
@@ -44,7 +42,6 @@ export const EntityDetailRelations: React.FC<EntityDetailRelations> = ({
     async (relationId: string) => await api.relationDelete(relationId),
     {
       onSuccess: (data, variables) => {
-        // TODO
         queryClient.invalidateQueries("entity");
       },
     }
