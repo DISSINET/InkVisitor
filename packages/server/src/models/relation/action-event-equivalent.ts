@@ -23,13 +23,13 @@ export default class ActionEventEquivalent extends Relation implements RelationT
   ): Promise<
     RelationTypes.IConnection<RelationTypes.IActionEventEquivalent, RelationTypes.ISuperclass>[]> {
     const out: RelationTypes.IConnection<RelationTypes.IActionEventEquivalent, RelationTypes.ISuperclass>[] = [];
-  
+
     if (nestLvl > maxNestLvl) {
       return out;
     }
-  
+
     let relations: RelationTypes.IActionEventEquivalent[] = [];
-  
+
     if (
       asClass === EntityEnums.Class.Action ||
       asClass === EntityEnums.Class.Concept
@@ -41,7 +41,7 @@ export default class ActionEventEquivalent extends Relation implements RelationT
         0
       );
     }
-  
+
     for (const relation of relations) {
       const subparentId = relation.entityIds[1];
       const connection: RelationTypes.IConnection<
@@ -51,28 +51,30 @@ export default class ActionEventEquivalent extends Relation implements RelationT
         ...relation,
         subtrees: [],
       };
-  
-      connection.subtrees = await Superclass.getSuperclassForwardConnections(
-        conn,
-        subparentId,
-        EntityEnums.Class.Concept,
-        maxNestLvl,
-        nestLvl + 1
-      );
-  
+
+      if (asClass === EntityEnums.Class.Concept) {
+        connection.subtrees = await Superclass.getSuperclassForwardConnections(
+          conn,
+          subparentId,
+          asClass,
+          maxNestLvl,
+          nestLvl + 1
+        );
+      }
+
       out.push(connection);
     }
-  
+
     return out;
   };
-  
-  static async getActionEventEquivalentInverseConnections (
+
+  static async getActionEventEquivalentInverseConnections(
     conn: Connection,
     parentId: string,
     asClass: EntityEnums.Class
   ): Promise<RelationTypes.IActionEventEquivalent[]> {
     let out: RelationTypes.IActionEventEquivalent[] = [];
-  
+
     if (asClass === EntityEnums.Class.Action) {
       out = await Relation.getForEntity(
         conn,
@@ -81,8 +83,8 @@ export default class ActionEventEquivalent extends Relation implements RelationT
         1
       );
     }
-  
+
     return out;
   };
-  
+
 }
