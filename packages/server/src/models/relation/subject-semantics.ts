@@ -59,7 +59,7 @@ export default class SubjectSemantics extends Relation implements RelationTypes.
       out = await Relation.getForEntity(
         conn,
         entityId,
-        RelationEnums.Type.Implication,
+        RelationEnums.Type.SubjectSemantics,
         0
       );
     }
