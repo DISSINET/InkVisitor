@@ -55,7 +55,7 @@ export default class Actant1Semantics extends Relation implements RelationTypes.
   ): Promise<RelationTypes.IConnection<RelationTypes.IActant1Semantics>[]> {
     let out: RelationTypes.IActant1Semantics[] = [];
 
-    if (asClass === EntityEnums.Class.Concept) {
+    if (asClass === EntityEnums.Class.Action) {
       out = await Relation.getForEntity(
         conn,
         entityId,
@@ -81,7 +81,7 @@ export default class Actant1Semantics extends Relation implements RelationTypes.
   ): Promise<RelationTypes.IActant1Semantics[]> {
     let out: RelationTypes.IActant1Semantics[] = [];
 
-    if (asClass === EntityEnums.Class.Action) {
+    if (asClass === EntityEnums.Class.Concept) {
       out = await Relation.getForEntity(
         conn,
         parentId,

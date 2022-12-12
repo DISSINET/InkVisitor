@@ -54,8 +54,8 @@ export default class Actant2Semantics extends Relation implements RelationTypes.
     asClass: EntityEnums.Class
   ): Promise<RelationTypes.IConnection<RelationTypes.IActant2Semantics>[]> {
     let out: RelationTypes.IActant2Semantics[] = [];
-  
-    if (asClass === EntityEnums.Class.Concept) {
+
+    if (asClass === EntityEnums.Class.Action) {
       out = await Relation.getForEntity(
         conn,
         entityId,
@@ -63,25 +63,25 @@ export default class Actant2Semantics extends Relation implements RelationTypes.
         0
       );
     }
-  
+
     // sort by order
     out.sort(
       (a, b) =>
         (a.order === undefined ? EntityEnums.Order.Last : a.order) -
         (b.order === undefined ? EntityEnums.Order.Last : b.order)
     );
-  
+
     return out;
   };
-  
+
   static async getActant2SemanticsInverseConnections(
     conn: Connection,
     parentId: string,
     asClass: EntityEnums.Class
   ): Promise<RelationTypes.IActant2Semantics[]> {
     let out: RelationTypes.IActant2Semantics[] = [];
-  
-    if (asClass === EntityEnums.Class.Action) {
+
+    if (asClass === EntityEnums.Class.Concept) {
       out = await Relation.getForEntity(
         conn,
         parentId,
@@ -89,15 +89,15 @@ export default class Actant2Semantics extends Relation implements RelationTypes.
         1
       );
     }
-  
+
     // sort by order
     out.sort(
       (a, b) =>
         (a.order === undefined ? EntityEnums.Order.Last : a.order) -
         (b.order === undefined ? EntityEnums.Order.Last : b.order)
     );
-  
+
     return out;
   };
-  
+
 }
