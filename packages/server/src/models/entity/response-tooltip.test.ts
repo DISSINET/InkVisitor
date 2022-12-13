@@ -18,14 +18,14 @@ describe("test ResponseTooltip.getActionEventNodes", function () {
   beforeAll(async () => {
     await db.initDb();
     [, entity] = prepareEntity();
-    entity.class = EntityEnums.Class.Action
+    entity.class = EntityEnums.Class.Action;
     await entity.save(db.connection);
 
-    console.log("entity saved")
+    console.log("entity saved");
     // search for AEE
     const [, relation1] = prepareRelation(RelationEnums.Type.ActionEventEquivalent);
     relation1.entityIds = [entity.id, "2"];
-    console.log("relation1", relation1.type, relation1.entityIds)
+    console.log("relation1", relation1.type, relation1.entityIds);
     await relation1.save(db.connection);
 
     // search for SCL
@@ -53,35 +53,30 @@ describe("test ResponseTooltip.getActionEventNodes", function () {
     await relation5.save(db.connection);
 
     request = newMockRequest(db);
-  })
+  });
 
   afterAll(async () => {
     await clean(db);
-  })
+  });
 
   test("bad class for relation", async () => {
-    const entity = new Entity({ class: EntityEnums.Class.Concept })
+    const entity = new Entity({ class: EntityEnums.Class.Concept });
     const response = new ResponseTooltip(entity);
-    const rootTree = await response.getActionEventNodes(db.connection, entity.id, entity.class);
-    expect(rootTree.subtrees).toHaveLength(0)
-  })
+    await response.relations.prepare(request, [RelationEnums.Type.ActionEventEquivalent]);
+    expect(response.relations[RelationEnums.Type.ActionEventEquivalent]?.connections).toHaveLength(0);
+  });
 
   test("full tree available", async () => {
-
     const response = new ResponseTooltip(entity);
-    const rootTree = await response.getActionEventNodes(db.connection, entity.id, entity.class);
+    await response.relations.prepare(request, [RelationEnums.Type.ActionEventEquivalent]);
+
+    const connections = response.relations[RelationEnums.Type.ActionEventEquivalent]?.connections || [];
 
     // AEE
-    expect(rootTree.subtrees).toHaveLength(1); // relation1
+    expect(connections).toHaveLength(1); // relation1
 
-    const lvl1 = rootTree.subtrees[0].subtrees;
-    const lvl2 = rootTree.subtrees[0].subtrees[0].subtrees;
-    const lvl3 = rootTree.subtrees[0].subtrees[0].subtrees[0].subtrees;
-    const lvl4 = rootTree.subtrees[0].subtrees[0].subtrees[0].subtrees[0].subtrees
+    const lvl1 = connections[0].subtrees;
 
-    expect(lvl1).toHaveLength(1) // relation2
-    expect(lvl2).toHaveLength(1) // relation3
-    expect(lvl3).toHaveLength(2); // relation4_1 + relation4_2
-    expect(lvl4).toHaveLength(0); // over the nest level
-  })
+    expect(lvl1).toHaveLength(1); // relation2
+  });
 });

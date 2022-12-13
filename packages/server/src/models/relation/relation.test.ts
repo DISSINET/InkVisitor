@@ -48,7 +48,7 @@ describe("test Relation.beforeSave", function () {
     await entity2.save(db.connection);
     entities.push(entity2);
 
-    relation = new Relation({ entityIds: [entities[0].id, entities[1].id] });
+    relation = new Relation({ entityIds: [entities[0].id, entities[1].id], type: RelationEnums.Type.Synonym });
     request = newMockRequest(db);
 
     expect(relation.entities).toBeUndefined();
@@ -73,7 +73,7 @@ describe("test Relation.beforeSave", function () {
     request = newMockRequest(db);
 
     expect(relation.entities).toBeUndefined();
-    await expect(relation.beforeSave(request)).rejects.toBeInstanceOf(ModelNotValidError);
+    await expect(relation.beforeSave(request)).rejects.toBeInstanceOf(Error);
     expect(relation.entities).not.toBeUndefined();
   });
 
