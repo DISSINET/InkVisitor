@@ -40,34 +40,6 @@ export default class Synonym extends Relation implements RelationTypes.ISynonym 
   }
 
   /**
-  * areEntitiesValid checks if entities have acceptable classes
-  * @returns 
-  */
-  areEntitiesValid(): Error | null {
-    let prevClass: EntityEnums.Class | undefined;
-    for (const entityId of this.entityIds) {
-      const entity = this.entities?.find(e => e.id === entityId);
-      if (!entity) {
-        throw new InternalServerError('', `cannot check entity's class - not preloaded`);
-      }
-
-      if (!this.hasEntityCorrectClass(entityId, [EntityEnums.Class.Action, EntityEnums.Class.Concept])) {
-        return new ModelNotValidError(`Entity '${entityId}' mush have class '${EntityEnums.Class.Action}' or '${EntityEnums.Class.Concept}'`);
-      }
-
-      if (prevClass === undefined) {
-        prevClass = entity.class;
-      }
-
-      if (prevClass !== entity.class) {
-        return new ModelNotValidError("Entities must have equal classes");
-      }
-    }
-
-    return null;
-  }
-
-  /**
    * called before save operation - in synonyms, that would cover transitive dependency if relations:
    * A + B => synonym 1
    * B + C => synonym 2
@@ -90,13 +62,13 @@ export default class Synonym extends Relation implements RelationTypes.ISynonym 
     }
   }
 
-  static async getSynonymForwardConnections (
+  static async getSynonymForwardConnections(
     conn: Connection,
     entityId: string,
     asClass: EntityEnums.Class
   ): Promise<RelationTypes.IConnection<RelationTypes.ISynonym>[]> {
     let out: RelationTypes.IConnection<RelationTypes.ISynonym>[] = [];
-  
+
     if (
       asClass === EntityEnums.Class.Concept ||
       asClass === EntityEnums.Class.Action
@@ -115,7 +87,7 @@ export default class Synonym extends Relation implements RelationTypes.ISynonym 
       }
       out = Object.values(mapped);
     }
-  
+
     return out;
   };
 }

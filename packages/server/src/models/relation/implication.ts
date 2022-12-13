@@ -2,6 +2,7 @@ import { EntityEnums, RelationEnums } from "@shared/enums";
 import Relation from "./relation";
 import { Relation as RelationTypes } from "@shared/types";
 import { Connection } from "rethinkdb-ts";
+import { ModelNotValidError } from "@shared/types/errors";
 
 export default class Implication extends Relation implements RelationTypes.IImplication {
   type: RelationEnums.Type.Implication;
@@ -21,7 +22,7 @@ export default class Implication extends Relation implements RelationTypes.IImpl
     asClass: EntityEnums.Class
   ): Promise<RelationTypes.IConnection<RelationTypes.IImplication>[]> {
     let out: RelationTypes.IImplication[] = [];
-  
+
     if (asClass === EntityEnums.Class.Action) {
       out = await Relation.getForEntity(
         conn,
@@ -30,24 +31,24 @@ export default class Implication extends Relation implements RelationTypes.IImpl
         0
       );
     }
-  
+
     // sort by order
     out.sort(
       (a, b) =>
         (a.order === undefined ? EntityEnums.Order.Last : a.order) -
         (b.order === undefined ? EntityEnums.Order.Last : b.order)
     );
-  
+
     return out;
   };
-  
+
   static async getImplicationInverseConnections(
     conn: Connection,
     parentId: string,
     asClass: EntityEnums.Class
   ): Promise<RelationTypes.IImplication[]> {
     let out: RelationTypes.IImplication[] = [];
-  
+
     if (asClass === EntityEnums.Class.Action) {
       out = await Relation.getForEntity(
         conn,
@@ -56,14 +57,14 @@ export default class Implication extends Relation implements RelationTypes.IImpl
         1
       );
     }
-  
+
     // sort by order
     out.sort(
       (a, b) =>
         (a.order === undefined ? EntityEnums.Order.Last : a.order) -
         (b.order === undefined ? EntityEnums.Order.Last : b.order)
     );
-  
+
     return out;
   };
 }

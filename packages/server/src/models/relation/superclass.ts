@@ -16,50 +16,7 @@ export default class Superclass extends Relation implements RelationTypes.ISuper
     this.order = data.order === undefined ? EntityEnums.Order.Last : data.order;
   }
 
-  /**
-  * areEntitiesValid checks if entities have acceptable classes
-  * @returns 
-  */
-  areEntitiesValid(): Error | null {
-    let prevClass: EntityEnums.Class | undefined;
-    for (const entityId of this.entityIds) {
-      const entity = this.entities?.find(e => e.id === entityId);
-      if (!entity) {
-        throw new InternalServerError('', `cannot check entity's class - not preloaded`);
-      }
-
-      if (!this.hasEntityCorrectClass(entityId, [EntityEnums.Class.Action, EntityEnums.Class.Concept])) {
-        return new ModelNotValidError(`Entity '${entityId}' mush have class '${EntityEnums.Class.Action}' or '${EntityEnums.Class.Concept}'`);
-      }
-      if (prevClass === undefined) {
-        prevClass = entity.class;
-      }
-
-      if (prevClass !== entity.class) {
-        return new ModelNotValidError("Entities must have equal classes");
-      }
-    }
-
-    return null;
-  }
-
-  /**
-   * Test validity of the model
-   * @returns 
-   */
-  isValid(): boolean {
-    if (!super.isValid()) {
-      return false;
-    }
-
-    if (this.entityIds.length !== 2) {
-      return false;
-    }
-
-    return true;
-  }
-
-  static async getSuperclassForwardConnections (
+  static async getSuperclassForwardConnections(
     conn: Connection,
     parentId: string,
     asClass: EntityEnums.Class,
@@ -67,13 +24,13 @@ export default class Superclass extends Relation implements RelationTypes.ISuper
     nestLvl: number
   ): Promise<RelationTypes.IConnection<RelationTypes.ISuperclass>[]> {
     const out: RelationTypes.IConnection<RelationTypes.ISuperclass>[] = [];
-  
+
     if (nestLvl > maxNestLvl) {
       return out;
     }
-  
+
     let relations: RelationTypes.IRelation[] = [];
-  
+
     if (
       [EntityEnums.Class.Concept, EntityEnums.Class.Action].indexOf(asClass) !==
       -1
@@ -92,21 +49,21 @@ export default class Superclass extends Relation implements RelationTypes.ISuper
         0
       );
     }
-  
+
     // sort by order
     relations.sort(
       (a, b) =>
         (a.order === undefined ? EntityEnums.Order.Last : a.order) -
         (b.order === undefined ? EntityEnums.Order.Last : b.order)
     );
-  
+
     for (const relation of relations) {
       const subparentId = relation.entityIds[1];
       const connection: RelationTypes.IConnection<RelationTypes.ISuperclass> = {
         ...(relation as RelationTypes.ISuperclass),
         subtrees: [],
       };
-  
+
       connection.subtrees = await Superclass.getSuperclassForwardConnections(
         conn,
         subparentId,
@@ -116,7 +73,7 @@ export default class Superclass extends Relation implements RelationTypes.ISuper
       );
       out.push(connection);
     }
-  
+
     return out;
   };
 
@@ -126,7 +83,7 @@ export default class Superclass extends Relation implements RelationTypes.ISuper
     asClass: EntityEnums.Class
   ): Promise<RelationTypes.ISuperclass[]> {
     let out: RelationTypes.ISuperclass[] = [];
-  
+
     if (
       asClass === EntityEnums.Class.Action ||
       asClass === EntityEnums.Class.Concept
@@ -138,14 +95,14 @@ export default class Superclass extends Relation implements RelationTypes.ISuper
         1
       );
     }
-  
+
     // sort by order
     out.sort(
       (a, b) =>
         (a.order === undefined ? EntityEnums.Order.Last : a.order) -
         (b.order === undefined ? EntityEnums.Order.Last : b.order)
     );
-  
+
     return out;
   };
 }

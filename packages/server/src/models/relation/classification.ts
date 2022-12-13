@@ -17,23 +17,6 @@ export default class Classification extends Relation implements RelationTypes.IC
     this.order = data.order === undefined ? EntityEnums.Order.Last : data.order;
   }
 
-  /**
-  * areEntitiesValid checks if entities have acceptable classes
-  * @returns 
-  */
-  areEntitiesValid(): Error | null {
-    if (!this.hasEntityCorrectClass(this.entityIds[0], EntityEnums.PLOGESTRB)) {
-      return new ModelNotValidError(`First entity should be one of '${EntityEnums.PLOGESTRB}'`);
-    }
-
-    if (!this.hasEntityCorrectClass(this.entityIds[1], [EntityEnums.Class.Concept])) {
-      return new ModelNotValidError(`Second entity should be of class '${EntityEnums.Class.Concept}'`);
-    }
-
-    return null;
-  }
-
-
   static async getClassificationForwardConnections(
     conn: Connection,
     entityId: string,

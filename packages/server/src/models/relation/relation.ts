@@ -38,13 +38,13 @@ export default class Relation implements IRelationModel {
    * @param entityId 
    * @param acceptableClasses 
    */
-  hasEntityCorrectClass(entityId: string, acceptableClasses: EntityEnums.Class[]): boolean {
+  hasEntityCorrectClass(entityId: string, acceptableClass: EntityEnums.Class): boolean {
     const loadedEntity = this.entities?.find(e => e.id === entityId);
     if (!loadedEntity) {
       throw new InternalServerError('', `cannot check entity's class - not preloaded`);
     }
 
-    return acceptableClasses.indexOf(loadedEntity.class) !== -1;
+    return acceptableClass === loadedEntity.class;
   }
 
   /**
@@ -52,10 +52,38 @@ export default class Relation implements IRelationModel {
   * @returns 
   */
   areEntitiesValid(): Error | null {
-    for (const entityId of this.entityIds) {
-      if (!this.hasEntityCorrectClass(entityId, Object.values(EntityEnums.Class))) {
-        return new ModelNotValidError(`Entity '${entityId}' does not have valid class`);
+    const rules = RelationTypes.RelationRules[this.type];
+    if (!rules) {
+      return new InternalServerError(`Missing rules for relation type '${this.type}'`);
+    }
+
+    // default is true - if no pattern provided => everything is allowed
+    let patternFound = true;
+
+    for (const pattern of rules?.allowedEntitiesPattern) {
+      if (!rules.cloudType && pattern.length !== this.entityIds.length) {
+        return new ModelNotValidError(`Pattern requires '${pattern.length}' entities`);
       }
+
+      for (const i in this.entityIds) {
+        // cloud type has always 
+        const wantedClass = rules.cloudType ? pattern[0] : pattern[i];
+
+        patternFound = this.hasEntityCorrectClass(this.entityIds[i], wantedClass);
+        if (!patternFound) {
+          // patter cannot be accepted any further - continue with another pattern
+          break;
+        }
+      }
+
+      if (patternFound) {
+        // pattern acceptable and no more entities to check
+        break;
+      }
+    }
+
+    if (!patternFound) {
+      return new ModelNotValidError(`Not allowed entity-class pattern`);
     }
 
     return null;
@@ -147,7 +175,13 @@ export default class Relation implements IRelationModel {
    * @returns 
    */
   isValid(): boolean {
-    // is must be string or undefined
+    const rules = RelationTypes.RelationRules[this.type];
+
+    if (!rules) {
+      throw new InternalServerError(`Missing rules for relation type '${this.type}'`);
+    }
+
+    // id must be string or undefined
     if (typeof this.id !== "string" && this.id !== undefined) {
       return false;
     }
@@ -166,10 +200,8 @@ export default class Relation implements IRelationModel {
       return false;
     }
 
-    if (this.order !== undefined) {
-      if (typeof this.order !== "number") {
-        return false;
-      }
+    if (rules.order && typeof this.order !== "number") {
+      throw new ModelNotValidError(`Order must be a number for relation type '${this.type}'`);
     }
 
     return true;

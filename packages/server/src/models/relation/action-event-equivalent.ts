@@ -15,22 +15,6 @@ export default class ActionEventEquivalent extends Relation implements RelationT
     this.type = RelationEnums.Type.ActionEventEquivalent;
   }
 
-  /**
-  * areEntitiesValid checks if entities have acceptable classes
-  * @returns 
-  */
-  areEntitiesValid(): Error | null {
-    if (!this.hasEntityCorrectClass(this.entityIds[0], [EntityEnums.Class.Action])) {
-      return new ModelNotValidError(`First entity should be of class '${EntityEnums.Class.Action}'`);
-    }
-
-    if (!this.hasEntityCorrectClass(this.entityIds[1], [EntityEnums.Class.Concept])) {
-      return new ModelNotValidError(`Second entity should be of class '${EntityEnums.Class.Concept}'`);
-    }
-
-    return null;
-  }
-
   static async getActionEventEquivalentForwardConnections(
     conn: Connection,
     entityId: string,
@@ -47,10 +31,7 @@ export default class ActionEventEquivalent extends Relation implements RelationT
 
     let relations: RelationTypes.IActionEventEquivalent[] = [];
 
-    if (
-      asClass === EntityEnums.Class.Action ||
-      asClass === EntityEnums.Class.Concept
-    ) {
+    if (asClass === EntityEnums.Class.Action) {
       relations = await Relation.getForEntity(
         conn,
         entityId,
@@ -69,15 +50,13 @@ export default class ActionEventEquivalent extends Relation implements RelationT
         subtrees: [],
       };
 
-      if (asClass === EntityEnums.Class.Concept) {
-        connection.subtrees = await Superclass.getSuperclassForwardConnections(
-          conn,
-          subparentId,
-          asClass,
-          maxNestLvl,
-          nestLvl + 1
-        );
-      }
+      connection.subtrees = await Superclass.getSuperclassForwardConnections(
+        conn,
+        subparentId,
+        EntityEnums.Class.Concept,
+        maxNestLvl,
+        nestLvl + 1
+      );
 
       out.push(connection);
     }

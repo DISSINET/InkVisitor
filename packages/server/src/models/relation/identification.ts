@@ -18,29 +18,11 @@ export default class Identification extends Relation implements RelationTypes.II
   }
 
   /**
-  * areEntitiesValid checks if entities have acceptable classes
-  * @returns 
-  */
-  areEntitiesValid(): Error | null {
-    for (const entityId of this.entityIds) {
-      if (!this.hasEntityCorrectClass(entityId, EntityEnums.PLOGESTRB)) {
-        return new ModelNotValidError(`Entity '${entityId}' does not have valid class`);
-      }
-    }
-
-    return null;
-  }
-
-  /**
    * Test validity of the model
    * @returns 
    */
   isValid(): boolean {
     if (!super.isValid()) {
-      return false;
-    }
-
-    if (this.entityIds.length !== 2) {
       return false;
     }
 
