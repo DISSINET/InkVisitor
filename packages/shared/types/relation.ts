@@ -276,8 +276,18 @@ export namespace Relation {
   RelationRules[RelationEnums.Type.Identification] = {
     label: "Identification",
     inverseLabel: false,
-    allowedEntitiesPattern: [], // any combination is allowed
-    allowedSameEntityClassesOnly: false,
+    allowedEntitiesPattern: [
+      [EntityEnums.Class.Person, EntityEnums.Class.Person],
+      [EntityEnums.Class.Location, EntityEnums.Class.Location],
+      [EntityEnums.Class.Object, EntityEnums.Class.Object],
+      [EntityEnums.Class.Group, EntityEnums.Class.Group],
+      [EntityEnums.Class.Event, EntityEnums.Class.Event],
+      [EntityEnums.Class.Statement, EntityEnums.Class.Statement],
+      [EntityEnums.Class.Territory, EntityEnums.Class.Territory],
+      [EntityEnums.Class.Resource, EntityEnums.Class.Resource],
+      [EntityEnums.Class.Being, EntityEnums.Class.Being],
+    ],
+    allowedSameEntityClassesOnly: true,
     asymmetrical: false,
     multiple: true,
     cloudType: false,
