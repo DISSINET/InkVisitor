@@ -8,7 +8,6 @@ import {
   Relation,
 } from "@shared/types";
 import { DropTargetMonitor, XYCoord } from "react-dnd";
-import { restrictedIDEClasses } from "Theme/constants";
 import { DragItem, EntityDragItem } from "types";
 
 // TODO: not used, references not in statement data interface
@@ -172,13 +171,7 @@ export const getEntityRelationRules = (
 ) => {
   const typesToFilter = relationTypes ? relationTypes : RelationEnums.AllTypes;
   return typesToFilter.filter((rule) => {
-    if (
-      !Relation.RelationRules[rule]?.allowedEntitiesPattern.length &&
-      !(
-        rule === RelationEnums.Type.Identification &&
-        restrictedIDEClasses.includes(entityClass)
-      )
-    ) {
+    if (!Relation.RelationRules[rule]?.allowedEntitiesPattern.length) {
       return rule;
     } else if (
       Relation.RelationRules[rule]?.allowedEntitiesPattern.some(
