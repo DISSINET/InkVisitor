@@ -5,7 +5,7 @@ import { clean, newMockRequest } from "@modules/common.test";
 import { prepareEntity } from "@models/entity/entity.test";
 import Entity from "@models/entity/entity";
 import { IRequest } from "src/custom_typings/request";
-import { ModelNotValidError } from "@shared/types/errors";
+import { InternalServerError, ModelNotValidError } from "@shared/types/errors";
 import { EntityEnums, RelationEnums } from "@shared/enums";
 import { getRelationClass } from "@models/factory";
 import Actant1Semantics from "./actant1-semantics";
@@ -130,5 +130,48 @@ describe("test Relation.beforeSave", function () {
     await relation5.save(db.connection);
     expect(relation5.order).toEqual(2);
 
+  });
+});
+
+describe("test Relation.areEntitiesValid", function () {
+  test("missing preloaded entities", () => {
+    const relation = new Relation({ entityIds: ["1", "2"] });
+    expect(relation.areEntitiesValid()).toBeInstanceOf(InternalServerError);
+  });
+
+  test("test synonym (success)", () => {
+    const relation = new Relation({ entityIds: ["1", "2"], type: RelationEnums.Type.Synonym });
+    relation.entities = [];
+    relation.entities.push(new Entity({ id: "1", class: EntityEnums.Class.Concept }));
+    relation.entities.push(new Entity({ id: "2", class: EntityEnums.Class.Concept }));
+
+    expect(relation.areEntitiesValid()).toBeNull();
+  });
+
+  test("test synonym (fail)", () => {
+    const relation = new Relation({ entityIds: ["1", "2"], type: RelationEnums.Type.Synonym });
+    relation.entities = [];
+    relation.entities.push(new Entity({ id: "1", class: EntityEnums.Class.Concept }));
+    relation.entities.push(new Entity({ id: "2", class: EntityEnums.Class.Action }));
+
+    expect(relation.areEntitiesValid()).toBeInstanceOf(ModelNotValidError);
+  });
+
+  test("test classification (success)", () => {
+    const relation = new Relation({ entityIds: ["1", "2"], type: RelationEnums.Type.Classification });
+    relation.entities = [];
+    relation.entities.push(new Entity({ id: "1", class: EntityEnums.Class.Event }));
+    relation.entities.push(new Entity({ id: "2", class: EntityEnums.Class.Concept }));
+
+    expect(relation.areEntitiesValid()).toBeNull();
+  });
+
+  test("test classification (fail)", () => {
+    const relation = new Relation({ entityIds: ["1", "2"], type: RelationEnums.Type.Classification });
+    relation.entities = [];
+    relation.entities.push(new Entity({ id: "1", class: EntityEnums.Class.Concept }));
+    relation.entities.push(new Entity({ id: "2", class: EntityEnums.Class.Action }));
+
+    expect(relation.areEntitiesValid()).toBeInstanceOf(ModelNotValidError);
   });
 });
