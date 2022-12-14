@@ -90,12 +90,12 @@ const PersonWithIcon: React.FC<IPersonWithIcon> = ({ label, url }) => {
     </StyledModalLink>
   );
 };
-interface AboutModal {
+interface IAboutModal {
   isOpen: boolean;
   onCloseFn: Function;
 }
 
-export const AboutModal: React.FC<AboutModal> = ({ isOpen, onCloseFn }) => {
+export const AboutModal: React.FC<IAboutModal> = ({ isOpen, onCloseFn }) => {
   return (
     <Modal showModal={isOpen} onClose={() => onCloseFn()} width={"fat"}>
       <ModalHeader title={"About"} />
@@ -120,13 +120,16 @@ export const AboutModal: React.FC<AboutModal> = ({ isOpen, onCloseFn }) => {
                   The data are entered in the form of <b>entities</b> and <b>statements</b>. Statements relate entities of various types into <b>semantic quadruples</b> (subject, verb, object 1, object 2) following the syntactic structure of texts.
                 </StyledModalTextListItem>
                 <StyledModalTextListItem>
-                  InkVisitor serves as a data-entry front-end for the data collection. This data are then stored on RethinkDB database research databases. These databases allow for complex queries and render the data available for various kinds of computational analyses.
+                  InkVisitor serves as a data-entry front-end for JSON-format <b>research databases</b> (<LinkWithIcon label="RethinkDB" url="https://rethinkdb.com" />). These databases allow for complex queries and render the data available for various kinds of computational analyses.
                 </StyledModalTextListItem>
                 <StyledModalTextListItem>
                   InkVisitor has been developed by the <b>ERC-funded Dissident Networks Project</b> (<LinkWithIcon url="https://dissinet.cz" label="DISSINET" />).
                 </StyledModalTextListItem>
                 <StyledModalTextListItem>
                   InkVisitor is distributed under an <b>open license</b> (the <LinkWithIcon url="https://opensource.org/licenses/BSD-3-Clause" label="BSD 3-Clause License" />).
+                </StyledModalTextListItem>
+                <StyledModalTextListItem>
+                  Please post feature requests and report bugs on our  <LinkWithIcon url="https://github.com/DISSINET/InkVisitor/issues" label="GitHub" />.
                 </StyledModalTextListItem>
 
               </StyledModalTextList>
@@ -194,15 +197,15 @@ export const AboutModal: React.FC<AboutModal> = ({ isOpen, onCloseFn }) => {
           <StyledModalAcknowledgement>
             <AcknowledgementLogo
               src={LogoERC.default}
-              url=""
+              url="https://erc.europa.eu/homepage"
             />
             <AcknowledgementLogo
               src={LogoGACR.default}
-              url=""
+              url="https://gacr.cz/en/"
             />
             <AcknowledgementLogo
               src={LogoMUNI.default}
-              url=""
+              url="https://www.phil.muni.cz/en"
             />
           </StyledModalAcknowledgement>
         </StyledModalContentWrapper>
