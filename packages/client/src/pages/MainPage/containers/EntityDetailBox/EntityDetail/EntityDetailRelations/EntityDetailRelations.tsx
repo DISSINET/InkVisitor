@@ -52,7 +52,10 @@ export const EntityDetailRelations: React.FC<EntityDetailRelations> = ({
   >([]);
 
   useEffect(() => {
-    const filteredTypes = getEntityRelationRules(entity.class);
+    const filteredTypes = getEntityRelationRules(
+      entity.class,
+      RelationEnums.EntityDetailTypes
+    );
     setFilteredRelationTypes(filteredTypes);
   }, [entity]);
 

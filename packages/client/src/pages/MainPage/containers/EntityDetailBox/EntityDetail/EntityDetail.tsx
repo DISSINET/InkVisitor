@@ -49,6 +49,7 @@ import { EntityDetailInverseRelations } from "./EntityDetailRelations/EntityDeta
 import { EntityDetailMetaPropsTable } from "./EntityDetailUsedInTable/EntityDetailMetaPropsTable/EntityDetailMetaPropsTable";
 import { EntityDetailStatementPropsTable } from "./EntityDetailUsedInTable/EntityDetailStatementPropsTable/EntityDetailStatementPropsTable";
 import { EntityDetailStatementsTable } from "./EntityDetailUsedInTable/EntityDetailStatementsTable/EntityDetailStatementsTable";
+import { EntityDetailValency } from "./EntityDetailValency/EntityDetailValency";
 
 const allowedEntityChangeClasses = [
   EntityEnums.Class.Value,
@@ -525,6 +526,20 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
                 />
               </StyledDetailSectionContent>
             </StyledDetailSection>
+
+            {/* Valency (A) */}
+            {entity.class === EntityEnums.Class.Action && (
+              <StyledDetailSection>
+                <StyledDetailSectionHeader>Valency</StyledDetailSectionHeader>
+                <StyledDetailSectionContent>
+                  <EntityDetailValency
+                    entity={entity}
+                    userCanEdit={userCanEdit}
+                    updateEntityMutation={updateEntityMutation}
+                  />
+                </StyledDetailSectionContent>
+              </StyledDetailSection>
+            )}
 
             {/* Relations */}
             <StyledDetailSection>
