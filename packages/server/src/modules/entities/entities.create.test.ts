@@ -8,7 +8,7 @@ import request from "supertest";
 import { apiPath } from "@common/constants";
 import app from "../../Server";
 import { supertestConfig } from "..";
-import Statement from "@models/statement/statement";
+import Statement, { StatementData, StatementTerritory } from "@models/statement/statement";
 import {
   deleteEntities,
   findEntityById,
@@ -23,7 +23,7 @@ describe("Entities create", function () {
   describe("empty data", () => {
     it("should return a ModelNotValid error wrapped in IResponseGeneric", (done) => {
       return request(app)
-        .post(`${apiPath}/entities/create`)
+        .post(`${apiPath}/entities`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(
@@ -35,7 +35,7 @@ describe("Entities create", function () {
   describe("faulty data ", () => {
     it("should return a ModelNotValid error wrapped in IResponseGeneric", (done) => {
       return request(app)
-        .post(`${apiPath}/entities/create`)
+        .post(`${apiPath}/entities`)
         .send({ test: "" })
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
@@ -53,15 +53,13 @@ describe("Entities create", function () {
       const statementRandomId = Math.random().toString();
       const entityData = new Statement({
         id: statementRandomId,
-        data: {
-          territory: {
-            id: "not relevant",
-          },
-        },
+        data: new StatementData({
+          territory: new StatementTerritory({ territoryId: "not relevant" }),
+        }),
       });
 
       await request(app)
-        .post(`${apiPath}/entities/create`)
+        .post(`${apiPath}/entities`)
         .send(entityData)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect(200)
@@ -83,7 +81,7 @@ describe("Entities create", function () {
       });
 
       await request(app)
-        .post(`${apiPath}/entities/create`)
+        .post(`${apiPath}/entities`)
         .send(territoryData)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect(200)
@@ -107,7 +105,7 @@ describe("Entities create", function () {
       const ent = new Territory({ label: "22323" });
 
       await request(app)
-        .post(`${apiPath}/entities/create`)
+        .post(`${apiPath}/entities`)
         .send(ent)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect(200)

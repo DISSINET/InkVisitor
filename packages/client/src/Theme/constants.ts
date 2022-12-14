@@ -1,11 +1,16 @@
-import { EntityClass } from "@shared/enums";
+import { EntityEnums } from "@shared/enums";
 import theme from "./theme";
 
 export const DropdownAny = "any";
 export const wildCardChar = "*";
 
 export const rootTerritoryId = "T0";
-export const excludedSuggesterEntities = [EntityClass.Value];
+export const excludedSuggesterEntities = [EntityEnums.Class.Value];
+export const restrictedIDEClasses = [
+  EntityEnums.Class.Action,
+  EntityEnums.Class.Concept,
+];
+export const scrollOverscanCount = 10;
 
 // layout
 export const heightHeader = 70;
@@ -13,15 +18,22 @@ export const heightFooter = 30;
 
 export const minLayoutWidth = 1440;
 export const layoutWidthBreakpoint = 1400;
-// INIT PANEL WIDTHS
-export const initPanelWidths = [200, 570, 800, 350];
 // MORE PANEL WIDTHS
 export const collapsedPanelWidth = 31;
 export const secondPanelMinWidth = 430;
-export const thirdPanelMinWidth = 470;
+export const thirdPanelMinWidth = 300;
 // % PERCENT PANEL WIDTHS
 export const percentPanelWidths = [10, 31, 41, 18];
 export const separatorXPercentPosition = 42;
+// BOXES
+export const hiddenBoxHeight = 34;
+export const fourthPanelBoxesHeightThirds = {
+  search: 40,
+  bookmarks: 27,
+  templates: 33,
+};
+
+export const maxTabCount = 10;
 
 // animations
 export const springConfig: { [key: string]: {} } = {

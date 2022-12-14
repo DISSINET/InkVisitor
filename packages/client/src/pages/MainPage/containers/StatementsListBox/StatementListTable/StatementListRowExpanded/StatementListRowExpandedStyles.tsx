@@ -10,10 +10,6 @@ export const StyledSubRow = styled.div`
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   color: ${({ theme }) => theme.color["black"]};
 `;
-export const StyledActantGroup = styled.div`
-  display: grid;
-  overflow: hidden;
-`;
 
 const getIndentation = (level: 1 | 2 | 3) => {
   switch (level) {
@@ -25,16 +21,26 @@ const getIndentation = (level: 1 | 2 | 3) => {
       return theme.space[16];
   }
 };
-interface StyledPropRow {
+interface StyledPropGridRow {
   level: 1 | 2 | 3;
   disableBottomMargin?: boolean;
 }
-export const StyledPropRow = styled.div<StyledPropRow>`
+export const StyledPropGridRow = styled.div<StyledPropGridRow>`
   margin-left: ${({ level }) => getIndentation(level)};
   margin-bottom: ${({ theme, disableBottomMargin }) =>
     disableBottomMargin ? 0 : theme.space[1]};
+  display: grid;
+  grid-template-columns: auto auto;
+  overflow: hidden;
+`;
+interface StyledPropRow {
+  disableBottomMargin?: boolean;
+}
+export const StyledPropRow = styled.div<StyledPropRow>`
+  margin-left: ${({ theme }) => theme.space[5]};
+  margin-bottom: ${({ theme, disableBottomMargin }) =>
+    disableBottomMargin ? 0 : theme.space[1]};
   display: inline-flex;
-  /* dislay: grid; */
   overflow: hidden;
 `;
 
@@ -56,6 +62,7 @@ export const StyledActantWithPropsWrap = styled.div`
   overflow: hidden;
   margin-bottom: ${({ theme }) => theme.space[1]};
 `;
+
 export const StyledExpandedRowTd = styled.td``;
 export const StyledExpandedRowTr = styled.tr`
   width: 100%;
@@ -81,9 +88,23 @@ export const StyledReferenceRow = styled.div`
   display: grid;
   grid-template-columns: auto auto;
 `;
-export const StyledReferenceColumn = styled.div`
+interface StyledReferenceColumn {
+  marginRight?: boolean;
+}
+export const StyledReferenceColumn = styled.div<StyledReferenceColumn>`
   display: grid;
+  margin-right: ${({ theme, marginRight }) =>
+    marginRight ? theme.space[1] : ""};
 `;
-export const StyledPropGroupCell = styled.div`
+interface StyledTagWrap {
+  marginRight?: boolean;
+}
+export const StyledTagWrap = styled.div<StyledTagWrap>`
+  display: inline-flex;
+  overflow: hidden;
+  margin-right: ${({ theme, marginRight }) =>
+    marginRight ? theme.space[1] : ""};
+`;
+export const StyledGrid = styled.div`
   display: grid;
 `;

@@ -9,21 +9,20 @@ export class CustomError extends Error {
   public static code: number = 400; // html code
   public loggable: boolean = false; // errors could be logged into console as warn messages
   public log: string = ""; // same as first constructor argument - wont be thrown in realtime, but it will be printed as warning
-  public title: string = "";
+  public title: string = ""; // represents the error class in readable form
 
   // the following is commented, it should be inherited from base Error
   //public name: string = ""; // Stands for class name, replaces default 'Error' string from parent constructor
   //public message: string = ""; // this is what will be printed in output - public text, some error classes have overriden message attr
 
-
-  constructor(message?: string) {
+  constructor(message?: string, loggableMessage?: string) {
     super(message);
-    this.log = message || "";
     this.name = this.constructor.name; // so the value would be taken from the constructor - not the default Error
     this.title = (this.constructor as any).title;
     if (!message) {
       this.message = (this.constructor as any).message;
     }
+    this.log = loggableMessage || message || "";
   }
 
   statusCode(): number {
@@ -62,7 +61,6 @@ class ModelNotValidError extends CustomError {
   public static code = 400;
   public static title = "Model not valid";
   public static message = "Invalid request data";
-  loggable = true;
 }
 
 /**
@@ -112,12 +110,26 @@ class UserNotActiveError extends CustomError {
 }
 
 /**
- * EntityDoesNotExits will be thrown when attempting to remove/update the entity entry, which does not exist
+ * EntityDoesNotExist will be thrown when attempting to remove/update the entity entry, which does not exist
  */
-class EntityDoesNotExits extends CustomError {
+class EntityDoesNotExist extends CustomError {
   public static code = 400;
   public static title = "Missing entity";
   public static message = "Entity $1 does not exist";
+
+  constructor(m: string, entityId: string) {
+    super(m);
+    this.message = this.message.replace("$1", entityId);
+  }
+}
+
+/**
+ * AuditsDoNotExist will be thrown when attempting to access audits entries, which do not exist
+ */
+class AuditsDoNotExist extends CustomError {
+  public static code = 400;
+  public static title = "Missing audits";
+  public static message = "Audits for entity $1 do not exist";
 
   constructor(m: string, entityId: string) {
     super(m);
@@ -177,7 +189,7 @@ class TerritoriesBrokenError extends CustomError {
 }
 
 /**
- * TerrytoryInvalidMove will be thrown during tree/moveTerritory request, while violating some constraint
+ * TerrytoryInvalidMove will be thrown during tree/id/position request, while violating some constraint
  */
 class TerrytoryInvalidMove extends CustomError {
   public static code = 500;
@@ -224,6 +236,36 @@ class InvalidDeleteError extends CustomError {
 }
 
 /**
+ * EmailError will be thrown in case of error occured in mail module
+ */
+class EmailError extends CustomError {
+  public static code = 500;
+  public static title = "Email cannot be sent";
+  public static message = "Unknow error while sending the email";
+  loggable = true;
+
+  constructor(m: string, internalMessage: string) {
+    super(m);
+    this.log = internalMessage;
+  }
+}
+
+/**
+ * RelationDoesNotExist will be thrown when attempting to remove/update the relation entry, which does not exist
+ */
+class RelationDoesNotExist extends CustomError {
+  public static code = 400;
+  public static title = "Cannot get Relation entry";
+  public static message = "Relation $1 does not exist";
+
+  static forId(id: string): RelationDoesNotExist {
+    return new RelationDoesNotExist(
+      RelationDoesNotExist.message.replace("$1", id)
+    );
+  }
+}
+
+/**
  * UnknownError works as a backup
  */
 class UnknownError extends CustomError {
@@ -243,13 +285,16 @@ const allErrors: Record<string, any> = {
   BadParams,
   UserDoesNotExits,
   UserNotActiveError,
-  EntityDoesNotExits,
+  EntityDoesNotExist,
+  AuditsDoNotExist,
   StatementDoesNotExits,
   PermissionDoesNotExits,
   TerritoriesBrokenError,
   TerritoryDoesNotExits,
   TerrytoryInvalidMove,
   StatementInvalidMove,
+  EmailError,
+  RelationDoesNotExist,
 };
 
 export interface IErrorSignature {
@@ -274,11 +319,14 @@ export {
   BadParams,
   UserDoesNotExits,
   UserNotActiveError,
-  EntityDoesNotExits,
+  EntityDoesNotExist,
+  AuditsDoNotExist,
   StatementDoesNotExits,
   PermissionDoesNotExits,
   TerritoriesBrokenError,
   TerritoryDoesNotExits,
   TerrytoryInvalidMove,
   StatementInvalidMove,
+  EmailError,
+  RelationDoesNotExist,
 };

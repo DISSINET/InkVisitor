@@ -1,0 +1,319 @@
+{
+  "$ref": "#/definitions/IPerson",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "EntityEnums.Certainty": {
+      "enum": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6"
+      ],
+      "type": "string"
+    },
+    "EntityEnums.Elvl": {
+      "enum": [
+        "1",
+        "2",
+        "3"
+      ],
+      "type": "string"
+    },
+    "EntityEnums.Language": {
+      "enum": [
+        "",
+        "lat",
+        "eng",
+        "enm",
+        "oci",
+        "ces",
+        "ita",
+        "fra",
+        "deu",
+        "spa",
+        "hun"
+      ],
+      "type": "string"
+    },
+    "EntityEnums.Logic": {
+      "enum": [
+        "1",
+        "2"
+      ],
+      "type": "string"
+    },
+    "EntityEnums.LogicalType": {
+      "enum": [
+        "1",
+        "2",
+        "3",
+        "4"
+      ],
+      "type": "string"
+    },
+    "EntityEnums.Mood": {
+      "enum": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12",
+        "13"
+      ],
+      "type": "string"
+    },
+    "EntityEnums.MoodVariant": {
+      "enum": [
+        "1",
+        "2",
+        "3"
+      ],
+      "type": "string"
+    },
+    "EntityEnums.Operator": {
+      "enum": [
+        "x",
+        "a",
+        "o",
+        ">",
+        ">=",
+        "=",
+        "<=",
+        "<"
+      ],
+      "type": "string"
+    },
+    "EntityEnums.Partitivity": {
+      "enum": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5"
+      ],
+      "type": "string"
+    },
+    "EntityEnums.Status": {
+      "enum": [
+        "0",
+        "1",
+        "2",
+        "3"
+      ],
+      "type": "string"
+    },
+    "EntityEnums.Virtuality": {
+      "enum": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6"
+      ],
+      "type": "string"
+    },
+    "IPerson": {
+      "additionalProperties": false,
+      "properties": {
+        "class": {
+          "const": "P",
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/definitions/IPersonData"
+        },
+        "detail": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "isTemplate": {
+          "type": "boolean"
+        },
+        "label": {
+          "type": "string"
+        },
+        "language": {
+          "$ref": "#/definitions/EntityEnums.Language"
+        },
+        "legacyId": {
+          "type": "string"
+        },
+        "notes": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "props": {
+          "items": {
+            "$ref": "#/definitions/IProp"
+          },
+          "type": "array"
+        },
+        "references": {
+          "items": {
+            "$ref": "#/definitions/IReference"
+          },
+          "type": "array"
+        },
+        "status": {
+          "$ref": "#/definitions/EntityEnums.Status"
+        },
+        "templateData": {
+          "type": "object"
+        },
+        "usedTemplate": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "class",
+        "data",
+        "detail",
+        "id",
+        "label",
+        "language",
+        "notes",
+        "props",
+        "references",
+        "status"
+      ],
+      "type": "object"
+    },
+    "IPersonData": {
+      "additionalProperties": false,
+      "properties": {
+        "logicalType": {
+          "$ref": "#/definitions/EntityEnums.LogicalType"
+        }
+      },
+      "required": [
+        "logicalType"
+      ],
+      "type": "object"
+    },
+    "IProp": {
+      "additionalProperties": false,
+      "properties": {
+        "bundleEnd": {
+          "type": "boolean"
+        },
+        "bundleOperator": {
+          "$ref": "#/definitions/EntityEnums.Operator"
+        },
+        "bundleStart": {
+          "type": "boolean"
+        },
+        "certainty": {
+          "$ref": "#/definitions/EntityEnums.Certainty"
+        },
+        "children": {
+          "items": {
+            "$ref": "#/definitions/IProp"
+          },
+          "type": "array"
+        },
+        "elvl": {
+          "$ref": "#/definitions/EntityEnums.Elvl"
+        },
+        "id": {
+          "type": "string"
+        },
+        "logic": {
+          "$ref": "#/definitions/EntityEnums.Logic"
+        },
+        "mood": {
+          "items": {
+            "$ref": "#/definitions/EntityEnums.Mood"
+          },
+          "type": "array"
+        },
+        "moodvariant": {
+          "$ref": "#/definitions/EntityEnums.MoodVariant"
+        },
+        "type": {
+          "$ref": "#/definitions/IPropSpec"
+        },
+        "value": {
+          "$ref": "#/definitions/IPropSpec"
+        }
+      },
+      "required": [
+        "id",
+        "elvl",
+        "certainty",
+        "logic",
+        "mood",
+        "moodvariant",
+        "bundleOperator",
+        "bundleStart",
+        "bundleEnd",
+        "children",
+        "type",
+        "value"
+      ],
+      "type": "object"
+    },
+    "IPropSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "elvl": {
+          "$ref": "#/definitions/EntityEnums.Elvl"
+        },
+        "entityId": {
+          "type": "string"
+        },
+        "logic": {
+          "$ref": "#/definitions/EntityEnums.Logic"
+        },
+        "partitivity": {
+          "$ref": "#/definitions/EntityEnums.Partitivity"
+        },
+        "virtuality": {
+          "$ref": "#/definitions/EntityEnums.Virtuality"
+        }
+      },
+      "required": [
+        "entityId",
+        "elvl",
+        "logic",
+        "virtuality",
+        "partitivity"
+      ],
+      "type": "object"
+    },
+    "IReference": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "resource": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "resource",
+        "value"
+      ],
+      "type": "object"
+    }
+  }
+}

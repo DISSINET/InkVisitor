@@ -1,0 +1,33 @@
+{
+  "$ref": "#/definitions/Relation.ISynonym",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "Relation.ISynonym": {
+      "additionalProperties": false,
+      "properties": {
+        "entityIds": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "id": {
+          "type": "string"
+        },
+        "order": {
+          "type": "number"
+        },
+        "type": {
+          "const": "SYN",
+          "type": "string"
+        }
+      },
+      "required": [
+        "entityIds",
+        "id",
+        "type"
+      ],
+      "type": "object"
+    }
+  }
+}

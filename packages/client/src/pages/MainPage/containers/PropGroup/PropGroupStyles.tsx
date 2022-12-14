@@ -56,7 +56,6 @@ export const StyledPropLineColumn = styled.div<StyledPropLineColumn>`
   margin-left: ${({ level = 0 }) => getIndentation(level)};
   padding-right: 3px;
   overflow: ${({ isTag }) => (isTag ? "hidden" : "visible")};
-  /* border: 1px dashed hotpink; */
 `;
 
 interface StyledPropButtonGroup {
@@ -69,11 +68,6 @@ export const StyledPropButtonGroup = styled.div<StyledPropButtonGroup>`
   border-radius: ${({ round }) => (round ? "8px" : "0")};
   border: ${({ border }) => (border ? "1px" : 0)} solid
     ${({ theme }) => theme.color["gray"][600]};
-
-  button:disabled,
-  button[disabled] {
-    //background-color: ${({ theme }) => theme.color["gray"][1000]};
-  }
 `;
 export const StyledFaGripVertical = styled(FaGripVertical)`
   margin-right: ${({ theme }) => theme.space[2]};

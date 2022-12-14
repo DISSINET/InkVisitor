@@ -7,14 +7,14 @@ import {
 import api from "api";
 import React, { useCallback } from "react";
 import { useQuery } from "react-query";
-import { AttributeName, DraggedPropRowCategory, ItemTypes } from "types";
+import { DraggedPropRowCategory, ItemTypes, PropAttributeFilter } from "types";
 import { FirstLevelPropGroup } from "./FirstLevelPropGroup/FirstLevelPropGroup";
 import { PropGroupRow } from "./PropGroupRow/PropGroupRow";
 import { StyledGrid, StyledListHeaderColumn } from "./PropGroupStyles";
 import { SecondLevelPropGroup } from "./SecondLevelPropGroup/SecondLevelPropGroup";
 import { ThirdLevelPropGroup } from "./ThirdLevelPropGroup/ThirdLevelPropGroup";
 
-interface IPropGroup {
+interface PropGroup {
   originId: string;
   entities: { [key: string]: IEntity };
   props: IProp[];
@@ -29,10 +29,12 @@ interface IPropGroup {
   userCanEdit: boolean;
   openDetailOnCreate: boolean;
   category: DraggedPropRowCategory;
-  disabledAttributes?: AttributeName[];
+  disabledAttributes?: PropAttributeFilter;
+  isInsideTemplate: boolean;
+  territoryParentId?: string;
 }
 
-export const PropGroup: React.FC<IPropGroup> = ({
+export const PropGroup: React.FC<PropGroup> = ({
   originId,
   entities,
   props,
@@ -47,7 +49,9 @@ export const PropGroup: React.FC<IPropGroup> = ({
   userCanEdit,
   openDetailOnCreate = false,
   category,
-  disabledAttributes = [],
+  disabledAttributes = {} as PropAttributeFilter,
+  isInsideTemplate,
+  territoryParentId,
 }) => {
   // territory query
   const {
@@ -97,6 +101,8 @@ export const PropGroup: React.FC<IPropGroup> = ({
             movePropToIndex={movePropToIndex}
             category={category}
             disabledAttributes={disabledAttributes}
+            isInsideTemplate={isInsideTemplate}
+            territoryParentId={territoryParentId}
           />
           {/* 2nd level */}
           <SecondLevelPropGroup
@@ -138,6 +144,8 @@ export const PropGroup: React.FC<IPropGroup> = ({
             movePropToIndex={movePropToIndex}
             category={category}
             disabledAttributes={disabledAttributes}
+            isInsideTemplate={isInsideTemplate}
+            territoryParentId={territoryParentId}
           />
           {/* 3rd level */}
           <ThirdLevelPropGroup
@@ -179,6 +187,8 @@ export const PropGroup: React.FC<IPropGroup> = ({
             movePropToIndex={movePropToIndex}
             category={category}
             disabledAttributes={disabledAttributes}
+            isInsideTemplate={isInsideTemplate}
+            territoryParentId={territoryParentId}
           />
         </React.Fragment>
       );
@@ -186,9 +196,9 @@ export const PropGroup: React.FC<IPropGroup> = ({
     [entities, boxEntity]
   );
 
-  return props.length > 0 ? (
-    <tr>
-      <td colSpan={4}>
+  return (
+    <>
+      {props.length > 0 && (
         <React.Fragment key={originId}>
           <StyledGrid>
             {/* Header */}
@@ -202,9 +212,7 @@ export const PropGroup: React.FC<IPropGroup> = ({
             renderFirsLevelPropRow={renderFirsLevelPropRow}
           />
         </React.Fragment>
-      </td>
-    </tr>
-  ) : (
-    <tr />
+      )}
+    </>
   );
 };

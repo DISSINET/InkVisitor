@@ -1,40 +1,42 @@
 {
-    "$id": "ILabel",
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "additionalProperties": false,
-    "defaultProperties": [],
-    "definitions": {
-        "Language": {
-            "enum": [
-                "",
-                "ces",
-                "deu",
-                "eng",
-                "enm",
-                "fra",
-                "ita",
-                "lat",
-                "oci"
-            ],
-            "type": "string"
-        }
+  "$ref": "#/definitions/ILabel",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "EntityEnums.Language": {
+      "enum": [
+        "",
+        "lat",
+        "eng",
+        "enm",
+        "oci",
+        "ces",
+        "ita",
+        "fra",
+        "deu",
+        "spa",
+        "hun"
+      ],
+      "type": "string"
     },
-    "properties": {
+    "ILabel": {
+      "additionalProperties": false,
+      "properties": {
         "id": {
-            "type": "string"
+          "type": "string"
         },
         "lang": {
-            "$ref": "ILabel#/definitions/Language"
+          "$ref": "#/definitions/EntityEnums.Language"
         },
         "value": {
-            "type": "string"
+          "type": "string"
         }
-    },
-    "required": [
+      },
+      "required": [
         "id",
-        "lang",
-        "value"
-    ],
-    "type": "object"
+        "value",
+        "lang"
+      ],
+      "type": "object"
+    }
+  }
 }
-

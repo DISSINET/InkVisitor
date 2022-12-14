@@ -1,5 +1,7 @@
 import { Connection, r as rethink } from "rethinkdb-ts";
-import { Request, Response } from "express";
+import { Response } from "express";
+import { Mutex, Awaiter } from "./mutex"
+import { IRequest } from "src/custom_typings/request";
 
 export const rethinkConfig = {
   db: process.env.DB_NAME,
@@ -9,8 +11,15 @@ export const rethinkConfig = {
 };
 
 export class Db {
-  // force type
+  // context for locks
+  static mutex = new Mutex();
+
+  // assigned lock for db connection
+  lockInstance?: Awaiter;
+
+  // wrapped db sonnection
   connection: Connection = {} as Connection;
+
 
   constructor() {
     if (!rethinkConfig.db || !rethinkConfig.host || !rethinkConfig.port) {
@@ -18,6 +27,9 @@ export class Db {
     }
   }
 
+  /**
+   * Creates the db connection
+   */
   async initDb(): Promise<void> {
     this.connection = await rethink.connect({
       ...rethinkConfig,
@@ -25,7 +37,22 @@ export class Db {
     });
   }
 
+  /**
+   * Creates awaiter instance and uses it to lock the mutex - if the queue allows it to
+   */
+  async lock(): Promise<void> {
+    this.lockInstance = new Awaiter();
+    await Db.mutex.lock(this.lockInstance)
+  }
+
+  /**
+   * Clears the mutex lock and closes the db connection
+   */
   async close() {
+    if (this.lockInstance) {
+      Db.mutex.unlock(this.lockInstance);
+    }
+
     if (this.connection) {
       await this.connection.close({ noreplyWait: true });
     }
@@ -46,7 +73,7 @@ export function handleErrorMiddleware(response: Response) {
 /*
  * Open RethinkDB connection and store in `request.rethink`.
  */
-export const createConnection = async (request: Request): Promise<void> => {
+export const createConnection = async (request: IRequest): Promise<void> => {
   request.db = new Db();
   await request.db.initDb();
 };
@@ -54,7 +81,7 @@ export const createConnection = async (request: Request): Promise<void> => {
 /*
  * Close the RethinkDB connection stored in `request.rethink`.
  */
-export const closeConnection = async (request: Request): Promise<void> => {
+export const closeConnection = async (request: IRequest): Promise<void> => {
   if (request.db) {
     await request.db.close();
   }

@@ -14,10 +14,20 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "paths": {
-      "@shared/*": ["./../shared/*"]
+      "@shared/*": [
+        "./../shared/*"
+      ]
     },
-    "types": ["node"],
-    "typeRoots": ["node_modules/@types"]
+    "types": [
+      "node"
+    ],
+    "typeRoots": [
+      "node_modules/@types"
+    ]
   },
-  "include": ["./scripts/**/*", "./datasets/**/*.ts"]
+  "include": [
+    "./types/**/*",
+    "./scripts/**/*",
+    "./datasets/**/*.ts"
+  ]
 }

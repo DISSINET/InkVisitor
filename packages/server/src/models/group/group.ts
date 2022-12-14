@@ -1,16 +1,12 @@
 import Entity from "@models/entity/entity";
 import { fillFlatObject, IModel, UnknownObject } from "@models/common";
-import { EntityClass, EntityLogicalType } from "@shared/enums";
-import { IGroup } from "@shared/types";
+import { EntityEnums } from "@shared/enums";
+import { IGroup, IGroupData } from "@shared/types";
 
-class GroupData implements IModel {
-  logicalType: EntityLogicalType = EntityLogicalType.Definite;
+class GroupData implements IGroupData, IModel {
+  logicalType: EntityEnums.LogicalType = EntityEnums.LogicalType.Definite;
 
-  constructor(data: UnknownObject) {
-    if (!data) {
-      return;
-    }
-
+  constructor(data: Partial<IGroupData>) {
     fillFlatObject(this, data);
   }
 
@@ -20,25 +16,20 @@ class GroupData implements IModel {
 }
 
 class Group extends Entity implements IGroup {
-  class: EntityClass.Group = EntityClass.Group; // just default
+  class: EntityEnums.Class.Group = EntityEnums.Class.Group; // just default
   data: GroupData;
 
-  constructor(data: UnknownObject) {
+  constructor(data: Partial<IGroup>) {
     super(data);
-
-    if (!data) {
-      data = {};
-    }
-
-    this.data = new GroupData(data.data as UnknownObject);
+    this.data = new GroupData(data.data || {});
   }
 
   isValid(): boolean {
-    if (this.class !== EntityClass.Group) {
+    if (this.class !== EntityEnums.Class.Group) {
       return false;
     }
 
-    return this.data.isValid();
+    return super.isValid() && this.data.isValid();
   }
 }
 

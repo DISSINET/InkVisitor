@@ -1,27 +1,23 @@
-import { Request } from "express";
-import { UserRoleMode } from "@shared/enums";
-import { IEntity, IResponseStatement, IResponseTerritory } from "@shared/types";
+import { UserEnums } from "@shared/enums";
+import { IEntity, IResponseStatement, IResponseTerritory, ITerritory } from "@shared/types";
 import Territory from "./territory";
 import Statement from "@models/statement/statement";
 import { ResponseStatement } from "@models/statement/response";
 import Entity from "@models/entity/entity";
+import { IRequest } from "src/custom_typings/request";
 
 export class ResponseTerritory extends Territory implements IResponseTerritory {
   statements: IResponseStatement[];
   entities: { [key: string]: IEntity };
-  right: UserRoleMode = UserRoleMode.Read;
+  right: UserEnums.RoleMode = UserEnums.RoleMode.Read;
 
-  constructor(entity: IEntity) {
-    super({});
-    for (const key of Object.keys(entity)) {
-      (this as any)[key] = (entity as any)[key];
-    }
-
+  constructor(entity: ITerritory) {
+    super(entity);
     this.statements = [];
     this.entities = {};
   }
 
-  async prepare(req: Request): Promise<void> {
+  async prepare(req: IRequest): Promise<void> {
     this.right = this.getUserRoleMode(req.getUserOrFail());
 
     const statements = await Statement.findStatementsInTerritory(

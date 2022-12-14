@@ -1,0 +1,36 @@
+{
+  "$ref": "#/definitions/Relation.IRelated",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "Relation.IRelated": {
+      "additionalProperties": false,
+      "properties": {
+        "entityIds": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 2,
+          "minItems": 2,
+          "type": "array"
+        },
+        "id": {
+          "type": "string"
+        },
+        "order": {
+          "type": "number"
+        },
+        "type": {
+          "const": "REL",
+          "type": "string"
+        }
+      },
+      "required": [
+        "entityIds",
+        "id",
+        "order",
+        "type"
+      ],
+      "type": "object"
+    }
+  }
+}

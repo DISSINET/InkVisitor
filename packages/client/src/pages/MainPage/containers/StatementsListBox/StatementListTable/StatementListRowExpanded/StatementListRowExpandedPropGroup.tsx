@@ -1,11 +1,10 @@
 import { IEntity, IProp } from "@shared/types";
-import { EmptyTag } from "pages/MainPage/containers";
+import { EmptyTag, EntityTag } from "components/advanced";
 import React from "react";
-import { EntityTag } from "../../../EntityTag/EntityTag";
 import {
-  StyledPropGroupCell,
+  StyledPropGridRow,
   StyledPropGroup,
-  StyledPropRow,
+  StyledTagWrap,
 } from "./StatementListRowExpandedStyles";
 
 interface StatementListRowExpandedPropGroup {
@@ -14,53 +13,48 @@ interface StatementListRowExpandedPropGroup {
   entities: { [key: string]: IEntity };
   renderChildrenPropRow?: (props: IProp[]) => React.ReactElement;
 }
-export const StatementListRowExpandedPropGroup: React.FC<
-  StatementListRowExpandedPropGroup
-> = ({ level, props, entities, renderChildrenPropRow }) => {
-  return (
-    <StyledPropGroup>
-      {props.map((prop, key) => {
-        const propTypeEntity: IEntity = entities[prop.type.id];
-        const propValueEntity: IEntity = entities[prop.value.id];
-        return (
-          <React.Fragment key={key}>
-            <StyledPropRow level={level}>
-              {propTypeEntity ? (
-                <>
-                  <EntityTag
-                    // fullWidth
-                    actant={propTypeEntity}
-                    tooltipPosition="bottom center"
-                  />
-                  <span>&nbsp;</span>
-                </>
-              ) : (
-                <>
-                  <EmptyTag label={"type"} />
-                  <span>&nbsp;</span>
-                </>
-              )}
-              {propValueEntity ? (
-                <>
-                  <EntityTag
-                    // fullWidth
-                    actant={propValueEntity}
-                    tooltipPosition="bottom center"
-                  />
-                </>
-              ) : (
-                <>
-                  <EmptyTag label={"value"} />
-                </>
-              )}
-            </StyledPropRow>
+export const StatementListRowExpandedPropGroup: React.FC<StatementListRowExpandedPropGroup> =
+  ({ level, props, entities, renderChildrenPropRow }) => {
+    return (
+      <StyledPropGroup>
+        {props.map((prop, key) => {
+          const propTypeEntity: IEntity = entities[prop.type.entityId];
+          const propValueEntity: IEntity = entities[prop.value.entityId];
+          return (
+            <React.Fragment key={key}>
+              <StyledPropGridRow level={level}>
+                {propTypeEntity ? (
+                  <StyledTagWrap marginRight>
+                    <EntityTag
+                      fullWidth
+                      entity={propTypeEntity}
+                      tooltipPosition="bottom"
+                    />
+                  </StyledTagWrap>
+                ) : (
+                  <StyledTagWrap marginRight>
+                    <EmptyTag label={"type"} />
+                  </StyledTagWrap>
+                )}
+                {propValueEntity ? (
+                  <StyledTagWrap>
+                    <EntityTag
+                      fullWidth
+                      entity={propValueEntity}
+                      tooltipPosition="bottom"
+                    />
+                  </StyledTagWrap>
+                ) : (
+                  <StyledTagWrap>
+                    <EmptyTag label={"value"} />
+                  </StyledTagWrap>
+                )}
+              </StyledPropGridRow>
 
-            <div key={`children-${key}`}>
               {renderChildrenPropRow && renderChildrenPropRow(prop.children)}
-            </div>
-          </React.Fragment>
-        );
-      })}
-    </StyledPropGroup>
-  );
-};
+            </React.Fragment>
+          );
+        })}
+      </StyledPropGroup>
+    );
+  };

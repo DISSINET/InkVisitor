@@ -1,7 +1,6 @@
-import { EntityClass } from "@shared/enums";
 import {
-  IEntity,
   IBookmarkFolder,
+  IEntity,
   IResponseBookmarkFolder,
 } from "@shared/types";
 import api from "api";
@@ -18,50 +17,23 @@ import {
 } from "components";
 import { CBookmarkFolder } from "constructors";
 import React, { useMemo, useState } from "react";
-import {
-  FaEdit,
-  FaFolder,
-  FaFolderOpen,
-  FaPlus,
-  FaRegFolder,
-  FaRegFolderOpen,
-  FaTrash,
-} from "react-icons/fa";
+import { FaPlus } from "react-icons/fa";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { toast } from "react-toastify";
-import { EntitySuggester } from "..";
+import { useAppSelector } from "redux/hooks";
 import {
   StyledContent,
-  StyledFolderContent,
-  StyledFolderContentTags,
-  StyledFolderHeader,
-  StyledFolderHeaderButtons,
-  StyledFolderHeaderText,
   StyledFolderList,
-  StyledFolderSuggester,
-  StyledFolderWrapper,
-  StyledFolderWrapperOpenArea,
   StyledHeader,
-  StyledIconWrap,
 } from "./EntityBookmarkBoxStyles";
-import { EntityBookmarkFolderTable } from "./EntityBookmarkFolderTable/EntityBookmarkFolderTable";
-
-const bookmarkEntities = [
-  EntityClass.Action,
-  EntityClass.Person,
-  EntityClass.Group,
-  EntityClass.Object,
-  EntityClass.Concept,
-  EntityClass.Location,
-  EntityClass.Value,
-  EntityClass.Event,
-  EntityClass.Statement,
-  EntityClass.Territory,
-  EntityClass.Resource,
-];
+import { EntityBookmarkFolder } from "./EntityBookmarkFolder/EntityBookmarkFolder";
 
 export const EntityBookmarkBox: React.FC = () => {
   const queryClient = useQueryClient();
+
+  const fourthPanelBoxesOpened: { [key: string]: boolean } = useAppSelector(
+    (state) => state.layout.fourthPanelBoxesOpened
+  );
 
   const [editingFolder, setEditingFolder] = useState<string | false>(false);
   const [removingFolder, setRemovingFolder] = useState<string | false>(false);
@@ -78,11 +50,11 @@ export const EntityBookmarkBox: React.FC = () => {
   } = useQuery(
     ["bookmarks"],
     async () => {
-      const res = await api.bookmarksGet(false);
+      const res = await api.bookmarksGet("me");
       res.data.sort((a, b) => (a.name > b.name ? 1 : -1));
       return res.data;
     },
-    { enabled: api.isLoggedIn() }
+    { enabled: api.isLoggedIn() && fourthPanelBoxesOpened["bookmarks"] }
   );
 
   const removingFolderName = useMemo(() => {
@@ -123,14 +95,18 @@ export const EntityBookmarkBox: React.FC = () => {
     setCreatingFolder(true);
   };
 
+  const cancelEditingFolder = () => {
+    setEditingFolderName("");
+    setEditingFolder(false);
+  };
+
   const startEditingFolder = (folder: IResponseBookmarkFolder) => {
     setEditingFolder(folder.id);
     setEditingFolderName(folder.name);
   };
 
-  const cancelEditingFolder = () => {
-    setEditingFolderName("");
-    setEditingFolder(false);
+  const askRemoveFolder = (folderId: string) => {
+    setRemovingFolder(folderId);
   };
 
   const acceptEditingFolderMutation = useMutation(
@@ -144,7 +120,7 @@ export const EntityBookmarkBox: React.FC = () => {
             return b;
           }
         });
-        await api.usersUpdate(false, {
+        await api.usersUpdate("me", {
           bookmarks: newBookmarksAfterEdit,
         });
       }
@@ -159,10 +135,6 @@ export const EntityBookmarkBox: React.FC = () => {
     }
   );
 
-  const askRemoveFolder = (folderId: string) => {
-    setRemovingFolder(folderId);
-  };
-
   const acceptRemoveFolderMutation = useMutation(
     async () => {
       const newBookmarks: IBookmarkFolder[] | false = getBookmarksCopy();
@@ -170,7 +142,7 @@ export const EntityBookmarkBox: React.FC = () => {
         const newBookmarksAfterRemove = newBookmarks.filter(
           (b) => b.id !== removingFolder
         );
-        await api.usersUpdate(false, {
+        await api.usersUpdate("me", {
           bookmarks: newBookmarksAfterRemove,
         });
       }
@@ -202,7 +174,7 @@ export const EntityBookmarkBox: React.FC = () => {
         const newBookmarks: IBookmarkFolder[] | false = getBookmarksCopy();
         if (newBookmarks) {
           newBookmarks.push(newBookmarkFolder);
-          await api.usersUpdate(false, { bookmarks: newBookmarks });
+          await api.usersUpdate("me", { bookmarks: newBookmarks });
         }
       }
     },
@@ -216,63 +188,6 @@ export const EntityBookmarkBox: React.FC = () => {
     }
   );
 
-  const handleClickFolder = (folderId: string) => {
-    if (openedFolders.includes(folderId)) {
-      // close
-      setOpenedFolders(openedFolders.filter((f) => f !== folderId));
-    } else {
-      // open
-      setOpenedFolders([...openedFolders, folderId]);
-    }
-  };
-
-  const addBookmark = async (folderId: string, bookmarkId: string) => {
-    const newBookmarks: IBookmarkFolder[] | false = getBookmarksCopy();
-    if (newBookmarks) {
-      const folder = newBookmarks.find((b) => b.id === folderId);
-
-      if (folder) {
-        if (!folder.entityIds.includes(bookmarkId)) {
-          folder.entityIds.push(bookmarkId);
-          changeBookmarksMutation.mutate(newBookmarks);
-        }
-      }
-    }
-  };
-
-  const removeBookmark = async (folderId: string, bookmarkId: string) => {
-    const newBookmarks: IBookmarkFolder[] | false = getBookmarksCopy();
-    if (newBookmarks) {
-      const folder = newBookmarks.find((b) => b.id === folderId);
-      if (folder) {
-        if (folder.entityIds.includes(bookmarkId)) {
-          folder.entityIds = folder.entityIds.filter((a) => a !== bookmarkId);
-          changeBookmarksMutation.mutate(newBookmarks);
-        }
-      }
-    }
-  };
-
-  const changeBookmarksMutation = useMutation(
-    async (newBookmarks: IBookmarkFolder[]) =>
-      await api.usersUpdate(false, { bookmarks: newBookmarks }),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries(["bookmarks"]);
-      },
-    }
-  );
-
-  const updateFolderEntitys = (newEntityIds: string[], folderId: string) => {
-    const newBookmarks: IBookmarkFolder[] | false = getBookmarksCopy();
-    if (newBookmarks) {
-      const folder = newBookmarks.find((b) => b.id === folderId);
-      if (folder) {
-        folder.entityIds = newEntityIds;
-        changeBookmarksMutation.mutate(newBookmarks);
-      }
-    }
-  };
   return (
     <StyledContent>
       <StyledHeader>
@@ -286,94 +201,37 @@ export const EntityBookmarkBox: React.FC = () => {
       </StyledHeader>
       {bookmarkFolders && (
         <StyledFolderList>
-          {bookmarkFolders.map((bookmarkFolder: IResponseBookmarkFolder) => {
-            const open = openedFolders.includes(bookmarkFolder.id);
-            const empty = bookmarkFolder.entities.length === 0;
+          {bookmarkFolders.map(
+            (bookmarkFolder: IResponseBookmarkFolder, key: number) => {
+              const open = openedFolders.includes(bookmarkFolder.id);
+              const empty = bookmarkFolder.entities.length === 0;
 
-            return (
-              <StyledFolderWrapper key={bookmarkFolder.id}>
-                <StyledFolderHeader
-                  onClick={() => {
-                    handleClickFolder(bookmarkFolder.id);
-                  }}
-                >
-                  <StyledFolderWrapperOpenArea>
-                    <StyledIconWrap>
-                      {(() => {
-                        if (open) {
-                          if (empty) {
-                            return <FaRegFolderOpen />;
-                          } else {
-                            return <FaFolderOpen />;
-                          }
-                        } else {
-                          if (empty) {
-                            return <FaRegFolder />;
-                          } else {
-                            return <FaFolder />;
-                          }
-                        }
-                      })()}
-                    </StyledIconWrap>
-                    <StyledFolderHeaderText>
-                      {bookmarkFolder.name}
-                    </StyledFolderHeaderText>
-                  </StyledFolderWrapperOpenArea>
-                  <StyledFolderHeaderButtons>
-                    <ButtonGroup>
-                      <Button
-                        key="edit"
-                        icon={<FaEdit size={12} />}
-                        color="plain"
-                        inverted
-                        onClick={(e: React.MouseEvent) => {
-                          e.stopPropagation();
-                          startEditingFolder(bookmarkFolder);
-                        }}
-                      />
-                      <Button
-                        key="remove"
-                        icon={<FaTrash size={12} />}
-                        color="danger"
-                        inverted
-                        onClick={(e: React.MouseEvent) => {
-                          e.stopPropagation();
-                          askRemoveFolder(bookmarkFolder.id);
-                        }}
-                      />
-                    </ButtonGroup>
-                  </StyledFolderHeaderButtons>
-                </StyledFolderHeader>
-                {open && (
-                  <StyledFolderContent>
-                    <StyledFolderContentTags>
-                      <EntityBookmarkFolderTable
-                        folder={bookmarkFolder}
-                        updateFolderEntitys={updateFolderEntitys}
-                        removeBookmark={removeBookmark}
-                      ></EntityBookmarkFolderTable>
-                    </StyledFolderContentTags>
-                    <StyledFolderSuggester>
-                      <EntitySuggester
-                        openDetailOnCreate
-                        onSelected={(bookmarkId: string) => {
-                          addBookmark(bookmarkFolder.id, bookmarkId);
-                        }}
-                        categoryTypes={bookmarkEntities}
-                        placeholder={"add new bookmark"}
-                      />
-                    </StyledFolderSuggester>
-                  </StyledFolderContent>
-                )}
-              </StyledFolderWrapper>
-            );
-          })}
+              return (
+                <EntityBookmarkFolder
+                  key={key}
+                  bookmarkFolder={bookmarkFolder}
+                  open={open}
+                  empty={empty}
+                  getBookmarksCopy={getBookmarksCopy}
+                  startEditingFolder={startEditingFolder}
+                  askRemoveFolder={askRemoveFolder}
+                  openedFolders={openedFolders}
+                  setOpenedFolders={setOpenedFolders}
+                />
+              );
+            }
+          )}
         </StyledFolderList>
       )}
       <Loader show={isFetching} />
 
       {/* edit modal */}
-      <Modal key="new-bookmar-modal" showModal={!!editingFolder} width="thin">
+      <Modal
+        key="new-bookmar-modal"
+        showModal={!!editingFolder}
+        width="thin"
+        onEnterPress={() => acceptEditingFolderMutation.mutate()}
+      >
         <ModalHeader title="Bookmark Folder" />
         <ModalContent>
           <Input
@@ -383,9 +241,6 @@ export const EntityBookmarkBox: React.FC = () => {
             value={editingFolderName}
             changeOnType
             autoFocus
-            onEnterPressFn={() => {
-              acceptEditingFolderMutation.mutate();
-            }}
           />
         </ModalContent>
 
@@ -413,7 +268,14 @@ export const EntityBookmarkBox: React.FC = () => {
       </Modal>
 
       {/* create modal */}
-      <Modal key="create-modal" showModal={creatingFolder == true}>
+      <Modal
+        key="create-modal"
+        showModal={creatingFolder == true}
+        onClose={() => {
+          cancelCreatingFolder();
+        }}
+        onEnterPress={() => createFolderMutation.mutate()}
+      >
         <ModalHeader title="Bookmark Folder" />
         <ModalContent>
           <Input
@@ -423,9 +285,6 @@ export const EntityBookmarkBox: React.FC = () => {
             value={editingFolderName}
             changeOnType
             autoFocus
-            onEnterPressFn={() => {
-              createFolderMutation.mutate();
-            }}
           />
         </ModalContent>
 
@@ -470,3 +329,5 @@ export const EntityBookmarkBox: React.FC = () => {
     </StyledContent>
   );
 };
+
+export const MemoizedEntityBookmarkBox = React.memo(EntityBookmarkBox);

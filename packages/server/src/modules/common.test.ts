@@ -1,25 +1,21 @@
-import Audit from "@models/audit/audit";
+import Acl from "@middlewares/acl";
 import "@models/events/register";
-import Statement from "@models/statement/statement";
+import Statement, { StatementData } from "@models/statement/statement";
 import Territory from "@models/territory/territory";
+import User from "@models/user/user";
 import { Db } from "@service/RethinkDB";
-import { createEntity, deleteEntities } from "@service/shorthands";
 import {
-  Certainty,
-  Elvl,
-  EntityClass,
-  EntityStatus,
-  Language,
-  Logic,
-  Mood,
-  MoodVariant,
-  Operator,
-} from "@shared/enums";
+  createEntity,
+  deleteAudits,
+  deleteEntities,
+  deleteRelations,
+} from "@service/shorthands";
+import { EntityEnums } from "@shared/enums";
 import { IResponseGeneric, IStatement, IStatementAction } from "@shared/types";
 import { CustomError } from "@shared/types/errors";
 import { ITerritory } from "@shared/types/index";
 import { errorTypes } from "@shared/types/response-generic";
-import { r as rethink } from "rethinkdb-ts";
+import { IRequest } from "src/custom_typings/request";
 import "ts-jest";
 
 describe("common", function () {
@@ -28,6 +24,23 @@ describe("common", function () {
 
 export const successfulGenericResponse: IResponseGeneric = {
   result: true,
+};
+
+export const newMockRequest = (db: Db): IRequest => {
+  return {
+    acl: new Acl(),
+    db: db,
+    user: undefined,
+    getUserOrFail: () => {
+      return new User({});
+    },
+    baseUrl: "",
+    method: "GET",
+    route: { path: "/" },
+    params: {},
+    body: {},
+    query: {},
+  };
 };
 
 export function testErroneousResponse(
@@ -50,62 +63,60 @@ function getRandomFromArray<T>(input: T[]): T {
 }
 
 export function getITerritoryMock(): ITerritory {
-  const fullData: ITerritory = {
-    status: EntityStatus.Approved,
+  return {
+    status: EntityEnums.Status.Approved,
     id: "id",
     detail: "detail",
-    language: Language.Latin,
+    language: EntityEnums.Language.Latin,
     notes: [],
     label: "label",
     data: {
       parent: false,
     },
     props: [],
-    class: EntityClass.Territory,
+    class: EntityEnums.Class.Territory,
     references: [],
   };
-
-  return fullData;
 }
 
 export function getIStatementActionMock(): IStatementAction {
   return {
-    action: "action",
+    actionId: "action",
     bundleEnd: false,
     bundleStart: false,
-    certainty: Certainty.Empty,
-    elvl: Elvl.Inferential,
+    certainty: EntityEnums.Certainty.Empty,
+    elvl: EntityEnums.Elvl.Inferential,
     id: "action",
-    logic: Logic.Positive,
-    mood: [Mood.Ability],
-    moodvariant: MoodVariant.Irrealis,
-    bundleOperator: Operator.And,
-  } as IStatementAction;
+    logic: EntityEnums.Logic.Positive,
+    mood: [EntityEnums.Mood.Ability],
+    moodvariant: EntityEnums.MoodVariant.Irrealis,
+    bundleOperator: EntityEnums.Operator.And,
+    props: [],
+  };
 }
 
 export function getIStatementMock(): IStatement {
-  const fullData: IStatement = {
+  return {
     id: "id",
-    class: EntityClass.Statement,
+    class: EntityEnums.Class.Statement,
     label: "label",
     data: {
       actions: [],
       actants: [],
       tags: [],
       territory: {
-        id: "id",
+        territoryId: "id",
         order: 0,
       },
       text: "text",
     },
     props: [],
     detail: "",
-    language: Language.Czech,
+    language: EntityEnums.Language.Czech,
     notes: [],
-    status: EntityStatus.Approved,
+    status: EntityEnums.Status.Approved,
     references: [],
   };
-  return fullData;
 }
 
 export async function createMockTree(
@@ -121,7 +132,7 @@ export async function createMockTree(
       id: `lvl1-1-${randSuffix}`,
       data: {
         parent: {
-          id: `root-${randSuffix}`,
+          territoryId: `root-${randSuffix}`,
           order: 1,
         },
       },
@@ -130,7 +141,7 @@ export async function createMockTree(
       id: `lvl1-2-${randSuffix}`,
       data: {
         parent: {
-          id: `root-${randSuffix}`,
+          territoryId: `root-${randSuffix}`,
           order: 2,
         },
       },
@@ -154,17 +165,16 @@ export async function createMockStatements(
 
   // create statements with territory id set
   for (let i = 0; i < 3; i++) {
-    out.push(
-      new Statement({
-        id: `statement-${i}-${randSuffix}`,
-        data: {
-          territory: {
-            id: chosenTerritory,
-            order: i + 1,
-          },
-        },
-      })
-    );
+    const stat = new Statement({
+      id: `statement-${i}-${randSuffix}`,
+    });
+    stat.data = new StatementData({
+      territory: {
+        territoryId: chosenTerritory,
+        order: i + 1,
+      },
+    });
+    out.push(stat);
   }
 
   for (const ter of out) {
@@ -175,11 +185,7 @@ export async function createMockStatements(
 
 export async function clean(db: Db): Promise<void> {
   await deleteEntities(db);
-
-  await db.close();
-}
-
-export async function clearAudits(db: Db): Promise<void> {
-  await rethink.table(Audit.table).delete().run(db.connection);
+  await deleteAudits(db);
+  await deleteRelations(db);
   await db.close();
 }

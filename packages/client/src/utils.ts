@@ -1,6 +1,15 @@
-import { IEntity, IResponseTree, IStatement } from "@shared/types";
+import { EntityEnums, RelationEnums } from "@shared/enums";
+import {
+  EntityTooltip,
+  IEntity,
+  IResponseEntity,
+  IResponseTree,
+  IStatement,
+  Relation,
+} from "@shared/types";
 import { DropTargetMonitor, XYCoord } from "react-dnd";
-import { DragItem } from "types";
+import { restrictedIDEClasses } from "Theme/constants";
+import { DragItem, EntityDragItem } from "types";
 
 // TODO: not used, references not in statement data interface
 export const findPositionInStatement = (
@@ -9,53 +18,53 @@ export const findPositionInStatement = (
 ) => {
   if (
     statement.data.actants
-      .filter((a) => a.position === "s")
-      .find((a) => a.actant === actant.id)
+      .filter((a) => a.position === EntityEnums.Position.Subject)
+      .find((a) => a.entityId === actant.id)
   ) {
     return "subject";
   } else if (
     statement.data.actants
-      .filter((a) => a.position === "a1")
-      .find((a) => a.actant === actant.id)
+      .filter((a) => a.position === EntityEnums.Position.Actant1)
+      .find((a) => a.entityId === actant.id)
   ) {
     return "actant1";
   } else if (
     statement.data.actants
-      .filter((a) => a.position === "a2")
-      .find((a) => a.actant === actant.id)
+      .filter((a) => a.position === EntityEnums.Position.Actant2)
+      .find((a) => a.entityId === actant.id)
   ) {
     return "actant2";
   } else if (
     statement.data.actants
-      .filter((a) => a.position === "p")
-      .find((a) => a.actant === actant.id)
+      .filter((a) => a.position === EntityEnums.Position.PseudoActant)
+      .find((a) => a.entityId === actant.id)
   ) {
     return "pseudo-actant";
   } else if (statement.data.tags.find((t) => t === actant.id)) {
     return "tag";
-  } else if (statement.data.territory?.id === actant.id) {
+  } else if (statement.data.territory?.territoryId === actant.id) {
     return "territory";
   } else if (
     statement.data.actants.find((act) =>
-      act.props.find((p) => p.value.id === actant.id)
+      act.props.find((p) => p.value.entityId === actant.id)
     )
   ) {
     return "actant property value";
   } else if (
     statement.data.actants.find((act) =>
-      act.props.find((p) => p.type.id === actant.id)
+      act.props.find((p) => p.type.entityId === actant.id)
     )
   ) {
     return "actant property type";
   } else if (
     statement.data.actions.find((act) =>
-      act.props.find((p) => p.value.id === actant.id)
+      act.props.find((p) => p.value.entityId === actant.id)
     )
   ) {
     return "action property value";
   } else if (
     statement.data.actions.find((act) =>
-      act.props.find((p) => p.type.id === actant.id)
+      act.props.find((p) => p.type.entityId === actant.id)
     )
   ) {
     return "action property type";
@@ -97,15 +106,16 @@ export const collectTerritoryChildren = (
 };
 
 export const dndHoverFn = (
-  item: DragItem,
+  item: EntityDragItem | DragItem,
   index: number,
   monitor: DropTargetMonitor,
   ref: React.RefObject<HTMLDivElement>,
-  moveProp: (dragIndex: number, hoverIndex: number) => void
+  moveFn: (dragIndex: number, hoverIndex: number) => void
 ) => {
   if (!ref.current) {
     return;
   }
+
   const dragIndex: number = item.index;
   const hoverIndex: number | undefined = index;
 
@@ -127,6 +137,66 @@ export const dndHoverFn = (
   if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) {
     return;
   }
-  moveProp(dragIndex, hoverIndex);
+
+  moveFn(dragIndex, hoverIndex);
   item.index = hoverIndex;
+};
+
+export const getEntityLabel = (entity?: IResponseEntity) =>
+  entity?.label || entity?.data.text || "no label";
+
+export const getShortLabelByLetterCount = (
+  label: string,
+  maxLetterCount: number
+) => {
+  const isOversized = label.length > maxLetterCount;
+  return isOversized ? label.slice(0, 200).concat("...") : label;
+};
+
+// Returns one more level, because there's always empty subtree array on the deepest level
+export const getRelationTreeDepth = (
+  array: EntityTooltip.ISuperclassTree[]
+): number => {
+  return (
+    1 +
+    Math.max(
+      0,
+      ...array.map(({ subtrees = [] }) => getRelationTreeDepth(subtrees))
+    )
+  );
+};
+
+export const getEntityRelationRules = (entityClass: EntityEnums.Class) => {
+  const relationRulesArray = Object.keys(Relation.RelationRules);
+  return relationRulesArray.filter((rule) => {
+    if (
+      !Relation.RelationRules[rule].allowedEntitiesPattern.length &&
+      !(
+        rule === RelationEnums.Type.Identification &&
+        restrictedIDEClasses.includes(entityClass)
+      )
+    ) {
+      return rule;
+    } else if (
+      Relation.RelationRules[rule].allowedEntitiesPattern.some(
+        (pair) => pair[0] === entityClass
+      )
+    ) {
+      return rule;
+    }
+  });
+};
+
+export const getRelationInvertedRules = (entityClass: EntityEnums.Class) => {
+  const relationRulesArray = Object.keys(Relation.RelationRules);
+  return relationRulesArray.filter((rule) => {
+    if (
+      Relation.RelationRules[rule].asymmetrical &&
+      Relation.RelationRules[rule].allowedEntitiesPattern.some(
+        (pair) => pair[1] === entityClass
+      )
+    ) {
+      return rule;
+    }
+  });
 };

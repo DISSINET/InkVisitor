@@ -1,39 +1,41 @@
-import { EntityClass } from "@shared/enums";
+import { EntityEnums } from "@shared/enums";
 import { IEntity, IReference } from "@shared/types";
 import { Button } from "components";
+import { EntitySuggester, EntityTag } from "components/advanced";
 import React from "react";
 import { FaExternalLinkAlt, FaTrashAlt, FaUnlink } from "react-icons/fa";
-import { EntitySuggester } from "../EntitySuggester/EntitySuggester";
-import { EntityTag } from "../EntityTag/EntityTag";
+import { excludedSuggesterEntities } from "Theme/constants";
 import {
   StyledReferencesListButtons,
   StyledReferencesListColumn,
   StyledReferenceValuePartLabel,
   StyledTagWrapper,
-} from "./EntityReferenceInputStyles";
+} from "./EntityReferenceTableStyles";
 
 interface EntityReferenceTableRow {
   reference: IReference;
   resource: IEntity | undefined;
   value: IEntity | undefined;
-  onChange: Function;
   disabled?: boolean;
   handleRemove: (refId: string) => void;
   handleChangeResource: (refId: string, newResource: string) => void;
   handleChangeValue: (refId: string, newValue: string) => void;
   openDetailOnCreate?: boolean;
+  isInsideTemplate: boolean;
+  territoryParentId?: string;
 }
 
 export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
   reference,
   resource,
   value,
-  onChange,
   disabled = true,
   handleRemove,
   handleChangeResource,
   handleChangeValue,
   openDetailOnCreate = false,
+  isInsideTemplate = false,
+  territoryParentId,
 }) => {
   return (
     <React.Fragment>
@@ -42,15 +44,15 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
         {resource ? (
           <StyledTagWrapper>
             <EntityTag
-              actant={resource}
+              entity={resource}
               fullWidth
               button={
                 !disabled && (
                   <Button
                     key="d"
-                    tooltip="unlink resource"
+                    tooltipLabel="unlink resource"
                     icon={<FaUnlink />}
-                    inverted={true}
+                    inverted
                     color="plain"
                     onClick={() => {
                       handleChangeResource(reference.id, "");
@@ -69,7 +71,9 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
                 onSelected={(newSelectedId: string) => {
                   handleChangeResource(reference.id, newSelectedId);
                 }}
-                categoryTypes={[EntityClass.Resource]}
+                categoryTypes={[EntityEnums.Class.Resource]}
+                isInsideTemplate={isInsideTemplate}
+                territoryParentId={territoryParentId}
               />
             </div>
           )
@@ -86,15 +90,15 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
         {value ? (
           <StyledTagWrapper>
             <EntityTag
-              actant={value}
+              entity={value}
               fullWidth
               button={
                 !disabled && (
                   <Button
                     key="d"
-                    tooltip="unlink resource"
+                    tooltipLabel="unlink resource"
                     icon={<FaUnlink />}
-                    inverted={true}
+                    inverted
                     color="plain"
                     onClick={() => {
                       handleChangeValue(reference.id, "");
@@ -113,7 +117,10 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
                 onSelected={(newSelectedId: string) => {
                   handleChangeValue(reference.id, newSelectedId);
                 }}
-                categoryTypes={[EntityClass.Value]}
+                categoryTypes={[EntityEnums.Class.Value]}
+                excludedEntities={excludedSuggesterEntities}
+                isInsideTemplate={isInsideTemplate}
+                territoryParentId={territoryParentId}
               />
             </div>
           )
@@ -125,8 +132,8 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
           {resource && value && resource.data.partValueBaseURL && (
             <Button
               key="url"
-              tooltip={""}
-              inverted={true}
+              tooltipLabel={""}
+              inverted
               icon={<FaExternalLinkAlt />}
               color="plain"
               onClick={() => {
@@ -140,8 +147,8 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
           {!disabled && (
             <Button
               key="delete"
-              tooltip="remove reference row"
-              inverted={true}
+              tooltipLabel="remove reference row"
+              inverted
               icon={<FaTrashAlt />}
               color="plain"
               onClick={() => {

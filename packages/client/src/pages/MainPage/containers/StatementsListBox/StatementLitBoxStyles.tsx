@@ -1,8 +1,9 @@
 import styled from "styled-components";
 
-export const StyledDots = styled.div`
+export const StyledDots = styled.p`
   display: flex;
   align-items: flex-end;
+  margin-left: ${({ theme }) => theme.space[1]};
   cursor: default;
 `;
 
@@ -33,4 +34,12 @@ export const StyledTableWrapper = styled.div`
   display: flex;
   flex-direction: column;
   overflow: auto;
+`;
+export const StyledEmptyState = styled.div`
+  padding: ${({ theme }) => theme.space[3]};
+  color: ${({ theme }) => theme.color["gray"][600]};
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
+  display: flex;
+  align-self: center;
+  align-items: center;
 `;

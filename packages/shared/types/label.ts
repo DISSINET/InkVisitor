@@ -1,7 +1,7 @@
-import { Language } from "./../enums";
+import { EntityEnums } from "@shared/enums";
 
 export interface ILabel {
   id: string;
   value: string;
-  lang: Language;
+  lang: EntityEnums.Language;
 }

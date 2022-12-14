@@ -1,11 +1,11 @@
-import { UserRole, UserRoleMode } from "./../enums";
+import { UserEnums } from "@shared/enums";
 
 export interface IUser {
   id: string;
   email: string;
   name: string;
   password?: string;
-  role: UserRole;
+  role: UserEnums.Role;
   options: IUserOptions;
   bookmarks: IBookmarkFolder[];
   storedTerritories: IStoredTerritory[];
@@ -15,7 +15,7 @@ export interface IUser {
 
 export interface IUserRight {
   territory: string; // entity id
-  mode: UserRoleMode;
+  mode: UserEnums.RoleMode;
 }
 
 export interface IUserOptions {

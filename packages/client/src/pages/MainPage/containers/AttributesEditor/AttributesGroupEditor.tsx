@@ -1,30 +1,42 @@
-import React, { SetStateAction, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 
-import { MdSettings } from "react-icons/md";
-import { EntityClass } from "@shared/enums";
 import {
-  Tooltip,
+  certaintyDict,
+  elvlDict,
+  logicDict,
+  moodDict,
+  moodVariantsDict,
+  operatorDict,
+  partitivityDict,
+  virtualityDict,
+} from "@shared/dictionaries";
+import { EntityEnums } from "@shared/enums";
+import { IEntity } from "@shared/types";
+import {
   Button,
-  Modal,
-  ModalHeader,
-  ModalContent,
-  ModalFooter,
   ButtonGroup,
   Loader,
+  Modal,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  Tooltip,
 } from "components";
+import { EntitySuggester, EntityTag } from "components/advanced";
+import { FaUnlink } from "react-icons/fa";
+import { MdSettings } from "react-icons/md";
+import {
+  AttributeData,
+  EntityColors,
+  PropAttributeFilter,
+  PropAttributeGroup,
+  PropAttributeGroupDataObject,
+  PropAttributeName,
+} from "types";
 import {
   StyledAttributeModalHeaderIcon,
   StyledAttributeModalHeaderWrapper,
 } from "./AttributesEditorStyles";
-import { TooltipAttributeRow } from "./TooltipAttributeRow/TooltipAttributeRow";
-import { TooltipBooleanRow } from "./TooltipBooleanRow/TooltipBooleanRow";
-import {
-  AttributeData,
-  AttributeGroupDataObject,
-  AttributeName,
-  Entities,
-  GroupName,
-} from "types";
 import { AttributesForm } from "./AttributesForm";
 import {
   StyledColumnHeading,
@@ -35,19 +47,8 @@ import {
   StyledTooltipGrid,
   StyledTooltipHeading,
 } from "./AttributesGroupEditorStyles";
-import {
-  elvlDict,
-  logicDict,
-  moodDict,
-  moodVariantsDict,
-  virtualityDict,
-  partitivityDict,
-  operatorDict,
-  certaintyDict,
-} from "@shared/dictionaries";
-import { IEntity } from "@shared/types";
-import { EntitySuggester, EntityTag } from "..";
-import { FaUnlink } from "react-icons/fa";
+import { TooltipAttributeRow } from "./TooltipAttributeRow/TooltipAttributeRow";
+import { TooltipBooleanRow } from "./TooltipBooleanRow/TooltipBooleanRow";
 
 interface AttributesGroupEditor {
   modalTitle: string;
@@ -55,18 +56,20 @@ interface AttributesGroupEditor {
   setModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
   statementId: string;
   propTypeActant?: IEntity;
-  classesPropType: EntityClass[];
+  classesPropType: EntityEnums.Class[];
   propValueActant?: IEntity;
-  classesPropValue: EntityClass[];
-  excludedSuggesterEntities: EntityClass[];
-  data: AttributeGroupDataObject;
-  handleUpdate: (data: AttributeGroupDataObject) => void;
+  classesPropValue: EntityEnums.Class[];
+  excludedSuggesterEntities: EntityEnums.Class[];
+  data: PropAttributeGroupDataObject;
+  handleUpdate: (data: PropAttributeGroupDataObject) => void;
   updateProp: (propId: string, changes: any) => void;
   loading?: boolean;
-  disabledAttributes?: AttributeName[];
+  disabledAttributes?: PropAttributeFilter;
   disabledAllAttributes?: boolean;
   disabledOpenModal?: boolean;
   userCanEdit?: boolean;
+  isInsideTemplate: boolean;
+  territoryParentId?: string;
 }
 
 export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
@@ -82,13 +85,16 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
   handleUpdate,
   updateProp,
   loading,
-  disabledAttributes = [],
+  disabledAttributes = {} as PropAttributeFilter,
   disabledAllAttributes = false,
   disabledOpenModal = false,
   statementId,
   userCanEdit,
+  isInsideTemplate = false,
+  territoryParentId,
 }) => {
-  const [modalData, setModalData] = useState<AttributeGroupDataObject>(data);
+  const [modalData, setModalData] =
+    useState<PropAttributeGroupDataObject>(data);
 
   const somethingWasUpdated = useMemo(() => {
     return JSON.stringify(data) !== JSON.stringify(modalData);
@@ -119,17 +125,21 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
 
   const handleSetModalData = (
     newModalData: AttributeData,
-    groupName?: GroupName
+    groupName?: PropAttributeGroup
   ) => {
     if (groupName) {
       setModalData({ ...modalData, [groupName]: newModalData });
     }
   };
 
-  const getTooltipColumn = (data: AttributeData) => {
+  const getTooltipColumn = (
+    data: AttributeData,
+    disabledAttributes: PropAttributeName[] | undefined
+  ) => {
+    const disabledAttributesVal = disabledAttributes || [];
     return (
       <div>
-        {data.elvl && (
+        {data.elvl && !disabledAttributesVal?.includes("elvl") && (
           <TooltipAttributeRow
             key="elvl"
             attributeName="elvl"
@@ -137,7 +147,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
             items={elvlDict}
           />
         )}
-        {data.logic && (
+        {data.logic && !disabledAttributesVal?.includes("logic") && (
           <TooltipAttributeRow
             key="logic"
             attributeName="logic"
@@ -145,7 +155,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
             items={logicDict}
           />
         )}
-        {data.mood && (
+        {data.mood && !disabledAttributesVal?.includes("mood") && (
           <TooltipAttributeRow
             key="mood"
             attributeName="mood"
@@ -153,15 +163,16 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
             items={moodDict}
           />
         )}
-        {data.moodvariant && (
-          <TooltipAttributeRow
-            key="moodvariant"
-            attributeName="moodvariant"
-            value={data.moodvariant}
-            items={moodVariantsDict}
-          />
-        )}
-        {data.virtuality && (
+        {data.moodvariant &&
+          !disabledAttributesVal?.includes("moodvariant") && (
+            <TooltipAttributeRow
+              key="moodvariant"
+              attributeName="moodvariant"
+              value={data.moodvariant}
+              items={moodVariantsDict}
+            />
+          )}
+        {data.virtuality && !disabledAttributesVal?.includes("virtuality") && (
           <TooltipAttributeRow
             key="virtuality"
             attributeName="virtuality"
@@ -169,31 +180,34 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
             items={virtualityDict}
           />
         )}
-        {data.partitivity && (
-          <TooltipAttributeRow
-            key="partitivity"
-            attributeName="partitivity"
-            value={data.partitivity}
-            items={partitivityDict}
-          />
-        )}
-        {data.bundleOperator && (
-          <TooltipAttributeRow
-            key="bundleOperator"
-            attributeName="bundleOperator"
-            value={data.bundleOperator}
-            items={operatorDict}
-          />
-        )}
-        {data.bundleStart && (
-          <TooltipBooleanRow
-            key="bundleStart"
-            attributeName="bundleStart"
-            label="bundle start"
-            show={data.bundleStart ? data.bundleStart : false}
-          />
-        )}
-        {data.bundleEnd && (
+        {data.partitivity &&
+          !disabledAttributesVal?.includes("partitivity") && (
+            <TooltipAttributeRow
+              key="partitivity"
+              attributeName="partitivity"
+              value={data.partitivity}
+              items={partitivityDict}
+            />
+          )}
+        {data.bundleOperator &&
+          !disabledAttributesVal?.includes("bundleOperator") && (
+            <TooltipAttributeRow
+              key="bundleOperator"
+              attributeName="bundleOperator"
+              value={data.bundleOperator}
+              items={operatorDict}
+            />
+          )}
+        {data.bundleStart &&
+          !disabledAttributesVal?.includes("bundleStart") && (
+            <TooltipBooleanRow
+              key="bundleStart"
+              attributeName="bundleStart"
+              label="bundle start"
+              show={data.bundleStart ? data.bundleStart : false}
+            />
+          )}
+        {data.bundleEnd && !disabledAttributesVal?.includes("bundleEnd") && (
           <TooltipBooleanRow
             key="bundleEnd"
             attributeName="bundleEnd"
@@ -201,7 +215,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
             show={data.bundleEnd ? data.bundleEnd : false}
           />
         )}
-        {data.certainty && (
+        {data.certainty && !disabledAttributesVal?.includes("certainty") && (
           <TooltipAttributeRow
             key="certainty"
             attributeName="certainty"
@@ -213,38 +227,39 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
     );
   };
 
+  const getTooltipContent = () => (
+    <StyledTooltipGrid>
+      <div>
+        <StyledTooltipHeading>Statement</StyledTooltipHeading>
+        {getTooltipColumn(modalData.statement, disabledAttributes.statement)}
+      </div>
+      <div>
+        <StyledTooltipHeading>Type</StyledTooltipHeading>
+        {getTooltipColumn(modalData.type, disabledAttributes.type)}
+      </div>
+      <div>
+        <StyledTooltipHeading>Value</StyledTooltipHeading>
+        {getTooltipColumn(modalData.value, disabledAttributes.value)}
+      </div>
+    </StyledTooltipGrid>
+  );
+
+  const dissabledStatement =
+    disabledAttributes.statement as PropAttributeName[];
+  const dissabledType = disabledAttributes.type as PropAttributeName[];
+  const dissabledValue = disabledAttributes.value as PropAttributeName[];
+
   return (
     <div>
-      <Tooltip
-        position="top right"
-        attributes={
-          <StyledTooltipGrid>
-            <div>
-              <StyledTooltipHeading>Statement</StyledTooltipHeading>
-              {getTooltipColumn(modalData.statement)}
-            </div>
-            <div>
-              <StyledTooltipHeading>Type</StyledTooltipHeading>
-              {getTooltipColumn(modalData.type)}
-            </div>
-            <div>
-              <StyledTooltipHeading>Value</StyledTooltipHeading>
-              {getTooltipColumn(modalData.value)}
-            </div>
-          </StyledTooltipGrid>
-        }
-      >
-        <div>
-          <Button
-            key="settings"
-            disabled={disabledOpenModal}
-            icon={<MdSettings />}
-            inverted
-            color="plain"
-            onClick={() => setModalOpen(true)}
-          />
-        </div>
-      </Tooltip>
+      <Button
+        key="settings"
+        disabled={disabledOpenModal}
+        icon={<MdSettings />}
+        inverted
+        color="plain"
+        onClick={() => setModalOpen(true)}
+        tooltipContent={getTooltipContent()}
+      />
 
       <Modal
         key="edit-modal"
@@ -267,12 +282,14 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
         />
         <ModalContent>
           <StyledGridColumns>
-            <StyledColumnWrap color={Entities[EntityClass.Statement].color}>
+            <StyledColumnWrap
+              color={EntityColors[EntityEnums.Class.Statement].color}
+            >
               <StyledColumnHeading>Statement</StyledColumnHeading>
 
               <AttributesForm
                 groupName="statement"
-                disabledAttributes={disabledAttributes}
+                disabledAttributes={dissabledStatement}
                 modalData={modalData.statement}
                 setNewModalData={handleSetModalData}
               />
@@ -280,7 +297,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
             <StyledColumnWrap
               color={
                 propTypeActant
-                  ? Entities[propTypeActant.class].color
+                  ? EntityColors[propTypeActant.class].color
                   : undefined
               }
             >
@@ -288,14 +305,14 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
 
               <AttributesForm
                 groupName="type"
-                disabledAttributes={disabledAttributes}
+                disabledAttributes={dissabledType}
                 modalData={modalData.type}
                 setNewModalData={handleSetModalData}
               />
               {propTypeActant ? (
                 <StyledEntityWrap>
                   <EntityTag
-                    actant={propTypeActant}
+                    entity={propTypeActant}
                     fullWidth
                     button={
                       <Button
@@ -303,7 +320,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
                         icon={<FaUnlink />}
                         color="plain"
                         inverted
-                        tooltip="unlink actant"
+                        tooltipLabel="unlink actant"
                         onClick={() => {
                           updateProp(statementId, {
                             type: {
@@ -320,6 +337,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
                 userCanEdit && (
                   <StyledSuggesterWrap>
                     <EntitySuggester
+                      disableCreate
                       openDetailOnCreate
                       onSelected={(newSelectedId: string) => {
                         updateProp(statementId, {
@@ -332,6 +350,8 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
                       categoryTypes={classesPropType}
                       inputWidth={"full"}
                       excludedEntities={excludedSuggesterEntities}
+                      isInsideTemplate={isInsideTemplate}
+                      territoryParentId={territoryParentId}
                     />
                   </StyledSuggesterWrap>
                 )
@@ -340,28 +360,28 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
             <StyledColumnWrap
               color={
                 propValueActant
-                  ? Entities[propValueActant.class].color
+                  ? EntityColors[propValueActant.class].color
                   : undefined
               }
             >
               <StyledColumnHeading>Value</StyledColumnHeading>
               <AttributesForm
                 groupName="value"
-                disabledAttributes={disabledAttributes}
+                disabledAttributes={dissabledValue}
                 modalData={modalData.value}
                 setNewModalData={handleSetModalData}
               />
               {propValueActant ? (
                 <StyledEntityWrap>
                   <EntityTag
-                    actant={propValueActant}
+                    entity={propValueActant}
                     fullWidth
-                    tooltipPosition="left center"
+                    tooltipPosition="left"
                     button={
                       <Button
                         key="d"
                         icon={<FaUnlink />}
-                        tooltip="unlink actant"
+                        tooltipLabel="unlink actant"
                         color="plain"
                         inverted
                         onClick={() => {
@@ -380,6 +400,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
                 userCanEdit && (
                   <StyledSuggesterWrap>
                     <EntitySuggester
+                      disableCreate
                       openDetailOnCreate
                       onSelected={(newSelectedId: string) => {
                         updateProp(statementId, {
@@ -392,6 +413,8 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
                       categoryTypes={classesPropValue}
                       inputWidth={"full"}
                       excludedEntities={excludedSuggesterEntities}
+                      isInsideTemplate={isInsideTemplate}
+                      territoryParentId={territoryParentId}
                     />
                   </StyledSuggesterWrap>
                 )

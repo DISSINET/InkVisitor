@@ -1,50 +1,35 @@
 import { IEntity, IProp } from "./";
 import {
-  EntityClass,
-  Certainty,
-  Elvl,
-  Position,
-  Logic,
-  Mood,
-  MoodVariant,
-  Virtuality,
-  Partitivity,
-  Operator,
-  Language,
+  EntityEnums,
 } from "../enums";
-import { IReference } from "./reference";
 
 export interface IStatement extends IEntity {
-  id: string;
-  class: EntityClass.Statement;
-  label: string;
-  detail: string;
-  language: Language;
-  props: IProp[];
-  notes: string[];
+  class: EntityEnums.Class.Statement;
   data: IStatementData;
 }
 
 export interface IStatementData {
   text: string;
-  territory?: {
-    id: string;
-    order: number;
-  };
+  territory?: IStatementDataTerritory;
   actions: IStatementAction[];
   actants: IStatementActant[];
   tags: string[]; // ids of IEntity;
 }
 
+export interface IStatementDataTerritory {
+  territoryId: string;
+  order: number;
+}
+
 export interface IStatementAction {
   id: string;
-  action: string;
-  elvl: Elvl;
-  certainty: Certainty;
-  logic: Logic;
-  mood: Mood[];
-  moodvariant: MoodVariant;
-  bundleOperator: Operator;
+  actionId: string;
+  elvl: EntityEnums.Elvl;
+  certainty: EntityEnums.Certainty;
+  logic: EntityEnums.Logic;
+  mood: EntityEnums.Mood[];
+  moodvariant: EntityEnums.MoodVariant;
+  bundleOperator: EntityEnums.Operator;
   bundleStart: boolean;
   bundleEnd: boolean;
   props: IProp[];
@@ -52,14 +37,36 @@ export interface IStatementAction {
 
 export interface IStatementActant {
   id: string;
-  actant: string;
-  position: Position;
-  elvl: Elvl;
-  logic: Logic;
-  virtuality: Virtuality;
-  partitivity: Partitivity;
-  bundleOperator: Operator;
+  entityId: string;
+  position: EntityEnums.Position;
+  elvl: EntityEnums.Elvl;
+  logic: EntityEnums.Logic;
+  virtuality: EntityEnums.Virtuality;
+  partitivity: EntityEnums.Partitivity;
+  bundleOperator: EntityEnums.Operator;
   bundleStart: boolean;
   bundleEnd: boolean;
   props: IProp[];
+  classifications: IStatementClassification[];
+  identifications: IStatementIdentification[];
+}
+
+export interface IStatementClassification {
+  id: string;
+  entityId: string;
+  elvl: EntityEnums.Elvl;
+  logic: EntityEnums.Logic;
+  certainty: EntityEnums.Certainty;
+  mood: EntityEnums.Mood[];
+  moodvariant: EntityEnums.MoodVariant;
+}
+
+export interface IStatementIdentification {
+  id: string;
+  entityId: string;
+  elvl: EntityEnums.Elvl;
+  logic: EntityEnums.Logic;
+  certainty: EntityEnums.Certainty;
+  mood: EntityEnums.Mood[];
+  moodvariant: EntityEnums.MoodVariant;
 }

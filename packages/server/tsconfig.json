@@ -14,23 +14,42 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "paths": {
-      "@daos/*": ["src/mocks/*"],
-      "@entities/*": ["src/domain/*"],
-      "@common/*": ["src/common/*"],
-      "@shared/*": ["./../shared/*"],
-      "@server/*": ["src/server"],
-      "@modules/*": ["src/modules/*"],
-      "@service/*": ["src/service/*"],
-      "@models/*": ["src/models/*"],
-      "@middlewares/*": ["src/middlewares/*"]
+      "@common/*": [
+        "src/common/*"
+      ],
+      "@shared/*": [
+        "./../shared/*"
+      ],
+      "@modules/*": [
+        "src/modules/*"
+      ],
+      "@service/*": [
+        "src/service/*"
+      ],
+      "@models/*": [
+        "src/models/*"
+      ],
+      "@middlewares/*": [
+        "src/middlewares/*"
+      ]
     },
-    "types": ["node"],
-    "typeRoots": ["node_modules/@types"]
+    "types": [
+      "node"
+    ],
+    "typeRoots": [
+      "node_modules/@types"
+    ]
   },
   "ts-node": {
     "files": true
   },
-  "files": ["src/custom.request.d.ts"],
-  "include": ["src/**/*.ts", "spec/**/*.ts"],
-  "exclude": ["src/public/"]
+  "files": [
+    "src/custom_typings/request.d.ts"
+  ],
+  "include": [
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "src/public/"
+  ]
 }

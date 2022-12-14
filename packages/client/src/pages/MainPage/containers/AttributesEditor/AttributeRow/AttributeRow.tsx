@@ -33,7 +33,7 @@ export const AttributeRow: React.FC<AttributeRow> = ({
   }, [value]);
 
   return (
-    <StyledAttributeModalRow>
+    <StyledAttributeModalRow disabled={disabled}>
       <StyledAttributeModalRowLabel>
         <StyledAttributeModalRowLabelIcon>
           <AttributeIcon attributeName={attributeName} />

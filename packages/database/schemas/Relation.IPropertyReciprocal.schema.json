@@ -1,0 +1,35 @@
+{
+  "$ref": "#/definitions/Relation.IPropertyReciprocal",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "Relation.IPropertyReciprocal": {
+      "additionalProperties": false,
+      "properties": {
+        "entityIds": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 2,
+          "minItems": 2,
+          "type": "array"
+        },
+        "id": {
+          "type": "string"
+        },
+        "order": {
+          "type": "number"
+        },
+        "type": {
+          "const": "PRR",
+          "type": "string"
+        }
+      },
+      "required": [
+        "entityIds",
+        "id",
+        "type"
+      ],
+      "type": "object"
+    }
+  }
+}

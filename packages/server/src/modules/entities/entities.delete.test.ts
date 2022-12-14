@@ -1,6 +1,6 @@
 import { clean, testErroneousResponse } from "@modules/common.test";
 import {
-  EntityDoesNotExits,
+  EntityDoesNotExist,
   BadParams,
   InvalidDeleteError,
 } from "@shared/types/errors";
@@ -17,7 +17,7 @@ describe("Entities delete", function () {
   describe("empty data", () => {
     it("should return a BadParams error wrapped in IResponseGeneric", (done) => {
       return request(app)
-        .delete(`${apiPath}/entities/delete`)
+        .delete(`${apiPath}/entities`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(testErroneousResponse.bind(undefined, new BadParams("")))
@@ -25,13 +25,13 @@ describe("Entities delete", function () {
     });
   });
   describe("faulty data", () => {
-    it("should return a EntityDoesNotExits error wrapped in IResponseGeneric", (done) => {
+    it("should return a EntityDoesNotExist error wrapped in IResponseGeneric", (done) => {
       return request(app)
-        .delete(`${apiPath}/entities/delete/randomid12345`)
+        .delete(`${apiPath}/entities/randomid12345`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(
-          testErroneousResponse.bind(undefined, new EntityDoesNotExits("", ""))
+          testErroneousResponse.bind(undefined, new EntityDoesNotExist("", ""))
         )
         .then(() => done());
     });
@@ -44,7 +44,7 @@ describe("Entities delete", function () {
       await territory.save(db.connection);
 
       await request(app)
-        .delete(`${apiPath}/entities/delete/${territory.id}`)
+        .delete(`${apiPath}/entities/${territory.id}`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(200)
@@ -65,12 +65,12 @@ describe("Entities delete", function () {
       const root = new Territory({});
       await root.save(db.connection);
       const leaf = new Territory({
-        data: { parent: { id: root.id, order: -1 } },
+        data: { parent: { territoryId: root.id, order: -1 } },
       });
       await leaf.save(db.connection);
 
       await request(app)
-        .delete(`${apiPath}/entities/delete/${root.id}`)
+        .delete(`${apiPath}/entities/${root.id}`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(

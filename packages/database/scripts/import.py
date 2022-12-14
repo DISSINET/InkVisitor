@@ -15,10 +15,11 @@ from dotenv import dotenv_values
 
 r = RethinkDB()
 
-datasets = {"all": [
+datasets = {
+  "all": [
   {
     "name": "acl_permissions",
-    "datafile": "datasets/all/acl_permissions.json",
+    "datafile": "datasets/default/acl_permissions.json",
   },
   {
     "name": "entities",
@@ -29,27 +30,27 @@ datasets = {"all": [
       r
         .table("entities")
         .index_create(
-        "data.actants.actant",
-        r.row["data"]["actants"]["actant"]
+        "data.actants.entityId",
+        r.row["data"]["actants"]["entityId"]
       ),
       r
         .table("entities")
         .index_create(
-        "data.actions.action",
-        r.row["data"]["actions"]["action"]
+        "data.actions.actionId",
+        r.row["data"]["actions"]["actionId"]
       ),
       r.table("entities").index_create("data.tags", r.row["data"]["tags"]),
       r
         .table("entities")
         .index_create(
-        "data.props.type.id",
-        r.row["data"]["props"]["type"]["id"]
+        "data.props.type.entityId",
+        r.row["data"]["props"]["type"]["entityId"]
       ),
       r
         .table("entities")
         .index_create(
-        "data.props.value.id",
-        r.row["data"]["props"]["value"]["id"]
+        "data.props.value.entityId",
+        r.row["data"]["props"]["value"]["entityId"]
       ),
       r
         .table("entities")
@@ -62,15 +63,15 @@ datasets = {"all": [
         .index_create("data.props.origin", r.row["data"]["props"]["origin"]),
       r
         .table("entities")
-        .index_create("data.territory.id", r.row["data"]["territory"]["id"]),
+        .index_create("data.territory.territoryId", r.row["data"]["territory"]["territoryId"]),
       r
         .table("entities")
-        .index_create("data.parent.id", r.row["data"]["parent"]["id"]),
+        .index_create("data.parent.territoryId", r.row["data"]["parent"]["territoryId"]),
     ],
   },
   {
     "name": "users",
-    "datafile": "datasets/all/users.json",
+    "datafile": "datasets/default/users.json",
   },
   {
     "name": "audits",
@@ -79,7 +80,7 @@ datasets = {"all": [
 ],"all-test":[
   {
     "name": "acl_permissions",
-    "datafile": "datasets/all-test/acl_permissions.json",
+    "datafile": "datasets/default/acl_permissions.json",
   },
   {
     "name": "entities",
@@ -90,27 +91,27 @@ datasets = {"all": [
       r
         .table("entities")
         .index_create(
-        "data.actants.actant",
-        r.row["data"]["actants"]["actant"]
+        "data.actants.entityId",
+        r.row["data"]["actants"]["entityId"]
       ),
       r
         .table("entities")
         .index_create(
-        "data.actions.action",
-        r.row["data"]["actions"]["action"]
+        "data.actions.actionId",
+        r.row["data"]["actions"]["actionId"]
       ),
       r.table("actants").index_create("data.tags", r.row["data"]["tags"]),
       r
         .table("entities")
         .index_create(
-        "data.props.type.id",
-        r.row["data"]["props"]["type"]["id"]
+        "data.props.type.entityId",
+        r.row["data"]["props"]["type"]["entityId"]
       ),
       r
         .table("entities")
         .index_create(
-        "data.props.value.id",
-        r.row["data"]["props"]["value"]["id"]
+        "data.props.value.entityId",
+        r.row["data"]["props"]["value"]["entityId"]
       ),
       r
         .table("entities")
@@ -123,15 +124,15 @@ datasets = {"all": [
         .index_create("data.props.origin", r.row["data"]["props"]["origin"]),
       r
         .table("entities")
-        .index_create("data.territory.id", r.row["data"]["territory"]["id"]),
+        .index_create("data.territory.territoryId", r.row["data"]["territory"]["territoryId"]),
       r
         .table("entities")
-        .index_create("data.parent.id", r.row["data"]["parent"]["id"]),
+        .index_create("data.parent.territoryId", r.row["data"]["parent"]["territoryId"]),
     ],
   },
   {
     "name": "users",
-    "datafile": "datasets/all-test/users.json",
+    "datafile": "datasets/default/users.json",
   },
   {
     "name": "audits",
@@ -140,7 +141,7 @@ datasets = {"all": [
 ],"all-parsed":[
   {
     "name": "acl_permissions",
-    "datafile": "datasets/all-parsed/acl_permissions.json",
+    "datafile": "datasets/default/acl_permissions.json",
   },
   {
     "name": "entities",
@@ -151,27 +152,27 @@ datasets = {"all": [
       r
         .table("entities")
         .index_create(
-        "data.actants.actant",
-        r.row["data"]["actants"]["actant"]
+        "data.actants.entityId",
+        r.row["data"]["actants"]["entityId"]
       ),
       r
         .table("entities")
         .index_create(
-        "data.actions.action",
-        r.row["data"]["actions"]["action"]
+        "data.actions.actionId",
+        r.row["data"]["actions"]["actionId"]
       ),
       r.table("actants").index_create("data.tags", r.row["data"]["tags"]),
       r
         .table("entities")
         .index_create(
-        "data.props.type.id",
-        r.row["data"]["props"]["type"]["id"]
+        "data.props.type.entityId",
+        r.row["data"]["props"]["type"]["entityId"]
       ),
       r
         .table("entities")
         .index_create(
-        "data.props.value.id",
-        r.row["data"]["props"]["value"]["id"]
+        "data.props.value.entityId",
+        r.row["data"]["props"]["value"]["entityId"]
       ),
       r
         .table("entities")
@@ -184,10 +185,10 @@ datasets = {"all": [
         .index_create("data.props.origin", r.row["data"]["props"]["origin"]),
       r
         .table("entities")
-        .index_create("data.territory.id", r.row["data"]["territory"]["id"]),
+        .index_create("data.territory.territoryId", r.row["data"]["territory"]["territoryId"]),
       r
         .table("entities")
-        .index_create("data.parent.id", r.row["data"]["parent"]["id"]),
+        .index_create("data.parent.territoryId", r.row["data"]["parent"]["territoryId"]),
     ],
   },
   {

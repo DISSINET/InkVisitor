@@ -1,16 +1,12 @@
 import Entity from "@models/entity/entity";
 import { fillFlatObject, IModel, UnknownObject } from "@models/common";
-import { EntityClass, EntityLogicalType } from "@shared/enums";
-import { IEvent } from "@shared/types";
+import { EntityEnums } from "@shared/enums";
+import { IEvent, IEventData } from "@shared/types";
 
-class EventData implements IModel {
-  logicalType: EntityLogicalType = EntityLogicalType.Definite;
+class EventData implements IEventData, IModel {
+  logicalType: EntityEnums.LogicalType = EntityEnums.LogicalType.Definite;
 
-  constructor(data: UnknownObject) {
-    if (!data) {
-      return;
-    }
-
+  constructor(data: Partial<IEventData>) {
     fillFlatObject(this, data);
   }
 
@@ -20,25 +16,20 @@ class EventData implements IModel {
 }
 
 class Event extends Entity implements IEvent {
-  class: EntityClass.Event = EntityClass.Event; // just default
+  class: EntityEnums.Class.Event = EntityEnums.Class.Event; // just default
   data: EventData;
 
-  constructor(data: UnknownObject) {
+  constructor(data: Partial<IEvent>) {
     super(data);
-
-    if (!data) {
-      data = {};
-    }
-
-    this.data = new EventData(data.data as UnknownObject);
+    this.data = new EventData(data.data || {});
   }
 
   isValid(): boolean {
-    if (this.class !== EntityClass.Event) {
+    if (this.class !== EntityEnums.Class.Event) {
       return false;
     }
 
-    return this.data.isValid();
+    return super.isValid() && this.data.isValid();
   }
 }
 

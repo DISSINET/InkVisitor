@@ -1,28 +1,28 @@
-import { EntityLogicalType } from "../enums";
+import { EntityEnums } from "../enums";
 
 export const actantLogicalTypeDict: {
   value: string;
   label: string;
   info?: string;
 }[] = [
-  {
-    value: EntityLogicalType.Definite,
-    label: "definite",
-    info: "",
-  },
-  {
-    value: EntityLogicalType.Indefinite,
-    label: "indefinite",
-    info: "",
-  },
-  {
-    value: EntityLogicalType.Hypothetical,
-    label: "hypothetical",
-    info: "",
-  },
-  {
-    value: EntityLogicalType.Generic,
-    label: "generic",
-    info: "",
-  },
-];
+    {
+      value: EntityEnums.LogicalType.Definite,
+      label: "definite",
+      info: "",
+    },
+    {
+      value: EntityEnums.LogicalType.Indefinite,
+      label: "indefinite",
+      info: "",
+    },
+    {
+      value: EntityEnums.LogicalType.Hypothetical,
+      label: "hypothetical",
+      info: "",
+    },
+    {
+      value: EntityEnums.LogicalType.Generic,
+      label: "generic",
+      info: "",
+    },
+  ];

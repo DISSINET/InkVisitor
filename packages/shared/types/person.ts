@@ -1,9 +1,11 @@
 import { IEntity } from ".";
-import { EntityClass, EntityLogicalType } from "../enums";
+import { EntityEnums } from "../enums";
 
 export interface IPerson extends IEntity {
-  class: EntityClass.Person;
-  data: {
-    logicalType: EntityLogicalType;
-  };
+  class: EntityEnums.Class.Person;
+  data: IPersonData;
+}
+
+export interface IPersonData {
+  logicalType: EntityEnums.LogicalType;
 }

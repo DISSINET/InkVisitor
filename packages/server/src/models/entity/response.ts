@@ -1,8 +1,8 @@
-import { Request } from "express";
-import { UsedInPosition, UserRoleMode } from "@shared/enums";
+import { EntityEnums, UserEnums } from "@shared/enums";
 import {
   IEntity,
   IProp,
+  Relation as RelationTypes,
   IResponseDetail,
   IResponseEntity,
   IResponseUsedInMetaProp,
@@ -13,90 +13,273 @@ import Entity from "./entity";
 import Statement from "@models/statement/statement";
 import { nonenumerable } from "@common/decorators";
 import { Connection } from "rethinkdb-ts";
-import { IResponseUsedInStatementProps } from "@shared/types/response-detail";
+import {
+  IResponseUsedInStatementClassification,
+  IResponseUsedInStatementIdentification,
+  IResponseUsedInStatementProps,
+} from "@shared/types/response-detail";
+import { IRequest } from "src/custom_typings/request";
+import {
+  IStatementClassification,
+  IStatementIdentification,
+} from "@shared/types/statement";
+import Relation from "@models/relation/relation";
 
 export class ResponseEntity extends Entity implements IResponseEntity {
+  // map of entity ids that should be populated in subsequent methods and used in fetching
+  // real entities in populateEntitiesMap method
+  // used in derived classes
   @nonenumerable
-  originalEntity: Entity;
+  linkedEntitiesIds: Record<string, undefined> = {};
 
-  right: UserRoleMode = UserRoleMode.Read;
+  right: UserEnums.RoleMode = UserEnums.RoleMode.Read;
 
   constructor(entity: Entity) {
     super({});
-    for (const key of Object.keys(entity)) {
-      (this as any)[key] = (entity as any)[key];
-    }
-    this.originalEntity = entity;
+
+    // using proxy to use the original entity - not the parent class which is used only to
+    // satisfy the interface
+    return new Proxy(this, {
+      ownKeys(target) {
+        return [
+          ...new Set(Reflect.ownKeys(entity).concat(Object.keys(target))),
+        ];
+      },
+      getOwnPropertyDescriptor(target, prop) {
+        return (
+          Object.getOwnPropertyDescriptor(entity, prop) ||
+          Object.getOwnPropertyDescriptor(target, prop)
+        );
+      },
+      get(target, prop, receiver) {
+        return (entity as any)[prop] || ((target as any)[prop as any] as any);
+      },
+    });
   }
 
   /**
    * Loads additional fields to satisfy the IResponseDetail interface
-   * @param req
+   * @param request
    */
-  async prepare(request: Request) {
-    this.right = this.originalEntity.getUserRoleMode(request.getUserOrFail());
+  prepare(request: IRequest) {
+    this.right = this.getUserRoleMode(request.getUserOrFail());
+  }
+
+  /**
+   * gathered ids from previous calls should be used to populate entities map
+   * @param conn
+   */
+  async populateEntitiesMap(
+    conn: Connection
+  ): Promise<Record<string, IEntity>> {
+    const entities: Record<string, IEntity> = {};
+
+    const additionalEntities = await Entity.findEntitiesByIds(
+      conn,
+      Object.keys(this.linkedEntitiesIds)
+    );
+    for (const entity of additionalEntities) {
+      entities[entity.id] = entity;
+    }
+
+    return entities;
+  }
+
+  /**
+   * populated linked entities map with either single id or list of ids
+   * @param idOrIds
+   */
+  addLinkedEntities(idOrIds: undefined | string | string[]) {
+    if (!idOrIds) {
+      return;
+    }
+
+    if (typeof idOrIds === "object") {
+      for (const id of idOrIds) {
+        this.addLinkedEntities(id);
+      }
+    } else {
+      this.linkedEntitiesIds[idOrIds] = undefined;
+    }
   }
 }
 
 export class ResponseEntityDetail
   extends ResponseEntity
-  implements IResponseDetail
-{
-  entities: { [key: string]: IEntity };
-  usedInStatement: IResponseUsedInStatement<UsedInPosition>[];
+  implements IResponseDetail {
+  entities: Record<string, IEntity>;
+  usedInStatements: IResponseUsedInStatement<EntityEnums.UsedInPosition>[];
   usedInStatementProps: IResponseUsedInStatementProps[];
-  usedInMetaProps: IResponseUsedInMetaProp<UsedInPosition>[];
+  usedInMetaProps: IResponseUsedInMetaProp[];
   usedAsTemplate?: string[] | undefined;
+  usedInStatementIdentifications: IResponseUsedInStatementIdentification[];
+  usedInStatementClassifications: IResponseUsedInStatementClassification[];
 
-  // map of entity ids that should be populated in subsequent methods and used in fetching
-  // real entities in populateEntitiesMap method
-  @nonenumerable
-  postponedEntities: Record<string, undefined> = {};
+  relations: RelationTypes.IRelation[] = [];
 
   constructor(entity: Entity) {
     super(entity);
     this.entities = {};
-    this.usedInStatement = [];
+    this.usedInStatements = [];
     this.usedInStatementProps = [];
     this.usedInMetaProps = [];
+    this.usedInStatementClassifications = [];
+    this.usedInStatementIdentifications = [];
 
-    for (const key of this.originalEntity.getEntitiesIds()) {
-      this.postponedEntities[key] = undefined;
-    }
+    this.addLinkedEntities(this.getEntitiesIds());
   }
 
   /**
    * Loads additional fields to satisfy the IResponseDetail interface
    * @param req
    */
-  async prepare(req: Request): Promise<void> {
+  async prepare(req: IRequest): Promise<void> {
     super.prepare(req);
 
-    // find entities in which at least one props reference equals this.id
-    const usedInEntityProps = await Entity.findUsedInProps(
-      req.db.connection,
-      this.id
-    );
+    const conn = req.db.connection;
 
-    for (const entity of usedInEntityProps) {
-      this.walkEntityProps(entity, entity.props);
+    // find entities in which at least one props reference equals this.id
+    for (const entity of await Entity.findUsedInProps(conn, this.id)) {
+      this.walkEntityProps(entity.id, entity.props);
     }
 
     this.walkStatementsDataEntities(
-      await Statement.findUsedInDataEntities(req.db.connection, this.id)
+      await Statement.getLinkedEntities(conn, this.id)
     );
 
     this.walkStatementsDataProps(
-      await Statement.findUsedInDataProps(req.db.connection, this.id)
+      await Statement.findByDataPropsId(conn, this.id)
     );
 
-    if (this.usedTemplate) {
-      this.postponedEntities[this.usedTemplate] = undefined;
+    this.addLinkedEntities(this.usedAsTemplate);
+
+    await this.populateInStatementsRelations(
+      await Statement.findByDataActantsCI(conn, this.id)
+    );
+
+    this.relations = await Relation.getForEntity<RelationTypes.IRelation>(
+      conn,
+      this.id
+    );
+
+    this.entities = await this.populateEntitiesMap(conn);
+
+    await this.processTemplateData(conn);
+  }
+
+  /**
+   * Loads entries for usedInStatementIdentifications and usedInStatementClassifications fields
+   * Needs to be called after walkStatementsDataEntities, since it uses also populated
+   * entries in usedInStatements field
+   * @param statements
+   */
+  async populateInStatementsRelations(statements: IStatement[]): Promise<void> {
+    for (const statement of statements) {
+      for (const actant of statement.data.actants) {
+        for (const classData of actant.classifications || []) {
+          if (classData.entityId === this.id) {
+            this.addToClassifications(
+              statement.id,
+              actant.entityId,
+              this.id,
+              classData
+            );
+          }
+        }
+
+        for (const identification of actant.identifications || []) {
+          if (identification.entityId === this.id) {
+            this.addToIdentifications(
+              statement.id,
+              actant.entityId,
+              this.id,
+              identification
+            );
+          }
+        }
+      }
     }
 
-    await this.populateEntitiesMap(req.db.connection);
+    // add Cs/Is, that are in actant object, that has the same ID as this entity
+    const usedAsActants = this.usedInStatements.filter(
+      (us) => us.position === EntityEnums.UsedInPosition.Actant
+    );
+    for (const usedAsActant of usedAsActants) {
+      const actants = usedAsActant.statement.data.actants.filter(
+        (a) => a.entityId === this.id
+      );
+      for (const actant of actants) {
+        actant.classifications?.forEach((c) =>
+          this.addToClassifications(
+            usedAsActant.statement.id,
+            actant.entityId,
+            c.entityId,
+            c
+          )
+        );
+        actant.identifications?.forEach((i) =>
+          this.addToIdentifications(
+            usedAsActant.statement.id,
+            actant.entityId,
+            i.entityId,
+            i
+          )
+        );
+      }
+    }
 
-    await this.processTemplateData(req.db.connection);
+    this.usedInStatementClassifications.forEach((c) => {
+      this.addLinkedEntities(c.statementId);
+      this.addLinkedEntities(c.actantEntityId);
+      this.addLinkedEntities(c.relationEntityId);
+    });
+    this.usedInStatementIdentifications.forEach((c) => {
+      this.addLinkedEntities(c.statementId);
+      this.addLinkedEntities(c.actantEntityId);
+      this.addLinkedEntities(c.relationEntityId);
+    });
+  }
+
+  /**
+   * Shorthand function for adding IResponseUsedInStatementClassification entries
+   * @param sID
+   * @param actantEID
+   * @param relationEID
+   * @param data
+   */
+  addToClassifications(
+    sID: string,
+    actantEID: string,
+    relationEID: string,
+    data: IStatementClassification
+  ) {
+    this.usedInStatementClassifications.push({
+      statementId: sID,
+      actantEntityId: actantEID,
+      relationEntityId: relationEID,
+      data,
+    });
+  }
+
+  /**
+   * Shorthand function for adding usedInStatementIdentification entries
+   * @param sID
+   * @param actantEID
+   * @param relationEID
+   * @param data
+   */
+  addToIdentifications(
+    sID: string,
+    actantEID: string,
+    relationEID: string,
+    data: IStatementIdentification
+  ) {
+    this.usedInStatementIdentifications.push({
+      statementId: sID,
+      actantEntityId: actantEID,
+      relationEntityId: relationEID,
+      data,
+    });
   }
 
   /**
@@ -107,22 +290,7 @@ export class ResponseEntityDetail
     const casts = await this.findFromTemplate(conn);
     this.usedAsTemplate = casts.map((c) => c.id);
 
-    console.log(this.usedAsTemplate);
     casts.forEach((c) => (this.entities[c.id] = c));
-  }
-
-  /**
-   * gathered ids from previous calls should be used to populate entities map
-   * @param conn
-   */
-  async populateEntitiesMap(conn: Connection): Promise<void> {
-    const additionalEntities = await Entity.findEntitiesByIds(
-      conn,
-      Object.keys(this.postponedEntities)
-    );
-    for (const entity of additionalEntities) {
-      this.entities[entity.id] = entity;
-    }
   }
 
   /**
@@ -130,23 +298,19 @@ export class ResponseEntityDetail
    * @param actant
    * @param props
    */
-  walkEntityProps(actant: IEntity, props: IProp[]) {
-    // if actant is linked to this detail entity - should be pushed to entities map
-    let actantValid = false;
-
+  walkEntityProps(originId: string, props: IProp[]) {
     for (const prop of props) {
-      if (prop.type.id === this.id || prop.value.id === this.id) {
-        this.addUsedInMetaProp(actant.id, prop.value.id, prop.type.id);
-        actantValid = true;
+      if (prop.type.entityId === this.id || prop.value.entityId === this.id) {
+        this.addUsedInMetaProp(
+          originId,
+          prop.value.entityId,
+          prop.type.entityId
+        );
       }
 
       if (prop.children.length) {
-        this.walkEntityProps(actant, prop.children);
+        this.walkEntityProps(originId, prop.children);
       }
-    }
-
-    if (actantValid) {
-      this.entities[actant.id] = actant;
     }
   }
 
@@ -157,14 +321,21 @@ export class ResponseEntityDetail
    * @param typeId
    */
   addUsedInMetaProp(originId: string, valueId: string, typeId: string) {
-    this.usedInMetaProps.push({
-      originId,
-      valueId,
-      typeId,
-    });
-    this.postponedEntities[originId] = undefined;
-    this.postponedEntities[valueId] = undefined;
-    this.postponedEntities[typeId] = undefined;
+    if (
+      !this.usedInMetaProps.find(
+        (u) =>
+          u.originId === originId &&
+          u.valueId === valueId &&
+          u.typeId === typeId
+      )
+    ) {
+      this.usedInMetaProps.push({
+        originId,
+        valueId,
+        typeId,
+      });
+    }
+    this.addLinkedEntities([originId, valueId, typeId]);
   }
 
   /**
@@ -174,43 +345,42 @@ export class ResponseEntityDetail
   walkStatementsDataEntities(statements: IStatement[]) {
     for (const statement of statements) {
       for (const action of statement.data.actions) {
-        if (action.action === this.id) {
-          this.addUsedInStatement(statement, UsedInPosition.Action);
+        if (action.actionId === this.id) {
+          this.addUsedInStatement(statement, EntityEnums.UsedInPosition.Action);
         }
       }
 
       for (const actant of statement.data.actants) {
-        if (actant.actant === this.id) {
-          this.addUsedInStatement(statement, UsedInPosition.Actant);
+        if (actant.entityId === this.id) {
+          this.addUsedInStatement(statement, EntityEnums.UsedInPosition.Actant);
         }
       }
 
       for (const tag of statement.data.tags) {
         if (tag === this.id) {
-          this.addUsedInStatement(statement, UsedInPosition.Tag);
+          this.addUsedInStatement(statement, EntityEnums.UsedInPosition.Tag);
         }
       }
     }
   }
 
   /**
-   * Adds statement to usedInStatement & entities fields
+   * Adds statement to usedInStatements & entities fields
    * @param statement
    * @param position
    */
-  addUsedInStatement(statement: IStatement, position: UsedInPosition) {
-    this.usedInStatement.push({
+  addUsedInStatement(
+    statement: IStatement,
+    position: EntityEnums.UsedInPosition
+  ) {
+    this.usedInStatements.push({
       statement,
       position,
     });
 
-    this.entities[statement.id] = statement;
-    statement.data.actants.forEach((actant) => {
-      this.postponedEntities[actant.actant] = undefined;
-    });
-    statement.data.actions.forEach((action) => {
-      this.postponedEntities[action.action] = undefined;
-    });
+    this.addLinkedEntities(statement.id);
+    this.addLinkedEntities(statement.data.actants.map((a) => a.entityId));
+    this.addLinkedEntities(statement.data.actions.map((a) => a.actionId));
   }
 
   /**
@@ -222,7 +392,7 @@ export class ResponseEntityDetail
       for (const action of statement.data.actions) {
         this.walkStatementDataRecursiveProps(
           statement,
-          action.action,
+          action.actionId,
           action.props
         );
       }
@@ -230,7 +400,7 @@ export class ResponseEntityDetail
       for (const actant of statement.data.actants) {
         this.walkStatementDataRecursiveProps(
           statement,
-          actant.actant,
+          actant.entityId,
           actant.props
         );
       }
@@ -238,7 +408,7 @@ export class ResponseEntityDetail
   }
 
   /**
-   * Adds statement to usedInStatement & entities fields
+   * Adds statement to usedInStatements & entities fields
    * @param statement
    * @param originId
    * @param props
@@ -249,12 +419,12 @@ export class ResponseEntityDetail
     props: IProp[]
   ) {
     for (const prop of props) {
-      if (prop.type.id === this.id || prop.value.id === this.id) {
+      if (prop.type.entityId === this.id || prop.value.entityId === this.id) {
         this.addUsedInStatementProp(
           statement.id,
           originId,
-          prop.type.id,
-          prop.value.id
+          prop.type.entityId,
+          prop.value.entityId
         );
       }
 
@@ -288,9 +458,6 @@ export class ResponseEntityDetail
       valueId,
     });
 
-    this.postponedEntities[statementId] = undefined;
-    this.postponedEntities[originId] = undefined;
-    this.postponedEntities[valueId] = undefined;
-    this.postponedEntities[typeId] = undefined;
+    this.addLinkedEntities([statementId, originId, valueId, typeId]);
   }
 }
