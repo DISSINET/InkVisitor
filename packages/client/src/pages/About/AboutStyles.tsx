@@ -1,4 +1,3 @@
-import { StyledHead } from "components/Box/BoxStyles";
 import styled from "styled-components";
 import theme from "Theme/theme";
 

@@ -18,8 +18,6 @@ import {
   hiddenBoxHeight,
 } from "Theme/constants";
 
-import { AboutModal } from "../About/AboutModal";
-
 import { MemoizedEntityBookmarkBox } from "./containers/EntityBookmarkBox/EntityBookmarkBox";
 import { MemoizedEntityDetailBox } from "./containers/EntityDetailBox/EntityDetailBox";
 import { MemoizedEntitySearchBox } from "./containers/EntitySearchBox/EntitySearchBox";
@@ -42,8 +40,6 @@ const MainPage: React.FC<MainPage> = ({ }) => {
     (state) => state.layout.fourthPanelBoxesOpened
   );
 
-  const [aboutOpen, setAboutOpen] = useState<boolean>(true);
-
   const firstPanelExpanded: boolean = useAppSelector(
     (state) => state.layout.firstPanelExpanded
   );
@@ -62,12 +58,6 @@ const MainPage: React.FC<MainPage> = ({ }) => {
   const statementListOpened: boolean = useAppSelector(
     (state) => state.layout.statementListOpened
   );
-  const handleOpenAbout = () => {
-    setAboutOpen(true);
-  };
-  const handleCloseAbout = () => {
-    setAboutOpen(false);
-  };
 
   const firstPanelButton = () => (
     <Button
@@ -300,7 +290,6 @@ const MainPage: React.FC<MainPage> = ({ }) => {
           <MemoizedTemplateListBox />
         </Box>
       </Panel>
-      <AboutModal isOpen={aboutOpen} onCloseFn={handleCloseAbout} />
     </>
   );
 };

@@ -16,11 +16,9 @@ import {
   StyledModalLink,
   StyledModalLogo,
   StyledModalText,
-  StyledModalSubTitle,
-  StyledModalTitle,
   StyledModalTextListItem,
   StyledModalTextList,
-} from "./AboutModalStyles";
+} from "./AboutStyles";
 
 import LogoInkvisitor from "assets/logos/inkvisitor-full.svg";
 import { AiOutlineLink } from "react-icons/ai";
@@ -90,15 +88,12 @@ const PersonWithIcon: React.FC<IPersonWithIcon> = ({ label, url }) => {
     </StyledModalLink>
   );
 };
-interface IAboutModal {
-  isOpen: boolean;
-  onCloseFn: Function;
+interface IAboutPage {
 }
 
-export const AboutModal: React.FC<IAboutModal> = ({ isOpen, onCloseFn }) => {
+export const AboutPage: React.FC<IAboutPage> = ({ }) => {
   return (
-    <Modal showModal={isOpen} onClose={() => onCloseFn()} width={"fat"}>
-      <ModalHeader title={"About"} />
+    <div style={{ margin: "auto" }}>
       <ModalContent>
         <StyledModalContentWrapper>
           <StyledModalLogo>
@@ -210,17 +205,6 @@ export const AboutModal: React.FC<IAboutModal> = ({ isOpen, onCloseFn }) => {
           </StyledModalAcknowledgement>
         </StyledModalContentWrapper>
       </ModalContent>
-      <ModalFooter>
-        <ButtonGroup>
-          <Button
-            key="close"
-            label="Close"
-            color="primary"
-            inverted
-            onClick={() => onCloseFn()}
-          />
-        </ButtonGroup>
-      </ModalFooter>
-    </Modal >
+    </div >
   );
 };
