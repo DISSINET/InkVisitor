@@ -1,6 +1,6 @@
 import { certaintyDict } from "@shared/dictionaries";
 import { RelationEnums } from "@shared/enums";
-import { IResponseEntity, IResponseGeneric, Relation } from "@shared/types";
+import { IEntity, IResponseGeneric, Relation } from "@shared/types";
 import { AxiosResponse } from "axios";
 import { Button, Dropdown } from "components";
 import { EntityTag } from "components/advanced";
@@ -25,7 +25,7 @@ interface EntityDetailRelationRow {
   entityId: string;
   relationRule: Relation.RelationRule;
   relationType: RelationEnums.Type;
-  entities?: IResponseEntity[];
+  entities: Record<string, IEntity>;
   relationUpdateMutation: UseMutationResult<
     AxiosResponse<IResponseGeneric>,
     unknown,
@@ -42,7 +42,6 @@ interface EntityDetailRelationRow {
     unknown
   >;
 
-  isMultiple: boolean;
   hasOrder: boolean;
   moveRow: (dragIndex: number, hoverIndex: number) => void;
   index: number;
@@ -57,7 +56,6 @@ export const EntityDetailRelationRow: React.FC<EntityDetailRelationRow> = ({
   relationUpdateMutation,
   relationDeleteMutation,
 
-  isMultiple,
   hasOrder,
   moveRow,
   index,
@@ -131,7 +129,7 @@ export const EntityDetailRelationRow: React.FC<EntityDetailRelationRow> = ({
       hasOrder={hasOrder}
     >
       {relation.entityIds.map((relationEntityId, key) => {
-        const relationEntity = entities?.find((e) => e.id === relationEntityId);
+        const relationEntity = entities[relationEntityId];
         return (
           <React.Fragment key={key}>
             {relationEntity &&

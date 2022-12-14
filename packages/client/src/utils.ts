@@ -8,7 +8,6 @@ import {
   Relation,
 } from "@shared/types";
 import { DropTargetMonitor, XYCoord } from "react-dnd";
-import { restrictedIDEClasses } from "Theme/constants";
 import { DragItem, EntityDragItem } from "types";
 
 // TODO: not used, references not in statement data interface
@@ -150,7 +149,7 @@ export const getShortLabelByLetterCount = (
   maxLetterCount: number
 ) => {
   const isOversized = label.length > maxLetterCount;
-  return isOversized ? label.slice(0, 200).concat("...") : label;
+  return isOversized ? label.slice(0, maxLetterCount).concat("...") : label;
 };
 
 // Returns one more level, because there's always empty subtree array on the deepest level
@@ -166,19 +165,16 @@ export const getRelationTreeDepth = (
   );
 };
 
-export const getEntityRelationRules = (entityClass: EntityEnums.Class) => {
-  const relationRulesArray = Object.keys(Relation.RelationRules);
-  return relationRulesArray.filter((rule) => {
-    if (
-      !Relation.RelationRules[rule].allowedEntitiesPattern.length &&
-      !(
-        rule === RelationEnums.Type.Identification &&
-        restrictedIDEClasses.includes(entityClass)
-      )
-    ) {
+export const getEntityRelationRules = (
+  entityClass: EntityEnums.Class,
+  relationTypes?: RelationEnums.Type[]
+) => {
+  const typesToFilter = relationTypes ? relationTypes : RelationEnums.AllTypes;
+  return typesToFilter.filter((rule) => {
+    if (!Relation.RelationRules[rule]?.allowedEntitiesPattern.length) {
       return rule;
     } else if (
-      Relation.RelationRules[rule].allowedEntitiesPattern.some(
+      Relation.RelationRules[rule]?.allowedEntitiesPattern.some(
         (pair) => pair[0] === entityClass
       )
     ) {
@@ -187,12 +183,15 @@ export const getEntityRelationRules = (entityClass: EntityEnums.Class) => {
   });
 };
 
-export const getRelationInvertedRules = (entityClass: EntityEnums.Class) => {
-  const relationRulesArray = Object.keys(Relation.RelationRules);
-  return relationRulesArray.filter((rule) => {
+export const getRelationInvertedRules = (
+  entityClass: EntityEnums.Class,
+  relationTypes?: RelationEnums.Type[]
+) => {
+  const typesToFilter = relationTypes ? relationTypes : RelationEnums.AllTypes;
+  return RelationEnums.AllTypes.filter((rule) => {
     if (
-      Relation.RelationRules[rule].asymmetrical &&
-      Relation.RelationRules[rule].allowedEntitiesPattern.some(
+      Relation.RelationRules[rule]?.asymmetrical &&
+      Relation.RelationRules[rule]?.allowedEntitiesPattern.some(
         (pair) => pair[1] === entityClass
       )
     ) {

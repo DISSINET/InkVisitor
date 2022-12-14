@@ -1,4 +1,4 @@
-import { IResponseEntity, IResponseGeneric, Relation } from "@shared/types";
+import { IEntity, IResponseGeneric, Relation } from "@shared/types";
 import { AxiosResponse } from "axios";
 import { Cloud } from "components";
 import { EntityTag } from "components/advanced";
@@ -6,14 +6,13 @@ import React from "react";
 import { UseMutationResult } from "react-query";
 import {
   StyledCloudEntityWrapper,
-  StyledGrid,
   StyledRelation,
 } from "../EntityDetailRelationTypeBlockStyles";
 
 interface EntityDetailCloudRelation {
   relation: Relation.IRelation;
   entityId: string;
-  entities?: IResponseEntity[];
+  entities: Record<string, IEntity>;
   relations: Relation.IRelation[];
   relationUpdateMutation: UseMutationResult<
     AxiosResponse<IResponseGeneric>,
@@ -59,9 +58,7 @@ export const EntityDetailCloudRelation: React.FC<EntityDetailCloudRelation> = ({
         <Cloud onUnlink={() => handleCloudRemove()}>
           <StyledRelation>
             {relation.entityIds.map((relationEntityId, key) => {
-              const relationEntity = entities?.find(
-                (e) => e.id === relationEntityId
-              );
+              const relationEntity = entities[relationEntityId];
               return (
                 <React.Fragment key={key}>
                   {relationEntity && relationEntity.id !== entityId && (

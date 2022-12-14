@@ -3,6 +3,7 @@ import { EnumValidators } from "@shared/enums";
 import Relation from "./relation";
 import { Relation as RelationTypes } from "@shared/types";
 import { ModelNotValidError } from "@shared/types/errors";
+import { Connection } from "rethinkdb-ts";
 
 export default class Identification extends Relation implements RelationTypes.IIdentification {
   certainty: EntityEnums.Certainty;
@@ -17,29 +18,11 @@ export default class Identification extends Relation implements RelationTypes.II
   }
 
   /**
-  * areEntitiesValid checks if entities have acceptable classes
-  * @returns 
-  */
-  areEntitiesValid(): Error | null {
-    for (const entityId of this.entityIds) {
-      if (!this.hasEntityCorrectClass(entityId, EntityEnums.PLOGESTRB)) {
-        return new ModelNotValidError(`Entity '${entityId}' does not have valid class`);
-      }
-    }
-
-    return null;
-  }
-
-  /**
    * Test validity of the model
    * @returns 
    */
   isValid(): boolean {
     if (!super.isValid()) {
-      return false;
-    }
-
-    if (this.entityIds.length !== 2) {
       return false;
     }
 
@@ -49,4 +32,65 @@ export default class Identification extends Relation implements RelationTypes.II
 
     return true;
   }
+
+  static async getIdentificationForwardConnections(
+    conn: Connection,
+    entityId: string,
+    requiredCertainty: EntityEnums.Certainty,
+    maxNestLvl: number,
+    nestLvl: number
+  ): Promise<RelationTypes.IConnection<RelationTypes.IIdentification>[]> {
+    const out: RelationTypes.IConnection<RelationTypes.IIdentification>[] = [];
+
+    if (nestLvl > maxNestLvl) {
+      return out;
+    }
+
+    let relations: RelationTypes.IIdentification[] = await Relation.getForEntity(
+      conn,
+      entityId,
+      RelationEnums.Type.Identification,
+      0
+    );
+    let thresholdReached = false;
+
+    if (requiredCertainty !== EntityEnums.Certainty.Empty) {
+      // if non-empty certainty, then some lvl of certainty needs to be respected
+      relations = relations.filter(
+        (r) => r.certainty === EntityEnums.Certainty.Certain
+      );
+    } else {
+      // empty certainty will end the search below
+      thresholdReached = true;
+    }
+
+    for (const relation of relations) {
+      const subparentId = relation.entityIds[1];
+      const connection: RelationTypes.IConnection<RelationTypes.IIdentification> =
+      {
+        ...relation,
+        subtrees: [],
+      };
+
+      if (!thresholdReached) {
+        // either continue with Certain or use Empty
+        const nextThreshold =
+          relation.certainty === EntityEnums.Certainty.Certain
+            ? EntityEnums.Certainty.Certain
+            : EntityEnums.Certainty.Empty;
+        connection.subtrees = await Identification.getIdentificationForwardConnections(
+          conn,
+          subparentId,
+          nextThreshold,
+          maxNestLvl,
+          nestLvl + 1
+        );
+      }
+
+      out.push(connection);
+    }
+
+    return out;
+  };
+
 }

@@ -1,8 +1,8 @@
 import { entitiesDict } from "@shared/dictionaries";
 import { EntityEnums, RelationEnums } from "@shared/enums";
 import {
+  IEntity,
   IResponseDetail,
-  IResponseEntity,
   IResponseGeneric,
   Relation,
 } from "@shared/types";
@@ -14,7 +14,6 @@ import update from "immutability-helper";
 import React, { useCallback, useEffect, useState } from "react";
 import { TbArrowNarrowRight, TbArrowsHorizontal } from "react-icons/tb";
 import { UseMutationResult, useQuery } from "react-query";
-import { restrictedIDEClasses } from "Theme/constants";
 import theme from "Theme/theme";
 import { v4 as uuidv4 } from "uuid";
 import { EntityDetailCloudRelation } from "./EntityDetailCloudRelation/EntityDetailCloudRelation";
@@ -29,9 +28,9 @@ import {
 
 // relations for one type
 interface EntityDetailRelationTypeBlock {
-  relations: Relation.IRelation[];
-  relationType: string;
-  entities?: IResponseEntity[];
+  relations?: Relation.IRelation[];
+  relationType: RelationEnums.Type;
+  entities: Record<string, IEntity>;
   relationCreateMutation: UseMutationResult<
     AxiosResponse<IResponseGeneric>,
     unknown,
@@ -61,7 +60,7 @@ interface EntityDetailRelationTypeBlock {
 export const EntityDetailRelationTypeBlock: React.FC<
   EntityDetailRelationTypeBlock
 > = ({
-  relations,
+  relations = [],
   relationType,
   entities,
   relationCreateMutation,
@@ -72,7 +71,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
   hasOrder,
   entity,
 }) => {
-  const relationRule = Relation.RelationRules[relationType];
+  const relationRule = Relation.RelationRules[relationType]!;
 
   // For suggester
   const getCategoryTypes = (): EntityEnums.ExtendedClass[] | undefined => {
@@ -107,13 +106,8 @@ export const EntityDetailRelationTypeBlock: React.FC<
         return [...new Set(collectedEntities)];
       }
     } else {
-      // Multiple
-      const allEntities = entitiesDict.map((e) => e.value as EntityEnums.Class);
-      if (relationType === RelationEnums.Type.Identification) {
-        return allEntities.filter((e) => !restrictedIDEClasses.includes(e));
-      } else {
-        return allEntities;
-      }
+      // Multiple - all entities
+      return entitiesDict.map((e) => e.value as EntityEnums.Class);
     }
   };
 
@@ -130,7 +124,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
       const newRelation: Relation.IRelation = {
         id: uuidv4(),
         entityIds: [entity.id, selectedId],
-        type: relationType as RelationEnums.Type,
+        type: relationType,
       };
       relationCreateMutation.mutate(newRelation);
     }
@@ -146,11 +140,11 @@ export const EntityDetailRelationTypeBlock: React.FC<
     setUsedEntityIds([...new Set(entityIds)]);
   }, [entities, relations]);
 
+  // TODO: Lift cloud handling to EntityDetailRelations
   const [tempCloudEntityId, setTempCloudEntityId] = useState<string | false>(
     false
   );
-
-  const {} = useQuery(
+  const { isLoading, isFetching } = useQuery(
     ["relation-entity-temp", tempCloudEntityId],
     async () => {
       if (tempCloudEntityId) {
@@ -165,18 +159,18 @@ export const EntityDetailRelationTypeBlock: React.FC<
       enabled: api.isLoggedIn() && !!tempCloudEntityId,
     }
   );
-
   const addToCloud = (cloudEntity: IResponseDetail) => {
-    const selectedEntityRelation = cloudEntity.relations.find(
-      (r) => r.type === relationType
-    );
-    if (selectedEntityRelation) {
+    const selectedEntityRelation =
+      cloudEntity.relations[relationType]?.connections;
+    // console.log(cloudEntity);
+
+    if (selectedEntityRelation?.length) {
       // update existing relation
       const changes = {
-        entityIds: [...selectedEntityRelation.entityIds, entity.id],
+        entityIds: [...selectedEntityRelation[0].entityIds, entity.id],
       };
       relationUpdateMutation.mutate({
-        relationId: selectedEntityRelation.id,
+        relationId: selectedEntityRelation[0].id,
         changes: changes,
       });
     } else {
@@ -245,7 +239,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
       {/* Type column */}
       <StyledRelationType>
         <LetterIcon letter={relationType} color="info" />
-        {relationRule.inverseLabel.length ? (
+        {relationRule.inverseLabel ? (
           <TbArrowsHorizontal color={theme.color["info"]} />
         ) : (
           <TbArrowNarrowRight color={theme.color["info"]} />
@@ -294,11 +288,10 @@ export const EntityDetailRelationTypeBlock: React.FC<
               entities={entities}
               entityId={entity.id}
               relationRule={relationRule}
-              relationType={relationType as RelationEnums.Type}
+              relationType={relationType}
               relationUpdateMutation={relationUpdateMutation}
               relationDeleteMutation={relationDeleteMutation}
-              isMultiple={isMultiple}
-              hasOrder={hasOrder}
+              hasOrder={hasOrder && currentRelations.length > 1}
               moveRow={moveRow}
               updateOrderFn={updateOrderFn}
             />

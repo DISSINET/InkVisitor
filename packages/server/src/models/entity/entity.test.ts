@@ -6,11 +6,12 @@ import { clean } from "@modules/common.test";
 import { findEntityById } from "@service/shorthands";
 import { IStatement } from "@shared/types";
 import Prop from "@models/prop/prop";
+import { EntityEnums } from "@shared/enums";
 
 export const prepareEntity = (): [string, Entity] => {
   const id = Math.random().toString();
 
-  const ent = new Entity({ id });
+  const ent = new Entity({ id, class: EntityEnums.Class.Concept });
   ent.props.push(new Prop({ id: `${id}-props[0].id` }));
 
   ent.props[0].children.push(new Prop({ id: `${id}-props[0].children[0].id` }));
