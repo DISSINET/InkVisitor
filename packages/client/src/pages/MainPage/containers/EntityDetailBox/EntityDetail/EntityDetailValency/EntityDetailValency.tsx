@@ -11,6 +11,7 @@ import { AxiosResponse } from "axios";
 import { Dropdown, Input } from "components";
 import React from "react";
 import { UseMutationResult } from "react-query";
+import { StyledRelationsGrid } from "../EntityDetailRelations/EntityDetailRelationsStyles";
 import { EntityDetailRelationTypeBlock } from "../EntityDetailRelations/EntityDetailRelationTypeBlock/EntityDetailRelationTypeBlock";
 import {
   StyledDetailContentRow,
@@ -61,19 +62,20 @@ export const EntityDetailValency: React.FC<EntityDetailValency> = ({
 }) => {
   const { relations, entities } = entity;
 
-  // const relationRule: Relation.RelationRule = Relation.RelationRules[relationType]!;
+  const getSortedRelations = (relationType: RelationEnums.Type) => {
+    const relationRule = Relation.RelationRules[relationType]!;
+    const selectedRelations = relations[relationType]?.connections;
 
-  // const selectedRelations = relations[relationType]?.connections;
-
-  // const sortedRelations = relationRule.multiple
-  //   ? selectedRelations?.sort((a, b) =>
-  //       a.order !== undefined && b.order !== undefined
-  //         ? a.order > b.order
-  //           ? 1
-  //           : -1
-  //         : 0
-  //     )
-  //   : selectedRelations;
+    return relationRule.multiple
+      ? selectedRelations?.sort((a, b) =>
+          a.order !== undefined && b.order !== undefined
+            ? a.order > b.order
+              ? 1
+              : -1
+            : 0
+        )
+      : selectedRelations;
+  };
 
   return (
     <StyledFormWrapper>
@@ -117,17 +119,23 @@ export const EntityDetailValency: React.FC<EntityDetailValency> = ({
           </StyledDetailContentRowValue>
         </StyledDetailContentRow>
 
-        <EntityDetailRelationTypeBlock
-          entity={entity}
-          relations={
-            relations[RelationEnums.Type.SubjectSemantics]?.connections!
-          }
-          entities={entities}
-          relationType={RelationEnums.Type.SubjectSemantics}
-          relationCreateMutation={relationCreateMutation}
-          relationUpdateMutation={relationUpdateMutation}
-          relationDeleteMutation={relationDeleteMutation}
-        />
+        <StyledDetailContentRow>
+          <td colSpan={2}>
+            <StyledRelationsGrid>
+              <EntityDetailRelationTypeBlock
+                entity={entity}
+                relations={getSortedRelations(
+                  RelationEnums.Type.SubjectSemantics
+                )}
+                entities={entities}
+                relationType={RelationEnums.Type.SubjectSemantics}
+                relationCreateMutation={relationCreateMutation}
+                relationUpdateMutation={relationUpdateMutation}
+                relationDeleteMutation={relationDeleteMutation}
+              />
+            </StyledRelationsGrid>
+          </td>
+        </StyledDetailContentRow>
 
         <StyledDetailContentRow>
           <StyledDetailContentRowLabel>
@@ -194,17 +202,23 @@ export const EntityDetailValency: React.FC<EntityDetailValency> = ({
           </StyledDetailContentRowValue>
         </StyledDetailContentRow>
 
-        <EntityDetailRelationTypeBlock
-          entity={entity}
-          relations={
-            relations[RelationEnums.Type.Actant1Semantics]?.connections!
-          }
-          entities={entities}
-          relationType={RelationEnums.Type.Actant1Semantics}
-          relationCreateMutation={relationCreateMutation}
-          relationUpdateMutation={relationUpdateMutation}
-          relationDeleteMutation={relationDeleteMutation}
-        />
+        <StyledDetailContentRow>
+          <td colSpan={2}>
+            <StyledRelationsGrid>
+              <EntityDetailRelationTypeBlock
+                entity={entity}
+                relations={getSortedRelations(
+                  RelationEnums.Type.Actant1Semantics
+                )}
+                entities={entities}
+                relationType={RelationEnums.Type.Actant1Semantics}
+                relationCreateMutation={relationCreateMutation}
+                relationUpdateMutation={relationUpdateMutation}
+                relationDeleteMutation={relationDeleteMutation}
+              />
+            </StyledRelationsGrid>
+          </td>
+        </StyledDetailContentRow>
 
         <StyledDetailContentRow>
           <StyledDetailContentRowLabel>
@@ -272,17 +286,23 @@ export const EntityDetailValency: React.FC<EntityDetailValency> = ({
           </StyledDetailContentRowValue>
         </StyledDetailContentRow>
 
-        <EntityDetailRelationTypeBlock
-          entity={entity}
-          relations={
-            relations[RelationEnums.Type.Actant2Semantics]?.connections!
-          }
-          entities={entities}
-          relationType={RelationEnums.Type.Actant2Semantics}
-          relationCreateMutation={relationCreateMutation}
-          relationUpdateMutation={relationUpdateMutation}
-          relationDeleteMutation={relationDeleteMutation}
-        />
+        <StyledDetailContentRow>
+          <td colSpan={2}>
+            <StyledRelationsGrid>
+              <EntityDetailRelationTypeBlock
+                entity={entity}
+                relations={getSortedRelations(
+                  RelationEnums.Type.Actant2Semantics
+                )}
+                entities={entities}
+                relationType={RelationEnums.Type.Actant2Semantics}
+                relationCreateMutation={relationCreateMutation}
+                relationUpdateMutation={relationUpdateMutation}
+                relationDeleteMutation={relationDeleteMutation}
+              />
+            </StyledRelationsGrid>
+          </td>
+        </StyledDetailContentRow>
 
         <StyledDetailContentRow>
           <StyledDetailContentRowLabel>
