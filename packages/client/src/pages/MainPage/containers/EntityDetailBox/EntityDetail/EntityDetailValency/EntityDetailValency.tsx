@@ -20,6 +20,7 @@ import {
   StyledDetailForm,
   StyledFormWrapper,
 } from "../EntityDetailStyles";
+import { StyledSectionSeparator } from "./EntityDetailValencyStyles";
 
 interface EntityDetailValency {
   entity: IResponseDetail;
@@ -80,6 +81,7 @@ export const EntityDetailValency: React.FC<EntityDetailValency> = ({
   return (
     <StyledFormWrapper>
       <StyledDetailForm>
+        {/* SUBJECT */}
         <StyledDetailContentRow>
           <StyledDetailContentRowLabel>
             Subject entity type
@@ -165,6 +167,9 @@ export const EntityDetailValency: React.FC<EntityDetailValency> = ({
           </StyledDetailContentRowValue>
         </StyledDetailContentRow>
 
+        <StyledSectionSeparator colSpan={2} />
+
+        {/* ACTANT 1 */}
         <StyledDetailContentRow>
           <StyledDetailContentRowLabel>
             Actant1 entity type
@@ -248,6 +253,9 @@ export const EntityDetailValency: React.FC<EntityDetailValency> = ({
           </StyledDetailContentRowValue>
         </StyledDetailContentRow>
 
+        <StyledSectionSeparator colSpan={2} />
+
+        {/* ACTANT 2 */}
         <StyledDetailContentRow>
           <StyledDetailContentRowLabel>
             Actant2 entity type
