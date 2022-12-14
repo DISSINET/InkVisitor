@@ -1,7 +1,11 @@
 import { Placement } from "@popperjs/core";
 import { certaintyDict } from "@shared/dictionaries";
-import { RelationEnums } from "@shared/enums";
-import { EntityTooltip as EntityTooltipNamespace } from "@shared/types";
+import { EntityEnums, RelationEnums } from "@shared/enums";
+import {
+  EntityTooltip as EntityTooltipNamespace,
+  IEntity,
+  Relation,
+} from "@shared/types";
 import api from "api";
 import { LetterIcon, Tooltip } from "components";
 import React, { useEffect, useMemo, useState } from "react";
@@ -10,7 +14,9 @@ import { BiCommentDetail } from "react-icons/bi";
 import { BsCardText } from "react-icons/bs";
 import { ImListNumbered } from "react-icons/im";
 import { useQuery } from "react-query";
+import { tooltipLabelSeparator } from "Theme/constants";
 import { Colors } from "types";
+import { getEntityRelationRules, getShortLabelByLetterCount } from "utils";
 import { EntityTooltipRelationTreeTable } from "./EntityTooltipRelationTreeTable/EntityTooltipRelationTreeTable";
 import {
   StyledDetail,
@@ -25,6 +31,7 @@ import {
 interface EntityTooltip {
   // entity
   entityId: string;
+  entityClass: EntityEnums.Class;
   label?: string;
   detail?: string;
   text?: string;
@@ -41,6 +48,7 @@ interface EntityTooltip {
 export const EntityTooltip: React.FC<EntityTooltip> = ({
   // entity
   entityId,
+  entityClass,
   label,
   detail,
   text,
@@ -54,8 +62,9 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
   //
   referenceElement,
 }) => {
-  const [tooltipData, setTooltipData] =
-    useState<EntityTooltipNamespace.IResponse | false>(false);
+  const [tooltipData, setTooltipData] = useState<
+    EntityTooltipNamespace.IResponse | false
+  >(false);
 
   const { data, isFetching, isSuccess } = useQuery(
     ["tooltip", entityId, tagHovered],
@@ -110,124 +119,119 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
     [text, detail, label, itemsCount]
   );
 
+  const renderCloudRelations = (
+    entities: Record<string, IEntity>,
+    cloudRelationIds?: string[]
+  ) => {
+    return (
+      <>
+        {cloudRelationIds && (
+          <StyledRelationTypeBlock>
+            {cloudRelationIds.map((cloudEntityId, key) => {
+              const entity = entities[cloudEntityId];
+              if (!entity || entityId === entity.id) return;
+
+              return (
+                <React.Fragment key={key}>
+                  {`${entity?.label}${
+                    key !== cloudRelationIds.length! - 1
+                      ? tooltipLabelSeparator
+                      : ""
+                  }`}
+                </React.Fragment>
+              );
+            })}
+          </StyledRelationTypeBlock>
+        )}
+      </>
+    );
+  };
+
   const renderRelations = useMemo(() => {
     if (tooltipData) {
-      const {
-        actionEventEquivalent,
-        identifications,
-        superclassTrees,
-        superordinateLocationTrees,
-        synonymCloud,
-        entities,
-      } = tooltipData;
+      const { relations, entities } = tooltipData || {};
 
-      const hasRelations =
-        actionEventEquivalent.length > 0 ||
-        identifications.length > 0 ||
-        superclassTrees.length > 0 ||
-        superordinateLocationTrees.length > 0 ||
-        (synonymCloud && synonymCloud.length > 0);
+      const { AEE, CLA, IDE, SCL, SOL, SYN } = relations;
+
+      const filteredTypes = getEntityRelationRules(
+        entityClass,
+        RelationEnums.TooltipTypes
+      );
+
+      const relationsCount: number[] = filteredTypes.map((t) =>
+        relations[t]?.connections ? relations[t]!.connections.length : 0
+      );
+      const hasRelations = relationsCount.some((count) => count > 0);
+      // TODO: filter relations related to entity class
+      // => some relations has non related connections in data-import
 
       return (
         <>
           {hasRelations && (
             <StyledRelations>
-              {/* actionEventEquivalent - Node */}
-              {actionEventEquivalent.length > 0 && (
-                <>
-                  <StyledLetterIconWrap>
-                    <LetterIcon
-                      color="white"
-                      letter={RelationEnums.Type.ActionEventEquivalent}
-                    />
-                  </StyledLetterIconWrap>
-                  <EntityTooltipRelationTreeTable
-                    relationTreeArray={actionEventEquivalent}
-                    entities={entities}
-                  />
-                </>
-              )}
-              {/* identifications - [] */}
-              {identifications.length > 0 && (
-                <>
-                  <StyledLetterIconWrap>
-                    <LetterIcon
-                      color="white"
-                      letter={RelationEnums.Type.Identification}
-                    />
-                  </StyledLetterIconWrap>
-                  <StyledRelationTypeBlock>
-                    {identifications.map((identification, key) => {
-                      const entity = entities[identification.entityId];
-                      // TODO: show class in text
-                      return entity ? (
-                        <React.Fragment key={key}>
-                          {`${entity?.label} (`}
-                          {certaintyDict[identification.certainty]?.label}
-                          {`)${key !== identifications.length - 1 ? ", " : ""}`}
-                        </React.Fragment>
-                      ) : null;
-                    })}
-                  </StyledRelationTypeBlock>
-                </>
-              )}
-              {/* superclassTrees - Node */}
-              {superclassTrees.length > 0 && (
-                <>
-                  <StyledLetterIconWrap>
-                    <LetterIcon
-                      color="white"
-                      letter={RelationEnums.Type.Superclass}
-                    />
-                  </StyledLetterIconWrap>
-                  {/* Render tree table */}
-                  <EntityTooltipRelationTreeTable
-                    relationTreeArray={superclassTrees}
-                    entities={entities}
-                  />
-                </>
-              )}
-              {/* superordinateLocationTrees - Node */}
-              {superordinateLocationTrees.length > 0 && (
-                <>
-                  <StyledLetterIconWrap>
-                    <LetterIcon
-                      color="white"
-                      letter={RelationEnums.Type.SuperordinateLocation}
-                    />
-                  </StyledLetterIconWrap>
-                  <EntityTooltipRelationTreeTable
-                    relationTreeArray={superordinateLocationTrees}
-                    entities={entities}
-                  />
-                </>
-              )}
-              {/* synonymCloud - string[] */}
-              {synonymCloud && synonymCloud.length > 0 && (
-                <>
-                  <StyledLetterIconWrap>
-                    <LetterIcon
-                      color="white"
-                      letter={RelationEnums.Type.Synonym}
-                    />
-                  </StyledLetterIconWrap>
-                  <StyledRelationTypeBlock>
-                    {synonymCloud.map((synonym, key) => {
-                      const entity = entities[synonym];
-                      if (!entity || entityId === entity.id) return;
+              {filteredTypes.map((relationType, key) => {
+                const currentRelations = relations[relationType]?.connections;
 
-                      return (
-                        <React.Fragment key={key}>
-                          {`${entity?.label}${
-                            key !== synonymCloud.length - 1 ? ", " : ""
-                          }`}
-                        </React.Fragment>
-                      );
-                    })}
-                  </StyledRelationTypeBlock>
-                </>
-              )}
-              {/* TODO: add new relations */}
+                const hasConnection =
+                  currentRelations && currentRelations.length! > 0;
+
+                const relationRule: Relation.RelationRule =
+                  Relation.RelationRules[relationType]!;
+
+                return (
+                  <React.Fragment key={key}>
+                    {hasConnection && (
+                      <>
+                        <StyledLetterIconWrap>
+                          <LetterIcon color="white" letter={relationType} />
+                        </StyledLetterIconWrap>
+                        {relationRule.cloudType ? (
+                          renderCloudRelations(
+                            entities,
+                            currentRelations[0]?.entityIds
+                          )
+                        ) : (
+                          <>
+                            {relationRule.treeType ? (
+                              <EntityTooltipRelationTreeTable
+                                relationTreeArray={currentRelations}
+                                entities={entities}
+                              />
+                            ) : (
+                              // Multiple - Identification with certainty / classification
+                              <StyledRelationTypeBlock>
+                                {currentRelations &&
+                                  currentRelations.map((connection, key) => {
+                                    const entity =
+                                      entities[connection.entityIds[1]];
+                                    const certainty = (
+                                      connection as Relation.IConnection<Relation.IIdentification>
+                                    ).certainty;
+
+                                    return (
+                                      <React.Fragment key={key}>
+                                        {getShortLabelByLetterCount(
+                                          entity?.label,
+                                          40
+                                        )}
+                                        {certainty
+                                          ? ` (${certaintyDict[certainty]?.label})`
+                                          : ""}
+                                        {key !== currentRelations.length! - 1
+                                          ? tooltipLabelSeparator
+                                          : ""}
+                                      </React.Fragment>
+                                    );
+                                  })}
+                              </StyledRelationTypeBlock>
+                            )}
+                          </>
+                        )}
+                      </>
+                    )}
+                  </React.Fragment>
+                );
+              })}
             </StyledRelations>
           )}
         </>

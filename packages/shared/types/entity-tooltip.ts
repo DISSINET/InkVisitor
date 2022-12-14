@@ -1,17 +1,11 @@
 import { IEntity, IResponseEntity } from ".";
-import { EntityEnums } from "../enums";
+import { EntityEnums, RelationEnums } from "../enums";
+import { Relation as RelationTypes } from "./relation";
 
 export namespace EntityTooltip {
   export interface IResponse extends IResponseEntity {
     entities: Record<string, IEntity>; //  all entities mentioned in relations
-
-    // C, A
-    superclassTrees: ISuperclassTree[];
-    // C
-    synonymCloud?: ISynonymCloud;
-    superordinateLocationTrees: ISuperordinateLocationTree[];
-    identifications: IIdentifications;
-    actionEventEquivalent: ActionEventNode;
+    relations: RelationTypes.IUsedRelations;
   }
 
   export type IIdentification = {
@@ -33,7 +27,7 @@ export namespace EntityTooltip {
   // in that case, I propose, the output will be {O:icecream: [C: icecream], C:icecream: [C:sweet, C:cold thing, C:grocery store product], C:sweet: ...}
   export type ISuperclassTree = {
     entityId: string,
-    subtrees: ISuperclassTree[]
+    subtrees: ISuperclassTree[];
   };
 
   // This should work the same way as ISuperclassTree but only for L and relation of type SuperordinateLocation

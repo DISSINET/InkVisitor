@@ -27,6 +27,9 @@ import Implication from "./relation/implication";
 import Related from "./relation/related";
 import Superclass from "./relation/superclass";
 import SuperordinateLocation from "./relation/superordinate-location";
+import PropertyReciprocal from "./relation/property-reciprocal";
+import ActionEventEquivalent from "./relation/action-event-equivalent";
+import SubjectActant1Reciprocal from "./relation/subject-actant1-reciprocal";
 
 /**
  * attempts to create new Entity instance depending on the type value
@@ -105,10 +108,12 @@ export function getRelationClass(data: UnknownObject): Relation {
       return new Actant1Semantics(data);
     case RelationEnums.Type.Actant2Semantics:
       return new Actant2Semantics(data);
-    case RelationEnums.Type.ActionEventEquivalent:
     case RelationEnums.Type.PropertyReciprocal:
+      return new PropertyReciprocal(data);
+    case RelationEnums.Type.ActionEventEquivalent:
+      return new ActionEventEquivalent(data);
     case RelationEnums.Type.SubjectActant1Reciprocal:
-      return new Relation(data);
+      return new SubjectActant1Reciprocal(data);
     default:
       throw new ModelNotValidError("unknown class for relation");
   }

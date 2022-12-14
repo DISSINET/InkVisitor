@@ -19,7 +19,8 @@ export interface IResponseDetail extends IResponseEntity {
   usedInStatementClassifications: IResponseUsedInStatementClassification[]; // statement.data.actants[].classifications + from usedInStatements field if actant.entityId = detailId
 
   usedAsTemplate?: string[];
-  relations: Relation.IRelation[];
+
+  relations: Relation.IUsedRelations;
 }
 
 export interface IResponseUsedInStatement<PositionEnum> {

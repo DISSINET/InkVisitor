@@ -1,4 +1,4 @@
-import { EntityEnums, UserEnums } from "@shared/enums";
+import { EntityEnums, RelationEnums, UserEnums } from "@shared/enums";
 import {
   IEntity,
   IProp,
@@ -23,7 +23,7 @@ import {
   IStatementClassification,
   IStatementIdentification,
 } from "@shared/types/statement";
-import Relation from "@models/relation/relation";
+import { UsedRelations } from "@models/relation/relations";
 
 export class ResponseEntity extends Entity implements IResponseEntity {
   // map of entity ids that should be populated in subsequent methods and used in fetching
@@ -115,7 +115,7 @@ export class ResponseEntityDetail
   usedInStatementIdentifications: IResponseUsedInStatementIdentification[];
   usedInStatementClassifications: IResponseUsedInStatementClassification[];
 
-  relations: RelationTypes.IRelation[] = [];
+  relations: UsedRelations;
 
   constructor(entity: Entity) {
     super(entity);
@@ -125,6 +125,7 @@ export class ResponseEntityDetail
     this.usedInMetaProps = [];
     this.usedInStatementClassifications = [];
     this.usedInStatementIdentifications = [];
+    this.relations = new UsedRelations(entity.id, entity.class);
 
     this.addLinkedEntities(this.getEntitiesIds());
   }
@@ -157,10 +158,13 @@ export class ResponseEntityDetail
       await Statement.findByDataActantsCI(conn, this.id)
     );
 
-    this.relations = await Relation.getForEntity<RelationTypes.IRelation>(
-      conn,
-      this.id
-    );
+
+    await this.relations.prepare(req, RelationEnums.AllTypes);
+    for (const type of RelationEnums.AllTypes) {
+      this.addLinkedEntities(
+        this.relations.getEntityIdsFromType(type)
+      );
+    }
 
     this.entities = await this.populateEntitiesMap(conn);
 
