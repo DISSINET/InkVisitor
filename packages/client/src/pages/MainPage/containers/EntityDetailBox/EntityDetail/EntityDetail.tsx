@@ -6,6 +6,7 @@ import {
   IProp,
   IReference,
   IResponseDetail,
+  Relation,
 } from "@shared/types";
 import api from "api";
 import { Button, Loader, Submit } from "components";
@@ -493,6 +494,37 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
     }
   };
 
+  const relationCreateMutation = useMutation(
+    async (newRelation: Relation.IRelation) =>
+      await api.relationCreate(newRelation),
+    {
+      onSuccess: (data, variables) => {
+        queryClient.invalidateQueries("entity");
+      },
+    }
+  );
+
+  const relationUpdateMutation = useMutation(
+    async (relationObject: { relationId: string; changes: any }) =>
+      await api.relationUpdate(
+        relationObject.relationId,
+        relationObject.changes
+      ),
+    {
+      onSuccess: (data, variables) => {
+        queryClient.invalidateQueries("entity");
+      },
+    }
+  );
+  const relationDeleteMutation = useMutation(
+    async (relationId: string) => await api.relationDelete(relationId),
+    {
+      onSuccess: (data, variables) => {
+        queryClient.invalidateQueries("entity");
+      },
+    }
+  );
+
   return (
     <>
       {entity && (
@@ -536,6 +568,9 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
                     entity={entity}
                     userCanEdit={userCanEdit}
                     updateEntityMutation={updateEntityMutation}
+                    relationCreateMutation={relationCreateMutation}
+                    relationUpdateMutation={relationUpdateMutation}
+                    relationDeleteMutation={relationDeleteMutation}
                   />
                 </StyledDetailSectionContent>
               </StyledDetailSection>
@@ -545,7 +580,12 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
             <StyledDetailSection>
               <StyledDetailSectionHeader>Relations</StyledDetailSectionHeader>
               <StyledDetailSectionContent>
-                <EntityDetailRelations entity={entity} />
+                <EntityDetailRelations
+                  entity={entity}
+                  relationCreateMutation={relationCreateMutation}
+                  relationUpdateMutation={relationUpdateMutation}
+                  relationDeleteMutation={relationDeleteMutation}
+                />
               </StyledDetailSectionContent>
             </StyledDetailSection>
 

@@ -1,8 +1,8 @@
 import { RelationEnums } from "@shared/enums";
-import { IResponseDetail, Relation } from "@shared/types";
-import api from "api";
+import { IResponseDetail, IResponseGeneric, Relation } from "@shared/types";
+import { AxiosResponse } from "axios";
 import React, { useEffect, useState } from "react";
-import { useMutation, useQueryClient } from "react-query";
+import { UseMutationResult } from "react-query";
 import { getEntityRelationRules } from "utils";
 import { EntityDetailInverseRelations } from "./EntityDetailInverseRelations/EntityDetailInverseRelations";
 import { StyledRelationsGrid } from "./EntityDetailRelationsStyles";
@@ -10,43 +10,35 @@ import { EntityDetailRelationTypeBlock } from "./EntityDetailRelationTypeBlock/E
 
 interface EntityDetailRelations {
   entity: IResponseDetail;
+  relationCreateMutation: UseMutationResult<
+    AxiosResponse<IResponseGeneric>,
+    unknown,
+    Relation.IRelation,
+    unknown
+  >;
+  relationUpdateMutation: UseMutationResult<
+    AxiosResponse<IResponseGeneric>,
+    unknown,
+    {
+      relationId: string;
+      changes: any;
+    },
+    unknown
+  >;
+  relationDeleteMutation: UseMutationResult<
+    AxiosResponse<IResponseGeneric>,
+    unknown,
+    string,
+    unknown
+  >;
 }
+
 export const EntityDetailRelations: React.FC<EntityDetailRelations> = ({
   entity,
+  relationCreateMutation,
+  relationUpdateMutation,
+  relationDeleteMutation,
 }) => {
-  const queryClient = useQueryClient();
-
-  const relationCreateMutation = useMutation(
-    async (newRelation: Relation.IRelation) =>
-      await api.relationCreate(newRelation),
-    {
-      onSuccess: (data, variables) => {
-        queryClient.invalidateQueries("entity");
-      },
-    }
-  );
-
-  const relationUpdateMutation = useMutation(
-    async (relationObject: { relationId: string; changes: any }) =>
-      await api.relationUpdate(
-        relationObject.relationId,
-        relationObject.changes
-      ),
-    {
-      onSuccess: (data, variables) => {
-        queryClient.invalidateQueries("entity");
-      },
-    }
-  );
-  const relationDeleteMutation = useMutation(
-    async (relationId: string) => await api.relationDelete(relationId),
-    {
-      onSuccess: (data, variables) => {
-        queryClient.invalidateQueries("entity");
-      },
-    }
-  );
-
   const [filteredRelationTypes, setFilteredRelationTypes] = useState<
     RelationEnums.Type[]
   >([]);
@@ -67,11 +59,10 @@ export const EntityDetailRelations: React.FC<EntityDetailRelations> = ({
         {filteredRelationTypes.map((relationType, key) => {
           const relationRule: Relation.RelationRule =
             Relation.RelationRules[relationType]!;
-          const { cloudType, multiple, order } = relationRule;
 
           const selectedRelations = relations[relationType]?.connections;
 
-          const sortedRelations = multiple
+          const sortedRelations = relationRule.multiple
             ? selectedRelations?.sort((a, b) =>
                 a.order !== undefined && b.order !== undefined
                   ? a.order > b.order
@@ -87,9 +78,6 @@ export const EntityDetailRelations: React.FC<EntityDetailRelations> = ({
               entities={entities}
               relationType={relationType}
               relations={sortedRelations}
-              isCloudType={cloudType}
-              isMultiple={multiple}
-              hasOrder={order}
               relationCreateMutation={relationCreateMutation}
               relationUpdateMutation={relationUpdateMutation}
               relationDeleteMutation={relationDeleteMutation}

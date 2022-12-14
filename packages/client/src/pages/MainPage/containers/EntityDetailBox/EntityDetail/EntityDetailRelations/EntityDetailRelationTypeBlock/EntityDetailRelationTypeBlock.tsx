@@ -52,9 +52,6 @@ interface EntityDetailRelationTypeBlock {
     string,
     unknown
   >;
-  isCloudType: boolean;
-  isMultiple: boolean;
-  hasOrder: boolean;
   entity: IResponseDetail;
 }
 export const EntityDetailRelationTypeBlock: React.FC<
@@ -66,12 +63,14 @@ export const EntityDetailRelationTypeBlock: React.FC<
   relationCreateMutation,
   relationUpdateMutation,
   relationDeleteMutation,
-  isCloudType,
-  isMultiple,
-  hasOrder,
   entity,
 }) => {
   const relationRule = Relation.RelationRules[relationType]!;
+  const {
+    cloudType: isCloudType,
+    multiple: isMultiple,
+    order: hasOrder,
+  } = relationRule;
 
   // For suggester
   const getCategoryTypes = (): EntityEnums.ExtendedClass[] | undefined => {
