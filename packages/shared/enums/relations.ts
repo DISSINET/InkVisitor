@@ -16,7 +16,6 @@ export namespace RelationEnums {
     Actant2Semantics = "A2S",
     Related = "REL",
   }
-  // All types to filter by entityClass, also preserves order
   export const AllTypes: Type[] = [
     Type.Superclass,
     Type.SuperordinateLocation,
@@ -34,6 +33,7 @@ export namespace RelationEnums {
     Type.Actant2Semantics,
     Type.Related,
   ];
+  // Used in detail relations section => Preserves order (excludes Action types)
   export const EntityDetailTypes: Type[] = [
     Type.Superclass,
     Type.SuperordinateLocation,
@@ -48,12 +48,7 @@ export namespace RelationEnums {
     Type.Implication,
     Type.Related,
   ];
-  export const ActionTypes: Type[] = [
-    Type.SubjectSemantics,
-    Type.Actant1Semantics,
-    Type.Actant2Semantics,
-  ];
-  // Tooltip types to filter by entityClass, also preserves order
+  // Used in tooltip => Preserves order
   export const TooltipTypes: Type[] = [
     Type.Superclass,
     Type.SuperordinateLocation,

@@ -50,6 +50,7 @@ export const StyledLabel = styled.div`
 `;
 export const StyledRelationValues = styled.div`
   margin-left: ${({ theme }) => theme.space[12]};
+  margin-top: 1.6rem;
 `;
 export const StyledSuggesterWrapper = styled.div`
   margin-top: ${({ theme }) => theme.space[1]};
