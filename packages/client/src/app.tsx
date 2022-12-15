@@ -33,6 +33,7 @@ import GlobalStyle from "Theme/global";
 import AclPage from "./pages/Acl";
 import MainPage from "./pages/MainPage";
 import theme from "./Theme/theme";
+import { AboutPage } from "pages/About";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -124,14 +125,14 @@ export const App: React.FC = () => {
         Math.floor(onePercent * percentPanelWidths[0] * 10) / 10;
       const secondPanel = Math.floor(
         (onePercent * (separatorPercentPosition - percentPanelWidths[0]) * 10) /
-          10
+        10
       );
       const thirdPanel = Math.floor(
         layoutWidth -
-          (onePercent *
-            (separatorPercentPosition + percentPanelWidths[3]) *
-            10) /
-            10
+        (onePercent *
+          (separatorPercentPosition + percentPanelWidths[3]) *
+          10) /
+        10
       );
       const fourthPanel =
         Math.floor(onePercent * percentPanelWidths[3] * 10) / 10;
@@ -165,6 +166,7 @@ export const App: React.FC = () => {
                     />
                     <ProtectedPath path="/" exact children={MainPage} />
                     <ProtectedPath path="/acl" children={AclPage} />
+                    <ProtectedPath path="/about" children={AboutPage} />
                     <ProtectedPath path="/users" children={UsersPage} />
                     <Route path="*" component={NotFoundPage} />
                   </Switch>

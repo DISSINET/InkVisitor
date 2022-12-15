@@ -11,7 +11,7 @@ import {
 } from "Theme/constants";
 import { Colors } from "types";
 
-interface ModalWrap {}
+interface ModalWrap { }
 export const StyledModalWrap = styled.div<ModalWrap>`
   display: flex;
   flex-direction: column;
@@ -35,9 +35,9 @@ export const StyledBackground = styled(animated.div)`
 `;
 
 interface Card {
-  width: "full" | "normal" | "thin" | number;
+  width: "full" | "fat" | "normal" | "thin" | number;
 }
-const getWidth = (width: "full" | "normal" | "thin" | number) => {
+const getWidth = (width: "full" | "fat" | "normal" | "thin" | number) => {
   if (typeof width === "number") {
     return `${width / 10}rem`;
   } else {
@@ -46,12 +46,14 @@ const getWidth = (width: "full" | "normal" | "thin" | number) => {
         return "calc(100vw - 40px)";
       case "normal":
         return "50rem";
+      case "fat":
+        return "100rem";
       case "thin":
         return "auto";
     }
   }
 };
-export const StyledCard = styled(animated.div)<Card>`
+export const StyledCard = styled(animated.div) <Card>`
   width: ${({ width }) => getWidth(width)};
   display: flex;
   flex-direction: column;
@@ -95,10 +97,12 @@ export const StyledCardBody = styled.section<StyledCardBody>`
   flex-direction: ${({ column }) => (column ? "column" : "row")};
   padding: ${space5} ${space7};
   overflow: ${({ enableScroll }) => (enableScroll ? "auto" : "initial")};
-
   font-size: ${({ theme }) => theme.fontSize["sm"]};
+  * {
+    user-select: text;
+  };
 `;
-interface StyledFooter {}
+interface StyledFooter { }
 export const StyledFooter = styled.div<StyledFooter>`
   border-top-style: solid;
   border-top-width: ${({ theme }) => theme.borderWidth["default"]};

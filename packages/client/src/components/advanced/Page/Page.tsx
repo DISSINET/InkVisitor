@@ -44,6 +44,7 @@ export const Page: React.FC<Page> = ({ children }) => {
   const disableRightHeader: boolean =
     location.pathname !== "/users" &&
     location.pathname !== "/acl" &&
+    location.pathname !== "/about" &&
     location.pathname !== "/";
 
   const {
