@@ -1,9 +1,9 @@
 import { UserEnums } from "@shared/enums";
-import LogoInkvisitor from "assets/logos/inkvisitor-full.svg";
+import LogoInkvisitor from "assets/logos/inkvisitor.svg";
 import { Button, Loader } from "components";
 import React, { useEffect, useRef, useState } from "react";
 import { BiLogOut } from "react-icons/bi";
-import { FaBars, FaBookOpen, FaKey, FaUsers } from "react-icons/fa";
+import { FaBars, FaBookOpen, FaInfo, FaKey, FaUsers } from "react-icons/fa";
 import { useHistory, useLocation } from "react-router";
 import { toast } from "react-toastify";
 import { heightHeader } from "Theme/constants";
@@ -21,14 +21,13 @@ import {
   StyledUsername,
 } from "./PageHeaderStyles";
 
-export const LeftHeader = React.memo(({}) => {
+export const LeftHeader = React.memo(({ }) => {
   const env = (process.env.ROOT_URL || "").replace(/apps\/inkvisitor[-]?/, "");
   const versionText = `v. ${packageJson.version} 
-  ${
-    ["production", ""].indexOf(env) === -1
+  ${["production", ""].indexOf(env) === -1
       ? `| ${env} | built: ${process.env.BUILD_TIMESTAMP}`
       : ""
-  }`;
+    }`;
 
   return (
     <StyledHeader>
@@ -57,7 +56,7 @@ interface RightHeaderProps {
 }
 
 interface IPage {
-  id: "main" | "users" | "acl";
+  id: "main" | "users" | "acl" | "about";
   label: string;
   color: "info" | "success" | "danger" | "warning";
   href: string;
@@ -73,6 +72,13 @@ const pages: IPage[] = [
     href: "/",
     admin: false,
     icon: <FaBookOpen />,
+  },
+  {
+    id: "about",
+    label: "About",
+    color: "info",
+    href: "/about",
+    icon: <FaInfo />,
   },
   {
     id: "acl",

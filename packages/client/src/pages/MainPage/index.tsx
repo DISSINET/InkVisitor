@@ -2,7 +2,7 @@ import { Box, Button, Panel } from "components";
 import { PanelSeparator } from "components/advanced";
 import { useSearchParams } from "hooks";
 import ScrollHandler from "hooks/ScrollHandler";
-import React, { Profiler } from "react";
+import React, { Profiler, useState } from "react";
 import { BiHide, BiShow } from "react-icons/bi";
 import { BsSquareFill, BsSquareHalf } from "react-icons/bs";
 import { IoMdClose } from "react-icons/io";
@@ -17,6 +17,7 @@ import {
   fourthPanelBoxesHeightThirds,
   hiddenBoxHeight,
 } from "Theme/constants";
+
 import { MemoizedEntityBookmarkBox } from "./containers/EntityBookmarkBox/EntityBookmarkBox";
 import { MemoizedEntityDetailBox } from "./containers/EntityDetailBox/EntityDetailBox";
 import { MemoizedEntitySearchBox } from "./containers/EntitySearchBox/EntitySearchBox";
@@ -27,9 +28,9 @@ import { MemoizedTerritoryTreeBox } from "./containers/TerritoryTreeBox/Territor
 
 type FourthPanelBoxes = "search" | "bookmarks" | "templates";
 
-interface MainPage {}
+interface MainPage { }
 
-const MainPage: React.FC<MainPage> = ({}) => {
+const MainPage: React.FC<MainPage> = ({ }) => {
   const { detailIdArray, clearAllDetailIds, selectedDetailId } =
     useSearchParams();
 
@@ -174,6 +175,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
       <ScrollHandler />
       {separatorXPosition > 0 && <PanelSeparator />}
       {/* FIRST PANEL */}
+
       <Panel width={firstPanelExpanded ? panelWidths[0] : collapsedPanelWidth}>
         <Box
           height={contentHeight}
