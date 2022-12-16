@@ -8,23 +8,20 @@ import {
 } from "@shared/types";
 import api from "api";
 import { AxiosResponse } from "axios";
-import { LetterIcon } from "components";
 import { EntitySuggester } from "components/advanced";
 import update from "immutability-helper";
 import React, { useCallback, useEffect, useState } from "react";
-import { TbArrowNarrowRight, TbArrowsHorizontal } from "react-icons/tb";
 import { UseMutationResult, useQuery } from "react-query";
-import theme from "Theme/theme";
 import { v4 as uuidv4 } from "uuid";
 import { EntityDetailCloudRelation } from "./EntityDetailCloudRelation/EntityDetailCloudRelation";
 import { EntityDetailRelationRow } from "./EntityDetailRelationRow/EntityDetailRelationRow";
 import {
   StyledLabel,
   StyledLabelSuggester,
-  StyledRelationType,
   StyledRelationValues,
   StyledSuggesterWrapper,
 } from "./EntityDetailRelationTypeBlockStyles";
+import { EntityDetailRelationTypeIcon } from "./EntityDetailRelationTypeIcon/EntityDetailRelationTypeIcon";
 
 // relations for one type
 interface EntityDetailRelationTypeBlock {
@@ -161,7 +158,6 @@ export const EntityDetailRelationTypeBlock: React.FC<
   const addToCloud = (cloudEntity: IResponseDetail) => {
     const selectedEntityRelation =
       cloudEntity.relations[relationType]?.connections;
-    // console.log(cloudEntity);
 
     if (selectedEntityRelation?.length) {
       // update existing relation
@@ -236,14 +232,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
   return (
     <>
       {/* Type column */}
-      <StyledRelationType>
-        <LetterIcon letter={relationType} color="info" />
-        {relationRule.inverseLabel ? (
-          <TbArrowsHorizontal color={theme.color["info"]} />
-        ) : (
-          <TbArrowNarrowRight color={theme.color["info"]} />
-        )}
-      </StyledRelationType>
+      <EntityDetailRelationTypeIcon relationType={relationType} />
       {/* Label & Suggester column */}
       <StyledLabelSuggester>
         <StyledLabel>{relationRule.label}</StyledLabel>

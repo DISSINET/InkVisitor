@@ -35,11 +35,6 @@ export const StyledGridColumn = styled.div`
   display: grid;
   align-items: center;
 `;
-export const StyledRelationType = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-`;
 export const StyledLabelSuggester = styled.div`
   display: flex;
   flex-direction: column;
@@ -54,5 +49,4 @@ export const StyledRelationValues = styled.div`
 `;
 export const StyledSuggesterWrapper = styled.div`
   margin-top: ${({ theme }) => theme.space[1]};
-  margin-left: ${({ theme }) => theme.space[2]};
 `;
