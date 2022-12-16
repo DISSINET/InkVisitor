@@ -6,6 +6,7 @@ import { TbArrowsHorizontal, TbArrowNarrowRight } from "react-icons/tb";
 import theme from "Theme/theme";
 import { StyledRelationType } from "./EntityDetailRelationTypeIconStyles";
 
+// TODO: Movo to components
 interface EntityDetailRelationTypeIcon {
   relationType: RelationEnums.Type;
 }
