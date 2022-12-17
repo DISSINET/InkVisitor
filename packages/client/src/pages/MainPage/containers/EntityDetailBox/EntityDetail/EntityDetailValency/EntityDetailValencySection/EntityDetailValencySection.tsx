@@ -78,18 +78,6 @@ export const EntityDetailValencySection: React.FC<
   const selectedRelations: Relation.IRelation[] =
     relations[relationType]!.connections;
 
-  const getSortedRelations = () => {
-    return relationRule.multiple
-      ? selectedRelations?.sort((a, b) =>
-          a.order !== undefined && b.order !== undefined
-            ? a.order > b.order
-              ? 1
-              : -1
-            : 0
-        )
-      : selectedRelations;
-  };
-
   const handleMultiSelected = (
     selectedId: string,
     relationType: RelationEnums.Type

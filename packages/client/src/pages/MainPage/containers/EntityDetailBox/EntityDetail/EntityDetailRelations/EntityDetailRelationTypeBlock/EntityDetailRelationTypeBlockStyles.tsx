@@ -44,8 +44,8 @@ export const StyledLabel = styled.div`
   font-size: ${({ theme }) => theme.fontSize["xs"]};
 `;
 export const StyledRelationValues = styled.div`
-  margin-left: ${({ theme }) => theme.space[12]};
-  margin-top: 1.6rem;
+  margin-left: ${({ theme }) => theme.space[8]};
+  margin-top: ${({ theme }) => theme.space[6]};
 `;
 export const StyledSuggesterWrapper = styled.div`
   margin-top: ${({ theme }) => theme.space[1]};

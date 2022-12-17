@@ -62,6 +62,7 @@ export const EntityDetailRelations: React.FC<EntityDetailRelations> = ({
 
           const selectedRelations = relations[relationType]?.connections;
 
+          // TODO: probably not needed (handled on BE)
           const sortedRelations = relationRule.multiple
             ? selectedRelations?.sort((a, b) =>
                 a.order !== undefined && b.order !== undefined

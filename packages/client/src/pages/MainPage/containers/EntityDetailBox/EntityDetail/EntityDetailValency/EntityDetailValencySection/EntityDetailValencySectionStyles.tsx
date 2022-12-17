@@ -18,7 +18,7 @@ export const StyledLabelInputWrapper = styled.div`
   flex-direction: column;
 `;
 export const StyledRelationsWrapper = styled.div`
-  margin-left: ${({ theme }) => theme.space[4]};
+  margin-left: ${({ theme }) => theme.space[10]};
   margin-top: ${({ theme }) => theme.space[6]};
   display: flex;
   flex-direction: column;
