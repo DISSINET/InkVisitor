@@ -151,8 +151,6 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
     if (tooltipData) {
       const { relations, entities } = tooltipData || {};
 
-      const { AEE, CLA, IDE, SCL, SOL, SYN } = relations;
-
       const filteredTypes = getEntityRelationRules(
         entityClass,
         RelationEnums.TooltipTypes
@@ -162,7 +160,6 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
         relations[t]?.connections ? relations[t]!.connections.length : 0
       );
       const hasRelations = relationsCount.some((count) => count > 0);
-      // TODO: filter relations related to entity class
       // => some relations has non related connections in data-import
 
       return (
