@@ -19,6 +19,7 @@ import { EntityDetailRelationTypeIcon } from "../../EntityDetailRelations/Entity
 import {
   StyledLabel,
   StyledLabelInputWrapper,
+  StyledRelationsWrapper,
   StyledSemanticsWrapper,
 } from "./EntityDetailValencySectionStyles";
 
@@ -69,7 +70,8 @@ export const EntityDetailValencySection: React.FC<
   const { entities, relations } = entity;
 
   const relationRule = Relation.RelationRules[relationType]!;
-  const selectedRelations = relations[relationType]!.connections;
+  const selectedRelations: Relation.IRelation[] =
+    relations[relationType]!.connections;
 
   const getSortedRelations = () => {
     return relationRule.multiple
@@ -212,23 +214,24 @@ export const EntityDetailValencySection: React.FC<
             excludedActantIds={usedEntityIds}
           />
         </StyledLabelInputWrapper>
-        {currentRelations.map((relation, key) => (
-          <EntityDetailRelationRow
-            key={key}
-            index={key}
-            relation={relation}
-            entities={entities}
-            entityId={entity.id}
-            relationRule={relationRule}
-            relationType={relationType}
-            relationUpdateMutation={relationUpdateMutation}
-            relationDeleteMutation={relationDeleteMutation}
-            hasOrder={relationRule.order}
-            moveRow={moveRow}
-            // updateOrderFn={updateOrderFn}
-            updateOrderFn={() => {}}
-          />
-        ))}
+        <StyledRelationsWrapper>
+          {currentRelations.map((relation, key) => (
+            <EntityDetailRelationRow
+              key={key}
+              index={key}
+              relation={relation}
+              entities={entities}
+              entityId={entity.id}
+              relationRule={relationRule}
+              relationType={relationType}
+              relationUpdateMutation={relationUpdateMutation}
+              relationDeleteMutation={relationDeleteMutation}
+              hasOrder={relationRule.order}
+              moveRow={moveRow}
+              updateOrderFn={updateOrderFn}
+            />
+          ))}
+        </StyledRelationsWrapper>
       </StyledSemanticsWrapper>
 
       <div />
