@@ -20,12 +20,17 @@ import {
   StyledLabel,
   StyledLabelInputWrapper,
   StyledRelationsWrapper,
+  StyledRelationTypeIconWrapper,
+  StyledSectionHeading,
   StyledSemanticsWrapper,
 } from "./EntityDetailValencySectionStyles";
 
 interface EntityDetailValencySection {
   entity: IResponseDetail;
-  relationType: RelationEnums.Type;
+  relationType:
+    | RelationEnums.Type.SubjectSemantics
+    | RelationEnums.Type.Actant1Semantics
+    | RelationEnums.Type.Actant2Semantics;
 
   userCanEdit: boolean;
   updateEntityMutation: UseMutationResult<
@@ -157,11 +162,38 @@ export const EntityDetailValencySection: React.FC<
     });
   };
 
+  const getEntityTypeValue = () =>
+    [allEntities].concat(entitiesDict).filter((i: any) => {
+      switch (relationType) {
+        case RelationEnums.Type.SubjectSemantics:
+          return (entity as IAction).data.entities?.s.includes(i.value);
+        case RelationEnums.Type.Actant1Semantics:
+          return (entity as IAction).data.entities?.a1.includes(i.value);
+        case RelationEnums.Type.Actant2Semantics:
+          return (entity as IAction).data.entities?.a2.includes(i.value);
+      }
+    });
+
+  const handleDropdownNewValue = (newValue: any) =>
+    newValue ? (newValue as string[]).map((v: any) => v.value) : [];
+
+  const getValencyValue = () => {
+    switch (relationType) {
+      case RelationEnums.Type.SubjectSemantics:
+        return (entity as IAction).data.valencies?.s;
+      case RelationEnums.Type.Actant1Semantics:
+        return (entity as IAction).data.valencies?.a1;
+      case RelationEnums.Type.Actant2Semantics:
+        return (entity as IAction).data.valencies?.a2;
+    }
+  };
+
   return (
     <>
-      <StyledLabel style={{ marginRight: ".8rem" }}>
-        {relationRule.label}
-      </StyledLabel>
+      {/* ENTITY TYPE ROW */}
+      <StyledSectionHeading style={{ marginRight: ".8rem" }}>
+        {relationRule.label.split(" ")[0]}
+      </StyledSectionHeading>
 
       <StyledLabelInputWrapper>
         <StyledLabel>Entity type</StyledLabel>
@@ -170,11 +202,7 @@ export const EntityDetailValencySection: React.FC<
           disabled={!userCanEdit}
           isMulti
           options={entitiesDict}
-          value={[allEntities]
-            .concat(entitiesDict)
-            .filter((i: any) =>
-              (entity as IAction).data.entities?.s.includes(i.value)
-            )}
+          value={getEntityTypeValue()}
           width="full"
           noOptionsMessage={"no entity"}
           placeholder={"no entity"}
@@ -185,11 +213,18 @@ export const EntityDetailValencySection: React.FC<
                 ...oldData,
                 ...{
                   entities: {
-                    s: newValue
-                      ? (newValue as string[]).map((v: any) => v.value)
-                      : [],
-                    a1: entity.data.entities.a1,
-                    a2: entity.data.entities.a2,
+                    s:
+                      relationType === RelationEnums.Type.SubjectSemantics
+                        ? handleDropdownNewValue(newValue)
+                        : entity.data.entities.s,
+                    a1:
+                      relationType === RelationEnums.Type.Actant1Semantics
+                        ? handleDropdownNewValue(newValue)
+                        : entity.data.entities.a1,
+                    a2:
+                      relationType === RelationEnums.Type.Actant2Semantics
+                        ? handleDropdownNewValue(newValue)
+                        : entity.data.entities.a2,
                   },
                 },
               },
@@ -198,9 +233,10 @@ export const EntityDetailValencySection: React.FC<
         />
       </StyledLabelInputWrapper>
 
-      <div style={{ display: "flex", justifyContent: "flex-end" }}>
+      {/* SEMANTICS ROW */}
+      <StyledRelationTypeIconWrapper>
         <EntityDetailRelationTypeIcon relationType={relationType} />
-      </div>
+      </StyledRelationTypeIconWrapper>
 
       <StyledSemanticsWrapper>
         <StyledLabelInputWrapper>
@@ -208,7 +244,6 @@ export const EntityDetailValencySection: React.FC<
           <EntitySuggester
             categoryTypes={[EntityEnums.Class.Concept]}
             onSelected={(selectedId: string) => {
-              console.log(selectedId);
               handleMultiSelected(selectedId, relationType);
             }}
             excludedActantIds={usedEntityIds}
@@ -234,12 +269,13 @@ export const EntityDetailValencySection: React.FC<
         </StyledRelationsWrapper>
       </StyledSemanticsWrapper>
 
+      {/* VALENCY ROW */}
       <div />
       <StyledLabelInputWrapper>
         <StyledLabel>Grammatical valency</StyledLabel>
         <Input
           disabled={!userCanEdit}
-          value={(entity as IAction).data.valencies?.s}
+          value={getValencyValue()}
           width="full"
           onChangeFn={async (newValue: string) => {
             const oldData = { ...entity.data };
@@ -248,9 +284,18 @@ export const EntityDetailValencySection: React.FC<
                 ...oldData,
                 ...{
                   valencies: {
-                    s: newValue,
-                    a1: entity.data.valencies.a1,
-                    a2: entity.data.valencies.a2,
+                    s:
+                      relationType === RelationEnums.Type.SubjectSemantics
+                        ? newValue
+                        : entity.data.valencies.s,
+                    a1:
+                      relationType === RelationEnums.Type.Actant1Semantics
+                        ? newValue
+                        : entity.data.valencies.a1,
+                    a2:
+                      relationType === RelationEnums.Type.Actant2Semantics
+                        ? newValue
+                        : entity.data.valencies.a2,
                   },
                 },
               },
