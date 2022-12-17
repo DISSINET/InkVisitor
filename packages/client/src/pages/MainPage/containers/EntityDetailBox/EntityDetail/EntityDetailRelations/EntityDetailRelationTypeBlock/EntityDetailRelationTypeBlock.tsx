@@ -8,27 +8,24 @@ import {
 } from "@shared/types";
 import api from "api";
 import { AxiosResponse } from "axios";
-import { LetterIcon } from "components";
 import { EntitySuggester } from "components/advanced";
 import update from "immutability-helper";
 import React, { useCallback, useEffect, useState } from "react";
-import { TbArrowNarrowRight, TbArrowsHorizontal } from "react-icons/tb";
 import { UseMutationResult, useQuery } from "react-query";
-import theme from "Theme/theme";
 import { v4 as uuidv4 } from "uuid";
 import { EntityDetailCloudRelation } from "./EntityDetailCloudRelation/EntityDetailCloudRelation";
 import { EntityDetailRelationRow } from "./EntityDetailRelationRow/EntityDetailRelationRow";
 import {
   StyledLabel,
   StyledLabelSuggester,
-  StyledRelationType,
   StyledRelationValues,
   StyledSuggesterWrapper,
 } from "./EntityDetailRelationTypeBlockStyles";
+import { EntityDetailRelationTypeIcon } from "./EntityDetailRelationTypeIcon/EntityDetailRelationTypeIcon";
 
 // relations for one type
 interface EntityDetailRelationTypeBlock {
-  relations?: Relation.IRelation[];
+  selectedRelations?: Relation.IRelation[];
   relationType: RelationEnums.Type;
   entities: Record<string, IEntity>;
   relationCreateMutation: UseMutationResult<
@@ -52,26 +49,25 @@ interface EntityDetailRelationTypeBlock {
     string,
     unknown
   >;
-  isCloudType: boolean;
-  isMultiple: boolean;
-  hasOrder: boolean;
   entity: IResponseDetail;
 }
 export const EntityDetailRelationTypeBlock: React.FC<
   EntityDetailRelationTypeBlock
 > = ({
-  relations = [],
+  selectedRelations = [],
   relationType,
   entities,
   relationCreateMutation,
   relationUpdateMutation,
   relationDeleteMutation,
-  isCloudType,
-  isMultiple,
-  hasOrder,
   entity,
 }) => {
   const relationRule = Relation.RelationRules[relationType]!;
+  const {
+    cloudType: isCloudType,
+    multiple: isMultiple,
+    order: hasOrder,
+  } = relationRule;
 
   // For suggester
   const getCategoryTypes = (): EntityEnums.ExtendedClass[] | undefined => {
@@ -133,12 +129,12 @@ export const EntityDetailRelationTypeBlock: React.FC<
   const [usedEntityIds, setUsedEntityIds] = useState<string[]>([]);
 
   useEffect(() => {
-    const entityIds = relations
+    const entityIds = selectedRelations
       .map((relation) => relation.entityIds.map((entityId) => entityId))
       .flat(1)
       .concat(entity.id);
     setUsedEntityIds([...new Set(entityIds)]);
-  }, [entities, relations]);
+  }, [entities, selectedRelations]);
 
   // TODO: Lift cloud handling to EntityDetailRelations
   const [tempCloudEntityId, setTempCloudEntityId] = useState<string | false>(
@@ -162,7 +158,6 @@ export const EntityDetailRelationTypeBlock: React.FC<
   const addToCloud = (cloudEntity: IResponseDetail) => {
     const selectedEntityRelation =
       cloudEntity.relations[relationType]?.connections;
-    // console.log(cloudEntity);
 
     if (selectedEntityRelation?.length) {
       // update existing relation
@@ -185,8 +180,8 @@ export const EntityDetailRelationTypeBlock: React.FC<
   };
 
   useEffect(() => {
-    setCurrentRelations(relations);
-  }, [relations]);
+    setCurrentRelations(selectedRelations);
+  }, [selectedRelations]);
 
   const [currentRelations, setCurrentRelations] = useState<
     Relation.IRelation[]
@@ -208,18 +203,18 @@ export const EntityDetailRelationTypeBlock: React.FC<
   );
 
   const updateOrderFn = (relationId: string, newOrder: number) => {
-    let allOrders: number[] = relations.map((relation, key) =>
+    let allOrders: number[] = selectedRelations.map((relation, key) =>
       relation.order !== undefined ? relation.order : 0
     );
     let finalOrder: number = 0;
 
-    const currentRelation = relations.find(
+    const currentRelation = selectedRelations.find(
       (relation) => relation.id === relationId
     );
 
     if (newOrder === 0) {
       finalOrder = allOrders[0] - 1;
-    } else if (newOrder === relations.length - 1) {
+    } else if (newOrder === selectedRelations.length - 1) {
       finalOrder = allOrders[newOrder - 1] + 1;
     } else {
       if (currentRelation?.order === allOrders[newOrder - 1]) {
@@ -237,18 +232,11 @@ export const EntityDetailRelationTypeBlock: React.FC<
   return (
     <>
       {/* Type column */}
-      <StyledRelationType>
-        <LetterIcon letter={relationType} color="info" />
-        {relationRule.inverseLabel ? (
-          <TbArrowsHorizontal color={theme.color["info"]} />
-        ) : (
-          <TbArrowNarrowRight color={theme.color["info"]} />
-        )}
-      </StyledRelationType>
+      <EntityDetailRelationTypeIcon relationType={relationType} />
       {/* Label & Suggester column */}
       <StyledLabelSuggester>
         <StyledLabel>{relationRule.label}</StyledLabel>
-        {(isMultiple || relations.length < 1) && (
+        {(isMultiple || selectedRelations.length < 1) && (
           <StyledSuggesterWrapper>
             <EntitySuggester
               categoryTypes={
@@ -275,7 +263,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
               key={key}
               relation={relation}
               entityId={entity.id}
-              relations={relations}
+              relations={selectedRelations}
               entities={entities}
               relationUpdateMutation={relationUpdateMutation}
               relationDeleteMutation={relationDeleteMutation}
