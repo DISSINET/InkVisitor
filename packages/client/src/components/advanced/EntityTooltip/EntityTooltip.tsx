@@ -121,20 +121,22 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
 
   const renderCloudRelations = (
     entities: Record<string, IEntity>,
-    cloudRelationIds?: string[]
+    cloudRelationIds: string[]
   ) => {
+    const filteredCloudRelationIds = cloudRelationIds.filter(
+      (rId) => entities[rId].id !== entityId
+    );
     return (
       <>
         {cloudRelationIds && (
           <StyledRelationTypeBlock>
-            {cloudRelationIds.map((cloudEntityId, key) => {
-              const entity = entities[cloudEntityId];
-              if (!entity || entityId === entity.id) return;
+            {filteredCloudRelationIds.map((cloudEntityId, key) => {
+              const relationEntity = entities[cloudEntityId];
 
               return (
                 <React.Fragment key={key}>
-                  {`${entity?.label}${
-                    key !== cloudRelationIds.length! - 1
+                  {`${relationEntity?.label}${
+                    key !== filteredCloudRelationIds.length - 1
                       ? tooltipLabelSeparator
                       : ""
                   }`}
@@ -170,7 +172,7 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
                 const currentRelations = relations[relationType]?.connections;
 
                 const hasConnection =
-                  currentRelations && currentRelations.length! > 0;
+                  currentRelations && currentRelations.length > 0;
 
                 const relationRule: Relation.RelationRule =
                   Relation.RelationRules[relationType]!;
@@ -182,10 +184,11 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
                         <StyledLetterIconWrap>
                           <LetterIcon color="white" letter={relationType} />
                         </StyledLetterIconWrap>
-                        {relationRule.cloudType ? (
+                        {relationRule.cloudType &&
+                        currentRelations[0]?.entityIds ? (
                           renderCloudRelations(
                             entities,
-                            currentRelations[0]?.entityIds
+                            currentRelations[0].entityIds
                           )
                         ) : (
                           <>
@@ -214,7 +217,7 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
                                         {certainty
                                           ? ` (${certaintyDict[certainty]?.label})`
                                           : ""}
-                                        {key !== currentRelations.length! - 1
+                                        {key !== currentRelations.length - 1
                                           ? tooltipLabelSeparator
                                           : ""}
                                       </React.Fragment>
