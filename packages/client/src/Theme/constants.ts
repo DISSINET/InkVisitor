@@ -29,7 +29,10 @@ export const fourthPanelBoxesHeightThirds = {
   templates: 33,
 };
 
+// LIMITS
 export const maxTabCount = 10;
+export const maxTooltipTreeForks = 2;
+export const maxTooltipMultiRelations = 5;
 
 export const tooltipLabelSeparator = " • ";
 
