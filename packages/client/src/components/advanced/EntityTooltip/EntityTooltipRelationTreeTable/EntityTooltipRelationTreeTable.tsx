@@ -1,6 +1,6 @@
 import { IEntity, Relation } from "@shared/types";
 import React from "react";
-import { getRelationTreeDepth } from "utils";
+import { getRelationTreeDepth, getShortLabelByLetterCount } from "utils";
 import {
   StyledFlexColumn,
   StyledGridRowHalf,
@@ -19,13 +19,16 @@ export const EntityTooltipRelationTreeTable: React.FC<
   const treeDepth = getRelationTreeDepth(relationTreeArray) - 1;
   return (
     <StyledRelationTypeTreeBlock depth={treeDepth}>
-      {relationTreeArray.map(
-        (relation: Relation.IConnection<any>, key: number) => {
+      {relationTreeArray
+        .slice(0, 2)
+        .map((relation: Relation.IConnection<any>, key: number) => {
           const entity = entities[relation.entityIds[1]];
           return (
             <StyledGridRowThird key={key} onlyTwoLevels={treeDepth === 2}>
               {/* First level */}
-              <StyledTreeBlock>{entity?.label}</StyledTreeBlock>
+              <StyledTreeBlock>
+                {getShortLabelByLetterCount(entity?.label, 40)}
+              </StyledTreeBlock>
               <StyledFlexColumn>
                 {relation.subtrees.length > 0 ? (
                   relation.subtrees.map(
@@ -34,7 +37,9 @@ export const EntityTooltipRelationTreeTable: React.FC<
                       return (
                         <StyledGridRowHalf key={key}>
                           {/* Second level */}
-                          <StyledTreeBlock>{entity?.label}</StyledTreeBlock>
+                          <StyledTreeBlock>
+                            {getShortLabelByLetterCount(entity?.label, 40)}
+                          </StyledTreeBlock>
                           <StyledFlexColumn>
                             {subtree.subtrees.length > 0 ? (
                               subtree.subtrees.map(
@@ -46,7 +51,10 @@ export const EntityTooltipRelationTreeTable: React.FC<
                                   /* third level */
                                   return (
                                     <StyledTreeBlock key={key}>
-                                      {entity?.label}
+                                      {getShortLabelByLetterCount(
+                                        entity?.label,
+                                        40
+                                      )}
                                     </StyledTreeBlock>
                                   );
                                 }
@@ -65,8 +73,7 @@ export const EntityTooltipRelationTreeTable: React.FC<
               </StyledFlexColumn>
             </StyledGridRowThird>
           );
-        }
-      )}
+        })}
     </StyledRelationTypeTreeBlock>
   );
 };

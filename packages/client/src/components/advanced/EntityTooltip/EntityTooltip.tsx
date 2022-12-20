@@ -14,7 +14,10 @@ import { BiCommentDetail } from "react-icons/bi";
 import { BsCardText } from "react-icons/bs";
 import { ImListNumbered } from "react-icons/im";
 import { useQuery } from "react-query";
-import { tooltipLabelSeparator } from "Theme/constants";
+import {
+  maxTooltipMultiRelations,
+  tooltipLabelSeparator,
+} from "Theme/constants";
 import { Colors } from "types";
 import { getEntityRelationRules, getShortLabelByLetterCount } from "utils";
 import { EntityTooltipRelationTreeTable } from "./EntityTooltipRelationTreeTable/EntityTooltipRelationTreeTable";
@@ -121,20 +124,22 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
 
   const renderCloudRelations = (
     entities: Record<string, IEntity>,
-    cloudRelationIds?: string[]
+    cloudRelationIds: string[]
   ) => {
+    const filteredCloudRelationIds = cloudRelationIds.filter(
+      (rId) => entities[rId].id !== entityId
+    );
     return (
       <>
         {cloudRelationIds && (
           <StyledRelationTypeBlock>
-            {cloudRelationIds.map((cloudEntityId, key) => {
-              const entity = entities[cloudEntityId];
-              if (!entity || entityId === entity.id) return;
+            {filteredCloudRelationIds.map((cloudEntityId, key) => {
+              const relationEntity = entities[cloudEntityId];
 
               return (
                 <React.Fragment key={key}>
-                  {`${entity?.label}${
-                    key !== cloudRelationIds.length! - 1
+                  {`${relationEntity?.label}${
+                    key !== filteredCloudRelationIds.length - 1
                       ? tooltipLabelSeparator
                       : ""
                   }`}
@@ -170,7 +175,7 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
                 const currentRelations = relations[relationType]?.connections;
 
                 const hasConnection =
-                  currentRelations && currentRelations.length! > 0;
+                  currentRelations && currentRelations.length > 0;
 
                 const relationRule: Relation.RelationRule =
                   Relation.RelationRules[relationType]!;
@@ -182,10 +187,11 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
                         <StyledLetterIconWrap>
                           <LetterIcon color="white" letter={relationType} />
                         </StyledLetterIconWrap>
-                        {relationRule.cloudType ? (
+                        {relationRule.cloudType &&
+                        currentRelations[0]?.entityIds ? (
                           renderCloudRelations(
                             entities,
-                            currentRelations[0]?.entityIds
+                            currentRelations[0].entityIds
                           )
                         ) : (
                           <>
@@ -198,28 +204,31 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
                               // Multiple - Identification with certainty / classification
                               <StyledRelationTypeBlock>
                                 {currentRelations &&
-                                  currentRelations.map((connection, key) => {
-                                    const entity =
-                                      entities[connection.entityIds[1]];
-                                    const certainty = (
-                                      connection as Relation.IConnection<Relation.IIdentification>
-                                    ).certainty;
+                                  currentRelations
+                                    .slice(0, maxTooltipMultiRelations)
+                                    .map((connection, key) => {
+                                      const entity =
+                                        entities[connection.entityIds[1]];
+                                      const certainty = (
+                                        connection as Relation.IConnection<Relation.IIdentification>
+                                      ).certainty;
 
-                                    return (
-                                      <React.Fragment key={key}>
-                                        {getShortLabelByLetterCount(
-                                          entity?.label,
-                                          40
-                                        )}
-                                        {certainty
-                                          ? ` (${certaintyDict[certainty]?.label})`
-                                          : ""}
-                                        {key !== currentRelations.length! - 1
-                                          ? tooltipLabelSeparator
-                                          : ""}
-                                      </React.Fragment>
-                                    );
-                                  })}
+                                      return (
+                                        <React.Fragment key={key}>
+                                          {getShortLabelByLetterCount(
+                                            entity?.label,
+                                            40
+                                          )}
+                                          {certainty
+                                            ? ` (${certaintyDict[certainty]?.label})`
+                                            : ""}
+                                          {key < currentRelations.length - 1 &&
+                                          key < maxTooltipMultiRelations - 1
+                                            ? tooltipLabelSeparator
+                                            : ""}
+                                        </React.Fragment>
+                                      );
+                                    })}
                               </StyledRelationTypeBlock>
                             )}
                           </>
