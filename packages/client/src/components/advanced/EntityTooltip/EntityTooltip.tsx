@@ -14,7 +14,10 @@ import { BiCommentDetail } from "react-icons/bi";
 import { BsCardText } from "react-icons/bs";
 import { ImListNumbered } from "react-icons/im";
 import { useQuery } from "react-query";
-import { tooltipLabelSeparator } from "Theme/constants";
+import {
+  maxTooltipMultiRelations,
+  tooltipLabelSeparator,
+} from "Theme/constants";
 import { Colors } from "types";
 import { getEntityRelationRules, getShortLabelByLetterCount } from "utils";
 import { EntityTooltipRelationTreeTable } from "./EntityTooltipRelationTreeTable/EntityTooltipRelationTreeTable";
@@ -201,28 +204,31 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
                               // Multiple - Identification with certainty / classification
                               <StyledRelationTypeBlock>
                                 {currentRelations &&
-                                  currentRelations.map((connection, key) => {
-                                    const entity =
-                                      entities[connection.entityIds[1]];
-                                    const certainty = (
-                                      connection as Relation.IConnection<Relation.IIdentification>
-                                    ).certainty;
+                                  currentRelations
+                                    .slice(0, maxTooltipMultiRelations)
+                                    .map((connection, key) => {
+                                      const entity =
+                                        entities[connection.entityIds[1]];
+                                      const certainty = (
+                                        connection as Relation.IConnection<Relation.IIdentification>
+                                      ).certainty;
 
-                                    return (
-                                      <React.Fragment key={key}>
-                                        {getShortLabelByLetterCount(
-                                          entity?.label,
-                                          40
-                                        )}
-                                        {certainty
-                                          ? ` (${certaintyDict[certainty]?.label})`
-                                          : ""}
-                                        {key !== currentRelations.length - 1
-                                          ? tooltipLabelSeparator
-                                          : ""}
-                                      </React.Fragment>
-                                    );
-                                  })}
+                                      return (
+                                        <React.Fragment key={key}>
+                                          {getShortLabelByLetterCount(
+                                            entity?.label,
+                                            40
+                                          )}
+                                          {certainty
+                                            ? ` (${certaintyDict[certainty]?.label})`
+                                            : ""}
+                                          {key < currentRelations.length - 1 &&
+                                          key < maxTooltipMultiRelations - 1
+                                            ? tooltipLabelSeparator
+                                            : ""}
+                                        </React.Fragment>
+                                      );
+                                    })}
                               </StyledRelationTypeBlock>
                             )}
                           </>
