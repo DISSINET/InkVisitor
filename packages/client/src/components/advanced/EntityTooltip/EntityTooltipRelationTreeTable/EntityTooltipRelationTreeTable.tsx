@@ -19,8 +19,9 @@ export const EntityTooltipRelationTreeTable: React.FC<
   const treeDepth = getRelationTreeDepth(relationTreeArray) - 1;
   return (
     <StyledRelationTypeTreeBlock depth={treeDepth}>
-      {relationTreeArray.map(
-        (relation: Relation.IConnection<any>, key: number) => {
+      {relationTreeArray
+        .slice(0, 2)
+        .map((relation: Relation.IConnection<any>, key: number) => {
           const entity = entities[relation.entityIds[1]];
           return (
             <StyledGridRowThird key={key} onlyTwoLevels={treeDepth === 2}>
@@ -72,8 +73,7 @@ export const EntityTooltipRelationTreeTable: React.FC<
               </StyledFlexColumn>
             </StyledGridRowThird>
           );
-        }
-      )}
+        })}
     </StyledRelationTypeTreeBlock>
   );
 };
