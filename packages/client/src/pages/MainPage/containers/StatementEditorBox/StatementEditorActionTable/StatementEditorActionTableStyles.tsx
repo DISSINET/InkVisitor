@@ -8,7 +8,7 @@ export const StyledGrid = styled.div<StyledGrid>`
 
   align-items: center;
   padding-left: ${({ theme }) => theme.space[0]};
-  grid-template-columns: 2rem auto auto;
+  grid-template-columns: ${({ theme }) => `${theme.space[8]} auto auto`};
   width: fit-content;
   grid-template-rows: auto;
   grid-auto-flow: row;

@@ -64,6 +64,7 @@ interface StatementEditorActantTableRow {
   addClassification: (originId: string) => void;
   addIdentification: (originId: string) => void;
   territoryActants?: string[];
+  hasOrder?: boolean;
 }
 
 export const StatementEditorActantTableRow: React.FC<
@@ -85,6 +86,7 @@ export const StatementEditorActantTableRow: React.FC<
   addClassification,
   addIdentification,
   territoryActants,
+  hasOrder,
 }) => {
   const isInsideTemplate = statement.isTemplate || false;
   const { statementId, territoryId } = useSearchParams();
@@ -264,127 +266,109 @@ export const StatementEditorActantTableRow: React.FC<
     const { entityId: propOriginId, id: propRowId } = sActant;
 
     return (
-      <ButtonGroups>
-        <ButtonGroup height={19} key="edits" noMarginRight>
-          {sActant && (
-            <AttributesEditor
-              modalOpen={actantAttributesModalOpen}
-              setModalOpen={setActantAttributesModalOpen}
-              modalTitle={`Actant involvement`}
-              entity={actant}
-              disabledAllAttributes={!userCanEdit}
-              userCanEdit={userCanEdit}
-              data={{
-                elvl: sActant.elvl,
-                logic: sActant.logic,
-                virtuality: sActant.virtuality,
-                partitivity: sActant.partitivity,
-                bundleOperator: sActant.bundleOperator,
-                bundleStart: sActant.bundleStart,
-                bundleEnd: sActant.bundleEnd,
-              }}
-              handleUpdate={(newData) => {
-                updateActant(sActant.id, newData);
-              }}
-              updateActantId={(newId: string) => {
-                updateActant(sActant.id, { entityId: newId });
-              }}
-              classEntitiesActant={classEntitiesActant}
-              loading={updateStatementDataMutation.isLoading}
-              isInsideTemplate={isInsideTemplate}
-              territoryParentId={territoryParentId}
-            />
-          )}
-          {userCanEdit && (
-            <Button
-              key="d"
-              icon={<FaTrashAlt />}
-              color="plain"
-              inverted
-              tooltipLabel="remove actant row"
-              onClick={() => {
-                removeActant(filteredActant.data.sActant.id);
-              }}
-            />
-          )}
-        </ButtonGroup>
-        <ButtonGroup key="edit-buttons" height={19} noMarginRight>
-          {userCanEdit && (
-            <Button
-              key="a"
-              icon={
-                <>
-                  <FaPlus />p
-                </>
-              }
-              color="primary"
-              inverted
-              tooltipLabel="add new prop"
-              onClick={() => {
-                addProp(propRowId);
-              }}
-            />
-          )}
-          {userCanEdit && (
-            <Button
-              key="c"
-              icon={
-                <>
-                  <FaPlus />c
-                </>
-              }
-              color="primary"
-              inverted
-              tooltipLabel="add classification"
-              onClick={() => {
-                addClassification(propRowId);
-              }}
-            />
-          )}
-          {userCanEdit && (
-            <Button
-              key="i"
-              icon={
-                <>
-                  <FaPlus />i
-                </>
-              }
-              color="primary"
-              inverted
-              tooltipLabel="add identification"
-              onClick={() => {
-                addIdentification(propRowId);
-              }}
-            />
-          )}
-        </ButtonGroup>
-        {
-          <ButtonGroup key="signals" height={19} noMarginRight>
-            {sActant.logic == "2" && (
-              <Button
-                key="neg"
-                tooltipLabel="Negative logic"
-                color="success"
-                inverted
-                noBorder
-                icon={<AttributeIcon attributeName={"negation"} />}
-                onClick={() => setActantAttributesModalOpen(true)}
-              />
-            )}
-            {sActant.bundleOperator && (
-              <Button
-                key="oper"
-                tooltipLabel="Logical operator type"
-                color="success"
-                inverted
-                noBorder
-                icon={sActant.bundleOperator}
-                onClick={() => setActantAttributesModalOpen(true)}
-              />
-            )}
-          </ButtonGroup>
-        }
-      </ButtonGroups>
+      <ButtonGroup noMarginRight height={19}>
+        {sActant && (
+          <AttributesEditor
+            modalOpen={actantAttributesModalOpen}
+            setModalOpen={setActantAttributesModalOpen}
+            modalTitle={`Actant involvement`}
+            entity={actant}
+            disabledAllAttributes={!userCanEdit}
+            userCanEdit={userCanEdit}
+            data={{
+              elvl: sActant.elvl,
+              logic: sActant.logic,
+              virtuality: sActant.virtuality,
+              partitivity: sActant.partitivity,
+              bundleOperator: sActant.bundleOperator,
+              bundleStart: sActant.bundleStart,
+              bundleEnd: sActant.bundleEnd,
+            }}
+            handleUpdate={(newData) => {
+              updateActant(sActant.id, newData);
+            }}
+            updateActantId={(newId: string) => {
+              updateActant(sActant.id, { entityId: newId });
+            }}
+            classEntitiesActant={classEntitiesActant}
+            loading={updateStatementDataMutation.isLoading}
+            isInsideTemplate={isInsideTemplate}
+            territoryParentId={territoryParentId}
+          />
+        )}
+        {userCanEdit && (
+          <Button
+            key="d"
+            icon={<FaTrashAlt />}
+            color="plain"
+            inverted
+            tooltipLabel="remove actant row"
+            onClick={() => {
+              removeActant(filteredActant.data.sActant.id);
+            }}
+          />
+        )}
+        {userCanEdit && (
+          <Button
+            key="a"
+            icon={<FaPlus />}
+            color="plain"
+            inverted
+            tooltipLabel="add new prop"
+            onClick={() => {
+              addProp(propRowId);
+            }}
+          />
+        )}
+        {userCanEdit && (
+          <Button
+            key="c"
+            icon={<FaPlus />}
+            label="c"
+            color="plain"
+            inverted
+            tooltipLabel="add classification"
+            onClick={() => {
+              addClassification(propRowId);
+            }}
+          />
+        )}
+        {userCanEdit && (
+          <Button
+            key="i"
+            icon={<FaPlus />}
+            label="i"
+            color="plain"
+            inverted
+            tooltipLabel="add identification"
+            onClick={() => {
+              addIdentification(propRowId);
+            }}
+          />
+        )}
+        {sActant.logic == "2" && (
+          <Button
+            key="neg"
+            tooltipLabel="Negative logic"
+            color="success"
+            inverted
+            noBorder
+            icon={<AttributeIcon attributeName={"negation"} />}
+            onClick={() => setActantAttributesModalOpen(true)}
+          />
+        )}
+        {sActant.bundleOperator && (
+          <Button
+            key="oper"
+            tooltipLabel="Logical operator type"
+            color="success"
+            inverted
+            noBorder
+            icon={sActant.bundleOperator}
+            onClick={() => setActantAttributesModalOpen(true)}
+          />
+        )}
+      </ButtonGroup>
     );
   };
 
@@ -439,9 +423,13 @@ export const StatementEditorActantTableRow: React.FC<
       marginBottom={classifications.length > 0 || identifications.length > 0}
     >
       <StyledGrid ref={dropRef} style={{ opacity }}>
-        <StyledGridColumn ref={dragRef} style={{ cursor: "move" }}>
-          {userCanEdit && <FaGripVertical />}
-        </StyledGridColumn>
+        {userCanEdit && hasOrder ? (
+          <StyledGridColumn ref={dragRef} style={{ cursor: "move" }}>
+            <FaGripVertical />
+          </StyledGridColumn>
+        ) : (
+          <StyledGridColumn />
+        )}
         <StyledGridColumn>{renderActantCell()}</StyledGridColumn>
         <StyledGridColumn>{renderPositionCell()}</StyledGridColumn>
         <StyledGridColumn>{renderAttributesCell()}</StyledGridColumn>

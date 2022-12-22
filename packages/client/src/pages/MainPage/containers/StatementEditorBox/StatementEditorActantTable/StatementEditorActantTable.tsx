@@ -99,6 +99,7 @@ export const StatementEditorActantTable: React.FC<
               addClassification={addClassification}
               addIdentification={addIdentification}
               territoryActants={territoryActants}
+              hasOrder={filteredActants.length > 1}
             />
           );
         })}
