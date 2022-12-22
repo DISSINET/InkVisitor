@@ -19,6 +19,7 @@ interface EntityBookmarkTableRow {
   folder: IResponseBookmarkFolder;
   updateOrderFn: () => void;
   visibleColumns: ColumnInstance<{}>[];
+  hasOrder: boolean;
 }
 
 export const EntityBookmarkTableRow: React.FC<EntityBookmarkTableRow> = ({
@@ -28,6 +29,7 @@ export const EntityBookmarkTableRow: React.FC<EntityBookmarkTableRow> = ({
   folder,
   updateOrderFn,
   visibleColumns,
+  hasOrder,
 }) => {
   const dropRef = useRef<HTMLTableRowElement>(null);
   const dragRef = useRef<HTMLTableCellElement>(null);
@@ -57,9 +59,13 @@ export const EntityBookmarkTableRow: React.FC<EntityBookmarkTableRow> = ({
   return (
     <React.Fragment key={index}>
       <StyledTr ref={dropRef} opacity={opacity} isOdd={Boolean(index % 2)}>
-        <td ref={dragRef} style={{ cursor: "move" }}>
-          <FaGripVertical />
-        </td>
+        {hasOrder ? (
+          <td ref={dragRef} style={{ cursor: "move" }}>
+            <FaGripVertical />
+          </td>
+        ) : (
+          <td style={{ width: "2rem" }} />
+        )}
         {row.cells.map((cell: Cell) => {
           return (
             <StyledTd {...cell.getCellProps()}>{cell.render("Cell")}</StyledTd>

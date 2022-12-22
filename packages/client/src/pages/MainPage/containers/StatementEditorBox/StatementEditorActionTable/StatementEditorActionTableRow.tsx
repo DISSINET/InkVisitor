@@ -292,7 +292,7 @@ export const StatementEditorActionTableRow: React.FC<
 
   return (
     <React.Fragment key={index}>
-      <StyledGrid ref={dropRef} style={{ opacity }}>
+      <StyledGrid ref={dropRef} style={{ opacity }} hasOrder={hasOrder}>
         {userCanEdit && hasOrder ? (
           <StyledGridColumn ref={dragRef} style={{ cursor: "move" }}>
             <FaGripVertical />
