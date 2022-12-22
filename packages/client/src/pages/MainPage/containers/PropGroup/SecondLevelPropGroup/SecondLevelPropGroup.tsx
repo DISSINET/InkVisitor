@@ -10,7 +10,8 @@ interface SecondLevelPropGroup {
     prop2: IProp,
     pi2: number,
     prop1: IProp,
-    moveProp: (dragIndex: number, hoverIndex: number) => void
+    moveProp: (dragIndex: number, hoverIndex: number) => void,
+    hasOrder: boolean
   ) => JSX.Element;
   secondLevelProps: IProp[];
   category: DraggedPropRowCategory;
@@ -61,7 +62,13 @@ export const SecondLevelPropGroup: React.FC<SecondLevelPropGroup> = ({
     <>
       {!hideChildren &&
         props.map((prop2: IProp, pi2: number) =>
-          renderSecondLevelPropRow(prop2, pi2, prop1, moveProp)
+          renderSecondLevelPropRow(
+            prop2,
+            pi2,
+            prop1,
+            moveProp,
+            props.length > 1
+          )
         )}
     </>
   );

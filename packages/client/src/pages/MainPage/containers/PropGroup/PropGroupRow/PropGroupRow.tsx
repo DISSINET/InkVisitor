@@ -19,7 +19,6 @@ import {
   DraggedPropRowCategory,
   DraggedPropRowItem,
   DragItem,
-  EntityDragItem,
   ItemTypes,
   PropAttributeFilter,
   PropAttributeGroupDataObject,
@@ -37,6 +36,7 @@ interface PropGroupRow {
   prop: IProp;
   entities: { [key: string]: IEntity };
   level: 1 | 2 | 3;
+  hasOrder: boolean;
 
   updateProp: (propId: string, changes: any) => void;
   removeProp: (propId: string) => void;
@@ -63,6 +63,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
   prop,
   entities,
   level,
+  hasOrder,
   updateProp,
   removeProp,
   addProp,
@@ -101,7 +102,9 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
   }, [draggedPropRow]);
 
   const dispatch = useAppDispatch();
-  const ref = useRef<HTMLDivElement>(null);
+  // const ref = useRef<HTMLDivElement>(null);
+  const dropRef = useRef<HTMLDivElement>(null);
+  const dragRef = useRef<HTMLDivElement>(null);
 
   const [{ handlerId }, drop] = useDrop({
     accept: itemType ? itemType : ItemTypes.PROP_ROW,
@@ -114,11 +117,11 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
       if (tempDisabled) {
         return;
       }
-      dndHoverFn(item, index, monitor, ref, moveProp);
+      dndHoverFn(item, index, monitor, dropRef, moveProp);
     },
   });
 
-  const [{ isDragging }, drag] = useDrag({
+  const [{ isDragging }, drag, preview] = useDrag({
     item: { type: itemType ? itemType : ItemTypes.PROP_ROW, id, index },
     collect: (monitor: DragSourceMonitor) => ({
       isDragging: monitor.isDragging(),
@@ -133,7 +136,8 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
     },
   });
 
-  drag(drop(ref));
+  preview(drop(dropRef));
+  drag(dragRef);
 
   useEffect(() => {
     if (isDragging) {
@@ -160,6 +164,13 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
           level={level}
           isTag={propTypeEntity ? true : false}
         >
+          {hasOrder ? (
+            <div ref={dragRef} style={{ width: "2rem" }}>
+              <StyledFaGripVertical />
+            </div>
+          ) : (
+            <div style={{ width: "2rem" }} />
+          )}
           {propTypeEntity ? (
             <>
               <EntityTag
@@ -405,7 +416,11 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
 
   return (
     <>
-      <div ref={ref} data-handler-id={handlerId} style={{ opacity: opacity }}>
+      <div
+        ref={dropRef}
+        data-handler-id={handlerId}
+        style={{ opacity: opacity }}
+      >
         {renderPropRow()}
       </div>
     </>
