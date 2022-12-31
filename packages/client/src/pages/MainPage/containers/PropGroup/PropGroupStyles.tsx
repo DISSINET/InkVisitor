@@ -58,17 +58,6 @@ export const StyledPropLineColumn = styled.div<StyledPropLineColumn>`
   overflow: ${({ isTag }) => (isTag ? "hidden" : "visible")};
 `;
 
-interface StyledPropButtonGroup {
-  border?: boolean;
-  round?: boolean;
-}
-export const StyledPropButtonGroup = styled.div<StyledPropButtonGroup>`
-  vertical-align: middle;
-  display: inline-flex;
-  border-radius: ${({ round }) => (round ? "8px" : "0")};
-  border: ${({ border }) => (border ? "1px" : 0)} solid
-    ${({ theme }) => theme.color["gray"][600]};
-`;
 export const StyledFaGripVertical = styled(FaGripVertical)`
   margin-right: ${({ theme }) => theme.space[2]};
   cursor: move;
