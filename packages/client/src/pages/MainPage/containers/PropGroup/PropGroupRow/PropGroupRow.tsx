@@ -167,21 +167,23 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
                 fullWidth
                 tooltipPosition="right"
                 button={
-                  <Button
-                    key="d"
-                    icon={<FaUnlink />}
-                    color="plain"
-                    inverted
-                    tooltipLabel="unlink actant"
-                    onClick={() => {
-                      updateProp(prop.id, {
-                        type: {
-                          ...prop.type,
-                          ...{ entityId: "" },
-                        },
-                      });
-                    }}
-                  />
+                  userCanEdit && (
+                    <Button
+                      key="d"
+                      icon={<FaUnlink />}
+                      color="plain"
+                      inverted
+                      tooltipLabel="unlink actant"
+                      onClick={() => {
+                        updateProp(prop.id, {
+                          type: {
+                            ...prop.type,
+                            ...{ entityId: "" },
+                          },
+                        });
+                      }}
+                    />
+                  )
                 }
               />
               <StyledPropButtonGroup>
@@ -229,21 +231,23 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
                 fullWidth
                 tooltipPosition="right"
                 button={
-                  <Button
-                    key="d"
-                    icon={<FaUnlink />}
-                    tooltipLabel="unlink actant"
-                    color="plain"
-                    inverted
-                    onClick={() => {
-                      updateProp(prop.id, {
-                        value: {
-                          ...prop.value,
-                          ...{ entityId: "" },
-                        },
-                      });
-                    }}
-                  />
+                  userCanEdit && (
+                    <Button
+                      key="d"
+                      icon={<FaUnlink />}
+                      tooltipLabel="unlink actant"
+                      color="plain"
+                      inverted
+                      onClick={() => {
+                        updateProp(prop.id, {
+                          value: {
+                            ...prop.value,
+                            ...{ entityId: "" },
+                          },
+                        });
+                      }}
+                    />
+                  )
                 }
               />
 
