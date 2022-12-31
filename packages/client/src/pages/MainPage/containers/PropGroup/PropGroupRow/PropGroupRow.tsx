@@ -329,7 +329,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
               territoryParentId={territoryParentId}
             />
 
-            {(level === 1 || level === 2) && (
+            {(level === 1 || level === 2) && userCanEdit && (
               <Button
                 key="add"
                 icon={
@@ -345,16 +345,18 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
                 }}
               />
             )}
-            <Button
-              key="delete"
-              icon={<FaTrashAlt />}
-              tooltipLabel="remove prop row"
-              color="plain"
-              inverted
-              onClick={() => {
-                removeProp(prop.id);
-              }}
-            />
+            {userCanEdit && (
+              <Button
+                key="delete"
+                icon={<FaTrashAlt />}
+                tooltipLabel="remove prop row"
+                color="plain"
+                inverted
+                onClick={() => {
+                  removeProp(prop.id);
+                }}
+              />
+            )}
             {prop.logic == "2" ? (
               <Button
                 key="neg"
