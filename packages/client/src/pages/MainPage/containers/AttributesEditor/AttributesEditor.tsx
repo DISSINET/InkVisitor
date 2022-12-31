@@ -168,9 +168,9 @@ const AttributesEditor: React.FC<AttributesEditor> = ({
           inverted
           color={!disabledOpenModal && userCanEdit ? "plain" : "grey"}
           onClick={() => {
-            if (!disabledOpenModal && userCanEdit) {
-              setModalOpen(true);
-            }
+            //if (!disabledOpenModal && userCanEdit) {
+            setModalOpen(true);
+            //}
           }}
           tooltipContent={getTooltipAttributes()}
         />

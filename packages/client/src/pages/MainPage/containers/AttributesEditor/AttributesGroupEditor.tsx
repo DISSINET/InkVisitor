@@ -258,9 +258,9 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
         inverted
         color={!disabledOpenModal && userCanEdit ? "plain" : "grey"}
         onClick={() => {
-          if (!disabledOpenModal && userCanEdit) {
-            setModalOpen(true);
-          }
+          // if (!disabledOpenModal && userCanEdit) {
+          setModalOpen(true);
+          //   }
         }}
         tooltipContent={getTooltipContent()}
       />
@@ -296,6 +296,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
                 disabledAttributes={dissabledStatement}
                 modalData={modalData.statement}
                 setNewModalData={handleSetModalData}
+                disabledAllAttributes={disabledAllAttributes || !userCanEdit}
               />
             </StyledColumnWrap>
             <StyledColumnWrap
@@ -312,6 +313,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
                 disabledAttributes={dissabledType}
                 modalData={modalData.type}
                 setNewModalData={handleSetModalData}
+                disabledAllAttributes={disabledAllAttributes || !userCanEdit}
               />
               {propTypeActant ? (
                 <StyledEntityWrap>
@@ -372,6 +374,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
               <AttributesForm
                 groupName="value"
                 disabledAttributes={dissabledValue}
+                disabledAllAttributes={disabledAllAttributes || !userCanEdit}
                 modalData={modalData.value}
                 setNewModalData={handleSetModalData}
               />
