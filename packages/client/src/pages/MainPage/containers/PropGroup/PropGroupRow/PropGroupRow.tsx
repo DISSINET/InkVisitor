@@ -29,6 +29,7 @@ import { AttributesGroupEditor } from "../../AttributesEditor/AttributesGroupEdi
 import {
   StyledFaGripVertical,
   StyledGrid,
+  StyledNoEntity,
   StyledPropLineColumn,
 } from "../PropGroupStyles";
 
@@ -160,28 +161,43 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
           isTag={propTypeEntity ? true : false}
         >
           {propTypeEntity ? (
-            <EntityTag
-              entity={propTypeEntity}
-              fullWidth
-              tooltipPosition="right"
-              button={
-                <Button
-                  key="d"
-                  icon={<FaUnlink />}
-                  color="plain"
-                  inverted
-                  tooltipLabel="unlink actant"
-                  onClick={() => {
-                    updateProp(prop.id, {
-                      type: {
-                        ...prop.type,
-                        ...{ entityId: "" },
-                      },
-                    });
-                  }}
-                />
-              }
-            />
+            <>
+              <EntityTag
+                entity={propTypeEntity}
+                fullWidth
+                tooltipPosition="right"
+                button={
+                  <Button
+                    key="d"
+                    icon={<FaUnlink />}
+                    color="plain"
+                    inverted
+                    tooltipLabel="unlink actant"
+                    onClick={() => {
+                      updateProp(prop.id, {
+                        type: {
+                          ...prop.type,
+                          ...{ entityId: "" },
+                        },
+                      });
+                    }}
+                  />
+                }
+              />
+              <StyledPropButtonGroup>
+                {prop.type.logic == "2" && (
+                  <Button
+                    key="neg"
+                    tooltipLabel="Negative logic"
+                    color="success"
+                    inverted
+                    noBorder
+                    onClick={() => setModalOpen(true)}
+                    icon={<AttributeIcon attributeName={"negation"} />}
+                  />
+                )}
+              </StyledPropButtonGroup>
+            </>
           ) : userCanEdit ? (
             <EntitySuggester
               territoryActants={territoryActants}
@@ -201,48 +217,49 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
               territoryParentId={territoryParentId}
             />
           ) : (
-            <>-</>
+            <StyledNoEntity>-</StyledNoEntity>
           )}
-          <StyledPropButtonGroup>
-            {prop.type.logic == "2" ? (
-              <Button
-                key="neg"
-                tooltipLabel="Negative logic"
-                color="success"
-                inverted
-                noBorder
-                onClick={() => setModalOpen(true)}
-                icon={<AttributeIcon attributeName={"negation"} />}
-              />
-            ) : (
-              <div />
-            )}
-          </StyledPropButtonGroup>
         </StyledPropLineColumn>
         <StyledPropLineColumn isTag={propValueEntity ? true : false}>
           {propValueEntity ? (
-            <EntityTag
-              entity={propValueEntity}
-              fullWidth
-              tooltipPosition="right"
-              button={
-                <Button
-                  key="d"
-                  icon={<FaUnlink />}
-                  tooltipLabel="unlink actant"
-                  color="plain"
-                  inverted
-                  onClick={() => {
-                    updateProp(prop.id, {
-                      value: {
-                        ...prop.value,
-                        ...{ entityId: "" },
-                      },
-                    });
-                  }}
-                />
-              }
-            />
+            <>
+              <EntityTag
+                entity={propValueEntity}
+                fullWidth
+                tooltipPosition="right"
+                button={
+                  <Button
+                    key="d"
+                    icon={<FaUnlink />}
+                    tooltipLabel="unlink actant"
+                    color="plain"
+                    inverted
+                    onClick={() => {
+                      updateProp(prop.id, {
+                        value: {
+                          ...prop.value,
+                          ...{ entityId: "" },
+                        },
+                      });
+                    }}
+                  />
+                }
+              />
+
+              <StyledPropButtonGroup>
+                {prop.value.logic == "2" && (
+                  <Button
+                    key="neg"
+                    tooltipLabel="Negative logic"
+                    color="success"
+                    inverted
+                    noBorder
+                    onClick={() => setModalOpen(true)}
+                    icon={<AttributeIcon attributeName={"negation"} />}
+                  />
+                )}
+              </StyledPropButtonGroup>
+            </>
           ) : userCanEdit ? (
             <EntitySuggester
               territoryActants={territoryActants}
@@ -262,23 +279,8 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
               territoryParentId={territoryParentId}
             />
           ) : (
-            <>-</>
+            <StyledNoEntity>-</StyledNoEntity>
           )}
-          <StyledPropButtonGroup>
-            {prop.value.logic == "2" ? (
-              <Button
-                key="neg"
-                tooltipLabel="Negative logic"
-                color="success"
-                inverted
-                noBorder
-                onClick={() => setModalOpen(true)}
-                icon={<AttributeIcon attributeName={"negation"} />}
-              />
-            ) : (
-              <div />
-            )}
-          </StyledPropButtonGroup>
         </StyledPropLineColumn>
 
         <StyledPropLineColumn>

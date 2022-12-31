@@ -20,6 +20,10 @@ export const StyledGrid = styled.div<StyledGrid>`
   opacity: ${({ tempDisabled }) => (tempDisabled ? 0.2 : 1)};
 `;
 
+export const StyledNoEntity = styled.div`
+  margin-left: ${({ theme }) => theme.space[4]};
+`;
+
 interface StyledListHeaderColumn {
   leftMargin?: boolean;
 }
