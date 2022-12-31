@@ -105,14 +105,16 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
       const newModalData = {
         ...modalData,
         type: {
-          ...{ id: propTypeActant?.id },
+          ...{ entityId: propTypeActant?.id },
           ...modalData.type,
         },
         value: {
-          ...{ id: propValueActant?.id },
+          ...{ entityId: propValueActant?.id },
           ...modalData.value,
         },
       };
+
+      console.log(newModalData.type);
       handleUpdate(newModalData);
       setModalOpen(false);
     }
@@ -332,7 +334,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
                             updateProp(statementId, {
                               type: {
                                 ...data.type,
-                                ...{ id: "" },
+                                ...{ entityId: "" },
                               },
                             });
                           }}
@@ -351,7 +353,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
                         updateProp(statementId, {
                           type: {
                             ...data.type,
-                            ...{ id: newSelectedId },
+                            ...{ entityId: newSelectedId },
                           },
                         });
                       }}
@@ -398,7 +400,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
                             updateProp(statementId, {
                               value: {
                                 ...data.value,
-                                ...{ id: "" },
+                                ...{ entityId: "" },
                               },
                             });
                           }}
@@ -417,7 +419,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
                         updateProp(statementId, {
                           value: {
                             ...data.type,
-                            ...{ id: newSelectedId },
+                            ...{ entityId: newSelectedId },
                           },
                         });
                       }}
