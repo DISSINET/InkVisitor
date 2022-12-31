@@ -10,7 +10,7 @@ export const StyledGrid = styled.div<StyledGrid>`
 
   align-items: center;
   padding-left: ${({ theme }) => theme.space[0]};
-  grid-template-columns: 1fr 1fr 10rem;
+  grid-template-columns: 20px 1fr 1fr 10rem;
   width: fit-content;
   grid-template-rows: auto;
   grid-auto-flow: row;
@@ -18,6 +18,10 @@ export const StyledGrid = styled.div<StyledGrid>`
   width: 100%;
 
   opacity: ${({ tempDisabled }) => (tempDisabled ? 0.2 : 1)};
+`;
+
+export const StyledNoEntity = styled.div`
+  margin-left: ${({ theme }) => theme.space[4]};
 `;
 
 interface StyledListHeaderColumn {

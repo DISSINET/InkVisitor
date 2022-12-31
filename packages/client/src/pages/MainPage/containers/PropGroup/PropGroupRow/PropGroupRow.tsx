@@ -29,6 +29,7 @@ import { AttributesGroupEditor } from "../../AttributesEditor/AttributesGroupEdi
 import {
   StyledFaGripVertical,
   StyledGrid,
+  StyledNoEntity,
   StyledPropLineColumn,
 } from "../PropGroupStyles";
 
@@ -152,37 +153,54 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
         key={level + "|" + index + "|" + id}
         tempDisabled={tempDisabled && category === draggedPropRow.category}
       >
+        <StyledPropLineColumn level={level} isTag={false}>
+          <div>{userCanEdit && <StyledFaGripVertical />}</div>
+        </StyledPropLineColumn>
         <StyledPropLineColumn
           level={level}
           isTag={propTypeEntity ? true : false}
         >
-          <div>
-            <StyledFaGripVertical />
-          </div>
           {propTypeEntity ? (
-            <EntityTag
-              entity={propTypeEntity}
-              fullWidth
-              tooltipPosition="right"
-              button={
-                <Button
-                  key="d"
-                  icon={<FaUnlink />}
-                  color="plain"
-                  inverted
-                  tooltipLabel="unlink actant"
-                  onClick={() => {
-                    updateProp(prop.id, {
-                      type: {
-                        ...prop.type,
-                        ...{ entityId: "" },
-                      },
-                    });
-                  }}
-                />
-              }
-            />
-          ) : (
+            <>
+              <EntityTag
+                entity={propTypeEntity}
+                fullWidth
+                tooltipPosition="right"
+                button={
+                  userCanEdit && (
+                    <Button
+                      key="d"
+                      icon={<FaUnlink />}
+                      color="plain"
+                      inverted
+                      tooltipLabel="unlink actant"
+                      onClick={() => {
+                        updateProp(prop.id, {
+                          type: {
+                            ...prop.type,
+                            ...{ entityId: "" },
+                          },
+                        });
+                      }}
+                    />
+                  )
+                }
+              />
+              <StyledPropButtonGroup>
+                {prop.type.logic == "2" && (
+                  <Button
+                    key="neg"
+                    tooltipLabel="Negative logic"
+                    color="success"
+                    inverted
+                    noBorder
+                    onClick={() => setModalOpen(true)}
+                    icon={<AttributeIcon attributeName={"negation"} />}
+                  />
+                )}
+              </StyledPropButtonGroup>
+            </>
+          ) : userCanEdit ? (
             <EntitySuggester
               territoryActants={territoryActants}
               onSelected={(newSelectedId: string) => {
@@ -193,6 +211,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
                   },
                 });
               }}
+              placeholder="type"
               openDetailOnCreate={openDetailOnCreate}
               categoryTypes={classesPropType}
               inputWidth={90}
@@ -200,48 +219,53 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
               isInsideTemplate={isInsideTemplate}
               territoryParentId={territoryParentId}
             />
+          ) : (
+            <StyledNoEntity>-</StyledNoEntity>
           )}
-          <StyledPropButtonGroup>
-            {prop.type.logic == "2" ? (
-              <Button
-                key="neg"
-                tooltipLabel="Negative logic"
-                color="success"
-                inverted
-                noBorder
-                onClick={() => setModalOpen(true)}
-                icon={<AttributeIcon attributeName={"negation"} />}
-              />
-            ) : (
-              <div />
-            )}
-          </StyledPropButtonGroup>
         </StyledPropLineColumn>
         <StyledPropLineColumn isTag={propValueEntity ? true : false}>
           {propValueEntity ? (
-            <EntityTag
-              entity={propValueEntity}
-              fullWidth
-              tooltipPosition="right"
-              button={
-                <Button
-                  key="d"
-                  icon={<FaUnlink />}
-                  tooltipLabel="unlink actant"
-                  color="plain"
-                  inverted
-                  onClick={() => {
-                    updateProp(prop.id, {
-                      value: {
-                        ...prop.value,
-                        ...{ entityId: "" },
-                      },
-                    });
-                  }}
-                />
-              }
-            />
-          ) : (
+            <>
+              <EntityTag
+                entity={propValueEntity}
+                fullWidth
+                tooltipPosition="right"
+                button={
+                  userCanEdit && (
+                    <Button
+                      key="d"
+                      icon={<FaUnlink />}
+                      tooltipLabel="unlink actant"
+                      color="plain"
+                      inverted
+                      onClick={() => {
+                        updateProp(prop.id, {
+                          value: {
+                            ...prop.value,
+                            ...{ entityId: "" },
+                          },
+                        });
+                      }}
+                    />
+                  )
+                }
+              />
+
+              <StyledPropButtonGroup>
+                {prop.value.logic == "2" && (
+                  <Button
+                    key="neg"
+                    tooltipLabel="Negative logic"
+                    color="success"
+                    inverted
+                    noBorder
+                    onClick={() => setModalOpen(true)}
+                    icon={<AttributeIcon attributeName={"negation"} />}
+                  />
+                )}
+              </StyledPropButtonGroup>
+            </>
+          ) : userCanEdit ? (
             <EntitySuggester
               territoryActants={territoryActants}
               onSelected={(newSelectedId: string) => {
@@ -252,6 +276,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
                   },
                 });
               }}
+              placeholder="value"
               openDetailOnCreate={openDetailOnCreate}
               categoryTypes={classesPropValue}
               inputWidth={90}
@@ -259,22 +284,9 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
               isInsideTemplate={isInsideTemplate}
               territoryParentId={territoryParentId}
             />
+          ) : (
+            <StyledNoEntity>-</StyledNoEntity>
           )}
-          <StyledPropButtonGroup>
-            {prop.value.logic == "2" ? (
-              <Button
-                key="neg"
-                tooltipLabel="Negative logic"
-                color="success"
-                inverted
-                noBorder
-                onClick={() => setModalOpen(true)}
-                icon={<AttributeIcon attributeName={"negation"} />}
-              />
-            ) : (
-              <div />
-            )}
-          </StyledPropButtonGroup>
         </StyledPropLineColumn>
 
         <StyledPropLineColumn>
@@ -329,7 +341,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
               territoryParentId={territoryParentId}
             />
 
-            {(level === 1 || level === 2) && (
+            {(level === 1 || level === 2) && userCanEdit && (
               <Button
                 key="add"
                 icon={
@@ -345,16 +357,18 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
                 }}
               />
             )}
-            <Button
-              key="delete"
-              icon={<FaTrashAlt />}
-              tooltipLabel="remove prop row"
-              color="plain"
-              inverted
-              onClick={() => {
-                removeProp(prop.id);
-              }}
-            />
+            {userCanEdit && (
+              <Button
+                key="delete"
+                icon={<FaTrashAlt />}
+                tooltipLabel="remove prop row"
+                color="plain"
+                inverted
+                onClick={() => {
+                  removeProp(prop.id);
+                }}
+              />
+            )}
             {prop.logic == "2" ? (
               <Button
                 key="neg"

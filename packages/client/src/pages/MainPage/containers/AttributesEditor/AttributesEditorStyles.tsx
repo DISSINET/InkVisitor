@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import theme from "Theme/theme";
 import { Colors } from "types";
 
 interface StyledAttributeModalRow {
@@ -6,7 +7,10 @@ interface StyledAttributeModalRow {
 }
 
 export const StyledAttributeModalRow = styled.div<StyledAttributeModalRow>`
-  display: ${({ disabled }) => (disabled ? "none" : "grid")};
+  // display: ${({ disabled }) => (disabled ? "none" : "grid")};
+  color: ${({ disabled }) =>
+    disabled ? theme.color["grey"] : theme.color["black"]};
+  display: "grid";
   padding-bottom: ${({ theme }) => theme.space[1]};
   width: 100%;
   grid-template-columns: ${({ theme }) => `auto ${theme.space[64]}`};
