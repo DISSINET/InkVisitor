@@ -61,8 +61,14 @@ export const StyledLabel = styled.div<StyledLabel>`
       : isFavorited
       ? theme.color["warning"]
       : theme.color["white"]};
-  color: ${({ theme, invertedLabel }) =>
-    invertedLabel ? theme.color["white"] : theme.color["black"]};
+  color: ${({ theme, invertedLabel, isItalic }) =>
+    invertedLabel
+      ? isItalic
+        ? theme.color["grey"]
+        : theme.color["white"]
+      : isItalic
+      ? theme.color["greyer"]
+      : theme.color["black"]};
   border-left-width: ${({ theme, labelOnly }) =>
     labelOnly ? 0 : theme.borderWidth[2]};
   border-left-style: ${({ borderStyle }) => borderStyle};
