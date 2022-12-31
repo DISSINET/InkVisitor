@@ -8,6 +8,7 @@ interface StyledHeaderLogo {
 export const StyledHeaderLogo = styled.img<StyledHeaderLogo>`
   height: ${({ height }) => (height ? `${height / 10}rem` : "auto")};
   padding: ${({ theme }) => theme.space[4]};
+  cursor: pointer;
 `;
 
 export const StyledHeader = styled.div`
@@ -15,6 +16,7 @@ export const StyledHeader = styled.div`
 `;
 
 export const StyledHeaderTag = styled.div`
+  cursor: copy;
   font-size: 12px;
   margin-top: 28px;
   opacity: 0.8;

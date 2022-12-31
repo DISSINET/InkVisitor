@@ -21,13 +21,16 @@ import {
   StyledUsername,
 } from "./PageHeaderStyles";
 
-export const LeftHeader = React.memo(({ }) => {
+import { RouteComponentProps } from "react-router-dom";
+
+export const LeftHeader = React.memo(({}) => {
   const env = (process.env.ROOT_URL || "").replace(/apps\/inkvisitor[-]?/, "");
-  const versionText = `v. ${packageJson.version} 
-  ${["production", ""].indexOf(env) === -1
+  const versionText = `v. ${packageJson.version} ${
+    ["production", ""].indexOf(env) === -1
       ? `| ${env} | built: ${process.env.BUILD_TIMESTAMP}`
       : ""
-    }`;
+  }`;
+  const history = useHistory();
 
   return (
     <StyledHeader>
@@ -35,6 +38,9 @@ export const LeftHeader = React.memo(({ }) => {
         height={heightHeader - 10}
         src={LogoInkvisitor}
         alt="Inkvisitor Logo"
+        onClick={async () => {
+          history.push("");
+        }}
       />
       <StyledHeaderTag
         onClick={async () => {
