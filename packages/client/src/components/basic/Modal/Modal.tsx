@@ -23,17 +23,17 @@ interface Modal {
   disableBgClick?: boolean;
   width?: "full" | "fat" | "normal" | "thin" | number;
   disableEscapeClose?: boolean;
-  disableBackground?: boolean
+  disableBackground?: boolean;
 }
 export const Modal: FC<Modal> = ({
   children,
-  onClose = () => { },
-  onEnterPress = () => { },
+  onClose = () => {},
+  onEnterPress = () => {},
   showModal,
   disableBgClick = false,
   width = "normal",
   disableEscapeClose = false,
-  disableBackground = true
+  disableBackground = false,
 }) => {
   const animatedMount = useSpring({
     opacity: showModal ? 1 : 0,
@@ -45,17 +45,19 @@ export const Modal: FC<Modal> = ({
       {showModal && (
         <>
           <StyledModalWrap>
-            {!disableBackground && (<StyledBackground
-              style={animatedMount}
-              onClick={disableBgClick ? () => { } : onClose}
-            />)}
+            {!disableBackground && (
+              <StyledBackground
+                style={animatedMount}
+                onClick={disableBgClick ? () => {} : onClose}
+              />
+            )}
             <ModalCard animatedMount={animatedMount} width={width}>
               {children}
             </ModalCard>
           </StyledModalWrap>
           <ModalKeyPress
             onEnter={onEnterPress}
-            onEscape={disableEscapeClose ? () => { } : onClose}
+            onEscape={disableEscapeClose ? () => {} : onClose}
           />
         </>
       )}
