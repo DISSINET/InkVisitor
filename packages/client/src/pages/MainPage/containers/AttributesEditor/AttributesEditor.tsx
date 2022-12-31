@@ -19,7 +19,6 @@ import {
   ModalFooter,
   ModalHeader,
   Tooltip,
-  Tooltip,
 } from "components";
 import { EntitySuggester, EntityTag } from "components/advanced";
 import React, { useMemo, useState } from "react";
@@ -167,8 +166,12 @@ const AttributesEditor: React.FC<AttributesEditor> = ({
           disabled={disabledOpenModal}
           icon={<MdSettings />}
           inverted
-          color="plain"
-          onClick={() => setModalOpen(true)}
+          color={!disabledOpenModal && userCanEdit ? "plain" : "grey"}
+          onClick={() => {
+            if (!disabledOpenModal && userCanEdit) {
+              setModalOpen(true);
+            }
+          }}
           tooltipContent={getTooltipAttributes()}
         />
       </div>

@@ -253,11 +253,15 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
     <div>
       <Button
         key="settings"
-        disabled={disabledOpenModal}
+        //disabled={disabledOpenModal || !userCanEdit}
         icon={<MdSettings />}
         inverted
-        color="plain"
-        onClick={() => setModalOpen(true)}
+        color={!disabledOpenModal && userCanEdit ? "plain" : "grey"}
+        onClick={() => {
+          if (!disabledOpenModal && userCanEdit) {
+            setModalOpen(true);
+          }
+        }}
         tooltipContent={getTooltipContent()}
       />
 
