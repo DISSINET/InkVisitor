@@ -1,6 +1,7 @@
 import { IEntity, IProp } from "@shared/types";
-import { AttributeIcon, Button } from "components";
+import { AttributeIcon, Button, ButtonGroup } from "components";
 import { EntitySuggester, EntityTag } from "components/advanced";
+import { StyledPropButtonGroup } from "components/advanced/AttributeButtonGroup/AttributeButtonGroupStyles";
 import React, { useEffect, useRef, useState } from "react";
 import {
   DragSourceMonitor,
@@ -28,7 +29,6 @@ import { AttributesGroupEditor } from "../../AttributesEditor/AttributesGroupEdi
 import {
   StyledFaGripVertical,
   StyledGrid,
-  StyledPropButtonGroup,
   StyledPropLineColumn,
 } from "../PropGroupStyles";
 
@@ -278,7 +278,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
         </StyledPropLineColumn>
 
         <StyledPropLineColumn>
-          <StyledPropButtonGroup>
+          <ButtonGroup height={19} noMarginRight>
             <AttributesGroupEditor
               modalTitle={`Property attributes`}
               modalOpen={modalOpen}
@@ -332,10 +332,14 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
             {(level === 1 || level === 2) && (
               <Button
                 key="add"
-                icon={<FaPlus />}
-                tooltipLabel="add child prop"
-                color="plain"
+                icon={
+                  <>
+                    <FaPlus />p
+                  </>
+                }
+                color="primary"
                 inverted
+                tooltipLabel="add child prop"
                 onClick={() => {
                   addProp(prop.id);
                 }}
@@ -377,7 +381,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
             ) : (
               <div />
             )}
-          </StyledPropButtonGroup>
+          </ButtonGroup>
         </StyledPropLineColumn>
       </StyledGrid>
     );

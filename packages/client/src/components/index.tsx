@@ -1,6 +1,6 @@
 import { Box } from "./basic/Box/Box";
 import { Button } from "./basic/Button/Button";
-import { ButtonGroup } from "./basic/ButtonGroup/ButtonGroup";
+import { ButtonGroup, ButtonGroups } from "./basic/ButtonGroup/ButtonGroup";
 import { Dropdown } from "./basic/Dropdown/Dropdown";
 import { Footer, MemoizedFooter } from "./basic/Footer/Footer";
 import { Header } from "./basic/Header/Header";
@@ -36,6 +36,7 @@ export {
   Box,
   Button,
   ButtonGroup,
+  ButtonGroups,
   Cloud,
   Checkbox,
   Header,
