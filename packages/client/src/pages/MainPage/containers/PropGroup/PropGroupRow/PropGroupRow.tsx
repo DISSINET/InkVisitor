@@ -152,13 +152,13 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
         key={level + "|" + index + "|" + id}
         tempDisabled={tempDisabled && category === draggedPropRow.category}
       >
+        <StyledPropLineColumn level={level} isTag={false}>
+          <div>{userCanEdit && <StyledFaGripVertical />}</div>
+        </StyledPropLineColumn>
         <StyledPropLineColumn
           level={level}
           isTag={propTypeEntity ? true : false}
         >
-          <div>
-            <StyledFaGripVertical />
-          </div>
           {propTypeEntity ? (
             <EntityTag
               entity={propTypeEntity}
@@ -182,7 +182,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
                 />
               }
             />
-          ) : (
+          ) : userCanEdit ? (
             <EntitySuggester
               territoryActants={territoryActants}
               onSelected={(newSelectedId: string) => {
@@ -200,6 +200,8 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
               isInsideTemplate={isInsideTemplate}
               territoryParentId={territoryParentId}
             />
+          ) : (
+            <>-</>
           )}
           <StyledPropButtonGroup>
             {prop.type.logic == "2" ? (
@@ -241,7 +243,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
                 />
               }
             />
-          ) : (
+          ) : userCanEdit ? (
             <EntitySuggester
               territoryActants={territoryActants}
               onSelected={(newSelectedId: string) => {
@@ -259,6 +261,8 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
               isInsideTemplate={isInsideTemplate}
               territoryParentId={territoryParentId}
             />
+          ) : (
+            <>-</>
           )}
           <StyledPropButtonGroup>
             {prop.value.logic == "2" ? (
