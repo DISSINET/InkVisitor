@@ -200,12 +200,6 @@ export const PropGroup: React.FC<PropGroup> = ({
     <>
       {props.length > 0 && (
         <React.Fragment key={originId}>
-          <StyledGrid>
-            {/* Header */}
-            <StyledListHeaderColumn leftMargin>Type</StyledListHeaderColumn>
-            <StyledListHeaderColumn>Value</StyledListHeaderColumn>
-            <StyledListHeaderColumn></StyledListHeaderColumn>
-          </StyledGrid>
           {/* Rows */}
           <FirstLevelPropGroup
             props={props}

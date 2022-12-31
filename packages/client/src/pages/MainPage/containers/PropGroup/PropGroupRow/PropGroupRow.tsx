@@ -209,6 +209,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
                   },
                 });
               }}
+              placeholder="type"
               openDetailOnCreate={openDetailOnCreate}
               categoryTypes={classesPropType}
               inputWidth={90}
@@ -271,6 +272,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
                   },
                 });
               }}
+              placeholder="value"
               openDetailOnCreate={openDetailOnCreate}
               categoryTypes={classesPropValue}
               inputWidth={90}
