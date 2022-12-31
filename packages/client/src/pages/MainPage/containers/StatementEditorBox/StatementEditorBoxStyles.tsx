@@ -137,7 +137,7 @@ export const StyledBreadcrumbWrap = styled.div`
 `;
 
 export const StyledEditorStatementInfo = styled.div`
-  display: inline-flex;
+  display: block;
   flex-wrap: wrap;
   align-items: center;
   overflow: hidden;
