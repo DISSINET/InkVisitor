@@ -438,11 +438,9 @@ export const StatementEditorActantTableRow: React.FC<
       marginBottom={classifications.length > 0 || identifications.length > 0}
     >
       <StyledGrid ref={dropRef} style={{ opacity }}>
-        {userCanEdit && (
-          <StyledGridColumn ref={dragRef} style={{ cursor: "move" }}>
-            <FaGripVertical />
-          </StyledGridColumn>
-        )}
+        <StyledGridColumn ref={dragRef} style={{ cursor: "move" }}>
+          {userCanEdit && <FaGripVertical />}
+        </StyledGridColumn>
         <StyledGridColumn>{renderActantCell()}</StyledGridColumn>
         <StyledGridColumn>{renderPositionCell()}</StyledGridColumn>
         <StyledGridColumn>{renderAttributesCell()}</StyledGridColumn>
