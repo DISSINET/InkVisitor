@@ -253,11 +253,15 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
     <div>
       <Button
         key="settings"
-        disabled={disabledOpenModal}
+        //disabled={disabledOpenModal || !userCanEdit}
         icon={<MdSettings />}
         inverted
-        color="plain"
-        onClick={() => setModalOpen(true)}
+        color={!disabledOpenModal && userCanEdit ? "plain" : "grey"}
+        onClick={() => {
+          // if (!disabledOpenModal && userCanEdit) {
+          setModalOpen(true);
+          //   }
+        }}
         tooltipContent={getTooltipContent()}
       />
 
@@ -292,6 +296,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
                 disabledAttributes={dissabledStatement}
                 modalData={modalData.statement}
                 setNewModalData={handleSetModalData}
+                disabledAllAttributes={disabledAllAttributes || !userCanEdit}
               />
             </StyledColumnWrap>
             <StyledColumnWrap
@@ -308,6 +313,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
                 disabledAttributes={dissabledType}
                 modalData={modalData.type}
                 setNewModalData={handleSetModalData}
+                disabledAllAttributes={disabledAllAttributes || !userCanEdit}
               />
               {propTypeActant ? (
                 <StyledEntityWrap>
@@ -315,21 +321,23 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
                     entity={propTypeActant}
                     fullWidth
                     button={
-                      <Button
-                        key="d"
-                        icon={<FaUnlink />}
-                        color="plain"
-                        inverted
-                        tooltipLabel="unlink actant"
-                        onClick={() => {
-                          updateProp(statementId, {
-                            type: {
-                              ...data.type,
-                              ...{ id: "" },
-                            },
-                          });
-                        }}
-                      />
+                      userCanEdit && (
+                        <Button
+                          key="d"
+                          icon={<FaUnlink />}
+                          color="plain"
+                          inverted
+                          tooltipLabel="unlink actant"
+                          onClick={() => {
+                            updateProp(statementId, {
+                              type: {
+                                ...data.type,
+                                ...{ id: "" },
+                              },
+                            });
+                          }}
+                        />
+                      )
                     }
                   />
                 </StyledEntityWrap>
@@ -368,6 +376,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
               <AttributesForm
                 groupName="value"
                 disabledAttributes={dissabledValue}
+                disabledAllAttributes={disabledAllAttributes || !userCanEdit}
                 modalData={modalData.value}
                 setNewModalData={handleSetModalData}
               />
@@ -378,21 +387,23 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
                     fullWidth
                     tooltipPosition="left"
                     button={
-                      <Button
-                        key="d"
-                        icon={<FaUnlink />}
-                        tooltipLabel="unlink actant"
-                        color="plain"
-                        inverted
-                        onClick={() => {
-                          updateProp(statementId, {
-                            value: {
-                              ...data.value,
-                              ...{ id: "" },
-                            },
-                          });
-                        }}
-                      />
+                      userCanEdit && (
+                        <Button
+                          key="d"
+                          icon={<FaUnlink />}
+                          tooltipLabel="unlink actant"
+                          color="plain"
+                          inverted
+                          onClick={() => {
+                            updateProp(statementId, {
+                              value: {
+                                ...data.value,
+                                ...{ id: "" },
+                              },
+                            });
+                          }}
+                        />
+                      )
                     }
                   />
                 </StyledEntityWrap>

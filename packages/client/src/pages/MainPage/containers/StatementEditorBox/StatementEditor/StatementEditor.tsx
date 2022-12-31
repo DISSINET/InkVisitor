@@ -118,8 +118,9 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   // TEMPLATES
   const [showApplyTemplateModal, setShowApplyTemplateModal] =
     useState<boolean>(false);
-  const [templateToApply, setTemplateToApply] =
-    useState<IEntity | false>(false);
+  const [templateToApply, setTemplateToApply] = useState<IEntity | false>(
+    false
+  );
 
   const handleAskForTemplateApply = (templateOptionToApply: IOption) => {
     if (templates) {
@@ -457,20 +458,22 @@ export const StatementEditor: React.FC<StatementEditor> = ({
             <StyledHeaderTagWrap>
               <EntityTag entity={statement} fullWidth />
             </StyledHeaderTagWrap>
-            <div style={{ display: "flex" }}>
-              <StyledEditorStatementInfoLabel>
-                change statement label:
-              </StyledEditorStatementInfoLabel>
-              <StyledEditorHeaderInputWrap>
-                <Input
-                  type="text"
-                  value={statement.label}
-                  onChangeFn={(newValue: string) => {
-                    updateStatementMutation.mutate({ label: newValue });
-                  }}
-                />
-              </StyledEditorHeaderInputWrap>
-            </div>
+            {userCanEdit && (
+              <div style={{ display: "flex" }}>
+                <StyledEditorStatementInfoLabel>
+                  change statement label:
+                </StyledEditorStatementInfoLabel>
+                <StyledEditorHeaderInputWrap>
+                  <Input
+                    type="text"
+                    value={statement.label}
+                    onChangeFn={(newValue: string) => {
+                      updateStatementMutation.mutate({ label: newValue });
+                    }}
+                  />
+                </StyledEditorHeaderInputWrap>
+              </div>
+            )}
           </StyledEditorStatementInfo>
           {!statement.isTemplate && (
             <StyledBreadcrumbWrap>
