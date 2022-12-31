@@ -103,24 +103,6 @@ export const StyledPropsActantList = styled(StyledGrid)<StyledPropsActantList>`
   width: 100%;
 `;
 
-interface StyledPropLineColumn {
-  padded?: boolean;
-  lastSecondLevel?: boolean;
-  isTag?: boolean;
-}
-export const StyledPropLineColumn = styled(
-  StyledGridCell
-)<StyledPropLineColumn>`
-  display: inline-flex;
-  margin-bottom: ${({ theme, lastSecondLevel }) =>
-    lastSecondLevel ? theme.space[4] : theme.space[0]};
-  align-items: center;
-  padding-left: ${({ theme, padded }) =>
-    padded ? theme.space[6] : theme.space[0]};
-  padding-right: 5px;
-  overflow: ${({ isTag }) => (isTag ? "hidden" : "visible")};
-`;
-
 // tags
 interface StyledTagsList {}
 export const StyledTagsList = styled.div<StyledTagsList>`
