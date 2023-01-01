@@ -23,7 +23,6 @@ export default class Related extends Relation implements RelationTypes.IRelated 
       conn,
       parentId,
       RelationEnums.Type.Related,
-      0
     );
   
     // sort by order
