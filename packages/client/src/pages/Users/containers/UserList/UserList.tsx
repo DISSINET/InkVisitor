@@ -14,7 +14,6 @@ import {
   FaToggleOff,
   FaToggleOn,
   FaTrashAlt,
-  FaTrashAlt,
   FaUnlink,
 } from "react-icons/fa";
 import {
@@ -444,6 +443,7 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
                 icon={
                   active ? <FaToggleOn size={14} /> : <FaToggleOff size={14} />
                 }
+                disabled={userId === localStorage.getItem("userid")}
                 color={active ? "success" : "danger"}
                 tooltipLabel={active ? "set inactive" : "set active"}
                 onClick={() => {
