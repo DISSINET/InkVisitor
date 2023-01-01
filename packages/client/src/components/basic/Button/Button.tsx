@@ -1,5 +1,5 @@
 import { EntityEnums } from "@shared/enums";
-import { Tooltip, Tooltip } from "components";
+import { Tooltip } from "components";
 import React, { MouseEventHandler, ReactElement, useState } from "react";
 import { Colors } from "types";
 import { StyledButton, StyledButtonLabel } from "./ButtonStyles";

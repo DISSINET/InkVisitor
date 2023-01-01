@@ -13,6 +13,7 @@ import {
   TableSchema,
 } from "./import-utils";
 import { auditsIndexes, entitiesIndexes, relationsIndexes } from "./indexes";
+import { EntityEnums } from "@shared/enums";
 
 const [datasetId, env] = parseArgs();
 const envData = require("dotenv").config({ path: `env/.env.${env}` }).parsed;
@@ -161,8 +162,14 @@ const datasets: Record<string, DbSchema> = {
       tableName: "users",
       data: require("../datasets/default/users.json"),
       transform: function () {
+        
+        // get a list of all entities
+        const entities = require("../datasets/relationstest/entities.json")
+        const allTIds = entities.filter((e: any) => e.class === EntityEnums.Class.Territory).map((e: any) => e.id)
+        
         this.data = this.data.map((user: IUser) => {
           user.password = hashPassword(user.password ? user.password : "");
+          user.rights = user.rights.filter((r: any) => allTIds.includes(r.territory))
           return user;
         });
       },

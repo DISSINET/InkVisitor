@@ -88,6 +88,14 @@ export const StyledTerritoryListItem = styled.div`
   padding-bottom: ${({ theme }) => theme.space[1]};
   display: inline-block;
 `;
+export const StyledTerritoryListItemMissing = styled.div`
+  padding: ${({ theme }) => theme.space[1]};
+  display: inline-flex;
+  align-items: center;
+  background-color: ${({ theme }) => theme.color.danger};
+  color: ${({ theme }) => theme.color.white};
+  font-size: ${({ theme }) => theme.fontSize.xxs};
+`;
 
 export const StyledUserNameColumn = styled.div`
   display: inline-flex;

@@ -31,6 +31,7 @@ import {
   StyledTerritoryColumnAllLabel,
   StyledTerritoryList,
   StyledTerritoryListItem,
+  StyledTerritoryListItemMissing,
   StyledTh,
   StyledTHead,
   StyledUserNameColumn,
@@ -281,9 +282,19 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
                             />
                           </StyledTerritoryListItem>
                         ) : (
-                          <StyledTerritoryListItem key={right.territory}>
-                            {right.territory}
-                          </StyledTerritoryListItem>
+                          <StyledTerritoryListItemMissing key={right.territory}>
+                            invalid T {right.territory}
+                            <Button
+                              key="d"
+                              tooltipLabel="remove invalid territory"
+                              icon={<FaTrashAlt />}
+                              color="danger"
+                              noBorder
+                              onClick={() => {
+                                removeRightFromUser(userId, right.territory);
+                              }}
+                            />
+                          </StyledTerritoryListItemMissing>
                         );
                       })
                     ) : (
@@ -359,9 +370,21 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
                               />
                             </StyledTerritoryListItem>
                           ) : (
-                            <StyledTerritoryListItem key={right.territory}>
-                              {right.territory}
-                            </StyledTerritoryListItem>
+                            <StyledTerritoryListItemMissing
+                              key={right.territory}
+                            >
+                              invalid T {right.territory}
+                              <Button
+                                key="d"
+                                tooltipLabel="remove invalid territory"
+                                icon={<FaTrashAlt />}
+                                color="danger"
+                                noBorder
+                                onClick={() => {
+                                  removeRightFromUser(userId, right.territory);
+                                }}
+                              />
+                            </StyledTerritoryListItemMissing>
                           );
                         })
                       ) : (
@@ -420,6 +443,7 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
                 icon={
                   active ? <FaToggleOn size={14} /> : <FaToggleOff size={14} />
                 }
+                disabled={userId === localStorage.getItem("userid")}
                 color={active ? "success" : "danger"}
                 tooltipLabel={active ? "set inactive" : "set active"}
                 onClick={() => {
