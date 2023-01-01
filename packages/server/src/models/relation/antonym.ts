@@ -24,7 +24,6 @@ export default class Antonym extends Relation implements RelationTypes.IAntonym 
         conn,
         entityId,
         RelationEnums.Type.Antonym,
-        0
       );
   
     // sort by order
