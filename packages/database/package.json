@@ -40,6 +40,6 @@
     "@types/tunnel-ssh": "^4.1.1",
     "install": "^0.13.0",
     "npm": "^8.11.0",
-    "tsconfig-paths": "^3.14.1"
+    "tsconfig-paths": "^4.1.2"
   }
 }
