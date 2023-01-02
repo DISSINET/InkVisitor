@@ -28,9 +28,9 @@ import { MemoizedTerritoryTreeBox } from "./containers/TerritoryTreeBox/Territor
 
 type FourthPanelBoxes = "search" | "bookmarks" | "templates";
 
-interface MainPage { }
+interface MainPage {}
 
-const MainPage: React.FC<MainPage> = ({ }) => {
+const MainPage: React.FC<MainPage> = ({}) => {
   const { detailIdArray, clearAllDetailIds, selectedDetailId } =
     useSearchParams();
 
@@ -224,7 +224,7 @@ const MainPage: React.FC<MainPage> = ({ }) => {
                   statementListOpened ? (
                     <BsSquareFill />
                   ) : (
-                    <BsSquareHalf style={{ transform: "rotate(90deg)" }} />
+                    <BsSquareHalf style={{ transform: "rotate(270deg)" }} />
                   )
                 }
                 onClick={() => {
