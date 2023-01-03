@@ -127,7 +127,7 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
     cloudRelationIds: string[]
   ) => {
     const filteredCloudRelationIds = cloudRelationIds.filter(
-      (rId) => entities[rId].id !== entityId
+      (rId) => entities[rId]?.id !== entityId
     );
     return (
       <>
