@@ -2,11 +2,11 @@ import { Box, Button, Panel } from "components";
 import { PanelSeparator } from "components/advanced";
 import { useSearchParams } from "hooks";
 import ScrollHandler from "hooks/ScrollHandler";
-import React, { Profiler, useState } from "react";
+import React from "react";
 import { BiHide, BiShow } from "react-icons/bi";
 import { BsSquareFill, BsSquareHalf } from "react-icons/bs";
-import { IoMdClose } from "react-icons/io";
 import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
+import { VscCloseAll } from "react-icons/vsc";
 import { setFirstPanelExpanded } from "redux/features/layout/firstPanelExpandedSlice";
 import { setFourthPanelBoxesOpened } from "redux/features/layout/fourthPanelBoxesOpenedSlice";
 import { setFourthPanelExpanded } from "redux/features/layout/fourthPanelExpandedSlice";
@@ -236,7 +236,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
               />,
               <Button
                 inverted
-                icon={<IoMdClose />}
+                icon={<VscCloseAll style={{ transform: "scale(1.3)" }} />}
                 onClick={() => {
                   clearAllDetailIds();
                   dispatch(setStatementListOpened(true));
