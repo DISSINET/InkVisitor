@@ -350,7 +350,7 @@
   },
   {
     "type": "SYN",
-    "entityIds": ["a5", "c505", "c506"],
+    "entityIds": ["a5", "a505", "a506"],
     "order": 1
   },
 
