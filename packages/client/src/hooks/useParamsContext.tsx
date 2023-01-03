@@ -105,11 +105,11 @@ export const SearchParamsProvider = ({
           ...detailIdArray.splice(1, detailIdArray.length),
           id,
         ]);
-        toast.info(
-          `Tab [${
-            data ? getEntityLabel(data[0]) : detailIdArray
-          }] canceled from detail`
-        );
+        // toast.info(
+        //   `Tab [${
+        //     data ? getEntityLabel(data[0]) : detailIdArray
+        //   }] canceled from detail`
+        // );
       }
       setDetailId(newDetailIdArray.join(arrJoinChar));
     }
