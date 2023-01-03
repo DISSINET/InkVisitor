@@ -117,6 +117,7 @@ export const EntityBookmarkTable: React.FC<EntityBookmarkTable> = ({
               moveRow={moveRow}
               updateOrderFn={updateFolderItemOrder}
               visibleColumns={visibleColumns}
+              hasOrder={rows.length > 1}
               {...row.getRowProps()}
             />
           );
