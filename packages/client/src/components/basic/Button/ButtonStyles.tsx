@@ -14,7 +14,7 @@ interface IButtonStyle {
 }
 export const StyledButton = styled.button.attrs(({ ref }) => ({
   ref: ref,
-})) <IButtonStyle>`
+}))<IButtonStyle>`
   display: flex;
   align-items: center;
   justify-content: center;
@@ -33,14 +33,14 @@ export const StyledButton = styled.button.attrs(({ ref }) => ({
     disabled
       ? theme.color["gray"][800]
       : inverted
-        ? theme.color[color]
-        : theme.color["white"]};
+      ? theme.color[color]
+      : theme.color["white"]};
   background: ${({ theme, disabled, color, inverted }) =>
     disabled
       ? "repeating-linear-gradient(-45deg,#cbd5e0,#cbd5e0,1px,#fff 1px,#fff 12px)"
       : inverted
-        ? theme.color["invertedBg"][color]
-        : theme.color[color]};
+      ? theme.color["invertedBg"][color]
+      : theme.color[color]};
   cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
   white-space: nowrap;
 
@@ -50,6 +50,10 @@ export const StyledButton = styled.button.attrs(({ ref }) => ({
   }
 `;
 
-export const StyledButtonLabel = styled.span<{ hasIcon?: boolean }>`
-  margin-left: ${({ theme, hasIcon }) => (hasIcon ? theme.space[2] : 0)};
+export const StyledButtonLabel = styled.span<{
+  hasIcon?: boolean;
+  noIconMargin?: boolean;
+}>`
+  margin-left: ${({ theme, hasIcon = false, noIconMargin = false }) =>
+    hasIcon ? (noIconMargin ? 0 : theme.space[2]) : 0};
 `;

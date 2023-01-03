@@ -9,6 +9,7 @@ interface ButtonProps {
   tooltipContent?: ReactElement[] | ReactElement;
   label?: string;
   icon?: JSX.Element | EntityEnums.Operator;
+  noIconMargin?: boolean;
   inverted?: boolean;
   noBorder?: boolean;
   textRegular?: boolean;
@@ -25,6 +26,7 @@ export const Button: React.FC<ButtonProps> = ({
   tooltipContent,
   label = "",
   icon,
+  noIconMargin = false,
   inverted = false,
   noBorder = false,
   radiusLeft = false,
@@ -60,7 +62,9 @@ export const Button: React.FC<ButtonProps> = ({
       >
         {icon}
         {label && (
-          <StyledButtonLabel hasIcon={!!icon}>{label}</StyledButtonLabel>
+          <StyledButtonLabel hasIcon={!!icon} noIconMargin={noIconMargin}>
+            {label}
+          </StyledButtonLabel>
         )}
       </StyledButton>
     );

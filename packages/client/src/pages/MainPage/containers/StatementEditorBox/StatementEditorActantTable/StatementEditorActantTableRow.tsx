@@ -312,7 +312,9 @@ export const StatementEditorActantTableRow: React.FC<
           <Button
             key="a"
             icon={<FaPlus />}
-            color="plain"
+            noIconMargin
+            label="p"
+            color="primary"
             inverted
             tooltipLabel="add new prop"
             onClick={() => {
@@ -324,8 +326,9 @@ export const StatementEditorActantTableRow: React.FC<
           <Button
             key="c"
             icon={<FaPlus />}
+            noIconMargin
             label="c"
-            color="plain"
+            color="primary"
             inverted
             tooltipLabel="add classification"
             onClick={() => {
@@ -337,8 +340,9 @@ export const StatementEditorActantTableRow: React.FC<
           <Button
             key="i"
             icon={<FaPlus />}
+            noIconMargin
             label="i"
-            color="plain"
+            color="primary"
             inverted
             tooltipLabel="add identification"
             onClick={() => {
