@@ -79,7 +79,8 @@ export const PropGroup: React.FC<PropGroup> = ({
     (
       prop1: IProp,
       pi1: number,
-      moveProp: (dragIndex: number, hoverIndex: number) => void
+      moveProp: (dragIndex: number, hoverIndex: number) => void,
+      hasOrder: boolean
     ) => {
       return (
         <React.Fragment key={prop1.id}>
@@ -103,6 +104,7 @@ export const PropGroup: React.FC<PropGroup> = ({
             disabledAttributes={disabledAttributes}
             isInsideTemplate={isInsideTemplate}
             territoryParentId={territoryParentId}
+            hasOrder={hasOrder}
           />
           {/* 2nd level */}
           <SecondLevelPropGroup
@@ -122,7 +124,8 @@ export const PropGroup: React.FC<PropGroup> = ({
       prop2: IProp,
       pi2: number,
       prop1: IProp,
-      moveProp: (dragIndex: number, hoverIndex: number) => void
+      moveProp: (dragIndex: number, hoverIndex: number) => void,
+      hasOrder: boolean
     ) => {
       return (
         <React.Fragment key={prop2.id}>
@@ -146,6 +149,7 @@ export const PropGroup: React.FC<PropGroup> = ({
             disabledAttributes={disabledAttributes}
             isInsideTemplate={isInsideTemplate}
             territoryParentId={territoryParentId}
+            hasOrder={hasOrder}
           />
           {/* 3rd level */}
           <ThirdLevelPropGroup
@@ -165,7 +169,8 @@ export const PropGroup: React.FC<PropGroup> = ({
       prop3: IProp,
       pi3: number,
       prop2: IProp,
-      moveProp: (dragIndex: number, hoverIndex: number) => void
+      moveProp: (dragIndex: number, hoverIndex: number) => void,
+      hasOrder: boolean
     ) => {
       return (
         <React.Fragment key={prop3.id}>
@@ -189,6 +194,7 @@ export const PropGroup: React.FC<PropGroup> = ({
             disabledAttributes={disabledAttributes}
             isInsideTemplate={isInsideTemplate}
             territoryParentId={territoryParentId}
+            hasOrder={hasOrder}
           />
         </React.Fragment>
       );

@@ -180,7 +180,7 @@ export const EntityDetailValencySection: React.FC<
     <>
       {/* ENTITY TYPE ROW */}
       <StyledSectionHeading style={{ marginRight: ".8rem" }}>
-        {relationRule.label.split(" ")[0]}
+        {relationRule.label.replace(" Semantics", "")}
       </StyledSectionHeading>
 
       <StyledLabelInputWrapper>

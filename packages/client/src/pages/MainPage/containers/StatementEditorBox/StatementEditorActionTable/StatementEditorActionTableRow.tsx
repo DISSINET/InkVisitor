@@ -44,6 +44,7 @@ interface StatementEditorActionTableRow {
   updateActionsMutation: UseMutationResult<any, unknown, object, unknown>;
   territoryParentId?: string;
   territoryActants?: string[];
+  hasOrder?: boolean;
 }
 
 export const StatementEditorActionTableRow: React.FC<
@@ -62,6 +63,7 @@ export const StatementEditorActionTableRow: React.FC<
   updateActionsMutation,
   territoryParentId,
   territoryActants,
+  hasOrder,
 }) => {
   const isInsideTemplate = statement.isTemplate || false;
   const { statementId, territoryId } = useSearchParams();
@@ -290,10 +292,14 @@ export const StatementEditorActionTableRow: React.FC<
 
   return (
     <React.Fragment key={index}>
-      <StyledGrid ref={dropRef} style={{ opacity }}>
-        <StyledGridColumn ref={dragRef} style={{ cursor: "move" }}>
-          {userCanEdit && <FaGripVertical />}
-        </StyledGridColumn>
+      <StyledGrid ref={dropRef} style={{ opacity }} hasOrder={hasOrder}>
+        {userCanEdit && hasOrder ? (
+          <StyledGridColumn ref={dragRef} style={{ cursor: "move" }}>
+            <FaGripVertical />
+          </StyledGridColumn>
+        ) : (
+          <StyledGridColumn />
+        )}
         <StyledGridColumn>{renderActionCell()}</StyledGridColumn>
         <StyledGridColumn>{renderButtonsCell()}</StyledGridColumn>
       </StyledGrid>
