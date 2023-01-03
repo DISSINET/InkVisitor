@@ -158,19 +158,18 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
         tempDisabled={tempDisabled && category === draggedPropRow.category}
       >
         <StyledPropLineColumn level={level} isTag={false}>
-          <div>{userCanEdit && <StyledFaGripVertical />}</div>
-        </StyledPropLineColumn>
-        <StyledPropLineColumn
-          level={level}
-          isTag={propTypeEntity ? true : false}
-        >
-          {hasOrder ? (
+          {userCanEdit && hasOrder ? (
             <div ref={dragRef} style={{ width: "2rem" }}>
               <StyledFaGripVertical />
             </div>
           ) : (
             <div style={{ width: "2rem" }} />
           )}
+        </StyledPropLineColumn>
+        <StyledPropLineColumn
+          level={level}
+          isTag={propTypeEntity ? true : false}
+        >
           {propTypeEntity ? (
             <>
               <EntityTag
