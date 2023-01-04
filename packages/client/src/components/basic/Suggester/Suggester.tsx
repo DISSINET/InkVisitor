@@ -54,8 +54,8 @@ interface Suggester {
   onType: (newType: string) => void;
   onChangeCategory: (selectedOption: ValueType<OptionTypeBase, any>) => void;
   onCreate: (item: SuggesterItemToCreate) => void;
-  onPick: (entity: IEntity, duplicate?: boolean) => void;
-  onDrop: (item: EntityDragItem, duplicate?: boolean) => void;
+  onPick: (entity: IEntity, instantiateTemplate?: boolean) => void;
+  onDrop: (item: EntityDragItem, instantiateTemplate?: boolean) => void;
   onHover: (item: EntityDragItem) => void;
   onCancel: () => void;
   cleanOnSelect?: boolean;
@@ -325,7 +325,7 @@ export const Suggester: React.FC<Suggester> = ({
               setShowTemplateModal(false);
             }
           }}
-          onDuplicate={() => {
+          onInstantiate={() => {
             tempDropItem && onDrop(tempDropItem, true);
             setTempDropItem(false);
             setShowTemplateModal(false);

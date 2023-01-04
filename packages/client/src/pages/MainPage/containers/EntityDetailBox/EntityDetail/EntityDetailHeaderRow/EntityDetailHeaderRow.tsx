@@ -3,10 +3,16 @@ import { IEntity } from "@shared/types";
 import api from "api";
 import { ButtonGroup, Button } from "components";
 import { EntityTag } from "components/advanced";
-import { DEntity } from "constructors";
+import { DEntity, InstTemplate } from "constructors";
 import { useSearchParams } from "hooks";
 import React from "react";
-import { FaClone, FaTrashAlt, FaRecycle, FaEdit } from "react-icons/fa";
+import {
+  FaClone,
+  FaTrashAlt,
+  FaRecycle,
+  FaEdit,
+  FaPlusSquare,
+} from "react-icons/fa";
 import { GrClone } from "react-icons/gr";
 import { useMutation, useQueryClient } from "react-query";
 import { toast } from "react-toastify";
@@ -60,23 +66,24 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
     duplicateEntityMutation.mutate(newEntity);
   };
 
+  const instantiateTemplate = async () => {
+    const newInstanceId = await InstTemplate(
+      entity,
+      localStorage.getItem("userrole") as UserEnums.Role
+    );
+
+    if (newInstanceId) {
+      appendDetailId(newInstanceId);
+      toast.info(`Entity instantiated from a template!`);
+    }
+  };
+
   return (
     <StyledActantHeaderRow>
       <StyledTagWrap>
         <EntityTag entity={entity} tooltipText={entity.data.text} fullWidth />
       </StyledTagWrap>
       <ButtonGroup style={{ marginTop: "1rem" }}>
-        {entity.class !== EntityEnums.Class.Statement && userCanEdit && (
-          <Button
-            icon={<FaClone size={14} />}
-            color="primary"
-            tooltipLabel="duplicate entity"
-            inverted
-            onClick={() => {
-              duplicateEntity(entity);
-            }}
-          />
-        )}
         {userCanEdit && (
           <Button
             color="primary"
@@ -95,19 +102,56 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
             }}
           />
         )}
-        {userCanEdit && (
-          <Button
-            key="template"
-            icon={<GrClone size={14} />}
-            tooltipLabel={`create template from ${
-              entity.isTemplate ? "template" : "entity"
-            }`}
-            inverted
-            color="primary"
-            onClick={() => {
-              setCreateTemplateModal(true);
-            }}
-          />
+        {userCanEdit && entity.isTemplate && (
+          <>
+            <Button
+              key="template-create-template"
+              icon={<FaClone size={14} />}
+              tooltipLabel="create a new template from template"
+              inverted
+              color="primary"
+              onClick={() => {
+                setCreateTemplateModal(true);
+              }}
+            />
+            <Button
+              key="instance-template"
+              icon={<GrClone size={14} />}
+              tooltipLabel="create entity from template"
+              inverted
+              color="primary"
+              onClick={() => {
+                // instantiate entity
+                instantiateTemplate();
+              }}
+            />
+          </>
+        )}
+        {userCanEdit && !entity.isTemplate && (
+          <>
+            <Button
+              key="entity-duplicate"
+              icon={<FaClone size={14} />}
+              color="primary"
+              tooltipLabel="duplicate entity"
+              inverted
+              onClick={() => {
+                if (entity.class !== EntityEnums.Class.Statement) {
+                  duplicateEntity(entity);
+                }
+              }}
+            />
+            <Button
+              key="entity-create-template"
+              icon={<GrClone size={14} />}
+              tooltipLabel="create template from entity"
+              inverted
+              color="primary"
+              onClick={() => {
+                setCreateTemplateModal(true);
+              }}
+            />
+          </>
         )}
         <Button
           key="refresh"
