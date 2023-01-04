@@ -70,7 +70,6 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
           <Button
             icon={<FaClone size={14} />}
             color="primary"
-            label="duplicate"
             tooltipLabel="duplicate entity"
             inverted
             onClick={() => {
@@ -78,15 +77,21 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
             }}
           />
         )}
-        {mayBeRemoved && userCanEdit && (
+        {userCanEdit && (
           <Button
             color="primary"
             icon={<FaTrashAlt />}
-            label="remove"
-            tooltipLabel="remove entity"
+            disabled={!mayBeRemoved}
+            tooltipLabel={
+              mayBeRemoved
+                ? "remove entity"
+                : "entity cannot be removed while it is linked elsewhere"
+            }
             inverted
             onClick={() => {
-              setShowRemoveSubmit(true);
+              if (mayBeRemoved) {
+                setShowRemoveSubmit(true);
+              }
             }}
           />
         )}
@@ -94,10 +99,11 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
           <Button
             key="template"
             icon={<GrClone size={14} />}
-            tooltipLabel="create template from entity"
+            tooltipLabel={`create template from ${
+              entity.isTemplate ? "template" : "entity"
+            }`}
             inverted
             color="primary"
-            label="Create template"
             onClick={() => {
               setCreateTemplateModal(true);
             }}
@@ -106,10 +112,9 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
         <Button
           key="refresh"
           icon={<FaRecycle size={14} />}
-          tooltipLabel="refresh data"
+          tooltipLabel="refresh entity data"
           inverted
           color="primary"
-          label="refresh"
           onClick={() => {
             queryClient.invalidateQueries(["entity"]);
           }}
@@ -121,7 +126,6 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
             tooltipLabel="open statement in editor"
             inverted
             color="primary"
-            label="open"
             onClick={() => {
               setStatementId(entity.id);
               if (!entity.isTemplate) {
