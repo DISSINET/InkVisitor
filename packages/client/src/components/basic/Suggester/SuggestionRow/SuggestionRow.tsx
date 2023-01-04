@@ -1,8 +1,12 @@
 import { EntityEnums } from "@shared/enums";
+import { IEntity } from "@shared/types";
+import { Button, ButtonGroup } from "components";
+import { EntityTag } from "components/advanced";
 import memoize from "memoize-one";
 import React from "react";
-import { FaPlayCircle } from "react-icons/fa";
-import theme from "Theme/theme";
+import { FaLink, FaPlusSquare } from "react-icons/fa";
+import { areEqual } from "react-window";
+import { EntitySuggestion } from "types";
 import {
   StyledSuggestionLineActions,
   StyledSuggestionLineIcons,
@@ -10,13 +14,6 @@ import {
   StyledSuggestionRow,
   StyledTagWrapper,
 } from "../SuggesterStyles";
-import { areEqual } from "react-window";
-import { Button, ButtonGroup, Tag } from "components";
-import { EntitySuggestion } from "types";
-import { IEntity } from "@shared/types";
-import { ImInsertTemplate } from "react-icons/im";
-import { BiDuplicate } from "react-icons/bi";
-import { EntityTag } from "components/advanced";
 
 export const createItemData = memoize(
   (
@@ -68,8 +65,7 @@ const EntityRow: React.FC<EntityRow> = ({ data, index, style }) => {
             key="link entity"
             noIconMargin
             icon={
-              <FaPlayCircle
-                color={theme.color["black"]}
+              <FaLink
                 onClick={() => {
                   // onPick nonTemplate entity
                   onPick(entity);
@@ -86,8 +82,7 @@ const EntityRow: React.FC<EntityRow> = ({ data, index, style }) => {
             noBorder
             noBackground
             icon={
-              <BiDuplicate
-                color={theme.color["black"]}
+              <FaPlusSquare
                 onClick={() => {
                   // onPick template inside nonTemplate
                   onPick(entity, true);
@@ -104,8 +99,7 @@ const EntityRow: React.FC<EntityRow> = ({ data, index, style }) => {
             noBorder
             noBackground
             icon={
-              <ImInsertTemplate
-                color={theme.color["black"]}
+              <FaLink
                 onClick={() => {
                   // onPick template entity
                   onPick(entity);

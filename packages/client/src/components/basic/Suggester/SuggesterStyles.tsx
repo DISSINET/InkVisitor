@@ -73,6 +73,8 @@ export const StyledSuggestionRow = styled.div<StyledSuggestionRow>`
   align-items: center;
 `;
 export const StyledSuggestionLineActions = styled.div<Column>`
+  margin-left: ${({ theme }) => theme.space[2]};
+  margin-right: ${({ theme }) => theme.space[2]};
   background-color: ${({ theme, isSelected }) =>
     isSelected ? theme.color["blue"][100] : "transparent"};
 `;
