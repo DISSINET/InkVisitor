@@ -76,7 +76,7 @@ const EntityRow: React.FC<EntityRow> = ({ data, index, style }) => {
         )}
         {entity.isTemplate && !territoryWithoutParent && (
           <Button
-            tooltipLabel="instantiate template"
+            tooltipLabel="link a new template instance"
             key="instantiate template"
             inverted
             noBorder

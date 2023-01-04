@@ -319,10 +319,10 @@
     "props": [],
     "references": [],
     "data": {
-      "text": "This sacrify ceremony will take place at the sanctuary of the Mauw mountain temple.",
+      "text": "This sacrifice ceremony will take place at the sanctuary of the Mauw mountain temple.",
       "territory": {
         "territoryId": "t1",
-        "order": 3
+        "order": 4
       },
       "actions": [
         {
@@ -413,10 +413,10 @@
     "props": [],
     "references": [],
     "data": {
-      "text": "A pug drinks coffee in the DISSINET office.",
+      "text": "Meanwhile, the pug drinks coffee in the DISSINET office.",
       "territory": {
         "territoryId": "t1",
-        "order": 3
+        "order": 5
       },
       "actions": [
         {
