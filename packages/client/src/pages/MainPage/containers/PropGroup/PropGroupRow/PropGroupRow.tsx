@@ -183,7 +183,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
                       icon={<FaUnlink />}
                       color="plain"
                       inverted
-                      tooltipLabel="unlink actant"
+                      tooltipLabel="unlink entity"
                       onClick={() => {
                         updateProp(prop.id, {
                           type: {
@@ -245,7 +245,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
                     <Button
                       key="d"
                       icon={<FaUnlink />}
-                      tooltipLabel="unlink actant"
+                      tooltipLabel="unlink entity"
                       color="plain"
                       inverted
                       onClick={() => {
