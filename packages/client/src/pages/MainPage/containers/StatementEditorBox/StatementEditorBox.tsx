@@ -56,6 +56,9 @@ export const StatementEditorBox: React.FC = () => {
         }
         queryClient.invalidateQueries(["statement"]);
         queryClient.invalidateQueries(["territory"]);
+
+        queryClient.invalidateQueries("statement-templates");
+        queryClient.invalidateQueries("entity-templates");
       },
     }
   );

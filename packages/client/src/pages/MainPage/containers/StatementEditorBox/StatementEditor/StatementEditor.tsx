@@ -166,17 +166,18 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     ];
 
     if (templates) {
-      templates.forEach((template) => {
-        const maxLetterCount = 200;
-
-        options.push({
-          value: template.id,
-          label: getShortLabelByLetterCount(
-            getEntityLabel(template),
-            maxLetterCount
-          ),
+      templates
+        .filter((template) => template.id !== statement.id)
+        .forEach((template) => {
+          const maxLetterCount = 200;
+          options.push({
+            value: template.id,
+            label: getShortLabelByLetterCount(
+              getEntityLabel(template),
+              maxLetterCount
+            ),
+          });
         });
-      });
     }
     return options;
   }, [templates]);
