@@ -146,6 +146,17 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
             </StyledDetailContentRowValue>
           </StyledDetailContentRow>
 
+          {entity.usedTemplate && entity.usedTemplate in entity.entities && (
+            <StyledDetailContentRow>
+              <StyledDetailContentRowLabel>
+                Applied Template
+              </StyledDetailContentRowLabel>
+              <StyledDetailContentRowValue>
+                <EntityTag entity={entity.entities[entity.usedTemplate]} />
+              </StyledDetailContentRowValue>
+            </StyledDetailContentRow>
+          )}
+
           {entity.legacyId && (
             <StyledDetailContentRow>
               <StyledDetailContentRowLabel>
@@ -444,18 +455,6 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                 </StyledDetailContentRowValue>
               </StyledDetailContentRow>
             </React.Fragment>
-          )}
-
-          {/* templates */}
-          {entity.usedTemplate && entity.usedTemplate in entity.entities && (
-            <StyledDetailContentRow>
-              <StyledDetailContentRowLabel>
-                Applied Template
-              </StyledDetailContentRowLabel>
-              <StyledDetailContentRowValue>
-                <EntityTag entity={entity.entities[entity.usedTemplate]} />
-              </StyledDetailContentRowValue>
-            </StyledDetailContentRow>
           )}
 
           <StyledDetailContentRow>
