@@ -11,7 +11,7 @@ import {
   StyledTagWrapper,
 } from "../SuggesterStyles";
 import { areEqual } from "react-window";
-import { Tag } from "components";
+import { Button, ButtonGroup, Tag } from "components";
 import { EntitySuggestion } from "types";
 import { IEntity } from "@shared/types";
 import { ImInsertTemplate } from "react-icons/im";
@@ -58,26 +58,46 @@ const EntityRow: React.FC<EntityRow> = ({ data, index, style }) => {
   const renderIcons = () => {
     if (!entity.isTemplate) {
       return (
-        <FaPlayCircle
-          color={theme.color["black"]}
-          onClick={() => {
-            // onPick nonTemplate entity
-            onPick(entity);
-          }}
-          style={iconStyle}
+        <Button
+          tooltipLabel="link entity"
+          inverted
+          noBorder
+          noBackground
+          color="none"
+          noIconMargin
+          icon={
+            <FaPlayCircle
+              color={theme.color["black"]}
+              onClick={() => {
+                // onPick nonTemplate entity
+                onPick(entity);
+              }}
+              style={iconStyle}
+            />
+          }
         />
       );
     } else if (entity.isTemplate && !isInsideTemplate) {
       return (
         <>
           {!territoryWithoutParent && (
-            <BiDuplicate
-              color={theme.color["black"]}
-              onClick={() => {
-                // onPick template inside nonTemplate
-                onPick(entity, true);
-              }}
-              style={iconStyle}
+            <Button
+              tooltipLabel="link entity"
+              inverted
+              noBorder
+              noBackground
+              color="none"
+              noIconMargin
+              icon={
+                <BiDuplicate
+                  color={theme.color["black"]}
+                  onClick={() => {
+                    // onPick template inside nonTemplate
+                    onPick(entity, true);
+                  }}
+                  style={iconStyle}
+                />
+              }
             />
           )}
         </>
@@ -85,24 +105,46 @@ const EntityRow: React.FC<EntityRow> = ({ data, index, style }) => {
     } else if (entity.isTemplate && isInsideTemplate) {
       return (
         <div>
-          {!territoryWithoutParent && (
-            <BiDuplicate
-              color={theme.color["black"]}
-              onClick={() => {
-                // onPick duplicate template to entity
-                onPick(entity, true);
-              }}
-              style={iconStyle}
+          <ButtonGroup>
+            {!territoryWithoutParent && (
+              <Button
+                tooltipLabel="link entity"
+                inverted
+                noBorder
+                noBackground
+                color="none"
+                noIconMargin
+                icon={
+                  <BiDuplicate
+                    color={theme.color["black"]}
+                    onClick={() => {
+                      // onPick duplicate template to entity
+                      onPick(entity, true);
+                    }}
+                    style={iconStyle}
+                  />
+                }
+              />
+            )}
+            <Button
+              tooltipLabel="link entity"
+              inverted
+              noBorder
+              noBackground
+              color="none"
+              noIconMargin
+              icon={
+                <ImInsertTemplate
+                  color={theme.color["black"]}
+                  onClick={() => {
+                    // onPick template entity
+                    onPick(entity);
+                  }}
+                  style={iconStyle}
+                />
+              }
             />
-          )}
-          <ImInsertTemplate
-            color={theme.color["black"]}
-            onClick={() => {
-              // onPick template entity
-              onPick(entity);
-            }}
-            style={iconStyle}
-          />
+          </ButtonGroup>
         </div>
       );
     }

@@ -10,6 +10,7 @@ interface ButtonProps {
   label?: string;
   icon?: JSX.Element | EntityEnums.Operator;
   noIconMargin?: boolean;
+  noBackground?: boolean;
   inverted?: boolean;
   noBorder?: boolean;
   textRegular?: boolean;
@@ -29,6 +30,7 @@ export const Button: React.FC<ButtonProps> = ({
   noIconMargin = false,
   inverted = false,
   noBorder = false,
+  noBackground = false,
   radiusLeft = false,
   radiusRight = false,
   textRegular = false,
@@ -53,6 +55,7 @@ export const Button: React.FC<ButtonProps> = ({
         inverted={inverted}
         textRegular={textRegular}
         noBorder={noBorder}
+        noBackground={noBackground}
         radiusLeft={radiusLeft}
         radiusRight={radiusRight}
         fullWidth={fullWidth}
