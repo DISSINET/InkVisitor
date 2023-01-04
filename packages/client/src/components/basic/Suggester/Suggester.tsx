@@ -96,8 +96,9 @@ export const Suggester: React.FC<Suggester> = ({
 
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showTemplateModal, setShowTemplateModal] = useState(false);
-  const [tempDropItem, setTempDropItem] =
-    useState<EntityDragItem | false>(false);
+  const [tempDropItem, setTempDropItem] = useState<EntityDragItem | false>(
+    false
+  );
 
   useKeypress(
     "Escape",

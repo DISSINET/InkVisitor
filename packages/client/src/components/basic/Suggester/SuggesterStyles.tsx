@@ -69,15 +69,10 @@ interface StyledSuggestionRow {
 }
 export const StyledSuggestionRow = styled.div<StyledSuggestionRow>`
   display: grid;
-  grid-template-columns: ${({ twoIcons }) => (twoIcons ? "5rem" : "2.5rem")} auto 3rem;
+  grid-template-columns: ${({ twoIcons }) => (twoIcons ? "4rem" : "2.5rem")} auto 3rem;
   align-items: center;
 `;
 export const StyledSuggestionLineActions = styled.div<Column>`
-  display: grid;
-  justify-content: flex-start;
-  align-items: center;
-  height: 100%;
-  width: 100%;
   background-color: ${({ theme, isSelected }) =>
     isSelected ? theme.color["blue"][100] : "transparent"};
 `;

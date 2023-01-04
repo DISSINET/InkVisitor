@@ -5,6 +5,7 @@ interface IButtonStyle {
   hasIcon?: boolean;
   fullWidth?: boolean;
   noBorder?: boolean;
+  noBackground?: boolean;
   textRegular?: boolean;
   inverted: boolean;
   color: any;
@@ -35,8 +36,10 @@ export const StyledButton = styled.button.attrs(({ ref }) => ({
       : inverted
       ? theme.color[color]
       : theme.color["white"]};
-  background: ${({ theme, disabled, color, inverted }) =>
-    disabled
+  background: ${({ theme, noBackground, disabled, color, inverted }) =>
+    noBackground
+      ? "none"
+      : disabled
       ? "repeating-linear-gradient(-45deg,#cbd5e0,#cbd5e0,1px,#fff 1px,#fff 12px)"
       : inverted
       ? theme.color["invertedBg"][color]

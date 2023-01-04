@@ -47,6 +47,7 @@ interface EntityRow {
   index: number;
   style: any;
 }
+
 const EntityRow: React.FC<EntityRow> = ({ data, index, style }) => {
   const { items, onPick, selected, isInsideTemplate, territoryParentId } = data;
   const { entity, icons } = items[index];
@@ -54,100 +55,67 @@ const EntityRow: React.FC<EntityRow> = ({ data, index, style }) => {
   const territoryWithoutParent =
     entity.class === EntityEnums.Class.Territory && !territoryParentId;
 
-  const iconStyle = { marginLeft: "0.5rem", cursor: "pointer" };
   const renderIcons = () => {
-    if (!entity.isTemplate) {
-      return (
-        <Button
-          tooltipLabel="link entity"
-          inverted
-          noBorder
-          noBackground
-          color="none"
-          noIconMargin
-          icon={
-            <FaPlayCircle
-              color={theme.color["black"]}
-              onClick={() => {
-                // onPick nonTemplate entity
-                onPick(entity);
-              }}
-              style={iconStyle}
-            />
-          }
-        />
-      );
-    } else if (entity.isTemplate && !isInsideTemplate) {
-      return (
-        <>
-          {!territoryWithoutParent && (
-            <Button
-              tooltipLabel="link entity"
-              inverted
-              noBorder
-              noBackground
-              color="none"
-              noIconMargin
-              icon={
-                <BiDuplicate
-                  color={theme.color["black"]}
-                  onClick={() => {
-                    // onPick template inside nonTemplate
-                    onPick(entity, true);
-                  }}
-                  style={iconStyle}
-                />
-              }
-            />
-          )}
-        </>
-      );
-    } else if (entity.isTemplate && isInsideTemplate) {
-      return (
-        <div>
-          <ButtonGroup>
-            {!territoryWithoutParent && (
-              <Button
-                tooltipLabel="link entity"
-                inverted
-                noBorder
-                noBackground
-                color="none"
-                noIconMargin
-                icon={
-                  <BiDuplicate
-                    color={theme.color["black"]}
-                    onClick={() => {
-                      // onPick duplicate template to entity
-                      onPick(entity, true);
-                    }}
-                    style={iconStyle}
-                  />
-                }
+    return (
+      <ButtonGroup noMarginRight>
+        {!entity.isTemplate && (
+          <Button
+            tooltipLabel="link entity"
+            inverted
+            noBorder
+            noBackground
+            color="none"
+            key="link entity"
+            noIconMargin
+            icon={
+              <FaPlayCircle
+                color={theme.color["black"]}
+                onClick={() => {
+                  // onPick nonTemplate entity
+                  onPick(entity);
+                }}
               />
-            )}
-            <Button
-              tooltipLabel="link entity"
-              inverted
-              noBorder
-              noBackground
-              color="none"
-              noIconMargin
-              icon={
-                <ImInsertTemplate
-                  color={theme.color["black"]}
-                  onClick={() => {
-                    // onPick template entity
-                    onPick(entity);
-                  }}
-                  style={iconStyle}
-                />
-              }
-            />
-          </ButtonGroup>
-        </div>
-      );
-    }
+            }
+          />
+        )}
+        {entity.isTemplate && !territoryWithoutParent && (
+          <Button
+            tooltipLabel="instantiate template"
+            key="instantiate template"
+            inverted
+            noBorder
+            noBackground
+            icon={
+              <BiDuplicate
+                color={theme.color["black"]}
+                onClick={() => {
+                  // onPick template inside nonTemplate
+                  onPick(entity, true);
+                }}
+              />
+            }
+          />
+        )}
+        {entity.isTemplate && isInsideTemplate && (
+          <Button
+            tooltipLabel="link template"
+            key="link template"
+            inverted
+            noBorder
+            noBackground
+            icon={
+              <ImInsertTemplate
+                color={theme.color["black"]}
+                onClick={() => {
+                  // onPick template entity
+                  onPick(entity);
+                }}
+              />
+            }
+          />
+        )}
+      </ButtonGroup>
+    );
   };
 
   const entityIsTemplate = entity.isTemplate || false;
