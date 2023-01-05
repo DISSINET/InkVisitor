@@ -86,14 +86,14 @@ const pages: IPage[] = [
     href: "/about",
     icon: <FaInfo />,
   },
-  {
-    id: "acl",
-    label: "Acl",
-    color: "info",
-    href: "/acl",
-    admin: true,
-    icon: <FaKey />,
-  },
+  // {
+  //   id: "acl",
+  //   label: "Acl",
+  //   color: "info",
+  //   href: "/acl",
+  //   admin: true,
+  //   icon: <FaKey />,
+  // },
   {
     id: "users",
     label: "Manage Users",
