@@ -1,6 +1,6 @@
 import { AiOutlineWarning } from "react-icons/ai";
 import styled from "styled-components";
-import { space1, space2, space4, space36 } from "Theme/constants";
+import { space2, space4 } from "Theme/constants";
 
 interface StyledSuggester {
   marginTop?: boolean;
@@ -51,16 +51,17 @@ export const StyledSuggestionCancelButton = styled.div<StyledSuggestionCancelBut
 
 export const StyledSuggesterList = styled.div`
   position: absolute;
-  top: 2.5rem;
-  left: 0;
-  /* left: 3.5rem; */
+  top: ${({ theme }) => theme.space[10]};
+  left: ${({ theme }) => theme.space[14]}
   z-index: 40;
 `;
 export const StyledRelativePosition = styled.div`
   position: relative;
   background-color: ${({ theme }) => theme.color["blue"][50]};
+  border-radius: ${({ theme }) => theme.borderRadius["sm"]};
   min-width: 16.1rem;
   max-width: 24rem;
+  overflow: hidden;
   display: grid;
 
   min-height: 2.8rem;
