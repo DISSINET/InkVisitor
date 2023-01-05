@@ -59,6 +59,7 @@ export const StatementEditorBox: React.FC = () => {
       },
     }
   );
+
   const updateStatementDataMutation = useMutation(
     async (changes: object) => {
       await api.entityUpdate(statementId, {

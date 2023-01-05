@@ -139,161 +139,221 @@ export const CStatement = (
   return newStatement;
 };
 
-export const InstProps: any = async(oldProps: IProp[], userRole: UserEnums.Role) => {
+export const InstProps: any = async (
+  oldProps: IProp[],
+  userRole: UserEnums.Role
+) => {
   const newProps = [...oldProps];
 
-  const validateInstProp: any = async(prop: IProp, userRole: UserEnums.Role) => {
-    
+  const validateInstProp: any = async (
+    prop: IProp,
+    userRole: UserEnums.Role
+  ) => {
     // type
     if (prop.type.entityId) {
-      const typeEntityReq = await api.entitiesGet(prop.type.entityId)
-      
+      const typeEntityReq = await api.entitiesGet(prop.type.entityId);
+
       if (typeEntityReq && typeEntityReq.data) {
         if (typeEntityReq.data.isTemplate) {
-          const newTypeEId = await InstTemplate(typeEntityReq.data, userRole)
+          const newTypeEId = await InstTemplate(typeEntityReq.data, userRole);
           if (newTypeEId) {
-            prop.type.entityId = newTypeEId
+            prop.type.entityId = newTypeEId;
           }
-        } 
+        }
       }
     }
 
     // value
     if (prop.value.entityId) {
-      const valueEntityReq = await api.entitiesGet(prop.value.entityId)
+      const valueEntityReq = await api.entitiesGet(prop.value.entityId);
 
       if (valueEntityReq && valueEntityReq.data) {
         if (valueEntityReq.data.isTemplate) {
-          const newValueEId = await InstTemplate(valueEntityReq.data, userRole)
+          const newValueEId = await InstTemplate(valueEntityReq.data, userRole);
           if (newValueEId) {
-            prop.value.entityId = newValueEId
+            prop.value.entityId = newValueEId;
           }
-        } 
+        }
       }
     }
 
-    return prop
-  }
+    return prop;
+  };
 
   for (const [pi1, prop1] of newProps.entries()) {
     for (const [pi2, prop2] of prop1.children.entries()) {
       for (const [pi3, prop3] of prop2.children.entries()) {
-        prop2.children[pi3] = await validateInstProp(prop3, userRole)
-        
+        prop2.children[pi3] = await validateInstProp(prop3, userRole);
       }
-      prop1.children[pi2] = await validateInstProp(prop2, userRole)
+      prop1.children[pi2] = await validateInstProp(prop2, userRole);
     }
 
-    newProps[pi1] = await validateInstProp(prop1, userRole)
+    newProps[pi1] = await validateInstProp(prop1, userRole);
   }
-  return newProps
-}
+  return newProps;
+};
 
-export const InstActant = async(actant: IStatementActant, userRole: UserEnums.Role) => {
+export const InstActant = async (
+  actant: IStatementActant,
+  userRole: UserEnums.Role
+) => {
   actant.props = await InstProps(actant.props, userRole);
-  
-  const eReq = await api.entitiesGet(actant.entityId)
-  const actantE = eReq.data
+
+  const eReq = await api.entitiesGet(actant.entityId);
+  const actantE = eReq.data;
 
   if (actantE && actantE.isTemplate) {
-    InstTemplate(actantE.data, userRole)
+    const instActantId = await InstTemplate(actantE, userRole);
+    if (instActantId) {
+      actant.entityId = instActantId;
+    }
   }
-  return actant
-}
+  return actant;
+};
 
-export const InstAction: any = async(action: IStatementAction, userRole: UserEnums.Role) => {
+export const InstAction: any = async (
+  action: IStatementAction,
+  userRole: UserEnums.Role
+) => {
   action.props = await InstProps(action.props, userRole);
-  
-  const eReq = await api.entitiesGet(action.actionId)
-  const actionE = eReq.data
+
+  const eReq = await api.entitiesGet(action.actionId);
+  const actionE = eReq.data;
 
   if (actionE && actionE.isTemplate) {
-    InstTemplate(actionE.data, userRole)
-  }
-  return action
-}
+    const instActionId = await InstTemplate(actionE, userRole);
 
-export const InstReference: any = async(reference: IReference, userRole: UserEnums.Role) => {
-  
+    if (instActionId) {
+      action.actionId = instActionId;
+    }
+  }
+  return action;
+};
+
+export const InstReference: any = async (
+  reference: IReference,
+  userRole: UserEnums.Role
+) => {
   if (reference.resource) {
-    const resourceEReq = await api.entitiesGet(reference.resource)
-   
+    const resourceEReq = await api.entitiesGet(reference.resource);
+
     if (resourceEReq && resourceEReq.data) {
       if (resourceEReq.data.isTemplate) {
-        const newResourceEId = await InstTemplate(resourceEReq.data, userRole)
+        const newResourceEId = await InstTemplate(resourceEReq.data, userRole);
         if (newResourceEId) {
-          reference.resource = newResourceEId
+          reference.resource = newResourceEId;
         }
-      } 
+      }
     }
   }
 
   if (reference.value) {
-    const valueEReq = await api.entitiesGet(reference.value)
-   
+    const valueEReq = await api.entitiesGet(reference.value);
+
     if (valueEReq && valueEReq.data) {
       if (valueEReq.data.isTemplate) {
-        const newValueEId = await InstTemplate(valueEReq.data, userRole)
+        const newValueEId = await InstTemplate(valueEReq.data, userRole);
         if (newValueEId) {
-          reference.value = newValueEId
+          reference.value = newValueEId;
         }
-      } 
+      }
     }
   }
 
-  return reference
-}
+  return reference;
+};
 
-export const InstTemplate = async(
-  templateEntity: IEntity,
-  userRole: UserEnums.Role
-):Promise<string | false> => {
+// instantiate template
+
+export const InstTemplate = async (
+  templateEntity: IEntity | IStatement,
+  userRole: UserEnums.Role,
+  createInstance: boolean = false
+): Promise<string | false> => {
   if (templateEntity.isTemplate) {
-    let iEntity: false | IEntity = false
+    let iEntity: false | IEntity = false;
     if (templateEntity.class === EntityEnums.Class.Statement) {
       // entity is a statement
-      iEntity = DStatement(templateEntity as IStatement, userRole)
+      iEntity = DStatement(templateEntity as IStatement, userRole);
       for (const [ai, action] of iEntity.data.actions.entries()) {
-        const iAction: IStatementAction = await InstAction(action, userRole)
-        iEntity.data.actions[ai] = iAction
+        iEntity.data.actions[ai] = await InstAction(action, userRole);
       }
       for (const [ai, actant] of iEntity.data.actants.entries()) {
-        const iActant: IStatementActant = await InstActant(actant, userRole)
-        iEntity.data.actants[ai] = iActant
+        iEntity.data.actants[ai] = await InstActant(actant, userRole);
       }
-      
     } else {
       // entity is not a statement
-      iEntity = DEntity({...templateEntity}, userRole)
+      iEntity = DEntity({ ...templateEntity }, userRole);
     }
-    
+
     if (iEntity) {
-      iEntity.label = `[INSTANCE OF] ${templateEntity.label}` 
-      iEntity.usedTemplate = templateEntity.id
-      iEntity.props = await InstProps(templateEntity.props)
-      iEntity.isTemplate = false
+      iEntity.label = `[INSTANCE OF] ${templateEntity.label}`;
+      iEntity.usedTemplate = templateEntity.id;
+      iEntity.props = await InstProps(templateEntity.props);
+      iEntity.isTemplate = false;
 
       for (const [ri, reference] of iEntity.references.entries()) {
-        const iReference: IReference = await InstReference(reference, userRole)
-        iEntity.references[ri] = iReference
+        const iReference: IReference = await InstReference(reference, userRole);
+        iEntity.references[ri] = iReference;
+      }
+    }
+
+    const createReq = await api.entityCreate(iEntity);
+    if (createReq) {
+      return iEntity.id;
+    }
+  }
+
+  return false;
+};
+
+// apply template
+export const applyTemplate = async (
+  templateEntity: IEntity | IStatement,
+  entity: IEntity | IStatement,
+  userRole: UserEnums.Role
+): Promise<IEntity> => {
+  if (templateEntity.isTemplate && templateEntity.class === entity.class) {
+    const newEntity = { ...templateEntity };
+
+    if (templateEntity.class === EntityEnums.Class.Statement) {
+      // entity is a statement
+      for (const [ai, action] of newEntity.data.actions.entries()) {
+        console.log(action);
+        newEntity.data.actions[ai] = await InstAction(action, userRole);
+      }
+      for (const [ai, actant] of newEntity.data.actants.entries()) {
+        newEntity.data.actants[ai] = await InstActant(actant, userRole);
       }
 
+      newEntity.data.territory = entity.data.territory;
+    } else {
+      // entity is not a statement
     }
 
-    const createReq = await api.entityCreate(iEntity)
-    if (createReq ) {
-      return iEntity.id
+    if (newEntity) {
+      newEntity.id = entity.id;
+      newEntity.label = `[INSTANCE OF] ${templateEntity.label}`;
+      newEntity.usedTemplate = templateEntity.id;
+      newEntity.props = await InstProps(templateEntity.props);
+      newEntity.isTemplate = false;
+
+      for (const [ri, reference] of newEntity.references.entries()) {
+        const iReference: IReference = await InstReference(reference, userRole);
+        newEntity.references[ri] = iReference;
+      }
     }
 
+    return newEntity;
+  } else {
+    return entity;
   }
-  
-  return false
-}
+};
 
 // duplicate statement
 export const DStatement = (
   statement: IStatement,
-  userRole: UserEnums.Role,
+  userRole: UserEnums.Role
 ): IStatement => {
   const duplicatedStatement: IStatement = {
     id: uuidv4(),
@@ -310,7 +370,7 @@ export const DStatement = (
         ? EntityEnums.Status.Approved
         : EntityEnums.Status.Pending,
     isTemplate: statement.isTemplate,
-    usedTemplate: statement.usedTemplate
+    usedTemplate: statement.usedTemplate,
   };
 
   duplicatedStatement.data.actants.forEach((a) => {
@@ -329,12 +389,8 @@ export const DStatement = (
   return duplicatedStatement;
 };
 
-
 // duplicate entity
-export const DEntity = (
-  entity: IEntity,
-  userRole: UserEnums.Role,
-): IEntity => {
+export const DEntity = (entity: IEntity, userRole: UserEnums.Role): IEntity => {
   const duplicatedEntity: IEntity = {
     id: uuidv4(),
     class: entity.class,
@@ -347,10 +403,10 @@ export const DEntity = (
     references: entity.references,
     status:
       userRole === UserEnums.Role.Admin
-      ? EntityEnums.Status.Approved
-      : EntityEnums.Status.Pending,
+        ? EntityEnums.Status.Approved
+        : EntityEnums.Status.Pending,
     isTemplate: entity.isTemplate,
-    usedTemplate: entity.usedTemplate
+    usedTemplate: entity.usedTemplate,
   };
 
   duplicatedEntity.references.forEach((r) => (r.id = uuidv4()));
