@@ -184,7 +184,6 @@ export const InstProps: any = async(oldProps: IProp[], userRole: UserEnums.Role)
       prop1.children[pi2] = await validateInstProp(prop2, userRole)
     }
 
-    console.log(prop1)
     newProps[pi1] = await validateInstProp(prop1, userRole)
   }
   return newProps
@@ -212,6 +211,37 @@ export const InstAction: any = async(action: IStatementAction, userRole: UserEnu
     InstTemplate(actionE.data, userRole)
   }
   return action
+}
+
+export const InstReference: any = async(reference: IReference, userRole: UserEnums.Role) => {
+  
+  if (reference.resource) {
+    const resourceEReq = await api.entitiesGet(reference.resource)
+   
+    if (resourceEReq && resourceEReq.data) {
+      if (resourceEReq.data.isTemplate) {
+        const newResourceEId = await InstTemplate(resourceEReq.data, userRole)
+        if (newResourceEId) {
+          reference.resource = newResourceEId
+        }
+      } 
+    }
+  }
+
+  if (reference.value) {
+    const valueEReq = await api.entitiesGet(reference.value)
+   
+    if (valueEReq && valueEReq.data) {
+      if (valueEReq.data.isTemplate) {
+        const newValueEId = await InstTemplate(valueEReq.data, userRole)
+        if (newValueEId) {
+          reference.value = newValueEId
+        }
+      } 
+    }
+  }
+
+  return reference
 }
 
 export const InstTemplate = async(
@@ -242,6 +272,12 @@ export const InstTemplate = async(
       iEntity.usedTemplate = templateEntity.id
       iEntity.props = await InstProps(templateEntity.props)
       iEntity.isTemplate = false
+
+      for (const [ri, reference] of iEntity.references.entries()) {
+        const iReference: IReference = await InstReference(reference, userRole)
+        iEntity.references[ri] = iReference
+      }
+
     }
 
     const createReq = await api.entityCreate(iEntity)
