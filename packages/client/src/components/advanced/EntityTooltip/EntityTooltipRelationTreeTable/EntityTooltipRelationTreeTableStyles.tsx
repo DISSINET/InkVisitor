@@ -46,5 +46,6 @@ export const StyledGridRowThird = styled.div<StyledGridRowThird>`
 export const StyledGridRowHalf = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
+  height: 100%;
   width: 100%;
 `;
