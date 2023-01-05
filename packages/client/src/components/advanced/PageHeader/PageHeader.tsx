@@ -86,14 +86,14 @@ const pages: IPage[] = [
     href: "/about",
     icon: <FaInfo />,
   },
-  {
-    id: "acl",
-    label: "Acl",
-    color: "info",
-    href: "/acl",
-    admin: true,
-    icon: <FaKey />,
-  },
+  // {
+  //   id: "acl",
+  //   label: "Acl",
+  //   color: "info",
+  //   href: "/acl",
+  //   admin: true,
+  //   icon: <FaKey />,
+  // },
   {
     id: "users",
     label: "Manage Users",
@@ -109,6 +109,8 @@ export const RightHeader: React.FC<RightHeaderProps> = React.memo(
     const history = useHistory();
     const location = useLocation();
     const [menuOpen, setMenuOpen] = useState<boolean>(false);
+
+    const [tempLocation, setTempLocation] = useState<string | false>(false);
 
     return (
       <StyledRightHeader>
@@ -157,9 +159,20 @@ export const RightHeader: React.FC<RightHeaderProps> = React.memo(
                   key={key}
                   color="primary"
                   onClick={() => {
-                    history.push({
-                      pathname: p.href,
-                    });
+                    if (p.id === "main") {
+                      history.push({
+                        pathname: "/",
+                        hash: tempLocation ? tempLocation : "",
+                      });
+                      setTempLocation(false);
+                    } else {
+                      history.push({
+                        pathname: p.href,
+                      });
+                      if (location.pathname === "/") {
+                        setTempLocation(location.hash);
+                      }
+                    }
                   }}
                 >
                   {p.icon || null}
