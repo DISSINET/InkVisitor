@@ -51,9 +51,9 @@ export const StyledSuggestionCancelButton = styled.div<StyledSuggestionCancelBut
 
 export const StyledSuggesterList = styled.div`
   position: absolute;
-  top: ${({ theme }) => theme.space[10]};
-  left: ${({ theme }) => theme.space[14]}
   z-index: 40;
+  top: ${({ theme }) => theme.space[10]};
+  left: ${({ theme }) => theme.space[14]};
 `;
 export const StyledRelativePosition = styled.div`
   position: relative;
