@@ -442,16 +442,34 @@ export default Router()
         throw new UserDoesNotExits(UserDoesNotExits.message, "");
       }
 
+      const rawPassword = existingUser.generatePassword();
+
       const result = await existingUser.update(request.db.connection, {
         active: true,
+        password: existingUser.password,
       });
-      if (!result.replaced) {
+      if (!result.replaced && !result.unchanged) {
         throw new InternalServerError(`cannot update user ${existingUser.id}`);
+      }
+
+      console.log(`User activated: ${existingUser.email}`);
+
+      try {
+        await mailer.sendTemplate(
+          existingUser.email,
+          passwordResetTemplate(
+            existingUser.name,
+            domainName(),
+            rawPassword,
+          )
+        );
+      } catch (e) {
+        throw new EmailError("please check the logs", (e as Error).toString());
       }
 
       return {
         result: true,
-        message: "User activated",
+        message: "User activated. An email with the password has been sent to your email address",
       };
     })
   )
