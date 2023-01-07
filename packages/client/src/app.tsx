@@ -64,12 +64,15 @@ const clockPerformance = (
 export const PublicPath = (props: any) => {
   const Component = props.children;
 
-  return !api.isLoggedIn() ? (
+  const loggedIn = !api.isLoggedIn();
+  if (loggedIn) {
+    api.signOut();
+  }
+
+  return (
     <Route path={props.path} render={props.render} exact={props.exact}>
       <Component props />
     </Route>
-  ) : (
-    <Redirect to="/" />
   );
 };
 
