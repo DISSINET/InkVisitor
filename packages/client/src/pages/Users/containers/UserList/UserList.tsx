@@ -435,7 +435,7 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
                 color="warning"
                 onClick={() => {
                   api
-                    .resetPasswordAdmin(userId)
+                    .resetPassword(userId)
                     .then((data) => toast.success(data.data.message));
                 }}
               />
