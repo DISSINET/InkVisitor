@@ -578,7 +578,7 @@ export default Router()
 
       return {
         result: true,
-        message: "Email with the new password has been sent",
+        message: `Email with the new password has been sent. New password: '${rawPassword}'.`,
         data: rawPassword,
       };
     })
