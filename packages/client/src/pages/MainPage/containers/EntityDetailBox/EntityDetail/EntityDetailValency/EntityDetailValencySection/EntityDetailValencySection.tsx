@@ -231,6 +231,7 @@ export const EntityDetailValencySection: React.FC<
           <StyledLabel>Semantics</StyledLabel>
           <EntitySuggester
             categoryTypes={[EntityEnums.Class.Concept]}
+            disableTemplatesAccept
             onSelected={(selectedId: string) => {
               handleMultiSelected(selectedId, relationType);
             }}

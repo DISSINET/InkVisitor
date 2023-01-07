@@ -692,6 +692,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                     toast.info("Tag already added!");
                   }
                 }}
+                disableTemplatesAccept
                 categoryTypes={classesEditorTags}
                 placeholder={"add new tag"}
                 excludedEntities={excludedSuggesterEntities}

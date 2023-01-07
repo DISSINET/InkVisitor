@@ -11,12 +11,12 @@ import React, { useEffect, useState } from "react";
 interface SuggesterTemplateModal {
   onClose: () => void;
   onUse: () => void;
-  onDuplicate: () => void;
+  onInstantiate: () => void;
 }
 export const SuggesterTemplateModal: React.FC<SuggesterTemplateModal> = ({
   onClose,
   onUse,
-  onDuplicate,
+  onInstantiate,
 }) => {
   const [showModal, setShowModal] = useState(false);
 
@@ -32,7 +32,7 @@ export const SuggesterTemplateModal: React.FC<SuggesterTemplateModal> = ({
         <ButtonGroup>
           <Button label="Cancel" color="warning" onClick={onClose} />
           <Button label="Use template" color="success" onClick={onUse} />
-          <Button label="Duplicate to entity" onClick={onDuplicate} />
+          <Button label="Instantiate template" onClick={onInstantiate} />
         </ButtonGroup>
       </ModalFooter>
     </Modal>

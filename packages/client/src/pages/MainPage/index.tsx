@@ -220,6 +220,11 @@ const MainPage: React.FC<MainPage> = ({}) => {
             button={[
               <Button
                 inverted
+                tooltipLabel={
+                  statementListOpened
+                    ? "maximize detail box"
+                    : "shrink detail box"
+                }
                 icon={
                   statementListOpened ? (
                     <BsSquareFill />
@@ -236,6 +241,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
               />,
               <Button
                 inverted
+                tooltipLabel="close all tabs"
                 icon={<VscCloseAll style={{ transform: "scale(1.3)" }} />}
                 onClick={() => {
                   clearAllDetailIds();

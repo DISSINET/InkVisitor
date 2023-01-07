@@ -71,6 +71,7 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
                 onSelected={(newSelectedId: string) => {
                   handleChangeResource(reference.id, newSelectedId);
                 }}
+                disableTemplatesAccept
                 categoryTypes={[EntityEnums.Class.Resource]}
                 isInsideTemplate={isInsideTemplate}
                 territoryParentId={territoryParentId}
