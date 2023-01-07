@@ -50,7 +50,6 @@ export default class Identification extends Relation implements RelationTypes.II
       conn,
       entityId,
       RelationEnums.Type.Identification,
-      0
     );
     let thresholdReached = false;
 
