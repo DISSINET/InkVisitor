@@ -11,7 +11,6 @@ import { SearchParamsProvider } from "hooks/useParamsContext";
 import { useWindowSize } from "hooks/useWindowSize";
 import ActivatePage from "pages/Activate";
 import LoginPage from "pages/Login";
-import PasswordResetPage from "pages/PasswordReset";
 import UsersPage from "pages/Users";
 
 import { Page } from "components/advanced";
@@ -160,10 +159,6 @@ export const App: React.FC = () => {
                   <Switch>
                     <PublicPath path="/login" children={LoginPage} />
                     <PublicPath path="/activate" children={ActivatePage} />
-                    <PublicPath
-                      path="/password_reset"
-                      children={PasswordResetPage}
-                    />
                     <ProtectedPath path="/" exact children={MainPage} />
                     <ProtectedPath path="/acl" children={AclPage} />
                     <ProtectedPath path="/about" children={AboutPage} />
