@@ -96,8 +96,9 @@ export const Suggester: React.FC<Suggester> = ({
 
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showTemplateModal, setShowTemplateModal] = useState(false);
-  const [tempDropItem, setTempDropItem] =
-    useState<EntityDragItem | false>(false);
+  const [tempDropItem, setTempDropItem] = useState<EntityDragItem | false>(
+    false
+  );
 
   useKeypress(
     "Escape",
@@ -283,7 +284,6 @@ export const Suggester: React.FC<Suggester> = ({
             onMouseLeave={() => setIsHovered(false)}
           >
             <StyledRelativePosition>
-              {/* TODO: try to map suggestions in normal way */}
               {renderEntitySuggestions()}
 
               <Loader size={30} show={isFetching} />

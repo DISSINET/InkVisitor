@@ -2,7 +2,6 @@ import { EntityEnums, UserEnums } from "@shared/enums";
 import {
   IAction,
   IEntity,
-  IResponseAudit,
   IResponseStatement,
   IStatement,
 } from "@shared/types";
@@ -36,7 +35,7 @@ import {
 } from "./StatementLitBoxStyles";
 
 const initialData: {
-  statements: (IResponseStatement & { audit?: IResponseAudit })[];
+  statements: IResponseStatement[];
   entities: { [key: string]: IEntity };
   right: UserEnums.RoleMode;
 } = {
@@ -263,55 +262,6 @@ export const StatementListBox: React.FC = () => {
     }
   };
 
-  const actantsUpdateMutation = useMutation(
-    async (statementObject: { statementId: string; data: {} }) =>
-      await api.entityUpdate(statementObject.statementId, {
-        data: statementObject.data,
-      }),
-    {
-      onSuccess: (data, variables) => {
-        queryClient.invalidateQueries("territory");
-      },
-      onError: () => {
-        toast.error(`Error: Statement order not changed!`);
-      },
-    }
-  );
-
-  const moveEndRow = async (statementToMove: IStatement, index: number) => {
-    if (statementToMove.data.territory && statements[index].data.territory) {
-      const { order: thisOrder, territoryId } = statementToMove.data.territory;
-
-      if (thisOrder !== statements[index].data.territory?.order) {
-        let allOrders: number[] = statements.map((s) =>
-          s.data.territory ? s.data.territory.order : 0
-        );
-        allOrders.sort((a, b) => (a && b ? (a > b ? 1 : -1) : 0));
-
-        allOrders = allOrders.filter((o) => o !== thisOrder);
-        allOrders.splice(index, 0, thisOrder);
-
-        if (index === 0) {
-          allOrders[index] = allOrders[1] - 1;
-        } else if (index === allOrders.length - 1) {
-          allOrders[index] = allOrders[index - 1] + 1;
-        } else {
-          allOrders[index] = (allOrders[index - 1] + allOrders[index + 1]) / 2;
-        }
-
-        actantsUpdateMutation.mutate({
-          statementId: statementToMove.id,
-          data: {
-            territory: {
-              territoryId: territoryId,
-              order: allOrders[index],
-            },
-          },
-        });
-      }
-    }
-  };
-
   const columns: Column<{}>[] = useMemo(() => {
     return [
       {
@@ -513,12 +463,19 @@ export const StatementListBox: React.FC = () => {
     ];
   }, [data, statementId, rowsExpanded]);
 
-  statements.sort((a, b) =>
-    a.data.territory && b.data.territory
-      ? a.data.territory.order > b.data.territory.order
-        ? 1
-        : -1
-      : 0
+  const actantsUpdateMutation = useMutation(
+    async (statementObject: { statementId: string; data: {} }) =>
+      await api.entityUpdate(statementObject.statementId, {
+        data: statementObject.data,
+      }),
+    {
+      onSuccess: (data, variables) => {
+        queryClient.invalidateQueries("territory");
+      },
+      onError: () => {
+        toast.error(`Error: Statement order not changed!`);
+      },
+    }
   );
 
   const moveTerritoryMutation = useMutation(
@@ -531,19 +488,6 @@ export const StatementListBox: React.FC = () => {
       },
     }
   );
-
-  const tableData: (IResponseStatement & {
-    audit: IResponseAudit | undefined;
-  })[] = useMemo(() => {
-    if (statements && audits) {
-      return statements.map((st) => ({
-        ...st,
-        audit: audits.find((a) => a.entityId === st.id),
-      }));
-    } else {
-      return [];
-    }
-  }, [statements, audits]);
 
   return (
     <>
@@ -558,12 +502,13 @@ export const StatementListBox: React.FC = () => {
       {statements && audits ? (
         <StyledTableWrapper id="Statements-box-table">
           <StatementListTable
-            moveEndRow={moveEndRow}
-            data={tableData}
+            statements={statements}
+            audits={audits}
             columns={columns}
             handleRowClick={(rowId: string) => {
               setStatementId(rowId);
             }}
+            actantsUpdateMutation={actantsUpdateMutation}
             entities={entities}
           />
         </StyledTableWrapper>
@@ -611,6 +556,7 @@ export const StatementListBox: React.FC = () => {
           duplicateStatementMutation.isLoading ||
           addStatementAtTheEndMutation.isLoading ||
           actantsCreateMutation.isLoading ||
+          actantsUpdateMutation.isLoading ||
           moveTerritoryMutation.isLoading
         }
       />
