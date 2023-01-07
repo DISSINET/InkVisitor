@@ -25,7 +25,6 @@ export default class SubjectActant1Reciprocal extends Relation implements Relati
         conn,
         entityId,
         RelationEnums.Type.SubjectActant1Reciprocal,
-        0
       );
     }
   
