@@ -229,7 +229,7 @@ export const EntityBookmarkFolder: React.FC<EntityBookmarkFolder> = ({
           </StyledFolderContentTags>
           <StyledFolderSuggester>
             <EntitySuggester
-              disableDuplicate
+              disableTemplateInstantiation
               openDetailOnCreate
               onSelected={(bookmarkId: string) => {
                 addBookmark(bookmarkFolder.id, bookmarkId);

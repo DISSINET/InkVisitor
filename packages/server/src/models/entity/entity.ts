@@ -181,6 +181,11 @@ export default class Entity implements IEntity, IDbModel {
   getEntitiesIds(): string[] {
     const entityIds: Record<string, null> = {};
 
+    // get usedTemplate entity
+    if (this.usedTemplate) {
+      entityIds[this.usedTemplate] = null
+    }
+
     Entity.extractIdsFromProps(this.props).forEach((element) => {
       if (element) {
         entityIds[element] = null;
@@ -195,6 +200,7 @@ export default class Entity implements IEntity, IDbModel {
 
     return Object.keys(entityIds);
   }
+
 
   static extractIdsFromReferences(references: IReference[]): string[] {
     let out: string[] = [];
