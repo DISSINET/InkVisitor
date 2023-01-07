@@ -40,8 +40,6 @@ export const ApplyTemplateModal: React.FC<ApplyTemplateModal> = ({
 }) => {
   const handleApplyTemplate = async () => {
     if (templateToApply && entity) {
-      // TODO #952 handle conflicts in Templates application
-
       const entityAfterTemplateApplied = await applyTemplate(
         templateToApply,
         entity,

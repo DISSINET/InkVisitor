@@ -230,45 +230,46 @@ export const InstAction: any = async (
   return action;
 };
 
-export const InstReference: any = async (
-  reference: IReference,
-  userRole: UserEnums.Role
-) => {
-  if (reference.resource) {
-    const resourceEReq = await api.entitiesGet(reference.resource);
+// not used anymore
+// export const InstReference: any = async (
+//   reference: IReference,
+//   userRole: UserEnums.Role
+// ) => {
+//   if (reference.resource) {
+//     const resourceEReq = await api.entitiesGet(reference.resource);
 
-    if (resourceEReq && resourceEReq.data) {
-      if (resourceEReq.data.isTemplate) {
-        const newResourceEId = await InstTemplate(resourceEReq.data, userRole);
-        if (newResourceEId) {
-          reference.resource = newResourceEId;
-        }
-      }
-    }
-  }
+//     if (resourceEReq && resourceEReq.data) {
+//       if (resourceEReq.data.isTemplate) {
+//         const newResourceEId = await InstTemplate(resourceEReq.data, userRole);
+//         if (newResourceEId) {
+//           reference.resource = newResourceEId;
+//         }
+//       }
+//     }
+//   }
 
-  if (reference.value) {
-    const valueEReq = await api.entitiesGet(reference.value);
+//   if (reference.value) {
+//     const valueEReq = await api.entitiesGet(reference.value);
 
-    if (valueEReq && valueEReq.data) {
-      if (valueEReq.data.isTemplate) {
-        const newValueEId = await InstTemplate(valueEReq.data, userRole);
-        if (newValueEId) {
-          reference.value = newValueEId;
-        }
-      }
-    }
-  }
+//     if (valueEReq && valueEReq.data) {
+//       if (valueEReq.data.isTemplate) {
+//         const newValueEId = await InstTemplate(valueEReq.data, userRole);
+//         if (newValueEId) {
+//           reference.value = newValueEId;
+//         }
+//       }
+//     }
+//   }
 
-  return reference;
-};
+//   return reference;
+// };
 
 // instantiate template
+// TODO #952 handle conflicts in Templates application
 
 export const InstTemplate = async (
   templateEntity: IEntity | IStatement,
-  userRole: UserEnums.Role,
-  createInstance: boolean = false
+  userRole: UserEnums.Role
 ): Promise<string | false> => {
   if (templateEntity.isTemplate) {
     let iEntity: false | IEntity = false;
@@ -292,10 +293,11 @@ export const InstTemplate = async (
       iEntity.props = await InstProps(templateEntity.props);
       iEntity.isTemplate = false;
 
-      for (const [ri, reference] of iEntity.references.entries()) {
-        const iReference: IReference = await InstReference(reference, userRole);
-        iEntity.references[ri] = iReference;
-      }
+      // references are not relevant for templates
+      // for (const [ri, reference] of iEntity.references.entries()) {
+      //   const iReference: IReference = await InstReference(reference, userRole);
+      //   iEntity.references[ri] = iReference;
+      // }
     }
 
     const createReq = await api.entityCreate(iEntity);
@@ -337,11 +339,6 @@ export const applyTemplate = async (
       newEntity.usedTemplate = templateEntity.id;
       newEntity.props = await InstProps(templateEntity.props);
       newEntity.isTemplate = false;
-
-      for (const [ri, reference] of newEntity.references.entries()) {
-        const iReference: IReference = await InstReference(reference, userRole);
-        newEntity.references[ri] = iReference;
-      }
     }
 
     return newEntity;
