@@ -20,6 +20,7 @@
       "actions": [
         {
           "id": "s1_a1",
+          "statementOrder": 4,
           "actionId": "a1",
           "certainty": "1",
           "elvl": "1",
@@ -32,6 +33,7 @@
           "props": [
             {
               "id": "s1_a1_p1",
+              "statementOrder": 5,
               "elvl": "1",
               "certainty": "1",
               "logic": "1",
@@ -63,6 +65,7 @@
       "actants": [
         {
           "id": "s1_a2",
+          "statementOrder": 1,
           "entityId": "p1",
           "position": "s",
           "elvl": "1",
@@ -75,6 +78,7 @@
           "props": [
             {
               "id": "s1_a2_p1",
+              "statementOrder": 2,
               "elvl": "1",
               "certainty": "1",
               "logic": "1",
@@ -102,6 +106,7 @@
             },
             {
               "id": "s1_a2_p2",
+              "statementOrder": 3,
               "elvl": "1",
               "certainty": "1",
               "logic": "1",
@@ -134,6 +139,7 @@
 
         {
           "id": "s1_a3",
+          "statementOrder": 6,
           "entityId": "p2",
           "position": "a1",
           "elvl": "1",
@@ -149,6 +155,7 @@
         },
         {
           "id": "s1_a4",
+          "statementOrder": 7,
           "entityId": "s2",
           "position": "a2",
           "elvl": "1",
@@ -164,6 +171,7 @@
         },
         {
           "id": "s1_a5",
+          "statementOrder": 8,
           "entityId": "s3",
           "position": "a2",
           "elvl": "1",
@@ -201,6 +209,7 @@
       "actions": [
         {
           "id": "s2_a1",
+          "statementOrder": 3,
           "actionId": "a2",
           "certainty": "1",
           "elvl": "1",
@@ -216,6 +225,7 @@
       "actants": [
         {
           "id": "s2_a2",
+          "statementOrder": 1,
           "entityId": "b1",
           "position": "s",
           "elvl": "1",
@@ -229,6 +239,7 @@
           "classifications": [
             {
               "id": "s2_a2_i1",
+              "statementOrder": 2,
               "entityId": "c211",
               "elvl": "1",
               "logic": "1",
@@ -241,6 +252,7 @@
         },
         {
           "id": "s2_a3",
+          "statementOrder": 4,
           "entityId": "c41",
           "position": "a1",
           "elvl": "1",
@@ -276,6 +288,7 @@
       "actions": [
         {
           "id": "s3_a1",
+          "statementOrder": 1,
           "actionId": "a3",
           "certainty": "1",
           "elvl": "1",
@@ -291,6 +304,7 @@
       "actants": [
         {
           "id": "s3_a2",
+          "statementOrder": false,
           "entityId": "b1",
           "position": "s",
           "elvl": "1",
@@ -327,6 +341,7 @@
       "actions": [
         {
           "id": "s4_a1",
+          "statementOrder": 2,
           "actionId": "a4",
           "certainty": "1",
           "elvl": "1",
@@ -342,6 +357,7 @@
       "actants": [
         {
           "id": "s4_a2",
+          "statementOrder": 1,
           "entityId": "e1",
           "position": "s",
           "elvl": "1",
@@ -357,6 +373,7 @@
         },
         {
           "id": "s4_a3",
+          "statementOrder": 3,
           "entityId": "l2",
           "position": "a1",
           "elvl": "1",
@@ -369,6 +386,7 @@
           "props": [
             {
               "id": "s4_a3_p1",
+              "statementOrder": 4,
               "elvl": "1",
               "certainty": "1",
               "logic": "1",
@@ -421,6 +439,7 @@
       "actions": [
         {
           "id": "s5_a1",
+          "statementOrder": 2,
           "actionId": "a4",
           "certainty": "1",
           "elvl": "1",
@@ -436,6 +455,7 @@
       "actants": [
         {
           "id": "s5_a2",
+          "statementOrder": 1,
           "entityId": "b1",
           "position": "s",
           "elvl": "1",
@@ -451,6 +471,7 @@
         },
         {
           "id": "s5_a3",
+          "statementOrder": 3,
           "entityId": "l1200",
           "position": "a2",
           "elvl": "1",
