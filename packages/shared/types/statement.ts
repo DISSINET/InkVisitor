@@ -1,7 +1,5 @@
 import { IEntity, IProp } from "./";
-import {
-  EntityEnums,
-} from "../enums";
+import { EntityEnums } from "../enums";
 
 export interface IStatement extends IEntity {
   class: EntityEnums.Class.Statement;
@@ -33,6 +31,7 @@ export interface IStatementAction {
   bundleStart: boolean;
   bundleEnd: boolean;
   props: IProp[];
+  statementOrder: number | false;
 }
 
 export interface IStatementActant {
@@ -49,6 +48,7 @@ export interface IStatementActant {
   props: IProp[];
   classifications: IStatementClassification[];
   identifications: IStatementIdentification[];
+  statementOrder: number | false;
 }
 
 export interface IStatementClassification {
@@ -59,6 +59,7 @@ export interface IStatementClassification {
   certainty: EntityEnums.Certainty;
   mood: EntityEnums.Mood[];
   moodvariant: EntityEnums.MoodVariant;
+  statementOrder: number | false;
 }
 
 export interface IStatementIdentification {
@@ -69,4 +70,5 @@ export interface IStatementIdentification {
   certainty: EntityEnums.Certainty;
   mood: EntityEnums.Mood[];
   moodvariant: EntityEnums.MoodVariant;
+  statementOrder: number | false;
 }

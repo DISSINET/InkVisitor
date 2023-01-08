@@ -15,6 +15,8 @@ export interface IProp {
 
   type: IPropSpec;
   value: IPropSpec;
+
+  statementOrder?: number | false;
 }
 
 export interface IPropSpec {
