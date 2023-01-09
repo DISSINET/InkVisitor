@@ -212,7 +212,7 @@ export default class Entity implements IEntity, IDbModel {
     return out;
   }
 
-  static extractIdsFromProps(props: IProp[] = []): string[] {
+  static extractIdsFromProps(props: IProp[] = [], cb?: (prop: IProp) => void): string[] {
     let out: string[] = [];
     for (const prop of props) {
       if (prop.type) {
@@ -222,7 +222,11 @@ export default class Entity implements IEntity, IDbModel {
         out.push(prop.value.entityId);
       }
 
-      out = out.concat(Entity.extractIdsFromProps(prop.children));
+      if (cb) {
+        cb(prop);
+      }
+
+      out = out.concat(Entity.extractIdsFromProps(prop.children, cb));
     }
 
     return out;
