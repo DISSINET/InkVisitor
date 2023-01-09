@@ -34,6 +34,7 @@ export class StatementClassification implements IStatementClassification {
   certainty: EntityEnums.Certainty = EntityEnums.Certainty.AlmostCertain;
   mood: EntityEnums.Mood[];
   moodvariant: EntityEnums.MoodVariant = EntityEnums.MoodVariant.Irrealis;
+  statementOrder: number | false = false;
 
   constructor(data: Partial<IStatementClassification>) {
     fillFlatObject(this, data);
@@ -49,6 +50,7 @@ export class StatementIdentification implements IStatementClassification {
   certainty: EntityEnums.Certainty = EntityEnums.Certainty.AlmostCertain;
   mood: EntityEnums.Mood[];
   moodvariant: EntityEnums.MoodVariant = EntityEnums.MoodVariant.Irrealis;
+  statementOrder: number | false = false;
 
   constructor(data: Partial<IStatementClassification>) {
     fillFlatObject(this, data);
@@ -68,6 +70,7 @@ export class StatementActant implements IStatementActant, IModel {
   bundleStart: boolean = false;
   bundleEnd: boolean = false;
   props: Prop[] = [];
+  statementOrder: number | false = false;
 
   classifications: StatementClassification[] = [];
   identifications: StatementIdentification[] = [];
@@ -124,6 +127,7 @@ export class StatementAction implements IStatementAction {
   bundleStart: boolean = false;
   bundleEnd: boolean = false;
   props: Prop[] = [];
+  statementOrder: number | false = false;
 
   constructor(data: Partial<IStatementAction>) {
     fillFlatObject(this, data);
