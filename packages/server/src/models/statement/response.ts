@@ -1,13 +1,13 @@
 import { UserEnums } from "@shared/enums";
 import { IEntity, IResponseStatement, IStatement } from "@shared/types";
-import { Order, OrderType } from "@shared/types/response-statement";
+import { EntityOrder, OrderType } from "@shared/types/response-statement";
 import { Connection } from "rethinkdb-ts";
 import { IRequest } from "src/custom_typings/request";
 import Statement from "./statement";
 
 export class ResponseStatement extends Statement implements IResponseStatement {
   entities: { [key: string]: IEntity; };
-  statementOrders: Order<OrderType>[];
+  statementOrders: OrderType[];
   right: UserEnums.RoleMode = UserEnums.RoleMode.Read;
 
   constructor(entity: IStatement) {
