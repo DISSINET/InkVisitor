@@ -74,7 +74,7 @@ export const EntityDetailRelationRow: React.FC<EntityDetailRelationRow> = ({
   const renderCertainty = (relation: Relation.IRelation) => (
     <div>
       <Dropdown
-        width={110}
+        width={105}
         placeholder="certainty"
         options={certaintyDict}
         value={{
@@ -147,28 +147,20 @@ export const EntityDetailRelationRow: React.FC<EntityDetailRelationRow> = ({
                     </StyledGridColumn>
                   )}
                   <StyledGridColumn key={key}>
-                    <div
-                      style={{
-                        minWidth: "8rem",
-                        display: "inline-flex",
-                        overflow: "hidden",
-                      }}
-                    >
-                      <EntityTag
-                        fullWidth
-                        entity={relationEntity}
-                        button={
-                          <Button
-                            key="d"
-                            icon={<FaUnlink />}
-                            color="plain"
-                            inverted
-                            tooltipLabel="unlink"
-                            onClick={() => handleMultiRemove(relation.id)}
-                          />
-                        }
-                      />
-                    </div>
+                    <EntityTag
+                      fullWidth
+                      entity={relationEntity}
+                      button={
+                        <Button
+                          key="d"
+                          icon={<FaUnlink />}
+                          color="plain"
+                          inverted
+                          tooltipLabel="unlink"
+                          onClick={() => handleMultiRemove(relation.id)}
+                        />
+                      }
+                    />
                   </StyledGridColumn>
                 </>
               )}

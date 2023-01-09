@@ -239,6 +239,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
         {(isMultiple || selectedRelations.length < 1) && (
           <StyledSuggesterWrapper>
             <EntitySuggester
+              inputWidth={80}
               disableTemplatesAccept
               categoryTypes={
                 getCategoryTypes() ||
