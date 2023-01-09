@@ -25,7 +25,9 @@ interface StyledGrid {
 export const StyledGrid = styled.div<StyledGrid>`
   display: grid;
   grid-template-columns: ${({ hasAttribute, hasOrder }) =>
-    `${hasOrder ? "2rem" : ""} auto ${hasAttribute ? "14rem" : ""}`};
+    `${hasOrder ? "2rem" : ""} ${
+      hasAttribute ? "minmax(7rem, auto)" : "auto"
+    } ${hasAttribute ? "10.5rem" : ""}`};
   max-width: 100%;
   align-items: center;
   width: fit-content;

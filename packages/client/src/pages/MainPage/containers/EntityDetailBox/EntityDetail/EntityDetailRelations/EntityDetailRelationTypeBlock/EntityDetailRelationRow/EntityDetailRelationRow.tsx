@@ -74,7 +74,7 @@ export const EntityDetailRelationRow: React.FC<EntityDetailRelationRow> = ({
   const renderCertainty = (relation: Relation.IRelation) => (
     <div>
       <Dropdown
-        width={140}
+        width={105}
         placeholder="certainty"
         options={certaintyDict}
         value={{

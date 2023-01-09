@@ -25,6 +25,7 @@ export const StyledEditorEmptyState = styled.div<StyledEditorEmptyState>`
   display: flex;
   align-self: center;
   align-items: center;
+  text-align: center;
 `;
 interface StyledEditorPreSection {}
 export const StyledEditorPreSection = styled.div<StyledEditorPreSection>`
