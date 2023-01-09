@@ -42,4 +42,5 @@ export const StyledEmptyState = styled.div`
   display: flex;
   align-self: center;
   align-items: center;
+  text-align: center;
 `;

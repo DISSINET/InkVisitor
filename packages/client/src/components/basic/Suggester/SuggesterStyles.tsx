@@ -23,7 +23,7 @@ export const StyledInputWrapper = styled.div<InputWrapper>`
   opacity: ${({ isOver }) => isOver && "75%"};
   max-width: 16.1rem;
   input {
-    padding-right: ${space4};
+    padding-right: ${({ theme }) => theme.space[7]};
   }
   input[type="text"] {
     border-left-width: 0;
