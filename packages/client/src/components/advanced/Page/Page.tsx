@@ -79,6 +79,8 @@ export const Page: React.FC<Page> = ({ children }) => {
 
   const [userCustomizationOpen, setUserCustomizationOpen] = useState(false);
 
+  const [tempLocation, setTempLocation] = useState<string | false>(false);
+
   return (
     <StyledPage layoutWidth={layoutWidth}>
       <Header
@@ -89,7 +91,7 @@ export const Page: React.FC<Page> = ({ children }) => {
             ? environmentName
             : "primary"
         }
-        left={<LeftHeader />}
+        left={<LeftHeader tempLocation={tempLocation} />}
         right={
           <>
             {!disableRightHeader && (
@@ -98,6 +100,8 @@ export const Page: React.FC<Page> = ({ children }) => {
                 handleLogOut={logOutMutation.mutate}
                 userName={user ? user.name : ""}
                 userRole={userRole || ""}
+                setTempLocation={setTempLocation}
+                tempLocation={tempLocation}
               />
             )}
           </>
