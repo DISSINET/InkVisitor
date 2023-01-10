@@ -1,9 +1,10 @@
 import { UserEnums } from "@shared/enums";
 import LogoInkvisitor from "assets/logos/inkvisitor.svg";
 import { Button, Loader } from "components";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState } from "react";
 import { BiLogOut } from "react-icons/bi";
-import { FaBars, FaBookOpen, FaInfo, FaKey, FaUsers } from "react-icons/fa";
+import { FaBars, FaBookOpen, FaInfo, FaUsers } from "react-icons/fa";
+import { useQueryClient } from "react-query";
 import { useHistory, useLocation } from "react-router";
 import { toast } from "react-toastify";
 import { heightHeader } from "Theme/constants";
@@ -21,44 +22,62 @@ import {
   StyledUsername,
 } from "./PageHeaderStyles";
 
-import { RouteComponentProps } from "react-router-dom";
+interface LeftHeader {
+  tempLocation: string | false;
+}
+export const LeftHeader: React.FC<LeftHeader> = React.memo(
+  ({ tempLocation }) => {
+    const env = (process.env.ROOT_URL || "").replace(
+      /apps\/inkvisitor[-]?/,
+      ""
+    );
+    const versionText = `v. ${packageJson.version} ${
+      ["production", ""].indexOf(env) === -1
+        ? `| ${env} | built: ${process.env.BUILD_TIMESTAMP}`
+        : ""
+    }`;
+    const location = useLocation();
+    const history = useHistory();
 
-export const LeftHeader = React.memo(({}) => {
-  const env = (process.env.ROOT_URL || "").replace(/apps\/inkvisitor[-]?/, "");
-  const versionText = `v. ${packageJson.version} ${
-    ["production", ""].indexOf(env) === -1
-      ? `| ${env} | built: ${process.env.BUILD_TIMESTAMP}`
-      : ""
-  }`;
-  const history = useHistory();
+    const queryClient = useQueryClient();
 
-  return (
-    <StyledHeader>
-      <StyledHeaderLogo
-        height={heightHeader - 10}
-        src={LogoInkvisitor}
-        alt="Inkvisitor Logo"
-        onClick={async () => {
-          history.push("");
-        }}
-      />
-      <StyledHeaderTag
-        onClick={async () => {
-          await navigator.clipboard.writeText(versionText);
-          toast.info("Inkvisitor version copied to clipboard");
-        }}
-      >
-        {versionText}
-      </StyledHeaderTag>
-    </StyledHeader>
-  );
-});
+    return (
+      <StyledHeader>
+        <StyledHeaderLogo
+          height={heightHeader - 10}
+          src={LogoInkvisitor}
+          alt="Inkvisitor Logo"
+          onClick={async () => {
+            if (location.pathname !== "/") {
+              history.push({
+                pathname: "/",
+                hash: tempLocation ? tempLocation : "",
+              });
+            } else {
+              queryClient.invalidateQueries();
+            }
+          }}
+        />
+        <StyledHeaderTag
+          onClick={async () => {
+            await navigator.clipboard.writeText(versionText);
+            toast.info("Inkvisitor version copied to clipboard");
+          }}
+        >
+          {versionText}
+        </StyledHeaderTag>
+      </StyledHeader>
+    );
+  }
+);
 
 interface RightHeaderProps {
   setUserCustomizationOpen: (arg0: boolean) => void;
   handleLogOut: () => void;
   userName: string;
   userRole: string;
+  setTempLocation: React.Dispatch<React.SetStateAction<string | false>>;
+  tempLocation: string | false;
 }
 
 interface IPage {
@@ -105,12 +124,17 @@ const pages: IPage[] = [
 ];
 
 export const RightHeader: React.FC<RightHeaderProps> = React.memo(
-  ({ setUserCustomizationOpen, handleLogOut, userName, userRole }) => {
+  ({
+    setUserCustomizationOpen,
+    handleLogOut,
+    userName,
+    userRole,
+    tempLocation,
+    setTempLocation,
+  }) => {
     const history = useHistory();
     const location = useLocation();
     const [menuOpen, setMenuOpen] = useState<boolean>(false);
-
-    const [tempLocation, setTempLocation] = useState<string | false>(false);
 
     return (
       <StyledRightHeader>
