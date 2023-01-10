@@ -57,28 +57,14 @@ export const EntityDetailRelations: React.FC<EntityDetailRelations> = ({
     <>
       <StyledRelationsGrid>
         {filteredRelationTypes.map((relationType, key) => {
-          const relationRule: Relation.RelationRule =
-            Relation.RelationRules[relationType]!;
-
           const selectedRelations = relations[relationType]?.connections;
-
-          // TODO: probably not needed (handled on BE)
-          const sortedRelations = relationRule.multiple
-            ? selectedRelations?.sort((a, b) =>
-                a.order !== undefined && b.order !== undefined
-                  ? a.order > b.order
-                    ? 1
-                    : -1
-                  : 0
-              )
-            : selectedRelations;
 
           return (
             <EntityDetailRelationTypeBlock
               key={key}
               entities={entities}
               relationType={relationType}
-              selectedRelations={sortedRelations}
+              selectedRelations={selectedRelations}
               relationCreateMutation={relationCreateMutation}
               relationUpdateMutation={relationUpdateMutation}
               relationDeleteMutation={relationDeleteMutation}
