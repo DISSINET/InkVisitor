@@ -528,37 +528,72 @@
 
   {
     "type": "HOL",
-    "entityIds": ["c51", "56"],
+    "entityIds": ["c51", "c56"],
     "order": 1
   },
   {
     "type": "HOL",
-    "entityIds": ["c52", "56"],
+    "entityIds": ["c52", "c56"],
     "order": 1
   },
   {
     "type": "HOL",
-    "entityIds": ["c53", "56"],
+    "entityIds": ["c53", "c56"],
     "order": 1
   },
   {
     "type": "HOL",
-    "entityIds": ["c54", "57"],
+    "entityIds": ["c54", "c57"],
     "order": 1
   },
   {
     "type": "HOL",
-    "entityIds": ["c55", "57"],
+    "entityIds": ["c55", "c57"],
     "order": 1
   },
   {
     "type": "HOL",
-    "entityIds": ["c56", "57"],
+    "entityIds": ["c56", "c57"],
     "order": 1
   },
   {
     "type": "IMP",
     "entityIds": ["a3", "a33"],
+    "order": 1
+  },
+  {
+    "type": "REL",
+    "entityIds": ["p1", ""],
+    "order": 1
+  },
+  {
+    "type": "REL",
+    "entityIds": ["p1", false],
+    "order": 1
+  },
+  {
+    "type": "REL",
+    "entityIds": ["p1", 554],
+    "order": 1
+  },
+  {
+    "type": "REL",
+    "entityIds": ["p1", "p4497464"],
+    "order": 1
+  },
+  {
+    "type": "REL",
+    "entityIds": ["p1"],
+    "order": 1
+  },
+  {
+    "type": "REL",
+    "entityIds": ["p1", "p1"],
+    "order": 1
+  },
+  {
+    "type": "REL",
+    "entityIds": ["p1", "p12", "p1"],
     "order": 1
   }
 ]
