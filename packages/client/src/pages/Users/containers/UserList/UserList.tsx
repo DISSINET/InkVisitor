@@ -186,6 +186,7 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
           const { id, name, email, role } = row.original as any;
           return (
             <AttributeButtonGroup
+              disabled={id === localStorage.getItem("userid")}
               options={[
                 {
                   longValue: userRoleDict[0].label,
