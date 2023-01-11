@@ -18,4 +18,5 @@ export interface IResponseGeneric {
   result: boolean;
   error?: errorTypes;
   message?: string;
+  data?: {};
 }

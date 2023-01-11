@@ -442,86 +442,34 @@ export default Router()
         throw new UserDoesNotExits(UserDoesNotExits.message, "");
       }
 
+      const rawPassword = existingUser.generatePassword();
+
       const result = await existingUser.update(request.db.connection, {
         active: true,
+        password: existingUser.password,
       });
-      if (!result.replaced) {
+      if (!result.replaced && !result.unchanged) {
         throw new InternalServerError(`cannot update user ${existingUser.id}`);
+      }
+
+      console.log(`User activated: ${existingUser.email}`);
+
+      try {
+        await mailer.sendTemplate(
+          existingUser.email,
+          passwordResetTemplate(
+            existingUser.name,
+            domainName(),
+            rawPassword,
+          )
+        );
+      } catch (e) {
+        throw new EmailError("please check the logs", (e as Error).toString());
       }
 
       return {
         result: true,
-        message: "User activated",
-      };
-    })
-  )
-  /**
-   * @openapi
-   * /users/password:
-   *   patch:
-   *     description: Validates the password request change and updates the password for user
-   *     tags:
-   *       - users
-   *     parameters:
-   *       - in: query
-   *         name: hash
-   *         schema:
-   *           type: string
-   *         required: true
-   *         description: Hash for identyfing the user who requested the password update
-   *     requestBody:
-   *       description: Passwords
-   *       content: 
-   *         application/json:
-   *           schema:
-   *             type: object
-   *             properties:
-   *               password: 
-   *                 type: string
-   *               passwordRepeat:
-   *                 type: string   
-   *     responses:
-   *       200:
-   *         description: Returns IResponseGeneric object
-   *         content:
-   *           application/json:
-   *             schema:
-   *               $ref: "#/components/schemas/IResponseGeneric"
-   */
-  .patch(
-    "/password",
-    asyncRouteHandler<IResponseGeneric>(async (request: IRequest) => {
-      const hash = (request.query.hash as string) || "";
-      if (!hash) {
-        throw new BadParams("hash is required");
-      }
-
-      const password = request.body.password;
-      const passwordRepeat = request.body.passwordRepeat;
-
-      if (password !== passwordRepeat) {
-        throw new BadParams("Passwords do not match");
-      }
-
-      const existingUser = await User.getUserByHash(
-        request.db.connection,
-        hash
-      );
-      if (!existingUser) {
-        throw new UserDoesNotExits("Invalid hash", "");
-      }
-
-      const result = await existingUser.update(request.db.connection, {
-        hash: null,
-        password: hashPassword(password),
-      });
-      if (!result.replaced) {
-        throw new InternalServerError(`cannot update user ${existingUser.id}`);
-      }
-
-      return {
-        result: true,
-        message: "Password changed",
+        message: "User activated. An email with the password has been sent to your email address",
       };
     })
   )
@@ -583,7 +531,7 @@ export default Router()
    * @openapi
    * /users/{userId}}/password:
    *   patch:
-   *     description: Prepares the user to reset the password by setting hash + sending email
+   *     description: Reset the password of given user + sends email with raw password to the user
    *     tags:
    *       - users
    *     parameters:
@@ -592,7 +540,7 @@ export default Router()
    *         schema:
    *           type: string
    *         required: true
-   *         description: ID of the user entry
+   *         description: ID of the user entry or 'me' to identify the current user
    *     responses:
    *       200:
    *         description: Returns IResponseGeneric object
@@ -610,22 +558,28 @@ export default Router()
         throw new BadParams("userId has to be set");
       }
 
-      const user = await User.getUser(request.db.connection, userId);
+      let user: User | null;
+
+      if (userId === "me") {
+        user = request.getUserOrFail();
+      } else {
+        user = await User.getUser(request.db.connection, userId);
+      }
+
       if (!user) {
         throw new UserDoesNotExits(`user ${userId} was not found`, userId);
       }
 
-      const hash = user.generateHash();
-
+      const rawPassword = user.generatePassword();
       const result = await user.update(request.db.connection, {
-        hash,
+        password: user.password,
       });
 
       if (!result.replaced && !result.unchanged) {
         throw new InternalServerError(`cannot update user ${userId}`);
       }
 
-      console.log(`Admin Password reset request for ${user.email}. Hash = ${hash}`);
+      console.log(`Password reset for ${user.email}`);
 
       try {
         await mailer.sendTemplate(
@@ -633,7 +587,7 @@ export default Router()
           passwordResetTemplate(
             user.name,
             domainName(),
-            `${hostUrl()}/password_reset?hash=${hash}`
+            rawPassword,
           )
         );
       } catch (e) {
@@ -642,7 +596,8 @@ export default Router()
 
       return {
         result: true,
-        message: "Email with the new password has been sent",
+        message: `Email with the new password has been sent. New password: '${rawPassword}'.`,
+        data: rawPassword,
       };
     })
   )
