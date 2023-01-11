@@ -80,26 +80,13 @@ export const EntityDetailRelationTypeBlock: React.FC<
         } else {
           return entitiesPattern.flat(1);
         }
-      } else if (!relationRule.asymmetrical) {
-        // Symetrical
+      } else {
         const pairs = entitiesPattern.filter(
           (array) => array[0] === entity.class
         );
         if (pairs.length > 0) {
           return [...new Set(pairs.map((pair) => pair[1]))];
         }
-      } else {
-        // Asymetrical
-        let collectedEntities: EntityEnums.Class[] = [];
-        const leftSide = entitiesPattern.filter(
-          (array) => array[0] === entity.class
-        );
-        if (leftSide.length > 0) {
-          const collectedLeft = leftSide.map((r) => r[1]);
-          collectedEntities.push(...collectedLeft);
-        }
-
-        return [...new Set(collectedEntities)];
       }
     } else {
       // Multiple - all entities
