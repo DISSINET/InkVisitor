@@ -11,6 +11,7 @@ import {
   prepareDbConnection,
   DbSchema,
   TableSchema,
+  checkRelation,
 } from "./import-utils";
 import { auditsIndexes, entitiesIndexes, relationsIndexes } from "./indexes";
 import { EntityEnums } from "@shared/enums";
@@ -63,9 +64,9 @@ const datasets: Record<string, DbSchema> = {
         this.data = this.data.map((relation: Relation.IRelation) => {
           if (!relation.order) {
             relation.order = 1;
-          };
-          return relation
-        })
+          }
+          return relation;
+        });
       },
       indexes: relationsIndexes,
     },
@@ -150,9 +151,9 @@ const datasets: Record<string, DbSchema> = {
         this.data = this.data.map((relation: Relation.IRelation) => {
           if (!relation.order) {
             relation.order = 1;
-          };
-          return relation
-        })
+          }
+          return relation;
+        });
       },
       indexes: relationsIndexes,
     },
@@ -162,14 +163,17 @@ const datasets: Record<string, DbSchema> = {
       tableName: "users",
       data: require("../datasets/default/users.json"),
       transform: function () {
-        
         // get a list of all entities
-        const entities = require("../datasets/relationstest/entities.json")
-        const allTIds = entities.filter((e: any) => e.class === EntityEnums.Class.Territory).map((e: any) => e.id)
-        
+        const entities = require("../datasets/relationstest/entities.json");
+        const allTIds = entities
+          .filter((e: any) => e.class === EntityEnums.Class.Territory)
+          .map((e: any) => e.id);
+
         this.data = this.data.map((user: IUser) => {
           user.password = hashPassword(user.password ? user.password : "");
-          user.rights = user.rights.filter((r: any) => allTIds.includes(r.territory))
+          user.rights = user.rights.filter((r: any) =>
+            allTIds.includes(r.territory)
+          );
           return user;
         });
       },
@@ -200,12 +204,19 @@ const datasets: Record<string, DbSchema> = {
       tableName: "relations",
       data: require("../datasets/relationstest/relations.json"),
       transform: function () {
+        // check validity
+        const entities = require("../datasets/relationstest/entities.json");
+        const allEntityIds = entities.map((e: any) => e.id);
+        this.data = this.data.filter((relation: Relation.IRelation) => {
+          return checkRelation(relation, allEntityIds);
+        });
+
         this.data = this.data.map((relation: Relation.IRelation) => {
           if (!relation.order) {
             relation.order = 1;
-          };
-          return relation
-        })
+          }
+          return relation;
+        });
       },
       indexes: relationsIndexes,
     },
@@ -269,9 +280,9 @@ const importData = async () => {
       console.log("Closing connection");
       await conn.close({ noreplyWait: true });
 
-      resolve(undefined)
+      resolve(undefined);
     });
-  })
+  });
 };
 
 (async () => {
