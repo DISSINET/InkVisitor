@@ -1,3 +1,5 @@
+import { RelationEnums } from "@shared/enums";
+import { Relation } from "@shared/types";
 import {
   Connection,
   RConnectionOptions,
@@ -58,4 +60,52 @@ export const prepareDbConnection = async (
   conn.use(config.db as string);
 
   return conn;
+};
+
+export const checkRelation = (
+  relation: Relation.IRelation,
+  entityIds: string[]
+): boolean => {
+  // right number of entities
+  // TODO: check by rele models
+  if (
+    relation.entityIds.length !== 2 &&
+    relation.type !== RelationEnums.Type.Synonym
+  ) {
+    console.log(
+      ` -- relation removed: wrong number of entities ${relation.entityIds}`
+    );
+    return false;
+  } else {
+    // entity ids should not be the same
+    if (
+      relation.entityIds.length === 2 &&
+      relation.entityIds[0] === relation.entityIds[1]
+    ) {
+      console.log(
+        ` -- relation removed: entities are the same ${relation.entityIds}`
+      );
+      return false;
+    }
+  }
+
+  // check if entity is empty or not string
+  if (
+    !relation.entityIds.every(
+      (eid: any) => eid && typeof eid === "string" && eid.length !== 0
+    )
+  ) {
+    console.log(
+      ` -- relation removed: invalid entity id ${relation.entityIds}`
+    );
+    return false;
+  }
+
+  // check if entity is not in entity list
+  if (!relation.entityIds.every((eid: any) => entityIds.includes(eid))) {
+    console.log(` -- relation removed: entity not found ${relation.entityIds}`);
+    return false;
+  }
+
+  return true;
 };
