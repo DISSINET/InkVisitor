@@ -6,8 +6,9 @@ import { FaBars, FaBookOpen, FaInfo, FaUsers } from "react-icons/fa";
 import { useHistory, useLocation } from "react-router";
 import {
   StyledMenuGroup,
+  StyledMenuGroupWrapper,
   StyledMenuItem,
-} from "../PageHeader/PageHeaderStyles";
+} from "./MenuStyles";
 
 interface IPage {
   id: "main" | "users" | "acl" | "about";
@@ -69,7 +70,10 @@ export const Menu: React.FC<Menu> = ({
   const [menuOpen, setMenuOpen] = useState<boolean>(false);
 
   return (
-    <>
+    <div
+      onMouseLeave={() => setMenuOpen(false)}
+      onMouseEnter={() => setMenuOpen(true)}
+    >
       <Button
         icon={
           <FaBars
@@ -79,46 +83,47 @@ export const Menu: React.FC<Menu> = ({
             }}
           />
         }
-        onClick={() => setMenuOpen(!menuOpen)}
         label="Menu"
       />
       {menuOpen && (
-        <StyledMenuGroup>
-          {pages
-            .filter((p) => !p.admin || userRole === UserEnums.Role.Admin)
-            .filter((p) => location.pathname !== p.href)
-            .map((p, key) => (
-              <StyledMenuItem
-                key={key}
-                color="primary"
-                onClick={() => {
-                  if (p.id === "main") {
-                    history.push({
-                      pathname: "/",
-                      hash: tempLocation ? tempLocation : "",
-                    });
-                    setTempLocation(false);
-                  } else {
-                    history.push({
-                      pathname: p.href,
-                    });
-                    if (location.pathname === "/") {
-                      setTempLocation(location.hash);
+        <StyledMenuGroupWrapper>
+          <StyledMenuGroup>
+            {pages
+              .filter((p) => !p.admin || userRole === UserEnums.Role.Admin)
+              .filter((p) => location.pathname !== p.href)
+              .map((p, key) => (
+                <StyledMenuItem
+                  key={key}
+                  color="primary"
+                  onClick={() => {
+                    if (p.id === "main") {
+                      history.push({
+                        pathname: "/",
+                        hash: tempLocation ? tempLocation : "",
+                      });
+                      setTempLocation(false);
+                    } else {
+                      history.push({
+                        pathname: p.href,
+                      });
+                      if (location.pathname === "/") {
+                        setTempLocation(location.hash);
+                      }
                     }
-                  }
-                }}
-              >
-                {p.icon || null}
-                {p.label}
-              </StyledMenuItem>
-            ))}
-          <hr />
-          <StyledMenuItem color="danger" onClick={() => handleLogOut()}>
-            <BiLogOut />
-            Log out
-          </StyledMenuItem>
-        </StyledMenuGroup>
+                  }}
+                >
+                  {p.icon || null}
+                  {p.label}
+                </StyledMenuItem>
+              ))}
+            <hr />
+            <StyledMenuItem color="danger" onClick={() => handleLogOut()}>
+              <BiLogOut />
+              Log out
+            </StyledMenuItem>
+          </StyledMenuGroup>
+        </StyledMenuGroupWrapper>
       )}
-    </>
+    </div>
   );
 };

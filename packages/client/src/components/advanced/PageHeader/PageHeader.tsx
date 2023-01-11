@@ -1,9 +1,6 @@
-import { UserEnums } from "@shared/enums";
 import LogoInkvisitor from "assets/logos/inkvisitor.svg";
-import { Button, Loader } from "components";
-import React, { useState } from "react";
-import { BiLogOut } from "react-icons/bi";
-import { FaBars } from "react-icons/fa";
+import { Loader } from "components";
+import React from "react";
 import { useQueryClient } from "react-query";
 import { useHistory, useLocation } from "react-router";
 import { toast } from "react-toastify";
@@ -15,8 +12,6 @@ import {
   StyledHeader,
   StyledHeaderLogo,
   StyledHeaderTag,
-  StyledMenuGroup,
-  StyledMenuItem,
   StyledRightHeader,
   StyledText,
   StyledUser,
