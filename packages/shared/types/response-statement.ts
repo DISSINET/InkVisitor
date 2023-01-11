@@ -6,8 +6,8 @@ import { IEntity, IStatement } from ".";
 import { UserEnums } from "../enums";
 
 export interface EntityOrder {
-  entityId: string; // actant.entityId
-  linkId: string; // actant.id
+  entityId: string; // actant.entityId | action.actionId
+  linkId: string; // actant.id | action.id
 }
 
 export interface PropOrder {
