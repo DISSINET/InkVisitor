@@ -6,7 +6,7 @@ import { IRequest } from "src/custom_typings/request";
 import Statement from "./statement";
 import Entity from "../entity/entity";
 
-type OrderTypeWithIndex = OrderType & { order: number | false; };
+export type OrderTypeWithIndex = OrderType & { order: number | false; };
 
 export class ResponseStatement extends Statement implements IResponseStatement {
   entities: { [key: string]: IEntity; };
@@ -102,8 +102,12 @@ export class ResponseStatement extends Statement implements IResponseStatement {
       }
     }
 
-    console.log(JSON.stringify(temp, null, 4));
-    return temp.sort((a, b) => {
+    return ResponseStatement.sortListOfStatementItems(temp);
+  }
+
+  public static sortListOfStatementItems(unsorted: OrderTypeWithIndex[]): OrderType[] {
+    return unsorted.sort((a, b) => {
+      if (b.order === a.order && a.order === false) { return 0; };
       if (b.order === false) { return -Infinity; };
       if (a.order === false) { return Infinity; };
       return a.order - b.order;
