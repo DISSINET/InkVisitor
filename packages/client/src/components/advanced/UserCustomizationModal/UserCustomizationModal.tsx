@@ -23,7 +23,12 @@ import {
 } from "components/advanced";
 import React, { useMemo, useState } from "react";
 import { FaUnlink } from "react-icons/fa";
-import { useMutation, useQuery, useQueryClient } from "react-query";
+import {
+  notifyManager,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "react-query";
 import { OptionTypeBase, ValueType } from "react-select";
 import { toast } from "react-toastify";
 import {
@@ -91,6 +96,15 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
       ...data,
       [key]: value,
     });
+  };
+
+  const handleResetPassword = async () => {
+    const resetRes = await api.resetMyPassword();
+    if (resetRes.status == 200) {
+      toast.success(
+        `an email with a new pre-generated password has been sent to ${user.email}`
+      );
+    }
   };
 
   const {
@@ -292,6 +306,13 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
         </ModalContent>
         <ModalFooter>
           <ButtonGroup>
+            <Button
+              key="reset-password"
+              label="Reset password"
+              tooltipLabel={`Generate a new password and send it to ${user.email}`}
+              color="info"
+              onClick={() => handleResetPassword()}
+            />
             <Button
               key="cancel"
               label="Cancel"
