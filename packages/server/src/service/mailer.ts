@@ -39,14 +39,14 @@ export function userCreatedTemplate(
 export function passwordResetTemplate(
   username: string,
   domain: string,
-  link: string
+  rawPassword: string
 ): DynamicTplRequest {
   return {
     id: TplIds.PasswordReset,
     data: {
       username,
       domain,
-      link,
+      rawPassword,
     },
     subject: EmailSubject.PasswordReset,
   };
@@ -63,6 +63,8 @@ export function testTemplate(domain: string): DynamicTplRequest {
 }
 
 class Mailer {
+  lastEmailSubject?: string;
+  lastEmailData?: any;
   devMode: boolean = true;
 
   constructor() {
@@ -79,6 +81,9 @@ class Mailer {
     if (this.devMode) {
       console.log(`[Mailer] dev sendTemplate: ${tpl.subject} -> ${recipient}`);
       console.log("Data: ", JSON.stringify(tpl.data, null, 4));
+
+      this.lastEmailSubject = tpl.subject;
+      this.lastEmailData = tpl.data;
       return;
     }
 

@@ -31,4 +31,5 @@ export function asyncRouteHandler<T = unknown>(
 
 export const supertestConfig = {
   token: process.env.TEST_JWT_TOKEN,
+  username: "admin",
 };
