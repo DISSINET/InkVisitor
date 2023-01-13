@@ -1,3 +1,4 @@
+import { animated } from "react-spring";
 import styled from "styled-components";
 import { heightHeader } from "Theme/constants";
 
@@ -23,14 +24,14 @@ export const StyledMenuGroup = styled.div`
 interface StyledMenuItem {
   color: string;
 }
-export const StyledMenuItem = styled.div<StyledMenuItem>`
+export const StyledMenuItem = styled(animated.div)<StyledMenuItem>`
   padding: ${({ theme }) => theme.space[3]};
-  color: ${({ theme, color }) => theme.color[color]};
-  background-color: ${({ theme }) => theme.color["white"]};
+  /* color: ${({ theme, color }) => theme.color[color]}; */
+  /* background-color: ${({ theme }) => theme.color["white"]};
   :hover {
     background-color: ${({ color, theme }) => theme.color[color]};
     color: ${({ theme }) => theme.color["white"]};
-  }
+  } */
   svg {
     margin-right: ${({ theme }) => theme.space[2]};
     vertical-align: middle;
