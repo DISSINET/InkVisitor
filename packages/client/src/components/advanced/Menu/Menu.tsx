@@ -4,20 +4,13 @@ import React, { useState } from "react";
 import { BiLogOut } from "react-icons/bi";
 import { FaBars, FaBookOpen, FaInfo, FaUsers } from "react-icons/fa";
 import { useHistory, useLocation } from "react-router";
+import { IPage } from "types";
+import { MenuItem } from "./MenuItem";
 import {
   StyledMenuGroup,
   StyledMenuGroupWrapper,
   StyledMenuItem,
 } from "./MenuStyles";
-
-interface IPage {
-  id: "main" | "users" | "acl" | "about";
-  label: string;
-  color: "info" | "success" | "danger" | "warning";
-  href: string;
-  admin?: boolean;
-  icon?: React.ReactElement;
-}
 
 interface Menu {
   userRole: string;
@@ -91,12 +84,13 @@ export const Menu: React.FC<Menu> = ({
             {pages
               .filter((p) => !p.admin || userRole === UserEnums.Role.Admin)
               .filter((p) => location.pathname !== p.href)
-              .map((p, key) => (
-                <StyledMenuItem
+              .map((page, key) => (
+                <MenuItem
                   key={key}
-                  color="primary"
+                  label={page.label}
+                  icon={page.icon}
                   onClick={() => {
-                    if (p.id === "main") {
+                    if (page.id === "main") {
                       history.push({
                         pathname: "/",
                         hash: tempLocation ? tempLocation : "",
@@ -104,23 +98,22 @@ export const Menu: React.FC<Menu> = ({
                       setTempLocation(false);
                     } else {
                       history.push({
-                        pathname: p.href,
+                        pathname: page.href,
                       });
                       if (location.pathname === "/") {
                         setTempLocation(location.hash);
                       }
                     }
                   }}
-                >
-                  {p.icon || null}
-                  {p.label}
-                </StyledMenuItem>
+                />
               ))}
             <hr />
-            <StyledMenuItem color="danger" onClick={() => handleLogOut()}>
-              <BiLogOut />
-              Log out
-            </StyledMenuItem>
+            <MenuItem
+              label="Log out"
+              icon={<BiLogOut />}
+              color="danger"
+              onClick={() => handleLogOut()}
+            />
           </StyledMenuGroup>
         </StyledMenuGroupWrapper>
       )}
