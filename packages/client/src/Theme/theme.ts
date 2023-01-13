@@ -1,4 +1,6 @@
-export default {
+export type ThemeType = typeof theme;
+
+const theme = {
   color: {
     transparent: "transparent",
     blue: {
@@ -167,3 +169,5 @@ export default {
       "0 2px 0px hsl(220, 7%, 83%, 0.5), inset 0 2px 2px hsla(0, 0%, 0%, 0.1)",
   },
 };
+
+export default theme;

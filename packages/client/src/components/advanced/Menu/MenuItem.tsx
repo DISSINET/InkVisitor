@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { config, useSpring } from "react-spring";
-import theme from "Theme/theme";
-import { Colors, IPage } from "types";
+import theme, { ThemeType } from "Theme/theme";
+import { Colors } from "types";
 import { StyledMenuItem } from "./MenuStyles";
 
 interface MenuItem {
