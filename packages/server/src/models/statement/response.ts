@@ -39,7 +39,7 @@ export class ResponseStatement extends Statement implements IResponseStatement {
         propValueId: prop.value.entityId,
         propTypeId: prop.type.entityId,
         originId: this.id,
-        linkId: prop.id,
+        elementId: prop.id,
         order: prop.statementOrder
       } as PropOrder & { order: number | false; });
     });
@@ -48,7 +48,7 @@ export class ResponseStatement extends Statement implements IResponseStatement {
     for (const action of this.data.actions) {
       temp.push({
         entityId: action.actionId,
-        linkId: action.id,
+        elementId: action.id,
         order: action.statementOrder
       } as EntityOrder & { order: number | false; });
 
@@ -58,7 +58,7 @@ export class ResponseStatement extends Statement implements IResponseStatement {
           propValueId: prop.value.entityId,
           propTypeId: prop.type.entityId,
           originId: action.actionId,
-          linkId: action.id,
+          elementId: action.id,
           order: prop.statementOrder
         } as PropOrder & { order: number | false; });
       });
@@ -68,7 +68,7 @@ export class ResponseStatement extends Statement implements IResponseStatement {
     for (const actant of this.data.actants) {
       temp.push({
         entityId: actant.entityId,
-        linkId: actant.id,
+        elementId: actant.id,
         order: actant.statementOrder
       } as EntityOrder & { order: number | false; });
 
@@ -78,7 +78,7 @@ export class ResponseStatement extends Statement implements IResponseStatement {
           propValueId: prop.value.entityId,
           propTypeId: prop.type.entityId,
           originId: actant.entityId,
-          linkId: actant.id,
+          elementId: actant.id,
           order: prop.statementOrder
         } as PropOrder & { order: number | false; });
       });
@@ -87,7 +87,8 @@ export class ResponseStatement extends Statement implements IResponseStatement {
       for (const classification of actant.classifications) {
         temp.push({
           entityId: classification.entityId,
-          linkId: actant.entityId,
+          originId: actant.entityId,
+          elementId: classification.id,
           order: classification.statementOrder
         } as EntityOrder & { order: number | false; });
       }
@@ -96,7 +97,8 @@ export class ResponseStatement extends Statement implements IResponseStatement {
       for (const identification of actant.identifications) {
         temp.push({
           entityId: identification.entityId,
-          linkId: actant.entityId,
+          elementId: actant.entityId,
+          originId: identification.id,
           order: identification.statementOrder
         } as EntityOrder & { order: number | false; });
       }
