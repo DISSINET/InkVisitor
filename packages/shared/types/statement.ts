@@ -19,6 +19,8 @@ export interface IStatementDataTerritory {
   order: number;
 }
 
+export type StatementObject = IStatementClassification | IStatementIdentification | IProp | IStatementActant | IStatementAction;
+
 export interface IStatementAction {
   id: string;
   actionId: string;
