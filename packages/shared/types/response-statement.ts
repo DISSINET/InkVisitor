@@ -37,7 +37,7 @@ export type OrderType =
 
 export interface IResponseStatement extends IStatement {
   entities: { [key: string]: IEntity; }; // all entities (IEntity) used in actions/actants, actions/actants.props.type/value, territory, references, tags, actant identifications and classifications
-  statementOrders: OrderType[];
+  elementsOrders: OrderType[];
   // usedIn?: IStatement[];
   right?: UserEnums.RoleMode;
 }

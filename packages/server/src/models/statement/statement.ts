@@ -4,6 +4,7 @@ import {
   IStatementActant,
   IStatementAction,
   IReference,
+  IProp,
 } from "@shared/types";
 import {
   fillFlatObject,
@@ -11,11 +12,7 @@ import {
   IModel,
   determineOrder,
 } from "@models/common";
-import {
-  EntityEnums,
-  UserEnums,
-  DbEnums,
-} from "@shared/enums";
+import { EntityEnums, UserEnums, DbEnums } from "@shared/enums";
 
 import Entity from "@models/entity/entity";
 import { r as rethink, Connection, RDatum, WriteResult } from "rethinkdb-ts";
@@ -24,7 +21,12 @@ import User from "@models/user/user";
 import { EventMapSingle, EventTypes } from "@models/events/types";
 import treeCache from "@service/treeCache";
 import Prop from "@models/prop/prop";
-import { IStatementClassification, IStatementDataTerritory } from "@shared/types/statement";
+import {
+  IStatementClassification,
+  IStatementDataTerritory,
+  IStatementIdentification,
+  StatementObject,
+} from "@shared/types/statement";
 
 export class StatementClassification implements IStatementClassification {
   id: string = "";
@@ -38,7 +40,9 @@ export class StatementClassification implements IStatementClassification {
 
   constructor(data: Partial<IStatementClassification>) {
     fillFlatObject(this, data);
-    this.mood = data.mood ? data.mood : [EntityEnums.Mood.Indication];
+    this.mood = data.mood ? data.mood : [];
+    this.statementOrder =
+      data.statementOrder !== undefined ? data.statementOrder : false;
   }
 }
 
@@ -54,7 +58,9 @@ export class StatementIdentification implements IStatementClassification {
 
   constructor(data: Partial<IStatementClassification>) {
     fillFlatObject(this, data);
-    this.mood = data.mood ? data.mood : [EntityEnums.Mood.Indication];
+    this.mood = data.mood || [EntityEnums.Mood.Indication];
+    this.statementOrder =
+      data.statementOrder !== undefined ? data.statementOrder : false;
   }
 }
 
@@ -78,8 +84,18 @@ export class StatementActant implements IStatementActant, IModel {
   constructor(data: Partial<IStatementActant>) {
     fillFlatObject(this, data);
     fillArray<Prop>(this.props, Prop, data.props);
-    fillArray<StatementClassification>(this.classifications, StatementClassification, data.classifications);
-    fillArray<StatementIdentification>(this.identifications, StatementIdentification, data.identifications);
+    fillArray<StatementClassification>(
+      this.classifications,
+      StatementClassification,
+      data.classifications
+    );
+    fillArray<StatementIdentification>(
+      this.identifications,
+      StatementIdentification,
+      data.identifications
+    );
+    this.statementOrder =
+      data.statementOrder !== undefined ? data.statementOrder : false;
   }
 
   /**
@@ -131,8 +147,10 @@ export class StatementAction implements IStatementAction {
 
   constructor(data: Partial<IStatementAction>) {
     fillFlatObject(this, data);
-    this.mood = data.mood ? data.mood : [EntityEnums.Mood.Indication];
+    this.mood = data.mood || [EntityEnums.Mood.Indication];
     fillArray<Prop>(this.props, Prop, data.props);
+    this.statementOrder =
+      data.statementOrder !== undefined ? data.statementOrder : false;
   }
 
   /**
@@ -378,7 +396,7 @@ class Statement extends Entity implements IStatement {
   getEntitiesIds(): string[] {
     const entitiesIds: Record<string, null> = {};
 
-    // get ids from Entity.props ( + childs), references and template 
+    // get ids from Entity.props ( + childs), references and template
     new Entity({}).getEntitiesIds.call(this).forEach((element) => {
       entitiesIds[element] = null;
     });
@@ -393,12 +411,12 @@ class Statement extends Entity implements IStatement {
       }
     });
 
-    // get ids from Statement.data.actants, Statement.data.actants[].props ( + childs), 
+    // get ids from Statement.data.actants, Statement.data.actants[].props ( + childs),
     // Statement.data.actants[].classifications, Statement.data.actants[].identifications
     this.data.actants?.forEach((a) => {
       entitiesIds[a.entityId] = null;
-      a.classifications?.forEach(ca => entitiesIds[ca.entityId] = null);
-      a.identifications?.forEach(ci => entitiesIds[ci.entityId] = null);
+      a.classifications?.forEach((ca) => (entitiesIds[ca.entityId] = null));
+      a.identifications?.forEach((ci) => (entitiesIds[ci.entityId] = null));
 
       Entity.extractIdsFromProps(a.props).forEach((element) => {
         entitiesIds[element] = null;
@@ -411,7 +429,7 @@ class Statement extends Entity implements IStatement {
 
     this.data.tags.forEach((t) => (entitiesIds[t] = null));
 
-    return Object.keys(entitiesIds).filter(id => !!id);
+    return Object.keys(entitiesIds).filter((id) => !!id);
   }
 
   async unlinkActantId(
@@ -462,8 +480,8 @@ class Statement extends Entity implements IStatement {
 
   /**
    * Finds statements with data.territoryId.id set to required values
-   * @param db 
-   * @param territoryId 
+   * @param db
+   * @param territoryId
    * @returns {Statement[]} list of found statements
    */
   static async findByTerritoryIds(
@@ -472,12 +490,15 @@ class Statement extends Entity implements IStatement {
   ): Promise<Statement[]> {
     const list: IStatement[] = await rethink
       .table(Entity.table)
-      .getAll.apply(undefined, (territoryIds as (string | { index: string; })[]).concat({
-        index: DbEnums.Indexes.StatementTerritory,
-      }))
+      .getAll.apply(
+        undefined,
+        (territoryIds as (string | { index: string })[]).concat({
+          index: DbEnums.Indexes.StatementTerritory,
+        })
+      )
       .run(db);
 
-    return list.map(data => new Statement(data));
+    return list.map((data) => new Statement(data));
   }
 
   /**
@@ -551,11 +572,11 @@ class Statement extends Entity implements IStatement {
   }
 
   /**
-   * finds statements that are using provided entityId in their 
+   * finds statements that are using provided entityId in their
    * data.actants[].classifications or data.actants[].ident
-   * @param db 
-   * @param entityId 
-   * @returns 
+   * @param db
+   * @param entityId
+   * @returns
    */
   static async findByDataActantsCI(
     db: Connection | undefined,
@@ -611,8 +632,12 @@ class Statement extends Entity implements IStatement {
 
     // sort by order ASC
     return statements.sort((a, b) => {
-      if (!a.data.territory) { return -1; };
-      if (!b.data.territory) { return 0; };
+      if (!a.data.territory) {
+        return -1;
+      }
+      if (!b.data.territory) {
+        return 0;
+      }
       return a.data.territory.order - b.data.territory.order;
     });
   }

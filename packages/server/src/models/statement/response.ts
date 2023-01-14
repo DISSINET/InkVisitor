@@ -10,26 +10,26 @@ export type OrderTypeWithIndex = OrderType & { order: number | false; };
 
 export class ResponseStatement extends Statement implements IResponseStatement {
   entities: { [key: string]: IEntity; };
-  statementOrders: OrderType[];
+  elementsOrders: OrderType[];
   right: UserEnums.RoleMode = UserEnums.RoleMode.Read;
 
   constructor(entity: IStatement) {
     super(entity);
     this.entities = {};
-    this.statementOrders = [];
+    this.elementsOrders = [];
   }
 
   async prepare(req: IRequest) {
     this.right = this.getUserRoleMode(req.getUserOrFail());
     const entities = await this.getEntities(req.db.connection as Connection);
     this.entities = Object.assign({}, ...entities.map((x) => ({ [x.id]: x })));
-    this.statementOrders = this.prepareStatementOrders();
+    this.elementsOrders = this.prepareElementsOrders();
   }
 
   /**
-   * fills values for statementOrders array + sort them afterwards
+   * fills values for elementsOrders array + sort them afterwards
    */
-  prepareStatementOrders(): OrderType[] {
+  prepareElementsOrders(): OrderType[] {
     /// unsorted items here
     let temp: OrderTypeWithIndex[] = [];
 
@@ -107,6 +107,12 @@ export class ResponseStatement extends Statement implements IResponseStatement {
     return ResponseStatement.sortListOfStatementItems(temp);
   }
 
+  /**
+   * Sorts the list of sortable elements for elementsOrders field.
+   * Empty (false) values would be pushed to the end of the list.
+   * @param unsorted 
+   * @returns 
+   */
   public static sortListOfStatementItems(unsorted: OrderTypeWithIndex[]): OrderType[] {
     return unsorted.sort((a, b) => {
       if (b.order === a.order && a.order === false) { return 0; };
