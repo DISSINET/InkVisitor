@@ -12,6 +12,7 @@ export interface IRequestSearch {
   label?: string;
   entityIds?: string[];
   cooccurrenceId?: string;
+  territoryId?: string;
   onlyTemplates?: boolean;
   usedTemplate?: string;
 }
@@ -21,11 +22,12 @@ export class RequestSearch {
   label?: string;
   entityIds?: string[];
   cooccurrenceId?: string;
+  territoryId?: string;
   excluded?: EntityEnums.Class[];
   onlyTemplates?: boolean;
   usedTemplate?: string;
 
-  constructor(requestData: IRequestSearch & { excluded?: EntityEnums.Class[] }) {
+  constructor(requestData: IRequestSearch & { excluded?: EntityEnums.Class[]; }) {
     this.class = requestData.class;
     this.label = requestData.label;
     this.cooccurrenceId =
@@ -53,22 +55,23 @@ export class RequestSearch {
     }
 
     if (
+      this.excluded !== undefined &&
+      this.excluded.constructor.name !== "Array"
+    ) {
+      return new BadParams("excluded needs to be array");
+    }
+
+    if (
       !this.label &&
       !this.class &&
       !this.onlyTemplates &&
       !this.usedTemplate &&
+      !this.territoryId &&
       (typeof this.entityIds !== "object" || !this.entityIds.length)
     ) {
       return new BadParams(
         "label, class, onlyTemplates, usedTemplate or entityIds field has to be set"
       );
-    }
-
-    if (
-      this.excluded !== undefined &&
-      this.excluded.constructor.name !== "Array"
-    ) {
-      return new BadParams("excluded needs to be array");
     }
 
     return;
