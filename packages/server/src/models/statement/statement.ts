@@ -463,6 +463,37 @@ class Statement extends Entity implements IStatement {
     }
   }
 
+  walkObjects(cb: (o: StatementObject) => void) {
+    // statement.props
+    Entity.extractIdsFromProps(this.props, cb);
+
+    // statement.actions
+    for (const action of this.data.actions) {
+      cb(action);
+
+      // statement.actions.props
+      Entity.extractIdsFromProps(action.props, cb);
+    }
+
+    // statement.actants
+    for (const actant of this.data.actants) {
+      cb(actant);
+
+      // statement.actants.props
+      Entity.extractIdsFromProps(actant.props, cb);
+
+      // statement.actants.classifications
+      for (const classification of actant.classifications) {
+        cb(classification);
+      }
+
+      // statement.actants.identifications
+      for (const identification of actant.identifications) {
+        cb(identification);
+      }
+    }
+  }
+
   async unlinkActantId(
     db: Connection,
     actantIdToUnlink: string
