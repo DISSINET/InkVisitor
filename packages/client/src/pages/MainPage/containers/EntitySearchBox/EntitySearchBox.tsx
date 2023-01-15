@@ -4,7 +4,11 @@ import { IEntity, IOption } from "@shared/types";
 import { IRequestSearch } from "@shared/types/request-search";
 import api from "api";
 import { Button, Dropdown, Input, Loader, TypeBar } from "components";
-import { EntitySuggester, EntityTag } from "components/advanced";
+import {
+  AttributeButtonGroup,
+  EntitySuggester,
+  EntityTag,
+} from "components/advanced";
 import { useDebounce } from "hooks";
 import React, { useMemo, useState } from "react";
 import { FaUnlink } from "react-icons/fa";
@@ -145,7 +149,7 @@ export const EntitySearchBox: React.FC = () => {
 
   // apply changes to search parameters
   const handleChange = (changes: {
-    [key: string]: string | false | ValueType<OptionTypeBase, any>;
+    [key: string]: string | false | true | ValueType<OptionTypeBase, any>;
   }) => {
     const newSearch = {
       ...searchData,
@@ -239,7 +243,7 @@ export const EntitySearchBox: React.FC = () => {
       </StyledRow>
 
       <StyledRow>
-        <StyledRowHeader>Limit territory</StyledRowHeader>
+        <StyledRowHeader>Limit by territory</StyledRowHeader>
         {debouncedValues.territoryId && searchTerritoryEntity ? (
           <>
             <Loader size={26} show={searchTerritoryEntityIsFetching} />
@@ -275,6 +279,34 @@ export const EntitySearchBox: React.FC = () => {
           />
         )}
       </StyledRow>
+
+      {debouncedValues.territoryId && (
+        <StyledRow>
+          <StyledRowHeader>Territory children</StyledRowHeader>
+          {searchTerritoryEntity && (
+            <AttributeButtonGroup
+              options={[
+                {
+                  longValue: "included",
+                  shortValue: "included",
+                  onClick: () => {
+                    handleChange({ subTerritorySearch: true });
+                  },
+                  selected: debouncedValues.subTerritorySearch === true,
+                },
+                {
+                  longValue: "not included",
+                  shortValue: "not included",
+                  onClick: () => {
+                    handleChange({ subTerritorySearch: false });
+                  },
+                  selected: debouncedValues.subTerritorySearch !== true,
+                },
+              ]}
+            />
+          )}
+        </StyledRow>
+      )}
 
       <StyledRow>
         <StyledRowHeader>Limit by co-occurrence</StyledRowHeader>
