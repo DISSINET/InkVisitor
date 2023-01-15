@@ -13,7 +13,6 @@ import { ResponseStatement } from "@models/statement/response";
 import { EntityEnums } from "@shared/enums";
 import { IRequest } from "src/custom_typings/request";
 import { StatementObject } from "@shared/types/statement";
-import { link } from "fs";
 
 export default Router()
   /**
@@ -75,7 +74,7 @@ export default Router()
    * @openapi
    * /statements/{statementId}/elementsOrders:
    *   put:
-   *     description: Update statementOrder value in all statement objects according to provided input list of link ids
+   *     description: Update statementOrder value in all statement objects according to provided input list of element ids
    *     tags:
    *       - entities
    *     parameters:
@@ -104,8 +103,8 @@ export default Router()
     "/:statementId/elementsOrders",
     asyncRouteHandler<IResponseGeneric>(async (request: IRequest) => {
       const statementId = request.params.statementId;
-      const linkIds = request.body as string[]; // list of linkIds
-      if (linkIds.length === undefined) {
+      const elementIds = request.body as string[]; // list of ids
+      if (elementIds.length === undefined) {
         throw new BadParams("list of ids must be provided");
       }
 
@@ -132,7 +131,7 @@ export default Router()
 
       // update indexes, or set to false if order value not provided
       model.walkObjects((object: StatementObject) => {
-        const index = (linkIds || []).findIndex(linkId => linkId === object.id);
+        const index = (elementIds || []).findIndex(elementId => elementId === object.id);
 
         if (index !== -1) {
           object.statementOrder = index;
