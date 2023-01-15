@@ -104,13 +104,13 @@ export const EntitySearchBox: React.FC = () => {
   } = useQuery(
     ["search", debouncedValues],
     async () => {
-      console.log("getting a new search", debouncedValues);
       if (debouncedValues.usedTemplate === "Any") {
         const { usedTemplate, ...filters } = debouncedValues;
         filters.onlyTemplates = true;
         const res = await api.entitiesSearch(filters);
         return res.data;
       }
+      console.log("getting a new search", debouncedValues);
       const res = await api.entitiesSearch(debouncedValues);
       return res.data;
     },
@@ -149,12 +149,26 @@ export const EntitySearchBox: React.FC = () => {
 
   // apply changes to search parameters
   const handleChange = (changes: {
-    [key: string]: string | false | true | ValueType<OptionTypeBase, any>;
+    [key: string]:
+      | string
+      | false
+      | true
+      | undefined
+      | ValueType<OptionTypeBase, any>;
   }) => {
     const newSearch = {
       ...searchData,
       ...changes,
     };
+
+    // remove parameters where the value is set to undefined
+    Object.keys(changes).forEach((changeKey) => {
+      const value = changes[changeKey];
+      if (value === undefined) {
+        delete changes[changeKey];
+      }
+    });
+
     setSearchData(newSearch);
   };
 
@@ -259,7 +273,10 @@ export const EntitySearchBox: React.FC = () => {
                     inverted
                     tooltipLabel="unlink entity"
                     onClick={() => {
-                      handleChange({ territoryId: "" });
+                      handleChange({
+                        territoryId: "",
+                        subTerritorySearch: undefined,
+                      });
                     }}
                   />
                 }
@@ -298,7 +315,7 @@ export const EntitySearchBox: React.FC = () => {
                   longValue: "not included",
                   shortValue: "not included",
                   onClick: () => {
-                    handleChange({ subTerritorySearch: false });
+                    handleChange({ subTerritorySearch: undefined });
                   },
                   selected: debouncedValues.subTerritorySearch !== true,
                 },
