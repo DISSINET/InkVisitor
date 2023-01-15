@@ -9,15 +9,15 @@ export const StyledBoxContent = styled.div`
 `;
 export const StyledRow = styled.div`
   position: relative;
-  display: flex;
-  justify-content: flex-end;
+  display: grid;
+  grid-template-columns: ${({ theme }) => theme.space["32"]} auto;
   align-items: center;
   margin-bottom: ${({ theme }) => theme.space[2]};
 `;
 export const StyledRowHeader = styled.div`
-  display: flex;
+  display: block;
   margin-right: ${({ theme }) => theme.space[2]};
-  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  font-size: ${({ theme }) => theme.fontSize["xxs"]};
   text-align: right;
 `;
 export const StyledRowContent = styled.div`
