@@ -26,22 +26,24 @@ const initValues: IRequestSearch = {
   label: "",
   cooccurrenceId: "",
 };
-const defaultOption: DropdownItem = {
+const defaultClassOption: DropdownItem = {
   label: "*",
   value: "",
 };
+
 const anyTemplate: DropdownItem = {
   value: "Any",
-  label: "IS TEMPLATE",
+  label: "Any template",
   info: "",
 };
 
 const debounceTime: number = 100;
 
 export const EntitySearchBox: React.FC = () => {
-  const [classOption, setClassOption] = useState<DropdownItem>(defaultOption);
+  const [classOption, setClassOption] =
+    useState<DropdownItem>(defaultClassOption);
   const [templateOption, setTemplateOption] =
-    useState<ValueType<OptionTypeBase, any>>(defaultOption);
+    useState<ValueType<OptionTypeBase, any>>(defaultClassOption);
   const [searchData, setSearchData] = useState<IRequestSearch>(initValues);
   const debouncedValues = useDebounce<IRequestSearch>(searchData, debounceTime);
 
@@ -79,6 +81,7 @@ export const EntitySearchBox: React.FC = () => {
   } = useQuery(
     ["search", debouncedValues],
     async () => {
+      console.log("getting a new search");
       if (debouncedValues.usedTemplate === "Any") {
         const { usedTemplate, ...filters } = debouncedValues;
         filters.onlyTemplates = true;
@@ -93,39 +96,16 @@ export const EntitySearchBox: React.FC = () => {
     }
   );
 
-  const options: DropdownItem[] = entitiesDict.filter(
-    (e) => e.value !== "A" && e.value !== "R" && e.value !== "X"
-  );
-
-  const handleChange = (changes: {
-    [key: string]: string | false | ValueType<OptionTypeBase, any>;
-  }) => {
-    const newSearch = {
-      ...searchData,
-      ...changes,
-    };
-    setSearchData(newSearch);
-  };
-
-  const sortedEntities = useMemo(() => {
-    if (entities) {
-      const sorted = [...entities];
-      sorted.sort((a: IEntity, b: IEntity) =>
-        a.label.toLocaleLowerCase() > b.label.toLocaleLowerCase() ? 1 : -1
-      );
-      return entities;
-    }
-    return [];
-  }, [entities]);
-
+  // get all templates for the "limit by template" option
   const {
     status: templateStatus,
     data: templates,
     error: templateError,
     isFetching: isFetchingTemplates,
   } = useQuery(
-    ["statement-templates", searchData, classOption],
+    ["search-templates", searchData, classOption],
     async () => {
+      console.log("getting new templates for search");
       const res = await api.entitiesSearch({
         onlyTemplates: true,
         class: searchData.class,
@@ -141,8 +121,36 @@ export const EntitySearchBox: React.FC = () => {
     { enabled: api.isLoggedIn() }
   );
 
+  const options: DropdownItem[] = entitiesDict.filter(
+    (e) => e.value !== "A" && e.value !== "R" && e.value !== "X"
+  );
+
+  // apply changes to search parameters
+  const handleChange = (changes: {
+    [key: string]: string | false | ValueType<OptionTypeBase, any>;
+  }) => {
+    const newSearch = {
+      ...searchData,
+      ...changes,
+    };
+    setSearchData(newSearch);
+  };
+
+  // sort found entities by label
+  const sortedEntities = useMemo(() => {
+    if (entities) {
+      const sorted = [...entities];
+      sorted.sort((a: IEntity, b: IEntity) =>
+        a.label.toLocaleLowerCase() > b.label.toLocaleLowerCase() ? 1 : -1
+      );
+      return entities;
+    }
+    return [];
+  }, [entities]);
+
   const templateOptions: DropdownItem[] = useMemo(() => {
     const options: DropdownItem[] = [anyTemplate];
+    console.log("constructing new template options", templates);
 
     if (templates) {
       templates.forEach((template) => {
@@ -184,14 +192,14 @@ export const EntitySearchBox: React.FC = () => {
             placeholder={""}
             width={150}
             entityDropdown
-            options={[defaultOption].concat(options)}
+            options={[defaultClassOption].concat(options)}
             value={classOption}
             onChange={(option: ValueType<OptionTypeBase, any>) => {
               setClassOption(option as DropdownItem);
-              setTemplateOption(defaultOption);
+              setTemplateOption(defaultClassOption);
               handleChange({
                 class: (option as IOption).value,
-                usedTemplate: defaultOption.value,
+                usedTemplate: defaultClassOption.value,
               });
             }}
           />
@@ -203,7 +211,7 @@ export const EntitySearchBox: React.FC = () => {
         <Dropdown
           placeholder={""}
           width={150}
-          options={[defaultOption].concat(templateOptions)}
+          options={[defaultClassOption].concat(templateOptions)}
           value={templateOption}
           onChange={(option: ValueType<OptionTypeBase, any>) => {
             setTemplateOption(option);
