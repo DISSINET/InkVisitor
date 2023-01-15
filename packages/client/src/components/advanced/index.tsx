@@ -8,6 +8,7 @@ import { EntityTag } from "./EntityTag/EntityTag";
 import { EntityTooltip } from "./EntityTooltip/EntityTooltip";
 import { JSONExplorer } from "./JSONExplorer/JSONExplorer";
 import { LoginModal, MemoizedLoginModal } from "./LoginModal/LoginModal";
+import { Menu } from "./Menu/Menu";
 import { Page } from "./Page/Page";
 import { LeftHeader, RightHeader } from "./PageHeader/PageHeader";
 import { PanelSeparator } from "./PanelSeparator/PanelSeparator";
@@ -25,6 +26,7 @@ export {
   JSONExplorer,
   LoginModal,
   MemoizedLoginModal,
+  Menu,
   Page,
   LeftHeader,
   RightHeader,
