@@ -21,17 +21,9 @@ export const StyledMenuGroup = styled.div`
   border-radius: ${({ theme }) => theme.space[2]};
 `;
 
-interface StyledMenuItem {
-  color: string;
-}
+interface StyledMenuItem {}
 export const StyledMenuItem = styled(animated.div)<StyledMenuItem>`
   padding: ${({ theme }) => theme.space[3]};
-  /* color: ${({ theme, color }) => theme.color[color]}; */
-  /* background-color: ${({ theme }) => theme.color["white"]};
-  :hover {
-    background-color: ${({ color, theme }) => theme.color[color]};
-    color: ${({ theme }) => theme.color["white"]};
-  } */
   svg {
     margin-right: ${({ theme }) => theme.space[2]};
     vertical-align: middle;

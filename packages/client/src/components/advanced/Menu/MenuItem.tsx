@@ -1,13 +1,12 @@
 import React, { useState } from "react";
 import { config, useSpring } from "react-spring";
-import theme, { ThemeType } from "Theme/theme";
-import { Colors } from "types";
+import theme, { ThemeColor } from "Theme/theme";
 import { StyledMenuItem } from "./MenuStyles";
 
 interface MenuItem {
   label: string;
   icon?: React.ReactElement<any, string | React.JSXElementConstructor<any>>;
-  color?: typeof Colors[number];
+  color?: keyof ThemeColor;
   onClick?: React.MouseEventHandler<HTMLDivElement>;
 }
 export const MenuItem: React.FC<MenuItem> = ({
@@ -18,9 +17,11 @@ export const MenuItem: React.FC<MenuItem> = ({
 }) => {
   const [isHovered, setIsHovered] = useState(false);
 
+  const selectedColor: any = theme.color[color];
+
   const animatedBackground = useSpring({
-    color: isHovered ? theme.color["white"] : theme.color[color],
-    backgroundColor: isHovered ? theme.color[color] : theme.color["white"],
+    color: isHovered ? theme.color["white"] : selectedColor,
+    backgroundColor: isHovered ? selectedColor : theme.color["white"],
     config: config.stiff,
   });
 
@@ -29,7 +30,6 @@ export const MenuItem: React.FC<MenuItem> = ({
       style={animatedBackground}
       onMouseOver={() => setIsHovered(true)}
       onMouseOut={() => setIsHovered(false)}
-      color={color}
       onClick={onClick}
     >
       {icon || null}

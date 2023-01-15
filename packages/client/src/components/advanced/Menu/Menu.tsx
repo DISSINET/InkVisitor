@@ -64,6 +64,7 @@ export const Menu: React.FC<Menu> = ({
 
   return (
     <div
+      onClick={() => setMenuOpen(!menuOpen)}
       onMouseLeave={() => setMenuOpen(false)}
       onMouseEnter={() => setMenuOpen(true)}
     >
