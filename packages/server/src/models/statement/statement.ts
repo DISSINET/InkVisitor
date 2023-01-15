@@ -460,20 +460,20 @@ class Statement extends Entity implements IStatement {
   }
 
   /**
-   * Finds statements with data.territoryId.id set to required value
+   * Finds statements with data.territoryId.id set to required values
    * @param db 
    * @param territoryId 
    * @returns {Statement[]} list of found statements
    */
-  static async findByTerritoryId(
+  static async findByTerritoryIds(
     db: Connection,
-    territoryId: string
+    territoryIds: string[]
   ): Promise<Statement[]> {
     const list: IStatement[] = await rethink
       .table(Entity.table)
-      .getAll(territoryId, {
+      .getAll.apply(undefined, (territoryIds as (string | { index: string; })[]).concat({
         index: DbEnums.Indexes.StatementTerritory,
-      })
+      }))
       .run(db);
 
     return list.map(data => new Statement(data));

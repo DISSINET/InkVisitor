@@ -614,26 +614,32 @@ describe("models/statement", function () {
       await db.close();
     });
 
+    describe("found by multiple territories", () => {
+      const [id1a, st1a] = prepareStatement();
+      const [id1b, st1b] = prepareStatement();
+      const [id2a, st2a] = prepareStatement();
+      const [id2b, st2b] = prepareStatement();
 
+      const tId1 = `t-${id1a}`;
+      const tId2 = `t-${id2a}`;
 
-    describe("detail id in actants[0].props[0].type.id", () => {
-      const [id1, st1] = prepareStatement();
-      const [id2, st2] = prepareStatement();
+      st1a.data.territory = new StatementTerritory({ territoryId: tId1 });
+      st1b.data.territory = new StatementTerritory({ territoryId: tId1 });
+      st2a.data.territory = new StatementTerritory({ territoryId: tId2 });
+      st2b.data.territory = new StatementTerritory({ territoryId: tId2 });
 
-      console.log("jeaa");
-      const tId = `t-${id1}`;
+      it("should find the statements successfully", async () => {
+        await st1a.save(db.connection);
+        await st1b.save(db.connection);
+        await st2a.save(db.connection);
+        await st2b.save(db.connection);
 
-      st1.data.territory = new StatementTerritory({ territoryId: tId });
-      st2.data.territory = new StatementTerritory({ territoryId: tId });
-
-      it("should find the statement successfully", async () => {
-        await st1.save(db.connection);
-        await st2.save(db.connection);
-
-        const foundStatements = await Statement.findByTerritoryId(db.connection, tId);
-        expect(foundStatements).toHaveLength(2);
-        expect(foundStatements.find(s => s.id === id1)).toBeTruthy();
-        expect(foundStatements.find(s => s.id === id2)).toBeTruthy();
+        const foundStatements = await Statement.findByTerritoryIds(db.connection, [tId1, tId2]);
+        expect(foundStatements).toHaveLength(4);
+        expect(foundStatements.find(s => s.id === id1a)).toBeTruthy();
+        expect(foundStatements.find(s => s.id === id1b)).toBeTruthy();
+        expect(foundStatements.find(s => s.id === id2a)).toBeTruthy();
+        expect(foundStatements.find(s => s.id === id2b)).toBeTruthy();
       });
     });
   });

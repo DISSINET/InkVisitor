@@ -13,6 +13,7 @@ export interface IRequestSearch {
   entityIds?: string[];
   cooccurrenceId?: string;
   territoryId?: string;
+  subTerritorySearch?: boolean;
   onlyTemplates?: boolean;
   usedTemplate?: string;
 }
@@ -23,6 +24,7 @@ export class RequestSearch {
   entityIds?: string[];
   cooccurrenceId?: string;
   territoryId?: string;
+  subTerritorySearch?: boolean;
   excluded?: EntityEnums.Class[];
   onlyTemplates?: boolean;
   usedTemplate?: string;
@@ -71,6 +73,10 @@ export class RequestSearch {
       this.entityIds.constructor.name !== "Array"
     ) {
       return new BadParams("entityIds needs to be an array");
+    }
+
+    if (this.subTerritorySearch && !this.territoryId) {
+      return new BadParams("subTerritorySearch needs valid territoryId to be set");
     }
 
     if (
