@@ -59,9 +59,10 @@ export const EntitySearchBox: React.FC = () => {
     );
   }, [debouncedValues]);
 
+  // get the co-occurence entity
   const { data: cooccurrenceEntity, isFetching: cooccurrenceIsFetching } =
     useQuery(
-      ["co-occurrence", searchData.cooccurrenceId],
+      ["search-cooccurrence", searchData.cooccurrenceId],
       async () => {
         if (searchData?.cooccurrenceId) {
           const res = await api.entitiesGet(searchData.cooccurrenceId);
@@ -73,6 +74,23 @@ export const EntitySearchBox: React.FC = () => {
       }
     );
 
+  // get the searchByTerritory entity
+  const {
+    data: searchTerritoryEntity,
+    isFetching: searchTerritoryEntityIsFetching,
+  } = useQuery(
+    ["search-territory", searchData.territoryId],
+    async () => {
+      if (searchData?.territoryId) {
+        const res = await api.entitiesGet(searchData.territoryId);
+        return res.data;
+      }
+    },
+    {
+      enabled: !!searchData?.territoryId,
+    }
+  );
+
   const {
     status,
     data: entities,
@@ -81,7 +99,7 @@ export const EntitySearchBox: React.FC = () => {
   } = useQuery(
     ["search", debouncedValues],
     async () => {
-      console.log("getting a new search");
+      console.log("getting a new search", debouncedValues);
       if (debouncedValues.usedTemplate === "Any") {
         const { usedTemplate, ...filters } = debouncedValues;
         filters.onlyTemplates = true;
@@ -105,7 +123,6 @@ export const EntitySearchBox: React.FC = () => {
   } = useQuery(
     ["search-templates", searchData, classOption],
     async () => {
-      console.log("getting new templates for search");
       const res = await api.entitiesSearch({
         onlyTemplates: true,
         class: searchData.class,
@@ -221,56 +238,93 @@ export const EntitySearchBox: React.FC = () => {
       </StyledRow>
 
       <StyledRow>
-        <StyledRowHeader>Limit by co-occurrence</StyledRowHeader>
-        <EntitySuggester
-          disableTemplatesAccept
-          categoryTypes={[
-            EntityEnums.Class.Statement,
-            EntityEnums.Class.Action,
-            EntityEnums.Class.Territory,
-            EntityEnums.Class.Resource,
-            EntityEnums.Class.Person,
-            EntityEnums.Class.Being,
-            EntityEnums.Class.Group,
-            EntityEnums.Class.Object,
-            EntityEnums.Class.Concept,
-            EntityEnums.Class.Location,
-            EntityEnums.Class.Value,
-            EntityEnums.Class.Event,
-          ]}
-          onSelected={(newSelectedId: string) => {
-            handleChange({ cooccurrenceId: newSelectedId });
-          }}
-          placeholder={"entity"}
-          disableCreate
-          inputWidth={114}
-        />
+        <StyledRowHeader>Limit territory</StyledRowHeader>
+        {debouncedValues.territoryId && searchTerritoryEntity ? (
+          <>
+            <Loader size={26} show={searchTerritoryEntityIsFetching} />
+            {searchTerritoryEntity && (
+              <EntityTag
+                entity={searchTerritoryEntity}
+                tooltipPosition={"left"}
+                button={
+                  <Button
+                    key="d"
+                    icon={<FaUnlink />}
+                    color="danger"
+                    inverted
+                    tooltipLabel="unlink entity"
+                    onClick={() => {
+                      handleChange({ territoryId: "" });
+                    }}
+                  />
+                }
+              />
+            )}
+          </>
+        ) : (
+          <EntitySuggester
+            disableTemplatesAccept
+            categoryTypes={[EntityEnums.Class.Territory]}
+            onSelected={(newSelectedId: string) => {
+              handleChange({ territoryId: newSelectedId });
+            }}
+            placeholder={"territory"}
+            disableCreate
+            inputWidth={114}
+          />
+        )}
       </StyledRow>
-      {(cooccurrenceEntity || cooccurrenceIsFetching) && (
-        <StyledRow>
-          <StyledTagLoaderWrap>
+
+      <StyledRow>
+        <StyledRowHeader>Limit by co-occurrence</StyledRowHeader>
+        {debouncedValues.cooccurrenceId ? (
+          <>
             <Loader size={26} show={cooccurrenceIsFetching} />
-          </StyledTagLoaderWrap>
-          {cooccurrenceEntity && (
-            <EntityTag
-              entity={cooccurrenceEntity}
-              tooltipPosition={"left"}
-              button={
-                <Button
-                  key="d"
-                  icon={<FaUnlink />}
-                  color="danger"
-                  inverted
-                  tooltipLabel="unlink entity"
-                  onClick={() => {
-                    handleChange({ cooccurrenceId: "" });
-                  }}
-                />
-              }
-            />
-          )}
-        </StyledRow>
-      )}
+            {cooccurrenceEntity && (
+              <EntityTag
+                entity={cooccurrenceEntity}
+                tooltipPosition={"left"}
+                button={
+                  <Button
+                    key="d"
+                    icon={<FaUnlink />}
+                    color="danger"
+                    inverted
+                    tooltipLabel="unlink entity"
+                    onClick={() => {
+                      handleChange({ cooccurrenceId: "" });
+                    }}
+                  />
+                }
+              />
+            )}
+          </>
+        ) : (
+          <EntitySuggester
+            disableTemplatesAccept
+            categoryTypes={[
+              EntityEnums.Class.Statement,
+              EntityEnums.Class.Action,
+              EntityEnums.Class.Territory,
+              EntityEnums.Class.Resource,
+              EntityEnums.Class.Person,
+              EntityEnums.Class.Being,
+              EntityEnums.Class.Group,
+              EntityEnums.Class.Object,
+              EntityEnums.Class.Concept,
+              EntityEnums.Class.Location,
+              EntityEnums.Class.Value,
+              EntityEnums.Class.Event,
+            ]}
+            onSelected={(newSelectedId: string) => {
+              handleChange({ cooccurrenceId: newSelectedId });
+            }}
+            placeholder={"entity"}
+            disableCreate
+            inputWidth={114}
+          />
+        )}
+      </StyledRow>
 
       <StyledResultsWrapper ref={resultRef}>
         {/* RESULTS */}

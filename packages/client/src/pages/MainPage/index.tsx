@@ -130,8 +130,13 @@ const MainPage: React.FC<MainPage> = ({}) => {
       </>
     );
   };
-  const refreshBoxButton = (queriesToRefresh: string[]) => {
-    return (
+  const refreshBoxButton = (
+    queriesToRefresh: string[],
+    isThisBoxHidden: boolean
+  ) => {
+    return isThisBoxHidden ? (
+      <></>
+    ) : (
       <>
         {queriesToRefresh.length && (
           <Button
@@ -202,7 +207,10 @@ const MainPage: React.FC<MainPage> = ({}) => {
           height={contentHeight}
           label="Territories"
           isExpanded={firstPanelExpanded}
-          button={[refreshBoxButton(["territories"]), firstPanelButton()]}
+          button={[
+            refreshBoxButton(["territories"], !firstPanelExpanded),
+            firstPanelButton(),
+          ]}
           noPadding
         >
           <MemoizedTerritoryTreeBox />
@@ -239,7 +247,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
             }
             label="Detail"
             button={[
-              refreshBoxButton(["entity"]),
+              refreshBoxButton(["entity"], false),
               <Button
                 inverted
                 tooltipLabel={
@@ -296,7 +304,10 @@ const MainPage: React.FC<MainPage> = ({}) => {
           color="white"
           isExpanded={fourthPanelExpanded}
           button={[
-            refreshBoxButton(["search-templates", "search"]),
+            refreshBoxButton(
+              ["search-templates", "search"],
+              !fourthPanelExpanded
+            ),
             hideBoxButton("search"),
             hideFourthPanelButton(),
           ]}
@@ -309,7 +320,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
           color="white"
           isExpanded={fourthPanelExpanded}
           button={[
-            refreshBoxButton(["bookmarks"]),
+            refreshBoxButton(["bookmarks"], !fourthPanelExpanded),
             hideBoxButton("bookmarks"),
             hideFourthPanelButton(),
           ]}
@@ -322,7 +333,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
           color="white"
           isExpanded={fourthPanelExpanded}
           button={[
-            refreshBoxButton(["templates"]),
+            refreshBoxButton(["templates"], !fourthPanelExpanded),
             hideBoxButton("templates"),
             hideFourthPanelButton(),
           ]}
