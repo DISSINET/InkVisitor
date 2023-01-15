@@ -8,6 +8,7 @@ import { EntitySuggester, EntityTag } from "components/advanced";
 import { useDebounce } from "hooks";
 import React, { useMemo, useState } from "react";
 import { FaUnlink } from "react-icons/fa";
+import { RiContactsBookLine } from "react-icons/ri";
 import { useQuery } from "react-query";
 import { OptionTypeBase, ValueType } from "react-select";
 import { wildCardChar } from "Theme/constants";
@@ -25,7 +26,7 @@ const initValues: IRequestSearch = {
   label: "",
   cooccurrenceId: "",
 };
-const defaultOption = {
+const defaultOption: DropdownItem = {
   label: "*",
   value: "",
 };
@@ -51,8 +52,8 @@ export const EntitySearchBox: React.FC = () => {
   // check whether the search should be executed
   const validSearch = useMemo(() => {
     return (
-      (debouncedValues.label && debouncedValues.label.length > 2) ||
-      !!debouncedValues.usedTemplate
+      Object.values(debouncedValues).filter((searchValue: any) => searchValue)
+        .length > 0
     );
   }, [debouncedValues]);
 
@@ -88,7 +89,7 @@ export const EntitySearchBox: React.FC = () => {
       return res.data;
     },
     {
-      enabled: api.isLoggedIn() && validSearch === true,
+      enabled: api.isLoggedIn() && validSearch,
     }
   );
 
