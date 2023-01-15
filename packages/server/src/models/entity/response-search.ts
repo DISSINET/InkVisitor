@@ -40,6 +40,23 @@ export class SearchQuery {
   }
 
   /**
+   * searches Statements under specific territory and returns ids of all statement entity ids
+   * @param territoryId 
+   * @returns 
+   */
+  async getStatementObjectIdsForTerritory(territoryId: string): Promise<string[]> {
+    const statements = await Statement.findByTerritoryId(this.connection, territoryId);
+    const idsMap: Record<string, null> = {};
+    for (const st of statements) {
+      for (const id of st.getEntitiesIds()) {
+        idsMap[id] = null;
+      }
+    }
+
+    return Object.keys(idsMap);
+  }
+
+  /**
    * adds condition to limit results by filtering by specific class
    * @param entityClass
    * @returns
@@ -203,9 +220,16 @@ export class SearchQuery {
     }
 
     if (req.cooccurrenceId) {
-      const assocEntityIds = await this.getCooccurredEntitiesIds(
-        req.cooccurrenceId
-      );
+      const assocEntityIds = await this.getCooccurredEntitiesIds(req.cooccurrenceId);
+      if (!req.entityIds) {
+        req.entityIds = [];
+      }
+      req.entityIds = req.entityIds.concat(assocEntityIds);
+    }
+
+
+    if (req.territoryId) {
+      const assocEntityIds = await this.getStatementObjectIdsForTerritory(req.territoryId);
       if (!req.entityIds) {
         req.entityIds = [];
       }

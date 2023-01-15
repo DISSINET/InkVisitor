@@ -377,7 +377,7 @@ class Statement extends Entity implements IStatement {
   getEntitiesIds(): string[] {
     const entitiesIds: Record<string, null> = {};
 
-    // get ids from Entity.props ( + childs) and references
+    // get ids from Entity.props ( + childs), references and template 
     new Entity({}).getEntitiesIds.call(this).forEach((element) => {
       entitiesIds[element] = null;
     });
@@ -457,6 +457,26 @@ class Statement extends Entity implements IStatement {
     }
 
     return out;
+  }
+
+  /**
+   * Finds statements with data.territoryId.id set to required value
+   * @param db 
+   * @param territoryId 
+   * @returns {Statement[]} list of found statements
+   */
+  static async findByTerritoryId(
+    db: Connection,
+    territoryId: string
+  ): Promise<Statement[]> {
+    const list: IStatement[] = await rethink
+      .table(Entity.table)
+      .getAll(territoryId, {
+        index: DbEnums.Indexes.StatementTerritory,
+      })
+      .run(db);
+
+    return list.map(data => new Statement(data));
   }
 
   /**
