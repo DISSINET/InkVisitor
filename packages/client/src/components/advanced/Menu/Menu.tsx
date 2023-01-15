@@ -4,13 +4,10 @@ import React, { useState } from "react";
 import { BiLogOut } from "react-icons/bi";
 import { FaBars, FaBookOpen, FaInfo, FaUsers } from "react-icons/fa";
 import { useHistory, useLocation } from "react-router";
+import { animated, config, useSpring } from "react-spring";
 import { IPage } from "types";
 import { MenuItem } from "./MenuItem";
-import {
-  StyledMenuGroup,
-  StyledMenuGroupWrapper,
-  StyledMenuItem,
-} from "./MenuStyles";
+import { StyledMenuGroup, StyledMenuGroupWrapper } from "./MenuStyles";
 
 interface Menu {
   userRole: string;
@@ -62,6 +59,11 @@ export const Menu: React.FC<Menu> = ({
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState<boolean>(false);
 
+  const rotateMenuIcon = useSpring({
+    transform: menuOpen ? "rotate(90deg)" : "rotate(0deg)",
+    config: config.stiff,
+  });
+
   return (
     <div
       onClick={() => setMenuOpen(!menuOpen)}
@@ -70,12 +72,9 @@ export const Menu: React.FC<Menu> = ({
     >
       <Button
         icon={
-          <FaBars
-            style={{
-              transition: "transform 0.1s",
-              transform: menuOpen ? "rotate(90deg)" : "",
-            }}
-          />
+          <animated.div style={rotateMenuIcon}>
+            <FaBars />
+          </animated.div>
         }
         label="Menu"
       />
