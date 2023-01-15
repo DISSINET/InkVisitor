@@ -49,6 +49,10 @@ export class RequestSearch {
     this.usedTemplate = requestData.usedTemplate || undefined;
   }
 
+  /**
+   * Tests tests if the object can be used for querying
+   * @returns {(Error|void)} error instance in case of a problem - not throwed
+   */
   validate(): Error | void {
     if (this.class && !EnumValidators.IsValidEntityClass(this.class)) {
       return new BadParams("invalid 'class' value");
@@ -58,7 +62,15 @@ export class RequestSearch {
       this.excluded !== undefined &&
       this.excluded.constructor.name !== "Array"
     ) {
-      return new BadParams("excluded needs to be array");
+      return new BadParams("excluded needs to be an array");
+    }
+
+
+    if (
+      this.entityIds !== undefined &&
+      this.entityIds.constructor.name !== "Array"
+    ) {
+      return new BadParams("entityIds needs to be an array");
     }
 
     if (
@@ -67,10 +79,10 @@ export class RequestSearch {
       !this.onlyTemplates &&
       !this.usedTemplate &&
       !this.territoryId &&
-      (typeof this.entityIds !== "object" || !this.entityIds.length)
+      (this.entityIds === undefined || !this.entityIds.length)
     ) {
       return new BadParams(
-        "label, class, onlyTemplates, usedTemplate or entityIds field has to be set"
+        "label, class, onlyTemplates, usedTemplate, entityIds or territoryId field has to be set"
       );
     }
 
