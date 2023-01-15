@@ -410,7 +410,7 @@ class Statement extends Entity implements IStatement {
 
     this.data.tags.forEach((t) => (entitiesIds[t] = null));
 
-    return Object.keys(entitiesIds);
+    return Object.keys(entitiesIds).filter(id => !!id);
   }
 
   async unlinkActantId(
