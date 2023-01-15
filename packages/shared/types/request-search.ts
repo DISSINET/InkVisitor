@@ -29,7 +29,7 @@ export class RequestSearch {
   onlyTemplates?: boolean;
   usedTemplate?: string;
 
-  constructor(requestData: IRequestSearch & { excluded?: EntityEnums.Class[]; }) {
+  constructor(requestData: IRequestSearch) {
     this.class = requestData.class;
     this.label = requestData.label;
     this.cooccurrenceId =
@@ -49,6 +49,8 @@ export class RequestSearch {
 
     this.onlyTemplates = requestData.onlyTemplates || undefined;
     this.usedTemplate = requestData.usedTemplate || undefined;
+    this.territoryId = requestData.territoryId || undefined;
+    this.subTerritorySearch = requestData.subTerritorySearch || undefined;
   }
 
   /**

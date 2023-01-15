@@ -234,7 +234,7 @@ export class SearchQuery {
 
       // include childs
       if (req.subTerritorySearch) {
-        const childs = Object.values(new Territory({ id: req.territoryId }).findChilds(this.connection));
+        const childs = Object.values(await new Territory({ id: req.territoryId }).findChilds(this.connection));
         territoryIds = territoryIds.concat(childs.map(ch => ch.id));
       }
 
