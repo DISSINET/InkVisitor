@@ -8,7 +8,8 @@ import { EntitySuggester, EntityTag } from "components/advanced";
 import { useDebounce } from "hooks";
 import React, { useMemo, useState } from "react";
 import { FaUnlink } from "react-icons/fa";
-import { RiContactsBookLine } from "react-icons/ri";
+import { RiCloseFill, RiContactsBookLine } from "react-icons/ri";
+import { TiDelete } from "react-icons/ti";
 import { useQuery } from "react-query";
 import { OptionTypeBase, ValueType } from "react-select";
 import { wildCardChar } from "Theme/constants";
@@ -249,7 +250,7 @@ export const EntitySearchBox: React.FC = () => {
                 button={
                   <Button
                     key="d"
-                    icon={<FaUnlink />}
+                    icon={<RiCloseFill />}
                     color="danger"
                     inverted
                     tooltipLabel="unlink entity"
@@ -287,7 +288,7 @@ export const EntitySearchBox: React.FC = () => {
                 button={
                   <Button
                     key="d"
-                    icon={<FaUnlink />}
+                    icon={<RiCloseFill />}
                     color="danger"
                     inverted
                     tooltipLabel="unlink entity"
