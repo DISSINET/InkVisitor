@@ -377,17 +377,18 @@ export const EntitySearchBox: React.FC = () => {
         )}
       </StyledRow>
 
+      {sortedEntities.length > 0 && (
+        <StyledResultsHeader>{`Results (${sortedEntities.length})`}</StyledResultsHeader>
+      )}
       <StyledResultsWrapper ref={resultRef}>
         {/* RESULTS */}
-
         {sortedEntities.length > 0 && (
           <>
-          <StyledResultsHeader>{`Results (${sortedEntities.length})`}</StyledResultsHeader>
-          <EntitySearchResults
-            results={sortedEntities}
-            height={debouncedResultsHeight}
+            <EntitySearchResults
+              results={sortedEntities}
+              height={debouncedResultsHeight}
             />
-            </>
+          </>
         )}
         <Loader show={isFetching} />
       </StyledResultsWrapper>
