@@ -1,4 +1,5 @@
-import { IEntity, IResponseGeneric, OrderType } from "@shared/types";
+import { StatementEnums } from "@shared/enums";
+import { IEntity, IResponseGeneric, OrderType, PropOrder } from "@shared/types";
 import { AxiosResponse } from "axios";
 import { Button, Table } from "components";
 import { EntityTag } from "components/advanced";
@@ -39,22 +40,47 @@ export const StatementEditorNoOrderTable: React.FC<
         id: "tags",
         accessor: "data",
         Cell: ({ row }: Cell) => {
-          // console.log(row.original);
-          const { entityId } = row.original as any;
+          const orderObject = row.original as OrderType;
+          if (orderObject.type === StatementEnums.ElementType.Prop) {
+            const { propValueId, propTypeId, originId } =
+              orderObject as PropOrder;
+            const propTypeEntity = entities[propTypeId];
+            const propValueEntity = entities[propValueId];
+            const originEntity = entities[originId];
 
-          const entity = entities[entityId];
-
-          return (
-            <>
-              {entity && (
-                <EntityTag
-                  key={entity.id}
-                  entity={entity}
-                  tooltipText={entity.label}
-                />
-              )}
-            </>
-          );
+            return (
+              <>
+                {propTypeEntity && (
+                  <EntityTag
+                    key={propTypeEntity.id}
+                    entity={propTypeEntity}
+                    tooltipText={propTypeEntity.label}
+                  />
+                )}
+                {propValueEntity && (
+                  <EntityTag
+                    key={propValueEntity.id}
+                    entity={propValueEntity}
+                    tooltipText={propValueEntity.label}
+                  />
+                )}
+              </>
+            );
+          } else {
+            const { entityId } = row.original as any;
+            const entity = entities[entityId];
+            return (
+              <>
+                {entity && (
+                  <EntityTag
+                    key={entity.id}
+                    entity={entity}
+                    tooltipText={entity.label}
+                  />
+                )}
+              </>
+            );
+          }
         },
       },
       {
