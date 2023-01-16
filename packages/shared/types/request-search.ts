@@ -47,10 +47,10 @@ export class RequestSearch {
       }
     }
 
-    this.onlyTemplates = requestData.onlyTemplates || undefined;
+    this.onlyTemplates = !!requestData.onlyTemplates;
     this.usedTemplate = requestData.usedTemplate || undefined;
     this.territoryId = requestData.territoryId || undefined;
-    this.subTerritorySearch = requestData.subTerritorySearch || undefined;
+    this.subTerritorySearch = !!requestData.subTerritorySearch;
   }
 
   /**
