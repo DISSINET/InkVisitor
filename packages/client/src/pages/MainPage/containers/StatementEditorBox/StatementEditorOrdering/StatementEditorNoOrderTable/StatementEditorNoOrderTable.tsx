@@ -2,7 +2,7 @@ import { StatementEnums } from "@shared/enums";
 import { IEntity, IResponseGeneric, OrderType, PropOrder } from "@shared/types";
 import { AxiosResponse } from "axios";
 import { Button, Table } from "components";
-import { EntityTag } from "components/advanced";
+import { EmptyTag, EntityTag } from "components/advanced";
 import React, { useMemo } from "react";
 import { CgPlayListAdd } from "react-icons/cg";
 import { UseMutationResult } from "react-query";
@@ -50,19 +50,23 @@ export const StatementEditorNoOrderTable: React.FC<
 
             return (
               <>
-                {propTypeEntity && (
+                {propTypeEntity ? (
                   <EntityTag
                     key={propTypeEntity.id}
                     entity={propTypeEntity}
                     tooltipText={propTypeEntity.label}
                   />
+                ) : (
+                  <EmptyTag label="type" />
                 )}
-                {propValueEntity && (
+                {propValueEntity ? (
                   <EntityTag
                     key={propValueEntity.id}
                     entity={propValueEntity}
                     tooltipText={propValueEntity.label}
                   />
+                ) : (
+                  <EmptyTag label="value" />
                 )}
               </>
             );
