@@ -69,7 +69,6 @@ export class RequestSearch {
       return new BadParams("excluded needs to be an array");
     }
 
-
     if (
       this.entityIds !== undefined &&
       this.entityIds.constructor.name !== "Array"
@@ -78,13 +77,16 @@ export class RequestSearch {
     }
 
     if (this.subTerritorySearch && !this.territoryId) {
-      return new BadParams("subTerritorySearch needs valid territoryId to be set");
+      return new BadParams(
+        "subTerritorySearch needs valid territoryId to be set"
+      );
     }
 
     if (
       !this.label &&
       !this.class &&
       !this.onlyTemplates &&
+      !this.cooccurrenceId &&
       !this.usedTemplate &&
       !this.territoryId &&
       (this.entityIds === undefined || !this.entityIds.length)

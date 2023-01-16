@@ -581,8 +581,8 @@ class Statement extends Entity implements IStatement {
     const entityIds: string[] = [];
 
     (statements as IStatement[]).forEach((s) => {
-      const ids = s.data.actants.map((a) => a.entityId);
-      entityIds.push(...ids);
+      const statement  = new Statement(s)
+      entityIds.push(...statement.getEntitiesIds())
     });
 
     return entityIds;
