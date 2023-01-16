@@ -35,6 +35,7 @@ import { getEntityLabel, getShortLabelByLetterCount } from "utils";
 import { EntityReferenceTable } from "../../EntityReferenceTable/EntityReferenceTable";
 import { StatementEditorActantTable } from "../StatementEditorActantTable/StatementEditorActantTable";
 import { StatementEditorActionTable } from "../StatementEditorActionTable/StatementEditorActionTable";
+import { StatementEditorOrdering } from "../StatementEditorOrdering/StatementEditorOrdering";
 import {
   StyledBreadcrumbWrap,
   StyledEditorActantTableWrapper,
@@ -628,6 +629,18 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 territoryParentId={statementTerritoryId}
               />
             )}
+          </StyledEditorSectionContent>
+        </StyledEditorSection>
+
+        {/* Ordering */}
+        <StyledEditorSection>
+          <StyledEditorSectionHeader>Ordering</StyledEditorSectionHeader>
+          <StyledEditorSectionContent>
+            <StatementEditorOrdering
+            statementId={statementId}
+              elementsOrders={statement.elementsOrders}
+              entities={statement.entities}
+            />
           </StyledEditorSectionContent>
         </StyledEditorSection>
 

@@ -532,7 +532,10 @@ class Api {
     elementIdsWithOrder: string[]
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
-      const response = await this.connection.put(`/statements/${statementId}`, elementIdsWithOrder);
+      const response = await this.connection.put(
+        `/statements/${statementId}/elementsOrders`,
+        elementIdsWithOrder
+      );
       return response;
     } catch (err: any | AxiosError) {
       throw { ...err.response.data };
