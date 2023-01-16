@@ -22,11 +22,14 @@ export const StatementEditorNoOrderTable: React.FC<
         id: "button",
         accesor: "data",
         Cell: ({ row }: Cell) => {
+          const orderObject = row.original as OrderType;
+          console.log(orderObject.type);
           const { elementId } = row.original as any;
 
           return (
-            <Button
-              icon={<CgPlayListAdd />}
+            <CgPlayListAdd
+              size={20}
+              style={{ cursor: "pointer" }}
               onClick={() => addToOrdering(elementId)}
             />
           );
@@ -36,7 +39,7 @@ export const StatementEditorNoOrderTable: React.FC<
         id: "tags",
         accessor: "data",
         Cell: ({ row }: Cell) => {
-          console.log(row.original);
+          // console.log(row.original);
           const { entityId } = row.original as any;
 
           const entity = entities[entityId];
@@ -54,6 +57,17 @@ export const StatementEditorNoOrderTable: React.FC<
           );
         },
       },
+      {
+        id: "info",
+        Cell: ({ row }: Cell) => {
+          const orderObject = row.original as OrderType;
+          return (
+            <div style={{ backgroundColor: "pink", textAlign: "right" }}>
+              {orderObject.type}
+            </div>
+          );
+        },
+      },
     ],
     [elements, entities]
   );
@@ -65,6 +79,7 @@ export const StatementEditorNoOrderTable: React.FC<
       perPage={1000}
       disableHeading
       disableHeader
+      firstColumnMinWidth
     />
   );
 };
