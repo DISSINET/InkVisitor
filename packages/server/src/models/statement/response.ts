@@ -6,8 +6,6 @@ import { IRequest } from "src/custom_typings/request";
 import Statement from "./statement";
 import Entity from "../entity/entity";
 
-export type OrderTypeWithIndex = OrderType & { order: number | false; };
-
 export class ResponseStatement extends Statement implements IResponseStatement {
   entities: { [key: string]: IEntity; };
   elementsOrders: OrderType[];
@@ -31,7 +29,7 @@ export class ResponseStatement extends Statement implements IResponseStatement {
    */
   prepareElementsOrders(): OrderType[] {
     /// unsorted items here
-    let temp: OrderTypeWithIndex[] = [];
+    let temp: OrderType[] = [];
 
     // statement.props
     Entity.extractIdsFromProps(this.props, (prop: IProp) => {
@@ -113,15 +111,12 @@ export class ResponseStatement extends Statement implements IResponseStatement {
    * @param unsorted 
    * @returns 
    */
-  public static sortListOfStatementItems(unsorted: OrderTypeWithIndex[]): OrderType[] {
+  public static sortListOfStatementItems(unsorted: OrderType[]): OrderType[] {
     return unsorted.sort((a, b) => {
       if (b.order === a.order && a.order === false) { return 0; };
       if (b.order === false) { return -Infinity; };
       if (a.order === false) { return Infinity; };
       return a.order - b.order;
-    }).map<OrderType>((a: OrderTypeWithIndex) => {
-      const { order, ...orderObject } = a;
-      return orderObject;
     });
   }
 }

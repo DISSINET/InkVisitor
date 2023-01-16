@@ -29,11 +29,11 @@ export interface IdentificationOrder {
   elementId: string; // identification.id
 }
 
-export type OrderType =
+export type OrderType = (
   | EntityOrder
   | PropOrder
   | ClassificationOrder
-  | IdentificationOrder;
+  | IdentificationOrder) & { order: number | false; };
 
 export interface IResponseStatement extends IStatement {
   entities: { [key: string]: IEntity; }; // all entities (IEntity) used in actions/actants, actions/actants.props.type/value, territory, references, tags, actant identifications and classifications
