@@ -40,6 +40,7 @@ export const StatementEditorNoOrderTable: React.FC<
           const { entityId } = row.original as any;
 
           const entity = entities[entityId];
+
           return (
             <>
               {entity && (
@@ -57,5 +58,13 @@ export const StatementEditorNoOrderTable: React.FC<
     [elements, entities]
   );
 
-  return <Table data={data} columns={columns} disableHeading />;
+  return (
+    <Table
+      data={data}
+      columns={columns}
+      perPage={1000}
+      disableHeading
+      disableHeader
+    />
+  );
 };

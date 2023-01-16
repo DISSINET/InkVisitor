@@ -138,10 +138,7 @@ export const Table: React.FC<Table> = ({
     <>
       {!disablePaging && renderPagination("top")}
       <StyledTableContainer>
-        <StyledTable
-          {...getTableProps()}
-          noBorder={noBorder}
-        >
+        <StyledTable {...getTableProps()} noBorder={noBorder}>
           {!disableHeader && data.length > 0 && (
             <StyledTHead noBorder={noBorder}>
               {headerGroups.map((headerGroup, key) => (
@@ -197,7 +194,7 @@ export const Table: React.FC<Table> = ({
         </StyledTable>
         {/* {"Server error"} */}
         <Loader show={isLoading} />
-        {(!disablePaging || !disableBottomPaging) && renderPagination("bottom")}
+        {!disablePaging && !disableBottomPaging && renderPagination("bottom")}
       </StyledTableContainer>
     </>
   );
