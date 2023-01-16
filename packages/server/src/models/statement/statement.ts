@@ -377,7 +377,7 @@ class Statement extends Entity implements IStatement {
   getEntitiesIds(): string[] {
     const entitiesIds: Record<string, null> = {};
 
-    // get ids from Entity.props ( + childs) and references
+    // get ids from Entity.props ( + childs), references and template 
     new Entity({}).getEntitiesIds.call(this).forEach((element) => {
       entitiesIds[element] = null;
     });
@@ -410,7 +410,7 @@ class Statement extends Entity implements IStatement {
 
     this.data.tags.forEach((t) => (entitiesIds[t] = null));
 
-    return Object.keys(entitiesIds);
+    return Object.keys(entitiesIds).filter(id => !!id);
   }
 
   async unlinkActantId(
@@ -457,6 +457,26 @@ class Statement extends Entity implements IStatement {
     }
 
     return out;
+  }
+
+  /**
+   * Finds statements with data.territoryId.id set to required values
+   * @param db 
+   * @param territoryId 
+   * @returns {Statement[]} list of found statements
+   */
+  static async findByTerritoryIds(
+    db: Connection,
+    territoryIds: string[]
+  ): Promise<Statement[]> {
+    const list: IStatement[] = await rethink
+      .table(Entity.table)
+      .getAll.apply(undefined, (territoryIds as (string | { index: string; })[]).concat({
+        index: DbEnums.Indexes.StatementTerritory,
+      }))
+      .run(db);
+
+    return list.map(data => new Statement(data));
   }
 
   /**
@@ -561,8 +581,8 @@ class Statement extends Entity implements IStatement {
     const entityIds: string[] = [];
 
     (statements as IStatement[]).forEach((s) => {
-      const ids = s.data.actants.map((a) => a.entityId);
-      entityIds.push(...ids);
+      const statement  = new Statement(s)
+      entityIds.push(...statement.getEntitiesIds())
     });
 
     return entityIds;

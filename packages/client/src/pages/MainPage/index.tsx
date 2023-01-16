@@ -3,10 +3,11 @@ import { PanelSeparator } from "components/advanced";
 import { useSearchParams } from "hooks";
 import ScrollHandler from "hooks/ScrollHandler";
 import React from "react";
-import { BiHide, BiShow } from "react-icons/bi";
+import { BiHide, BiRefresh, BiShow } from "react-icons/bi";
 import { BsSquareFill, BsSquareHalf } from "react-icons/bs";
 import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
 import { VscCloseAll } from "react-icons/vsc";
+import { useQueryClient } from "react-query";
 import { setFirstPanelExpanded } from "redux/features/layout/firstPanelExpandedSlice";
 import { setFourthPanelBoxesOpened } from "redux/features/layout/fourthPanelBoxesOpenedSlice";
 import { setFourthPanelExpanded } from "redux/features/layout/fourthPanelExpandedSlice";
@@ -35,6 +36,8 @@ const MainPage: React.FC<MainPage> = ({}) => {
     useSearchParams();
 
   const dispatch = useAppDispatch();
+
+  const queryClient = useQueryClient();
 
   const fourthPanelBoxesOpened: { [key: string]: boolean } = useAppSelector(
     (state) => state.layout.fourthPanelBoxesOpened
@@ -127,6 +130,29 @@ const MainPage: React.FC<MainPage> = ({}) => {
       </>
     );
   };
+  const refreshBoxButton = (
+    queriesToRefresh: string[],
+    isThisBoxHidden: boolean
+  ) => {
+    return isThisBoxHidden ? (
+      <></>
+    ) : (
+      <>
+        {queriesToRefresh.length && (
+          <Button
+            key="refresh queries"
+            inverted
+            icon={<BiRefresh />}
+            onClick={() => {
+              queriesToRefresh.forEach((queryToRefresh) => {
+                queryClient.invalidateQueries(queryToRefresh);
+              });
+            }}
+          />
+        )}
+      </>
+    );
+  };
 
   const getFourthPanelBoxHeight = (box: FourthPanelBoxes): number => {
     const onePercent = contentHeight / 100;
@@ -181,7 +207,10 @@ const MainPage: React.FC<MainPage> = ({}) => {
           height={contentHeight}
           label="Territories"
           isExpanded={firstPanelExpanded}
-          button={[firstPanelButton()]}
+          button={[
+            refreshBoxButton(["territories"], !firstPanelExpanded),
+            firstPanelButton(),
+          ]}
           noPadding
         >
           <MemoizedTerritoryTreeBox />
@@ -218,6 +247,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
             }
             label="Detail"
             button={[
+              refreshBoxButton(["entity"], false),
               <Button
                 inverted
                 tooltipLabel={
@@ -273,7 +303,14 @@ const MainPage: React.FC<MainPage> = ({}) => {
           label="Search"
           color="white"
           isExpanded={fourthPanelExpanded}
-          button={[hideBoxButton("search"), hideFourthPanelButton()]}
+          button={[
+            refreshBoxButton(
+              ["search-templates", "search"],
+              !fourthPanelExpanded
+            ),
+            hideBoxButton("search"),
+            hideFourthPanelButton(),
+          ]}
         >
           <MemoizedEntitySearchBox />
         </Box>
@@ -282,7 +319,11 @@ const MainPage: React.FC<MainPage> = ({}) => {
           label="Bookmarks"
           color="white"
           isExpanded={fourthPanelExpanded}
-          button={[hideBoxButton("bookmarks"), hideFourthPanelButton()]}
+          button={[
+            refreshBoxButton(["bookmarks"], !fourthPanelExpanded),
+            hideBoxButton("bookmarks"),
+            hideFourthPanelButton(),
+          ]}
         >
           <MemoizedEntityBookmarkBox />
         </Box>
@@ -291,7 +332,11 @@ const MainPage: React.FC<MainPage> = ({}) => {
           label="Templates"
           color="white"
           isExpanded={fourthPanelExpanded}
-          button={[hideBoxButton("templates"), hideFourthPanelButton()]}
+          button={[
+            refreshBoxButton(["templates"], !fourthPanelExpanded),
+            hideBoxButton("templates"),
+            hideFourthPanelButton(),
+          ]}
         >
           <MemoizedTemplateListBox />
         </Box>

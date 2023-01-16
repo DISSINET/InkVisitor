@@ -153,16 +153,6 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
             />
           </>
         )}
-        <Button
-          key="refresh"
-          icon={<FaRecycle size={14} />}
-          tooltipLabel="refresh entity data"
-          inverted
-          color="primary"
-          onClick={() => {
-            queryClient.invalidateQueries(["entity"]);
-          }}
-        />
         {entity.class === EntityEnums.Class.Statement && (
           <Button
             key="edit"

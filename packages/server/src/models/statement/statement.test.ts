@@ -296,7 +296,7 @@ describe("models/statement", function () {
 
     describe("insert one child without explicit order", () => {
       it("should have order = 0", async (done) => {
-        const statement = new Statement({})
+        const statement = new Statement({});
         statement.data = new StatementData({ territory: { territoryId: "any", order: 0 } });
         await statement.save(db.connection);
 
@@ -312,8 +312,8 @@ describe("models/statement", function () {
 
     describe("insert one child with explicit order", () => {
       it("should have order = 999 as wanted", async (done) => {
-        const statement = new Statement({})
-        statement.data = new StatementData({ territory: { territoryId: "any", order: 999 } })
+        const statement = new Statement({});
+        statement.data = new StatementData({ territory: { territoryId: "any", order: 999 } });
         await statement.save(db.connection);
 
         const createdData = await findEntityById<IStatement>(db, statement.id);
@@ -330,11 +330,11 @@ describe("models/statement", function () {
 
     describe("insert two child without explicit order", () => {
       it("should have order = 0 and 1 respectively", async (done) => {
-        const statement1 = new Statement({})
-        statement1.data = new StatementData({ territory: { territoryId: "any", order: 0 } })
+        const statement1 = new Statement({});
+        statement1.data = new StatementData({ territory: { territoryId: "any", order: 0 } });
         await statement1.save(db.connection);
 
-        const statement2 = new Statement({})
+        const statement2 = new Statement({});
         statement2.data = new StatementData({ territory: { territoryId: "any", order: 0 } });
         await statement2.save(db.connection);
 
@@ -375,7 +375,7 @@ describe("models/statement", function () {
 
     describe("update the only child", () => {
       it("should have order = 0", async (done) => {
-        const statement = new Statement({})
+        const statement = new Statement({});
         statement.data = new StatementData({ territory: { territoryId: "any", order: 0 } });
         await statement.save(db.connection);
 
@@ -392,11 +392,11 @@ describe("models/statement", function () {
 
     describe("update the second's order value without conflict ", () => {
       it("should have order as chosen", async (done) => {
-        const statement1 = new Statement({})
+        const statement1 = new Statement({});
         statement1.data = new StatementData({ territory: { territoryId: "any", order: 0 } });
         await statement1.save(db.connection);
 
-        const statement2 = new Statement({})
+        const statement2 = new Statement({});
         statement2.data = new StatementData({ territory: { territoryId: "any", order: 0 } });
         await statement2.save(db.connection);
 
@@ -414,11 +414,11 @@ describe("models/statement", function () {
 
     describe("update the second's order value (conflict)", () => {
       it("should have order as before", async (done) => {
-        const statement1 = new Statement({})
+        const statement1 = new Statement({});
         statement1.data = new StatementData({ territory: { territoryId: "any", order: 0 } });
         await statement1.save(db.connection);
 
-        const statement2 = new Statement({})
+        const statement2 = new Statement({});
         statement2.data = new StatementData({ territory: { territoryId: "any", order: 0 } });
         await statement2.save(db.connection);
 
@@ -440,15 +440,15 @@ describe("models/statement", function () {
 
     describe("update the third's order value (conflict)", () => {
       it("should have non conflicting order", async (done) => {
-        const statement1 = new Statement({})
+        const statement1 = new Statement({});
         statement1.data = new StatementData({ territory: { territoryId: "any", order: 0 } });
         await statement1.save(db.connection);
 
-        const statement2 = new Statement({})
+        const statement2 = new Statement({});
         statement2.data = new StatementData({ territory: { territoryId: "any", order: 0 } });
         await statement2.save(db.connection);
 
-        const statement3 = new Statement({})
+        const statement3 = new Statement({});
         statement3.data = new StatementData({ territory: { territoryId: "any", order: 0 } });
         await statement3.save(db.connection);
 
@@ -594,6 +594,52 @@ describe("models/statement", function () {
         expect(foundStatements).toHaveLength(2);
         expect(foundStatements.find((st) => st.id === st1.id)).not.toBeNull();
         expect(foundStatements.find((st) => st.id === st2.id)).not.toBeNull();
+      });
+    });
+  });
+
+  describe("test Statement.findByTerritoryId", function () {
+    let db: Db;
+
+    beforeAll(async () => {
+      db = new Db();
+      await db.initDb();
+    });
+
+    beforeEach(async () => {
+      await deleteEntities(db);
+    });
+
+    afterAll(async () => {
+      await db.close();
+    });
+
+    describe("found by multiple territories", () => {
+      const [id1a, st1a] = prepareStatement();
+      const [id1b, st1b] = prepareStatement();
+      const [id2a, st2a] = prepareStatement();
+      const [id2b, st2b] = prepareStatement();
+
+      const tId1 = `t-${id1a}`;
+      const tId2 = `t-${id2a}`;
+
+      st1a.data.territory = new StatementTerritory({ territoryId: tId1 });
+      st1b.data.territory = new StatementTerritory({ territoryId: tId1 });
+      st2a.data.territory = new StatementTerritory({ territoryId: tId2 });
+      st2b.data.territory = new StatementTerritory({ territoryId: tId2 });
+
+      it("should find the statements successfully", async () => {
+        await st1a.save(db.connection);
+        await st1b.save(db.connection);
+        await st2a.save(db.connection);
+        await st2b.save(db.connection);
+
+        const foundStatements = await Statement.findByTerritoryIds(db.connection, [tId1, tId2]);
+        expect(foundStatements).toHaveLength(4);
+        expect(foundStatements.find(s => s.id === id1a)).toBeTruthy();
+        expect(foundStatements.find(s => s.id === id1b)).toBeTruthy();
+        expect(foundStatements.find(s => s.id === id2a)).toBeTruthy();
+        expect(foundStatements.find(s => s.id === id2b)).toBeTruthy();
       });
     });
   });

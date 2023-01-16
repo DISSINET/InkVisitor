@@ -208,7 +208,11 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
                                     .slice(0, maxTooltipMultiRelations)
                                     .map((connection, key) => {
                                       const entity =
-                                        entities[connection.entityIds[1]];
+                                        entities[
+                                          connection.entityIds[0] === entityId
+                                            ? connection.entityIds[1]
+                                            : connection.entityIds[0]
+                                        ];
                                       const certainty = (
                                         connection as Relation.IConnection<Relation.IIdentification>
                                       ).certainty;
