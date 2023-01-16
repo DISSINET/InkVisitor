@@ -2,6 +2,7 @@ import { IEntity, OrderType } from "@shared/types";
 import api from "api";
 import React, { useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "react-query";
+import { StatementEditorNoOrderTable } from "./StatementEditorNoOrderTable/StatementEditorNoOrderTable";
 
 interface StatementEditorOrdering {
   statementId: string;
@@ -31,14 +32,17 @@ export const StatementEditorOrdering: React.FC<StatementEditorOrdering> = ({
       await api.statementReorderElements(statementId, elementsWithOrdering),
     {
       onSuccess: (data, variables) => {
-        console.log(data);
         queryClient.invalidateQueries("statement");
       },
     }
   );
 
-  // console.log("elementsWithOrder", withOrder);
-  // console.log("elementsWithoutOrder", withoutOrder);
+  const addToOrdering = (elementId: string) => {
+    orderElementsMutation.mutate([
+      ...withOrder.map((e) => e.elementId),
+      elementId,
+    ]);
+  };
 
   return (
     <>
@@ -59,20 +63,11 @@ export const StatementEditorOrdering: React.FC<StatementEditorOrdering> = ({
         ))}
       </div>
       <div>without order</div>
-      <div>
-        {withoutOrder.map((element, key) => (
-          <p
-            onClick={() =>
-              orderElementsMutation.mutate([
-                ...withOrder.map((e) => e.elementId),
-                element.elementId,
-              ])
-            }
-          >
-            {element.elementId}
-          </p>
-        ))}
-      </div>
+      <StatementEditorNoOrderTable
+        elements={withoutOrder}
+        entities={entities}
+        addToOrdering={addToOrdering}
+      />
     </>
   );
 };
