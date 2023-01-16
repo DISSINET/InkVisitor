@@ -7,6 +7,7 @@ import { Connection, r, RDatum, RTable } from "rethinkdb-ts";
 import { ResponseEntity } from "./response";
 import { getEntityClass } from "@models/factory";
 import { IRequest } from "src/custom_typings/request";
+import Territory from "@models/territory/territory";
 
 /**
  * SearchQuery is customized builder for search queries, allowing to build query by chaining prepared filters
@@ -37,6 +38,23 @@ export class SearchQuery {
 
     // filter out duplicates
     return [...new Set(associatedEntityIds)];
+  }
+
+  /**
+   * searches Statements under specific territory and returns ids of all statement entity ids
+   * @param territoryId 
+   * @returns 
+   */
+  async getStatementObjectIdsForTerritories(territoryIds: string[]): Promise<string[]> {
+    const statements = await Statement.findByTerritoryIds(this.connection, territoryIds);
+    const idsMap: Record<string, null> = {};
+    for (const st of statements) {
+      for (const id of st.getEntitiesIds()) {
+        idsMap[id] = null;
+      }
+    }
+
+    return Object.keys(idsMap);
   }
 
   /**
@@ -203,9 +221,24 @@ export class SearchQuery {
     }
 
     if (req.cooccurrenceId) {
-      const assocEntityIds = await this.getCooccurredEntitiesIds(
-        req.cooccurrenceId
-      );
+      const assocEntityIds = await this.getCooccurredEntitiesIds(req.cooccurrenceId);
+      if (!req.entityIds) {
+        req.entityIds = [];
+      }
+      req.entityIds = req.entityIds.concat(assocEntityIds);
+    }
+
+
+    if (req.territoryId) {
+      let territoryIds = [req.territoryId];
+
+      // include childs
+      if (req.subTerritorySearch) {
+        const childs = Object.values(await new Territory({ id: req.territoryId }).findChilds(this.connection));
+        territoryIds = territoryIds.concat(childs.map(ch => ch.id));
+      }
+
+      const assocEntityIds = await this.getStatementObjectIdsForTerritories(territoryIds);
       if (!req.entityIds) {
         req.entityIds = [];
       }

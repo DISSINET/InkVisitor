@@ -45,7 +45,7 @@ export class TerritoryData implements ITerritoryData, IModel {
 }
 
 class Territory extends Entity implements ITerritory {
-  class: EntityEnums.Class.Territory = EntityEnums.Class.Territory;
+  class: EntityEnums.Class.Territory;
   data: TerritoryData;
 
   @nonenumerable
@@ -53,6 +53,7 @@ class Territory extends Entity implements ITerritory {
 
   constructor(data: Partial<ITerritory>) {
     super(data);
+    this.class = EntityEnums.Class.Territory;
     this.data = new TerritoryData(data.data || {});
   }
 
