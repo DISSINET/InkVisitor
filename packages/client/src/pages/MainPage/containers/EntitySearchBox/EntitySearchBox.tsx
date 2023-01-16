@@ -11,20 +11,17 @@ import {
 } from "components/advanced";
 import { useDebounce } from "hooks";
 import React, { useMemo, useState } from "react";
-import { FaUnlink } from "react-icons/fa";
-import { RiCloseFill, RiContactsBookLine } from "react-icons/ri";
-import { TiDelete } from "react-icons/ti";
+import { RiCloseFill } from "react-icons/ri";
 import { useQuery } from "react-query";
 import { OptionTypeBase, ValueType } from "react-select";
 import { wildCardChar } from "Theme/constants";
 import useResizeObserver from "use-resize-observer";
 import {
   StyledBoxContent,
-  StyledResultsWrapper,
   StyledResultsHeader,
+  StyledResultsWrapper,
   StyledRow,
   StyledRowHeader,
-  StyledTagLoaderWrap,
 } from "./EntitySearchBoxStyles";
 import { EntitySearchResults } from "./EntitySearchResults/EntitySearchResults";
 
@@ -377,9 +374,13 @@ export const EntitySearchBox: React.FC = () => {
         )}
       </StyledRow>
 
-      {sortedEntities.length > 0 && (
-        <StyledResultsHeader>{`Results (${sortedEntities.length})`}</StyledResultsHeader>
-      )}
+      <StyledResultsHeader>
+        {sortedEntities.length > 0 && (
+          <>{`Results (${sortedEntities.length})`}</>
+        )}
+      </StyledResultsHeader>
+
+      {/* StyledResultsWrapper is used to calculate size for infinite scroll, don't put any other components inside! */}
       <StyledResultsWrapper ref={resultRef}>
         {/* RESULTS */}
         {sortedEntities.length > 0 && (
