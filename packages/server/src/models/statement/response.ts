@@ -1,4 +1,4 @@
-import { UserEnums } from "@shared/enums";
+import { StatementEnums, UserEnums } from "@shared/enums";
 import { IEntity, IProp, IResponseStatement, IStatement } from "@shared/types";
 import { EntityOrder, OrderType, PropOrder } from "@shared/types/response-statement";
 import { Connection } from "rethinkdb-ts";
@@ -34,71 +34,78 @@ export class ResponseStatement extends Statement implements IResponseStatement {
     // statement.props
     Entity.extractIdsFromProps(this.props, (prop: IProp) => {
       temp.push({
+        type: StatementEnums.ElementType.Prop,
         propValueId: prop.value.entityId,
         propTypeId: prop.type.entityId,
         originId: this.id,
         elementId: prop.id,
-        order: prop.statementOrder
-      } as PropOrder & { order: number | false; });
+        order: prop.statementOrder !== undefined ? prop.statementOrder : false,
+      });
     });
 
     // statement.actions
     for (const action of this.data.actions) {
       temp.push({
+        type: StatementEnums.ElementType.Action,
         entityId: action.actionId,
         elementId: action.id,
-        order: action.statementOrder
-      } as EntityOrder & { order: number | false; });
+        order: action.statementOrder,
+      });
 
       // statement.actions.props
       Entity.extractIdsFromProps(action.props, (prop: IProp) => {
         temp.push({
+          type: StatementEnums.ElementType.Prop,
           propValueId: prop.value.entityId,
           propTypeId: prop.type.entityId,
           originId: action.actionId,
           elementId: action.id,
-          order: prop.statementOrder
-        } as PropOrder & { order: number | false; });
+          order: prop.statementOrder !== undefined ? prop.statementOrder : false,
+        });
       });
     }
 
     // statement.actants
     for (const actant of this.data.actants) {
       temp.push({
+        type: StatementEnums.ElementType.Actant,
         entityId: actant.entityId,
         elementId: actant.id,
         order: actant.statementOrder
-      } as EntityOrder & { order: number | false; });
+      });
 
       // statement.actants.props
       Entity.extractIdsFromProps(actant.props, (prop: IProp) => {
         temp.push({
+          type: StatementEnums.ElementType.Prop,
           propValueId: prop.value.entityId,
           propTypeId: prop.type.entityId,
           originId: actant.entityId,
           elementId: actant.id,
-          order: prop.statementOrder
-        } as PropOrder & { order: number | false; });
+          order: prop.statementOrder !== undefined ? prop.statementOrder : false,
+        });
       });
 
       // statement.actants.classifications
       for (const classification of actant.classifications) {
         temp.push({
+          type: StatementEnums.ElementType.Classification,
           entityId: classification.entityId,
           originId: actant.entityId,
           elementId: classification.id,
           order: classification.statementOrder
-        } as EntityOrder & { order: number | false; });
+        });
       }
 
       // statement.actants.identifications
       for (const identification of actant.identifications) {
         temp.push({
+          type: StatementEnums.ElementType.Identification,
           entityId: identification.entityId,
           elementId: actant.entityId,
           originId: identification.id,
           order: identification.statementOrder
-        } as EntityOrder & { order: number | false; });
+        });
       }
     }
 
