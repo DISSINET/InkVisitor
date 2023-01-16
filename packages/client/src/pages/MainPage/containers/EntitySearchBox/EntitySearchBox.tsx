@@ -21,6 +21,7 @@ import useResizeObserver from "use-resize-observer";
 import {
   StyledBoxContent,
   StyledResultsWrapper,
+  StyledResultsHeader,
   StyledRow,
   StyledRowHeader,
   StyledTagLoaderWrap,
@@ -378,11 +379,15 @@ export const EntitySearchBox: React.FC = () => {
 
       <StyledResultsWrapper ref={resultRef}>
         {/* RESULTS */}
+
         {sortedEntities.length > 0 && (
+          <>
+          <StyledResultsHeader>{`Results (${sortedEntities.length})`}</StyledResultsHeader>
           <EntitySearchResults
             results={sortedEntities}
             height={debouncedResultsHeight}
-          />
+            />
+            </>
         )}
         <Loader show={isFetching} />
       </StyledResultsWrapper>

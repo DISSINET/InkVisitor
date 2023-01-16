@@ -38,6 +38,12 @@ export const StyledResults = styled.div`
   overflow: hidden;
   width: 100%;
 `;
+export const StyledResultsHeader = styled.div`
+  font-weight: ${({ theme }) => theme.fontWeight.regular};
+  font-size: ${({ theme }) => theme.fontSize.lg};
+  margin-bottom: ${({ theme }) => theme.space["4"]};
+  color: ${({ theme }) => theme.color["primary"]};
+`;
 
 export const StyledResultHeading = styled.h6`
   width: 100%;
