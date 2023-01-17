@@ -3,6 +3,7 @@ import api from "api";
 import React, { useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "react-query";
 import { StatementEditorNoOrderTable } from "./StatementEditorNoOrderTable/StatementEditorNoOrderTable";
+import { StatementEditorOrderTable } from "./StatementEditorOrderTable/StatementEditorOrderTable";
 
 interface StatementEditorOrdering {
   statementId: string;
@@ -52,22 +53,11 @@ export const StatementEditorOrdering: React.FC<StatementEditorOrdering> = ({
 
   return (
     <>
-      <div>with order</div>
-      <div>
-        {withOrder.map((element, key) => (
-          <p
-            onClick={() =>
-              orderElementsMutation.mutate(
-                withOrder
-                  .map((e) => e.elementId)
-                  .filter((eId) => eId !== element.elementId)
-              )
-            }
-          >
-            {element.elementId}
-          </p>
-        ))}
-      </div>
+      <StatementEditorOrderTable
+        elements={withOrder}
+        entities={entities}
+        removeFromOrdering={removeFromOrdering}
+      />
       <div>without order</div>
       <StatementEditorNoOrderTable
         elements={withoutOrder}

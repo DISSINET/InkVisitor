@@ -25,13 +25,12 @@ export const StatementEditorNoOrderTable: React.FC<
         accesor: "data",
         Cell: ({ row }: Cell) => {
           const orderObject = row.original as OrderType;
-          const { elementId } = orderObject;
 
           return (
             <CgPlayListAdd
               size={20}
               style={{ cursor: "pointer" }}
-              onClick={() => addToOrdering(elementId)}
+              onClick={() => addToOrdering(orderObject.elementId)}
             />
           );
         },
