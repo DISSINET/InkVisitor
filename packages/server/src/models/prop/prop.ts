@@ -15,7 +15,7 @@ export class PropSpec implements IPropSpec, IModel {
   partitivity: EntityEnums.Partitivity = EntityEnums.Partitivity.Unison;
 
   constructor(data: Partial<IPropSpec>) {
-    fillFlatObject(this, data)
+    fillFlatObject(this, data);
   }
 
   isValid(): boolean {
@@ -25,10 +25,10 @@ export class PropSpec implements IPropSpec, IModel {
 
 export default class Prop implements IProp, IModel {
   id = "";
-  elvl: EntityEnums.Elvl = EntityEnums.Elvl.Textual
+  elvl: EntityEnums.Elvl = EntityEnums.Elvl.Textual;
   certainty: EntityEnums.Certainty = EntityEnums.Certainty.Empty;
   logic: EntityEnums.Logic = EntityEnums.Logic.Positive;
-  mood: EntityEnums.Mood[] = [EntityEnums.Mood.Indication];
+  mood: EntityEnums.Mood[];
   moodvariant: EntityEnums.MoodVariant = EntityEnums.MoodVariant.Realis;
   bundleOperator: EntityEnums.Operator = EntityEnums.Operator.And;
   bundleStart: boolean = false;
@@ -41,11 +41,9 @@ export default class Prop implements IProp, IModel {
 
   constructor(data: Partial<IProp>) {
     fillFlatObject(this, data);
-    fillArray(this.mood, String, data.mood);
-
     this.type = new PropSpec(data.type || {});
     this.value = new PropSpec(data.value || {});
-
+    this.mood = data.mood ? data.mood : [EntityEnums.Mood.Indication];
     fillArray<Prop>(this.children, Prop, data.children);
   }
 
