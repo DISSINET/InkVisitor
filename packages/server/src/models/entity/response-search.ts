@@ -239,13 +239,15 @@ export class SearchQuery {
       }
 
       const assocEntityIds = await this.getStatementObjectIdsForTerritories(territoryIds);
+      
       if (!req.entityIds) {
         req.entityIds = [];
       }
       req.entityIds = req.entityIds.concat(assocEntityIds);
-    }
 
-    if (req.entityIds?.length) {
+      // TODO check this
+      this.whereEntityIds(req.entityIds);
+    } else if (req.entityIds?.length) {
       this.whereEntityIds(req.entityIds);
     }
 
