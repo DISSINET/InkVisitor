@@ -59,7 +59,7 @@ export class ResponseStatement extends Statement implements IResponseStatement {
           propValueId: prop.value.entityId,
           propTypeId: prop.type.entityId,
           originId: action.actionId,
-          elementId: action.id,
+          elementId: prop.id,
           order: prop.statementOrder !== undefined ? prop.statementOrder : false,
         });
       });
@@ -81,7 +81,7 @@ export class ResponseStatement extends Statement implements IResponseStatement {
           propValueId: prop.value.entityId,
           propTypeId: prop.type.entityId,
           originId: actant.entityId,
-          elementId: actant.id,
+          elementId: prop.id,
           order: prop.statementOrder !== undefined ? prop.statementOrder : false,
         });
       });
@@ -102,8 +102,8 @@ export class ResponseStatement extends Statement implements IResponseStatement {
         temp.push({
           type: StatementEnums.ElementType.Identification,
           entityId: identification.entityId,
-          elementId: actant.entityId,
-          originId: identification.id,
+          originId: actant.entityId,
+          elementId: identification.id,
           order: identification.statementOrder
         });
       }
