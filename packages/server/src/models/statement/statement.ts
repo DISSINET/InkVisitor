@@ -32,12 +32,12 @@ export class StatementClassification implements IStatementClassification {
   elvl: EntityEnums.Elvl = EntityEnums.Elvl.Textual;
   logic: EntityEnums.Logic = EntityEnums.Logic.Positive;
   certainty: EntityEnums.Certainty = EntityEnums.Certainty.AlmostCertain;
-  mood: EntityEnums.Mood[] = [EntityEnums.Mood.Indication];
+  mood: EntityEnums.Mood[];
   moodvariant: EntityEnums.MoodVariant = EntityEnums.MoodVariant.Irrealis;
 
   constructor(data: Partial<IStatementClassification>) {
     fillFlatObject(this, data);
-    this.mood = data.mood ? data.mood : [];
+    this.mood = data.mood ? data.mood : [EntityEnums.Mood.Indication];
   }
 }
 
@@ -47,15 +47,12 @@ export class StatementIdentification implements IStatementClassification {
   elvl: EntityEnums.Elvl = EntityEnums.Elvl.Textual;
   logic: EntityEnums.Logic = EntityEnums.Logic.Positive;
   certainty: EntityEnums.Certainty = EntityEnums.Certainty.AlmostCertain;
-  mood: EntityEnums.Mood[] = [EntityEnums.Mood.Indication];
+  mood: EntityEnums.Mood[];
   moodvariant: EntityEnums.MoodVariant = EntityEnums.MoodVariant.Irrealis;
 
   constructor(data: Partial<IStatementClassification>) {
-    if (!data) {
-      return;
-    }
-
     fillFlatObject(this, data);
+    this.mood = data.mood ? data.mood : [EntityEnums.Mood.Indication];
   }
 }
 
@@ -121,7 +118,7 @@ export class StatementAction implements IStatementAction {
   elvl: EntityEnums.Elvl = EntityEnums.Elvl.Textual;
   certainty: EntityEnums.Certainty = EntityEnums.Certainty.Empty;
   logic: EntityEnums.Logic = EntityEnums.Logic.Positive;
-  mood: EntityEnums.Mood[] = [EntityEnums.Mood.Indication];
+  mood: EntityEnums.Mood[];
   moodvariant: EntityEnums.MoodVariant = EntityEnums.MoodVariant.Realis;
   bundleOperator: EntityEnums.Operator = EntityEnums.Operator.And;
   bundleStart: boolean = false;
@@ -130,7 +127,7 @@ export class StatementAction implements IStatementAction {
 
   constructor(data: Partial<IStatementAction>) {
     fillFlatObject(this, data);
-    fillArray(this.mood, String, data.mood);
+    this.mood = data.mood ? data.mood : [EntityEnums.Mood.Indication];
     fillArray<Prop>(this.props, Prop, data.props);
   }
 
@@ -581,8 +578,8 @@ class Statement extends Entity implements IStatement {
     const entityIds: string[] = [];
 
     (statements as IStatement[]).forEach((s) => {
-      const statement  = new Statement(s)
-      entityIds.push(...statement.getEntitiesIds())
+      const statement = new Statement(s);
+      entityIds.push(...statement.getEntitiesIds());
     });
 
     return entityIds;
