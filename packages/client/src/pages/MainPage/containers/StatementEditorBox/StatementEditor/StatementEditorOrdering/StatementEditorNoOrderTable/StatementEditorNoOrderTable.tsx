@@ -1,14 +1,12 @@
-import { StatementEnums } from "@shared/enums";
-import { IEntity, OrderType, PropOrder } from "@shared/types";
+import { IEntity, OrderType } from "@shared/types";
 import { Table } from "components";
 import React, { useMemo } from "react";
 import { CgPlayListAdd } from "react-icons/cg";
 import { Cell, Column } from "react-table";
 import {
-  renderOrderingEntityTag,
   renderOrderingInfoColumn,
   renderOrderingMainColumn,
-} from "../StatementEditorOrderingColumnHelper";
+} from "../StatementEditorOrderingColumnHelper/StatementEditorOrderingColumnHelper";
 
 interface StatementEditorNoOrderTable {
   elements: OrderType[];
@@ -39,7 +37,7 @@ export const StatementEditorNoOrderTable: React.FC<
         },
       },
       {
-        id: "tags",
+        id: "main",
         accessor: "data",
         Cell: ({ row }: Cell) => {
           const orderObject = row.original as OrderType;
@@ -52,16 +50,7 @@ export const StatementEditorNoOrderTable: React.FC<
         Cell: ({ row }: Cell) => {
           const orderObject = row.original as OrderType;
 
-          return (
-            <div
-              style={{
-                textAlign: "right",
-                whiteSpace: "nowrap",
-              }}
-            >
-              {renderOrderingInfoColumn(orderObject, entities)}
-            </div>
-          );
+          return renderOrderingInfoColumn(orderObject, entities);
         },
       },
     ],

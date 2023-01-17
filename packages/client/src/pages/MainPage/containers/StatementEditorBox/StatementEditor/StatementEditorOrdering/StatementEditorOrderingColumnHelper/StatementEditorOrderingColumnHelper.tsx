@@ -1,13 +1,11 @@
 import { StatementEnums } from "@shared/enums";
-import {
-  IEntity,
-  OrderType,
-  ClassificationOrder,
-  IdentificationOrder,
-  PropOrder,
-} from "@shared/types";
-import { EntityTag, EmptyTag } from "components/advanced";
+import { IEntity, OrderType } from "@shared/types";
+import { EmptyTag, EntityTag } from "components/advanced";
 import React from "react";
+import {
+  StyledInfoColumn,
+  StyledMainColumn,
+} from "./StatementEditorOrderingColumnHelperStyles";
 
 export const renderOrderingEntityTag = (
   entity?: IEntity,
@@ -56,10 +54,10 @@ export const renderOrderingMainColumn = (
       const propValueEntity = entities[propValueId];
 
       return (
-        <div style={{ whiteSpace: "nowrap" }}>
+        <StyledMainColumn>
           {renderOrderingEntityTag(propTypeEntity, "type")}{" "}
           {renderOrderingEntityTag(propValueEntity, "value")}
-        </div>
+        </StyledMainColumn>
       );
   }
 };
@@ -70,29 +68,29 @@ export const renderOrderingInfoColumn = (
 ) => {
   switch (orderObject.type) {
     case StatementEnums.ElementType.Actant:
-      return "Actant";
+      return <StyledInfoColumn>{"Actant"}</StyledInfoColumn>;
     case StatementEnums.ElementType.Action:
-      return "Action";
+      return <StyledInfoColumn>{"Action"}</StyledInfoColumn>;
     case StatementEnums.ElementType.Classification:
       return (
-        <>
+        <StyledInfoColumn>
           {"Classification of "}
           {renderOrderingEntityTag(entities[orderObject.originId], "empty")}
-        </>
+        </StyledInfoColumn>
       );
     case StatementEnums.ElementType.Identification:
       return (
-        <>
+        <StyledInfoColumn>
           {"Identification of "}
           {renderOrderingEntityTag(entities[orderObject.originId], "empty")}
-        </>
+        </StyledInfoColumn>
       );
     case StatementEnums.ElementType.Prop:
       return (
-        <>
+        <StyledInfoColumn>
           {"Prop of "}
           {renderOrderingEntityTag(entities[orderObject.originId], "empty")}
-        </>
+        </StyledInfoColumn>
       );
   }
 };
