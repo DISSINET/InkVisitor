@@ -53,7 +53,13 @@ export const StatementEditorOrdering: React.FC<StatementEditorOrdering> = ({
   };
 
   const changeOrder = (elementIdToMove: string, newOrder: number) => {
-    console.log(newOrder);
+    let elementIds = withOrder.map((e) => e.elementId);
+    // const index = elementIds.indexOf(elementIdToMove);
+
+    elementIds = elementIds.filter((o) => o !== elementIdToMove);
+    elementIds.splice(newOrder, 0, elementIdToMove);
+
+    orderElementsMutation.mutate(elementIds);
   };
 
   return (
