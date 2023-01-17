@@ -2,6 +2,7 @@ import { IEntity, OrderType } from "@shared/types";
 import api from "api";
 import React, { useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "react-query";
+import theme from "Theme/theme";
 import { StatementEditorNoOrderTable } from "./StatementEditorNoOrderTable/StatementEditorNoOrderTable";
 import { StatementEditorOrderTable } from "./StatementEditorOrderTable/StatementEditorOrderTable";
 
@@ -51,14 +52,27 @@ export const StatementEditorOrdering: React.FC<StatementEditorOrdering> = ({
     );
   };
 
+  const changeOrder = (elementIdToMove: string, newOrder: number) => {
+    console.log(newOrder);
+  };
+
   return (
     <>
       <StatementEditorOrderTable
         elements={withOrder}
         entities={entities}
         removeFromOrdering={removeFromOrdering}
+        changeOrder={changeOrder}
       />
-      <div>without order</div>
+      <p
+        style={{
+          fontSize: theme.fontSize.xs,
+          marginBottom: "0.5rem",
+          marginTop: "1.5rem",
+        }}
+      >
+        {"Without order"}
+      </p>
       <StatementEditorNoOrderTable
         elements={withoutOrder}
         entities={entities}

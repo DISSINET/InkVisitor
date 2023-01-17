@@ -3,6 +3,7 @@ import { Table } from "components";
 import React, { useMemo } from "react";
 import { CgPlayListAdd } from "react-icons/cg";
 import { Cell, Column } from "react-table";
+import theme from "Theme/theme";
 import {
   renderOrderingInfoColumn,
   renderOrderingMainColumn,
@@ -29,7 +30,7 @@ export const StatementEditorNoOrderTable: React.FC<
           return (
             <CgPlayListAdd
               size={20}
-              style={{ cursor: "pointer" }}
+              style={{ cursor: "pointer", color: theme.color.gray[700] }}
               onClick={() => addToOrdering(orderObject.elementId)}
             />
           );
