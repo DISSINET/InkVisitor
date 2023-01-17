@@ -34,8 +34,8 @@ import {
   ItemTypes,
 } from "types";
 import { dndHoverFn } from "utils";
-import AttributesEditor from "../../AttributesEditor/AttributesEditor";
-import { PropGroup } from "../../PropGroup/PropGroup";
+import AttributesEditor from "../../../AttributesEditor/AttributesEditor";
+import { PropGroup } from "../../../PropGroup/PropGroup";
 import { StatementEditorActantClassification } from "./StatementEditorActantClassification/StatementEditorActantClassification";
 import { StatementEditorActantIdentification } from "./StatementEditorActantIdentification/StatementEditorActantIdentification";
 import {

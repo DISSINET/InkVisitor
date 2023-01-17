@@ -44,6 +44,12 @@ export const StatementEditorOrdering: React.FC<StatementEditorOrdering> = ({
     ]);
   };
 
+  const removeFromOrdering = (elementId: string) => {
+    orderElementsMutation.mutate(
+      withOrder.map((e) => e.elementId).filter((eId) => eId !== elementId)
+    );
+  };
+
   return (
     <>
       <div>with order</div>
