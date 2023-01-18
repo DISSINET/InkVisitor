@@ -1,29 +1,30 @@
 import { IEntity, OrderType } from "@shared/types";
-import { Table } from "components";
-import React, { useMemo } from "react";
-import { CgPlayListRemove } from "react-icons/cg";
-import { RiArrowDownCircleLine, RiArrowUpCircleLine } from "react-icons/ri";
-import { Cell, Column } from "react-table";
-import theme from "Theme/theme";
+import update from "immutability-helper";
+import React, { useCallback, useMemo } from "react";
+import { Cell, Column, Row, useTable } from "react-table";
 import {
   renderOrderingInfoColumn,
   renderOrderingMainColumn,
 } from "../StatementEditorOrderingColumnHelper/StatementEditorOrderingColumnHelper";
+import { StatementEditorOrderTableRow } from "./StatementEditorOrderTableRow";
 import {
   StyledButtonsWrap,
   StyledCgPlayListRemove,
   StyledRiArrowDownCircleLine,
   StyledRiArrowUpCircleLine,
+  StyledTable,
 } from "./StatementEditorOrderTableStyles";
 
 interface StatementEditorOrderTable {
   elements: OrderType[];
+  setElements: React.Dispatch<React.SetStateAction<OrderType[]>>;
   entities: { [key: string]: IEntity };
   removeFromOrdering: (elementId: string) => void;
   changeOrder: (elementIdToMove: string, newOrder: number) => void;
 }
 export const StatementEditorOrderTable: React.FC<StatementEditorOrderTable> = ({
   elements,
+  setElements,
   entities,
   removeFromOrdering,
   changeOrder,
@@ -89,14 +90,58 @@ export const StatementEditorOrderTable: React.FC<StatementEditorOrderTable> = ({
     [elements, entities]
   );
 
+  const {
+    getTableProps,
+    getTableBodyProps,
+    headerGroups,
+    rows,
+    prepareRow,
+    visibleColumns,
+  } = useTable({
+    columns,
+    data: data,
+    initialState: {
+      hiddenColumns: ["id"],
+    },
+  });
+
+  const moveRow = useCallback(
+    (dragIndex: number, hoverIndex: number) => {
+      const dragRecord = elements[dragIndex];
+      setElements(
+        update(elements, {
+          $splice: [
+            [dragIndex, 1],
+            [hoverIndex, 0, dragRecord],
+          ],
+        })
+      );
+    },
+    [elements]
+  );
+
+  const moveEndRow = (elementIdToMove: string, index: number) => {
+    console.log("row dropped");
+  };
+
   return (
-    <Table
-      data={data}
-      columns={columns}
-      perPage={1000}
-      disableHeading
-      disableHeader
-      firstColumnMinWidth
-    />
+    <StyledTable {...getTableProps()}>
+      <tbody {...getTableBodyProps()}>
+        {rows.map((row: Row, i: number) => {
+          prepareRow(row);
+          return (
+            <StatementEditorOrderTableRow
+              index={i}
+              row={row}
+              moveRow={moveRow}
+              moveEndRow={moveEndRow}
+              visibleColumns={visibleColumns}
+              entities={entities}
+              {...row.getRowProps()}
+            />
+          );
+        })}
+      </tbody>
+    </StyledTable>
   );
 };

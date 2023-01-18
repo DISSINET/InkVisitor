@@ -66,6 +66,7 @@ export const StatementEditorOrdering: React.FC<StatementEditorOrdering> = ({
     <>
       <StatementEditorOrderTable
         elements={withOrder}
+        setElements={setWithOrder}
         entities={entities}
         removeFromOrdering={removeFromOrdering}
         changeOrder={changeOrder}

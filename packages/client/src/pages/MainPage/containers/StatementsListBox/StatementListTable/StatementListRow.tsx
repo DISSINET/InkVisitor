@@ -110,7 +110,6 @@ export const StatementListRow: React.FC<StatementListRow> = ({
       <StyledTr
         ref={dropRef}
         opacity={opacity}
-        isOdd={Boolean(index % 2)}
         isSelected={row.original.id === statementId}
         onClick={(e: any) => {
           handleClick(row.original.id);
@@ -132,8 +131,7 @@ export const StatementListRow: React.FC<StatementListRow> = ({
                 {lastEditdateText}
               </StyledTdLastEdit>
             );
-          }
-          if (
+          } else if (
             [
               "Statement",
               "Actions",
