@@ -33,7 +33,6 @@ import { EntitySearchResults } from "./EntitySearchResults/EntitySearchResults";
 const initValues: IRequestSearch = {
   label: "",
   cooccurrenceId: "",
-  updatedDate: new Date()
 };
 const defaultClassOption: DropdownItem = {
   label: "*",
@@ -379,6 +378,38 @@ export const EntitySearchBox: React.FC = () => {
           />
         )}
       </StyledRow>
+      <StyledRow>
+        <StyledRowHeader>Created at</StyledRowHeader>
+        {debouncedValues.createdDate ? (
+          <StyledDateTag>
+            <StyledDateTagText>{debouncedValues.createdDate.toDateString()}</StyledDateTagText>
+            <StyledDateTagButton
+              key="d"
+              icon={<RiCloseFill />}
+              color="white"
+              noBorder
+              noBackground
+              inverted
+              tooltipLabel="remove date"
+              onClick={() => {
+                handleChange({ createdDate: undefined });
+              }}
+            />
+          </StyledDateTag>
+        ) : (
+          <StyledDatePicker
+            type="date"
+            id="created-date"
+            width={150}
+            name="created-date"
+            onChange={(e) => {
+              const createdDate = new Date(e.target.value);
+              handleChange({ createdDate });
+            }}
+          />
+        )}
+      </StyledRow>
+
       <StyledRow>
         <StyledRowHeader>Udpated at</StyledRowHeader>
         {debouncedValues.updatedDate ? (
