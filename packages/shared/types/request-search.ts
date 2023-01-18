@@ -37,7 +37,7 @@ export class RequestSearch {
       (requestData as any).relatedEntityId ||
       false;
 
-    this.entityIds = requestData.entityIds || [];
+    this.entityIds = requestData.entityIds;
 
     if (requestData.excluded) {
       if (requestData.excluded.constructor.name === "String") {
