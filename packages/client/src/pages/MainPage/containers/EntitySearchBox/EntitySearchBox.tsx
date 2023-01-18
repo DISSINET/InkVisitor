@@ -3,12 +3,13 @@ import { EntityEnums } from "@shared/enums";
 import { IEntity, IOption } from "@shared/types";
 import { IRequestSearch } from "@shared/types/request-search";
 import api from "api";
-import { Button, Dropdown, Input, Loader, TypeBar } from "components";
+import { Button, Dropdown, Input, Loader, Tag, TypeBar } from "components";
 import {
   AttributeButtonGroup,
   EntitySuggester,
   EntityTag,
 } from "components/advanced";
+import { StyledLabel } from "components/basic/Tag/TagStyles";
 import { useDebounce } from "hooks";
 import React, { useMemo, useState } from "react";
 import { RiCloseFill } from "react-icons/ri";
@@ -18,6 +19,10 @@ import { wildCardChar } from "Theme/constants";
 import useResizeObserver from "use-resize-observer";
 import {
   StyledBoxContent,
+  StyledDatePicker,
+  StyledDateTag,
+  StyledDateTagButton,
+  StyledDateTagText,
   StyledResultsHeader,
   StyledResultsWrapper,
   StyledRow,
@@ -28,6 +33,7 @@ import { EntitySearchResults } from "./EntitySearchResults/EntitySearchResults";
 const initValues: IRequestSearch = {
   label: "",
   cooccurrenceId: "",
+  updatedDate: new Date()
 };
 const defaultClassOption: DropdownItem = {
   label: "*",
@@ -370,6 +376,38 @@ export const EntitySearchBox: React.FC = () => {
             placeholder={"entity"}
             disableCreate
             inputWidth={114}
+          />
+        )}
+      </StyledRow>
+      <StyledRow>
+        <StyledRowHeader>Udpated at</StyledRowHeader>
+        {debouncedValues.updatedDate ? (
+          <StyledDateTag>
+            <StyledDateTagText>{debouncedValues.updatedDate.toDateString()}</StyledDateTagText>
+            <StyledDateTagButton
+              key="d"
+              icon={<RiCloseFill />}
+              color="white"
+              noBorder
+              noBackground
+              inverted
+              tooltipLabel="remove date"
+              onClick={() => {
+                handleChange({ updatedDate: undefined });
+              }}
+            />
+          </StyledDateTag>
+        ) : (
+          <StyledDatePicker
+            type="date"
+            id="updated-date"
+            width={150}
+            name="updated-date"
+            onChange={(e) => {
+              const updatedDate = new Date(e.target.value);
+              console.log(updatedDate);
+              handleChange({ updatedDate });
+            }}
           />
         )}
       </StyledRow>
