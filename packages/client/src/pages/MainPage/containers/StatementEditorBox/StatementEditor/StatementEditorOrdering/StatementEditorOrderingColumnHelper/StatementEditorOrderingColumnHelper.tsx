@@ -5,6 +5,8 @@ import React from "react";
 import {
   StyledInfoColumn,
   StyledMainColumn,
+  StyledTableTextGridCell,
+  StyledTagWrap,
 } from "./StatementEditorOrderingColumnHelperStyles";
 
 export const renderOrderingEntityTag = (
@@ -21,9 +23,22 @@ export const renderOrderingEntityTag = (
   return (
     <>
       {entity ? (
-        <EntityTag key={entity.id} entity={entity} tooltipText={entity.label} />
+        <StyledTableTextGridCell>
+          <StyledTagWrap>
+            <EntityTag
+              key={entity.id}
+              entity={entity}
+              tooltipText={entity.label}
+              // fullWidth
+            />
+          </StyledTagWrap>
+        </StyledTableTextGridCell>
       ) : (
-        fallback && <EmptyTag label={fallback} />
+        fallback && (
+          <div>
+            <EmptyTag label={fallback} />
+          </div>
+        )
       )}
     </>
   );

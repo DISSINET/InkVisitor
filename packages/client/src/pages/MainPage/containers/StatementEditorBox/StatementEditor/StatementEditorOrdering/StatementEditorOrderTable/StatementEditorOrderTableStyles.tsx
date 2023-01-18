@@ -34,7 +34,7 @@ export const StyledTr = styled.tr<StyledTr>`
 export const StyledTd = styled.td`
   padding: ${({ theme }) => theme.space[2]};
   padding-left: ${({ theme }) => theme.space[4]};
-  font-size: ${({ theme }) => theme.fontSize["sm"]};
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
 `;
 export const StyledTdLastEdit = styled(StyledTd)`
   font-size: ${({ theme }) => theme.fontSize["xxs"]};
