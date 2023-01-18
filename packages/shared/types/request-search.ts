@@ -16,6 +16,9 @@ export interface IRequestSearch {
   subTerritorySearch?: boolean;
   onlyTemplates?: boolean;
   usedTemplate?: string;
+  status?: EntityEnums.Status;
+  createdDate?: Date;
+  updatedDate?: Date;
 }
 
 export class RequestSearch {
@@ -28,6 +31,9 @@ export class RequestSearch {
   excluded?: EntityEnums.Class[];
   onlyTemplates?: boolean;
   usedTemplate?: string;
+  status?: EntityEnums.Status;
+  createdDate?: Date;
+  updatedDate?: Date;
 
   constructor(requestData: IRequestSearch) {
     this.class = requestData.class;
@@ -76,6 +82,21 @@ export class RequestSearch {
       return new BadParams("entityIds needs to be an array");
     }
 
+    // check dates
+    if (
+      this.createdDate !== undefined &&
+      this.createdDate.constructor.name !== "Date"
+    ) {
+      return new BadParams("createdDate needs to be a date");
+    }
+    if (
+      this.updatedDate !== undefined &&
+      this.updatedDate.constructor.name !== "Date"
+    ) {
+      return new BadParams("updatedDate needs to be a date");
+    }
+
+
     if (this.subTerritorySearch && !this.territoryId) {
       return new BadParams(
         "subTerritorySearch needs valid territoryId to be set"
@@ -89,10 +110,13 @@ export class RequestSearch {
       !this.cooccurrenceId &&
       !this.usedTemplate &&
       !this.territoryId &&
+      !this.status &&
+      !this.createdDate &&
+      !this.updatedDate &&
       (this.entityIds === undefined || !this.entityIds.length)
     ) {
       return new BadParams(
-        "label, class, onlyTemplates, usedTemplate, entityIds or territoryId field has to be set"
+        "one of the search field has to be set"
       );
     }
 
