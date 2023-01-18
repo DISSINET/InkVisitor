@@ -51,23 +51,25 @@ export const StyledResultItem = styled.div`
 export const StyledTagLoaderWrap = styled.div`
   min-height: 3rem;
 `;
+
 export const StyledDatePicker = styled(StyledInput)`
 `;
 
 export const StyledDateTag = styled.div`
   background-color: ${({theme}) => theme.color['gray'][600]};
-  padding: ${({theme}) => theme.space[2]};
+  padding: ${({theme}) => theme.space[2] + " " + theme.space[4]};
   border-radius: ${({theme}) => theme.space[2]};
   width: 150px;
   display: grid;
   grid-template-columns: ${({ theme }) => "auto " + theme.space["6"]} ;
-  
 `;
+
 export const StyledDateTagText = styled.div`
   font-size: ${({ theme }) => theme.fontSize.xs};
   color: ${({ theme }) => theme.color['white']};
   margin-right: ${({theme}) => theme.space[4]};
-`;
-export const StyledDateTagButton = styled(Button)`
+  align-self: center;
 `;
 
+export const StyledDateTagButton = styled(Button)`
+`;
