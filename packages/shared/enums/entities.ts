@@ -41,6 +41,7 @@ export namespace EntityEnums {
     Approved = "1",
     Discouraged = "2",
     Warning = "3",
+    Unfinished = "4",
   }
 
   export enum Certainty {
