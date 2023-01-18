@@ -4,7 +4,9 @@ import { EmptyTag, EntityTag } from "components/advanced";
 import React from "react";
 import {
   StyledInfoColumn,
+  StyledInfoText,
   StyledMainColumn,
+  StyledSeparator,
   StyledTableTextGridCell,
   StyledTagWrap,
 } from "./StatementEditorOrderingColumnHelperStyles";
@@ -70,7 +72,8 @@ export const renderOrderingMainColumn = (
 
       return (
         <StyledMainColumn>
-          {renderOrderingEntityTag(propTypeEntity, "type")}{" "}
+          {renderOrderingEntityTag(propTypeEntity, "type")}
+          <StyledSeparator />
           {renderOrderingEntityTag(propValueEntity, "value")}
         </StyledMainColumn>
       );
@@ -89,21 +92,24 @@ export const renderOrderingInfoColumn = (
     case StatementEnums.ElementType.Classification:
       return (
         <StyledInfoColumn>
-          {"Classification of "}
+          <StyledInfoText>{"Classification of"}</StyledInfoText>
+          <StyledSeparator />
           {renderOrderingEntityTag(entities[orderObject.originId], "empty")}
         </StyledInfoColumn>
       );
     case StatementEnums.ElementType.Identification:
       return (
         <StyledInfoColumn>
-          {"Identification of "}
+          <StyledInfoText>{"Identification of"}</StyledInfoText>
+          <StyledSeparator />
           {renderOrderingEntityTag(entities[orderObject.originId], "empty")}
         </StyledInfoColumn>
       );
     case StatementEnums.ElementType.Prop:
       return (
         <StyledInfoColumn>
-          {"Prop of "}
+          <StyledInfoText>{"Prop of"}</StyledInfoText>
+          <StyledSeparator />
           {renderOrderingEntityTag(entities[orderObject.originId], "empty")}
         </StyledInfoColumn>
       );

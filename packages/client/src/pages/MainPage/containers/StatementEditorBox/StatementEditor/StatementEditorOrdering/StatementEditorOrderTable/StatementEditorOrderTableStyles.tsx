@@ -22,9 +22,6 @@ export const StyledTr = styled.tr<StyledTr>`
   border-top: 1px solid ${({ theme }) => theme.color["gray"][500]};
   cursor: move;
   td:first-child {
-    padding-left: ${({ theme }) => theme.space[1]};
-  }
-  td:first-child {
     width: 1%;
   }
   :hover {
@@ -33,7 +30,6 @@ export const StyledTr = styled.tr<StyledTr>`
 `;
 export const StyledTd = styled.td`
   padding: ${({ theme }) => theme.space[2]};
-  padding-left: ${({ theme }) => theme.space[4]};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
 `;
 export const StyledTdLastEdit = styled(StyledTd)`
