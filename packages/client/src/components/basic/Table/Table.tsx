@@ -1,6 +1,7 @@
 import { Button, Loader } from "components";
 import React, { ReactNode } from "react";
 import { Column, usePagination, useSortBy, useTable } from "react-table";
+import { ThemeColor } from "Theme/theme";
 import {
   StyledHeading,
   StyledPageNumber,

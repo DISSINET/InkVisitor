@@ -3,7 +3,7 @@ import { Table } from "components";
 import React, { useMemo } from "react";
 import { CgPlayListAdd } from "react-icons/cg";
 import { Cell, Column } from "react-table";
-import theme from "Theme/theme";
+import theme, { ThemeColor } from "Theme/theme";
 import {
   renderOrderingInfoColumn,
   renderOrderingMainColumn,
