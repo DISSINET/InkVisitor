@@ -271,6 +271,12 @@ export class SearchQuery {
       this.whereStatus(req.status);
     }
 
+    // search by date
+    // TODO
+    if (req.updatedDate || req.createdDate) {
+
+    }
+
     if (req.usedTemplate) {
       this.whereUsedTemplate(req.usedTemplate);
     }
