@@ -1,3 +1,4 @@
+import { StyledInput } from "components/basic/Input/InputStyles";
 import styled from "styled-components";
 
 export const StyledBoxContent = styled.div`
@@ -49,3 +50,10 @@ export const StyledResultItem = styled.div`
 export const StyledTagLoaderWrap = styled.div`
   min-height: 3rem;
 `;
+
+export const StyledDateTag = styled.div`
+  
+`;
+export const StyledDatePicker = styled(StyledInput)`
+`;
+
