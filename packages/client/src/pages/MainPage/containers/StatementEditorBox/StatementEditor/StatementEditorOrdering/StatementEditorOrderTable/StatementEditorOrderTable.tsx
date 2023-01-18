@@ -120,10 +120,6 @@ export const StatementEditorOrderTable: React.FC<StatementEditorOrderTable> = ({
     [elements]
   );
 
-  const moveEndRow = (elementIdToMove: string, index: number) => {
-    console.log("row dropped");
-  };
-
   return (
     <StyledTable {...getTableProps()}>
       <tbody {...getTableBodyProps()}>
@@ -134,7 +130,7 @@ export const StatementEditorOrderTable: React.FC<StatementEditorOrderTable> = ({
               index={i}
               row={row}
               moveRow={moveRow}
-              moveEndRow={moveEndRow}
+              moveEndRow={changeOrder}
               visibleColumns={visibleColumns}
               entities={entities}
               {...row.getRowProps()}
