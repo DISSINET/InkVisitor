@@ -71,6 +71,19 @@ export class SearchQuery {
   }
 
   /**
+   * adds condition to limit results by filtering by specific status
+   * @param entityClass
+   * @returns
+   */
+  whereStatus(status: EntityEnums.Status): SearchQuery {
+    this.query = this.query.filter({
+      status: status,
+    });
+
+    return this;
+  }
+
+  /**
    * adds condition to limit results by excluding specific classes
    * @param entityClass
    * @returns
@@ -252,6 +265,10 @@ export class SearchQuery {
 
     if (req.class) {
       this.whereClass(req.class);
+    }
+
+    if (req.status) {
+      this.whereStatus(req.status);
     }
 
     if (req.usedTemplate) {
