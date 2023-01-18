@@ -239,15 +239,14 @@ export class SearchQuery {
       }
 
       const assocEntityIds = await this.getStatementObjectIdsForTerritories(territoryIds);
-      
+
       if (!req.entityIds) {
         req.entityIds = [];
       }
       req.entityIds = req.entityIds.concat(assocEntityIds);
+    }
 
-      // TODO check this
-      this.whereEntityIds(req.entityIds);
-    } else if (req.entityIds?.length) {
+    if (req.entityIds) {
       this.whereEntityIds(req.entityIds);
     }
 
@@ -270,6 +269,8 @@ export class SearchQuery {
     if (req.label) {
       this.whereLabel(req.label);
     }
+
+    console.log(this.query.toString());
   }
 
   /**
