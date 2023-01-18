@@ -16,6 +16,11 @@ export const entityStatusDict: {
       info: "",
     },
     {
+      value: EntityEnums.Status.Unfinished,
+      label: "unfinished",
+      info: "",
+    },
+    {
       value: EntityEnums.Status.Discouraged,
       label: "discouraged",
       info: "",
