@@ -1,3 +1,4 @@
+import { entityStatusDict } from "@shared/dictionaries";
 import { DropdownItem, entitiesDict } from "@shared/dictionaries/entity";
 import { EntityEnums } from "@shared/enums";
 import { IEntity, IOption } from "@shared/types";
@@ -39,6 +40,13 @@ const defaultClassOption: DropdownItem = {
   value: "",
 };
 
+const defaultStatusOption: DropdownItem = {
+  label: "all",
+  value: "",
+};
+const statusOptions: DropdownItem[] = entityStatusDict;
+statusOptions.push(defaultStatusOption);
+
 const anyTemplate: DropdownItem = {
   value: "Any",
   label: "Any template",
@@ -58,6 +66,18 @@ export const EntitySearchBox: React.FC = () => {
   const { ref: resultRef, height = 0 } = useResizeObserver<HTMLDivElement>();
 
   const debouncedResultsHeight = useDebounce(height, 20);
+
+  const statusOptionSelected: IOption = useMemo(() => {
+    if (!!debouncedValues.status) {
+      return (
+        statusOptions.find((option) => {
+          return option.value === debouncedValues.status;
+        }) || defaultStatusOption
+      );
+    }
+    return defaultStatusOption;
+  }, [debouncedValues.status]);
+
 
   // check whether the search should be executed
   const validSearch = useMemo(() => {
@@ -146,7 +166,7 @@ export const EntitySearchBox: React.FC = () => {
     { enabled: api.isLoggedIn() }
   );
 
-  const options: DropdownItem[] = entitiesDict.filter(
+  const classOptions: DropdownItem[] = entitiesDict.filter(
     (e) => e.value !== "A" && e.value !== "R" && e.value !== "X"
   );
 
@@ -231,7 +251,7 @@ export const EntitySearchBox: React.FC = () => {
             placeholder={""}
             width={150}
             entityDropdown
-            options={[defaultClassOption].concat(options)}
+            options={[defaultClassOption].concat(classOptions)}
             value={classOption}
             onChange={(option: ValueType<OptionTypeBase, any>) => {
               setClassOption(option as DropdownItem);
@@ -245,6 +265,24 @@ export const EntitySearchBox: React.FC = () => {
           <TypeBar entityLetter={(classOption as IOption).value} />
         </div>
       </StyledRow>
+      <StyledRow>
+        <StyledRowHeader>Limit by status</StyledRowHeader>
+        <div style={{ position: "relative" }}>
+          <Dropdown
+            placeholder={""}
+            width={150}
+            options={statusOptions}
+            value={statusOptionSelected}
+            onChange={(option: ValueType<OptionTypeBase, any>) => {
+              handleChange({
+                status: (option as IOption).value,
+              });
+            }}
+          />
+          <TypeBar entityLetter={(classOption as IOption).value} />
+        </div>
+      </StyledRow>
+
       <StyledRow>
         <StyledRowHeader>Limit by template</StyledRowHeader>
         <Dropdown
@@ -382,7 +420,9 @@ export const EntitySearchBox: React.FC = () => {
         <StyledRowHeader>Created at</StyledRowHeader>
         {debouncedValues.createdDate ? (
           <StyledDateTag>
-            <StyledDateTagText>{debouncedValues.createdDate.toDateString()}</StyledDateTagText>
+            <StyledDateTagText>
+              {debouncedValues.createdDate.toDateString()}
+            </StyledDateTagText>
             <StyledDateTagButton
               key="d"
               icon={<RiCloseFill />}
@@ -414,7 +454,9 @@ export const EntitySearchBox: React.FC = () => {
         <StyledRowHeader>Udpated at</StyledRowHeader>
         {debouncedValues.updatedDate ? (
           <StyledDateTag>
-            <StyledDateTagText>{debouncedValues.updatedDate.toDateString()}</StyledDateTagText>
+            <StyledDateTagText>
+              {debouncedValues.updatedDate.toDateString()}
+            </StyledDateTagText>
             <StyledDateTagButton
               key="d"
               icon={<RiCloseFill />}
