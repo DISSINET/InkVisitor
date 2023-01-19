@@ -38,10 +38,15 @@ export class RequestSearch {
   constructor(requestData: IRequestSearch) {
     this.class = requestData.class;
     this.label = requestData.label;
-    this.status = requestData.status
-    
-    this.createdDate = requestData.createdDate
-    this.updatedDate = requestData.updatedDate
+    this.status = requestData.status;
+
+    if (this.createdDate) {
+      this.createdDate = new Date(requestData.createdDate || "");
+    }
+
+    if (this.updatedDate) {
+      this.updatedDate = new Date(requestData.updatedDate || "");
+    }
 
     this.cooccurrenceId =
       requestData.cooccurrenceId ||
