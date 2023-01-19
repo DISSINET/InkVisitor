@@ -86,13 +86,13 @@ export const StatementEditorOrderTable: React.FC<StatementEditorOrderTable> = ({
           return renderOrderingInfoColumn(orderObject, entities);
         },
       },
-      {
-        id: "lastEdit",
-        Header: "Edited",
-        Cell: ({ row }: Cell) => {
-          return false;
-        },
-      },
+      // {
+      //   id: "lastEdit",
+      //   Header: "Edited",
+      //   Cell: ({ row }: Cell) => {
+      //     return false;
+      //   },
+      // },
     ],
     [elements, entities]
   );
