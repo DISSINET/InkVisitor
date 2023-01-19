@@ -24,7 +24,7 @@ export const CBookmarkFolder = (bookmarkName: string): IBookmarkFolder => ({
   entityIds: [],
 });
 
-export const CProp = (): IProp => ({
+export const CProp = (newStatementOrder?: number | false): IProp => ({
   id: uuidv4(),
   elvl: EntityEnums.Elvl.Textual,
   certainty: EntityEnums.Certainty.Empty,
@@ -35,6 +35,7 @@ export const CProp = (): IProp => ({
   bundleStart: false,
   bundleEnd: false,
   children: [],
+  statementOrder: newStatementOrder,
 
   type: {
     entityId: "",
@@ -52,7 +53,9 @@ export const CProp = (): IProp => ({
   },
 });
 
-export const CClassification = (): IStatementClassification => ({
+export const CClassification = (
+  newStatementOrder: number | false
+): IStatementClassification => ({
   id: uuidv4(),
   entityId: "",
   elvl: EntityEnums.Elvl.Textual,
@@ -60,9 +63,12 @@ export const CClassification = (): IStatementClassification => ({
   certainty: EntityEnums.Certainty.Empty,
   mood: [EntityEnums.Mood.Indication],
   moodvariant: EntityEnums.MoodVariant.Realis,
+  statementOrder: newStatementOrder,
 });
 
-export const CIdentification = (): IStatementIdentification => ({
+export const CIdentification = (
+  newStatementOrder: number | false
+): IStatementIdentification => ({
   id: uuidv4(),
   entityId: "",
   elvl: EntityEnums.Elvl.Textual,
@@ -70,6 +76,7 @@ export const CIdentification = (): IStatementIdentification => ({
   certainty: EntityEnums.Certainty.Empty,
   mood: [EntityEnums.Mood.Indication],
   moodvariant: EntityEnums.MoodVariant.Realis,
+  statementOrder: newStatementOrder,
 });
 
 export const CMetaProp = (): IProp => ({
@@ -425,9 +432,12 @@ export const DProps = (oldProps: IProp[]): IProp[] => {
   return newProps;
 };
 
-export const CStatementActant = (): IStatementActant => ({
+export const CStatementActant = (
+  entityId: string,
+  newStatementOrder: number | false
+): IStatementActant => ({
   id: uuidv4(),
-  entityId: "",
+  entityId: entityId,
   position: EntityEnums.Position.Subject,
   elvl: EntityEnums.Elvl.Textual,
   logic: EntityEnums.Logic.Positive,
@@ -439,9 +449,13 @@ export const CStatementActant = (): IStatementActant => ({
   props: [],
   classifications: [],
   identifications: [],
+  statementOrder: newStatementOrder,
 });
 
-export const CStatementAction = (actionId: string): IStatementAction => ({
+export const CStatementAction = (
+  actionId: string,
+  newStatementOrder: number | false
+): IStatementAction => ({
   id: uuidv4(),
   actionId: actionId,
   certainty: EntityEnums.Certainty.Empty,
@@ -453,6 +467,7 @@ export const CStatementAction = (actionId: string): IStatementAction => ({
   bundleStart: false,
   bundleEnd: false,
   props: [],
+  statementOrder: newStatementOrder,
 });
 
 export const CTerritoryActant = (

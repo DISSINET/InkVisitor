@@ -33,8 +33,9 @@ import { excludedSuggesterEntities } from "Theme/constants";
 import { classesEditorActants, classesEditorTags, DropdownItem } from "types";
 import { getEntityLabel, getShortLabelByLetterCount } from "utils";
 import { EntityReferenceTable } from "../../EntityReferenceTable/EntityReferenceTable";
-import { StatementEditorActantTable } from "../StatementEditorActantTable/StatementEditorActantTable";
-import { StatementEditorActionTable } from "../StatementEditorActionTable/StatementEditorActionTable";
+import { StatementEditorActantTable } from "./StatementEditorActantTable/StatementEditorActantTable";
+import { StatementEditorActionTable } from "./StatementEditorActionTable/StatementEditorActionTable";
+import { StatementEditorOrdering } from "./StatementEditorOrdering/StatementEditorOrdering";
 import {
   StyledBreadcrumbWrap,
   StyledEditorActantTableWrapper,
@@ -230,7 +231,10 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
   // actions
   const addAction = (newActionId: string) => {
-    const newStatementAction = CStatementAction(newActionId);
+    const newStatementAction = CStatementAction(
+      newActionId,
+      statement.elementsOrders.length
+    );
     const newData = {
       actions: [...statement.data.actions, newStatementAction],
     };
@@ -238,8 +242,10 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   };
 
   const addActant = (newStatementActantId: string) => {
-    const newStatementActant = CStatementActant();
-    newStatementActant.entityId = newStatementActantId;
+    const newStatementActant = CStatementActant(
+      newStatementActantId,
+      statement.elementsOrders.length
+    );
     const newData = {
       actants: [...statement.data.actants, newStatementActant],
     };
@@ -248,7 +254,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
   // Props handling
   const addProp = (rowId: string) => {
-    const newProp = CProp();
+    const newProp = CProp(statement.elementsOrders.length);
     const newStatementData = { ...statement.data };
 
     [...newStatementData.actants, ...newStatementData.actions].forEach(
@@ -285,7 +291,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   };
 
   const addClassification = (rowId: string) => {
-    const newClassification = CClassification();
+    const newClassification = CClassification(statement.elementsOrders.length);
     const newStatementData = { ...statement.data };
 
     [...newStatementData.actants].forEach((actant: IStatementActant) => {
@@ -298,7 +304,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   };
 
   const addIdentification = (rowId: string) => {
-    const newIdentification = CIdentification();
+    const newIdentification = CIdentification(statement.elementsOrders.length);
     const newStatementData = { ...statement.data };
 
     [...newStatementData.actants].forEach((actant: IStatementActant) => {
@@ -628,6 +634,18 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 territoryParentId={statementTerritoryId}
               />
             )}
+          </StyledEditorSectionContent>
+        </StyledEditorSection>
+
+        {/* Ordering */}
+        <StyledEditorSection>
+          <StyledEditorSectionHeader>Ordering</StyledEditorSectionHeader>
+          <StyledEditorSectionContent>
+            <StatementEditorOrdering
+              statementId={statementId}
+              elementsOrders={statement.elementsOrders}
+              entities={statement.entities}
+            />
           </StyledEditorSectionContent>
         </StyledEditorSection>
 

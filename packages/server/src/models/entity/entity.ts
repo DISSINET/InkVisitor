@@ -14,6 +14,7 @@ import { InternalServerError } from "@shared/types/errors";
 import User from "@models/user/user";
 import emitter from "@models/events/emitter";
 import { EventTypes } from "@models/events/types";
+import Prop from "@models/prop/prop";
 
 export default class Entity implements IEntity, IDbModel {
   static table = "entities";
@@ -27,7 +28,7 @@ export default class Entity implements IEntity, IDbModel {
   detail: string = "";
   language: EntityEnums.Language = EntityEnums.Language.Latin;
   notes: string[] = [];
-  props: IProp[] = [];
+  props: Prop[] = [];
   references: IReference[] = [];
 
   isTemplate?: boolean;
@@ -38,7 +39,7 @@ export default class Entity implements IEntity, IDbModel {
     fillFlatObject(this, { ...data, data: undefined });
     fillArray(this.references, Object, data.references);
     fillArray(this.notes, String, data.notes);
-    fillArray(this.props, Object, data.props);
+    fillArray<Prop>(this.props, Prop, data.props);
 
     if (data.legacyId !== undefined) {
       this.legacyId = data.legacyId;
@@ -212,7 +213,7 @@ export default class Entity implements IEntity, IDbModel {
     return out;
   }
 
-  static extractIdsFromProps(props: IProp[] = []): string[] {
+  static extractIdsFromProps(props: IProp[] = [], cb?: (prop: IProp) => void): string[] {
     let out: string[] = [];
     for (const prop of props) {
       if (prop.type) {
@@ -222,7 +223,11 @@ export default class Entity implements IEntity, IDbModel {
         out.push(prop.value.entityId);
       }
 
-      out = out.concat(Entity.extractIdsFromProps(prop.children));
+      if (cb) {
+        cb(prop);
+      }
+
+      out = out.concat(Entity.extractIdsFromProps(prop.children, cb));
     }
 
     return out;
