@@ -94,6 +94,7 @@ export namespace EntityEnums {
     Belief = "11",
     Allegation = "12",
     Semblance = "13",
+    Rectitude = "14",
   }
 
   export enum MoodVariant {
