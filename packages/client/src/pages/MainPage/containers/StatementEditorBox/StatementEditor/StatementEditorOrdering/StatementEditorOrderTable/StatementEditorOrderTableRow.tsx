@@ -1,4 +1,4 @@
-import { IEntity } from "@shared/types";
+import { IEntity, OrderType } from "@shared/types";
 import React, { useRef } from "react";
 import {
   DragSourceMonitor,
@@ -50,7 +50,12 @@ export const StatementEditorOrderTableRow: React.FC<
 
   return (
     <React.Fragment>
-      <StyledTr ref={ref} opacity={opacity} id={row.original.elementId}>
+      <StyledTr
+        ref={ref}
+        opacity={opacity}
+        id={row.original.elementId}
+        borderColor={(row.original as OrderType).type}
+      >
         {row.cells.map((cell: Cell) => {
           // if (cell.column.id === "lastEdit") {
           //   return (

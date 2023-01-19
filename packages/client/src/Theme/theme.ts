@@ -1,5 +1,6 @@
 export type ThemeType = typeof theme;
 export type ThemeColor = typeof theme.color;
+export type ElementTypeColor = typeof theme.color.elementType;
 
 const theme = {
   color: {
@@ -71,6 +72,14 @@ const theme = {
     entityT: "hsl(212, 78%, 50%)",
     // seda
     entityV: "#BAB0AC",
+
+    elementType: {
+      action: "#EB6B6B",
+      actant: "#7E9BFF",
+      prop: "#91BB93",
+      class: "#E28FBB",
+      ident: "#EAE3A3",
+    },
 
     // tag status
     0: "#a0aec0", // pending

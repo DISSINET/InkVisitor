@@ -1,4 +1,7 @@
+import { CgPlayListRemove } from "react-icons/cg";
+import { RiArrowDownCircleLine, RiArrowUpCircleLine } from "react-icons/ri";
 import styled from "styled-components";
+import { ElementTypeColor } from "Theme/theme";
 
 export const StyledTable = styled.table`
   width: 100%;
@@ -13,6 +16,7 @@ export const StyledTable = styled.table`
 interface StyledTr {
   opacity?: number;
   noOrder?: boolean;
+  borderColor?: keyof ElementTypeColor;
 }
 export const StyledTr = styled.tr<StyledTr>`
   background-color: ${({ theme, noOrder }) =>
@@ -20,6 +24,9 @@ export const StyledTr = styled.tr<StyledTr>`
   color: ${({ theme }) => theme.color["black"]};
   opacity: ${({ opacity }) => (opacity ? opacity : 1)};
   border-top: 1px solid ${({ theme }) => theme.color["gray"][500]};
+  border-right: 4px solid
+    ${({ theme, borderColor }) =>
+      borderColor ? ` ${theme.color.elementType[borderColor]}` : ""};
   cursor: ${({ noOrder }) => (noOrder ? "default" : "move")};
   td:first-child {
     width: 1%;
@@ -67,4 +74,29 @@ export const StyledSeparator = styled.div`
 `;
 export const StyledInfoText = styled.div`
   margin-bottom: 0.1rem;
+`;
+
+interface StyledRiArrowUpCircleLine {
+  $isFirst: boolean;
+}
+export const StyledRiArrowUpCircleLine = styled(
+  RiArrowUpCircleLine
+)<StyledRiArrowUpCircleLine>`
+  cursor: ${({ $isFirst }) => ($isFirst ? "default" : "pointer")};
+  color: ${({ theme, $isFirst }) =>
+    $isFirst ? theme.color.gray[400] : theme.color.gray[700]};
+`;
+interface StyledRiArrowDownCircleLine {
+  $isLast: boolean;
+}
+export const StyledRiArrowDownCircleLine = styled(
+  RiArrowDownCircleLine
+)<StyledRiArrowDownCircleLine>`
+  cursor: ${({ $isLast }) => ($isLast ? "default" : "pointer")};
+  color: ${({ theme, $isLast }) =>
+    $isLast ? theme.color.gray[400] : theme.color.gray[700]};
+`;
+export const StyledCgPlayListRemove = styled(CgPlayListRemove)`
+  cursor: pointer;
+  color: ${({ theme }) => theme.color.gray[700]};
 `;

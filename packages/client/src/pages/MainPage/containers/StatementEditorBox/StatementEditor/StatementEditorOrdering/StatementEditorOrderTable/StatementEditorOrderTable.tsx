@@ -4,6 +4,9 @@ import React, { useCallback, useMemo } from "react";
 import { Cell, Column, Row, useTable } from "react-table";
 import {
   StyledButtonsWrap,
+  StyledCgPlayListRemove,
+  StyledRiArrowDownCircleLine,
+  StyledRiArrowUpCircleLine,
   StyledTable,
 } from "../StatementEditorOrderingTableUtils/StatementEditorOrderingTableStyles";
 import {
@@ -11,11 +14,6 @@ import {
   renderOrderingMainColumn,
 } from "../StatementEditorOrderingTableUtils/StatementEditorOrderingTableUtils";
 import { StatementEditorOrderTableRow } from "./StatementEditorOrderTableRow";
-import {
-  StyledCgPlayListRemove,
-  StyledRiArrowDownCircleLine,
-  StyledRiArrowUpCircleLine,
-} from "./StatementEditorOrderTableStyles";
 
 interface StatementEditorOrderTable {
   elements: OrderType[];

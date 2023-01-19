@@ -77,7 +77,11 @@ export const StatementEditorNoOrderTable: React.FC<
         {rows.map((row: Row, i: number) => {
           prepareRow(row);
           return (
-            <StyledTr id={(row.original as OrderType).elementId} noOrder>
+            <StyledTr
+              id={(row.original as OrderType).elementId}
+              noOrder
+              borderColor={(row.original as OrderType).type}
+            >
               {row.cells.map((cell: Cell) => {
                 // if (cell.column.id === "lastEdit") {
                 //   return (
