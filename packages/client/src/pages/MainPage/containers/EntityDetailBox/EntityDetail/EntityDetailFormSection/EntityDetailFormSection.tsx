@@ -246,48 +246,18 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
             <StyledDetailContentRowValue>
               <AttributeButtonGroup
                 disabled={!userCanAdmin}
-                options={[
-                  {
-                    longValue: entityStatusDict[0]["label"],
-                    shortValue: entityStatusDict[0]["label"],
+                options={entityStatusDict.map((entityStatusOption) => {
+                  return {
+                    longValue: entityStatusOption["label"],
+                    shortValue: entityStatusOption["label"],
                     onClick: () => {
                       updateEntityMutation.mutate({
-                        status: entityStatusDict[0]["value"],
+                        status: entityStatusOption["value"],
                       });
                     },
-                    selected: entityStatusDict[0]["value"] === entity.status,
-                  },
-                  {
-                    longValue: entityStatusDict[1]["label"],
-                    shortValue: entityStatusDict[1]["label"],
-                    onClick: () => {
-                      updateEntityMutation.mutate({
-                        status: entityStatusDict[1]["value"],
-                      });
-                    },
-                    selected: entityStatusDict[1]["value"] === entity.status,
-                  },
-                  {
-                    longValue: entityStatusDict[2]["label"],
-                    shortValue: entityStatusDict[2]["label"],
-                    onClick: () => {
-                      updateEntityMutation.mutate({
-                        status: entityStatusDict[2]["value"],
-                      });
-                    },
-                    selected: entityStatusDict[2]["value"] === entity.status,
-                  },
-                  {
-                    longValue: entityStatusDict[3]["label"],
-                    shortValue: entityStatusDict[3]["label"],
-                    onClick: () => {
-                      updateEntityMutation.mutate({
-                        status: entityStatusDict[3]["value"],
-                      });
-                    },
-                    selected: entityStatusDict[3]["value"] === entity.status,
-                  },
-                ]}
+                    selected: entityStatusOption["value"] === entity.status,
+                  };
+                })}
               />
             </StyledDetailContentRowValue>
           </StyledDetailContentRow>
