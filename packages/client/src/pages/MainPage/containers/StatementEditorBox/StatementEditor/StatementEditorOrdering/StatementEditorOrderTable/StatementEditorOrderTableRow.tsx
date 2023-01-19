@@ -11,6 +11,7 @@ import { DragItem, ItemTypes } from "types";
 import { dndHoverFn } from "utils";
 import {
   StyledTd,
+  StyledTdLastEdit,
   StyledTr,
 } from "../StatementEditorOrderingTableUtils/StatementEditorOrderingTableStyles";
 
@@ -48,6 +49,32 @@ export const StatementEditorOrderTableRow: React.FC<
 
   drag(drop(ref));
 
+  // const audit = row.original.audit;
+
+  // const lastEditDateText = () => {
+  //   if (audit && audit.last && audit.last[0] && audit.last[0].date) {
+  //     const today = new Date().setHours(0, 0, 0, 0);
+  //     const lastEditDate = audit.last[0].date;
+  //     const lastEditDay = new Date(lastEditDate).setHours(0, 0, 0, 0);
+
+  //     if (today === lastEditDay) {
+  //       return (
+  //         "today " +
+  //         new Date(lastEditDate).toLocaleTimeString("en-GB", {
+  //           hour: "2-digit",
+  //           minute: "2-digit",
+  //         })
+  //       );
+  //     } else {
+  //       new Date(lastEditDate).toLocaleDateString("en-GB");
+  //     }
+  //   } else {
+  //     return "";
+  //   }
+
+  //   return;
+  // };
+
   return (
     <React.Fragment>
       <StyledTr
@@ -57,13 +84,13 @@ export const StatementEditorOrderTableRow: React.FC<
         borderColor={(row.original as OrderType).type}
       >
         {row.cells.map((cell: Cell) => {
-          // if (cell.column.id === "lastEdit") {
-          //   return (
-          //     <StyledTdLastEdit key="audit">
-          //       {lastEditdateText}
-          //     </StyledTdLastEdit>
-          //   );
-          // }
+          if (cell.column.id === "lastEdit") {
+            return (
+              <StyledTdLastEdit key="audit">
+                {/* {lastEditDateText()} */}
+              </StyledTdLastEdit>
+            );
+          }
           if (["buttons", "main", "info"].includes(cell.column.id)) {
             return (
               <StyledTd {...cell.getCellProps()}>
