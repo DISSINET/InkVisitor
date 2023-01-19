@@ -58,13 +58,6 @@ export const StatementEditorNoOrderTable: React.FC<
           return renderOrderingInfoColumn(orderObject, entities);
         },
       },
-      // {
-      //   id: "lastEdit",
-      //   Header: "Edited",
-      //   Cell: ({ row }: Cell) => {
-      //     return false;
-      //   },
-      // },
     ],
     [elements, entities]
   );
@@ -90,20 +83,11 @@ export const StatementEditorNoOrderTable: React.FC<
               borderColor={(row.original as OrderType).type}
             >
               {row.cells.map((cell: Cell) => {
-                if (cell.column.id === "lastEdit") {
-                  return (
-                    <StyledTdLastEdit key="audit">
-                      {/* {lastEditdateText} */}
-                    </StyledTdLastEdit>
-                  );
-                }
-                if (["buttons", "main", "info"].includes(cell.column.id)) {
-                  return (
-                    <StyledTd {...cell.getCellProps()}>
-                      {cell.render("Cell")}
-                    </StyledTd>
-                  );
-                }
+                return (
+                  <StyledTd {...cell.getCellProps()}>
+                    {cell.render("Cell")}
+                  </StyledTd>
+                );
               })}
             </StyledTr>
           );
