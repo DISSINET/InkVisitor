@@ -8,11 +8,11 @@ import {
   StyledRiArrowDownCircleLine,
   StyledRiArrowUpCircleLine,
   StyledTable,
-} from "../StatementEditorOrderingTableUtils/StatementEditorOrderingTableStyles";
+} from "../StatementEditorOrderingStyles";
 import {
   renderOrderingInfoColumn,
   renderOrderingMainColumn,
-} from "../StatementEditorOrderingTableUtils/StatementEditorOrderingTableUtils";
+} from "../StatementEditorOrderingUtils";
 import { StatementEditorOrderTableRow } from "./StatementEditorOrderTableRow";
 
 interface StatementEditorOrderTable {

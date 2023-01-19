@@ -13,7 +13,7 @@ import {
   StyledTd,
   StyledTdLastEdit,
   StyledTr,
-} from "../StatementEditorOrderingTableUtils/StatementEditorOrderingTableStyles";
+} from "../StatementEditorOrderingStyles";
 
 interface StatementEditorOrderTableRow {
   row: any;

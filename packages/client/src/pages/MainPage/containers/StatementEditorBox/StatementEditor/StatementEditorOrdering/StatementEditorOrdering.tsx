@@ -2,9 +2,8 @@ import { IEntity, OrderType } from "@shared/types";
 import api from "api";
 import React, { useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "react-query";
-import theme from "Theme/theme";
 import { StatementEditorNoOrderTable } from "./StatementEditorNoOrderTable/StatementEditorNoOrderTable";
-import { StyledHeading } from "./StatementEditorOrderingStyles";
+import { StyledNoOrderHeading } from "./StatementEditorOrderingStyles";
 import { StatementEditorOrderTable } from "./StatementEditorOrderTable/StatementEditorOrderTable";
 
 interface StatementEditorOrdering {
@@ -72,7 +71,7 @@ export const StatementEditorOrdering: React.FC<StatementEditorOrdering> = ({
         removeFromOrdering={removeFromOrdering}
         changeOrder={changeOrder}
       />
-      <StyledHeading>{"Without order"}</StyledHeading>
+      <StyledNoOrderHeading>{"Without order"}</StyledNoOrderHeading>
       <StatementEditorNoOrderTable
         elements={withoutOrder}
         entities={entities}

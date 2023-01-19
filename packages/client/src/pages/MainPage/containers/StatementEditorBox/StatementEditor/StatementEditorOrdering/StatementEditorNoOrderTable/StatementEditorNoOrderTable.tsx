@@ -1,19 +1,18 @@
 import { IEntity, OrderType } from "@shared/types";
-import { Table } from "components";
 import React, { useMemo } from "react";
 import { CgPlayListAdd } from "react-icons/cg";
 import { Cell, Column, Row, useTable } from "react-table";
-import theme, { ThemeColor } from "Theme/theme";
+import theme from "Theme/theme";
 import {
   StyledTable,
   StyledTd,
   StyledTdLastEdit,
   StyledTr,
-} from "../StatementEditorOrderingTableUtils/StatementEditorOrderingTableStyles";
+} from "../StatementEditorOrderingStyles";
 import {
   renderOrderingInfoColumn,
   renderOrderingMainColumn,
-} from "../StatementEditorOrderingTableUtils/StatementEditorOrderingTableUtils";
+} from "../StatementEditorOrderingUtils";
 
 interface StatementEditorNoOrderTable {
   elements: OrderType[];
