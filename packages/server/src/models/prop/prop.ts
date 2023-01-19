@@ -1,11 +1,7 @@
 import { EntityEnums } from "@shared/enums";
 import { IProp } from "@shared/types";
 import { IPropSpec } from "@shared/types";
-import {
-  fillArray,
-  fillFlatObject,
-  IModel,
-} from "@models/common";
+import { fillArray, fillFlatObject, IModel } from "@models/common";
 
 export class PropSpec implements IPropSpec, IModel {
   entityId: string = "";
@@ -39,11 +35,16 @@ export default class Prop implements IProp, IModel {
   type: PropSpec;
   value: PropSpec;
 
+  statementOrder?: number | false;
+
   constructor(data: Partial<IProp>) {
     fillFlatObject(this, data);
     this.type = new PropSpec(data.type || {});
     this.value = new PropSpec(data.value || {});
-    this.mood = data.mood ? data.mood : [EntityEnums.Mood.Indication];
+    this.mood = data.mood || [EntityEnums.Mood.Indication];
+    this.statementOrder =
+      data.statementOrder !== undefined ? data.statementOrder : false;
+
     fillArray<Prop>(this.children, Prop, data.children);
   }
 

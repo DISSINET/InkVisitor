@@ -4,10 +4,7 @@ import { Table } from "components";
 import { EntityTag } from "components/advanced";
 import React, { useMemo } from "react";
 import { Cell, Column } from "react-table";
-import {
-  StyledTableTextGridCell,
-  StyledTagWrap,
-} from "../EntityDetailUsedInTableStyles";
+import { renderEntityTag } from "../EntityDetailUsedInTableUtils";
 
 interface EntityDetailIdentificationTable {
   title: { singular: string; plural: string };
@@ -18,17 +15,6 @@ interface EntityDetailIdentificationTable {
 export const EntityDetailIdentificationTable: React.FC<
   EntityDetailIdentificationTable
 > = ({ title, entities, useCases, perPage = 5 }) => {
-  // TODO: utilise
-  const renderEntityTag = (entity: IEntity) => {
-    return (
-      <StyledTableTextGridCell>
-        <StyledTagWrap>
-          <EntityTag fullWidth entity={entity} />
-        </StyledTagWrap>
-      </StyledTableTextGridCell>
-    );
-  };
-
   const data = useMemo(() => (useCases ? useCases : []), [useCases]);
 
   const columns: Column<{}>[] = React.useMemo(

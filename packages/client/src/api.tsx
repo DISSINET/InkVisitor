@@ -527,6 +527,25 @@ class Api {
     }
   }
 
+  async statementReorderElements(
+    statementId: string,
+    elementIdsWithOrder: string[]
+  ): Promise<AxiosResponse<IResponseGeneric>> {
+    try {
+      const response = await this.connection.put(
+        `/statements/${statementId}/elementsOrders`,
+        elementIdsWithOrder
+      );
+      return response;
+    } catch (err: any | AxiosError) {
+      throw { ...err.response.data };
+    }
+  }
+
+  /**
+   * Pernmissions
+   */
+
   async getAclPermissions(): Promise<AxiosResponse<IResponsePermission[]>> {
     try {
       const response = await this.connection.get(`/acls`);

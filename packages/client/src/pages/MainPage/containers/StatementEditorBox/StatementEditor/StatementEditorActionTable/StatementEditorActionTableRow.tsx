@@ -3,6 +3,8 @@ import { IProp, IResponseStatement } from "@shared/types";
 import { AttributeIcon, Button, ButtonGroup } from "components";
 import { EntitySuggester, EntityTag } from "components/advanced";
 import { useSearchParams } from "hooks";
+import AttributesEditor from "pages/MainPage/containers/AttributesEditor/AttributesEditor";
+import { PropGroup } from "pages/MainPage/containers/PropGroup/PropGroup";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   DragSourceMonitor,
@@ -23,8 +25,6 @@ import {
   ItemTypes,
 } from "types";
 import { dndHoverFn } from "utils";
-import AttributesEditor from "../../AttributesEditor/AttributesEditor";
-import { PropGroup } from "../../PropGroup/PropGroup";
 import {
   StyledGrid,
   StyledGridColumn,
