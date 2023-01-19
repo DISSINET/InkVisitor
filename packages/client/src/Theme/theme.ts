@@ -77,6 +77,7 @@ const theme = {
     1: "#000", //approved
     2: "#BA2525", //discouraged
     3: "#D8AA37", //warning
+    4: "#f27a43", //unfinished
   },
   space: {
     px: "1px",
