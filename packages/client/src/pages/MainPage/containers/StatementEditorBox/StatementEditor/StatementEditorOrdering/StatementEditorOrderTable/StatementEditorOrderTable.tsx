@@ -3,16 +3,18 @@ import update from "immutability-helper";
 import React, { useCallback, useMemo } from "react";
 import { Cell, Column, Row, useTable } from "react-table";
 import {
+  StyledButtonsWrap,
+  StyledTable,
+} from "../StatementEditorOrderingTableUtils/StatementEditorOrderingTableStyles";
+import {
   renderOrderingInfoColumn,
   renderOrderingMainColumn,
-} from "../StatementEditorOrderingColumnHelper/StatementEditorOrderingColumnHelper";
+} from "../StatementEditorOrderingTableUtils/StatementEditorOrderingTableUtils";
 import { StatementEditorOrderTableRow } from "./StatementEditorOrderTableRow";
 import {
-  StyledButtonsWrap,
   StyledCgPlayListRemove,
   StyledRiArrowDownCircleLine,
   StyledRiArrowUpCircleLine,
-  StyledTable,
 } from "./StatementEditorOrderTableStyles";
 
 interface StatementEditorOrderTable {
@@ -90,20 +92,14 @@ export const StatementEditorOrderTable: React.FC<StatementEditorOrderTable> = ({
     [elements, entities]
   );
 
-  const {
-    getTableProps,
-    getTableBodyProps,
-    headerGroups,
-    rows,
-    prepareRow,
-    visibleColumns,
-  } = useTable({
-    columns,
-    data: data,
-    initialState: {
-      hiddenColumns: ["id"],
-    },
-  });
+  const { getTableProps, getTableBodyProps, rows, prepareRow, visibleColumns } =
+    useTable({
+      columns,
+      data: data,
+      initialState: {
+        hiddenColumns: ["id"],
+      },
+    });
 
   const moveRow = useCallback(
     (dragIndex: number, hoverIndex: number) => {

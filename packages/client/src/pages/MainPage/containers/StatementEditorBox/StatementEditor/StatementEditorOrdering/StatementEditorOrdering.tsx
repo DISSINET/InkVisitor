@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "react-query";
 import theme from "Theme/theme";
 import { StatementEditorNoOrderTable } from "./StatementEditorNoOrderTable/StatementEditorNoOrderTable";
+import { StyledHeading } from "./StatementEditorOrderingStyles";
 import { StatementEditorOrderTable } from "./StatementEditorOrderTable/StatementEditorOrderTable";
 
 interface StatementEditorOrdering {
@@ -71,15 +72,7 @@ export const StatementEditorOrdering: React.FC<StatementEditorOrdering> = ({
         removeFromOrdering={removeFromOrdering}
         changeOrder={changeOrder}
       />
-      <p
-        style={{
-          fontSize: theme.fontSize.xs,
-          marginBottom: "0.5rem",
-          marginTop: "1.5rem",
-        }}
-      >
-        {"Without order"}
-      </p>
+      <StyledHeading>{"Without order"}</StyledHeading>
       <StatementEditorNoOrderTable
         elements={withoutOrder}
         entities={entities}

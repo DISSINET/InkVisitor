@@ -9,7 +9,10 @@ import {
 import { Cell, ColumnInstance } from "react-table";
 import { DragItem, ItemTypes } from "types";
 import { dndHoverFn } from "utils";
-import { StyledTd, StyledTr } from "./StatementEditorOrderTableStyles";
+import {
+  StyledTd,
+  StyledTr,
+} from "../StatementEditorOrderingTableUtils/StatementEditorOrderingTableStyles";
 
 interface StatementEditorOrderTableRow {
   row: any;
@@ -47,7 +50,7 @@ export const StatementEditorOrderTableRow: React.FC<
 
   return (
     <React.Fragment>
-      <StyledTr ref={ref} opacity={opacity} id={`statement${row.original.id}`}>
+      <StyledTr ref={ref} opacity={opacity} id={row.original.elementId}>
         {row.cells.map((cell: Cell) => {
           // if (cell.column.id === "lastEdit") {
           //   return (

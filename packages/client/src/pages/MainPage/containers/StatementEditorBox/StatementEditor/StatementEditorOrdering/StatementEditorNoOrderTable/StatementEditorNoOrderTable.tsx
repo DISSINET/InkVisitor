@@ -2,12 +2,17 @@ import { IEntity, OrderType } from "@shared/types";
 import { Table } from "components";
 import React, { useMemo } from "react";
 import { CgPlayListAdd } from "react-icons/cg";
-import { Cell, Column } from "react-table";
+import { Cell, Column, Row, useTable } from "react-table";
 import theme, { ThemeColor } from "Theme/theme";
+import {
+  StyledTable,
+  StyledTd,
+  StyledTr,
+} from "../StatementEditorOrderingTableUtils/StatementEditorOrderingTableStyles";
 import {
   renderOrderingInfoColumn,
   renderOrderingMainColumn,
-} from "../StatementEditorOrderingColumnHelper/StatementEditorOrderingColumnHelper";
+} from "../StatementEditorOrderingTableUtils/StatementEditorOrderingTableUtils";
 
 interface StatementEditorNoOrderTable {
   elements: OrderType[];
@@ -22,7 +27,7 @@ export const StatementEditorNoOrderTable: React.FC<
   const columns: Column<{}>[] = React.useMemo(
     () => [
       {
-        id: "button",
+        id: "buttons",
         accesor: "data",
         Cell: ({ row }: Cell) => {
           const orderObject = row.original as OrderType;
@@ -57,14 +62,42 @@ export const StatementEditorNoOrderTable: React.FC<
     [elements, entities]
   );
 
+  const { getTableProps, getTableBodyProps, rows, prepareRow, visibleColumns } =
+    useTable({
+      columns,
+      data: data,
+      initialState: {
+        hiddenColumns: ["id"],
+      },
+    });
+
   return (
-    <Table
-      data={data}
-      columns={columns}
-      perPage={1000}
-      disableHeading
-      disableHeader
-      firstColumnMinWidth
-    />
+    <StyledTable {...getTableProps()}>
+      <tbody {...getTableBodyProps()}>
+        {rows.map((row: Row, i: number) => {
+          prepareRow(row);
+          return (
+            <StyledTr id={(row.original as OrderType).elementId} noOrder>
+              {row.cells.map((cell: Cell) => {
+                // if (cell.column.id === "lastEdit") {
+                //   return (
+                //     <StyledTdLastEdit key="audit">
+                //       {lastEditdateText}
+                //     </StyledTdLastEdit>
+                //   );
+                // }
+                if (["buttons", "main", "info"].includes(cell.column.id)) {
+                  return (
+                    <StyledTd {...cell.getCellProps()}>
+                      {cell.render("Cell")}
+                    </StyledTd>
+                  );
+                }
+              })}
+            </StyledTr>
+          );
+        })}
+      </tbody>
+    </StyledTable>
   );
 };

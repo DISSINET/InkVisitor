@@ -9,7 +9,7 @@ import {
   StyledSeparator,
   StyledTableTextGridCell,
   StyledTagWrap,
-} from "./StatementEditorOrderingColumnHelperStyles";
+} from "./StatementEditorOrderingTableStyles";
 
 export const renderOrderingEntityTag = (
   entity?: IEntity,
