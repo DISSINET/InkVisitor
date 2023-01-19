@@ -35,6 +35,7 @@ export const StatementEditorOrdering: React.FC<StatementEditorOrdering> = ({
     {
       onSuccess: (data, variables) => {
         queryClient.invalidateQueries("statement");
+        queryClient.invalidateQueries("territory");
       },
     }
   );
@@ -54,7 +55,6 @@ export const StatementEditorOrdering: React.FC<StatementEditorOrdering> = ({
 
   const changeOrder = (elementIdToMove: string, newOrder: number) => {
     let elementIds = withOrder.map((e) => e.elementId);
-    // const index = elementIds.indexOf(elementIdToMove);
 
     elementIds = elementIds.filter((o) => o !== elementIdToMove);
     elementIds.splice(newOrder, 0, elementIdToMove);
