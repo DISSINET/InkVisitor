@@ -67,14 +67,14 @@ export const renderOrderingMainColumn = (
       );
     case StatementEnums.ElementType.Prop:
       const { propValueId, propTypeId } = orderObject;
-      const propTypeEntity = entities[propTypeId];
       const propValueEntity = entities[propValueId];
+      const propTypeEntity = entities[propTypeId];
 
       return (
         <StyledMainColumn>
-          {renderOrderingEntityTag(propTypeEntity, "type")}
-          <StyledSeparator />
           {renderOrderingEntityTag(propValueEntity, "value")}
+          <StyledSeparator />
+          {renderOrderingEntityTag(propTypeEntity, "type")}
         </StyledMainColumn>
       );
   }

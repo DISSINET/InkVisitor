@@ -39,9 +39,6 @@ export const StyledTd = styled.td`
   padding: ${({ theme }) => theme.space[2]};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
 `;
-export const StyledTdLastEdit = styled(StyledTd)`
-  font-size: ${({ theme }) => theme.fontSize["xxs"]};
-`;
 
 export const StyledButtonsWrap = styled.div`
   display: flex;

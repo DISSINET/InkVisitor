@@ -9,11 +9,7 @@ import {
 import { Cell, ColumnInstance } from "react-table";
 import { DragItem, ItemTypes } from "types";
 import { dndHoverFn } from "utils";
-import {
-  StyledTd,
-  StyledTdLastEdit,
-  StyledTr,
-} from "../StatementEditorOrderingStyles";
+import { StyledTd, StyledTr } from "../StatementEditorOrderingStyles";
 
 interface StatementEditorOrderTableRow {
   row: any;

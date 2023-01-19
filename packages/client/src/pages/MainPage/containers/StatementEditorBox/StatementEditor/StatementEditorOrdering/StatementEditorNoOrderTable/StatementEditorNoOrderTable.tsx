@@ -6,7 +6,6 @@ import theme from "Theme/theme";
 import {
   StyledTable,
   StyledTd,
-  StyledTdLastEdit,
   StyledTr,
 } from "../StatementEditorOrderingStyles";
 import {
