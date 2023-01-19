@@ -13,6 +13,8 @@ import { ResponseStatement } from "@models/statement/response";
 import { EntityEnums } from "@shared/enums";
 import { IRequest } from "src/custom_typings/request";
 import { StatementObject } from "@shared/types/statement";
+import Audit from "@models/audit/audit";
+import Entity from "@models/entity/entity";
 
 export default Router()
   /**
@@ -144,7 +146,18 @@ export default Router()
 
       // update only the required fields
       const result = await model.update(request.db.connection, { data: model.data, props: model.props });
+      const newData = await findEntityById(request.db, model.id);
+      if (!newData) {
+        throw new InternalServerError(`cannot retrieve updated statement ${model.id}`);
+      }
+
       if (result.replaced || result.unchanged) {
+        await Audit.createNew(
+          request,
+          model.id,
+          newData
+        );
+
         return {
           result: true,
         };
