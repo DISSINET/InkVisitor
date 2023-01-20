@@ -250,7 +250,7 @@ export const EntityDetailValencySection: React.FC<
               relationType={relationType}
               relationUpdateMutation={relationUpdateMutation}
               relationDeleteMutation={relationDeleteMutation}
-              hasOrder={relationRule.order}
+              hasOrder={relationRule.order && currentRelations.length > 1}
               moveRow={moveRow}
               updateOrderFn={updateOrderFn}
             />

@@ -3,7 +3,6 @@ import styled from "styled-components";
 interface StyledActantHeaderRow {}
 export const StyledActantHeaderRow = styled.div<StyledActantHeaderRow>`
   display: flex;
-  flex-wrap: wrap;
   width: 100%;
   padding-bottom: ${({ theme }) => theme.space[4]};
   padding-right: ${({ theme }) => theme.space[6]};

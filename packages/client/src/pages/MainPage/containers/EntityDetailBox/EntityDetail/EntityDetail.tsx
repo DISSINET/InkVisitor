@@ -705,8 +705,8 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
               {!entity.isTemplate && (
                 <EntityDetailStatementPropsTable
                   title={{
-                    singular: "Statement Property",
-                    plural: "Statement Properties",
+                    singular: "In-statement Property",
+                    plural: "In-statement Properties",
                   }}
                   entities={entity.entities}
                   useCases={entity.usedInStatementProps}
@@ -718,8 +718,8 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
               {!entity.isTemplate && (
                 <EntityDetailIdentificationTable
                   title={{
-                    singular: "Statement Identification",
-                    plural: "Statement Identifications",
+                    singular: "In-statement Identification",
+                    plural: "In-statement Identifications",
                   }}
                   entities={entity.entities}
                   useCases={entity.usedInStatementIdentifications}
@@ -731,8 +731,8 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
               {!entity.isTemplate && (
                 <EntityDetailClassificationTable
                   title={{
-                    singular: "Statement Classification",
-                    plural: "Statement Classifications",
+                    singular: "In-statement Classification",
+                    plural: "In-statement Classifications",
                   }}
                   entities={entity.entities}
                   useCases={entity.usedInStatementClassifications}
