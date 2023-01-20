@@ -42,8 +42,8 @@ const anyTemplate: DropdownItem = {
 
 const debounceTime: number = 100;
 
-// the minimum pixels for the results section height  
-const MIN_RESULT_H = 100
+// the minimum pixels for the results section height
+const MIN_RESULT_H = 100;
 
 export const EntitySearchBox: React.FC = () => {
   const [classOption, setClassOption] =
@@ -390,7 +390,11 @@ export const EntitySearchBox: React.FC = () => {
           <>
             <EntitySearchResults
               results={sortedEntities}
-              height={debouncedResultsHeight > MIN_RESULT_H ? debouncedResultsHeight : MIN_RESULT_H}
+              height={
+                debouncedResultsHeight > MIN_RESULT_H
+                  ? debouncedResultsHeight
+                  : MIN_RESULT_H
+              }
             />
           </>
         )}

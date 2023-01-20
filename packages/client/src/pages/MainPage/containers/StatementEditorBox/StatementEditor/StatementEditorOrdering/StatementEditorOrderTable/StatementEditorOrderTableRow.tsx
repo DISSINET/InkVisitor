@@ -6,13 +6,13 @@ import {
   useDrag,
   useDrop,
 } from "react-dnd";
-import { Cell, ColumnInstance } from "react-table";
+import { Cell, ColumnInstance, Row } from "react-table";
 import { DragItem, ItemTypes } from "types";
 import { dndHoverFn } from "utils";
 import { StyledTd, StyledTr } from "../StatementEditorOrderingStyles";
 
 interface StatementEditorOrderTableRow {
-  row: any;
+  row: Row<{}>;
   index: number;
   moveRow: (dragIndex: number, hoverIndex: number) => void;
   moveEndRow: (elementIdToMove: string, index: number) => void;
@@ -22,6 +22,8 @@ interface StatementEditorOrderTableRow {
 export const StatementEditorOrderTableRow: React.FC<
   StatementEditorOrderTableRow
 > = ({ row, index, moveRow, moveEndRow, visibleColumns, entities }) => {
+  const { elementId } = row.original as OrderType;
+
   const ref = useRef<HTMLTableRowElement>(null);
 
   const [, drop] = useDrop({
@@ -32,12 +34,16 @@ export const StatementEditorOrderTableRow: React.FC<
   });
 
   const [{ isDragging }, drag, preview] = useDrag({
-    item: { type: ItemTypes.STATEMENT_ORDER_ROW, index, id: row.original.id },
+    item: {
+      type: ItemTypes.STATEMENT_ORDER_ROW,
+      index,
+      id: elementId,
+    },
     collect: (monitor: DragSourceMonitor) => ({
       isDragging: monitor.isDragging(),
     }),
     end: (item: DragItem | undefined, monitor: DragSourceMonitor) => {
-      moveEndRow(row.original, index);
+      moveEndRow(elementId, index);
     },
   });
 
@@ -48,9 +54,9 @@ export const StatementEditorOrderTableRow: React.FC<
   return (
     <React.Fragment>
       <StyledTr
+        key={elementId}
         ref={ref}
         opacity={opacity}
-        id={row.original.elementId}
         borderColor={(row.original as OrderType).type}
       >
         {row.cells.map((cell: Cell) => {
