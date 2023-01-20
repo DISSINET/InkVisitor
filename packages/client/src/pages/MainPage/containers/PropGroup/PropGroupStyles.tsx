@@ -42,11 +42,11 @@ const getIndentation = (level: 0 | 1 | 2 | 3) => {
     case 0:
       return 0;
     case 1:
-      return theme.space[6];
+      return theme.space[0];
     case 2:
-      return theme.space[10];
+      return theme.space[4];
     case 3:
-      return theme.space[14];
+      return theme.space[8];
   }
 };
 interface StyledPropLineColumn {
