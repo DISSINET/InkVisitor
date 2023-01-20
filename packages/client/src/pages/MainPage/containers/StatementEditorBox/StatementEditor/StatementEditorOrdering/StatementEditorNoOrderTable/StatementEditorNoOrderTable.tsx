@@ -77,7 +77,7 @@ export const StatementEditorNoOrderTable: React.FC<
           prepareRow(row);
           return (
             <StyledTr
-              id={(row.original as OrderType).elementId}
+              key={(row.original as OrderType).elementId}
               noOrder
               borderColor={(row.original as OrderType).type}
             >
