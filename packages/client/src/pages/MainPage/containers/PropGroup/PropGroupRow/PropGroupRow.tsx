@@ -102,7 +102,6 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
   }, [draggedPropRow]);
 
   const dispatch = useAppDispatch();
-  // const ref = useRef<HTMLDivElement>(null);
   const dropRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<HTMLDivElement>(null);
 

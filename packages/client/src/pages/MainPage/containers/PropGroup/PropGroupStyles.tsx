@@ -37,21 +37,22 @@ export const StyledListHeaderColumn = styled.div<StyledListHeaderColumn>`
   font-style: italic;
 `;
 
-const getIndentation = (level: 0 | 1 | 2 | 3) => {
+const getIndentation = (level: 0 | 1 | 2 | 3, lowIdent?: boolean) => {
   switch (level) {
     case 0:
       return 0;
     case 1:
-      return theme.space[0];
+      return lowIdent ? theme.space[0] : theme.space[4];
     case 2:
-      return theme.space[4];
+      return lowIdent ? theme.space[4] : theme.space[8];
     case 3:
-      return theme.space[8];
+      return lowIdent ? theme.space[8] : theme.space[12];
   }
 };
 interface StyledPropLineColumn {
   level?: 0 | 1 | 2 | 3;
   isTag?: boolean;
+  lowIdent?: boolean;
 }
 export const StyledPropLineColumn = styled.div<StyledPropLineColumn>`
   display: inline-flex;
