@@ -9,16 +9,17 @@ export const StyledRow = styled.div<StyledRow>`
 interface StyledGrid {
   tempDisabled?: boolean;
   hasOrder?: boolean;
+  hasActant?: boolean;
 }
 export const StyledGrid = styled.div<StyledGrid>`
   display: grid;
 
   align-items: center;
   padding-left: ${({ theme }) => theme.space[0]};
-  grid-template-columns: ${({ theme, hasOrder }) =>
-    `${
-      hasOrder ? theme.space[8] : theme.space[2]
-    } minmax(7rem, auto) auto auto`};
+  grid-template-columns: ${({ theme, hasOrder, hasActant }) =>
+    `${hasOrder ? theme.space[8] : theme.space[2]} minmax(${
+      hasActant ? "7rem" : "14.5rem"
+    }, auto) auto auto`};
   width: fit-content;
   grid-auto-flow: row;
   padding-bottom: ${({ theme }) => theme.space[1]};

@@ -10,7 +10,8 @@ export const StyledGrid = styled.div<StyledGrid>`
 
   align-items: center;
   padding-left: ${({ theme }) => theme.space[0]};
-  grid-template-columns: 20px 1fr 1fr 10rem;
+
+  grid-template-columns: 20px auto auto 1fr;
   width: fit-content;
   grid-template-rows: auto;
   grid-auto-flow: row;

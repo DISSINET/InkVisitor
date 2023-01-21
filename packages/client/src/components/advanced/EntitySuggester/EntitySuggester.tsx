@@ -6,8 +6,6 @@ import {
   CEntity,
   CStatement,
   CTerritoryActant,
-  DEntity,
-  DStatement,
   InstTemplate,
 } from "constructors";
 import { useDebounce, useSearchParams } from "hooks";
