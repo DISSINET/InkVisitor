@@ -1,5 +1,6 @@
 import { IEntity, OrderType } from "@shared/types";
-import React, { useMemo } from "react";
+import { Tooltip } from "components";
+import React, { useMemo, useState } from "react";
 import { CgPlayListAdd } from "react-icons/cg";
 import { Cell, Column, Row, useTable } from "react-table";
 import theme from "Theme/theme";
@@ -31,12 +32,31 @@ export const StatementEditorNoOrderTable: React.FC<
         Cell: ({ row }: Cell) => {
           const orderObject = row.original as OrderType;
 
+          const [referenceElement, setReferenceElement] =
+            useState<HTMLDivElement | null>(null);
+          const [showTooltip, setShowTooltip] = useState(false);
+
           return (
-            <CgPlayListAdd
-              size={20}
-              style={{ cursor: "pointer", color: theme.color.gray[700] }}
-              onClick={() => addToOrdering(orderObject.elementId)}
-            />
+            <>
+              <Tooltip
+                visible={showTooltip}
+                referenceElement={referenceElement}
+                label="add order"
+                position="left"
+              />
+
+              <div
+                ref={setReferenceElement}
+                onMouseEnter={() => setShowTooltip(true)}
+                onMouseLeave={() => setShowTooltip(false)}
+              >
+                <CgPlayListAdd
+                  size={20}
+                  style={{ cursor: "pointer", color: theme.color.gray[700] }}
+                  onClick={() => addToOrdering(orderObject.elementId)}
+                />
+              </div>
+            </>
           );
         },
       },

@@ -1,6 +1,7 @@
 import { IEntity, OrderType } from "@shared/types";
+import { Tooltip } from "components";
 import update from "immutability-helper";
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { Cell, Column, Row, useTable } from "react-table";
 import {
   StyledButtonsWrap,
@@ -41,6 +42,10 @@ export const StatementEditorOrderTable: React.FC<StatementEditorOrderTable> = ({
           const isFirst = row.index === 0;
           const isLast = row.index === elements.length - 1;
 
+          const [referenceElement, setReferenceElement] =
+            useState<HTMLDivElement | null>(null);
+          const [showTooltip, setShowTooltip] = useState(false);
+
           return (
             <StyledButtonsWrap>
               <StyledRiArrowUpCircleLine
@@ -61,10 +66,22 @@ export const StatementEditorOrderTable: React.FC<StatementEditorOrderTable> = ({
                     : {}
                 }
               />
-              <StyledCgPlayListRemove
-                size={20}
-                onClick={() => removeFromOrdering(orderObject.elementId)}
+
+              <Tooltip
+                visible={showTooltip}
+                referenceElement={referenceElement}
+                label="remove order"
               />
+              <div
+                ref={setReferenceElement}
+                onMouseEnter={() => setShowTooltip(true)}
+                onMouseLeave={() => setShowTooltip(false)}
+              >
+                <StyledCgPlayListRemove
+                  size={20}
+                  onClick={() => removeFromOrdering(orderObject.elementId)}
+                />
+              </div>
             </StyledButtonsWrap>
           );
         },
