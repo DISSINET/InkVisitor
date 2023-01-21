@@ -640,6 +640,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
                   }
                   isInsideTemplate={entity.isTemplate || false}
                   territoryParentId={getTerritoryId(entity)}
+                  lowIdent
                 />
                 {userCanEdit && (
                   <Button
