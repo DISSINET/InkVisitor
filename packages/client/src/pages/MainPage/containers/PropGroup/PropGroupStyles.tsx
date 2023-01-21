@@ -58,7 +58,8 @@ export const StyledPropLineColumn = styled.div<StyledPropLineColumn>`
   display: inline-flex;
   margin: ${({ theme }) => theme.space[1]};
   align-items: center;
-  margin-left: ${({ level = 0 }) => getIndentation(level)};
+  margin-left: ${({ level = 0, lowIdent = false }) =>
+    getIndentation(level, lowIdent)};
   padding-right: 3px;
   overflow: ${({ isTag }) => (isTag ? "hidden" : "visible")};
 `;

@@ -10,7 +10,6 @@ import { useQuery } from "react-query";
 import { DraggedPropRowCategory, ItemTypes, PropAttributeFilter } from "types";
 import { FirstLevelPropGroup } from "./FirstLevelPropGroup/FirstLevelPropGroup";
 import { PropGroupRow } from "./PropGroupRow/PropGroupRow";
-import { StyledGrid, StyledListHeaderColumn } from "./PropGroupStyles";
 import { SecondLevelPropGroup } from "./SecondLevelPropGroup/SecondLevelPropGroup";
 import { ThirdLevelPropGroup } from "./ThirdLevelPropGroup/ThirdLevelPropGroup";
 
@@ -32,6 +31,7 @@ interface PropGroup {
   disabledAttributes?: PropAttributeFilter;
   isInsideTemplate: boolean;
   territoryParentId?: string;
+  lowIdent?: boolean;
 }
 
 export const PropGroup: React.FC<PropGroup> = ({
@@ -52,6 +52,7 @@ export const PropGroup: React.FC<PropGroup> = ({
   disabledAttributes = {} as PropAttributeFilter,
   isInsideTemplate,
   territoryParentId,
+  lowIdent,
 }) => {
   // territory query
   const {
@@ -105,6 +106,7 @@ export const PropGroup: React.FC<PropGroup> = ({
             isInsideTemplate={isInsideTemplate}
             territoryParentId={territoryParentId}
             hasOrder={hasOrder}
+            lowIdent={lowIdent}
           />
           {/* 2nd level */}
           <SecondLevelPropGroup
@@ -150,6 +152,7 @@ export const PropGroup: React.FC<PropGroup> = ({
             isInsideTemplate={isInsideTemplate}
             territoryParentId={territoryParentId}
             hasOrder={hasOrder}
+            lowIdent={lowIdent}
           />
           {/* 3rd level */}
           <ThirdLevelPropGroup
@@ -195,6 +198,7 @@ export const PropGroup: React.FC<PropGroup> = ({
             isInsideTemplate={isInsideTemplate}
             territoryParentId={territoryParentId}
             hasOrder={hasOrder}
+            lowIdent={lowIdent}
           />
         </React.Fragment>
       );

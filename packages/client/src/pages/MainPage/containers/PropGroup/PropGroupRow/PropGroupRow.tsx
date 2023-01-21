@@ -57,6 +57,7 @@ interface PropGroupRow {
   disabledAttributes?: PropAttributeFilter;
   isInsideTemplate: boolean;
   territoryParentId?: string;
+  lowIdent?: boolean;
 }
 
 export const PropGroupRow: React.FC<PropGroupRow> = ({
@@ -80,6 +81,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
   disabledAttributes = {} as PropAttributeFilter,
   isInsideTemplate = false,
   territoryParentId,
+  lowIdent = false,
 }) => {
   const propTypeEntity: IEntity = entities[prop.type.entityId];
   const propValueEntity: IEntity = entities[prop.value.entityId];
@@ -156,7 +158,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
         key={level + "|" + index + "|" + id}
         tempDisabled={tempDisabled && category === draggedPropRow.category}
       >
-        <StyledPropLineColumn level={level} isTag={false}>
+        <StyledPropLineColumn level={level} lowIdent={lowIdent} isTag={false}>
           {userCanEdit && hasOrder ? (
             <div ref={dragRef} style={{ width: "2rem" }}>
               <StyledFaGripVertical />
@@ -167,6 +169,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
         </StyledPropLineColumn>
         <StyledPropLineColumn
           level={level}
+          lowIdent={lowIdent}
           isTag={propTypeEntity ? true : false}
         >
           {propTypeEntity ? (
