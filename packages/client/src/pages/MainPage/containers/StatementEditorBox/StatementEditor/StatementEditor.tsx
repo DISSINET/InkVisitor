@@ -592,7 +592,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 }}
                 categoryTypes={[EntityEnums.Class.Action]}
                 excludedEntities={excludedSuggesterEntities}
-                placeholder={"add new action"}
+                placeholder={"add action"}
                 isInsideTemplate={statement.isTemplate}
                 territoryParentId={statementTerritoryId}
               />
@@ -628,7 +628,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                   addActant(newSelectedId);
                 }}
                 categoryTypes={classesEditorActants}
-                placeholder={"add new actant"}
+                placeholder={"add actant"}
                 excludedEntities={excludedSuggesterEntities}
                 isInsideTemplate={statement.isTemplate}
                 territoryParentId={statementTerritoryId}

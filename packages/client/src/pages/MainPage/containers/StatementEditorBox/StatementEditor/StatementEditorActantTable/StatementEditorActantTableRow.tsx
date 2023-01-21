@@ -184,6 +184,7 @@ export const StatementEditorActantTableRow: React.FC<
           isInsideTemplate={isInsideTemplate}
           territoryParentId={territoryParentId}
           territoryActants={territoryActants}
+          placeholder={"add actant"}
         />
       )
     );
