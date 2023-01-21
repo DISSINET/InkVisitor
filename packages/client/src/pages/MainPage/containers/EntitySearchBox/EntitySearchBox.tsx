@@ -187,7 +187,6 @@ export const EntitySearchBox: React.FC = () => {
 
   const templateOptions: DropdownItem[] = useMemo(() => {
     const options: DropdownItem[] = [anyTemplate];
-    console.log("constructing new template options", templates);
 
     if (templates) {
       templates.forEach((template) => {
