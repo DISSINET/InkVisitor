@@ -72,9 +72,9 @@ export const renderOrderingMainColumn = (
 
       return (
         <StyledMainColumn>
-          {renderOrderingEntityTag(propValueEntity, "value")}
-          <StyledSeparator />
           {renderOrderingEntityTag(propTypeEntity, "type")}
+          <StyledSeparator />
+          {renderOrderingEntityTag(propValueEntity, "value")}
         </StyledMainColumn>
       );
   }
