@@ -17,13 +17,15 @@ interface Column {
 interface InputWrapper {
   isOver: boolean;
   hasButton: boolean;
+  hasText?: boolean;
 }
 export const StyledInputWrapper = styled.div<InputWrapper>`
   display: flex;
   opacity: ${({ isOver }) => isOver && "75%"};
   max-width: 16.1rem;
   input {
-    padding-right: ${({ theme }) => theme.space[7]};
+    padding-right: ${({ theme, hasText }) =>
+      hasText ? theme.space[7] : theme.space[1]};
   }
   input[type="text"] {
     border-left-width: 0;

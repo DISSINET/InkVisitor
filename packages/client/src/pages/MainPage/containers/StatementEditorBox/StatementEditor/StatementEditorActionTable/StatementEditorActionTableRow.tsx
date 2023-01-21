@@ -150,7 +150,7 @@ export const StatementEditorActionTableRow: React.FC<
           openDetailOnCreate
           categoryTypes={[EntityEnums.Class.Action]}
           excludedEntities={excludedSuggesterEntities}
-          placeholder={"add new action"}
+          placeholder={"add action"}
           isInsideTemplate={isInsideTemplate}
           territoryParentId={territoryParentId}
           territoryActants={territoryActants}

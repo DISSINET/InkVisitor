@@ -73,7 +73,7 @@ export const Suggester: React.FC<Suggester> = ({
   categories,
   suggestionListPosition,
   disabled,
-  inputWidth = 100,
+  inputWidth = 80,
   disableCreate = false,
   allowDrop = false,
 
@@ -219,6 +219,7 @@ export const Suggester: React.FC<Suggester> = ({
           ref={dropRef}
           hasButton={!disableCreate}
           isOver={isOver}
+          hasText={typed.length > 0}
         >
           <Dropdown
             value={{ label: category.label, value: category.value }}

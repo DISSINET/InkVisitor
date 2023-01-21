@@ -184,6 +184,7 @@ export const StatementEditorActantTableRow: React.FC<
           isInsideTemplate={isInsideTemplate}
           territoryParentId={territoryParentId}
           territoryActants={territoryActants}
+          placeholder={"add actant"}
         />
       )
     );
@@ -425,7 +426,12 @@ export const StatementEditorActantTableRow: React.FC<
       key={index}
       marginBottom={classifications.length > 0 || identifications.length > 0}
     >
-      <StyledGrid ref={dropRef} style={{ opacity }} hasOrder={hasOrder}>
+      <StyledGrid
+        ref={dropRef}
+        style={{ opacity }}
+        hasOrder={hasOrder}
+        hasActant={!!filteredActant.data.actant}
+      >
         {userCanEdit && hasOrder ? (
           <StyledGridColumn ref={dragRef} style={{ cursor: "move" }}>
             <FaGripVertical />
