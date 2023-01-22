@@ -1,6 +1,6 @@
 import React from "react";
 import { UserList } from "./containers";
-import { StyledBoxWrap, StyledContent } from "./UsersPageStyles";
+import { StyledBoxWrap, StyledContent, StyledWrapper } from "./UsersPageStyles";
 
 interface UsersPageProps {}
 
