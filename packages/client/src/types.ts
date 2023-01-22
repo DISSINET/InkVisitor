@@ -80,6 +80,10 @@ export const EntityColors: { [key: string]: IEntityColor } = {
     color: "entityV",
   },
   X: {
+    entityClass: EntityEnums.Extension.NoClass,
+    color: "white",
+  },
+  empty: {
     entityClass: EntityEnums.Extension.Empty,
     color: "white",
   },

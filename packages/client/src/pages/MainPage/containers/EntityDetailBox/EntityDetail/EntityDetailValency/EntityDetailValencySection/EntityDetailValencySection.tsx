@@ -25,6 +25,15 @@ import {
   StyledSemanticsWrapper,
 } from "./EntityDetailValencySectionStyles";
 
+const valencyEntitiesOptions = [
+  ...entitiesDict,
+  {
+    value: EntityEnums.Extension.Empty,
+    label: "empty",
+    info: "",
+  },
+];
+
 interface EntityDetailValencySection {
   entity: IResponseDetail;
   relationType:
@@ -151,7 +160,7 @@ export const EntityDetailValencySection: React.FC<
   };
 
   const getEntityTypeValue = () =>
-    [allEntities].concat(entitiesDict).filter((i: any) => {
+  valencyEntitiesOptions.filter((i: any) => {
       switch (relationType) {
         case RelationEnums.Type.SubjectSemantics:
           return (entity as IAction).data.entities?.s.includes(i.value);
@@ -189,7 +198,7 @@ export const EntityDetailValencySection: React.FC<
           allowAny
           disabled={!userCanEdit}
           isMulti
-          options={entitiesDict}
+          options={valencyEntitiesOptions}
           value={getEntityTypeValue()}
           width="full"
           noOptionsMessage={"no entity"}
