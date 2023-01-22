@@ -24,7 +24,7 @@ export const StyledTr = styled.tr<StyledTr>`
   color: ${({ theme }) => theme.color["black"]};
   opacity: ${({ opacity }) => (opacity ? opacity : 1)};
   border-top: 1px solid ${({ theme }) => theme.color["gray"][500]};
-  border-right: 4px solid
+  border-left: 6px solid
     ${({ theme, borderColor }) =>
       borderColor ? ` ${theme.color.elementType[borderColor]}` : ""};
   cursor: ${({ noOrder }) => (noOrder ? "default" : "move")};
