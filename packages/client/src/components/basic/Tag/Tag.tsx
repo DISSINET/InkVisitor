@@ -62,7 +62,7 @@ export const Tag: React.FC<TagProps> = ({
   parentId,
   label = "",
   labelItalic = false,
-  entityClass = EntityEnums.Extension.Empty,
+  entityClass = EntityEnums.Extension.NoClass,
   status = "1",
   ltype = "1",
   entity,

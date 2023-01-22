@@ -24,7 +24,8 @@ export namespace EntityEnums {
 
   export enum Extension {
     Any = "*",
-    Empty = "X",
+    Empty = "empty",
+    NoClass = "X",
   }
 
   export type ExtendedClass = Class | Extension;
