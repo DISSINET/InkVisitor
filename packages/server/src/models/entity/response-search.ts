@@ -194,7 +194,7 @@ export class SearchQuery {
     }
 
     // words have to be splitted and joined with regexps to provide variable glue
-    label = label.toLowerCase().split(" ").join(`[\\W]+`);
+    label = label.toLowerCase().split(" ").join(`([\\W]+|([\\W]+[\\w]+))+`);
 
     const regexp = `${left}${label}${right}`;
 
