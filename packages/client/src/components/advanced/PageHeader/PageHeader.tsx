@@ -27,11 +27,7 @@ export const LeftHeader: React.FC<LeftHeader> = React.memo(
       /apps\/inkvisitor[-]?/,
       ""
     );
-    const versionText = `v. ${packageJson.version} ${
-      ["production", ""].indexOf(env) === -1
-        ? `| ${env} | built: ${process.env.BUILD_TIMESTAMP}`
-        : ""
-    }`;
+    const versionText = `v. ${packageJson.version}${env ? ` | ${env}` : ``} | built: ${process.env.BUILD_TIMESTAMP}`;
     const location = useLocation();
     const history = useHistory();
 
