@@ -230,7 +230,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
               disableTemplatesAccept
               categoryTypes={
                 getCategoryTypes() ||
-                ([EntityEnums.Extension.Empty] as [EntityEnums.ExtendedClass])
+                ([EntityEnums.Extension.NoClass] as [EntityEnums.ExtendedClass])
               }
               onSelected={(selectedId: string) => {
                 if (isCloudType) {
