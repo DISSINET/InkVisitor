@@ -40,11 +40,11 @@ export class RequestSearch {
     this.label = requestData.label;
     this.status = requestData.status;
 
-    if (this.createdDate) {
+    if (requestData.createdDate) {
       this.createdDate = new Date(requestData.createdDate || "");
     }
 
-    if (this.updatedDate) {
+    if (requestData.updatedDate) {
       this.updatedDate = new Date(requestData.updatedDate || "");
     }
 
