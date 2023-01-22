@@ -8,6 +8,7 @@ import { ResponseEntity } from "./response";
 import { getEntityClass } from "@models/factory";
 import { IRequest } from "src/custom_typings/request";
 import Territory from "@models/territory/territory";
+import Audit from "@models/audit/audit";
 
 /**
  * SearchQuery is customized builder for search queries, allowing to build query by chaining prepared filters
@@ -241,7 +242,6 @@ export class SearchQuery {
       req.entityIds = req.entityIds.concat(assocEntityIds);
     }
 
-
     if (req.territoryId) {
       let territoryIds = [req.territoryId];
 
@@ -271,10 +271,32 @@ export class SearchQuery {
       this.whereStatus(req.status);
     }
 
-    // search by date
-    // TODO
-    if (req.updatedDate || req.createdDate) {
+    if (req.createdDate) {
+      const audits = await Audit.getByCreatedDate(this.connection, req.createdDate);
+      if (!req.entityIds) {
+        req.entityIds = audits.map(a => a.entityId);
+      } else {
+        req.entityIds = req.entityIds.reduce((acc, curr) => {
+          if (audits.find(a => a.entityId === curr)) {
+            acc.push(curr);
+          }
+          return acc;
+        }, [] as string[]);
+      }
+    }
 
+    if (req.updatedDate) {
+      const audits = await Audit.getByUpdatedDate(this.connection, req.updatedDate);
+      if (!req.entityIds) {
+        req.entityIds = audits.map(a => a.entityId);
+      } else {
+        req.entityIds = req.entityIds.reduce((acc, curr) => {
+          if (audits.find(a => a.entityId === curr)) {
+            acc.push(curr);
+          }
+          return acc;
+        }, [] as string[]);
+      }
     }
 
     if (req.usedTemplate) {
