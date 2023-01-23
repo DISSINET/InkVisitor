@@ -259,10 +259,6 @@ export class SearchQuery {
       req.entityIds = req.entityIds.concat(assocEntityIds);
     }
 
-    if (req.entityIds) {
-      this.whereEntityIds(req.entityIds);
-    }
-
     if (req.class) {
       this.whereClass(req.class);
     }
@@ -270,6 +266,7 @@ export class SearchQuery {
     if (req.status) {
       this.whereStatus(req.status);
     }
+
 
     if (req.createdDate) {
       const audits = await Audit.getByCreatedDate(this.connection, req.createdDate);
@@ -285,6 +282,7 @@ export class SearchQuery {
       }
     }
 
+
     if (req.updatedDate) {
       const audits = await Audit.getByUpdatedDate(this.connection, req.updatedDate);
       if (!req.entityIds) {
@@ -297,6 +295,10 @@ export class SearchQuery {
           return acc;
         }, [] as string[]);
       }
+    }
+
+    if (req.entityIds) {
+      this.whereEntityIds(req.entityIds);
     }
 
     if (req.usedTemplate) {
