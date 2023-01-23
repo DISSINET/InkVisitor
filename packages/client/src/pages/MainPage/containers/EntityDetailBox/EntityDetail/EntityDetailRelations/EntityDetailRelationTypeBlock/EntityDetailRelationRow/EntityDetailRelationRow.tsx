@@ -128,12 +128,11 @@ export const EntityDetailRelationRow: React.FC<EntityDetailRelationRow> = ({
       hasAttribute={relationRule.attributes.length > 0}
       hasOrder={hasOrder}
     >
-      {relation.entityIds.map((relationEntityId, key) => {
+      {[...new Set(relation.entityIds)].map((relationEntityId, key) => {
         const relationEntity = entities[relationEntityId];
         return (
           <React.Fragment key={key}>
             {relationEntity &&
-              relationEntity.id !== entityId &&
               shouldBeRendered(key) && (
                 <>
                   {hasOrder && (
