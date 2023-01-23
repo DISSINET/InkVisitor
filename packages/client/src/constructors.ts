@@ -393,6 +393,13 @@ export const DStatement = (
   return duplicatedStatement;
 };
 
+export const DStatementReferences = (
+  referenceToDuplicate: IReference[]
+): IReference[] => {
+  referenceToDuplicate.forEach((r) => (r.id = uuidv4()));
+  return referenceToDuplicate;
+};
+
 // duplicate entity
 export const DEntity = (entity: IEntity, userRole: UserEnums.Role): IEntity => {
   const duplicatedEntity: IEntity = {

@@ -3,11 +3,11 @@ import { Button } from "components";
 import { CReference } from "constructors";
 import React from "react";
 import { FaPlus } from "react-icons/fa";
+import { EntityReferenceTableRow } from "./EntityReferenceTableRow";
 import {
   StyledListHeaderColumn,
-  StyledReferencesList,
+  StyledReferencesList
 } from "./EntityReferenceTableStyles";
-import { EntityReferenceTableRow } from "./EntityReferenceTableRow";
 
 interface EntityReferenceTable {
   entities: { [key: string]: IEntity };
@@ -41,6 +41,7 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
     });
     sendChanges(newReferences);
   };
+
 
   const handleChangeValue = (refId: string, newValueId: string) => {
     const newReferences = [...references];

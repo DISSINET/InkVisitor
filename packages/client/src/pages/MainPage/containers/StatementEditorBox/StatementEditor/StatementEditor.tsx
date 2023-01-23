@@ -4,11 +4,20 @@ import {
   IOption,
   IReference,
   IResponseStatement,
+  IResponseTerritory,
   IStatementActant,
   IStatementAction,
+  ITerritory,
 } from "@shared/types";
 import api from "api";
-import { Button, Dropdown, Input, Loader, MultiInput } from "components";
+import {
+  Button,
+  ButtonGroup,
+  Dropdown,
+  Input,
+  Loader,
+  MultiInput,
+} from "components";
 import {
   ApplyTemplateModal,
   AuditTable,
@@ -23,6 +32,7 @@ import {
   CProp,
   CStatementActant,
   CStatementAction,
+  DStatementReferences,
 } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
@@ -51,9 +61,11 @@ import {
   StyledEditorStatementInfoLabel,
   StyledEditorTemplateSection,
   StyledHeaderTagWrap,
+  StyledReferencesButtons,
   StyledTagsList,
   StyledTagsListItem,
 } from "./../StatementEditorBoxStyles";
+import { MdDriveFileMove } from "react-icons/md";
 
 interface StatementEditor {
   statement: IResponseStatement;
@@ -215,6 +227,24 @@ export const StatementEditor: React.FC<StatementEditor> = ({
       enabled: !!statementId && !!statementTerritoryId,
     }
   );
+
+  // get data for the previous statement
+  const previousStatement: false | IResponseStatement = useMemo(() => {
+    if (territoryData) {
+      let thisStatementIndex: false | number = false;
+      territoryData.statements.forEach((s, si) => {
+        if (s.id === statement.id) {
+          thisStatementIndex = si;
+        }
+      });
+      if (!!thisStatementIndex && thisStatementIndex > 0) {
+        return territoryData.statements[thisStatementIndex - 1];
+      } else {
+        return false;
+      }
+    }
+    return false;
+  }, [territoryData, statement.id]);
 
   //TODO recurse to get all parents
   const territoryPath =
@@ -457,6 +487,14 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     }
   };
 
+  // copy reference from previous statements
+  const handleCopyPreviousStatementReferences = () => {
+    if (previousStatement) {
+      const copiedReferences = DStatementReferences(previousStatement.references)
+      updateStatementMutation.mutate({references: copiedReferences})
+    }
+  };
+
   return (
     <>
       <div style={{ marginBottom: "4rem" }} key={statement.id}>
@@ -653,6 +691,17 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         <StyledEditorSection key="editor-section-refs">
           <StyledEditorSectionHeader>References</StyledEditorSectionHeader>
           <StyledEditorSectionContent>
+            <StyledReferencesButtons>
+              <ButtonGroup>
+                <Button
+                  icon={<MdDriveFileMove />}
+                  label="copy references from previous statements"
+                  disabled={!previousStatement}
+                  tooltipLabel="copy references from previous statements"
+                  onClick={() => handleCopyPreviousStatementReferences()}
+                />
+              </ButtonGroup>
+            </StyledReferencesButtons>
             <EntityReferenceTable
               openDetailOnCreate
               entities={statement.entities}
