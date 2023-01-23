@@ -204,3 +204,8 @@ export const StyledEditorTemplateSection = styled.div`
     }
   }
 `;
+
+
+export const StyledReferencesButtons = styled.div`
+  margin-bottom: ${({ theme }) => theme.space[4]};
+`;
