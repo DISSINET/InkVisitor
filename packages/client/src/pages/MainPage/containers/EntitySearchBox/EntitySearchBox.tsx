@@ -1,14 +1,16 @@
+import { entityStatusDict } from "@shared/dictionaries";
 import { DropdownItem, entitiesDict } from "@shared/dictionaries/entity";
 import { EntityEnums } from "@shared/enums";
 import { IEntity, IOption } from "@shared/types";
 import { IRequestSearch } from "@shared/types/request-search";
 import api from "api";
-import { Button, Dropdown, Input, Loader, TypeBar } from "components";
+import { Button, Dropdown, Input, Loader, Tag, TypeBar } from "components";
 import {
   AttributeButtonGroup,
   EntitySuggester,
   EntityTag,
 } from "components/advanced";
+import { StyledLabel } from "components/basic/Tag/TagStyles";
 import { useDebounce } from "hooks";
 import React, { useMemo, useState } from "react";
 import { RiCloseFill } from "react-icons/ri";
@@ -18,6 +20,10 @@ import { wildCardChar } from "Theme/constants";
 import useResizeObserver from "use-resize-observer";
 import {
   StyledBoxContent,
+  StyledDatePicker,
+  StyledDateTag,
+  StyledDateTagButton,
+  StyledDateTagText,
   StyledResultsHeader,
   StyledResultsWrapper,
   StyledRow,
@@ -33,6 +39,13 @@ const defaultClassOption: DropdownItem = {
   label: "*",
   value: "",
 };
+
+const defaultStatusOption: DropdownItem = {
+  label: "all",
+  value: "",
+};
+const statusOptions: DropdownItem[] = entityStatusDict;
+statusOptions.push(defaultStatusOption);
 
 const anyTemplate: DropdownItem = {
   value: "Any",
@@ -56,6 +69,18 @@ export const EntitySearchBox: React.FC = () => {
   const { ref: resultRef, height = 0 } = useResizeObserver<HTMLDivElement>();
 
   const debouncedResultsHeight = useDebounce(height, 20);
+
+  const statusOptionSelected: IOption = useMemo(() => {
+    if (!!debouncedValues.status) {
+      return (
+        statusOptions.find((option) => {
+          return option.value === debouncedValues.status;
+        }) || defaultStatusOption
+      );
+    }
+    return defaultStatusOption;
+  }, [debouncedValues.status]);
+
 
   // check whether the search should be executed
   const validSearch = useMemo(() => {
@@ -144,7 +169,7 @@ export const EntitySearchBox: React.FC = () => {
     { enabled: api.isLoggedIn() }
   );
 
-  const options: DropdownItem[] = entitiesDict.filter(
+  const classOptions: DropdownItem[] = entitiesDict.filter(
     (e) => e.value !== "A" && e.value !== "R" && e.value !== "X"
   );
 
@@ -228,7 +253,7 @@ export const EntitySearchBox: React.FC = () => {
             placeholder={""}
             width={150}
             entityDropdown
-            options={[defaultClassOption].concat(options)}
+            options={[defaultClassOption].concat(classOptions)}
             value={classOption}
             onChange={(option: ValueType<OptionTypeBase, any>) => {
               setClassOption(option as DropdownItem);
@@ -242,6 +267,24 @@ export const EntitySearchBox: React.FC = () => {
           <TypeBar entityLetter={(classOption as IOption).value} />
         </div>
       </StyledRow>
+      <StyledRow>
+        <StyledRowHeader>Limit by status</StyledRowHeader>
+        <div style={{ position: "relative" }}>
+          <Dropdown
+            placeholder={""}
+            width={150}
+            options={statusOptions}
+            value={statusOptionSelected}
+            onChange={(option: ValueType<OptionTypeBase, any>) => {
+              handleChange({
+                status: (option as IOption).value,
+              });
+            }}
+          />
+          <TypeBar entityLetter={(classOption as IOption).value} />
+        </div>
+      </StyledRow>
+
       <StyledRow>
         <StyledRowHeader>Limit by template</StyledRowHeader>
         <Dropdown
@@ -377,6 +420,74 @@ export const EntitySearchBox: React.FC = () => {
               inputWidth={114}
             />
           </div>
+        )}
+      </StyledRow>
+      <StyledRow>
+        <StyledRowHeader>Created at</StyledRowHeader>
+        {debouncedValues.createdDate ? (
+          <StyledDateTag>
+            <StyledDateTagText>
+              {debouncedValues.createdDate.toDateString()}
+            </StyledDateTagText>
+            <StyledDateTagButton
+              key="d"
+              icon={<RiCloseFill />}
+              color="white"
+              noBorder
+              noBackground
+              inverted
+              tooltipLabel="remove date"
+              onClick={() => {
+                handleChange({ createdDate: undefined });
+              }}
+            />
+          </StyledDateTag>
+        ) : (
+          <StyledDatePicker
+            type="date"
+            id="created-date"
+            width={150}
+            name="created-date"
+            onChange={(e) => {
+              const createdDate = new Date(e.target.value);
+              handleChange({ createdDate });
+            }}
+          />
+        )}
+      </StyledRow>
+
+      <StyledRow>
+        <StyledRowHeader>Udpated at</StyledRowHeader>
+        {debouncedValues.updatedDate ? (
+          <StyledDateTag>
+            <StyledDateTagText>
+              {debouncedValues.updatedDate.toDateString()}
+            </StyledDateTagText>
+            <StyledDateTagButton
+              key="d"
+              icon={<RiCloseFill />}
+              color="white"
+              noBorder
+              noBackground
+              inverted
+              tooltipLabel="remove date"
+              onClick={() => {
+                handleChange({ updatedDate: undefined });
+              }}
+            />
+          </StyledDateTag>
+        ) : (
+          <StyledDatePicker
+            type="date"
+            id="updated-date"
+            width={150}
+            name="updated-date"
+            onChange={(e) => {
+              const updatedDate = new Date(e.target.value);
+              console.log(updatedDate);
+              handleChange({ updatedDate });
+            }}
+          />
         )}
       </StyledRow>
 

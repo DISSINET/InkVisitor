@@ -8,6 +8,7 @@ import { ResponseEntity } from "./response";
 import { getEntityClass } from "@models/factory";
 import { IRequest } from "src/custom_typings/request";
 import Territory from "@models/territory/territory";
+import Audit from "@models/audit/audit";
 
 /**
  * SearchQuery is customized builder for search queries, allowing to build query by chaining prepared filters
@@ -65,6 +66,19 @@ export class SearchQuery {
   whereClass(entityClass: EntityEnums.Class): SearchQuery {
     this.query = this.query.filter({
       class: entityClass,
+    });
+
+    return this;
+  }
+
+  /**
+   * adds condition to limit results by filtering by specific status
+   * @param entityClass
+   * @returns
+   */
+  whereStatus(status: EntityEnums.Status): SearchQuery {
+    this.query = this.query.filter({
+      status: status,
     });
 
     return this;
@@ -228,7 +242,6 @@ export class SearchQuery {
       req.entityIds = req.entityIds.concat(assocEntityIds);
     }
 
-
     if (req.territoryId) {
       let territoryIds = [req.territoryId];
 
@@ -246,12 +259,46 @@ export class SearchQuery {
       req.entityIds = req.entityIds.concat(assocEntityIds);
     }
 
-    if (req.entityIds) {
-      this.whereEntityIds(req.entityIds);
-    }
-
     if (req.class) {
       this.whereClass(req.class);
+    }
+
+    if (req.status) {
+      this.whereStatus(req.status);
+    }
+
+
+    if (req.createdDate) {
+      const audits = await Audit.getByCreatedDate(this.connection, req.createdDate);
+      if (!req.entityIds) {
+        req.entityIds = audits.map(a => a.entityId);
+      } else {
+        req.entityIds = req.entityIds.reduce((acc, curr) => {
+          if (audits.find(a => a.entityId === curr)) {
+            acc.push(curr);
+          }
+          return acc;
+        }, [] as string[]);
+      }
+    }
+
+
+    if (req.updatedDate) {
+      const audits = await Audit.getByUpdatedDate(this.connection, req.updatedDate);
+      if (!req.entityIds) {
+        req.entityIds = audits.map(a => a.entityId);
+      } else {
+        req.entityIds = req.entityIds.reduce((acc, curr) => {
+          if (audits.find(a => a.entityId === curr)) {
+            acc.push(curr);
+          }
+          return acc;
+        }, [] as string[]);
+      }
+    }
+
+    if (req.entityIds) {
+      this.whereEntityIds(req.entityIds);
     }
 
     if (req.usedTemplate) {
