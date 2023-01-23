@@ -695,9 +695,9 @@ export const StatementEditor: React.FC<StatementEditor> = ({
               <ButtonGroup>
                 <Button
                   icon={<MdDriveFileMove />}
-                  label="copy references from previous statements"
+                  label="copy references from the previous statement"
                   disabled={!previousStatement}
-                  tooltipLabel="copy references from previous statements"
+                  tooltipLabel="copy references the from previous statement"
                   onClick={() => handleCopyPreviousStatementReferences()}
                 />
               </ButtonGroup>
