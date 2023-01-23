@@ -177,6 +177,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
         return true
       }
     })
+    
     setCurrentRelations([...new Set(uniqueRelations)]);
   }, [selectedRelations]);
 

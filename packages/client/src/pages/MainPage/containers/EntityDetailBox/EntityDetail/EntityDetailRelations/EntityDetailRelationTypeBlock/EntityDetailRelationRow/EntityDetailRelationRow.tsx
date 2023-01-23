@@ -121,6 +121,10 @@ export const EntityDetailRelationRow: React.FC<EntityDetailRelationRow> = ({
   preview(drop(dropRef));
   drag(dragRef);
 
+  const uniqueRelationIds = [...new Set(relation.entityIds)]
+
+  console.log(uniqueRelationIds)
+
   return (
     <StyledGrid
       ref={dropRef}
@@ -128,9 +132,11 @@ export const EntityDetailRelationRow: React.FC<EntityDetailRelationRow> = ({
       hasAttribute={relationRule.attributes.length > 0}
       hasOrder={hasOrder}
     >
-      {[...new Set(relation.entityIds)].map((relationEntityId, key) => {
+      {uniqueRelationIds.map((relationEntityId, key) => {
+
+
         const relationEntity = entities[relationEntityId];
-        return (
+        return (relationEntityId !== entityId || uniqueRelationIds.length === 1) && (
           <React.Fragment key={key}>
             {relationEntity &&
               shouldBeRendered(key) && (
