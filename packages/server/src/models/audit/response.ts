@@ -1,7 +1,6 @@
-import { r as rethink, Connection } from "rethinkdb-ts";
+import { Connection } from "rethinkdb-ts";
 import { IAudit, IResponseAudit } from "@shared/types";
 import Audit from "./audit";
-import { DbEnums } from "@shared/enums";
 
 export class ResponseAudit implements IResponseAudit {
   entityId: string;
@@ -14,46 +13,17 @@ export class ResponseAudit implements IResponseAudit {
   }
 
   /**
-   * Retrieves N audits for entity, ordered by date DESC (last N items)
-   * @param dbConn rethinkdb Connection
-   * @param n limit for returned entries
-   * @returns Promise<void>
-   */
-  async getLastNForEntity(dbConn: Connection, n: number = 5): Promise<void> {
-    const result = await rethink
-      .table(Audit.table)
-      .getAll(this.entityId, { index: DbEnums.Indexes.AuditEntityId })
-      .orderBy(rethink.desc("date"))
-      .limit(n)
-      .run(dbConn);
-
-    if (!result || !result.length) {
-      this.last = [];
-      return;
-    }
-
-    this.last = result.map((r) => new Audit(r));
-  }
-
-  /**
-   * Retrieves first created audit entry for entity.
-   * First audit entry stands for created-at entry.
+   * Fills fields for this response
    * @param db rethinkdb Connection
    * @returns Promise<void>
    */
-  async getFirstForEntity(db: Connection): Promise<void> {
-    const result = await rethink
-      .table(Audit.table)
-      .getAll(this.entityId, { index: DbEnums.Indexes.AuditEntityId })
-      .orderBy(rethink.asc("date"))
-      .limit(1)
-      .run(db);
-
-    if (!result || !result.length) {
-      this.first = undefined;
-      return;
+  async prepare(db: Connection): Promise<void> {
+    this.last = await Audit.getLastNForEntity(db, this.entityId, 5);
+    if (this.last.length) {
+      const firstEntity = await Audit.getFirstForEntity(db, this.entityId);
+      if (firstEntity) {
+        this.first = firstEntity;
+      }
     }
-
-    this.first = new Audit(result[0]);
   }
 }
