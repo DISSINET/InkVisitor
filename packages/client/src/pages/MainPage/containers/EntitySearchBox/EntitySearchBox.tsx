@@ -4,13 +4,12 @@ import { EntityEnums } from "@shared/enums";
 import { IEntity, IOption } from "@shared/types";
 import { IRequestSearch } from "@shared/types/request-search";
 import api from "api";
-import { Button, Dropdown, Input, Loader, Tag, TypeBar } from "components";
+import { Button, Dropdown, Input, Loader, TypeBar } from "components";
 import {
   AttributeButtonGroup,
   EntitySuggester,
   EntityTag,
 } from "components/advanced";
-import { StyledLabel } from "components/basic/Tag/TagStyles";
 import { useDebounce } from "hooks";
 import React, { useMemo, useState } from "react";
 import { RiCloseFill } from "react-icons/ri";
@@ -53,7 +52,7 @@ const anyTemplate: DropdownItem = {
   info: "",
 };
 
-const debounceTime: number = 100;
+const debounceTime: number = 500;
 
 // the minimum pixels for the results section height
 const MIN_RESULT_H = 100;
@@ -80,7 +79,6 @@ export const EntitySearchBox: React.FC = () => {
     }
     return defaultStatusOption;
   }, [debouncedValues.status]);
-
 
   // check whether the search should be executed
   const validSearch = useMemo(() => {

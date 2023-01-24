@@ -8,6 +8,7 @@ import {
 } from "@shared/types";
 import api from "api";
 import { LetterIcon, Tooltip } from "components";
+import { useDebounce } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
 import { AiOutlineTag } from "react-icons/ai";
 import { BiCommentDetail } from "react-icons/bi";
@@ -71,16 +72,27 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
   const [tooltipData, setTooltipData] = useState<
     EntityTooltipNamespace.IResponse | false
   >(false);
+  const [allowFetch, setAllowFetch] = useState(false);
+
+  useEffect(() => {
+    if (tagHovered) {
+      const timer = setTimeout(() => setAllowFetch(true), 500);
+      return () => {
+        setAllowFetch(false);
+        clearTimeout(timer);
+      };
+    }
+  }, [tagHovered]);
 
   const { data, isFetching, isSuccess } = useQuery(
-    ["tooltip", entityId, tagHovered],
+    ["tooltip", entityId, allowFetch],
     async () => {
       const res = await api.tooltipGet(entityId);
       setTooltipData(res.data);
       return res.data;
     },
     {
-      enabled: api.isLoggedIn() && !!entityId && tagHovered,
+      enabled: api.isLoggedIn() && !!entityId && allowFetch,
     }
   );
 
