@@ -118,12 +118,13 @@ export const EntityDetailRelationTypeBlock: React.FC<
   useEffect(() => {
     const entityIds = selectedRelations
       .map((relation) => relation.entityIds.map((entityId) => entityId))
-      .flat(1)
-      .concat(entity.id);
+      .flat(1);
+    if (!relationRule.selfLoop) {
+      entityIds.concat(entity.id);
+    }
     setUsedEntityIds([...new Set(entityIds)]);
-  }, [entities, selectedRelations]);
+  }, [selectedRelations, relationRule]);
 
-  // TODO: Lift cloud handling to EntityDetailRelations
   const [tempCloudEntityId, setTempCloudEntityId] = useState<string | false>(
     false
   );
@@ -167,17 +168,17 @@ export const EntityDetailRelationTypeBlock: React.FC<
   };
 
   useEffect(() => {
-    const uniqueRelationIds: string[] = []
-    
-    const uniqueRelations = selectedRelations.filter(r => {
+    const uniqueRelationIds: string[] = [];
+
+    const uniqueRelations = selectedRelations.filter((r) => {
       if (uniqueRelationIds.includes(r.id)) {
-        return false
+        return false;
       } else {
-        uniqueRelationIds.push(r.id)
-        return true
+        uniqueRelationIds.push(r.id);
+        return true;
       }
-    })
-    
+    });
+
     setCurrentRelations([...new Set(uniqueRelations)]);
   }, [selectedRelations]);
 
@@ -250,7 +251,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
                   handleMultiSelected(selectedId);
                 }
               }}
-              //excludedActantIds={usedEntityIds}
+              excludedActantIds={usedEntityIds}
             />
           </StyledSuggesterWrapper>
         )}
