@@ -1,5 +1,5 @@
 import { Placement } from "@popperjs/core";
-import { certaintyDict } from "@shared/dictionaries";
+import { certaintyDict, languageDict } from "@shared/dictionaries";
 import { EntityEnums, RelationEnums } from "@shared/enums";
 import {
   EntityTooltip as EntityTooltipNamespace,
@@ -22,6 +22,7 @@ import { Colors } from "types";
 import { getEntityRelationRules, getShortLabelByLetterCount } from "utils";
 import { EntityTooltipRelationTreeTable } from "./EntityTooltipRelationTreeTable/EntityTooltipRelationTreeTable";
 import {
+  StyledBold,
   StyledDetail,
   StyledIconWrap,
   StyledLabel,
@@ -36,6 +37,7 @@ interface EntityTooltip {
   entityId: string;
   entityClass: EntityEnums.Class;
   label?: string;
+  language: EntityEnums.Language;
   detail?: string;
   text?: string;
   itemsCount?: number;
@@ -53,6 +55,7 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
   entityId,
   entityClass,
   label,
+  language,
   detail,
   text,
   itemsCount,
@@ -90,7 +93,10 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
               <StyledIconWrap>
                 <AiOutlineTag />
               </StyledIconWrap>
-              <StyledLabel>{label}</StyledLabel>
+              <StyledLabel>
+                <StyledBold>{label}</StyledBold>
+                {` (${languageDict.find((l) => l.value === language)?.label})`}
+              </StyledLabel>
             </StyledRow>
             {text && (
               <StyledRow>
@@ -154,7 +160,7 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
 
   const renderRelations = useMemo(() => {
     if (tooltipData) {
-      const { relations, entities } = tooltipData || {};
+      const { relations, entities } = tooltipData;
 
       const filteredTypes = getEntityRelationRules(
         entityClass,
