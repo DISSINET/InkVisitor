@@ -154,7 +154,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
       onSuccess: (data, variables) => {
         onSelected(variables.id);
         handleClean();
-        if (openDetailOnCreate) {
+        if (openDetailOnCreate && variables.class !== EntityEnums.Class.Value) {
           appendDetailId(variables.id);
           setSelectedDetailId(variables.id);
         }
@@ -209,7 +209,10 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
     if (newEntityId) {
       onSelected(newEntityId);
       handleClean();
-      if (openDetailOnCreate) {
+      if (
+        openDetailOnCreate &&
+        templateToDuplicate.class !== EntityEnums.Class.Value
+      ) {
         appendDetailId(newEntityId);
         setSelectedDetailId(newEntityId);
       }
