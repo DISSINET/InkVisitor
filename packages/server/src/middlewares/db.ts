@@ -13,6 +13,7 @@ export default async function dbMiddleware(
     await createConnection(req);
   } catch (e) {
     next(new InternalServerError("database timeout"));
+    return;
   }
 
   res.on('close', function () {
