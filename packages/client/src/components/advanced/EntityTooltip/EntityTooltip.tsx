@@ -37,7 +37,7 @@ interface EntityTooltip {
   entityId: string;
   entityClass: EntityEnums.Class;
   label?: string;
-  language?: string;
+  language: EntityEnums.Language;
   detail?: string;
   text?: string;
   itemsCount?: number;
