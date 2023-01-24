@@ -9,8 +9,10 @@ export const StyledRow = styled.div`
 `;
 export const StyledLabel = styled.p`
   max-width: 35rem;
-  font-weight: ${({ theme }) => theme.fontWeight["bold"]};
   word-wrap: break-word;
+`;
+export const StyledBold = styled.span`
+  font-weight: ${({ theme }) => theme.fontWeight["bold"]};
 `;
 export const StyledDetail = styled.p``;
 export const StyledIconWrap = styled.span`
