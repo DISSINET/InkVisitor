@@ -34,7 +34,8 @@ export const ContextMenuNewTerritoryModal: React.FC<
 
   const queryClient = useQueryClient();
 
-  const { setTerritoryId } = useSearchParams();
+  const { setTerritoryId, appendDetailId, setSelectedDetailId } =
+    useSearchParams();
   const dispatch = useAppDispatch();
 
   const createTerritoryMutation = useMutation(
@@ -46,6 +47,9 @@ export const ContextMenuNewTerritoryModal: React.FC<
 
         dispatch(setTreeInitialized(false));
         setTerritoryId(variables.id);
+
+        appendDetailId(variables.id);
+        setSelectedDetailId(variables.id);
       },
       onError: () => {
         toast.error(`Error: Territory [${territoryName}] not created!`);
