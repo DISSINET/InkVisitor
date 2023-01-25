@@ -120,7 +120,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
       .map((relation) => relation.entityIds.map((entityId) => entityId))
       .flat(1);
     if (!relationRule.selfLoop) {
-      entityIds.concat(entity.id);
+      entityIds.push(entity.id);
     }
     setUsedEntityIds([...new Set(entityIds)]);
   }, [selectedRelations, relationRule]);
