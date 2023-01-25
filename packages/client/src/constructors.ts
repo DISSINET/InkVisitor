@@ -295,7 +295,13 @@ export const InstTemplate = async (
     }
 
     if (iEntity) {
-      iEntity.label = `[INSTANCE OF] ${templateEntity.label}`;
+
+      // #1554
+      if (templateEntity.class === EntityEnums.Class.Statement) {
+        iEntity.label = "";
+      } else {
+        iEntity.label = `[INSTANCE OF] ${templateEntity.label}`;
+      }
       iEntity.usedTemplate = templateEntity.id;
       iEntity.props = await InstProps(templateEntity.props);
       iEntity.isTemplate = false;
@@ -342,7 +348,13 @@ export const applyTemplate = async (
 
     if (newEntity) {
       newEntity.id = entity.id;
-      newEntity.label = `[INSTANCE OF] ${templateEntity.label}`;
+
+      // #1554
+      if (templateEntity.class === EntityEnums.Class.Statement) {
+        newEntity.label = "";
+      } else {
+        newEntity.label = `[INSTANCE OF] ${templateEntity.label}`;
+      }
       newEntity.usedTemplate = templateEntity.id;
       newEntity.props = await InstProps(templateEntity.props);
       newEntity.isTemplate = false;
@@ -363,7 +375,7 @@ export const DStatement = (
     id: uuidv4(),
     class: EntityEnums.Class.Statement,
     data: { ...statement.data },
-    label: `[COPY OF] ${statement.label}`,
+    label: "",
     detail: statement.detail,
     language: statement.language,
     notes: statement.notes,
