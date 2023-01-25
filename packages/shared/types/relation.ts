@@ -130,6 +130,7 @@ export namespace Relation {
     treeType: boolean;
     attributes: any[];
     order: boolean;
+    selfLoop: boolean;
   };
 
   export const RelationRules: { [key in RelationEnums.Type]?: RelationRule } =
@@ -150,6 +151,7 @@ export namespace Relation {
     treeType: true,
     attributes: [],
     order: true,
+    selfLoop: false,
   };
   RelationRules[RelationEnums.Type.SuperordinateLocation] = {
     label: "Superordinate Location",
@@ -164,6 +166,7 @@ export namespace Relation {
     treeType: true,
     attributes: [],
     order: true,
+    selfLoop: false,
   };
   RelationRules[RelationEnums.Type.Synonym] = {
     label: "Synonym",
@@ -179,6 +182,7 @@ export namespace Relation {
     treeType: false,
     attributes: [],
     order: false,
+    selfLoop: false,
   };
   RelationRules[RelationEnums.Type.Antonym] = {
     label: "Antonym",
@@ -194,6 +198,7 @@ export namespace Relation {
     treeType: false,
     attributes: [],
     order: true,
+    selfLoop: false,
   };
   RelationRules[RelationEnums.Type.Holonym] = {
     label: "Holonym",
@@ -208,6 +213,7 @@ export namespace Relation {
     treeType: true,
     attributes: [],
     order: true,
+    selfLoop: false,
   };
   RelationRules[RelationEnums.Type.PropertyReciprocal] = {
     label: "Property Reciprocal",
@@ -222,6 +228,7 @@ export namespace Relation {
     treeType: false,
     attributes: [],
     order: false,
+    selfLoop: true,
   };
   RelationRules[RelationEnums.Type.SubjectActant1Reciprocal] = {
     label: "Subject/Actant1 Reciprocal",
@@ -236,6 +243,7 @@ export namespace Relation {
     treeType: false,
     attributes: [],
     order: false,
+    selfLoop: true,
   };
   RelationRules[RelationEnums.Type.ActionEventEquivalent] = {
     label: "Action/Event Equivalent",
@@ -250,6 +258,7 @@ export namespace Relation {
     treeType: true,
     attributes: [],
     order: false,
+    selfLoop: false,
   };
   RelationRules[RelationEnums.Type.Classification] = {
     label: "Classification",
@@ -272,6 +281,7 @@ export namespace Relation {
     treeType: true,
     attributes: [],
     order: true,
+    selfLoop: false,
   };
   RelationRules[RelationEnums.Type.Identification] = {
     label: "Identification",
@@ -294,6 +304,7 @@ export namespace Relation {
     treeType: false,
     attributes: [EntityEnums.Certainty],
     order: false,
+    selfLoop: false,
   };
   RelationRules[RelationEnums.Type.Implication] = {
     label: "Implication",
@@ -308,6 +319,7 @@ export namespace Relation {
     treeType: true,
     attributes: [],
     order: true,
+    selfLoop: false,
   };
   RelationRules[RelationEnums.Type.SubjectSemantics] = {
     label: "Subject Semantics",
@@ -322,6 +334,7 @@ export namespace Relation {
     treeType: false,
     attributes: [],
     order: true,
+    selfLoop: false,
   };
   RelationRules[RelationEnums.Type.Actant1Semantics] = {
     label: "Actant1 Semantics",
@@ -336,6 +349,7 @@ export namespace Relation {
     treeType: false,
     attributes: [],
     order: true,
+    selfLoop: false,
   };
   RelationRules[RelationEnums.Type.Actant2Semantics] = {
     label: "Actant2 Semantics",
@@ -350,6 +364,7 @@ export namespace Relation {
     treeType: false,
     attributes: [],
     order: true,
+    selfLoop: false,
   };
   RelationRules[RelationEnums.Type.Related] = {
     label: "Related",
@@ -362,5 +377,6 @@ export namespace Relation {
     treeType: false,
     attributes: [],
     order: true,
+    selfLoop: false,
   };
 }
