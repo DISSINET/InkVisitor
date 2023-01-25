@@ -1,4 +1,4 @@
-import { IEntity, IStatement } from "@shared/types";
+import { IEntity, IResponseAudit, IStatement } from "@shared/types";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useRef } from "react";
 import {
@@ -28,6 +28,7 @@ interface StatementListRow {
   handleClick: (rowId: string) => void;
   visibleColumns: ColumnInstance<{}>[];
   entities: { [key: string]: IEntity };
+  audits: IResponseAudit[];
 }
 
 export const StatementListRow: React.FC<StatementListRow> = ({
@@ -38,6 +39,7 @@ export const StatementListRow: React.FC<StatementListRow> = ({
   handleClick = () => {},
   visibleColumns,
   entities,
+  audits,
 }) => {
   const dispatch = useAppDispatch();
 
@@ -48,9 +50,10 @@ export const StatementListRow: React.FC<StatementListRow> = ({
     (state) => state.statementList.draggedRowId
   );
   const { statementId } = useSearchParams();
-  const audit = row.original.audit;
 
   const lastEditdateText = useMemo(() => {
+    const audit = audits.find((a) => a.entityId === row.original.id);
+
     if (audit && audit.last && audit.last[0] && audit.last[0].date) {
       const today = new Date().setHours(0, 0, 0, 0);
       const lastEditDate = audit.last[0].date;
@@ -70,9 +73,7 @@ export const StatementListRow: React.FC<StatementListRow> = ({
     } else {
       return "";
     }
-
-    return;
-  }, [audit]);
+  }, [audits]);
 
   const dropRef = useRef<HTMLTableRowElement>(null);
   const dragRef = useRef<HTMLTableCellElement>(null);
