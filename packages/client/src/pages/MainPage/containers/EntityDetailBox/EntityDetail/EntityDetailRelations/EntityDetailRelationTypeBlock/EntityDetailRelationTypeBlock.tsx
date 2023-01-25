@@ -118,12 +118,13 @@ export const EntityDetailRelationTypeBlock: React.FC<
   useEffect(() => {
     const entityIds = selectedRelations
       .map((relation) => relation.entityIds.map((entityId) => entityId))
-      .flat(1)
-      .concat(entity.id);
+      .flat(1);
+    if (!relationRule.selfLoop) {
+      entityIds.push(entity.id);
+    }
     setUsedEntityIds([...new Set(entityIds)]);
-  }, [entities, selectedRelations]);
+  }, [selectedRelations, relationRule]);
 
-  // TODO: Lift cloud handling to EntityDetailRelations
   const [tempCloudEntityId, setTempCloudEntityId] = useState<string | false>(
     false
   );
@@ -167,7 +168,18 @@ export const EntityDetailRelationTypeBlock: React.FC<
   };
 
   useEffect(() => {
-    setCurrentRelations(selectedRelations);
+    const uniqueRelationIds: string[] = [];
+
+    const uniqueRelations = selectedRelations.filter((r) => {
+      if (uniqueRelationIds.includes(r.id)) {
+        return false;
+      } else {
+        uniqueRelationIds.push(r.id);
+        return true;
+      }
+    });
+
+    setCurrentRelations([...new Set(uniqueRelations)]);
   }, [selectedRelations]);
 
   const [currentRelations, setCurrentRelations] = useState<
