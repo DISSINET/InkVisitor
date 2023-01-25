@@ -51,12 +51,16 @@ const ScrollHandler = () => {
           `statement${statementId}`
         );
         const statementBox = document.getElementById(`Statements-box-table`);
-        console.log("statementBox by ID", statementBox);
-        console.log("statementInTable", statementInTable);
-        statementBox?.scrollTo({
-          behavior: statementInTable ? "smooth" : "auto",
-          top: statementInTable ? statementInTable.offsetTop - 34 : 0,
-        });
+        if (statementInTable && statementBox) {
+          statementBox?.scrollTo({
+            behavior: statementInTable ? "smooth" : "auto",
+            top: statementInTable ? statementInTable.offsetTop - 34 : 0,
+          });
+        } else {
+          console.log("SL element not found");
+          console.log("statementBox by ID", statementBox);
+          console.log("statementInTable", statementInTable);
+        }
       }, 200);
     }
   }, [statementId, statementListStatus, auditStatus, isFetchingAudits]);
@@ -68,10 +72,13 @@ const ScrollHandler = () => {
           `territory${territoryId}`
         );
         const territoryBox = document.getElementById(`Territories-box-content`);
-        territoryBox?.scrollTo({
-          behavior: territoryInTree ? "smooth" : "auto",
-          top: territoryInTree ? territoryInTree.offsetTop - 103 : 0,
-        });
+
+        if (territoryBox && territoryInTree) {
+          territoryBox?.scrollTo({
+            behavior: territoryInTree ? "smooth" : "auto",
+            top: territoryInTree ? territoryInTree.offsetTop - 103 : 0,
+          });
+        }
       }, 200);
     }
   }, [territoryId, treeStatus]);

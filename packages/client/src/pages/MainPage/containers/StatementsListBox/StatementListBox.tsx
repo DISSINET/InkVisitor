@@ -288,14 +288,6 @@ export const StatementListBox: React.FC = () => {
     }
   );
 
-  useEffect(() => {
-    if (isFetchingAudits) {
-      console.log("isFetchingAudits");
-    } else {
-      console.log("NOT Fetching Audits");
-    }
-  }, [isFetchingAudits]);
-
   const auditsData = audits || [];
 
   return (
