@@ -133,7 +133,8 @@ export const EntityDetailRelationRow: React.FC<EntityDetailRelationRow> = ({
       {uniqueRelationIds.map((relationEntityId, key) => {
         const relationEntity = entities[relationEntityId];
         return (
-          (relationEntityId !== entityId || uniqueRelationIds.length === 1) && (
+          (relationEntityId !== entityId ||
+            (relationRule.selfLoop && uniqueRelationIds.length === 1)) && (
             <React.Fragment key={key}>
               {relationEntity && shouldBeRendered(key) && (
                 <>
