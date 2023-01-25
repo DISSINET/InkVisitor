@@ -1,38 +1,19 @@
 import { EntityEnums, UserEnums } from "@shared/enums";
-import {
-  IAction,
-  IEntity,
-  IResponseStatement,
-  IStatement,
-} from "@shared/types";
+import { IEntity, IResponseStatement, IStatement } from "@shared/types";
 import api from "api";
-import { Button, ButtonGroup, Loader, Submit, TagGroup } from "components";
-import { EntityTag } from "components/advanced";
+import { Loader, Submit } from "components";
 import { CStatement, DStatement } from "constructors";
 import { useSearchParams } from "hooks";
-import React, { useEffect, useMemo, useState } from "react";
-import { BsArrowDown, BsArrowUp, BsInfoCircle } from "react-icons/bs";
-import {
-  FaChevronCircleDown,
-  FaChevronCircleUp,
-  FaClone,
-  FaPlus,
-  FaTrashAlt,
-} from "react-icons/fa";
+import React, { useEffect, useState } from "react";
+import { BsInfoCircle } from "react-icons/bs";
 import { useMutation, useQuery, useQueryClient } from "react-query";
-import { Cell, Column } from "react-table";
 import { toast } from "react-toastify";
 import { setStatementListOpened } from "redux/features/layout/statementListOpenedSlice";
 import { setRowsExpanded } from "redux/features/statementList/rowsExpandedSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { StatementListContextMenu } from "./StatementListContextMenu/StatementListContextMenu";
 import { StatementListHeader } from "./StatementListHeader/StatementListHeader";
 import { StatementListTable } from "./StatementListTable/StatementListTable";
-import {
-  StyledEmptyState,
-  StyledTableWrapper,
-  StyledText,
-} from "./StatementLitBoxStyles";
+import { StyledEmptyState, StyledTableWrapper } from "./StatementLitBoxStyles";
 
 const initialData: {
   statements: IResponseStatement[];
@@ -85,17 +66,6 @@ export const StatementListBox: React.FC = () => {
   );
 
   const { statements, entities, right } = data || initialData;
-
-  const { data: audits, isFetching: isFetchingAudits } = useQuery(
-    ["territory", "statement-list", "audits", territoryId, statementListOpened],
-    async () => {
-      const res = await api.auditsForStatements(territoryId);
-      return res.data;
-    },
-    {
-      enabled: !!territoryId && api.isLoggedIn() && statementListOpened,
-    }
-  );
 
   useEffect(() => {
     if (statements.length !== Object.keys(rowsExpanded).length) {
@@ -288,8 +258,6 @@ export const StatementListBox: React.FC = () => {
     }
   );
 
-  const auditsData = audits || [];
-
   return (
     <>
       {data && (
@@ -304,7 +272,6 @@ export const StatementListBox: React.FC = () => {
         <StyledTableWrapper id="Statements-box-table">
           <StatementListTable
             statements={statements}
-            audits={auditsData}
             handleRowClick={(rowId: string) => {
               setStatementId(rowId);
             }}
@@ -356,7 +323,6 @@ export const StatementListBox: React.FC = () => {
       <Loader
         show={
           isFetching ||
-          isFetchingAudits ||
           removeStatementMutation.isLoading ||
           duplicateStatementMutation.isLoading ||
           addStatementAtTheEndMutation.isLoading ||

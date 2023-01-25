@@ -2,32 +2,38 @@ import api from "api";
 import { useSearchParams } from "hooks";
 import { useEffect } from "react";
 import { useQuery } from "react-query";
+import { useAppSelector } from "redux/hooks";
 
 const ScrollHandler = () => {
   const { statementId, territoryId } = useSearchParams();
 
-  const { status: statementListStatus } = useQuery(
-    ["territory", "statement-list", territoryId],
-    async () => {
-      const res = await api.territoryGet(territoryId);
-      return res.data;
-    },
-    {
-      enabled: !!territoryId && api.isLoggedIn(),
-    }
+  const statementListOpened: boolean = useAppSelector(
+    (state) => state.layout.statementListOpened
   );
+
+  const { status: statementListStatus, isFetching: isFetchingStatementList } =
+    useQuery(
+      ["territory", "statement-list", territoryId, statementListOpened],
+      async () => {
+        const res = await api.territoryGet(territoryId);
+        return res.data;
+      },
+      {
+        enabled: !!territoryId && api.isLoggedIn() && statementListOpened,
+      }
+    );
   const { status: auditStatus, isFetching: isFetchingAudits } = useQuery(
-    ["territory", "statement-list", "audits", territoryId],
+    ["territory", "statement-list", "audits", territoryId, statementListOpened],
     async () => {
       const res = await api.auditsForStatements(territoryId);
       return res.data;
     },
     {
-      enabled: !!territoryId && api.isLoggedIn(),
+      enabled: !!territoryId && api.isLoggedIn() && statementListOpened,
     }
   );
 
-  const { status: treeStatus } = useQuery(
+  const { status: treeStatus, isFetching: isFetchingTree } = useQuery(
     ["tree"],
     async () => {
       const res = await api.treeGet();
@@ -37,13 +43,10 @@ const ScrollHandler = () => {
   );
 
   useEffect(() => {
-    console.log("SL status: ", statementListStatus);
-    console.log("audit status: ", auditStatus);
-    console.log("isFetchingAudits", isFetchingAudits);
-
     if (
       statementListStatus === "success" &&
       auditStatus === "success" &&
+      !isFetchingStatementList &&
       !isFetchingAudits
     ) {
       setTimeout(() => {
@@ -56,17 +59,19 @@ const ScrollHandler = () => {
             behavior: statementInTable ? "smooth" : "auto",
             top: statementInTable ? statementInTable.offsetTop - 34 : 0,
           });
-        } else {
-          console.log("SL element not found");
-          console.log("statementBox by ID", statementBox);
-          console.log("statementInTable", statementInTable);
         }
       }, 200);
     }
-  }, [statementId, statementListStatus, auditStatus, isFetchingAudits]);
+  }, [
+    statementId,
+    statementListStatus,
+    isFetchingStatementList,
+    auditStatus,
+    isFetchingAudits,
+  ]);
 
   useEffect(() => {
-    if (treeStatus === "success") {
+    if (treeStatus === "success" && !isFetchingTree) {
       setTimeout(() => {
         const territoryInTree = document.getElementById(
           `territory${territoryId}`
@@ -81,7 +86,7 @@ const ScrollHandler = () => {
         }
       }, 200);
     }
-  }, [territoryId, treeStatus]);
+  }, [territoryId, treeStatus, isFetchingTree]);
 
   return null;
 };
