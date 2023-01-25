@@ -32,7 +32,6 @@ import { StyledTable, StyledTh, StyledTHead } from "./StatementListTableStyles";
 
 interface StatementListTable {
   statements: IResponseStatement[];
-  // audits: IResponseAudit[];
   handleRowClick?: (rowId: string) => void;
   actantsUpdateMutation: UseMutationResult<
     AxiosResponse<IResponseGeneric>,
@@ -55,12 +54,11 @@ interface StatementListTable {
 }
 export const StatementListTable: React.FC<StatementListTable> = ({
   statements,
-  // audits,
   handleRowClick = () => {},
   actantsUpdateMutation,
   entities,
   right,
-  //
+
   duplicateStatement,
   setStatementToDelete,
   setShowSubmit,

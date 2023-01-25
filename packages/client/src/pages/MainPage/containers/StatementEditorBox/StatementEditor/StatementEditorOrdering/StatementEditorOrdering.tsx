@@ -35,6 +35,11 @@ export const StatementEditorOrdering: React.FC<StatementEditorOrdering> = ({
     {
       onSuccess: (data, variables) => {
         queryClient.invalidateQueries("statement");
+        queryClient.invalidateQueries([
+          "territory",
+          "statement-list",
+          "audits",
+        ]);
       },
     }
   );
