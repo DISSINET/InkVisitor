@@ -41,27 +41,16 @@ export const StatementListTable: React.FC<StatementListTable> = ({
   entities,
 }) => {
   const [statementsWithAudit, setStatementsWithAudit] = useState<
-    StatementWithAudit[]
+    IResponseStatement[]
   >([]);
 
   useEffect(() => {
-    setStatementsWithAudit(getStatementsWithAudit());
+    setStatementsWithAudit(statements);
   }, [statements]);
 
   const getRowId = useCallback((row) => {
     return row.id;
   }, []);
-
-  const getStatementsWithAudit: () => StatementWithAudit[] = () => {
-    if (statements && audits) {
-      return statements.map((st) => ({
-        ...st,
-        audit: audits.find((a) => a.entityId === st.id),
-      }));
-    } else {
-      return [];
-    }
-  };
 
   const {
     getTableProps,
@@ -161,6 +150,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
               moveEndRow={moveEndRow}
               visibleColumns={visibleColumns}
               entities={entities}
+              audits={audits}
               {...row.getRowProps()}
             />
           );

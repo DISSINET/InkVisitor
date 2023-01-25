@@ -16,6 +16,17 @@ const ScrollHandler = () => {
       enabled: !!territoryId && api.isLoggedIn(),
     }
   );
+  const { status: auditStatus, isFetching: isFetchingAudits } = useQuery(
+    ["territory", "statement-list", "audits", territoryId],
+    async () => {
+      const res = await api.auditsForStatements(territoryId);
+      return res.data;
+    },
+    {
+      enabled: !!territoryId && api.isLoggedIn(),
+    }
+  );
+
   const { status: treeStatus } = useQuery(
     ["tree"],
     async () => {
@@ -26,19 +37,28 @@ const ScrollHandler = () => {
   );
 
   useEffect(() => {
-    if (statementListStatus === "success") {
+    console.log("SL status: ", statementListStatus);
+    console.log("audit status: ", auditStatus);
+
+    if (
+      statementListStatus === "success" &&
+      auditStatus === "success" &&
+      !isFetchingAudits
+    ) {
       setTimeout(() => {
         const statementInTable = document.getElementById(
           `statement${statementId}`
         );
         const statementBox = document.getElementById(`Statements-box-table`);
+        console.log("statementBox by ID", statementBox);
+        console.log("statementInTable", statementInTable);
         statementBox?.scrollTo({
           behavior: statementInTable ? "smooth" : "auto",
           top: statementInTable ? statementInTable.offsetTop - 34 : 0,
         });
       }, 200);
     }
-  }, [statementId, statementListStatus]);
+  }, [statementId, statementListStatus, auditStatus, isFetchingAudits]);
 
   useEffect(() => {
     if (treeStatus === "success") {

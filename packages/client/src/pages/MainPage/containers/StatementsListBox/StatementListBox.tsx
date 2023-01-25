@@ -489,6 +489,16 @@ export const StatementListBox: React.FC = () => {
     }
   );
 
+  useEffect(() => {
+    if (isFetchingAudits) {
+      console.log("isFetchingAudits");
+    } else {
+      console.log("NOT Fetching Audits");
+    }
+  }, [isFetchingAudits]);
+
+  const auditsData = audits || [];
+
   return (
     <>
       {data && (
@@ -499,11 +509,11 @@ export const StatementListBox: React.FC = () => {
           isFavorited={isFavorited}
         />
       )}
-      {statements && audits ? (
+      {statements ? (
         <StyledTableWrapper id="Statements-box-table">
           <StatementListTable
             statements={statements}
-            audits={audits}
+            audits={auditsData}
             columns={columns}
             handleRowClick={(rowId: string) => {
               setStatementId(rowId);
