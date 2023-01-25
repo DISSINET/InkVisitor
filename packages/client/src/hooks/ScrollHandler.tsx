@@ -39,6 +39,7 @@ const ScrollHandler = () => {
   useEffect(() => {
     console.log("SL status: ", statementListStatus);
     console.log("audit status: ", auditStatus);
+    console.log("isFetchingAudits", isFetchingAudits);
 
     if (
       statementListStatus === "success" &&
