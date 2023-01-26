@@ -2,15 +2,14 @@ import { UserEnums } from "@shared/enums";
 import {
   IAction,
   IEntity,
+  IResponseAudit,
   IResponseGeneric,
   IResponseStatement,
   IStatement,
 } from "@shared/types";
-import api from "api";
 import { AxiosResponse } from "axios";
 import { Button, ButtonGroup, TagGroup } from "components";
 import { EntityTag } from "components/advanced";
-import { useSearchParams } from "hooks";
 import update from "immutability-helper";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { BsArrowDown, BsArrowUp } from "react-icons/bs";
@@ -21,7 +20,7 @@ import {
   FaPlus,
   FaTrashAlt,
 } from "react-icons/fa";
-import { UseMutationResult, useQuery } from "react-query";
+import { UseMutationResult } from "react-query";
 import { Cell, Column, Row, useExpanded, useTable } from "react-table";
 import { setRowsExpanded } from "redux/features/statementList/rowsExpandedSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
@@ -44,6 +43,7 @@ interface StatementListTable {
   >;
   entities: { [key: string]: IEntity };
   right: UserEnums.RoleMode;
+  audits: IResponseAudit[];
 
   duplicateStatement: (statementToDuplicate: IResponseStatement) => void;
   setStatementToDelete: React.Dispatch<
@@ -58,6 +58,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
   actantsUpdateMutation,
   entities,
   right,
+  audits,
 
   duplicateStatement,
   setStatementToDelete,
@@ -67,9 +68,6 @@ export const StatementListTable: React.FC<StatementListTable> = ({
   const dispatch = useAppDispatch();
   const rowsExpanded: { [key: string]: boolean } = useAppSelector(
     (state) => state.statementList.rowsExpanded
-  );
-  const statementListOpened: boolean = useAppSelector(
-    (state) => state.layout.statementListOpened
   );
 
   const [statementsLocal, setStatementsLocal] = useState<IResponseStatement[]>(
@@ -353,19 +351,6 @@ export const StatementListTable: React.FC<StatementListTable> = ({
     }
   };
 
-  const { territoryId } = useSearchParams();
-
-  const { data: audits, isFetching: isFetchingAudits } = useQuery(
-    ["territory", "statement-list", "audits", territoryId, statementListOpened],
-    async () => {
-      const res = await api.auditsForStatements(territoryId);
-      return res.data;
-    },
-    {
-      enabled: !!territoryId && api.isLoggedIn() && statementListOpened,
-    }
-  );
-
   return (
     <StyledTable {...getTableProps()}>
       <StyledTHead>
@@ -396,7 +381,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
               moveEndRow={moveEndRow}
               visibleColumns={visibleColumns}
               entities={entities}
-              audits={audits || []}
+              audits={audits}
               {...row.getRowProps()}
             />
           );
