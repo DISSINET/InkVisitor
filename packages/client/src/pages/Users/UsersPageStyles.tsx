@@ -8,8 +8,7 @@ export const StyledContent = styled.div`
 `;
 interface StyledBoxWrap {}
 export const StyledBoxWrap = styled.div<StyledBoxWrap>`
-  width: 100%;
-  width: 120rem;
+  max-width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
