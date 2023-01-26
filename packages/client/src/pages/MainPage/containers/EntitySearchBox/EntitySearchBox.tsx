@@ -43,8 +43,9 @@ const defaultStatusOption: DropdownItem = {
   label: "all",
   value: "",
 };
-const statusOptions: DropdownItem[] = entityStatusDict;
-statusOptions.push(defaultStatusOption);
+const statusOptions: DropdownItem[] = [defaultStatusOption].concat(
+  entityStatusDict
+);
 
 const anyTemplate: DropdownItem = {
   value: "Any",
