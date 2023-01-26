@@ -125,10 +125,10 @@ export default Router()
       const childsMap = await new Territory({ ...parent }).findChilds(
         request.db.connection
       );
+
       const childsArray = Object.values(childsMap).sort(
         TreeCreator.sortTerritories
       );
-
       // negative index not allowed
       if (newIndex < 0) {
         throw new TerrytoryInvalidMove(
@@ -137,8 +137,8 @@ export default Router()
       }
 
       // enforce max new index value
-      if (newIndex > childsArray.length) {
-        newIndex = childsArray.length;
+      if (newIndex >= childsArray.length) {
+        newIndex = childsArray.length - 1;
       }
 
       const out: IResponseGeneric = {
