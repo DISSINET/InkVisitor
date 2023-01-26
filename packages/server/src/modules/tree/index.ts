@@ -76,7 +76,7 @@ export default Router()
     asyncRouteHandler<IResponseGeneric>(async (request: IRequest) => {
       const territoryId = request.params.territoryId as string;
       const parentId = request.body.parentId as string;
-      const newIndex = request.body.newIndex as number;
+      let newIndex = request.body.newIndex as number;
 
       if (!territoryId || !parentId || newIndex === undefined) {
         throw new BadParams("moveId/parentId/newIndex has be set");
@@ -84,7 +84,7 @@ export default Router()
 
       await request.db.lock();
 
-      // check child territory
+      // check territory which should be moved
       const territoryData = await findEntityById<ITerritory>(
         request.db,
         territoryId
@@ -129,10 +129,16 @@ export default Router()
         TreeCreator.sortTerritories
       );
 
-      if (newIndex < 0 || newIndex > childsArray.length) {
+      // negative index not allowed
+      if (newIndex < 0) {
         throw new TerrytoryInvalidMove(
           "cannot move territory to invalid index"
         );
+      }
+
+      // enforce max new index value
+      if (newIndex > childsArray.length) {
+        newIndex = childsArray.length;
       }
 
       const out: IResponseGeneric = {
@@ -144,8 +150,9 @@ export default Router()
         throw new TerrytoryInvalidMove("cannot move root territory");
       } else if (territoryData.data.parent.territoryId !== parentId) {
         // change parent of the territory
+        // here the order should be the biggest
         territoryData.data.parent.territoryId = parentId;
-        territoryData.data.parent.order = -1;
+        territoryData.data.parent.order = childsArray.length;
       } else {
         const currentIndex = childsArray.findIndex(
           (ter) => ter.id === territoryId
