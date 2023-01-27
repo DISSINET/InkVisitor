@@ -203,7 +203,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
                   <Button
                     key="neg"
                     tooltipLabel="Negative logic"
-                    color="success"
+                    color="danger"
                     inverted
                     noBorder
                     onClick={() => setModalOpen(true)}
@@ -268,7 +268,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
                   <Button
                     key="neg"
                     tooltipLabel="Negative logic"
-                    color="success"
+                    color="danger"
                     inverted
                     noBorder
                     onClick={() => setModalOpen(true)}
@@ -383,7 +383,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
               <Button
                 key="neg"
                 tooltipLabel="Negative logic"
-                color="success"
+                color="danger"
                 inverted
                 noBorder
                 onClick={() => setModalOpen(true)}

@@ -354,7 +354,7 @@ export const StatementEditorActantTableRow: React.FC<
           <Button
             key="neg"
             tooltipLabel="Negative logic"
-            color="success"
+            color="danger"
             inverted
             noBorder
             icon={<AttributeIcon attributeName={"negation"} />}
