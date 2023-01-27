@@ -132,6 +132,7 @@ export const StatementListBox: React.FC = () => {
           removeDetailId(sId);
           queryClient.invalidateQueries("detail-tab-entities");
         }
+        queryClient.invalidateQueries("tree");
         queryClient.invalidateQueries("territory").then(() => {
           setStatementId("");
         });
