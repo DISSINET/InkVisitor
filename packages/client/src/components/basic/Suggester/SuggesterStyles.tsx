@@ -51,11 +51,14 @@ export const StyledSuggestionCancelButton = styled.div<StyledSuggestionCancelBut
   }
 `;
 
-export const StyledSuggesterList = styled.div`
+interface StyledSuggesterList {
+  noLeftMargin?: boolean;
+}
+export const StyledSuggesterList = styled.div<StyledSuggesterList>`
   position: absolute;
   z-index: 40;
   top: ${({ theme }) => theme.space[10]};
-  left: ${({ theme }) => theme.space[14]};
+  left: ${({ theme, noLeftMargin }) => (noLeftMargin ? "" : theme.space[14])};
 `;
 export const StyledRelativePosition = styled.div`
   position: relative;
