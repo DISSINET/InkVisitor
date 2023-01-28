@@ -28,138 +28,138 @@ interface StatementEditorActantIdentification {
   classEntitiesActant: EntityEnums.Class[];
   territoryActants?: string[];
 }
-export const StatementEditorActantIdentification: React.FC<StatementEditorActantIdentification> =
-  ({
-    identifications,
-    identification,
-    statement,
-    updateActant,
-    userCanEdit,
-    isInsideTemplate,
-    territoryParentId,
-    updateStatementDataMutation,
-    sActant,
-    classEntitiesActant,
-    territoryActants,
-  }) => {
-    const [identificationModalOpen, setIdentificationModalOpen] =
-      useState(false);
-    const entity = statement.entities[identification.entityId];
+export const StatementEditorActantIdentification: React.FC<
+  StatementEditorActantIdentification
+> = ({
+  identifications,
+  identification,
+  statement,
+  updateActant,
+  userCanEdit,
+  isInsideTemplate,
+  territoryParentId,
+  updateStatementDataMutation,
+  sActant,
+  classEntitiesActant,
+  territoryActants,
+}) => {
+  const [identificationModalOpen, setIdentificationModalOpen] = useState(false);
+  const entity = statement.entities[identification.entityId];
 
-    return (
-      <>
-        <StyledCIGrid>
-          {entity ? (
-            <StyledTagWrapper>
-              <EntityTag
-                entity={entity}
-                fullWidth
-                button={
-                  userCanEdit && (
-                    <Button
-                      key="d"
-                      tooltipLabel="unlink identification"
-                      icon={<FaUnlink />}
-                      color="plain"
-                      inverted
-                      onClick={() => {
-                        updateActant(sActant.id, {
-                          identifications: identifications.map((c) =>
-                            c.id === identification.id
-                              ? { ...c, entityId: "" }
-                              : { ...c }
-                          ),
-                        });
-                      }}
-                    />
-                  )
-                }
-              />
-            </StyledTagWrapper>
-          ) : (
-            <EntitySuggester
-              categoryTypes={classEntitiesActant}
-              onSelected={(newSelectedId: string) => {
-                const newIdentifications: IStatementIdentification[] =
-                  identifications.map((c) =>
-                    c.id === identification.id
-                      ? { ...c, entityId: newSelectedId }
-                      : { ...c }
-                  );
+  return (
+    <>
+      <StyledCIGrid>
+        {entity ? (
+          <StyledTagWrapper>
+            <EntityTag
+              entity={entity}
+              fullWidth
+              button={
+                userCanEdit && (
+                  <Button
+                    key="d"
+                    tooltipLabel="unlink identification"
+                    icon={<FaUnlink />}
+                    color="plain"
+                    inverted
+                    onClick={() => {
+                      updateActant(sActant.id, {
+                        identifications: identifications.map((c) =>
+                          c.id === identification.id
+                            ? { ...c, entityId: "" }
+                            : { ...c }
+                        ),
+                      });
+                    }}
+                  />
+                )
+              }
+            />
+          </StyledTagWrapper>
+        ) : (
+          <EntitySuggester
+            categoryTypes={classEntitiesActant}
+            onSelected={(newSelectedId: string) => {
+              const newIdentifications: IStatementIdentification[] =
+                identifications.map((c) =>
+                  c.id === identification.id
+                    ? { ...c, entityId: newSelectedId }
+                    : { ...c }
+                );
+              updateActant(sActant.id, {
+                identifications: newIdentifications,
+              });
+            }}
+            openDetailOnCreate
+            isInsideTemplate={isInsideTemplate}
+            territoryActants={territoryActants}
+          />
+        )}
+        <ButtonGroup style={{ marginLeft: "1rem" }}>
+          <AttributesEditor
+            modalOpen={identificationModalOpen}
+            setModalOpen={setIdentificationModalOpen}
+            modalTitle={`Identification`}
+            entity={entity}
+            disabledAllAttributes={!userCanEdit}
+            userCanEdit={userCanEdit}
+            data={{
+              elvl: identification.elvl,
+              logic: identification.logic,
+              certainty: identification.certainty,
+              mood: identification.mood,
+              moodvariant: identification.moodvariant,
+            }}
+            handleUpdate={(newData) => {
+              updateActant(sActant.id, {
+                identifications: identifications.map((c) =>
+                  c.id === identification.id ? { ...c, ...newData } : { ...c }
+                ),
+              });
+            }}
+            updateActantId={(newId: string) => {
+              updateActant(sActant.id, {
+                identifications: identifications.map((c) =>
+                  c.id === identification.id
+                    ? { ...c, entityId: newId }
+                    : { ...c }
+                ),
+              });
+            }}
+            classEntitiesActant={[EntityEnums.Class.Concept]}
+            loading={updateStatementDataMutation.isLoading}
+            isInsideTemplate={isInsideTemplate}
+            territoryParentId={territoryParentId}
+          />
+          {userCanEdit && (
+            <Button
+              key="d"
+              icon={<FaTrashAlt />}
+              color="plain"
+              inverted
+              tooltipLabel="remove identification row"
+              onClick={() => {
                 updateActant(sActant.id, {
-                  identifications: newIdentifications,
+                  identifications: identifications.filter(
+                    (c) => c.id !== identification.id
+                  ),
                 });
               }}
-              openDetailOnCreate
-              isInsideTemplate={isInsideTemplate}
-              territoryActants={territoryActants}
             />
           )}
-          <ButtonGroup style={{ marginLeft: "1rem" }}>
-            <AttributesEditor
-              modalOpen={identificationModalOpen}
-              setModalOpen={setIdentificationModalOpen}
-              modalTitle={`Identification`}
-              entity={entity}
-              disabledAllAttributes={!userCanEdit}
-              userCanEdit={userCanEdit}
-              data={{
-                elvl: identification.elvl,
-                logic: identification.logic,
-                certainty: identification.certainty,
-                mood: identification.mood,
-                moodvariant: identification.moodvariant,
-              }}
-              handleUpdate={(newData) => {
-                updateActant(sActant.id, {
-                  identifications: identifications.map((c) =>
-                    c.id === identification.id ? { ...c, ...newData } : { ...c }
-                  ),
-                });
-              }}
-              updateActantId={(newId: string) => {
-                updateActant(sActant.id, {
-                  identifications: identifications.map((c) =>
-                    c.id === identification.id
-                      ? { ...c, entityId: newId }
-                      : { ...c }
-                  ),
-                });
-              }}
-              classEntitiesActant={[EntityEnums.Class.Concept]}
-              loading={updateStatementDataMutation.isLoading}
-              isInsideTemplate={isInsideTemplate}
-              territoryParentId={territoryParentId}
+          {identification.logic === "2" && (
+            <Button
+              key="neg"
+              tooltipLabel="Negative logic"
+              color="danger"
+              inverted
+              noBorder
+              icon={<AttributeIcon attributeName={"negation"} />}
+              onClick={() => setIdentificationModalOpen(true)}
             />
-            {userCanEdit && (
-              <Button
-                key="d"
-                icon={<FaTrashAlt />}
-                color="plain"
-                inverted
-                tooltipLabel="remove identification row"
-                onClick={() => {
-                  updateActant(sActant.id, {
-                    identifications: identifications.filter(
-                      (c) => c.id !== identification.id
-                    ),
-                  });
-                }}
-              />
-            )}
-            {identification.logic === "2" && (
-              <Button
-                key="neg"
-                tooltipLabel="Negative logic"
-                color="success"
-                inverted
-                noBorder
-                icon={<AttributeIcon attributeName={"negation"} />}
-                onClick={() => setIdentificationModalOpen(true)}
-              />
-            )}
-          </ButtonGroup>
-        </StyledCIGrid>
-      </>
-    );
-  };
+          )}
+        </ButtonGroup>
+      </StyledCIGrid>
+    </>
+  );
+};
