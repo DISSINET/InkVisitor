@@ -217,6 +217,14 @@ class TreeCache {
     return undefined;
   }
 
+  /**
+   * DEPRECATED - does not make much sense anyway.
+   * Attemts to find closest right for child subtrees.
+   * This method uses leftmost tree search.
+   * @param terId 
+   * @param rights 
+   * @returns 
+   */
   findRightInChildTerritory(
     terId: string,
     rights: UserRight[]
@@ -248,6 +256,12 @@ class TreeCache {
     return undefined;
   }
 
+  /**
+   * Attempts to find closest right applicable to territory
+   * @param terId 
+   * @param rights 
+   * @returns 
+   */
   getRightForTerritory(
     terId: string,
     rights: UserRight[]
@@ -257,12 +271,7 @@ class TreeCache {
       return exactRight;
     }
 
-    let derivedRight = this.findRightInParentTerritory(terId, rights);
-    if (derivedRight) {
-      return derivedRight;
-    }
-
-    derivedRight = this.findRightInChildTerritory(terId, rights);
+    const derivedRight = this.findRightInParentTerritory(terId, rights);
     if (derivedRight) {
       return derivedRight;
     }
