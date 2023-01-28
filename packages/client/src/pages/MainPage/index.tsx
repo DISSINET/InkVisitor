@@ -208,7 +208,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
           label="Territories"
           isExpanded={firstPanelExpanded}
           button={[
-            refreshBoxButton(["territories"], !firstPanelExpanded),
+            refreshBoxButton(["tree"], !firstPanelExpanded),
             firstPanelButton(),
           ]}
           noPadding

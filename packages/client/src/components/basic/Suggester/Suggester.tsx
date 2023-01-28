@@ -281,6 +281,7 @@ export const Suggester: React.FC<Suggester> = ({
 
         {((isFocused || isHovered) && suggestions.length) || isFetching ? (
           <StyledSuggesterList
+            noLeftMargin={categories.length === 1}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
           >
