@@ -141,7 +141,7 @@ export class TreeCreator {
   }
 }
 
-class TreeCache {
+export class TreeCache {
   tree: TreeCreator;
 
   constructor() {
@@ -152,10 +152,16 @@ class TreeCache {
     if (process.env.NODE_ENV === "test") {
       return;
     }
-    const newTree = new TreeCreator();
 
     const db = new Db();
     await db.initDb();
+
+    this.tree = await this.createTree(db);
+    console.log("[TreeCache.initialize]: done");
+  }
+
+  async createTree(db: Db): Promise<TreeCreator> {
+    const newTree = new TreeCreator();
 
     const [territoriesData, statementsCountMap] = await Promise.all([
       getEntitiesDataByClass<ITerritory>(db, EntityEnums.Class.Territory),
@@ -172,8 +178,7 @@ class TreeCache {
 
     newTree.populateTree(newTree.getRootTerritory(), 0, []);
 
-    this.tree = newTree;
-    console.log("[TreeCache.initialize]: done");
+    return newTree;
   }
 
   forUser(user: User): IResponseTree {
