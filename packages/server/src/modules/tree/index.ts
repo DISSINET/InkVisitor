@@ -95,6 +95,7 @@ export default Router()
           territoryId
         );
       }
+
       if (
         !new Territory({ ...territoryData }).canBeEditedByUser(
           request.getUserOrFail()
