@@ -297,8 +297,13 @@ class Statement extends Entity implements IStatement {
     );
   }
 
+  /**
+   * Predicate for testing if the user can remove the statement from db
+   * @param user 
+   * @returns boolean representing the access
+   */
   canBeDeletedByUser(user: User): boolean {
-    // admin role has always the right
+    // only admin has the right, no matter the territory
     if (user.role === UserEnums.Role.Admin) {
       return true;
     }
