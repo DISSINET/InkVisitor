@@ -858,4 +858,49 @@ describe("models/statement", function () {
       });
     });
   });
+
+  describe("Statement.canBeDeletedByUser", function () {
+    const db = new Db();
+    const randSuffix = Math.random().toString();
+
+    beforeAll(async () => {
+      await db.initDb();
+      await createMockTree(db, randSuffix);
+      treeCache.tree = await treeCache.createTree(db);
+    });
+
+    beforeEach(async () => {
+    });
+
+    afterAll(async () => {
+      await db.close();
+    });
+
+    describe("test for meta statement", () => {
+      const statement = new Statement({});
+      statement.data = new StatementData({});
+      statement.data.territory = new StatementTerritory({ territoryId: `T1-${randSuffix}`, order: 1 });
+      const exactReadRight = new UserRight({ mode: UserEnums.RoleMode.Read, territory: `T1-${randSuffix}` });
+      const exactWriteRight = new UserRight({ mode: UserEnums.RoleMode.Write, territory: `T1-${randSuffix}` });
+      const exactAdminRight = new UserRight({ mode: UserEnums.RoleMode.Admin, territory: `T1-${randSuffix}` });
+
+      it("should deny the access for viewer/editor with exact rights", () => {
+        expect(statement.canBeDeletedByUser(new User({ role: UserEnums.Role.Viewer, rights: [exactReadRight] }))).toBeFalsy();
+        expect(statement.canBeDeletedByUser(new User({ role: UserEnums.Role.Viewer, rights: [exactWriteRight] }))).toBeFalsy();
+        expect(statement.canBeDeletedByUser(new User({ role: UserEnums.Role.Viewer, rights: [exactAdminRight] }))).toBeFalsy();
+
+        expect(statement.canBeDeletedByUser(new User({ role: UserEnums.Role.Editor, rights: [exactReadRight] }))).toBeFalsy();
+        expect(statement.canBeDeletedByUser(new User({ role: UserEnums.Role.Editor, rights: [exactWriteRight] }))).toBeFalsy();
+        expect(statement.canBeDeletedByUser(new User({ role: UserEnums.Role.Editor, rights: [exactAdminRight] }))).toBeFalsy();
+      });
+
+      it("should allow admin role no matter what", () => {
+        expect(statement.canBeDeletedByUser(new User({ role: UserEnums.Role.Admin, rights: [exactReadRight] }))).toBeTruthy();
+        expect(statement.canBeDeletedByUser(new User({ role: UserEnums.Role.Admin, rights: [exactWriteRight] }))).toBeTruthy();
+        expect(statement.canBeDeletedByUser(new User({ role: UserEnums.Role.Admin, rights: [exactAdminRight] }))).toBeTruthy();
+
+        expect(statement.canBeDeletedByUser(new User({ role: UserEnums.Role.Admin }))).toBeTruthy();
+      });
+    });
+  });
 });
