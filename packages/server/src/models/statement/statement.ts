@@ -192,6 +192,14 @@ export class StatementData implements IStatementData, IModel {
   }
 
   /**
+   * Returns assigned territory id or undefined if no territory set
+   * @returns string | undefined
+   */
+  getTerritoryId(): string | undefined {
+    return this.territory ? this.territory.territoryId : undefined;
+  }
+
+  /**
    * predicate for valid data content
    * @returns boolean result
    */
@@ -231,6 +239,11 @@ class Statement extends Entity implements IStatement {
     return super.isValid() && this.data.isValid();
   }
 
+  /**
+   * Predicate for testing if the user can edit the statement entry
+   * @param user 
+   * @returns boolean representing the access
+   */
   canBeEditedByUser(user: User): boolean {
     // admin role has always the right
     if (user.role === UserEnums.Role.Admin) {
@@ -238,11 +251,7 @@ class Statement extends Entity implements IStatement {
     }
 
     // editors should be able to access META statements
-    if (
-      user.role === UserEnums.Role.Editor &&
-      this.data.territory &&
-      this.data.territory.territoryId === "T0"
-    ) {
+    if (user.role === UserEnums.Role.Editor && this.data.getTerritoryId() === ROOT_TERRITORY_ID) {
       return true;
     }
 
@@ -251,15 +260,18 @@ class Statement extends Entity implements IStatement {
         this.data.territory.territoryId,
         user.rights
       );
+      // user right cannot be obtained/derived - false
       if (!closestRight) {
         return false;
       }
+
       return (
         closestRight.mode === UserEnums.RoleMode.Admin ||
         closestRight.mode === UserEnums.RoleMode.Write
       );
     }
-    return true;
+
+    return false;
   }
 
   /**

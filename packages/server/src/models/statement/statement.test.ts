@@ -690,20 +690,6 @@ describe("models/statement", function () {
       });
     });
 
-    describe("test without user rights", () => {
-      const statement = new Statement({});
-      statement.data = new StatementData({});
-      statement.data.territory = new StatementTerritory({ territoryId: "T1", order: 1 });
-
-      it("should allow the access for admin without any rights", () => {
-        expect(statement.canBeViewedByUser(new User({ role: UserEnums.Role.Admin }))).toBeTruthy();
-      });
-      it("should deny the access for editor/reader without any rights", () => {
-        expect(statement.canBeViewedByUser(new User({ role: UserEnums.Role.Editor }))).toBeFalsy();
-        expect(statement.canBeViewedByUser(new User({ role: UserEnums.Role.Viewer }))).toBeFalsy();
-      });
-    });
-
     describe("test exact right", () => {
       const statement = new Statement({});
       statement.data = new StatementData({});
@@ -748,6 +734,127 @@ describe("models/statement", function () {
 
       it("should allow the access for admin nonetheless", () => {
         expect(statement.canBeViewedByUser(new User({ role: UserEnums.Role.Admin, rights: [childRight] }))).toBeTruthy();
+      });
+    });
+  });
+
+  describe("Statement.canBeEditedByUser", function () {
+    const db = new Db();
+    const randSuffix = Math.random().toString();
+
+    beforeAll(async () => {
+      await db.initDb();
+      await createMockTree(db, randSuffix);
+      treeCache.tree = await treeCache.createTree(db);
+    });
+
+    beforeEach(async () => {
+    });
+
+    afterAll(async () => {
+      await db.close();
+    });
+
+    describe("test without user rights", () => {
+      const statement = new Statement({});
+      statement.data = new StatementData({});
+      statement.data.territory = new StatementTerritory({ territoryId: `doesnotexist`, order: 1 });
+
+      it("should allow admin", () => {
+        expect(statement.canBeEditedByUser(new User({ role: UserEnums.Role.Admin }))).toBeTruthy();
+      });
+      it("should NOT allow editor/viewer", () => {
+        expect(statement.canBeEditedByUser(new User({ role: UserEnums.Role.Viewer }))).toBeFalsy();
+        expect(statement.canBeEditedByUser(new User({ role: UserEnums.Role.Editor }))).toBeFalsy();
+      });
+    });
+
+    describe("test for meta statement", () => {
+      const statement = new Statement({});
+      statement.data = new StatementData({});
+      statement.data.territory = new StatementTerritory({ territoryId: ROOT_TERRITORY_ID, order: 1 });
+
+      it("should allow the access for editors", () => {
+        expect(statement.canBeEditedByUser(new User({ role: UserEnums.Role.Editor }))).toBeTruthy();
+      });
+
+      it("should deny the access for viewers", () => {
+        expect(statement.canBeEditedByUser(new User({ role: UserEnums.Role.Viewer }))).toBeFalsy();
+      });
+    });
+
+    describe("test for meta statement", () => {
+      const statement = new Statement({});
+      statement.data = new StatementData({});
+      statement.data.territory = new StatementTerritory({ territoryId: ROOT_TERRITORY_ID, order: 1 });
+
+      it("should allow the access for editors", () => {
+        expect(statement.canBeEditedByUser(new User({ role: UserEnums.Role.Editor }))).toBeTruthy();
+      });
+
+      it("should deny the access for viewers", () => {
+        expect(statement.canBeEditedByUser(new User({ role: UserEnums.Role.Viewer }))).toBeFalsy();
+      });
+    });
+
+    describe("test exact right", () => {
+      const statement = new Statement({});
+      statement.data = new StatementData({});
+      statement.data.territory = new StatementTerritory({ territoryId: `T1-${randSuffix}`, order: 1 });
+      const exactReadRight = new UserRight({ mode: UserEnums.RoleMode.Read, territory: `T1-${randSuffix}` });
+      const exactWriteRight = new UserRight({ mode: UserEnums.RoleMode.Write, territory: `T1-${randSuffix}` });
+      const exactAdminRight = new UserRight({ mode: UserEnums.RoleMode.Admin, territory: `T1-${randSuffix}` });
+
+      it("should allow the access for exact edit/admin right", () => {
+        expect(statement.canBeEditedByUser(new User({ rights: [exactReadRight] }))).toBeFalsy();
+        expect(statement.canBeEditedByUser(new User({ rights: [exactWriteRight] }))).toBeTruthy();
+        expect(statement.canBeEditedByUser(new User({ rights: [exactAdminRight] }))).toBeTruthy();
+      });
+    });
+
+    describe("test derived right from parent", () => {
+      const statement = new Statement({});
+      const stTerritory = `T1-2-${randSuffix}`;
+      const parentTerritory = `T1-${randSuffix}`;
+      const rootTerritory = `root-${randSuffix}`;
+
+      statement.data.territory = new StatementTerritory({ territoryId: stTerritory, order: 1 });
+      const parentAdminReadRight = new UserRight({ mode: UserEnums.RoleMode.Read, territory: parentTerritory });
+      const parentAdminWriteRight = new UserRight({ mode: UserEnums.RoleMode.Write, territory: parentTerritory });
+      const parentAdminAdminRight = new UserRight({ mode: UserEnums.RoleMode.Admin, territory: parentTerritory });
+
+      const upmostParentReadRight = new UserRight({ mode: UserEnums.RoleMode.Read, territory: rootTerritory });
+      const upmostParentWriteRight = new UserRight({ mode: UserEnums.RoleMode.Write, territory: rootTerritory });
+      const upmostParentAdminRight = new UserRight({ mode: UserEnums.RoleMode.Admin, territory: rootTerritory });
+
+      it("should allow the access for user with parent right", () => {
+        expect(statement.canBeEditedByUser(new User({ rights: [parentAdminReadRight] }))).toBeFalsy();
+        expect(statement.canBeEditedByUser(new User({ rights: [parentAdminWriteRight] }))).toBeTruthy();
+        expect(statement.canBeEditedByUser(new User({ rights: [parentAdminAdminRight] }))).toBeTruthy();
+      });
+
+
+      it("should allow the access for user with upmost parent right", () => {
+        expect(statement.canBeEditedByUser(new User({ rights: [upmostParentReadRight] }))).toBeFalsy();
+        expect(statement.canBeEditedByUser(new User({ rights: [upmostParentWriteRight] }))).toBeTruthy();
+        expect(statement.canBeEditedByUser(new User({ rights: [upmostParentAdminRight] }))).toBeTruthy();
+      });
+    });
+
+    describe("test derived right from child (deny)", () => {
+      const statement = new Statement({});
+      const stTerritory = `T1-${randSuffix}`;
+      const childTerritory = `T1-1-${randSuffix}`;
+
+      statement.data.territory = new StatementTerritory({ territoryId: stTerritory, order: 1 });
+      const childRight = new UserRight({ mode: UserEnums.RoleMode.Admin, territory: childTerritory });
+
+      it("should deny the access for user with child right", () => {
+        expect(statement.canBeEditedByUser(new User({ rights: [childRight] }))).toBeFalsy();
+      });
+
+      it("should allow the access for admin nonetheless", () => {
+        expect(statement.canBeEditedByUser(new User({ role: UserEnums.Role.Admin, rights: [childRight] }))).toBeTruthy();
       });
     });
   });
