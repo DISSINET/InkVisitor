@@ -80,7 +80,7 @@ class Territory extends Entity implements ITerritory {
 
       const wantedOrder = this.data.parent.order;
       this.data.parent.order = determineOrder(wantedOrder, childs);
-    } else if (this.id !== "T0" && !this.isTemplate) {
+    } else if (this.id !== "T0" && this.id.indexOf("root") !== 0 && !this.isTemplate) {
       return {
         deleted: 0,
         first_error: "cannot create territory without a parent",

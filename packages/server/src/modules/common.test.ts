@@ -128,7 +128,6 @@ export async function createMockTree(
   const out: Territory[] = [
     new Territory({
       id: `root-${randSuffix}`,
-      isTemplate: true, // so it is saved
     }),
     new Territory({
       id: `T1-${randSuffix}`,
