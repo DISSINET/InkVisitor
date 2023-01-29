@@ -4,7 +4,6 @@ import {
   IStatementActant,
   IStatementAction,
   IReference,
-  IProp,
 } from "@shared/types";
 import {
   fillFlatObject,
@@ -24,7 +23,7 @@ import Prop from "@models/prop/prop";
 import {
   IStatementClassification,
   IStatementDataTerritory,
-  IStatementIdentification,
+  ROOT_TERRITORY_ID,
   StatementObject,
 } from "@shared/types/statement";
 
@@ -263,20 +262,27 @@ class Statement extends Entity implements IStatement {
     return true;
   }
 
+  /**
+   * Predicate for testing if the user can at least view statement 
+   * @param user 
+   * @returns boolean representing the access
+   */
   canBeViewedByUser(user: User): boolean {
     // admin role has always the right
     if (user.role === UserEnums.Role.Admin) {
       return true;
     }
 
-    if (this.data.territory) {
-      return !!treeCache.getRightForTerritory(
-        this.data.territory.territoryId,
-        user.rights
-      );
-    } else {
+    // draft or meta statement - always can be viewed
+    if (!this.data.territory || this.data.territory.territoryId === ROOT_TERRITORY_ID) {
       return true;
     }
+
+    // any right entry will suffice
+    return !!treeCache.getRightForTerritory(
+      this.data.territory.territoryId,
+      user.rights
+    );
   }
 
   canBeDeletedByUser(user: User): boolean {
@@ -353,7 +359,7 @@ class Statement extends Entity implements IStatement {
     await treeCache.initialize();
 
     return result;
-  }
+  };
 
   /**
    * Finds statements that are stored under the same territory (while not being
@@ -523,14 +529,14 @@ class Statement extends Entity implements IStatement {
       .table(Entity.table)
       .getAll.apply(
         undefined,
-        (territoryIds as (string | { index: string })[]).concat({
+        (territoryIds as (string | { index: string; })[]).concat({
           index: DbEnums.Indexes.StatementTerritory,
         })
       )
       .run(db);
 
     return list.map((data) => new Statement(data));
-  }
+  };
 
   /**
    * getEntitiesIdsForMany wrapped in foreach cycle
@@ -573,7 +579,7 @@ class Statement extends Entity implements IStatement {
     return statements.sort((a, b) => {
       return a.data.territory.order - b.data.territory.order;
     });
-  }
+  };
 
   /**
    * finds statements which are linked to different entity
@@ -600,7 +606,7 @@ class Statement extends Entity implements IStatement {
         return a.data.territory.order - b.data.territory.order;
       }
     });
-  }
+  };
 
   /**
    * finds statements that are using provided entityId in their
@@ -617,7 +623,7 @@ class Statement extends Entity implements IStatement {
       .table(Entity.table)
       .getAll(entityId, { index: DbEnums.Indexes.StatementActantsCI })
       .run(db);
-  }
+  };
 
   /**
    * reduces findByDataEntityId results to list of ids

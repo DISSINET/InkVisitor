@@ -8,12 +8,17 @@ import Statement, {
 import { Db } from "@service/RethinkDB";
 import { deleteEntities, findEntityById } from "@service/shorthands";
 import Territory from "@models/territory/territory";
-import { IStatement, IStatementData } from "@shared/types/statement";
+import { IStatement, IStatementData, ROOT_TERRITORY_ID } from "@shared/types/statement";
 import {
+  createMockTree,
   getIStatementActionMock,
   getIStatementMock,
 } from "@modules/common.test";
 import Prop, { PropSpec } from "@models/prop/prop";
+import treeCache, { TreeCache } from "@service/treeCache";
+import User, { UserRight } from "@models/user/user";
+import { UserEnums } from "@shared/enums";
+import tree from "@modules/tree";
 
 const fillStatementProps = function (
   container: StatementActant | StatementAction,
@@ -73,208 +78,6 @@ describe("models/statement", function () {
 
       it("should return full statement", () => {
         expect(JSON.parse(JSON.stringify(fullStatement))).toEqual(fullData);
-      });
-    });
-  });
-
-  describe("Statement validate test", function () {
-    describe("empty data", () => {
-      it("should be true", () => {
-        const emptyStatement = new Statement({});
-        expect(emptyStatement.isValid()).toEqual(true);
-      });
-    });
-    describe("invalid territory data", () => {
-      it("should be true", () => {
-        const emptyStatement = new Statement({});
-        emptyStatement.data.territory = new StatementTerritory({}); // invalid - empty id
-        expect(emptyStatement.isValid()).toEqual(false);
-      });
-    });
-    describe("not empty data", () => {
-      it("should return true", () => {
-        const notEmpty = new Statement({
-          id: "id",
-          label: "label",
-          data: {
-            text: "text",
-            territory: {
-              territoryId: "id",
-              order: 1,
-            },
-          } as IStatementData,
-        });
-        expect(notEmpty.isValid()).toEqual(true);
-      });
-    });
-  });
-
-  describe("findDependentStatementIds", function () {
-    let db: Db;
-    const baseStatementData = new Statement({});
-
-    beforeAll(async () => {
-      db = new Db();
-      await db.initDb();
-    });
-
-    beforeEach(async () => {
-      await deleteEntities(db);
-    });
-
-    afterAll(async () => {
-      await db.close();
-    });
-
-    describe("empty db", () => {
-      it("should return empty array", async (done) => {
-        const statements = await Statement.getLinkedEntities(db.connection, "");
-        expect(statements).toHaveLength(0);
-        done();
-      });
-    });
-
-    describe("one territory", () => {
-      it("should return empty array", async () => {
-        const territory = new Territory({});
-        await territory.save(db.connection);
-
-        const statements = await Statement.getLinkedEntities(
-          db.connection,
-          territory.id
-        );
-        expect(statements).toHaveLength(0);
-      });
-    });
-
-    describe("one territory, one unlinked statement", () => {
-      it("should return empty array", async () => {
-        const territory = new Territory({});
-        await territory.save(db.connection);
-
-        const statement = new Statement({
-          data: new StatementData({ territory: { territoryId: "non existent", order: 1 } }),
-        });
-        await statement.save(db.connection);
-
-        const statements = await Statement.getLinkedEntities(
-          db.connection,
-          territory.id
-        );
-        expect(statements).toHaveLength(0);
-      });
-    });
-
-    describe("one territory, one linked statement via actants field", () => {
-      it("should return empty array", async () => {
-        const territory = new Territory({});
-        await territory.save(db.connection);
-
-        const statement = new Statement(
-          JSON.parse(JSON.stringify(baseStatementData))
-        );
-        statement.data.actants = [
-          new StatementActant({
-            entityId: territory.id,
-          }),
-        ];
-        await statement.save(db.connection);
-
-        const statements = await Statement.getLinkedEntities(
-          db.connection,
-          territory.id
-        );
-        expect(statements).toHaveLength(1);
-      });
-    });
-
-    describe("one territory, one linked statement via tags field", () => {
-      it("should return empty array", async () => {
-        const territory = new Territory({});
-        await territory.save(db.connection);
-
-        const statement = new Statement(
-          JSON.parse(JSON.stringify(baseStatementData))
-        );
-        statement.data.tags = [territory.id];
-        await statement.save(db.connection);
-
-        const statements = await Statement.getLinkedEntities(
-          db.connection,
-          territory.id
-        );
-        expect(statements).toHaveLength(1);
-      });
-    });
-
-    describe("one territory, one linked statement via territory.id field", () => {
-      it("should return empty array", async () => {
-        const territory = new Territory({});
-        await territory.save(db.connection);
-
-        const statement = new Statement(
-          JSON.parse(JSON.stringify(baseStatementData))
-        );
-        statement.data.territory = new StatementTerritory({ territoryId: territory.id });
-
-        await statement.save(db.connection);
-
-        const statements = await Statement.getLinkedEntities(
-          db.connection,
-          territory.id
-        );
-        expect(statements).toHaveLength(1);
-      });
-    });
-
-    describe("one territory, two linked statement via territory.id and tags respectively", () => {
-      it("should return empty array", async () => {
-        const territory = new Territory({ id: "T0" });
-        await territory.save(db.connection);
-
-        // first statement linked via references array
-        const statement1 = new Statement(
-          JSON.parse(JSON.stringify(baseStatementData))
-        );
-        statement1.data.territory = new StatementTerritory({ territoryId: territory.id });
-        await statement1.save(db.connection);
-
-        // second statement linked via tags array
-        const statement2 = new Statement(JSON.parse(JSON.stringify(baseStatementData)));
-        statement2.data.tags = [territory.id];
-        await statement2.save(db.connection);
-
-        const statements = await Statement.getLinkedEntities(
-          db.connection,
-          territory.id
-        );
-        expect(statements).toHaveLength(2);
-      });
-    });
-
-    describe("one territory, two linked statement via references.resource and tags at once", () => {
-      it("should return empty array", async () => {
-        const territory = new Territory({ id: "T0" });
-        await territory.save(db.connection);
-
-        // first statement linked via references array and tags
-        const statement1 = new Statement(
-          JSON.parse(JSON.stringify(baseStatementData))
-        );
-        statement1.data.tags = [territory.id];
-        statement1.data.territory = new StatementTerritory({ territoryId: territory.id });
-
-        // second statement is the same
-        const statement2 = new Statement(JSON.parse(JSON.stringify(statement1)));
-
-        await statement1.save(db.connection);
-        await statement2.save(db.connection);
-
-        const statements = await Statement.getLinkedEntities(
-          db.connection,
-          territory.id
-        );
-        expect(statements).toHaveLength(2);
       });
     });
   });
@@ -478,7 +281,209 @@ describe("models/statement", function () {
     });
   });
 
-  describe("test Statement.findUsedInDataProps", function () {
+  describe("Statement.validate", function () {
+    describe("empty data", () => {
+      it("should be true", () => {
+        const emptyStatement = new Statement({});
+        expect(emptyStatement.isValid()).toEqual(true);
+      });
+    });
+    describe("invalid territory data", () => {
+      it("should be true", () => {
+        const emptyStatement = new Statement({});
+        emptyStatement.data.territory = new StatementTerritory({}); // invalid - empty id
+        expect(emptyStatement.isValid()).toEqual(false);
+      });
+    });
+    describe("not empty data", () => {
+      it("should return true", () => {
+        const notEmpty = new Statement({
+          id: "id",
+          label: "label",
+          data: {
+            text: "text",
+            territory: {
+              territoryId: "id",
+              order: 1,
+            },
+          } as IStatementData,
+        });
+        expect(notEmpty.isValid()).toEqual(true);
+      });
+    });
+  });
+
+  describe("Statement.findDependentStatementIds", function () {
+    let db: Db;
+    const baseStatementData = new Statement({});
+
+    beforeAll(async () => {
+      db = new Db();
+      await db.initDb();
+    });
+
+    beforeEach(async () => {
+      await deleteEntities(db);
+    });
+
+    afterAll(async () => {
+      await db.close();
+    });
+
+    describe("empty db", () => {
+      it("should return empty array", async (done) => {
+        const statements = await Statement.getLinkedEntities(db.connection, "");
+        expect(statements).toHaveLength(0);
+        done();
+      });
+    });
+
+    describe("one territory", () => {
+      it("should return empty array", async () => {
+        const territory = new Territory({});
+        await territory.save(db.connection);
+
+        const statements = await Statement.getLinkedEntities(
+          db.connection,
+          territory.id
+        );
+        expect(statements).toHaveLength(0);
+      });
+    });
+
+    describe("one territory, one unlinked statement", () => {
+      it("should return empty array", async () => {
+        const territory = new Territory({});
+        await territory.save(db.connection);
+
+        const statement = new Statement({
+          data: new StatementData({ territory: { territoryId: "non existent", order: 1 } }),
+        });
+        await statement.save(db.connection);
+
+        const statements = await Statement.getLinkedEntities(
+          db.connection,
+          territory.id
+        );
+        expect(statements).toHaveLength(0);
+      });
+    });
+
+    describe("one territory, one linked statement via actants field", () => {
+      it("should return empty array", async () => {
+        const territory = new Territory({});
+        await territory.save(db.connection);
+
+        const statement = new Statement(
+          JSON.parse(JSON.stringify(baseStatementData))
+        );
+        statement.data.actants = [
+          new StatementActant({
+            entityId: territory.id,
+          }),
+        ];
+        await statement.save(db.connection);
+
+        const statements = await Statement.getLinkedEntities(
+          db.connection,
+          territory.id
+        );
+        expect(statements).toHaveLength(1);
+      });
+    });
+
+    describe("one territory, one linked statement via tags field", () => {
+      it("should return empty array", async () => {
+        const territory = new Territory({});
+        await territory.save(db.connection);
+
+        const statement = new Statement(
+          JSON.parse(JSON.stringify(baseStatementData))
+        );
+        statement.data.tags = [territory.id];
+        await statement.save(db.connection);
+
+        const statements = await Statement.getLinkedEntities(
+          db.connection,
+          territory.id
+        );
+        expect(statements).toHaveLength(1);
+      });
+    });
+
+    describe("one territory, one linked statement via territory.id field", () => {
+      it("should return empty array", async () => {
+        const territory = new Territory({});
+        await territory.save(db.connection);
+
+        const statement = new Statement(
+          JSON.parse(JSON.stringify(baseStatementData))
+        );
+        statement.data.territory = new StatementTerritory({ territoryId: territory.id });
+
+        await statement.save(db.connection);
+
+        const statements = await Statement.getLinkedEntities(
+          db.connection,
+          territory.id
+        );
+        expect(statements).toHaveLength(1);
+      });
+    });
+
+    describe("one territory, two linked statement via territory.id and tags respectively", () => {
+      it("should return empty array", async () => {
+        const territory = new Territory({ id: "T0" });
+        await territory.save(db.connection);
+
+        // first statement linked via references array
+        const statement1 = new Statement(
+          JSON.parse(JSON.stringify(baseStatementData))
+        );
+        statement1.data.territory = new StatementTerritory({ territoryId: territory.id });
+        await statement1.save(db.connection);
+
+        // second statement linked via tags array
+        const statement2 = new Statement(JSON.parse(JSON.stringify(baseStatementData)));
+        statement2.data.tags = [territory.id];
+        await statement2.save(db.connection);
+
+        const statements = await Statement.getLinkedEntities(
+          db.connection,
+          territory.id
+        );
+        expect(statements).toHaveLength(2);
+      });
+    });
+
+    describe("one territory, two linked statement via references.resource and tags at once", () => {
+      it("should return empty array", async () => {
+        const territory = new Territory({ id: "T0" });
+        await territory.save(db.connection);
+
+        // first statement linked via references array and tags
+        const statement1 = new Statement(
+          JSON.parse(JSON.stringify(baseStatementData))
+        );
+        statement1.data.tags = [territory.id];
+        statement1.data.territory = new StatementTerritory({ territoryId: territory.id });
+
+        // second statement is the same
+        const statement2 = new Statement(JSON.parse(JSON.stringify(statement1)));
+
+        await statement1.save(db.connection);
+        await statement2.save(db.connection);
+
+        const statements = await Statement.getLinkedEntities(
+          db.connection,
+          territory.id
+        );
+        expect(statements).toHaveLength(2);
+      });
+    });
+  });
+
+  describe("Statement.findUsedInDataProps", function () {
     let db: Db;
 
     beforeAll(async () => {
@@ -598,7 +603,7 @@ describe("models/statement", function () {
     });
   });
 
-  describe("test Statement.findByTerritoryId", function () {
+  describe("Statement.findByTerritoryId", function () {
     let db: Db;
 
     beforeAll(async () => {
@@ -640,6 +645,109 @@ describe("models/statement", function () {
         expect(foundStatements.find(s => s.id === id1b)).toBeTruthy();
         expect(foundStatements.find(s => s.id === id2a)).toBeTruthy();
         expect(foundStatements.find(s => s.id === id2b)).toBeTruthy();
+      });
+    });
+  });
+
+  describe("Statement.canBeViewedByUser", function () {
+    const db = new Db();
+    const randSuffix = Math.random().toString();
+
+    beforeAll(async () => {
+      await db.initDb();
+      await createMockTree(db, randSuffix);
+      treeCache.tree = await treeCache.createTree(db);
+    });
+
+    beforeEach(async () => {
+    });
+
+    afterAll(async () => {
+      await db.close();
+    });
+
+    describe("test for meta statement", () => {
+      const statement = new Statement({});
+      statement.data = new StatementData({});
+      statement.data.territory = new StatementTerritory({ territoryId: ROOT_TERRITORY_ID, order: 1 });
+
+      it("should allow the access for anybody", () => {
+        expect(statement.canBeViewedByUser(new User({ role: UserEnums.Role.Viewer }))).toBeTruthy();
+      });
+    });
+
+    describe("test without user rights", () => {
+      const statement = new Statement({});
+      statement.data = new StatementData({});
+      statement.data.territory = new StatementTerritory({ territoryId: "T1", order: 1 });
+
+      it("should allow the access for admin without any rights", () => {
+        expect(statement.canBeViewedByUser(new User({ role: UserEnums.Role.Admin }))).toBeTruthy();
+      });
+      it("should deny the access for editor/reader without any rights", () => {
+        expect(statement.canBeViewedByUser(new User({ role: UserEnums.Role.Editor }))).toBeFalsy();
+        expect(statement.canBeViewedByUser(new User({ role: UserEnums.Role.Viewer }))).toBeFalsy();
+      });
+    });
+
+    describe("test without user rights", () => {
+      const statement = new Statement({});
+      statement.data = new StatementData({});
+      statement.data.territory = new StatementTerritory({ territoryId: "T1", order: 1 });
+
+      it("should allow the access for admin without any rights", () => {
+        expect(statement.canBeViewedByUser(new User({ role: UserEnums.Role.Admin }))).toBeTruthy();
+      });
+      it("should deny the access for editor/reader without any rights", () => {
+        expect(statement.canBeViewedByUser(new User({ role: UserEnums.Role.Editor }))).toBeFalsy();
+        expect(statement.canBeViewedByUser(new User({ role: UserEnums.Role.Viewer }))).toBeFalsy();
+      });
+    });
+
+    describe("test exact right", () => {
+      const statement = new Statement({});
+      statement.data = new StatementData({});
+      statement.data.territory = new StatementTerritory({ territoryId: `T1-${randSuffix}`, order: 1 });
+      const exactRight = new UserRight({ mode: UserEnums.RoleMode.Read, territory: `T1-${randSuffix}` });
+
+      it("should allow the access for user with exact right", () => {
+        expect(statement.canBeViewedByUser(new User({ rights: [exactRight] }))).toBeTruthy();
+      });
+    });
+
+    describe("test derived right from parent", () => {
+      const statement = new Statement({});
+      const stTerritory = `T1-2-${randSuffix}`;
+      const parentTerritory = `T1-${randSuffix}`;
+      const rootTerritory = `root-${randSuffix}`;
+
+      statement.data.territory = new StatementTerritory({ territoryId: stTerritory, order: 1 });
+      const parentRight = new UserRight({ mode: UserEnums.RoleMode.Read, territory: parentTerritory });
+      const upmostParentRight = new UserRight({ mode: UserEnums.RoleMode.Read, territory: rootTerritory });
+
+      it("should allow the access for user with parent right", () => {
+        expect(statement.canBeViewedByUser(new User({ rights: [parentRight] }))).toBeTruthy();
+      });
+
+      it("should allow the access for user with upmost parent right", () => {
+        expect(statement.canBeViewedByUser(new User({ rights: [upmostParentRight] }))).toBeTruthy();
+      });
+    });
+
+    describe("test derived right from child (deny)", () => {
+      const statement = new Statement({});
+      const stTerritory = `T1-${randSuffix}`;
+      const childTerritory = `T1-1-${randSuffix}`;
+
+      statement.data.territory = new StatementTerritory({ territoryId: stTerritory, order: 1 });
+      const childRight = new UserRight({ mode: UserEnums.RoleMode.Read, territory: childTerritory });
+
+      it("should deny the access for user with child right", () => {
+        expect(statement.canBeViewedByUser(new User({ rights: [childRight] }))).toBeFalsy();
+      });
+
+      it("should allow the access for admin nonetheless", () => {
+        expect(statement.canBeViewedByUser(new User({ role: UserEnums.Role.Admin, rights: [childRight] }))).toBeTruthy();
       });
     });
   });
