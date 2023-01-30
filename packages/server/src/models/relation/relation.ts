@@ -71,7 +71,7 @@ export default class Relation implements IRelationModel {
 
         patternFound = this.hasEntityCorrectClass(this.entityIds[i], wantedClass);
         if (!patternFound) {
-          // patter cannot be accepted any further - continue with another pattern
+          // pattern cannot be accepted any further - continue with another pattern
           break;
         }
       }
@@ -98,8 +98,12 @@ export default class Relation implements IRelationModel {
    * @param request 
    */
   async beforeSave(request: IRequest): Promise<void> {
-    if (!this.entities) {
+    if (!this.entities || this.entities.length !== this.entityIds.length) {
       this.entities = await Entity.findEntitiesByIds(request.db.connection, this.entityIds);
+
+      if (this.entities.length !== this.entityIds.length) {
+        throw new ModelNotValidError(`At least one entity does not exist`);
+      }
     }
 
     const err = this.areEntitiesValid();
