@@ -45,9 +45,12 @@ export const StyledLabel = styled.div`
   color: ${({ theme }) => theme.color["info"]};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
 `;
-export const StyledRelationValues = styled.div`
-  margin-left: ${({ theme }) => theme.space[8]};
-  margin-top: ${({ theme }) => theme.space[6]};
+interface StyledRelationValues {
+  hasSuggester: boolean;
+}
+export const StyledRelationValues = styled.div<StyledRelationValues>`
+  margin-top: ${({ theme, hasSuggester }) =>
+    hasSuggester ? theme.space[2] : theme.space[1]};
 `;
 export const StyledSuggesterWrapper = styled.div`
   margin-top: ${({ theme }) => theme.space[1]};
