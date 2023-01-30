@@ -37,6 +37,9 @@ export default class Synonym extends Relation implements RelationTypes.ISynonym 
 
     this.siblingRelations = [...new Set(this.siblingRelations)].sort();
     this.entityIds = [...new Set(toInclude)].sort();
+
+    // list of entity ids could have changed, this cached field needs to be reset
+    this.entities = undefined;
   }
 
   /**
