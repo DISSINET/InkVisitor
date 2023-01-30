@@ -16,8 +16,8 @@ export const minLayoutWidth = 1440;
 export const layoutWidthBreakpoint = 1400;
 // MORE PANEL WIDTHS
 export const collapsedPanelWidth = 31;
-export const secondPanelMinWidth = 440;
-export const thirdPanelMinWidth = 400;
+export const secondPanelMinWidth = 480;
+export const thirdPanelMinWidth = 450;
 // % PERCENT PANEL WIDTHS
 export const percentPanelWidths = [10, 31, 41, 18];
 export const separatorXPercentPosition = 42;
