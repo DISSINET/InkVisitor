@@ -3,7 +3,6 @@ import Relation from "./relation";
 import { Relation as RelationTypes } from "@shared/types";
 import { IRequest } from "src/custom_typings/request";
 import { nonenumerable } from "@common/decorators";
-import { InternalServerError, ModelNotValidError } from "@shared/types/errors";
 import { Connection } from "rethinkdb-ts";
 
 export default class Synonym extends Relation implements RelationTypes.ISynonym {
@@ -23,19 +22,20 @@ export default class Synonym extends Relation implements RelationTypes.ISynonym 
     let toInclude: string[] = this.entityIds;
     this.siblingRelations = [];
 
-
     for (const entityId of this.entityIds) {
       const relations = await Relation.getForEntity(request.db.connection, entityId, type);
       for (const relation of relations) {
         if (this.id !== relation.id) {
+          toInclude = toInclude.concat(relation.entityIds);
           this.siblingRelations.push(relation.id);
         }
-
-        toInclude = toInclude.concat(relation.entityIds);
       }
     }
 
+    // sibling relations will be removed in afterSave
     this.siblingRelations = [...new Set(this.siblingRelations)].sort();
+
+    // new cloud should contain all entities from each sibling relation + this relation
     this.entityIds = [...new Set(toInclude)].sort();
 
     // list of entity ids could have changed, this cached field needs to be reset
@@ -47,7 +47,7 @@ export default class Synonym extends Relation implements RelationTypes.ISynonym 
    * A + B => synonym 1
    * B + C => synonym 2
    * then
-   * New relation will be created which covers all of these ids
+   * New relation will be created which covers all of these ids A + B + C
    * @param request 
    */
   async beforeSave(request: IRequest): Promise<void> {
