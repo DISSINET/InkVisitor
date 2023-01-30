@@ -228,65 +228,71 @@ export const EntityDetailRelationTypeBlock: React.FC<
     });
   };
 
+  const hasSuggester = isMultiple || selectedRelations.length < 1;
+
   return (
     <>
       {/* Type column */}
       <EntityDetailRelationTypeIcon relationType={relationType} />
       {/* Label & Suggester column */}
-      <StyledLabelSuggester>
-        <StyledLabel>{relationRule.label}</StyledLabel>
-        {(isMultiple || selectedRelations.length < 1) && (
-          <StyledSuggesterWrapper>
-            <EntitySuggester
-              inputWidth={80}
-              disableTemplatesAccept
-              categoryTypes={
-                getCategoryTypes() ||
-                ([EntityEnums.Extension.NoClass] as [EntityEnums.ExtendedClass])
-              }
-              onSelected={(selectedId: string) => {
-                if (isCloudType) {
-                  setTempCloudEntityId(selectedId);
-                } else {
-                  handleMultiSelected(selectedId);
+      <div>
+        <StyledLabelSuggester>
+          <StyledLabel>{relationRule.label}</StyledLabel>
+          {hasSuggester && (
+            <StyledSuggesterWrapper>
+              <EntitySuggester
+                inputWidth={80}
+                disableTemplatesAccept
+                categoryTypes={
+                  getCategoryTypes() ||
+                  ([EntityEnums.Extension.NoClass] as [
+                    EntityEnums.ExtendedClass
+                  ])
                 }
-              }}
-              excludedActantIds={usedEntityIds}
-            />
-          </StyledSuggesterWrapper>
-        )}
-      </StyledLabelSuggester>
-      {/* Values column */}
-      <StyledRelationValues>
-        {currentRelations.map((relation, key) =>
-          isCloudType ? (
-            <EntityDetailCloudRelation
-              key={key}
-              relation={relation}
-              entityId={entity.id}
-              relations={selectedRelations}
-              entities={entities}
-              relationUpdateMutation={relationUpdateMutation}
-              relationDeleteMutation={relationDeleteMutation}
-            />
-          ) : (
-            <EntityDetailRelationRow
-              key={key}
-              index={key}
-              relation={relation}
-              entities={entities}
-              entityId={entity.id}
-              relationRule={relationRule}
-              relationType={relationType}
-              relationUpdateMutation={relationUpdateMutation}
-              relationDeleteMutation={relationDeleteMutation}
-              hasOrder={hasOrder && currentRelations.length > 1}
-              moveRow={moveRow}
-              updateOrderFn={updateOrderFn}
-            />
-          )
-        )}
-      </StyledRelationValues>
+                onSelected={(selectedId: string) => {
+                  if (isCloudType) {
+                    setTempCloudEntityId(selectedId);
+                  } else {
+                    handleMultiSelected(selectedId);
+                  }
+                }}
+                excludedActantIds={usedEntityIds}
+              />
+            </StyledSuggesterWrapper>
+          )}
+        </StyledLabelSuggester>
+        {/* Values column */}
+        <StyledRelationValues hasSuggester={hasSuggester}>
+          {currentRelations.map((relation, key) =>
+            isCloudType ? (
+              <EntityDetailCloudRelation
+                key={key}
+                relation={relation}
+                entityId={entity.id}
+                relations={selectedRelations}
+                entities={entities}
+                relationUpdateMutation={relationUpdateMutation}
+                relationDeleteMutation={relationDeleteMutation}
+              />
+            ) : (
+              <EntityDetailRelationRow
+                key={key}
+                index={key}
+                relation={relation}
+                entities={entities}
+                entityId={entity.id}
+                relationRule={relationRule}
+                relationType={relationType}
+                relationUpdateMutation={relationUpdateMutation}
+                relationDeleteMutation={relationDeleteMutation}
+                hasOrder={hasOrder && currentRelations.length > 1}
+                moveRow={moveRow}
+                updateOrderFn={updateOrderFn}
+              />
+            )
+          )}
+        </StyledRelationValues>
+      </div>
     </>
   );
 };
