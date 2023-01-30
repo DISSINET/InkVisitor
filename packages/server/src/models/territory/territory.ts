@@ -7,6 +7,7 @@ import { InternalServerError, InvalidDeleteError } from "@shared/types/errors";
 import User from "@models/user/user";
 import treeCache from "@service/treeCache";
 import { nonenumerable } from "@common/decorators";
+import { ROOT_TERRITORY_ID } from "@shared/types/statement";
 
 export class TerritoryParent implements IParentTerritory, IModel {
   territoryId: string;
@@ -186,6 +187,12 @@ class Territory extends Entity implements ITerritory {
   canBeViewedByUser(user: User): boolean {
     // admin role has always the right
     if (user.role === UserEnums.Role.Admin) {
+      return true;
+    }
+
+
+    // root territory - always can be viewed
+    if (this.id === ROOT_TERRITORY_ID) {
       return true;
     }
 
