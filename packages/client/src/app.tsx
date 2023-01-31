@@ -104,10 +104,6 @@ export const App: React.FC = () => {
 
   useEffect(() => {
     if (debouncedWidth > 0) {
-      // const layoutWidth =
-      //   debouncedWidth < layoutWidthBreakpoint
-      //     ? minLayoutWidth
-      //     : debouncedWidth;
       const layoutWidth = debouncedWidth;
       dispatch(setLayoutWidth(layoutWidth));
       const onePercent = layoutWidth / 100;
@@ -128,15 +124,17 @@ export const App: React.FC = () => {
       // FIRST
       const firstPanel =
         Math.floor(onePercent * percentPanelWidths[0] * 10) / 10;
+
       // SECOND
       const secondPanelPx = Math.floor(
         (onePercent * (separatorPercentPosition - percentPanelWidths[0]) * 10) /
           10
       );
-      const secondPanel =
-        secondPanelPx < secondPanelMinWidth
-          ? secondPanelMinWidth
-          : secondPanelPx;
+      const isSecondPanelUndersized = secondPanelPx < secondPanelMinWidth;
+      let secondPanel = isSecondPanelUndersized
+        ? secondPanelMinWidth
+        : secondPanelPx;
+
       // THIRD
       const thirdPanelPx = Math.floor(
         layoutWidth -
@@ -145,11 +143,19 @@ export const App: React.FC = () => {
             10) /
             10
       );
-      const thirdPanel =
-        thirdPanelPx < thirdPanelMinWidth ? thirdPanelMinWidth : thirdPanelPx;
+      const isThirdPanelUndersized = thirdPanelPx < thirdPanelMinWidth;
+      let thirdPanel = isThirdPanelUndersized
+        ? thirdPanelMinWidth
+        : thirdPanelPx;
+
       // FOURTH
       const fourthPanel =
         Math.floor(onePercent * percentPanelWidths[3] * 10) / 10;
+
+      if (!isSecondPanelUndersized && isThirdPanelUndersized) {
+        const undersizeDifference = thirdPanelMinWidth - thirdPanelPx;
+        secondPanel = secondPanel - undersizeDifference;
+      }
 
       const panels = [firstPanel, secondPanel, thirdPanel, fourthPanel];
       dispatch(setPanelWidths(panels));

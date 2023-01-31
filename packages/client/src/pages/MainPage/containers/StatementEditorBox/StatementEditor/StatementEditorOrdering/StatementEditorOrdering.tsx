@@ -68,19 +68,25 @@ export const StatementEditorOrdering: React.FC<StatementEditorOrdering> = ({
 
   return (
     <>
-      <StatementEditorOrderTable
-        elements={withOrder}
-        setElements={setWithOrder}
-        entities={entities}
-        removeFromOrdering={removeFromOrdering}
-        changeOrder={changeOrder}
-      />
-      <StyledNoOrderHeading>{"Without order"}</StyledNoOrderHeading>
-      <StatementEditorNoOrderTable
-        elements={withoutOrder}
-        entities={entities}
-        addToOrdering={addToOrdering}
-      />
+      {withOrder.length > 0 && (
+        <StatementEditorOrderTable
+          elements={withOrder}
+          setElements={setWithOrder}
+          entities={entities}
+          removeFromOrdering={removeFromOrdering}
+          changeOrder={changeOrder}
+        />
+      )}
+      {withoutOrder.length > 0 && (
+        <StyledNoOrderHeading>{"Without order"}</StyledNoOrderHeading>
+      )}
+      {withoutOrder.length > 0 && (
+        <StatementEditorNoOrderTable
+          elements={withoutOrder}
+          entities={entities}
+          addToOrdering={addToOrdering}
+        />
+      )}
     </>
   );
 };
