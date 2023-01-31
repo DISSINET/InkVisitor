@@ -490,8 +490,10 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   // copy reference from previous statements
   const handleCopyPreviousStatementReferences = () => {
     if (previousStatement) {
-      const copiedReferences = DStatementReferences(previousStatement.references)
-      updateStatementMutation.mutate({references: copiedReferences})
+      const copiedReferences = DStatementReferences(
+        previousStatement.references
+      );
+      updateStatementMutation.mutate({ references: copiedReferences });
     }
   };
 
@@ -676,16 +678,18 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         </StyledEditorSection>
 
         {/* Ordering */}
-        <StyledEditorSection>
-          <StyledEditorSectionHeader>Ordering</StyledEditorSectionHeader>
-          <StyledEditorSectionContent>
-            <StatementEditorOrdering
-              statementId={statementId}
-              elementsOrders={statement.elementsOrders}
-              entities={statement.entities}
-            />
-          </StyledEditorSectionContent>
-        </StyledEditorSection>
+        {statement.elementsOrders.length > 0 && (
+          <StyledEditorSection>
+            <StyledEditorSectionHeader>Ordering</StyledEditorSectionHeader>
+            <StyledEditorSectionContent>
+              <StatementEditorOrdering
+                statementId={statementId}
+                elementsOrders={statement.elementsOrders}
+                entities={statement.entities}
+              />
+            </StyledEditorSectionContent>
+          </StyledEditorSection>
+        )}
 
         {/* Refs */}
         <StyledEditorSection key="editor-section-refs">
