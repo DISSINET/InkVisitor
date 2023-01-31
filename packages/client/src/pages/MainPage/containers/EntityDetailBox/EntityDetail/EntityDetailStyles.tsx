@@ -15,7 +15,6 @@ interface StyledDetailSection {
 }
 export const StyledDetailSection = styled.div<StyledDetailSection>`
   padding: ${({ theme }) => theme.space[6]};
-  /* margin-left: ${({ theme }) => theme.space[8]}; */
   padding-right: ${({ metaSection }) => (metaSection ? 0 : "")};
   padding-top: ${({ firstSection }) => (firstSection ? 0 : "")};
   border-bottom-width: ${({ theme, lastSection = false }) =>
@@ -157,4 +156,8 @@ export const StyledTagWrap = styled.div`
   display: grid;
   overflow: hidden;
   max-width: 100%;
+`;
+
+export const StyledPropGroupWrap = styled.div`
+  margin-bottom: ${({ theme }) => theme.space[5]};
 `;
