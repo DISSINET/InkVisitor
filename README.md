@@ -55,13 +55,13 @@ The uses of properties include:
 
 ## User Administration
 
-The environment supports a system of three roles:
+The environment supports three user roles:
 
-- admin
-- editor
-- viewer
+- admin,
+- editor,
+- viewer.
 
-Further, the admin may grant particular users (editors and viewers) access rights for specified territories. Editor role may be granted by "edit" rights, viewer role has "view" rights.
+Further, admins may grant particular users (editors and viewers) access rights for specified territories. Editor role may be granted by "edit" rights, viewer role has "view" rights.
 
 **Entity Detail** is accessible to all roles. The viewer is not allowed to change any value, while the editor may change label, detail, notes, language and add, remove and edit property statements with the status of "pending." Moreover, all meta props in detail that he creates are getting status "pending." Admin has full access to internal attributes of the entity (status, class) and meta props. All meta props he creates have the status "approved."
 
