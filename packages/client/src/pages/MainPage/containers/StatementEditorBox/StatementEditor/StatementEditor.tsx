@@ -57,6 +57,7 @@ import {
   StyledEditorSection,
   StyledEditorSectionContent,
   StyledEditorSectionHeader,
+  StyledEditorSectionHeading,
   StyledEditorStatementInfo,
   StyledEditorStatementInfoLabel,
   StyledEditorTemplateSection,
@@ -65,7 +66,11 @@ import {
   StyledTagsList,
   StyledTagsListItem,
 } from "./../StatementEditorBoxStyles";
-import { MdDriveFileMove } from "react-icons/md";
+import {
+  MdDriveFileMove,
+  MdDriveFileMoveOutline,
+  MdDriveFolderUpload,
+} from "react-icons/md";
 
 interface StatementEditor {
   statement: IResponseStatement;
@@ -487,13 +492,36 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     }
   };
 
-  // copy reference from previous statements
-  const handleCopyPreviousStatementReferences = () => {
+  const handleCopyPreviousStatement = (
+    section: "actions" | "actants" | "references" | "tags"
+  ) => {
     if (previousStatement) {
-      const copiedReferences = DStatementReferences(
-        previousStatement.references
-      );
-      updateStatementMutation.mutate({ references: copiedReferences });
+      switch (section) {
+        case "actions":
+          console.log(previousStatement.data.actions);
+          return;
+        case "actants":
+          console.log(previousStatement.data.actants);
+          return;
+        case "references":
+          const copiedReferences = DStatementReferences(
+            previousStatement.references
+          );
+          updateStatementMutation.mutate({ references: copiedReferences });
+          return;
+        case "tags":
+          const mergedTags = [
+            ...statement.data.tags,
+            ...previousStatement.data.tags,
+          ];
+          const uniqueTags = [...new Set(mergedTags)];
+          updateStatementMutation.mutate({
+            data: {
+              tags: uniqueTags,
+            },
+          });
+          return;
+      }
     }
   };
 
@@ -607,7 +635,24 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
         {/* Actions */}
         <StyledEditorSection metaSection key="editor-section-actions">
-          <StyledEditorSectionHeader>Actions</StyledEditorSectionHeader>
+          <StyledEditorSectionHeader>
+            <StyledEditorSectionHeading>Actions</StyledEditorSectionHeading>
+            <ButtonGroup>
+              <Button
+                icon={<MdDriveFileMove />}
+                disabled={!previousStatement}
+                tooltipLabel="copy actions from the previous statement"
+                inverted
+                onClick={() => handleCopyPreviousStatement("actions")}
+              />
+              <Button
+                icon={<MdDriveFolderUpload />}
+                inverted
+                tooltipLabel="copy actions from selected statement"
+                onClick={() => console.log("copy from selected statement")}
+              />
+            </ButtonGroup>
+          </StyledEditorSectionHeader>
           <StyledEditorSectionContent>
             <StyledEditorActantTableWrapper>
               <StatementEditorActionTable
@@ -642,7 +687,24 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
         {/* Actants */}
         <StyledEditorSection metaSection key="editor-section-actants">
-          <StyledEditorSectionHeader>Actants</StyledEditorSectionHeader>
+          <StyledEditorSectionHeader>
+            <StyledEditorSectionHeading>Actants</StyledEditorSectionHeading>
+            <ButtonGroup>
+              <Button
+                icon={<MdDriveFileMove />}
+                disabled={!previousStatement}
+                tooltipLabel="copy actions from the previous statement"
+                inverted
+                onClick={() => handleCopyPreviousStatement("actants")}
+              />
+              <Button
+                icon={<MdDriveFolderUpload />}
+                inverted
+                tooltipLabel="copy actions from selected statement"
+                onClick={() => console.log("copy from selected statement")}
+              />
+            </ButtonGroup>
+          </StyledEditorSectionHeader>
           <StyledEditorSectionContent>
             <StyledEditorActantTableWrapper>
               <StatementEditorActantTable
@@ -693,19 +755,21 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
         {/* Refs */}
         <StyledEditorSection key="editor-section-refs">
-          <StyledEditorSectionHeader>References</StyledEditorSectionHeader>
-          <StyledEditorSectionContent>
+          <StyledEditorSectionHeader>
+            <StyledEditorSectionHeading>References</StyledEditorSectionHeading>
             <StyledReferencesButtons>
               <ButtonGroup>
                 <Button
                   icon={<MdDriveFileMove />}
                   label="copy references from the previous statement"
                   disabled={!previousStatement}
-                  tooltipLabel="copy references the from previous statement"
-                  onClick={() => handleCopyPreviousStatementReferences()}
+                  tooltipLabel="copy references from the previous statement"
+                  onClick={() => handleCopyPreviousStatement("references")}
                 />
               </ButtonGroup>
             </StyledReferencesButtons>
+          </StyledEditorSectionHeader>
+          <StyledEditorSectionContent>
             <EntityReferenceTable
               openDetailOnCreate
               entities={statement.entities}
@@ -722,14 +786,32 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
         {/* Tags */}
         <StyledEditorSection key="editor-section-tags">
-          <StyledEditorSectionHeader>Tags</StyledEditorSectionHeader>
+          <StyledEditorSectionHeader>
+            <StyledEditorSectionHeading>Tags</StyledEditorSectionHeading>
+            <ButtonGroup>
+              <Button
+                icon={<MdDriveFileMove />}
+                disabled={!previousStatement}
+                tooltipLabel="copy tags from the previous statement"
+                inverted
+                onClick={() => handleCopyPreviousStatement("tags")}
+              />
+              <Button
+                icon={<MdDriveFolderUpload />}
+                inverted
+                tooltipLabel="copy tags from selected statement"
+                onClick={() => console.log("copy from selected statement")}
+              />
+            </ButtonGroup>
+          </StyledEditorSectionHeader>
+
           <StyledEditorSectionContent>
             <StyledTagsList>
-              {statement.data.tags.map((tag: string) => {
+              {statement.data.tags.map((tag: string, key: number) => {
                 const tagActant = statement?.entities[tag];
                 return (
                   tagActant && (
-                    <StyledTagsListItem key={tag}>
+                    <StyledTagsListItem key={key}>
                       <EntityTag
                         entity={tagActant}
                         fullWidth
