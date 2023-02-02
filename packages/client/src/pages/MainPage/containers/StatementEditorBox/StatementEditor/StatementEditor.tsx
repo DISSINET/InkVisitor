@@ -35,6 +35,7 @@ import {
 import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
 import { FaUnlink } from "react-icons/fa";
+import { HiOutlineFolderRemove } from "react-icons/hi";
 import { MdDriveFileMove, MdDriveFolderUpload } from "react-icons/md";
 import { UseMutationResult, useQuery, useQueryClient } from "react-query";
 import { toast } from "react-toastify";
@@ -492,14 +493,14 @@ export const StatementEditor: React.FC<StatementEditor> = ({
       switch (section) {
         case "actions":
           console.log(previousStatement.data.actions);
-          updateStatementMutation.mutate({
-            data: { actions: [...previousStatement.data.actions] },
+          updateStatementDataMutation.mutate({
+            actions: [...previousStatement.data.actions],
           });
           return;
         case "actants":
           console.log(previousStatement.data.actants);
-          updateStatementMutation.mutate({
-            data: { actants: [...previousStatement.data.actants] },
+          updateStatementDataMutation.mutate({
+            actants: [...previousStatement.data.actants],
           });
           return;
         case "references":
@@ -514,10 +515,8 @@ export const StatementEditor: React.FC<StatementEditor> = ({
             ...previousStatement.data.tags,
           ];
           const uniqueTags = [...new Set(mergedTags)];
-          updateStatementMutation.mutate({
-            data: {
-              tags: uniqueTags,
-            },
+          updateStatementDataMutation.mutate({
+            tags: uniqueTags,
           });
           return;
       }
@@ -647,8 +646,18 @@ export const StatementEditor: React.FC<StatementEditor> = ({
               <Button
                 icon={<MdDriveFolderUpload />}
                 inverted
+                color="info"
                 tooltipLabel="copy actions from selected statement"
                 onClick={() => console.log("copy from selected statement")}
+              />
+              <Button
+                icon={<HiOutlineFolderRemove />}
+                inverted
+                color="danger"
+                tooltipLabel="remove all actions from statement"
+                onClick={() =>
+                  updateStatementDataMutation.mutate({ actions: [] })
+                }
               />
             </ButtonGroup>
           </StyledEditorSectionHeader>
@@ -692,15 +701,24 @@ export const StatementEditor: React.FC<StatementEditor> = ({
               <Button
                 icon={<MdDriveFileMove />}
                 disabled={!previousStatement}
-                tooltipLabel="copy actions from the previous statement"
+                tooltipLabel="copy actants from the previous statement"
                 inverted
                 onClick={() => handleCopyPreviousStatement("actants")}
               />
               <Button
                 icon={<MdDriveFolderUpload />}
                 inverted
-                tooltipLabel="copy actions from selected statement"
+                tooltipLabel="copy actants from selected statement"
                 onClick={() => console.log("copy from selected statement")}
+              />
+              <Button
+                icon={<HiOutlineFolderRemove />}
+                inverted
+                color="danger"
+                tooltipLabel="remove all actants from statement"
+                onClick={() =>
+                  updateStatementDataMutation.mutate({ actants: [] })
+                }
               />
             </ButtonGroup>
           </StyledEditorSectionHeader>
@@ -767,8 +785,18 @@ export const StatementEditor: React.FC<StatementEditor> = ({
               <Button
                 icon={<MdDriveFolderUpload />}
                 inverted
+                color="info"
                 tooltipLabel="copy references from selected statement"
                 onClick={() => console.log("copy from selected statement")}
+              />
+              <Button
+                icon={<HiOutlineFolderRemove />}
+                inverted
+                color="danger"
+                tooltipLabel="remove all references from statement"
+                onClick={() =>
+                  updateStatementMutation.mutate({ references: [] })
+                }
               />
             </ButtonGroup>
           </StyledEditorSectionHeader>
@@ -802,8 +830,16 @@ export const StatementEditor: React.FC<StatementEditor> = ({
               <Button
                 icon={<MdDriveFolderUpload />}
                 inverted
+                color="info"
                 tooltipLabel="copy tags from selected statement"
                 onClick={() => console.log("copy from selected statement")}
+              />
+              <Button
+                icon={<HiOutlineFolderRemove />}
+                inverted
+                color="danger"
+                tooltipLabel="remove all tags from statement"
+                onClick={() => updateStatementDataMutation.mutate({ tags: [] })}
               />
             </ButtonGroup>
           </StyledEditorSectionHeader>
