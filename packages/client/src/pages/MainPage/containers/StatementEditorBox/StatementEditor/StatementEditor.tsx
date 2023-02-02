@@ -523,6 +523,39 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     }
   };
 
+  const renderSectionButtons = (
+    section: "actions" | "actants" | "references" | "tags"
+  ) => (
+    <ButtonGroup>
+      <Button
+        icon={<MdDriveFileMove />}
+        disabled={!previousStatement}
+        tooltipLabel={`copy ${section} from the previous statement`}
+        inverted
+        onClick={() => handleCopyPreviousStatement(section)}
+      />
+      <Button
+        icon={<MdDriveFolderUpload />}
+        inverted
+        color="info"
+        tooltipLabel={`copy ${section} from selected statement`}
+        onClick={() => console.log("copy from selected statement")}
+      />
+      <Button
+        icon={<HiOutlineFolderRemove />}
+        inverted
+        color="danger"
+        tooltipLabel={`remove all ${section} from statement`}
+        onClick={() => {
+          if (section === "references") {
+            updateStatementMutation.mutate({ references: [] });
+          } else {
+            updateStatementDataMutation.mutate({ [section]: [] });
+          }
+        }}
+      />
+    </ButtonGroup>
+  );
   return (
     <>
       <div style={{ marginBottom: "4rem" }} key={statement.id}>
@@ -635,31 +668,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         <StyledEditorSection metaSection key="editor-section-actions">
           <StyledEditorSectionHeader>
             <StyledEditorSectionHeading>Actions</StyledEditorSectionHeading>
-            <ButtonGroup>
-              <Button
-                icon={<MdDriveFileMove />}
-                disabled={!previousStatement}
-                tooltipLabel="copy actions from the previous statement"
-                inverted
-                onClick={() => handleCopyPreviousStatement("actions")}
-              />
-              <Button
-                icon={<MdDriveFolderUpload />}
-                inverted
-                color="info"
-                tooltipLabel="copy actions from selected statement"
-                onClick={() => console.log("copy from selected statement")}
-              />
-              <Button
-                icon={<HiOutlineFolderRemove />}
-                inverted
-                color="danger"
-                tooltipLabel="remove all actions from statement"
-                onClick={() =>
-                  updateStatementDataMutation.mutate({ actions: [] })
-                }
-              />
-            </ButtonGroup>
+            {renderSectionButtons("actions")}
           </StyledEditorSectionHeader>
           <StyledEditorSectionContent>
             <StyledEditorActantTableWrapper>
@@ -697,30 +706,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         <StyledEditorSection metaSection key="editor-section-actants">
           <StyledEditorSectionHeader>
             <StyledEditorSectionHeading>Actants</StyledEditorSectionHeading>
-            <ButtonGroup>
-              <Button
-                icon={<MdDriveFileMove />}
-                disabled={!previousStatement}
-                tooltipLabel="copy actants from the previous statement"
-                inverted
-                onClick={() => handleCopyPreviousStatement("actants")}
-              />
-              <Button
-                icon={<MdDriveFolderUpload />}
-                inverted
-                tooltipLabel="copy actants from selected statement"
-                onClick={() => console.log("copy from selected statement")}
-              />
-              <Button
-                icon={<HiOutlineFolderRemove />}
-                inverted
-                color="danger"
-                tooltipLabel="remove all actants from statement"
-                onClick={() =>
-                  updateStatementDataMutation.mutate({ actants: [] })
-                }
-              />
-            </ButtonGroup>
+            {renderSectionButtons("actants")}
           </StyledEditorSectionHeader>
           <StyledEditorSectionContent>
             <StyledEditorActantTableWrapper>
@@ -774,31 +760,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         <StyledEditorSection key="editor-section-refs">
           <StyledEditorSectionHeader>
             <StyledEditorSectionHeading>References</StyledEditorSectionHeading>
-            <ButtonGroup>
-              <Button
-                icon={<MdDriveFileMove />}
-                disabled={!previousStatement}
-                tooltipLabel="copy references from the previous statement"
-                inverted
-                onClick={() => handleCopyPreviousStatement("references")}
-              />
-              <Button
-                icon={<MdDriveFolderUpload />}
-                inverted
-                color="info"
-                tooltipLabel="copy references from selected statement"
-                onClick={() => console.log("copy from selected statement")}
-              />
-              <Button
-                icon={<HiOutlineFolderRemove />}
-                inverted
-                color="danger"
-                tooltipLabel="remove all references from statement"
-                onClick={() =>
-                  updateStatementMutation.mutate({ references: [] })
-                }
-              />
-            </ButtonGroup>
+            {renderSectionButtons("references")}
           </StyledEditorSectionHeader>
           <StyledEditorSectionContent>
             <EntityReferenceTable
@@ -819,29 +781,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         <StyledEditorSection key="editor-section-tags">
           <StyledEditorSectionHeader>
             <StyledEditorSectionHeading>Tags</StyledEditorSectionHeading>
-            <ButtonGroup>
-              <Button
-                icon={<MdDriveFileMove />}
-                disabled={!previousStatement}
-                tooltipLabel="copy tags from the previous statement"
-                inverted
-                onClick={() => handleCopyPreviousStatement("tags")}
-              />
-              <Button
-                icon={<MdDriveFolderUpload />}
-                inverted
-                color="info"
-                tooltipLabel="copy tags from selected statement"
-                onClick={() => console.log("copy from selected statement")}
-              />
-              <Button
-                icon={<HiOutlineFolderRemove />}
-                inverted
-                color="danger"
-                tooltipLabel="remove all tags from statement"
-                onClick={() => updateStatementDataMutation.mutate({ tags: [] })}
-              />
-            </ButtonGroup>
+            {renderSectionButtons("tags")}
           </StyledEditorSectionHeader>
 
           <StyledEditorSectionContent>
