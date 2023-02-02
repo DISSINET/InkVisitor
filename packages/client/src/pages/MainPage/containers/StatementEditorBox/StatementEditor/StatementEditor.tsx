@@ -4,10 +4,8 @@ import {
   IOption,
   IReference,
   IResponseStatement,
-  IResponseTerritory,
   IStatementActant,
   IStatementAction,
-  ITerritory,
 } from "@shared/types";
 import api from "api";
 import {
@@ -37,15 +35,13 @@ import {
 import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
 import { FaUnlink } from "react-icons/fa";
+import { MdDriveFileMove, MdDriveFolderUpload } from "react-icons/md";
 import { UseMutationResult, useQuery, useQueryClient } from "react-query";
 import { toast } from "react-toastify";
 import { excludedSuggesterEntities } from "Theme/constants";
 import { classesEditorActants, classesEditorTags, DropdownItem } from "types";
 import { getEntityLabel, getShortLabelByLetterCount } from "utils";
 import { EntityReferenceTable } from "../../EntityReferenceTable/EntityReferenceTable";
-import { StatementEditorActantTable } from "./StatementEditorActantTable/StatementEditorActantTable";
-import { StatementEditorActionTable } from "./StatementEditorActionTable/StatementEditorActionTable";
-import { StatementEditorOrdering } from "./StatementEditorOrdering/StatementEditorOrdering";
 import {
   StyledBreadcrumbWrap,
   StyledEditorActantTableWrapper,
@@ -62,15 +58,12 @@ import {
   StyledEditorStatementInfoLabel,
   StyledEditorTemplateSection,
   StyledHeaderTagWrap,
-  StyledReferencesButtons,
   StyledTagsList,
   StyledTagsListItem,
 } from "./../StatementEditorBoxStyles";
-import {
-  MdDriveFileMove,
-  MdDriveFileMoveOutline,
-  MdDriveFolderUpload,
-} from "react-icons/md";
+import { StatementEditorActantTable } from "./StatementEditorActantTable/StatementEditorActantTable";
+import { StatementEditorActionTable } from "./StatementEditorActionTable/StatementEditorActionTable";
+import { StatementEditorOrdering } from "./StatementEditorOrdering/StatementEditorOrdering";
 
 interface StatementEditor {
   statement: IResponseStatement;
@@ -499,9 +492,15 @@ export const StatementEditor: React.FC<StatementEditor> = ({
       switch (section) {
         case "actions":
           console.log(previousStatement.data.actions);
+          updateStatementMutation.mutate({
+            data: { actions: [...previousStatement.data.actions] },
+          });
           return;
         case "actants":
           console.log(previousStatement.data.actants);
+          updateStatementMutation.mutate({
+            data: { actants: [...previousStatement.data.actants] },
+          });
           return;
         case "references":
           const copiedReferences = DStatementReferences(
@@ -757,17 +756,21 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         <StyledEditorSection key="editor-section-refs">
           <StyledEditorSectionHeader>
             <StyledEditorSectionHeading>References</StyledEditorSectionHeading>
-            <StyledReferencesButtons>
-              <ButtonGroup>
-                <Button
-                  icon={<MdDriveFileMove />}
-                  label="copy references from the previous statement"
-                  disabled={!previousStatement}
-                  tooltipLabel="copy references from the previous statement"
-                  onClick={() => handleCopyPreviousStatement("references")}
-                />
-              </ButtonGroup>
-            </StyledReferencesButtons>
+            <ButtonGroup>
+              <Button
+                icon={<MdDriveFileMove />}
+                disabled={!previousStatement}
+                tooltipLabel="copy references from the previous statement"
+                inverted
+                onClick={() => handleCopyPreviousStatement("references")}
+              />
+              <Button
+                icon={<MdDriveFolderUpload />}
+                inverted
+                tooltipLabel="copy references from selected statement"
+                onClick={() => console.log("copy from selected statement")}
+              />
+            </ButtonGroup>
           </StyledEditorSectionHeader>
           <StyledEditorSectionContent>
             <EntityReferenceTable
