@@ -30,6 +30,8 @@ import {
   CProp,
   CStatementActant,
   CStatementAction,
+  DStatementActants,
+  DStatementActions,
   DStatementReferences,
 } from "constructors";
 import { useSearchParams } from "hooks";
@@ -65,6 +67,7 @@ import {
 import { StatementEditorActantTable } from "./StatementEditorActantTable/StatementEditorActantTable";
 import { StatementEditorActionTable } from "./StatementEditorActionTable/StatementEditorActionTable";
 import { StatementEditorOrdering } from "./StatementEditorOrdering/StatementEditorOrdering";
+import { v4 as uuidv4 } from "uuid";
 
 interface StatementEditor {
   statement: IResponseStatement;
@@ -492,15 +495,19 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     if (previousStatement) {
       switch (section) {
         case "actions":
-          console.log(previousStatement.data.actions);
           updateStatementDataMutation.mutate({
-            actions: [...previousStatement.data.actions],
+            actions: [
+              ...statement.data.actions,
+              ...DStatementActions(previousStatement.data.actions),
+            ],
           });
           return;
         case "actants":
-          console.log(previousStatement.data.actants);
           updateStatementDataMutation.mutate({
-            actants: [...previousStatement.data.actants],
+            actants: [
+              ...statement.data.actants,
+              ...DStatementActants(previousStatement.data.actants),
+            ],
           });
           return;
         case "references":
@@ -538,7 +545,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         icon={<MdDriveFolderUpload />}
         inverted
         color="info"
-        tooltipLabel={`copy ${section} from selected statement`}
+        tooltipLabel={`copy ${section} from the selected statement`}
         onClick={() => console.log("copy from selected statement")}
       />
       <Button
