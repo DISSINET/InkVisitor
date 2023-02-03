@@ -308,6 +308,23 @@ class Statement extends Entity implements IStatement {
       return true;
     }
 
+    if (this.data.territory) {
+
+      const closestRight = treeCache.getRightForTerritory(
+        this.data.territory.territoryId,
+        user.rights
+      );
+      // user right cannot be obtained/derived - false
+      if (!closestRight) {
+        return false;
+      }
+
+      return (
+        closestRight.mode === UserEnums.RoleMode.Admin ||
+        closestRight.mode === UserEnums.RoleMode.Write
+      );
+    }
+
     return false;
   }
 
