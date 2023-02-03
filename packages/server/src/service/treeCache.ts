@@ -223,7 +223,6 @@ export class TreeCache {
   }
 
   /**
-   * DEPRECATED - does not make much sense anyway.
    * Attemts to find closest right for child subtrees.
    * This method uses leftmost tree search.
    * @param terId 
@@ -271,14 +270,23 @@ export class TreeCache {
     terId: string,
     rights: UserRight[]
   ): UserRight | undefined {
+    // exact match - territory matches to user right
     const exactRight = rights.find((r) => r.territory === terId);
     if (exactRight) {
       return exactRight;
     }
 
-    const derivedRight = this.findRightInParentTerritory(terId, rights);
+    // first parent in the way up to root T should be used
+    let derivedRight = this.findRightInParentTerritory(terId, rights);
     if (derivedRight) {
       return derivedRight;
+    }
+
+    // searching for right derived from some child territory 
+    derivedRight = this.findRightInChildTerritory(terId, rights);
+    if (derivedRight) {
+      // if the right is found - it must be changed to VIEW right
+      return new UserRight({ mode: UserEnums.RoleMode.Read, territory: derivedRight.territory });
     }
 
     return undefined;
