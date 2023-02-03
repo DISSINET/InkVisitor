@@ -490,7 +490,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   };
 
   const handleCopyPreviousStatement = (
-    section: "actions" | "actants" | "references" | "tags"
+    section: "actions" | "actants" | "references"
   ) => {
     if (previousStatement) {
       switch (section) {
@@ -516,22 +516,12 @@ export const StatementEditor: React.FC<StatementEditor> = ({
           );
           updateStatementMutation.mutate({ references: copiedReferences });
           return;
-        case "tags":
-          const mergedTags = [
-            ...statement.data.tags,
-            ...previousStatement.data.tags,
-          ];
-          const uniqueTags = [...new Set(mergedTags)];
-          updateStatementDataMutation.mutate({
-            tags: uniqueTags,
-          });
-          return;
       }
     }
   };
 
   const renderSectionButtons = (
-    section: "actions" | "actants" | "references" | "tags"
+    section: "actions" | "actants" | "references"
   ) => (
     <ButtonGroup>
       <Button
@@ -788,7 +778,6 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         <StyledEditorSection key="editor-section-tags">
           <StyledEditorSectionHeader>
             <StyledEditorSectionHeading>Tags</StyledEditorSectionHeading>
-            {renderSectionButtons("tags")}
           </StyledEditorSectionHeader>
 
           <StyledEditorSectionContent>
