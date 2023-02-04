@@ -16,17 +16,10 @@ describe("Tree moveTerritory", function () {
     await db.initDb();
   });
 
-  afterEach(async () => {
-    // await deleteEntities(db);
-    // await deleteAudits(db);
-    // await deleteRelations(db);
-  });
-
   afterAll(async () => {
-    //await clean(db);
+    await clean(db);
   });
 
-  /*
   describe("Move T1 after T2", () => {
     const randSuffix = "tree-moveTerritory-" + Math.random().toString();
     let t1: ITerritory, t2: ITerritory, t1_1: ITerritory, t1_2: ITerritory;
@@ -64,7 +57,13 @@ describe("Tree moveTerritory", function () {
 
       return done();
     });
-  });*/
+
+    afterAll(async () => {
+      await deleteEntities(db);
+      await deleteAudits(db);
+      await deleteRelations(db);;
+    });
+  });
 
   describe("Move T1-1 under T2", () => {
     const randSuffix = "tree-moveTerritory-" + Math.random().toString();
@@ -118,5 +117,12 @@ describe("Tree moveTerritory", function () {
 
       return done();
     });
+
+    afterAll(async () => {
+      await deleteEntities(db);
+      await deleteAudits(db);
+      await deleteRelations(db);;
+    });
   });
+
 });

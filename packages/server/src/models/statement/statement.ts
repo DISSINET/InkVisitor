@@ -4,7 +4,6 @@ import {
   IStatementActant,
   IStatementAction,
   IReference,
-  IProp,
 } from "@shared/types";
 import {
   fillFlatObject,
@@ -24,7 +23,7 @@ import Prop from "@models/prop/prop";
 import {
   IStatementClassification,
   IStatementDataTerritory,
-  IStatementIdentification,
+  ROOT_TERRITORY_ID,
   StatementObject,
 } from "@shared/types/statement";
 
@@ -193,6 +192,14 @@ export class StatementData implements IStatementData, IModel {
   }
 
   /**
+   * Returns assigned territory id or undefined if no territory set
+   * @returns string | undefined
+   */
+  getTerritoryId(): string | undefined {
+    return this.territory ? this.territory.territoryId : undefined;
+  }
+
+  /**
    * predicate for valid data content
    * @returns boolean result
    */
@@ -232,18 +239,24 @@ class Statement extends Entity implements IStatement {
     return super.isValid() && this.data.isValid();
   }
 
+  /**
+   * Predicate for testing if the user can edit the statement entry
+   * @param user 
+   * @returns boolean representing the access
+   */
   canBeEditedByUser(user: User): boolean {
     // admin role has always the right
     if (user.role === UserEnums.Role.Admin) {
       return true;
     }
 
+    // only editor should continue
+    if (user.role !== UserEnums.Role.Editor) {
+      return false;
+    }
+
     // editors should be able to access META statements
-    if (
-      user.role === UserEnums.Role.Editor &&
-      this.data.territory &&
-      this.data.territory.territoryId === "T0"
-    ) {
+    if (this.data.getTerritoryId() === ROOT_TERRITORY_ID) {
       return true;
     }
 
@@ -252,37 +265,74 @@ class Statement extends Entity implements IStatement {
         this.data.territory.territoryId,
         user.rights
       );
+
+      // user right cannot be obtained/derived - false
       if (!closestRight) {
         return false;
       }
+
       return (
         closestRight.mode === UserEnums.RoleMode.Admin ||
         closestRight.mode === UserEnums.RoleMode.Write
       );
     }
-    return true;
+
+    return false;
   }
 
+  /**
+   * Predicate for testing if the user can at least view statement 
+   * @param user 
+   * @returns boolean representing the access
+   */
   canBeViewedByUser(user: User): boolean {
     // admin role has always the right
     if (user.role === UserEnums.Role.Admin) {
       return true;
     }
 
+    // draft or meta statement - always can be viewed
+    if (!this.data.territory || this.data.territory.territoryId === ROOT_TERRITORY_ID) {
+      return true;
+    }
+
+    // any right entry will suffice
+    return !!treeCache.getRightForTerritory(
+      this.data.territory.territoryId,
+      user.rights
+    );
+  }
+
+  /**
+   * Predicate for testing if the user can remove the statement from db
+   * @param user 
+   * @returns boolean representing the access
+   */
+  canBeDeletedByUser(user: User): boolean {
+    // only admin has the right, no matter the territory
+    if (user.role === UserEnums.Role.Admin) {
+      return true;
+    }
+
+    // only editor should continue
+    if (user.role !== UserEnums.Role.Editor) {
+      return false;
+    }
+
     if (this.data.territory) {
-      return !!treeCache.getRightForTerritory(
+      const closestRight = treeCache.getRightForTerritory(
         this.data.territory.territoryId,
         user.rights
       );
-    } else {
-      return true;
-    }
-  }
+      // user right cannot be obtained/derived - false
+      if (!closestRight) {
+        return false;
+      }
 
-  canBeDeletedByUser(user: User): boolean {
-    // admin role has always the right
-    if (user.role === UserEnums.Role.Admin) {
-      return true;
+      return (
+        closestRight.mode === UserEnums.RoleMode.Admin ||
+        closestRight.mode === UserEnums.RoleMode.Write
+      );
     }
 
     return false;
@@ -353,7 +403,7 @@ class Statement extends Entity implements IStatement {
     await treeCache.initialize();
 
     return result;
-  }
+  };
 
   /**
    * Finds statements that are stored under the same territory (while not being
@@ -523,14 +573,14 @@ class Statement extends Entity implements IStatement {
       .table(Entity.table)
       .getAll.apply(
         undefined,
-        (territoryIds as (string | { index: string })[]).concat({
+        (territoryIds as (string | { index: string; })[]).concat({
           index: DbEnums.Indexes.StatementTerritory,
         })
       )
       .run(db);
 
     return list.map((data) => new Statement(data));
-  }
+  };
 
   /**
    * getEntitiesIdsForMany wrapped in foreach cycle
@@ -573,7 +623,7 @@ class Statement extends Entity implements IStatement {
     return statements.sort((a, b) => {
       return a.data.territory.order - b.data.territory.order;
     });
-  }
+  };
 
   /**
    * finds statements which are linked to different entity
@@ -600,7 +650,7 @@ class Statement extends Entity implements IStatement {
         return a.data.territory.order - b.data.territory.order;
       }
     });
-  }
+  };
 
   /**
    * finds statements that are using provided entityId in their
@@ -617,7 +667,7 @@ class Statement extends Entity implements IStatement {
       .table(Entity.table)
       .getAll(entityId, { index: DbEnums.Indexes.StatementActantsCI })
       .run(db);
-  }
+  };
 
   /**
    * reduces findByDataEntityId results to list of ids
