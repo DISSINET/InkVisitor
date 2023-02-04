@@ -1,6 +1,8 @@
 import { IEntity, IProp } from "./";
 import { EntityEnums } from "../enums";
 
+export const ROOT_TERRITORY_ID = "T0";
+
 export interface IStatement extends IEntity {
   class: EntityEnums.Class.Statement;
   data: IStatementData;

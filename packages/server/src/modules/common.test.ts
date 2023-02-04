@@ -128,7 +128,6 @@ export async function createMockTree(
   const out: Territory[] = [
     new Territory({
       id: `root-${randSuffix}`,
-      isTemplate: true, // so it is saved
     }),
     new Territory({
       id: `T1-${randSuffix}`,
@@ -144,6 +143,15 @@ export async function createMockTree(
       data: {
         parent: {
           territoryId: `T1-${randSuffix}`,
+          order: 0,
+        },
+      },
+    }),
+    new Territory({
+      id: `T1-1-1-${randSuffix}`,
+      data: {
+        parent: {
+          territoryId: `T1-1-${randSuffix}`,
           order: 0,
         },
       },

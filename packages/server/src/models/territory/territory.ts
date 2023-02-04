@@ -7,6 +7,7 @@ import { InternalServerError, InvalidDeleteError } from "@shared/types/errors";
 import User from "@models/user/user";
 import treeCache from "@service/treeCache";
 import { nonenumerable } from "@common/decorators";
+import { ROOT_TERRITORY_ID } from "@shared/types/statement";
 
 export class TerritoryParent implements IParentTerritory, IModel {
   territoryId: string;
@@ -80,7 +81,7 @@ class Territory extends Entity implements ITerritory {
 
       const wantedOrder = this.data.parent.order;
       this.data.parent.order = determineOrder(wantedOrder, childs);
-    } else if (this.id !== "T0" && !this.isTemplate) {
+    } else if (this.id !== "T0" && this.id.indexOf("root") !== 0 && !this.isTemplate) {
       return {
         deleted: 0,
         first_error: "cannot create territory without a parent",
@@ -189,6 +190,11 @@ class Territory extends Entity implements ITerritory {
       return true;
     }
 
+    // root territory - always can be viewed
+    if (this.id === ROOT_TERRITORY_ID) {
+      return true;
+    }
+
     return !!treeCache.getRightForTerritory(this.id, user.rights);
   }
 
@@ -198,8 +204,12 @@ class Territory extends Entity implements ITerritory {
       return true;
     }
 
-    const closestRight = treeCache.getRightForTerritory(this.id, user.rights);
+    // only editor should continue
+    if (user.role !== UserEnums.Role.Editor) {
+      return false;
+    }
 
+    const closestRight = treeCache.getRightForTerritory(this.id, user.rights);
     if (!closestRight) {
       return false;
     }
@@ -211,13 +221,18 @@ class Territory extends Entity implements ITerritory {
   }
 
   canBeCreatedByUser(user: User): boolean {
-    // in case of create - no id provided yet
-    if (!this.id) {
+    // admin role has always the right
+    if (user.role === UserEnums.Role.Admin) {
       return true;
     }
 
-    // admin role has always the right
-    if (user.role === UserEnums.Role.Admin) {
+    // only editor should continue
+    if (user.role !== UserEnums.Role.Editor) {
+      return false;
+    }
+
+    // in case of create - no id provided yet
+    if (!this.id) {
       return true;
     }
 

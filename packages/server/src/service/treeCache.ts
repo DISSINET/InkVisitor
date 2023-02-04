@@ -141,7 +141,7 @@ export class TreeCreator {
   }
 }
 
-class TreeCache {
+export class TreeCache {
   tree: TreeCreator;
 
   constructor() {
@@ -152,10 +152,16 @@ class TreeCache {
     if (process.env.NODE_ENV === "test") {
       return;
     }
-    const newTree = new TreeCreator();
 
     const db = new Db();
     await db.initDb();
+
+    this.tree = await this.createTree(db);
+    console.log("[TreeCache.initialize]: done");
+  }
+
+  async createTree(db: Db): Promise<TreeCreator> {
+    const newTree = new TreeCreator();
 
     const [territoriesData, statementsCountMap] = await Promise.all([
       getEntitiesDataByClass<ITerritory>(db, EntityEnums.Class.Territory),
@@ -172,8 +178,7 @@ class TreeCache {
 
     newTree.populateTree(newTree.getRootTerritory(), 0, []);
 
-    this.tree = newTree;
-    console.log("[TreeCache.initialize]: done");
+    return newTree;
   }
 
   forUser(user: User): IResponseTree {
@@ -217,6 +222,13 @@ class TreeCache {
     return undefined;
   }
 
+  /**
+   * Attemts to find closest right for child subtrees.
+   * This method uses leftmost tree search.
+   * @param terId 
+   * @param rights 
+   * @returns 
+   */
   findRightInChildTerritory(
     terId: string,
     rights: UserRight[]
@@ -248,23 +260,33 @@ class TreeCache {
     return undefined;
   }
 
+  /**
+   * Attempts to find closest right applicable to territory
+   * @param terId 
+   * @param rights 
+   * @returns 
+   */
   getRightForTerritory(
     terId: string,
     rights: UserRight[]
   ): UserRight | undefined {
+    // exact match - territory matches to user right
     const exactRight = rights.find((r) => r.territory === terId);
     if (exactRight) {
       return exactRight;
     }
 
+    // first parent in the way up to root T should be used
     let derivedRight = this.findRightInParentTerritory(terId, rights);
     if (derivedRight) {
       return derivedRight;
     }
 
+    // searching for right derived from some child territory 
     derivedRight = this.findRightInChildTerritory(terId, rights);
     if (derivedRight) {
-      return derivedRight;
+      // if the right is found - it must be changed to VIEW right
+      return new UserRight({ mode: UserEnums.RoleMode.Read, territory: derivedRight.territory });
     }
 
     return undefined;

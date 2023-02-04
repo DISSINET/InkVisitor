@@ -328,10 +328,7 @@ export default Router()
       }
 
       // get correct IDbModel implementation
-      const model = getEntityClass({
-        class: existingEntity.class,
-        id: entityId,
-      });
+      const model = getEntityClass(existingEntity);
 
       if (!model.canBeDeletedByUser(request.getUserOrFail())) {
         throw new PermissionDeniedError(
