@@ -148,6 +148,15 @@ export async function createMockTree(
       },
     }),
     new Territory({
+      id: `T1-1-1-${randSuffix}`,
+      data: {
+        parent: {
+          territoryId: `T1-1-${randSuffix}`,
+          order: 0,
+        },
+      },
+    }),
+    new Territory({
       id: `T1-2-${randSuffix}`,
       data: {
         parent: {
