@@ -1,0 +1,109 @@
+name: deploy-master
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  production-build:
+    name: Build the production docker image
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout InkVisitor
+        uses: actions/checkout@v2
+
+      - name: Create env file for client
+        run: |
+          touch packages/client/env/.env.staging
+          echo "$CLIENT_ENV" >> packages/client/env/.env.staging
+        env:
+          CLIENT_ENV: ${{secrets.CLIENT_ENV_PRODUCTION}}
+
+      - name: Generate certificates
+        run: |
+          mkdir -p ./packages/server/secret
+          openssl req -x509 -newkey rsa:2048 -nodes -out ./packages/server/secret/cert.pem -keyout ./packages/server/secret/key.pem -days 365 -subj "/C=FR/O=krkr/OU=Domain Control Validated/CN=*"
+
+      # Pull the latest image to build, and avoid caching pull-only images.
+      # (docker pull is faster than caching in most cases.)
+      - run: docker-compose pull
+
+      - name: Run docker build task
+        run: docker-compose build inkvisitor-production
+
+      - name: Save docker-compose stack
+        run: docker save inkvisitor:production | gzip > inkvisitor-production.tar.gz
+
+      - name: Cache image.tar
+        uses: actions/cache@v2
+        with:
+          path: inkvisitor-production.tar.gz
+          key: inkvisitor-production-${{ github.sha }}.tar.gz
+
+  deploy:
+    needs: [production-build]
+    name: Deploy to production environment
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout InkVisitor
+        uses: actions/checkout@v2
+
+      - name: Restore cache
+        uses: actions/cache@v2
+        with:
+          path: inkvisitor-production.tar.gz
+          key: inkvisitor-production-${{ github.sha }}.tar.gz
+
+      - name: Install SSH Key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          known_hosts: ${{ secrets.KNOWN_HOSTS }}
+
+      - name: Create env file for server
+        run: |
+          touch packages/server/env/.env.production
+          echo "$SERVER_ENV" >> packages/server/env/.env.production
+        env:
+          SERVER_ENV: ${{secrets.SERVER_ENV_PRODUCTION}}
+
+      - name: Update packages
+        run: |
+          sudo apt-get update
+
+      - name: Install OpenVPN
+        run: |
+          sudo apt install -y openvpn openvpn-systemd-resolved
+
+      - name: Prepare OpenVPN creds file
+        run: |
+          touch pass.txt
+          echo ${{ secrets.VPN_USER }} >> pass.txt
+          echo ${{ secrets.VPN_PASS }} >> pass.txt
+
+      - name: Pull OpenVPN Config
+        run: curl https://it.muni.cz/media/3404274/muni-main-linux.ovpn -o muni-linux.ovpn
+
+      - name: Connect to VPN and deploy
+        run: sudo openvpn --config muni-linux.ovpn --auth-user-pass pass.txt --daemon
+
+      - name: Wait for a VPN connection
+        timeout-minutes: 2
+        run: until ping -w 2 ${{ secrets.SSH_HOST }}; do sleep 2; done
+
+      - name: Upload image production
+        run: scp inkvisitor-production.tar.gz ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/var/www/html/apps
+
+      - name: Load image
+        run: |
+          ssh -tt ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}  -- "sh -c '
+          podman container prune -f &&
+          podman image prune -f &&
+          rm -rf /var/tmp/docker-tar* &&
+          podman rm inkvisitor-production --force || true && 
+          podman load -i /var/www/html/apps/inkvisitor-production.tar.gz && 
+          podman-compose -f /var/www/html/apps/docker-compose.yml up -d inkvisitor-production
+          '"
