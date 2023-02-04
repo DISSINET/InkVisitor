@@ -250,8 +250,13 @@ class Statement extends Entity implements IStatement {
       return true;
     }
 
+    // only editor should continue
+    if (user.role !== UserEnums.Role.Editor) {
+      return false;
+    }
+
     // editors should be able to access META statements
-    if (user.role === UserEnums.Role.Editor && this.data.getTerritoryId() === ROOT_TERRITORY_ID) {
+    if (this.data.getTerritoryId() === ROOT_TERRITORY_ID) {
       return true;
     }
 
@@ -260,6 +265,7 @@ class Statement extends Entity implements IStatement {
         this.data.territory.territoryId,
         user.rights
       );
+
       // user right cannot be obtained/derived - false
       if (!closestRight) {
         return false;
@@ -308,8 +314,12 @@ class Statement extends Entity implements IStatement {
       return true;
     }
 
-    if (this.data.territory) {
+    // only editor should continue
+    if (user.role !== UserEnums.Role.Editor) {
+      return false;
+    }
 
+    if (this.data.territory) {
       const closestRight = treeCache.getRightForTerritory(
         this.data.territory.territoryId,
         user.rights
