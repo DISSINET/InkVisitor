@@ -1,5 +1,7 @@
-import { IResponseStatement } from "@shared/types";
+import { EntityEnums } from "@shared/enums";
+import { IEntity, IResponseStatement, IStatement } from "@shared/types";
 import { ButtonGroup, Button, Checkbox } from "components";
+import { EntitySuggester } from "components/advanced";
 import {
   DStatementActions,
   DStatementActants,
@@ -33,44 +35,42 @@ export const StatementEditorSectionButtons: React.FC<
 }) => {
   const [replaceSection, setReplaceSection] = useState(false);
 
-  const handleCopyPreviousStatement = (
+  const handleCopyFromStatement = (
+    selectedStatement: IResponseStatement | IStatement | false,
     section: "actions" | "actants" | "references",
     replaceSection: boolean
   ) => {
-    if (previousStatement) {
+    if (selectedStatement) {
       switch (section) {
         case "actions":
           const newActions = replaceSection
-            ? [...DStatementActions(previousStatement.data.actions)]
+            ? [...DStatementActions(selectedStatement.data.actions)]
             : [
                 ...statement.data.actions,
-                ...DStatementActions(previousStatement.data.actions),
+                ...DStatementActions(selectedStatement.data.actions),
               ];
-
           updateStatementDataMutation.mutate({
             actions: newActions,
           });
           return;
         case "actants":
           const newActants = replaceSection
-            ? [...DStatementActants(previousStatement.data.actants)]
+            ? [...DStatementActants(selectedStatement.data.actants)]
             : [
                 ...statement.data.actants,
-                ...DStatementActants(previousStatement.data.actants),
+                ...DStatementActants(selectedStatement.data.actants),
               ];
-
           updateStatementDataMutation.mutate({
             actants: newActants,
           });
           return;
         case "references":
           const newReferences = replaceSection
-            ? [...DStatementReferences(previousStatement.references)]
+            ? [...DStatementReferences(selectedStatement.references)]
             : [
                 ...statement.references,
-                ...DStatementReferences(previousStatement.references),
+                ...DStatementReferences(selectedStatement.references),
               ];
-
           updateStatementMutation.mutate({ references: newReferences });
           return;
       }
@@ -78,39 +78,52 @@ export const StatementEditorSectionButtons: React.FC<
   };
 
   return (
-    <ButtonGroup height={19}>
-      <Button
-        icon={<MdDriveFileMove />}
-        disabled={!previousStatement}
-        tooltipLabel={`copy ${section} from the previous statement`}
-        inverted
-        onClick={() => handleCopyPreviousStatement(section, replaceSection)}
-      />
-      <Button
-        icon={<MdDriveFolderUpload />}
-        inverted
-        color="info"
-        tooltipLabel={`copy ${section} from the selected statement`}
-        onClick={() => console.log("copy from selected statement")}
-      />
-      <Button
-        icon={<HiOutlineFolderRemove />}
-        inverted
-        color="danger"
-        tooltipLabel={`remove all ${section} from statement`}
-        onClick={() => {
-          if (section === "references") {
-            updateStatementMutation.mutate({ references: [] });
-          } else {
-            updateStatementDataMutation.mutate({ [section]: [] });
+    <>
+      <ButtonGroup height={19}>
+        <Button
+          icon={<MdDriveFileMove />}
+          disabled={!previousStatement}
+          tooltipLabel={`copy ${section} from the previous statement`}
+          inverted
+          onClick={() =>
+            handleCopyFromStatement(previousStatement, section, replaceSection)
           }
-        }}
+        />
+        {/* <Button
+          icon={<MdDriveFolderUpload />}
+          inverted
+          color="info"
+          tooltipLabel={`copy ${section} from the selected statement`}
+          onClick={() => console.log("copy from selected statement")}
+        /> */}
+        <Button
+          icon={<HiOutlineFolderRemove />}
+          inverted
+          color="danger"
+          tooltipLabel={`remove all ${section} from statement`}
+          onClick={() => {
+            if (section === "references") {
+              updateStatementMutation.mutate({ references: [] });
+            } else {
+              updateStatementDataMutation.mutate({ [section]: [] });
+            }
+          }}
+        />
+        <Checkbox
+          label="replace"
+          value={replaceSection}
+          onChangeFn={(checked: boolean) => setReplaceSection(checked)}
+        />
+      </ButtonGroup>
+      <EntitySuggester
+        categoryTypes={[EntityEnums.Class.Statement]}
+        onSelected={(id: string) => console.log(id)}
+        onPicked={(entity: IEntity) =>
+          handleCopyFromStatement(entity as IStatement, section, replaceSection)
+        }
+        excludedActantIds={[statement.id]}
+        disableCreate
       />
-      <Checkbox
-        label="replace"
-        value={replaceSection}
-        onChangeFn={(checked: boolean) => setReplaceSection(checked)}
-      />
-    </ButtonGroup>
+    </>
   );
 };
