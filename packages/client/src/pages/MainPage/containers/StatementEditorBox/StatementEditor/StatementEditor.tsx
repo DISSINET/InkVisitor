@@ -69,6 +69,7 @@ import { StatementEditorActantTable } from "./StatementEditorActantTable/Stateme
 import { StatementEditorActionTable } from "./StatementEditorActionTable/StatementEditorActionTable";
 import { StatementEditorOrdering } from "./StatementEditorOrdering/StatementEditorOrdering";
 import { v4 as uuidv4 } from "uuid";
+import { StatementEditorSectionButtons } from "./StatementEditorSectionButtons/StatementEditorSectionButtons";
 
 interface StatementEditor {
   statement: IResponseStatement;
@@ -490,100 +491,6 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     }
   };
 
-  const handleCopyPreviousStatement = (
-    section: "actions" | "actants" | "references",
-    replaceSection: boolean
-  ) => {
-    if (previousStatement) {
-      switch (section) {
-        case "actions":
-          const newActions = replaceSection
-            ? [...DStatementActions(previousStatement.data.actions)]
-            : [
-                ...statement.data.actions,
-                ...DStatementActions(previousStatement.data.actions),
-              ];
-          updateStatementDataMutation.mutate({
-            actions: newActions,
-          });
-          return;
-        case "actants":
-          const newActants = replaceSection
-            ? [...DStatementActants(previousStatement.data.actants)]
-            : [
-                ...statement.data.actants,
-                ...DStatementActants(previousStatement.data.actants),
-              ];
-
-          updateStatementDataMutation.mutate({
-            actants: newActants,
-          });
-          return;
-        case "references":
-          const newReferences = replaceSection
-            ? [...DStatementReferences(previousStatement.references)]
-            : [
-                ...statement.references,
-                ...DStatementReferences(previousStatement.references),
-              ];
-
-          updateStatementMutation.mutate({ references: newReferences });
-          return;
-      }
-    }
-  };
-
-  const [replaceSection, setReplaceSection] = useState({
-    actions: false,
-    actants: false,
-    references: false,
-  });
-
-  const renderSectionButtons = (
-    section: "actions" | "actants" | "references"
-  ) => {
-    return (
-      <ButtonGroup>
-        <Button
-          icon={<MdDriveFileMove />}
-          disabled={!previousStatement}
-          tooltipLabel={`copy ${section} from the previous statement`}
-          inverted
-          onClick={() =>
-            handleCopyPreviousStatement(section, replaceSection[section])
-          }
-        />
-        <Button
-          icon={<MdDriveFolderUpload />}
-          inverted
-          color="info"
-          tooltipLabel={`copy ${section} from the selected statement`}
-          onClick={() => console.log("copy from selected statement")}
-        />
-        <Button
-          icon={<HiOutlineFolderRemove />}
-          inverted
-          color="danger"
-          tooltipLabel={`remove all ${section} from statement`}
-          onClick={() => {
-            if (section === "references") {
-              updateStatementMutation.mutate({ references: [] });
-            } else {
-              updateStatementDataMutation.mutate({ [section]: [] });
-            }
-          }}
-        />
-        <Checkbox
-          label="replace"
-          value={replaceSection[section]}
-          onChangeFn={(checked: boolean) =>
-            setReplaceSection({ ...replaceSection, [section]: checked })
-          }
-        />
-      </ButtonGroup>
-    );
-  };
-
   return (
     <>
       <div style={{ marginBottom: "4rem" }} key={statement.id}>
@@ -696,7 +603,14 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         <StyledEditorSection metaSection key="editor-section-actions">
           <StyledEditorSectionHeader>
             <StyledEditorSectionHeading>Actions</StyledEditorSectionHeading>
-            {renderSectionButtons("actions")}
+
+            <StatementEditorSectionButtons
+              section="actions"
+              statement={statement}
+              previousStatement={previousStatement}
+              updateStatementMutation={updateStatementMutation}
+              updateStatementDataMutation={updateStatementDataMutation}
+            />
           </StyledEditorSectionHeader>
           <StyledEditorSectionContent>
             <StyledEditorActantTableWrapper>
@@ -734,7 +648,14 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         <StyledEditorSection metaSection key="editor-section-actants">
           <StyledEditorSectionHeader>
             <StyledEditorSectionHeading>Actants</StyledEditorSectionHeading>
-            {renderSectionButtons("actants")}
+
+            <StatementEditorSectionButtons
+              section="actants"
+              statement={statement}
+              previousStatement={previousStatement}
+              updateStatementMutation={updateStatementMutation}
+              updateStatementDataMutation={updateStatementDataMutation}
+            />
           </StyledEditorSectionHeader>
           <StyledEditorSectionContent>
             <StyledEditorActantTableWrapper>
@@ -788,7 +709,14 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         <StyledEditorSection key="editor-section-refs">
           <StyledEditorSectionHeader>
             <StyledEditorSectionHeading>References</StyledEditorSectionHeading>
-            {renderSectionButtons("references")}
+
+            <StatementEditorSectionButtons
+              section="references"
+              statement={statement}
+              previousStatement={previousStatement}
+              updateStatementMutation={updateStatementMutation}
+              updateStatementDataMutation={updateStatementDataMutation}
+            />
           </StyledEditorSectionHeader>
           <StyledEditorSectionContent>
             <EntityReferenceTable
