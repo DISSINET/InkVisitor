@@ -5,7 +5,7 @@ import { Relation } from "../../shared/types/relation";
 import { r, RConnectionOptions, Connection } from "rethinkdb-ts";
 import tunnel from "tunnel-ssh";
 import { Server } from "net";
-import readline from "readline";
+import { confirm } from './import/prompts';
 import {
   parseArgs,
   prepareDbConnection,
@@ -15,6 +15,7 @@ import {
 } from "./import-utils";
 import { auditsIndexes, entitiesIndexes, relationsIndexes } from "./indexes";
 import { EntityEnums } from "@shared/enums";
+import { question } from "./import/prompts";
 
 const [datasetId, env] = parseArgs();
 const envData = require("dotenv").config({ path: `env/.env.${env}` }).parsed;
@@ -38,12 +39,12 @@ const datasets: Record<string, DbSchema> = {
     aclPermissions: {
       tableName: "acl_permissions",
       data: require("../datasets/default/acl_permissions.json"),
-      transform: function () {},
+      transform: function () { },
     },
     entities: {
       tableName: "entities",
       data: require("../datasets/all/entities.json"),
-      transform: function () {},
+      transform: function () { },
       indexes: entitiesIndexes,
     },
     audits: {
@@ -85,12 +86,12 @@ const datasets: Record<string, DbSchema> = {
     aclPermissions: {
       tableName: "acl_permissions",
       data: require("../datasets/default/acl_permissions.json"),
-      transform: function () {},
+      transform: function () { },
     },
     entities: {
       tableName: "entities",
       data: require("../datasets/empty/entities.json"),
-      transform: function () {},
+      transform: function () { },
       indexes: entitiesIndexes,
     },
     audits: {
@@ -107,7 +108,7 @@ const datasets: Record<string, DbSchema> = {
     relations: {
       tableName: "relations",
       data: require("../datasets/empty/relations.json"),
-      transform: function () {},
+      transform: function () { },
       indexes: relationsIndexes,
     },
   },
@@ -125,12 +126,12 @@ const datasets: Record<string, DbSchema> = {
     aclPermissions: {
       tableName: "acl_permissions",
       data: require("../datasets/default/acl_permissions.json"),
-      transform: function () {},
+      transform: function () { },
     },
     entities: {
       tableName: "entities",
       data: require("../datasets/all-parsed/entities.json"),
-      transform: function () {},
+      transform: function () { },
       indexes: entitiesIndexes,
     },
     audits: {
@@ -181,12 +182,12 @@ const datasets: Record<string, DbSchema> = {
     aclPermissions: {
       tableName: "acl_permissions",
       data: require("../datasets/default/acl_permissions.json"),
-      transform: function () {},
+      transform: function () { },
     },
     entities: {
       tableName: "entities",
       data: require("../datasets/relationstest/entities.json"),
-      transform: function () {},
+      transform: function () { },
       indexes: entitiesIndexes,
     },
     audits: {
@@ -223,7 +224,7 @@ const datasets: Record<string, DbSchema> = {
   },
 };
 
-const config: RConnectionOptions & { tables: DbSchema } = {
+const config: RConnectionOptions & { tables: DbSchema; } = {
   timeout: 5,
   db: envData.DB_NAME,
   host: envData.DB_HOST,
@@ -256,71 +257,49 @@ const importTable = async (
 };
 
 const importData = async () => {
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
+  if (!await confirm(`Using db ${config.db}. Continue?`)) {
+    return;
+  }
 
-  return new Promise((resolve, reject) => {
-    rl.question(`Using db ${config.db}. Continue? y/n\n`, async (result) => {
-      rl.close();
+  const conn = await prepareDbConnection(config);
 
-      if (result.toLowerCase() !== "y") {
-        return resolve(undefined);
-      }
+  console.log(`***importing dataset ${datasetId}***\n`);
 
-      const conn = await prepareDbConnection(config);
+  for (const tableConfig of Object.values(config.tables)) {
+    await importTable(tableConfig, conn);
+  }
 
-      console.log(`***importing dataset ${datasetId}***\n`);
-
-      for (const tableConfig of Object.values(config.tables)) {
-        await importTable(tableConfig, conn);
-      }
-
-      console.log("Closing connection");
-      await conn.close({ noreplyWait: true });
-
-      resolve(undefined);
-    });
-  });
+  console.log("Closing connection");
+  await conn.close({ noreplyWait: true });
 };
 
 (async () => {
   if (envData.SSH_USERNAME) {
-    const rl = readline.createInterface({
-      input: process.stdin,
-      output: process.stdout,
-    });
+    if (!await question(`Using the tunnel. Continue?`)) {
+      return;
+    }
 
-    rl.question("Using the tunnel. Continue? y/n\n", function (result) {
-      rl.close();
-
-      if (result.toLowerCase() !== "y") {
-        process.exit(0);
-      }
-
-      const tnl = tunnel(
-        {
-          host: envData.SSH_IP,
-          dstPort: 28015,
-          localPort: envData.DB_PORT,
-          username: envData.SSH_USERNAME,
-          password: envData.SSH_PASSWORD,
-        },
-        async (error: Error, srv: Server) => {
-          try {
-            await importData();
-          } catch (e) {
-            console.warn(`Encountered error in importData: ${e}`);
-          } finally {
-            await srv.close();
-          }
+    const tnl = tunnel(
+      {
+        host: envData.SSH_IP,
+        dstPort: 28015,
+        localPort: envData.DB_PORT,
+        username: envData.SSH_USERNAME,
+        password: envData.SSH_PASSWORD,
+      },
+      async (error: Error, srv: Server) => {
+        try {
+          await importData();
+        } catch (e) {
+          console.warn(`Encountered error in importData: ${e}`);
+        } finally {
+          await srv.close();
         }
-      );
+      }
+    );
 
-      tnl.on("error", function (err) {
-        console.error("SSH connection error:", err);
-      });
+    tnl.on("error", function (err) {
+      console.error("SSH connection error:", err);
     });
   } else {
     try {
