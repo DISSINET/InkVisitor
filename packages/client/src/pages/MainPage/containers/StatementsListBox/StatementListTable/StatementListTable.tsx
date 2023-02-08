@@ -8,7 +8,7 @@ import {
   IStatement,
 } from "@shared/types";
 import { AxiosResponse } from "axios";
-import { Button, ButtonGroup, TagGroup } from "components";
+import { Button, ButtonGroup, Checkbox, TagGroup } from "components";
 import { EntityTag } from "components/advanced";
 import update from "immutability-helper";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
@@ -87,6 +87,18 @@ export const StatementListTable: React.FC<StatementListTable> = ({
       {
         Header: "ID",
         accessor: "id",
+      },
+      {
+        Header: "",
+        id: "batchId",
+        Cell: ({ row }: Cell) => {
+          return (
+            <Checkbox
+              value={false}
+              onChangeFn={(value: boolean) => console.log(value)}
+            />
+          );
+        },
       },
       {
         Header: "",

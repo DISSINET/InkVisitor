@@ -132,16 +132,7 @@ export const StatementListRow: React.FC<StatementListRow> = ({
                 {lastEditdateText}
               </StyledTdLastEdit>
             );
-          } else if (
-            [
-              "Statement",
-              "Actions",
-              "Objects",
-              "data",
-              "Text",
-              "expander",
-            ].includes(cell.column.id)
-          ) {
+          } else {
             return (
               <StyledTd {...cell.getCellProps()}>
                 {cell.render("Cell")}
