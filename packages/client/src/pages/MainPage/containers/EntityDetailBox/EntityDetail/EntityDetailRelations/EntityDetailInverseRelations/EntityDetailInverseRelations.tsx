@@ -26,9 +26,13 @@ export const EntityDetailInverseRelations: React.FC<
     setFilteredRelationTypes(filteredTypes);
   }, [entity]);
 
+  const atLeastOneNonEmpty = filteredRelationTypes.some(
+    (type) => relations[type]?.iConnections!.length! > 0
+  );
+
   return (
     <>
-      {filteredRelationTypes.length > 0 && (
+      {filteredRelationTypes.length > 0 && atLeastOneNonEmpty && (
         <>
           <StyledDetailSectionHeader secondary>
             Inverse relations
