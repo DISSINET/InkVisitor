@@ -604,13 +604,15 @@ export const StatementEditor: React.FC<StatementEditor> = ({
           <StyledEditorSectionHeader>
             <StyledEditorSectionHeading>Actions</StyledEditorSectionHeading>
 
-            <StatementEditorSectionButtons
-              section="actions"
-              statement={statement}
-              previousStatement={previousStatement}
-              updateStatementMutation={updateStatementMutation}
-              updateStatementDataMutation={updateStatementDataMutation}
-            />
+            {userCanEdit && (
+              <StatementEditorSectionButtons
+                section="actions"
+                statement={statement}
+                previousStatement={previousStatement}
+                updateStatementMutation={updateStatementMutation}
+                updateStatementDataMutation={updateStatementDataMutation}
+              />
+            )}
           </StyledEditorSectionHeader>
           <StyledEditorSectionContent>
             <StyledEditorActantTableWrapper>
@@ -649,13 +651,15 @@ export const StatementEditor: React.FC<StatementEditor> = ({
           <StyledEditorSectionHeader>
             <StyledEditorSectionHeading>Actants</StyledEditorSectionHeading>
 
-            <StatementEditorSectionButtons
-              section="actants"
-              statement={statement}
-              previousStatement={previousStatement}
-              updateStatementMutation={updateStatementMutation}
-              updateStatementDataMutation={updateStatementDataMutation}
-            />
+            {userCanEdit && (
+              <StatementEditorSectionButtons
+                section="actants"
+                statement={statement}
+                previousStatement={previousStatement}
+                updateStatementMutation={updateStatementMutation}
+                updateStatementDataMutation={updateStatementDataMutation}
+              />
+            )}
           </StyledEditorSectionHeader>
           <StyledEditorSectionContent>
             <StyledEditorActantTableWrapper>
@@ -710,13 +714,15 @@ export const StatementEditor: React.FC<StatementEditor> = ({
           <StyledEditorSectionHeader>
             <StyledEditorSectionHeading>References</StyledEditorSectionHeading>
 
-            <StatementEditorSectionButtons
-              section="references"
-              statement={statement}
-              previousStatement={previousStatement}
-              updateStatementMutation={updateStatementMutation}
-              updateStatementDataMutation={updateStatementDataMutation}
-            />
+            {userCanEdit && (
+              <StatementEditorSectionButtons
+                section="references"
+                statement={statement}
+                previousStatement={previousStatement}
+                updateStatementMutation={updateStatementMutation}
+                updateStatementDataMutation={updateStatementDataMutation}
+              />
+            )}
           </StyledEditorSectionHeader>
           <StyledEditorSectionContent>
             <EntityReferenceTable

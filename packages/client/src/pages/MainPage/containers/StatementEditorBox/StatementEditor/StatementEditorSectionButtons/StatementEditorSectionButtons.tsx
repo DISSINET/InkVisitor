@@ -101,17 +101,16 @@ export const StatementEditorSectionButtons: React.FC<
           style={{ borderRight: "1px dashed black", marginLeft: "0.3rem" }}
         />
         <AttributeButtonGroup
-          // disabled={!userCanEdit}
           options={[
             {
               longValue: "append",
-              shortValue: "append",
+              shortValue: "a",
               onClick: () => setReplaceSection(false),
               selected: !replaceSection,
             },
             {
               longValue: "replace",
-              shortValue: "replace",
+              shortValue: "r",
               onClick: () => setReplaceSection(true),
               selected: replaceSection,
             },
@@ -119,7 +118,7 @@ export const StatementEditorSectionButtons: React.FC<
         />
         <Button
           icon={<FaClone />}
-          label="...from previous S"
+          label="previous S"
           disabled={!previousStatement}
           tooltipLabel={`copy ${section} from the previous statement`}
           inverted
@@ -136,7 +135,7 @@ export const StatementEditorSectionButtons: React.FC<
         }
         excludedActantIds={[statement.id]}
         disableCreate
-        placeholder="...from another S"
+        placeholder="another S"
       />
     </>
   );
