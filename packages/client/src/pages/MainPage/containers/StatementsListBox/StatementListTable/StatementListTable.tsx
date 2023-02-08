@@ -11,7 +11,13 @@ import { AxiosResponse } from "axios";
 import { Button, ButtonGroup, Checkbox, TagGroup } from "components";
 import { EntityTag } from "components/advanced";
 import update from "immutability-helper";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+  HTMLProps,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { BsArrowDown, BsArrowUp } from "react-icons/bs";
 import {
   FaChevronCircleDown,
@@ -21,7 +27,14 @@ import {
   FaTrashAlt,
 } from "react-icons/fa";
 import { UseMutationResult } from "react-query";
-import { Cell, Column, Row, useExpanded, useTable } from "react-table";
+import {
+  Cell,
+  Column,
+  Row,
+  useExpanded,
+  useRowSelect,
+  useTable,
+} from "react-table";
 import { setRowsExpanded } from "redux/features/statementList/rowsExpandedSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { StatementListContextMenu } from "../StatementListContextMenu/StatementListContextMenu";
@@ -87,18 +100,6 @@ export const StatementListTable: React.FC<StatementListTable> = ({
       {
         Header: "ID",
         accessor: "id",
-      },
-      {
-        Header: "",
-        id: "batchId",
-        Cell: ({ row }: Cell) => {
-          return (
-            <Checkbox
-              value={false}
-              onChangeFn={(value: boolean) => console.log(value)}
-            />
-          );
-        },
       },
       {
         Header: "",
@@ -302,6 +303,8 @@ export const StatementListTable: React.FC<StatementListTable> = ({
     rows,
     prepareRow,
     visibleColumns,
+    selectedFlatRows,
+    state: { selectedRowIds },
   } = useTable(
     {
       columns,
@@ -311,8 +314,36 @@ export const StatementListTable: React.FC<StatementListTable> = ({
         hiddenColumns: ["id"],
       },
     },
-    useExpanded
+    useExpanded,
+    useRowSelect,
+    (hooks) => {
+      hooks.visibleColumns.push((columns) => [
+        // Let's make a column for selection
+        {
+          id: "selection",
+          // The header can use the table's getToggleAllRowsSelectedProps method
+          // to render a checkbox
+          Header: ({ getToggleAllRowsSelectedProps }) => (
+            <div>
+              <IndeterminateCheckbox {...getToggleAllRowsSelectedProps()} />
+            </div>
+          ),
+          // The cell can use the individual row's getToggleRowSelectedProps method
+          // to the render a checkbox
+          Cell: ({ row }) => (
+            <div>
+              <IndeterminateCheckbox {...row.getToggleRowSelectedProps()} />
+            </div>
+          ),
+        },
+        ...columns,
+      ]);
+    }
   );
+
+  useEffect(() => {
+    console.log(selectedFlatRows.map((row) => row.original));
+  }, [selectedFlatRows]);
 
   const moveRow = useCallback(
     (dragIndex: number, hoverIndex: number) => {
@@ -402,3 +433,25 @@ export const StatementListTable: React.FC<StatementListTable> = ({
     </StyledTable>
   );
 };
+
+const IndeterminateCheckbox = React.forwardRef(
+  ({ indeterminate, ...rest }, ref) => {
+    const defaultRef = React.useRef();
+    const resolvedRef = ref || defaultRef;
+
+    React.useEffect(() => {
+      resolvedRef.current.indeterminate = indeterminate;
+    }, [resolvedRef, indeterminate]);
+
+    return (
+      <>
+        <input
+          onClick={(e) => e.stopPropagation()}
+          type="checkbox"
+          ref={resolvedRef}
+          {...rest}
+        />
+      </>
+    );
+  }
+);

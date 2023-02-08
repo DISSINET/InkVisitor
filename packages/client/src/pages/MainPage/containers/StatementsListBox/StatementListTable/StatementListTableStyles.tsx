@@ -45,9 +45,13 @@ export const StyledTr = styled.tr<StyledTr>`
     background-color: ${({ theme }) => theme.color["gray"][100]};
   }
 `;
-export const StyledTd = styled.td`
+interface StyledTd {
+  noPaddingLeft?: boolean;
+}
+export const StyledTd = styled.td<StyledTd>`
   padding: ${({ theme }) => theme.space[2]};
-  padding-left: ${({ theme }) => theme.space[4]};
+  padding-left: ${({ theme, noPaddingLeft }) =>
+    noPaddingLeft ? "" : theme.space[4]};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
 `;
 export const StyledTdLastEdit = styled(StyledTd)`
