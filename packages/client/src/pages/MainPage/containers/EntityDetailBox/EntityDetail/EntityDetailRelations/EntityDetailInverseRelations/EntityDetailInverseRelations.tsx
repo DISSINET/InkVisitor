@@ -39,7 +39,8 @@ export const EntityDetailInverseRelations: React.FC<
               const relationRule: Relation.RelationRule =
                 Relation.RelationRules[relationType]!;
 
-              if (!relationRule.asymmetrical) return;
+              if (!relationRule.asymmetrical || !selectedRelations?.length)
+                return;
 
               return (
                 <StyledInverseRelationRow key={key}>
