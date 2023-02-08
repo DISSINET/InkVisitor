@@ -1,16 +1,15 @@
 import { EntityEnums } from "@shared/enums";
 import { IEntity, IResponseStatement, IStatement } from "@shared/types";
-import { ButtonGroup, Button, Checkbox } from "components";
+import { Button, ButtonGroup } from "components";
 import { AttributeButtonGroup, EntitySuggester } from "components/advanced";
 import {
-  DStatementActions,
   DStatementActants,
+  DStatementActions,
   DStatementReferences,
 } from "constructors";
 import React, { useState } from "react";
-import { FaClone, FaTrashAlt } from "react-icons/fa";
-import { HiOutlineFolderRemove } from "react-icons/hi";
-import { MdDriveFileMove, MdDriveFolderUpload } from "react-icons/md";
+import { FaClone, FaPlus, FaTrashAlt } from "react-icons/fa";
+import { TbReplace } from "react-icons/tb";
 import { UseMutationResult } from "react-query";
 
 interface StatementEditorSectionButtons {
@@ -104,15 +103,17 @@ export const StatementEditorSectionButtons: React.FC<
           options={[
             {
               longValue: "append",
-              shortValue: "a",
+              shortValue: "",
               onClick: () => setReplaceSection(false),
               selected: !replaceSection,
+              shortIcon: <FaPlus />,
             },
             {
               longValue: "replace",
-              shortValue: "r",
+              shortValue: "",
               onClick: () => setReplaceSection(true),
               selected: replaceSection,
+              shortIcon: <TbReplace />,
             },
           ]}
         />
