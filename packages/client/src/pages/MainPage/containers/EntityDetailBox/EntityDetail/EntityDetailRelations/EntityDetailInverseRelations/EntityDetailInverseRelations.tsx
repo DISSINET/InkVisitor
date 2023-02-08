@@ -26,9 +26,13 @@ export const EntityDetailInverseRelations: React.FC<
     setFilteredRelationTypes(filteredTypes);
   }, [entity]);
 
+  const atLeastOneNonEmpty = filteredRelationTypes.some(
+    (type) => relations[type]?.iConnections!.length! > 0
+  );
+
   return (
     <>
-      {filteredRelationTypes.length > 0 && (
+      {filteredRelationTypes.length > 0 && atLeastOneNonEmpty && (
         <>
           <StyledDetailSectionHeader secondary>
             Inverse relations
@@ -39,7 +43,8 @@ export const EntityDetailInverseRelations: React.FC<
               const relationRule: Relation.RelationRule =
                 Relation.RelationRules[relationType]!;
 
-              if (!relationRule.asymmetrical) return;
+              if (!relationRule.asymmetrical || !selectedRelations?.length)
+                return;
 
               return (
                 <StyledInverseRelationRow key={key}>
