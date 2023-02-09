@@ -1,6 +1,6 @@
 import { EntityEnums } from "@shared/enums";
 import { IEntity, IResponseStatement, IStatement } from "@shared/types";
-import { Button, ButtonGroup } from "components";
+import { Button, ButtonGroup, Submit } from "components";
 import { AttributeButtonGroup, EntitySuggester } from "components/advanced";
 import {
   DStatementActants,
@@ -77,6 +77,19 @@ export const StatementEditorSectionButtons: React.FC<
     }
   };
 
+  const [showSubmit, setShowSubmit] = useState(false);
+
+  const hasEntities = () => {
+    switch (section) {
+      case "actions":
+        return statement.data.actions.length > 0;
+      case "actants":
+        return statement.data.actants.length > 0;
+      case "references":
+        return statement.references.length > 0;
+    }
+  };
+
   return (
     <>
       <ButtonGroup
@@ -84,17 +97,12 @@ export const StatementEditorSectionButtons: React.FC<
         style={{ marginLeft: "0.5rem", marginRight: "1rem" }}
       >
         <Button
+          disabled={!hasEntities()}
           icon={<FaTrashAlt />}
           inverted
           color="danger"
           tooltipLabel={`remove all ${section} from statement`}
-          onClick={() => {
-            if (section === "references") {
-              updateStatementMutation.mutate({ references: [] });
-            } else {
-              updateStatementDataMutation.mutate({ [section]: [] });
-            }
-          }}
+          onClick={() => setShowSubmit(true)}
         />
         <div
           style={{ borderRight: "1px dashed black", marginLeft: "0.3rem" }}
@@ -137,6 +145,25 @@ export const StatementEditorSectionButtons: React.FC<
         excludedActantIds={[statement.id]}
         disableCreate
         placeholder="another S"
+      />
+
+      <Submit
+        show={showSubmit}
+        text={`Do you really want to remove all ${section} from this statement?`}
+        title={`Remove ${section}`}
+        onSubmit={() => {
+          if (section === "references") {
+            updateStatementMutation.mutate({ references: [] });
+          } else {
+            updateStatementDataMutation.mutate({ [section]: [] });
+          }
+          setShowSubmit(false);
+        }}
+        loading={
+          updateStatementMutation.isLoading ||
+          updateStatementDataMutation.isLoading
+        }
+        onCancel={() => setShowSubmit(false)}
       />
     </>
   );

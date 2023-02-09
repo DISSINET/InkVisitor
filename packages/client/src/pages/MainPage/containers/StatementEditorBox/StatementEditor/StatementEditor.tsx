@@ -8,15 +8,7 @@ import {
   IStatementAction,
 } from "@shared/types";
 import api from "api";
-import {
-  Button,
-  ButtonGroup,
-  Checkbox,
-  Dropdown,
-  Input,
-  Loader,
-  MultiInput,
-} from "components";
+import { Button, Dropdown, Input, Loader, MultiInput } from "components";
 import {
   ApplyTemplateModal,
   AuditTable,
@@ -31,15 +23,10 @@ import {
   CProp,
   CStatementActant,
   CStatementAction,
-  DStatementActants,
-  DStatementActions,
-  DStatementReferences,
 } from "constructors";
 import { useSearchParams } from "hooks";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { FaUnlink } from "react-icons/fa";
-import { HiOutlineFolderRemove } from "react-icons/hi";
-import { MdDriveFileMove, MdDriveFolderUpload } from "react-icons/md";
 import { UseMutationResult, useQuery, useQueryClient } from "react-query";
 import { toast } from "react-toastify";
 import { excludedSuggesterEntities } from "Theme/constants";
@@ -68,7 +55,6 @@ import {
 import { StatementEditorActantTable } from "./StatementEditorActantTable/StatementEditorActantTable";
 import { StatementEditorActionTable } from "./StatementEditorActionTable/StatementEditorActionTable";
 import { StatementEditorOrdering } from "./StatementEditorOrdering/StatementEditorOrdering";
-import { v4 as uuidv4 } from "uuid";
 import { StatementEditorSectionButtons } from "./StatementEditorSectionButtons/StatementEditorSectionButtons";
 
 interface StatementEditor {
