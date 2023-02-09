@@ -166,7 +166,7 @@ export const StatementEditorActionTableRow: React.FC<
     const { actionId: propOriginId, id: rowId } = sAction;
 
     return (
-      <ButtonGroup noMarginRight>
+      <ButtonGroup noMarginRight height={19}>
         {sAction && (
           <AttributesEditor
             modalOpen={modalOpen}
@@ -213,7 +213,9 @@ export const StatementEditorActionTableRow: React.FC<
           <Button
             key="a"
             icon={<FaPlus />}
-            color="plain"
+            noIconMargin
+            label="p"
+            color="primary"
             inverted
             tooltipLabel="add new prop"
             onClick={() => {
