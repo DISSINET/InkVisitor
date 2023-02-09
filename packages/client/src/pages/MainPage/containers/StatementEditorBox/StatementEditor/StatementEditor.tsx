@@ -4,19 +4,17 @@ import {
   IOption,
   IReference,
   IResponseStatement,
-  IResponseTerritory,
   IStatementActant,
   IStatementAction,
-  ITerritory,
 } from "@shared/types";
 import api from "api";
 import {
   Button,
-  ButtonGroup,
   Dropdown,
   Input,
   Loader,
   MultiInput,
+  Submit,
 } from "components";
 import {
   ApplyTemplateModal,
@@ -32,7 +30,6 @@ import {
   CProp,
   CStatementActant,
   CStatementAction,
-  DStatementReferences,
 } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
@@ -43,9 +40,6 @@ import { excludedSuggesterEntities } from "Theme/constants";
 import { classesEditorActants, classesEditorTags, DropdownItem } from "types";
 import { getEntityLabel, getShortLabelByLetterCount } from "utils";
 import { EntityReferenceTable } from "../../EntityReferenceTable/EntityReferenceTable";
-import { StatementEditorActantTable } from "./StatementEditorActantTable/StatementEditorActantTable";
-import { StatementEditorActionTable } from "./StatementEditorActionTable/StatementEditorActionTable";
-import { StatementEditorOrdering } from "./StatementEditorOrdering/StatementEditorOrdering";
 import {
   StyledBreadcrumbWrap,
   StyledEditorActantTableWrapper,
@@ -57,15 +51,18 @@ import {
   StyledEditorSection,
   StyledEditorSectionContent,
   StyledEditorSectionHeader,
+  StyledEditorSectionHeading,
   StyledEditorStatementInfo,
   StyledEditorStatementInfoLabel,
   StyledEditorTemplateSection,
   StyledHeaderTagWrap,
-  StyledReferencesButtons,
   StyledTagsList,
   StyledTagsListItem,
 } from "./../StatementEditorBoxStyles";
-import { MdDriveFileMove } from "react-icons/md";
+import { StatementEditorActantTable } from "./StatementEditorActantTable/StatementEditorActantTable";
+import { StatementEditorActionTable } from "./StatementEditorActionTable/StatementEditorActionTable";
+import { StatementEditorOrdering } from "./StatementEditorOrdering/StatementEditorOrdering";
+import { StatementEditorSectionButtons } from "./StatementEditorSectionButtons/StatementEditorSectionButtons";
 
 interface StatementEditor {
   statement: IResponseStatement;
@@ -487,15 +484,9 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     }
   };
 
-  // copy reference from previous statements
-  const handleCopyPreviousStatementReferences = () => {
-    if (previousStatement) {
-      const copiedReferences = DStatementReferences(
-        previousStatement.references
-      );
-      updateStatementMutation.mutate({ references: copiedReferences });
-    }
-  };
+  const [showSubmitSection, setShowSubmitSection] = useState<
+    "actants" | "actions" | "references" | false
+  >(false);
 
   return (
     <>
@@ -607,7 +598,20 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
         {/* Actions */}
         <StyledEditorSection metaSection key="editor-section-actions">
-          <StyledEditorSectionHeader>Actions</StyledEditorSectionHeader>
+          <StyledEditorSectionHeader>
+            <StyledEditorSectionHeading>Actions</StyledEditorSectionHeading>
+
+            {userCanEdit && (
+              <StatementEditorSectionButtons
+                section="actions"
+                statement={statement}
+                previousStatement={previousStatement}
+                updateStatementMutation={updateStatementMutation}
+                updateStatementDataMutation={updateStatementDataMutation}
+                setShowSubmitSection={setShowSubmitSection}
+              />
+            )}
+          </StyledEditorSectionHeader>
           <StyledEditorSectionContent>
             <StyledEditorActantTableWrapper>
               <StatementEditorActionTable
@@ -642,7 +646,20 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
         {/* Actants */}
         <StyledEditorSection metaSection key="editor-section-actants">
-          <StyledEditorSectionHeader>Actants</StyledEditorSectionHeader>
+          <StyledEditorSectionHeader>
+            <StyledEditorSectionHeading>Actants</StyledEditorSectionHeading>
+
+            {userCanEdit && (
+              <StatementEditorSectionButtons
+                section="actants"
+                statement={statement}
+                previousStatement={previousStatement}
+                updateStatementMutation={updateStatementMutation}
+                updateStatementDataMutation={updateStatementDataMutation}
+                setShowSubmitSection={setShowSubmitSection}
+              />
+            )}
+          </StyledEditorSectionHeader>
           <StyledEditorSectionContent>
             <StyledEditorActantTableWrapper>
               <StatementEditorActantTable
@@ -693,19 +710,21 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
         {/* Refs */}
         <StyledEditorSection key="editor-section-refs">
-          <StyledEditorSectionHeader>References</StyledEditorSectionHeader>
+          <StyledEditorSectionHeader>
+            <StyledEditorSectionHeading>References</StyledEditorSectionHeading>
+
+            {userCanEdit && (
+              <StatementEditorSectionButtons
+                section="references"
+                statement={statement}
+                previousStatement={previousStatement}
+                updateStatementMutation={updateStatementMutation}
+                updateStatementDataMutation={updateStatementDataMutation}
+                setShowSubmitSection={setShowSubmitSection}
+              />
+            )}
+          </StyledEditorSectionHeader>
           <StyledEditorSectionContent>
-            <StyledReferencesButtons>
-              <ButtonGroup>
-                <Button
-                  icon={<MdDriveFileMove />}
-                  label="copy references from the previous statement"
-                  disabled={!previousStatement}
-                  tooltipLabel="copy references the from previous statement"
-                  onClick={() => handleCopyPreviousStatementReferences()}
-                />
-              </ButtonGroup>
-            </StyledReferencesButtons>
             <EntityReferenceTable
               openDetailOnCreate
               entities={statement.entities}
@@ -722,14 +741,17 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
         {/* Tags */}
         <StyledEditorSection key="editor-section-tags">
-          <StyledEditorSectionHeader>Tags</StyledEditorSectionHeader>
+          <StyledEditorSectionHeader>
+            <StyledEditorSectionHeading>Tags</StyledEditorSectionHeading>
+          </StyledEditorSectionHeader>
+
           <StyledEditorSectionContent>
             <StyledTagsList>
-              {statement.data.tags.map((tag: string) => {
+              {statement.data.tags.map((tag: string, key: number) => {
                 const tagActant = statement?.entities[tag];
                 return (
                   tagActant && (
-                    <StyledTagsListItem key={tag}>
+                    <StyledTagsListItem key={key}>
                       <EntityTag
                         entity={tagActant}
                         fullWidth
@@ -814,6 +836,25 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         templateToApply={templateToApply}
         setTemplateToApply={setTemplateToApply}
         entity={statement}
+      />
+
+      <Submit
+        show={showSubmitSection !== false}
+        text={`Do you really want to remove all ${showSubmitSection} from this statement?`}
+        title={`Remove ${showSubmitSection}`}
+        onSubmit={() => {
+          if (showSubmitSection === "references") {
+            updateStatementMutation.mutate({ references: [] });
+          } else if (showSubmitSection !== false) {
+            updateStatementDataMutation.mutate({ [showSubmitSection]: [] });
+          }
+          setShowSubmitSection(false);
+        }}
+        loading={
+          updateStatementMutation.isLoading ||
+          updateStatementDataMutation.isLoading
+        }
+        onCancel={() => setShowSubmitSection(false)}
       />
     </>
   );

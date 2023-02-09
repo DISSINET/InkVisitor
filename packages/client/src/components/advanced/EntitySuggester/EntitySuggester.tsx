@@ -19,6 +19,7 @@ import { EntityDragItem } from "types";
 interface EntitySuggester {
   categoryTypes: EntityEnums.ExtendedClass[];
   onSelected: (id: string) => void;
+  onPicked?: (entity: IEntity) => void;
   placeholder?: string;
   inputWidth?: number | "full";
   openDetailOnCreate?: boolean;
@@ -38,6 +39,7 @@ interface EntitySuggester {
 export const EntitySuggester: React.FC<EntitySuggester> = ({
   categoryTypes,
   onSelected,
+  onPicked = () => {},
   placeholder = "",
   inputWidth,
   openDetailOnCreate = false,
@@ -153,6 +155,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
     {
       onSuccess: (data, variables) => {
         onSelected(variables.id);
+        onPicked(variables);
         handleClean();
         if (openDetailOnCreate && variables.class !== EntityEnums.Class.Value) {
           appendDetailId(variables.id);
@@ -224,6 +227,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
       handleInstantiateTemplate(newPicked);
     } else {
       onSelected(newPicked.id);
+      onPicked(newPicked);
       handleClean();
     }
   };
@@ -237,6 +241,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
         newDropped.entity && handleInstantiateTemplate(newDropped.entity);
       } else {
         onSelected(newDropped.id);
+        newDropped.entity && onPicked(newDropped.entity);
         handleClean();
       }
     }

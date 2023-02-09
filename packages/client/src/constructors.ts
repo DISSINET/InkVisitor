@@ -9,6 +9,7 @@ import {
   IStatementActant,
   IStatementAction,
   ITerritory,
+  IAction,
 } from "@shared/types";
 
 import {
@@ -237,40 +238,6 @@ export const InstAction: any = async (
   return action;
 };
 
-// not used anymore
-// export const InstReference: any = async (
-//   reference: IReference,
-//   userRole: UserEnums.Role
-// ) => {
-//   if (reference.resource) {
-//     const resourceEReq = await api.entitiesGet(reference.resource);
-
-//     if (resourceEReq && resourceEReq.data) {
-//       if (resourceEReq.data.isTemplate) {
-//         const newResourceEId = await InstTemplate(resourceEReq.data, userRole);
-//         if (newResourceEId) {
-//           reference.resource = newResourceEId;
-//         }
-//       }
-//     }
-//   }
-
-//   if (reference.value) {
-//     const valueEReq = await api.entitiesGet(reference.value);
-
-//     if (valueEReq && valueEReq.data) {
-//       if (valueEReq.data.isTemplate) {
-//         const newValueEId = await InstTemplate(valueEReq.data, userRole);
-//         if (newValueEId) {
-//           reference.value = newValueEId;
-//         }
-//       }
-//     }
-//   }
-
-//   return reference;
-// };
-
 // instantiate template
 // TODO #952 handle conflicts in Templates application
 
@@ -295,7 +262,6 @@ export const InstTemplate = async (
     }
 
     if (iEntity) {
-
       // #1554
       if (templateEntity.class === EntityEnums.Class.Statement) {
         iEntity.label = "";
@@ -405,11 +371,59 @@ export const DStatement = (
   return duplicatedStatement;
 };
 
+export const DStatementActions = (
+  actionsToDuplicate: IStatementAction[]
+): IStatementAction[] => {
+  return actionsToDuplicate.map((action) => {
+    return {
+      ...action,
+      props: DProps(action.props),
+      id: uuidv4(),
+    };
+  });
+};
+
+export const DStatementClassifications = (
+  classifications: IStatementClassification[]
+): IStatementClassification[] => {
+  return classifications.map((c) => {
+    return {
+      ...c,
+      id: uuidv4(),
+    };
+  });
+};
+export const DStatementIdentifications = (
+  identifications: IStatementIdentification[]
+): IStatementIdentification[] => {
+  return identifications.map((i) => {
+    return {
+      ...i,
+      id: uuidv4(),
+    };
+  });
+};
+
+export const DStatementActants = (
+  actantsToDuplicate: IStatementActant[]
+): IStatementActant[] => {
+  return actantsToDuplicate.map((actant) => {
+    return {
+      ...actant,
+      classifications: DStatementClassifications(actant.classifications),
+      identifications: DStatementIdentifications(actant.identifications),
+      props: DProps(actant.props),
+      id: uuidv4(),
+    };
+  });
+};
+
 export const DStatementReferences = (
   referenceToDuplicate: IReference[]
 ): IReference[] => {
-  referenceToDuplicate.forEach((r) => (r.id = uuidv4()));
-  return referenceToDuplicate;
+  return referenceToDuplicate.map((r) => {
+    return { ...r, id: uuidv4() };
+  });
 };
 
 // duplicate entity
