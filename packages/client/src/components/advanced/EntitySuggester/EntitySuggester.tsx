@@ -223,7 +223,6 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
   };
 
   const handlePick = (newPicked: IEntity, instantiateTemplate?: boolean) => {
-    console.log(newPicked);
     if (instantiateTemplate && !disableTemplateInstantiation) {
       handleInstantiateTemplate(newPicked);
     } else {

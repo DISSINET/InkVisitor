@@ -23,6 +23,9 @@ interface StatementEditorSectionButtons {
     object,
     unknown
   >;
+  setShowSubmitSection: (
+    value: React.SetStateAction<false | "actants" | "references" | "actions">
+  ) => void;
 }
 export const StatementEditorSectionButtons: React.FC<
   StatementEditorSectionButtons
@@ -32,6 +35,7 @@ export const StatementEditorSectionButtons: React.FC<
   previousStatement,
   updateStatementMutation,
   updateStatementDataMutation,
+  setShowSubmitSection,
 }) => {
   const [replaceSection, setReplaceSection] = useState(false);
 
@@ -77,8 +81,6 @@ export const StatementEditorSectionButtons: React.FC<
     }
   };
 
-  const [showSubmit, setShowSubmit] = useState(false);
-
   const hasEntities = () => {
     switch (section) {
       case "actions":
@@ -102,7 +104,7 @@ export const StatementEditorSectionButtons: React.FC<
           inverted
           color="danger"
           tooltipLabel={`remove all ${section} from statement`}
-          onClick={() => setShowSubmit(true)}
+          onClick={() => setShowSubmitSection(section)}
         />
         <div
           style={{ borderRight: "1px dashed black", marginLeft: "0.3rem" }}
@@ -138,32 +140,13 @@ export const StatementEditorSectionButtons: React.FC<
       </ButtonGroup>
       <EntitySuggester
         categoryTypes={[EntityEnums.Class.Statement]}
-        onSelected={(id: string) => console.log(id)}
+        onSelected={(id: string) => {}}
         onPicked={(entity: IEntity) =>
           handleCopyFromStatement(entity as IStatement, section, replaceSection)
         }
         excludedActantIds={[statement.id]}
         disableCreate
         placeholder="another S"
-      />
-
-      <Submit
-        show={showSubmit}
-        text={`Do you really want to remove all ${section} from this statement?`}
-        title={`Remove ${section}`}
-        onSubmit={() => {
-          if (section === "references") {
-            updateStatementMutation.mutate({ references: [] });
-          } else {
-            updateStatementDataMutation.mutate({ [section]: [] });
-          }
-          setShowSubmit(false);
-        }}
-        loading={
-          updateStatementMutation.isLoading ||
-          updateStatementDataMutation.isLoading
-        }
-        onCancel={() => setShowSubmit(false)}
       />
     </>
   );

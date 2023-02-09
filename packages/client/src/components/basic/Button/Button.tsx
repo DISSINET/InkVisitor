@@ -1,6 +1,11 @@
 import { EntityEnums } from "@shared/enums";
 import { Tooltip } from "components";
-import React, { MouseEventHandler, ReactElement, useState } from "react";
+import React, {
+  MouseEventHandler,
+  ReactElement,
+  useState,
+  KeyboardEvent,
+} from "react";
 import { Colors } from "types";
 import { StyledButton, StyledButtonLabel } from "./ButtonStyles";
 
@@ -62,6 +67,7 @@ export const Button: React.FC<ButtonProps> = ({
         disabled={disabled}
         onMouseEnter={() => setShowTooltip(true)}
         onMouseLeave={() => setShowTooltip(false)}
+        onKeyPress={(e: KeyboardEvent<HTMLButtonElement>) => e.preventDefault()}
       >
         {icon}
         {label && (

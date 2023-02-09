@@ -8,7 +8,14 @@ import {
   IStatementAction,
 } from "@shared/types";
 import api from "api";
-import { Button, Dropdown, Input, Loader, MultiInput } from "components";
+import {
+  Button,
+  Dropdown,
+  Input,
+  Loader,
+  MultiInput,
+  Submit,
+} from "components";
 import {
   ApplyTemplateModal,
   AuditTable,
@@ -477,6 +484,10 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     }
   };
 
+  const [showSubmitSection, setShowSubmitSection] = useState<
+    "actants" | "actions" | "references" | false
+  >(false);
+
   return (
     <>
       <div style={{ marginBottom: "4rem" }} key={statement.id}>
@@ -597,6 +608,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 previousStatement={previousStatement}
                 updateStatementMutation={updateStatementMutation}
                 updateStatementDataMutation={updateStatementDataMutation}
+                setShowSubmitSection={setShowSubmitSection}
               />
             )}
           </StyledEditorSectionHeader>
@@ -644,6 +656,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 previousStatement={previousStatement}
                 updateStatementMutation={updateStatementMutation}
                 updateStatementDataMutation={updateStatementDataMutation}
+                setShowSubmitSection={setShowSubmitSection}
               />
             )}
           </StyledEditorSectionHeader>
@@ -707,6 +720,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 previousStatement={previousStatement}
                 updateStatementMutation={updateStatementMutation}
                 updateStatementDataMutation={updateStatementDataMutation}
+                setShowSubmitSection={setShowSubmitSection}
               />
             )}
           </StyledEditorSectionHeader>
@@ -822,6 +836,25 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         templateToApply={templateToApply}
         setTemplateToApply={setTemplateToApply}
         entity={statement}
+      />
+
+      <Submit
+        show={showSubmitSection !== false}
+        text={`Do you really want to remove all ${showSubmitSection} from this statement?`}
+        title={`Remove ${showSubmitSection}`}
+        onSubmit={() => {
+          if (showSubmitSection === "references") {
+            updateStatementMutation.mutate({ references: [] });
+          } else if (showSubmitSection !== false) {
+            updateStatementDataMutation.mutate({ [showSubmitSection]: [] });
+          }
+          setShowSubmitSection(false);
+        }}
+        loading={
+          updateStatementMutation.isLoading ||
+          updateStatementDataMutation.isLoading
+        }
+        onCancel={() => setShowSubmitSection(false)}
       />
     </>
   );
