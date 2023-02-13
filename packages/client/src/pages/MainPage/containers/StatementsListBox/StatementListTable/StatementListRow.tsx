@@ -118,13 +118,6 @@ export const StatementListRow: React.FC<StatementListRow> = ({
         }}
         id={`statement${row.original.id}`}
       >
-        <td
-          ref={dragRef}
-          style={{ cursor: "move" }}
-          onClick={(e: React.MouseEvent) => e.stopPropagation()}
-        >
-          <FaGripVertical />
-        </td>
         {row.cells.map((cell: Cell) => {
           if (cell.column.id === "lastEdit") {
             return (
@@ -132,10 +125,20 @@ export const StatementListRow: React.FC<StatementListRow> = ({
                 {lastEditdateText}
               </StyledTdLastEdit>
             );
+          } else if (cell.column.id === "move") {
+            return (
+              <td
+                ref={dragRef}
+                style={{ cursor: "move" }}
+                onClick={(e: React.MouseEvent) => e.stopPropagation()}
+              >
+                <FaGripVertical />
+              </td>
+            );
           } else {
             return (
               <StyledTd
-                noPaddingLeft={cell.column.id === "selection"}
+                // noPaddingLeft={cell.column.id === "selection"}
                 {...cell.getCellProps()}
               >
                 {cell.render("Cell")}

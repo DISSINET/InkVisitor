@@ -39,7 +39,7 @@ export const StyledTr = styled.tr<StyledTr>`
     isSelected ? "4px solid " + theme.color["success"] : ""};
   cursor: ${({ isSelected }) => (isSelected ? "default" : "pointer")};
   td:first-child {
-    padding-left: ${({ theme }) => theme.space[1]};
+    /* padding-left: ${({ theme }) => theme.space[1]}; */
   }
   :hover {
     background-color: ${({ theme }) => theme.color["gray"][100]};
