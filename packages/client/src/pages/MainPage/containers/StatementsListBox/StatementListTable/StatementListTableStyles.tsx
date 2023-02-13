@@ -44,20 +44,22 @@ export const StyledTr = styled.tr<StyledTr>`
     isOpened ? "4px solid " + theme.color["success"] : ""};
   cursor: ${({ isOpened }) => (isOpened ? "default" : "pointer")};
   td:first-child {
-    /* padding-left: ${({ theme }) => theme.space[1]}; */
+    padding-left: ${({ theme, isOpened }) => (isOpened ? "0.9rem" : "")};
+    width: 1%;
   }
   :hover {
     background-color: ${({ theme }) => theme.color["gray"][100]};
   }
 `;
-interface StyledTd {
-  noPaddingLeft?: boolean;
-}
+interface StyledTd {}
 export const StyledTd = styled.td<StyledTd>`
   padding: ${({ theme }) => theme.space[2]};
-  padding-left: ${({ theme, noPaddingLeft }) =>
-    noPaddingLeft ? "" : theme.space[4]};
+  padding-left: ${({ theme }) => theme.space[4]};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
+`;
+export const StyledTdMove = styled.td`
+  cursor: move;
+  width: 1%;
 `;
 export const StyledTdLastEdit = styled(StyledTd)`
   font-size: ${({ theme }) => theme.fontSize["xxs"]};

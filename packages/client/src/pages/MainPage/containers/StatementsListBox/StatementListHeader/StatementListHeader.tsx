@@ -152,12 +152,14 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
       ? setSelectedRows(data.statements.map((statement) => statement.id))
       : setSelectedRows([]);
 
-  const getCheckBoxIcon = () => {
-    const size = 20;
+  const renderCheckBox = () => {
+    const size = 18;
+    const color = theme.color.black;
     if (isAllSelected) {
       return (
         <MdOutlineCheckBox
           size={size}
+          color={color}
           style={{ cursor: "pointer" }}
           onClick={() => handleSelectAll(false)}
         />
@@ -167,6 +169,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
       return (
         <MdOutlineIndeterminateCheckBox
           size={size}
+          color={color}
           style={{ cursor: "pointer" }}
           onClick={() => handleSelectAll(false)}
         />
@@ -175,6 +178,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
       return (
         <MdOutlineCheckBoxOutlineBlank
           size={size}
+          color={color}
           style={{ cursor: "pointer" }}
           onClick={() => handleSelectAll(true)}
         />
@@ -239,10 +243,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
       </StyledHeaderRow>
 
       <StyledSuggesterRow>
-        <div style={{ paddingLeft: ".2rem" }}>
-          <input id="selectAll" type="checkbox" style={{ display: "none" }} />
-          <label htmlFor="selectAll">{getCheckBoxIcon()}</label>
-        </div>
+        <div style={{ paddingLeft: ".5rem" }}>{renderCheckBox()}</div>
         <div>
           {"Move to parent:\xa0"}
           <EntitySuggester

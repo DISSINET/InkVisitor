@@ -20,6 +20,10 @@ import {
   FaPlus,
   FaTrashAlt,
 } from "react-icons/fa";
+import {
+  MdOutlineCheckBox,
+  MdOutlineCheckBoxOutlineBlank,
+} from "react-icons/md";
 import { UseMutationResult } from "react-query";
 import {
   Cell,
@@ -113,18 +117,30 @@ export const StatementListTable: React.FC<StatementListTable> = ({
       },
       {
         id: "selection",
-        Cell: ({ row }: Cell) => (
-          <input
-            type="checkbox"
-            checked={selectedRows.includes(row.id)}
-            onClick={(e: React.MouseEvent<HTMLInputElement, MouseEvent>) =>
-              e.stopPropagation()
-            }
-            onChange={() => {
-              handleRowSelect(row.id);
-            }}
-          />
-        ),
+        Cell: ({ row }: Cell) => {
+          const size = 18;
+          const checked = selectedRows.includes(row.id);
+
+          return checked ? (
+            <MdOutlineCheckBox
+              size={size}
+              style={{ cursor: "pointer" }}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleRowSelect(row.id);
+              }}
+            />
+          ) : (
+            <MdOutlineCheckBoxOutlineBlank
+              size={size}
+              style={{ cursor: "pointer" }}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleRowSelect(row.id);
+              }}
+            />
+          );
+        },
       },
       {
         id: "move",

@@ -17,6 +17,7 @@ import { StatementListRowExpanded } from "./StatementListRowExpanded/StatementLi
 import {
   StyledTd,
   StyledTdLastEdit,
+  StyledTdMove,
   StyledTr,
 } from "./StatementListTableStyles";
 
@@ -130,14 +131,13 @@ export const StatementListRow: React.FC<StatementListRow> = ({
             );
           } else if (cell.column.id === "move") {
             return (
-              <td
+              <StyledTdMove
                 key="move"
                 ref={dragRef}
-                style={{ cursor: "move" }}
                 onClick={(e: React.MouseEvent) => e.stopPropagation()}
               >
                 <FaGripVertical />
-              </td>
+              </StyledTdMove>
             );
           } else {
             return (
