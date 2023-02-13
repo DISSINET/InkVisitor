@@ -278,11 +278,6 @@ export const StatementListBox: React.FC = () => {
 
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
 
-  const handleSelectAll = (checked: boolean) =>
-    checked
-      ? setSelectedRows(statements.map((statement) => statement.id))
-      : setSelectedRows([]);
-
   return (
     <>
       {data && (
@@ -291,7 +286,8 @@ export const StatementListBox: React.FC = () => {
           addStatementAtTheEndMutation={addStatementAtTheEndMutation}
           moveTerritoryMutation={moveTerritoryMutation}
           isFavorited={isFavorited}
-          handleSelectAll={handleSelectAll}
+          selectedRows={selectedRows}
+          setSelectedRows={setSelectedRows}
           isAllSelected={selectedRows.length === statements.length}
         />
       )}

@@ -7,12 +7,17 @@ import {
 } from "@shared/types";
 import api from "api";
 import { AxiosResponse } from "axios";
-import { Button, ButtonGroup, Checkbox } from "components";
+import { Button, ButtonGroup } from "components";
 import { BreadcrumbItem, EntitySuggester } from "components/advanced";
 import { CStatement } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
 import { FaPlus, FaRecycle } from "react-icons/fa";
+import {
+  MdOutlineCheckBox,
+  MdOutlineCheckBoxOutlineBlank,
+  MdOutlineIndeterminateCheckBox,
+} from "react-icons/md";
 import { UseMutationResult, useQuery, useQueryClient } from "react-query";
 import { useAppSelector } from "redux/hooks";
 import theme from "Theme/theme";
@@ -44,7 +49,8 @@ interface StatementListHeader {
   isFavorited?: boolean;
 
   isAllSelected: boolean;
-  handleSelectAll: (checked: boolean) => void;
+  selectedRows: string[];
+  setSelectedRows: React.Dispatch<React.SetStateAction<string[]>>;
 }
 export const StatementListHeader: React.FC<StatementListHeader> = ({
   data,
@@ -53,7 +59,8 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
   isFavorited,
 
   isAllSelected,
-  handleSelectAll,
+  selectedRows,
+  setSelectedRows,
 }) => {
   const queryClient = useQueryClient();
   const { territoryId } = useSearchParams();
@@ -140,6 +147,41 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
     return `${label}`;
   };
 
+  const handleSelectAll = (checked: boolean) =>
+    checked
+      ? setSelectedRows(data.statements.map((statement) => statement.id))
+      : setSelectedRows([]);
+
+  const getCheckBoxIcon = () => {
+    const size = 20;
+    if (isAllSelected) {
+      return (
+        <MdOutlineCheckBox
+          size={size}
+          style={{ cursor: "pointer" }}
+          onClick={() => handleSelectAll(false)}
+        />
+      );
+    } else if (selectedRows.length > 0) {
+      // some rows selected
+      return (
+        <MdOutlineIndeterminateCheckBox
+          size={size}
+          style={{ cursor: "pointer" }}
+          onClick={() => handleSelectAll(false)}
+        />
+      );
+    } else {
+      return (
+        <MdOutlineCheckBoxOutlineBlank
+          size={size}
+          style={{ cursor: "pointer" }}
+          onClick={() => handleSelectAll(true)}
+        />
+      );
+    }
+  };
+
   return (
     <StyledHeader>
       <StyledHeaderBreadcrumbRow>
@@ -197,14 +239,9 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
       </StyledHeaderRow>
 
       <StyledSuggesterRow>
-        <div style={{ paddingLeft: ".5rem" }}>
-          <input
-            type="checkbox"
-            checked={isAllSelected}
-            onChange={() =>
-              isAllSelected ? handleSelectAll(false) : handleSelectAll(true)
-            }
-          />
+        <div style={{ paddingLeft: ".2rem" }}>
+          <input id="selectAll" type="checkbox" style={{ display: "none" }} />
+          <label htmlFor="selectAll">{getCheckBoxIcon()}</label>
         </div>
         <div>
           {"Move to parent:\xa0"}
