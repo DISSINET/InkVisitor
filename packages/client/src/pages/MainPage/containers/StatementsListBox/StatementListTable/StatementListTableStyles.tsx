@@ -25,19 +25,24 @@ export const StyledTh = styled.th`
 `;
 
 interface StyledTr {
+  isOpened?: boolean;
   isSelected?: boolean;
   opacity?: number;
 }
 export const StyledTr = styled.tr<StyledTr>`
-  background-color: ${({ theme, isSelected }) =>
-    isSelected ? theme.color["invertedBg"]["info"] : theme.color["white"]};
-  color: ${({ theme, isSelected }) =>
-    isSelected ? theme.color["primary"] : theme.color["black"]};
+  background-color: ${({ theme, isOpened, isSelected }) =>
+    isOpened
+      ? theme.color["invertedBg"]["info"]
+      : isSelected
+      ? theme.color["invertedBg"]["primary"]
+      : theme.color["white"]};
+  color: ${({ theme, isOpened }) =>
+    isOpened ? theme.color["primary"] : theme.color["black"]};
   opacity: ${({ opacity }) => (opacity ? opacity : 1)};
   border-top: 1px solid ${({ theme }) => theme.color["gray"][500]};
-  border-left: ${({ theme, isSelected }) =>
-    isSelected ? "4px solid " + theme.color["success"] : ""};
-  cursor: ${({ isSelected }) => (isSelected ? "default" : "pointer")};
+  border-left: ${({ theme, isOpened }) =>
+    isOpened ? "4px solid " + theme.color["success"] : ""};
+  cursor: ${({ isOpened }) => (isOpened ? "default" : "pointer")};
   td:first-child {
     /* padding-left: ${({ theme }) => theme.space[1]}; */
   }

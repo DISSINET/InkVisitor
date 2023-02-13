@@ -29,6 +29,7 @@ interface StatementListRow {
   visibleColumns: ColumnInstance<{}>[];
   entities: { [key: string]: IEntity };
   audits: IResponseAudit[];
+  isSelected: boolean;
 }
 
 export const StatementListRow: React.FC<StatementListRow> = ({
@@ -40,6 +41,7 @@ export const StatementListRow: React.FC<StatementListRow> = ({
   visibleColumns,
   entities,
   audits,
+  isSelected,
 }) => {
   const dispatch = useAppDispatch();
 
@@ -111,7 +113,8 @@ export const StatementListRow: React.FC<StatementListRow> = ({
       <StyledTr
         ref={dropRef}
         opacity={opacity}
-        isSelected={row.original.id === statementId}
+        isOpened={row.original.id === statementId}
+        isSelected={isSelected}
         onClick={(e: any) => {
           handleClick(row.original.id);
           e.stopPropagation();
@@ -128,6 +131,7 @@ export const StatementListRow: React.FC<StatementListRow> = ({
           } else if (cell.column.id === "move") {
             return (
               <td
+                key="move"
                 ref={dragRef}
                 style={{ cursor: "move" }}
                 onClick={(e: React.MouseEvent) => e.stopPropagation()}

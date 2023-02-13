@@ -30,7 +30,7 @@ export const StyledHeading = styled.span`
 `;
 export const StyledSuggesterRow = styled.div`
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   align-items: center;
   color: ${({ theme }) => theme.color["info"]};
   font-size: ${({ theme }) => theme.fontSize["sm"]};

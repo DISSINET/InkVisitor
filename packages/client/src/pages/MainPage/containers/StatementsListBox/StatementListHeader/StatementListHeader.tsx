@@ -7,7 +7,7 @@ import {
 } from "@shared/types";
 import api from "api";
 import { AxiosResponse } from "axios";
-import { Button, ButtonGroup } from "components";
+import { Button, ButtonGroup, Checkbox } from "components";
 import { BreadcrumbItem, EntitySuggester } from "components/advanced";
 import { CStatement } from "constructors";
 import { useSearchParams } from "hooks";
@@ -42,12 +42,18 @@ interface StatementListHeader {
     unknown
   >;
   isFavorited?: boolean;
+
+  isAllSelected: boolean;
+  handleSelectAll: (checked: boolean) => void;
 }
 export const StatementListHeader: React.FC<StatementListHeader> = ({
   data,
   addStatementAtTheEndMutation,
   moveTerritoryMutation,
   isFavorited,
+
+  isAllSelected,
+  handleSelectAll,
 }) => {
   const queryClient = useQueryClient();
   const { territoryId } = useSearchParams();
@@ -191,8 +197,17 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
       </StyledHeaderRow>
 
       <StyledSuggesterRow>
-        {"Move to parent:\xa0"}
+        <div style={{ paddingLeft: ".5rem" }}>
+          <input
+            type="checkbox"
+            checked={isAllSelected}
+            onChange={() =>
+              isAllSelected ? handleSelectAll(false) : handleSelectAll(true)
+            }
+          />
+        </div>
         <div>
+          {"Move to parent:\xa0"}
           <EntitySuggester
             disableTemplatesAccept
             filterEditorRights
