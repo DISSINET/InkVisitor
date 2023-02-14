@@ -2,7 +2,7 @@ import { IUser } from "../../shared/types/user";
 import { hashPassword } from "../../server/src/common/auth";
 import { IAudit } from "../../shared/types";
 import { Relation } from "../../shared/types/relation";
-import { r, RConnectionOptions, Connection } from "rethinkdb-ts";
+import { r, RConnectionOptions, Connection, Func } from "rethinkdb-ts";
 import tunnel from "tunnel-ssh";
 import { Server } from "net";
 import { confirm } from './import/prompts';
@@ -23,7 +23,7 @@ const envData = require("dotenv").config({ path: `env/.env.${env}` }).parsed;
 if (!envData) {
   throw new Error(`Cannot load env file env/.env.${env}`);
 }
-
+/*
 const datasets: Record<string, DbSchema> = {
   all: {
     users: {
@@ -309,3 +309,186 @@ const importData = async () => {
     }
   }
 })();
+*/
+enum MODES {
+  USE_SSH = 1 << 0,
+  RECREATE_DATABASE = 1 << 1,
+  IMPORT_DATA = 1 << 2,
+}
+
+interface ISshConfig {
+  sshIp: string;
+  sshUsername: string;
+  sshPassword: string;
+}
+
+interface IDbConfig {
+  name: string;
+  host: string;
+  port: number;
+  password: string;
+}
+
+function getEnv(envName: string): string {
+  if (envData[envName] !== undefined) {
+    return envData[envName] as string;
+  }
+
+  throw new Error(`ENV variable '${envName}' is required`);
+}
+
+class DbHelper {
+  database: string = "";
+  conn?: Connection;
+  dbConfig: IDbConfig;
+
+  constructor() {
+    this.dbConfig = {
+      host: getEnv("DB_HOST"),
+      port: parseInt(getEnv("DB_PORT")),
+      name: getEnv("DB_NAME"),
+      password: getEnv("DB_PASS"),
+    };
+  }
+
+  async connect(): Promise<void> {
+    try {
+      this.conn = await r.connect(this.dbConfig);
+    } catch (e) {
+      throw new Error(`Cannot connect to the db: ${e}`);
+    }
+  }
+
+  async dbDrop(name: string): Promise<void> {
+    try {
+      await r.dbDrop(name).run(this.conn);
+      console.log("Database dropped");
+    } catch (e) {
+      console.log(`Database not dropped ('${name}'). Does not exist?`);
+    }
+  }
+
+  async dbCreate(): Promise<void> {
+    try {
+      await r.dbCreate(this.dbConfig.name).run(this.conn);
+      console.log("Database created");
+    } catch (e) {
+      throw new Error(`Database not created: ${e}`);
+    }
+  }
+
+  async dbList(): Promise<string[]> {
+    try {
+      return await r.dbList().run(this.conn);
+    } catch (e) {
+      throw new Error(`Cannot retieve db list: ${e}`);
+    }
+  }
+
+  useDb(dbName: string) {
+    console.log(`Using db ${dbName}`);
+    this.dbConfig.name = dbName;
+    this.conn?.use(dbName);
+  }
+}
+
+class Importer {
+
+  mode: MODES = 0;
+  sshConfig?: ISshConfig;
+  db: DbHelper;
+
+  constructor(initialModes: MODES[]) {
+    for (const mode of initialModes) {
+      this.mode = this.mode | mode;
+    }
+
+    this.db = new DbHelper();
+  }
+
+  enableMode(mode: MODES) {
+    this.mode = this.mode | mode;
+  }
+
+  modeEnabled(mode: MODES) {
+    return this.mode & mode;
+  }
+
+  async run(): Promise<void> {
+    if (this.modeEnabled(MODES.USE_SSH) && (await confirm("Use SSH connection?"))) {
+      await this.startSshTunnel();
+    }
+
+    await this.db.connect();
+
+    do {
+      await this.selectAction();
+    } while (1);
+  }
+
+  async selectDb(): Promise<void> {
+    const dbNames = await this.db.dbList();
+    console.log(`Databases: ${["", ...dbNames.map((name, i) => `${name} (${i + 1})}`)].join("\n- ")}`);
+
+    const dbName = await question<string>("Choose the db (name/number)", (input: string): string | undefined => {
+      if (parseInt(input) > 0) {
+        input = dbNames[parseInt(input) - 1];
+      }
+
+      return dbNames.find(name => name === input);
+    }, "");
+
+    this.db.useDb(dbName);
+  }
+
+  async selectAction(): Promise<void> {
+    let that = this;
+    const menu: Record<string, { description: string, action: Function; }> = {
+      'L': {
+        description: `Press 'L' to switch databases`,
+        action: that.selectDb.bind(that)
+      },
+      'X': {
+        description: `Press 'X' to end`,
+        action: () => process.exit(0)
+      }
+    };
+
+    console.log(`\nImport app\n`);
+    Object.values(menu).forEach(item => console.log(item.description));
+
+    const actionChoice = await question<string>("", (input: string): string | undefined => { return Object.keys(menu).find(key => key === input); }, "");
+    return menu[actionChoice].action();
+  }
+
+  startSshTunnel() {
+    this.sshConfig = {
+      sshIp: getEnv("SSH_IP"),
+      sshPassword: getEnv("SSH_PASSWORD"),
+      sshUsername: getEnv("SSH_USERNAME"),
+    };
+
+    return new Promise((resolve, reject) => {
+      const tnl = tunnel(
+        {
+          host: this.sshConfig?.sshIp,
+          dstPort: this.db.dbConfig.port, // using the same port as db
+          localPort: this.db.dbConfig.port,  // using the same port as db
+          username: envData.SSH_USERNAME,
+          password: envData.SSH_PASSWORD,
+        },
+        async (error: Error, srv: Server) => {
+          resolve(srv);
+        }
+      );
+
+      tnl.on("error", function (err) {
+        console.error("SSH connection error:", err);
+        process.exit(1);
+      });
+    });
+  }
+}
+
+const i = new Importer([]);
+i.run().finally();
