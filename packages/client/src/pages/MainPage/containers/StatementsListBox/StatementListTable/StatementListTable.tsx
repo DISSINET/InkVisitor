@@ -109,6 +109,10 @@ export const StatementListTable: React.FC<StatementListTable> = ({
     }
   };
 
+  const [lastClickedIndex, setLastClickedIndex] = useState<number | false>(
+    false
+  );
+
   const columns: Column<{}>[] = useMemo(() => {
     return [
       {
@@ -127,6 +131,13 @@ export const StatementListTable: React.FC<StatementListTable> = ({
               style={{ cursor: "pointer" }}
               onClick={(e) => {
                 e.stopPropagation();
+                if (e.shiftKey) {
+                  // unset all between
+                  if (!lastClickedIndex) {
+                    setLastClickedIndex(row.index);
+                  } else {
+                  }
+                }
                 handleRowSelect(row.id);
               }}
             />
@@ -136,6 +147,14 @@ export const StatementListTable: React.FC<StatementListTable> = ({
               style={{ cursor: "pointer" }}
               onClick={(e) => {
                 e.stopPropagation();
+                if (e.shiftKey) {
+                  // set all between
+                  if (!lastClickedIndex) {
+                    setLastClickedIndex(row.index);
+                  } else {
+                  }
+                  console.log(row.index);
+                }
                 handleRowSelect(row.id);
               }}
             />

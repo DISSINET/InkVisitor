@@ -53,6 +53,7 @@ export const StatementListBox: React.FC = () => {
 
   const [showSubmit, setShowSubmit] = useState(false);
   const [statementToDelete, setStatementToDelete] = useState<IStatement>();
+  const [selectedRows, setSelectedRows] = useState<string[]>([]);
 
   const { status, data, error, isFetching } = useQuery(
     ["territory", "statement-list", territoryId, statementListOpened],
@@ -137,6 +138,7 @@ export const StatementListBox: React.FC = () => {
         queryClient.invalidateQueries("territory").then(() => {
           setStatementId("");
         });
+        setSelectedRows(selectedRows.filter((r) => r !== sId));
       },
     }
   );
@@ -275,8 +277,6 @@ export const StatementListBox: React.FC = () => {
       },
     }
   );
-
-  const [selectedRows, setSelectedRows] = useState<string[]>([]);
 
   return (
     <>
