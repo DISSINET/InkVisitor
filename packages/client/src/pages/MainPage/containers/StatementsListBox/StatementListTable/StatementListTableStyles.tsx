@@ -34,7 +34,7 @@ export const StyledTr = styled.tr<StyledTr>`
     isOpened
       ? theme.color["invertedBg"]["info"]
       : isSelected
-      ? theme.color["invertedBg"]["primary"]
+      ? theme.color["tableSelection"]
       : theme.color["white"]};
   color: ${({ theme, isOpened }) =>
     isOpened ? theme.color["primary"] : theme.color["black"]};

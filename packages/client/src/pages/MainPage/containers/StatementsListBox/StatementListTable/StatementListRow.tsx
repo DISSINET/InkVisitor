@@ -141,10 +141,7 @@ export const StatementListRow: React.FC<StatementListRow> = ({
             );
           } else {
             return (
-              <StyledTd
-                // noPaddingLeft={cell.column.id === "selection"}
-                {...cell.getCellProps()}
-              >
+              <StyledTd {...cell.getCellProps()}>
                 {cell.render("Cell")}
               </StyledTd>
             );
