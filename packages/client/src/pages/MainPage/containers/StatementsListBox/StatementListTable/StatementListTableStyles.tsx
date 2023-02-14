@@ -48,7 +48,10 @@ export const StyledTr = styled.tr<StyledTr>`
     width: 1%;
   }
   :hover {
-    background-color: ${({ theme }) => theme.color["gray"][100]};
+    background-color: ${({ theme, isSelected }) =>
+      isSelected
+        ? theme.color["tableSelectionHover"]
+        : theme.color["gray"][100]};
   }
 `;
 interface StyledTd {}

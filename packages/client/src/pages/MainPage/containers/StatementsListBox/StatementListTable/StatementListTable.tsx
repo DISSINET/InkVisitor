@@ -35,6 +35,7 @@ import {
 } from "react-table";
 import { setRowsExpanded } from "redux/features/statementList/rowsExpandedSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
+import theme from "Theme/theme";
 import { StatementListContextMenu } from "../StatementListContextMenu/StatementListContextMenu";
 import { StyledText } from "../StatementLitBoxStyles";
 import { StatementListRow } from "./StatementListRow";
@@ -124,38 +125,47 @@ export const StatementListTable: React.FC<StatementListTable> = ({
         Cell: ({ row }: Cell) => {
           const size = 18;
           const checked = selectedRows.includes(row.id);
+          const isFocused = lastClickedIndex === row.index;
 
           return checked ? (
             <MdOutlineCheckBox
               size={size}
+              color={isFocused ? theme.color.info : theme.color.black}
               style={{ cursor: "pointer" }}
               onClick={(e) => {
                 e.stopPropagation();
                 if (e.shiftKey) {
                   // unset all between
-                  if (!lastClickedIndex) {
-                    setLastClickedIndex(row.index);
-                  } else {
-                  }
                 }
+                setLastClickedIndex(row.index);
                 handleRowSelect(row.id);
               }}
             />
           ) : (
             <MdOutlineCheckBoxOutlineBlank
               size={size}
+              color={isFocused ? theme.color.info : theme.color.black}
               style={{ cursor: "pointer" }}
               onClick={(e) => {
                 e.stopPropagation();
-                if (e.shiftKey) {
+                if (
+                  e.shiftKey &&
+                  lastClickedIndex &&
+                  lastClickedIndex !== row.index
+                ) {
                   // set all between
-                  if (!lastClickedIndex) {
-                    setLastClickedIndex(row.index);
-                  } else {
-                  }
-                  console.log(row.index);
+                  const slicedIds = statementsLocal.slice(
+                    lastClickedIndex,
+                    row.index + 1
+                  );
+                  const mappedIds = slicedIds.map((statement) => statement.id);
+                  const concatedIds = selectedRows.concat(mappedIds);
+
+                  setSelectedRows([...new Set(concatedIds)]);
+                } else {
+                  handleRowSelect(row.id);
                 }
-                handleRowSelect(row.id);
+                setLastClickedIndex(row.index);
               }}
             />
           );
@@ -360,7 +370,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
         },
       },
     ];
-  }, [statementsLocal, rowsExpanded, right, selectedRows]);
+  }, [statementsLocal, rowsExpanded, right, selectedRows, lastClickedIndex]);
 
   const {
     getTableProps,
