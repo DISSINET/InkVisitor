@@ -114,6 +114,26 @@ export const StatementListTable: React.FC<StatementListTable> = ({
     false
   );
 
+  const handleSelection = (
+    lastClickedIndex: number,
+    rowIndex: number
+  ): string[] => {
+    let selectedStatements: IResponseStatement[] = [];
+    if (lastClickedIndex < rowIndex) {
+      selectedStatements = statementsLocal.slice(
+        lastClickedIndex,
+        rowIndex + 1
+      );
+    } else {
+      // is bigger than - oposite direction of selection
+      selectedStatements = statementsLocal.slice(
+        rowIndex,
+        lastClickedIndex + 1
+      );
+    }
+    return selectedStatements.map((statement) => statement.id);
+  };
+
   const columns: Column<{}>[] = useMemo(() => {
     return [
       {
@@ -140,26 +160,13 @@ export const StatementListTable: React.FC<StatementListTable> = ({
                   lastClickedIndex !== row.index
                 ) {
                   // unset all between
-                  let deselectedStatements: IResponseStatement[] = [];
-                  if (lastClickedIndex < row.index) {
-                    deselectedStatements = statementsLocal.slice(
-                      lastClickedIndex,
-                      row.index + 1
-                    );
-                  } else {
-                    // is bigger than - oposite direction of selection
-                    deselectedStatements = statementsLocal.slice(
-                      row.index,
-                      lastClickedIndex + 1
-                    );
-                  }
-                  const mappedIds = deselectedStatements.map(
-                    (statement) => statement.id
+                  const mappedIds = handleSelection(
+                    lastClickedIndex,
+                    row.index
                   );
                   const filteredIds = selectedRows.filter(
                     (id) => !mappedIds.includes(id)
                   );
-
                   setSelectedRows(filteredIds);
                 } else {
                   handleRowSelect(row.id);
@@ -174,30 +181,15 @@ export const StatementListTable: React.FC<StatementListTable> = ({
               style={{ cursor: "pointer" }}
               onClick={(e) => {
                 e.stopPropagation();
-
                 if (
                   e.shiftKey &&
                   lastClickedIndex !== false &&
                   lastClickedIndex !== row.index
                 ) {
                   // set all between
-                  let selectedStatements: IResponseStatement[] = [];
-
-                  if (lastClickedIndex < row.index) {
-                    selectedStatements = statementsLocal.slice(
-                      lastClickedIndex,
-                      row.index + 1
-                    );
-                  } else {
-                    // is bigger than - oposite direction of selection
-                    selectedStatements = statementsLocal.slice(
-                      row.index,
-                      lastClickedIndex + 1
-                    );
-                  }
-
-                  const mappedIds = selectedStatements.map(
-                    (statement) => statement.id
+                  const mappedIds = handleSelection(
+                    lastClickedIndex,
+                    row.index
                   );
                   setSelectedRows([...new Set(selectedRows.concat(mappedIds))]);
                 } else {
