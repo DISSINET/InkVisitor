@@ -134,11 +134,37 @@ export const StatementListTable: React.FC<StatementListTable> = ({
               style={{ cursor: "pointer" }}
               onClick={(e) => {
                 e.stopPropagation();
-                if (e.shiftKey) {
+                if (
+                  e.shiftKey &&
+                  lastClickedIndex !== false &&
+                  lastClickedIndex !== row.index
+                ) {
                   // unset all between
+                  let deselectedStatements: IResponseStatement[] = [];
+                  if (lastClickedIndex < row.index) {
+                    deselectedStatements = statementsLocal.slice(
+                      lastClickedIndex,
+                      row.index + 1
+                    );
+                  } else {
+                    // is bigger than - oposite direction of selection
+                    deselectedStatements = statementsLocal.slice(
+                      row.index,
+                      lastClickedIndex + 1
+                    );
+                  }
+                  const mappedIds = deselectedStatements.map(
+                    (statement) => statement.id
+                  );
+                  const filteredIds = selectedRows.filter(
+                    (id) => !mappedIds.includes(id)
+                  );
+
+                  setSelectedRows(filteredIds);
+                } else {
+                  handleRowSelect(row.id);
                 }
                 setLastClickedIndex(row.index);
-                handleRowSelect(row.id);
               }}
             />
           ) : (
@@ -148,20 +174,32 @@ export const StatementListTable: React.FC<StatementListTable> = ({
               style={{ cursor: "pointer" }}
               onClick={(e) => {
                 e.stopPropagation();
+
                 if (
                   e.shiftKey &&
-                  lastClickedIndex &&
+                  lastClickedIndex !== false &&
                   lastClickedIndex !== row.index
                 ) {
                   // set all between
-                  const slicedIds = statementsLocal.slice(
-                    lastClickedIndex,
-                    row.index + 1
-                  );
-                  const mappedIds = slicedIds.map((statement) => statement.id);
-                  const concatedIds = selectedRows.concat(mappedIds);
+                  let selectedStatements: IResponseStatement[] = [];
 
-                  setSelectedRows([...new Set(concatedIds)]);
+                  if (lastClickedIndex < row.index) {
+                    selectedStatements = statementsLocal.slice(
+                      lastClickedIndex,
+                      row.index + 1
+                    );
+                  } else {
+                    // is bigger than - oposite direction of selection
+                    selectedStatements = statementsLocal.slice(
+                      row.index,
+                      lastClickedIndex + 1
+                    );
+                  }
+
+                  const mappedIds = selectedStatements.map(
+                    (statement) => statement.id
+                  );
+                  setSelectedRows([...new Set(selectedRows.concat(mappedIds))]);
                 } else {
                   handleRowSelect(row.id);
                 }
