@@ -8,11 +8,16 @@ import {
 import api from "api";
 import { AxiosResponse } from "axios";
 import { Button, ButtonGroup } from "components";
-import { BreadcrumbItem, EntitySuggester } from "components/advanced";
+import {
+  AttributeButtonGroup,
+  BreadcrumbItem,
+  EntitySuggester,
+} from "components/advanced";
 import { CStatement } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
-import { FaPlus, FaRecycle } from "react-icons/fa";
+import { FaClone, FaPlus, FaRecycle } from "react-icons/fa";
+import { ImBoxRemove } from "react-icons/im";
 import {
   MdOutlineCheckBox,
   MdOutlineCheckBoxOutlineBlank,
@@ -90,6 +95,8 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
   const [excludedMoveTerritories, setExcludedMoveTerritories] = useState<
     string[]
   >([territoryId]);
+
+  const [duplicateSelection, setDuplicateSelection] = useState(false);
 
   useEffect(() => {
     const toExclude = [territoryId];
@@ -201,6 +208,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
           <BreadcrumbItem territoryId={territoryId} territoryData={data} />
         </React.Fragment>
       </StyledHeaderBreadcrumbRow>
+
       <StyledHeaderRow>
         {isFavorited && (
           <StyledFaStar size={18} color={theme.color["warning"]} />
@@ -243,9 +251,51 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
       </StyledHeaderRow>
 
       <StyledSuggesterRow>
-        <div style={{ paddingLeft: ".5rem" }}>{renderCheckBox()}</div>
+        <div
+          style={{
+            paddingLeft: ".5rem",
+            display: "flex",
+            alignItems: "center",
+          }}
+        >
+          {renderCheckBox()}
+
+          {selectedRows.length > 0 && (
+            <>
+              <AttributeButtonGroup
+                options={[
+                  {
+                    longValue: "move",
+                    shortValue: "",
+                    onClick: () => setDuplicateSelection(false),
+                    selected: !duplicateSelection,
+                    shortIcon: <ImBoxRemove />,
+                  },
+                  {
+                    longValue: "duplicate",
+                    shortValue: "",
+                    onClick: () => setDuplicateSelection(true),
+                    selected: duplicateSelection,
+                    shortIcon: <FaClone />,
+                  },
+                ]}
+              />
+              <EntitySuggester
+                disableTemplatesAccept
+                filterEditorRights
+                disableCreate
+                categoryTypes={[EntityEnums.Class.Territory]}
+                onSelected={(newSelectedId: string) => {
+                  // TODO: implement batch move
+                }}
+                excludedActantIds={[data.id]}
+              />
+            </>
+          )}
+        </div>
+
         <div>
-          {"Move to parent:\xa0"}
+          {"Move T. to parent:\xa0"}
           <EntitySuggester
             disableTemplatesAccept
             filterEditorRights
