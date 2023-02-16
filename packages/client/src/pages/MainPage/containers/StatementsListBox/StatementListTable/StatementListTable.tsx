@@ -8,8 +8,9 @@ import {
   IStatement,
 } from "@shared/types";
 import { AxiosResponse } from "axios";
-import { Button, ButtonGroup, Checkbox, TagGroup } from "components";
+import { Button, ButtonGroup, TagGroup } from "components";
 import { EntityTag } from "components/advanced";
+import { useSearchParams } from "hooks";
 import update from "immutability-helper";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { BsArrowDown, BsArrowUp } from "react-icons/bs";
@@ -90,6 +91,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
   setSelectedRows,
 }) => {
   const dispatch = useAppDispatch();
+  const { territoryId } = useSearchParams();
   const rowsExpanded: { [key: string]: boolean } = useAppSelector(
     (state) => state.statementList.rowsExpanded
   );
@@ -97,6 +99,13 @@ export const StatementListTable: React.FC<StatementListTable> = ({
   const [statementsLocal, setStatementsLocal] = useState<IResponseStatement[]>(
     []
   );
+  const [lastClickedIndex, setLastClickedIndex] = useState<number | false>(
+    false
+  );
+
+  useEffect(() => {
+    setLastClickedIndex(false);
+  }, [territoryId]);
 
   useEffect(() => {
     setStatementsLocal(statements);
@@ -115,10 +124,6 @@ export const StatementListTable: React.FC<StatementListTable> = ({
       setSelectedRows([...selectedRows, rowId]);
     }
   };
-
-  const [lastClickedIndex, setLastClickedIndex] = useState<number | false>(
-    false
-  );
 
   const handleSelection = (
     lastClickedIndex: number,
