@@ -55,6 +55,7 @@ const theme = {
 
     tableSelection: "#bce5ff",
     tableSelectionHover: "#e0f3ff",
+    focusedCheckbox: "rgba(9,16,52,0.1)",
 
     staging: "#911111",
     "data-import": "#99004C",

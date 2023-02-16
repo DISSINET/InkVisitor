@@ -305,6 +305,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
                     data.statements.filter((statement) =>
                       selectedRows.includes(statement.id)
                     );
+                  console.log(newSelectedId, statementsToMove);
                   // updateTerritoryMutation.mutate({
                   //   territoryId: newSelectedId,
                   //   statements: statementsToMove,

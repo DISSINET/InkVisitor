@@ -67,3 +67,23 @@ export const StyledTdMove = styled.td`
 export const StyledTdLastEdit = styled(StyledTd)`
   font-size: ${({ theme }) => theme.fontSize["xxs"]};
 `;
+interface StyledFocusedCircle {
+  checked: boolean;
+}
+export const StyledFocusedCircle = styled.span<StyledFocusedCircle>`
+  position: absolute;
+  background-color: ${({ theme }) => theme.color.focusedCheckbox};
+  width: 3.2rem;
+  height: 3.2rem;
+  border-radius: 50%;
+  border: 1px solid ${({ theme }) => theme.color.focusedCheckbox};
+  transform: translate(-50%, -50%);
+  top: 50%;
+  left: 50%;
+`;
+export const StyledCheckboxWrapper = styled.div`
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;

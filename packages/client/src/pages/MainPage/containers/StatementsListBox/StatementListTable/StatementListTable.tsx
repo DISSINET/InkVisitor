@@ -39,7 +39,13 @@ import theme from "Theme/theme";
 import { StatementListContextMenu } from "../StatementListContextMenu/StatementListContextMenu";
 import { StyledText } from "../StatementLitBoxStyles";
 import { StatementListRow } from "./StatementListRow";
-import { StyledTable, StyledTh, StyledTHead } from "./StatementListTableStyles";
+import {
+  StyledCheckboxWrapper,
+  StyledFocusedCircle,
+  StyledTable,
+  StyledTh,
+  StyledTHead,
+} from "./StatementListTableStyles";
 
 interface StatementListTable {
   statements: IResponseStatement[];
@@ -147,57 +153,64 @@ export const StatementListTable: React.FC<StatementListTable> = ({
           const checked = selectedRows.includes(row.id);
           const isFocused = lastClickedIndex === row.index;
 
-          return checked ? (
-            <MdOutlineCheckBox
-              size={size}
-              color={isFocused ? theme.color.info : theme.color.black}
-              style={{ cursor: "pointer" }}
-              onClick={(e) => {
-                e.stopPropagation();
-                if (
-                  e.shiftKey &&
-                  lastClickedIndex !== false &&
-                  lastClickedIndex !== row.index
-                ) {
-                  // unset all between
-                  const mappedIds = handleSelection(
-                    lastClickedIndex,
-                    row.index
-                  );
-                  const filteredIds = selectedRows.filter(
-                    (id) => !mappedIds.includes(id)
-                  );
-                  setSelectedRows(filteredIds);
-                } else {
-                  handleRowSelect(row.id);
-                }
-                setLastClickedIndex(row.index);
-              }}
-            />
-          ) : (
-            <MdOutlineCheckBoxOutlineBlank
-              size={size}
-              color={isFocused ? theme.color.info : theme.color.black}
-              style={{ cursor: "pointer" }}
-              onClick={(e) => {
-                e.stopPropagation();
-                if (
-                  e.shiftKey &&
-                  lastClickedIndex !== false &&
-                  lastClickedIndex !== row.index
-                ) {
-                  // set all between
-                  const mappedIds = handleSelection(
-                    lastClickedIndex,
-                    row.index
-                  );
-                  setSelectedRows([...new Set(selectedRows.concat(mappedIds))]);
-                } else {
-                  handleRowSelect(row.id);
-                }
-                setLastClickedIndex(row.index);
-              }}
-            />
+          return (
+            <StyledCheckboxWrapper>
+              {isFocused && <StyledFocusedCircle checked={checked} />}
+              {checked ? (
+                <MdOutlineCheckBox
+                  size={size}
+                  color={theme.color.black}
+                  style={{ cursor: "pointer", zIndex: 2 }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (
+                      e.shiftKey &&
+                      lastClickedIndex !== false &&
+                      lastClickedIndex !== row.index
+                    ) {
+                      // unset all between
+                      const mappedIds = handleSelection(
+                        lastClickedIndex,
+                        row.index
+                      );
+                      const filteredIds = selectedRows.filter(
+                        (id) => !mappedIds.includes(id)
+                      );
+                      setSelectedRows(filteredIds);
+                    } else {
+                      handleRowSelect(row.id);
+                    }
+                    setLastClickedIndex(row.index);
+                  }}
+                />
+              ) : (
+                <MdOutlineCheckBoxOutlineBlank
+                  size={size}
+                  color={theme.color.black}
+                  style={{ cursor: "pointer", zIndex: 2 }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (
+                      e.shiftKey &&
+                      lastClickedIndex !== false &&
+                      lastClickedIndex !== row.index
+                    ) {
+                      // set all between
+                      const mappedIds = handleSelection(
+                        lastClickedIndex,
+                        row.index
+                      );
+                      setSelectedRows([
+                        ...new Set(selectedRows.concat(mappedIds)),
+                      ]);
+                    } else {
+                      handleRowSelect(row.id);
+                    }
+                    setLastClickedIndex(row.index);
+                  }}
+                />
+              )}
+            </StyledCheckboxWrapper>
           );
         },
       },
