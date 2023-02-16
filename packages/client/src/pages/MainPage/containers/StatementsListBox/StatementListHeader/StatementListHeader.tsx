@@ -1,6 +1,7 @@
 import { EntityEnums, UserEnums } from "@shared/enums";
 import {
   IResponseGeneric,
+  IResponseStatement,
   IResponseTerritory,
   IResponseTree,
   IStatement,
@@ -51,6 +52,15 @@ interface StatementListHeader {
     string,
     unknown
   >;
+  updateTerritoryMutation: UseMutationResult<
+    AxiosResponse<IResponseGeneric>,
+    unknown,
+    {
+      territoryId: string;
+      statements: IResponseStatement[];
+    },
+    unknown
+  >;
   isFavorited?: boolean;
 
   isAllSelected: boolean;
@@ -61,8 +71,9 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
   data,
   addStatementAtTheEndMutation,
   moveTerritoryMutation,
-  isFavorited,
+  updateTerritoryMutation,
 
+  isFavorited,
   isAllSelected,
   selectedRows,
   setSelectedRows,
@@ -97,6 +108,10 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
   >([territoryId]);
 
   const [duplicateSelection, setDuplicateSelection] = useState(false);
+
+  useEffect(() => {
+    setSelectedRows([]);
+  }, [territoryId]);
 
   useEffect(() => {
     const toExclude = [territoryId];
@@ -265,14 +280,14 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
               <AttributeButtonGroup
                 options={[
                   {
-                    longValue: "move",
+                    longValue: `move ${selectedRows.length} S.`,
                     shortValue: "",
                     onClick: () => setDuplicateSelection(false),
                     selected: !duplicateSelection,
                     shortIcon: <ImBoxRemove />,
                   },
                   {
-                    longValue: "duplicate",
+                    longValue: `duplicate ${selectedRows.length} S.`,
                     shortValue: "",
                     onClick: () => setDuplicateSelection(true),
                     selected: duplicateSelection,
@@ -286,7 +301,14 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
                 disableCreate
                 categoryTypes={[EntityEnums.Class.Territory]}
                 onSelected={(newSelectedId: string) => {
-                  // TODO: implement batch move
+                  const statementsToMove: IResponseStatement[] =
+                    data.statements.filter((statement) =>
+                      selectedRows.includes(statement.id)
+                    );
+                  // updateTerritoryMutation.mutate({
+                  //   territoryId: newSelectedId,
+                  //   statements: statementsToMove,
+                  // });
                 }}
                 excludedActantIds={[data.id]}
               />
@@ -295,7 +317,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
         </div>
 
         <div>
-          {"Move T. to parent:\xa0"}
+          {"Move to parent:\xa0"}
           <EntitySuggester
             disableTemplatesAccept
             filterEditorRights
