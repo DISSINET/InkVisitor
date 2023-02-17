@@ -275,7 +275,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
         >
           {renderCheckBox()}
 
-          {selectedRows.length > 0 && (
+          {
             <>
               <AttributeButtonGroup
                 options={[
@@ -294,6 +294,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
                     shortIcon: <FaClone />,
                   },
                 ]}
+                disabled={selectedRows.length < 1}
               />
               <EntitySuggester
                 disableTemplatesAccept
@@ -314,7 +315,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
                 excludedActantIds={[data.id]}
               />
             </>
-          )}
+          }
         </div>
 
         <div>

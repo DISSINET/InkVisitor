@@ -19,3 +19,14 @@ export const StyledPropButtonGroup = styled.div<StyledPropButtonGroup>`
     ${({ theme }) => theme.color["gray"][600]};
   max-width: fit-content;
 `;
+
+interface StyledButtonWrap {
+  leftMargin?: boolean;
+  rightMargin?: boolean;
+}
+export const StyledButtonWrap = styled.div<StyledButtonWrap>`
+  margin-left: ${({ theme, leftMargin }) =>
+    leftMargin ? theme.space[3] : theme.space[0]};
+  margin-right: ${({ theme, rightMargin }) =>
+    rightMargin ? theme.space[3] : theme.space[0]};
+`;
