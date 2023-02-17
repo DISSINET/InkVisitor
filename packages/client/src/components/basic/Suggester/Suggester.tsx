@@ -237,6 +237,7 @@ export const Suggester: React.FC<Suggester> = ({
             onBlur={() => setIsFocused(false)}
             disableTyping
             suggester
+            disabled={disabled}
           />
           <TypeBar entityLetter={category.value} />
           <Input
@@ -256,6 +257,7 @@ export const Suggester: React.FC<Suggester> = ({
             onEnterPressFn={() => {
               handleEnterPress();
             }}
+            disabled={disabled}
           />
           {typed.length > 0 && (
             <StyledSuggestionCancelButton hasButton={!disableCreate}>
@@ -273,6 +275,7 @@ export const Suggester: React.FC<Suggester> = ({
                 onClick={() => {
                   handleAddBtnClick();
                 }}
+                disabled={disabled}
               />
             </StyledSuggesterButton>
           )}

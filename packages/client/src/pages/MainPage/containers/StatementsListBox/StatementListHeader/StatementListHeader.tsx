@@ -29,6 +29,7 @@ import { useAppSelector } from "redux/hooks";
 import theme from "Theme/theme";
 import { collectTerritoryChildren, searchTree } from "utils";
 import {
+  StyledActionsWrapper,
   StyledButtons,
   StyledFaStar,
   StyledHeader,
@@ -266,13 +267,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
       </StyledHeaderRow>
 
       <StyledSuggesterRow>
-        <div
-          style={{
-            paddingLeft: ".5rem",
-            display: "flex",
-            alignItems: "center",
-          }}
-        >
+        <StyledActionsWrapper>
           {renderCheckBox()}
 
           {
@@ -280,23 +275,24 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
               <AttributeButtonGroup
                 options={[
                   {
-                    longValue: `move ${selectedRows.length} S.`,
+                    longValue: `move ${selectedRows.length} S`,
                     shortValue: "",
                     onClick: () => setDuplicateSelection(false),
                     selected: !duplicateSelection,
                     shortIcon: <ImBoxRemove />,
                   },
                   {
-                    longValue: `duplicate ${selectedRows.length} S.`,
+                    longValue: `duplicate ${selectedRows.length} S`,
                     shortValue: "",
                     onClick: () => setDuplicateSelection(true),
                     selected: duplicateSelection,
                     shortIcon: <FaClone />,
                   },
                 ]}
-                disabled={selectedRows.length < 1}
+                disabled={selectedRows.length === 0}
               />
               <EntitySuggester
+                placeholder="to territory"
                 disableTemplatesAccept
                 filterEditorRights
                 disableCreate
@@ -313,10 +309,11 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
                   // });
                 }}
                 excludedActantIds={[data.id]}
+                disabled={selectedRows.length === 0}
               />
             </>
           }
-        </div>
+        </StyledActionsWrapper>
 
         <div>
           {"Move to parent:\xa0"}

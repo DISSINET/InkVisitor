@@ -35,3 +35,8 @@ export const StyledSuggesterRow = styled.div`
   color: ${({ theme }) => theme.color["info"]};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
 `;
+export const StyledActionsWrapper = styled.div`
+  padding-left: 0.5rem;
+  display: flex;
+  align-items: center;
+`;

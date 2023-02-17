@@ -29,6 +29,8 @@ interface EntitySuggester {
   disableTemplateInstantiation?: boolean;
   disableWildCard?: boolean;
   disableTemplatesAccept?: boolean;
+
+  disabled?: boolean;
 }
 
 export const EntitySuggester: React.FC<EntitySuggester> = ({
@@ -49,6 +51,8 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
   disableTemplateInstantiation = false,
   disableWildCard = false,
   disableTemplatesAccept = false,
+
+  disabled = false,
 }) => {
   const [typed, setTyped] = useState<string>("");
   const debouncedTyped = useDebounce(typed, 100);
@@ -337,6 +341,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
       isInsideTemplate={isInsideTemplate}
       territoryParentId={territoryParentId}
       userOptions={user.options}
+      disabled={disabled}
     />
   ) : (
     <div />
