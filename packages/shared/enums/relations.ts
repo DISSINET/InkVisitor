@@ -56,5 +56,8 @@ export namespace RelationEnums {
     Type.ActionEventEquivalent,
     Type.Classification,
     Type.Identification,
+    Type.SubjectSemantics,
+    Type.Actant1Semantics,
+    Type.Actant2Semantics,
   ];
 }
