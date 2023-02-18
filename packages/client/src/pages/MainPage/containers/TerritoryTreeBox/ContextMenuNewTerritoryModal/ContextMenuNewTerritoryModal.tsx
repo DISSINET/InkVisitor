@@ -14,7 +14,7 @@ import {
 import { CTerritory } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
-import { useMutation, useQueryClient } from "react-query";
+import { useMutation, useQuery, useQueryClient } from "react-query";
 import { toast } from "react-toastify";
 import { setTreeInitialized } from "redux/features/territoryTree/treeInitializeSlice";
 import { useAppDispatch } from "redux/hooks";
@@ -33,6 +33,26 @@ export const ContextMenuNewTerritoryModal: React.FC<
   }, []);
 
   const queryClient = useQueryClient();
+
+  // get user data
+  const userId = localStorage.getItem("userid");
+  const {
+    status: statusUser,
+    data: user,
+    error: errorUser,
+    isFetching: isFetchingUser,
+  } = useQuery(
+    ["user", userId],
+    async () => {
+      if (userId) {
+        const res = await api.usersGet(userId);
+        return res.data;
+      } else {
+        return false;
+      }
+    },
+    { enabled: !!userId && api.isLoggedIn() }
+  );
 
   const { setTerritoryId, appendDetailId, setSelectedDetailId } =
     useSearchParams();
@@ -58,12 +78,14 @@ export const ContextMenuNewTerritoryModal: React.FC<
   );
 
   const handleCreateTerritory = () => {
-    if (territoryName.length > 0) {
+    if (territoryName.length > 0 && user) {
       const newTerritory: ITerritory = CTerritory(
+        localStorage.getItem("userrole") as UserEnums.Role,
+        user.options,
         territoryName,
+        "",
         territoryActantId,
-        EntityEnums.Order.Last,
-        localStorage.getItem("userrole") as UserEnums.Role
+        EntityEnums.Order.Last
       );
       createTerritoryMutation.mutate(newTerritory);
     } else {

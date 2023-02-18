@@ -467,16 +467,17 @@ export const CStatementAction = (
 
 export const CStatement = (
   userRole: UserEnums.Role,
-  territoryId?: string,
+  userOptions: UserOptions,
   label?: string,
-  detail?: string
+  detail?: string,
+  territoryId?: string
 ): IStatement => {
   const newStatement: IStatement = {
     id: uuidv4(),
     class: EntityEnums.Class.Statement,
     label: label ? label : "",
     detail: detail ? detail : "",
-    language: EntityEnums.Language.Latin,
+    language: userOptions.defaultLanguage,
     notes: [],
     data: {
       actions: [],
@@ -505,17 +506,18 @@ export const CStatement = (
 };
 
 export const CTerritory = (
-  label: string,
-  parentId: string,
-  parentOrder: number,
   userRole: UserEnums.Role,
-  detail?: string
+  userOptions: UserOptions,
+  label: string,
+  detail: string,
+  parentId: string,
+  parentOrder: number
 ): ITerritory => ({
   id: uuidv4(),
   class: EntityEnums.Class.Territory,
   label: label,
-  detail: detail ? detail : "",
-  language: EntityEnums.Language.Latin,
+  detail: detail,
+  language: userOptions.defaultLanguage,
   notes: [],
   data: {
     parent: { territoryId: parentId, order: parentOrder },

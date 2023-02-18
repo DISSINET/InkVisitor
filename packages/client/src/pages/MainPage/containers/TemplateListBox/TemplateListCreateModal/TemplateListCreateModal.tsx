@@ -102,14 +102,19 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
     }
   );
 
-  const handleCreateNewStatementTemplate = (): IEntity => {
-    const newTemplate = CStatement(
-      localStorage.getItem("userrole") as UserEnums.Role,
-      undefined,
-      createModalEntityLabel,
-      createModalEntityDetail
-    );
-    return newTemplate;
+  const handleCreateNewStatementTemplate = (): IEntity | false => {
+    if (user) {
+      const newTemplate = CStatement(
+        localStorage.getItem("userrole") as UserEnums.Role,
+        user.options,
+        createModalEntityLabel,
+        createModalEntityDetail,
+        undefined
+      );
+      return newTemplate;
+    } else {
+      return false;
+    }
   };
   const handleCreateNewEntityTemplate = (): IEntity | false => {
     if (user) {

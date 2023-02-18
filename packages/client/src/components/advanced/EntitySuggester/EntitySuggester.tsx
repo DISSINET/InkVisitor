@@ -58,9 +58,8 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
   const { appendDetailId, setSelectedDetailId } = useSearchParams();
   const userRole = localStorage.getItem("userrole");
 
-  const userId = localStorage.getItem("userid");
-
   // get user data
+  const userId = localStorage.getItem("userid");
   const {
     status: statusUser,
     data: user,
@@ -194,18 +193,20 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
       ) {
         const newStatement = CStatement(
           localStorage.getItem("userrole") as UserEnums.Role,
-          newCreated.territoryId,
+          user.options,
           newCreated.label,
-          newCreated.detail
+          newCreated.detail,
+          newCreated.territoryId
         );
         actantsCreateMutation.mutate(newStatement);
       } else if (newCreated.entityClass === EntityEnums.Class.Territory) {
         const newTerritory = CTerritory(
-          newCreated.label,
-          newCreated.territoryId ? newCreated.territoryId : rootTerritoryId,
-          -1,
           localStorage.getItem("userrole") as UserEnums.Role,
-          newCreated.detail
+          user.options,
+          newCreated.label,
+          newCreated.detail || "",
+          newCreated.territoryId ? newCreated.territoryId : rootTerritoryId,
+          -1
         );
         actantsCreateMutation.mutate(newTerritory);
       } else {
