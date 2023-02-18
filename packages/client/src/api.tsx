@@ -542,6 +542,41 @@ class Api {
     }
   }
 
+  async statementsBatchMove(
+    statementsIds: string[],
+    territoryId: string
+  ): Promise<AxiosResponse<IResponseGeneric>> {
+    try {
+      const response = await this.connection.put(
+        `/statements/batch-move?ids=${statementsIds.join(",")}`,
+        {
+          territoryId
+        }
+      );
+      return response;
+    } catch (err: any | AxiosError) {
+      throw { ...err.response.data };
+    }
+  }
+
+  async statementsBatchCopy(
+    statementsIds: string[],
+    territoryId: string
+  ): Promise<AxiosResponse<IResponseGeneric>> {
+    try {
+      const response = await this.connection.post(
+        `/statements/batch-copy?ids=${statementsIds.join(",")}`,
+        {
+          territoryId
+        }
+      );
+      // response.data.data should have list of new ids
+      return response;
+    } catch (err: any | AxiosError) {
+      throw { ...err.response.data };
+    }
+  }
+
   /**
    * Pernmissions
    */
