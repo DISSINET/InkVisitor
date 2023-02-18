@@ -8,7 +8,6 @@ import {
 } from "@shared/types";
 import api from "api";
 import { LetterIcon, Tooltip } from "components";
-import { useDebounce } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
 import { AiOutlineTag } from "react-icons/ai";
 import { BiCommentDetail } from "react-icons/bi";
@@ -72,6 +71,7 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
   const [tooltipData, setTooltipData] = useState<
     EntityTooltipNamespace.IResponse | false
   >(false);
+
   const [allowFetch, setAllowFetch] = useState(false);
 
   useEffect(() => {
