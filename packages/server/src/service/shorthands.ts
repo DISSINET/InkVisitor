@@ -34,7 +34,7 @@ export async function findEntityById<T extends IEntity>(
 export async function createEntity(
   db: Db,
   data: IDbModel
-): Promise<WriteResult> {
+): Promise<boolean> {
   if (!data.isValid()) {
     throw new ModelNotValidError("");
   }

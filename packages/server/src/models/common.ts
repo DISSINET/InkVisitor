@@ -10,7 +10,7 @@ export interface IModel {
 
 export interface IDbModel extends IModel {
   id: string;
-  save(dbInstance: Connection | undefined): Promise<WriteResult>;
+  save(dbInstance: Connection | undefined): Promise<boolean>;
   update(
     dbInstance: Connection | undefined,
     updateData: Record<string, unknown>

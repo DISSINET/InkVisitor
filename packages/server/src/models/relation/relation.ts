@@ -133,7 +133,12 @@ export default class Relation implements IRelationModel {
     return childs.filter(ch => ch.id !== this.id);
   }
 
-  async save(db: Connection | undefined): Promise<WriteResult> {
+  /**
+  * Stores the relation in the db
+  * @param db db connection
+  * @returns Promise<boolean> to indicate result of the operation
+  */
+  async save(db: Connection | undefined): Promise<boolean> {
     const result = await rethink
       .table(Relation.table)
       .insert({ ...this, id: this.id || undefined })
@@ -143,7 +148,7 @@ export default class Relation implements IRelationModel {
       this.id = result.generated_keys[0];
     }
 
-    return result;
+    return result.inserted === 1;
   }
 
 

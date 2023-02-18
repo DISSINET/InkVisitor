@@ -181,27 +181,19 @@ export default Router()
 
       await request.db.lock();
 
-      const result = await model.save(request.db.connection);
-
-      if (
-        result.first_error &&
-        result.first_error.indexOf("Duplicate") !== -1
-      ) {
-        throw new ModelNotValidError("id already exists");
-      }
-
-      if (result.inserted === 1) {
-        await Audit.createNew(
-          request,
-          model.id,
-          request.body
-        );
-        return {
-          result: true,
-        };
-      } else {
+      const saved = await model.save(request.db.connection);
+      if (!saved) {
         throw new InternalServerError(`cannot create entity`);
       }
+
+      await Audit.createNew(
+        request,
+        model.id,
+        request.body
+      );
+      return {
+        result: true,
+      };
     })
   )
   /**

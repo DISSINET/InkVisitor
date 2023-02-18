@@ -339,11 +339,11 @@ class Statement extends Entity implements IStatement {
   }
 
   /**
-   * Stores the statement data in the db
+   * Stores the statement in the db
    * @param db db connection
-   * @returns write result of the db operation
+   * @returns Promise<boolean> to indicate result of the operation
    */
-  async save(db: Connection | undefined): Promise<WriteResult> {
+  async save(db: Connection | undefined): Promise<boolean> {
     const siblings = await this.findTerritorySiblings(db);
     if (this.data.territory) {
       this.data.territory.order = determineOrder(
@@ -352,11 +352,12 @@ class Statement extends Entity implements IStatement {
       );
     }
 
-    const res = await super.save(db);
+    const result = await super.save(db);
+    if (result) {
+      await treeCache.initialize();
+    }
 
-    await treeCache.initialize();
-
-    return res;
+    return result;
   }
 
   /**

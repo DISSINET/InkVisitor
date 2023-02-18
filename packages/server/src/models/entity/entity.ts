@@ -10,7 +10,7 @@ import {
   EntityEnums,
   UserEnums,
 } from "@shared/enums";
-import { InternalServerError } from "@shared/types/errors";
+import { InternalServerError, ModelNotValidError } from "@shared/types/errors";
 import User from "@models/user/user";
 import emitter from "@models/events/emitter";
 import { EventTypes } from "@models/events/types";
@@ -55,7 +55,12 @@ export default class Entity implements IEntity, IDbModel {
     }
   }
 
-  async save(db: Connection | undefined): Promise<WriteResult> {
+  /**
+  * Stores the entity in the db
+  * @param db db connection
+  * @returns Promise<boolean> to indicate result of the operation
+  */
+  async save(db: Connection | undefined): Promise<boolean> {
     const result = await rethink
       .table(Entity.table)
       .insert({ ...this, id: this.id || undefined })
@@ -65,7 +70,14 @@ export default class Entity implements IEntity, IDbModel {
       this.id = result.generated_keys[0];
     }
 
-    return result;
+    if (
+      result.first_error &&
+      result.first_error.indexOf("Duplicate") !== -1
+    ) {
+      throw new ModelNotValidError("id already exists");
+    }
+
+    return result.inserted === 1;
   }
 
   update(
@@ -184,7 +196,7 @@ export default class Entity implements IEntity, IDbModel {
 
     // get usedTemplate entity
     if (this.usedTemplate) {
-      entityIds[this.usedTemplate] = null
+      entityIds[this.usedTemplate] = null;
     }
 
     Entity.extractIdsFromProps(this.props).forEach((element) => {

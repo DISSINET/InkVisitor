@@ -261,31 +261,30 @@ export default Router()
       await request.db.lock();
 
       const hash = user.generateHash();
-      const result = await user.save(request.db.connection);
-
-      if (result.inserted === 1) {
-        try {
-          await mailer.sendTemplate(
-            user.email,
-            userCreatedTemplate(
-              user.name,
-              domainName(),
-              `${hostUrl()}/activate?hash=${hash}`
-            )
-          );
-        } catch (e) {
-          throw new EmailError(
-            "please check the logs",
-            (e as Error).toString()
-          );
-        }
-
-        return {
-          result: true,
-        };
-      } else {
-        throw new InternalServerError("cannot create user");
+      const saved = await user.save(request.db.connection);
+      if (!saved) {
+        throw new InternalServerError(`cannot create user`);
       }
+
+      try {
+        await mailer.sendTemplate(
+          user.email,
+          userCreatedTemplate(
+            user.name,
+            domainName(),
+            `${hostUrl()}/activate?hash=${hash}`
+          )
+        );
+      } catch (e) {
+        throw new EmailError(
+          "please check the logs",
+          (e as Error).toString()
+        );
+      }
+
+      return {
+        result: true,
+      };
     })
   )
   /**
