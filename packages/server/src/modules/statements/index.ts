@@ -5,10 +5,11 @@ import {
   InternalServerError,
   PermissionDeniedError,
   StatementDoesNotExits,
+  TerritoryDoesNotExits,
 } from "@shared/types/errors";
 import { asyncRouteHandler } from "..";
-import { IResponseGeneric, IResponseStatement, IStatement } from "@shared/types";
-import Statement from "@models/statement/statement";
+import { IResponseGeneric, IResponseStatement, IStatement, ITerritory } from "@shared/types";
+import Statement, { StatementTerritory } from "@models/statement/statement";
 import { ResponseStatement } from "@models/statement/response";
 import { EntityEnums } from "@shared/enums";
 import { IRequest } from "src/custom_typings/request";
@@ -48,10 +49,7 @@ export default Router()
         throw new BadParams("statement id has to be set");
       }
 
-      const statementData = await findEntityById<IStatement>(
-        request.db,
-        statementId
-      );
+      const statementData = await findEntityById<IStatement>(request.db, statementId);
 
       if (!statementData || statementData.class !== EntityEnums.Class.Statement) {
         throw new StatementDoesNotExits(
@@ -164,5 +162,82 @@ export default Router()
       } else {
         throw new InternalServerError(`cannot update statement ${model.id}`);
       }
+    })
+  )
+  /**
+   * @openapi
+   * /statements/batch-move:
+   *   put:
+   *     description: Move N statements under specific territory
+   *     tags:
+   *       - entities
+   *     parameters:
+   *       - in: query
+   *         name: statementId
+   *         schema:
+   *           type: array
+   *           items:
+   *             type: string
+   *         required: true
+   *         description: statements ids which should be moved
+   *     requestBody:
+   *       description: territory id to be used
+   *       content: 
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             properties:
+   *               territoryId: 
+   *                 type: string
+   *     responses:
+   *       200:
+   *         description: Returns generic response
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/IResponseGeneric"
+   */
+  .put(
+    "/batch-move",
+    asyncRouteHandler<IResponseGeneric>(async (request: IRequest) => {
+      let statementsIds = request.query.ids;
+      const newTerritoryId = request.body.territoryId;
+
+      if (statementsIds && statementsIds.constructor.name == "String") {
+        statementsIds = statementsIds.split(",");
+      }
+      if (!statementsIds || statementsIds.constructor.name !== "Array") {
+        throw new BadParams("statement ids are required");
+      }
+      if (!newTerritoryId) {
+        throw new BadParams("territory id is required");
+      }
+
+      await request.db.lock();
+
+      const territory = await findEntityById<ITerritory>(request.db, newTerritoryId);
+      if (!territory || territory.class !== EntityEnums.Class.Territory) {
+        throw new TerritoryDoesNotExits(
+          `territory ${newTerritoryId} was not found`,
+          newTerritoryId,
+        );
+      }
+
+      const statements = await Entity.findEntitiesByIds(request.db.connection, statementsIds);
+      const statementsCount = statements.reduce((acc, cur) => cur.class === EntityEnums.Class.Statement ? acc + 1 : acc, 0);
+      if (statementsCount !== statementsIds.length) {
+        throw new StatementDoesNotExits("at least one statement not found", "");
+      }
+
+      for (const statementData of statements) {
+        const model = new Statement({ ...statementData as IStatement });
+        model.data.territory = new StatementTerritory({ territoryId: newTerritoryId });
+        await model.update(request.db.connection, { data: model.data });
+      }
+
+      return {
+        result: true,
+        message: `${statementsCount} statements has been moved under '${territory.label}'`
+      };
     })
   );
