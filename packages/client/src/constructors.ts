@@ -278,10 +278,12 @@ export const applyTemplate = async (
       newEntity.id = entity.id;
 
       // #1554
-      if (templateEntity.class === EntityEnums.Class.Statement) {
-        newEntity.label = "";
-      } else {
-        newEntity.label = `[INSTANCE OF] ${templateEntity.label}`;
+      if (!entity.label) {
+        if (templateEntity.class === EntityEnums.Class.Statement) {
+          newEntity.label = "";
+        } else {
+          newEntity.label = `[INSTANCE OF] ${templateEntity.label}`;
+        }
       }
       newEntity.usedTemplate = templateEntity.id;
       newEntity.props = await InstProps(templateEntity.props);
