@@ -23,13 +23,6 @@ export interface TableSchema {
   indexes?: ((table: RTable) => any)[];
 }
 
-export function parseArgs(): [datasetId: string, env: string] {
-  const datasetId: string = process.argv[2];
-  const env = process.argv[3];
-
-  return [datasetId, env];
-}
-
 export const prepareDbConnection = async (
   config: RConnectionOptions
 ): Promise<Connection> => {

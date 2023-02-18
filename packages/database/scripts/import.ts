@@ -4,10 +4,8 @@ import { IAudit } from "../../shared/types";
 import { Relation } from "../../shared/types/relation";
 import { r, RConnectionOptions, Connection, Func } from "rethinkdb-ts";
 import tunnel from "tunnel-ssh";
-import { Server } from "net";
 import { confirm } from './import/prompts';
 import {
-  parseArgs,
   prepareDbConnection,
   DbSchema,
   TableSchema,
@@ -16,13 +14,11 @@ import {
 import { auditsIndexes, entitiesIndexes, relationsIndexes } from "./indexes";
 import { EntityEnums } from "@shared/enums";
 import { question } from "./import/prompts";
+import { DbHelper } from "./import/db";
+import { getEnv } from "./import/common";
+import { ISshConfig, SshHelper, startSshTunnel } from "./import/ssh";
+import { Server } from "net";
 
-const [datasetId, env] = parseArgs();
-const envData = require("dotenv").config({ path: `env/.env.${env}` }).parsed;
-
-if (!envData) {
-  throw new Error(`Cannot load env file env/.env.${env}`);
-}
 /*
 const datasets: Record<string, DbSchema> = {
   all: {
@@ -316,87 +312,10 @@ enum MODES {
   IMPORT_DATA = 1 << 2,
 }
 
-interface ISshConfig {
-  sshIp: string;
-  sshUsername: string;
-  sshPassword: string;
-}
-
-interface IDbConfig {
-  name: string;
-  host: string;
-  port: number;
-  password: string;
-}
-
-function getEnv(envName: string): string {
-  if (envData[envName] !== undefined) {
-    return envData[envName] as string;
-  }
-
-  throw new Error(`ENV variable '${envName}' is required`);
-}
-
-class DbHelper {
-  database: string = "";
-  conn?: Connection;
-  dbConfig: IDbConfig;
-
-  constructor() {
-    this.dbConfig = {
-      host: getEnv("DB_HOST"),
-      port: parseInt(getEnv("DB_PORT")),
-      name: getEnv("DB_NAME"),
-      password: getEnv("DB_PASS"),
-    };
-  }
-
-  async connect(): Promise<void> {
-    try {
-      this.conn = await r.connect(this.dbConfig);
-    } catch (e) {
-      throw new Error(`Cannot connect to the db: ${e}`);
-    }
-  }
-
-  async dbDrop(name: string): Promise<void> {
-    try {
-      await r.dbDrop(name).run(this.conn);
-      console.log("Database dropped");
-    } catch (e) {
-      console.log(`Database not dropped ('${name}'). Does not exist?`);
-    }
-  }
-
-  async dbCreate(): Promise<void> {
-    try {
-      await r.dbCreate(this.dbConfig.name).run(this.conn);
-      console.log("Database created");
-    } catch (e) {
-      throw new Error(`Database not created: ${e}`);
-    }
-  }
-
-  async dbList(): Promise<string[]> {
-    try {
-      return await r.dbList().run(this.conn);
-    } catch (e) {
-      throw new Error(`Cannot retieve db list: ${e}`);
-    }
-  }
-
-  useDb(dbName: string) {
-    console.log(`Using db ${dbName}`);
-    this.dbConfig.name = dbName;
-    this.conn?.use(dbName);
-  }
-}
-
 class Importer {
-
   mode: MODES = 0;
-  sshConfig?: ISshConfig;
   db: DbHelper;
+  ssh?: SshHelper;
 
   constructor(initialModes: MODES[]) {
     for (const mode of initialModes) {
@@ -406,17 +325,37 @@ class Importer {
     this.db = new DbHelper();
   }
 
+  /**
+   * Enables run mode by setting required config bit
+   * @param mode 
+   */
   enableMode(mode: MODES) {
     this.mode = this.mode | mode;
   }
 
-  modeEnabled(mode: MODES) {
-    return this.mode & mode;
+  /**
+   * Predicate for testing if mode has been enabled (if config bit is set)
+   * @param mode
+   * @returns result
+   */
+  modeEnabled(mode: MODES): boolean {
+    return !!(this.mode & mode);
   }
 
+  /**
+   * Starts the lifecycle by initiating the optional ssh connection and mandatory db connection.
+   * Then starts polling for user input and doing actions afterwards.
+   */
   async run(): Promise<void> {
     if (this.modeEnabled(MODES.USE_SSH) && (await confirm("Use SSH connection?"))) {
-      await this.startSshTunnel();
+      this.ssh = new SshHelper({
+        sshIp: getEnv("SSH_IP"),
+        sshPassword: getEnv("SSH_PASSWORD"),
+        sshUsername: getEnv("SSH_USERNAME"),
+        dstPort: this.db.dbConfig.port,
+        localPort: this.db.dbConfig.port,
+      });
+      await this.ssh.startSshTunnel();
     }
 
     await this.db.connect();
@@ -426,21 +365,21 @@ class Importer {
     } while (1);
   }
 
-  async selectDb(): Promise<void> {
-    const dbNames = await this.db.dbList();
-    console.log(`Databases: ${["", ...dbNames.map((name, i) => `${name} (${i + 1})}`)].join("\n- ")}`);
-
-    const dbName = await question<string>("Choose the db (name/number)", (input: string): string | undefined => {
-      if (parseInt(input) > 0) {
-        input = dbNames[parseInt(input) - 1];
-      }
-
-      return dbNames.find(name => name === input);
-    }, "");
-
-    this.db.useDb(dbName);
+  /**
+   * Closes any pending connections, cleanups
+   * @returns Promise<void>
+   */
+  async end(): Promise<void> {
+    if (this.ssh) {
+      await this.ssh.end();
+    }
+    await this.db.end();
   }
 
+  /**
+   * Shows the main menu and waits for user input
+   * @returns Promise<void>
+   */
   async selectAction(): Promise<void> {
     let that = this;
     const menu: Record<string, { description: string, action: Function; }> = {
@@ -461,32 +400,23 @@ class Importer {
     return menu[actionChoice].action();
   }
 
-  startSshTunnel() {
-    this.sshConfig = {
-      sshIp: getEnv("SSH_IP"),
-      sshPassword: getEnv("SSH_PASSWORD"),
-      sshUsername: getEnv("SSH_USERNAME"),
-    };
+  /**
+   * Action which asks which db should be used in the following session
+   * @returns Promise<void>
+   */
+  async selectDb(): Promise<void> {
+    const dbNames = await this.db.dbList();
+    console.log(`Databases: ${["", ...dbNames.map((name, i) => `${name} (${i + 1})}`)].join("\n- ")}`);
 
-    return new Promise((resolve, reject) => {
-      const tnl = tunnel(
-        {
-          host: this.sshConfig?.sshIp,
-          dstPort: this.db.dbConfig.port, // using the same port as db
-          localPort: this.db.dbConfig.port,  // using the same port as db
-          username: envData.SSH_USERNAME,
-          password: envData.SSH_PASSWORD,
-        },
-        async (error: Error, srv: Server) => {
-          resolve(srv);
-        }
-      );
+    const dbName = await question<string>("Choose the db (name/number)", (input: string): string | undefined => {
+      if (parseInt(input) > 0) {
+        input = dbNames[parseInt(input) - 1];
+      }
 
-      tnl.on("error", function (err) {
-        console.error("SSH connection error:", err);
-        process.exit(1);
-      });
-    });
+      return dbNames.find(name => name === input);
+    }, "");
+
+    this.db.useDb(dbName);
   }
 }
 
