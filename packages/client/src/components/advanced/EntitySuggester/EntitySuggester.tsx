@@ -9,7 +9,7 @@ import { FaHome } from "react-icons/fa";
 import { useMutation, useQuery } from "react-query";
 import { OptionTypeBase, ValueType } from "react-select";
 import { DropdownAny, rootTerritoryId, wildCardChar } from "Theme/constants";
-import { EntityDragItem } from "types";
+import { EntityDragItem, SuggesterItemToCreate } from "types";
 
 interface EntitySuggester {
   categoryTypes: EntityEnums.ExtendedClass[];
@@ -184,6 +184,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
     label: string;
     entityClass: EntityEnums.Class;
     detail?: string;
+    language?: EntityEnums.Language;
     territoryId?: string;
   }) => {
     if (user) {
@@ -193,7 +194,11 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
       ) {
         const newStatement = CStatement(
           localStorage.getItem("userrole") as UserEnums.Role,
-          user.options,
+          {
+            ...user.options,
+            defaultLanguage:
+              newCreated.language || user.options.defaultLanguage,
+          },
           newCreated.label,
           newCreated.detail,
           newCreated.territoryId
@@ -202,7 +207,11 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
       } else if (newCreated.entityClass === EntityEnums.Class.Territory) {
         const newTerritory = CTerritory(
           localStorage.getItem("userrole") as UserEnums.Role,
-          user.options,
+          {
+            ...user.options,
+            defaultLanguage:
+              newCreated.language || user.options.defaultLanguage,
+          },
           newCreated.label,
           newCreated.detail || "",
           newCreated.territoryId ? newCreated.territoryId : rootTerritoryId,
@@ -212,7 +221,11 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
       } else {
         const newEntity = CEntity(
           localStorage.getItem("userrole") as UserEnums.Role,
-          user.options,
+          {
+            ...user.options,
+            defaultLanguage:
+              newCreated.language || user.options.defaultLanguage,
+          },
           newCreated.entityClass,
           newCreated.label,
           newCreated.detail
@@ -306,12 +319,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
       onChangeCategory={(option: ValueType<OptionTypeBase, any> | null) => {
         setSelectedCategory(option);
       }}
-      onCreate={(newCreated: {
-        label: string;
-        entityClass: EntityEnums.Class;
-        detail?: string;
-        territoryId?: string;
-      }) => {
+      onCreate={(newCreated: SuggesterItemToCreate) => {
         handleCreate(newCreated);
       }}
       onPick={(newPicked: IEntity, instantiateTemplate?: boolean) => {
@@ -328,6 +336,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
       inputWidth={inputWidth}
       isInsideTemplate={isInsideTemplate}
       territoryParentId={territoryParentId}
+      userOptions={user.options}
     />
   ) : (
     <div />

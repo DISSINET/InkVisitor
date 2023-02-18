@@ -1,3 +1,4 @@
+import { languageDict } from "@shared/dictionaries";
 import { EntityEnums, UserEnums } from "@shared/enums";
 import { IOption } from "@shared/types";
 import api from "api";
@@ -30,6 +31,7 @@ interface SuggesterCreateModal {
   typed: string;
   category: IOption;
   categories: IOption[];
+  defaultLanguage: EntityEnums.Language | false;
   onCreate: (item: SuggesterItemToCreate) => void;
   closeModal: () => void;
 }
@@ -37,6 +39,7 @@ export const SuggesterCreateModal: React.FC<SuggesterCreateModal> = ({
   typed,
   category,
   categories,
+  defaultLanguage,
   onCreate,
   closeModal,
 }) => {
@@ -49,6 +52,8 @@ export const SuggesterCreateModal: React.FC<SuggesterCreateModal> = ({
   const [selectedCategory, setSelectedCategory] = useState<any>(
     category.value !== DropdownAny ? category : categories[0]
   );
+  const [selectedLanguage, setSelectedLanguage] =
+    useState<any>(defaultLanguage);
 
   const [label, setLabel] = useState<string>(typed);
   const [detail, setDetail] = useState<string>("");
@@ -61,6 +66,7 @@ export const SuggesterCreateModal: React.FC<SuggesterCreateModal> = ({
       label: label,
       entityClass: selectedCategory.value,
       detail: detail,
+      language: selectedLanguage,
       territoryId: territoryId,
     });
     closeModal();
@@ -140,6 +146,20 @@ export const SuggesterCreateModal: React.FC<SuggesterCreateModal> = ({
                 value={detail}
                 onChangeFn={(newType: string) => setDetail(newType)}
                 changeOnType
+              />
+            </ModalInputWrap>
+            <ModalInputLabel>{"Language: "}</ModalInputLabel>
+            <ModalInputWrap>
+              <Dropdown
+                isMulti={false}
+                width="full"
+                options={languageDict}
+                value={languageDict.find(
+                  (i: any) => i.value === selectedLanguage
+                )}
+                onChange={(newValue: any) => {
+                  setSelectedLanguage(newValue.value);
+                }}
               />
             </ModalInputWrap>
             {/* Suggester territory */}
