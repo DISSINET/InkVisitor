@@ -86,6 +86,7 @@ export const StatementListBox: React.FC = () => {
     }
   }, [statements, rowsExpanded]);
 
+  // get user
   const userId = localStorage.getItem("userid");
   const {
     status: userStatus,
@@ -202,45 +203,50 @@ export const StatementListBox: React.FC = () => {
   const addStatementAtCertainIndex = async (index: number) => {
     let newOrder: number | false = false;
 
-    if (index + 1 > statements.length) {
-      // last one
-      newOrder = EntityEnums.Order.Last;
-    } else {
-      if (index < 1 && statements[0].data.territory) {
-        // first one
-        newOrder = EntityEnums.Order.First;
-      } else if (
-        statements[index - 1].data.territory &&
-        statements[index].data.territory
-      ) {
-        // somewhere between
-        newOrder =
-          ((
-            statements[index - 1].data.territory as {
-              order: number;
-              territoryId: string;
-            }
-          ).order +
-            (
-              statements[index].data.territory as {
+    if (userData) {
+      if (index + 1 > statements.length) {
+        // last one
+        newOrder = EntityEnums.Order.Last;
+      } else {
+        if (index < 1 && statements[0].data.territory) {
+          // first one
+          newOrder = EntityEnums.Order.First;
+        } else if (
+          statements[index - 1].data.territory &&
+          statements[index].data.territory
+        ) {
+          // somewhere between
+          newOrder =
+            ((
+              statements[index - 1].data.territory as {
                 order: number;
                 territoryId: string;
               }
-            ).order) /
-          2;
+            ).order +
+              (
+                statements[index].data.territory as {
+                  order: number;
+                  territoryId: string;
+                }
+              ).order) /
+            2;
+        }
       }
-    }
 
-    if (newOrder) {
-      const newStatement: IStatement = CStatement(
-        localStorage.getItem("userrole") as UserEnums.Role,
-        territoryId
-      );
-      (
-        newStatement.data.territory as { order: number; territoryId: string }
-      ).order = newOrder;
+      if (newOrder) {
+        const newStatement: IStatement = CStatement(
+          localStorage.getItem("userrole") as UserEnums.Role,
+          userData.options,
+          "",
+          "",
+          territoryId
+        );
+        (
+          newStatement.data.territory as { order: number; territoryId: string }
+        ).order = newOrder;
 
-      actantsCreateMutation.mutate(newStatement);
+        actantsCreateMutation.mutate(newStatement);
+      }
     }
   };
 

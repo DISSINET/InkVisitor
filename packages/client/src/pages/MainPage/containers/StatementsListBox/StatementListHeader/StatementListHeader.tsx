@@ -5,6 +5,7 @@ import {
   IResponseTree,
   IStatement,
 } from "@shared/types";
+import api from "api";
 import { AxiosResponse } from "axios";
 import { Button, ButtonGroup } from "components";
 import { BreadcrumbItem, EntitySuggester } from "components/advanced";
@@ -12,7 +13,7 @@ import { CStatement } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
 import { FaPlus, FaRecycle } from "react-icons/fa";
-import { UseMutationResult, useQueryClient } from "react-query";
+import { UseMutationResult, useQuery, useQueryClient } from "react-query";
 import { useAppSelector } from "redux/hooks";
 import theme from "Theme/theme";
 import { collectTerritoryChildren, searchTree } from "utils";
@@ -53,6 +54,26 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
 
   const treeData: IResponseTree | undefined = queryClient.getQueryData("tree");
 
+  // get user data
+  const userId = localStorage.getItem("userid");
+  const {
+    status: statusUser,
+    data: user,
+    error: errorUser,
+    isFetching: isFetchingUser,
+  } = useQuery(
+    ["user", userId],
+    async () => {
+      if (userId) {
+        const res = await api.usersGet(userId);
+        return res.data;
+      } else {
+        return false;
+      }
+    },
+    { enabled: !!userId && api.isLoggedIn() }
+  );
+
   const [excludedMoveTerritories, setExcludedMoveTerritories] = useState<
     string[]
   >([territoryId]);
@@ -80,23 +101,28 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
   );
 
   const handleCreateStatement = () => {
-    const newStatement: IStatement = CStatement(
-      localStorage.getItem("userrole") as UserEnums.Role,
-      territoryId
-    );
-    const { statements } = data;
+    if (user) {
+      const newStatement: IStatement = CStatement(
+        localStorage.getItem("userrole") as UserEnums.Role,
+        user.options,
+        "",
+        "",
+        territoryId
+      );
+      const { statements } = data;
 
-    const lastStatement = statements[statements.length - 1];
-    if (!statements.length) {
-      addStatementAtTheEndMutation.mutate(newStatement);
-    } else if (
-      newStatement?.data?.territory &&
-      lastStatement?.data?.territory
-    ) {
-      newStatement.data.territory.order = statements.length
-        ? lastStatement.data.territory.order + 1
-        : 1;
-      addStatementAtTheEndMutation.mutate(newStatement);
+      const lastStatement = statements[statements.length - 1];
+      if (!statements.length) {
+        addStatementAtTheEndMutation.mutate(newStatement);
+      } else if (
+        newStatement?.data?.territory &&
+        lastStatement?.data?.territory
+      ) {
+        newStatement.data.territory.order = statements.length
+          ? lastStatement.data.territory.order + 1
+          : 1;
+        addStatementAtTheEndMutation.mutate(newStatement);
+      }
     }
   };
 
