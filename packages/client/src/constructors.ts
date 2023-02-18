@@ -11,6 +11,7 @@ import {
   ITerritory,
   IAction,
 } from "@shared/types";
+import { UserOptions } from "@shared/types/response-user";
 
 import {
   IStatementClassification,
@@ -530,9 +531,10 @@ export const CTerritory = (
 });
 
 export const CEntity = (
+  userRole: UserEnums.Role,
+  userOptions: UserOptions,
   entityClass: EntityEnums.Class,
   label: string,
-  userRole: UserEnums.Role,
   detail?: string
 ): IEntity => {
   return {
@@ -545,7 +547,7 @@ export const CEntity = (
       userRole === UserEnums.Role.Admin
         ? EntityEnums.Status.Approved
         : EntityEnums.Status.Pending,
-    language: EntityEnums.Language.Latin,
+    language: userOptions.defaultLanguage,
     notes: [],
     props: [],
     references: [],
