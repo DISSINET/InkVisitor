@@ -231,6 +231,7 @@ export default Router()
 
       for (const statementData of statements) {
         const model = new Statement({ ...statementData as IStatement });
+        //update territory
         model.data.territory = new StatementTerritory({ territoryId: newTerritoryId });
         await model.update(request.db.connection, { data: model.data });
       }
@@ -238,6 +239,89 @@ export default Router()
       return {
         result: true,
         message: `${statementsCount} statements has been moved under '${territory.label}'`
+      };
+    })
+  )
+  /**
+  * @openapi
+  * /statements/batch-copy:
+  *   post:
+  *     description: Copy N statements under new territory
+  *     tags:
+  *       - entities
+  *     parameters:
+  *       - in: query
+  *         name: statementId
+  *         schema:
+  *           type: array
+  *           items:
+  *             type: string
+  *         required: true
+  *         description: statements ids which should be copied
+  *     requestBody:
+  *       description: territory id to be used
+  *       content: 
+  *         application/json:
+  *           schema:
+  *             type: object
+  *             properties:
+  *               territoryId: 
+  *                 type: string
+  *     responses:
+  *       200:
+  *         description: Returns generic response
+  *         content:
+  *           application/json:
+  *             schema:
+  *               $ref: "#/components/schemas/IResponseGeneric"
+  */
+  .post(
+    "/batch-copy",
+    asyncRouteHandler<IResponseGeneric>(async (request: IRequest) => {
+      let statementsIds = request.query.ids;
+      const newTerritoryId = request.body.territoryId;
+
+      if (statementsIds && statementsIds.constructor.name == "String") {
+        statementsIds = statementsIds.split(",");
+      }
+      if (!statementsIds || statementsIds.constructor.name !== "Array") {
+        throw new BadParams("statement ids are required");
+      }
+      if (!newTerritoryId) {
+        throw new BadParams("territory id is required");
+      }
+
+      await request.db.lock();
+
+      const territory = await findEntityById<ITerritory>(request.db, newTerritoryId);
+      if (!territory || territory.class !== EntityEnums.Class.Territory) {
+        throw new TerritoryDoesNotExits(
+          `territory ${newTerritoryId} was not found`,
+          newTerritoryId,
+        );
+      }
+
+      const statements = await Entity.findEntitiesByIds(request.db.connection, statementsIds);
+      const statementsCount = statements.reduce((acc, cur) => cur.class === EntityEnums.Class.Statement ? acc + 1 : acc, 0);
+      if (statementsCount !== statementsIds.length) {
+        throw new StatementDoesNotExits("at least one statement not found", "");
+      }
+
+      const newIds: string[] = [];
+      for (const statementData of statements) {
+        const model = new Statement({ ...statementData as IStatement });
+        //update territory
+        model.data.territory = new StatementTerritory({ territoryId: newTerritoryId });
+        // make sure the id will be created anew
+        model.id = "";
+        await model.save(request.db.connection);
+        newIds.push(model.id);
+      }
+
+      return {
+        result: true,
+        message: `${statementsCount} statements has been copied under '${territory.label}'`,
+        data: newIds,
       };
     })
   );
