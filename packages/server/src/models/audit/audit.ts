@@ -24,12 +24,11 @@ export default class Audit implements IAudit, IDbModel {
   }
 
   /**
-   * Inserts the Audit entry to the db.
-   * Stores created id in the structure afterwards.
-   * @param db rethinkdb Connection
-   * @returns Promise<WriteResult>
+   * Stores the audit in the db
+   * @param db db connection
+   * @returns boolean to indicate result of the operation
    */
-  async save(db: Connection | undefined): Promise<WriteResult> {
+  async save(db: Connection | undefined): Promise<boolean> {
     const result = await rethink
       .table(Audit.table)
       .insert({ ...this, id: this.id || undefined })
@@ -39,7 +38,7 @@ export default class Audit implements IAudit, IDbModel {
       this.id = result.generated_keys[0];
     }
 
-    return result;
+    return result.inserted === 1;
   }
 
   /**
@@ -78,13 +77,13 @@ export default class Audit implements IAudit, IDbModel {
    * @param req IRequest
    * @param entityId
    * @param updateData blob containing snapshot of entity data
-   * @returns Promise<WriteResult>
+   * @returns Promise<boolean>
    */
   static async createNew(
     req: IRequest,
     entityId: string,
     updateData: object
-  ): Promise<WriteResult> {
+  ): Promise<boolean> {
     const entry = new Audit({
       entityId,
       user: req.getUserOrFail().id,
