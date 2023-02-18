@@ -11,7 +11,7 @@ import {
   ModalFooter,
   ModalHeader,
 } from "components";
-import { CTerritoryActant } from "constructors";
+import { CTerritory } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "react-query";
@@ -59,7 +59,7 @@ export const ContextMenuNewTerritoryModal: React.FC<
 
   const handleCreateTerritory = () => {
     if (territoryName.length > 0) {
-      const newTerritory: ITerritory = CTerritoryActant(
+      const newTerritory: ITerritory = CTerritory(
         territoryName,
         territoryActantId,
         EntityEnums.Order.Last,

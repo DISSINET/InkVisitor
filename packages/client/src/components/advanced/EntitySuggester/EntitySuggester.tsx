@@ -2,12 +2,7 @@ import { EntityEnums, UserEnums } from "@shared/enums";
 import { IEntity, IOption, IStatement, ITerritory } from "@shared/types";
 import api from "api";
 import { Suggester } from "components";
-import {
-  CEntity,
-  CStatement,
-  CTerritoryActant,
-  InstTemplate,
-} from "constructors";
+import { CEntity, CStatement, CTerritory, InstTemplate } from "constructors";
 import { useDebounce, useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
 import { FaHome } from "react-icons/fa";
@@ -62,6 +57,27 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
 
   const { appendDetailId, setSelectedDetailId } = useSearchParams();
   const userRole = localStorage.getItem("userrole");
+
+  const userId = localStorage.getItem("userid");
+
+  // get user data
+  const {
+    status: statusUser,
+    data: user,
+    error: errorUser,
+    isFetching: isFetchingUser,
+  } = useQuery(
+    ["user", userId],
+    async () => {
+      if (userId) {
+        const res = await api.usersGet(userId);
+        return res.data;
+      } else {
+        return false;
+      }
+    },
+    { enabled: !!userId && api.isLoggedIn() }
+  );
 
   // Suggesions query
   const {
@@ -183,7 +199,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
       );
       actantsCreateMutation.mutate(newStatement);
     } else if (newCreated.entityClass === EntityEnums.Class.Territory) {
-      const newTerritory = CTerritoryActant(
+      const newTerritory = CTerritory(
         newCreated.label,
         newCreated.territoryId ? newCreated.territoryId : rootTerritoryId,
         -1,

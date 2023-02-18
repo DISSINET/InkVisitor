@@ -108,45 +108,6 @@ export const CMetaProp = (): IProp => ({
   },
 });
 
-export const CStatement = (
-  userRole: UserEnums.Role,
-  territoryId?: string,
-  label?: string,
-  detail?: string
-): IStatement => {
-  const newStatement: IStatement = {
-    id: uuidv4(),
-    class: EntityEnums.Class.Statement,
-    label: label ? label : "",
-    detail: detail ? detail : "",
-    language: EntityEnums.Language.Latin,
-    notes: [],
-    data: {
-      actions: [],
-      text: "",
-      actants: [],
-      tags: [],
-    },
-    props: [],
-    status:
-      userRole === UserEnums.Role.Admin
-        ? EntityEnums.Status.Approved
-        : EntityEnums.Status.Pending,
-    references: [],
-    isTemplate: false,
-  };
-  if (territoryId) {
-    newStatement.data = {
-      ...newStatement.data,
-      territory: {
-        territoryId: territoryId,
-        order: -1,
-      },
-    };
-  }
-  return newStatement;
-};
-
 export const InstProps: any = async (
   oldProps: IProp[],
   userRole: UserEnums.Role
@@ -503,7 +464,46 @@ export const CStatementAction = (
   statementOrder: newStatementOrder,
 });
 
-export const CTerritoryActant = (
+export const CStatement = (
+  userRole: UserEnums.Role,
+  territoryId?: string,
+  label?: string,
+  detail?: string
+): IStatement => {
+  const newStatement: IStatement = {
+    id: uuidv4(),
+    class: EntityEnums.Class.Statement,
+    label: label ? label : "",
+    detail: detail ? detail : "",
+    language: EntityEnums.Language.Latin,
+    notes: [],
+    data: {
+      actions: [],
+      text: "",
+      actants: [],
+      tags: [],
+    },
+    props: [],
+    status:
+      userRole === UserEnums.Role.Admin
+        ? EntityEnums.Status.Approved
+        : EntityEnums.Status.Pending,
+    references: [],
+    isTemplate: false,
+  };
+  if (territoryId) {
+    newStatement.data = {
+      ...newStatement.data,
+      territory: {
+        territoryId: territoryId,
+        order: -1,
+      },
+    };
+  }
+  return newStatement;
+};
+
+export const CTerritory = (
   label: string,
   parentId: string,
   parentOrder: number,

@@ -307,8 +307,8 @@ class Api {
   }
 
   /**
-   * Administration
-   * Administration container
+   * Bookmarks
+   * Bookmarks container
    */
   async bookmarksGet(
     userId: string
