@@ -16,10 +16,10 @@ import { EntityEnums } from "@shared/enums";
 import { question } from "./import/prompts";
 import { DbHelper } from "./import/db";
 import { getEnv } from "./import/common";
-import { ISshConfig, SshHelper, startSshTunnel } from "./import/ssh";
+import { ISshConfig, SshHelper } from "./import/ssh";
 import { Server } from "net";
 
-/*
+
 const datasets: Record<string, DbSchema> = {
   all: {
     users: {
@@ -220,6 +220,7 @@ const datasets: Record<string, DbSchema> = {
   },
 };
 
+/*
 const config: RConnectionOptions & { tables: DbSchema; } = {
   timeout: 5,
   db: envData.DB_NAME,
@@ -314,8 +315,11 @@ enum MODES {
 
 class Importer {
   mode: MODES = 0;
+
   db: DbHelper;
   ssh?: SshHelper;
+  datasetName?: string;
+  dataset?: DbSchema;
 
   constructor(initialModes: MODES[]) {
     for (const mode of initialModes) {
@@ -347,7 +351,7 @@ class Importer {
    * Then starts polling for user input and doing actions afterwards.
    */
   async run(): Promise<void> {
-    if (this.modeEnabled(MODES.USE_SSH) && (await confirm("Use SSH connection?"))) {
+    if (this.modeEnabled(MODES.USE_SSH) || (await confirm("Use SSH connection?"))) {
       this.ssh = new SshHelper({
         sshIp: getEnv("SSH_IP"),
         sshPassword: getEnv("SSH_PASSWORD"),
@@ -387,13 +391,34 @@ class Importer {
         description: `Press 'L' to switch databases`,
         action: that.selectDb.bind(that)
       },
+      'D': {
+        description: `Press 'D' to select dataset`,
+        action: that.selectDataset.bind(that)
+      },
       'X': {
         description: `Press 'X' to end`,
         action: () => process.exit(0)
-      }
+      },
+      'FI': {
+        description: `Press 'FI' to do a fast drop & import`,
+        action: () => process.exit(0)
+      },
     };
 
-    console.log(`\nImport app\n`);
+    if (!this.datasetName || !this.db.dbConfig.name) {
+      delete (menu['FI']);
+    }
+
+    const info: string[] = [];
+    info.push(`ssh=${!!this.ssh}`);
+    if (this.datasetName) {
+      info.push(`dataset=${this.datasetName}`);
+    }
+    if (this.db.dbConfig.name) {
+      info.push(`db=${this.db.dbConfig.name}`);
+    }
+
+    console.log(`\nImport app${info.length ? ': ' + info.join(", ") : ''}\n`);
     Object.values(menu).forEach(item => console.log(item.description));
 
     const actionChoice = await question<string>("", (input: string): string | undefined => { return Object.keys(menu).find(key => key === input); }, "");
@@ -417,6 +442,25 @@ class Importer {
     }, "");
 
     this.db.useDb(dbName);
+  }
+
+  /**
+   * Action which asks which collection should be used in the following session
+   * @returns Promise<void>
+   */
+  async selectDataset(): Promise<void> {
+    console.log(`Datasets: ${["", ...Object.keys(datasets).map((key, i) => `${key} (${i + 1})}`)].join("\n- ")}`);
+
+    const dataset = await question<string>("Choose the dataset (name/number)", (input: string): string | undefined => {
+      if (parseInt(input) > 0) {
+        input = Object.keys(datasets)[parseInt(input) - 1];
+      }
+
+      return Object.keys(datasets).find(key => key === input);
+    }, "");
+
+    this.dataset = datasets[dataset];
+    this.datasetName = dataset;
   }
 }
 

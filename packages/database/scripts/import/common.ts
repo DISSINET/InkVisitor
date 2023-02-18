@@ -6,10 +6,11 @@ export function parseArgs(): [datasetId: string, env: string] {
 }
 
 const [datasetId, env] = parseArgs();
-const envData = require("dotenv").config({ path: `env/.env.${env}` }).parsed;
+const envFile = `env/.env${env ? "." + env : ''}`;
+const envData = require("dotenv").config({ path: envFile }).parsed;
 
 if (!envData) {
-    throw new Error(`Cannot load env file env/.env.${env}`);
+    throw new Error(`Cannot load env file ${envFile}`);
 }
 
 export function getEnv(envName: string): string {
