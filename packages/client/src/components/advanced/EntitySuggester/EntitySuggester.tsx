@@ -187,34 +187,37 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
     detail?: string;
     territoryId?: string;
   }) => {
-    if (
-      newCreated.entityClass === EntityEnums.Class.Statement &&
-      newCreated.territoryId
-    ) {
-      const newStatement = CStatement(
-        localStorage.getItem("userrole") as UserEnums.Role,
-        newCreated.territoryId,
-        newCreated.label,
-        newCreated.detail
-      );
-      actantsCreateMutation.mutate(newStatement);
-    } else if (newCreated.entityClass === EntityEnums.Class.Territory) {
-      const newTerritory = CTerritory(
-        newCreated.label,
-        newCreated.territoryId ? newCreated.territoryId : rootTerritoryId,
-        -1,
-        localStorage.getItem("userrole") as UserEnums.Role,
-        newCreated.detail
-      );
-      actantsCreateMutation.mutate(newTerritory);
-    } else {
-      const newEntity = CEntity(
-        newCreated.entityClass,
-        newCreated.label,
-        localStorage.getItem("userrole") as UserEnums.Role,
-        newCreated.detail
-      );
-      actantsCreateMutation.mutate(newEntity);
+    if (user) {
+      if (
+        newCreated.entityClass === EntityEnums.Class.Statement &&
+        newCreated.territoryId
+      ) {
+        const newStatement = CStatement(
+          localStorage.getItem("userrole") as UserEnums.Role,
+          newCreated.territoryId,
+          newCreated.label,
+          newCreated.detail
+        );
+        actantsCreateMutation.mutate(newStatement);
+      } else if (newCreated.entityClass === EntityEnums.Class.Territory) {
+        const newTerritory = CTerritory(
+          newCreated.label,
+          newCreated.territoryId ? newCreated.territoryId : rootTerritoryId,
+          -1,
+          localStorage.getItem("userrole") as UserEnums.Role,
+          newCreated.detail
+        );
+        actantsCreateMutation.mutate(newTerritory);
+      } else {
+        const newEntity = CEntity(
+          localStorage.getItem("userrole") as UserEnums.Role,
+          user.options,
+          newCreated.entityClass,
+          newCreated.label,
+          newCreated.detail
+        );
+        actantsCreateMutation.mutate(newEntity);
+      }
     }
   };
 
@@ -282,7 +285,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
     }
   };
 
-  return selectedCategory && allCategories ? (
+  return selectedCategory && allCategories && user ? (
     <Suggester
       isFetching={isFetchingStatement}
       marginTop={false}

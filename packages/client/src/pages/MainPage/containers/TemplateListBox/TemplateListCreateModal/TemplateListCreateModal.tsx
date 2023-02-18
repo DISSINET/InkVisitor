@@ -20,10 +20,11 @@ import {
 import { CEntity, CStatement, CTemplateEntity } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useState } from "react";
-import { useMutation, useQueryClient } from "react-query";
+import { useMutation, useQuery, useQueryClient } from "react-query";
 import { OptionTypeBase, ValueType } from "react-select";
 import { DropdownItem } from "types";
 import { toast } from "react-toastify";
+import { UserOptions } from "@shared/types/response-user";
 
 interface TemplateListCreateModal {
   showCreateModal: boolean;
@@ -59,6 +60,26 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
     resetCreateModal();
   };
 
+  // get user data
+  const userId = localStorage.getItem("userid");
+  const {
+    status: statusUser,
+    data: user,
+    error: errorUser,
+    isFetching: isFetchingUser,
+  } = useQuery(
+    ["user", userId],
+    async () => {
+      if (userId) {
+        const res = await api.usersGet(userId);
+        return res.data;
+      } else {
+        return false;
+      }
+    },
+    { enabled: !!userId && api.isLoggedIn() }
+  );
+
   const templateCreateMutation = useMutation(
     async (newEntity: IEntity) => await api.entityCreate(newEntity),
     {
@@ -90,27 +111,38 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
     );
     return newTemplate;
   };
-  const handleCreateNewEntityTemplate = (): IEntity => {
-    const newTemplate = CEntity(
-      createModalEntityClass.value as EntityEnums.Class,
-      createModalEntityLabel,
-      localStorage.getItem("userrole") as UserEnums.Role,
-      createModalEntityDetail
-    );
-    return newTemplate;
+  const handleCreateNewEntityTemplate = (): IEntity | false => {
+    if (user) {
+      const newTemplate = CEntity(
+        localStorage.getItem("userrole") as UserEnums.Role,
+        user.options,
+        createModalEntityClass.value as EntityEnums.Class,
+        createModalEntityLabel,
+        createModalEntityDetail
+      );
+
+      return newTemplate;
+    } else {
+      return false;
+    }
   };
 
   const handleCreateTemplate = () => {
-    const entity =
-      createModalEntityClass.value === EntityEnums.Class.Statement
-        ? handleCreateNewStatementTemplate()
-        : handleCreateNewEntityTemplate();
-    const templateEntity = CTemplateEntity(
-      entity,
-      createModalEntityLabel,
-      createModalEntityDetail
-    );
-    templateCreateMutation.mutate(templateEntity);
+    if (user) {
+      const entity =
+        createModalEntityClass.value === EntityEnums.Class.Statement
+          ? handleCreateNewStatementTemplate()
+          : handleCreateNewEntityTemplate();
+
+      if (entity) {
+        const templateEntity = CTemplateEntity(
+          entity,
+          createModalEntityLabel,
+          createModalEntityDetail
+        );
+        templateCreateMutation.mutate(templateEntity);
+      }
+    }
   };
 
   return (
