@@ -264,7 +264,7 @@ export const Suggester: React.FC<Suggester> = ({
             <StyledSuggesterButton>
               <Button
                 icon={<FaPlus style={{ fontSize: "16px", padding: "2px" }} />}
-                tooltipLabel="create new actant"
+                tooltipLabel="create new entity"
                 color="primary"
                 inverted={selected !== -1}
                 onClick={() => {

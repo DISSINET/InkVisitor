@@ -590,22 +590,6 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
               </StyledDetailSectionContent>
             </StyledDetailSection>
 
-            {/* reference section */}
-            <StyledDetailSection>
-              <StyledDetailSectionHeader>References</StyledDetailSectionHeader>
-              <StyledDetailSectionContent>
-                <EntityReferenceTable
-                  disabled={!userCanEdit}
-                  references={entity.references || []}
-                  entities={entity.entities}
-                  onChange={(newValues: IReference[]) => {
-                    updateEntityMutation.mutate({ references: newValues });
-                  }}
-                  isInsideTemplate={entity.isTemplate || false}
-                />
-              </StyledDetailSectionContent>
-            </StyledDetailSection>
-
             {/* meta props section */}
             <StyledDetailSection metaSection>
               <StyledDetailSectionHeader>
@@ -658,6 +642,22 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
                     }}
                   />
                 )}
+              </StyledDetailSectionContent>
+            </StyledDetailSection>
+
+            {/* reference section */}
+            <StyledDetailSection>
+              <StyledDetailSectionHeader>References</StyledDetailSectionHeader>
+              <StyledDetailSectionContent>
+                <EntityReferenceTable
+                  disabled={!userCanEdit}
+                  references={entity.references || []}
+                  entities={entity.entities}
+                  onChange={(newValues: IReference[]) => {
+                    updateEntityMutation.mutate({ references: newValues });
+                  }}
+                  isInsideTemplate={entity.isTemplate || false}
+                />
               </StyledDetailSectionContent>
             </StyledDetailSection>
 
