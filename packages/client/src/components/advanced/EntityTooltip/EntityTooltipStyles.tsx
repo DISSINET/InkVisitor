@@ -29,13 +29,14 @@ export const StyledRelations = styled.div`
   row-gap: ${({ theme }) => theme.space[5]};
   margin-top: 1rem;
   padding-bottom: ${({ theme }) => theme.space[1]};
+  vertical-align: middle;
 `;
 export const StyledRelationTypeBlock = styled.div`
   display: flex;
   flex-direction: column;
   margin-left: ${({ theme }) => theme.space[2]};
+  margin-top: 5px;
 `;
-
 export const StyledLetterIconWrap = styled.div`
   display: grid;
   justify-content: center;

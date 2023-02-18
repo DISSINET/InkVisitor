@@ -33,6 +33,9 @@ export class ResponseTooltip
       RelationEnums.Type.ActionEventEquivalent,
       RelationEnums.Type.Classification,
       RelationEnums.Type.Identification,
+      RelationEnums.Type.SubjectSemantics,
+      RelationEnums.Type.Actant1Semantics,
+      RelationEnums.Type.Actant2Semantics,
     ]);
 
     this.addLinkedEntities(
@@ -56,6 +59,17 @@ export class ResponseTooltip
     );
     this.addLinkedEntities(
       this.relations.getEntityIdsFromType(RelationEnums.Type.Identification)
+    );
+
+    // semantics
+    this.addLinkedEntities(
+      this.relations.getEntityIdsFromType(RelationEnums.Type.SubjectSemantics)
+    );
+    this.addLinkedEntities(
+      this.relations.getEntityIdsFromType(RelationEnums.Type.Actant1Semantics)
+    );
+    this.addLinkedEntities(
+      this.relations.getEntityIdsFromType(RelationEnums.Type.Actant2Semantics)
     );
 
     this.entities = await this.populateEntitiesMap(request.db.connection);
