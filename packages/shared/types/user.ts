@@ -1,4 +1,4 @@
-import { UserEnums } from "@shared/enums";
+import { EntityEnums, UserEnums } from "@shared/enums";
 
 export interface IUser {
   id: string;
@@ -20,8 +20,8 @@ export interface IUserRight {
 
 export interface IUserOptions {
   defaultTerritory: string;
-  defaultLanguage: string;
-  searchLanguages: string[];
+  defaultLanguage: EntityEnums.Language;
+  searchLanguages: EntityEnums.Language[];
 }
 
 export interface IStoredTerritory {

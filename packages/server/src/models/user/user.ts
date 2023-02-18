@@ -12,7 +12,7 @@ import {
   fillFlatObject,
   UnknownObject,
 } from "@models/common";
-import { UserEnums } from "@shared/enums";
+import { EntityEnums, UserEnums } from "@shared/enums";
 import { ModelNotValidError } from "@shared/types/errors";
 import { generateRandomString, generateUuid, hashPassword } from "@common/auth";
 import { regExpEscape } from "@common/functions";
@@ -34,8 +34,8 @@ export class UserRight implements IUserRight {
 
 export class UserOptions implements IUserOptions {
   defaultTerritory: string = "";
-  defaultLanguage: string = "";
-  searchLanguages: string[] = [];
+  defaultLanguage: EntityEnums.Language = EntityEnums.Language.English;
+  searchLanguages: EntityEnums.Language[] = [];
 
   constructor(data: Partial<IUserOptions>) {
     fillFlatObject(this, data);
@@ -118,10 +118,10 @@ export default class User implements IUser, IDbModel {
   }
 
   /**
-  * Stores the user in the db
-  * @param db db connection
-  * @returns Promise<boolean> to indicate result of the operation
-  */
+   * Stores the user in the db
+   * @param db db connection
+   * @returns Promise<boolean> to indicate result of the operation
+   */
   async save(dbInstance: Connection | undefined): Promise<boolean> {
     const result = await rethink
       .table(User.table)

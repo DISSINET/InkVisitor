@@ -1,6 +1,6 @@
 import { entitiesDictKeys } from "@shared/dictionaries";
 import { EntityEnums } from "@shared/enums";
-import { IEntity, IOption } from "@shared/types";
+import { IEntity, IOption, IUserOptions } from "@shared/types";
 import { Button, Dropdown, Input, Loader, TypeBar } from "components";
 import useKeypress from "hooks/useKeyPress";
 import React, { useState } from "react";
@@ -62,6 +62,7 @@ interface Suggester {
   isWrongDropCategory?: boolean;
   isInsideTemplate: boolean;
   territoryParentId?: string;
+  userOptions?: IUserOptions;
 }
 
 export const Suggester: React.FC<Suggester> = ({
@@ -89,6 +90,8 @@ export const Suggester: React.FC<Suggester> = ({
   isWrongDropCategory,
   isInsideTemplate = false,
   territoryParentId,
+
+  userOptions,
 }) => {
   const [selected, setSelected] = useState(-1);
   const [isFocused, setIsFocused] = useState(false);
@@ -309,6 +312,7 @@ export const Suggester: React.FC<Suggester> = ({
           typed={typed}
           category={category}
           categories={categories.slice(1)}
+          defaultLanguage={userOptions ? userOptions.defaultLanguage : false}
           onCreate={onCreate}
           closeModal={() => setShowCreateModal(false)}
         />

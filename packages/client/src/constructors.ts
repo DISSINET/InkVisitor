@@ -11,6 +11,7 @@ import {
   ITerritory,
   IAction,
 } from "@shared/types";
+import { UserOptions } from "@shared/types/response-user";
 
 import {
   IStatementClassification,
@@ -107,45 +108,6 @@ export const CMetaProp = (): IProp => ({
     partitivity: EntityEnums.Partitivity.Unison,
   },
 });
-
-export const CStatement = (
-  userRole: UserEnums.Role,
-  territoryId?: string,
-  label?: string,
-  detail?: string
-): IStatement => {
-  const newStatement: IStatement = {
-    id: uuidv4(),
-    class: EntityEnums.Class.Statement,
-    label: label ? label : "",
-    detail: detail ? detail : "",
-    language: EntityEnums.Language.Latin,
-    notes: [],
-    data: {
-      actions: [],
-      text: "",
-      actants: [],
-      tags: [],
-    },
-    props: [],
-    status:
-      userRole === UserEnums.Role.Admin
-        ? EntityEnums.Status.Approved
-        : EntityEnums.Status.Pending,
-    references: [],
-    isTemplate: false,
-  };
-  if (territoryId) {
-    newStatement.data = {
-      ...newStatement.data,
-      territory: {
-        territoryId: territoryId,
-        order: -1,
-      },
-    };
-  }
-  return newStatement;
-};
 
 export const InstProps: any = async (
   oldProps: IProp[],
@@ -316,10 +278,12 @@ export const applyTemplate = async (
       newEntity.id = entity.id;
 
       // #1554
-      if (templateEntity.class === EntityEnums.Class.Statement) {
-        newEntity.label = "";
-      } else {
-        newEntity.label = `[INSTANCE OF] ${templateEntity.label}`;
+      if (!entity.label) {
+        if (templateEntity.class === EntityEnums.Class.Statement) {
+          newEntity.label = "";
+        } else {
+          newEntity.label = `[INSTANCE OF] ${templateEntity.label}`;
+        }
       }
       newEntity.usedTemplate = templateEntity.id;
       newEntity.props = await InstProps(templateEntity.props);
@@ -503,18 +467,59 @@ export const CStatementAction = (
   statementOrder: newStatementOrder,
 });
 
-export const CTerritoryActant = (
-  label: string,
-  parentId: string,
-  parentOrder: number,
+export const CStatement = (
   userRole: UserEnums.Role,
-  detail?: string
+  userOptions: UserOptions,
+  label?: string,
+  detail?: string,
+  territoryId?: string
+): IStatement => {
+  const newStatement: IStatement = {
+    id: uuidv4(),
+    class: EntityEnums.Class.Statement,
+    label: label ? label : "",
+    detail: detail ? detail : "",
+    language: userOptions.defaultLanguage,
+    notes: [],
+    data: {
+      actions: [],
+      text: "",
+      actants: [],
+      tags: [],
+    },
+    props: [],
+    status:
+      userRole === UserEnums.Role.Admin
+        ? EntityEnums.Status.Approved
+        : EntityEnums.Status.Pending,
+    references: [],
+    isTemplate: false,
+  };
+  if (territoryId) {
+    newStatement.data = {
+      ...newStatement.data,
+      territory: {
+        territoryId: territoryId,
+        order: -1,
+      },
+    };
+  }
+  return newStatement;
+};
+
+export const CTerritory = (
+  userRole: UserEnums.Role,
+  userOptions: UserOptions,
+  label: string,
+  detail: string,
+  parentId: string,
+  parentOrder: number
 ): ITerritory => ({
   id: uuidv4(),
   class: EntityEnums.Class.Territory,
   label: label,
-  detail: detail ? detail : "",
-  language: EntityEnums.Language.Latin,
+  detail: detail,
+  language: userOptions.defaultLanguage,
   notes: [],
   data: {
     parent: { territoryId: parentId, order: parentOrder },
@@ -530,9 +535,10 @@ export const CTerritoryActant = (
 });
 
 export const CEntity = (
+  userRole: UserEnums.Role,
+  userOptions: UserOptions,
   entityClass: EntityEnums.Class,
   label: string,
-  userRole: UserEnums.Role,
   detail?: string
 ): IEntity => {
   return {
@@ -545,7 +551,7 @@ export const CEntity = (
       userRole === UserEnums.Role.Admin
         ? EntityEnums.Status.Approved
         : EntityEnums.Status.Pending,
-    language: EntityEnums.Language.Latin,
+    language: userOptions.defaultLanguage,
     notes: [],
     props: [],
     references: [],

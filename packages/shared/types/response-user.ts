@@ -2,6 +2,7 @@
  * type of the /users endpoint response
  */
 
+import { EntityEnums } from "@shared/enums";
 import { IResponseEntity, IUser, IResponseBookmarkFolder } from "./";
 
 export interface IResponseUser
@@ -13,8 +14,8 @@ export interface IResponseUser
 
 export interface UserOptions {
   defaultTerritory: string;
-  defaultLanguage: string;
-  searchLanguages: string[];
+  defaultLanguage: EntityEnums.Language;
+  searchLanguages: EntityEnums.Language[];
 }
 
 export interface IResponseStoredTerritory {
