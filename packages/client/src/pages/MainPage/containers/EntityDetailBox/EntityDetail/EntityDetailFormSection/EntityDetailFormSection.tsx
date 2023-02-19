@@ -152,7 +152,12 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                 Applied Template
               </StyledDetailContentRowLabel>
               <StyledDetailContentRowValue>
-                <EntityTag entity={entity.entities[entity.usedTemplate]} />
+                <div style={{ display: "grid" }}>
+                  <EntityTag
+                    entity={entity.entities[entity.usedTemplate]}
+                    fullWidth
+                  />
+                </div>
               </StyledDetailContentRowValue>
             </StyledDetailContentRow>
           )}

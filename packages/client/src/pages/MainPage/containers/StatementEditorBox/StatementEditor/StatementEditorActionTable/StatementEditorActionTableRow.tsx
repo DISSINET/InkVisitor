@@ -281,7 +281,7 @@ export const StatementEditorActionTableRow: React.FC<
             addProp={addProp}
             movePropToIndex={movePropToIndex}
             userCanEdit={userCanEdit}
-            openDetailOnCreate={false}
+            openDetailOnCreate
             category={category}
             isInsideTemplate={isInsideTemplate}
             territoryParentId={territoryParentId}
