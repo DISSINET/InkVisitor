@@ -74,7 +74,7 @@ export const StyledLabel = styled.div<StyledLabel>`
   border-left-style: ${({ borderStyle }) => borderStyle};
   border-left-color: ${({ theme, status }) => theme.color[status]};
   max-width: ${({ theme, fullWidth }) =>
-    fullWidth ? "100%" : theme.space[52]};
+    fullWidth ? "100%" : theme.space[30]};
 `;
 
 interface StyledButtonWrapper {

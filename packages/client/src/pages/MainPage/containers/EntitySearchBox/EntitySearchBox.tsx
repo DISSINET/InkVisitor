@@ -377,7 +377,7 @@ export const EntitySearchBox: React.FC = () => {
             {cooccurrenceEntity && (
               <EntityTag
                 entity={cooccurrenceEntity}
-                tooltipPosition={"left"}
+                tooltipPosition="left"
                 button={
                   <Button
                     key="d"

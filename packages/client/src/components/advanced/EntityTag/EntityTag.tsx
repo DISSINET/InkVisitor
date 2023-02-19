@@ -33,7 +33,7 @@ export const EntityTag: React.FC<EntityTag> = ({
   tooltipText,
   parentId,
   showOnly,
-  fullWidth,
+  fullWidth = false,
   mode,
   button = false,
   index,

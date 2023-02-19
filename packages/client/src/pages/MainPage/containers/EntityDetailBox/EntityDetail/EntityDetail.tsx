@@ -675,7 +675,12 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
                   <StyledDetailSectionEntityList>
                     {entity.usedAsTemplate.map((entityId) => (
                       <React.Fragment key={entityId}>
-                        <EntityTag entity={entity.entities[entityId]} />
+                        <div style={{ display: "grid" }}>
+                          <EntityTag
+                            entity={entity.entities[entityId]}
+                            fullWidth
+                          />
+                        </div>
                       </React.Fragment>
                     ))}
                   </StyledDetailSectionEntityList>
