@@ -24,7 +24,13 @@ import {
   MdOutlineCheckBoxOutlineBlank,
   MdOutlineIndeterminateCheckBox,
 } from "react-icons/md";
-import { UseMutationResult, useQuery, useQueryClient } from "react-query";
+import {
+  useMutation,
+  UseMutationResult,
+  useQuery,
+  useQueryClient,
+} from "react-query";
+import { toast } from "react-toastify";
 import { useAppSelector } from "redux/hooks";
 import theme from "Theme/theme";
 import { collectTerritoryChildren, searchTree } from "utils";
@@ -80,7 +86,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
   setSelectedRows,
 }) => {
   const queryClient = useQueryClient();
-  const { territoryId } = useSearchParams();
+  const { territoryId, setTerritoryId } = useSearchParams();
 
   const treeData: IResponseTree | undefined = queryClient.getQueryData("tree");
 
@@ -134,6 +140,34 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
 
   const selectedTerritoryPath = useAppSelector(
     (state) => state.territoryTree.selectedTerritoryPath
+  );
+
+  const moveStatementsMutation = useMutation(
+    async (data: { statements: string[]; newTerritoryId: string }) =>
+      await api.statementsBatchMove(data.statements, data.newTerritoryId),
+    {
+      onSuccess: (variables, data) => {
+        queryClient.invalidateQueries("territory");
+        queryClient.invalidateQueries("tree");
+        toast.info("Statements moved");
+        setSelectedRows([]);
+        setTerritoryId(data.newTerritoryId);
+      },
+    }
+  );
+
+  const duplicateStatementsMutation = useMutation(
+    async (data: { statements: string[]; newTerritoryId: string }) =>
+      await api.statementsBatchCopy(data.statements, data.newTerritoryId),
+    {
+      onSuccess: (variables, data) => {
+        queryClient.invalidateQueries("territory");
+        queryClient.invalidateQueries("tree");
+        toast.info("Statements duplicated");
+        setSelectedRows([]);
+        setTerritoryId(data.newTerritoryId);
+      },
+    }
   );
 
   const handleCreateStatement = () => {
@@ -298,15 +332,19 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
                 disableCreate
                 categoryTypes={[EntityEnums.Class.Territory]}
                 onSelected={(newSelectedId: string) => {
-                  const statementsToMove: IResponseStatement[] =
-                    data.statements.filter((statement) =>
-                      selectedRows.includes(statement.id)
-                    );
-                  console.log(newSelectedId, statementsToMove);
-                  // updateTerritoryMutation.mutate({
-                  //   territoryId: newSelectedId,
-                  //   statements: statementsToMove,
-                  // });
+                  if (duplicateSelection) {
+                    duplicateStatementsMutation.mutate({
+                      statements: selectedRows,
+                      newTerritoryId: newSelectedId,
+                    });
+                    // api.statementsBatchCopy(selectedRows, newSelectedId);
+                  } else {
+                    moveStatementsMutation.mutate({
+                      statements: selectedRows,
+                      newTerritoryId: newSelectedId,
+                    });
+                    // api.statementsBatchMove(selectedRows, newSelectedId);
+                  }
                 }}
                 excludedActantIds={[data.id]}
                 disabled={selectedRows.length === 0}
