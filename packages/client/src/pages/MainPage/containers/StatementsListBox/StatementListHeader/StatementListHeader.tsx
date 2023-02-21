@@ -36,7 +36,7 @@ import theme from "Theme/theme";
 import { collectTerritoryChildren, searchTree } from "utils";
 import {
   StyledActionsWrapper,
-  StyledButtons,
+  StyledMoveToParent,
   StyledFaStar,
   StyledHeader,
   StyledHeaderBreadcrumbRow,
@@ -268,36 +268,21 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
             ? `T:\xa0${trimTerritoryLabel(data.label)}`
             : "no territory selected"}
         </StyledHeading>
-        {territoryId && (
-          <StyledButtons>
-            <ButtonGroup marginBottom>
-              {data.right !== UserEnums.RoleMode.Read && (
-                <Button
-                  key="add"
-                  icon={<FaPlus size={14} />}
-                  tooltipLabel="add new statement at the end of the list"
-                  color="primary"
-                  label="new statement"
-                  onClick={() => {
-                    handleCreateStatement();
-                  }}
-                />
-              )}
-              <Button
-                key="refresh"
-                icon={<FaRecycle size={14} />}
-                tooltipLabel="refresh data"
-                inverted
-                color="primary"
-                label="refresh"
-                onClick={() => {
-                  queryClient.invalidateQueries(["territory"]);
-                  queryClient.invalidateQueries(["statement"]);
-                }}
-              />
-            </ButtonGroup>
-          </StyledButtons>
-        )}
+
+        <StyledMoveToParent>
+          {"Move to parent:\xa0"}
+          <EntitySuggester
+            disableTemplatesAccept
+            filterEditorRights
+            inputWidth={96}
+            disableCreate
+            categoryTypes={[EntityEnums.Class.Territory]}
+            onSelected={(newSelectedId: string) => {
+              moveTerritoryMutation.mutate(newSelectedId);
+            }}
+            excludedActantIds={excludedMoveTerritories}
+          />
+        </StyledMoveToParent>
       </StyledHeaderRow>
 
       <StyledSuggesterRow>
@@ -337,13 +322,11 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
                       statements: selectedRows,
                       newTerritoryId: newSelectedId,
                     });
-                    // api.statementsBatchCopy(selectedRows, newSelectedId);
                   } else {
                     moveStatementsMutation.mutate({
                       statements: selectedRows,
                       newTerritoryId: newSelectedId,
                     });
-                    // api.statementsBatchMove(selectedRows, newSelectedId);
                   }
                 }}
                 excludedActantIds={[data.id]}
@@ -353,20 +336,34 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
           }
         </StyledActionsWrapper>
 
-        <div>
-          {"Move to parent:\xa0"}
-          <EntitySuggester
-            disableTemplatesAccept
-            filterEditorRights
-            inputWidth={96}
-            disableCreate
-            categoryTypes={[EntityEnums.Class.Territory]}
-            onSelected={(newSelectedId: string) => {
-              moveTerritoryMutation.mutate(newSelectedId);
-            }}
-            excludedActantIds={excludedMoveTerritories}
-          />
-        </div>
+        {territoryId && (
+          <ButtonGroup marginBottom>
+            {data.right !== UserEnums.RoleMode.Read && (
+              <Button
+                key="add"
+                icon={<FaPlus size={14} />}
+                tooltipLabel="add new statement at the end of the list"
+                color="primary"
+                label="new statement"
+                onClick={() => {
+                  handleCreateStatement();
+                }}
+              />
+            )}
+            <Button
+              key="refresh"
+              icon={<FaRecycle size={14} />}
+              tooltipLabel="refresh data"
+              inverted
+              color="primary"
+              label="refresh"
+              onClick={() => {
+                queryClient.invalidateQueries(["territory"]);
+                queryClient.invalidateQueries(["statement"]);
+              }}
+            />
+          </ButtonGroup>
+        )}
       </StyledSuggesterRow>
     </StyledHeader>
   );

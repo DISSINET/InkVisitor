@@ -20,10 +20,15 @@ export const StyledFaStar = styled(FaStar)`
   margin-top: 0.5rem;
   margin-right: 0.3rem;
 `;
-export const StyledButtons = styled.div`
+export const StyledMoveToParent = styled.div`
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
+  font-weight: ${({ theme }) => theme.fontWeight["normal"]};
+  display: flex;
+  align-items: center;
   float: right;
-  margin-top: 0.3rem;
+  margin-bottom: ${({ theme }) => theme.space[2]};
   margin-left: 0.3rem;
+  margin-top: 0.3rem;
 `;
 export const StyledHeading = styled.span`
   word-wrap: break-word;
