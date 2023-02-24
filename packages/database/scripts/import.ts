@@ -6,9 +6,7 @@ import { r, RConnectionOptions, Connection, Func } from "rethinkdb-ts";
 import tunnel from "tunnel-ssh";
 import { confirm } from './import/prompts';
 import {
-  prepareDbConnection,
   DbSchema,
-  TableSchema,
   checkRelation,
 } from "./import-utils";
 import { auditsIndexes, entitiesIndexes, relationsIndexes } from "./indexes";
@@ -16,8 +14,8 @@ import { EntityEnums } from "@shared/enums";
 import { question } from "./import/prompts";
 import { DbHelper } from "./import/db";
 import { getEnv } from "./import/common";
-import { ISshConfig, SshHelper } from "./import/ssh";
-import { Server } from "net";
+import { SshHelper } from "./import/ssh";
+import colors from "colors/safe";
 
 
 const datasets: Record<string, DbSchema> = {
@@ -220,93 +218,6 @@ const datasets: Record<string, DbSchema> = {
   },
 };
 
-/*
-const config: RConnectionOptions & { tables: DbSchema; } = {
-  timeout: 5,
-  db: envData.DB_NAME,
-  host: envData.DB_HOST,
-  port: envData.DB_PORT,
-  password: process.env.DB_AUTH,
-  tables: datasets[datasetId],
-};
-
-const importTable = async (
-  table: TableSchema,
-  conn: Connection
-): Promise<void> => {
-  await r.tableCreate(table.tableName).run(conn);
-  if (table.indexes) {
-    for (const i in table.indexes) {
-      await table.indexes[i](r.table(table.tableName)).run(conn);
-    }
-  }
-
-  console.log(`Table ${table.tableName} created`);
-
-  table.transform();
-
-  await r.table(table.tableName).insert(table.data).run(conn);
-
-  const itemsImported = await r.table(table.tableName).count().run(conn);
-  console.log(`Imported ${itemsImported} entries to table ${table.tableName}`);
-
-  return;
-};
-
-const importData = async () => {
-  if (!await confirm(`Using db ${config.db}. Continue?`)) {
-    return;
-  }
-
-  const conn = await prepareDbConnection(config);
-
-  console.log(`***importing dataset ${datasetId}***\n`);
-
-  for (const tableConfig of Object.values(config.tables)) {
-    await importTable(tableConfig, conn);
-  }
-
-  console.log("Closing connection");
-  await conn.close({ noreplyWait: true });
-};
-
-(async () => {
-  if (envData.SSH_USERNAME) {
-    if (!await question(`Using the tunnel. Continue?`)) {
-      return;
-    }
-
-    const tnl = tunnel(
-      {
-        host: envData.SSH_IP,
-        dstPort: 28015,
-        localPort: envData.DB_PORT,
-        username: envData.SSH_USERNAME,
-        password: envData.SSH_PASSWORD,
-      },
-      async (error: Error, srv: Server) => {
-        try {
-          await importData();
-        } catch (e) {
-          console.warn(`Encountered error in importData: ${e}`);
-        } finally {
-          await srv.close();
-        }
-      }
-    );
-
-    tnl.on("error", function (err) {
-      console.error("SSH connection error:", err);
-    });
-  } else {
-    try {
-      await importData();
-    } catch (e) {
-      console.warn(e);
-    }
-  }
-})();
-*/
 enum MODES {
   USE_SSH = 1 << 0,
   RECREATE_DATABASE = 1 << 1,
@@ -364,9 +275,19 @@ class Importer {
 
     await this.db.connect();
 
+    if (process.argv.length > 2 && process.argv[2]) {
+      this.db.useDb(process.argv[2]);
+    }
+
     do {
-      await this.selectAction();
+      const lastAction = await this.selectAction();
+      if (lastAction) {
+        break;
+      }
+
     } while (1);
+
+    await this.end();
   }
 
   /**
@@ -384,45 +305,60 @@ class Importer {
    * Shows the main menu and waits for user input
    * @returns Promise<void>
    */
-  async selectAction(): Promise<void> {
+  async selectAction(): Promise<boolean> {
     let that = this;
-    const menu: Record<string, { description: string, action: Function; }> = {
+    const menu: Record<string, { description: string, action: Function; lastAction?: boolean; }> = {
       'L': {
-        description: `Press 'L' to switch databases`,
+        description: `Enter '${colors.yellow('L')}' to switch databases`,
         action: that.selectDb.bind(that)
       },
       'D': {
-        description: `Press 'D' to select dataset`,
+        description: `Enter '${colors.yellow('D')}' to select dataset`,
         action: that.selectDataset.bind(that)
       },
-      'X': {
-        description: `Press 'X' to end`,
-        action: () => process.exit(0)
+      'E': {
+        description: `Enter '${colors.yellow('E')}' to end`,
+        action: () => { },
+        lastAction: true,
       },
-      'FI': {
-        description: `Press 'FI' to do a fast drop & import`,
-        action: () => process.exit(0)
+      'X': {
+        description: `Enter '${colors.yellow('X')}' to do a full recreate & import`,
+        action: that.dropAndImport.bind(that),
+        lastAction: true,
+      },
+      'C': {
+        description: `Enter '${colors.yellow('C')}' to drop and recreate the schema`,
+        action: that.dropAndImport.bind(that),
+        lastAction: true,
       },
     };
 
     if (!this.datasetName || !this.db.dbConfig.name) {
-      delete (menu['FI']);
+      delete (menu['X']);
+      delete (menu['C']);
     }
 
     const info: string[] = [];
-    info.push(`ssh=${!!this.ssh}`);
+    info.push(`ssh=${!!this.ssh ? colors.green('true') : colors.red('false')}`);
     if (this.datasetName) {
-      info.push(`dataset=${this.datasetName}`);
+      info.push(`dataset=${this.datasetName ? colors.green(this.datasetName) : colors.red('not set')}`);
     }
     if (this.db.dbConfig.name) {
-      info.push(`db=${this.db.dbConfig.name}`);
+      info.push(`db=${this.db.dbConfig.name ? colors.green(this.db.dbConfig.name) : colors.red('not set')}`);
     }
 
-    console.log(`\nImport app${info.length ? ': ' + info.join(", ") : ''}\n`);
+    console.log(`\nImport app${info.length ? ': ' + info.join(", ") : ''}`);
+    console.log(`To specify db from the , use ${colors.yellow("npm start <dbname>")}\n`);
     Object.values(menu).forEach(item => console.log(item.description));
 
-    const actionChoice = await question<string>("", (input: string): string | undefined => { return Object.keys(menu).find(key => key === input); }, "");
-    return menu[actionChoice].action();
+    const actionChoice = await question<string>("", (input: string): string | undefined => { return Object.keys(menu).find(key => key.toLowerCase() === input.toLowerCase()); }, "");
+    try {
+      await menu[actionChoice].action();
+      return !!menu[actionChoice].lastAction;
+    } catch (e) {
+      console.log(colors.red(`Something went wrong: ${e}`));
+      return false;
+    }
   }
 
   /**
@@ -461,6 +397,43 @@ class Importer {
 
     this.dataset = datasets[dataset];
     this.datasetName = dataset;
+  }
+
+  /**
+   * Action drops and imports the database without any further prompt
+   * @returns Promise<void>
+   */
+  async dropAndImport(): Promise<void> {
+    if (!this.dataset || !this.db.dbConfig.name) {
+      console.log(colors.red("Dataset / database name not set"));
+      return;
+    }
+
+    await this.db.dbDrop();
+    await this.db.dbCreate();
+    for (const tableConfig of Object.values(this.dataset)) {
+      await this.db.createTables(tableConfig);
+    }
+    for (const tableConfig of Object.values(this.dataset)) {
+      await this.db.importData(tableConfig);
+    }
+  }
+
+  /**
+   * Action drops and creates the database without data
+   * @returns Promise<void>
+   */
+  async dropAndCreate(): Promise<void> {
+    if (!this.dataset || !this.db.dbConfig.name) {
+      console.log(colors.red("Dataset / database name not set"));
+      return;
+    }
+
+    await this.db.dbDrop();
+    await this.db.dbCreate();
+    for (const tableConfig of Object.values(this.dataset)) {
+      await this.db.createTables(tableConfig);
+    }
   }
 }
 

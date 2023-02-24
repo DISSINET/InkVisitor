@@ -45,6 +45,10 @@ export class SshHelper {
         });
     };
 
+    /**
+     * Closes the ssh tunnel
+     * @returns Promise<void>
+     */
     end(): Promise<void> {
         return new Promise((resolve) => {
             if (!this.server) {
