@@ -34,6 +34,10 @@ export
     } catch (e) {
       throw new Error(`Cannot connect to the db: ${e}`);
     }
+
+    if (this.dbConfig.name) {
+      this.useDb(this.dbConfig.name);
+    }
   }
 
   /**
@@ -53,7 +57,7 @@ export
       await r.dbDrop(this.dbConfig.name).run(this.conn);
       console.log(colors.green(`Database ${this.dbConfig.name} dropped`));
     } catch (e) {
-      console.log(colors.yellow(`Database not dropped ('${this.dbConfig.name}'). Does not exist?`));
+      console.log(colors.yellow(`Database not dropped ('${this.dbConfig.name}'). Does is exist?`));
     }
   }
 

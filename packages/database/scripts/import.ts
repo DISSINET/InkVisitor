@@ -13,53 +13,6 @@ import { SshHelper } from "./import/ssh";
 import colors from "colors/safe";
 
 const datasets: Record<string, DbSchema> = {
-  all: {
-    users: {
-      tableName: "users",
-      data: require("../datasets/default/users.json"),
-      transform: function () {
-        this.data = this.data.map((user: IUser) => {
-          user.password = hashPassword(user.password ? user.password : "");
-          return user;
-        });
-      },
-    },
-    aclPermissions: {
-      tableName: "acl_permissions",
-      data: require("../datasets/default/acl_permissions.json"),
-      transform: function () { },
-    },
-    entities: {
-      tableName: "entities",
-      data: require("../datasets/all/entities.json"),
-      transform: function () { },
-      indexes: entitiesIndexes,
-    },
-    audits: {
-      tableName: "audits",
-      data: require("../datasets/all/audits.json"),
-      transform: function () {
-        this.data = this.data.map((audit: IAudit) => {
-          audit.date = new Date(audit.date);
-          return audit;
-        });
-      },
-      indexes: auditsIndexes,
-    },
-    relations: {
-      tableName: "relations",
-      data: require("../datasets/all/relations.json"),
-      transform: function () {
-        this.data = this.data.map((relation: Relation.IRelation) => {
-          if (!relation.order) {
-            relation.order = 1;
-          }
-          return relation;
-        });
-      },
-      indexes: relationsIndexes,
-    },
-  },
   empty: {
     users: {
       tableName: "users",
@@ -97,53 +50,6 @@ const datasets: Record<string, DbSchema> = {
       tableName: "relations",
       data: require("../datasets/empty/relations.json"),
       transform: function () { },
-      indexes: relationsIndexes,
-    },
-  },
-  allparsed: {
-    users: {
-      tableName: "users",
-      data: require("../datasets/all-parsed/users.json"),
-      transform: function () {
-        this.data = this.data.map((user: IUser) => {
-          user.password = hashPassword(user.password ? user.password : "");
-          return user;
-        });
-      },
-    },
-    aclPermissions: {
-      tableName: "acl_permissions",
-      data: require("../datasets/default/acl_permissions.json"),
-      transform: function () { },
-    },
-    entities: {
-      tableName: "entities",
-      data: require("../datasets/all-parsed/entities.json"),
-      transform: function () { },
-      indexes: entitiesIndexes,
-    },
-    audits: {
-      tableName: "audits",
-      data: require("../datasets/all-parsed/audits.json"),
-      transform: function () {
-        this.data = this.data.map((audit: IAudit) => {
-          audit.date = new Date(audit.date);
-          return audit;
-        });
-      },
-      indexes: auditsIndexes,
-    },
-    relations: {
-      tableName: "relations",
-      data: require("../datasets/all-parsed/relations.json"),
-      transform: function () {
-        this.data = this.data.map((relation: Relation.IRelation) => {
-          if (!relation.order) {
-            relation.order = 1;
-          }
-          return relation;
-        });
-      },
       indexes: relationsIndexes,
     },
   },
@@ -322,6 +228,11 @@ class Importer {
       },
       'C': {
         description: `Enter '${colors.yellow('C')}' to drop and recreate without the data`,
+        action: that.dropAndCreate.bind(that),
+        lastAction: true,
+      },
+      'T': {
+        description: `Enter '${colors.yellow('T')}' to create (if does not exist) & import data for single table`,
         action: that.dropAndCreate.bind(that),
         lastAction: true,
       },
