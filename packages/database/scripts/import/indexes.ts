@@ -1,5 +1,5 @@
 import { r, RDatum, RTable, RValue } from "rethinkdb-ts";
-import { DbEnums } from "@shared/enums"
+import { DbEnums } from "@shared/enums";
 
 const entitiesIndexes: ((table: RTable) => any)[] = [
   // if the prop object is missing value/type/children attrs, this wont work! model should handle this
@@ -58,7 +58,7 @@ const entitiesIndexes: ((table: RTable) => any)[] = [
                       ]) as RValue
                     )
                 ) as RValue
-              )
+              );
           });
         }).add(
           row("data")("actants").concatMap((actant: RDatum) => {
@@ -79,10 +79,10 @@ const entitiesIndexes: ((table: RTable) => any)[] = [
                         ]) as RValue
                       )
                   ) as RValue
-                )
+                );
             });
           }) as any
-        ) as any).distinct()
+        ) as any).distinct();
       },
       { multi: true }
     ),
@@ -126,7 +126,7 @@ const entitiesIndexes: ((table: RTable) => any)[] = [
             r.branch(a.hasFields("identifications"), a("identifications").map(function (iRow: RDatum) {
               return iRow("entityId");
             }), []) as any
-          )
+          );
         }).distinct();
       },
       {
