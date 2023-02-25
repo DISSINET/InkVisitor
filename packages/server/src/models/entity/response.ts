@@ -106,7 +106,8 @@ export class ResponseEntity extends Entity implements IResponseEntity {
 
 export class ResponseEntityDetail
   extends ResponseEntity
-  implements IResponseDetail {
+  implements IResponseDetail
+{
   entities: Record<string, IEntity>;
   usedInStatements: IResponseUsedInStatement<EntityEnums.UsedInPosition>[];
   usedInStatementProps: IResponseUsedInStatementProps[];
@@ -148,9 +149,27 @@ export class ResponseEntityDetail
       await Statement.getLinkedEntities(conn, this.id)
     );
 
-    this.walkStatementsDataProps(
-      await Statement.findByDataPropsId(conn, this.id)
+    const statementsByPropsValueType = await Statement.findByDataPropsId(
+      conn,
+      this.id
     );
+
+    // this was added as a hot fix for #1528, this should be done better
+    const statementsByActantActions = await Statement.getLinkedEntities(
+      conn,
+      this.id
+    );
+    statementsByActantActions.forEach((s) => {
+      s.data.actants
+        .filter((a) => a.entityId === this.id)
+        .forEach((a) => {
+          if (a.props.length !== 0) {
+            statementsByPropsValueType.push(s);
+          }
+        });
+    });
+
+    this.walkStatementsDataProps(statementsByPropsValueType);
 
     this.addLinkedEntities(this.usedAsTemplate);
 
@@ -158,12 +177,9 @@ export class ResponseEntityDetail
       await Statement.findByDataActantsCI(conn, this.id)
     );
 
-
     await this.relations.prepare(req, RelationEnums.AllTypes);
     for (const type of RelationEnums.AllTypes) {
-      this.addLinkedEntities(
-        this.relations.getEntityIdsFromType(type)
-      );
+      this.addLinkedEntities(this.relations.getEntityIdsFromType(type));
     }
 
     this.entities = await this.populateEntitiesMap(conn);
@@ -394,7 +410,7 @@ export class ResponseEntityDetail
   walkStatementsDataProps(statements: IStatement[]) {
     for (const statement of statements) {
       for (const action of statement.data.actions) {
-        this.walkStatementDataRecursiveProps(
+        this.walkStatementDataRecursiveProps( 
           statement,
           action.actionId,
           action.props
@@ -423,7 +439,11 @@ export class ResponseEntityDetail
     props: IProp[]
   ) {
     for (const prop of props) {
-      if (prop.type.entityId === this.id || prop.value.entityId === this.id) {
+      if (
+        prop.type.entityId === this.id ||
+        prop.value.entityId === this.id ||
+        originId === this.id
+      ) {
         this.addUsedInStatementProp(
           statement.id,
           originId,

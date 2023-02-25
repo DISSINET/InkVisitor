@@ -1,6 +1,6 @@
 import { entitiesDictKeys } from "@shared/dictionaries";
 import { EntityEnums } from "@shared/enums";
-import { IEntity, IOption } from "@shared/types";
+import { IEntity, IOption, IUserOptions } from "@shared/types";
 import { Button, Dropdown, Input, Loader, TypeBar } from "components";
 import useKeypress from "hooks/useKeyPress";
 import React, { useState } from "react";
@@ -62,6 +62,7 @@ interface Suggester {
   isWrongDropCategory?: boolean;
   isInsideTemplate: boolean;
   territoryParentId?: string;
+  userOptions?: IUserOptions;
 }
 
 export const Suggester: React.FC<Suggester> = ({
@@ -73,7 +74,7 @@ export const Suggester: React.FC<Suggester> = ({
   categories,
   suggestionListPosition,
   disabled,
-  inputWidth = 100,
+  inputWidth = 80,
   disableCreate = false,
   allowDrop = false,
 
@@ -89,6 +90,8 @@ export const Suggester: React.FC<Suggester> = ({
   isWrongDropCategory,
   isInsideTemplate = false,
   territoryParentId,
+
+  userOptions,
 }) => {
   const [selected, setSelected] = useState(-1);
   const [isFocused, setIsFocused] = useState(false);
@@ -219,6 +222,7 @@ export const Suggester: React.FC<Suggester> = ({
           ref={dropRef}
           hasButton={!disableCreate}
           isOver={isOver}
+          hasText={typed.length > 0}
         >
           <Dropdown
             value={{ label: category.label, value: category.value }}
@@ -263,7 +267,7 @@ export const Suggester: React.FC<Suggester> = ({
             <StyledSuggesterButton>
               <Button
                 icon={<FaPlus style={{ fontSize: "16px", padding: "2px" }} />}
-                tooltipLabel="create new actant"
+                tooltipLabel="create new entity"
                 color="primary"
                 inverted={selected !== -1}
                 onClick={() => {
@@ -280,6 +284,7 @@ export const Suggester: React.FC<Suggester> = ({
 
         {((isFocused || isHovered) && suggestions.length) || isFetching ? (
           <StyledSuggesterList
+            noLeftMargin={categories.length === 1}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
           >
@@ -307,6 +312,7 @@ export const Suggester: React.FC<Suggester> = ({
           typed={typed}
           category={category}
           categories={categories.slice(1)}
+          defaultLanguage={userOptions ? userOptions.defaultLanguage : false}
           onCreate={onCreate}
           closeModal={() => setShowCreateModal(false)}
         />

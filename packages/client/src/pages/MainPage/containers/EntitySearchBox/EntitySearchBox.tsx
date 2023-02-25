@@ -1,23 +1,32 @@
+import { entityStatusDict } from "@shared/dictionaries";
 import { DropdownItem, entitiesDict } from "@shared/dictionaries/entity";
 import { EntityEnums } from "@shared/enums";
 import { IEntity, IOption } from "@shared/types";
 import { IRequestSearch } from "@shared/types/request-search";
 import api from "api";
 import { Button, Dropdown, Input, Loader, TypeBar } from "components";
-import { EntitySuggester, EntityTag } from "components/advanced";
+import {
+  AttributeButtonGroup,
+  EntitySuggester,
+  EntityTag,
+} from "components/advanced";
 import { useDebounce } from "hooks";
 import React, { useMemo, useState } from "react";
-import { FaUnlink } from "react-icons/fa";
+import { RiCloseFill } from "react-icons/ri";
 import { useQuery } from "react-query";
 import { OptionTypeBase, ValueType } from "react-select";
 import { wildCardChar } from "Theme/constants";
 import useResizeObserver from "use-resize-observer";
 import {
   StyledBoxContent,
+  StyledDatePicker,
+  StyledDateTag,
+  StyledDateTagButton,
+  StyledDateTagText,
+  StyledResultsHeader,
   StyledResultsWrapper,
   StyledRow,
   StyledRowHeader,
-  StyledTagLoaderWrap,
 } from "./EntitySearchBoxStyles";
 import { EntitySearchResults } from "./EntitySearchResults/EntitySearchResults";
 
@@ -25,22 +34,35 @@ const initValues: IRequestSearch = {
   label: "",
   cooccurrenceId: "",
 };
-const defaultOption = {
+const defaultClassOption: DropdownItem = {
   label: "*",
   value: "",
 };
+
+const defaultStatusOption: DropdownItem = {
+  label: "all",
+  value: "",
+};
+const statusOptions: DropdownItem[] = [defaultStatusOption].concat(
+  entityStatusDict
+);
+
 const anyTemplate: DropdownItem = {
   value: "Any",
-  label: "IS TEMPLATE",
+  label: "Any template",
   info: "",
 };
 
-const debounceTime: number = 100;
+const debounceTime: number = 500;
+
+// the minimum pixels for the results section height
+const MIN_RESULT_H = 100;
 
 export const EntitySearchBox: React.FC = () => {
-  const [classOption, setClassOption] = useState<DropdownItem>(defaultOption);
+  const [classOption, setClassOption] =
+    useState<DropdownItem>(defaultClassOption);
   const [templateOption, setTemplateOption] =
-    useState<ValueType<OptionTypeBase, any>>(defaultOption);
+    useState<ValueType<OptionTypeBase, any>>(defaultClassOption);
   const [searchData, setSearchData] = useState<IRequestSearch>(initValues);
   const debouncedValues = useDebounce<IRequestSearch>(searchData, debounceTime);
 
@@ -48,17 +70,29 @@ export const EntitySearchBox: React.FC = () => {
 
   const debouncedResultsHeight = useDebounce(height, 20);
 
+  const statusOptionSelected: IOption = useMemo(() => {
+    if (!!debouncedValues.status) {
+      return (
+        statusOptions.find((option) => {
+          return option.value === debouncedValues.status;
+        }) || defaultStatusOption
+      );
+    }
+    return defaultStatusOption;
+  }, [debouncedValues.status]);
+
   // check whether the search should be executed
   const validSearch = useMemo(() => {
     return (
-      (debouncedValues.label && debouncedValues.label.length > 2) ||
-      !!debouncedValues.usedTemplate
+      Object.values(debouncedValues).filter((searchValue: any) => searchValue)
+        .length > 0
     );
   }, [debouncedValues]);
 
+  // get the co-occurence entity
   const { data: cooccurrenceEntity, isFetching: cooccurrenceIsFetching } =
     useQuery(
-      ["co-occurrence", searchData.cooccurrenceId],
+      ["search-cooccurrence", searchData.cooccurrenceId],
       async () => {
         if (searchData?.cooccurrenceId) {
           const res = await api.entitiesGet(searchData.cooccurrenceId);
@@ -69,6 +103,23 @@ export const EntitySearchBox: React.FC = () => {
         enabled: !!searchData?.cooccurrenceId,
       }
     );
+
+  // get the searchByTerritory entity
+  const {
+    data: searchTerritoryEntity,
+    isFetching: searchTerritoryEntityIsFetching,
+  } = useQuery(
+    ["search-territory", searchData.territoryId],
+    async () => {
+      if (searchData?.territoryId) {
+        const res = await api.entitiesGet(searchData.territoryId);
+        return res.data;
+      }
+    },
+    {
+      enabled: !!searchData?.territoryId,
+    }
+  );
 
   const {
     status,
@@ -84,46 +135,23 @@ export const EntitySearchBox: React.FC = () => {
         const res = await api.entitiesSearch(filters);
         return res.data;
       }
+      console.log("getting a new search", debouncedValues);
       const res = await api.entitiesSearch(debouncedValues);
       return res.data;
     },
     {
-      enabled: api.isLoggedIn() && validSearch === true,
+      enabled: api.isLoggedIn() && validSearch,
     }
   );
 
-  const options: DropdownItem[] = entitiesDict.filter(
-    (e) => e.value !== "A" && e.value !== "R" && e.value !== "X"
-  );
-
-  const handleChange = (changes: {
-    [key: string]: string | false | ValueType<OptionTypeBase, any>;
-  }) => {
-    const newSearch = {
-      ...searchData,
-      ...changes,
-    };
-    setSearchData(newSearch);
-  };
-
-  const sortedEntities = useMemo(() => {
-    if (entities) {
-      const sorted = [...entities];
-      sorted.sort((a: IEntity, b: IEntity) =>
-        a.label.toLocaleLowerCase() > b.label.toLocaleLowerCase() ? 1 : -1
-      );
-      return entities;
-    }
-    return [];
-  }, [entities]);
-
+  // get all templates for the "limit by template" option
   const {
     status: templateStatus,
     data: templates,
     error: templateError,
     isFetching: isFetchingTemplates,
   } = useQuery(
-    ["statement-templates", searchData, classOption],
+    ["search-templates", searchData, classOption],
     async () => {
       const res = await api.entitiesSearch({
         onlyTemplates: true,
@@ -139,6 +167,47 @@ export const EntitySearchBox: React.FC = () => {
     },
     { enabled: api.isLoggedIn() }
   );
+
+  const classOptions: DropdownItem[] = entitiesDict.filter(
+    (e) => e.value !== "A" && e.value !== "R" && e.value !== "X"
+  );
+
+  // apply changes to search parameters
+  const handleChange = (changes: {
+    [key: string]:
+      | string
+      | false
+      | true
+      | undefined
+      | ValueType<OptionTypeBase, any>;
+  }) => {
+    const newSearch = {
+      ...searchData,
+      ...changes,
+    };
+
+    // remove parameters where the value is set to undefined
+    Object.keys(changes).forEach((changeKey) => {
+      const value = changes[changeKey];
+      if (value === undefined) {
+        delete changes[changeKey];
+      }
+    });
+
+    setSearchData(newSearch);
+  };
+
+  // sort found entities by label
+  const sortedEntities = useMemo(() => {
+    if (entities) {
+      const sorted = [...entities];
+      sorted.sort((a: IEntity, b: IEntity) =>
+        a.label.toLocaleLowerCase() > b.label.toLocaleLowerCase() ? 1 : -1
+      );
+      return entities;
+    }
+    return [];
+  }, [entities]);
 
   const templateOptions: DropdownItem[] = useMemo(() => {
     const options: DropdownItem[] = [anyTemplate];
@@ -183,14 +252,14 @@ export const EntitySearchBox: React.FC = () => {
             placeholder={""}
             width={150}
             entityDropdown
-            options={[defaultOption].concat(options)}
+            options={[defaultClassOption].concat(classOptions)}
             value={classOption}
             onChange={(option: ValueType<OptionTypeBase, any>) => {
               setClassOption(option as DropdownItem);
-              setTemplateOption(defaultOption);
+              setTemplateOption(defaultClassOption);
               handleChange({
                 class: (option as IOption).value,
-                usedTemplate: defaultOption.value,
+                usedTemplate: defaultClassOption.value,
               });
             }}
           />
@@ -198,11 +267,29 @@ export const EntitySearchBox: React.FC = () => {
         </div>
       </StyledRow>
       <StyledRow>
+        <StyledRowHeader>Limit by status</StyledRowHeader>
+        <div style={{ position: "relative" }}>
+          <Dropdown
+            placeholder={""}
+            width={150}
+            options={statusOptions}
+            value={statusOptionSelected}
+            onChange={(option: ValueType<OptionTypeBase, any>) => {
+              handleChange({
+                status: (option as IOption).value,
+              });
+            }}
+          />
+          <TypeBar entityLetter={(classOption as IOption).value} />
+        </div>
+      </StyledRow>
+
+      <StyledRow>
         <StyledRowHeader>Limit by template</StyledRowHeader>
         <Dropdown
           placeholder={""}
           width={150}
-          options={[defaultOption].concat(templateOptions)}
+          options={[defaultClassOption].concat(templateOptions)}
           value={templateOption}
           onChange={(option: ValueType<OptionTypeBase, any>) => {
             setTemplateOption(option);
@@ -212,64 +299,217 @@ export const EntitySearchBox: React.FC = () => {
       </StyledRow>
 
       <StyledRow>
-        <StyledRowHeader>Limit by co-occurrence</StyledRowHeader>
-        <EntitySuggester
-          disableTemplatesAccept
-          categoryTypes={[
-            EntityEnums.Class.Statement,
-            EntityEnums.Class.Action,
-            EntityEnums.Class.Territory,
-            EntityEnums.Class.Resource,
-            EntityEnums.Class.Person,
-            EntityEnums.Class.Being,
-            EntityEnums.Class.Group,
-            EntityEnums.Class.Object,
-            EntityEnums.Class.Concept,
-            EntityEnums.Class.Location,
-            EntityEnums.Class.Value,
-            EntityEnums.Class.Event,
-          ]}
-          onSelected={(newSelectedId: string) => {
-            handleChange({ cooccurrenceId: newSelectedId });
-          }}
-          placeholder={"entity"}
-          disableCreate
-          inputWidth={114}
-        />
+        <StyledRowHeader>Limit by territory</StyledRowHeader>
+        {debouncedValues.territoryId && searchTerritoryEntity ? (
+          <>
+            <Loader size={26} show={searchTerritoryEntityIsFetching} />
+            {searchTerritoryEntity && (
+              <EntityTag
+                entity={searchTerritoryEntity}
+                tooltipPosition={"left"}
+                button={
+                  <Button
+                    key="d"
+                    icon={<RiCloseFill />}
+                    color="danger"
+                    inverted
+                    tooltipLabel="unlink entity"
+                    onClick={() => {
+                      handleChange({
+                        territoryId: "",
+                        subTerritorySearch: undefined,
+                      });
+                    }}
+                  />
+                }
+              />
+            )}
+          </>
+        ) : (
+          <div>
+            <EntitySuggester
+              disableTemplatesAccept
+              categoryTypes={[EntityEnums.Class.Territory]}
+              onSelected={(newSelectedId: string) => {
+                handleChange({ territoryId: newSelectedId });
+              }}
+              placeholder={"territory"}
+              disableCreate
+              inputWidth={114}
+            />
+          </div>
+        )}
       </StyledRow>
-      {(cooccurrenceEntity || cooccurrenceIsFetching) && (
+
+      {debouncedValues.territoryId && (
         <StyledRow>
-          <StyledTagLoaderWrap>
-            <Loader size={26} show={cooccurrenceIsFetching} />
-          </StyledTagLoaderWrap>
-          {cooccurrenceEntity && (
-            <EntityTag
-              entity={cooccurrenceEntity}
-              tooltipPosition={"left"}
-              button={
-                <Button
-                  key="d"
-                  icon={<FaUnlink />}
-                  color="danger"
-                  inverted
-                  tooltipLabel="unlink entity"
-                  onClick={() => {
-                    handleChange({ cooccurrenceId: "" });
-                  }}
-                />
-              }
+          <StyledRowHeader>Territory children</StyledRowHeader>
+          {searchTerritoryEntity && (
+            <AttributeButtonGroup
+              options={[
+                {
+                  longValue: "included",
+                  shortValue: "included",
+                  onClick: () => {
+                    handleChange({ subTerritorySearch: true });
+                  },
+                  selected: debouncedValues.subTerritorySearch === true,
+                },
+                {
+                  longValue: "not included",
+                  shortValue: "not included",
+                  onClick: () => {
+                    handleChange({ subTerritorySearch: undefined });
+                  },
+                  selected: debouncedValues.subTerritorySearch !== true,
+                },
+              ]}
             />
           )}
         </StyledRow>
       )}
 
+      <StyledRow>
+        <StyledRowHeader>Limit by co-occurrence</StyledRowHeader>
+        {debouncedValues.cooccurrenceId ? (
+          <>
+            <Loader size={26} show={cooccurrenceIsFetching} />
+            {cooccurrenceEntity && (
+              <EntityTag
+                entity={cooccurrenceEntity}
+                tooltipPosition="left"
+                button={
+                  <Button
+                    key="d"
+                    icon={<RiCloseFill />}
+                    color="danger"
+                    inverted
+                    tooltipLabel="unlink entity"
+                    onClick={() => {
+                      handleChange({ cooccurrenceId: "" });
+                    }}
+                  />
+                }
+              />
+            )}
+          </>
+        ) : (
+          <div>
+            <EntitySuggester
+              disableTemplatesAccept
+              categoryTypes={[
+                EntityEnums.Class.Statement,
+                EntityEnums.Class.Action,
+                EntityEnums.Class.Territory,
+                EntityEnums.Class.Resource,
+                EntityEnums.Class.Person,
+                EntityEnums.Class.Being,
+                EntityEnums.Class.Group,
+                EntityEnums.Class.Object,
+                EntityEnums.Class.Concept,
+                EntityEnums.Class.Location,
+                EntityEnums.Class.Value,
+                EntityEnums.Class.Event,
+              ]}
+              onSelected={(newSelectedId: string) => {
+                handleChange({ cooccurrenceId: newSelectedId });
+              }}
+              placeholder={"entity"}
+              disableCreate
+              inputWidth={114}
+            />
+          </div>
+        )}
+      </StyledRow>
+      <StyledRow>
+        <StyledRowHeader>Created at</StyledRowHeader>
+        {debouncedValues.createdDate ? (
+          <StyledDateTag>
+            <StyledDateTagText>
+              {debouncedValues.createdDate.toDateString()}
+            </StyledDateTagText>
+            <StyledDateTagButton
+              key="d"
+              icon={<RiCloseFill />}
+              color="white"
+              noBorder
+              noBackground
+              inverted
+              tooltipLabel="remove date"
+              onClick={() => {
+                handleChange({ createdDate: undefined });
+              }}
+            />
+          </StyledDateTag>
+        ) : (
+          <StyledDatePicker
+            type="date"
+            id="created-date"
+            width={150}
+            name="created-date"
+            onChange={(e) => {
+              const createdDate = new Date(e.target.value);
+              handleChange({ createdDate });
+            }}
+          />
+        )}
+      </StyledRow>
+
+      <StyledRow>
+        <StyledRowHeader>Udpated at</StyledRowHeader>
+        {debouncedValues.updatedDate ? (
+          <StyledDateTag>
+            <StyledDateTagText>
+              {debouncedValues.updatedDate.toDateString()}
+            </StyledDateTagText>
+            <StyledDateTagButton
+              key="d"
+              icon={<RiCloseFill />}
+              color="white"
+              noBorder
+              noBackground
+              inverted
+              tooltipLabel="remove date"
+              onClick={() => {
+                handleChange({ updatedDate: undefined });
+              }}
+            />
+          </StyledDateTag>
+        ) : (
+          <StyledDatePicker
+            type="date"
+            id="updated-date"
+            width={150}
+            name="updated-date"
+            onChange={(e) => {
+              const updatedDate = new Date(e.target.value);
+              console.log(updatedDate);
+              handleChange({ updatedDate });
+            }}
+          />
+        )}
+      </StyledRow>
+
+      <StyledResultsHeader>
+        {sortedEntities.length > 0 && (
+          <>{`Results (${sortedEntities.length})`}</>
+        )}
+      </StyledResultsHeader>
+
+      {/* StyledResultsWrapper is used to calculate size for infinite scroll, don't put any other components inside! */}
       <StyledResultsWrapper ref={resultRef}>
         {/* RESULTS */}
         {sortedEntities.length > 0 && (
-          <EntitySearchResults
-            results={sortedEntities}
-            height={debouncedResultsHeight}
-          />
+          <>
+            <EntitySearchResults
+              results={sortedEntities}
+              height={
+                debouncedResultsHeight > MIN_RESULT_H
+                  ? debouncedResultsHeight
+                  : MIN_RESULT_H
+              }
+            />
+          </>
         )}
         <Loader show={isFetching} />
       </StyledResultsWrapper>

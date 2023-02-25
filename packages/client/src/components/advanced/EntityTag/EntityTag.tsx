@@ -33,7 +33,7 @@ export const EntityTag: React.FC<EntityTag> = ({
   tooltipText,
   parentId,
   showOnly,
-  fullWidth,
+  fullWidth = false,
   mode,
   button = false,
   index,
@@ -68,6 +68,7 @@ export const EntityTag: React.FC<EntityTag> = ({
             entityId={entity.id}
             entityClass={entity.class}
             label={getEntityLabel(entity)}
+            language={entity.language}
             detail={entity.detail}
             text={tooltipText}
             itemsCount={statementsCount}

@@ -1,6 +1,10 @@
 import styled from "styled-components";
 import { space1 } from "Theme/constants";
 
+export const StyledCheckboxWrapper = styled.div`
+  display: flex;
+  align-items: center;
+`;
 interface StyledCheckbox {
   disabled: boolean;
 }
@@ -14,4 +18,8 @@ export const StyledCheckbox = styled.input<StyledCheckbox>`
   :focus {
     outline: 0;
   }
+`;
+export const StyledLabel = styled.label`
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  margin-left: ${({ theme }) => theme.space[1]};
 `;

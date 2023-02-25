@@ -1,38 +1,19 @@
 import { EntityEnums, UserEnums } from "@shared/enums";
-import {
-  IAction,
-  IEntity,
-  IResponseStatement,
-  IStatement,
-} from "@shared/types";
+import { IEntity, IResponseStatement, IStatement } from "@shared/types";
 import api from "api";
-import { Button, ButtonGroup, Loader, Submit, TagGroup } from "components";
-import { EntityTag } from "components/advanced";
+import { Loader, Submit } from "components";
 import { CStatement, DStatement } from "constructors";
 import { useSearchParams } from "hooks";
-import React, { useEffect, useMemo, useState } from "react";
-import { BsArrowDown, BsArrowUp, BsInfoCircle } from "react-icons/bs";
-import {
-  FaChevronCircleDown,
-  FaChevronCircleUp,
-  FaClone,
-  FaPlus,
-  FaTrashAlt,
-} from "react-icons/fa";
+import React, { useEffect, useState } from "react";
+import { BsInfoCircle } from "react-icons/bs";
 import { useMutation, useQuery, useQueryClient } from "react-query";
-import { Cell, Column } from "react-table";
 import { toast } from "react-toastify";
 import { setStatementListOpened } from "redux/features/layout/statementListOpenedSlice";
 import { setRowsExpanded } from "redux/features/statementList/rowsExpandedSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { StatementListContextMenu } from "./StatementListContextMenu/StatementListContextMenu";
 import { StatementListHeader } from "./StatementListHeader/StatementListHeader";
 import { StatementListTable } from "./StatementListTable/StatementListTable";
-import {
-  StyledEmptyState,
-  StyledTableWrapper,
-  StyledText,
-} from "./StatementLitBoxStyles";
+import { StyledEmptyState, StyledTableWrapper } from "./StatementLitBoxStyles";
 
 const initialData: {
   statements: IResponseStatement[];
@@ -84,7 +65,7 @@ export const StatementListBox: React.FC = () => {
     }
   );
 
-  const { statements, entities } = data || initialData;
+  const { statements, entities, right } = data || initialData;
 
   const { data: audits, isFetching: isFetchingAudits } = useQuery(
     ["territory", "statement-list", "audits", territoryId, statementListOpened],
@@ -105,6 +86,7 @@ export const StatementListBox: React.FC = () => {
     }
   }, [statements, rowsExpanded]);
 
+  // get user
   const userId = localStorage.getItem("userid");
   const {
     status: userStatus,
@@ -151,6 +133,7 @@ export const StatementListBox: React.FC = () => {
           removeDetailId(sId);
           queryClient.invalidateQueries("detail-tab-entities");
         }
+        queryClient.invalidateQueries("tree");
         queryClient.invalidateQueries("territory").then(() => {
           setStatementId("");
         });
@@ -220,248 +203,52 @@ export const StatementListBox: React.FC = () => {
   const addStatementAtCertainIndex = async (index: number) => {
     let newOrder: number | false = false;
 
-    if (index + 1 > statements.length) {
-      // last one
-      newOrder = EntityEnums.Order.Last;
-    } else {
-      if (index < 1 && statements[0].data.territory) {
-        // first one
-        newOrder = EntityEnums.Order.First;
-      } else if (
-        statements[index - 1].data.territory &&
-        statements[index].data.territory
-      ) {
-        // somewhere between
-        newOrder =
-          ((
-            statements[index - 1].data.territory as {
-              order: number;
-              territoryId: string;
-            }
-          ).order +
-            (
-              statements[index].data.territory as {
+    if (userData) {
+      if (index + 1 > statements.length) {
+        // last one
+        newOrder = EntityEnums.Order.Last;
+      } else {
+        if (index < 1 && statements[0].data.territory) {
+          // first one
+          newOrder = EntityEnums.Order.First;
+        } else if (
+          statements[index - 1].data.territory &&
+          statements[index].data.territory
+        ) {
+          // somewhere between
+          newOrder =
+            ((
+              statements[index - 1].data.territory as {
                 order: number;
                 territoryId: string;
               }
-            ).order) /
-          2;
+            ).order +
+              (
+                statements[index].data.territory as {
+                  order: number;
+                  territoryId: string;
+                }
+              ).order) /
+            2;
+        }
+      }
+
+      if (newOrder) {
+        const newStatement: IStatement = CStatement(
+          localStorage.getItem("userrole") as UserEnums.Role,
+          userData.options,
+          "",
+          "",
+          territoryId
+        );
+        (
+          newStatement.data.territory as { order: number; territoryId: string }
+        ).order = newOrder;
+
+        actantsCreateMutation.mutate(newStatement);
       }
     }
-
-    if (newOrder) {
-      const newStatement: IStatement = CStatement(
-        localStorage.getItem("userrole") as UserEnums.Role,
-        territoryId
-      );
-      (
-        newStatement.data.territory as { order: number; territoryId: string }
-      ).order = newOrder;
-
-      actantsCreateMutation.mutate(newStatement);
-    }
   };
-
-  const columns: Column<{}>[] = useMemo(() => {
-    return [
-      {
-        Header: "ID",
-        accessor: "id",
-      },
-      {
-        Header: "",
-        id: "Statement",
-        Cell: ({ row }: Cell) => {
-          const statement = row.original as IStatement;
-          return (
-            <EntityTag
-              entity={statement as IEntity}
-              showOnly="entity"
-              tooltipText={statement.data.text}
-            />
-          );
-        },
-      },
-      {
-        Header: "Subj.",
-        accessor: "data",
-        Cell: ({ row }: Cell) => {
-          const subjectIds: string[] = row.values.data?.actants
-            ? row.values.data.actants
-                .filter((a: any) => a.position === "s")
-                .map((a: any) => a.entityId)
-            : [];
-          const subjectObjects = subjectIds.map(
-            (actantId: string) => entities[actantId]
-          );
-          const definedSubjects = subjectObjects.filter((s) => s !== undefined);
-
-          return (
-            <>
-              {definedSubjects ? (
-                <TagGroup definedEntities={definedSubjects} />
-              ) : (
-                <div />
-              )}
-            </>
-          );
-        },
-      },
-      {
-        Header: "Actions",
-        Cell: ({ row }: Cell) => {
-          const actionIds = row.values.data?.actions
-            ? row.values.data.actions.map((a: any) => a.actionId)
-            : [];
-          const actionObjects: IAction[] = actionIds.map(
-            (actionId: string) => entities[actionId]
-          );
-          const definedActions = actionObjects.filter((a) => a !== undefined);
-
-          return (
-            <>
-              {definedActions ? (
-                <TagGroup definedEntities={definedActions} />
-              ) : (
-                <div />
-              )}
-            </>
-          );
-        },
-      },
-      {
-        Header: "Objects",
-        Cell: ({ row }: Cell) => {
-          const actantIds = row.values.data?.actants
-            ? row.values.data.actants
-                .filter((a: any) => a.position !== "s")
-                .map((a: any) => a.entityId)
-            : [];
-          const actantObjects: IEntity[] = actantIds.map(
-            (actantId: string) => entities[actantId]
-          );
-          const definedObjects = actantObjects.filter((o) => o !== undefined);
-
-          return (
-            <>
-              {definedObjects ? (
-                <TagGroup definedEntities={definedObjects} oversizeLimit={4} />
-              ) : (
-                <div />
-              )}
-            </>
-          );
-        },
-      },
-      {
-        Header: "Text",
-        Cell: ({ row }: Cell) => {
-          const { text } = row.values.data;
-          const maxWordsCount = 20;
-          const trimmedText = text.split(" ").slice(0, maxWordsCount).join(" ");
-          if (text?.match(/(\w+)/g)?.length > maxWordsCount) {
-            return <StyledText>{trimmedText}...</StyledText>;
-          }
-          return <StyledText>{trimmedText}</StyledText>;
-        },
-      },
-      {
-        id: "lastEdit",
-        Header: "Edited",
-        Cell: ({ row }: Cell) => {
-          return false;
-        },
-      },
-      {
-        Header: "",
-        id: "expander",
-        width: 300,
-        Cell: ({ row }: Cell) => {
-          return (
-            <ButtonGroup>
-              {data?.right !== UserEnums.RoleMode.Read && (
-                <StatementListContextMenu
-                  buttons={[
-                    <Button
-                      key="r"
-                      icon={<FaTrashAlt size={14} />}
-                      color="danger"
-                      tooltipLabel="delete"
-                      onClick={() => {
-                        setStatementToDelete(
-                          row.original as IResponseStatement
-                        );
-                        setShowSubmit(true);
-                      }}
-                    />,
-                    <Button
-                      key="d"
-                      icon={<FaClone size={14} />}
-                      color="warning"
-                      tooltipLabel="duplicate"
-                      onClick={() => {
-                        duplicateStatement(row.original as IResponseStatement);
-                      }}
-                    />,
-                    <Button
-                      key="add-up"
-                      icon={
-                        <>
-                          <FaPlus size={14} />
-                          <BsArrowUp size={14} />
-                        </>
-                      }
-                      tooltipLabel="add new statement before"
-                      color="info"
-                      onClick={() => {
-                        addStatementAtCertainIndex(row.index);
-                      }}
-                    />,
-                    <Button
-                      key="add-down"
-                      icon={
-                        <>
-                          <FaPlus size={14} />
-                          <BsArrowDown size={14} />
-                        </>
-                      }
-                      tooltipLabel="add new statement after"
-                      color="success"
-                      onClick={() => {
-                        addStatementAtCertainIndex(row.index + 1);
-                      }}
-                    />,
-                  ]}
-                />
-              )}
-              <span
-                {...row.getToggleRowExpandedProps()}
-                style={{
-                  cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                }}
-                onClick={(e: React.MouseEvent) => {
-                  e.stopPropagation();
-                  const newObject = {
-                    ...rowsExpanded,
-                    [row.values.id]: !rowsExpanded[row.values.id],
-                  };
-                  dispatch(setRowsExpanded(newObject));
-                }}
-              >
-                {rowsExpanded[row.values.id] ? (
-                  <FaChevronCircleUp />
-                ) : (
-                  <FaChevronCircleDown />
-                )}
-              </span>
-            </ButtonGroup>
-          );
-        },
-      },
-    ];
-  }, [data, statementId, rowsExpanded]);
 
   const actantsUpdateMutation = useMutation(
     async (statementObject: { statementId: string; data: {} }) =>
@@ -499,17 +286,21 @@ export const StatementListBox: React.FC = () => {
           isFavorited={isFavorited}
         />
       )}
-      {statements && audits ? (
+      {statements ? (
         <StyledTableWrapper id="Statements-box-table">
           <StatementListTable
             statements={statements}
-            audits={audits}
-            columns={columns}
             handleRowClick={(rowId: string) => {
               setStatementId(rowId);
             }}
             actantsUpdateMutation={actantsUpdateMutation}
             entities={entities}
+            right={right}
+            audits={audits || []}
+            duplicateStatement={duplicateStatement}
+            setStatementToDelete={setStatementToDelete}
+            setShowSubmit={setShowSubmit}
+            addStatementAtCertainIndex={addStatementAtCertainIndex}
           />
         </StyledTableWrapper>
       ) : (

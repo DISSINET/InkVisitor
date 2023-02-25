@@ -92,6 +92,7 @@ export function getIStatementActionMock(): IStatementAction {
     moodvariant: EntityEnums.MoodVariant.Irrealis,
     bundleOperator: EntityEnums.Operator.And,
     props: [],
+    statementOrder: false,
   };
 }
 
@@ -129,7 +130,43 @@ export async function createMockTree(
       id: `root-${randSuffix}`,
     }),
     new Territory({
-      id: `lvl1-1-${randSuffix}`,
+      id: `T1-${randSuffix}`,
+      data: {
+        parent: {
+          territoryId: `root-${randSuffix}`,
+          order: 0,
+        },
+      },
+    }),
+    new Territory({
+      id: `T1-1-${randSuffix}`,
+      data: {
+        parent: {
+          territoryId: `T1-${randSuffix}`,
+          order: 0,
+        },
+      },
+    }),
+    new Territory({
+      id: `T1-1-1-${randSuffix}`,
+      data: {
+        parent: {
+          territoryId: `T1-1-${randSuffix}`,
+          order: 0,
+        },
+      },
+    }),
+    new Territory({
+      id: `T1-2-${randSuffix}`,
+      data: {
+        parent: {
+          territoryId: `T1-${randSuffix}`,
+          order: 1,
+        },
+      },
+    }),
+    new Territory({
+      id: `T2-${randSuffix}`,
       data: {
         parent: {
           territoryId: `root-${randSuffix}`,
@@ -138,11 +175,20 @@ export async function createMockTree(
       },
     }),
     new Territory({
-      id: `lvl1-2-${randSuffix}`,
+      id: `T2-1-${randSuffix}`,
       data: {
         parent: {
-          territoryId: `root-${randSuffix}`,
-          order: 2,
+          territoryId: `T2-${randSuffix}`,
+          order: 0,
+        },
+      },
+    }),
+    new Territory({
+      id: `T2-2-${randSuffix}`,
+      data: {
+        parent: {
+          territoryId: `T2-${randSuffix}`,
+          order: 1,
         },
       },
     }),

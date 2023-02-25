@@ -22,7 +22,12 @@ export default class AclPermission implements IDbModel, IResponsePermission {
     this.public = !!data.public;
   }
 
-  async save(dbInstance: Connection | undefined): Promise<WriteResult> {
+  /**
+  * Stores the permission in the db
+  * @param db db connection
+  * @returns Promise<boolean> to indicate result of the operation
+  */
+  async save(dbInstance: Connection | undefined): Promise<boolean> {
     const result = await rethink
       .table(AclPermission.table)
       .insert({ ...this, id: this.id || undefined })
@@ -32,7 +37,7 @@ export default class AclPermission implements IDbModel, IResponsePermission {
       this.id = result.generated_keys[0];
     }
 
-    return result;
+    return result.inserted === 1;
   }
 
   update(

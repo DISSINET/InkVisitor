@@ -26,7 +26,7 @@ export namespace EntityTooltip {
   // and also O:icecream -> C:grocery store products -> C:everyhing,
   // in that case, I propose, the output will be {O:icecream: [C: icecream], C:icecream: [C:sweet, C:cold thing, C:grocery store product], C:sweet: ...}
   export type ISuperclassTree = {
-    entityId: string,
+    entityId: string;
     subtrees: ISuperclassTree[];
   };
 

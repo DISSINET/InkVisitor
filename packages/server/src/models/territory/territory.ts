@@ -3,10 +3,11 @@ import { ITerritory, IParentTerritory, ITerritoryData } from "@shared/types";
 import { r as rethink, Connection, WriteResult, RDatum } from "rethinkdb-ts";
 import { IModel, determineOrder } from "@models/common";
 import Entity from "@models/entity/entity";
-import { InternalServerError, InvalidDeleteError } from "@shared/types/errors";
+import { InternalServerError, InvalidDeleteError, ModelNotValidError } from "@shared/types/errors";
 import User from "@models/user/user";
 import treeCache from "@service/treeCache";
 import { nonenumerable } from "@common/decorators";
+import { ROOT_TERRITORY_ID } from "@shared/types/statement";
 
 export class TerritoryParent implements IParentTerritory, IModel {
   territoryId: string;
@@ -45,7 +46,7 @@ export class TerritoryData implements ITerritoryData, IModel {
 }
 
 class Territory extends Entity implements ITerritory {
-  class: EntityEnums.Class.Territory = EntityEnums.Class.Territory;
+  class: EntityEnums.Class.Territory;
   data: TerritoryData;
 
   @nonenumerable
@@ -53,6 +54,7 @@ class Territory extends Entity implements ITerritory {
 
   constructor(data: Partial<ITerritory>) {
     super(data);
+    this.class = EntityEnums.Class.Territory;
     this.data = new TerritoryData(data.data || {});
   }
 
@@ -68,7 +70,12 @@ class Territory extends Entity implements ITerritory {
     this._siblings = childsMap;
   }
 
-  async save(db: Connection | undefined): Promise<WriteResult> {
+  /**
+  * Stores the territory in the db
+  * @param db db connection
+  * @returns Promise<boolean> to indicate result of the operation
+  */
+  async save(db: Connection | undefined): Promise<boolean> {
     if (this.data.parent) {
       // get count of future siblings and move current territory to last
       // position
@@ -79,21 +86,14 @@ class Territory extends Entity implements ITerritory {
 
       const wantedOrder = this.data.parent.order;
       this.data.parent.order = determineOrder(wantedOrder, childs);
-    } else if (this.id !== "T0" && !this.isTemplate) {
-      return {
-        deleted: 0,
-        first_error: "cannot create territory without a parent",
-        errors: 1,
-        inserted: 0,
-        replaced: 0,
-        skipped: 0,
-        unchanged: 0,
-      };
+    } else if (this.id !== "T0" && this.id.indexOf("root") !== 0 && !this.isTemplate) {
+      throw new ModelNotValidError("cannot create territory without a parent");
     }
 
     const result = await super.save(db);
-
-    await treeCache.initialize();
+    if (result) {
+      await treeCache.initialize();
+    }
 
     return result;
   }
@@ -188,6 +188,11 @@ class Territory extends Entity implements ITerritory {
       return true;
     }
 
+    // root territory - always can be viewed
+    if (this.id === ROOT_TERRITORY_ID) {
+      return true;
+    }
+
     return !!treeCache.getRightForTerritory(this.id, user.rights);
   }
 
@@ -197,8 +202,12 @@ class Territory extends Entity implements ITerritory {
       return true;
     }
 
-    const closestRight = treeCache.getRightForTerritory(this.id, user.rights);
+    // only editor should continue
+    if (user.role !== UserEnums.Role.Editor) {
+      return false;
+    }
 
+    const closestRight = treeCache.getRightForTerritory(this.id, user.rights);
     if (!closestRight) {
       return false;
     }
@@ -210,13 +219,18 @@ class Territory extends Entity implements ITerritory {
   }
 
   canBeCreatedByUser(user: User): boolean {
-    // in case of create - no id provided yet
-    if (!this.id) {
+    // admin role has always the right
+    if (user.role === UserEnums.Role.Admin) {
       return true;
     }
 
-    // admin role has always the right
-    if (user.role === UserEnums.Role.Admin) {
+    // only editor should continue
+    if (user.role !== UserEnums.Role.Editor) {
+      return false;
+    }
+
+    // in case of create - no id provided yet
+    if (!this.id) {
       return true;
     }
 

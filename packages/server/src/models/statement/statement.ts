@@ -11,11 +11,7 @@ import {
   IModel,
   determineOrder,
 } from "@models/common";
-import {
-  EntityEnums,
-  UserEnums,
-  DbEnums,
-} from "@shared/enums";
+import { EntityEnums, UserEnums, DbEnums } from "@shared/enums";
 
 import Entity from "@models/entity/entity";
 import { r as rethink, Connection, RDatum, WriteResult } from "rethinkdb-ts";
@@ -24,7 +20,12 @@ import User from "@models/user/user";
 import { EventMapSingle, EventTypes } from "@models/events/types";
 import treeCache from "@service/treeCache";
 import Prop from "@models/prop/prop";
-import { IStatementClassification, IStatementDataTerritory } from "@shared/types/statement";
+import {
+  IStatementClassification,
+  IStatementDataTerritory,
+  ROOT_TERRITORY_ID,
+  StatementObject,
+} from "@shared/types/statement";
 
 export class StatementClassification implements IStatementClassification {
   id: string = "";
@@ -32,12 +33,15 @@ export class StatementClassification implements IStatementClassification {
   elvl: EntityEnums.Elvl = EntityEnums.Elvl.Textual;
   logic: EntityEnums.Logic = EntityEnums.Logic.Positive;
   certainty: EntityEnums.Certainty = EntityEnums.Certainty.AlmostCertain;
-  mood: EntityEnums.Mood[] = [EntityEnums.Mood.Indication];
+  mood: EntityEnums.Mood[];
   moodvariant: EntityEnums.MoodVariant = EntityEnums.MoodVariant.Irrealis;
+  statementOrder: number | false = false;
 
   constructor(data: Partial<IStatementClassification>) {
     fillFlatObject(this, data);
     this.mood = data.mood ? data.mood : [];
+    this.statementOrder =
+      data.statementOrder !== undefined ? data.statementOrder : false;
   }
 }
 
@@ -47,15 +51,15 @@ export class StatementIdentification implements IStatementClassification {
   elvl: EntityEnums.Elvl = EntityEnums.Elvl.Textual;
   logic: EntityEnums.Logic = EntityEnums.Logic.Positive;
   certainty: EntityEnums.Certainty = EntityEnums.Certainty.AlmostCertain;
-  mood: EntityEnums.Mood[] = [EntityEnums.Mood.Indication];
+  mood: EntityEnums.Mood[];
   moodvariant: EntityEnums.MoodVariant = EntityEnums.MoodVariant.Irrealis;
+  statementOrder: number | false = false;
 
   constructor(data: Partial<IStatementClassification>) {
-    if (!data) {
-      return;
-    }
-
     fillFlatObject(this, data);
+    this.mood = data.mood || [EntityEnums.Mood.Indication];
+    this.statementOrder =
+      data.statementOrder !== undefined ? data.statementOrder : false;
   }
 }
 
@@ -71,6 +75,7 @@ export class StatementActant implements IStatementActant, IModel {
   bundleStart: boolean = false;
   bundleEnd: boolean = false;
   props: Prop[] = [];
+  statementOrder: number | false = false;
 
   classifications: StatementClassification[] = [];
   identifications: StatementIdentification[] = [];
@@ -78,8 +83,18 @@ export class StatementActant implements IStatementActant, IModel {
   constructor(data: Partial<IStatementActant>) {
     fillFlatObject(this, data);
     fillArray<Prop>(this.props, Prop, data.props);
-    fillArray<StatementClassification>(this.classifications, StatementClassification, data.classifications);
-    fillArray<StatementIdentification>(this.identifications, StatementIdentification, data.identifications);
+    fillArray<StatementClassification>(
+      this.classifications,
+      StatementClassification,
+      data.classifications
+    );
+    fillArray<StatementIdentification>(
+      this.identifications,
+      StatementIdentification,
+      data.identifications
+    );
+    this.statementOrder =
+      data.statementOrder !== undefined ? data.statementOrder : false;
   }
 
   /**
@@ -121,17 +136,20 @@ export class StatementAction implements IStatementAction {
   elvl: EntityEnums.Elvl = EntityEnums.Elvl.Textual;
   certainty: EntityEnums.Certainty = EntityEnums.Certainty.Empty;
   logic: EntityEnums.Logic = EntityEnums.Logic.Positive;
-  mood: EntityEnums.Mood[] = [EntityEnums.Mood.Indication];
+  mood: EntityEnums.Mood[];
   moodvariant: EntityEnums.MoodVariant = EntityEnums.MoodVariant.Realis;
   bundleOperator: EntityEnums.Operator = EntityEnums.Operator.And;
   bundleStart: boolean = false;
   bundleEnd: boolean = false;
   props: Prop[] = [];
+  statementOrder: number | false = false;
 
   constructor(data: Partial<IStatementAction>) {
     fillFlatObject(this, data);
-    fillArray(this.mood, String, data.mood);
+    this.mood = data.mood || [EntityEnums.Mood.Indication];
     fillArray<Prop>(this.props, Prop, data.props);
+    this.statementOrder =
+      data.statementOrder !== undefined ? data.statementOrder : false;
   }
 
   /**
@@ -174,6 +192,14 @@ export class StatementData implements IStatementData, IModel {
   }
 
   /**
+   * Returns assigned territory id or undefined if no territory set
+   * @returns string | undefined
+   */
+  getTerritoryId(): string | undefined {
+    return this.territory ? this.territory.territoryId : undefined;
+  }
+
+  /**
    * predicate for valid data content
    * @returns boolean result
    */
@@ -213,18 +239,24 @@ class Statement extends Entity implements IStatement {
     return super.isValid() && this.data.isValid();
   }
 
+  /**
+   * Predicate for testing if the user can edit the statement entry
+   * @param user 
+   * @returns boolean representing the access
+   */
   canBeEditedByUser(user: User): boolean {
     // admin role has always the right
     if (user.role === UserEnums.Role.Admin) {
       return true;
     }
 
+    // only editor should continue
+    if (user.role !== UserEnums.Role.Editor) {
+      return false;
+    }
+
     // editors should be able to access META statements
-    if (
-      user.role === UserEnums.Role.Editor &&
-      this.data.territory &&
-      this.data.territory.territoryId === "T0"
-    ) {
+    if (this.data.getTerritoryId() === ROOT_TERRITORY_ID) {
       return true;
     }
 
@@ -233,48 +265,85 @@ class Statement extends Entity implements IStatement {
         this.data.territory.territoryId,
         user.rights
       );
+
+      // user right cannot be obtained/derived - false
       if (!closestRight) {
         return false;
       }
+
       return (
         closestRight.mode === UserEnums.RoleMode.Admin ||
         closestRight.mode === UserEnums.RoleMode.Write
       );
-    }
-    return true;
-  }
-
-  canBeViewedByUser(user: User): boolean {
-    // admin role has always the right
-    if (user.role === UserEnums.Role.Admin) {
-      return true;
-    }
-
-    if (this.data.territory) {
-      return !!treeCache.getRightForTerritory(
-        this.data.territory.territoryId,
-        user.rights
-      );
-    } else {
-      return true;
-    }
-  }
-
-  canBeDeletedByUser(user: User): boolean {
-    // admin role has always the right
-    if (user.role === UserEnums.Role.Admin) {
-      return true;
     }
 
     return false;
   }
 
   /**
-   * Stores the statement data in the db
-   * @param db db connection
-   * @returns write result of the db operation
+   * Predicate for testing if the user can at least view statement 
+   * @param user 
+   * @returns boolean representing the access
    */
-  async save(db: Connection | undefined): Promise<WriteResult> {
+  canBeViewedByUser(user: User): boolean {
+    // admin role has always the right
+    if (user.role === UserEnums.Role.Admin) {
+      return true;
+    }
+
+    // draft or meta statement - always can be viewed
+    if (!this.data.territory || this.data.territory.territoryId === ROOT_TERRITORY_ID) {
+      return true;
+    }
+
+    // any right entry will suffice
+    return !!treeCache.getRightForTerritory(
+      this.data.territory.territoryId,
+      user.rights
+    );
+  }
+
+  /**
+   * Predicate for testing if the user can remove the statement from db
+   * @param user 
+   * @returns boolean representing the access
+   */
+  canBeDeletedByUser(user: User): boolean {
+    // only admin has the right, no matter the territory
+    if (user.role === UserEnums.Role.Admin) {
+      return true;
+    }
+
+    // only editor should continue
+    if (user.role !== UserEnums.Role.Editor) {
+      return false;
+    }
+
+    if (this.data.territory) {
+      const closestRight = treeCache.getRightForTerritory(
+        this.data.territory.territoryId,
+        user.rights
+      );
+      // user right cannot be obtained/derived - false
+      if (!closestRight) {
+        return false;
+      }
+
+      return (
+        closestRight.mode === UserEnums.RoleMode.Admin ||
+        closestRight.mode === UserEnums.RoleMode.Write
+      );
+    }
+
+    return false;
+  }
+
+  /**
+   * Stores the statement in the db
+   * @param db db connection
+   * @returns Promise<boolean> to indicate result of the operation
+   */
+  async save(db: Connection | undefined): Promise<boolean> {
     const siblings = await this.findTerritorySiblings(db);
     if (this.data.territory) {
       this.data.territory.order = determineOrder(
@@ -283,11 +352,12 @@ class Statement extends Entity implements IStatement {
       );
     }
 
-    const res = await super.save(db);
+    const result = await super.save(db);
+    if (result) {
+      await treeCache.initialize();
+    }
 
-    await treeCache.initialize();
-
-    return res;
+    return result;
   }
 
   /**
@@ -334,7 +404,7 @@ class Statement extends Entity implements IStatement {
     await treeCache.initialize();
 
     return result;
-  }
+  };
 
   /**
    * Finds statements that are stored under the same territory (while not being
@@ -377,7 +447,7 @@ class Statement extends Entity implements IStatement {
   getEntitiesIds(): string[] {
     const entitiesIds: Record<string, null> = {};
 
-    // get ids from Entity.props ( + childs) and references
+    // get ids from Entity.props ( + childs), references and template
     new Entity({}).getEntitiesIds.call(this).forEach((element) => {
       entitiesIds[element] = null;
     });
@@ -392,12 +462,12 @@ class Statement extends Entity implements IStatement {
       }
     });
 
-    // get ids from Statement.data.actants, Statement.data.actants[].props ( + childs), 
+    // get ids from Statement.data.actants, Statement.data.actants[].props ( + childs),
     // Statement.data.actants[].classifications, Statement.data.actants[].identifications
     this.data.actants?.forEach((a) => {
       entitiesIds[a.entityId] = null;
-      a.classifications?.forEach(ca => entitiesIds[ca.entityId] = null);
-      a.identifications?.forEach(ci => entitiesIds[ci.entityId] = null);
+      a.classifications?.forEach((ca) => (entitiesIds[ca.entityId] = null));
+      a.identifications?.forEach((ci) => (entitiesIds[ci.entityId] = null));
 
       Entity.extractIdsFromProps(a.props).forEach((element) => {
         entitiesIds[element] = null;
@@ -410,7 +480,38 @@ class Statement extends Entity implements IStatement {
 
     this.data.tags.forEach((t) => (entitiesIds[t] = null));
 
-    return Object.keys(entitiesIds);
+    return Object.keys(entitiesIds).filter((id) => !!id);
+  }
+
+  walkObjects(cb: (o: StatementObject) => void) {
+    // statement.props
+    Entity.extractIdsFromProps(this.props, cb);
+
+    // statement.actions
+    for (const action of this.data.actions) {
+      cb(action);
+
+      // statement.actions.props
+      Entity.extractIdsFromProps(action.props, cb);
+    }
+
+    // statement.actants
+    for (const actant of this.data.actants) {
+      cb(actant);
+
+      // statement.actants.props
+      Entity.extractIdsFromProps(actant.props, cb);
+
+      // statement.actants.classifications
+      for (const classification of actant.classifications) {
+        cb(classification);
+      }
+
+      // statement.actants.identifications
+      for (const identification of actant.identifications) {
+        cb(identification);
+      }
+    }
   }
 
   async unlinkActantId(
@@ -460,6 +561,29 @@ class Statement extends Entity implements IStatement {
   }
 
   /**
+   * Finds statements with data.territoryId.id set to required values
+   * @param db
+   * @param territoryId
+   * @returns {Statement[]} list of found statements
+   */
+  static async findByTerritoryIds(
+    db: Connection,
+    territoryIds: string[]
+  ): Promise<Statement[]> {
+    const list: IStatement[] = await rethink
+      .table(Entity.table)
+      .getAll.apply(
+        undefined,
+        (territoryIds as (string | { index: string; })[]).concat({
+          index: DbEnums.Indexes.StatementTerritory,
+        })
+      )
+      .run(db);
+
+    return list.map((data) => new Statement(data));
+  };
+
+  /**
    * getEntitiesIdsForMany wrapped in foreach cycle
    * @param statements list of scanned statements
    * @returns list of ids unique for multiple statements
@@ -500,7 +624,7 @@ class Statement extends Entity implements IStatement {
     return statements.sort((a, b) => {
       return a.data.territory.order - b.data.territory.order;
     });
-  }
+  };
 
   /**
    * finds statements which are linked to different entity
@@ -527,14 +651,14 @@ class Statement extends Entity implements IStatement {
         return a.data.territory.order - b.data.territory.order;
       }
     });
-  }
+  };
 
   /**
-   * finds statements that are using provided entityId in their 
+   * finds statements that are using provided entityId in their
    * data.actants[].classifications or data.actants[].ident
-   * @param db 
-   * @param entityId 
-   * @returns 
+   * @param db
+   * @param entityId
+   * @returns
    */
   static async findByDataActantsCI(
     db: Connection | undefined,
@@ -544,7 +668,7 @@ class Statement extends Entity implements IStatement {
       .table(Entity.table)
       .getAll(entityId, { index: DbEnums.Indexes.StatementActantsCI })
       .run(db);
-  }
+  };
 
   /**
    * reduces findByDataEntityId results to list of ids
@@ -561,8 +685,9 @@ class Statement extends Entity implements IStatement {
     const entityIds: string[] = [];
 
     (statements as IStatement[]).forEach((s) => {
-      const ids = s.data.actants.map((a) => a.entityId);
-      entityIds.push(...ids);
+      const statement = new Statement(s);
+      entityIds.push(...statement.getEntitiesIds());
+      entityIds.push(statement.id);
     });
 
     return entityIds;
@@ -590,8 +715,12 @@ class Statement extends Entity implements IStatement {
 
     // sort by order ASC
     return statements.sort((a, b) => {
-      if (!a.data.territory) { return -1; };
-      if (!b.data.territory) { return 0; };
+      if (!a.data.territory) {
+        return -1;
+      }
+      if (!b.data.territory) {
+        return 0;
+      }
       return a.data.territory.order - b.data.territory.order;
     });
   }

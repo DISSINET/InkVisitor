@@ -1,4 +1,6 @@
+import { UserEnums } from "@shared/enums";
 import {
+  IAction,
   IEntity,
   IResponseAudit,
   IResponseGeneric,
@@ -6,20 +8,29 @@ import {
   IStatement,
 } from "@shared/types";
 import { AxiosResponse } from "axios";
+import { Button, ButtonGroup, TagGroup } from "components";
+import { EntityTag } from "components/advanced";
 import update from "immutability-helper";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { BsArrowDown, BsArrowUp } from "react-icons/bs";
+import {
+  FaChevronCircleDown,
+  FaChevronCircleUp,
+  FaClone,
+  FaPlus,
+  FaTrashAlt,
+} from "react-icons/fa";
 import { UseMutationResult } from "react-query";
-import { Column, Row, useExpanded, useTable } from "react-table";
+import { Cell, Column, Row, useExpanded, useTable } from "react-table";
+import { setRowsExpanded } from "redux/features/statementList/rowsExpandedSlice";
+import { useAppDispatch, useAppSelector } from "redux/hooks";
+import { StatementListContextMenu } from "../StatementListContextMenu/StatementListContextMenu";
+import { StyledText } from "../StatementLitBoxStyles";
 import { StatementListRow } from "./StatementListRow";
 import { StyledTable, StyledTh, StyledTHead } from "./StatementListTableStyles";
 
-type StatementWithAudit = IResponseStatement & {
-  audit: IResponseAudit | undefined;
-};
 interface StatementListTable {
   statements: IResponseStatement[];
-  audits: IResponseAudit[];
-  columns: Column<{}>[];
   handleRowClick?: (rowId: string) => void;
   actantsUpdateMutation: UseMutationResult<
     AxiosResponse<IResponseGeneric>,
@@ -31,37 +42,246 @@ interface StatementListTable {
     unknown
   >;
   entities: { [key: string]: IEntity };
+  right: UserEnums.RoleMode;
+  audits: IResponseAudit[];
+
+  duplicateStatement: (statementToDuplicate: IResponseStatement) => void;
+  setStatementToDelete: React.Dispatch<
+    React.SetStateAction<IStatement | undefined>
+  >;
+  setShowSubmit: React.Dispatch<React.SetStateAction<boolean>>;
+  addStatementAtCertainIndex: (index: number) => Promise<void>;
 }
 export const StatementListTable: React.FC<StatementListTable> = ({
   statements,
-  audits,
-  columns,
   handleRowClick = () => {},
   actantsUpdateMutation,
   entities,
+  right,
+  audits,
+
+  duplicateStatement,
+  setStatementToDelete,
+  setShowSubmit,
+  addStatementAtCertainIndex,
 }) => {
-  const [statementsWithAudit, setStatementsWithAudit] = useState<
-    StatementWithAudit[]
-  >([]);
+  const dispatch = useAppDispatch();
+  const rowsExpanded: { [key: string]: boolean } = useAppSelector(
+    (state) => state.statementList.rowsExpanded
+  );
+
+  const [statementsLocal, setStatementsLocal] = useState<IResponseStatement[]>(
+    []
+  );
 
   useEffect(() => {
-    setStatementsWithAudit(getStatementsWithAudit());
+    setStatementsLocal(statements);
   }, [statements]);
 
   const getRowId = useCallback((row) => {
     return row.id;
   }, []);
 
-  const getStatementsWithAudit: () => StatementWithAudit[] = () => {
-    if (statements && audits) {
-      return statements.map((st) => ({
-        ...st,
-        audit: audits.find((a) => a.entityId === st.id),
-      }));
-    } else {
-      return [];
-    }
-  };
+  const columns: Column<{}>[] = useMemo(() => {
+    return [
+      {
+        Header: "ID",
+        accessor: "id",
+      },
+      {
+        Header: "",
+        id: "Statement",
+        Cell: ({ row }: Cell) => {
+          const statement = row.original as IStatement;
+          return (
+            <EntityTag
+              entity={statement as IEntity}
+              showOnly="entity"
+              tooltipText={statement.data.text}
+            />
+          );
+        },
+      },
+      {
+        Header: "Subj.",
+        accessor: "data",
+        Cell: ({ row }: Cell) => {
+          const subjectIds: string[] = row.values.data?.actants
+            ? row.values.data.actants
+                .filter((a: any) => a.position === "s")
+                .map((a: any) => a.entityId)
+            : [];
+          const subjectObjects = subjectIds.map(
+            (actantId: string) => entities[actantId]
+          );
+          const definedSubjects = subjectObjects.filter((s) => s !== undefined);
+
+          return (
+            <>
+              {definedSubjects ? (
+                <TagGroup definedEntities={definedSubjects} />
+              ) : (
+                <div />
+              )}
+            </>
+          );
+        },
+      },
+      {
+        Header: "Actions",
+        Cell: ({ row }: Cell) => {
+          const actionIds = row.values.data?.actions
+            ? row.values.data.actions.map((a: any) => a.actionId)
+            : [];
+          const actionObjects: IAction[] = actionIds.map(
+            (actionId: string) => entities[actionId]
+          );
+          const definedActions = actionObjects.filter((a) => a !== undefined);
+
+          return (
+            <>
+              {definedActions ? (
+                <TagGroup definedEntities={definedActions} />
+              ) : (
+                <div />
+              )}
+            </>
+          );
+        },
+      },
+      {
+        Header: "Objects",
+        Cell: ({ row }: Cell) => {
+          const actantIds = row.values.data?.actants
+            ? row.values.data.actants
+                .filter((a: any) => a.position !== "s")
+                .map((a: any) => a.entityId)
+            : [];
+          const actantObjects: IEntity[] = actantIds.map(
+            (actantId: string) => entities[actantId]
+          );
+          const definedObjects = actantObjects.filter((o) => o !== undefined);
+
+          return (
+            <>
+              {definedObjects ? (
+                <TagGroup definedEntities={definedObjects} oversizeLimit={4} />
+              ) : (
+                <div />
+              )}
+            </>
+          );
+        },
+      },
+      {
+        Header: "Text",
+        Cell: ({ row }: Cell) => {
+          const { text } = row.values.data;
+          const maxWordsCount = 20;
+          const trimmedText = text.split(" ").slice(0, maxWordsCount).join(" ");
+          if (text?.match(/(\w+)/g)?.length > maxWordsCount) {
+            return <StyledText>{trimmedText}...</StyledText>;
+          }
+          return <StyledText>{trimmedText}</StyledText>;
+        },
+      },
+      {
+        id: "lastEdit",
+        Header: "Edited",
+        Cell: ({ row }: Cell) => {
+          return false;
+        },
+      },
+      {
+        Header: "",
+        id: "expander",
+        width: 300,
+        Cell: ({ row }: Cell) => {
+          return (
+            <ButtonGroup>
+              {right !== UserEnums.RoleMode.Read && (
+                <StatementListContextMenu
+                  buttons={[
+                    <Button
+                      key="r"
+                      icon={<FaTrashAlt size={14} />}
+                      color="danger"
+                      tooltipLabel="delete"
+                      onClick={() => {
+                        setStatementToDelete(
+                          row.original as IResponseStatement
+                        );
+                        setShowSubmit(true);
+                      }}
+                    />,
+                    <Button
+                      key="d"
+                      icon={<FaClone size={14} />}
+                      color="warning"
+                      tooltipLabel="duplicate"
+                      onClick={() => {
+                        duplicateStatement(row.original as IResponseStatement);
+                      }}
+                    />,
+                    <Button
+                      key="add-up"
+                      icon={
+                        <>
+                          <FaPlus size={14} />
+                          <BsArrowUp size={14} />
+                        </>
+                      }
+                      tooltipLabel="add new statement before"
+                      color="info"
+                      onClick={() => {
+                        addStatementAtCertainIndex(row.index);
+                      }}
+                    />,
+                    <Button
+                      key="add-down"
+                      icon={
+                        <>
+                          <FaPlus size={14} />
+                          <BsArrowDown size={14} />
+                        </>
+                      }
+                      tooltipLabel="add new statement after"
+                      color="success"
+                      onClick={() => {
+                        addStatementAtCertainIndex(row.index + 1);
+                      }}
+                    />,
+                  ]}
+                />
+              )}
+              <span
+                {...row.getToggleRowExpandedProps()}
+                style={{
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                }}
+                onClick={(e: React.MouseEvent) => {
+                  e.stopPropagation();
+                  const newObject = {
+                    ...rowsExpanded,
+                    [row.values.id]: !rowsExpanded[row.values.id],
+                  };
+                  dispatch(setRowsExpanded(newObject));
+                }}
+              >
+                {rowsExpanded[row.values.id] ? (
+                  <FaChevronCircleUp />
+                ) : (
+                  <FaChevronCircleDown />
+                )}
+              </span>
+            </ButtonGroup>
+          );
+        },
+      },
+    ];
+  }, [statementsLocal, rowsExpanded, right]);
 
   const {
     getTableProps,
@@ -73,7 +293,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
   } = useTable(
     {
       columns,
-      data: statementsWithAudit,
+      data: statementsLocal,
       getRowId,
       initialState: {
         hiddenColumns: ["id"],
@@ -84,9 +304,9 @@ export const StatementListTable: React.FC<StatementListTable> = ({
 
   const moveRow = useCallback(
     (dragIndex: number, hoverIndex: number) => {
-      const dragRecord = statementsWithAudit[dragIndex];
-      setStatementsWithAudit(
-        update(statementsWithAudit, {
+      const dragRecord = statementsLocal[dragIndex];
+      setStatementsLocal(
+        update(statementsLocal, {
           $splice: [
             [dragIndex, 1],
             [hoverIndex, 0, dragRecord],
@@ -94,7 +314,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
         })
       );
     },
-    [statementsWithAudit]
+    [statementsLocal]
   );
 
   const moveEndRow = async (statementToMove: IStatement, index: number) => {
@@ -161,6 +381,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
               moveEndRow={moveEndRow}
               visibleColumns={visibleColumns}
               entities={entities}
+              audits={audits}
               {...row.getRowProps()}
             />
           );

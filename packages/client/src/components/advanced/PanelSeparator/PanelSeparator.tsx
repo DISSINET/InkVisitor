@@ -26,8 +26,9 @@ export const PanelSeparator: React.FC<PanelSeparator> = ({}) => {
   const LEFT_SIDE_MIN_WIDTH = secondPanelMinWidth + panelWidths[0];
   const LEFT_SIDE_MAX_WIDTH = layoutWidth - panelWidths[3] - thirdPanelMinWidth;
 
-  const [separatorXTempPosition, setSeparatorXTempPosition] =
-    useState<undefined | number>(undefined);
+  const [separatorXTempPosition, setSeparatorXTempPosition] = useState<
+    undefined | number
+  >(undefined);
   const [leftWidth, setLeftWidth] = useState<number>(separatorXPosition);
   const [dragging, setDragging] = useState(false);
   const [hovered, setHovered] = useState(false);
@@ -39,6 +40,8 @@ export const PanelSeparator: React.FC<PanelSeparator> = ({}) => {
 
   useEffect(() => {
     setLeftWidth(separatorXPosition);
+
+    window.getSelection()?.removeAllRanges();
 
     const onePercent = layoutWidth / 100;
     const separatorXPercentPosition =

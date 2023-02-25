@@ -66,4 +66,9 @@ export const moodDict = [
     label: "semblance",
     info: "",
   },
+  {
+    value: EntityEnums.Mood.Rectitude,
+    label: "rectitude",
+    info: "",
+  },
 ];

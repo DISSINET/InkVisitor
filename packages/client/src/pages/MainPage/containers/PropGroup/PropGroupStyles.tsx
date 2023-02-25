@@ -10,7 +10,8 @@ export const StyledGrid = styled.div<StyledGrid>`
 
   align-items: center;
   padding-left: ${({ theme }) => theme.space[0]};
-  grid-template-columns: 20px 1fr 1fr 10rem;
+
+  grid-template-columns: 20px auto auto 1fr;
   width: fit-content;
   grid-template-rows: auto;
   grid-auto-flow: row;
@@ -37,27 +38,29 @@ export const StyledListHeaderColumn = styled.div<StyledListHeaderColumn>`
   font-style: italic;
 `;
 
-const getIndentation = (level: 0 | 1 | 2 | 3) => {
+const getIndentation = (level: 0 | 1 | 2 | 3, lowIdent?: boolean) => {
   switch (level) {
     case 0:
       return 0;
     case 1:
-      return theme.space[6];
+      return lowIdent ? theme.space[0] : theme.space[4];
     case 2:
-      return theme.space[10];
+      return lowIdent ? theme.space[4] : theme.space[8];
     case 3:
-      return theme.space[14];
+      return lowIdent ? theme.space[8] : theme.space[12];
   }
 };
 interface StyledPropLineColumn {
   level?: 0 | 1 | 2 | 3;
   isTag?: boolean;
+  lowIdent?: boolean;
 }
 export const StyledPropLineColumn = styled.div<StyledPropLineColumn>`
   display: inline-flex;
   margin: ${({ theme }) => theme.space[1]};
   align-items: center;
-  margin-left: ${({ level = 0 }) => getIndentation(level)};
+  margin-left: ${({ level = 0, lowIdent = false }) =>
+    getIndentation(level, lowIdent)};
   padding-right: 3px;
   overflow: ${({ isTag }) => (isTag ? "hidden" : "visible")};
 `;

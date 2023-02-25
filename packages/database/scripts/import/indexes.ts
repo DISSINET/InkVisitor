@@ -61,8 +61,8 @@ const entitiesIndexes: ((table: RTable) => any)[] = [
               );
           });
         }).add(
-          row("data")("actants").concatMap((action: RDatum) => {
-            return action("props").concatMap((ch1: RDatum) => {
+          row("data")("actants").concatMap((actant: RDatum) => {
+            return actant("props").concatMap((ch1: RDatum) => {
               return r
                 .expr([ch1("value")("entityId"), ch1("type")("entityId")])
                 .add(

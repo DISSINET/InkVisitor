@@ -10,10 +10,9 @@ export default function profilerMiddleware(
   const start = Date.now();
   res.once("finish", () => {
     const elapsed = Date.now() - start;
-    if (elapsed > threshold) {
+    if (req.baseUrl && req.route.path && elapsed > threshold) {
       console.log(
-        `[${new Date().toUTCString()}] Slow query(${elapsed}ms): ${
-          req.baseUrl + req.route.path
+        `[${new Date().toUTCString()}] Slow query(${elapsed}ms): ${req.baseUrl + req.route.path
         }`
       );
     }

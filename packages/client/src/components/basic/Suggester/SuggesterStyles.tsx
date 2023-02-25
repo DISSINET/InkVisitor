@@ -17,13 +17,15 @@ interface Column {
 interface InputWrapper {
   isOver: boolean;
   hasButton: boolean;
+  hasText?: boolean;
 }
 export const StyledInputWrapper = styled.div<InputWrapper>`
   display: flex;
   opacity: ${({ isOver }) => isOver && "75%"};
   max-width: 16.1rem;
   input {
-    padding-right: ${({ theme }) => theme.space[7]};
+    padding-right: ${({ theme, hasText }) =>
+      hasText ? theme.space[7] : theme.space[1]};
   }
   input[type="text"] {
     border-left-width: 0;
@@ -49,11 +51,14 @@ export const StyledSuggestionCancelButton = styled.div<StyledSuggestionCancelBut
   }
 `;
 
-export const StyledSuggesterList = styled.div`
+interface StyledSuggesterList {
+  noLeftMargin?: boolean;
+}
+export const StyledSuggesterList = styled.div<StyledSuggesterList>`
   position: absolute;
   z-index: 40;
   top: ${({ theme }) => theme.space[10]};
-  left: ${({ theme }) => theme.space[14]};
+  left: ${({ theme, noLeftMargin }) => (noLeftMargin ? "" : theme.space[14])};
 `;
 export const StyledRelativePosition = styled.div`
   position: relative;

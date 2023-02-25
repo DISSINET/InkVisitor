@@ -1,6 +1,6 @@
 import { Connection, r as rethink } from "rethinkdb-ts";
 import { Response } from "express";
-import { Mutex, Awaiter } from "./mutex"
+import { Mutex, Awaiter } from "./mutex";
 import { IRequest } from "src/custom_typings/request";
 
 export const rethinkConfig = {
@@ -33,7 +33,7 @@ export class Db {
   async initDb(): Promise<void> {
     this.connection = await rethink.connect({
       ...rethinkConfig,
-      timeout: 2, // important -  close will wait for this seconds
+      timeout: 5, // important -  close will wait for this seconds
     });
   }
 
@@ -42,7 +42,7 @@ export class Db {
    */
   async lock(): Promise<void> {
     this.lockInstance = new Awaiter();
-    await Db.mutex.lock(this.lockInstance)
+    await Db.mutex.lock(this.lockInstance);
   }
 
   /**

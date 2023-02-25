@@ -2,25 +2,19 @@ import { EntityEnums, UserEnums } from "@shared/enums";
 import { IEntity, IOption, IStatement, ITerritory } from "@shared/types";
 import api from "api";
 import { Suggester } from "components";
-import {
-  CEntity,
-  CStatement,
-  CTerritoryActant,
-  DEntity,
-  DStatement,
-  InstTemplate,
-} from "constructors";
+import { CEntity, CStatement, CTerritory, InstTemplate } from "constructors";
 import { useDebounce, useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
 import { FaHome } from "react-icons/fa";
 import { useMutation, useQuery } from "react-query";
 import { OptionTypeBase, ValueType } from "react-select";
 import { DropdownAny, rootTerritoryId, wildCardChar } from "Theme/constants";
-import { EntityDragItem } from "types";
+import { EntityDragItem, SuggesterItemToCreate } from "types";
 
 interface EntitySuggester {
   categoryTypes: EntityEnums.ExtendedClass[];
   onSelected: (id: string) => void;
+  onPicked?: (entity: IEntity) => void;
   placeholder?: string;
   inputWidth?: number | "full";
   openDetailOnCreate?: boolean;
@@ -40,6 +34,7 @@ interface EntitySuggester {
 export const EntitySuggester: React.FC<EntitySuggester> = ({
   categoryTypes,
   onSelected,
+  onPicked = () => {},
   placeholder = "",
   inputWidth,
   openDetailOnCreate = false,
@@ -62,6 +57,26 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
 
   const { appendDetailId, setSelectedDetailId } = useSearchParams();
   const userRole = localStorage.getItem("userrole");
+
+  // get user data
+  const userId = localStorage.getItem("userid");
+  const {
+    status: statusUser,
+    data: user,
+    error: errorUser,
+    isFetching: isFetchingUser,
+  } = useQuery(
+    ["user", userId],
+    async () => {
+      if (userId) {
+        const res = await api.usersGet(userId);
+        return res.data;
+      } else {
+        return false;
+      }
+    },
+    { enabled: !!userId && api.isLoggedIn() }
+  );
 
   // Suggesions query
   const {
@@ -155,8 +170,9 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
     {
       onSuccess: (data, variables) => {
         onSelected(variables.id);
+        onPicked(variables);
         handleClean();
-        if (openDetailOnCreate) {
+        if (openDetailOnCreate && variables.class !== EntityEnums.Class.Value) {
           appendDetailId(variables.id);
           setSelectedDetailId(variables.id);
         }
@@ -168,36 +184,54 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
     label: string;
     entityClass: EntityEnums.Class;
     detail?: string;
+    language?: EntityEnums.Language;
     territoryId?: string;
   }) => {
-    if (
-      newCreated.entityClass === EntityEnums.Class.Statement &&
-      newCreated.territoryId
-    ) {
-      const newStatement = CStatement(
-        localStorage.getItem("userrole") as UserEnums.Role,
-        newCreated.territoryId,
-        newCreated.label,
-        newCreated.detail
-      );
-      actantsCreateMutation.mutate(newStatement);
-    } else if (newCreated.entityClass === EntityEnums.Class.Territory) {
-      const newTerritory = CTerritoryActant(
-        newCreated.label,
-        newCreated.territoryId ? newCreated.territoryId : rootTerritoryId,
-        -1,
-        localStorage.getItem("userrole") as UserEnums.Role,
-        newCreated.detail
-      );
-      actantsCreateMutation.mutate(newTerritory);
-    } else {
-      const newEntity = CEntity(
-        newCreated.entityClass,
-        newCreated.label,
-        localStorage.getItem("userrole") as UserEnums.Role,
-        newCreated.detail
-      );
-      actantsCreateMutation.mutate(newEntity);
+    if (user) {
+      if (
+        newCreated.entityClass === EntityEnums.Class.Statement &&
+        newCreated.territoryId
+      ) {
+        const newStatement = CStatement(
+          localStorage.getItem("userrole") as UserEnums.Role,
+          {
+            ...user.options,
+            defaultLanguage:
+              newCreated.language || user.options.defaultLanguage,
+          },
+          newCreated.label,
+          newCreated.detail,
+          newCreated.territoryId
+        );
+        actantsCreateMutation.mutate(newStatement);
+      } else if (newCreated.entityClass === EntityEnums.Class.Territory) {
+        const newTerritory = CTerritory(
+          localStorage.getItem("userrole") as UserEnums.Role,
+          {
+            ...user.options,
+            defaultLanguage:
+              newCreated.language || user.options.defaultLanguage,
+          },
+          newCreated.label,
+          newCreated.detail || "",
+          newCreated.territoryId ? newCreated.territoryId : rootTerritoryId,
+          -1
+        );
+        actantsCreateMutation.mutate(newTerritory);
+      } else {
+        const newEntity = CEntity(
+          localStorage.getItem("userrole") as UserEnums.Role,
+          {
+            ...user.options,
+            defaultLanguage:
+              newCreated.language || user.options.defaultLanguage,
+          },
+          newCreated.entityClass,
+          newCreated.label,
+          newCreated.detail
+        );
+        actantsCreateMutation.mutate(newEntity);
+      }
     }
   };
 
@@ -211,7 +245,10 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
     if (newEntityId) {
       onSelected(newEntityId);
       handleClean();
-      if (openDetailOnCreate) {
+      if (
+        openDetailOnCreate &&
+        templateToDuplicate.class !== EntityEnums.Class.Value
+      ) {
         appendDetailId(newEntityId);
         setSelectedDetailId(newEntityId);
       }
@@ -223,6 +260,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
       handleInstantiateTemplate(newPicked);
     } else {
       onSelected(newPicked.id);
+      onPicked(newPicked);
       handleClean();
     }
   };
@@ -236,6 +274,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
         newDropped.entity && handleInstantiateTemplate(newDropped.entity);
       } else {
         onSelected(newDropped.id);
+        newDropped.entity && onPicked(newDropped.entity);
         handleClean();
       }
     }
@@ -260,7 +299,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
     }
   };
 
-  return selectedCategory && allCategories ? (
+  return selectedCategory && allCategories && user ? (
     <Suggester
       isFetching={isFetchingStatement}
       marginTop={false}
@@ -280,12 +319,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
       onChangeCategory={(option: ValueType<OptionTypeBase, any> | null) => {
         setSelectedCategory(option);
       }}
-      onCreate={(newCreated: {
-        label: string;
-        entityClass: EntityEnums.Class;
-        detail?: string;
-        territoryId?: string;
-      }) => {
+      onCreate={(newCreated: SuggesterItemToCreate) => {
         handleCreate(newCreated);
       }}
       onPick={(newPicked: IEntity, instantiateTemplate?: boolean) => {
@@ -302,6 +336,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
       inputWidth={inputWidth}
       isInsideTemplate={isInsideTemplate}
       territoryParentId={territoryParentId}
+      userOptions={user.options}
     />
   ) : (
     <div />

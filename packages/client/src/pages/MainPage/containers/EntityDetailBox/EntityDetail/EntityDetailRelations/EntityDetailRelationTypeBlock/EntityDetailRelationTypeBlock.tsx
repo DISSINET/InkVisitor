@@ -118,12 +118,13 @@ export const EntityDetailRelationTypeBlock: React.FC<
   useEffect(() => {
     const entityIds = selectedRelations
       .map((relation) => relation.entityIds.map((entityId) => entityId))
-      .flat(1)
-      .concat(entity.id);
+      .flat(1);
+    if (!relationRule.selfLoop) {
+      entityIds.push(entity.id);
+    }
     setUsedEntityIds([...new Set(entityIds)]);
-  }, [entities, selectedRelations]);
+  }, [selectedRelations, relationRule]);
 
-  // TODO: Lift cloud handling to EntityDetailRelations
   const [tempCloudEntityId, setTempCloudEntityId] = useState<string | false>(
     false
   );
@@ -167,7 +168,18 @@ export const EntityDetailRelationTypeBlock: React.FC<
   };
 
   useEffect(() => {
-    setCurrentRelations(selectedRelations);
+    const uniqueRelationIds: string[] = [];
+
+    const uniqueRelations = selectedRelations.filter((r) => {
+      if (uniqueRelationIds.includes(r.id)) {
+        return false;
+      } else {
+        uniqueRelationIds.push(r.id);
+        return true;
+      }
+    });
+
+    setCurrentRelations([...new Set(uniqueRelations)]);
   }, [selectedRelations]);
 
   const [currentRelations, setCurrentRelations] = useState<
@@ -216,65 +228,71 @@ export const EntityDetailRelationTypeBlock: React.FC<
     });
   };
 
+  const hasSuggester = isMultiple || selectedRelations.length < 1;
+
   return (
     <>
       {/* Type column */}
       <EntityDetailRelationTypeIcon relationType={relationType} />
       {/* Label & Suggester column */}
-      <StyledLabelSuggester>
-        <StyledLabel>{relationRule.label}</StyledLabel>
-        {(isMultiple || selectedRelations.length < 1) && (
-          <StyledSuggesterWrapper>
-            <EntitySuggester
-              inputWidth={80}
-              disableTemplatesAccept
-              categoryTypes={
-                getCategoryTypes() ||
-                ([EntityEnums.Extension.Empty] as [EntityEnums.ExtendedClass])
-              }
-              onSelected={(selectedId: string) => {
-                if (isCloudType) {
-                  setTempCloudEntityId(selectedId);
-                } else {
-                  handleMultiSelected(selectedId);
+      <div>
+        <StyledLabelSuggester>
+          <StyledLabel>{relationRule.label}</StyledLabel>
+          {hasSuggester && (
+            <StyledSuggesterWrapper>
+              <EntitySuggester
+                inputWidth={80}
+                disableTemplatesAccept
+                categoryTypes={
+                  getCategoryTypes() ||
+                  ([EntityEnums.Extension.NoClass] as [
+                    EntityEnums.ExtendedClass
+                  ])
                 }
-              }}
-              excludedActantIds={usedEntityIds}
-            />
-          </StyledSuggesterWrapper>
-        )}
-      </StyledLabelSuggester>
-      {/* Values column */}
-      <StyledRelationValues>
-        {currentRelations.map((relation, key) =>
-          isCloudType ? (
-            <EntityDetailCloudRelation
-              key={key}
-              relation={relation}
-              entityId={entity.id}
-              relations={selectedRelations}
-              entities={entities}
-              relationUpdateMutation={relationUpdateMutation}
-              relationDeleteMutation={relationDeleteMutation}
-            />
-          ) : (
-            <EntityDetailRelationRow
-              key={key}
-              index={key}
-              relation={relation}
-              entities={entities}
-              entityId={entity.id}
-              relationRule={relationRule}
-              relationType={relationType}
-              relationUpdateMutation={relationUpdateMutation}
-              relationDeleteMutation={relationDeleteMutation}
-              hasOrder={hasOrder && currentRelations.length > 1}
-              moveRow={moveRow}
-              updateOrderFn={updateOrderFn}
-            />
-          )
-        )}
-      </StyledRelationValues>
+                onSelected={(selectedId: string) => {
+                  if (isCloudType) {
+                    setTempCloudEntityId(selectedId);
+                  } else {
+                    handleMultiSelected(selectedId);
+                  }
+                }}
+                excludedActantIds={usedEntityIds}
+              />
+            </StyledSuggesterWrapper>
+          )}
+        </StyledLabelSuggester>
+        {/* Values column */}
+        <StyledRelationValues hasSuggester={hasSuggester}>
+          {currentRelations.map((relation, key) =>
+            isCloudType ? (
+              <EntityDetailCloudRelation
+                key={key}
+                relation={relation}
+                entityId={entity.id}
+                relations={selectedRelations}
+                entities={entities}
+                relationUpdateMutation={relationUpdateMutation}
+                relationDeleteMutation={relationDeleteMutation}
+              />
+            ) : (
+              <EntityDetailRelationRow
+                key={key}
+                index={key}
+                relation={relation}
+                entities={entities}
+                entityId={entity.id}
+                relationRule={relationRule}
+                relationType={relationType}
+                relationUpdateMutation={relationUpdateMutation}
+                relationDeleteMutation={relationDeleteMutation}
+                hasOrder={hasOrder && currentRelations.length > 1}
+                moveRow={moveRow}
+                updateOrderFn={updateOrderFn}
+              />
+            )
+          )}
+        </StyledRelationValues>
+      </div>
     </>
   );
 };

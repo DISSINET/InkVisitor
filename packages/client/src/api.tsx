@@ -307,8 +307,8 @@ class Api {
   }
 
   /**
-   * Administration
-   * Administration container
+   * Bookmarks
+   * Bookmarks container
    */
   async bookmarksGet(
     userId: string
@@ -526,6 +526,25 @@ class Api {
       throw { ...err.response.data };
     }
   }
+
+  async statementReorderElements(
+    statementId: string,
+    elementIdsWithOrder: string[]
+  ): Promise<AxiosResponse<IResponseGeneric>> {
+    try {
+      const response = await this.connection.put(
+        `/statements/${statementId}/elementsOrders`,
+        elementIdsWithOrder
+      );
+      return response;
+    } catch (err: any | AxiosError) {
+      throw { ...err.response.data };
+    }
+  }
+
+  /**
+   * Pernmissions
+   */
 
   async getAclPermissions(): Promise<AxiosResponse<IResponsePermission[]>> {
     try {

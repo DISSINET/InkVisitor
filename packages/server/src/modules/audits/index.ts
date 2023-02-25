@@ -26,10 +26,7 @@ export const getAuditByEntityId = asyncRouteHandler<IResponseAudit>(
     }
 
     const response = new ResponseAudit(entityId);
-    await response.getLastNForEntity(request.db.connection);
-    if (response.last.length) {
-      await response.getFirstForEntity(request.db.connection);
-    }
+    await response.prepare(request.db.connection);
 
     return response;
   }
@@ -76,10 +73,7 @@ export default Router()
       const out: IResponseAudit[] = [];
       for (const statementData of statements) {
         const response = new ResponseAudit(statementData.id);
-        await response.getLastNForEntity(request.db.connection);
-        if (response.last.length) {
-          await response.getFirstForEntity(request.db.connection);
-        }
+        await response.prepare(request.db.connection);
         out.push(response);
       }
 

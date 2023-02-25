@@ -9,7 +9,9 @@ import {
   IStatementActant,
   IStatementAction,
   ITerritory,
+  IAction,
 } from "@shared/types";
+import { UserOptions } from "@shared/types/response-user";
 
 import {
   IStatementClassification,
@@ -24,7 +26,7 @@ export const CBookmarkFolder = (bookmarkName: string): IBookmarkFolder => ({
   entityIds: [],
 });
 
-export const CProp = (): IProp => ({
+export const CProp = (newStatementOrder?: number | false): IProp => ({
   id: uuidv4(),
   elvl: EntityEnums.Elvl.Textual,
   certainty: EntityEnums.Certainty.Empty,
@@ -35,6 +37,7 @@ export const CProp = (): IProp => ({
   bundleStart: false,
   bundleEnd: false,
   children: [],
+  statementOrder: newStatementOrder,
 
   type: {
     entityId: "",
@@ -52,7 +55,9 @@ export const CProp = (): IProp => ({
   },
 });
 
-export const CClassification = (): IStatementClassification => ({
+export const CClassification = (
+  newStatementOrder: number | false
+): IStatementClassification => ({
   id: uuidv4(),
   entityId: "",
   elvl: EntityEnums.Elvl.Textual,
@@ -60,9 +65,12 @@ export const CClassification = (): IStatementClassification => ({
   certainty: EntityEnums.Certainty.Empty,
   mood: [EntityEnums.Mood.Indication],
   moodvariant: EntityEnums.MoodVariant.Realis,
+  statementOrder: newStatementOrder,
 });
 
-export const CIdentification = (): IStatementIdentification => ({
+export const CIdentification = (
+  newStatementOrder: number | false
+): IStatementIdentification => ({
   id: uuidv4(),
   entityId: "",
   elvl: EntityEnums.Elvl.Textual,
@@ -70,6 +78,7 @@ export const CIdentification = (): IStatementIdentification => ({
   certainty: EntityEnums.Certainty.Empty,
   mood: [EntityEnums.Mood.Indication],
   moodvariant: EntityEnums.MoodVariant.Realis,
+  statementOrder: newStatementOrder,
 });
 
 export const CMetaProp = (): IProp => ({
@@ -99,45 +108,6 @@ export const CMetaProp = (): IProp => ({
     partitivity: EntityEnums.Partitivity.Unison,
   },
 });
-
-export const CStatement = (
-  userRole: UserEnums.Role,
-  territoryId?: string,
-  label?: string,
-  detail?: string
-): IStatement => {
-  const newStatement: IStatement = {
-    id: uuidv4(),
-    class: EntityEnums.Class.Statement,
-    label: label ? label : "",
-    detail: detail ? detail : "",
-    language: EntityEnums.Language.Latin,
-    notes: [],
-    data: {
-      actions: [],
-      text: "",
-      actants: [],
-      tags: [],
-    },
-    props: [],
-    status:
-      userRole === UserEnums.Role.Admin
-        ? EntityEnums.Status.Approved
-        : EntityEnums.Status.Pending,
-    references: [],
-    isTemplate: false,
-  };
-  if (territoryId) {
-    newStatement.data = {
-      ...newStatement.data,
-      territory: {
-        territoryId: territoryId,
-        order: -1,
-      },
-    };
-  }
-  return newStatement;
-};
 
 export const InstProps: any = async (
   oldProps: IProp[],
@@ -230,40 +200,6 @@ export const InstAction: any = async (
   return action;
 };
 
-// not used anymore
-// export const InstReference: any = async (
-//   reference: IReference,
-//   userRole: UserEnums.Role
-// ) => {
-//   if (reference.resource) {
-//     const resourceEReq = await api.entitiesGet(reference.resource);
-
-//     if (resourceEReq && resourceEReq.data) {
-//       if (resourceEReq.data.isTemplate) {
-//         const newResourceEId = await InstTemplate(resourceEReq.data, userRole);
-//         if (newResourceEId) {
-//           reference.resource = newResourceEId;
-//         }
-//       }
-//     }
-//   }
-
-//   if (reference.value) {
-//     const valueEReq = await api.entitiesGet(reference.value);
-
-//     if (valueEReq && valueEReq.data) {
-//       if (valueEReq.data.isTemplate) {
-//         const newValueEId = await InstTemplate(valueEReq.data, userRole);
-//         if (newValueEId) {
-//           reference.value = newValueEId;
-//         }
-//       }
-//     }
-//   }
-
-//   return reference;
-// };
-
 // instantiate template
 // TODO #952 handle conflicts in Templates application
 
@@ -288,7 +224,12 @@ export const InstTemplate = async (
     }
 
     if (iEntity) {
-      iEntity.label = `[INSTANCE OF] ${templateEntity.label}`;
+      // #1554
+      if (templateEntity.class === EntityEnums.Class.Statement) {
+        iEntity.label = "";
+      } else {
+        iEntity.label = `[INSTANCE OF] ${templateEntity.label}`;
+      }
       iEntity.usedTemplate = templateEntity.id;
       iEntity.props = await InstProps(templateEntity.props);
       iEntity.isTemplate = false;
@@ -335,7 +276,15 @@ export const applyTemplate = async (
 
     if (newEntity) {
       newEntity.id = entity.id;
-      newEntity.label = `[INSTANCE OF] ${templateEntity.label}`;
+
+      // #1554
+      if (!entity.label) {
+        if (templateEntity.class === EntityEnums.Class.Statement) {
+          newEntity.label = "";
+        } else {
+          newEntity.label = `[INSTANCE OF] ${templateEntity.label}`;
+        }
+      }
       newEntity.usedTemplate = templateEntity.id;
       newEntity.props = await InstProps(templateEntity.props);
       newEntity.isTemplate = false;
@@ -356,7 +305,7 @@ export const DStatement = (
     id: uuidv4(),
     class: EntityEnums.Class.Statement,
     data: { ...statement.data },
-    label: `[COPY OF] ${statement.label}`,
+    label: "",
     detail: statement.detail,
     language: statement.language,
     notes: statement.notes,
@@ -384,6 +333,61 @@ export const DStatement = (
   duplicatedStatement.references.forEach((r) => (r.id = uuidv4()));
 
   return duplicatedStatement;
+};
+
+export const DStatementActions = (
+  actionsToDuplicate: IStatementAction[]
+): IStatementAction[] => {
+  return actionsToDuplicate.map((action) => {
+    return {
+      ...action,
+      props: DProps(action.props),
+      id: uuidv4(),
+    };
+  });
+};
+
+export const DStatementClassifications = (
+  classifications: IStatementClassification[]
+): IStatementClassification[] => {
+  return classifications.map((c) => {
+    return {
+      ...c,
+      id: uuidv4(),
+    };
+  });
+};
+export const DStatementIdentifications = (
+  identifications: IStatementIdentification[]
+): IStatementIdentification[] => {
+  return identifications.map((i) => {
+    return {
+      ...i,
+      id: uuidv4(),
+    };
+  });
+};
+
+export const DStatementActants = (
+  actantsToDuplicate: IStatementActant[]
+): IStatementActant[] => {
+  return actantsToDuplicate.map((actant) => {
+    return {
+      ...actant,
+      classifications: DStatementClassifications(actant.classifications),
+      identifications: DStatementIdentifications(actant.identifications),
+      props: DProps(actant.props),
+      id: uuidv4(),
+    };
+  });
+};
+
+export const DStatementReferences = (
+  referenceToDuplicate: IReference[]
+): IReference[] => {
+  return referenceToDuplicate.map((r) => {
+    return { ...r, id: uuidv4() };
+  });
 };
 
 // duplicate entity
@@ -425,9 +429,12 @@ export const DProps = (oldProps: IProp[]): IProp[] => {
   return newProps;
 };
 
-export const CStatementActant = (): IStatementActant => ({
+export const CStatementActant = (
+  entityId: string,
+  newStatementOrder: number | false
+): IStatementActant => ({
   id: uuidv4(),
-  entityId: "",
+  entityId: entityId,
   position: EntityEnums.Position.Subject,
   elvl: EntityEnums.Elvl.Textual,
   logic: EntityEnums.Logic.Positive,
@@ -439,9 +446,13 @@ export const CStatementActant = (): IStatementActant => ({
   props: [],
   classifications: [],
   identifications: [],
+  statementOrder: newStatementOrder,
 });
 
-export const CStatementAction = (actionId: string): IStatementAction => ({
+export const CStatementAction = (
+  actionId: string,
+  newStatementOrder: number | false
+): IStatementAction => ({
   id: uuidv4(),
   actionId: actionId,
   certainty: EntityEnums.Certainty.Empty,
@@ -453,20 +464,62 @@ export const CStatementAction = (actionId: string): IStatementAction => ({
   bundleStart: false,
   bundleEnd: false,
   props: [],
+  statementOrder: newStatementOrder,
 });
 
-export const CTerritoryActant = (
-  label: string,
-  parentId: string,
-  parentOrder: number,
+export const CStatement = (
   userRole: UserEnums.Role,
-  detail?: string
+  userOptions: UserOptions,
+  label?: string,
+  detail?: string,
+  territoryId?: string
+): IStatement => {
+  const newStatement: IStatement = {
+    id: uuidv4(),
+    class: EntityEnums.Class.Statement,
+    label: label ? label : "",
+    detail: detail ? detail : "",
+    language: userOptions.defaultLanguage,
+    notes: [],
+    data: {
+      actions: [],
+      text: "",
+      actants: [],
+      tags: [],
+    },
+    props: [],
+    status:
+      userRole === UserEnums.Role.Admin
+        ? EntityEnums.Status.Approved
+        : EntityEnums.Status.Pending,
+    references: [],
+    isTemplate: false,
+  };
+  if (territoryId) {
+    newStatement.data = {
+      ...newStatement.data,
+      territory: {
+        territoryId: territoryId,
+        order: -1,
+      },
+    };
+  }
+  return newStatement;
+};
+
+export const CTerritory = (
+  userRole: UserEnums.Role,
+  userOptions: UserOptions,
+  label: string,
+  detail: string,
+  parentId: string,
+  parentOrder: number
 ): ITerritory => ({
   id: uuidv4(),
   class: EntityEnums.Class.Territory,
   label: label,
-  detail: detail ? detail : "",
-  language: EntityEnums.Language.Latin,
+  detail: detail,
+  language: userOptions.defaultLanguage,
   notes: [],
   data: {
     parent: { territoryId: parentId, order: parentOrder },
@@ -482,9 +535,10 @@ export const CTerritoryActant = (
 });
 
 export const CEntity = (
+  userRole: UserEnums.Role,
+  userOptions: UserOptions,
   entityClass: EntityEnums.Class,
   label: string,
-  userRole: UserEnums.Role,
   detail?: string
 ): IEntity => {
   return {
@@ -497,7 +551,7 @@ export const CEntity = (
       userRole === UserEnums.Role.Admin
         ? EntityEnums.Status.Approved
         : EntityEnums.Status.Pending,
-    language: EntityEnums.Language.Latin,
+    language: userOptions.defaultLanguage,
     notes: [],
     props: [],
     references: [],

@@ -3,9 +3,7 @@ import styled from "styled-components";
 export const StyledTableWrapper = styled.div`
   display: flex;
   width: 100%;
-  justify-content: center;
-  overflow-x: auto;
-  overflow-y: auto;
+  overflow: auto;
 `;
 
 export const StyledTable = styled.table`

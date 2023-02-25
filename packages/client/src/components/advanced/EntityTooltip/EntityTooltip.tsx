@@ -1,5 +1,5 @@
 import { Placement } from "@popperjs/core";
-import { certaintyDict } from "@shared/dictionaries";
+import { certaintyDict, languageDict } from "@shared/dictionaries";
 import { EntityEnums, RelationEnums } from "@shared/enums";
 import {
   EntityTooltip as EntityTooltipNamespace,
@@ -22,6 +22,7 @@ import { Colors } from "types";
 import { getEntityRelationRules, getShortLabelByLetterCount } from "utils";
 import { EntityTooltipRelationTreeTable } from "./EntityTooltipRelationTreeTable/EntityTooltipRelationTreeTable";
 import {
+  StyledBold,
   StyledDetail,
   StyledIconWrap,
   StyledLabel,
@@ -36,6 +37,7 @@ interface EntityTooltip {
   entityId: string;
   entityClass: EntityEnums.Class;
   label?: string;
+  language: EntityEnums.Language;
   detail?: string;
   text?: string;
   itemsCount?: number;
@@ -53,6 +55,7 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
   entityId,
   entityClass,
   label,
+  language,
   detail,
   text,
   itemsCount,
@@ -69,15 +72,27 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
     EntityTooltipNamespace.IResponse | false
   >(false);
 
+  const [allowFetch, setAllowFetch] = useState(false);
+
+  useEffect(() => {
+    if (tagHovered) {
+      const timer = setTimeout(() => setAllowFetch(true), 500);
+      return () => {
+        setAllowFetch(false);
+        clearTimeout(timer);
+      };
+    }
+  }, [tagHovered]);
+
   const { data, isFetching, isSuccess } = useQuery(
-    ["tooltip", entityId, tagHovered],
+    ["tooltip", entityId, allowFetch],
     async () => {
       const res = await api.tooltipGet(entityId);
       setTooltipData(res.data);
       return res.data;
     },
     {
-      enabled: api.isLoggedIn() && !!entityId && tagHovered,
+      enabled: api.isLoggedIn() && !!entityId && allowFetch,
     }
   );
 
@@ -90,7 +105,10 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
               <StyledIconWrap>
                 <AiOutlineTag />
               </StyledIconWrap>
-              <StyledLabel>{label}</StyledLabel>
+              <StyledLabel>
+                <StyledBold>{label}</StyledBold>
+                {` (${languageDict.find((l) => l.value === language)?.label})`}
+              </StyledLabel>
             </StyledRow>
             {text && (
               <StyledRow>
@@ -154,7 +172,7 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
 
   const renderRelations = useMemo(() => {
     if (tooltipData) {
-      const { relations, entities } = tooltipData || {};
+      const { relations, entities } = tooltipData;
 
       const filteredTypes = getEntityRelationRules(
         entityClass,
@@ -208,7 +226,11 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
                                     .slice(0, maxTooltipMultiRelations)
                                     .map((connection, key) => {
                                       const entity =
-                                        entities[connection.entityIds[1]];
+                                        entities[
+                                          connection.entityIds[0] === entityId
+                                            ? connection.entityIds[1]
+                                            : connection.entityIds[0]
+                                        ];
                                       const certainty = (
                                         connection as Relation.IConnection<Relation.IIdentification>
                                       ).certainty;

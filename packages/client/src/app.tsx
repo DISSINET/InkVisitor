@@ -26,7 +26,9 @@ import {
   heightFooter,
   heightHeader,
   percentPanelWidths,
+  secondPanelMinWidth,
   separatorXPercentPosition,
+  thirdPanelMinWidth,
 } from "Theme/constants";
 import GlobalStyle from "Theme/global";
 import AclPage from "./pages/Acl";
@@ -102,10 +104,6 @@ export const App: React.FC = () => {
 
   useEffect(() => {
     if (debouncedWidth > 0) {
-      // const layoutWidth =
-      //   debouncedWidth < layoutWidthBreakpoint
-      //     ? minLayoutWidth
-      //     : debouncedWidth;
       const layoutWidth = debouncedWidth;
       dispatch(setLayoutWidth(layoutWidth));
       const onePercent = layoutWidth / 100;
@@ -123,21 +121,41 @@ export const App: React.FC = () => {
         );
       }
 
+      // FIRST
       const firstPanel =
         Math.floor(onePercent * percentPanelWidths[0] * 10) / 10;
-      const secondPanel = Math.floor(
+
+      // SECOND
+      const secondPanelPx = Math.floor(
         (onePercent * (separatorPercentPosition - percentPanelWidths[0]) * 10) /
-        10
+          10
       );
-      const thirdPanel = Math.floor(
+      const isSecondPanelUndersized = secondPanelPx < secondPanelMinWidth;
+      let secondPanel = isSecondPanelUndersized
+        ? secondPanelMinWidth
+        : secondPanelPx;
+
+      // THIRD
+      const thirdPanelPx = Math.floor(
         layoutWidth -
-        (onePercent *
-          (separatorPercentPosition + percentPanelWidths[3]) *
-          10) /
-        10
+          (onePercent *
+            (separatorPercentPosition + percentPanelWidths[3]) *
+            10) /
+            10
       );
+      const isThirdPanelUndersized = thirdPanelPx < thirdPanelMinWidth;
+      let thirdPanel = isThirdPanelUndersized
+        ? thirdPanelMinWidth
+        : thirdPanelPx;
+
+      // FOURTH
       const fourthPanel =
         Math.floor(onePercent * percentPanelWidths[3] * 10) / 10;
+
+      if (!isSecondPanelUndersized && isThirdPanelUndersized) {
+        const undersizeDifference = thirdPanelMinWidth - thirdPanelPx;
+        secondPanel = secondPanel - undersizeDifference;
+      }
 
       const panels = [firstPanel, secondPanel, thirdPanel, fourthPanel];
       dispatch(setPanelWidths(panels));

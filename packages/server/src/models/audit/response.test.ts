@@ -2,7 +2,6 @@ import "ts-jest";
 import { Db } from "@service/RethinkDB";
 import { clean } from "@modules/common.test";
 import Audit from "./audit";
-import { ResponseAudit } from "./response";
 
 function prepareAudit(forEntityId: string, date: Date): [string, Audit] {
   const id = Math.random().toFixed();
@@ -53,11 +52,10 @@ describe("test ResponseAudit.getFirstForEntity", function () {
   afterAll(async () => await clean(db));
 
   it("should return exactly the first audit entry", async () => {
-    const response = new ResponseAudit(entityId);
-    await response.getFirstForEntity(db.connection);
-    expect(response.first).not.toBe(null);
-    if (response.first) {
-      expect(response.first.id).not.toBe("");
+    const first = await Audit.getFirstForEntity(db.connection, entityId);
+    expect(first).not.toBe(null);
+    if (first) {
+      expect(first.id).not.toBe("");
     }
   });
 });
@@ -83,17 +81,15 @@ describe("test ResponseAudit.getLastNForEntity", function () {
   afterAll(async () => await clean(db));
 
   it("should return both entries", async () => {
-    const response = new ResponseAudit(entityId);
-    await response.getLastNForEntity(db.connection, 2);
-    expect(response.last).toHaveLength(2);
-    expect(response.last[0].date).toEqual(a2.date);
-    expect(response.last[1].date).toEqual(a1.date);
+    const last = await Audit.getLastNForEntity(db.connection, entityId, 2);
+    expect(last).toHaveLength(2);
+    expect(last[0].date).toEqual(a2.date);
+    expect(last[1].date).toEqual(a1.date);
   });
 
   it("should return one last entry", async () => {
-    const response = new ResponseAudit(entityId);
-    await response.getLastNForEntity(db.connection, 1);
-    expect(response.last).toHaveLength(1);
-    expect(response.last[0].date).toEqual(a2.date);
+    const last = await Audit.getLastNForEntity(db.connection, entityId, 1);
+    expect(last).toHaveLength(1);
+    expect(last[0].date).toEqual(a2.date);
   });
 });

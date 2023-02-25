@@ -63,6 +63,7 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
       entityToDuplicate,
       localStorage.getItem("userrole") as UserEnums.Role
     );
+
     duplicateEntityMutation.mutate(newEntity);
   };
 
@@ -133,6 +134,7 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
               key="entity-duplicate"
               icon={<FaClone size={14} />}
               color="primary"
+              disabled={entity.class === EntityEnums.Class.Statement}
               tooltipLabel="duplicate entity"
               inverted
               onClick={() => {
@@ -153,16 +155,6 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
             />
           </>
         )}
-        <Button
-          key="refresh"
-          icon={<FaRecycle size={14} />}
-          tooltipLabel="refresh entity data"
-          inverted
-          color="primary"
-          onClick={() => {
-            queryClient.invalidateQueries(["entity"]);
-          }}
-        />
         {entity.class === EntityEnums.Class.Statement && (
           <Button
             key="edit"

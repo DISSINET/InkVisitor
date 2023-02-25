@@ -24,7 +24,8 @@ export namespace EntityEnums {
 
   export enum Extension {
     Any = "*",
-    Empty = "X",
+    Empty = "empty",
+    NoClass = "X",
   }
 
   export type ExtendedClass = Class | Extension;
@@ -41,6 +42,7 @@ export namespace EntityEnums {
     Approved = "1",
     Discouraged = "2",
     Warning = "3",
+    Unfinished = "4",
   }
 
   export enum Certainty {
@@ -93,6 +95,7 @@ export namespace EntityEnums {
     Belief = "11",
     Allegation = "12",
     Semblance = "13",
+    Rectitude = "14",
   }
 
   export enum MoodVariant {

@@ -25,4 +25,9 @@ export const entityStatusDict: {
       label: "warning",
       info: "",
     },
+    {
+      value: EntityEnums.Status.Unfinished,
+      label: "unfinished",
+      info: "",
+    },
   ];

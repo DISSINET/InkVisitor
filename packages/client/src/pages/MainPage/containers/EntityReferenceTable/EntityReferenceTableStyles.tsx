@@ -6,7 +6,7 @@ export const StyledReferencesList = styled.div<StyledReferencesList>`
   display: grid;
   align-items: center;
   padding-left: ${({ theme }) => theme.space[0]};
-  grid-template-columns: 1fr 1fr 2rem;
+  grid-template-columns: auto auto 1fr;
   width: fit-content;
   grid-template-rows: auto;
   grid-auto-flow: row;

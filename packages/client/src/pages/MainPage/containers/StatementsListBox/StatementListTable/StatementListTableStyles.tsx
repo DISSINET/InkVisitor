@@ -25,7 +25,6 @@ export const StyledTh = styled.th`
 `;
 
 interface StyledTr {
-  isOdd?: boolean;
   isSelected?: boolean;
   opacity?: number;
 }

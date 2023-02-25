@@ -4,7 +4,7 @@ import styled from "styled-components";
 interface StyledBox {
   height?: number;
 }
-export const StyledBox = styled(animated.div) <StyledBox>`
+export const StyledBox = styled(animated.div)<StyledBox>`
   position: relative;
   display: flex;
   flex-direction: column;
@@ -17,7 +17,7 @@ interface StyledHead {
   $noPadding: boolean;
   $isExpanded: boolean;
 }
-export const StyledHead = styled(animated.div) <StyledHead>`
+export const StyledHead = styled(animated.div)<StyledHead>`
   height: 3.2rem;
   background-color: ${({ theme, color }) => (color ? color : "")};
   color: ${({ theme }) => theme.color["gray"]["600"]};
@@ -37,7 +37,7 @@ export const StyledHead = styled(animated.div) <StyledHead>`
   border-width: ${({ theme, $noPadding, $isExpanded }) =>
     $noPadding || !$isExpanded ? theme.borderWidth[1] : theme.borderWidth[4]};
 `;
-interface StyledButtonWrap { }
+interface StyledButtonWrap {}
 export const StyledButtonWrap = styled.div<StyledButtonWrap>`
   position: absolute;
   top: ${({ theme }) => theme.space[2]};
@@ -49,8 +49,7 @@ interface StyledContent {
   $borderColor?: string;
   $isExpanded: boolean;
 }
-export const StyledContent = styled(animated.div) <StyledContent>`
-  background-color: ${({ theme }) => theme.color["grey"]};
+export const StyledContent = styled(animated.div)<StyledContent>`
   display: flex;
   flex-direction: column;
   overflow-y: auto;
@@ -74,7 +73,7 @@ interface StyledContentAnimationWrap {
 }
 export const StyledContentAnimationWrap = styled(
   animated.div
-) <StyledContentAnimationWrap>`
+)<StyledContentAnimationWrap>`
   display: ${({ $hideContent }) => ($hideContent ? "none" : "inherit")};
   flex-direction: column;
   height: 100%;
@@ -82,7 +81,7 @@ export const StyledContentAnimationWrap = styled(
 interface StyledVerticalText {
   $showContentLabel: boolean;
 }
-export const StyledVerticalText = styled(animated.p) <StyledVerticalText>`
+export const StyledVerticalText = styled(animated.p)<StyledVerticalText>`
   position: absolute;
   top: ${({ theme }) => theme.space[14]};
   left: 0.4rem;

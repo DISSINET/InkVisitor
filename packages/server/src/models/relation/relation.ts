@@ -71,7 +71,7 @@ export default class Relation implements IRelationModel {
 
         patternFound = this.hasEntityCorrectClass(this.entityIds[i], wantedClass);
         if (!patternFound) {
-          // patter cannot be accepted any further - continue with another pattern
+          // pattern cannot be accepted any further - continue with another pattern
           break;
         }
       }
@@ -98,8 +98,12 @@ export default class Relation implements IRelationModel {
    * @param request 
    */
   async beforeSave(request: IRequest): Promise<void> {
-    if (!this.entities) {
+    if (!this.entities || this.entities.length !== this.entityIds.length) {
       this.entities = await Entity.findEntitiesByIds(request.db.connection, this.entityIds);
+
+      if (this.entities.length !== this.entityIds.length) {
+        throw new ModelNotValidError(`At least one entity does not exist`);
+      }
     }
 
     const err = this.areEntitiesValid();
@@ -129,7 +133,12 @@ export default class Relation implements IRelationModel {
     return childs.filter(ch => ch.id !== this.id);
   }
 
-  async save(db: Connection | undefined): Promise<WriteResult> {
+  /**
+  * Stores the relation in the db
+  * @param db db connection
+  * @returns Promise<boolean> to indicate result of the operation
+  */
+  async save(db: Connection | undefined): Promise<boolean> {
     const result = await rethink
       .table(Relation.table)
       .insert({ ...this, id: this.id || undefined })
@@ -139,7 +148,7 @@ export default class Relation implements IRelationModel {
       this.id = result.generated_keys[0];
     }
 
-    return result;
+    return result.inserted === 1;
   }
 
 

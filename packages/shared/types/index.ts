@@ -39,7 +39,14 @@ import { IResponseAdministration } from "./response-administration";
 import { IResponseAudit } from "./response-audit";
 import { IResponseGeneric } from "./response-generic";
 import { IResponsePermission } from "./response-permission";
-import { IResponseStatement } from "./response-statement";
+import {
+  ClassificationOrder,
+  EntityOrder,
+  IdentificationOrder,
+  IResponseStatement,
+  OrderType,
+  PropOrder,
+} from "./response-statement";
 import { IResponseTerritory } from "./response-territory";
 import {
   IResponseTree,
@@ -114,5 +121,10 @@ export type {
   IResponsePermission,
   IResponseStats,
   EntityTooltip,
+  OrderType,
+  EntityOrder,
+  PropOrder,
+  ClassificationOrder,
+  IdentificationOrder,
 };
 export { RequestSearch, RequestPermissionUpdate, Relation };

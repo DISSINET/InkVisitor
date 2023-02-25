@@ -41,6 +41,7 @@ import {
   StyledDetailSectionEntityList,
   StyledDetailSectionHeader,
   StyledDetailWrapper,
+  StyledPropGroupWrap,
   StyledUsedAsHeading,
   StyledUsedAsTitle,
 } from "./EntityDetailStyles";
@@ -589,58 +590,45 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
               </StyledDetailSectionContent>
             </StyledDetailSection>
 
-            {/* reference section */}
-            <StyledDetailSection>
-              <StyledDetailSectionHeader>References</StyledDetailSectionHeader>
-              <StyledDetailSectionContent>
-                <EntityReferenceTable
-                  disabled={!userCanEdit}
-                  references={entity.references || []}
-                  entities={entity.entities}
-                  onChange={(newValues: IReference[]) => {
-                    updateEntityMutation.mutate({ references: newValues });
-                  }}
-                  isInsideTemplate={entity.isTemplate || false}
-                />
-              </StyledDetailSectionContent>
-            </StyledDetailSection>
-
             {/* meta props section */}
             <StyledDetailSection metaSection>
               <StyledDetailSectionHeader>
                 Meta properties
               </StyledDetailSectionHeader>
               <StyledDetailSectionContent>
-                <PropGroup
-                  boxEntity={entity}
-                  originId={entity.id}
-                  entities={entity.entities}
-                  props={entity.props}
-                  territoryId={territoryId}
-                  updateProp={updateProp}
-                  removeProp={removeProp}
-                  addProp={addMetaProp}
-                  userCanEdit={userCanEdit}
-                  openDetailOnCreate={false}
-                  movePropToIndex={(propId, oldIndex, newIndex) => {
-                    movePropToIndex(propId, oldIndex, newIndex);
-                  }}
-                  category={DraggedPropRowCategory.META_PROP}
-                  disabledAttributes={
-                    {
-                      statement: [
-                        "elvl",
-                        "moodvariant",
-                        "mood",
-                        "bundleOperator",
-                      ],
-                      type: ["elvl", "logic", "virtuality", "partitivity"],
-                      value: ["elvl", "logic", "virtuality", "partitivity"],
-                    } as PropAttributeFilter
-                  }
-                  isInsideTemplate={entity.isTemplate || false}
-                  territoryParentId={getTerritoryId(entity)}
-                />
+                <StyledPropGroupWrap>
+                  <PropGroup
+                    boxEntity={entity}
+                    originId={entity.id}
+                    entities={entity.entities}
+                    props={entity.props}
+                    territoryId={territoryId}
+                    updateProp={updateProp}
+                    removeProp={removeProp}
+                    addProp={addMetaProp}
+                    userCanEdit={userCanEdit}
+                    openDetailOnCreate={false}
+                    movePropToIndex={(propId, oldIndex, newIndex) => {
+                      movePropToIndex(propId, oldIndex, newIndex);
+                    }}
+                    category={DraggedPropRowCategory.META_PROP}
+                    disabledAttributes={
+                      {
+                        statement: [
+                          "elvl",
+                          "moodvariant",
+                          "mood",
+                          "bundleOperator",
+                        ],
+                        type: ["elvl", "logic", "virtuality", "partitivity"],
+                        value: ["elvl", "logic", "virtuality", "partitivity"],
+                      } as PropAttributeFilter
+                    }
+                    isInsideTemplate={entity.isTemplate || false}
+                    territoryParentId={getTerritoryId(entity)}
+                    lowIdent
+                  />
+                </StyledPropGroupWrap>
                 {userCanEdit && (
                   <Button
                     color="primary"
@@ -654,6 +642,22 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
                     }}
                   />
                 )}
+              </StyledDetailSectionContent>
+            </StyledDetailSection>
+
+            {/* reference section */}
+            <StyledDetailSection>
+              <StyledDetailSectionHeader>References</StyledDetailSectionHeader>
+              <StyledDetailSectionContent>
+                <EntityReferenceTable
+                  disabled={!userCanEdit}
+                  references={entity.references || []}
+                  entities={entity.entities}
+                  onChange={(newValues: IReference[]) => {
+                    updateEntityMutation.mutate({ references: newValues });
+                  }}
+                  isInsideTemplate={entity.isTemplate || false}
+                />
               </StyledDetailSectionContent>
             </StyledDetailSection>
 
@@ -671,7 +675,12 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
                   <StyledDetailSectionEntityList>
                     {entity.usedAsTemplate.map((entityId) => (
                       <React.Fragment key={entityId}>
-                        <EntityTag entity={entity.entities[entityId]} />
+                        <div style={{ display: "grid" }}>
+                          <EntityTag
+                            entity={entity.entities[entityId]}
+                            fullWidth
+                          />
+                        </div>
                       </React.Fragment>
                     ))}
                   </StyledDetailSectionEntityList>
@@ -705,8 +714,8 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
               {!entity.isTemplate && (
                 <EntityDetailStatementPropsTable
                   title={{
-                    singular: "Statement Property",
-                    plural: "Statement Properties",
+                    singular: "In-statement Property",
+                    plural: "In-statement Properties",
                   }}
                   entities={entity.entities}
                   useCases={entity.usedInStatementProps}
@@ -718,8 +727,8 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
               {!entity.isTemplate && (
                 <EntityDetailIdentificationTable
                   title={{
-                    singular: "Statement Identification",
-                    plural: "Statement Identifications",
+                    singular: "In-statement Identification",
+                    plural: "In-statement Identifications",
                   }}
                   entities={entity.entities}
                   useCases={entity.usedInStatementIdentifications}
@@ -731,8 +740,8 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
               {!entity.isTemplate && (
                 <EntityDetailClassificationTable
                   title={{
-                    singular: "Statement Classification",
-                    plural: "Statement Classifications",
+                    singular: "In-statement Classification",
+                    plural: "In-statement Classifications",
                   }}
                   entities={entity.entities}
                   useCases={entity.usedInStatementClassifications}
