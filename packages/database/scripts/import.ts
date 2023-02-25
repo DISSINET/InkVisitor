@@ -316,12 +316,12 @@ class Importer {
         lastAction: true,
       },
       'X': {
-        description: `Enter '${colors.yellow('X')}' to do a full recreate & import`,
+        description: `Enter '${colors.yellow('X')}' to do a drop, recreate & import`,
         action: that.dropAndImport.bind(that),
         lastAction: true,
       },
       'C': {
-        description: `Enter '${colors.yellow('C')}' to drop and recreate the schema`,
+        description: `Enter '${colors.yellow('C')}' to drop and recreate without the data`,
         action: that.dropAndCreate.bind(that),
         lastAction: true,
       },
