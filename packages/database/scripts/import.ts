@@ -2,21 +2,15 @@ import { IUser } from "../../shared/types/user";
 import { hashPassword } from "../../server/src/common/auth";
 import { IAudit } from "../../shared/types";
 import { Relation } from "../../shared/types/relation";
-import { r, RConnectionOptions, Connection, Func } from "rethinkdb-ts";
-import tunnel from "tunnel-ssh";
 import { confirm } from './import/prompts';
-import {
-  DbSchema,
-  checkRelation,
-} from "./import-utils";
-import { auditsIndexes, entitiesIndexes, relationsIndexes } from "./indexes";
+import { DbSchema, checkRelation } from "./import/common";
+import { auditsIndexes, entitiesIndexes, relationsIndexes } from "./import/indexes";
 import { EntityEnums } from "@shared/enums";
 import { question } from "./import/prompts";
 import { DbHelper } from "./import/db";
 import { getEnv } from "./import/common";
 import { SshHelper } from "./import/ssh";
 import colors from "colors/safe";
-
 
 const datasets: Record<string, DbSchema> = {
   all: {
@@ -242,7 +236,7 @@ class Importer {
 
   /**
    * Enables run mode by setting required config bit
-   * @param mode 
+   * @param mode
    */
   enableMode(mode: MODES) {
     this.mode = this.mode | mode;
