@@ -328,7 +328,7 @@ class Importer {
       },
       'C': {
         description: `Enter '${colors.yellow('C')}' to drop and recreate the schema`,
-        action: that.dropAndImport.bind(that),
+        action: that.dropAndCreate.bind(that),
         lastAction: true,
       },
     };
