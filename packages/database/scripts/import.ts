@@ -3,7 +3,7 @@ import { hashPassword } from "../../server/src/common/auth";
 import { IAudit } from "../../shared/types";
 import { Relation } from "../../shared/types/relation";
 import { confirm } from './import/prompts';
-import { DbSchema, checkRelation } from "./import/common";
+import { DbSchema, checkRelation, TableSchema } from "./import/common";
 import { auditsIndexes, entitiesIndexes, relationsIndexes } from "./import/indexes";
 import { EntityEnums } from "@shared/enums";
 import { question } from "./import/prompts";
@@ -232,8 +232,8 @@ class Importer {
         lastAction: true,
       },
       'T': {
-        description: `Enter '${colors.yellow('T')}' to create (if does not exist) & import data for single table`,
-        action: that.dropAndCreate.bind(that),
+        description: `Enter '${colors.yellow('T')}' to recreate & import data for single table`,
+        action: that.createSingleTable.bind(that),
         lastAction: true,
       },
     };
@@ -241,6 +241,7 @@ class Importer {
     if (!this.datasetName || !this.db.dbConfig.name) {
       delete (menu['X']);
       delete (menu['C']);
+      delete (menu['T']);
     }
 
     const info: string[] = [];
@@ -317,7 +318,7 @@ class Importer {
     await this.db.dbDrop();
     await this.db.dbCreate();
     for (const tableConfig of Object.values(this.dataset)) {
-      await this.db.createTables(tableConfig);
+      await this.db.createTable(tableConfig);
     }
     for (const tableConfig of Object.values(this.dataset)) {
       await this.db.importData(tableConfig);
@@ -337,8 +338,33 @@ class Importer {
     await this.db.dbDrop();
     await this.db.dbCreate();
     for (const tableConfig of Object.values(this.dataset)) {
-      await this.db.createTables(tableConfig);
+      await this.db.createTable(tableConfig);
     }
+  }
+
+  /**
+   * Action recreates + import data for single table
+   * @returns Promise<void>
+   */
+  async createSingleTable(): Promise<void> {
+    if (!this.dataset || !this.db.dbConfig.name) {
+      console.log(colors.red("Dataset / database name not set"));
+      return;
+    }
+
+    const tableList = Object.keys(this.dataset);
+    console.log(`Tables: ${["", ...tableList.map((key, i) => `${key} (${i + 1})}`)].join("\n- ")}`);
+    const chosenTable = await question<string>("Choose the table (name/number)", (input: string): string | undefined => {
+      if (parseInt(input) > 0) {
+        input = tableList[parseInt(input) - 1];
+      }
+
+      return tableList.find(key => key === input);
+    }, "");
+
+    await this.db.dropTable(chosenTable);
+    await this.db.createTable(this.dataset[chosenTable as keyof DbSchema]);
+    await this.db.importData(this.dataset[chosenTable as keyof DbSchema]);
   }
 }
 

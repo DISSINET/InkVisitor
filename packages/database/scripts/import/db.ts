@@ -101,7 +101,7 @@ export
   * @param table TableSchema table collection
   * @returns Promise<void>
   */
-  async createTables(table: TableSchema): Promise<void> {
+  async createTable(table: TableSchema): Promise<void> {
     await r.tableCreate(table.tableName).run(this.conn);
     if (table.indexes) {
       for (const i in table.indexes) {
@@ -110,6 +110,16 @@ export
     }
 
     console.log(colors.green(`Table ${table.tableName} created`));
+  }
+
+  /**
+  * Drops single table
+  * @param table TableSchema table collection
+  * @returns Promise<void>
+  */
+  async dropTable(table: string): Promise<void> {
+    await r.tableDrop(table).run(this.conn);
+    console.log(colors.green(`Table ${table} dropped`));
   }
 
   /**
