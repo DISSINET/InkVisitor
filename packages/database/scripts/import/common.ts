@@ -1,12 +1,7 @@
 import { RelationEnums } from "@shared/enums";
 import { Relation } from "@shared/types";
-import {
-  Connection,
-  RConnectionOptions,
-  r,
-  RValue,
-  RTable,
-} from "rethinkdb-ts";
+import { RValue, RTable } from "rethinkdb-ts";
+
 
 export interface DbSchema {
   users: TableSchema;
@@ -30,37 +25,21 @@ export function parseArgs(): [datasetId: string, env: string] {
   return [datasetId, env];
 }
 
-export const prepareDbConnection = async (
-  config: RConnectionOptions
-): Promise<Connection> => {
-  let conn: Connection;
+const [datasetId, env] = parseArgs();
+const envFile = `env/.env${env ? "." + env : ''}`;
+const envData = require("dotenv").config({ path: envFile }).parsed;
 
-  try {
-    conn = await r.connect(config);
-  } catch (e) {
-    throw new Error(`Cannot connect to the db: ${e}`);
+if (!envData) {
+  throw new Error(`Cannot load env file ${envFile}`);
+}
+
+export function getEnv(envName: string): string {
+  if (envData[envName] !== undefined) {
+    return envData[envName] as string;
   }
 
-  // Drop the database.
-  try {
-    await r.dbDrop(config.db as RValue<string>).run(conn);
-    console.log("Database dropped");
-  } catch (e) {
-    console.log(`Database not dropped ('${config.db}'). Does not exist?`);
-  }
-
-  try {
-    await r.dbCreate(config.db as RValue<string>).run(conn);
-    console.log("Database created");
-  } catch (e) {
-    throw new Error(`Database not created: ${e}`);
-  }
-
-  // set default database
-  conn.use(config.db as string);
-
-  return conn;
-};
+  throw new Error(`ENV variable '${envName}' is required`);
+}
 
 export const checkRelation = (
   relation: Relation.IRelation,
