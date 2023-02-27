@@ -56,7 +56,7 @@ interface StyledSuggesterList {
 }
 export const StyledSuggesterList = styled.div<StyledSuggesterList>`
   position: absolute;
-  z-index: 40;
+  z-index: 1000;
   top: ${({ theme }) => theme.space[10]};
   left: ${({ theme, noLeftMargin }) => (noLeftMargin ? "" : theme.space[14])};
 `;

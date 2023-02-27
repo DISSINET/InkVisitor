@@ -85,7 +85,7 @@ export const Page: React.FC<Page> = ({ children }) => {
 
   const [tempLocation, setTempLocation] = useState<string | false>(false);
 
-  useKeypress("Shift", () => dispatch(setDisableUserSelect(true)), []);
+  useKeypress("Shift", () => dispatch(setDisableUserSelect(true)));
 
   useKeyLift("Shift", () => dispatch(setDisableUserSelect(false)));
 

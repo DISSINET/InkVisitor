@@ -13,7 +13,7 @@ export const StyledHeaderBreadcrumbRow = styled.div`
   flex-wrap: wrap;
 `;
 export const StyledHeaderRow = styled.h3`
-  overflow: hidden;
+  /* overflow: hidden; */
 `;
 export const StyledFaStar = styled(FaStar)`
   float: left;
@@ -26,6 +26,7 @@ export const StyledMoveToParent = styled.div`
   display: flex;
   align-items: center;
   float: right;
+  color: ${({ theme }) => theme.color["info"]};
   margin-bottom: ${({ theme }) => theme.space[2]};
   margin-left: 0.3rem;
   margin-top: 0.3rem;
