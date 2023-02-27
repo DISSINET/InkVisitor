@@ -170,7 +170,7 @@ export const App: React.FC = () => {
         <title>InkVisitor</title>
       </Helmet>
       <ThemeProvider theme={theme}>
-        <GlobalStyle />
+        <GlobalStyle disableUserSelect={true} />
         <QueryClientProvider client={queryClient}>
           <ReactQueryDevtools initialIsOpen={false} />
           <DndProvider backend={HTML5Backend}>

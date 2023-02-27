@@ -82,7 +82,10 @@ export const Page: React.FC<Page> = ({ children }) => {
   const [tempLocation, setTempLocation] = useState<string | false>(false);
 
   return (
-    <StyledPage layoutWidth={layoutWidth}>
+    <StyledPage
+      layoutWidth={layoutWidth}
+      onClick={() => console.log("page clicked")}
+    >
       <Header
         paddingY={0}
         paddingX={10}
