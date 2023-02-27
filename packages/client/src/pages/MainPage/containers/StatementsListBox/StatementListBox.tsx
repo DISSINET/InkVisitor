@@ -293,6 +293,42 @@ export const StatementListBox: React.FC = () => {
     }
   );
 
+  const moveStatementsMutation = useMutation(
+    async (data: { statements: string[]; newTerritoryId: string }) =>
+      await api.statementsBatchMove(data.statements, data.newTerritoryId),
+    {
+      onSuccess: (variables, data) => {
+        queryClient.invalidateQueries("territory");
+        queryClient.invalidateQueries("tree");
+        toast.info(
+          `${data.statements.length} statement${
+            data.statements.length > 1 ? "s" : ""
+          } moved`
+        );
+        setSelectedRows([]);
+        setTerritoryId(data.newTerritoryId);
+      },
+    }
+  );
+
+  const duplicateStatementsMutation = useMutation(
+    async (data: { statements: string[]; newTerritoryId: string }) =>
+      await api.statementsBatchCopy(data.statements, data.newTerritoryId),
+    {
+      onSuccess: (variables, data) => {
+        queryClient.invalidateQueries("territory");
+        queryClient.invalidateQueries("tree");
+        toast.info(
+          `${data.statements.length} statement${
+            data.statements.length > 1 ? "s" : ""
+          } duplicated`
+        );
+        setSelectedRows([]);
+        setTerritoryId(data.newTerritoryId);
+      },
+    }
+  );
+
   return (
     <>
       {data && (
@@ -305,6 +341,8 @@ export const StatementListBox: React.FC = () => {
           selectedRows={selectedRows}
           setSelectedRows={setSelectedRows}
           isAllSelected={selectedRows.length === statements.length}
+          moveStatementsMutation={moveStatementsMutation}
+          duplicateStatementsMutation={duplicateStatementsMutation}
         />
       )}
       {statements ? (
@@ -371,7 +409,9 @@ export const StatementListBox: React.FC = () => {
           addStatementAtTheEndMutation.isLoading ||
           actantsCreateMutation.isLoading ||
           statementUpdateMutation.isLoading ||
-          moveTerritoryMutation.isLoading
+          moveTerritoryMutation.isLoading ||
+          moveStatementsMutation.isLoading ||
+          duplicateStatementsMutation.isLoading
         }
       />
     </>

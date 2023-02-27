@@ -24,25 +24,19 @@ import {
   MdOutlineCheckBoxOutlineBlank,
   MdOutlineIndeterminateCheckBox,
 } from "react-icons/md";
-import {
-  useMutation,
-  UseMutationResult,
-  useQuery,
-  useQueryClient,
-} from "react-query";
-import { toast } from "react-toastify";
+import { UseMutationResult, useQuery, useQueryClient } from "react-query";
 import { setLastClickedIndex } from "redux/features/statementList/lastClickedIndexSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import theme from "Theme/theme";
 import { collectTerritoryChildren, searchTree } from "utils";
 import {
   StyledActionsWrapper,
-  StyledMoveToParent,
   StyledFaStar,
   StyledHeader,
   StyledHeaderBreadcrumbRow,
   StyledHeaderRow,
   StyledHeading,
+  StyledMoveToParent,
   StyledSuggesterRow,
 } from "./StatementListHeaderStyles";
 
@@ -74,17 +68,38 @@ interface StatementListHeader {
   isAllSelected: boolean;
   selectedRows: string[];
   setSelectedRows: React.Dispatch<React.SetStateAction<string[]>>;
+
+  moveStatementsMutation: UseMutationResult<
+    AxiosResponse<IResponseGeneric>,
+    unknown,
+    {
+      statements: string[];
+      newTerritoryId: string;
+    },
+    unknown
+  >;
+  duplicateStatementsMutation: UseMutationResult<
+    AxiosResponse<IResponseGeneric>,
+    unknown,
+    {
+      statements: string[];
+      newTerritoryId: string;
+    },
+    unknown
+  >;
 }
 export const StatementListHeader: React.FC<StatementListHeader> = ({
   data,
   addStatementAtTheEndMutation,
   moveTerritoryMutation,
-  updateTerritoryMutation,
 
   isFavorited,
   isAllSelected,
   selectedRows,
   setSelectedRows,
+
+  moveStatementsMutation,
+  duplicateStatementsMutation,
 }) => {
   const dispatch = useAppDispatch();
   const queryClient = useQueryClient();
@@ -142,34 +157,6 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
 
   const selectedTerritoryPath = useAppSelector(
     (state) => state.territoryTree.selectedTerritoryPath
-  );
-
-  const moveStatementsMutation = useMutation(
-    async (data: { statements: string[]; newTerritoryId: string }) =>
-      await api.statementsBatchMove(data.statements, data.newTerritoryId),
-    {
-      onSuccess: (variables, data) => {
-        queryClient.invalidateQueries("territory");
-        queryClient.invalidateQueries("tree");
-        toast.info("Statements moved");
-        setSelectedRows([]);
-        setTerritoryId(data.newTerritoryId);
-      },
-    }
-  );
-
-  const duplicateStatementsMutation = useMutation(
-    async (data: { statements: string[]; newTerritoryId: string }) =>
-      await api.statementsBatchCopy(data.statements, data.newTerritoryId),
-    {
-      onSuccess: (variables, data) => {
-        queryClient.invalidateQueries("territory");
-        queryClient.invalidateQueries("tree");
-        toast.info("Statements duplicated");
-        setSelectedRows([]);
-        setTerritoryId(data.newTerritoryId);
-      },
-    }
   );
 
   const handleCreateStatement = () => {
