@@ -1,7 +1,6 @@
-import { createGlobalStyle } from "styled-components";
-
-import MuniFont from "assets/fonts/muni-bold-webfont.woff2";
 import MuniArial from "assets/fonts/academicons.woff2";
+import MuniFont from "assets/fonts/muni-bold-webfont.woff2";
+import { createGlobalStyle } from "styled-components";
 import { ThemeType } from "./theme";
 
 interface GlobalStyle {

@@ -16,6 +16,7 @@ import treeInitializeSlice from "./features/territoryTree/treeInitializeSlice";
 import usernameSlice from "./features/usernameSlice";
 import contentHeightSlice from "./features/layout/contentHeightSlice";
 import statementListOpenedSlice from "./features/layout/statementListOpenedSlice";
+import disableUserSelectSlice from "./features/layout/disableUserSelectSlice";
 
 const store: Store = configureStore({
   reducer: {
@@ -42,6 +43,7 @@ const store: Store = configureStore({
       fourthPanelExpanded: fourthPanelExpandedSlice,
       fourthPanelBoxesOpened: fourthPanelBoxesOpenedSlice,
       statementListOpened: statementListOpenedSlice,
+      disableUserSelect: disableUserSelectSlice,
     }),
   },
 });
