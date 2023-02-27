@@ -9,9 +9,7 @@ import React, {
 } from "react";
 import { useQuery } from "react-query";
 import { useHistory, useLocation } from "react-router-dom";
-import { toast } from "react-toastify";
 import { maxTabCount } from "Theme/constants";
-import { getEntityLabel } from "utils";
 
 const UNINITIALISED = (): void => {
   throw `function uninitialised`;

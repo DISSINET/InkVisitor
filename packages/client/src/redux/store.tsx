@@ -16,6 +16,8 @@ import treeInitializeSlice from "./features/territoryTree/treeInitializeSlice";
 import usernameSlice from "./features/usernameSlice";
 import contentHeightSlice from "./features/layout/contentHeightSlice";
 import statementListOpenedSlice from "./features/layout/statementListOpenedSlice";
+import disableUserSelectSlice from "./features/layout/disableUserSelectSlice";
+import lastClickedIndexSlice from "./features/statementList/lastClickedIndexSlice";
 
 const store: Store = configureStore({
   reducer: {
@@ -28,6 +30,7 @@ const store: Store = configureStore({
     statementList: combineReducers({
       rowsExpanded: rowsExpandedSlice,
       draggedRowId: draggedRowIdSlice,
+      lastClickedIndex: lastClickedIndexSlice,
     }),
     rowDnd: combineReducers({
       draggedPropRow: draggedPropRowSlice,
@@ -42,6 +45,7 @@ const store: Store = configureStore({
       fourthPanelExpanded: fourthPanelExpandedSlice,
       fourthPanelBoxesOpened: fourthPanelBoxesOpenedSlice,
       statementListOpened: statementListOpenedSlice,
+      disableUserSelect: disableUserSelectSlice,
     }),
   },
 });

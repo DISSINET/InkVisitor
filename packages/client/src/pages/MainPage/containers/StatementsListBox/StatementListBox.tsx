@@ -53,6 +53,7 @@ export const StatementListBox: React.FC = () => {
 
   const [showSubmit, setShowSubmit] = useState(false);
   const [statementToDelete, setStatementToDelete] = useState<IStatement>();
+  const [selectedRows, setSelectedRows] = useState<string[]>([]);
 
   const { status, data, error, isFetching } = useQuery(
     ["territory", "statement-list", territoryId, statementListOpened],
@@ -137,6 +138,7 @@ export const StatementListBox: React.FC = () => {
         queryClient.invalidateQueries("territory").then(() => {
           setStatementId("");
         });
+        setSelectedRows(selectedRows.filter((r) => r !== sId));
       },
     }
   );
@@ -250,7 +252,7 @@ export const StatementListBox: React.FC = () => {
     }
   };
 
-  const actantsUpdateMutation = useMutation(
+  const statementUpdateMutation = useMutation(
     async (statementObject: { statementId: string; data: {} }) =>
       await api.entityUpdate(statementObject.statementId, {
         data: statementObject.data,
@@ -276,6 +278,57 @@ export const StatementListBox: React.FC = () => {
     }
   );
 
+  const updateTerritoryMutation = useMutation(
+    async (tObject: {
+      territoryId: string;
+      statements: IResponseStatement[];
+    }) =>
+      await api.entityUpdate(tObject.territoryId, {
+        statements: tObject.statements,
+      }),
+    {
+      onSuccess: (data, variables) => {
+        queryClient.invalidateQueries("territory");
+      },
+    }
+  );
+
+  const moveStatementsMutation = useMutation(
+    async (data: { statements: string[]; newTerritoryId: string }) =>
+      await api.statementsBatchMove(data.statements, data.newTerritoryId),
+    {
+      onSuccess: (variables, data) => {
+        queryClient.invalidateQueries("territory");
+        queryClient.invalidateQueries("tree");
+        toast.info(
+          `${data.statements.length} statement${
+            data.statements.length > 1 ? "s" : ""
+          } moved`
+        );
+        setSelectedRows([]);
+        setTerritoryId(data.newTerritoryId);
+      },
+    }
+  );
+
+  const duplicateStatementsMutation = useMutation(
+    async (data: { statements: string[]; newTerritoryId: string }) =>
+      await api.statementsBatchCopy(data.statements, data.newTerritoryId),
+    {
+      onSuccess: (variables, data) => {
+        queryClient.invalidateQueries("territory");
+        queryClient.invalidateQueries("tree");
+        toast.info(
+          `${data.statements.length} statement${
+            data.statements.length > 1 ? "s" : ""
+          } duplicated`
+        );
+        setSelectedRows([]);
+        setTerritoryId(data.newTerritoryId);
+      },
+    }
+  );
+
   return (
     <>
       {data && (
@@ -283,7 +336,13 @@ export const StatementListBox: React.FC = () => {
           data={data}
           addStatementAtTheEndMutation={addStatementAtTheEndMutation}
           moveTerritoryMutation={moveTerritoryMutation}
+          updateTerritoryMutation={updateTerritoryMutation}
           isFavorited={isFavorited}
+          selectedRows={selectedRows}
+          setSelectedRows={setSelectedRows}
+          isAllSelected={selectedRows.length === statements.length}
+          moveStatementsMutation={moveStatementsMutation}
+          duplicateStatementsMutation={duplicateStatementsMutation}
         />
       )}
       {statements ? (
@@ -293,7 +352,7 @@ export const StatementListBox: React.FC = () => {
             handleRowClick={(rowId: string) => {
               setStatementId(rowId);
             }}
-            actantsUpdateMutation={actantsUpdateMutation}
+            actantsUpdateMutation={statementUpdateMutation}
             entities={entities}
             right={right}
             audits={audits || []}
@@ -301,6 +360,8 @@ export const StatementListBox: React.FC = () => {
             setStatementToDelete={setStatementToDelete}
             setShowSubmit={setShowSubmit}
             addStatementAtCertainIndex={addStatementAtCertainIndex}
+            selectedRows={selectedRows}
+            setSelectedRows={setSelectedRows}
           />
         </StyledTableWrapper>
       ) : (
@@ -347,8 +408,10 @@ export const StatementListBox: React.FC = () => {
           duplicateStatementMutation.isLoading ||
           addStatementAtTheEndMutation.isLoading ||
           actantsCreateMutation.isLoading ||
-          actantsUpdateMutation.isLoading ||
-          moveTerritoryMutation.isLoading
+          statementUpdateMutation.isLoading ||
+          moveTerritoryMutation.isLoading ||
+          moveStatementsMutation.isLoading ||
+          duplicateStatementsMutation.isLoading
         }
       />
     </>

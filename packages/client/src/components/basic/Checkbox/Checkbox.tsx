@@ -31,6 +31,9 @@ export const Checkbox: React.FC<Checkbox> = ({
         type="checkbox"
         id={id}
         checked={checked}
+        onClick={(e: React.MouseEvent<HTMLInputElement, MouseEvent>) =>
+          e.stopPropagation()
+        }
         onChange={() => {
           setChecked(!checked);
         }}

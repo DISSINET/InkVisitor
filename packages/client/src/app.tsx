@@ -3,7 +3,7 @@ import { Helmet } from "react-helmet";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { ReactQueryDevtools } from "react-query/devtools";
 import { BrowserRouter, Redirect, Route, Switch } from "react-router-dom";
-import { useAppDispatch } from "redux/hooks";
+import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { ThemeProvider } from "styled-components";
 
 import api from "api";
@@ -92,6 +92,9 @@ export const ProtectedPath = (props: any) => {
 
 export const App: React.FC = () => {
   const dispatch = useAppDispatch();
+  const disableUserSelect = useAppSelector(
+    (state) => state.layout.disableUserSelect
+  );
 
   const [debouncedWidth, debouncedHeight] = useDebounce(useWindowSize(), 50);
 
@@ -170,7 +173,7 @@ export const App: React.FC = () => {
         <title>InkVisitor</title>
       </Helmet>
       <ThemeProvider theme={theme}>
-        <GlobalStyle />
+        <GlobalStyle disableUserSelect={disableUserSelect} />
         <QueryClientProvider client={queryClient}>
           <ReactQueryDevtools initialIsOpen={false} />
           <DndProvider backend={HTML5Backend}>

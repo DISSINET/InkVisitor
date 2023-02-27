@@ -1,9 +1,13 @@
-import { createGlobalStyle } from "styled-components";
-
-import MuniFont from "assets/fonts/muni-bold-webfont.woff2";
 import MuniArial from "assets/fonts/academicons.woff2";
+import MuniFont from "assets/fonts/muni-bold-webfont.woff2";
+import { createGlobalStyle } from "styled-components";
+import { ThemeType } from "./theme";
 
-const GlobalStyle = createGlobalStyle`
+interface GlobalStyle {
+  theme: ThemeType;
+  disableUserSelect?: boolean;
+}
+const GlobalStyle = createGlobalStyle<GlobalStyle>`
   html {
     font-size: 62.5%;
   }
@@ -29,8 +33,8 @@ const GlobalStyle = createGlobalStyle`
     -moz-osx-font-smoothing: grayscale;
   }
   *:not(input,textarea) {
-    //user-select: none;
-    
+    user-select: ${({ disableUserSelect }) =>
+      disableUserSelect ? "none" : "auto"};
   }
   h1 {
     font-size: ${({ theme }) => theme.fontSize["4xl"]};
