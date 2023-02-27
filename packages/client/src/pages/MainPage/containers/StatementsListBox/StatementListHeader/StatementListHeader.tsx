@@ -31,7 +31,8 @@ import {
   useQueryClient,
 } from "react-query";
 import { toast } from "react-toastify";
-import { useAppSelector } from "redux/hooks";
+import { setLastClickedIndex } from "redux/features/statementList/lastClickedIndexSlice";
+import { useAppDispatch, useAppSelector } from "redux/hooks";
 import theme from "Theme/theme";
 import { collectTerritoryChildren, searchTree } from "utils";
 import {
@@ -85,6 +86,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
   selectedRows,
   setSelectedRows,
 }) => {
+  const dispatch = useAppDispatch();
   const queryClient = useQueryClient();
   const { territoryId, setTerritoryId } = useSearchParams();
 
@@ -218,7 +220,10 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
           size={size}
           color={color}
           style={{ cursor: "pointer" }}
-          onClick={() => handleSelectAll(false)}
+          onClick={() => {
+            handleSelectAll(false);
+            dispatch(setLastClickedIndex(-1));
+          }}
         />
       );
     } else if (selectedRows.length > 0) {
@@ -228,7 +233,10 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
           size={size}
           color={color}
           style={{ cursor: "pointer" }}
-          onClick={() => handleSelectAll(false)}
+          onClick={() => {
+            handleSelectAll(false);
+            dispatch(setLastClickedIndex(-1));
+          }}
         />
       );
     } else {

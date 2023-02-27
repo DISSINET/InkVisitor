@@ -34,6 +34,7 @@ import {
   useRowSelect,
   useTable,
 } from "react-table";
+import { setLastClickedIndex } from "redux/features/statementList/lastClickedIndexSlice";
 import { setRowsExpanded } from "redux/features/statementList/rowsExpandedSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import theme from "Theme/theme";
@@ -95,16 +96,16 @@ export const StatementListTable: React.FC<StatementListTable> = ({
   const rowsExpanded: { [key: string]: boolean } = useAppSelector(
     (state) => state.statementList.rowsExpanded
   );
+  const lastClickedIndex: number = useAppSelector(
+    (state) => state.statementList.lastClickedIndex
+  );
 
   const [statementsLocal, setStatementsLocal] = useState<IResponseStatement[]>(
     []
   );
-  const [lastClickedIndex, setLastClickedIndex] = useState<number | false>(
-    false
-  );
 
   useEffect(() => {
-    setLastClickedIndex(false);
+    dispatch(setLastClickedIndex(-1));
   }, [territoryId]);
 
   useEffect(() => {
@@ -170,7 +171,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
                     e.stopPropagation();
                     if (
                       e.shiftKey &&
-                      lastClickedIndex !== false &&
+                      lastClickedIndex !== -1 &&
                       lastClickedIndex !== row.index
                     ) {
                       // unset all between
@@ -185,7 +186,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
                     } else {
                       handleRowSelect(row.id);
                     }
-                    setLastClickedIndex(row.index);
+                    dispatch(setLastClickedIndex(row.index));
                   }}
                 />
               ) : (
@@ -197,7 +198,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
                     e.stopPropagation();
                     if (
                       e.shiftKey &&
-                      lastClickedIndex !== false &&
+                      lastClickedIndex !== -1 &&
                       lastClickedIndex !== row.index
                     ) {
                       // set all between
@@ -211,7 +212,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
                     } else {
                       handleRowSelect(row.id);
                     }
-                    setLastClickedIndex(row.index);
+                    dispatch(setLastClickedIndex(row.index));
                   }}
                 />
               )}

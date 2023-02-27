@@ -13,6 +13,7 @@ import { useMutation, useQuery, useQueryClient } from "react-query";
 import { useLocation, useHistory } from "react-router";
 import { toast } from "react-toastify";
 import { setDisableUserSelect } from "redux/features/layout/disableUserSelectSlice";
+import { setLastClickedIndex } from "redux/features/statementList/lastClickedIndexSlice";
 import { setUsername } from "redux/features/usernameSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { heightFooter } from "Theme/constants";
@@ -91,7 +92,7 @@ export const Page: React.FC<Page> = ({ children }) => {
   return (
     <StyledPage
       layoutWidth={layoutWidth}
-      onClick={() => console.log("page clicked")}
+      onClick={() => dispatch(setLastClickedIndex(-1))}
     >
       <Header
         paddingY={0}
