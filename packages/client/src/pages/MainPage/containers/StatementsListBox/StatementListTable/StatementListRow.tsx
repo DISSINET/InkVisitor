@@ -17,6 +17,7 @@ import { StatementListRowExpanded } from "./StatementListRowExpanded/StatementLi
 import {
   StyledTd,
   StyledTdLastEdit,
+  StyledTdMove,
   StyledTr,
 } from "./StatementListTableStyles";
 
@@ -29,6 +30,7 @@ interface StatementListRow {
   visibleColumns: ColumnInstance<{}>[];
   entities: { [key: string]: IEntity };
   audits: IResponseAudit[];
+  isSelected: boolean;
 }
 
 export const StatementListRow: React.FC<StatementListRow> = ({
@@ -40,6 +42,7 @@ export const StatementListRow: React.FC<StatementListRow> = ({
   visibleColumns,
   entities,
   audits,
+  isSelected,
 }) => {
   const dispatch = useAppDispatch();
 
@@ -111,20 +114,14 @@ export const StatementListRow: React.FC<StatementListRow> = ({
       <StyledTr
         ref={dropRef}
         opacity={opacity}
-        isSelected={row.original.id === statementId}
+        isOpened={row.original.id === statementId}
+        isSelected={isSelected}
         onClick={(e: any) => {
           handleClick(row.original.id);
           e.stopPropagation();
         }}
         id={`statement${row.original.id}`}
       >
-        <td
-          ref={dragRef}
-          style={{ cursor: "move" }}
-          onClick={(e: React.MouseEvent) => e.stopPropagation()}
-        >
-          <FaGripVertical />
-        </td>
         {row.cells.map((cell: Cell) => {
           if (cell.column.id === "lastEdit") {
             return (
@@ -132,16 +129,17 @@ export const StatementListRow: React.FC<StatementListRow> = ({
                 {lastEditdateText}
               </StyledTdLastEdit>
             );
-          } else if (
-            [
-              "Statement",
-              "Actions",
-              "Objects",
-              "data",
-              "Text",
-              "expander",
-            ].includes(cell.column.id)
-          ) {
+          } else if (cell.column.id === "move") {
+            return (
+              <StyledTdMove
+                key="move"
+                ref={dragRef}
+                onClick={(e: React.MouseEvent) => e.stopPropagation()}
+              >
+                <FaGripVertical />
+              </StyledTdMove>
+            );
+          } else {
             return (
               <StyledTd {...cell.getCellProps()}>
                 {cell.render("Cell")}

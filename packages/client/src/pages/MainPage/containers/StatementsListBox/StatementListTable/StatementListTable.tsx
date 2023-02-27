@@ -10,6 +10,7 @@ import {
 import { AxiosResponse } from "axios";
 import { Button, ButtonGroup, TagGroup } from "components";
 import { EntityTag } from "components/advanced";
+import { useSearchParams } from "hooks";
 import update from "immutability-helper";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { BsArrowDown, BsArrowUp } from "react-icons/bs";
@@ -20,14 +21,33 @@ import {
   FaPlus,
   FaTrashAlt,
 } from "react-icons/fa";
+import {
+  MdOutlineCheckBox,
+  MdOutlineCheckBoxOutlineBlank,
+} from "react-icons/md";
 import { UseMutationResult } from "react-query";
-import { Cell, Column, Row, useExpanded, useTable } from "react-table";
+import {
+  Cell,
+  Column,
+  Row,
+  useExpanded,
+  useRowSelect,
+  useTable,
+} from "react-table";
+import { setLastClickedIndex } from "redux/features/statementList/lastClickedIndexSlice";
 import { setRowsExpanded } from "redux/features/statementList/rowsExpandedSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
+import theme from "Theme/theme";
 import { StatementListContextMenu } from "../StatementListContextMenu/StatementListContextMenu";
 import { StyledText } from "../StatementLitBoxStyles";
 import { StatementListRow } from "./StatementListRow";
-import { StyledTable, StyledTh, StyledTHead } from "./StatementListTableStyles";
+import {
+  StyledCheckboxWrapper,
+  StyledFocusedCircle,
+  StyledTable,
+  StyledTh,
+  StyledTHead,
+} from "./StatementListTableStyles";
 
 interface StatementListTable {
   statements: IResponseStatement[];
@@ -51,6 +71,9 @@ interface StatementListTable {
   >;
   setShowSubmit: React.Dispatch<React.SetStateAction<boolean>>;
   addStatementAtCertainIndex: (index: number) => Promise<void>;
+
+  selectedRows: string[];
+  setSelectedRows: React.Dispatch<React.SetStateAction<string[]>>;
 }
 export const StatementListTable: React.FC<StatementListTable> = ({
   statements,
@@ -64,10 +87,17 @@ export const StatementListTable: React.FC<StatementListTable> = ({
   setStatementToDelete,
   setShowSubmit,
   addStatementAtCertainIndex,
+
+  selectedRows,
+  setSelectedRows,
 }) => {
   const dispatch = useAppDispatch();
+  const { territoryId } = useSearchParams();
   const rowsExpanded: { [key: string]: boolean } = useAppSelector(
     (state) => state.statementList.rowsExpanded
+  );
+  const lastClickedIndex: number = useAppSelector(
+    (state) => state.statementList.lastClickedIndex
   );
 
   const [statementsLocal, setStatementsLocal] = useState<IResponseStatement[]>(
@@ -75,18 +105,126 @@ export const StatementListTable: React.FC<StatementListTable> = ({
   );
 
   useEffect(() => {
+    dispatch(setLastClickedIndex(-1));
+  }, [territoryId]);
+
+  useEffect(() => {
     setStatementsLocal(statements);
   }, [statements]);
 
-  const getRowId = useCallback((row) => {
+  const getRowId = useCallback((row): string => {
     return row.id;
   }, []);
+
+  const handleRowSelect = (rowId: string) => {
+    if (selectedRows.includes(rowId)) {
+      setSelectedRows(
+        selectedRows.filter((selectedRow) => selectedRow !== rowId)
+      );
+    } else {
+      setSelectedRows([...selectedRows, rowId]);
+    }
+  };
+
+  const handleSelection = (
+    lastClickedIndex: number,
+    rowIndex: number
+  ): string[] => {
+    let selectedStatements: IResponseStatement[] = [];
+    if (lastClickedIndex < rowIndex) {
+      selectedStatements = statementsLocal.slice(
+        lastClickedIndex,
+        rowIndex + 1
+      );
+    } else {
+      // is bigger than - oposite direction of selection
+      selectedStatements = statementsLocal.slice(
+        rowIndex,
+        lastClickedIndex + 1
+      );
+    }
+    return selectedStatements.map((statement) => statement.id);
+  };
 
   const columns: Column<{}>[] = useMemo(() => {
     return [
       {
         Header: "ID",
         accessor: "id",
+      },
+      {
+        id: "selection",
+        Cell: ({ row }: Cell) => {
+          const size = 18;
+          const checked = selectedRows.includes(row.id);
+          const isFocused = lastClickedIndex === row.index;
+
+          return (
+            <StyledCheckboxWrapper>
+              {isFocused && <StyledFocusedCircle checked={checked} />}
+              {checked ? (
+                <MdOutlineCheckBox
+                  size={size}
+                  color={theme.color.black}
+                  style={{ cursor: "pointer", zIndex: 2 }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (
+                      e.shiftKey &&
+                      lastClickedIndex !== -1 &&
+                      lastClickedIndex !== row.index
+                    ) {
+                      // unset all between
+                      const mappedIds = handleSelection(
+                        lastClickedIndex,
+                        row.index
+                      );
+                      const filteredIds = selectedRows.filter(
+                        (id) => !mappedIds.includes(id)
+                      );
+                      setSelectedRows(filteredIds);
+                    } else {
+                      handleRowSelect(row.id);
+                    }
+                    dispatch(setLastClickedIndex(row.index));
+                  }}
+                />
+              ) : (
+                <MdOutlineCheckBoxOutlineBlank
+                  size={size}
+                  color={theme.color.black}
+                  style={{ cursor: "pointer", zIndex: 2 }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (
+                      e.shiftKey &&
+                      lastClickedIndex !== -1 &&
+                      lastClickedIndex !== row.index
+                    ) {
+                      // set all between
+                      const mappedIds = handleSelection(
+                        lastClickedIndex,
+                        row.index
+                      );
+                      setSelectedRows([
+                        ...new Set(selectedRows.concat(mappedIds)),
+                      ]);
+                    } else {
+                      handleRowSelect(row.id);
+                    }
+                    dispatch(setLastClickedIndex(row.index));
+                  }}
+                />
+              )}
+            </StyledCheckboxWrapper>
+          );
+        },
+      },
+      {
+        id: "move",
+        Cell: ({ row }: Cell) => {
+          return false;
+        },
       },
       {
         Header: "",
@@ -281,7 +419,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
         },
       },
     ];
-  }, [statementsLocal, rowsExpanded, right]);
+  }, [statementsLocal, rowsExpanded, right, selectedRows, lastClickedIndex]);
 
   const {
     getTableProps,
@@ -290,6 +428,8 @@ export const StatementListTable: React.FC<StatementListTable> = ({
     rows,
     prepareRow,
     visibleColumns,
+    selectedFlatRows,
+    state: { selectedRowIds },
   } = useTable(
     {
       columns,
@@ -299,7 +439,8 @@ export const StatementListTable: React.FC<StatementListTable> = ({
         hiddenColumns: ["id"],
       },
     },
-    useExpanded
+    useExpanded,
+    useRowSelect
   );
 
   const moveRow = useCallback(
@@ -356,7 +497,6 @@ export const StatementListTable: React.FC<StatementListTable> = ({
       <StyledTHead>
         {headerGroups.map((headerGroup, key) => (
           <tr {...headerGroup.getHeaderGroupProps()} key={key}>
-            <th></th>
             {headerGroup.headers.map((column, key) =>
               key < 6 ? (
                 <StyledTh {...column.getHeaderProps()} key={key}>
@@ -382,6 +522,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
               visibleColumns={visibleColumns}
               entities={entities}
               audits={audits}
+              isSelected={selectedRows.includes(row.id)}
               {...row.getRowProps()}
             />
           );

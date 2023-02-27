@@ -6,10 +6,14 @@ import {
   UserCustomizationModal,
 } from "components/advanced";
 import { useSearchParams } from "hooks";
+import useKeyLift from "hooks/useKeyLift";
+import useKeypress from "hooks/useKeyPress";
 import React, { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { useLocation, useHistory } from "react-router";
 import { toast } from "react-toastify";
+import { setDisableUserSelect } from "redux/features/layout/disableUserSelectSlice";
+import { setLastClickedIndex } from "redux/features/statementList/lastClickedIndexSlice";
 import { setUsername } from "redux/features/usernameSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { heightFooter } from "Theme/constants";
@@ -81,8 +85,15 @@ export const Page: React.FC<Page> = ({ children }) => {
 
   const [tempLocation, setTempLocation] = useState<string | false>(false);
 
+  useKeypress("Shift", () => dispatch(setDisableUserSelect(true)));
+
+  useKeyLift("Shift", () => dispatch(setDisableUserSelect(false)));
+
   return (
-    <StyledPage layoutWidth={layoutWidth}>
+    <StyledPage
+      layoutWidth={layoutWidth}
+      onClick={() => dispatch(setLastClickedIndex(-1))}
+    >
       <Header
         paddingY={0}
         paddingX={10}

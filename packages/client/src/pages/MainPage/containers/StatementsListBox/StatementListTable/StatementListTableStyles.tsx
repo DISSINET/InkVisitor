@@ -25,31 +25,65 @@ export const StyledTh = styled.th`
 `;
 
 interface StyledTr {
+  isOpened?: boolean;
   isSelected?: boolean;
   opacity?: number;
 }
 export const StyledTr = styled.tr<StyledTr>`
-  background-color: ${({ theme, isSelected }) =>
-    isSelected ? theme.color["invertedBg"]["info"] : theme.color["white"]};
-  color: ${({ theme, isSelected }) =>
-    isSelected ? theme.color["primary"] : theme.color["black"]};
+  background-color: ${({ theme, isOpened, isSelected }) =>
+    isOpened
+      ? theme.color["invertedBg"]["info"]
+      : isSelected
+      ? theme.color["tableSelection"]
+      : theme.color["white"]};
+  color: ${({ theme, isOpened }) =>
+    isOpened ? theme.color["primary"] : theme.color["black"]};
   opacity: ${({ opacity }) => (opacity ? opacity : 1)};
   border-top: 1px solid ${({ theme }) => theme.color["gray"][500]};
-  border-left: ${({ theme, isSelected }) =>
-    isSelected ? "4px solid " + theme.color["success"] : ""};
-  cursor: ${({ isSelected }) => (isSelected ? "default" : "pointer")};
+  border-left: ${({ theme, isOpened }) =>
+    isOpened ? "4px solid " + theme.color["success"] : ""};
+  cursor: ${({ isOpened }) => (isOpened ? "default" : "pointer")};
   td:first-child {
-    padding-left: ${({ theme }) => theme.space[1]};
+    padding-left: ${({ theme, isOpened }) => (isOpened ? "0.9rem" : "")};
+    width: 1%;
   }
   :hover {
-    background-color: ${({ theme }) => theme.color["gray"][100]};
+    background-color: ${({ theme, isSelected }) =>
+      isSelected
+        ? theme.color["tableSelectionHover"]
+        : theme.color["gray"][100]};
   }
 `;
-export const StyledTd = styled.td`
+interface StyledTd {}
+export const StyledTd = styled.td<StyledTd>`
   padding: ${({ theme }) => theme.space[2]};
   padding-left: ${({ theme }) => theme.space[4]};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
 `;
+export const StyledTdMove = styled.td`
+  cursor: move;
+  width: 1%;
+`;
 export const StyledTdLastEdit = styled(StyledTd)`
   font-size: ${({ theme }) => theme.fontSize["xxs"]};
+`;
+interface StyledFocusedCircle {
+  checked: boolean;
+}
+export const StyledFocusedCircle = styled.span<StyledFocusedCircle>`
+  position: absolute;
+  background-color: ${({ theme }) => theme.color.focusedCheckbox};
+  width: 3.2rem;
+  height: 3.2rem;
+  border-radius: 50%;
+  border: 1px solid ${({ theme }) => theme.color.focusedCheckbox};
+  transform: translate(-50%, -50%);
+  top: 50%;
+  left: 50%;
+`;
+export const StyledCheckboxWrapper = styled.div`
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 `;

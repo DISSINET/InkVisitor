@@ -1,6 +1,9 @@
 import { Button } from "components";
 import React from "react";
-import { StyledPropButtonGroup } from "./AttributeButtonGroupStyles";
+import {
+  StyledButtonWrap,
+  StyledPropButtonGroup,
+} from "./AttributeButtonGroupStyles";
 
 interface AttributeButtonGroup {
   options: {
@@ -20,10 +23,12 @@ export const AttributeButtonGroup: React.FC<AttributeButtonGroup> = ({
   noMargin = false,
 }) => {
   return disabled ? (
-    <Button
-      disabled
-      label={options.find((o) => o.selected)?.longValue}
-    ></Button>
+    <StyledButtonWrap leftMargin={!noMargin} rightMargin={!noMargin}>
+      <Button
+        disabled
+        label={options.find((o) => o.selected)?.longValue}
+      ></Button>
+    </StyledButtonWrap>
   ) : (
     <StyledPropButtonGroup
       leftMargin={!noMargin}

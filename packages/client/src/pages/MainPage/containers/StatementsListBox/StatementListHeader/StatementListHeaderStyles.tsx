@@ -13,25 +13,36 @@ export const StyledHeaderBreadcrumbRow = styled.div`
   flex-wrap: wrap;
 `;
 export const StyledHeaderRow = styled.h3`
-  overflow: hidden;
+  /* overflow: hidden; */
 `;
 export const StyledFaStar = styled(FaStar)`
   float: left;
   margin-top: 0.5rem;
   margin-right: 0.3rem;
 `;
-export const StyledButtons = styled.div`
+export const StyledMoveToParent = styled.div`
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
+  font-weight: ${({ theme }) => theme.fontWeight["normal"]};
+  display: flex;
+  align-items: center;
   float: right;
-  margin-top: 0.3rem;
+  color: ${({ theme }) => theme.color["info"]};
+  margin-bottom: ${({ theme }) => theme.space[2]};
   margin-left: 0.3rem;
+  margin-top: 0.3rem;
 `;
 export const StyledHeading = styled.span`
   word-wrap: break-word;
 `;
 export const StyledSuggesterRow = styled.div`
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   align-items: center;
   color: ${({ theme }) => theme.color["info"]};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
+`;
+export const StyledActionsWrapper = styled.div`
+  padding-left: 0.5rem;
+  display: flex;
+  align-items: center;
 `;
