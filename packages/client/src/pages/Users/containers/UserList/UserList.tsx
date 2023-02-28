@@ -73,6 +73,27 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
     }
   );
 
+  const resetPasswordMutation = useMutation(
+    async (userId: string) => await api.resetPassword(userId),
+    {
+      onSuccess: (data, variables) => {
+        const { message } = data.data;
+
+        toast.success(message, {
+          autoClose: 8000,
+          pauseOnHover: true,
+          closeOnClick: false,
+          onClick: () => {
+            navigator.clipboard.writeText(message ? message.split("'")[1] : "");
+            toast.info("Password copied to clipboard");
+          },
+          closeButton: true,
+          draggable: false,
+        });
+      },
+    }
+  );
+
   const removeUser = async () => {
     if (removingUser) {
       const res: any = await api.usersDelete(removingUser.id);
@@ -435,9 +456,24 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
                 tooltipLabel="reset password"
                 color="warning"
                 onClick={() => {
-                  api
-                    .resetPassword(userId)
-                    .then((data) => toast.success(data.data.message));
+                  resetPasswordMutation.mutate(userId);
+                  // api.resetPassword(userId).then((data) =>
+                  //   toast.success(data.data.message, {
+                  //     autoClose: 8000,
+                  //     pauseOnHover: true,
+                  //     closeOnClick: false,
+                  //     onClick: () => {
+                  //       navigator.clipboard.writeText(
+                  //         data.data.message
+                  //           ? data.data.message.split("'")[1]
+                  //           : ""
+                  //       );
+                  //       toast.info("Password copied to clipboard");
+                  //     },
+                  //     closeButton: true,
+                  //     draggable: false,
+                  //   })
+                  // );
                 }}
               />
               <Button
