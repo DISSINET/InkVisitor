@@ -548,9 +548,10 @@ export const CEntity = (
     detail: detail ? detail : "",
     data: {},
     status:
-      userRole === UserEnums.Role.Admin
-        ? EntityEnums.Status.Approved
-        : EntityEnums.Status.Pending,
+      entityClass === EntityEnums.Class.Action ||
+      entityClass === EntityEnums.Class.Concept
+        ? EntityEnums.Status.Pending
+        : EntityEnums.Status.Approved,
     language: userOptions.defaultLanguage,
     notes: [],
     props: [],
