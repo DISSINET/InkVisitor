@@ -14,6 +14,7 @@ import {
 } from "react-icons/bs";
 import { useMutation, UseMutationResult, useQueryClient } from "react-query";
 import { animated, config, useSpring } from "react-spring";
+import { setDisableTreeScroll } from "redux/features/territoryTree/disableTreeScrollSlice";
 import { setTreeInitialized } from "redux/features/territoryTree/treeInitializeSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { rootTerritoryId } from "Theme/constants";
@@ -129,6 +130,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
     },
     {
       onSuccess: () => {
+        dispatch(setDisableTreeScroll(true));
         queryClient.invalidateQueries("tree");
       },
     }

@@ -2,7 +2,9 @@ import api from "api";
 import { useSearchParams } from "hooks";
 import { useEffect } from "react";
 import { useQuery } from "react-query";
-import { useAppSelector } from "redux/hooks";
+import { setDisableStatementListScroll } from "redux/features/statementList/disableStatementListScrollSlice";
+import { setDisableTreeScroll } from "redux/features/territoryTree/disableTreeScrollSlice";
+import { useAppDispatch, useAppSelector } from "redux/hooks";
 
 const ScrollHandler = () => {
   const { statementId, territoryId } = useSearchParams();
@@ -10,6 +12,14 @@ const ScrollHandler = () => {
   const statementListOpened: boolean = useAppSelector(
     (state) => state.layout.statementListOpened
   );
+  const disableStatementListScroll: boolean = useAppSelector(
+    (state) => state.statementList.disableStatementListScroll
+  );
+  const disableTreeScroll: boolean = useAppSelector(
+    (state) => state.territoryTree.disableTreeScroll
+  );
+
+  const dispatch = useAppDispatch();
 
   const { status: statementListStatus, isFetching: isFetchingStatementList } =
     useQuery(
@@ -49,18 +59,22 @@ const ScrollHandler = () => {
       !isFetchingStatementList &&
       !isFetchingAudits
     ) {
-      setTimeout(() => {
-        const statementInTable = document.getElementById(
-          `statement${statementId}`
-        );
-        const statementBox = document.getElementById(`Statements-box-table`);
-        if (statementInTable && statementBox) {
-          statementBox?.scrollTo({
-            behavior: statementInTable ? "smooth" : "auto",
-            top: statementInTable ? statementInTable.offsetTop - 34 : 0,
-          });
-        }
-      }, 200);
+      if (!disableStatementListScroll) {
+        setTimeout(() => {
+          const statementInTable = document.getElementById(
+            `statement${statementId}`
+          );
+          const statementBox = document.getElementById(`Statements-box-table`);
+          if (statementInTable && statementBox) {
+            statementBox?.scrollTo({
+              behavior: statementInTable ? "smooth" : "auto",
+              top: statementInTable ? statementInTable.offsetTop - 34 : 0,
+            });
+          }
+        }, 200);
+      } else {
+        dispatch(setDisableStatementListScroll(false));
+      }
     }
   }, [
     statementId,
@@ -72,19 +86,25 @@ const ScrollHandler = () => {
 
   useEffect(() => {
     if (treeStatus === "success" && !isFetchingTree) {
-      setTimeout(() => {
-        const territoryInTree = document.getElementById(
-          `territory${territoryId}`
-        );
-        const territoryBox = document.getElementById(`Territories-box-content`);
+      if (!disableTreeScroll) {
+        setTimeout(() => {
+          const territoryInTree = document.getElementById(
+            `territory${territoryId}`
+          );
+          const territoryBox = document.getElementById(
+            `Territories-box-content`
+          );
 
-        if (territoryBox && territoryInTree) {
-          territoryBox?.scrollTo({
-            behavior: territoryInTree ? "smooth" : "auto",
-            top: territoryInTree ? territoryInTree.offsetTop - 103 : 0,
-          });
-        }
-      }, 200);
+          if (territoryBox && territoryInTree) {
+            territoryBox?.scrollTo({
+              behavior: territoryInTree ? "smooth" : "auto",
+              top: territoryInTree ? territoryInTree.offsetTop - 103 : 0,
+            });
+          }
+        }, 200);
+      } else {
+        dispatch(setDisableTreeScroll(false));
+      }
     }
   }, [territoryId, treeStatus, isFetchingTree]);
 
