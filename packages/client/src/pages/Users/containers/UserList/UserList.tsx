@@ -80,7 +80,7 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
         const { message } = data.data;
 
         toast.info(message, {
-          autoClose: 8000,
+          autoClose: 6000,
           pauseOnHover: true,
           closeOnClick: false,
           onClick: () => {
@@ -457,23 +457,6 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
                 color="warning"
                 onClick={() => {
                   resetPasswordMutation.mutate(userId);
-                  // api.resetPassword(userId).then((data) =>
-                  //   toast.success(data.data.message, {
-                  //     autoClose: 8000,
-                  //     pauseOnHover: true,
-                  //     closeOnClick: false,
-                  //     onClick: () => {
-                  //       navigator.clipboard.writeText(
-                  //         data.data.message
-                  //           ? data.data.message.split("'")[1]
-                  //           : ""
-                  //       );
-                  //       toast.info("Password copied to clipboard");
-                  //     },
-                  //     closeButton: true,
-                  //     draggable: false,
-                  //   })
-                  // );
                 }}
               />
               <Button
