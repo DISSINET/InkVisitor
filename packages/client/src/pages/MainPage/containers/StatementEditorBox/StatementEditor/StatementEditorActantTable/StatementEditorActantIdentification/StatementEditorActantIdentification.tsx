@@ -14,6 +14,7 @@ import AttributesEditor from "pages/MainPage/containers/AttributesEditor/Attribu
 import React, { useState } from "react";
 import { FaTrashAlt, FaUnlink } from "react-icons/fa";
 import { UseMutationResult } from "react-query";
+import { excludedSuggesterEntities } from "Theme/constants";
 import { StyledCIGrid } from "../StatementEditorActantTableStyles";
 
 interface StatementEditorActantIdentification {
@@ -66,6 +67,7 @@ export const StatementEditorActantIdentification: React.FC<
             }}
             isInsideTemplate={isInsideTemplate}
             excludedActantIds={[entity.id]}
+            excludedEntities={excludedSuggesterEntities}
           >
             <EntityTag
               entity={entity}
@@ -109,6 +111,7 @@ export const StatementEditorActantIdentification: React.FC<
             openDetailOnCreate
             isInsideTemplate={isInsideTemplate}
             territoryActants={territoryActants}
+            excludedEntities={excludedSuggesterEntities}
           />
         )}
         <ButtonGroup style={{ marginLeft: "1rem" }}>

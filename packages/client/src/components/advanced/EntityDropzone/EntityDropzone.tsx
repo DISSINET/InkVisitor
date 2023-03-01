@@ -70,7 +70,8 @@ export const EntityDropzone: React.FC<EntityDropzone> = ({
       (newHoverred.isTemplate &&
         newHoverred.entityClass === EntityEnums.Class.Territory &&
         !territoryParentId) ||
-      excludedActantIds.includes(newHoverred.id)
+      excludedActantIds.includes(newHoverred.id) ||
+      excludedEntities.includes(newHoverred.entityClass)
     ) {
       setIsWrongDropCategory(true);
     } else {
