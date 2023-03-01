@@ -3,7 +3,11 @@ import React, { ReactElement, useState } from "react";
 import { DropTargetMonitor, useDrop } from "react-dnd";
 import theme from "Theme/theme";
 import { EntityDragItem, ItemTypes } from "types";
-import { StyledAiOutlineWarning } from "./DropzoneStyles";
+import {
+  StyledAiOutlineWarning,
+  StyledDropzone,
+  StyledIconWrap,
+} from "./DropzoneStyles";
 
 interface Dropzone {
   onDrop: (item: EntityDragItem, instantiateTemplate?: boolean) => void;
@@ -52,14 +56,15 @@ export const Dropzone: React.FC<Dropzone> = ({
 
   return (
     <>
-      <div
-        ref={dropRef}
-        style={{ opacity: opacity, display: "inline-flex", overflow: "hidden" }}
-      >
-        {children}
-        {isWrongDropCategory && isOver && (
-          <StyledAiOutlineWarning size={22} color={theme.color["warning"]} />
-        )}
+      <div style={{ display: "inline-flex", overflow: "hidden" }}>
+        <StyledDropzone ref={dropRef} style={{ opacity: opacity }}>
+          {children}
+        </StyledDropzone>
+        <StyledIconWrap>
+          {isWrongDropCategory && isOver && (
+            <StyledAiOutlineWarning size={22} color={theme.color["warning"]} />
+          )}
+        </StyledIconWrap>
       </div>
 
       {showTemplateModal && (
