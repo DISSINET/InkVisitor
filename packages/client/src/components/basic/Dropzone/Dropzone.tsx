@@ -5,10 +5,11 @@ import { EntityDragItem, ItemTypes } from "types";
 interface Dropzone {
   onDrop: (item: EntityDragItem, instantiateTemplate?: boolean) => void;
   onHover: (item: EntityDragItem) => void;
-  children: ReactElement;
 
   isWrongDropCategory?: boolean;
   isInsideTemplate: boolean;
+
+  children: ReactElement;
 }
 export const Dropzone: React.FC<Dropzone> = ({
   onDrop,

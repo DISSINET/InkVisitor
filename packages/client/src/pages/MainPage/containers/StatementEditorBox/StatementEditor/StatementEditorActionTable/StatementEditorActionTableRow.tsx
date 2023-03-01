@@ -1,7 +1,11 @@
 import { EntityEnums } from "@shared/enums";
 import { IProp, IResponseStatement } from "@shared/types";
 import { AttributeIcon, Button, ButtonGroup, Dropzone } from "components";
-import { EntitySuggester, EntityTag } from "components/advanced";
+import {
+  EntityDropzone,
+  EntitySuggester,
+  EntityTag,
+} from "components/advanced";
 import { useSearchParams } from "hooks";
 import AttributesEditor from "pages/MainPage/containers/AttributesEditor/AttributesEditor";
 import { PropGroup } from "pages/MainPage/containers/PropGroup/PropGroup";
@@ -119,10 +123,16 @@ export const StatementEditorActionTableRow: React.FC<
   const renderActionCell = () => {
     const { action, sAction } = filteredAction.data;
     return action ? (
-      <Dropzone
-        onDrop={() => console.log("dropped")}
-        onHover={() => console.log("hovered")}
+      <EntityDropzone
+        onSelected={(newSelectedId: string) => {
+          updateAction(sAction.id, {
+            actionId: newSelectedId,
+          });
+        }}
         isInsideTemplate={isInsideTemplate}
+        categoryTypes={[EntityEnums.Class.Action]}
+        excludedEntities={excludedSuggesterEntities}
+        territoryParentId={territoryParentId}
       >
         <EntityTag
           fullWidth
@@ -144,7 +154,7 @@ export const StatementEditorActionTableRow: React.FC<
             )
           }
         />
-      </Dropzone>
+      </EntityDropzone>
     ) : (
       userCanEdit && (
         <EntitySuggester
