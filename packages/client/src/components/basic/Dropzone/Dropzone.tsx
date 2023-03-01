@@ -1,3 +1,4 @@
+import { TemplateActionModal } from "components";
 import React, { ReactElement, useState } from "react";
 import { DropTargetMonitor, useDrop } from "react-dnd";
 import theme from "Theme/theme";
@@ -60,6 +61,27 @@ export const Dropzone: React.FC<Dropzone> = ({
           <StyledAiOutlineWarning size={22} color={theme.color["warning"]} />
         )}
       </div>
+
+      {showTemplateModal && (
+        <TemplateActionModal
+          onClose={() => {
+            setTempDropItem(false);
+            setShowTemplateModal(false);
+          }}
+          onUse={() => {
+            {
+              tempDropItem && onDrop(tempDropItem);
+              setTempDropItem(false);
+              setShowTemplateModal(false);
+            }
+          }}
+          onInstantiate={() => {
+            tempDropItem && onDrop(tempDropItem, true);
+            setTempDropItem(false);
+            setShowTemplateModal(false);
+          }}
+        />
+      )}
     </>
   );
 };

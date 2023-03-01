@@ -31,6 +31,7 @@ import { Cloud } from "./basic/Cloud/Cloud";
 import { LetterIcon } from "./basic/LetterIcon/LetterIcon";
 import { Tooltip } from "./basic/Tooltip/Tooltip";
 import { Dropzone } from "./basic/Dropzone/Dropzone";
+import { TemplateActionModal } from "./basic/TemplateActionModal/TemplateActionModal";
 
 export {
   AttributeIcon,
@@ -64,6 +65,7 @@ export {
   ModalInputWrap,
   MemoizedFooter,
   Submit,
+  TemplateActionModal,
   TypeBar,
   Tooltip,
 };
