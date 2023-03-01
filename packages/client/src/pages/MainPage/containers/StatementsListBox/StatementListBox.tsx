@@ -340,7 +340,9 @@ export const StatementListBox: React.FC = () => {
           isFavorited={isFavorited}
           selectedRows={selectedRows}
           setSelectedRows={setSelectedRows}
-          isAllSelected={selectedRows.length === statements.length}
+          isAllSelected={
+            statements.length > 0 && selectedRows.length === statements.length
+          }
           moveStatementsMutation={moveStatementsMutation}
           duplicateStatementsMutation={duplicateStatementsMutation}
         />
