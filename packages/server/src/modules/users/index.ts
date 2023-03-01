@@ -38,15 +38,15 @@ export default Router()
    *       - users
    *     requestBody:
    *       description: Login credentials
-   *       content: 
+   *       content:
    *         application/json:
    *           schema:
    *             type: object
    *             properties:
-   *               username: 
+   *               username:
    *                 type: string
    *               password:
-   *                 type: string           
+   *                 type: string
    *     responses:
    *       200:
    *         description: Returns generic response
@@ -55,7 +55,7 @@ export default Router()
    *             schema:
    *               type: object
    *               properties:
-   *                 token: 
+   *                 token:
    *                   type: string
    */
   .post(
@@ -100,7 +100,7 @@ export default Router()
    *           application/json:
    *             schema:
    *               type: array
-   *               items: 
+   *               items:
    *                 $ref: "#/components/schemas/IResponseAdministration"
    */
   .get(
@@ -164,7 +164,7 @@ export default Router()
    *         content:
    *           application/json:
    *             schema:
-  *                 $ref: "#/components/schemas/IResponseUser"
+   *                 $ref: "#/components/schemas/IResponseUser"
    */
   .get(
     "/:userId",
@@ -207,7 +207,7 @@ export default Router()
    *           application/json:
    *             schema:
    *               type: array
-   *               items: 
+   *               items:
    *                 $ref: "#/components/schemas/IUser"
    */
   .get(
@@ -232,10 +232,10 @@ export default Router()
    *       - users
    *     requestBody:
    *       description: User object
-   *       content: 
+   *       content:
    *         application/json:
    *           schema:
-   *             $ref: "#/components/schemas/IUser"               
+   *             $ref: "#/components/schemas/IUser"
    *     responses:
    *       200:
    *         description: Returns generic response
@@ -276,10 +276,7 @@ export default Router()
           )
         );
       } catch (e) {
-        throw new EmailError(
-          "please check the logs",
-          (e as Error).toString()
-        );
+        throw new EmailError("please check the logs", (e as Error).toString());
       }
 
       return {
@@ -303,10 +300,10 @@ export default Router()
    *         description: ID of the user entry
    *     requestBody:
    *       description: User object
-   *       content: 
+   *       content:
    *         application/json:
    *           schema:
-   *             $ref: "#/components/schemas/IUser"               
+   *             $ref: "#/components/schemas/IUser"
    *     responses:
    *       200:
    *         description: Returns generic response
@@ -456,11 +453,7 @@ export default Router()
       try {
         await mailer.sendTemplate(
           existingUser.email,
-          passwordResetTemplate(
-            existingUser.name,
-            domainName(),
-            rawPassword,
-          )
+          passwordResetTemplate(existingUser.name, domainName(), rawPassword)
         );
       } catch (e) {
         throw new EmailError("please check the logs", (e as Error).toString());
@@ -468,7 +461,8 @@ export default Router()
 
       return {
         result: true,
-        message: "User activated. An email with the password has been sent to your email address",
+        message:
+          "User activated. An email with the password has been sent to your email address",
       };
     })
   )
@@ -493,7 +487,7 @@ export default Router()
    *           application/json:
    *             schema:
    *               type: array
-   *               items: 
+   *               items:
    *                 $ref: "#/components/schemas/IResponseBookmarkFolder"
    */
   .get(
@@ -583,11 +577,7 @@ export default Router()
       try {
         await mailer.sendTemplate(
           user.email,
-          passwordResetTemplate(
-            user.name,
-            domainName(),
-            rawPassword,
-          )
+          passwordResetTemplate(user.name, domainName(), rawPassword)
         );
       } catch (e) {
         throw new EmailError("please check the logs", (e as Error).toString());
@@ -595,7 +585,7 @@ export default Router()
 
       return {
         result: true,
-        message: `Email with the new password has been sent. New password: '${rawPassword}'.`,
+        message: `Email with the new password has been sent. Click to copy the new password: '${rawPassword}'.`,
         data: rawPassword,
       };
     })
