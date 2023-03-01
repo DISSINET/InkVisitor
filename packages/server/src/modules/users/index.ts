@@ -585,7 +585,7 @@ export default Router()
 
       return {
         result: true,
-        message: `Email with the new password has been sent. Click to copy new password: '${rawPassword}'.`,
+        message: `Email with the new password has been sent. Click to copy the new password: '${rawPassword}'.`,
         data: rawPassword,
       };
     })

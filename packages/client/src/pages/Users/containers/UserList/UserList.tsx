@@ -79,7 +79,7 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
       onSuccess: (data, variables) => {
         const { message } = data.data;
 
-        toast.success(message, {
+        toast.info(message, {
           autoClose: 8000,
           pauseOnHover: true,
           closeOnClick: false,
