@@ -150,6 +150,7 @@ export const StyledEditorStatementInfo = styled.div`
 `;
 
 export const StyledHeaderTagWrap = styled.div`
+  max-width: 100%;
   display: inline-flex;
   overflow: hidden;
   margin-right: ${({ theme }) => theme.space[3]};

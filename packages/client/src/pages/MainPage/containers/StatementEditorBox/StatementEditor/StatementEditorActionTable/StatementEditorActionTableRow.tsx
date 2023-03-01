@@ -1,6 +1,6 @@
 import { EntityEnums } from "@shared/enums";
 import { IProp, IResponseStatement } from "@shared/types";
-import { AttributeIcon, Button, ButtonGroup } from "components";
+import { AttributeIcon, Button, ButtonGroup, Dropzone } from "components";
 import { EntitySuggester, EntityTag } from "components/advanced";
 import { useSearchParams } from "hooks";
 import AttributesEditor from "pages/MainPage/containers/AttributesEditor/AttributesEditor";
@@ -119,26 +119,32 @@ export const StatementEditorActionTableRow: React.FC<
   const renderActionCell = () => {
     const { action, sAction } = filteredAction.data;
     return action ? (
-      <EntityTag
-        fullWidth
-        entity={action}
-        button={
-          userCanEdit && (
-            <Button
-              key="d"
-              tooltipLabel="unlink action"
-              icon={<FaUnlink />}
-              inverted
-              color="plain"
-              onClick={() => {
-                updateAction(sAction.id, {
-                  actionId: "",
-                });
-              }}
-            />
-          )
-        }
-      />
+      <Dropzone
+        onDrop={() => console.log("dropped")}
+        onHover={() => console.log("hovered")}
+        isInsideTemplate={isInsideTemplate}
+      >
+        <EntityTag
+          fullWidth
+          entity={action}
+          button={
+            userCanEdit && (
+              <Button
+                key="d"
+                tooltipLabel="unlink action"
+                icon={<FaUnlink />}
+                inverted
+                color="plain"
+                onClick={() => {
+                  updateAction(sAction.id, {
+                    actionId: "",
+                  });
+                }}
+              />
+            )
+          }
+        />
+      </Dropzone>
     ) : (
       userCanEdit && (
         <EntitySuggester

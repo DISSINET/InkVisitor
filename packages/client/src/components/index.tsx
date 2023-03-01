@@ -30,6 +30,7 @@ import { TypeBar } from "./basic/TypeBar/TypeBar";
 import { Cloud } from "./basic/Cloud/Cloud";
 import { LetterIcon } from "./basic/LetterIcon/LetterIcon";
 import { Tooltip } from "./basic/Tooltip/Tooltip";
+import { Dropzone } from "./basic/Dropzone/Dropzone";
 
 export {
   AttributeIcon,
@@ -39,6 +40,7 @@ export {
   ButtonGroups,
   Cloud,
   Checkbox,
+  Dropzone,
   Header,
   Footer,
   Input,
