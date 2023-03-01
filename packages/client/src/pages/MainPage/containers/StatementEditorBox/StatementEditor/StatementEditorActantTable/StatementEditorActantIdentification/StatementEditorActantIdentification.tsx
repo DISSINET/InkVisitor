@@ -65,6 +65,7 @@ export const StatementEditorActantIdentification: React.FC<
               });
             }}
             isInsideTemplate={isInsideTemplate}
+            excludedActantIds={[entity.id]}
           >
             <EntityTag
               entity={entity}

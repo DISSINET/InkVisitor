@@ -53,6 +53,7 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
             categoryTypes={[EntityEnums.Class.Resource]}
             isInsideTemplate={isInsideTemplate}
             territoryParentId={territoryParentId}
+            excludedActantIds={[resource.id]}
           >
             <EntityTag
               entity={resource}
@@ -108,6 +109,7 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
             excludedEntities={excludedSuggesterEntities}
             isInsideTemplate={isInsideTemplate}
             territoryParentId={territoryParentId}
+            excludedActantIds={[value.id]}
           >
             <EntityTag
               entity={value}

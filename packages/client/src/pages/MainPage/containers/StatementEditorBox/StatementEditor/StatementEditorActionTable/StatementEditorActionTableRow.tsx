@@ -133,6 +133,7 @@ export const StatementEditorActionTableRow: React.FC<
         categoryTypes={[EntityEnums.Class.Action]}
         excludedEntities={excludedSuggesterEntities}
         territoryParentId={territoryParentId}
+        excludedActantIds={[action.id]}
       >
         <EntityTag
           fullWidth

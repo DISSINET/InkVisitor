@@ -191,6 +191,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
                 excludedEntities={excludedSuggesterEntities}
                 isInsideTemplate={isInsideTemplate}
                 territoryParentId={territoryParentId}
+                excludedActantIds={[propTypeEntity.id]}
               >
                 <EntityTag
                   entity={propTypeEntity}
@@ -270,6 +271,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
                 excludedEntities={excludedSuggesterEntities}
                 isInsideTemplate={isInsideTemplate}
                 territoryParentId={territoryParentId}
+                excludedActantIds={[propValueEntity.id]}
               >
                 <EntityTag
                   entity={propValueEntity}

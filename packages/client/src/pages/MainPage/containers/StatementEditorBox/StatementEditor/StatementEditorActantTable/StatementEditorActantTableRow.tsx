@@ -160,6 +160,7 @@ export const StatementEditorActantTableRow: React.FC<
           excludedEntities={excludedSuggesterEntities}
           isInsideTemplate={isInsideTemplate}
           territoryParentId={territoryParentId}
+          excludedActantIds={[actant.id]}
         >
           <EntityTag
             entity={actant}
