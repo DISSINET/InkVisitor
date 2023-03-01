@@ -5,15 +5,16 @@ import {
   IStatementIdentification,
 } from "@shared/types/statement";
 import { AttributeIcon, Button, ButtonGroup } from "components";
-import { EntitySuggester, EntityTag } from "components/advanced";
+import {
+  EntityDropzone,
+  EntitySuggester,
+  EntityTag,
+} from "components/advanced";
 import AttributesEditor from "pages/MainPage/containers/AttributesEditor/AttributesEditor";
 import React, { useState } from "react";
 import { FaTrashAlt, FaUnlink } from "react-icons/fa";
 import { UseMutationResult } from "react-query";
-import {
-  StyledCIGrid,
-  StyledTagWrapper,
-} from "../StatementEditorActantTableStyles";
+import { StyledCIGrid } from "../StatementEditorActantTableStyles";
 
 interface StatementEditorActantIdentification {
   identifications: IStatementIdentification[];
@@ -50,7 +51,21 @@ export const StatementEditorActantIdentification: React.FC<
     <>
       <StyledCIGrid>
         {entity ? (
-          <StyledTagWrapper>
+          <EntityDropzone
+            categoryTypes={classEntitiesActant}
+            onSelected={(newSelectedId: string) => {
+              const newIdentifications: IStatementIdentification[] =
+                identifications.map((c) =>
+                  c.id === identification.id
+                    ? { ...c, entityId: newSelectedId }
+                    : { ...c }
+                );
+              updateActant(sActant.id, {
+                identifications: newIdentifications,
+              });
+            }}
+            isInsideTemplate={isInsideTemplate}
+          >
             <EntityTag
               entity={entity}
               fullWidth
@@ -75,7 +90,7 @@ export const StatementEditorActantIdentification: React.FC<
                 )
               }
             />
-          </StyledTagWrapper>
+          </EntityDropzone>
         ) : (
           <EntitySuggester
             categoryTypes={classEntitiesActant}

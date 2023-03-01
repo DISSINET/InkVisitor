@@ -87,6 +87,7 @@ export const EntityDropzone: React.FC<EntityDropzone> = ({
         handleHoverred(newHoverred);
       }}
       isInsideTemplate={isInsideTemplate}
+      isWrongDropCategory={isWrongDropCategory}
     >
       {children}
     </Dropzone>

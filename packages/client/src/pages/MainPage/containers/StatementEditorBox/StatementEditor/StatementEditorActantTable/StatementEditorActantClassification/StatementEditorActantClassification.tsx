@@ -5,15 +5,16 @@ import {
   IStatementClassification,
 } from "@shared/types/statement";
 import { AttributeIcon, Button, ButtonGroup } from "components";
-import { EntitySuggester, EntityTag } from "components/advanced";
+import {
+  EntityDropzone,
+  EntitySuggester,
+  EntityTag,
+} from "components/advanced";
 import AttributesEditor from "pages/MainPage/containers/AttributesEditor/AttributesEditor";
 import React, { useState } from "react";
 import { FaTrashAlt, FaUnlink } from "react-icons/fa";
 import { UseMutationResult } from "react-query";
-import {
-  StyledCIGrid,
-  StyledTagWrapper,
-} from "../StatementEditorActantTableStyles";
+import { StyledCIGrid } from "../StatementEditorActantTableStyles";
 
 interface StatementEditorActantClassification {
   classifications: IStatementClassification[];
@@ -48,7 +49,21 @@ export const StatementEditorActantClassification: React.FC<
     <>
       <StyledCIGrid>
         {entity ? (
-          <StyledTagWrapper>
+          <EntityDropzone
+            categoryTypes={[EntityEnums.Class.Concept]}
+            onSelected={(newSelectedId: string) => {
+              const newClassifications: IStatementClassification[] =
+                classifications.map((c) =>
+                  c.id === classification.id
+                    ? { ...c, entityId: newSelectedId }
+                    : { ...c }
+                );
+              updateActant(sActant.id, {
+                classifications: newClassifications,
+              });
+            }}
+            isInsideTemplate={isInsideTemplate}
+          >
             <EntityTag
               entity={entity}
               fullWidth
@@ -73,7 +88,7 @@ export const StatementEditorActantClassification: React.FC<
                 )
               }
             />
-          </StyledTagWrapper>
+          </EntityDropzone>
         ) : (
           <EntitySuggester
             categoryTypes={[EntityEnums.Class.Concept]}
