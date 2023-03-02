@@ -114,7 +114,7 @@ export const Tag: React.FC<TagProps> = ({
       type: ItemTypes.TAG,
       id: propId,
       index,
-      entityClass,
+      entityClass: entityClass as EntityEnums.Class,
       isTemplate,
       isDiscouraged,
       entity: entity || false,
