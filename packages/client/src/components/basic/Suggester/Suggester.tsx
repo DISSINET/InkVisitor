@@ -267,7 +267,7 @@ export const Suggester: React.FC<Suggester> = ({
           />
           {typed.length > 0 && (
             <StyledSuggestionCancelButton hasButton={!disableCreate}>
-              <MdCancel onClick={() => onCancel()} />
+              <MdCancel size={16} onClick={() => onCancel()} />
             </StyledSuggestionCancelButton>
           )}
 
