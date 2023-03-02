@@ -19,7 +19,7 @@ import { setTreeInitialized } from "redux/features/territoryTree/treeInitializeS
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { rootTerritoryId } from "Theme/constants";
 import theme from "Theme/theme";
-import { DraggedTerritoryItem, EntityDragItem } from "types";
+import { DraggedEntityReduxItem, EntityDragItem } from "types";
 import { TerritoryTreeContextMenu } from "../TerritoryTreeContextMenu/TerritoryTreeContextMenu";
 import {
   StyledChildrenWrap,
@@ -205,8 +205,8 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
     }
   };
 
-  const draggedTerritory: DraggedTerritoryItem = useAppSelector(
-    (state) => state.territoryTree.draggedTerritory
+  const draggedEntity: DraggedEntityReduxItem = useAppSelector(
+    (state) => state.draggedEntity
   );
 
   const [tempDisabled, setTempDisabled] = useState(false);
@@ -214,26 +214,26 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
 
   useEffect(() => {
     if (
-      draggedTerritory.parentId &&
-      draggedTerritory.parentId !==
+      draggedEntity.parentId &&
+      draggedEntity.parentId !==
         (territory.data.parent as IParentTerritory).territoryId &&
-      draggedTerritory.parentId !== propId
+      draggedEntity.parentId !== propId
     ) {
-      if (draggedTerritory.lvl && draggedTerritory.lvl > lvl) {
+      if (draggedEntity.lvl && draggedEntity.lvl > lvl) {
         setTempDisabled(true);
       }
     } else {
       setTempDisabled(false);
     }
 
-    if (draggedTerritory.parentId) {
-      if (draggedTerritory.lvl && draggedTerritory.lvl === lvl) {
+    if (draggedEntity.parentId) {
+      if (draggedEntity.lvl && draggedEntity.lvl === lvl) {
         setHideChildTerritories(true);
       }
     } else {
       setHideChildTerritories(false);
     }
-  }, [draggedTerritory]);
+  }, [draggedEntity]);
 
   const renderTreeNode = () => {
     const hasChildren = children.length > 0;

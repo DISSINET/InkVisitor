@@ -8,10 +8,10 @@ import {
   useDrag,
   useDrop,
 } from "react-dnd";
-import { setDraggedTerritory } from "redux/features/territoryTree/draggedTerritorySlice";
+import { setDraggedEntity } from "redux/features/territoryTree/draggedEntitySlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import {
-  DraggedTerritoryItem,
+  DraggedEntityReduxItem,
   EntityColors,
   EntityDragItem,
   ItemTypes,
@@ -88,8 +88,8 @@ export const Tag: React.FC<TagProps> = ({
 }) => {
   const { appendDetailId } = useSearchParams();
   const dispatch = useAppDispatch();
-  const draggedTerritory: DraggedTerritoryItem = useAppSelector(
-    (state) => state.territoryTree.draggedTerritory
+  const draggedEntity: DraggedEntityReduxItem = useAppSelector(
+    (state) => state.draggedEntity
   );
 
   const ref = useRef<HTMLDivElement>(null);
@@ -98,7 +98,7 @@ export const Tag: React.FC<TagProps> = ({
     accept: ItemTypes.TAG,
     hover(item: EntityDragItem, monitor: DropTargetMonitor) {
       // TODO: debounce?
-      if (moveFn && draggedTerritory && draggedTerritory.lvl === lvl) {
+      if (moveFn && draggedEntity && draggedEntity.lvl === lvl) {
         dndHoverFn(item, index, monitor, ref, moveFn);
       }
     },
@@ -114,7 +114,7 @@ export const Tag: React.FC<TagProps> = ({
       type: ItemTypes.TAG,
       id: propId,
       index,
-      entityClass,
+      entityClass: entityClass as EntityEnums.Class,
       isTemplate,
       isDiscouraged,
       entity: entity || false,
@@ -130,9 +130,9 @@ export const Tag: React.FC<TagProps> = ({
 
   useEffect(() => {
     if (isDragging) {
-      dispatch(setDraggedTerritory({ id: propId, parentId, index, lvl }));
+      dispatch(setDraggedEntity({ id: propId, parentId, index, lvl }));
     } else {
-      dispatch(setDraggedTerritory({}));
+      dispatch(setDraggedEntity({}));
     }
   }, [isDragging]);
 

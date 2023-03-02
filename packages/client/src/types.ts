@@ -136,7 +136,7 @@ export interface EntityDragItem extends DragItem {
   isTemplate: boolean;
   isDiscouraged: boolean;
 }
-export interface DraggedTerritoryItem {
+export interface DraggedEntityReduxItem {
   index?: number;
   id?: string;
   parentId?: string;
