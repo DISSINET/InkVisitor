@@ -101,24 +101,35 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
           </StyledReferenceValuePartLabel>
         )}
         {value ? (
-          <EntityTag
-            entity={value}
-            fullWidth
-            button={
-              !disabled && (
-                <Button
-                  key="d"
-                  tooltipLabel="unlink resource"
-                  icon={<FaUnlink />}
-                  inverted
-                  color="plain"
-                  onClick={() => {
-                    handleChangeValue(reference.id, "");
-                  }}
-                />
-              )
-            }
-          />
+          <EntityDropzone
+            onSelected={(newSelectedId: string) => {
+              handleChangeValue(reference.id, newSelectedId);
+            }}
+            categoryTypes={[EntityEnums.Class.Value]}
+            excludedEntities={excludedSuggesterEntities}
+            isInsideTemplate={isInsideTemplate}
+            territoryParentId={territoryParentId}
+            excludedActantIds={[value.id]}
+          >
+            <EntityTag
+              entity={value}
+              fullWidth
+              button={
+                !disabled && (
+                  <Button
+                    key="d"
+                    tooltipLabel="unlink resource"
+                    icon={<FaUnlink />}
+                    inverted
+                    color="plain"
+                    onClick={() => {
+                      handleChangeValue(reference.id, "");
+                    }}
+                  />
+                )
+              }
+            />
+          </EntityDropzone>
         ) : (
           !disabled && (
             <div>

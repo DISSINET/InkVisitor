@@ -21,7 +21,7 @@ interface InputWrapper {
 }
 export const StyledInputWrapper = styled.div<InputWrapper>`
   display: flex;
-  opacity: ${({ isOver }) => isOver && "75%"};
+  opacity: ${({ isOver }) => isOver && "50%"};
   max-width: 16.1rem;
   input {
     padding-right: ${({ theme, hasText }) =>
