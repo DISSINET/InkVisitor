@@ -10,7 +10,7 @@ import draggedActantRowSlice from "./features/rowDnd/draggedActantRowSlice";
 import draggedPropRowSlice from "./features/rowDnd/draggedPropRowSlice";
 import draggedRowIdSlice from "./features/statementList/draggedRowIdSlice";
 import rowsExpandedSlice from "./features/statementList/rowsExpandedSlice";
-import draggedTerritorySlice from "./features/territoryTree/draggedTerritorySlice";
+import draggedEntitySlice from "./features/territoryTree/draggedEntitySlice";
 import selectedTerritoryPathSlice from "./features/territoryTree/selectedTerritoryPathSlice";
 import treeInitializeSlice from "./features/territoryTree/treeInitializeSlice";
 import usernameSlice from "./features/usernameSlice";
@@ -24,10 +24,10 @@ import disableTreeScrollSlice from "./features/territoryTree/disableTreeScrollSl
 const store: Store = configureStore({
   reducer: {
     username: usernameSlice,
+    draggedEntity: draggedEntitySlice,
     territoryTree: combineReducers({
       selectedTerritoryPath: selectedTerritoryPathSlice,
       treeInitialized: treeInitializeSlice,
-      draggedTerritory: draggedTerritorySlice,
       disableTreeScroll: disableTreeScrollSlice,
     }),
     statementList: combineReducers({
