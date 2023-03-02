@@ -206,7 +206,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
   };
 
   const draggedEntity: DraggedEntityReduxItem = useAppSelector(
-    (state) => state.territoryTree.draggedEntity
+    (state) => state.draggedEntity
   );
 
   const [tempDisabled, setTempDisabled] = useState(false);

@@ -89,7 +89,7 @@ export const Tag: React.FC<TagProps> = ({
   const { appendDetailId } = useSearchParams();
   const dispatch = useAppDispatch();
   const draggedEntity: DraggedEntityReduxItem = useAppSelector(
-    (state) => state.territoryTree.draggedEntity
+    (state) => state.draggedEntity
   );
 
   const ref = useRef<HTMLDivElement>(null);

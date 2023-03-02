@@ -24,10 +24,10 @@ import disableTreeScrollSlice from "./features/territoryTree/disableTreeScrollSl
 const store: Store = configureStore({
   reducer: {
     username: usernameSlice,
+    draggedEntity: draggedEntitySlice,
     territoryTree: combineReducers({
       selectedTerritoryPath: selectedTerritoryPathSlice,
       treeInitialized: treeInitializeSlice,
-      draggedEntity: draggedEntitySlice,
       disableTreeScroll: disableTreeScrollSlice,
     }),
     statementList: combineReducers({

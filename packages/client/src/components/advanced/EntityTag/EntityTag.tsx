@@ -50,7 +50,7 @@ export const EntityTag: React.FC<EntityTag> = ({
   isFavorited,
 }) => {
   const draggedEntity: DraggedEntityReduxItem = useAppSelector(
-    (state) => state.territoryTree.draggedEntity
+    (state) => state.draggedEntity
   );
 
   const classId = entity.class;
