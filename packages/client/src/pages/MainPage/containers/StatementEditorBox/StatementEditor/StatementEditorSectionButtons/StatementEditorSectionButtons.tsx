@@ -146,7 +146,7 @@ export const StatementEditorSectionButtons: React.FC<
         }
         excludedActantIds={[statement.id]}
         disableCreate
-        inputWidth={64}
+        inputWidth={65}
         placeholder="another S"
       />
     </>

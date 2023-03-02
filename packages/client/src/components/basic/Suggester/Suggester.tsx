@@ -207,12 +207,17 @@ export const Suggester: React.FC<Suggester> = ({
       isInsideTemplate,
       territoryParentId
     );
+    const rowHeight = 25;
     return (
       <List
         itemData={itemData as SuggestionRowEntityItemData}
-        height={suggestions.length > 7 ? 200 : suggestions.length * 25}
+        height={
+          suggestions.length > 7
+            ? rowHeight * 8
+            : rowHeight * suggestions.length
+        }
         itemCount={suggestions.length}
-        itemSize={25}
+        itemSize={rowHeight}
         width="100%"
         overscanCount={scrollOverscanCount}
       >

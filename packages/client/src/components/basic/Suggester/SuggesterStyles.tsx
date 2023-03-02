@@ -11,9 +11,7 @@ export const StyledSuggester = styled.div<StyledSuggester>`
   margin-top: ${({ marginTop }) => (marginTop ? space2 : 0)};
 `;
 
-interface Column {
-  isSelected: boolean;
-}
+interface Column {}
 interface InputWrapper {
   isOver: boolean;
   hasButton: boolean;
@@ -73,32 +71,29 @@ export const StyledRelativePosition = styled.div`
 `;
 interface StyledSuggestionRow {
   twoIcons: boolean;
+  isSelected: boolean;
 }
 export const StyledSuggestionRow = styled.div<StyledSuggestionRow>`
   display: grid;
   grid-template-columns: ${({ twoIcons }) => (twoIcons ? "4rem" : "2.5rem")} auto 3rem;
   align-items: center;
+  background-color: ${({ theme, isSelected }) =>
+    isSelected ? theme.color["blue"][100] : "transparent"};
 `;
 export const StyledSuggestionLineActions = styled.div<Column>`
   margin-left: ${({ theme }) => theme.space[2]};
   margin-right: ${({ theme }) => theme.space[2]};
-  background-color: ${({ theme, isSelected }) =>
-    isSelected ? theme.color["blue"][100] : "transparent"};
 `;
 export const StyledSuggestionLineTag = styled.div<Column>`
   display: grid;
   align-items: center;
   height: 100%;
-  background-color: ${({ theme, isSelected }) =>
-    isSelected ? theme.color["blue"][100] : "transparent"};
 `;
 export const StyledSuggestionLineIcons = styled.div<Column>`
   display: grid;
   height: 100%;
   align-items: center;
   justify-content: center;
-  background-color: ${({ theme, isSelected }) =>
-    isSelected ? theme.color["blue"][100] : "transparent"};
 `;
 export const StyledTagWrapper = styled.div`
   display: inline-flex;
