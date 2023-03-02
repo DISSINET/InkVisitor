@@ -132,7 +132,7 @@ export type DragItem = {
 };
 export interface EntityDragItem extends DragItem {
   entity: IEntity | false;
-  entityClass: EntityEnums.ExtendedClass;
+  entityClass: EntityEnums.Class;
   isTemplate: boolean;
   isDiscouraged: boolean;
 }

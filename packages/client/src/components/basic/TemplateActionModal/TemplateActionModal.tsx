@@ -8,12 +8,12 @@ import {
 } from "components";
 import React, { useEffect, useState } from "react";
 
-interface SuggesterTemplateModal {
+interface TemplateActionModal {
   onClose: () => void;
   onUse: () => void;
   onInstantiate: () => void;
 }
-export const SuggesterTemplateModal: React.FC<SuggesterTemplateModal> = ({
+export const TemplateActionModal: React.FC<TemplateActionModal> = ({
   onClose,
   onUse,
   onInstantiate,

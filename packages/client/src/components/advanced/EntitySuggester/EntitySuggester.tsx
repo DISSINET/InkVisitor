@@ -296,6 +296,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
         newHoverred.entityClass === EntityEnums.Class.Territory &&
         !territoryParentId) ||
       excludedActantIds.includes(newHoverred.id) ||
+      excludedEntities.includes(newHoverred.entityClass) ||
       disabled
     ) {
       setIsWrongDropCategory(true);

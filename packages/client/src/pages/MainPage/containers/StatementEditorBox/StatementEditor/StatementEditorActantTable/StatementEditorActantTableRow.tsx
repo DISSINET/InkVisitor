@@ -9,6 +9,7 @@ import {
 import { AttributeIcon, Button, ButtonGroup } from "components";
 import {
   AttributeButtonGroup,
+  EntityDropzone,
   EntitySuggester,
   EntityTag,
 } from "components/advanced";
@@ -149,26 +150,39 @@ export const StatementEditorActantTableRow: React.FC<
     } = filteredActant.data;
     return actant ? (
       <StyledTagWrapper>
-        <EntityTag
-          entity={actant}
-          fullWidth
-          button={
-            userCanEdit && (
-              <Button
-                key="d"
-                tooltipLabel="unlink actant"
-                icon={<FaUnlink />}
-                color="plain"
-                inverted
-                onClick={() => {
-                  updateActant(sActant.id, {
-                    entityId: "",
-                  });
-                }}
-              />
-            )
-          }
-        />
+        <EntityDropzone
+          onSelected={(newSelectedId: string) => {
+            updateActant(sActant.id, {
+              entityId: newSelectedId,
+            });
+          }}
+          categoryTypes={classEntitiesActant}
+          excludedEntities={excludedSuggesterEntities}
+          isInsideTemplate={isInsideTemplate}
+          territoryParentId={territoryParentId}
+          excludedActantIds={[actant.id]}
+        >
+          <EntityTag
+            entity={actant}
+            fullWidth
+            button={
+              userCanEdit && (
+                <Button
+                  key="d"
+                  tooltipLabel="unlink actant"
+                  icon={<FaUnlink />}
+                  color="plain"
+                  inverted
+                  onClick={() => {
+                    updateActant(sActant.id, {
+                      entityId: "",
+                    });
+                  }}
+                />
+              )
+            }
+          />
+        </EntityDropzone>
       </StyledTagWrapper>
     ) : (
       userCanEdit && (
