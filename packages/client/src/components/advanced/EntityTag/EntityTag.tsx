@@ -5,7 +5,7 @@ import { Tag } from "components";
 import { EntityTooltip } from "components/advanced";
 import React, { ReactNode, useEffect, useState } from "react";
 import { useAppSelector } from "redux/hooks";
-import { DraggedTerritoryItem, EntityDragItem } from "types";
+import { DraggedEntityReduxItem, EntityDragItem } from "types";
 import { getEntityLabel } from "utils";
 
 interface EntityTag {
@@ -49,8 +49,8 @@ export const EntityTag: React.FC<EntityTag> = ({
   statementsCount,
   isFavorited,
 }) => {
-  const draggedTerritory: DraggedTerritoryItem = useAppSelector(
-    (state) => state.territoryTree.draggedTerritory
+  const draggedEntity: DraggedEntityReduxItem = useAppSelector(
+    (state) => state.territoryTree.draggedEntity
   );
 
   const classId = entity.class;
@@ -80,7 +80,7 @@ export const EntityTag: React.FC<EntityTag> = ({
             position={tooltipPosition}
             disabled={
               (button !== null && buttonHovered) ||
-              Object.keys(draggedTerritory).length !== 0
+              Object.keys(draggedEntity).length !== 0
             }
             tagHovered={tagHovered}
             referenceElement={referenceElement}
