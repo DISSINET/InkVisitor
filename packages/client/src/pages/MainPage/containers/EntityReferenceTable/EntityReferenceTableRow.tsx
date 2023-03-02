@@ -1,7 +1,11 @@
 import { EntityEnums } from "@shared/enums";
 import { IEntity, IReference } from "@shared/types";
 import { Button } from "components";
-import { EntitySuggester, EntityTag } from "components/advanced";
+import {
+  EntityDropzone,
+  EntitySuggester,
+  EntityTag,
+} from "components/advanced";
 import React from "react";
 import { FaExternalLinkAlt, FaTrashAlt, FaUnlink } from "react-icons/fa";
 import { excludedSuggesterEntities } from "Theme/constants";
@@ -9,7 +13,6 @@ import {
   StyledReferencesListButtons,
   StyledReferencesListColumn,
   StyledReferenceValuePartLabel,
-  StyledTagWrapper,
 } from "./EntityReferenceTableStyles";
 
 interface EntityReferenceTableRow {
@@ -42,7 +45,16 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
       {/* resource */}
       <StyledReferencesListColumn>
         {resource ? (
-          <StyledTagWrapper>
+          <EntityDropzone
+            onSelected={(newSelectedId: string) => {
+              handleChangeResource(reference.id, newSelectedId);
+            }}
+            disableTemplatesAccept
+            categoryTypes={[EntityEnums.Class.Resource]}
+            isInsideTemplate={isInsideTemplate}
+            territoryParentId={territoryParentId}
+            excludedActantIds={[resource.id]}
+          >
             <EntityTag
               entity={resource}
               fullWidth
@@ -61,7 +73,7 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
                 )
               }
             />
-          </StyledTagWrapper>
+          </EntityDropzone>
         ) : (
           !disabled && (
             <div>
@@ -89,7 +101,16 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
           </StyledReferenceValuePartLabel>
         )}
         {value ? (
-          <StyledTagWrapper>
+          <EntityDropzone
+            onSelected={(newSelectedId: string) => {
+              handleChangeValue(reference.id, newSelectedId);
+            }}
+            categoryTypes={[EntityEnums.Class.Value]}
+            excludedEntities={excludedSuggesterEntities}
+            isInsideTemplate={isInsideTemplate}
+            territoryParentId={territoryParentId}
+            excludedActantIds={[value.id]}
+          >
             <EntityTag
               entity={value}
               fullWidth
@@ -108,7 +129,7 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
                 )
               }
             />
-          </StyledTagWrapper>
+          </EntityDropzone>
         ) : (
           !disabled && (
             <div>

@@ -1,6 +1,10 @@
 import { IEntity, IProp } from "@shared/types";
 import { AttributeIcon, Button, ButtonGroup } from "components";
-import { EntitySuggester, EntityTag } from "components/advanced";
+import {
+  EntityDropzone,
+  EntitySuggester,
+  EntityTag,
+} from "components/advanced";
 import { StyledPropButtonGroup } from "components/advanced/AttributeButtonGroup/AttributeButtonGroupStyles";
 import React, { useEffect, useRef, useState } from "react";
 import {
@@ -174,30 +178,46 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
         >
           {propTypeEntity ? (
             <>
-              <EntityTag
-                entity={propTypeEntity}
-                fullWidth
-                tooltipPosition="right"
-                button={
-                  userCanEdit && (
-                    <Button
-                      key="d"
-                      icon={<FaUnlink />}
-                      color="plain"
-                      inverted
-                      tooltipLabel="unlink entity"
-                      onClick={() => {
-                        updateProp(prop.id, {
-                          type: {
-                            ...prop.type,
-                            ...{ entityId: "" },
-                          },
-                        });
-                      }}
-                    />
-                  )
-                }
-              />
+              <EntityDropzone
+                onSelected={(newSelectedId: string) => {
+                  updateProp(prop.id, {
+                    type: {
+                      ...prop.type,
+                      ...{ entityId: newSelectedId },
+                    },
+                  });
+                }}
+                categoryTypes={classesPropType}
+                excludedEntities={excludedSuggesterEntities}
+                isInsideTemplate={isInsideTemplate}
+                territoryParentId={territoryParentId}
+                excludedActantIds={[propTypeEntity.id]}
+              >
+                <EntityTag
+                  entity={propTypeEntity}
+                  fullWidth
+                  tooltipPosition="right"
+                  button={
+                    userCanEdit && (
+                      <Button
+                        key="d"
+                        icon={<FaUnlink />}
+                        color="plain"
+                        inverted
+                        tooltipLabel="unlink entity"
+                        onClick={() => {
+                          updateProp(prop.id, {
+                            type: {
+                              ...prop.type,
+                              ...{ entityId: "" },
+                            },
+                          });
+                        }}
+                      />
+                    )
+                  }
+                />
+              </EntityDropzone>
               <StyledPropButtonGroup>
                 {prop.type.logic == "2" && (
                   <Button
@@ -238,30 +258,46 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
         <StyledPropLineColumn isTag={propValueEntity ? true : false}>
           {propValueEntity ? (
             <>
-              <EntityTag
-                entity={propValueEntity}
-                fullWidth
-                tooltipPosition="right"
-                button={
-                  userCanEdit && (
-                    <Button
-                      key="d"
-                      icon={<FaUnlink />}
-                      tooltipLabel="unlink entity"
-                      color="plain"
-                      inverted
-                      onClick={() => {
-                        updateProp(prop.id, {
-                          value: {
-                            ...prop.value,
-                            ...{ entityId: "" },
-                          },
-                        });
-                      }}
-                    />
-                  )
-                }
-              />
+              <EntityDropzone
+                onSelected={(newSelectedId: string) => {
+                  updateProp(prop.id, {
+                    value: {
+                      ...prop.type,
+                      ...{ entityId: newSelectedId },
+                    },
+                  });
+                }}
+                categoryTypes={classesPropValue}
+                excludedEntities={excludedSuggesterEntities}
+                isInsideTemplate={isInsideTemplate}
+                territoryParentId={territoryParentId}
+                excludedActantIds={[propValueEntity.id]}
+              >
+                <EntityTag
+                  entity={propValueEntity}
+                  fullWidth
+                  tooltipPosition="right"
+                  button={
+                    userCanEdit && (
+                      <Button
+                        key="d"
+                        icon={<FaUnlink />}
+                        tooltipLabel="unlink entity"
+                        color="plain"
+                        inverted
+                        onClick={() => {
+                          updateProp(prop.id, {
+                            value: {
+                              ...prop.value,
+                              ...{ entityId: "" },
+                            },
+                          });
+                        }}
+                      />
+                    )
+                  }
+                />
+              </EntityDropzone>
 
               <StyledPropButtonGroup>
                 {prop.value.logic == "2" && (

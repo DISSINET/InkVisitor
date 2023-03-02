@@ -1,7 +1,11 @@
 import { EntityEnums } from "@shared/enums";
 import { IProp, IResponseStatement } from "@shared/types";
-import { AttributeIcon, Button, ButtonGroup } from "components";
-import { EntitySuggester, EntityTag } from "components/advanced";
+import { AttributeIcon, Button, ButtonGroup, Dropzone } from "components";
+import {
+  EntityDropzone,
+  EntitySuggester,
+  EntityTag,
+} from "components/advanced";
 import { useSearchParams } from "hooks";
 import AttributesEditor from "pages/MainPage/containers/AttributesEditor/AttributesEditor";
 import { PropGroup } from "pages/MainPage/containers/PropGroup/PropGroup";
@@ -119,26 +123,39 @@ export const StatementEditorActionTableRow: React.FC<
   const renderActionCell = () => {
     const { action, sAction } = filteredAction.data;
     return action ? (
-      <EntityTag
-        fullWidth
-        entity={action}
-        button={
-          userCanEdit && (
-            <Button
-              key="d"
-              tooltipLabel="unlink action"
-              icon={<FaUnlink />}
-              inverted
-              color="plain"
-              onClick={() => {
-                updateAction(sAction.id, {
-                  actionId: "",
-                });
-              }}
-            />
-          )
-        }
-      />
+      <EntityDropzone
+        onSelected={(newSelectedId: string) => {
+          updateAction(sAction.id, {
+            actionId: newSelectedId,
+          });
+        }}
+        isInsideTemplate={isInsideTemplate}
+        categoryTypes={[EntityEnums.Class.Action]}
+        excludedEntities={excludedSuggesterEntities}
+        territoryParentId={territoryParentId}
+        excludedActantIds={[action.id]}
+      >
+        <EntityTag
+          fullWidth
+          entity={action}
+          button={
+            userCanEdit && (
+              <Button
+                key="d"
+                tooltipLabel="unlink action"
+                icon={<FaUnlink />}
+                inverted
+                color="plain"
+                onClick={() => {
+                  updateAction(sAction.id, {
+                    actionId: "",
+                  });
+                }}
+              />
+            )
+          }
+        />
+      </EntityDropzone>
     ) : (
       userCanEdit && (
         <EntitySuggester

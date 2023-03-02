@@ -1,7 +1,14 @@
 import { entitiesDictKeys } from "@shared/dictionaries";
 import { EntityEnums } from "@shared/enums";
 import { IEntity, IOption, IUserOptions } from "@shared/types";
-import { Button, Dropdown, Input, Loader, TypeBar } from "components";
+import {
+  Button,
+  Dropdown,
+  Input,
+  Loader,
+  TemplateActionModal,
+  TypeBar,
+} from "components";
 import useKeypress from "hooks/useKeyPress";
 import React, { useState } from "react";
 import { DropTargetMonitor, useDrop } from "react-dnd";
@@ -29,11 +36,10 @@ import {
   StyledSuggesterList,
   StyledSuggestionCancelButton,
 } from "./SuggesterStyles";
-import { SuggesterTemplateModal } from "./SuggesterTemplateModal/SuggesterTemplateModal";
 import {
   createItemData,
-  SuggestionRowEntityItemData,
   MemoizedEntityRow,
+  SuggestionRowEntityItemData,
 } from "./SuggestionRow/SuggestionRow";
 
 interface Suggester {
@@ -201,12 +207,17 @@ export const Suggester: React.FC<Suggester> = ({
       isInsideTemplate,
       territoryParentId
     );
+    const rowHeight = 25;
     return (
       <List
         itemData={itemData as SuggestionRowEntityItemData}
-        height={suggestions.length > 7 ? 200 : suggestions.length * 25}
+        height={
+          suggestions.length > 7
+            ? rowHeight * 8
+            : rowHeight * suggestions.length
+        }
         itemCount={suggestions.length}
-        itemSize={25}
+        itemSize={rowHeight}
         width="100%"
         overscanCount={scrollOverscanCount}
       >
@@ -261,7 +272,7 @@ export const Suggester: React.FC<Suggester> = ({
           />
           {typed.length > 0 && (
             <StyledSuggestionCancelButton hasButton={!disableCreate}>
-              <MdCancel onClick={() => onCancel()} />
+              <MdCancel size={16} onClick={() => onCancel()} />
             </StyledSuggestionCancelButton>
           )}
 
@@ -321,7 +332,7 @@ export const Suggester: React.FC<Suggester> = ({
         />
       )}
       {showTemplateModal && (
-        <SuggesterTemplateModal
+        <TemplateActionModal
           onClose={() => {
             setTempDropItem(false);
             setShowTemplateModal(false);

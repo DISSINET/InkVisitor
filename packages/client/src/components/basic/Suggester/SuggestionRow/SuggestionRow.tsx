@@ -119,18 +119,17 @@ const EntityRow: React.FC<EntityRow> = ({ data, index, style }) => {
       key={index}
       style={style}
       twoIcons={entityIsTemplate && isInsideTemplate && !territoryWithoutParent}
+      isSelected={selected === index}
     >
-      <StyledSuggestionLineActions isSelected={selected === index}>
+      <StyledSuggestionLineActions>
         {isNotDiscouraged && <>{renderIcons()}</>}
       </StyledSuggestionLineActions>
-      <StyledSuggestionLineTag isSelected={selected === index}>
+      <StyledSuggestionLineTag>
         <StyledTagWrapper>
           <EntityTag fullWidth entity={entity} tooltipPosition="right" />
         </StyledTagWrapper>
       </StyledSuggestionLineTag>
-      <StyledSuggestionLineIcons isSelected={selected === index}>
-        {icons}
-      </StyledSuggestionLineIcons>
+      <StyledSuggestionLineIcons>{icons}</StyledSuggestionLineIcons>
     </StyledSuggestionRow>
   );
 };
