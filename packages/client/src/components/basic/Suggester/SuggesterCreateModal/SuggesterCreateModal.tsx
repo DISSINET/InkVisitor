@@ -49,7 +49,7 @@ export const SuggesterCreateModal: React.FC<SuggesterCreateModal> = ({
     setShowModal(true);
   }, []);
 
-  const [selectedCategory, setSelectedCategory] = useState<any>(
+  const [selectedCategory, setSelectedCategory] = useState<IOption>(
     category.value !== DropdownAny ? category : categories[0]
   );
   const [selectedLanguage, setSelectedLanguage] =
@@ -64,7 +64,7 @@ export const SuggesterCreateModal: React.FC<SuggesterCreateModal> = ({
   const handleCreateActant = () => {
     onCreate({
       label: label,
-      entityClass: selectedCategory.value,
+      entityClass: selectedCategory.value as EntityEnums.Class,
       detail: detail,
       language: selectedLanguage,
       territoryId: territoryId,
@@ -123,7 +123,7 @@ export const SuggesterCreateModal: React.FC<SuggesterCreateModal> = ({
                 }}
                 options={categories}
                 onChange={(option: ValueType<OptionTypeBase, any>) => {
-                  setSelectedCategory(option);
+                  setSelectedCategory(option as IOption);
                 }}
                 width={40}
                 entityDropdown
@@ -167,7 +167,7 @@ export const SuggesterCreateModal: React.FC<SuggesterCreateModal> = ({
               selectedCategory.value === "S") && (
               <>
                 <ModalInputLabel>
-                  {selectedCategory === "T"
+                  {selectedCategory.value === "T"
                     ? "Parent territory: "
                     : "Territory: "}
                 </ModalInputLabel>

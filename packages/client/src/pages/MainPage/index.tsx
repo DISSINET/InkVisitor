@@ -2,7 +2,7 @@ import { Box, Button, Panel } from "components";
 import { PanelSeparator } from "components/advanced";
 import { useSearchParams } from "hooks";
 import ScrollHandler from "hooks/ScrollHandler";
-import React from "react";
+import React, { useState } from "react";
 import { BiHide, BiRefresh, BiShow } from "react-icons/bi";
 import { BsSquareFill, BsSquareHalf } from "react-icons/bs";
 import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
@@ -21,6 +21,7 @@ import {
 
 import { MemoizedEntityBookmarkBox } from "./containers/EntityBookmarkBox/EntityBookmarkBox";
 import { MemoizedEntityDetailBox } from "./containers/EntityDetailBox/EntityDetailBox";
+import { NewEntityModal } from "./containers/EntityDetailBox/NewEntityModal/NewEntityModal";
 import { MemoizedEntitySearchBox } from "./containers/EntitySearchBox/EntitySearchBox";
 import { MemoizedStatementEditorBox } from "./containers/StatementEditorBox/StatementEditorBox";
 import { MemoizedStatementListBox } from "./containers/StatementsListBox/StatementListBox";
@@ -196,6 +197,8 @@ const MainPage: React.FC<MainPage> = ({}) => {
     });
   };
 
+  const [showNewEntityModal, setShowNewEntityModal] = useState(false);
+
   return (
     <>
       <ScrollHandler />
@@ -247,6 +250,10 @@ const MainPage: React.FC<MainPage> = ({}) => {
             }
             label="Detail"
             button={[
+              <Button
+                label="new entity"
+                onClick={() => setShowNewEntityModal(true)}
+              />,
               refreshBoxButton(["entity"], false),
               <Button
                 inverted
@@ -282,6 +289,9 @@ const MainPage: React.FC<MainPage> = ({}) => {
           >
             <MemoizedEntityDetailBox />
           </Box>
+        )}
+        {showNewEntityModal && (
+          <NewEntityModal closeModal={() => setShowNewEntityModal(false)} />
         )}
       </Panel>
       {/* THIRD PANEL */}

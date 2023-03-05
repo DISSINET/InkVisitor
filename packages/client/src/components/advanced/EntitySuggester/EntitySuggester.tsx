@@ -15,6 +15,7 @@ interface EntitySuggester {
   categoryTypes: EntityEnums.ExtendedClass[];
   onSelected: (id: string) => void;
   onPicked?: (entity: IEntity) => void;
+  onChangeCategory?: (selectedOption: ValueType<OptionTypeBase, any>) => void;
   placeholder?: string;
   inputWidth?: number | "full";
   openDetailOnCreate?: boolean;
@@ -37,6 +38,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
   categoryTypes,
   onSelected,
   onPicked = () => {},
+  onChangeCategory,
   placeholder = "",
   inputWidth,
   openDetailOnCreate = false,
@@ -323,6 +325,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
       }}
       onChangeCategory={(option: ValueType<OptionTypeBase, any> | null) => {
         setSelectedCategory(option);
+        onChangeCategory && onChangeCategory(option);
       }}
       onCreate={(newCreated: SuggesterItemToCreate) => {
         handleCreate(newCreated);
