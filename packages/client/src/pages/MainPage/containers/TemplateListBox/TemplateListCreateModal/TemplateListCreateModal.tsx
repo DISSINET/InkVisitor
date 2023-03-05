@@ -160,6 +160,7 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
       onClose={() => {
         handleCloseCreateModal();
       }}
+      isLoading={templateCreateMutation.isLoading}
     >
       <ModalHeader title="Create Template" />
       <ModalContent>
@@ -225,7 +226,6 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
           />
         </ButtonGroup>
       </ModalFooter>
-      <Loader show={templateCreateMutation.isLoading} />
     </Modal>
   );
 };
