@@ -580,11 +580,11 @@ export const CRelationIdentity = (
 });
 
 export const CTemplateEntity = (
+  userRole: UserEnums.Role,
   entity: IEntity,
   templateLabel: string,
   templateDetail?: string
 ): IEntity => {
-  const userRole = localStorage.getItem("userrole") as UserEnums.Role;
   const templateEntity =
     entity.class === EntityEnums.Class.Statement
       ? DStatement(entity as IStatement, userRole)

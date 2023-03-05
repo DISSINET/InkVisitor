@@ -16,26 +16,29 @@ import {
   ModalInputWrap,
 } from "components";
 import { EntitySuggester, EntityTag } from "components/advanced";
-import { CEntity } from "constructors";
+import { CEntity, CStatement, CTerritory } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
 import { FaUnlink } from "react-icons/fa";
 import { useMutation, useQuery } from "react-query";
 import { OptionTypeBase, ValueType } from "react-select";
 import { toast } from "react-toastify";
+import { rootTerritoryId } from "Theme/constants";
 import { classesEditorActants } from "types";
+import { StyledContent, StyledNote } from "./NewEntityModalStyles";
 
 interface NewEntityModal {
   closeModal: () => void;
 }
 export const NewEntityModal: React.FC<NewEntityModal> = ({ closeModal }) => {
+  const allowedEntityClasses = classesEditorActants;
   const userRole = localStorage.getItem("userrole") as UserEnums.Role;
 
   const [detailTyped, setDetailTyped] = useState("");
   const [selectedLanguage, setSelectedLanguage] = useState<any>(false);
   const [selectedCategory, setSelectedCategory] = useState<IOption>({
-    value: entitiesDictKeys[classesEditorActants[0]].value,
-    label: entitiesDictKeys[classesEditorActants[0]].label,
+    value: entitiesDictKeys[allowedEntityClasses[0]].value,
+    label: entitiesDictKeys[allowedEntityClasses[0]].label,
   });
   const [labelTyped, setLabelTyped] = useState("");
   const [territoryId, setTerritoryId] = useState<string>("");
@@ -89,7 +92,7 @@ export const NewEntityModal: React.FC<NewEntityModal> = ({ closeModal }) => {
     }
   );
 
-  const createEntityMutation = useMutation(
+  const entityCreateMutation = useMutation(
     async (newEntity: IEntity) => await api.entityCreate(newEntity),
     {
       onSuccess: (data, variables) => {
@@ -103,18 +106,65 @@ export const NewEntityModal: React.FC<NewEntityModal> = ({ closeModal }) => {
   );
 
   const handleCreateActant = () => {
-    if (user) {
-      const newEntity = CEntity(
-        {
-          ...user.options,
-          defaultLanguage: selectedLanguage || user.options.defaultLanguage,
-        },
+    const newCreated: {
+      label: string;
+      entityClass: EntityEnums.Class;
+      detail?: string;
+      language?: EntityEnums.Language;
+      territoryId?: string;
+    } = {
+      label: labelTyped,
+      entityClass:
         entitiesDictKeys[selectedCategory.value as EntityEnums.Class].value,
-        labelTyped,
-        detailTyped
-      );
+      detail: detailTyped,
+      language: selectedLanguage,
+      territoryId: territoryId,
+    };
 
-      createEntityMutation.mutate(newEntity);
+    if (user) {
+      if (
+        newCreated.entityClass === EntityEnums.Class.Statement &&
+        newCreated.territoryId
+      ) {
+        const newStatement = CStatement(
+          localStorage.getItem("userrole") as UserEnums.Role,
+          {
+            ...user.options,
+            defaultLanguage:
+              newCreated.language || user.options.defaultLanguage,
+          },
+          newCreated.label,
+          newCreated.detail,
+          newCreated.territoryId
+        );
+        entityCreateMutation.mutate(newStatement);
+      } else if (newCreated.entityClass === EntityEnums.Class.Territory) {
+        const newTerritory = CTerritory(
+          localStorage.getItem("userrole") as UserEnums.Role,
+          {
+            ...user.options,
+            defaultLanguage:
+              newCreated.language || user.options.defaultLanguage,
+          },
+          newCreated.label,
+          newCreated.detail || "",
+          newCreated.territoryId ? newCreated.territoryId : rootTerritoryId,
+          -1
+        );
+        entityCreateMutation.mutate(newTerritory);
+      } else {
+        const newEntity = CEntity(
+          {
+            ...user.options,
+            defaultLanguage:
+              newCreated.language || user.options.defaultLanguage,
+          },
+          newCreated.entityClass,
+          newCreated.label,
+          newCreated.detail
+        );
+        entityCreateMutation.mutate(newEntity);
+      }
     }
   };
 
@@ -138,96 +188,112 @@ export const NewEntityModal: React.FC<NewEntityModal> = ({ closeModal }) => {
     <Modal
       showModal={showModal}
       width="thin"
-      isLoading={createEntityMutation.isLoading}
-      onEnterPress={() => handleCheckOnSubmit()}
+      isLoading={entityCreateMutation.isLoading}
+      onEnterPress={handleCheckOnSubmit}
+      onClose={closeModal}
     >
       <ModalHeader title="Create entity" />
       <ModalContent>
-        <ModalInputForm>
-          <ModalInputLabel>{"Type & label: "}</ModalInputLabel>
-          <ModalInputWrap>
-            <EntitySuggester
-              categoryTypes={classesEditorActants}
-              onSelected={() => console.log("cannot select")}
-              onChangeCategory={(
-                selectedOption: ValueType<OptionTypeBase, any>
-              ) => {
-                if (selectedOption)
-                  setSelectedCategory(selectedOption as IOption);
-              }}
-              onTyped={(newType: string) => setLabelTyped(newType)}
-              disableCreate
-              disableTemplatesAccept
-              disableWildCard
-              disableTemplateInstantiation
-              inputWidth={96}
-            />
-          </ModalInputWrap>
-          <ModalInputLabel>{"Detail: "}</ModalInputLabel>
-          <ModalInputWrap>
-            <Input
-              value={detailTyped}
-              onChangeFn={(newType: string) => setDetailTyped(newType)}
-              changeOnType
-            />
-          </ModalInputWrap>
-          <ModalInputLabel>{"Language: "}</ModalInputLabel>
-          <ModalInputWrap>
-            <Dropdown
-              isMulti={false}
-              width="full"
-              options={languageDict}
-              value={languageDict.find(
-                (i: any) => i.value === selectedLanguage
-              )}
-              onChange={(newValue: any) => {
-                setSelectedLanguage(newValue.value);
-              }}
-            />
-          </ModalInputWrap>
-          {/* Suggester territory */}
-          {(selectedCategory.value === "T" ||
-            selectedCategory.value === "S") && (
-            <>
-              <ModalInputLabel>
-                {selectedCategory.value === "T"
-                  ? "Parent territory: "
-                  : "Territory: "}
-              </ModalInputLabel>
-              <ModalInputWrap>
-                {territory ? (
-                  <EntityTag
-                    entity={territory}
-                    tooltipPosition="left"
-                    button={
-                      <Button
-                        key="d"
-                        icon={<FaUnlink />}
-                        color="danger"
-                        inverted
-                        tooltipLabel="unlink actant"
-                        onClick={() => {
-                          setTerritoryId("");
-                        }}
-                      />
-                    }
-                  />
-                ) : (
-                  <EntitySuggester
-                    disableTemplatesAccept
-                    filterEditorRights
-                    inputWidth={96}
-                    disableCreate
-                    categoryTypes={[EntityEnums.Class.Territory]}
-                    onSelected={(newSelectedId: string) => {
-                      setTerritoryId(newSelectedId);
-                    }}
-                  />
+        <StyledContent>
+          <ModalInputForm>
+            <ModalInputLabel>{"Class & Label: "}</ModalInputLabel>
+            <ModalInputWrap>
+              <EntitySuggester
+                categoryTypes={allowedEntityClasses}
+                onSelected={() => console.log("cannot select")}
+                onChangeCategory={(
+                  selectedOption: ValueType<OptionTypeBase, any>
+                ) => {
+                  if (selectedOption)
+                    setSelectedCategory(selectedOption as IOption);
+                }}
+                onTyped={(newType: string) => setLabelTyped(newType)}
+                disableCreate
+                disableTemplatesAccept
+                disableWildCard
+                disableTemplateInstantiation
+                inputWidth={96}
+              />
+            </ModalInputWrap>
+            <ModalInputLabel>{"Detail: "}</ModalInputLabel>
+            <ModalInputWrap>
+              <Input
+                value={detailTyped}
+                onChangeFn={(newType: string) => setDetailTyped(newType)}
+                changeOnType
+              />
+            </ModalInputWrap>
+            <ModalInputLabel>{"Language: "}</ModalInputLabel>
+            <ModalInputWrap>
+              <Dropdown
+                isMulti={false}
+                width="full"
+                options={languageDict}
+                value={languageDict.find(
+                  (i: any) => i.value === selectedLanguage
                 )}
-              </ModalInputWrap>
+                onChange={(newValue: any) => {
+                  setSelectedLanguage(newValue.value);
+                }}
+              />
+            </ModalInputWrap>
+            {/* Suggester territory */}
+            {(selectedCategory.value === "T" ||
+              selectedCategory.value === "S") && (
+              <>
+                <ModalInputLabel>
+                  {selectedCategory.value === "T"
+                    ? "Parent territory: "
+                    : "Territory: "}
+                </ModalInputLabel>
+                <ModalInputWrap>
+                  {territory ? (
+                    <EntityTag
+                      entity={territory}
+                      tooltipPosition="left"
+                      button={
+                        <Button
+                          key="d"
+                          icon={<FaUnlink />}
+                          color="danger"
+                          inverted
+                          tooltipLabel="unlink actant"
+                          onClick={() => {
+                            setTerritoryId("");
+                          }}
+                        />
+                      }
+                    />
+                  ) : (
+                    <EntitySuggester
+                      disableTemplatesAccept
+                      filterEditorRights
+                      inputWidth={96}
+                      disableCreate
+                      categoryTypes={[EntityEnums.Class.Territory]}
+                      onSelected={(newSelectedId: string) => {
+                        setTerritoryId(newSelectedId);
+                      }}
+                    />
+                  )}
+                </ModalInputWrap>
+              </>
+            )}
+          </ModalInputForm>
+          {userRole === UserEnums.Role.Admin && (
+            <>
+              {selectedCategory.value === "T" && !territoryId ? (
+                <StyledNote>
+                  {"Territory will be added under root"}
+                  <br />
+                  {"when nothing is selected"}
+                </StyledNote>
+              ) : (
+                <div />
+              )}
             </>
           )}
-        </ModalInputForm>
+        </StyledContent>
       </ModalContent>
       <ModalFooter>
         <ButtonGroup>
@@ -236,13 +302,13 @@ export const NewEntityModal: React.FC<NewEntityModal> = ({ closeModal }) => {
             label="Cancel"
             color="greyer"
             inverted
-            onClick={() => closeModal()}
+            onClick={closeModal}
           />
           <Button
             key="submit"
             label="Create"
             color="info"
-            onClick={() => handleCheckOnSubmit()}
+            onClick={handleCheckOnSubmit}
           />
         </ButtonGroup>
       </ModalFooter>

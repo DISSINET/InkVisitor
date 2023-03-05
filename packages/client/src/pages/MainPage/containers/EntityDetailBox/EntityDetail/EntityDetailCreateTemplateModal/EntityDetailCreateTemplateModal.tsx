@@ -1,4 +1,4 @@
-import { EntityEnums } from "@shared/enums";
+import { EntityEnums, UserEnums } from "@shared/enums";
 import { IEntity, IResponseGeneric } from "@shared/types";
 import api from "api";
 import { AxiosResponse } from "axios";
@@ -76,7 +76,11 @@ export const EntityDetailCreateTemplateModal: React.FC<
   const handleCreateTemplate = () => {
     // create template as a copy of the entity
     if (entity) {
-      const templateEntity = CTemplateEntity(entity, createTemplateLabel);
+      const templateEntity = CTemplateEntity(
+        localStorage.getItem("userrole") as UserEnums.Role,
+        entity,
+        createTemplateLabel
+      );
       templateCreateMutation.mutate(templateEntity);
     }
   };

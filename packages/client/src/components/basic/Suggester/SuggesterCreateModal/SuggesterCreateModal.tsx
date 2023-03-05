@@ -14,7 +14,6 @@ import {
   ModalInputForm,
   ModalInputLabel,
   ModalInputWrap,
-  Tag,
   TypeBar,
 } from "components";
 import { EntitySuggester, EntityTag } from "components/advanced";
@@ -108,8 +107,8 @@ export const SuggesterCreateModal: React.FC<SuggesterCreateModal> = ({
     <Modal
       showModal={showModal}
       width="thin"
-      onEnterPress={() => handleCheckOnSubmit()}
-      onClose={() => closeModal()}
+      onEnterPress={handleCheckOnSubmit}
+      onClose={closeModal}
     >
       <ModalHeader title="Create entity" />
       <ModalContent>
