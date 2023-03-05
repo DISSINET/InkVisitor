@@ -82,7 +82,7 @@ export const NewEntityModal: React.FC<NewEntityModal> = ({ closeModal }) => {
       <ModalHeader title="Create entity" />
       <ModalContent>
         <ModalInputForm>
-          <ModalInputLabel>{"Entity type: "}</ModalInputLabel>
+          <ModalInputLabel>{"Type & label: "}</ModalInputLabel>
           <ModalInputWrap>
             <EntitySuggester
               categoryTypes={classesEditorActants}
@@ -93,6 +93,11 @@ export const NewEntityModal: React.FC<NewEntityModal> = ({ closeModal }) => {
                 if (selectedOption)
                   setSelectedCategory(selectedOption as IOption);
               }}
+              disableCreate
+              disableTemplatesAccept
+              disableWildCard
+              disableTemplateInstantiation
+              inputWidth={96}
             />
           </ModalInputWrap>
           <ModalInputLabel>{"Detail: "}</ModalInputLabel>
