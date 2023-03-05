@@ -535,7 +535,6 @@ export const CTerritory = (
 });
 
 export const CEntity = (
-  userRole: UserEnums.Role,
   userOptions: UserOptions,
   entityClass: EntityEnums.Class,
   label: string,

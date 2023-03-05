@@ -16,6 +16,7 @@ interface EntitySuggester {
   onSelected: (id: string) => void;
   onPicked?: (entity: IEntity) => void;
   onChangeCategory?: (selectedOption: ValueType<OptionTypeBase, any>) => void;
+  onTyped?: (newType: string) => void;
   placeholder?: string;
   inputWidth?: number | "full";
   openDetailOnCreate?: boolean;
@@ -39,6 +40,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
   onSelected,
   onPicked = () => {},
   onChangeCategory,
+  onTyped,
   placeholder = "",
   inputWidth,
   openDetailOnCreate = false,
@@ -147,6 +149,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
 
   const handleClean = () => {
     setTyped("");
+    onTyped && onTyped("");
   };
 
   // initial load of categories
@@ -226,7 +229,6 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
         actantsCreateMutation.mutate(newTerritory);
       } else {
         const newEntity = CEntity(
-          localStorage.getItem("userrole") as UserEnums.Role,
           {
             ...user.options,
             defaultLanguage:
@@ -322,6 +324,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
       }}
       onType={(newType: string) => {
         setTyped(newType);
+        onTyped && onTyped(newType);
       }}
       onChangeCategory={(option: ValueType<OptionTypeBase, any> | null) => {
         setSelectedCategory(option);

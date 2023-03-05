@@ -1,6 +1,6 @@
-import { languageDict } from "@shared/dictionaries";
-import { EntityEnums } from "@shared/enums";
-import { IOption } from "@shared/types";
+import { entitiesDictKeys, languageDict } from "@shared/dictionaries";
+import { EntityEnums, UserEnums } from "@shared/enums";
+import { IEntity, IOption } from "@shared/types";
 import api from "api";
 import {
   Button,
@@ -16,23 +16,35 @@ import {
   ModalInputWrap,
 } from "components";
 import { EntitySuggester, EntityTag } from "components/advanced";
+import { CEntity } from "constructors";
+import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
 import { FaUnlink } from "react-icons/fa";
-import { useQuery } from "react-query";
+import { useMutation, useQuery } from "react-query";
 import { OptionTypeBase, ValueType } from "react-select";
+import { toast } from "react-toastify";
 import { classesEditorActants } from "types";
 
 interface NewEntityModal {
   closeModal: () => void;
 }
 export const NewEntityModal: React.FC<NewEntityModal> = ({ closeModal }) => {
+  const userRole = localStorage.getItem("userrole") as UserEnums.Role;
+
   const [detailTyped, setDetailTyped] = useState("");
   const [selectedLanguage, setSelectedLanguage] = useState<any>(false);
   const [selectedCategory, setSelectedCategory] = useState<IOption>({
-    value: "*",
-    label: "*",
+    value: entitiesDictKeys[classesEditorActants[0]].value,
+    label: entitiesDictKeys[classesEditorActants[0]].label,
   });
+  const [labelTyped, setLabelTyped] = useState("");
   const [territoryId, setTerritoryId] = useState<string>("");
+  const { appendDetailId, setSelectedDetailId } = useSearchParams();
+  const [showModal, setShowModal] = useState(false);
+
+  useEffect(() => {
+    setShowModal(true);
+  }, []);
 
   const userId = localStorage.getItem("userid");
   const {
@@ -77,8 +89,58 @@ export const NewEntityModal: React.FC<NewEntityModal> = ({ closeModal }) => {
     }
   );
 
+  const createEntityMutation = useMutation(
+    async (newEntity: IEntity) => await api.entityCreate(newEntity),
+    {
+      onSuccess: (data, variables) => {
+        if (variables.class !== EntityEnums.Class.Value) {
+          closeModal();
+          appendDetailId(variables.id);
+          setSelectedDetailId(variables.id);
+        }
+      },
+    }
+  );
+
+  const handleCreateActant = () => {
+    if (user) {
+      const newEntity = CEntity(
+        {
+          ...user.options,
+          defaultLanguage: selectedLanguage || user.options.defaultLanguage,
+        },
+        entitiesDictKeys[selectedCategory.value as EntityEnums.Class].value,
+        labelTyped,
+        detailTyped
+      );
+
+      createEntityMutation.mutate(newEntity);
+    }
+  };
+
+  const handleCheckOnSubmit = () => {
+    if (labelTyped.length < 2) {
+      toast.info("fill at least 2 characters");
+    } else if (selectedCategory.value === "S" && !territoryId) {
+      toast.warning("Territory is required!");
+    } else if (
+      selectedCategory.value === "T" &&
+      !territoryId &&
+      userRole !== UserEnums.Role.Admin
+    ) {
+      toast.warning("Parent territory is required!");
+    } else {
+      handleCreateActant();
+    }
+  };
+
   return (
-    <Modal showModal width="thin">
+    <Modal
+      showModal={showModal}
+      width="thin"
+      isLoading={createEntityMutation.isLoading}
+      onEnterPress={() => handleCheckOnSubmit()}
+    >
       <ModalHeader title="Create entity" />
       <ModalContent>
         <ModalInputForm>
@@ -93,6 +155,7 @@ export const NewEntityModal: React.FC<NewEntityModal> = ({ closeModal }) => {
                 if (selectedOption)
                   setSelectedCategory(selectedOption as IOption);
               }}
+              onTyped={(newType: string) => setLabelTyped(newType)}
               disableCreate
               disableTemplatesAccept
               disableWildCard
@@ -179,20 +242,7 @@ export const NewEntityModal: React.FC<NewEntityModal> = ({ closeModal }) => {
             key="submit"
             label="Create"
             color="info"
-            onClick={() => {
-              // if (selectedCategory.value === "S" && !territoryId) {
-              //   toast.warning("Territory is required!");
-              // } else if (
-              //   selectedCategory.value === "T" &&
-              //   !territoryId &&
-              //   userRole !== UserEnums.Role.Admin
-              // ) {
-              //   toast.warning("Parent territory is required!");
-              // } else {
-              //   handleCreateActant();
-              //   closeModal();
-              // }
-            }}
+            onClick={() => handleCheckOnSubmit()}
           />
         </ButtonGroup>
       </ModalFooter>

@@ -119,7 +119,6 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
   const handleCreateNewEntityTemplate = (): IEntity | false => {
     if (user) {
       const newTemplate = CEntity(
-        localStorage.getItem("userrole") as UserEnums.Role,
         user.options,
         createModalEntityClass.value as EntityEnums.Class,
         createModalEntityLabel,

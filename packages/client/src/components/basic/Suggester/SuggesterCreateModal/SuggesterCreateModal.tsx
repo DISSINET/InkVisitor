@@ -90,24 +90,25 @@ export const SuggesterCreateModal: React.FC<SuggesterCreateModal> = ({
     }
   );
 
+  const handleCheckOnSubmit = () => {
+    if (selectedCategory.value === "S" && !territoryId) {
+      toast.warning("Territory is required!");
+    } else if (
+      selectedCategory.value === "T" &&
+      !territoryId &&
+      userRole !== UserEnums.Role.Admin
+    ) {
+      toast.warning("Parent territory is required!");
+    } else {
+      handleCreateActant();
+    }
+  };
+
   return (
     <Modal
       showModal={showModal}
       width="thin"
-      onEnterPress={() => {
-        if (selectedCategory.value === "S" && !territoryId) {
-          toast.warning("Territory is required!");
-        } else if (
-          selectedCategory.value === "T" &&
-          !territoryId &&
-          userRole !== UserEnums.Role.Admin
-        ) {
-          toast.warning("Parent territory is required!");
-        } else {
-          handleCreateActant();
-          closeModal();
-        }
-      }}
+      onEnterPress={() => handleCheckOnSubmit()}
       onClose={() => closeModal()}
     >
       <ModalHeader title="Create entity" />
@@ -236,20 +237,7 @@ export const SuggesterCreateModal: React.FC<SuggesterCreateModal> = ({
             key="submit"
             label="Create"
             color="info"
-            onClick={() => {
-              if (selectedCategory.value === "S" && !territoryId) {
-                toast.warning("Territory is required!");
-              } else if (
-                selectedCategory.value === "T" &&
-                !territoryId &&
-                userRole !== UserEnums.Role.Admin
-              ) {
-                toast.warning("Parent territory is required!");
-              } else {
-                handleCreateActant();
-                closeModal();
-              }
-            }}
+            onClick={() => handleCheckOnSubmit()}
           />
         </ButtonGroup>
       </ModalFooter>

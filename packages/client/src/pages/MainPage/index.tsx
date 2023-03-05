@@ -5,6 +5,7 @@ import ScrollHandler from "hooks/ScrollHandler";
 import React, { useState } from "react";
 import { BiHide, BiRefresh, BiShow } from "react-icons/bi";
 import { BsSquareFill, BsSquareHalf } from "react-icons/bs";
+import { FaPlus } from "react-icons/fa";
 import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
 import { VscCloseAll } from "react-icons/vsc";
 import { useQueryClient } from "react-query";
@@ -251,6 +252,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
             label="Detail"
             button={[
               <Button
+                icon={<FaPlus />}
                 label="new entity"
                 onClick={() => setShowNewEntityModal(true)}
               />,
