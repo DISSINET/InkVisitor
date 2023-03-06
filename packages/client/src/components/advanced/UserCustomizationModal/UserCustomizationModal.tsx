@@ -257,11 +257,10 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
               )}
             </ModalInputWrap>
 
-            <ModalInputLabel>
-              {"display statement element ordering table"}
-            </ModalInputLabel>
+            <ModalInputLabel>{"ordering table in Editor"}</ModalInputLabel>
             <ModalInputWrap width={165}>
               <AttributeButtonGroup
+                noMargin
                 options={[
                   {
                     longValue: "display",
