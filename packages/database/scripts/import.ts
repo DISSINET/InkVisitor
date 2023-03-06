@@ -301,7 +301,7 @@ class Importer {
     }
 
     console.log(`\nImport app${info.length ? ': ' + info.join(", ") : ''}`);
-    console.log(`To specify db from the , use ${colors.yellow("npm start <dbname>")}\n`);
+    console.log(`To specify db from the command line, use ${colors.yellow("npm start <dbname>")}\n`);
     Object.values(menu).forEach(item => console.log(item.description));
 
     const actionChoice = await question<string>("", (input: string): string | undefined => { return Object.keys(menu).find(key => key.toLowerCase() === input.toLowerCase()); }, "");
