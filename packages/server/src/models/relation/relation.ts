@@ -35,8 +35,8 @@ export default class Relation implements IRelationModel {
   /**
    * Shorthand for testing if entity linked to this relation if of required class.
    * Throws an InternalServerError in case the entity is not preloaded - entities should be already loaded before calling this method
-   * @param entityId 
-   * @param acceptableClasses 
+   * @param entityId
+   * @param acceptableClasses
    */
   hasEntityCorrectClass(entityId: string, acceptableClass: EntityEnums.Class): boolean {
     const loadedEntity = this.entities?.find(e => e.id === entityId);
@@ -48,8 +48,30 @@ export default class Relation implements IRelationModel {
   }
 
   /**
+   * Tests if all entities have the same class, by utilizing hasEntityCorrectClass method.
+   * Throws error if some entity is not preloaded.
+   * @param entityIds
+   * @returns
+   */
+  areEntitiesSameClass(): boolean {
+    if (!this.entityIds.length) {
+      return true;
+    }
+
+    const firstEntity = this.entities?.find(e => e.id === this.entityIds[0])
+
+    for (const id of this.entityIds) {
+      if (!this.hasEntityCorrectClass(id, firstEntity ? firstEntity.class : "" as EntityEnums.Class)) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  /**
   * areEntitiesValid checks if entities have acceptable classes
-  * @returns 
+  * @returns
   */
   areEntitiesValid(): Error | null {
     const rules = RelationTypes.RelationRules[this.type];
@@ -57,8 +79,11 @@ export default class Relation implements IRelationModel {
       return new InternalServerError(`Missing rules for relation type '${this.type}'`);
     }
 
-    // default is true - if no pattern provided => everything is allowed
-    let patternFound = true;
+    // check if same-classes-only is required
+    let patternFound = !rules.allowedSameEntityClassesOnly || this.areEntitiesSameClass();
+    if (!patternFound) {
+      return new ModelNotValidError(`Entities must have the same class`);
+    }
 
     for (const pattern of rules?.allowedEntitiesPattern) {
       if (!rules.cloudType && pattern.length !== this.entityIds.length) {
@@ -66,7 +91,7 @@ export default class Relation implements IRelationModel {
       }
 
       for (const i in this.entityIds) {
-        // cloud type has always 
+        // cloud type has always
         const wantedClass = rules.cloudType ? pattern[0] : pattern[i];
 
         patternFound = this.hasEntityCorrectClass(this.entityIds[i], wantedClass);
@@ -95,7 +120,7 @@ export default class Relation implements IRelationModel {
 
   /**
    * use this method for doing asynchronous operation/checks before save/create is called
-   * @param request 
+   * @param request
    */
   async beforeSave(request: IRequest): Promise<void> {
     if (!this.entities || this.entities.length !== this.entityIds.length) {
@@ -181,7 +206,7 @@ export default class Relation implements IRelationModel {
 
   /**
    * Test validity of the model
-   * @returns 
+   * @returns
    */
   isValid(): boolean {
     const rules = RelationTypes.RelationRules[this.type];
@@ -234,8 +259,8 @@ export default class Relation implements IRelationModel {
 
   /**
    * Searched for relation by id
-   * @param req 
-   * @param id 
+   * @param req
+   * @param id
    * @returns relation model or null if not found
    */
   static async getById(req: IRequest, id: string): Promise<Relation | null> {
@@ -249,9 +274,9 @@ export default class Relation implements IRelationModel {
 
   /**
    * Searches for relation assigned for entityId, filtered by optional relation type
-   * @param db 
-   * @param entityId 
-   * @param relType 
+   * @param db
+   * @param entityId
+   * @param relType
    * @param position - position in entityIds
    * @returns array of relation interfaces
    */
@@ -270,9 +295,9 @@ export default class Relation implements IRelationModel {
 
   /**
    * Removes multiple relation entries
-   * @param request 
-   * @param ids 
-   * @returns 
+   * @param request
+   * @param ids
+   * @returns
    */
   static async deleteMany(request: IRequest, ids: string[]): Promise<WriteResult> {
     return rethink
