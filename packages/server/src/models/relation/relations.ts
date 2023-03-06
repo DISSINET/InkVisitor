@@ -213,7 +213,8 @@ export class UsedRelations implements RelationTypes.IUsedRelations {
         this.entityId,
         EntityEnums.Certainty.Certain,
         this.maxNestLvl,
-        0
+        0,
+        []
       ),
     };
   }

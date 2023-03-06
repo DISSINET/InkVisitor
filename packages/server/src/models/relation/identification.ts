@@ -38,7 +38,8 @@ export default class Identification extends Relation implements RelationTypes.II
     entityId: string,
     requiredCertainty: EntityEnums.Certainty,
     maxNestLvl: number,
-    nestLvl: number
+    nestLvl: number,
+    previousPairs: string[]
   ): Promise<RelationTypes.IConnection<RelationTypes.IIdentification>[]> {
     const out: RelationTypes.IConnection<RelationTypes.IIdentification>[] = [];
 
@@ -46,11 +47,12 @@ export default class Identification extends Relation implements RelationTypes.II
       return out;
     }
 
-    let relations: RelationTypes.IIdentification[] = await Relation.getForEntity(
+    let relations: RelationTypes.IIdentification[] = (await Relation.getForEntity<RelationTypes.IIdentification>(
       conn,
       entityId,
       RelationEnums.Type.Identification,
-    );
+    )).filter(r => !previousPairs.find(pr => pr === r.id))
+
     let thresholdReached = false;
 
     if (requiredCertainty !== EntityEnums.Certainty.Empty) {
@@ -64,7 +66,10 @@ export default class Identification extends Relation implements RelationTypes.II
     }
 
     for (const relation of relations) {
+        previousPairs.push(relation.id);
+
       const subparentId = relation.entityIds[1];
+
       const connection: RelationTypes.IConnection<RelationTypes.IIdentification> =
       {
         ...relation,
@@ -82,7 +87,8 @@ export default class Identification extends Relation implements RelationTypes.II
           subparentId,
           nextThreshold,
           maxNestLvl,
-          nestLvl + 1
+          nestLvl + 1,
+          previousPairs,
         );
       }
 
