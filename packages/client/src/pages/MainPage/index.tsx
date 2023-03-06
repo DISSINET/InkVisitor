@@ -22,7 +22,7 @@ import {
 
 import { MemoizedEntityBookmarkBox } from "./containers/EntityBookmarkBox/EntityBookmarkBox";
 import { MemoizedEntityDetailBox } from "./containers/EntityDetailBox/EntityDetailBox";
-import { NewEntityModal } from "./containers/EntityDetailBox/NewEntityModal/NewEntityModal";
+import { EntityCreateModal } from "./containers/EntityDetailBox/EntityCreateModal/EntityCreateModal";
 import { MemoizedEntitySearchBox } from "./containers/EntitySearchBox/EntitySearchBox";
 import { MemoizedStatementEditorBox } from "./containers/StatementEditorBox/StatementEditorBox";
 import { MemoizedStatementListBox } from "./containers/StatementsListBox/StatementListBox";
@@ -198,7 +198,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
     });
   };
 
-  const [showNewEntityModal, setShowNewEntityModal] = useState(false);
+  const [showEntityCreateModal, setShowEntityCreateModal] = useState(false);
 
   return (
     <>
@@ -254,7 +254,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
               <Button
                 icon={<FaPlus />}
                 label="new entity"
-                onClick={() => setShowNewEntityModal(true)}
+                onClick={() => setShowEntityCreateModal(true)}
               />,
               refreshBoxButton(["entity"], false),
               <Button
@@ -292,8 +292,10 @@ const MainPage: React.FC<MainPage> = ({}) => {
             <MemoizedEntityDetailBox />
           </Box>
         )}
-        {showNewEntityModal && (
-          <NewEntityModal closeModal={() => setShowNewEntityModal(false)} />
+        {showEntityCreateModal && (
+          <EntityCreateModal
+            closeModal={() => setShowEntityCreateModal(false)}
+          />
         )}
       </Panel>
       {/* THIRD PANEL */}

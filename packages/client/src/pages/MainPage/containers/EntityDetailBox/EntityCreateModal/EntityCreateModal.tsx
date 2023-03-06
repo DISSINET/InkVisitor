@@ -25,12 +25,14 @@ import { OptionTypeBase, ValueType } from "react-select";
 import { toast } from "react-toastify";
 import { rootTerritoryId } from "Theme/constants";
 import { classesEditorActants } from "types";
-import { StyledContent, StyledNote } from "./NewEntityModalStyles";
+import { StyledContent, StyledNote } from "./EntityCreateModalStyles";
 
-interface NewEntityModal {
+interface EntityCreateModal {
   closeModal: () => void;
 }
-export const NewEntityModal: React.FC<NewEntityModal> = ({ closeModal }) => {
+export const EntityCreateModal: React.FC<EntityCreateModal> = ({
+  closeModal,
+}) => {
   const allowedEntityClasses = classesEditorActants;
   const userRole = localStorage.getItem("userrole") as UserEnums.Role;
 
@@ -213,6 +215,7 @@ export const NewEntityModal: React.FC<NewEntityModal> = ({ closeModal }) => {
                 disableWildCard
                 disableTemplateInstantiation
                 inputWidth={96}
+                disableButtons
               />
             </ModalInputWrap>
             <ModalInputLabel>{"Detail: "}</ModalInputLabel>

@@ -31,6 +31,7 @@ interface EntitySuggester {
   disableTemplateInstantiation?: boolean;
   disableWildCard?: boolean;
   disableTemplatesAccept?: boolean;
+  disableButtons?: boolean;
 
   disabled?: boolean;
 }
@@ -55,6 +56,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
   disableTemplateInstantiation = false,
   disableWildCard = false,
   disableTemplatesAccept = false,
+  disableButtons = false,
 
   disabled = false,
 }) => {
@@ -346,6 +348,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
       }}
       isWrongDropCategory={isWrongDropCategory}
       disableCreate={disableCreate}
+      disableButtons={disableButtons}
       inputWidth={inputWidth}
       isInsideTemplate={isInsideTemplate}
       territoryParentId={territoryParentId}
