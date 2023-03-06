@@ -2,9 +2,10 @@ import { Box, Button, Panel } from "components";
 import { PanelSeparator } from "components/advanced";
 import { useSearchParams } from "hooks";
 import ScrollHandler from "hooks/ScrollHandler";
-import React from "react";
+import React, { useState } from "react";
 import { BiHide, BiRefresh, BiShow } from "react-icons/bi";
 import { BsSquareFill, BsSquareHalf } from "react-icons/bs";
+import { FaPlus } from "react-icons/fa";
 import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
 import { VscCloseAll } from "react-icons/vsc";
 import { useQueryClient } from "react-query";
@@ -21,6 +22,7 @@ import {
 
 import { MemoizedEntityBookmarkBox } from "./containers/EntityBookmarkBox/EntityBookmarkBox";
 import { MemoizedEntityDetailBox } from "./containers/EntityDetailBox/EntityDetailBox";
+import { EntityCreateModal } from "./containers/EntityDetailBox/EntityCreateModal/EntityCreateModal";
 import { MemoizedEntitySearchBox } from "./containers/EntitySearchBox/EntitySearchBox";
 import { MemoizedStatementEditorBox } from "./containers/StatementEditorBox/StatementEditorBox";
 import { MemoizedStatementListBox } from "./containers/StatementsListBox/StatementListBox";
@@ -196,6 +198,8 @@ const MainPage: React.FC<MainPage> = ({}) => {
     });
   };
 
+  const [showEntityCreateModal, setShowEntityCreateModal] = useState(false);
+
   return (
     <>
       <ScrollHandler />
@@ -247,6 +251,11 @@ const MainPage: React.FC<MainPage> = ({}) => {
             }
             label="Detail"
             button={[
+              <Button
+                icon={<FaPlus />}
+                label="new entity"
+                onClick={() => setShowEntityCreateModal(true)}
+              />,
               refreshBoxButton(["entity"], false),
               <Button
                 inverted
@@ -282,6 +291,11 @@ const MainPage: React.FC<MainPage> = ({}) => {
           >
             <MemoizedEntityDetailBox />
           </Box>
+        )}
+        {showEntityCreateModal && (
+          <EntityCreateModal
+            closeModal={() => setShowEntityCreateModal(false)}
+          />
         )}
       </Panel>
       {/* THIRD PANEL */}

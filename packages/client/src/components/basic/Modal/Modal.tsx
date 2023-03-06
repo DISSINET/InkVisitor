@@ -1,3 +1,4 @@
+import { Loader } from "components";
 import React, { FC, ReactNode } from "react";
 import { config, useSpring } from "react-spring";
 import { Colors } from "types";
@@ -24,6 +25,7 @@ interface Modal {
   width?: "full" | "fat" | "normal" | "thin" | number;
   disableEscapeClose?: boolean;
   disableBackground?: boolean;
+  isLoading?: boolean;
 }
 export const Modal: FC<Modal> = ({
   children,
@@ -34,6 +36,7 @@ export const Modal: FC<Modal> = ({
   width = "normal",
   disableEscapeClose = false,
   disableBackground = false,
+  isLoading = false,
 }) => {
   const animatedMount = useSpring({
     opacity: showModal ? 1 : 0,
@@ -51,7 +54,11 @@ export const Modal: FC<Modal> = ({
                 onClick={disableBgClick ? () => {} : onClose}
               />
             )}
-            <ModalCard animatedMount={animatedMount} width={width}>
+            <ModalCard
+              animatedMount={animatedMount}
+              width={width}
+              isLoading={isLoading}
+            >
               {children}
             </ModalCard>
           </StyledModalWrap>
@@ -69,15 +76,18 @@ interface ModalCard {
   children?: ReactNode;
   width: "full" | "fat" | "normal" | "thin" | number;
   animatedMount: any;
+  isLoading?: boolean;
 }
 export const ModalCard: FC<ModalCard> = ({
   children,
   width,
   animatedMount,
+  isLoading,
 }) => {
   return (
     <StyledCard style={animatedMount} width={width}>
       {children}
+      <Loader show={isLoading} />
     </StyledCard>
   );
 };

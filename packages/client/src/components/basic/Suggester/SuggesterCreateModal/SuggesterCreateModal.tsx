@@ -14,7 +14,6 @@ import {
   ModalInputForm,
   ModalInputLabel,
   ModalInputWrap,
-  Tag,
   TypeBar,
 } from "components";
 import { EntitySuggester, EntityTag } from "components/advanced";
@@ -49,7 +48,7 @@ export const SuggesterCreateModal: React.FC<SuggesterCreateModal> = ({
     setShowModal(true);
   }, []);
 
-  const [selectedCategory, setSelectedCategory] = useState<any>(
+  const [selectedCategory, setSelectedCategory] = useState<IOption>(
     category.value !== DropdownAny ? category : categories[0]
   );
   const [selectedLanguage, setSelectedLanguage] =
@@ -64,7 +63,7 @@ export const SuggesterCreateModal: React.FC<SuggesterCreateModal> = ({
   const handleCreateActant = () => {
     onCreate({
       label: label,
-      entityClass: selectedCategory.value,
+      entityClass: selectedCategory.value as EntityEnums.Class,
       detail: detail,
       language: selectedLanguage,
       territoryId: territoryId,
@@ -90,25 +89,26 @@ export const SuggesterCreateModal: React.FC<SuggesterCreateModal> = ({
     }
   );
 
+  const handleCheckOnSubmit = () => {
+    if (selectedCategory.value === "S" && !territoryId) {
+      toast.warning("Territory is required!");
+    } else if (
+      selectedCategory.value === "T" &&
+      !territoryId &&
+      userRole !== UserEnums.Role.Admin
+    ) {
+      toast.warning("Parent territory is required!");
+    } else {
+      handleCreateActant();
+    }
+  };
+
   return (
     <Modal
       showModal={showModal}
       width="thin"
-      onEnterPress={() => {
-        if (selectedCategory.value === "S" && !territoryId) {
-          toast.warning("Territory is required!");
-        } else if (
-          selectedCategory.value === "T" &&
-          !territoryId &&
-          userRole !== UserEnums.Role.Admin
-        ) {
-          toast.warning("Parent territory is required!");
-        } else {
-          handleCreateActant();
-          closeModal();
-        }
-      }}
-      onClose={() => closeModal()}
+      onEnterPress={handleCheckOnSubmit}
+      onClose={closeModal}
     >
       <ModalHeader title="Create entity" />
       <ModalContent>
@@ -123,7 +123,7 @@ export const SuggesterCreateModal: React.FC<SuggesterCreateModal> = ({
                 }}
                 options={categories}
                 onChange={(option: ValueType<OptionTypeBase, any>) => {
-                  setSelectedCategory(option);
+                  setSelectedCategory(option as IOption);
                 }}
                 width={40}
                 entityDropdown
@@ -167,7 +167,7 @@ export const SuggesterCreateModal: React.FC<SuggesterCreateModal> = ({
               selectedCategory.value === "S") && (
               <>
                 <ModalInputLabel>
-                  {selectedCategory === "T"
+                  {selectedCategory.value === "T"
                     ? "Parent territory: "
                     : "Territory: "}
                 </ModalInputLabel>
@@ -236,20 +236,7 @@ export const SuggesterCreateModal: React.FC<SuggesterCreateModal> = ({
             key="submit"
             label="Create"
             color="info"
-            onClick={() => {
-              if (selectedCategory.value === "S" && !territoryId) {
-                toast.warning("Territory is required!");
-              } else if (
-                selectedCategory.value === "T" &&
-                !territoryId &&
-                userRole !== UserEnums.Role.Admin
-              ) {
-                toast.warning("Parent territory is required!");
-              } else {
-                handleCreateActant();
-                closeModal();
-              }
-            }}
+            onClick={() => handleCheckOnSubmit()}
           />
         </ButtonGroup>
       </ModalFooter>

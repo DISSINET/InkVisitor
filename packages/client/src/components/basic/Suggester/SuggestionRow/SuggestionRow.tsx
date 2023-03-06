@@ -21,13 +21,15 @@ export const createItemData = memoize(
     onPick,
     selected,
     isInsideTemplate,
-    territoryParentId
+    territoryParentId,
+    disableButtons
   ): SuggestionRowEntityItemData => ({
     items,
     onPick,
     selected,
     isInsideTemplate,
     territoryParentId,
+    disableButtons,
   })
 );
 
@@ -37,6 +39,7 @@ export type SuggestionRowEntityItemData = {
   selected: number;
   isInsideTemplate: boolean;
   territoryParentId: string;
+  disableButtons: boolean;
 };
 
 interface EntityRow {
@@ -46,7 +49,14 @@ interface EntityRow {
 }
 
 const EntityRow: React.FC<EntityRow> = ({ data, index, style }) => {
-  const { items, onPick, selected, isInsideTemplate, territoryParentId } = data;
+  const {
+    items,
+    onPick,
+    selected,
+    isInsideTemplate,
+    territoryParentId,
+    disableButtons,
+  } = data;
   const { entity, icons } = items[index];
   const isNotDiscouraged = entity.status !== EntityEnums.Status.Discouraged;
   const territoryWithoutParent =
@@ -122,7 +132,7 @@ const EntityRow: React.FC<EntityRow> = ({ data, index, style }) => {
       isSelected={selected === index}
     >
       <StyledSuggestionLineActions>
-        {isNotDiscouraged && <>{renderIcons()}</>}
+        {!disableButtons && isNotDiscouraged && <>{renderIcons()}</>}
       </StyledSuggestionLineActions>
       <StyledSuggestionLineTag>
         <StyledTagWrapper>

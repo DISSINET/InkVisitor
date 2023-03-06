@@ -7,7 +7,6 @@ import {
   ButtonGroup,
   Dropdown,
   Input,
-  Loader,
   Modal,
   ModalContent,
   ModalFooter,
@@ -22,9 +21,8 @@ import { useSearchParams } from "hooks";
 import React, { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { OptionTypeBase, ValueType } from "react-select";
-import { DropdownItem } from "types";
 import { toast } from "react-toastify";
-import { UserOptions } from "@shared/types/response-user";
+import { DropdownItem } from "types";
 
 interface TemplateListCreateModal {
   showCreateModal: boolean;
@@ -119,7 +117,6 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
   const handleCreateNewEntityTemplate = (): IEntity | false => {
     if (user) {
       const newTemplate = CEntity(
-        localStorage.getItem("userrole") as UserEnums.Role,
         user.options,
         createModalEntityClass.value as EntityEnums.Class,
         createModalEntityLabel,
@@ -141,6 +138,7 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
 
       if (entity) {
         const templateEntity = CTemplateEntity(
+          localStorage.getItem("userrole") as UserEnums.Role,
           entity,
           createModalEntityLabel,
           createModalEntityDetail
@@ -161,6 +159,7 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
       onClose={() => {
         handleCloseCreateModal();
       }}
+      isLoading={templateCreateMutation.isLoading}
     >
       <ModalHeader title="Create Template" />
       <ModalContent>
@@ -226,7 +225,6 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
           />
         </ButtonGroup>
       </ModalFooter>
-      <Loader show={templateCreateMutation.isLoading} />
     </Modal>
   );
 };

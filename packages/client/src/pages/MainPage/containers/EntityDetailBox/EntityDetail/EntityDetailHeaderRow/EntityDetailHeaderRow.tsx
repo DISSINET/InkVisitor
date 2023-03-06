@@ -6,6 +6,7 @@ import { EntityTag } from "components/advanced";
 import { DEntity, InstTemplate } from "constructors";
 import { useSearchParams } from "hooks";
 import React from "react";
+import { CgListTree } from "react-icons/cg";
 import {
   FaClone,
   FaTrashAlt,
@@ -167,6 +168,18 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
               if (!entity.isTemplate) {
                 setTerritoryId(entity.data.territory.id);
               }
+            }}
+          />
+        )}
+        {entity.class === EntityEnums.Class.Territory && (
+          <Button
+            key="open-territory"
+            icon={<CgListTree />}
+            tooltipLabel="open territory in tree"
+            inverted
+            color="primary"
+            onClick={() => {
+              setTerritoryId(entity.id);
             }}
           />
         )}

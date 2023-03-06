@@ -275,6 +275,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
         }}
         onEnterPress={handleAcceptClick}
         width={1200}
+        isLoading={loading}
       >
         <ModalHeader
           title={
@@ -457,7 +458,6 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
             />
           </ButtonGroup>
         </ModalFooter>
-        <Loader show={loading} />
       </Modal>
     </div>
   );
