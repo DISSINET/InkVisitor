@@ -22,6 +22,7 @@ import {
   EntityTag,
 } from "components/advanced";
 import React, { useMemo, useState } from "react";
+import { BiHide, BiShow } from "react-icons/bi";
 import { FaUnlink } from "react-icons/fa";
 import {
   notifyManager,
@@ -29,6 +30,7 @@ import {
   useQuery,
   useQueryClient,
 } from "react-query";
+import { Switch } from "react-router";
 import { OptionTypeBase, ValueType } from "react-select";
 import { toast } from "react-toastify";
 import theme from "Theme/theme";
@@ -58,6 +60,7 @@ interface DataObject {
       )[]
     | null;
   defaultTerritory: string | null;
+  hideStatementElementsOrderTable?: boolean;
 }
 interface UserCustomizationModal {
   user: IResponseUser;
@@ -91,7 +94,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
 
   const handleChange = (
     key: string,
-    value: string | false | ValueType<OptionTypeBase, any>
+    value: string | true | false | ValueType<OptionTypeBase, any>
   ) => {
     setData({
       ...data,
@@ -173,6 +176,9 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
       >
         <ModalHeader title="User customization" />
         <ModalContent column>
+          <StyledRightsHeading>
+            <b>{"User information"}</b>
+          </StyledRightsHeading>
           <ModalInputForm>
             <ModalInputLabel>{"name"}</ModalInputLabel>
             <ModalInputWrap width={165}>
@@ -192,6 +198,13 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                 onChangeFn={(value: string) => handleChange("email", value)}
               />
             </ModalInputWrap>
+          </ModalInputForm>
+
+          <StyledRightsHeading>
+            <b>{"Customization"}</b>
+          </StyledRightsHeading>
+
+          <ModalInputForm>
             <ModalInputLabel>{"default language"}</ModalInputLabel>
             <ModalInputWrap width={165}>
               <Dropdown
@@ -242,6 +255,36 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                   />
                 </div>
               )}
+            </ModalInputWrap>
+
+            <ModalInputLabel>
+              {"display statement element ordering table"}
+            </ModalInputLabel>
+            <ModalInputWrap width={165}>
+              <AttributeButtonGroup
+                options={[
+                  {
+                    longValue: "display",
+                    shortValue: "",
+                    shortIcon: <BiShow />,
+                    onClick: () => {
+                      handleChange("hideStatementElementsOrderTable", true);
+                    },
+                    selected:
+                      !!data.hideStatementElementsOrderTable &&
+                      data.hideStatementElementsOrderTable,
+                  },
+                  {
+                    longValue: "hide",
+                    shortValue: "",
+                    shortIcon: <BiHide />,
+                    onClick: () => {
+                      handleChange("hideStatementElementsOrderTable", false);
+                    },
+                    selected: !data.hideStatementElementsOrderTable,
+                  },
+                ]}
+              />
             </ModalInputWrap>
           </ModalInputForm>
 
