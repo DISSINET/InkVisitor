@@ -36,6 +36,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { FaUnlink } from "react-icons/fa";
 import { UseMutationResult, useQuery, useQueryClient } from "react-query";
 import { toast } from "react-toastify";
+import { useAppSelector } from "redux/hooks";
 import { excludedSuggesterEntities } from "Theme/constants";
 import { classesEditorActants, classesEditorTags, DropdownItem } from "types";
 import { getEntityLabel, getShortLabelByLetterCount } from "utils";
@@ -99,6 +100,27 @@ export const StatementEditor: React.FC<StatementEditor> = ({
       return res.data;
     },
     { enabled: !!statementId && api.isLoggedIn() }
+  );
+
+  // user query
+  const username: string = useAppSelector((state) => state.username);
+  const userId = localStorage.getItem("userid");
+  const {
+    status: statusUser,
+    data: user,
+    error: errorUser,
+    isFetching: isFetchingUser,
+  } = useQuery(
+    ["user", username],
+    async () => {
+      if (userId) {
+        const res = await api.usersGet(userId);
+        return res.data;
+      } else {
+        return false;
+      }
+    },
+    { enabled: !!userId && api.isLoggedIn() }
   );
 
   // territory query
@@ -695,18 +717,20 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         </StyledEditorSection>
 
         {/* Ordering */}
-        {statement.elementsOrders.length > 0 && (
-          <StyledEditorSection>
-            <StyledEditorSectionHeader>Ordering</StyledEditorSectionHeader>
-            <StyledEditorSectionContent>
-              <StatementEditorOrdering
-                statementId={statementId}
-                elementsOrders={statement.elementsOrders}
-                entities={statement.entities}
-              />
-            </StyledEditorSectionContent>
-          </StyledEditorSection>
-        )}
+        {statement.elementsOrders.length > 0 &&
+          user &&
+          user.options.hideStatementElementsOrderTable && (
+            <StyledEditorSection>
+              <StyledEditorSectionHeader>Ordering</StyledEditorSectionHeader>
+              <StyledEditorSectionContent>
+                <StatementEditorOrdering
+                  statementId={statementId}
+                  elementsOrders={statement.elementsOrders}
+                  entities={statement.entities}
+                />
+              </StyledEditorSectionContent>
+            </StyledEditorSection>
+          )}
 
         {/* Refs */}
         <StyledEditorSection key="editor-section-refs">

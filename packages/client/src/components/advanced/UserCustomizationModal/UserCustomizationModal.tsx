@@ -87,6 +87,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
       searchLanguages:
         searchLanguagesObject.length > 0 ? searchLanguagesObject : null,
       defaultTerritory: options.defaultTerritory,
+      hideStatementElementsOrderTable: options.hideStatementElementsOrderTable,
     };
   }, [user]);
 
@@ -152,6 +153,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
             data.defaultLanguage?.value || EntityEnums.Language.Empty,
           searchLanguages: data.searchLanguages?.map((sL) => sL?.value),
           defaultTerritory: data.defaultTerritory,
+          hideStatementElementsOrderTable: data.hideStatementElementsOrderTable,
         },
       });
     }
