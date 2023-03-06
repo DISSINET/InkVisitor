@@ -1,3 +1,4 @@
+import { classesAll } from "@shared/dictionaries/entity";
 import { EntityEnums, RelationEnums } from "@shared/enums";
 import {
   EntityTooltip,
@@ -198,4 +199,8 @@ export const getRelationInvertedRules = (
       return rule;
     }
   });
+};
+
+export const isValidEntityClass = (entityClass: EntityEnums.Class) => {
+  return classesAll.includes(entityClass);
 };
