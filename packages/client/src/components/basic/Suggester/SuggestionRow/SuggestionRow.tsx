@@ -122,6 +122,7 @@ const EntityRow: React.FC<EntityRow> = ({ data, index, style }) => {
       isSelected={selected === index}
     >
       <StyledSuggestionLineActions>
+        {/* TODO: disable buttons by prop */}
         {isNotDiscouraged && <>{renderIcons()}</>}
       </StyledSuggestionLineActions>
       <StyledSuggestionLineTag>

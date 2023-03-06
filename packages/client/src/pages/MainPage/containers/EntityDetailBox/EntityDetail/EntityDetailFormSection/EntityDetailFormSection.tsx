@@ -1,18 +1,11 @@
 import {
   actantLogicalTypeDict,
-  entitiesDict,
   entitiesDictKeys,
   entityStatusDict,
   languageDict,
 } from "@shared/dictionaries";
-import { allEntities } from "@shared/dictionaries/entity";
 import { EntityEnums } from "@shared/enums";
-import {
-  IAction,
-  IOption,
-  IResponseDetail,
-  IResponseGeneric,
-} from "@shared/types";
+import { IOption, IResponseDetail, IResponseGeneric } from "@shared/types";
 import { AxiosResponse } from "axios";
 import { Button, Dropdown, Input, MultiInput, TypeBar } from "components";
 import { AttributeButtonGroup, EntityTag } from "components/advanced";
@@ -217,19 +210,21 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
               </StyledDetailContentRowLabel>
               <StyledDetailContentRowValue>
                 <StyledTagWrap>
-                  <EntityTag
-                    fullWidth
-                    entity={entity.entities[entity.data.parent.territoryId]}
-                    disableDoubleClick={
-                      entity.data.parent.territoryId === rootTerritoryId
-                    }
-                    disableDrag={
-                      entity.data.parent.territoryId === rootTerritoryId
-                    }
-                    disableTooltip={
-                      entity.data.parent.territoryId === rootTerritoryId
-                    }
-                  />
+                  <div>
+                    <EntityTag
+                      fullWidth
+                      entity={entity.entities[entity.data.parent.territoryId]}
+                      disableDoubleClick={
+                        entity.data.parent.territoryId === rootTerritoryId
+                      }
+                      disableDrag={
+                        entity.data.parent.territoryId === rootTerritoryId
+                      }
+                      disableTooltip={
+                        entity.data.parent.territoryId === rootTerritoryId
+                      }
+                    />
+                  </div>
                 </StyledTagWrap>
               </StyledDetailContentRowValue>
             </StyledDetailContentRow>
