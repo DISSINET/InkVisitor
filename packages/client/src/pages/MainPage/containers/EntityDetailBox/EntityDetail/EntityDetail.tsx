@@ -47,7 +47,6 @@ import {
 } from "./EntityDetailStyles";
 import { EntityDetailClassificationTable } from "./EntityDetailUsedInTable/EntityDetailClassificationTable/EntityDetailClassificationTable";
 import { EntityDetailIdentificationTable } from "./EntityDetailUsedInTable/EntityDetailIdentificationTable/EntityDetailIdentificationTable";
-import { EntityDetailInverseRelations } from "./EntityDetailRelations/EntityDetailInverseRelations/EntityDetailInverseRelations";
 import { EntityDetailMetaPropsTable } from "./EntityDetailUsedInTable/EntityDetailMetaPropsTable/EntityDetailMetaPropsTable";
 import { EntityDetailStatementPropsTable } from "./EntityDetailUsedInTable/EntityDetailStatementPropsTable/EntityDetailStatementPropsTable";
 import { EntityDetailStatementsTable } from "./EntityDetailUsedInTable/EntityDetailStatementsTable/EntityDetailStatementsTable";
@@ -90,6 +89,12 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
     },
     { enabled: !!detailId && api.isLoggedIn() }
   );
+
+  useEffect(() => {
+    if (error && (error as any).message === "unknown class for entity") {
+      removeDetailId(detailId);
+    }
+  }, [error]);
 
   const [createTemplateModal, setCreateTemplateModal] =
     useState<boolean>(false);

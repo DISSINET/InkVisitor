@@ -15,15 +15,12 @@ import { IEntity } from "@shared/types";
 import {
   Button,
   ButtonGroup,
-  Loader,
   Modal,
   ModalContent,
   ModalFooter,
   ModalHeader,
-  Tooltip,
 } from "components";
 import { EntitySuggester, EntityTag } from "components/advanced";
-import { FaUnlink } from "react-icons/fa";
 import { MdSettings } from "react-icons/md";
 import {
   AttributeData,
@@ -49,6 +46,7 @@ import {
 } from "./AttributesGroupEditorStyles";
 import { TooltipAttributeRow } from "./TooltipAttributeRow/TooltipAttributeRow";
 import { TooltipBooleanRow } from "./TooltipBooleanRow/TooltipBooleanRow";
+import { isValidEntityClass } from "utils";
 
 interface AttributesGroupEditor {
   modalTitle: string;
@@ -304,7 +302,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
             </StyledColumnWrap>
             <StyledColumnWrap
               color={
-                propTypeActant
+                propTypeActant && isValidEntityClass(propTypeActant.class)
                   ? EntityColors[propTypeActant.class].color
                   : undefined
               }
@@ -363,7 +361,7 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
             </StyledColumnWrap>
             <StyledColumnWrap
               color={
-                propValueActant
+                propValueActant && isValidEntityClass(propValueActant.class)
                   ? EntityColors[propValueActant.class].color
                   : undefined
               }

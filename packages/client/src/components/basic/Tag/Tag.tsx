@@ -16,7 +16,7 @@ import {
   EntityDragItem,
   ItemTypes,
 } from "types";
-import { dndHoverFn } from "utils";
+import { dndHoverFn, isValidEntityClass } from "utils";
 import {
   StyledButtonWrapper,
   StyledEntityTag,
@@ -140,7 +140,11 @@ export const Tag: React.FC<TagProps> = ({
 
   const renderEntityTag = () => (
     <StyledEntityTag
-      color={EntityColors[entityClass].color}
+      color={
+        entityClass !== EntityEnums.Extension.Invalid
+          ? EntityColors[entityClass].color
+          : "white"
+      }
       isTemplate={isTemplate}
     >
       {entityClass}

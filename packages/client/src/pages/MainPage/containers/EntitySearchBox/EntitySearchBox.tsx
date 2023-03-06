@@ -154,7 +154,6 @@ export const EntitySearchBox: React.FC = () => {
         const res = await api.entitiesSearch(filters);
         return res.data;
       }
-      console.log("getting a new search", debouncedValues);
       const res = await api.entitiesSearch(debouncedValues);
       return res.data;
     },

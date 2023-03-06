@@ -34,7 +34,7 @@ export const StyledEntityTag = styled.div<StyledEntityTag>`
   justify-content: center;
   align-items: center;
   flex-shrink: 0;
-  font-weight: ${({ theme }) => theme.fontWeight["extrabold"]};
+  font-weight: ${({ theme }) => theme.fontWeight["normal"]};
   width: ${({ theme }) => theme.space[7]};
 `;
 

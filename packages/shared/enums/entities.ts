@@ -19,13 +19,33 @@ export namespace EntityEnums {
     Event = "E",
   }
 
-  export const PLOGESTR = [Class.Person, Class.Location, Class.Object, Class.Group, Class.Event, Class.Statement, Class.Territory, Class.Resource];
-  export const PLOGESTRB = [Class.Person, Class.Location, Class.Object, Class.Group, Class.Event, Class.Statement, Class.Territory, Class.Resource, Class.Being];
+  export const PLOGESTR = [
+    Class.Person,
+    Class.Location,
+    Class.Object,
+    Class.Group,
+    Class.Event,
+    Class.Statement,
+    Class.Territory,
+    Class.Resource,
+  ];
+  export const PLOGESTRB = [
+    Class.Person,
+    Class.Location,
+    Class.Object,
+    Class.Group,
+    Class.Event,
+    Class.Statement,
+    Class.Territory,
+    Class.Resource,
+    Class.Being,
+  ];
 
   export enum Extension {
     Any = "*",
     Empty = "empty",
     NoClass = "X",
+    Invalid = "?",
   }
 
   export type ExtendedClass = Class | Extension;
