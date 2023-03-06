@@ -43,11 +43,16 @@ export class SearchQuery {
 
   /**
    * searches Statements under specific territory and returns ids of all statement entity ids
-   * @param territoryId 
-   * @returns 
+   * @param territoryId
+   * @returns
    */
-  async getStatementObjectIdsForTerritories(territoryIds: string[]): Promise<string[]> {
-    const statements = await Statement.findByTerritoryIds(this.connection, territoryIds);
+  async getStatementObjectIdsForTerritories(
+    territoryIds: string[]
+  ): Promise<string[]> {
+    const statements = await Statement.findByTerritoryIds(
+      this.connection,
+      territoryIds
+    );
     const idsMap: Record<string, null> = {};
     for (const st of statements) {
       for (const id of st.getEntitiesIds()) {
@@ -123,6 +128,18 @@ export class SearchQuery {
   whereIsTemplate(): SearchQuery {
     this.query = this.query.filter({
       isTemplate: true,
+    });
+
+    return this;
+  }
+
+  /**
+   * adds condition to limit results to entries with isTemplate = true flag
+   * @returns
+   */
+  whereLanguage(language: EntityEnums.Language): SearchQuery {
+    this.query = this.query.filter({
+      language: language,
     });
 
     return this;
@@ -235,7 +252,9 @@ export class SearchQuery {
     }
 
     if (req.cooccurrenceId) {
-      const assocEntityIds = await this.getCooccurredEntitiesIds(req.cooccurrenceId);
+      const assocEntityIds = await this.getCooccurredEntitiesIds(
+        req.cooccurrenceId
+      );
       if (!req.entityIds) {
         req.entityIds = [];
       }
@@ -247,11 +266,17 @@ export class SearchQuery {
 
       // include childs
       if (req.subTerritorySearch) {
-        const childs = Object.values(await new Territory({ id: req.territoryId }).findChilds(this.connection));
-        territoryIds = territoryIds.concat(childs.map(ch => ch.id));
+        const childs = Object.values(
+          await new Territory({ id: req.territoryId }).findChilds(
+            this.connection
+          )
+        );
+        territoryIds = territoryIds.concat(childs.map((ch) => ch.id));
       }
 
-      const assocEntityIds = await this.getStatementObjectIdsForTerritories(territoryIds);
+      const assocEntityIds = await this.getStatementObjectIdsForTerritories(
+        territoryIds
+      );
 
       if (!req.entityIds) {
         req.entityIds = [];
@@ -267,14 +292,16 @@ export class SearchQuery {
       this.whereStatus(req.status);
     }
 
-
     if (req.createdDate) {
-      const audits = await Audit.getByCreatedDate(this.connection, req.createdDate);
+      const audits = await Audit.getByCreatedDate(
+        this.connection,
+        req.createdDate
+      );
       if (!req.entityIds) {
-        req.entityIds = audits.map(a => a.entityId);
+        req.entityIds = audits.map((a) => a.entityId);
       } else {
         req.entityIds = req.entityIds.reduce((acc, curr) => {
-          if (audits.find(a => a.entityId === curr)) {
+          if (audits.find((a) => a.entityId === curr)) {
             acc.push(curr);
           }
           return acc;
@@ -282,14 +309,16 @@ export class SearchQuery {
       }
     }
 
-
     if (req.updatedDate) {
-      const audits = await Audit.getByUpdatedDate(this.connection, req.updatedDate);
+      const audits = await Audit.getByUpdatedDate(
+        this.connection,
+        req.updatedDate
+      );
       if (!req.entityIds) {
-        req.entityIds = audits.map(a => a.entityId);
+        req.entityIds = audits.map((a) => a.entityId);
       } else {
         req.entityIds = req.entityIds.reduce((acc, curr) => {
-          if (audits.find(a => a.entityId === curr)) {
+          if (audits.find((a) => a.entityId === curr)) {
             acc.push(curr);
           }
           return acc;
@@ -303,6 +332,10 @@ export class SearchQuery {
 
     if (req.usedTemplate) {
       this.whereUsedTemplate(req.usedTemplate);
+    }
+
+    if (req.language) {
+      this.whereLanguage(req.language);
     }
 
     if (req.onlyTemplates) {
