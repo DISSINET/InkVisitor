@@ -1,4 +1,5 @@
 import { entitiesDictKeys, languageDict } from "@shared/dictionaries";
+import { classesAll } from "@shared/dictionaries/entity";
 import { EntityEnums, UserEnums } from "@shared/enums";
 import { IEntity, IOption } from "@shared/types";
 import api from "api";
@@ -23,7 +24,6 @@ import { useMutation, useQuery, useQueryClient } from "react-query";
 import { OptionTypeBase, ValueType } from "react-select";
 import { toast } from "react-toastify";
 import { excludedSuggesterEntities, rootTerritoryId } from "Theme/constants";
-import { classesEditorActants } from "types";
 import { StyledContent, StyledNote } from "./EntityCreateModalStyles";
 
 interface EntityCreateModal {
@@ -32,7 +32,10 @@ interface EntityCreateModal {
 export const EntityCreateModal: React.FC<EntityCreateModal> = ({
   closeModal,
 }) => {
-  const allowedEntityClasses = classesEditorActants;
+  const allowedEntityClasses: EntityEnums.Class[] = [...classesAll].splice(
+    0,
+    classesAll.length - 1
+  );
   const userRole = localStorage.getItem("userrole") as UserEnums.Role;
 
   const [detailTyped, setDetailTyped] = useState("");
