@@ -307,21 +307,16 @@ export const EntitySearchBox: React.FC = () => {
               <EntityTag
                 entity={searchTerritoryEntity}
                 tooltipPosition={"left"}
-                button={
-                  <Button
-                    key="d"
-                    icon={<RiCloseFill />}
-                    color="danger"
-                    inverted
-                    tooltipLabel="unlink entity"
-                    onClick={() => {
-                      handleChange({
-                        territoryId: "",
-                        subTerritorySearch: undefined,
-                      });
-                    }}
-                  />
-                }
+                unlinkButton={{
+                  onClick: () => {
+                    handleChange({
+                      territoryId: "",
+                      subTerritorySearch: undefined,
+                    });
+                  },
+                  color: "danger",
+                  icon: <RiCloseFill />,
+                }}
               />
             )}
           </>
@@ -378,18 +373,13 @@ export const EntitySearchBox: React.FC = () => {
               <EntityTag
                 entity={cooccurrenceEntity}
                 tooltipPosition="left"
-                button={
-                  <Button
-                    key="d"
-                    icon={<RiCloseFill />}
-                    color="danger"
-                    inverted
-                    tooltipLabel="unlink entity"
-                    onClick={() => {
-                      handleChange({ cooccurrenceId: "" });
-                    }}
-                  />
-                }
+                unlinkButton={{
+                  onClick: () => {
+                    handleChange({ cooccurrenceId: "" });
+                  },
+                  color: "danger",
+                  icon: <RiCloseFill />,
+                }}
               />
             )}
           </>

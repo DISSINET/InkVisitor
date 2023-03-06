@@ -138,21 +138,14 @@ export const StatementEditorActionTableRow: React.FC<
         <EntityTag
           fullWidth
           entity={action}
-          button={
-            userCanEdit && (
-              <Button
-                key="d"
-                tooltipLabel="unlink action"
-                icon={<FaUnlink />}
-                inverted
-                color="plain"
-                onClick={() => {
-                  updateAction(sAction.id, {
-                    actionId: "",
-                  });
-                }}
-              />
-            )
+          unlinkButton={
+            userCanEdit && {
+              onClick: () => {
+                updateAction(sAction.id, {
+                  actionId: "",
+                });
+              },
+            }
           }
         />
       </EntityDropzone>

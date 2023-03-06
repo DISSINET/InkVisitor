@@ -68,25 +68,19 @@ export const StatementEditorActantClassification: React.FC<
             <EntityTag
               entity={entity}
               fullWidth
-              button={
-                userCanEdit && (
-                  <Button
-                    key="d"
-                    tooltipLabel="unlink classification"
-                    icon={<FaUnlink />}
-                    color="plain"
-                    inverted
-                    onClick={() => {
-                      updateActant(sActant.id, {
-                        classifications: classifications.map((c) =>
-                          c.id === classification.id
-                            ? { ...c, entityId: "" }
-                            : { ...c }
-                        ),
-                      });
-                    }}
-                  />
-                )
+              unlinkButton={
+                userCanEdit && {
+                  onClick: () => {
+                    updateActant(sActant.id, {
+                      classifications: classifications.map((c) =>
+                        c.id === classification.id
+                          ? { ...c, entityId: "" }
+                          : { ...c }
+                      ),
+                    });
+                  },
+                  tooltipLabel: "unlink classification",
+                }
               }
             />
           </EntityDropzone>

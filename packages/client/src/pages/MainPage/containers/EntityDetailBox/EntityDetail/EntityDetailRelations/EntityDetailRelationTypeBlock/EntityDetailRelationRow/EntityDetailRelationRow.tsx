@@ -152,16 +152,9 @@ export const EntityDetailRelationRow: React.FC<EntityDetailRelationRow> = ({
                     <EntityTag
                       fullWidth
                       entity={relationEntity}
-                      button={
-                        <Button
-                          key="d"
-                          icon={<FaUnlink />}
-                          color="plain"
-                          inverted
-                          tooltipLabel="unlink"
-                          onClick={() => handleMultiRemove(relation.id)}
-                        />
-                      }
+                      unlinkButton={{
+                        onClick: () => handleMultiRemove(relation.id),
+                      }}
                     />
                   </StyledGridColumn>
                 </>
