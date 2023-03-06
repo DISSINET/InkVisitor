@@ -32,9 +32,8 @@ interface EntityCreateModal {
 export const EntityCreateModal: React.FC<EntityCreateModal> = ({
   closeModal,
 }) => {
-  const allowedEntityClasses: EntityEnums.Class[] = [...classesAll].splice(
-    0,
-    classesAll.length - 1
+  const allowedEntityClasses: EntityEnums.Class[] = classesAll.filter(
+    (c) => c !== EntityEnums.Class.Value
   );
   const userRole = localStorage.getItem("userrole") as UserEnums.Role;
 
