@@ -26,6 +26,7 @@ import { FaUnlink } from "react-icons/fa";
 import { MdSettings } from "react-icons/md";
 import { excludedSuggesterEntities } from "Theme/constants";
 import { AttributeData, EntityColors, PropAttributeName } from "types";
+import { isValidEntityClass } from "utils";
 import {
   StyledAttributeModalHeaderIcon,
   StyledAttributeModalHeaderWrapper,
@@ -197,7 +198,11 @@ const AttributesEditor: React.FC<AttributesEditor> = ({
         />
         <ModalContent>
           <StyledContentWrap
-            color={entity ? EntityColors[entity.class].color : undefined}
+            color={
+              entity && isValidEntityClass(entity.class)
+                ? EntityColors[entity.class].color
+                : undefined
+            }
           >
             <AttributesForm
               modalData={modalData}

@@ -6,10 +6,15 @@ import { EntityTooltip } from "components/advanced";
 import React, { ReactNode, useState } from "react";
 import { FaUnlink } from "react-icons/fa";
 import { useAppSelector } from "redux/hooks";
-import { ThemeColor } from "Theme/theme";
 import { Colors, DraggedEntityReduxItem, EntityDragItem } from "types";
-import { getEntityLabel } from "utils";
+import { getEntityLabel, isValidEntityClass } from "utils";
 
+interface UnlinkButton {
+  onClick: () => void;
+  color?: typeof Colors[number];
+  tooltipLabel?: string;
+  icon?: JSX.Element;
+}
 interface EntityTag {
   entity: IEntity;
   tooltipText?: string;
@@ -30,14 +35,7 @@ interface EntityTag {
   statementsCount?: number;
   isFavorited?: boolean;
 
-  unlinkButton?:
-    | {
-        onClick: () => void;
-        color?: typeof Colors[number];
-        tooltipLabel?: string;
-        icon?: JSX.Element;
-      }
-    | false;
+  unlinkButton?: UnlinkButton | false;
 }
 
 export const EntityTag: React.FC<EntityTag> = ({
@@ -72,6 +70,33 @@ export const EntityTag: React.FC<EntityTag> = ({
   const [referenceElement, setReferenceElement] =
     useState<HTMLDivElement | null>(null);
   const [tagHovered, setTagHovered] = useState(false);
+
+  const renderUnlinkButton = (unlinkButton: UnlinkButton) => (
+    <Button
+      key="d"
+      tooltipLabel={
+        unlinkButton.tooltipLabel ? unlinkButton.tooltipLabel : "unlink entity"
+      }
+      icon={unlinkButton.icon ? unlinkButton.icon : <FaUnlink />}
+      color={unlinkButton.color ? unlinkButton.color : "plain"}
+      inverted
+      onClick={unlinkButton.onClick}
+    />
+  );
+
+  if (!isValidEntityClass(entity.class)) {
+    return (
+      <Tag
+        propId={entity.id}
+        entityClass={EntityEnums.Extension.Invalid}
+        label={getEntityLabel(entity)}
+        labelItalic={entity.label === ""}
+        button={unlinkButton && renderUnlinkButton(unlinkButton)}
+        disableDrag
+        disableDoubleClick
+      />
+    );
+  }
 
   return (
     <>
@@ -110,22 +135,7 @@ export const EntityTag: React.FC<EntityTag> = ({
           entity={entity}
           showOnly={showOnly}
           button={
-            button
-              ? button
-              : unlinkButton && (
-                  <Button
-                    key="d"
-                    tooltipLabel={
-                      unlinkButton.tooltipLabel
-                        ? unlinkButton.tooltipLabel
-                        : "unlink entity"
-                    }
-                    icon={unlinkButton.icon ? unlinkButton.icon : <FaUnlink />}
-                    color={unlinkButton.color ? unlinkButton.color : "plain"}
-                    inverted
-                    onClick={unlinkButton.onClick}
-                  />
-                )
+            button ? button : unlinkButton && renderUnlinkButton(unlinkButton)
           }
           moveFn={moveFn}
           entityClass={classId}
