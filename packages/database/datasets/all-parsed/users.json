@@ -1,0 +1,257 @@
+[
+  {
+    "id": "0",
+    "name": "import",
+    "email": "import@inkvisitor.com",
+    "password": "import",
+    "active": false,
+    "options": {
+      "defaultTerritory": "",
+      "defaultLanguage": "",
+      "searchLanguages": []
+    },
+    "bookmarks": null,
+    "role": "admin",
+    "rights": []
+  },
+  {
+    "id": "1",
+    "name": "admin",
+    "email": "admin@admin.com",
+    "password": "admin",
+    "active": true,
+    "options": {
+      "defaultTerritory": "",
+      "defaultLanguage": "",
+      "searchLanguages": []
+    },
+    "bookmarks": null,
+    "role": "admin",
+    "rights": [
+      {
+        "territory": "T0",
+        "mode": "admin"
+      }
+    ]
+  },
+  {
+    "id": "2",
+    "name": "editor1",
+    "email": "editor@inkvisitor.com",
+    "password": "abc",
+    "active": true,
+    "options": {
+      "defaultTerritory": "",
+      "defaultLanguage": "",
+      "searchLanguages": []
+    },
+    "bookmarks": null,
+    "role": "editor",
+    "rights": []
+  },
+  {
+    "id": "3",
+    "name": "editor2",
+    "email": "editor2@inkvisitor.com",
+    "password": "def",
+    "active": true,
+    "options": {
+      "defaultTerritory": "",
+      "defaultLanguage": "",
+      "searchLanguages": []
+    },
+    "bookmarks": null,
+    "role": "editor",
+    "rights": []
+  },
+  {
+    "id": "4",
+    "name": "viewer1",
+    "email": "viewer1@inkvisitor.com",
+    "password": "viewer",
+    "active": true,
+    "options": {
+      "defaultTerritory": "",
+      "defaultLanguage": "",
+      "searchLanguages": []
+    },
+    "bookmarks": null,
+    "role": "viewer",
+    "rights": []
+  },
+  {
+    "id": "5",
+    "name": "inactive",
+    "email": "inactive@inkvisitor.com",
+    "password": "inactive",
+    "active": false,
+    "options": {
+      "defaultTerritory": "",
+      "defaultLanguage": "",
+      "searchLanguages": []
+    },
+    "bookmarks": null,
+    "role": "viewer",
+    "rights": []
+  },
+  {
+    "id": "100",
+    "name": "David Zbíral",
+    "email": "david.zbiral@mail.muni.cz",
+    "password": "test123",
+    "active": true,
+    "options": {
+      "defaultTerritory": "",
+      "defaultLanguage": "",
+      "searchLanguages": []
+    },
+    "bookmarks": null,
+    "role": "admin",
+    "rights": [
+      {
+        "territory": "T0",
+        "mode": "admin"
+      }
+    ]
+  },
+  {
+    "id": "101",
+    "name": "Robert Shaw",
+    "email": "robert.shaw@mail.muni.cz",
+    "password": "test123",
+    "active": true,
+    "options": {
+      "defaultTerritory": "",
+      "defaultLanguage": "",
+      "searchLanguages": []
+    },
+    "bookmarks": null,
+    "role": "admin",
+    "rights": [
+      {
+        "territory": "T0",
+        "mode": "admin"
+      }
+    ]
+  },
+  {
+    "id": "102",
+    "name": "Davor Salihović",
+    "email": "davor.salihovic@mail.muni.cz",
+    "password": "test123",
+    "active": true,
+    "options": {
+      "defaultTerritory": "",
+      "defaultLanguage": "",
+      "searchLanguages": []
+    },
+    "bookmarks": null,
+    "role": "admin",
+    "rights": [
+      {
+        "territory": "T0",
+        "mode": "admin"
+      }
+    ]
+  },
+  {
+    "id": "103",
+    "name": "Katia Riccardo",
+    "email": "katia.riccardo@mail.muni.cz",
+    "password": "test123",
+    "active": true,
+    "options": {
+      "defaultTerritory": "",
+      "defaultLanguage": "",
+      "searchLanguages": []
+    },
+    "bookmarks": null,
+    "role": "editor",
+    "rights": [
+      {
+        "territory": "T0",
+        "mode": "admin"
+      }
+    ]
+  },
+  {
+    "id": "104",
+    "name": "Jan Král",
+    "email": "kral.jan@mail.muni.cz",
+    "password": "test123",
+    "active": true,
+    "options": {
+      "defaultTerritory": "",
+      "defaultLanguage": "",
+      "searchLanguages": []
+    },
+    "bookmarks": null,
+    "role": "editor",
+    "rights": [
+      {
+        "territory": "T0",
+        "mode": "admin"
+      }
+    ]
+  },
+  {
+    "id": "105",
+    "name": "Reima Välimäki",
+    "email": "reima.valimaki@gmail.com",
+    "password": "test123",
+    "active": true,
+    "options": {
+      "defaultTerritory": "",
+      "defaultLanguage": "",
+      "searchLanguages": []
+    },
+    "bookmarks": null,
+    "role": "editor",
+    "rights": [
+      {
+        "territory": "T0",
+        "mode": "admin"
+      }
+    ]
+  },
+  {
+    "id": "106",
+    "name": "Lidia Hinz-Wieczorek",
+    "email": "lidhin93@gmail.com",
+    "password": "test123",
+    "active": true,
+    "options": {
+      "defaultTerritory": "",
+      "defaultLanguage": "",
+      "searchLanguages": []
+    },
+    "bookmarks": null,
+    "role": "editor",
+    "rights": [
+      {
+        "territory": "T0",
+        "mode": "admin"
+      }
+    ]
+  },
+   {
+    "id": "107",
+    "name": "Larissa de Freitas Lyth",
+    "email": "larissa.lyth@mail.muni.cz",
+    "password": "test123",
+    "active": true,
+    "options": {
+      "defaultTerritory": "",
+      "defaultLanguage": "",
+      "searchLanguages": []
+    },
+    "bookmarks": null,
+    "role": "editor",
+    "rights": [
+      {
+        "territory": "T0",
+        "mode": "admin"
+      }
+    ]
+  }
+]

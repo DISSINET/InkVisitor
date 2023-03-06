@@ -116,6 +116,53 @@ const datasets: Record<string, DbSchema> = {
       indexes: relationsIndexes,
     },
   },
+  allparsed: {
+    users: {
+      tableName: "users",
+      data: require("../datasets/all-parsed/users.json"),
+      transform: function () {
+        this.data = this.data.map((user: IUser) => {
+          user.password = hashPassword(user.password ? user.password : "");
+          return user;
+        });
+      },
+    },
+    aclPermissions: {
+      tableName: "acl_permissions",
+      data: require("../datasets/default/acl_permissions.json"),
+      transform: function () {},
+    },
+    entities: {
+      tableName: "entities",
+      data: require("../datasets/all-parsed/entities.json"),
+      transform: function () {},
+      indexes: entitiesIndexes,
+    },
+    audits: {
+      tableName: "audits",
+      data: require("../datasets/all-parsed/audits.json"),
+      transform: function () {
+        this.data = this.data.map((audit: IAudit) => {
+          audit.date = new Date(audit.date);
+          return audit;
+        });
+      },
+      indexes: auditsIndexes,
+    },
+    relations: {
+      tableName: "relations",
+      data: require("../datasets/all-parsed/relations.json"),
+      transform: function () {
+        this.data = this.data.map((relation: Relation.IRelation) => {
+          if (!relation.order) {
+            relation.order = 1;
+          }
+          return relation;
+        });
+      },
+      indexes: relationsIndexes,
+    },
+  },
 };
 
 enum MODES {
