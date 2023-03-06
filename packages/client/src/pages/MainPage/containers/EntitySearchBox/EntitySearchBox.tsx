@@ -1,4 +1,4 @@
-import { entityStatusDict } from "@shared/dictionaries";
+import { entityStatusDict, languageDict } from "@shared/dictionaries";
 import { DropdownItem, entitiesDict } from "@shared/dictionaries/entity";
 import { EntityEnums } from "@shared/enums";
 import { IEntity, IOption } from "@shared/types";
@@ -47,6 +47,14 @@ const statusOptions: DropdownItem[] = [defaultStatusOption].concat(
   entityStatusDict
 );
 
+const defaultLanguageOption: DropdownItem = {
+  label: "all",
+  value: "",
+};
+const languageOptions: DropdownItem[] = [defaultLanguageOption].concat(
+  languageDict
+);
+
 const anyTemplate: DropdownItem = {
   value: "Any",
   label: "Any template",
@@ -80,6 +88,17 @@ export const EntitySearchBox: React.FC = () => {
     }
     return defaultStatusOption;
   }, [debouncedValues.status]);
+
+  const languageOptionSelected: IOption = useMemo(() => {
+    if (!!debouncedValues.language) {
+      return (
+        languageOptions.find((option) => {
+          return option.value === debouncedValues.language;
+        }) || defaultLanguageOption
+      );
+    }
+    return defaultLanguageOption;
+  }, [debouncedValues.language]);
 
   // check whether the search should be executed
   const validSearch = useMemo(() => {
@@ -266,6 +285,7 @@ export const EntitySearchBox: React.FC = () => {
           <TypeBar entityLetter={(classOption as IOption).value} />
         </div>
       </StyledRow>
+
       <StyledRow>
         <StyledRowHeader>Limit by status</StyledRowHeader>
         <div style={{ position: "relative" }}>
@@ -277,6 +297,24 @@ export const EntitySearchBox: React.FC = () => {
             onChange={(option: ValueType<OptionTypeBase, any>) => {
               handleChange({
                 status: (option as IOption).value,
+              });
+            }}
+          />
+          <TypeBar entityLetter={(classOption as IOption).value} />
+        </div>
+      </StyledRow>
+
+      <StyledRow>
+        <StyledRowHeader>Limit by language</StyledRowHeader>
+        <div style={{ position: "relative" }}>
+          <Dropdown
+            placeholder={""}
+            width={150}
+            options={languageOptions}
+            value={languageOptionSelected}
+            onChange={(option: ValueType<OptionTypeBase, any>) => {
+              handleChange({
+                language: (option as IOption).value,
               });
             }}
           />
