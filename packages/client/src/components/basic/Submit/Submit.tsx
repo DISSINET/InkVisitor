@@ -34,6 +34,7 @@ export const Submit: React.FC<Submit> = ({
         onClose={onCancel}
         showModal={show}
         disableBgClick
+        isLoading={loading}
       >
         <ModalHeader title={title} />
         <ModalContent>
@@ -45,7 +46,6 @@ export const Submit: React.FC<Submit> = ({
             <Button label={submitLabel} color="danger" onClick={onSubmit} />
           </ButtonGroup>
         </ModalFooter>
-        <Loader show={loading} />
       </Modal>
     </>
   );

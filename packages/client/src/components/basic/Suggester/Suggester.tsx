@@ -53,6 +53,7 @@ interface Suggester {
   disabled?: boolean; // todo not implemented yet
   inputWidth?: number | "full";
   disableCreate?: boolean;
+  disableButtons?: boolean;
   allowDrop?: boolean;
   isFetching?: boolean;
 
@@ -82,6 +83,7 @@ export const Suggester: React.FC<Suggester> = ({
   disabled,
   inputWidth = 80,
   disableCreate = false,
+  disableButtons = false,
   allowDrop = false,
 
   // events
@@ -205,7 +207,8 @@ export const Suggester: React.FC<Suggester> = ({
       onPick,
       selected,
       isInsideTemplate,
-      territoryParentId
+      territoryParentId,
+      disableButtons
     );
     const rowHeight = 25;
     return (

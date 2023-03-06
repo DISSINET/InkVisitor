@@ -82,6 +82,7 @@ export const TemplateListRemoveModal: React.FC<TemplateListRemoveModal> = ({
       onClose={() => {
         setRemoveEntityId(false);
       }}
+      isLoading={templateRemoveMutation.isLoading}
     >
       <ModalHeader title="Remove Template" />
       <ModalContent>
@@ -111,7 +112,6 @@ export const TemplateListRemoveModal: React.FC<TemplateListRemoveModal> = ({
           />
         </ButtonGroup>
       </ModalFooter>
-      <Loader show={templateRemoveMutation.isLoading} />
     </Modal>
   );
 };

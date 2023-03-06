@@ -100,6 +100,7 @@ export const ContextMenuNewTerritoryModal: React.FC<
         onClose={() => onClose()}
         showModal={showModal}
         disableBgClick
+        isLoading={createTerritoryMutation.isLoading}
       >
         <ModalHeader title={"Add Territory"} />
         <ModalContent>
@@ -127,7 +128,6 @@ export const ContextMenuNewTerritoryModal: React.FC<
             />
           </ButtonGroup>
         </ModalFooter>
-        <Loader show={createTerritoryMutation.isLoading} />
       </Modal>
     </>
   );

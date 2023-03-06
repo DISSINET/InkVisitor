@@ -15,6 +15,8 @@ interface EntitySuggester {
   categoryTypes: EntityEnums.ExtendedClass[];
   onSelected: (id: string) => void;
   onPicked?: (entity: IEntity) => void;
+  onChangeCategory?: (selectedOption: ValueType<OptionTypeBase, any>) => void;
+  onTyped?: (newType: string) => void;
   placeholder?: string;
   inputWidth?: number | "full";
   openDetailOnCreate?: boolean;
@@ -29,6 +31,7 @@ interface EntitySuggester {
   disableTemplateInstantiation?: boolean;
   disableWildCard?: boolean;
   disableTemplatesAccept?: boolean;
+  disableButtons?: boolean;
 
   disabled?: boolean;
 }
@@ -37,6 +40,8 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
   categoryTypes,
   onSelected,
   onPicked = () => {},
+  onChangeCategory,
+  onTyped,
   placeholder = "",
   inputWidth,
   openDetailOnCreate = false,
@@ -51,6 +56,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
   disableTemplateInstantiation = false,
   disableWildCard = false,
   disableTemplatesAccept = false,
+  disableButtons = false,
 
   disabled = false,
 }) => {
@@ -145,6 +151,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
 
   const handleClean = () => {
     setTyped("");
+    onTyped && onTyped("");
   };
 
   // initial load of categories
@@ -168,7 +175,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
     }
   }, [categoryTypes]);
 
-  const actantsCreateMutation = useMutation(
+  const entityCreateMutation = useMutation(
     async (newActant: IEntity | IStatement | ITerritory) =>
       await api.entityCreate(newActant),
     {
@@ -207,7 +214,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
           newCreated.detail,
           newCreated.territoryId
         );
-        actantsCreateMutation.mutate(newStatement);
+        entityCreateMutation.mutate(newStatement);
       } else if (newCreated.entityClass === EntityEnums.Class.Territory) {
         const newTerritory = CTerritory(
           localStorage.getItem("userrole") as UserEnums.Role,
@@ -221,10 +228,9 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
           newCreated.territoryId ? newCreated.territoryId : rootTerritoryId,
           -1
         );
-        actantsCreateMutation.mutate(newTerritory);
+        entityCreateMutation.mutate(newTerritory);
       } else {
         const newEntity = CEntity(
-          localStorage.getItem("userrole") as UserEnums.Role,
           {
             ...user.options,
             defaultLanguage:
@@ -234,7 +240,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
           newCreated.label,
           newCreated.detail
         );
-        actantsCreateMutation.mutate(newEntity);
+        entityCreateMutation.mutate(newEntity);
       }
     }
   };
@@ -320,9 +326,11 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
       }}
       onType={(newType: string) => {
         setTyped(newType);
+        onTyped && onTyped(newType);
       }}
       onChangeCategory={(option: ValueType<OptionTypeBase, any> | null) => {
         setSelectedCategory(option);
+        onChangeCategory && onChangeCategory(option);
       }}
       onCreate={(newCreated: SuggesterItemToCreate) => {
         handleCreate(newCreated);
@@ -340,6 +348,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
       }}
       isWrongDropCategory={isWrongDropCategory}
       disableCreate={disableCreate}
+      disableButtons={disableButtons}
       inputWidth={inputWidth}
       isInsideTemplate={isInsideTemplate}
       territoryParentId={territoryParentId}
