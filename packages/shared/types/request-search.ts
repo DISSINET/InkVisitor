@@ -14,6 +14,7 @@ export interface IRequestSearch {
   cooccurrenceId?: string;
   territoryId?: string;
   subTerritorySearch?: boolean;
+  language?: EntityEnums.Language;
   onlyTemplates?: boolean;
   usedTemplate?: string;
   status?: EntityEnums.Status;
@@ -29,6 +30,7 @@ export class RequestSearch {
   territoryId?: string;
   subTerritorySearch?: boolean;
   excluded?: EntityEnums.Class[];
+  language?: EntityEnums.Language;
   onlyTemplates?: boolean;
   usedTemplate?: string;
   status?: EntityEnums.Status;
@@ -66,6 +68,7 @@ export class RequestSearch {
     this.onlyTemplates = !!requestData.onlyTemplates;
     this.usedTemplate = requestData.usedTemplate || undefined;
     this.territoryId = requestData.territoryId || undefined;
+    this.language = requestData.language || undefined;
     this.subTerritorySearch = !!requestData.subTerritorySearch;
   }
 
@@ -106,7 +109,6 @@ export class RequestSearch {
       return new BadParams("updatedDate needs to be a date");
     }
 
-
     if (this.subTerritorySearch && !this.territoryId) {
       return new BadParams(
         "subTerritorySearch needs valid territoryId to be set"
@@ -121,13 +123,12 @@ export class RequestSearch {
       !this.usedTemplate &&
       !this.territoryId &&
       !this.status &&
+      !this.language &&
       !this.createdDate &&
       !this.updatedDate &&
       (this.entityIds === undefined || !this.entityIds.length)
     ) {
-      return new BadParams(
-        "one of the search field has to be set"
-      );
+      return new BadParams("one of the search field has to be set");
     }
 
     return;
