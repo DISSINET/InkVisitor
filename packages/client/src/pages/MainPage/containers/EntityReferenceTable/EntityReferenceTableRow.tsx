@@ -58,19 +58,13 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
             <EntityTag
               entity={resource}
               fullWidth
-              button={
-                !disabled && (
-                  <Button
-                    key="d"
-                    tooltipLabel="unlink resource"
-                    icon={<FaUnlink />}
-                    inverted
-                    color="plain"
-                    onClick={() => {
-                      handleChangeResource(reference.id, "");
-                    }}
-                  />
-                )
+              unlinkButton={
+                !disabled && {
+                  onClick: () => {
+                    handleChangeResource(reference.id, "");
+                  },
+                  tooltipLabel: "unlink resource",
+                }
               }
             />
           </EntityDropzone>
@@ -114,19 +108,13 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
             <EntityTag
               entity={value}
               fullWidth
-              button={
-                !disabled && (
-                  <Button
-                    key="d"
-                    tooltipLabel="unlink resource"
-                    icon={<FaUnlink />}
-                    inverted
-                    color="plain"
-                    onClick={() => {
-                      handleChangeValue(reference.id, "");
-                    }}
-                  />
-                )
+              unlinkButton={
+                !disabled && {
+                  onClick: () => {
+                    handleChangeValue(reference.id, "");
+                  },
+                  tooltipLabel: "unlink value",
+                }
               }
             />
           </EntityDropzone>

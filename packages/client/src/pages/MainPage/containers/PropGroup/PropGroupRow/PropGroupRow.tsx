@@ -197,24 +197,17 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
                   entity={propTypeEntity}
                   fullWidth
                   tooltipPosition="right"
-                  button={
-                    userCanEdit && (
-                      <Button
-                        key="d"
-                        icon={<FaUnlink />}
-                        color="plain"
-                        inverted
-                        tooltipLabel="unlink entity"
-                        onClick={() => {
-                          updateProp(prop.id, {
-                            type: {
-                              ...prop.type,
-                              ...{ entityId: "" },
-                            },
-                          });
-                        }}
-                      />
-                    )
+                  unlinkButton={
+                    userCanEdit && {
+                      onClick: () => {
+                        updateProp(prop.id, {
+                          type: {
+                            ...prop.type,
+                            ...{ entityId: "" },
+                          },
+                        });
+                      },
+                    }
                   }
                 />
               </EntityDropzone>
@@ -277,24 +270,17 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
                   entity={propValueEntity}
                   fullWidth
                   tooltipPosition="right"
-                  button={
-                    userCanEdit && (
-                      <Button
-                        key="d"
-                        icon={<FaUnlink />}
-                        tooltipLabel="unlink entity"
-                        color="plain"
-                        inverted
-                        onClick={() => {
-                          updateProp(prop.id, {
-                            value: {
-                              ...prop.value,
-                              ...{ entityId: "" },
-                            },
-                          });
-                        }}
-                      />
-                    )
+                  unlinkButton={
+                    userCanEdit && {
+                      onClick: () => {
+                        updateProp(prop.id, {
+                          value: {
+                            ...prop.value,
+                            ...{ entityId: "" },
+                          },
+                        });
+                      },
+                    }
                   }
                 />
               </EntityDropzone>

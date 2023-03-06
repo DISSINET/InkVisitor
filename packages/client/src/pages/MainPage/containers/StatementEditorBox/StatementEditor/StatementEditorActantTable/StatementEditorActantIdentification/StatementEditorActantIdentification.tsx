@@ -72,25 +72,19 @@ export const StatementEditorActantIdentification: React.FC<
             <EntityTag
               entity={entity}
               fullWidth
-              button={
-                userCanEdit && (
-                  <Button
-                    key="d"
-                    tooltipLabel="unlink identification"
-                    icon={<FaUnlink />}
-                    color="plain"
-                    inverted
-                    onClick={() => {
-                      updateActant(sActant.id, {
-                        identifications: identifications.map((c) =>
-                          c.id === identification.id
-                            ? { ...c, entityId: "" }
-                            : { ...c }
-                        ),
-                      });
-                    }}
-                  />
-                )
+              unlinkButton={
+                userCanEdit && {
+                  onClick: () => {
+                    updateActant(sActant.id, {
+                      identifications: identifications.map((c) =>
+                        c.id === identification.id
+                          ? { ...c, entityId: "" }
+                          : { ...c }
+                      ),
+                    });
+                  },
+                  tooltipLabel: "unlink identification",
+                }
               }
             />
           </EntityDropzone>

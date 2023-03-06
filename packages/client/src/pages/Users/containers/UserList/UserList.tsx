@@ -286,21 +286,12 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
                           <StyledTerritoryListItem key={right.territory}>
                             <EntityTag
                               entity={territoryActant.territory}
-                              button={
-                                <Button
-                                  key="d"
-                                  tooltipLabel="remove territory from rights"
-                                  icon={<FaUnlink />}
-                                  color="plain"
-                                  inverted
-                                  onClick={() => {
-                                    removeRightFromUser(
-                                      userId,
-                                      right.territory
-                                    );
-                                  }}
-                                />
-                              }
+                              unlinkButton={{
+                                onClick: () => {
+                                  removeRightFromUser(userId, right.territory);
+                                },
+                                tooltipLabel: "remove territory from rights",
+                              }}
                             />
                           </StyledTerritoryListItem>
                         ) : (
@@ -374,21 +365,15 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
                             <StyledTerritoryListItem key={right.territory}>
                               <EntityTag
                                 entity={territoryActant.territory}
-                                button={
-                                  <Button
-                                    key="d"
-                                    tooltipLabel="remove territory from rights"
-                                    icon={<FaUnlink />}
-                                    color="plain"
-                                    inverted
-                                    onClick={() => {
-                                      removeRightFromUser(
-                                        userId,
-                                        right.territory
-                                      );
-                                    }}
-                                  />
-                                }
+                                unlinkButton={{
+                                  onClick: () => {
+                                    removeRightFromUser(
+                                      userId,
+                                      right.territory
+                                    );
+                                  },
+                                  tooltipLabel: "remove territory from rights",
+                                }}
                               />
                             </StyledTerritoryListItem>
                           ) : (

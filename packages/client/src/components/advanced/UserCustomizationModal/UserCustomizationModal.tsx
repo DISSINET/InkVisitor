@@ -31,6 +31,7 @@ import {
 } from "react-query";
 import { OptionTypeBase, ValueType } from "react-select";
 import { toast } from "react-toastify";
+import theme from "Theme/theme";
 import {
   StyledRightsHeading,
   StyledRightsWrap,
@@ -222,18 +223,12 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                 <EntityTag
                   entity={territory}
                   tooltipPosition="left"
-                  button={
-                    <Button
-                      key="d"
-                      icon={<FaUnlink />}
-                      color="danger"
-                      inverted
-                      tooltipLabel="unlink actant"
-                      onClick={() => {
-                        handleChange("defaultTerritory", "");
-                      }}
-                    />
-                  }
+                  unlinkButton={{
+                    onClick: () => {
+                      handleChange("defaultTerritory", "");
+                    },
+                    color: "danger",
+                  }}
                 />
               ) : (
                 <div>

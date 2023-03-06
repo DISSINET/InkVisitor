@@ -756,18 +756,11 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                         entity={tagActant}
                         fullWidth
                         tooltipPosition="left"
-                        button={
-                          <Button
-                            key="d"
-                            tooltipLabel="unlink actant from tags"
-                            icon={<FaUnlink />}
-                            color="plain"
-                            inverted
-                            onClick={() => {
-                              removeTag(tag);
-                            }}
-                          />
-                        }
+                        unlinkButton={{
+                          onClick: () => {
+                            removeTag(tag);
+                          },
+                        }}
                       />
                     </StyledTagsListItem>
                   )
