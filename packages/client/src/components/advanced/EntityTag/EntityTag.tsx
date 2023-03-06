@@ -92,6 +92,8 @@ export const EntityTag: React.FC<EntityTag> = ({
         label={getEntityLabel(entity)}
         labelItalic={entity.label === ""}
         button={unlinkButton && renderUnlinkButton(unlinkButton)}
+        disableDrag
+        disableDoubleClick
       />
     );
   }
