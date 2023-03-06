@@ -202,7 +202,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                 options={languageDict}
               />
             </ModalInputWrap>
-            <ModalInputLabel>{"search languages"}</ModalInputLabel>
+            {/* <ModalInputLabel>{"search languages"}</ModalInputLabel>
             <ModalInputWrap width={165}>
               <Dropdown
                 value={data.searchLanguages}
@@ -215,7 +215,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                   (lang) => lang.value !== EntityEnums.Language.Empty
                 )}
               />
-            </ModalInputWrap>
+            </ModalInputWrap> */}
             <ModalInputLabel>{"default territory"}</ModalInputLabel>
             <ModalInputWrap width={165}>
               {territory ? (
