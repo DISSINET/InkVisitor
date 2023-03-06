@@ -15,6 +15,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
     selectedDetailId,
     setSelectedDetailId,
     appendDetailId,
+    clearAllDetailIds,
   } = useSearchParams();
 
   useEffect(() => {
@@ -27,7 +28,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
 
   const [entities, setEntities] = useState<IResponseEntity[]>([]);
 
-  const { data } = useQuery(
+  const { data, error } = useQuery(
     ["detail-tab-entities", detailIdArray],
     async () => {
       const res = await api.entitiesSearch({ entityIds: detailIdArray });
@@ -37,6 +38,19 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
       enabled: api.isLoggedIn() && detailIdArray.length > 0,
     }
   );
+
+  useEffect(() => {
+    if (error && (error as any).message === "unknown class for entity") {
+      clearAllDetailIds();
+
+      // TODO: filter ids with valid entity classes and push to url
+      // if (data) {
+      //   const validIds = data.map((entity) => entity.id);
+      //   clearAllDetailIds();
+      //   validIds.forEach((id) => appendDetailId(id));
+      // }
+    }
+  }, [error]);
 
   useEffect(() => {
     if (data) {
