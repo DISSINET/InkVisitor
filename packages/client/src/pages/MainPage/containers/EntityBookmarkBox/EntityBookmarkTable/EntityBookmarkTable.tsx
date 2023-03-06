@@ -42,18 +42,11 @@ export const EntityBookmarkTable: React.FC<EntityBookmarkTable> = ({
                 entity={entity as IEntity}
                 tooltipPosition="left"
                 fullWidth
-                button={
-                  <Button
-                    key="d"
-                    icon={<FaUnlink />}
-                    color="plain"
-                    inverted
-                    tooltipLabel="unlink entity"
-                    onClick={() => {
-                      removeBookmark(folder.id, entity.id);
-                    }}
-                  />
-                }
+                unlinkButton={{
+                  onClick: () => {
+                    removeBookmark(folder.id, entity.id);
+                  },
+                }}
               />
             </StyledTagWrap>
           );

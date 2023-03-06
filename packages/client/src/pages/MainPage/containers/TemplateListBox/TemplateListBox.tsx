@@ -159,17 +159,13 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
                     entity={templateEntity}
                     fullWidth
                     tooltipPosition="left"
-                    button={
-                      <Button
-                        tooltipLabel="remove template"
-                        icon={<FaTrash />}
-                        color="plain"
-                        inverted
-                        onClick={() => {
-                          handleAskRemoveTemplate(templateEntity.id);
-                        }}
-                      />
-                    }
+                    unlinkButton={{
+                      onClick: () => {
+                        handleAskRemoveTemplate(templateEntity.id);
+                      },
+                      tooltipLabel: "remove template",
+                      icon: <FaTrash />,
+                    }}
                   />
                 </React.Fragment>
               );

@@ -323,24 +323,17 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
                   <EntityTag
                     entity={propTypeActant}
                     fullWidth
-                    button={
-                      userCanEdit && (
-                        <Button
-                          key="d"
-                          icon={<FaUnlink />}
-                          color="plain"
-                          inverted
-                          tooltipLabel="unlink actant"
-                          onClick={() => {
-                            updateProp(statementId, {
-                              type: {
-                                ...data.type,
-                                ...{ entityId: "" },
-                              },
-                            });
-                          }}
-                        />
-                      )
+                    unlinkButton={
+                      userCanEdit && {
+                        onClick: () => {
+                          updateProp(statementId, {
+                            type: {
+                              ...data.type,
+                              ...{ entityId: "" },
+                            },
+                          });
+                        },
+                      }
                     }
                   />
                 </StyledEntityWrap>
@@ -389,24 +382,17 @@ export const AttributesGroupEditor: React.FC<AttributesGroupEditor> = ({
                     entity={propValueActant}
                     fullWidth
                     tooltipPosition="left"
-                    button={
-                      userCanEdit && (
-                        <Button
-                          key="d"
-                          icon={<FaUnlink />}
-                          tooltipLabel="unlink actant"
-                          color="plain"
-                          inverted
-                          onClick={() => {
-                            updateProp(statementId, {
-                              value: {
-                                ...data.value,
-                                ...{ entityId: "" },
-                              },
-                            });
-                          }}
-                        />
-                      )
+                    unlinkButton={
+                      userCanEdit && {
+                        onClick: () => {
+                          updateProp(statementId, {
+                            value: {
+                              ...data.value,
+                              ...{ entityId: "" },
+                            },
+                          });
+                        },
+                      }
                     }
                   />
                 </StyledEntityWrap>

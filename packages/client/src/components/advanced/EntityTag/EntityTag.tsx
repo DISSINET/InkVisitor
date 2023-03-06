@@ -1,11 +1,13 @@
 import { Placement } from "@popperjs/core";
 import { EntityEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
-import { Tag } from "components";
+import { Button, Tag } from "components";
 import { EntityTooltip } from "components/advanced";
-import React, { ReactNode, useEffect, useState } from "react";
+import React, { ReactNode, useState } from "react";
+import { FaUnlink } from "react-icons/fa";
 import { useAppSelector } from "redux/hooks";
-import { DraggedEntityReduxItem, EntityDragItem } from "types";
+import { ThemeColor } from "Theme/theme";
+import { Colors, DraggedEntityReduxItem, EntityDragItem } from "types";
 import { getEntityLabel } from "utils";
 
 interface EntityTag {
@@ -27,6 +29,15 @@ interface EntityTag {
   lvl?: number;
   statementsCount?: number;
   isFavorited?: boolean;
+
+  unlinkButton?:
+    | {
+        onClick: () => void;
+        color?: typeof Colors[number];
+        tooltipLabel?: string;
+        icon?: JSX.Element;
+      }
+    | false;
 }
 
 export const EntityTag: React.FC<EntityTag> = ({
@@ -48,6 +59,8 @@ export const EntityTag: React.FC<EntityTag> = ({
   lvl,
   statementsCount,
   isFavorited,
+
+  unlinkButton,
 }) => {
   const draggedEntity: DraggedEntityReduxItem = useAppSelector(
     (state) => state.draggedEntity
@@ -96,7 +109,24 @@ export const EntityTag: React.FC<EntityTag> = ({
           isDiscouraged={entity.status === EntityEnums.Status.Discouraged}
           entity={entity}
           showOnly={showOnly}
-          button={button}
+          button={
+            button
+              ? button
+              : unlinkButton && (
+                  <Button
+                    key="d"
+                    tooltipLabel={
+                      unlinkButton.tooltipLabel
+                        ? unlinkButton.tooltipLabel
+                        : "unlink entity"
+                    }
+                    icon={unlinkButton.icon ? unlinkButton.icon : <FaUnlink />}
+                    color={unlinkButton.color ? unlinkButton.color : "plain"}
+                    inverted
+                    onClick={unlinkButton.onClick}
+                  />
+                )
+          }
           moveFn={moveFn}
           entityClass={classId}
           mode={mode}

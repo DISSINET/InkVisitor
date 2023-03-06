@@ -212,20 +212,11 @@ const AttributesEditor: React.FC<AttributesEditor> = ({
                 <EntityTag
                   entity={entity}
                   fullWidth
-                  button={
-                    userCanEdit && (
-                      <Button
-                        key="d"
-                        tooltipLabel="unlink actant"
-                        icon={<FaUnlink />}
-                        color="plain"
-                        inverted
-                        onClick={() => {
-                          updateActantId("");
-                        }}
-                      />
-                    )
-                  }
+                  unlinkButton={{
+                    onClick: () => {
+                      updateActantId("");
+                    },
+                  }}
                 />
               </StyledEntityWrap>
             ) : (
