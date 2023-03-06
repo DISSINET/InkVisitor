@@ -211,7 +211,7 @@ export class UsedRelations implements RelationTypes.IUsedRelations {
       connections: await Identification.getIdentificationForwardConnections(
         dbConn,
         this.entityId,
-        EntityEnums.Certainty.Empty,
+        EntityEnums.Certainty.Certain,
         this.maxNestLvl,
         0
       ),

@@ -19,7 +19,7 @@ export default class Identification extends Relation implements RelationTypes.II
 
   /**
    * Test validity of the model
-   * @returns 
+   * @returns
    */
   isValid(): boolean {
     if (!super.isValid()) {
@@ -56,7 +56,7 @@ export default class Identification extends Relation implements RelationTypes.II
     if (requiredCertainty !== EntityEnums.Certainty.Empty) {
       // if non-empty certainty, then some lvl of certainty needs to be respected
       relations = relations.filter(
-        (r) => r.certainty === EntityEnums.Certainty.Certain
+        (r) => r.certainty === requiredCertainty
       );
     } else {
       // empty certainty will end the search below
