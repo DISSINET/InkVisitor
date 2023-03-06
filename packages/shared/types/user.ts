@@ -22,6 +22,7 @@ export interface IUserOptions {
   defaultTerritory: string;
   defaultLanguage: EntityEnums.Language;
   searchLanguages: EntityEnums.Language[];
+  hideStatementElementsOrderTable?: boolean;
 }
 
 export interface IStoredTerritory {
