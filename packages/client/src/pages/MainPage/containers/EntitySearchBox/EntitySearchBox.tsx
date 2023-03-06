@@ -322,7 +322,7 @@ export const EntitySearchBox: React.FC = () => {
         </div>
       </StyledRow>
 
-      <StyledRow>
+      {/* <StyledRow>
         <StyledRowHeader>Limit by template</StyledRowHeader>
         <Dropdown
           placeholder={""}
@@ -334,7 +334,7 @@ export const EntitySearchBox: React.FC = () => {
             handleChange({ usedTemplate: (option as IOption).value });
           }}
         />
-      </StyledRow>
+      </StyledRow> */}
 
       <StyledRow>
         <StyledRowHeader>Limit by territory</StyledRowHeader>
