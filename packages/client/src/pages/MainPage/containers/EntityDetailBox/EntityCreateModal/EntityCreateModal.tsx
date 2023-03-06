@@ -19,11 +19,10 @@ import { EntitySuggester, EntityTag } from "components/advanced";
 import { CEntity, CStatement, CTerritory } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
-import { FaUnlink } from "react-icons/fa";
-import { useMutation, useQuery } from "react-query";
+import { useMutation, useQuery, useQueryClient } from "react-query";
 import { OptionTypeBase, ValueType } from "react-select";
 import { toast } from "react-toastify";
-import { rootTerritoryId } from "Theme/constants";
+import { excludedSuggesterEntities, rootTerritoryId } from "Theme/constants";
 import { classesEditorActants } from "types";
 import { StyledContent, StyledNote } from "./EntityCreateModalStyles";
 
@@ -94,14 +93,17 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
     }
   );
 
+  const queryClient = useQueryClient();
+
   const entityCreateMutation = useMutation(
     async (newEntity: IEntity) => await api.entityCreate(newEntity),
     {
       onSuccess: (data, variables) => {
-        if (variables.class !== EntityEnums.Class.Value) {
-          closeModal();
-          appendDetailId(variables.id);
-          setSelectedDetailId(variables.id);
+        closeModal();
+        appendDetailId(variables.id);
+        setSelectedDetailId(variables.id);
+        if (variables.class === EntityEnums.Class.Territory) {
+          queryClient.invalidateQueries("tree");
         }
       },
     }
@@ -202,6 +204,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
             <ModalInputWrap>
               <EntitySuggester
                 categoryTypes={allowedEntityClasses}
+                excludedEntities={excludedSuggesterEntities}
                 onSelected={() => console.log("cannot select")}
                 onChangeCategory={(
                   selectedOption: ValueType<OptionTypeBase, any>

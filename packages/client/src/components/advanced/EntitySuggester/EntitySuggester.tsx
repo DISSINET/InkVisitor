@@ -6,7 +6,7 @@ import { CEntity, CStatement, CTerritory, InstTemplate } from "constructors";
 import { useDebounce, useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
 import { FaHome } from "react-icons/fa";
-import { useMutation, useQuery } from "react-query";
+import { useMutation, useQuery, useQueryClient } from "react-query";
 import { OptionTypeBase, ValueType } from "react-select";
 import { DropdownAny, rootTerritoryId, wildCardChar } from "Theme/constants";
 import { EntityDragItem, SuggesterItemToCreate } from "types";
@@ -175,6 +175,8 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
     }
   }, [categoryTypes]);
 
+  const queryClient = useQueryClient();
+
   const entityCreateMutation = useMutation(
     async (newActant: IEntity | IStatement | ITerritory) =>
       await api.entityCreate(newActant),
@@ -186,6 +188,9 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
         if (openDetailOnCreate && variables.class !== EntityEnums.Class.Value) {
           appendDetailId(variables.id);
           setSelectedDetailId(variables.id);
+        }
+        if (variables.class === EntityEnums.Class.Territory) {
+          queryClient.invalidateQueries("tree");
         }
       },
     }
