@@ -139,7 +139,7 @@ export const StatementEditorActantIdentification: React.FC<
                 ),
               });
             }}
-            classEntitiesActant={[EntityEnums.Class.Concept]}
+            classEntitiesActant={classEntitiesActant}
             loading={updateStatementDataMutation.isLoading}
             isInsideTemplate={isInsideTemplate}
             territoryParentId={territoryParentId}
