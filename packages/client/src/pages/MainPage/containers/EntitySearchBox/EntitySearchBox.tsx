@@ -1,10 +1,10 @@
 import { entityStatusDict, languageDict } from "@shared/dictionaries";
-import { DropdownItem, entitiesDict } from "@shared/dictionaries/entity";
+import { entitiesDict } from "@shared/dictionaries/entity";
 import { EntityEnums } from "@shared/enums";
-import { IEntity, IOption } from "@shared/types";
+import { IEntity } from "@shared/types";
 import { IRequestSearch } from "@shared/types/request-search";
 import api from "api";
-import { Button, Dropdown, Input, Loader, TypeBar } from "components";
+import { Dropdown, Input, Loader, TypeBar } from "components";
 import {
   AttributeButtonGroup,
   EntitySuggester,
@@ -16,6 +16,7 @@ import { RiCloseFill } from "react-icons/ri";
 import { useQuery } from "react-query";
 import { OptionTypeBase, ValueType } from "react-select";
 import { wildCardChar } from "Theme/constants";
+import { DropdownItem } from "types";
 import useResizeObserver from "use-resize-observer";
 import {
   StyledBoxContent,
@@ -78,7 +79,7 @@ export const EntitySearchBox: React.FC = () => {
 
   const debouncedResultsHeight = useDebounce(height, 20);
 
-  const statusOptionSelected: IOption = useMemo(() => {
+  const statusOptionSelected: DropdownItem = useMemo(() => {
     if (!!debouncedValues.status) {
       return (
         statusOptions.find((option) => {
@@ -89,7 +90,7 @@ export const EntitySearchBox: React.FC = () => {
     return defaultStatusOption;
   }, [debouncedValues.status]);
 
-  const languageOptionSelected: IOption = useMemo(() => {
+  const languageOptionSelected: DropdownItem = useMemo(() => {
     if (!!debouncedValues.language) {
       return (
         languageOptions.find((option) => {
@@ -276,12 +277,12 @@ export const EntitySearchBox: React.FC = () => {
               setClassOption(option as DropdownItem);
               setTemplateOption(defaultClassOption);
               handleChange({
-                class: (option as IOption).value,
+                class: (option as DropdownItem).value,
                 usedTemplate: defaultClassOption.value,
               });
             }}
           />
-          <TypeBar entityLetter={(classOption as IOption).value} />
+          <TypeBar entityLetter={(classOption as DropdownItem).value} />
         </div>
       </StyledRow>
 
@@ -295,11 +296,11 @@ export const EntitySearchBox: React.FC = () => {
             value={statusOptionSelected}
             onChange={(option: ValueType<OptionTypeBase, any>) => {
               handleChange({
-                status: (option as IOption).value,
+                status: (option as DropdownItem).value,
               });
             }}
           />
-          <TypeBar entityLetter={(classOption as IOption).value} />
+          <TypeBar entityLetter={(classOption as DropdownItem).value} />
         </div>
       </StyledRow>
 
@@ -313,11 +314,11 @@ export const EntitySearchBox: React.FC = () => {
             value={languageOptionSelected}
             onChange={(option: ValueType<OptionTypeBase, any>) => {
               handleChange({
-                language: (option as IOption).value,
+                language: (option as DropdownItem).value,
               });
             }}
           />
-          <TypeBar entityLetter={(classOption as IOption).value} />
+          <TypeBar entityLetter={(classOption as DropdownItem).value} />
         </div>
       </StyledRow>
 
@@ -330,7 +331,7 @@ export const EntitySearchBox: React.FC = () => {
           value={templateOption}
           onChange={(option: ValueType<OptionTypeBase, any>) => {
             setTemplateOption(option);
-            handleChange({ usedTemplate: (option as IOption).value });
+            handleChange({ usedTemplate: (option as DropdownItem).value });
           }}
         />
       </StyledRow> */}
