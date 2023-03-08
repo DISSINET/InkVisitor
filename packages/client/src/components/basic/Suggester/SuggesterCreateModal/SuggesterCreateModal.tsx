@@ -1,6 +1,5 @@
 import { languageDict } from "@shared/dictionaries";
 import { EntityEnums, UserEnums } from "@shared/enums";
-import { IOption } from "@shared/types";
 import api from "api";
 import {
   Button,
@@ -18,18 +17,17 @@ import {
 } from "components";
 import { EntitySuggester, EntityTag } from "components/advanced";
 import React, { useEffect, useState } from "react";
-import { FaUnlink } from "react-icons/fa";
 import { useQuery } from "react-query";
 import { OptionTypeBase, ValueType } from "react-select";
 import { toast } from "react-toastify";
 import { DropdownAny } from "Theme/constants";
-import { SuggesterItemToCreate } from "types";
+import { DropdownItem, SuggesterItemToCreate } from "types";
 import { StyledContent, StyledNote } from "./SuggesterCreateModalStyles";
 
 interface SuggesterCreateModal {
   typed: string;
-  category: IOption;
-  categories: IOption[];
+  category: DropdownItem;
+  categories: DropdownItem[];
   defaultLanguage: EntityEnums.Language | false;
   onCreate: (item: SuggesterItemToCreate) => void;
   closeModal: () => void;
@@ -48,7 +46,7 @@ export const SuggesterCreateModal: React.FC<SuggesterCreateModal> = ({
     setShowModal(true);
   }, []);
 
-  const [selectedCategory, setSelectedCategory] = useState<IOption>(
+  const [selectedCategory, setSelectedCategory] = useState<DropdownItem>(
     category.value !== DropdownAny ? category : categories[0]
   );
   const [selectedLanguage, setSelectedLanguage] =
@@ -123,7 +121,7 @@ export const SuggesterCreateModal: React.FC<SuggesterCreateModal> = ({
                 }}
                 options={categories}
                 onChange={(option: ValueType<OptionTypeBase, any>) => {
-                  setSelectedCategory(option as IOption);
+                  setSelectedCategory(option as DropdownItem);
                 }}
                 width={40}
                 entityDropdown

@@ -1,5 +1,4 @@
 import { allEntities } from "@shared/dictionaries/entity";
-import { IOption } from "@shared/types";
 import React, { ReactNode, useEffect, useState } from "react";
 import {
   components,
@@ -84,7 +83,7 @@ export const Dropdown: React.FC<Dropdown> = ({
         isDisabled={disabled || isOneOptionSingleSelect}
         isOneOptionSingleSelect={isOneOptionSingleSelect}
         entityDropdown={entityDropdown}
-        wildCardChar={(value as IOption)?.label === "*"}
+        wildCardChar={(value as DropdownItem)?.label === "*"}
         className="react-select-container"
         classNamePrefix="react-select"
         placeholder={placeholder}

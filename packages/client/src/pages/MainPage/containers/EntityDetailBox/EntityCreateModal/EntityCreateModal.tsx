@@ -1,7 +1,7 @@
 import { entitiesDictKeys, languageDict } from "@shared/dictionaries";
 import { classesAll } from "@shared/dictionaries/entity";
 import { EntityEnums, UserEnums } from "@shared/enums";
-import { IEntity, IOption } from "@shared/types";
+import { IEntity } from "@shared/types";
 import api from "api";
 import {
   Button,
@@ -24,6 +24,7 @@ import { useMutation, useQuery, useQueryClient } from "react-query";
 import { OptionTypeBase, ValueType } from "react-select";
 import { toast } from "react-toastify";
 import { excludedSuggesterEntities, rootTerritoryId } from "Theme/constants";
+import { DropdownItem } from "types";
 import { StyledContent, StyledNote } from "./EntityCreateModalStyles";
 
 interface EntityCreateModal {
@@ -39,7 +40,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
 
   const [detailTyped, setDetailTyped] = useState("");
   const [selectedLanguage, setSelectedLanguage] = useState<any>(false);
-  const [selectedCategory, setSelectedCategory] = useState<IOption>({
+  const [selectedCategory, setSelectedCategory] = useState<DropdownItem>({
     value: entitiesDictKeys[allowedEntityClasses[0]].value,
     label: entitiesDictKeys[allowedEntityClasses[0]].label,
   });
@@ -212,7 +213,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
                   selectedOption: ValueType<OptionTypeBase, any>
                 ) => {
                   if (selectedOption)
-                    setSelectedCategory(selectedOption as IOption);
+                    setSelectedCategory(selectedOption as DropdownItem);
                 }}
                 onTyped={(newType: string) => setLabelTyped(newType)}
                 disableCreate

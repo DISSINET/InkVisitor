@@ -2,7 +2,6 @@ import { entitiesDictKeys } from "@shared/dictionaries";
 import { EntityEnums, UserEnums } from "@shared/enums";
 import {
   IEntity,
-  IOption,
   IProp,
   IReference,
   IResponseDetail,
@@ -112,7 +111,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
     return selectedEntityType ? entitiesDictKeys[selectedEntityType].label : "";
   }, [selectedEntityType]);
 
-  const handleAskForTemplateApply = (templateOptionToApply: IOption) => {
+  const handleAskForTemplateApply = (templateOptionToApply: DropdownItem) => {
     if (templates) {
       const templateThatIsGoingToBeApplied = templates.find(
         (template: IEntity) => template.id === templateOptionToApply.value

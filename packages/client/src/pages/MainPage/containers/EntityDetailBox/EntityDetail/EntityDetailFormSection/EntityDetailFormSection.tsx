@@ -5,7 +5,7 @@ import {
   languageDict,
 } from "@shared/dictionaries";
 import { EntityEnums } from "@shared/enums";
-import { IOption, IResponseDetail, IResponseGeneric } from "@shared/types";
+import { IResponseDetail, IResponseGeneric } from "@shared/types";
 import { AxiosResponse } from "axios";
 import { Button, Dropdown, Input, MultiInput, TypeBar } from "components";
 import { AttributeButtonGroup, EntityTag } from "components/advanced";
@@ -45,7 +45,7 @@ interface EntityDetailFormSection {
     value: React.SetStateAction<EntityEnums.Class | undefined>
   ) => void;
   setShowTypeSubmit: (value: React.SetStateAction<boolean>) => void;
-  handleAskForTemplateApply: (templateOptionToApply: IOption) => void;
+  handleAskForTemplateApply: (templateOptionToApply: DropdownItem) => void;
   isTerritoryWithParent: (entity: IResponseDetail) => boolean;
   isStatementWithTerritory: (entity: IResponseDetail) => boolean;
 }
@@ -106,7 +106,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                     )}
                     onChange={(option: ValueType<OptionTypeBase, any>) => {
                       setSelectedEntityType(
-                        (option as IOption).value as EntityEnums.Class
+                        (option as DropdownItem).value as EntityEnums.Class
                       );
                       setShowTypeSubmit(true);
                     }}

@@ -1,6 +1,6 @@
 import { entitiesDictKeys } from "@shared/dictionaries";
 import { EntityEnums } from "@shared/enums";
-import { IEntity, IOption, IUserOptions } from "@shared/types";
+import { IEntity, IUserOptions } from "@shared/types";
 import {
   Button,
   Dropdown,
@@ -20,6 +20,7 @@ import { FixedSizeList as List } from "react-window";
 import { DropdownAny, scrollOverscanCount } from "Theme/constants";
 import theme from "Theme/theme";
 import {
+  DropdownItem,
   EntityDragItem,
   EntitySuggestion,
   ItemTypes,
@@ -47,8 +48,8 @@ interface Suggester {
   suggestions: EntitySuggestion[];
   placeholder?: string; // text to display when typed === ""
   typed: string; // input value
-  category: IOption; // selected category
-  categories: IOption[]; // all possible categories
+  category: DropdownItem; // selected category
+  categories: DropdownItem[]; // all possible categories
   suggestionListPosition?: string; // todo not implemented yet
   disabled?: boolean; // todo not implemented yet
   inputWidth?: number | "full";
