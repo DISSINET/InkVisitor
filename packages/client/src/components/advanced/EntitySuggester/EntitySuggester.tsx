@@ -1,5 +1,5 @@
 import { EntityEnums, UserEnums } from "@shared/enums";
-import { IEntity, IOption, IStatement, ITerritory } from "@shared/types";
+import { IEntity, IStatement, ITerritory } from "@shared/types";
 import api from "api";
 import { Suggester } from "components";
 import { CEntity, CStatement, CTerritory, InstTemplate } from "constructors";
@@ -9,7 +9,7 @@ import { FaHome } from "react-icons/fa";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { OptionTypeBase, ValueType } from "react-select";
 import { DropdownAny, rootTerritoryId, wildCardChar } from "Theme/constants";
-import { EntityDragItem, SuggesterItemToCreate } from "types";
+import { DropdownItem, EntityDragItem, SuggesterItemToCreate } from "types";
 
 interface EntitySuggester {
   categoryTypes: EntityEnums.ExtendedClass[];
@@ -63,7 +63,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
   const [typed, setTyped] = useState<string>("");
   const debouncedTyped = useDebounce(typed, 100);
   const [selectedCategory, setSelectedCategory] = useState<any>();
-  const [allCategories, setAllCategories] = useState<IOption[]>();
+  const [allCategories, setAllCategories] = useState<DropdownItem[]>();
 
   const { appendDetailId, setSelectedDetailId } = useSearchParams();
   const userRole = localStorage.getItem("userrole");
@@ -156,7 +156,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
 
   // initial load of categories
   useEffect(() => {
-    const categories: IOption[] = [];
+    const categories: DropdownItem[] = [];
     categoryTypes.forEach((category) => {
       categories.push({
         label: category.valueOf(),

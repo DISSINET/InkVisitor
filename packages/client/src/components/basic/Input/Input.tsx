@@ -1,5 +1,5 @@
-import { IOption } from "@shared/types";
 import React, { useEffect, useState } from "react";
+import { DropdownItem } from "types";
 import {
   Label,
   StyledInput,
@@ -15,7 +15,7 @@ interface Input {
   inverted?: boolean;
   suggester?: boolean;
   type?: "text" | "textarea" | "select";
-  options?: IOption[];
+  options?: DropdownItem[];
   rows?: number;
   cols?: number;
   width?: number | "full";

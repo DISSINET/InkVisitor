@@ -1,21 +1,13 @@
 import { EntityEnums, UserEnums } from "@shared/enums";
 import {
   IEntity,
-  IOption,
   IReference,
   IResponseStatement,
   IStatementActant,
   IStatementAction,
 } from "@shared/types";
 import api from "api";
-import {
-  Button,
-  Dropdown,
-  Input,
-  Loader,
-  MultiInput,
-  Submit,
-} from "components";
+import { Dropdown, Input, Loader, MultiInput, Submit } from "components";
 import {
   ApplyTemplateModal,
   AuditTable,
@@ -33,7 +25,6 @@ import {
 } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
-import { FaUnlink } from "react-icons/fa";
 import { UseMutationResult, useQuery, useQueryClient } from "react-query";
 import { toast } from "react-toastify";
 import { useAppSelector } from "redux/hooks";
@@ -154,7 +145,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     false
   );
 
-  const handleAskForTemplateApply = (templateOptionToApply: IOption) => {
+  const handleAskForTemplateApply = (templateOptionToApply: DropdownItem) => {
     if (templates) {
       const templateThatIsGoingToBeApplied = templates.find(
         (template: IEntity) => template.id === templateOptionToApply.value

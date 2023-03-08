@@ -1,5 +1,5 @@
+import { DropdownItem } from "types";
 import { EntityEnums } from "../enums";
-export type DropdownItem = { value: string; label: string; info?: string };
 
 export const allEntities: DropdownItem = {
   value: EntityEnums.Extension.Any,
