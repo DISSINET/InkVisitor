@@ -309,7 +309,6 @@ describe("models/response-search", function () {
     });
   })
 
-
   describe("search by classes", function() {
     let db: Db;
     const rand = Math.random().toString();
@@ -385,6 +384,63 @@ describe("models/response-search", function () {
           throw new Error(`existing class for one class entry not satisfied`);
         }
     });
+    });
+  })
+
+  describe("search by grouped conditions", function() {
+    let db: Db;
+    const rand = Math.random().toString();
+
+    const [, entity1] = prepareEntity();
+    entity1.class = EntityEnums.Class.Action
+    const [, entity2] = prepareEntity();
+    entity2.class = EntityEnums.Class.Group
+    const [, entity3] = prepareEntity();
+    entity3.class = EntityEnums.Class.Location
+    const [, entity4] = prepareEntity();
+    entity4.class = EntityEnums.Class.Location
+
+    beforeAll(async () => {
+      db = new Db();
+      await db.initDb();
+
+      await entity1.save(db.connection);
+      await entity2.save(db.connection);
+      await entity3.save(db.connection);
+      await entity4.save(db.connection);
+    });
+
+    afterAll(async () => {
+      await deleteEntities(db);
+      await db.close();
+    });
+
+    describe("search for class while restricting results by id", () => {
+      it("should return empty list if class-entity does not have provided id", async () => {
+          const entities = await new SearchQuery(db.connection)
+            .whereEntityIds([entity2.id, entity3.id, entity4.id])
+            .whereClass(entity1.class)
+            .do();
+          try {
+            expect(entities).toHaveLength(0);
+          } catch (e) {
+            throw new Error(`whereClass + whereEntityIds without match not satisfied`);
+          }
+      });
+
+      it("should return entities that match both filters", async () => {
+        const entities = await new SearchQuery(db.connection)
+          .whereEntityIds([entity1, entity2, entity3, entity4].map(e => e.id))
+          .whereClass(entity3.class)
+          .do();
+        try {
+          expect(entities).toHaveLength(2);
+          expect(entities.find(e => e.id === entity3.id)).toBeTruthy();
+          expect(entities.find(e => e.id === entity4.id)).toBeTruthy();
+        } catch (e) {
+          throw new Error(`whereClass + whereEntityIds with match not satisfied`);
+        }
+      });
     });
   })
 });
