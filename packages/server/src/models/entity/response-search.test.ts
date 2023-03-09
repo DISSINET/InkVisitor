@@ -256,4 +256,135 @@ describe("models/response-search", function () {
       });
     });
   });
+
+  describe("search by language", function() {
+    let db: Db;
+    const rand = Math.random().toString();
+
+    const [, entity1] = prepareEntity();
+    entity1.language = EntityEnums.Language.Czech
+    const [, entity2] = prepareEntity();
+    entity2.language = EntityEnums.Language.German
+    const [, entity3] = prepareEntity();
+    entity3.language = EntityEnums.Language.Czech
+
+    beforeAll(async () => {
+      db = new Db();
+      await db.initDb();
+
+      await entity1.save(db.connection);
+      await entity2.save(db.connection);
+      await entity3.save(db.connection);
+    });
+
+    afterAll(async () => {
+      await deleteEntities(db);
+      await db.close();
+    });
+
+    describe("search for non existing language", () => {
+      it("should return empty list", async () => {
+          const entities = await new SearchQuery(db.connection)
+            .whereLanguage(EntityEnums.Language.Hungarian)
+            .do();
+          try {
+            expect(entities).toHaveLength(0);
+          } catch (e) {
+            throw new Error(`non-existing language not satisfied`);
+          }
+      });
+    });
+
+    describe("search for existing language present in 2 entities", () => {
+      it("should return list of 2 results", async () => {
+          const entities = await new SearchQuery(db.connection)
+            .whereLanguage(EntityEnums.Language.Czech)
+            .do();
+          try {
+            expect(entities).toHaveLength(2);
+          } catch (e) {
+            throw new Error(`existing language present in 2 entities not satisfied`);
+          }
+      });
+    });
+  })
+
+
+  describe("search by classes", function() {
+    let db: Db;
+    const rand = Math.random().toString();
+
+    const [, entity1] = prepareEntity();
+    entity1.class = EntityEnums.Class.Action
+    const [, entity2] = prepareEntity();
+    entity2.class = EntityEnums.Class.Group
+    const [, entity3] = prepareEntity();
+    entity3.class = EntityEnums.Class.Location
+    const [, entity4] = prepareEntity();
+    entity4.class = EntityEnums.Class.Location
+
+    beforeAll(async () => {
+      db = new Db();
+      await db.initDb();
+
+      await entity1.save(db.connection);
+      await entity2.save(db.connection);
+      await entity3.save(db.connection);
+      await entity4.save(db.connection);
+    });
+
+    afterAll(async () => {
+      await deleteEntities(db);
+      await db.close();
+    });
+
+    describe("search for entities by evading a class values", () => {
+      it("should return empty list if not wanting any of stored classes", async () => {
+          const entities = await new SearchQuery(db.connection)
+            .whereNotClass([entity1, entity2, entity3].map(e => e.class))
+            .do();
+          try {
+            expect(entities).toHaveLength(0);
+          } catch (e) {
+            throw new Error(`whereNotClass (1) not satisfied`);
+          }
+      });
+
+      it("should return entities which does not have particular classes", async () => {
+        const entities = await new SearchQuery(db.connection)
+          .whereNotClass([entity1, entity2].map(e => e.class))
+          .do();
+        try {
+          expect(entities).toHaveLength(2);
+          expect(entities.find(e => e.id === entity4.id)).toBeTruthy();
+        } catch (e) {
+          throw new Error(`whereNotClass (2) not satisfied`);
+        }
+    });
+    });
+
+    describe("search for specific class", () => {
+      it("should return list of 2 results if there are 2 entities with the same class", async () => {
+          const entities = await new SearchQuery(db.connection)
+          .whereClass(entity3.class)
+            .do();
+          try {
+            expect(entities).toHaveLength(2);
+          } catch (e) {
+            throw new Error(`existing class for two locations not satisfied`);
+          }
+      });
+
+      it("should return list of 1 result if there is only one entity with the class", async () => {
+        const entities = await new SearchQuery(db.connection)
+          .whereClass(entity1.class)
+          .do();
+        try {
+          expect(entities).toHaveLength(1);
+        } catch (e) {
+          throw new Error(`existing class for one class entry not satisfied`);
+        }
+    });
+    });
+  })
 });
