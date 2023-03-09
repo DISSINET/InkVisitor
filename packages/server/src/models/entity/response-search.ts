@@ -70,7 +70,7 @@ export class SearchQuery {
    */
   whereClass(entityClass: EntityEnums.Class): SearchQuery {
     this.query = this.query.filter({
-      class: entityClass,
+      "class": entityClass,
     });
 
     return this;
@@ -233,7 +233,8 @@ export class SearchQuery {
   }
 
   /**
-   * adds condition to limit the query only to selected ids
+   * adds condition to limit the query only to selected ids.
+   * Note: this filter should be applied last.
    * @param entityIds
    * @returns
    */
@@ -326,10 +327,6 @@ export class SearchQuery {
       }
     }
 
-    if (req.entityIds) {
-      this.whereEntityIds(req.entityIds);
-    }
-
     if (req.usedTemplate) {
       this.whereUsedTemplate(req.usedTemplate);
     }
@@ -348,6 +345,10 @@ export class SearchQuery {
 
     if (req.label) {
       this.whereLabel(req.label);
+    }
+
+    if (req.entityIds) {
+      this.whereEntityIds(req.entityIds);
     }
 
     console.log(this.query.toString());
