@@ -134,7 +134,7 @@ export class SearchQuery {
   }
 
   /**
-   * adds condition to limit results to entries with isTemplate = true flag
+   * adds condition to filter entries with language
    * @returns
    */
   whereLanguage(language: EntityEnums.Language): SearchQuery {
