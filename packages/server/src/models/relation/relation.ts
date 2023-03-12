@@ -70,10 +70,34 @@ export default class Relation implements IRelationModel {
   }
 
   /**
-  * areEntitiesValid checks if entities have acceptable classes
+   * tests if entities data are acceptable, for now tests only if entities are not templates
+   * @returns
+   */
+  validateEntitiesData(): Error | null {
+    for (const i in this.entityIds) {
+      const loadedEntity = this.entities?.find(e => e.id === this.entityIds[i]);
+      if (!loadedEntity) {
+        return new InternalServerError('', `cannot check entity's class - not preloaded`);
+      }
+
+      if (loadedEntity.isTemplate) {
+        return new ModelNotValidError(`Entity ${loadedEntity.id} must not be a template`);
+      }
+    }
+
+    return null;
+  }
+
+  /**
+  * validateEntities checks if entities can be used in the relation
   * @returns
   */
-  areEntitiesValid(): Error | null {
+  validateEntities(): Error | null {
+    const entityNotAllowedError = this.validateEntitiesData()
+    if (entityNotAllowedError) {
+      return entityNotAllowedError;
+    }
+
     const rules = RelationTypes.RelationRules[this.type];
     if (!rules) {
       return new InternalServerError(`Missing rules for relation type '${this.type}'`);
@@ -127,7 +151,7 @@ export default class Relation implements IRelationModel {
       }
     }
 
-    const err = this.areEntitiesValid();
+    const err = this.validateEntities();
     if (err) {
       throw err;
     }
