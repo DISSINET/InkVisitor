@@ -133,10 +133,10 @@ describe("test Relation.beforeSave", function () {
   });
 });
 
-describe("test Relation.areEntitiesValid", function () {
+describe("test Relation.validateEntities", function () {
   test("missing preloaded entities", () => {
     const relation = new Relation({ entityIds: ["1", "2"] });
-    expect(relation.areEntitiesValid()).toBeInstanceOf(InternalServerError);
+    expect(relation.validateEntities()).toBeInstanceOf(InternalServerError);
   });
 
   test("test synonym (success)", () => {
@@ -145,7 +145,7 @@ describe("test Relation.areEntitiesValid", function () {
     relation.entities.push(new Entity({ id: "1", class: EntityEnums.Class.Concept }));
     relation.entities.push(new Entity({ id: "2", class: EntityEnums.Class.Concept }));
 
-    expect(relation.areEntitiesValid()).toBeNull();
+    expect(relation.validateEntities()).toBeNull();
   });
 
   test("test synonym (fail)", () => {
@@ -154,7 +154,7 @@ describe("test Relation.areEntitiesValid", function () {
     relation.entities.push(new Entity({ id: "1", class: EntityEnums.Class.Concept }));
     relation.entities.push(new Entity({ id: "2", class: EntityEnums.Class.Action }));
 
-    expect(relation.areEntitiesValid()).toBeInstanceOf(ModelNotValidError);
+    expect(relation.validateEntities()).toBeInstanceOf(ModelNotValidError);
   });
 
   test("test classification (success)", () => {
@@ -163,7 +163,7 @@ describe("test Relation.areEntitiesValid", function () {
     relation.entities.push(new Entity({ id: "1", class: EntityEnums.Class.Event }));
     relation.entities.push(new Entity({ id: "2", class: EntityEnums.Class.Concept }));
 
-    expect(relation.areEntitiesValid()).toBeNull();
+    expect(relation.validateEntities()).toBeNull();
   });
 
   test("test classification (fail)", () => {
@@ -172,6 +172,18 @@ describe("test Relation.areEntitiesValid", function () {
     relation.entities.push(new Entity({ id: "1", class: EntityEnums.Class.Concept }));
     relation.entities.push(new Entity({ id: "2", class: EntityEnums.Class.Action }));
 
-    expect(relation.areEntitiesValid()).toBeInstanceOf(ModelNotValidError);
+    expect(relation.validateEntities()).toBeInstanceOf(ModelNotValidError);
+  });
+
+  test("template in entities", () => {
+    const relation = new Relation({ entityIds: ["1", "2"], type: RelationEnums.Type.Identification });
+    relation.entities = [
+      new Entity({ id: "1", class: EntityEnums.Class.Concept }),
+      new Entity({ id: "2", class: EntityEnums.Class.Action, isTemplate: true }),
+    ];
+
+    const result = relation.validateEntities()
+    expect(result).toBeInstanceOf(ModelNotValidError);
+    expect(result?.message).toContain("must not be a template");
   });
 });
