@@ -23,7 +23,7 @@ export default class Relation implements IRelationModel {
   order?: number;
 
   @nonenumerable
-  entities?: IEntity[]; // holds preloaded entities for checks
+  entities?: IEntity[]; // holds preloaded entities for validity checks
 
   constructor(data: Partial<RelationTypes.IRelation>) {
     this.id = data.id || "";
@@ -114,12 +114,8 @@ export default class Relation implements IRelationModel {
     return null;
   }
 
-  async afterSave(request: IRequest): Promise<void> {
-
-  }
-
   /**
-   * use this method for doing asynchronous operation/checks before save/create is called
+   * Use this method for doing asynchronous operation/checks before the save operation
    * @param request
    */
   async beforeSave(request: IRequest): Promise<void> {
@@ -149,7 +145,15 @@ export default class Relation implements IRelationModel {
   }
 
   /**
-   * returns list of relations with the same main entityId (minut this entity)
+   * Use this method for doing asynchronous operation/checks after the save operation
+   * @param request
+   */
+  async afterSave(request: IRequest): Promise<void> {
+
+  }
+
+  /**
+   * returns list of relations with the same main entityId (minus this entity)
    * @param db database connection
    * @returns  list of relations
    */
@@ -176,7 +180,12 @@ export default class Relation implements IRelationModel {
     return result.inserted === 1;
   }
 
-
+  /**
+   * Updates data for relation entry identified by model's id
+   * @param db
+   * @param updateData
+   * @returns
+   */
   async update(
     db: Connection | undefined,
     updateData: Record<string, unknown>
@@ -188,6 +197,13 @@ export default class Relation implements IRelationModel {
       .run(db);
   }
 
+  /**
+   * Deletes the relation entry identified by model's id.
+   * Throws an error if the id is empty.
+   * @param db
+   * @param updateData
+   * @returns
+   */
   async delete(db: Connection | undefined): Promise<WriteResult> {
     if (!this.id) {
       throw new InternalServerError(
@@ -241,18 +257,38 @@ export default class Relation implements IRelationModel {
     return true;
   }
 
+  /**
+   * Predicate for testing if the current user can view the relation entry
+   * @param user
+   * @returns
+   */
   canBeViewedByUser(user: User): boolean {
     return true;
   }
 
+  /**
+   * Predicate for testing if the current user can create the relation
+   * @param user
+   * @returns
+   */
   canBeCreatedByUser(user: User): boolean {
     return user.role !== UserEnums.Role.Viewer;
   }
 
+  /**
+   * Predicate for testing if the current user can edit the relation entry
+   * @param user
+   * @returns
+   */
   canBeEditedByUser(user: User): boolean {
     return user.role !== UserEnums.Role.Viewer;
   }
 
+  /**
+   * Predicate for testing if the current user can delete the relation entry
+   * @param user
+   * @returns
+   */
   canBeDeletedByUser(user: User): boolean {
     return user.role !== UserEnums.Role.Viewer;
   }
