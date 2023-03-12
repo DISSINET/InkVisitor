@@ -3,7 +3,7 @@ import Relation from "./relation";
 import { Relation as RelationTypes } from "@shared/types";
 import { Connection } from "rethinkdb-ts";
 import Superclass from "./superclass";
-import { ModelNotValidError } from "@shared/types/errors";
+import { InternalServerError, ModelNotValidError } from "@shared/types/errors";
 
 export default class Classification extends Relation implements RelationTypes.IClassification {
   type: RelationEnums.Type.Classification;
@@ -15,6 +15,15 @@ export default class Classification extends Relation implements RelationTypes.IC
     this.entityIds = data.entityIds as [string, string];
     this.type = RelationEnums.Type.Classification;
     this.order = data.order === undefined ? EntityEnums.Order.Last : data.order;
+  }
+
+  /**
+   * tests if entities data are acceptable, classification doesn't have any restrictions currently.
+   * issue #1271
+   * @returns
+   */
+  validateEntitiesData(): Error | null {
+    return null;
   }
 
   static async getClassificationForwardConnections(
