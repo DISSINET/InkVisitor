@@ -4,6 +4,16 @@ export enum TerritoryType {
 }
 
 export namespace EntityEnums {
+  // Helper function for testing if the class is part of PLOGESTRB group
+  export const IsPLOGESTRB = (entityClass: Class): boolean => {
+    return PLOGESTRB.indexOf(entityClass) !== -1
+  }
+
+  // Helper function for testing if the class is part of PLOGESTR group
+  export const IsPLOGESTR = (entityClass: Class): boolean => {
+    return PLOGESTR.indexOf(entityClass) !== -1
+  }
+
   export enum Class {
     Action = "A",
     Territory = "T",
