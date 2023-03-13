@@ -33,18 +33,27 @@ export default class Relation implements IRelationModel {
   }
 
   /**
+   * Getter for preloaded entity - either returns the entity or fails with InternalServerError
+   * @param entityId
+   * @returns
+   */
+  getPreloadedEntity(entityId: string): IEntity {
+    const loadedEntity = this.entities?.find(e => e.id === entityId);
+    if (!loadedEntity) {
+      throw new InternalServerError('', `cannot retrieve entity - not preloaded`);
+    }
+
+    return loadedEntity
+  }
+
+  /**
    * Shorthand for testing if entity linked to this relation if of required class.
    * Throws an InternalServerError in case the entity is not preloaded - entities should be already loaded before calling this method
    * @param entityId
    * @param acceptableClasses
    */
   hasEntityCorrectClass(entityId: string, acceptableClass: EntityEnums.Class): boolean {
-    const loadedEntity = this.entities?.find(e => e.id === entityId);
-    if (!loadedEntity) {
-      throw new InternalServerError('', `cannot check entity's class - not preloaded`);
-    }
-
-    return acceptableClass === loadedEntity.class;
+    return acceptableClass === this.getPreloadedEntity(entityId).class;
   }
 
   /**
@@ -75,11 +84,7 @@ export default class Relation implements IRelationModel {
    */
   validateEntitiesData(): Error | null {
     for (const i in this.entityIds) {
-      const loadedEntity = this.entities?.find(e => e.id === this.entityIds[i]);
-      if (!loadedEntity) {
-        return new InternalServerError('', `cannot check entity's class - not preloaded`);
-      }
-
+      const loadedEntity = this.getPreloadedEntity(this.entityIds[i])
       if (loadedEntity.isTemplate) {
         return new ModelNotValidError(`Entity ${loadedEntity.id} must not be a template`);
       }
