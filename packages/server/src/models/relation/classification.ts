@@ -18,11 +18,22 @@ export default class Classification extends Relation implements RelationTypes.IC
   }
 
   /**
-   * tests if entities data are acceptable, classification doesn't have any restrictions currently.
+   * tests if entities data are acceptable, classification cant be used if going non-template -> template
    * issue #1271
    * @returns
    */
   validateEntitiesData(): Error | null {
+    for (let i = 0; i < this.entityIds.length; i++) {
+      const loadedEntity = this.entities?.find(e => e.id === this.entityIds[i]);
+      if (!loadedEntity) {
+        return new InternalServerError('', `cannot check entity's class - not preloaded`);
+      }
+
+      if (i > 0 && loadedEntity.isTemplate) {
+        return new ModelNotValidError(`Entity ${loadedEntity.id} must not be a template`);
+      }
+    }
+
     return null;
   }
 
