@@ -1,4 +1,4 @@
-import { r as rethink, RDatum, WriteResult } from "rethinkdb-ts";
+import { Connection, r as rethink, RDatum, WriteResult } from "rethinkdb-ts";
 import { IEntity } from "@shared/types";
 import { Db } from "./RethinkDB";
 import { IDbModel } from "@models/common";
@@ -24,10 +24,11 @@ export async function getEntitiesDataByClass<T>(
 }
 
 export async function findEntityById<T extends IEntity>(
-  db: Db,
+  db: Db | Connection,
   id: string
 ): Promise<T> {
-  const data = await rethink.table(Entity.table).get(id).run(db.connection);
+  const connection = db instanceof Db ? db.connection : db;
+  const data = await rethink.table(Entity.table).get(id).run(connection);
   return data || null;
 }
 
