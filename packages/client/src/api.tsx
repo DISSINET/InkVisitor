@@ -16,6 +16,7 @@ import {
   ITerritory,
   Relation,
   EntityTooltip,
+  IReference,
 } from "@shared/types";
 import * as errors from "@shared/types/errors";
 import { IRequestSearch } from "@shared/types/request-search";
@@ -571,6 +572,36 @@ class Api {
         }
       );
       // response.data.data should have list of new ids
+      return response;
+    } catch (err: any | AxiosError) {
+      throw { ...err.response.data };
+    }
+  }
+
+  async statementsReferencesReplace(
+    statementsIds: string[],
+    references: IReference[]
+  ): Promise<AxiosResponse<IResponseGeneric>> {
+    try {
+      const response = await this.connection.post(
+        `/statements/references?ids=${statementsIds.join(",")}?replace=true`,
+        references
+      );
+      return response;
+    } catch (err: any | AxiosError) {
+      throw { ...err.response.data };
+    }
+  }
+
+  async statementsReferencesAppend(
+    statementsIds: string[],
+    references: IReference[]
+  ): Promise<AxiosResponse<IResponseGeneric>> {
+    try {
+      const response = await this.connection.post(
+        `/statements/references?ids=${statementsIds.join(",")}`,
+        references
+      );
       return response;
     } catch (err: any | AxiosError) {
       throw { ...err.response.data };

@@ -174,7 +174,7 @@ export default Router()
    *       - entities
    *     parameters:
    *       - in: query
-   *         name: statementId
+   *         name: ids
    *         schema:
    *           type: array
    *           items:
@@ -252,7 +252,7 @@ export default Router()
   *       - entities
   *     parameters:
   *       - in: query
-  *         name: statementId
+  *         name: ids
   *         schema:
   *           type: array
   *           items:
@@ -336,7 +336,7 @@ export default Router()
   *       - entities
   *     parameters:
   *       - in: query
-  *         name: statementIds
+  *         name: ids
   *         schema:
   *           type: array
   *           items:
@@ -366,7 +366,7 @@ export default Router()
   .put(
     "/references",
     asyncRouteHandler<IResponseGeneric>(async (request: IRequest) => {
-      const statementIds = request.query.statementIds;
+      const statementIds = request.query.ids;
       const replaceAction = !!request.query.replace;
       const referencesData = request.body as IReference[];
 
