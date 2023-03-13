@@ -124,7 +124,7 @@ export default Router()
    *           application/json:
    *             schema:
    *               type: array
-   *               items: 
+   *               items:
    *                 $ref: "#/components/schemas/IResponseEntity"
    */
   .get(
@@ -153,11 +153,11 @@ export default Router()
    *       - entities
    *     requestBody:
    *       description: Entity object
-   *       content: 
+   *       content:
    *         application/json:
    *           schema:
    *             allOf:
-   *               - $ref: "#/components/schemas/IEntity"               
+   *               - $ref: "#/components/schemas/IEntity"
    *     responses:
    *       200:
    *         description: Returns generic response
@@ -186,11 +186,16 @@ export default Router()
         throw new InternalServerError(`cannot create entity`);
       }
 
+      if (model.usedTemplate) {
+        model.applyTemplate(request, model.usedTemplate)
+      }
+
       await Audit.createNew(
         request,
         model.id,
         request.body
       );
+
       return {
         result: true,
       };
@@ -212,11 +217,11 @@ export default Router()
    *         description: ID of the entity entry
    *     requestBody:
    *       description: Entity object
-   *       content: 
+   *       content:
    *         application/json:
    *           schema:
    *             allOf:
-   *               - $ref: "#/components/schemas/IEntity"               
+   *               - $ref: "#/components/schemas/IEntity"
    *     responses:
    *       200:
    *         description: Returns generic response
@@ -290,7 +295,7 @@ export default Router()
    *         schema:
    *           type: string
    *         required: true
-   *         description: ID of the entity entry             
+   *         description: ID of the entity entry
    *     responses:
    *       200:
    *         description: Returns generic response
@@ -360,7 +365,7 @@ export default Router()
    *           application/json:
    *             schema:
    *               type: array
-   *               items: 
+   *               items:
    *                 $ref: "#/components/schemas/IResponseDetail"
    */
   .get(

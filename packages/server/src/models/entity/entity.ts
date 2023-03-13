@@ -15,6 +15,10 @@ import User from "@models/user/user";
 import emitter from "@models/events/emitter";
 import { EventTypes } from "@models/events/types";
 import Prop from "@models/prop/prop";
+import { findEntityById } from "@service/shorthands";
+import Relation from "@models/relation/relation";
+import { getRelationClass} from "@models/factory"
+import { IRequest } from "src/custom_typings/request";
 
 export default class Entity implements IEntity, IDbModel {
   static table = "entities";
@@ -214,6 +218,42 @@ export default class Entity implements IEntity, IDbModel {
     return Object.keys(entityIds);
   }
 
+  /**
+   * Applies the template for entity:
+   *  - applies altered label if not provided
+   *  - copies relations from template
+   * @param db
+   * @param templateId
+   */
+  async applyTemplate(req: IRequest, templateId: string): Promise<void> {
+    const template = await findEntityById(req.db.connection, templateId)
+    if (!template) {
+      throw new InternalServerError('', `Cannot apply template - template ${templateId} not found`)
+    }
+
+    this.usedTemplate = templateId;
+    this.isTemplate = false;
+    if (!this.label) {
+      this.label = `${template.label} (from template)`
+    }
+
+    const relations = await Relation.getForEntity(req.db.connection, templateId);
+    for (let i = 0; i < relations.length; i++) {
+      const relation = getRelationClass(relations[i]);
+
+      // relation should be created anew
+      relation.id = "";
+
+      // replace template id with this.id
+      const templateIdIndex = relation.entityIds.findIndex(eid => eid === templateId)
+      relation.entityIds[templateIdIndex] = this.id;
+
+
+      await relation.beforeSave(req);
+      await relation.save(req.db.connection);
+      await relation.afterSave(req)
+    }
+  }
 
   static extractIdsFromReferences(references: IReference[]): string[] {
     let out: string[] = [];
