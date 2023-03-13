@@ -3,7 +3,7 @@ import Relation from "./relation";
 import { Relation as RelationTypes } from "@shared/types";
 import { Connection } from "rethinkdb-ts";
 import Superclass from "./superclass";
-import { ModelNotValidError } from "@shared/types/errors";
+import { InternalServerError, ModelNotValidError } from "@shared/types/errors";
 
 export default class Classification extends Relation implements RelationTypes.IClassification {
   type: RelationEnums.Type.Classification;
@@ -15,6 +15,26 @@ export default class Classification extends Relation implements RelationTypes.IC
     this.entityIds = data.entityIds as [string, string];
     this.type = RelationEnums.Type.Classification;
     this.order = data.order === undefined ? EntityEnums.Order.Last : data.order;
+  }
+
+  /**
+   * tests if entities data are acceptable, classification cant be used if going non-template -> template
+   * issue #1271
+   * @returns
+   */
+  validateEntitiesData(): Error | null {
+    for (let i = 0; i < this.entityIds.length; i++) {
+      const loadedEntity = this.entities?.find(e => e.id === this.entityIds[i]);
+      if (!loadedEntity) {
+        return new InternalServerError('', `cannot check entity's class - not preloaded`);
+      }
+
+      if (i > 0 && loadedEntity.isTemplate) {
+        return new ModelNotValidError(`Entity ${loadedEntity.id} must not be a template`);
+      }
+    }
+
+    return null;
   }
 
   static async getClassificationForwardConnections(
