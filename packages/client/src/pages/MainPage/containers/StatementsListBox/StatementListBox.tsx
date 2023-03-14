@@ -1,5 +1,10 @@
 import { EntityEnums, UserEnums } from "@shared/enums";
-import { IEntity, IResponseStatement, IStatement } from "@shared/types";
+import {
+  IEntity,
+  IReference,
+  IResponseStatement,
+  IStatement,
+} from "@shared/types";
 import api from "api";
 import { Loader, Submit } from "components";
 import { CStatement, DStatement } from "constructors";
@@ -325,6 +330,26 @@ export const StatementListBox: React.FC = () => {
         );
         setSelectedRows([]);
         setTerritoryId(data.newTerritoryId);
+      },
+    }
+  );
+
+  const replaceReferencesMutation = useMutation(
+    async (references: IReference[]) =>
+      await api.statementsReferencesReplace(selectedRows, references),
+    {
+      onSuccess: (variables, references) => {
+        // TODO:
+      },
+    }
+  );
+
+  const appendReferencesMutation = useMutation(
+    async (references: IReference[]) =>
+      await api.statementsReferencesAppend(selectedRows, references),
+    {
+      onSuccess: (variables, references) => {
+        // TODO:
       },
     }
   );

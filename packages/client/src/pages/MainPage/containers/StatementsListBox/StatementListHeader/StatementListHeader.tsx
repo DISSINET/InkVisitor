@@ -1,3 +1,4 @@
+import { entitiesDictKeys } from "@shared/dictionaries";
 import { EntityEnums, UserEnums } from "@shared/enums";
 import {
   IResponseGeneric,
@@ -6,25 +7,22 @@ import {
   IResponseTree,
   IStatement,
 } from "@shared/types";
+import { DropdownItem } from "types";
 import api from "api";
 import { AxiosResponse } from "axios";
-import { Button, ButtonGroup } from "components";
-import {
-  AttributeButtonGroup,
-  BreadcrumbItem,
-  EntitySuggester,
-} from "components/advanced";
+import { Button, ButtonGroup, Dropdown } from "components";
+import { BreadcrumbItem, EntitySuggester } from "components/advanced";
 import { CStatement } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
-import { FaClone, FaPlus, FaRecycle } from "react-icons/fa";
-import { ImBoxRemove } from "react-icons/im";
+import { FaPlus, FaRecycle } from "react-icons/fa";
 import {
   MdOutlineCheckBox,
   MdOutlineCheckBoxOutlineBlank,
   MdOutlineIndeterminateCheckBox,
 } from "react-icons/md";
 import { UseMutationResult, useQuery, useQueryClient } from "react-query";
+import { OptionTypeBase, ValueType } from "react-select";
 import { setLastClickedIndex } from "redux/features/statementList/lastClickedIndexSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import theme from "Theme/theme";
@@ -104,6 +102,25 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
   const dispatch = useAppDispatch();
   const queryClient = useQueryClient();
   const { territoryId, setTerritoryId } = useSearchParams();
+
+  const batchOptions = [
+    { value: `move S`, label: `move ${selectedRows.length} S`, info: "T" },
+    {
+      value: `duplicate S`,
+      label: `duplicate ${selectedRows.length} S`,
+      info: "T",
+    },
+    {
+      value: `replace R`,
+      label: `replace R for ${selectedRows.length} S`,
+      info: "R",
+    },
+    {
+      value: `append R`,
+      label: `append R for ${selectedRows.length} S`,
+      info: "R",
+    },
+  ];
 
   const treeData: IResponseTree | undefined = queryClient.getQueryData("tree");
 
@@ -238,6 +255,8 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
     }
   };
 
+  const [batchAction, setBatchAction] = useState<DropdownItem>(batchOptions[0]);
+
   return (
     <StyledHeader>
       <StyledHeaderBreadcrumbRow>
@@ -286,7 +305,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
 
           {
             <>
-              <AttributeButtonGroup
+              {/* <AttributeButtonGroup
                 options={[
                   {
                     longValue: `move ${selectedRows.length} S`,
@@ -304,13 +323,26 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
                   },
                 ]}
                 disabled={selectedRows.length === 0}
+              /> */}
+              <Dropdown
+                width={100}
+                disabled={selectedRows.length === 0}
+                value={batchAction}
+                onChange={(selectedOption: ValueType<OptionTypeBase, any>) =>
+                  setBatchAction(selectedOption as DropdownItem)
+                }
+                options={batchOptions}
               />
               <EntitySuggester
-                placeholder="to territory"
+                placeholder={
+                  batchAction.info === "T" ? "to territory" : "choose R"
+                }
                 disableTemplatesAccept
                 filterEditorRights
                 disableCreate
-                categoryTypes={[EntityEnums.Class.Territory]}
+                categoryTypes={[
+                  entitiesDictKeys[batchAction.info as EntityEnums.Class].value,
+                ]}
                 onSelected={(newSelectedId: string) => {
                   if (duplicateSelection) {
                     duplicateStatementsMutation.mutate({
