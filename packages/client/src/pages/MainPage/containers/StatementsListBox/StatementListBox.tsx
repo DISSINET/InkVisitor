@@ -370,6 +370,8 @@ export const StatementListBox: React.FC = () => {
           }
           moveStatementsMutation={moveStatementsMutation}
           duplicateStatementsMutation={duplicateStatementsMutation}
+          replaceReferencesMutation={replaceReferencesMutation}
+          appendReferencesMutation={appendReferencesMutation}
         />
       )}
       {statements ? (

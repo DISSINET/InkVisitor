@@ -1,6 +1,8 @@
 import { entitiesDictKeys } from "@shared/dictionaries";
 import { EntityEnums, UserEnums } from "@shared/enums";
 import {
+  IEntity,
+  IReference,
   IResponseGeneric,
   IResponseStatement,
   IResponseTerritory,
@@ -85,6 +87,18 @@ interface StatementListHeader {
     },
     unknown
   >;
+  replaceReferencesMutation: UseMutationResult<
+    AxiosResponse<IResponseGeneric>,
+    unknown,
+    IReference[],
+    unknown
+  >;
+  appendReferencesMutation: UseMutationResult<
+    AxiosResponse<IResponseGeneric>,
+    unknown,
+    IReference[],
+    unknown
+  >;
 }
 export const StatementListHeader: React.FC<StatementListHeader> = ({
   data,
@@ -98,25 +112,37 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
 
   moveStatementsMutation,
   duplicateStatementsMutation,
+  replaceReferencesMutation,
+  appendReferencesMutation,
 }) => {
   const dispatch = useAppDispatch();
   const queryClient = useQueryClient();
   const { territoryId, setTerritoryId } = useSearchParams();
 
+  enum BatchOption {
+    move_S = "move_S",
+    duplicate_S = "duplicate_S",
+    replace_R = "replace_R",
+    append_R = "append_R",
+  }
   const batchOptions = [
-    { value: `move S`, label: `move ${selectedRows.length} S`, info: "T" },
     {
-      value: `duplicate S`,
+      value: BatchOption.move_S,
+      label: `move ${selectedRows.length} S`,
+      info: "T",
+    },
+    {
+      value: BatchOption.duplicate_S,
       label: `duplicate ${selectedRows.length} S`,
       info: "T",
     },
     {
-      value: `replace R`,
+      value: BatchOption.replace_R,
       label: `replace R for ${selectedRows.length} S`,
       info: "R",
     },
     {
-      value: `append R`,
+      value: BatchOption.append_R,
       label: `append R for ${selectedRows.length} S`,
       info: "R",
     },
@@ -305,25 +331,6 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
 
           {
             <>
-              {/* <AttributeButtonGroup
-                options={[
-                  {
-                    longValue: `move ${selectedRows.length} S`,
-                    shortValue: "",
-                    onClick: () => setDuplicateSelection(false),
-                    selected: !duplicateSelection,
-                    shortIcon: <ImBoxRemove />,
-                  },
-                  {
-                    longValue: `duplicate ${selectedRows.length} S`,
-                    shortValue: "",
-                    onClick: () => setDuplicateSelection(true),
-                    selected: duplicateSelection,
-                    shortIcon: <FaClone />,
-                  },
-                ]}
-                disabled={selectedRows.length === 0}
-              /> */}
               <Dropdown
                 width={100}
                 disabled={selectedRows.length === 0}
@@ -343,17 +350,23 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
                 categoryTypes={[
                   entitiesDictKeys[batchAction.info as EntityEnums.Class].value,
                 ]}
-                onSelected={(newSelectedId: string) => {
-                  if (duplicateSelection) {
-                    duplicateStatementsMutation.mutate({
-                      statements: selectedRows,
-                      newTerritoryId: newSelectedId,
-                    });
-                  } else {
-                    moveStatementsMutation.mutate({
-                      statements: selectedRows,
-                      newTerritoryId: newSelectedId,
-                    });
+                onSelected={(newSelectedId: string) => {}}
+                onPicked={(newSelectedEntity: IEntity) => {
+                  switch (batchAction.value) {
+                    case BatchOption.move_S:
+                      moveStatementsMutation.mutate({
+                        statements: selectedRows,
+                        newTerritoryId: newSelectedEntity.id,
+                      });
+                    case BatchOption.duplicate_S:
+                      duplicateStatementsMutation.mutate({
+                        statements: selectedRows,
+                        newTerritoryId: newSelectedEntity.id,
+                      });
+                    case BatchOption.append_R:
+                      console.log(newSelectedEntity);
+                    case BatchOption.replace_R:
+                      console.log(newSelectedEntity);
                   }
                 }}
                 excludedActantIds={[data.id]}
