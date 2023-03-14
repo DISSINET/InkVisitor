@@ -366,11 +366,14 @@ export default Router()
   .put(
     "/references",
     asyncRouteHandler<IResponseGeneric>(async (request: IRequest) => {
-      const statementIds = request.query.ids;
+      let statementIds = request.query.ids;
       const replaceAction = !!request.query.replace;
       const referencesData = request.body as IReference[];
 
-      if (!statementIds || !statementIds.length) {
+      if (statementIds && statementIds.constructor.name == "String") {
+        statementIds = statementIds.split(",");
+      }
+      if (!statementIds || statementIds.constructor.name !== "Array") {
         throw new BadParams("statement ids are required");
       }
 
@@ -400,7 +403,7 @@ export default Router()
 
       for (const statementData of statements) {
         const statement = new Statement(statementData as IStatement);
-        await statement.save(request.db.connection);
+        await statement.update(request.db.connection, { references: statement.references});
       }
 
       return {
