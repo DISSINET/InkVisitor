@@ -12,11 +12,11 @@ export default class Reference implements IReference {
   }
 
   /**
-   * predicate for valid data
+   * predicate for valid data, id is required
    * @returns boolean result
    */
   isValid(): boolean {
-    if (!this.id || !this.resource || !this.value) {
+    if (!this.id) {
       return false;
     }
 
