@@ -354,6 +354,11 @@ export const StatementListBox: React.FC = () => {
     }
   );
 
+  useEffect(() => {
+    console.log(statements);
+    console.log(selectedRows);
+  }, [selectedRows]);
+
   return (
     <>
       {data && (

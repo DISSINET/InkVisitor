@@ -551,7 +551,7 @@ class Api {
       const response = await this.connection.put(
         `/statements/batch-move?ids=${statementsIds.join(",")}`,
         {
-          territoryId
+          territoryId,
         }
       );
       return response;
@@ -568,7 +568,7 @@ class Api {
       const response = await this.connection.post(
         `/statements/batch-copy?ids=${statementsIds.join(",")}`,
         {
-          territoryId
+          territoryId,
         }
       );
       // response.data.data should have list of new ids
@@ -583,7 +583,7 @@ class Api {
     references: IReference[]
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
-      const response = await this.connection.post(
+      const response = await this.connection.put(
         `/statements/references?ids=${statementsIds.join(",")}?replace=true`,
         references
       );
@@ -598,7 +598,7 @@ class Api {
     references: IReference[]
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
-      const response = await this.connection.post(
+      const response = await this.connection.put(
         `/statements/references?ids=${statementsIds.join(",")}`,
         references
       );

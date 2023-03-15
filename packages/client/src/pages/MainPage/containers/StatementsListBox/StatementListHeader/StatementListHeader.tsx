@@ -39,6 +39,7 @@ import {
   StyledMoveToParent,
   StyledSuggesterRow,
 } from "./StatementListHeaderStyles";
+import { v4 as uuidv4 } from "uuid";
 
 interface StatementListHeader {
   data: IResponseTerritory;
@@ -350,23 +351,26 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
                 categoryTypes={[
                   entitiesDictKeys[batchAction.info as EntityEnums.Class].value,
                 ]}
-                onSelected={(newSelectedId: string) => {}}
-                onPicked={(newSelectedEntity: IEntity) => {
+                onSelected={(newSelectedId: string) => {
                   switch (batchAction.value) {
                     case BatchOption.move_S:
                       moveStatementsMutation.mutate({
                         statements: selectedRows,
-                        newTerritoryId: newSelectedEntity.id,
+                        newTerritoryId: newSelectedId,
                       });
                     case BatchOption.duplicate_S:
                       duplicateStatementsMutation.mutate({
                         statements: selectedRows,
-                        newTerritoryId: newSelectedEntity.id,
+                        newTerritoryId: newSelectedId,
                       });
                     case BatchOption.append_R:
-                      console.log(newSelectedEntity);
+                      appendReferencesMutation.mutate([
+                        { id: uuidv4(), resource: newSelectedId, value: "" },
+                      ]);
                     case BatchOption.replace_R:
-                      console.log(newSelectedEntity);
+                      replaceReferencesMutation.mutate([
+                        { id: uuidv4(), resource: newSelectedId, value: "" },
+                      ]);
                   }
                 }}
                 excludedActantIds={[data.id]}
