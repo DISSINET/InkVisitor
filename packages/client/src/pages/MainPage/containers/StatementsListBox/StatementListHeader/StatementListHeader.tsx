@@ -360,19 +360,23 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
                         statements: selectedRows,
                         newTerritoryId: newSelectedId,
                       });
+                      return;
                     case BatchOption.duplicate_S:
                       duplicateStatementsMutation.mutate({
                         statements: selectedRows,
                         newTerritoryId: newSelectedId,
                       });
+                      return;
                     case BatchOption.append_R:
                       appendReferencesMutation.mutate([
                         { id: uuidv4(), resource: newSelectedId, value: "" },
                       ]);
+                      return;
                     case BatchOption.replace_R:
                       replaceReferencesMutation.mutate([
                         { id: uuidv4(), resource: newSelectedId, value: "" },
                       ]);
+                      return;
                   }
                 }}
                 excludedActantIds={[data.id]}
