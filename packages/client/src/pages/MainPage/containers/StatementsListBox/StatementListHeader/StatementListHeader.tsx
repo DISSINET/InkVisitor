@@ -332,15 +332,17 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
 
           {
             <>
-              <Dropdown
-                width={100}
-                disabled={selectedRows.length === 0}
-                value={batchAction}
-                onChange={(selectedOption: ValueType<OptionTypeBase, any>) =>
-                  setBatchAction(selectedOption as DropdownItem)
-                }
-                options={batchOptions}
-              />
+              <div style={{ margin: "0 0.5rem" }}>
+                <Dropdown
+                  width={100}
+                  disabled={selectedRows.length === 0}
+                  value={batchAction}
+                  onChange={(selectedOption: ValueType<OptionTypeBase, any>) =>
+                    setBatchAction(selectedOption as DropdownItem)
+                  }
+                  options={batchOptions}
+                />
+              </div>
               <EntitySuggester
                 placeholder={
                   batchAction.info === "T" ? "to territory" : "choose R"

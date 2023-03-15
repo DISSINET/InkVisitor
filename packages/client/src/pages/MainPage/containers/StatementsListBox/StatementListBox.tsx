@@ -340,6 +340,7 @@ export const StatementListBox: React.FC = () => {
     {
       onSuccess: (variables, references) => {
         // TODO:
+        queryClient.invalidateQueries("statement");
       },
     }
   );
@@ -350,6 +351,7 @@ export const StatementListBox: React.FC = () => {
     {
       onSuccess: (variables, references) => {
         // TODO:
+        queryClient.invalidateQueries("statement");
       },
     }
   );
