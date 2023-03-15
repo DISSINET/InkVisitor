@@ -584,7 +584,7 @@ class Api {
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
       const response = await this.connection.put(
-        `/statements/references?ids=${statementsIds.join(",")}?replace=true`,
+        `/statements/references?ids=${statementsIds.join(",")}&replace=true`,
         references
       );
       return response;
