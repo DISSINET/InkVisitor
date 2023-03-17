@@ -129,22 +129,22 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
   const batchOptions = [
     {
       value: BatchOption.move_S,
-      label: `move ${selectedRows.length} S`,
+      label: `move`,
       info: "T",
     },
     {
       value: BatchOption.duplicate_S,
-      label: `duplicate ${selectedRows.length} S`,
+      label: `duplicate`,
       info: "T",
     },
     {
       value: BatchOption.replace_R,
-      label: `replace R for ${selectedRows.length} S`,
+      label: `replace R`,
       info: "R",
     },
     {
       value: BatchOption.append_R,
-      label: `append R for ${selectedRows.length} S`,
+      label: `append R`,
       info: "R",
     },
   ];
@@ -329,7 +329,15 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
       <StyledSuggesterRow>
         <StyledActionsWrapper>
           {renderCheckBox()}
-
+          {selectedRows.length > 0 && (
+            <div
+              style={{
+                whiteSpace: "nowrap",
+                marginLeft: "0.5rem",
+                color: "black",
+              }}
+            >{`${selectedRows.length}/${data.statements.length}`}</div>
+          )}
           {
             <>
               <div style={{ margin: "0 0.5rem" }}>
