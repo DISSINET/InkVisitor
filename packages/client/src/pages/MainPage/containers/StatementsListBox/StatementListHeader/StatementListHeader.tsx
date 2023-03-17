@@ -15,6 +15,7 @@ import { BreadcrumbItem, EntitySuggester } from "components/advanced";
 import { CStatement } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
+import { BiRefresh } from "react-icons/bi";
 import { FaPlus, FaRecycle } from "react-icons/fa";
 import {
   MdOutlineCheckBox,
@@ -175,8 +176,6 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
   const [excludedMoveTerritories, setExcludedMoveTerritories] = useState<
     string[]
   >([territoryId]);
-
-  const [duplicateSelection, setDuplicateSelection] = useState(false);
 
   useEffect(() => {
     setSelectedRows([]);
@@ -339,7 +338,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
             <>
               <StyledDropdownWrap>
                 <Dropdown
-                  width={100}
+                  width={78}
                   disabled={selectedRows.length === 0}
                   value={batchAction}
                   onChange={(selectedOption: ValueType<OptionTypeBase, any>) =>
@@ -349,9 +348,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
                 />
               </StyledDropdownWrap>
               <EntitySuggester
-                placeholder={
-                  batchAction.info === "T" ? "to territory" : "choose R"
-                }
+                placeholder={batchAction.info === "T" ? "to territory" : ""}
                 disableTemplatesAccept
                 filterEditorRights
                 disableCreate
@@ -392,7 +389,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
         </StyledActionsWrapper>
 
         {territoryId && (
-          <ButtonGroup marginBottom>
+          <ButtonGroup>
             {data.right !== UserEnums.RoleMode.Read && (
               <Button
                 key="add"
@@ -407,11 +404,10 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
             )}
             <Button
               key="refresh"
-              icon={<FaRecycle size={14} />}
+              icon={<BiRefresh size={14} />}
               tooltipLabel="refresh data"
               inverted
               color="primary"
-              label="refresh"
               onClick={() => {
                 queryClient.invalidateQueries(["territory"]);
                 queryClient.invalidateQueries(["statement"]);
