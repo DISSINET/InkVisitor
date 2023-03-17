@@ -1,7 +1,6 @@
 import { entitiesDictKeys } from "@shared/dictionaries";
 import { EntityEnums, UserEnums } from "@shared/enums";
 import {
-  IEntity,
   IReference,
   IResponseGeneric,
   IResponseStatement,
@@ -9,7 +8,6 @@ import {
   IResponseTree,
   IStatement,
 } from "@shared/types";
-import { DropdownItem } from "types";
 import api from "api";
 import { AxiosResponse } from "axios";
 import { Button, ButtonGroup, Dropdown } from "components";
@@ -28,9 +26,13 @@ import { OptionTypeBase, ValueType } from "react-select";
 import { setLastClickedIndex } from "redux/features/statementList/lastClickedIndexSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import theme from "Theme/theme";
+import { DropdownItem } from "types";
 import { collectTerritoryChildren, searchTree } from "utils";
+import { v4 as uuidv4 } from "uuid";
 import {
   StyledActionsWrapper,
+  StyledCounter,
+  StyledDropdownWrap,
   StyledFaStar,
   StyledHeader,
   StyledHeaderBreadcrumbRow,
@@ -39,7 +41,6 @@ import {
   StyledMoveToParent,
   StyledSuggesterRow,
 } from "./StatementListHeaderStyles";
-import { v4 as uuidv4 } from "uuid";
 
 interface StatementListHeader {
   data: IResponseTerritory;
@@ -329,18 +330,14 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
       <StyledSuggesterRow>
         <StyledActionsWrapper>
           {renderCheckBox()}
+
           {selectedRows.length > 0 && (
-            <div
-              style={{
-                whiteSpace: "nowrap",
-                marginLeft: "0.5rem",
-                color: "black",
-              }}
-            >{`${selectedRows.length}/${data.statements.length}`}</div>
+            <StyledCounter>{`${selectedRows.length}/${data.statements.length}`}</StyledCounter>
           )}
+
           {
             <>
-              <div style={{ margin: "0 0.5rem" }}>
+              <StyledDropdownWrap>
                 <Dropdown
                   width={100}
                   disabled={selectedRows.length === 0}
@@ -350,7 +347,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
                   }
                   options={batchOptions}
                 />
-              </div>
+              </StyledDropdownWrap>
               <EntitySuggester
                 placeholder={
                   batchAction.info === "T" ? "to territory" : "choose R"
