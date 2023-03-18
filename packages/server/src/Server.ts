@@ -61,14 +61,21 @@ server.get("/health", function (req, res) {
 });
 
 // Swagger UI
-if (!!process.env.SWAGGER_FILE) {
-  const swaggerFileData = readFileSync(process.env.SWAGGER_FILE)
+if (process.env.SWAGGER_FILE) {
+  const swaggerFileData = readFileSync(process.env.SWAGGER_FILE);
   if (!swaggerFileData) {
-    throw new Error(`Cannot load swagger file from '${process.env.SWAGGER_FILE}'`)
+    throw new Error(
+      `Cannot load swagger file from '${process.env.SWAGGER_FILE}'`
+    );
   }
-  console.info(`[Server] serving swagger file from '${process.env.SWAGGER_FILE}'`)
-  server.use('/api-docs', swaggerUi.serve);
-  server.get('/api-docs', swaggerUi.setup(JSON.parse(swaggerFileData.toString())));
+  console.info(
+    `[Server] serving swagger file from '${process.env.SWAGGER_FILE}'`
+  );
+  server.use("/api-docs", swaggerUi.serve);
+  server.get(
+    "/api-docs",
+    swaggerUi.setup(JSON.parse(swaggerFileData.toString()))
+  );
 }
 
 server.use(profilerMiddleware);

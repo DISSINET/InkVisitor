@@ -1,8 +1,10 @@
 import * as bcrypt from "bcrypt";
 import { sign as signJwt } from "jsonwebtoken";
 import { IUser } from "@shared/types/user";
-import jwt, { secretType } from "express-jwt";
-import { Request } from "express";
+import { Secret } from "jsonwebtoken";
+import { Request as RequestJWT, expressjwt } from "express-jwt";
+import { unless } from "express-unless";
+import { Request, Response, NextFunction } from "express";
 import { v1 as uuid } from "uuid";
 
 export function hashPassword(rawPassword: string): string {
@@ -26,7 +28,7 @@ export function checkPassword(
 
 const defaultJwtAlgo = "HS256";
 
-export function generateAccessToken(user: IUser, expDays: number = 30): string {
+export function generateAccessToken(user: IUser, expDays = 30): string {
   return signJwt(
     {
       user,
@@ -39,20 +41,27 @@ export function generateAccessToken(user: IUser, expDays: number = 30): string {
   );
 }
 
-export function validateJwt(): jwt.RequestHandler {
-  return jwt({
-    secret: process.env.SECRET as secretType,
+export function validateJwt(): {
+  (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void | NodeJS.Immediate>;
+  unless: typeof unless;
+} {
+  return expressjwt({
+    secret: process.env.SECRET as string,
     algorithms: [defaultJwtAlgo],
-    getToken: function fromHeaderOrQuerystring(req: Request) {
+    getToken: (req: Request): string | Promise<string> | undefined => {
       if (
         req.headers.authorization &&
         req.headers.authorization.split(" ")[0] === "Bearer"
       ) {
         return req.headers.authorization.split(" ")[1];
       } else if (req.query && req.query.token) {
-        return req.query.token;
+        return req.query.token as string;
       }
-      return null;
+      return undefined;
     },
   });
 }
