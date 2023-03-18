@@ -4,15 +4,12 @@
     "sourceMap": false,
     "outDir": "dist",
     "baseUrl": "./",
-    "experimentalDecorators": true
+    "experimentalDecorators": true,
+    "skipLibCheck": true
   },
   "ts-node": {
     "files": true
   },
-  "files": [
-    "./src/custom_typings/request.d.ts"
-  ],
-  "exclude": [
-    "src/**/*.test.ts",
-  ]
+  "files": ["./src/custom_typings/request.d.ts"],
+  "exclude": ["src/**/*.test.ts"]
 }
