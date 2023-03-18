@@ -1,6 +1,6 @@
 import { IUser } from "../../shared/types/user";
 import { hashPassword } from "../../server/src/common/auth";
-import { IAudit } from "../../shared/types";
+import { IAudit, IEntity } from "../../shared/types";
 import { Relation } from "../../shared/types/relation";
 import { confirm } from './import/prompts';
 import { DbSchema, checkRelation, TableSchema } from "./import/common";
@@ -32,7 +32,14 @@ const datasets: Record<string, DbSchema> = {
     entities: {
       tableName: "entities",
       data: require("../datasets/empty/entities.json"),
-      transform: function () { },
+      transform: function () {
+        this.data = this.data.map((entity: IEntity) => {
+          if (!entity.createdAt) {
+            entity.createdAt = new Date();
+          }
+          return entity;
+        });
+      },
       indexes: entitiesIndexes,
     },
     audits: {
@@ -81,7 +88,14 @@ const datasets: Record<string, DbSchema> = {
     entities: {
       tableName: "entities",
       data: require("../datasets/relationstest/entities.json"),
-      transform: function () { },
+      transform: function () {
+        this.data = this.data.map((entity: IEntity) => {
+          if (!entity.createdAt) {
+            entity.createdAt = new Date();
+          }
+          return entity;
+        });
+      },
       indexes: entitiesIndexes,
     },
     audits: {
@@ -135,7 +149,14 @@ const datasets: Record<string, DbSchema> = {
     entities: {
       tableName: "entities",
       data: require("../datasets/all-parsed/entities.json"),
-      transform: function () {},
+      transform: function () {
+        this.data = this.data.map((entity: IEntity) => {
+          if (!entity.createdAt) {
+            entity.createdAt = new Date();
+          }
+          return entity;
+        });
+      },
       indexes: entitiesIndexes,
     },
     audits: {
