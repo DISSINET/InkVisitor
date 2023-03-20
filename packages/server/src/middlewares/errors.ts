@@ -29,14 +29,16 @@ export default function errorsMiddleware(
       err = unauthorizedError;
     } else {
       // unknown unhandled error - should log the message
-      console.error(red(`[Unhandled error] ${err.message}`))
+      console.error(red(`[Unhandled error] ${err.message}`));
       console.error(err);
 
       // hide details for client
       err = internalServerError;
     }
   } else if ((err as CustomError).shouldLog()) {
-    console.error(red(`[Error] ${(err as CustomError).name}: ${(err as CustomError).log}`));
+    console.error(
+      red(`[Error] ${(err as CustomError).name}: ${(err as CustomError).log}`)
+    );
   }
 
   // in any case, the error should be wrapper in IResponseGeneric
