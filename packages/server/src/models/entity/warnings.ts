@@ -161,10 +161,10 @@ export default class EntityWarnings {
     }
 
     if (
-      !action.data.valencies ||
-      (action.data.valencies.a1 === undefined &&
-        action.data.valencies.a2 === undefined &&
-        action.data.valencies.s === undefined)
+      !action.data.entities ||
+      (action.data.entities.a1 === undefined &&
+        action.data.entities.a2 === undefined &&
+        action.data.entities.s === undefined)
     ) {
       return this.newWarning(WarningTypeEnums.MVAL);
     }

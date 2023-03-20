@@ -174,7 +174,11 @@ describe("models/entity/warnings", function () {
     const [, actionInvalid] = prepareEntity(EntityEnums.Class.Action);
     const actionValid = new Action({
       data: {
-        entities: {},
+        entities: {
+          a1: [],
+          a2: [],
+          s: [],
+        },
         valencies: {
           a1: "",
           a2: "",

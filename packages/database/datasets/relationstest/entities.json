@@ -2544,5 +2544,56 @@
     "data": {
       "pos": ""
     }
+  },
+  {
+    "id": "a-hasnt-mval",
+    "class": "A",
+    "label": "a-hasnt-mval",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "createdAt": "2021-12-05T19:10:15.739Z",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {
+      "entities": {
+        "s": [],
+        "a1": [],
+        "a2": []
+      },
+      "pos": "verb"
+    }
+  },
+  {
+    "id": "a-has-mval-1",
+    "class": "A",
+    "label": "a-has-mval-1",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "createdAt": "2021-12-05T19:10:15.739Z",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {
+      "entities": {},
+      "pos": "verb"
+    }
+  },
+  {
+    "id": "a-has-mval-2",
+    "class": "A",
+    "label": "a-has-mval-2",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "createdAt": "2021-12-05T19:10:15.739Z",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {
+      "pos": "verb"
+    }
   }
 ]
