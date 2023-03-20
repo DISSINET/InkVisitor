@@ -4,12 +4,11 @@ import {
   IEntity,
   IProp,
   IReference,
-  Relation,
   IStatement,
   IStatementActant,
   IStatementAction,
   ITerritory,
-  IAction,
+  Relation,
 } from "@shared/types";
 import { UserOptions } from "@shared/types/response-user";
 
