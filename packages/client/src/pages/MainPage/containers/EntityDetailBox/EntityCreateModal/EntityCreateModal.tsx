@@ -30,12 +30,12 @@ import { StyledContent, StyledNote } from "./EntityCreateModalStyles";
 interface EntityCreateModal {
   closeModal: () => void;
 }
+const allowedEntityClasses: EntityEnums.Class[] = classesAll.filter(
+  (c) => !excludedSuggesterEntities.includes(c)
+);
 export const EntityCreateModal: React.FC<EntityCreateModal> = ({
   closeModal,
 }) => {
-  const allowedEntityClasses: EntityEnums.Class[] = classesAll.filter(
-    (c) => c !== EntityEnums.Class.Value
-  );
   const userRole = localStorage.getItem("userrole") as UserEnums.Role;
 
   const [detailTyped, setDetailTyped] = useState("");
