@@ -46,3 +46,11 @@ export const StyledActionsWrapper = styled.div`
   display: flex;
   align-items: center;
 `;
+export const StyledCounter = styled.div`
+  white-space: nowrap;
+  margin-left: 0.5rem;
+  color: black;
+`;
+export const StyledDropdownWrap = styled.div`
+  margin: 0 0.5rem;
+`;

@@ -8,7 +8,7 @@ import {
   TerritoryDoesNotExits,
 } from "@shared/types/errors";
 import { asyncRouteHandler } from "..";
-import { IResponseGeneric, IResponseStatement, IStatement, ITerritory } from "@shared/types";
+import { IReference, IResponseGeneric, IResponseStatement, IStatement, ITerritory } from "@shared/types";
 import Statement, { StatementTerritory } from "@models/statement/statement";
 import { ResponseStatement } from "@models/statement/response";
 import { EntityEnums } from "@shared/enums";
@@ -16,6 +16,7 @@ import { IRequest } from "src/custom_typings/request";
 import { StatementObject } from "@shared/types/statement";
 import Audit from "@models/audit/audit";
 import Entity from "@models/entity/entity";
+import Reference from "@models/entity/reference";
 
 export default Router()
   /**
@@ -86,9 +87,9 @@ export default Router()
    *         description: ID of the statement-entity entry
    *     requestBody:
    *       description: list of sorted ids
-   *       content: 
+   *       content:
    *         application/json:
-   *           type: array 
+   *           type: array
    *           items:
    *             type: string
    *     responses:
@@ -173,7 +174,7 @@ export default Router()
    *       - entities
    *     parameters:
    *       - in: query
-   *         name: statementId
+   *         name: ids
    *         schema:
    *           type: array
    *           items:
@@ -182,12 +183,12 @@ export default Router()
    *         description: statements ids which should be moved
    *     requestBody:
    *       description: territory id to be used
-   *       content: 
+   *       content:
    *         application/json:
    *           schema:
    *             type: object
    *             properties:
-   *               territoryId: 
+   *               territoryId:
    *                 type: string
    *     responses:
    *       200:
@@ -251,7 +252,7 @@ export default Router()
   *       - entities
   *     parameters:
   *       - in: query
-  *         name: statementId
+  *         name: ids
   *         schema:
   *           type: array
   *           items:
@@ -260,12 +261,12 @@ export default Router()
   *         description: statements ids which should be copied
   *     requestBody:
   *       description: territory id to be used
-  *       content: 
+  *       content:
   *         application/json:
   *           schema:
   *             type: object
   *             properties:
-  *               territoryId: 
+  *               territoryId:
   *                 type: string
   *     responses:
   *       200:
@@ -322,6 +323,92 @@ export default Router()
         result: true,
         message: `${statementsCount} statements has been copied under '${territory.label}'`,
         data: newIds,
+      };
+    })
+  )
+
+ /**
+  * @openapi
+  * /statements/references:
+  *   put:
+  *     description: Handles batch update for statements references according to replace flag
+  *     tags:
+  *       - entities
+  *     parameters:
+  *       - in: query
+  *         name: ids
+  *         schema:
+  *           type: array
+  *           items:
+  *             type: string
+  *         required: true
+  *         description: statements ids which should be processed
+  *       - in: query
+  *         name: replace
+  *         schema:
+  *           type: boolean
+  *     requestBody:
+  *       description: list of references to be applied
+  *       content:
+  *         application/json:
+  *           schema:
+  *             type: array
+  *             items:
+  *               type: object:
+  *     responses:
+  *       200:
+  *         description: Returns generic response
+  *         content:
+  *           application/json:
+  *             schema:
+  *               $ref: "#/components/schemas/IResponseGeneric"
+  */
+  .put(
+    "/references",
+    asyncRouteHandler<IResponseGeneric>(async (request: IRequest) => {
+      let statementIds = request.query.ids;
+      const replaceAction = !!request.query.replace;
+      const referencesData = request.body as IReference[];
+
+      if (statementIds && statementIds.constructor.name == "String") {
+        statementIds = statementIds.split(",");
+      }
+      if (!statementIds || statementIds.constructor.name !== "Array") {
+        throw new BadParams("statement ids are required");
+      }
+
+      if (referencesData.constructor.name != "Array" || referencesData.map(r => new Reference(r)).find(r => !r.isValid())) {
+        throw new BadParams("bad references data");
+      }
+
+      await request.db.lock();
+
+      const statements = await Entity.findEntitiesByIds(request.db.connection, statementIds);
+      const statementsCount = statements.reduce((acc, cur) => cur.class === EntityEnums.Class.Statement ? acc + 1 : acc, 0);
+      if (statementsCount !== statementIds.length) {
+        throw new StatementDoesNotExits("at least one statement not found", "");
+      }
+
+      if (replaceAction) {
+        statements.forEach(s => s.references = referencesData)
+      } else {
+        statements.forEach(s => {
+          for (const refData of referencesData) {
+            if (!s.references.find(stored => stored.id === refData.id)) {
+              s.references.push(refData);
+            }
+          }
+        })
+      }
+
+      for (const statementData of statements) {
+        const statement = new Statement(statementData as IStatement);
+        await statement.update(request.db.connection, { references: statement.references});
+      }
+
+      return {
+        result: true,
+        message: replaceAction ? 'References replaced' : 'References appended',
       };
     })
   );

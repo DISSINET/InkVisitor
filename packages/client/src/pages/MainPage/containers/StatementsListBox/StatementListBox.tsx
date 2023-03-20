@@ -1,5 +1,10 @@
 import { EntityEnums, UserEnums } from "@shared/enums";
-import { IEntity, IResponseStatement, IStatement } from "@shared/types";
+import {
+  IEntity,
+  IReference,
+  IResponseStatement,
+  IStatement,
+} from "@shared/types";
 import api from "api";
 import { Loader, Submit } from "components";
 import { CStatement, DStatement } from "constructors";
@@ -329,6 +334,28 @@ export const StatementListBox: React.FC = () => {
     }
   );
 
+  const replaceReferencesMutation = useMutation(
+    async (references: IReference[]) =>
+      await api.statementsReferencesReplace(selectedRows, references),
+    {
+      onSuccess: (variables, references) => {
+        // TODO:
+        queryClient.invalidateQueries("statement");
+      },
+    }
+  );
+
+  const appendReferencesMutation = useMutation(
+    async (references: IReference[]) =>
+      await api.statementsReferencesAppend(selectedRows, references),
+    {
+      onSuccess: (variables, references) => {
+        // TODO:
+        queryClient.invalidateQueries("statement");
+      },
+    }
+  );
+
   return (
     <>
       {data && (
@@ -345,6 +372,8 @@ export const StatementListBox: React.FC = () => {
           }
           moveStatementsMutation={moveStatementsMutation}
           duplicateStatementsMutation={duplicateStatementsMutation}
+          replaceReferencesMutation={replaceReferencesMutation}
+          appendReferencesMutation={appendReferencesMutation}
         />
       )}
       {statements ? (
