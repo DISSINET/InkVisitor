@@ -146,7 +146,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
     return selectedStatements.map((statement) => statement.id);
   };
 
-  const columns: Column<{}>[] = useMemo(() => {
+  const columns: Column<IResponseStatement>[] = useMemo(() => {
     return [
       {
         Header: "ID",
@@ -430,7 +430,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
     visibleColumns,
     selectedFlatRows,
     state: { selectedRowIds },
-  } = useTable(
+  } = useTable<IResponseStatement>(
     {
       columns,
       data: statementsLocal,
@@ -510,7 +510,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
         ))}
       </StyledTHead>
       <tbody {...getTableBodyProps()}>
-        {rows.map((row: Row, i: number) => {
+        {rows.map((row, i) => {
           prepareRow(row);
           return (
             <StatementListRow
