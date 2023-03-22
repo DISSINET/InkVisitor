@@ -56,6 +56,12 @@ export default class Entity implements IEntity, IDbModel {
     if (data.templateData !== undefined) {
       this.templateData = data.templateData;
     }
+    if (data.createdAt !== undefined) {
+      this.createdAt = data.createdAt;
+    }
+    if (data.updatedAt !== undefined) {
+      this.updatedAt = data.updatedAt;
+    }
   }
 
   /**
