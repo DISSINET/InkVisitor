@@ -11,6 +11,7 @@ import { DbHelper } from "./import/db";
 import { getEnv } from "./import/common";
 import { SshHelper } from "./import/ssh";
 import colors from "colors/safe";
+import jobs from "./jobs/index";
 
 const datasets: Record<string, DbSchema> = {
   empty: {
@@ -304,12 +305,21 @@ class Importer {
         action: that.createSingleTable.bind(that),
         lastAction: true,
       },
+      'J': {
+        description: `Enter '${colors.yellow('J')}' to select jobs`,
+        action: that.selectJob.bind(that),
+        lastAction: true,
+      },
     };
 
     if (!this.datasetName || !this.db.dbConfig.name) {
       delete (menu['X']);
       delete (menu['C']);
       delete (menu['T']);
+    }
+
+    if (!this.db.dbConfig.name) {
+      delete (menu['J']);
     }
 
     const info: string[] = [];
@@ -371,6 +381,20 @@ class Importer {
 
     this.dataset = datasets[dataset];
     this.datasetName = dataset;
+  }
+
+  async selectJob(): Promise<void> {
+    console.log(`Jobs: ${["", ...Object.keys(jobs).map((key, i) => `${key} (${i + 1})}`)].join("\n- ")}`);
+
+    const job = await question<string>("Choose the job (name/number)", (input: string): string | undefined => {
+      if (parseInt(input) > 0) {
+        input = Object.keys(jobs)[parseInt(input) - 1];
+      }
+
+      return Object.keys(jobs).find(key => key === input);
+    }, "");
+
+    await jobs[job](this.db.getConnection());
   }
 
   /**
