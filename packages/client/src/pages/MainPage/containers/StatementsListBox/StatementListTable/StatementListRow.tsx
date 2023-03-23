@@ -1,6 +1,11 @@
-import { IEntity, IResponseAudit, IResponseStatement, IStatement } from "@shared/types";
+import {
+  IEntity,
+  IResponseAudit,
+  IResponseStatement,
+  IStatement,
+} from "@shared/types";
 import { useSearchParams } from "hooks";
-import React, { useEffect, useMemo, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import {
   DragSourceMonitor,
   DropTargetMonitor,
@@ -14,12 +19,7 @@ import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { DragItem, ItemTypes } from "types";
 import { dndHoverFn } from "utils";
 import { StatementListRowExpanded } from "./StatementListRowExpanded/StatementListRowExpanded";
-import {
-  StyledTd,
-  StyledTdLastEdit,
-  StyledTdMove,
-  StyledTr,
-} from "./StatementListTableStyles";
+import { StyledTd, StyledTdMove, StyledTr } from "./StatementListTableStyles";
 
 interface StatementListRow {
   row: Row<IResponseStatement>;
@@ -29,7 +29,6 @@ interface StatementListRow {
   handleClick: (rowId: string) => void;
   visibleColumns: ColumnInstance<IResponseStatement>[];
   entities: { [key: string]: IEntity };
-  audits: IResponseAudit[];
   isSelected: boolean;
 }
 
@@ -41,7 +40,6 @@ export const StatementListRow: React.FC<StatementListRow> = ({
   handleClick = () => {},
   visibleColumns,
   entities,
-  audits,
   isSelected,
 }) => {
   const dispatch = useAppDispatch();
@@ -53,28 +51,6 @@ export const StatementListRow: React.FC<StatementListRow> = ({
     (state) => state.statementList.draggedRowId
   );
   const { statementId } = useSearchParams();
-
-  const lastEditdateText = useMemo(() => {
-    const lastEditDate: Date | undefined = row.original.updatedAt || row.original.createdAt;
-    if (!lastEditDate) {
-      return "";
-    }
-
-    const today = new Date().setHours(0, 0, 0, 0);
-    const lastEditDay = new Date(lastEditDate).setHours(0, 0, 0, 0);
-
-    if (today === lastEditDay) {
-      return (
-        "today " +
-        new Date(lastEditDate).toLocaleTimeString("en-GB", {
-          hour: "2-digit",
-          minute: "2-digit",
-        })
-      );
-    } else {
-      new Date(lastEditDate).toLocaleDateString("en-GB");
-    }
-  }, [audits]);
 
   const dropRef = useRef<HTMLTableRowElement>(null);
   const dragRef = useRef<HTMLTableCellElement>(null);
@@ -121,13 +97,7 @@ export const StatementListRow: React.FC<StatementListRow> = ({
         id={`statement${row.original.id}`}
       >
         {row.cells.map((cell: Cell<IResponseStatement>) => {
-          if (cell.column.id === "lastEdit") {
-            return (
-              <StyledTdLastEdit key="audit">
-                {lastEditdateText}
-              </StyledTdLastEdit>
-            );
-          } else if (cell.column.id === "move") {
+          if (cell.column.id === "move") {
             return (
               <StyledTdMove
                 key="move"
