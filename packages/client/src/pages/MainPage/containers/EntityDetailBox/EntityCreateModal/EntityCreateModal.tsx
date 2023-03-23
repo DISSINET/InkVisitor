@@ -221,6 +221,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
                 disableWildCard
                 disableTemplateInstantiation
                 inputWidth={96}
+                autoFocus
                 disableButtons
               />
             </ModalInputWrap>

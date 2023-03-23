@@ -350,8 +350,9 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
               <EntitySuggester
                 placeholder={batchAction.info === "T" ? "to territory" : ""}
                 disableTemplatesAccept
-                filterEditorRights
+                inputWidth={70}
                 disableCreate
+                filterEditorRights
                 categoryTypes={[
                   entitiesDictKeys[batchAction.info as EntityEnums.Class].value,
                 ]}
