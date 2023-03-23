@@ -45,6 +45,7 @@ import {
   StyledCheckboxWrapper,
   StyledFocusedCircle,
   StyledTable,
+  StyledTdLastEdit,
   StyledTh,
   StyledTHead,
 } from "./StatementListTableStyles";
@@ -63,7 +64,6 @@ interface StatementListTable {
   >;
   entities: { [key: string]: IEntity };
   right: UserEnums.RoleMode;
-  audits: IResponseAudit[];
 
   duplicateStatement: (statementToDuplicate: IResponseStatement) => void;
   setStatementToDelete: React.Dispatch<
@@ -81,7 +81,6 @@ export const StatementListTable: React.FC<StatementListTable> = ({
   actantsUpdateMutation,
   entities,
   right,
-  audits,
 
   duplicateStatement,
   setStatementToDelete,
@@ -327,7 +326,29 @@ export const StatementListTable: React.FC<StatementListTable> = ({
         id: "lastEdit",
         Header: "Edited",
         Cell: ({ row }: Cell) => {
-          return false;
+          const { updatedAt, createdAt } = row.original as IResponseStatement;
+          const lastEditDate: Date | undefined = updatedAt || createdAt;
+          if (!lastEditDate) {
+            return "";
+          }
+          const today = new Date().setHours(0, 0, 0, 0);
+          const lastEditDay = new Date(lastEditDate).setHours(0, 0, 0, 0);
+
+          if (today === lastEditDay) {
+            return (
+              <StyledTdLastEdit>
+                {"today " +
+                  new Date(lastEditDate).toLocaleTimeString("en-GB", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+              </StyledTdLastEdit>
+            );
+          } else {
+            <StyledTdLastEdit>
+              {new Date(lastEditDate).toLocaleDateString("en-GB")}
+            </StyledTdLastEdit>;
+          }
         },
       },
       {
@@ -521,7 +542,6 @@ export const StatementListTable: React.FC<StatementListTable> = ({
               moveEndRow={moveEndRow}
               visibleColumns={visibleColumns}
               entities={entities}
-              audits={audits}
               isSelected={selectedRows.includes(row.id)}
               {...row.getRowProps()}
             />

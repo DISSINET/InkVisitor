@@ -68,17 +68,6 @@ export const StatementListBox: React.FC = () => {
 
   const { statements, entities, right } = data || initialData;
 
-  const { data: audits, isFetching: isFetchingAudits } = useQuery(
-    ["territory", "statement-list", "audits", territoryId, statementListOpened],
-    async () => {
-      const res = await api.auditsForStatements(territoryId);
-      return res.data;
-    },
-    {
-      enabled: !!territoryId && api.isLoggedIn() && statementListOpened,
-    }
-  );
-
   useEffect(() => {
     if (statements.length !== Object.keys(rowsExpanded).length) {
       const arrayWithIds = statements.map((s, key) => [s.id, false]);
@@ -357,7 +346,6 @@ export const StatementListBox: React.FC = () => {
             actantsUpdateMutation={statementUpdateMutation}
             entities={entities}
             right={right}
-            audits={audits || []}
             duplicateStatement={duplicateStatement}
             setStatementToDelete={setStatementToDelete}
             setShowSubmit={setShowSubmit}
@@ -405,7 +393,6 @@ export const StatementListBox: React.FC = () => {
       <Loader
         show={
           isFetching ||
-          isFetchingAudits ||
           removeStatementMutation.isLoading ||
           duplicateStatementMutation.isLoading ||
           addStatementAtTheEndMutation.isLoading ||
