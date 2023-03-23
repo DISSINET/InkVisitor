@@ -71,6 +71,7 @@ interface Suggester {
   isInsideTemplate: boolean;
   territoryParentId?: string;
   userOptions?: IUserOptions;
+  autoFocus?: boolean;
 }
 
 export const Suggester: React.FC<Suggester> = ({
@@ -101,6 +102,7 @@ export const Suggester: React.FC<Suggester> = ({
   territoryParentId,
 
   userOptions,
+  autoFocus,
 }) => {
   const [selected, setSelected] = useState(-1);
   const [isFocused, setIsFocused] = useState(false);
@@ -253,6 +255,7 @@ export const Suggester: React.FC<Suggester> = ({
             disableTyping
             suggester
             disabled={disabled}
+            autoFocus={autoFocus}
           />
           <TypeBar entityLetter={category.value} />
           <Input
