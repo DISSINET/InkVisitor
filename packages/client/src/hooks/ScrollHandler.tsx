@@ -32,16 +32,6 @@ const ScrollHandler = () => {
         enabled: !!territoryId && api.isLoggedIn() && statementListOpened,
       }
     );
-  const { status: auditStatus, isFetching: isFetchingAudits } = useQuery(
-    ["territory", "statement-list", "audits", territoryId, statementListOpened],
-    async () => {
-      const res = await api.auditsForStatements(territoryId);
-      return res.data;
-    },
-    {
-      enabled: !!territoryId && api.isLoggedIn() && statementListOpened,
-    }
-  );
 
   const { status: treeStatus, isFetching: isFetchingTree } = useQuery(
     ["tree"],
@@ -53,12 +43,7 @@ const ScrollHandler = () => {
   );
 
   useEffect(() => {
-    if (
-      statementListStatus === "success" &&
-      auditStatus === "success" &&
-      !isFetchingStatementList &&
-      !isFetchingAudits
-    ) {
+    if (statementListStatus === "success" && !isFetchingStatementList) {
       if (!disableStatementListScroll) {
         setTimeout(() => {
           const statementInTable = document.getElementById(
@@ -76,13 +61,7 @@ const ScrollHandler = () => {
         dispatch(setDisableStatementListScroll(false));
       }
     }
-  }, [
-    statementId,
-    statementListStatus,
-    isFetchingStatementList,
-    auditStatus,
-    isFetchingAudits,
-  ]);
+  }, [statementId, statementListStatus, isFetchingStatementList]);
 
   useEffect(() => {
     if (treeStatus === "success" && !isFetchingTree) {
