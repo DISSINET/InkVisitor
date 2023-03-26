@@ -45,6 +45,7 @@ import {
   StyledCheckboxWrapper,
   StyledFocusedCircle,
   StyledTable,
+  StyledTdLastEdit,
   StyledTh,
   StyledTHead,
 } from "./StatementListTableStyles";
@@ -63,7 +64,6 @@ interface StatementListTable {
   >;
   entities: { [key: string]: IEntity };
   right: UserEnums.RoleMode;
-  audits: IResponseAudit[];
 
   duplicateStatement: (statementToDuplicate: IResponseStatement) => void;
   setStatementToDelete: React.Dispatch<
@@ -81,7 +81,6 @@ export const StatementListTable: React.FC<StatementListTable> = ({
   actantsUpdateMutation,
   entities,
   right,
-  audits,
 
   duplicateStatement,
   setStatementToDelete,
@@ -146,7 +145,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
     return selectedStatements.map((statement) => statement.id);
   };
 
-  const columns: Column<{}>[] = useMemo(() => {
+  const columns: Column<IResponseStatement>[] = useMemo(() => {
     return [
       {
         Header: "ID",
@@ -327,7 +326,31 @@ export const StatementListTable: React.FC<StatementListTable> = ({
         id: "lastEdit",
         Header: "Edited",
         Cell: ({ row }: Cell) => {
-          return false;
+          const { updatedAt, createdAt } = row.original as IResponseStatement;
+          const lastEditDate: Date | undefined = updatedAt || createdAt;
+          if (!lastEditDate) {
+            return "";
+          }
+          const today = new Date().setHours(0, 0, 0, 0);
+          const lastEditDay = new Date(lastEditDate).setHours(0, 0, 0, 0);
+
+          if (today === lastEditDay) {
+            return (
+              <StyledTdLastEdit>
+                {"today " +
+                  new Date(lastEditDate).toLocaleTimeString("en-GB", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+              </StyledTdLastEdit>
+            );
+          } else {
+            return (
+              <StyledTdLastEdit>
+                {new Date(lastEditDate).toLocaleDateString("en-GB")}
+              </StyledTdLastEdit>
+            );
+          }
         },
       },
       {
@@ -430,7 +453,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
     visibleColumns,
     selectedFlatRows,
     state: { selectedRowIds },
-  } = useTable(
+  } = useTable<IResponseStatement>(
     {
       columns,
       data: statementsLocal,
@@ -510,7 +533,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
         ))}
       </StyledTHead>
       <tbody {...getTableBodyProps()}>
-        {rows.map((row: Row, i: number) => {
+        {rows.map((row, i) => {
           prepareRow(row);
           return (
             <StatementListRow
@@ -521,7 +544,6 @@ export const StatementListTable: React.FC<StatementListTable> = ({
               moveEndRow={moveEndRow}
               visibleColumns={visibleColumns}
               entities={entities}
-              audits={audits}
               isSelected={selectedRows.includes(row.id)}
               {...row.getRowProps()}
             />
