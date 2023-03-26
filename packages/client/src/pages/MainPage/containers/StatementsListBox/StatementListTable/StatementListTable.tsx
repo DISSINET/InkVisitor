@@ -345,9 +345,11 @@ export const StatementListTable: React.FC<StatementListTable> = ({
               </StyledTdLastEdit>
             );
           } else {
-            <StyledTdLastEdit>
-              {new Date(lastEditDate).toLocaleDateString("en-GB")}
-            </StyledTdLastEdit>;
+            return (
+              <StyledTdLastEdit>
+                {new Date(lastEditDate).toLocaleDateString("en-GB")}
+              </StyledTdLastEdit>
+            );
           }
         },
       },
