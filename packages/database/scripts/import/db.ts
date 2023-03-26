@@ -25,6 +25,18 @@ export
   }
 
   /**
+   * Returns the connection instance or throws an error in case the connection not initiated
+   * @returns Connection
+   */
+  getConnection(): Connection {
+    if(!this.conn) {
+      throw new Error("Connection not available");
+    }
+
+    return this.conn;
+  }
+
+  /**
    * Connects to the db service according to config values
    * @returns Promise<void>
    */

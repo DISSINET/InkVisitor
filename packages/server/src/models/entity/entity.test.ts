@@ -21,6 +21,122 @@ export const prepareEntity = (): [string, Entity] => {
   return [id, ent];
 };
 
+describe("test Entity.save", () => {
+  let db: Db;
+  const entity = new Entity({});
+
+  beforeAll(async () => {
+    db = new Db();
+    await db.initDb();
+  });
+
+  afterAll(async () => {
+    await db.close();
+  });
+
+  test("createdAt timestamp should be added in save call", async () => {
+    expect(entity.createdAt).toBeUndefined()
+
+    await entity.save(db.connection);
+    expect(entity.createdAt).not.toBeUndefined()
+  })
+
+  test("createdAt timestamp should be retrievable", async() => {
+    const foundEntity = await findEntityById(db, entity.id);
+    expect(foundEntity.createdAt).toEqual(entity.createdAt);
+  })
+
+  test("updatedAt timestamp should be empty after initial save", async() => {
+    expect(entity.updatedAt).toBeUndefined();
+  })
+})
+
+describe("test Entity.update", function () {
+  let db: Db;
+  let entity = new Entity({});
+  let afterSave: Date | undefined, after1Update: Date | undefined, after2Update: Date | undefined;
+
+  beforeAll(async () => {
+    db = new Db();
+    await db.initDb();
+    await entity.save(db.connection)
+    afterSave = entity.updatedAt
+    await entity.update(db.connection, {})
+    after1Update = entity.updatedAt
+    entity = new Entity(await findEntityById(db, entity.id))
+    await entity.update(db.connection, {})
+    after2Update = entity.updatedAt;
+  });
+
+  afterAll(async () => {
+    await db.close();
+  });
+
+  describe("if providing only part of nested data", () => {
+    it("should update it as merge operation", async (done) => {
+      const entity = new Statement({});
+      entity.data.tags = ["origtag1", "origtag2"];
+      entity.data.text = "jea";
+      entity.data.territory = new StatementTerritory({
+        territoryId: "territoryId",
+        order: 2,
+      });
+      entity.data.actants = [
+        new StatementActant({ id: "1" }),
+        new StatementActant({ id: "2" })
+      ];
+
+      await entity.save(db.connection);
+
+      const entityRef = new Statement({ id: entity.id });
+      const newTextValue = "changed";
+      const newEntityId = "3";
+      const newTagsValue: string[] = [];
+      await entityRef.update(db.connection, {
+        data: {
+          text: newTextValue,
+          actants: [{ id: newEntityId }],
+          tags: newTagsValue,
+        },
+      });
+
+      const existingEntityData = await findEntityById<IStatement>(
+        db,
+        entity.id
+      );
+
+      // new value
+      expect(existingEntityData.data.text).toEqual(newTextValue);
+      //  territory data from the save call
+      expect(existingEntityData.data.territory?.territoryId).toEqual(
+        entity.data.territory?.territoryId
+      );
+      // actants field should be replaced
+      expect(existingEntityData.data.actants).toHaveLength(1);
+      expect(existingEntityData.data.actants[0].id).toEqual(newEntityId);
+      expect(existingEntityData.data.tags).toEqual(newTagsValue);
+
+      await clean(db);
+      done();
+    });
+  });
+
+  describe("updatedAt timestamp should be added in update call", () => {
+    it("updateAt should be empty after save", () => {
+      expect(afterSave).toBeUndefined()
+    })
+
+    it("updateAt should be set after first update", () => {
+      expect(after1Update).not.toBeUndefined()
+    })
+
+    it("updateAt should be renewed after second update", () => {
+      expect(after2Update).not.toBeUndefined()
+      expect(after1Update?.getTime()).not.toEqual(after2Update?.getTime())
+    })
+  })
+});
+
 describe("test Entity.delete", function () {
   describe("one existing linked statement", () => {
     it("should correctly remove entity from statement's data.actants", async () => {
@@ -93,60 +209,6 @@ describe("test Entity.delete", function () {
         statementViaActions.id
       );
       expect(existinStatementViaAction.data.actions).toHaveLength(0);
-    });
-  });
-});
-
-describe("test Entity.update", function () {
-  describe("if providing only part of nested data", () => {
-    it("should update it as merge operation", async (done) => {
-      const db = new Db();
-      await db.initDb();
-
-      const entity = new Statement({});
-      entity.data.tags = ["origtag1", "origtag2"];
-      entity.data.text = "jea";
-      entity.data.territory = new StatementTerritory({
-        territoryId: "territoryId",
-        order: 2,
-      });
-      entity.data.actants = [
-        new StatementActant({ id: "1" }),
-        new StatementActant({ id: "2" })
-      ];
-
-      await entity.save(db.connection);
-
-      const entityRef = new Statement({ id: entity.id });
-      const newTextValue = "changed";
-      const newEntityId = "3";
-      const newTagsValue: string[] = [];
-      await entityRef.update(db.connection, {
-        data: {
-          text: newTextValue,
-          actants: [{ id: newEntityId }],
-          tags: newTagsValue,
-        },
-      });
-
-      const existingEntityData = await findEntityById<IStatement>(
-        db,
-        entity.id
-      );
-
-      // new value
-      expect(existingEntityData.data.text).toEqual(newTextValue);
-      //  territory data from the save call
-      expect(existingEntityData.data.territory?.territoryId).toEqual(
-        entity.data.territory?.territoryId
-      );
-      // actants field should be replaced
-      expect(existingEntityData.data.actants).toHaveLength(1);
-      expect(existingEntityData.data.actants[0].id).toEqual(newEntityId);
-      expect(existingEntityData.data.tags).toEqual(newTagsValue);
-
-      await clean(db);
-      done();
     });
   });
 });

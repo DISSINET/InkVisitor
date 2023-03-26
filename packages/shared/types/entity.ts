@@ -17,4 +17,6 @@ export interface IEntity {
   isTemplate?: boolean;
   usedTemplate?: string;
   templateData?: object;
+  createdAt?: Date;
+  updatedAt?: Date;
 }

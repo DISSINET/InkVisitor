@@ -98,7 +98,7 @@ export const AuditTableRow: React.FC<IAuditTableRow> = ({
           <RiTimeLine />
           {prettyTime}
         </StyledAuditColumn>
-        <StyledAuditColumn>
+        <StyledAuditColumn wrap>
           {mode === "create" ? <MdAddCircleOutline /> : <FaExchangeAlt />}
           {mode === "create" ? "" : changedKeys.join(", ")}
         </StyledAuditColumn>
