@@ -14,9 +14,9 @@ export type errorTypes = keyof typeof errors;
  *   message: "Label is required"
  * }
  */
-export interface IResponseGeneric {
+export interface IResponseGeneric<T = any> {
   result: boolean;
   error?: errorTypes;
   message?: string;
-  data?: {};
+  data?: T;
 }

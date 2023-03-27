@@ -6,15 +6,47 @@ import {
   PermissionDeniedError,
   RelationDoesNotExist,
 } from "@shared/types/errors";
-import Relation from "@models/relation/relation";
+import Relation, { IRelationModel } from "@models/relation/relation";
 import { Router } from "express";
 import { asyncRouteHandler } from "../index";
 import { getRelationClass } from "@models/factory";
 import { mergeDeep } from "@common/functions";
 import Entity from "@models/entity/entity";
 import { IRequest } from "src/custom_typings/request";
+import { Relation as RelationTypes } from "@shared/types";
 
 export default Router()
+  /**
+   * @openapi
+   * /relations/:
+   *   get:
+   *     description: Retrieves all possible relation entries filtered by optional arguments
+   *     tags:
+   *       - relations
+   *     parameters:
+   *       - in: query
+   *         name: type
+   *         schema:
+   *           type: string
+   *         description: type of searched relations
+   *     responses:
+   *       200:
+   *         description: Returns array with relation entries
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: array
+   *               items:
+   *                 $ref: "#/components/schemas/RelationIModel"
+   */
+  .get(
+    "/",
+    asyncRouteHandler<RelationTypes.IRelation[]>(async (request: IRequest) => {
+      const relations = await Relation.getAll(request, request.query.type);
+
+      return relations;
+    })
+  )
   /**
    * @openapi
    * /relations/:
@@ -24,11 +56,11 @@ export default Router()
    *       - relations
    *     requestBody:
    *       description: Relation object
-   *       content: 
+   *       content:
    *         application/json:
    *           schema:
    *             allOf:
-   *               - $ref: "#/components/schemas/RelationIModel"               
+   *               - $ref: "#/components/schemas/RelationIModel"
    *     responses:
    *       200:
    *         description: Returns generic response
@@ -48,7 +80,10 @@ export default Router()
 
       await request.db.lock();
 
-      model.entities = await Entity.findEntitiesByIds(request.db.connection, model.entityIds);
+      model.entities = await Entity.findEntitiesByIds(
+        request.db.connection,
+        model.entityIds
+      );
       if (model.entities.length !== model.entityIds.length) {
         throw new ModelNotValidError("entity(ies) not found");
       }
@@ -60,7 +95,7 @@ export default Router()
       await model.beforeSave(request);
       const saved = await model.save(request.db.connection);
       if (!saved) {
-        throw new InternalServerError(`cannot create relation`);
+        throw new InternalServerError("cannot create relation");
       }
 
       await model.afterSave(request);
@@ -86,11 +121,11 @@ export default Router()
    *         description: ID of the relation entry
    *     requestBody:
    *       description: Relation object
-   *       content: 
+   *       content:
    *         application/json:
    *           schema:
    *             allOf:
-   *               - $ref: "#/components/schemas/RelationIModel"               
+   *               - $ref: "#/components/schemas/RelationIModel"
    *     responses:
    *       200:
    *         description: Returns generic response
@@ -126,7 +161,10 @@ export default Router()
         throw new ModelNotValidError("");
       }
 
-      const entities = await Entity.findEntitiesByIds(request.db.connection, model.entityIds);
+      const entities = await Entity.findEntitiesByIds(
+        request.db.connection,
+        model.entityIds
+      );
       if (entities.length !== model.entityIds.length) {
         throw new ModelNotValidError("entity(ies) not found");
       }
@@ -136,7 +174,10 @@ export default Router()
       }
 
       await model.beforeSave(request);
-      const updateData: { [key: string]: unknown; } = { ...data, entityIds: model.entityIds };
+      const updateData: { [key: string]: unknown } = {
+        ...data,
+        entityIds: model.entityIds,
+      };
       if (model.order !== undefined) {
         updateData.order = model.order;
       }
@@ -167,7 +208,7 @@ export default Router()
    *         schema:
    *           type: string
    *         required: true
-   *         description: ID of the relation entry             
+   *         description: ID of the relation entry
    *     responses:
    *       200:
    *         description: Returns generic response
@@ -180,7 +221,6 @@ export default Router()
     "/:relationId",
     asyncRouteHandler<IResponseGeneric>(async (request: IRequest) => {
       const id = request.params.relationId;
-
       if (!id) {
         throw new BadParams("relation id has to be set");
       }
