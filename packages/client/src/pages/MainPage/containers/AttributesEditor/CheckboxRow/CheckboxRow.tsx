@@ -23,7 +23,6 @@ export const CheckboxRow: React.FC<CheckboxRow> = ({
   attributeName,
   disabled = false,
 }) => {
-  console.log(attributeName);
   return (
     <StyledAttributeModalRow disabled={false}>
       <StyledAttributeModalRowLabel>

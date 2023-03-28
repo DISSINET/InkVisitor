@@ -2,7 +2,6 @@ import { UserEnums } from "@shared/enums";
 import {
   IAction,
   IEntity,
-  IResponseAudit,
   IResponseGeneric,
   IResponseStatement,
   IStatement,
@@ -26,14 +25,7 @@ import {
   MdOutlineCheckBoxOutlineBlank,
 } from "react-icons/md";
 import { UseMutationResult } from "react-query";
-import {
-  Cell,
-  Column,
-  Row,
-  useExpanded,
-  useRowSelect,
-  useTable,
-} from "react-table";
+import { Cell, Column, useExpanded, useRowSelect, useTable } from "react-table";
 import { setLastClickedIndex } from "redux/features/statementList/lastClickedIndexSlice";
 import { setRowsExpanded } from "redux/features/statementList/rowsExpandedSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
