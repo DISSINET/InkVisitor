@@ -5,7 +5,7 @@ import {
   IStoredTerritory,
   IUserRight,
 } from "@shared/types";
-import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
+import { r as rethink, Connection, WriteResult, RDatum } from "rethinkdb-ts";
 import {
   IDbModel,
   fillArray,
@@ -33,7 +33,7 @@ export class UserRight implements IUserRight {
 }
 
 export class UserOptions implements IUserOptions {
-  defaultTerritory: string = "";
+  defaultTerritory = "";
   defaultLanguage: EntityEnums.Language = EntityEnums.Language.English;
   searchLanguages: EntityEnums.Language[] = [];
   hideStatementElementsOrderTable?: boolean = false;
@@ -53,8 +53,8 @@ export class UserOptions implements IUserOptions {
 }
 
 export class BookmarkFolder implements IBookmarkFolder {
-  id: string = "";
-  name: string = "";
+  id = "";
+  name = "";
   entityIds: string[] = [];
 
   constructor(data: Partial<IBookmarkFolder>) {
@@ -77,6 +77,14 @@ export class BookmarkFolder implements IBookmarkFolder {
 
     return true;
   }
+
+  /**
+   * Shorthand for removing entity id from array of ids
+   * @param entityId
+   */
+  removeEntity(entityId: string) {
+    this.entityIds = this.entityIds.filter((id) => id != entityId);
+  }
 }
 
 export class StoredTerritory implements IStoredTerritory {
@@ -92,15 +100,15 @@ export class StoredTerritory implements IStoredTerritory {
 }
 
 export default class User implements IUser, IDbModel {
-  id: string = "";
-  email: string = "";
+  id = "";
+  email = "";
 
   @nonenumerable
-  password: string = "";
+  password = "";
 
-  name: string = "";
+  name = "";
   role: UserEnums.Role = UserEnums.Role.Viewer;
-  active: boolean = false;
+  active = false;
   options: UserOptions = new UserOptions({});
   bookmarks: BookmarkFolder[] = [];
   storedTerritories: StoredTerritory[] = [];
@@ -189,7 +197,7 @@ export default class User implements IUser, IDbModel {
     return this.hash;
   }
 
-  static async getUser(
+  static async findUserById(
     dbInstance: Connection | undefined,
     id: string
   ): Promise<User | null> {
@@ -264,5 +272,44 @@ export default class User implements IUser, IDbModel {
       })
       .run(dbInstance);
     return data.map((d) => new User(d));
+  }
+
+  /**
+   * Searches for users associated with entities via any User field, currently only bookmarks
+   * @param db
+   * @param entityId
+   * @returns array of IUser interfaces
+   */
+  static async findForEntity(
+    db: Connection,
+    entityId: string
+  ): Promise<IUser[]> {
+    const users: IUser[] = await rethink
+      .table(User.table)
+      .filter(function (user: RDatum<IUser>) {
+        return user("bookmarks").contains((bookmark: RDatum<IBookmarkFolder>) =>
+          bookmark("entityIds").contains(entityId)
+        );
+      })
+      .run(db);
+
+    return users;
+  }
+
+  /**
+   * Removed bookmarks with entityId from all user
+   * @param db
+   * @param entityId
+   */
+  static async removeBookmarksForEntity(
+    db: Connection,
+    entityId: string
+  ): Promise<void> {
+    const userEntries = await User.findForEntity(db, entityId);
+    for (const userData of userEntries) {
+      const userModel = new User(userData);
+      userModel.bookmarks.forEach((b) => b.removeEntity(entityId));
+      await userModel.update(db, { bookmarks: userModel.bookmarks });
+    }
   }
 }
