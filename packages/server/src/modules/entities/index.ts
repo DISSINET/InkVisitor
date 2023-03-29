@@ -27,6 +27,8 @@ import { getAuditByEntityId } from "@modules/audits";
 import { ResponseTooltip } from "@models/entity/response-tooltip";
 import { IRequest } from "src/custom_typings/request";
 import Relation from "@models/relation/relation";
+import User from "@models/user/user";
+import Entity from "@models/entity/entity";
 
 export default Router()
   /**
@@ -325,19 +327,27 @@ export default Router()
         );
       }
 
-      // if anything is linked to this entity, the delete should not be allowed
+      // if relations are linked to this entity, the delete should not be allowed
       const linkedRelations = await Relation.getForEntity(
         request.db.connection,
         entityId
       );
       if (linkedRelations && linkedRelations.length) {
+        const data = Array.from(new Set(linkedRelations.map((r) => r.id)));
+        const spec = data[0];
+        if (data.length > 1) {
+          spec + ` + ${data.length - 1} others`;
+        }
         return {
           result: false,
           error: "InvalidDeleteError",
-          message: "Cannot be deleted while linked to relations",
-          data: Array.from(new Set(linkedRelations.map((r) => r.id))),
+          message: `Cannot be deleted while linked to relations (${spec})`,
+          data,
         };
       }
+
+      // if bookmarks are linked to this entity, the bookmarks should be removed also
+      await User.removeBookmarksForEntity(request.db.connection, entityId);
 
       const result = await model.delete(request.db.connection);
       if (result.deleted === 1) {
