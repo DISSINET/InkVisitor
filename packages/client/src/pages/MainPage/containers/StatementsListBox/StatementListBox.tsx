@@ -48,6 +48,7 @@ export const StatementListBox: React.FC = () => {
     setStatementId,
     detailIdArray,
     removeDetailId,
+    appendDetailId,
   } = useSearchParams();
 
   useEffect(() => {
@@ -133,6 +134,22 @@ export const StatementListBox: React.FC = () => {
           setStatementId("");
         });
         setSelectedRows(selectedRows.filter((r) => r !== sId));
+      },
+      onError: (error) => {
+        if (
+          (error as any).error === "InvalidDeleteError" &&
+          (error as any).data &&
+          (error as any).data.length > 0
+        ) {
+          const { data } = error as any;
+          toast.info("Click to open conflicting entity in detail", {
+            autoClose: 6000,
+            pauseOnHover: true,
+            onClick: () => {
+              appendDetailId(data[0]);
+            },
+          });
+        }
       },
     }
   );
