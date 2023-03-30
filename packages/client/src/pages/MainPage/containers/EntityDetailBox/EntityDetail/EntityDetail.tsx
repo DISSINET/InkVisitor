@@ -275,8 +275,6 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
     (entityId: string) => api.entityDelete(entityId),
     {
       onSuccess: async (data, entityId) => {
-        setShowRemoveSubmit(false);
-
         toast.info(`Entity removed!`);
 
         // hide selected territory if T removed
@@ -306,7 +304,6 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
         removeDetailId(entityId);
       },
       onError: async (error) => {
-        setShowRemoveSubmit(false);
         if (
           (error as any).error === "InvalidDeleteError" &&
           (error as any).data &&
@@ -797,6 +794,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
         submitLabel="Remove"
         onSubmit={() => {
           deleteEntityMutation.mutate(detailId);
+          setShowRemoveSubmit(false);
         }}
         onCancel={() => setShowRemoveSubmit(false)}
         show={showRemoveSubmit}
