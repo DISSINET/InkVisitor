@@ -54,7 +54,8 @@ export class SshHelper {
       if (!this.server) {
         return resolve();
       }
-      this.server.close(() => resolve());
+      this.server.close();
+      resolve()
     });
   }
 }
