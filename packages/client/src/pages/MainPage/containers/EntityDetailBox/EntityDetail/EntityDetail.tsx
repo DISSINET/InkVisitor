@@ -313,7 +313,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
           (error as any).data.length > 0
         ) {
           const { data } = error as any;
-          toast.info("Click to open conflicted entity in detail", {
+          toast.info("Click to open conflicting entity in detail", {
             autoClose: 6000,
             pauseOnHover: true,
             onClick: () => {
