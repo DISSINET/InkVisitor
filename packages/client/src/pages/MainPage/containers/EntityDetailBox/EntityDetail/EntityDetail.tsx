@@ -72,6 +72,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
     setTerritoryId,
     removeDetailId,
     setSelectedDetailId,
+    appendDetailId,
     detailIdArray,
     selectedDetailId,
   } = useSearchParams();
@@ -303,6 +304,17 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
         queryClient.invalidateQueries("tree");
 
         removeDetailId(entityId);
+      },
+      onError: async (error) => {
+        setShowRemoveSubmit(false);
+        if (
+          (error as any).error === "InvalidDeleteError" &&
+          (error as any).data &&
+          (error as any).data.length > 0
+        ) {
+          const { data } = error as any;
+          appendDetailId(data[0]);
+        }
       },
     }
   );
