@@ -333,6 +333,14 @@ export default Router()
         entityId
       );
       if (linkedRelations && linkedRelations.length) {
+        const entityIds = Array.from(
+          new Set(
+            linkedRelations.reduce<string[]>((acc, r) => {
+              acc = acc.concat(r.entityIds);
+              return acc;
+            }, [])
+          )
+        ).filter((id) => id != entityId);
         const data = Array.from(new Set(linkedRelations.map((r) => r.id)));
         const spec = data[0];
         if (data.length > 1) {
@@ -342,7 +350,7 @@ export default Router()
           result: false,
           error: "InvalidDeleteError",
           message: `Cannot be deleted while linked to relations (${spec})`,
-          data,
+          data: entityIds,
         };
       }
 
