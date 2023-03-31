@@ -1,23 +1,21 @@
 import React, { useEffect, useState } from "react";
 import {
-  StyledCheckbox,
-  StyledCheckboxWrapper,
-  StyledLabel,
-} from "./CheckboxStyles";
+  MdOutlineCheckBox,
+  MdOutlineCheckBoxOutlineBlank,
+} from "react-icons/md";
+import theme from "Theme/theme";
+import { StyledCheckboxWrapper } from "./CheckboxStyles";
 
 interface Checkbox {
   value: boolean;
   onChangeFn: (value: boolean) => void;
   label?: string;
-  id?: string;
-  disabled?: boolean;
+  size?: number;
 }
 export const Checkbox: React.FC<Checkbox> = ({
   value,
   onChangeFn,
-  label,
-  id = "default",
-  disabled = false,
+  size = 18,
 }) => {
   const [checked, setChecked] = useState(value);
 
@@ -27,19 +25,27 @@ export const Checkbox: React.FC<Checkbox> = ({
 
   return (
     <StyledCheckboxWrapper>
-      <StyledCheckbox
-        type="checkbox"
-        id={id}
-        checked={checked}
-        onClick={(e: React.MouseEvent<HTMLInputElement, MouseEvent>) =>
-          e.stopPropagation()
-        }
-        onChange={() => {
-          setChecked(!checked);
-        }}
-        disabled={disabled}
-      />
-      <StyledLabel htmlFor={id}>{label}</StyledLabel>
+      {checked ? (
+        <MdOutlineCheckBox
+          size={size}
+          color={theme.color.black}
+          style={{ cursor: "pointer", zIndex: 2 }}
+          onClick={(e) => {
+            e.stopPropagation();
+            setChecked(false);
+          }}
+        />
+      ) : (
+        <MdOutlineCheckBoxOutlineBlank
+          size={size}
+          color={theme.color.black}
+          style={{ cursor: "pointer", zIndex: 2 }}
+          onClick={(e) => {
+            e.stopPropagation();
+            setChecked(true);
+          }}
+        />
+      )}
     </StyledCheckboxWrapper>
   );
 };

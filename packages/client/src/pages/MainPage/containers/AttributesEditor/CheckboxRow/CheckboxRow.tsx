@@ -21,7 +21,7 @@ export const CheckboxRow: React.FC<CheckboxRow> = ({
   onChangeFn,
   label,
   attributeName,
-  disabled = false,
+  disabled = true,
 }) => {
   return (
     <StyledAttributeModalRow disabled={false}>
@@ -42,9 +42,7 @@ export const CheckboxRow: React.FC<CheckboxRow> = ({
         )
       ) : (
         <Checkbox
-          disabled={disabled}
           onChangeFn={(newValue: boolean) => onChangeFn(newValue)}
-          id={label}
           value={value}
         />
       )}
