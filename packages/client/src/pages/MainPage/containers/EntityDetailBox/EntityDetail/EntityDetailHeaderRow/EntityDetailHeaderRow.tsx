@@ -124,8 +124,18 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
               color="primary"
               onClick={() => {
                 // instantiate entity
-                instantiateTemplate();
+                if (entity.class === EntityEnums.Class.Territory) {
+                  // TODO: modal for choosing territory parent
+                } else if (entity.class === EntityEnums.Class.Statement) {
+                  // TODO: modal for choosing territory for S
+                } else {
+                  instantiateTemplate();
+                }
               }}
+              disabled={
+                entity.class === EntityEnums.Class.Territory ||
+                entity.class === EntityEnums.Class.Statement
+              }
             />
           </>
         )}
