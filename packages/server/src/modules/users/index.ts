@@ -175,7 +175,7 @@ export default Router()
         throw new BadParams("userId has to be set");
       }
 
-      const user = await User.getUser(request.db.connection, userId);
+      const user = await User.findUserById(request.db.connection, userId);
       if (!user) {
         throw new UserDoesNotExits(`user ${userId} was not found`, userId);
       }
@@ -263,7 +263,7 @@ export default Router()
       const hash = user.generateHash();
       const saved = await user.save(request.db.connection);
       if (!saved) {
-        throw new InternalServerError(`cannot create user`);
+        throw new InternalServerError("cannot create user");
       }
 
       try {
@@ -325,7 +325,10 @@ export default Router()
         throw new BadParams("user id and data have to be set");
       }
 
-      const existingUser = await User.getUser(request.db.connection, userId);
+      const existingUser = await User.findUserById(
+        request.db.connection,
+        userId
+      );
       if (!existingUser) {
         throw new UserDoesNotExits(
           `user with id ${userId} does not exist`,
@@ -377,7 +380,10 @@ export default Router()
         throw new BadParams("user id has to be set");
       }
 
-      const existingUser = await User.getUser(request.db.connection, userId);
+      const existingUser = await User.findUserById(
+        request.db.connection,
+        userId
+      );
       if (!existingUser) {
         throw new UserDoesNotExits(
           `user with id ${userId} does not exist`,
@@ -506,7 +512,7 @@ export default Router()
         throw new BadParams("user id has to be set");
       }
 
-      const user = await User.getUser(request.db.connection, userId);
+      const user = await User.findUserById(request.db.connection, userId);
       if (!user) {
         throw new UserDoesNotExits(
           `user with id ${userId} does not exist`,
@@ -556,7 +562,7 @@ export default Router()
       if (userId === "me") {
         user = request.getUserOrFail();
       } else {
-        user = await User.getUser(request.db.connection, userId);
+        user = await User.findUserById(request.db.connection, userId);
       }
 
       if (!user) {

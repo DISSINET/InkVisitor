@@ -19,7 +19,7 @@ export default async function customizeRequest(
 ): Promise<void> {
   let user: User | null = null;
   if (req.user && req.user.user) {
-    user = await User.getUser(req.db.connection, req.user.user.id);
+    user = await User.findUserById(req.db.connection, req.user.user.id);
   }
 
   req.getUserOrFail = getUserOrFail.bind(undefined, user);
