@@ -38,12 +38,15 @@ export default class Relation implements IRelationModel {
    * @returns
    */
   getPreloadedEntity(entityId: string): IEntity {
-    const loadedEntity = this.entities?.find(e => e.id === entityId);
+    const loadedEntity = this.entities?.find((e) => e.id === entityId);
     if (!loadedEntity) {
-      throw new InternalServerError('', `cannot retrieve entity - not preloaded`);
+      throw new InternalServerError(
+        "",
+        "cannot retrieve entity - not preloaded"
+      );
     }
 
-    return loadedEntity
+    return loadedEntity;
   }
 
   /**
@@ -52,7 +55,10 @@ export default class Relation implements IRelationModel {
    * @param entityId
    * @param acceptableClasses
    */
-  hasEntityCorrectClass(entityId: string, acceptableClass: EntityEnums.Class): boolean {
+  hasEntityCorrectClass(
+    entityId: string,
+    acceptableClass: EntityEnums.Class
+  ): boolean {
     return acceptableClass === this.getPreloadedEntity(entityId).class;
   }
 
@@ -67,10 +73,15 @@ export default class Relation implements IRelationModel {
       return true;
     }
 
-    const firstEntity = this.entities?.find(e => e.id === this.entityIds[0])
+    const firstEntity = this.entities?.find((e) => e.id === this.entityIds[0]);
 
     for (const id of this.entityIds) {
-      if (!this.hasEntityCorrectClass(id, firstEntity ? firstEntity.class : "" as EntityEnums.Class)) {
+      if (
+        !this.hasEntityCorrectClass(
+          id,
+          firstEntity ? firstEntity.class : ("" as EntityEnums.Class)
+        )
+      ) {
         return false;
       }
     }
@@ -84,9 +95,11 @@ export default class Relation implements IRelationModel {
    */
   validateEntitiesData(): Error | null {
     for (const i in this.entityIds) {
-      const loadedEntity = this.getPreloadedEntity(this.entityIds[i])
+      const loadedEntity = this.getPreloadedEntity(this.entityIds[i]);
       if (loadedEntity.isTemplate) {
-        return new ModelNotValidError(`Entity ${loadedEntity.id} must not be a template`);
+        return new ModelNotValidError(
+          `Entity ${loadedEntity.id} must not be a template`
+        );
       }
     }
 
@@ -94,36 +107,44 @@ export default class Relation implements IRelationModel {
   }
 
   /**
-  * validateEntities checks if entities can be used in the relation
-  * @returns
-  */
+   * validateEntities checks if entities can be used in the relation
+   * @returns
+   */
   validateEntities(): Error | null {
-    const entityNotAllowedError = this.validateEntitiesData()
+    const entityNotAllowedError = this.validateEntitiesData();
     if (entityNotAllowedError) {
       return entityNotAllowedError;
     }
 
     const rules = RelationTypes.RelationRules[this.type];
     if (!rules) {
-      return new InternalServerError(`Missing rules for relation type '${this.type}'`);
+      return new InternalServerError(
+        `Missing rules for relation type '${this.type}'`
+      );
     }
 
     // check if same-classes-only is required
-    let patternFound = !rules.allowedSameEntityClassesOnly || this.areEntitiesSameClass();
+    let patternFound =
+      !rules.allowedSameEntityClassesOnly || this.areEntitiesSameClass();
     if (!patternFound) {
-      return new ModelNotValidError(`Entities must have the same class`);
+      return new ModelNotValidError("Entities must have the same class");
     }
 
     for (const pattern of rules?.allowedEntitiesPattern) {
       if (!rules.cloudType && pattern.length !== this.entityIds.length) {
-        return new ModelNotValidError(`Pattern requires '${pattern.length}' entities`);
+        return new ModelNotValidError(
+          `Pattern requires '${pattern.length}' entities`
+        );
       }
 
       for (const i in this.entityIds) {
         // cloud type has always
         const wantedClass = rules.cloudType ? pattern[0] : pattern[i];
 
-        patternFound = this.hasEntityCorrectClass(this.entityIds[i], wantedClass);
+        patternFound = this.hasEntityCorrectClass(
+          this.entityIds[i],
+          wantedClass
+        );
         if (!patternFound) {
           // pattern cannot be accepted any further - continue with another pattern
           break;
@@ -137,7 +158,7 @@ export default class Relation implements IRelationModel {
     }
 
     if (!patternFound) {
-      return new ModelNotValidError(`Not allowed entity-class pattern`);
+      return new ModelNotValidError("Not allowed entity-class pattern");
     }
 
     return null;
@@ -149,10 +170,13 @@ export default class Relation implements IRelationModel {
    */
   async beforeSave(request: IRequest): Promise<void> {
     if (!this.entities || this.entities.length !== this.entityIds.length) {
-      this.entities = await Entity.findEntitiesByIds(request.db.connection, this.entityIds);
+      this.entities = await Entity.findEntitiesByIds(
+        request.db.connection,
+        this.entityIds
+      );
 
       if (this.entities.length !== this.entityIds.length) {
-        throw new ModelNotValidError(`At least one entity does not exist`);
+        throw new ModelNotValidError("At least one entity does not exist");
       }
     }
 
@@ -177,9 +201,7 @@ export default class Relation implements IRelationModel {
    * Use this method for doing asynchronous operation/checks after the save operation
    * @param request
    */
-  async afterSave(request: IRequest): Promise<void> {
-
-  }
+  async afterSave(request: IRequest): Promise<void> {}
 
   /**
    * returns list of relations with the same main entityId (minus this entity)
@@ -187,15 +209,19 @@ export default class Relation implements IRelationModel {
    * @returns  list of relations
    */
   async getSiblings(db: Connection): Promise<RelationTypes.IRelation[]> {
-    const childs = await Relation.getForEntity(db, this.entityIds[0], this.type);
-    return childs.filter(ch => ch.id !== this.id);
+    const childs = await Relation.getForEntity(
+      db,
+      this.entityIds[0],
+      this.type
+    );
+    return childs.filter((ch) => ch.id !== this.id);
   }
 
   /**
-  * Stores the relation in the db
-  * @param db db connection
-  * @returns Promise<boolean> to indicate result of the operation
-  */
+   * Stores the relation in the db
+   * @param db db connection
+   * @returns Promise<boolean> to indicate result of the operation
+   */
   async save(db: Connection | undefined): Promise<boolean> {
     const result = await rethink
       .table(Relation.table)
@@ -257,7 +283,9 @@ export default class Relation implements IRelationModel {
     const rules = RelationTypes.RelationRules[this.type];
 
     if (!rules) {
-      throw new InternalServerError(`Missing rules for relation type '${this.type}'`);
+      throw new InternalServerError(
+        `Missing rules for relation type '${this.type}'`
+      );
     }
 
     // id must be string or undefined
@@ -271,16 +299,19 @@ export default class Relation implements IRelationModel {
     }
 
     // entityIds must be [] with at least 2 strings
-    if (this.entityIds === undefined ||
+    if (
+      this.entityIds === undefined ||
       this.entityIds.constructor.name !== "Array" ||
       this.entityIds.length < 2 ||
-      !this.entityIds.reduce((acc, eId) => acc && typeof eId === 'string', true)
+      !this.entityIds.reduce((acc, eId) => acc && typeof eId === "string", true)
     ) {
       return false;
     }
 
     if (rules.order && typeof this.order !== "number") {
-      throw new ModelNotValidError(`Order must be a number for relation type '${this.type}'`);
+      throw new ModelNotValidError(
+        `Order must be a number for relation type '${this.type}'`
+      );
     }
 
     return true;
@@ -345,7 +376,12 @@ export default class Relation implements IRelationModel {
    * @param position - position in entityIds
    * @returns array of relation interfaces
    */
-  static async getForEntity<T extends RelationTypes.IRelation>(db: Connection, entityId: string, relType?: RelationEnums.Type, position?: number): Promise<T[]> {
+  static async getForEntity<T extends RelationTypes.IRelation>(
+    db: Connection,
+    entityId: string,
+    relType?: RelationEnums.Type,
+    position?: number
+  ): Promise<T[]> {
     const items: T[] = await rethink
       .table(Relation.table)
       .getAll(entityId, { index: DbEnums.Indexes.RelationsEntityIds })
@@ -353,8 +389,26 @@ export default class Relation implements IRelationModel {
       .run(db);
 
     if (position !== undefined) {
-      return items.filter(d => d.entityIds[position] === entityId);
+      return items.filter((d) => d.entityIds[position] === entityId);
     }
+    return items;
+  }
+
+  /**
+   * Retrieves all relation entries filtered by basic parameters like type
+   * @param db
+   * @param relType
+   * @returns array of relation interfaces
+   */
+  static async getAll(
+    req: IRequest,
+    relType?: RelationEnums.Type
+  ): Promise<RelationTypes.IRelation[]> {
+    const items: RelationTypes.IRelation[] = await rethink
+      .table(Relation.table)
+      .filter(relType ? { type: relType } : {})
+      .run(req.db.connection);
+
     return items;
   }
 
@@ -364,7 +418,10 @@ export default class Relation implements IRelationModel {
    * @param ids
    * @returns
    */
-  static async deleteMany(request: IRequest, ids: string[]): Promise<WriteResult> {
+  static async deleteMany(
+    request: IRequest,
+    ids: string[]
+  ): Promise<WriteResult> {
     return rethink
       .table(Relation.table)
       .getAll.apply(undefined, ids)
