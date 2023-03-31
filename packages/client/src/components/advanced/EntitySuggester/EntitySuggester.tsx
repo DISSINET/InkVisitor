@@ -255,10 +255,19 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
   const handleInstantiateTemplate = async (
     templateToDuplicate: IEntity | IStatement | ITerritory
   ) => {
-    const newEntityId = await InstTemplate(
-      templateToDuplicate,
-      localStorage.getItem("userrole") as UserEnums.Role
-    );
+    let newEntityId;
+    if (templateToDuplicate.class === EntityEnums.Class.Territory) {
+      newEntityId = await InstTemplate(
+        templateToDuplicate,
+        localStorage.getItem("userrole") as UserEnums.Role,
+        territoryParentId
+      );
+    } else {
+      newEntityId = await InstTemplate(
+        templateToDuplicate,
+        localStorage.getItem("userrole") as UserEnums.Role
+      );
+    }
     if (newEntityId) {
       onSelected(newEntityId);
       handleClean();

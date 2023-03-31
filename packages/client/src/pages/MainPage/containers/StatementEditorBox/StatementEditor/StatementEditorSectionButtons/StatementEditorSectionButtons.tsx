@@ -5,7 +5,7 @@ import { AttributeButtonGroup, EntitySuggester } from "components/advanced";
 import {
   DStatementActants,
   DStatementActions,
-  DStatementReferences,
+  DReferences,
 } from "constructors";
 import React, { useState } from "react";
 import { FaClone, FaPlus, FaTrashAlt } from "react-icons/fa";
@@ -70,10 +70,10 @@ export const StatementEditorSectionButtons: React.FC<
           return;
         case "references":
           const newReferences = replaceSection
-            ? [...DStatementReferences(selectedStatement.references)]
+            ? [...DReferences(selectedStatement.references)]
             : [
                 ...statement.references,
-                ...DStatementReferences(selectedStatement.references),
+                ...DReferences(selectedStatement.references),
               ];
           updateStatementMutation.mutate({ references: newReferences });
           return;
