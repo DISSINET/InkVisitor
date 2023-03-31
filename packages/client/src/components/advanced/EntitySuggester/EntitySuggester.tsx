@@ -305,6 +305,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
       !categoryTypes.includes(hoverredCategory) ||
       (disableTemplatesAccept && newHoverred.isTemplate) ||
       newHoverred.isDiscouraged ||
+      // Maybe disable also for non-templates + add condition also to filtering results query
       (newHoverred.isTemplate &&
         newHoverred.entityClass === EntityEnums.Class.Territory &&
         !territoryParentId) ||
