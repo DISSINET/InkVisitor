@@ -1,5 +1,7 @@
+import { entitiesDictKeys } from "@shared/dictionaries";
 import { EntityEnums, UserEnums } from "@shared/enums";
 import {
+  IReference,
   IResponseGeneric,
   IResponseStatement,
   IResponseTerritory,
@@ -8,29 +10,30 @@ import {
 } from "@shared/types";
 import api from "api";
 import { AxiosResponse } from "axios";
-import { Button, ButtonGroup } from "components";
-import {
-  AttributeButtonGroup,
-  BreadcrumbItem,
-  EntitySuggester,
-} from "components/advanced";
+import { Button, ButtonGroup, Dropdown } from "components";
+import { BreadcrumbItem, EntitySuggester } from "components/advanced";
 import { CStatement } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
-import { FaClone, FaPlus, FaRecycle } from "react-icons/fa";
-import { ImBoxRemove } from "react-icons/im";
+import { BiRefresh } from "react-icons/bi";
+import { FaPlus, FaRecycle } from "react-icons/fa";
 import {
   MdOutlineCheckBox,
   MdOutlineCheckBoxOutlineBlank,
   MdOutlineIndeterminateCheckBox,
 } from "react-icons/md";
 import { UseMutationResult, useQuery, useQueryClient } from "react-query";
+import { OptionTypeBase, ValueType } from "react-select";
 import { setLastClickedIndex } from "redux/features/statementList/lastClickedIndexSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import theme from "Theme/theme";
+import { DropdownItem } from "types";
 import { collectTerritoryChildren, searchTree } from "utils";
+import { v4 as uuidv4 } from "uuid";
 import {
   StyledActionsWrapper,
+  StyledCounter,
+  StyledDropdownWrap,
   StyledFaStar,
   StyledHeader,
   StyledHeaderBreadcrumbRow,
@@ -87,6 +90,18 @@ interface StatementListHeader {
     },
     unknown
   >;
+  replaceReferencesMutation: UseMutationResult<
+    AxiosResponse<IResponseGeneric>,
+    unknown,
+    IReference[],
+    unknown
+  >;
+  appendReferencesMutation: UseMutationResult<
+    AxiosResponse<IResponseGeneric>,
+    unknown,
+    IReference[],
+    unknown
+  >;
 }
 export const StatementListHeader: React.FC<StatementListHeader> = ({
   data,
@@ -100,10 +115,41 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
 
   moveStatementsMutation,
   duplicateStatementsMutation,
+  replaceReferencesMutation,
+  appendReferencesMutation,
 }) => {
   const dispatch = useAppDispatch();
   const queryClient = useQueryClient();
   const { territoryId, setTerritoryId } = useSearchParams();
+
+  enum BatchOption {
+    move_S = "move_S",
+    duplicate_S = "duplicate_S",
+    replace_R = "replace_R",
+    append_R = "append_R",
+  }
+  const batchOptions = [
+    {
+      value: BatchOption.move_S,
+      label: `move`,
+      info: "T",
+    },
+    {
+      value: BatchOption.duplicate_S,
+      label: `duplicate`,
+      info: "T",
+    },
+    {
+      value: BatchOption.replace_R,
+      label: `replace R`,
+      info: "R",
+    },
+    {
+      value: BatchOption.append_R,
+      label: `append R`,
+      info: "R",
+    },
+  ];
 
   const treeData: IResponseTree | undefined = queryClient.getQueryData("tree");
 
@@ -130,8 +176,6 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
   const [excludedMoveTerritories, setExcludedMoveTerritories] = useState<
     string[]
   >([territoryId]);
-
-  const [duplicateSelection, setDuplicateSelection] = useState(false);
 
   useEffect(() => {
     setSelectedRows([]);
@@ -238,6 +282,8 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
     }
   };
 
+  const [batchAction, setBatchAction] = useState<DropdownItem>(batchOptions[0]);
+
   return (
     <StyledHeader>
       <StyledHeaderBreadcrumbRow>
@@ -284,44 +330,56 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
         <StyledActionsWrapper>
           {renderCheckBox()}
 
+          {selectedRows.length > 0 && (
+            <StyledCounter>{`${selectedRows.length}/${data.statements.length}`}</StyledCounter>
+          )}
+
           {
             <>
-              <AttributeButtonGroup
-                options={[
-                  {
-                    longValue: `move ${selectedRows.length} S`,
-                    shortValue: "",
-                    onClick: () => setDuplicateSelection(false),
-                    selected: !duplicateSelection,
-                    shortIcon: <ImBoxRemove />,
-                  },
-                  {
-                    longValue: `duplicate ${selectedRows.length} S`,
-                    shortValue: "",
-                    onClick: () => setDuplicateSelection(true),
-                    selected: duplicateSelection,
-                    shortIcon: <FaClone />,
-                  },
-                ]}
-                disabled={selectedRows.length === 0}
-              />
+              <StyledDropdownWrap>
+                <Dropdown
+                  width={78}
+                  disabled={selectedRows.length === 0}
+                  value={batchAction}
+                  onChange={(selectedOption: ValueType<OptionTypeBase, any>) =>
+                    setBatchAction(selectedOption as DropdownItem)
+                  }
+                  options={batchOptions}
+                />
+              </StyledDropdownWrap>
               <EntitySuggester
-                placeholder="to territory"
+                placeholder={batchAction.info === "T" ? "to territory" : ""}
                 disableTemplatesAccept
-                filterEditorRights
+                inputWidth={70}
                 disableCreate
-                categoryTypes={[EntityEnums.Class.Territory]}
+                filterEditorRights
+                categoryTypes={[
+                  entitiesDictKeys[batchAction.info as EntityEnums.Class].value,
+                ]}
                 onSelected={(newSelectedId: string) => {
-                  if (duplicateSelection) {
-                    duplicateStatementsMutation.mutate({
-                      statements: selectedRows,
-                      newTerritoryId: newSelectedId,
-                    });
-                  } else {
-                    moveStatementsMutation.mutate({
-                      statements: selectedRows,
-                      newTerritoryId: newSelectedId,
-                    });
+                  switch (batchAction.value) {
+                    case BatchOption.move_S:
+                      moveStatementsMutation.mutate({
+                        statements: selectedRows,
+                        newTerritoryId: newSelectedId,
+                      });
+                      return;
+                    case BatchOption.duplicate_S:
+                      duplicateStatementsMutation.mutate({
+                        statements: selectedRows,
+                        newTerritoryId: newSelectedId,
+                      });
+                      return;
+                    case BatchOption.append_R:
+                      appendReferencesMutation.mutate([
+                        { id: uuidv4(), resource: newSelectedId, value: "" },
+                      ]);
+                      return;
+                    case BatchOption.replace_R:
+                      replaceReferencesMutation.mutate([
+                        { id: uuidv4(), resource: newSelectedId, value: "" },
+                      ]);
+                      return;
                   }
                 }}
                 excludedActantIds={[data.id]}
@@ -332,7 +390,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
         </StyledActionsWrapper>
 
         {territoryId && (
-          <ButtonGroup marginBottom>
+          <ButtonGroup>
             {data.right !== UserEnums.RoleMode.Read && (
               <Button
                 key="add"
@@ -347,11 +405,10 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
             )}
             <Button
               key="refresh"
-              icon={<FaRecycle size={14} />}
+              icon={<BiRefresh size={14} />}
               tooltipLabel="refresh data"
               inverted
               color="primary"
-              label="refresh"
               onClick={() => {
                 queryClient.invalidateQueries(["territory"]);
                 queryClient.invalidateQueries(["statement"]);

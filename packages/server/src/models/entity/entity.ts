@@ -39,6 +39,9 @@ export default class Entity implements IEntity, IDbModel {
   usedTemplate?: string;
   templateData?: object;
 
+  createdAt?: Date;
+  updatedAt?: Date;
+
   constructor(data: Partial<IEntity>) {
     fillFlatObject(this, { ...data, data: undefined });
     fillArray(this.references, Object, data.references);
@@ -57,6 +60,12 @@ export default class Entity implements IEntity, IDbModel {
     if (data.templateData !== undefined) {
       this.templateData = data.templateData;
     }
+    if (data.createdAt !== undefined) {
+      this.createdAt = data.createdAt;
+    }
+    if (data.updatedAt !== undefined) {
+      this.updatedAt = data.updatedAt;
+    }
   }
 
   /**
@@ -65,6 +74,8 @@ export default class Entity implements IEntity, IDbModel {
   * @returns Promise<boolean> to indicate result of the operation
   */
   async save(db: Connection | undefined): Promise<boolean> {
+    this.createdAt = new Date();
+
     const result = await rethink
       .table(Entity.table)
       .insert({ ...this, id: this.id || undefined })
@@ -88,6 +99,7 @@ export default class Entity implements IEntity, IDbModel {
     db: Connection | undefined,
     updateData: Record<string, unknown>
   ): Promise<WriteResult> {
+    this.updatedAt = updateData.updatedAt = new Date();
     return rethink.table(Entity.table).get(this.id).update(updateData).run(db);
   }
 

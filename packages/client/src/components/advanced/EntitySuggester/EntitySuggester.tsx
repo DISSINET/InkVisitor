@@ -32,6 +32,7 @@ interface EntitySuggester {
   disableWildCard?: boolean;
   disableTemplatesAccept?: boolean;
   disableButtons?: boolean;
+  autoFocus?: boolean;
 
   disabled?: boolean;
 }
@@ -57,6 +58,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
   disableWildCard = false,
   disableTemplatesAccept = false,
   disableButtons = false,
+  autoFocus,
 
   disabled = false,
 }) => {
@@ -358,6 +360,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
       isInsideTemplate={isInsideTemplate}
       territoryParentId={territoryParentId}
       userOptions={user.options}
+      autoFocus={autoFocus}
       disabled={disabled}
     />
   ) : (

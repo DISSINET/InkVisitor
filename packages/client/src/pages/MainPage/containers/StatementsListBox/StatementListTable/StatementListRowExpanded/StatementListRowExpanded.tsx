@@ -4,6 +4,7 @@ import {
   IEntity,
   IProp,
   IReference,
+  IResponseStatement,
   IStatementActant,
   IStatementAction,
 } from "@shared/types";
@@ -29,8 +30,8 @@ import {
 } from "./StatementListRowExpandedStyles";
 
 interface StatementListRowExpanded {
-  row: Row;
-  visibleColumns: ColumnInstance<{}>[];
+  row: Row<IResponseStatement>;
+  visibleColumns: ColumnInstance<IResponseStatement>[];
   entities: { [key: string]: IEntity };
 }
 export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
