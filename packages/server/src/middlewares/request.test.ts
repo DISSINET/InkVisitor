@@ -9,7 +9,6 @@ import { generateAccessToken } from "@common/auth";
 
 describe("Test valid/invalid user", function () {
   const db = new Db();
-  const randSuffix = Math.random().toString();
   const activeUser = new User({
     email: "active@active.com",
     name: "active",
