@@ -74,7 +74,7 @@ export default Router()
       }
 
       if (!user.active) {
-        throw new UserNotActiveError(UserNotActiveError.message, user.id);
+        throw new UserNotActiveError(UserNotActiveError.message, user.email);
       }
 
       if (!checkPassword(rawPassword, user.password || "")) {

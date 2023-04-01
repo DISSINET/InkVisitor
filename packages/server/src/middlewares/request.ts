@@ -36,7 +36,7 @@ export default async function customizeAuthenticatedRequest(
     user = await User.findUserById(req.db.connection, req.user.user.id);
     if (user && !user.active) {
       next(
-        new UserNotActiveError(UserNotActiveError.message, req.user.user.id)
+        new UserNotActiveError(UserNotActiveError.message, req.user.user.email)
       );
     }
   }
