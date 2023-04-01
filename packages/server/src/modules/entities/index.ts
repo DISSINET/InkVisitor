@@ -14,6 +14,7 @@ import {
 import {
   EntityDoesNotExist,
   BadParams,
+  InvalidDeleteError,
   InternalServerError,
   ModelNotValidError,
   PermissionDeniedError,
@@ -25,6 +26,9 @@ import { IRequestSearch } from "@shared/types/request-search";
 import { getAuditByEntityId } from "@modules/audits";
 import { ResponseTooltip } from "@models/entity/response-tooltip";
 import { IRequest } from "src/custom_typings/request";
+import Relation from "@models/relation/relation";
+import User from "@models/user/user";
+import Entity from "@models/entity/entity";
 
 export default Router()
   /**
@@ -183,7 +187,7 @@ export default Router()
 
       const saved = await model.save(request.db.connection);
       if (!saved) {
-        throw new InternalServerError(`cannot create entity`);
+        throw new InternalServerError("cannot create entity");
       }
 
       if (model.usedTemplate) {
@@ -306,7 +310,7 @@ export default Router()
    */
   .delete(
     "/:entityId",
-    asyncRouteHandler<IResponseGeneric>(async (request: IRequest) => {
+    asyncRouteHandler<IResponseGeneric<string[]>>(async (request: IRequest) => {
       const entityId = request.params.entityId;
 
       if (!entityId) {
@@ -326,15 +330,43 @@ export default Router()
 
       // get correct IDbModel implementation
       const model = getEntityClass(existingEntity);
-
       if (!model.canBeDeletedByUser(request.getUserOrFail())) {
         throw new PermissionDeniedError(
           "entity cannot be deleted by current user"
         );
       }
 
-      const result = await model.delete(request.db.connection);
+      // if relations are linked to this entity, the delete should not be allowed
+      const linkedRelations = await Relation.getForEntity(
+        request.db.connection,
+        entityId
+      );
+      if (linkedRelations && linkedRelations.length) {
+        const entityIds = Array.from(
+          new Set(
+            linkedRelations.reduce<string[]>((acc, r) => {
+              acc = acc.concat(r.entityIds);
+              return acc;
+            }, [])
+          )
+        ).filter((id) => id != entityId);
+        const data = Array.from(new Set(linkedRelations.map((r) => r.id)));
+        const spec = data[0];
+        if (data.length > 1) {
+          spec + ` + ${data.length - 1} others`;
+        }
+        return {
+          result: false,
+          error: "InvalidDeleteError",
+          message: `Cannot be deleted while linked to relations (${spec})`,
+          data: entityIds,
+        };
+      }
 
+      // if bookmarks are linked to this entity, the bookmarks should be removed also
+      await User.removeBookmarksForEntity(request.db.connection, entityId);
+
+      const result = await model.delete(request.db.connection);
       if (result.deleted === 1) {
         return {
           result: true,

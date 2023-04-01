@@ -241,7 +241,7 @@ class Statement extends Entity implements IStatement {
 
   /**
    * Predicate for testing if the user can edit the statement entry
-   * @param user 
+   * @param user
    * @returns boolean representing the access
    */
   canBeEditedByUser(user: User): boolean {
@@ -281,8 +281,8 @@ class Statement extends Entity implements IStatement {
   }
 
   /**
-   * Predicate for testing if the user can at least view statement 
-   * @param user 
+   * Predicate for testing if the user can at least view statement
+   * @param user
    * @returns boolean representing the access
    */
   canBeViewedByUser(user: User): boolean {
@@ -305,7 +305,7 @@ class Statement extends Entity implements IStatement {
 
   /**
    * Predicate for testing if the user can remove the statement from db
-   * @param user 
+   * @param user
    * @returns boolean representing the access
    */
   canBeDeletedByUser(user: User): boolean {

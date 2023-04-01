@@ -21,8 +21,13 @@ export const ContextMenuSubmitDelete: React.FC<ContextMenuSubmitDelete> = ({
   }, []);
 
   const queryClient = useQueryClient();
-  const { territoryId, setTerritoryId, detailIdArray, removeDetailId } =
-    useSearchParams();
+  const {
+    territoryId,
+    setTerritoryId,
+    detailIdArray,
+    removeDetailId,
+    appendDetailId,
+  } = useSearchParams();
 
   const deleteTerritoryMutation = useMutation(
     async () => await api.entityDelete(territoryActant.id),
@@ -39,8 +44,22 @@ export const ContextMenuSubmitDelete: React.FC<ContextMenuSubmitDelete> = ({
         queryClient.invalidateQueries("bookmarks");
         onClose();
       },
-      onError: () => {
-        toast.error(`Error: Territory [${territoryActant.label}] not deleted!`);
+      onError: (error) => {
+        if (
+          (error as any).error === "InvalidDeleteError" &&
+          (error as any).data &&
+          (error as any).data.length > 0
+        ) {
+          const { data } = error as any;
+          toast.info("Click to open conflicting entity in detail", {
+            autoClose: 6000,
+            pauseOnHover: true,
+            onClick: () => {
+              appendDetailId(data[0]);
+            },
+          });
+          onClose();
+        }
       },
     }
   );

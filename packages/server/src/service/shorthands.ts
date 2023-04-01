@@ -32,10 +32,7 @@ export async function findEntityById<T extends IEntity>(
   return data || null;
 }
 
-export async function createEntity(
-  db: Db,
-  data: IDbModel
-): Promise<boolean> {
+export async function createEntity(db: Db, data: IDbModel): Promise<boolean> {
   if (!data.isValid()) {
     throw new ModelNotValidError("");
   }
@@ -52,4 +49,8 @@ export async function deleteAudits(db: Db): Promise<WriteResult> {
 
 export async function deleteRelations(db: Db): Promise<WriteResult> {
   return rethink.table(Relation.table).delete().run(db.connection);
+}
+
+export async function deleteUsers(db: Db): Promise<WriteResult> {
+  return rethink.table(User.table).delete().run(db.connection);
 }

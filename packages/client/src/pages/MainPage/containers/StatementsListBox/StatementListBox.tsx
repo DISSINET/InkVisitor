@@ -1,5 +1,10 @@
 import { EntityEnums, UserEnums } from "@shared/enums";
-import { IEntity, IResponseStatement, IStatement } from "@shared/types";
+import {
+  IEntity,
+  IReference,
+  IResponseStatement,
+  IStatement,
+} from "@shared/types";
 import api from "api";
 import { Loader, Submit } from "components";
 import { CStatement, DStatement } from "constructors";
@@ -43,6 +48,7 @@ export const StatementListBox: React.FC = () => {
     setStatementId,
     detailIdArray,
     removeDetailId,
+    appendDetailId,
   } = useSearchParams();
 
   useEffect(() => {
@@ -67,17 +73,6 @@ export const StatementListBox: React.FC = () => {
   );
 
   const { statements, entities, right } = data || initialData;
-
-  const { data: audits, isFetching: isFetchingAudits } = useQuery(
-    ["territory", "statement-list", "audits", territoryId, statementListOpened],
-    async () => {
-      const res = await api.auditsForStatements(territoryId);
-      return res.data;
-    },
-    {
-      enabled: !!territoryId && api.isLoggedIn() && statementListOpened,
-    }
-  );
 
   useEffect(() => {
     if (statements.length !== Object.keys(rowsExpanded).length) {
@@ -139,6 +134,22 @@ export const StatementListBox: React.FC = () => {
           setStatementId("");
         });
         setSelectedRows(selectedRows.filter((r) => r !== sId));
+      },
+      onError: (error) => {
+        if (
+          (error as any).error === "InvalidDeleteError" &&
+          (error as any).data &&
+          (error as any).data.length > 0
+        ) {
+          const { data } = error as any;
+          toast.info("Click to open conflicting entity in detail", {
+            autoClose: 6000,
+            pauseOnHover: true,
+            onClick: () => {
+              appendDetailId(data[0]);
+            },
+          });
+        }
       },
     }
   );
@@ -329,6 +340,28 @@ export const StatementListBox: React.FC = () => {
     }
   );
 
+  const replaceReferencesMutation = useMutation(
+    async (references: IReference[]) =>
+      await api.statementsReferencesReplace(selectedRows, references),
+    {
+      onSuccess: (variables, references) => {
+        // TODO:
+        queryClient.invalidateQueries("statement");
+      },
+    }
+  );
+
+  const appendReferencesMutation = useMutation(
+    async (references: IReference[]) =>
+      await api.statementsReferencesAppend(selectedRows, references),
+    {
+      onSuccess: (variables, references) => {
+        // TODO:
+        queryClient.invalidateQueries("statement");
+      },
+    }
+  );
+
   return (
     <>
       {data && (
@@ -345,6 +378,8 @@ export const StatementListBox: React.FC = () => {
           }
           moveStatementsMutation={moveStatementsMutation}
           duplicateStatementsMutation={duplicateStatementsMutation}
+          replaceReferencesMutation={replaceReferencesMutation}
+          appendReferencesMutation={appendReferencesMutation}
         />
       )}
       {statements ? (
@@ -357,7 +392,6 @@ export const StatementListBox: React.FC = () => {
             actantsUpdateMutation={statementUpdateMutation}
             entities={entities}
             right={right}
-            audits={audits || []}
             duplicateStatement={duplicateStatement}
             setStatementToDelete={setStatementToDelete}
             setShowSubmit={setShowSubmit}
@@ -405,7 +439,6 @@ export const StatementListBox: React.FC = () => {
       <Loader
         show={
           isFetching ||
-          isFetchingAudits ||
           removeStatementMutation.isLoading ||
           duplicateStatementMutation.isLoading ||
           addStatementAtTheEndMutation.isLoading ||

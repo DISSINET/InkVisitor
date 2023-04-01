@@ -1,3 +1,5 @@
+import { IResponseGeneric } from "@shared/types";
+import { getErrorByCode, IErrorSignature } from "@shared/types/errors";
 import { Response, Request, NextFunction } from "express";
 
 /**
@@ -22,6 +24,10 @@ export function asyncRouteHandler<T = unknown>(
 
     try {
       const returnedData = await fn(req);
+      if ((returnedData as IResponseGeneric).error) {
+        const errInstance = getErrorByCode(returnedData as IErrorSignature);
+        res.status(errInstance.statusCode());
+      }
       res.json(returnedData);
     } catch (err) {
       next(err);

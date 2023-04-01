@@ -99,7 +99,7 @@ class UserDoesNotExits extends CustomError {
  * UserDoesNotExits will be thrown when attempting to remove/update the user entry, which does not exist
  */
 class UserNotActiveError extends CustomError {
-  public static code = 405;
+  public static code = 403;
   public static title = "Inactive user";
   public static message = "User $1 is not active";
 

@@ -201,7 +201,7 @@ export const AttributesForm: React.FC<AttributesForm> = ({
           }}
         />
       )}
-      {modalData.bundleStart && (
+      {modalData.bundleStart !== undefined && (
         <CheckboxRow
           disabled={
             disabledAllAttributes || disabledAttributes.includes("bundleStart")
@@ -214,7 +214,7 @@ export const AttributesForm: React.FC<AttributesForm> = ({
           }}
         />
       )}
-      {modalData.bundleEnd && (
+      {modalData.bundleEnd !== undefined && (
         <CheckboxRow
           disabled={
             disabledAllAttributes || disabledAttributes.includes("bundleEnd")

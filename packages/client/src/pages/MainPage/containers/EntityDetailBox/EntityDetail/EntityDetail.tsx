@@ -72,6 +72,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
     setTerritoryId,
     removeDetailId,
     setSelectedDetailId,
+    appendDetailId,
     detailIdArray,
     selectedDetailId,
   } = useSearchParams();
@@ -274,8 +275,6 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
     (entityId: string) => api.entityDelete(entityId),
     {
       onSuccess: async (data, entityId) => {
-        setShowRemoveSubmit(false);
-
         toast.info(`Entity removed!`);
 
         // hide selected territory if T removed
@@ -303,6 +302,22 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
         queryClient.invalidateQueries("tree");
 
         removeDetailId(entityId);
+      },
+      onError: async (error) => {
+        if (
+          (error as any).error === "InvalidDeleteError" &&
+          (error as any).data &&
+          (error as any).data.length > 0
+        ) {
+          const { data } = error as any;
+          toast.info("Click to open conflicting entity in detail", {
+            autoClose: 6000,
+            pauseOnHover: true,
+            onClick: () => {
+              appendDetailId(data[0]);
+            },
+          });
+        }
       },
     }
   );
@@ -779,6 +794,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
         submitLabel="Remove"
         onSubmit={() => {
           deleteEntityMutation.mutate(detailId);
+          setShowRemoveSubmit(false);
         }}
         onCancel={() => setShowRemoveSubmit(false)}
         show={showRemoveSubmit}
