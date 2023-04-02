@@ -8,7 +8,6 @@ import User from "@models/user/user";
 import { IRequest } from "src/custom_typings/request";
 import { nonenumerable } from "@common/decorators";
 import Entity from "@models/entity/entity";
-import { getRelationClass } from "@models/relationFactory";
 
 export interface IRelationModel extends RelationTypes.IRelation, IDbModel {
   beforeSave(request: IRequest): Promise<void>;

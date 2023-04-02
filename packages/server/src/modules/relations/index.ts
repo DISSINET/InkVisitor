@@ -9,7 +9,7 @@ import {
 import Relation from "@models/relation/relation";
 import { Router } from "express";
 import { asyncRouteHandler } from "../index";
-import { getRelationClass } from "@models/relationFactory";
+import { getRelationClass } from "@models/factory";
 import { mergeDeep } from "@common/functions";
 import Entity from "@models/entity/entity";
 import { IRequest } from "src/custom_typings/request";
