@@ -27,6 +27,8 @@ import { ResponseTooltip } from "@models/entity/response-tooltip";
 import { IRequest } from "src/custom_typings/request";
 import Relation from "@models/relation/relation";
 import User from "@models/user/user";
+import { RelationEnums } from "@shared/enums";
+import { copyRelations } from "@models/relation/functions";
 
 export default Router()
   /**
@@ -188,15 +190,23 @@ export default Router()
         throw new InternalServerError("cannot create entity");
       }
 
+      const out: IResponseGeneric = { result: true };
+
       if (model.usedTemplate) {
         model.applyTemplate(request, model.usedTemplate);
+        try {
+          await copyRelations(request, model.usedTemplate, model.id, [
+            RelationEnums.Type.Classification,
+            RelationEnums.Type.Related,
+          ]);
+        } catch (e) {
+          out.message = "At least one relation not applied";
+        }
       }
 
       await Audit.createNew(request, model.id, request.body);
 
-      return {
-        result: true,
-      };
+      return out;
     })
   )
   /**
