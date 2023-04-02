@@ -5,7 +5,7 @@ import Entity from "./entity";
 import Statement from "@models/statement/statement";
 import { Connection, r, RDatum, RTable } from "rethinkdb-ts";
 import { ResponseEntity } from "./response";
-import { getEntityClass } from "@models/entityFactory";
+import { getEntityClass } from "@models/factory";
 import { IRequest } from "src/custom_typings/request";
 import Territory from "@models/territory/territory";
 import Audit from "@models/audit/audit";
@@ -218,10 +218,10 @@ export class SearchQuery {
     // otherwise with wildcard, the '*uilding' would be changed to 'uilding' without constraint
     // and will behave like wildcard on the left
     if (left === "^") {
-      left = "(\^|[\\W\\_])";
+      left = "(^|[\\W\\_])";
     }
     if (right === "$") {
-      right = "(\$|[\\W\\_])";
+      right = "($|[\\W\\_])";
     }
 
     // words have to be splitted and joined with regexps to provide variable glue

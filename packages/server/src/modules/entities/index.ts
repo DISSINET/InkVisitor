@@ -1,7 +1,7 @@
 import { mergeDeep } from "@common/functions";
 import { ResponseEntity, ResponseEntityDetail } from "@models/entity/response";
 import Audit from "@models/audit/audit";
-import { getEntityClass } from "@models/entityFactory";
+import { getEntityClass } from "@models/factory";
 import { findEntityById } from "@service/shorthands";
 import {
   IEntity,
