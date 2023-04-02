@@ -1,4 +1,4 @@
-import { determineOrder, IDbModel, IModel } from "@models/common";
+import { determineOrder, IDbModel } from "@models/common";
 import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
 import { IEntity, Relation as RelationTypes } from "@shared/types";
 import { DbEnums, EntityEnums, RelationEnums, UserEnums } from "@shared/enums";
@@ -8,6 +8,7 @@ import User from "@models/user/user";
 import { IRequest } from "src/custom_typings/request";
 import { nonenumerable } from "@common/decorators";
 import Entity from "@models/entity/entity";
+import { getRelationClass } from "@models/relationFactory";
 
 export interface IRelationModel extends RelationTypes.IRelation, IDbModel {
   beforeSave(request: IRequest): Promise<void>;
@@ -209,7 +210,7 @@ export default class Relation implements IRelationModel {
    * @returns  list of relations
    */
   async getSiblings(db: Connection): Promise<RelationTypes.IRelation[]> {
-    const childs = await Relation.getForEntity(
+    const childs = await Relation.findForEntity(
       db,
       this.entityIds[0],
       this.type
@@ -376,7 +377,7 @@ export default class Relation implements IRelationModel {
    * @param position - position in entityIds
    * @returns array of relation interfaces
    */
-  static async getForEntity<T extends RelationTypes.IRelation>(
+  static async findForEntity<T extends RelationTypes.IRelation>(
     db: Connection,
     entityId: string,
     relType?: RelationEnums.Type,
