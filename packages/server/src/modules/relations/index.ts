@@ -6,10 +6,10 @@ import {
   PermissionDeniedError,
   RelationDoesNotExist,
 } from "@shared/types/errors";
-import Relation, { IRelationModel } from "@models/relation/relation";
+import Relation from "@models/relation/relation";
 import { Router } from "express";
 import { asyncRouteHandler } from "../index";
-import { getRelationClass } from "@models/factory";
+import { getRelationClass } from "@models/relationFactory";
 import { mergeDeep } from "@common/functions";
 import Entity from "@models/entity/entity";
 import { IRequest } from "src/custom_typings/request";
