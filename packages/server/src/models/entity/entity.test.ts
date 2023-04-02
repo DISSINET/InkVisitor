@@ -1,22 +1,32 @@
 import "ts-jest";
 import { Db } from "@service/RethinkDB";
 import Entity from "./entity";
-import Statement, { StatementActant, StatementAction, StatementTerritory } from "@models/statement/statement";
+import Statement, {
+  StatementActant,
+  StatementAction,
+  StatementTerritory,
+} from "@models/statement/statement";
 import { clean } from "@modules/common.test";
 import { findEntityById } from "@service/shorthands";
 import { IStatement } from "@shared/types";
 import Prop from "@models/prop/prop";
 import { EntityEnums } from "@shared/enums";
 
-export const prepareEntity = (): [string, Entity] => {
+export const prepareEntity = (
+  classValue: EntityEnums.Class = EntityEnums.Class.Concept
+): [string, Entity] => {
   const id = Math.random().toString();
 
-  const ent = new Entity({ id, class: EntityEnums.Class.Concept });
+  const ent = new Entity({ id, class: classValue });
   ent.props.push(new Prop({ id: `${id}-props[0].id` }));
 
   ent.props[0].children.push(new Prop({ id: `${id}-props[0].children[0].id` }));
-  ent.props[0].children[0].children.push(new Prop({ id: `${id}-props[0].children[0].children[0].id` }));
-  ent.props[0].children[0].children[0].children.push(new Prop({ id: `${id}-props[0].children[0].children[0].children[0].id` }));
+  ent.props[0].children[0].children.push(
+    new Prop({ id: `${id}-props[0].children[0].children[0].id` })
+  );
+  ent.props[0].children[0].children[0].children.push(
+    new Prop({ id: `${id}-props[0].children[0].children[0].children[0].id` })
+  );
 
   return [id, ent];
 };
@@ -35,36 +45,38 @@ describe("test Entity.save", () => {
   });
 
   test("createdAt timestamp should be added in save call", async () => {
-    expect(entity.createdAt).toBeUndefined()
+    expect(entity.createdAt).toBeUndefined();
 
     await entity.save(db.connection);
-    expect(entity.createdAt).not.toBeUndefined()
-  })
+    expect(entity.createdAt).not.toBeUndefined();
+  });
 
-  test("createdAt timestamp should be retrievable", async() => {
+  test("createdAt timestamp should be retrievable", async () => {
     const foundEntity = await findEntityById(db, entity.id);
     expect(foundEntity.createdAt).toEqual(entity.createdAt);
-  })
+  });
 
-  test("updatedAt timestamp should be empty after initial save", async() => {
+  test("updatedAt timestamp should be empty after initial save", async () => {
     expect(entity.updatedAt).toBeUndefined();
-  })
-})
+  });
+});
 
 describe("test Entity.update", function () {
   let db: Db;
   let entity = new Entity({});
-  let afterSave: Date | undefined, after1Update: Date | undefined, after2Update: Date | undefined;
+  let afterSave: Date | undefined,
+    after1Update: Date | undefined,
+    after2Update: Date | undefined;
 
   beforeAll(async () => {
     db = new Db();
     await db.initDb();
-    await entity.save(db.connection)
-    afterSave = entity.updatedAt
-    await entity.update(db.connection, {})
-    after1Update = entity.updatedAt
-    entity = new Entity(await findEntityById(db, entity.id))
-    await entity.update(db.connection, {})
+    await entity.save(db.connection);
+    afterSave = entity.updatedAt;
+    await entity.update(db.connection, {});
+    after1Update = entity.updatedAt;
+    entity = new Entity(await findEntityById(db, entity.id));
+    await entity.update(db.connection, {});
     after2Update = entity.updatedAt;
   });
 
@@ -83,7 +95,7 @@ describe("test Entity.update", function () {
       });
       entity.data.actants = [
         new StatementActant({ id: "1" }),
-        new StatementActant({ id: "2" })
+        new StatementActant({ id: "2" }),
       ];
 
       await entity.save(db.connection);
@@ -123,18 +135,18 @@ describe("test Entity.update", function () {
 
   describe("updatedAt timestamp should be added in update call", () => {
     it("updateAt should be empty after save", () => {
-      expect(afterSave).toBeUndefined()
-    })
+      expect(afterSave).toBeUndefined();
+    });
 
     it("updateAt should be set after first update", () => {
-      expect(after1Update).not.toBeUndefined()
-    })
+      expect(after1Update).not.toBeUndefined();
+    });
 
     it("updateAt should be renewed after second update", () => {
-      expect(after2Update).not.toBeUndefined()
-      expect(after1Update?.getTime()).not.toEqual(after2Update?.getTime())
-    })
-  })
+      expect(after2Update).not.toBeUndefined();
+      expect(after1Update?.getTime()).not.toEqual(after2Update?.getTime());
+    });
+  });
 });
 
 describe("test Entity.delete", function () {
@@ -146,9 +158,11 @@ describe("test Entity.delete", function () {
       const entity = new Entity({});
       await entity.save(db.connection);
       const statement = new Statement({});
-      statement.data.actants.push(new StatementActant({
-        entityId: entity.id,
-      }));
+      statement.data.actants.push(
+        new StatementActant({
+          entityId: entity.id,
+        })
+      );
       await statement.save(db.connection);
 
       await entity.delete(db.connection);
@@ -176,15 +190,19 @@ describe("test Entity.delete", function () {
       await entity.save(db.connection);
 
       statementViaActants = new Statement({});
-      statementViaActants.data.actants.push(new StatementActant({
-        entityId: entity.id,
-      }));
+      statementViaActants.data.actants.push(
+        new StatementActant({
+          entityId: entity.id,
+        })
+      );
       await statementViaActants.save(db.connection);
 
       statementViaActions = new Statement({});
-      statementViaActions.data.actions.push(new StatementAction({
-        actionId: entity.id,
-      }));
+      statementViaActions.data.actions.push(
+        new StatementAction({
+          actionId: entity.id,
+        })
+      );
       await statementViaActions.save(db.connection);
       await entity.delete(db.connection);
     });

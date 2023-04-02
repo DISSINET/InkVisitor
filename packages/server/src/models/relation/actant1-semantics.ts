@@ -4,7 +4,10 @@ import { Relation as RelationTypes } from "@shared/types";
 import { ModelNotValidError } from "@shared/types/errors";
 import { Connection } from "rethinkdb-ts";
 
-export default class Actant1Semantics extends Relation implements RelationTypes.IActant1Semantics {
+export default class Actant1Semantics
+  extends Relation
+  implements RelationTypes.IActant1Semantics
+{
   type: RelationEnums.Type.Actant1Semantics;
   entityIds: [string, string];
   order: number;
@@ -24,7 +27,7 @@ export default class Actant1Semantics extends Relation implements RelationTypes.
     let out: RelationTypes.IActant1Semantics[] = [];
 
     if (asClass === EntityEnums.Class.Action) {
-      out = await Relation.getForEntity(
+      out = await Relation.findForEntity(
         conn,
         entityId,
         RelationEnums.Type.Actant1Semantics,
@@ -40,7 +43,7 @@ export default class Actant1Semantics extends Relation implements RelationTypes.
     );
 
     return out;
-  };
+  }
 
   static async getActant1SemanticsInverseConnections(
     conn: Connection,
@@ -50,7 +53,7 @@ export default class Actant1Semantics extends Relation implements RelationTypes.
     let out: RelationTypes.IActant1Semantics[] = [];
 
     if (asClass === EntityEnums.Class.Concept) {
-      out = await Relation.getForEntity(
+      out = await Relation.findForEntity(
         conn,
         parentId,
         RelationEnums.Type.Actant1Semantics,
@@ -66,6 +69,5 @@ export default class Actant1Semantics extends Relation implements RelationTypes.
     );
 
     return out;
-  };
-
+  }
 }

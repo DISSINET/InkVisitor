@@ -3,7 +3,10 @@ import Relation from "./relation";
 import { Relation as RelationTypes } from "@shared/types";
 import { Connection } from "rethinkdb-ts";
 
-export default class Antonym extends Relation implements RelationTypes.IAntonym {
+export default class Antonym
+  extends Relation
+  implements RelationTypes.IAntonym
+{
   type: RelationEnums.Type.Antonym;
   entityIds: [string, string];
   order: number;
@@ -20,20 +23,19 @@ export default class Antonym extends Relation implements RelationTypes.IAntonym 
     entityId: string
   ): Promise<RelationTypes.IConnection<RelationTypes.IAntonym>[]> {
     const out: RelationTypes.IConnection<RelationTypes.IAntonym>[] =
-      await Relation.getForEntity<RelationTypes.IAntonym>(
+      await Relation.findForEntity<RelationTypes.IAntonym>(
         conn,
         entityId,
-        RelationEnums.Type.Antonym,
+        RelationEnums.Type.Antonym
       );
-  
+
     // sort by order
     out.sort(
       (a, b) =>
         (a.order === undefined ? EntityEnums.Order.Last : a.order) -
         (b.order === undefined ? EntityEnums.Order.Last : b.order)
     );
-  
+
     return out;
-  };
-  
+  }
 }

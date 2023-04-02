@@ -1,31 +1,29 @@
-import {
-  IDbModel,
-  fillFlatObject,
-  fillArray,
-} from "@models/common";
+import { IDbModel, fillFlatObject, fillArray } from "@models/common";
 import { r as rethink, Connection, WriteResult, RDatum } from "rethinkdb-ts";
 import { IEntity, IProp, IReference } from "@shared/types";
+import { DbEnums, EntityEnums, UserEnums } from "@shared/enums";
 import {
-  DbEnums,
-  EntityEnums,
-  UserEnums,
-} from "@shared/enums";
-import { InternalServerError, ModelNotValidError } from "@shared/types/errors";
+  EntityDoesNotExist,
+  InternalServerError,
+  ModelNotValidError,
+} from "@shared/types/errors";
 import User from "@models/user/user";
 import emitter from "@models/events/emitter";
 import { EventTypes } from "@models/events/types";
 import Prop from "@models/prop/prop";
+import { findEntityById } from "@service/shorthands";
+import { IRequest } from "src/custom_typings/request";
 
 export default class Entity implements IEntity, IDbModel {
   static table = "entities";
 
-  id: string = "";
+  id = "";
   legacyId?: string;
   class: EntityEnums.Class = EntityEnums.Class.Person;
   status: EntityEnums.Status = EntityEnums.Status.Approved;
   data: any = {};
-  label: string = "";
-  detail: string = "";
+  label = "";
+  detail = "";
   language: EntityEnums.Language = EntityEnums.Language.Latin;
   notes: string[] = [];
   props: Prop[] = [];
@@ -65,10 +63,10 @@ export default class Entity implements IEntity, IDbModel {
   }
 
   /**
-  * Stores the entity in the db
-  * @param db db connection
-  * @returns Promise<boolean> to indicate result of the operation
-  */
+   * Stores the entity in the db
+   * @param db db connection
+   * @returns Promise<boolean> to indicate result of the operation
+   */
   async save(db: Connection | undefined): Promise<boolean> {
     this.createdAt = new Date();
 
@@ -81,10 +79,7 @@ export default class Entity implements IEntity, IDbModel {
       this.id = result.generated_keys[0];
     }
 
-    if (
-      result.first_error &&
-      result.first_error.indexOf("Duplicate") !== -1
-    ) {
+    if (result.first_error && result.first_error.indexOf("Duplicate") !== -1) {
       throw new ModelNotValidError("id already exists");
     }
 
@@ -93,7 +88,7 @@ export default class Entity implements IEntity, IDbModel {
 
   update(
     db: Connection | undefined,
-    updateData: Record<string, unknown>
+    updateData: Partial<IEntity>
   ): Promise<WriteResult> {
     this.updatedAt = updateData.updatedAt = new Date();
     return rethink.table(Entity.table).get(this.id).update(updateData).run(db);
@@ -226,9 +221,31 @@ export default class Entity implements IEntity, IDbModel {
     return Object.keys(entityIds);
   }
 
+  /**
+   * Applies the template for entity.
+   * @param db
+   * @param tplId
+   */
+  async applyTemplate(req: IRequest, tplId: string): Promise<void> {
+    const template = await findEntityById(req.db.connection, tplId);
+    if (!template) {
+      throw new EntityDoesNotExist(`Can't apply template - ${tplId} not found`);
+    }
+
+    this.usedTemplate = tplId;
+    this.isTemplate = false;
+    if (!this.label) {
+      this.label = `${template.label} (from template)`;
+    }
+    await this.update(req.db.connection, {
+      usedTemplate: this.usedTemplate,
+      isTemplate: this.isTemplate,
+      label: this.label,
+    });
+  }
 
   static extractIdsFromReferences(references: IReference[]): string[] {
-    let out: string[] = [];
+    const out: string[] = [];
     for (const reference of references) {
       out.push(reference.resource);
       out.push(reference.value);
@@ -237,7 +254,10 @@ export default class Entity implements IEntity, IDbModel {
     return out;
   }
 
-  static extractIdsFromProps(props: IProp[] = [], cb?: (prop: IProp) => void): string[] {
+  static extractIdsFromProps(
+    props: IProp[] = [],
+    cb?: (prop: IProp) => void
+  ): string[] {
     let out: string[] = [];
     for (const prop of props) {
       if (prop.type) {
