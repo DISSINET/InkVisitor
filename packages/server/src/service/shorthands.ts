@@ -1,5 +1,5 @@
 import { Connection, r as rethink, RDatum, WriteResult } from "rethinkdb-ts";
-import { IEntity } from "@shared/types";
+import { IEntity, IUser } from "@shared/types";
 import { Db } from "./RethinkDB";
 import { IDbModel } from "@models/common";
 import { ModelNotValidError } from "@shared/types/errors";
@@ -52,5 +52,11 @@ export async function deleteRelations(db: Db): Promise<WriteResult> {
 }
 
 export async function deleteUsers(db: Db): Promise<WriteResult> {
-  return rethink.table(User.table).delete().run(db.connection);
+  return rethink
+    .table(User.table)
+    .filter(function (user: RDatum<IUser>) {
+      return user("name").ne("admin");
+    })
+    .delete()
+    .run(db.connection);
 }
