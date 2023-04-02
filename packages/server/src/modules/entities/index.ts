@@ -191,14 +191,10 @@ export default Router()
       }
 
       if (model.usedTemplate) {
-        model.applyTemplate(request, model.usedTemplate)
+        model.applyTemplate(request, model.usedTemplate);
       }
 
-      await Audit.createNew(
-        request,
-        model.id,
-        request.body
-      );
+      await Audit.createNew(request, model.id, request.body);
 
       return {
         result: true,
@@ -337,7 +333,7 @@ export default Router()
       }
 
       // if relations are linked to this entity, the delete should not be allowed
-      const linkedRelations = await Relation.getForEntity(
+      const linkedRelations = await Relation.findForEntity(
         request.db.connection,
         entityId
       );

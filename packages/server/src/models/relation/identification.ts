@@ -5,7 +5,10 @@ import { Relation as RelationTypes } from "@shared/types";
 import { ModelNotValidError } from "@shared/types/errors";
 import { Connection } from "rethinkdb-ts";
 
-export default class Identification extends Relation implements RelationTypes.IIdentification {
+export default class Identification
+  extends Relation
+  implements RelationTypes.IIdentification
+{
   certainty: EntityEnums.Certainty;
   type: RelationEnums.Type.Identification;
   entityIds: [string, string];
@@ -19,7 +22,7 @@ export default class Identification extends Relation implements RelationTypes.II
 
   /**
    * Test validity of the model
-   * @returns 
+   * @returns
    */
   isValid(): boolean {
     if (!super.isValid()) {
@@ -46,11 +49,12 @@ export default class Identification extends Relation implements RelationTypes.II
       return out;
     }
 
-    let relations: RelationTypes.IIdentification[] = await Relation.getForEntity(
-      conn,
-      entityId,
-      RelationEnums.Type.Identification,
-    );
+    let relations: RelationTypes.IIdentification[] =
+      await Relation.findForEntity(
+        conn,
+        entityId,
+        RelationEnums.Type.Identification
+      );
     let thresholdReached = false;
 
     if (requiredCertainty !== EntityEnums.Certainty.Empty) {
@@ -66,10 +70,10 @@ export default class Identification extends Relation implements RelationTypes.II
     for (const relation of relations) {
       const subparentId = relation.entityIds[1];
       const connection: RelationTypes.IConnection<RelationTypes.IIdentification> =
-      {
-        ...relation,
-        subtrees: [],
-      };
+        {
+          ...relation,
+          subtrees: [],
+        };
 
       if (!thresholdReached) {
         // either continue with Certain or use Empty
@@ -77,19 +81,19 @@ export default class Identification extends Relation implements RelationTypes.II
           relation.certainty === EntityEnums.Certainty.Certain
             ? EntityEnums.Certainty.Certain
             : EntityEnums.Certainty.Empty;
-        connection.subtrees = await Identification.getIdentificationForwardConnections(
-          conn,
-          subparentId,
-          nextThreshold,
-          maxNestLvl,
-          nestLvl + 1
-        );
+        connection.subtrees =
+          await Identification.getIdentificationForwardConnections(
+            conn,
+            subparentId,
+            nextThreshold,
+            maxNestLvl,
+            nestLvl + 1
+          );
       }
 
       out.push(connection);
     }
 
     return out;
-  };
-
+  }
 }
