@@ -4,7 +4,10 @@ import { Relation as RelationTypes } from "@shared/types";
 import { Connection } from "rethinkdb-ts";
 import { ModelNotValidError } from "@shared/types/errors";
 
-export default class Implication extends Relation implements RelationTypes.IImplication {
+export default class Implication
+  extends Relation
+  implements RelationTypes.IImplication
+{
   type: RelationEnums.Type.Implication;
   entityIds: [string, string];
   order: number;
@@ -24,7 +27,7 @@ export default class Implication extends Relation implements RelationTypes.IImpl
     let out: RelationTypes.IImplication[] = [];
 
     if (asClass === EntityEnums.Class.Action) {
-      out = await Relation.getForEntity(
+      out = await Relation.findForEntity(
         conn,
         entityId,
         RelationEnums.Type.Implication,
@@ -40,7 +43,7 @@ export default class Implication extends Relation implements RelationTypes.IImpl
     );
 
     return out;
-  };
+  }
 
   static async getImplicationInverseConnections(
     conn: Connection,
@@ -50,7 +53,7 @@ export default class Implication extends Relation implements RelationTypes.IImpl
     let out: RelationTypes.IImplication[] = [];
 
     if (asClass === EntityEnums.Class.Action) {
-      out = await Relation.getForEntity(
+      out = await Relation.findForEntity(
         conn,
         parentId,
         RelationEnums.Type.Implication,
@@ -66,5 +69,5 @@ export default class Implication extends Relation implements RelationTypes.IImpl
     );
 
     return out;
-  };
+  }
 }

@@ -12,7 +12,9 @@ import Actant1Semantics from "./actant1-semantics";
 import Actant2Semantics from "./actant2-semantics";
 import { deleteRelations } from "@service/shorthands";
 
-export const prepareRelation = <T extends Relation>(type: RelationEnums.Type): [string, T] => {
+export const prepareRelation = <T extends Relation>(
+  type: RelationEnums.Type
+): [string, T] => {
   const id = Math.random().toString();
 
   const ent = getRelationClass({ id, type }) as T;
@@ -48,7 +50,10 @@ describe("test Relation.beforeSave", function () {
     await entity2.save(db.connection);
     entities.push(entity2);
 
-    relation = new Relation({ entityIds: [entities[0].id, entities[1].id], type: RelationEnums.Type.Synonym });
+    relation = new Relation({
+      entityIds: [entities[0].id, entities[1].id],
+      type: RelationEnums.Type.Synonym,
+    });
     request = newMockRequest(db);
 
     expect(relation.entities).toBeUndefined();
@@ -78,7 +83,9 @@ describe("test Relation.beforeSave", function () {
   });
 
   test("invalid order", async () => {
-    const [, relation] = prepareRelation<Actant1Semantics>(RelationEnums.Type.Actant1Semantics);
+    const [, relation] = prepareRelation<Actant1Semantics>(
+      RelationEnums.Type.Actant1Semantics
+    );
     relation.order = "random" as any;
 
     expect(relation.isValid()).toBeFalsy();
@@ -93,43 +100,50 @@ describe("test Relation.beforeSave", function () {
     await entity2.save(db.connection);
 
     // first - should have order 0
-    const [, relation1] = prepareRelation<Actant1Semantics>(RelationEnums.Type.Actant1Semantics);
+    const [, relation1] = prepareRelation<Actant1Semantics>(
+      RelationEnums.Type.Actant1Semantics
+    );
     relation1.entityIds = [entity1.id, entity2.id];
     await relation1.beforeSave(newMockRequest(db));
     await relation1.save(db.connection);
     expect(relation1.order).toEqual(0);
 
     // second - should have order 1
-    const [, relation2] = prepareRelation<Actant1Semantics>(RelationEnums.Type.Actant1Semantics);
+    const [, relation2] = prepareRelation<Actant1Semantics>(
+      RelationEnums.Type.Actant1Semantics
+    );
     relation2.entityIds = [entity1.id, entity2.id];
     await relation2.beforeSave(newMockRequest(db));
     await relation2.save(db.connection);
     expect(relation2.order).toEqual(1);
 
     // third - manually set order - should be stored as 0.5
-    const [, relation3] = prepareRelation<Actant1Semantics>(RelationEnums.Type.Actant1Semantics);
+    const [, relation3] = prepareRelation<Actant1Semantics>(
+      RelationEnums.Type.Actant1Semantics
+    );
     relation3.entityIds = [entity1.id, entity2.id];
     relation3.order = 0;
     await relation3.beforeSave(newMockRequest(db));
     await relation3.save(db.connection);
     expect(relation3.order).toEqual(0.5);
 
-
     // fourth - different class - different order
-    const [, relation4] = prepareRelation<Actant2Semantics>(RelationEnums.Type.Actant2Semantics);
+    const [, relation4] = prepareRelation<Actant2Semantics>(
+      RelationEnums.Type.Actant2Semantics
+    );
     relation4.entityIds = [entity1.id, entity2.id];
     await relation4.beforeSave(newMockRequest(db));
     await relation4.save(db.connection);
     expect(relation4.order).toEqual(0);
 
-
     // fifth - using the first order - automatically set to 2
-    const [, relation5] = prepareRelation<Actant1Semantics>(RelationEnums.Type.Actant1Semantics);
+    const [, relation5] = prepareRelation<Actant1Semantics>(
+      RelationEnums.Type.Actant1Semantics
+    );
     relation5.entityIds = [entity1.id, entity2.id];
     await relation5.beforeSave(newMockRequest(db));
     await relation5.save(db.connection);
     expect(relation5.order).toEqual(2);
-
   });
 });
 
@@ -140,49 +154,84 @@ describe("test Relation.validateEntities", function () {
   });
 
   test("test synonym (success)", () => {
-    const relation = new Relation({ entityIds: ["1", "2"], type: RelationEnums.Type.Synonym });
+    const relation = new Relation({
+      entityIds: ["1", "2"],
+      type: RelationEnums.Type.Synonym,
+    });
     relation.entities = [];
-    relation.entities.push(new Entity({ id: "1", class: EntityEnums.Class.Concept }));
-    relation.entities.push(new Entity({ id: "2", class: EntityEnums.Class.Concept }));
+    relation.entities.push(
+      new Entity({ id: "1", class: EntityEnums.Class.Concept })
+    );
+    relation.entities.push(
+      new Entity({ id: "2", class: EntityEnums.Class.Concept })
+    );
 
     expect(relation.validateEntities()).toBeNull();
   });
 
   test("test synonym (fail)", () => {
-    const relation = new Relation({ entityIds: ["1", "2"], type: RelationEnums.Type.Synonym });
+    const relation = new Relation({
+      entityIds: ["1", "2"],
+      type: RelationEnums.Type.Synonym,
+    });
     relation.entities = [];
-    relation.entities.push(new Entity({ id: "1", class: EntityEnums.Class.Concept }));
-    relation.entities.push(new Entity({ id: "2", class: EntityEnums.Class.Action }));
+    relation.entities.push(
+      new Entity({ id: "1", class: EntityEnums.Class.Concept })
+    );
+    relation.entities.push(
+      new Entity({ id: "2", class: EntityEnums.Class.Action })
+    );
 
     expect(relation.validateEntities()).toBeInstanceOf(ModelNotValidError);
   });
 
   test("test classification (success)", () => {
-    const relation = new Relation({ entityIds: ["1", "2"], type: RelationEnums.Type.Classification });
+    const relation = new Relation({
+      entityIds: ["1", "2"],
+      type: RelationEnums.Type.Classification,
+    });
     relation.entities = [];
-    relation.entities.push(new Entity({ id: "1", class: EntityEnums.Class.Event }));
-    relation.entities.push(new Entity({ id: "2", class: EntityEnums.Class.Concept }));
+    relation.entities.push(
+      new Entity({ id: "1", class: EntityEnums.Class.Event })
+    );
+    relation.entities.push(
+      new Entity({ id: "2", class: EntityEnums.Class.Concept })
+    );
 
     expect(relation.validateEntities()).toBeNull();
   });
 
   test("test classification (fail)", () => {
-    const relation = new Relation({ entityIds: ["1", "2"], type: RelationEnums.Type.Classification });
+    const relation = new Relation({
+      entityIds: ["1", "2"],
+      type: RelationEnums.Type.Classification,
+    });
     relation.entities = [];
-    relation.entities.push(new Entity({ id: "1", class: EntityEnums.Class.Concept }));
-    relation.entities.push(new Entity({ id: "2", class: EntityEnums.Class.Action }));
+    relation.entities.push(
+      new Entity({ id: "1", class: EntityEnums.Class.Concept })
+    );
+    relation.entities.push(
+      new Entity({ id: "2", class: EntityEnums.Class.Action })
+    );
 
     expect(relation.validateEntities()).toBeInstanceOf(ModelNotValidError);
   });
 
   test("template in entities", () => {
-    const relation = new Relation({ entityIds: ["1", "2"], type: RelationEnums.Type.Identification });
+    const relation = new Relation({
+      entityIds: ["1", "2"],
+      type: RelationEnums.Type.Identification,
+    });
     relation.entities = [
       new Entity({ id: "1", class: EntityEnums.Class.Concept }),
-      new Entity({ id: "2", class: EntityEnums.Class.Action, isTemplate: true }),
+      new Entity({
+        id: "2",
+        class: EntityEnums.Class.Action,
+        isTemplate: true,
+      }),
     ];
 
-    const result = relation.validateEntities()
+    const result = relation.validateEntities();
     expect(result).toBeInstanceOf(ModelNotValidError);
     expect(result?.message).toContain("must not be a template");
   });

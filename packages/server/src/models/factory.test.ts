@@ -1,6 +1,8 @@
 import { EntityEnums, RelationEnums } from "@shared/enums";
 import "ts-jest";
-import { getEntityClass, getRelationClass } from "./factory";
+import { getRelationClass } from "./factory";
+import { getEntityClass } from "./factory";
+
 import "ts-jest";
 
 describe("Entity factory test", function () {
@@ -31,7 +33,9 @@ describe("Entity factory test", function () {
 describe("Relationship factory test", function () {
   describe("known types", () => {
     it("should return implementation", () => {
-      for (const rType of Object.values(RelationEnums.Type).filter(type => !!type)) {
+      for (const rType of Object.values(RelationEnums.Type).filter(
+        (type) => !!type
+      )) {
         const instance = getRelationClass({ type: rType });
         expect(instance).not.toBeNull();
         expect(instance.type).toEqual(rType);

@@ -4,7 +4,10 @@ import { Relation as RelationTypes } from "@shared/types";
 import { InternalServerError, ModelNotValidError } from "@shared/types/errors";
 import { Connection } from "rethinkdb-ts";
 
-export default class Superclass extends Relation implements RelationTypes.ISuperclass {
+export default class Superclass
+  extends Relation
+  implements RelationTypes.ISuperclass
+{
   type: RelationEnums.Type.Superclass;
   entityIds: [string, string];
   order: number;
@@ -35,14 +38,14 @@ export default class Superclass extends Relation implements RelationTypes.ISuper
       [EntityEnums.Class.Concept, EntityEnums.Class.Action].indexOf(asClass) !==
       -1
     ) {
-      relations = await Relation.getForEntity(
+      relations = await Relation.findForEntity(
         conn,
         parentId,
         RelationEnums.Type.Superclass,
         0
       );
     } else if (EntityEnums.PLOGESTR.indexOf(asClass) !== -1) {
-      relations = await Relation.getForEntity(
+      relations = await Relation.findForEntity(
         conn,
         parentId,
         RelationEnums.Type.Classification,
@@ -75,7 +78,7 @@ export default class Superclass extends Relation implements RelationTypes.ISuper
     }
 
     return out;
-  };
+  }
 
   static async getSuperclassInverseConnections(
     conn: Connection,
@@ -88,7 +91,7 @@ export default class Superclass extends Relation implements RelationTypes.ISuper
       asClass === EntityEnums.Class.Action ||
       asClass === EntityEnums.Class.Concept
     ) {
-      out = await Relation.getForEntity(
+      out = await Relation.findForEntity(
         conn,
         parentId,
         RelationEnums.Type.Superclass,
@@ -104,5 +107,5 @@ export default class Superclass extends Relation implements RelationTypes.ISuper
     );
 
     return out;
-  };
+  }
 }

@@ -5,7 +5,10 @@ import { Connection } from "rethinkdb-ts";
 import Superclass from "./superclass";
 import { InternalServerError, ModelNotValidError } from "@shared/types/errors";
 
-export default class Classification extends Relation implements RelationTypes.IClassification {
+export default class Classification
+  extends Relation
+  implements RelationTypes.IClassification
+{
   type: RelationEnums.Type.Classification;
   entityIds: [string, string];
   order: number;
@@ -24,13 +27,20 @@ export default class Classification extends Relation implements RelationTypes.IC
    */
   validateEntitiesData(): Error | null {
     for (let i = 0; i < this.entityIds.length; i++) {
-      const loadedEntity = this.entities?.find(e => e.id === this.entityIds[i]);
+      const loadedEntity = this.entities?.find(
+        (e) => e.id === this.entityIds[i]
+      );
       if (!loadedEntity) {
-        return new InternalServerError('', `cannot check entity's class - not preloaded`);
+        return new InternalServerError(
+          "",
+          "cannot check entity's class - not preloaded"
+        );
       }
 
       if (i > 0 && loadedEntity.isTemplate) {
-        return new ModelNotValidError(`Entity ${loadedEntity.id} must not be a template`);
+        return new ModelNotValidError(
+          `Entity ${loadedEntity.id} must not be a template`
+        );
       }
     }
 
@@ -44,8 +54,15 @@ export default class Classification extends Relation implements RelationTypes.IC
     maxNestLvl: number,
     nestLvl: number
   ): Promise<
-    RelationTypes.IConnection<RelationTypes.IClassification, RelationTypes.ISuperclass>[]> {
-    const out: RelationTypes.IConnection<RelationTypes.IClassification, RelationTypes.ISuperclass>[] = [];
+    RelationTypes.IConnection<
+      RelationTypes.IClassification,
+      RelationTypes.ISuperclass
+    >[]
+  > {
+    const out: RelationTypes.IConnection<
+      RelationTypes.IClassification,
+      RelationTypes.ISuperclass
+    >[] = [];
 
     if (nestLvl > maxNestLvl) {
       return out;
@@ -54,7 +71,7 @@ export default class Classification extends Relation implements RelationTypes.IC
     let relations: RelationTypes.IClassification[] = [];
 
     if (nestLvl === 0 && EntityEnums.PLOGESTRB.indexOf(asClass) !== -1) {
-      relations = await Relation.getForEntity(
+      relations = await Relation.findForEntity(
         conn,
         entityId,
         RelationEnums.Type.Classification,
@@ -90,13 +107,13 @@ export default class Classification extends Relation implements RelationTypes.IC
     }
 
     return out;
-  };
+  }
 
   static async getClassificationInverseConnections(
     conn: Connection,
     parentId: string
   ): Promise<RelationTypes.IClassification[]> {
-    const out: RelationTypes.IClassification[] = await Relation.getForEntity(
+    const out: RelationTypes.IClassification[] = await Relation.findForEntity(
       conn,
       parentId,
       RelationEnums.Type.Classification,
@@ -111,5 +128,5 @@ export default class Classification extends Relation implements RelationTypes.IC
     );
 
     return out;
-  };
+  }
 }

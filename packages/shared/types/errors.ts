@@ -117,9 +117,13 @@ class EntityDoesNotExist extends CustomError {
   public static title = "Missing entity";
   public static message = "Entity $1 does not exist";
 
-  constructor(m: string, entityId: string) {
+  constructor(m: string, entityId?: string) {
     super(m);
-    this.message = this.message.replace("$1", entityId);
+    if (entityId) {
+      this.message = this.message.replace("$1", entityId);
+    } else {
+      this.message = this.message.replace(" $1 ", " ");
+    }
   }
 }
 
