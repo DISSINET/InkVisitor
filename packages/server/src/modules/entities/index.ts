@@ -193,7 +193,7 @@ export default Router()
       const out: IResponseGeneric = { result: true };
 
       if (model.usedTemplate) {
-        model.applyTemplate(request, model.usedTemplate);
+        await model.applyTemplate(request, model.usedTemplate);
         try {
           await copyRelations(request, model.usedTemplate, model.id, [
             RelationEnums.Type.Classification,
