@@ -5,7 +5,7 @@ import Entity from "./entity";
 import Statement from "@models/statement/statement";
 import { Connection, r, RDatum, RTable } from "rethinkdb-ts";
 import { ResponseEntity } from "./response";
-import { getEntityClass } from "@models/factory";
+import { getEntityClass } from "@models/entityFactory";
 import { IRequest } from "src/custom_typings/request";
 import Territory from "@models/territory/territory";
 import Audit from "@models/audit/audit";
@@ -70,7 +70,7 @@ export class SearchQuery {
    */
   whereClass(entityClass: EntityEnums.Class): SearchQuery {
     this.query = this.query.filter({
-      "class": entityClass,
+      class: entityClass,
     });
 
     return this;
@@ -151,8 +151,8 @@ export class SearchQuery {
    * @returns
    */
   whereLabel(label: string): SearchQuery {
-    let leftWildcard: string = "^",
-      rightWildcard: string = "$";
+    let leftWildcard = "^",
+      rightWildcard = "$";
 
     if (label[0] === "*") {
       leftWildcard = "";
@@ -218,14 +218,14 @@ export class SearchQuery {
     // otherwise with wildcard, the '*uilding' would be changed to 'uilding' without constraint
     // and will behave like wildcard on the left
     if (left === "^") {
-      left = `(\^|[\\W\\_])`;
+      left = "(\^|[\\W\\_])";
     }
     if (right === "$") {
-      right = `(\$|[\\W\\_])`;
+      right = "(\$|[\\W\\_])";
     }
 
     // words have to be splitted and joined with regexps to provide variable glue
-    label = label.toLowerCase().split(" ").join(`([\\W\\_]+[\\w]+)*[\\W\\_]+`);
+    label = label.toLowerCase().split(" ").join("([\\W\\_]+[\\w]+)*[\\W\\_]+");
 
     const regexp = `${left}${label}${right}`;
 
@@ -385,7 +385,7 @@ export class ResponseSearch {
       entities = sortByWordMatch(sortByLength(entities), query.usedLabel);
     }
 
-    let out: ResponseEntity[] = [];
+    const out: ResponseEntity[] = [];
     for (const entityData of entities) {
       const response = new ResponseEntity(getEntityClass(entityData));
       await response.prepare(httpRequest);
@@ -404,7 +404,7 @@ export class ResponseSearch {
  * @param label original wanted label
  * @returns sorted entities list
  */
-export function sort(entities: IEntity[], label: string = ""): IEntity[] {
+export function sort(entities: IEntity[], label = ""): IEntity[] {
   const indexMap: Record<number, IEntity[]> = {};
 
   // sort by distance from the start
@@ -449,14 +449,14 @@ export function sortByLength(entities: IEntity[]) {
  */
 export function sortByWordMatch(
   entities: IEntity[],
-  usedLabel: string = ""
+  usedLabel = ""
 ): IEntity[] {
   if (!usedLabel) {
     return entities;
   }
 
-  let sortedExact: IEntity[] = [];
-  let sortedSubstring: IEntity[] = [];
+  const sortedExact: IEntity[] = [];
+  const sortedSubstring: IEntity[] = [];
 
   for (const entity of entities) {
     if (
