@@ -1,7 +1,7 @@
 import { mergeDeep } from "@common/functions";
 import { ResponseEntity, ResponseEntityDetail } from "@models/entity/response";
 import Audit from "@models/audit/audit";
-import { getEntityClass } from "@models/factory";
+import { getEntityClass } from "@models/entityFactory";
 import { findEntityById } from "@service/shorthands";
 import {
   IEntity,
@@ -14,7 +14,6 @@ import {
 import {
   EntityDoesNotExist,
   BadParams,
-  InvalidDeleteError,
   InternalServerError,
   ModelNotValidError,
   PermissionDeniedError,
@@ -28,7 +27,6 @@ import { ResponseTooltip } from "@models/entity/response-tooltip";
 import { IRequest } from "src/custom_typings/request";
 import Relation from "@models/relation/relation";
 import User from "@models/user/user";
-import Entity from "@models/entity/entity";
 
 export default Router()
   /**

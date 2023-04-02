@@ -3,7 +3,11 @@ import { ITerritory, IParentTerritory, ITerritoryData } from "@shared/types";
 import { r as rethink, Connection, WriteResult, RDatum } from "rethinkdb-ts";
 import { IModel, determineOrder } from "@models/common";
 import Entity from "@models/entity/entity";
-import { InternalServerError, InvalidDeleteError, ModelNotValidError } from "@shared/types/errors";
+import {
+  InternalServerError,
+  InvalidDeleteError,
+  ModelNotValidError,
+} from "@shared/types/errors";
 import User from "@models/user/user";
 import treeCache from "@service/treeCache";
 import { nonenumerable } from "@common/decorators";
@@ -71,10 +75,10 @@ class Territory extends Entity implements ITerritory {
   }
 
   /**
-  * Stores the territory in the db
-  * @param db db connection
-  * @returns Promise<boolean> to indicate result of the operation
-  */
+   * Stores the territory in the db
+   * @param db db connection
+   * @returns Promise<boolean> to indicate result of the operation
+   */
   async save(db: Connection | undefined): Promise<boolean> {
     if (this.data.parent) {
       // get count of future siblings and move current territory to last
@@ -86,7 +90,11 @@ class Territory extends Entity implements ITerritory {
 
       const wantedOrder = this.data.parent.order;
       this.data.parent.order = determineOrder(wantedOrder, childs);
-    } else if (this.id !== "T0" && this.id.indexOf("root") !== 0 && !this.isTemplate) {
+    } else if (
+      this.id !== "T0" &&
+      this.id.indexOf("root") !== 0 &&
+      !this.isTemplate
+    ) {
       throw new ModelNotValidError("cannot create territory without a parent");
     }
 
