@@ -7,7 +7,7 @@ import Entity from "@models/entity/entity";
 import { IRequest } from "src/custom_typings/request";
 import { InternalServerError, ModelNotValidError } from "@shared/types/errors";
 import { EntityEnums, RelationEnums } from "@shared/enums";
-import { getRelationClass } from "@models/relationFactory";
+import { getRelationClass } from "@models/factory";
 import Actant1Semantics from "./actant1-semantics";
 import Actant2Semantics from "./actant2-semantics";
 import { deleteRelations } from "@service/shorthands";
