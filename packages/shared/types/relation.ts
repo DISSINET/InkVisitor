@@ -247,12 +247,12 @@ export namespace Relation {
   };
   RelationRules[RelationEnums.Type.ActionEventEquivalent] = {
     label: "Action/Event Equivalent",
-    inverseLabel: false,
+    inverseLabel: "Action equivalent",
     allowedEntitiesPattern: [
       [EntityEnums.Class.Action, EntityEnums.Class.Concept],
     ],
     allowedSameEntityClassesOnly: false,
-    asymmetrical: false,
+    asymmetrical: true,
     multiple: false,
     cloudType: false,
     treeType: true,
