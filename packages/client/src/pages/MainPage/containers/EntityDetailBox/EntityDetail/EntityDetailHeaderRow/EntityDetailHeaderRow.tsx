@@ -126,15 +126,15 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
                 // instantiate entity
                 if (entity.class === EntityEnums.Class.Territory) {
                   // TODO: modal for choosing territory parent
-                } else if (entity.class === EntityEnums.Class.Statement) {
+                  // } else if (entity.class === EntityEnums.Class.Statement) {
                   // TODO: modal for choosing territory for S
                 } else {
                   instantiateTemplate();
                 }
               }}
               disabled={
-                entity.class === EntityEnums.Class.Territory ||
-                entity.class === EntityEnums.Class.Statement
+                entity.class === EntityEnums.Class.Territory
+                // || entity.class === EntityEnums.Class.Statement
               }
             />
           </>

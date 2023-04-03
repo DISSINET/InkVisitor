@@ -136,8 +136,15 @@ export const Suggester: React.FC<Suggester> = ({
         } else if (item.isTemplate && !isInsideTemplate) {
           onDrop(item, true);
         } else if (item.isTemplate && isInsideTemplate) {
-          setTempDropItem(item);
-          setShowTemplateModal(true);
+          if (
+            item.entityClass === EntityEnums.Class.Territory ||
+            item.entityClass === EntityEnums.Class.Statement
+          ) {
+            onDrop(item);
+          } else {
+            setTempDropItem(item);
+            setShowTemplateModal(true);
+          }
         }
       }
     },

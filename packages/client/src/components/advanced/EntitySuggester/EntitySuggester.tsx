@@ -308,6 +308,11 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
 
   const [isWrongDropCategory, setIsWrongDropCategory] = useState(false);
 
+  // => nejde instancovat
+  // (newHoverred.isTemplate &&
+  //   newHoverred.entityClass === EntityEnums.Class.Territory &&
+  //   !territoryParentId) ||
+
   const handleHoverred = (newHoverred: EntityDragItem) => {
     const hoverredCategory = newHoverred.entityClass;
     if (
@@ -315,9 +320,9 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
       (disableTemplatesAccept && newHoverred.isTemplate) ||
       newHoverred.isDiscouraged ||
       // Maybe disable also for non-templates + add condition also to filtering results query
-      (newHoverred.isTemplate &&
-        newHoverred.entityClass === EntityEnums.Class.Territory &&
-        !territoryParentId) ||
+      // (newHoverred.isTemplate &&
+      //   newHoverred.entityClass === EntityEnums.Class.Territory &&
+      //   !territoryParentId) ||
       excludedActantIds.includes(newHoverred.id) ||
       excludedEntities.includes(newHoverred.entityClass) ||
       disabled

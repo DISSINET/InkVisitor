@@ -61,6 +61,8 @@ const EntityRow: React.FC<EntityRow> = ({ data, index, style }) => {
   const isNotDiscouraged = entity.status !== EntityEnums.Status.Discouraged;
   const territoryWithoutParent =
     entity.class === EntityEnums.Class.Territory && !territoryParentId;
+  const statementWithoutParent =
+    EntityEnums.Class.Statement && !territoryParentId;
 
   const renderIcons = () => {
     return (
