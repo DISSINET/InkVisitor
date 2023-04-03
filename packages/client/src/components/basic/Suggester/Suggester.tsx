@@ -136,11 +136,9 @@ export const Suggester: React.FC<Suggester> = ({
         } else if (item.isTemplate && !isInsideTemplate) {
           onDrop(item, true);
         } else if (item.isTemplate && isInsideTemplate) {
-          if (
-            item.entityClass === EntityEnums.Class.Territory ||
-            item.entityClass === EntityEnums.Class.Statement
-          ) {
+          if (item.entityClass === EntityEnums.Class.Territory) {
             onDrop(item);
+            // TODO: notification why not instantiated - used because of missing parent
           } else {
             setTempDropItem(item);
             setShowTemplateModal(true);
