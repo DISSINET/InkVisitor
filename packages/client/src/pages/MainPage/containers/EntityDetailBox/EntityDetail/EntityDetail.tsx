@@ -138,16 +138,18 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
   } = useQuery(
     ["entity-templates", "templates", entity?.class],
     async () => {
-      const res = await api.entitiesSearch({
-        onlyTemplates: true,
-        class: entity?.class,
-      });
+      if (entity) {
+        const res = await api.entitiesSearch({
+          onlyTemplates: true,
+          class: entity?.class,
+        });
 
-      const templates = res.data;
-      templates.sort((a: IEntity, b: IEntity) =>
-        a.label.toLocaleLowerCase() > b.label.toLocaleLowerCase() ? 1 : -1
-      );
-      return templates;
+        const templates = res.data;
+        templates.sort((a: IEntity, b: IEntity) =>
+          a.label.toLocaleLowerCase() > b.label.toLocaleLowerCase() ? 1 : -1
+        );
+        return templates;
+      }
     },
     { enabled: !!entity && api.isLoggedIn() }
   );

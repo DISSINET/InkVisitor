@@ -168,15 +168,19 @@ export const InstActant = async (
 ) => {
   actant.props = await InstProps(actant.props, userRole);
 
-  const eReq = await api.entitiesGet(actant.entityId);
-  const actantE = eReq.data;
+  if (actant?.entityId) {
+    const eReq = await api.entitiesGet(actant.entityId);
+    const actantE = eReq.data;
 
-  if (actantE && actantE.isTemplate) {
-    const instActantId = await InstTemplate(actantE, userRole);
-    if (instActantId) {
-      actant.entityId = instActantId;
+    if (actantE && actantE.isTemplate) {
+      const instActantId = await InstTemplate(actantE, userRole);
+
+      if (instActantId) {
+        actant.entityId = instActantId;
+      }
     }
   }
+
   return actant;
 };
 
@@ -186,14 +190,16 @@ export const InstAction: any = async (
 ) => {
   action.props = await InstProps(action.props, userRole);
 
-  const eReq = await api.entitiesGet(action.actionId);
-  const actionE = eReq.data;
+  if (action?.actionId) {
+    const eReq = await api.entitiesGet(action.actionId);
+    const actionE = eReq.data;
 
-  if (actionE && actionE.isTemplate) {
-    const instActionId = await InstTemplate(actionE, userRole);
+    if (actionE && actionE.isTemplate) {
+      const instActionId = await InstTemplate(actionE, userRole);
 
-    if (instActionId) {
-      action.actionId = instActionId;
+      if (instActionId) {
+        action.actionId = instActionId;
+      }
     }
   }
   return action;

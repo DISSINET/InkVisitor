@@ -1,5 +1,5 @@
 import { EntityEnums, UserEnums } from "@shared/enums";
-import { IEntity } from "@shared/types";
+import { IEntity, IStatement } from "@shared/types";
 import api from "api";
 import { ButtonGroup, Button } from "components";
 import { EntityTag } from "components/advanced";
@@ -69,10 +69,13 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
   };
 
   const instantiateTemplate = async () => {
+    console.log("instantiate template");
     const newInstanceId = await InstTemplate(
       entity,
       localStorage.getItem("userrole") as UserEnums.Role
     );
+
+    console.log(newInstanceId);
 
     if (newInstanceId) {
       appendDetailId(newInstanceId);
@@ -175,8 +178,11 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
             color="primary"
             onClick={() => {
               setStatementId(entity.id);
-              if (!entity.isTemplate) {
-                setTerritoryId(entity.data.territory.id);
+              if (
+                !entity.isTemplate &&
+                (entity as IStatement).data.territory?.territoryId
+              ) {
+                setTerritoryId(entity.data.territory.territoryId);
               }
             }}
           />
