@@ -702,6 +702,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 excludedEntities={excludedSuggesterEntities}
                 isInsideTemplate={statement.isTemplate}
                 territoryParentId={statementTerritoryId}
+                excludedActantIds={[statement.id]}
               />
             )}
           </StyledEditorSectionContent>
