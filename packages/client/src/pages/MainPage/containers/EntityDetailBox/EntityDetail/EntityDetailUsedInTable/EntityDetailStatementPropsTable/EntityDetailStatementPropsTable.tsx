@@ -1,4 +1,5 @@
-import { IEntity } from "@shared/types";
+import { EntityEnums } from "@shared/enums";
+import { IEntity, IStatement } from "@shared/types";
 import { IResponseUsedInStatementProps } from "@shared/types/response-detail";
 import { Button, Table } from "components";
 import { EntityTag } from "components/advanced";
@@ -88,9 +89,12 @@ export const EntityDetailStatementPropsTable: React.FC<
                   noBorder
                   tooltipLabel="edit statement"
                   onClick={async () => {
-                    if (entity.data.territory) {
-                      setStatementId(entity.id);
-                      setTerritoryId(entity.data.territory.id);
+                    if (entity.class === EntityEnums.Class.Statement) {
+                      const statement = entity as IStatement;
+                      if (statement.data.territory) {
+                        setStatementId(statement.id);
+                        setTerritoryId(statement.data.territory.territoryId);
+                      }
                     }
                   }}
                 />
