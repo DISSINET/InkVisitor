@@ -69,17 +69,18 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
   };
 
   const instantiateTemplate = async () => {
-    console.log("instantiate template");
     const newInstanceId = await InstTemplate(
       entity,
       localStorage.getItem("userrole") as UserEnums.Role
     );
 
-    console.log(newInstanceId);
-
     if (newInstanceId) {
       appendDetailId(newInstanceId);
       toast.info(`Entity instantiated from a template!`);
+
+      if (entity.class === EntityEnums.Class.Statement) {
+        toast.warning(`Statement created without territory!`);
+      }
     }
   };
 
