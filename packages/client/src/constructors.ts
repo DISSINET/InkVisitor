@@ -277,7 +277,6 @@ export const applyTemplate = async (
     if (templateEntity.class === EntityEnums.Class.Statement) {
       // entity is a statement
       for (const [ai, action] of newEntity.data.actions.entries()) {
-        console.log(action);
         newEntity.data.actions[ai] = await InstAction(action, userRole);
       }
       for (const [ai, actant] of newEntity.data.actants.entries()) {

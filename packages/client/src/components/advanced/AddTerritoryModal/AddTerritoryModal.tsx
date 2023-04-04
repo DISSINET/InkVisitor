@@ -1,5 +1,5 @@
 import { EntityEnums } from "@shared/enums";
-import { IResponseTerritory } from "@shared/types";
+import { IEntity, IResponseTerritory } from "@shared/types";
 import api from "api";
 import {
   Button,
@@ -23,6 +23,7 @@ export const AddTerritoryModal: React.FC<AddTerritoryModal> = ({
 }) => {
   const [showModal, setShowModal] = useState(false);
   const [territoryId, setTerritoryId] = useState("");
+  // const [territoryTemporary, setterritoryTemporary] = useState();
 
   useEffect(() => {
     setShowModal(true);
@@ -74,6 +75,7 @@ export const AddTerritoryModal: React.FC<AddTerritoryModal> = ({
               inputWidth={96}
               disableCreate
               categoryTypes={[EntityEnums.Class.Territory]}
+              // onPicked={(entity: IEntity) => console.log(entity)}
               onSelected={(newSelectedId: string) => {
                 setTerritoryId(newSelectedId);
               }}
@@ -94,7 +96,7 @@ export const AddTerritoryModal: React.FC<AddTerritoryModal> = ({
             />
             <Button
               key="submit"
-              label="Create"
+              label="Submit"
               color="info"
               onClick={() => territory && onSubmit(territory)}
               disabled={!territory}
