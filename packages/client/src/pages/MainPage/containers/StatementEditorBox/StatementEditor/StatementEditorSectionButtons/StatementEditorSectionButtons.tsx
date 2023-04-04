@@ -145,6 +145,7 @@ export const StatementEditorSectionButtons: React.FC<
           handleCopyFromStatement(entity as IStatement, section, replaceSection)
         }
         excludedActantIds={[statement.id]}
+        disableTemplatesAccept
         disableCreate
         inputWidth={65}
         placeholder="another S"
