@@ -25,10 +25,12 @@ import {
 } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
+import { AiOutlineWarning } from "react-icons/ai";
 import { UseMutationResult, useQuery, useQueryClient } from "react-query";
 import { toast } from "react-toastify";
 import { useAppSelector } from "redux/hooks";
 import { excludedSuggesterEntities } from "Theme/constants";
+import theme from "Theme/theme";
 import { classesEditorActants, classesEditorTags, DropdownItem } from "types";
 import { getEntityLabel, getShortLabelByLetterCount } from "utils";
 import { EntityReferenceTable } from "../../EntityReferenceTable/EntityReferenceTable";
@@ -536,13 +538,26 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                     </React.Fragment>
                   );
                 })}
-              {territoryData && (
+              {territoryData ? (
                 <React.Fragment key={territoryData.id}>
                   <BreadcrumbItem
                     territoryId={territoryData.id}
                     territoryData={territoryData}
                   />
                 </React.Fragment>
+              ) : (
+                <div style={{ display: "flex", alignItems: "flex-end" }}>
+                  <AiOutlineWarning size={22} color={theme.color["warning"]} />
+                  <p
+                    style={{
+                      color: theme.color.warning,
+                      marginLeft: "0.5rem",
+                      marginBottom: "0.1rem",
+                    }}
+                  >
+                    {"missing territory"}
+                  </p>
+                </div>
               )}
               <Loader size={20} show={isFetchingTerritory} />
             </StyledBreadcrumbWrap>
