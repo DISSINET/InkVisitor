@@ -33,12 +33,8 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
   setShowCreateModal,
 }) => {
   const queryClient = useQueryClient();
-  const {
-    setStatementId,
-    appendDetailId,
-    selectedDetailId,
-    setSelectedDetailId,
-  } = useSearchParams();
+  const { setStatementId, appendDetailId, selectedDetailId } =
+    useSearchParams();
 
   const [createModalEntityClass, setCreateModalEntityClass] =
     useState<DropdownItem>(entitiesDict[0]);
@@ -93,7 +89,6 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
           setStatementId(variables.id);
         } else {
           appendDetailId(variables.id);
-          setSelectedDetailId(variables.id);
         }
         handleCloseCreateModal();
       },

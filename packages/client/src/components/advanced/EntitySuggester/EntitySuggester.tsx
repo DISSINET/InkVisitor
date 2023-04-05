@@ -1,5 +1,10 @@
 import { EntityEnums, UserEnums } from "@shared/enums";
-import { IEntity, IStatement, ITerritory } from "@shared/types";
+import {
+  IEntity,
+  IResponseTerritory,
+  IStatement,
+  ITerritory,
+} from "@shared/types";
 import api from "api";
 import { Suggester } from "components";
 import { CEntity, CStatement, CTerritory, InstTemplate } from "constructors";
@@ -10,6 +15,7 @@ import { useMutation, useQuery, useQueryClient } from "react-query";
 import { OptionTypeBase, ValueType } from "react-select";
 import { DropdownAny, rootTerritoryId, wildCardChar } from "Theme/constants";
 import { DropdownItem, EntityDragItem, SuggesterItemToCreate } from "types";
+import { AddTerritoryModal } from "..";
 
 interface EntitySuggester {
   categoryTypes: EntityEnums.ExtendedClass[];
@@ -69,7 +75,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
   const [selectedCategory, setSelectedCategory] = useState<any>();
   const [allCategories, setAllCategories] = useState<DropdownItem[]>();
 
-  const { appendDetailId, setSelectedDetailId } = useSearchParams();
+  const { appendDetailId } = useSearchParams();
   const userRole = localStorage.getItem("userrole");
 
   // get user data
@@ -204,7 +210,6 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
         handleClean();
         if (openDetailOnCreate && variables.class !== EntityEnums.Class.Value) {
           appendDetailId(variables.id);
-          setSelectedDetailId(variables.id);
         }
         if (variables.class === EntityEnums.Class.Territory) {
           queryClient.invalidateQueries("tree");
@@ -267,16 +272,24 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
     }
   };
 
+  const [showAddTerritoryModal, setShowAddTerritoryModal] = useState(false);
+
   const handleInstantiateTemplate = async (
-    templateToDuplicate: IEntity | IStatement | ITerritory
+    templateToDuplicate: IEntity | IStatement | ITerritory,
+    newSelectedTerritoryParentId?: string
   ) => {
     let newEntityId;
     if (templateToDuplicate.class === EntityEnums.Class.Territory) {
-      newEntityId = await InstTemplate(
-        templateToDuplicate,
-        localStorage.getItem("userrole") as UserEnums.Role,
-        territoryParentId
-      );
+      const tempParentId = territoryParentId || newSelectedTerritoryParentId;
+      if (tempParentId) {
+        newEntityId = await InstTemplate(
+          templateToDuplicate,
+          localStorage.getItem("userrole") as UserEnums.Role,
+          territoryParentId
+        );
+      } else {
+        setShowAddTerritoryModal(true);
+      }
     } else {
       newEntityId = await InstTemplate(
         templateToDuplicate,
@@ -291,7 +304,6 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
         templateToDuplicate.class !== EntityEnums.Class.Value
       ) {
         appendDetailId(newEntityId);
-        setSelectedDetailId(newEntityId);
       }
     }
   };
@@ -346,50 +358,61 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
   };
 
   return selectedCategory && allCategories && user ? (
-    <Suggester
-      isFetching={isFetchingStatement}
-      marginTop={false}
-      suggestions={suggestions || []}
-      placeholder={placeholder}
-      typed={typed} // input value
-      category={selectedCategory} // selected category
-      categories={allCategories} // all possible categories
-      suggestionListPosition={""} // todo not implemented yet
-      onCancel={() => {
-        handleClean();
-      }}
-      onType={(newType: string) => {
-        setTyped(newType);
-        onTyped && onTyped(newType);
-      }}
-      onChangeCategory={(option: ValueType<OptionTypeBase, any> | null) => {
-        setSelectedCategory(option);
-        onChangeCategory && onChangeCategory(option);
-      }}
-      onCreate={(newCreated: SuggesterItemToCreate) => {
-        handleCreate(newCreated);
-      }}
-      onPick={(newPicked: IEntity, instantiateTemplate?: boolean) => {
-        handlePick(newPicked, instantiateTemplate);
-      }}
-      onDrop={(newDropped: EntityDragItem, instantiateTemplate?: boolean) => {
-        if (!disabled) {
-          handleDropped(newDropped, instantiateTemplate);
-        }
-      }}
-      onHover={(newHoverred: EntityDragItem) => {
-        handleHoverred(newHoverred);
-      }}
-      isWrongDropCategory={isWrongDropCategory}
-      disableCreate={disableCreate}
-      disableButtons={disableButtons}
-      inputWidth={inputWidth}
-      isInsideTemplate={isInsideTemplate}
-      territoryParentId={territoryParentId}
-      userOptions={user.options}
-      autoFocus={autoFocus}
-      disabled={disabled}
-    />
+    <>
+      <Suggester
+        isFetching={isFetchingStatement}
+        marginTop={false}
+        suggestions={suggestions || []}
+        placeholder={placeholder}
+        typed={typed} // input value
+        category={selectedCategory} // selected category
+        categories={allCategories} // all possible categories
+        suggestionListPosition={""} // todo not implemented yet
+        onCancel={() => {
+          handleClean();
+        }}
+        onType={(newType: string) => {
+          setTyped(newType);
+          onTyped && onTyped(newType);
+        }}
+        onChangeCategory={(option: ValueType<OptionTypeBase, any> | null) => {
+          setSelectedCategory(option);
+          onChangeCategory && onChangeCategory(option);
+        }}
+        onCreate={(newCreated: SuggesterItemToCreate) => {
+          handleCreate(newCreated);
+        }}
+        onPick={(newPicked: IEntity, instantiateTemplate?: boolean) => {
+          handlePick(newPicked, instantiateTemplate);
+        }}
+        onDrop={(newDropped: EntityDragItem, instantiateTemplate?: boolean) => {
+          if (!disabled) {
+            handleDropped(newDropped, instantiateTemplate);
+          }
+        }}
+        onHover={(newHoverred: EntityDragItem) => {
+          handleHoverred(newHoverred);
+        }}
+        isWrongDropCategory={isWrongDropCategory}
+        disableCreate={disableCreate}
+        disableButtons={disableButtons}
+        inputWidth={inputWidth}
+        isInsideTemplate={isInsideTemplate}
+        territoryParentId={territoryParentId}
+        userOptions={user.options}
+        autoFocus={autoFocus}
+        disabled={disabled}
+      />
+      {showAddTerritoryModal && (
+        <AddTerritoryModal
+          onSubmit={
+            (territory: IResponseTerritory) => {}
+            // handleInstantiateTemplate()
+          }
+          onClose={() => setShowAddTerritoryModal(false)}
+        />
+      )}
+    </>
   ) : (
     <div />
   );
