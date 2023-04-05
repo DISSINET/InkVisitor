@@ -193,6 +193,7 @@ export const StatementEditorActantTableRow: React.FC<
           territoryParentId={territoryParentId}
           territoryActants={territoryActants}
           placeholder={"add actant"}
+          isInsideStatement
         />
       )
     );

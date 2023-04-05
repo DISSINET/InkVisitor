@@ -25,6 +25,7 @@ interface EntitySuggester {
   excludedActantIds?: string[];
   filterEditorRights?: boolean;
   isInsideTemplate?: boolean;
+  isInsideStatement?: boolean;
   territoryParentId?: string;
 
   disableCreate?: boolean;
@@ -51,6 +52,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
   filterEditorRights = false,
   excludedActantIds = [],
   isInsideTemplate = false,
+  isInsideStatement = false,
   territoryParentId,
 
   disableCreate,
@@ -116,29 +118,42 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
           return -1;
         }
       });
-      return resSuggestions.data
-        .filter((s) =>
-          filterEditorRights && userRole !== UserEnums.Role.Admin
-            ? s.right === UserEnums.RoleMode.Write
-            : s
-        )
-        .filter((s) =>
-          excludedActantIds.length ? !excludedActantIds.includes(s.id) : s
-        )
-        .filter((s) => (disableTemplatesAccept ? !s.isTemplate : s))
-        .filter((s) => categoryTypes.includes(s.class))
-        .map((entity: IEntity) => {
-          const icons: React.ReactNode[] = [];
+      return (
+        resSuggestions.data
+          .filter((s) =>
+            filterEditorRights && userRole !== UserEnums.Role.Admin
+              ? s.right === UserEnums.RoleMode.Write
+              : s
+          )
+          .filter((s) =>
+            excludedActantIds.length ? !excludedActantIds.includes(s.id) : s
+          )
+          .filter((s) => (disableTemplatesAccept ? !s.isTemplate : s))
+          // filter T or S template inside S template
+          .filter(
+            (s) =>
+              !(
+                (s.class === EntityEnums.Class.Territory ||
+                  s.class === EntityEnums.Class.Statement) &&
+                s.isTemplate &&
+                isInsideStatement &&
+                isInsideTemplate
+              )
+          )
+          .filter((s) => categoryTypes.includes(s.class))
+          .map((entity: IEntity) => {
+            const icons: React.ReactNode[] = [];
 
-          if (territoryActants?.includes(entity.id)) {
-            icons.push(<FaHome key={entity.id} color="" />);
-          }
+            if (territoryActants?.includes(entity.id)) {
+              icons.push(<FaHome key={entity.id} color="" />);
+            }
 
-          return {
-            entity: entity,
-            icons: icons,
-          };
-        });
+            return {
+              entity: entity,
+              icons: icons,
+            };
+          })
+      );
     },
     {
       enabled:
@@ -308,23 +323,20 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
 
   const [isWrongDropCategory, setIsWrongDropCategory] = useState(false);
 
-  // => nejde instancovat
-  // (newHoverred.isTemplate &&
-  //   newHoverred.entityClass === EntityEnums.Class.Territory &&
-  //   !territoryParentId) ||
-
   const handleHoverred = (newHoverred: EntityDragItem) => {
     const hoverredCategory = newHoverred.entityClass;
     if (
       !categoryTypes.includes(hoverredCategory) ||
       (disableTemplatesAccept && newHoverred.isTemplate) ||
       newHoverred.isDiscouraged ||
-      // Maybe disable also for non-templates + add condition also to filtering results query
-      // (newHoverred.isTemplate &&
-      //   newHoverred.entityClass === EntityEnums.Class.Territory &&
-      //   !territoryParentId) ||
       excludedActantIds.includes(newHoverred.id) ||
       excludedEntities.includes(newHoverred.entityClass) ||
+      // Is T or S template inside S template
+      ((newHoverred.entityClass === EntityEnums.Class.Territory ||
+        newHoverred.entityClass === EntityEnums.Class.Statement) &&
+        isInsideStatement &&
+        isInsideTemplate &&
+        newHoverred.isTemplate) ||
       disabled
     ) {
       setIsWrongDropCategory(true);

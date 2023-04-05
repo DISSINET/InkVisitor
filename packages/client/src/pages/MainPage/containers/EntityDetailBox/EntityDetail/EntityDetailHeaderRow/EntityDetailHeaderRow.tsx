@@ -64,13 +64,17 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
 
   const instantiateTemplate = async (territoryParentId?: string) => {
     let newInstanceId;
-    if (entity.class === EntityEnums.Class.Territory && territoryParentId) {
-      newInstanceId = await InstTemplate(
-        entity,
-        localStorage.getItem("userrole") as UserEnums.Role,
-        territoryParentId
-      );
-      setShowAddParentModal(false);
+    if (entity.class === EntityEnums.Class.Territory) {
+      if (territoryParentId) {
+        newInstanceId = await InstTemplate(
+          entity,
+          localStorage.getItem("userrole") as UserEnums.Role,
+          territoryParentId
+        );
+        setShowAddParentModal(false);
+      } else {
+        toast.info("Cannot create territory without parent");
+      }
     } else {
       newInstanceId = await InstTemplate(
         entity,
