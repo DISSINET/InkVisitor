@@ -273,22 +273,35 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
   };
 
   const [showAddTerritoryModal, setShowAddTerritoryModal] = useState(false);
+  const [tempTemplateToInstantiate, setTempTemplateToInstantiate] = useState<
+    ITerritory | false
+  >(false);
+
+  const instantiateTerritory = async (
+    territoryToInst: ITerritory,
+    territoryParentId?: string
+  ): Promise<string | false> => {
+    return await InstTemplate(
+      territoryToInst,
+      localStorage.getItem("userrole") as UserEnums.Role,
+      territoryParentId
+    );
+  };
 
   const handleInstantiateTemplate = async (
-    templateToDuplicate: IEntity | IStatement | ITerritory,
-    newSelectedTerritoryParentId?: string
+    templateToDuplicate: IEntity | IStatement | ITerritory
   ) => {
-    let newEntityId;
+    let newEntityId: string | false;
     if (templateToDuplicate.class === EntityEnums.Class.Territory) {
-      const tempParentId = territoryParentId || newSelectedTerritoryParentId;
-      if (tempParentId) {
-        newEntityId = await InstTemplate(
-          templateToDuplicate,
-          localStorage.getItem("userrole") as UserEnums.Role,
+      if (territoryParentId) {
+        newEntityId = await instantiateTerritory(
+          templateToDuplicate as ITerritory,
           territoryParentId
         );
       } else {
+        setTempTemplateToInstantiate(templateToDuplicate as ITerritory);
         setShowAddTerritoryModal(true);
+        return;
       }
     } else {
       newEntityId = await InstTemplate(
@@ -405,10 +418,21 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
       />
       {showAddTerritoryModal && (
         <AddTerritoryModal
-          onSubmit={
-            (territory: IResponseTerritory) => {}
-            // handleInstantiateTemplate()
-          }
+          onSubmit={async (territory: IResponseTerritory) => {
+            setShowAddTerritoryModal(false);
+            const newEntityId = await instantiateTerritory(
+              tempTemplateToInstantiate as ITerritory,
+              territory.id
+            );
+            if (newEntityId) {
+              onSelected(newEntityId);
+              handleClean();
+              if (openDetailOnCreate) {
+                appendDetailId(newEntityId);
+              }
+            }
+            setTempTemplateToInstantiate(false);
+          }}
           onClose={() => setShowAddTerritoryModal(false)}
         />
       )}
