@@ -138,16 +138,18 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
   } = useQuery(
     ["entity-templates", "templates", entity?.class],
     async () => {
-      const res = await api.entitiesSearch({
-        onlyTemplates: true,
-        class: entity?.class,
-      });
+      if (entity) {
+        const res = await api.entitiesSearch({
+          onlyTemplates: true,
+          class: entity?.class,
+        });
 
-      const templates = res.data;
-      templates.sort((a: IEntity, b: IEntity) =>
-        a.label.toLocaleLowerCase() > b.label.toLocaleLowerCase() ? 1 : -1
-      );
-      return templates;
+        const templates = res.data;
+        templates.sort((a: IEntity, b: IEntity) =>
+          a.label.toLocaleLowerCase() > b.label.toLocaleLowerCase() ? 1 : -1
+        );
+        return templates;
+      }
     },
     { enabled: !!entity && api.isLoggedIn() }
   );
@@ -500,7 +502,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
     return (
       entity.class === EntityEnums.Class.Statement &&
       entity.data.territory &&
-      Object.keys(entity.entities).includes(entity.data.territory.id)
+      Object.keys(entity.entities).includes(entity.data.territory.territoryId)
     );
   };
 
@@ -508,7 +510,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
     if (isTerritoryWithParent(entity)) {
       return entity.entities[entity.data.parent.territoryId].id;
     } else if (isStatementWithTerritory(entity)) {
-      return entity.entities[entity.data.territory.id].id;
+      return entity.entities[entity.data.territory.territoryId].id;
     } else {
       return undefined;
     }
