@@ -318,6 +318,9 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
       ) {
         appendDetailId(newEntityId);
       }
+      if (templateToDuplicate.class === EntityEnums.Class.Territory) {
+        queryClient.invalidateQueries("tree");
+      }
     }
   };
 
@@ -418,11 +421,11 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
       />
       {showAddTerritoryModal && (
         <AddTerritoryModal
-          onSubmit={async (territory: IResponseTerritory) => {
+          onSubmit={async (territoryId: string) => {
             setShowAddTerritoryModal(false);
             const newEntityId = await instantiateTerritory(
               tempTemplateToInstantiate as ITerritory,
-              territory.id
+              territoryId
             );
             if (newEntityId) {
               onSelected(newEntityId);
@@ -430,6 +433,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
               if (openDetailOnCreate) {
                 appendDetailId(newEntityId);
               }
+              queryClient.invalidateQueries("tree");
             }
             setTempTemplateToInstantiate(false);
           }}

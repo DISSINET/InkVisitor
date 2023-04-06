@@ -1,6 +1,4 @@
 import { EntityEnums } from "@shared/enums";
-import { IEntity, IResponseTerritory } from "@shared/types";
-import api from "api";
 import {
   Button,
   ButtonGroup,
@@ -10,77 +8,37 @@ import {
   ModalHeader,
 } from "components";
 import React, { useEffect, useState } from "react";
-import { useQuery } from "react-query";
-import { EntitySuggester, EntityTag } from "..";
+import { EntitySuggester } from "..";
 
 interface AddTerritoryModal {
   onClose: () => void;
-  onSubmit: (territory: IResponseTerritory) => void;
+  onSubmit: (territoryId: string) => void;
 }
 export const AddTerritoryModal: React.FC<AddTerritoryModal> = ({
   onClose,
   onSubmit,
 }) => {
   const [showModal, setShowModal] = useState(false);
-  const [territoryId, setTerritoryId] = useState("");
-  // const [territoryTemporary, setterritoryTemporary] = useState();
 
   useEffect(() => {
     setShowModal(true);
   }, []);
 
-  const {
-    status,
-    data: territory,
-    error,
-    isFetching,
-  } = useQuery(
-    ["territory", territoryId],
-    async () => {
-      if (territoryId) {
-        const res = await api.territoryGet(territoryId);
-        return res.data;
-      }
-    },
-    {
-      enabled: !!territoryId && api.isLoggedIn(),
-    }
-  );
-
   return (
     <>
-      <Modal
-        showModal={showModal}
-        width="thin"
-        onEnterPress={() => territory && onSubmit(territory)}
-        onClose={onClose}
-      >
+      <Modal showModal={showModal} width="thin" onClose={onClose}>
         <ModalHeader title="Select parent territory" />
         <ModalContent>
-          {territory ? (
-            <EntityTag
-              entity={territory}
-              tooltipPosition="left"
-              unlinkButton={{
-                onClick: () => {
-                  setTerritoryId("");
-                },
-                color: "danger",
-              }}
-            />
-          ) : (
-            <EntitySuggester
-              disableTemplatesAccept
-              filterEditorRights
-              inputWidth={96}
-              disableCreate
-              categoryTypes={[EntityEnums.Class.Territory]}
-              // onPicked={(entity: IEntity) => console.log(entity)}
-              onSelected={(newSelectedId: string) => {
-                setTerritoryId(newSelectedId);
-              }}
-            />
-          )}
+          <EntitySuggester
+            disableTemplatesAccept
+            filterEditorRights
+            inputWidth={96}
+            disableCreate
+            categoryTypes={[EntityEnums.Class.Territory]}
+            onSelected={(newSelectedId: string) => {
+              onSubmit(newSelectedId);
+            }}
+          />
         </ModalContent>
         <ModalFooter>
           <ButtonGroup>
@@ -89,17 +47,7 @@ export const AddTerritoryModal: React.FC<AddTerritoryModal> = ({
               label="Cancel"
               color="greyer"
               inverted
-              onClick={() => {
-                setTerritoryId("");
-                onClose();
-              }}
-            />
-            <Button
-              key="submit"
-              label="Submit"
-              color="info"
-              onClick={() => territory && onSubmit(territory)}
-              disabled={!territory}
+              onClick={onClose}
             />
           </ButtonGroup>
         </ModalFooter>

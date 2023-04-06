@@ -221,8 +221,8 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
       {showAddParentModal && (
         <AddTerritoryModal
           onClose={() => setShowAddParentModal(false)}
-          onSubmit={(territory: IResponseTerritory) => {
-            instantiateTemplate(territory.id);
+          onSubmit={(territoryId: string) => {
+            instantiateTemplate(territoryId);
           }}
         />
       )}
