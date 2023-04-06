@@ -92,12 +92,7 @@ export const SearchParamsProvider = ({
     }
   );
 
-  useEffect(() => {
-    console.log(selectedDetailId);
-  }, [selectedDetailId]);
-
   const appendDetailId = (id: string) => {
-    console.log("here");
     const detailIdArray = getDetailIdArray();
     if (!detailIdArray.includes(id)) {
       const newDetailIdArray = [];
@@ -116,7 +111,7 @@ export const SearchParamsProvider = ({
       }
       setDetailId(newDetailIdArray.join(arrJoinChar));
     }
-    setSelectedDetailId(id);
+    setTimeout(() => setSelectedDetailId(id), 100);
   };
 
   const removeDetailId = (id: string) => {

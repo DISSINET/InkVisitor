@@ -33,8 +33,12 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
   setShowCreateModal,
 }) => {
   const queryClient = useQueryClient();
-  const { setStatementId, appendDetailId, selectedDetailId } =
-    useSearchParams();
+  const {
+    setStatementId,
+    appendDetailId,
+    selectedDetailId,
+    setSelectedDetailId,
+  } = useSearchParams();
 
   const [createModalEntityClass, setCreateModalEntityClass] =
     useState<DropdownItem>(entitiesDict[0]);
