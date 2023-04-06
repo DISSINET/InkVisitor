@@ -230,14 +230,16 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
             </StyledDetailContentRow>
           )}
 
-          {/* statement  terriroty */}
+          {/* statement terriroty */}
           {isStatementWithTerritory(entity) && (
             <StyledDetailContentRow>
               <StyledDetailContentRowLabel>
                 Territory
               </StyledDetailContentRowLabel>
               <StyledDetailContentRowValue>
-                <EntityTag entity={entity.entities[entity.data.territory.id]} />
+                <EntityTag
+                  entity={entity.entities[entity.data.territory.territoryId]}
+                />
               </StyledDetailContentRowValue>
             </StyledDetailContentRow>
           )}

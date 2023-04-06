@@ -1,5 +1,10 @@
 import { EntityEnums, UserEnums } from "@shared/enums";
-import { IEntity, IStatement, ITerritory } from "@shared/types";
+import {
+  IEntity,
+  IResponseTerritory,
+  IStatement,
+  ITerritory,
+} from "@shared/types";
 import api from "api";
 import { Suggester } from "components";
 import { CEntity, CStatement, CTerritory, InstTemplate } from "constructors";
@@ -10,6 +15,7 @@ import { useMutation, useQuery, useQueryClient } from "react-query";
 import { OptionTypeBase, ValueType } from "react-select";
 import { DropdownAny, rootTerritoryId, wildCardChar } from "Theme/constants";
 import { DropdownItem, EntityDragItem, SuggesterItemToCreate } from "types";
+import { AddTerritoryModal } from "..";
 
 interface EntitySuggester {
   categoryTypes: EntityEnums.ExtendedClass[];
@@ -25,6 +31,7 @@ interface EntitySuggester {
   excludedActantIds?: string[];
   filterEditorRights?: boolean;
   isInsideTemplate?: boolean;
+  isInsideStatement?: boolean;
   territoryParentId?: string;
 
   disableCreate?: boolean;
@@ -51,6 +58,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
   filterEditorRights = false,
   excludedActantIds = [],
   isInsideTemplate = false,
+  isInsideStatement = false,
   territoryParentId,
 
   disableCreate,
@@ -67,7 +75,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
   const [selectedCategory, setSelectedCategory] = useState<any>();
   const [allCategories, setAllCategories] = useState<DropdownItem[]>();
 
-  const { appendDetailId, setSelectedDetailId } = useSearchParams();
+  const { appendDetailId } = useSearchParams();
   const userRole = localStorage.getItem("userrole");
 
   // get user data
@@ -116,29 +124,42 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
           return -1;
         }
       });
-      return resSuggestions.data
-        .filter((s) =>
-          filterEditorRights && userRole !== UserEnums.Role.Admin
-            ? s.right === UserEnums.RoleMode.Write
-            : s
-        )
-        .filter((s) =>
-          excludedActantIds.length ? !excludedActantIds.includes(s.id) : s
-        )
-        .filter((s) => (disableTemplatesAccept ? !s.isTemplate : s))
-        .filter((s) => categoryTypes.includes(s.class))
-        .map((entity: IEntity) => {
-          const icons: React.ReactNode[] = [];
+      return (
+        resSuggestions.data
+          .filter((s) =>
+            filterEditorRights && userRole !== UserEnums.Role.Admin
+              ? s.right === UserEnums.RoleMode.Write
+              : s
+          )
+          .filter((s) =>
+            excludedActantIds.length ? !excludedActantIds.includes(s.id) : s
+          )
+          .filter((s) => (disableTemplatesAccept ? !s.isTemplate : s))
+          // filter T or S template inside S template
+          .filter(
+            (s) =>
+              !(
+                (s.class === EntityEnums.Class.Territory ||
+                  s.class === EntityEnums.Class.Statement) &&
+                s.isTemplate &&
+                isInsideStatement &&
+                isInsideTemplate
+              )
+          )
+          .filter((s) => categoryTypes.includes(s.class))
+          .map((entity: IEntity) => {
+            const icons: React.ReactNode[] = [];
 
-          if (territoryActants?.includes(entity.id)) {
-            icons.push(<FaHome key={entity.id} color="" />);
-          }
+            if (territoryActants?.includes(entity.id)) {
+              icons.push(<FaHome key={entity.id} color="" />);
+            }
 
-          return {
-            entity: entity,
-            icons: icons,
-          };
-        });
+            return {
+              entity: entity,
+              icons: icons,
+            };
+          })
+      );
     },
     {
       enabled:
@@ -189,7 +210,6 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
         handleClean();
         if (openDetailOnCreate && variables.class !== EntityEnums.Class.Value) {
           appendDetailId(variables.id);
-          setSelectedDetailId(variables.id);
         }
         if (variables.class === EntityEnums.Class.Territory) {
           queryClient.invalidateQueries("tree");
@@ -252,13 +272,43 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
     }
   };
 
+  const [showAddTerritoryModal, setShowAddTerritoryModal] = useState(false);
+  const [tempTemplateToInstantiate, setTempTemplateToInstantiate] = useState<
+    ITerritory | false
+  >(false);
+
+  const instantiateTerritory = async (
+    territoryToInst: ITerritory,
+    territoryParentId?: string
+  ): Promise<string | false> => {
+    return await InstTemplate(
+      territoryToInst,
+      localStorage.getItem("userrole") as UserEnums.Role,
+      territoryParentId
+    );
+  };
+
   const handleInstantiateTemplate = async (
     templateToDuplicate: IEntity | IStatement | ITerritory
   ) => {
-    const newEntityId = await InstTemplate(
-      templateToDuplicate,
-      localStorage.getItem("userrole") as UserEnums.Role
-    );
+    let newEntityId: string | false;
+    if (templateToDuplicate.class === EntityEnums.Class.Territory) {
+      if (territoryParentId) {
+        newEntityId = await instantiateTerritory(
+          templateToDuplicate as ITerritory,
+          territoryParentId
+        );
+      } else {
+        setTempTemplateToInstantiate(templateToDuplicate as ITerritory);
+        setShowAddTerritoryModal(true);
+        return;
+      }
+    } else {
+      newEntityId = await InstTemplate(
+        templateToDuplicate,
+        localStorage.getItem("userrole") as UserEnums.Role
+      );
+    }
     if (newEntityId) {
       onSelected(newEntityId);
       handleClean();
@@ -267,7 +317,9 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
         templateToDuplicate.class !== EntityEnums.Class.Value
       ) {
         appendDetailId(newEntityId);
-        setSelectedDetailId(newEntityId);
+      }
+      if (templateToDuplicate.class === EntityEnums.Class.Territory) {
+        queryClient.invalidateQueries("tree");
       }
     }
   };
@@ -305,11 +357,14 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
       !categoryTypes.includes(hoverredCategory) ||
       (disableTemplatesAccept && newHoverred.isTemplate) ||
       newHoverred.isDiscouraged ||
-      (newHoverred.isTemplate &&
-        newHoverred.entityClass === EntityEnums.Class.Territory &&
-        !territoryParentId) ||
       excludedActantIds.includes(newHoverred.id) ||
       excludedEntities.includes(newHoverred.entityClass) ||
+      // Is T or S template inside S template
+      ((newHoverred.entityClass === EntityEnums.Class.Territory ||
+        newHoverred.entityClass === EntityEnums.Class.Statement) &&
+        isInsideStatement &&
+        isInsideTemplate &&
+        newHoverred.isTemplate) ||
       disabled
     ) {
       setIsWrongDropCategory(true);
@@ -319,50 +374,73 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
   };
 
   return selectedCategory && allCategories && user ? (
-    <Suggester
-      isFetching={isFetchingStatement}
-      marginTop={false}
-      suggestions={suggestions || []}
-      placeholder={placeholder}
-      typed={typed} // input value
-      category={selectedCategory} // selected category
-      categories={allCategories} // all possible categories
-      suggestionListPosition={""} // todo not implemented yet
-      onCancel={() => {
-        handleClean();
-      }}
-      onType={(newType: string) => {
-        setTyped(newType);
-        onTyped && onTyped(newType);
-      }}
-      onChangeCategory={(option: ValueType<OptionTypeBase, any> | null) => {
-        setSelectedCategory(option);
-        onChangeCategory && onChangeCategory(option);
-      }}
-      onCreate={(newCreated: SuggesterItemToCreate) => {
-        handleCreate(newCreated);
-      }}
-      onPick={(newPicked: IEntity, instantiateTemplate?: boolean) => {
-        handlePick(newPicked, instantiateTemplate);
-      }}
-      onDrop={(newDropped: EntityDragItem, instantiateTemplate?: boolean) => {
-        if (!disabled) {
-          handleDropped(newDropped, instantiateTemplate);
-        }
-      }}
-      onHover={(newHoverred: EntityDragItem) => {
-        handleHoverred(newHoverred);
-      }}
-      isWrongDropCategory={isWrongDropCategory}
-      disableCreate={disableCreate}
-      disableButtons={disableButtons}
-      inputWidth={inputWidth}
-      isInsideTemplate={isInsideTemplate}
-      territoryParentId={territoryParentId}
-      userOptions={user.options}
-      autoFocus={autoFocus}
-      disabled={disabled}
-    />
+    <>
+      <Suggester
+        isFetching={isFetchingStatement}
+        marginTop={false}
+        suggestions={suggestions || []}
+        placeholder={placeholder}
+        typed={typed} // input value
+        category={selectedCategory} // selected category
+        categories={allCategories} // all possible categories
+        suggestionListPosition={""} // todo not implemented yet
+        onCancel={() => {
+          handleClean();
+        }}
+        onType={(newType: string) => {
+          setTyped(newType);
+          onTyped && onTyped(newType);
+        }}
+        onChangeCategory={(option: ValueType<OptionTypeBase, any> | null) => {
+          setSelectedCategory(option);
+          onChangeCategory && onChangeCategory(option);
+        }}
+        onCreate={(newCreated: SuggesterItemToCreate) => {
+          handleCreate(newCreated);
+        }}
+        onPick={(newPicked: IEntity, instantiateTemplate?: boolean) => {
+          handlePick(newPicked, instantiateTemplate);
+        }}
+        onDrop={(newDropped: EntityDragItem, instantiateTemplate?: boolean) => {
+          if (!disabled) {
+            handleDropped(newDropped, instantiateTemplate);
+          }
+        }}
+        onHover={(newHoverred: EntityDragItem) => {
+          handleHoverred(newHoverred);
+        }}
+        isWrongDropCategory={isWrongDropCategory}
+        disableCreate={disableCreate}
+        disableButtons={disableButtons}
+        inputWidth={inputWidth}
+        isInsideTemplate={isInsideTemplate}
+        territoryParentId={territoryParentId}
+        userOptions={user.options}
+        autoFocus={autoFocus}
+        disabled={disabled}
+      />
+      {showAddTerritoryModal && (
+        <AddTerritoryModal
+          onSubmit={async (territoryId: string) => {
+            setShowAddTerritoryModal(false);
+            const newEntityId = await instantiateTerritory(
+              tempTemplateToInstantiate as ITerritory,
+              territoryId
+            );
+            if (newEntityId) {
+              onSelected(newEntityId);
+              handleClean();
+              if (openDetailOnCreate) {
+                appendDetailId(newEntityId);
+              }
+              queryClient.invalidateQueries("tree");
+            }
+            setTempTemplateToInstantiate(false);
+          }}
+          onClose={() => setShowAddTerritoryModal(false)}
+        />
+      )}
+    </>
   ) : (
     <div />
   );

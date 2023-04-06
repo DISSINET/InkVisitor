@@ -188,10 +188,12 @@ export const StatementEditorActantTableRow: React.FC<
           categoryTypes={classEntitiesActant}
           openDetailOnCreate
           excludedEntities={excludedSuggesterEntities}
+          excludedActantIds={[statement.id]}
           isInsideTemplate={isInsideTemplate}
           territoryParentId={territoryParentId}
           territoryActants={territoryActants}
           placeholder={"add actant"}
+          isInsideStatement
         />
       )
     );

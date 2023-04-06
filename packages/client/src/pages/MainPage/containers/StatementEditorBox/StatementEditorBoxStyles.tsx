@@ -209,3 +209,8 @@ export const StyledEditorTemplateSection = styled.div`
     }
   }
 `;
+export const StyledMissingTerritory = styled.p`
+  color: ${({ theme }) => theme.color["warning"]};
+  margin-left: 0.5rem;
+  margin-bottom: 0.1rem;
+`;
