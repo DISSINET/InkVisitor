@@ -260,7 +260,7 @@ export const Suggester: React.FC<Suggester> = ({
             disableTyping
             suggester
             disabled={disabled}
-            autoFocus={autoFocus}
+            autoFocus={categories.length > 1 && autoFocus}
           />
           <TypeBar entityLetter={category.value} />
           <Input
@@ -280,6 +280,7 @@ export const Suggester: React.FC<Suggester> = ({
             onEnterPressFn={() => {
               handleEnterPress();
             }}
+            autoFocus={categories.length === 1 && autoFocus}
             disabled={disabled}
           />
           {typed.length > 0 && (

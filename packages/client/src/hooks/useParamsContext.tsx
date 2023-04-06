@@ -92,7 +92,12 @@ export const SearchParamsProvider = ({
     }
   );
 
+  useEffect(() => {
+    console.log(selectedDetailId);
+  }, [selectedDetailId]);
+
   const appendDetailId = (id: string) => {
+    console.log("here");
     const detailIdArray = getDetailIdArray();
     if (!detailIdArray.includes(id)) {
       const newDetailIdArray = [];

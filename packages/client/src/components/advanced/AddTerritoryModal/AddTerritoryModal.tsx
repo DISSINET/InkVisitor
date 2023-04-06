@@ -30,6 +30,7 @@ export const AddTerritoryModal: React.FC<AddTerritoryModal> = ({
         <ModalHeader title="Select parent territory" />
         <ModalContent>
           <EntitySuggester
+            autoFocus
             disableTemplatesAccept
             filterEditorRights
             inputWidth={96}
