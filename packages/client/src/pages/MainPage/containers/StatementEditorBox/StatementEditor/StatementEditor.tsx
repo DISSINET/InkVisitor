@@ -50,6 +50,7 @@ import {
   StyledEditorStatementInfoLabel,
   StyledEditorTemplateSection,
   StyledHeaderTagWrap,
+  StyledMissingTerritory,
   StyledTagsList,
   StyledTagsListItem,
 } from "./../StatementEditorBoxStyles";
@@ -546,18 +547,19 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                   />
                 </React.Fragment>
               ) : (
-                <div style={{ display: "flex", alignItems: "flex-end" }}>
-                  <AiOutlineWarning size={22} color={theme.color["warning"]} />
-                  <p
-                    style={{
-                      color: theme.color.warning,
-                      marginLeft: "0.5rem",
-                      marginBottom: "0.1rem",
-                    }}
-                  >
-                    {"missing territory"}
-                  </p>
-                </div>
+                <>
+                  {!isFetchingTerritory && (
+                    <div style={{ display: "flex", alignItems: "flex-end" }}>
+                      <AiOutlineWarning
+                        size={22}
+                        color={theme.color["warning"]}
+                      />
+                      <StyledMissingTerritory>
+                        {"missing territory"}
+                      </StyledMissingTerritory>
+                    </div>
+                  )}
+                </>
               )}
               <Loader size={20} show={isFetchingTerritory} />
             </StyledBreadcrumbWrap>
