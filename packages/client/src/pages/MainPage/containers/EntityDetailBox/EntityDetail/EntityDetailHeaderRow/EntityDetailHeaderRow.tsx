@@ -87,7 +87,9 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
       toast.info(`Entity instantiated from a template!`);
 
       if (entity.class === EntityEnums.Class.Statement) {
-        toast.warning(`Statement created without territory!`);
+        toast.warning(`Statement created without territory!`, {
+          autoClose: 5000,
+        });
       }
       if (entity.class === EntityEnums.Class.Territory) {
         queryClient.invalidateQueries("tree");
