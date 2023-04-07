@@ -29,7 +29,7 @@ export const Checkbox: React.FC<Checkbox> = ({
         <MdOutlineCheckBox
           size={size}
           color={theme.color.black}
-          style={{ cursor: "pointer", zIndex: 2 }}
+          style={{ cursor: "pointer" }}
           onClick={(e) => {
             e.stopPropagation();
             setChecked(false);
@@ -39,7 +39,7 @@ export const Checkbox: React.FC<Checkbox> = ({
         <MdOutlineCheckBoxOutlineBlank
           size={size}
           color={theme.color.black}
-          style={{ cursor: "pointer", zIndex: 2 }}
+          style={{ cursor: "pointer" }}
           onClick={(e) => {
             e.stopPropagation();
             setChecked(true);
