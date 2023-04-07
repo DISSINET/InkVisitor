@@ -31,6 +31,7 @@ import { LetterIcon } from "./basic/LetterIcon/LetterIcon";
 import { Tooltip } from "./basic/Tooltip/Tooltip";
 import { Dropzone } from "./basic/Dropzone/Dropzone";
 import { TemplateActionModal } from "./basic/TemplateActionModal/TemplateActionModal";
+import { ElvlButtonGroup } from "./basic/ElvlButtonGroup/ElvlButtonGroup";
 
 export {
   AttributeIcon,
@@ -41,6 +42,7 @@ export {
   Cloud,
   Checkbox,
   Dropzone,
+  ElvlButtonGroup,
   Header,
   Input,
   MultiInput,

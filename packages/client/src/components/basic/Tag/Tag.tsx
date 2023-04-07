@@ -38,6 +38,7 @@ interface TagProps {
   mode?: "selected" | "disabled" | "invalid" | false;
   borderStyle?: "solid" | "dashed" | "dotted";
   button?: ReactNode;
+  elvlButtonGroup?: ReactNode | false;
   invertedLabel?: boolean;
   showOnly?: "entity" | "label";
   fullWidth?: boolean;
@@ -69,6 +70,7 @@ export const Tag: React.FC<TagProps> = ({
   mode = false,
   borderStyle = "solid",
   button,
+  elvlButtonGroup,
   invertedLabel,
   showOnly,
   fullWidth = false,
@@ -207,6 +209,7 @@ export const Tag: React.FC<TagProps> = ({
         >
           {label}
         </StyledLabel>
+        {elvlButtonGroup && elvlButtonGroup}
         {button && renderButton()}
       </>
     );

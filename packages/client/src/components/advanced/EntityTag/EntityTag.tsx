@@ -1,7 +1,7 @@
 import { Placement } from "@popperjs/core";
 import { EntityEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
-import { Button, Tag } from "components";
+import { Button, ElvlButtonGroup, Tag } from "components";
 import { EntityTooltip } from "components/advanced";
 import React, { ReactNode, useState } from "react";
 import { FaUnlink } from "react-icons/fa";
@@ -34,6 +34,8 @@ interface EntityTag {
   lvl?: number;
   statementsCount?: number;
   isFavorited?: boolean;
+  elvlButtonGroup?: ReactNode;
+  onElvlChange?: (elvl: EntityEnums.Elvl) => void;
 
   unlinkButton?: UnlinkButton | false;
 }
@@ -57,6 +59,9 @@ export const EntityTag: React.FC<EntityTag> = ({
   lvl,
   statementsCount,
   isFavorited,
+
+  elvlButtonGroup = false,
+  onElvlChange,
 
   unlinkButton,
 }) => {
@@ -156,6 +161,13 @@ export const EntityTag: React.FC<EntityTag> = ({
             setButtonHovered(false);
             setTagHovered(false);
           }}
+          elvlButtonGroup={
+            elvlButtonGroup && (
+              <ElvlButtonGroup
+                onChange={(elvl) => onElvlChange && onElvlChange(elvl)}
+              />
+            )
+          }
         />
       </div>
     </>

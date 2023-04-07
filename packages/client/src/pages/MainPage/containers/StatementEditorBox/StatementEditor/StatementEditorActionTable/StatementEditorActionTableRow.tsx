@@ -1,6 +1,7 @@
 import { EntityEnums } from "@shared/enums";
 import { IProp, IResponseStatement } from "@shared/types";
-import { AttributeIcon, Button, ButtonGroup, Dropzone } from "components";
+import { excludedSuggesterEntities } from "Theme/constants";
+import { AttributeIcon, Button, ButtonGroup } from "components";
 import {
   EntityDropzone,
   EntitySuggester,
@@ -16,15 +17,14 @@ import {
   useDrag,
   useDrop,
 } from "react-dnd";
-import { FaGripVertical, FaPlus, FaTrashAlt, FaUnlink } from "react-icons/fa";
+import { FaGripVertical, FaPlus, FaTrashAlt } from "react-icons/fa";
 import { UseMutationResult } from "react-query";
 import { setDraggedActantRow } from "redux/features/rowDnd/draggedActantRowSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { excludedSuggesterEntities } from "Theme/constants";
 import {
+  DragItem,
   DraggedActantRowItem,
   DraggedPropRowCategory,
-  DragItem,
   FilteredActionObject,
   ItemTypes,
 } from "types";
