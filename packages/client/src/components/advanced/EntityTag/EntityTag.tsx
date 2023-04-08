@@ -34,8 +34,7 @@ interface EntityTag {
   lvl?: number;
   statementsCount?: number;
   isFavorited?: boolean;
-  elvlButtonGroup?: ReactNode;
-  onElvlChange?: (elvl: EntityEnums.Elvl) => void;
+  elvlButtonGroup?: ReactNode | false;
 
   unlinkButton?: UnlinkButton | false;
 }
@@ -61,7 +60,6 @@ export const EntityTag: React.FC<EntityTag> = ({
   isFavorited,
 
   elvlButtonGroup = false,
-  onElvlChange,
 
   unlinkButton,
 }) => {
@@ -161,13 +159,7 @@ export const EntityTag: React.FC<EntityTag> = ({
             setButtonHovered(false);
             setTagHovered(false);
           }}
-          elvlButtonGroup={
-            elvlButtonGroup && (
-              <ElvlButtonGroup
-                onChange={(elvl) => onElvlChange && onElvlChange(elvl)}
-              />
-            )
-          }
+          elvlButtonGroup={elvlButtonGroup}
         />
       </div>
     </>

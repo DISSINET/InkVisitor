@@ -6,7 +6,12 @@ import {
   IResponseStatement,
   IStatementActant,
 } from "@shared/types";
-import { AttributeIcon, Button, ButtonGroup } from "components";
+import {
+  AttributeIcon,
+  Button,
+  ButtonGroup,
+  ElvlButtonGroup,
+} from "components";
 import {
   AttributeButtonGroup,
   EntityDropzone,
@@ -173,6 +178,16 @@ export const StatementEditorActantTableRow: React.FC<
                   });
                 },
               }
+            }
+            elvlButtonGroup={
+              <ElvlButtonGroup
+                value={sActant.elvl}
+                onChange={(elvl) =>
+                  updateActant(sActant.id, {
+                    elvl: elvl,
+                  })
+                }
+              />
             }
           />
         </EntityDropzone>

@@ -12,14 +12,18 @@ const icons = {
   [EntityEnums.Elvl.Inferential]: <BiLinkExternal size={14} />,
 };
 interface ElvlButtonGroup {
+  value: EntityEnums.Elvl;
   onChange: (elvl: EntityEnums.Elvl) => void;
 }
-export const ElvlButtonGroup: React.FC<ElvlButtonGroup> = ({ onChange }) => {
+export const ElvlButtonGroup: React.FC<ElvlButtonGroup> = ({
+  value,
+  onChange,
+}) => {
   const [elvl, setElvl] = useState(EntityEnums.Elvl.Textual);
 
   useEffect(() => {
-    onChange(elvl);
-  }, [elvl]);
+    setElvl(value);
+  }, [value]);
 
   return (
     <div style={{ display: "flex" }}>
@@ -34,7 +38,7 @@ export const ElvlButtonGroup: React.FC<ElvlButtonGroup> = ({ onChange }) => {
             color={option.value === elvl ? "primary" : "greyer"}
             onClick={() => {
               if (option.value !== elvl) {
-                setElvl(option.value);
+                onChange(option.value);
               }
             }}
           />
