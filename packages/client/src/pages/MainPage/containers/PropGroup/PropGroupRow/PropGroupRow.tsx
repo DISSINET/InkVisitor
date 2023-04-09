@@ -1,6 +1,11 @@
 import { IEntity, IProp } from "@shared/types";
 import { excludedSuggesterEntities } from "Theme/constants";
-import { AttributeIcon, Button, ButtonGroup } from "components";
+import {
+  AttributeIcon,
+  Button,
+  ButtonGroup,
+  ElvlButtonGroup,
+} from "components";
 import {
   EntityDropzone,
   EntitySuggester,
@@ -209,6 +214,21 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
                       },
                     }
                   }
+                  elvlButtonGroup={
+                    !disabledAttributes.type?.includes("elvl") && (
+                      <ElvlButtonGroup
+                        value={prop.type.elvl}
+                        onChange={(elvl) =>
+                          updateProp(prop.id, {
+                            type: {
+                              ...prop.type,
+                              elvl: elvl,
+                            },
+                          })
+                        }
+                      />
+                    )
+                  }
                 />
               </EntityDropzone>
               <StyledPropButtonGroup>
@@ -281,6 +301,21 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
                         });
                       },
                     }
+                  }
+                  elvlButtonGroup={
+                    !disabledAttributes.value?.includes("elvl") && (
+                      <ElvlButtonGroup
+                        value={prop.value.elvl}
+                        onChange={(elvl) =>
+                          updateProp(prop.id, {
+                            value: {
+                              ...prop.value,
+                              elvl: elvl,
+                            },
+                          })
+                        }
+                      />
+                    )
                   }
                 />
               </EntityDropzone>
