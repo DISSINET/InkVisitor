@@ -19,7 +19,7 @@ export const ElvlButtonGroup: React.FC<ElvlButtonGroup> = ({
   value,
   onChange,
 }) => {
-  const [elvl, setElvl] = useState(EntityEnums.Elvl.Textual);
+  const [elvl, setElvl] = useState<EntityEnums.Elvl | false>(false);
 
   useEffect(() => {
     setElvl(value);

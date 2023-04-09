@@ -1,7 +1,12 @@
 import { EntityEnums } from "@shared/enums";
 import { IProp, IResponseStatement } from "@shared/types";
 import { excludedSuggesterEntities } from "Theme/constants";
-import { AttributeIcon, Button, ButtonGroup } from "components";
+import {
+  AttributeIcon,
+  Button,
+  ButtonGroup,
+  ElvlButtonGroup,
+} from "components";
 import {
   EntityDropzone,
   EntitySuggester,
@@ -146,6 +151,16 @@ export const StatementEditorActionTableRow: React.FC<
                 });
               },
             }
+          }
+          elvlButtonGroup={
+            <ElvlButtonGroup
+              value={sAction.elvl}
+              onChange={(elvl) =>
+                updateAction(sAction.id, {
+                  elvl: elvl,
+                })
+              }
+            />
           }
         />
       </EntityDropzone>
