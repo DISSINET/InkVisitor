@@ -1,7 +1,7 @@
 import { Placement } from "@popperjs/core";
 import { EntityEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
-import { Button, ElvlButtonGroup, Tag } from "components";
+import { Button, Tag } from "components";
 import { EntityTooltip } from "components/advanced";
 import React, { ReactNode, useState } from "react";
 import { FaUnlink } from "react-icons/fa";

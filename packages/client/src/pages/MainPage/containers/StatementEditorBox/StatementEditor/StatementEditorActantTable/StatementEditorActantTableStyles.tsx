@@ -19,7 +19,7 @@ export const StyledGrid = styled.div<StyledGrid>`
   grid-template-columns: ${({ theme, hasOrder, hasActant }) =>
     `${hasOrder ? theme.space[8] : theme.space[2]} minmax(${
       hasActant ? "7rem" : "14.5rem"
-    }, auto) auto auto auto auto`};
+    }, auto) auto auto auto`};
   width: fit-content;
   grid-auto-flow: row;
   padding-bottom: ${({ theme }) => theme.space[1]};

@@ -9,6 +9,7 @@ import { EntitySuggester } from "./EntitySuggester/EntitySuggester";
 import { EntityTag } from "./EntityTag/EntityTag";
 import { EntityTooltip } from "./EntityTooltip/EntityTooltip";
 import { ElvlButtonGroup } from "./IconButtonGroups/ElvlButtonGroup";
+import { MoodVariantButtonGroup } from "./IconButtonGroups/MoodVariantButtonGroup";
 import { JSONExplorer } from "./JSONExplorer/JSONExplorer";
 import { LoginModal, MemoizedLoginModal } from "./LoginModal/LoginModal";
 import { Menu } from "./Menu/Menu";
@@ -29,6 +30,7 @@ export {
   EntityTag,
   EntityTooltip,
   ElvlButtonGroup,
+  MoodVariantButtonGroup,
   JSONExplorer,
   LoginModal,
   MemoizedLoginModal,

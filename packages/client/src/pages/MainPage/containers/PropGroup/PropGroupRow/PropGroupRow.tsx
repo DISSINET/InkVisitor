@@ -6,6 +6,7 @@ import {
   EntityDropzone,
   EntitySuggester,
   EntityTag,
+  MoodVariantButtonGroup,
 } from "components/advanced";
 import { StyledPropButtonGroup } from "components/advanced/AttributeButtonGroup/AttributeButtonGroupStyles";
 import React, { useEffect, useRef, useState } from "react";
@@ -357,7 +358,18 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
         {/* mood */}
         <StyledPropLineColumn>mood</StyledPropLineColumn>
         {/* mood variant */}
-        <StyledPropLineColumn>moodVar.</StyledPropLineColumn>
+        <StyledPropLineColumn>
+          <MoodVariantButtonGroup
+            border
+            value={prop.moodvariant}
+            onChange={(moodvariant) =>
+              updateProp(prop.id, {
+                ...prop,
+                moodvariant: moodvariant,
+              })
+            }
+          />
+        </StyledPropLineColumn>
         {/* prop elvl */}
         <StyledPropLineColumn>
           <ElvlButtonGroup

@@ -7,6 +7,7 @@ import {
   EntityDropzone,
   EntitySuggester,
   EntityTag,
+  MoodVariantButtonGroup,
 } from "components/advanced";
 import { useSearchParams } from "hooks";
 import AttributesEditor from "pages/MainPage/containers/AttributesEditor/AttributesEditor";
@@ -325,7 +326,17 @@ export const StatementEditorActionTableRow: React.FC<
         )}
         <StyledGridColumn>{renderActionCell()}</StyledGridColumn>
         <StyledGridColumn>{"mood"}</StyledGridColumn>
-        <StyledGridColumn>{"moodVar"}</StyledGridColumn>
+        <StyledGridColumn>
+          <MoodVariantButtonGroup
+            border
+            onChange={(moodvariant) =>
+              updateAction(filteredAction.data.sAction.id, {
+                moodvariant: moodvariant,
+              })
+            }
+            value={filteredAction.data.sAction.moodvariant}
+          />
+        </StyledGridColumn>
         <StyledGridColumn>{renderButtonsCell()}</StyledGridColumn>
       </StyledGrid>
 

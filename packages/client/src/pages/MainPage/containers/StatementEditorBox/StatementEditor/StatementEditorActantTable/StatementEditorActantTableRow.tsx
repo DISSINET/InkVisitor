@@ -14,6 +14,7 @@ import {
   EntityDropzone,
   EntitySuggester,
   EntityTag,
+  MoodVariantButtonGroup,
 } from "components/advanced";
 import { useSearchParams } from "hooks";
 import React, { useCallback, useEffect, useRef, useState } from "react";
@@ -462,7 +463,6 @@ export const StatementEditorActantTableRow: React.FC<
         <StyledGridColumn>{renderActantCell()}</StyledGridColumn>
         <StyledGridColumn>{renderPositionCell()}</StyledGridColumn>
         <StyledGridColumn>{"mood"}</StyledGridColumn>
-        <StyledGridColumn>{"moodVar"}</StyledGridColumn>
         <StyledGridColumn>{renderAttributesCell()}</StyledGridColumn>
       </StyledGrid>
 
