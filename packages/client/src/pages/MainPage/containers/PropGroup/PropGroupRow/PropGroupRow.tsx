@@ -188,7 +188,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
                   updateProp(prop.id, {
                     type: {
                       ...prop.type,
-                      ...{ entityId: newSelectedId },
+                      entityId: newSelectedId,
                     },
                   });
                 }}
@@ -208,7 +208,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
                         updateProp(prop.id, {
                           type: {
                             ...prop.type,
-                            ...{ entityId: "" },
+                            entityId: "",
                           },
                         });
                       },
@@ -252,7 +252,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
                 updateProp(prop.id, {
                   type: {
                     ...prop.type,
-                    ...{ entityId: newSelectedId },
+                    entityId: newSelectedId,
                   },
                 });
               }}
@@ -276,7 +276,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
                   updateProp(prop.id, {
                     value: {
                       ...prop.type,
-                      ...{ entityId: newSelectedId },
+                      entityId: newSelectedId,
                     },
                   });
                 }}
@@ -296,7 +296,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
                         updateProp(prop.id, {
                           value: {
                             ...prop.value,
-                            ...{ entityId: "" },
+                            entityId: "",
                           },
                         });
                       },
@@ -341,7 +341,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
                 updateProp(prop.id, {
                   value: {
                     ...prop.type,
-                    ...{ entityId: newSelectedId },
+                    entityId: newSelectedId,
                   },
                 });
               }}
@@ -356,6 +356,24 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
           ) : (
             <StyledNoEntity>-</StyledNoEntity>
           )}
+        </StyledPropLineColumn>
+
+        {/* mood */}
+        <StyledPropLineColumn>mood</StyledPropLineColumn>
+        {/* mood variant */}
+        <StyledPropLineColumn>moodVar.</StyledPropLineColumn>
+        {/* prop elvl */}
+        <StyledPropLineColumn>
+          <ElvlButtonGroup
+            border
+            value={prop.elvl}
+            onChange={(elvl) =>
+              updateProp(prop.id, {
+                ...prop,
+                elvl: elvl,
+              })
+            }
+          />
         </StyledPropLineColumn>
 
         <StyledPropLineColumn>
