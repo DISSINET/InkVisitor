@@ -328,6 +328,8 @@ export const StatementEditorActionTableRow: React.FC<
           <StyledGridColumn />
         )}
         <StyledGridColumn>{renderActionCell()}</StyledGridColumn>
+        <StyledGridColumn>{"mood"}</StyledGridColumn>
+        <StyledGridColumn>{"moodVar"}</StyledGridColumn>
         <StyledGridColumn>{renderButtonsCell()}</StyledGridColumn>
       </StyledGrid>
 

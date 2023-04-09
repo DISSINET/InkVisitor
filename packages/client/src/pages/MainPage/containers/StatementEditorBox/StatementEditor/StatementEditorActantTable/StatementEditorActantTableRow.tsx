@@ -465,6 +465,8 @@ export const StatementEditorActantTableRow: React.FC<
         )}
         <StyledGridColumn>{renderActantCell()}</StyledGridColumn>
         <StyledGridColumn>{renderPositionCell()}</StyledGridColumn>
+        <StyledGridColumn>{"mood"}</StyledGridColumn>
+        <StyledGridColumn>{"moodVar"}</StyledGridColumn>
         <StyledGridColumn>{renderAttributesCell()}</StyledGridColumn>
       </StyledGrid>
 

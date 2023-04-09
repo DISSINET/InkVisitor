@@ -1,9 +1,9 @@
 import styled from "styled-components";
 
-interface StyledElvlWrapper {
+interface StyledWrapper {
   border?: boolean;
 }
-export const StyledElvlWrapper = styled.div<StyledElvlWrapper>`
+export const StyledWrapper = styled.div<StyledWrapper>`
   display: flex;
   border: ${({ theme, border }) =>
     border ? `${theme.borderWidth[1]} solid ${theme.color["grey"]}` : ""};
