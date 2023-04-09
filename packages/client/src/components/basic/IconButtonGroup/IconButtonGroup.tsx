@@ -3,35 +3,27 @@ import { StyledWrapper } from "./IconButtonGroupStyles";
 import { Button } from "components";
 import { EntityEnums } from "@shared/enums";
 
-type IconButtonGroupValue<
-  TValue extends
-    | EntityEnums.Elvl
-    | EntityEnums.Position
-    | EntityEnums.Mood
-    | EntityEnums.MoodVariant
-    | EntityEnums.Logic
-> = {
+type ValueTypes =
+  | EntityEnums.Elvl
+  | EntityEnums.Position
+  | EntityEnums.Mood
+  | EntityEnums.MoodVariant
+  | EntityEnums.Logic;
+
+type IconButtonGroup<TValue extends ValueTypes> = {
   border?: boolean;
-  // values: map() z dictionary.value coz by bylo ve wrapper komponente, ale potrebuju sem poslat i tak dictionary, kvuli labelu pro tooltip
-  values: TValue[];
+  options: { value: TValue; label: string; info?: string }[];
   onChange: (value: TValue) => void;
   value: TValue;
   icons: { [key in TValue]: JSX.Element };
 };
-export const IconButtonGroupValue = <
-  TValue extends
-    | EntityEnums.Elvl
-    | EntityEnums.Position
-    | EntityEnums.Mood
-    | EntityEnums.MoodVariant
-    | EntityEnums.Logic
->({
+export const IconButtonGroup = <TValue extends ValueTypes>({
   border,
-  values,
+  options,
   onChange,
   value,
   icons,
-}: IconButtonGroupValue<TValue>) => {
+}: IconButtonGroup<TValue>) => {
   const [localValue, setLocalValue] = useState<TValue | false>(false);
 
   useEffect(() => {
@@ -40,18 +32,18 @@ export const IconButtonGroupValue = <
 
   return (
     <StyledWrapper border={border}>
-      {values.map((value, key) => {
+      {options.map((option, key) => {
         return (
           <Button
             key={key}
-            icon={icons[value]}
-            // tooltipLabel={option.label}
+            icon={icons[option.value]}
+            tooltipLabel={option.label}
             noBorder
             inverted
-            color={value === localValue ? "primary" : "greyer"}
+            color={option.value === localValue ? "primary" : "greyer"}
             onClick={() => {
-              if (value !== localValue) {
-                onChange(value);
+              if (option.value !== localValue) {
+                onChange(option.value);
               }
             }}
           />

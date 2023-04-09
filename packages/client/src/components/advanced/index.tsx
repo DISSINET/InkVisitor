@@ -8,6 +8,7 @@ import { EntityDropzone } from "./EntityDropzone/EntityDropzone";
 import { EntitySuggester } from "./EntitySuggester/EntitySuggester";
 import { EntityTag } from "./EntityTag/EntityTag";
 import { EntityTooltip } from "./EntityTooltip/EntityTooltip";
+import { ElvlButtonGroup } from "./IconButtonGroups/ElvlButtonGroup";
 import { JSONExplorer } from "./JSONExplorer/JSONExplorer";
 import { LoginModal, MemoizedLoginModal } from "./LoginModal/LoginModal";
 import { Menu } from "./Menu/Menu";
@@ -27,6 +28,7 @@ export {
   EntitySuggester,
   EntityTag,
   EntityTooltip,
+  ElvlButtonGroup,
   JSONExplorer,
   LoginModal,
   MemoizedLoginModal,

@@ -1,12 +1,8 @@
 import { IEntity, IProp } from "@shared/types";
 import { excludedSuggesterEntities } from "Theme/constants";
+import { AttributeIcon, Button, ButtonGroup } from "components";
 import {
-  AttributeIcon,
-  Button,
-  ButtonGroup,
   ElvlButtonGroup,
-} from "components";
-import {
   EntityDropzone,
   EntitySuggester,
   EntityTag,
