@@ -19,6 +19,7 @@ import {
 import { dndHoverFn, isValidEntityClass } from "utils";
 import {
   StyledButtonWrapper,
+  StyledElvlWrapper,
   StyledEntityTag,
   StyledLabel,
   StyledTagWrapper,
@@ -153,6 +154,10 @@ export const Tag: React.FC<TagProps> = ({
     </StyledEntityTag>
   );
 
+  const renderElvl = () => (
+    <StyledElvlWrapper>{elvlButtonGroup}</StyledElvlWrapper>
+  );
+
   const renderButton = () => (
     <StyledButtonWrapper
       status={status}
@@ -209,7 +214,7 @@ export const Tag: React.FC<TagProps> = ({
         >
           {label}
         </StyledLabel>
-        {elvlButtonGroup && elvlButtonGroup}
+        {elvlButtonGroup && renderElvl()}
         {button && renderButton()}
       </>
     );
