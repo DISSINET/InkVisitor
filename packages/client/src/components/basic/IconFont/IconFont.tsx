@@ -7,6 +7,14 @@ interface IconFont {
   size?: number;
   color?: typeof Colors[number];
 }
-export const IconFont: React.FC<IconFont> = ({ letter, size, color }) => {
-  return <StyledIconFont>{letter}</StyledIconFont>;
+export const IconFont: React.FC<IconFont> = ({
+  letter,
+  size = 16,
+  color = "greyer",
+}) => {
+  return (
+    <StyledIconFont color={color} size={size}>
+      {letter}
+    </StyledIconFont>
+  );
 };
