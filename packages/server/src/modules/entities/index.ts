@@ -17,6 +17,7 @@ import {
   InternalServerError,
   ModelNotValidError,
   PermissionDeniedError,
+  InvalidDeleteError,
 } from "@shared/types/errors";
 import { Router } from "express";
 import { asyncRouteHandler } from "../index";
@@ -314,7 +315,7 @@ export default Router()
    */
   .delete(
     "/:entityId",
-    asyncRouteHandler<IResponseGeneric<string[]>>(async (request: IRequest) => {
+    asyncRouteHandler<IResponseGeneric>(async (request: IRequest) => {
       const entityId = request.params.entityId;
 
       if (!entityId) {
@@ -359,12 +360,9 @@ export default Router()
         if (data.length > 1) {
           spec + ` + ${data.length - 1} others`;
         }
-        return {
-          result: false,
-          error: "InvalidDeleteError",
-          message: `Cannot be deleted while linked to relations (${spec})`,
-          data: entityIds,
-        };
+        throw new InvalidDeleteError(
+          `Cannot be deleted while linked to relations (${spec})`
+        ).withData(entityIds);
       }
 
       // if bookmarks are linked to this entity, the bookmarks should be removed also

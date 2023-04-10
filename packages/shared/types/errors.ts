@@ -10,6 +10,7 @@ export class CustomError extends Error {
   public loggable: boolean = false; // errors could be logged into console as warn messages
   public log: string = ""; // same as first constructor argument - wont be thrown in realtime, but it will be printed as warning
   public title: string = ""; // represents the error class in readable form
+  public data: any; // arbitrary data
 
   // the following is commented, it should be inherited from base Error
   //public name: string = ""; // Stands for class name, replaces default 'Error' string from parent constructor
@@ -31,6 +32,11 @@ export class CustomError extends Error {
 
   shouldLog(): boolean {
     return this.loggable;
+  }
+
+  withData(data: any): CustomError {
+    this.data = data
+    return this;
   }
 }
 
