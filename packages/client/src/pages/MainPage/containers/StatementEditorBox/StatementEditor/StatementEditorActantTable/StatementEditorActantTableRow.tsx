@@ -15,6 +15,7 @@ import {
   EntitySuggester,
   EntityTag,
   MoodVariantButtonGroup,
+  PositionButtonGroup,
 } from "components/advanced";
 import { useSearchParams } from "hooks";
 import React, { useCallback, useEffect, useRef, useState } from "react";
@@ -214,62 +215,72 @@ export const StatementEditorActantTableRow: React.FC<
   const renderPositionCell = () => {
     const { sActant } = filteredActant.data;
     return (
-      <AttributeButtonGroup
-        disabled={!userCanEdit}
-        options={[
-          {
-            longValue: actantPositionDict[EntityEnums.Position.Subject].label,
-            shortValue: actantPositionDict[EntityEnums.Position.Subject].value,
-            onClick: () =>
-              updateActant(sActant.id, {
-                position:
-                  actantPositionDict[EntityEnums.Position.Subject].value,
-              }),
-            selected:
-              sActant.position ==
-              actantPositionDict[EntityEnums.Position.Subject].value,
-          },
-          {
-            longValue: actantPositionDict[EntityEnums.Position.Actant1].label,
-            shortValue: actantPositionDict[EntityEnums.Position.Actant1].value,
-            onClick: () =>
-              updateActant(sActant.id, {
-                position:
-                  actantPositionDict[EntityEnums.Position.Actant1].value,
-              }),
-            selected:
-              sActant.position ==
-              actantPositionDict[EntityEnums.Position.Actant1].value,
-          },
-          {
-            longValue: actantPositionDict[EntityEnums.Position.Actant2].label,
-            shortValue: actantPositionDict[EntityEnums.Position.Actant2].value,
-            onClick: () =>
-              updateActant(sActant.id, {
-                position:
-                  actantPositionDict[EntityEnums.Position.Actant2].value,
-              }),
-            selected:
-              sActant.position ==
-              actantPositionDict[EntityEnums.Position.Actant2].value,
-          },
-          {
-            longValue:
-              actantPositionDict[EntityEnums.Position.PseudoActant].label,
-            shortValue:
-              actantPositionDict[EntityEnums.Position.PseudoActant].value,
-            onClick: () =>
-              updateActant(sActant.id, {
-                position:
-                  actantPositionDict[EntityEnums.Position.PseudoActant].value,
-              }),
-            selected:
-              sActant.position ==
-              actantPositionDict[EntityEnums.Position.PseudoActant].value,
-          },
-        ]}
+      <PositionButtonGroup
+        border
+        value={sActant.position}
+        onChange={(position) =>
+          updateActant(sActant.id, {
+            position: position,
+          })
+        }
       />
     );
+    // <AttributeButtonGroup
+    //   disabled={!userCanEdit}
+    //   options={[
+    //     {
+    //       longValue: actantPositionDict[EntityEnums.Position.Subject].label,
+    //       shortValue: actantPositionDict[EntityEnums.Position.Subject].value,
+    //       onClick: () =>
+    //         updateActant(sActant.id, {
+    //           position:
+    //             actantPositionDict[EntityEnums.Position.Subject].value,
+    //         }),
+    //       selected:
+    //         sActant.position ==
+    //         actantPositionDict[EntityEnums.Position.Subject].value,
+    //     },
+    //     {
+    //       longValue: actantPositionDict[EntityEnums.Position.Actant1].label,
+    //       shortValue: actantPositionDict[EntityEnums.Position.Actant1].value,
+    //       onClick: () =>
+    //         updateActant(sActant.id, {
+    //           position:
+    //             actantPositionDict[EntityEnums.Position.Actant1].value,
+    //         }),
+    //       selected:
+    //         sActant.position ==
+    //         actantPositionDict[EntityEnums.Position.Actant1].value,
+    //     },
+    //     {
+    //       longValue: actantPositionDict[EntityEnums.Position.Actant2].label,
+    //       shortValue: actantPositionDict[EntityEnums.Position.Actant2].value,
+    //       onClick: () =>
+    //         updateActant(sActant.id, {
+    //           position:
+    //             actantPositionDict[EntityEnums.Position.Actant2].value,
+    //         }),
+    //       selected:
+    //         sActant.position ==
+    //         actantPositionDict[EntityEnums.Position.Actant2].value,
+    //     },
+    //     {
+    //       longValue:
+    //         actantPositionDict[EntityEnums.Position.PseudoActant].label,
+    //       shortValue:
+    //         actantPositionDict[EntityEnums.Position.PseudoActant].value,
+    //       onClick: () =>
+    //         updateActant(sActant.id, {
+    //           position:
+    //             actantPositionDict[EntityEnums.Position.PseudoActant].value,
+    //         }),
+    //       selected:
+    //         sActant.position ==
+    //         actantPositionDict[EntityEnums.Position.PseudoActant].value,
+    //     },
+    //   ]}
+    // />
+    // );
   };
 
   const [actantAttributesModalOpen, setActantAttributesModalOpen] =
