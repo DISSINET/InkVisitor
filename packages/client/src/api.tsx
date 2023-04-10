@@ -23,6 +23,7 @@ import { IRequestSearch } from "@shared/types/request-search";
 import axios, { AxiosError, AxiosInstance, AxiosResponse } from "axios";
 import React from "react";
 import { toast } from "react-toastify";
+import io, { Socket } from 'socket.io-client';
 
 type IFilterUsers = {
   label?: string;
@@ -51,11 +52,25 @@ class Api {
   private headers: object;
   private connection: AxiosInstance;
   private token: string;
+  private ws: Socket;
 
   constructor() {
     if (!process.env.APIURL) {
       throw new Error("APIURL is not set");
     }
+
+    this.ws = io(process.env.APIURL);
+    this.ws.on("connect", () => {
+      console.log("Socket.IO connected")
+    })
+    setInterval(() => {
+      const start = Date.now();
+
+      this.ws.emit("ping", () => {
+        const duration = Date.now() - start;
+        console.log(`WS ping: ${duration}`);
+      });
+    }, 1000);
 
     this.baseUrl = process.env.APIURL + "/api/v1";
     this.headers = {
