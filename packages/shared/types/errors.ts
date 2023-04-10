@@ -134,6 +134,42 @@ class EntityDoesNotExist extends CustomError {
 }
 
 /**
+ * EntityDoesExist will be thrown when attempting to restore the entity entry, which still does exist
+ */
+class EntityDoesExist extends CustomError {
+  public static code = 400;
+  public static title = "Entity still exists";
+  public static message = "Entity $1 does exist";
+
+  constructor(m: string, entityId?: string) {
+    super(m);
+    if (entityId) {
+      this.message = this.message.replace("$1", entityId);
+    } else {
+      this.message = this.message.replace(" $1 ", " ");
+    }
+  }
+}
+
+/**
+ * AuditDoesNotExist will be thrown when attempting to retrieve entry by id, which does not exist
+ */
+class AuditDoesNotExist extends CustomError {
+  public static code = 400;
+  public static title = "Missing audit";
+  public static message = "Audit $1 does not exist";
+
+  constructor(m: string, entityId?: string) {
+    super(m);
+    if (entityId) {
+      this.message = this.message.replace("$1", entityId);
+    } else {
+      this.message = this.message.replace(" $1 ", " ");
+    }
+  }
+}
+
+/**
  * AuditsDoNotExist will be thrown when attempting to access audits entries, which do not exist
  */
 class AuditsDoNotExist extends CustomError {
@@ -296,6 +332,8 @@ const allErrors: Record<string, any> = {
   UserDoesNotExits,
   UserNotActiveError,
   EntityDoesNotExist,
+  EntityDoesExist,
+  AuditDoesNotExist,
   AuditsDoNotExist,
   StatementDoesNotExits,
   PermissionDoesNotExits,
@@ -330,6 +368,8 @@ export {
   UserDoesNotExits,
   UserNotActiveError,
   EntityDoesNotExist,
+  EntityDoesExist,
+  AuditDoesNotExist,
   AuditsDoNotExist,
   StatementDoesNotExits,
   PermissionDoesNotExits,

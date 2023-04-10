@@ -2,7 +2,7 @@ import { mergeDeep } from "@common/functions";
 import { ResponseEntity, ResponseEntityDetail } from "@models/entity/response";
 import Audit from "@models/audit/audit";
 import { getEntityClass } from "@models/factory";
-import { findEntityById } from "@service/shorthands";
+import { findEntityById, getEntitiesDataByClass } from "@service/shorthands";
 import {
   IEntity,
   IResponseEntity,
@@ -18,12 +18,15 @@ import {
   ModelNotValidError,
   PermissionDeniedError,
   InvalidDeleteError,
+  AuditsDoNotExist,
+  AuditDoesNotExist,
+  EntityDoesExist,
 } from "@shared/types/errors";
 import { Router } from "express";
 import { asyncRouteHandler } from "../index";
 import { ResponseSearch } from "@models/entity/response-search";
 import { IRequestSearch } from "@shared/types/request-search";
-import { getAuditByEntityId } from "@modules/audits";
+import audits, { getAuditByEntityId } from "@modules/audits";
 import { ResponseTooltip } from "@models/entity/response-tooltip";
 import { IRequest } from "src/custom_typings/request";
 import Relation from "@models/relation/relation";
@@ -212,6 +215,78 @@ export default Router()
   )
   /**
    * @openapi
+   * /:entityId/restoration:
+   *   post:
+   *     description: Attempts to restore entity from audit log
+   *     tags:
+   *       - entities
+   *     parameters:
+   *       - in: query
+   *         name: fromAuditId
+   *         schema:
+   *           type: string
+   *         required: true
+   *         description: ID of the audit entry
+   *     responses:
+   *       200:
+   *         description: Returns generic response
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/IResponseGeneric"
+   */
+  .post(
+    "/:entityId/restoration",
+    asyncRouteHandler<IResponseGeneric>(async (request: IRequest) => {
+      const auditId = request.query.fromAuditId;
+      const entityId = request.params.entityId;
+
+      if (!auditId) {
+        throw new BadParams("audit has to be set");
+      }
+      if (!entityId) {
+        throw new BadParams("entityId has to be set");
+      }
+
+      await request.db.lock();
+
+      const audit = await Audit.findAuditById(request.db.connection, auditId);
+      if (!audit) {
+        throw new AuditDoesNotExist(AuditDoesNotExist.message, auditId);
+      }
+      if (audit.entityId !== entityId) {
+        throw new BadParams("bad entityId or auditId");
+      }
+
+      const existingEntity = await findEntityById(
+        request.db.connection,
+        entityId
+      );
+      if (existingEntity) {
+        throw new EntityDoesExist(EntityDoesExist.message);
+      }
+
+      const entity = getEntityClass(audit.changes);
+      if (!entity.isValid()) {
+        throw new ModelNotValidError("");
+      }
+
+      if (!entity.canBeCreatedByUser(request.getUserOrFail())) {
+        throw new PermissionDeniedError("entity cannot be saved");
+      }
+
+      const saved = await entity.save(request.db.connection);
+      if (!saved) {
+        throw new InternalServerError("cannot create entity");
+      }
+
+      return {
+        result: true,
+      };
+    })
+  )
+  /**
+   * @openapi
    * /entities/{entityId}:
    *   put:
    *     description: Update an existing entity entry
@@ -315,68 +390,76 @@ export default Router()
    */
   .delete(
     "/:entityId",
-    asyncRouteHandler<IResponseGeneric>(async (request: IRequest) => {
-      const entityId = request.params.entityId;
+    asyncRouteHandler<IResponseGeneric<string | null>>(
+      async (request: IRequest) => {
+        const entityId = request.params.entityId;
 
-      if (!entityId) {
-        throw new BadParams("entity id has to be set");
-      }
+        if (!entityId) {
+          throw new BadParams("entity id has to be set");
+        }
 
-      await request.db.lock();
+        await request.db.lock();
 
-      // entityId must be already in the db
-      const existingEntity = await findEntityById(request.db, entityId);
-      if (!existingEntity) {
-        throw new EntityDoesNotExist(
-          `entity with id ${entityId} does not exist`,
+        // entityId must be already in the db
+        const existingEntity = await findEntityById(request.db, entityId);
+        if (!existingEntity) {
+          throw new EntityDoesNotExist(
+            `entity with id ${entityId} does not exist`,
+            entityId
+          );
+        }
+
+        // get correct IDbModel implementation
+        const model = getEntityClass(existingEntity);
+        if (!model.canBeDeletedByUser(request.getUserOrFail())) {
+          throw new PermissionDeniedError(
+            "entity cannot be deleted by current user"
+          );
+        }
+
+        // if relations are linked to this entity, the delete should not be allowed
+        const linkedRelations = await Relation.findForEntity(
+          request.db.connection,
           entityId
         );
-      }
-
-      // get correct IDbModel implementation
-      const model = getEntityClass(existingEntity);
-      if (!model.canBeDeletedByUser(request.getUserOrFail())) {
-        throw new PermissionDeniedError(
-          "entity cannot be deleted by current user"
-        );
-      }
-
-      // if relations are linked to this entity, the delete should not be allowed
-      const linkedRelations = await Relation.findForEntity(
-        request.db.connection,
-        entityId
-      );
-      if (linkedRelations && linkedRelations.length) {
-        const entityIds = Array.from(
-          new Set(
-            linkedRelations.reduce<string[]>((acc, r) => {
-              acc = acc.concat(r.entityIds);
-              return acc;
-            }, [])
-          )
-        ).filter((id) => id != entityId);
-        const data = Array.from(new Set(linkedRelations.map((r) => r.id)));
-        const spec = data[0];
-        if (data.length > 1) {
-          spec + ` + ${data.length - 1} others`;
+        if (linkedRelations && linkedRelations.length) {
+          const entityIds = Array.from(
+            new Set(
+              linkedRelations.reduce<string[]>((acc, r) => {
+                acc = acc.concat(r.entityIds);
+                return acc;
+              }, [])
+            )
+          ).filter((id) => id != entityId);
+          const data = Array.from(new Set(linkedRelations.map((r) => r.id)));
+          const spec = data[0];
+          if (data.length > 1) {
+            spec + ` + ${data.length - 1} others`;
+          }
+          throw new InvalidDeleteError(
+            `Cannot be deleted while linked to relations (${spec})`
+          ).withData(entityIds);
         }
-        throw new InvalidDeleteError(
-          `Cannot be deleted while linked to relations (${spec})`
-        ).withData(entityIds);
-      }
 
-      // if bookmarks are linked to this entity, the bookmarks should be removed also
-      await User.removeBookmarksForEntity(request.db.connection, entityId);
+        // if bookmarks are linked to this entity, the bookmarks should be removed also
+        await User.removeBookmarksForEntity(request.db.connection, entityId);
 
-      const result = await model.delete(request.db.connection);
-      if (result.deleted === 1) {
-        return {
-          result: true,
-        };
-      } else {
-        throw new InternalServerError(`cannot delete entity ${entityId}`);
+        const lastAudit = await Audit.getLastForEntity(
+          request.db.connection,
+          entityId
+        );
+
+        const result = await model.delete(request.db.connection);
+        if (result.deleted === 1) {
+          return {
+            result: true,
+            data: lastAudit?.id,
+          };
+        } else {
+          throw new InternalServerError(`cannot delete entity ${entityId}`);
+        }
       }
-    })
+    )
   )
   /**
    * @openapi
