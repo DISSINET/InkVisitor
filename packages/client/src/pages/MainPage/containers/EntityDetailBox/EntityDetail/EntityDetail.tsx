@@ -276,7 +276,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
   const deleteEntityMutation = useMutation(
     (entityId: string) => api.entityDelete(entityId),
     {
-      onSuccess: async (data, entityId) => {
+      onSuccess: async (response, entityId) => {
         toast.info(`Entity removed!`);
 
         // hide selected territory if T removed
@@ -299,6 +299,14 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
           setStatementId("");
         } else {
           queryClient.invalidateQueries("statement");
+        }
+
+        if (response) {
+          toast.info("Click here to restore the entity", {
+            autoClose: 6000,
+            pauseOnHover: true,
+            onClick: api.entityRestore.bind(api, entityId, response.data.data)
+          });
         }
 
         queryClient.invalidateQueries("tree");

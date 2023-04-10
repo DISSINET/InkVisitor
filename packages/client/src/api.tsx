@@ -389,6 +389,18 @@ class Api {
     }
   }
 
+  async entityRestore(
+    entityId: string,
+    auditId: string
+  ): Promise<AxiosResponse<IResponseGeneric>> {
+    try {
+      const response = await this.connection.post(`/entities/${entityId}?fromAudit=${auditId}`);
+      return response;
+    } catch (err: any | AxiosError) {
+      throw { ...err.response.data };
+    }
+  }
+
   /**
    * Detail
    * Detail container
