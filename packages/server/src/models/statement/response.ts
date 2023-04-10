@@ -1,20 +1,29 @@
-import { StatementEnums, UserEnums } from "@shared/enums";
+import { EntityEnums, StatementEnums, UserEnums } from "@shared/enums";
 import { IEntity, IProp, IResponseStatement, IStatement } from "@shared/types";
-import { EntityOrder, OrderType, PropOrder } from "@shared/types/response-statement";
+import {
+  EntityOrder,
+  IWarning,
+  OrderType,
+  PropOrder,
+} from "@shared/types/response-statement";
+
+import { WarningTypeEnums } from "@shared/enums";
 import { Connection } from "rethinkdb-ts";
 import { IRequest } from "src/custom_typings/request";
 import Statement from "./statement";
 import Entity from "../entity/entity";
 
 export class ResponseStatement extends Statement implements IResponseStatement {
-  entities: { [key: string]: IEntity; };
+  entities: { [key: string]: IEntity };
   elementsOrders: OrderType[];
   right: UserEnums.RoleMode = UserEnums.RoleMode.Read;
+  warnings: IWarning[];
 
   constructor(entity: IStatement) {
     super(entity);
     this.entities = {};
     this.elementsOrders = [];
+    this.warnings = [];
   }
 
   async prepare(req: IRequest) {
@@ -22,6 +31,107 @@ export class ResponseStatement extends Statement implements IResponseStatement {
     const entities = await this.getEntities(req.db.connection as Connection);
     this.entities = Object.assign({}, ...entities.map((x) => ({ [x.id]: x })));
     this.elementsOrders = this.prepareElementsOrders();
+    this.warnings = this.getWarnings();
+  }
+
+  /**
+   * get a list of all warnings
+   */
+  getWarnings(): IWarning[] {
+    const warnings: IWarning[] = [];
+
+    /**
+     * Check allowed entity classes for subject position based on action valencies
+     */
+    const subjectETypes: EntityEnums.Class[] = [];
+    this.data.actions
+      .map((a) => a.actionId)
+      .forEach((aid) => subjectETypes.push(this.entities[aid].data.entities.s));
+
+    this.data.actants
+      .filter((a) => a.position === EntityEnums.Position.Subject)
+      .forEach((a) => {
+        const entity = this.entities[a.entityId];
+        if (entity) {
+          if (!subjectETypes.includes(entity.class)) {
+            warnings.push({
+              type: WarningTypeEnums.SValency,
+              message: "",
+              origin: this.id,
+              position: {
+                section: "editor.subject",
+                entityId: a.entityId,
+                actantId: a.id,
+              },
+            });
+          }
+        }
+      });
+
+    /**
+     * Check allowed entity classes for subject / actant1 / actant2 position based on action valencies
+     */
+
+    const checkValencyClassesForPosition = (
+      warnings: IWarning[],
+      position: EntityEnums.Position,
+      warningType: WarningTypeEnums
+    ): void => {
+      const allowedEntityClasses: EntityEnums.ExtendedClass[] = [];
+
+      this.data.actions
+        .map((a) => a.actionId)
+        .forEach((aid) => {
+          const actionAllowedEntityClasses =
+            this.entities[aid].data.entities[position];
+          actionAllowedEntityClasses.forEach(
+            (actionAllowedEntityClass: EntityEnums.ExtendedClass) => {
+              if (!allowedEntityClasses.includes(actionAllowedEntityClass))
+                allowedEntityClasses.push(actionAllowedEntityClass);
+            }
+          );
+        });
+
+      this.data.actants
+        .filter((a) => a.position === position)
+        .forEach((a) => {
+          const entity = this.entities[a.entityId];
+          if (entity) {
+            if (!allowedEntityClasses.includes(entity.class)) {
+              warnings.push({
+                type: warningType,
+                message: "",
+                origin: this.id,
+                position: {
+                  section: `editor.${position}`,
+                  entityId: a.entityId,
+                  actantId: a.id,
+                },
+              });
+            }
+          }
+        });
+    };
+
+    checkValencyClassesForPosition(
+      warnings,
+      EntityEnums.Position.Subject,
+      WarningTypeEnums.SValency
+    );
+    checkValencyClassesForPosition(
+      warnings,
+      EntityEnums.Position.Actant1,
+      WarningTypeEnums.A1Valency
+    );
+    checkValencyClassesForPosition(
+      warnings,
+      EntityEnums.Position.Actant2,
+      WarningTypeEnums.A2Valency
+    );
+
+    console.log(warnings);
+
+    return warnings;
   }
 
   /**
@@ -60,7 +170,8 @@ export class ResponseStatement extends Statement implements IResponseStatement {
           propTypeId: prop.type.entityId,
           originId: action.actionId,
           elementId: prop.id,
-          order: prop.statementOrder !== undefined ? prop.statementOrder : false,
+          order:
+            prop.statementOrder !== undefined ? prop.statementOrder : false,
         });
       });
     }
@@ -71,7 +182,7 @@ export class ResponseStatement extends Statement implements IResponseStatement {
         type: StatementEnums.ElementType.Actant,
         entityId: actant.entityId,
         elementId: actant.id,
-        order: actant.statementOrder
+        order: actant.statementOrder,
       });
 
       // statement.actants.props
@@ -82,7 +193,8 @@ export class ResponseStatement extends Statement implements IResponseStatement {
           propTypeId: prop.type.entityId,
           originId: actant.entityId,
           elementId: prop.id,
-          order: prop.statementOrder !== undefined ? prop.statementOrder : false,
+          order:
+            prop.statementOrder !== undefined ? prop.statementOrder : false,
         });
       });
 
@@ -93,7 +205,7 @@ export class ResponseStatement extends Statement implements IResponseStatement {
           entityId: classification.entityId,
           originId: actant.entityId,
           elementId: classification.id,
-          order: classification.statementOrder
+          order: classification.statementOrder,
         });
       }
 
@@ -104,7 +216,7 @@ export class ResponseStatement extends Statement implements IResponseStatement {
           entityId: identification.entityId,
           originId: actant.entityId,
           elementId: identification.id,
-          order: identification.statementOrder
+          order: identification.statementOrder,
         });
       }
     }
@@ -115,14 +227,20 @@ export class ResponseStatement extends Statement implements IResponseStatement {
   /**
    * Sorts the list of sortable elements for elementsOrders field.
    * Empty (false) values would be pushed to the end of the list.
-   * @param unsorted 
-   * @returns 
+   * @param unsorted
+   * @returns
    */
   public static sortListOfStatementItems(unsorted: OrderType[]): OrderType[] {
     return unsorted.sort((a, b) => {
-      if (b.order === a.order && a.order === false) { return 0; };
-      if (b.order === false) { return -Infinity; };
-      if (a.order === false) { return Infinity; };
+      if (b.order === a.order && a.order === false) {
+        return 0;
+      }
+      if (b.order === false) {
+        return -Infinity;
+      }
+      if (a.order === false) {
+        return Infinity;
+      }
       return a.order - b.order;
     });
   }
