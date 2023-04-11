@@ -57,7 +57,12 @@ interface StatementListTable {
   entities: { [key: string]: IEntity };
   right: UserEnums.RoleMode;
 
-  duplicateStatement: (statementToDuplicate: IResponseStatement) => void;
+  cloneStatementMutation: UseMutationResult<
+    AxiosResponse<IResponseGeneric<any>>,
+    unknown,
+    string,
+    unknown
+  >;
   setStatementToDelete: React.Dispatch<
     React.SetStateAction<IStatement | undefined>
   >;
@@ -74,7 +79,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
   entities,
   right,
 
-  duplicateStatement,
+  cloneStatementMutation,
   setStatementToDelete,
   setShowSubmit,
   addStatementAtCertainIndex,
@@ -373,7 +378,9 @@ export const StatementListTable: React.FC<StatementListTable> = ({
                       color="warning"
                       tooltipLabel="duplicate"
                       onClick={() => {
-                        duplicateStatement(row.original as IResponseStatement);
+                        cloneStatementMutation.mutate(
+                          (row.original as IResponseStatement).id
+                        );
                       }}
                     />,
                     <Button
