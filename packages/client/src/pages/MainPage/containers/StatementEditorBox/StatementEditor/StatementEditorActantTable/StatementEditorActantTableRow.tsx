@@ -49,6 +49,7 @@ import {
   StyledRow,
   StyledTagWrapper,
 } from "./StatementEditorActantTableStyles";
+import { TbSettingsFilled, TbSettingsAutomation } from "react-icons/tb";
 
 interface StatementEditorActantTableRow {
   filteredActant: FilteredActantObject;
@@ -395,6 +396,8 @@ export const StatementEditorActantTableRow: React.FC<
     [statement]
   );
 
+  const [isExpanded, setIsExpanded] = useState(false);
+
   const { classifications, identifications } = filteredActant.data.sActant;
 
   return (
@@ -419,8 +422,30 @@ export const StatementEditorActantTableRow: React.FC<
         <StyledGridColumn>{renderPositionCell()}</StyledGridColumn>
         <StyledGridColumn>{"mood"}</StyledGridColumn>
         <StyledGridColumn>{renderAttributesCell()}</StyledGridColumn>
+        <StyledGridColumn>
+          <Button
+            inverted
+            onClick={() => setIsExpanded(!isExpanded)}
+            icon={
+              isExpanded ? (
+                <TbSettingsFilled size={16} />
+              ) : (
+                <TbSettingsAutomation
+                  size={16}
+                  style={{ transform: "rotate(90deg)" }}
+                />
+              )
+            }
+          />
+        </StyledGridColumn>
       </StyledGrid>
 
+      {/* Expanded Row */}
+      {isExpanded && (
+        <div style={{ backgroundColor: "hotpink" }}>expanded actant row</div>
+      )}
+
+      {/* Prop group */}
       {!(
         draggedActantRow.category &&
         draggedActantRow.category === DraggedPropRowCategory.ACTANT
@@ -431,11 +456,13 @@ export const StatementEditorActantTableRow: React.FC<
           DraggedPropRowCategory.ACTANT
         )}
 
+      {/* CI */}
       {!(
         draggedActantRow.category &&
         draggedActantRow.category === DraggedPropRowCategory.ACTANT
       ) && (
         <>
+          {/* Classifications */}
           {classifications.length > 0 && (
             <StyledCI>
               <StyledCIHeading>Classifications:</StyledCIHeading>
@@ -457,6 +484,8 @@ export const StatementEditorActantTableRow: React.FC<
                 ))}
             </StyledCI>
           )}
+
+          {/* Identifications */}
           {identifications.length > 0 && (
             <StyledCI>
               <StyledCIHeading>Identifications:</StyledCIHeading>

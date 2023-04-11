@@ -37,6 +37,7 @@ import {
 } from "./StatementEditorActionTableStyles";
 import { moodDict } from "@shared/dictionaries";
 import { allEntities } from "@shared/dictionaries/entity";
+import { TbSettingsAutomation, TbSettingsFilled } from "react-icons/tb";
 
 interface StatementEditorActionTableRow {
   filteredAction: FilteredActionObject;
@@ -316,6 +317,8 @@ export const StatementEditorActionTableRow: React.FC<
     [statement]
   );
 
+  const [isExpanded, setIsExpanded] = useState(false);
+
   return (
     <React.Fragment key={index}>
       <StyledGrid ref={dropRef} style={{ opacity }} hasOrder={hasOrder}>
@@ -360,7 +363,27 @@ export const StatementEditorActionTableRow: React.FC<
           />
         </StyledGridColumn>
         <StyledGridColumn>{renderButtonsCell()}</StyledGridColumn>
+        <StyledGridColumn>
+          <Button
+            inverted
+            onClick={() => setIsExpanded(!isExpanded)}
+            icon={
+              isExpanded ? (
+                <TbSettingsFilled size={16} />
+              ) : (
+                <TbSettingsAutomation
+                  size={16}
+                  style={{ transform: "rotate(90deg)" }}
+                />
+              )
+            }
+          />
+        </StyledGridColumn>
       </StyledGrid>
+
+      {isExpanded && (
+        <div style={{ backgroundColor: "hotpink" }}>expanded action row</div>
+      )}
 
       {!(
         draggedActantRow.category &&

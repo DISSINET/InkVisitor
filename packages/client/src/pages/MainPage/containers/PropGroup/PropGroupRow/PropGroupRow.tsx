@@ -529,7 +529,9 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
       >
         {renderPropRow()}
         {isExpanded && (
-          <div style={{ backgroundColor: "hotpink" }}>expanded row</div>
+          <div style={{ backgroundColor: "hotpink" }}>
+            expanded PropGroup row
+          </div>
         )}
       </div>
     </>
