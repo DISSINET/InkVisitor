@@ -10,6 +10,7 @@ import {
 } from "@shared/dictionaries";
 import { EntityEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
+import { excludedSuggesterEntities } from "Theme/constants";
 import {
   Button,
   ButtonGroup,
@@ -18,13 +19,10 @@ import {
   ModalContent,
   ModalFooter,
   ModalHeader,
-  Tooltip,
 } from "components";
 import { EntitySuggester, EntityTag } from "components/advanced";
 import React, { useMemo, useState } from "react";
-import { FaUnlink } from "react-icons/fa";
 import { MdSettings } from "react-icons/md";
-import { excludedSuggesterEntities } from "Theme/constants";
 import { AttributeData, EntityColors, PropAttributeName } from "types";
 import { isValidEntityClass } from "utils";
 import {

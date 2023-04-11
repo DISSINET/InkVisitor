@@ -3,10 +3,10 @@ import { StyledWrapper } from "./IconButtonGroupStyles";
 import { Button } from "components";
 import { EntityEnums } from "@shared/enums";
 
+// Possible types for values - choosed in interface when using component
 type ValueTypes =
   | EntityEnums.Elvl
   | EntityEnums.Position
-  | EntityEnums.Mood
   | EntityEnums.MoodVariant
   | EntityEnums.Logic;
 

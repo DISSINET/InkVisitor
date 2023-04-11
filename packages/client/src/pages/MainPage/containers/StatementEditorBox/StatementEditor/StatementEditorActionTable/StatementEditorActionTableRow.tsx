@@ -1,7 +1,7 @@
 import { EntityEnums } from "@shared/enums";
 import { IProp, IResponseStatement } from "@shared/types";
 import { excludedSuggesterEntities } from "Theme/constants";
-import { AttributeIcon, Button, ButtonGroup } from "components";
+import { AttributeIcon, Button, ButtonGroup, Dropdown } from "components";
 import {
   ElvlButtonGroup,
   EntityDropzone,
@@ -35,6 +35,8 @@ import {
   StyledGrid,
   StyledGridColumn,
 } from "./StatementEditorActionTableStyles";
+import { moodDict } from "@shared/dictionaries";
+import { allEntities } from "@shared/dictionaries/entity";
 
 interface StatementEditorActionTableRow {
   filteredAction: FilteredActionObject;
@@ -325,7 +327,27 @@ export const StatementEditorActionTableRow: React.FC<
           <StyledGridColumn />
         )}
         <StyledGridColumn>{renderActionCell()}</StyledGridColumn>
-        <StyledGridColumn>{"mood"}</StyledGridColumn>
+        <StyledGridColumn>
+          {
+            <Dropdown
+              width={100}
+              isMulti
+              // disabled={disabled}
+              placeholder="mood"
+              options={moodDict}
+              value={[allEntities]
+                .concat(moodDict)
+                .filter((i: any) =>
+                  filteredAction.data.sAction.mood.includes(i.value)
+                )}
+              onChange={(newValue: any) => {
+                updateAction(filteredAction.data.sAction.id, {
+                  mood: newValue ? newValue.map((v: any) => v.value) : [],
+                });
+              }}
+            />
+          }
+        </StyledGridColumn>
         <StyledGridColumn>
           <MoodVariantButtonGroup
             border
