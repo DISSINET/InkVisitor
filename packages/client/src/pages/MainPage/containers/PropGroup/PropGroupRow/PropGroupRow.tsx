@@ -356,32 +356,38 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
         </StyledPropLineColumn>
 
         {/* mood */}
-        <StyledPropLineColumn>mood</StyledPropLineColumn>
+        <StyledPropLineColumn>
+          {!disabledAttributes.statement?.includes("mood") && "mood"}
+        </StyledPropLineColumn>
         {/* mood variant */}
         <StyledPropLineColumn>
-          <MoodVariantButtonGroup
-            border
-            value={prop.moodvariant}
-            onChange={(moodvariant) =>
-              updateProp(prop.id, {
-                ...prop,
-                moodvariant: moodvariant,
-              })
-            }
-          />
+          {!disabledAttributes.statement?.includes("moodvariant") && (
+            <MoodVariantButtonGroup
+              border
+              value={prop.moodvariant}
+              onChange={(moodvariant) =>
+                updateProp(prop.id, {
+                  ...prop,
+                  moodvariant: moodvariant,
+                })
+              }
+            />
+          )}
         </StyledPropLineColumn>
         {/* prop elvl */}
         <StyledPropLineColumn>
-          <ElvlButtonGroup
-            border
-            value={prop.elvl}
-            onChange={(elvl) =>
-              updateProp(prop.id, {
-                ...prop,
-                elvl: elvl,
-              })
-            }
-          />
+          {!disabledAttributes.statement?.includes("elvl") && (
+            <ElvlButtonGroup
+              border
+              value={prop.elvl}
+              onChange={(elvl) =>
+                updateProp(prop.id, {
+                  ...prop,
+                  elvl: elvl,
+                })
+              }
+            />
+          )}
         </StyledPropLineColumn>
 
         <StyledPropLineColumn>

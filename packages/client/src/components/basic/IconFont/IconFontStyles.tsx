@@ -1,5 +1,4 @@
 import styled from "styled-components";
-import { Colors } from "types";
 
 export const StyledIconFont = styled.div`
   display: flex;
