@@ -1,20 +1,16 @@
 import React from "react";
-import { Colors } from "types";
-import { StyledIconFont } from "./IconFontStyles";
+import { FaSquareFull } from "react-icons/fa";
+import { StyledIconFont, StyledText } from "./IconFontStyles";
 
 interface IconFont {
   letter: string;
   size?: number;
-  color?: typeof Colors[number];
 }
-export const IconFont: React.FC<IconFont> = ({
-  letter,
-  size = 16,
-  color = "greyer",
-}) => {
+export const IconFont: React.FC<IconFont> = ({ letter, size = 16 }) => {
   return (
-    <StyledIconFont color={color} size={size}>
-      {letter}
+    <StyledIconFont>
+      <FaSquareFull size={size} />
+      <StyledText>{letter}</StyledText>
     </StyledIconFont>
   );
 };
