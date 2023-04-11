@@ -364,10 +364,12 @@ class Api {
   }
 
   async entityClone(
-    originalId: string,
+    originalId: string
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
-      const response = await this.connection.post(`/entities/${originalId}/clone`);
+      const response = await this.connection.post(
+        `/entities/${originalId}/clone`
+      );
       return response;
     } catch (err: any | AxiosError) {
       console.log(err);

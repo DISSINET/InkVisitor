@@ -59,6 +59,23 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
     }
   );
 
+  const cloneEntityMutation = useMutation(
+    async (entityId: string) => await api.entityClone(entityId),
+    {
+      onSuccess: (data, variables) => {
+        appendDetailId(data.data.data);
+        toast.info(`Entity duplicated!`);
+        queryClient.invalidateQueries("templates");
+        // if (data.class === EntityEnums.Class.Territory) {
+        //   queryClient.invalidateQueries("tree");
+        // }
+      },
+      onError: () => {
+        toast.error(`Error: Entity not duplicated!`);
+      },
+    }
+  );
+
   const duplicateEntity = (entityToDuplicate: IEntity) => {
     const newEntity = DEntity(
       entityToDuplicate,
@@ -140,7 +157,8 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
               inverted
               onClick={() => {
                 if (entity.class !== EntityEnums.Class.Statement) {
-                  duplicateEntity(entity);
+                  // duplicateEntity(entity);
+                  cloneEntityMutation.mutate(entity.id);
                 }
               }}
             />
