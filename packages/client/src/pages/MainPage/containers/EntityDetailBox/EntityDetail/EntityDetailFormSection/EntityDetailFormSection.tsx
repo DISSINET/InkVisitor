@@ -198,6 +198,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                   if (newValue !== entity.detail)
                     updateEntityMutation.mutate({ detail: newValue });
                 }}
+                shortTextarea
               />
             </StyledDetailContentRowValue>
           </StyledDetailContentRow>

@@ -60,6 +60,7 @@ export const MultiInput: React.FC<MultiInput> = ({
               }}
               width={width}
               value={value}
+              shortTextarea
             />
             <div style={{ display: "flex" }}>
               {!disabled && (
