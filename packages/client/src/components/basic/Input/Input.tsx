@@ -29,6 +29,8 @@ interface Input {
   autoFocus?: boolean;
   disabled?: boolean;
   noBorder?: boolean;
+  // for 3 rows textarea
+  shortTextarea?: boolean;
 }
 
 export const Input: React.FC<Input> = ({
@@ -51,6 +53,8 @@ export const Input: React.FC<Input> = ({
   noBorder = false,
   onFocus = () => {},
   onBlur = () => {},
+
+  shortTextarea = false,
 }) => {
   const [displayValue, setDisplayValue] = useState(value);
   useEffect(() => {
@@ -131,6 +135,7 @@ export const Input: React.FC<Input> = ({
           inverted={inverted}
           noBorder={noBorder}
           suggester={suggester}
+          shortTextarea={shortTextarea}
         />
       )}
       {type === "select" && options && (
