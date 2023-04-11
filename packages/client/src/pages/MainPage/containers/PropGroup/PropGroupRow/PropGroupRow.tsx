@@ -37,6 +37,7 @@ import {
   StyledNoEntity,
   StyledPropLineColumn,
 } from "../PropGroupStyles";
+import { TbSettingsAutomation, TbSettingsFilled } from "react-icons/tb";
 
 interface PropGroupRow {
   prop: IProp;
@@ -157,6 +158,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
   }, [isDragging]);
 
   const [modalOpen, setModalOpen] = useState<boolean>(false);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const renderPropRow = () => {
     return (
@@ -496,6 +498,22 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
             )}
           </ButtonGroup>
         </StyledPropLineColumn>
+        <StyledPropLineColumn>
+          <Button
+            inverted
+            onClick={() => setIsExpanded(!isExpanded)}
+            icon={
+              isExpanded ? (
+                <TbSettingsFilled size={16} />
+              ) : (
+                <TbSettingsAutomation
+                  size={16}
+                  style={{ transform: "rotate(90deg)" }}
+                />
+              )
+            }
+          />
+        </StyledPropLineColumn>
       </StyledGrid>
     );
   };
@@ -510,6 +528,9 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
         style={{ opacity: opacity }}
       >
         {renderPropRow()}
+        {isExpanded && (
+          <div style={{ backgroundColor: "hotpink" }}>expanded row</div>
+        )}
       </div>
     </>
   );
