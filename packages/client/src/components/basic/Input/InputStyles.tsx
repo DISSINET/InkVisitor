@@ -95,10 +95,8 @@ export const StyledSelectReadonly = styled.input<IValueStyle>`
     outline: 0;
   }
 `;
-interface StyledTextarea extends IValueStyle {
-  shortTextarea: boolean;
-}
-export const StyledTextArea = styled.textarea<StyledTextarea>`
+
+export const StyledTextArea = styled.textarea<IValueStyle>`
   font-family: inherit;
   text-align: left;
   color: ${({ inverted, theme }) =>
@@ -115,7 +113,6 @@ export const StyledTextArea = styled.textarea<StyledTextarea>`
     disabled ? theme.background["stripes"] : ""};
   cursor: ${({ disabled }) => (disabled ? "not-allowed" : "default")};
   resize: none;
-  height: ${({ shortTextarea }) => (shortTextarea ? "4.7rem" : "")};
   line-height: 1.2;
   :focus {
     outline: 0;
