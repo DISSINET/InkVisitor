@@ -270,21 +270,23 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
                 <StyledNoEntity>-</StyledNoEntity>
               )}
             </div>
-            <div style={{ display: "flex", flexWrap: "wrap" }}>
-              <div>
-                <LogicButtonGroup
-                  border
-                  value={prop.type.logic}
-                  onChange={(logic) =>
-                    updateProp(prop.id, {
-                      type: { ...prop.type, logic: logic },
-                    })
-                  }
-                />
+            {isExpanded && (
+              <div style={{ display: "flex", flexWrap: "wrap" }}>
+                <div>
+                  <LogicButtonGroup
+                    border
+                    value={prop.type.logic}
+                    onChange={(logic) =>
+                      updateProp(prop.id, {
+                        type: { ...prop.type, logic: logic },
+                      })
+                    }
+                  />
+                </div>
+                <div>{"virtuality "}</div>
+                <div>{"partivity"}</div>
               </div>
-              <div>{"virtuality "}</div>
-              <div>{"partivity"}</div>
-            </div>
+            )}
           </div>
         </StyledPropLineColumn>
         <StyledPropLineColumn isTag={propValueEntity ? true : false}>
@@ -378,24 +380,26 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
                 <StyledNoEntity>-</StyledNoEntity>
               )}
             </div>
-            <div style={{ display: "flex", flexWrap: "wrap" }}>
-              <div>
-                <LogicButtonGroup
-                  border
-                  value={prop.value.logic}
-                  onChange={(logic) =>
-                    updateProp(prop.id, {
-                      value: {
-                        ...prop.value,
-                        logic: logic,
-                      },
-                    })
-                  }
-                />
+            {isExpanded && (
+              <div style={{ display: "flex", flexWrap: "wrap" }}>
+                <div>
+                  <LogicButtonGroup
+                    border
+                    value={prop.value.logic}
+                    onChange={(logic) =>
+                      updateProp(prop.id, {
+                        value: {
+                          ...prop.value,
+                          logic: logic,
+                        },
+                      })
+                    }
+                  />
+                </div>
+                <div>{"virtuality "}</div>
+                <div>{"partivity"}</div>
               </div>
-              <div>{"virtuality "}</div>
-              <div>{"partivity"}</div>
-            </div>
+            )}
           </div>
         </StyledPropLineColumn>
         {/* S elvl */}
@@ -423,35 +427,37 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
               {/* mood */}
               {!disabledAttributes.statement?.includes("mood") && "mood"}
             </div>
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                flexWrap: "wrap",
-              }}
-            >
-              <div style={{ display: "flex", flexDirection: "row" }}>
-                <div>
-                  {!disabledAttributes.statement?.includes("moodvariant") && (
-                    <MoodVariantButtonGroup
-                      border
-                      value={prop.moodvariant}
-                      onChange={(moodvariant) =>
-                        updateProp(prop.id, {
-                          ...prop,
-                          moodvariant: moodvariant,
-                        })
-                      }
-                    />
-                  )}
+            {isExpanded && (
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  flexWrap: "wrap",
+                }}
+              >
+                <div style={{ display: "flex", flexDirection: "row" }}>
+                  <div>
+                    {!disabledAttributes.statement?.includes("moodvariant") && (
+                      <MoodVariantButtonGroup
+                        border
+                        value={prop.moodvariant}
+                        onChange={(moodvariant) =>
+                          updateProp(prop.id, {
+                            ...prop,
+                            moodvariant: moodvariant,
+                          })
+                        }
+                      />
+                    )}
+                  </div>
+                  <div>{"Logical op."}</div>
                 </div>
-                <div>{"Logical op."}</div>
+                <div style={{ display: "flex", flexDirection: "row" }}>
+                  <div>{"start|end"}</div>
+                  <div>{"certainty"}</div>
+                </div>
               </div>
-              <div style={{ display: "flex", flexDirection: "row" }}>
-                <div>{"start|end"}</div>
-                <div>{"certainty"}</div>
-              </div>
-            </div>
+            )}
           </div>
         </StyledPropLineColumn>
 
@@ -591,20 +597,6 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
         style={{ opacity: opacity }}
       >
         {renderPropRow()}
-        {/* {isExpanded && (
-          <div
-            style={{
-              display: "grid",
-              fontSize: "1.4rem",
-              gridTemplateColumns: "repeat(3,auto) 1fr",
-              gridColumnGap: "1rem",
-              marginLeft: "3rem",
-              marginBottom: "1rem",
-              backgroundColor: "",
-            }}
-          >
-          </div>
-        )} */}
       </div>
     </>
   );
