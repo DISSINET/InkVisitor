@@ -8,10 +8,10 @@ interface StyledGrid {
 export const StyledGrid = styled.div<StyledGrid>`
   display: grid;
 
-  align-items: center;
+  align-items: flex-start;
   padding-left: ${({ theme }) => theme.space[0]};
 
-  grid-template-columns: 20px repeat(6, auto) 1fr;
+  grid-template-columns: 20px repeat(5, auto) 1fr;
   width: fit-content;
   grid-template-rows: auto;
   grid-auto-flow: row;

@@ -456,6 +456,8 @@ export const StatementEditorActantTableRow: React.FC<
         <div
           style={{
             display: "grid",
+            marginLeft: "3rem",
+            marginBottom: "1rem",
             gridTemplateColumns: "repeat(3, auto) 1fr",
             gridColumnGap: "1rem",
             fontSize: "1.4rem",
@@ -464,7 +466,7 @@ export const StatementEditorActantTableRow: React.FC<
         >
           <div>{"virtuality"}</div>
           <div>{"partivity"}</div>
-          <div>{"logical operator"}</div>
+          <div>{"logical op."}</div>
           <div>{"bundle start|end"}</div>
         </div>
       )}

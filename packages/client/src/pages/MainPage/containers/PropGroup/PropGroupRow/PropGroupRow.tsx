@@ -181,216 +181,278 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
           lowIdent={lowIdent}
           isTag={propTypeEntity ? true : false}
         >
-          {propTypeEntity ? (
-            <>
-              <EntityDropzone
-                onSelected={(newSelectedId: string) => {
-                  updateProp(prop.id, {
-                    type: {
-                      ...prop.type,
-                      entityId: newSelectedId,
-                    },
-                  });
-                }}
-                categoryTypes={classesPropType}
-                excludedEntities={excludedSuggesterEntities}
-                isInsideTemplate={isInsideTemplate}
-                territoryParentId={territoryParentId}
-                excludedActantIds={[propTypeEntity.id]}
-              >
-                <EntityTag
-                  entity={propTypeEntity}
-                  fullWidth
-                  tooltipPosition="right"
-                  unlinkButton={
-                    userCanEdit && {
-                      onClick: () => {
-                        updateProp(prop.id, {
-                          type: {
-                            ...prop.type,
-                            entityId: "",
+          <div style={{ display: "inline-flex", flexDirection: "column" }}>
+            <div>
+              {propTypeEntity ? (
+                <>
+                  <EntityDropzone
+                    onSelected={(newSelectedId: string) => {
+                      updateProp(prop.id, {
+                        type: {
+                          ...prop.type,
+                          entityId: newSelectedId,
+                        },
+                      });
+                    }}
+                    categoryTypes={classesPropType}
+                    excludedEntities={excludedSuggesterEntities}
+                    isInsideTemplate={isInsideTemplate}
+                    territoryParentId={territoryParentId}
+                    excludedActantIds={[propTypeEntity.id]}
+                  >
+                    <EntityTag
+                      entity={propTypeEntity}
+                      fullWidth
+                      tooltipPosition="right"
+                      unlinkButton={
+                        userCanEdit && {
+                          onClick: () => {
+                            updateProp(prop.id, {
+                              type: {
+                                ...prop.type,
+                                entityId: "",
+                              },
+                            });
                           },
-                        });
-                      },
-                    }
-                  }
-                  elvlButtonGroup={
-                    !disabledAttributes.type?.includes("elvl") && (
-                      <ElvlButtonGroup
-                        value={prop.type.elvl}
-                        onChange={(elvl) =>
-                          updateProp(prop.id, {
-                            type: {
-                              ...prop.type,
-                              elvl: elvl,
-                            },
-                          })
                         }
+                      }
+                      elvlButtonGroup={
+                        !disabledAttributes.type?.includes("elvl") && (
+                          <ElvlButtonGroup
+                            value={prop.type.elvl}
+                            onChange={(elvl) =>
+                              updateProp(prop.id, {
+                                type: {
+                                  ...prop.type,
+                                  elvl: elvl,
+                                },
+                              })
+                            }
+                          />
+                        )
+                      }
+                    />
+                  </EntityDropzone>
+                  <StyledPropButtonGroup>
+                    {prop.type.logic == "2" && (
+                      <Button
+                        key="neg"
+                        tooltipLabel="Negative logic"
+                        color="danger"
+                        inverted
+                        noBorder
+                        onClick={() => setModalOpen(true)}
+                        icon={<AttributeIcon attributeName={"negation"} />}
                       />
-                    )
+                    )}
+                  </StyledPropButtonGroup>
+                </>
+              ) : userCanEdit ? (
+                <EntitySuggester
+                  territoryActants={territoryActants}
+                  onSelected={(newSelectedId: string) => {
+                    updateProp(prop.id, {
+                      type: {
+                        ...prop.type,
+                        entityId: newSelectedId,
+                      },
+                    });
+                  }}
+                  placeholder="type"
+                  openDetailOnCreate={openDetailOnCreate}
+                  categoryTypes={classesPropType}
+                  inputWidth={80}
+                  excludedEntities={excludedSuggesterEntities}
+                  isInsideTemplate={isInsideTemplate}
+                  territoryParentId={territoryParentId}
+                />
+              ) : (
+                <StyledNoEntity>-</StyledNoEntity>
+              )}
+            </div>
+            <div style={{ display: "flex", flexWrap: "wrap" }}>
+              <div>
+                <LogicButtonGroup
+                  border
+                  value={prop.type.logic}
+                  onChange={(logic) =>
+                    updateProp(prop.id, {
+                      type: { ...prop.type, logic: logic },
+                    })
                   }
                 />
-              </EntityDropzone>
-              <StyledPropButtonGroup>
-                {prop.type.logic == "2" && (
-                  <Button
-                    key="neg"
-                    tooltipLabel="Negative logic"
-                    color="danger"
-                    inverted
-                    noBorder
-                    onClick={() => setModalOpen(true)}
-                    icon={<AttributeIcon attributeName={"negation"} />}
-                  />
-                )}
-              </StyledPropButtonGroup>
-            </>
-          ) : userCanEdit ? (
-            <EntitySuggester
-              territoryActants={territoryActants}
-              onSelected={(newSelectedId: string) => {
-                updateProp(prop.id, {
-                  type: {
-                    ...prop.type,
-                    entityId: newSelectedId,
-                  },
-                });
-              }}
-              placeholder="type"
-              openDetailOnCreate={openDetailOnCreate}
-              categoryTypes={classesPropType}
-              inputWidth={80}
-              excludedEntities={excludedSuggesterEntities}
-              isInsideTemplate={isInsideTemplate}
-              territoryParentId={territoryParentId}
-            />
-          ) : (
-            <StyledNoEntity>-</StyledNoEntity>
-          )}
+              </div>
+              <div>{"virtuality "}</div>
+              <div>{"partivity"}</div>
+            </div>
+          </div>
         </StyledPropLineColumn>
         <StyledPropLineColumn isTag={propValueEntity ? true : false}>
-          {propValueEntity ? (
-            <>
-              <EntityDropzone
-                onSelected={(newSelectedId: string) => {
-                  updateProp(prop.id, {
-                    value: {
-                      ...prop.type,
-                      entityId: newSelectedId,
-                    },
-                  });
-                }}
-                categoryTypes={classesPropValue}
-                excludedEntities={excludedSuggesterEntities}
-                isInsideTemplate={isInsideTemplate}
-                territoryParentId={territoryParentId}
-                excludedActantIds={[propValueEntity.id]}
-              >
-                <EntityTag
-                  entity={propValueEntity}
-                  fullWidth
-                  tooltipPosition="right"
-                  unlinkButton={
-                    userCanEdit && {
-                      onClick: () => {
-                        updateProp(prop.id, {
-                          value: {
-                            ...prop.value,
-                            entityId: "",
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <div>
+              {propValueEntity ? (
+                <>
+                  <EntityDropzone
+                    onSelected={(newSelectedId: string) => {
+                      updateProp(prop.id, {
+                        value: {
+                          ...prop.type,
+                          entityId: newSelectedId,
+                        },
+                      });
+                    }}
+                    categoryTypes={classesPropValue}
+                    excludedEntities={excludedSuggesterEntities}
+                    isInsideTemplate={isInsideTemplate}
+                    territoryParentId={territoryParentId}
+                    excludedActantIds={[propValueEntity.id]}
+                  >
+                    <EntityTag
+                      entity={propValueEntity}
+                      fullWidth
+                      tooltipPosition="right"
+                      unlinkButton={
+                        userCanEdit && {
+                          onClick: () => {
+                            updateProp(prop.id, {
+                              value: {
+                                ...prop.value,
+                                entityId: "",
+                              },
+                            });
                           },
-                        });
-                      },
-                    }
-                  }
-                  elvlButtonGroup={
-                    !disabledAttributes.value?.includes("elvl") && (
-                      <ElvlButtonGroup
-                        value={prop.value.elvl}
-                        onChange={(elvl) =>
-                          updateProp(prop.id, {
-                            value: {
-                              ...prop.value,
-                              elvl: elvl,
-                            },
-                          })
                         }
+                      }
+                      elvlButtonGroup={
+                        !disabledAttributes.value?.includes("elvl") && (
+                          <ElvlButtonGroup
+                            value={prop.value.elvl}
+                            onChange={(elvl) =>
+                              updateProp(prop.id, {
+                                value: {
+                                  ...prop.value,
+                                  elvl: elvl,
+                                },
+                              })
+                            }
+                          />
+                        )
+                      }
+                    />
+                  </EntityDropzone>
+
+                  <StyledPropButtonGroup>
+                    {prop.value.logic == "2" && (
+                      <Button
+                        key="neg"
+                        tooltipLabel="Negative logic"
+                        color="danger"
+                        inverted
+                        noBorder
+                        onClick={() => setModalOpen(true)}
+                        icon={<AttributeIcon attributeName={"negation"} />}
                       />
-                    )
+                    )}
+                  </StyledPropButtonGroup>
+                </>
+              ) : userCanEdit ? (
+                <EntitySuggester
+                  territoryActants={territoryActants}
+                  onSelected={(newSelectedId: string) => {
+                    updateProp(prop.id, {
+                      value: {
+                        ...prop.type,
+                        entityId: newSelectedId,
+                      },
+                    });
+                  }}
+                  placeholder="value"
+                  openDetailOnCreate={openDetailOnCreate}
+                  categoryTypes={classesPropValue}
+                  inputWidth={80}
+                  excludedEntities={excludedSuggesterEntities}
+                  isInsideTemplate={isInsideTemplate}
+                  territoryParentId={territoryParentId}
+                />
+              ) : (
+                <StyledNoEntity>-</StyledNoEntity>
+              )}
+            </div>
+            <div style={{ display: "flex", flexWrap: "wrap" }}>
+              <div>
+                <LogicButtonGroup
+                  border
+                  value={prop.value.logic}
+                  onChange={(logic) =>
+                    updateProp(prop.id, {
+                      value: {
+                        ...prop.value,
+                        logic: logic,
+                      },
+                    })
                   }
                 />
-              </EntityDropzone>
-
-              <StyledPropButtonGroup>
-                {prop.value.logic == "2" && (
-                  <Button
-                    key="neg"
-                    tooltipLabel="Negative logic"
-                    color="danger"
-                    inverted
-                    noBorder
-                    onClick={() => setModalOpen(true)}
-                    icon={<AttributeIcon attributeName={"negation"} />}
-                  />
-                )}
-              </StyledPropButtonGroup>
-            </>
-          ) : userCanEdit ? (
-            <EntitySuggester
-              territoryActants={territoryActants}
-              onSelected={(newSelectedId: string) => {
-                updateProp(prop.id, {
-                  value: {
-                    ...prop.type,
-                    entityId: newSelectedId,
-                  },
-                });
+              </div>
+              <div>{"virtuality "}</div>
+              <div>{"partivity"}</div>
+            </div>
+          </div>
+        </StyledPropLineColumn>
+        {/* S elvl */}
+        <StyledPropLineColumn>
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <div style={{ display: "flex", flexDirection: "row" }}>
+              {!disabledAttributes.statement?.includes("elvl") && (
+                <ElvlButtonGroup
+                  border
+                  value={prop.elvl}
+                  onChange={(elvl) =>
+                    updateProp(prop.id, {
+                      ...prop,
+                      elvl: elvl,
+                    })
+                  }
+                />
+              )}
+              {/* Logic */}
+              <LogicButtonGroup
+                border
+                value={prop.logic}
+                onChange={(logic) => updateProp(prop.id, { logic: logic })}
+              />
+              {/* mood */}
+              {!disabledAttributes.statement?.includes("mood") && "mood"}
+            </div>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                flexWrap: "wrap",
               }}
-              placeholder="value"
-              openDetailOnCreate={openDetailOnCreate}
-              categoryTypes={classesPropValue}
-              inputWidth={80}
-              excludedEntities={excludedSuggesterEntities}
-              isInsideTemplate={isInsideTemplate}
-              territoryParentId={territoryParentId}
-            />
-          ) : (
-            <StyledNoEntity>-</StyledNoEntity>
-          )}
-        </StyledPropLineColumn>
-
-        {/* mood */}
-        <StyledPropLineColumn>
-          {!disabledAttributes.statement?.includes("mood") && "mood"}
-        </StyledPropLineColumn>
-        {/* mood variant */}
-        <StyledPropLineColumn>
-          {!disabledAttributes.statement?.includes("moodvariant") && (
-            <MoodVariantButtonGroup
-              border
-              value={prop.moodvariant}
-              onChange={(moodvariant) =>
-                updateProp(prop.id, {
-                  ...prop,
-                  moodvariant: moodvariant,
-                })
-              }
-            />
-          )}
-        </StyledPropLineColumn>
-        {/* prop elvl */}
-        <StyledPropLineColumn>
-          {!disabledAttributes.statement?.includes("elvl") && (
-            <ElvlButtonGroup
-              border
-              value={prop.elvl}
-              onChange={(elvl) =>
-                updateProp(prop.id, {
-                  ...prop,
-                  elvl: elvl,
-                })
-              }
-            />
-          )}
+            >
+              <div style={{ display: "flex", flexDirection: "row" }}>
+                <div>
+                  {!disabledAttributes.statement?.includes("moodvariant") && (
+                    <MoodVariantButtonGroup
+                      border
+                      value={prop.moodvariant}
+                      onChange={(moodvariant) =>
+                        updateProp(prop.id, {
+                          ...prop,
+                          moodvariant: moodvariant,
+                        })
+                      }
+                    />
+                  )}
+                </div>
+                <div>{"Logical op."}</div>
+              </div>
+              <div style={{ display: "flex", flexDirection: "row" }}>
+                <div>{"start|end"}</div>
+                <div>{"certainty"}</div>
+              </div>
+            </div>
+          </div>
         </StyledPropLineColumn>
 
         <StyledPropLineColumn>
@@ -529,16 +591,20 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
         style={{ opacity: opacity }}
       >
         {renderPropRow()}
-        {isExpanded && (
-          <div style={{ display: "flex", backgroundColor: "hotpink" }}>
-            <LogicButtonGroup
-              border
-              value={prop.logic}
-              onChange={(logic) => updateProp(prop.id, { logic: logic })}
-            />
-            expanded PropGroup row
+        {/* {isExpanded && (
+          <div
+            style={{
+              display: "grid",
+              fontSize: "1.4rem",
+              gridTemplateColumns: "repeat(3,auto) 1fr",
+              gridColumnGap: "1rem",
+              marginLeft: "3rem",
+              marginBottom: "1rem",
+              backgroundColor: "",
+            }}
+          >
           </div>
-        )}
+        )} */}
       </div>
     </>
   );
