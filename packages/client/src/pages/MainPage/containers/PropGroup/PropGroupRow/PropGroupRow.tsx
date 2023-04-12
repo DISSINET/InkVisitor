@@ -159,7 +159,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
   }, [isDragging]);
 
   const [modalOpen, setModalOpen] = useState<boolean>(false);
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
 
   const renderPropRow = () => {
     return (
@@ -530,7 +530,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
       >
         {renderPropRow()}
         {isExpanded && (
-          <div style={{ backgroundColor: "hotpink" }}>
+          <div style={{ display: "flex", backgroundColor: "hotpink" }}>
             <LogicButtonGroup
               border
               value={prop.logic}

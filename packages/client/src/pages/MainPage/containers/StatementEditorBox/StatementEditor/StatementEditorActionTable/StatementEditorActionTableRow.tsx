@@ -318,7 +318,7 @@ export const StatementEditorActionTableRow: React.FC<
     [statement]
   );
 
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
 
   return (
     <React.Fragment key={index}>
@@ -331,6 +331,17 @@ export const StatementEditorActionTableRow: React.FC<
           <StyledGridColumn />
         )}
         <StyledGridColumn>{renderActionCell()}</StyledGridColumn>
+        <StyledGridColumn>
+          {
+            <LogicButtonGroup
+              border
+              value={filteredAction.data.sAction.logic}
+              onChange={(logic) =>
+                updateAction(filteredAction.data.sAction.id, { logic: logic })
+              }
+            />
+          }
+        </StyledGridColumn>
         <StyledGridColumn>
           {
             <Dropdown
@@ -352,17 +363,6 @@ export const StatementEditorActionTableRow: React.FC<
             />
           }
         </StyledGridColumn>
-        <StyledGridColumn>
-          <MoodVariantButtonGroup
-            border
-            onChange={(moodvariant) =>
-              updateAction(filteredAction.data.sAction.id, {
-                moodvariant: moodvariant,
-              })
-            }
-            value={filteredAction.data.sAction.moodvariant}
-          />
-        </StyledGridColumn>
         <StyledGridColumn>{renderButtonsCell()}</StyledGridColumn>
         <StyledGridColumn>
           <Button
@@ -383,15 +383,28 @@ export const StatementEditorActionTableRow: React.FC<
       </StyledGrid>
 
       {isExpanded && (
-        <div style={{ backgroundColor: "hotpink" }}>
-          <LogicButtonGroup
+        <div
+          style={{
+            display: "grid",
+            marginLeft: "2rem",
+            gridTemplateColumns: "repeat(3, auto) 1fr",
+            gridColumnGap: "1rem",
+            fontSize: "1.4rem",
+            backgroundColor: "",
+          }}
+        >
+          <MoodVariantButtonGroup
             border
-            value={filteredAction.data.sAction.logic}
-            onChange={(logic) =>
-              updateAction(filteredAction.data.sAction.id, { logic: logic })
+            onChange={(moodvariant) =>
+              updateAction(filteredAction.data.sAction.id, {
+                moodvariant: moodvariant,
+              })
             }
+            value={filteredAction.data.sAction.moodvariant}
           />
-          expanded action row
+          <div>{"logical op."}</div>
+          <div>{"start|end"}</div>
+          <div>{"certainty"}</div>
         </div>
       )}
 

@@ -397,7 +397,7 @@ export const StatementEditorActantTableRow: React.FC<
     [statement]
   );
 
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
 
   const { classifications, identifications } = filteredActant.data.sActant;
 
@@ -420,8 +420,18 @@ export const StatementEditorActantTableRow: React.FC<
           <StyledGridColumn />
         )}
         <StyledGridColumn>{renderActantCell()}</StyledGridColumn>
+        <StyledGridColumn>
+          {
+            <LogicButtonGroup
+              border
+              value={filteredActant.data.sActant.logic}
+              onChange={(logic) =>
+                updateActant(filteredActant.data.sActant.id, { logic: logic })
+              }
+            />
+          }
+        </StyledGridColumn>
         <StyledGridColumn>{renderPositionCell()}</StyledGridColumn>
-        <StyledGridColumn>{"mood"}</StyledGridColumn>
         <StyledGridColumn>{renderAttributesCell()}</StyledGridColumn>
         <StyledGridColumn>
           <Button
@@ -443,15 +453,19 @@ export const StatementEditorActantTableRow: React.FC<
 
       {/* Expanded Row */}
       {isExpanded && (
-        <div style={{ backgroundColor: "hotpink" }}>
-          <LogicButtonGroup
-            border
-            value={filteredActant.data.sActant.logic}
-            onChange={(logic) =>
-              updateActant(filteredActant.data.sActant.id, { logic: logic })
-            }
-          />
-          expanded actant row
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(3, auto) 1fr",
+            gridColumnGap: "1rem",
+            fontSize: "1.4rem",
+            backgroundColor: "",
+          }}
+        >
+          <div>{"virtuality"}</div>
+          <div>{"partivity"}</div>
+          <div>{"logical operator"}</div>
+          <div>{"bundle start|end"}</div>
         </div>
       )}
 
