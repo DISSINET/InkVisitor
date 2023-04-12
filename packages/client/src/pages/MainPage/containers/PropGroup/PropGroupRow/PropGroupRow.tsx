@@ -6,6 +6,7 @@ import {
   EntityDropzone,
   EntitySuggester,
   EntityTag,
+  LogicButtonGroup,
   MoodVariantButtonGroup,
 } from "components/advanced";
 import { StyledPropButtonGroup } from "components/advanced/AttributeButtonGroup/AttributeButtonGroupStyles";
@@ -530,6 +531,11 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
         {renderPropRow()}
         {isExpanded && (
           <div style={{ backgroundColor: "hotpink" }}>
+            <LogicButtonGroup
+              border
+              value={prop.logic}
+              onChange={(logic) => updateProp(prop.id, { logic: logic })}
+            />
             expanded PropGroup row
           </div>
         )}

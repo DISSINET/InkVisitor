@@ -14,6 +14,7 @@ import {
   EntityDropzone,
   EntitySuggester,
   EntityTag,
+  LogicButtonGroup,
   MoodVariantButtonGroup,
   PositionButtonGroup,
 } from "components/advanced";
@@ -442,7 +443,16 @@ export const StatementEditorActantTableRow: React.FC<
 
       {/* Expanded Row */}
       {isExpanded && (
-        <div style={{ backgroundColor: "hotpink" }}>expanded actant row</div>
+        <div style={{ backgroundColor: "hotpink" }}>
+          <LogicButtonGroup
+            border
+            value={filteredActant.data.sActant.logic}
+            onChange={(logic) =>
+              updateActant(filteredActant.data.sActant.id, { logic: logic })
+            }
+          />
+          expanded actant row
+        </div>
       )}
 
       {/* Prop group */}

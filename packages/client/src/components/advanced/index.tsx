@@ -9,6 +9,7 @@ import { EntitySuggester } from "./EntitySuggester/EntitySuggester";
 import { EntityTag } from "./EntityTag/EntityTag";
 import { EntityTooltip } from "./EntityTooltip/EntityTooltip";
 import { ElvlButtonGroup } from "./IconButtonGroups/ElvlButtonGroup";
+import { LogicButtonGroup } from "./IconButtonGroups/LogicButtonGroup";
 import { MoodVariantButtonGroup } from "./IconButtonGroups/MoodVariantButtonGroup";
 import { PositionButtonGroup } from "./IconButtonGroups/PositionButtonGroup";
 import { JSONExplorer } from "./JSONExplorer/JSONExplorer";
@@ -42,4 +43,5 @@ export {
   ElvlButtonGroup,
   MoodVariantButtonGroup,
   PositionButtonGroup,
+  LogicButtonGroup,
 };

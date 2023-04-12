@@ -7,6 +7,7 @@ import {
   EntityDropzone,
   EntitySuggester,
   EntityTag,
+  LogicButtonGroup,
   MoodVariantButtonGroup,
 } from "components/advanced";
 import { useSearchParams } from "hooks";
@@ -382,7 +383,16 @@ export const StatementEditorActionTableRow: React.FC<
       </StyledGrid>
 
       {isExpanded && (
-        <div style={{ backgroundColor: "hotpink" }}>expanded action row</div>
+        <div style={{ backgroundColor: "hotpink" }}>
+          <LogicButtonGroup
+            border
+            value={filteredAction.data.sAction.logic}
+            onChange={(logic) =>
+              updateAction(filteredAction.data.sAction.id, { logic: logic })
+            }
+          />
+          expanded action row
+        </div>
       )}
 
       {!(
