@@ -240,27 +240,15 @@ export default Router()
         throw new InternalServerError("cannot copy entity");
       }
 
-      const relations = await Relation.getForEntity(
-        request.db.connection,
-        originalId
+      const rels = (
+        await Relation.getForEntity(request.db.connection, originalId)
+      ).map((r) => getRelationClass(r));
+      const relationConflict = await Relation.copyMany(
+        request,
+        rels,
+        originalId,
+        clone.id
       );
-
-      let relationConflict = false;
-
-      for (const relation of relations) {
-        // replace original entity id with cloned id + remove original relation id - should be created anew
-        relation.entityIds = relation.entityIds.map((id) =>
-          id === originalId ? clone.id : id
-        );
-        const clonedRelation = getRelationClass({ ...relation, id: "" });
-
-        // todo beforeSave can fail - should be done before entity cloning
-        await clonedRelation.beforeSave(request);
-        await clonedRelation.save(request.db.connection);
-        await clonedRelation.afterSave(request);
-
-        relationConflict = true;
-      }
 
       return {
         result: true,

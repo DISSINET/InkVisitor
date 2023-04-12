@@ -1,31 +1,16 @@
-import {
-  clean,
-  successfulGenericResponse,
-  testErroneousResponse,
-} from "@modules/common.test";
+import "ts-jest";
+import { clean, testErroneousResponse } from "@modules/common.test";
 import { EntityDoesNotExist, ModelNotValidError } from "@shared/types/errors";
 import request from "supertest";
 import { apiPath } from "@common/constants";
 import app from "../../Server";
 import { supertestConfig } from "..";
-import Statement, {
-  StatementData,
-  StatementTerritory,
-} from "@models/statement/statement";
-import {
-  deleteEntities,
-  findEntityById,
-  getEntitiesDataByClass,
-} from "@service/shorthands";
+import Statement, { StatementTerritory } from "@models/statement/statement";
+import { findEntityById } from "@service/shorthands";
 import { Db } from "@service/RethinkDB";
-import Territory from "@models/territory/territory";
-import "ts-jest";
-import { ITerritory } from "@shared/types";
 import { prepareEntity } from "@models/entity/entity.test";
 import { prepareRelation } from "@models/relation/relation.test";
 import { RelationEnums } from "@shared/enums";
-import { getRelationClass } from "@models/factory";
-import Entity from "@models/entity/entity";
 import Relation from "@models/relation/relation";
 
 describe("Entities clone", function () {
@@ -54,6 +39,7 @@ describe("Entities clone", function () {
 
     it("should return a ModelNotValid error wrapped in IResponseGeneric", async () => {
       const entity = new Statement({}); // invalid - empty territory
+      entity.data.territory = new StatementTerritory({ territoryId: "" });
       const saved = await entity.save(db.connection); // should be saved without isValid test
       expect(saved).toBeTruthy();
 
