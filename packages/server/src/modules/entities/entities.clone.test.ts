@@ -101,10 +101,10 @@ describe("Entities clone", function () {
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(200);
-      const clonedId = data.body.data;
-      expect(clonedId).toBeTruthy();
+      const cloneData = data.body.data;
+      expect(cloneData).toBeTruthy();
 
-      const clone = await findEntityById(db, clonedId);
+      const clone = await findEntityById(db, cloneData.id);
       expect(clone).toBeTruthy();
       expect(clone.label).toEqual(entity.label);
 
@@ -114,7 +114,7 @@ describe("Entities clone", function () {
       );
       expect(clonedRelations).toHaveLength(1);
       expect(clonedRelations[0].id).not.toEqual(relation.id);
-      expect(clonedRelations[0].entityIds).toContain(clonedId);
+      expect(clonedRelations[0].entityIds).toContain(cloneData.id);
       expect(clonedRelations[0].entityIds).toContain(relationEntity.id);
     });
   });

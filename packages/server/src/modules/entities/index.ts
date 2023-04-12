@@ -213,7 +213,7 @@ export default Router()
    */
   .post(
     "/:entityId/clone",
-    asyncRouteHandler<IResponseGeneric>(async (request: IRequest) => {
+    asyncRouteHandler<IResponseGeneric<IEntity>>(async (request: IRequest) => {
       const originalId = request.params.entityId;
       const original = await findEntityById(request.db, originalId);
       if (!original) {
@@ -267,7 +267,7 @@ export default Router()
         message: relationConflict
           ? "There has been at least one conflict while copying relations"
           : undefined,
-        data: clone.id,
+        data: clone,
       };
     })
   )
