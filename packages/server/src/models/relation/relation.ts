@@ -8,6 +8,7 @@ import User from "@models/user/user";
 import { IRequest } from "src/custom_typings/request";
 import { nonenumerable } from "@common/decorators";
 import Entity from "@models/entity/entity";
+import { getRelationClass } from "@models/factory";
 
 export interface IRelationModel extends RelationTypes.IRelation, IDbModel {
   beforeSave(request: IRequest): Promise<void>;
@@ -412,6 +413,34 @@ export default class Relation implements IRelationModel {
     return items;
   }
 
+  static async copyMany(
+    request: IRequest,
+    relations: Relation[],
+    originalEntityId: string,
+    targetEntityId: string
+  ): Promise<boolean> {
+    let relationConflict = false;
+
+    for (const relation of relations) {
+      // replace original entity id with cloned id
+      relation.entityIds = relation.entityIds.map((id) =>
+        id === originalEntityId ? targetEntityId : id
+      );
+      // remove original relation id - should be created anew
+      relation.id = "";
+
+      try {
+        await relation.beforeSave(request);
+        await relation.save(request.db.connection);
+        await relation.afterSave(request);
+      } catch (e) {
+        console.log("[Relation.copyMany]: failed to copy relation", e);
+        relationConflict = true;
+      }
+    }
+
+    return relationConflict;
+  }
   /**
    * Removes multiple relation entries
    * @param request
