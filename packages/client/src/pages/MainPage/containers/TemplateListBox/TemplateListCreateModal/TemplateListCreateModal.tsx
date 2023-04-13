@@ -93,7 +93,6 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
           setStatementId(variables.id);
         } else {
           appendDetailId(variables.id);
-          setSelectedDetailId(variables.id);
         }
         handleCloseCreateModal();
       },

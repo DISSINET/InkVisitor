@@ -6,12 +6,12 @@ import { ITerritory } from ".";
 import { UserEnums } from "../enums";
 
 // to discuss
-export interface IResponseTree extends IResponseTreeTerritoryComponent { }
+export interface IResponseTree extends IResponseTreeTerritoryComponent {}
 
 export interface IResponseTreeTerritoryComponent {
   territory: ITerritory;
   path: string[]; // array of parents
-  statementsCount: number; // number of statements with this data.territory.id
+  statementsCount: number; // number of statements with this data.territory.territoryId
   lvl: number; // levels of nesting
   children: IResponseTreeTerritoryComponent[];
   empty?: boolean;

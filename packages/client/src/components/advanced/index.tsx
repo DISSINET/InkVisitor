@@ -1,3 +1,4 @@
+import { AddTerritoryModal } from "./AddTerritoryModal/AddTerritoryModal";
 import { ApplyTemplateModal } from "./ApplyTemplateModal/ApplyTemplateModal";
 import { AttributeButtonGroup } from "./AttributeButtonGroup/AttributeButtonGroup";
 import { AuditTable } from "./AuditTable/AuditTable";
@@ -16,6 +17,7 @@ import { PanelSeparator } from "./PanelSeparator/PanelSeparator";
 import { UserCustomizationModal } from "./UserCustomizationModal/UserCustomizationModal";
 
 export {
+  AddTerritoryModal,
   ApplyTemplateModal,
   AttributeButtonGroup,
   AuditTable,

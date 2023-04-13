@@ -136,8 +136,13 @@ export const Suggester: React.FC<Suggester> = ({
         } else if (item.isTemplate && !isInsideTemplate) {
           onDrop(item, true);
         } else if (item.isTemplate && isInsideTemplate) {
-          setTempDropItem(item);
-          setShowTemplateModal(true);
+          if (item.entityClass === EntityEnums.Class.Territory) {
+            onDrop(item);
+            // TODO: notification why not instantiated - used because of missing parent
+          } else {
+            setTempDropItem(item);
+            setShowTemplateModal(true);
+          }
         }
       }
     },
@@ -255,7 +260,7 @@ export const Suggester: React.FC<Suggester> = ({
             disableTyping
             suggester
             disabled={disabled}
-            autoFocus={autoFocus}
+            autoFocus={categories.length > 1 && autoFocus}
           />
           <TypeBar entityLetter={category.value} />
           <Input
@@ -275,6 +280,7 @@ export const Suggester: React.FC<Suggester> = ({
             onEnterPressFn={() => {
               handleEnterPress();
             }}
+            autoFocus={categories.length === 1 && autoFocus}
             disabled={disabled}
           />
           {typed.length > 0 && (

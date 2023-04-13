@@ -5,7 +5,10 @@ import { IRequest } from "src/custom_typings/request";
 import { nonenumerable } from "@common/decorators";
 import { Connection } from "rethinkdb-ts";
 
-export default class Synonym extends Relation implements RelationTypes.ISynonym {
+export default class Synonym
+  extends Relation
+  implements RelationTypes.ISynonym
+{
   type: RelationEnums.Type.Synonym;
   entityIds: string[];
 
@@ -18,12 +21,19 @@ export default class Synonym extends Relation implements RelationTypes.ISynonym 
     this.type = RelationEnums.Type.Synonym;
   }
 
-  async findSiblings(request: IRequest, type: RelationEnums.Type): Promise<void> {
+  async findSiblings(
+    request: IRequest,
+    type: RelationEnums.Type
+  ): Promise<void> {
     let toInclude: string[] = this.entityIds;
     this.siblingRelations = [];
 
     for (const entityId of this.entityIds) {
-      const relations = await Relation.getForEntity(request.db.connection, entityId, type);
+      const relations = await Relation.findForEntity(
+        request.db.connection,
+        entityId,
+        type
+      );
       for (const relation of relations) {
         if (this.id !== relation.id) {
           toInclude = toInclude.concat(relation.entityIds);
@@ -48,7 +58,7 @@ export default class Synonym extends Relation implements RelationTypes.ISynonym 
    * B + C => synonym 2
    * then
    * New relation will be created which covers all of these ids A + B + C
-   * @param request 
+   * @param request
    */
   async beforeSave(request: IRequest): Promise<void> {
     await this.findSiblings(request, RelationEnums.Type.Synonym);
@@ -57,7 +67,7 @@ export default class Synonym extends Relation implements RelationTypes.ISynonym 
 
   /**
    * Takes care of identified sibling relations, see beforeSave for details
-   * @param request 
+   * @param request
    */
   async afterSave(request: IRequest): Promise<void> {
     if (this.siblingRelations) {
@@ -76,7 +86,7 @@ export default class Synonym extends Relation implements RelationTypes.ISynonym 
       asClass === EntityEnums.Class.Concept ||
       asClass === EntityEnums.Class.Action
     ) {
-      out = await Relation.getForEntity(
+      out = await Relation.findForEntity(
         conn,
         entityId,
         RelationEnums.Type.Synonym
@@ -92,5 +102,5 @@ export default class Synonym extends Relation implements RelationTypes.ISynonym 
     }
 
     return out;
-  };
+  }
 }

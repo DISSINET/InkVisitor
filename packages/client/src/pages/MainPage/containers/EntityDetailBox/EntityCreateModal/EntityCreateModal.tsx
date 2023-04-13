@@ -46,7 +46,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
   });
   const [labelTyped, setLabelTyped] = useState("");
   const [territoryId, setTerritoryId] = useState<string>("");
-  const { appendDetailId, setSelectedDetailId } = useSearchParams();
+  const { appendDetailId } = useSearchParams();
   const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
@@ -104,7 +104,6 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
       onSuccess: (data, variables) => {
         closeModal();
         appendDetailId(variables.id);
-        setSelectedDetailId(variables.id);
         if (variables.class === EntityEnums.Class.Territory) {
           queryClient.invalidateQueries("tree");
         }

@@ -6,7 +6,7 @@ import {
   PermissionDeniedError,
   RelationDoesNotExist,
 } from "@shared/types/errors";
-import Relation, { IRelationModel } from "@models/relation/relation";
+import Relation from "@models/relation/relation";
 import { Router } from "express";
 import { asyncRouteHandler } from "../index";
 import { getRelationClass } from "@models/factory";

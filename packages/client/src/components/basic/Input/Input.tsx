@@ -38,7 +38,7 @@ export const Input: React.FC<Input> = ({
   value = "",
   type = "text",
   options = [],
-  rows = 5,
+  rows = 3,
   cols = 50,
   width,
   changeOnType = false,

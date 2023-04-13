@@ -14,7 +14,6 @@ import {
 import {
   EntityDoesNotExist,
   BadParams,
-  InvalidDeleteError,
   InternalServerError,
   ModelNotValidError,
   PermissionDeniedError,
@@ -28,7 +27,8 @@ import { ResponseTooltip } from "@models/entity/response-tooltip";
 import { IRequest } from "src/custom_typings/request";
 import Relation from "@models/relation/relation";
 import User from "@models/user/user";
-import Entity from "@models/entity/entity";
+import { RelationEnums } from "@shared/enums";
+import { copyRelations } from "@models/relation/functions";
 
 export default Router()
   /**
@@ -190,10 +190,23 @@ export default Router()
         throw new InternalServerError("cannot create entity");
       }
 
+      const out: IResponseGeneric = { result: true };
+
+      if (model.usedTemplate) {
+        await model.applyTemplate(request, model.usedTemplate);
+        try {
+          await copyRelations(request, model.usedTemplate, model.id, [
+            RelationEnums.Type.Classification,
+            RelationEnums.Type.Related,
+          ]);
+        } catch (e) {
+          out.message = "At least one relation not applied";
+        }
+      }
+
       await Audit.createNew(request, model.id, request.body);
-      return {
-        result: true,
-      };
+
+      return out;
     })
   )
   /**
@@ -392,7 +405,7 @@ export default Router()
       }
 
       // if relations are linked to this entity, the delete should not be allowed
-      const linkedRelations = await Relation.getForEntity(
+      const linkedRelations = await Relation.findForEntity(
         request.db.connection,
         entityId
       );
