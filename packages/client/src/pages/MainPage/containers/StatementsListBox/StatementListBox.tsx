@@ -158,10 +158,11 @@ export const StatementListBox: React.FC = () => {
     async (entityId: string) => await api.entityClone(entityId),
     {
       onSuccess: (data, variables) => {
-        setStatementId(data.data.data);
+        setStatementId(data.data.data.id);
         toast.info(`Statement duplicated!`);
         queryClient.invalidateQueries("territory");
         queryClient.invalidateQueries("entity");
+        queryClient.invalidateQueries("tree");
       },
       onError: () => {
         toast.error(`Error: Statement not duplicated!`);
@@ -433,7 +434,8 @@ export const StatementListBox: React.FC = () => {
           statementUpdateMutation.isLoading ||
           moveTerritoryMutation.isLoading ||
           moveStatementsMutation.isLoading ||
-          duplicateStatementsMutation.isLoading
+          duplicateStatementsMutation.isLoading ||
+          cloneStatementMutation.isLoading
         }
       />
     </>
