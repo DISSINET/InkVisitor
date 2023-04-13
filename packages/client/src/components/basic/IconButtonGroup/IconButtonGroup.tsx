@@ -24,11 +24,11 @@ export const IconButtonGroup = <TValue extends ValueTypes>({
   value,
   icons,
 }: IconButtonGroup<TValue>) => {
-  const [localValue, setLocalValue] = useState<TValue | false>(false);
+  // const [localValue, setLocalValue] = useState<TValue | false>(false);
 
-  useEffect(() => {
-    setLocalValue(value);
-  }, [value]);
+  // useEffect(() => {
+  //   setLocalValue(value);
+  // }, [value]);
 
   return (
     <StyledWrapper border={border}>
@@ -40,9 +40,9 @@ export const IconButtonGroup = <TValue extends ValueTypes>({
             tooltipLabel={option.label}
             noBorder
             inverted
-            color={option.value === localValue ? "primary" : "greyer"}
+            color={option.value === value ? "primary" : "greyer"}
             onClick={() => {
-              if (option.value !== localValue) {
+              if (option.value !== value) {
                 onChange(option.value);
               }
             }}

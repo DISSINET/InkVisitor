@@ -1,7 +1,13 @@
 import { EntityEnums } from "@shared/enums";
 import { IProp, IResponseStatement } from "@shared/types";
 import { excludedSuggesterEntities } from "Theme/constants";
-import { AttributeIcon, Button, ButtonGroup, Dropdown } from "components";
+import {
+  AttributeIcon,
+  BundleButtonGroup,
+  Button,
+  ButtonGroup,
+  Dropdown,
+} from "components";
 import {
   ElvlButtonGroup,
   EntityDropzone,
@@ -320,6 +326,52 @@ export const StatementEditorActionTableRow: React.FC<
 
   const [isExpanded, setIsExpanded] = useState(true);
 
+  const renderExpandedRow = () => {
+    const { sAction } = filteredAction.data;
+
+    return (
+      <div
+        style={{
+          display: "grid",
+          marginLeft: "3rem",
+          marginBottom: "1rem",
+          gridTemplateColumns: "repeat(3, auto) 1fr",
+          gridColumnGap: "1rem",
+          fontSize: "1.4rem",
+          backgroundColor: "",
+        }}
+      >
+        <MoodVariantButtonGroup
+          border
+          onChange={(moodvariant) =>
+            updateAction(sAction.id, {
+              moodvariant: moodvariant,
+            })
+          }
+          value={sAction.moodvariant}
+        />
+        <div>{"logical op."}</div>
+        <div>
+          <BundleButtonGroup
+            bundleStart={sAction.bundleStart}
+            onBundleStartChange={(bundleStart) =>
+              updateAction(sAction.id, {
+                bundleStart: bundleStart,
+              })
+            }
+            bundleEnd={sAction.bundleEnd}
+            onBundleEndChange={(bundleEnd) =>
+              updateAction(sAction.id, {
+                bundleEnd: bundleEnd,
+              })
+            }
+          />
+        </div>
+        <div>{"certainty"}</div>
+      </div>
+    );
+  };
+
   return (
     <React.Fragment key={index}>
       <StyledGrid ref={dropRef} style={{ opacity }} hasOrder={hasOrder}>
@@ -382,32 +434,7 @@ export const StatementEditorActionTableRow: React.FC<
         </StyledGridColumn>
       </StyledGrid>
 
-      {isExpanded && (
-        <div
-          style={{
-            display: "grid",
-            marginLeft: "3rem",
-            marginBottom: "1rem",
-            gridTemplateColumns: "repeat(3, auto) 1fr",
-            gridColumnGap: "1rem",
-            fontSize: "1.4rem",
-            backgroundColor: "",
-          }}
-        >
-          <MoodVariantButtonGroup
-            border
-            onChange={(moodvariant) =>
-              updateAction(filteredAction.data.sAction.id, {
-                moodvariant: moodvariant,
-              })
-            }
-            value={filteredAction.data.sAction.moodvariant}
-          />
-          <div>{"logical op."}</div>
-          <div>{"start|end"}</div>
-          <div>{"certainty"}</div>
-        </div>
-      )}
+      {isExpanded && renderExpandedRow()}
 
       {!(
         draggedActantRow.category &&

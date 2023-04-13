@@ -7,6 +7,7 @@ import { Cloud } from "./basic/Cloud/Cloud";
 import { Dropdown } from "./basic/Dropdown/Dropdown";
 import { Dropzone } from "./basic/Dropzone/Dropzone";
 import { Header } from "./basic/Header/Header";
+import { BundleButtonGroup } from "./basic/IconButtonGroup/BundleButtonGroup";
 import { IconButtonGroup } from "./basic/IconButtonGroup/IconButtonGroup";
 import { IconFont } from "./basic/IconFont/IconFont";
 import { Input } from "./basic/Input/Input";
@@ -37,6 +38,7 @@ import { TypeBar } from "./basic/TypeBar/TypeBar";
 export {
   AttributeIcon,
   Box,
+  BundleButtonGroup,
   Button,
   ButtonGroup,
   ButtonGroups,
