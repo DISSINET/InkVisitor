@@ -1,6 +1,11 @@
 import { IEntity, IProp } from "@shared/types";
 import { excludedSuggesterEntities } from "Theme/constants";
-import { AttributeIcon, Button, ButtonGroup } from "components";
+import {
+  AttributeIcon,
+  BundleButtonGroup,
+  Button,
+  ButtonGroup,
+} from "components";
 import {
   ElvlButtonGroup,
   EntityDropzone,
@@ -453,7 +458,24 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
                   <div>{"Logical op."}</div>
                 </div>
                 <div style={{ display: "flex", flexDirection: "row" }}>
-                  <div>{"start|end"}</div>
+                  <div>
+                    <BundleButtonGroup
+                      bundleStart={prop.bundleStart}
+                      onBundleStartChange={(bundleStart) =>
+                        updateProp(prop.id, {
+                          ...prop,
+                          bundleStart: bundleStart,
+                        })
+                      }
+                      bundleEnd={prop.bundleEnd}
+                      onBundleEndChange={(bundleEnd) =>
+                        updateProp(prop.id, {
+                          ...prop,
+                          bundleEnd: bundleEnd,
+                        })
+                      }
+                    />
+                  </div>
                   <div>{"certainty"}</div>
                 </div>
               </div>

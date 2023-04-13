@@ -4,7 +4,7 @@ interface StyledWrapper {
   border?: boolean;
 }
 export const StyledWrapper = styled.div<StyledWrapper>`
-  display: flex;
+  display: inline-flex;
   border: ${({ theme, border }) =>
     border ? `${theme.borderWidth[1]} solid ${theme.color["grey"]}` : ""};
   border-radius: ${({ theme }) => theme.borderRadius["xs"]};

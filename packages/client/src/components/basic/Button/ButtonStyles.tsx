@@ -16,7 +16,7 @@ interface IButtonStyle {
 export const StyledButton = styled.button.attrs(({ ref }) => ({
   ref: ref,
 }))<IButtonStyle>`
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   width: ${({ fullWidth }) => (fullWidth ? "100%" : "auto")};
