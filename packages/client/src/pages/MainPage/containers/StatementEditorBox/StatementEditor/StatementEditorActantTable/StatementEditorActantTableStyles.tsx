@@ -65,3 +65,12 @@ export const StyledCIGrid = styled.div`
   max-width: 100%;
   align-items: center;
 `;
+
+export const StyledExpandedRow = styled.div`
+  display: grid;
+  margin-left: 3rem;
+  margin-bottom: 1rem;
+  grid-template-columns: repeat(3, auto) 1fr;
+  grid-column-gap: 1rem;
+  font-size: 1.4rem;
+`;

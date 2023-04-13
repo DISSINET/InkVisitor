@@ -1,4 +1,3 @@
-import { actantPositionDict } from "@shared/dictionaries";
 import { EntityEnums } from "@shared/enums";
 import {
   IEntity,
@@ -7,15 +6,18 @@ import {
   IStatementActant,
 } from "@shared/types";
 import { excludedSuggesterEntities } from "Theme/constants";
-import { AttributeIcon, Button, ButtonGroup } from "components";
 import {
-  AttributeButtonGroup,
+  AttributeIcon,
+  BundleButtonGroup,
+  Button,
+  ButtonGroup,
+} from "components";
+import {
   ElvlButtonGroup,
   EntityDropzone,
   EntitySuggester,
   EntityTag,
   LogicButtonGroup,
-  MoodVariantButtonGroup,
   PositionButtonGroup,
 } from "components/advanced";
 import { useSearchParams } from "hooks";
@@ -27,6 +29,7 @@ import {
   useDrop,
 } from "react-dnd";
 import { FaGripVertical, FaPlus, FaTrashAlt } from "react-icons/fa";
+import { TbSettingsAutomation, TbSettingsFilled } from "react-icons/tb";
 import { UseMutationResult } from "react-query";
 import { setDraggedActantRow } from "redux/features/rowDnd/draggedActantRowSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
@@ -45,12 +48,12 @@ import { StatementEditorActantIdentification } from "./StatementEditorActantIden
 import {
   StyledCI,
   StyledCIHeading,
+  StyledExpandedRow,
   StyledGrid,
   StyledGridColumn,
   StyledRow,
   StyledTagWrapper,
 } from "./StatementEditorActantTableStyles";
-import { TbSettingsFilled, TbSettingsAutomation } from "react-icons/tb";
 
 interface StatementEditorActantTableRow {
   filteredActant: FilteredActantObject;
@@ -95,6 +98,13 @@ export const StatementEditorActantTableRow: React.FC<
 }) => {
   const isInsideTemplate = statement.isTemplate || false;
   const { statementId, territoryId } = useSearchParams();
+  const {
+    actant,
+    sActant,
+  }: {
+    actant?: IEntity;
+    sActant: IStatementActant;
+  } = filteredActant.data;
 
   const dropRef = useRef<HTMLTableRowElement>(null);
   const dragRef = useRef<HTMLTableCellElement>(null);
@@ -146,13 +156,6 @@ export const StatementEditorActantTableRow: React.FC<
   };
 
   const renderActantCell = () => {
-    const {
-      actant,
-      sActant,
-    }: {
-      actant?: IEntity;
-      sActant: IStatementActant;
-    } = filteredActant.data;
     return actant ? (
       <StyledTagWrapper>
         <EntityDropzone
@@ -215,7 +218,6 @@ export const StatementEditorActantTableRow: React.FC<
   };
 
   const renderPositionCell = () => {
-    const { sActant } = filteredActant.data;
     return (
       <PositionButtonGroup
         border
@@ -233,14 +235,6 @@ export const StatementEditorActantTableRow: React.FC<
     useState<boolean>(false);
 
   const renderAttributesCell = () => {
-    const {
-      actant,
-      sActant,
-    }: {
-      actant?: IEntity;
-      sActant: IStatementActant;
-    } = filteredActant.data;
-
     const { entityId: propOriginId, id: propRowId } = sActant;
 
     return (
@@ -453,22 +447,27 @@ export const StatementEditorActantTableRow: React.FC<
 
       {/* Expanded Row */}
       {isExpanded && (
-        <div
-          style={{
-            display: "grid",
-            marginLeft: "3rem",
-            marginBottom: "1rem",
-            gridTemplateColumns: "repeat(3, auto) 1fr",
-            gridColumnGap: "1rem",
-            fontSize: "1.4rem",
-            backgroundColor: "",
-          }}
-        >
+        <StyledExpandedRow>
           <div>{"virtuality"}</div>
           <div>{"partivity"}</div>
           <div>{"logical op."}</div>
-          <div>{"bundle start|end"}</div>
-        </div>
+          <div>
+            <BundleButtonGroup
+              bundleStart={sActant.bundleStart}
+              onBundleStartChange={(bundleStart) =>
+                updateActant(sActant.id, {
+                  bundleStart: bundleStart,
+                })
+              }
+              bundleEnd={sActant.bundleEnd}
+              onBundleEndChange={(bundleEnd) =>
+                updateActant(sActant.id, {
+                  bundleEnd: bundleEnd,
+                })
+              }
+            />
+          </div>
+        </StyledExpandedRow>
       )}
 
       {/* Prop group */}

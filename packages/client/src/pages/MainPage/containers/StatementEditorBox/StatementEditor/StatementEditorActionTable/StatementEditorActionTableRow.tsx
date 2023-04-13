@@ -39,6 +39,7 @@ import {
 } from "types";
 import { dndHoverFn } from "utils";
 import {
+  StyledExpandedRow,
   StyledGrid,
   StyledGridColumn,
 } from "./StatementEditorActionTableStyles";
@@ -83,6 +84,7 @@ export const StatementEditorActionTableRow: React.FC<
 }) => {
   const isInsideTemplate = statement.isTemplate || false;
   const { statementId, territoryId } = useSearchParams();
+  const { action, sAction } = filteredAction.data;
 
   const dropRef = useRef<HTMLTableRowElement>(null);
   const dragRef = useRef<HTMLTableCellElement>(null);
@@ -133,7 +135,6 @@ export const StatementEditorActionTableRow: React.FC<
   drag(dragRef);
 
   const renderActionCell = () => {
-    const { action, sAction } = filteredAction.data;
     return action ? (
       <EntityDropzone
         onSelected={(newSelectedId: string) => {
@@ -194,7 +195,6 @@ export const StatementEditorActionTableRow: React.FC<
   const [modalOpen, setModalOpen] = useState<boolean>(false);
 
   const renderButtonsCell = () => {
-    const { action, sAction } = filteredAction.data;
     const { actionId: propOriginId, id: rowId } = sAction;
 
     return (
@@ -326,52 +326,6 @@ export const StatementEditorActionTableRow: React.FC<
 
   const [isExpanded, setIsExpanded] = useState(true);
 
-  const renderExpandedRow = () => {
-    const { sAction } = filteredAction.data;
-
-    return (
-      <div
-        style={{
-          display: "grid",
-          marginLeft: "3rem",
-          marginBottom: "1rem",
-          gridTemplateColumns: "repeat(3, auto) 1fr",
-          gridColumnGap: "1rem",
-          fontSize: "1.4rem",
-          backgroundColor: "",
-        }}
-      >
-        <MoodVariantButtonGroup
-          border
-          onChange={(moodvariant) =>
-            updateAction(sAction.id, {
-              moodvariant: moodvariant,
-            })
-          }
-          value={sAction.moodvariant}
-        />
-        <div>{"logical op."}</div>
-        <div>
-          <BundleButtonGroup
-            bundleStart={sAction.bundleStart}
-            onBundleStartChange={(bundleStart) =>
-              updateAction(sAction.id, {
-                bundleStart: bundleStart,
-              })
-            }
-            bundleEnd={sAction.bundleEnd}
-            onBundleEndChange={(bundleEnd) =>
-              updateAction(sAction.id, {
-                bundleEnd: bundleEnd,
-              })
-            }
-          />
-        </div>
-        <div>{"certainty"}</div>
-      </div>
-    );
-  };
-
   return (
     <React.Fragment key={index}>
       <StyledGrid ref={dropRef} style={{ opacity }} hasOrder={hasOrder}>
@@ -387,10 +341,8 @@ export const StatementEditorActionTableRow: React.FC<
           {
             <LogicButtonGroup
               border
-              value={filteredAction.data.sAction.logic}
-              onChange={(logic) =>
-                updateAction(filteredAction.data.sAction.id, { logic: logic })
-              }
+              value={sAction.logic}
+              onChange={(logic) => updateAction(sAction.id, { logic: logic })}
             />
           }
         </StyledGridColumn>
@@ -404,11 +356,9 @@ export const StatementEditorActionTableRow: React.FC<
               options={moodDict}
               value={[allEntities]
                 .concat(moodDict)
-                .filter((i: any) =>
-                  filteredAction.data.sAction.mood.includes(i.value)
-                )}
+                .filter((i: any) => sAction.mood.includes(i.value))}
               onChange={(newValue: any) => {
-                updateAction(filteredAction.data.sAction.id, {
+                updateAction(sAction.id, {
                   mood: newValue ? newValue.map((v: any) => v.value) : [],
                 });
               }}
@@ -434,15 +384,47 @@ export const StatementEditorActionTableRow: React.FC<
         </StyledGridColumn>
       </StyledGrid>
 
-      {isExpanded && renderExpandedRow()}
+      {/* Expanded row */}
+      {isExpanded && (
+        <StyledExpandedRow>
+          <MoodVariantButtonGroup
+            border
+            onChange={(moodvariant) =>
+              updateAction(sAction.id, {
+                moodvariant: moodvariant,
+              })
+            }
+            value={sAction.moodvariant}
+          />
+          <div>{"logical op."}</div>
+          <div>
+            <BundleButtonGroup
+              bundleStart={sAction.bundleStart}
+              onBundleStartChange={(bundleStart) =>
+                updateAction(sAction.id, {
+                  bundleStart: bundleStart,
+                })
+              }
+              bundleEnd={sAction.bundleEnd}
+              onBundleEndChange={(bundleEnd) =>
+                updateAction(sAction.id, {
+                  bundleEnd: bundleEnd,
+                })
+              }
+            />
+          </div>
+          <div>{"certainty"}</div>
+        </StyledExpandedRow>
+      )}
 
+      {/* Prop groups */}
       {!(
         draggedActantRow.category &&
         draggedActantRow.category === DraggedPropRowCategory.ACTION
       ) &&
         renderPropGroup(
-          filteredAction.data.sAction.actionId,
-          filteredAction.data.sAction.props,
+          sAction.actionId,
+          sAction.props,
           DraggedPropRowCategory.ACTION
         )}
     </React.Fragment>
