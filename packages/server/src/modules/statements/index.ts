@@ -370,8 +370,11 @@ export default Router()
         const rels = (
           await Relation.getForEntity(req.db.connection, origId)
         ).map((r) => getRelationClass(r));
-        relsErr =
-          relsErr && (await Relation.copyMany(req, rels, origId, newId));
+        if (
+          (await Relation.copyMany(req, rels, origId, newId)) !== rels.length
+        ) {
+          relsErr = true;
+        }
       }
 
       let msg = `${statementsCount} statements has been copied under '${territory.label}'`;

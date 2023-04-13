@@ -418,8 +418,8 @@ export default class Relation implements IRelationModel {
     relations: Relation[],
     originalEntityId: string,
     targetEntityId: string
-  ): Promise<boolean> {
-    let relationConflict = false;
+  ): Promise<number> {
+    let relationsCopied = 0;
 
     for (const relation of relations) {
       // replace original entity id with cloned id
@@ -433,13 +433,14 @@ export default class Relation implements IRelationModel {
         await relation.beforeSave(request);
         await relation.save(request.db.connection);
         await relation.afterSave(request);
+        console.log("relation copied", relation.entityIds);
+        relationsCopied++;
       } catch (e) {
         console.log("[Relation.copyMany]: failed to copy relation", e);
-        relationConflict = true;
       }
     }
 
-    return relationConflict;
+    return relationsCopied;
   }
   /**
    * Removes multiple relation entries

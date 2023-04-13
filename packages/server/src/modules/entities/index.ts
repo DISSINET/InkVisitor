@@ -243,7 +243,7 @@ export default Router()
       const rels = (
         await Relation.getForEntity(request.db.connection, originalId)
       ).map((r) => getRelationClass(r));
-      const relationConflict = await Relation.copyMany(
+      const relsCopied = await Relation.copyMany(
         request,
         rels,
         originalId,
@@ -252,9 +252,10 @@ export default Router()
 
       return {
         result: true,
-        message: relationConflict
-          ? "There has been at least one conflict while copying relations"
-          : undefined,
+        message:
+          relsCopied !== rels.length
+            ? "There has been at least one conflict while copying relations"
+            : undefined,
         data: clone,
       };
     })
