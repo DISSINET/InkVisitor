@@ -277,19 +277,25 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
             </div>
             {isExpanded && (
               <div style={{ display: "flex", flexWrap: "wrap" }}>
-                <div>
-                  <LogicButtonGroup
-                    border
-                    value={prop.type.logic}
-                    onChange={(logic) =>
-                      updateProp(prop.id, {
-                        type: { ...prop.type, logic: logic },
-                      })
-                    }
-                  />
-                </div>
-                <div>{"virtuality "}</div>
-                <div>{"partivity"}</div>
+                {!disabledAttributes.type?.includes("logic") && (
+                  <div>
+                    <LogicButtonGroup
+                      border
+                      value={prop.type.logic}
+                      onChange={(logic) =>
+                        updateProp(prop.id, {
+                          type: { ...prop.type, logic: logic },
+                        })
+                      }
+                    />
+                  </div>
+                )}
+                {!disabledAttributes.type?.includes("virtuality") && (
+                  <div>{"virtuality "}</div>
+                )}
+                {!disabledAttributes.type?.includes("partitivity") && (
+                  <div>{"partitivity"}</div>
+                )}
               </div>
             )}
           </div>
@@ -387,30 +393,36 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
             </div>
             {isExpanded && (
               <div style={{ display: "flex", flexWrap: "wrap" }}>
-                <div>
-                  <LogicButtonGroup
-                    border
-                    value={prop.value.logic}
-                    onChange={(logic) =>
-                      updateProp(prop.id, {
-                        value: {
-                          ...prop.value,
-                          logic: logic,
-                        },
-                      })
-                    }
-                  />
-                </div>
-                <div>{"virtuality "}</div>
-                <div>{"partivity"}</div>
+                {!disabledAttributes.value?.includes("logic") && (
+                  <div>
+                    <LogicButtonGroup
+                      border
+                      value={prop.value.logic}
+                      onChange={(logic) =>
+                        updateProp(prop.id, {
+                          value: {
+                            ...prop.value,
+                            logic: logic,
+                          },
+                        })
+                      }
+                    />
+                  </div>
+                )}
+                {!disabledAttributes.value?.includes("virtuality") && (
+                  <div>{"virtuality "}</div>
+                )}
+                {!disabledAttributes.value?.includes("partitivity") && (
+                  <div>{"partitivity"}</div>
+                )}
               </div>
             )}
           </div>
         </StyledPropLineColumn>
-        {/* S elvl */}
         <StyledPropLineColumn>
           <div style={{ display: "flex", flexDirection: "column" }}>
             <div style={{ display: "flex", flexDirection: "row" }}>
+              {/* Elvl */}
               {!disabledAttributes.statement?.includes("elvl") && (
                 <ElvlButtonGroup
                   border
@@ -424,11 +436,13 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
                 />
               )}
               {/* Logic */}
-              <LogicButtonGroup
-                border
-                value={prop.logic}
-                onChange={(logic) => updateProp(prop.id, { logic: logic })}
-              />
+              {!disabledAttributes.statement?.includes("logic") && (
+                <LogicButtonGroup
+                  border
+                  value={prop.logic}
+                  onChange={(logic) => updateProp(prop.id, { logic: logic })}
+                />
+              )}
               {/* mood */}
               {!disabledAttributes.statement?.includes("mood") && "mood"}
             </div>
@@ -455,7 +469,9 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
                       />
                     )}
                   </div>
-                  <div>{"Logical op."}</div>
+                  {!disabledAttributes.statement?.includes(
+                    "bundleOperator"
+                  ) && <div>{"Logical op."}</div>}
                 </div>
                 <div style={{ display: "flex", flexDirection: "row" }}>
                   <div>
@@ -476,7 +492,10 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
                       }
                     />
                   </div>
-                  <div>{"certainty"}</div>
+                  <div>
+                    {!disabledAttributes.statement?.includes("certainty") &&
+                      "certainty"}
+                  </div>
                 </div>
               </div>
             )}
