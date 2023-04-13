@@ -99,7 +99,7 @@ class UserDoesNotExits extends CustomError {
  * UserDoesNotExits will be thrown when attempting to remove/update the user entry, which does not exist
  */
 class UserNotActiveError extends CustomError {
-  public static code = 405;
+  public static code = 403;
   public static title = "Inactive user";
   public static message = "User $1 is not active";
 
@@ -117,9 +117,13 @@ class EntityDoesNotExist extends CustomError {
   public static title = "Missing entity";
   public static message = "Entity $1 does not exist";
 
-  constructor(m: string, entityId: string) {
+  constructor(m: string, entityId?: string) {
     super(m);
-    this.message = this.message.replace("$1", entityId);
+    if (entityId) {
+      this.message = this.message.replace("$1", entityId);
+    } else {
+      this.message = this.message.replace(" $1 ", " ");
+    }
   }
 }
 

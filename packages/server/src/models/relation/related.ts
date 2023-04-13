@@ -4,7 +4,10 @@ import { Relation as RelationTypes } from "@shared/types";
 import { Connection } from "rethinkdb-ts";
 import { InternalServerError, ModelNotValidError } from "@shared/types/errors";
 
-export default class Related extends Relation implements RelationTypes.IRelated {
+export default class Related
+  extends Relation
+  implements RelationTypes.IRelated
+{
   type: RelationEnums.Type.Related;
   entityIds: [string, string];
   order: number;
@@ -23,27 +26,37 @@ export default class Related extends Relation implements RelationTypes.IRelated 
    */
   validateEntitiesData(): Error | null {
     for (const i in this.entityIds) {
-      const loadedEntity = this.entities?.find(e => e.id === this.entityIds[i]);
+      const loadedEntity = this.entities?.find(
+        (e) => e.id === this.entityIds[i]
+      );
       if (!loadedEntity) {
-        return new InternalServerError('', `cannot check entity's class - not preloaded`);
+        return new InternalServerError(
+          "",
+          "cannot check entity's class - not preloaded"
+        );
       }
 
-      if (!EntityEnums.IsPLOGESTRB(loadedEntity.class) && loadedEntity.isTemplate) {
-        return new ModelNotValidError(`Entity ${loadedEntity.id} must not be a template`);
+      if (
+        !EntityEnums.IsPLOGESTRB(loadedEntity.class) &&
+        loadedEntity.isTemplate
+      ) {
+        return new ModelNotValidError(
+          `Entity ${loadedEntity.id} must not be a template`
+        );
       }
     }
 
     return null;
   }
 
-  static async getRelatedForwardConnections (
+  static async getRelatedForwardConnections(
     conn: Connection,
     parentId: string
   ): Promise<RelationTypes.IRelated[]> {
-    const out: RelationTypes.IRelated[] = await Relation.getForEntity(
+    const out: RelationTypes.IRelated[] = await Relation.findForEntity(
       conn,
       parentId,
-      RelationEnums.Type.Related,
+      RelationEnums.Type.Related
     );
 
     // sort by order
@@ -54,6 +67,5 @@ export default class Related extends Relation implements RelationTypes.IRelated 
     );
 
     return out;
-  };
-
+  }
 }

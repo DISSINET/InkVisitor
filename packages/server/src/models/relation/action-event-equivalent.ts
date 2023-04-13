@@ -5,7 +5,10 @@ import { Connection } from "rethinkdb-ts";
 import Superclass from "./superclass";
 import { ModelNotValidError } from "@shared/types/errors";
 
-export default class ActionEventEquivalent extends Relation implements RelationTypes.IActionEventEquivalent {
+export default class ActionEventEquivalent
+  extends Relation
+  implements RelationTypes.IActionEventEquivalent
+{
   type: RelationEnums.Type.ActionEventEquivalent;
   entityIds: [string, string];
 
@@ -22,8 +25,15 @@ export default class ActionEventEquivalent extends Relation implements RelationT
     maxNestLvl: number,
     nestLvl: number
   ): Promise<
-    RelationTypes.IConnection<RelationTypes.IActionEventEquivalent, RelationTypes.ISuperclass>[]> {
-    const out: RelationTypes.IConnection<RelationTypes.IActionEventEquivalent, RelationTypes.ISuperclass>[] = [];
+    RelationTypes.IConnection<
+      RelationTypes.IActionEventEquivalent,
+      RelationTypes.ISuperclass
+    >[]
+  > {
+    const out: RelationTypes.IConnection<
+      RelationTypes.IActionEventEquivalent,
+      RelationTypes.ISuperclass
+    >[] = [];
 
     if (nestLvl > maxNestLvl) {
       return out;
@@ -32,7 +42,7 @@ export default class ActionEventEquivalent extends Relation implements RelationT
     let relations: RelationTypes.IActionEventEquivalent[] = [];
 
     if (asClass === EntityEnums.Class.Action) {
-      relations = await Relation.getForEntity(
+      relations = await Relation.findForEntity(
         conn,
         entityId,
         RelationEnums.Type.ActionEventEquivalent,
@@ -62,7 +72,7 @@ export default class ActionEventEquivalent extends Relation implements RelationT
     }
 
     return out;
-  };
+  }
 
   static async getActionEventEquivalentInverseConnections(
     conn: Connection,
@@ -72,7 +82,7 @@ export default class ActionEventEquivalent extends Relation implements RelationT
     let out: RelationTypes.IActionEventEquivalent[] = [];
 
     if (asClass === EntityEnums.Class.Concept) {
-      out = await Relation.getForEntity(
+      out = await Relation.findForEntity(
         conn,
         parentId,
         RelationEnums.Type.ActionEventEquivalent,
@@ -81,6 +91,5 @@ export default class ActionEventEquivalent extends Relation implements RelationT
     }
 
     return out;
-  };
-
+  }
 }

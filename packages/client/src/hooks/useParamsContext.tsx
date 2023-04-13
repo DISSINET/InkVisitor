@@ -111,7 +111,7 @@ export const SearchParamsProvider = ({
       }
       setDetailId(newDetailIdArray.join(arrJoinChar));
     }
-    setSelectedDetailId(id);
+    setTimeout(() => setSelectedDetailId(id), 100);
   };
 
   const removeDetailId = (id: string) => {

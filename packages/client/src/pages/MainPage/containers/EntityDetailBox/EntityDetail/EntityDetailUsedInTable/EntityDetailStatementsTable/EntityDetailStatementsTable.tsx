@@ -2,6 +2,7 @@ import { EntityEnums } from "@shared/enums";
 import {
   IEntity,
   IResponseUsedInStatement,
+  IStatement,
   IStatementActant,
   IStatementAction,
 } from "@shared/types";
@@ -167,9 +168,12 @@ export const EntityDetailStatementsTable: React.FC<
                   noBorder
                   tooltipLabel="edit statement"
                   onClick={async () => {
-                    if (entity.data.territory) {
-                      setStatementId(entity.id);
-                      setTerritoryId(entity.data.territory.id);
+                    if (entity.class === EntityEnums.Class.Statement) {
+                      const statement = entity as IStatement;
+                      if (statement.data.territory) {
+                        setStatementId(statement.id);
+                        setTerritoryId(statement.data.territory.territoryId);
+                      }
                     }
                   }}
                 />

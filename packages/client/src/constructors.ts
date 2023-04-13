@@ -168,15 +168,19 @@ export const InstActant = async (
 ) => {
   actant.props = await InstProps(actant.props, userRole);
 
-  const eReq = await api.entitiesGet(actant.entityId);
-  const actantE = eReq.data;
+  if (actant?.entityId) {
+    const eReq = await api.entitiesGet(actant.entityId);
+    const actantE = eReq.data;
 
-  if (actantE && actantE.isTemplate) {
-    const instActantId = await InstTemplate(actantE, userRole);
-    if (instActantId) {
-      actant.entityId = instActantId;
+    if (actantE && actantE.isTemplate) {
+      const instActantId = await InstTemplate(actantE, userRole);
+
+      if (instActantId) {
+        actant.entityId = instActantId;
+      }
     }
   }
+
   return actant;
 };
 
@@ -186,14 +190,16 @@ export const InstAction: any = async (
 ) => {
   action.props = await InstProps(action.props, userRole);
 
-  const eReq = await api.entitiesGet(action.actionId);
-  const actionE = eReq.data;
+  if (action?.actionId) {
+    const eReq = await api.entitiesGet(action.actionId);
+    const actionE = eReq.data;
 
-  if (actionE && actionE.isTemplate) {
-    const instActionId = await InstTemplate(actionE, userRole);
+    if (actionE && actionE.isTemplate) {
+      const instActionId = await InstTemplate(actionE, userRole);
 
-    if (instActionId) {
-      action.actionId = instActionId;
+      if (instActionId) {
+        action.actionId = instActionId;
+      }
     }
   }
   return action;
@@ -203,8 +209,9 @@ export const InstAction: any = async (
 // TODO #952 handle conflicts in Templates application
 
 export const InstTemplate = async (
-  templateEntity: IEntity | IStatement,
-  userRole: UserEnums.Role
+  templateEntity: IEntity | IStatement | ITerritory,
+  userRole: UserEnums.Role,
+  territoryParentId?: string
 ): Promise<string | false> => {
   if (templateEntity.isTemplate) {
     let iEntity: false | IEntity = false;
@@ -217,6 +224,15 @@ export const InstTemplate = async (
       for (const [ai, actant] of iEntity.data.actants.entries()) {
         iEntity.data.actants[ai] = await InstActant(actant, userRole);
       }
+    } else if (
+      templateEntity.class === EntityEnums.Class.Territory &&
+      territoryParentId
+    ) {
+      iEntity = DTerritory(
+        { ...(templateEntity as ITerritory) },
+        territoryParentId,
+        userRole
+      );
     } else {
       // entity is not a statement
       iEntity = DEntity({ ...templateEntity }, userRole);
@@ -261,7 +277,6 @@ export const applyTemplate = async (
     if (templateEntity.class === EntityEnums.Class.Statement) {
       // entity is a statement
       for (const [ai, action] of newEntity.data.actions.entries()) {
-        console.log(action);
         newEntity.data.actions[ai] = await InstAction(action, userRole);
       }
       for (const [ai, actant] of newEntity.data.actants.entries()) {
@@ -381,7 +396,7 @@ export const DStatementActants = (
   });
 };
 
-export const DStatementReferences = (
+export const DReferences = (
   referenceToDuplicate: IReference[]
 ): IReference[] => {
   return referenceToDuplicate.map((r) => {
@@ -400,7 +415,7 @@ export const DEntity = (entity: IEntity, userRole: UserEnums.Role): IEntity => {
     language: entity.language,
     notes: entity.notes,
     props: DProps(entity.props),
-    references: entity.references,
+    references: DReferences(entity.references),
     status:
       userRole === UserEnums.Role.Admin
         ? EntityEnums.Status.Approved
@@ -409,9 +424,40 @@ export const DEntity = (entity: IEntity, userRole: UserEnums.Role): IEntity => {
     usedTemplate: entity.usedTemplate,
   };
 
-  duplicatedEntity.references.forEach((r) => (r.id = uuidv4()));
-
   return duplicatedEntity;
+};
+
+// duplicate territory
+export const DTerritory = (
+  entity: ITerritory,
+  territoryParentId: string,
+  userRole: UserEnums.Role
+): ITerritory => {
+  const duplicatedTerritory: ITerritory = {
+    id: uuidv4(),
+    class: EntityEnums.Class.Territory,
+    data: {
+      ...entity.data,
+      parent: {
+        territoryId: territoryParentId,
+        order: EntityEnums.Order.Last,
+      },
+    },
+    label: `[COPY OF] ${entity.label}`,
+    detail: entity.detail,
+    language: entity.language,
+    notes: entity.notes,
+    props: DProps(entity.props),
+    references: DReferences(entity.references),
+    status:
+      userRole === UserEnums.Role.Admin
+        ? EntityEnums.Status.Approved
+        : EntityEnums.Status.Pending,
+    isTemplate: entity.isTemplate,
+    usedTemplate: entity.usedTemplate,
+  };
+
+  return duplicatedTerritory;
 };
 
 export const DProps = (oldProps: IProp[]): IProp[] => {

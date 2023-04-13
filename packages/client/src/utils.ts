@@ -189,7 +189,7 @@ export const getRelationInvertedRules = (
   relationTypes?: RelationEnums.Type[]
 ) => {
   const typesToFilter = relationTypes ? relationTypes : RelationEnums.AllTypes;
-  return RelationEnums.AllTypes.filter((rule) => {
+  return typesToFilter.filter((rule) => {
     if (
       Relation.RelationRules[rule]?.asymmetrical &&
       Relation.RelationRules[rule]?.allowedEntitiesPattern.some(

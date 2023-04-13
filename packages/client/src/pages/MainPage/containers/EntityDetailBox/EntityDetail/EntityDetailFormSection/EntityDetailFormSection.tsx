@@ -192,7 +192,6 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                 disabled={!userCanEdit}
                 width="full"
                 type="textarea"
-                rows={2}
                 value={entity.detail}
                 onChangeFn={async (newValue: string) => {
                   if (newValue !== entity.detail)
@@ -230,14 +229,16 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
             </StyledDetailContentRow>
           )}
 
-          {/* statement  terriroty */}
+          {/* statement terriroty */}
           {isStatementWithTerritory(entity) && (
             <StyledDetailContentRow>
               <StyledDetailContentRowLabel>
                 Territory
               </StyledDetailContentRowLabel>
               <StyledDetailContentRowValue>
-                <EntityTag entity={entity.entities[entity.data.territory.id]} />
+                <EntityTag
+                  entity={entity.entities[entity.data.territory.territoryId]}
+                />
               </StyledDetailContentRowValue>
             </StyledDetailContentRow>
           )}
