@@ -1,4 +1,5 @@
-import { certaintyDict, operatorDict } from "@shared/dictionaries";
+import { certaintyDict, moodDict, operatorDict } from "@shared/dictionaries";
+import { allEntities } from "@shared/dictionaries/entity";
 import { IProp } from "@shared/types";
 import { AttributeIcon, BundleButtonGroup, Dropdown } from "components";
 import {
@@ -44,7 +45,26 @@ export const PropGroupRowStatementAttributes: React.FC<
           />
         )}
         {/* mood */}
-        {!disabledAttributes.statement?.includes("mood") && "mood"}
+        {!disabledAttributes.statement?.includes("mood") && (
+          <Dropdown
+            width={100}
+            isMulti
+            disabled={!userCanEdit}
+            placeholder="mood"
+            tooltipLabel="mood"
+            icon={<AttributeIcon attributeName="mood" />}
+            options={moodDict}
+            value={[allEntities]
+              .concat(moodDict)
+              .filter((i: any) => prop.mood.includes(i.value))}
+            onChange={(newValue: any) => {
+              updateProp(prop.id, {
+                ...prop,
+                mood: newValue ? newValue.map((v: any) => v.value) : [],
+              });
+            }}
+          />
+        )}
       </div>
       {isExpanded && (
         <div

@@ -347,24 +347,23 @@ export const StatementEditorActionTableRow: React.FC<
           }
         </StyledGridColumn>
         <StyledGridColumn>
-          {
-            <Dropdown
-              width={100}
-              isMulti
-              disabled={!userCanEdit}
-              placeholder="mood"
-              icon={<AttributeIcon attributeName="mood" />}
-              options={moodDict}
-              value={[allEntities]
-                .concat(moodDict)
-                .filter((i: any) => sAction.mood.includes(i.value))}
-              onChange={(newValue: any) => {
-                updateAction(sAction.id, {
-                  mood: newValue ? newValue.map((v: any) => v.value) : [],
-                });
-              }}
-            />
-          }
+          <Dropdown
+            width={100}
+            isMulti
+            disabled={!userCanEdit}
+            placeholder="mood"
+            tooltipLabel="mood"
+            icon={<AttributeIcon attributeName="mood" />}
+            options={moodDict}
+            value={[allEntities]
+              .concat(moodDict)
+              .filter((i: any) => sAction.mood.includes(i.value))}
+            onChange={(newValue: any) => {
+              updateAction(sAction.id, {
+                mood: newValue ? newValue.map((v: any) => v.value) : [],
+              });
+            }}
+          />
         </StyledGridColumn>
         <StyledGridColumn>{renderButtonsCell()}</StyledGridColumn>
         <StyledGridColumn>
