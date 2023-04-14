@@ -11,6 +11,7 @@ import {
   BundleButtonGroup,
   Button,
   ButtonGroup,
+  Dropdown,
 } from "components";
 import {
   ElvlButtonGroup,
@@ -54,6 +55,11 @@ import {
   StyledRow,
   StyledTagWrapper,
 } from "./StatementEditorActantTableStyles";
+import {
+  operatorDict,
+  partitivityDict,
+  virtualityDict,
+} from "@shared/dictionaries";
 
 interface StatementEditorActantTableRow {
   filteredActant: FilteredActantObject;
@@ -448,9 +454,54 @@ export const StatementEditorActantTableRow: React.FC<
       {/* Expanded Row */}
       {isExpanded && (
         <StyledExpandedRow>
-          <div>{"virtuality"}</div>
-          <div>{"partivity"}</div>
-          <div>{"logical op."}</div>
+          <div>
+            <Dropdown
+              width={90}
+              placeholder="virtuality"
+              tooltipLabel="virtuality"
+              icon={<AttributeIcon attributeName="virtuality" />}
+              disabled={!userCanEdit}
+              options={virtualityDict}
+              value={virtualityDict.find(
+                (i: any) => sActant.virtuality === i.value
+              )}
+              onChange={(newValue: any) => {
+                updateActant(sActant.id, { virtuality: newValue.value });
+              }}
+            />
+          </div>
+          <div>
+            <Dropdown
+              width={120}
+              placeholder="partitivity"
+              tooltipLabel="partitivity"
+              icon={<AttributeIcon attributeName="partitivity" />}
+              disabled={!userCanEdit}
+              options={partitivityDict}
+              value={partitivityDict.find(
+                (i: any) => sActant.partitivity === i.value
+              )}
+              onChange={(newValue: any) => {
+                updateActant(sActant.id, { partitivity: newValue.value });
+              }}
+            />
+          </div>
+          <div>
+            <Dropdown
+              width={50}
+              placeholder="logical operator"
+              tooltipLabel="logical operator"
+              icon={<AttributeIcon attributeName="bundleOperator" />}
+              disabled={!userCanEdit}
+              options={operatorDict}
+              value={operatorDict.find(
+                (i: any) => sActant.bundleOperator === i.value
+              )}
+              onChange={(newValue: any) => {
+                updateActant(sActant.id, { bundleOperator: newValue.value });
+              }}
+            />
+          </div>
           <div>
             <BundleButtonGroup
               bundleStart={sActant.bundleStart}

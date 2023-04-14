@@ -11,6 +11,7 @@ const getWidth = (width?: number | "full") => {
 };
 interface StyledSelectWrapper {
   width?: number | "full";
+  ref?: any;
 }
 export const StyledSelectWrapper = styled.div<StyledSelectWrapper>`
   display: inline-flex;

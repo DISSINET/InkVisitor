@@ -353,6 +353,7 @@ export const StatementEditorActionTableRow: React.FC<
               isMulti
               disabled={!userCanEdit}
               placeholder="mood"
+              icon={<AttributeIcon attributeName="mood" />}
               options={moodDict}
               value={[allEntities]
                 .concat(moodDict)
@@ -401,6 +402,7 @@ export const StatementEditorActionTableRow: React.FC<
               width={50}
               placeholder="logical operator"
               tooltipLabel="logical operator"
+              icon={<AttributeIcon attributeName="bundleOperator" />}
               disabled={!userCanEdit}
               options={operatorDict}
               value={operatorDict.find(
@@ -432,6 +434,7 @@ export const StatementEditorActionTableRow: React.FC<
               width={100}
               placeholder="certainty"
               tooltipLabel="certainty"
+              icon={<AttributeIcon attributeName="certainty" />}
               disabled={!userCanEdit}
               options={certaintyDict}
               value={certaintyDict.find(

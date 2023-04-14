@@ -42,6 +42,8 @@ interface Dropdown {
   autoFocus?: boolean;
   disableTyping?: boolean;
   suggester?: boolean;
+
+  icon?: JSX.Element;
   tooltipLabel?: string;
 
   // TODO: not implemented yet
@@ -66,6 +68,8 @@ export const Dropdown: React.FC<Dropdown> = ({
   autoFocus = false,
   disableTyping = false,
   suggester = false,
+
+  icon,
   tooltipLabel,
 
   allowAny = false,
