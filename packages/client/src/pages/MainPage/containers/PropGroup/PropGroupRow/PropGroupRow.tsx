@@ -1,16 +1,6 @@
 import { IEntity, IProp } from "@shared/types";
 import { excludedSuggesterEntities } from "Theme/constants";
-import {
-  AttributeIcon,
-  BundleButtonGroup,
-  Button,
-  ButtonGroup,
-} from "components";
-import {
-  ElvlButtonGroup,
-  LogicButtonGroup,
-  MoodVariantButtonGroup,
-} from "components/advanced";
+import { AttributeIcon, Button, ButtonGroup } from "components";
 import React, { useEffect, useRef, useState } from "react";
 import {
   DragSourceMonitor,
@@ -39,6 +29,7 @@ import {
   StyledGrid,
   StyledPropLineColumn,
 } from "../PropGroupStyles";
+import { PropGroupRowStatementAttributes } from "./PropGroupRowStatementAttributes";
 import { PropGroupRowType } from "./PropGroupRowType";
 import { PropGroupRowValue } from "./PropGroupRowValue";
 
@@ -213,86 +204,13 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
           />
         </StyledPropLineColumn>
         <StyledPropLineColumn>
-          <div style={{ display: "flex", flexDirection: "column" }}>
-            <div style={{ display: "flex", flexDirection: "row" }}>
-              {/* Elvl */}
-              {!disabledAttributes.statement?.includes("elvl") && (
-                <ElvlButtonGroup
-                  border
-                  value={prop.elvl}
-                  onChange={(elvl) =>
-                    updateProp(prop.id, {
-                      ...prop,
-                      elvl: elvl,
-                    })
-                  }
-                />
-              )}
-              {/* Logic */}
-              {!disabledAttributes.statement?.includes("logic") && (
-                <LogicButtonGroup
-                  border
-                  value={prop.logic}
-                  onChange={(logic) => updateProp(prop.id, { logic: logic })}
-                />
-              )}
-              {/* mood */}
-              {!disabledAttributes.statement?.includes("mood") && "mood"}
-            </div>
-            {isExpanded && (
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  flexWrap: "wrap",
-                }}
-              >
-                <div style={{ display: "flex", flexDirection: "row" }}>
-                  <div>
-                    {!disabledAttributes.statement?.includes("moodvariant") && (
-                      <MoodVariantButtonGroup
-                        border
-                        value={prop.moodvariant}
-                        onChange={(moodvariant) =>
-                          updateProp(prop.id, {
-                            ...prop,
-                            moodvariant: moodvariant,
-                          })
-                        }
-                      />
-                    )}
-                  </div>
-                  {!disabledAttributes.statement?.includes(
-                    "bundleOperator"
-                  ) && <div>{"Logical op."}</div>}
-                </div>
-                <div style={{ display: "flex", flexDirection: "row" }}>
-                  <div>
-                    <BundleButtonGroup
-                      bundleStart={prop.bundleStart}
-                      onBundleStartChange={(bundleStart) =>
-                        updateProp(prop.id, {
-                          ...prop,
-                          bundleStart: bundleStart,
-                        })
-                      }
-                      bundleEnd={prop.bundleEnd}
-                      onBundleEndChange={(bundleEnd) =>
-                        updateProp(prop.id, {
-                          ...prop,
-                          bundleEnd: bundleEnd,
-                        })
-                      }
-                    />
-                  </div>
-                  <div>
-                    {!disabledAttributes.statement?.includes("certainty") &&
-                      "certainty"}
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
+          <PropGroupRowStatementAttributes
+            prop={prop}
+            updateProp={updateProp}
+            isExpanded={isExpanded}
+            disabledAttributes={disabledAttributes}
+            userCanEdit={userCanEdit}
+          />
         </StyledPropLineColumn>
 
         <StyledPropLineColumn>

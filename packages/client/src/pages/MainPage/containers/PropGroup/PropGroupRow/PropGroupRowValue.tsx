@@ -1,6 +1,6 @@
 import { IEntity, IProp } from "@shared/types";
 import { excludedSuggesterEntities } from "Theme/constants";
-import { AttributeIcon, Button } from "components";
+import { AttributeIcon, Button, Dropdown } from "components";
 import {
   ElvlButtonGroup,
   EntityDropzone,
@@ -11,6 +11,7 @@ import {
 import React from "react";
 import { PropAttributeFilter, classesPropValue } from "types";
 import { StyledNoEntity } from "../PropGroupStyles";
+import { partitivityDict, virtualityDict } from "@shared/dictionaries";
 
 interface PropGroupRowValue {
   propValueEntity: IEntity;
@@ -148,10 +149,44 @@ export const PropGroupRowValue: React.FC<PropGroupRowValue> = ({
             </div>
           )}
           {!disabledAttributes.value?.includes("virtuality") && (
-            <div>{"virtuality "}</div>
+            <div>
+              <Dropdown
+                width={90}
+                placeholder="virtuality"
+                tooltipLabel="virtuality"
+                icon={<AttributeIcon attributeName="virtuality" />}
+                disabled={!userCanEdit}
+                options={virtualityDict}
+                value={virtualityDict.find(
+                  (i: any) => prop.value.virtuality === i.value
+                )}
+                onChange={(newValue: any) => {
+                  updateProp(prop.id, {
+                    value: { ...prop.value, virtuality: newValue.value },
+                  });
+                }}
+              />
+            </div>
           )}
           {!disabledAttributes.value?.includes("partitivity") && (
-            <div>{"partitivity"}</div>
+            <div>
+              <Dropdown
+                width={120}
+                placeholder="partitivity"
+                tooltipLabel="partitivity"
+                icon={<AttributeIcon attributeName="partitivity" />}
+                disabled={!userCanEdit}
+                options={partitivityDict}
+                value={partitivityDict.find(
+                  (i: any) => prop.value.partitivity === i.value
+                )}
+                onChange={(newValue: any) => {
+                  updateProp(prop.id, {
+                    value: { ...prop.value, partitivity: newValue.value },
+                  });
+                }}
+              />
+            </div>
           )}
         </div>
       )}
