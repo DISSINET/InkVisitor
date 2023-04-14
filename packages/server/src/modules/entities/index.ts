@@ -1,7 +1,7 @@
 import { mergeDeep } from "@common/functions";
 import { ResponseEntity, ResponseEntityDetail } from "@models/entity/response";
 import Audit from "@models/audit/audit";
-import { getEntityClass } from "@models/factory";
+import { getEntityClass, getRelationClass } from "@models/factory";
 import { findEntityById } from "@service/shorthands";
 import {
   IEntity,
@@ -207,6 +207,70 @@ export default Router()
       await Audit.createNew(request, model.id, request.body);
 
       return out;
+    })
+  )
+  /**
+   * @openapi
+   * /entities/:entityId/clone:
+   *   post:
+   *     description: Create a new cloned entity from another
+   *     tags:
+   *       - entities
+   *     responses:
+   *       200:
+   *         description: Returns generic response
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/IResponseGeneric"
+   */
+  .post(
+    "/:entityId/clone",
+    asyncRouteHandler<IResponseGeneric<IEntity>>(async (request: IRequest) => {
+      const originalId = request.params.entityId;
+      const original = await findEntityById(request.db, originalId);
+      if (!original) {
+        throw new EntityDoesNotExist(
+          "cannot copy entity - does not exist",
+          originalId
+        );
+      }
+
+      // clone the entry without id - should be created anew
+      const clone = getEntityClass({ ...original, id: "" });
+      if (!clone.isValid()) {
+        throw new ModelNotValidError("");
+      }
+
+      if (!clone.canBeCreatedByUser(request.getUserOrFail())) {
+        throw new PermissionDeniedError("entity cannot be copied");
+      }
+
+      await request.db.lock();
+
+      const saved = await clone.save(request.db.connection);
+      if (!saved) {
+        throw new InternalServerError("cannot copy entity");
+      }
+
+      const rels = (
+        await Relation.findForEntity(request.db.connection, originalId)
+      ).map((r) => getRelationClass(r));
+      const relsCopied = await Relation.copyMany(
+        request,
+        rels,
+        originalId,
+        clone.id
+      );
+
+      return {
+        result: true,
+        message:
+          relsCopied !== rels.length
+            ? "There has been at least one conflict while copying relations"
+            : undefined,
+        data: clone,
+      };
     })
   )
   /**
