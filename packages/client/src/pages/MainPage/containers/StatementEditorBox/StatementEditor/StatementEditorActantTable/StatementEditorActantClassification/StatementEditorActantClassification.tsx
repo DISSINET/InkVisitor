@@ -6,14 +6,16 @@ import {
 } from "@shared/types/statement";
 import { AttributeIcon, Button, ButtonGroup } from "components";
 import {
+  ElvlButtonGroup,
   EntityDropzone,
   EntitySuggester,
   EntityTag,
 } from "components/advanced";
 import AttributesEditor from "pages/MainPage/containers/AttributesEditor/AttributesEditor";
 import React, { useState } from "react";
-import { FaTrashAlt, FaUnlink } from "react-icons/fa";
+import { FaTrashAlt } from "react-icons/fa";
 import { UseMutationResult } from "react-query";
+import { AttributeData } from "types";
 import { StyledCIGrid } from "../StatementEditorActantTableStyles";
 
 interface StatementEditorActantClassification {
@@ -45,22 +47,22 @@ export const StatementEditorActantClassification: React.FC<
   const entity = statement.entities[classification.entityId];
   const [classificationModalOpen, setClassificationModalOpen] = useState(false);
 
+  const handleUpdate = (newData: AttributeData & { entityId?: string }) => {
+    updateActant(sActant.id, {
+      classifications: classifications.map((c) =>
+        c.id === classification.id ? { ...c, ...newData } : { ...c }
+      ),
+    });
+  };
+
   return (
     <>
       <StyledCIGrid>
         {entity ? (
           <EntityDropzone
             categoryTypes={[EntityEnums.Class.Concept]}
-            onSelected={(newSelectedId: string) => {
-              const newClassifications: IStatementClassification[] =
-                classifications.map((c) =>
-                  c.id === classification.id
-                    ? { ...c, entityId: newSelectedId }
-                    : { ...c }
-                );
-              updateActant(sActant.id, {
-                classifications: newClassifications,
-              });
+            onSelected={(entityId: string) => {
+              handleUpdate({ entityId });
             }}
             isInsideTemplate={isInsideTemplate}
             excludedActantIds={[entity.id]}
@@ -71,32 +73,26 @@ export const StatementEditorActantClassification: React.FC<
               unlinkButton={
                 userCanEdit && {
                   onClick: () => {
-                    updateActant(sActant.id, {
-                      classifications: classifications.map((c) =>
-                        c.id === classification.id
-                          ? { ...c, entityId: "" }
-                          : { ...c }
-                      ),
-                    });
+                    handleUpdate({ entityId: "" });
                   },
                   tooltipLabel: "unlink classification",
                 }
+              }
+              elvlButtonGroup={
+                <ElvlButtonGroup
+                  value={classification.elvl}
+                  onChange={(elvl) => {
+                    handleUpdate({ elvl });
+                  }}
+                />
               }
             />
           </EntityDropzone>
         ) : (
           <EntitySuggester
             categoryTypes={[EntityEnums.Class.Concept]}
-            onSelected={(newSelectedId: string) => {
-              const newClassifications: IStatementClassification[] =
-                classifications.map((c) =>
-                  c.id === classification.id
-                    ? { ...c, entityId: newSelectedId }
-                    : { ...c }
-                );
-              updateActant(sActant.id, {
-                classifications: newClassifications,
-              });
+            onSelected={(entityId: string) => {
+              handleUpdate({ entityId });
             }}
             openDetailOnCreate
             isInsideTemplate={isInsideTemplate}
@@ -125,14 +121,8 @@ export const StatementEditorActantClassification: React.FC<
                 ),
               });
             }}
-            updateActantId={(newId: string) => {
-              updateActant(sActant.id, {
-                classifications: classifications.map((c) =>
-                  c.id === classification.id
-                    ? { ...c, entityId: newId }
-                    : { ...c }
-                ),
-              });
+            updateActantId={(entityId: string) => {
+              handleUpdate({ entityId });
             }}
             classEntitiesActant={[EntityEnums.Class.Concept]}
             loading={updateStatementDataMutation.isLoading}

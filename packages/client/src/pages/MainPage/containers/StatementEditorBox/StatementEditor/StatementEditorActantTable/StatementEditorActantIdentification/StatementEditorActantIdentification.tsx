@@ -4,18 +4,20 @@ import {
   IStatementActant,
   IStatementIdentification,
 } from "@shared/types/statement";
+import { excludedSuggesterEntities } from "Theme/constants";
 import { AttributeIcon, Button, ButtonGroup } from "components";
 import {
+  ElvlButtonGroup,
   EntityDropzone,
   EntitySuggester,
   EntityTag,
 } from "components/advanced";
 import AttributesEditor from "pages/MainPage/containers/AttributesEditor/AttributesEditor";
 import React, { useState } from "react";
-import { FaTrashAlt, FaUnlink } from "react-icons/fa";
+import { FaTrashAlt } from "react-icons/fa";
 import { UseMutationResult } from "react-query";
-import { excludedSuggesterEntities } from "Theme/constants";
 import { StyledCIGrid } from "../StatementEditorActantTableStyles";
+import { AttributeData } from "types";
 
 interface StatementEditorActantIdentification {
   identifications: IStatementIdentification[];
@@ -48,22 +50,22 @@ export const StatementEditorActantIdentification: React.FC<
   const [identificationModalOpen, setIdentificationModalOpen] = useState(false);
   const entity = statement.entities[identification.entityId];
 
+  const handleUpdate = (newData: AttributeData & { entityId?: string }) => {
+    updateActant(sActant.id, {
+      identifications: identifications.map((c) =>
+        c.id === identification.id ? { ...c, ...newData } : { ...c }
+      ),
+    });
+  };
+
   return (
     <>
       <StyledCIGrid>
         {entity ? (
           <EntityDropzone
             categoryTypes={classEntitiesActant}
-            onSelected={(newSelectedId: string) => {
-              const newIdentifications: IStatementIdentification[] =
-                identifications.map((c) =>
-                  c.id === identification.id
-                    ? { ...c, entityId: newSelectedId }
-                    : { ...c }
-                );
-              updateActant(sActant.id, {
-                identifications: newIdentifications,
-              });
+            onSelected={(entityId: string) => {
+              handleUpdate({ entityId });
             }}
             isInsideTemplate={isInsideTemplate}
             excludedActantIds={[entity.id]}
@@ -75,32 +77,26 @@ export const StatementEditorActantIdentification: React.FC<
               unlinkButton={
                 userCanEdit && {
                   onClick: () => {
-                    updateActant(sActant.id, {
-                      identifications: identifications.map((c) =>
-                        c.id === identification.id
-                          ? { ...c, entityId: "" }
-                          : { ...c }
-                      ),
-                    });
+                    handleUpdate({ entityId: "" });
                   },
                   tooltipLabel: "unlink identification",
                 }
+              }
+              elvlButtonGroup={
+                <ElvlButtonGroup
+                  value={identification.elvl}
+                  onChange={(elvl) => {
+                    handleUpdate({ elvl });
+                  }}
+                />
               }
             />
           </EntityDropzone>
         ) : (
           <EntitySuggester
             categoryTypes={classEntitiesActant}
-            onSelected={(newSelectedId: string) => {
-              const newIdentifications: IStatementIdentification[] =
-                identifications.map((c) =>
-                  c.id === identification.id
-                    ? { ...c, entityId: newSelectedId }
-                    : { ...c }
-                );
-              updateActant(sActant.id, {
-                identifications: newIdentifications,
-              });
+            onSelected={(entityId: string) => {
+              handleUpdate({ entityId });
             }}
             openDetailOnCreate
             isInsideTemplate={isInsideTemplate}
@@ -130,14 +126,8 @@ export const StatementEditorActantIdentification: React.FC<
                 ),
               });
             }}
-            updateActantId={(newId: string) => {
-              updateActant(sActant.id, {
-                identifications: identifications.map((c) =>
-                  c.id === identification.id
-                    ? { ...c, entityId: newId }
-                    : { ...c }
-                ),
-              });
+            updateActantId={(entityId: string) => {
+              handleUpdate({ entityId });
             }}
             classEntitiesActant={classEntitiesActant}
             loading={updateStatementDataMutation.isLoading}
