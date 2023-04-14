@@ -368,7 +368,7 @@ export default Router()
         const newId = model.id;
 
         const rels = (
-          await Relation.getForEntity(req.db.connection, origId)
+          await Relation.findForEntity(req.db.connection, origId)
         ).map((r) => getRelationClass(r));
         if (
           (await Relation.copyMany(req, rels, origId, newId)) !== rels.length

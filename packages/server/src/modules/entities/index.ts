@@ -254,7 +254,7 @@ export default Router()
       }
 
       const rels = (
-        await Relation.getForEntity(request.db.connection, originalId)
+        await Relation.findForEntity(request.db.connection, originalId)
       ).map((r) => getRelationClass(r));
       const relsCopied = await Relation.copyMany(
         request,
