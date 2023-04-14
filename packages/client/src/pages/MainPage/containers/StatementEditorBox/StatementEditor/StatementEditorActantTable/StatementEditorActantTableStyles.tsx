@@ -60,7 +60,8 @@ export const StyledCIHeading = styled.p`
 export const StyledCIGrid = styled.div`
   margin-bottom: 0.5rem;
   display: grid;
-  grid-template-columns: auto auto;
+  grid-template-columns: repeat(4, auto);
+  grid-column-gap: 1rem;
   width: fit-content;
   max-width: 100%;
   align-items: center;

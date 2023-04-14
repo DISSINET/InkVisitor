@@ -7,12 +7,13 @@ import {
   StyledAttributeModalRowLabelIcon,
   StyledAttributeModalRowLabelText,
 } from "../AttributesEditorStyles";
+import { attributeIconsKeys } from "components/basic/AttributeIcon/AttributeIcon";
 
 interface AttributeRow {
   value: string | string[];
   items: { value: string; label: string }[];
   label: string;
-  attributeName: string;
+  attributeName: keyof typeof attributeIconsKeys;
   multi?: boolean;
   onChangeFn: (value: string | string[]) => void;
   disabled?: boolean;

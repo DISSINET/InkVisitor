@@ -1,22 +1,30 @@
+import { certaintyDict, moodDict } from "@shared/dictionaries";
+import { allEntities } from "@shared/dictionaries/entity";
 import { EntityEnums } from "@shared/enums";
 import { IResponseStatement } from "@shared/types";
 import {
   IStatementActant,
   IStatementClassification,
 } from "@shared/types/statement";
-import { AttributeIcon, Button, ButtonGroup } from "components";
+import { AttributeIcon, Button, ButtonGroup, Dropdown } from "components";
 import {
   ElvlButtonGroup,
   EntityDropzone,
   EntitySuggester,
   EntityTag,
+  LogicButtonGroup,
+  MoodVariantButtonGroup,
 } from "components/advanced";
 import AttributesEditor from "pages/MainPage/containers/AttributesEditor/AttributesEditor";
 import React, { useState } from "react";
 import { FaTrashAlt } from "react-icons/fa";
+import { TbSettingsAutomation, TbSettingsFilled } from "react-icons/tb";
 import { UseMutationResult } from "react-query";
 import { AttributeData } from "types";
-import { StyledCIGrid } from "../StatementEditorActantTableStyles";
+import {
+  StyledCIGrid,
+  StyledExpandedRow,
+} from "../StatementEditorActantTableStyles";
 
 interface StatementEditorActantClassification {
   classifications: IStatementClassification[];
@@ -54,6 +62,8 @@ export const StatementEditorActantClassification: React.FC<
       ),
     });
   };
+
+  const [isExpanded, setIsExpanded] = useState(true);
 
   return (
     <>
@@ -99,7 +109,14 @@ export const StatementEditorActantClassification: React.FC<
             territoryActants={territoryActants}
           />
         )}
-        <ButtonGroup style={{ marginLeft: "1rem" }}>
+
+        <LogicButtonGroup
+          border
+          value={classification.logic}
+          onChange={(logic) => handleUpdate({ logic })}
+        />
+
+        <ButtonGroup>
           <AttributesEditor
             modalOpen={classificationModalOpen}
             setModalOpen={setClassificationModalOpen}
@@ -157,7 +174,69 @@ export const StatementEditorActantClassification: React.FC<
             />
           )}
         </ButtonGroup>
+        <Button
+          inverted
+          onClick={() => setIsExpanded(!isExpanded)}
+          icon={
+            isExpanded ? (
+              <TbSettingsFilled size={16} />
+            ) : (
+              <TbSettingsAutomation
+                size={16}
+                style={{ transform: "rotate(90deg)" }}
+              />
+            )
+          }
+        />
       </StyledCIGrid>
+
+      {/* Expanded Row */}
+      {isExpanded && (
+        <StyledExpandedRow>
+          <div>
+            <Dropdown
+              width={100}
+              isMulti
+              disabled={!userCanEdit}
+              placeholder="mood"
+              tooltipLabel="mood"
+              icon={<AttributeIcon attributeName="mood" />}
+              options={moodDict}
+              value={[allEntities]
+                .concat(moodDict)
+                .filter((i: any) => classification.mood.includes(i.value))}
+              onChange={(newValue: any) => {
+                handleUpdate({
+                  mood: newValue ? newValue.map((v: any) => v.value) : [],
+                });
+              }}
+            />
+          </div>
+          <div>
+            <MoodVariantButtonGroup
+              border
+              value={classification.moodvariant}
+              onChange={(moodvariant) => handleUpdate({ moodvariant })}
+            />
+          </div>
+          <div>
+            <Dropdown
+              width={110}
+              placeholder="certainty"
+              tooltipLabel="certainty"
+              icon={<AttributeIcon attributeName="certainty" />}
+              disabled={!userCanEdit}
+              options={certaintyDict}
+              value={certaintyDict.find(
+                (i: any) => classification.certainty === i.value
+              )}
+              onChange={(newValue: any) => {
+                handleUpdate({ certainty: newValue.value });
+              }}
+            />
+          </div>
+        </StyledExpandedRow>
+      )}
     </>
   );
 };

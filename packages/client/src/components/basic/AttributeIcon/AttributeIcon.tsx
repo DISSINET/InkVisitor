@@ -12,7 +12,7 @@ import { SiRealm } from "react-icons/si";
 import { TiPlus } from "react-icons/ti";
 import { VscDebugDisconnect } from "react-icons/vsc";
 
-const attributeIconsKeys = {
+export const attributeIconsKeys = {
   ["certainty"]: <FaQuestionCircle />,
   ["elvl"]: <FaBook />,
   ["logic"]: <TiPlus />,

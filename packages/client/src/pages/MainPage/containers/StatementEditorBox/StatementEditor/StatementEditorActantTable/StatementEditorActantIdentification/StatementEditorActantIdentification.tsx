@@ -1,3 +1,5 @@
+import { certaintyDict, moodDict } from "@shared/dictionaries";
+import { allEntities } from "@shared/dictionaries/entity";
 import { EntityEnums } from "@shared/enums";
 import { IResponseStatement } from "@shared/types";
 import {
@@ -5,19 +7,25 @@ import {
   IStatementIdentification,
 } from "@shared/types/statement";
 import { excludedSuggesterEntities } from "Theme/constants";
-import { AttributeIcon, Button, ButtonGroup } from "components";
+import { AttributeIcon, Button, ButtonGroup, Dropdown } from "components";
 import {
   ElvlButtonGroup,
   EntityDropzone,
   EntitySuggester,
   EntityTag,
+  LogicButtonGroup,
+  MoodVariantButtonGroup,
 } from "components/advanced";
 import AttributesEditor from "pages/MainPage/containers/AttributesEditor/AttributesEditor";
 import React, { useState } from "react";
 import { FaTrashAlt } from "react-icons/fa";
+import { TbSettingsAutomation, TbSettingsFilled } from "react-icons/tb";
 import { UseMutationResult } from "react-query";
-import { StyledCIGrid } from "../StatementEditorActantTableStyles";
 import { AttributeData } from "types";
+import {
+  StyledCIGrid,
+  StyledExpandedRow,
+} from "../StatementEditorActantTableStyles";
 
 interface StatementEditorActantIdentification {
   identifications: IStatementIdentification[];
@@ -57,6 +65,8 @@ export const StatementEditorActantIdentification: React.FC<
       ),
     });
   };
+
+  const [isExpanded, setIsExpanded] = useState(true);
 
   return (
     <>
@@ -104,7 +114,14 @@ export const StatementEditorActantIdentification: React.FC<
             excludedEntities={excludedSuggesterEntities}
           />
         )}
-        <ButtonGroup style={{ marginLeft: "1rem" }}>
+
+        <LogicButtonGroup
+          border
+          value={identification.logic}
+          onChange={(logic) => handleUpdate({ logic })}
+        />
+
+        <ButtonGroup>
           <AttributesEditor
             modalOpen={identificationModalOpen}
             setModalOpen={setIdentificationModalOpen}
@@ -162,7 +179,69 @@ export const StatementEditorActantIdentification: React.FC<
             />
           )}
         </ButtonGroup>
+        <Button
+          inverted
+          onClick={() => setIsExpanded(!isExpanded)}
+          icon={
+            isExpanded ? (
+              <TbSettingsFilled size={16} />
+            ) : (
+              <TbSettingsAutomation
+                size={16}
+                style={{ transform: "rotate(90deg)" }}
+              />
+            )
+          }
+        />
       </StyledCIGrid>
+
+      {/* Expanded Row */}
+      {isExpanded && (
+        <StyledExpandedRow>
+          <div>
+            <Dropdown
+              width={100}
+              isMulti
+              disabled={!userCanEdit}
+              placeholder="mood"
+              tooltipLabel="mood"
+              icon={<AttributeIcon attributeName="mood" />}
+              options={moodDict}
+              value={[allEntities]
+                .concat(moodDict)
+                .filter((i: any) => identification.mood.includes(i.value))}
+              onChange={(newValue: any) => {
+                handleUpdate({
+                  mood: newValue ? newValue.map((v: any) => v.value) : [],
+                });
+              }}
+            />
+          </div>
+          <div>
+            <MoodVariantButtonGroup
+              border
+              value={identification.moodvariant}
+              onChange={(moodvariant) => handleUpdate({ moodvariant })}
+            />
+          </div>
+          <div>
+            <Dropdown
+              width={110}
+              placeholder="certainty"
+              tooltipLabel="certainty"
+              icon={<AttributeIcon attributeName="certainty" />}
+              disabled={!userCanEdit}
+              options={certaintyDict}
+              value={certaintyDict.find(
+                (i: any) => identification.certainty === i.value
+              )}
+              onChange={(newValue: any) => {
+                handleUpdate({ certainty: newValue.value });
+              }}
+            />
+          </div>
+        </StyledExpandedRow>
+      )}
     </>
   );
 };
