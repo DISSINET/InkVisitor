@@ -43,7 +43,7 @@ import {
   StyledGrid,
   StyledGridColumn,
 } from "./StatementEditorActionTableStyles";
-import { moodDict } from "@shared/dictionaries";
+import { certaintyDict, moodDict, operatorDict } from "@shared/dictionaries";
 import { allEntities } from "@shared/dictionaries/entity";
 import { TbSettingsAutomation, TbSettingsFilled } from "react-icons/tb";
 
@@ -351,7 +351,7 @@ export const StatementEditorActionTableRow: React.FC<
             <Dropdown
               width={100}
               isMulti
-              // disabled={disabled}
+              disabled={!userCanEdit}
               placeholder="mood"
               options={moodDict}
               value={[allEntities]
@@ -396,7 +396,21 @@ export const StatementEditorActionTableRow: React.FC<
             }
             value={sAction.moodvariant}
           />
-          <div>{"logical op."}</div>
+          <div>
+            <Dropdown
+              width={50}
+              placeholder="logical operator"
+              tooltipLabel="logical operator"
+              disabled={!userCanEdit}
+              options={operatorDict}
+              value={operatorDict.find(
+                (i: any) => sAction.bundleOperator === i.value
+              )}
+              onChange={(newValue: any) => {
+                updateAction(sAction.id, { bundleOperator: newValue.value });
+              }}
+            />
+          </div>
           <div>
             <BundleButtonGroup
               bundleStart={sAction.bundleStart}
@@ -413,7 +427,21 @@ export const StatementEditorActionTableRow: React.FC<
               }
             />
           </div>
-          <div>{"certainty"}</div>
+          <div>
+            <Dropdown
+              width={100}
+              placeholder="certainty"
+              tooltipLabel="certainty"
+              disabled={!userCanEdit}
+              options={certaintyDict}
+              value={certaintyDict.find(
+                (i: any) => sAction.certainty === i.value
+              )}
+              onChange={(newValue: any) => {
+                updateAction(sAction.id, { certainty: newValue.value });
+              }}
+            />
+          </div>
         </StyledExpandedRow>
       )}
 

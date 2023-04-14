@@ -28,7 +28,7 @@ interface StyledSelect {
 }
 export const StyledSelect = styled(Select)`
   display: inline-flex;
-  min-height: ${({ theme }) => theme.space[10]};
+  min-height: ${({ theme }) => theme.space[8]};
   vertical-align: bottom;
   font-size: ${({ theme }) => theme.fontSize["xs"]};
 

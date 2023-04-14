@@ -20,6 +20,7 @@ import {
   StyledSelect,
   StyledSelectWrapper,
 } from "./DropdownStyles";
+import { Tooltip } from "components";
 
 interface Dropdown {
   options?: OptionsType<OptionTypeBase> | GroupedOptionsType<OptionTypeBase>;
@@ -41,6 +42,9 @@ interface Dropdown {
   autoFocus?: boolean;
   disableTyping?: boolean;
   suggester?: boolean;
+  tooltipLabel?: string;
+
+  // TODO: not implemented yet
   allowAny?: boolean;
 }
 export const Dropdown: React.FC<Dropdown> = ({
@@ -62,6 +66,8 @@ export const Dropdown: React.FC<Dropdown> = ({
   autoFocus = false,
   disableTyping = false,
   suggester = false,
+  tooltipLabel,
+
   allowAny = false,
 }) => {
   const optionsWithIterator = options[Symbol.iterator]();
@@ -72,71 +78,91 @@ export const Dropdown: React.FC<Dropdown> = ({
     setDisplayValue(value);
   }, [value]);
 
+  const [referenceElement, setReferenceElement] =
+    useState<HTMLButtonElement | null>(null);
+  const [showTooltip, setShowTooltip] = useState(false);
+
   return (
-    <StyledSelectWrapper width={width}>
-      <StyledSelect
-        suggester={suggester}
-        onFocus={onFocus}
-        autoFocus={autoFocus}
-        onBlur={onBlur}
-        isMulti={isMulti}
-        isDisabled={disabled || isOneOptionSingleSelect}
-        isOneOptionSingleSelect={isOneOptionSingleSelect}
-        entityDropdown={entityDropdown}
-        wildCardChar={(value as DropdownItem)?.label === "*"}
-        className="react-select-container"
-        classNamePrefix="react-select"
-        placeholder={placeholder}
-        noOptionsMessage={() => noOptionsMessage}
-        isClearable={isClearable}
-        captureMenuScroll={false}
-        components={{
-          components,
-          Option,
-          SingleValue,
-          MultiValue,
-          ValueContainer,
-          DropdownIndicator,
-        }}
-        isSearchable={!disableTyping}
-        value={displayValue}
-        styles={{
-          dropdownIndicator: () => {
-            return {
-              display:
-                noDropDownIndicator || isOneOptionSingleSelect ? "none" : "",
-            };
-          },
-        }}
-        onChange={(selected: any, event: any) => {
-          if (selected !== null && selected.length > 0) {
-            // kdyz je neco vybrany = aspon jeden option
-            if (selected[selected.length - 1].value === allEntities.value) {
-              // kdyz vyberu all option
-              return onChange([allEntities, ...options]);
-            }
-            let result = [];
-            if (selected.length === options.length) {
-              // kdyz jsou vybrany vsechny
-              if (selected.includes(allEntities)) {
-                //
-                result = selected.filter(
-                  (option: { label: string; value: string }) =>
-                    option.value !== allEntities.value
-                );
-              } else if (event.action === "select-option") {
-                result = [allEntities, ...options];
-              }
-              return onChange(result);
-            }
-          }
-          return onChange(selected);
-        }}
-        options={isMulti ? [allEntities, ...optionsWithIterator] : options}
+    <>
+      <StyledSelectWrapper
         width={width}
-        hideSelectedOptions={hideSelectedOptions}
-      />
-    </StyledSelectWrapper>
+        ref={setReferenceElement}
+        onMouseEnter={() => setShowTooltip(true)}
+        onMouseLeave={() => setShowTooltip(false)}
+        onClick={() => setShowTooltip(false)}
+      >
+        <StyledSelect
+          suggester={suggester}
+          onFocus={onFocus}
+          autoFocus={autoFocus}
+          onBlur={onBlur}
+          isMulti={isMulti}
+          isDisabled={disabled || isOneOptionSingleSelect}
+          isOneOptionSingleSelect={isOneOptionSingleSelect}
+          entityDropdown={entityDropdown}
+          wildCardChar={(value as DropdownItem)?.label === "*"}
+          className="react-select-container"
+          classNamePrefix="react-select"
+          placeholder={placeholder}
+          noOptionsMessage={() => noOptionsMessage}
+          isClearable={isClearable}
+          captureMenuScroll={false}
+          components={{
+            components,
+            Option,
+            SingleValue,
+            MultiValue,
+            ValueContainer,
+            DropdownIndicator,
+          }}
+          isSearchable={!disableTyping}
+          value={displayValue}
+          styles={{
+            dropdownIndicator: () => {
+              return {
+                display:
+                  noDropDownIndicator || isOneOptionSingleSelect ? "none" : "",
+              };
+            },
+          }}
+          onChange={(selected: any, event: any) => {
+            if (selected !== null && selected.length > 0) {
+              // kdyz je neco vybrany = aspon jeden option
+              if (selected[selected.length - 1].value === allEntities.value) {
+                // kdyz vyberu all option
+                return onChange([allEntities, ...options]);
+              }
+              let result = [];
+              if (selected.length === options.length) {
+                // kdyz jsou vybrany vsechny
+                if (selected.includes(allEntities)) {
+                  //
+                  result = selected.filter(
+                    (option: { label: string; value: string }) =>
+                      option.value !== allEntities.value
+                  );
+                } else if (event.action === "select-option") {
+                  result = [allEntities, ...options];
+                }
+                return onChange(result);
+              }
+            }
+            return onChange(selected);
+          }}
+          options={isMulti ? [allEntities, ...optionsWithIterator] : options}
+          width={width}
+          hideSelectedOptions={hideSelectedOptions}
+        />
+      </StyledSelectWrapper>
+
+      {tooltipLabel && (
+        <Tooltip
+          label={tooltipLabel}
+          visible={showTooltip}
+          referenceElement={referenceElement}
+        />
+      )}
+    </>
   );
 };
 
