@@ -28,8 +28,8 @@ import {
 } from "@shared/types/statement";
 
 export class StatementClassification implements IStatementClassification {
-  id: string = "";
-  entityId: string = "";
+  id = "";
+  entityId = "";
   elvl: EntityEnums.Elvl = EntityEnums.Elvl.Textual;
   logic: EntityEnums.Logic = EntityEnums.Logic.Positive;
   certainty: EntityEnums.Certainty = EntityEnums.Certainty.AlmostCertain;
@@ -46,8 +46,8 @@ export class StatementClassification implements IStatementClassification {
 }
 
 export class StatementIdentification implements IStatementClassification {
-  id: string = "";
-  entityId: string = "";
+  id = "";
+  entityId = "";
   elvl: EntityEnums.Elvl = EntityEnums.Elvl.Textual;
   logic: EntityEnums.Logic = EntityEnums.Logic.Positive;
   certainty: EntityEnums.Certainty = EntityEnums.Certainty.AlmostCertain;
@@ -72,8 +72,8 @@ export class StatementActant implements IStatementActant, IModel {
   virtuality: EntityEnums.Virtuality = EntityEnums.Virtuality.Reality;
   partitivity: EntityEnums.Partitivity = EntityEnums.Partitivity.Unison;
   bundleOperator: EntityEnums.Operator = EntityEnums.Operator.And;
-  bundleStart: boolean = false;
-  bundleEnd: boolean = false;
+  bundleStart = false;
+  bundleEnd = false;
   props: Prop[] = [];
   statementOrder: number | false = false;
 
@@ -132,15 +132,15 @@ export class StatementTerritory implements IStatementDataTerritory {
 
 export class StatementAction implements IStatementAction {
   id = "";
-  actionId: string = "";
+  actionId = "";
   elvl: EntityEnums.Elvl = EntityEnums.Elvl.Textual;
   certainty: EntityEnums.Certainty = EntityEnums.Certainty.Empty;
   logic: EntityEnums.Logic = EntityEnums.Logic.Positive;
   mood: EntityEnums.Mood[];
   moodvariant: EntityEnums.MoodVariant = EntityEnums.MoodVariant.Realis;
   bundleOperator: EntityEnums.Operator = EntityEnums.Operator.And;
-  bundleStart: boolean = false;
-  bundleEnd: boolean = false;
+  bundleStart = false;
+  bundleEnd = false;
   props: Prop[] = [];
   statementOrder: number | false = false;
 
@@ -292,7 +292,10 @@ class Statement extends Entity implements IStatement {
     }
 
     // draft or meta statement - always can be viewed
-    if (!this.data.territory || this.data.territory.territoryId === ROOT_TERRITORY_ID) {
+    if (
+      !this.data.territory ||
+      this.data.territory.territoryId === ROOT_TERRITORY_ID
+    ) {
       return true;
     }
 
@@ -404,7 +407,7 @@ class Statement extends Entity implements IStatement {
     await treeCache.initialize();
 
     return result;
-  };
+  }
 
   /**
    * Finds statements that are stored under the same territory (while not being
@@ -551,7 +554,7 @@ class Statement extends Entity implements IStatement {
   }
 
   static extractIdsFromReference(references: IReference[]): string[] {
-    let out: string[] = [];
+    const out: string[] = [];
     for (const reference of references) {
       out.push(reference.resource);
       out.push(reference.value);
@@ -574,14 +577,14 @@ class Statement extends Entity implements IStatement {
       .table(Entity.table)
       .getAll.apply(
         undefined,
-        (territoryIds as (string | { index: string; })[]).concat({
+        (territoryIds as (string | { index: string })[]).concat({
           index: DbEnums.Indexes.StatementTerritory,
         })
       )
       .run(db);
 
     return list.map((data) => new Statement(data));
-  };
+  }
 
   /**
    * getEntitiesIdsForMany wrapped in foreach cycle
@@ -624,7 +627,7 @@ class Statement extends Entity implements IStatement {
     return statements.sort((a, b) => {
       return a.data.territory.order - b.data.territory.order;
     });
-  };
+  }
 
   /**
    * finds statements which are linked to different entity
@@ -651,7 +654,7 @@ class Statement extends Entity implements IStatement {
         return a.data.territory.order - b.data.territory.order;
       }
     });
-  };
+  }
 
   /**
    * finds statements that are using provided entityId in their
@@ -668,7 +671,7 @@ class Statement extends Entity implements IStatement {
       .table(Entity.table)
       .getAll(entityId, { index: DbEnums.Indexes.StatementActantsCI })
       .run(db);
-  };
+  }
 
   /**
    * reduces findByDataEntityId results to list of ids

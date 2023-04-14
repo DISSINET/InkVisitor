@@ -235,7 +235,7 @@ export async function clean(db: Db): Promise<void> {
   await deleteEntities(db);
   await deleteAudits(db);
   await deleteRelations(db);
-  await deleteUsers(db);
+  //await deleteUsers(db);
 
   await db.close();
 }
