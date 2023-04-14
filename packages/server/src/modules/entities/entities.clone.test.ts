@@ -94,7 +94,7 @@ describe("Entities clone", function () {
       expect(clone).toBeTruthy();
       expect(clone.label).toEqual(entity.label);
 
-      const clonedRelations = await Relation.getForEntity(
+      const clonedRelations = await Relation.findForEntity(
         db.connection,
         clone.id
       );
