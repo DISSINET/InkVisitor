@@ -17,6 +17,7 @@ import { Connection } from "rethinkdb-ts";
 import { IRequest } from "src/custom_typings/request";
 import Statement from "./statement";
 import Entity from "../entity/entity";
+import { InternalServerError } from "@shared/types/errors";
 
 export class ResponseStatement extends Statement implements IResponseStatement {
   entities: { [key: string]: IEntity };
@@ -33,10 +34,18 @@ export class ResponseStatement extends Statement implements IResponseStatement {
 
   async prepare(req: IRequest) {
     this.right = this.getUserRoleMode(req.getUserOrFail());
-    const entities = await this.getEntities(req.db.connection as Connection);
-    this.entities = Object.assign({}, ...entities.map((x) => ({ [x.id]: x })));
+    this.prepareEntities(req.db.connection);
     this.elementsOrders = this.prepareElementsOrders();
     this.warnings = this.getWarnings();
+  }
+
+  /**
+   * Prepares the entities map
+   * @param db
+   */
+  async prepareEntities(db: Connection): Promise<void> {
+    const entities = await this.getEntities(db);
+    this.entities = Object.assign({}, ...entities.map((x) => ({ [x.id]: x })));
   }
 
   /**
@@ -76,6 +85,15 @@ export class ResponseStatement extends Statement implements IResponseStatement {
     };
   }
 
+  getEntity(id: string): IEntity {
+    const entity = this.entities[id];
+    if (!entity) {
+      throw new InternalServerError(`Entity ${id} not preloaded`);
+    }
+
+    return entity;
+  }
+
   /**
    * Check allowed entity classes for subject / actant1 / actant2 position based on action valencies and adds it to warnings field
    * @param warnings
@@ -93,7 +111,7 @@ export class ResponseStatement extends Statement implements IResponseStatement {
     this.data.actions
       .map((a) => a.actionId)
       .forEach((aid) => {
-        const actionEntities = (this.entities[aid] as IAction).data
+        const actionEntities = (this.getEntity(aid) as IAction).data
           .entities as Record<EntityEnums.Position, EntityEnums.Class[]>;
         allowedClasses = allowedClasses.concat(actionEntities[position]);
       });
@@ -163,8 +181,6 @@ export class ResponseStatement extends Statement implements IResponseStatement {
         WarningTypeEnums.A2Valency
       )
     );
-
-    console.log(warnings);
 
     return warnings;
   }
