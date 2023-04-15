@@ -1,10 +1,15 @@
 import { EntityEnums, StatementEnums, UserEnums } from "@shared/enums";
-import { IEntity, IProp, IResponseStatement, IStatement } from "@shared/types";
 import {
-  EntityOrder,
+  IAction,
+  IEntity,
+  IProp,
+  IResponseStatement,
+  IStatement,
+} from "@shared/types";
+import {
   IWarning,
+  IWarningPosition,
   OrderType,
-  PropOrder,
 } from "@shared/types/response-statement";
 
 import { WarningTypeEnums } from "@shared/enums";
@@ -35,98 +40,123 @@ export class ResponseStatement extends Statement implements IResponseStatement {
   }
 
   /**
+   * Returns list of supported entity classes from actions valencies
+   * @returns list of classes
+   */
+  getSubjectETypes(): EntityEnums.Class[] {
+    return this.data.actions
+      .map((a) => a.actionId)
+      .filter(
+        (aid) =>
+          this.entities[aid] &&
+          this.entities[aid].class === EntityEnums.Class.Action
+      )
+      .reduce<EntityEnums.Class[]>(
+        (acc, aid) =>
+          acc.concat((this.entities[aid] as IAction).data.entities.s),
+        []
+      );
+  }
+
+  /**
+   * Shorthand for creating new statement warning
+   * @param warningType
+   * @param position
+   * @returns new instance of warning
+   */
+  newStatementWarning(
+    warningType: WarningTypeEnums,
+    position: IWarningPosition
+  ): IWarning {
+    return {
+      type: warningType,
+      message: "",
+      origin: this.id,
+      position,
+    };
+  }
+
+  /**
+   * Check allowed entity classes for subject / actant1 / actant2 position based on action valencies and adds it to warnings field
+   * @param warnings
+   * @param position
+   * @param warningType
+   */
+  checkValencyClassesForPosition(
+    position: EntityEnums.Position,
+    warningType: WarningTypeEnums
+  ): IWarning[] {
+    const warnings: IWarning[] = [];
+
+    let allowedClasses: EntityEnums.ExtendedClass[] = [];
+
+    this.data.actions
+      .map((a) => a.actionId)
+      .forEach((aid) => {
+        const actionEntities = (this.entities[aid] as IAction).data
+          .entities as Record<EntityEnums.Position, EntityEnums.Class[]>;
+        allowedClasses = allowedClasses.concat(actionEntities[position]);
+      });
+
+    this.data.actants
+      .filter((a) => a.position === position)
+      .forEach((a) => {
+        const entity = this.entities[a.entityId];
+        if (entity && !allowedClasses.includes(entity.class)) {
+          warnings.push(
+            this.newStatementWarning(warningType, {
+              section: `editor.${position}`,
+              entityId: a.entityId,
+              actantId: a.id,
+            })
+          );
+        }
+      });
+
+    return warnings;
+  }
+
+  /**
    * get a list of all warnings
    */
   getWarnings(): IWarning[] {
-    const warnings: IWarning[] = [];
+    let warnings: IWarning[] = [];
 
-    /**
-     * Check allowed entity classes for subject position based on action valencies
-     */
-    const subjectETypes: EntityEnums.Class[] = [];
-    this.data.actions
-      .map((a) => a.actionId)
-      .forEach((aid) => subjectETypes.push(this.entities[aid].data.entities.s));
+    const subjectETypes = this.getSubjectETypes();
 
+    // Check allowed entity classes for subject position based on action valencies
     this.data.actants
       .filter((a) => a.position === EntityEnums.Position.Subject)
       .forEach((a) => {
         const entity = this.entities[a.entityId];
-        if (entity) {
-          if (!subjectETypes.includes(entity.class)) {
-            warnings.push({
-              type: WarningTypeEnums.SValency,
-              message: "",
-              origin: this.id,
-              position: {
-                section: "editor.subject",
-                entityId: a.entityId,
-                actantId: a.id,
-              },
-            });
-          }
+        if (entity && !subjectETypes.includes(entity.class)) {
+          warnings.push(
+            this.newStatementWarning(WarningTypeEnums.SValency, {
+              section: "editor.subject",
+              entityId: a.entityId,
+              actantId: a.id,
+            })
+          );
         }
       });
 
-    /**
-     * Check allowed entity classes for subject / actant1 / actant2 position based on action valencies
-     */
-
-    const checkValencyClassesForPosition = (
-      warnings: IWarning[],
-      position: EntityEnums.Position,
-      warningType: WarningTypeEnums
-    ): void => {
-      const allowedEntityClasses: EntityEnums.ExtendedClass[] = [];
-
-      this.data.actions
-        .map((a) => a.actionId)
-        .forEach((aid) => {
-          const actionAllowedEntityClasses =
-            this.entities[aid].data.entities[position];
-          actionAllowedEntityClasses.forEach(
-            (actionAllowedEntityClass: EntityEnums.ExtendedClass) => {
-              if (!allowedEntityClasses.includes(actionAllowedEntityClass))
-                allowedEntityClasses.push(actionAllowedEntityClass);
-            }
-          );
-        });
-
-      this.data.actants
-        .filter((a) => a.position === position)
-        .forEach((a) => {
-          const entity = this.entities[a.entityId];
-          if (entity) {
-            if (!allowedEntityClasses.includes(entity.class)) {
-              warnings.push({
-                type: warningType,
-                message: "",
-                origin: this.id,
-                position: {
-                  section: `editor.${position}`,
-                  entityId: a.entityId,
-                  actantId: a.id,
-                },
-              });
-            }
-          }
-        });
-    };
-
-    checkValencyClassesForPosition(
-      warnings,
-      EntityEnums.Position.Subject,
-      WarningTypeEnums.SValency
+    warnings = warnings.concat(
+      this.checkValencyClassesForPosition(
+        EntityEnums.Position.Subject,
+        WarningTypeEnums.SValency
+      )
     );
-    checkValencyClassesForPosition(
-      warnings,
-      EntityEnums.Position.Actant1,
-      WarningTypeEnums.A1Valency
+    warnings = warnings.concat(
+      this.checkValencyClassesForPosition(
+        EntityEnums.Position.Actant1,
+        WarningTypeEnums.A1Valency
+      )
     );
-    checkValencyClassesForPosition(
-      warnings,
-      EntityEnums.Position.Actant2,
-      WarningTypeEnums.A2Valency
+    warnings = warnings.concat(
+      this.checkValencyClassesForPosition(
+        EntityEnums.Position.Actant2,
+        WarningTypeEnums.A2Valency
+      )
     );
 
     console.log(warnings);
@@ -139,7 +169,7 @@ export class ResponseStatement extends Statement implements IResponseStatement {
    */
   prepareElementsOrders(): OrderType[] {
     /// unsorted items here
-    let temp: OrderType[] = [];
+    const temp: OrderType[] = [];
 
     // statement.props
     Entity.extractIdsFromProps(this.props, (prop: IProp) => {

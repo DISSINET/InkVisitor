@@ -45,6 +45,8 @@ import {
   IResponseStatement,
   OrderType,
   PropOrder,
+  IWarning,
+  IWarningPosition,
 } from "./response-statement";
 import { IResponseTerritory } from "./response-territory";
 import {
@@ -122,6 +124,8 @@ export type {
   OrderType,
   EntityOrder,
   PropOrder,
+  IWarning,
+  IWarningPosition,
   ClassificationOrder,
   IdentificationOrder,
 };
