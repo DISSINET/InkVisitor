@@ -122,6 +122,11 @@ export class ResponseStatement extends Statement implements IResponseStatement {
   getWarnings(): IWarning[] {
     let warnings: IWarning[] = [];
 
+    if (!this.data.actions.length) {
+      warnings.push(this.newStatementWarning(WarningTypeEnums.NoAction, {}));
+      return warnings;
+    }
+
     const subjectETypes = this.getSubjectETypes();
 
     // Check allowed entity classes for subject position based on action valencies
