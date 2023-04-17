@@ -10,7 +10,7 @@ import {
 } from "components/advanced";
 import React from "react";
 import { PropAttributeFilter, classesPropValue } from "types";
-import { StyledNoEntity } from "../PropGroupStyles";
+import { StyledNoEntity } from "./PropGroupRowStyles";
 import { partitivityDict, virtualityDict } from "@shared/dictionaries";
 
 interface PropGroupRowValue {

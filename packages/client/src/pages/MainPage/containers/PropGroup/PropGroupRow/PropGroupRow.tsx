@@ -28,7 +28,7 @@ import {
   StyledFaGripVertical,
   StyledGrid,
   StyledPropLineColumn,
-} from "../PropGroupStyles";
+} from "./PropGroupRowStyles";
 import { PropGroupRowStatementAttributes } from "./PropGroupRowStatementAttributes";
 import { PropGroupRowType } from "./PropGroupRowType";
 import { PropGroupRowValue } from "./PropGroupRowValue";

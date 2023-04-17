@@ -69,3 +69,15 @@ export const StyledFaGripVertical = styled(FaGripVertical)`
   margin-right: ${({ theme }) => theme.space[2]};
   cursor: move;
 `;
+
+export const StyledAttributesFlexColumn = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+`;
+export const StyledAttributesFlexRow = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+`;

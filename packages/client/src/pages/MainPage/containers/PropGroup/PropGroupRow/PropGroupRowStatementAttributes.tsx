@@ -9,6 +9,10 @@ import {
 } from "components/advanced";
 import React from "react";
 import { PropAttributeFilter } from "types";
+import {
+  StyledAttributesFlexColumn,
+  StyledAttributesFlexRow,
+} from "./PropGroupRowStyles";
 
 interface PropGroupRowStatementAttributes {
   prop: IProp;
@@ -21,8 +25,8 @@ export const PropGroupRowStatementAttributes: React.FC<
   PropGroupRowStatementAttributes
 > = ({ prop, updateProp, isExpanded, disabledAttributes, userCanEdit }) => {
   return (
-    <div style={{ display: "flex", flexDirection: "column" }}>
-      <div style={{ display: "flex", flexDirection: "row" }}>
+    <StyledAttributesFlexColumn>
+      <StyledAttributesFlexRow>
         {/* Elvl */}
         {!disabledAttributes.statement?.includes("elvl") && (
           <ElvlButtonGroup
@@ -65,92 +69,78 @@ export const PropGroupRowStatementAttributes: React.FC<
             }}
           />
         )}
-      </div>
+      </StyledAttributesFlexRow>
       {isExpanded && (
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            flexWrap: "wrap",
-          }}
-        >
-          <div style={{ display: "flex", flexDirection: "row" }}>
-            <div>
-              {!disabledAttributes.statement?.includes("moodvariant") && (
-                <MoodVariantButtonGroup
-                  border
-                  value={prop.moodvariant}
-                  onChange={(moodvariant) =>
-                    updateProp(prop.id, {
-                      ...prop,
-                      moodvariant: moodvariant,
-                    })
-                  }
-                />
-              )}
-            </div>
-            {!disabledAttributes.statement?.includes("bundleOperator") && (
-              <div>
-                <Dropdown
-                  width={50}
-                  placeholder="logical operator"
-                  tooltipLabel="logical operator"
-                  icon={<AttributeIcon attributeName="bundleOperator" />}
-                  disabled={!userCanEdit}
-                  options={operatorDict}
-                  value={operatorDict.find(
-                    (i: any) => prop.bundleOperator === i.value
-                  )}
-                  onChange={(newValue: any) => {
-                    updateProp(prop.id, {
-                      ...prop,
-                      bundleOperator: newValue.value,
-                    });
-                  }}
-                />
-              </div>
-            )}
-          </div>
-          <div style={{ display: "flex", flexDirection: "row" }}>
-            <div>
-              <BundleButtonGroup
-                bundleStart={prop.bundleStart}
-                onBundleStartChange={(bundleStart) =>
+        <>
+          <StyledAttributesFlexRow>
+            {!disabledAttributes.statement?.includes("moodvariant") && (
+              <MoodVariantButtonGroup
+                border
+                value={prop.moodvariant}
+                onChange={(moodvariant) =>
                   updateProp(prop.id, {
                     ...prop,
-                    bundleStart: bundleStart,
-                  })
-                }
-                bundleEnd={prop.bundleEnd}
-                onBundleEndChange={(bundleEnd) =>
-                  updateProp(prop.id, {
-                    ...prop,
-                    bundleEnd: bundleEnd,
+                    moodvariant: moodvariant,
                   })
                 }
               />
-            </div>
-            <div>
-              {!disabledAttributes.statement?.includes("certainty") && (
-                <Dropdown
-                  width={100}
-                  placeholder="certainty"
-                  tooltipLabel="certainty"
-                  icon={<AttributeIcon attributeName="certainty" />}
-                  disabled={!userCanEdit}
-                  options={certaintyDict}
-                  value={certaintyDict.find(
-                    (i: any) => prop.certainty === i.value
-                  )}
-                  onChange={(newValue: any) => {
-                    updateProp(prop.id, { ...prop, certainty: newValue.value });
-                  }}
-                />
-              )}
-            </div>
-          </div>
-        </div>
+            )}
+            {!disabledAttributes.statement?.includes("bundleOperator") && (
+              <Dropdown
+                width={50}
+                placeholder="logical operator"
+                tooltipLabel="logical operator"
+                icon={<AttributeIcon attributeName="bundleOperator" />}
+                disabled={!userCanEdit}
+                options={operatorDict}
+                value={operatorDict.find(
+                  (i: any) => prop.bundleOperator === i.value
+                )}
+                onChange={(newValue: any) => {
+                  updateProp(prop.id, {
+                    ...prop,
+                    bundleOperator: newValue.value,
+                  });
+                }}
+              />
+            )}
+          </StyledAttributesFlexRow>
+          <StyledAttributesFlexRow>
+            <BundleButtonGroup
+              bundleStart={prop.bundleStart}
+              onBundleStartChange={(bundleStart) =>
+                updateProp(prop.id, {
+                  ...prop,
+                  bundleStart: bundleStart,
+                })
+              }
+              bundleEnd={prop.bundleEnd}
+              onBundleEndChange={(bundleEnd) =>
+                updateProp(prop.id, {
+                  ...prop,
+                  bundleEnd: bundleEnd,
+                })
+              }
+            />
+            {!disabledAttributes.statement?.includes("certainty") && (
+              <Dropdown
+                width={100}
+                placeholder="certainty"
+                tooltipLabel="certainty"
+                icon={<AttributeIcon attributeName="certainty" />}
+                disabled={!userCanEdit}
+                options={certaintyDict}
+                value={certaintyDict.find(
+                  (i: any) => prop.certainty === i.value
+                )}
+                onChange={(newValue: any) => {
+                  updateProp(prop.id, { ...prop, certainty: newValue.value });
+                }}
+              />
+            )}
+          </StyledAttributesFlexRow>
+        </>
       )}
-    </div>
+    </StyledAttributesFlexColumn>
   );
 };
