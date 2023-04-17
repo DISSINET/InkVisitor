@@ -1,12 +1,47 @@
 import Action from "@models/action/action";
 import Group from "@models/group/group";
+import Location from "@models/location/location";
 import Person from "@models/person/person";
-import { EntityEnums, StatementEnums } from "@shared/enums";
+import { EntityEnums, StatementEnums, WarningTypeEnums } from "@shared/enums";
+import { IAction, IEntity } from "@shared/types";
 import { InternalServerError } from "@shared/types/errors";
 import "ts-jest";
 import { ResponseStatement } from "./response";
 import Statement, { StatementActant, StatementAction } from "./statement";
 import { prepareStatement } from "./statement.test";
+
+class MockResponse extends ResponseStatement {
+  static new(): MockResponse {
+    const statement = new Statement({ id: "statement" });
+    return new MockResponse(statement);
+  }
+
+  // @ts-ignore
+  addAction(map: { [key: EntityEnums.Position]: EntityEnums.Class[] }) {
+    const action = new Action({
+      id: `action1-${this.data.actions.length + 1}`,
+    });
+    for (const key of Object.keys(map)) {
+      const pos = key as EntityEnums.Position;
+      // @ts-ignore
+      action.data.entities[pos] = map[key];
+    }
+
+    this.data.actions = [new StatementAction({ actionId: action.id })];
+    this.entities[action.id] = action;
+  }
+
+  addActant(actant: IEntity, pos: EntityEnums.Position) {
+    this.data.actants.push(
+      new StatementActant({
+        entityId: actant.id,
+        position: pos,
+      })
+    );
+    this.entities[actant.id] = actant;
+    return actant;
+  }
+}
 
 describe("models/statement/response", function () {
   test("test ResponseStatement.sortListOfStatementItems", function () {
@@ -92,6 +127,108 @@ describe("models/statement/response", function () {
       response.entities[group.id] = group;
 
       expect(response.getWarnings()).toHaveLength(0);
+    });
+
+    test("no action", () => {
+      const response = MockResponse.new();
+
+      const warnings = response.getWarnings();
+      expect(warnings.find((w) => w.type === WarningTypeEnums.NA)).toBeTruthy();
+    });
+
+    describe("1 action", () => {
+      describe("any", () => {
+        test("no actant - MA", () => {
+          const response = MockResponse.new();
+          response.addAction({
+            [EntityEnums.Position.Subject]: EntityEnums.PLOGESTRB,
+          });
+          const ws = response.getWarnings();
+          expect(ws.find((w) => w.type === WarningTypeEnums.MA)).toBeTruthy();
+        });
+
+        test("has actants - empty", () => {
+          const response = MockResponse.new();
+          response.addAction({
+            [EntityEnums.Position.Subject]: EntityEnums.PLOGESTRB,
+          });
+          const person = new Person({ id: "person" });
+          const group = new Group({ id: "group" });
+          response.addActant(person, EntityEnums.Position.Subject);
+          response.addActant(group, EntityEnums.Position.Subject);
+
+          const ws = response.getWarnings();
+          expect(ws).toHaveLength(0);
+        });
+      });
+
+      describe("[P, G]", () => {
+        const response = MockResponse.new();
+        response.addAction({
+          [EntityEnums.Position.Subject]: [
+            EntityEnums.Class.Person,
+            EntityEnums.Class.Group,
+          ],
+        });
+        const person = new Person({ id: "person" });
+        const group = new Group({ id: "group" });
+        const location = new Location({ id: "location" });
+
+        response.addActant(person, EntityEnums.Position.Subject);
+        response.addActant(group, EntityEnums.Position.Subject);
+        response.addActant(location, EntityEnums.Position.Subject);
+
+        it("should only accept P & G, L should has a warning", () => {
+          const ws = response.getWarnings();
+          expect(ws).toHaveLength(1);
+          expect(
+            ws.find(
+              (w) =>
+                w.type === WarningTypeEnums.WA &&
+                w.position.entityId === location.id
+            )
+          ).toBeTruthy();
+        });
+      });
+
+      describe("empty", () => {
+        it("should return OK for no actant", () => {
+          const response = MockResponse.new();
+          response.addAction({ [EntityEnums.Position.Subject]: [] });
+          const ws = response.getWarnings();
+          expect(ws).toHaveLength(0);
+        });
+
+        it("should return AMA for empty rules", () => {
+          const response = MockResponse.new();
+          response.addAction({ [EntityEnums.Position.Subject]: [] });
+          const act1 = response.addActant(
+            new Person({ id: "person" }),
+            EntityEnums.Position.Subject
+          );
+          const act2 = response.addActant(
+            new Group({ id: "group" }),
+            EntityEnums.Position.Subject
+          );
+
+          const ws = response.getWarnings();
+          expect(
+            ws.find(
+              (w) =>
+                w.type === WarningTypeEnums.ANA &&
+                w.position.entityId === act1.id
+            )
+          ).toBeTruthy();
+          expect(
+            ws.find(
+              (w) =>
+                w.type === WarningTypeEnums.ANA &&
+                w.position.entityId === act2.id
+            )
+          ).toBeTruthy();
+          expect(ws).toHaveLength(2);
+        });
+      });
     });
   });
 });

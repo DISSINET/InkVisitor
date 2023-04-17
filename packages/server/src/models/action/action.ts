@@ -28,7 +28,7 @@ class ActionValency implements IActionValency, IModel {
   }
 }
 
-class ActionEntity implements IActionEntity, IModel {
+export class ActionEntity implements IActionEntity, IModel {
   a1: EntityEnums.Class[];
   a2: EntityEnums.Class[];
   s: EntityEnums.Class[];
@@ -45,6 +45,17 @@ class ActionEntity implements IActionEntity, IModel {
       this.a2.constructor.name === "Array" &&
       this.s.constructor.name === "Array"
     );
+  }
+
+  static toRules(
+    ae: IActionEntity
+  ): Record<EntityEnums.Position, EntityEnums.Class[]> {
+    return {
+      a1: ae.a1,
+      a2: ae.a2,
+      s: ae.s,
+      pa: [],
+    };
   }
 }
 

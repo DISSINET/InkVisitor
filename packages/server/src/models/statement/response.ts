@@ -18,6 +18,7 @@ import { IRequest } from "src/custom_typings/request";
 import Statement from "./statement";
 import Entity from "../entity/entity";
 import { InternalServerError } from "@shared/types/errors";
+import Action, { ActionEntity } from "@models/action/action";
 
 export class ResponseStatement extends Statement implements IResponseStatement {
   entities: { [key: string]: IEntity };
@@ -138,14 +139,69 @@ export class ResponseStatement extends Statement implements IResponseStatement {
    * get a list of all warnings
    */
   getWarnings(): IWarning[] {
-    let warnings: IWarning[] = [];
+    const warnings: IWarning[] = [];
 
     if (!this.data.actions.length) {
-      warnings.push(this.newStatementWarning(WarningTypeEnums.NoAction, {}));
+      warnings.push(this.newStatementWarning(WarningTypeEnums.NA, {}));
       return warnings;
     }
 
-    const subjectETypes = this.getSubjectETypes();
+    for (const stActionIndex in this.data.actions) {
+      const stAction = this.data.actions[stActionIndex];
+      const action = this.getEntity(stAction.actionId) as Action;
+      const rules = ActionEntity.toRules(action.data.entities);
+
+      for (const position of [
+        EntityEnums.Position.Actant1,
+        EntityEnums.Position.Actant2,
+        EntityEnums.Position.Subject,
+      ]) {
+        const actants = this.data.actants.filter(
+          (a) => a.position === position
+        );
+
+        let commonWarn: WarningTypeEnums | undefined;
+        if (rules[position] && rules[position].length && !actants.length) {
+          commonWarn = WarningTypeEnums.MA;
+        }
+
+        for (const stActant of actants) {
+          const actant = this.getEntity(stActant.entityId);
+          const position = stActant.position;
+
+          // rule supported - ok
+          if (rules[position].includes(actant.class)) {
+            commonWarn = undefined;
+          } else if (!rules[position] || !rules[position].length) {
+            warnings.push(
+              this.newStatementWarning(WarningTypeEnums.ANA, {
+                section: `editor.${position}`,
+                actantId: stActant.id,
+                entityId: stActant.entityId,
+              })
+            );
+          } else {
+            warnings.push(
+              this.newStatementWarning(WarningTypeEnums.WA, {
+                section: `editor.${position}`,
+                actantId: stActant.id,
+                entityId: stActant.entityId,
+              })
+            );
+          }
+        }
+
+        if (commonWarn) {
+          warnings.push(
+            this.newStatementWarning(commonWarn, {
+              section: `editor.${position}`,
+            })
+          );
+        }
+      }
+    }
+
+    /*const subjectETypes = this.getSubjectETypes();
 
     // Check allowed entity classes for subject position based on action valencies
     this.data.actants
@@ -181,7 +237,7 @@ export class ResponseStatement extends Statement implements IResponseStatement {
         WarningTypeEnums.A2Valency
       )
     );
-
+*/
     return warnings;
   }
 
