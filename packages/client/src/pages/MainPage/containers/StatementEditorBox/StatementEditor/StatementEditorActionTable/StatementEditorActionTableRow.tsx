@@ -398,7 +398,7 @@ export const StatementEditorActionTableRow: React.FC<
           />
           <div>
             <Dropdown
-              width={50}
+              width={70}
               placeholder="logical operator"
               tooltipLabel="logical operator"
               icon={<AttributeIcon attributeName="bundleOperator" />}
@@ -430,7 +430,7 @@ export const StatementEditorActionTableRow: React.FC<
           </div>
           <div>
             <Dropdown
-              width={100}
+              width={120}
               placeholder="certainty"
               tooltipLabel="certainty"
               icon={<AttributeIcon attributeName="certainty" />}

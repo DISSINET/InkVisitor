@@ -69,6 +69,7 @@ export const StyledCIGrid = styled.div`
 
 export const StyledExpandedRow = styled.div`
   display: grid;
+  align-items: center;
   margin-left: 3rem;
   margin-bottom: 1rem;
   grid-template-columns: repeat(3, auto) 1fr;

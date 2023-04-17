@@ -26,10 +26,10 @@ interface StyledSelect {
   suggester?: boolean;
   entityDropdown?: boolean;
   wildCardChar?: boolean;
+  isMulti: boolean;
 }
 export const StyledSelect = styled(Select)`
   display: inline-flex;
-  min-height: ${({ theme }) => theme.space[8]};
   vertical-align: bottom;
   font-size: ${({ theme }) => theme.fontSize["xs"]};
 
@@ -39,7 +39,8 @@ export const StyledSelect = styled(Select)`
   .react-select__control {
     width: ${({ width }) => getWidth(width)};
     max-width: 100%;
-    min-height: ${({ theme }) => theme.space[10]};
+    min-height: ${({ theme }) => theme.space[8]};
+    /* height: ${({ theme, isMulti }) => (isMulti ? "" : theme.space[10])}; */
     border-width: 1px;
     border-style: solid;
     border-color: ${({ theme, suggester }) =>

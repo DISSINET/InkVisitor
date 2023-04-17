@@ -5,7 +5,7 @@ interface StyledWrapper {
 }
 export const StyledWrapper = styled.div<StyledWrapper>`
   display: inline-flex;
-  height: 2rem;
+  height: ${({ theme, border }) => (border ? theme.space[8] : theme.space[8])};
   border: ${({ theme, border }) =>
     border ? `${theme.borderWidth[1]} solid ${theme.color["grey"]}` : ""};
   border-radius: ${({ theme }) => theme.borderRadius["xs"]};
