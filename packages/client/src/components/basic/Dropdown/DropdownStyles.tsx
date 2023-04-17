@@ -147,3 +147,9 @@ export const StyledFaChevronDown = styled(FaChevronDown)`
   margin-right: 4px;
   margin-left: 1px;
 `;
+
+export const StyledIconWrap = styled.div`
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
+  margin-left: ${({ theme }) => theme.space[1]};
+  color: ${({ theme }) => theme.color["greyer"]};
+`;

@@ -2,6 +2,7 @@ import { allEntities } from "@shared/dictionaries/entity";
 import React, { ReactNode, useEffect, useState } from "react";
 import {
   components,
+  ControlProps,
   GroupedOptionsType,
   IndicatorProps,
   MultiValueProps,
@@ -17,6 +18,7 @@ import { DropdownItem, EntityColors } from "types";
 import {
   StyledEntityValue,
   StyledFaChevronDown,
+  StyledIconWrap,
   StyledSelect,
   StyledSelectWrapper,
 } from "./DropdownStyles";
@@ -118,9 +120,11 @@ export const Dropdown: React.FC<Dropdown> = ({
             MultiValue,
             ValueContainer,
             DropdownIndicator,
+            Control,
           }}
           isSearchable={!disableTyping}
           value={displayValue}
+          icon={icon}
           styles={{
             dropdownIndicator: () => {
               return {
@@ -245,5 +249,17 @@ const DropdownIndicator = (props: IndicatorProps<any, any>) => {
     <components.DropdownIndicator {...props}>
       <StyledFaChevronDown size={9} />
     </components.DropdownIndicator>
+  );
+};
+
+const Control = ({ children, ...props }: ControlProps<any, false>) => {
+  // @ts-ignore
+  const { icon } = props.selectProps;
+
+  return (
+    <components.Control {...props}>
+      {icon && <StyledIconWrap>{icon}</StyledIconWrap>}
+      {children}
+    </components.Control>
   );
 };
