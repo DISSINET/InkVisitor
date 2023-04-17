@@ -10,7 +10,11 @@ import {
 } from "components/advanced";
 import React from "react";
 import { PropAttributeFilter, classesPropType } from "types";
-import { StyledNoEntity } from "./PropGroupRowStyles";
+import {
+  StyledAttributesFlexColumn,
+  StyledAttributesFlexRow,
+  StyledNoEntity,
+} from "./PropGroupRowStyles";
 import { partitivityDict, virtualityDict } from "@shared/dictionaries";
 
 interface PropGroupRowType {
@@ -40,8 +44,8 @@ export const PropGroupRowType: React.FC<PropGroupRowType> = ({
   setModalOpen,
 }) => {
   return (
-    <div style={{ display: "inline-flex", flexDirection: "column" }}>
-      <div>
+    <StyledAttributesFlexColumn>
+      <StyledAttributesFlexRow noGap>
         {propTypeEntity ? (
           <>
             <EntityDropzone
@@ -92,7 +96,7 @@ export const PropGroupRowType: React.FC<PropGroupRowType> = ({
                 }
               />
             </EntityDropzone>
-            <div style={{ display: "inline-flex", verticalAlign: "middle" }}>
+            <div>
               {prop.type.logic == "2" && (
                 <Button
                   key="neg"
@@ -128,11 +132,11 @@ export const PropGroupRowType: React.FC<PropGroupRowType> = ({
         ) : (
           <StyledNoEntity>-</StyledNoEntity>
         )}
-      </div>
+      </StyledAttributesFlexRow>
       {isExpanded && (
-        <div style={{ display: "flex", flexWrap: "wrap" }}>
-          {!disabledAttributes.type?.includes("logic") && (
-            <div>
+        <>
+          <StyledAttributesFlexRow>
+            {!disabledAttributes.type?.includes("logic") && (
               <LogicButtonGroup
                 border
                 value={prop.type.logic}
@@ -142,10 +146,8 @@ export const PropGroupRowType: React.FC<PropGroupRowType> = ({
                   })
                 }
               />
-            </div>
-          )}
-          {!disabledAttributes.type?.includes("virtuality") && (
-            <div>
+            )}
+            {!disabledAttributes.type?.includes("virtuality") && (
               <Dropdown
                 width={90}
                 placeholder="virtuality"
@@ -162,30 +164,28 @@ export const PropGroupRowType: React.FC<PropGroupRowType> = ({
                   });
                 }}
               />
-            </div>
-          )}
+            )}
+          </StyledAttributesFlexRow>
           {!disabledAttributes.type?.includes("partitivity") && (
-            <div>
-              <Dropdown
-                width={120}
-                placeholder="partitivity"
-                tooltipLabel="partitivity"
-                icon={<AttributeIcon attributeName="partitivity" />}
-                disabled={!userCanEdit}
-                options={partitivityDict}
-                value={partitivityDict.find(
-                  (i: any) => prop.type.partitivity === i.value
-                )}
-                onChange={(newValue: any) => {
-                  updateProp(prop.id, {
-                    type: { ...prop.type, partitivity: newValue.value },
-                  });
-                }}
-              />
-            </div>
+            <Dropdown
+              width={120}
+              placeholder="partitivity"
+              tooltipLabel="partitivity"
+              icon={<AttributeIcon attributeName="partitivity" />}
+              disabled={!userCanEdit}
+              options={partitivityDict}
+              value={partitivityDict.find(
+                (i: any) => prop.type.partitivity === i.value
+              )}
+              onChange={(newValue: any) => {
+                updateProp(prop.id, {
+                  type: { ...prop.type, partitivity: newValue.value },
+                });
+              }}
+            />
           )}
-        </div>
+        </>
       )}
-    </div>
+    </StyledAttributesFlexColumn>
   );
 };

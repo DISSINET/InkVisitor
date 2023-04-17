@@ -430,7 +430,7 @@ export const StatementEditorActionTableRow: React.FC<
           </div>
           <div>
             <Dropdown
-              width={120}
+              width={122}
               placeholder="certainty"
               tooltipLabel="certainty"
               icon={<AttributeIcon attributeName="certainty" />}

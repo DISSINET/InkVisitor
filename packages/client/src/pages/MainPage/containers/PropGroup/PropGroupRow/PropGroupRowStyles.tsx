@@ -11,7 +11,7 @@ export const StyledGrid = styled.div<StyledGrid>`
   align-items: flex-start;
   padding-left: ${({ theme }) => theme.space[0]};
 
-  grid-template-columns: 20px repeat(5, auto) 1fr;
+  grid-template-columns: 20px repeat(4, auto) 1fr;
   width: fit-content;
   grid-template-rows: auto;
   grid-auto-flow: row;
@@ -75,9 +75,13 @@ export const StyledAttributesFlexColumn = styled.div`
   flex-direction: column;
   gap: 0.5rem;
 `;
-export const StyledAttributesFlexRow = styled.div`
+
+interface StyledAttributesFlexRow {
+  noGap?: boolean;
+}
+export const StyledAttributesFlexRow = styled.div<StyledAttributesFlexRow>`
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 0.5rem;
+  gap: ${({ noGap }) => (noGap ? "" : "0.5rem")};
 `;

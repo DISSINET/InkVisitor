@@ -20,10 +20,18 @@ interface PropGroupRowStatementAttributes {
   isExpanded: boolean;
   disabledAttributes: PropAttributeFilter;
   userCanEdit: boolean;
+  buttons: JSX.Element;
 }
 export const PropGroupRowStatementAttributes: React.FC<
   PropGroupRowStatementAttributes
-> = ({ prop, updateProp, isExpanded, disabledAttributes, userCanEdit }) => {
+> = ({
+  prop,
+  updateProp,
+  isExpanded,
+  disabledAttributes,
+  userCanEdit,
+  buttons,
+}) => {
   return (
     <StyledAttributesFlexColumn>
       <StyledAttributesFlexRow>
@@ -48,31 +56,32 @@ export const PropGroupRowStatementAttributes: React.FC<
             onChange={(logic) => updateProp(prop.id, { logic: logic })}
           />
         )}
-        {/* mood */}
-        {!disabledAttributes.statement?.includes("mood") && (
-          <Dropdown
-            width={100}
-            isMulti
-            disabled={!userCanEdit}
-            placeholder="mood"
-            tooltipLabel="mood"
-            icon={<AttributeIcon attributeName="mood" />}
-            options={moodDict}
-            value={[allEntities]
-              .concat(moodDict)
-              .filter((i: any) => prop.mood.includes(i.value))}
-            onChange={(newValue: any) => {
-              updateProp(prop.id, {
-                ...prop,
-                mood: newValue ? newValue.map((v: any) => v.value) : [],
-              });
-            }}
-          />
-        )}
+        {buttons}
       </StyledAttributesFlexRow>
       {isExpanded && (
         <>
           <StyledAttributesFlexRow>
+            {/* mood */}
+            {!disabledAttributes.statement?.includes("mood") && (
+              <Dropdown
+                width={100}
+                isMulti
+                disabled={!userCanEdit}
+                placeholder="mood"
+                tooltipLabel="mood"
+                icon={<AttributeIcon attributeName="mood" />}
+                options={moodDict}
+                value={[allEntities]
+                  .concat(moodDict)
+                  .filter((i: any) => prop.mood.includes(i.value))}
+                onChange={(newValue: any) => {
+                  updateProp(prop.id, {
+                    ...prop,
+                    mood: newValue ? newValue.map((v: any) => v.value) : [],
+                  });
+                }}
+              />
+            )}
             {!disabledAttributes.statement?.includes("moodvariant") && (
               <MoodVariantButtonGroup
                 border

@@ -10,7 +10,11 @@ import {
 } from "components/advanced";
 import React from "react";
 import { PropAttributeFilter, classesPropValue } from "types";
-import { StyledNoEntity } from "./PropGroupRowStyles";
+import {
+  StyledAttributesFlexColumn,
+  StyledAttributesFlexRow,
+  StyledNoEntity,
+} from "./PropGroupRowStyles";
 import { partitivityDict, virtualityDict } from "@shared/dictionaries";
 
 interface PropGroupRowValue {
@@ -40,8 +44,8 @@ export const PropGroupRowValue: React.FC<PropGroupRowValue> = ({
   setModalOpen,
 }) => {
   return (
-    <div style={{ display: "flex", flexDirection: "column" }}>
-      <div>
+    <StyledAttributesFlexColumn>
+      <StyledAttributesFlexRow noGap>
         {propValueEntity ? (
           <>
             <EntityDropzone
@@ -93,19 +97,17 @@ export const PropGroupRowValue: React.FC<PropGroupRowValue> = ({
               />
             </EntityDropzone>
 
-            <div style={{ display: "inline-flex", verticalAlign: "middle" }}>
-              {prop.value.logic == "2" && (
-                <Button
-                  key="neg"
-                  tooltipLabel="Negative logic"
-                  color="danger"
-                  inverted
-                  noBorder
-                  onClick={() => setModalOpen(true)}
-                  icon={<AttributeIcon attributeName={"negation"} />}
-                />
-              )}
-            </div>
+            {prop.value.logic == "2" && (
+              <Button
+                key="neg"
+                tooltipLabel="Negative logic"
+                color="danger"
+                inverted
+                noBorder
+                onClick={() => setModalOpen(true)}
+                icon={<AttributeIcon attributeName={"negation"} />}
+              />
+            )}
           </>
         ) : userCanEdit ? (
           <EntitySuggester
@@ -129,11 +131,11 @@ export const PropGroupRowValue: React.FC<PropGroupRowValue> = ({
         ) : (
           <StyledNoEntity>-</StyledNoEntity>
         )}
-      </div>
+      </StyledAttributesFlexRow>
       {isExpanded && (
-        <div style={{ display: "flex", flexWrap: "wrap" }}>
-          {!disabledAttributes.value?.includes("logic") && (
-            <div>
+        <>
+          <StyledAttributesFlexRow>
+            {!disabledAttributes.value?.includes("logic") && (
               <LogicButtonGroup
                 border
                 value={prop.value.logic}
@@ -146,10 +148,8 @@ export const PropGroupRowValue: React.FC<PropGroupRowValue> = ({
                   })
                 }
               />
-            </div>
-          )}
-          {!disabledAttributes.value?.includes("virtuality") && (
-            <div>
+            )}
+            {!disabledAttributes.value?.includes("virtuality") && (
               <Dropdown
                 width={90}
                 placeholder="virtuality"
@@ -166,30 +166,28 @@ export const PropGroupRowValue: React.FC<PropGroupRowValue> = ({
                   });
                 }}
               />
-            </div>
-          )}
+            )}
+          </StyledAttributesFlexRow>
           {!disabledAttributes.value?.includes("partitivity") && (
-            <div>
-              <Dropdown
-                width={120}
-                placeholder="partitivity"
-                tooltipLabel="partitivity"
-                icon={<AttributeIcon attributeName="partitivity" />}
-                disabled={!userCanEdit}
-                options={partitivityDict}
-                value={partitivityDict.find(
-                  (i: any) => prop.value.partitivity === i.value
-                )}
-                onChange={(newValue: any) => {
-                  updateProp(prop.id, {
-                    value: { ...prop.value, partitivity: newValue.value },
-                  });
-                }}
-              />
-            </div>
+            <Dropdown
+              width={120}
+              placeholder="partitivity"
+              tooltipLabel="partitivity"
+              icon={<AttributeIcon attributeName="partitivity" />}
+              disabled={!userCanEdit}
+              options={partitivityDict}
+              value={partitivityDict.find(
+                (i: any) => prop.value.partitivity === i.value
+              )}
+              onChange={(newValue: any) => {
+                updateProp(prop.id, {
+                  value: { ...prop.value, partitivity: newValue.value },
+                });
+              }}
+            />
           )}
-        </div>
+        </>
       )}
-    </div>
+    </StyledAttributesFlexColumn>
   );
 };
