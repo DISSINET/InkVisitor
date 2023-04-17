@@ -149,7 +149,7 @@ export const PropGroupRowType: React.FC<PropGroupRowType> = ({
             )}
             {!disabledAttributes.type?.includes("virtuality") && (
               <Dropdown
-                width={90}
+                width={100}
                 placeholder="virtuality"
                 tooltipLabel="virtuality"
                 icon={<AttributeIcon attributeName="virtuality" />}
@@ -168,7 +168,7 @@ export const PropGroupRowType: React.FC<PropGroupRowType> = ({
           </StyledAttributesFlexRow>
           {!disabledAttributes.type?.includes("partitivity") && (
             <Dropdown
-              width={120}
+              width={150}
               placeholder="partitivity"
               tooltipLabel="partitivity"
               icon={<AttributeIcon attributeName="partitivity" />}

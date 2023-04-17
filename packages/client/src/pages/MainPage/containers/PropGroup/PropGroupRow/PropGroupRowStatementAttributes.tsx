@@ -96,7 +96,7 @@ export const PropGroupRowStatementAttributes: React.FC<
             )}
             {!disabledAttributes.statement?.includes("bundleOperator") && (
               <Dropdown
-                width={50}
+                width={70}
                 placeholder="logical operator"
                 tooltipLabel="logical operator"
                 icon={<AttributeIcon attributeName="bundleOperator" />}
@@ -133,7 +133,7 @@ export const PropGroupRowStatementAttributes: React.FC<
             />
             {!disabledAttributes.statement?.includes("certainty") && (
               <Dropdown
-                width={100}
+                width={122}
                 placeholder="certainty"
                 tooltipLabel="certainty"
                 icon={<AttributeIcon attributeName="certainty" />}

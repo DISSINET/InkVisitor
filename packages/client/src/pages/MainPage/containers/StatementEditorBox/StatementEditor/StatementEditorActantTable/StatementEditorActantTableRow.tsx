@@ -488,7 +488,7 @@ export const StatementEditorActantTableRow: React.FC<
           </div>
           <div>
             <Dropdown
-              width={50}
+              width={70}
               placeholder="logical operator"
               tooltipLabel="logical operator"
               icon={<AttributeIcon attributeName="bundleOperator" />}
