@@ -14,6 +14,7 @@ import {
   StyledAttributesFlexColumn,
   StyledAttributesFlexRow,
   StyledNoEntity,
+  StyledTagGrid,
 } from "./PropGroupRowStyles";
 import { partitivityDict, virtualityDict } from "@shared/dictionaries";
 
@@ -45,7 +46,7 @@ export const PropGroupRowValue: React.FC<PropGroupRowValue> = ({
 }) => {
   return (
     <StyledAttributesFlexColumn>
-      <div style={{ display: "grid", gridTemplateColumns: "auto auto" }}>
+      <StyledTagGrid>
         {propValueEntity ? (
           <>
             <EntityDropzone
@@ -131,7 +132,7 @@ export const PropGroupRowValue: React.FC<PropGroupRowValue> = ({
         ) : (
           <StyledNoEntity>-</StyledNoEntity>
         )}
-      </div>
+      </StyledTagGrid>
       {isExpanded && (
         <>
           <StyledAttributesFlexRow>

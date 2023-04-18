@@ -14,6 +14,7 @@ import {
   StyledAttributesFlexColumn,
   StyledAttributesFlexRow,
   StyledNoEntity,
+  StyledTagGrid,
 } from "./PropGroupRowStyles";
 import { partitivityDict, virtualityDict } from "@shared/dictionaries";
 
@@ -45,7 +46,7 @@ export const PropGroupRowType: React.FC<PropGroupRowType> = ({
 }) => {
   return (
     <StyledAttributesFlexColumn>
-      <div style={{ display: "grid", gridTemplateColumns: "auto auto" }}>
+      <StyledTagGrid>
         {propTypeEntity ? (
           <>
             <EntityDropzone
@@ -96,19 +97,18 @@ export const PropGroupRowType: React.FC<PropGroupRowType> = ({
                 }
               />
             </EntityDropzone>
-            <div>
-              {prop.type.logic == "2" && (
-                <Button
-                  key="neg"
-                  tooltipLabel="Negative logic"
-                  color="danger"
-                  inverted
-                  noBorder
-                  onClick={() => setModalOpen(true)}
-                  icon={<AttributeIcon attributeName="negation" />}
-                />
-              )}
-            </div>
+
+            {prop.type.logic == "2" && (
+              <Button
+                key="neg"
+                tooltipLabel="Negative logic"
+                color="danger"
+                inverted
+                noBorder
+                onClick={() => setModalOpen(true)}
+                icon={<AttributeIcon attributeName="negation" />}
+              />
+            )}
           </>
         ) : userCanEdit ? (
           <EntitySuggester
@@ -132,7 +132,7 @@ export const PropGroupRowType: React.FC<PropGroupRowType> = ({
         ) : (
           <StyledNoEntity>-</StyledNoEntity>
         )}
-      </div>
+      </StyledTagGrid>
       {isExpanded && (
         <>
           <StyledAttributesFlexRow>

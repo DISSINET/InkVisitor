@@ -4,7 +4,7 @@ interface StyledRow {
   marginBottom?: boolean;
 }
 export const StyledRow = styled.div<StyledRow>`
-  margin-bottom: ${({ marginBottom }) => (marginBottom ? "1rem" : "")};
+  margin-bottom: ${({ marginBottom }) => (marginBottom ? "2rem" : "")};
 `;
 interface StyledGrid {
   tempDisabled?: boolean;

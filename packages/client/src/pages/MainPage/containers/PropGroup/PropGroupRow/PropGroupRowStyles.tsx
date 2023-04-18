@@ -19,6 +19,7 @@ export const StyledGrid = styled.div<StyledGrid>`
   width: 100%;
 
   opacity: ${({ tempDisabled }) => (tempDisabled ? 0.2 : 1)};
+  margin-bottom: ${({ theme }) => theme.space[2]};
 `;
 
 export const StyledNoEntity = styled.div`
@@ -52,7 +53,6 @@ const getIndentation = (level: 0 | 1 | 2 | 3, lowIdent?: boolean) => {
 };
 interface StyledPropLineColumn {
   level?: 0 | 1 | 2 | 3;
-  // isTag?: boolean;
   lowIdent?: boolean;
 }
 export const StyledPropLineColumn = styled.div<StyledPropLineColumn>`
@@ -84,4 +84,9 @@ export const StyledAttributesFlexRow = styled.div<StyledAttributesFlexRow>`
   flex-direction: row;
   align-items: center;
   gap: ${({ isTag }) => (isTag ? "" : "0.5rem")};
+`;
+export const StyledTagGrid = styled.div`
+  display: grid;
+  grid-template-columns: auto auto;
+  align-items: center;
 `;
