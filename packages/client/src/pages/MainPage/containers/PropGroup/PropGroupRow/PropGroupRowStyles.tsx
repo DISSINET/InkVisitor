@@ -52,7 +52,7 @@ const getIndentation = (level: 0 | 1 | 2 | 3, lowIdent?: boolean) => {
 };
 interface StyledPropLineColumn {
   level?: 0 | 1 | 2 | 3;
-  isTag?: boolean;
+  // isTag?: boolean;
   lowIdent?: boolean;
 }
 export const StyledPropLineColumn = styled.div<StyledPropLineColumn>`
@@ -62,7 +62,6 @@ export const StyledPropLineColumn = styled.div<StyledPropLineColumn>`
   margin-left: ${({ level = 0, lowIdent = false }) =>
     getIndentation(level, lowIdent)};
   padding-right: 3px;
-  overflow: ${({ isTag }) => (isTag ? "hidden" : "visible")};
 `;
 
 export const StyledFaGripVertical = styled(FaGripVertical)`
@@ -71,17 +70,18 @@ export const StyledFaGripVertical = styled(FaGripVertical)`
 `;
 
 export const StyledAttributesFlexColumn = styled.div`
-  display: flex;
+  display: inline-flex;
   flex-direction: column;
   gap: 0.5rem;
 `;
 
 interface StyledAttributesFlexRow {
-  noGap?: boolean;
+  isTag?: boolean;
 }
 export const StyledAttributesFlexRow = styled.div<StyledAttributesFlexRow>`
-  display: flex;
+  display: inline-flex;
+  overflow: ${({ isTag }) => (isTag ? "hidden" : "")};
   flex-direction: row;
   align-items: center;
-  gap: ${({ noGap }) => (noGap ? "" : "0.5rem")};
+  gap: ${({ isTag }) => (isTag ? "" : "0.5rem")};
 `;

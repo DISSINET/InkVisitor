@@ -34,7 +34,7 @@ export const BundleButtonGroup: React.FC<BundleButtonGroup> = ({
         }}
       />
       <Button
-        key="bundleStart"
+        key="bundleEnd"
         icon={
           <HiArrowDownTray
             strokeWidth={2}

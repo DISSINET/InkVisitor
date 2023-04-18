@@ -114,6 +114,8 @@ export const PropGroupRowStatementAttributes: React.FC<
               />
             )}
           </StyledAttributesFlexRow>
+
+          {/* ROW */}
           <StyledAttributesFlexRow>
             <BundleButtonGroup
               bundleStart={prop.bundleStart}

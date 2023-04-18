@@ -45,7 +45,7 @@ export const PropGroupRowType: React.FC<PropGroupRowType> = ({
 }) => {
   return (
     <StyledAttributesFlexColumn>
-      <StyledAttributesFlexRow noGap>
+      <div style={{ display: "grid", gridTemplateColumns: "auto auto" }}>
         {propTypeEntity ? (
           <>
             <EntityDropzone
@@ -132,7 +132,7 @@ export const PropGroupRowType: React.FC<PropGroupRowType> = ({
         ) : (
           <StyledNoEntity>-</StyledNoEntity>
         )}
-      </StyledAttributesFlexRow>
+      </div>
       {isExpanded && (
         <>
           <StyledAttributesFlexRow>
