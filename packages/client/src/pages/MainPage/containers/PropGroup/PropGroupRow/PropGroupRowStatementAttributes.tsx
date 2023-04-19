@@ -46,6 +46,7 @@ export const PropGroupRowStatementAttributes: React.FC<
                 elvl: elvl,
               })
             }
+            disabled={!userCanEdit}
           />
         )}
         {/* Logic */}
@@ -54,6 +55,7 @@ export const PropGroupRowStatementAttributes: React.FC<
             border
             value={prop.logic}
             onChange={(logic) => updateProp(prop.id, { logic: logic })}
+            disabled={!userCanEdit}
           />
         )}
         {buttons}
@@ -92,6 +94,7 @@ export const PropGroupRowStatementAttributes: React.FC<
                     moodvariant: moodvariant,
                   })
                 }
+                disabled={!userCanEdit}
               />
             )}
             {!disabledAttributes.statement?.includes("bundleOperator") && (

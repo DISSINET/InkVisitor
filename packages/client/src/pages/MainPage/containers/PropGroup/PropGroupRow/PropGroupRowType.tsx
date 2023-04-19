@@ -92,6 +92,7 @@ export const PropGroupRowType: React.FC<PropGroupRowType> = ({
                           },
                         })
                       }
+                      disabled={!userCanEdit}
                     />
                   )
                 }
@@ -145,6 +146,7 @@ export const PropGroupRowType: React.FC<PropGroupRowType> = ({
                     type: { ...prop.type, logic: logic },
                   })
                 }
+                disabled={!userCanEdit}
               />
             )}
             {!disabledAttributes.type?.includes("virtuality") && (

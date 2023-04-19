@@ -92,6 +92,7 @@ export const PropGroupRowValue: React.FC<PropGroupRowValue> = ({
                           },
                         })
                       }
+                      disabled={!userCanEdit}
                     />
                   )
                 }
@@ -148,6 +149,7 @@ export const PropGroupRowValue: React.FC<PropGroupRowValue> = ({
                     },
                   })
                 }
+                disabled={!userCanEdit}
               />
             )}
             {!disabledAttributes.value?.includes("virtuality") && (

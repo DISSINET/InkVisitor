@@ -168,6 +168,7 @@ export const StatementEditorActionTableRow: React.FC<
                   elvl: elvl,
                 })
               }
+              disabled={!userCanEdit}
             />
           }
         />
@@ -343,6 +344,7 @@ export const StatementEditorActionTableRow: React.FC<
               border
               value={sAction.logic}
               onChange={(logic) => updateAction(sAction.id, { logic: logic })}
+              disabled={!userCanEdit}
             />
           }
         </StyledGridColumn>
@@ -395,6 +397,7 @@ export const StatementEditorActionTableRow: React.FC<
               })
             }
             value={sAction.moodvariant}
+            disabled={!userCanEdit}
           />
           <div>
             <Dropdown

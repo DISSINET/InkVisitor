@@ -98,6 +98,7 @@ export const StatementEditorActantIdentification: React.FC<
                   onChange={(elvl) => {
                     handleUpdate({ elvl });
                   }}
+                  disabled={!userCanEdit}
                 />
               }
             />
@@ -119,6 +120,7 @@ export const StatementEditorActantIdentification: React.FC<
           border
           value={identification.logic}
           onChange={(logic) => handleUpdate({ logic })}
+          disabled={!userCanEdit}
         />
 
         <ButtonGroup>
@@ -222,6 +224,7 @@ export const StatementEditorActantIdentification: React.FC<
               border
               value={identification.moodvariant}
               onChange={(moodvariant) => handleUpdate({ moodvariant })}
+              disabled={!userCanEdit}
             />
           </div>
           <div>

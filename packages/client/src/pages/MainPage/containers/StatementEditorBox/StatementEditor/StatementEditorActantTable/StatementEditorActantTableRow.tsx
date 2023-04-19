@@ -196,6 +196,7 @@ export const StatementEditorActantTableRow: React.FC<
                     elvl: elvl,
                   })
                 }
+                disabled={!userCanEdit}
               />
             }
           />
@@ -233,6 +234,7 @@ export const StatementEditorActantTableRow: React.FC<
             position: position,
           })
         }
+        disabled={!userCanEdit}
       />
     );
   };
@@ -428,6 +430,7 @@ export const StatementEditorActantTableRow: React.FC<
               onChange={(logic) =>
                 updateActant(filteredActant.data.sActant.id, { logic: logic })
               }
+              disabled={!userCanEdit}
             />
           }
         </StyledGridColumn>

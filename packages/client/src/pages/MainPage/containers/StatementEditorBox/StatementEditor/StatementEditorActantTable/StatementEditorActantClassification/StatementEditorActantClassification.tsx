@@ -94,6 +94,7 @@ export const StatementEditorActantClassification: React.FC<
                   onChange={(elvl) => {
                     handleUpdate({ elvl });
                   }}
+                  disabled={!userCanEdit}
                 />
               }
             />
@@ -114,6 +115,7 @@ export const StatementEditorActantClassification: React.FC<
           border
           value={classification.logic}
           onChange={(logic) => handleUpdate({ logic })}
+          disabled={!userCanEdit}
         />
 
         <ButtonGroup>
@@ -217,6 +219,7 @@ export const StatementEditorActantClassification: React.FC<
               border
               value={classification.moodvariant}
               onChange={(moodvariant) => handleUpdate({ moodvariant })}
+              disabled={!userCanEdit}
             />
           </div>
           <div>
