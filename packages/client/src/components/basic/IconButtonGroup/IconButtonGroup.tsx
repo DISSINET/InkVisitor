@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { StyledWrapper } from "./IconButtonGroupStyles";
+import { StyledBold, StyledWrapper } from "./IconButtonGroupStyles";
 import { Button } from "components";
 import { EntityEnums } from "@shared/enums";
 
@@ -11,6 +11,7 @@ type ValueTypes =
   | EntityEnums.Logic;
 
 type IconButtonGroup<TValue extends ValueTypes> = {
+  attributeName?: string;
   border?: boolean;
   options: { value: TValue; label: string; info?: string }[];
   onChange: (value: TValue) => void;
@@ -18,18 +19,13 @@ type IconButtonGroup<TValue extends ValueTypes> = {
   icons: { [key in TValue]: JSX.Element };
 };
 export const IconButtonGroup = <TValue extends ValueTypes>({
+  attributeName,
   border,
   options,
   onChange,
   value,
   icons,
 }: IconButtonGroup<TValue>) => {
-  // const [localValue, setLocalValue] = useState<TValue | false>(false);
-
-  // useEffect(() => {
-  //   setLocalValue(value);
-  // }, [value]);
-
   return (
     <StyledWrapper border={border}>
       {options.map((option, key) => {
@@ -37,7 +33,17 @@ export const IconButtonGroup = <TValue extends ValueTypes>({
           <Button
             key={key}
             icon={icons[option.value]}
-            tooltipLabel={option.label}
+            tooltipContent={
+              <p>
+                {attributeName ? (
+                  <>
+                    <StyledBold>{option.label}</StyledBold> ({attributeName})
+                  </>
+                ) : (
+                  <StyledBold>{option.label}</StyledBold>
+                )}
+              </p>
+            }
             noBorder
             inverted
             color={option.value === value ? "primary" : "greyer"}

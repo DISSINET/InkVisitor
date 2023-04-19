@@ -23,6 +23,7 @@ export const MoodVariantButtonGroup: React.FC<MoodVariantButtonGroup> = ({
 }) => {
   return (
     <IconButtonGroup<EntityEnums.MoodVariant>
+      attributeName="mood variant"
       border={border}
       icons={icons}
       options={moodVariantsDict}

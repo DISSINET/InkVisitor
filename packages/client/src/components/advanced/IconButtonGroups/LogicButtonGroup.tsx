@@ -20,6 +20,7 @@ export const LogicButtonGroup: React.FC<LogicButtonGroup> = ({
 }) => {
   return (
     <IconButtonGroup<EntityEnums.Logic>
+      attributeName="logic"
       border={border}
       icons={icons}
       options={logicDict}

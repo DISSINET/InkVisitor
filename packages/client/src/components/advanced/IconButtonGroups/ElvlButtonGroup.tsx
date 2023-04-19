@@ -23,6 +23,7 @@ export const ElvlButtonGroup: React.FC<ElvlButtonGroup> = ({
 }) => {
   return (
     <IconButtonGroup<EntityEnums.Elvl>
+      attributeName="epistemic level"
       border={border}
       icons={icons}
       options={elvlDict}

@@ -22,6 +22,7 @@ export const PositionButtonGroup: React.FC<PositionButtonGroup> = ({
 }) => {
   return (
     <IconButtonGroup<EntityEnums.Position>
+      attributeName="position"
       border={border}
       icons={icons}
       options={Object.values(actantPositionDict)}

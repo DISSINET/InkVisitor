@@ -11,3 +11,7 @@ export const StyledWrapper = styled.div<StyledWrapper>`
   border-radius: ${({ theme }) => theme.borderRadius["xs"]};
   overflow: ${({ border }) => (border ? "hidden" : "")};
 `;
+
+export const StyledBold = styled.span`
+  font-weight: ${({ theme }) => theme.fontWeight["bold"]};
+`;
