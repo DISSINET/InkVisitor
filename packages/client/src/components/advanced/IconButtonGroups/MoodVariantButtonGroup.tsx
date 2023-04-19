@@ -15,11 +15,13 @@ interface MoodVariantButtonGroup {
   border?: boolean;
   value: EntityEnums.MoodVariant;
   onChange: (moodvariant: EntityEnums.MoodVariant) => void;
+  disabled?: boolean;
 }
 export const MoodVariantButtonGroup: React.FC<MoodVariantButtonGroup> = ({
   border = false,
   value,
   onChange,
+  disabled,
 }) => {
   return (
     <IconButtonGroup<EntityEnums.MoodVariant>
@@ -29,6 +31,7 @@ export const MoodVariantButtonGroup: React.FC<MoodVariantButtonGroup> = ({
       options={moodVariantsDict}
       onChange={onChange}
       value={value}
+      disabled={disabled}
     />
   );
 };

@@ -14,11 +14,13 @@ interface PositionButtonGroup {
   border?: boolean;
   value: EntityEnums.Position;
   onChange: (position: EntityEnums.Position) => void;
+  disabled?: boolean;
 }
 export const PositionButtonGroup: React.FC<PositionButtonGroup> = ({
   border = false,
   value,
   onChange,
+  disabled,
 }) => {
   return (
     <IconButtonGroup<EntityEnums.Position>
@@ -28,6 +30,7 @@ export const PositionButtonGroup: React.FC<PositionButtonGroup> = ({
       options={Object.values(actantPositionDict)}
       onChange={onChange}
       value={value}
+      disabled={disabled}
     />
   );
 };

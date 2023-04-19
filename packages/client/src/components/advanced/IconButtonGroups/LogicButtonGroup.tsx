@@ -12,11 +12,13 @@ interface LogicButtonGroup {
   border?: boolean;
   value: EntityEnums.Logic;
   onChange: (logic: EntityEnums.Logic) => void;
+  disabled?: boolean;
 }
 export const LogicButtonGroup: React.FC<LogicButtonGroup> = ({
   border = false,
   value,
   onChange,
+  disabled,
 }) => {
   return (
     <IconButtonGroup<EntityEnums.Logic>
@@ -26,6 +28,7 @@ export const LogicButtonGroup: React.FC<LogicButtonGroup> = ({
       options={logicDict}
       onChange={onChange}
       value={value}
+      disabled={disabled}
     />
   );
 };

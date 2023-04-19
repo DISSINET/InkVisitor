@@ -17,6 +17,7 @@ type IconButtonGroup<TValue extends ValueTypes> = {
   onChange: (value: TValue) => void;
   value: TValue;
   icons: { [key in TValue]: JSX.Element };
+  disabled?: boolean;
 };
 export const IconButtonGroup = <TValue extends ValueTypes>({
   attributeName,
@@ -25,34 +26,40 @@ export const IconButtonGroup = <TValue extends ValueTypes>({
   onChange,
   value,
   icons,
+  disabled = false,
 }: IconButtonGroup<TValue>) => {
   return (
     <StyledWrapper border={border}>
       {options.map((option, key) => {
         return (
-          <Button
-            key={key}
-            icon={icons[option.value]}
-            tooltipContent={
-              <p>
-                {attributeName ? (
-                  <>
-                    <StyledBold>{option.label}</StyledBold> ({attributeName})
-                  </>
-                ) : (
-                  <StyledBold>{option.label}</StyledBold>
-                )}
-              </p>
-            }
-            noBorder
-            inverted
-            color={option.value === value ? "primary" : "greyer"}
-            onClick={() => {
-              if (option.value !== value) {
-                onChange(option.value);
-              }
-            }}
-          />
+          <>
+            {(!disabled || option.value === value) && (
+              <Button
+                key={key}
+                icon={icons[option.value]}
+                tooltipContent={
+                  <p>
+                    {attributeName ? (
+                      <>
+                        <StyledBold>{option.label}</StyledBold> ({attributeName}
+                        )
+                      </>
+                    ) : (
+                      <StyledBold>{option.label}</StyledBold>
+                    )}
+                  </p>
+                }
+                noBorder
+                inverted
+                color={option.value === value ? "primary" : "greyer"}
+                onClick={() => {
+                  if (option.value !== value) {
+                    onChange(option.value);
+                  }
+                }}
+              />
+            )}
+          </>
         );
       })}
     </StyledWrapper>
