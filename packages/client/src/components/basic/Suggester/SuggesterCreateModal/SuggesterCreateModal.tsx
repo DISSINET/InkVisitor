@@ -149,7 +149,6 @@ export const SuggesterCreateModal: React.FC<SuggesterCreateModal> = ({
             <ModalInputLabel>{"Language: "}</ModalInputLabel>
             <ModalInputWrap>
               <Dropdown
-                isMulti={false}
                 width="full"
                 options={languageDict}
                 value={languageDict.find(

@@ -235,7 +235,6 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
             <ModalInputLabel>{"Language: "}</ModalInputLabel>
             <ModalInputWrap>
               <Dropdown
-                isMulti={false}
                 width="full"
                 options={languageDict}
                 value={languageDict.find(

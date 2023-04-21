@@ -47,6 +47,7 @@ interface Dropdown {
 
   icon?: JSX.Element;
   tooltipLabel?: string;
+  attributeDropdown?: boolean;
 
   // TODO: not implemented yet
   allowAny?: boolean;
@@ -73,6 +74,7 @@ export const Dropdown: React.FC<Dropdown> = ({
 
   icon,
   tooltipLabel,
+  attributeDropdown,
 
   allowAny = false,
 }) => {
@@ -125,6 +127,7 @@ export const Dropdown: React.FC<Dropdown> = ({
           isSearchable={!disableTyping}
           value={displayValue}
           icon={icon}
+          attributeDropdown={attributeDropdown}
           styles={{
             dropdownIndicator: () => {
               return {
@@ -136,6 +139,9 @@ export const Dropdown: React.FC<Dropdown> = ({
           onChange={(selected: any, event: any) => {
             if (selected !== null && selected.length > 0) {
               // kdyz je neco vybrany = aspon jeden option
+              if (attributeDropdown && event.action === "remove-value") {
+                return onChange([]);
+              }
               if (selected[selected.length - 1].value === allEntities.value) {
                 // kdyz vyberu all option
                 return onChange([allEntities, ...options]);
@@ -232,7 +238,10 @@ const Option = ({ ...props }: OptionProps | any): React.ReactElement => {
 
 const MultiValue = (props: MultiValueProps<any>): React.ReactElement => {
   let labelToBeDisplayed = `${props.data.label}`;
-  if (props.data.value === allEntities.value) {
+  const { attributeDropdown, isMulti, value } = props.selectProps;
+  if (attributeDropdown && isMulti && value.length > 1) {
+    labelToBeDisplayed = `${value.length} selected`;
+  } else if (props.data.value === allEntities.value) {
     labelToBeDisplayed = "All options selected";
   }
   return (
@@ -252,7 +261,10 @@ const ValueContainer = ({
 >): React.ReactElement => {
   const currentValues: DropdownItem[] = props.getValue().map((v) => v);
   let toBeRendered = children;
-  if (currentValues.some((val) => val.value === allEntities.value)) {
+  if (
+    currentValues.some((val) => val.value === allEntities.value) ||
+    (props.selectProps.attributeDropdown && props.selectProps.value.length > 1)
+  ) {
     toBeRendered = [[children[0][0]], children[1]];
   }
 

@@ -589,7 +589,6 @@ export const StatementEditor: React.FC<StatementEditor> = ({
               <StyledEditorContentRowValue>
                 <Dropdown
                   disabled={!userCanEdit}
-                  isMulti={false}
                   width="full"
                   options={templateOptions}
                   value={templateOptions[0]}

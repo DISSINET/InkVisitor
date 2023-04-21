@@ -128,7 +128,6 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
             <StyledDetailContentRowValue>
               <Dropdown
                 disabled={!userCanEdit}
-                isMulti={false}
                 width="full"
                 options={templateOptions}
                 value={templateOptions[0]}
@@ -269,7 +268,6 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
             <StyledDetailContentRowValue>
               <Dropdown
                 disabled={!userCanEdit}
-                isMulti={false}
                 width="full"
                 options={languageDict}
                 value={languageDict.find(
