@@ -163,9 +163,30 @@ export const Dropdown: React.FC<Dropdown> = ({
         />
       </StyledSelectWrapper>
 
+      {/* Tooltip */}
       {tooltipLabel && (
         <Tooltip
-          label={tooltipLabel}
+          content={
+            <p>
+              {isMulti ? (
+                <>
+                  <b>
+                    {(value as DropdownItem[]).map((v, key) => {
+                      return (
+                        <React.Fragment key={key}>
+                          {v.label}
+                          {key !== value?.length - 1 && ", "}
+                        </React.Fragment>
+                      );
+                    })}
+                  </b>{" "}
+                  ({tooltipLabel})
+                </>
+              ) : (
+                tooltipLabel
+              )}
+            </p>
+          }
           visible={showTooltip}
           referenceElement={referenceElement}
         />

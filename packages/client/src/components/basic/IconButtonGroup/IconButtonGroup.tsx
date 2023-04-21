@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react";
-import { StyledBold, StyledWrapper } from "./IconButtonGroupStyles";
-import { Button } from "components";
 import { EntityEnums } from "@shared/enums";
+import { Button } from "components";
+import React from "react";
+import { StyledBold, StyledWrapper } from "./IconButtonGroupStyles";
 
 // Possible types for values - choosed in interface when using component
 type ValueTypes =
@@ -32,10 +32,9 @@ export const IconButtonGroup = <TValue extends ValueTypes>({
     <StyledWrapper border={border}>
       {options.map((option, key) => {
         return (
-          <>
+          <React.Fragment key={key}>
             {(!disabled || option.value === value) && (
               <Button
-                key={key}
                 icon={icons[option.value]}
                 tooltipContent={
                   <p>
@@ -59,7 +58,7 @@ export const IconButtonGroup = <TValue extends ValueTypes>({
                 }}
               />
             )}
-          </>
+          </React.Fragment>
         );
       })}
     </StyledWrapper>
