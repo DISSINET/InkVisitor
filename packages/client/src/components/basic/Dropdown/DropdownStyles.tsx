@@ -40,7 +40,6 @@ export const StyledSelect = styled(Select)`
     width: ${({ width }) => getWidth(width)};
     max-width: 100%;
     min-height: ${({ theme }) => theme.space[8]};
-    /* height: ${({ theme, isMulti }) => (isMulti ? "" : theme.space[10])}; */
     border-width: 1px;
     border-style: solid;
     border-color: ${({ theme, suggester }) =>

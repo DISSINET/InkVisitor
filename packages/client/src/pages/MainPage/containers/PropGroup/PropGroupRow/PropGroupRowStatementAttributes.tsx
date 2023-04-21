@@ -66,7 +66,7 @@ export const PropGroupRowStatementAttributes: React.FC<
             {/* mood */}
             {!disabledAttributes.statement?.includes("mood") && (
               <Dropdown
-                width={100}
+                width={130}
                 isMulti
                 disabled={!userCanEdit}
                 placeholder="mood"
@@ -82,6 +82,7 @@ export const PropGroupRowStatementAttributes: React.FC<
                     mood: newValue ? newValue.map((v: any) => v.value) : [],
                   });
                 }}
+                attributeDropdown
               />
             )}
             {!disabledAttributes.statement?.includes("moodvariant") && (

@@ -197,7 +197,7 @@ export const StatementEditorActantClassification: React.FC<
         <StyledExpandedRow>
           <div>
             <Dropdown
-              width={100}
+              width={130}
               isMulti
               disabled={!userCanEdit}
               placeholder="mood"
@@ -212,6 +212,7 @@ export const StatementEditorActantClassification: React.FC<
                   mood: newValue ? newValue.map((v: any) => v.value) : [],
                 });
               }}
+              attributeDropdown
             />
           </div>
           <div>

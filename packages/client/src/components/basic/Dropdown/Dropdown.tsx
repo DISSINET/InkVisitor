@@ -180,8 +180,12 @@ export const Dropdown: React.FC<Dropdown> = ({
                     {(value as DropdownItem[]).map((v, key) => {
                       return (
                         <React.Fragment key={key}>
-                          {v.label}
-                          {key !== value?.length - 1 && ", "}
+                          {v.value !== allEntities.value && (
+                            <>
+                              {v.label}
+                              {key !== value?.length - 1 && ", "}
+                            </>
+                          )}
                         </React.Fragment>
                       );
                     })}
@@ -238,9 +242,14 @@ const Option = ({ ...props }: OptionProps | any): React.ReactElement => {
 
 const MultiValue = (props: MultiValueProps<any>): React.ReactElement => {
   let labelToBeDisplayed = `${props.data.label}`;
-  const { attributeDropdown, isMulti, value } = props.selectProps;
+  const { attributeDropdown, isMulti, value, options } = props.selectProps;
+
   if (attributeDropdown && isMulti && value.length > 1) {
-    labelToBeDisplayed = `${value.length} selected`;
+    if (value.length === options?.length) {
+      labelToBeDisplayed = `${value.length - 1} selected`;
+    } else {
+      labelToBeDisplayed = `${value.length} selected`;
+    }
   } else if (props.data.value === allEntities.value) {
     labelToBeDisplayed = "All options selected";
   }
