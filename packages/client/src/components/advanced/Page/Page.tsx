@@ -1,5 +1,5 @@
 import api from "api";
-import { Header, Loader, MemoizedFooter, Toast } from "components";
+import { Header, Loader, Toast } from "components";
 import {
   LeftHeader,
   RightHeader,
@@ -16,7 +16,6 @@ import { setDisableUserSelect } from "redux/features/layout/disableUserSelectSli
 import { setLastClickedIndex } from "redux/features/statementList/lastClickedIndexSlice";
 import { setUsername } from "redux/features/usernameSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { heightFooter } from "Theme/constants";
 import { StyledPageContent, StyledPage } from "./PageStyles";
 
 interface Page {
@@ -128,8 +127,6 @@ export const Page: React.FC<Page> = ({ children }) => {
           <Loader show />
         </StyledPageContent>
       )}
-
-      <MemoizedFooter height={heightFooter} />
 
       {user && userCustomizationOpen && (
         <UserCustomizationModal
