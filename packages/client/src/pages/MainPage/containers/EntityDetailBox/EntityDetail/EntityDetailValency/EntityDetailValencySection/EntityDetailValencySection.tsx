@@ -160,7 +160,7 @@ export const EntityDetailValencySection: React.FC<
   };
 
   const getEntityTypeValue = () =>
-  valencyEntitiesOptions.filter((i: any) => {
+    valencyEntitiesOptions.filter((i: any) => {
       switch (relationType) {
         case RelationEnums.Type.SubjectSemantics:
           return (entity as IAction).data.entities?.s.includes(i.value);
@@ -270,7 +270,7 @@ export const EntityDetailValencySection: React.FC<
       {/* VALENCY ROW */}
       <div />
       <StyledLabelInputWrapper>
-        <StyledLabel>Grammatical valency</StyledLabel>
+        <StyledLabel>Morphosyntactic valency</StyledLabel>
         <Input
           disabled={!userCanEdit}
           value={getValencyValue()}
