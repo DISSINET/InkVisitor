@@ -63,7 +63,7 @@ export class ResponseStatement extends Statement implements IResponseStatement {
       )
       .reduce<EntityEnums.Class[]>(
         (acc, aid) =>
-          acc.concat((this.entities[aid] as IAction).data.entities.s),
+          acc.concat((this.entities[aid] as IAction).data.entities.s || []),
         []
       );
   }
@@ -135,6 +135,37 @@ export class ResponseStatement extends Statement implements IResponseStatement {
     return warnings;
   }
 
+  hasEmptyActionRule(): IWarning | undefined {
+    for (const stActionIndex in this.data.actions) {
+      const stAction = this.data.actions[stActionIndex];
+      const action = this.getEntity(stAction.actionId) as Action;
+      const rules = ActionEntity.toRules(action.data.entities);
+
+      for (const position of [
+        EntityEnums.Position.Actant1,
+        EntityEnums.Position.Actant2,
+        EntityEnums.Position.Subject,
+      ]) {
+        const positionRules = rules[position];
+
+        // rule not set
+        if (!positionRules) {
+          continue;
+        }
+
+        // at least one empty rule -> WAC takes precedence
+        const emptyRule = !positionRules.length;
+
+        if (emptyRule) {
+          return this.newStatementWarning(WarningTypeEnums.WAC, {
+            section: `editor.${position}`,
+          });
+        }
+      }
+    }
+    return undefined;
+  }
+
   /**
    * get a list of all warnings
    */
@@ -143,6 +174,12 @@ export class ResponseStatement extends Statement implements IResponseStatement {
 
     if (!this.data.actions.length) {
       warnings.push(this.newStatementWarning(WarningTypeEnums.NA, {}));
+      return warnings;
+    }
+
+    const emptyRuleWarn = this.hasEmptyActionRule();
+    if (emptyRuleWarn && this.data.actions.length > 1) {
+      warnings.push(emptyRuleWarn);
       return warnings;
     }
 
@@ -160,44 +197,64 @@ export class ResponseStatement extends Statement implements IResponseStatement {
           (a) => a.position === position
         );
 
+        const positionRules = rules[position];
+
+        // rule not set
+        if (!positionRules) {
+          continue;
+        }
+
+        const emptyRule = !positionRules.length;
+
         let commonWarn: WarningTypeEnums | undefined;
-        if (rules[position] && rules[position].length && !actants.length) {
+        if (!emptyRule && !actants.length) {
           commonWarn = WarningTypeEnums.MA;
         }
 
-        for (const stActant of actants) {
-          const actant = this.getEntity(stActant.entityId);
-          const position = stActant.position;
+        // continue with actant specific warning only if common warn is not set
+        if (!commonWarn) {
+          for (const stActant of actants) {
+            const actant = this.getEntity(stActant.entityId);
+            const position = stActant.position;
 
-          // rule supported - ok
-          if (rules[position].includes(actant.class)) {
-            commonWarn = undefined;
-          } else if (!rules[position] || !rules[position].length) {
-            warnings.push(
-              this.newStatementWarning(WarningTypeEnums.ANA, {
-                section: `editor.${position}`,
-                actantId: stActant.id,
-                entityId: stActant.entityId,
-              })
-            );
-          } else {
-            warnings.push(
-              this.newStatementWarning(WarningTypeEnums.WA, {
-                section: `editor.${position}`,
-                actantId: stActant.id,
-                entityId: stActant.entityId,
-              })
-            );
+            // rule supported - ok
+            if (positionRules.includes(actant.class)) {
+              commonWarn = undefined;
+            } else if (emptyRule) {
+              warnings.push(
+                this.newStatementWarning(WarningTypeEnums.ANA, {
+                  section: `editor.${position}`,
+                  actantId: stActant.id,
+                  entityId: stActant.entityId,
+                })
+              );
+            } else {
+              warnings.push(
+                this.newStatementWarning(WarningTypeEnums.WA, {
+                  section: `editor.${position}`,
+                  actantId: stActant.id,
+                  entityId: stActant.entityId,
+                })
+              );
+            }
+
+            if (warnings.length) {
+              commonWarn = undefined;
+              break;
+            }
           }
-        }
-
-        if (commonWarn) {
+        } else {
           warnings.push(
             this.newStatementWarning(commonWarn, {
               section: `editor.${position}`,
             })
           );
+          break;
         }
+      }
+
+      if (warnings.length) {
+        break;
       }
     }
 
