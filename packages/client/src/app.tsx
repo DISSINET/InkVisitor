@@ -23,7 +23,6 @@ import { setLayoutWidth } from "redux/features/layout/layoutWidthSlice";
 import { setPanelWidths } from "redux/features/layout/panelWidthsSlice";
 import { setSeparatorXPosition } from "redux/features/layout/separatorXPositionSlice";
 import {
-  heightFooter,
   heightHeader,
   percentPanelWidths,
   secondPanelMinWidth,
@@ -100,7 +99,7 @@ export const App: React.FC = () => {
 
   useEffect(() => {
     if (debouncedHeight > 0) {
-      const heightContent = debouncedHeight - heightHeader - heightFooter;
+      const heightContent = debouncedHeight - heightHeader;
       dispatch(setContentHeight(heightContent));
     }
   }, [debouncedHeight]);

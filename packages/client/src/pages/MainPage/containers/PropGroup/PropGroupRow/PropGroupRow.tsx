@@ -1,4 +1,5 @@
 import { IEntity, IProp } from "@shared/types";
+import { excludedSuggesterEntities } from "Theme/constants";
 import { AttributeIcon, Button, ButtonGroup } from "components";
 import {
   EntityDropzone,
@@ -13,19 +14,18 @@ import {
   useDrag,
   useDrop,
 } from "react-dnd";
-import { FaPlus, FaTrashAlt, FaUnlink } from "react-icons/fa";
+import { FaPlus, FaTrashAlt } from "react-icons/fa";
 import { setDraggedPropRow } from "redux/features/rowDnd/draggedPropRowSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { excludedSuggesterEntities } from "Theme/constants";
 import {
-  classesPropType,
-  classesPropValue,
+  DragItem,
   DraggedPropRowCategory,
   DraggedPropRowItem,
-  DragItem,
   ItemTypes,
   PropAttributeFilter,
   PropAttributeGroupDataObject,
+  classesPropType,
+  classesPropValue,
 } from "types";
 import { dndHoverFn } from "utils";
 import { AttributesGroupEditor } from "../../AttributesEditor/AttributesGroupEditor";

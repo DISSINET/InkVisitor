@@ -2,7 +2,6 @@ import { Box } from "./basic/Box/Box";
 import { Button } from "./basic/Button/Button";
 import { ButtonGroup, ButtonGroups } from "./basic/ButtonGroup/ButtonGroup";
 import { Dropdown } from "./basic/Dropdown/Dropdown";
-import { Footer, MemoizedFooter } from "./basic/Footer/Footer";
 import { Header } from "./basic/Header/Header";
 import { Input } from "./basic/Input/Input";
 import { Loader } from "./basic/Loader/Loader";
@@ -43,7 +42,6 @@ export {
   Checkbox,
   Dropzone,
   Header,
-  Footer,
   Input,
   MultiInput,
   Loader,
@@ -63,7 +61,6 @@ export {
   ModalInputForm,
   ModalInputLabel,
   ModalInputWrap,
-  MemoizedFooter,
   Submit,
   TemplateActionModal,
   TypeBar,

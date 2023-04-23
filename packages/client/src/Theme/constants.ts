@@ -10,7 +10,6 @@ export const scrollOverscanCount = 10;
 
 // layout
 export const heightHeader = 70;
-export const heightFooter = 30;
 
 export const minLayoutWidth = 1440;
 export const layoutWidthBreakpoint = 1400;
