@@ -1,4 +1,4 @@
-import { fillFlatObject, UnknownObject, IModel } from "@models/common";
+import { IModel } from "@models/common";
 import { EntityEnums } from "@shared/enums";
 import Entity from "@models/entity/entity";
 import { IAction } from "@shared/types";
@@ -29,27 +29,27 @@ class ActionValency implements IActionValency, IModel {
 }
 
 export class ActionEntity implements IActionEntity, IModel {
-  a1: EntityEnums.Class[];
-  a2: EntityEnums.Class[];
-  s: EntityEnums.Class[];
+  a1?: EntityEnums.Class[];
+  a2?: EntityEnums.Class[];
+  s?: EntityEnums.Class[];
 
   constructor(data: Partial<IActionEntity>) {
-    this.a1 = data.a1 || [];
-    this.a2 = data.a2 || [];
-    this.s = data.s || [];
+    this.a1 = data.a1 || undefined;
+    this.a2 = data.a2 || undefined;
+    this.s = data.s || undefined;
   }
 
   isValid(): boolean {
     return (
-      this.a1.constructor.name === "Array" &&
-      this.a2.constructor.name === "Array" &&
-      this.s.constructor.name === "Array"
+      (this.a1 ? this.a1.constructor.name === "Array" : true) &&
+      (this.a2 ? this.a2.constructor.name === "Array" : true) &&
+      (this.s ? this.s.constructor.name === "Array" : true)
     );
   }
 
   static toRules(
     ae: IActionEntity
-  ): Record<EntityEnums.Position, EntityEnums.Class[]> {
+  ): Record<EntityEnums.Position, EntityEnums.Class[] | undefined> {
     return {
       a1: ae.a1,
       a2: ae.a2,

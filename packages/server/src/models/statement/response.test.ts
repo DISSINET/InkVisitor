@@ -19,7 +19,7 @@ class MockResponse extends ResponseStatement {
   // @ts-ignore
   addAction(map: { [key: EntityEnums.Position]: EntityEnums.Class[] }) {
     const action = new Action({
-      id: `action1-${this.data.actions.length + 1}`,
+      id: `action-${this.data.actions.length + 1}`,
     });
     for (const key of Object.keys(map)) {
       const pos = key as EntityEnums.Position;
@@ -27,7 +27,7 @@ class MockResponse extends ResponseStatement {
       action.data.entities[pos] = map[key];
     }
 
-    this.data.actions = [new StatementAction({ actionId: action.id })];
+    this.data.actions.push(new StatementAction({ actionId: action.id }));
     this.entities[action.id] = action;
   }
 
@@ -215,18 +215,212 @@ describe("models/statement/response", function () {
           expect(
             ws.find(
               (w) =>
-                w.type === WarningTypeEnums.ANA &&
-                w.position.entityId === act1.id
-            )
-          ).toBeTruthy();
-          expect(
-            ws.find(
-              (w) =>
-                w.type === WarningTypeEnums.ANA &&
+                (w.type === WarningTypeEnums.ANA &&
+                  w.position.entityId === act1.id) ||
                 w.position.entityId === act2.id
             )
           ).toBeTruthy();
-          expect(ws).toHaveLength(2);
+          expect(ws).toHaveLength(1);
+        });
+      });
+    });
+
+    describe("2 actions", () => {
+      describe("any + any", () => {
+        const prepareResponse = () => {
+          const response = MockResponse.new();
+          response.addAction({
+            [EntityEnums.Position.Subject]: EntityEnums.PLOGESTRB,
+          });
+          response.addAction({
+            [EntityEnums.Position.Subject]: EntityEnums.PLOGESTRB,
+          });
+
+          return response;
+        };
+
+        test("no actant - MA", () => {
+          const response = prepareResponse();
+          const ws = response.getWarnings();
+          expect(ws.find((w) => w.type === WarningTypeEnums.MA)).toBeTruthy();
+        });
+
+        test("has actants - no warning", () => {
+          const response = prepareResponse();
+          const person = new Person({ id: "person" });
+          const group = new Group({ id: "group" });
+          response.addActant(person, EntityEnums.Position.Subject);
+          response.addActant(group, EntityEnums.Position.Subject);
+
+          const ws = response.getWarnings();
+          expect(ws).toHaveLength(0);
+        });
+      });
+
+      describe("any + P", () => {
+        const prepareResponse = () => {
+          const response = MockResponse.new();
+          response.addAction({
+            [EntityEnums.Position.Subject]: EntityEnums.PLOGESTRB,
+          });
+          response.addAction({
+            [EntityEnums.Position.Subject]: [EntityEnums.Class.Person],
+          });
+
+          return response;
+        };
+
+        it("should return MA if no actant", () => {
+          const ws = prepareResponse().getWarnings();
+          expect(ws).toHaveLength(1);
+          expect(ws.find((w) => w.type === WarningTypeEnums.MA)).toBeTruthy();
+        });
+
+        describe("with actant(s)", () => {
+          const person = new Person({ id: "person" });
+          const person2 = new Person({ id: "person2" });
+          const group = new Group({ id: "group" });
+          const location = new Location({ id: "location" });
+
+          it("should process P as OK", () => {
+            const response = prepareResponse();
+            response.addActant(person, EntityEnums.Position.Subject);
+            const ws = response.getWarnings();
+
+            expect(ws).toHaveLength(0);
+          });
+
+          it("should process G as WA", () => {
+            const response = prepareResponse();
+            response.addActant(group, EntityEnums.Position.Subject);
+            const ws = response.getWarnings();
+
+            expect(ws).toHaveLength(1);
+            expect(
+              ws.find(
+                (w) =>
+                  w.type === WarningTypeEnums.WA &&
+                  w.position.entityId === group.id
+              )
+            ).toBeTruthy();
+          });
+
+          it("should process P + P as OK", () => {
+            const response = prepareResponse();
+            response.addActant(person, EntityEnums.Position.Subject);
+            response.addActant(person2, EntityEnums.Position.Subject);
+            const ws = response.getWarnings();
+
+            expect(ws).toHaveLength(0);
+          });
+
+          it("should process P + G as WA, because G is not in the second action", () => {
+            const response = prepareResponse();
+            response.addActant(person, EntityEnums.Position.Subject);
+            response.addActant(group, EntityEnums.Position.Subject);
+            const ws = response.getWarnings();
+
+            expect(ws).toHaveLength(1);
+            expect(
+              ws.find(
+                (w) =>
+                  w.type === WarningTypeEnums.WA &&
+                  w.position.entityId === group.id
+              )
+            ).toBeTruthy();
+          });
+        });
+      });
+
+      describe("at least 1 empty", () => {
+        const prepareResponse = () => {
+          const response = MockResponse.new();
+          response.addAction({
+            [EntityEnums.Position.Subject]: EntityEnums.PLOGESTRB,
+          });
+          response.addAction({
+            [EntityEnums.Position.Subject]: [],
+          });
+
+          return response;
+        };
+
+        it("should return WAC for no actant", () => {
+          const response = prepareResponse();
+          const ws = response.getWarnings();
+          expect(ws).toHaveLength(1);
+          expect(ws.find((w) => w.type === WarningTypeEnums.WAC)).toBeTruthy();
+        });
+
+        it("should return WAC for 2 actants", () => {
+          const response = prepareResponse();
+          response.addActant(
+            new Person({ id: "person" }),
+            EntityEnums.Position.Subject
+          );
+          response.addActant(
+            new Group({ id: "group" }),
+            EntityEnums.Position.Subject
+          );
+          const ws = response.getWarnings();
+          expect(ws).toHaveLength(1);
+          expect(ws.find((w) => w.type === WarningTypeEnums.WAC)).toBeTruthy();
+        });
+      });
+
+      describe("P + [P,G]", () => {
+        const prepareResponse = () => {
+          const response = MockResponse.new();
+          response.addAction({
+            [EntityEnums.Position.Subject]: EntityEnums.Class.Person,
+          });
+          response.addAction({
+            [EntityEnums.Position.Subject]: [
+              EntityEnums.Class.Person,
+              EntityEnums.Class.Group,
+            ],
+          });
+
+          return response;
+        };
+
+        it("should return OK for single P actant", () => {
+          const response = prepareResponse();
+          response.addActant(
+            new Person({ id: "person1" }),
+            EntityEnums.Position.Subject
+          );
+          const ws = response.getWarnings();
+          expect(ws).toHaveLength(0);
+        });
+
+        it("should return OK for two P actant", () => {
+          const response = prepareResponse();
+          response.addActant(
+            new Person({ id: "person1" }),
+            EntityEnums.Position.Subject
+          );
+          response.addActant(
+            new Person({ id: "person2" }),
+            EntityEnums.Position.Subject
+          );
+          const ws = response.getWarnings();
+          expect(ws).toHaveLength(0);
+        });
+
+        it("should return WA if P + G", () => {
+          const response = prepareResponse();
+          response.addActant(
+            new Person({ id: "person" }),
+            EntityEnums.Position.Subject
+          );
+          response.addActant(
+            new Group({ id: "group" }),
+            EntityEnums.Position.Subject
+          );
+          const ws = response.getWarnings();
+          expect(ws).toHaveLength(1);
+          expect(ws.find((w) => w.type === WarningTypeEnums.WA)).toBeTruthy();
         });
       });
     });

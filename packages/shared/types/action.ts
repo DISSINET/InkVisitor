@@ -19,7 +19,7 @@ export interface IActionValency {
 }
 
 export interface IActionEntity {
-  s: EntityEnums.Class[];
-  a1: EntityEnums.Class[];
-  a2: EntityEnums.Class[];
+  s?: EntityEnums.Class[];
+  a1?: EntityEnums.Class[];
+  a2?: EntityEnums.Class[];
 }
