@@ -192,7 +192,6 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                 disabled={!userCanEdit}
                 width="full"
                 type="textarea"
-                rows={2}
                 value={entity.detail}
                 onChangeFn={async (newValue: string) => {
                   if (newValue !== entity.detail)

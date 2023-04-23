@@ -608,8 +608,9 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         >
           <StyledEditorSectionContent firstSection>
             <Input
-              disabled={!userCanEdit}
               type="textarea"
+              rows={5}
+              disabled={!userCanEdit}
               width="full"
               noBorder
               placeholder="Insert statement text here"

@@ -154,26 +154,15 @@ export const StatementListBox: React.FC = () => {
     }
   );
 
-  const duplicateStatement = (statementToDuplicate: IResponseStatement) => {
-    const { ...newStatementObject } = statementToDuplicate;
-
-    const duplicatedStatement = DStatement(
-      newStatementObject as IStatement,
-      localStorage.getItem("userrole") as UserEnums.Role
-    );
-    duplicateStatementMutation.mutate(duplicatedStatement);
-  };
-
-  const duplicateStatementMutation = useMutation(
-    async (duplicatedStatement: IStatement) => {
-      await api.entityCreate(duplicatedStatement);
-    },
+  const cloneStatementMutation = useMutation(
+    async (entityId: string) => await api.entityClone(entityId),
     {
       onSuccess: (data, variables) => {
-        setStatementId(variables.id);
+        setStatementId(data.data.data.id);
         toast.info(`Statement duplicated!`);
         queryClient.invalidateQueries("territory");
         queryClient.invalidateQueries("entity");
+        queryClient.invalidateQueries("tree");
       },
       onError: () => {
         toast.error(`Error: Statement not duplicated!`);
@@ -392,7 +381,7 @@ export const StatementListBox: React.FC = () => {
             actantsUpdateMutation={statementUpdateMutation}
             entities={entities}
             right={right}
-            duplicateStatement={duplicateStatement}
+            cloneStatementMutation={cloneStatementMutation}
             setStatementToDelete={setStatementToDelete}
             setShowSubmit={setShowSubmit}
             addStatementAtCertainIndex={addStatementAtCertainIndex}
@@ -440,13 +429,13 @@ export const StatementListBox: React.FC = () => {
         show={
           isFetching ||
           removeStatementMutation.isLoading ||
-          duplicateStatementMutation.isLoading ||
           addStatementAtTheEndMutation.isLoading ||
           actantsCreateMutation.isLoading ||
           statementUpdateMutation.isLoading ||
           moveTerritoryMutation.isLoading ||
           moveStatementsMutation.isLoading ||
-          duplicateStatementsMutation.isLoading
+          duplicateStatementsMutation.isLoading ||
+          cloneStatementMutation.isLoading
         }
       />
     </>

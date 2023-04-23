@@ -34,16 +34,14 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
 
   const { setStatementId, setTerritoryId, appendDetailId } = useSearchParams();
 
-  const duplicateEntityMutation = useMutation(
-    async (newEntity: IEntity) => {
-      await api.entityCreate(newEntity);
-    },
+  const cloneEntityMutation = useMutation(
+    async (entityId: string) => await api.entityClone(entityId),
     {
       onSuccess: (data, variables) => {
-        appendDetailId(variables.id);
+        appendDetailId(data.data.data.id);
         toast.info(`Entity duplicated!`);
         queryClient.invalidateQueries("templates");
-        if (variables.class === EntityEnums.Class.Territory) {
+        if (data.data.data.class === EntityEnums.Class.Territory) {
           queryClient.invalidateQueries("tree");
         }
       },
@@ -52,15 +50,6 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
       },
     }
   );
-
-  const duplicateEntity = (entityToDuplicate: IEntity) => {
-    const newEntity = DEntity(
-      entityToDuplicate,
-      localStorage.getItem("userrole") as UserEnums.Role
-    );
-
-    duplicateEntityMutation.mutate(newEntity);
-  };
 
   const instantiateTemplate = async (territoryParentId?: string) => {
     let newInstanceId;
@@ -170,7 +159,7 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
                 inverted
                 onClick={() => {
                   if (entity.class !== EntityEnums.Class.Statement) {
-                    duplicateEntity(entity);
+                    cloneEntityMutation.mutate(entity.id);
                   }
                 }}
               />
