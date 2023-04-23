@@ -188,7 +188,7 @@ export const EntitySearchBox: React.FC = () => {
   );
 
   const classOptions: DropdownItem[] = entitiesDict.filter(
-    (e) => e.value !== "A" && e.value !== "R" && e.value !== "X"
+    (e) => e.value !== "R" && e.value !== "X"
   );
 
   // apply changes to search parameters
