@@ -424,7 +424,6 @@ export const StatementEditorActantTableRow: React.FC<
           <StyledGrid
             ref={dropRef}
             style={{ opacity }}
-            hasOrder={hasOrder}
             hasActant={!!filteredActant.data.actant}
           >
             <StyledGridColumn>{renderActantCell()}</StyledGridColumn>

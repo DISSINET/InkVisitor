@@ -9,14 +9,13 @@ export const StyledRow = styled.div<StyledRow>`
 `;
 interface StyledGrid {
   tempDisabled?: boolean;
-  hasOrder?: boolean;
   hasActant?: boolean;
 }
 export const StyledGrid = styled.div<StyledGrid>`
   display: grid;
   align-items: center;
   padding-left: ${({ theme }) => theme.space[0]};
-  grid-template-columns: ${({ theme, hasOrder, hasActant }) =>
+  grid-template-columns: ${({ hasActant }) =>
     ` minmax(${hasActant ? "7rem" : "14.5rem"}, auto) repeat(4, auto)`};
   width: fit-content;
   grid-auto-flow: row;
@@ -69,7 +68,6 @@ export const StyledExpandedRow = styled.div`
   display: grid;
   align-items: center;
   margin-left: 3rem;
-  /* margin-bottom: 1rem; */
   grid-template-columns: repeat(3, auto) 1fr;
   grid-column-gap: 1rem;
   font-size: 1.4rem;
@@ -82,7 +80,7 @@ interface StyledBorderLeft {
 export const StyledBorderLeft = styled.div<StyledBorderLeft>`
   border-left: 3px solid
     ${({ theme, borderColor }) => theme.color.elementType[borderColor]};
-  padding-left: ${({ padding }) => (padding ? "3px" : "")};
+  padding-left: ${({ theme, padding }) => (padding ? theme.space[1] : "")};
   margin-bottom: ${({ theme, marginBottom }) =>
     marginBottom ? theme.space[4] : ""};
 `;

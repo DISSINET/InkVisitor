@@ -341,7 +341,7 @@ export const StatementEditorActionTableRow: React.FC<
         )}
 
         <StyledBorderLeft>
-          <StyledGrid ref={dropRef} style={{ opacity }} hasOrder={hasOrder}>
+          <StyledGrid ref={dropRef} style={{ opacity }}>
             <StyledGridColumn>{renderActionCell()}</StyledGridColumn>
             <StyledGridColumn>
               {
