@@ -69,7 +69,7 @@ export const StyledExpandedRow = styled.div`
   display: grid;
   align-items: center;
   margin-left: 3rem;
-  margin-bottom: 1rem;
+  /* margin-bottom: 1rem; */
   grid-template-columns: repeat(3, auto) 1fr;
   grid-column-gap: 1rem;
   font-size: 1.4rem;
@@ -77,11 +77,14 @@ export const StyledExpandedRow = styled.div`
 interface StyledBorderLeft {
   borderColor: keyof ElementTypeColor;
   padding?: boolean;
+  marginBottom?: boolean;
 }
 export const StyledBorderLeft = styled.div<StyledBorderLeft>`
   border-left: 3px solid
     ${({ theme, borderColor }) => theme.color.elementType[borderColor]};
   padding-left: ${({ padding }) => (padding ? "3px" : "")};
+  margin-bottom: ${({ theme, marginBottom }) =>
+    marginBottom ? theme.space[4] : ""};
 `;
 export const StyledFlexStart = styled.div`
   display: flex;

@@ -29,13 +29,13 @@ export const StyledExpandedRow = styled.div`
   display: grid;
   align-items: center;
   margin-left: 3rem;
-  margin-bottom: 1rem;
   grid-template-columns: repeat(3, auto) 1fr;
   grid-column-gap: 1rem;
   font-size: 1.4rem;
 `;
 export const StyledBorderLeft = styled.div`
   border-left: 3px solid ${({ theme }) => theme.color.elementType.action};
+  margin-bottom: ${({ theme }) => theme.space[4]};
 `;
 
 export const StyledFlexStart = styled.div`

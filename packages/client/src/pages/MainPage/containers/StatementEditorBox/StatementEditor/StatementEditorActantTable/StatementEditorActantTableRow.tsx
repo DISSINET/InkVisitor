@@ -420,7 +420,7 @@ export const StatementEditorActantTableRow: React.FC<
           <StyledGridColumn />
         )}
 
-        <StyledBorderLeft borderColor="actant">
+        <StyledBorderLeft borderColor="actant" marginBottom>
           <StyledGrid
             ref={dropRef}
             style={{ opacity }}
