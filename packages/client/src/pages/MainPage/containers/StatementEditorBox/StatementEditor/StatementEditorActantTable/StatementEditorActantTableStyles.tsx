@@ -1,3 +1,4 @@
+import { ElementTypeColor } from "Theme/theme";
 import styled from "styled-components";
 
 interface StyledRow {
@@ -13,13 +14,10 @@ interface StyledGrid {
 }
 export const StyledGrid = styled.div<StyledGrid>`
   display: grid;
-
   align-items: center;
   padding-left: ${({ theme }) => theme.space[0]};
   grid-template-columns: ${({ theme, hasOrder, hasActant }) =>
-    `${hasOrder ? theme.space[8] : theme.space[2]} minmax(${
-      hasActant ? "7rem" : "14.5rem"
-    }, auto) repeat(4, auto)`};
+    ` minmax(${hasActant ? "7rem" : "14.5rem"}, auto) repeat(4, auto)`};
   width: fit-content;
   grid-auto-flow: row;
   padding-bottom: ${({ theme }) => theme.space[1]};
@@ -75,4 +73,17 @@ export const StyledExpandedRow = styled.div`
   grid-template-columns: repeat(3, auto) 1fr;
   grid-column-gap: 1rem;
   font-size: 1.4rem;
+`;
+interface StyledBorderLeft {
+  borderColor: keyof ElementTypeColor;
+  padding?: boolean;
+}
+export const StyledBorderLeft = styled.div<StyledBorderLeft>`
+  border-left: 3px solid
+    ${({ theme, borderColor }) => theme.color.elementType[borderColor]};
+  padding-left: ${({ padding }) => (padding ? "3px" : "")};
+`;
+export const StyledFlexStart = styled.div`
+  display: flex;
+  align-items: flex-start;
 `;

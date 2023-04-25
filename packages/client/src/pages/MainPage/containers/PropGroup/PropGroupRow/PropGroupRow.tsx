@@ -25,6 +25,7 @@ import {
 import { dndHoverFn } from "utils";
 import { AttributesGroupEditor } from "../../AttributesEditor/AttributesGroupEditor";
 import {
+  StyledBorderLeft,
   StyledFaGripVertical,
   StyledGrid,
   StyledPropLineColumn,
@@ -177,19 +178,21 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
             )}
           </StyledPropLineColumn>
           <StyledPropLineColumn level={level} lowIdent={lowIdent}>
-            <PropGroupRowType
-              propTypeEntity={propTypeEntity}
-              prop={prop}
-              isExpanded={isExpanded}
-              disabledAttributes={disabledAttributes}
-              isInsideTemplate={isInsideTemplate}
-              openDetailOnCreate={openDetailOnCreate}
-              setModalOpen={setModalOpen}
-              territoryActants={territoryActants}
-              territoryParentId={territoryParentId}
-              updateProp={updateProp}
-              userCanEdit={userCanEdit}
-            />
+            <StyledBorderLeft>
+              <PropGroupRowType
+                propTypeEntity={propTypeEntity}
+                prop={prop}
+                isExpanded={isExpanded}
+                disabledAttributes={disabledAttributes}
+                isInsideTemplate={isInsideTemplate}
+                openDetailOnCreate={openDetailOnCreate}
+                setModalOpen={setModalOpen}
+                territoryActants={territoryActants}
+                territoryParentId={territoryParentId}
+                updateProp={updateProp}
+                userCanEdit={userCanEdit}
+              />
+            </StyledBorderLeft>
           </StyledPropLineColumn>
           <StyledPropLineColumn>
             <PropGroupRowValue

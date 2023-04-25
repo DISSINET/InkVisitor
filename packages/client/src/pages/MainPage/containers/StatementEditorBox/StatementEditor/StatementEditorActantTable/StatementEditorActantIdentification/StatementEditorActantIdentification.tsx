@@ -23,6 +23,7 @@ import { TbSettingsAutomation, TbSettingsFilled } from "react-icons/tb";
 import { UseMutationResult } from "react-query";
 import { AttributeData } from "types";
 import {
+  StyledBorderLeft,
   StyledCIGrid,
   StyledExpandedRow,
 } from "../StatementEditorActantTableStyles";
@@ -69,7 +70,7 @@ export const StatementEditorActantIdentification: React.FC<
   const [isExpanded, setIsExpanded] = useState(true);
 
   return (
-    <>
+    <StyledBorderLeft borderColor="ident" padding>
       <StyledCIGrid>
         {entity ? (
           <EntityDropzone
@@ -246,6 +247,6 @@ export const StatementEditorActantIdentification: React.FC<
           </div>
         </StyledExpandedRow>
       )}
-    </>
+    </StyledBorderLeft>
   );
 };

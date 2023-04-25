@@ -172,6 +172,7 @@ export const Dropdown: React.FC<Dropdown> = ({
       {/* Tooltip */}
       {tooltipLabel && (
         <Tooltip
+          disabled={isMulti && value?.length === 0}
           content={
             <p>
               {isMulti ? (
@@ -193,7 +194,7 @@ export const Dropdown: React.FC<Dropdown> = ({
                   ({tooltipLabel})
                 </>
               ) : (
-                tooltipLabel
+                <b>{tooltipLabel}</b>
               )}
             </p>
           }

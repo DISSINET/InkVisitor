@@ -6,11 +6,9 @@ interface StyledGrid {
 }
 export const StyledGrid = styled.div<StyledGrid>`
   display: grid;
-
   align-items: center;
   padding-left: ${({ theme }) => theme.space[0]};
-  grid-template-columns: ${({ theme, hasOrder }) =>
-    `${hasOrder ? theme.space[8] : theme.space[2]} repeat(5, auto)`};
+  grid-template-columns: ${({ theme, hasOrder }) => `repeat(5, auto)`};
   width: fit-content;
   grid-template-rows: auto;
   grid-auto-flow: row;
@@ -35,4 +33,12 @@ export const StyledExpandedRow = styled.div`
   grid-template-columns: repeat(3, auto) 1fr;
   grid-column-gap: 1rem;
   font-size: 1.4rem;
+`;
+export const StyledBorderLeft = styled.div`
+  border-left: 3px solid ${({ theme }) => theme.color.elementType.action};
+`;
+
+export const StyledFlexStart = styled.div`
+  display: flex;
+  align-items: flex-start;
 `;

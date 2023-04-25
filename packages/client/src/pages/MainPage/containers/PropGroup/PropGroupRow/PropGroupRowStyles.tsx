@@ -90,3 +90,7 @@ export const StyledTagGrid = styled.div`
   grid-template-columns: auto auto;
   align-items: center;
 `;
+export const StyledBorderLeft = styled.div`
+  border-left: 3px solid ${({ theme }) => theme.color.elementType.prop};
+  padding-left: 3px;
+`;

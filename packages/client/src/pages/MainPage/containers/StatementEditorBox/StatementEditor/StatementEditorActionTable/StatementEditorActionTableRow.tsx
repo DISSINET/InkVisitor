@@ -39,7 +39,9 @@ import {
 } from "types";
 import { dndHoverFn } from "utils";
 import {
+  StyledBorderLeft,
   StyledExpandedRow,
+  StyledFlexStart,
   StyledGrid,
   StyledGridColumn,
 } from "./StatementEditorActionTableStyles";
@@ -329,7 +331,7 @@ export const StatementEditorActionTableRow: React.FC<
 
   return (
     <React.Fragment key={index}>
-      <StyledGrid ref={dropRef} style={{ opacity }} hasOrder={hasOrder}>
+      <StyledFlexStart>
         {userCanEdit && hasOrder ? (
           <StyledGridColumn ref={dragRef} style={{ cursor: "move" }}>
             <FaGripVertical />
@@ -337,119 +339,128 @@ export const StatementEditorActionTableRow: React.FC<
         ) : (
           <StyledGridColumn />
         )}
-        <StyledGridColumn>{renderActionCell()}</StyledGridColumn>
-        <StyledGridColumn>
-          {
-            <LogicButtonGroup
-              border
-              value={sAction.logic}
-              onChange={(logic) => updateAction(sAction.id, { logic: logic })}
-              disabled={!userCanEdit}
-            />
-          }
-        </StyledGridColumn>
-        <StyledGridColumn>
-          <Dropdown
-            width={130}
-            isMulti
-            disabled={!userCanEdit}
-            placeholder="mood"
-            tooltipLabel="mood"
-            icon={<AttributeIcon attributeName="mood" />}
-            options={moodDict}
-            value={[allEntities]
-              .concat(moodDict)
-              .filter((i: any) => sAction.mood.includes(i.value))}
-            onChange={(newValue: any) => {
-              updateAction(sAction.id, {
-                mood: newValue ? newValue.map((v: any) => v.value) : [],
-              });
-            }}
-            attributeDropdown
-          />
-        </StyledGridColumn>
-        <StyledGridColumn>{renderButtonsCell()}</StyledGridColumn>
-        <StyledGridColumn>
-          <Button
-            inverted
-            onClick={() => setIsExpanded(!isExpanded)}
-            icon={
-              isExpanded ? (
-                <TbSettingsFilled size={16} />
-              ) : (
-                <TbSettingsAutomation
-                  size={16}
-                  style={{ transform: "rotate(90deg)" }}
-                />
-              )
-            }
-          />
-        </StyledGridColumn>
-      </StyledGrid>
 
-      {/* Expanded row */}
-      {isExpanded && (
-        <StyledExpandedRow>
-          <MoodVariantButtonGroup
-            border
-            onChange={(moodvariant) =>
-              updateAction(sAction.id, {
-                moodvariant: moodvariant,
-              })
-            }
-            value={sAction.moodvariant}
-            disabled={!userCanEdit}
-          />
-          <div>
-            <Dropdown
-              width={70}
-              placeholder="logical operator"
-              tooltipLabel="logical operator"
-              icon={<AttributeIcon attributeName="bundleOperator" />}
-              disabled={!userCanEdit}
-              options={operatorDict}
-              value={operatorDict.find(
-                (i: any) => sAction.bundleOperator === i.value
-              )}
-              onChange={(newValue: any) => {
-                updateAction(sAction.id, { bundleOperator: newValue.value });
-              }}
-            />
-          </div>
-          <div>
-            <BundleButtonGroup
-              bundleStart={sAction.bundleStart}
-              onBundleStartChange={(bundleStart) =>
-                updateAction(sAction.id, {
-                  bundleStart: bundleStart,
-                })
+        <StyledBorderLeft>
+          <StyledGrid ref={dropRef} style={{ opacity }} hasOrder={hasOrder}>
+            <StyledGridColumn>{renderActionCell()}</StyledGridColumn>
+            <StyledGridColumn>
+              {
+                <LogicButtonGroup
+                  border
+                  value={sAction.logic}
+                  onChange={(logic) =>
+                    updateAction(sAction.id, { logic: logic })
+                  }
+                  disabled={!userCanEdit}
+                />
               }
-              bundleEnd={sAction.bundleEnd}
-              onBundleEndChange={(bundleEnd) =>
-                updateAction(sAction.id, {
-                  bundleEnd: bundleEnd,
-                })
-              }
-            />
-          </div>
-          <div>
-            <Dropdown
-              width={122}
-              placeholder="certainty"
-              tooltipLabel="certainty"
-              icon={<AttributeIcon attributeName="certainty" />}
-              disabled={!userCanEdit}
-              options={certaintyDict}
-              value={certaintyDict.find(
-                (i: any) => sAction.certainty === i.value
-              )}
-              onChange={(newValue: any) => {
-                updateAction(sAction.id, { certainty: newValue.value });
-              }}
-            />
-          </div>
-        </StyledExpandedRow>
-      )}
+            </StyledGridColumn>
+            <StyledGridColumn>
+              <Dropdown
+                width={130}
+                isMulti
+                disabled={!userCanEdit}
+                placeholder="mood"
+                tooltipLabel="mood"
+                icon={<AttributeIcon attributeName="mood" />}
+                options={moodDict}
+                value={[allEntities]
+                  .concat(moodDict)
+                  .filter((i: any) => sAction.mood.includes(i.value))}
+                onChange={(newValue: any) => {
+                  updateAction(sAction.id, {
+                    mood: newValue ? newValue.map((v: any) => v.value) : [],
+                  });
+                }}
+                attributeDropdown
+              />
+            </StyledGridColumn>
+            <StyledGridColumn>{renderButtonsCell()}</StyledGridColumn>
+            <StyledGridColumn>
+              <Button
+                inverted
+                onClick={() => setIsExpanded(!isExpanded)}
+                icon={
+                  isExpanded ? (
+                    <TbSettingsFilled size={16} />
+                  ) : (
+                    <TbSettingsAutomation
+                      size={16}
+                      style={{ transform: "rotate(90deg)" }}
+                    />
+                  )
+                }
+              />
+            </StyledGridColumn>
+          </StyledGrid>
+
+          {/* Expanded row */}
+          {isExpanded && (
+            <StyledExpandedRow>
+              <MoodVariantButtonGroup
+                border
+                onChange={(moodvariant) =>
+                  updateAction(sAction.id, {
+                    moodvariant: moodvariant,
+                  })
+                }
+                value={sAction.moodvariant}
+                disabled={!userCanEdit}
+              />
+              <div>
+                <Dropdown
+                  width={70}
+                  placeholder="logical operator"
+                  tooltipLabel="logical operator"
+                  icon={<AttributeIcon attributeName="bundleOperator" />}
+                  disabled={!userCanEdit}
+                  options={operatorDict}
+                  value={operatorDict.find(
+                    (i: any) => sAction.bundleOperator === i.value
+                  )}
+                  onChange={(newValue: any) => {
+                    updateAction(sAction.id, {
+                      bundleOperator: newValue.value,
+                    });
+                  }}
+                />
+              </div>
+              <div>
+                <BundleButtonGroup
+                  bundleStart={sAction.bundleStart}
+                  onBundleStartChange={(bundleStart) =>
+                    updateAction(sAction.id, {
+                      bundleStart: bundleStart,
+                    })
+                  }
+                  bundleEnd={sAction.bundleEnd}
+                  onBundleEndChange={(bundleEnd) =>
+                    updateAction(sAction.id, {
+                      bundleEnd: bundleEnd,
+                    })
+                  }
+                />
+              </div>
+              <div>
+                <Dropdown
+                  width={122}
+                  placeholder="certainty"
+                  tooltipLabel="certainty"
+                  icon={<AttributeIcon attributeName="certainty" />}
+                  disabled={!userCanEdit}
+                  options={certaintyDict}
+                  value={certaintyDict.find(
+                    (i: any) => sAction.certainty === i.value
+                  )}
+                  onChange={(newValue: any) => {
+                    updateAction(sAction.id, { certainty: newValue.value });
+                  }}
+                />
+              </div>
+            </StyledExpandedRow>
+          )}
+        </StyledBorderLeft>
+      </StyledFlexStart>
 
       {/* Prop groups */}
       {!(

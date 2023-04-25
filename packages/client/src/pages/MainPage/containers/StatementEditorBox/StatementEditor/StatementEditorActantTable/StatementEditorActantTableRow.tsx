@@ -47,9 +47,11 @@ import { PropGroup } from "../../../PropGroup/PropGroup";
 import { StatementEditorActantClassification } from "./StatementEditorActantClassification/StatementEditorActantClassification";
 import { StatementEditorActantIdentification } from "./StatementEditorActantIdentification/StatementEditorActantIdentification";
 import {
+  StyledBorderLeft,
   StyledCI,
   StyledCIHeading,
   StyledExpandedRow,
+  StyledFlexStart,
   StyledGrid,
   StyledGridColumn,
   StyledRow,
@@ -408,12 +410,8 @@ export const StatementEditorActantTableRow: React.FC<
       key={index}
       marginBottom={classifications.length > 0 || identifications.length > 0}
     >
-      <StyledGrid
-        ref={dropRef}
-        style={{ opacity }}
-        hasOrder={hasOrder}
-        hasActant={!!filteredActant.data.actant}
-      >
+      <StyledFlexStart>
+        {/* Order */}
         {userCanEdit && hasOrder ? (
           <StyledGridColumn ref={dragRef} style={{ cursor: "move" }}>
             <FaGripVertical />
@@ -421,108 +419,122 @@ export const StatementEditorActantTableRow: React.FC<
         ) : (
           <StyledGridColumn />
         )}
-        <StyledGridColumn>{renderActantCell()}</StyledGridColumn>
-        <StyledGridColumn>
-          {
-            <LogicButtonGroup
-              border
-              value={filteredActant.data.sActant.logic}
-              onChange={(logic) =>
-                updateActant(filteredActant.data.sActant.id, { logic: logic })
-              }
-              disabled={!userCanEdit}
-            />
-          }
-        </StyledGridColumn>
-        <StyledGridColumn>{renderPositionCell()}</StyledGridColumn>
-        <StyledGridColumn>{renderAttributesCell()}</StyledGridColumn>
-        <StyledGridColumn>
-          <Button
-            inverted
-            onClick={() => setIsExpanded(!isExpanded)}
-            icon={
-              isExpanded ? (
-                <TbSettingsFilled size={16} />
-              ) : (
-                <TbSettingsAutomation
-                  size={16}
-                  style={{ transform: "rotate(90deg)" }}
-                />
-              )
-            }
-          />
-        </StyledGridColumn>
-      </StyledGrid>
 
-      {/* Expanded Row */}
-      {isExpanded && (
-        <StyledExpandedRow>
-          <div>
-            <Dropdown
-              width={90}
-              placeholder="virtuality"
-              tooltipLabel="virtuality"
-              icon={<AttributeIcon attributeName="virtuality" />}
-              disabled={!userCanEdit}
-              options={virtualityDict}
-              value={virtualityDict.find(
-                (i: any) => sActant.virtuality === i.value
-              )}
-              onChange={(newValue: any) => {
-                updateActant(sActant.id, { virtuality: newValue.value });
-              }}
-            />
-          </div>
-          <div>
-            <Dropdown
-              width={120}
-              placeholder="partitivity"
-              tooltipLabel="partitivity"
-              icon={<AttributeIcon attributeName="partitivity" />}
-              disabled={!userCanEdit}
-              options={partitivityDict}
-              value={partitivityDict.find(
-                (i: any) => sActant.partitivity === i.value
-              )}
-              onChange={(newValue: any) => {
-                updateActant(sActant.id, { partitivity: newValue.value });
-              }}
-            />
-          </div>
-          <div>
-            <Dropdown
-              width={70}
-              placeholder="logical operator"
-              tooltipLabel="logical operator"
-              icon={<AttributeIcon attributeName="bundleOperator" />}
-              disabled={!userCanEdit}
-              options={operatorDict}
-              value={operatorDict.find(
-                (i: any) => sActant.bundleOperator === i.value
-              )}
-              onChange={(newValue: any) => {
-                updateActant(sActant.id, { bundleOperator: newValue.value });
-              }}
-            />
-          </div>
-          <div>
-            <BundleButtonGroup
-              bundleStart={sActant.bundleStart}
-              onBundleStartChange={(bundleStart) =>
-                updateActant(sActant.id, {
-                  bundleStart: bundleStart,
-                })
+        <StyledBorderLeft borderColor="actant">
+          <StyledGrid
+            ref={dropRef}
+            style={{ opacity }}
+            hasOrder={hasOrder}
+            hasActant={!!filteredActant.data.actant}
+          >
+            <StyledGridColumn>{renderActantCell()}</StyledGridColumn>
+            <StyledGridColumn>
+              {
+                <LogicButtonGroup
+                  border
+                  value={filteredActant.data.sActant.logic}
+                  onChange={(logic) =>
+                    updateActant(filteredActant.data.sActant.id, {
+                      logic: logic,
+                    })
+                  }
+                  disabled={!userCanEdit}
+                />
               }
-              bundleEnd={sActant.bundleEnd}
-              onBundleEndChange={(bundleEnd) =>
-                updateActant(sActant.id, {
-                  bundleEnd: bundleEnd,
-                })
-              }
-            />
-          </div>
-        </StyledExpandedRow>
-      )}
+            </StyledGridColumn>
+            <StyledGridColumn>{renderPositionCell()}</StyledGridColumn>
+            <StyledGridColumn>{renderAttributesCell()}</StyledGridColumn>
+            <StyledGridColumn>
+              <Button
+                inverted
+                onClick={() => setIsExpanded(!isExpanded)}
+                icon={
+                  isExpanded ? (
+                    <TbSettingsFilled size={16} />
+                  ) : (
+                    <TbSettingsAutomation
+                      size={16}
+                      style={{ transform: "rotate(90deg)" }}
+                    />
+                  )
+                }
+              />
+            </StyledGridColumn>
+          </StyledGrid>
+
+          {/* Expanded Row */}
+          {isExpanded && (
+            <StyledExpandedRow>
+              <div>
+                <Dropdown
+                  width={90}
+                  placeholder="virtuality"
+                  tooltipLabel="virtuality"
+                  icon={<AttributeIcon attributeName="virtuality" />}
+                  disabled={!userCanEdit}
+                  options={virtualityDict}
+                  value={virtualityDict.find(
+                    (i: any) => sActant.virtuality === i.value
+                  )}
+                  onChange={(newValue: any) => {
+                    updateActant(sActant.id, { virtuality: newValue.value });
+                  }}
+                />
+              </div>
+              <div>
+                <Dropdown
+                  width={120}
+                  placeholder="partitivity"
+                  tooltipLabel="partitivity"
+                  icon={<AttributeIcon attributeName="partitivity" />}
+                  disabled={!userCanEdit}
+                  options={partitivityDict}
+                  value={partitivityDict.find(
+                    (i: any) => sActant.partitivity === i.value
+                  )}
+                  onChange={(newValue: any) => {
+                    updateActant(sActant.id, { partitivity: newValue.value });
+                  }}
+                />
+              </div>
+              <div>
+                <Dropdown
+                  width={70}
+                  placeholder="logical operator"
+                  tooltipLabel="logical operator"
+                  icon={<AttributeIcon attributeName="bundleOperator" />}
+                  disabled={!userCanEdit}
+                  options={operatorDict}
+                  value={operatorDict.find(
+                    (i: any) => sActant.bundleOperator === i.value
+                  )}
+                  onChange={(newValue: any) => {
+                    updateActant(sActant.id, {
+                      bundleOperator: newValue.value,
+                    });
+                  }}
+                />
+              </div>
+              <div>
+                <BundleButtonGroup
+                  bundleStart={sActant.bundleStart}
+                  onBundleStartChange={(bundleStart) =>
+                    updateActant(sActant.id, {
+                      bundleStart: bundleStart,
+                    })
+                  }
+                  bundleEnd={sActant.bundleEnd}
+                  onBundleEndChange={(bundleEnd) =>
+                    updateActant(sActant.id, {
+                      bundleEnd: bundleEnd,
+                    })
+                  }
+                />
+              </div>
+            </StyledExpandedRow>
+          )}
+        </StyledBorderLeft>
+      </StyledFlexStart>
 
       {/* Prop group */}
       {!(
