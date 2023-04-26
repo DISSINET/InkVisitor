@@ -70,7 +70,7 @@ export const StatementEditorActantIdentification: React.FC<
   const [isExpanded, setIsExpanded] = useState(true);
 
   return (
-    <StyledBorderLeft borderColor="ident" padding>
+    <StyledBorderLeft borderColor="ident" padding marginBottom>
       <StyledCIGrid>
         {entity ? (
           <EntityDropzone

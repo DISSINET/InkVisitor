@@ -67,7 +67,7 @@ export const StatementEditorActantClassification: React.FC<
   const [isExpanded, setIsExpanded] = useState(true);
 
   return (
-    <StyledBorderLeft borderColor="class" padding>
+    <StyledBorderLeft borderColor="class" padding marginBottom>
       <StyledCIGrid>
         {entity ? (
           <EntityDropzone
