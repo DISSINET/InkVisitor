@@ -66,7 +66,7 @@ export const PropGroupRowStatementAttributes: React.FC<
             {/* mood */}
             {!disabledAttributes.statement?.includes("mood") && (
               <Dropdown
-                width={130}
+                width={131}
                 isMulti
                 disabled={!userCanEdit}
                 placeholder="mood"

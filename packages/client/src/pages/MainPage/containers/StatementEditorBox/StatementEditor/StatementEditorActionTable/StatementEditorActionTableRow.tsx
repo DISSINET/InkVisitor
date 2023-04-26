@@ -357,7 +357,7 @@ export const StatementEditorActionTableRow: React.FC<
             </StyledGridColumn>
             <StyledGridColumn>
               <Dropdown
-                width={130}
+                width={131}
                 isMulti
                 disabled={!userCanEdit}
                 placeholder="mood"
