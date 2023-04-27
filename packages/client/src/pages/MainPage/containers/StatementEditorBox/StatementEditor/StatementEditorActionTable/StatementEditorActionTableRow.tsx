@@ -327,6 +327,10 @@ export const StatementEditorActionTableRow: React.FC<
     [statement]
   );
 
+  const isDraggingAction =
+    draggedActantRow.category &&
+    draggedActantRow.category === DraggedPropRowCategory.ACTION;
+
   const [isExpanded, setIsExpanded] = useState(true);
 
   return (
@@ -334,7 +338,7 @@ export const StatementEditorActionTableRow: React.FC<
       <StyledFlexStart>
         {userCanEdit && hasOrder ? (
           <StyledGridColumn ref={dragRef} style={{ cursor: "move" }}>
-            <FaGripVertical />
+            <FaGripVertical style={{ marginTop: "0.3rem" }} />
           </StyledGridColumn>
         ) : (
           <StyledGridColumn />
@@ -395,7 +399,7 @@ export const StatementEditorActionTableRow: React.FC<
           </StyledGrid>
 
           {/* Expanded row */}
-          {isExpanded && (
+          {isExpanded && !isDraggingAction && (
             <StyledExpandedRow>
               <MoodVariantButtonGroup
                 border
@@ -463,10 +467,7 @@ export const StatementEditorActionTableRow: React.FC<
       </StyledFlexStart>
 
       {/* Prop groups */}
-      {!(
-        draggedActantRow.category &&
-        draggedActantRow.category === DraggedPropRowCategory.ACTION
-      ) &&
+      {!isDraggingAction &&
         renderPropGroup(
           sAction.actionId,
           sAction.props,

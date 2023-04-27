@@ -401,6 +401,10 @@ export const StatementEditorActantTableRow: React.FC<
     [statement]
   );
 
+  const isDraggingActant =
+    draggedActantRow.category &&
+    draggedActantRow.category === DraggedPropRowCategory.ACTANT;
+
   const [isExpanded, setIsExpanded] = useState(true);
 
   const { classifications, identifications } = filteredActant.data.sActant;
@@ -414,7 +418,7 @@ export const StatementEditorActantTableRow: React.FC<
         {/* Order */}
         {userCanEdit && hasOrder ? (
           <StyledGridColumn ref={dragRef} style={{ cursor: "move" }}>
-            <FaGripVertical />
+            <FaGripVertical style={{ marginTop: "0.3rem" }} />
           </StyledGridColumn>
         ) : (
           <StyledGridColumn />
@@ -462,7 +466,7 @@ export const StatementEditorActantTableRow: React.FC<
           </StyledGrid>
 
           {/* Expanded Row */}
-          {isExpanded && (
+          {isExpanded && !isDraggingActant && (
             <StyledExpandedRow>
               <div>
                 <Dropdown
@@ -536,10 +540,7 @@ export const StatementEditorActantTableRow: React.FC<
       </StyledFlexStart>
 
       {/* Prop group */}
-      {!(
-        draggedActantRow.category &&
-        draggedActantRow.category === DraggedPropRowCategory.ACTANT
-      ) &&
+      {!isDraggingActant &&
         renderPropGroup(
           filteredActant.data.sActant.entityId,
           filteredActant.data.sActant.props,
@@ -547,10 +548,7 @@ export const StatementEditorActantTableRow: React.FC<
         )}
 
       {/* CI */}
-      {!(
-        draggedActantRow.category &&
-        draggedActantRow.category === DraggedPropRowCategory.ACTANT
-      ) && (
+      {!isDraggingActant && (
         <>
           {/* Classifications */}
           {classifications.length > 0 && (

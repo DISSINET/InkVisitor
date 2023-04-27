@@ -171,7 +171,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
           <StyledPropLineColumn level={level} lowIdent={lowIdent}>
             {userCanEdit && hasOrder ? (
               <div ref={dragRef} style={{ width: "2rem" }}>
-                <StyledFaGripVertical />
+                <StyledFaGripVertical style={{ marginTop: "0.3rem" }} />
               </div>
             ) : (
               <div style={{ width: "2rem" }} />
@@ -340,23 +340,6 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
                 </>
               }
             />
-          </StyledPropLineColumn>
-
-          <StyledPropLineColumn>
-            {/* <Button
-              inverted
-              onClick={() => setIsExpanded(!isExpanded)}
-              icon={
-                isExpanded ? (
-                  <TbSettingsFilled size={16} />
-                ) : (
-                  <TbSettingsAutomation
-                    size={16}
-                    style={{ transform: "rotate(90deg)" }}
-                  />
-                )
-              }
-            /> */}
           </StyledPropLineColumn>
         </StyledGrid>
       </div>
