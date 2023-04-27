@@ -405,7 +405,7 @@ export const StatementEditorActantTableRow: React.FC<
     draggedActantRow.category &&
     draggedActantRow.category === DraggedPropRowCategory.ACTANT;
 
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const { classifications, identifications } = filteredActant.data.sActant;
 

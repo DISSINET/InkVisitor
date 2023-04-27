@@ -153,7 +153,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
   }, [isDragging]);
 
   const [modalOpen, setModalOpen] = useState<boolean>(false);
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const opacity = isDragging ? 0.5 : 1;
 

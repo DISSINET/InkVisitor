@@ -331,7 +331,7 @@ export const StatementEditorActionTableRow: React.FC<
     draggedActantRow.category &&
     draggedActantRow.category === DraggedPropRowCategory.ACTION;
 
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   return (
     <React.Fragment key={index}>
