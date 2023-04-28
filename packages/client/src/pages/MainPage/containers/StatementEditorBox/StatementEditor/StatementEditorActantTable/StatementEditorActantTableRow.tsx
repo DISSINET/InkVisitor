@@ -414,7 +414,7 @@ export const StatementEditorActantTableRow: React.FC<
       key={index}
       marginBottom={classifications.length > 0 || identifications.length > 0}
     >
-      <StyledFlexStart>
+      <StyledFlexStart ref={dropRef}>
         {/* Order */}
         {userCanEdit && hasOrder ? (
           <StyledGridColumn ref={dragRef} style={{ cursor: "move" }}>
@@ -426,7 +426,6 @@ export const StatementEditorActantTableRow: React.FC<
 
         <StyledBorderLeft borderColor="actant" marginBottom>
           <StyledGrid
-            ref={dropRef}
             style={{ opacity }}
             hasActant={!!filteredActant.data.actant}
           >
