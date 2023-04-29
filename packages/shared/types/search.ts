@@ -16,9 +16,9 @@ export namespace Search {
   }
 
   export interface ISearchNodeParams {
-    class?: EntityEnums.Class;
-    label?: "string";
-    id?: "string";
+    classes?: EntityEnums.Class[];
+    label?: string;
+    id?: string;
   }
   export interface ISearchEdgeParams {}
 
@@ -28,6 +28,7 @@ export namespace Search {
     A = "Action",
     S = "Statement",
     R = "Resource",
+    T = "Territory",
   }
   export enum SearchEdgeType {
     XHasProptype = "X_has_proptype",
