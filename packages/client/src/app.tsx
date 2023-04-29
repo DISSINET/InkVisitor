@@ -37,15 +37,6 @@ import theme from "./Theme/theme";
 import { AboutPage } from "pages/About";
 import { setPing } from "redux/features/pingSlice";
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: false,
-      retry: false,
-    },
-  },
-});
-
 const clockPerformance = (
   profilerId: any,
   mode: any,
@@ -92,6 +83,19 @@ export const ProtectedPath = (props: any) => {
 };
 
 export const App: React.FC = () => {
+  const ping = useAppSelector((state) => state.ping);
+
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        refetchOnWindowFocus: false,
+        retry: false,
+        // TODO: disabling not working
+        enabled: ping !== -1,
+      },
+    },
+  });
+
   const dispatch = useAppDispatch();
   const disableUserSelect = useAppSelector(
     (state) => state.layout.disableUserSelect
