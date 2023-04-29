@@ -20,10 +20,12 @@ import disableUserSelectSlice from "./features/layout/disableUserSelectSlice";
 import lastClickedIndexSlice from "./features/statementList/lastClickedIndexSlice";
 import disableStatementListScrollSlice from "./features/statementList/disableStatementListScrollSlice";
 import disableTreeScrollSlice from "./features/territoryTree/disableTreeScrollSlice";
+import pingSlice from "./features/pingSlice";
 
 const store: Store = configureStore({
   reducer: {
     username: usernameSlice,
+    ping: pingSlice,
     draggedEntity: draggedEntitySlice,
     territoryTree: combineReducers({
       selectedTerritoryPath: selectedTerritoryPathSlice,

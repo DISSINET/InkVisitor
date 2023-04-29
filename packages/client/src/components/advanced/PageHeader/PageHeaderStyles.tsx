@@ -1,3 +1,4 @@
+import { PingColor } from "Theme/theme";
 import { FaUserAlt } from "react-icons/fa";
 import styled from "styled-components";
 
@@ -46,5 +47,16 @@ export const StyledLoaderWrap = styled.div`
   height: 1rem;
   width: 1rem;
   position: relative;
+  margin-right: 2rem;
+`;
+
+interface StyledPingColor {
+  pingColor: keyof PingColor;
+}
+export const StyledPingColor = styled.div<StyledPingColor>`
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  background-color: ${({ theme, pingColor }) => theme.color.ping[pingColor]};
   margin-right: 2rem;
 `;

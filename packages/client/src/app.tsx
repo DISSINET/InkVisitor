@@ -35,6 +35,7 @@ import AclPage from "./pages/Acl";
 import MainPage from "./pages/MainPage";
 import theme from "./Theme/theme";
 import { AboutPage } from "pages/About";
+import { setPing } from "redux/features/pingSlice";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -165,6 +166,14 @@ export const App: React.FC = () => {
       dispatch(setSeparatorXPosition(panels[0] + panels[1]));
     }
   }, [debouncedWidth]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      // console.log(api.getPing());
+      dispatch(setPing(api.getPing()));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <>

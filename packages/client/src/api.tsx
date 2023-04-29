@@ -23,7 +23,7 @@ import { IRequestSearch } from "@shared/types/request-search";
 import axios, { AxiosError, AxiosInstance, AxiosResponse } from "axios";
 import React from "react";
 import { toast } from "react-toastify";
-import io, { Socket } from 'socket.io-client';
+import io, { Socket } from "socket.io-client";
 
 type IFilterUsers = {
   label?: string;
@@ -53,6 +53,7 @@ class Api {
   private connection: AxiosInstance;
   private token: string;
   private ws: Socket;
+  private ping: number;
 
   constructor() {
     if (!process.env.APIURL) {
@@ -61,14 +62,16 @@ class Api {
 
     this.ws = io(process.env.APIURL);
     this.ws.on("connect", () => {
-      console.log("Socket.IO connected")
-    })
+      // console.log("Socket.IO connected");
+    });
+    this.ping = -1;
     setInterval(() => {
       const start = Date.now();
 
       this.ws.emit("ping", () => {
         const duration = Date.now() - start;
-        console.log(`WS ping: ${duration}`);
+        // console.log(`WS ping: ${duration}`);
+        this.ping = duration;
       });
     }, 1000);
 
@@ -107,6 +110,10 @@ class Api {
 
     this.token = "";
     this.checkLogin();
+  }
+
+  getPing() {
+    return this.ping;
   }
 
   responseToError(responseData: unknown): errors.IErrorSignature {

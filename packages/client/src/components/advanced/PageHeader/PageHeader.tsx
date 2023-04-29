@@ -1,6 +1,6 @@
 import LogoInkvisitor from "assets/logos/inkvisitor.svg";
 import { Loader } from "components";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useQueryClient } from "react-query";
 import { useHistory, useLocation } from "react-router";
 import { toast } from "react-toastify";
@@ -12,11 +12,14 @@ import {
   StyledHeader,
   StyledHeaderLogo,
   StyledHeaderTag,
+  StyledPingColor,
   StyledRightHeader,
   StyledText,
   StyledUser,
   StyledUsername,
 } from "./PageHeaderStyles";
+import { useAppSelector } from "redux/hooks";
+import { PingColor } from "Theme/theme";
 
 interface LeftHeader {
   tempLocation: string | false;
@@ -27,7 +30,9 @@ export const LeftHeader: React.FC<LeftHeader> = React.memo(
       /apps\/inkvisitor[-]?/,
       ""
     );
-    const versionText = `v. ${packageJson.version}${env ? ` | ${env}` : ``} | built: ${process.env.BUILD_TIMESTAMP}`;
+    const versionText = `v. ${packageJson.version}${
+      env ? ` | ${env}` : ``
+    } | built: ${process.env.BUILD_TIMESTAMP}`;
     const location = useLocation();
     const history = useHistory();
 
@@ -81,8 +86,36 @@ export const RightHeader: React.FC<RightHeaderProps> = React.memo(
     setTempLocation,
     handleLogOut,
   }) => {
+    const ping: number = useAppSelector((state) => state.ping);
+
+    const [pingColor, setPingColor] = useState<keyof PingColor>(0);
+
+    useEffect(() => {
+      switch (true) {
+        case ping < 10:
+          setPingColor(5);
+          return;
+        case ping < 20:
+          setPingColor(4);
+          return;
+        case ping < 50:
+          setPingColor(3);
+          return;
+        case ping < 200:
+          setPingColor(2);
+          return;
+        case ping < 500:
+          setPingColor(1);
+          return;
+        case ping > 500:
+          setPingColor(0);
+          return;
+      }
+    }, [ping]);
+
     return (
       <StyledRightHeader>
+        <StyledPingColor pingColor={pingColor} />
         {userName.length > 0 ? (
           <StyledUser>
             <StyledText>logged as</StyledText>
