@@ -60,18 +60,38 @@ class Api {
       throw new Error("APIURL is not set");
     }
 
+    this.ping = -1;
+
     this.ws = io(process.env.APIURL);
     this.ws.on("connect", () => {
-      // console.log("Socket.IO connected");
+      console.log("Socket.IO connected");
     });
-    this.ping = -1;
+    this.ws.on("disconnect", () => {
+      this.ping = -1;
+      console.log("Socket.IO disconnected");
+    });
+    this.ws.on("error", (error) => {
+      this.ping = -1;
+      console.error("Socket error:", error);
+    });
+    this.ws.on("connect_error", (error) => {
+      console.error("Socket connection error:", error);
+    });
+    this.ws.on("connect_timeout", () => {
+      console.error("Socket connection timeout.");
+    });
+
     setInterval(() => {
       const start = Date.now();
 
-      this.ws.emit("ping", () => {
-        const duration = Date.now() - start;
-        // console.log(`WS ping: ${duration}`);
-        this.ping = duration;
+      this.ws.emit("ping", (ack: any) => {
+        if (ack instanceof Error) {
+          console.error("Socket ping error:", ack);
+        } else {
+          const duration = Date.now() - start;
+          // console.log(`Socket ping: ${duration}`);
+          this.ping = duration;
+        }
       });
     }, 1000);
 

@@ -92,6 +92,9 @@ export const RightHeader: React.FC<RightHeaderProps> = React.memo(
 
     useEffect(() => {
       switch (true) {
+        case ping === -1:
+          setPingColor(0);
+          return;
         case ping < 10:
           setPingColor(5);
           return;
