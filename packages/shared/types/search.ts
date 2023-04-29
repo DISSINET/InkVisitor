@@ -15,9 +15,9 @@ export interface ISearchEdge {
 }
 
 export interface ISearchNodeParams {
-  class: EntityEnums.Class;
-  label: "string";
-  id: "string";
+  class?: EntityEnums.Class;
+  label?: "string";
+  id?: "string";
 }
 export interface ISearchEdgeParams {}
 
