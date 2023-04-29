@@ -41,8 +41,8 @@ import { IResponsePermission } from "./response-permission";
 import {
   ClassificationOrder,
   EntityOrder,
-  IdentificationOrder,
   IResponseStatement,
+  IdentificationOrder,
   OrderType,
   PropOrder,
 } from "./response-statement";
@@ -62,6 +62,8 @@ import {
   IUserOptions,
   IUserRight,
 } from "./user";
+
+import { Search } from "./search";
 
 export type {
   IAudit,
@@ -125,4 +127,4 @@ export type {
   ClassificationOrder,
   IdentificationOrder,
 };
-export { RequestSearch, RequestPermissionUpdate, Relation };
+export { RequestSearch, RequestPermissionUpdate, Relation, Search };
