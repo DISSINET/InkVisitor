@@ -80,6 +80,7 @@ interface StyledEditorSectionContent {}
 export const StyledEditorSectionContent = styled.div<StyledEditorSectionContent>`
   padding-left: ${({ theme, firstSection = false }) =>
     firstSection ? "" : theme.space[6]};
+  overflow: auto;
 `;
 
 // Grids
@@ -126,6 +127,7 @@ export const StyledTagsListItem = styled.div<StyledTagsListItem>`
 
 export const StyledEditorActantTableWrapper = styled.div`
   margin-bottom: ${({ theme }) => theme.space[4]};
+  min-width: 54rem;
 `;
 export const StyledTagWrapper = styled.div`
   display: inline-flex;
