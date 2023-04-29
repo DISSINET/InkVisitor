@@ -1,22 +1,25 @@
-export interface SearchNode {
+import { EntityEnums } from "./../enums";
+
+export interface ISearchNode {
   type: SearchNodeType;
-  params: SearchNodeParams;
+  params: ISearchNodeParams;
   operator: SearchNodeOperator;
-  edges: SearchEdge[];
+  edges: ISearchEdge[];
 }
 
-export interface SearchEdge {
+export interface ISearchEdge {
   type: SearchEdgeType;
-  params: SearchEdgeParams;
+  params: ISearchEdgeParams;
   logic: SearchEdgeLogic;
-  node: SearchNode;
+  node: ISearchNode;
 }
 
-export interface SearchNodeParams {
+export interface ISearchNodeParams {
+  class: EntityEnums.Class;
   label: "string";
   id: "string";
 }
-export interface SearchEdgeParams {}
+export interface ISearchEdgeParams {}
 
 export enum SearchNodeType {
   X = "Entity",
@@ -31,7 +34,9 @@ export enum SearchEdgeType {
   HAS_SUPERCLASS = "has_superclass",
   HAS_CLASSIFICATIOn = "has_classification",
   HAS_ACTANT = "has actant",
+  IS_ACTANT = "is actant",
   HAS_STATEMENT = "has_statement",
+  IS_IN_STATEMENT = "is_in_statement",
 }
 export enum SearchNodeOperator {
   AND = "and",
