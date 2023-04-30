@@ -13,7 +13,7 @@ import {
   BsCaretRightFill,
 } from "react-icons/bs";
 import { useMutation, UseMutationResult, useQueryClient } from "react-query";
-import { animated, config, useSpring } from "react-spring";
+import { animated, config, useSpring } from "@react-spring/web";
 import { setDisableTreeScroll } from "redux/features/territoryTree/disableTreeScrollSlice";
 import { setTreeInitialized } from "redux/features/territoryTree/treeInitializeSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";

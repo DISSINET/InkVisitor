@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { BiLogOut } from "react-icons/bi";
 import { FaBars, FaBookOpen, FaInfo, FaUsers } from "react-icons/fa";
 import { useHistory, useLocation } from "react-router";
-import { animated, config, useSpring } from "react-spring";
+import { animated, config, useSpring } from "@react-spring/web";
 import { IPage } from "types";
 import { MenuItem } from "./MenuItem";
 import { StyledMenuGroup, StyledMenuGroupWrapper } from "./MenuStyles";

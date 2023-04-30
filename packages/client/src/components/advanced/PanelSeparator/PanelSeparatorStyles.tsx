@@ -1,4 +1,4 @@
-import { animated } from "react-spring";
+import { animated } from "@react-spring/web";
 import styled from "styled-components";
 
 interface StyledPanelSeparator {
@@ -6,12 +6,14 @@ interface StyledPanelSeparator {
 }
 export const StyledPanelSeparator = styled(animated.div)<StyledPanelSeparator>`
   position: absolute;
-  width: ${({ $show, theme }) => ($show ? theme.borderWidth[4] : theme.borderWidth[2])};
+  width: ${({ $show, theme }) =>
+    $show ? theme.borderWidth[4] : theme.borderWidth[2]};
 
   cursor: col-resize;
   height: ${({ theme }) => `calc(100% - ${theme.borderWidth[2]})`};
   background-color: ${({ theme }) => theme.color["success"]};
- background-color: ${({ $show, theme }) => ($show ? theme.color["success"] : theme.color["gray"][500])  };
+  background-color: ${({ $show, theme }) =>
+    $show ? theme.color["success"] : theme.color["gray"][500]};
   z-index: 30;
 
   opacity: ${({ $show }) => ($show ? 1 : 0.4)};

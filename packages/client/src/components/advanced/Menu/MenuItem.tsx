@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { config, useSpring } from "react-spring";
+import { config, useSpring } from "@react-spring/web";
 import theme, { ThemeColor } from "Theme/theme";
 import { StyledMenuItem } from "./MenuStyles";
 

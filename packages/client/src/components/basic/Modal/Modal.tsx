@@ -1,6 +1,6 @@
 import { Loader } from "components";
 import React, { FC, ReactNode } from "react";
-import { config, useSpring } from "react-spring";
+import { config, useSpring } from "@react-spring/web";
 import { Colors } from "types";
 import { ModalKeyPress } from "./ModalKeyPress";
 import {
@@ -94,7 +94,7 @@ export const ModalCard: FC<ModalCard> = ({
 
 interface ModalHeader {
   title?: string | React.ReactElement;
-  color?: typeof Colors[number];
+  color?: (typeof Colors)[number];
 }
 export const ModalHeader: FC<ModalHeader> = ({ title, color }) => {
   return (
