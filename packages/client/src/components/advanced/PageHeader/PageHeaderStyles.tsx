@@ -57,6 +57,7 @@ interface StyledPingColor {
 export const StyledPingColor = styled.div<StyledPingColor>`
   width: 1rem;
   height: 1rem;
+  border: 1px solid ${({ theme }) => theme.color["white"]};
   border-radius: 50%;
   background-color: ${({ theme, pingColor }) => theme.color.ping[pingColor]};
   margin-right: 0.5rem;
