@@ -366,7 +366,8 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         changes.type &&
         changes.type.entityId &&
         changes.type.elvl !== EntityEnums.Elvl.Inferential &&
-        user
+        user &&
+        user.options.defaultStatementLanguage
       ) {
         checkTypeEntityLanguage(propId, changes);
       } else {
