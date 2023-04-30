@@ -13,6 +13,7 @@ import {
   StyledHeaderLogo,
   StyledHeaderTag,
   StyledPingColor,
+  StyledPingText,
   StyledRightHeader,
   StyledText,
   StyledUser,
@@ -38,6 +39,36 @@ export const LeftHeader: React.FC<LeftHeader> = React.memo(
 
     const queryClient = useQueryClient();
 
+    const ping: number = useAppSelector((state) => state.ping);
+
+    const [pingColor, setPingColor] = useState<keyof PingColor>("0");
+
+    useEffect(() => {
+      switch (true) {
+        case ping === -1:
+          setPingColor("-1");
+          return;
+        case ping < 100:
+          setPingColor("5");
+          return;
+        case ping < 200:
+          setPingColor("4");
+          return;
+        case ping < 300:
+          setPingColor("3");
+          return;
+        case ping < 500:
+          setPingColor("2");
+          return;
+        case ping < 1000:
+          setPingColor("1");
+          return;
+        case ping > 1000:
+          setPingColor("0");
+          return;
+      }
+    }, [ping]);
+
     return (
       <StyledHeader>
         <StyledHeaderLogo
@@ -55,14 +86,28 @@ export const LeftHeader: React.FC<LeftHeader> = React.memo(
             }
           }}
         />
-        <StyledHeaderTag
-          onClick={async () => {
-            await navigator.clipboard.writeText(versionText);
-            toast.info("Inkvisitor version copied to clipboard");
-          }}
-        >
-          {versionText}
-        </StyledHeaderTag>
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          <StyledHeaderTag
+            onClick={async () => {
+              await navigator.clipboard.writeText(versionText);
+              toast.info("Inkvisitor version copied to clipboard");
+            }}
+          >
+            {versionText}
+          </StyledHeaderTag>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+            }}
+          >
+            <StyledPingColor pingColor={pingColor} />
+            <StyledPingText>{`ping: ${
+              ping > -1 ? ping : "∞"
+            }ms`}</StyledPingText>
+          </div>
+        </div>
       </StyledHeader>
     );
   }
@@ -86,39 +131,8 @@ export const RightHeader: React.FC<RightHeaderProps> = React.memo(
     setTempLocation,
     handleLogOut,
   }) => {
-    const ping: number = useAppSelector((state) => state.ping);
-
-    const [pingColor, setPingColor] = useState<keyof PingColor>(0);
-
-    useEffect(() => {
-      switch (true) {
-        case ping === -1:
-          setPingColor("-1");
-          return;
-        case ping < 100:
-          setPingColor(5);
-          return;
-        case ping < 200:
-          setPingColor(4);
-          return;
-        case ping < 300:
-          setPingColor(3);
-          return;
-        case ping < 500:
-          setPingColor(2);
-          return;
-        case ping < 1000:
-          setPingColor(1);
-          return;
-        case ping > 1000:
-          setPingColor(0);
-          return;
-      }
-    }, [ping]);
-
     return (
       <StyledRightHeader>
-        <StyledPingColor pingColor={pingColor} />
         {userName.length > 0 ? (
           <StyledUser>
             <StyledText>logged as</StyledText>

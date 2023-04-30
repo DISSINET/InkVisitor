@@ -17,10 +17,11 @@ export const StyledHeader = styled.div`
 
 export const StyledHeaderTag = styled.div`
   cursor: copy;
-  font-size: 12px;
-  margin-top: 28px;
+  font-size: 1.2rem;
+  margin-top: 2.6rem;
   opacity: 0.8;
   padding: ${({ theme }) => theme.space[2]};
+  padding-bottom: 0;
 `;
 
 export const StyledFaUserAlt = styled(FaUserAlt)`
@@ -58,5 +59,10 @@ export const StyledPingColor = styled.div<StyledPingColor>`
   height: 1rem;
   border-radius: 50%;
   background-color: ${({ theme, pingColor }) => theme.color.ping[pingColor]};
-  margin-right: 2rem;
+  margin-right: 0.5rem;
+  margin-left: 0.3rem;
+`;
+export const StyledPingText = styled.p`
+  font-size: 1rem;
+  opacity: 0.8;
 `;
