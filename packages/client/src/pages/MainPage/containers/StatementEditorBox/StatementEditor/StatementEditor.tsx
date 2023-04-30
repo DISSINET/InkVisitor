@@ -360,43 +360,80 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   };
 
   const updateProp = (propId: string, changes: any) => {
+    console.log("updating props", changes);
     if (propId) {
-      const newStatementData = { ...statement.data };
+      if (
+        changes.type &&
+        changes.type.entityId &&
+        changes.type.elvl !== EntityEnums.Elvl.Inferential &&
+        user
+      ) {
+        checkTypeEntityLanguage(propId, changes);
+      } else {
+        applyPropChanges(propId, changes);
+      }
+    }
+  };
 
-      // this is probably an overkill
-      [...newStatementData.actants, ...newStatementData.actions].forEach(
-        (actant: IStatementActant | IStatementAction) => {
-          actant.props.forEach((prop1, pi1) => {
-            // 1st level
-            if (prop1.id === propId) {
-              actant.props[pi1] = { ...actant.props[pi1], ...changes };
+  // checking if the language is not different from user.options.defaultStatementLanguage -> in that case, switch elvl to EntityEnums.Elvl.Inferential
+  const checkTypeEntityLanguage = (propId: string, changes: any) => {
+    console.log("checking type entity language");
+    if (user) {
+      const statementLanguage = user.options.defaultStatementLanguage;
+      api.entitiesGet(changes.type.entityId).then((typeEntity) => {
+        if (typeEntity.data) {
+          const entityLanguage = typeEntity.data.language;
+          if (entityLanguage !== statementLanguage) {
+            console.log(
+              `changing elvl of prop type as user language is ${statementLanguage} and entity has language ${entityLanguage}`
+            );
+            changes.type.elvl = EntityEnums.Elvl.Inferential;
+            applyPropChanges(propId, {
+              changes,
+            });
+            toast.info(
+              `The epistemic level of property type's involvement changed to "inferential"`
+            );
+          }
+        }
+      });
+    }
+    applyPropChanges(propId, changes);
+  };
+
+  const applyPropChanges = (propId: string, changes: any) => {
+    const newStatementData = { ...statement.data };
+    [...newStatementData.actants, ...newStatementData.actions].forEach(
+      (actant: IStatementActant | IStatementAction) => {
+        actant.props.forEach((prop1, pi1) => {
+          // 1st level
+          if (prop1.id === propId) {
+            actant.props[pi1] = { ...actant.props[pi1], ...changes };
+          }
+
+          // 2nd level
+          actant.props[pi1].children.forEach((prop2, pi2) => {
+            if (prop2.id === propId) {
+              actant.props[pi1].children[pi2] = {
+                ...actant.props[pi1].children[pi2],
+                ...changes,
+              };
             }
 
-            // 2nd level
-            actant.props[pi1].children.forEach((prop2, pi2) => {
-              if (prop2.id === propId) {
-                actant.props[pi1].children[pi2] = {
-                  ...actant.props[pi1].children[pi2],
+            // 3rd level
+            actant.props[pi1].children[pi2].children.forEach((prop3, pi3) => {
+              if (prop3.id === propId) {
+                actant.props[pi1].children[pi2].children[pi3] = {
+                  ...actant.props[pi1].children[pi2].children[pi3],
                   ...changes,
                 };
               }
-
-              // 3rd level
-              actant.props[pi1].children[pi2].children.forEach((prop3, pi3) => {
-                if (prop3.id === propId) {
-                  actant.props[pi1].children[pi2].children[pi3] = {
-                    ...actant.props[pi1].children[pi2].children[pi3],
-                    ...changes,
-                  };
-                }
-              });
             });
           });
-        }
-      );
-
-      updateStatementDataMutation.mutate(newStatementData);
-    }
+        });
+      }
+    );
+    updateStatementDataMutation.mutate(newStatementData);
   };
 
   const removeProp = (propId: string) => {
