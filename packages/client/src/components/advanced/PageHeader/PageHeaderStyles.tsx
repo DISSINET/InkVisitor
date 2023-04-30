@@ -1,3 +1,4 @@
+import { PingColor } from "Theme/theme";
 import { FaUserAlt } from "react-icons/fa";
 import styled from "styled-components";
 
@@ -16,10 +17,11 @@ export const StyledHeader = styled.div`
 
 export const StyledHeaderTag = styled.div`
   cursor: copy;
-  font-size: 12px;
-  margin-top: 28px;
+  font-size: 1.2rem;
+  margin-top: 2.6rem;
   opacity: 0.8;
   padding: ${({ theme }) => theme.space[2]};
+  padding-bottom: 0;
 `;
 
 export const StyledFaUserAlt = styled(FaUserAlt)`
@@ -47,4 +49,31 @@ export const StyledLoaderWrap = styled.div`
   width: 1rem;
   position: relative;
   margin-right: 2rem;
+`;
+
+interface StyledPingColor {
+  pingColor: keyof PingColor;
+}
+export const StyledPingColor = styled.div<StyledPingColor>`
+  width: 1rem;
+  height: 1rem;
+  border: 0.5px solid rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
+  background-color: ${({ theme, pingColor }) => theme.color.ping[pingColor]};
+  margin-right: 0.3rem;
+  margin-left: 0.3rem;
+`;
+export const StyledPingText = styled.p`
+  font-size: 1rem;
+  opacity: 0.8;
+`;
+
+export const StyledFlexColumn = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+export const StyledFlexRow = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
 `;

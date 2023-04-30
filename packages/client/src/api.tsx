@@ -23,6 +23,7 @@ import { IRequestSearch } from "@shared/types/request-search";
 import axios, { AxiosError, AxiosInstance, AxiosResponse } from "axios";
 import React from "react";
 import { toast } from "react-toastify";
+import io, { Socket } from "socket.io-client";
 
 type IFilterUsers = {
   label?: string;
@@ -51,11 +52,48 @@ class Api {
   private headers: object;
   private connection: AxiosInstance;
   private token: string;
+  private ws: Socket;
+  private ping: number;
 
   constructor() {
     if (!process.env.APIURL) {
       throw new Error("APIURL is not set");
     }
+
+    this.ping = -1;
+
+    this.ws = io(process.env.APIURL);
+    this.ws.on("connect", () => {
+      console.log("Socket.IO connected");
+    });
+    this.ws.on("disconnect", () => {
+      this.ping = -1;
+      console.log("Socket.IO disconnected");
+    });
+    this.ws.on("error", (error) => {
+      this.ping = -1;
+      console.error("Socket error:", error);
+    });
+    this.ws.on("connect_error", (error) => {
+      console.error("Socket connection error:", error);
+    });
+    this.ws.on("connect_timeout", () => {
+      console.error("Socket connection timeout.");
+    });
+
+    setInterval(() => {
+      const start = Date.now();
+
+      this.ws.emit("ping", (ack: any) => {
+        if (ack instanceof Error) {
+          console.error("Socket ping error:", ack);
+        } else {
+          const duration = Date.now() - start;
+          // console.log(`Socket ping: ${duration}`);
+          this.ping = duration;
+        }
+      });
+    }, 1000);
 
     this.baseUrl = process.env.APIURL + "/api/v1";
     this.headers = {
@@ -92,6 +130,10 @@ class Api {
 
     this.token = "";
     this.checkLogin();
+  }
+
+  getPing() {
+    return this.ping;
   }
 
   responseToError(responseData: unknown): errors.IErrorSignature {
