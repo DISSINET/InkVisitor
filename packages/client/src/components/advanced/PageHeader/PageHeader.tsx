@@ -9,6 +9,8 @@ import { Menu } from "..";
 import packageJson from "../../../../package.json";
 import {
   StyledFaUserAlt,
+  StyledFlexColumn,
+  StyledFlexRow,
   StyledHeader,
   StyledHeaderLogo,
   StyledHeaderTag,
@@ -86,7 +88,7 @@ export const LeftHeader: React.FC<LeftHeader> = React.memo(
             }
           }}
         />
-        <div style={{ display: "flex", flexDirection: "column" }}>
+        <StyledFlexColumn>
           <StyledHeaderTag
             onClick={async () => {
               await navigator.clipboard.writeText(versionText);
@@ -95,19 +97,14 @@ export const LeftHeader: React.FC<LeftHeader> = React.memo(
           >
             {versionText}
           </StyledHeaderTag>
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              alignItems: "center",
-            }}
-          >
+          <StyledFlexRow>
+            <StyledPingText
+              style={{ marginLeft: "0.3rem" }}
+            >{`Server connection latency:`}</StyledPingText>
             <StyledPingColor pingColor={pingColor} />
-            <StyledPingText>{`ping: ${
-              ping > -1 ? ping : "∞"
-            }ms`}</StyledPingText>
-          </div>
-        </div>
+            <StyledPingText>{`${ping > -1 ? ping : "∞"}ms`}</StyledPingText>
+          </StyledFlexRow>
+        </StyledFlexColumn>
       </StyledHeader>
     );
   }
