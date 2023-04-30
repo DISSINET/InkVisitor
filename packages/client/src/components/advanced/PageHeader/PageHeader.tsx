@@ -93,24 +93,24 @@ export const RightHeader: React.FC<RightHeaderProps> = React.memo(
     useEffect(() => {
       switch (true) {
         case ping === -1:
-          setPingColor(0);
+          setPingColor("-1");
           return;
-        case ping < 10:
+        case ping < 100:
           setPingColor(5);
           return;
-        case ping < 20:
+        case ping < 200:
           setPingColor(4);
           return;
-        case ping < 50:
+        case ping < 300:
           setPingColor(3);
           return;
-        case ping < 200:
+        case ping < 500:
           setPingColor(2);
           return;
-        case ping < 500:
+        case ping < 1000:
           setPingColor(1);
           return;
-        case ping > 500:
+        case ping > 1000:
           setPingColor(0);
           return;
       }

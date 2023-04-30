@@ -87,6 +87,7 @@ const theme = {
     },
 
     ping: {
+      "-1": "black",
       0: "#d73027",
       1: "#fc8d59",
       2: "#fee08b",
