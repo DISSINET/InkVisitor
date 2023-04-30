@@ -46,10 +46,18 @@ import { UserRightItem } from "./UserRightItem/UserRightItem";
 interface DataObject {
   name: string;
   email: string;
-  defaultLanguage: {
-    label: string;
-    value: EntityEnums.Language;
-  } | null;
+  defaultLanguage:
+    | {
+        label: string;
+        value: EntityEnums.Language;
+      }
+    | undefined;
+  defaultStatementLanguage:
+    | {
+        label: string;
+        value: EntityEnums.Language;
+      }
+    | undefined;
   searchLanguages:
     | (
         | {
@@ -58,7 +66,7 @@ interface DataObject {
           }
         | undefined
       )[]
-    | null;
+    | [];
   defaultTerritory: string | null;
   hideStatementElementsOrderTable?: boolean;
 }
@@ -72,9 +80,12 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
 }) => {
   const { options, name, email, role, rights } = useMemo(() => user, [user]);
 
-  const initialValues = useMemo(() => {
+  const initialValues: DataObject = useMemo(() => {
     const defaultLanguageObject = languageDict.find(
       (i: any) => i.value === options.defaultLanguage
+    );
+    const defaultStatementLanguageObject = languageDict.find(
+      (i: any) => i.value === options.defaultStatementLanguage
     );
     const searchLanguagesObject = options.searchLanguages.map((sL) => {
       return languageDict.find((i: any) => i.value === sL);
@@ -83,9 +94,9 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
     return {
       name: name,
       email: email,
-      defaultLanguage: defaultLanguageObject ? defaultLanguageObject : null,
-      searchLanguages:
-        searchLanguagesObject.length > 0 ? searchLanguagesObject : null,
+      defaultLanguage: defaultLanguageObject,
+      defaultStatementLanguage: defaultStatementLanguageObject,
+      searchLanguages: searchLanguagesObject,
       defaultTerritory: options.defaultTerritory,
       hideStatementElementsOrderTable: options.hideStatementElementsOrderTable,
     };
@@ -138,7 +149,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
       onSuccess: (data, variables) => {
         queryClient.invalidateQueries(["user"]);
         toast.info("User updated!");
-        onClose();
+        //onClose();
       },
     }
   );
@@ -151,6 +162,8 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
         options: {
           defaultLanguage:
             data.defaultLanguage?.value || EntityEnums.Language.Empty,
+          defaultStatementLanguage:
+            data.defaultStatementLanguage?.value || EntityEnums.Language.Empty,
           searchLanguages: data.searchLanguages?.map((sL) => sL?.value),
           defaultTerritory: data.defaultTerritory,
           hideStatementElementsOrderTable: data.hideStatementElementsOrderTable,
@@ -214,6 +227,17 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                 value={data.defaultLanguage}
                 onChange={(selectedOption) =>
                   handleChange("defaultLanguage", selectedOption)
+                }
+                options={languageDict}
+              />
+            </ModalInputWrap>
+            <ModalInputLabel>{"statement language"}</ModalInputLabel>
+            <ModalInputWrap width={165}>
+              <Dropdown
+                width="full"
+                value={data.defaultStatementLanguage}
+                onChange={(selectedOption) =>
+                  handleChange("defaultStatementLanguage", selectedOption)
                 }
                 options={languageDict}
               />
