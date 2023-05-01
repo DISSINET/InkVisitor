@@ -11,6 +11,7 @@ import {
   StyledAuditRow,
   StyledAuditTable,
 } from "./AuditTableStyles";
+import { Button } from "components/basic/Button/Button";
 
 export const AuditTable: React.FC<IResponseAudit> = ({
   entityId,
@@ -74,10 +75,7 @@ export const AuditTableRow: React.FC<IAuditTableRow> = ({
       return "today";
     } else {
       const newDate = new Date(date);
-      // TODO: use toLocaleString
-      return `${newDate.getFullYear()}-${
-        newDate.getMonth() + 1
-      }-${newDate.getDate()}`;
+      return newDate.toISOString().slice(0, 10);
     }
   };
 
@@ -99,7 +97,23 @@ export const AuditTableRow: React.FC<IAuditTableRow> = ({
           {prettyTime}
         </StyledAuditColumn>
         <StyledAuditColumn $wrap>
-          {mode === "create" ? <MdAddCircleOutline /> : <FaExchangeAlt />}
+          {mode === "create" ? (
+            <Button
+              icon={<MdAddCircleOutline />}
+              noBackground
+              inverted
+              noBorder
+              tooltipLabel="created"
+            />
+          ) : (
+            <Button
+              icon={<FaExchangeAlt />}
+              noBackground
+              inverted
+              noBorder
+              tooltipLabel="edited"
+            />
+          )}
           {mode === "create" ? "" : changedKeys.join(", ")}
         </StyledAuditColumn>
       </StyledAuditRow>
