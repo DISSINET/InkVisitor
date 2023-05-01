@@ -70,14 +70,12 @@ export const AuditTableRow: React.FC<IAuditTableRow> = ({
   const today = new Date().setHours(0, 0, 0, 0);
 
   const getPrettyDate = () => {
-    if (today === new Date(date).setHours(0, 0, 0, 0)) {
+    if (false && today === new Date(date).setHours(0, 0, 0, 0)) {
       return "today";
     } else {
       const newDate = new Date(date);
       // TODO: use toLocaleString
-      return `${newDate.getFullYear()}-${
-        newDate.getMonth() + 1
-      }-${newDate.getDate()}`;
+      return newDate.toISOString().slice(0, 10);
     }
   };
 
@@ -99,7 +97,13 @@ export const AuditTableRow: React.FC<IAuditTableRow> = ({
           {prettyTime}
         </StyledAuditColumn>
         <StyledAuditColumn $wrap>
-          {mode === "create" ? <MdAddCircleOutline /> : <FaExchangeAlt />}
+          {mode === "create" ? (
+            <Button>
+              <MdAddCircleOutline />
+            </Button>
+          ) : (
+            <FaExchangeAlt />
+          )}
           {mode === "create" ? "" : changedKeys.join(", ")}
         </StyledAuditColumn>
       </StyledAuditRow>
