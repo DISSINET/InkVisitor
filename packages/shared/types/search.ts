@@ -12,7 +12,7 @@ export namespace Search {
     type: SearchEdgeType;
     params: ISearchEdgeParams;
     logic: SearchEdgeLogic;
-    node: ISearchNode;
+    node?: ISearchNode;
   }
 
   export interface ISearchNodeParams {
