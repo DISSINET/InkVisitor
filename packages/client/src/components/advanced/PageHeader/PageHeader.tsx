@@ -98,11 +98,11 @@ export const LeftHeader: React.FC<LeftHeader> = React.memo(
             {versionText}
           </StyledHeaderTag>
           <StyledFlexRow>
-            <StyledPingText
-              style={{ marginLeft: "0.3rem" }}
-            >{`Server connection latency:`}</StyledPingText>
+            <StyledPingText style={{ marginLeft: "0.3rem" }}>
+              {ping > -1 ? `Server connection latency:` : "Server is down"}
+            </StyledPingText>
             <StyledPingColor pingColor={pingColor} />
-            <StyledPingText>{`${ping > -1 ? ping : "∞"}ms`}</StyledPingText>
+            {ping > -1 && <StyledPingText>{ping}ms</StyledPingText>}
           </StyledFlexRow>
         </StyledFlexColumn>
       </StyledHeader>
