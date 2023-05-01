@@ -48,7 +48,7 @@ const parseJwt = (token: string) => {
 };
 
 class Api {
-  private baseUrl: string;
+  private apiUrl: string;
   private headers: object;
   private connection: AxiosInstance;
   private token: string;
@@ -60,9 +60,14 @@ class Api {
       throw new Error("APIURL is not set");
     }
 
+    const baseUrl =process.env.APIURL;
+    this.apiUrl = baseUrl + "/api/v1";
+
     this.ping = -1;
 
-    this.ws = io(process.env.APIURL);
+    const url = new URL(baseUrl);
+
+    this.ws = io(baseUrl, { path: url.pathname + "/socket.io" });
     this.ws.on("connect", () => {
       console.log("Socket.IO connected");
     });
@@ -95,14 +100,13 @@ class Api {
       });
     }, 1000);
 
-    this.baseUrl = process.env.APIURL + "/api/v1";
     this.headers = {
       "Content-Type": "application/json",
       //"Content-Encoding": "gzip",
     };
 
     this.connection = axios.create({
-      baseURL: this.baseUrl,
+      baseURL: this.apiUrl,
       timeout: 8000,
       responseType: "json",
       headers: this.headers,
