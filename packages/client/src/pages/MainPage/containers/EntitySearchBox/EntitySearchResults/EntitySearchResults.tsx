@@ -1,7 +1,7 @@
 import { IResponseEntity } from "@shared/types";
 import { EntityTag } from "components/advanced";
 import React, { useMemo } from "react";
-import { config, useSpring } from "react-spring";
+import { config, useSpring } from "@react-spring/web";
 import { areEqual, FixedSizeList as List } from "react-window";
 import { scrollOverscanCount, springConfig } from "Theme/constants";
 import { StyledResultItem } from "../EntitySearchBoxStyles";

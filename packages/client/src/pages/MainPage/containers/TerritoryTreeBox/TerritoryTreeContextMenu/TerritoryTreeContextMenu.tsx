@@ -4,8 +4,7 @@ import { Button } from "components";
 import React, { useRef, useState } from "react";
 import { FaPlus, FaStar, FaTrashAlt } from "react-icons/fa";
 import { UseMutationResult } from "react-query";
-import { useSpring } from "react-spring";
-import { config } from "react-spring/renderprops";
+import { useSpring, config } from "@react-spring/web";
 import { ContextMenuNewTerritoryModal } from "../ContextMenuNewTerritoryModal/ContextMenuNewTerritoryModal";
 import { ContextMenuSubmitDelete } from "../ContextMenuSubmitDelete/ContextMenuSubmitDelete";
 import {
@@ -135,18 +134,18 @@ export const TerritoryTreeContextMenu: React.FC<TerritoryTreeContextMenu> = ({
             />
             {((right === UserEnums.RoleMode.Admin && empty) ||
               (right === UserEnums.RoleMode.Write && empty)) && (
-                <Button
-                  key="delete"
-                  tooltipLabel="delete territory"
-                  icon={<FaTrashAlt size={14} />}
-                  color="danger"
-                  onClick={() => {
-                    setShowSubmit(true);
-                    setShowMenu(false);
-                    onMenuClose();
-                  }}
-                />
-              )}
+              <Button
+                key="delete"
+                tooltipLabel="delete territory"
+                icon={<FaTrashAlt size={14} />}
+                color="danger"
+                onClick={() => {
+                  setShowSubmit(true);
+                  setShowMenu(false);
+                  onMenuClose();
+                }}
+              />
+            )}
           </StyledContextButtonGroup>
         )}
       </StyledWrapper>

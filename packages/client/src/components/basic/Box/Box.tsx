@@ -1,6 +1,6 @@
 import { ButtonGroup } from "components";
 import React, { ReactNode, useState } from "react";
-import { animated, useSpring } from "react-spring";
+import { animated, useSpring } from "@react-spring/web";
 import { springConfig } from "Theme/constants";
 import theme from "Theme/theme";
 import { Colors } from "types";
@@ -15,8 +15,8 @@ import {
 
 interface BoxProps {
   label?: string;
-  color?: typeof Colors[number];
-  borderColor?: typeof Colors[number];
+  color?: (typeof Colors)[number];
+  borderColor?: (typeof Colors)[number];
   height?: number;
   noPadding?: boolean;
   isExpanded?: boolean;

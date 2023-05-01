@@ -1,5 +1,5 @@
 import { FaCircle, FaDotCircle } from "react-icons/fa";
-import { animated } from "react-spring";
+import { animated } from "@react-spring/web";
 import styled from "styled-components";
 
 export const StyledTerritoryTagWrap = styled(animated.div)`
