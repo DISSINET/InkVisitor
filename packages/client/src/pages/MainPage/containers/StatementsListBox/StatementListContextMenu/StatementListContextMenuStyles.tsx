@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { animated } from "react-spring";
+import { animated } from "@react-spring/web";
 import { collapsedPanelWidth, heightHeader } from "Theme/constants";
 import { CgMenuBoxed } from "react-icons/cg";
 

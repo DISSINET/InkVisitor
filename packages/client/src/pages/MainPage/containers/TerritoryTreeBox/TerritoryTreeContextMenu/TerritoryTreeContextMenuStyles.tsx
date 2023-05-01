@@ -1,5 +1,5 @@
 import { CgMenuBoxed } from "react-icons/cg";
-import { animated } from "react-spring";
+import { animated } from "@react-spring/web";
 import styled from "styled-components";
 import { heightHeader } from "Theme/constants";
 
