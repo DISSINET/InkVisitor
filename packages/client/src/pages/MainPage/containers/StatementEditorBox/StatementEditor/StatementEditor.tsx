@@ -37,6 +37,7 @@ import { EntityReferenceTable } from "../../EntityReferenceTable/EntityReference
 import {
   StyledBreadcrumbWrap,
   StyledEditorActantTableWrapper,
+  StyledEditorActionTableWrapper,
   StyledEditorContentRow,
   StyledEditorContentRowLabel,
   StyledEditorContentRowValue,
@@ -681,20 +682,21 @@ export const StatementEditor: React.FC<StatementEditor> = ({
             )}
           </StyledEditorSectionHeader>
           <StyledEditorSectionContent>
-            <StyledEditorActantTableWrapper id="action-table">
-              <StatementEditorActionTable
-                userCanEdit={userCanEdit}
-                statement={statement}
-                updateActionsMutation={updateStatementDataMutation}
-                addProp={addProp}
-                updateProp={updateProp}
-                removeProp={removeProp}
-                movePropToIndex={movePropToIndex}
-                territoryParentId={statementTerritoryId}
-                territoryActants={territoryActants}
-              />
-            </StyledEditorActantTableWrapper>
-
+            <div style={{ overflow: "auto" }}>
+              <StyledEditorActionTableWrapper id="action-table">
+                <StatementEditorActionTable
+                  userCanEdit={userCanEdit}
+                  statement={statement}
+                  updateActionsMutation={updateStatementDataMutation}
+                  addProp={addProp}
+                  updateProp={updateProp}
+                  removeProp={removeProp}
+                  movePropToIndex={movePropToIndex}
+                  territoryParentId={statementTerritoryId}
+                  territoryActants={territoryActants}
+                />
+              </StyledEditorActionTableWrapper>
+            </div>
             {userCanEdit && (
               <EntitySuggester
                 territoryActants={territoryActants}
@@ -729,22 +731,24 @@ export const StatementEditor: React.FC<StatementEditor> = ({
             )}
           </StyledEditorSectionHeader>
           <StyledEditorSectionContent>
-            <StyledEditorActantTableWrapper id="actant-table">
-              <StatementEditorActantTable
-                statement={statement}
-                userCanEdit={userCanEdit}
-                classEntitiesActant={classesEditorActants}
-                updateStatementDataMutation={updateStatementDataMutation}
-                addProp={addProp}
-                updateProp={updateProp}
-                removeProp={removeProp}
-                movePropToIndex={movePropToIndex}
-                territoryParentId={statementTerritoryId}
-                addClassification={addClassification}
-                addIdentification={addIdentification}
-                territoryActants={territoryActants}
-              />
-            </StyledEditorActantTableWrapper>
+            <div style={{ overflow: "auto" }}>
+              <StyledEditorActantTableWrapper id="actant-table">
+                <StatementEditorActantTable
+                  statement={statement}
+                  userCanEdit={userCanEdit}
+                  classEntitiesActant={classesEditorActants}
+                  updateStatementDataMutation={updateStatementDataMutation}
+                  addProp={addProp}
+                  updateProp={updateProp}
+                  removeProp={removeProp}
+                  movePropToIndex={movePropToIndex}
+                  territoryParentId={statementTerritoryId}
+                  addClassification={addClassification}
+                  addIdentification={addIdentification}
+                  territoryActants={territoryActants}
+                />
+              </StyledEditorActantTableWrapper>
+            </div>
             {userCanEdit && (
               <EntitySuggester
                 territoryActants={territoryActants}
