@@ -1,6 +1,7 @@
 export type ThemeType = typeof theme;
 export type ThemeColor = typeof theme.color;
 export type ElementTypeColor = typeof theme.color.elementType;
+export type PingColor = typeof theme.color.ping;
 
 const theme = {
   color: {
@@ -83,6 +84,16 @@ const theme = {
       prop: "#91BB93",
       class: "#E28FBB",
       ident: "#EAE3A3",
+    },
+
+    ping: {
+      "-1": "black",
+      "0": "#d73027",
+      "1": "#fc8d59",
+      "2": "#fee08b",
+      "3": "#d9ef8b",
+      "4": "#91cf60",
+      "5": "#1a9850",
     },
 
     // tag status

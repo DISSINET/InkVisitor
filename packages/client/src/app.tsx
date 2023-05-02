@@ -34,15 +34,7 @@ import AclPage from "./pages/Acl";
 import MainPage from "./pages/MainPage";
 import theme from "./Theme/theme";
 import { AboutPage } from "pages/About";
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: false,
-      retry: false,
-    },
-  },
-});
+import { setPing } from "redux/features/pingSlice";
 
 const clockPerformance = (
   profilerId: any,
@@ -90,6 +82,19 @@ export const ProtectedPath = (props: any) => {
 };
 
 export const App: React.FC = () => {
+  const ping = useAppSelector((state) => state.ping);
+
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        refetchOnWindowFocus: false,
+        retry: false,
+        // TODO: disabling not working
+        enabled: ping !== -1,
+      },
+    },
+  });
+
   const dispatch = useAppDispatch();
   const disableUserSelect = useAppSelector(
     (state) => state.layout.disableUserSelect
@@ -164,6 +169,14 @@ export const App: React.FC = () => {
       dispatch(setSeparatorXPosition(panels[0] + panels[1]));
     }
   }, [debouncedWidth]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      // console.log(api.getPing());
+      dispatch(setPing(api.getPing()));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <>

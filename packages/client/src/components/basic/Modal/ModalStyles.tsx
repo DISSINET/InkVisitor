@@ -1,4 +1,4 @@
-import { animated } from "react-spring";
+import { animated } from "@react-spring/web";
 import styled from "styled-components";
 import {
   space1,
@@ -11,7 +11,7 @@ import {
 } from "Theme/constants";
 import { Colors } from "types";
 
-interface ModalWrap { }
+interface ModalWrap {}
 export const StyledModalWrap = styled.div<ModalWrap>`
   display: flex;
   flex-direction: column;
@@ -53,7 +53,7 @@ const getWidth = (width: "full" | "fat" | "normal" | "thin" | number) => {
     }
   }
 };
-export const StyledCard = styled(animated.div) <Card>`
+export const StyledCard = styled(animated.div)<Card>`
   width: ${({ width }) => getWidth(width)};
   display: flex;
   flex-direction: column;
@@ -66,7 +66,7 @@ export const StyledCard = styled(animated.div) <Card>`
 `;
 
 interface StyledCardHeader {
-  color?: typeof Colors[number];
+  color?: (typeof Colors)[number];
 }
 export const StyledCardHeader = styled.header<StyledCardHeader>`
   display: flex;
@@ -100,9 +100,9 @@ export const StyledCardBody = styled.section<StyledCardBody>`
   font-size: ${({ theme }) => theme.fontSize["sm"]};
   * {
     user-select: text;
-  };
+  }
 `;
-interface StyledFooter { }
+interface StyledFooter {}
 export const StyledFooter = styled.div<StyledFooter>`
   border-top-style: solid;
   border-top-width: ${({ theme }) => theme.borderWidth["default"]};

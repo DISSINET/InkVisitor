@@ -1,6 +1,6 @@
 import LogoInkvisitor from "assets/logos/inkvisitor.svg";
 import { Loader } from "components";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useQueryClient } from "react-query";
 import { useHistory, useLocation } from "react-router";
 import { toast } from "react-toastify";
@@ -9,14 +9,20 @@ import { Menu } from "..";
 import packageJson from "../../../../package.json";
 import {
   StyledFaUserAlt,
+  StyledFlexColumn,
+  StyledFlexRow,
   StyledHeader,
   StyledHeaderLogo,
   StyledHeaderTag,
+  StyledPingColor,
+  StyledPingText,
   StyledRightHeader,
   StyledText,
   StyledUser,
   StyledUsername,
 } from "./PageHeaderStyles";
+import { useAppSelector } from "redux/hooks";
+import { PingColor } from "Theme/theme";
 
 interface LeftHeader {
   tempLocation: string | false;
@@ -27,11 +33,43 @@ export const LeftHeader: React.FC<LeftHeader> = React.memo(
       /apps\/inkvisitor[-]?/,
       ""
     );
-    const versionText = `v. ${packageJson.version}${env ? ` | ${env}` : ``} | built: ${process.env.BUILD_TIMESTAMP}`;
+    const versionText = `v. ${packageJson.version}${
+      env ? ` | ${env}` : ``
+    } | built: ${process.env.BUILD_TIMESTAMP}`;
     const location = useLocation();
     const history = useHistory();
 
     const queryClient = useQueryClient();
+
+    const ping: number = useAppSelector((state) => state.ping);
+
+    const [pingColor, setPingColor] = useState<keyof PingColor>("0");
+
+    useEffect(() => {
+      switch (true) {
+        case ping === -1:
+          setPingColor("-1");
+          return;
+        case ping < 100:
+          setPingColor("5");
+          return;
+        case ping < 200:
+          setPingColor("4");
+          return;
+        case ping < 300:
+          setPingColor("3");
+          return;
+        case ping < 500:
+          setPingColor("2");
+          return;
+        case ping < 1000:
+          setPingColor("1");
+          return;
+        case ping > 1000:
+          setPingColor("0");
+          return;
+      }
+    }, [ping]);
 
     return (
       <StyledHeader>
@@ -50,14 +88,23 @@ export const LeftHeader: React.FC<LeftHeader> = React.memo(
             }
           }}
         />
-        <StyledHeaderTag
-          onClick={async () => {
-            await navigator.clipboard.writeText(versionText);
-            toast.info("Inkvisitor version copied to clipboard");
-          }}
-        >
-          {versionText}
-        </StyledHeaderTag>
+        <StyledFlexColumn>
+          <StyledHeaderTag
+            onClick={async () => {
+              await navigator.clipboard.writeText(versionText);
+              toast.info("Inkvisitor version copied to clipboard");
+            }}
+          >
+            {versionText}
+          </StyledHeaderTag>
+          <StyledFlexRow>
+            <StyledPingText style={{ marginLeft: "0.3rem" }}>
+              {ping > -1 ? `Server connection latency:` : "Server is down"}
+            </StyledPingText>
+            <StyledPingColor pingColor={pingColor} />
+            {ping > -1 && <StyledPingText>{ping}ms</StyledPingText>}
+          </StyledFlexRow>
+        </StyledFlexColumn>
       </StyledHeader>
     );
   }

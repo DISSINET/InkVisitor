@@ -34,7 +34,8 @@ export class UserRight implements IUserRight {
 
 export class UserOptions implements IUserOptions {
   defaultTerritory = "";
-  defaultLanguage: EntityEnums.Language = EntityEnums.Language.English;
+  defaultStatementLanguage: EntityEnums.Language = EntityEnums.Language.Empty;
+  defaultLanguage: EntityEnums.Language = EntityEnums.Language.Empty;
   searchLanguages: EntityEnums.Language[] = [];
   hideStatementElementsOrderTable?: boolean = false;
 
