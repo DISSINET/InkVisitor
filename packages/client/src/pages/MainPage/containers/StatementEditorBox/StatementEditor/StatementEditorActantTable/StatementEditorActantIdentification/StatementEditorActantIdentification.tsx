@@ -16,7 +16,6 @@ import {
   LogicButtonGroup,
   MoodVariantButtonGroup,
 } from "components/advanced";
-import AttributesEditor from "pages/MainPage/containers/AttributesEditor/AttributesEditor";
 import React, { useState } from "react";
 import { FaTrashAlt } from "react-icons/fa";
 import { TbSettingsAutomation, TbSettingsFilled } from "react-icons/tb";
@@ -27,6 +26,7 @@ import {
   StyledCIGrid,
   StyledExpandedRow,
 } from "../StatementEditorActantTableStyles";
+import { TooltipAttributes } from "pages/MainPage/containers";
 
 interface StatementEditorActantIdentification {
   identifications: IStatementIdentification[];
@@ -56,7 +56,6 @@ export const StatementEditorActantIdentification: React.FC<
   classEntitiesActant,
   territoryActants,
 }) => {
-  const [identificationModalOpen, setIdentificationModalOpen] = useState(false);
   const entity = statement.entities[identification.entityId];
 
   const handleUpdate = (newData: AttributeData & { entityId?: string }) => {
@@ -125,35 +124,6 @@ export const StatementEditorActantIdentification: React.FC<
         />
 
         <ButtonGroup>
-          <AttributesEditor
-            modalOpen={identificationModalOpen}
-            setModalOpen={setIdentificationModalOpen}
-            modalTitle={`Identification`}
-            entity={entity}
-            disabledAllAttributes={!userCanEdit}
-            userCanEdit={userCanEdit}
-            data={{
-              elvl: identification.elvl,
-              logic: identification.logic,
-              certainty: identification.certainty,
-              mood: identification.mood,
-              moodvariant: identification.moodvariant,
-            }}
-            handleUpdate={(newData) => {
-              updateActant(sActant.id, {
-                identifications: identifications.map((c) =>
-                  c.id === identification.id ? { ...c, ...newData } : { ...c }
-                ),
-              });
-            }}
-            updateActantId={(entityId: string) => {
-              handleUpdate({ entityId });
-            }}
-            classEntitiesActant={classEntitiesActant}
-            loading={updateStatementDataMutation.isLoading}
-            isInsideTemplate={isInsideTemplate}
-            territoryParentId={territoryParentId}
-          />
           {userCanEdit && (
             <Button
               key="d"
@@ -178,7 +148,6 @@ export const StatementEditorActantIdentification: React.FC<
               inverted
               noBorder
               icon={<AttributeIcon attributeName={"negation"} />}
-              onClick={() => setIdentificationModalOpen(true)}
             />
           )}
         </ButtonGroup>
@@ -194,6 +163,17 @@ export const StatementEditorActantIdentification: React.FC<
                 style={{ transform: "rotate(90deg)" }}
               />
             )
+          }
+          tooltipContent={
+            <TooltipAttributes
+              data={{
+                elvl: identification.elvl,
+                logic: identification.logic,
+                certainty: identification.certainty,
+                mood: identification.mood,
+                moodvariant: identification.moodvariant,
+              }}
+            />
           }
         />
       </StyledCIGrid>

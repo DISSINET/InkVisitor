@@ -15,7 +15,6 @@ import {
   LogicButtonGroup,
   MoodVariantButtonGroup,
 } from "components/advanced";
-import AttributesEditor from "pages/MainPage/containers/AttributesEditor/AttributesEditor";
 import React, { useState } from "react";
 import { FaTrashAlt } from "react-icons/fa";
 import { TbSettingsAutomation, TbSettingsFilled } from "react-icons/tb";
@@ -26,6 +25,7 @@ import {
   StyledCIGrid,
   StyledExpandedRow,
 } from "../StatementEditorActantTableStyles";
+import { TooltipAttributes } from "pages/MainPage/containers";
 
 interface StatementEditorActantClassification {
   classifications: IStatementClassification[];
@@ -54,7 +54,6 @@ export const StatementEditorActantClassification: React.FC<
   territoryActants,
 }) => {
   const entity = statement.entities[classification.entityId];
-  const [classificationModalOpen, setClassificationModalOpen] = useState(false);
 
   const handleUpdate = (newData: AttributeData & { entityId?: string }) => {
     updateActant(sActant.id, {
@@ -120,35 +119,6 @@ export const StatementEditorActantClassification: React.FC<
         />
 
         <ButtonGroup>
-          <AttributesEditor
-            modalOpen={classificationModalOpen}
-            setModalOpen={setClassificationModalOpen}
-            modalTitle={`Classification`}
-            entity={entity}
-            disabledAllAttributes={!userCanEdit}
-            userCanEdit={userCanEdit}
-            data={{
-              elvl: classification.elvl,
-              logic: classification.logic,
-              certainty: classification.certainty,
-              mood: classification.mood,
-              moodvariant: classification.moodvariant,
-            }}
-            handleUpdate={(newData) => {
-              updateActant(sActant.id, {
-                classifications: classifications.map((c) =>
-                  c.id === classification.id ? { ...c, ...newData } : { ...c }
-                ),
-              });
-            }}
-            updateActantId={(entityId: string) => {
-              handleUpdate({ entityId });
-            }}
-            classEntitiesActant={[EntityEnums.Class.Concept]}
-            loading={updateStatementDataMutation.isLoading}
-            isInsideTemplate={isInsideTemplate}
-            territoryParentId={territoryParentId}
-          />
           {userCanEdit && (
             <Button
               key="d"
@@ -173,7 +143,6 @@ export const StatementEditorActantClassification: React.FC<
               inverted
               noBorder
               icon={<AttributeIcon attributeName={"negation"} />}
-              onClick={() => setClassificationModalOpen(true)}
             />
           )}
         </ButtonGroup>
@@ -189,6 +158,17 @@ export const StatementEditorActantClassification: React.FC<
                 style={{ transform: "rotate(90deg)" }}
               />
             )
+          }
+          tooltipContent={
+            <TooltipAttributes
+              data={{
+                elvl: classification.elvl,
+                logic: classification.logic,
+                certainty: classification.certainty,
+                mood: classification.mood,
+                moodvariant: classification.moodvariant,
+              }}
+            />
           }
         />
       </StyledCIGrid>
