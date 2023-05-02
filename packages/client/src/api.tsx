@@ -67,7 +67,7 @@ class Api {
 
     const url = new URL(baseUrl);
 
-    this.ws = io(baseUrl, { path: url.pathname + "/socket.io" });
+    this.ws = io(baseUrl, { path: (url.pathname + "/socket.io").replace(`//`, '/') });
     this.ws.on("connect", () => {
       console.log("Socket.IO connected");
     });
