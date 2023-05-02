@@ -1,5 +1,4 @@
 import { IEntity, IProp } from "@shared/types";
-import { excludedSuggesterEntities } from "Theme/constants";
 import { AttributeIcon, Button, ButtonGroup } from "components";
 import React, { useEffect, useRef, useState } from "react";
 import {
@@ -18,19 +17,16 @@ import {
   DraggedPropRowItem,
   ItemTypes,
   PropAttributeFilter,
-  PropAttributeGroupDataObject,
-  classesPropType,
-  classesPropValue,
 } from "types";
 import { dndHoverFn } from "utils";
-import { AttributesGroupEditor } from "../../AttributesEditor/AttributesGroupEditor";
+import { TooltipAttributesGroup } from "../..";
+import { PropGroupRowStatementAttributes } from "./PropGroupRowStatementAttributes";
 import {
   StyledBorderLeft,
   StyledFaGripVertical,
   StyledGrid,
   StyledPropLineColumn,
 } from "./PropGroupRowStyles";
-import { PropGroupRowStatementAttributes } from "./PropGroupRowStatementAttributes";
 import { PropGroupRowType } from "./PropGroupRowType";
 import { PropGroupRowValue } from "./PropGroupRowValue";
 
@@ -152,7 +148,6 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
     }
   }, [isDragging]);
 
-  const [modalOpen, setModalOpen] = useState<boolean>(false);
   const [isExpanded, setIsExpanded] = useState(false);
 
   const opacity = isDragging ? 0.5 : 1;
@@ -186,7 +181,6 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
                 disabledAttributes={disabledAttributes}
                 isInsideTemplate={isInsideTemplate}
                 openDetailOnCreate={openDetailOnCreate}
-                setModalOpen={setModalOpen}
                 territoryActants={territoryActants}
                 territoryParentId={territoryParentId}
                 updateProp={updateProp}
@@ -202,7 +196,6 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
               disabledAttributes={disabledAttributes}
               isInsideTemplate={isInsideTemplate}
               openDetailOnCreate={openDetailOnCreate}
-              setModalOpen={setModalOpen}
               territoryActants={territoryActants}
               territoryParentId={territoryParentId}
               updateProp={updateProp}
@@ -219,57 +212,6 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
               buttons={
                 <>
                   <ButtonGroup height={19} noMarginRight>
-                    <AttributesGroupEditor
-                      modalTitle={`Property attributes`}
-                      modalOpen={modalOpen}
-                      setModalOpen={setModalOpen}
-                      disabledAllAttributes={!userCanEdit}
-                      disabledAttributes={disabledAttributes}
-                      propTypeActant={propTypeEntity}
-                      propValueActant={propValueEntity}
-                      excludedSuggesterEntities={excludedSuggesterEntities}
-                      classesPropType={classesPropType}
-                      classesPropValue={classesPropValue}
-                      updateProp={updateProp}
-                      statementId={prop.id}
-                      data={{
-                        statement: {
-                          elvl: prop.elvl,
-                          certainty: prop.certainty,
-                          logic: prop.logic,
-                          mood: prop.mood,
-                          moodvariant: prop.moodvariant,
-                          bundleOperator: prop.bundleOperator,
-                          bundleStart: prop.bundleStart,
-                          bundleEnd: prop.bundleEnd,
-                        },
-                        type: {
-                          elvl: prop.type.elvl,
-                          logic: prop.type.logic,
-                          virtuality: prop.type.virtuality,
-                          partitivity: prop.type.partitivity,
-                        },
-                        value: {
-                          elvl: prop.value.elvl,
-                          logic: prop.value.logic,
-                          virtuality: prop.value.virtuality,
-                          partitivity: prop.value.partitivity,
-                        },
-                      }}
-                      handleUpdate={(newData: PropAttributeGroupDataObject) => {
-                        const newDataObject = {
-                          ...newData.statement,
-                          ...newData,
-                        };
-                        const { statement, ...statementPropObject } =
-                          newDataObject;
-                        updateProp(prop.id, statementPropObject);
-                      }}
-                      userCanEdit={userCanEdit}
-                      isInsideTemplate={isInsideTemplate}
-                      territoryParentId={territoryParentId}
-                    />
-
                     {userCanEdit && (
                       <Button
                         key="delete"
@@ -303,7 +245,6 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
                         color="danger"
                         inverted
                         noBorder
-                        onClick={() => setModalOpen(true)}
                         icon={<AttributeIcon attributeName={"negation"} />}
                       />
                     ) : (
@@ -316,7 +257,6 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
                         color="success"
                         inverted
                         noBorder
-                        onClick={() => setModalOpen(true)}
                         icon={prop.bundleOperator}
                       />
                     ) : (
@@ -335,6 +275,35 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
                           style={{ transform: "rotate(90deg)" }}
                         />
                       )
+                    }
+                    tooltipContent={
+                      <TooltipAttributesGroup
+                        data={{
+                          statement: {
+                            elvl: prop.elvl,
+                            certainty: prop.certainty,
+                            logic: prop.logic,
+                            mood: prop.mood,
+                            moodvariant: prop.moodvariant,
+                            bundleOperator: prop.bundleOperator,
+                            bundleStart: prop.bundleStart,
+                            bundleEnd: prop.bundleEnd,
+                          },
+                          type: {
+                            elvl: prop.type.elvl,
+                            logic: prop.type.logic,
+                            virtuality: prop.type.virtuality,
+                            partitivity: prop.type.partitivity,
+                          },
+                          value: {
+                            elvl: prop.value.elvl,
+                            logic: prop.value.logic,
+                            virtuality: prop.value.virtuality,
+                            partitivity: prop.value.partitivity,
+                          },
+                        }}
+                        disabledAttributes={disabledAttributes}
+                      />
                     }
                   />
                 </>

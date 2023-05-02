@@ -29,7 +29,6 @@ interface PropGroupRowType {
   isExpanded: boolean;
   disabledAttributes: PropAttributeFilter;
   openDetailOnCreate: boolean;
-  setModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 export const PropGroupRowType: React.FC<PropGroupRowType> = ({
   propTypeEntity,
@@ -42,7 +41,6 @@ export const PropGroupRowType: React.FC<PropGroupRowType> = ({
   isExpanded,
   disabledAttributes,
   openDetailOnCreate,
-  setModalOpen,
 }) => {
   return (
     <StyledAttributesFlexColumn>
@@ -106,7 +104,6 @@ export const PropGroupRowType: React.FC<PropGroupRowType> = ({
                 color="danger"
                 inverted
                 noBorder
-                onClick={() => setModalOpen(true)}
                 icon={<AttributeIcon attributeName="negation" />}
               />
             )}

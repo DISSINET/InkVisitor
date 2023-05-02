@@ -6,6 +6,7 @@ import { StatementListBox } from "./StatementsListBox/StatementListBox";
 import { TemplateListBox } from "./TemplateListBox/TemplateListBox";
 import { TerritoryTreeBox } from "./TerritoryTreeBox/TerritoryTreeBox";
 import { TooltipAttributes } from "./TooltipAttributes/TooltipAttributes";
+import { TooltipAttributesGroup } from "./TooltipAttributes/TooltipAttributesGroup";
 
 export {
   EntitySearchBox,
@@ -16,4 +17,5 @@ export {
   TerritoryTreeBox,
   TemplateListBox,
   TooltipAttributes,
+  TooltipAttributesGroup,
 };
