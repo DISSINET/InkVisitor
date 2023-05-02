@@ -294,6 +294,14 @@ export const StatementEditorActionTableRow: React.FC<
       dispatch(
         setDraggedActantRow({ category: DraggedPropRowCategory.ACTION })
       );
+      const boxContentEditor = document.getElementById(`box-content-editor`);
+      const actionTable = document.getElementById(`action-table`);
+      if (boxContentEditor) {
+        boxContentEditor.scrollTo({
+          behavior: "smooth",
+          top: actionTable ? actionTable.offsetTop + 250 : 0,
+        });
+      }
     } else {
       dispatch(setDraggedActantRow({}));
     }
@@ -335,7 +343,7 @@ export const StatementEditorActionTableRow: React.FC<
 
   return (
     <React.Fragment key={index}>
-      <StyledFlexStart>
+      <StyledFlexStart ref={dropRef}>
         {userCanEdit && hasOrder ? (
           <StyledGridColumn ref={dragRef} style={{ cursor: "move" }}>
             <FaGripVertical style={{ marginTop: "0.3rem" }} />
@@ -345,7 +353,7 @@ export const StatementEditorActionTableRow: React.FC<
         )}
 
         <StyledBorderLeft>
-          <StyledGrid ref={dropRef} style={{ opacity }}>
+          <StyledGrid style={{ opacity }}>
             <StyledGridColumn>{renderActionCell()}</StyledGridColumn>
             <StyledGridColumn>
               {

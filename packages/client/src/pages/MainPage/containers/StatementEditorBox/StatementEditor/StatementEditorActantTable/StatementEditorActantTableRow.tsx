@@ -113,6 +113,10 @@ export const StatementEditorActantTableRow: React.FC<
     actant?: IEntity;
     sActant: IStatementActant;
   } = filteredActant.data;
+  const dispatch = useAppDispatch();
+  const draggedActantRow: DraggedActantRowItem = useAppSelector(
+    (state) => state.rowDnd.draggedActantRow
+  );
 
   const dropRef = useRef<HTMLTableRowElement>(null);
   const dragRef = useRef<HTMLTableCellElement>(null);
@@ -142,6 +146,24 @@ export const StatementEditorActantTableRow: React.FC<
 
   preview(drop(dropRef));
   drag(dragRef);
+
+  useEffect(() => {
+    if (isDragging) {
+      dispatch(
+        setDraggedActantRow({ category: DraggedPropRowCategory.ACTANT })
+      );
+      const boxContentEditor = document.getElementById(`box-content-editor`);
+      const actantTable = document.getElementById(`actant-table`);
+      if (boxContentEditor) {
+        boxContentEditor.scrollTo({
+          behavior: "smooth",
+          top: actantTable ? actantTable.offsetTop + 550 : 0,
+        });
+      }
+    } else {
+      dispatch(setDraggedActantRow({}));
+    }
+  }, [isDragging]);
 
   const updateActant = (statementActantId: string, changes: any) => {
     if (statement && statementActantId) {
@@ -357,21 +379,6 @@ export const StatementEditorActantTableRow: React.FC<
       </ButtonGroup>
     );
   };
-
-  const dispatch = useAppDispatch();
-  const draggedActantRow: DraggedActantRowItem = useAppSelector(
-    (state) => state.rowDnd.draggedActantRow
-  );
-
-  useEffect(() => {
-    if (isDragging) {
-      dispatch(
-        setDraggedActantRow({ category: DraggedPropRowCategory.ACTANT })
-      );
-    } else {
-      dispatch(setDraggedActantRow({}));
-    }
-  }, [isDragging]);
 
   const renderPropGroup = useCallback(
     (originId: string, props: IProp[], category: DraggedPropRowCategory) => {

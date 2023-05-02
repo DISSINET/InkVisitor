@@ -681,7 +681,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
             )}
           </StyledEditorSectionHeader>
           <StyledEditorSectionContent>
-            <StyledEditorActantTableWrapper>
+            <StyledEditorActantTableWrapper id="action-table">
               <StatementEditorActionTable
                 userCanEdit={userCanEdit}
                 statement={statement}
@@ -729,7 +729,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
             )}
           </StyledEditorSectionHeader>
           <StyledEditorSectionContent>
-            <StyledEditorActantTableWrapper>
+            <StyledEditorActantTableWrapper id="actant-table">
               <StatementEditorActantTable
                 statement={statement}
                 userCanEdit={userCanEdit}

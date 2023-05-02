@@ -78,6 +78,7 @@ export const Box: React.FC<BoxProps> = ({
         </StyledButtonWrap>
       </StyledHead>
       <StyledContent
+        id={`box-content-${label.toLowerCase()}`}
         color={color}
         $borderColor={borderColor}
         $noPadding={noPadding}
