@@ -5,6 +5,7 @@ import { StatementEditorBox } from "./StatementEditorBox/StatementEditorBox";
 import { StatementListBox } from "./StatementsListBox/StatementListBox";
 import { TemplateListBox } from "./TemplateListBox/TemplateListBox";
 import { TerritoryTreeBox } from "./TerritoryTreeBox/TerritoryTreeBox";
+import { TooltipAttributes } from "./TooltipAttributes/TooltipAttributes";
 
 export {
   EntitySearchBox,
@@ -14,4 +15,5 @@ export {
   StatementListBox,
   TerritoryTreeBox,
   TemplateListBox,
+  TooltipAttributes,
 };

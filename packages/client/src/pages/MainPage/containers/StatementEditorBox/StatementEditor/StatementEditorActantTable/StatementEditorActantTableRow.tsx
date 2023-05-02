@@ -1,3 +1,8 @@
+import {
+  operatorDict,
+  partitivityDict,
+  virtualityDict,
+} from "@shared/dictionaries";
 import { EntityEnums } from "@shared/enums";
 import {
   IEntity,
@@ -22,6 +27,7 @@ import {
   PositionButtonGroup,
 } from "components/advanced";
 import { useSearchParams } from "hooks";
+import { TooltipAttributes } from "pages/MainPage/containers";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   DragSourceMonitor,
@@ -42,7 +48,6 @@ import {
   ItemTypes,
 } from "types";
 import { dndHoverFn } from "utils";
-import AttributesEditor from "../../../AttributesEditor/AttributesEditor";
 import { PropGroup } from "../../../PropGroup/PropGroup";
 import { StatementEditorActantClassification } from "./StatementEditorActantClassification/StatementEditorActantClassification";
 import { StatementEditorActantIdentification } from "./StatementEditorActantIdentification/StatementEditorActantIdentification";
@@ -57,11 +62,6 @@ import {
   StyledRow,
   StyledTagWrapper,
 } from "./StatementEditorActantTableStyles";
-import {
-  operatorDict,
-  partitivityDict,
-  virtualityDict,
-} from "@shared/dictionaries";
 
 interface StatementEditorActantTableRow {
   filteredActant: FilteredActantObject;
@@ -263,43 +263,11 @@ export const StatementEditorActantTableRow: React.FC<
     );
   };
 
-  const [actantAttributesModalOpen, setActantAttributesModalOpen] =
-    useState<boolean>(false);
-
   const renderAttributesCell = () => {
     const { entityId: propOriginId, id: propRowId } = sActant;
 
     return (
       <ButtonGroup noMarginRight height={19}>
-        {sActant && (
-          <AttributesEditor
-            modalOpen={actantAttributesModalOpen}
-            setModalOpen={setActantAttributesModalOpen}
-            modalTitle={`Actant involvement`}
-            entity={actant}
-            disabledAllAttributes={!userCanEdit}
-            userCanEdit={userCanEdit}
-            data={{
-              elvl: sActant.elvl,
-              logic: sActant.logic,
-              virtuality: sActant.virtuality,
-              partitivity: sActant.partitivity,
-              bundleOperator: sActant.bundleOperator,
-              bundleStart: sActant.bundleStart,
-              bundleEnd: sActant.bundleEnd,
-            }}
-            handleUpdate={(newData) => {
-              updateActant(sActant.id, newData);
-            }}
-            updateActantId={(newId: string) => {
-              updateActant(sActant.id, { entityId: newId });
-            }}
-            classEntitiesActant={classEntitiesActant}
-            loading={updateStatementDataMutation.isLoading}
-            isInsideTemplate={isInsideTemplate}
-            territoryParentId={territoryParentId}
-          />
-        )}
         {userCanEdit && (
           <Button
             key="d"
@@ -362,18 +330,6 @@ export const StatementEditorActantTableRow: React.FC<
             inverted
             noBorder
             icon={<AttributeIcon attributeName={"negation"} />}
-            onClick={() => setActantAttributesModalOpen(true)}
-          />
-        )}
-        {sActant.bundleOperator && (
-          <Button
-            key="oper"
-            tooltipLabel="Logical operator type"
-            color="success"
-            inverted
-            noBorder
-            icon={sActant.bundleOperator}
-            onClick={() => setActantAttributesModalOpen(true)}
           />
         )}
       </ButtonGroup>
@@ -466,6 +422,19 @@ export const StatementEditorActantTableRow: React.FC<
                       style={{ transform: "rotate(90deg)" }}
                     />
                   )
+                }
+                tooltipContent={
+                  <TooltipAttributes
+                    data={{
+                      elvl: sActant.elvl,
+                      logic: sActant.logic,
+                      virtuality: sActant.virtuality,
+                      partitivity: sActant.partitivity,
+                      bundleOperator: sActant.bundleOperator,
+                      bundleStart: sActant.bundleStart,
+                      bundleEnd: sActant.bundleEnd,
+                    }}
+                  />
                 }
               />
             </StyledGridColumn>

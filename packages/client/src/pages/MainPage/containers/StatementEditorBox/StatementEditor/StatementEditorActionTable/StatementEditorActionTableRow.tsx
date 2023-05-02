@@ -1,3 +1,5 @@
+import { certaintyDict, moodDict, operatorDict } from "@shared/dictionaries";
+import { allEntities } from "@shared/dictionaries/entity";
 import { EntityEnums } from "@shared/enums";
 import { IProp, IResponseStatement } from "@shared/types";
 import { excludedSuggesterEntities } from "Theme/constants";
@@ -17,7 +19,7 @@ import {
   MoodVariantButtonGroup,
 } from "components/advanced";
 import { useSearchParams } from "hooks";
-import AttributesEditor from "pages/MainPage/containers/AttributesEditor/AttributesEditor";
+import { TooltipAttributes } from "pages/MainPage/containers";
 import { PropGroup } from "pages/MainPage/containers/PropGroup/PropGroup";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -27,6 +29,7 @@ import {
   useDrop,
 } from "react-dnd";
 import { FaGripVertical, FaPlus, FaTrashAlt } from "react-icons/fa";
+import { TbSettingsAutomation, TbSettingsFilled } from "react-icons/tb";
 import { UseMutationResult } from "react-query";
 import { setDraggedActantRow } from "redux/features/rowDnd/draggedActantRowSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
@@ -45,9 +48,6 @@ import {
   StyledGrid,
   StyledGridColumn,
 } from "./StatementEditorActionTableStyles";
-import { certaintyDict, moodDict, operatorDict } from "@shared/dictionaries";
-import { allEntities } from "@shared/dictionaries/entity";
-import { TbSettingsAutomation, TbSettingsFilled } from "react-icons/tb";
 
 interface StatementEditorActionTableRow {
   filteredAction: FilteredActionObject;
@@ -195,43 +195,11 @@ export const StatementEditorActionTableRow: React.FC<
     );
   };
 
-  const [modalOpen, setModalOpen] = useState<boolean>(false);
-
   const renderButtonsCell = () => {
     const { actionId: propOriginId, id: rowId } = sAction;
 
     return (
       <ButtonGroup noMarginRight height={19}>
-        {sAction && (
-          <AttributesEditor
-            modalOpen={modalOpen}
-            setModalOpen={setModalOpen}
-            modalTitle={`Action attribute`}
-            entity={action}
-            disabledAllAttributes={!userCanEdit}
-            data={{
-              elvl: sAction.elvl,
-              certainty: sAction.certainty,
-              logic: sAction.logic,
-              mood: sAction.mood,
-              moodvariant: sAction.moodvariant,
-              bundleOperator: sAction.bundleOperator,
-              bundleStart: sAction.bundleStart,
-              bundleEnd: sAction.bundleEnd,
-            }}
-            handleUpdate={(newData) => {
-              updateAction(sAction.id, newData);
-            }}
-            updateActantId={(newId: string) => {
-              updateAction(sAction.id, { actionId: newId });
-            }}
-            userCanEdit={userCanEdit}
-            classEntitiesActant={[EntityEnums.Class.Action]}
-            loading={updateActionsMutation.isLoading}
-            isInsideTemplate={isInsideTemplate}
-            territoryParentId={territoryParentId}
-          />
-        )}
         {userCanEdit && (
           <Button
             key="d"
@@ -266,18 +234,6 @@ export const StatementEditorActionTableRow: React.FC<
             inverted
             noBorder
             icon={<AttributeIcon attributeName={"negation"} />}
-            onClick={() => setModalOpen(true)}
-          />
-        )}
-        {sAction.bundleOperator && (
-          <Button
-            key="oper"
-            tooltipLabel="Logical operator type"
-            color="success"
-            inverted
-            noBorder
-            icon={sAction.bundleOperator}
-            onClick={() => setModalOpen(true)}
           />
         )}
       </ButtonGroup>
@@ -401,6 +357,20 @@ export const StatementEditorActionTableRow: React.FC<
                       style={{ transform: "rotate(90deg)" }}
                     />
                   )
+                }
+                tooltipContent={
+                  <TooltipAttributes
+                    data={{
+                      elvl: sAction.elvl,
+                      certainty: sAction.certainty,
+                      logic: sAction.logic,
+                      mood: sAction.mood,
+                      moodvariant: sAction.moodvariant,
+                      bundleOperator: sAction.bundleOperator,
+                      bundleStart: sAction.bundleStart,
+                      bundleEnd: sAction.bundleEnd,
+                    }}
+                  />
                 }
               />
             </StyledGridColumn>
