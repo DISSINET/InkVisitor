@@ -2,7 +2,7 @@ import { ActionEntity } from "@models/action/action";
 import { EntityEnums } from "@shared/enums";
 import { IAction } from "@shared/types";
 
-export class Rules {
+export class PositionRules {
   classes: EntityEnums.Class[] = [];
   undefined = false;
   allEmpty = true;
