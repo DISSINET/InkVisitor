@@ -3,7 +3,7 @@ import { EntityEnums } from "@shared/enums";
 import { IAction } from "@shared/types";
 
 export class PositionRules {
-  classes: EntityEnums.Class[] = [];
+  classes: EntityEnums.ExtendedClass[] = [];
   undefined = false;
   allEmpty = true;
   mismatch = false;
@@ -12,7 +12,7 @@ export class PositionRules {
     for (const action of actions) {
       const rules = ActionEntity.toRules(action.data.entities)[position];
       this.undefined = this.undefined || !rules;
-      this.allEmpty = this.allEmpty && ((rules && !rules.length) as boolean);
+      this.allEmpty = this.allEmpty && PositionRules.isRuleEmpty(rules);
 
       if (!this.mismatch) {
         if (this.classes.length) {
@@ -28,5 +28,15 @@ export class PositionRules {
       }
       this.classes = this.classes.concat(rules || []);
     }
+  }
+
+  static isRuleEmpty(rules: EntityEnums.ExtendedClass[] | undefined): boolean {
+    if (!rules) {
+      return false;
+    }
+
+    return (
+      !rules.length || !!rules.find((r) => r === EntityEnums.Extension.Empty)
+    );
   }
 }

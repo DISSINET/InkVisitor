@@ -49,7 +49,7 @@ export class ActionEntity implements IActionEntity, IModel {
 
   static toRules(
     ae: IActionEntity
-  ): Record<EntityEnums.Position, EntityEnums.Class[] | undefined> {
+  ): Record<EntityEnums.Position, EntityEnums.ExtendedClass[] | undefined> {
     return {
       a1: ae.a1,
       a2: ae.a2,
