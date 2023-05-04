@@ -19,7 +19,7 @@ import Statement from "./statement";
 import Entity from "../entity/entity";
 import { InternalServerError } from "@shared/types/errors";
 import Action, { ActionEntity } from "@models/action/action";
-import { Rules } from "./PositionRules";
+import { PositionRules } from "./PositionRules";
 
 export class ResponseStatement extends Statement implements IResponseStatement {
   entities: { [key: string]: IEntity };
@@ -141,7 +141,7 @@ export class ResponseStatement extends Statement implements IResponseStatement {
     const actions = this.data.actions;
     const actants = this.data.actants.filter((a) => a.position === position);
 
-    const rules = new Rules(
+    const rules = new PositionRules(
       actions.map<IAction>((a) => this.getEntity(a.actionId) as IAction),
       position
     );
