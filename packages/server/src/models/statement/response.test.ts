@@ -560,7 +560,7 @@ describe("models/statement/response", function () {
             [EntityEnums.Position.Subject]: [],
           });
           response.addAction({
-            [EntityEnums.Position.Subject]: [],
+            [EntityEnums.Position.Subject]: [EntityEnums.Extension.Empty],
           });
           return response;
         };

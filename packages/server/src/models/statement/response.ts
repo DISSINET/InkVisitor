@@ -87,6 +87,11 @@ export class ResponseStatement extends Statement implements IResponseStatement {
     };
   }
 
+  /**
+   * Returns single cached entity by id. Throws error in case of not found entity.
+   * @param id
+   * @returns wanted IEntity
+   */
   getEntity(id: string): IEntity {
     const entity = this.entities[id];
     if (!entity) {
@@ -136,6 +141,11 @@ export class ResponseStatement extends Statement implements IResponseStatement {
     return warnings;
   }
 
+  /**
+   * checks actions -> actants relations for single position and generates appropriate IWarning entries
+   * @param position
+   * @returns list of warnings
+   */
   getWarningsForPosition(position: EntityEnums.Position): IWarning[] {
     const warnings: IWarning[] = [];
     const actions = this.data.actions;
@@ -185,8 +195,8 @@ export class ResponseStatement extends Statement implements IResponseStatement {
         const position = stActant.position;
 
         if (!actionRules) {
-          //
-        } else if (!actionRules.length) {
+          // action rules undefined for this position - only common warning should be returned (AVU)
+        } else if (PositionRules.isRuleEmpty(actionRules)) {
           warnings.push(
             this.newStatementWarning(WarningTypeEnums.ANA, {
               section: `editor.${position}`,
@@ -210,7 +220,8 @@ export class ResponseStatement extends Statement implements IResponseStatement {
   }
 
   /**
-   * get a list of all warnings
+   * get a list of all warnings for actions -> actants relations
+   * @returns list of warnings
    */
   getWarnings(): IWarning[] {
     let warnings: IWarning[] = [];
@@ -228,43 +239,6 @@ export class ResponseStatement extends Statement implements IResponseStatement {
       warnings = warnings.concat(this.getWarningsForPosition(position));
     }
 
-    /*const subjectETypes = this.getSubjectETypes();
-
-    // Check allowed entity classes for subject position based on action valencies
-    this.data.actants
-      .filter((a) => a.position === EntityEnums.Position.Subject)
-      .forEach((a) => {
-        const entity = this.entities[a.entityId];
-        if (entity && !subjectETypes.includes(entity.class)) {
-          warnings.push(
-            this.newStatementWarning(WarningTypeEnums.SValency, {
-              section: "editor.subject",
-              entityId: a.entityId,
-              actantId: a.id,
-            })
-          );
-        }
-      });
-
-    warnings = warnings.concat(
-      this.checkValencyClassesForPosition(
-        EntityEnums.Position.Subject,
-        WarningTypeEnums.SValency
-      )
-    );
-    warnings = warnings.concat(
-      this.checkValencyClassesForPosition(
-        EntityEnums.Position.Actant1,
-        WarningTypeEnums.A1Valency
-      )
-    );
-    warnings = warnings.concat(
-      this.checkValencyClassesForPosition(
-        EntityEnums.Position.Actant2,
-        WarningTypeEnums.A2Valency
-      )
-    );
-*/
     return warnings;
   }
 
