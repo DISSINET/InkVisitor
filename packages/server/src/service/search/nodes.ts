@@ -2,17 +2,17 @@ import { Search } from "@shared/types";
 import { Connection } from "rethinkdb-ts";
 import { SearchEdge } from ".";
 
-export default class SearchNode implements Search.ISearchNode {
-  type: Search.SearchNodeType;
-  params: Search.ISearchNodeParams;
-  operator: Search.SearchNodeOperator;
-  edges: Search.ISearchEdge[];
+export default class SearchNode implements Search.INode {
+  type: Search.NodeType;
+  params: Search.INodeParams;
+  operator: Search.NodeOperator;
+  edges: Search.IEdge[];
   results: any;
 
-  constructor(data: Partial<Search.ISearchNode>) {
-    this.type = data.type || ("" as Search.SearchNodeType);
+  constructor(data: Partial<Search.INode>) {
+    this.type = data.type || ("" as Search.NodeType);
     this.params = data.params || {};
-    this.operator = data.operator || Search.SearchNodeOperator.And;
+    this.operator = data.operator || Search.NodeOperator.And;
     this.edges = data.edges
       ? data.edges.map((edgeData) => new SearchEdge(edgeData))
       : [];

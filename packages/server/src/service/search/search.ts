@@ -6,7 +6,7 @@ export default class AdvancedSearch {
   root: SearchNode;
   results: any;
 
-  constructor(data: Partial<Search.ISearchNode>) {
+  constructor(data: Partial<Search.INode>) {
     this.root = new SearchNode(data);
   }
 

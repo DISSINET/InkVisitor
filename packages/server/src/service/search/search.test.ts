@@ -1,13 +1,7 @@
 import "ts-jest";
 import { Db } from "@service/RethinkDB";
-import { clean } from "@modules/common.test";
 import AdvancedSearch from "./search";
-import {
-  SearchEdgeLogic,
-  SearchEdgeType,
-  SearchNodeOperator,
-  SearchNodeType,
-} from "@shared/types/search";
+import { Search } from "@shared/types/search";
 
 describe("test AdvancedSearch", () => {
   let db: Db;
@@ -21,18 +15,18 @@ describe("test AdvancedSearch", () => {
     await db.close();
   });
 
-  test("constructor", async () => {
+  test("Search constructor", async () => {
     const s = new AdvancedSearch({
-      operator: SearchNodeOperator.AND,
-      type: SearchNodeType.A,
+      operator: Search.NodeOperator.And,
+      type: Search.NodeType.A,
       edges: [
         {
-          logic: SearchEdgeLogic.NEGATIVE,
-          type: SearchEdgeType.HAS_PROPTYPE,
+          logic: Search.EdgeLogic.Negative,
+          type: Search.EdgeType.XHasProptype,
           params: {},
           node: {
-            operator: SearchNodeOperator.AND,
-            type: SearchNodeType.A,
+            operator: Search.NodeOperator.And,
+            type: Search.NodeType.A,
             edges: [],
             params: {},
           },

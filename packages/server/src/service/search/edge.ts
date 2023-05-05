@@ -2,16 +2,16 @@ import { Search } from "@shared/types/search";
 import { Connection } from "rethinkdb-ts";
 import { SearchNode } from ".";
 
-export default class SearchEdge implements Search.ISearchEdge {
-  type: Search.SearchEdgeType;
-  params: Search.ISearchEdgeParams;
-  logic: Search.SearchEdgeLogic;
+export default class SearchEdge implements Search.IEdge {
+  type: Search.EdgeType;
+  params: Search.IEdgeParams;
+  logic: Search.EdgeLogic;
   node?: SearchNode;
 
-  constructor(data: Partial<Search.ISearchEdge>) {
-    this.type = data.type || ("" as Search.SearchEdgeType);
+  constructor(data: Partial<Search.IEdge>) {
+    this.type = data.type || ("" as Search.EdgeType);
     this.params = data.params || {};
-    this.logic = data.logic || Search.SearchEdgeLogic.Positive;
+    this.logic = data.logic || Search.EdgeLogic.Positive;
     if (data.node) {
       this.node = new SearchNode(data.node);
     }

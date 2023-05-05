@@ -1,28 +1,28 @@
 import { EntityEnums } from "./../enums";
 
 export namespace Search {
-  export interface ISearchNode {
-    type: SearchNodeType;
-    params: ISearchNodeParams;
-    operator: SearchNodeOperator;
-    edges: ISearchEdge[];
+  export interface INode {
+    type: NodeType;
+    params: INodeParams;
+    operator: NodeOperator;
+    edges: IEdge[];
   }
 
-  export interface ISearchEdge {
-    type: SearchEdgeType;
-    params: ISearchEdgeParams;
-    logic: SearchEdgeLogic;
-    node?: ISearchNode;
+  export interface IEdge {
+    type: EdgeType;
+    params: IEdgeParams;
+    logic: EdgeLogic;
+    node?: INode;
   }
 
-  export interface ISearchNodeParams {
+  export interface INodeParams {
     classes?: EntityEnums.Class[];
     label?: string;
     id?: string;
   }
-  export interface ISearchEdgeParams {}
+  export interface IEdgeParams {}
 
-  export enum SearchNodeType {
+  export enum NodeType {
     X = "Entity",
     C = "Concept",
     A = "Action",
@@ -30,7 +30,7 @@ export namespace Search {
     R = "Resource",
     T = "Territory",
   }
-  export enum SearchEdgeType {
+  export enum EdgeType {
     XHasProptype = "X_has_proptype",
     XHasPropvalue = "X_has_propvalue",
     XHasSuperclass = "X_has_superclass",
@@ -42,11 +42,11 @@ export namespace Search {
     THasS = "T_has_S",
     SIsInT = "S_is_in_T",
   }
-  export enum SearchNodeOperator {
+  export enum NodeOperator {
     And = "and",
     Or = "or",
   }
-  export enum SearchEdgeLogic {
+  export enum EdgeLogic {
     Positive = "positive",
     Negative = "negative",
   }
