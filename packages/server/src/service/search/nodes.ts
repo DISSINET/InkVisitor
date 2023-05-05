@@ -1,24 +1,18 @@
-import {
-  ISearchNode,
-  SearchNodeType,
-  SearchNodeOperator,
-  ISearchNodeParams,
-  ISearchEdge,
-} from "@shared/types/search";
+import { Search } from "@shared/types";
 import { Connection } from "rethinkdb-ts";
 import { SearchEdge } from ".";
 
-export default class SearchNode implements ISearchNode {
-  type: SearchNodeType;
-  params: ISearchNodeParams;
-  operator: SearchNodeOperator;
-  edges: ISearchEdge[];
+export default class SearchNode implements Search.ISearchNode {
+  type: Search.SearchNodeType;
+  params: Search.ISearchNodeParams;
+  operator: Search.SearchNodeOperator;
+  edges: Search.ISearchEdge[];
   results: any;
 
-  constructor(data: Partial<ISearchNode>) {
-    this.type = data.type || ("" as SearchNodeType);
+  constructor(data: Partial<Search.ISearchNode>) {
+    this.type = data.type || ("" as Search.SearchNodeType);
     this.params = data.params || {};
-    this.operator = data.operator || SearchNodeOperator.AND;
+    this.operator = data.operator || Search.SearchNodeOperator.And;
     this.edges = data.edges
       ? data.edges.map((edgeData) => new SearchEdge(edgeData))
       : [];

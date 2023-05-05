@@ -1,4 +1,4 @@
-import { ISearchNode } from "@shared/types/search";
+import { Search } from "@shared/types/search";
 import { Connection } from "rethinkdb-ts";
 import { SearchNode } from ".";
 
@@ -6,7 +6,7 @@ export default class AdvancedSearch {
   root: SearchNode;
   results: any;
 
-  constructor(data: Partial<ISearchNode>) {
+  constructor(data: Partial<Search.ISearchNode>) {
     this.root = new SearchNode(data);
   }
 
