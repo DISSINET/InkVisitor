@@ -1,5 +1,6 @@
-import { Search } from "@shared/types";
-import { Connection } from "rethinkdb-ts";
+import Entity from "@models/entity/entity";
+import { IEntity, Search } from "@shared/types";
+import { Connection, r, RDatum } from "rethinkdb-ts";
 import { SearchEdge } from ".";
 
 export default class SearchNode implements Search.INode {
@@ -18,7 +19,20 @@ export default class SearchNode implements Search.INode {
       : [];
   }
 
-  async run(db: Connection): Promise<void> {
-    throw new Error("base SearchNode does not implement run method");
+  addEdge(edgeData: Partial<Search.IEdge>): void {
+    this.edges.push(new SearchEdge(edgeData));
+  }
+
+  async run(db: Connection): Promise<any> {
+    let q = r.table(Entity.table);
+    const searchParams = this.params;
+    if (this.params.classes && this.params.classes.length) {
+      q = q.filter(function (row: RDatum) {
+        return r.expr(searchParams.classes).contains(row("class"));
+      });
+    }
+
+    this.results = await q.run(db);
+    return this.results;
   }
 }
