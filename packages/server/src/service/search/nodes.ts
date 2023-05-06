@@ -31,6 +31,12 @@ export default class SearchNode implements Search.INode {
         return r.expr(searchParams.classes).contains(row("class"));
       });
     }
+    if (this.params.id) {
+      q = q.filter({ id: this.params.id });
+    }
+    if (this.params.label) {
+      q = q.filter({ label: this.params.label });
+    }
 
     this.results = await q.run(db);
     return this.results;
