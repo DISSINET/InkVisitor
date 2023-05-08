@@ -4,7 +4,7 @@ import { SearchNode } from ".";
 
 export default class AdvancedSearch {
   root: SearchNode;
-  results: any;
+  results: any[] | null = null;
 
   constructor(data: Partial<Search.INode>) {
     this.root = new SearchNode(data);
@@ -12,5 +12,9 @@ export default class AdvancedSearch {
 
   async run(db: Connection): Promise<void> {
     this.results = await this.root.run(db);
+  }
+
+  addEdge(edgeData: Partial<Search.IEdge>): void {
+    this.root.addEdge(edgeData);
   }
 }

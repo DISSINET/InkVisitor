@@ -12,7 +12,7 @@ export namespace Search {
     type: EdgeType;
     params: IEdgeParams;
     logic: EdgeLogic;
-    node?: INode;
+    node: INode;
   }
 
   export interface INodeParams {
@@ -31,16 +31,23 @@ export namespace Search {
     T = "Territory",
   }
   export enum EdgeType {
-    XHasProptype = "X_has_proptype",
-    XHasPropvalue = "X_has_propvalue",
+    XHasPropType = "X_has_proptype",
+    XHasPropValue = "X_has_propvalue",
+    XIsInS = "X_is_in_S",
+    AIsActionInS = "A_is_action_in_S",
+    XIsSubjectInS = "X_is_subject_in_S",
+    XIsActant1InS = "X_is_actant_1_in_S",
+    XIsActant2InS = "X_is_actant_2_in_S",
+    SUnderT = "S_under_T",
+    XHasReferenceR = "X_has_reference_R",
+    THasChildT = "T_has_child_T",
+    XHasSPropTypeC = "X_has_S_proptype_C",
+    XHasSPropValue = "X_has_S_propvalue",
+    XHasSIdentification = "X_has_S_identification",
+    XHasSClassification = "X_has_S_classification",
+    XHasRelation = "X_has_relation",
     XHasSuperclass = "X_has_superclass",
     XHasClassification = "X_has_classification",
-    // actant in statement
-    SHasXAsActant = "S_has_X_as_actant",
-    XIsActantInS = "X_is_actant_in_S",
-    // statement in territory
-    THasS = "T_has_S",
-    SIsInT = "S_is_in_T",
   }
   export enum NodeOperator {
     And = "and",

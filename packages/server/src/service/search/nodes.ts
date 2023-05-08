@@ -1,7 +1,30 @@
 import Entity from "@models/entity/entity";
-import { IEntity, Search } from "@shared/types";
+import { Search } from "@shared/types";
 import { Connection, r, RDatum } from "rethinkdb-ts";
 import { SearchEdge } from ".";
+import Edge from "./edge";
+
+type Validation = Record<Search.EdgeType, [Search.NodeType, Search.NodeType]>;
+
+const validationRules: Validation = {
+  [Search.EdgeType.XHasPropType]: [Search.NodeType.X, Search.NodeType.C],
+  [Search.EdgeType.XHasPropValue]: [Search.NodeType.X, Search.NodeType.X],
+  [Search.EdgeType.XIsInS]: [Search.NodeType.X, Search.NodeType.S],
+  [Search.EdgeType.AIsActionInS]: [Search.NodeType.A, Search.NodeType.S],
+  [Search.EdgeType.XIsSubjectInS]: [Search.NodeType.X, Search.NodeType.S],
+  [Search.EdgeType.XIsActant1InS]: [Search.NodeType.X, Search.NodeType.S],
+  [Search.EdgeType.XIsActant2InS]: [Search.NodeType.X, Search.NodeType.S],
+  [Search.EdgeType.SUnderT]: [Search.NodeType.S, Search.NodeType.T],
+  [Search.EdgeType.XHasReferenceR]: [Search.NodeType.X, Search.NodeType.R],
+  [Search.EdgeType.THasChildT]: [Search.NodeType.T, Search.NodeType.T],
+  [Search.EdgeType.XHasSPropTypeC]: [Search.NodeType.X, Search.NodeType.C],
+  [Search.EdgeType.XHasSPropValue]: [Search.NodeType.X, Search.NodeType.X],
+  [Search.EdgeType.XHasSIdentification]: [Search.NodeType.X, Search.NodeType.X],
+  [Search.EdgeType.XHasSClassification]: [Search.NodeType.X, Search.NodeType.C],
+  [Search.EdgeType.XHasRelation]: [Search.NodeType.X, Search.NodeType.X],
+  [Search.EdgeType.XHasSuperclass]: [Search.NodeType.C, Search.NodeType.C],
+  [Search.EdgeType.XHasClassification]: [Search.NodeType.X, Search.NodeType.C],
+};
 
 export default class SearchNode implements Search.INode {
   type: Search.NodeType;
@@ -19,8 +42,10 @@ export default class SearchNode implements Search.INode {
       : [];
   }
 
-  addEdge(edgeData: Partial<Search.IEdge>): void {
-    this.edges.push(new SearchEdge(edgeData));
+  addEdge(edgeData: Partial<Search.IEdge>): SearchEdge {
+    const edgeInstance = new SearchEdge(edgeData);
+    this.edges.push(edgeInstance);
+    return edgeInstance;
   }
 
   async run(db: Connection): Promise<any> {
@@ -40,5 +65,21 @@ export default class SearchNode implements Search.INode {
 
     this.results = await q.run(db);
     return this.results;
+  }
+
+  isValid(): boolean {
+    for (const edge of this.edges) {
+      const rule = validationRules[edge.type];
+
+      if (!rule) {
+        return false;
+      }
+
+      if (rule[0] !== this.type || rule[1] !== edge.node.type) {
+        return false;
+      }
+    }
+
+    return true;
   }
 }
