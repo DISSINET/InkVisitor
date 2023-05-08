@@ -270,6 +270,16 @@ class RelationDoesNotExist extends CustomError {
 }
 
 /**
+ * SearchEdgeTypesInvalid will be thrown when attempting to run invalid search request, specifically edge misplacement
+ */
+class SearchEdgeTypesInvalid extends CustomError {
+  public static code = 400;
+  public static title = "Invalid search query";
+  public static message = "Bad edge type(s)";
+}
+
+
+/**
  * UnknownError works as a backup
  */
 class UnknownError extends CustomError {
@@ -299,6 +309,7 @@ const allErrors: Record<string, any> = {
   StatementInvalidMove,
   EmailError,
   RelationDoesNotExist,
+  SearchEdgeTypesInvalid,
 };
 
 export interface IErrorSignature {
@@ -333,4 +344,5 @@ export {
   StatementInvalidMove,
   EmailError,
   RelationDoesNotExist,
+  SearchEdgeTypesInvalid
 };

@@ -1,3 +1,7 @@
+import {
+  EntityDoesNotExist,
+  SearchEdgeTypesInvalid,
+} from "@shared/types/errors";
 import { Search } from "@shared/types/search";
 import { Connection } from "rethinkdb-ts";
 import { SearchNode } from ".";
@@ -11,6 +15,9 @@ export default class AdvancedSearch {
   }
 
   async run(db: Connection): Promise<void> {
+    if (!this.root.isValid()) {
+      throw new SearchEdgeTypesInvalid();
+    }
     this.results = await this.root.run(db);
   }
 
