@@ -27,8 +27,10 @@ interface StyledSelect {
   entityDropdown?: boolean;
   wildCardChar?: boolean;
   isMulti: boolean;
+  attributeDropdown?: boolean;
+  icon?: JSX.Element;
 }
-export const StyledSelect = styled(Select)`
+export const StyledSelect = styled(Select)<StyledSelect>`
   display: inline-flex;
   vertical-align: bottom;
   font-size: ${({ theme }) => theme.fontSize["xs"]};

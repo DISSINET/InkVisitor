@@ -3,17 +3,13 @@ import React, { ReactNode, useEffect, useState } from "react";
 import {
   components,
   ControlProps,
-  GroupedOptionsType,
-  IndicatorProps,
   MultiValueProps,
-  OptionsType,
-  OptionTypeBase,
   SingleValueProps,
   ValueContainerProps,
-  ValueType,
+  OptionProps,
+  DropdownIndicatorProps,
 } from "react-select";
-import { OptionProps } from "react-select/src/types";
-import { DropdownAny } from "Theme/constants";
+import { DropdownAny, heightHeader } from "Theme/constants";
 import { DropdownItem, EntityColors } from "types";
 import {
   StyledEntityValue,
@@ -25,9 +21,9 @@ import {
 import { Tooltip } from "components";
 
 interface Dropdown {
-  options?: OptionsType<OptionTypeBase> | GroupedOptionsType<OptionTypeBase>;
-  value?: ValueType<OptionTypeBase, any>;
-  onChange: (selectedOption: ValueType<OptionTypeBase, any>) => void;
+  options?: DropdownItem[];
+  value?: DropdownItem | DropdownItem[];
+  onChange: (selectedOption: DropdownItem | DropdownItem[]) => void;
   components?: any;
   ref?: React.RefObject<ReactNode>;
   width?: number | "full";
@@ -116,7 +112,7 @@ export const Dropdown: React.FC<Dropdown> = ({
           isClearable={isClearable}
           captureMenuScroll={false}
           components={{
-            components,
+            // components,
             Option,
             SingleValue,
             MultiValue,
@@ -135,7 +131,15 @@ export const Dropdown: React.FC<Dropdown> = ({
                   noDropDownIndicator || isOneOptionSingleSelect ? "none" : "",
               };
             },
+            menuPortal: (base: any) => ({
+              ...base,
+              marginTop: `${-heightHeader}px`,
+              zIndex: 9999,
+            }),
           }}
+          menuPortalTarget={document.getElementById("page")!}
+          menuPosition={"absolute"}
+          // maxMenuHeight={180}
           onChange={(selected: any, event: any) => {
             if (selected !== null && selected.length > 0) {
               // kdyz je neco vybrany = aspon jeden option
@@ -172,7 +176,7 @@ export const Dropdown: React.FC<Dropdown> = ({
       {/* Tooltip */}
       {tooltipLabel && (
         <Tooltip
-          disabled={isMulti && value?.length === 0}
+          disabled={isMulti && (value as DropdownItem[])?.length === 0}
           content={
             <p>
               {isMulti ? (
@@ -184,7 +188,8 @@ export const Dropdown: React.FC<Dropdown> = ({
                           {v.value !== allEntities.value && (
                             <>
                               {v.label}
-                              {key !== value?.length - 1 && ", "}
+                              {key !== (value as DropdownItem[])?.length - 1 &&
+                                ", "}
                             </>
                           )}
                         </React.Fragment>
@@ -243,6 +248,7 @@ const Option = ({ ...props }: OptionProps | any): React.ReactElement => {
 
 const MultiValue = (props: MultiValueProps<any>): React.ReactElement => {
   let labelToBeDisplayed = `${props.data.label}`;
+  // @ts-ignore
   const { attributeDropdown, isMulti, value, options } = props.selectProps;
 
   if (attributeDropdown && isMulti && value.length > 1) {
@@ -273,6 +279,7 @@ const ValueContainer = ({
   let toBeRendered = children;
   if (
     currentValues.some((val) => val.value === allEntities.value) ||
+    // @ts-ignore
     (props.selectProps.attributeDropdown && props.selectProps.value.length > 1)
   ) {
     toBeRendered = [[children[0][0]], children[1]];
@@ -287,7 +294,7 @@ const ValueContainer = ({
   );
 };
 
-const DropdownIndicator = (props: IndicatorProps<any, any>) => {
+const DropdownIndicator = (props: DropdownIndicatorProps) => {
   return (
     <components.DropdownIndicator {...props}>
       <StyledFaChevronDown size={9} />
