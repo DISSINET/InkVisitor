@@ -119,6 +119,7 @@ export const Dropdown: React.FC<Dropdown> = ({
             ValueContainer,
             DropdownIndicator,
             Control,
+            MenuPortal,
           }}
           isSearchable={!disableTyping}
           value={displayValue}
@@ -205,6 +206,7 @@ export const Dropdown: React.FC<Dropdown> = ({
           }
           visible={showTooltip}
           referenceElement={referenceElement}
+          position="top"
         />
       )}
     </>
@@ -311,5 +313,17 @@ const Control = ({ children, ...props }: ControlProps<any, false>) => {
       {icon && <StyledIconWrap>{icon}</StyledIconWrap>}
       {children}
     </components.Control>
+  );
+};
+
+const MenuPortal: typeof components.MenuPortal = (props) => {
+  // @ts-ignore
+  const { entityDropdown } = props.selectProps;
+
+  return (
+    <components.MenuPortal
+      {...props}
+      className={entityDropdown ? "react-select__entity-dropdown" : ""}
+    />
   );
 };
