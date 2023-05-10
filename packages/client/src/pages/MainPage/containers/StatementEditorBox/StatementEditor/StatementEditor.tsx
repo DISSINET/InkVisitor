@@ -666,7 +666,11 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         </StyledEditorSection>
 
         {/* Actions */}
-        <StyledEditorSection metaSection key="editor-section-actions">
+        <StyledEditorSection
+          metaSection
+          key="editor-section-actions"
+          id="action-section"
+        >
           <StyledEditorSectionHeader>
             <StyledEditorSectionHeading>Actions</StyledEditorSectionHeading>
 
@@ -683,7 +687,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
           </StyledEditorSectionHeader>
           <StyledEditorSectionContent>
             <div style={{ overflow: "auto" }}>
-              <StyledEditorActionTableWrapper id="action-table">
+              <StyledEditorActionTableWrapper>
                 <StatementEditorActionTable
                   userCanEdit={userCanEdit}
                   statement={statement}
@@ -715,7 +719,11 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         </StyledEditorSection>
 
         {/* Actants */}
-        <StyledEditorSection metaSection key="editor-section-actants">
+        <StyledEditorSection
+          metaSection
+          key="editor-section-actants"
+          id="actant-section"
+        >
           <StyledEditorSectionHeader>
             <StyledEditorSectionHeading>Actants</StyledEditorSectionHeading>
 
@@ -732,7 +740,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
           </StyledEditorSectionHeader>
           <StyledEditorSectionContent>
             <div style={{ overflow: "auto" }}>
-              <StyledEditorActantTableWrapper id="actant-table">
+              <StyledEditorActantTableWrapper>
                 <StatementEditorActantTable
                   statement={statement}
                   userCanEdit={userCanEdit}

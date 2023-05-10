@@ -251,11 +251,11 @@ export const StatementEditorActionTableRow: React.FC<
         setDraggedActantRow({ category: DraggedPropRowCategory.ACTION })
       );
       const boxContentEditor = document.getElementById(`box-content-editor`);
-      const actionTable = document.getElementById(`action-table`);
+      const actionTable = document.getElementById(`action-section`);
       if (boxContentEditor) {
         boxContentEditor.scrollTo({
           behavior: "smooth",
-          top: actionTable ? actionTable.offsetTop + 250 : 0,
+          top: actionTable ? actionTable.offsetTop - 30 : 0,
         });
       }
     } else {
