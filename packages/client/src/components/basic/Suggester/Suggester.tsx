@@ -14,7 +14,6 @@ import React, { useState } from "react";
 import { DropTargetMonitor, useDrop } from "react-dnd";
 import { FaPlus } from "react-icons/fa";
 import { MdCancel } from "react-icons/md";
-import { OptionTypeBase, ValueType } from "react-select";
 import { toast } from "react-toastify";
 import { FixedSizeList as List } from "react-window";
 import { DropdownAny, scrollOverscanCount } from "Theme/constants";
@@ -60,7 +59,7 @@ interface Suggester {
 
   // events
   onType: (newType: string) => void;
-  onChangeCategory: (selectedOption: ValueType<OptionTypeBase, any>) => void;
+  onChangeCategory: (selectedOption: DropdownItem | DropdownItem[]) => void;
   onCreate: (item: SuggesterItemToCreate) => void;
   onPick: (entity: IEntity, instantiateTemplate?: boolean) => void;
   onDrop: (item: EntityDragItem, instantiateTemplate?: boolean) => void;

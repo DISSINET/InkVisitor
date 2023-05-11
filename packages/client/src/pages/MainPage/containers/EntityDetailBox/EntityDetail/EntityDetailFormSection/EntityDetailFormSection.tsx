@@ -12,7 +12,6 @@ import { AttributeButtonGroup, EntityTag } from "components/advanced";
 import React from "react";
 import { FaRegCopy } from "react-icons/fa";
 import { UseMutationResult } from "react-query";
-import { OptionTypeBase, ValueType } from "react-select";
 import { toast } from "react-toastify";
 import { rootTerritoryId } from "Theme/constants";
 import { DropdownItem } from "types";
@@ -104,7 +103,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                     options={allowedEntityChangeClasses.map(
                       (c) => entitiesDictKeys[c]
                     )}
-                    onChange={(option: ValueType<OptionTypeBase, any>) => {
+                    onChange={(option) => {
                       setSelectedEntityType(
                         (option as DropdownItem).value as EntityEnums.Class
                       );

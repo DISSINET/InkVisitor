@@ -12,7 +12,6 @@ import { useDebounce, useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
 import { FaHome } from "react-icons/fa";
 import { useMutation, useQuery, useQueryClient } from "react-query";
-import { OptionTypeBase, ValueType } from "react-select";
 import { DropdownAny, rootTerritoryId, wildCardChar } from "Theme/constants";
 import { DropdownItem, EntityDragItem, SuggesterItemToCreate } from "types";
 import { AddTerritoryModal } from "..";
@@ -21,7 +20,7 @@ interface EntitySuggester {
   categoryTypes: EntityEnums.ExtendedClass[];
   onSelected: (id: string) => void;
   onPicked?: (entity: IEntity) => void;
-  onChangeCategory?: (selectedOption: ValueType<OptionTypeBase, any>) => void;
+  onChangeCategory?: (selectedOption: DropdownItem) => void;
   onTyped?: (newType: string) => void;
   placeholder?: string;
   inputWidth?: number | "full";
@@ -391,9 +390,9 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
           setTyped(newType);
           onTyped && onTyped(newType);
         }}
-        onChangeCategory={(option: ValueType<OptionTypeBase, any> | null) => {
+        onChangeCategory={(option) => {
           setSelectedCategory(option);
-          onChangeCategory && onChangeCategory(option);
+          onChangeCategory && onChangeCategory(option as DropdownItem);
         }}
         onCreate={(newCreated: SuggesterItemToCreate) => {
           handleCreate(newCreated);
