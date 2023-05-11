@@ -84,11 +84,13 @@ export const StyledAttributesFlexRow = styled.div<StyledAttributesFlexRow>`
   flex-direction: row;
   align-items: center;
   gap: ${({ isTag }) => (isTag ? "" : "0.5rem")};
+  height: ${({ theme }) => theme.space[10]};
 `;
 export const StyledTagGrid = styled.div`
   display: grid;
   grid-template-columns: auto auto;
   align-items: center;
+  height: ${({ theme }) => theme.space[10]};
 `;
 export const StyledBorderLeft = styled.div`
   border-left: 3px solid ${({ theme }) => theme.color.elementType.prop};

@@ -41,7 +41,7 @@ export const StyledSelect = styled(Select)<StyledSelect>`
   .react-select__control {
     width: ${({ width }) => getWidth(width)};
     max-width: 100%;
-    min-height: ${({ theme }) => theme.space[8]};
+    min-height: ${({ theme }) => theme.space[10]};
     border-width: 1px;
     border-style: solid;
     border-color: ${({ theme, suggester }) =>
@@ -104,6 +104,9 @@ export const StyledSelect = styled(Select)<StyledSelect>`
   }
   .react-select__indicator-separator {
     display: none;
+  }
+  .react-select__multi-value__label {
+    padding: 0.2rem;
   }
   // portal menu style is in global stylesheet
 `;
