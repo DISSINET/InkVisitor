@@ -97,13 +97,13 @@ export const LeftHeader: React.FC<LeftHeader> = React.memo(
           >
             {versionText}
           </StyledHeaderTag>
-          {/* <StyledFlexRow>
+          <StyledFlexRow>
             <StyledPingText style={{ marginLeft: "0.3rem" }}>
               {ping > -1 ? `Server connection latency:` : "Server is down"}
             </StyledPingText>
             <StyledPingColor pingColor={pingColor} />
             {ping > -1 && <StyledPingText>{ping}ms</StyledPingText>}
-          </StyledFlexRow> */}
+          </StyledFlexRow>
         </StyledFlexColumn>
       </StyledHeader>
     );

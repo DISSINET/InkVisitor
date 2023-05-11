@@ -90,7 +90,7 @@ export const App: React.FC = () => {
         refetchOnWindowFocus: false,
         retry: false,
         // TODO: disabling not working
-        enabled: ping !== -1,
+        // enabled: ping !== -1,
       },
     },
   });
