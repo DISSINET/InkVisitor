@@ -18,7 +18,7 @@ export default class Antonym
     this.order = data.order === undefined ? EntityEnums.Order.Last : data.order;
   }
 
-  static async getAntonymForwardConnections(
+  static async getForwardConnections(
     conn: Connection,
     entityId: string
   ): Promise<RelationTypes.IConnection<RelationTypes.IAntonym>[]> {

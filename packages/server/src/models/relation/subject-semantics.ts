@@ -1,7 +1,6 @@
 import { EntityEnums, RelationEnums } from "@shared/enums";
 import Relation from "./relation";
 import { Relation as RelationTypes } from "@shared/types";
-import { ModelNotValidError } from "@shared/types/errors";
 import { Connection } from "rethinkdb-ts";
 
 export default class SubjectSemantics
@@ -19,7 +18,7 @@ export default class SubjectSemantics
     this.order = data.order === undefined ? EntityEnums.Order.Last : data.order;
   }
 
-  static async getSubjectSemanticsForwardConnections(
+  static async getForwardConnections(
     conn: Connection,
     entityId: string,
     asClass: EntityEnums.Class
@@ -45,7 +44,7 @@ export default class SubjectSemantics
     return out;
   }
 
-  static async getSubjectSemanticsInverseConnections(
+  static async getInverseConnections(
     conn: Connection,
     parentId: string,
     asClass: EntityEnums.Class

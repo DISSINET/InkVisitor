@@ -41,9 +41,9 @@ export class UsedRelations implements RelationTypes.IUsedRelations {
   @nonenumerable
   entityClass: EntityEnums.Class;
   @nonenumerable
-  maxNestLvl: number = 3;
+  maxNestLvl = 3;
   @nonenumerable
-  maxListLen: number = 10;
+  maxListLen = 10;
 
   [RelationEnums.Type.Superclass]?: RelationTypes.IDetailType<ISuperclass>;
   [RelationEnums.Type
@@ -81,14 +81,14 @@ export class UsedRelations implements RelationTypes.IUsedRelations {
 
   async prepareSuperclasses(dbConn: Connection): Promise<void> {
     this[RelationEnums.Type.Superclass] = {
-      connections: await Superclass.getSuperclassForwardConnections(
+      connections: await Superclass.getForwardConnections(
         dbConn,
         this.entityId,
         this.entityClass,
         this.maxNestLvl,
         0
       ),
-      iConnections: await Superclass.getSuperclassInverseConnections(
+      iConnections: await Superclass.getInverseConnections(
         dbConn,
         this.entityId,
         this.entityClass
@@ -98,26 +98,24 @@ export class UsedRelations implements RelationTypes.IUsedRelations {
 
   async prepareSuperordinateLocations(dbConn: Connection): Promise<void> {
     this[RelationEnums.Type.SuperordinateLocation] = {
-      connections:
-        await SuperordinateLocation.getSuperordinateLocationForwardConnections(
-          dbConn,
-          this.entityId,
-          this.entityClass,
-          this.maxNestLvl,
-          0
-        ),
-      iConnections:
-        await SuperordinateLocation.getSuperordinateLocationInverseConnections(
-          dbConn,
-          this.entityId,
-          this.entityClass
-        ),
+      connections: await SuperordinateLocation.getForwardConnections(
+        dbConn,
+        this.entityId,
+        this.entityClass,
+        this.maxNestLvl,
+        0
+      ),
+      iConnections: await SuperordinateLocation.getInverseConnections(
+        dbConn,
+        this.entityId,
+        this.entityClass
+      ),
     };
   }
 
   async prepareSynonyms(dbConn: Connection): Promise<void> {
     this[RelationEnums.Type.Synonym] = {
-      connections: await Synonym.getSynonymForwardConnections(
+      connections: await Synonym.getForwardConnections(
         dbConn,
         this.entityId,
         this.entityClass
@@ -127,21 +125,18 @@ export class UsedRelations implements RelationTypes.IUsedRelations {
 
   async prepareAntonyms(dbConn: Connection): Promise<void> {
     this[RelationEnums.Type.Antonym] = {
-      connections: await Antonym.getAntonymForwardConnections(
-        dbConn,
-        this.entityId
-      ),
+      connections: await Antonym.getForwardConnections(dbConn, this.entityId),
     };
   }
 
   async prepareHolonyms(dbConn: Connection): Promise<void> {
     this[RelationEnums.Type.Holonym] = {
-      connections: await Holonym.getHolonymForwardConnections(
+      connections: await Holonym.getForwardConnections(
         dbConn,
         this.entityId,
         this.entityClass
       ),
-      iConnections: await Holonym.getHolonymInverseConnections(
+      iConnections: await Holonym.getInverseConnections(
         dbConn,
         this.entityId,
         this.entityClass
@@ -151,55 +146,51 @@ export class UsedRelations implements RelationTypes.IUsedRelations {
 
   async preparePropertyReciprocals(dbConn: Connection): Promise<void> {
     this[RelationEnums.Type.PropertyReciprocal] = {
-      connections:
-        await PropertyReciprocal.getPropertyReciprocalForwardConnections(
-          dbConn,
-          this.entityId,
-          this.entityClass
-        ),
+      connections: await PropertyReciprocal.getForwardConnections(
+        dbConn,
+        this.entityId,
+        this.entityClass
+      ),
     };
   }
 
   async prepareSubjectActant1Reciprocals(dbConn: Connection): Promise<void> {
     this[RelationEnums.Type.SubjectActant1Reciprocal] = {
-      connections:
-        await SubjectActant1Reciprocal.getSubjectActant1ReciprocalForwardConnections(
-          dbConn,
-          this.entityId,
-          this.entityClass
-        ),
+      connections: await SubjectActant1Reciprocal.getForwardConnections(
+        dbConn,
+        this.entityId,
+        this.entityClass
+      ),
     };
   }
 
   async prepareActionEventEquivalents(dbConn: Connection): Promise<void> {
     this[RelationEnums.Type.ActionEventEquivalent] = {
-      connections:
-        await ActionEventEquivalent.getActionEventEquivalentForwardConnections(
-          dbConn,
-          this.entityId,
-          this.entityClass,
-          this.maxNestLvl,
-          0
-        ),
-      iConnections:
-        await ActionEventEquivalent.getActionEventEquivalentInverseConnections(
-          dbConn,
-          this.entityId,
-          this.entityClass
-        ),
-    };
-  }
-
-  async prepareClassifications(dbConn: Connection): Promise<void> {
-    this[RelationEnums.Type.Classification] = {
-      connections: await Classification.getClassificationForwardConnections(
+      connections: await ActionEventEquivalent.getForwardConnections(
         dbConn,
         this.entityId,
         this.entityClass,
         this.maxNestLvl,
         0
       ),
-      iConnections: await Classification.getClassificationInverseConnections(
+      iConnections: await ActionEventEquivalent.getInverseConnections(
+        dbConn,
+        this.entityId,
+        this.entityClass
+      ),
+    };
+  }
+
+  async prepareClassifications(dbConn: Connection): Promise<void> {
+    this[RelationEnums.Type.Classification] = {
+      connections: await Classification.getForwardConnections(
+        dbConn,
+        this.entityId,
+        this.entityClass,
+        this.maxNestLvl,
+        0
+      ),
+      iConnections: await Classification.getInverseConnections(
         dbConn,
         this.entityId
       ),
@@ -208,7 +199,7 @@ export class UsedRelations implements RelationTypes.IUsedRelations {
 
   async prepareIdentifications(dbConn: Connection): Promise<void> {
     this[RelationEnums.Type.Identification] = {
-      connections: await Identification.getIdentificationForwardConnections(
+      connections: await Identification.getForwardConnections(
         dbConn,
         this.entityId,
         EntityEnums.Certainty.Empty,
@@ -220,12 +211,12 @@ export class UsedRelations implements RelationTypes.IUsedRelations {
 
   async prepareImplications(dbConn: Connection): Promise<void> {
     this[RelationEnums.Type.Implication] = {
-      connections: await Implication.getImplicationForwardConnections(
+      connections: await Implication.getForwardConnections(
         dbConn,
         this.entityId,
         this.entityClass
       ),
-      iConnections: await Implication.getImplicationInverseConnections(
+      iConnections: await Implication.getInverseConnections(
         dbConn,
         this.entityId,
         this.entityClass
@@ -235,58 +226,52 @@ export class UsedRelations implements RelationTypes.IUsedRelations {
 
   async prepareSubjectSemantics(dbConn: Connection): Promise<void> {
     this[RelationEnums.Type.SubjectSemantics] = {
-      connections: await SubjectSemantics.getSubjectSemanticsForwardConnections(
+      connections: await SubjectSemantics.getForwardConnections(
         dbConn,
         this.entityId,
         this.entityClass
       ),
-      iConnections:
-        await SubjectSemantics.getSubjectSemanticsInverseConnections(
-          dbConn,
-          this.entityId,
-          this.entityClass
-        ),
+      iConnections: await SubjectSemantics.getInverseConnections(
+        dbConn,
+        this.entityId,
+        this.entityClass
+      ),
     };
   }
 
   async prepareActant1Semantics(dbConn: Connection): Promise<void> {
     this[RelationEnums.Type.Actant1Semantics] = {
-      connections: await Actant1Semantics.getActant1SemanticsForwardConnections(
+      connections: await Actant1Semantics.getForwardConnections(
         dbConn,
         this.entityId,
         this.entityClass
       ),
-      iConnections:
-        await Actant1Semantics.getActant1SemanticsInverseConnections(
-          dbConn,
-          this.entityId,
-          this.entityClass
-        ),
+      iConnections: await Actant1Semantics.getInverseConnections(
+        dbConn,
+        this.entityId,
+        this.entityClass
+      ),
     };
   }
 
   async prepareActant2Semantics(dbConn: Connection): Promise<void> {
     this[RelationEnums.Type.Actant2Semantics] = {
-      connections: await Actant2Semantics.getActant2SemanticsForwardConnections(
+      connections: await Actant2Semantics.getForwardConnections(
         dbConn,
         this.entityId,
         this.entityClass
       ),
-      iConnections:
-        await Actant2Semantics.getActant2SemanticsInverseConnections(
-          dbConn,
-          this.entityId,
-          this.entityClass
-        ),
+      iConnections: await Actant2Semantics.getInverseConnections(
+        dbConn,
+        this.entityId,
+        this.entityClass
+      ),
     };
   }
 
   async prepareRelateds(dbConn: Connection): Promise<void> {
     this[RelationEnums.Type.Related] = {
-      connections: await Related.getRelatedForwardConnections(
-        dbConn,
-        this.entityId
-      ),
+      connections: await Related.getForwardConnections(dbConn, this.entityId),
     };
   }
 

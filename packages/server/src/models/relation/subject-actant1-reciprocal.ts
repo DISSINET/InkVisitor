@@ -16,7 +16,7 @@ export default class SubjectActant1Reciprocal
     this.type = RelationEnums.Type.SubjectActant1Reciprocal;
   }
 
-  static async getSubjectActant1ReciprocalForwardConnections(
+  static async getForwardConnections(
     conn: Connection,
     entityId: string,
     asClass: EntityEnums.Class

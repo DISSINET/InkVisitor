@@ -2,7 +2,6 @@ import { EntityEnums, RelationEnums } from "@shared/enums";
 import Relation from "./relation";
 import { Relation as RelationTypes } from "@shared/types";
 import { Connection } from "rethinkdb-ts";
-import { ModelNotValidError } from "@shared/types/errors";
 
 export default class Implication
   extends Relation
@@ -19,7 +18,7 @@ export default class Implication
     this.order = data.order === undefined ? EntityEnums.Order.Last : data.order;
   }
 
-  static async getImplicationForwardConnections(
+  static async getForwardConnections(
     conn: Connection,
     entityId: string,
     asClass: EntityEnums.Class
@@ -45,7 +44,7 @@ export default class Implication
     return out;
   }
 
-  static async getImplicationInverseConnections(
+  static async getInverseConnections(
     conn: Connection,
     parentId: string,
     asClass: EntityEnums.Class

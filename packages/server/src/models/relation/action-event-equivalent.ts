@@ -3,7 +3,6 @@ import Relation from "./relation";
 import { Relation as RelationTypes } from "@shared/types";
 import { Connection } from "rethinkdb-ts";
 import Superclass from "./superclass";
-import { ModelNotValidError } from "@shared/types/errors";
 
 export default class ActionEventEquivalent
   extends Relation
@@ -18,7 +17,7 @@ export default class ActionEventEquivalent
     this.type = RelationEnums.Type.ActionEventEquivalent;
   }
 
-  static async getActionEventEquivalentForwardConnections(
+  static async getForwardConnections(
     conn: Connection,
     entityId: string,
     asClass: EntityEnums.Class,
@@ -60,7 +59,7 @@ export default class ActionEventEquivalent
         subtrees: [],
       };
 
-      connection.subtrees = await Superclass.getSuperclassForwardConnections(
+      connection.subtrees = await Superclass.getForwardConnections(
         conn,
         subparentId,
         EntityEnums.Class.Concept,
@@ -74,7 +73,7 @@ export default class ActionEventEquivalent
     return out;
   }
 
-  static async getActionEventEquivalentInverseConnections(
+  static async getInverseConnections(
     conn: Connection,
     parentId: string,
     asClass: EntityEnums.Class

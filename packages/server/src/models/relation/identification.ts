@@ -36,7 +36,7 @@ export default class Identification
     return true;
   }
 
-  static async getIdentificationForwardConnections(
+  static async getForwardConnections(
     conn: Connection,
     entityId: string,
     requiredCertainty: EntityEnums.Certainty,
@@ -81,14 +81,13 @@ export default class Identification
           relation.certainty === EntityEnums.Certainty.Certain
             ? EntityEnums.Certainty.Certain
             : EntityEnums.Certainty.Empty;
-        connection.subtrees =
-          await Identification.getIdentificationForwardConnections(
-            conn,
-            subparentId,
-            nextThreshold,
-            maxNestLvl,
-            nestLvl + 1
-          );
+        connection.subtrees = await Identification.getForwardConnections(
+          conn,
+          subparentId,
+          nextThreshold,
+          maxNestLvl,
+          nestLvl + 1
+        );
       }
 
       out.push(connection);

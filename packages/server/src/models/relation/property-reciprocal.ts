@@ -16,7 +16,7 @@ export default class PropertyReciprocal
     this.type = RelationEnums.Type.PropertyReciprocal;
   }
 
-  static async getPropertyReciprocalForwardConnections(
+  static async getForwardConnections(
     conn: Connection,
     entityId: string,
     asClass: EntityEnums.Class

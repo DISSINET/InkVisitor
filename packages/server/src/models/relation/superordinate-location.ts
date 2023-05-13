@@ -18,7 +18,7 @@ export default class SuperordinateLocation
     this.order = data.order === undefined ? EntityEnums.Order.Last : data.order;
   }
 
-  static async getSuperordinateLocationForwardConnections(
+  static async getForwardConnections(
     conn: Connection,
     parentId: string,
     asClass: EntityEnums.Class,
@@ -58,14 +58,13 @@ export default class SuperordinateLocation
             subtrees: [],
           };
 
-        connection.subtrees =
-          await SuperordinateLocation.getSuperordinateLocationForwardConnections(
-            conn,
-            subparentId,
-            asClass,
-            maxNestLvl,
-            nestLvl + 1
-          );
+        connection.subtrees = await SuperordinateLocation.getForwardConnections(
+          conn,
+          subparentId,
+          asClass,
+          maxNestLvl,
+          nestLvl + 1
+        );
 
         out.push(connection);
       }
@@ -74,7 +73,7 @@ export default class SuperordinateLocation
     return out;
   }
 
-  static async getSuperordinateLocationInverseConnections(
+  static async getInverseConnections(
     conn: Connection,
     parentId: string,
     asClass: EntityEnums.Class

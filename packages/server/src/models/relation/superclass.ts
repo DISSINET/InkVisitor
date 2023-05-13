@@ -19,7 +19,7 @@ export default class Superclass
     this.order = data.order === undefined ? EntityEnums.Order.Last : data.order;
   }
 
-  static async getSuperclassForwardConnections(
+  static async getForwardConnections(
     conn: Connection,
     parentId: string,
     asClass: EntityEnums.Class,
@@ -67,7 +67,7 @@ export default class Superclass
         subtrees: [],
       };
 
-      connection.subtrees = await Superclass.getSuperclassForwardConnections(
+      connection.subtrees = await Superclass.getForwardConnections(
         conn,
         subparentId,
         EntityEnums.Class.Concept,
@@ -80,7 +80,7 @@ export default class Superclass
     return out;
   }
 
-  static async getSuperclassInverseConnections(
+  static async getInverseConnections(
     conn: Connection,
     parentId: string,
     asClass: EntityEnums.Class
