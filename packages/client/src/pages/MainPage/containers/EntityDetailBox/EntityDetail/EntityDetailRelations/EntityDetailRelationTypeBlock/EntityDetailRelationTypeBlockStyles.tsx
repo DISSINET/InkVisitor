@@ -67,4 +67,5 @@ interface StyledEntityDetailRelationGraph {
 export const StyledEntityDetailRelationGraph = styled.div<StyledEntityDetailRelationGraph>`
   display: block;
   height: ${({ theme, height }) => (height ? `${height}px` : "500px")};
+  margin-bottom: ${({ theme }) => theme.space[12]};
 `;

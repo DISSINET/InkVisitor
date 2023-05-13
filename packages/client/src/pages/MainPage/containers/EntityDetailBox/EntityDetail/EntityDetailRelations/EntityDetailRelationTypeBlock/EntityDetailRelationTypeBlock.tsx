@@ -189,7 +189,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
   >([]);
 
   if (relationType === RelationEnums.Type.Classification) {
-    console.log(currentRelations);
+    //console.log(currentRelations);
   }
 
   const moveRow = useCallback(
