@@ -18,6 +18,7 @@ import { EntityDetailRelationRow } from "./EntityDetailRelationRow/EntityDetailR
 import {
   StyledLabel,
   StyledLabelSuggester,
+  StyledRelationBlock,
   StyledRelationValues,
   StyledSuggesterWrapper,
 } from "./EntityDetailRelationTypeBlockStyles";
@@ -236,37 +237,13 @@ export const EntityDetailRelationTypeBlock: React.FC<
   const hasSuggester = isMultiple || selectedRelations.length < 1;
 
   return (
-    <>
+    <StyledRelationBlock>
       {/* Type column */}
 
       {/* Label & Suggester column */}
       <div>
         <EntityDetailRelationTypeIcon relationType={relationType} />
-        <StyledLabelSuggester>
-          {/* <StyledLabel>{relationRule.label}</StyledLabel> */}
-          {hasSuggester && (
-            <StyledSuggesterWrapper>
-              <EntitySuggester
-                inputWidth={80}
-                disableTemplatesAccept
-                categoryTypes={
-                  getCategoryTypes() ||
-                  ([EntityEnums.Extension.NoClass] as [
-                    EntityEnums.ExtendedClass
-                  ])
-                }
-                onSelected={(selectedId: string) => {
-                  if (isCloudType) {
-                    setTempCloudEntityId(selectedId);
-                  } else {
-                    handleMultiSelected(selectedId);
-                  }
-                }}
-                excludedActantIds={usedEntityIds}
-              />
-            </StyledSuggesterWrapper>
-          )}
-        </StyledLabelSuggester>
+
         {/* Values column */}
         <StyledRelationValues hasSuggester={hasSuggester}>
           {currentRelations.map((relation, key) =>
@@ -298,6 +275,32 @@ export const EntityDetailRelationTypeBlock: React.FC<
             )
           )}
         </StyledRelationValues>
+
+        <StyledLabelSuggester>
+          {/* <StyledLabel>{relationRule.label}</StyledLabel> */}
+          {hasSuggester && (
+            <StyledSuggesterWrapper>
+              <EntitySuggester
+                inputWidth={80}
+                disableTemplatesAccept
+                categoryTypes={
+                  getCategoryTypes() ||
+                  ([EntityEnums.Extension.NoClass] as [
+                    EntityEnums.ExtendedClass
+                  ])
+                }
+                onSelected={(selectedId: string) => {
+                  if (isCloudType) {
+                    setTempCloudEntityId(selectedId);
+                  } else {
+                    handleMultiSelected(selectedId);
+                  }
+                }}
+                excludedActantIds={usedEntityIds}
+              />
+            </StyledSuggesterWrapper>
+          )}
+        </StyledLabelSuggester>
       </div>
       <div>
         {relationType === RelationEnums.Type.Classification && (
@@ -312,6 +315,6 @@ export const EntityDetailRelationTypeBlock: React.FC<
           />
         )}
       </div>
-    </>
+    </StyledRelationBlock>
   );
 };

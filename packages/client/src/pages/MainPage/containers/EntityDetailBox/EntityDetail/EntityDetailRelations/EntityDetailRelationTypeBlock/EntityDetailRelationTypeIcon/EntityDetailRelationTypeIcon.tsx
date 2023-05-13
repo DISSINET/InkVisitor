@@ -18,12 +18,12 @@ export const EntityDetailRelationTypeIcon: React.FC<
   return (
     <StyledRelationType>
       <LetterIcon letter={relationType} color="info" />
+      <StyledLabel>{relationRule.label}</StyledLabel>
       {relationRule.inverseLabel ? (
         <TbArrowsHorizontal color={theme.color["info"]} />
       ) : (
         <TbArrowNarrowRight color={theme.color["info"]} />
       )}
-      <StyledLabel>{relationRule.label}</StyledLabel>
     </StyledRelationType>
   );
 };

@@ -55,3 +55,16 @@ export const StyledRelationValues = styled.div<StyledRelationValues>`
 export const StyledSuggesterWrapper = styled.div`
   margin-top: ${({ theme }) => theme.space[1]};
 `;
+
+export const StyledRelationBlock = styled.div`
+  margin-top: ${({ theme }) => theme.space[4]};
+`;
+
+interface StyledEntityDetailRelationGraph {
+  height?: number;
+}
+
+export const StyledEntityDetailRelationGraph = styled.div<StyledEntityDetailRelationGraph>`
+  display: block;
+  height: ${({ theme, height }) => (height ? `${height}px` : "500px")};
+`;

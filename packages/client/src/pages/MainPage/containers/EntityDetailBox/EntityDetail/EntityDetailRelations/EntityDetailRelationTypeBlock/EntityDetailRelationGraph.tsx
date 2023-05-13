@@ -2,7 +2,10 @@ import { RelationEnums } from "@shared/enums";
 import { IEntity, IResponseDetail, Relation } from "@shared/types";
 import ReactFlow from "reactflow";
 import "reactflow/dist/style.css";
-import React from "react";
+
+import { StyledEntityDetailRelationGraph } from "./EntityDetailRelationTypeBlockStyles";
+import React, { useState } from "react";
+import { Button } from "components";
 
 interface Node {
   id: string;
@@ -86,11 +89,29 @@ export const EntityDetailRelationGraph: React.FC<EntityDetailRelationGraph> = ({
   entities,
   relations,
 }) => {
+  const [open, setOpen] = useState<boolean>(true);
+
+  const handleSetOpen = () => {
+    setOpen(!open);
+  };
+  const [height, setHeight] = useState<number>(500);
+
   const { nodes, edges } = convertToGraph(relations);
   return (
-    <div>
+    <StyledEntityDetailRelationGraph height={open ? height : 50}>
+      <Button
+        onClick={handleSetOpen}
+        label={open ? "hide graph" : "open graph"}
+      />
       {/* {JSON.stringify(relations)} */}
-      <ReactFlow nodes={nodes} edges={edges} fitView />
-    </div>
+      {open && (
+        <ReactFlow
+          nodes={nodes}
+          edges={edges}
+          fitView
+          style={{ backgroundColor: "white" }}
+        />
+      )}
+    </StyledEntityDetailRelationGraph>
   );
 };
