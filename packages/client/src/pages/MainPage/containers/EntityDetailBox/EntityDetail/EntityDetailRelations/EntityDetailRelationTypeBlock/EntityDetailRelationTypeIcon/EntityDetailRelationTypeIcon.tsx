@@ -5,6 +5,7 @@ import React from "react";
 import { TbArrowsHorizontal, TbArrowNarrowRight } from "react-icons/tb";
 import theme from "Theme/theme";
 import { StyledRelationType } from "./EntityDetailRelationTypeIconStyles";
+import { StyledLabel } from "../EntityDetailRelationTypeBlockStyles";
 
 interface EntityDetailRelationTypeIcon {
   relationType: RelationEnums.Type;
@@ -22,6 +23,7 @@ export const EntityDetailRelationTypeIcon: React.FC<
       ) : (
         <TbArrowNarrowRight color={theme.color["info"]} />
       )}
+      <StyledLabel>{relationRule.label}</StyledLabel>
     </StyledRelationType>
   );
 };

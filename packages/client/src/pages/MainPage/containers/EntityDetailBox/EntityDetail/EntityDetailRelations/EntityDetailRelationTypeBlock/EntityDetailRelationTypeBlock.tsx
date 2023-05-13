@@ -22,6 +22,7 @@ import {
   StyledSuggesterWrapper,
 } from "./EntityDetailRelationTypeBlockStyles";
 import { EntityDetailRelationTypeIcon } from "./EntityDetailRelationTypeIcon/EntityDetailRelationTypeIcon";
+import { EntityDetailRelationGraph } from "./EntityDetailRelationGraph";
 
 // relations for one type
 interface EntityDetailRelationTypeBlock {
@@ -186,6 +187,10 @@ export const EntityDetailRelationTypeBlock: React.FC<
     Relation.IRelation[]
   >([]);
 
+  if (relationType === RelationEnums.Type.Classification) {
+    console.log(currentRelations);
+  }
+
   const moveRow = useCallback(
     (dragIndex: number, hoverIndex: number) => {
       const dragRecord = currentRelations[dragIndex];
@@ -233,11 +238,12 @@ export const EntityDetailRelationTypeBlock: React.FC<
   return (
     <>
       {/* Type column */}
-      <EntityDetailRelationTypeIcon relationType={relationType} />
+
       {/* Label & Suggester column */}
       <div>
+        <EntityDetailRelationTypeIcon relationType={relationType} />
         <StyledLabelSuggester>
-          <StyledLabel>{relationRule.label}</StyledLabel>
+          {/* <StyledLabel>{relationRule.label}</StyledLabel> */}
           {hasSuggester && (
             <StyledSuggesterWrapper>
               <EntitySuggester
@@ -292,6 +298,19 @@ export const EntityDetailRelationTypeBlock: React.FC<
             )
           )}
         </StyledRelationValues>
+      </div>
+      <div>
+        {relationType === RelationEnums.Type.Classification && (
+          <EntityDetailRelationGraph
+            entities={entities}
+            relations={
+              currentRelations as Relation.IConnection<Relation.IClassification>[]
+            }
+            relationType={relationType}
+            entity={entity}
+            relationRule={relationRule}
+          />
+        )}
       </div>
     </>
   );

@@ -90,6 +90,8 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
     { enabled: !!detailId && api.isLoggedIn() }
   );
 
+  console.log(entity);
+
   useEffect(() => {
     if (error && (error as any).message === "unknown class for entity") {
       removeDetailId(detailId);

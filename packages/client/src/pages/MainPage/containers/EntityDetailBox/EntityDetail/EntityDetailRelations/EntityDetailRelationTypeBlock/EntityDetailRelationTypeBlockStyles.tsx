@@ -43,7 +43,7 @@ export const StyledLabelSuggester = styled.div`
 `;
 export const StyledLabel = styled.div`
   color: ${({ theme }) => theme.color["info"]};
-  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  font-size: ${({ theme }) => theme.fontSize["s"]};
 `;
 interface StyledRelationValues {
   hasSuggester: boolean;
