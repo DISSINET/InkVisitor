@@ -69,3 +69,9 @@ export const StyledEntityDetailRelationGraph = styled.div<StyledEntityDetailRela
   height: ${({ theme, height }) => (height ? `${height}px` : "500px")};
   margin-bottom: ${({ theme }) => theme.space[12]};
 `;
+
+export const StyledEntityDetailRelationGraphButton = styled.div<StyledEntityDetailRelationGraph>`
+  position: relative;
+  top: ${({ theme }) => theme.space[8]};
+  z-index: 1500;
+`;

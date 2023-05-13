@@ -3,22 +3,27 @@ import { IEntity, IResponseDetail, Relation } from "@shared/types";
 import ReactFlow, {
   Background,
   Controls,
+  Handle,
   MiniMap,
   Position,
   ReactFlowInstance,
 } from "reactflow";
 import "reactflow/dist/style.css";
 
-import { StyledEntityDetailRelationGraph } from "./EntityDetailRelationTypeBlockStyles";
-import React, { useEffect, useMemo, useState } from "react";
+import {
+  StyledEntityDetailRelationGraph,
+  StyledEntityDetailRelationGraphButton,
+} from "./EntityDetailRelationTypeBlockStyles";
+import React, { memo, useEffect, useMemo, useState } from "react";
 import { Button } from "components";
+import { EntityTag } from "components/advanced";
 
 interface Node {
   id: string;
   type: string;
   position: { x: number; y: number };
   data: {
-    label: string;
+    entity: IResponseDetail;
     level: number;
   };
   sourcePosition: Position;
@@ -36,6 +41,24 @@ interface Graph {
   edges: Edge[];
 }
 
+const EntityNode: React.FC<{
+  data: { entity: IResponseDetail; level: number };
+}> = ({ data }) => {
+  return (
+    <>
+      <Handle type="source" position={Position.Right} />
+      <div>
+        <EntityTag entity={data.entity} />
+      </div>
+      <Handle type="target" position={Position.Left} />
+    </>
+  );
+};
+
+const nodeTypes = {
+  entityNode: EntityNode,
+};
+
 const convertToGraph = (
   entity: IResponseDetail,
   relations: Relation.IConnection<Relation.IClassification>[],
@@ -44,7 +67,8 @@ const convertToGraph = (
   const nodes: Node[] = [];
   const edges: Edge[] = [];
 
-  console.log(relations);
+  const nodeW = 120;
+  const nodeH = 50;
 
   const levelNodes: Record<string, number> = {};
   const addNode = (entityId: string, level: number) => {
@@ -56,11 +80,13 @@ const convertToGraph = (
       }
       levelNodes[sLevel] += 1;
 
+      const entity = entities[entityId];
+
       nodes.push({
         id: entityId,
-        type: "default",
-        data: { label: entityId, level: level },
-        position: { x: level * 200, y: 0 },
+        type: "entityNode",
+        data: { entity: entity, level: level },
+        position: { x: level * nodeW, y: 0 },
         sourcePosition: Position.Right,
         targetPosition: Position.Left,
       });
@@ -98,7 +124,6 @@ const convertToGraph = (
 
   const maxOnLevel = Math.max(...Object.values(levelNodes));
 
-  const nodeW = 60;
   const processedLevels: Record<string, number> = {};
   const nodesWithY: Node[] = nodes.map((node) => {
     const nodeLevel = node.data.level;
@@ -112,7 +137,7 @@ const convertToGraph = (
     const p = processedLevels[nodeSLevel];
     const a = levelNodes[nodeSLevel];
 
-    const newY = (p - (a + 1) / 2) * nodeW;
+    const newY = (p - (a + 1) / 2) * nodeH;
 
     return {
       ...node,
@@ -122,7 +147,7 @@ const convertToGraph = (
     };
   });
 
-  return { nodes: nodesWithY, edges, maxHeight: maxOnLevel * nodeW };
+  return { nodes: nodesWithY, edges, maxHeight: maxOnLevel * nodeH };
 };
 
 interface EntityDetailRelationGraph {
@@ -157,16 +182,19 @@ export const EntityDetailRelationGraph: React.FC<EntityDetailRelationGraph> = ({
 
   return (
     <StyledEntityDetailRelationGraph height={open ? height : 50}>
-      <Button
-        onClick={handleSetOpen}
-        label={open ? "hide graph" : "open graph"}
-      />
+      <StyledEntityDetailRelationGraphButton style={{ position: "relative" }}>
+        <Button
+          onClick={handleSetOpen}
+          label={open ? "hide graph" : "open graph"}
+        />
+      </StyledEntityDetailRelationGraphButton>
       {/* {JSON.stringify(relations)} */}
       {open && (
         <ReactFlow
           nodes={nodes}
           edges={edges}
           style={{ backgroundColor: "white" }}
+          nodeTypes={nodeTypes}
           nodesDraggable={false}
           nodesConnectable={false}
           nodesFocusable={false}
