@@ -2,13 +2,15 @@ import styled from "styled-components";
 import { Colors } from "types";
 
 interface StyledCircle {
-  color: typeof Colors[number];
+  color: (typeof Colors)[number];
+  bgColor: (typeof Colors)[number];
   size: number;
 }
 export const StyledCircle = styled.div<StyledCircle>`
   border: 2px solid;
   border-color: ${({ theme, color }) => theme.color[color]};
   border-radius: 5rem;
+  background-color: ${({ theme, bgColor }) => theme.color[bgColor]};
   display: inline-flex;
   justify-content: center;
   align-items: center;
@@ -21,7 +23,7 @@ export const StyledCircle = styled.div<StyledCircle>`
 
 interface StyledLetter {
   size: number;
-  color: typeof Colors[number];
+  color: (typeof Colors)[number];
 }
 export const StyledLetter = styled.p<StyledLetter>`
   font-size: ${({ theme }) => theme.fontSize["xxs"]};

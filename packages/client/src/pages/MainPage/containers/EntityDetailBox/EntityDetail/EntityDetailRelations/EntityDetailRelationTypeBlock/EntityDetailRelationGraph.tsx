@@ -10,6 +10,10 @@ import ReactFlow, {
   MarkerType,
   Edge,
   Node,
+  EdgeProps,
+  getBezierPath,
+  EdgeLabelRenderer,
+  EdgeTypes,
 } from "reactflow";
 import "reactflow/dist/style.css";
 
@@ -18,8 +22,9 @@ import {
   StyledEntityDetailRelationGraphButton,
 } from "./EntityDetailRelationTypeBlockStyles";
 import React, { memo, useEffect, useMemo, useState } from "react";
-import { Button } from "components";
+import { Button, LetterIcon } from "components";
 import { EntityTag } from "components/advanced";
+import { EntityDetailRelationTypeIcon } from "./EntityDetailRelationTypeIcon/EntityDetailRelationTypeIcon";
 
 interface Graph {
   nodes: Node[];
@@ -41,8 +46,51 @@ const EntityNode: React.FC<{
   );
 };
 
+const RelationshipEdge: React.FC<EdgeProps> = ({
+  id,
+  sourceX,
+  sourceY,
+  targetX,
+  targetY,
+  sourcePosition,
+  targetPosition,
+  data,
+}) => {
+  const [edgePath, labelX, labelY] = getBezierPath({
+    sourceX,
+    sourceY,
+    sourcePosition,
+    targetX,
+    targetY,
+    targetPosition,
+  });
+
+  const scaleLabel = 0.5;
+
+  return (
+    <>
+      <path id={id} className="react-flow__edge-path" d={edgePath} />
+      <EdgeLabelRenderer>
+        <div
+          style={{
+            position: "absolute",
+            transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px) scale(${scaleLabel},${scaleLabel})`,
+          }}
+          className="nodrag nopan"
+        >
+          <LetterIcon size={6} letter={data.relationType} color="info" />
+        </div>
+      </EdgeLabelRenderer>
+    </>
+  );
+};
+
 const nodeTypes = {
   entityNode: EntityNode,
+};
+
+const edgeTypes: EdgeTypes = {
+  relationship: RelationshipEdge,
 };
 
 const convertToGraph = (
@@ -59,7 +107,6 @@ const convertToGraph = (
   const levelNodes: Record<string, number> = {};
   const addNode = (entityId: string, level: number) => {
     if (!nodes.map((n) => n.id).includes(entityId)) {
-      console.log(entityId, level);
       const sLevel = String(level);
       if (!Object.keys(levelNodes).includes(sLevel)) {
         levelNodes[sLevel] = 0;
@@ -83,7 +130,11 @@ const convertToGraph = (
     if (!edges.find((e) => e.source === sourceId && e.target === targetId)) {
       edges.push({
         id: String(edges.length),
+        type: "relationship",
         markerEnd: "arrowhead",
+        data: {
+          relationType: RelationEnums.Type.Superclass,
+        },
         style: {
           strokeWidth: 1,
           stroke: "black",
@@ -206,6 +257,7 @@ export const EntityDetailRelationGraph: React.FC<EntityDetailRelationGraph> = ({
           edges={edges}
           style={{ backgroundColor: "white" }}
           nodeTypes={nodeTypes}
+          edgeTypes={edgeTypes}
           nodesDraggable={true}
           nodesConnectable={false}
           nodesFocusable={false}
