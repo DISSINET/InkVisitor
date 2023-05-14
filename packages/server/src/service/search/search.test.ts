@@ -2,11 +2,13 @@ import "ts-jest";
 import { Db } from "@service/RethinkDB";
 import AdvancedSearch from "./search";
 import { Search } from "@shared/types/search";
-import { EntityEnums } from "@shared/enums";
+import { EntityEnums, RelationEnums } from "@shared/enums";
 import { SearchEdge, SearchNode } from ".";
 import { deleteEntities, getEntitiesDataByClass } from "@service/shorthands";
 import { prepareEntity } from "@models/entity/entity.test";
 import { clean } from "@modules/common.test";
+import Entity from "@models/entity/entity";
+import { prepareRelation } from "@models/relation/relation.test";
 
 const mockSearch = (rootType: Search.NodeType): AdvancedSearch => {
   return new AdvancedSearch({
@@ -126,20 +128,22 @@ describe("test AdvancedSearch", () => {
     const wantedClass = EntityEnums.Class.Territory;
     const [, entity1] = prepareEntity(wantedClass);
     const [, entity2] = prepareEntity(wantedClass);
-    entity1.label = `${entity1.id}-label`;
-    entity2.label = `${entity2.id}-label`;
+    const [, cEntity] = prepareEntity(EntityEnums.Class.Concept);
+    const [, cRel1] = prepareRelation(RelationEnums.Type.Classification);
+    const [, cRel2] = prepareRelation(RelationEnums.Type.Classification);
+    cRel1.entityIds = [entity1.id, cEntity.id];
+    cRel2.entityIds = [entity2.id, cEntity.id];
 
     beforeAll(async () => {
       await entity1.save(db.connection);
       await entity2.save(db.connection);
+      await cEntity.save(db.connection);
+      await cRel1.save(db.connection);
+      await cRel2.save(db.connection);
     });
 
     it("should return all prepared T entities when searching by class param", async () => {
       const search = mockSearch(Search.NodeType.S);
-      search.root.addEdge({
-        logic: Search.EdgeLogic.Positive,
-        type: Search.EdgeType.SUnderT,
-      });
       search.root.params = { classes: [wantedClass] };
       await search.run(db.connection);
       expect(search.results).toBeTruthy();
@@ -164,6 +168,42 @@ describe("test AdvancedSearch", () => {
       }
       expect(search.results.length).toEqual(1);
       expect(search.results[0].id).toEqual(entity1.id);
+    });
+
+    it("should return both entities for XHasClassification edge", async () => {
+      const search = mockSearch(Search.NodeType.X);
+      const edge = search.root.addEdge({
+        logic: Search.EdgeLogic.Positive,
+        type: Search.EdgeType.XHasClassification,
+      });
+      edge.node = new SearchNode({
+        type: Search.NodeType.C,
+      });
+      await search.run(db.connection);
+      expect(search.results).toBeTruthy();
+      if (!search.results) {
+        return;
+      }
+      expect(search.results).toHaveLength(2);
+    });
+
+    it("should return one entity for XHasClassification edge + node param", async () => {
+      const search = mockSearch(Search.NodeType.X);
+      const edge = search.root.addEdge({
+        logic: Search.EdgeLogic.Positive,
+        type: Search.EdgeType.XHasClassification,
+      });
+      edge.node = new SearchNode({
+        type: Search.NodeType.C,
+      });
+      search.root.params.label = entity2.label;
+
+      await search.run(db.connection);
+      expect(search.results).toBeTruthy();
+      if (!search.results) {
+        return;
+      }
+      expect(search.results).toHaveLength(1);
     });
   });
 });
