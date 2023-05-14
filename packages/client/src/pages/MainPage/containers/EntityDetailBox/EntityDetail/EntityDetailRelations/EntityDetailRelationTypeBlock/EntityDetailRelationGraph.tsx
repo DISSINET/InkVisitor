@@ -7,6 +7,9 @@ import ReactFlow, {
   MiniMap,
   Position,
   ReactFlowInstance,
+  MarkerType,
+  Edge,
+  Node,
 } from "reactflow";
 import "reactflow/dist/style.css";
 
@@ -17,24 +20,6 @@ import {
 import React, { memo, useEffect, useMemo, useState } from "react";
 import { Button } from "components";
 import { EntityTag } from "components/advanced";
-
-interface Node {
-  id: string;
-  type: string;
-  position: { x: number; y: number };
-  data: {
-    entity: IResponseDetail;
-    level: number;
-  };
-  sourcePosition: Position;
-  targetPosition: Position;
-}
-
-interface Edge {
-  id: string;
-  source: string;
-  target: string;
-}
 
 interface Graph {
   nodes: Node[];
@@ -49,6 +34,7 @@ const EntityNode: React.FC<{
       <Handle type="source" position={Position.Right} />
       <div>
         <EntityTag entity={data.entity} />
+        <div className="custom-drag-handle"></div>
       </div>
       <Handle type="target" position={Position.Left} />
     </>
@@ -89,6 +75,7 @@ const convertToGraph = (
         position: { x: level * nodeW, y: 0 },
         sourcePosition: Position.Right,
         targetPosition: Position.Left,
+        dragHandle: ".custom-drag-handle",
       });
     }
   };
@@ -96,6 +83,11 @@ const convertToGraph = (
     if (!edges.find((e) => e.source === sourceId && e.target === targetId)) {
       edges.push({
         id: String(edges.length),
+        markerEnd: "arrowhead",
+        style: {
+          strokeWidth: 1,
+          stroke: "black",
+        },
         source: sourceId,
         target: targetId,
       });
@@ -182,6 +174,25 @@ export const EntityDetailRelationGraph: React.FC<EntityDetailRelationGraph> = ({
 
   return (
     <StyledEntityDetailRelationGraph height={open ? height : 50}>
+      <div style={{ position: "absolute", top: 0, left: 0 }}>
+        <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker
+              id="arrowhead"
+              viewBox="0 0 6 6"
+              refX="6"
+              refY="3"
+              markerUnits="strokeWidth"
+              markerWidth="6"
+              markerHeight="6"
+              orient="auto-start-reverse"
+            >
+              <path d="M 0 0 L 6 3 L 0 6 z" fill="black" />
+            </marker>
+          </defs>
+        </svg>
+      </div>
+
       <StyledEntityDetailRelationGraphButton style={{ position: "relative" }}>
         <Button
           onClick={handleSetOpen}
@@ -195,7 +206,7 @@ export const EntityDetailRelationGraph: React.FC<EntityDetailRelationGraph> = ({
           edges={edges}
           style={{ backgroundColor: "white" }}
           nodeTypes={nodeTypes}
-          nodesDraggable={false}
+          nodesDraggable={true}
           nodesConnectable={false}
           nodesFocusable={false}
           edgesFocusable={false}
