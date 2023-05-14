@@ -1,11 +1,11 @@
+import { IEntity } from "@shared/types";
 import { SearchEdgeTypesInvalid } from "@shared/types/errors";
 import { Search } from "@shared/types/search";
 import { Connection } from "rethinkdb-ts";
-import { SearchEdge, SearchNode } from ".";
+import { Results, SearchEdge, SearchNode } from ".";
 
 export default class AdvancedSearch {
   root: SearchNode;
-  results: any[] | null = null;
 
   constructor(data: Partial<Search.INode>) {
     this.root = new SearchNode(data);
@@ -15,11 +15,11 @@ export default class AdvancedSearch {
    * Calls the whole search tree with additional validation
    * @param db Connection
    */
-  async run(db: Connection): Promise<void> {
+  async run(db: Connection): Promise<Results<IEntity>> {
     if (!this.root.isValid()) {
       throw new SearchEdgeTypesInvalid();
     }
-    this.results = (await this.root.run(db)) as any;
+    return await this.root.run(db);
   }
 
   /**

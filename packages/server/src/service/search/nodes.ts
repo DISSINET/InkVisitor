@@ -1,7 +1,7 @@
 import Entity from "@models/entity/entity";
-import { Search } from "@shared/types";
+import { IEntity, Search } from "@shared/types";
 import { Connection, r, RDatum, RStream } from "rethinkdb-ts";
-import { SearchEdge } from ".";
+import { Results, SearchEdge } from ".";
 import Edge, { getEdgeInstance } from "./edge";
 
 type Validation = Record<Search.EdgeType, [Search.NodeType, Search.NodeType]>;
@@ -34,7 +34,7 @@ export default class SearchNode implements Search.INode {
   params: Search.INodeParams;
   operator: Search.NodeOperator;
   edges: Edge[];
-  results: any;
+  results: Results<IEntity>;
 
   constructor(data: Partial<Search.INode>) {
     this.type = data.type || ("" as Search.NodeType);
@@ -43,6 +43,7 @@ export default class SearchNode implements Search.INode {
     this.edges = data.edges
       ? data.edges.map((edgeData) => new SearchEdge(edgeData))
       : [];
+    this.results = new Results();
   }
 
   /**
@@ -61,29 +62,44 @@ export default class SearchNode implements Search.INode {
    * @param db Connection
    * @returns Promise<any>
    */
-  async run(db: Connection): Promise<unknown> {
+  async run(db: Connection): Promise<Results<IEntity>> {
+    if (!this.edges.length) {
+      await this.runSingleBatch(db);
+    }
     for (const edge of this.edges) {
-      let q: RStream = r.table(Entity.table);
-      const searchParams = this.params;
-      if (this.params.classes && this.params.classes.length) {
-        q = q.filter(function (row: RDatum) {
-          return r.expr(searchParams.classes).contains(row("class"));
-        });
-      }
-
-      if (this.params.id) {
-        q = q.filter({ id: this.params.id });
-      }
-      if (this.params.label) {
-        q = q.filter({ label: this.params.label });
-      }
-
-      q = edge.run(q);
-
-      this.results = await q.run(db);
+      await this.runSingleBatch(db, edge);
     }
 
     return this.results;
+  }
+
+  async runSingleBatch(db: Connection, edge?: SearchEdge): Promise<void> {
+    let q: RStream = r.table(Entity.table);
+    const searchParams = this.params;
+    if (this.params.classes && this.params.classes.length) {
+      q = q.filter(function (row: RDatum) {
+        return r.expr(searchParams.classes).contains(row("class"));
+      });
+    }
+
+    if (this.params.id) {
+      q = q.filter({ id: this.params.id });
+    }
+    if (this.params.label) {
+      q = q.filter({ label: this.params.label });
+    }
+
+    // processing could be done solely on params
+    if (edge) {
+      q = edge.run(q);
+    }
+
+    const edgeResults = await q.run(db);
+    if (this.operator === Search.NodeOperator.And) {
+      this.results.addAnd(edgeResults);
+    } else {
+      this.results.addOr(edgeResults);
+    }
   }
 
   /**
@@ -98,7 +114,9 @@ export default class SearchNode implements Search.INode {
         return false;
       }
 
-      if (rule[0] !== this.type || rule[1] !== edge.node.type) {
+      if (rule[0] === Search.NodeType.X && rule[1] === Search.NodeType.X) {
+        // X-X is always ok
+      } else if (rule[0] !== this.type || rule[1] !== edge.node.type) {
         return false;
       }
     }

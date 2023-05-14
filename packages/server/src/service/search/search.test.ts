@@ -98,13 +98,13 @@ describe("test AdvancedSearch", () => {
     it("should return all prepared T entities when searching by class param", async () => {
       const search = mockSearch(Search.NodeType.A);
       search.root.params.classes = [wantedClass];
-      await search.run(db.connection);
-      expect(search.results).toBeTruthy();
-      if (!search.results) {
+      const results = await search.run(db.connection);
+      expect(results.items).toBeTruthy();
+      if (!results.items) {
         return;
       }
       const raw = await getEntitiesDataByClass(db, wantedClass);
-      expect(raw.length).toEqual(search.results.length);
+      expect(raw.length).toEqual(results.items.length);
     });
 
     it("should return only 1 prepared entity when searching by all params", async () => {
@@ -114,13 +114,13 @@ describe("test AdvancedSearch", () => {
         id: entity1.id,
         label: entity1.label,
       };
-      await search.run(db.connection);
-      expect(search.results).toBeTruthy();
-      if (!search.results) {
+      const results = await search.run(db.connection);
+      expect(results.items).toBeTruthy();
+      if (!results.items) {
         return;
       }
-      expect(search.results.length).toEqual(1);
-      expect(search.results[0].id).toEqual(entity1.id);
+      expect(results.items.length).toEqual(1);
+      expect(results.items[0].id).toEqual(entity1.id);
     });
   });
 
@@ -145,13 +145,13 @@ describe("test AdvancedSearch", () => {
     it("should return all prepared T entities when searching by class param", async () => {
       const search = mockSearch(Search.NodeType.S);
       search.root.params = { classes: [wantedClass] };
-      await search.run(db.connection);
-      expect(search.results).toBeTruthy();
-      if (!search.results) {
+      const results = await search.run(db.connection);
+      expect(results.items).toBeTruthy();
+      if (!results.items) {
         return;
       }
       const raw = await getEntitiesDataByClass(db, wantedClass);
-      expect(raw.length).toEqual(search.results.length);
+      expect(raw.length).toEqual(results.items.length);
     });
 
     it("should return only 1 prepared entity when searching by all params", async () => {
@@ -161,13 +161,13 @@ describe("test AdvancedSearch", () => {
         id: entity1.id,
         label: entity1.label,
       };
-      await search.run(db.connection);
-      expect(search.results).toBeTruthy();
-      if (!search.results) {
+      const results = await search.run(db.connection);
+      expect(results.items).toBeTruthy();
+      if (!results.items) {
         return;
       }
-      expect(search.results.length).toEqual(1);
-      expect(search.results[0].id).toEqual(entity1.id);
+      expect(results.items).toHaveLength(1);
+      expect(results.items[0].id).toEqual(entity1.id);
     });
 
     it("should return both entities for XHasClassification edge", async () => {
@@ -179,12 +179,12 @@ describe("test AdvancedSearch", () => {
       edge.node = new SearchNode({
         type: Search.NodeType.C,
       });
-      await search.run(db.connection);
-      expect(search.results).toBeTruthy();
-      if (!search.results) {
+      const results = await search.run(db.connection);
+      expect(results.items).toBeTruthy();
+      if (!results.items) {
         return;
       }
-      expect(search.results).toHaveLength(2);
+      expect(results.items).toHaveLength(2);
     });
 
     it("should return one entity for XHasClassification edge + node param", async () => {
@@ -198,12 +198,87 @@ describe("test AdvancedSearch", () => {
       });
       search.root.params.label = entity2.label;
 
-      await search.run(db.connection);
-      expect(search.results).toBeTruthy();
-      if (!search.results) {
+      const results = await search.run(db.connection);
+      expect(results.items).toBeTruthy();
+      if (!results.items) {
         return;
       }
-      expect(search.results).toHaveLength(1);
+      expect(results.items).toHaveLength(1);
+    });
+  });
+
+  describe("Multi edge search", () => {
+    const wantedClass = EntityEnums.Class.Territory;
+    const [, entity1] = prepareEntity(wantedClass);
+    const [, entity2] = prepareEntity(wantedClass);
+    const [, cEntity1] = prepareEntity(EntityEnums.Class.Concept);
+    const [, cEntity2] = prepareEntity(EntityEnums.Class.Concept);
+
+    const [, cRel1] = prepareRelation(RelationEnums.Type.Classification);
+    const [, cRel2] = prepareRelation(RelationEnums.Type.Classification);
+    const [, sRel] = prepareRelation(RelationEnums.Type.Superclass);
+
+    cRel1.entityIds = [entity1.id, cEntity1.id];
+    cRel2.entityIds = [entity2.id, cEntity1.id];
+    sRel.entityIds = [cEntity1.id, cEntity2.id];
+
+    beforeAll(async () => {
+      await entity1.save(db.connection);
+      await entity2.save(db.connection);
+      await cEntity1.save(db.connection);
+      await cEntity2.save(db.connection);
+      await cRel1.save(db.connection);
+      await cRel2.save(db.connection);
+      await sRel.save(db.connection);
+    });
+
+    it("should return merged results (AND) from two edges", async () => {
+      const search = mockSearch(Search.NodeType.X);
+      const edge1 = search.root.addEdge({
+        logic: Search.EdgeLogic.Positive,
+        type: Search.EdgeType.XHasClassification,
+      });
+      edge1.node = new SearchNode({
+        type: Search.NodeType.C,
+      });
+      const edge2 = search.root.addEdge({
+        logic: Search.EdgeLogic.Positive,
+        type: Search.EdgeType.XHasRelation,
+      });
+      edge2.node = new SearchNode({
+        type: Search.NodeType.C,
+      });
+      const results = await search.run(db.connection);
+      expect(results.items).toBeTruthy();
+      if (!results.items) {
+        return;
+      }
+      expect(results.items).toHaveLength(2);
+    });
+
+    it("should return merged results (OR) from two edges", async () => {
+      const search = mockSearch(Search.NodeType.X);
+      search.root.operator = Search.NodeOperator.Or;
+      const edge1 = search.root.addEdge({
+        logic: Search.EdgeLogic.Positive,
+        type: Search.EdgeType.XHasClassification,
+      });
+      edge1.node = new SearchNode({
+        type: Search.NodeType.C,
+      });
+      const edge2 = search.root.addEdge({
+        logic: Search.EdgeLogic.Positive,
+        type: Search.EdgeType.XHasRelation,
+      });
+      edge2.node = new SearchNode({
+        type: Search.NodeType.C,
+      });
+      const results = await search.run(db.connection);
+      expect(results.items).toBeTruthy();
+      if (!results.items) {
+        return;
+      }
+      expect(results.items).toHaveLength(4);
     });
   });
 });
