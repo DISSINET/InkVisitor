@@ -41,7 +41,7 @@ export class UsedRelations implements RelationTypes.IUsedRelations {
   @nonenumerable
   entityClass: EntityEnums.Class;
   @nonenumerable
-  maxNestLvl: number = 3;
+  maxNestLvl: number = 10;
   @nonenumerable
   maxListLen: number = 10;
 
@@ -211,9 +211,10 @@ export class UsedRelations implements RelationTypes.IUsedRelations {
       connections: await Identification.getIdentificationForwardConnections(
         dbConn,
         this.entityId,
-        EntityEnums.Certainty.Empty,
+        EntityEnums.Certainty.Certain,
         this.maxNestLvl,
-        0
+        0,
+        []
       ),
     };
   }
