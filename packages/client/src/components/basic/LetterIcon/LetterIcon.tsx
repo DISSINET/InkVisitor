@@ -11,7 +11,7 @@ interface LetterIcon {
 export const LetterIcon: React.FC<LetterIcon> = ({
   letter = "X",
   color = "black",
-  bgColor = "white",
+  bgColor = "none",
   size = 16,
 }) => {
   return (

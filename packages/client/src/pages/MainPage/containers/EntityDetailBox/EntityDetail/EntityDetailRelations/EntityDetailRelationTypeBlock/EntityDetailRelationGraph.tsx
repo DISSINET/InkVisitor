@@ -1,4 +1,4 @@
-import { RelationEnums } from "@shared/enums";
+import { EntityEnums, RelationEnums } from "@shared/enums";
 import { IEntity, IResponseDetail, Relation } from "@shared/types";
 import ReactFlow, {
   Background,
@@ -25,6 +25,8 @@ import React, { memo, useEffect, useMemo, useState } from "react";
 import { Button, LetterIcon } from "components";
 import { EntityTag } from "components/advanced";
 import { EntityDetailRelationTypeIcon } from "./EntityDetailRelationTypeIcon/EntityDetailRelationTypeIcon";
+import { Colors } from "types";
+import { ThemeColor } from "Theme/theme";
 
 interface Graph {
   nodes: Node[];
@@ -34,11 +36,14 @@ interface Graph {
 const EntityNode: React.FC<{
   data: { entity: IResponseDetail; level: number };
 }> = ({ data }) => {
+  if (!data.entity) {
+    console.log("problem");
+  }
   return (
     <>
       <Handle type="source" position={Position.Right} />
       <div>
-        <EntityTag entity={data.entity} />
+        {data.entity ? <EntityTag entity={data.entity} /> : <div />}
         <div className="custom-drag-handle"></div>
       </div>
       <Handle type="target" position={Position.Left} />
@@ -65,11 +70,37 @@ const RelationshipEdge: React.FC<EdgeProps> = ({
     targetPosition,
   });
 
-  const scaleLabel = 0.5;
+  const scaleLabel = 0.75;
+
+  const certaintyStyles: Record<
+    EntityEnums.Certainty,
+    { dashArray: string; width: number; stroke: string; strokeOpacity: number }
+  > = {
+    "0": { strokeOpacity: 1, dashArray: "1 1", width: 1, stroke: "white" },
+    "1": { strokeOpacity: 1, dashArray: "10 0", width: 3, stroke: "black" },
+    "2": { strokeOpacity: 1, dashArray: "5 2", width: 2, stroke: "black" },
+    "3": { strokeOpacity: 1, dashArray: "5 5", width: 2, stroke: "black" },
+    "4": { strokeOpacity: 1, dashArray: "3 3", width: 1, stroke: "grey" },
+    "5": { strokeOpacity: 1, dashArray: "2 2", width: 1, stroke: "darkred" },
+    "6": { strokeOpacity: 1, dashArray: "1 1", width: 1, stroke: "red" },
+  };
 
   return (
     <>
-      <path id={id} className="react-flow__edge-path" d={edgePath} />
+      <path
+        id={id}
+        d={edgePath}
+        strokeDasharray={
+          certaintyStyles[data.certainty as EntityEnums.Certainty].dashArray
+        }
+        strokeOpacity={
+          certaintyStyles[data.certainty as EntityEnums.Certainty].strokeOpacity
+        }
+        fill="none"
+        width={certaintyStyles[data.certainty as EntityEnums.Certainty].width}
+        stroke={certaintyStyles[data.certainty as EntityEnums.Certainty].stroke}
+        style={{}}
+      />
       <EdgeLabelRenderer>
         <div
           style={{
@@ -78,7 +109,12 @@ const RelationshipEdge: React.FC<EdgeProps> = ({
           }}
           className="nodrag nopan"
         >
-          <LetterIcon size={6} letter={data.relationType} color="info" />
+          <LetterIcon
+            size={6}
+            letter={data.relationType}
+            color="info"
+            bgColor="white"
+          />
         </div>
       </EdgeLabelRenderer>
     </>
@@ -95,14 +131,13 @@ const edgeTypes: EdgeTypes = {
 
 const convertToGraph = (
   entity: IResponseDetail,
-  relations: Relation.IConnection<Relation.IClassification>[],
-  entities: any
+  relations: Relation.IConnection<Relation.IRelation>[],
+  entities: any,
+  nodeW: number,
+  nodeH: number
 ): { nodes: Node[]; edges: Edge[]; maxHeight: number } => {
   const nodes: Node[] = [];
   const edges: Edge[] = [];
-
-  const nodeW = 120;
-  const nodeH = 50;
 
   const levelNodes: Record<string, number> = {};
   const addNode = (entityId: string, level: number) => {
@@ -126,14 +161,25 @@ const convertToGraph = (
       });
     }
   };
-  const addEdge = (sourceId: string, targetId: string) => {
+  const addEdge = (
+    sourceId: string,
+    targetId: string,
+    branch: Relation.IConnection<Relation.IRelation, Relation.IRelation>
+  ) => {
     if (!edges.find((e) => e.source === sourceId && e.target === targetId)) {
       edges.push({
         id: String(edges.length),
         type: "relationship",
         markerEnd: "arrowhead",
         data: {
-          relationType: RelationEnums.Type.Superclass,
+          certainty:
+            (
+              branch as Relation.IConnection<
+                Relation.IIdentification,
+                Relation.IIdentification
+              >
+            ).certainty || 1,
+          relationType: branch.type,
         },
         style: {
           strokeWidth: 1,
@@ -147,22 +193,35 @@ const convertToGraph = (
 
   addNode(entity.id, 0);
 
-  const getNodesFromSubtree = (relationNode: any, level: number) => {
-    relationNode.subtrees.forEach((branch: any) => {
-      addNode(branch.entityIds[1], level);
-      addEdge(branch.entityIds[0], branch.entityIds[1]);
+  const getNodesFromSubtree = (
+    sourceId: string,
+    relationNode: Relation.IConnection<Relation.IRelation, Relation.IRelation>,
+    level: number
+  ) => {
+    relationNode.subtrees &&
+      relationNode.subtrees.forEach((branch: any) => {
+        const [sourceEntityId, targetEntityId] =
+          sourceId === branch.entityIds[0]
+            ? branch.entityIds
+            : [branch.entityIds[1], branch.entityIds[0]];
 
-      getNodesFromSubtree(branch, level + 1);
-    });
+        addNode(targetEntityId, level);
+        addEdge(sourceEntityId, targetEntityId, branch);
+
+        getNodesFromSubtree(targetEntityId, branch, level + 1);
+      });
   };
 
   relations.forEach((relation) => {
-    const entityId = relation.entityIds[1];
+    const [sourceEntityId, targetEntityId] =
+      entity.id === relation.entityIds[0]
+        ? relation.entityIds
+        : [relation.entityIds[1], relation.entityIds[0]];
 
-    addNode(entityId, 1);
-    addEdge(relation.entityIds[0], relation.entityIds[1]);
+    addNode(targetEntityId, 1);
+    addEdge(sourceEntityId, targetEntityId, relation);
 
-    getNodesFromSubtree(relation, 2);
+    getNodesFromSubtree(targetEntityId, relation, 2);
   });
 
   const maxOnLevel = Math.max(...Object.values(levelNodes));
@@ -190,7 +249,7 @@ const convertToGraph = (
     };
   });
 
-  return { nodes: nodesWithY, edges, maxHeight: maxOnLevel * nodeH };
+  return { nodes: nodesWithY, edges, maxHeight: (maxOnLevel + 1) * nodeH };
 };
 
 interface EntityDetailRelationGraph {
@@ -198,7 +257,7 @@ interface EntityDetailRelationGraph {
   relationType: RelationEnums.Type;
   entity: IResponseDetail;
   entities: Record<string, IEntity>;
-  relations: Relation.IConnection<Relation.IClassification>[];
+  relations: Relation.IConnection<Relation.IRelation>[];
 }
 
 export const EntityDetailRelationGraph: React.FC<EntityDetailRelationGraph> = ({
@@ -210,13 +269,16 @@ export const EntityDetailRelationGraph: React.FC<EntityDetailRelationGraph> = ({
 }) => {
   const [open, setOpen] = useState<boolean>(true);
 
+  const nodeW = 150;
+  const nodeH = 50;
+
   const handleSetOpen = () => {
     setOpen(!open);
   };
   const [height, setHeight] = useState<number>(500);
 
   const { nodes, edges, maxHeight } = useMemo(() => {
-    return convertToGraph(entity, relations, entities);
+    return convertToGraph(entity, relations, entities, nodeW, nodeH);
   }, [entity, relations]);
 
   useEffect(() => {
@@ -268,7 +330,7 @@ export const EntityDetailRelationGraph: React.FC<EntityDetailRelationGraph> = ({
           defaultViewport={{ x: 0, y: 0, zoom: 1 }}
         >
           {/* <MiniMap /> */}
-          <Controls showInteractive={false} />
+          <Controls showInteractive={false} showZoom={false} />
           <Background />
         </ReactFlow>
       )}

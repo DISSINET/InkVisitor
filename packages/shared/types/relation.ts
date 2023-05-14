@@ -131,6 +131,7 @@ export namespace Relation {
     attributes: any[];
     order: boolean;
     selfLoop: boolean;
+    graph?: boolean;
   };
 
   export const RelationRules: { [key in RelationEnums.Type]?: RelationRule } =
@@ -152,6 +153,7 @@ export namespace Relation {
     attributes: [],
     order: true,
     selfLoop: false,
+    graph: true,
   };
   RelationRules[RelationEnums.Type.SuperordinateLocation] = {
     label: "Superordinate Location",
@@ -167,6 +169,7 @@ export namespace Relation {
     attributes: [],
     order: true,
     selfLoop: false,
+    graph: true,
   };
   RelationRules[RelationEnums.Type.Synonym] = {
     label: "Synonym",
@@ -214,6 +217,7 @@ export namespace Relation {
     attributes: [],
     order: true,
     selfLoop: false,
+    graph: true,
   };
   RelationRules[RelationEnums.Type.PropertyReciprocal] = {
     label: "Property Reciprocal",
@@ -259,6 +263,7 @@ export namespace Relation {
     attributes: [],
     order: false,
     selfLoop: false,
+    graph: true,
   };
   RelationRules[RelationEnums.Type.Classification] = {
     label: "Classification",
@@ -282,6 +287,7 @@ export namespace Relation {
     attributes: [],
     order: true,
     selfLoop: false,
+    graph: true,
   };
   RelationRules[RelationEnums.Type.Identification] = {
     label: "Identification",
@@ -295,6 +301,7 @@ export namespace Relation {
     attributes: [EntityEnums.Certainty],
     order: false,
     selfLoop: false,
+    graph: true,
   };
   RelationRules[RelationEnums.Type.Implication] = {
     label: "Implication",
@@ -310,6 +317,7 @@ export namespace Relation {
     attributes: [],
     order: true,
     selfLoop: false,
+    graph: true,
   };
   RelationRules[RelationEnums.Type.SubjectSemantics] = {
     label: "Subject Semantics",

@@ -303,11 +303,11 @@ export const EntityDetailRelationTypeBlock: React.FC<
         </StyledLabelSuggester>
       </div>
       <div>
-        {relationType === RelationEnums.Type.Classification && (
+        {relationRule.graph && (
           <EntityDetailRelationGraph
             entities={entities}
             relations={
-              currentRelations as Relation.IConnection<Relation.IClassification>[]
+              currentRelations as Relation.IConnection<Relation.IRelation>[]
             }
             relationType={relationType}
             entity={entity}
