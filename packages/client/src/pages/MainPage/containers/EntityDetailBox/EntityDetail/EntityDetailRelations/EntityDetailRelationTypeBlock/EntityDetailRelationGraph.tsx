@@ -28,6 +28,15 @@ import { EntityDetailRelationTypeIcon } from "./EntityDetailRelationTypeIcon/Ent
 import { Colors } from "types";
 import { ThemeColor } from "Theme/theme";
 
+/**
+ * TODO:
+ *  - clean the code
+ *  - create separate components for node, edge
+ *  - do not draw on default
+ *  - fix and text certainties
+ *  - edge tooltips - probably just the certainty
+ *  - fix layout / define the problem in  a separate PR
+ */
 interface Graph {
   nodes: Node[];
   edges: Edge[];

@@ -77,8 +77,6 @@ export default class Identification
               nestLvl + 1,
               processedRelations
             );
-        } else if (nestLvl > 0) {
-          continue;
         }
 
         out.push(connection);
