@@ -14,7 +14,6 @@ import { useDebounce } from "hooks";
 import React, { useMemo, useState } from "react";
 import { RiCloseFill } from "react-icons/ri";
 import { useQuery } from "react-query";
-import { OptionTypeBase, ValueType } from "react-select";
 import { wildCardChar } from "Theme/constants";
 import { DropdownItem } from "types";
 import useResizeObserver from "use-resize-observer";
@@ -71,7 +70,7 @@ export const EntitySearchBox: React.FC = () => {
   const [classOption, setClassOption] =
     useState<DropdownItem>(defaultClassOption);
   const [templateOption, setTemplateOption] =
-    useState<ValueType<OptionTypeBase, any>>(defaultClassOption);
+    useState<DropdownItem>(defaultClassOption);
   const [searchData, setSearchData] = useState<IRequestSearch>(initValues);
   const debouncedValues = useDebounce<IRequestSearch>(searchData, debounceTime);
 
@@ -193,12 +192,7 @@ export const EntitySearchBox: React.FC = () => {
 
   // apply changes to search parameters
   const handleChange = (changes: {
-    [key: string]:
-      | string
-      | false
-      | true
-      | undefined
-      | ValueType<OptionTypeBase, any>;
+    [key: string]: string | false | true | undefined | DropdownItem | Date;
   }) => {
     const newSearch = {
       ...searchData,
@@ -273,7 +267,7 @@ export const EntitySearchBox: React.FC = () => {
             entityDropdown
             options={[defaultClassOption].concat(classOptions)}
             value={classOption}
-            onChange={(option: ValueType<OptionTypeBase, any>) => {
+            onChange={(option) => {
               setClassOption(option as DropdownItem);
               setTemplateOption(defaultClassOption);
               handleChange({
@@ -294,7 +288,7 @@ export const EntitySearchBox: React.FC = () => {
             width={150}
             options={statusOptions}
             value={statusOptionSelected}
-            onChange={(option: ValueType<OptionTypeBase, any>) => {
+            onChange={(option) => {
               handleChange({
                 status: (option as DropdownItem).value,
               });
@@ -312,7 +306,7 @@ export const EntitySearchBox: React.FC = () => {
             width={150}
             options={languageOptions}
             value={languageOptionSelected}
-            onChange={(option: ValueType<OptionTypeBase, any>) => {
+            onChange={(option) => {
               handleChange({
                 language: (option as DropdownItem).value,
               });
@@ -329,7 +323,7 @@ export const EntitySearchBox: React.FC = () => {
           width={150}
           options={[defaultClassOption].concat(templateOptions)}
           value={templateOption}
-          onChange={(option: ValueType<OptionTypeBase, any>) => {
+          onChange={(option) => {
             setTemplateOption(option);
             handleChange({ usedTemplate: (option as DropdownItem).value });
           }}

@@ -14,7 +14,6 @@ import {
   ModalInputForm,
   ModalInputLabel,
   ModalInputWrap,
-  Tag,
 } from "components";
 import {
   AttributeButtonGroup,
@@ -23,17 +22,8 @@ import {
 } from "components/advanced";
 import React, { useMemo, useState } from "react";
 import { BiHide, BiShow } from "react-icons/bi";
-import { FaUnlink } from "react-icons/fa";
-import {
-  notifyManager,
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "react-query";
-import { Switch } from "react-router";
-import { OptionTypeBase, ValueType } from "react-select";
+import { useMutation, useQuery, useQueryClient } from "react-query";
 import { toast } from "react-toastify";
-import theme from "Theme/theme";
 import {
   StyledRightsHeading,
   StyledRightsWrap,
@@ -42,6 +32,7 @@ import {
   StyledUserRights,
 } from "./UserCustomizationModalStyles";
 import { UserRightItem } from "./UserRightItem/UserRightItem";
+import { DropdownItem } from "types";
 
 interface DataObject {
   name: string;
@@ -106,7 +97,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
 
   const handleChange = (
     key: string,
-    value: string | true | false | ValueType<OptionTypeBase, any>
+    value: string | true | false | DropdownItem
   ) => {
     setData({
       ...data,
@@ -226,7 +217,10 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                 width="full"
                 value={data.defaultLanguage}
                 onChange={(selectedOption) =>
-                  handleChange("defaultLanguage", selectedOption)
+                  handleChange(
+                    "defaultLanguage",
+                    selectedOption as DropdownItem
+                  )
                 }
                 options={languageDict}
               />
@@ -237,7 +231,10 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                 width="full"
                 value={data.defaultStatementLanguage}
                 onChange={(selectedOption) =>
-                  handleChange("defaultStatementLanguage", selectedOption)
+                  handleChange(
+                    "defaultStatementLanguage",
+                    selectedOption as DropdownItem
+                  )
                 }
                 options={languageDict}
               />

@@ -19,6 +19,7 @@ import {
 import { dndHoverFn, isValidEntityClass } from "utils";
 import {
   StyledButtonWrapper,
+  StyledElvlWrapper,
   StyledEntityTag,
   StyledLabel,
   StyledTagWrapper,
@@ -38,6 +39,7 @@ interface TagProps {
   mode?: "selected" | "disabled" | "invalid" | false;
   borderStyle?: "solid" | "dashed" | "dotted";
   button?: ReactNode;
+  elvlButtonGroup?: ReactNode | false;
   invertedLabel?: boolean;
   showOnly?: "entity" | "label";
   fullWidth?: boolean;
@@ -69,6 +71,7 @@ export const Tag: React.FC<TagProps> = ({
   mode = false,
   borderStyle = "solid",
   button,
+  elvlButtonGroup,
   invertedLabel,
   showOnly,
   fullWidth = false,
@@ -151,6 +154,10 @@ export const Tag: React.FC<TagProps> = ({
     </StyledEntityTag>
   );
 
+  const renderElvl = () => (
+    <StyledElvlWrapper>{elvlButtonGroup}</StyledElvlWrapper>
+  );
+
   const renderButton = () => (
     <StyledButtonWrapper
       status={status}
@@ -207,6 +214,7 @@ export const Tag: React.FC<TagProps> = ({
         >
           {label}
         </StyledLabel>
+        {elvlButtonGroup && renderElvl()}
         {button && renderButton()}
       </>
     );

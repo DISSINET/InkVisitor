@@ -170,13 +170,12 @@ export const App: React.FC = () => {
     }
   }, [debouncedWidth]);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      // console.log(api.getPing());
-      dispatch(setPing(api.getPing()));
-    }, 1000);
-    return () => clearInterval(interval);
-  }, []);
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     dispatch(setPing(api.getPing()));
+  //   }, 1000);
+  //   return () => clearInterval(interval);
+  // }, []);
 
   return (
     <>

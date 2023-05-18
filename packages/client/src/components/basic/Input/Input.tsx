@@ -21,7 +21,11 @@ interface Input {
   width?: number | "full";
   onChangeFn: (value: string) => void;
   onEnterPressFn?: () => void;
-  onFocus?: () => void;
+  onFocus?: (
+    event: React.FocusEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => void;
   onBlur?: () => void;
   placeholder?: string;
   changeOnType?: boolean;
@@ -89,7 +93,9 @@ export const Input: React.FC<Input> = ({
                 event.preventDefault();
             }
           }}
-          onFocus={() => onFocus()}
+          onFocus={(event: React.FocusEvent<HTMLInputElement>) =>
+            onFocus(event)
+          }
           onBlur={() => {
             if (displayValue !== value && !changeOnType) {
               onChangeFn(displayValue);
@@ -116,7 +122,9 @@ export const Input: React.FC<Input> = ({
               onChangeFn(e.currentTarget.value);
             }
           }}
-          onFocus={() => onFocus()}
+          onFocus={(event: React.FocusEvent<HTMLTextAreaElement>) =>
+            onFocus(event)
+          }
           onBlur={() => {
             if (!changeOnType) {
               onChangeFn(displayValue);
@@ -152,7 +160,9 @@ export const Input: React.FC<Input> = ({
               }}
               inverted={inverted}
               suggester={suggester}
-              onFocus={() => onFocus()}
+              onFocus={(event: React.FocusEvent<HTMLSelectElement>) =>
+                onFocus(event)
+              }
               onBlur={() => onBlur()}
             >
               {options.map((option, oi) => (

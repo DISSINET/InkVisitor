@@ -124,8 +124,13 @@ export const StyledTagsListItem = styled.div<StyledTagsListItem>`
   max-width: 100%;
 `;
 
+export const StyledEditorActionTableWrapper = styled.div`
+  margin-bottom: ${({ theme }) => theme.space[4]};
+  min-width: 56rem;
+`;
 export const StyledEditorActantTableWrapper = styled.div`
   margin-bottom: ${({ theme }) => theme.space[4]};
+  min-width: 58rem;
 `;
 export const StyledTagWrapper = styled.div`
   display: inline-flex;

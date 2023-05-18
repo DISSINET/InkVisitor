@@ -126,25 +126,18 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
                 }}
               />
               <Button
-                key="instance-template"
+                key="instantiate-template"
                 icon={<GrClone size={14} />}
                 tooltipLabel="create entity from template"
                 inverted
                 color="primary"
                 onClick={() => {
-                  // instantiate entity
                   if (entity.class === EntityEnums.Class.Territory) {
-                    // TODO: modal for choosing territory parent
                     setShowAddParentModal(true);
-                    // } else if (entity.class === EntityEnums.Class.Statement) {
-                    // TODO: modal for choosing territory for S
                   } else {
                     instantiateTemplate();
                   }
                 }}
-                // disabled={
-                //   entity.class === EntityEnums.Class.Territory
-                // }
               />
             </>
           )}

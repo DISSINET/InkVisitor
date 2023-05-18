@@ -21,7 +21,6 @@ import { CEntity, CStatement, CTerritory } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "react-query";
-import { OptionTypeBase, ValueType } from "react-select";
 import { toast } from "react-toastify";
 import { excludedSuggesterEntities, rootTerritoryId } from "Theme/constants";
 import { DropdownItem } from "types";
@@ -208,9 +207,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
                 categoryTypes={allowedEntityClasses}
                 excludedEntities={excludedSuggesterEntities}
                 onSelected={() => console.log("cannot select")}
-                onChangeCategory={(
-                  selectedOption: ValueType<OptionTypeBase, any>
-                ) => {
+                onChangeCategory={(selectedOption) => {
                   if (selectedOption)
                     setSelectedCategory(selectedOption as DropdownItem);
                 }}
@@ -235,7 +232,6 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
             <ModalInputLabel>{"Language: "}</ModalInputLabel>
             <ModalInputWrap>
               <Dropdown
-                isMulti={false}
                 width="full"
                 options={languageDict}
                 value={languageDict.find(

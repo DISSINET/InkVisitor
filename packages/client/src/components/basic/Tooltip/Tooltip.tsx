@@ -1,13 +1,13 @@
+import { FloatingPortal } from "@floating-ui/react";
 import {
   AutoPlacement,
   BasePlacement,
   VariationPlacement,
   VirtualElement,
 } from "@popperjs/core";
-import React, { ReactElement, useEffect, useState } from "react";
-import ReactDOM from "react-dom";
-import { usePopper } from "react-popper";
 import { useSpring } from "@react-spring/web";
+import React, { ReactElement, useEffect, useState } from "react";
+import { usePopper } from "react-popper";
 import { Colors } from "types";
 import {
   StyledArrow,
@@ -109,7 +109,7 @@ export const Tooltip: React.FC<Tooltip> = ({
     <>
       {!disabled && (showTooltip || tooltipHovered) && (
         <>
-          {ReactDOM.createPortal(
+          <FloatingPortal id="page">
             <StyledContainer
               ref={setPopperElement}
               style={{ ...styles.popper, ...animatedTooltip }}
@@ -145,9 +145,8 @@ export const Tooltip: React.FC<Tooltip> = ({
                   </StyledContent>
                 )}
               </div>
-            </StyledContainer>,
-            document.getElementById("page")!
-          )}
+            </StyledContainer>
+          </FloatingPortal>
         </>
       )}
     </>

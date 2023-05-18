@@ -20,7 +20,6 @@ import { CEntity, CStatement, CTemplateEntity } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "react-query";
-import { OptionTypeBase, ValueType } from "react-select";
 import { toast } from "react-toastify";
 import { DropdownItem } from "types";
 
@@ -171,7 +170,7 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
                 value: createModalEntityClass.value,
               }}
               options={entitiesDict}
-              onChange={(option: ValueType<OptionTypeBase, any>) => {
+              onChange={(option) => {
                 setCreateModalEntityClass(option as DropdownItem);
               }}
               width={100}

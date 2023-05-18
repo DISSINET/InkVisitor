@@ -18,7 +18,6 @@ import {
 import { EntitySuggester, EntityTag } from "components/advanced";
 import React, { useEffect, useState } from "react";
 import { useQuery } from "react-query";
-import { OptionTypeBase, ValueType } from "react-select";
 import { toast } from "react-toastify";
 import { DropdownAny } from "Theme/constants";
 import { DropdownItem, SuggesterItemToCreate } from "types";
@@ -120,7 +119,7 @@ export const SuggesterCreateModal: React.FC<SuggesterCreateModal> = ({
                   value: selectedCategory.value,
                 }}
                 options={categories}
-                onChange={(option: ValueType<OptionTypeBase, any>) => {
+                onChange={(option) => {
                   setSelectedCategory(option as DropdownItem);
                 }}
                 width={40}
@@ -149,7 +148,6 @@ export const SuggesterCreateModal: React.FC<SuggesterCreateModal> = ({
             <ModalInputLabel>{"Language: "}</ModalInputLabel>
             <ModalInputWrap>
               <Dropdown
-                isMulti={false}
                 width="full"
                 options={languageDict}
                 value={languageDict.find(

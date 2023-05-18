@@ -50,8 +50,8 @@ export const Button: React.FC<ButtonProps> = ({
     useState<HTMLButtonElement | null>(null);
   const [showTooltip, setShowTooltip] = useState(false);
 
-  const renderButton = () => {
-    return (
+  return (
+    <>
       <StyledButton
         ref={setReferenceElement}
         onClick={onClick}
@@ -76,19 +76,15 @@ export const Button: React.FC<ButtonProps> = ({
           </StyledButtonLabel>
         )}
       </StyledButton>
-    );
-  };
-  return tooltipLabel || tooltipContent ? (
-    <>
-      <Tooltip
-        label={tooltipLabel}
-        content={tooltipContent}
-        visible={showTooltip}
-        referenceElement={referenceElement}
-      />
-      {renderButton()}
+
+      {(tooltipLabel || tooltipContent) && (
+        <Tooltip
+          label={tooltipLabel}
+          content={tooltipContent}
+          visible={showTooltip}
+          referenceElement={referenceElement}
+        />
+      )}
     </>
-  ) : (
-    renderButton()
   );
 };
