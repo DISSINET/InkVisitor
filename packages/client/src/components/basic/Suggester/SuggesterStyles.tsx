@@ -53,10 +53,11 @@ interface StyledSuggesterList {
   noLeftMargin?: boolean;
 }
 export const StyledSuggesterList = styled.div<StyledSuggesterList>`
-  position: absolute;
   z-index: 40;
-  top: ${({ theme }) => theme.space[10]};
-  left: ${({ theme, noLeftMargin }) => (noLeftMargin ? "" : theme.space[14])};
+  /* position: absolute; */
+  /* top: ${({ theme }) => theme.space[10]}; */
+  /* left: ${({ theme, noLeftMargin }) =>
+    noLeftMargin ? "" : theme.space[14]}; */
 `;
 export const StyledRelativePosition = styled.div`
   position: relative;

@@ -112,7 +112,6 @@ export const Dropdown: React.FC<Dropdown> = ({
           isClearable={isClearable}
           captureMenuScroll={false}
           components={{
-            // components,
             Option,
             SingleValue,
             MultiValue,
@@ -139,8 +138,7 @@ export const Dropdown: React.FC<Dropdown> = ({
             }),
           }}
           menuPortalTarget={document.getElementById("page")!}
-          menuPosition={"absolute"}
-          // maxMenuHeight={180}
+          menuPosition="absolute"
           onChange={(selected: any, event: any) => {
             if (selected !== null && selected.length > 0) {
               // kdyz je neco vybrany = aspon jeden option
