@@ -128,11 +128,6 @@ export const Suggester: React.FC<Suggester> = ({
     false
   );
 
-  const [position, setPosition] = useState<{
-    x: number;
-    y: number;
-  } | null>(null);
-
   useKeypress(
     "Escape",
     () => {
@@ -264,7 +259,6 @@ export const Suggester: React.FC<Suggester> = ({
     // onOpenChange: setIsOpen,
     whileElementsMounted: autoUpdate,
     middleware: [
-      offset(5),
       flip({ padding: 10 }),
       size({
         apply({ rects, elements, availableHeight }) {
@@ -314,16 +308,8 @@ export const Suggester: React.FC<Suggester> = ({
               suggester
               changeOnType={true}
               width={inputWidth}
-              onFocus={(event) => {
+              onFocus={() => {
                 setIsFocused(true);
-                const bounds = event.currentTarget.getBoundingClientRect();
-                // const bounds = referenceEl.current?.getBoundingClientRect();
-                if (bounds) {
-                  setPosition({
-                    x: bounds.x,
-                    y: bounds.y + bounds.height,
-                  });
-                }
               }}
               onBlur={() => {
                 // Comment this for debug
@@ -363,9 +349,10 @@ export const Suggester: React.FC<Suggester> = ({
           <StyledAiOutlineWarning size={22} color={theme.color["warning"]} />
         )}
 
-        {((isFocused || isHovered) && suggestions.length) || isFetching ? (
+        {((isFocused || isHovered) && suggestions.length) ||
+        (isFetching && isFocused) ? (
           <>
-            <FloatingPortal>
+            <FloatingPortal id="page">
               <StyledSuggesterList
                 ref={refs.setFloating}
                 noLeftMargin={categories.length === 1}
