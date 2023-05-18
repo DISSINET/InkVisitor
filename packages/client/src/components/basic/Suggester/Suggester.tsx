@@ -1,17 +1,9 @@
 import {
-  useFloating,
-  useClick,
-  useDismiss,
-  useRole,
-  useListNavigation,
-  useInteractions,
-  FloatingFocusManager,
-  useTypeahead,
-  offset,
+  FloatingPortal,
+  autoUpdate,
   flip,
   size,
-  autoUpdate,
-  FloatingPortal,
+  useFloating,
 } from "@floating-ui/react";
 import { entitiesDictKeys } from "@shared/dictionaries";
 import { EntityEnums } from "@shared/enums";
@@ -41,6 +33,7 @@ import {
   SuggesterItemToCreate,
 } from "types";
 import { SuggesterCreateModal } from "./SuggesterCreateModal/SuggesterCreateModal";
+import { SuggesterKeyPress } from "./SuggesterKeyPress";
 import {
   StyledAiOutlineWarning,
   StyledInputWrapper,
@@ -55,7 +48,6 @@ import {
   SuggestionRowEntityItemData,
   createItemData,
 } from "./SuggestionRow/SuggestionRow";
-import { SuggesterKeyPress } from "./SuggesterKeyPress";
 
 interface Suggester {
   marginTop?: boolean;
@@ -255,8 +247,6 @@ export const Suggester: React.FC<Suggester> = ({
 
   const { refs, floatingStyles, context } = useFloating({
     placement: "bottom-start",
-    // open: isOpen,
-    // onOpenChange: setIsOpen,
     whileElementsMounted: autoUpdate,
     middleware: [
       flip({ padding: 10 }),
