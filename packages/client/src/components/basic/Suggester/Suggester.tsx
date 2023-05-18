@@ -273,7 +273,8 @@ export const Suggester: React.FC<Suggester> = ({
   });
 
   return (
-    <>
+    // div is necessary for flex to work and render the clear button properly
+    <div>
       <StyledSuggester marginTop={marginTop}>
         <StyledInputWrapper
           ref={dropRef}
@@ -412,6 +413,6 @@ export const Suggester: React.FC<Suggester> = ({
           }}
         />
       )}
-    </>
+    </div>
   );
 };
