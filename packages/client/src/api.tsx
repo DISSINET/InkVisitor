@@ -52,7 +52,7 @@ class Api {
   private headers: object;
   private connection: AxiosInstance;
   private token: string;
-  // private ws: Socket;
+  private ws: Socket;
   private ping: number;
 
   constructor() {
@@ -67,37 +67,39 @@ class Api {
 
     const url = new URL(baseUrl);
 
-    // this.ws = io(baseUrl, { path: url.pathname + "/socket.io" });
-    // this.ws.on("connect", () => {
-    //   console.log("Socket.IO connected");
-    // });
-    // this.ws.on("disconnect", () => {
-    //   this.ping = -1;
-    //   console.log("Socket.IO disconnected");
-    // });
-    // this.ws.on("error", (error) => {
-    //   this.ping = -1;
-    //   console.error("Socket error:", error);
-    // });
-    // this.ws.on("connect_error", (error) => {
-    //   console.error("Socket connection error:", error);
-    // });
-    // this.ws.on("connect_timeout", () => {
-    //   console.error("Socket connection timeout.");
-    // });
+    this.ws = io(url.origin, {
+      path: (url.pathname + "/socket.io").replace(`//`, "/"),
+    });
+    this.ws.on("connect", () => {
+      console.log("Socket.IO connected");
+    });
+    this.ws.on("disconnect", () => {
+      this.ping = -1;
+      console.log("Socket.IO disconnected");
+    });
+    this.ws.on("error", (error) => {
+      this.ping = -1;
+      console.error("Socket error:", error);
+    });
+    this.ws.on("connect_error", (error) => {
+      console.error("Socket connection error:", error);
+    });
+    this.ws.on("connect_timeout", () => {
+      console.error("Socket connection timeout.");
+    });
 
-    // setInterval(() => {
-    //   const start = Date.now();
+    setInterval(() => {
+      const start = Date.now();
 
-    //   this.ws.emit("ping", (ack: any) => {
-    //     if (ack instanceof Error) {
-    //       console.error("Socket ping error:", ack);
-    //     } else {
-    //       const duration = Date.now() - start;
-    //       this.ping = duration;
-    //     }
-    //   });
-    // }, 1000);
+      this.ws.emit("ping", (ack: any) => {
+        if (ack instanceof Error) {
+          console.error("Socket ping error:", ack);
+        } else {
+          const duration = Date.now() - start;
+          this.ping = duration;
+        }
+      });
+    }, 1000);
 
     this.headers = {
       "Content-Type": "application/json",
