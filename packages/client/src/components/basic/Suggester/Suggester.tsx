@@ -2,7 +2,6 @@ import {
   FloatingPortal,
   autoUpdate,
   flip,
-  size,
   useFloating,
 } from "@floating-ui/react";
 import { entitiesDictKeys } from "@shared/dictionaries";
@@ -19,7 +18,7 @@ import {
   TypeBar,
 } from "components";
 import useKeypress from "hooks/useKeyPress";
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import { DropTargetMonitor, useDrop } from "react-dnd";
 import { FaPlus } from "react-icons/fa";
 import { MdCancel } from "react-icons/md";
@@ -243,23 +242,10 @@ export const Suggester: React.FC<Suggester> = ({
     );
   };
 
-  const referenceEl = useRef<HTMLDivElement>(null);
-
-  const { refs, floatingStyles, context } = useFloating({
+  const { refs, floatingStyles, middlewareData } = useFloating({
     placement: "bottom-start",
     whileElementsMounted: autoUpdate,
-    middleware: [
-      flip({ padding: 10 }),
-      size({
-        apply({ rects, elements, availableHeight }) {
-          Object.assign(elements.floating.style, {
-            maxHeight: `${availableHeight}px`,
-            minWidth: `${rects.reference.width}px`,
-          });
-        },
-        padding: 10,
-      }),
-    ],
+    middleware: [flip({ padding: 10 })],
   });
 
   return (
@@ -340,7 +326,9 @@ export const Suggester: React.FC<Suggester> = ({
           <StyledAiOutlineWarning size={22} color={theme.color["warning"]} />
         )}
 
-        {((isFocused || isHovered) && suggestions.length) ||
+        {((isFocused || isHovered) &&
+          suggestions.length &&
+          !middlewareData.hide?.referenceHidden) ||
         (isFetching && isFocused) ? (
           <>
             <FloatingPortal id="page">
