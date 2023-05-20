@@ -20,7 +20,7 @@ import {
   EntitySuggester,
   EntityTag,
 } from "components/advanced";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { BiHide, BiShow } from "react-icons/bi";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { toast } from "react-toastify";
@@ -58,7 +58,7 @@ interface DataObject {
         | undefined
       )[]
     | [];
-  defaultTerritory: string | null;
+  defaultTerritory?: string | null;
   hideStatementElementsOrderTable?: boolean;
 }
 interface UserCustomizationModal {
@@ -69,9 +69,9 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
   user,
   onClose = () => {},
 }) => {
-  const { options, name, email, role, rights } = useMemo(() => user, [user]);
-
   const initialValues: DataObject = useMemo(() => {
+    const { options, name, email } = user;
+
     const defaultLanguageObject = languageDict.find(
       (i: any) => i.value === options.defaultLanguage
     );
@@ -94,6 +94,10 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
   }, [user]);
 
   const [data, setData] = useState<DataObject>(initialValues);
+
+  useEffect(() => {
+    setData(initialValues);
+  }, [initialValues]);
 
   const handleChange = (
     key: string,
@@ -138,7 +142,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
     async (changes: any) => await api.usersUpdate(user.id, changes),
     {
       onSuccess: (data, variables) => {
-        queryClient.invalidateQueries(["user"]);
+        queryClient.invalidateQueries("user");
         toast.info("User updated!");
         //onClose();
       },
@@ -163,6 +167,9 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
     }
   };
 
+  const { role, rights } = user;
+  const { name, email, defaultLanguage, defaultStatementLanguage } = data;
+
   const readRights = useMemo(
     () => rights.filter((r) => r.mode === UserEnums.RoleMode.Read),
     [rights]
@@ -175,10 +182,10 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
   return (
     <div>
       <Modal
-        showModal={true}
+        showModal
         width="thin"
-        onEnterPress={() => handleSubmit()}
-        onClose={() => onClose()}
+        onEnterPress={handleSubmit}
+        onClose={onClose}
       >
         <ModalHeader title="User customization" />
         <ModalContent column>
@@ -215,7 +222,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
             <ModalInputWrap width={165}>
               <Dropdown
                 width="full"
-                value={data.defaultLanguage}
+                value={defaultLanguage}
                 onChange={(selectedOption) =>
                   handleChange(
                     "defaultLanguage",
@@ -229,7 +236,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
             <ModalInputWrap width={165}>
               <Dropdown
                 width="full"
-                value={data.defaultStatementLanguage}
+                value={defaultStatementLanguage}
                 onChange={(selectedOption) =>
                   handleChange(
                     "defaultStatementLanguage",
@@ -377,16 +384,14 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
               key="cancel"
               label="Cancel"
               color="warning"
-              onClick={() => {
-                onClose();
-              }}
+              onClick={onClose}
             />
             <Button
               disabled={JSON.stringify(data) === JSON.stringify(initialValues)}
               key="submit"
               label="Submit"
               color="primary"
-              onClick={() => handleSubmit()}
+              onClick={handleSubmit}
             />
           </ButtonGroup>
         </ModalFooter>

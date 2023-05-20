@@ -224,7 +224,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
     {
       onSuccess: (data, variables) => {
         // TODO - check this
-        queryClient.invalidateQueries(["entity"]);
+        queryClient.invalidateQueries("entity");
         queryClient.invalidateQueries("statement");
 
         if (statementId === detailId) {

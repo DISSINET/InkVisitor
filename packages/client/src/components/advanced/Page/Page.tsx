@@ -8,7 +8,7 @@ import {
 import { useSearchParams } from "hooks";
 import useKeyLift from "hooks/useKeyLift";
 import useKeypress from "hooks/useKeyPress";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { useLocation, useHistory } from "react-router";
 import { toast } from "react-toastify";
@@ -56,7 +56,7 @@ export const Page: React.FC<Page> = ({ children }) => {
     error: errorUser,
     isFetching: isFetchingUser,
   } = useQuery(
-    ["user", username],
+    ["user", userId],
     async () => {
       if (userId) {
         const res = await api.usersGet(userId);
@@ -65,7 +65,7 @@ export const Page: React.FC<Page> = ({ children }) => {
         return false;
       }
     },
-    { enabled: !!userId && api.isLoggedIn() && !disableRightHeader }
+    { enabled: api.isLoggedIn() && !disableRightHeader }
   );
 
   const logOutMutation = useMutation(async () => await api.signOut(), {
@@ -106,7 +106,7 @@ export const Page: React.FC<Page> = ({ children }) => {
           <>
             {!disableRightHeader && (
               <RightHeader
-                setUserCustomizationOpen={() => setUserCustomizationOpen(true)}
+                setUserCustomizationOpen={setUserCustomizationOpen}
                 handleLogOut={logOutMutation.mutate}
                 userName={user ? user.name : ""}
                 userRole={userRole || ""}
