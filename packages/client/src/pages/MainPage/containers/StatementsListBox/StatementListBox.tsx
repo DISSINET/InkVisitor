@@ -90,7 +90,7 @@ export const StatementListBox: React.FC = () => {
     error: userError,
     isFetching: userIsFetching,
   } = useQuery(
-    ["user"],
+    ["user", userId],
     async () => {
       if (userId) {
         const res = await api.usersGet(userId);
