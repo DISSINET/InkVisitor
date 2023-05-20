@@ -1,10 +1,12 @@
+import { heightHeader } from "Theme/constants";
+import { PingColor } from "Theme/theme";
 import LogoInkvisitor from "assets/logos/inkvisitor.svg";
 import { Loader } from "components";
 import React, { useEffect, useState } from "react";
 import { useQueryClient } from "react-query";
 import { useHistory, useLocation } from "react-router";
 import { toast } from "react-toastify";
-import { heightHeader } from "Theme/constants";
+import { useAppSelector } from "redux/hooks";
 import { Menu } from "..";
 import packageJson from "../../../../package.json";
 import {
@@ -21,8 +23,6 @@ import {
   StyledUser,
   StyledUsername,
 } from "./PageHeaderStyles";
-import { useAppSelector } from "redux/hooks";
-import { PingColor } from "Theme/theme";
 
 interface LeftHeader {
   tempLocation: string | false;
@@ -110,7 +110,7 @@ export const LeftHeader: React.FC<LeftHeader> = React.memo(
   }
 );
 
-interface RightHeaderProps {
+interface RightHeader {
   setUserCustomizationOpen: (arg0: boolean) => void;
   userName: string;
   userRole: string;
@@ -119,7 +119,7 @@ interface RightHeaderProps {
   handleLogOut: () => void;
 }
 
-export const RightHeader: React.FC<RightHeaderProps> = React.memo(
+export const RightHeader: React.FC<RightHeader> = React.memo(
   ({
     setUserCustomizationOpen,
     userName,

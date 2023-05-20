@@ -106,7 +106,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     error: errorUser,
     isFetching: isFetchingUser,
   } = useQuery(
-    ["user", username],
+    ["user", userId],
     async () => {
       if (userId) {
         const res = await api.usersGet(userId);

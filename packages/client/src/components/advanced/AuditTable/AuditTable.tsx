@@ -37,9 +37,9 @@ export const AuditTable: React.FC<IResponseAudit> = ({
   );
 };
 
-type IAuditTableRow = { mode: "edit" | "create" } & IAudit;
+type AuditTableRow = { mode: "edit" | "create" } & IAudit;
 
-export const AuditTableRow: React.FC<IAuditTableRow> = ({
+export const AuditTableRow: React.FC<AuditTableRow> = ({
   id,
   entityId,
   user,

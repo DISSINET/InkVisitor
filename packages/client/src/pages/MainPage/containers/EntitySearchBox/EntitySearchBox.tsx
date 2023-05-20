@@ -505,7 +505,6 @@ export const EntitySearchBox: React.FC = () => {
             name="updated-date"
             onChange={(e) => {
               const updatedDate = new Date(e.target.value);
-              console.log(updatedDate);
               handleChange({ updatedDate });
             }}
           />
