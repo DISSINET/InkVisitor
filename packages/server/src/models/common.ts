@@ -1,7 +1,8 @@
+import { sanitizeText } from "@common/functions";
 import { EntityEnums } from "@shared/enums";
 import { Connection, WriteResult } from "rethinkdb-ts";
 
-type GenericObject = { [key: string]: any; };
+type GenericObject = { [key: string]: any };
 export type UnknownObject = GenericObject | undefined;
 
 export interface IModel {
@@ -25,16 +26,16 @@ export function fillFlatObject<T>(
   if (!source) {
     return;
   }
+  const tgt = ctx as Record<string, unknown>;
+
   for (const key of Object.keys(source)) {
-    const wantedType = typeof (ctx as Record<string, unknown>)[key];
+    const wantedType = typeof tgt[key];
     if (wantedType === "undefined") {
       continue;
     }
 
-    if (
-      ((ctx as Record<string, unknown>)[key] as any).constructor.name === "Date"
-    ) {
-      (ctx as Record<string, unknown>)[key] = source[key];
+    if ((tgt[key] as any).constructor.name === "Date") {
+      tgt[key] = source[key];
       continue;
     }
 
@@ -48,7 +49,7 @@ export function fillFlatObject<T>(
     if (
       gotType === "object" &&
       wantedType === "boolean" &&
-      (ctx as Record<string, unknown>)[key] === false
+      tgt[key] === false
     ) {
       continue;
     }
@@ -57,7 +58,10 @@ export function fillFlatObject<T>(
       continue;
     }
 
-    (ctx as Record<string, unknown>)[key] = source[key];
+    tgt[key] = source[key];
+    if (typeof tgt[key] === "string" && tgt[key]) {
+      tgt[key] = sanitizeText(tgt[key] as string);
+    }
   }
 }
 
@@ -82,7 +86,10 @@ export function fillArray<T>(
   }
 }
 
-export const determineOrder = (want: number, sibl: Record<number, unknown>): number => {
+export const determineOrder = (
+  want: number,
+  sibl: Record<number, unknown>
+): number => {
   const sortedOrders: number[] = Object.keys(sibl)
     .map((k) => parseFloat(k))
     .sort((a, b) => a - b);

@@ -13,6 +13,7 @@ import { EventTypes } from "@models/events/types";
 import Prop from "@models/prop/prop";
 import { findEntityById } from "@service/shorthands";
 import { IRequest } from "src/custom_typings/request";
+import { sanitizeText } from "@common/functions";
 
 export default class Entity implements IEntity, IDbModel {
   static table = "entities";
@@ -39,9 +40,11 @@ export default class Entity implements IEntity, IDbModel {
   constructor(data: Partial<IEntity>) {
     fillFlatObject(this, { ...data, data: undefined });
     fillArray(this.references, Object, data.references);
-    fillArray(this.notes, String, data.notes);
     fillArray<Prop>(this.props, Prop, data.props);
 
+    if (data.notes !== undefined) {
+      this.notes = data.notes.map(sanitizeText);
+    }
     if (data.legacyId !== undefined) {
       this.legacyId = data.legacyId;
     }
