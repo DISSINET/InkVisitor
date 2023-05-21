@@ -33,9 +33,9 @@ export class ActionValency implements IActionValency, IModel {
 }
 
 export class ActionEntity implements IActionEntity, IModel {
-  a1?: EntityEnums.Class[];
-  a2?: EntityEnums.Class[];
-  s?: EntityEnums.Class[];
+  a1?: EntityEnums.ExtendedClass[];
+  a2?: EntityEnums.ExtendedClass[];
+  s?: EntityEnums.ExtendedClass[];
 
   constructor(data: Partial<IActionEntity>) {
     this.a1 = data.a1 || undefined;
@@ -43,12 +43,41 @@ export class ActionEntity implements IActionEntity, IModel {
     this.s = data.s || undefined;
   }
 
+  /**
+   * predicate function for validating single field
+   * @param field
+   * @returns
+   */
+  static isFieldValid(field: unknown): boolean {
+    if (!field) {
+      return true;
+    }
+
+    if (field.constructor.name !== "Array") {
+      return false;
+    }
+
+    if ((field as unknown[]).find((v) => !EntityEnums.IsExtendedClass(v))) {
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * predicate function for testing validity of the whole ActionEntity instance
+   * @returns
+   */
   isValid(): boolean {
-    return (
-      (this.a1 ? this.a1.constructor.name === "Array" : true) &&
-      (this.a2 ? this.a2.constructor.name === "Array" : true) &&
-      (this.s ? this.s.constructor.name === "Array" : true)
-    );
+    if (
+      !ActionEntity.isFieldValid(this.a1) ||
+      !ActionEntity.isFieldValid(this.a2) ||
+      !ActionEntity.isFieldValid(this.s)
+    ) {
+      return false;
+    }
+
+    return true;
   }
 
   static toRules(

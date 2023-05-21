@@ -60,6 +60,15 @@ export namespace EntityEnums {
 
   export type ExtendedClass = Class | Extension;
 
+  /**
+   * Helper function for testing if input value is valid extended class value
+   * @param input
+   * @returns
+   */
+  export const IsExtendedClass = (input: unknown): boolean => {
+    return Object.values(Class).indexOf(input as any) !== -1 || Object.values(Extension).indexOf(input as any) !== -1
+  }
+
   export enum LogicalType {
     Definite = "1",
     Indefinite = "2",
