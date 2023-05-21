@@ -54,7 +54,7 @@ export class ResponseStatement extends Statement implements IResponseStatement {
    * Returns list of supported entity classes from actions valencies
    * @returns list of classes
    */
-  getSubjectETypes(): EntityEnums.Class[] {
+  getSubjectETypes(): EntityEnums.ExtendedClass[] {
     return this.data.actions
       .map((a) => a.actionId)
       .filter(
@@ -62,7 +62,7 @@ export class ResponseStatement extends Statement implements IResponseStatement {
           this.entities[aid] &&
           this.entities[aid].class === EntityEnums.Class.Action
       )
-      .reduce<EntityEnums.Class[]>(
+      .reduce<EntityEnums.ExtendedClass[]>(
         (acc, aid) =>
           acc.concat((this.entities[aid] as IAction).data.entities.s || []),
         []
