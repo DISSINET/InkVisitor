@@ -8,7 +8,7 @@ import {
   IActionData,
 } from "@shared/types/action";
 
-class ActionValency implements IActionValency, IModel {
+export class ActionValency implements IActionValency, IModel {
   a1: string;
   a2: string;
   s: string;
@@ -20,6 +20,10 @@ class ActionValency implements IActionValency, IModel {
   }
 
   isValid(): boolean {
+    if (this.a1 === "NULL" || this.a2 === "NULL" || this.s === "NULL") {
+      return false;
+    }
+
     return (
       typeof this.a1 === "string" &&
       typeof this.a2 === "string" &&
