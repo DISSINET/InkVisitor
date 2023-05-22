@@ -1,7 +1,7 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import React, { useEffect } from "react";
 import { Helmet } from "react-helmet";
-import { QueryClient, QueryClientProvider } from "react-query";
-import { ReactQueryDevtools } from "react-query/devtools";
 import { BrowserRouter, Redirect, Route, Switch } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { ThemeProvider } from "styled-components";
@@ -13,15 +13,6 @@ import ActivatePage from "pages/Activate";
 import LoginPage from "pages/Login";
 import UsersPage from "pages/Users";
 
-import { Page } from "components/advanced";
-import { useDebounce } from "hooks";
-import NotFoundPage from "pages/NotFound";
-import { DndProvider } from "react-dnd";
-import { HTML5Backend } from "react-dnd-html5-backend";
-import { setContentHeight } from "redux/features/layout/contentHeightSlice";
-import { setLayoutWidth } from "redux/features/layout/layoutWidthSlice";
-import { setPanelWidths } from "redux/features/layout/panelWidthsSlice";
-import { setSeparatorXPosition } from "redux/features/layout/separatorXPositionSlice";
 import {
   heightHeader,
   percentPanelWidths,
@@ -30,11 +21,19 @@ import {
   thirdPanelMinWidth,
 } from "Theme/constants";
 import GlobalStyle from "Theme/global";
+import { Page } from "components/advanced";
+import { useDebounce } from "hooks";
+import { AboutPage } from "pages/About";
+import NotFoundPage from "pages/NotFound";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
+import { setContentHeight } from "redux/features/layout/contentHeightSlice";
+import { setLayoutWidth } from "redux/features/layout/layoutWidthSlice";
+import { setPanelWidths } from "redux/features/layout/panelWidthsSlice";
+import { setSeparatorXPosition } from "redux/features/layout/separatorXPositionSlice";
+import theme from "./Theme/theme";
 import AclPage from "./pages/Acl";
 import MainPage from "./pages/MainPage";
-import theme from "./Theme/theme";
-import { AboutPage } from "pages/About";
-import { setPing } from "redux/features/pingSlice";
 
 const clockPerformance = (
   profilerId: any,
@@ -81,20 +80,15 @@ export const ProtectedPath = (props: any) => {
   );
 };
 
-export const App: React.FC = () => {
-  const ping = useAppSelector((state) => state.ping);
-
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: {
-        refetchOnWindowFocus: false,
-        retry: false,
-        // TODO: disabling not working
-        // enabled: ping !== -1,
-      },
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: false,
     },
-  });
-
+  },
+});
+export const App: React.FC = () => {
   const dispatch = useAppDispatch();
   const disableUserSelect = useAppSelector(
     (state) => state.layout.disableUserSelect
@@ -169,13 +163,6 @@ export const App: React.FC = () => {
       dispatch(setSeparatorXPosition(panels[0] + panels[1]));
     }
   }, [debouncedWidth]);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      dispatch(setPing(api.getPing()));
-    }, 1000);
-    return () => clearInterval(interval);
-  }, []);
 
   return (
     <>

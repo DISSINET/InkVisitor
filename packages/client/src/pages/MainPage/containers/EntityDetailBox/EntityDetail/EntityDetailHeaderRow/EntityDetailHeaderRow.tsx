@@ -9,7 +9,7 @@ import React, { useState } from "react";
 import { CgListTree } from "react-icons/cg";
 import { FaClone, FaEdit, FaTrashAlt } from "react-icons/fa";
 import { GrClone } from "react-icons/gr";
-import { useMutation, useQueryClient } from "react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import {
   StyledActantHeaderRow,
@@ -40,9 +40,9 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
       onSuccess: (data, variables) => {
         appendDetailId(data.data.data.id);
         toast.info(`Entity duplicated!`);
-        queryClient.invalidateQueries("templates");
+        queryClient.invalidateQueries(["templates"]);
         if (data.data.data.class === EntityEnums.Class.Territory) {
-          queryClient.invalidateQueries("tree");
+          queryClient.invalidateQueries(["tree"]);
         }
       },
       onError: () => {
@@ -81,7 +81,7 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
         });
       }
       if (entity.class === EntityEnums.Class.Territory) {
-        queryClient.invalidateQueries("tree");
+        queryClient.invalidateQueries(["tree"]);
       }
     }
   };

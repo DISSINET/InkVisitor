@@ -3,7 +3,7 @@ import { PingColor } from "Theme/theme";
 import LogoInkvisitor from "assets/logos/inkvisitor.svg";
 import { Loader } from "components";
 import React, { useEffect, useState } from "react";
-import { useQueryClient } from "react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { useHistory, useLocation } from "react-router";
 import { toast } from "react-toastify";
 import { useAppSelector } from "redux/hooks";

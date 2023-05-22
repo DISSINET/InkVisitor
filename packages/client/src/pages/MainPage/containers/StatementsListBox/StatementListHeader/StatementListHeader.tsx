@@ -23,7 +23,11 @@ import {
   MdOutlineCheckBoxOutlineBlank,
   MdOutlineIndeterminateCheckBox,
 } from "react-icons/md";
-import { UseMutationResult, useQuery, useQueryClient } from "react-query";
+import {
+  UseMutationResult,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { setLastClickedIndex } from "redux/features/statementList/lastClickedIndexSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { DropdownItem } from "types";
@@ -150,7 +154,9 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
     },
   ];
 
-  const treeData: IResponseTree | undefined = queryClient.getQueryData("tree");
+  const treeData: IResponseTree | undefined = queryClient.getQueryData([
+    "tree",
+  ]);
 
   // get user data
   const userId = localStorage.getItem("userid");

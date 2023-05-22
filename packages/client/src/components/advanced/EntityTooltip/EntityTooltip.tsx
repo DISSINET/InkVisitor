@@ -13,7 +13,7 @@ import { AiOutlineTag } from "react-icons/ai";
 import { BiCommentDetail } from "react-icons/bi";
 import { BsCardText } from "react-icons/bs";
 import { ImListNumbered } from "react-icons/im";
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 import {
   maxTooltipMultiRelations,
   tooltipLabelSeparator,
@@ -43,7 +43,7 @@ interface EntityTooltip {
   itemsCount?: number;
   // settings
   position?: Placement;
-  color?: typeof Colors[number];
+  color?: (typeof Colors)[number];
   disabled?: boolean;
 
   tagHovered: boolean;

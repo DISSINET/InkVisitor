@@ -13,7 +13,7 @@ import {
 import { EntityTag } from "components/advanced";
 import { applyTemplate } from "constructors";
 import React from "react";
-import { UseMutationResult } from "react-query";
+import { UseMutationResult } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 
 interface ApplyTemplateModal {

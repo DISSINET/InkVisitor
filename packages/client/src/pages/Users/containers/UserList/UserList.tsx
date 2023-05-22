@@ -21,7 +21,7 @@ import {
   RiUserSettingsFill,
   RiUserStarFill,
 } from "react-icons/ri";
-import { useMutation, useQuery, useQueryClient } from "react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Cell, Column, Row, useTable } from "react-table";
 import { toast } from "react-toastify";
 import {
@@ -99,7 +99,7 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
       const res: any = await api.usersDelete(removingUser.id);
       if (res.status === 200) {
         toast.warning(`User ${removingUser.name} removed!`);
-        queryClient.invalidateQueries("users");
+        queryClient.invalidateQueries(["users"]);
         setRemovingUserId(false);
       }
     }

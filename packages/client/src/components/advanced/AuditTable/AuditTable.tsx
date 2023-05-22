@@ -4,7 +4,7 @@ import React from "react";
 import { FaExchangeAlt, FaRegCalendarAlt, FaUser } from "react-icons/fa";
 import { MdAddCircleOutline } from "react-icons/md";
 import { RiTimeLine } from "react-icons/ri";
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 import {
   StyledAuditColumn,
   StyledAuditEllipsis,

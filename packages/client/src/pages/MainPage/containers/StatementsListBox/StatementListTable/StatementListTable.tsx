@@ -24,7 +24,7 @@ import {
   MdOutlineCheckBox,
   MdOutlineCheckBoxOutlineBlank,
 } from "react-icons/md";
-import { UseMutationResult } from "react-query";
+import { UseMutationResult } from "@tanstack/react-query";
 import { Cell, Column, useExpanded, useRowSelect, useTable } from "react-table";
 import { setLastClickedIndex } from "redux/features/statementList/lastClickedIndexSlice";
 import { setRowsExpanded } from "redux/features/statementList/rowsExpandedSlice";

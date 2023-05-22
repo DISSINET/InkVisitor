@@ -4,7 +4,7 @@ import { Button, Loader } from "components";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
 import { FaPlus } from "react-icons/fa";
-import { useMutation, useQuery, useQueryClient } from "react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { setSelectedTerritoryPath } from "redux/features/territoryTree/selectedTerritoryPathSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { rootTerritoryId } from "Theme/constants";

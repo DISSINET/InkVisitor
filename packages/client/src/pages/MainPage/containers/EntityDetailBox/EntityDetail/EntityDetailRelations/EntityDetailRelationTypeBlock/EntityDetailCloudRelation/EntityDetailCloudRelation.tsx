@@ -3,7 +3,7 @@ import { AxiosResponse } from "axios";
 import { Cloud } from "components";
 import { EntityTag } from "components/advanced";
 import React from "react";
-import { UseMutationResult } from "react-query";
+import { UseMutationResult } from "@tanstack/react-query";
 import {
   StyledCloudEntityWrapper,
   StyledRelation,

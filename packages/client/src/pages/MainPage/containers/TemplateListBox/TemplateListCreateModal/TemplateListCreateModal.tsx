@@ -19,7 +19,7 @@ import {
 import { CEntity, CStatement, CTemplateEntity } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { DropdownItem } from "types";
 
@@ -86,7 +86,7 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
         );
         queryClient.invalidateQueries(["templates"]);
         if (selectedDetailId) {
-          queryClient.invalidateQueries("entity-templates");
+          queryClient.invalidateQueries(["entity-templates"]);
         }
         if (variables.class === EntityEnums.Class.Statement) {
           setStatementId(variables.id);
