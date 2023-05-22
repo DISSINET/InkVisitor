@@ -47,8 +47,6 @@ export const ContextMenuNewTerritoryModal: React.FC<
       if (userId) {
         const res = await api.usersGet(userId);
         return res.data;
-      } else {
-        return false;
       }
     },
     { enabled: !!userId && api.isLoggedIn() }

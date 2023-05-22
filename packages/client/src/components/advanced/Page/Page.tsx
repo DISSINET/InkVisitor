@@ -62,8 +62,6 @@ export const Page: React.FC<Page> = ({ children }) => {
       if (userId) {
         const res = await api.usersGet(userId);
         return res.data;
-      } else {
-        return false;
       }
     },
     { enabled: api.isLoggedIn() && !disableRightHeader }
