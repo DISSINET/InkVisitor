@@ -3,7 +3,7 @@ import api from "api";
 import { Submit } from "components";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
-import { useMutation, useQueryClient } from "react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 
 interface ContextMenuSubmitDelete {
@@ -38,10 +38,10 @@ export const ContextMenuSubmitDelete: React.FC<ContextMenuSubmitDelete> = ({
           setTerritoryId("");
         }
         removeDetailId(territoryActant.id);
-        queryClient.invalidateQueries("detail-tab-entities");
-        queryClient.invalidateQueries("tree");
-        queryClient.invalidateQueries("statement");
-        queryClient.invalidateQueries("bookmarks");
+        queryClient.invalidateQueries(["detail-tab-entities"]);
+        queryClient.invalidateQueries(["tree"]);
+        queryClient.invalidateQueries(["statement"]);
+        queryClient.invalidateQueries(["bookmarks"]);
         onClose();
       },
       onError: (error) => {

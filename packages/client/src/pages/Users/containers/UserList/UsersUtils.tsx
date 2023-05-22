@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { toast } from "react-toastify";
-import { useMutation, useQueryClient } from "react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { FaPlus } from "react-icons/fa";
 
 import api from "api";
@@ -27,7 +27,7 @@ export const UsersUtils: React.FC<UsersUtils> = React.memo(({}) => {
         toast.success(`User ${newUserName} created!`);
         setNewUserName("");
         setNewUserEmail("");
-        queryClient.invalidateQueries("users");
+        queryClient.invalidateQueries(["users"]);
       },
       onError() {
         toast.warning(`problem creating user!`);

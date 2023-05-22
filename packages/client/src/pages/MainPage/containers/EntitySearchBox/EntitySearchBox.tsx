@@ -13,7 +13,7 @@ import {
 import { useDebounce } from "hooks";
 import React, { useMemo, useState } from "react";
 import { RiCloseFill } from "react-icons/ri";
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 import { wildCardChar } from "Theme/constants";
 import { DropdownItem } from "types";
 import useResizeObserver from "use-resize-observer";

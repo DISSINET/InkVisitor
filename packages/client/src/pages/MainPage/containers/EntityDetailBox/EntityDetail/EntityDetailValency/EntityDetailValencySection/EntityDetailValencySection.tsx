@@ -12,7 +12,7 @@ import { Dropdown, Input } from "components";
 import { EntitySuggester } from "components/advanced";
 import update from "immutability-helper";
 import React, { useCallback, useEffect, useState } from "react";
-import { UseMutationResult } from "react-query";
+import { UseMutationResult } from "@tanstack/react-query";
 import { v4 as uuidv4 } from "uuid";
 import { EntityDetailRelationRow } from "../../EntityDetailRelations/EntityDetailRelationTypeBlock/EntityDetailRelationRow/EntityDetailRelationRow";
 import { EntityDetailRelationTypeIcon } from "../../EntityDetailRelations/EntityDetailRelationTypeBlock/EntityDetailRelationTypeIcon/EntityDetailRelationTypeIcon";

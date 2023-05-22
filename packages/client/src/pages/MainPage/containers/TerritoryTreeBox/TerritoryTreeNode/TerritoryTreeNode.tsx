@@ -12,7 +12,11 @@ import {
   BsCaretRight,
   BsCaretRightFill,
 } from "react-icons/bs";
-import { useMutation, UseMutationResult, useQueryClient } from "react-query";
+import {
+  useMutation,
+  UseMutationResult,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { animated, config, useSpring } from "@react-spring/web";
 import { setDisableTreeScroll } from "redux/features/territoryTree/disableTreeScrollSlice";
 import { setTreeInitialized } from "redux/features/territoryTree/treeInitializeSlice";
@@ -131,7 +135,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
     {
       onSuccess: () => {
         dispatch(setDisableTreeScroll(true));
-        queryClient.invalidateQueries("tree");
+        queryClient.invalidateQueries(["tree"]);
       },
     }
   );

@@ -2,7 +2,7 @@ import { IResponseEntity } from "@shared/types";
 import api from "api";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 import { EntityDetail } from "./EntityDetail/EntityDetail";
 import { StyledTabGroup } from "./EntityDetailBoxStyles";
 import { EntityDetailTab } from "./EntityDetailTab/EntityDetailTab";

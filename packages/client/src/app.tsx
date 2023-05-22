@@ -1,7 +1,11 @@
 import React, { useEffect } from "react";
 import { Helmet } from "react-helmet";
-import { QueryClient, QueryClientProvider } from "react-query";
-import { ReactQueryDevtools } from "react-query/devtools";
+import {
+  QueryClient,
+  QueryClientProvider,
+  useQuery,
+} from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { BrowserRouter, Redirect, Route, Switch } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { ThemeProvider } from "styled-components";
@@ -82,15 +86,11 @@ export const ProtectedPath = (props: any) => {
 };
 
 export const App: React.FC = () => {
-  const ping = useAppSelector((state) => state.ping);
-
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
         refetchOnWindowFocus: false,
         retry: false,
-        // TODO: disabling not working
-        // enabled: ping !== -1,
       },
     },
   });
@@ -169,13 +169,6 @@ export const App: React.FC = () => {
       dispatch(setSeparatorXPosition(panels[0] + panels[1]));
     }
   }, [debouncedWidth]);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      dispatch(setPing(api.getPing()));
-    }, 1000);
-    return () => clearInterval(interval);
-  }, []);
 
   return (
     <>

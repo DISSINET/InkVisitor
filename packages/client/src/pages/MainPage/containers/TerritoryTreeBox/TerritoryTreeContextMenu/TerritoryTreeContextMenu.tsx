@@ -3,7 +3,7 @@ import { IEntity } from "@shared/types";
 import { Button } from "components";
 import React, { useRef, useState } from "react";
 import { FaPlus, FaStar, FaTrashAlt } from "react-icons/fa";
-import { UseMutationResult } from "react-query";
+import { UseMutationResult } from "@tanstack/react-query";
 import { useSpring, config } from "@react-spring/web";
 import { ContextMenuNewTerritoryModal } from "../ContextMenuNewTerritoryModal/ContextMenuNewTerritoryModal";
 import { ContextMenuSubmitDelete } from "../ContextMenuSubmitDelete/ContextMenuSubmitDelete";

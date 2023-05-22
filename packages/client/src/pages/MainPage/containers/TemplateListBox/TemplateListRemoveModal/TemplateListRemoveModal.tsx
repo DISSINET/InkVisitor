@@ -13,7 +13,7 @@ import {
 import { EntityTag } from "components/advanced";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
-import { useMutation, useQueryClient } from "react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { StyledModalContent } from "../TemplateListBoxStyles";
 
@@ -43,7 +43,7 @@ export const TemplateListRemoveModal: React.FC<TemplateListRemoveModal> = ({
       onSuccess: (data, variables) => {
         if (detailIdArray.includes(removeEntityId)) {
           removeDetailId(removeEntityId);
-          queryClient.invalidateQueries("detail-tab-entities");
+          queryClient.invalidateQueries(["detail-tab-entities"]);
         }
         entityToRemove &&
           toast.warning(
@@ -52,14 +52,14 @@ export const TemplateListRemoveModal: React.FC<TemplateListRemoveModal> = ({
         queryClient.invalidateQueries(["templates"]);
         if (selectedDetailId) {
           // TODO: check if entity class is the same as opened detail
-          queryClient.invalidateQueries("entity-templates");
+          queryClient.invalidateQueries(["entity-templates"]);
         }
         if (
           statementId &&
           entityToRemove &&
           entityToRemove.class === EntityEnums.Class.Statement
         ) {
-          queryClient.invalidateQueries("statement-templates");
+          queryClient.invalidateQueries(["statement-templates"]);
         }
         queryClient.invalidateQueries(["entity"]);
         setRemoveEntityId(false);

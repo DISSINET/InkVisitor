@@ -1,7 +1,7 @@
 import api from "api";
 import { useSearchParams } from "hooks";
 import { useEffect } from "react";
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 import { setDisableStatementListScroll } from "redux/features/statementList/disableStatementListScrollSlice";
 import { setDisableTreeScroll } from "redux/features/territoryTree/disableTreeScrollSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
