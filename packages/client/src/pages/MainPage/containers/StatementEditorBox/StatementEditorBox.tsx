@@ -4,7 +4,7 @@ import { Loader } from "components";
 import { useSearchParams } from "hooks";
 import React, { useEffect } from "react";
 import { BsInfoCircle } from "react-icons/bs";
-import { useMutation, useQuery, useQueryClient } from "react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { StatementEditor } from "./StatementEditor/StatementEditor";
 import { StyledEditorEmptyState } from "./StatementEditorBoxStyles";
 
@@ -52,13 +52,13 @@ export const StatementEditorBox: React.FC = () => {
           queryClient.invalidateQueries(["templates"]);
         }
         if (variables.label !== undefined) {
-          queryClient.invalidateQueries("detail-tab-entities");
+          queryClient.invalidateQueries(["detail-tab-entities"]);
         }
         queryClient.invalidateQueries(["statement"]);
         queryClient.invalidateQueries(["territory"]);
 
-        queryClient.invalidateQueries("statement-templates");
-        queryClient.invalidateQueries("entity-templates");
+        queryClient.invalidateQueries(["statement-templates"]);
+        queryClient.invalidateQueries(["entity-templates"]);
       },
     }
   );
@@ -75,7 +75,7 @@ export const StatementEditorBox: React.FC = () => {
         queryClient.invalidateQueries(["statement"]);
         queryClient.invalidateQueries(["territory"]);
         if (variables.text !== undefined) {
-          queryClient.invalidateQueries("detail-tab-entities");
+          queryClient.invalidateQueries(["detail-tab-entities"]);
         }
       },
     }
@@ -95,9 +95,9 @@ export const StatementEditorBox: React.FC = () => {
     {
       onSuccess: (data, variables) => {
         setTerritoryId(variables);
-        queryClient.invalidateQueries("statement");
-        queryClient.invalidateQueries("tree");
-        queryClient.invalidateQueries("territory");
+        queryClient.invalidateQueries(["statement"]);
+        queryClient.invalidateQueries(["tree"]);
+        queryClient.invalidateQueries(["territory"]);
       },
     }
   );

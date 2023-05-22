@@ -6,7 +6,7 @@ import { EntityTag } from "components/advanced";
 import { useSearchParams } from "hooks";
 import React from "react";
 import { BsArrow90DegLeft, BsArrowRightShort } from "react-icons/bs";
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 import { setTreeInitialized } from "redux/features/territoryTree/treeInitializeSlice";
 import { useAppDispatch } from "redux/hooks";
 import { rootTerritoryId } from "Theme/constants";

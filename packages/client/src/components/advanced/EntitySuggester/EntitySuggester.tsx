@@ -11,7 +11,7 @@ import { CEntity, CStatement, CTerritory, InstTemplate } from "constructors";
 import { useDebounce, useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
 import { FaHome } from "react-icons/fa";
-import { useMutation, useQuery, useQueryClient } from "react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { DropdownAny, rootTerritoryId, wildCardChar } from "Theme/constants";
 import { DropdownItem, EntityDragItem, SuggesterItemToCreate } from "types";
 import { AddTerritoryModal } from "..";
@@ -211,7 +211,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
           appendDetailId(variables.id);
         }
         if (variables.class === EntityEnums.Class.Territory) {
-          queryClient.invalidateQueries("tree");
+          queryClient.invalidateQueries(["tree"]);
         }
       },
     }
@@ -318,7 +318,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
         appendDetailId(newEntityId);
       }
       if (templateToDuplicate.class === EntityEnums.Class.Territory) {
-        queryClient.invalidateQueries("tree");
+        queryClient.invalidateQueries(["tree"]);
       }
     }
   };
@@ -432,7 +432,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
               if (openDetailOnCreate) {
                 appendDetailId(newEntityId);
               }
-              queryClient.invalidateQueries("tree");
+              queryClient.invalidateQueries(["tree"]);
             }
             setTempTemplateToInstantiate(false);
           }}

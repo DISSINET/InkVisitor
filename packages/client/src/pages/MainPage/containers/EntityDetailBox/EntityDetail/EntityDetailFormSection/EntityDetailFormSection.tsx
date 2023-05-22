@@ -11,7 +11,7 @@ import { Button, Dropdown, Input, MultiInput, TypeBar } from "components";
 import { AttributeButtonGroup, EntityTag } from "components/advanced";
 import React from "react";
 import { FaRegCopy } from "react-icons/fa";
-import { UseMutationResult } from "react-query";
+import { UseMutationResult } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { rootTerritoryId } from "Theme/constants";
 import { DropdownItem } from "types";

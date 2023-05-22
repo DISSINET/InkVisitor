@@ -22,7 +22,7 @@ import {
 } from "components/advanced";
 import React, { useEffect, useMemo, useState } from "react";
 import { BiHide, BiShow } from "react-icons/bi";
-import { useMutation, useQuery, useQueryClient } from "react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import {
   StyledRightsHeading,
@@ -142,7 +142,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
     async (changes: any) => await api.usersUpdate(user.id, changes),
     {
       onSuccess: (data, variables) => {
-        queryClient.invalidateQueries("user");
+        queryClient.invalidateQueries(["user"]);
         toast.info("User updated!");
         //onClose();
       },

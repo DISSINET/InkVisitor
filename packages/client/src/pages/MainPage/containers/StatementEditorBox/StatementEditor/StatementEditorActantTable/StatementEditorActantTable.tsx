@@ -2,7 +2,7 @@ import { EntityEnums } from "@shared/enums";
 import { IEntity, IResponseStatement, IStatementActant } from "@shared/types";
 import update from "immutability-helper";
 import React, { useCallback, useMemo, useState } from "react";
-import { UseMutationResult } from "react-query";
+import { UseMutationResult } from "@tanstack/react-query";
 import { FilteredActantObject } from "types";
 import { StatementEditorActantTableRow } from "./StatementEditorActantTableRow";
 

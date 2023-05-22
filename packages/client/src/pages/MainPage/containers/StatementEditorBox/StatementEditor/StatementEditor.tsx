@@ -26,7 +26,11 @@ import {
 import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
 import { AiOutlineWarning } from "react-icons/ai";
-import { UseMutationResult, useQuery, useQueryClient } from "react-query";
+import {
+  UseMutationResult,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { useAppSelector } from "redux/hooks";
 import { excludedSuggesterEntities } from "Theme/constants";
@@ -211,7 +215,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
   // refetch audit when statement changes
   useEffect(() => {
-    queryClient.invalidateQueries("audit");
+    queryClient.invalidateQueries(["audit"]);
   }, [statement]);
 
   // stores territory id

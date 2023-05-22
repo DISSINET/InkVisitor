@@ -20,7 +20,7 @@ import { EntitySuggester, EntityTag } from "components/advanced";
 import { CEntity, CStatement, CTerritory } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { excludedSuggesterEntities, rootTerritoryId } from "Theme/constants";
 import { DropdownItem } from "types";
@@ -104,7 +104,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
         closeModal();
         appendDetailId(variables.id);
         if (variables.class === EntityEnums.Class.Territory) {
-          queryClient.invalidateQueries("tree");
+          queryClient.invalidateQueries(["tree"]);
         }
       },
     }

@@ -1,7 +1,7 @@
 import { IResponseStatement, IStatementAction } from "@shared/types";
 import update from "immutability-helper";
 import React, { useCallback, useEffect, useState } from "react";
-import { UseMutationResult } from "react-query";
+import { UseMutationResult } from "@tanstack/react-query";
 import { FilteredActionObject } from "types";
 import { StatementEditorActionTableRow } from "./StatementEditorActionTableRow";
 

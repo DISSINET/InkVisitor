@@ -12,7 +12,7 @@ import {
   useDrop,
 } from "react-dnd";
 import { FaGripVertical, FaUnlink } from "react-icons/fa";
-import { UseMutationResult } from "react-query";
+import { UseMutationResult } from "@tanstack/react-query";
 import { DragItem, ItemTypes } from "types";
 import { dndHoverFn } from "utils";
 import {

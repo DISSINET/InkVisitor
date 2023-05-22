@@ -9,7 +9,7 @@ import { useSearchParams } from "hooks";
 import useKeyLift from "hooks/useKeyLift";
 import useKeypress from "hooks/useKeyPress";
 import React, { useEffect, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocation, useHistory } from "react-router";
 import { toast } from "react-toastify";
 import { setDisableUserSelect } from "redux/features/layout/disableUserSelectSlice";
@@ -17,6 +17,7 @@ import { setLastClickedIndex } from "redux/features/statementList/lastClickedInd
 import { setUsername } from "redux/features/usernameSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { StyledPageContent, StyledPage } from "./PageStyles";
+import { setPing } from "redux/features/pingSlice";
 
 interface Page {
   children?: React.ReactNode;
@@ -87,6 +88,18 @@ export const Page: React.FC<Page> = ({ children }) => {
   useKeypress("Shift", () => dispatch(setDisableUserSelect(true)));
 
   useKeyLift("Shift", () => dispatch(setDisableUserSelect(false)));
+
+  useQuery(
+    ["ping"],
+    async () => {
+      const localPing = await api.getPing();
+      if (localPing) dispatch(setPing(localPing));
+      return localPing;
+    },
+    {
+      refetchInterval: 1000,
+    }
+  );
 
   return (
     <StyledPage

@@ -17,7 +17,7 @@ import {
 } from "components";
 import { EntitySuggester, EntityTag } from "components/advanced";
 import React, { useEffect, useState } from "react";
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { DropdownAny } from "Theme/constants";
 import { DropdownItem, SuggesterItemToCreate } from "types";
