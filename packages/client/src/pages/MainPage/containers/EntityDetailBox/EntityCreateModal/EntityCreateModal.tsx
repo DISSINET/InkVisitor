@@ -64,8 +64,6 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
       if (userId) {
         const res = await api.usersGet(userId);
         return res.data;
-      } else {
-        return false;
       }
     },
     { enabled: !!userId && api.isLoggedIn() }

@@ -97,7 +97,7 @@ export const StatementListBox: React.FC = () => {
         return res.data;
       }
     },
-    { enabled: api.isLoggedIn() }
+    { enabled: api.isLoggedIn() && !!userId }
   );
 
   const [storedTerritoryIds, setStoredTerritoryIds] = useState<string[]>([]);

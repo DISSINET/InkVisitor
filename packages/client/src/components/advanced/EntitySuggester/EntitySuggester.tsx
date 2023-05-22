@@ -90,8 +90,6 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
       if (userId) {
         const res = await api.usersGet(userId);
         return res.data;
-      } else {
-        return false;
       }
     },
     { enabled: !!userId && api.isLoggedIn() }

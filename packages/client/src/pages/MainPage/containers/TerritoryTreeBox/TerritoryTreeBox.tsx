@@ -39,7 +39,7 @@ export const TerritoryTreeBox: React.FC = () => {
         return res.data;
       }
     },
-    { enabled: api.isLoggedIn() }
+    { enabled: api.isLoggedIn() && !!userId }
   );
 
   const [storedTerritoryIds, setStoredTerritoryIds] = useState<string[]>([]);
@@ -115,9 +115,7 @@ export const TerritoryTreeBox: React.FC = () => {
           territoryActantId={rootTerritoryId}
         />
       )}
-      <Loader
-        show={isFetching || userIsFetching || updateUserMutation.isLoading}
-      />
+      <Loader show={isFetching || updateUserMutation.isLoading} />
     </>
   );
 };
