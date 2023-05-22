@@ -14,6 +14,11 @@ export namespace EntityEnums {
     return PLOGESTR.indexOf(entityClass) !== -1
   }
 
+  // Predicate for testing if input value is one of accepted class values
+  export const IsClass = function(input: unknown, ...accepted: Class[]): boolean {
+    return accepted.indexOf(input as Class) !== -1
+  }
+
   export enum Class {
     Action = "A",
     Territory = "T",
