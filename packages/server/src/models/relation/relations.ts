@@ -1,6 +1,6 @@
 import { nonenumerable } from "@common/decorators";
-import { EntityEnums, RelationEnums } from "@shared/enums";
-import { Relation as RelationTypes } from "@shared/types";
+import { EntityEnums, RelationEnums, WarningTypeEnums } from "@shared/enums";
+import { IWarning, Relation as RelationTypes } from "@shared/types";
 import { Connection } from "rethinkdb-ts";
 import { IRequest } from "src/custom_typings/request";
 import Actant1Semantics from "./actant1-semantics";
@@ -18,6 +18,7 @@ import SubjectSemantics from "./subject-semantics";
 import Superclass from "./superclass";
 import SuperordinateLocation from "./superordinate-location";
 import Synonym from "./synonym";
+import Relation from "./relation";
 
 type ISuperclass = RelationTypes.ISuperclass;
 type ISuperordinateLocation = RelationTypes.ISuperordinateLocation;
@@ -41,9 +42,9 @@ export class UsedRelations implements RelationTypes.IUsedRelations {
   @nonenumerable
   entityClass: EntityEnums.Class;
   @nonenumerable
-  maxNestLvl: number = 3;
+  maxNestLvl = 3;
   @nonenumerable
-  maxListLen: number = 10;
+  maxListLen = 10;
 
   [RelationEnums.Type.Superclass]?: RelationTypes.IDetailType<ISuperclass>;
   [RelationEnums.Type
@@ -73,10 +74,12 @@ export class UsedRelations implements RelationTypes.IUsedRelations {
   [RelationEnums.Type
     .Actant2Semantics]?: RelationTypes.IDetailType<IActant2Semantics>;
   [RelationEnums.Type.Related]?: RelationTypes.IDetailType<IRelated>;
+  warnings: IWarning[];
 
   constructor(forEntityId: string, forEntityClass: EntityEnums.Class) {
     this.entityId = forEntityId;
     this.entityClass = forEntityClass;
+    this.warnings = [];
   }
 
   async prepareSuperclasses(dbConn: Connection): Promise<void> {
@@ -350,6 +353,8 @@ export class UsedRelations implements RelationTypes.IUsedRelations {
     if (types.indexOf(RelationEnums.Type.Related) != -1) {
       await this.prepareRelateds(req.db.connection);
     }
+
+    this.warnings = await this.getWarnings(req.db.connection);
   }
 
   getEntityIdsFromType(relationType: RelationEnums.Type): string[] {
@@ -381,5 +386,57 @@ export class UsedRelations implements RelationTypes.IUsedRelations {
     }
 
     return out;
+  }
+
+  /**
+   * Shorthand for creating new warning
+   * @param warningType
+   * @param relId
+   * @returns new instance of warning
+   */
+  newWarning(warningType: WarningTypeEnums, relId: string): IWarning {
+    return {
+      type: warningType,
+      message: "",
+      origin: relId,
+    };
+  }
+
+  /**
+   * prepares warning instances for current response object
+   * @param conn
+   * @returns
+   */
+  async getWarnings(conn: Connection): Promise<IWarning[]> {
+    const warnings: IWarning[] = [];
+
+    const sclmWarning = await this.hasSCLM(conn);
+    if (sclmWarning) {
+      warnings.push(sclmWarning);
+    }
+
+    return warnings;
+  }
+
+  /**
+   * Tests if there is SCLM warning and returns it
+   * @param conn
+   * @returns
+   */
+  async hasSCLM(conn: Connection): Promise<IWarning | undefined> {
+    const scls = await Relation.findForEntity(
+      conn,
+      this.entityId,
+      RelationEnums.Type.Superclass
+    );
+    let warn: IWarning | undefined;
+    for (const scl of scls) {
+      if (scl.entityIds[0] === this.entityId) {
+        warn = this.newWarning(WarningTypeEnums.SCLM, scl.id);
+        break;
+      }
+    }
+
+    return warn;
   }
 }
