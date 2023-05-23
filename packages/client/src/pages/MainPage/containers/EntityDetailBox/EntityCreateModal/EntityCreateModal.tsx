@@ -217,6 +217,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
                 inputWidth={96}
                 autoFocus
                 disableButtons
+                disableEnter
               />
             </ModalInputWrap>
             <ModalInputLabel>{"Detail: "}</ModalInputLabel>

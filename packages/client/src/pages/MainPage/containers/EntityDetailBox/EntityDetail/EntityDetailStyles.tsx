@@ -48,6 +48,7 @@ export const StyledDetailContentRowValueID = styled.div`
 `;
 
 export const StyledFormWrapper = styled.div`
+  margin-top: 0.3rem;
   display: flex;
   flex-direction: column;
   overflow: visible;

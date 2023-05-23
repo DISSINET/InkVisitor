@@ -137,6 +137,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
           addToCloud(res.data);
           setTempCloudEntityId(false);
         }
+        return res.data;
       }
     },
     {

@@ -90,7 +90,7 @@ export const Page: React.FC<Page> = ({ children }) => {
   useQuery(
     ["ping"],
     async () => {
-      const localPing = await api.getPing();
+      const localPing = api.getPing();
       if (localPing) dispatch(setPing(localPing));
       return localPing;
     },

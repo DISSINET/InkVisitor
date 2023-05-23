@@ -38,6 +38,7 @@ interface EntitySuggester {
   disableWildCard?: boolean;
   disableTemplatesAccept?: boolean;
   disableButtons?: boolean;
+  disableEnter?: boolean;
   autoFocus?: boolean;
 
   disabled?: boolean;
@@ -65,6 +66,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
   disableWildCard = false,
   disableTemplatesAccept = false,
   disableButtons = false,
+  disableEnter,
   autoFocus,
 
   disabled = false,
@@ -409,6 +411,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
         isWrongDropCategory={isWrongDropCategory}
         disableCreate={disableCreate}
         disableButtons={disableButtons}
+        disableEnter={disableEnter}
         inputWidth={inputWidth}
         isInsideTemplate={isInsideTemplate}
         territoryParentId={territoryParentId}
