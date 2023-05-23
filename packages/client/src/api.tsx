@@ -99,7 +99,7 @@ class Api {
           this.ping = duration;
         }
       });
-    }, 1000);
+    }, 5000);
 
     this.headers = {
       "Content-Type": "application/json",
