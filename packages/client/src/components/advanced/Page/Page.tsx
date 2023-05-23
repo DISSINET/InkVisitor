@@ -95,7 +95,7 @@ export const Page: React.FC<Page> = ({ children }) => {
       return localPing;
     },
     {
-      refetchInterval: 1000,
+      refetchInterval: 5000,
     }
   );
 
