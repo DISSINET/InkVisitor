@@ -77,6 +77,7 @@ interface Suggester {
   territoryParentId?: string;
   userOptions?: IUserOptions;
   autoFocus?: boolean;
+  disableEnter?: boolean;
 }
 
 export const Suggester: React.FC<Suggester> = ({
@@ -108,6 +109,7 @@ export const Suggester: React.FC<Suggester> = ({
 
   userOptions,
   autoFocus,
+  disableEnter,
 }) => {
   const [selected, setSelected] = useState(-1);
   const [isFocused, setIsFocused] = useState(false);
@@ -294,7 +296,9 @@ export const Suggester: React.FC<Suggester> = ({
                 setSelected(-1);
               }}
               onEnterPressFn={() => {
-                handleEnterPress();
+                if (!disableEnter) {
+                  handleEnterPress();
+                }
               }}
               autoFocus={categories.length === 1 && autoFocus}
               disabled={disabled}
