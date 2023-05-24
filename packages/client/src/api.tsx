@@ -20,6 +20,7 @@ import {
 } from "@shared/types";
 import * as errors from "@shared/types/errors";
 import { IRequestSearch } from "@shared/types/request-search";
+import { defaultPing } from "Theme/constants";
 import axios, { AxiosError, AxiosInstance, AxiosResponse } from "axios";
 import React from "react";
 import { toast } from "react-toastify";
@@ -63,7 +64,7 @@ class Api {
     const baseUrl = process.env.APIURL;
     this.apiUrl = baseUrl + "/api/v1";
 
-    this.ping = -1;
+    this.ping = defaultPing;
 
     const url = new URL(baseUrl);
 
