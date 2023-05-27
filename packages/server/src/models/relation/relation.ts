@@ -370,7 +370,7 @@ export default class Relation implements IRelationModel {
   }
 
   /**
-   * Searches for relation assigned for entityId, filtered by optional relation type
+   * Searches for relations assigned for entityId, filtered by optional relation type
    * @param db
    * @param entityId
    * @param relType
@@ -391,6 +391,37 @@ export default class Relation implements IRelationModel {
 
     if (position !== undefined) {
       return items.filter((d) => d.entityIds[position] === entityId);
+    }
+    return items;
+  }
+
+  /**
+   * Searches for relations assigned for multiple entity ids, filtered by optional relation type
+   * @param db
+   * @param entityId array of entity ids
+   * @param relType
+   * @param position - position in entityIds
+   * @returns array of relation interfaces
+   */
+  static async findForEntities<T extends RelationTypes.IRelation>(
+    db: Connection,
+    entityIds: string[],
+    relType?: RelationEnums.Type,
+    position?: number
+  ): Promise<T[]> {
+    const items: T[] = await rethink
+      .table(Relation.table)
+      .getAll.call(undefined, ...entityIds, {
+        index: DbEnums.Indexes.RelationsEntityIds,
+      })
+      .filter(relType ? { type: relType } : {})
+      .distinct()
+      .run(db);
+
+    if (position !== undefined) {
+      return items.filter(
+        (d) => entityIds.indexOf(d.entityIds[position]) !== -1
+      );
     }
     return items;
   }

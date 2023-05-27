@@ -40,8 +40,6 @@ describe("test Relation.beforeSave", function () {
 
   test("test preloading entities", async () => {
     const entities: Entity[] = [];
-    let relation: Relation;
-    let request: IRequest;
 
     const [, entity1] = prepareEntity();
     await entity1.save(db.connection);
@@ -50,11 +48,11 @@ describe("test Relation.beforeSave", function () {
     await entity2.save(db.connection);
     entities.push(entity2);
 
-    relation = new Relation({
+    const relation = new Relation({
       entityIds: [entities[0].id, entities[1].id],
       type: RelationEnums.Type.Synonym,
     });
-    request = newMockRequest(db);
+    const request = newMockRequest(db);
 
     expect(relation.entities).toBeUndefined();
     await expect(relation.beforeSave(request)).resolves.not.toThrowError();
@@ -63,8 +61,6 @@ describe("test Relation.beforeSave", function () {
 
   test("test invalid entity", async () => {
     const entities: Entity[] = [];
-    let relation: Relation;
-    let request: IRequest;
 
     const [, entity1] = prepareEntity();
     await entity1.save(db.connection);
@@ -74,8 +70,10 @@ describe("test Relation.beforeSave", function () {
     await entity2.save(db.connection);
     entities.push(entity2);
 
-    relation = new Relation({ entityIds: [entities[0].id, entities[1].id] });
-    request = newMockRequest(db);
+    const relation = new Relation({
+      entityIds: [entities[0].id, entities[1].id],
+    });
+    const request = newMockRequest(db);
 
     expect(relation.entities).toBeUndefined();
     await expect(relation.beforeSave(request)).rejects.toBeInstanceOf(Error);
@@ -234,5 +232,50 @@ describe("test Relation.validateEntities", function () {
     const result = relation.validateEntities();
     expect(result).toBeInstanceOf(ModelNotValidError);
     expect(result?.message).toContain("must not be a template");
+  });
+});
+
+describe("test Relation.findForEntities", function () {
+  let db: Db;
+  const rand = Math.random().toString();
+  const syn1 = new Relation({
+    entityIds: [`${rand}-1`, `${rand}-2`, `${rand}-3`],
+    type: RelationEnums.Type.Synonym,
+  });
+  const syn2 = new Relation({
+    entityIds: [`${rand}-4`, `${rand}-5`],
+    type: RelationEnums.Type.Synonym,
+  });
+
+  beforeAll(async () => {
+    db = new Db();
+    await db.initDb();
+    await syn1.save(db.connection);
+    await syn2.save(db.connection);
+  });
+
+  afterAll(async () => {
+    await clean(db);
+  });
+
+  test("find multiple entities in SYN relations", async () => {
+    const found = await Relation.findForEntities(
+      db.connection,
+      syn1.entityIds,
+      RelationEnums.Type.Synonym
+    );
+    expect(found).toHaveLength(1);
+    expect(found[0].id).toEqual(syn1.id);
+  });
+
+  test("find relations for two distinct groups", async () => {
+    const found = await Relation.findForEntities(
+      db.connection,
+      [syn1.entityIds[0], syn2.entityIds[1]],
+      RelationEnums.Type.Synonym
+    );
+    expect(found).toHaveLength(2);
+    expect(found.find((f) => f.id === syn1.id)).toBeTruthy();
+    expect(found.find((f) => f.id === syn2.id)).toBeTruthy();
   });
 });
