@@ -1,4 +1,9 @@
-import { EntityEnums, RelationEnums, UserEnums } from "@shared/enums";
+import {
+  EntityEnums,
+  RelationEnums,
+  UserEnums,
+  WarningTypeEnums,
+} from "@shared/enums";
 import {
   IEntity,
   IProp,
@@ -8,6 +13,7 @@ import {
   IResponseUsedInMetaProp,
   IResponseUsedInStatement,
   IStatement,
+  IWarning,
 } from "@shared/types";
 import Entity from "./entity";
 import Statement from "@models/statement/statement";
@@ -24,6 +30,8 @@ import {
   IStatementIdentification,
 } from "@shared/types/statement";
 import { UsedRelations } from "@models/relation/relations";
+import Relation from "@models/relation/relation";
+import Superclass from "@models/relation/superclass";
 
 export class ResponseEntity extends Entity implements IResponseEntity {
   // map of entity ids that should be populated in subsequent methods and used in fetching
@@ -117,6 +125,7 @@ export class ResponseEntityDetail
   usedInStatementClassifications: IResponseUsedInStatementClassification[];
 
   relations: UsedRelations;
+  warnings: IWarning[];
 
   constructor(entity: Entity) {
     super(entity);
@@ -127,6 +136,7 @@ export class ResponseEntityDetail
     this.usedInStatementClassifications = [];
     this.usedInStatementIdentifications = [];
     this.relations = new UsedRelations(entity.id, entity.class);
+    this.warnings = [];
 
     this.addLinkedEntities(this.getEntitiesIds());
   }
@@ -185,6 +195,8 @@ export class ResponseEntityDetail
     this.entities = await this.populateEntitiesMap(conn);
 
     await this.processTemplateData(conn);
+
+    this.warnings = await this.getWarnings(req.db.connection);
   }
 
   /**
@@ -410,7 +422,7 @@ export class ResponseEntityDetail
   walkStatementsDataProps(statements: IStatement[]) {
     for (const statement of statements) {
       for (const action of statement.data.actions) {
-        this.walkStatementDataRecursiveProps( 
+        this.walkStatementDataRecursiveProps(
           statement,
           action.actionId,
           action.props
@@ -483,5 +495,144 @@ export class ResponseEntityDetail
     });
 
     this.addLinkedEntities([statementId, originId, valueId, typeId]);
+  }
+
+  /**
+   * Shorthand for creating new warning
+   * @param warningType
+   * @param relId
+   * @returns new instance of warning
+   */
+  newWarning(warningType: WarningTypeEnums, relId?: string): IWarning {
+    return {
+      type: warningType,
+      message: "",
+      origin: relId || "",
+    };
+  }
+
+  /**
+   * prepares warning instances for current response object
+   * @param conn
+   * @returns
+   */
+  async getWarnings(conn: Connection): Promise<IWarning[]> {
+    const warnings: IWarning[] = [];
+
+    const sclmWarning = await this.hasSCLM(conn);
+    if (sclmWarning) {
+      warnings.push(sclmWarning);
+    }
+
+    const isyncWarning = await this.hasISYNC(conn);
+    if (isyncWarning) {
+      warnings.push(isyncWarning);
+    }
+
+    return warnings;
+  }
+
+  /**
+   * Tests if there is SCLM warning and returns it
+   * @param conn
+   * @returns
+   */
+  async hasSCLM(conn: Connection): Promise<IWarning | null> {
+    if (this.class !== EntityEnums.Class.Concept) {
+      return null;
+    }
+
+    const scls = await Relation.findForEntity(
+      conn,
+      this.id,
+      RelationEnums.Type.Superclass
+    );
+    let warn: IWarning | null = null;
+    for (const scl of scls) {
+      if (scl.entityIds[0] === this.id) {
+        warn = this.newWarning(WarningTypeEnums.SCLM, scl.id);
+        break;
+      }
+    }
+
+    return warn;
+  }
+
+  /**
+   * Tests if there is ISYNC warning and returns it
+   * @param conn
+   * @returns
+   */
+  async hasISYNC(conn: Connection): Promise<IWarning | null> {
+    if (this.class !== EntityEnums.Class.Concept) {
+      return null;
+    }
+
+    const synonym = await Relation.findForEntity(
+      conn,
+      this.id,
+      RelationEnums.Type.Synonym
+    );
+
+    let entityIds: string[] = [];
+    for (const syn of synonym) {
+      entityIds = entityIds.concat(syn.entityIds);
+    }
+    entityIds = Array.from(new Set(entityIds));
+
+    // find SCL relations with checked entities on 0 index
+    const scls = await Superclass.findForEntities(
+      conn,
+      entityIds,
+      RelationEnums.Type.Superclass,
+      0
+    );
+
+    let warn: IWarning | null = null;
+    const sclTargets = Array.from(new Set(scls.map((s) => s.entityIds[1])));
+    if (sclTargets.length === 1 && scls.length > 1) {
+      warn = this.newWarning(WarningTypeEnums.ISYNC);
+    }
+
+    return warn;
+  }
+
+  /**
+   * Tests if there is MVAL warning and returns it
+   * @param conn
+   * @returns
+   */
+  async hasMVAL(conn: Connection): Promise<IWarning | null> {
+    if (this.class !== EntityEnums.Class.Action) {
+      return null;
+    }
+
+    const synonym = await Relation.findForEntity(
+      conn,
+      this.id,
+      RelationEnums.Type.Synonym
+    );
+
+    let entityIds: string[] = [];
+    for (const syn of synonym) {
+      entityIds = entityIds.concat(syn.entityIds);
+    }
+    entityIds = Array.from(new Set(entityIds));
+
+    // find SCL relations with checked entities on 0 index
+    const scls = await Superclass.findForEntities(
+      conn,
+      entityIds,
+      RelationEnums.Type.Superclass,
+      0
+    );
+
+    let warn: IWarning | null = null;
+    const sclTargets = Array.from(new Set(scls.map((s) => s.entityIds[1])));
+    if (sclTargets.length === 1 && scls.length > 1) {
+      warn = this.newWarning(WarningTypeEnums.ISYNC);
+    }
+
+    return warn;
   }
 }
