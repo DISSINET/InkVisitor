@@ -34,6 +34,11 @@ export const PropGroupRowStatementAttributes: React.FC<
 }) => {
   return (
     <StyledAttributesFlexColumn>
+      {/* {!(
+        disabledAttributes.statement?.includes("elvl") &&
+        disabledAttributes.statement?.includes("mood") &&
+        disabledAttributes.statement?.includes("moodvariant")
+      ) && ( */}
       <StyledAttributesFlexRow>
         {/* Elvl */}
         {!disabledAttributes.statement?.includes("elvl") && (
@@ -49,52 +54,52 @@ export const PropGroupRowStatementAttributes: React.FC<
             disabled={!userCanEdit}
           />
         )}
-        {/* Logic */}
-        {!disabledAttributes.statement?.includes("logic") && (
-          <LogicButtonGroup
+        {!disabledAttributes.statement?.includes("mood") && (
+          <Dropdown
+            width={131}
+            isMulti
+            disabled={!userCanEdit}
+            placeholder="mood"
+            tooltipLabel="mood"
+            icon={<AttributeIcon attributeName="mood" />}
+            options={moodDict}
+            value={[allEntities]
+              .concat(moodDict)
+              .filter((i: any) => prop.mood.includes(i.value))}
+            onChange={(newValue: any) => {
+              updateProp(prop.id, {
+                ...prop,
+                mood: newValue ? newValue.map((v: any) => v.value) : [],
+              });
+            }}
+            attributeDropdown
+          />
+        )}
+        {!disabledAttributes.statement?.includes("moodvariant") && (
+          <MoodVariantButtonGroup
             border
-            value={prop.logic}
-            onChange={(logic) => updateProp(prop.id, { logic: logic })}
+            value={prop.moodvariant}
+            onChange={(moodvariant) =>
+              updateProp(prop.id, {
+                ...prop,
+                moodvariant: moodvariant,
+              })
+            }
             disabled={!userCanEdit}
           />
         )}
         {buttons}
       </StyledAttributesFlexRow>
+      {/* )} */}
       {isExpanded && (
         <>
           <StyledAttributesFlexRow>
-            {/* mood */}
-            {!disabledAttributes.statement?.includes("mood") && (
-              <Dropdown
-                width={131}
-                isMulti
-                disabled={!userCanEdit}
-                placeholder="mood"
-                tooltipLabel="mood"
-                icon={<AttributeIcon attributeName="mood" />}
-                options={moodDict}
-                value={[allEntities]
-                  .concat(moodDict)
-                  .filter((i: any) => prop.mood.includes(i.value))}
-                onChange={(newValue: any) => {
-                  updateProp(prop.id, {
-                    ...prop,
-                    mood: newValue ? newValue.map((v: any) => v.value) : [],
-                  });
-                }}
-                attributeDropdown
-              />
-            )}
-            {!disabledAttributes.statement?.includes("moodvariant") && (
-              <MoodVariantButtonGroup
+            {/* Logic */}
+            {!disabledAttributes.statement?.includes("logic") && (
+              <LogicButtonGroup
                 border
-                value={prop.moodvariant}
-                onChange={(moodvariant) =>
-                  updateProp(prop.id, {
-                    ...prop,
-                    moodvariant: moodvariant,
-                  })
-                }
+                value={prop.logic}
+                onChange={(logic) => updateProp(prop.id, { logic: logic })}
                 disabled={!userCanEdit}
               />
             )}

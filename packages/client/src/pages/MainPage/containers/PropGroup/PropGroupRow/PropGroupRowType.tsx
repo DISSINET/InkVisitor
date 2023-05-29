@@ -165,24 +165,26 @@ export const PropGroupRowType: React.FC<PropGroupRowType> = ({
               />
             )}
           </StyledAttributesFlexRow>
-          {!disabledAttributes.type?.includes("partitivity") && (
-            <Dropdown
-              width={150}
-              placeholder="partitivity"
-              tooltipLabel="partitivity"
-              icon={<AttributeIcon attributeName="partitivity" />}
-              disabled={!userCanEdit}
-              options={partitivityDict}
-              value={partitivityDict.find(
-                (i: any) => prop.type.partitivity === i.value
-              )}
-              onChange={(newValue: any) => {
-                updateProp(prop.id, {
-                  type: { ...prop.type, partitivity: newValue.value },
-                });
-              }}
-            />
-          )}
+          <StyledAttributesFlexRow>
+            {!disabledAttributes.type?.includes("partitivity") && (
+              <Dropdown
+                width={150}
+                placeholder="partitivity"
+                tooltipLabel="partitivity"
+                icon={<AttributeIcon attributeName="partitivity" />}
+                disabled={!userCanEdit}
+                options={partitivityDict}
+                value={partitivityDict.find(
+                  (i: any) => prop.type.partitivity === i.value
+                )}
+                onChange={(newValue: any) => {
+                  updateProp(prop.id, {
+                    type: { ...prop.type, partitivity: newValue.value },
+                  });
+                }}
+              />
+            )}
+          </StyledAttributesFlexRow>
         </>
       )}
     </StyledAttributesFlexColumn>
