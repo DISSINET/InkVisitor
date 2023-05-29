@@ -28,7 +28,7 @@ export const BundleButtonGroup: React.FC<BundleButtonGroup> = ({
         tooltipLabel={"bundle start"}
         noBorder
         inverted
-        color={bundleStart ? "primary" : "greyer"}
+        color={bundleStart ? "primary" : "grey"}
         onClick={() => {
           onBundleStartChange(!bundleStart);
         }}
@@ -44,7 +44,7 @@ export const BundleButtonGroup: React.FC<BundleButtonGroup> = ({
         tooltipLabel={"bundle end"}
         noBorder
         inverted
-        color={bundleEnd ? "primary" : "greyer"}
+        color={bundleEnd ? "primary" : "grey"}
         onClick={() => {
           onBundleEndChange(!bundleEnd);
         }}
