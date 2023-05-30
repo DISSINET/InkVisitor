@@ -1,6 +1,11 @@
 import { ElementTypeColor } from "Theme/theme";
 import styled from "styled-components";
 
+export const StyledEditorActantTableWrapper = styled.div`
+  margin-bottom: ${({ theme }) => theme.space[4]};
+  min-width: 58rem;
+`;
+
 interface StyledRow {
   marginBottom?: boolean;
 }
