@@ -7,7 +7,14 @@ import {
   IStatementAction,
 } from "@shared/types";
 import api from "api";
-import { Dropdown, Input, Loader, MultiInput, Submit } from "components";
+import {
+  Button,
+  Dropdown,
+  Input,
+  Loader,
+  MultiInput,
+  Submit,
+} from "components";
 import {
   ApplyTemplateModal,
   AuditTable,
@@ -63,6 +70,7 @@ import { StatementEditorActantTable } from "./StatementEditorActantTable/Stateme
 import { StatementEditorActionTable } from "./StatementEditorActionTable/StatementEditorActionTable";
 import { StatementEditorOrdering } from "./StatementEditorOrdering/StatementEditorOrdering";
 import { StatementEditorSectionButtons } from "./StatementEditorSectionButtons/StatementEditorSectionButtons";
+import { FaRegCopy } from "react-icons/fa";
 
 interface StatementEditor {
   statement: IResponseStatement;
@@ -552,6 +560,19 @@ export const StatementEditor: React.FC<StatementEditor> = ({
           <StyledEditorStatementInfo>
             <StyledHeaderTagWrap>
               <EntityTag entity={statement} fullWidth />
+              <div style={{ marginLeft: "0.5rem", marginRight: "0.5rem" }}>
+                <Button
+                  inverted
+                  tooltipLabel="copy statement ID"
+                  color="primary"
+                  label=""
+                  icon={<FaRegCopy />}
+                  onClick={async () => {
+                    await navigator.clipboard.writeText(statement.id);
+                    toast.info("ID copied to clipboard");
+                  }}
+                />
+              </div>
             </StyledHeaderTagWrap>
             {userCanEdit && (
               <div style={{ display: "flex" }}>

@@ -158,6 +158,7 @@ export const StyledHeaderTagWrap = styled.div`
   max-width: 100%;
   display: inline-flex;
   overflow: hidden;
+  align-items: center;
   margin-right: ${({ theme }) => theme.space[3]};
   margin-bottom: ${({ theme }) => theme.space[2]};
 `;
