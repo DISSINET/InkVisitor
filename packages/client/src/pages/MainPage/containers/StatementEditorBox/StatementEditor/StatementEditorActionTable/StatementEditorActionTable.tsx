@@ -73,7 +73,7 @@ export const StatementEditorActionTable: React.FC<
   );
 
   return (
-    <>
+    <div style={{ overflow: "auto" }}>
       {filteredActions.length > 0 && (
         <StyledEditorActionTableWrapper>
           {filteredActions.map((filteredAction, key) => {
@@ -99,6 +99,6 @@ export const StatementEditorActionTable: React.FC<
           })}
         </StyledEditorActionTableWrapper>
       )}
-    </>
+    </div>
   );
 };
