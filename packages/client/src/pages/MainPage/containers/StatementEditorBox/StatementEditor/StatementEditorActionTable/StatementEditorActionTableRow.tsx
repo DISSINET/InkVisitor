@@ -343,6 +343,18 @@ export const StatementEditorActionTableRow: React.FC<
                 attributeDropdown
               />
             </StyledGridColumn>
+            <StyledGridColumn>
+              <MoodVariantButtonGroup
+                border
+                onChange={(moodvariant) =>
+                  updateAction(sAction.id, {
+                    moodvariant: moodvariant,
+                  })
+                }
+                value={sAction.moodvariant}
+                disabled={!userCanEdit}
+              />
+            </StyledGridColumn>
             <StyledGridColumn>{renderButtonsCell()}</StyledGridColumn>
             <StyledGridColumn>
               <Button
@@ -379,16 +391,6 @@ export const StatementEditorActionTableRow: React.FC<
           {/* Expanded row */}
           {isExpanded && !isDraggingAction && (
             <StyledExpandedRow>
-              <MoodVariantButtonGroup
-                border
-                onChange={(moodvariant) =>
-                  updateAction(sAction.id, {
-                    moodvariant: moodvariant,
-                  })
-                }
-                value={sAction.moodvariant}
-                disabled={!userCanEdit}
-              />
               <div>
                 <Dropdown
                   width={70}

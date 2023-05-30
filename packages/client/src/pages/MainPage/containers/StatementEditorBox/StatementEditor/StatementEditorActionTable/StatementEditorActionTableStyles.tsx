@@ -12,7 +12,7 @@ export const StyledGrid = styled.div<StyledGrid>`
   display: grid;
   align-items: center;
   padding-left: ${({ theme }) => theme.space[0]};
-  grid-template-columns: repeat(5, auto);
+  grid-template-columns: repeat(6, auto);
   width: fit-content;
   grid-template-rows: auto;
   grid-auto-flow: row;
