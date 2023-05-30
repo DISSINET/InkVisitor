@@ -1,5 +1,10 @@
 import styled from "styled-components";
 
+export const StyledEditorActionTableWrapper = styled.div`
+  margin-bottom: ${({ theme }) => theme.space[4]};
+  min-width: 56rem;
+`;
+
 interface StyledGrid {
   tempDisabled?: boolean;
 }
