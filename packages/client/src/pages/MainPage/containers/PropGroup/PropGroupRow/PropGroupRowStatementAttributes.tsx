@@ -117,10 +117,7 @@ export const PropGroupRowStatementAttributes: React.FC<
                 }}
               />
             )}
-          </StyledAttributesFlexRow>
-
-          {/* ROW */}
-          <StyledAttributesFlexRow>
+            {/* Bundle start|end */}
             <BundleButtonGroup
               bundleStart={prop.bundleStart}
               onBundleStartChange={(bundleStart) =>
@@ -137,6 +134,10 @@ export const PropGroupRowStatementAttributes: React.FC<
                 })
               }
             />
+          </StyledAttributesFlexRow>
+
+          {/* ROW */}
+          <StyledAttributesFlexRow>
             {!disabledAttributes.statement?.includes("certainty") && (
               <Dropdown
                 width={122}
