@@ -78,7 +78,7 @@ export const StatementEditorActantTable: React.FC<
   );
 
   return (
-    <>
+    <div style={{ overflow: "auto" }}>
       {filteredActants.length > 0 && (
         <StyledEditorActantTableWrapper>
           {filteredActants.map((filteredActant, key) => {
@@ -107,6 +107,6 @@ export const StatementEditorActantTable: React.FC<
           })}
         </StyledEditorActantTableWrapper>
       )}
-    </>
+    </div>
   );
 };
