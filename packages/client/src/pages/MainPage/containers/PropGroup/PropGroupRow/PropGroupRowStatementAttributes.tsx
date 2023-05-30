@@ -34,11 +34,6 @@ export const PropGroupRowStatementAttributes: React.FC<
 }) => {
   return (
     <StyledAttributesFlexColumn>
-      {/* {!(
-        disabledAttributes.statement?.includes("elvl") &&
-        disabledAttributes.statement?.includes("mood") &&
-        disabledAttributes.statement?.includes("moodvariant")
-      ) && ( */}
       <StyledAttributesFlexRow>
         {/* Elvl */}
         {!disabledAttributes.statement?.includes("elvl") && (
