@@ -1,152 +1,39 @@
-import { EntityEnums, RelationEnums } from "@shared/enums";
+import { RelationEnums } from "@shared/enums";
 import { IEntity, IResponseDetail, Relation } from "@shared/types";
 import ReactFlow, {
   Background,
   Controls,
-  Handle,
-  MiniMap,
-  Position,
-  ReactFlowInstance,
-  MarkerType,
   Edge,
   Node,
-  EdgeProps,
-  getBezierPath,
-  EdgeLabelRenderer,
-  EdgeTypes,
+  Position,
+  ReactFlowInstance,
 } from "reactflow";
 import "reactflow/dist/style.css";
 
+import { Button } from "components";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   StyledEntityDetailRelationGraph,
   StyledEntityDetailRelationGraphButton,
-} from "./EntityDetailRelationTypeBlockStyles";
-import React, { memo, useEffect, useMemo, useState } from "react";
-import { Button, LetterIcon, Tooltip } from "components";
-import { EntityTag } from "components/advanced";
-import { EntityDetailRelationTypeIcon } from "./EntityDetailRelationTypeIcon/EntityDetailRelationTypeIcon";
-import { Colors } from "types";
-import { ThemeColor } from "Theme/theme";
+} from "../EntityDetailRelationTypeBlockStyles";
+
+import { edgeTypes } from "./EntityDetailGraphEdge";
+import { nodeTypes } from "./EntityDetailGraphNode";
 
 /**
  * TODO:
  *  - clean the code
- *  - create separate components for node, edge
  *  - do not draw on default
  *  - fix and text certainties
  *  - edge tooltips - probably just the certainty
  *  - fix layout / define the problem in  a separate PR
  */
+
 interface Graph {
   nodes: Node[];
   edges: Edge[];
+  maxHeight: number;
 }
-
-const EntityNode: React.FC<{
-  data: { entity: IResponseDetail; level: number };
-}> = ({ data }) => {
-  if (!data.entity) {
-    console.log("problem");
-  }
-  return (
-    <>
-      <Handle type="source" position={Position.Right} />
-      <div>
-        {data.entity ? <EntityTag entity={data.entity} /> : <div />}
-        <div className="custom-drag-handle"></div>
-      </div>
-      <Handle type="target" position={Position.Left} />
-    </>
-  );
-};
-
-const RelationshipEdge: React.FC<EdgeProps> = ({
-  id,
-  sourceX,
-  sourceY,
-  targetX,
-  targetY,
-  sourcePosition,
-  targetPosition,
-  data,
-}) => {
-  const [referenceElement, setReferenceElement] =
-    useState<HTMLDivElement | null>(null);
-
-  const [edgePath, labelX, labelY] = getBezierPath({
-    sourceX,
-    sourceY,
-    sourcePosition,
-    targetX,
-    targetY,
-    targetPosition,
-  });
-
-  const scaleLabel = 0.75;
-
-  const certaintyStyles: Record<
-    EntityEnums.Certainty,
-    { dashArray: string; width: number; stroke: string; strokeOpacity: number }
-  > = {
-    "0": { strokeOpacity: 1, dashArray: "1 1", width: 1, stroke: "white" },
-    "1": { strokeOpacity: 1, dashArray: "10 0", width: 3, stroke: "black" },
-    "2": { strokeOpacity: 1, dashArray: "5 2", width: 2, stroke: "black" },
-    "3": { strokeOpacity: 1, dashArray: "5 5", width: 2, stroke: "black" },
-    "4": { strokeOpacity: 1, dashArray: "3 3", width: 1, stroke: "grey" },
-    "5": { strokeOpacity: 1, dashArray: "2 2", width: 1, stroke: "darkred" },
-    "6": { strokeOpacity: 1, dashArray: "1 1", width: 1, stroke: "red" },
-  };
-
-  return (
-    <>
-      <path
-        id={id}
-        d={edgePath}
-        strokeDasharray={
-          certaintyStyles[data.certainty as EntityEnums.Certainty].dashArray
-        }
-        strokeOpacity={
-          certaintyStyles[data.certainty as EntityEnums.Certainty].strokeOpacity
-        }
-        fill="none"
-        width={certaintyStyles[data.certainty as EntityEnums.Certainty].width}
-        stroke={certaintyStyles[data.certainty as EntityEnums.Certainty].stroke}
-        style={{}}
-      />
-      <EdgeLabelRenderer>
-        <Tooltip
-          label={data.certainty}
-          visible
-          referenceElement={referenceElement}
-        >
-          <div
-            ref={setReferenceElement}
-            style={{
-              position: "absolute",
-              transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px) scale(${scaleLabel},${scaleLabel})`,
-            }}
-            className="nodrag nopan"
-          >
-            <LetterIcon
-              size={6}
-              letter={data.relationType}
-              color="info"
-              bgColor="white"
-            />
-          </div>
-        </Tooltip>
-      </EdgeLabelRenderer>
-    </>
-  );
-};
-
-const nodeTypes = {
-  entityNode: EntityNode,
-};
-
-const edgeTypes: EdgeTypes = {
-  relationship: RelationshipEdge,
-};
 
 const convertToGraph = (
   entity: IResponseDetail,
@@ -154,7 +41,7 @@ const convertToGraph = (
   entities: any,
   nodeW: number,
   nodeH: number
-): { nodes: Node[]; edges: Edge[]; maxHeight: number } => {
+): Graph => {
   const nodes: Node[] = [];
   const edges: Edge[] = [];
 

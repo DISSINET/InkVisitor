@@ -23,7 +23,7 @@ import {
   StyledSuggesterWrapper,
 } from "./EntityDetailRelationTypeBlockStyles";
 import { EntityDetailRelationTypeIcon } from "./EntityDetailRelationTypeIcon/EntityDetailRelationTypeIcon";
-import { EntityDetailRelationGraph } from "./EntityDetailRelationGraph";
+import { EntityDetailRelationGraph } from "./EntityDetailGraph/EntityDetailGraph";
 
 // relations for one type
 interface EntityDetailRelationTypeBlock {
