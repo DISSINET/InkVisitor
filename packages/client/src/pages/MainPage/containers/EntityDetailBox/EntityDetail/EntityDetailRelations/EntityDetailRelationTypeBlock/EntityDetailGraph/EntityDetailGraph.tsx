@@ -84,7 +84,7 @@ const convertToGraph = (
                 Relation.IIdentification,
                 Relation.IIdentification
               >
-            ).certainty || 1,
+            ).certainty || undefined,
           relationType: branch.type,
         },
         style: {
