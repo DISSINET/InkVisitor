@@ -22,7 +22,7 @@ import {
   StyledEntityDetailRelationGraphButton,
 } from "./EntityDetailRelationTypeBlockStyles";
 import React, { memo, useEffect, useMemo, useState } from "react";
-import { Button, LetterIcon } from "components";
+import { Button, LetterIcon, Tooltip } from "components";
 import { EntityTag } from "components/advanced";
 import { EntityDetailRelationTypeIcon } from "./EntityDetailRelationTypeIcon/EntityDetailRelationTypeIcon";
 import { Colors } from "types";
@@ -70,6 +70,9 @@ const RelationshipEdge: React.FC<EdgeProps> = ({
   targetPosition,
   data,
 }) => {
+  const [referenceElement, setReferenceElement] =
+    useState<HTMLDivElement | null>(null);
+
   const [edgePath, labelX, labelY] = getBezierPath({
     sourceX,
     sourceY,
@@ -111,20 +114,27 @@ const RelationshipEdge: React.FC<EdgeProps> = ({
         style={{}}
       />
       <EdgeLabelRenderer>
-        <div
-          style={{
-            position: "absolute",
-            transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px) scale(${scaleLabel},${scaleLabel})`,
-          }}
-          className="nodrag nopan"
+        <Tooltip
+          label={data.certainty}
+          visible
+          referenceElement={referenceElement}
         >
-          <LetterIcon
-            size={6}
-            letter={data.relationType}
-            color="info"
-            bgColor="white"
-          />
-        </div>
+          <div
+            ref={setReferenceElement}
+            style={{
+              position: "absolute",
+              transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px) scale(${scaleLabel},${scaleLabel})`,
+            }}
+            className="nodrag nopan"
+          >
+            <LetterIcon
+              size={6}
+              letter={data.relationType}
+              color="info"
+              bgColor="white"
+            />
+          </div>
+        </Tooltip>
       </EdgeLabelRenderer>
     </>
   );
