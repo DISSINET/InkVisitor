@@ -16,12 +16,16 @@ import { v4 as uuidv4 } from "uuid";
 import { EntityDetailCloudRelation } from "./EntityDetailCloudRelation/EntityDetailCloudRelation";
 import { EntityDetailRelationRow } from "./EntityDetailRelationRow/EntityDetailRelationRow";
 import {
+  StyledEntityDetailRelationGraphButton,
   StyledLabel,
   StyledLabelSuggester,
+  StyledRelationBlock,
   StyledRelationValues,
   StyledSuggesterWrapper,
 } from "./EntityDetailRelationTypeBlockStyles";
+import { Button } from "components";
 import { EntityDetailRelationTypeIcon } from "./EntityDetailRelationTypeIcon/EntityDetailRelationTypeIcon";
+import { EntityDetailRelationGraph } from "./EntityDetailGraph/EntityDetailGraph";
 
 // relations for one type
 interface EntityDetailRelationTypeBlock {
@@ -68,6 +72,12 @@ export const EntityDetailRelationTypeBlock: React.FC<
     multiple: isMultiple,
     order: hasOrder,
   } = relationRule;
+
+  const [graphOpen, setGraphOpen] = useState<boolean>(false);
+
+  const handleOpenGraph = () => {
+    setGraphOpen(!graphOpen);
+  };
 
   // For suggester
   const getCategoryTypes = (): EntityEnums.ExtendedClass[] | undefined => {
@@ -187,6 +197,10 @@ export const EntityDetailRelationTypeBlock: React.FC<
     Relation.IRelation[]
   >([]);
 
+  if (relationType === RelationEnums.Type.Classification) {
+    //console.log(currentRelations);
+  }
+
   const moveRow = useCallback(
     (dragIndex: number, hoverIndex: number) => {
       const dragRecord = currentRelations[dragIndex];
@@ -232,36 +246,17 @@ export const EntityDetailRelationTypeBlock: React.FC<
   const hasSuggester = isMultiple || selectedRelations.length < 1;
 
   return (
-    <>
+    <StyledRelationBlock>
       {/* Type column */}
-      <EntityDetailRelationTypeIcon relationType={relationType} />
+
       {/* Label & Suggester column */}
       <div>
-        <StyledLabelSuggester>
-          <StyledLabel>{relationRule.label}</StyledLabel>
-          {hasSuggester && (
-            <StyledSuggesterWrapper>
-              <EntitySuggester
-                inputWidth={80}
-                disableTemplatesAccept
-                categoryTypes={
-                  getCategoryTypes() ||
-                  ([EntityEnums.Extension.NoClass] as [
-                    EntityEnums.ExtendedClass
-                  ])
-                }
-                onSelected={(selectedId: string) => {
-                  if (isCloudType) {
-                    setTempCloudEntityId(selectedId);
-                  } else {
-                    handleMultiSelected(selectedId);
-                  }
-                }}
-                excludedActantIds={usedEntityIds}
-              />
-            </StyledSuggesterWrapper>
-          )}
-        </StyledLabelSuggester>
+        <EntityDetailRelationTypeIcon
+          relationType={relationType}
+          graphOpen={graphOpen}
+          handleOpenGraph={handleOpenGraph}
+        />
+
         {/* Values column */}
         <StyledRelationValues hasSuggester={hasSuggester}>
           {currentRelations.map((relation, key) =>
@@ -293,7 +288,46 @@ export const EntityDetailRelationTypeBlock: React.FC<
             )
           )}
         </StyledRelationValues>
+
+        <StyledLabelSuggester>
+          {/* <StyledLabel>{relationRule.label}</StyledLabel> */}
+          {hasSuggester && (
+            <StyledSuggesterWrapper>
+              <EntitySuggester
+                inputWidth={80}
+                disableTemplatesAccept
+                categoryTypes={
+                  getCategoryTypes() ||
+                  ([EntityEnums.Extension.NoClass] as [
+                    EntityEnums.ExtendedClass
+                  ])
+                }
+                onSelected={(selectedId: string) => {
+                  if (isCloudType) {
+                    setTempCloudEntityId(selectedId);
+                  } else {
+                    handleMultiSelected(selectedId);
+                  }
+                }}
+                excludedActantIds={usedEntityIds}
+              />
+            </StyledSuggesterWrapper>
+          )}
+        </StyledLabelSuggester>
       </div>
-    </>
+      <div>
+        {relationRule.graph && graphOpen && (
+          <EntityDetailRelationGraph
+            entities={entities}
+            relations={
+              currentRelations as Relation.IConnection<Relation.IRelation>[]
+            }
+            relationType={relationType}
+            entity={entity}
+            relationRule={relationRule}
+          />
+        )}
+      </div>
+    </StyledRelationBlock>
   );
 };

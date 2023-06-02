@@ -123,6 +123,10 @@ export const EntityDetailRelationRow: React.FC<EntityDetailRelationRow> = ({
 
   const uniqueRelationIds = [...new Set(relation.entityIds)];
 
+  if (relation.type === RelationEnums.Type.Classification) {
+    //console.log(relation);
+  }
+
   return (
     <StyledGrid
       ref={dropRef}

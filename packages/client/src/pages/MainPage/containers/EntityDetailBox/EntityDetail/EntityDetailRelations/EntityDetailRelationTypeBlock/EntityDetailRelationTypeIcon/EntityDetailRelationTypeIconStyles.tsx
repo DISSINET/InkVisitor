@@ -2,6 +2,11 @@ import styled from "styled-components";
 
 export const StyledRelationType = styled.div`
   display: flex;
-  flex-direction: column;
-  align-items: center;
+  flex-direction: row;
+  justify-content: start;
+  align-items: left;
+
+  > * {
+    margin-right: ${({ theme }) => theme.space[2]};
+  }
 `;
