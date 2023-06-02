@@ -107,8 +107,8 @@ export const GraphEdge: React.FC<EdgeProps> = ({
         d={edgePath}
         fill="none"
         strokeWidth={10}
-        stroke="gold"
-        strokeOpacity={tooltipVisible ? 0.1 : 0.01}
+        stroke="orange"
+        strokeOpacity={tooltipVisible ? 0.2 : 0.01}
         onMouseOver={() => {
           setTooltipVisible(true);
         }}

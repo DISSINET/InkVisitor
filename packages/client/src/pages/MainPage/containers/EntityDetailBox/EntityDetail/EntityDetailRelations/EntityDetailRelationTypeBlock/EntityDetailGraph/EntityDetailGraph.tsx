@@ -10,24 +10,11 @@ import ReactFlow, {
 } from "reactflow";
 import "reactflow/dist/style.css";
 
-import { Button } from "components";
 import React, { useEffect, useMemo, useState } from "react";
-import {
-  StyledEntityDetailRelationGraph,
-  StyledEntityDetailRelationGraphButton,
-} from "../EntityDetailRelationTypeBlockStyles";
+import { StyledEntityDetailRelationGraph } from "../EntityDetailRelationTypeBlockStyles";
 
 import { edgeTypes } from "./EntityDetailGraphEdge";
 import { nodeTypes } from "./EntityDetailGraphNode";
-
-/**
- * TODO:
- *  - clean the code
- *  - do not draw on default
- *  - fix and text certainties
- *  - edge tooltips - probably just the certainty
- *  - fix layout / define the problem in  a separate PR
- */
 
 interface Graph {
   nodes: Node[];
@@ -173,15 +160,10 @@ export const EntityDetailRelationGraph: React.FC<EntityDetailRelationGraph> = ({
   entities,
   relations,
 }) => {
-  const [open, setOpen] = useState<boolean>(true);
-
   const nodeW = 150;
   const nodeH = 50;
 
-  const handleSetOpen = () => {
-    setOpen(!open);
-  };
-  const [height, setHeight] = useState<number>(500);
+  const [height, setHeight] = useState<number>(0);
 
   const { nodes, edges, maxHeight } = useMemo(() => {
     return convertToGraph(entity, relations, entities, nodeW, nodeH);
@@ -192,7 +174,7 @@ export const EntityDetailRelationGraph: React.FC<EntityDetailRelationGraph> = ({
   }, [maxHeight]);
 
   return (
-    <StyledEntityDetailRelationGraph height={open ? height : 50}>
+    <StyledEntityDetailRelationGraph height={height}>
       <div style={{ position: "absolute", top: 0, left: 0 }}>
         <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
           <defs>
@@ -212,34 +194,26 @@ export const EntityDetailRelationGraph: React.FC<EntityDetailRelationGraph> = ({
         </svg>
       </div>
 
-      <StyledEntityDetailRelationGraphButton style={{ position: "relative" }}>
-        <Button
-          onClick={handleSetOpen}
-          label={open ? "hide graph" : "open graph"}
-        />
-      </StyledEntityDetailRelationGraphButton>
       {/* {JSON.stringify(relations)} */}
-      {open && (
-        <ReactFlow
-          nodes={nodes}
-          edges={edges}
-          style={{ backgroundColor: "white" }}
-          nodeTypes={nodeTypes}
-          edgeTypes={edgeTypes}
-          nodesDraggable={true}
-          nodesConnectable={false}
-          nodesFocusable={false}
-          edgesFocusable={false}
-          onInit={(reactFlowInstance: ReactFlowInstance) => {
-            reactFlowInstance.fitView();
-          }}
-          defaultViewport={{ x: 0, y: 0, zoom: 1 }}
-        >
-          {/* <MiniMap /> */}
-          <Controls showInteractive={false} showZoom={false} />
-          <Background />
-        </ReactFlow>
-      )}
+      <ReactFlow
+        nodes={nodes}
+        edges={edges}
+        style={{ backgroundColor: "white" }}
+        nodeTypes={nodeTypes}
+        edgeTypes={edgeTypes}
+        nodesDraggable={true}
+        nodesConnectable={false}
+        nodesFocusable={false}
+        edgesFocusable={false}
+        onInit={(reactFlowInstance: ReactFlowInstance) => {
+          reactFlowInstance.fitView();
+        }}
+        defaultViewport={{ x: 0, y: 0, zoom: 1 }}
+      >
+        {/* <MiniMap /> */}
+        <Controls showInteractive={false} showZoom={false} />
+        <Background />
+      </ReactFlow>
     </StyledEntityDetailRelationGraph>
   );
 };

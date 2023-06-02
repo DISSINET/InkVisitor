@@ -16,12 +16,14 @@ import { v4 as uuidv4 } from "uuid";
 import { EntityDetailCloudRelation } from "./EntityDetailCloudRelation/EntityDetailCloudRelation";
 import { EntityDetailRelationRow } from "./EntityDetailRelationRow/EntityDetailRelationRow";
 import {
+  StyledEntityDetailRelationGraphButton,
   StyledLabel,
   StyledLabelSuggester,
   StyledRelationBlock,
   StyledRelationValues,
   StyledSuggesterWrapper,
 } from "./EntityDetailRelationTypeBlockStyles";
+import { Button } from "components";
 import { EntityDetailRelationTypeIcon } from "./EntityDetailRelationTypeIcon/EntityDetailRelationTypeIcon";
 import { EntityDetailRelationGraph } from "./EntityDetailGraph/EntityDetailGraph";
 
@@ -70,6 +72,12 @@ export const EntityDetailRelationTypeBlock: React.FC<
     multiple: isMultiple,
     order: hasOrder,
   } = relationRule;
+
+  const [graphOpen, setGraphOpen] = useState<boolean>(false);
+
+  const handleOpenGraph = () => {
+    setGraphOpen(!graphOpen);
+  };
 
   // For suggester
   const getCategoryTypes = (): EntityEnums.ExtendedClass[] | undefined => {
@@ -243,7 +251,11 @@ export const EntityDetailRelationTypeBlock: React.FC<
 
       {/* Label & Suggester column */}
       <div>
-        <EntityDetailRelationTypeIcon relationType={relationType} />
+        <EntityDetailRelationTypeIcon
+          relationType={relationType}
+          graphOpen={graphOpen}
+          handleOpenGraph={handleOpenGraph}
+        />
 
         {/* Values column */}
         <StyledRelationValues hasSuggester={hasSuggester}>
@@ -304,7 +316,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
         </StyledLabelSuggester>
       </div>
       <div>
-        {relationRule.graph && (
+        {relationRule.graph && graphOpen && (
           <EntityDetailRelationGraph
             entities={entities}
             relations={
