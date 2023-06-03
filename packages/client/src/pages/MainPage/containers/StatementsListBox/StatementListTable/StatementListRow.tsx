@@ -64,7 +64,7 @@ export const StatementListRow: React.FC<StatementListRow> = ({
 
   const [{ isDragging }, drag, preview] = useDrag({
     type: ItemTypes.STATEMENT_ROW,
-    item: { type: ItemTypes.STATEMENT_ROW, index, id: row.original.id },
+    item: { index, id: row.original.id },
     collect: (monitor: DragSourceMonitor) => ({
       isDragging: monitor.isDragging(),
     }),

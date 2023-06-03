@@ -131,7 +131,6 @@ export const StatementEditorActantTableRow: React.FC<
   const [{ isDragging }, drag, preview] = useDrag({
     type: ItemTypes.ACTANT_ROW,
     item: {
-      type: ItemTypes.ACTANT_ROW,
       index,
       id: filteredActant.id.toString(),
     },

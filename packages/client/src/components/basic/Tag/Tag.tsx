@@ -119,7 +119,6 @@ export const Tag: React.FC<TagProps> = ({
   >({
     type: ItemTypes.TAG,
     item: {
-      type: ItemTypes.TAG,
       id: propId,
       index,
       entityClass: entityClass as EntityEnums.Class,

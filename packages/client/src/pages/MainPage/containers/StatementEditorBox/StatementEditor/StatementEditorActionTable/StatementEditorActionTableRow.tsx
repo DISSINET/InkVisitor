@@ -120,7 +120,6 @@ export const StatementEditorActionTableRow: React.FC<
   const [{ isDragging }, drag, preview] = useDrag({
     type: ItemTypes.ACTION_ROW,
     item: {
-      type: ItemTypes.ACTION_ROW,
       index,
       id: filteredAction.id.toString(),
     },
