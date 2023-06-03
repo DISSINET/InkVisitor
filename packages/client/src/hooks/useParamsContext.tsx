@@ -51,7 +51,7 @@ export const SearchParamsProvider = ({
 }: {
   children: ReactElement;
 }) => {
-  const history = useNavigate();
+  const navigate = useNavigate();
   const location = useLocation();
   const params = new URLSearchParams(location.hash.substring(1));
   const parsedParams = Object.fromEntries(params);
@@ -150,7 +150,7 @@ export const SearchParamsProvider = ({
 
   const handleHistoryPush = () => {
     if (!disablePush) {
-      history({
+      navigate({
         hash: `${params}`,
       });
     }

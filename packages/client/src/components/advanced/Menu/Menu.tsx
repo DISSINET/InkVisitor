@@ -55,7 +55,7 @@ export const Menu: React.FC<Menu> = ({
     },
   ];
 
-  const history = useNavigate();
+  const navigate = useNavigate();
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState<boolean>(false);
 
@@ -91,13 +91,13 @@ export const Menu: React.FC<Menu> = ({
                   icon={page.icon}
                   onClick={() => {
                     if (page.id === "main") {
-                      history({
+                      navigate({
                         pathname: "/",
                         hash: tempLocation ? tempLocation : "",
                       });
                       setTempLocation(false);
                     } else {
-                      history({
+                      navigate({
                         pathname: page.href,
                       });
                       if (location.pathname === "/") {

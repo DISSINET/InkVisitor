@@ -43,7 +43,7 @@ export const Page: React.FC<Page> = ({ children }) => {
   );
 
   const location = useLocation();
-  const history = useNavigate();
+  const navigate = useNavigate();
 
   const disableRightHeader: boolean =
     location.pathname !== "/users" &&
@@ -75,7 +75,7 @@ export const Page: React.FC<Page> = ({ children }) => {
       //
       cleanAllParams();
 
-      history("/");
+      navigate("/login");
     },
   });
 

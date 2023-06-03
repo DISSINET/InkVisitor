@@ -37,7 +37,7 @@ export const LeftHeader: React.FC<LeftHeader> = React.memo(
       env ? ` | ${env}` : ``
     } | built: ${process.env.BUILD_TIMESTAMP}`;
     const location = useLocation();
-    const history = useNavigate();
+    const navigate = useNavigate();
 
     const queryClient = useQueryClient();
 
@@ -79,7 +79,7 @@ export const LeftHeader: React.FC<LeftHeader> = React.memo(
           alt="Inkvisitor Logo"
           onClick={async () => {
             if (location.pathname !== "/") {
-              history({
+              navigate({
                 pathname: "/",
                 hash: tempLocation ? tempLocation : "",
               });
