@@ -63,9 +63,16 @@ export const GraphEdge: React.FC<EdgeProps> = ({
 
   return (
     <>
-      <Tooltip
-        content={
-          tooltipVisible ? (
+      <g
+        onMouseEnter={() => {
+          setTooltipVisible(true);
+        }}
+        onMouseLeave={() => {
+          setTooltipVisible(false);
+        }}
+      >
+        <Tooltip
+          content={
             <>
               <div>
                 {
@@ -84,55 +91,47 @@ export const GraphEdge: React.FC<EdgeProps> = ({
                 </div>
               )}
             </>
-          ) : (
-            <></>
-          )
-        }
-        visible={tooltipVisible}
-        referenceElement={referenceElement}
-      ></Tooltip>
-      <path
-        id={id}
-        d={edgePath}
-        strokeDasharray={edgeStyle.dashArray}
-        strokeOpacity={edgeStyle.strokeOpacity}
-        fill="none"
-        strokeWidth={edgeStyle.width}
-        stroke={edgeStyle.stroke}
-        style={{}}
-      />
-      {/* tooltip interaction path */}
-      <path
-        id={id}
-        d={edgePath}
-        fill="none"
-        strokeWidth={10}
-        stroke="orange"
-        strokeOpacity={tooltipVisible ? 0.2 : 0.01}
-        onMouseOver={() => {
-          setTooltipVisible(true);
-        }}
-        onMouseOut={() => {
-          setTooltipVisible(false);
-        }}
-      />
-      <EdgeLabelRenderer>
-        <div
-          ref={setReferenceElement}
-          style={{
-            position: "absolute",
-            transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px) scale(${scaleLabel},${scaleLabel})`,
-          }}
-          className="nodrag nopan"
-        >
-          <LetterIcon
-            size={6}
-            letter={data.relationType}
-            color="info"
-            bgColor="white"
-          />
-        </div>
-      </EdgeLabelRenderer>
+          }
+          visible={tooltipVisible}
+          referenceElement={referenceElement}
+        ></Tooltip>
+        <path
+          id={id}
+          d={edgePath}
+          strokeDasharray={edgeStyle.dashArray}
+          strokeOpacity={edgeStyle.strokeOpacity}
+          fill="none"
+          strokeWidth={edgeStyle.width}
+          stroke={edgeStyle.stroke}
+          style={{}}
+        />
+        {/* tooltip interaction path */}
+        <path
+          id={id}
+          d={edgePath}
+          fill="none"
+          strokeWidth={10}
+          stroke="orange"
+          strokeOpacity={tooltipVisible ? 0.2 : 0.01}
+        />
+        <EdgeLabelRenderer>
+          <div
+            ref={setReferenceElement}
+            style={{
+              position: "absolute",
+              transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px) scale(${scaleLabel},${scaleLabel})`,
+            }}
+            className="nodrag nopan"
+          >
+            <LetterIcon
+              size={6}
+              letter={data.relationType}
+              color="info"
+              bgColor="white"
+            />
+          </div>
+        </EdgeLabelRenderer>
+      </g>
     </>
   );
 };
