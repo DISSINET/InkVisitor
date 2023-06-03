@@ -192,13 +192,14 @@ const datasets: Record<string, DbSchema> = {
 };
 
 enum MODES {
+  NOTHING = 0,
   USE_SSH = 1 << 0,
   RECREATE_DATABASE = 1 << 1,
   IMPORT_DATA = 1 << 2,
 }
 
 class Importer {
-  mode: MODES = 0;
+  mode: MODES = MODES.NOTHING;
 
   db: DbHelper;
   ssh?: SshHelper;
