@@ -123,6 +123,7 @@ export namespace Relation {
     label: string;
     inverseLabel: false | string;
     allowedEntitiesPattern: EntityEnums.Class[][];
+    disabledEntities?: EntityEnums.Class[];
     allowedSameEntityClassesOnly: boolean;
     asymmetrical: boolean;
     multiple: boolean;
@@ -293,6 +294,7 @@ export namespace Relation {
     label: "Identification",
     inverseLabel: false,
     allowedEntitiesPattern: [], // any combination is allowed
+    disabledEntities: [EntityEnums.Class.Action, EntityEnums.Class.Concept],
     allowedSameEntityClassesOnly: false,
     asymmetrical: false,
     multiple: true,

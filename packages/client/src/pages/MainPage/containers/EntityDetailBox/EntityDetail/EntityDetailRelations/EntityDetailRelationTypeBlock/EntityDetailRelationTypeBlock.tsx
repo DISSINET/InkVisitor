@@ -196,10 +196,6 @@ export const EntityDetailRelationTypeBlock: React.FC<
     Relation.IRelation[]
   >([]);
 
-  if (relationType === RelationEnums.Type.Classification) {
-    //console.log(currentRelations);
-  }
-
   const moveRow = useCallback(
     (dragIndex: number, hoverIndex: number) => {
       const dragRecord = currentRelations[dragIndex];
