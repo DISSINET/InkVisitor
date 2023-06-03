@@ -79,9 +79,11 @@ export const EntityDetailRelationRow: React.FC<EntityDetailRelationRow> = ({
         options={certaintyDict}
         value={{
           value: (relation as Relation.IIdentification).certainty,
-          label: certaintyDict.find(
-            (c) => c.value === (relation as Relation.IIdentification).certainty
-          )?.label,
+          label:
+            certaintyDict.find(
+              (c) =>
+                c.value === (relation as Relation.IIdentification).certainty
+            )?.label ?? "",
         }}
         onChange={(newValue: any) => {
           relationUpdateMutation.mutate({
@@ -122,10 +124,6 @@ export const EntityDetailRelationRow: React.FC<EntityDetailRelationRow> = ({
   drag(dragRef);
 
   const uniqueRelationIds = [...new Set(relation.entityIds)];
-
-  if (relation.type === RelationEnums.Type.Classification) {
-    //console.log(relation);
-  }
 
   return (
     <StyledGrid

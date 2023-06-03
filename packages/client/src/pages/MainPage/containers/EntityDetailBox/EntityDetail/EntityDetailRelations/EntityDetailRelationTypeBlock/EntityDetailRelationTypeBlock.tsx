@@ -99,7 +99,18 @@ export const EntityDetailRelationTypeBlock: React.FC<
       }
     } else {
       // Multiple - all entities
-      return entitiesDict.map((e) => e.value as EntityEnums.Class);
+      if (!relationRule.disabledEntities?.length) {
+        return entitiesDict.map((e) => e.value as EntityEnums.Class);
+      } else {
+        return entitiesDict
+          .filter(
+            (e) =>
+              !relationRule.disabledEntities?.includes(
+                e.value as EntityEnums.Class
+              )
+          )
+          .map((e) => e.value as EntityEnums.Class);
+      }
     }
   };
 
@@ -195,10 +206,6 @@ export const EntityDetailRelationTypeBlock: React.FC<
   const [currentRelations, setCurrentRelations] = useState<
     Relation.IRelation[]
   >([]);
-
-  if (relationType === RelationEnums.Type.Classification) {
-    //console.log(currentRelations);
-  }
 
   const moveRow = useCallback(
     (dragIndex: number, hoverIndex: number) => {
