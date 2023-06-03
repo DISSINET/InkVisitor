@@ -8,6 +8,7 @@ import { animated, config, useSpring } from "@react-spring/web";
 import { IPage } from "types";
 import { MenuItem } from "./MenuItem";
 import { StyledMenuGroup, StyledMenuGroupWrapper } from "./MenuStyles";
+import { GrDocumentText } from "react-icons/gr";
 
 interface Menu {
   userRole: string;
@@ -52,6 +53,14 @@ export const Menu: React.FC<Menu> = ({
       href: "/users",
       admin: true,
       icon: <FaUsers />,
+    },
+    {
+      id: "documents",
+      label: "Documents",
+      color: "info",
+      href: "/documents",
+      admin: true,
+      icon: <GrDocumentText />,
     },
   ];
 

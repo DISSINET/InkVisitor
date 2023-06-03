@@ -34,6 +34,7 @@ import { setSeparatorXPosition } from "redux/features/layout/separatorXPositionS
 import theme from "./Theme/theme";
 import AclPage from "./pages/Acl";
 import MainPage from "./pages/MainPage";
+import { DocumentsPage } from "pages/Documents";
 
 const clockPerformance = (
   profilerId: any,
@@ -212,6 +213,14 @@ export const App: React.FC = () => {
                       element={
                         <RequireAuth>
                           <UsersPage />
+                        </RequireAuth>
+                      }
+                    />
+                    <Route
+                      path="/documents"
+                      element={
+                        <RequireAuth>
+                          <DocumentsPage />
                         </RequireAuth>
                       }
                     />

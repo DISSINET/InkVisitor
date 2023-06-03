@@ -96,7 +96,7 @@ export const EntityColors: { [key: string]: IEntityColor } = {
 export type EntityKeys = keyof typeof EntityColors;
 
 export interface IPage {
-  id: "main" | "users" | "acl" | "about";
+  id: "main" | "users" | "acl" | "about" | "documents";
   label: string;
   color: "info" | "success" | "danger" | "warning";
   href: string;
