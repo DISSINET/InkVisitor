@@ -113,6 +113,7 @@ export const Tag: React.FC<TagProps> = ({
   );
 
   const [{ isDragging }, drag] = useDrag({
+    type: ItemTypes.TAG,
     item: {
       type: ItemTypes.TAG,
       id: propId,
@@ -125,7 +126,10 @@ export const Tag: React.FC<TagProps> = ({
     collect: (monitor: DragSourceMonitor) => ({
       isDragging: monitor.isDragging(),
     }),
-    end: (item: EntityDragItem | undefined, monitor: DragSourceMonitor) => {
+    end: (
+      item: EntityDragItem | false | undefined,
+      monitor: DragSourceMonitor
+    ) => {
       if (item && item.index !== index) updateOrderFn(item);
     },
     canDrag: canDrag,

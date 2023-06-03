@@ -42,6 +42,7 @@ export const EntityBookmarkTableRow: React.FC<EntityBookmarkTableRow> = ({
   });
 
   const [{ isDragging }, drag, preview] = useDrag({
+    type: ItemTypes.ENTITY_ROW,
     item: { type: ItemTypes.ENTITY_ROW, index, id: row.values.id },
     collect: (monitor: DragSourceMonitor) => ({
       isDragging: monitor.isDragging(),

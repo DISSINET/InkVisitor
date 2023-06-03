@@ -3,7 +3,7 @@ import { Button } from "components/basic/Button/Button";
 import React, { useState } from "react";
 import { BiLogOut } from "react-icons/bi";
 import { FaBars, FaBookOpen, FaInfo, FaUsers } from "react-icons/fa";
-import { useHistory, useLocation } from "react-router";
+import { useNavigate, useLocation } from "react-router";
 import { animated, config, useSpring } from "@react-spring/web";
 import { IPage } from "types";
 import { MenuItem } from "./MenuItem";
@@ -55,7 +55,7 @@ export const Menu: React.FC<Menu> = ({
     },
   ];
 
-  const history = useHistory();
+  const history = useNavigate();
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState<boolean>(false);
 
@@ -91,13 +91,13 @@ export const Menu: React.FC<Menu> = ({
                   icon={page.icon}
                   onClick={() => {
                     if (page.id === "main") {
-                      history.push({
+                      history({
                         pathname: "/",
                         hash: tempLocation ? tempLocation : "",
                       });
                       setTempLocation(false);
                     } else {
-                      history.push({
+                      history({
                         pathname: page.href,
                       });
                       if (location.pathname === "/") {

@@ -8,7 +8,7 @@ import React, {
   useState,
 } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useHistory, useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { maxTabCount } from "Theme/constants";
 
 const UNINITIALISED = (): void => {
@@ -51,12 +51,12 @@ export const SearchParamsProvider = ({
 }: {
   children: ReactElement;
 }) => {
-  const history = useHistory();
-  const { hash, search } = useLocation();
-  const params = new URLSearchParams(hash.substring(1));
+  const history = useNavigate();
+  const location = useLocation();
+  const params = new URLSearchParams(location.hash.substring(1));
   const parsedParams = Object.fromEntries(params);
 
-  const paramsSearch = new URLSearchParams(search);
+  const paramsSearch = new URLSearchParams(location.search);
   const parsedParamsSearch = Object.fromEntries(paramsSearch);
 
   const [territoryId, setTerritoryId] = useState<string>(
@@ -150,7 +150,7 @@ export const SearchParamsProvider = ({
 
   const handleHistoryPush = () => {
     if (!disablePush) {
-      history.push({
+      history({
         hash: `${params}`,
       });
     }
@@ -210,13 +210,13 @@ export const SearchParamsProvider = ({
     // Should be only change from the url => add state to switch of listener
     // this condition is for redirect - don't use our lifecycle when params are set by search query (?)
     if (!hasSearchParams) {
-      return history.listen((location: any) => {
-        setDisablePush(true);
-        handleLocationChange(location);
-        setDisablePush(false);
-      });
+      // return history.listen((location: any) => {
+      setDisablePush(true);
+      handleLocationChange(location);
+      setDisablePush(false);
+      // });
     }
-  }, [history]);
+  }, [location]);
 
   return (
     <SearchParamsContext.Provider

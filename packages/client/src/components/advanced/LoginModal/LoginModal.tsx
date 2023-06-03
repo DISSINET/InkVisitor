@@ -1,7 +1,7 @@
 import api from "api";
 import { Button, Input, Modal } from "components";
 import React, { useState } from "react";
-import { Redirect } from "react-router";
+import { Navigate } from "react-router";
 import { toast } from "react-toastify";
 import { setUsername } from "redux/features/usernameSlice";
 import { useAppDispatch } from "redux/hooks";
@@ -38,7 +38,9 @@ export const LoginModal: React.FC = () => {
     }
   };
 
-  return redirectToMain ? <Redirect to="/" /> : (
+  return redirectToMain ? (
+    <Navigate to="/" />
+  ) : (
     <Modal showModal disableBgClick width="thin" onEnterPress={handleLogIn}>
       <StyledContentWrap>
         <StyledHeading>{"Log In"}</StyledHeading>

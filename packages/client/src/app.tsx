@@ -2,7 +2,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import React, { useEffect } from "react";
 import { Helmet } from "react-helmet";
-import { BrowserRouter, Redirect, Route, Switch } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { ThemeProvider } from "styled-components";
 
@@ -54,30 +54,16 @@ const clockPerformance = (
 };
 
 export const PublicPath = (props: any) => {
-  const Component = props.children;
-
   const loggedIn = !api.isLoggedIn();
   if (loggedIn) {
     api.signOut();
   }
 
-  return (
-    <Route path={props.path} render={props.render} exact={props.exact}>
-      <Component props />
-    </Route>
-  );
+  return props.children;
 };
 
-export const ProtectedPath = (props: any) => {
-  const Component = props.children;
-
-  return api.isLoggedIn() ? (
-    <Route path={props.path} render={props.render} exact={props.exact}>
-      <Component props />
-    </Route>
-  ) : (
-    <Redirect to="/login" />
-  );
+export const RequireAuth = ({ children }: { children: JSX.Element }) => {
+  return api.isLoggedIn() ? children : <Navigate to="/login" />;
 };
 
 const queryClient = new QueryClient({
@@ -164,6 +150,15 @@ export const App: React.FC = () => {
     }
   }, [debouncedWidth]);
 
+  // Ensure basename
+  if (!window.location.pathname.includes(process.env.ROOT_URL!)) {
+    window.history.replaceState(
+      "",
+      "",
+      process.env.ROOT_URL + window.location.pathname
+    );
+  }
+
   return (
     <>
       <Helmet>
@@ -178,15 +173,59 @@ export const App: React.FC = () => {
             <BrowserRouter basename={process.env.ROOT_URL}>
               <SearchParamsProvider>
                 <Page>
-                  <Switch>
-                    <PublicPath path="/login" children={LoginPage} />
-                    <PublicPath path="/activate" children={ActivatePage} />
-                    <ProtectedPath path="/" exact children={MainPage} />
-                    <ProtectedPath path="/acl" children={AclPage} />
-                    <ProtectedPath path="/about" children={AboutPage} />
-                    <ProtectedPath path="/users" children={UsersPage} />
-                    <Route path="*" component={NotFoundPage} />
-                  </Switch>
+                  <Routes>
+                    {/* PUBLIC */}
+                    <Route
+                      path="/login"
+                      element={
+                        <PublicPath>
+                          <LoginPage />
+                        </PublicPath>
+                      }
+                    />
+                    <Route
+                      path="/activate"
+                      element={
+                        <PublicPath>
+                          <ActivatePage />
+                        </PublicPath>
+                      }
+                    />
+                    {/* PRIVATE */}
+                    <Route
+                      path="/"
+                      element={
+                        <RequireAuth>
+                          <MainPage />
+                        </RequireAuth>
+                      }
+                    />
+                    <Route
+                      path="/acl"
+                      element={
+                        <RequireAuth>
+                          <AclPage />
+                        </RequireAuth>
+                      }
+                    />
+                    <Route
+                      path="/about"
+                      element={
+                        <RequireAuth>
+                          <AboutPage />
+                        </RequireAuth>
+                      }
+                    />
+                    <Route
+                      path="/users"
+                      element={
+                        <RequireAuth>
+                          <UsersPage />
+                        </RequireAuth>
+                      }
+                    />
+                    <Route path="*" element={<NotFoundPage />} />
+                  </Routes>
                 </Page>
               </SearchParamsProvider>
             </BrowserRouter>

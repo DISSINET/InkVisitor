@@ -4,7 +4,7 @@ import LogoInkvisitor from "assets/logos/inkvisitor.svg";
 import { Loader } from "components";
 import React, { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { useHistory, useLocation } from "react-router";
+import { useNavigate, useLocation } from "react-router";
 import { toast } from "react-toastify";
 import { useAppSelector } from "redux/hooks";
 import { Menu } from "..";
@@ -37,7 +37,7 @@ export const LeftHeader: React.FC<LeftHeader> = React.memo(
       env ? ` | ${env}` : ``
     } | built: ${process.env.BUILD_TIMESTAMP}`;
     const location = useLocation();
-    const history = useHistory();
+    const history = useNavigate();
 
     const queryClient = useQueryClient();
 
@@ -79,7 +79,7 @@ export const LeftHeader: React.FC<LeftHeader> = React.memo(
           alt="Inkvisitor Logo"
           onClick={async () => {
             if (location.pathname !== "/") {
-              history.push({
+              history({
                 pathname: "/",
                 hash: tempLocation ? tempLocation : "",
               });

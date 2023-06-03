@@ -34,6 +34,7 @@ export const StatementEditorOrderTableRow: React.FC<
   });
 
   const [{ isDragging }, drag, preview] = useDrag({
+    type: ItemTypes.STATEMENT_ORDER_ROW,
     item: {
       type: ItemTypes.STATEMENT_ORDER_ROW,
       index,

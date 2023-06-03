@@ -101,6 +101,7 @@ export const EntityDetailRelationRow: React.FC<EntityDetailRelationRow> = ({
   });
 
   const [{ isDragging }, drag, preview] = useDrag({
+    type: ItemTypes.MULTI_RELATION,
     item: {
       type: ItemTypes.MULTI_RELATION,
       index,
