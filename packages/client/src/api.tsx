@@ -753,6 +753,15 @@ class Api {
     }
   }
 
+  async documentDelete(documentId: string): Promise<AxiosResponse<IDocument>> {
+    try {
+      const response = await this.connection.delete(`/documents/${documentId}`);
+      return response;
+    } catch (err: any | AxiosError) {
+      throw { ...err.response.data };
+    }
+  }
+
   /**
    * Document
    */

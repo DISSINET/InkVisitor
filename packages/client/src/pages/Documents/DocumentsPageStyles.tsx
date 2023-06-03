@@ -18,6 +18,7 @@ export const StyledBoxWrap = styled.div<StyledBoxWrap>`
 `;
 export const StyledItem = styled.div`
   display: flex;
+  flex-direction: row;
   font-size: ${({ theme }) => theme.fontSize["base"]};
   cursor: pointer;
   border: 1px dotted hotpink;

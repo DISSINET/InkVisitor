@@ -15,6 +15,7 @@ import {
   ModalContent,
   ModalFooter,
 } from "components";
+import { FaTrash } from "react-icons/fa";
 
 export const DocumentsPage: React.FC = ({}) => {
   const queryClient = useQueryClient();
@@ -110,6 +111,15 @@ export const DocumentsPage: React.FC = ({}) => {
     setOpenedDocument(false);
   };
 
+  const documentDeleteMutation = useMutation(
+    async (id: string) => await api.documentDelete(id),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["documents"]);
+      },
+    }
+  );
+
   return (
     <>
       <StyledContent>
@@ -118,11 +128,16 @@ export const DocumentsPage: React.FC = ({}) => {
           {documents &&
             documents.map((doc: IResponseDocument, key: number) => {
               return (
-                <StyledItem
-                  key={key}
-                  onClick={() => handleDocumentClick(doc.id)}
-                >
-                  {doc.title}
+                <StyledItem key={key}>
+                  <div onClick={() => handleDocumentClick(doc.id)}>
+                    {doc.title}
+                  </div>
+                  <Button
+                    icon={<FaTrash />}
+                    color="danger"
+                    inverted
+                    onClick={() => documentDeleteMutation.mutate(doc.id)}
+                  />
                 </StyledItem>
               );
             })}
