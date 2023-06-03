@@ -89,30 +89,52 @@ Package containing typescript definitions, types and enums, that should be avail
 
 ## Deploy
 
-For standalone deployment of each package, please refer to respective `README.md` files. No matter the approach, the database should be started first.
+To deploy the Inkvisitor instance, you can use Docker (or Podman) or build and deploy the packages separately.
 
-### Docker
+### Deploy with Docker
 
-1. Install [docker](https://docs.docker.com/get-docker/).
-2. Install [docker-compose tool](https://docs.docker.com/compose/install/)
-3. Prepare `.env` files for servers listed under `env_file` sections. Check server's [README.md](./packages/server/README.md) and [example.env](./packages/server/env/example.env) files.
-4. Prepare `.env` files for clients identified by `ENV` variable under `build -> args` section. Check server's [README.md](./packages/server/README.md) files and [example.env](./packages/server/env/example.env) files.
-4. Run the database - either as a service or containerized using `docker-compose up -d database`
-5. Build app image (will be done also in next step if not available) `docker-compose build inkvisitor` (or `inkvisitor-<env>`)
-6. Run the containerized app `docker-compose up inkvisitor` (or `inkvisitor-<env>`)
+To use docker to deploy the InkVisitor application:
+
+1.  Install [docker](https://docs.docker.com/get-docker/).
+2.  Install [docker-compose tool](https://docs.docker.com/compose/install/).
+3.  Clone | Fork | Download the Inkvisitor [repository](https://github.com/DISSINET/InkVisitor).
+4.  Prepare `.env` files for servers listed under `env_file` sections. Check the server's [README.md](https://github.com/DISSINET/InkVisitor/blob/dev/packages/server/README.md) and [example.env](https://github.com/DISSINET/InkVisitor/blob/dev/packages/server/env/example.env) files for more information.
+5.  To prepare the necessary configuration files for the client application, you should identify the appropriate environment variables (ENV) under the `build -> args` section and then use them to create the `.env` files. You can see the server's [README.md](https://github.com/DISSINET/InkVisitor/blob/dev/packages/server/README.md) and [example.env](https://github.com/DISSINET/InkVisitor/blob/dev/packages/server/env/example.env) files to ensure you have included all the necessary configuration information.
+6.  Run the database - either as a service or containerized using `docker-compose up -d database`.
+7.  Build app image (will also be done in next step if not available) `docker-compose build inkvisitor` (or `inkvisitor-<env>`).
+8.  Run the containerized application with the command `docker-compose up inkvisitor` (or `inkvisitor-<env>`).
+
+### Deploy by packages
+
+The InkVisitor codebase consists of three interconnected packages (parts) - the client application, the server, and the database. You can deploy those packages individually if you do not want to use Docker. In each step, make sure to have the appropriate `.env.<env>` file accessible - see the Readme.md file in the package for more information.
+
+#### 1\. Client application
+
+The client application runs on static files - html/css/js + additional assets. These files need to be moved to your HTTP server by:
+
+1.  Build the frontend app by `npm run build-<env>` to create/update the `dist` folder
+2.  Copy contents of `dist` folder to the directory used by your HTTP server.
+
+#### 2\. Server
+
+The server is also built in Javascript, using mainly the Node + Express libraries. You need to first build the application, move the build to your server and run it from there.
+
+1.  Run `yarn run build` to transpile the code.
+2.  Move the `dist` folder to your server that supports the Node.js environment.
+3.  Do `ENV_FILE=<env> yarn run start` to run the built application with a loaded `.env.<env>` file.
+
+#### 3\. Database
+
+Follow tutorials on the [official page](https://rethinkdb.com/docs/install/) to install RethinkDB on your machine. Then, use the import script to create the database structure and (optional) import some testing data by running \`npm run import\` and following the information in the prompt.
 
 ### Firewall
 
-Make sure the ports required by each application are not blocked. Required ports are listed in [docker-compose.yml](./docker-compose.yml). Examples:
+Make sure the ports required by each application are not blocked. Required ports are listed in [docker-compose.yml](https://github.com/DISSINET/InkVisitor/blob/dev/docker-compose.yml). Examples:
 
-1. [ufw](https://help.ubuntu.com/community/UFW): `ufw allow <port>`
-2. [firewalld](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/security_guide/sec-using_firewalls): `firewall-cmd --zone=public --permanent --add-port=<port>/tcp`
+1.  [ufw](https://help.ubuntu.com/community/UFW): `ufw allow <port>`
+2.  [firewalld](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/security_guide/sec-using_firewalls): `firewall-cmd --zone=public --permanent --add-port=<port>/tcp`
 
 Setup for additional system specific features (reverse proxies etc) are beyond the scope of this readme.
-
-## Wiki
-
-For more in-depth description for models etc, please visit our [wiki page](https://github.com/DISSINET/InkVisitor/wiki)
 
 ## ACL - access control list
 
