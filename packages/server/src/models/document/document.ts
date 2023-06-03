@@ -15,6 +15,7 @@ export default class Document implements IDocument, IDbModel {
   updatedAt?: Date;
 
   constructor(data: Partial<IDocument>) {
+    this.id = data.id || "";
     this.title = data.title || "";
     this.content = data.content || "";
     this.createdAt = data.createdAt || new Date();
@@ -57,6 +58,7 @@ export default class Document implements IDocument, IDbModel {
     updateData: Partial<IDocument>
   ): Promise<WriteResult> {
     this.updatedAt = updateData.updatedAt = new Date();
+    delete updateData.createdAt;
     return rethink
       .table(Document.table)
       .get(this.id)
@@ -90,9 +92,6 @@ export default class Document implements IDocument, IDbModel {
    * @returns boolean
    */
   isValid(): boolean {
-    if (!this.createdAt || this.createdAt.constructor.name !== "Date") {
-      return false;
-    }
     if (!this.content) {
       return false;
     }
@@ -178,7 +177,6 @@ export default class Document implements IDocument, IDbModel {
    */
   static async getAll(db: Connection): Promise<IDocument[]> {
     const entries = await rethink.table(Document.table).run(db);
-
     return entries && entries.length ? entries : [];
   }
 }
