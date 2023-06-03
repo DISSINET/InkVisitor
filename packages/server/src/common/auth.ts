@@ -1,8 +1,8 @@
 import * as bcrypt from "bcrypt";
 import { sign as signJwt } from "jsonwebtoken";
 import { IUser } from "@shared/types/user";
-import jwt, { secretType } from "express-jwt";
-import { Request } from "express";
+import { expressjwt, Request as JWTRequest } from "express-jwt";
+import { NextFunction, Request } from "express";
 import { v1 as uuid } from "uuid";
 
 /**
@@ -70,10 +70,14 @@ export function generateAccessToken(user: IUser, expDays = 30): string {
  * For db specific task - check for user's properties, see customizeAuthenticatedRequest middleware in ./request.ts
  * @returns middleware
  */
-export function validateJwt(): jwt.RequestHandler {
-  return jwt({
-    secret: process.env.SECRET as secretType,
+export function validateJwt() {
+  return expressjwt({
+    secret: process.env.SECRET || "",
     algorithms: [defaultJwtAlgo],
+    requestProperty: "user",
+    isRevoked: async (req, tokenn) => {
+      return false
+    },
     getToken: (req: Request): string | Promise<string> | undefined => {
       if (
         req.headers.authorization &&

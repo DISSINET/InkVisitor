@@ -34,7 +34,7 @@ export const EntityBookmarkTableRow: React.FC<EntityBookmarkTableRow> = ({
   const dropRef = useRef<HTMLTableRowElement>(null);
   const dragRef = useRef<HTMLTableCellElement>(null);
 
-  const [, drop] = useDrop({
+  const [, drop] = useDrop<DragItem>({
     accept: ItemTypes.ENTITY_ROW,
     hover(item: DragItem, monitor: DropTargetMonitor) {
       dndHoverFn(item, index, monitor, dropRef, moveRow);
@@ -42,7 +42,8 @@ export const EntityBookmarkTableRow: React.FC<EntityBookmarkTableRow> = ({
   });
 
   const [{ isDragging }, drag, preview] = useDrag({
-    item: { type: ItemTypes.ENTITY_ROW, index, id: row.values.id },
+    type: ItemTypes.ENTITY_ROW,
+    item: { index, id: row.values.id },
     collect: (monitor: DragSourceMonitor) => ({
       isDragging: monitor.isDragging(),
     }),

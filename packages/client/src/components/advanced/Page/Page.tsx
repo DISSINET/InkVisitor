@@ -10,7 +10,7 @@ import useKeyLift from "hooks/useKeyLift";
 import useKeypress from "hooks/useKeyPress";
 import React, { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useLocation, useHistory } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { toast } from "react-toastify";
 import { setDisableUserSelect } from "redux/features/layout/disableUserSelectSlice";
 import { setLastClickedIndex } from "redux/features/statementList/lastClickedIndexSlice";
@@ -43,7 +43,7 @@ export const Page: React.FC<Page> = ({ children }) => {
   );
 
   const location = useLocation();
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const disableRightHeader: boolean =
     location.pathname !== "/users" &&
@@ -75,7 +75,7 @@ export const Page: React.FC<Page> = ({ children }) => {
       //
       cleanAllParams();
 
-      history.push("/");
+      navigate("/login");
     },
   });
 

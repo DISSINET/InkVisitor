@@ -26,7 +26,7 @@ export const Colors = [
 
 interface IEntityColor {
   entityClass: EntityEnums.ExtendedClass;
-  color: typeof Colors[number];
+  color: (typeof Colors)[number];
 }
 
 // Use for colors, for dropdowns use entity.ts dictionary
@@ -113,8 +113,6 @@ export enum ItemTypes {
   TAG = "TAG",
   STATEMENT_ROW = "STATEMENT_ROW",
   STATEMENT_ORDER_ROW = "STATEMENT_ORDER_ROW",
-
-  // should be removed
   ACTANT_ROW = "ACTANT_ROW",
   ENTITY_ROW = "ENTITY_ROW",
   ACTION_ROW = "ACTION_ROW",
@@ -128,7 +126,6 @@ export enum ItemTypes {
 export type DragItem = {
   index: number;
   id: string;
-  type: ItemTypes;
 };
 export interface EntityDragItem extends DragItem {
   entity: IEntity | false;

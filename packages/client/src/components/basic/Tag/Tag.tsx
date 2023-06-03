@@ -16,7 +16,7 @@ import {
   EntityDragItem,
   ItemTypes,
 } from "types";
-import { dndHoverFn, isValidEntityClass } from "utils";
+import { dndHoverFn } from "utils";
 import {
   StyledButtonWrapper,
   StyledElvlWrapper,
@@ -97,7 +97,7 @@ export const Tag: React.FC<TagProps> = ({
 
   const ref = useRef<HTMLDivElement>(null);
 
-  const [, drop] = useDrop({
+  const [, drop] = useDrop<EntityDragItem>({
     accept: ItemTypes.TAG,
     hover(item: EntityDragItem, monitor: DropTargetMonitor) {
       // TODO: debounce?
@@ -112,9 +112,13 @@ export const Tag: React.FC<TagProps> = ({
     [entityClass, disableDrag]
   );
 
-  const [{ isDragging }, drag] = useDrag({
+  const [{ isDragging }, drag] = useDrag<
+    EntityDragItem,
+    unknown,
+    { isDragging: boolean }
+  >({
+    type: ItemTypes.TAG,
     item: {
-      type: ItemTypes.TAG,
       id: propId,
       index,
       entityClass: entityClass as EntityEnums.Class,

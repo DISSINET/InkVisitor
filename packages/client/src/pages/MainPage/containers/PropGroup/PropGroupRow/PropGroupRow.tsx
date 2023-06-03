@@ -30,6 +30,8 @@ import {
 import { PropGroupRowType } from "./PropGroupRowType";
 import { PropGroupRowValue } from "./PropGroupRowValue";
 
+export declare type Identifier = string | symbol;
+
 interface PropGroupRow {
   prop: IProp;
   entities: { [key: string]: IEntity };
@@ -105,7 +107,11 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
   const dropRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<HTMLDivElement>(null);
 
-  const [{ handlerId }, drop] = useDrop({
+  const [{ handlerId }, drop] = useDrop<
+    DragItem,
+    void,
+    { handlerId: Identifier | null }
+  >({
     accept: itemType ? itemType : ItemTypes.PROP_ROW,
     collect(monitor) {
       return {
@@ -121,7 +127,8 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
   });
 
   const [{ isDragging }, drag, preview] = useDrag({
-    item: { type: itemType ? itemType : ItemTypes.PROP_ROW, id, index },
+    type: itemType ? itemType : ItemTypes.PROP_ROW,
+    item: { id, index },
     collect: (monitor: DragSourceMonitor) => ({
       isDragging: monitor.isDragging(),
     }),
