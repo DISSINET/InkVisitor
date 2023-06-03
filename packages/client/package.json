@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "preinstall": "npx only-allow pnpm",
     "test": "jest",
     "start": "webpack-dev-server --open --config webpack.development.js",
     "build-development": "webpack --config webpack.development.js",
