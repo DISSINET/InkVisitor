@@ -172,7 +172,11 @@ export const getEntityRelationRules = (
 ) => {
   const typesToFilter = relationTypes ? relationTypes : RelationEnums.AllTypes;
   return typesToFilter.filter((rule) => {
-    if (!Relation.RelationRules[rule]?.allowedEntitiesPattern.length) {
+    if (
+      !Relation.RelationRules[rule]?.allowedEntitiesPattern.length &&
+      (!Relation.RelationRules[rule]?.disabledEntities ||
+        !Relation.RelationRules[rule]?.disabledEntities?.includes(entityClass))
+    ) {
       return rule;
     } else if (
       Relation.RelationRules[rule]?.allowedEntitiesPattern.some(
