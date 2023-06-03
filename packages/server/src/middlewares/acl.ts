@@ -34,8 +34,8 @@ class Acl {
   /**
    * Returns Acl entries that match current route.
    * If route does not exist, it is created with empty roles field and then returned as a match.
-   * @param req 
-   * @returns 
+   * @param req
+   * @returns
    */
   private async getPermissions(req: IRequest): Promise<AclPermission[]> {
     const controller = req.baseUrl.split("/").pop() || "";
@@ -66,10 +66,10 @@ class Acl {
   }
 
   /**
-   * Determine if the request should be blocked or allowed. 
+   * Determine if the request should be blocked or allowed.
    * Block is represented by returned PermissionDeniedError error.
-   * @param req 
-   * @returns 
+   * @param req
+   * @returns
    */
   public async validate(req: IRequest): Promise<CustomError | null> {
     const permissions = await this.getPermissions(req);
@@ -81,6 +81,8 @@ class Acl {
 
     // block not logged visitors
     if (!req.user) {
+    console.log("nono", req)
+
       return permissionDeniedErr;
     }
 
