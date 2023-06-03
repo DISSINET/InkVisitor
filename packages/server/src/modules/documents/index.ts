@@ -1,4 +1,4 @@
-import { IDocument, IResponseGeneric } from "@shared/types";
+import { IDocument, IResponseDocument, IResponseDocumentDetail, IResponseGeneric } from "@shared/types";
 import {
   BadParams,
   DocumentDoesNotExist,
@@ -15,7 +15,40 @@ import Document from "@models/document/document";
 export default Router()
   /**
    * @openapi
-   * /relations/{documentId}:
+   * /documents/:
+   *   get:
+   *     description: Returns list of filtered documents entries
+   *     tags:
+   *       - documents
+   *     parameters:
+   *       - in: query
+   *         name: search params
+   *         schema:
+   *           $ref: "#/components/schemas/IRequestDocument"
+   *         required: true
+   *         description: search options for the query
+   *         style: form
+   *         explode: true
+   *     responses:
+   *       200:
+   *         description: Returns list of documents entries
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: array
+   *               items:
+   *                 $ref: "#/components/schemas/IResponseDocument"
+   */
+  .get(
+    "/",
+    asyncRouteHandler<IResponseDocument[]>(async (request: IRequest) => {
+      const docs = await Document.getAll(request.db.connection)
+      return docs
+    })
+  )
+  /**
+   * @openapi
+   * /documents/{documentId}:
    *   put:
    *     description: Retrieves an existing document entry
    *     tags:
@@ -40,11 +73,11 @@ export default Router()
    *         content:
    *           application/json:
    *             schema:
-   *               $ref: "#/components/schemas/IResponseGeneric"
+   *               $ref: "#/components/schemas/IResponseDocumentDetail"
    */
   .get(
     "/:documentId?",
-    asyncRouteHandler<IDocument>(async (request: IRequest) => {
+    asyncRouteHandler<IResponseDocumentDetail>(async (request: IRequest) => {
       const id = request.params.documentId;
 
       if (!id) {
@@ -61,7 +94,7 @@ export default Router()
   )
     /**
    * @openapi
-   * /entities/:
+   * /documents/:
    *   post:
    *     description: Create a new entity entry
    *     tags:
@@ -106,9 +139,9 @@ export default Router()
         return out;
       })
     )
-      /**
+  /**
    * @openapi
-   * /entities/{documentId}:
+   * /documents/{documentId}:
    *   put:
    *     description: Update an existing document entry
    *     tags:
@@ -183,7 +216,7 @@ export default Router()
   )
   /**
    * @openapi
-   * /relations/{documentId}:
+   * /documents/{documentId}:
    *   delete:
    *     description: Delete a document entry
    *     tags:

@@ -62,7 +62,9 @@ import {
   IUserOptions,
   IUserRight,
 } from "./user";
-import { IDocument } from "./document";
+import {
+  IDocument, IResponseDocument, IResponseDocumentDetail
+} from "./document";
 
 export type {
   IAudit,
@@ -126,5 +128,7 @@ export type {
   ClassificationOrder,
   IdentificationOrder,
   IDocument,
+  IResponseDocument,
+  IResponseDocumentDetail,
 };
 export { RequestSearch, RequestPermissionUpdate, Relation };

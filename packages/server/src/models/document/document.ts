@@ -141,7 +141,7 @@ export default class Document implements IDocument, IDbModel {
    * search for single document by ids
    * @param db Connection database connection
    * @param documentId string id
-   * @returns Promise<IDocument> wanted document
+   * @returns Promise<Document> wanted document
    */
     static async findDocumentById(
       db: Connection,
@@ -159,7 +159,7 @@ export default class Document implements IDocument, IDbModel {
    * search for multiple documents by ids
    * @param db Connection database connection
    * @param documentIds string[] list of ids
-   * @returns Promise<IDocument[]> list of documents
+   * @returns Promise<Document[]> list of documents
    */
   static async findDocumentsByIds(
     db: Connection,
@@ -172,4 +172,19 @@ export default class Document implements IDocument, IDbModel {
 
     return entries && entries.length ? entries.map(d => new Document(d)) : [];
   }
+
+  /**
+   * Retrieves all documents
+   * @param db Connection database connection
+   * @returns Promise<IDocument[]> list of documents
+   */
+    static async getAll(
+      db: Connection,
+    ): Promise<IDocument[]> {
+      const entries = await rethink
+        .table(Document.table)
+        .run(db);
+
+      return entries && entries.length ? entries : [];
+    }
 }
