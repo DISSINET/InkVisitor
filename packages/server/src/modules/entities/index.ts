@@ -237,7 +237,7 @@ export default Router()
       }
 
       // clone the entry without id - should be created anew
-      const clone = getEntityClass({ ...original, id: "" });
+      const clone = getEntityClass({ ...original, id: "", legacyId: undefined } as Partial<IEntity>);
       if (!clone.isValid()) {
         throw new ModelNotValidError("");
       }
