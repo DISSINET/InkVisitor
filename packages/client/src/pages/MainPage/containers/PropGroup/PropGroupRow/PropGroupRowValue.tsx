@@ -51,7 +51,7 @@ export const PropGroupRowValue: React.FC<PropGroupRowValue> = ({
               onSelected={(newSelectedId: string) => {
                 updateProp(prop.id, {
                   value: {
-                    ...prop.type,
+                    ...prop.value,
                     entityId: newSelectedId,
                   },
                 });
@@ -114,7 +114,7 @@ export const PropGroupRowValue: React.FC<PropGroupRowValue> = ({
             onSelected={(newSelectedId: string) => {
               updateProp(prop.id, {
                 value: {
-                  ...prop.type,
+                  ...prop.value,
                   entityId: newSelectedId,
                 },
               });
