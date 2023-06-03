@@ -1,10 +1,24 @@
 import { IDocument, IResponseDocument } from "@shared/types";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import React, { ChangeEvent } from "react";
+import React, { ChangeEvent, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
+import {
+  StyledBoxWrap,
+  StyledContent,
+  StyledItem,
+} from "./DocumentsPageStyles";
+import {
+  Button,
+  ButtonGroup,
+  Modal,
+  ModalContent,
+  ModalFooter,
+} from "components";
 
 export const DocumentsPage: React.FC = ({}) => {
+  const queryClient = useQueryClient();
+
   const {
     data: documents,
     error,
@@ -20,11 +34,28 @@ export const DocumentsPage: React.FC = ({}) => {
     }
   );
 
+  const {
+    data: resources,
+    error: resourcesError,
+    isFetching: resourcesIsFetching,
+  } = useQuery(
+    ["resourcesWithDocuments"],
+    async () => {
+      const res = await api.entitiesSearch({
+        resourceHasDocument: true,
+      });
+      return res.data;
+    },
+    {
+      enabled: api.isLoggedIn(),
+    }
+  );
+
   const uploadDocumentMutation = useMutation(
     async (doc: IDocument) => api.documentUpload(doc),
     {
       onSuccess: (variables, data) => {
-        console.log(variables);
+        queryClient.invalidateQueries(["documents"]);
       },
     }
   );
@@ -35,7 +66,6 @@ export const DocumentsPage: React.FC = ({}) => {
       const reader = new FileReader();
       reader.onload = (e) => {
         const text = e.target?.result;
-        console.log(text);
         if (text) {
           handleUpload(file.name, text as string);
         }
@@ -53,14 +83,76 @@ export const DocumentsPage: React.FC = ({}) => {
     uploadDocumentMutation.mutate(document);
   };
 
+  const [openedDocument, setOpenedDocument] = useState<string | false>(false);
+
+  const {
+    data: document,
+    error: documentError,
+    isFetching: documentIsFetching,
+  } = useQuery(
+    ["openedDocument"],
+    async () => {
+      if (openedDocument) {
+        const res = await api.documentGet(openedDocument);
+        return res.data;
+      }
+    },
+    {
+      enabled: api.isLoggedIn() && !!openedDocument,
+    }
+  );
+
+  const handleDocumentClick = (id: string) => {
+    setOpenedDocument(id);
+  };
+
+  const handleModalClose = () => {
+    setOpenedDocument(false);
+  };
+
   return (
-    <div>
-      <h3>Documents</h3>
-      {documents &&
-        documents.map((doc: IResponseDocument, key: number) => {
-          return <div key={key}>{doc.title}</div>;
-        })}
-      <input type="file" accept=".txt" onChange={handleFileChange} />
-    </div>
+    <>
+      <StyledContent>
+        <StyledBoxWrap>
+          <h3>Documents</h3>
+          {documents &&
+            documents.map((doc: IResponseDocument, key: number) => {
+              return (
+                <StyledItem
+                  key={key}
+                  onClick={() => handleDocumentClick(doc.id)}
+                >
+                  {doc.title}
+                </StyledItem>
+              );
+            })}
+          <input type="file" accept=".txt" onChange={handleFileChange} />
+        </StyledBoxWrap>
+      </StyledContent>
+
+      {/* MODAL */}
+      <Modal showModal={openedDocument !== false} onClose={handleModalClose}>
+        <ModalContent column>
+          <div>{document?.content}</div>
+        </ModalContent>
+        <ModalFooter>
+          <ButtonGroup>
+            <Button
+              key="cancel"
+              label="Cancel"
+              color="greyer"
+              inverted
+              onClick={handleModalClose}
+            />
+            <Button
+              key="submit"
+              label="Save"
+              color="info"
+              onClick={() => console.log("handle save")}
+            />
+          </ButtonGroup>
+        </ModalFooter>
+      </Modal>
+    </>
   );
 };
