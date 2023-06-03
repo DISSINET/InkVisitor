@@ -46,7 +46,7 @@ export default class Entity implements IEntity, IDbModel {
       this.notes = data.notes.map(sanitizeText);
     }
     if (data.legacyId !== undefined) {
-      this.legacyId = data.legacyId;
+      // this.legacyId = data.legacyId;
     }
     if (data.isTemplate !== undefined) {
       this.isTemplate = data.isTemplate;
