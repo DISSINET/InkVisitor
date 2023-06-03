@@ -123,6 +123,7 @@ export const StatementEditorActantTableRow: React.FC<
 
   const [, drop] = useDrop({
     accept: ItemTypes.ACTANT_ROW,
+    // @ts-ignore
     hover(item: DragItem, monitor: DropTargetMonitor) {
       dndHoverFn(item, index, monitor, dropRef, moveRow);
     },

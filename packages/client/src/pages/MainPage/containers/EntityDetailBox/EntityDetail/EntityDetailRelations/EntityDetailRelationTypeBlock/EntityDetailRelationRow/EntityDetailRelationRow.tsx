@@ -79,9 +79,11 @@ export const EntityDetailRelationRow: React.FC<EntityDetailRelationRow> = ({
         options={certaintyDict}
         value={{
           value: (relation as Relation.IIdentification).certainty,
-          label: certaintyDict.find(
-            (c) => c.value === (relation as Relation.IIdentification).certainty
-          )?.label,
+          label:
+            certaintyDict.find(
+              (c) =>
+                c.value === (relation as Relation.IIdentification).certainty
+            )?.label ?? "",
         }}
         onChange={(newValue: any) => {
           relationUpdateMutation.mutate({
@@ -95,6 +97,7 @@ export const EntityDetailRelationRow: React.FC<EntityDetailRelationRow> = ({
 
   const [, drop] = useDrop({
     accept: ItemTypes.MULTI_RELATION,
+    // @ts-ignore
     hover(item: DragItem, monitor: DropTargetMonitor) {
       dndHoverFn(item, index, monitor, dropRef, moveRow);
     },

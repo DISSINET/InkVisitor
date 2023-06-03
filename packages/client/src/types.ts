@@ -26,7 +26,7 @@ export const Colors = [
 
 interface IEntityColor {
   entityClass: EntityEnums.ExtendedClass;
-  color: typeof Colors[number];
+  color: (typeof Colors)[number];
 }
 
 // Use for colors, for dropdowns use entity.ts dictionary

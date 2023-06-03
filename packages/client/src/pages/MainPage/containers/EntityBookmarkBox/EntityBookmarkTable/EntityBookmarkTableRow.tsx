@@ -36,6 +36,7 @@ export const EntityBookmarkTableRow: React.FC<EntityBookmarkTableRow> = ({
 
   const [, drop] = useDrop({
     accept: ItemTypes.ENTITY_ROW,
+    // @ts-ignore
     hover(item: DragItem, monitor: DropTargetMonitor) {
       dndHoverFn(item, index, monitor, dropRef, moveRow);
     },

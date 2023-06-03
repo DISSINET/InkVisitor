@@ -99,6 +99,7 @@ export const Tag: React.FC<TagProps> = ({
 
   const [, drop] = useDrop({
     accept: ItemTypes.TAG,
+    // @ts-ignore
     hover(item: EntityDragItem, monitor: DropTargetMonitor) {
       // TODO: debounce?
       if (moveFn && draggedEntity && draggedEntity.lvl === lvl) {
@@ -126,10 +127,8 @@ export const Tag: React.FC<TagProps> = ({
     collect: (monitor: DragSourceMonitor) => ({
       isDragging: monitor.isDragging(),
     }),
-    end: (
-      item: EntityDragItem | false | undefined,
-      monitor: DragSourceMonitor
-    ) => {
+    // @ts-ignore
+    end: (item: EntityDragItem | undefined, monitor: DragSourceMonitor) => {
       if (item && item.index !== index) updateOrderFn(item);
     },
     canDrag: canDrag,

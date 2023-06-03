@@ -57,6 +57,7 @@ export const StatementListRow: React.FC<StatementListRow> = ({
 
   const [, drop] = useDrop({
     accept: ItemTypes.STATEMENT_ROW,
+    // @ts-ignore
     hover(item: DragItem, monitor: DropTargetMonitor) {
       dndHoverFn(item, index, monitor, dropRef, moveRow);
     },

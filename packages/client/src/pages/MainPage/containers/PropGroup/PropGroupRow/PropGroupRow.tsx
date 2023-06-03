@@ -105,6 +105,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
   const dropRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<HTMLDivElement>(null);
 
+  // @ts-ignore
   const [{ handlerId }, drop] = useDrop({
     accept: itemType ? itemType : ItemTypes.PROP_ROW,
     collect(monitor) {
@@ -112,6 +113,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
         handlerId: monitor.getHandlerId(),
       };
     },
+    // @ts-ignore
     hover(item: DragItem, monitor: DropTargetMonitor) {
       if (tempDisabled) {
         return;
