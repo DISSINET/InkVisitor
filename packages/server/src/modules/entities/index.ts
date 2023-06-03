@@ -28,6 +28,7 @@ import { IRequest } from "src/custom_typings/request";
 import Relation from "@models/relation/relation";
 import User from "@models/user/user";
 import { RelationEnums } from "@shared/enums";
+import { Relation as RelationType } from "@shared/types";
 import { copyRelations } from "@models/relation/functions";
 
 export default Router()
@@ -237,7 +238,11 @@ export default Router()
       }
 
       // clone the entry without id - should be created anew
-      const clone = getEntityClass({ ...original, id: "", legacyId: undefined } as Partial<IEntity>);
+      const clone = getEntityClass({
+        ...original,
+        id: "",
+        legacyId: undefined,
+      } as Partial<IEntity>);
       if (!clone.isValid()) {
         throw new ModelNotValidError("");
       }
@@ -255,10 +260,19 @@ export default Router()
 
       const rels = (
         await Relation.findForEntity(request.db.connection, originalId)
-      ).map((r) => getRelationClass(r));
+      ).filter((rel) => {
+        const relType = RelationType.RelationRules[rel.type];
+        if (!relType?.asymmetrical) {
+          return true;
+        } else {
+          return rel.entityIds.indexOf(originalId) === 0;
+        }
+      });
+
+      const relsWithClas = rels.map((r) => getRelationClass(r));
       const relsCopied = await Relation.copyMany(
         request,
-        rels,
+        relsWithClas,
         originalId,
         clone.id
       );
@@ -266,7 +280,7 @@ export default Router()
       return {
         result: true,
         message:
-          relsCopied !== rels.length
+          relsCopied !== relsWithClas.length
             ? "There has been at least one conflict while copying relations"
             : undefined,
         data: clone,
