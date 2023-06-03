@@ -2,9 +2,13 @@ import { IUser } from "../../shared/types/user";
 import { hashPassword } from "../../server/src/common/auth";
 import { IAudit, IEntity } from "../../shared/types";
 import { Relation } from "../../shared/types/relation";
-import { confirm } from './import/prompts';
+import { confirm } from "./import/prompts";
 import { DbSchema, checkRelation, TableSchema } from "./import/common";
-import { auditsIndexes, entitiesIndexes, relationsIndexes } from "./import/indexes";
+import {
+  auditsIndexes,
+  entitiesIndexes,
+  relationsIndexes,
+} from "./import/indexes";
 import { EntityEnums } from "@shared/enums";
 import { question } from "./import/prompts";
 import { DbHelper } from "./import/db";
@@ -28,7 +32,7 @@ const datasets: Record<string, DbSchema> = {
     aclPermissions: {
       tableName: "acl_permissions",
       data: require("../datasets/default/acl_permissions.json"),
-      transform: function () { },
+      transform: function () {},
     },
     entities: {
       tableName: "entities",
@@ -57,7 +61,7 @@ const datasets: Record<string, DbSchema> = {
     relations: {
       tableName: "relations",
       data: require("../datasets/empty/relations.json"),
-      transform: function () { },
+      transform: function () {},
       indexes: relationsIndexes,
     },
   },
@@ -84,7 +88,7 @@ const datasets: Record<string, DbSchema> = {
     aclPermissions: {
       tableName: "acl_permissions",
       data: require("../datasets/default/acl_permissions.json"),
-      transform: function () { },
+      transform: function () {},
     },
     entities: {
       tableName: "entities",
@@ -231,7 +235,10 @@ class Importer {
    * Then starts polling for user input and doing actions afterwards.
    */
   async run(): Promise<void> {
-    if (this.modeEnabled(MODES.USE_SSH) || (await confirm("Use SSH connection?"))) {
+    if (
+      this.modeEnabled(MODES.USE_SSH) ||
+      (await confirm("Use SSH connection?"))
+    ) {
       this.ssh = new SshHelper({
         sshIp: getEnv("SSH_IP"),
         sshPassword: getEnv("SSH_PASSWORD"),
@@ -253,7 +260,6 @@ class Importer {
       if (lastAction) {
         break;
       }
-
     } while (1);
 
     await this.end();
@@ -276,66 +282,99 @@ class Importer {
    */
   async selectAction(): Promise<boolean> {
     let that = this;
-    const menu: Record<string, { description: string, action: Function; lastAction?: boolean; }> = {
-      'L': {
-        description: `Enter '${colors.yellow('L')}' to switch databases`,
-        action: that.selectDb.bind(that)
+    const menu: Record<
+      string,
+      { description: string; action: Function; lastAction?: boolean }
+    > = {
+      L: {
+        description: `Enter '${colors.yellow("L")}' to switch databases`,
+        action: that.selectDb.bind(that),
       },
-      'D': {
-        description: `Enter '${colors.yellow('D')}' to select dataset`,
-        action: that.selectDataset.bind(that)
+      D: {
+        description: `Enter '${colors.yellow("D")}' to select dataset`,
+        action: that.selectDataset.bind(that),
       },
-      'E': {
-        description: `Enter '${colors.yellow('E')}' to end`,
-        action: () => { },
+      E: {
+        description: `Enter '${colors.yellow("E")}' to end`,
+        action: () => {},
         lastAction: true,
       },
-      'X': {
-        description: `Enter '${colors.yellow('X')}' to do a drop, recreate & import`,
+      X: {
+        description: `Enter '${colors.yellow(
+          "X"
+        )}' to do a drop, recreate & import`,
         action: that.dropAndImport.bind(that),
         lastAction: true,
       },
-      'C': {
-        description: `Enter '${colors.yellow('C')}' to drop and recreate without the data`,
+      C: {
+        description: `Enter '${colors.yellow(
+          "C"
+        )}' to drop and recreate without the data`,
         action: that.dropAndCreate.bind(that),
         lastAction: true,
       },
-      'T': {
-        description: `Enter '${colors.yellow('T')}' to recreate & import data for single table`,
+      T: {
+        description: `Enter '${colors.yellow(
+          "T"
+        )}' to recreate & import data for single table`,
         action: that.createSingleTable.bind(that),
         lastAction: true,
       },
-      'J': {
-        description: `Enter '${colors.yellow('J')}' to select jobs`,
+      J: {
+        description: `Enter '${colors.yellow("J")}' to select jobs`,
         action: that.selectJob.bind(that),
         lastAction: true,
       },
     };
 
     if (!this.datasetName || !this.db.dbConfig.name) {
-      delete (menu['X']);
-      delete (menu['C']);
-      delete (menu['T']);
+      delete menu["X"];
+      delete menu["C"];
+      delete menu["T"];
     }
 
     if (!this.db.dbConfig.name) {
-      delete (menu['J']);
+      delete menu["J"];
     }
 
     const info: string[] = [];
-    info.push(`ssh=${!!this.ssh ? colors.green('true') : colors.red('false')}`);
+    info.push(`ssh=${!!this.ssh ? colors.green("true") : colors.red("false")}`);
     if (this.datasetName) {
-      info.push(`dataset=${this.datasetName ? colors.green(this.datasetName) : colors.red('not set')}`);
+      info.push(
+        `dataset=${
+          this.datasetName
+            ? colors.green(this.datasetName)
+            : colors.red("not set")
+        }`
+      );
     }
     if (this.db.dbConfig.name) {
-      info.push(`db=${this.db.dbConfig.name ? colors.green(this.db.dbConfig.name) : colors.red('not set')}`);
+      info.push(
+        `db=${
+          this.db.dbConfig.name
+            ? colors.green(this.db.dbConfig.name)
+            : colors.red("not set")
+        }`
+      );
     }
 
-    console.log(`\nImport app${info.length ? ': ' + info.join(", ") : ''}`);
-    console.log(`To specify db from the command line, use ${colors.yellow("npm start <dbname>")}\n`);
-    Object.values(menu).forEach(item => console.log(item.description));
+    console.log(`\nImport app${info.length ? ": " + info.join(", ") : ""}`);
+    console.log(
+      `To specify db from the command line, use ${colors.yellow(
+        "npm start <dbname>"
+      )}\n`
+    );
+    Object.values(menu).forEach((item) => console.log(item.description));
 
-    const actionChoice = await question<string>("", (input: string): string | undefined => { return Object.keys(menu).find(key => key.toLowerCase() === input.toLowerCase()); }, "");
+    const actionChoice = await question<string>(
+      "",
+      (input: string): string | undefined => {
+        return Object.keys(menu).find(
+          (key) => key.toLowerCase() === input.toLowerCase()
+        );
+      },
+      ""
+    );
     try {
       await menu[actionChoice].action();
       return !!menu[actionChoice].lastAction;
@@ -351,15 +390,24 @@ class Importer {
    */
   async selectDb(): Promise<void> {
     const dbNames = await this.db.dbList();
-    console.log(`Databases: ${["", ...dbNames.map((name, i) => `${name} (${i + 1})}`)].join("\n- ")}`);
+    console.log(
+      `Databases: ${[
+        "",
+        ...dbNames.map((name, i) => `${name} (${i + 1})}`),
+      ].join("\n- ")}`
+    );
 
-    const dbName = await question<string>("Choose the db (name/number)", (input: string): string | undefined => {
-      if (parseInt(input) > 0) {
-        input = dbNames[parseInt(input) - 1];
-      }
+    const dbName = await question<string>(
+      "Choose the db (name/number)",
+      (input: string): string | undefined => {
+        if (parseInt(input) > 0) {
+          input = dbNames[parseInt(input) - 1];
+        }
 
-      return dbNames.find(name => name === input);
-    }, "");
+        return dbNames.find((name) => name === input);
+      },
+      ""
+    );
 
     this.db.useDb(dbName);
   }
@@ -369,30 +417,48 @@ class Importer {
    * @returns Promise<void>
    */
   async selectDataset(): Promise<void> {
-    console.log(`Datasets: ${["", ...Object.keys(datasets).map((key, i) => `${key} (${i + 1})}`)].join("\n- ")}`);
+    console.log(
+      `Datasets: ${[
+        "",
+        ...Object.keys(datasets).map((key, i) => `${key} (${i + 1})}`),
+      ].join("\n- ")}`
+    );
 
-    const dataset = await question<string>("Choose the dataset (name/number)", (input: string): string | undefined => {
-      if (parseInt(input) > 0) {
-        input = Object.keys(datasets)[parseInt(input) - 1];
-      }
+    const dataset = await question<string>(
+      "Choose the dataset (name/number)",
+      (input: string): string | undefined => {
+        if (parseInt(input) > 0) {
+          input = Object.keys(datasets)[parseInt(input) - 1];
+        }
 
-      return Object.keys(datasets).find(key => key === input);
-    }, "");
+        return Object.keys(datasets).find((key) => key === input);
+      },
+      ""
+    );
 
     this.dataset = datasets[dataset];
     this.datasetName = dataset;
   }
 
   async selectJob(): Promise<void> {
-    console.log(`Jobs: ${["", ...Object.keys(jobs).map((key, i) => `${key} (${i + 1})}`)].join("\n- ")}`);
+    console.log(
+      `Jobs: ${[
+        "",
+        ...Object.keys(jobs).map((key, i) => `${key} (${i + 1})}`),
+      ].join("\n- ")}`
+    );
 
-    const job = await question<string>("Choose the job (name/number)", (input: string): string | undefined => {
-      if (parseInt(input) > 0) {
-        input = Object.keys(jobs)[parseInt(input) - 1];
-      }
+    const job = await question<string>(
+      "Choose the job (name/number)",
+      (input: string): string | undefined => {
+        if (parseInt(input) > 0) {
+          input = Object.keys(jobs)[parseInt(input) - 1];
+        }
 
-      return Object.keys(jobs).find(key => key === input);
-    }, "");
+        return Object.keys(jobs).find((key) => key === input);
+      },
+      ""
+    );
 
     await jobs[job](this.db.getConnection());
   }
@@ -445,14 +511,22 @@ class Importer {
     }
 
     const tableList = Object.keys(this.dataset);
-    console.log(`Tables: ${["", ...tableList.map((key, i) => `${key} (${i + 1})}`)].join("\n- ")}`);
-    const chosenTable = await question<string>("Choose the table (name/number)", (input: string): string | undefined => {
-      if (parseInt(input) > 0) {
-        input = tableList[parseInt(input) - 1];
-      }
+    console.log(
+      `Tables: ${["", ...tableList.map((key, i) => `${key} (${i + 1})}`)].join(
+        "\n- "
+      )}`
+    );
+    const chosenTable = await question<string>(
+      "Choose the table (name/number)",
+      (input: string): string | undefined => {
+        if (parseInt(input) > 0) {
+          input = tableList[parseInt(input) - 1];
+        }
 
-      return tableList.find(key => key === input);
-    }, "");
+        return tableList.find((key) => key === input);
+      },
+      ""
+    );
 
     await this.db.dropTable(chosenTable);
     await this.db.createTable(this.dataset[chosenTable as keyof DbSchema]);
