@@ -7,7 +7,7 @@ class ResourceData implements IResourceData, IModel {
   url: string = "";
   partValueLabel: string = "";
   partValueBaseURL: string = "";
-  documentId: string | undefined = undefined;
+  documentId?: string;
 
   constructor(data: Partial<IResourceData>) {
     fillFlatObject(this, data);
