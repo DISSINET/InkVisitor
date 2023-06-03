@@ -431,7 +431,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                 <StyledDetailContentRowValue>
                   <Input
                     disabled={!userCanEdit}
-                    value={entity.data.partValueLabel}
+                    value={entity.data.documentId}
                     width="full"
                     onChangeFn={async (newValue: string) => {
                       const oldData = { ...entity.data };
