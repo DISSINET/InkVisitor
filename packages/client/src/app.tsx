@@ -35,8 +35,6 @@ import theme from "./Theme/theme";
 import AclPage from "./pages/Acl";
 import MainPage from "./pages/MainPage";
 
-import "./ensure-basename";
-
 const clockPerformance = (
   profilerId: any,
   mode: any,

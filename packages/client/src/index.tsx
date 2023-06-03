@@ -5,6 +5,8 @@ import { Provider } from "react-redux";
 import { App } from "app";
 import store from "redux/store";
 
+import "./ensure-basename";
+
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
 );

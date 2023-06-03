@@ -210,11 +210,9 @@ export const SearchParamsProvider = ({
     // Should be only change from the url => add state to switch of listener
     // this condition is for redirect - don't use our lifecycle when params are set by search query (?)
     if (!hasSearchParams) {
-      // return history.listen((location: any) => {
       setDisablePush(true);
       handleLocationChange(location);
       setDisablePush(false);
-      // });
     }
   }, [location]);
 

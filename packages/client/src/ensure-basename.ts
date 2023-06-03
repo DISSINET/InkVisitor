@@ -3,7 +3,10 @@ if (process.env.ROOT_URL) {
     window.history.replaceState(
       "",
       "",
-      process.env.ROOT_URL + window.location.pathname
+      process.env.ROOT_URL +
+        window.location.pathname +
+        window.location.search +
+        window.location.hash
     );
   }
 } else {
