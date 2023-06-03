@@ -445,7 +445,11 @@ class Importer {
     console.log(
       `Jobs: ${[
         "",
-        ...Object.keys(jobs).map((key, i) => `${key} (${i + 1})}`),
+        ...Object.keys(jobs).map((key, i) => {
+          let jobName = key.replace(/([A-Z])/g, " $1");
+          jobName = jobName.charAt(0).toUpperCase() + jobName.slice(1);
+          return `${jobName} (${i + 1})}`;
+        }),
       ].join("\n- ")}`
     );
 

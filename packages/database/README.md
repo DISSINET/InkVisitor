@@ -49,8 +49,8 @@ Then, follow the instructions in the command line.
 ### Jobs
 
 - You can run specialized jobs by typing "J":
-  - **restore dates**
-  - **print deleted entities**
+  - **Restore Dates**
+  - **Print Deleted Entities**
 
 ## Backup
 
