@@ -62,9 +62,7 @@ import {
   IUserOptions,
   IUserRight,
 } from "./user";
-import {
-  IDocument
-} from "./document";
+import { IDocument } from "./document";
 
 export type {
   IAudit,
