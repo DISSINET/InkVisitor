@@ -28,7 +28,7 @@ Follow tutorials on [official page](https://rethinkdb.com/docs/install/)
 
 Warning: the following script will remove all tables and recreates them with basic mock data!
 
-For creating base schema with mock data, please use [import.ts](./scripts/import.ts) script. Usage: `npm run import-<suffix>`. Each import run task calls `import.ts` script with
+For creating base schema with mock data, please use [import.ts](./scripts/import.ts) script. Usage: `pnpm import-<suffix>`. Each import run task calls `import.ts` script with
 arguments `dataset name` and `env name`.
 
 `dataset` identifies the configuration - which file to import, which indexes to prepare, how to transform data before importing.
@@ -40,9 +40,17 @@ To switch between local -> remote host, just provide `SSH*` variables. If provid
 
 ### Example usage
 
-- `npm run import-local`
-- `npm run import-remote`
+- `pnpm import:remote`
+- `pnpm import:remote-data-import`
 - etc
+
+Then, follow the instructions in the command line.
+
+### Jobs
+
+- You can run specialized jobs by typing "J":
+  - **restore dates**
+  - **print deleted entities**
 
 ## Backup
 
