@@ -15,7 +15,7 @@ import {
   ModalContent,
   ModalFooter,
 } from "components";
-import { FaTrash } from "react-icons/fa";
+import { FaEdit, FaTrash } from "react-icons/fa";
 
 export const DocumentsPage: React.FC = ({}) => {
   const queryClient = useQueryClient();
@@ -132,12 +132,20 @@ export const DocumentsPage: React.FC = ({}) => {
                   <div onClick={() => handleDocumentClick(doc.id)}>
                     {doc.title}
                   </div>
-                  <Button
-                    icon={<FaTrash />}
-                    color="danger"
-                    inverted
-                    onClick={() => documentDeleteMutation.mutate(doc.id)}
-                  />
+                  <ButtonGroup>
+                    <Button
+                      icon={<FaEdit />}
+                      color="warning"
+                      inverted
+                      onClick={() => console.log("show input to edit title")}
+                    />
+                    <Button
+                      icon={<FaTrash />}
+                      color="danger"
+                      inverted
+                      onClick={() => documentDeleteMutation.mutate(doc.id)}
+                    />
+                  </ButtonGroup>
                 </StyledItem>
               );
             })}
