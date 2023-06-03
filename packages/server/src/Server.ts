@@ -84,7 +84,13 @@ server.use(dbMiddleware);
 
 // uncomment this to enable auth
 server.use(
-  validateJwt()
+  validateJwt().unless({
+    path: [
+      /api\/v1\/users\/signin/,
+      /api\/v1\/users\/active/,
+      /api\/v1\/users\/password/,
+    ],
+  })
 );
 server.use(customizeRequest);
 

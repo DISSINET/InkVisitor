@@ -81,7 +81,6 @@ class Acl {
 
     // block not logged visitors
     if (!req.user) {
-    console.log("nono", req)
 
       return permissionDeniedErr;
     }
