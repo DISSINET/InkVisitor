@@ -170,6 +170,7 @@ export const SearchParamsProvider = ({
   useEffect(() => {
     // Change from the inside of the app to this state
     if (!hasSearchParams) {
+      console.log("change from inside");
       territoryId
         ? params.set("territory", territoryId)
         : params.delete("territory");
@@ -206,15 +207,16 @@ export const SearchParamsProvider = ({
       : setDetailId("");
   };
 
-  useEffect(() => {
-    // Should be only change from the url => add state to switch of listener
-    // this condition is for redirect - don't use our lifecycle when params are set by search query (?)
-    if (!hasSearchParams) {
-      setDisablePush(true);
-      handleLocationChange(location);
-      setDisablePush(false);
-    }
-  }, [location]);
+  // useEffect(() => {
+  // Should be only change from the url => add state to switch of listener
+  // this condition is for redirect - don't use our lifecycle when params are set by search query (?)
+  // if (!hasSearchParams) {
+  //   setDisablePush(true);
+  //   handleLocationChange(location);
+  //   setDisablePush(false);
+  // }
+  // }),
+  // [location];
 
   return (
     <SearchParamsContext.Provider
