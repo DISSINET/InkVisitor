@@ -10,7 +10,7 @@ export namespace Relation {
 
   export interface ISuperclass extends IRelation {
     type: RelationEnums.Type.Superclass;
-    entityIds: [string, string];
+    entityIds: [string, string]; // 0 - abstract class, 1 - specific class
     order: number;
   }
   export interface ISuperordinateLocation extends IRelation {
