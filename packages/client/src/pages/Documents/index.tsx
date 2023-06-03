@@ -1,7 +1,8 @@
-import { IDocument } from "@shared/types";
+import { IDocument, IResponseDocument } from "@shared/types";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import api from "api";
 import React, { ChangeEvent } from "react";
+import { v4 as uuidv4 } from "uuid";
 
 export const DocumentsPage: React.FC = ({}) => {
   const {
@@ -20,7 +21,7 @@ export const DocumentsPage: React.FC = ({}) => {
   );
 
   const uploadDocumentMutation = useMutation(
-    async (doc: IDocument) => api.uploadDocument(doc),
+    async (doc: IDocument) => api.documentUpload(doc),
     {
       onSuccess: (variables, data) => {
         console.log(variables);
@@ -30,24 +31,34 @@ export const DocumentsPage: React.FC = ({}) => {
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      handleUpload(e.target.files[0]);
+      const file = e.target.files[0];
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const text = e.target?.result;
+        console.log(text);
+        if (text) {
+          handleUpload(file.name, text as string);
+        }
+      };
+      reader.readAsText(file);
     }
   };
 
-  const handleUpload = (file: File) => {
-    if (!file) {
-      return;
-    } else {
-      console.log(file);
-    }
+  const handleUpload = (filename: string, text: string) => {
+    const document: IDocument = {
+      id: uuidv4(),
+      title: filename.substring(0, filename.lastIndexOf(".")) || filename,
+      content: text,
+    };
+    uploadDocumentMutation.mutate(document);
   };
 
   return (
     <div>
       <h3>Documents</h3>
       {documents &&
-        documents.map((doc: IDocument) => {
-          return <>{doc.title}</>;
+        documents.map((doc: IResponseDocument, key: number) => {
+          return <div key={key}>{doc.title}</div>;
         })}
       <input type="file" accept=".txt" onChange={handleFileChange} />
     </div>

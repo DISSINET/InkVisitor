@@ -2,10 +2,7 @@ import { IDbModel } from "@models/common";
 import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
 import { IDocument } from "@shared/types";
 import { UserEnums } from "@shared/enums";
-import {
-  InternalServerError,
-  ModelNotValidError,
-} from "@shared/types/errors";
+import { InternalServerError, ModelNotValidError } from "@shared/types/errors";
 import User from "@models/user/user";
 
 export default class Document implements IDocument, IDbModel {
@@ -14,7 +11,7 @@ export default class Document implements IDocument, IDbModel {
   id = "";
   title: string;
   content: string;
-  createdAt: Date;
+  createdAt?: Date;
   updatedAt?: Date;
 
   constructor(data: Partial<IDocument>) {
@@ -60,7 +57,11 @@ export default class Document implements IDocument, IDbModel {
     updateData: Partial<IDocument>
   ): Promise<WriteResult> {
     this.updatedAt = updateData.updatedAt = new Date();
-    return rethink.table(Document.table).get(this.id).update(updateData).run(db);
+    return rethink
+      .table(Document.table)
+      .get(this.id)
+      .update(updateData)
+      .run(db);
   }
 
   /**
@@ -143,17 +144,14 @@ export default class Document implements IDocument, IDbModel {
    * @param documentId string id
    * @returns Promise<Document> wanted document
    */
-    static async findDocumentById(
-      db: Connection,
-      documentId: string
-    ): Promise<Document | null> {
-      const data = await rethink
-        .table(Document.table)
-        .get(documentId)
-        .run(db);
+  static async findDocumentById(
+    db: Connection,
+    documentId: string
+  ): Promise<Document | null> {
+    const data = await rethink.table(Document.table).get(documentId).run(db);
 
-        return data ? new Document(data) : null;
-      }
+    return data ? new Document(data) : null;
+  }
 
   /**
    * search for multiple documents by ids
@@ -170,7 +168,7 @@ export default class Document implements IDocument, IDbModel {
       .getAll(documentIds)
       .run(db);
 
-    return entries && entries.length ? entries.map(d => new Document(d)) : [];
+    return entries && entries.length ? entries.map((d) => new Document(d)) : [];
   }
 
   /**
@@ -178,13 +176,9 @@ export default class Document implements IDocument, IDbModel {
    * @param db Connection database connection
    * @returns Promise<IDocument[]> list of documents
    */
-    static async getAll(
-      db: Connection,
-    ): Promise<IDocument[]> {
-      const entries = await rethink
-        .table(Document.table)
-        .run(db);
+  static async getAll(db: Connection): Promise<IDocument[]> {
+    const entries = await rethink.table(Document.table).run(db);
 
-      return entries && entries.length ? entries : [];
-    }
+    return entries && entries.length ? entries : [];
+  }
 }

@@ -17,6 +17,8 @@ import {
   Relation,
   EntityTooltip,
   IReference,
+  IResponseDocument,
+  IDocument,
 } from "@shared/types";
 import * as errors from "@shared/types/errors";
 import { IRequestSearch } from "@shared/types/request-search";
@@ -724,6 +726,39 @@ class Api {
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
       const response = await this.connection.delete(`/relations/${relationId}`);
+      return response;
+    } catch (err: any | AxiosError) {
+      throw { ...err.response.data };
+    }
+  }
+
+  /**
+   * Document titles
+   */
+  async documentsGet(): Promise<AxiosResponse<IResponseDocument[]>> {
+    try {
+      const response = await this.connection.get(`/documents/`);
+      return response;
+    } catch (err: any | AxiosError) {
+      throw { ...err.response.data };
+    }
+  }
+
+  async documentGet(documentId: string): Promise<AxiosResponse<IDocument>> {
+    try {
+      const response = await this.connection.get(`/documents/${documentId}`);
+      return response;
+    } catch (err: any | AxiosError) {
+      throw { ...err.response.data };
+    }
+  }
+
+  /**
+   * Document
+   */
+  async documentUpload(document: IDocument): Promise<AxiosResponse<IDocument>> {
+    try {
+      const response = await this.connection.post(`/documents`, document);
       return response;
     } catch (err: any | AxiosError) {
       throw { ...err.response.data };
