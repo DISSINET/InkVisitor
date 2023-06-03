@@ -35,6 +35,8 @@ import theme from "./Theme/theme";
 import AclPage from "./pages/Acl";
 import MainPage from "./pages/MainPage";
 
+import "./ensure-basename";
+
 const clockPerformance = (
   profilerId: any,
   mode: any,
@@ -149,15 +151,6 @@ export const App: React.FC = () => {
       dispatch(setSeparatorXPosition(panels[0] + panels[1]));
     }
   }, [debouncedWidth]);
-
-  // Ensure basename
-  if (!window.location.pathname.includes(process.env.ROOT_URL!)) {
-    window.history.replaceState(
-      "",
-      "",
-      process.env.ROOT_URL + window.location.pathname
-    );
-  }
 
   return (
     <>

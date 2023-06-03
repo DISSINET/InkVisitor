@@ -29,12 +29,14 @@ export const LoginModal: React.FC = () => {
       toast.warn("Fill password");
       return;
     }
-    const res = await api.signIn(usernameLocal, password);
-    if (res.token) {
-      await dispatch(setUsername(usernameLocal));
-      setRedirectToMain(true);
-    } else {
-      toast.error("Wrong attempt!");
+    try {
+      const res = await api.signIn(usernameLocal, password);
+      if (res?.token) {
+        await dispatch(setUsername(usernameLocal));
+        setRedirectToMain(true);
+      }
+    } catch (err) {
+      console.log(err);
     }
   };
 
