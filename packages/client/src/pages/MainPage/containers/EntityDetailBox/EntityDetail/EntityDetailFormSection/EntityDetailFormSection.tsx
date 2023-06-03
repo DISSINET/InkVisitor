@@ -9,9 +9,9 @@ import { IResponseDetail, IResponseGeneric } from "@shared/types";
 import { AxiosResponse } from "axios";
 import { Button, Dropdown, Input, MultiInput, TypeBar } from "components";
 import { AttributeButtonGroup, EntityTag } from "components/advanced";
-import React from "react";
+import React, { useMemo } from "react";
 import { FaRegCopy } from "react-icons/fa";
-import { UseMutationResult } from "@tanstack/react-query";
+import { UseMutationResult, useQuery } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { rootTerritoryId } from "Theme/constants";
 import { DropdownItem } from "types";
@@ -25,6 +25,7 @@ import {
   StyledRelativePosition,
   StyledTagWrap,
 } from "../EntityDetailStyles";
+import api from "api";
 
 interface EntityDetailFormSection {
   entity: IResponseDetail;
@@ -63,6 +64,37 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
   isTerritoryWithParent,
   isStatementWithTerritory,
 }) => {
+  const { status: documentsStatus, data: documents } = useQuery(
+    ["documents"],
+    async () => {
+      const res = await api.documentsGet();
+      return res.data;
+    },
+    { enabled: actantMode === "resource" && api.isLoggedIn() }
+  );
+
+  const noDocumentLinkedItem: DropdownItem = {
+    value: "",
+    label: "no document linked",
+  };
+  const documentOptions: DropdownItem[] = useMemo(() => {
+    const options = [noDocumentLinkedItem];
+    documents?.forEach((doc) => {
+      options.push({
+        value: doc.id,
+        label: doc.title,
+      });
+    });
+    return options;
+  }, [documents]);
+
+  const selectedDocumentOption: DropdownItem = useMemo(() => {
+    return (
+      documentOptions?.find((doc) => doc.value === entity.data.documentId) ??
+      noDocumentLinkedItem
+    );
+  }, [documentOptions, entity.data.documentId]);
+
   return (
     <>
       <StyledFormWrapper>
@@ -426,20 +458,22 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
               {/* document id */}
               <StyledDetailContentRow>
                 <StyledDetailContentRowLabel>
-                  Document id
+                  Linked Document
                 </StyledDetailContentRowLabel>
                 <StyledDetailContentRowValue>
-                  <Input
+                  <Dropdown
                     disabled={!userCanEdit}
-                    value={entity.data.documentId}
+                    value={selectedDocumentOption}
                     width="full"
-                    onChangeFn={async (newValue: string) => {
+                    options={documentOptions}
+                    isMulti={false}
+                    onChange={(selectedOption) => {
                       const oldData = { ...entity.data };
                       updateEntityMutation.mutate({
                         data: {
                           ...oldData,
                           ...{
-                            documentId: newValue,
+                            documentId: (selectedOption as DropdownItem).value,
                           },
                         },
                       });
