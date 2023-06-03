@@ -20,6 +20,7 @@ export interface IRequestSearch {
   status?: EntityEnums.Status;
   createdDate?: Date;
   updatedDate?: Date;
+  resourceHasDocument?: boolean;
 }
 
 export class RequestSearch {
@@ -36,6 +37,7 @@ export class RequestSearch {
   status?: EntityEnums.Status;
   createdDate?: Date;
   updatedDate?: Date;
+  resourceHasDocument?: boolean;
 
   constructor(requestData: IRequestSearch) {
     this.class = requestData.class;
@@ -70,6 +72,7 @@ export class RequestSearch {
     this.territoryId = requestData.territoryId || undefined;
     this.language = requestData.language || undefined;
     this.subTerritorySearch = !!requestData.subTerritorySearch;
+    this.resourceHasDocument = !!requestData.resourceHasDocument;
   }
 
   /**
@@ -119,6 +122,7 @@ export class RequestSearch {
       !this.label &&
       !this.class &&
       !this.onlyTemplates &&
+      !this.resourceHasDocument &&
       !this.cooccurrenceId &&
       !this.usedTemplate &&
       !this.territoryId &&

@@ -90,6 +90,18 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
     { enabled: !!detailId && api.isLoggedIn() }
   );
 
+  const { status: aStatus, data: aEntity } = useQuery(
+    ["test"],
+    async () => {
+      const res = await api.entitiesSearch({
+        resourceHasDocument: true,
+      });
+      console.log("test", res);
+      return res.data;
+    },
+    { enabled: !!detailId && api.isLoggedIn() }
+  );
+
   useEffect(() => {
     if (error && (error as any).message === "unknown class for entity") {
       removeDetailId(detailId);

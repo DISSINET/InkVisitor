@@ -422,6 +422,31 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                   />
                 </StyledDetailContentRowValue>
               </StyledDetailContentRow>
+
+              {/* document id */}
+              <StyledDetailContentRow>
+                <StyledDetailContentRowLabel>
+                  Document id
+                </StyledDetailContentRowLabel>
+                <StyledDetailContentRowValue>
+                  <Input
+                    disabled={!userCanEdit}
+                    value={entity.data.partValueLabel}
+                    width="full"
+                    onChangeFn={async (newValue: string) => {
+                      const oldData = { ...entity.data };
+                      updateEntityMutation.mutate({
+                        data: {
+                          ...oldData,
+                          ...{
+                            documentId: newValue,
+                          },
+                        },
+                      });
+                    }}
+                  />
+                </StyledDetailContentRowValue>
+              </StyledDetailContentRow>
             </React.Fragment>
           )}
 
