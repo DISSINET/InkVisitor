@@ -61,7 +61,7 @@ export const EntityDetailCloudRelation: React.FC<EntityDetailCloudRelation> = ({
               const relationEntity = entities[relationEntityId];
               return (
                 <React.Fragment key={key}>
-                  {relationEntity && relationEntity.id !== entityId && (
+                  {relationEntity && (
                     <StyledCloudEntityWrapper>
                       <EntityTag fullWidth entity={relationEntity} />
                     </StyledCloudEntityWrapper>

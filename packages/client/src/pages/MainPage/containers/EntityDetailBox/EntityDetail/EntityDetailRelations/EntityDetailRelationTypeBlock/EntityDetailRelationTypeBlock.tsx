@@ -10,13 +10,12 @@ import api from "api";
 import { AxiosResponse } from "axios";
 import { EntitySuggester } from "components/advanced";
 import update from "immutability-helper";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { UseMutationResult, useQuery } from "@tanstack/react-query";
 import { v4 as uuidv4 } from "uuid";
 import { EntityDetailCloudRelation } from "./EntityDetailCloudRelation/EntityDetailCloudRelation";
 import { EntityDetailRelationRow } from "./EntityDetailRelationRow/EntityDetailRelationRow";
 import {
-  StyledEntityDetailRelationGraphButton,
   StyledLabel,
   StyledLabelSuggester,
   StyledRelationBlock,
@@ -243,7 +242,12 @@ export const EntityDetailRelationTypeBlock: React.FC<
     });
   };
 
-  const hasSuggester = isMultiple || selectedRelations.length < 1;
+  const hasSuggester = useMemo(() => {
+    if (isCloudType) {
+      return true;
+    }
+    return isMultiple || selectedRelations.length < 1;
+  }, []);
 
   return (
     <StyledRelationBlock>
