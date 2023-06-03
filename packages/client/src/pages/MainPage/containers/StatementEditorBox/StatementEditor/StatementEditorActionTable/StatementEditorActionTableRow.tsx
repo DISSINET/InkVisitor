@@ -110,9 +110,8 @@ export const StatementEditorActionTableRow: React.FC<
     }
   };
 
-  const [, drop] = useDrop({
+  const [, drop] = useDrop<DragItem>({
     accept: ItemTypes.ACTION_ROW,
-    // @ts-ignore
     hover(item: DragItem, monitor: DropTargetMonitor) {
       dndHoverFn(item, index, monitor, dropRef, moveRow);
     },

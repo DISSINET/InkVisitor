@@ -16,7 +16,7 @@ import {
   EntityDragItem,
   ItemTypes,
 } from "types";
-import { dndHoverFn, isValidEntityClass } from "utils";
+import { dndHoverFn } from "utils";
 import {
   StyledButtonWrapper,
   StyledElvlWrapper,
@@ -97,9 +97,8 @@ export const Tag: React.FC<TagProps> = ({
 
   const ref = useRef<HTMLDivElement>(null);
 
-  const [, drop] = useDrop({
+  const [, drop] = useDrop<EntityDragItem>({
     accept: ItemTypes.TAG,
-    // @ts-ignore
     hover(item: EntityDragItem, monitor: DropTargetMonitor) {
       // TODO: debounce?
       if (moveFn && draggedEntity && draggedEntity.lvl === lvl) {
@@ -113,7 +112,11 @@ export const Tag: React.FC<TagProps> = ({
     [entityClass, disableDrag]
   );
 
-  const [{ isDragging }, drag] = useDrag({
+  const [{ isDragging }, drag] = useDrag<
+    EntityDragItem,
+    unknown,
+    { isDragging: boolean }
+  >({
     type: ItemTypes.TAG,
     item: {
       type: ItemTypes.TAG,
@@ -127,7 +130,6 @@ export const Tag: React.FC<TagProps> = ({
     collect: (monitor: DragSourceMonitor) => ({
       isDragging: monitor.isDragging(),
     }),
-    // @ts-ignore
     end: (item: EntityDragItem | undefined, monitor: DragSourceMonitor) => {
       if (item && item.index !== index) updateOrderFn(item);
     },

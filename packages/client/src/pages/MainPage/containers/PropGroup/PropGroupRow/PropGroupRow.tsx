@@ -30,6 +30,8 @@ import {
 import { PropGroupRowType } from "./PropGroupRowType";
 import { PropGroupRowValue } from "./PropGroupRowValue";
 
+export declare type Identifier = string | symbol;
+
 interface PropGroupRow {
   prop: IProp;
   entities: { [key: string]: IEntity };
@@ -105,15 +107,17 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
   const dropRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<HTMLDivElement>(null);
 
-  // @ts-ignore
-  const [{ handlerId }, drop] = useDrop({
+  const [{ handlerId }, drop] = useDrop<
+    DragItem,
+    void,
+    { handlerId: Identifier | null }
+  >({
     accept: itemType ? itemType : ItemTypes.PROP_ROW,
     collect(monitor) {
       return {
         handlerId: monitor.getHandlerId(),
       };
     },
-    // @ts-ignore
     hover(item: DragItem, monitor: DropTargetMonitor) {
       if (tempDisabled) {
         return;

@@ -26,9 +26,8 @@ export const StatementEditorOrderTableRow: React.FC<
 
   const ref = useRef<HTMLTableRowElement>(null);
 
-  const [, drop] = useDrop({
+  const [, drop] = useDrop<DragItem>({
     accept: ItemTypes.STATEMENT_ORDER_ROW,
-    // @ts-ignore
     hover(item: DragItem, monitor: DropTargetMonitor) {
       dndHoverFn(item, index, monitor, ref, moveRow);
     },

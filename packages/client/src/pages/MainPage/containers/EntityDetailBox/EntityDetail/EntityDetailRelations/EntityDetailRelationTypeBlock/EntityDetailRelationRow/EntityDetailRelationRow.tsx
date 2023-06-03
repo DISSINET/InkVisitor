@@ -95,9 +95,8 @@ export const EntityDetailRelationRow: React.FC<EntityDetailRelationRow> = ({
     </div>
   );
 
-  const [, drop] = useDrop({
+  const [, drop] = useDrop<DragItem>({
     accept: ItemTypes.MULTI_RELATION,
-    // @ts-ignore
     hover(item: DragItem, monitor: DropTargetMonitor) {
       dndHoverFn(item, index, monitor, dropRef, moveRow);
     },
