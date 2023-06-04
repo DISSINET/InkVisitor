@@ -10,6 +10,7 @@ import {
   Input,
 } from "components";
 import React, { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 
 interface DocumentModal {
   entityId?: string;
@@ -49,12 +50,13 @@ export const DocumentModal: React.FC<DocumentModal> = ({
       api.documentUpdate(data.id, data.doc),
     {
       onSuccess: (variables, data) => {
-        queryClient.invalidateQueries(["document"]);
+        queryClient.invalidateQueries(["openedDocument"]);
+        toast.info("Document saved");
       },
     }
   );
 
-  const [localContent, setLocalContent] = useState<>("");
+  const [localContent, setLocalContent] = useState<string>("");
   useEffect(() => {
     setLocalContent(document?.content ?? "");
   }, [document]);
@@ -68,6 +70,7 @@ export const DocumentModal: React.FC<DocumentModal> = ({
           value={localContent}
           rows={30}
           cols={100}
+          changeOnType
         />
       </ModalContent>
       <ModalFooter>
@@ -83,12 +86,13 @@ export const DocumentModal: React.FC<DocumentModal> = ({
             key="submit"
             label="Save"
             color="info"
-            onClick={() =>
+            disabled={document?.content === localContent}
+            onClick={() => {
               updateDocumentMutation.mutate({
                 id: documentId,
                 doc: { content: localContent },
-              })
-            }
+              });
+            }}
           />
         </ButtonGroup>
       </ModalFooter>

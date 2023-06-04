@@ -3,6 +3,7 @@ import { ApplyTemplateModal } from "./ApplyTemplateModal/ApplyTemplateModal";
 import { AttributeButtonGroup } from "./AttributeButtonGroup/AttributeButtonGroup";
 import { AuditTable } from "./AuditTable/AuditTable";
 import { BreadcrumbItem } from "./BreadcrumbItem/BreadcrumbItem";
+import { DocumentModal } from "./DocumentModal/DocumentModal";
 import { EmptyTag } from "./EmptyTag/EmptyTag";
 import { EntityDropzone } from "./EntityDropzone/EntityDropzone";
 import { EntitySuggester } from "./EntitySuggester/EntitySuggester";
@@ -26,6 +27,7 @@ export {
   AttributeButtonGroup,
   AuditTable,
   BreadcrumbItem,
+  DocumentModal,
   EmptyTag,
   EntityDropzone,
   EntitySuggester,

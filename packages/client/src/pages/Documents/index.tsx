@@ -1,16 +1,10 @@
 import { IDocument, IResponseDocument } from "@shared/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import {
-  Button,
-  ButtonGroup,
-  Modal,
-  ModalContent,
-  ModalFooter,
-  Submit,
-} from "components";
+import { Submit } from "components";
 import React, { ChangeEvent, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
+import { DocumentModal } from "../../components/advanced/DocumentModal/DocumentModal";
 import { DocumentRow } from "./DocumentRow/DocumentRow";
 import {
   StyledBoxWrap,
@@ -18,7 +12,6 @@ import {
   StyledGrid,
   StyledHeading,
 } from "./DocumentsPageStyles";
-import { DocumentModal } from "./DocumentModal/DocumentModal";
 
 export const DocumentsPage: React.FC = ({}) => {
   const queryClient = useQueryClient();
