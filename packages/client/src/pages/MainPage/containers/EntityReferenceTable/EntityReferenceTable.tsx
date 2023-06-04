@@ -1,4 +1,9 @@
-import { IReference, IResponseDetail, IResponseDocument } from "@shared/types";
+import {
+  IEntity,
+  IReference,
+  IResponseDetail,
+  IResponseDocument,
+} from "@shared/types";
 import { Button } from "components";
 import { CReference } from "constructors";
 import React from "react";
@@ -8,29 +13,59 @@ import {
   StyledListHeaderColumn,
   StyledReferencesList,
 } from "./EntityReferenceTableStyles";
+import api from "api";
+import { useQuery } from "@tanstack/react-query";
 
 interface EntityReferenceTable {
-  entity: IResponseDetail;
+  entityId: string;
+  entities: {
+    [key: string]: IEntity;
+  };
   references: IReference[];
   onChange: (newRefefences: IReference[]) => void;
   disabled: boolean;
   openDetailOnCreate?: boolean;
   isInsideTemplate: boolean;
   territoryParentId?: string;
-  documents: IResponseDocument[];
 }
 
 export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
-  entity,
+  entityId,
+  entities,
   references,
   onChange,
   disabled = true,
   openDetailOnCreate,
   isInsideTemplate,
   territoryParentId,
-  documents,
 }) => {
-  const entities = entity?.entities ?? {};
+  // Documents query
+  const {
+    status: documentsStatus,
+    data: documents,
+    error: documentsError,
+    isFetching: DocumentsIsFetching,
+  } = useQuery(
+    ["documents", references],
+    async () => {
+      const documentIds: string[] = [];
+
+      references
+        .map((ref) => ref.resource)
+        .forEach((ref) => {
+          const refE = entities[ref];
+          if (refE) {
+            if (refE.data.documentId) {
+              documentIds.push(refE.data.documentId);
+            }
+          }
+        });
+      const res = await api.documentsGet({ documentIds: documentIds });
+      return res.data;
+    },
+    { enabled: !!entityId && api.isLoggedIn() }
+  );
+
   const sendChanges = (newValues: IReference[]) => {
     onChange(newValues);
   };
@@ -84,17 +119,18 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
               const resourceEntity = entities[reference.resource];
               const valueEntity = entities[reference.value];
 
-              const document = resourceEntity
-                ? documents.find(
-                    (doc) => doc.id === resourceEntity.data.documentId
-                  )
-                : undefined;
+              const document =
+                resourceEntity && documents
+                  ? documents.find(
+                      (doc) => doc.id === resourceEntity.data.documentId
+                    )
+                  : undefined;
               return (
                 <EntityReferenceTableRow
                   key={ri}
                   reference={reference}
                   document={document}
-                  entity={entity}
+                  entityId={entityId}
                   resource={resourceEntity}
                   value={valueEntity}
                   disabled={disabled}

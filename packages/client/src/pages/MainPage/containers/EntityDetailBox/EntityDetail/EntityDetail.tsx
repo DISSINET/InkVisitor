@@ -179,33 +179,6 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
     return options;
   }, [templates]);
 
-  // Documents query
-  const {
-    status: documentsStatus,
-    data: documents,
-    error: documentsError,
-    isFetching: DocumentsIsFetching,
-  } = useQuery(
-    ["documents", entity?.references],
-    async () => {
-      const documentIds: string[] = [];
-
-      entity?.references
-        .map((ref) => ref.resource)
-        .forEach((ref) => {
-          const refE = entity?.entities[ref];
-          if (refE) {
-            if (refE.data.documentId) {
-              documentIds.push(refE.data.documentId);
-            }
-          }
-        });
-      const res = await api.documentsGet({ documentIds: documentIds });
-      return res.data;
-    },
-    { enabled: !!detailId && api.isLoggedIn() }
-  );
-
   // Audit query
   const {
     status: statusAudit,
@@ -699,9 +672,9 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
               <StyledDetailSectionContent>
                 <EntityReferenceTable
                   disabled={!userCanEdit}
-                  documents={documents ?? []}
                   references={entity.references ?? []}
-                  entity={entity}
+                  entities={entity.entities}
+                  entityId={entity.id}
                   onChange={(newValues: IReference[]) => {
                     updateEntityMutation.mutate({ references: newValues });
                   }}

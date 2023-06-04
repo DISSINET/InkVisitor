@@ -824,7 +824,6 @@ export const StatementEditor: React.FC<StatementEditor> = ({
           <StyledEditorSectionContent>
             <EntityReferenceTable
               openDetailOnCreate
-              entities={statement.entities}
               references={statement.references}
               onChange={(newReferences: IReference[]) => {
                 updateStatementMutation.mutate({ references: newReferences });
@@ -832,6 +831,8 @@ export const StatementEditor: React.FC<StatementEditor> = ({
               disabled={!userCanEdit}
               isInsideTemplate={statement.isTemplate || false}
               territoryParentId={statementTerritoryId}
+              entities={statement.entities ?? {}}
+              entityId={statement.id}
             />
           </StyledEditorSectionContent>
         </StyledEditorSection>

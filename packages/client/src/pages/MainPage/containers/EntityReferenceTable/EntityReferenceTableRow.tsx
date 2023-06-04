@@ -38,7 +38,7 @@ interface EntityReferenceTableRow {
   isInsideTemplate: boolean;
   territoryParentId?: string;
   document: IResponseDocument | undefined;
-  entity: IResponseDetail;
+  entityId: string;
 }
 
 export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
@@ -53,9 +53,8 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
   isInsideTemplate = false,
   territoryParentId,
   document = undefined,
-  entity,
+  entityId,
 }) => {
-  console.log(document);
   return (
     <React.Fragment>
       {/* resource */}
@@ -157,7 +156,7 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
       <StyledReferencesListColumn>
         {resource ? (
           resource.data.documentId ? (
-            document?.referencedEntityIds.includes(entity.id) ? (
+            document?.referencedEntityIds.includes(entityId) ? (
               <Button
                 tooltipLabel="with entity"
                 icon={<GrDocumentVerified />}
