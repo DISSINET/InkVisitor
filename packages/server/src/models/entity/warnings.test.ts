@@ -67,4 +67,118 @@ describe("models/entity/warnings", function () {
       expect(sclm).toBeFalsy();
     });
   });
+
+  describe("test hasISYNC", function () {
+    const db = new Db();
+    const [, actionEntity] = prepareEntity(EntityEnums.Class.Action);
+    const [, conceptWithoutSyn] = prepareEntity(EntityEnums.Class.Concept);
+    const [, entityWithoutSCSyn1] = prepareEntity(EntityEnums.Class.Concept);
+    const [, entityWithoutSCSyn2] = prepareEntity(EntityEnums.Class.Concept);
+    const [, synCloud1] = prepareRelation(RelationEnums.Type.Synonym);
+    synCloud1.entityIds = [entityWithoutSCSyn1.id, entityWithoutSCSyn2.id];
+
+    const [, entityWithSCSyn1] = prepareEntity(EntityEnums.Class.Concept);
+    entityWithSCSyn1.id = "entityWithSCSyn1";
+    const [, entityWithSCSyn2] = prepareEntity(EntityEnums.Class.Concept);
+    entityWithSCSyn2.id = "entityWithSCSyn2";
+    const [, synCloud2] = prepareRelation(RelationEnums.Type.Synonym);
+    synCloud2.entityIds = [entityWithSCSyn1.id, entityWithSCSyn2.id];
+    const equalSc = "someabstractsc1";
+    const [, sc1] = prepareRelation(RelationEnums.Type.Superclass);
+    sc1.entityIds = [equalSc, entityWithSCSyn1.id];
+    const [, sc2] = prepareRelation(RelationEnums.Type.Superclass);
+    sc2.entityIds = [equalSc, entityWithSCSyn2.id];
+
+    const [, entityInequalSCSyn1] = prepareEntity(EntityEnums.Class.Concept);
+    entityInequalSCSyn1.id = "entityInequalSCSyn1";
+    const [, entityInequalSCSyn2] = prepareEntity(EntityEnums.Class.Concept);
+    entityInequalSCSyn2.id = "entityInequalSCSyn2";
+    const [, synCloud3] = prepareRelation(RelationEnums.Type.Synonym);
+    synCloud3.entityIds = [entityInequalSCSyn1.id, entityInequalSCSyn2.id];
+    const equalSc2 = "someabstractsc2";
+    const [, sc3] = prepareRelation(RelationEnums.Type.Superclass);
+    sc3.entityIds = [equalSc2, entityInequalSCSyn1.id];
+
+    beforeAll(async () => {
+      await db.initDb();
+      await actionEntity.save(db.connection);
+      await conceptWithoutSyn.save(db.connection);
+      await entityWithoutSCSyn1.save(db.connection);
+      await entityWithoutSCSyn2.save(db.connection);
+      await synCloud1.save(db.connection);
+
+      await entityWithSCSyn1.save(db.connection);
+      await entityWithSCSyn2.save(db.connection);
+      await synCloud2.save(db.connection);
+      await sc1.save(db.connection);
+      await sc2.save(db.connection);
+
+      await entityInequalSCSyn1.save(db.connection);
+      await entityInequalSCSyn2.save(db.connection);
+      await synCloud3.save(db.connection);
+      await sc3.save(db.connection);
+    });
+
+    afterAll(async () => {
+      await clean(db);
+    });
+
+    it("should ignore ISYNC for non-concept entity", async () => {
+      const isync = await new EntityWarnings(
+        actionEntity.id,
+        actionEntity.class
+      ).hasISYNC(db.connection);
+      expect(isync).toBeFalsy();
+    });
+
+    it("should not find ISYNC warning for conceptWithoutSyn entity", async () => {
+      const isync = await new EntityWarnings(
+        conceptWithoutSyn.id,
+        conceptWithoutSyn.class
+      ).hasISYNC(db.connection);
+      expect(isync).toBeFalsy();
+    });
+
+    it("should not find ISYNC warning for synonyms without SC", async () => {
+      const isync1 = await new EntityWarnings(
+        entityWithoutSCSyn1.id,
+        entityWithoutSCSyn1.class
+      ).hasISYNC(db.connection);
+      expect(isync1).toBeFalsy();
+
+      const isync2 = await new EntityWarnings(
+        entityWithoutSCSyn2.id,
+        entityWithoutSCSyn2.class
+      ).hasISYNC(db.connection);
+      expect(isync2).toBeFalsy();
+    });
+
+    it("should not find ISYNC warning for synonyms with equal SC", async () => {
+      const isync1 = await new EntityWarnings(
+        entityWithSCSyn1.id,
+        entityWithSCSyn1.class
+      ).hasISYNC(db.connection);
+      expect(isync1).toBeFalsy();
+
+      const isync2 = await new EntityWarnings(
+        entityWithSCSyn2.id,
+        entityWithSCSyn2.class
+      ).hasISYNC(db.connection);
+      expect(isync2).toBeFalsy();
+    });
+
+    it("should find ISYNC warning for synonyms with inequal SC", async () => {
+      const isync1 = await new EntityWarnings(
+        entityInequalSCSyn1.id,
+        entityInequalSCSyn1.class
+      ).hasISYNC(db.connection);
+      expect(isync1).toBeTruthy();
+
+      const isync2 = await new EntityWarnings(
+        entityInequalSCSyn2.id,
+        entityInequalSCSyn2.class
+      ).hasISYNC(db.connection);
+      expect(isync2).toBeTruthy();
+    });
+  });
 });
