@@ -1,11 +1,11 @@
 import { IDocument, IResponseDocument } from "@shared/types";
-import { ButtonGroup, Button, Input } from "components";
-import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
-import { FaEdit, FaTrash } from "react-icons/fa";
-import { StyledItem } from "../DocumentsPageStyles";
-import { BsCheckLg } from "react-icons/bs";
 import { UseMutationResult } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
+import { Button, ButtonGroup, Input } from "components";
+import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { BsCheckLg } from "react-icons/bs";
+import { FaDotCircle, FaEdit, FaTrash } from "react-icons/fa";
+import { StyledReference, StyledTitle } from "../DocumentsPageStyles";
 
 interface DocumentRow {
   document: IResponseDocument;
@@ -47,17 +47,24 @@ export const DocumentRow: React.FC<DocumentRow> = ({
   }, [editMode]);
 
   return (
-    <StyledItem>
-      {editMode ? (
-        <Input
-          value={localTitle}
-          onChangeFn={(value: string) => setLocalTitle(value)}
-        />
-      ) : (
-        <div onClick={() => handleDocumentClick(document.id)}>
-          {document.title}
-        </div>
-      )}
+    <>
+      <FaDotCircle size={10} />
+      <StyledTitle>
+        {editMode ? (
+          <Input
+            value={localTitle}
+            onChangeFn={(value: string) => setLocalTitle(value)}
+            autoFocus
+          />
+        ) : (
+          <div
+            style={{ padding: "0.3rem 0" }}
+            onClick={() => handleDocumentClick(document.id)}
+          >
+            {document.title}
+          </div>
+        )}
+      </StyledTitle>
       <ButtonGroup>
         {!editMode ? (
           <Button
@@ -90,6 +97,8 @@ export const DocumentRow: React.FC<DocumentRow> = ({
           onClick={() => setDocToDelete(document.id)}
         />
       </ButtonGroup>
-    </StyledItem>
+      <StyledReference>ref. / suggester</StyledReference>
+      <div>count</div>
+    </>
   );
 };

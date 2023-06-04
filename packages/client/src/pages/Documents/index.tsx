@@ -1,13 +1,6 @@
 import { IDocument, IResponseDocument } from "@shared/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import React, { ChangeEvent, useState } from "react";
-import { v4 as uuidv4 } from "uuid";
-import {
-  StyledBoxWrap,
-  StyledContent,
-  StyledItem,
-} from "./DocumentsPageStyles";
 import {
   Button,
   ButtonGroup,
@@ -16,8 +9,15 @@ import {
   ModalFooter,
   Submit,
 } from "components";
-import { FaEdit, FaTrash } from "react-icons/fa";
+import React, { ChangeEvent, useState } from "react";
+import { v4 as uuidv4 } from "uuid";
 import { DocumentRow } from "./DocumentRow/DocumentRow";
+import {
+  StyledBoxWrap,
+  StyledContent,
+  StyledGrid,
+  StyledHeading,
+} from "./DocumentsPageStyles";
 
 export const DocumentsPage: React.FC = ({}) => {
   const queryClient = useQueryClient();
@@ -55,7 +55,7 @@ export const DocumentsPage: React.FC = ({}) => {
   );
 
   const uploadDocumentMutation = useMutation(
-    async (doc: Partial<IDocument>) => api.documentUpload(doc),
+    async (doc: IDocument) => api.documentUpload(doc),
     {
       onSuccess: (variables, data) => {
         queryClient.invalidateQueries(["documents"]);
@@ -141,22 +141,27 @@ export const DocumentsPage: React.FC = ({}) => {
     <>
       <StyledContent>
         <StyledBoxWrap>
-          <h3>Documents</h3>
-          {documents &&
-            documents.map((doc: IResponseDocument, key: number) => {
-              return (
-                <DocumentRow
-                  key={key}
-                  document={doc}
-                  handleDocumentClick={handleDocumentClick}
-                  setDocToDelete={setDocToDelete}
-                  updateDocumentMutation={updateDocumentMutation}
-                  editMode={editMode === key}
-                  setEditMode={() => setEditMode(key)}
-                  cancelEditMode={() => setEditMode(false)}
-                />
-              );
-            })}
+          <div>
+            <StyledHeading>Documents</StyledHeading>
+            {documents && (
+              <StyledGrid>
+                {documents.map((doc: IResponseDocument, key: number) => {
+                  return (
+                    <DocumentRow
+                      key={key}
+                      document={doc}
+                      handleDocumentClick={handleDocumentClick}
+                      setDocToDelete={setDocToDelete}
+                      updateDocumentMutation={updateDocumentMutation}
+                      editMode={editMode === key}
+                      setEditMode={() => setEditMode(key)}
+                      cancelEditMode={() => setEditMode(false)}
+                    />
+                  );
+                })}
+              </StyledGrid>
+            )}
+          </div>
           <input type="file" accept=".txt" onChange={handleFileChange} />
         </StyledBoxWrap>
       </StyledContent>
