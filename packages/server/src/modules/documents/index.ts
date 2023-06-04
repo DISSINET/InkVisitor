@@ -1,4 +1,9 @@
-import { IDocument, IResponseDocument, IResponseDocumentDetail, IResponseGeneric } from "@shared/types";
+import {
+  IDocument,
+  IResponseDocument,
+  IResponseDocumentDetail,
+  IResponseGeneric,
+} from "@shared/types";
 import {
   BadParams,
   DocumentDoesNotExist,
@@ -11,6 +16,7 @@ import { asyncRouteHandler } from "../index";
 import { mergeDeep } from "@common/functions";
 import { IRequest } from "src/custom_typings/request";
 import Document from "@models/document/document";
+import ResponseDocument from "@models/document/response";
 
 export default Router()
   /**
@@ -42,8 +48,8 @@ export default Router()
   .get(
     "/",
     asyncRouteHandler<IResponseDocument[]>(async (request: IRequest) => {
-      const docs = await Document.getAll(request.db.connection)
-      return docs
+      const docs = await Document.getAll(request.db.connection);
+      return docs.map((d) => new ResponseDocument(d));
     })
   )
   /**
@@ -84,15 +90,19 @@ export default Router()
         throw new BadParams("document id has to be set");
       }
 
-      const existing = await Document.findDocumentById(request.db.connection, id);
+      const existing = await Document.findDocumentById(
+        request.db.connection,
+        id
+      );
+
       if (!existing) {
         throw DocumentDoesNotExist.forId(id);
       }
 
-      return existing
+      return new ResponseDocument(existing);
     })
   )
-    /**
+  /**
    * @openapi
    * /documents/:
    *   post:
@@ -114,31 +124,31 @@ export default Router()
    *             schema:
    *               $ref: "#/components/schemas/IResponseGeneric"
    */
-    .post(
-      "/",
-      asyncRouteHandler<IResponseGeneric>(async (request: IRequest) => {
-        const model = new Document(request.body as Record<string, unknown>);
+  .post(
+    "/",
+    asyncRouteHandler<IResponseGeneric>(async (request: IRequest) => {
+      const model = new Document(request.body as Record<string, unknown>);
 
-        if (!model.isValid()) {
-          throw new ModelNotValidError("");
-        }
+      if (!model.isValid()) {
+        throw new ModelNotValidError("");
+      }
 
-        if (!model.canBeCreatedByUser(request.getUserOrFail())) {
-          throw new PermissionDeniedError("document cannot be created");
-        }
+      if (!model.canBeCreatedByUser(request.getUserOrFail())) {
+        throw new PermissionDeniedError("document cannot be created");
+      }
 
-        await request.db.lock();
+      await request.db.lock();
 
-        const saved = await model.save(request.db.connection);
-        if (!saved) {
-          throw new InternalServerError("cannot create document");
-        }
+      const saved = await model.save(request.db.connection);
+      if (!saved) {
+        throw new InternalServerError("cannot create document");
+      }
 
-        const out: IResponseGeneric = { result: true };
+      const out: IResponseGeneric = { result: true };
 
-        return out;
-      })
-    )
+      return out;
+    })
+  )
   /**
    * @openapi
    * /documents/{documentId}:
@@ -175,16 +185,23 @@ export default Router()
       const documentData = request.body as Record<string, unknown>;
 
       // not validation, just required data for this operation
-      if (!documentId || !documentData || Object.keys(documentData).length === 0) {
+      if (
+        !documentId ||
+        !documentData ||
+        Object.keys(documentData).length === 0
+      ) {
         throw new BadParams("document id and data have to be set");
       }
 
       await request.db.lock();
 
       // documentId must be already in the db
-      const existingDocument = await Document.findDocumentById(request.db.connection, documentId);
+      const existingDocument = await Document.findDocumentById(
+        request.db.connection,
+        documentId
+      );
       if (!existingDocument) {
-        throw DocumentDoesNotExist.forId(documentId)
+        throw DocumentDoesNotExist.forId(documentId);
       }
 
       // get correct IDbModel implementation
@@ -246,7 +263,10 @@ export default Router()
 
       await request.db.lock();
 
-      const existing = await Document.findDocumentById(request.db.connection, id);
+      const existing = await Document.findDocumentById(
+        request.db.connection,
+        id
+      );
       if (!existing) {
         throw DocumentDoesNotExist.forId(id);
       }

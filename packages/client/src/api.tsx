@@ -32,6 +32,10 @@ type IFilterUsers = {
   label?: string;
 };
 
+type IFilterDocuments = {
+  documentIds?: string[];
+};
+
 const parseJwt = (token: string) => {
   var base64Url = token.split(".")[1];
   var base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
@@ -735,16 +739,23 @@ class Api {
   /**
    * Document titles
    */
-  async documentsGet(): Promise<AxiosResponse<IResponseDocument[]>> {
+
+  async documentsGet(
+    filter: IFilterDocuments
+  ): Promise<AxiosResponse<IResponseDocument[]>> {
     try {
-      const response = await this.connection.get(`/documents/`);
+      const response = await this.connection.get(`/documents/`, {
+        params: filter,
+      });
       return response;
     } catch (err: any | AxiosError) {
       throw { ...err.response.data };
     }
   }
 
-  async documentGet(documentId: string): Promise<AxiosResponse<IDocument>> {
+  async documentGet(
+    documentId: string
+  ): Promise<AxiosResponse<IResponseDocument>> {
     try {
       const response = await this.connection.get(`/documents/${documentId}`);
       return response;

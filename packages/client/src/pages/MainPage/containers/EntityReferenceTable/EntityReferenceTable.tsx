@@ -1,4 +1,4 @@
-import { IEntity, IReference } from "@shared/types";
+import { IReference, IResponseDetail, IResponseDocument } from "@shared/types";
 import { Button } from "components";
 import { CReference } from "constructors";
 import React from "react";
@@ -6,28 +6,31 @@ import { FaPlus } from "react-icons/fa";
 import { EntityReferenceTableRow } from "./EntityReferenceTableRow";
 import {
   StyledListHeaderColumn,
-  StyledReferencesList
+  StyledReferencesList,
 } from "./EntityReferenceTableStyles";
 
 interface EntityReferenceTable {
-  entities: { [key: string]: IEntity };
+  entity: IResponseDetail;
   references: IReference[];
   onChange: (newRefefences: IReference[]) => void;
   disabled: boolean;
   openDetailOnCreate?: boolean;
   isInsideTemplate: boolean;
   territoryParentId?: string;
+  documents: IResponseDocument[];
 }
 
 export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
-  entities,
+  entity,
   references,
   onChange,
   disabled = true,
   openDetailOnCreate,
   isInsideTemplate,
   territoryParentId,
+  documents,
 }) => {
+  const entities = entity?.entities ?? {};
   const sendChanges = (newValues: IReference[]) => {
     onChange(newValues);
   };
@@ -41,7 +44,6 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
     });
     sendChanges(newReferences);
   };
-
 
   const handleChangeValue = (refId: string, newValueId: string) => {
     const newReferences = [...references];
@@ -74,16 +76,25 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
             <StyledListHeaderColumn>Resource</StyledListHeaderColumn>
             <StyledListHeaderColumn>Part</StyledListHeaderColumn>
             <StyledListHeaderColumn></StyledListHeaderColumn>
+            <StyledListHeaderColumn></StyledListHeaderColumn>
           </React.Fragment>
 
           {references &&
             references.map((reference: IReference, ri: number) => {
               const resourceEntity = entities[reference.resource];
               const valueEntity = entities[reference.value];
+
+              const document = resourceEntity
+                ? documents.find(
+                    (doc) => doc.id === resourceEntity.data.documentId
+                  )
+                : undefined;
               return (
                 <EntityReferenceTableRow
                   key={ri}
                   reference={reference}
+                  document={document}
+                  entity={entity}
                   resource={resourceEntity}
                   value={valueEntity}
                   disabled={disabled}

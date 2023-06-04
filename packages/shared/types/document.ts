@@ -6,11 +6,16 @@ export interface IDocument {
   updatedAt?: Date;
 }
 
+// lookup -> getAll
 export interface IResponseDocument {
   id: string;
   title: string;
   createdAt?: Date;
   updatedAt?: Date;
+  referencedEntityIds: string[];
 }
 
-export interface IResponseDocumentDetail extends IDocument {}
+// detail -> get
+export interface IResponseDocumentDetail extends IResponseDocument {
+  content: string;
+}
