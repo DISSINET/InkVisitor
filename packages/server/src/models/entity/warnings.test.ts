@@ -233,4 +233,49 @@ describe("models/entity/warnings", function () {
       expect(mval).toBeFalsy();
     });
   });
+
+  describe("test hasMAEE", function () {
+    const db = new Db();
+    const [, conceptEntity] = prepareEntity(EntityEnums.Class.Concept);
+    const [, actionInvalid] = prepareEntity(EntityEnums.Class.Action);
+    const [, actionValid] = prepareEntity(EntityEnums.Class.Action);
+    const [, aee] = prepareRelation(RelationEnums.Type.ActionEventEquivalent);
+    aee.entityIds = [actionValid.id, "somerandomid"];
+
+    beforeAll(async () => {
+      await db.initDb();
+      await conceptEntity.save(db.connection);
+      await actionInvalid.save(db.connection);
+      await actionValid.save(db.connection);
+      await aee.save(db.connection);
+    });
+
+    afterAll(async () => {
+      await clean(db);
+    });
+
+    it("should ignore MAEE for non-action entity", async () => {
+      const maee = await new EntityWarnings(
+        conceptEntity.id,
+        conceptEntity.class
+      ).hasMAEE(db.connection);
+      expect(maee).toBeFalsy();
+    });
+
+    it("should have MAEE for action without AEE", async () => {
+      const maee = await new EntityWarnings(
+        actionInvalid.id,
+        actionInvalid.class
+      ).hasMAEE(db.connection);
+      expect(maee).toBeTruthy();
+    });
+
+    it("should not have MAEE for action with AEE", async () => {
+      const maee = await new EntityWarnings(
+        actionValid.id,
+        actionValid.class
+      ).hasMAEE(db.connection);
+      expect(maee).toBeFalsy();
+    });
+  });
 });

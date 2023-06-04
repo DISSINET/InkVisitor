@@ -170,4 +170,27 @@ export default class EntityWarnings {
 
     return null;
   }
+
+  /**
+   * Tests if there is MAEE warning and returns it
+   * @param conn
+   * @returns
+   */
+  async hasMAEE(conn: Connection): Promise<IWarning | null> {
+    if (this.class !== EntityEnums.Class.Action) {
+      return null;
+    }
+
+    const aee = await Relation.findForEntity(
+      conn,
+      this.entityId,
+      RelationEnums.Type.ActionEventEquivalent
+    );
+
+    if (!aee || !aee.length) {
+      return this.newWarning(WarningTypeEnums.MAEE);
+    }
+
+    return null;
+  }
 }
