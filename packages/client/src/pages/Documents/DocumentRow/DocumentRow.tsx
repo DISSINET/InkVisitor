@@ -46,6 +46,17 @@ export const DocumentRow: React.FC<DocumentRow> = ({
     }
   }, [editMode]);
 
+  const handleSave = () => {
+    if (document.title !== localTitle) {
+      updateDocumentMutation.mutate({
+        id: document.id,
+        doc: { title: localTitle },
+      });
+    } else {
+      cancelEditMode();
+    }
+  };
+
   return (
     <>
       <FaDotCircle size={10} />
@@ -54,7 +65,9 @@ export const DocumentRow: React.FC<DocumentRow> = ({
           <Input
             value={localTitle}
             onChangeFn={(value: string) => setLocalTitle(value)}
+            changeOnType
             autoFocus
+            onBlur={handleSave}
           />
         ) : (
           <div
@@ -78,16 +91,7 @@ export const DocumentRow: React.FC<DocumentRow> = ({
             icon={<BsCheckLg />}
             color="success"
             inverted
-            onClick={() => {
-              if (document.title !== localTitle) {
-                updateDocumentMutation.mutate({
-                  id: document.id,
-                  doc: { title: localTitle },
-                });
-              } else {
-                cancelEditMode();
-              }
-            }}
+            onClick={handleSave}
           />
         )}
         <Button
