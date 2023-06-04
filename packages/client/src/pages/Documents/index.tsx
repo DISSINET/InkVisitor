@@ -14,8 +14,10 @@ import {
   Modal,
   ModalContent,
   ModalFooter,
+  Submit,
 } from "components";
 import { FaEdit, FaTrash } from "react-icons/fa";
+import { DocumentRow } from "./DocumentRow/DocumentRow";
 
 export const DocumentsPage: React.FC = ({}) => {
   const queryClient = useQueryClient();
@@ -53,9 +55,20 @@ export const DocumentsPage: React.FC = ({}) => {
   );
 
   const uploadDocumentMutation = useMutation(
-    async (doc: IDocument) => api.documentUpload(doc),
+    async (doc: Partial<IDocument>) => api.documentUpload(doc),
     {
       onSuccess: (variables, data) => {
+        queryClient.invalidateQueries(["documents"]);
+      },
+    }
+  );
+
+  const updateDocumentMutation = useMutation(
+    async (data: { id: string; doc: Partial<IDocument> }) =>
+      api.documentUpdate(data.id, data.doc),
+    {
+      onSuccess: (variables, data) => {
+        setEditMode(false);
         queryClient.invalidateQueries(["documents"]);
       },
     }
@@ -116,9 +129,13 @@ export const DocumentsPage: React.FC = ({}) => {
     {
       onSuccess: () => {
         queryClient.invalidateQueries(["documents"]);
+        setDocToDelete(false);
       },
     }
   );
+
+  const [docToDelete, setDocToDelete] = useState<string | false>(false);
+  const [editMode, setEditMode] = useState<false | number>(false);
 
   return (
     <>
@@ -128,25 +145,16 @@ export const DocumentsPage: React.FC = ({}) => {
           {documents &&
             documents.map((doc: IResponseDocument, key: number) => {
               return (
-                <StyledItem key={key}>
-                  <div onClick={() => handleDocumentClick(doc.id)}>
-                    {doc.title}
-                  </div>
-                  <ButtonGroup>
-                    <Button
-                      icon={<FaEdit />}
-                      color="warning"
-                      inverted
-                      onClick={() => console.log("show input to edit title")}
-                    />
-                    <Button
-                      icon={<FaTrash />}
-                      color="danger"
-                      inverted
-                      onClick={() => documentDeleteMutation.mutate(doc.id)}
-                    />
-                  </ButtonGroup>
-                </StyledItem>
+                <DocumentRow
+                  key={key}
+                  document={doc}
+                  handleDocumentClick={handleDocumentClick}
+                  setDocToDelete={setDocToDelete}
+                  updateDocumentMutation={updateDocumentMutation}
+                  editMode={editMode === key}
+                  setEditMode={() => setEditMode(key)}
+                  cancelEditMode={() => setEditMode(false)}
+                />
               );
             })}
           <input type="file" accept=".txt" onChange={handleFileChange} />
@@ -176,6 +184,16 @@ export const DocumentsPage: React.FC = ({}) => {
           </ButtonGroup>
         </ModalFooter>
       </Modal>
+
+      <Submit
+        title="Delete document"
+        text="Do you really want to delete this document?"
+        show={docToDelete !== false}
+        onSubmit={() =>
+          docToDelete && documentDeleteMutation.mutate(docToDelete)
+        }
+        onCancel={() => setDocToDelete(false)}
+      />
     </>
   );
 };

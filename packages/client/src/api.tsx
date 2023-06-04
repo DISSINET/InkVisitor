@@ -765,9 +765,29 @@ class Api {
   /**
    * Document
    */
-  async documentUpload(document: IDocument): Promise<AxiosResponse<IDocument>> {
+  async documentUpload(
+    document: Partial<IDocument>
+  ): Promise<AxiosResponse<IDocument>> {
     try {
       const response = await this.connection.post(`/documents`, document);
+      return response;
+    } catch (err: any | AxiosError) {
+      throw { ...err.response.data };
+    }
+  }
+
+  /**
+   * Document update
+   */
+  async documentUpdate(
+    documentId: string,
+    document: Partial<IDocument>
+  ): Promise<AxiosResponse<IDocument>> {
+    try {
+      const response = await this.connection.put(
+        `/documents/${documentId}`,
+        document
+      );
       return response;
     } catch (err: any | AxiosError) {
       throw { ...err.response.data };
