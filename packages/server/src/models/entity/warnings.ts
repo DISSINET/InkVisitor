@@ -50,6 +50,8 @@ export default class EntityWarnings {
 
   /**
    * Tests if there is SCLM warning and returns it
+   * SCLM warning should pop when the is no superclass for this entity
+   * (all entities should have SC pointed to some abstract entity)
    * @param conn
    * @returns
    */
@@ -63,15 +65,17 @@ export default class EntityWarnings {
       this.entityId,
       RelationEnums.Type.Superclass
     );
-    let warn: IWarning | null = null;
+
+    let gotAbstractSC = false;
+
     for (const scl of scls) {
-      if (scl.entityIds[0] === this.entityId) {
-        warn = this.newWarning(WarningTypeEnums.SCLM, scl.id);
+      if (scl.entityIds[1] === this.entityId) {
+        gotAbstractSC = true;
         break;
       }
     }
 
-    return warn;
+    return gotAbstractSC ? null : this.newWarning(WarningTypeEnums.SCLM);
   }
 
   /**
