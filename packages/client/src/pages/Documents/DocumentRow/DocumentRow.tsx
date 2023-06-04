@@ -1,5 +1,10 @@
 import { IDocument, IResponseDocument } from "@shared/types";
-import { UseMutationResult } from "@tanstack/react-query";
+import {
+  UseMutationResult,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
 import { Button, ButtonGroup, Input } from "components";
 import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
@@ -13,6 +18,7 @@ import {
 import { EntitySuggester } from "components/advanced";
 import { EntityEnums } from "@shared/enums";
 import { RiFileEditFill } from "react-icons/ri";
+import api from "api";
 
 interface DocumentRow {
   document: IResponseDocument;
@@ -64,9 +70,17 @@ export const DocumentRow: React.FC<DocumentRow> = ({
     }
   };
 
-  const addDocumentToResource = (id: string) => {
-    // updateResourceMutation.mutate
-  };
+  const queryClient = useQueryClient();
+
+  const updateResourceMutation = useMutation(
+    async (resourceId: string) =>
+      api.entityUpdate(resourceId, { documentId: document.id }),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["resourcesWithDocuments"]);
+      },
+    }
+  );
 
   return (
     <>
@@ -106,7 +120,7 @@ export const DocumentRow: React.FC<DocumentRow> = ({
         <EntitySuggester
           placeholder="add resource"
           categoryTypes={[EntityEnums.Class.Resource]}
-          onSelected={(id: string) => addDocumentToResource(id)}
+          onSelected={(id: string) => updateResourceMutation.mutate(id)}
         />
       </StyledReference>
       <StyledCount>{document.referencedEntityIds.length}</StyledCount>
