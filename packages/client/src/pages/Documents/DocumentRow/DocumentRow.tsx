@@ -5,9 +5,14 @@ import { Button, ButtonGroup, Input } from "components";
 import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { BsCheckLg } from "react-icons/bs";
 import { FaDotCircle, FaEdit, FaTrash } from "react-icons/fa";
-import { StyledReference, StyledTitle } from "../DocumentsPageStyles";
+import {
+  StyledCount,
+  StyledReference,
+  StyledTitle,
+} from "../DocumentsPageStyles";
 import { EntitySuggester } from "components/advanced";
 import { EntityEnums } from "@shared/enums";
+import { RiFileEditFill } from "react-icons/ri";
 
 interface DocumentRow {
   document: IResponseDocument;
@@ -77,30 +82,18 @@ export const DocumentRow: React.FC<DocumentRow> = ({
             width={150}
           />
         ) : (
-          <div
-            style={{ padding: "0.3rem 0" }}
-            onClick={() => handleDocumentClick(document.id)}
-          >
+          <div style={{ padding: "0.3rem 0" }} onClick={setEditMode}>
             {document.title}
           </div>
         )}
       </StyledTitle>
       <ButtonGroup>
-        {!editMode ? (
-          <Button
-            icon={<FaEdit />}
-            color="warning"
-            inverted
-            onClick={setEditMode}
-          />
-        ) : (
-          <Button
-            icon={<BsCheckLg />}
-            color="success"
-            inverted
-            onClick={handleSave}
-          />
-        )}
+        <Button
+          icon={<RiFileEditFill />}
+          color="warning"
+          inverted
+          onClick={() => handleDocumentClick(document.id)}
+        />
         <Button
           icon={<FaTrash />}
           color="danger"
@@ -116,7 +109,7 @@ export const DocumentRow: React.FC<DocumentRow> = ({
           onSelected={(id: string) => addDocumentToResource(id)}
         />
       </StyledReference>
-      <div>count</div>
+      <StyledCount>{document.referencedEntityIds.length}</StyledCount>
     </>
   );
 };

@@ -40,3 +40,6 @@ export const StyledHeading = styled.div`
   font-weight: ${({ theme }) => theme.fontWeight["bold"]};
   margin-bottom: ${({ theme }) => theme.space[2]};
 `;
+export const StyledCount = styled.div`
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
+`;

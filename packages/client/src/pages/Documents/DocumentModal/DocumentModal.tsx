@@ -1,0 +1,97 @@
+import { IDocument } from "@shared/types";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import api from "api";
+import {
+  Modal,
+  ModalContent,
+  ModalFooter,
+  ButtonGroup,
+  Button,
+  Input,
+} from "components";
+import React, { useEffect, useState } from "react";
+
+interface DocumentModal {
+  entityId?: string;
+  documentId: string;
+  onClose: () => void;
+}
+export const DocumentModal: React.FC<DocumentModal> = ({
+  onClose,
+  entityId,
+  documentId,
+}) => {
+  const [show, setShow] = useState(false);
+
+  useEffect(() => {
+    setShow(true);
+  }, []);
+
+  const {
+    data: document,
+    error: documentError,
+    isFetching: documentIsFetching,
+  } = useQuery(
+    ["openedDocument"],
+    async () => {
+      const res = await api.documentGet(documentId);
+      return res.data;
+    },
+    {
+      enabled: api.isLoggedIn(),
+    }
+  );
+
+  const queryClient = useQueryClient();
+
+  const updateDocumentMutation = useMutation(
+    async (data: { id: string; doc: Partial<IDocument> }) =>
+      api.documentUpdate(data.id, data.doc),
+    {
+      onSuccess: (variables, data) => {
+        queryClient.invalidateQueries(["document"]);
+      },
+    }
+  );
+
+  const [localContent, setLocalContent] = useState<>("");
+  useEffect(() => {
+    setLocalContent(document?.content ?? "");
+  }, [document]);
+
+  return (
+    <Modal showModal={show} onClose={onClose}>
+      <ModalContent column>
+        <Input
+          type="textarea"
+          onChangeFn={(value: string) => setLocalContent(value)}
+          value={localContent}
+          rows={30}
+          cols={100}
+        />
+      </ModalContent>
+      <ModalFooter>
+        <ButtonGroup>
+          <Button
+            key="cancel"
+            label="Cancel"
+            color="greyer"
+            inverted
+            onClick={onClose}
+          />
+          <Button
+            key="submit"
+            label="Save"
+            color="info"
+            onClick={() =>
+              updateDocumentMutation.mutate({
+                id: documentId,
+                doc: { content: localContent },
+              })
+            }
+          />
+        </ButtonGroup>
+      </ModalFooter>
+    </Modal>
+  );
+};

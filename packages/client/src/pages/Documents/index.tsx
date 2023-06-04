@@ -18,6 +18,7 @@ import {
   StyledGrid,
   StyledHeading,
 } from "./DocumentsPageStyles";
+import { DocumentModal } from "./DocumentModal/DocumentModal";
 
 export const DocumentsPage: React.FC = ({}) => {
   const queryClient = useQueryClient();
@@ -29,7 +30,7 @@ export const DocumentsPage: React.FC = ({}) => {
   } = useQuery(
     ["documents"],
     async () => {
-      const res = await api.documentsGet();
+      const res = await api.documentsGet({});
       return res.data;
     },
     {
@@ -97,31 +98,16 @@ export const DocumentsPage: React.FC = ({}) => {
     uploadDocumentMutation.mutate(document);
   };
 
-  const [openedDocument, setOpenedDocument] = useState<string | false>(false);
-
-  const {
-    data: document,
-    error: documentError,
-    isFetching: documentIsFetching,
-  } = useQuery(
-    ["openedDocument"],
-    async () => {
-      if (openedDocument) {
-        const res = await api.documentGet(openedDocument);
-        return res.data;
-      }
-    },
-    {
-      enabled: api.isLoggedIn() && !!openedDocument,
-    }
+  const [openedDocumentId, setOpenedDocumentId] = useState<string | false>(
+    false
   );
 
   const handleDocumentClick = (id: string) => {
-    setOpenedDocument(id);
+    setOpenedDocumentId(id);
   };
 
   const handleModalClose = () => {
-    setOpenedDocument(false);
+    setOpenedDocumentId(false);
   };
 
   const documentDeleteMutation = useMutation(
@@ -166,29 +152,12 @@ export const DocumentsPage: React.FC = ({}) => {
         </StyledBoxWrap>
       </StyledContent>
 
-      {/* MODAL */}
-      <Modal showModal={openedDocument !== false} onClose={handleModalClose}>
-        <ModalContent column>
-          <div>{document?.content}</div>
-        </ModalContent>
-        <ModalFooter>
-          <ButtonGroup>
-            <Button
-              key="cancel"
-              label="Cancel"
-              color="greyer"
-              inverted
-              onClick={handleModalClose}
-            />
-            <Button
-              key="submit"
-              label="Save"
-              color="info"
-              onClick={() => console.log("handle save")}
-            />
-          </ButtonGroup>
-        </ModalFooter>
-      </Modal>
+      {openedDocumentId && (
+        <DocumentModal
+          documentId={openedDocumentId}
+          onClose={handleModalClose}
+        />
+      )}
 
       <Submit
         title="Delete document"

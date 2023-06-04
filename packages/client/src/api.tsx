@@ -19,6 +19,7 @@ import {
   IReference,
   IResponseDocument,
   IDocument,
+  IResponseDocumentDetail,
 } from "@shared/types";
 import * as errors from "@shared/types/errors";
 import { IRequestSearch } from "@shared/types/request-search";
@@ -755,7 +756,7 @@ class Api {
 
   async documentGet(
     documentId: string
-  ): Promise<AxiosResponse<IResponseDocument>> {
+  ): Promise<AxiosResponse<IResponseDocumentDetail>> {
     try {
       const response = await this.connection.get(`/documents/${documentId}`);
       return response;
