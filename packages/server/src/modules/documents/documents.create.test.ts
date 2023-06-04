@@ -10,8 +10,6 @@ import app from "../../Server";
 import { supertestConfig } from "..";
 import { Db } from "@service/RethinkDB";
 import "ts-jest";
-import Relation from "@models/relation/relation";
-import { RelationEnums } from "@shared/enums";
 import Document from "@models/document/document";
 
 describe("modules/documents create", function () {
@@ -47,7 +45,7 @@ describe("modules/documents create", function () {
 
       const newDocument = new Document({
         content: "test",
-        title: "test"
+        title: "test",
       });
 
       await request(app)

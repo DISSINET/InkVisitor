@@ -1,13 +1,10 @@
 import { clean, testErroneousResponse } from "@modules/common.test";
-import { EntityDoesNotExist, BadParams, DocumentDoesNotExist } from "@shared/types/errors";
+import { BadParams, DocumentDoesNotExist } from "@shared/types/errors";
 import request from "supertest";
 import { apiPath } from "@common/constants";
 import app from "../../Server";
 import { supertestConfig } from "..";
 import { Db } from "@service/RethinkDB";
-import { findEntityById } from "@service/shorthands";
-import { IEntity } from "@shared/types";
-import Statement, { StatementData, StatementTerritory } from "@models/statement/statement";
 import { successfulGenericResponse } from "@modules/common.test";
 import Document from "@models/document/document";
 
@@ -30,7 +27,10 @@ describe("modules/documents UPDATE", function () {
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(
-          testErroneousResponse.bind(undefined, new DocumentDoesNotExist("", ""))
+          testErroneousResponse.bind(
+            undefined,
+            new DocumentDoesNotExist("", "")
+          )
         )
         .then(() => done());
     });
@@ -40,8 +40,8 @@ describe("modules/documents UPDATE", function () {
     const changeTitleTo = "new title";
     const document = new Document({
       content: "test",
-      title: "test"
-    })
+      title: "test",
+    });
 
     beforeAll(async () => {
       await db.initDb();
@@ -59,7 +59,10 @@ describe("modules/documents UPDATE", function () {
         .expect(200)
         .expect(successfulGenericResponse)
         .expect(async () => {
-          const changedEntry = await Document.findDocumentById(db.connection, document.id);
+          const changedEntry = await Document.findDocumentById(
+            db.connection,
+            document.id
+          );
           expect(changedEntry?.title).toEqual(changeTitleTo);
         });
     });

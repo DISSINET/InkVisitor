@@ -1,16 +1,10 @@
 import { clean, testErroneousResponse } from "@modules/common.test";
-import { DocumentDoesNotExist, EntityDoesNotExist, InvalidDeleteError } from "@shared/types/errors";
+import { DocumentDoesNotExist } from "@shared/types/errors";
 import { Db } from "@service/RethinkDB";
 import request from "supertest";
 import { apiPath } from "@common/constants";
 import app from "../../Server";
-import { findEntityById } from "@service/shorthands";
 import { supertestConfig } from "..";
-import { IEntity } from "@shared/types";
-import Territory from "@models/territory/territory";
-import Classification from "@models/relation/classification";
-import Person from "@models/person/person";
-import Concept from "@models/concept/concept";
 import Document from "@models/document/document";
 
 describe("modules/documents DELETE", function () {
@@ -21,7 +15,10 @@ describe("modules/documents DELETE", function () {
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(
-          testErroneousResponse.bind(undefined, new DocumentDoesNotExist("", ""))
+          testErroneousResponse.bind(
+            undefined,
+            new DocumentDoesNotExist("", "")
+          )
         )
         .then(() => done());
     });
@@ -31,8 +28,8 @@ describe("modules/documents DELETE", function () {
 
     const document = new Document({
       content: "test",
-      title: "test"
-    })
+      title: "test",
+    });
 
     beforeAll(async () => {
       await db.initDb();

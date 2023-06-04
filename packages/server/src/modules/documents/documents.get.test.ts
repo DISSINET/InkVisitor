@@ -1,10 +1,9 @@
 import { clean, testErroneousResponse } from "@modules/common.test";
-import { EntityDoesNotExist, BadParams, DocumentDoesNotExist } from "@shared/types/errors";
+import { DocumentDoesNotExist } from "@shared/types/errors";
 import request from "supertest";
 import { supertestConfig } from "..";
 import { apiPath } from "@common/constants";
 import app from "../../Server";
-import Statement, { StatementData, StatementTerritory } from "@models/statement/statement";
 import { Db } from "@service/RethinkDB";
 import Document from "@models/document/document";
 
@@ -15,8 +14,11 @@ describe("modules/documents GET", function () {
         .get(`${apiPath}/documents/123`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect(
-          testErroneousResponse.bind(undefined, new DocumentDoesNotExist("", ""))
-        )
+          testErroneousResponse.bind(
+            undefined,
+            new DocumentDoesNotExist("", "")
+          )
+        );
     });
   });
   describe("Correct param", () => {
@@ -24,8 +26,8 @@ describe("modules/documents GET", function () {
 
     const document = new Document({
       content: "test",
-      title: "test"
-    })
+      title: "test",
+    });
 
     beforeAll(async () => {
       await db.initDb();
@@ -42,7 +44,6 @@ describe("modules/documents GET", function () {
         .expect((res) => {
           expect(typeof res.body).toEqual("object");
           expect(res.body.id).toEqual(document.id);
-
         });
     });
   });

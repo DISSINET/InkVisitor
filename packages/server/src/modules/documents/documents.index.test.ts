@@ -1,13 +1,10 @@
-import { clean, testErroneousResponse } from "@modules/common.test";
-import { EntityDoesNotExist, BadParams, DocumentDoesNotExist } from "@shared/types/errors";
+import { clean } from "@modules/common.test";
 import request from "supertest";
 import { supertestConfig } from "..";
 import { apiPath } from "@common/constants";
 import app from "../../Server";
-import Statement, { StatementData, StatementTerritory } from "@models/statement/statement";
 import { Db } from "@service/RethinkDB";
 import Document from "@models/document/document";
-import { timeout } from "@common/functions";
 import { deleteDocuments } from "@service/shorthands";
 
 describe("modules/documents INDEX", function () {
@@ -15,12 +12,12 @@ describe("modules/documents INDEX", function () {
 
   const document1 = new Document({
     content: "test",
-    title: "test"
-  })
+    title: "test",
+  });
   const document2 = new Document({
     content: "test2",
-    title: "test2"
-  })
+    title: "test2",
+  });
 
   beforeAll(async () => {
     await db.initDb();
@@ -39,8 +36,12 @@ describe("modules/documents INDEX", function () {
       .expect((res) => {
         expect(res.body.length).toBeTruthy();
         expect(res.body.length).toEqual(2);
-        expect((res.body as Document[]).find(d => d.id === document1.id)).toBeTruthy();
-        expect((res.body as Document[]).find(d => d.id === document2.id)).toBeTruthy();
+        expect(
+          (res.body as Document[]).find((d) => d.id === document1.id)
+        ).toBeTruthy();
+        expect(
+          (res.body as Document[]).find((d) => d.id === document2.id)
+        ).toBeTruthy();
       });
   });
 });
