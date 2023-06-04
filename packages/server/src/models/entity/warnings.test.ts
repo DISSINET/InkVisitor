@@ -14,12 +14,13 @@ import {
   IResponseUsedInStatementClassification,
   IResponseUsedInStatementIdentification,
 } from "@shared/types/response-detail";
-import { IStatement } from "@shared/types";
+import { IActionData, IStatement } from "@shared/types";
 import { prepareEntity } from "./entity.test";
 import { Db } from "@service/RethinkDB";
 import { clean } from "@modules/common.test";
 import EntityWarnings from "./warnings";
 import { prepareRelation } from "@models/relation/relation.test";
+import Action from "@models/action/action";
 
 describe("models/entity/warnings", function () {
   describe("test hasSCLM", function () {
@@ -179,6 +180,57 @@ describe("models/entity/warnings", function () {
         entityInequalSCSyn2.class
       ).hasISYNC(db.connection);
       expect(isync2).toBeTruthy();
+    });
+  });
+
+  describe("test hasMVAL", function () {
+    const db = new Db();
+    const [, conceptEntity] = prepareEntity(EntityEnums.Class.Concept);
+    const [, actionInvalid] = prepareEntity(EntityEnums.Class.Action);
+    const actionValid = new Action({
+      data: {
+        entities: {},
+        valencies: {
+          a1: "",
+          a2: "",
+          s: "",
+        },
+      },
+    });
+
+    beforeAll(async () => {
+      await db.initDb();
+      await conceptEntity.save(db.connection);
+      await actionInvalid.save(db.connection);
+      await actionValid.save(db.connection);
+    });
+
+    afterAll(async () => {
+      await clean(db);
+    });
+
+    it("should ignore MVAL for non-actin entity", async () => {
+      const mval = await new EntityWarnings(
+        conceptEntity.id,
+        conceptEntity.class
+      ).hasMVAL(db.connection);
+      expect(mval).toBeFalsy();
+    });
+
+    it("should have MVAL for invalid valencies", async () => {
+      const mval = await new EntityWarnings(
+        actionInvalid.id,
+        actionInvalid.class
+      ).hasMVAL(db.connection);
+      expect(mval).toBeTruthy();
+    });
+
+    it("should not have MVAL if all valency fields are set", async () => {
+      const mval = await new EntityWarnings(
+        actionValid.id,
+        actionValid.class
+      ).hasMVAL(db.connection);
+      expect(mval).toBeFalsy();
     });
   });
 });

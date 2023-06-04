@@ -1,7 +1,9 @@
 import Relation from "@models/relation/relation";
 import Superclass from "@models/relation/superclass";
+import { findEntityById } from "@service/shorthands";
 import { EntityEnums, RelationEnums, WarningTypeEnums } from "@shared/enums";
-import { IWarning } from "@shared/types";
+import { IAction, IWarning } from "@shared/types";
+import { InternalServerError } from "@shared/types/errors";
 import { Connection } from "rethinkdb-ts";
 
 export default class EntityWarnings {
@@ -150,32 +152,22 @@ export default class EntityWarnings {
       return null;
     }
 
-    const synonym = await Relation.findForEntity(
-      conn,
-      this.entityId,
-      RelationEnums.Type.Synonym
-    );
-
-    let entityIds: string[] = [];
-    for (const syn of synonym) {
-      entityIds = entityIds.concat(syn.entityIds);
-    }
-    entityIds = Array.from(new Set(entityIds));
-
-    // find SCL relations with checked entities on 0 index
-    const scls = await Superclass.findForEntities(
-      conn,
-      entityIds,
-      RelationEnums.Type.Superclass,
-      0
-    );
-
-    let warn: IWarning | null = null;
-    const sclTargets = Array.from(new Set(scls.map((s) => s.entityIds[1])));
-    if (sclTargets.length === 1 && scls.length > 1) {
-      warn = this.newWarning(WarningTypeEnums.ISYNC);
+    const action = await findEntityById<IAction>(conn, this.entityId);
+    if (!action) {
+      throw new InternalServerError(
+        "action not found while checking MVAL warning"
+      );
     }
 
-    return warn;
+    if (
+      !action.data.valencies ||
+      (action.data.valencies.a1 === undefined &&
+        action.data.valencies.a2 === undefined &&
+        action.data.valencies.s === undefined)
+    ) {
+      return this.newWarning(WarningTypeEnums.MVAL);
+    }
+
+    return null;
   }
 }
