@@ -47,6 +47,16 @@ export default class EntityWarnings {
       warnings.push(isyncWarning);
     }
 
+    const mvalWarning = await this.hasMVAL(conn);
+    if (mvalWarning) {
+      warnings.push(mvalWarning);
+    }
+
+    const maeeWarning = await this.hasMAEE(conn);
+    if (maeeWarning) {
+      warnings.push(maeeWarning);
+    }
+
     return warnings;
   }
 
