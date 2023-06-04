@@ -20,8 +20,7 @@ import { EntitySuggester, EntityTag } from "components/advanced";
 import { CEntity, CStatement, CTerritory } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "react-query";
-import { OptionTypeBase, ValueType } from "react-select";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { excludedSuggesterEntities, rootTerritoryId } from "Theme/constants";
 import { DropdownItem } from "types";
@@ -65,8 +64,6 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
       if (userId) {
         const res = await api.usersGet(userId);
         return res.data;
-      } else {
-        return false;
       }
     },
     { enabled: !!userId && api.isLoggedIn() }
@@ -105,7 +102,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
         closeModal();
         appendDetailId(variables.id);
         if (variables.class === EntityEnums.Class.Territory) {
-          queryClient.invalidateQueries("tree");
+          queryClient.invalidateQueries(["tree"]);
         }
       },
     }
@@ -208,9 +205,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
                 categoryTypes={allowedEntityClasses}
                 excludedEntities={excludedSuggesterEntities}
                 onSelected={() => console.log("cannot select")}
-                onChangeCategory={(
-                  selectedOption: ValueType<OptionTypeBase, any>
-                ) => {
+                onChangeCategory={(selectedOption) => {
                   if (selectedOption)
                     setSelectedCategory(selectedOption as DropdownItem);
                 }}
@@ -222,6 +217,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
                 inputWidth={96}
                 autoFocus
                 disableButtons
+                disableEnter
               />
             </ModalInputWrap>
             <ModalInputLabel>{"Detail: "}</ModalInputLabel>
@@ -235,7 +231,6 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
             <ModalInputLabel>{"Language: "}</ModalInputLabel>
             <ModalInputWrap>
               <Dropdown
-                isMulti={false}
                 width="full"
                 options={languageDict}
                 value={languageDict.find(

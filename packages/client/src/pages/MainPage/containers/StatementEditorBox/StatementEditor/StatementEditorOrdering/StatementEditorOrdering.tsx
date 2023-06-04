@@ -1,7 +1,7 @@
 import { IEntity, OrderType } from "@shared/types";
 import api from "api";
 import React, { useEffect, useState } from "react";
-import { useMutation, useQueryClient } from "react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { StatementEditorNoOrderTable } from "./StatementEditorNoOrderTable/StatementEditorNoOrderTable";
 import { StyledNoOrderHeading } from "./StatementEditorOrderingStyles";
 import { StatementEditorOrderTable } from "./StatementEditorOrderTable/StatementEditorOrderTable";
@@ -34,7 +34,7 @@ export const StatementEditorOrdering: React.FC<StatementEditorOrdering> = ({
       await api.statementReorderElements(statementId, elementsWithOrdering),
     {
       onSuccess: (data, variables) => {
-        queryClient.invalidateQueries("statement");
+        queryClient.invalidateQueries(["statement"]);
         queryClient.invalidateQueries([
           "territory",
           "statement-list",

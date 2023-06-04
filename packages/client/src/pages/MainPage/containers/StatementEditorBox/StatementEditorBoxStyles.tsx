@@ -124,9 +124,6 @@ export const StyledTagsListItem = styled.div<StyledTagsListItem>`
   max-width: 100%;
 `;
 
-export const StyledEditorActantTableWrapper = styled.div`
-  margin-bottom: ${({ theme }) => theme.space[4]};
-`;
 export const StyledTagWrapper = styled.div`
   display: inline-flex;
   overflow: hidden;
@@ -153,6 +150,7 @@ export const StyledHeaderTagWrap = styled.div`
   max-width: 100%;
   display: inline-flex;
   overflow: hidden;
+  align-items: center;
   margin-right: ${({ theme }) => theme.space[3]};
   margin-bottom: ${({ theme }) => theme.space[2]};
 `;

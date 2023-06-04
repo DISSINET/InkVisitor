@@ -20,9 +20,11 @@ import {
 } from "@shared/types";
 import * as errors from "@shared/types/errors";
 import { IRequestSearch } from "@shared/types/request-search";
+import { defaultPing } from "Theme/constants";
 import axios, { AxiosError, AxiosInstance, AxiosResponse } from "axios";
 import React from "react";
 import { toast } from "react-toastify";
+import io, { Socket } from "socket.io-client";
 
 type IFilterUsers = {
   label?: string;
@@ -47,24 +49,66 @@ const parseJwt = (token: string) => {
 };
 
 class Api {
-  private baseUrl: string;
+  private apiUrl: string;
   private headers: object;
   private connection: AxiosInstance;
   private token: string;
+  private ws: Socket;
+  private ping: number;
 
   constructor() {
     if (!process.env.APIURL) {
       throw new Error("APIURL is not set");
     }
 
-    this.baseUrl = process.env.APIURL + "/api/v1";
+    const baseUrl = process.env.APIURL;
+    this.apiUrl = baseUrl + "/api/v1";
+
+    this.ping = defaultPing;
+
+    const url = new URL(baseUrl);
+
+    this.ws = io(url.origin, {
+      path: (url.pathname + "/socket.io").replace(`//`, "/"),
+    });
+    this.ws.on("connect", () => {
+      console.log("Socket.IO connected");
+    });
+    this.ws.on("disconnect", () => {
+      this.ping = -1;
+      console.log("Socket.IO disconnected");
+    });
+    this.ws.on("error", (error) => {
+      this.ping = -1;
+      console.error("Socket error:", error);
+    });
+    this.ws.on("connect_error", (error) => {
+      console.error("Socket connection error:", error);
+    });
+    this.ws.on("connect_timeout", () => {
+      console.error("Socket connection timeout.");
+    });
+
+    setInterval(() => {
+      const start = Date.now();
+
+      this.ws.emit("ping", (ack: any) => {
+        if (ack instanceof Error) {
+          console.error("Socket ping error:", ack);
+        } else {
+          const duration = Date.now() - start;
+          this.ping = duration;
+        }
+      });
+    }, 5000);
+
     this.headers = {
       "Content-Type": "application/json",
       //"Content-Encoding": "gzip",
     };
 
     this.connection = axios.create({
-      baseURL: this.baseUrl,
+      baseURL: this.apiUrl,
       timeout: 8000,
       responseType: "json",
       headers: this.headers,
@@ -92,6 +136,10 @@ class Api {
 
     this.token = "";
     this.checkLogin();
+  }
+
+  getPing() {
+    return this.ping;
   }
 
   responseToError(responseData: unknown): errors.IErrorSignature {

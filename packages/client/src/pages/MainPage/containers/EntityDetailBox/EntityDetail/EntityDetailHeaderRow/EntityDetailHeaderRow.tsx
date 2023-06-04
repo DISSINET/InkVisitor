@@ -1,15 +1,16 @@
 import { EntityEnums, UserEnums } from "@shared/enums";
-import { IEntity, IResponseTerritory, IStatement } from "@shared/types";
+import { IEntity, IStatement } from "@shared/types";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Button, ButtonGroup } from "components";
 import { AddTerritoryModal, EntityTag } from "components/advanced";
-import { DEntity, InstTemplate } from "constructors";
+import { InstTemplate } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useState } from "react";
+import { AiOutlineLink } from "react-icons/ai";
 import { CgListTree } from "react-icons/cg";
 import { FaClone, FaEdit, FaTrashAlt } from "react-icons/fa";
 import { GrClone } from "react-icons/gr";
-import { useMutation, useQueryClient } from "react-query";
 import { toast } from "react-toastify";
 import {
   StyledActantHeaderRow,
@@ -40,9 +41,9 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
       onSuccess: (data, variables) => {
         appendDetailId(data.data.data.id);
         toast.info(`Entity duplicated!`);
-        queryClient.invalidateQueries("templates");
+        queryClient.invalidateQueries(["templates"]);
         if (data.data.data.class === EntityEnums.Class.Territory) {
-          queryClient.invalidateQueries("tree");
+          queryClient.invalidateQueries(["tree"]);
         }
       },
       onError: () => {
@@ -81,7 +82,7 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
         });
       }
       if (entity.class === EntityEnums.Class.Territory) {
-        queryClient.invalidateQueries("tree");
+        queryClient.invalidateQueries(["tree"]);
       }
     }
   };
@@ -126,25 +127,18 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
                 }}
               />
               <Button
-                key="instance-template"
+                key="instantiate-template"
                 icon={<GrClone size={14} />}
                 tooltipLabel="create entity from template"
                 inverted
                 color="primary"
                 onClick={() => {
-                  // instantiate entity
                   if (entity.class === EntityEnums.Class.Territory) {
-                    // TODO: modal for choosing territory parent
                     setShowAddParentModal(true);
-                    // } else if (entity.class === EntityEnums.Class.Statement) {
-                    // TODO: modal for choosing territory for S
                   } else {
                     instantiateTemplate();
                   }
                 }}
-                // disabled={
-                //   entity.class === EntityEnums.Class.Territory
-                // }
               />
             </>
           )}
@@ -204,6 +198,20 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
                 setTerritoryId(entity.id);
               }}
               disabled={entity.isTemplate}
+            />
+          )}
+          {userCanEdit && (
+            <Button
+              color="primary"
+              icon={<AiOutlineLink size={16} />}
+              tooltipLabel={"copy link to detail"}
+              inverted
+              onClick={async () => {
+                await navigator.clipboard.writeText(
+                  `${window.location.host}${window.location.pathname}#selectedDetail=${entity.id}&detail=${entity.id}`
+                );
+                toast.info("Link to detail copied to clipboard");
+              }}
             />
           )}
         </ButtonGroup>

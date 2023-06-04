@@ -89,6 +89,15 @@ export const StyledButtonWrapper = styled.div<StyledButtonWrapper>`
     border-left-style: solid;
   }
 `;
+export const StyledElvlWrapper = styled.div`
+  display: flex;
+  > div {
+    border-width: 0;
+    border-left-width: ${({ theme }) => theme.borderWidth[1]};
+    border-left-color: ${({ theme }) => theme.color["black"]};
+    border-left-style: solid;
+  }
+`;
 
 export const StyledItalic = styled.i`
   font-size: ${({ theme }) => theme.fontSize["xxs"]};

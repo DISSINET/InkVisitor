@@ -8,15 +8,16 @@ import {
 import { useSearchParams } from "hooks";
 import useKeyLift from "hooks/useKeyLift";
 import useKeypress from "hooks/useKeyPress";
-import React, { useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "react-query";
-import { useLocation, useHistory } from "react-router";
+import React, { useEffect, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useLocation, useNavigate } from "react-router";
 import { toast } from "react-toastify";
 import { setDisableUserSelect } from "redux/features/layout/disableUserSelectSlice";
 import { setLastClickedIndex } from "redux/features/statementList/lastClickedIndexSlice";
 import { setUsername } from "redux/features/usernameSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { StyledPageContent, StyledPage } from "./PageStyles";
+import { setPing } from "redux/features/pingSlice";
 
 interface Page {
   children?: React.ReactNode;
@@ -42,7 +43,7 @@ export const Page: React.FC<Page> = ({ children }) => {
   );
 
   const location = useLocation();
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const disableRightHeader: boolean =
     location.pathname !== "/users" &&
@@ -56,16 +57,14 @@ export const Page: React.FC<Page> = ({ children }) => {
     error: errorUser,
     isFetching: isFetchingUser,
   } = useQuery(
-    ["user", username],
+    ["user", userId],
     async () => {
       if (userId) {
         const res = await api.usersGet(userId);
         return res.data;
-      } else {
-        return false;
       }
     },
-    { enabled: !!userId && api.isLoggedIn() && !disableRightHeader }
+    { enabled: api.isLoggedIn() && !disableRightHeader }
   );
 
   const logOutMutation = useMutation(async () => await api.signOut(), {
@@ -76,7 +75,7 @@ export const Page: React.FC<Page> = ({ children }) => {
       //
       cleanAllParams();
 
-      history.push("/");
+      navigate("/login");
     },
   });
 
@@ -87,6 +86,18 @@ export const Page: React.FC<Page> = ({ children }) => {
   useKeypress("Shift", () => dispatch(setDisableUserSelect(true)));
 
   useKeyLift("Shift", () => dispatch(setDisableUserSelect(false)));
+
+  useQuery(
+    ["ping"],
+    async () => {
+      const localPing = api.getPing();
+      if (localPing) dispatch(setPing(localPing));
+      return localPing;
+    },
+    {
+      refetchInterval: 5000,
+    }
+  );
 
   return (
     <StyledPage
@@ -106,7 +117,7 @@ export const Page: React.FC<Page> = ({ children }) => {
           <>
             {!disableRightHeader && (
               <RightHeader
-                setUserCustomizationOpen={() => setUserCustomizationOpen(true)}
+                setUserCustomizationOpen={setUserCustomizationOpen}
                 handleLogOut={logOutMutation.mutate}
                 userName={user ? user.name : ""}
                 userRole={userRole || ""}

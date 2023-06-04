@@ -20,7 +20,6 @@ export class Db {
   // wrapped db sonnection
   connection: Connection = {} as Connection;
 
-
   constructor() {
     if (!rethinkConfig.db || !rethinkConfig.host || !rethinkConfig.port) {
       throw new Error("Missing db params, check env vars");
@@ -33,7 +32,7 @@ export class Db {
   async initDb(): Promise<void> {
     this.connection = await rethink.connect({
       ...rethinkConfig,
-      timeout: 5, // important -  close will wait for this seconds
+      timeout: 30, // important -  close will wait for this seconds
     });
   }
 

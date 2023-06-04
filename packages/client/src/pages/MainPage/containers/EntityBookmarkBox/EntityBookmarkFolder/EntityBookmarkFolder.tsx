@@ -13,7 +13,7 @@ import {
   FaRegFolderOpen,
   FaTrash,
 } from "react-icons/fa";
-import { useMutation, useQueryClient } from "react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { DragItem, ItemTypes } from "types";
 import { EntityBookmarkTable } from "../EntityBookmarkTable/EntityBookmarkTable";
 import {

@@ -55,6 +55,7 @@ describe("Entities clone", function () {
   describe("existing valid source entity", () => {
     const db = new Db();
     const [, entity] = prepareEntity();
+    entity.legacyId = `${entity.id}-legacyid`;
     const [, relationEntity] = prepareEntity(); // so the relation is valid
     const [, relation] = prepareRelation(RelationEnums.Type.Related);
     entity.label = `${entity.id}-label`;
@@ -79,6 +80,7 @@ describe("Entities clone", function () {
       expect(entitiesSaved).toBeTruthy();
       expect(entity.isValid()).toBeTruthy();
       expect(relationSaved).toBeTruthy();
+      expect(entity.legacyId).toBeTruthy();
     });
 
     it("should return a successful response wrapped in IResponseGeneric", async () => {
@@ -93,6 +95,7 @@ describe("Entities clone", function () {
       const clone = await findEntityById(db, cloneData.id);
       expect(clone).toBeTruthy();
       expect(clone.label).toEqual(entity.label);
+      expect(clone.legacyId).toBeFalsy();
 
       const clonedRelations = await Relation.findForEntity(
         db.connection,

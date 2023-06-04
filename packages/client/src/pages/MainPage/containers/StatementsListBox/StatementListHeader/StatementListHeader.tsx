@@ -8,6 +8,7 @@ import {
   IResponseTree,
   IStatement,
 } from "@shared/types";
+import theme from "Theme/theme";
 import api from "api";
 import { AxiosResponse } from "axios";
 import { Button, ButtonGroup, Dropdown } from "components";
@@ -16,17 +17,19 @@ import { CStatement } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
 import { BiRefresh } from "react-icons/bi";
-import { FaPlus, FaRecycle } from "react-icons/fa";
+import { FaPlus } from "react-icons/fa";
 import {
   MdOutlineCheckBox,
   MdOutlineCheckBoxOutlineBlank,
   MdOutlineIndeterminateCheckBox,
 } from "react-icons/md";
-import { UseMutationResult, useQuery, useQueryClient } from "react-query";
-import { OptionTypeBase, ValueType } from "react-select";
+import {
+  UseMutationResult,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { setLastClickedIndex } from "redux/features/statementList/lastClickedIndexSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import theme from "Theme/theme";
 import { DropdownItem } from "types";
 import { collectTerritoryChildren, searchTree } from "utils";
 import { v4 as uuidv4 } from "uuid";
@@ -151,7 +154,9 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
     },
   ];
 
-  const treeData: IResponseTree | undefined = queryClient.getQueryData("tree");
+  const treeData: IResponseTree | undefined = queryClient.getQueryData([
+    "tree",
+  ]);
 
   // get user data
   const userId = localStorage.getItem("userid");
@@ -166,8 +171,6 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
       if (userId) {
         const res = await api.usersGet(userId);
         return res.data;
-      } else {
-        return false;
       }
     },
     { enabled: !!userId && api.isLoggedIn() }
@@ -341,7 +344,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
                   width={78}
                   disabled={selectedRows.length === 0}
                   value={batchAction}
-                  onChange={(selectedOption: ValueType<OptionTypeBase, any>) =>
+                  onChange={(selectedOption) =>
                     setBatchAction(selectedOption as DropdownItem)
                   }
                   options={batchOptions}

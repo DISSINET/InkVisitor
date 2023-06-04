@@ -1,9 +1,9 @@
-import { animated } from "react-spring";
+import { animated } from "@react-spring/web";
 import styled from "styled-components";
 import { Colors } from "types";
 
 interface StyledContainer {
-  color: typeof Colors[number];
+  color: (typeof Colors)[number];
   arrowoffset: number;
 }
 export const StyledContainer = styled(animated.div)<StyledContainer>`
@@ -63,7 +63,7 @@ export const StyledArrow = styled.div`
 
 interface StyledContent {
   tagGroup?: boolean;
-  color: typeof Colors[number];
+  color: (typeof Colors)[number];
 }
 export const StyledContent = styled.div<StyledContent>`
   margin: ${({ theme, tagGroup }) =>

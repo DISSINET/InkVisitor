@@ -34,6 +34,7 @@ interface EntityTag {
   lvl?: number;
   statementsCount?: number;
   isFavorited?: boolean;
+  elvlButtonGroup?: ReactNode | false;
 
   unlinkButton?: UnlinkButton | false;
 }
@@ -58,6 +59,8 @@ export const EntityTag: React.FC<EntityTag> = ({
   statementsCount,
   isFavorited,
 
+  elvlButtonGroup = false,
+
   unlinkButton,
 }) => {
   const draggedEntity: DraggedEntityReduxItem = useAppSelector(
@@ -66,6 +69,7 @@ export const EntityTag: React.FC<EntityTag> = ({
 
   const classId = entity.class;
   const [buttonHovered, setButtonHovered] = useState(false);
+  const [elvlHovered, setElvlHovered] = useState(false);
 
   const [referenceElement, setReferenceElement] =
     useState<HTMLDivElement | null>(null);
@@ -117,7 +121,7 @@ export const EntityTag: React.FC<EntityTag> = ({
             itemsCount={statementsCount}
             position={tooltipPosition}
             disabled={
-              (button !== null && buttonHovered) ||
+              (button !== null && (buttonHovered || elvlHovered)) ||
               Object.keys(draggedEntity).length !== 0
             }
             tagHovered={tagHovered}
@@ -156,6 +160,18 @@ export const EntityTag: React.FC<EntityTag> = ({
             setButtonHovered(false);
             setTagHovered(false);
           }}
+          elvlButtonGroup={
+            elvlButtonGroup ? (
+              <div
+                onMouseOver={() => setElvlHovered(true)}
+                onMouseOut={() => setElvlHovered(false)}
+              >
+                {elvlButtonGroup}
+              </div>
+            ) : (
+              false
+            )
+          }
         />
       </div>
     </>

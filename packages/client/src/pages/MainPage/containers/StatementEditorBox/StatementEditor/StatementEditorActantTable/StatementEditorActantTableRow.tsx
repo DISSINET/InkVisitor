@@ -1,4 +1,8 @@
-import { actantPositionDict } from "@shared/dictionaries";
+import {
+  operatorDict,
+  partitivityDict,
+  virtualityDict,
+} from "@shared/dictionaries";
 import { EntityEnums } from "@shared/enums";
 import {
   IEntity,
@@ -6,14 +10,24 @@ import {
   IResponseStatement,
   IStatementActant,
 } from "@shared/types";
-import { AttributeIcon, Button, ButtonGroup } from "components";
+import { excludedSuggesterEntities } from "Theme/constants";
 import {
-  AttributeButtonGroup,
+  AttributeIcon,
+  BundleButtonGroup,
+  Button,
+  ButtonGroup,
+  Dropdown,
+} from "components";
+import {
+  ElvlButtonGroup,
   EntityDropzone,
   EntitySuggester,
   EntityTag,
+  LogicButtonGroup,
+  PositionButtonGroup,
 } from "components/advanced";
 import { useSearchParams } from "hooks";
+import { TooltipAttributes } from "pages/MainPage/containers";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   DragSourceMonitor,
@@ -21,26 +35,28 @@ import {
   useDrag,
   useDrop,
 } from "react-dnd";
-import { FaGripVertical, FaPlus, FaTrashAlt, FaUnlink } from "react-icons/fa";
-import { UseMutationResult } from "react-query";
+import { FaGripVertical, FaPlus, FaTrashAlt } from "react-icons/fa";
+import { TbSettingsAutomation, TbSettingsFilled } from "react-icons/tb";
+import { UseMutationResult } from "@tanstack/react-query";
 import { setDraggedActantRow } from "redux/features/rowDnd/draggedActantRowSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { excludedSuggesterEntities } from "Theme/constants";
 import {
+  DragItem,
   DraggedActantRowItem,
   DraggedPropRowCategory,
-  DragItem,
   FilteredActantObject,
   ItemTypes,
 } from "types";
 import { dndHoverFn } from "utils";
-import AttributesEditor from "../../../AttributesEditor/AttributesEditor";
 import { PropGroup } from "../../../PropGroup/PropGroup";
 import { StatementEditorActantClassification } from "./StatementEditorActantClassification/StatementEditorActantClassification";
 import { StatementEditorActantIdentification } from "./StatementEditorActantIdentification/StatementEditorActantIdentification";
 import {
+  StyledBorderLeft,
   StyledCI,
   StyledCIHeading,
+  StyledExpandedRow,
+  StyledFlexStart,
   StyledGrid,
   StyledGridColumn,
   StyledRow,
@@ -90,11 +106,22 @@ export const StatementEditorActantTableRow: React.FC<
 }) => {
   const isInsideTemplate = statement.isTemplate || false;
   const { statementId, territoryId } = useSearchParams();
+  const {
+    actant,
+    sActant,
+  }: {
+    actant?: IEntity;
+    sActant: IStatementActant;
+  } = filteredActant.data;
+  const dispatch = useAppDispatch();
+  const draggedActantRow: DraggedActantRowItem = useAppSelector(
+    (state) => state.rowDnd.draggedActantRow
+  );
 
   const dropRef = useRef<HTMLTableRowElement>(null);
   const dragRef = useRef<HTMLTableCellElement>(null);
 
-  const [, drop] = useDrop({
+  const [, drop] = useDrop<DragItem>({
     accept: ItemTypes.ACTANT_ROW,
     hover(item: DragItem, monitor: DropTargetMonitor) {
       dndHoverFn(item, index, monitor, dropRef, moveRow);
@@ -102,8 +129,8 @@ export const StatementEditorActantTableRow: React.FC<
   });
 
   const [{ isDragging }, drag, preview] = useDrag({
+    type: ItemTypes.ACTANT_ROW,
     item: {
-      type: ItemTypes.ACTANT_ROW,
       index,
       id: filteredActant.id.toString(),
     },
@@ -119,6 +146,24 @@ export const StatementEditorActantTableRow: React.FC<
 
   preview(drop(dropRef));
   drag(dragRef);
+
+  useEffect(() => {
+    if (isDragging) {
+      dispatch(
+        setDraggedActantRow({ category: DraggedPropRowCategory.ACTANT })
+      );
+      const boxContentEditor = document.getElementById(`box-content-editor`);
+      const actantTable = document.getElementById(`actant-section`);
+      if (boxContentEditor) {
+        boxContentEditor.scrollTo({
+          behavior: "smooth",
+          top: actantTable ? actantTable.offsetTop - 30 : 0,
+        });
+      }
+    } else {
+      dispatch(setDraggedActantRow({}));
+    }
+  }, [isDragging]);
 
   const updateActant = (statementActantId: string, changes: any) => {
     if (statement && statementActantId) {
@@ -141,13 +186,6 @@ export const StatementEditorActantTableRow: React.FC<
   };
 
   const renderActantCell = () => {
-    const {
-      actant,
-      sActant,
-    }: {
-      actant?: IEntity;
-      sActant: IStatementActant;
-    } = filteredActant.data;
     return actant ? (
       <StyledTagWrapper>
         <EntityDropzone
@@ -173,6 +211,17 @@ export const StatementEditorActantTableRow: React.FC<
                   });
                 },
               }
+            }
+            elvlButtonGroup={
+              <ElvlButtonGroup
+                value={sActant.elvl}
+                onChange={(elvl) =>
+                  updateActant(sActant.id, {
+                    elvl: elvl,
+                  })
+                }
+                disabled={!userCanEdit}
+              />
             }
           />
         </EntityDropzone>
@@ -200,111 +249,25 @@ export const StatementEditorActantTableRow: React.FC<
   };
 
   const renderPositionCell = () => {
-    const { sActant } = filteredActant.data;
     return (
-      <AttributeButtonGroup
+      <PositionButtonGroup
+        border
+        value={sActant.position}
+        onChange={(position) =>
+          updateActant(sActant.id, {
+            position: position,
+          })
+        }
         disabled={!userCanEdit}
-        options={[
-          {
-            longValue: actantPositionDict[EntityEnums.Position.Subject].label,
-            shortValue: actantPositionDict[EntityEnums.Position.Subject].value,
-            onClick: () =>
-              updateActant(sActant.id, {
-                position:
-                  actantPositionDict[EntityEnums.Position.Subject].value,
-              }),
-            selected:
-              sActant.position ==
-              actantPositionDict[EntityEnums.Position.Subject].value,
-          },
-          {
-            longValue: actantPositionDict[EntityEnums.Position.Actant1].label,
-            shortValue: actantPositionDict[EntityEnums.Position.Actant1].value,
-            onClick: () =>
-              updateActant(sActant.id, {
-                position:
-                  actantPositionDict[EntityEnums.Position.Actant1].value,
-              }),
-            selected:
-              sActant.position ==
-              actantPositionDict[EntityEnums.Position.Actant1].value,
-          },
-          {
-            longValue: actantPositionDict[EntityEnums.Position.Actant2].label,
-            shortValue: actantPositionDict[EntityEnums.Position.Actant2].value,
-            onClick: () =>
-              updateActant(sActant.id, {
-                position:
-                  actantPositionDict[EntityEnums.Position.Actant2].value,
-              }),
-            selected:
-              sActant.position ==
-              actantPositionDict[EntityEnums.Position.Actant2].value,
-          },
-          {
-            longValue:
-              actantPositionDict[EntityEnums.Position.PseudoActant].label,
-            shortValue:
-              actantPositionDict[EntityEnums.Position.PseudoActant].value,
-            onClick: () =>
-              updateActant(sActant.id, {
-                position:
-                  actantPositionDict[EntityEnums.Position.PseudoActant].value,
-              }),
-            selected:
-              sActant.position ==
-              actantPositionDict[EntityEnums.Position.PseudoActant].value,
-          },
-        ]}
       />
     );
   };
 
-  const [actantAttributesModalOpen, setActantAttributesModalOpen] =
-    useState<boolean>(false);
-
   const renderAttributesCell = () => {
-    const {
-      actant,
-      sActant,
-    }: {
-      actant?: IEntity;
-      sActant: IStatementActant;
-    } = filteredActant.data;
-
     const { entityId: propOriginId, id: propRowId } = sActant;
 
     return (
       <ButtonGroup noMarginRight height={19}>
-        {sActant && (
-          <AttributesEditor
-            modalOpen={actantAttributesModalOpen}
-            setModalOpen={setActantAttributesModalOpen}
-            modalTitle={`Actant involvement`}
-            entity={actant}
-            disabledAllAttributes={!userCanEdit}
-            userCanEdit={userCanEdit}
-            data={{
-              elvl: sActant.elvl,
-              logic: sActant.logic,
-              virtuality: sActant.virtuality,
-              partitivity: sActant.partitivity,
-              bundleOperator: sActant.bundleOperator,
-              bundleStart: sActant.bundleStart,
-              bundleEnd: sActant.bundleEnd,
-            }}
-            handleUpdate={(newData) => {
-              updateActant(sActant.id, newData);
-            }}
-            updateActantId={(newId: string) => {
-              updateActant(sActant.id, { entityId: newId });
-            }}
-            classEntitiesActant={classEntitiesActant}
-            loading={updateStatementDataMutation.isLoading}
-            isInsideTemplate={isInsideTemplate}
-            territoryParentId={territoryParentId}
-          />
-        )}
         {userCanEdit && (
           <Button
             key="d"
@@ -367,38 +330,11 @@ export const StatementEditorActantTableRow: React.FC<
             inverted
             noBorder
             icon={<AttributeIcon attributeName={"negation"} />}
-            onClick={() => setActantAttributesModalOpen(true)}
-          />
-        )}
-        {sActant.bundleOperator && (
-          <Button
-            key="oper"
-            tooltipLabel="Logical operator type"
-            color="success"
-            inverted
-            noBorder
-            icon={sActant.bundleOperator}
-            onClick={() => setActantAttributesModalOpen(true)}
           />
         )}
       </ButtonGroup>
     );
   };
-
-  const dispatch = useAppDispatch();
-  const draggedActantRow: DraggedActantRowItem = useAppSelector(
-    (state) => state.rowDnd.draggedActantRow
-  );
-
-  useEffect(() => {
-    if (isDragging) {
-      dispatch(
-        setDraggedActantRow({ category: DraggedPropRowCategory.ACTANT })
-      );
-    } else {
-      dispatch(setDraggedActantRow({}));
-    }
-  }, [isDragging]);
 
   const renderPropGroup = useCallback(
     (originId: string, props: IProp[], category: DraggedPropRowCategory) => {
@@ -428,6 +364,12 @@ export const StatementEditorActantTableRow: React.FC<
     [statement]
   );
 
+  const isDraggingActant =
+    draggedActantRow.category &&
+    draggedActantRow.category === DraggedPropRowCategory.ACTANT;
+
+  const [isExpanded, setIsExpanded] = useState(false);
+
   const { classifications, identifications } = filteredActant.data.sActant;
 
   return (
@@ -435,39 +377,155 @@ export const StatementEditorActantTableRow: React.FC<
       key={index}
       marginBottom={classifications.length > 0 || identifications.length > 0}
     >
-      <StyledGrid
-        ref={dropRef}
-        style={{ opacity }}
-        hasOrder={hasOrder}
-        hasActant={!!filteredActant.data.actant}
-      >
+      <StyledFlexStart ref={dropRef}>
+        {/* Order */}
         {userCanEdit && hasOrder ? (
           <StyledGridColumn ref={dragRef} style={{ cursor: "move" }}>
-            <FaGripVertical />
+            <FaGripVertical style={{ marginTop: "0.3rem" }} />
           </StyledGridColumn>
         ) : (
           <StyledGridColumn />
         )}
-        <StyledGridColumn>{renderActantCell()}</StyledGridColumn>
-        <StyledGridColumn>{renderPositionCell()}</StyledGridColumn>
-        <StyledGridColumn>{renderAttributesCell()}</StyledGridColumn>
-      </StyledGrid>
 
-      {!(
-        draggedActantRow.category &&
-        draggedActantRow.category === DraggedPropRowCategory.ACTANT
-      ) &&
+        <StyledBorderLeft borderColor="actant" marginBottom>
+          <StyledGrid
+            style={{ opacity }}
+            hasActant={!!filteredActant.data.actant}
+          >
+            <StyledGridColumn>{renderActantCell()}</StyledGridColumn>
+            <StyledGridColumn>
+              {
+                <LogicButtonGroup
+                  border
+                  value={filteredActant.data.sActant.logic}
+                  onChange={(logic) =>
+                    updateActant(filteredActant.data.sActant.id, {
+                      logic: logic,
+                    })
+                  }
+                  disabled={!userCanEdit}
+                />
+              }
+            </StyledGridColumn>
+            <StyledGridColumn>{renderPositionCell()}</StyledGridColumn>
+            <StyledGridColumn>{renderAttributesCell()}</StyledGridColumn>
+            <StyledGridColumn>
+              <Button
+                inverted
+                onClick={() => setIsExpanded(!isExpanded)}
+                icon={
+                  isExpanded ? (
+                    <TbSettingsFilled size={16} />
+                  ) : (
+                    <TbSettingsAutomation
+                      size={16}
+                      style={{ transform: "rotate(90deg)" }}
+                    />
+                  )
+                }
+                tooltipContent={
+                  <TooltipAttributes
+                    data={{
+                      elvl: sActant.elvl,
+                      logic: sActant.logic,
+                      virtuality: sActant.virtuality,
+                      partitivity: sActant.partitivity,
+                      bundleOperator: sActant.bundleOperator,
+                      bundleStart: sActant.bundleStart,
+                      bundleEnd: sActant.bundleEnd,
+                    }}
+                  />
+                }
+              />
+            </StyledGridColumn>
+          </StyledGrid>
+
+          {/* Expanded Row */}
+          {isExpanded && !isDraggingActant && (
+            <StyledExpandedRow>
+              <div>
+                <Dropdown
+                  width={90}
+                  placeholder="virtuality"
+                  tooltipLabel="virtuality"
+                  icon={<AttributeIcon attributeName="virtuality" />}
+                  disabled={!userCanEdit}
+                  options={virtualityDict}
+                  value={virtualityDict.find(
+                    (i: any) => sActant.virtuality === i.value
+                  )}
+                  onChange={(newValue: any) => {
+                    updateActant(sActant.id, { virtuality: newValue.value });
+                  }}
+                />
+              </div>
+              <div>
+                <Dropdown
+                  width={120}
+                  placeholder="partitivity"
+                  tooltipLabel="partitivity"
+                  icon={<AttributeIcon attributeName="partitivity" />}
+                  disabled={!userCanEdit}
+                  options={partitivityDict}
+                  value={partitivityDict.find(
+                    (i: any) => sActant.partitivity === i.value
+                  )}
+                  onChange={(newValue: any) => {
+                    updateActant(sActant.id, { partitivity: newValue.value });
+                  }}
+                />
+              </div>
+              <div>
+                <Dropdown
+                  width={70}
+                  placeholder="logical operator"
+                  tooltipLabel="logical operator"
+                  icon={<AttributeIcon attributeName="bundleOperator" />}
+                  disabled={!userCanEdit}
+                  options={operatorDict}
+                  value={operatorDict.find(
+                    (i: any) => sActant.bundleOperator === i.value
+                  )}
+                  onChange={(newValue: any) => {
+                    updateActant(sActant.id, {
+                      bundleOperator: newValue.value,
+                    });
+                  }}
+                />
+              </div>
+              <div>
+                <BundleButtonGroup
+                  bundleStart={sActant.bundleStart}
+                  onBundleStartChange={(bundleStart) =>
+                    updateActant(sActant.id, {
+                      bundleStart: bundleStart,
+                    })
+                  }
+                  bundleEnd={sActant.bundleEnd}
+                  onBundleEndChange={(bundleEnd) =>
+                    updateActant(sActant.id, {
+                      bundleEnd: bundleEnd,
+                    })
+                  }
+                />
+              </div>
+            </StyledExpandedRow>
+          )}
+        </StyledBorderLeft>
+      </StyledFlexStart>
+
+      {/* Prop group */}
+      {!isDraggingActant &&
         renderPropGroup(
           filteredActant.data.sActant.entityId,
           filteredActant.data.sActant.props,
           DraggedPropRowCategory.ACTANT
         )}
 
-      {!(
-        draggedActantRow.category &&
-        draggedActantRow.category === DraggedPropRowCategory.ACTANT
-      ) && (
+      {/* CI */}
+      {!isDraggingActant && (
         <>
+          {/* Classifications */}
           {classifications.length > 0 && (
             <StyledCI>
               <StyledCIHeading>Classifications:</StyledCIHeading>
@@ -489,6 +547,8 @@ export const StatementEditorActantTableRow: React.FC<
                 ))}
             </StyledCI>
           )}
+
+          {/* Identifications */}
           {identifications.length > 0 && (
             <StyledCI>
               <StyledCIHeading>Identifications:</StyledCIHeading>

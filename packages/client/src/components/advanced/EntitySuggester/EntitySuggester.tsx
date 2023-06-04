@@ -11,8 +11,7 @@ import { CEntity, CStatement, CTerritory, InstTemplate } from "constructors";
 import { useDebounce, useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
 import { FaHome } from "react-icons/fa";
-import { useMutation, useQuery, useQueryClient } from "react-query";
-import { OptionTypeBase, ValueType } from "react-select";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { DropdownAny, rootTerritoryId, wildCardChar } from "Theme/constants";
 import { DropdownItem, EntityDragItem, SuggesterItemToCreate } from "types";
 import { AddTerritoryModal } from "..";
@@ -21,7 +20,7 @@ interface EntitySuggester {
   categoryTypes: EntityEnums.ExtendedClass[];
   onSelected: (id: string) => void;
   onPicked?: (entity: IEntity) => void;
-  onChangeCategory?: (selectedOption: ValueType<OptionTypeBase, any>) => void;
+  onChangeCategory?: (selectedOption: DropdownItem) => void;
   onTyped?: (newType: string) => void;
   placeholder?: string;
   inputWidth?: number | "full";
@@ -39,6 +38,7 @@ interface EntitySuggester {
   disableWildCard?: boolean;
   disableTemplatesAccept?: boolean;
   disableButtons?: boolean;
+  disableEnter?: boolean;
   autoFocus?: boolean;
 
   disabled?: boolean;
@@ -66,6 +66,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
   disableWildCard = false,
   disableTemplatesAccept = false,
   disableButtons = false,
+  disableEnter,
   autoFocus,
 
   disabled = false,
@@ -91,8 +92,6 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
       if (userId) {
         const res = await api.usersGet(userId);
         return res.data;
-      } else {
-        return false;
       }
     },
     { enabled: !!userId && api.isLoggedIn() }
@@ -212,7 +211,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
           appendDetailId(variables.id);
         }
         if (variables.class === EntityEnums.Class.Territory) {
-          queryClient.invalidateQueries("tree");
+          queryClient.invalidateQueries(["tree"]);
         }
       },
     }
@@ -319,7 +318,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
         appendDetailId(newEntityId);
       }
       if (templateToDuplicate.class === EntityEnums.Class.Territory) {
-        queryClient.invalidateQueries("tree");
+        queryClient.invalidateQueries(["tree"]);
       }
     }
   };
@@ -391,9 +390,9 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
           setTyped(newType);
           onTyped && onTyped(newType);
         }}
-        onChangeCategory={(option: ValueType<OptionTypeBase, any> | null) => {
+        onChangeCategory={(option) => {
           setSelectedCategory(option);
-          onChangeCategory && onChangeCategory(option);
+          onChangeCategory && onChangeCategory(option as DropdownItem);
         }}
         onCreate={(newCreated: SuggesterItemToCreate) => {
           handleCreate(newCreated);
@@ -412,6 +411,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
         isWrongDropCategory={isWrongDropCategory}
         disableCreate={disableCreate}
         disableButtons={disableButtons}
+        disableEnter={disableEnter}
         inputWidth={inputWidth}
         isInsideTemplate={isInsideTemplate}
         territoryParentId={territoryParentId}
@@ -433,7 +433,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
               if (openDetailOnCreate) {
                 appendDetailId(newEntityId);
               }
-              queryClient.invalidateQueries("tree");
+              queryClient.invalidateQueries(["tree"]);
             }
             setTempTemplateToInstantiate(false);
           }}

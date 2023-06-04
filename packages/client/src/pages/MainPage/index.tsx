@@ -8,7 +8,7 @@ import { BsSquareFill, BsSquareHalf } from "react-icons/bs";
 import { FaPlus } from "react-icons/fa";
 import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
 import { VscCloseAll } from "react-icons/vsc";
-import { useQueryClient } from "react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { setFirstPanelExpanded } from "redux/features/layout/firstPanelExpandedSlice";
 import { setFourthPanelBoxesOpened } from "redux/features/layout/fourthPanelBoxesOpenedSlice";
 import { setFourthPanelExpanded } from "redux/features/layout/fourthPanelExpandedSlice";
@@ -147,7 +147,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
             icon={<BiRefresh />}
             onClick={() => {
               queriesToRefresh.forEach((queryToRefresh) => {
-                queryClient.invalidateQueries(queryToRefresh);
+                queryClient.invalidateQueries([queryToRefresh]);
               });
             }}
           />

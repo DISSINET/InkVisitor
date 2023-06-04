@@ -7,9 +7,10 @@ import {
   StyledValue,
   StyledValues,
 } from "./TooltipAttributeRowStyles";
+import { attributeIconsKeys } from "components/basic/AttributeIcon/AttributeIcon";
 
 interface TooltipAttributeRow {
-  attributeName: string;
+  attributeName: keyof typeof attributeIconsKeys;
   value?: string | string[];
   items: DropdownItem[];
 }

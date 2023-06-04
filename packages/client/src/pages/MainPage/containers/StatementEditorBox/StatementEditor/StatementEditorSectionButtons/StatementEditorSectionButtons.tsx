@@ -10,7 +10,7 @@ import {
 import React, { useState } from "react";
 import { FaClone, FaPlus, FaTrashAlt } from "react-icons/fa";
 import { TbReplace } from "react-icons/tb";
-import { UseMutationResult } from "react-query";
+import { UseMutationResult } from "@tanstack/react-query";
 
 interface StatementEditorSectionButtons {
   section: "actions" | "actants" | "references";

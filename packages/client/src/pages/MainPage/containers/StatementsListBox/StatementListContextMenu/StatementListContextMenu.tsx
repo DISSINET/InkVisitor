@@ -1,6 +1,5 @@
 import React, { ReactNode, useRef, useState } from "react";
-import { useSpring } from "react-spring";
-import { config } from "react-spring/renderprops";
+import { useSpring, config } from "@react-spring/web";
 import { useAppSelector } from "redux/hooks";
 import {
   StyledCgMenuBoxed,

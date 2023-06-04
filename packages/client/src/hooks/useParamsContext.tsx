@@ -7,8 +7,8 @@ import React, {
   useMemo,
   useState,
 } from "react";
-import { useQuery } from "react-query";
-import { useHistory, useLocation } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { useNavigate, useLocation } from "react-router-dom";
 import { maxTabCount } from "Theme/constants";
 
 const UNINITIALISED = (): void => {
@@ -51,12 +51,12 @@ export const SearchParamsProvider = ({
 }: {
   children: ReactElement;
 }) => {
-  const history = useHistory();
-  const { hash, search } = useLocation();
-  const params = new URLSearchParams(hash.substring(1));
+  const navigate = useNavigate();
+  const location = useLocation();
+  const params = new URLSearchParams(location.hash.substring(1));
   const parsedParams = Object.fromEntries(params);
 
-  const paramsSearch = new URLSearchParams(search);
+  const paramsSearch = new URLSearchParams(location.search);
   const parsedParamsSearch = Object.fromEntries(paramsSearch);
 
   const [territoryId, setTerritoryId] = useState<string>(
@@ -150,7 +150,7 @@ export const SearchParamsProvider = ({
 
   const handleHistoryPush = () => {
     if (!disablePush) {
-      history.push({
+      navigate({
         hash: `${params}`,
       });
     }
@@ -170,6 +170,7 @@ export const SearchParamsProvider = ({
   useEffect(() => {
     // Change from the inside of the app to this state
     if (!hasSearchParams) {
+      console.log("change from inside");
       territoryId
         ? params.set("territory", territoryId)
         : params.delete("territory");
@@ -206,17 +207,16 @@ export const SearchParamsProvider = ({
       : setDetailId("");
   };
 
-  useEffect(() => {
-    // Should be only change from the url => add state to switch of listener
-    // this condition is for redirect - don't use our lifecycle when params are set by search query (?)
-    if (!hasSearchParams) {
-      return history.listen((location: any) => {
-        setDisablePush(true);
-        handleLocationChange(location);
-        setDisablePush(false);
-      });
-    }
-  }, [history]);
+  // useEffect(() => {
+  // Should be only change from the url => add state to switch of listener
+  // this condition is for redirect - don't use our lifecycle when params are set by search query (?)
+  // if (!hasSearchParams) {
+  //   setDisablePush(true);
+  //   handleLocationChange(location);
+  //   setDisablePush(false);
+  // }
+  // }),
+  // [location];
 
   return (
     <SearchParamsContext.Provider

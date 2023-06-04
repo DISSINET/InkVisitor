@@ -7,7 +7,7 @@ export const getRandomInt = () => {
  * @param item
  * @returns {boolean}
  */
-export function isObject(item: any) {
+export function isObject(item: unknown) {
   return item && typeof item === "object" && !Array.isArray(item);
 }
 
@@ -16,6 +16,7 @@ export function isObject(item: any) {
  * @param target
  * @param ...sources
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function mergeDeep(target: any, ...sources: any): any {
   if (!sources.length) return target;
   const source = sources.shift();
@@ -35,13 +36,13 @@ export function mergeDeep(target: any, ...sources: any): any {
 }
 
 export function timeout(mseconds: number): Promise<void> {
-  return new Promise((resolve: Function) => {
+  return new Promise((resolve: (value: void | PromiseLike<void>) => void) => {
     setTimeout(resolve, mseconds);
   });
 }
 
 export function regExpEscape(literal: string) {
-  return literal.replace(/[-[\]{}()*+!<=:?.\/\\^$|#,]/g, "\\$&");
+  return literal.replace(/[-[\]{}()*+!<=:?./\\^$|#,]/g, "\\$&");
 }
 
 /**
@@ -66,4 +67,10 @@ export function hostUrl(): string {
   }
 
   return `https://${process.env.DOMAIN}`;
+}
+
+export function sanitizeText(inStr: string): string {
+  inStr = inStr.replace(/\\xa0/gi, " ");
+  inStr = inStr.replace(/\xa0/gi, " ");
+  return inStr;
 }

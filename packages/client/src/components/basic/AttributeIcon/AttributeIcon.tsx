@@ -12,28 +12,23 @@ import { SiRealm } from "react-icons/si";
 import { TiPlus } from "react-icons/ti";
 import { VscDebugDisconnect } from "react-icons/vsc";
 
-export const attributeIcons = {
-  certainty: <FaQuestionCircle />,
-  elvl: <FaBook />,
-  logic: <TiPlus />,
-  mood: <MdMood />,
-  moodvariant: <SiRealm />,
-  virtuality: <FaRegObjectGroup />,
-  partitivity: <AiOutlineApartment />,
-  bundleOperator: <VscDebugDisconnect />,
-  bundleStart: <BiChevronLeft />,
-  bundleEnd: <BiChevronRight />,
-  negation: <FaMinusCircle />,
+export const attributeIconsKeys = {
+  ["certainty"]: <FaQuestionCircle />,
+  ["elvl"]: <FaBook />,
+  ["logic"]: <TiPlus />,
+  ["mood"]: <MdMood />,
+  ["moodvariant"]: <SiRealm />,
+  ["virtuality"]: <FaRegObjectGroup />,
+  ["partitivity"]: <AiOutlineApartment />,
+  ["bundleOperator"]: <VscDebugDisconnect />,
+  ["bundleStart"]: <BiChevronLeft />,
+  ["bundleEnd"]: <BiChevronRight />,
+  ["negation"]: <FaMinusCircle />,
 };
 
-export const AttributeIcon: React.FC<{ attributeName: string }> = ({
-  attributeName,
-}) => {
-  if (Object.keys(attributeIcons).includes(attributeName)) {
-    //@ts-ignore
-    return attributeIcons[attributeName];
-  } else {
-    console.log(attributeName);
-    return <div />;
-  }
+export const AttributeIcon: React.FC<{
+  attributeName: keyof typeof attributeIconsKeys;
+}> = ({ attributeName }) => {
+  //@ts-ignore
+  return attributeIconsKeys[attributeName];
 };

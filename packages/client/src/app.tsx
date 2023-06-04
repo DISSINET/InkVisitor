@@ -1,8 +1,8 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import React, { useEffect } from "react";
 import { Helmet } from "react-helmet";
-import { QueryClient, QueryClientProvider } from "react-query";
-import { ReactQueryDevtools } from "react-query/devtools";
-import { BrowserRouter, Redirect, Route, Switch } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { ThemeProvider } from "styled-components";
 
@@ -13,15 +13,6 @@ import ActivatePage from "pages/Activate";
 import LoginPage from "pages/Login";
 import UsersPage from "pages/Users";
 
-import { Page } from "components/advanced";
-import { useDebounce } from "hooks";
-import NotFoundPage from "pages/NotFound";
-import { DndProvider } from "react-dnd";
-import { HTML5Backend } from "react-dnd-html5-backend";
-import { setContentHeight } from "redux/features/layout/contentHeightSlice";
-import { setLayoutWidth } from "redux/features/layout/layoutWidthSlice";
-import { setPanelWidths } from "redux/features/layout/panelWidthsSlice";
-import { setSeparatorXPosition } from "redux/features/layout/separatorXPositionSlice";
 import {
   heightHeader,
   percentPanelWidths,
@@ -30,19 +21,19 @@ import {
   thirdPanelMinWidth,
 } from "Theme/constants";
 import GlobalStyle from "Theme/global";
+import { Page } from "components/advanced";
+import { useDebounce } from "hooks";
+import { AboutPage } from "pages/About";
+import NotFoundPage from "pages/NotFound";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
+import { setContentHeight } from "redux/features/layout/contentHeightSlice";
+import { setLayoutWidth } from "redux/features/layout/layoutWidthSlice";
+import { setPanelWidths } from "redux/features/layout/panelWidthsSlice";
+import { setSeparatorXPosition } from "redux/features/layout/separatorXPositionSlice";
+import theme from "./Theme/theme";
 import AclPage from "./pages/Acl";
 import MainPage from "./pages/MainPage";
-import theme from "./Theme/theme";
-import { AboutPage } from "pages/About";
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: false,
-      retry: false,
-    },
-  },
-});
 
 const clockPerformance = (
   profilerId: any,
@@ -63,32 +54,26 @@ const clockPerformance = (
 };
 
 export const PublicPath = (props: any) => {
-  const Component = props.children;
-
   const loggedIn = !api.isLoggedIn();
   if (loggedIn) {
     api.signOut();
   }
 
-  return (
-    <Route path={props.path} render={props.render} exact={props.exact}>
-      <Component props />
-    </Route>
-  );
+  return props.children;
 };
 
-export const ProtectedPath = (props: any) => {
-  const Component = props.children;
-
-  return api.isLoggedIn() ? (
-    <Route path={props.path} render={props.render} exact={props.exact}>
-      <Component props />
-    </Route>
-  ) : (
-    <Redirect to="/login" />
-  );
+export const RequireAuth = ({ children }: { children: JSX.Element }) => {
+  return api.isLoggedIn() ? children : <Navigate to="/login" />;
 };
 
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: false,
+    },
+  },
+});
 export const App: React.FC = () => {
   const dispatch = useAppDispatch();
   const disableUserSelect = useAppSelector(
@@ -179,15 +164,59 @@ export const App: React.FC = () => {
             <BrowserRouter basename={process.env.ROOT_URL}>
               <SearchParamsProvider>
                 <Page>
-                  <Switch>
-                    <PublicPath path="/login" children={LoginPage} />
-                    <PublicPath path="/activate" children={ActivatePage} />
-                    <ProtectedPath path="/" exact children={MainPage} />
-                    <ProtectedPath path="/acl" children={AclPage} />
-                    <ProtectedPath path="/about" children={AboutPage} />
-                    <ProtectedPath path="/users" children={UsersPage} />
-                    <Route path="*" component={NotFoundPage} />
-                  </Switch>
+                  <Routes>
+                    {/* PUBLIC */}
+                    <Route
+                      path="/login"
+                      element={
+                        <PublicPath>
+                          <LoginPage />
+                        </PublicPath>
+                      }
+                    />
+                    <Route
+                      path="/activate"
+                      element={
+                        <PublicPath>
+                          <ActivatePage />
+                        </PublicPath>
+                      }
+                    />
+                    {/* PRIVATE */}
+                    <Route
+                      path="/"
+                      element={
+                        <RequireAuth>
+                          <MainPage />
+                        </RequireAuth>
+                      }
+                    />
+                    <Route
+                      path="/acl"
+                      element={
+                        <RequireAuth>
+                          <AclPage />
+                        </RequireAuth>
+                      }
+                    />
+                    <Route
+                      path="/about"
+                      element={
+                        <RequireAuth>
+                          <AboutPage />
+                        </RequireAuth>
+                      }
+                    />
+                    <Route
+                      path="/users"
+                      element={
+                        <RequireAuth>
+                          <UsersPage />
+                        </RequireAuth>
+                      }
+                    />
+                    <Route path="*" element={<NotFoundPage />} />
+                  </Routes>
                 </Page>
               </SearchParamsProvider>
             </BrowserRouter>

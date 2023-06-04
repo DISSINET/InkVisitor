@@ -4,7 +4,7 @@ import { Button, Loader } from "components";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
 import { FaPlus } from "react-icons/fa";
-import { useMutation, useQuery, useQueryClient } from "react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { setSelectedTerritoryPath } from "redux/features/territoryTree/selectedTerritoryPathSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { rootTerritoryId } from "Theme/constants";
@@ -32,14 +32,14 @@ export const TerritoryTreeBox: React.FC = () => {
     error: userError,
     isFetching: userIsFetching,
   } = useQuery(
-    ["user"],
+    ["user", userId],
     async () => {
       if (userId) {
         const res = await api.usersGet(userId);
         return res.data;
       }
     },
-    { enabled: api.isLoggedIn() }
+    { enabled: api.isLoggedIn() && !!userId }
   );
 
   const [storedTerritoryIds, setStoredTerritoryIds] = useState<string[]>([]);
@@ -115,9 +115,7 @@ export const TerritoryTreeBox: React.FC = () => {
           territoryActantId={rootTerritoryId}
         />
       )}
-      <Loader
-        show={isFetching || userIsFetching || updateUserMutation.isLoading}
-      />
+      <Loader show={isFetching || updateUserMutation.isLoading} />
     </>
   );
 };

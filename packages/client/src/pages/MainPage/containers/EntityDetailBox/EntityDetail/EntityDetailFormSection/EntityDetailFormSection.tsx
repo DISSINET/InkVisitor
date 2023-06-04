@@ -11,8 +11,7 @@ import { Button, Dropdown, Input, MultiInput, TypeBar } from "components";
 import { AttributeButtonGroup, EntityTag } from "components/advanced";
 import React from "react";
 import { FaRegCopy } from "react-icons/fa";
-import { UseMutationResult } from "react-query";
-import { OptionTypeBase, ValueType } from "react-select";
+import { UseMutationResult } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { rootTerritoryId } from "Theme/constants";
 import { DropdownItem } from "types";
@@ -104,7 +103,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                     options={allowedEntityChangeClasses.map(
                       (c) => entitiesDictKeys[c]
                     )}
-                    onChange={(option: ValueType<OptionTypeBase, any>) => {
+                    onChange={(option) => {
                       setSelectedEntityType(
                         (option as DropdownItem).value as EntityEnums.Class
                       );
@@ -128,7 +127,6 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
             <StyledDetailContentRowValue>
               <Dropdown
                 disabled={!userCanEdit}
-                isMulti={false}
                 width="full"
                 options={templateOptions}
                 value={templateOptions[0]}
@@ -269,7 +267,6 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
             <StyledDetailContentRowValue>
               <Dropdown
                 disabled={!userCanEdit}
-                isMulti={false}
                 width="full"
                 options={languageDict}
                 value={languageDict.find(

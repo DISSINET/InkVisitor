@@ -1,6 +1,14 @@
+import {
+  FloatingPortal,
+  autoUpdate,
+  flip,
+  useFloating,
+} from "@floating-ui/react";
 import { entitiesDictKeys } from "@shared/dictionaries";
 import { EntityEnums } from "@shared/enums";
 import { IEntity, IUserOptions } from "@shared/types";
+import { DropdownAny, scrollOverscanCount } from "Theme/constants";
+import theme from "Theme/theme";
 import {
   Button,
   Dropdown,
@@ -14,11 +22,8 @@ import React, { useState } from "react";
 import { DropTargetMonitor, useDrop } from "react-dnd";
 import { FaPlus } from "react-icons/fa";
 import { MdCancel } from "react-icons/md";
-import { OptionTypeBase, ValueType } from "react-select";
 import { toast } from "react-toastify";
 import { FixedSizeList as List } from "react-window";
-import { DropdownAny, scrollOverscanCount } from "Theme/constants";
-import theme from "Theme/theme";
 import {
   DropdownItem,
   EntityDragItem,
@@ -38,9 +43,9 @@ import {
   StyledSuggestionCancelButton,
 } from "./SuggesterStyles";
 import {
-  createItemData,
   MemoizedEntityRow,
   SuggestionRowEntityItemData,
+  createItemData,
 } from "./SuggestionRow/SuggestionRow";
 
 interface Suggester {
@@ -60,7 +65,7 @@ interface Suggester {
 
   // events
   onType: (newType: string) => void;
-  onChangeCategory: (selectedOption: ValueType<OptionTypeBase, any>) => void;
+  onChangeCategory: (selectedOption: DropdownItem | DropdownItem[]) => void;
   onCreate: (item: SuggesterItemToCreate) => void;
   onPick: (entity: IEntity, instantiateTemplate?: boolean) => void;
   onDrop: (item: EntityDragItem, instantiateTemplate?: boolean) => void;
@@ -72,6 +77,7 @@ interface Suggester {
   territoryParentId?: string;
   userOptions?: IUserOptions;
   autoFocus?: boolean;
+  disableEnter?: boolean;
 }
 
 export const Suggester: React.FC<Suggester> = ({
@@ -103,6 +109,7 @@ export const Suggester: React.FC<Suggester> = ({
 
   userOptions,
   autoFocus,
+  disableEnter,
 }) => {
   const [selected, setSelected] = useState(-1);
   const [isFocused, setIsFocused] = useState(false);
@@ -237,8 +244,15 @@ export const Suggester: React.FC<Suggester> = ({
     );
   };
 
+  const { refs, floatingStyles, middlewareData } = useFloating({
+    placement: "bottom-start",
+    whileElementsMounted: autoUpdate,
+    middleware: [flip({ padding: 10 })],
+  });
+
   return (
-    <>
+    // div is necessary for flex to work and render the clear button properly
+    <div>
       <StyledSuggester marginTop={marginTop}>
         <StyledInputWrapper
           ref={dropRef}
@@ -263,26 +277,33 @@ export const Suggester: React.FC<Suggester> = ({
             autoFocus={categories.length > 1 && autoFocus}
           />
           <TypeBar entityLetter={category.value} />
-          <Input
-            type="text"
-            value={typed}
-            onChangeFn={(newType: string) => onTypeFn(newType)}
-            placeholder={placeholder}
-            suggester
-            changeOnType={true}
-            width={inputWidth}
-            onFocus={() => setIsFocused(true)}
-            onBlur={() => {
-              // Comment this for debug
-              setIsFocused(false);
-              setSelected(-1);
-            }}
-            onEnterPressFn={() => {
-              handleEnterPress();
-            }}
-            autoFocus={categories.length === 1 && autoFocus}
-            disabled={disabled}
-          />
+
+          <div ref={refs.setReference}>
+            <Input
+              type="text"
+              value={typed}
+              onChangeFn={(newType: string) => onTypeFn(newType)}
+              placeholder={placeholder}
+              suggester
+              changeOnType={true}
+              width={inputWidth}
+              onFocus={() => {
+                setIsFocused(true);
+              }}
+              onBlur={() => {
+                // Comment this for debug
+                setIsFocused(false);
+                setSelected(-1);
+              }}
+              onEnterPressFn={() => {
+                if (!disableEnter) {
+                  handleEnterPress();
+                }
+              }}
+              autoFocus={categories.length === 1 && autoFocus}
+              disabled={disabled}
+            />
+          </div>
           {typed.length > 0 && (
             <StyledSuggestionCancelButton hasButton={!disableCreate}>
               <MdCancel size={16} onClick={() => onCancel()} />
@@ -309,28 +330,38 @@ export const Suggester: React.FC<Suggester> = ({
           <StyledAiOutlineWarning size={22} color={theme.color["warning"]} />
         )}
 
-        {((isFocused || isHovered) && suggestions.length) || isFetching ? (
-          <StyledSuggesterList
-            noLeftMargin={categories.length === 1}
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
-          >
-            <StyledRelativePosition>
-              {renderEntitySuggestions()}
-
-              <Loader size={30} show={isFetching} />
-            </StyledRelativePosition>
-            <SuggesterKeyPress
-              onArrowDown={() => {
-                if (selected < suggestions.length - 1)
-                  setSelected(selected + 1);
-              }}
-              onArrowUp={() => {
-                if (selected > -1) setSelected(selected - 1);
-              }}
-              dependencyArr={[selected]}
-            />
-          </StyledSuggesterList>
+        {((isFocused || isHovered) &&
+          suggestions.length &&
+          !middlewareData.hide?.referenceHidden) ||
+        (isFetching && isFocused) ? (
+          <>
+            <FloatingPortal id="page">
+              <StyledSuggesterList
+                ref={refs.setFloating}
+                noLeftMargin={categories.length === 1}
+                onMouseEnter={() => setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)}
+                style={{
+                  ...floatingStyles,
+                }}
+              >
+                <StyledRelativePosition>
+                  {renderEntitySuggestions()}
+                  <Loader size={30} show={isFetching} />
+                </StyledRelativePosition>
+                <SuggesterKeyPress
+                  onArrowDown={() => {
+                    if (selected < suggestions.length - 1)
+                      setSelected(selected + 1);
+                  }}
+                  onArrowUp={() => {
+                    if (selected > -1) setSelected(selected - 1);
+                  }}
+                  dependencyArr={[selected]}
+                />
+              </StyledSuggesterList>
+            </FloatingPortal>
+          </>
         ) : null}
       </StyledSuggester>
 
@@ -364,6 +395,6 @@ export const Suggester: React.FC<Suggester> = ({
           }}
         />
       )}
-    </>
+    </div>
   );
 };

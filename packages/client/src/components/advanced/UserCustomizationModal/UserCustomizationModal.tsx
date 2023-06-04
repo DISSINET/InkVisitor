@@ -14,26 +14,16 @@ import {
   ModalInputForm,
   ModalInputLabel,
   ModalInputWrap,
-  Tag,
 } from "components";
 import {
   AttributeButtonGroup,
   EntitySuggester,
   EntityTag,
 } from "components/advanced";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { BiHide, BiShow } from "react-icons/bi";
-import { FaUnlink } from "react-icons/fa";
-import {
-  notifyManager,
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "react-query";
-import { Switch } from "react-router";
-import { OptionTypeBase, ValueType } from "react-select";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
-import theme from "Theme/theme";
 import {
   StyledRightsHeading,
   StyledRightsWrap,
@@ -42,14 +32,23 @@ import {
   StyledUserRights,
 } from "./UserCustomizationModalStyles";
 import { UserRightItem } from "./UserRightItem/UserRightItem";
+import { DropdownItem } from "types";
 
 interface DataObject {
   name: string;
   email: string;
-  defaultLanguage: {
-    label: string;
-    value: EntityEnums.Language;
-  } | null;
+  defaultLanguage:
+    | {
+        label: string;
+        value: EntityEnums.Language;
+      }
+    | undefined;
+  defaultStatementLanguage:
+    | {
+        label: string;
+        value: EntityEnums.Language;
+      }
+    | undefined;
   searchLanguages:
     | (
         | {
@@ -58,8 +57,8 @@ interface DataObject {
           }
         | undefined
       )[]
-    | null;
-  defaultTerritory: string | null;
+    | [];
+  defaultTerritory?: string | null;
   hideStatementElementsOrderTable?: boolean;
 }
 interface UserCustomizationModal {
@@ -70,11 +69,14 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
   user,
   onClose = () => {},
 }) => {
-  const { options, name, email, role, rights } = useMemo(() => user, [user]);
+  const initialValues: DataObject = useMemo(() => {
+    const { options, name, email } = user;
 
-  const initialValues = useMemo(() => {
     const defaultLanguageObject = languageDict.find(
       (i: any) => i.value === options.defaultLanguage
+    );
+    const defaultStatementLanguageObject = languageDict.find(
+      (i: any) => i.value === options.defaultStatementLanguage
     );
     const searchLanguagesObject = options.searchLanguages.map((sL) => {
       return languageDict.find((i: any) => i.value === sL);
@@ -83,9 +85,9 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
     return {
       name: name,
       email: email,
-      defaultLanguage: defaultLanguageObject ? defaultLanguageObject : null,
-      searchLanguages:
-        searchLanguagesObject.length > 0 ? searchLanguagesObject : null,
+      defaultLanguage: defaultLanguageObject,
+      defaultStatementLanguage: defaultStatementLanguageObject,
+      searchLanguages: searchLanguagesObject,
       defaultTerritory: options.defaultTerritory,
       hideStatementElementsOrderTable: options.hideStatementElementsOrderTable,
     };
@@ -93,9 +95,13 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
 
   const [data, setData] = useState<DataObject>(initialValues);
 
+  useEffect(() => {
+    setData(initialValues);
+  }, [initialValues]);
+
   const handleChange = (
     key: string,
-    value: string | true | false | ValueType<OptionTypeBase, any>
+    value: string | true | false | DropdownItem
   ) => {
     setData({
       ...data,
@@ -138,7 +144,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
       onSuccess: (data, variables) => {
         queryClient.invalidateQueries(["user"]);
         toast.info("User updated!");
-        onClose();
+        //onClose();
       },
     }
   );
@@ -151,6 +157,8 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
         options: {
           defaultLanguage:
             data.defaultLanguage?.value || EntityEnums.Language.Empty,
+          defaultStatementLanguage:
+            data.defaultStatementLanguage?.value || EntityEnums.Language.Empty,
           searchLanguages: data.searchLanguages?.map((sL) => sL?.value),
           defaultTerritory: data.defaultTerritory,
           hideStatementElementsOrderTable: data.hideStatementElementsOrderTable,
@@ -158,6 +166,9 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
       });
     }
   };
+
+  const { role, rights } = user;
+  const { name, email, defaultLanguage, defaultStatementLanguage } = data;
 
   const readRights = useMemo(
     () => rights.filter((r) => r.mode === UserEnums.RoleMode.Read),
@@ -171,10 +182,10 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
   return (
     <div>
       <Modal
-        showModal={true}
+        showModal
         width="thin"
-        onEnterPress={() => handleSubmit()}
-        onClose={() => onClose()}
+        onEnterPress={handleSubmit}
+        onClose={onClose}
       >
         <ModalHeader title="User customization" />
         <ModalContent column>
@@ -211,9 +222,26 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
             <ModalInputWrap width={165}>
               <Dropdown
                 width="full"
-                value={data.defaultLanguage}
+                value={defaultLanguage}
                 onChange={(selectedOption) =>
-                  handleChange("defaultLanguage", selectedOption)
+                  handleChange(
+                    "defaultLanguage",
+                    selectedOption as DropdownItem
+                  )
+                }
+                options={languageDict}
+              />
+            </ModalInputWrap>
+            <ModalInputLabel>{"statement language"}</ModalInputLabel>
+            <ModalInputWrap width={165}>
+              <Dropdown
+                width="full"
+                value={defaultStatementLanguage}
+                onChange={(selectedOption) =>
+                  handleChange(
+                    "defaultStatementLanguage",
+                    selectedOption as DropdownItem
+                  )
                 }
                 options={languageDict}
               />
@@ -356,16 +384,14 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
               key="cancel"
               label="Cancel"
               color="warning"
-              onClick={() => {
-                onClose();
-              }}
+              onClick={onClose}
             />
             <Button
               disabled={JSON.stringify(data) === JSON.stringify(initialValues)}
               key="submit"
               label="Submit"
               color="primary"
-              onClick={() => handleSubmit()}
+              onClick={handleSubmit}
             />
           </ButtonGroup>
         </ModalFooter>

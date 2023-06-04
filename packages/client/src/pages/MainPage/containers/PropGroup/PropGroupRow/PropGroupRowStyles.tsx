@@ -8,10 +8,10 @@ interface StyledGrid {
 export const StyledGrid = styled.div<StyledGrid>`
   display: grid;
 
-  align-items: center;
+  align-items: flex-start;
   padding-left: ${({ theme }) => theme.space[0]};
 
-  grid-template-columns: 20px auto auto 1fr;
+  grid-template-columns: 20px repeat(4, auto) 1fr;
   width: fit-content;
   grid-template-rows: auto;
   grid-auto-flow: row;
@@ -19,6 +19,7 @@ export const StyledGrid = styled.div<StyledGrid>`
   width: 100%;
 
   opacity: ${({ tempDisabled }) => (tempDisabled ? 0.2 : 1)};
+  margin-bottom: ${({ theme }) => theme.space[2]};
 `;
 
 export const StyledNoEntity = styled.div`
@@ -52,7 +53,6 @@ const getIndentation = (level: 0 | 1 | 2 | 3, lowIdent?: boolean) => {
 };
 interface StyledPropLineColumn {
   level?: 0 | 1 | 2 | 3;
-  isTag?: boolean;
   lowIdent?: boolean;
 }
 export const StyledPropLineColumn = styled.div<StyledPropLineColumn>`
@@ -62,10 +62,38 @@ export const StyledPropLineColumn = styled.div<StyledPropLineColumn>`
   margin-left: ${({ level = 0, lowIdent = false }) =>
     getIndentation(level, lowIdent)};
   padding-right: 3px;
-  overflow: ${({ isTag }) => (isTag ? "hidden" : "visible")};
 `;
 
 export const StyledFaGripVertical = styled(FaGripVertical)`
   margin-right: ${({ theme }) => theme.space[2]};
   cursor: move;
+`;
+
+export const StyledAttributesFlexColumn = styled.div`
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 13rem;
+`;
+
+interface StyledAttributesFlexRow {
+  isTag?: boolean;
+}
+export const StyledAttributesFlexRow = styled.div<StyledAttributesFlexRow>`
+  display: inline-flex;
+  overflow: ${({ isTag }) => (isTag ? "hidden" : "")};
+  flex-direction: row;
+  align-items: center;
+  gap: ${({ isTag }) => (isTag ? "" : "0.5rem")};
+  height: ${({ theme }) => theme.space[10]};
+`;
+export const StyledTagGrid = styled.div`
+  display: grid;
+  grid-template-columns: auto auto;
+  align-items: center;
+  height: ${({ theme }) => theme.space[10]};
+`;
+export const StyledBorderLeft = styled.div`
+  border-left: 3px solid ${({ theme }) => theme.color.elementType.prop};
+  padding-left: 3px;
 `;

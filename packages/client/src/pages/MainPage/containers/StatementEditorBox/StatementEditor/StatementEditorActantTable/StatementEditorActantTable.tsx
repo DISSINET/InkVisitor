@@ -1,10 +1,11 @@
 import { EntityEnums } from "@shared/enums";
-import { IEntity, IResponseStatement, IStatementActant } from "@shared/types";
+import { IResponseStatement, IStatementActant } from "@shared/types";
+import { UseMutationResult } from "@tanstack/react-query";
 import update from "immutability-helper";
 import React, { useCallback, useMemo, useState } from "react";
-import { UseMutationResult } from "react-query";
 import { FilteredActantObject } from "types";
 import { StatementEditorActantTableRow } from "./StatementEditorActantTableRow";
+import { StyledEditorActantTableWrapper } from "./StatementEditorActantTableStyles";
 
 interface StatementEditorActantTable {
   statement: IResponseStatement;
@@ -77,32 +78,35 @@ export const StatementEditorActantTable: React.FC<
   );
 
   return (
-    <>
-      {filteredActants.length > 0 &&
-        filteredActants.map((filteredActant, key) => {
-          return (
-            <StatementEditorActantTableRow
-              key={key}
-              index={key}
-              filteredActant={filteredActant}
-              statement={statement}
-              moveRow={moveRow}
-              userCanEdit={userCanEdit}
-              updateOrderFn={updateActantsOrder}
-              classEntitiesActant={classEntitiesActant}
-              updateStatementDataMutation={updateStatementDataMutation}
-              addProp={addProp}
-              updateProp={updateProp}
-              removeProp={removeProp}
-              movePropToIndex={movePropToIndex}
-              territoryParentId={territoryParentId}
-              addClassification={addClassification}
-              addIdentification={addIdentification}
-              territoryActants={territoryActants}
-              hasOrder={filteredActants.length > 1}
-            />
-          );
-        })}
-    </>
+    <div style={{ overflow: "auto" }}>
+      {filteredActants.length > 0 && (
+        <StyledEditorActantTableWrapper>
+          {filteredActants.map((filteredActant, key) => {
+            return (
+              <StatementEditorActantTableRow
+                key={key}
+                index={key}
+                filteredActant={filteredActant}
+                statement={statement}
+                moveRow={moveRow}
+                userCanEdit={userCanEdit}
+                updateOrderFn={updateActantsOrder}
+                classEntitiesActant={classEntitiesActant}
+                updateStatementDataMutation={updateStatementDataMutation}
+                addProp={addProp}
+                updateProp={updateProp}
+                removeProp={removeProp}
+                movePropToIndex={movePropToIndex}
+                territoryParentId={territoryParentId}
+                addClassification={addClassification}
+                addIdentification={addIdentification}
+                territoryActants={territoryActants}
+                hasOrder={filteredActants.length > 1}
+              />
+            );
+          })}
+        </StyledEditorActantTableWrapper>
+      )}
+    </div>
   );
 };

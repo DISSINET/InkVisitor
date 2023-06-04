@@ -8,6 +8,10 @@ import { EntityDropzone } from "./EntityDropzone/EntityDropzone";
 import { EntitySuggester } from "./EntitySuggester/EntitySuggester";
 import { EntityTag } from "./EntityTag/EntityTag";
 import { EntityTooltip } from "./EntityTooltip/EntityTooltip";
+import { ElvlButtonGroup } from "./IconButtonGroups/ElvlButtonGroup";
+import { LogicButtonGroup } from "./IconButtonGroups/LogicButtonGroup";
+import { MoodVariantButtonGroup } from "./IconButtonGroups/MoodVariantButtonGroup";
+import { PositionButtonGroup } from "./IconButtonGroups/PositionButtonGroup";
 import { JSONExplorer } from "./JSONExplorer/JSONExplorer";
 import { LoginModal, MemoizedLoginModal } from "./LoginModal/LoginModal";
 import { Menu } from "./Menu/Menu";
@@ -36,4 +40,8 @@ export {
   RightHeader,
   PanelSeparator,
   UserCustomizationModal,
+  ElvlButtonGroup,
+  MoodVariantButtonGroup,
+  PositionButtonGroup,
+  LogicButtonGroup,
 };

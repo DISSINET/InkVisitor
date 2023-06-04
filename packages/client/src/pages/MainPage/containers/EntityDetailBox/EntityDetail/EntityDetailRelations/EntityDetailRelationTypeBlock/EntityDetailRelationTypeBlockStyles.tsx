@@ -43,7 +43,7 @@ export const StyledLabelSuggester = styled.div`
 `;
 export const StyledLabel = styled.div`
   color: ${({ theme }) => theme.color["info"]};
-  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  font-size: ${({ theme }) => theme.fontSize["s"]};
 `;
 interface StyledRelationValues {
   hasSuggester: boolean;
@@ -54,4 +54,19 @@ export const StyledRelationValues = styled.div<StyledRelationValues>`
 `;
 export const StyledSuggesterWrapper = styled.div`
   margin-top: ${({ theme }) => theme.space[1]};
+`;
+
+export const StyledRelationBlock = styled.div`
+  margin-top: ${({ theme }) => theme.space[4]};
+`;
+
+interface StyledEntityDetailRelationGraph {
+  height?: number;
+}
+
+export const StyledEntityDetailRelationGraph = styled.div<StyledEntityDetailRelationGraph>`
+  display: block;
+  height: ${({ theme, height }) => (height ? `${height}px` : "500px")};
+  margin-bottom: ${({ theme }) => theme.space[12]};
+  margin-bottom: ${({ theme }) => -theme.space[8]};
 `;

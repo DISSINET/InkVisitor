@@ -1,21 +1,32 @@
+import { certaintyDict, moodDict } from "@shared/dictionaries";
+import { allEntities } from "@shared/dictionaries/entity";
 import { EntityEnums } from "@shared/enums";
 import { IResponseStatement } from "@shared/types";
 import {
   IStatementActant,
   IStatementIdentification,
 } from "@shared/types/statement";
-import { AttributeIcon, Button, ButtonGroup } from "components";
+import { excludedSuggesterEntities } from "Theme/constants";
+import { AttributeIcon, Button, ButtonGroup, Dropdown } from "components";
 import {
+  ElvlButtonGroup,
   EntityDropzone,
   EntitySuggester,
   EntityTag,
+  LogicButtonGroup,
+  MoodVariantButtonGroup,
 } from "components/advanced";
-import AttributesEditor from "pages/MainPage/containers/AttributesEditor/AttributesEditor";
 import React, { useState } from "react";
-import { FaTrashAlt, FaUnlink } from "react-icons/fa";
-import { UseMutationResult } from "react-query";
-import { excludedSuggesterEntities } from "Theme/constants";
-import { StyledCIGrid } from "../StatementEditorActantTableStyles";
+import { FaTrashAlt } from "react-icons/fa";
+import { TbSettingsAutomation, TbSettingsFilled } from "react-icons/tb";
+import { UseMutationResult } from "@tanstack/react-query";
+import { AttributeData } from "types";
+import {
+  StyledBorderLeft,
+  StyledCIGrid,
+  StyledExpandedRow,
+} from "../StatementEditorActantTableStyles";
+import { TooltipAttributes } from "pages/MainPage/containers";
 
 interface StatementEditorActantIdentification {
   identifications: IStatementIdentification[];
@@ -45,25 +56,26 @@ export const StatementEditorActantIdentification: React.FC<
   classEntitiesActant,
   territoryActants,
 }) => {
-  const [identificationModalOpen, setIdentificationModalOpen] = useState(false);
   const entity = statement.entities[identification.entityId];
 
+  const handleUpdate = (newData: AttributeData & { entityId?: string }) => {
+    updateActant(sActant.id, {
+      identifications: identifications.map((c) =>
+        c.id === identification.id ? { ...c, ...newData } : { ...c }
+      ),
+    });
+  };
+
+  const [isExpanded, setIsExpanded] = useState(false);
+
   return (
-    <>
+    <StyledBorderLeft borderColor="ident" padding marginBottom>
       <StyledCIGrid>
         {entity ? (
           <EntityDropzone
             categoryTypes={classEntitiesActant}
-            onSelected={(newSelectedId: string) => {
-              const newIdentifications: IStatementIdentification[] =
-                identifications.map((c) =>
-                  c.id === identification.id
-                    ? { ...c, entityId: newSelectedId }
-                    : { ...c }
-                );
-              updateActant(sActant.id, {
-                identifications: newIdentifications,
-              });
+            onSelected={(entityId: string) => {
+              handleUpdate({ entityId });
             }}
             isInsideTemplate={isInsideTemplate}
             excludedActantIds={[entity.id]}
@@ -75,32 +87,27 @@ export const StatementEditorActantIdentification: React.FC<
               unlinkButton={
                 userCanEdit && {
                   onClick: () => {
-                    updateActant(sActant.id, {
-                      identifications: identifications.map((c) =>
-                        c.id === identification.id
-                          ? { ...c, entityId: "" }
-                          : { ...c }
-                      ),
-                    });
+                    handleUpdate({ entityId: "" });
                   },
                   tooltipLabel: "unlink identification",
                 }
+              }
+              elvlButtonGroup={
+                <ElvlButtonGroup
+                  value={identification.elvl}
+                  onChange={(elvl) => {
+                    handleUpdate({ elvl });
+                  }}
+                  disabled={!userCanEdit}
+                />
               }
             />
           </EntityDropzone>
         ) : (
           <EntitySuggester
             categoryTypes={classEntitiesActant}
-            onSelected={(newSelectedId: string) => {
-              const newIdentifications: IStatementIdentification[] =
-                identifications.map((c) =>
-                  c.id === identification.id
-                    ? { ...c, entityId: newSelectedId }
-                    : { ...c }
-                );
-              updateActant(sActant.id, {
-                identifications: newIdentifications,
-              });
+            onSelected={(entityId: string) => {
+              handleUpdate({ entityId });
             }}
             openDetailOnCreate
             isInsideTemplate={isInsideTemplate}
@@ -108,42 +115,15 @@ export const StatementEditorActantIdentification: React.FC<
             excludedEntities={excludedSuggesterEntities}
           />
         )}
-        <ButtonGroup style={{ marginLeft: "1rem" }}>
-          <AttributesEditor
-            modalOpen={identificationModalOpen}
-            setModalOpen={setIdentificationModalOpen}
-            modalTitle={`Identification`}
-            entity={entity}
-            disabledAllAttributes={!userCanEdit}
-            userCanEdit={userCanEdit}
-            data={{
-              elvl: identification.elvl,
-              logic: identification.logic,
-              certainty: identification.certainty,
-              mood: identification.mood,
-              moodvariant: identification.moodvariant,
-            }}
-            handleUpdate={(newData) => {
-              updateActant(sActant.id, {
-                identifications: identifications.map((c) =>
-                  c.id === identification.id ? { ...c, ...newData } : { ...c }
-                ),
-              });
-            }}
-            updateActantId={(newId: string) => {
-              updateActant(sActant.id, {
-                identifications: identifications.map((c) =>
-                  c.id === identification.id
-                    ? { ...c, entityId: newId }
-                    : { ...c }
-                ),
-              });
-            }}
-            classEntitiesActant={classEntitiesActant}
-            loading={updateStatementDataMutation.isLoading}
-            isInsideTemplate={isInsideTemplate}
-            territoryParentId={territoryParentId}
-          />
+
+        <LogicButtonGroup
+          border
+          value={identification.logic}
+          onChange={(logic) => handleUpdate({ logic })}
+          disabled={!userCanEdit}
+        />
+
+        <ButtonGroup>
           {userCanEdit && (
             <Button
               key="d"
@@ -168,11 +148,85 @@ export const StatementEditorActantIdentification: React.FC<
               inverted
               noBorder
               icon={<AttributeIcon attributeName={"negation"} />}
-              onClick={() => setIdentificationModalOpen(true)}
             />
           )}
         </ButtonGroup>
+        <Button
+          inverted
+          onClick={() => setIsExpanded(!isExpanded)}
+          icon={
+            isExpanded ? (
+              <TbSettingsFilled size={16} />
+            ) : (
+              <TbSettingsAutomation
+                size={16}
+                style={{ transform: "rotate(90deg)" }}
+              />
+            )
+          }
+          tooltipContent={
+            <TooltipAttributes
+              data={{
+                elvl: identification.elvl,
+                logic: identification.logic,
+                certainty: identification.certainty,
+                mood: identification.mood,
+                moodvariant: identification.moodvariant,
+              }}
+            />
+          }
+        />
       </StyledCIGrid>
-    </>
+
+      {/* Expanded Row */}
+      {isExpanded && (
+        <StyledExpandedRow>
+          <div>
+            <Dropdown
+              width={130}
+              isMulti
+              disabled={!userCanEdit}
+              placeholder="mood"
+              tooltipLabel="mood"
+              icon={<AttributeIcon attributeName="mood" />}
+              options={moodDict}
+              value={[allEntities]
+                .concat(moodDict)
+                .filter((i: any) => identification.mood.includes(i.value))}
+              onChange={(newValue: any) => {
+                handleUpdate({
+                  mood: newValue ? newValue.map((v: any) => v.value) : [],
+                });
+              }}
+              attributeDropdown
+            />
+          </div>
+          <div>
+            <MoodVariantButtonGroup
+              border
+              value={identification.moodvariant}
+              onChange={(moodvariant) => handleUpdate({ moodvariant })}
+              disabled={!userCanEdit}
+            />
+          </div>
+          <div>
+            <Dropdown
+              width={110}
+              placeholder="certainty"
+              tooltipLabel="certainty"
+              icon={<AttributeIcon attributeName="certainty" />}
+              disabled={!userCanEdit}
+              options={certaintyDict}
+              value={certaintyDict.find(
+                (i: any) => identification.certainty === i.value
+              )}
+              onChange={(newValue: any) => {
+                handleUpdate({ certainty: newValue.value });
+              }}
+            />
+          </div>
+        </StyledExpandedRow>
+      )}
+    </StyledBorderLeft>
   );
 };

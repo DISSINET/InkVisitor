@@ -1,13 +1,13 @@
+import { FloatingPortal } from "@floating-ui/react";
 import {
   AutoPlacement,
   BasePlacement,
   VariationPlacement,
   VirtualElement,
 } from "@popperjs/core";
+import { useSpring } from "@react-spring/web";
 import React, { ReactElement, useEffect, useState } from "react";
-import ReactDOM from "react-dom";
 import { usePopper } from "react-popper";
-import { useSpring } from "react-spring";
 import { Colors } from "types";
 import {
   StyledArrow,
@@ -26,7 +26,7 @@ interface Tooltip {
   content?: ReactElement[] | ReactElement;
   tagGroup?: boolean;
   // style
-  color?: typeof Colors[number];
+  color?: (typeof Colors)[number];
   position?: AutoPlacement | BasePlacement | VariationPlacement;
   noArrow?: boolean;
   offsetX?: number;
@@ -55,8 +55,9 @@ export const Tooltip: React.FC<Tooltip> = ({
   disableAutoPosition = false,
   onMouseLeave = () => {},
 }) => {
-  const [popperElement, setPopperElement] =
-    useState<HTMLDivElement | null>(null);
+  const [popperElement, setPopperElement] = useState<HTMLDivElement | null>(
+    null
+  );
   const [arrowElement, setArrowElement] = useState<HTMLDivElement | null>(null);
   const { styles, attributes, update, state, forceUpdate } = usePopper(
     referenceElement,
@@ -108,7 +109,7 @@ export const Tooltip: React.FC<Tooltip> = ({
     <>
       {!disabled && (showTooltip || tooltipHovered) && (
         <>
-          {ReactDOM.createPortal(
+          <FloatingPortal id="page">
             <StyledContainer
               ref={setPopperElement}
               style={{ ...styles.popper, ...animatedTooltip }}
@@ -144,9 +145,8 @@ export const Tooltip: React.FC<Tooltip> = ({
                   </StyledContent>
                 )}
               </div>
-            </StyledContainer>,
-            document.getElementById("page")!
-          )}
+            </StyledContainer>
+          </FloatingPortal>
         </>
       )}
     </>

@@ -11,7 +11,7 @@ import { CStatement, DStatement } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
 import { BsInfoCircle } from "react-icons/bs";
-import { useMutation, useQuery, useQueryClient } from "react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { setStatementListOpened } from "redux/features/layout/statementListOpenedSlice";
 import { setRowsExpanded } from "redux/features/statementList/rowsExpandedSlice";
@@ -90,14 +90,14 @@ export const StatementListBox: React.FC = () => {
     error: userError,
     isFetching: userIsFetching,
   } = useQuery(
-    ["user"],
+    ["user", userId],
     async () => {
       if (userId) {
         const res = await api.usersGet(userId);
         return res.data;
       }
     },
-    { enabled: api.isLoggedIn() }
+    { enabled: api.isLoggedIn() && !!userId }
   );
 
   const [storedTerritoryIds, setStoredTerritoryIds] = useState<string[]>([]);
@@ -127,10 +127,10 @@ export const StatementListBox: React.FC = () => {
         toast.info(`Statement removed!`);
         if (detailIdArray.includes(sId)) {
           removeDetailId(sId);
-          queryClient.invalidateQueries("detail-tab-entities");
+          queryClient.invalidateQueries(["detail-tab-entities"]);
         }
-        queryClient.invalidateQueries("tree");
-        queryClient.invalidateQueries("territory").then(() => {
+        queryClient.invalidateQueries(["tree"]);
+        queryClient.invalidateQueries(["territory"]).then(() => {
           setStatementId("");
         });
         setSelectedRows(selectedRows.filter((r) => r !== sId));
@@ -160,9 +160,9 @@ export const StatementListBox: React.FC = () => {
       onSuccess: (data, variables) => {
         setStatementId(data.data.data.id);
         toast.info(`Statement duplicated!`);
-        queryClient.invalidateQueries("territory");
-        queryClient.invalidateQueries("entity");
-        queryClient.invalidateQueries("tree");
+        queryClient.invalidateQueries(["territory"]);
+        queryClient.invalidateQueries(["entity"]);
+        queryClient.invalidateQueries(["tree"]);
       },
       onError: () => {
         toast.error(`Error: Statement not duplicated!`);
@@ -177,8 +177,8 @@ export const StatementListBox: React.FC = () => {
     {
       onSuccess: (data, variables) => {
         setStatementId(variables.id);
-        queryClient.invalidateQueries("territory");
-        queryClient.invalidateQueries("tree");
+        queryClient.invalidateQueries(["territory"]);
+        queryClient.invalidateQueries(["tree"]);
       },
     }
   );
@@ -194,7 +194,7 @@ export const StatementListBox: React.FC = () => {
           territoryId,
         ]);
         setStatementId(variables.id);
-        queryClient.invalidateQueries("tree");
+        queryClient.invalidateQueries(["tree"]);
       },
       onError: () => {
         toast.error(`Error: Statement not created!`);
@@ -259,7 +259,7 @@ export const StatementListBox: React.FC = () => {
       }),
     {
       onSuccess: (data, variables) => {
-        queryClient.invalidateQueries("territory");
+        queryClient.invalidateQueries(["territory"]);
       },
       onError: () => {
         toast.error(`Error: Statement order not changed!`);
@@ -272,8 +272,8 @@ export const StatementListBox: React.FC = () => {
       await api.treeMoveTerritory(territoryId, newParentId, 0),
     {
       onSuccess: (data, variables) => {
-        queryClient.invalidateQueries("tree");
-        queryClient.invalidateQueries("territory");
+        queryClient.invalidateQueries(["tree"]);
+        queryClient.invalidateQueries(["territory"]);
       },
     }
   );
@@ -288,7 +288,7 @@ export const StatementListBox: React.FC = () => {
       }),
     {
       onSuccess: (data, variables) => {
-        queryClient.invalidateQueries("territory");
+        queryClient.invalidateQueries(["territory"]);
       },
     }
   );
@@ -298,8 +298,8 @@ export const StatementListBox: React.FC = () => {
       await api.statementsBatchMove(data.statements, data.newTerritoryId),
     {
       onSuccess: (variables, data) => {
-        queryClient.invalidateQueries("territory");
-        queryClient.invalidateQueries("tree");
+        queryClient.invalidateQueries(["territory"]);
+        queryClient.invalidateQueries(["tree"]);
         toast.info(
           `${data.statements.length} statement${
             data.statements.length > 1 ? "s" : ""
@@ -316,8 +316,8 @@ export const StatementListBox: React.FC = () => {
       await api.statementsBatchCopy(data.statements, data.newTerritoryId),
     {
       onSuccess: (variables, data) => {
-        queryClient.invalidateQueries("territory");
-        queryClient.invalidateQueries("tree");
+        queryClient.invalidateQueries(["territory"]);
+        queryClient.invalidateQueries(["tree"]);
         toast.info(
           `${data.statements.length} statement${
             data.statements.length > 1 ? "s" : ""
@@ -335,7 +335,7 @@ export const StatementListBox: React.FC = () => {
     {
       onSuccess: (variables, references) => {
         // TODO:
-        queryClient.invalidateQueries("statement");
+        queryClient.invalidateQueries(["statement"]);
       },
     }
   );
@@ -346,7 +346,7 @@ export const StatementListBox: React.FC = () => {
     {
       onSuccess: (variables, references) => {
         // TODO:
-        queryClient.invalidateQueries("statement");
+        queryClient.invalidateQueries(["statement"]);
       },
     }
   );

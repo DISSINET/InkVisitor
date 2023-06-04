@@ -107,7 +107,7 @@ const entitiesIndexes: ((table: RTable) => any)[] = [
             row("data")("tags").map(function (t: RDatum) {
               return t;
             }) as any,
-            r.branch(row("data").hasFields("territory"), [row("data")("territory")("territoryId")], [])
+            r.branch(row("data").hasFields("territory"), [row("data")("territory")("territoryId")], []) as any
           ) as any).distinct();
       },
       {
