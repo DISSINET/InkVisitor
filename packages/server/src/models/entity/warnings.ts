@@ -80,6 +80,8 @@ export default class EntityWarnings {
 
   /**
    * Tests if there is ISYNC warning and returns it
+   * ISYNC warning should pop when the connected synonym cloud does have some concepts that does not share the same superclass relation
+   * (all concepts in the connected cloud should have SC pointed to some abstract entity)
    * @param conn
    * @returns
    */
@@ -94,27 +96,48 @@ export default class EntityWarnings {
       RelationEnums.Type.Synonym
     );
 
-    let entityIds: string[] = [];
+    let conceptIds: string[] = [];
     for (const syn of synonym) {
-      entityIds = entityIds.concat(syn.entityIds);
+      conceptIds = conceptIds.concat(syn.entityIds);
     }
-    entityIds = Array.from(new Set(entityIds));
+    conceptIds = Array.from(new Set(conceptIds));
 
-    // find SCL relations with checked entities on 0 index
+    // find SCL relations with checked entities on 1 index
     const scls = await Superclass.findForEntities(
       conn,
-      entityIds,
+      conceptIds,
       RelationEnums.Type.Superclass,
-      0
+      1
     );
 
-    let warn: IWarning | null = null;
-    const sclTargets = Array.from(new Set(scls.map((s) => s.entityIds[1])));
-    if (sclTargets.length === 1 && scls.length > 1) {
-      warn = this.newWarning(WarningTypeEnums.ISYNC);
+    // all concepts in the cloud should have these base superclasses
+    const scBaseIds = Array.from(new Set(scls.map((s) => s.entityIds[0])));
+
+    // generate list of base superclasses grouped by each concept
+    const baseIdsPerConcept: Record<string, string[]> = {};
+    for (const conceptId of conceptIds) {
+      baseIdsPerConcept[conceptId] = [];
     }
 
-    return warn;
+    for (const scl of scls) {
+      const specClassId = scl.entityIds[1];
+      const baseClassId = scl.entityIds[0];
+      const index = baseIdsPerConcept[specClassId].indexOf(baseClassId);
+      if (index === -1) {
+        baseIdsPerConcept[specClassId].push(baseClassId);
+      }
+    }
+
+    for (const requiredBaseClassId of scBaseIds) {
+      for (const baseClassIds of Object.values(baseIdsPerConcept)) {
+        if (baseClassIds.indexOf(requiredBaseClassId) === -1) {
+          // required base class is not present for this concept
+          return this.newWarning(WarningTypeEnums.ISYNC);
+        }
+      }
+    }
+
+    return null;
   }
 
   /**
