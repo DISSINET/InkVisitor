@@ -12,7 +12,7 @@ export const StyledBoxWrap = styled.div<StyledBoxWrap>`
   padding: 1rem;
   border: 1px dashed black;
   background-color: ${({ theme }) => theme.color["white"]};
-  width: 45rem;
+  width: 50rem;
   max-width: 100%;
   display: flex;
   flex-direction: column;
@@ -32,7 +32,7 @@ export const StyledTitle = styled.div`
   padding: 0 1rem 0 0.8rem;
 `;
 export const StyledReference = styled.div`
-  padding: 0 1rem;
+  padding: 0.2rem 1rem;
 `;
 export const StyledHeading = styled.div`
   font-size: ${({ theme }) => theme.fontSize["lg"]};

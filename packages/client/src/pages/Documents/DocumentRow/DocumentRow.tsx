@@ -6,6 +6,8 @@ import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { BsCheckLg } from "react-icons/bs";
 import { FaDotCircle, FaEdit, FaTrash } from "react-icons/fa";
 import { StyledReference, StyledTitle } from "../DocumentsPageStyles";
+import { EntitySuggester } from "components/advanced";
+import { EntityEnums } from "@shared/enums";
 
 interface DocumentRow {
   document: IResponseDocument;
@@ -57,6 +59,10 @@ export const DocumentRow: React.FC<DocumentRow> = ({
     }
   };
 
+  const addDocumentToResource = (id: string) => {
+    // updateResourceMutation.mutate
+  };
+
   return (
     <>
       <FaDotCircle size={10} />
@@ -68,6 +74,7 @@ export const DocumentRow: React.FC<DocumentRow> = ({
             changeOnType
             autoFocus
             onBlur={handleSave}
+            width={150}
           />
         ) : (
           <div
@@ -101,7 +108,14 @@ export const DocumentRow: React.FC<DocumentRow> = ({
           onClick={() => setDocToDelete(document.id)}
         />
       </ButtonGroup>
-      <StyledReference>ref. / suggester</StyledReference>
+      {/* reference / suggester */}
+      <StyledReference>
+        <EntitySuggester
+          placeholder="add resource"
+          categoryTypes={[EntityEnums.Class.Resource]}
+          onSelected={(id: string) => addDocumentToResource(id)}
+        />
+      </StyledReference>
       <div>count</div>
     </>
   );
