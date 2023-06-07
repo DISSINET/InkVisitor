@@ -2,7 +2,7 @@ import { IDocument, IResponseDocument, IResponseEntity } from "@shared/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Loader, Submit } from "components";
-import React, { ChangeEvent, useMemo, useState } from "react";
+import React, { ChangeEvent, useMemo, useRef, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { DocumentModal } from "../../components/advanced/DocumentModal/DocumentModal";
 import { DocumentRow } from "./DocumentRow/DocumentRow";
@@ -11,6 +11,7 @@ import {
   StyledContent,
   StyledGrid,
   StyledHeading,
+  StyledInputWrap,
 } from "./DocumentsPageStyles";
 
 type DocumentWithResource = {
@@ -134,6 +135,8 @@ export const DocumentsPage: React.FC = ({}) => {
   const [docToDelete, setDocToDelete] = useState<string | false>(false);
   const [editMode, setEditMode] = useState<false | number>(false);
 
+  const inputRef = useRef<HTMLInputElement>(null);
+
   return (
     <>
       <StyledContent>
@@ -160,7 +163,17 @@ export const DocumentsPage: React.FC = ({}) => {
               )}
             </StyledGrid>
           </div>
-          <input type="file" accept=".txt" onChange={handleFileChange} />
+          <StyledInputWrap onClick={() => inputRef.current?.click()}>
+            Upload document
+            <input
+              ref={inputRef}
+              type="file"
+              accept=".txt"
+              title="x"
+              onChange={handleFileChange}
+              hidden
+            />
+          </StyledInputWrap>
 
           <Loader show={resourcesIsFetching} size={50} />
         </StyledBoxWrap>

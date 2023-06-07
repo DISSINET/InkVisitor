@@ -138,6 +138,7 @@ export const DocumentRow: React.FC<DocumentRow> = ({
             unlinkButton={{
               onClick: () => removeResourceMutation.mutate(resource.id),
             }}
+            fullWidth
           />
         ) : (
           <EntitySuggester

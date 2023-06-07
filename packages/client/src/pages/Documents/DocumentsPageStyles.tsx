@@ -33,6 +33,8 @@ export const StyledTitle = styled.div`
   padding: 0 1rem 0 0.8rem;
 `;
 export const StyledReference = styled.div`
+  display: grid;
+  max-width: 16rem;
   position: relative;
   padding: 0.2rem 1rem;
 `;
@@ -44,4 +46,15 @@ export const StyledHeading = styled.div`
 `;
 export const StyledCount = styled.div`
   font-size: ${({ theme }) => theme.fontSize["sm"]};
+`;
+
+export const StyledInputWrap = styled.div`
+  height: 5rem;
+  border: 1px dashed black;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
+  background-color: ${({ theme }) => theme.color["blue"][100]};
 `;
