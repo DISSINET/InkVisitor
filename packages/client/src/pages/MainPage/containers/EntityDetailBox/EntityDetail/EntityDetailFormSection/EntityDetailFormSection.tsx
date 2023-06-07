@@ -67,7 +67,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
   const { status: documentsStatus, data: documents } = useQuery(
     ["documents"],
     async () => {
-      const res = await api.documentsGet();
+      const res = await api.documentsGet({});
       return res.data;
     },
     { enabled: actantMode === "resource" && api.isLoggedIn() }

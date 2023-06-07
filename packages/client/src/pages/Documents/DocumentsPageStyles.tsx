@@ -19,6 +19,7 @@ export const StyledBoxWrap = styled.div<StyledBoxWrap>`
   justify-content: space-between;
   overflow: auto;
   box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.3);
+  position: relative;
 `;
 export const StyledGrid = styled.div`
   display: grid;
@@ -32,6 +33,7 @@ export const StyledTitle = styled.div`
   padding: 0 1rem 0 0.8rem;
 `;
 export const StyledReference = styled.div`
+  position: relative;
   padding: 0.2rem 1rem;
 `;
 export const StyledHeading = styled.div`

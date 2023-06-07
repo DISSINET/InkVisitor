@@ -1,27 +1,31 @@
-import { IDocument, IResponseDocument } from "@shared/types";
+import { EntityEnums } from "@shared/enums";
+import {
+  IDocument,
+  IResource,
+  IResponseDocument,
+  IResponseEntity,
+} from "@shared/types";
 import {
   UseMutationResult,
   useMutation,
-  useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
+import api from "api";
 import { AxiosResponse } from "axios";
-import { Button, ButtonGroup, Input } from "components";
+import { Button, ButtonGroup, Input, Loader } from "components";
+import { EntitySuggester, EntityTag } from "components/advanced";
 import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
-import { BsCheckLg } from "react-icons/bs";
-import { FaDotCircle, FaEdit, FaTrash } from "react-icons/fa";
+import { FaDotCircle, FaTrash } from "react-icons/fa";
+import { RiFileEditFill } from "react-icons/ri";
 import {
   StyledCount,
   StyledReference,
   StyledTitle,
 } from "../DocumentsPageStyles";
-import { EntitySuggester } from "components/advanced";
-import { EntityEnums } from "@shared/enums";
-import { RiFileEditFill } from "react-icons/ri";
-import api from "api";
 
 interface DocumentRow {
   document: IResponseDocument;
+  resource: IResponseEntity | false;
   handleDocumentClick: (id: string) => void;
   setDocToDelete: Dispatch<SetStateAction<string | false>>;
   updateDocumentMutation: UseMutationResult<
@@ -39,6 +43,7 @@ interface DocumentRow {
 }
 export const DocumentRow: React.FC<DocumentRow> = ({
   document,
+  resource,
   handleDocumentClick,
   setDocToDelete,
   updateDocumentMutation,
@@ -74,7 +79,17 @@ export const DocumentRow: React.FC<DocumentRow> = ({
 
   const updateResourceMutation = useMutation(
     async (resourceId: string) =>
-      api.entityUpdate(resourceId, { documentId: document.id }),
+      api.entityUpdate(resourceId, { data: { documentId: document.id } }),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["resourcesWithDocuments"]);
+      },
+    }
+  );
+
+  const removeResourceMutation = useMutation(
+    async (resourceId: string) =>
+      api.entityUpdate(resourceId, { data: { documentId: "" } }),
     {
       onSuccess: () => {
         queryClient.invalidateQueries(["resourcesWithDocuments"]);
@@ -117,11 +132,20 @@ export const DocumentRow: React.FC<DocumentRow> = ({
       </ButtonGroup>
       {/* reference / suggester */}
       <StyledReference>
-        <EntitySuggester
-          placeholder="add resource"
-          categoryTypes={[EntityEnums.Class.Resource]}
-          onSelected={(id: string) => updateResourceMutation.mutate(id)}
-        />
+        {resource ? (
+          <EntityTag
+            entity={resource}
+            unlinkButton={{
+              onClick: () => removeResourceMutation.mutate(resource.id),
+            }}
+          />
+        ) : (
+          <EntitySuggester
+            placeholder="add resource"
+            categoryTypes={[EntityEnums.Class.Resource]}
+            onSelected={(id: string) => updateResourceMutation.mutate(id)}
+          />
+        )}
       </StyledReference>
       <StyledCount>{document.referencedEntityIds.length}</StyledCount>
     </>

@@ -1,8 +1,8 @@
-import { IDocument, IResponseDocument } from "@shared/types";
+import { IDocument, IResponseDocument, IResponseEntity } from "@shared/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import { Submit } from "components";
-import React, { ChangeEvent, useState } from "react";
+import { Loader, Submit } from "components";
+import React, { ChangeEvent, useMemo, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { DocumentModal } from "../../components/advanced/DocumentModal/DocumentModal";
 import { DocumentRow } from "./DocumentRow/DocumentRow";
@@ -12,6 +12,11 @@ import {
   StyledGrid,
   StyledHeading,
 } from "./DocumentsPageStyles";
+
+type DocumentWithResource = {
+  document: IResponseDocument;
+  resource: false | IResponseEntity;
+};
 
 export const DocumentsPage: React.FC = ({}) => {
   const queryClient = useQueryClient();
@@ -47,6 +52,19 @@ export const DocumentsPage: React.FC = ({}) => {
       enabled: api.isLoggedIn(),
     }
   );
+
+  const documentsWithResources: DocumentWithResource[] = useMemo(() => {
+    return documents
+      ? documents.map((document) => {
+          const resource =
+            resources &&
+            resources.find(
+              (resource) => resource.data.documentId === document.id
+            );
+          return { document, resource: resource ?? false };
+        })
+      : [];
+  }, [resources, documents]);
 
   const uploadDocumentMutation = useMutation(
     async (doc: IDocument) => api.documentUpload(doc),
@@ -122,13 +140,14 @@ export const DocumentsPage: React.FC = ({}) => {
         <StyledBoxWrap>
           <div>
             <StyledHeading>Documents</StyledHeading>
-            {documents && (
-              <StyledGrid>
-                {documents.map((doc: IResponseDocument, key: number) => {
+            <StyledGrid>
+              {documentsWithResources.map(
+                (documentWithResource: DocumentWithResource, key: number) => {
                   return (
                     <DocumentRow
                       key={key}
-                      document={doc}
+                      document={documentWithResource.document}
+                      resource={documentWithResource.resource}
                       handleDocumentClick={handleDocumentClick}
                       setDocToDelete={setDocToDelete}
                       updateDocumentMutation={updateDocumentMutation}
@@ -137,11 +156,13 @@ export const DocumentsPage: React.FC = ({}) => {
                       cancelEditMode={() => setEditMode(false)}
                     />
                   );
-                })}
-              </StyledGrid>
-            )}
+                }
+              )}
+            </StyledGrid>
           </div>
           <input type="file" accept=".txt" onChange={handleFileChange} />
+
+          <Loader show={resourcesIsFetching} size={50} />
         </StyledBoxWrap>
       </StyledContent>
 

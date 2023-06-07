@@ -51,6 +51,7 @@ export const DocumentModal: React.FC<DocumentModal> = ({
     {
       onSuccess: (variables, data) => {
         queryClient.invalidateQueries(["openedDocument"]);
+        queryClient.invalidateQueries(["documents"]);
         toast.info("Document saved");
       },
     }
