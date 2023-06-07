@@ -50,11 +50,28 @@ export const StyledCount = styled.div`
 
 export const StyledInputWrap = styled.div`
   height: 5rem;
-  border: 1px dashed black;
   display: flex;
   justify-content: center;
   align-items: center;
+  border-radius: ${({ theme }) => theme.borderRadius["default"]};
   cursor: pointer;
   font-size: ${({ theme }) => theme.fontSize["sm"]};
-  background-color: ${({ theme }) => theme.color["blue"][100]};
+  background: repeating-linear-gradient(
+    -45deg,
+    #fff,
+    #fff,
+    2px,
+    #ccd5f4 1px,
+    #ccd5f4 12px
+  );
+  background: ${({ theme }) => `
+    repeating-linear-gradient(
+    -45deg,
+    #fff,
+    #fff,
+    2px,
+    ${theme.color["blue"][100]} 1px,
+    ${theme.color["blue"][100]} 12px
+  )
+  `};
 `;
