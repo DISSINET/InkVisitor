@@ -7,6 +7,7 @@ import { v4 as uuidv4 } from "uuid";
 import { DocumentModal } from "../../components/advanced/DocumentModal/DocumentModal";
 import { DocumentRow } from "./DocumentRow/DocumentRow";
 import {
+  StyledBackground,
   StyledBoxWrap,
   StyledContent,
   StyledGrid,
@@ -141,7 +142,7 @@ export const DocumentsPage: React.FC = ({}) => {
     <>
       <StyledContent>
         <StyledBoxWrap>
-          <div>
+          <StyledBackground>
             <StyledHeading>Documents</StyledHeading>
             <StyledGrid>
               {documentsWithResources.map(
@@ -162,18 +163,18 @@ export const DocumentsPage: React.FC = ({}) => {
                 }
               )}
             </StyledGrid>
-          </div>
-          <StyledInputWrap onClick={() => inputRef.current?.click()}>
-            Upload document
-            <input
-              ref={inputRef}
-              type="file"
-              accept=".txt"
-              title="x"
-              onChange={handleFileChange}
-              hidden
-            />
-          </StyledInputWrap>
+            <StyledInputWrap onClick={() => inputRef.current?.click()}>
+              Upload document
+              <input
+                ref={inputRef}
+                type="file"
+                accept=".txt"
+                title="x"
+                onChange={handleFileChange}
+                hidden
+              />
+            </StyledInputWrap>
+          </StyledBackground>
 
           <Loader show={resourcesIsFetching} size={50} />
         </StyledBoxWrap>

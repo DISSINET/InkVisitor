@@ -108,7 +108,7 @@ export const DocumentRow: React.FC<DocumentRow> = ({
             changeOnType
             autoFocus
             onBlur={handleSave}
-            width={150}
+            width={196}
           />
         ) : (
           <div style={{ padding: "0.3rem 0" }} onClick={setEditMode}>
