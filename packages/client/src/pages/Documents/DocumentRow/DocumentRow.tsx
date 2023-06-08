@@ -52,17 +52,12 @@ export const DocumentRow: React.FC<DocumentRow> = ({
   cancelEditMode,
 }) => {
   const [localTitle, setLocalTitle] = useState<string>("");
+
   useEffect(() => {
     if (document) {
       setLocalTitle(document.title);
     }
   }, [document]);
-
-  useEffect(() => {
-    if (!editMode && document.title !== localTitle) {
-      setLocalTitle(document.title);
-    }
-  }, [editMode]);
 
   const handleSave = () => {
     if (document.title !== localTitle) {
@@ -112,7 +107,8 @@ export const DocumentRow: React.FC<DocumentRow> = ({
           />
         ) : (
           <div style={{ padding: "0.3rem 0" }} onClick={setEditMode}>
-            {document.title}
+            {/* {document.title} */}
+            {localTitle}
           </div>
         )}
       </StyledTitle>
