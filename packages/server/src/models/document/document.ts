@@ -176,7 +176,10 @@ export default class Document implements IDocument, IDbModel {
    * @returns Promise<IDocument[]> list of documents
    */
   static async getAll(db: Connection): Promise<IDocument[]> {
-    const entries = await rethink.table(Document.table).run(db);
+    const entries = await rethink
+      .table(Document.table)
+      .orderBy(rethink.asc("createdAt"))
+      .run(db);
     return entries && entries.length ? entries : [];
   }
 }
