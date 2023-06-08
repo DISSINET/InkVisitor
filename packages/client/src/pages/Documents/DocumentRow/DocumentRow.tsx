@@ -14,7 +14,13 @@ import api from "api";
 import { AxiosResponse } from "axios";
 import { Button, ButtonGroup, Input, Loader } from "components";
 import { EntitySuggester, EntityTag } from "components/advanced";
-import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
+import React, {
+  Dispatch,
+  SetStateAction,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { FaDotCircle, FaTrash } from "react-icons/fa";
 import { RiFileEditFill } from "react-icons/ri";
 import {
@@ -22,6 +28,7 @@ import {
   StyledReference,
   StyledTitle,
 } from "../DocumentsPageStyles";
+import useResizeObserver from "use-resize-observer";
 
 interface DocumentRow {
   document: IResponseDocument;
@@ -92,10 +99,13 @@ export const DocumentRow: React.FC<DocumentRow> = ({
     }
   );
 
+  const { ref: titleRef, width: titleWidth = 0 } =
+    useResizeObserver<HTMLDivElement>();
+
   return (
     <>
       <FaDotCircle size={10} />
-      <StyledTitle>
+      <StyledTitle ref={titleRef}>
         {editMode ? (
           <Input
             value={localTitle}
@@ -103,11 +113,10 @@ export const DocumentRow: React.FC<DocumentRow> = ({
             changeOnType
             autoFocus
             onBlur={handleSave}
-            width={160}
+            width={titleWidth}
           />
         ) : (
           <div style={{ padding: "0.3rem 0" }} onClick={setEditMode}>
-            {/* {document.title} */}
             {localTitle}
           </div>
         )}
