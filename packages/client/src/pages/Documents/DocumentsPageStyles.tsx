@@ -8,7 +8,7 @@ export const StyledContent = styled.div`
 `;
 interface StyledBoxWrap {}
 export const StyledBoxWrap = styled.div<StyledBoxWrap>`
-  min-width: 50rem;
+  /* min-width: 50rem; */
   max-width: 100%;
   display: flex;
   flex-direction: column;
@@ -33,6 +33,7 @@ export const StyledGrid = styled.div`
 `;
 
 export const StyledTitle = styled.div`
+  min-width: 18rem;
   cursor: pointer;
   font-size: ${({ theme }) => theme.fontSize["sm"]};
   padding: 0 1rem 0 0.8rem;
@@ -56,8 +57,9 @@ export const StyledCount = styled.div`
 
 export const StyledInputWrap = styled.div`
   height: 5rem;
+  min-width: 40rem;
   margin-top: 1rem;
-  padding: 0.3rem;
+  padding: 0.3rem 1rem;
   display: flex;
   justify-content: center;
   align-items: center;

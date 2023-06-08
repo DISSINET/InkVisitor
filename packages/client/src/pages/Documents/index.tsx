@@ -109,6 +109,7 @@ export const DocumentsPage: React.FC = ({}) => {
       content: text,
     };
     uploadDocumentMutation.mutate(document);
+    if (inputRef.current) inputRef.current.value = "";
   };
 
   const [openedDocumentId, setOpenedDocumentId] = useState<string | false>(
@@ -174,9 +175,9 @@ export const DocumentsPage: React.FC = ({}) => {
                 hidden
               />
             </StyledInputWrap>
-          </StyledBackground>
 
-          <Loader show={resourcesIsFetching} size={50} />
+            <Loader show={resourcesIsFetching} size={50} />
+          </StyledBackground>
         </StyledBoxWrap>
       </StyledContent>
 
