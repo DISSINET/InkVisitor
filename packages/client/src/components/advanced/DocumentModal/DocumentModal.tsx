@@ -13,6 +13,7 @@ import {
 } from "components";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
+import { getShortLabelByLetterCount } from "utils";
 
 interface DocumentModal {
   entityId?: string;
@@ -69,8 +70,12 @@ export const DocumentModal: React.FC<DocumentModal> = ({
   const [fontSize, setFontSize] = useState<number>(2);
 
   return (
-    <Modal showModal={show} onClose={onClose} fullHeight>
-      <ModalHeader title={document?.title} />
+    <Modal width={550} showModal={show} onClose={onClose} fullHeight>
+      <ModalHeader
+        title={
+          document?.title && getShortLabelByLetterCount(document.title, 90)
+        }
+      />
       <ModalContent column>
         <Input
           type="textarea"
