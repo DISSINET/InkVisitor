@@ -26,6 +26,7 @@ interface Modal {
   disableEscapeClose?: boolean;
   disableBackground?: boolean;
   isLoading?: boolean;
+  fullHeight?: boolean;
 }
 export const Modal: FC<Modal> = ({
   children,
@@ -37,6 +38,7 @@ export const Modal: FC<Modal> = ({
   disableEscapeClose = false,
   disableBackground = false,
   isLoading = false,
+  fullHeight = false,
 }) => {
   const animatedMount = useSpring({
     opacity: showModal ? 1 : 0,
@@ -58,6 +60,7 @@ export const Modal: FC<Modal> = ({
               animatedMount={animatedMount}
               width={width}
               isLoading={isLoading}
+              fullHeight={fullHeight}
             >
               {children}
             </ModalCard>
@@ -77,15 +80,17 @@ interface ModalCard {
   width: "full" | "fat" | "normal" | "thin" | number;
   animatedMount: any;
   isLoading?: boolean;
+  fullHeight: boolean;
 }
 export const ModalCard: FC<ModalCard> = ({
   children,
   width,
   animatedMount,
   isLoading,
+  fullHeight,
 }) => {
   return (
-    <StyledCard style={animatedMount} width={width}>
+    <StyledCard style={animatedMount} width={width} fullHeight={fullHeight}>
       {children}
       <Loader show={isLoading} />
     </StyledCard>

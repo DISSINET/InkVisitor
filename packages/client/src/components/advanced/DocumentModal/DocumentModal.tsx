@@ -8,6 +8,7 @@ import {
   ButtonGroup,
   Button,
   Input,
+  ModalHeader,
 } from "components";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
@@ -63,14 +64,15 @@ export const DocumentModal: React.FC<DocumentModal> = ({
   }, [document]);
 
   return (
-    <Modal showModal={show} onClose={onClose}>
+    <Modal showModal={show} onClose={onClose} fullHeight>
+      <ModalHeader title={document?.title} />
       <ModalContent column>
         <Input
           type="textarea"
+          fullHeightTextArea
           onChangeFn={(value: string) => setLocalContent(value)}
           value={localContent}
-          rows={30}
-          cols={100}
+          cols={120}
           changeOnType
         />
       </ModalContent>

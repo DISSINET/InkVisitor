@@ -33,6 +33,8 @@ interface Input {
   autoFocus?: boolean;
   disabled?: boolean;
   noBorder?: boolean;
+
+  fullHeightTextArea?: boolean;
 }
 
 export const Input: React.FC<Input> = ({
@@ -55,6 +57,8 @@ export const Input: React.FC<Input> = ({
   noBorder = false,
   onFocus = () => {},
   onBlur = () => {},
+
+  fullHeightTextArea = false,
 }) => {
   const [displayValue, setDisplayValue] = useState(value);
   useEffect(() => {
@@ -62,7 +66,7 @@ export const Input: React.FC<Input> = ({
   }, [value]);
 
   return (
-    <Wrapper>
+    <Wrapper fullHeightTextArea={type === "textarea" && fullHeightTextArea}>
       {label && <Label className="label">{label}</Label>}
       {type === "text" && (
         <StyledInput
@@ -108,6 +112,7 @@ export const Input: React.FC<Input> = ({
       )}
       {type === "textarea" && (
         <StyledTextArea
+          fullHeightTextArea={fullHeightTextArea}
           disabled={disabled}
           className="value"
           placeholder={placeholder}

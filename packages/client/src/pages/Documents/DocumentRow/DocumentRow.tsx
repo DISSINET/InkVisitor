@@ -1,10 +1,5 @@
 import { EntityEnums } from "@shared/enums";
-import {
-  IDocument,
-  IResource,
-  IResponseDocument,
-  IResponseEntity,
-} from "@shared/types";
+import { IDocument, IResponseDocument, IResponseEntity } from "@shared/types";
 import {
   UseMutationResult,
   useMutation,
@@ -12,23 +7,18 @@ import {
 } from "@tanstack/react-query";
 import api from "api";
 import { AxiosResponse } from "axios";
-import { Button, ButtonGroup, Input, Loader } from "components";
+import { Button, ButtonGroup, Input } from "components";
 import { EntitySuggester, EntityTag } from "components/advanced";
-import React, {
-  Dispatch,
-  SetStateAction,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { FaDotCircle, FaTrash } from "react-icons/fa";
 import { RiFileEditFill } from "react-icons/ri";
+import useResizeObserver from "use-resize-observer";
 import {
   StyledCount,
   StyledReference,
   StyledTitle,
+  StyledTitleWrap,
 } from "../DocumentsPageStyles";
-import useResizeObserver from "use-resize-observer";
 
 interface DocumentRow {
   document: IResponseDocument;
@@ -105,7 +95,7 @@ export const DocumentRow: React.FC<DocumentRow> = ({
   return (
     <>
       <FaDotCircle size={10} />
-      <StyledTitle ref={titleRef}>
+      <StyledTitleWrap ref={titleRef} onClick={setEditMode}>
         {editMode ? (
           <Input
             value={localTitle}
@@ -116,11 +106,9 @@ export const DocumentRow: React.FC<DocumentRow> = ({
             width={titleWidth}
           />
         ) : (
-          <div style={{ padding: "0.3rem 0" }} onClick={setEditMode}>
-            {localTitle}
-          </div>
+          <StyledTitle>{localTitle}</StyledTitle>
         )}
-      </StyledTitle>
+      </StyledTitleWrap>
       <ButtonGroup>
         <Button
           icon={<RiFileEditFill />}

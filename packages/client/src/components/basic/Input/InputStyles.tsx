@@ -15,8 +15,12 @@ const getWidth = (width?: number | "full") => {
     return "auto";
   }
 };
-export const Wrapper = styled.div`
+interface Wrapper {
+  fullHeightTextArea: boolean;
+}
+export const Wrapper = styled.div<Wrapper>`
   display: flex;
+  height: ${({ fullHeightTextArea }) => (fullHeightTextArea ? "100%" : "")};
 `;
 export const Label = styled.span`
   text-align: right;
@@ -77,7 +81,6 @@ export const StyledSelect = styled.select<IValueStyle>`
     outline: 0;
   }
 `;
-
 export const StyledSelectReadonly = styled.input<IValueStyle>`
   width: ${({ width }) => getWidth(width)};
   background-color: ${({ inverted, theme }) =>
@@ -96,7 +99,11 @@ export const StyledSelectReadonly = styled.input<IValueStyle>`
   }
 `;
 
-export const StyledTextArea = styled.textarea<IValueStyle>`
+interface StyledTextArea extends IValueStyle {
+  fullHeightTextArea: boolean;
+}
+export const StyledTextArea = styled.textarea<StyledTextArea>`
+  height: ${({ fullHeightTextArea }) => (fullHeightTextArea ? "100%" : "")};
   font-family: inherit;
   text-align: left;
   color: ${({ inverted, theme }) =>

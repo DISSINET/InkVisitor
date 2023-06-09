@@ -1,3 +1,4 @@
+import { animated } from "@react-spring/web";
 import styled from "styled-components";
 
 export const StyledContent = styled.div`
@@ -8,7 +9,6 @@ export const StyledContent = styled.div`
 `;
 interface StyledBoxWrap {}
 export const StyledBoxWrap = styled.div<StyledBoxWrap>`
-  /* min-width: 50rem; */
   max-width: 100%;
   display: flex;
   flex-direction: column;
@@ -32,12 +32,20 @@ export const StyledGrid = styled.div`
   overflow: auto;
 `;
 
-export const StyledTitle = styled.div`
+export const StyledTitleWrap = styled.div`
   min-width: 18rem;
   cursor: pointer;
   font-size: ${({ theme }) => theme.fontSize["sm"]};
   padding: 0 1rem 0 0.8rem;
+`;
+export const StyledTitle = styled.div`
+  max-width: 100%;
+  display: inline-block;
+  vertical-align: middle;
   white-space: nowrap;
+  overflow: hidden !important;
+  text-overflow: ellipsis;
+  padding: 0.3rem 0;
 `;
 export const StyledReference = styled.div`
   display: grid;
