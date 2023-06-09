@@ -1,6 +1,7 @@
 export type ThemeType = typeof theme;
 export type ThemeColor = typeof theme.color;
 export type ElementTypeColor = typeof theme.color.elementType;
+export type ThemeFontSize = typeof theme.fontSize;
 export type PingColor = typeof theme.color.ping;
 
 const theme = {

@@ -8,6 +8,7 @@ import {
   StyledTextArea,
   Wrapper,
 } from "./InputStyles";
+import { ThemeFontSize } from "Theme/theme";
 
 interface Input {
   label?: string;
@@ -34,7 +35,9 @@ interface Input {
   disabled?: boolean;
   noBorder?: boolean;
 
+  // TextArea props
   fullHeightTextArea?: boolean;
+  fontSizeTextArea?: keyof ThemeFontSize;
 }
 
 export const Input: React.FC<Input> = ({
@@ -59,6 +62,7 @@ export const Input: React.FC<Input> = ({
   onBlur = () => {},
 
   fullHeightTextArea = false,
+  fontSizeTextArea = "xs",
 }) => {
   const [displayValue, setDisplayValue] = useState(value);
   useEffect(() => {
@@ -144,6 +148,7 @@ export const Input: React.FC<Input> = ({
           inverted={inverted}
           noBorder={noBorder}
           suggester={suggester}
+          fontSizeTextArea={fontSizeTextArea}
         />
       )}
       {type === "select" && options && (

@@ -1,5 +1,6 @@
 import { IDocument } from "@shared/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import theme, { ThemeFontSize } from "Theme/theme";
 import api from "api";
 import {
   Modal,
@@ -63,6 +64,10 @@ export const DocumentModal: React.FC<DocumentModal> = ({
     setLocalContent(document?.content ?? "");
   }, [document]);
 
+  const fontSizeArray = Object.keys(theme.fontSize) as (keyof ThemeFontSize)[];
+
+  const [fontSize, setFontSize] = useState<number>(2);
+
   return (
     <Modal showModal={show} onClose={onClose} fullHeight>
       <ModalHeader title={document?.title} />
@@ -70,6 +75,7 @@ export const DocumentModal: React.FC<DocumentModal> = ({
         <Input
           type="textarea"
           fullHeightTextArea
+          fontSizeTextArea={fontSizeArray[fontSize]}
           onChangeFn={(value: string) => setLocalContent(value)}
           value={localContent}
           cols={120}
@@ -77,27 +83,53 @@ export const DocumentModal: React.FC<DocumentModal> = ({
         />
       </ModalContent>
       <ModalFooter>
-        <ButtonGroup>
-          <Button
-            key="cancel"
-            label="Cancel"
-            color="greyer"
-            inverted
-            onClick={onClose}
-          />
-          <Button
-            key="submit"
-            label="Save"
-            color="info"
-            disabled={document?.content === localContent}
-            onClick={() => {
-              updateDocumentMutation.mutate({
-                id: documentId,
-                doc: { content: localContent },
-              });
-            }}
-          />
-        </ButtonGroup>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            width: "100%",
+          }}
+        >
+          <ButtonGroup>
+            <Button
+              key="minus"
+              label="-"
+              color="success"
+              inverted
+              disabled={fontSize === 0}
+              onClick={() => setFontSize(fontSize - 1)}
+            />
+            <Button
+              key="plus"
+              label="+"
+              color="success"
+              inverted
+              disabled={fontSize > 5}
+              onClick={() => setFontSize(fontSize + 1)}
+            />
+          </ButtonGroup>
+          <ButtonGroup>
+            <Button
+              key="cancel"
+              label="Cancel"
+              color="greyer"
+              inverted
+              onClick={onClose}
+            />
+            <Button
+              key="submit"
+              label="Save"
+              color="info"
+              disabled={document?.content === localContent}
+              onClick={() => {
+                updateDocumentMutation.mutate({
+                  id: documentId,
+                  doc: { content: localContent },
+                });
+              }}
+            />
+          </ButtonGroup>
+        </div>
       </ModalFooter>
     </Modal>
   );
