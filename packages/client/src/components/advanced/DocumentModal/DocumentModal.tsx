@@ -12,6 +12,7 @@ import {
   ModalHeader,
 } from "components";
 import React, { useEffect, useState } from "react";
+import { FaMinus, FaPlus } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { getShortLabelByLetterCount } from "utils";
 
@@ -98,19 +99,21 @@ export const DocumentModal: React.FC<DocumentModal> = ({
           <ButtonGroup>
             <Button
               key="minus"
-              label="-"
+              icon={<FaMinus size={11} />}
               color="success"
               inverted
               disabled={fontSize === 0}
               onClick={() => setFontSize(fontSize - 1)}
+              tooltipLabel="zoom out"
             />
             <Button
               key="plus"
-              label="+"
+              icon={<FaPlus size={11} />}
               color="success"
               inverted
               disabled={fontSize > 5}
               onClick={() => setFontSize(fontSize + 1)}
+              tooltipLabel="zoom in"
             />
           </ButtonGroup>
           <ButtonGroup>
