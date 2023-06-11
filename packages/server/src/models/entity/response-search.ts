@@ -96,13 +96,7 @@ export class SearchQuery {
    */
   whereNotClass(entityClass: EntityEnums.Class[]): SearchQuery {
     this.query = this.query.filter(function (row: RDatum) {
-      return r.and.apply(
-        r,
-        entityClass.map((c) => row("class").ne(c)) as [
-          RDatum<boolean>,
-          ...RDatum<boolean>[]
-        ]
-      );
+      return r.expr(entityClass).contains(row("class")).not();
     });
 
     return this;
