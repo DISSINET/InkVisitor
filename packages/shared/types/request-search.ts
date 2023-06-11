@@ -85,14 +85,24 @@ export class RequestSearch {
       this.excluded !== undefined &&
       this.excluded.constructor.name !== "Array"
     ) {
-      return new BadParams("excluded needs to be an array");
+      // attempt to fix the string => array with one element
+      if (typeof  this.excluded === "string") {
+        this.excluded = (this.excluded as string).split(",") as EntityEnums.Class[]
+      } else {
+        return new BadParams("excluded needs to be an array");
+      }
     }
 
     if (
       this.entityIds !== undefined &&
       this.entityIds.constructor.name !== "Array"
     ) {
-      return new BadParams("entityIds needs to be an array");
+      // attempt to fix the string => array with one element
+      if (typeof this.entityIds === "string") {
+        this.entityIds = (this.entityIds as string).split(",")
+      } else {
+        return new BadParams("entityIds needs to be an array");
+      }
     }
 
     // check dates
