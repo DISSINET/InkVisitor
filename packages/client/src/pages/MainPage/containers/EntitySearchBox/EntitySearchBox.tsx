@@ -192,7 +192,7 @@ export const EntitySearchBox: React.FC = () => {
 
   // apply changes to search parameters
   const handleChange = (changes: {
-    [key: string]: string | false | true | undefined | DropdownItem | Date;
+    [key: string]: string | false | true | undefined | DropdownItem | Date | string[];
   }) => {
     const newSearch = {
       ...searchData,
@@ -278,6 +278,16 @@ export const EntitySearchBox: React.FC = () => {
           />
           <TypeBar entityLetter={(classOption as DropdownItem).value} />
         </div>
+      </StyledRow>
+
+      <StyledRow>
+        <StyledRowHeader>ID</StyledRowHeader>
+        <Input
+          width={150}
+          placeholder="ID"
+          changeOnType
+          onChangeFn={(value: string) => handleChange({ entityIds: [value] })}
+        />
       </StyledRow>
 
       <StyledRow>
