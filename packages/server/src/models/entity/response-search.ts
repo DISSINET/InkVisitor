@@ -20,6 +20,8 @@ export class SearchQuery {
   connection: Connection;
   query: RTable<any>;
 
+  filterUsed?: boolean;
+
   constructor(conn: Connection) {
     this.connection = conn;
     this.query = r.table(Entity.table);
@@ -73,6 +75,7 @@ export class SearchQuery {
       class: entityClass,
     });
 
+    this.filterUsed = true;
     return this;
   }
 
@@ -86,6 +89,7 @@ export class SearchQuery {
       status: status,
     });
 
+    this.filterUsed = true;
     return this;
   }
 
@@ -99,6 +103,7 @@ export class SearchQuery {
       return r.expr(entityClass).contains(row("class")).not();
     });
 
+    this.filterUsed = true;
     return this;
   }
 
@@ -112,6 +117,7 @@ export class SearchQuery {
       usedTemplate: tpl,
     });
 
+    this.filterUsed = true;
     return this;
   }
 
@@ -124,6 +130,7 @@ export class SearchQuery {
       isTemplate: true,
     });
 
+    this.filterUsed = true;
     return this;
   }
 
@@ -136,6 +143,7 @@ export class SearchQuery {
       language: language,
     });
 
+    this.filterUsed = true;
     return this;
   }
 
@@ -172,6 +180,7 @@ export class SearchQuery {
       );
     });
 
+    this.filterUsed = true;
     return this;
   }
 
@@ -228,12 +237,19 @@ export class SearchQuery {
 
   /**
    * adds condition to limit the query only to selected ids.
+   * According to previous filters, it will use filter or getAll method.
    * Note: this filter should be applied last.
    * @param entityIds
    * @returns
    */
   whereEntityIds(entityIds: string[]): SearchQuery {
-    this.query = this.query.getAll(r.args(entityIds)) as any;
+    if (this.filterUsed) {
+      this.query = this.query.filter((row: RDatum) =>
+        r.expr(entityIds).contains(row("id"))
+      );
+    } else {
+      this.query = this.query.getAll(r.args(entityIds)) as any;
+    }
     return this;
   }
 
