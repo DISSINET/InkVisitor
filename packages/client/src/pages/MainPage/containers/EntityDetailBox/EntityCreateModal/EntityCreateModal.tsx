@@ -29,9 +29,6 @@ import { StyledContent, StyledNote } from "./EntityCreateModalStyles";
 interface EntityCreateModal {
   closeModal: () => void;
 }
-const allowedEntityClasses: EntityEnums.Class[] = classesAll.filter(
-  (c) => !excludedSuggesterEntities.includes(c)
-);
 export const EntityCreateModal: React.FC<EntityCreateModal> = ({
   closeModal,
 }) => {
@@ -42,8 +39,8 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
     EntityEnums.Language | false
   >(false);
   const [selectedCategory, setSelectedCategory] = useState<DropdownItem>({
-    value: entitiesDictKeys[allowedEntityClasses[0]].value,
-    label: entitiesDictKeys[allowedEntityClasses[0]].label,
+    value: entitiesDictKeys[classesAll[0]].value,
+    label: entitiesDictKeys[classesAll[0]].label,
   });
   const [labelTyped, setLabelTyped] = useState("");
   const [territoryId, setTerritoryId] = useState<string>("");
@@ -205,7 +202,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
             <ModalInputLabel>{"Class & Label: "}</ModalInputLabel>
             <ModalInputWrap>
               <EntitySuggester
-                categoryTypes={allowedEntityClasses}
+                categoryTypes={classesAll}
                 excludedEntityClasses={excludedSuggesterEntities}
                 onChangeCategory={(selectedOption) => {
                   if (selectedOption)

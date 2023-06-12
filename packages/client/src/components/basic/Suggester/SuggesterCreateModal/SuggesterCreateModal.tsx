@@ -32,9 +32,6 @@ interface SuggesterCreateModal {
   onCreate: (item: SuggesterItemToCreate) => void;
   closeModal: () => void;
 }
-const allowedEntityClasses: EntityEnums.Class[] = classesAll.filter(
-  (c) => !excludedSuggesterEntities.includes(c)
-);
 export const SuggesterCreateModal: React.FC<SuggesterCreateModal> = ({
   typed,
   category,
@@ -119,7 +116,7 @@ export const SuggesterCreateModal: React.FC<SuggesterCreateModal> = ({
             <ModalInputLabel>{"Class & Label: "}</ModalInputLabel>
             <ModalInputWrap>
               <EntitySuggester
-                categoryTypes={allowedEntityClasses}
+                categoryTypes={classesAll}
                 excludedEntityClasses={excludedSuggesterEntities}
                 onChangeCategory={(selectedOption) => {
                   if (selectedOption)

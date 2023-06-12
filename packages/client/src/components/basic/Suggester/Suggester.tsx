@@ -55,12 +55,10 @@ interface Suggester {
   typed: string; // input value
   category: DropdownItem; // selected category
   categories: DropdownItem[]; // all possible categories
-  suggestionListPosition?: string; // todo not implemented yet
   disabled?: boolean; // todo not implemented yet
   inputWidth?: number | "full";
   disableCreate?: boolean;
   disableButtons?: boolean;
-  allowDrop?: boolean;
   isFetching?: boolean;
 
   // events
@@ -87,12 +85,10 @@ export const Suggester: React.FC<Suggester> = ({
   typed,
   category,
   categories,
-  suggestionListPosition,
   disabled,
   inputWidth = 80,
   disableCreate = false,
   disableButtons = false,
-  allowDrop = false,
 
   // events
   onType,

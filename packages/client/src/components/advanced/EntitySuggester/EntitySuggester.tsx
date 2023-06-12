@@ -1,18 +1,13 @@
 import { EntityEnums, UserEnums } from "@shared/enums";
-import {
-  IEntity,
-  IResponseTerritory,
-  IStatement,
-  ITerritory,
-} from "@shared/types";
+import { IEntity, IStatement, ITerritory } from "@shared/types";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { DropdownAny, rootTerritoryId, wildCardChar } from "Theme/constants";
 import api from "api";
 import { Suggester } from "components";
 import { CEntity, CStatement, CTerritory, InstTemplate } from "constructors";
 import { useDebounce, useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
 import { FaHome } from "react-icons/fa";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { DropdownAny, rootTerritoryId, wildCardChar } from "Theme/constants";
 import { DropdownItem, EntityDragItem, SuggesterItemToCreate } from "types";
 import { AddTerritoryModal } from "..";
 
@@ -184,8 +179,11 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
 
   // initial load of categories
   useEffect(() => {
+    const filteredCategoryTypes = categoryTypes.filter(
+      (c) => !(excludedEntityClasses as EntityEnums.ExtendedClass[]).includes(c)
+    );
     const categories: DropdownItem[] = [];
-    categoryTypes.forEach((category) => {
+    filteredCategoryTypes.forEach((category) => {
       categories.push({
         label: category.valueOf(),
         value: category.valueOf(),
@@ -359,7 +357,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
   const handleHoverred = (newHoverred: EntityDragItem) => {
     const hoverredCategory = newHoverred.entityClass;
     if (
-      !categoryTypes.includes(hoverredCategory) ||
+      !allCategories?.map((c) => c.value).includes(hoverredCategory) ||
       (disableTemplatesAccept && newHoverred.isTemplate) ||
       newHoverred.isDiscouraged ||
       excludedActantIds.includes(newHoverred.id) ||
@@ -388,7 +386,6 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
         typed={typed} // input value
         category={selectedCategory} // selected category
         categories={allCategories} // all possible categories
-        suggestionListPosition={""} // todo not implemented yet
         onCancel={() => {
           handleClean();
         }}
