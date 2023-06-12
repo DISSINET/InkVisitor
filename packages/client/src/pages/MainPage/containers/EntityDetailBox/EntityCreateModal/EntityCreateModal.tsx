@@ -44,6 +44,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
   });
   const [labelTyped, setLabelTyped] = useState("");
   const [territoryId, setTerritoryId] = useState<string>("");
+
   const { appendDetailId } = useSearchParams();
 
   const [showModal, setShowModal] = useState(false);

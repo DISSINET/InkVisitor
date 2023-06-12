@@ -347,16 +347,18 @@ export const Suggester: React.FC<Suggester> = ({
                   {renderEntitySuggestions()}
                   <Loader size={30} show={isFetching} />
                 </StyledRelativePosition>
-                <SuggesterKeyPress
-                  onArrowDown={() => {
-                    if (selected < suggestions.length - 1)
-                      setSelected(selected + 1);
-                  }}
-                  onArrowUp={() => {
-                    if (selected > -1) setSelected(selected - 1);
-                  }}
-                  dependencyArr={[selected]}
-                />
+                {!disableEnter && (
+                  <SuggesterKeyPress
+                    onArrowDown={() => {
+                      if (selected < suggestions.length - 1)
+                        setSelected(selected + 1);
+                    }}
+                    onArrowUp={() => {
+                      if (selected > -1) setSelected(selected - 1);
+                    }}
+                    dependencyArr={[selected]}
+                  />
+                )}
               </StyledSuggesterList>
             </FloatingPortal>
           </>
