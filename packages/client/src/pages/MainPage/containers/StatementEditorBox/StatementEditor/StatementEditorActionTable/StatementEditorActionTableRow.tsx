@@ -146,7 +146,7 @@ export const StatementEditorActionTableRow: React.FC<
         }}
         isInsideTemplate={isInsideTemplate}
         categoryTypes={[EntityEnums.Class.Action]}
-        excludedEntities={excludedSuggesterEntities}
+        excludedEntityClasses={excludedSuggesterEntities}
         territoryParentId={territoryParentId}
         excludedActantIds={[action.id]}
       >
@@ -185,7 +185,7 @@ export const StatementEditorActionTableRow: React.FC<
           }}
           openDetailOnCreate
           categoryTypes={[EntityEnums.Class.Action]}
-          excludedEntities={excludedSuggesterEntities}
+          excludedEntityClasses={excludedSuggesterEntities}
           placeholder={"add action"}
           isInsideTemplate={isInsideTemplate}
           territoryParentId={territoryParentId}

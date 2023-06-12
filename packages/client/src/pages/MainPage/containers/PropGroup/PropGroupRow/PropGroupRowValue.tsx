@@ -57,7 +57,7 @@ export const PropGroupRowValue: React.FC<PropGroupRowValue> = ({
                 });
               }}
               categoryTypes={classesPropValue}
-              excludedEntities={excludedSuggesterEntities}
+              excludedEntityClasses={excludedSuggesterEntities}
               isInsideTemplate={isInsideTemplate}
               territoryParentId={territoryParentId}
               excludedActantIds={[propValueEntity.id]}
@@ -123,7 +123,7 @@ export const PropGroupRowValue: React.FC<PropGroupRowValue> = ({
             openDetailOnCreate={openDetailOnCreate}
             categoryTypes={classesPropValue}
             inputWidth={80}
-            excludedEntities={excludedSuggesterEntities}
+            excludedEntityClasses={excludedSuggesterEntities}
             isInsideTemplate={isInsideTemplate}
             territoryParentId={territoryParentId}
           />

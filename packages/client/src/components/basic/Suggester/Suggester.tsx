@@ -174,6 +174,7 @@ export const Suggester: React.FC<Suggester> = ({
           label: typed,
           entityClass:
             entitiesDictKeys[category.value as EntityEnums.Class].value,
+          language: false,
         });
       }
     } else if (selected > -1) {
@@ -208,6 +209,7 @@ export const Suggester: React.FC<Suggester> = ({
           label: typed,
           entityClass:
             entitiesDictKeys[category.value as EntityEnums.Class].value,
+          language: false,
         });
       }
     } else {

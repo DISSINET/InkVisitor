@@ -18,7 +18,7 @@ import { AddTerritoryModal } from "..";
 
 interface EntitySuggester {
   categoryTypes: EntityEnums.ExtendedClass[];
-  onSelected: (id: string) => void;
+  onSelected?: (id: string) => void;
   onPicked?: (entity: IEntity) => void;
   onChangeCategory?: (selectedOption: DropdownItem) => void;
   onTyped?: (newType: string) => void;
@@ -26,7 +26,7 @@ interface EntitySuggester {
   inputWidth?: number | "full";
   openDetailOnCreate?: boolean;
   territoryActants?: string[];
-  excludedEntities?: EntityEnums.Class[];
+  excludedEntityClasses?: EntityEnums.Class[];
   excludedActantIds?: string[];
   filterEditorRights?: boolean;
   isInsideTemplate?: boolean;
@@ -41,12 +41,14 @@ interface EntitySuggester {
   disableEnter?: boolean;
   autoFocus?: boolean;
 
+  initTyped?: string;
+
   disabled?: boolean;
 }
 
 export const EntitySuggester: React.FC<EntitySuggester> = ({
   categoryTypes,
-  onSelected,
+  onSelected = () => {},
   onPicked = () => {},
   onChangeCategory,
   onTyped,
@@ -54,7 +56,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
   inputWidth,
   openDetailOnCreate = false,
   territoryActants,
-  excludedEntities = [],
+  excludedEntityClasses = [],
   filterEditorRights = false,
   excludedActantIds = [],
   isInsideTemplate = false,
@@ -69,9 +71,11 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
   disableEnter,
   autoFocus,
 
+  initTyped,
+
   disabled = false,
 }) => {
-  const [typed, setTyped] = useState<string>("");
+  const [typed, setTyped] = useState<string>(initTyped ?? "");
   const debouncedTyped = useDebounce(typed, 100);
   const [selectedCategory, setSelectedCategory] = useState<any>();
   const [allCategories, setAllCategories] = useState<DropdownItem[]>();
@@ -104,7 +108,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
     error: errorStatement,
     isFetching: isFetchingStatement,
   } = useQuery(
-    ["suggestion", debouncedTyped, selectedCategory, excludedEntities],
+    ["suggestion", debouncedTyped, selectedCategory, excludedEntityClasses],
     async () => {
       const resSuggestions = await api.entitiesSearch({
         label: debouncedTyped + wildCardChar,
@@ -112,7 +116,9 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
           selectedCategory?.value === DropdownAny
             ? false
             : selectedCategory?.value,
-        excluded: excludedEntities.length ? excludedEntities : undefined,
+        excluded: excludedEntityClasses.length
+          ? excludedEntityClasses
+          : undefined,
       });
 
       const suggestions = resSuggestions.data;
@@ -164,7 +170,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
       enabled:
         debouncedTyped.length > 1 &&
         !!selectedCategory &&
-        !excludedEntities
+        !excludedEntityClasses
           .map((key) => key.valueOf())
           .includes(selectedCategory?.value) &&
         api.isLoggedIn(),
@@ -221,7 +227,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
     label: string;
     entityClass: EntityEnums.Class;
     detail?: string;
-    language?: EntityEnums.Language;
+    language: EntityEnums.Language | false;
     territoryId?: string;
   }) => {
     if (user) {
@@ -357,7 +363,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
       (disableTemplatesAccept && newHoverred.isTemplate) ||
       newHoverred.isDiscouraged ||
       excludedActantIds.includes(newHoverred.id) ||
-      excludedEntities.includes(newHoverred.entityClass) ||
+      excludedEntityClasses.includes(newHoverred.entityClass) ||
       // Is T or S template inside S template
       ((newHoverred.entityClass === EntityEnums.Class.Territory ||
         newHoverred.entityClass === EntityEnums.Class.Statement) &&

@@ -726,7 +726,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                   addAction(newSelectedId);
                 }}
                 categoryTypes={[EntityEnums.Class.Action]}
-                excludedEntities={excludedSuggesterEntities}
+                excludedEntityClasses={excludedSuggesterEntities}
                 placeholder={"add action"}
                 isInsideTemplate={statement.isTemplate}
                 territoryParentId={statementTerritoryId}
@@ -779,7 +779,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 }}
                 categoryTypes={classesEditorActants}
                 placeholder={"add actant"}
-                excludedEntities={excludedSuggesterEntities}
+                excludedEntityClasses={excludedSuggesterEntities}
                 isInsideTemplate={statement.isTemplate}
                 territoryParentId={statementTerritoryId}
                 excludedActantIds={[statement.id]}
@@ -878,7 +878,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 disableTemplatesAccept
                 categoryTypes={classesEditorTags}
                 placeholder={"add new tag"}
-                excludedEntities={excludedSuggesterEntities}
+                excludedEntityClasses={excludedSuggesterEntities}
                 excludedActantIds={statement.data.tags}
                 isInsideTemplate={statement.isTemplate}
                 territoryParentId={statementTerritoryId}

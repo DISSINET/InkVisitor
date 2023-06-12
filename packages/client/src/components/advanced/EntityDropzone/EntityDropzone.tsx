@@ -9,7 +9,7 @@ interface EntityDropzone {
   categoryTypes: EntityEnums.ExtendedClass[];
   onSelected: (id: string) => void;
   onPicked?: (entity: IEntity) => void;
-  excludedEntities?: EntityEnums.Class[];
+  excludedEntityClasses?: EntityEnums.Class[];
   excludedActantIds?: string[];
 
   isInsideTemplate?: boolean;
@@ -23,7 +23,7 @@ export const EntityDropzone: React.FC<EntityDropzone> = ({
   categoryTypes,
   onSelected,
   onPicked = () => {},
-  excludedEntities = [],
+  excludedEntityClasses = [],
   excludedActantIds = [],
 
   isInsideTemplate = false,
@@ -71,7 +71,7 @@ export const EntityDropzone: React.FC<EntityDropzone> = ({
         newHoverred.entityClass === EntityEnums.Class.Territory &&
         !territoryParentId) ||
       excludedActantIds.includes(newHoverred.id) ||
-      excludedEntities.includes(newHoverred.entityClass)
+      excludedEntityClasses.includes(newHoverred.entityClass)
     ) {
       setIsWrongDropCategory(true);
     } else {

@@ -79,7 +79,7 @@ export const StatementEditorActantIdentification: React.FC<
             }}
             isInsideTemplate={isInsideTemplate}
             excludedActantIds={[entity.id]}
-            excludedEntities={excludedSuggesterEntities}
+            excludedEntityClasses={excludedSuggesterEntities}
           >
             <EntityTag
               entity={entity}
@@ -112,7 +112,7 @@ export const StatementEditorActantIdentification: React.FC<
             openDetailOnCreate
             isInsideTemplate={isInsideTemplate}
             territoryActants={territoryActants}
-            excludedEntities={excludedSuggesterEntities}
+            excludedEntityClasses={excludedSuggesterEntities}
           />
         )}
 

@@ -19,9 +19,10 @@ import { EntitySuggester, EntityTag } from "components/advanced";
 import React, { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "react-toastify";
-import { DropdownAny } from "Theme/constants";
+import { DropdownAny, excludedSuggesterEntities } from "Theme/constants";
 import { DropdownItem, SuggesterItemToCreate } from "types";
 import { StyledContent, StyledNote } from "./SuggesterCreateModalStyles";
+import { classesAll } from "@shared/dictionaries/entity";
 
 interface SuggesterCreateModal {
   typed: string;
@@ -31,6 +32,9 @@ interface SuggesterCreateModal {
   onCreate: (item: SuggesterItemToCreate) => void;
   closeModal: () => void;
 }
+const allowedEntityClasses: EntityEnums.Class[] = classesAll.filter(
+  (c) => !excludedSuggesterEntities.includes(c)
+);
 export const SuggesterCreateModal: React.FC<SuggesterCreateModal> = ({
   typed,
   category,
@@ -48,8 +52,9 @@ export const SuggesterCreateModal: React.FC<SuggesterCreateModal> = ({
   const [selectedCategory, setSelectedCategory] = useState<DropdownItem>(
     category.value !== DropdownAny ? category : categories[0]
   );
-  const [selectedLanguage, setSelectedLanguage] =
-    useState<any>(defaultLanguage);
+  const [selectedLanguage, setSelectedLanguage] = useState<
+    EntityEnums.Language | false
+  >(defaultLanguage);
 
   const [label, setLabel] = useState<string>(typed);
   const [detail, setDetail] = useState<string>("");
@@ -111,30 +116,25 @@ export const SuggesterCreateModal: React.FC<SuggesterCreateModal> = ({
       <ModalContent>
         <StyledContent>
           <ModalInputForm>
-            <ModalInputLabel>{"Entity type: "}</ModalInputLabel>
+            <ModalInputLabel>{"Class & Label: "}</ModalInputLabel>
             <ModalInputWrap>
-              <Dropdown
-                value={{
-                  label: selectedCategory.label,
-                  value: selectedCategory.value,
+              <EntitySuggester
+                categoryTypes={allowedEntityClasses}
+                excludedEntityClasses={excludedSuggesterEntities}
+                onChangeCategory={(selectedOption) => {
+                  if (selectedOption)
+                    setSelectedCategory(selectedOption as DropdownItem);
                 }}
-                options={categories}
-                onChange={(option) => {
-                  setSelectedCategory(option as DropdownItem);
-                }}
-                width={40}
-                entityDropdown
-                disableTyping
+                initTyped={typed}
+                onTyped={(newType: string) => setLabel(newType)}
+                disableCreate
+                disableTemplatesAccept
+                disableWildCard
+                disableTemplateInstantiation
+                inputWidth={96}
                 autoFocus
-              />
-              <TypeBar entityLetter={selectedCategory.value} />
-            </ModalInputWrap>
-            <ModalInputLabel>{"Label: "}</ModalInputLabel>
-            <ModalInputWrap>
-              <Input
-                value={label}
-                onChangeFn={(newType: string) => setLabel(newType)}
-                changeOnType
+                disableButtons
+                disableEnter
               />
             </ModalInputWrap>
             <ModalInputLabel>{"Detail: "}</ModalInputLabel>
@@ -176,7 +176,6 @@ export const SuggesterCreateModal: React.FC<SuggesterCreateModal> = ({
                         onClick: () => {
                           setTerritoryId("");
                         },
-                        color: "danger",
                       }}
                     />
                   ) : (

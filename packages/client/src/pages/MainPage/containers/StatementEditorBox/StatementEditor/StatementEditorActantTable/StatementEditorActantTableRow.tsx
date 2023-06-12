@@ -195,7 +195,7 @@ export const StatementEditorActantTableRow: React.FC<
             });
           }}
           categoryTypes={classEntitiesActant}
-          excludedEntities={excludedSuggesterEntities}
+          excludedEntityClasses={excludedSuggesterEntities}
           isInsideTemplate={isInsideTemplate}
           territoryParentId={territoryParentId}
           excludedActantIds={[actant.id]}
@@ -236,7 +236,7 @@ export const StatementEditorActantTableRow: React.FC<
           }}
           categoryTypes={classEntitiesActant}
           openDetailOnCreate
-          excludedEntities={excludedSuggesterEntities}
+          excludedEntityClasses={excludedSuggesterEntities}
           excludedActantIds={[statement.id]}
           isInsideTemplate={isInsideTemplate}
           territoryParentId={territoryParentId}

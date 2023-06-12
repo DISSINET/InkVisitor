@@ -38,7 +38,9 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
   const userRole = localStorage.getItem("userrole") as UserEnums.Role;
 
   const [detailTyped, setDetailTyped] = useState("");
-  const [selectedLanguage, setSelectedLanguage] = useState<any>(false);
+  const [selectedLanguage, setSelectedLanguage] = useState<
+    EntityEnums.Language | false
+  >(false);
   const [selectedCategory, setSelectedCategory] = useState<DropdownItem>({
     value: entitiesDictKeys[allowedEntityClasses[0]].value,
     label: entitiesDictKeys[allowedEntityClasses[0]].label,
@@ -46,6 +48,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
   const [labelTyped, setLabelTyped] = useState("");
   const [territoryId, setTerritoryId] = useState<string>("");
   const { appendDetailId } = useSearchParams();
+
   const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
@@ -75,24 +78,6 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
     }
   }, [user]);
 
-  const {
-    status,
-    data: territory,
-    error,
-    isFetching,
-  } = useQuery(
-    ["territory", territoryId],
-    async () => {
-      if (territoryId) {
-        const res = await api.territoryGet(territoryId);
-        return res.data;
-      }
-    },
-    {
-      enabled: !!territoryId && api.isLoggedIn(),
-    }
-  );
-
   const queryClient = useQueryClient();
 
   const entityCreateMutation = useMutation(
@@ -113,7 +98,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
       label: string;
       entityClass: EntityEnums.Class;
       detail?: string;
-      language?: EntityEnums.Language;
+      language: EntityEnums.Language | false;
       territoryId?: string;
     } = {
       label: labelTyped,
@@ -171,6 +156,24 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
     }
   };
 
+  const {
+    status,
+    data: territory,
+    error,
+    isFetching,
+  } = useQuery(
+    ["territory", territoryId],
+    async () => {
+      if (territoryId) {
+        const res = await api.territoryGet(territoryId);
+        return res.data;
+      }
+    },
+    {
+      enabled: !!territoryId && api.isLoggedIn(),
+    }
+  );
+
   const handleCheckOnSubmit = () => {
     if (labelTyped.length < 2) {
       toast.info("fill at least 2 characters");
@@ -203,8 +206,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
             <ModalInputWrap>
               <EntitySuggester
                 categoryTypes={allowedEntityClasses}
-                excludedEntities={excludedSuggesterEntities}
-                onSelected={() => console.log("cannot select")}
+                excludedEntityClasses={excludedSuggesterEntities}
                 onChangeCategory={(selectedOption) => {
                   if (selectedOption)
                     setSelectedCategory(selectedOption as DropdownItem);
