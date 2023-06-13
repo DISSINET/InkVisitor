@@ -119,8 +119,7 @@ export const SuggesterCreateModal: React.FC<SuggesterCreateModal> = ({
                 categoryTypes={classesAll}
                 excludedEntityClasses={excludedSuggesterEntities}
                 onChangeCategory={(selectedOption) => {
-                  if (selectedOption)
-                    setSelectedCategory(selectedOption as DropdownItem);
+                  if (selectedOption) setSelectedCategory(selectedOption);
                 }}
                 initTyped={typed}
                 onTyped={(newType: string) => setLabel(newType)}
@@ -150,8 +149,10 @@ export const SuggesterCreateModal: React.FC<SuggesterCreateModal> = ({
                 value={languageDict.find(
                   (i: any) => i.value === selectedLanguage
                 )}
-                onChange={(newValue: any) => {
-                  setSelectedLanguage(newValue.value);
+                onChange={(selectedOption) => {
+                  setSelectedLanguage(
+                    selectedOption[0].value as EntityEnums.Language
+                  );
                 }}
               />
             </ModalInputWrap>

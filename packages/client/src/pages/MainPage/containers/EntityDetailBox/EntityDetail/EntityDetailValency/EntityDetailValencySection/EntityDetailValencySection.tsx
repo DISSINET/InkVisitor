@@ -203,7 +203,7 @@ export const EntityDetailValencySection: React.FC<
           width="full"
           noOptionsMessage={"no entity"}
           placeholder={"no entity"}
-          onChange={(newValue: any) => {
+          onChange={(selectedOptions) => {
             const oldData = { ...entity.data };
             updateEntityMutation.mutate({
               data: {
@@ -212,15 +212,15 @@ export const EntityDetailValencySection: React.FC<
                   entities: {
                     s:
                       relationType === RelationEnums.Type.SubjectSemantics
-                        ? handleDropdownNewValue(newValue)
+                        ? handleDropdownNewValue(selectedOptions)
                         : entity.data.entities.s,
                     a1:
                       relationType === RelationEnums.Type.Actant1Semantics
-                        ? handleDropdownNewValue(newValue)
+                        ? handleDropdownNewValue(selectedOptions)
                         : entity.data.entities.a1,
                     a2:
                       relationType === RelationEnums.Type.Actant2Semantics
-                        ? handleDropdownNewValue(newValue)
+                        ? handleDropdownNewValue(selectedOptions)
                         : entity.data.entities.a2,
                   },
                 },
@@ -232,7 +232,7 @@ export const EntityDetailValencySection: React.FC<
 
       {/* SEMANTICS ROW */}
       <StyledRelationTypeIconWrapper>
-        <EntityDetailRelationTypeIcon relationType={relationType} />
+        <EntityDetailRelationTypeIcon relationType={relationType} hideLabel />
       </StyledRelationTypeIconWrapper>
 
       <StyledSemanticsWrapper>

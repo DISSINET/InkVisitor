@@ -157,9 +157,9 @@ export const PropGroupRowType: React.FC<PropGroupRowType> = ({
                 value={virtualityDict.find(
                   (i: any) => prop.type.virtuality === i.value
                 )}
-                onChange={(newValue: any) => {
+                onChange={(selectedOption) => {
                   updateProp(prop.id, {
-                    type: { ...prop.type, virtuality: newValue.value },
+                    type: { ...prop.type, virtuality: selectedOption[0].value },
                   });
                 }}
               />
@@ -175,11 +175,14 @@ export const PropGroupRowType: React.FC<PropGroupRowType> = ({
                 disabled={!userCanEdit}
                 options={partitivityDict}
                 value={partitivityDict.find(
-                  (i: any) => prop.type.partitivity === i.value
+                  (i) => prop.type.partitivity === i.value
                 )}
-                onChange={(newValue: any) => {
+                onChange={(selectedOption) => {
                   updateProp(prop.id, {
-                    type: { ...prop.type, partitivity: newValue.value },
+                    type: {
+                      ...prop.type,
+                      partitivity: selectedOption[0].value,
+                    },
                   });
                 }}
               />

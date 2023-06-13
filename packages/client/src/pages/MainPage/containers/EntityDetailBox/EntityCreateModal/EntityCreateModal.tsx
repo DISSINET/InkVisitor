@@ -28,6 +28,8 @@ import { StyledContent, StyledNote } from "./EntityCreateModalStyles";
 
 interface EntityCreateModal {
   closeModal: () => void;
+  // so far for suggester
+  typed?: string;
 }
 export const EntityCreateModal: React.FC<EntityCreateModal> = ({
   closeModal,
@@ -236,8 +238,10 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
                 value={languageDict.find(
                   (i: any) => i.value === selectedLanguage
                 )}
-                onChange={(newValue: any) => {
-                  setSelectedLanguage(newValue.value);
+                onChange={(newValue) => {
+                  setSelectedLanguage(
+                    newValue[0].value as EntityEnums.Language
+                  );
                 }}
               />
             </ModalInputWrap>

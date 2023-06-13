@@ -345,7 +345,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
                   disabled={selectedRows.length === 0}
                   value={batchAction}
                   onChange={(selectedOption) =>
-                    setBatchAction(selectedOption as DropdownItem)
+                    setBatchAction(selectedOption[0])
                   }
                   options={batchOptions}
                 />

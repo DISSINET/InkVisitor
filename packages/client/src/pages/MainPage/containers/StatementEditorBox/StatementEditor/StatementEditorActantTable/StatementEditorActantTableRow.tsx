@@ -454,8 +454,10 @@ export const StatementEditorActantTableRow: React.FC<
                   value={virtualityDict.find(
                     (i: any) => sActant.virtuality === i.value
                   )}
-                  onChange={(newValue: any) => {
-                    updateActant(sActant.id, { virtuality: newValue.value });
+                  onChange={(selectedOption) => {
+                    updateActant(sActant.id, {
+                      virtuality: selectedOption[0].value,
+                    });
                   }}
                 />
               </div>
@@ -470,8 +472,10 @@ export const StatementEditorActantTableRow: React.FC<
                   value={partitivityDict.find(
                     (i: any) => sActant.partitivity === i.value
                   )}
-                  onChange={(newValue: any) => {
-                    updateActant(sActant.id, { partitivity: newValue.value });
+                  onChange={(selectedOption) => {
+                    updateActant(sActant.id, {
+                      partitivity: selectedOption[0].value,
+                    });
                   }}
                 />
               </div>
@@ -486,9 +490,9 @@ export const StatementEditorActantTableRow: React.FC<
                   value={operatorDict.find(
                     (i: any) => sActant.bundleOperator === i.value
                   )}
-                  onChange={(newValue: any) => {
+                  onChange={(selectedOption) => {
                     updateActant(sActant.id, {
-                      bundleOperator: newValue.value,
+                      bundleOperator: selectedOption[0].value,
                     });
                   }}
                 />

@@ -63,7 +63,7 @@ interface Suggester {
 
   // events
   onType: (newType: string) => void;
-  onChangeCategory: (selectedOption: DropdownItem | DropdownItem[]) => void;
+  onChangeCategory: (selectedOption: DropdownItem[]) => void;
   onCreate: (item: SuggesterItemToCreate) => void;
   onPick: (entity: IEntity, instantiateTemplate?: boolean) => void;
   onDrop: (item: EntityDragItem, instantiateTemplate?: boolean) => void;

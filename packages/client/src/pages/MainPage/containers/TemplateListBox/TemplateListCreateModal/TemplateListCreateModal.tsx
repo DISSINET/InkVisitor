@@ -168,8 +168,8 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
                 value: createModalEntityClass.value,
               }}
               options={entitiesDict}
-              onChange={(option) => {
-                setCreateModalEntityClass(option as DropdownItem);
+              onChange={(selectedOption) => {
+                setCreateModalEntityClass(selectedOption[0]);
               }}
               width={100}
               entityDropdown

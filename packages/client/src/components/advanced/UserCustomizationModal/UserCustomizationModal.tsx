@@ -224,10 +224,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                 width="full"
                 value={defaultLanguage}
                 onChange={(selectedOption) =>
-                  handleChange(
-                    "defaultLanguage",
-                    selectedOption as DropdownItem
-                  )
+                  handleChange("defaultLanguage", selectedOption[0])
                 }
                 options={languageDict}
               />
@@ -238,10 +235,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                 width="full"
                 value={defaultStatementLanguage}
                 onChange={(selectedOption) =>
-                  handleChange(
-                    "defaultStatementLanguage",
-                    selectedOption as DropdownItem
-                  )
+                  handleChange("defaultStatementLanguage", selectedOption[0])
                 }
                 options={languageDict}
               />

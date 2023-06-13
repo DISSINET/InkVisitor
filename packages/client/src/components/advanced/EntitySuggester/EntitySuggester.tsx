@@ -72,7 +72,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
 }) => {
   const [typed, setTyped] = useState<string>(initTyped ?? "");
   const debouncedTyped = useDebounce(typed, 100);
-  const [selectedCategory, setSelectedCategory] = useState<any>();
+  const [selectedCategory, setSelectedCategory] = useState<DropdownItem>();
   const [allCategories, setAllCategories] = useState<DropdownItem[]>();
 
   const { appendDetailId } = useSearchParams();
@@ -109,8 +109,8 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
         label: debouncedTyped + wildCardChar,
         class:
           selectedCategory?.value === DropdownAny
-            ? false
-            : selectedCategory?.value,
+            ? undefined
+            : (selectedCategory?.value as EntityEnums.Class),
         excluded: excludedEntityClasses.length
           ? excludedEntityClasses
           : undefined,
@@ -393,9 +393,9 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
           setTyped(newType);
           onTyped && onTyped(newType);
         }}
-        onChangeCategory={(option) => {
-          setSelectedCategory(option);
-          onChangeCategory && onChangeCategory(option as DropdownItem);
+        onChangeCategory={(option: DropdownItem[]) => {
+          setSelectedCategory(option[0]);
+          onChangeCategory && onChangeCategory(option[0]);
         }}
         onCreate={(newCreated: SuggesterItemToCreate) => {
           handleCreate(newCreated);

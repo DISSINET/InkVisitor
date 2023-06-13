@@ -334,10 +334,14 @@ export const StatementEditorActionTableRow: React.FC<
                 options={moodDict}
                 value={[allEntities]
                   .concat(moodDict)
-                  .filter((i: any) => sAction.mood.includes(i.value))}
-                onChange={(newValue: any) => {
+                  .filter((i) =>
+                    sAction.mood.includes(i.value as EntityEnums.Mood)
+                  )}
+                onChange={(selectedOptions) => {
                   updateAction(sAction.id, {
-                    mood: newValue ? newValue.map((v: any) => v.value) : [],
+                    mood: selectedOptions
+                      ? selectedOptions.map((v: any) => v.value)
+                      : [],
                   });
                 }}
                 attributeDropdown
@@ -402,9 +406,9 @@ export const StatementEditorActionTableRow: React.FC<
                   value={operatorDict.find(
                     (i: any) => sAction.bundleOperator === i.value
                   )}
-                  onChange={(newValue: any) => {
+                  onChange={(selectedOption) => {
                     updateAction(sAction.id, {
-                      bundleOperator: newValue.value,
+                      bundleOperator: selectedOption[0].value,
                     });
                   }}
                 />
@@ -436,8 +440,10 @@ export const StatementEditorActionTableRow: React.FC<
                   value={certaintyDict.find(
                     (i: any) => sAction.certainty === i.value
                   )}
-                  onChange={(newValue: any) => {
-                    updateAction(sAction.id, { certainty: newValue.value });
+                  onChange={(selectedOption) => {
+                    updateAction(sAction.id, {
+                      certainty: selectedOption[0].value,
+                    });
                   }}
                 />
               </div>

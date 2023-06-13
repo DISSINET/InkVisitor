@@ -103,9 +103,9 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                     options={allowedEntityChangeClasses.map(
                       (c) => entitiesDictKeys[c]
                     )}
-                    onChange={(option) => {
+                    onChange={(selectedOption) => {
                       setSelectedEntityType(
-                        (option as DropdownItem).value as EntityEnums.Class
+                        selectedOption[0].value as EntityEnums.Class
                       );
                       setShowTypeSubmit(true);
                     }}
@@ -272,9 +272,10 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                 value={languageDict.find(
                   (i: any) => i.value === entity.language
                 )}
-                onChange={(newValue: any) => {
+                onChange={(selectedOption) => {
                   updateEntityMutation.mutate({
-                    language: newValue.value || EntityEnums.Language.Empty,
+                    language:
+                      selectedOption[0].value || EntityEnums.Language.Empty,
                   });
                 }}
               />
