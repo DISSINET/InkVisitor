@@ -121,6 +121,7 @@ export const SuggesterCreateModal: React.FC<SuggesterCreateModal> = ({
                 onChangeCategory={(selectedOption) => {
                   if (selectedOption) setSelectedCategory(selectedOption);
                 }}
+                initCategory={category}
                 initTyped={typed}
                 onTyped={(newType: string) => setLabel(newType)}
                 disableCreate

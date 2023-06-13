@@ -37,6 +37,7 @@ interface EntitySuggester {
   autoFocus?: boolean;
 
   initTyped?: string;
+  initCategory?: DropdownItem;
 
   disabled?: boolean;
 }
@@ -67,6 +68,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
   autoFocus,
 
   initTyped,
+  initCategory,
 
   disabled = false,
 }) => {
@@ -197,7 +199,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
     }
     if (categories.length) {
       setAllCategories(categories);
-      setSelectedCategory(categories[0]);
+      setSelectedCategory(initCategory ?? categories[0]);
     }
   }, [categoryTypes]);
 
