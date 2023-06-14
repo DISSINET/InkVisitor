@@ -427,7 +427,6 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
           categorySelected={selectedCategory}
           categories={allCategories.slice(1)}
           closeModal={() => setShowCreateModal(false)}
-          openDetailOnCreate={openDetailOnCreate}
           onMutationSuccess={(entity) => onMutationSuccess(entity)}
         />
       )}

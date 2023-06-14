@@ -294,7 +294,6 @@ const MainPage: React.FC<MainPage> = ({}) => {
         )}
         {showEntityCreateModal && (
           <EntityCreateModal
-            openDetailOnCreate
             closeModal={() => setShowEntityCreateModal(false)}
             onMutationSuccess={(entity) => {
               if (entity.class !== EntityEnums.Class.Value) {

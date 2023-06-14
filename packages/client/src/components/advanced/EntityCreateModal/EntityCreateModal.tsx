@@ -2,6 +2,12 @@ import { entitiesDictKeys, languageDict } from "@shared/dictionaries";
 import { classesAll, entitiesDict } from "@shared/dictionaries/entity";
 import { EntityEnums, UserEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import {
+  DropdownAny,
+  excludedSuggesterEntities,
+  rootTerritoryId,
+} from "Theme/constants";
 import api from "api";
 import {
   Button,
@@ -18,15 +24,8 @@ import {
 } from "components";
 import { EntitySuggester, EntityTag } from "components/advanced";
 import { CEntity, CStatement, CTerritory } from "constructors";
-import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
-import {
-  DropdownAny,
-  excludedSuggesterEntities,
-  rootTerritoryId,
-} from "Theme/constants";
 import { DropdownItem } from "types";
 import { StyledContent, StyledNote } from "./EntityCreateModalStyles";
 
@@ -37,16 +36,13 @@ interface EntityCreateModal {
   labelTyped?: string;
   categorySelected?: DropdownItem;
   categories?: DropdownItem[];
-  openDetailOnCreate?: boolean;
 }
 export const EntityCreateModal: React.FC<EntityCreateModal> = ({
   closeModal,
-  onMutationSuccess = (entity: IEntity) => {},
-  //
+  onMutationSuccess = () => {},
   labelTyped = "",
   categorySelected,
   categories = entitiesDict,
-  openDetailOnCreate = false,
 }) => {
   const [showModal, setShowModal] = useState(false);
   useEffect(() => {
@@ -88,10 +84,6 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
   }, [user]);
 
   const [territoryId, setTerritoryId] = useState<string>("");
-
-  const { appendDetailId } = useSearchParams();
-
-  const queryClient = useQueryClient();
 
   const entityCreateMutation = useMutation(
     async (newEntity: IEntity) => await api.entityCreate(newEntity),
@@ -217,6 +209,8 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
             <ModalInputLabel>{"Class & Label: "}</ModalInputLabel>
             <ModalInputWrap>
               <EntitySuggester
+                initTyped={label}
+                initCategory={selectedCategory}
                 categoryTypes={classesAll}
                 excludedEntityClasses={excludedSuggesterEntities}
                 onChangeCategory={(selectedOption) => {
