@@ -1,5 +1,7 @@
-import { languageDict } from "@shared/dictionaries";
+import { entitiesDictKeys, languageDict } from "@shared/dictionaries";
+import { classesAll, entitiesDict } from "@shared/dictionaries/entity";
 import { EntityEnums, UserEnums } from "@shared/enums";
+import { IEntity } from "@shared/types";
 import api from "api";
 import {
   Button,
@@ -13,61 +15,157 @@ import {
   ModalInputForm,
   ModalInputLabel,
   ModalInputWrap,
-  TypeBar,
 } from "components";
 import { EntitySuggester, EntityTag } from "components/advanced";
+import { CEntity, CStatement, CTerritory } from "constructors";
+import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
-import { DropdownAny, excludedSuggesterEntities } from "Theme/constants";
-import { DropdownItem, SuggesterItemToCreate } from "types";
-import { StyledContent, StyledNote } from "./SuggesterCreateModalStyles";
-import { classesAll } from "@shared/dictionaries/entity";
+import {
+  DropdownAny,
+  excludedSuggesterEntities,
+  rootTerritoryId,
+} from "Theme/constants";
+import { DropdownItem } from "types";
+import { StyledContent, StyledNote } from "./EntityCreateModalStyles";
 
-interface SuggesterCreateModal {
-  typed: string;
-  category: DropdownItem;
-  categories: DropdownItem[];
-  defaultLanguage: EntityEnums.Language | false;
-  onCreate: (item: SuggesterItemToCreate) => void;
+interface EntityCreateModal {
   closeModal: () => void;
+  onMutationSuccess?: (entity: IEntity) => void;
+
+  labelTyped?: string;
+  categorySelected?: DropdownItem;
+  categories?: DropdownItem[];
+  openDetailOnCreate?: boolean;
 }
-export const SuggesterCreateModal: React.FC<SuggesterCreateModal> = ({
-  typed,
-  category,
-  categories,
-  defaultLanguage,
-  onCreate,
+export const EntityCreateModal: React.FC<EntityCreateModal> = ({
   closeModal,
+  onMutationSuccess = (entity: IEntity) => {},
+  //
+  labelTyped = "",
+  categorySelected,
+  categories = entitiesDict,
+  openDetailOnCreate = false,
 }) => {
   const [showModal, setShowModal] = useState(false);
-
   useEffect(() => {
     setShowModal(true);
   }, []);
 
+  const [label, setLabel] = useState(labelTyped);
+  const [detailTyped, setDetailTyped] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<DropdownItem>(
-    category.value !== DropdownAny ? category : categories[0]
+    categorySelected && categorySelected.value !== DropdownAny
+      ? categorySelected
+      : categories[0]
   );
+
   const [selectedLanguage, setSelectedLanguage] = useState<
     EntityEnums.Language | false
-  >(defaultLanguage);
+  >(false);
 
-  const [label, setLabel] = useState<string>(typed);
-  const [detail, setDetail] = useState<string>("");
+  const userId = localStorage.getItem("userid");
+  const {
+    status: statusUser,
+    data: user,
+    error: errorUser,
+    isFetching: isFetchingUser,
+  } = useQuery(
+    ["user", userId],
+    async () => {
+      if (userId) {
+        const res = await api.usersGet(userId);
+        return res.data;
+      }
+    },
+    { enabled: !!userId && api.isLoggedIn() }
+  );
+  useEffect(() => {
+    if (user) {
+      setSelectedLanguage(user.options.defaultLanguage);
+    }
+  }, [user]);
+
   const [territoryId, setTerritoryId] = useState<string>("");
+
+  const { appendDetailId } = useSearchParams();
+
+  const queryClient = useQueryClient();
+
+  const entityCreateMutation = useMutation(
+    async (newEntity: IEntity) => await api.entityCreate(newEntity),
+    {
+      onSuccess: (data, variables) => {
+        onMutationSuccess(variables);
+        closeModal();
+      },
+    }
+  );
 
   const userRole = localStorage.getItem("userrole") as UserEnums.Role;
 
   const handleCreateActant = () => {
-    onCreate({
+    const newCreated: {
+      label: string;
+      entityClass: EntityEnums.Class;
+      detail?: string;
+      language: EntityEnums.Language | false;
+      territoryId?: string;
+    } = {
       label: label,
-      entityClass: selectedCategory.value as EntityEnums.Class,
-      detail: detail,
+      entityClass:
+        entitiesDictKeys[selectedCategory.value as EntityEnums.Class].value,
+      detail: detailTyped,
       language: selectedLanguage,
       territoryId: territoryId,
-    });
-    closeModal();
+    };
+
+    if (user) {
+      if (
+        newCreated.entityClass === EntityEnums.Class.Statement &&
+        newCreated.territoryId
+      ) {
+        const newStatement = CStatement(
+          userRole,
+          {
+            ...user.options,
+            defaultLanguage:
+              newCreated.language || user.options.defaultLanguage,
+          },
+          newCreated.label,
+          newCreated.detail,
+          newCreated.territoryId
+        );
+        entityCreateMutation.mutate(newStatement);
+      } else if (newCreated.entityClass === EntityEnums.Class.Territory) {
+        const newTerritory = CTerritory(
+          userRole,
+          {
+            ...user.options,
+            defaultLanguage:
+              newCreated.language || user.options.defaultLanguage,
+          },
+          newCreated.label,
+          newCreated.detail || "",
+          newCreated.territoryId ? newCreated.territoryId : rootTerritoryId,
+          -1
+        );
+        entityCreateMutation.mutate(newTerritory);
+      } else {
+        const newEntity = CEntity(
+          {
+            ...user.options,
+            defaultLanguage:
+              newCreated.language || user.options.defaultLanguage,
+          },
+          newCreated.entityClass,
+          newCreated.label,
+          newCreated.detail
+        );
+        entityCreateMutation.mutate(newEntity);
+      }
+    }
   };
 
   const {
@@ -89,7 +187,9 @@ export const SuggesterCreateModal: React.FC<SuggesterCreateModal> = ({
   );
 
   const handleCheckOnSubmit = () => {
-    if (selectedCategory.value === "S" && !territoryId) {
+    if (label.length < 2) {
+      toast.info("fill at least 2 characters");
+    } else if (selectedCategory.value === "S" && !territoryId) {
       toast.warning("Territory is required!");
     } else if (
       selectedCategory.value === "T" &&
@@ -106,6 +206,7 @@ export const SuggesterCreateModal: React.FC<SuggesterCreateModal> = ({
     <Modal
       showModal={showModal}
       width="thin"
+      isLoading={entityCreateMutation.isLoading}
       onEnterPress={handleCheckOnSubmit}
       onClose={closeModal}
     >
@@ -119,10 +220,9 @@ export const SuggesterCreateModal: React.FC<SuggesterCreateModal> = ({
                 categoryTypes={classesAll}
                 excludedEntityClasses={excludedSuggesterEntities}
                 onChangeCategory={(selectedOption) => {
-                  if (selectedOption) setSelectedCategory(selectedOption);
+                  if (selectedOption)
+                    setSelectedCategory(selectedOption as DropdownItem);
                 }}
-                initCategory={category}
-                initTyped={typed}
                 onTyped={(newType: string) => setLabel(newType)}
                 disableCreate
                 disableTemplatesAccept
@@ -137,8 +237,8 @@ export const SuggesterCreateModal: React.FC<SuggesterCreateModal> = ({
             <ModalInputLabel>{"Detail: "}</ModalInputLabel>
             <ModalInputWrap>
               <Input
-                value={detail}
-                onChangeFn={(newType: string) => setDetail(newType)}
+                value={detailTyped}
+                onChangeFn={(newType: string) => setDetailTyped(newType)}
                 changeOnType
               />
             </ModalInputWrap>
@@ -150,9 +250,9 @@ export const SuggesterCreateModal: React.FC<SuggesterCreateModal> = ({
                 value={languageDict.find(
                   (i: any) => i.value === selectedLanguage
                 )}
-                onChange={(selectedOption) => {
+                onChange={(newValue) => {
                   setSelectedLanguage(
-                    selectedOption[0].value as EntityEnums.Language
+                    newValue[0].value as EntityEnums.Language
                   );
                 }}
               />
@@ -215,16 +315,13 @@ export const SuggesterCreateModal: React.FC<SuggesterCreateModal> = ({
             label="Cancel"
             color="greyer"
             inverted
-            onClick={() => {
-              setTerritoryId("");
-              closeModal();
-            }}
+            onClick={closeModal}
           />
           <Button
             key="submit"
             label="Create"
             color="info"
-            onClick={() => handleCheckOnSubmit()}
+            onClick={handleCheckOnSubmit}
           />
         </ButtonGroup>
       </ModalFooter>

@@ -4,6 +4,7 @@ import { AttributeButtonGroup } from "./AttributeButtonGroup/AttributeButtonGrou
 import { AuditTable } from "./AuditTable/AuditTable";
 import { BreadcrumbItem } from "./BreadcrumbItem/BreadcrumbItem";
 import { EmptyTag } from "./EmptyTag/EmptyTag";
+import { EntityCreateModal } from "./EntityCreateModal/EntityCreateModal";
 import { EntityDropzone } from "./EntityDropzone/EntityDropzone";
 import { EntitySuggester } from "./EntitySuggester/EntitySuggester";
 import { EntityTag } from "./EntityTag/EntityTag";
@@ -27,6 +28,7 @@ export {
   AuditTable,
   BreadcrumbItem,
   EmptyTag,
+  EntityCreateModal,
   EntityDropzone,
   EntitySuggester,
   EntityTag,

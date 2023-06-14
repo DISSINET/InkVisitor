@@ -31,7 +31,6 @@ import {
   ItemTypes,
   SuggesterItemToCreate,
 } from "types";
-import { SuggesterCreateModal } from "./SuggesterCreateModal/SuggesterCreateModal";
 import { SuggesterKeyPress } from "./SuggesterKeyPress";
 import {
   StyledAiOutlineWarning,
@@ -76,6 +75,9 @@ interface Suggester {
   userOptions?: IUserOptions;
   autoFocus?: boolean;
   disableEnter?: boolean;
+
+  showCreateModal: boolean;
+  setShowCreateModal: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export const Suggester: React.FC<Suggester> = ({
@@ -106,12 +108,14 @@ export const Suggester: React.FC<Suggester> = ({
   userOptions,
   autoFocus,
   disableEnter,
+
+  showCreateModal,
+  setShowCreateModal,
 }) => {
   const [selected, setSelected] = useState(-1);
   const [isFocused, setIsFocused] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
-  const [showCreateModal, setShowCreateModal] = useState(false);
   const [showTemplateModal, setShowTemplateModal] = useState(false);
   const [tempDropItem, setTempDropItem] = useState<EntityDragItem | false>(
     false
@@ -365,16 +369,6 @@ export const Suggester: React.FC<Suggester> = ({
         ) : null}
       </StyledSuggester>
 
-      {showCreateModal && (
-        <SuggesterCreateModal
-          typed={typed}
-          category={category}
-          categories={categories.slice(1)}
-          defaultLanguage={userOptions ? userOptions.defaultLanguage : false}
-          onCreate={onCreate}
-          closeModal={() => setShowCreateModal(false)}
-        />
-      )}
       {showTemplateModal && (
         <TemplateActionModal
           onClose={() => {
