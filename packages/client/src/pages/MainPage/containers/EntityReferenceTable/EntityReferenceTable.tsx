@@ -1,4 +1,9 @@
-import { IEntity, IReference } from "@shared/types";
+import {
+  IEntity,
+  IReference,
+  IResponseDetail,
+  IResponseDocument,
+} from "@shared/types";
 import { Button } from "components";
 import { CReference } from "constructors";
 import React from "react";
@@ -6,11 +11,16 @@ import { FaPlus } from "react-icons/fa";
 import { EntityReferenceTableRow } from "./EntityReferenceTableRow";
 import {
   StyledListHeaderColumn,
-  StyledReferencesList
+  StyledReferencesList,
 } from "./EntityReferenceTableStyles";
+import api from "api";
+import { useQuery } from "@tanstack/react-query";
 
 interface EntityReferenceTable {
-  entities: { [key: string]: IEntity };
+  entityId: string;
+  entities: {
+    [key: string]: IEntity;
+  };
   references: IReference[];
   onChange: (newRefefences: IReference[]) => void;
   disabled: boolean;
@@ -20,6 +30,7 @@ interface EntityReferenceTable {
 }
 
 export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
+  entityId,
   entities,
   references,
   onChange,
@@ -28,6 +39,33 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
   isInsideTemplate,
   territoryParentId,
 }) => {
+  // Documents query
+  const {
+    status: documentsStatus,
+    data: documents,
+    error: documentsError,
+    isFetching: DocumentsIsFetching,
+  } = useQuery(
+    ["documents", references],
+    async () => {
+      const documentIds: string[] = [];
+
+      references
+        .map((ref) => ref.resource)
+        .forEach((ref) => {
+          const refE = entities[ref];
+          if (refE) {
+            if (refE.data.documentId) {
+              documentIds.push(refE.data.documentId);
+            }
+          }
+        });
+      const res = await api.documentsGet({ documentIds: documentIds });
+      return res.data;
+    },
+    { enabled: !!entityId && api.isLoggedIn() }
+  );
+
   const sendChanges = (newValues: IReference[]) => {
     onChange(newValues);
   };
@@ -41,7 +79,6 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
     });
     sendChanges(newReferences);
   };
-
 
   const handleChangeValue = (refId: string, newValueId: string) => {
     const newReferences = [...references];
@@ -74,16 +111,26 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
             <StyledListHeaderColumn>Resource</StyledListHeaderColumn>
             <StyledListHeaderColumn>Part</StyledListHeaderColumn>
             <StyledListHeaderColumn></StyledListHeaderColumn>
+            <StyledListHeaderColumn></StyledListHeaderColumn>
           </React.Fragment>
 
           {references &&
             references.map((reference: IReference, ri: number) => {
               const resourceEntity = entities[reference.resource];
               const valueEntity = entities[reference.value];
+
+              const document =
+                resourceEntity && documents
+                  ? documents.find(
+                      (doc) => doc.id === resourceEntity.data.documentId
+                    )
+                  : undefined;
               return (
                 <EntityReferenceTableRow
                   key={ri}
                   reference={reference}
+                  document={document}
+                  entityId={entityId}
                   resource={resourceEntity}
                   value={valueEntity}
                   disabled={disabled}

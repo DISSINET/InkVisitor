@@ -1,5 +1,6 @@
 import styled from "styled-components";
 import { space1, space2 } from "Theme/constants";
+import { ThemeFontSize } from "Theme/theme";
 
 interface IValueStyle {
   inverted?: boolean;
@@ -15,8 +16,12 @@ const getWidth = (width?: number | "full") => {
     return "auto";
   }
 };
-export const Wrapper = styled.div`
+interface Wrapper {
+  fullHeightTextArea: boolean;
+}
+export const Wrapper = styled.div<Wrapper>`
   display: flex;
+  height: ${({ fullHeightTextArea }) => (fullHeightTextArea ? "100%" : "")};
 `;
 export const Label = styled.span`
   text-align: right;
@@ -77,7 +82,6 @@ export const StyledSelect = styled.select<IValueStyle>`
     outline: 0;
   }
 `;
-
 export const StyledSelectReadonly = styled.input<IValueStyle>`
   width: ${({ width }) => getWidth(width)};
   background-color: ${({ inverted, theme }) =>
@@ -96,7 +100,12 @@ export const StyledSelectReadonly = styled.input<IValueStyle>`
   }
 `;
 
-export const StyledTextArea = styled.textarea<IValueStyle>`
+interface StyledTextArea extends IValueStyle {
+  fullHeightTextArea: boolean;
+  fontSizeTextArea: keyof ThemeFontSize;
+}
+export const StyledTextArea = styled.textarea<StyledTextArea>`
+  height: ${({ fullHeightTextArea }) => (fullHeightTextArea ? "100%" : "")};
   font-family: inherit;
   text-align: left;
   color: ${({ inverted, theme }) =>
@@ -106,7 +115,8 @@ export const StyledTextArea = styled.textarea<IValueStyle>`
   border-color: ${({ theme }) => theme.color["gray"]["400"]};
   border-width: ${({ theme, inverted, noBorder }) =>
     inverted || noBorder ? 0 : theme.borderWidth[1]};
-  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  font-size: ${({ theme, fontSizeTextArea }) =>
+    theme.fontSize[fontSizeTextArea]};
   width: ${({ width }) => getWidth(width)};
   padding: ${space1};
   background: ${({ disabled, theme }) =>

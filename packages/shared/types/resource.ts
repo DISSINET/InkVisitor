@@ -10,4 +10,5 @@ export interface IResourceData {
   url: string;
   partValueLabel: string;
   partValueBaseURL: string;
+  documentId?: string;
 }

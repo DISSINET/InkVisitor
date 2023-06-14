@@ -8,6 +8,7 @@ import {
   StyledTextArea,
   Wrapper,
 } from "./InputStyles";
+import { ThemeFontSize } from "Theme/theme";
 
 interface Input {
   label?: string;
@@ -33,6 +34,10 @@ interface Input {
   autoFocus?: boolean;
   disabled?: boolean;
   noBorder?: boolean;
+
+  // TextArea props
+  fullHeightTextArea?: boolean;
+  fontSizeTextArea?: keyof ThemeFontSize;
 }
 
 export const Input: React.FC<Input> = ({
@@ -55,6 +60,9 @@ export const Input: React.FC<Input> = ({
   noBorder = false,
   onFocus = () => {},
   onBlur = () => {},
+
+  fullHeightTextArea = false,
+  fontSizeTextArea = "xs",
 }) => {
   const [displayValue, setDisplayValue] = useState(value);
   useEffect(() => {
@@ -62,7 +70,7 @@ export const Input: React.FC<Input> = ({
   }, [value]);
 
   return (
-    <Wrapper>
+    <Wrapper fullHeightTextArea={type === "textarea" && fullHeightTextArea}>
       {label && <Label className="label">{label}</Label>}
       {type === "text" && (
         <StyledInput
@@ -108,6 +116,7 @@ export const Input: React.FC<Input> = ({
       )}
       {type === "textarea" && (
         <StyledTextArea
+          fullHeightTextArea={fullHeightTextArea}
           disabled={disabled}
           className="value"
           placeholder={placeholder}
@@ -139,6 +148,7 @@ export const Input: React.FC<Input> = ({
           inverted={inverted}
           noBorder={noBorder}
           suggester={suggester}
+          fontSizeTextArea={fontSizeTextArea}
         />
       )}
       {type === "select" && options && (

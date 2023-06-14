@@ -64,6 +64,11 @@ const datasets: Record<string, DbSchema> = {
       transform: function () {},
       indexes: relationsIndexes,
     },
+    documents: {
+      tableName: "documents",
+      data: require("../datasets/default/documents.json"),
+      transform: function () {},
+    },
   },
   relationstest: {
     users: {
@@ -134,6 +139,11 @@ const datasets: Record<string, DbSchema> = {
       },
       indexes: relationsIndexes,
     },
+    documents: {
+      tableName: "documents",
+      data: require("../datasets/default/documents.json"),
+      transform: function () {},
+    },
   },
   allparsed: {
     users: {
@@ -187,6 +197,11 @@ const datasets: Record<string, DbSchema> = {
         });
       },
       indexes: relationsIndexes,
+    },
+    documents: {
+      tableName: "documents",
+      data: require("../datasets/default/documents.json"),
+      transform: function () {},
     },
   },
 };

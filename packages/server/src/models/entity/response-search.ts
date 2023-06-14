@@ -134,6 +134,21 @@ export class SearchQuery {
   }
 
   /**
+   * adds condition to limit results to resources with documentId
+   * @returns
+   */
+  whereResourcesHasDocument(): SearchQuery {
+    this.query = this.query.filter(function (row: RDatum) {
+      return r.and(
+        row("class").eq(EntityEnums.Class.Resource),
+        row.hasFields({ data: { documentId: true } }),
+        row("data")("documentId").ne("")
+      );
+    });
+    return this;
+  }
+
+  /**
    * adds condition to filter entries with language
    * @returns
    */
@@ -337,6 +352,10 @@ export class SearchQuery {
 
     if (req.onlyTemplates) {
       this.whereIsTemplate();
+    }
+
+    if (req.resourceHasDocument) {
+      this.whereResourcesHasDocument();
     }
 
     if (req.excluded) {

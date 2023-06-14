@@ -672,8 +672,9 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
               <StyledDetailSectionContent>
                 <EntityReferenceTable
                   disabled={!userCanEdit}
-                  references={entity.references || []}
+                  references={entity.references ?? []}
                   entities={entity.entities}
+                  entityId={entity.id}
                   onChange={(newValues: IReference[]) => {
                     updateEntityMutation.mutate({ references: newValues });
                   }}

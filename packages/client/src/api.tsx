@@ -17,6 +17,9 @@ import {
   Relation,
   EntityTooltip,
   IReference,
+  IResponseDocument,
+  IDocument,
+  IResponseDocumentDetail,
 } from "@shared/types";
 import * as errors from "@shared/types/errors";
 import { IRequestSearch } from "@shared/types/request-search";
@@ -28,6 +31,10 @@ import io, { Socket } from "socket.io-client";
 
 type IFilterUsers = {
   label?: string;
+};
+
+type IFilterDocuments = {
+  documentIds?: string[];
 };
 
 const parseJwt = (token: string) => {
@@ -724,6 +731,75 @@ class Api {
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
       const response = await this.connection.delete(`/relations/${relationId}`);
+      return response;
+    } catch (err: any | AxiosError) {
+      throw { ...err.response.data };
+    }
+  }
+
+  /**
+   * Document titles
+   */
+
+  async documentsGet(
+    filter: IFilterDocuments
+  ): Promise<AxiosResponse<IResponseDocument[]>> {
+    try {
+      const response = await this.connection.get(`/documents/`, {
+        params: filter,
+      });
+      return response;
+    } catch (err: any | AxiosError) {
+      throw { ...err.response.data };
+    }
+  }
+
+  async documentGet(
+    documentId: string
+  ): Promise<AxiosResponse<IResponseDocumentDetail>> {
+    try {
+      const response = await this.connection.get(`/documents/${documentId}`);
+      return response;
+    } catch (err: any | AxiosError) {
+      throw { ...err.response.data };
+    }
+  }
+
+  async documentDelete(documentId: string): Promise<AxiosResponse<IDocument>> {
+    try {
+      const response = await this.connection.delete(`/documents/${documentId}`);
+      return response;
+    } catch (err: any | AxiosError) {
+      throw { ...err.response.data };
+    }
+  }
+
+  /**
+   * Document
+   */
+  async documentUpload(
+    document: Partial<IDocument>
+  ): Promise<AxiosResponse<IDocument>> {
+    try {
+      const response = await this.connection.post(`/documents`, document);
+      return response;
+    } catch (err: any | AxiosError) {
+      throw { ...err.response.data };
+    }
+  }
+
+  /**
+   * Document update
+   */
+  async documentUpdate(
+    documentId: string,
+    document: Partial<IDocument>
+  ): Promise<AxiosResponse<IDocument>> {
+    try {
+      const response = await this.connection.put(
+        `/documents/${documentId}`,
+        document
+      );
       return response;
     } catch (err: any | AxiosError) {
       throw { ...err.response.data };

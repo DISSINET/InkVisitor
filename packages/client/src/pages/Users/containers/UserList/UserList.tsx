@@ -1,6 +1,7 @@
 import { userRoleDict } from "@shared/dictionaries";
 import { EntityEnums, UserEnums } from "@shared/enums";
 import { IResponseUser, IUser, IUserRight } from "@shared/types";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Button, ButtonGroup, Input, Loader, Submit } from "components";
 import {
@@ -9,22 +10,16 @@ import {
   EntityTag,
 } from "components/advanced";
 import React, { useCallback, useMemo, useState } from "react";
-import {
-  FaKey,
-  FaToggleOff,
-  FaToggleOn,
-  FaTrashAlt,
-  FaUnlink,
-} from "react-icons/fa";
+import { FaKey, FaToggleOff, FaToggleOn, FaTrashAlt } from "react-icons/fa";
 import {
   RiUserSearchFill,
   RiUserSettingsFill,
   RiUserStarFill,
 } from "react-icons/ri";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Cell, Column, Row, useTable } from "react-table";
 import { toast } from "react-toastify";
 import {
+  StyledTHead,
   StyledTable,
   StyledTableWrapper,
   StyledTerritoryColumn,
@@ -33,7 +28,6 @@ import {
   StyledTerritoryListItem,
   StyledTerritoryListItemMissing,
   StyledTh,
-  StyledTHead,
   StyledUserNameColumn,
   StyledUserNameColumnIcon,
   StyledUserNameColumnText,
@@ -134,11 +128,11 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
     }
   };
 
-  const getRowId = useCallback((row) => {
+  const getRowId = useCallback((row: Row) => {
     return row.id;
   }, []);
 
-  const columns: Column<{}>[] = useMemo(() => {
+  const columns: Column<Row<{}>>[] = useMemo(() => {
     return [
       {
         Header: "",
