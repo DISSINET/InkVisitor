@@ -267,11 +267,11 @@ export const EntitySearchBox: React.FC = () => {
             entityDropdown
             options={[defaultClassOption].concat(classOptions)}
             value={classOption}
-            onChange={(option) => {
-              setClassOption(option as DropdownItem);
+            onChange={(selectedOption) => {
+              setClassOption(selectedOption[0]);
               setTemplateOption(defaultClassOption);
               handleChange({
-                class: (option as DropdownItem).value,
+                class: selectedOption[0].value,
                 usedTemplate: defaultClassOption.value,
               });
             }}
@@ -288,9 +288,9 @@ export const EntitySearchBox: React.FC = () => {
             width={150}
             options={statusOptions}
             value={statusOptionSelected}
-            onChange={(option) => {
+            onChange={(selectedOption) => {
               handleChange({
-                status: (option as DropdownItem).value,
+                status: selectedOption[0].value,
               });
             }}
           />
@@ -306,9 +306,9 @@ export const EntitySearchBox: React.FC = () => {
             width={150}
             options={languageOptions}
             value={languageOptionSelected}
-            onChange={(option) => {
+            onChange={(selectedOption) => {
               handleChange({
-                language: (option as DropdownItem).value,
+                language: selectedOption[0].value,
               });
             }}
           />
@@ -323,9 +323,9 @@ export const EntitySearchBox: React.FC = () => {
           width={150}
           options={[defaultClassOption].concat(templateOptions)}
           value={templateOption}
-          onChange={(option) => {
+          onChange={(selectedOption) => {
             setTemplateOption(option);
-            handleChange({ usedTemplate: (option as DropdownItem).value });
+            handleChange({ usedTemplate: (selectedOption[0]).value });
           }}
         />
       </StyledRow> */}

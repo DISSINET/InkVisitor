@@ -8,6 +8,7 @@ import {
   ValueContainerProps,
   OptionProps,
   DropdownIndicatorProps,
+  ActionMeta,
 } from "react-select";
 import { DropdownAny, heightHeader } from "Theme/constants";
 import { DropdownItem, EntityColors } from "types";
@@ -23,7 +24,7 @@ import { Tooltip } from "components";
 interface Dropdown {
   options?: DropdownItem[];
   value?: DropdownItem | DropdownItem[];
-  onChange: (selectedOption: DropdownItem | DropdownItem[]) => void;
+  onChange: (selectedOption: DropdownItem[]) => void;
   components?: any;
   ref?: React.RefObject<ReactNode>;
   width?: number | "full";
@@ -139,22 +140,29 @@ export const Dropdown: React.FC<Dropdown> = ({
           }}
           menuPortalTarget={document.getElementById("page")!}
           menuPosition="absolute"
-          onChange={(selected: any, event: any) => {
-            if (selected !== null && selected.length > 0) {
+          onChange={(selected: unknown, event: ActionMeta<unknown>) => {
+            const selectedOptions: DropdownItem[] = Array.isArray(selected)
+              ? selected
+              : [selected];
+
+            if (selectedOptions !== null && selectedOptions.length > 0) {
               // kdyz je neco vybrany = aspon jeden option
               if (attributeDropdown && event.action === "remove-value") {
                 return onChange([]);
               }
-              if (selected[selected.length - 1].value === allEntities.value) {
+              if (
+                selectedOptions[selectedOptions.length - 1].value ===
+                allEntities.value
+              ) {
                 // kdyz vyberu all option
                 return onChange([allEntities, ...options]);
               }
-              let result = [];
-              if (selected.length === options.length) {
+              let result: DropdownItem[] = [];
+              if (selectedOptions.length === options.length) {
                 // kdyz jsou vybrany vsechny
-                if (selected.includes(allEntities)) {
+                if (selectedOptions.includes(allEntities)) {
                   //
-                  result = selected.filter(
+                  result = selectedOptions.filter(
                     (option: { label: string; value: string }) =>
                       option.value !== allEntities.value
                   );
@@ -164,7 +172,7 @@ export const Dropdown: React.FC<Dropdown> = ({
                 return onChange(result);
               }
             }
-            return onChange(selected);
+            return onChange(selectedOptions);
           }}
           options={isMulti ? [allEntities, ...optionsWithIterator] : options}
           width={width}

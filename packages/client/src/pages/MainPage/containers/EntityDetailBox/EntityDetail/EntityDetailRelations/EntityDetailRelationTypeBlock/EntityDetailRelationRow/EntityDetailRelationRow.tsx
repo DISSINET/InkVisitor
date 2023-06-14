@@ -85,10 +85,10 @@ export const EntityDetailRelationRow: React.FC<EntityDetailRelationRow> = ({
                 c.value === (relation as Relation.IIdentification).certainty
             )?.label ?? "",
         }}
-        onChange={(newValue: any) => {
+        onChange={(selectedOption) => {
           relationUpdateMutation.mutate({
             relationId: relation.id,
-            changes: { certainty: newValue.value as string },
+            changes: { certainty: selectedOption[0].value as string },
           });
         }}
       />

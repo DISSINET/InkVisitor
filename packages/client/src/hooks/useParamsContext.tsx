@@ -170,7 +170,6 @@ export const SearchParamsProvider = ({
   useEffect(() => {
     // Change from the inside of the app to this state
     if (!hasSearchParams) {
-      console.log("change from inside");
       territoryId
         ? params.set("territory", territoryId)
         : params.delete("territory");

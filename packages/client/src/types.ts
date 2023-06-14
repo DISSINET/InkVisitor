@@ -319,7 +319,7 @@ export interface SuggesterItemToCreate {
   entityClass: EntityEnums.Class;
   detail?: string;
   territoryId?: string;
-  language?: EntityEnums.Language;
+  language: EntityEnums.Language | false;
 }
 
 export interface FilteredActantObject {

@@ -10,18 +10,24 @@ import { StyledRelationType } from "./EntityDetailRelationTypeIconStyles";
 
 interface EntityDetailRelationTypeIcon {
   relationType: RelationEnums.Type;
-  graphOpen: boolean;
-  handleOpenGraph: () => void;
+  graphOpen?: boolean;
+  handleOpenGraph?: () => void;
+  hideLabel?: boolean;
 }
 export const EntityDetailRelationTypeIcon: React.FC<
   EntityDetailRelationTypeIcon
-> = ({ relationType, graphOpen, handleOpenGraph }) => {
+> = ({
+  relationType,
+  graphOpen = false,
+  handleOpenGraph = () => {},
+  hideLabel,
+}) => {
   const relationRule = Relation.RelationRules[relationType]!;
 
   return (
     <StyledRelationType>
       <LetterIcon letter={relationType} color="info" />
-      <StyledLabel>{relationRule.label}</StyledLabel>
+      {!hideLabel && <StyledLabel>{relationRule.label}</StyledLabel>}
       {relationRule.inverseLabel ? (
         <TbArrowsHorizontal color={theme.color["info"]} />
       ) : (

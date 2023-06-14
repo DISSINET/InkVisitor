@@ -100,7 +100,7 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
               handleChangeValue(reference.id, newSelectedId);
             }}
             categoryTypes={[EntityEnums.Class.Value]}
-            excludedEntities={excludedSuggesterEntities}
+            excludedEntityClasses={excludedSuggesterEntities}
             isInsideTemplate={isInsideTemplate}
             territoryParentId={territoryParentId}
             excludedActantIds={[value.id]}
@@ -128,7 +128,7 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
                   handleChangeValue(reference.id, newSelectedId);
                 }}
                 categoryTypes={[EntityEnums.Class.Value]}
-                excludedEntities={excludedSuggesterEntities}
+                excludedEntityClasses={excludedSuggesterEntities}
                 isInsideTemplate={isInsideTemplate}
                 territoryParentId={territoryParentId}
               />

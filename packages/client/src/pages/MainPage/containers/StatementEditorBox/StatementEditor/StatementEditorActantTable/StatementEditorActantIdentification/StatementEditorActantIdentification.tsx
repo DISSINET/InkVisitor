@@ -79,7 +79,7 @@ export const StatementEditorActantIdentification: React.FC<
             }}
             isInsideTemplate={isInsideTemplate}
             excludedActantIds={[entity.id]}
-            excludedEntities={excludedSuggesterEntities}
+            excludedEntityClasses={excludedSuggesterEntities}
           >
             <EntityTag
               entity={entity}
@@ -112,7 +112,7 @@ export const StatementEditorActantIdentification: React.FC<
             openDetailOnCreate
             isInsideTemplate={isInsideTemplate}
             territoryActants={territoryActants}
-            excludedEntities={excludedSuggesterEntities}
+            excludedEntityClasses={excludedSuggesterEntities}
           />
         )}
 
@@ -193,9 +193,11 @@ export const StatementEditorActantIdentification: React.FC<
               value={[allEntities]
                 .concat(moodDict)
                 .filter((i: any) => identification.mood.includes(i.value))}
-              onChange={(newValue: any) => {
+              onChange={(selectedOptions) => {
                 handleUpdate({
-                  mood: newValue ? newValue.map((v: any) => v.value) : [],
+                  mood: selectedOptions
+                    ? selectedOptions.map((v: any) => v.value)
+                    : [],
                 });
               }}
               attributeDropdown
@@ -220,8 +222,10 @@ export const StatementEditorActantIdentification: React.FC<
               value={certaintyDict.find(
                 (i: any) => identification.certainty === i.value
               )}
-              onChange={(newValue: any) => {
-                handleUpdate({ certainty: newValue.value });
+              onChange={(selectedOption) => {
+                handleUpdate({
+                  certainty: selectedOption[0].value as EntityEnums.Certainty,
+                });
               }}
             />
           </div>
