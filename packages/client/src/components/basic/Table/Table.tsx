@@ -1,24 +1,23 @@
 import { Button, Loader } from "components";
 import React, { ReactNode } from "react";
 import { Column, usePagination, useSortBy, useTable } from "react-table";
-import { ThemeColor } from "Theme/theme";
 import {
   StyledHeading,
   StyledPageNumber,
   StyledPagination,
+  StyledTHead,
   StyledTable,
   StyledTableContainer,
   StyledTableHeader,
   StyledTd,
   StyledTh,
-  StyledTHead,
   StyledTr,
   StyledUsedInTitle,
 } from "./TableStyles";
 
-interface Table {
-  data: any[];
-  columns: Column<{}>[];
+interface Table<TData extends object> {
+  data: TData[];
+  columns: Column<TData>[];
   isLoading?: boolean;
   entityTitle?: { singular: string; plural: string };
   perPage?: number;
@@ -33,7 +32,7 @@ interface Table {
   lastColumnMinWidth?: boolean;
 }
 
-export const Table: React.FC<Table> = ({
+export const Table: React.FC<Table<any>> = ({
   data,
   columns,
   isLoading,

@@ -1,4 +1,4 @@
-import { IResponseBookmarkFolder } from "@shared/types";
+import { IEntity, IResponseBookmarkFolder } from "@shared/types";
 import React, { useRef } from "react";
 import {
   DragSourceMonitor,
@@ -18,7 +18,7 @@ interface EntityBookmarkTableRow {
   moveRow: (dragIndex: number, hoverIndex: number) => void;
   folder: IResponseBookmarkFolder;
   updateOrderFn: () => void;
-  visibleColumns: ColumnInstance<{}>[];
+  visibleColumns: ColumnInstance<IEntity>[];
   hasOrder: boolean;
 }
 
