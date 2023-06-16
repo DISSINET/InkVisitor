@@ -18,7 +18,7 @@ import {
 
 interface Table {
   data: any[];
-  columns: Column<{}>[];
+  columns: Column<any>[];
   isLoading?: boolean;
   entityTitle?: { singular: string; plural: string };
   perPage?: number;

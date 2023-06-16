@@ -3,8 +3,10 @@ import { IResponseUsedInStatementIdentification } from "@shared/types/response-d
 import { Table } from "components";
 import { EntityTag } from "components/advanced";
 import React, { useMemo } from "react";
-import { Cell, Column } from "react-table";
+import { CellProps, Column } from "react-table";
 import { renderEntityTag } from "../EntityDetailUsedInTableUtils";
+
+type CellType = CellProps<IResponseUsedInStatementIdentification>;
 
 interface EntityDetailIdentificationTable {
   title: { singular: string; plural: string };
@@ -17,14 +19,13 @@ export const EntityDetailIdentificationTable: React.FC<
 > = ({ title, entities, useCases, perPage = 5 }) => {
   const data = useMemo(() => (useCases ? useCases : []), [useCases]);
 
-  const columns: Column<{}>[] = React.useMemo(
+  const columns = useMemo<Column<IResponseUsedInStatementIdentification>[]>(
     () => [
       {
         Header: "Statement",
         accessor: "data",
-        Cell: ({ row }: Cell) => {
-          const useCase =
-            row.original as IResponseUsedInStatementIdentification;
+        Cell: ({ row }: CellType) => {
+          const useCase = row.original;
           const entityId = useCase.statementId;
           const entity = entityId ? entities[entityId] : false;
           return (
@@ -43,9 +44,8 @@ export const EntityDetailIdentificationTable: React.FC<
       {
         Header: "Actant",
         accesor: "data",
-        Cell: ({ row }: Cell) => {
-          const useCase =
-            row.original as IResponseUsedInStatementIdentification;
+        Cell: ({ row }: CellType) => {
+          const useCase = row.original;
           const entityId = useCase.actantEntityId;
           const entity = entityId ? entities[entityId] : false;
           return <>{entity && renderEntityTag(entity)}</>;
@@ -53,9 +53,8 @@ export const EntityDetailIdentificationTable: React.FC<
       },
       {
         Header: "Identification",
-        Cell: ({ row }: Cell) => {
-          const useCase =
-            row.original as IResponseUsedInStatementIdentification;
+        Cell: ({ row }: CellType) => {
+          const useCase = row.original;
           const entityId = useCase.relationEntityId;
           const entity = entityId ? entities[entityId] : false;
           return <>{entity && renderEntityTag(entity)}</>;

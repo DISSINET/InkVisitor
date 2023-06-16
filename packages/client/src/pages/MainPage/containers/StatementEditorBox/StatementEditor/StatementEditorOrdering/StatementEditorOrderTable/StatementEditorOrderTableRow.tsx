@@ -12,11 +12,11 @@ import { dndHoverFn } from "utils";
 import { StyledTd, StyledTr } from "../StatementEditorOrderingStyles";
 
 interface StatementEditorOrderTableRow {
-  row: Row<{}>;
+  row: Row<OrderType>;
   index: number;
   moveRow: (dragIndex: number, hoverIndex: number) => void;
   moveEndRow: (elementIdToMove: string, index: number) => void;
-  visibleColumns: ColumnInstance<{}>[];
+  visibleColumns: ColumnInstance<OrderType>[];
   entities: { [key: string]: IEntity };
 }
 export const StatementEditorOrderTableRow: React.FC<
@@ -59,7 +59,7 @@ export const StatementEditorOrderTableRow: React.FC<
         opacity={opacity}
         borderColor={(row.original as OrderType).type}
       >
-        {row.cells.map((cell: Cell) => {
+        {row.cells.map((cell: Cell<OrderType>) => {
           return (
             <StyledTd {...cell.getCellProps()}>{cell.render("Cell")}</StyledTd>
           );
