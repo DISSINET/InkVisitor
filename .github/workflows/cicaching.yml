@@ -8,6 +8,11 @@ on:
 jobs:
   build:
     runs-on: ubuntu-20.04
+    env:
+      working-directory: ./packages/server
+    defaults:
+      run:
+        working-directory: ${{ env.working-directory }}
     strategy:
       matrix:
         node-version: [16]
