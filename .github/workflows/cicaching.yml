@@ -22,8 +22,11 @@ jobs:
         node-version: ${{ matrix.node-version }}
         cache: 'pnpm'
     - name: Install dependencies
-      run: pnpm install
-
+      run: |
+        cd packages/server
+        pnpm install
+        ls 
+        
   staging-build:
     name: Build the staging docker image
     runs-on: ubuntu-latest
