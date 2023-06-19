@@ -19,8 +19,9 @@
     "paths": {
       "@shared/*": ["./../../shared/*"],
       "@dictionaries": ["./../../shared/dictionaries/index.ts"]
-    }
+    },
+    "types": ["cypress", "node"],
   },
-  "include": ["images.d.ts", "fonts.d.ts", "src"],
+  "include": ["images.d.ts", "fonts.d.ts", "cypress", "src"],
   "exclude": ["node_modules"]
 }
