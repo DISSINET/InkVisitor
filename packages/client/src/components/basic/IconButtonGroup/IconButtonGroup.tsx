@@ -20,7 +20,7 @@ type IconButtonGroup<TValue extends ValueTypes> = {
   disabled?: boolean;
 };
 
-export const IconButtonGroup: React.FC<IconButtonGroup<ValueTypes>> = ({
+export const IconButtonGroup = <TValue extends ValueTypes>({
   attributeName,
   border,
   options,
@@ -28,7 +28,7 @@ export const IconButtonGroup: React.FC<IconButtonGroup<ValueTypes>> = ({
   value,
   icons,
   disabled = false,
-}) => {
+}: IconButtonGroup<TValue>) => {
   return (
     <StyledWrapper border={border}>
       {options.map((option, key) => {
