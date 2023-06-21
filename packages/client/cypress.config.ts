@@ -5,8 +5,8 @@ import { defineConfig } from "cypress";
 import webpackConfig from "./webpack.common";
 
 export default defineConfig({
-  viewportWidth: 1280,
-  viewportHeight: 720,
+  // viewportWidth: 1280,
+  // viewportHeight: 720,
   component: {
     devServer: {
       framework: "react",

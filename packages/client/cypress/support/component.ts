@@ -21,6 +21,10 @@ import "../../src/setup";
 // require('./commands')
 
 import { mount } from "cypress/react18";
+import { ThemeProvider } from "styled-components";
+import React from "react";
+import theme from "Theme/theme";
+import GlobalStyle from "Theme/global";
 
 // Augment the Cypress namespace to include type definitions for
 // your custom command.
@@ -35,7 +39,9 @@ declare global {
   }
 }
 
-Cypress.Commands.add("mount", mount);
+Cypress.Commands.add("mount", (jsx, options) =>
+  mount(React.createElement(ThemeProvider, { theme }, jsx), options)
+);
 
 Cypress.on("uncaught:exception", (err, runnable) => {
   // returning false here prevents Cypress from
