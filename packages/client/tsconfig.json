@@ -20,8 +20,7 @@
       "@shared/*": ["./../../shared/*"],
       "@dictionaries": ["./../../shared/dictionaries/index.ts"]
     },
-    "types": ["cypress", "node"],
   },
-  "include": ["images.d.ts", "fonts.d.ts", "cypress", "src"],
+  "include": ["images.d.ts", "fonts.d.ts", "src", "cypress"],
   "exclude": ["node_modules"]
 }
