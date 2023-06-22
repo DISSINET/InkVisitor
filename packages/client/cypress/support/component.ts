@@ -14,17 +14,21 @@
 // ***********************************************************
 
 // Import commands.js using ES2015 syntax:
-import "./commands";
 import "../../src/setup";
+import "./commands";
 
 // Alternatively you can use CommonJS syntax:
 // require('./commands')
 
-import { mount } from "cypress/react18";
-import { ThemeProvider } from "styled-components";
-import React from "react";
-import theme from "Theme/theme";
 import GlobalStyle from "Theme/global";
+import theme from "Theme/theme";
+import { mount } from "cypress/react18";
+import { createElement } from "react";
+import { ThemeProvider } from "styled-components";
+import { Provider } from "react-redux";
+import store from "redux/store";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
 
 // Augment the Cypress namespace to include type definitions for
 // your custom command.
@@ -40,14 +44,26 @@ declare global {
 }
 
 Cypress.Commands.add("mount", (jsx, options) =>
-  mount(React.createElement(ThemeProvider, { theme }, jsx), options)
+  mount(
+    createElement(
+      ThemeProvider,
+      { theme },
+      createElement(GlobalStyle),
+      createElement(
+        DndProvider,
+        { backend: HTML5Backend },
+        createElement(Provider, { store, children: jsx })
+      )
+    ),
+    options
+  )
 );
 
-Cypress.on("uncaught:exception", (err, runnable) => {
-  // returning false here prevents Cypress from
-  // failing the test
-  return false;
-});
+// returning false here prevents Cypress from
+// failing the test
+// Cypress.on("uncaught:exception", (err, runnable) => {
+// return false;
+// });
 
 // Example use:
 // cy.mount(<MyComponent />)
