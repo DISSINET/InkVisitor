@@ -467,14 +467,13 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                     value={selectedDocumentOption}
                     width="full"
                     options={documentOptions}
-                    isMulti={false}
                     onChange={(selectedOption) => {
                       const oldData = { ...entity.data };
                       updateEntityMutation.mutate({
                         data: {
                           ...oldData,
                           ...{
-                            documentId: (selectedOption as DropdownItem).value,
+                            documentId: selectedOption[0].value,
                           },
                         },
                       });
