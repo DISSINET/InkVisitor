@@ -15,6 +15,8 @@ describe("<EntityTag />", () => {
       EntityEnums.Class.Territory,
       "xxx"
     );
-    cy.mount(<EntityTag entity={entity} />);
+    cy.mount(
+      <EntityTag entity={entity} unlinkButton={{ onClick: () => {} }} />
+    );
   });
 });
