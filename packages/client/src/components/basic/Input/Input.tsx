@@ -1,6 +1,5 @@
 import { ThemeFontSize } from "Theme/theme";
 import React, { useEffect, useState } from "react";
-import { DropdownItem } from "types";
 import { Label, StyledInput, StyledTextArea, Wrapper } from "./InputStyles";
 
 interface Input {
@@ -65,6 +64,8 @@ export const Input: React.FC<Input> = ({
       {label && <Label className="label">{label}</Label>}
       {type === "text" && (
         <StyledInput
+          // needed for e2e tests
+          data-cy="text-input"
           disabled={disabled}
           type={password ? "password" : "text"}
           width={width}
@@ -106,6 +107,7 @@ export const Input: React.FC<Input> = ({
       )}
       {type === "textarea" && (
         <StyledTextArea
+        data-cy="textarea-input"
           fullHeightTextArea={fullHeightTextArea}
           disabled={disabled}
           className="value"
