@@ -1,14 +1,7 @@
+import { ThemeFontSize } from "Theme/theme";
 import React, { useEffect, useState } from "react";
 import { DropdownItem } from "types";
-import {
-  Label,
-  StyledInput,
-  StyledSelect,
-  StyledSelectReadonly,
-  StyledTextArea,
-  Wrapper,
-} from "./InputStyles";
-import { ThemeFontSize } from "Theme/theme";
+import { Label, StyledInput, StyledTextArea, Wrapper } from "./InputStyles";
 
 interface Input {
   label?: string;
@@ -16,7 +9,6 @@ interface Input {
   inverted?: boolean;
   suggester?: boolean;
   type?: "text" | "textarea" | "select";
-  options?: DropdownItem[];
   rows?: number;
   cols?: number;
   width?: number | "full";
@@ -46,7 +38,6 @@ export const Input: React.FC<Input> = ({
   suggester = false,
   value = "",
   type = "text",
-  options = [],
   rows = 3,
   cols = 50,
   width,
@@ -150,47 +141,6 @@ export const Input: React.FC<Input> = ({
           suggester={suggester}
           fontSizeTextArea={fontSizeTextArea}
         />
-      )}
-      {type === "select" && options && (
-        <>
-          {options.length > 2 ? (
-            <StyledSelect
-              disabled={disabled}
-              className="value"
-              value={value}
-              width={width}
-              autoFocus={autoFocus}
-              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                onChangeFn(e.target.value);
-              }}
-              onKeyPress={(event: React.KeyboardEvent) => {
-                if (event.key === "Enter") {
-                  onEnterPressFn();
-                }
-              }}
-              inverted={inverted}
-              suggester={suggester}
-              onFocus={(event: React.FocusEvent<HTMLSelectElement>) =>
-                onFocus(event)
-              }
-              onBlur={() => onBlur()}
-            >
-              {options.map((option, oi) => (
-                <option key={oi} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </StyledSelect>
-          ) : (
-            <StyledSelectReadonly
-              readOnly
-              width={suggester ? 36 : width}
-              value={displayValue}
-              inverted={inverted}
-              suggester={suggester}
-            />
-          )}
-        </>
       )}
     </Wrapper>
   );
