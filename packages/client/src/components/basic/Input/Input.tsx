@@ -78,18 +78,17 @@ export const Input: React.FC<Input> = ({
               onChangeFn(e.currentTarget.value);
             }
           }}
-          onKeyPress={(event: React.KeyboardEvent) => {
+          onKeyDown={(event: React.KeyboardEvent) => {
             switch (event.key) {
               case "Enter":
                 onEnterPressFn();
-            }
-          }}
-          onKeyDown={(event: React.KeyboardEvent) => {
-            switch (event.key) {
+                return;
               case "ArrowUp":
                 event.preventDefault();
+                return;
               case "ArrowDown":
                 event.preventDefault();
+                return;
             }
           }}
           onFocus={(event: React.FocusEvent<HTMLInputElement>) =>
@@ -130,11 +129,6 @@ export const Input: React.FC<Input> = ({
               onChangeFn(displayValue);
             }
             onBlur();
-          }}
-          onKeyPress={(event: React.KeyboardEvent) => {
-            if (event.key === "Enter") {
-              onEnterPressFn();
-            }
           }}
           inverted={inverted}
           noBorder={noBorder}
