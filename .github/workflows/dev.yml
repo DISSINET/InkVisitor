@@ -184,6 +184,9 @@ jobs:
       - name: Upload image data-import
         run: scp inkvisitor-data-import.tar.gz ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/var/www/html/apps
 
+      - name: Upload image sandbox
+        run: scp inkvisitor-sandbox.tar.gz ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/var/www/html/apps
+        
       - name: Load image
         run: |
           ssh -tt ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}  -- "sh -c '
