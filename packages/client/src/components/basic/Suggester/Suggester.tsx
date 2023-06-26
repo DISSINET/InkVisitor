@@ -81,7 +81,7 @@ interface Suggester {
 }
 
 export const Suggester: React.FC<Suggester> = ({
-  marginTop,
+  marginTop = false,
   suggestions = [],
   placeholder = "",
   typed,

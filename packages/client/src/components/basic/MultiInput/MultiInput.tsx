@@ -13,7 +13,7 @@ export const MultiInput: React.FC<MultiInput> = ({
   values,
   onChange,
   width,
-  disabled = true,
+  disabled = false,
 }) => {
   const [displayValues, setDisplayValues] = useState(values);
   useEffect(() => {

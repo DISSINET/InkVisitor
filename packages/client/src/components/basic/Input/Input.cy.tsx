@@ -19,6 +19,10 @@ describe("<Input />", () => {
     cy.get("input[type='text']").clear();
     cy.get("input[type='text']").should("have.value", "");
   });
+  it("should be disabled", () => {
+    cy.mount(<Input disabled onChangeFn={(v: string) => {}} />);
+    cy.get("input[type='text']").should("be.disabled");
+  });
 
   // type: TEXTAREA
   it("renders", () => {
@@ -36,5 +40,9 @@ describe("<Input />", () => {
     cy.get("textarea").type(inputText);
     cy.get("textarea").clear();
     cy.get("textarea").should("have.value", "");
+  });
+  it("should be disabled", () => {
+    cy.mount(<Input type="textarea" disabled onChangeFn={(v: string) => {}} />);
+    cy.get("textarea").should("be.disabled");
   });
 });

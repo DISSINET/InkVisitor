@@ -25,7 +25,6 @@ interface Dropdown {
   options?: DropdownItem[];
   value?: DropdownItem | DropdownItem[];
   onChange: (selectedOption: DropdownItem[]) => void;
-  components?: any;
   ref?: React.RefObject<ReactNode>;
   width?: number | "full";
   disabled?: boolean;
@@ -53,7 +52,6 @@ export const Dropdown: React.FC<Dropdown> = ({
   options = [],
   value,
   onChange,
-  components = undefined,
   width,
   hideSelectedOptions = false,
   noDropDownIndicator = false,

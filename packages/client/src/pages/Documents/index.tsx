@@ -14,8 +14,6 @@ import {
   StyledHeading,
   StyledInputWrap,
 } from "./DocumentsPageStyles";
-import { useSpring } from "@react-spring/web";
-import { springConfig } from "Theme/constants";
 
 type DocumentWithResource = {
   document: IResponseDocument;

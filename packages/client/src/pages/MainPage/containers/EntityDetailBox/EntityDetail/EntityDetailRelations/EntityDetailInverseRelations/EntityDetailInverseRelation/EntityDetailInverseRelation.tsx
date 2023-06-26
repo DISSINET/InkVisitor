@@ -12,11 +12,12 @@ import {
   StyledInverseRelationGroup,
   StyledTagWrapper,
 } from "./EntityDetailInverseRelationStyles";
+import { RelationEnums } from "@shared/enums";
 
 interface EntityDetailInverseRelation {
   entity: IResponseDetail;
   relationRule: Relation.RelationRule;
-  relationType: string;
+  relationType: RelationEnums.Type;
   relations?: Relation.IRelation[];
   entities: Record<string, IEntity>;
 }

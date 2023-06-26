@@ -4,7 +4,7 @@ import api from "api";
 import { Button, ButtonGroup, Tooltip } from "components";
 import { EntitySuggester } from "components/advanced";
 import React, { useState } from "react";
-import { DragObjectWithType, DropTargetMonitor, useDrop } from "react-dnd";
+import { DropTargetMonitor, useDrop } from "react-dnd";
 import {
   FaEdit,
   FaFolder,
@@ -136,10 +136,10 @@ export const EntityBookmarkFolder: React.FC<EntityBookmarkFolder> = ({
 
   const [{ isOver }, dropRef] = useDrop({
     accept: ItemTypes.TAG,
-    drop: (item: DragObjectWithType) => {
+    drop: (item) => {
       addBookmark(bookmarkFolder.id, (item as DragItem).id);
     },
-    hover: (item: DragObjectWithType) => {
+    hover: (item) => {
       handleHoverred(item);
     },
     collect: (monitor: DropTargetMonitor) => ({

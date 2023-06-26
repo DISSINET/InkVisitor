@@ -29,6 +29,7 @@ import { Provider } from "react-redux";
 import store from "redux/store";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 // Augment the Cypress namespace to include type definitions for
 // your custom command.
@@ -43,6 +44,15 @@ declare global {
   }
 }
 
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: false,
+    },
+  },
+});
+
 Cypress.Commands.add("mount", (jsx, options) =>
   mount(
     createElement(
@@ -50,9 +60,13 @@ Cypress.Commands.add("mount", (jsx, options) =>
       { theme },
       createElement(GlobalStyle),
       createElement(
-        DndProvider,
-        { backend: HTML5Backend },
-        createElement(Provider, { store, children: jsx })
+        QueryClientProvider,
+        { client: queryClient },
+        createElement(
+          DndProvider,
+          { backend: HTML5Backend },
+          createElement(Provider, { store, children: jsx })
+        )
       )
     ),
     options

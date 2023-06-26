@@ -352,7 +352,6 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
     <>
       <Suggester
         isFetching={isFetchingStatement}
-        marginTop={false}
         suggestions={suggestions || []}
         placeholder={placeholder}
         typed={typed} // input value
