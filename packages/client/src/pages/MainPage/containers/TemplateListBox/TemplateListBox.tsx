@@ -130,7 +130,7 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
                   entityDropdown
                   disableTyping
                 />
-                <TypeBar entityLetter={filterByClass.value} />
+                <TypeBar entityClass={filterByClass.value} />
               </div>
             </StyledTemplateFilterInputValue>
           </StyledTemplateFilterInputRow>

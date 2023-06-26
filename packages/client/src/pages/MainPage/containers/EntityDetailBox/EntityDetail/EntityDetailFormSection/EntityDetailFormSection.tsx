@@ -147,7 +147,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                     entityDropdown
                     disableTyping
                   />
-                  <TypeBar entityLetter={entity.class} />
+                  <TypeBar entityClass={entity.class} />
                 </StyledRelativePosition>
               </StyledDetailContentRowValue>
             </StyledDetailContentRow>

@@ -176,7 +176,7 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
               disableTyping
               autoFocus
             />
-            <TypeBar entityLetter={createModalEntityClass.value} />
+            <TypeBar entityClass={createModalEntityClass.value} />
           </ModalInputWrap>
           <ModalInputLabel>{"Label: "}</ModalInputLabel>
           <ModalInputWrap>
