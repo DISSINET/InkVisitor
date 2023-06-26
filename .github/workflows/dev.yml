@@ -6,6 +6,42 @@ on:
       - dev
 
 jobs:
+  sandbox-build:
+    name: Build the sandbox docker image
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout InkVisitor
+        uses: actions/checkout@v2
+
+      - name: Create env file for client
+        run: |
+          touch packages/client/env/.env.sandbox
+          echo "$CLIENT_ENV" >> packages/client/env/.env.sandbox
+        env:
+          CLIENT_ENV: ${{secrets.CLIENT_ENV}}
+
+      - name: Generate certificates
+        run: |
+          mkdir -p ./packages/server/secret
+          openssl req -x509 -newkey rsa:2048 -nodes -out ./packages/server/secret/cert.pem -keyout ./packages/server/secret/key.pem -days 365 -subj "/C=FR/O=krkr/OU=Domain Control Validated/CN=*"
+
+      # Pull the latest image to build, and avoid caching pull-only images.
+      # (docker pull is faster than caching in most cases.)
+      - run: docker-compose pull
+
+      - name: Run docker build task
+        run: docker-compose build inkvisitor-sandbox
+
+      - name: Save docker-compose stack
+        run: docker save inkvisitor:sandbox | gzip > inkvisitor-sandbox.tar.gz
+
+      - name: Cache image.tar
+        uses: actions/cache@v2
+        with:
+          path: inkvisitor-sandbox.tar.gz
+          key: inkvisitor-sandbox-${{ github.sha }}.tar.gz
+
   staging-build:
     name: Build the staging docker image
     runs-on: ubuntu-latest
@@ -42,7 +78,7 @@ jobs:
           path: inkvisitor-staging.tar.gz
           key: inkvisitor-staging-${{ github.sha }}.tar.gz
 
-  staging-data-import:
+  data-import-build:
     name: Build the data-import docker image
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -79,8 +115,8 @@ jobs:
           key: inkvisitor-data-import-${{ github.sha }}.tar.gz
 
   deploy:
-    needs: [staging-build, staging-data-import]
-    name: Deploy to staging environment
+    needs: [staging-build, data-import-build, sandbox-build]
+    name: Deploy to dev environments
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -98,6 +134,12 @@ jobs:
         with:
           path: inkvisitor-data-import.tar.gz
           key: inkvisitor-data-import-${{ github.sha }}.tar.gz
+
+      - name: Restore cache
+        uses: actions/cache@v2
+        with:
+          path: inkvisitor-sandbox.tar.gz
+          key: inkvisitor-sandbox-${{ github.sha }}.tar.gz
 
       - name: Install SSH Key
         uses: shimataro/ssh-key-action@v2
@@ -148,10 +190,13 @@ jobs:
           podman container prune -f &&
           podman image prune -f &&
           rm -rf /var/tmp/docker-tar* &&
-          podman rm inkvisitor-staging --force || true && 
-          podman rm inkvisitor-data-import --force || true && 
-          podman load -i /var/www/html/apps/inkvisitor-staging.tar.gz && 
-          podman load -i /var/www/html/apps/inkvisitor-data-import.tar.gz && 
+          podman rm inkvisitor-staging --force || true &&
+          podman rm inkvisitor-data-import --force || true &&
+          podman rm inkvisitor-sandbox --force || true &&
+          podman load -i /var/www/html/apps/inkvisitor-staging.tar.gz &&
+          podman load -i /var/www/html/apps/inkvisitor-data-import.tar.gz &&
+          podman load -i /var/www/html/apps/inkvisitor-sandbox.tar.gz &&
           podman-compose -f /var/www/html/apps/docker-compose.yml up -d inkvisitor-staging &&
-          podman-compose -f /var/www/html/apps/docker-compose.yml up -d inkvisitor-data-import
+          podman-compose -f /var/www/html/apps/docker-compose.yml up -d inkvisitor-data-import &&
+          podman-compose -f /var/www/html/apps/docker-compose.yml up -d inkvisitor-sandbox
           '"
