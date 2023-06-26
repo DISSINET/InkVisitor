@@ -19,7 +19,7 @@ jobs:
           touch packages/client/env/.env.sandbox
           echo "$CLIENT_ENV" >> packages/client/env/.env.sandbox
         env:
-          CLIENT_ENV: ${{secrets.CLIENT_ENV}}
+          CLIENT_ENV: ${{secrets.CLIENT_ENV_SANDBOX}}
 
       - name: Generate certificates
         run: |
