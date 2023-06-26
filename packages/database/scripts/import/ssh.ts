@@ -46,7 +46,12 @@ export class SshHelper {
       dstPort: this.sshConfig.dstPort, // using the same port as db
     };
 
-    [this.server, this.client] = await  createTunnel(tunnelOptions, serverOptions,  sshOptions, forwardOptions)
+    try{
+      ([this.server, this.client] = await  createTunnel(tunnelOptions, serverOptions,  sshOptions, forwardOptions))
+    } catch(e) {
+      console.warn(e)
+    }
+
   };
 
   /**
