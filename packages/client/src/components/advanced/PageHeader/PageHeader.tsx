@@ -19,6 +19,8 @@ import {
   StyledPingColor,
   StyledPingText,
   StyledRightHeader,
+  StyledSandboxText,
+  StyledSpace,
   StyledText,
   StyledUser,
   StyledUsername,
@@ -130,38 +132,55 @@ export const RightHeader: React.FC<RightHeader> = React.memo(
     setTempLocation,
     handleLogOut,
   }) => {
+    const env = (process.env.ROOT_URL || "").replace(
+      /apps\/inkvisitor[-]?/,
+      ""
+    );
+
     return (
-      <StyledRightHeader>
-        {userName.length > 0 ? (
-          <StyledUser>
-            <StyledText>logged as</StyledText>
-            <StyledFaUserAlt
-              size={14}
-              onClick={() => setUserCustomizationOpen(true)}
-            />
-            <StyledUsername onClick={() => setUserCustomizationOpen(true)}>
-              {userName}
-            </StyledUsername>
-          </StyledUser>
-        ) : (
-          <div
-            style={{
-              height: "1rem",
-              width: "1rem",
-              position: "relative",
-              marginRight: "2rem",
-            }}
-          >
-            <Loader size={10} show />
-          </div>
+      <>
+        {env === "sandbox" && (
+          <>
+            <StyledSandboxText>
+              {
+                "This is a sandbox version of InkVisitor, to be used for testing only. Do not store important data here; your data stored here can be deleted without previous notice."
+              }
+            </StyledSandboxText>
+            <StyledSpace />
+          </>
         )}
-        <Menu
-          userRole={userRole}
-          tempLocation={tempLocation}
-          setTempLocation={setTempLocation}
-          handleLogOut={handleLogOut}
-        />
-      </StyledRightHeader>
+        <StyledRightHeader>
+          {userName.length > 0 ? (
+            <StyledUser>
+              <StyledText>logged as</StyledText>
+              <StyledFaUserAlt
+                size={14}
+                onClick={() => setUserCustomizationOpen(true)}
+              />
+              <StyledUsername onClick={() => setUserCustomizationOpen(true)}>
+                {userName}
+              </StyledUsername>
+            </StyledUser>
+          ) : (
+            <div
+              style={{
+                height: "1rem",
+                width: "1rem",
+                position: "relative",
+                marginRight: "2rem",
+              }}
+            >
+              <Loader size={10} show />
+            </div>
+          )}
+          <Menu
+            userRole={userRole}
+            tempLocation={tempLocation}
+            setTempLocation={setTempLocation}
+            handleLogOut={handleLogOut}
+          />
+        </StyledRightHeader>
+      </>
     );
   }
 );
