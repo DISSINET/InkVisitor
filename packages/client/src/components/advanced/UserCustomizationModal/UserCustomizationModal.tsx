@@ -69,6 +69,12 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
   user,
   onClose = () => {},
 }) => {
+  const [showModal, setShowModal] = useState(false);
+
+  useEffect(() => {
+    setShowModal(true);
+  }, []);
+
   const initialValues: DataObject = useMemo(() => {
     const { options, name, email } = user;
 
@@ -179,16 +185,20 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
     [rights]
   );
 
+  const [showPasswordChange, setShowPasswordChange] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+
   return (
     <div>
       <Modal
-        showModal
+        showModal={showModal}
         width="thin"
         onEnterPress={handleSubmit}
         onClose={onClose}
       >
         <ModalHeader title="User customization" />
-        <ModalContent column>
+        <ModalContent column enableScroll>
           <StyledRightsHeading>
             <b>{"User information"}</b>
           </StyledRightsHeading>
@@ -212,6 +222,78 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
               />
             </ModalInputWrap>
           </ModalInputForm>
+
+          {!showPasswordChange && (
+            <div
+              style={{
+                display: "flex",
+                width: "100%",
+                justifyContent: "center",
+              }}
+            >
+              <Button
+                label="change password"
+                noBorder
+                color="warning"
+                inverted
+                noBackground
+                onClick={() => setShowPasswordChange(!showPasswordChange)}
+              />
+            </div>
+          )}
+
+          {showPasswordChange && (
+            <>
+              <StyledRightsHeading>
+                <b>{"Change password"}</b>
+              </StyledRightsHeading>
+
+              <ModalInputForm>
+                <ModalInputLabel>{"current password"}</ModalInputLabel>
+                <ModalInputWrap width={165}>
+                  <Input
+                    width="full"
+                    changeOnType
+                    value={currentPassword}
+                    onChangeFn={(value: string) => setCurrentPassword(value)}
+                  />
+                </ModalInputWrap>
+                <ModalInputLabel>{"new password"}</ModalInputLabel>
+                <ModalInputWrap width={165}>
+                  <Input
+                    width="full"
+                    changeOnType
+                    value={newPassword}
+                    onChangeFn={(value: string) => setNewPassword(value)}
+                  />
+                </ModalInputWrap>
+              </ModalInputForm>
+
+              <div
+                style={{
+                  display: "flex",
+                  width: "100%",
+                  justifyContent: "center",
+                  marginTop: "0.5rem",
+                }}
+              >
+                <ButtonGroup>
+                  <Button
+                    color="warning"
+                    label="Cancel"
+                    inverted
+                    onClick={() => setShowPasswordChange(false)}
+                  />
+                  <Button
+                    color="danger"
+                    label="Submit"
+                    inverted
+                    onClick={() => console.log("api call")}
+                  />
+                </ButtonGroup>
+              </div>
+            </>
+          )}
 
           <StyledRightsHeading>
             <b>{"Customization"}</b>
@@ -241,19 +323,19 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
               />
             </ModalInputWrap>
             {/* <ModalInputLabel>{"search languages"}</ModalInputLabel>
-            <ModalInputWrap width={165}>
-              <Dropdown
-                value={data.searchLanguages}
-                width="full"
-                isMulti
-                onChange={(selectedOption) =>
-                  handleChange("searchLanguages", selectedOption)
-                }
-                options={languageDict.filter(
-                  (lang) => lang.value !== EntityEnums.Language.Empty
-                )}
-              />
-            </ModalInputWrap> */}
+              <ModalInputWrap width={165}>
+                <Dropdown
+                  value={data.searchLanguages}
+                  width="full"
+                  isMulti
+                  onChange={(selectedOption) =>
+                    handleChange("searchLanguages", selectedOption)
+                  }
+                  options={languageDict.filter(
+                    (lang) => lang.value !== EntityEnums.Language.Empty
+                  )}
+                />
+              </ModalInputWrap> */}
             <ModalInputLabel>{"default territory"}</ModalInputLabel>
             <ModalInputWrap width={165}>
               {territory ? (
@@ -365,6 +447,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
             </StyledUserRightItem>
           </StyledUserRights>
         </ModalContent>
+
         <ModalFooter>
           <ButtonGroup>
             <Button
