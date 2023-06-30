@@ -276,9 +276,9 @@ export default Router()
           a.id = randomUUID();
           a.props = duplicateProps(a.props);
         });
-      } else {
-        originalToClone.props = duplicateProps(originalToClone.props);
       }
+
+      originalToClone.props = duplicateProps(originalToClone.props);
 
       // clone the entry without id and with recreated ids - should be created anew
       const clone = getEntityClass({
