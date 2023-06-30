@@ -264,6 +264,12 @@ export default Router()
         originalToClone.data.actants.forEach((a: IStatementActant) => {
           a.id = randomUUID();
           a.props = duplicateProps(a.props);
+          a.identifications.forEach((i) => {
+            i.id = randomUUID();
+          });
+          a.classifications.forEach((c) => {
+            c.id = randomUUID();
+          });
         });
 
         originalToClone.data.actions.forEach((a: IStatementAction) => {

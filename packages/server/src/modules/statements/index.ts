@@ -386,6 +386,12 @@ export default Router()
         model.data.actants.forEach((a: IStatementActant) => {
           a.id = randomUUID();
           a.props = duplicateProps(a.props);
+          a.identifications.forEach((i) => {
+            i.id = randomUUID();
+          });
+          a.classifications.forEach((c) => {
+            c.id = randomUUID();
+          });
         });
 
         model.data.actions.forEach((a: IStatementAction) => {
