@@ -21,9 +21,10 @@ describe("<Button />", () => {
     cy.get("@click").should("have.been.calledOnce");
   });
 
-  it("should be disabled when the disabled prop is provided", () => {
-    cy.mount(<Button label="T" disabled />);
+  it("does not call the handler on the disabled button", () => {
+    cy.mount(<Button label="T" disabled onClick={cy.stub().as("click")} />);
+    cy.get("button").click({ force: true });
     cy.get("button").should("be.disabled");
+    cy.get("@click").should("not.have.been.called");
   });
 });
-//

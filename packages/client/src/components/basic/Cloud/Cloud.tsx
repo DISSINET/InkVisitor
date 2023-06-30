@@ -9,7 +9,7 @@ interface Cloud {
 }
 export const Cloud: React.FC<Cloud> = ({ children, onUnlink }) => {
   return (
-    <StyledCloudWrap>
+    <StyledCloudWrap data-cy="cloud">
       <StyledCloud>{children}</StyledCloud>
       <StyledButtonWrap>
         <Button

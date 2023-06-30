@@ -5,7 +5,6 @@ import { Dropdown } from "./Dropdown";
 
 describe("<Dropdown />", () => {
   it("renders", () => {
-    // see: https://on.cypress.io/mounting-react
     cy.mount(
       <Dropdown
         width={120}
@@ -16,5 +15,6 @@ describe("<Dropdown />", () => {
         ]}
       />
     );
+    cy.get("[data-cy=dropdown]").should("exist");
   });
 });

@@ -88,6 +88,7 @@ export const Dropdown: React.FC<Dropdown> = ({
   return (
     <>
       <StyledSelectWrapper
+        data-cy="dropdown"
         width={width}
         ref={setReferenceElement}
         onMouseEnter={() => setShowTooltip(true)}
