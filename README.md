@@ -87,6 +87,11 @@ For more information see [database package](./packages/database)
 
 Package containing typescript definitions, types and enums, that should be available to both client & server.
 
+## Development
+
+Install `pnpm` version `>=8.6.0`. You can switch the `pnpm` versions by running `corepack prepare pnpm@<version> --activate`.
+Go to all three folders in `packages` (`client`, `server`, `database`) and run `pnpm i` in each of them.
+
 ## Deploy
 
 To deploy the Inkvisitor instance, you can use Docker (or Podman) or build and deploy the packages separately.
