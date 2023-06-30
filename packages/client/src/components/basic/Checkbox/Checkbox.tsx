@@ -9,7 +9,6 @@ import { StyledCheckboxWrapper } from "./CheckboxStyles";
 interface Checkbox {
   value: boolean;
   onChangeFn: (value: boolean) => void;
-  label?: string;
   size?: number;
 }
 export const Checkbox: React.FC<Checkbox> = ({
@@ -24,7 +23,7 @@ export const Checkbox: React.FC<Checkbox> = ({
   }, [checked]);
 
   return (
-    <StyledCheckboxWrapper>
+    <StyledCheckboxWrapper data-cy="checkbox">
       {checked ? (
         <MdOutlineCheckBox
           size={size}

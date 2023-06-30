@@ -30,5 +30,7 @@ export const AttributeIcon: React.FC<{
   attributeName: keyof typeof attributeIconsKeys;
 }> = ({ attributeName }) => {
   //@ts-ignore
-  return <>{attributeIconsKeys[attributeName]}</>;
+  return (
+    <span data-cy="attribute-icon">{attributeIconsKeys[attributeName]}</span>
+  );
 };

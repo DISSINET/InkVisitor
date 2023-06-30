@@ -5,6 +5,7 @@ describe("<Button />", () => {
   it("renders", () => {
     cy.mount(<Button label="test" color="danger" />);
     cy.get("button").should("exist");
+    cy.contains("button", "test").should("exist");
   });
   it("label should exist", () => {
     const buttonText = "Click Me";
@@ -13,12 +14,11 @@ describe("<Button />", () => {
   });
 
   it("should call the onClick handler when clicked", () => {
-    const onClick = cy.stub();
-
-    cy.mount(<Button label="button" onClick={onClick} color="danger" />);
+    cy.mount(
+      <Button label="button" color="danger" onClick={cy.stub().as("click")} />
+    );
     cy.get("button").click();
-
-    expect(onClick).to.be.calledOnce;
+    cy.get("@click").should("have.been.calledOnce");
   });
 
   it("should be disabled when the disabled prop is provided", () => {
@@ -26,3 +26,4 @@ describe("<Button />", () => {
     cy.get("button").should("be.disabled");
   });
 });
+//
