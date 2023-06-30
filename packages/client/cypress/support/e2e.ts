@@ -14,7 +14,32 @@
 // ***********************************************************
 
 // Import commands.js using ES2015 syntax:
-import './commands'
+import "./commands";
 
 // Alternatively you can use CommonJS syntax:
 // require('./commands')
+
+declare global {
+  namespace Cypress {
+    interface Chainable<Subject = any> {
+      login(username: string, password: string): Chainable<any>;
+    }
+  }
+}
+
+Cypress.Commands.add("login", (username, password) => {
+  cy.visit("http://localhost:8000/");
+
+  cy.get("input[placeholder=username]").type(username);
+
+  // {ctrl+enter} causes the form to submit
+  cy.get("input[placeholder=password]").type(`${password}{ctrl+enter}`, {
+    log: false,
+  });
+
+  // our auth cookie should be present
+  // cy.getCookie("your-session-cookie").should("exist");
+
+  // UI should reflect this user being logged in
+  // cy.get('h1').should('contain', username)
+});
