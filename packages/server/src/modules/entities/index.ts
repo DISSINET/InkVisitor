@@ -10,6 +10,9 @@ import {
   IResponseGeneric,
   RequestSearch,
   EntityTooltip,
+  IProp,
+  IStatementActant,
+  IStatementAction,
 } from "@shared/types";
 import {
   EntityDoesNotExist,
@@ -27,9 +30,10 @@ import { ResponseTooltip } from "@models/entity/response-tooltip";
 import { IRequest } from "src/custom_typings/request";
 import Relation from "@models/relation/relation";
 import User from "@models/user/user";
-import { RelationEnums } from "@shared/enums";
+import { EntityEnums, RelationEnums } from "@shared/enums";
 import { Relation as RelationType } from "@shared/types";
 import { copyRelations } from "@models/relation/functions";
+import { randomUUID } from "crypto";
 
 export default Router()
   /**
@@ -237,9 +241,42 @@ export default Router()
         );
       }
 
-      // clone the entry without id - should be created anew
+      /**
+       * fix for cloning the identifiers
+       */
+      const originalToClone = { ...original };
+
+      const duplicateProps = (oldProps: IProp[]): IProp[] => {
+        const newProps = [...oldProps];
+        newProps.forEach((p, pi) => {
+          newProps[pi].id = randomUUID();
+          newProps[pi].children.forEach((pp, pii) => {
+            newProps[pi].children[pii].id = randomUUID();
+            newProps[pi].children[pii].children.forEach((ppp, piii) => {
+              newProps[pi].children[pii].children[piii].id = randomUUID();
+            });
+          });
+        });
+        return newProps;
+      };
+
+      if (originalToClone.class === EntityEnums.Class.Statement) {
+        originalToClone.data.actants.forEach((a: IStatementActant) => {
+          a.id = randomUUID();
+          a.props = duplicateProps(a.props);
+        });
+
+        originalToClone.data.actions.forEach((a: IStatementAction) => {
+          a.id = randomUUID();
+          a.props = duplicateProps(a.props);
+        });
+      } else {
+        originalToClone.props = duplicateProps(originalToClone.props);
+      }
+
+      // clone the entry without id and with recreated ids - should be created anew
       const clone = getEntityClass({
-        ...original,
+        ...originalToClone,
         id: "",
         legacyId: undefined,
       } as Partial<IEntity>);
