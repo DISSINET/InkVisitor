@@ -9,6 +9,7 @@ import {
 } from "@shared/types/errors";
 import { asyncRouteHandler } from "..";
 import {
+  IProp,
   IReference,
   IResponseGeneric,
   IResponseStatement,
@@ -19,12 +20,17 @@ import Statement, { StatementTerritory } from "@models/statement/statement";
 import { ResponseStatement } from "@models/statement/response";
 import { EntityEnums } from "@shared/enums";
 import { IRequest } from "src/custom_typings/request";
-import { StatementObject } from "@shared/types/statement";
+import {
+  IStatementActant,
+  IStatementAction,
+  StatementObject,
+} from "@shared/types/statement";
 import Audit from "@models/audit/audit";
 import Entity from "@models/entity/entity";
 import Reference from "@models/entity/reference";
 import Relation from "@models/relation/relation";
 import { getRelationClass } from "@models/factory";
+import { randomUUID } from "crypto";
 
 export default Router()
   /**
@@ -353,6 +359,20 @@ export default Router()
       const newIds: string[] = [];
       let relsErr = false;
 
+      const duplicateProps = (oldProps: IProp[]): IProp[] => {
+        const newProps = [...oldProps];
+        newProps.forEach((p, pi) => {
+          newProps[pi].id = randomUUID();
+          newProps[pi].children.forEach((pp, pii) => {
+            newProps[pi].children[pii].id = randomUUID();
+            newProps[pi].children[pii].children.forEach((ppp, piii) => {
+              newProps[pi].children[pii].children[piii].id = randomUUID();
+            });
+          });
+        });
+        return newProps;
+      };
+
       for (const stmtData of statements) {
         const model = new Statement({ ...(stmtData as IStatement) });
         //update territory
@@ -361,6 +381,18 @@ export default Router()
         });
         // make sure the id will be created anew
         model.id = "";
+
+        // reset identifiers
+        model.data.actants.forEach((a: IStatementActant) => {
+          a.id = randomUUID();
+          a.props = duplicateProps(a.props);
+        });
+
+        model.data.actions.forEach((a: IStatementAction) => {
+          a.id = randomUUID();
+          a.props = duplicateProps(a.props);
+        });
+
         await model.save(req.db.connection);
         newIds.push(model.id);
 
