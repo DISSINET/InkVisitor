@@ -20,17 +20,12 @@ import Statement, { StatementTerritory } from "@models/statement/statement";
 import { ResponseStatement } from "@models/statement/response";
 import { EntityEnums } from "@shared/enums";
 import { IRequest } from "src/custom_typings/request";
-import {
-  IStatementActant,
-  IStatementAction,
-  StatementObject,
-} from "@shared/types/statement";
+import { StatementObject } from "@shared/types/statement";
 import Audit from "@models/audit/audit";
 import Entity from "@models/entity/entity";
 import Reference from "@models/entity/reference";
 import Relation from "@models/relation/relation";
 import { getRelationClass } from "@models/factory";
-import { randomUUID } from "crypto";
 
 export default Router()
   /**
@@ -359,45 +354,15 @@ export default Router()
       const newIds: string[] = [];
       let relsErr = false;
 
-      const duplicateProps = (oldProps: IProp[]): IProp[] => {
-        const newProps = [...oldProps];
-        newProps.forEach((p, pi) => {
-          newProps[pi].id = randomUUID();
-          newProps[pi].children.forEach((pp, pii) => {
-            newProps[pi].children[pii].id = randomUUID();
-            newProps[pi].children[pii].children.forEach((ppp, piii) => {
-              newProps[pi].children[pii].children[piii].id = randomUUID();
-            });
-          });
-        });
-        return newProps;
-      };
-
       for (const stmtData of statements) {
         const model = new Statement({ ...(stmtData as IStatement) });
+
         //update territory
         model.data.territory = new StatementTerritory({
           territoryId: newTerritoryId,
         });
-        // make sure the id will be created anew
-        model.id = "";
 
-        // reset identifiers
-        model.data.actants.forEach((a: IStatementActant) => {
-          a.id = randomUUID();
-          a.props = duplicateProps(a.props);
-          a.identifications.forEach((i) => {
-            i.id = randomUUID();
-          });
-          a.classifications.forEach((c) => {
-            c.id = randomUUID();
-          });
-        });
-
-        model.data.actions.forEach((a: IStatementAction) => {
-          a.id = randomUUID();
-          a.props = duplicateProps(a.props);
-        });
+        model.resetIds();
 
         await model.save(req.db.connection);
         newIds.push(model.id);
@@ -415,7 +380,7 @@ export default Router()
         }
       }
 
-      let msg = `${statementsCount} statements has been copied under '${territory.label}'`;
+      let msg = `${statementsCount} statements have been copied under '${territory.label}'`;
       if (relsErr) {
         msg += ", but without complete relations";
       }
