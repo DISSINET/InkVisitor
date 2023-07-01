@@ -5,6 +5,7 @@ describe("open T", () => {
 
   it("opens territory", () => {
     cy.get("[data-cy=tree-node-0]").click();
-    cy.contains("Statement text").should("be.visible");
+    cy.get("[data-cy=statement-0]").click();
+    cy.contains("Statement label").should("be.visible");
   });
 });

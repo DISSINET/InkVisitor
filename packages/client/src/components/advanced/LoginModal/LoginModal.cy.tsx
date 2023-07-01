@@ -1,9 +1,8 @@
-import React from 'react'
-import { LoginModal } from './LoginModal'
+import React from "react";
+import { LoginModal } from "./LoginModal";
 
-describe('<LoginModal />', () => {
-  it('renders', () => {
-    // see: https://on.cypress.io/mounting-react
-    cy.mount(<LoginModal />)
-  })
-})
+describe("<LoginModal />", () => {
+  it("renders", () => {
+    cy.mount(<LoginModal />);
+  });
+});

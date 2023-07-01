@@ -96,6 +96,7 @@ export const StatementListRow: React.FC<StatementListRow> = ({
           e.stopPropagation();
         }}
         id={`statement${row.original.id}`}
+        data-cy={`statement-${index}`}
       >
         {row.cells.map((cell: Cell<IResponseStatement>) => {
           if (cell.column.id === "move") {

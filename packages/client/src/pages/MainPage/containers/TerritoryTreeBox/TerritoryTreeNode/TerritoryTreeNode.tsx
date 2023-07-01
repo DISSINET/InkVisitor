@@ -188,7 +188,6 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
               style={{
                 strokeWidth: "2",
                 strokeLinejoin: "bevel",
-
                 marginRight: "2px",
               }}
             />
@@ -251,7 +250,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
           <>
             {!tempDisabled ? (
               <StyledTerritoryTagWrap id={`territory${id}`}>
-                <StyledIconWrap>
+                <StyledIconWrap data-cy={`tree-node-${index}`}>
                   {hasChildren ? (
                     <>{renderArrowIcon()}</>
                   ) : (
