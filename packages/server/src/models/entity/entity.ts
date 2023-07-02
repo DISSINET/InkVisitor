@@ -14,6 +14,7 @@ import Prop from "@models/prop/prop";
 import { findEntityById } from "@service/shorthands";
 import { IRequest } from "src/custom_typings/request";
 import { sanitizeText } from "@common/functions";
+import Reference from "./reference";
 
 export default class Entity implements IEntity, IDbModel {
   static table = "entities";
@@ -28,7 +29,7 @@ export default class Entity implements IEntity, IDbModel {
   language: EntityEnums.Language = EntityEnums.Language.Latin;
   notes: string[] = [];
   props: Prop[] = [];
-  references: IReference[] = [];
+  references: Reference[] = [];
 
   isTemplate?: boolean;
   usedTemplate?: string;
@@ -39,7 +40,7 @@ export default class Entity implements IEntity, IDbModel {
 
   constructor(data: Partial<IEntity>) {
     fillFlatObject(this, { ...data, data: undefined });
-    fillArray(this.references, Object, data.references);
+    fillArray<Reference>(this.references, Reference, data.references);
     fillArray<Prop>(this.props, Prop, data.props);
 
     if (data.notes !== undefined) {
@@ -307,5 +308,15 @@ export default class Entity implements IEntity, IDbModel {
       .run(db);
 
     return data;
+  }
+
+  /**
+   * Resets IDs of nested objects
+   */
+  resetIds() {
+    // make sure the id will be created anew
+    this.id = "";
+    this.props.forEach((p) => p.resetIds());
+    this.references.forEach((p) => p.resetIds());
   }
 }

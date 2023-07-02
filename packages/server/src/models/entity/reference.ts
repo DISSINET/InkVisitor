@@ -1,4 +1,5 @@
 import { IReference } from "@shared/types";
+import { randomUUID } from "crypto";
 
 export default class Reference implements IReference {
   id: string;
@@ -21,5 +22,12 @@ export default class Reference implements IReference {
     }
 
     return true;
+  }
+
+  /**
+   * Resets IDs of nested objects
+   */
+  resetIds() {
+    this.id = randomUUID();
   }
 }

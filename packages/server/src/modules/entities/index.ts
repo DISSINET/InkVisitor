@@ -10,6 +10,9 @@ import {
   IResponseGeneric,
   RequestSearch,
   EntityTooltip,
+  IProp,
+  IStatementActant,
+  IStatementAction,
 } from "@shared/types";
 import {
   EntityDoesNotExist,
@@ -27,9 +30,10 @@ import { ResponseTooltip } from "@models/entity/response-tooltip";
 import { IRequest } from "src/custom_typings/request";
 import Relation from "@models/relation/relation";
 import User from "@models/user/user";
-import { RelationEnums } from "@shared/enums";
+import { EntityEnums, RelationEnums } from "@shared/enums";
 import { Relation as RelationType } from "@shared/types";
 import { copyRelations } from "@models/relation/functions";
+import { randomUUID } from "crypto";
 
 export default Router()
   /**
@@ -237,7 +241,7 @@ export default Router()
         );
       }
 
-      // clone the entry without id - should be created anew
+      // clone the entry without id and with recreated ids - should be created anew
       const clone = getEntityClass({
         ...original,
         id: "",
@@ -250,6 +254,8 @@ export default Router()
       if (!clone.canBeCreatedByUser(request.getUserOrFail())) {
         throw new PermissionDeniedError("entity cannot be copied");
       }
+
+      clone.resetIds();
 
       await request.db.lock();
 

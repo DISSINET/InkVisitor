@@ -8,9 +8,12 @@ import Statement, {
 } from "@models/statement/statement";
 import { clean } from "@modules/common.test";
 import { findEntityById } from "@service/shorthands";
-import { IStatement } from "@shared/types";
+import { IEntity, IEvent, IStatement } from "@shared/types";
 import Prop from "@models/prop/prop";
 import { EntityEnums } from "@shared/enums";
+import { getEntityClass } from "@models/factory";
+import entities from "@modules/entities";
+import Reference from "./reference";
 
 export const prepareEntity = (
   classValue: EntityEnums.Class = EntityEnums.Class.Concept
@@ -286,5 +289,44 @@ describe("test Entity.findFromTemplate", function () {
       expect(foundCasts.length).toEqual(1);
       expect(foundCasts[0].id).toEqual(cast1Id);
     });
+  });
+});
+
+describe("test Entity.resetIds", function () {
+  test("exhausting Event", function () {
+    const defaulId = "test";
+    const entityData: IEvent = {
+      id: defaulId,
+      class: EntityEnums.Class.Event,
+      data: {
+        logicalType: EntityEnums.LogicalType.Definite,
+      },
+      status: EntityEnums.Status.Approved,
+      label: "",
+      detail: "",
+      language: EntityEnums.Language.Empty,
+      notes: [],
+      props: [
+        new Prop({ id: defaulId, children: [new Prop({ id: defaulId })] }),
+      ],
+      references: [new Reference({ id: defaulId, resource: "", value: "" })],
+    };
+
+    const instance = getEntityClass(entityData);
+
+    expect(instance.id).toEqual(defaulId);
+    expect(instance.props[0].id).toEqual(defaulId);
+    expect(instance.props[0].children[0].id).toEqual(defaulId);
+    expect(instance.references[0].id).toEqual(defaulId);
+
+    instance.resetIds();
+
+    expect(instance.id).toBeFalsy();
+    expect(instance.props[0].id).toBeTruthy();
+    expect(instance.props[0].id).not.toEqual(defaulId);
+    expect(instance.props[0].children[0].id).toBeTruthy();
+    expect(instance.props[0].children[0].id).not.toEqual(defaulId);
+    expect(instance.references[0].id).toBeTruthy();
+    expect(instance.references[0].id).not.toEqual(defaulId);
   });
 });
