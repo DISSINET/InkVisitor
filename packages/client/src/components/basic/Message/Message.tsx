@@ -6,10 +6,7 @@ import { StyledMessage } from "./MessateStyles";
 
 interface Message {
   warning: IWarning;
-  color: keyof ThemeColor;
 }
-export const Message: React.FC<Message> = ({ warning, color = "success" }) => {
-  return (
-    <StyledMessage $color={color}>{getWarningMessage(warning)}</StyledMessage>
-  );
+export const Message: React.FC<Message> = ({ warning }) => {
+  return <StyledMessage>{getWarningMessage(warning)}</StyledMessage>;
 };

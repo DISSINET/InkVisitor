@@ -79,6 +79,9 @@ const theme = {
     // seda
     entityV: "#BAB0AC",
 
+    warningMessage: "#FFE089",
+    warningText: "#ffbb00",
+
     elementType: {
       action: "#EB6B6B",
       actant: "#7E9BFF",
@@ -175,7 +178,7 @@ const theme = {
     sm: "0.5rem",
     default: "0.75rem",
     md: "1rem",
-    lg: "0.5rem",
+    lg: "1.5rem",
     full: "9999px",
   },
   borderStyle: {

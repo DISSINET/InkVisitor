@@ -13,6 +13,7 @@ import { IconFont } from "./basic/IconFont/IconFont";
 import { Input } from "./basic/Input/Input";
 import { LetterIcon } from "./basic/LetterIcon/LetterIcon";
 import { Loader } from "./basic/Loader/Loader";
+import { Message } from "./basic/Message/Message";
 import {
   Modal,
   ModalCard,
@@ -50,6 +51,7 @@ export {
   IconFont,
   Input,
   Loader,
+  Message,
   MultiInput,
   Panel,
   Tag,
