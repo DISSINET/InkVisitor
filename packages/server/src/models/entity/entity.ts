@@ -12,7 +12,7 @@ import emitter from "@models/events/emitter";
 import { EventTypes } from "@models/events/types";
 import Prop from "@models/prop/prop";
 import { findEntityById } from "@service/shorthands";
-import { IRequest } from "src/custom_typings/request";
+import { IRequest } from "../../custom_typings/request";
 import { sanitizeText } from "@common/functions";
 import Reference from "./reference";
 

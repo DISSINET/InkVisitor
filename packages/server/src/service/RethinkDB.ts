@@ -1,7 +1,7 @@
 import { Connection, r as rethink } from "rethinkdb-ts";
 import { Response } from "express";
 import { Mutex, Awaiter } from "./mutex";
-import { IRequest } from "src/custom_typings/request";
+import { IRequest } from "../custom_typings/request";
 
 export const rethinkConfig = {
   db: process.env.DB_NAME,
