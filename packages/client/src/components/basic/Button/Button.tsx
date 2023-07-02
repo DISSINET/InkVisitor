@@ -1,12 +1,12 @@
 import { EntityEnums } from "@shared/enums";
+import { ThemeColor } from "Theme/theme";
 import { Tooltip } from "components";
 import React, {
+  KeyboardEvent,
   MouseEventHandler,
   ReactElement,
   useState,
-  KeyboardEvent,
 } from "react";
-import { Colors } from "types";
 import { StyledButton, StyledButtonLabel } from "./ButtonStyles";
 
 interface ButtonProps {
@@ -22,7 +22,7 @@ interface ButtonProps {
   radiusLeft?: boolean;
   radiusRight?: boolean;
   disabled?: boolean;
-  color?: typeof Colors[number];
+  color?: keyof ThemeColor;
   onClick?: MouseEventHandler<HTMLElement>;
   fullWidth?: boolean;
 }
@@ -56,7 +56,7 @@ export const Button: React.FC<ButtonProps> = ({
         ref={setReferenceElement}
         onClick={onClick}
         hasIcon={icon && true}
-        color={color}
+        $color={color}
         inverted={inverted}
         textRegular={textRegular}
         noBorder={noBorder}

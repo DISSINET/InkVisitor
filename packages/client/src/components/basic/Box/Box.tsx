@@ -1,9 +1,8 @@
-import { ButtonGroup } from "components";
-import React, { ReactNode, useState } from "react";
 import { animated, useSpring } from "@react-spring/web";
 import { springConfig } from "Theme/constants";
-import theme from "Theme/theme";
-import { Colors } from "types";
+import theme, { ThemeColor } from "Theme/theme";
+import { ButtonGroup } from "components";
+import React, { ReactNode, useState } from "react";
 import {
   StyledBox,
   StyledButtonWrap,
@@ -13,10 +12,10 @@ import {
   StyledVerticalText,
 } from "./BoxStyles";
 
-interface BoxProps {
+interface Box {
   label?: string;
-  color?: (typeof Colors)[number];
-  borderColor?: (typeof Colors)[number];
+  color?: keyof ThemeColor;
+  borderColor?: keyof ThemeColor;
   height?: number;
   noPadding?: boolean;
   isExpanded?: boolean;
@@ -24,10 +23,10 @@ interface BoxProps {
   children?: ReactNode;
 }
 
-export const Box: React.FC<BoxProps> = ({
+export const Box: React.FC<Box> = ({
   label = "",
-  color = "",
-  borderColor = "",
+  color,
+  borderColor,
   height = 0,
   noPadding = false,
   isExpanded = true,
@@ -61,7 +60,7 @@ export const Box: React.FC<BoxProps> = ({
       <StyledHead
         $borderColor={borderColor}
         $isExpanded={isExpanded}
-        color={color}
+        $color={color}
         $noPadding={noPadding}
       >
         {!hideContent && (
@@ -79,7 +78,7 @@ export const Box: React.FC<BoxProps> = ({
       </StyledHead>
       <StyledContent
         id={`box-content-${label.toLowerCase()}`}
-        color={color}
+        $color={color}
         $borderColor={borderColor}
         $noPadding={noPadding}
         $isExpanded={isExpanded}

@@ -147,7 +147,7 @@ export const Tag: React.FC<TagProps> = ({
 
   const renderEntityTag = () => (
     <StyledEntityTag
-      color={
+      $color={
         entityClass !== EntityEnums.Extension.Invalid
           ? EntityColors[entityClass].color
           : "white"
