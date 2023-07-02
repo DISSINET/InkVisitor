@@ -1,6 +1,5 @@
 import { getWarningMessage } from "@shared/enums/warning";
 import { IWarning } from "@shared/types";
-import { ThemeColor } from "Theme/theme";
 import React from "react";
 import { StyledMessage } from "./MessateStyles";
 

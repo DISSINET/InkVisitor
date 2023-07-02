@@ -1,3 +1,4 @@
+import { IWarning, IWarningPosition } from "./warning";
 import { IAudit } from "./audit";
 import { ILabel } from "./label";
 import { IReference } from "./reference";
@@ -45,8 +46,6 @@ import {
   IResponseStatement,
   OrderType,
   PropOrder,
-  IWarning,
-  IWarningPosition,
 } from "./response-statement";
 import { IResponseTerritory } from "./response-territory";
 import {
@@ -65,7 +64,9 @@ import {
   IUserRight,
 } from "./user";
 import {
-  IDocument, IResponseDocument, IResponseDocumentDetail
+  IDocument,
+  IResponseDocument,
+  IResponseDocumentDetail,
 } from "./document";
 
 export type {
