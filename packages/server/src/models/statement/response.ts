@@ -81,7 +81,6 @@ export class ResponseStatement extends Statement implements IResponseStatement {
   ): IWarning {
     return {
       type: warningType,
-      message: "",
       origin: this.id,
       position,
     };

@@ -53,7 +53,6 @@ export interface IResponseStatement extends IStatement {
 
 export interface IWarning {
   type: WarningTypeEnums;
-  message: string;
   position?: IWarningPosition;
   origin: string;
 }

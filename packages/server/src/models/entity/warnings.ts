@@ -24,7 +24,6 @@ export default class EntityWarnings {
   newWarning(warningType: WarningTypeEnums, relId?: string): IWarning {
     return {
       type: warningType,
-      message: "",
       origin: relId || "",
     };
   }
