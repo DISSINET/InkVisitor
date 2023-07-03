@@ -1,6 +1,7 @@
 import { EntityEnums } from "../enums";
 
 export const conceptPartOfSpeechDict = [
+  { value: EntityEnums.ConceptPartOfSpeech.Empty, label: "", infos: "" },
   { value: EntityEnums.ConceptPartOfSpeech.Noun, label: "noun", infos: "" },
   { value: EntityEnums.ConceptPartOfSpeech.Adj, label: "adjective", infos: "" },
   { value: EntityEnums.ConceptPartOfSpeech.Pron, label: "pronoun", infos: "" },
