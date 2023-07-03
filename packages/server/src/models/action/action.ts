@@ -15,6 +15,7 @@ class ActionData implements IActionData, IModel {
     a2: [],
     s: [],
   };
+  pos: EntityEnums.ActionPartOfSpeech = EntityEnums.ActionPartOfSpeech.Verb;
   status: EntityEnums.Status = EntityEnums.Status.Pending;
 
   constructor(data: Partial<IActionData>) {

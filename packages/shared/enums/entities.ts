@@ -6,13 +6,13 @@ export enum TerritoryType {
 export namespace EntityEnums {
   // Helper function for testing if the class is part of PLOGESTRB group
   export const IsPLOGESTRB = (entityClass: Class): boolean => {
-    return PLOGESTRB.indexOf(entityClass) !== -1
-  }
+    return PLOGESTRB.indexOf(entityClass) !== -1;
+  };
 
   // Helper function for testing if the class is part of PLOGESTR group
   export const IsPLOGESTR = (entityClass: Class): boolean => {
-    return PLOGESTR.indexOf(entityClass) !== -1
-  }
+    return PLOGESTR.indexOf(entityClass) !== -1;
+  };
 
   export enum Class {
     Action = "A",
@@ -189,5 +189,23 @@ export namespace EntityEnums {
   export enum Order {
     First = -9999,
     Last = 9999,
+  }
+
+  export enum ConceptPartOfSpeech {
+    Empty = "",
+    Noun = "noun",
+    Adj = "adj",
+    Pron = "pron",
+    Adv = "adv",
+    Num = "num",
+    Adp = "adp",
+    CConj = "cconj",
+    SConj = "sconj",
+    Det = "det",
+    Intj = "intj",
+    Part = "part",
+  }
+  export enum ActionPartOfSpeech {
+    Verb = "verb",
   }
 }
