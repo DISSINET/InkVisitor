@@ -1,7 +1,8 @@
+import { WarningTypeEnums } from "@shared/enums";
 import { IWarning } from "@shared/types";
 import React from "react";
+import { TiWarningOutline } from "react-icons/ti";
 import { StyledMessage } from "./MessateStyles";
-import { WarningTypeEnums } from "@shared/enums";
 
 interface Message {
   warning: IWarning;
@@ -17,49 +18,55 @@ export const Message: React.FC<Message> = ({ warning }) => {
   function getWarningMessage({ type, position }: IWarning): JSX.Element {
     switch (type) {
       case WarningTypeEnums.SValency:
-        return <>Subject Valency</>;
+        return <b>Subject Valency</b>;
       case WarningTypeEnums.A1Valency:
-        return <>Actant1 Valency</>;
+        return <b>Actant1 Valency</b>;
       case WarningTypeEnums.A2Valency:
-        return <>Actant2 Valency</>;
+        return <b>Actant2 Valency</b>;
       case WarningTypeEnums.NoTerritory:
-        return <>No Territory</>;
+        return <b>No Territory</b>;
       case WarningTypeEnums.NA:
-        return <>No Action defined</>;
+        return <b>No Action defined</b>;
       case WarningTypeEnums.MA:
         return (
-          <>
-            <b>
+          <span>
+            <b style={{ whiteSpace: "nowrap" }}>
               Missing{" "}
               {position?.section ? positionObject[position?.section] : "actant"}
+              :{" "}
             </b>
-            {": at least one actant of a matching type should be used"}
-          </>
+            {"at least one actant of a matching type should be used"}
+          </span>
         );
       case WarningTypeEnums.WA:
-        return <>Actant’s entity type does not match the Action</>;
+        return <b>Actant's entity type does not match the Action</b>;
       case WarningTypeEnums.ANA:
-        return <>This actant position allows no actant</>;
+        return <b>This actant position allows no actant</b>;
       case WarningTypeEnums.WAC:
-        return <>Entity type valencies of the actions not matching</>;
+        return <b>Entity type valencies of the actions not matching</b>;
       case WarningTypeEnums.AVU:
-        return <>Action valency not defined</>;
+        return <b>Action valency not defined</b>;
       case WarningTypeEnums.IELVL:
-        return <>Inconsistent Epistemic levels for the Property</>;
+        return <b>Inconsistent Epistemic levels for the Property</b>;
       case WarningTypeEnums.SCLM:
-        return <>Superclass missing</>;
+        return <b>Superclass missing</b>;
       case WarningTypeEnums.ISYNC:
-        return <>Inconsistent superclasses in the synonym cloud</>;
+        return <b>Inconsistent superclasses in the synonym cloud</b>;
       case WarningTypeEnums.MVAL:
-        return <>Missing at least one entity-type valency</>;
+        return <b>Missing at least one entity-type valency</b>;
       case WarningTypeEnums.AVAL:
-        return <>Asymmetrical valency</>;
+        return <b>Asymmetrical valency</b>;
       case WarningTypeEnums.MAEE:
-        return <>Missing action/event equivalent</>;
+        return <b>Missing action/event equivalent</b>;
       default:
         return <></>;
     }
   }
 
-  return <StyledMessage>{getWarningMessage(warning)}</StyledMessage>;
+  return (
+    <StyledMessage>
+      <TiWarningOutline size={20} style={{ marginRight: "0.5rem" }} />
+      {getWarningMessage(warning)}
+    </StyledMessage>
+  );
 };

@@ -2,6 +2,8 @@ import styled from "styled-components";
 
 interface StyledMessage {}
 export const StyledMessage = styled.div<StyledMessage>`
+  display: flex;
+  align-items: center;
   color: ${({ theme }) => theme.color["danger"]};
   background-color: ${({ theme }) => theme.color["warningMessage"]};
   padding: ${({ theme }) => theme.space[3]};
