@@ -515,7 +515,8 @@
         "s": ["empty"],
         "a1": [],
         "a2": []
-      }
+      },
+      "pos": "verb"
     }
   },
   {
@@ -539,7 +540,8 @@
         "s": [],
         "a1": [],
         "a2": []
-      }
+      },
+      "pos": "verb"
     }
   },
   {
@@ -563,7 +565,8 @@
         "s": [],
         "a1": [],
         "a2": []
-      }
+      },
+      "pos": "verb"
     }
   },
   {
@@ -587,7 +590,8 @@
         "s": [],
         "a1": [],
         "a2": []
-      }
+      },
+      "pos": "verb"
     }
   },
   {
@@ -611,7 +615,8 @@
         "s": [],
         "a1": [],
         "a2": []
-      }
+      },
+      "pos": "verb"
     }
   },
   {
@@ -635,7 +640,8 @@
         "s": [],
         "a1": [],
         "a2": []
-      }
+      },
+      "pos": "verb"
     }
   },
   {
@@ -659,7 +665,8 @@
         "s": [],
         "a1": [],
         "a2": []
-      }
+      },
+      "pos": "verb"
     }
   },
   {
@@ -683,7 +690,8 @@
         "s": [],
         "a1": [],
         "a2": []
-      }
+      },
+      "pos": "verb"
     }
   },
   {
@@ -707,7 +715,8 @@
         "s": [],
         "a1": [],
         "a2": []
-      }
+      },
+      "pos": "verb"
     }
   },
   {
@@ -731,7 +740,8 @@
         "s": [],
         "a1": [],
         "a2": []
-      }
+      },
+      "pos": "verb"
     }
   },
   {
@@ -755,7 +765,8 @@
         "s": [],
         "a1": [],
         "a2": []
-      }
+      },
+      "pos": "verb"
     }
   },
   {
@@ -779,7 +790,8 @@
         "s": [],
         "a1": [],
         "a2": []
-      }
+      },
+      "pos": "verb"
     }
   },
   {
@@ -803,7 +815,8 @@
         "s": [],
         "a1": [],
         "a2": []
-      }
+      },
+      "pos": "verb"
     }
   },
   {
@@ -827,7 +840,8 @@
         "s": [],
         "a1": [],
         "a2": []
-      }
+      },
+      "pos": "verb"
     }
   },
   {
@@ -851,7 +865,8 @@
         "s": [],
         "a1": [],
         "a2": []
-      }
+      },
+      "pos": "verb"
     }
   },
   {
@@ -875,7 +890,8 @@
         "s": [],
         "a1": [],
         "a2": []
-      }
+      },
+      "pos": "verb"
     }
   },
   {
@@ -899,7 +915,8 @@
         "s": [],
         "a1": [],
         "a2": []
-      }
+      },
+      "pos": "verb"
     }
   },
   {
@@ -923,7 +940,8 @@
         "s": [],
         "a1": [],
         "a2": []
-      }
+      },
+      "pos": "verb"
     }
   },
 
@@ -1352,7 +1370,9 @@
     "notes": [],
     "props": [],
     "references": [],
-    "data": {}
+    "data": {
+      "pos": "noun"
+    }
   },
   {
     "id": "c2",
@@ -1365,7 +1385,9 @@
     "notes": [],
     "props": [],
     "references": [],
-    "data": {}
+    "data": {
+      "pos": "noun"
+    }
   },
   {
     "id": "c3",
@@ -1378,7 +1400,9 @@
     "notes": [],
     "props": [],
     "references": [],
-    "data": {}
+    "data": {
+      "pos": "noun"
+    }
   },
 
   {
@@ -1392,7 +1416,9 @@
     "notes": [],
     "props": [],
     "references": [],
-    "data": {}
+    "data": {
+      "pos": "noun"
+    }
   },
   {
     "id": "c4",
@@ -1405,7 +1431,9 @@
     "notes": [],
     "props": [],
     "references": [],
-    "data": {}
+    "data": {
+      "pos": "noun"
+    }
   },
   {
     "id": "c401",
@@ -1418,7 +1446,9 @@
     "notes": [],
     "props": [],
     "references": [],
-    "data": {}
+    "data": {
+      "pos": "noun"
+    }
   },
   {
     "id": "c402",
@@ -1431,7 +1461,9 @@
     "notes": [],
     "props": [],
     "references": [],
-    "data": {}
+    "data": {
+      "pos": "noun"
+    }
   },
   {
     "id": "c403",
@@ -1444,7 +1476,9 @@
     "notes": [],
     "props": [],
     "references": [],
-    "data": {}
+    "data": {
+      "pos": "noun"
+    }
   },
   {
     "id": "c404",
@@ -1457,7 +1491,9 @@
     "notes": [],
     "props": [],
     "references": [],
-    "data": {}
+    "data": {
+      "pos": "noun"
+    }
   },
   {
     "id": "c5",
@@ -1470,7 +1506,9 @@
     "notes": [],
     "props": [],
     "references": [],
-    "data": {}
+    "data": {
+      "pos": "noun"
+    }
   },
   {
     "id": "c501",
@@ -1483,7 +1521,9 @@
     "notes": [],
     "props": [],
     "references": [],
-    "data": {}
+    "data": {
+      "pos": "noun"
+    }
   },
   {
     "id": "c502",
@@ -1496,7 +1536,9 @@
     "notes": [],
     "props": [],
     "references": [],
-    "data": {}
+    "data": {
+      "pos": "noun"
+    }
   },
   {
     "id": "c503",
@@ -1509,7 +1551,9 @@
     "notes": [],
     "props": [],
     "references": [],
-    "data": {}
+    "data": {
+      "pos": "noun"
+    }
   },
   {
     "id": "c504",
@@ -1522,7 +1566,9 @@
     "notes": [],
     "props": [],
     "references": [],
-    "data": {}
+    "data": {
+      "pos": "noun"
+    }
   },
   {
     "id": "c6",
@@ -1535,7 +1581,9 @@
     "notes": [],
     "props": [],
     "references": [],
-    "data": {}
+    "data": {
+      "pos": "noun"
+    }
   },
   {
     "id": "c211",
@@ -1548,7 +1596,9 @@
     "notes": [],
     "props": [],
     "references": [],
-    "data": {}
+    "data": {
+      "pos": "noun"
+    }
   },
   {
     "id": "c211a",
@@ -1561,7 +1611,9 @@
     "notes": [],
     "props": [],
     "references": [],
-    "data": {}
+    "data": {
+      "pos": "noun"
+    }
   },
   {
     "id": "c211b",
@@ -1574,7 +1626,9 @@
     "notes": [],
     "props": [],
     "references": [],
-    "data": {}
+    "data": {
+      "pos": "noun"
+    }
   },
   {
     "id": "c211c",
@@ -1587,7 +1641,9 @@
     "notes": [],
     "props": [],
     "references": [],
-    "data": {}
+    "data": {
+      "pos": "noun"
+    }
   },
   {
     "id": "c212",
@@ -1600,7 +1656,9 @@
     "notes": [],
     "props": [],
     "references": [],
-    "data": {}
+    "data": {
+      "pos": "noun"
+    }
   },
   {
     "id": "c213",
@@ -1613,7 +1671,9 @@
     "notes": [],
     "props": [],
     "references": [],
-    "data": {}
+    "data": {
+      "pos": "noun"
+    }
   },
   {
     "id": "c214",
@@ -1625,7 +1685,9 @@
     "notes": [],
     "props": [],
     "references": [],
-    "data": {}
+    "data": {
+      "pos": "noun"
+    }
   },
   {
     "id": "c215",
@@ -1638,7 +1700,9 @@
     "notes": [],
     "props": [],
     "references": [],
-    "data": {}
+    "data": {
+      "pos": "noun"
+    }
   },
   {
     "id": "c22",
@@ -1651,7 +1715,9 @@
     "notes": [],
     "props": [],
     "references": [],
-    "data": {}
+    "data": {
+      "pos": "noun"
+    }
   },
   {
     "id": "c23",
@@ -1664,7 +1730,9 @@
     "notes": [],
     "props": [],
     "references": [],
-    "data": {}
+    "data": {
+      "pos": "noun"
+    }
   },
   {
     "id": "c24",
@@ -1677,7 +1745,9 @@
     "notes": [],
     "props": [],
     "references": [],
-    "data": {}
+    "data": {
+      "pos": "noun"
+    }
   },
   {
     "id": "c31",
@@ -1690,7 +1760,9 @@
     "notes": [],
     "props": [],
     "references": [],
-    "data": {}
+    "data": {
+      "pos": "noun"
+    }
   },
   {
     "id": "c32",
@@ -1703,7 +1775,9 @@
     "notes": [],
     "props": [],
     "references": [],
-    "data": {}
+    "data": {
+      "pos": "noun"
+    }
   },
   {
     "id": "c33",
@@ -1716,7 +1790,9 @@
     "notes": [],
     "props": [],
     "references": [],
-    "data": {}
+    "data": {
+      "pos": "noun"
+    }
   },
   {
     "id": "c41",
@@ -1729,7 +1805,9 @@
     "notes": [],
     "props": [],
     "references": [],
-    "data": {}
+    "data": {
+      "pos": "noun"
+    }
   },
   {
     "id": "c42",
@@ -1742,7 +1820,9 @@
     "notes": [],
     "props": [],
     "references": [],
-    "data": {}
+    "data": {
+      "pos": "noun"
+    }
   },
 
   {
@@ -1756,7 +1836,9 @@
     "notes": [],
     "props": [],
     "references": [],
-    "data": {}
+    "data": {
+      "pos": "noun"
+    }
   },
   {
     "id": "c45",
@@ -1769,7 +1851,9 @@
     "notes": [],
     "props": [],
     "references": [],
-    "data": {}
+    "data": {
+      "pos": "noun"
+    }
   },
   {
     "id": "c46",
@@ -1782,7 +1866,9 @@
     "notes": [],
     "props": [],
     "references": [],
-    "data": {}
+    "data": {
+      "pos": "noun"
+    }
   },
   {
     "id": "c51",
@@ -1795,7 +1881,9 @@
     "notes": [],
     "props": [],
     "references": [],
-    "data": {}
+    "data": {
+      "pos": "noun"
+    }
   },
   {
     "id": "c52",
@@ -1808,7 +1896,9 @@
     "notes": [],
     "props": [],
     "references": [],
-    "data": {}
+    "data": {
+      "pos": "noun"
+    }
   },
   {
     "id": "c521",
@@ -1821,7 +1911,9 @@
     "notes": [],
     "props": [],
     "references": [],
-    "data": {}
+    "data": {
+      "pos": "noun"
+    }
   },
   {
     "id": "c522",
@@ -1834,7 +1926,9 @@
     "notes": [],
     "props": [],
     "references": [],
-    "data": {}
+    "data": {
+      "pos": "noun"
+    }
   },
   {
     "id": "c523",
@@ -1847,7 +1941,9 @@
     "notes": [],
     "props": [],
     "references": [],
-    "data": {}
+    "data": {
+      "pos": "noun"
+    }
   },
   {
     "id": "c524",
@@ -1860,7 +1956,9 @@
     "notes": [],
     "props": [],
     "references": [],
-    "data": {}
+    "data": {
+      "pos": "noun"
+    }
   },
   {
     "id": "c53",
@@ -1873,7 +1971,9 @@
     "notes": [],
     "props": [],
     "references": [],
-    "data": {}
+    "data": {
+      "pos": "noun"
+    }
   },
   {
     "id": "c54",
@@ -1886,7 +1986,9 @@
     "notes": [],
     "props": [],
     "references": [],
-    "data": {}
+    "data": {
+      "pos": "noun"
+    }
   },
   {
     "id": "c55",
@@ -1899,7 +2001,9 @@
     "notes": [],
     "props": [],
     "references": [],
-    "data": {}
+    "data": {
+      "pos": "noun"
+    }
   },
   {
     "id": "c56",
@@ -1912,7 +2016,9 @@
     "notes": [],
     "props": [],
     "references": [],
-    "data": {}
+    "data": {
+      "pos": "noun"
+    }
   },
   {
     "id": "c57",
@@ -1925,7 +2031,9 @@
     "notes": [],
     "props": [],
     "references": [],
-    "data": {}
+    "data": {
+      "pos": "noun"
+    }
   },
   {
     "id": "c60",
@@ -1938,7 +2046,9 @@
     "notes": [],
     "props": [],
     "references": [],
-    "data": {}
+    "data": {
+      "pos": "noun"
+    }
   },
   {
     "id": "c61",
@@ -1951,7 +2061,9 @@
     "notes": [],
     "props": [],
     "references": [],
-    "data": {}
+    "data": {
+      "pos": "noun"
+    }
   },
   {
     "id": "c70",
@@ -1964,7 +2076,9 @@
     "notes": [],
     "props": [],
     "references": [],
-    "data": {}
+    "data": {
+      "pos": "noun"
+    }
   },
   {
     "id": "c71",
@@ -1977,7 +2091,9 @@
     "notes": [],
     "props": [],
     "references": [],
-    "data": {}
+    "data": {
+      "pos": "noun"
+    }
   },
   {
     "id": "c80",
@@ -1990,7 +2106,9 @@
     "notes": [],
     "props": [],
     "references": [],
-    "data": {}
+    "data": {
+      "pos": "noun"
+    }
   },
 
   {
@@ -2004,7 +2122,9 @@
     "notes": [],
     "props": [],
     "references": [],
-    "data": {}
+    "data": {
+      "pos": "noun"
+    }
   },
   {
     "id": "c902",
@@ -2017,7 +2137,9 @@
     "notes": [],
     "props": [],
     "references": [],
-    "data": {}
+    "data": {
+      "pos": "noun"
+    }
   },
   {
     "id": "c903",
@@ -2030,7 +2152,9 @@
     "notes": [],
     "props": [],
     "references": [],
-    "data": {}
+    "data": {
+      "pos": "noun"
+    }
   },
   {
     "id": "c904",
@@ -2043,7 +2167,9 @@
     "notes": [],
     "props": [],
     "references": [],
-    "data": {}
+    "data": {
+      "pos": "noun"
+    }
   },
   {
     "id": "c905",
@@ -2056,7 +2182,9 @@
     "notes": [],
     "props": [],
     "references": [],
-    "data": {}
+    "data": {
+      "pos": "noun"
+    }
   },
   {
     "id": "c906",
@@ -2069,7 +2197,9 @@
     "notes": [],
     "props": [],
     "references": [],
-    "data": {}
+    "data": {
+      "pos": "noun"
+    }
   },
   {
     "id": "c907",
@@ -2082,7 +2212,9 @@
     "notes": [],
     "props": [],
     "references": [],
-    "data": {}
+    "data": {
+      "pos": "noun"
+    }
   },
   {
     "id": "c908",
@@ -2095,7 +2227,9 @@
     "notes": [],
     "props": [],
     "references": [],
-    "data": {}
+    "data": {
+      "pos": "noun"
+    }
   },
   {
     "id": "c1000",
@@ -2108,7 +2242,9 @@
     "notes": [],
     "props": [],
     "references": [],
-    "data": {}
+    "data": {
+      "pos": "noun"
+    }
   },
   {
     "id": "c1001",
@@ -2121,7 +2257,9 @@
     "notes": [],
     "props": [],
     "references": [],
-    "data": {}
+    "data": {
+      "pos": "noun"
+    }
   },
   {
     "id": "c1002",
@@ -2134,7 +2272,9 @@
     "notes": [],
     "props": [],
     "references": [],
-    "data": {}
+    "data": {
+      "pos": "noun"
+    }
   },
   {
     "id": "c1003",
@@ -2147,7 +2287,9 @@
     "notes": [],
     "props": [],
     "references": [],
-    "data": {}
+    "data": {
+      "pos": "noun"
+    }
   },
   {
     "id": "c1101",
@@ -2160,7 +2302,9 @@
     "notes": [],
     "props": [],
     "references": [],
-    "data": {}
+    "data": {
+      "pos": "noun"
+    }
   },
   {
     "id": "c1102",
@@ -2173,7 +2317,9 @@
     "notes": [],
     "props": [],
     "references": [],
-    "data": {}
+    "data": {
+      "pos": "noun"
+    }
   },
   {
     "id": "c1103",
@@ -2186,7 +2332,9 @@
     "notes": [],
     "props": [],
     "references": [],
-    "data": {}
+    "data": {
+      "pos": "noun"
+    }
   },
   {
     "id": "c1104",
@@ -2199,7 +2347,9 @@
     "notes": [],
     "props": [],
     "references": [],
-    "data": {}
+    "data": {
+      "pos": "noun"
+    }
   },
   {
     "id": "c1105",
@@ -2212,7 +2362,9 @@
     "notes": [],
     "props": [],
     "references": [],
-    "data": {}
+    "data": {
+      "pos": "noun"
+    }
   },
   {
     "id": "c1106",
@@ -2225,7 +2377,9 @@
     "notes": [],
     "props": [],
     "references": [],
-    "data": {}
+    "data": {
+      "pos": "noun"
+    }
   },
   {
     "id": "c1107",
@@ -2238,6 +2392,8 @@
     "notes": [],
     "props": [],
     "references": [],
-    "data": {}
+    "data": {
+      "pos": "noun"
+    }
   }
 ]
