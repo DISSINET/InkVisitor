@@ -2,10 +2,12 @@ import { UnknownObject, IModel } from "@models/common";
 import { EntityEnums } from "@shared/enums";
 import Entity from "@models/entity/entity";
 import { IConcept } from "@shared/types";
+import { IConceptData } from "@shared/types/concept";
 
-class ConceptData implements IModel {
-  constructor(data: UnknownObject) {
-  }
+class ConceptData implements IConceptData, IModel {
+  pos: EntityEnums.ConceptPartOfSpeech = EntityEnums.ConceptPartOfSpeech.Noun;
+
+  constructor(data: UnknownObject) {}
 
   isValid(): boolean {
     return true;
