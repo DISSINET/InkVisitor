@@ -175,7 +175,7 @@ const datasets: Record<string, DbSchema> = {
           // fix missing entity pos
           if (entity.class === EntityEnums.Class.Concept) {
             if (!entity.data.pos) {
-              entity.data.pos = EntityEnums.ConceptPartOfSpeech.Noun;
+              entity.data.pos = EntityEnums.ConceptPartOfSpeech.Empty;
             }
           }
           if (entity.class === EntityEnums.Class.Action) {

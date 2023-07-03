@@ -5,7 +5,7 @@ import { IConcept } from "@shared/types";
 import { IConceptData } from "@shared/types/concept";
 
 class ConceptData implements IConceptData, IModel {
-  pos: EntityEnums.ConceptPartOfSpeech = EntityEnums.ConceptPartOfSpeech.Noun;
+  pos: EntityEnums.ConceptPartOfSpeech = EntityEnums.ConceptPartOfSpeech.Empty;
 
   constructor(data: UnknownObject) {}
 

@@ -192,6 +192,7 @@ export namespace EntityEnums {
   }
 
   export enum ConceptPartOfSpeech {
+    Empty = "",
     Noun = "noun",
     Adj = "adj",
     Pron = "pron",
