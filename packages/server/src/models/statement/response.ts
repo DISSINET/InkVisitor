@@ -6,11 +6,8 @@ import {
   IResponseStatement,
   IStatement,
 } from "@shared/types";
-import {
-  IWarning,
-  IWarningPosition,
-  OrderType,
-} from "@shared/types/response-statement";
+import { OrderType } from "@shared/types/response-statement";
+import { IWarning, IWarningPosition } from "@shared/types/warning";
 
 import { WarningTypeEnums } from "@shared/enums";
 import { Connection } from "rethinkdb-ts";
@@ -129,7 +126,7 @@ export class ResponseStatement extends Statement implements IResponseStatement {
         if (entity && !allowedClasses.includes(entity.class)) {
           warnings.push(
             this.newStatementWarning(warningType, {
-              section: `editor.${position}`,
+              section: `${position}`,
               entityId: a.entityId,
               actantId: a.id,
             })
@@ -158,7 +155,7 @@ export class ResponseStatement extends Statement implements IResponseStatement {
     if (rules.undefined) {
       warnings.push(
         this.newStatementWarning(WarningTypeEnums.AVU, {
-          section: `editor.${position}`,
+          section: `${position}`,
         })
       );
     }
@@ -166,7 +163,7 @@ export class ResponseStatement extends Statement implements IResponseStatement {
     if (!actants.length && !rules.allEmpty) {
       warnings.push(
         this.newStatementWarning(WarningTypeEnums.MA, {
-          section: `editor.${position}`,
+          section: `${position}`,
         })
       );
     }
@@ -178,7 +175,7 @@ export class ResponseStatement extends Statement implements IResponseStatement {
       }
       warnings.push(
         this.newStatementWarning(WarningTypeEnums.WAC, {
-          section: `editor.${position}`,
+          section: `${position}`,
         })
       );
       return warnings;
@@ -198,7 +195,7 @@ export class ResponseStatement extends Statement implements IResponseStatement {
         } else if (PositionRules.isRuleEmpty(actionRules)) {
           warnings.push(
             this.newStatementWarning(WarningTypeEnums.ANA, {
-              section: `editor.${position}`,
+              section: `${position}`,
               actantId: stActant.id,
               entityId: stActant.entityId,
             })
@@ -206,7 +203,7 @@ export class ResponseStatement extends Statement implements IResponseStatement {
         } else if (!actionRules.includes(actant.class)) {
           warnings.push(
             this.newStatementWarning(WarningTypeEnums.WA, {
-              section: `editor.${position}`,
+              section: `${position}`,
               actantId: stActant.id,
               entityId: stActant.entityId,
             })
