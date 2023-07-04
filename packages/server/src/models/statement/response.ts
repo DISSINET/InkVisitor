@@ -15,7 +15,7 @@ import { IRequest } from "src/custom_typings/request";
 import Statement from "./statement";
 import Entity from "../entity/entity";
 import { InternalServerError } from "@shared/types/errors";
-import Action, { ActionEntity } from "@models/action/action";
+import { ActionEntity } from "@models/action/action";
 import { PositionRules } from "./PositionRules";
 
 export class ResponseStatement extends Statement implements IResponseStatement {

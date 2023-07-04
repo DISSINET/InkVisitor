@@ -3,7 +3,7 @@
  */
 
 import { IEntity, IStatement, IWarning } from ".";
-import { StatementEnums, UserEnums } from "../enums";
+import { StatementEnums, UserEnums, WarningTypeEnums } from "../enums";
 
 export interface EntityOrder {
   type: StatementEnums.ElementType.Actant | StatementEnums.ElementType.Action;
