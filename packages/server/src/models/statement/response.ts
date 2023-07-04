@@ -112,6 +112,7 @@ export class ResponseStatement extends Statement implements IResponseStatement {
     let allowedClasses: EntityEnums.ExtendedClass[] = [];
 
     this.data.actions
+      .filter((a) => !!a.actionId)
       .map((a) => a.actionId)
       .forEach((aid) => {
         const actionEntities = (this.getEntity(aid) as IAction).data
@@ -121,6 +122,7 @@ export class ResponseStatement extends Statement implements IResponseStatement {
 
     this.data.actants
       .filter((a) => a.position === position)
+      .filter((a) => !!a.entityId)
       .forEach((a) => {
         const entity = this.entities[a.entityId];
         if (entity && !allowedClasses.includes(entity.class)) {
@@ -144,8 +146,12 @@ export class ResponseStatement extends Statement implements IResponseStatement {
    */
   getWarningsForPosition(position: EntityEnums.Position): IWarning[] {
     const warnings: IWarning[] = [];
-    const actions = this.data.actions;
-    const actants = this.data.actants.filter((a) => a.position === position);
+
+    // actantId / entityId could be empty, ignore them
+    const actions = this.data.actions.filter((a) => !!a.actionId);
+    const actants = this.data.actants
+      .filter((a) => !!a.entityId)
+      .filter((a) => a.position === position);
 
     const rules = new PositionRules(
       actions.map<IAction>((a) => this.getEntity(a.actionId) as IAction),
