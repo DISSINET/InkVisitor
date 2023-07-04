@@ -1,4 +1,4 @@
-import { UnknownObject, IModel, fillFlatObject } from "@models/common";
+import { IModel } from "@models/common";
 import { EntityEnums } from "@shared/enums";
 import Entity from "@models/entity/entity";
 import { IConcept } from "@shared/types";
@@ -8,7 +8,9 @@ class ConceptData implements IConceptData, IModel {
   pos: EntityEnums.ConceptPartOfSpeech = EntityEnums.ConceptPartOfSpeech.Empty;
 
   constructor(data: Partial<IConceptData>) {
-    fillFlatObject(this, data);
+    if (data.pos) {
+      this.pos = data.pos;
+    }
   }
 
   isValid(): boolean {

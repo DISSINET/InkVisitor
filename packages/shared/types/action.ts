@@ -9,7 +9,7 @@ export interface IAction extends IEntity {
 export interface IActionData {
   valencies: ActionValency;
   entities: ActionEntity;
-  pos: EntityEnums.ActionPartOfSpeech;
+  pos: EntityEnums.ActionPartOfSpeech.Verb;
 }
 
 export interface ActionValency {

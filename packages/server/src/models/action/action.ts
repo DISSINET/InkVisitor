@@ -1,4 +1,4 @@
-import { fillFlatObject, UnknownObject, IModel } from "@models/common";
+import { IModel } from "@models/common";
 import { EntityEnums } from "@shared/enums";
 import Entity from "@models/entity/entity";
 import { IAction } from "@shared/types";
@@ -19,13 +19,12 @@ class ActionData implements IActionData, IModel {
   status: EntityEnums.Status = EntityEnums.Status.Pending;
 
   constructor(data: Partial<IActionData>) {
-    if (!data) {
-      return;
+    if (data.valencies) {
+      this.valencies = data.valencies;
     }
 
-    fillFlatObject(this.valencies, data.valencies as any);
     if (data.entities) {
-      this.entities = data.entities as any;
+      this.entities = data.entities;
     }
   }
 
