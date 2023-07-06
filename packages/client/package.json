@@ -60,6 +60,7 @@
     "@redux-devtools/extension": "^3.2.5",
     "@tanstack/react-query-devtools": "^4.29.12",
     "@types/jest": "^29.5.2",
+    "@types/node": "^20.3.3",
     "@types/react": "^18.2.8",
     "@types/react-dom": "^18.2.4",
     "@types/react-helmet": "^6.1.6",
