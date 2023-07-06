@@ -482,13 +482,15 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
 
         <ModalFooter>
           <ButtonGroup>
-            {/* <Button
-              key="reset-password"
-              label="Reset password"
-              tooltipLabel={`Generate a new password and send it to ${user.email}`}
-              color="info"
-              onClick={() => handleResetPassword()}
-            /> */}
+            {role === UserEnums.Role.Admin && (
+              <Button
+                key="reset-password"
+                label="Reset password"
+                tooltipLabel={`Generate a new password and send it to ${user.email}`}
+                color="info"
+                onClick={() => handleResetPassword()}
+              />
+            )}
             <Button
               key="cancel"
               label="Cancel"
