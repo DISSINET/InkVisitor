@@ -268,5 +268,37 @@
     "roles": [
       "*"
     ]
+  },
+  {
+    "controller": "documents",
+    "route": "",
+    "method": "GET",
+    "roles": [
+      "*"
+    ]
+  },
+  {
+    "controller": "documents",
+    "route": "",
+    "method": "POST",
+    "roles": [
+      "*"
+    ]
+  },
+  {
+    "controller": "documents",
+    "route": "",
+    "method": "PUT",
+    "roles": [
+      "*"
+    ]
+  },
+  {
+    "controller": "documents",
+    "route": "",
+    "method": "DELETE",
+    "roles": [
+      "*"
+    ]
   }
 ]
