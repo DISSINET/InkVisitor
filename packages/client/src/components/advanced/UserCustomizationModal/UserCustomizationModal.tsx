@@ -117,7 +117,6 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
   };
 
   const handleResetPassword = async () => {
-    //TODO: remove after implementation
     const resetRes = await api.resetMyPassword();
     if (resetRes.status == 200) {
       toast.success(
@@ -197,8 +196,8 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
   );
 
   const [showPasswordChange, setShowPasswordChange] = useState(false);
-  const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
+  const [repeatPassword, setRepeatPassword] = useState("");
 
   return (
     <div>
@@ -261,16 +260,6 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                 </StyledRightsHeading>
 
                 <ModalInputForm>
-                  <ModalInputLabel>{"current password"}</ModalInputLabel>
-                  <ModalInputWrap width={165}>
-                    <Input
-                      password
-                      width="full"
-                      changeOnType
-                      value={currentPassword}
-                      onChangeFn={(value: string) => setCurrentPassword(value)}
-                    />
-                  </ModalInputWrap>
                   <ModalInputLabel>{"new password"}</ModalInputLabel>
                   <ModalInputWrap width={165}>
                     <Input
@@ -279,6 +268,16 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                       changeOnType
                       value={newPassword}
                       onChangeFn={(value: string) => setNewPassword(value)}
+                    />
+                  </ModalInputWrap>
+                  <ModalInputLabel>{"repeat password"}</ModalInputLabel>
+                  <ModalInputWrap width={165}>
+                    <Input
+                      password
+                      width="full"
+                      changeOnType
+                      value={repeatPassword}
+                      onChangeFn={(value: string) => setRepeatPassword(value)}
                     />
                   </ModalInputWrap>
                 </ModalInputForm>
@@ -298,8 +297,8 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                       inverted
                       onClick={() => {
                         setShowPasswordChange(false);
-                        setCurrentPassword("");
                         setNewPassword("");
+                        setRepeatPassword("");
                       }}
                     />
                     <Button
@@ -307,10 +306,14 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                       label="Submit"
                       inverted
                       onClick={() => {
-                        passwordUpdateMutation.mutate();
-                        setShowPasswordChange(false);
-                        setCurrentPassword("");
-                        setNewPassword("");
+                        if (newPassword === repeatPassword) {
+                          passwordUpdateMutation.mutate();
+                          setShowPasswordChange(false);
+                          setNewPassword("");
+                          setRepeatPassword("");
+                        } else {
+                          toast.warning("Password are not matching");
+                        }
                       }}
                     />
                   </ButtonGroup>
