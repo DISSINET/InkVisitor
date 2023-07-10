@@ -96,6 +96,7 @@ class ActionData implements IActionData, IModel {
   valencies: ActionValency;
   entities: ActionEntity;
   status: EntityEnums.Status = EntityEnums.Status.Pending;
+  pos: EntityEnums.ActionPartOfSpeech = EntityEnums.ActionPartOfSpeech.Verb;
 
   constructor(data: Partial<IActionData>) {
     this.valencies = new ActionValency(data.valencies || {});

@@ -3,6 +3,8 @@ import {
   entitiesDictKeys,
   entityStatusDict,
   languageDict,
+  conceptPartOfSpeechDict,
+  actionPartOfSpeechDict,
 } from "@shared/dictionaries";
 import { EntityEnums } from "@shared/enums";
 import { IResponseDetail, IResponseGeneric } from "@shared/types";
@@ -292,6 +294,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
               />
             </StyledDetailContentRowValue>
           </StyledDetailContentRow>
+
           <StyledDetailContentRow>
             <StyledDetailContentRowLabel>
               Label language
@@ -313,6 +316,66 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
               />
             </StyledDetailContentRowValue>
           </StyledDetailContentRow>
+
+          {/* part of speech */}
+
+          {entity.class === EntityEnums.Class.Action && (
+            <StyledDetailContentRow>
+              <StyledDetailContentRowLabel>
+                Part of Speech
+              </StyledDetailContentRowLabel>
+              <StyledDetailContentRowValue>
+                <Dropdown
+                  disabled={!userCanEdit}
+                  width="full"
+                  options={actionPartOfSpeechDict}
+                  value={actionPartOfSpeechDict.find(
+                    (i: any) => i.value === entity.data.pos
+                  )}
+                  onChange={(selectedOption) => {
+                    const oldData = { ...entity.data };
+                    updateEntityMutation.mutate({
+                      data: {
+                        ...oldData,
+                        ...{
+                          pos: selectedOption[0].value,
+                        },
+                      },
+                    });
+                  }}
+                />
+              </StyledDetailContentRowValue>
+            </StyledDetailContentRow>
+          )}
+          {entity.class === EntityEnums.Class.Concept && (
+            <StyledDetailContentRow>
+              <StyledDetailContentRowLabel>
+                Part of Speech
+              </StyledDetailContentRowLabel>
+              <StyledDetailContentRowValue>
+                <Dropdown
+                  disabled={!userCanEdit}
+                  width="full"
+                  options={conceptPartOfSpeechDict}
+                  value={conceptPartOfSpeechDict.find(
+                    (i: any) => i.value === entity.data.pos
+                  )}
+                  onChange={(selectedOption) => {
+                    const oldData = { ...entity.data };
+                    updateEntityMutation.mutate({
+                      data: {
+                        ...oldData,
+                        ...{
+                          pos: selectedOption[0].value,
+                        },
+                      },
+                    });
+                  }}
+                />
+              </StyledDetailContentRowValue>
+            </StyledDetailContentRow>
+          )}
+
           {actantMode === "entity" && entity.data?.logicalType && (
             <StyledDetailContentRow>
               <StyledDetailContentRowLabel>
