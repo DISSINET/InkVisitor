@@ -1,13 +1,13 @@
 import { StatementEnums, UserEnums } from "@shared/enums";
 import { IEntity, IProp, IResponseStatement, IStatement } from "@shared/types";
-import { EntityOrder, OrderType, PropOrder } from "@shared/types/response-statement";
+import { OrderType } from "@shared/types/response-statement";
 import { Connection } from "rethinkdb-ts";
 import { IRequest } from "src/custom_typings/request";
 import Statement from "./statement";
 import Entity from "../entity/entity";
 
 export class ResponseStatement extends Statement implements IResponseStatement {
-  entities: { [key: string]: IEntity; };
+  entities: { [key: string]: IEntity };
   elementsOrders: OrderType[];
   right: UserEnums.RoleMode = UserEnums.RoleMode.Read;
 
@@ -29,7 +29,7 @@ export class ResponseStatement extends Statement implements IResponseStatement {
    */
   prepareElementsOrders(): OrderType[] {
     /// unsorted items here
-    let temp: OrderType[] = [];
+    const temp: OrderType[] = [];
 
     // statement.props
     Entity.extractIdsFromProps(this.props, (prop: IProp) => {
@@ -60,7 +60,8 @@ export class ResponseStatement extends Statement implements IResponseStatement {
           propTypeId: prop.type.entityId,
           originId: action.actionId,
           elementId: prop.id,
-          order: prop.statementOrder !== undefined ? prop.statementOrder : false,
+          order:
+            prop.statementOrder !== undefined ? prop.statementOrder : false,
         });
       });
     }
@@ -71,7 +72,7 @@ export class ResponseStatement extends Statement implements IResponseStatement {
         type: StatementEnums.ElementType.Actant,
         entityId: actant.entityId,
         elementId: actant.id,
-        order: actant.statementOrder
+        order: actant.statementOrder,
       });
 
       // statement.actants.props
@@ -82,7 +83,8 @@ export class ResponseStatement extends Statement implements IResponseStatement {
           propTypeId: prop.type.entityId,
           originId: actant.entityId,
           elementId: prop.id,
-          order: prop.statementOrder !== undefined ? prop.statementOrder : false,
+          order:
+            prop.statementOrder !== undefined ? prop.statementOrder : false,
         });
       });
 
@@ -93,7 +95,7 @@ export class ResponseStatement extends Statement implements IResponseStatement {
           entityId: classification.entityId,
           originId: actant.entityId,
           elementId: classification.id,
-          order: classification.statementOrder
+          order: classification.statementOrder,
         });
       }
 
@@ -104,7 +106,7 @@ export class ResponseStatement extends Statement implements IResponseStatement {
           entityId: identification.entityId,
           originId: actant.entityId,
           elementId: identification.id,
-          order: identification.statementOrder
+          order: identification.statementOrder,
         });
       }
     }
@@ -115,14 +117,20 @@ export class ResponseStatement extends Statement implements IResponseStatement {
   /**
    * Sorts the list of sortable elements for elementsOrders field.
    * Empty (false) values would be pushed to the end of the list.
-   * @param unsorted 
-   * @returns 
+   * @param unsorted
+   * @returns
    */
   public static sortListOfStatementItems(unsorted: OrderType[]): OrderType[] {
     return unsorted.sort((a, b) => {
-      if (b.order === a.order && a.order === false) { return 0; };
-      if (b.order === false) { return -Infinity; };
-      if (a.order === false) { return Infinity; };
+      if (b.order === a.order && a.order === false) {
+        return 0;
+      }
+      if (b.order === false) {
+        return -Infinity;
+      }
+      if (a.order === false) {
+        return Infinity;
+      }
       return a.order - b.order;
     });
   }
