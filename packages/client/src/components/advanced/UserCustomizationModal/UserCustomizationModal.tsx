@@ -26,6 +26,7 @@ import { BiHide, BiShow } from "react-icons/bi";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import {
+  StyledButtonWrap,
   StyledRightsHeading,
   StyledRightsWrap,
   StyledUserRightHeading,
@@ -282,14 +283,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                   </ModalInputWrap>
                 </ModalInputForm>
 
-                <div
-                  style={{
-                    display: "flex",
-                    width: "100%",
-                    justifyContent: "center",
-                    marginTop: "0.5rem",
-                  }}
-                >
+                <StyledButtonWrap>
                   <ButtonGroup>
                     <Button
                       color="warning"
@@ -306,18 +300,22 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                       label="Submit"
                       inverted
                       onClick={() => {
-                        if (newPassword === repeatPassword) {
-                          passwordUpdateMutation.mutate();
-                          setShowPasswordChange(false);
-                          setNewPassword("");
-                          setRepeatPassword("");
+                        if (newPassword.length >= 8) {
+                          if (newPassword === repeatPassword) {
+                            passwordUpdateMutation.mutate();
+                            setShowPasswordChange(false);
+                            setNewPassword("");
+                            setRepeatPassword("");
+                          } else {
+                            toast.warning("Passwords are not matching");
+                          }
                         } else {
-                          toast.warning("Password are not matching");
+                          toast.info("Fill at least 8 characters");
                         }
                       }}
                     />
                   </ButtonGroup>
-                </div>
+                </StyledButtonWrap>
               </>
             )}
 
