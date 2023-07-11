@@ -13,7 +13,8 @@ export const StyledHeaderBreadcrumbRow = styled.div`
   flex-wrap: wrap;
 `;
 export const StyledHeaderRow = styled.h3`
-  /* overflow: hidden; */
+  display: flex;
+  justify-content: space-between;
 `;
 export const StyledFaStar = styled(FaStar)`
   float: left;
@@ -24,7 +25,7 @@ export const StyledMoveToParent = styled.div`
   font-size: ${({ theme }) => theme.fontSize["sm"]};
   font-weight: ${({ theme }) => theme.fontWeight["normal"]};
   display: flex;
-  align-items: center;
+  flex-direction: column;
   float: right;
   color: ${({ theme }) => theme.color["info"]};
   margin-bottom: ${({ theme }) => theme.space[2]};
@@ -53,4 +54,9 @@ export const StyledCounter = styled.div`
 `;
 export const StyledDropdownWrap = styled.div`
   margin: 0 0.5rem;
+`;
+export const StyledReferencesConfig = styled.div`
+  font-weight: ${({ theme }) => theme.fontWeight["bold"]};
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
+  color: ${({ theme }) => theme.color["info"]};
 `;

@@ -8,6 +8,11 @@ import {
   IResponseTree,
   IStatement,
 } from "@shared/types";
+import {
+  UseMutationResult,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import theme from "Theme/theme";
 import api from "api";
 import { AxiosResponse } from "axios";
@@ -23,11 +28,8 @@ import {
   MdOutlineCheckBoxOutlineBlank,
   MdOutlineIndeterminateCheckBox,
 } from "react-icons/md";
-import {
-  UseMutationResult,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { TbFileSettings } from "react-icons/tb";
+import { TfiLayoutAccordionList } from "react-icons/tfi";
 import { setLastClickedIndex } from "redux/features/statementList/lastClickedIndexSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { DropdownItem } from "types";
@@ -43,8 +45,11 @@ import {
   StyledHeaderRow,
   StyledHeading,
   StyledMoveToParent,
+  StyledReferencesConfig,
   StyledSuggesterRow,
 } from "./StatementListHeaderStyles";
+import { ManageTerritoryReferencesModal } from "./ManageTerritoryReferencesModal/ManageTerritoryReferencesModal";
+import { SegmentateReferencesModal } from "./SegmentateReferencesModal/SegmentateReferencesModal";
 
 interface StatementListHeader {
   data: IResponseTerritory;
@@ -287,34 +292,31 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
 
   const [batchAction, setBatchAction] = useState<DropdownItem>(batchOptions[0]);
 
+  const [showManageReferencesModal, setShowManageReferencesModal] =
+    useState(false);
+
+  const [showSegmentateReferencesModal, setShowSegmentateReferencesModal] =
+    useState(false);
+
   return (
     <StyledHeader>
-      <StyledHeaderBreadcrumbRow>
-        {selectedTerritoryPath &&
-          selectedTerritoryPath.map((territoryId: string, key: number) => {
-            return (
-              <React.Fragment key={key}>
-                <BreadcrumbItem territoryId={territoryId} />
-              </React.Fragment>
-            );
-          })}
-        <React.Fragment key="this-territory">
-          <BreadcrumbItem territoryId={territoryId} territoryData={data} />
-        </React.Fragment>
-      </StyledHeaderBreadcrumbRow>
-
-      <StyledHeaderRow>
-        {isFavorited && (
-          <StyledFaStar size={18} color={theme.color["warning"]} />
-        )}
-        <StyledHeading>
-          {territoryId
-            ? `T:\xa0${trimTerritoryLabel(data.label)}`
-            : "no territory selected"}
-        </StyledHeading>
+      <div style={{ display: "flex", justifyContent: "space-between" }}>
+        <StyledHeaderBreadcrumbRow>
+          {selectedTerritoryPath &&
+            selectedTerritoryPath.map((territoryId: string, key: number) => {
+              return (
+                <React.Fragment key={key}>
+                  <BreadcrumbItem territoryId={territoryId} />
+                </React.Fragment>
+              );
+            })}
+          <React.Fragment key="this-territory">
+            <BreadcrumbItem territoryId={territoryId} territoryData={data} />
+          </React.Fragment>
+        </StyledHeaderBreadcrumbRow>
 
         <StyledMoveToParent>
-          {"Move to parent:\xa0"}
+          <p style={{ whiteSpace: "nowrap" }}>{"Move to parent:\xa0"}</p>
           <EntitySuggester
             disableTemplatesAccept
             filterEditorRights
@@ -327,6 +329,30 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
             excludedActantIds={excludedMoveTerritories}
           />
         </StyledMoveToParent>
+      </div>
+
+      {/* Territory name */}
+      <StyledHeaderRow>
+        <div>
+          {isFavorited && (
+            <StyledFaStar size={18} color={theme.color["warning"]} />
+          )}
+          <StyledHeading>
+            {territoryId
+              ? `T:\xa0${trimTerritoryLabel(data.label)}`
+              : "no territory selected"}
+          </StyledHeading>
+        </div>
+        <StyledReferencesConfig>
+          References{" "}
+          {data.right !== UserEnums.RoleMode.Read && (
+            <Button
+              label="Manage"
+              icon={<TbFileSettings />}
+              onClick={() => setShowManageReferencesModal(true)}
+            />
+          )}
+        </StyledReferencesConfig>
       </StyledHeaderRow>
 
       <StyledSuggesterRow>
@@ -396,6 +422,13 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
           <ButtonGroup>
             {data.right !== UserEnums.RoleMode.Read && (
               <Button
+                label="Segmentate"
+                icon={<TfiLayoutAccordionList />}
+                onClick={() => setShowSegmentateReferencesModal(true)}
+              />
+            )}
+            {data.right !== UserEnums.RoleMode.Read && (
+              <Button
                 key="add"
                 icon={<FaPlus size={14} />}
                 tooltipLabel="add new statement at the end of the list"
@@ -421,6 +454,19 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
           </ButtonGroup>
         )}
       </StyledSuggesterRow>
+
+      {showManageReferencesModal && (
+        <ManageTerritoryReferencesModal
+          managedTerritory={data}
+          onClose={() => setShowManageReferencesModal(false)}
+        />
+      )}
+      {showSegmentateReferencesModal && (
+        <SegmentateReferencesModal
+          managedTerritory={data}
+          onClose={() => setShowSegmentateReferencesModal(false)}
+        />
+      )}
     </StyledHeader>
   );
 };
