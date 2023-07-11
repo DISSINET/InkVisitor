@@ -19,6 +19,7 @@ import {
   Dropdown,
   Input,
   Loader,
+  Message,
   MultiInput,
   Submit,
 } from "components";
@@ -684,6 +685,13 @@ export const StatementEditor: React.FC<StatementEditor> = ({
               value={statement.data.text}
             />
           </StyledEditorSectionContent>
+        </StyledEditorSection>
+
+        <StyledEditorSection>
+          {statement.warnings &&
+            statement.warnings.map((warning, key) => {
+              return <Message key={key} warning={warning} />;
+            })}
         </StyledEditorSection>
 
         {/* Actions */}

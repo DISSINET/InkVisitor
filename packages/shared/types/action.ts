@@ -7,19 +7,19 @@ export interface IAction extends IEntity {
 }
 
 export interface IActionData {
-  valencies: ActionValency;
-  entities: ActionEntity;
+  valencies: IActionValency;
+  entities: IActionEntity;
   pos: EntityEnums.ActionPartOfSpeech.Verb;
 }
 
-export interface ActionValency {
+export interface IActionValency {
   s: string;
   a1: string;
   a2: string;
 }
 
-export interface ActionEntity {
-  s: string[];
-  a1: string[];
-  a2: string[];
+export interface IActionEntity {
+  s?: EntityEnums.ExtendedClass[];
+  a1?: EntityEnums.ExtendedClass[];
+  a2?: EntityEnums.ExtendedClass[];
 }
