@@ -590,5 +590,10 @@
     "type": "REL",
     "entityIds": ["p1", "p12", "p1"],
     "order": 1
+  },
+  {
+    "type": "SCL",
+    "entityIds": ["c-abstract", "c1108"],
+    "order": 1
   }
 ]

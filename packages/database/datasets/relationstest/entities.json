@@ -189,7 +189,6 @@
       ]
     }
   },
-
   {
     "id": "s2",
     "class": "S",
@@ -2385,6 +2384,36 @@
     "id": "c1107",
     "class": "C",
     "label": "event location",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "createdAt": "2021-12-05T19:10:15.739Z",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {
+      "pos": ""
+    }
+  },
+  {
+    "id": "c1108",
+    "class": "C",
+    "label": "dog",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "createdAt": "2021-12-05T19:10:15.739Z",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {
+      "pos": ""
+    }
+  },
+  {
+    "id": "c-abstract",
+    "class": "C",
+    "label": "abstract",
     "detail": "",
     "status": "1",
     "language": "eng",
