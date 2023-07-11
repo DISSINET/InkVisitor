@@ -24,3 +24,9 @@ export const StyledUserRightItem = styled.div`
   display: grid;
   margin-bottom: ${({ theme }) => theme.space[4]};
 `;
+export const StyledButtonWrap = styled.div`
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  margin-top: 0.5rem;
+`;

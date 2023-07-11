@@ -186,6 +186,18 @@ export default class User implements IUser, IDbModel {
     return true;
   }
 
+  canBeCreatedByUser(user: User): boolean {
+    return user.role === UserEnums.Role.Admin;
+  }
+
+  canBeEditedByUser(user: User): boolean {
+    return user.role === UserEnums.Role.Admin || user.id == this.id;
+  }
+
+  canBeDeletedByUser(user: User): boolean {
+    return user.role === UserEnums.Role.Admin;
+  }
+
   generatePassword(): string {
     const raw = generateRandomString(10);
     this.password = hashPassword(raw);

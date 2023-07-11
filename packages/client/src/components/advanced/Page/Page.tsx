@@ -1,3 +1,4 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Header, Loader, Toast } from "components";
 import {
@@ -8,16 +9,15 @@ import {
 import { useSearchParams } from "hooks";
 import useKeyLift from "hooks/useKeyLift";
 import useKeypress from "hooks/useKeyPress";
-import React, { useEffect, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { toast } from "react-toastify";
 import { setDisableUserSelect } from "redux/features/layout/disableUserSelectSlice";
+import { setPing } from "redux/features/pingSlice";
 import { setLastClickedIndex } from "redux/features/statementList/lastClickedIndexSlice";
 import { setUsername } from "redux/features/usernameSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { StyledPageContent, StyledPage } from "./PageStyles";
-import { setPing } from "redux/features/pingSlice";
+import { StyledPage, StyledPageContent } from "./PageStyles";
 
 interface Page {
   children?: React.ReactNode;

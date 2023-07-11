@@ -8,6 +8,7 @@ import {
   EmailError,
   InternalServerError,
   ModelNotValidError,
+  PermissionDeniedError,
   UserDoesNotExits,
   UserNotActiveError,
 } from "@shared/types/errors";
@@ -334,6 +335,14 @@ export default Router()
           `user with id ${userId} does not exist`,
           userId
         );
+      }
+
+      if (!existingUser.canBeEditedByUser(request.getUserOrFail())) {
+        throw new PermissionDeniedError("user cannot be saved");
+      }
+
+      if (userData.password) {
+        userData.password = hashPassword(userData.password);
       }
 
       const result = await existingUser.update(request.db.connection, {
