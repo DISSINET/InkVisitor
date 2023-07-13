@@ -1,5 +1,10 @@
 import { UserEnums } from "@shared/enums";
-import { IEntity, IResponseStatement, IResponseTerritory, ITerritory } from "@shared/types";
+import {
+  IEntity,
+  IResponseStatement,
+  IResponseTerritory,
+  ITerritory,
+} from "@shared/types";
 import Territory from "./territory";
 import Statement from "@models/statement/statement";
 import { ResponseStatement } from "@models/statement/response";
@@ -27,8 +32,11 @@ export class ResponseTerritory extends Territory implements IResponseTerritory {
 
     const entitiesList = await Entity.findEntitiesByIds(
       req.db.connection,
-      Statement.getEntitiesIdsForMany(statements)
+      Statement.getEntitiesIdsForMany(statements).concat(
+        Entity.extractIdsFromReferences(this.references)
+      )
     );
+
     this.entities = entitiesList.reduce<{ [key: string]: IEntity }>(
       (acc, entity) => {
         acc[entity.id] = entity;

@@ -9,8 +9,12 @@
     "createdAt": "2021-12-05T19:10:15.739Z",
     "notes": [],
     "props": [],
-    "references": [],
-    "data": {
+    "references": [{
+      "id": "1",
+      "resource": "l1202",
+      "value": "l1204"
+    }],
+        "data": {
       "text": "Minda, the priest of the great Cat lord, and son of saint Tiger, told someone on the street that...",
       "territory": {
         "territoryId": "t1",
@@ -969,7 +973,11 @@
     "createdAt": "2021-12-05T19:10:15.739Z",
     "notes": [],
     "props": [],
-    "references": [],
+    "references": [{
+      "id": "1",
+      "resource": "p12",
+      "value": "l6"
+    }],
     "data": {
       "parent": {
         "territoryId": "T0",
