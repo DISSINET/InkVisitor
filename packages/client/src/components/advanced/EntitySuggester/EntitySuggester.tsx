@@ -181,11 +181,8 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
 
   // initial load of categories
   useEffect(() => {
-    const filteredCategoryTypes = categoryTypes.filter(
-      (c) => !(excludedEntityClasses as EntityEnums.ExtendedClass[]).includes(c)
-    );
     const categories: DropdownItem[] = [];
-    filteredCategoryTypes.forEach((category) => {
+    categoryTypes.forEach((category) => {
       categories.push({
         label: category.valueOf(),
         value: category.valueOf(),
