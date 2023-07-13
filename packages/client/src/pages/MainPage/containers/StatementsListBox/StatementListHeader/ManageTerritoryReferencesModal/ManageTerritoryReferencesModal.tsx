@@ -21,7 +21,9 @@ import {
   EntityTag,
 } from "components/advanced";
 import React, { useEffect, useMemo, useState } from "react";
+import { LuLink2Off, LuLink2 } from "react-icons/lu";
 import { FaClone, FaEdit, FaPlus, FaTrashAlt } from "react-icons/fa";
+import { HiOutlineDocumentText } from "react-icons/hi";
 import { TbReplace } from "react-icons/tb";
 import { CellProps, Column } from "react-table";
 
@@ -75,8 +77,6 @@ export const ManageTerritoryReferencesModal: React.FC<
     return managedTerritory.references
       ? managedTerritory.references.map((reference) => {
           const document = resources?.find((r) => r.id === reference.resource);
-          console.log(document);
-
           return {
             reference: reference,
             documentId: document?.data.documentId ?? false,
@@ -127,11 +127,55 @@ export const ManageTerritoryReferencesModal: React.FC<
       {
         Header: "Document",
         Cell: ({ row }: CellType) => {
-          return <>{row.original.documentId}</>;
+          const { documentId } = row.original;
+          const document = documents?.find((d) => d.id === documentId);
+          return (
+            <>
+              {documentId && (
+                <p
+                  style={{
+                    whiteSpace: "nowrap",
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                >
+                  <HiOutlineDocumentText size={16} />
+                  {document?.title}
+                </p>
+              )}
+            </>
+          );
         },
       },
       {
         Header: "Anchor",
+        Cell: ({ row }: CellType) => {
+          const { documentId } = row.original;
+          const document = documents?.find((d) => d.id === documentId);
+          return (
+            <>
+              {documentId && (
+                <p
+                  style={{
+                    whiteSpace: "nowrap",
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                >
+                  {document?.referencedEntityIds &&
+                  document.referencedEntityIds.length > 0 ? (
+                    <>
+                      <LuLink2 size={16} />
+                      {document?.referencedEntityIds}
+                    </>
+                  ) : (
+                    <LuLink2Off size={16} />
+                  )}
+                </p>
+              )}
+            </>
+          );
+        },
       },
       {
         id: "edit",
@@ -140,7 +184,7 @@ export const ManageTerritoryReferencesModal: React.FC<
         },
       },
     ],
-    [managedTerritory]
+    [managedTerritory, documents]
   );
 
   const [replaceSection, setReplaceSection] = useState(false);
