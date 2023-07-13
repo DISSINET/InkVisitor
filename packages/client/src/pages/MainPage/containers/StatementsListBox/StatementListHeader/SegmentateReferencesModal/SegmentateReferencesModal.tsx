@@ -29,7 +29,7 @@ export const SegmentateReferencesModal: React.FC<SegmentateReferencesModal> = ({
         title={
           <div style={{ display: "flex", alignItems: "center" }}>
             <p style={{ marginRight: "0.5rem" }}>Manage Territory References</p>
-            <EntityTag entity={managedTerritory} />
+            <EntityTag entity={managedTerritory} disableDrag />
           </div>
         }
       />

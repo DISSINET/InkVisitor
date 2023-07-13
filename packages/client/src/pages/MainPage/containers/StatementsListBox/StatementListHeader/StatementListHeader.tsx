@@ -293,7 +293,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
   const [batchAction, setBatchAction] = useState<DropdownItem>(batchOptions[0]);
 
   const [showManageReferencesModal, setShowManageReferencesModal] =
-    useState(false);
+    useState(true);
 
   const [showSegmentateReferencesModal, setShowSegmentateReferencesModal] =
     useState(false);
