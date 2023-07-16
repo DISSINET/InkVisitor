@@ -6,7 +6,7 @@ on:
       - 1772-use-caching-in-ci
 
 jobs:
-  install-client:
+  preinstall-client:
     runs-on: ubuntu-20.04
     strategy:
       matrix:
@@ -26,9 +26,8 @@ jobs:
         run: |
           cd packages/client
           pnpm install
-          ls 
         
-  install-server:
+  preinstall-server:
     runs-on: ubuntu-20.04
     strategy:
       matrix:
@@ -48,10 +47,9 @@ jobs:
         run: |
           cd packages/server
           pnpm install
-          ls 
         
   staging-build:
-    needs: [install-client, install-server]
+    needs: [preinstall-client, preinstall-server]
     name: Build the staging docker image
     runs-on: ubuntu-latest
     strategy:
@@ -69,11 +67,20 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: 'pnpm'
           cache-dependency-path: packages/server/pnpm-lock.yaml
-      - name: Install dependencies
+      - name: Install server dependencies
         run: |
           cd packages/server
           pnpm install
-          ls 
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
+          cache-dependency-path: packages/client/pnpm-lock.yaml
+      - name: Install client dependencies
+        run: |
+          cd packages/client
+          pnpm install
           
       - name: Create env file for client
         run: |
@@ -95,7 +102,6 @@ jobs:
         run: |
           cd packages/server        
           ls 
-        
         
       - name: Check client node modules
         run: |
