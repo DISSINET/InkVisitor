@@ -6,7 +6,29 @@ on:
       - 1772-use-caching-in-ci
 
 jobs:
-  build:
+  install-client:
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        node-version: [16]
+    steps:
+    - uses: actions/checkout@v3
+    - uses: pnpm/action-setup@v2
+      with:
+        version: 8
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'pnpm'
+        cache-dependency-path: packages/server/pnpm-lock.yaml
+    - name: Install dependencies
+      run: |
+        cd packages/client
+        pnpm install
+        ls 
+        
+  install-server:
     runs-on: ubuntu-20.04
     strategy:
       matrix:
@@ -29,6 +51,7 @@ jobs:
         ls 
         
   staging-build:
+    needs: [install-client, install-server]
     name: Build the staging docker image
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -64,56 +87,14 @@ jobs:
           path: inkvisitor-staging.tar.gz
           key: inkvisitor-staging-${{ github.sha }}.tar.gz
 
-  staging-data-import:
-    name: Build the data-import docker image
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - name: Checkout InkVisitor
-        uses: actions/checkout@v2
-
-      - name: Create env file for client
-        run: |
-          touch packages/client/env/.env.data-import
-          echo "$CLIENT_ENV" >> packages/client/env/.env.data-import
-        env:
-          CLIENT_ENV: ${{secrets.CLIENT_ENV_DATAIMPORT}}
-
-      - name: Generate certificates
-        run: |
-          mkdir -p ./packages/server/secret
-          openssl req -x509 -newkey rsa:2048 -nodes -out ./packages/server/secret/cert.pem -keyout ./packages/server/secret/key.pem -days 365 -subj "/C=FR/O=krkr/OU=Domain Control Validated/CN=*"
-
-      # Pull the latest image to build, and avoid caching pull-only images.
-      # (docker pull is faster than caching in most cases.)
-      - run: docker-compose pull
-
-      - name: Run docker build task
-        run: docker-compose build inkvisitor-data-import
-
-      - name: Save docker-compose stack
-        run: docker save inkvisitor:data-import | gzip > inkvisitor-data-import.tar.gz
-
-      - name: Cache image.tar
-        uses: actions/cache@v2
-        with:
-          path: inkvisitor-data-import.tar.gz
-          key: inkvisitor-data-import-${{ github.sha }}.tar.gz
-
   deploy:
-    needs: [staging-build, staging-data-import]
-    name: Deploy to staging environment
+    needs: [staging-build]
+    name: Deploy
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - name: Checkout InkVisitor
         uses: actions/checkout@v2
-
-      - name: Restore cache
-        uses: actions/cache@v2
-        with:
-          path: inkvisitor-staging.tar.gz
-          key: inkvisitor-staging-${{ github.sha }}.tar.gz
 
       - name: Restore cache
         uses: actions/cache@v2
@@ -126,13 +107,6 @@ jobs:
         with:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           known_hosts: ${{ secrets.KNOWN_HOSTS }}
-
-      - name: Create env file for server
-        run: |
-          touch packages/server/env/.env.staging
-          echo "$SERVER_ENV" >> packages/server/env/.env.staging
-        env:
-          SERVER_ENV: ${{secrets.SERVER_ENV_STAGING}}
 
       - name: Update packages
         run: |
@@ -161,9 +135,6 @@ jobs:
       - name: Upload image staging
         run: scp inkvisitor-staging.tar.gz ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/var/www/html/apps
 
-      - name: Upload image data-import
-        run: scp inkvisitor-data-import.tar.gz ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/var/www/html/apps
-
       - name: Load image
         run: |
           ssh -tt ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}  -- "sh -c '
@@ -171,9 +142,6 @@ jobs:
           podman image prune -f &&
           rm -rf /var/tmp/docker-tar* &&
           podman rm inkvisitor-staging --force || true &&
-          podman rm inkvisitor-data-import --force || true &&
           podman load -i /var/www/html/apps/inkvisitor-staging.tar.gz &&
-          podman load -i /var/www/html/apps/inkvisitor-data-import.tar.gz &&
           podman-compose -f /var/www/html/apps/docker-compose.yml up -d inkvisitor-staging &&
-          podman-compose -f /var/www/html/apps/docker-compose.yml up -d inkvisitor-data-import
           '"
