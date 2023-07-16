@@ -12,21 +12,21 @@ jobs:
       matrix:
         node-version: [16]
     steps:
-    - uses: actions/checkout@v3
-    - uses: pnpm/action-setup@v2
-      with:
-        version: 8
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v3
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'pnpm'
-        cache-dependency-path: packages/client/pnpm-lock.yaml
-    - name: Install dependencies
-      run: |
-        cd packages/client
-        pnpm install
-        ls 
+      - uses: actions/checkout@v3
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
+          cache-dependency-path: packages/client/pnpm-lock.yaml
+      - name: Install dependencies
+        run: |
+          cd packages/client
+          pnpm install
+          ls 
         
   install-server:
     runs-on: ubuntu-20.04
@@ -34,31 +34,41 @@ jobs:
       matrix:
         node-version: [16]
     steps:
-    - uses: actions/checkout@v3
-    - uses: pnpm/action-setup@v2
-      with:
-        version: 8
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v3
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'pnpm'
-        cache-dependency-path: packages/server/pnpm-lock.yaml
-    - name: Install dependencies
-      run: |
-        cd packages/server
-        pnpm install
-        ls 
+      - uses: actions/checkout@v3
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
+          cache-dependency-path: packages/server/pnpm-lock.yaml
+      - name: Install dependencies
+        run: |
+          cd packages/server
+          pnpm install
+          ls 
         
   staging-build:
     needs: [install-client, install-server]
     name: Build the staging docker image
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [16]
     timeout-minutes: 10
     steps:
       - name: Checkout InkVisitor
         uses: actions/checkout@v2
 
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
+          cache-dependency-path: packages/server/pnpm-lock.yaml
+          
       - name: Create env file for client
         run: |
           touch packages/client/env/.env.staging
