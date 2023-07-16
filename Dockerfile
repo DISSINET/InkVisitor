@@ -9,7 +9,6 @@ ARG ENV
 
 COPY ./packages .
 
-RUN cd client && cd node_modules && ls
 RUN cd client && pnpm install && BUILD_TIMESTAMP=$(date +'%a %d.%m.%Y %H:%M') pnpm build:${ENV}
 RUN rm -rf client/node_modules client/src
 
