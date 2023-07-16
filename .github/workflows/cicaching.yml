@@ -20,7 +20,7 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
-        cache: 'pnpmclient'
+        cache: 'pnpm'
         cache-dependency-path: packages/client/pnpm-lock.yaml
     - name: Install dependencies
       run: |
@@ -42,7 +42,7 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
-        cache: 'pnpmserver'
+        cache: 'pnpm'
         cache-dependency-path: packages/server/pnpm-lock.yaml
     - name: Install dependencies
       run: |
