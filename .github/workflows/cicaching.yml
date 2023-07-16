@@ -59,15 +59,16 @@ jobs:
         node-version: [16]
     timeout-minutes: 10
     steps:
-      - name: Checkout InkVisitor
-        uses: actions/checkout@v2
-
+      - uses: actions/checkout@v3
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'pnpm'
-          cache-dependency-path: packages/server/pnpm-lock.yaml
+          cache-dependency-path: packages/client/pnpm-lock.yaml
           
       - name: Create env file for client
         run: |
