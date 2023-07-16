@@ -20,8 +20,8 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
-        cache: 'pnpm'
-        cache-dependency-path: packages/server/pnpm-lock.yaml
+        cache: 'pnpmclient'
+        cache-dependency-path: packages/client/pnpm-lock.yaml
     - name: Install dependencies
       run: |
         cd packages/client
@@ -42,7 +42,7 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
-        cache: 'pnpm'
+        cache: 'pnpmserver'
         cache-dependency-path: packages/server/pnpm-lock.yaml
     - name: Install dependencies
       run: |
@@ -75,6 +75,17 @@ jobs:
       # (docker pull is faster than caching in most cases.)
       - run: docker-compose pull
 
+      - name: Check server node modules
+        run: |
+          cd packages/server        
+          ls 
+        
+        
+      - name: Check client node modules
+        run: |
+          cd packages/client        
+          ls 
+          
       - name: Run docker build task
         run: docker-compose build inkvisitor-staging
 
