@@ -109,7 +109,7 @@ jobs:
           ls 
           
       - name: Run docker build task
-        run: docker-compose build inkvisitor-staging
+        run: DOCKER_BUILDKIT=1 docker-compose build inkvisitor-staging
 
       - name: Save docker-compose stack
         run: docker save inkvisitor:staging | gzip > inkvisitor-staging.tar.gz
