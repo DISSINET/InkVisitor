@@ -132,8 +132,8 @@ jobs:
       - name: Restore cache
         uses: actions/cache@v2
         with:
-          path: inkvisitor-data-import.tar.gz
-          key: inkvisitor-data-import-${{ github.sha }}.tar.gz
+          path: inkvisitor-staging.tar.gz
+          key: inkvisitor-staging-${{ github.sha }}.tar.gz
 
       - name: Install SSH Key
         uses: shimataro/ssh-key-action@v2
