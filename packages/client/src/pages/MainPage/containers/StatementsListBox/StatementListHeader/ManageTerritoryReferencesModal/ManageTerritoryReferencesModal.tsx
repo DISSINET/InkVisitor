@@ -1,9 +1,5 @@
 import { EntityEnums } from "@shared/enums";
-import {
-  IReference,
-  IResponseDocument,
-  IResponseTerritory,
-} from "@shared/types";
+import { IReference, IResponseTerritory } from "@shared/types";
 import { useQuery } from "@tanstack/react-query";
 import api from "api";
 import {
@@ -21,9 +17,9 @@ import {
   EntityTag,
 } from "components/advanced";
 import React, { useEffect, useMemo, useState } from "react";
-import { LuLink2Off, LuLink2 } from "react-icons/lu";
 import { FaClone, FaEdit, FaPlus, FaTrashAlt } from "react-icons/fa";
-import { HiOutlineDocumentText } from "react-icons/hi";
+import { HiOutlineDocument, HiOutlineDocumentText } from "react-icons/hi";
+import { LuLink2, LuLink2Off } from "react-icons/lu";
 import { TbReplace } from "react-icons/tb";
 import { CellProps, Column } from "react-table";
 
@@ -90,6 +86,8 @@ export const ManageTerritoryReferencesModal: React.FC<
     setShowModal(true);
   }, []);
 
+  const [editedRow, setEditedRow] = useState<false | number>(false);
+
   const columns = useMemo<Column<any>[]>(
     () => [
       {
@@ -131,18 +129,22 @@ export const ManageTerritoryReferencesModal: React.FC<
           const document = documents?.find((d) => d.id === documentId);
           return (
             <>
-              {documentId && (
-                <p
-                  style={{
-                    whiteSpace: "nowrap",
-                    display: "flex",
-                    alignItems: "center",
-                  }}
-                >
-                  <HiOutlineDocumentText size={16} />
-                  {document?.title}
-                </p>
-              )}
+              <p
+                style={{
+                  whiteSpace: "nowrap",
+                  display: "flex",
+                  alignItems: "center",
+                }}
+              >
+                {documentId ? (
+                  <>
+                    <HiOutlineDocumentText size={16} />
+                    {document?.title}
+                  </>
+                ) : (
+                  <HiOutlineDocument size={16} />
+                )}
+              </p>
             </>
           );
         },
@@ -180,7 +182,14 @@ export const ManageTerritoryReferencesModal: React.FC<
       {
         id: "edit",
         Cell: ({ row }: CellType) => {
-          return <Button color="warning" inverted icon={<FaEdit />} />;
+          return (
+            <Button
+              color="warning"
+              inverted
+              icon={<FaEdit />}
+              onClick={() => setEditedRow(row.index)}
+            />
+          );
         },
       },
     ],
