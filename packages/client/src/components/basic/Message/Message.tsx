@@ -82,9 +82,8 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
         return (
           <span>
             <b>{`Action valency not defined`}</b>
-            {` - [action label] - ${
-              position?.section && positionObject[position?.section]
-            }`}
+            {` - ${position?.section && positionObject[position?.section]}`}
+            {` - [A: action.label]`}
           </span>
         );
 

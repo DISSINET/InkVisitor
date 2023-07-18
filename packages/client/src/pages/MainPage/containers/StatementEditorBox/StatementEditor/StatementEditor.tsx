@@ -689,15 +689,17 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
         <StyledEditorSection>
           {statement.warnings &&
-            statement.warnings.map((warning, key) => {
-              return (
-                <Message
-                  key={key}
-                  warning={warning}
-                  entities={statement.entities}
-                />
-              );
-            })}
+            statement.warnings
+              .sort((a, b) => a.type.localeCompare(b.type))
+              .map((warning, key) => {
+                return (
+                  <Message
+                    key={key}
+                    warning={warning}
+                    entities={statement.entities}
+                  />
+                );
+              })}
         </StyledEditorSection>
 
         {/* Actions */}
