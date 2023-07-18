@@ -1,19 +1,33 @@
 import { WarningTypeEnums } from "@shared/enums";
-import { IWarning } from "@shared/types";
-import React from "react";
+import { IEntity, IWarning } from "@shared/types";
+import React, { useEffect, useState } from "react";
 import { TiWarningOutline } from "react-icons/ti";
 import { StyledMessage } from "./MessateStyles";
 
 interface Message {
   warning: IWarning;
+  entities: {
+    [key: string]: IEntity;
+  };
 }
-export const Message: React.FC<Message> = ({ warning }) => {
+export const Message: React.FC<Message> = ({ warning, entities }) => {
   const positionObject: { [key: string]: string } = {
     s: "Subject",
     a1: "Actant1",
     a2: "Actant2",
     pa: "Pseudo-Actant",
   };
+
+  const [entity, setEntity] = useState<IEntity | false>(false);
+
+  useEffect(() => {
+    if (warning.position?.entityId && entities) {
+      const entity = entities[warning.position.entityId];
+      if (entity) {
+        setEntity(entity);
+      }
+    }
+  }, [warning, entities]);
 
   function getWarningMessage({ type, position }: IWarning): JSX.Element {
     switch (type) {
@@ -25,6 +39,8 @@ export const Message: React.FC<Message> = ({ warning }) => {
         return <b>Actant2 Valency</b>;
       case WarningTypeEnums.NoTerritory:
         return <b>No Territory</b>;
+
+      // Statement warnings
       case WarningTypeEnums.NA:
         return <b>No Action defined</b>;
       case WarningTypeEnums.MA:
@@ -39,15 +55,44 @@ export const Message: React.FC<Message> = ({ warning }) => {
           </span>
         );
       case WarningTypeEnums.WA:
-        return <b>Actant's entity type does not match the Action</b>;
+        return (
+          <span>
+            <b>{`Actant's entity type does not match the Action`}</b>
+            {` - ${position?.section && positionObject[position?.section]}`}
+            {entity && ` - [${entity.class}: ${entity.label}]`}
+          </span>
+        );
       case WarningTypeEnums.ANA:
-        return <b>This actant position allows no actant</b>;
+        return (
+          <span>
+            <b>{`This actant position allows no actant`}</b>
+            {` - ${position?.section && positionObject[position?.section]}`}
+            {entity && ` - [${entity.class}: ${entity.label}]`}
+          </span>
+        );
       case WarningTypeEnums.WAC:
-        return <b>Entity type valencies of the actions not matching</b>;
+        return (
+          <span>
+            <b>{`Entity type valencies of the actions not matching`}</b>
+            {` - ${position?.section && positionObject[position?.section]}`}
+          </span>
+        );
       case WarningTypeEnums.AVU:
-        return <b>Action valency not defined</b>;
+        // TODO: waiting for action ID
+        return (
+          <span>
+            <b>{`Action valency not defined`}</b>
+            {` - [action label] - ${
+              position?.section && positionObject[position?.section]
+            }`}
+          </span>
+        );
+
+      // postponed - In-statement Props warnings
       case WarningTypeEnums.IELVL:
         return <b>Inconsistent Epistemic levels for the Property</b>;
+
+      // Entity warnings
       case WarningTypeEnums.SCLM:
         return <b>Superclass missing</b>;
       case WarningTypeEnums.ISYNC:
