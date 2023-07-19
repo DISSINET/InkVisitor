@@ -24,7 +24,9 @@ jobs:
           tags: client-dependencies:latest
           target: client-dependencies
           outputs: type=docker,dest=/tmp/client-dependencies.tar.gz
-        
+          cache-to: |
+            type=gha,scope=client-dependencies
+            
       - name: Cache image.tar
         uses: actions/cache@v2
         with:
