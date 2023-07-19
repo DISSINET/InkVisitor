@@ -5,7 +5,7 @@ on:
     branches:
       - 1772-use-caching-in-ci
 
-jobs:
+jobs: 
   client-dependencies:
     name: Build the client-dependencies docker stage
     runs-on: ubuntu-latest
