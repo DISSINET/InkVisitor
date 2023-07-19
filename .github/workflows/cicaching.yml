@@ -21,15 +21,15 @@ jobs:
         with:
           context: .
           file: ./Dockerfile
-          tags: base:latest
+          tags: client-dependencies:latest
           target: client-dependencies
-          outputs: type=docker,dest=/tmp/base.tar
+          outputs: type=docker,dest=/tmp/client-dependencies.tar
         
       - name: Upload artifact
         uses: actions/upload-artifact@v2
         with:
-          name: base
-          path: /tmp/base.tar
+          name: client-dependencies
+          path: /tmp/client-dependencies.tar
           
   staging-build:
     needs: [client-dependencies]
@@ -45,12 +45,12 @@ jobs:
       - name: Download artifact
         uses: actions/download-artifact@v2
         with:
-          name: base
+          name: client-dependencies
           path: /tmp
           
       - name: Load Docker image
         run: |
-          docker load --input /tmp/base.tar
+          docker load --input /tmp/client-dependencies.tar
           docker image ls -a
           
       - name: Create env file for client
