@@ -158,13 +158,14 @@ export class ResponseStatement extends Statement implements IResponseStatement {
       position
     );
 
-    if (rules.undefined) {
+    rules.undefinedActions.forEach((actionId) => {
       warnings.push(
         this.newStatementWarning(WarningTypeEnums.AVU, {
-          section: `${position}`,
+          section: position,
+          entityId: actionId,
         })
       );
-    }
+    });
 
     if (!actants.length && !rules.allEmpty) {
       warnings.push(

@@ -4,21 +4,22 @@ import { IAction } from "@shared/types";
 
 export class PositionRules {
   classes: EntityEnums.ExtendedClass[] = [];
-  undefined = false;
+  undefinedActions: string[] = [];
   allEmpty = true;
   mismatch = false;
 
   constructor(actions: IAction[], position: EntityEnums.Position) {
     for (const action of actions) {
       const rules = ActionEntity.toRules(action.data.entities)[position];
-      this.undefined = this.undefined || !rules;
+      if (!rules) {
+        this.undefinedActions.push(action.id);
+      }
       this.allEmpty = this.allEmpty && PositionRules.isRuleEmpty(rules);
 
       if (!this.mismatch) {
         if (this.classes.length) {
           this.mismatch = true;
           for (const rule of rules || []) {
-            console.log("test", this.classes, rule);
             if (this.classes.indexOf(rule) !== -1) {
               this.mismatch = false;
               break;
