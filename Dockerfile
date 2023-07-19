@@ -13,7 +13,7 @@ FROM base AS client-dependencies
 WORKDIR /app/client
 RUN pnpm install --frozen-lockfile
 
-FROM base AS client-build
+FROM client-dependencies AS client-build
 WORKDIR /app/client
 RUN pnpm install --frozen-lockfile
 RUN BUILD_TIMESTAMP=$(date +'%a %d.%m.%Y %H:%M') pnpm build:staging
