@@ -9,6 +9,7 @@ RUN BUILD_TIMESTAMP=$(date +'%a %d.%m.%Y %H:%M') pnpm build:${ENV}
 FROM inkvisitor AS server-build
 WORKDIR /app/server
 RUN pnpm run build
+RUN ls
 
 FROM inkvisitor
 
