@@ -20,16 +20,15 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
-          file: ./Dockerfile
-          tags: client-dependencies:latest
-          target: client-dependencies
-          outputs: type=docker,dest=/tmp/client-dependencies.tar.gz
+          file: ./Dockerfile.base
+          tags: base
+          outputs: type=docker,dest=/tmp/base.tar.gz
           
       - name: Cache image.tar
         uses: actions/cache@v2
         with:
-          path: /tmp/client-dependencies.tar.gz
-          key: client-dependencies-${{ github.sha }}.tar.gz
+          path: /tmp/base.tar.gz
+          key: base-${{ github.sha }}.tar.gz
           
   staging-build:
     needs: [client-dependencies]
@@ -45,12 +44,12 @@ jobs:
       - name: Restore cache
         uses: actions/cache@v2
         with:
-          path: /tmp/client-dependencies.tar.gz
-          key: client-dependencies-${{ github.sha }}.tar.gz
+          path: /tmp/base.tar.gz
+          key: base-${{ github.sha }}.tar.gz
           
       - name: Load Docker image
         run: |
-          docker load --input /tmp/client-dependencies.tar.gz
+          docker load --input /tmp/base.tar.gz
           docker image ls -a
           
       - name: Create env file for client
@@ -65,17 +64,6 @@ jobs:
           mkdir -p ./packages/server/secret
           openssl req -x509 -newkey rsa:2048 -nodes -out ./packages/server/secret/cert.pem -keyout ./packages/server/secret/key.pem -days 365 -subj "/C=FR/O=krkr/OU=Domain Control Validated/CN=*"
       
-      - name: Build base image
-        id: docker_build_base
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          file: Dockerfile
-          push: false
-          load: false
-          cache-from: |
-            type=gha,scope=client-dependencies
-          
       - name: Run docker build task
         run: docker-compose build inkvisitor-staging
 
