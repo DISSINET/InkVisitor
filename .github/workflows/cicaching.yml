@@ -45,12 +45,12 @@ jobs:
       - name: Restore cache
         uses: actions/cache@v2
         with:
-          path: client-dependencies.tar.gz
+          path: /tmp/client-dependencies.tar.gz
           key: client-dependencies-${{ github.sha }}.tar.gz
           
       - name: Load Docker image
         run: |
-          docker load --input client-dependencies.tar.gz
+          docker load --input /tmp/client-dependencies.tar.gz
           docker image ls -a
           
       - name: Create env file for client
