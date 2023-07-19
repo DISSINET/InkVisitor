@@ -50,7 +50,7 @@ jobs:
           
       - name: Load Docker image
         run: |
-          docker load --input /tmp/client-dependencies.tar
+          docker load --input client-dependencies.tar.gz
           docker image ls -a
           
       - name: Create env file for client
