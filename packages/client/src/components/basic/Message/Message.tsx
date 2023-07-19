@@ -58,7 +58,7 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
         return (
           <span>
             <b>{`Actant's entity type does not match the Action`}</b>
-            {` - ${position?.section && positionObject[position?.section]}`}
+            {position?.section && ` - ${positionObject[position?.section]}`}
             {entity && ` - [${entity.class}: ${entity.label}]`}
           </span>
         );
@@ -66,7 +66,7 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
         return (
           <span>
             <b>{`This actant position allows no actant`}</b>
-            {` - ${position?.section && positionObject[position?.section]}`}
+            {position?.section && ` - ${positionObject[position?.section]}`}
             {entity && ` - [${entity.class}: ${entity.label}]`}
           </span>
         );
@@ -74,16 +74,15 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
         return (
           <span>
             <b>{`Entity type valencies of the actions not matching`}</b>
-            {` - ${position?.section && positionObject[position?.section]}`}
+            {position?.section && ` - ${positionObject[position?.section]}`}
           </span>
         );
       case WarningTypeEnums.AVU:
-        // TODO: waiting for action ID
         return (
           <span>
             <b>{`Action valency not defined`}</b>
-            {` - ${position?.section && positionObject[position?.section]}`}
-            {` - [A: action.label]`}
+            {position?.section && ` - ${positionObject[position?.section]}`}
+            {entity && ` - [${entity.class}: ${entity.label}]`}
           </span>
         );
 
