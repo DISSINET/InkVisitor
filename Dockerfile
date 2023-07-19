@@ -12,20 +12,20 @@ COPY ./packages .
 
 FROM base AS client-dependencies
 WORKDIR /app/client
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
+RUN pnpm install --frozen-lockfile
 
 FROM client-dependencies AS client-build
 WORKDIR /app/client
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --offline --frozen-lockfile
+RUN pnpm install --offline --frozen-lockfile
 RUN BUILD_TIMESTAMP=$(date +'%a %d.%m.%Y %H:%M') pnpm build:${ENV}
 
 FROM base AS server-dependencies
 WORKDIR /app/server
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store2 pnpm install --frozen-lockfile
+RUN pnpm install --frozen-lockfile
 
 FROM base AS server-build
 WORKDIR /app/server
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store2 pnpm install --frozen-lockfile
+RUN pnpm install --frozen-lockfile
 RUN pnpm run build
 
 
