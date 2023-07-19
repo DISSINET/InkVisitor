@@ -2,7 +2,7 @@ FROM base AS inkvisitor
 
 FROM inkvisitor AS client-build
 WORKDIR /app/client
-COPY env .
+COPY ./packages/client/env /app/client/env
 ARG ENV
 RUN BUILD_TIMESTAMP=$(date +'%a %d.%m.%Y %H:%M') pnpm build:${ENV}
 
