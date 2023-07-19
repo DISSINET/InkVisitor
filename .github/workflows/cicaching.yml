@@ -23,12 +23,12 @@ jobs:
           file: ./Dockerfile
           tags: client-dependencies:latest
           target: client-dependencies
-          outputs: type=docker,dest=client-dependencies.tar
+          outputs: type=docker,dest=/tmp/client-dependencies.tar.gz
         
       - name: Cache image.tar
         uses: actions/cache@v2
         with:
-          path: client-dependencies.tar.gz
+          path: /tmp/client-dependencies.tar.gz
           key: client-dependencies-${{ github.sha }}.tar.gz
           
   staging-build:
