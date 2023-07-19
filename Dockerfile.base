@@ -1,4 +1,4 @@
-FROM gplane/pnpm:8.6.0-node16-alpine as base
+FROM gplane/pnpm:8.6.0-node16-alpine
 
 RUN apk add tzdata
 ENV TZ=Europe/Prague

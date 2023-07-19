@@ -1,16 +1,15 @@
-FROM base
+FROM base AS inkvisitor
 
-ARG ENV
-
-FROM base AS client-build
+FROM inkvisitor AS client-build
 WORKDIR /app/client
+ARG ENV
 RUN BUILD_TIMESTAMP=$(date +'%a %d.%m.%Y %H:%M') pnpm build:${ENV}
 
-FROM base AS server-build
+FROM inkvisitor AS server-build
 WORKDIR /app/server
 RUN pnpm run build
 
-FROM base
+FROM inkvisitor
 
 COPY --from=client-build /app/client/dist /app/client/dist
 COPY --from=server-build /app/server/node_modules /app/server/node_modules
