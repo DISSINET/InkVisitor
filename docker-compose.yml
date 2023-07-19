@@ -44,6 +44,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      cache_from:
+        - client-dependencies:latest
       args:
         ENV: staging
     image: inkvisitor:staging
