@@ -133,7 +133,7 @@ jobs:
           openssl req -x509 -newkey rsa:2048 -nodes -out ./packages/server/secret/cert.pem -keyout ./packages/server/secret/key.pem -days 365 -subj "/C=FR/O=krkr/OU=Domain Control Validated/CN=*"
       
       - name: Run docker build task
-        run: docker build -f Dockerfile.cached -t inkvisitor-staging .
+        run: docker build -f Dockerfile.cached -t inkvisitor:staging .
 
       - name: Save docker-compose stack
         run: docker save inkvisitor:staging | gzip > inkvisitor-staging.tar.gz
