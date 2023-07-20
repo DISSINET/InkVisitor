@@ -362,6 +362,6 @@ jobs:
           podman load -i /var/www/html/apps/inkvisitor-sandbox.tar.gz && 
           podman-compose -f /var/www/html/apps/docker-compose.yml up -d inkvisitor-staging &&
           podman-compose -f /var/www/html/apps/docker-compose.yml up -d inkvisitor-data-import &&
-          podman-compose -f /var/www/html/apps/docker-compose.yml up -d inkvisitor-sandbox &&
+          podman-compose -f /var/www/html/apps/docker-compose.yml up -d inkvisitor-sandbox
           '"
 
