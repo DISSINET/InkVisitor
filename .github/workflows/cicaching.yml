@@ -87,7 +87,7 @@ jobs:
       - uses: actions/cache@v3
         with:
           path: packages/client/dist
-          key: client-staging
+          key: client-staging-${{ github.sha }}
           
   build-client-data-import:
     needs: [preinstall-client]
@@ -137,7 +137,7 @@ jobs:
       - uses: actions/cache@v3
         with:
           path: packages/client/dist
-          key: client-data-import
+          key: client-data-import-${{ github.sha }}
           
   build-client-sandbox:
     needs: [preinstall-client]
@@ -187,7 +187,7 @@ jobs:
       - uses: actions/cache@v3
         with:
           path: packages/client/dist
-          key: client-sandbox     
+          key: client-sandbox-${{ github.sha }}     
                     
   build-staging:
     needs: [build-client-staging]
@@ -203,7 +203,7 @@ jobs:
       - uses: actions/cache@v3
         with:
           path: packages/client/dist
-          key: client-staging
+          key: client-staging-${{ github.sha }}
           
       - name: Generate certificates
         run: |
@@ -236,7 +236,7 @@ jobs:
       - uses: actions/cache@v3
         with:
           path: packages/client/dist
-          key: client-data-import
+          key: client-data-import-${{ github.sha }}
           
       - name: Generate certificates
         run: |
@@ -269,7 +269,7 @@ jobs:
       - uses: actions/cache@v3
         with:
           path: packages/client/dist
-          key: client-sandbox
+          key: client-sandbox-${{ github.sha }}
           
       - name: Generate certificates
         run: |
