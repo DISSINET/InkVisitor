@@ -82,6 +82,10 @@ jobs:
         run: |
           cd packages/client
           BUILD_TIMESTAMP=$(date +'%a %d.%m.%Y %H:%M') pnpm build:staging
+      - uses: actions/cache@v3
+        with:
+          path: packages/client/dist
+          key: client-staging
           
   client-dependencies:
     name: Build the client-dependencies docker stage
@@ -108,7 +112,7 @@ jobs:
           key: base-${{ github.sha }}.tar.gz
           
   staging-build:
-    needs: [client-dependencies]
+    needs: [build-client-staging]
     name: Build the staging docker image
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -118,31 +122,18 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
         
-      - name: Restore cache
-        uses: actions/cache@v2
+      - uses: actions/cache@v3
         with:
-          path: /tmp/base.tar.gz
-          key: base-${{ github.sha }}.tar.gz
+          path: packages/client/dist
+          key: client-staging
           
-      - name: Load Docker image
-        run: |
-          docker load --input /tmp/base.tar.gz
-          docker image ls -a
-          
-      - name: Create env file for client
-        run: |
-          touch packages/client/env/.env.staging
-          echo "$CLIENT_ENV" >> packages/client/env/.env.staging
-        env:
-          CLIENT_ENV: ${{secrets.CLIENT_ENV}}
-
       - name: Generate certificates
         run: |
           mkdir -p ./packages/server/secret
           openssl req -x509 -newkey rsa:2048 -nodes -out ./packages/server/secret/cert.pem -keyout ./packages/server/secret/key.pem -days 365 -subj "/C=FR/O=krkr/OU=Domain Control Validated/CN=*"
       
       - name: Run docker build task
-        run: docker-compose build inkvisitor-staging
+        run: docker build -f Dockerfile.cached -t inkvisitor-staging .
 
       - name: Save docker-compose stack
         run: docker save inkvisitor:staging | gzip > inkvisitor-staging.tar.gz
