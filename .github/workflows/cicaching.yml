@@ -78,10 +78,12 @@ jobs:
           echo "$CLIENT_ENV" >> packages/client/env/.env.staging
         env:
           CLIENT_ENV: ${{secrets.CLIENT_ENV}}
+      - name: Set current date as env variable
+        run: echo "NOW=$(date +'%Y-%m-%dT%H:%M:%S')" >> $GITHUB_ENV                        
       - name: Build
         run: |
           cd packages/client
-          BUILD_TIMESTAMP=$(date +'%a %d.%m.%Y %H:%M') pnpm build:staging
+          BUILD_TIMESTAMP=$NOW pnpm build:staging
       - uses: actions/cache@v3
         with:
           path: packages/client/dist
@@ -123,13 +125,15 @@ jobs:
       - name: Create env file for client
         run: |
           touch packages/client/env/.env.data-import
-          echo "$CLIENT_ENV" >> packages/client/env/.env.staging
+          echo "$CLIENT_ENV" >> packages/client/env/.env.data-import
         env:
           CLIENT_ENV: ${{secrets.CLIENT_ENV_DATAIMPORT}}
+      - name: Set current date as env variable
+        run: echo "NOW=$(date +'%Y-%m-%dT%H:%M:%S')" >> $GITHUB_ENV          
       - name: Build
         run: |
           cd packages/client
-          BUILD_TIMESTAMP=$(date +'%a %d.%m.%Y %H:%M') pnpm build:data-import
+          BUILD_TIMESTAMP=$NOW pnpm build:data-import
       - uses: actions/cache@v3
         with:
           path: packages/client/dist
@@ -174,10 +178,12 @@ jobs:
           echo "$CLIENT_ENV" >> packages/client/env/.env.sandbox
         env:
           CLIENT_ENV: ${{secrets.CLIENT_ENV_SANDBOX}}
+      - name: Set current date as env variable
+        run: echo "NOW=$(date +'%Y-%m-%dT%H:%M:%S')" >> $GITHUB_ENV                   
       - name: Build
         run: |
           cd packages/client
-          BUILD_TIMESTAMP=$(date +'%a %d.%m.%Y %H:%M') pnpm build:sandbox
+          BUILD_TIMESTAMP=$NOW pnpm build:sandbox
       - uses: actions/cache@v3
         with:
           path: packages/client/dist
