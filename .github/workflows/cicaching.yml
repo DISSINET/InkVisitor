@@ -87,31 +87,103 @@ jobs:
           path: packages/client/dist
           key: client-staging
           
-  client-dependencies:
-    name: Build the client-dependencies docker stage
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
+  build-client-data-import:
+    needs: [preinstall-client]
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        node-version: [16]
     steps:
       - uses: actions/checkout@v3
-    
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
-
-      - name: Build and push
-        uses: docker/build-push-action@v2
+      - uses: pnpm/action-setup@v2
         with:
-          context: .
-          file: ./Dockerfile.base
-          tags: base
-          outputs: type=docker,dest=/tmp/base.tar.gz
-          
-      - name: Cache image.tar
-        uses: actions/cache@v2
+          version: 8
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
         with:
-          path: /tmp/base.tar.gz
-          key: base-${{ github.sha }}.tar.gz
+          node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
+          cache-dependency-path: packages/client/pnpm-lock.yaml
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+      - uses: actions/cache@v3
+        name: Setup pnpm cache
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('packages/client/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+      - name: Install dependencies
+        run: |
+          cd packages/client
+          pnpm install --frozen-lockfile         
+      - name: Create env file for client
+        run: |
+          touch packages/client/env/.env.data-import
+          echo "$CLIENT_ENV" >> packages/client/env/.env.staging
+        env:
+          CLIENT_ENV: ${{secrets.CLIENT_ENV_DATAIMPORT}}
+      - name: Build
+        run: |
+          cd packages/client
+          BUILD_TIMESTAMP=$(date +'%a %d.%m.%Y %H:%M') pnpm build:data-import
+      - uses: actions/cache@v3
+        with:
+          path: packages/client/dist
+          key: client-data-import
           
-  staging-build:
+  build-client-sandbox:
+    needs: [preinstall-client]
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        node-version: [16]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
+          cache-dependency-path: packages/client/pnpm-lock.yaml
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+      - uses: actions/cache@v3
+        name: Setup pnpm cache
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('packages/client/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+      - name: Install dependencies
+        run: |
+          cd packages/client
+          pnpm install --frozen-lockfile         
+      - name: Create env file for client
+        run: |
+          touch packages/client/env/.env.sandbox
+          echo "$CLIENT_ENV" >> packages/client/env/.env.sandbox
+        env:
+          CLIENT_ENV: ${{secrets.CLIENT_ENV_SANDBOX}}
+      - name: Build
+        run: |
+          cd packages/client
+          BUILD_TIMESTAMP=$(date +'%a %d.%m.%Y %H:%M') pnpm build:sandbox
+      - uses: actions/cache@v3
+        with:
+          path: packages/client/dist
+          key: client-sandbox     
+                    
+  build-staging:
     needs: [build-client-staging]
     name: Build the staging docker image
     runs-on: ubuntu-latest
@@ -144,8 +216,74 @@ jobs:
           path: inkvisitor-staging.tar.gz
           key: inkvisitor-staging-${{ github.sha }}.tar.gz
 
+  build-data-import:
+    needs: [build-client-data-import]
+    name: Build the data-import docker image
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+        
+      - uses: actions/cache@v3
+        with:
+          path: packages/client/dist
+          key: client-data-import
+          
+      - name: Generate certificates
+        run: |
+          mkdir -p ./packages/server/secret
+          openssl req -x509 -newkey rsa:2048 -nodes -out ./packages/server/secret/cert.pem -keyout ./packages/server/secret/key.pem -days 365 -subj "/C=FR/O=krkr/OU=Domain Control Validated/CN=*"
+      
+      - name: Run docker build task
+        run: docker build -f Dockerfile.cached -t inkvisitor:data-import .
+
+      - name: Save docker-compose stack
+        run: docker save inkvisitor:data-import | gzip > inkvisitor-data-import.tar.gz
+
+      - name: Cache image.tar
+        uses: actions/cache@v2
+        with:
+          path: inkvisitor-data-import.tar.gz
+          key: inkvisitor-data-import-${{ github.sha }}.tar.gz
+          
+  build-sandbox:
+    needs: [build-client-sandbox]
+    name: Build the sandbox docker image
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+        
+      - uses: actions/cache@v3
+        with:
+          path: packages/client/dist
+          key: client-sandbox
+          
+      - name: Generate certificates
+        run: |
+          mkdir -p ./packages/server/secret
+          openssl req -x509 -newkey rsa:2048 -nodes -out ./packages/server/secret/cert.pem -keyout ./packages/server/secret/key.pem -days 365 -subj "/C=FR/O=krkr/OU=Domain Control Validated/CN=*"
+      
+      - name: Run docker build task
+        run: docker build -f Dockerfile.cached -t inkvisitor:sandbox .
+
+      - name: Save docker-compose stack
+        run: docker save inkvisitor:sandbox | gzip > inkvisitor-sandbox.tar.gz
+
+      - name: Cache image.tar
+        uses: actions/cache@v2
+        with:
+          path: inkvisitor-sandbox.tar.gz
+          key: inkvisitor-sandbox-${{ github.sha }}.tar.gz
+          
   deploy:
-    needs: [staging-build]
+    needs: [build-staging, build-data-import, build-sandbox]
     name: Deploy
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -153,12 +291,24 @@ jobs:
       - name: Checkout InkVisitor
         uses: actions/checkout@v2
 
-      - name: Restore cache
+      - name: Restore cached staging
         uses: actions/cache@v2
         with:
           path: inkvisitor-staging.tar.gz
           key: inkvisitor-staging-${{ github.sha }}.tar.gz
 
+      - name: Restore cached data-import
+        uses: actions/cache@v2
+        with:
+          path: inkvisitor-data-import.tar.gz
+          key: inkvisitor-data-import-${{ github.sha }}.tar.gz
+          
+      - name: Restore cached sandbox
+        uses: actions/cache@v2
+        with:
+          path: inkvisitor-sandbox.tar.gz
+          key: inkvisitor-sandbox-${{ github.sha }}.tar.gz
+          
       - name: Install SSH Key
         uses: shimataro/ssh-key-action@v2
         with:
@@ -192,14 +342,26 @@ jobs:
       - name: Upload image staging
         run: scp inkvisitor-staging.tar.gz ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/var/www/html/apps
         
-      - name: Load image
+      - name: Upload image data-import
+        run: scp inkvisitor-data-import.tar.gz ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/var/www/html/apps
+              
+      - name: Upload image sandbox
+        run: scp inkvisitor-sandbox.tar.gz ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/var/www/html/apps
+                              
+      - name: Restart containers
         run: |
           ssh -tt ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}  -- "sh -c '
           podman container prune -f &&
           podman image prune -f &&
           rm -rf /var/tmp/docker-tar* &&
           podman rm inkvisitor-staging --force || true && 
+          podman rm inkvisitor-data-import --force || true && 
+          podman rm inkvisitor-sandbox --force || true && 
           podman load -i /var/www/html/apps/inkvisitor-staging.tar.gz && 
-          podman-compose -f /var/www/html/apps/docker-compose.yml up -d inkvisitor-staging
+          podman load -i /var/www/html/apps/inkvisitor-data-import.tar.gz && 
+          podman load -i /var/www/html/apps/inkvisitor-sandbox.tar.gz && 
+          podman-compose -f /var/www/html/apps/docker-compose.yml up -d inkvisitor-staging &&
+          podman-compose -f /var/www/html/apps/docker-compose.yml up -d inkvisitor-data-import &&
+          podman-compose -f /var/www/html/apps/docker-compose.yml up -d inkvisitor-sandbox &&
           '"
 
