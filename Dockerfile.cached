@@ -1,0 +1,17 @@
+FROM gplane/pnpm:8.6.0-node16-alpine
+
+RUN apk add tzdata
+ENV TZ=Europe/Prague
+ENV CI=true
+
+WORKDIR /app
+
+COPY ./packages/client/dist /app/client/dist
+COPY ./packages/shared /app/shared
+COPY ./packages/server /app/server
+
+WORKDIR /app/server
+RUN pnpm install --frozen-lockfile
+RUN pnpm run build
+
+CMD ["pnpm", "start:dist"]
