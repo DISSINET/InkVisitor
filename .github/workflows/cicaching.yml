@@ -38,6 +38,47 @@ jobs:
         run: |
           cd packages/client
           pnpm install --frozen-lockfile
+          
+  build-client-staging:
+    needs: [preinstall-client]
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        node-version: [16]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
+          cache-dependency-path: packages/client/pnpm-lock.yaml
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+      - uses: actions/cache@v3
+        name: Setup pnpm cache
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('packages/client/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-            
+      - name: Create env file for client
+        run: |
+          touch packages/client/env/.env.staging
+          echo "$CLIENT_ENV" >> packages/client/env/.env.staging
+        env:
+          CLIENT_ENV: ${{secrets.CLIENT_ENV}}
+      - name: Build
+        run: |
+          cd packages/client
+          BUILD_TIMESTAMP=$(date +'%a %d.%m.%Y %H:%M') pnpm build:staging
+          
   client-dependencies:
     name: Build the client-dependencies docker stage
     runs-on: ubuntu-latest
