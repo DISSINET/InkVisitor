@@ -8,6 +8,11 @@ import React, {
   useState,
 } from "react";
 import { StyledButton, StyledButtonLabel } from "./ButtonStyles";
+import {
+  AutoPlacement,
+  BasePlacement,
+  VariationPlacement,
+} from "@popperjs/core";
 
 interface ButtonProps {
   tooltipLabel?: string;
@@ -25,6 +30,7 @@ interface ButtonProps {
   color?: keyof ThemeColor;
   onClick?: MouseEventHandler<HTMLElement>;
   fullWidth?: boolean;
+  tooltipPosition?: AutoPlacement | BasePlacement | VariationPlacement;
 }
 
 export const Button: React.FC<ButtonProps> = ({
@@ -45,6 +51,7 @@ export const Button: React.FC<ButtonProps> = ({
     // do nothing
   },
   fullWidth = false,
+  tooltipPosition = "auto",
 }) => {
   const [referenceElement, setReferenceElement] =
     useState<HTMLButtonElement | null>(null);
@@ -83,6 +90,7 @@ export const Button: React.FC<ButtonProps> = ({
           content={tooltipContent}
           visible={showTooltip}
           referenceElement={referenceElement}
+          position={tooltipPosition}
         />
       )}
     </>
