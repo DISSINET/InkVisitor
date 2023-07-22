@@ -5,6 +5,7 @@ import { DbEnums, EntityEnums, UserEnums } from "@shared/enums";
 import {
   EntityDoesNotExist,
   InternalServerError,
+  InvalidDeleteError,
   ModelNotValidError,
 } from "@shared/types/errors";
 import User from "@models/user/user";
@@ -99,14 +100,34 @@ export default class Entity implements IEntity, IDbModel {
   }
 
   async getUsedByEntity(db: Connection): Promise<IEntity | null> {
+    for (const index of DbEnums.EntityIdReferenceIndexes) {
+      const entities: IEntity[] = await rethink
+        .table(Entity.table)
+        .getAll(this.id, { index })
+        .run(db);
+
+      if (entities.length) {
+        return entities[0];
+      }
+    }
+
+    return null;
+  }
+
+  async delete(db: Connection): Promise<WriteResult> {
     if (!this.id) {
       throw new InternalServerError(
         "delete called on entity with undefined id"
       );
     }
 
-    if (db) {
-      await emitter.emit(EventTypes.BEFORE_ENTITY_DELETE, db, this.id);
+    const usedBy = await this.getUsedByEntity(db);
+    if (usedBy) {
+      throw new InvalidDeleteError(
+        `Referenced by entity ${usedBy.id}${
+          usedBy.label ? "(" + usedBy.label + ")" : ""
+        }`
+      );
     }
 
     const result = await rethink
@@ -114,10 +135,6 @@ export default class Entity implements IEntity, IDbModel {
       .get(this.id)
       .delete()
       .run(db);
-
-    if (result.deleted && db) {
-      await emitter.emit(EventTypes.AFTER_ENTITY_DELETE, db, this.id);
-    }
 
     return result;
   }

@@ -14,6 +14,7 @@ import { EntityEnums } from "@shared/enums";
 import { getEntityClass } from "@models/factory";
 import entities from "@modules/entities";
 import Reference from "./reference";
+import { InvalidDeleteError } from "@shared/types/errors";
 
 export const prepareEntity = (
   classValue: EntityEnums.Class = EntityEnums.Class.Concept
@@ -154,82 +155,29 @@ describe("test Entity.update", function () {
 
 describe("test Entity.delete", function () {
   describe("one existing linked statement", () => {
-    it("should correctly remove entity from statement's data.actants", async () => {
-      const db = new Db();
-      await db.initDb();
-
-      const entity = new Entity({});
-      await entity.save(db.connection);
-      const statement = new Statement({});
-      statement.data.actants.push(
-        new StatementActant({
-          entityId: entity.id,
-        })
-      );
-      await statement.save(db.connection);
-
-      await entity.delete(db.connection);
-
-      // after the deletion, the linked statement should reflect this ->
-      // empty actants array
-      const existingStatement = await findEntityById<IStatement>(
-        db,
-        statement.id
-      );
-      expect(existingStatement.data.actants).toHaveLength(0);
-
-      await clean(db);
-    });
-  });
-
-  describe("two existing linked statements", () => {
     const db = new Db();
-    let statementViaActants: Statement;
-    let statementViaActions: Statement;
+    const entity = new Entity({ id: Math.random().toString() });
+    const statement = new Statement({});
+    statement.data.actants.push(
+      new StatementActant({
+        entityId: entity.id,
+      })
+    );
 
     beforeAll(async () => {
       await db.initDb();
-      const entity = new Entity({});
       await entity.save(db.connection);
-
-      statementViaActants = new Statement({});
-      statementViaActants.data.actants.push(
-        new StatementActant({
-          entityId: entity.id,
-        })
-      );
-      await statementViaActants.save(db.connection);
-
-      statementViaActions = new Statement({});
-      statementViaActions.data.actions.push(
-        new StatementAction({
-          actionId: entity.id,
-        })
-      );
-      await statementViaActions.save(db.connection);
-      await entity.delete(db.connection);
+      await statement.save(db.connection);
     });
 
-    afterAll(async () => await clean(db));
-
-    it("should correctly remove actant from actants array for the first statement", async () => {
-      // after the deletion, the linked statement should reflect this ->
-      // empty actants array
-      const existinStatementViaActants = await findEntityById<IStatement>(
-        db,
-        statementViaActants.id
-      );
-      expect(existinStatementViaActants.data.actants).toHaveLength(0);
+    afterAll(async () => {
+      await clean(db);
     });
 
-    it("should correctly remove actant from actions array for the second statement", async () => {
-      // after the deletion, the linked statement should reflect this ->
-      // empty actants array
-      const existinStatementViaAction = await findEntityById<IStatement>(
-        db,
-        statementViaActions.id
+    it("should correctly issue error when trying to remove entity still referenced in statement's data.actants", async () => {
+      await expect(entity.delete(db.connection)).rejects.toThrowError(
+        InvalidDeleteError
       );
-      expect(existinStatementViaAction.data.actions).toHaveLength(0);
     });
   });
 });
