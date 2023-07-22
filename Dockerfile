@@ -1,23 +1,23 @@
-FROM base AS inkvisitor
+FROM gplane/pnpm:8.6.0-node16-alpine as build-env
 
-FROM inkvisitor AS client-build
-WORKDIR /app/client
-COPY ./packages/client/env /app/client/env
+RUN apk add tzdata
+ENV TZ=Europe/Prague
+
+WORKDIR /app
+
 ARG ENV
-RUN BUILD_TIMESTAMP=$(date +'%a %d.%m.%Y %H:%M') pnpm build:${ENV}
 
-FROM inkvisitor AS server-build
-WORKDIR /app/server
-RUN pnpm run build
-RUN ls
+COPY ./packages .
 
-FROM inkvisitor
+RUN cd client && pnpm install && BUILD_TIMESTAMP=$(date +'%a %d.%m.%Y %H:%M') pnpm build:${ENV}
+RUN rm -rf client/node_modules client/src
 
-COPY --from=client-build /app/client/dist /app/client/dist
-COPY --from=server-build /app/server/node_modules /app/server/node_modules
-RUN ls /app/server
-COPY --from=server-build /app/server/dist /app/server/dist
-COPY ./packages/server/secret /app/server/secret
+RUN cd server && pnpm install && pnpm build
+RUN cd server && pnpm prune --prod
+
+FROM gplane/pnpm:8.6.0-node16-alpine
+
+COPY --from=build-env /app /app
 
 WORKDIR /app/server
 

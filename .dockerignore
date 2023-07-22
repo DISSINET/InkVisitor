@@ -1,8 +1,12 @@
 .git
-.idea
 .github
-**/node_modules
-**/build
-packages/database
-data
+.idea
+.vscode
+database_data
 docs
+logo
+
+**/node_modules
+packages/database
+**/README.md
+**/Dockerfile*
