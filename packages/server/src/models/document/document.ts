@@ -1,5 +1,12 @@
 import { IDbModel } from "@models/common";
-import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
+import {
+  r as rethink,
+  Connection,
+  WriteResult,
+  RTable,
+  RSelection,
+  RQuery,
+} from "rethinkdb-ts";
 import { IDocument } from "@shared/types";
 import { UserEnums } from "@shared/enums";
 import { InternalServerError, ModelNotValidError } from "@shared/types/errors";
@@ -171,15 +178,20 @@ export default class Document implements IDocument, IDbModel {
   }
 
   /**
-   * Retrieves all documents
+   * Retrieves all documents or filtered by ids
    * @param db Connection database connection
+   * @param ids document ids
    * @returns Promise<IDocument[]> list of documents
    */
-  static async getAll(db: Connection): Promise<IDocument[]> {
-    const entries = await rethink
-      .table(Document.table)
-      .orderBy(rethink.asc("createdAt"))
-      .run(db);
-    return entries && entries.length ? entries : [];
+  static async getAll(db: Connection, ids?: string[]): Promise<Document[]> {
+    let q: RTable = rethink.table(Document.table);
+
+    if (ids) {
+      q = q.getAll(...ids) as RTable;
+    }
+
+    const entries = await q.orderBy(rethink.asc("createdAt")).run(db);
+
+    return entries && entries.length ? entries.map((e) => new Document(e)) : [];
   }
 }

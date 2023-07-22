@@ -17,6 +17,7 @@ import { mergeDeep } from "@common/functions";
 import { IRequest } from "src/custom_typings/request";
 import Document from "@models/document/document";
 import ResponseDocument from "@models/document/response";
+import { IRequestDocument, IRequestDocuments } from "@shared/types/document";
 
 export default Router()
   /**
@@ -30,7 +31,7 @@ export default Router()
    *       - in: query
    *         name: search params
    *         schema:
-   *           $ref: "#/components/schemas/IRequestDocument"
+   *           $ref: "#/components/schemas/IRequestDocuments"
    *         required: true
    *         description: search options for the query
    *         style: form
@@ -43,14 +44,21 @@ export default Router()
    *             schema:
    *               type: array
    *               items:
-   *                 $ref: "#/components/schemas/IResponseDocument"
+   *                 $ref: "#/components/schemas/IResponseDocumentDetail"
    */
   .get(
     "/",
-    asyncRouteHandler<IResponseDocument[]>(async (request: IRequest) => {
-      const docs = await Document.getAll(request.db.connection);
-      return docs.map((d) => new ResponseDocument(d));
-    })
+    asyncRouteHandler<IResponseDocumentDetail[]>(
+      async (request: IRequestDocuments) => {
+        const docs = await Document.getAll(
+          request.db.connection,
+          typeof request.query.ids === "string"
+            ? (request.query.ids as string).split(",")
+            : request.query.ids
+        );
+        return docs.map((d) => new ResponseDocument(d));
+      }
+    )
   )
   /**
    * @openapi
@@ -83,24 +91,26 @@ export default Router()
    */
   .get(
     "/:documentId?",
-    asyncRouteHandler<IResponseDocumentDetail>(async (request: IRequest) => {
-      const id = request.params.documentId;
+    asyncRouteHandler<IResponseDocumentDetail>(
+      async (request: IRequestDocument) => {
+        const id = request.params.documentId;
 
-      if (!id) {
-        throw new BadParams("document id has to be set");
+        if (!id) {
+          throw new BadParams("document id has to be set");
+        }
+
+        const existing = await Document.findDocumentById(
+          request.db.connection,
+          id
+        );
+
+        if (!existing) {
+          throw DocumentDoesNotExist.forId(id);
+        }
+
+        return new ResponseDocument(existing);
       }
-
-      const existing = await Document.findDocumentById(
-        request.db.connection,
-        id
-      );
-
-      if (!existing) {
-        throw DocumentDoesNotExist.forId(id);
-      }
-
-      return new ResponseDocument(existing);
-    })
+    )
   )
   /**
    * @openapi
