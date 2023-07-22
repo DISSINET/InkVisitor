@@ -1,9 +1,8 @@
-name: deploy-1772-use-caching-in-ci
-
+name: dev
 on:
   push:
     branches:
-      - 1772-use-caching-in-ci
+      - dev
 
 jobs: 
   preinstall-client:
