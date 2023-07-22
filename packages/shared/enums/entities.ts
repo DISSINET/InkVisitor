@@ -6,12 +6,17 @@ export enum TerritoryType {
 export namespace EntityEnums {
   // Helper function for testing if the class is part of PLOGESTRB group
   export const IsPLOGESTRB = (entityClass: Class): boolean => {
-    return PLOGESTRB.indexOf(entityClass) !== -1
-  }
+    return PLOGESTRB.indexOf(entityClass) !== -1;
+  };
 
   // Helper function for testing if the class is part of PLOGESTR group
   export const IsPLOGESTR = (entityClass: Class): boolean => {
-    return PLOGESTR.indexOf(entityClass) !== -1
+    return PLOGESTR.indexOf(entityClass) !== -1;
+  };
+
+  // Predicate for testing if input value is one of accepted class values
+  export const IsClass = function(input: unknown, ...accepted: Class[]): boolean {
+    return accepted.indexOf(input as Class) !== -1
   }
 
   export enum Class {
@@ -59,6 +64,15 @@ export namespace EntityEnums {
   }
 
   export type ExtendedClass = Class | Extension;
+
+  /**
+   * Helper function for testing if input value is valid extended class value
+   * @param input
+   * @returns
+   */
+  export const IsExtendedClass = (input: unknown): boolean => {
+    return Object.values(Class).indexOf(input as any) !== -1 || Object.values(Extension).indexOf(input as any) !== -1
+  }
 
   export enum LogicalType {
     Definite = "1",
@@ -189,5 +203,23 @@ export namespace EntityEnums {
   export enum Order {
     First = -9999,
     Last = 9999,
+  }
+
+  export enum ConceptPartOfSpeech {
+    Empty = "",
+    Noun = "noun",
+    Adj = "adj",
+    Pron = "pron",
+    Adv = "adv",
+    Num = "num",
+    Adp = "adp",
+    CConj = "cconj",
+    SConj = "sconj",
+    Det = "det",
+    Intj = "intj",
+    Part = "part",
+  }
+  export enum ActionPartOfSpeech {
+    Verb = "verb",
   }
 }

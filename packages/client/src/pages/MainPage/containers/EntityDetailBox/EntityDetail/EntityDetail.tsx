@@ -8,7 +8,7 @@ import {
   Relation,
 } from "@shared/types";
 import api from "api";
-import { Button, Loader, Submit } from "components";
+import { Button, Loader, Message, Submit } from "components";
 import {
   ApplyTemplateModal,
   AuditTable,
@@ -601,6 +601,10 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
             {/* Relations */}
             <StyledDetailSection>
               <StyledDetailSectionHeader>Relations</StyledDetailSectionHeader>
+              {entity.warnings &&
+                entity.warnings.map((warning, key) => {
+                  return <Message key={key} warning={warning} />;
+                })}
               <StyledDetailSectionContent>
                 <EntityDetailRelations
                   entity={entity}

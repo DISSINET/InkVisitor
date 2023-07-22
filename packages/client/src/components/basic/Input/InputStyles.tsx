@@ -62,43 +62,6 @@ export const StyledInput = styled.input<IValueStyle>`
     border-width: ${({ theme }) => theme.borderWidth[1]};
   }
 `;
-export const StyledSelect = styled.select<IValueStyle>`
-  height: ${({ theme }) => theme.space[10]};
-  text-align: left;
-  background-color: ${({ inverted, theme }) =>
-    inverted ? theme.color["gray"][200] : theme.color["white"]};
-  border-width: ${({ theme }) => theme.borderWidth[1]};
-  border-color: ${({ suggester, theme }) =>
-    suggester ? theme.color["primary"] : theme.color["gray"][500]};
-  font-size: ${({ theme }) => theme.fontSize["xs"]};
-  font-weight: bold;
-  width: ${({ width }) => getWidth(width)};
-  padding-left: ${({ theme }) => theme.space[3]};
-  background: ${({ disabled, theme }) =>
-    disabled ? theme.background["stripes"] : ""};
-  cursor: ${({ disabled }) => (disabled ? "not-allowed" : "default")};
-  resize: none;
-  :focus {
-    outline: 0;
-  }
-`;
-export const StyledSelectReadonly = styled.input<IValueStyle>`
-  width: ${({ width }) => getWidth(width)};
-  background-color: ${({ inverted, theme }) =>
-    inverted ? theme.color["gray"][200] : theme.color["white"]};
-  border-color: ${({ suggester, theme }) =>
-    suggester ? theme.color["primary"] : theme.color["gray"][400]};
-  border-width: ${({ theme }) => theme.borderWidth[1]};
-  font-weight: bold;
-  font-size: ${({ theme }) => theme.fontSize["xs"]};
-  padding-left: ${({ theme }) => theme.space[3]};
-  cursor: default;
-  border-right: none;
-
-  :focus {
-    outline: 0;
-  }
-`;
 
 interface StyledTextArea extends IValueStyle {
   fullHeightTextArea: boolean;

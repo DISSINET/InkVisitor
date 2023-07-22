@@ -19,6 +19,7 @@ import {
   Dropdown,
   Input,
   Loader,
+  Message,
   MultiInput,
   Submit,
 } from "components";
@@ -69,6 +70,7 @@ import { StatementEditorActantTable } from "./StatementEditorActantTable/Stateme
 import { StatementEditorActionTable } from "./StatementEditorActionTable/StatementEditorActionTable";
 import { StatementEditorOrdering } from "./StatementEditorOrdering/StatementEditorOrdering";
 import { StatementEditorSectionButtons } from "./StatementEditorSectionButtons/StatementEditorSectionButtons";
+import { TiWarningOutline } from "react-icons/ti";
 
 interface StatementEditor {
   statement: IResponseStatement;
@@ -550,6 +552,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   const [showSubmitSection, setShowSubmitSection] = useState<
     "actants" | "actions" | "references" | false
   >(false);
+  const [showWarnings, setShowWarnings] = useState(false);
 
   return (
     <>
@@ -685,6 +688,32 @@ export const StatementEditor: React.FC<StatementEditor> = ({
             />
           </StyledEditorSectionContent>
         </StyledEditorSection>
+
+        {statement.warnings.length > 0 && (
+          <StyledEditorSection>
+            <Button
+              icon={<TiWarningOutline size={16} />}
+              label={`${statement.warnings.length}`}
+              onClick={() => setShowWarnings(!showWarnings)}
+              color="warning"
+              tooltipLabel={showWarnings ? "hide warnings" : "show warnings"}
+              inverted={!showWarnings}
+              tooltipPosition="right"
+            />
+            {showWarnings &&
+              statement.warnings
+                .sort((a, b) => a.type.localeCompare(b.type))
+                .map((warning, key) => {
+                  return (
+                    <Message
+                      key={key}
+                      warning={warning}
+                      entities={statement.entities}
+                    />
+                  );
+                })}
+          </StyledEditorSection>
+        )}
 
         {/* Actions */}
         <StyledEditorSection

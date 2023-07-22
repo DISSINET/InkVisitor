@@ -1,15 +1,7 @@
 import { animated } from "@react-spring/web";
 import styled from "styled-components";
-import {
-  space1,
-  space2,
-  space3,
-  space4,
-  space5,
-  space6,
-  space7,
-} from "Theme/constants";
-import { Colors } from "types";
+import { space2, space4, space5, space6, space7 } from "Theme/constants";
+import { ThemeColor } from "Theme/theme";
 
 interface ModalWrap {}
 export const StyledModalWrap = styled.div<ModalWrap>`
@@ -68,7 +60,7 @@ export const StyledCard = styled(animated.div)<Card>`
 `;
 
 interface StyledCardHeader {
-  color?: (typeof Colors)[number];
+  $color?: keyof ThemeColor;
 }
 export const StyledCardHeader = styled.header<StyledCardHeader>`
   display: flex;

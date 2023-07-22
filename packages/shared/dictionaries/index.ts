@@ -14,6 +14,8 @@ import { moodVariantsDict } from "./moodvariants";
 import { partitivityDict } from "./partitivity";
 import { virtualityDict } from "./virtuality";
 import { operatorDict } from "./operator";
+import { conceptPartOfSpeechDict } from "./partofspeech";
+import { actionPartOfSpeechDict } from "./partofspeech";
 
 export {
   certaintyDict,
@@ -32,4 +34,6 @@ export {
   partitivityDict,
   virtualityDict,
   operatorDict,
+  conceptPartOfSpeechDict,
+  actionPartOfSpeechDict,
 };

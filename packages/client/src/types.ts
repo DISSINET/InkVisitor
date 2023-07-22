@@ -1,5 +1,6 @@
 import { EntityEnums } from "@shared/enums";
 import { IEntity, IStatementActant, IStatementAction } from "@shared/types";
+import { ThemeColor } from "Theme/theme";
 
 export const Colors = [
   "black",
@@ -26,7 +27,7 @@ export const Colors = [
 
 interface IEntityColor {
   entityClass: EntityEnums.ExtendedClass;
-  color: (typeof Colors)[number];
+  color: keyof ThemeColor;
 }
 
 // Use for colors, for dropdowns use entity.ts dictionary

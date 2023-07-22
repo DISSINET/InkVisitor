@@ -1,7 +1,6 @@
+import theme from "Theme/theme";
 import React from "react";
 import { DotLoader } from "react-spinners";
-import theme from "Theme/theme";
-import { Colors } from "types";
 import { StyledLoaderWrap } from "./LoaderStyles";
 
 interface Loader {

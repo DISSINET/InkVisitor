@@ -328,6 +328,25 @@ class Api {
     }
   }
 
+
+  /*
+    This request will update the password of the user represented by userId
+    Optionally use "me" as placeholder for the userId
+  */
+  async updatePassword(
+    userId: string,
+    password: string,
+  ): Promise<AxiosResponse<IResponseGeneric>> {
+    try {
+      const response = await this.connection.put(`/users/${userId}`, {
+        password
+      });
+      return response;
+    } catch (err: any | AxiosError) {
+      throw { ...err.response.data };
+    }
+  }
+
   /*
     Same request as resetPassword, just using currenly logged user for specyfing the target
   */

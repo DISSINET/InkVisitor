@@ -26,6 +26,7 @@ import {
   ROOT_TERRITORY_ID,
   StatementObject,
 } from "@shared/types/statement";
+import { randomUUID } from "crypto";
 
 export class StatementClassification implements IStatementClassification {
   id = "";
@@ -104,6 +105,20 @@ export class StatementActant implements IStatementActant, IModel {
   isValid(): boolean {
     return true;
   }
+
+  /**
+   * Resets IDs of nested objects
+   */
+  resetIds() {
+    this.id = randomUUID();
+    this.props.forEach((p) => p.resetIds());
+    this.identifications.forEach((i) => {
+      i.id = randomUUID();
+    });
+    this.classifications.forEach((c) => {
+      c.id = randomUUID();
+    });
+  }
 }
 
 export class StatementTerritory implements IStatementDataTerritory {
@@ -163,6 +178,14 @@ export class StatementAction implements IStatementAction {
     }
 
     return true;
+  }
+
+  /**
+   * Resets IDs of nested objects
+   */
+  resetIds() {
+    this.id = randomUUID();
+    this.props.forEach((p) => p.resetIds());
   }
 }
 
@@ -774,6 +797,16 @@ class Statement extends Entity implements IStatement {
       }
     },
   };
+
+  /**
+   * Resets IDs of nested objects
+   */
+  resetIds() {
+    super.resetIds();
+
+    this.data.actants.forEach((a) => a.resetIds());
+    this.data.actions.forEach((a) => a.resetIds());
+  }
 }
 
 export default Statement;

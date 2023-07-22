@@ -70,6 +70,7 @@ const datasets: Record<string, DbSchema> = {
       transform: function () {},
     },
   },
+
   relationstest: {
     users: {
       tableName: "users",
@@ -145,6 +146,7 @@ const datasets: Record<string, DbSchema> = {
       transform: function () {},
     },
   },
+
   allparsed: {
     users: {
       tableName: "users",
@@ -169,6 +171,19 @@ const datasets: Record<string, DbSchema> = {
           if (!entity.createdAt) {
             entity.createdAt = new Date();
           }
+
+          // fix missing entity pos
+          if (entity.class === EntityEnums.Class.Concept) {
+            if (!entity.data.pos) {
+              entity.data.pos = EntityEnums.ConceptPartOfSpeech.Empty;
+            }
+          }
+          if (entity.class === EntityEnums.Class.Action) {
+            if (!entity.data.pos) {
+              entity.data.pos = EntityEnums.ActionPartOfSpeech.Verb;
+            }
+          }
+
           return entity;
         });
       },

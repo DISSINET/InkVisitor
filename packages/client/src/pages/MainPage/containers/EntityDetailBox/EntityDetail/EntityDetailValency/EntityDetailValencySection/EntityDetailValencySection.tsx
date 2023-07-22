@@ -163,11 +163,11 @@ export const EntityDetailValencySection: React.FC<
     valencyEntitiesOptions.filter((i: any) => {
       switch (relationType) {
         case RelationEnums.Type.SubjectSemantics:
-          return (entity as IAction).data.entities?.s.includes(i.value);
+          return (entity as IAction).data.entities?.s?.includes(i.value);
         case RelationEnums.Type.Actant1Semantics:
-          return (entity as IAction).data.entities?.a1.includes(i.value);
+          return (entity as IAction).data.entities?.a1?.includes(i.value);
         case RelationEnums.Type.Actant2Semantics:
-          return (entity as IAction).data.entities?.a2.includes(i.value);
+          return (entity as IAction).data.entities?.a2?.includes(i.value);
       }
     });
 

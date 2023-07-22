@@ -1,11 +1,6 @@
 import { EntityEnums } from "@shared/enums";
-import {
-  IDocument,
-  IEntity,
-  IReference,
-  IResponseDetail,
-  IResponseDocument,
-} from "@shared/types";
+import { IEntity, IReference, IResponseDocument } from "@shared/types";
+import { excludedSuggesterEntities } from "Theme/constants";
 import { Button } from "components";
 import {
   EntityDropzone,
@@ -13,18 +8,17 @@ import {
   EntityTag,
 } from "components/advanced";
 import React from "react";
-import { FaExternalLinkAlt, FaTrashAlt, FaUnlink } from "react-icons/fa";
-import { excludedSuggesterEntities } from "Theme/constants";
-import {
-  StyledReferencesListButtons,
-  StyledReferencesListColumn,
-  StyledReferenceValuePartLabel,
-} from "./EntityReferenceTableStyles";
+import { FaExternalLinkAlt, FaTrashAlt } from "react-icons/fa";
 import {
   GrDocument,
   GrDocumentMissing,
   GrDocumentVerified,
 } from "react-icons/gr";
+import {
+  StyledReferenceValuePartLabel,
+  StyledReferencesListButtons,
+  StyledReferencesListColumn,
+} from "./EntityReferenceTableStyles";
 
 interface EntityReferenceTableRow {
   reference: IReference;
@@ -143,7 +137,6 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
                   handleChangeValue(reference.id, newSelectedId);
                 }}
                 categoryTypes={[EntityEnums.Class.Value]}
-                excludedEntityClasses={excludedSuggesterEntities}
                 isInsideTemplate={isInsideTemplate}
                 territoryParentId={territoryParentId}
               />

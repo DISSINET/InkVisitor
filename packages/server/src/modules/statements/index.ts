@@ -9,6 +9,7 @@ import {
 } from "@shared/types/errors";
 import { asyncRouteHandler } from "..";
 import {
+  IProp,
   IReference,
   IResponseGeneric,
   IResponseStatement,
@@ -355,12 +356,14 @@ export default Router()
 
       for (const stmtData of statements) {
         const model = new Statement({ ...(stmtData as IStatement) });
+
         //update territory
         model.data.territory = new StatementTerritory({
           territoryId: newTerritoryId,
         });
-        // make sure the id will be created anew
-        model.id = "";
+
+        model.resetIds();
+
         await model.save(req.db.connection);
         newIds.push(model.id);
 
@@ -377,7 +380,7 @@ export default Router()
         }
       }
 
-      let msg = `${statementsCount} statements has been copied under '${territory.label}'`;
+      let msg = `${statementsCount} statements have been copied under '${territory.label}'`;
       if (relsErr) {
         msg += ", but without complete relations";
       }

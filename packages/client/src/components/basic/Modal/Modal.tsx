@@ -1,7 +1,7 @@
+import { config, useSpring } from "@react-spring/web";
+import { ThemeColor } from "Theme/theme";
 import { Loader } from "components";
 import React, { FC, ReactNode } from "react";
-import { config, useSpring } from "@react-spring/web";
-import { Colors } from "types";
 import { ModalKeyPress } from "./ModalKeyPress";
 import {
   StyledBackground,
@@ -99,12 +99,12 @@ export const ModalCard: FC<ModalCard> = ({
 
 interface ModalHeader {
   title?: string | React.ReactElement;
-  color?: (typeof Colors)[number];
+  color?: keyof ThemeColor;
 }
 export const ModalHeader: FC<ModalHeader> = ({ title, color }) => {
   return (
     <>
-      <StyledCardHeader color={color}>
+      <StyledCardHeader $color={color}>
         <StyledCardTitle>{title}</StyledCardTitle>
       </StyledCardHeader>
     </>
