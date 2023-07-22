@@ -22,7 +22,7 @@ interface Modal {
   onEnterPress?: () => void;
   showModal: boolean;
   disableBgClick?: boolean;
-  width?: "full" | "fat" | "normal" | "thin" | number;
+  width?: "full" | "fat" | "normal" | "auto" | number;
   disableEscapeClose?: boolean;
   disableBackground?: boolean;
   isLoading?: boolean;
@@ -77,7 +77,7 @@ export const Modal: FC<Modal> = ({
 
 interface ModalCard {
   children?: ReactNode;
-  width: "full" | "fat" | "normal" | "thin" | number;
+  width: "full" | "fat" | "normal" | "auto" | number;
   animatedMount: any;
   isLoading?: boolean;
   fullHeight: boolean;

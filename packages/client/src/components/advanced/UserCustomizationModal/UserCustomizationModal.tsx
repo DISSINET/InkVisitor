@@ -204,7 +204,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
     <div>
       <Modal
         showModal={showModal}
-        width="thin"
+        width="auto"
         onEnterPress={handleSubmit}
         onClose={onClose}
       >

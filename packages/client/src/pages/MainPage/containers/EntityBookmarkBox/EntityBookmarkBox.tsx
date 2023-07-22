@@ -229,7 +229,7 @@ export const EntityBookmarkBox: React.FC = () => {
       <Modal
         key="new-bookmar-modal"
         showModal={!!editingFolder}
-        width="thin"
+        width="auto"
         onEnterPress={() => acceptEditingFolderMutation.mutate()}
         onClose={cancelEditingFolder}
       >

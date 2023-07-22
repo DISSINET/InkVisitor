@@ -27,10 +27,10 @@ export const StyledBackground = styled(animated.div)`
 `;
 
 interface Card {
-  width: "full" | "fat" | "normal" | "thin" | number;
+  width: "full" | "fat" | "normal" | "auto" | number;
   $fullHeight: boolean;
 }
-const getWidth = (width: "full" | "fat" | "normal" | "thin" | number) => {
+const getWidth = (width: "full" | "fat" | "normal" | "auto" | number) => {
   if (typeof width === "number") {
     return `${width / 10}rem`;
   } else {
@@ -41,13 +41,14 @@ const getWidth = (width: "full" | "fat" | "normal" | "thin" | number) => {
         return "50rem";
       case "fat":
         return "100rem";
-      case "thin":
+      case "auto":
         return "auto";
     }
   }
 };
 export const StyledCard = styled(animated.div)<Card>`
   width: ${({ width }) => getWidth(width)};
+  max-width: 100%;
   height: ${({ $fullHeight }) => ($fullHeight ? "100%" : "")};
   display: flex;
   flex-direction: column;

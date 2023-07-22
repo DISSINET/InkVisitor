@@ -43,7 +43,7 @@ export const LoginModal: React.FC = () => {
   return redirectToMain ? (
     <Navigate to="/" />
   ) : (
-    <Modal showModal disableBgClick width="thin" onEnterPress={handleLogIn}>
+    <Modal showModal disableBgClick width="auto" onEnterPress={handleLogIn}>
       <StyledContentWrap>
         <StyledHeading>{"Log In"}</StyledHeading>
         <StyledInputRow>

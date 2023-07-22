@@ -75,7 +75,7 @@ export const TemplateListRemoveModal: React.FC<TemplateListRemoveModal> = ({
     <Modal
       key="remove"
       showModal={showModal}
-      width="thin"
+      width="auto"
       onEnterPress={() => {
         handleRemoveTemplateAccept();
       }}

@@ -1,10 +1,11 @@
 import { EntityEnums } from "@shared/enums";
 import { IReference, IResponseTerritory } from "@shared/types";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import {
   Button,
   ButtonGroup,
+  Input,
   Modal,
   ModalContent,
   ModalFooter,
@@ -86,6 +87,41 @@ export const ManageTerritoryReferencesModal: React.FC<
     setShowModal(true);
   }, []);
 
+  const queryClient = useQueryClient();
+
+  const updateEntityMutation = useMutation(
+    async (newReferences: IReference[]) =>
+      await api.entityUpdate(managedTerritory.id, {
+        references: newReferences,
+      }),
+    {
+      onSuccess: (data, variables) => {
+        queryClient.invalidateQueries(["resourcesWithDocuments"]);
+        queryClient.invalidateQueries(["documents"]);
+      },
+    }
+  );
+
+  const handleChangeResource = (refId: string, newReSourceId: string) => {
+    const newReferences = [...managedTerritory.references];
+    newReferences.forEach((ref: IReference) => {
+      if (ref.id === refId) {
+        ref.resource = newReSourceId;
+      }
+    });
+    updateEntityMutation.mutate(newReferences);
+  };
+
+  const handleChangeValue = (refId: string, newValueId: string) => {
+    const newReferences = [...managedTerritory.references];
+    newReferences.forEach((ref: IReference) => {
+      if (ref.id === refId) {
+        ref.value = newValueId;
+      }
+    });
+    updateEntityMutation.mutate(newReferences);
+  };
+
   const [editedRow, setEditedRow] = useState<false | number>(false);
 
   const columns = useMemo<Column<any>[]>(
@@ -99,9 +135,26 @@ export const ManageTerritoryReferencesModal: React.FC<
           return (
             <>
               {resource ? (
-                <EntityTag entity={resource} />
+                <EntityTag
+                  entity={resource}
+                  unlinkButton={{
+                    onClick: () =>
+                      handleChangeResource(row.original.reference.id, ""),
+                  }}
+                />
               ) : (
-                row.original.reference.resource
+                <EntitySuggester
+                  openDetailOnCreate
+                  territoryActants={[]}
+                  onSelected={(newSelectedId: string) => {
+                    handleChangeResource(
+                      row.original.reference.id,
+                      newSelectedId
+                    );
+                  }}
+                  disableTemplatesAccept
+                  categoryTypes={[EntityEnums.Class.Resource]}
+                />
               )}
             </>
           );
@@ -114,9 +167,23 @@ export const ManageTerritoryReferencesModal: React.FC<
           return (
             <>
               {part ? (
-                <EntityTag entity={part} />
+                <EntityTag
+                  entity={part}
+                  unlinkButton={{
+                    onClick: () =>
+                      handleChangeValue(row.original.reference.id, ""),
+                  }}
+                />
               ) : (
-                row.original.reference.value
+                <EntitySuggester
+                  openDetailOnCreate
+                  territoryActants={[]}
+                  onSelected={(newSelectedId: string) => {
+                    handleChangeValue(row.original.reference.id, newSelectedId);
+                  }}
+                  disableTemplatesAccept
+                  categoryTypes={[EntityEnums.Class.Value]}
+                />
               )}
             </>
           );
@@ -154,6 +221,7 @@ export const ManageTerritoryReferencesModal: React.FC<
         Cell: ({ row }: CellType) => {
           const { documentId } = row.original;
           const document = documents?.find((d) => d.id === documentId);
+
           return (
             <>
               {documentId && (
@@ -187,19 +255,23 @@ export const ManageTerritoryReferencesModal: React.FC<
               color="warning"
               inverted
               icon={<FaEdit />}
-              onClick={() => setEditedRow(row.index)}
+              onClick={() =>
+                editedRow !== row.index
+                  ? setEditedRow(row.index)
+                  : setEditedRow(false)
+              }
             />
           );
         },
       },
     ],
-    [managedTerritory, documents]
+    [managedTerritory, resourcesWithDocuments, documents, resources, editedRow]
   );
 
   const [replaceSection, setReplaceSection] = useState(false);
 
   return (
-    <Modal showModal={showModal} onClose={onClose}>
+    <Modal showModal={showModal} onClose={onClose} width="auto">
       <ModalHeader
         title={
           <div style={{ display: "flex", alignItems: "center" }}>
@@ -266,7 +338,21 @@ export const ManageTerritoryReferencesModal: React.FC<
           />
         </ButtonGroup>
 
-        <Table columns={columns} data={resourcesWithDocuments} disableHeading />
+        <div style={{ display: "flex" }}>
+          <Table
+            columns={columns}
+            data={resourcesWithDocuments}
+            disableHeading
+          />
+
+          {editedRow !== false && (
+            <Input
+              type="textarea"
+              onChangeFn={(value) => console.log(value)}
+              value={editedRow.toString()}
+            />
+          )}
+        </div>
       </ModalContent>
       <ModalFooter>
         <Button color="warning" label="Close" onClick={onClose} />

@@ -58,7 +58,7 @@ export const ApplyTemplateModal: React.FC<ApplyTemplateModal> = ({
   return (
     <Modal
       showModal={showModal}
-      width="thin"
+      width="auto"
       onEnterPress={() => {
         setShowApplyTemplateModal(false);
         handleApplyTemplate();
