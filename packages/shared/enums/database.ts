@@ -14,7 +14,6 @@ export namespace DbEnums {
     export const EntityIdReferenceIndexes = [
       Indexes.PropsRecursive,
       Indexes.StatementDataProps,
-      Indexes.StatementTerritory,
       Indexes.StatementEntities,
       Indexes.StatementActantsCI,
     ]
