@@ -16,7 +16,7 @@ export interface IDbModel extends IModel {
     dbInstance: Connection | undefined,
     updateData: Record<string, unknown>
   ): Promise<WriteResult>;
-  delete(dbInstance: Connection | undefined): Promise<WriteResult>;
+  delete(dbInstance: Connection): Promise<WriteResult>;
 }
 
 export function fillFlatObject<T>(

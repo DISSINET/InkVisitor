@@ -23,10 +23,10 @@ export default class AclPermission implements IDbModel, IResponsePermission {
   }
 
   /**
-  * Stores the permission in the db
-  * @param db db connection
-  * @returns Promise<boolean> to indicate result of the operation
-  */
+   * Stores the permission in the db
+   * @param db db connection
+   * @returns Promise<boolean> to indicate result of the operation
+   */
   async save(dbInstance: Connection | undefined): Promise<boolean> {
     const result = await rethink
       .table(AclPermission.table)
@@ -51,7 +51,7 @@ export default class AclPermission implements IDbModel, IResponsePermission {
       .run(dbInstance);
   }
 
-  delete(dbInstance: Connection | undefined): Promise<WriteResult> {
+  delete(dbInstance: Connection): Promise<WriteResult> {
     return rethink
       .table(AclPermission.table)
       .get(this.id)
@@ -86,7 +86,7 @@ export default class AclPermission implements IDbModel, IResponsePermission {
       })
       .run(dbInstance);
 
-    return data.map(d => new AclPermission(d));
+    return data.map((d) => new AclPermission(d));
   }
 
   static async findById(

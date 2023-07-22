@@ -424,7 +424,7 @@ class Statement extends Entity implements IStatement {
     return result;
   }
 
-  async delete(db: Connection | undefined): Promise<WriteResult> {
+  async delete(db: Connection): Promise<WriteResult> {
     const result = await super.delete(db);
 
     await treeCache.initialize();
@@ -750,53 +750,6 @@ class Statement extends Entity implements IStatement {
       return a.data.territory.order - b.data.territory.order;
     });
   }
-
-  static events: EventMapSingle = {
-    [EventTypes.BEFORE_ENTITY_DELETE]: async (
-      db: Connection,
-      actantId: string
-    ): Promise<void> => {
-      const linkedToActant = await rethink
-        .table(Entity.table)
-        .filter({ class: EntityEnums.Class.Statement })
-        .filter((row: any) => {
-          return row("data")("actants").contains((actantElement: any) =>
-            actantElement("entityId").eq(actantId)
-          );
-        })
-        .run(db);
-
-      for (const stData of linkedToActant) {
-        const st = new Statement({ ...stData });
-        await st.unlinkActantId(db, actantId);
-      }
-
-      const linkedToProps = await rethink
-        .table(Entity.table)
-        .filter({ class: EntityEnums.Class.Statement })
-        .filter((row: any) => {
-          return row("data")("props").contains((actantElement: any) =>
-            actantElement("origin").eq(actantId)
-          );
-        })
-        .run(db);
-
-      const linkedToActions = await rethink
-        .table(Entity.table)
-        .filter({ class: EntityEnums.Class.Statement })
-        .filter((row: any) => {
-          return row("data")("actions").contains((actantElement: any) =>
-            actantElement("actionId").eq(actantId)
-          );
-        })
-        .run(db);
-
-      for (const stData of linkedToActions) {
-        const st = new Statement({ ...stData });
-        await st.unlinkActionId(db, actantId);
-      }
-    },
-  };
 
   /**
    * Resets IDs of nested objects

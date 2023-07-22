@@ -259,7 +259,7 @@ export default class Relation implements IRelationModel {
    * @param updateData
    * @returns
    */
-  async delete(db: Connection | undefined): Promise<WriteResult> {
+  async delete(db: Connection): Promise<WriteResult> {
     if (!this.id) {
       throw new InternalServerError(
         "delete called on relation with undefined id"
