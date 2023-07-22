@@ -154,9 +154,10 @@ describe("test Entity.update", function () {
 });
 
 describe("test Entity.delete", function () {
-  describe("one existing linked statement", () => {
+  describe("one referenced, one free entity", () => {
     const db = new Db();
     const entity = new Entity({ id: Math.random().toString() });
+    const freeEntity = new Entity({ id: Math.random().toString() });
     const statement = new Statement({});
     statement.data.actants.push(
       new StatementActant({
@@ -167,6 +168,7 @@ describe("test Entity.delete", function () {
     beforeAll(async () => {
       await db.initDb();
       await entity.save(db.connection);
+      await freeEntity.save(db.connection);
       await statement.save(db.connection);
     });
 
@@ -178,6 +180,13 @@ describe("test Entity.delete", function () {
       await expect(entity.delete(db.connection)).rejects.toThrowError(
         InvalidDeleteError
       );
+    });
+
+    it("should correctly allow delete call for not referenced entity", async () => {
+      await expect(freeEntity.delete(db.connection)).resolves.toBeTruthy();
+
+      const afterDelete = await findEntityById(db.connection, freeEntity.id);
+      expect(afterDelete).toBeFalsy();
     });
   });
 });
