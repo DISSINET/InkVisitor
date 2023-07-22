@@ -98,7 +98,7 @@ export default class Entity implements IEntity, IDbModel {
     return rethink.table(Entity.table).get(this.id).update(updateData).run(db);
   }
 
-  async delete(db: Connection | undefined): Promise<WriteResult> {
+  async getUsedByEntity(db: Connection): Promise<IEntity | null> {
     if (!this.id) {
       throw new InternalServerError(
         "delete called on entity with undefined id"

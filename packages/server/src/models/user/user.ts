@@ -165,7 +165,7 @@ export default class User implements IUser, IDbModel {
       .run(dbInstance);
   }
 
-  delete(dbInstance: Connection | undefined): Promise<WriteResult> {
+  delete(dbInstance: Connection): Promise<WriteResult> {
     return rethink.table(User.table).get(this.id).delete().run(dbInstance);
   }
 

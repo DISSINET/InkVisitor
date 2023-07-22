@@ -424,7 +424,7 @@ class Statement extends Entity implements IStatement {
     return result;
   }
 
-  async delete(db: Connection | undefined): Promise<WriteResult> {
+  async delete(db: Connection): Promise<WriteResult> {
     const result = await super.delete(db);
 
     await treeCache.initialize();

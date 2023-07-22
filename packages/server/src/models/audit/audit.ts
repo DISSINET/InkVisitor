@@ -60,7 +60,7 @@ export default class Audit implements IAudit, IDbModel {
    * @param db rethinkdb Connection
    * @param updateData Promise<WriteResult>
    */
-  async delete(db: Connection | undefined): Promise<WriteResult> {
+  async delete(db: Connection): Promise<WriteResult> {
     throw new InternalServerError("Audit entry cannot be deleted");
   }
 
