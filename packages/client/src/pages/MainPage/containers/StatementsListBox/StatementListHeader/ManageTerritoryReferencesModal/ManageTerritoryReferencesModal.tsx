@@ -1,5 +1,9 @@
 import { EntityEnums } from "@shared/enums";
-import { IReference, IResponseTerritory } from "@shared/types";
+import {
+  IReference,
+  IResponseDocument,
+  IResponseTerritory,
+} from "@shared/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import {
@@ -23,11 +27,13 @@ import { HiOutlineDocument, HiOutlineDocumentText } from "react-icons/hi";
 import { LuLink2, LuLink2Off } from "react-icons/lu";
 import { TbReplace } from "react-icons/tb";
 import { CellProps, Column } from "react-table";
+import { StyledAnchorText } from "./ManageTerritoryReferencesModalStyles";
 
 // IResponseDocument
 type ResourceWithDocument = {
   reference: IReference;
-  documentId: false | string;
+  document: false | IResponseDocument;
+  referencedId?: string;
 };
 type CellType = CellProps<ResourceWithDocument>;
 
@@ -70,17 +76,55 @@ export const ManageTerritoryReferencesModal: React.FC<
     }
   );
 
+  const { references, entities } = managedTerritory;
+
   const resourcesWithDocuments: ResourceWithDocument[] = useMemo(() => {
-    return managedTerritory.references
-      ? managedTerritory.references.map((reference) => {
-          const document = resources?.find((r) => r.id === reference.resource);
+    return references
+      ? references.map((reference) => {
+          const documentId = resources?.find((r) => r.id === reference.resource)
+            ?.data.documentId;
+          const document = documents?.find((d) => d.id === documentId);
+
           return {
             reference: reference,
-            documentId: document?.data.documentId ?? false,
+            document: document ?? false,
           };
         })
       : [];
-  }, [resources, documents, managedTerritory]);
+  }, [resources, documents, references]);
+
+  const newArrayWithOneReferencedId: ResourceWithDocument[] = useMemo(() => {
+    const createObjectsWithOneReferencedId = (
+      object: ResourceWithDocument
+    ): ResourceWithDocument[] => {
+      const { document, ...rest } = object;
+      if (document) {
+        const { referencedEntityIds } = document;
+        if (referencedEntityIds.length > 0) {
+          return referencedEntityIds.map((id) => ({
+            ...rest,
+            document: { ...document, referencedEntityIds: [id] },
+          }));
+        }
+        return [
+          { ...rest, document: { ...document, referencedEntityIds: [] } },
+        ];
+      }
+      return [{ ...rest, document: false }];
+    };
+
+    const result: ResourceWithDocument[] = resourcesWithDocuments.reduce(
+      (acc: ResourceWithDocument[], obj: ResourceWithDocument) => {
+        const objectsWithOneReferencedId =
+          createObjectsWithOneReferencedId(obj);
+        acc.push(...objectsWithOneReferencedId);
+        return acc;
+      },
+      []
+    );
+
+    return result;
+  }, [resourcesWithDocuments]);
 
   const [showModal, setShowModal] = useState(false);
   useEffect(() => {
@@ -124,14 +168,12 @@ export const ManageTerritoryReferencesModal: React.FC<
 
   const [editedRow, setEditedRow] = useState<false | number>(false);
 
-  const columns = useMemo<Column<any>[]>(
+  const columns = useMemo<Column<ResourceWithDocument>[]>(
     () => [
       {
         Header: "Resource",
-        accessor: "data",
         Cell: ({ row }: CellType) => {
-          const resource =
-            managedTerritory.entities[row.original.reference.resource];
+          const resource = entities[row.original.reference.resource];
           return (
             <>
               {resource ? (
@@ -163,7 +205,7 @@ export const ManageTerritoryReferencesModal: React.FC<
       {
         Header: "Part",
         Cell: ({ row }: CellType) => {
-          const part = managedTerritory.entities[row.original.reference.value];
+          const part = entities[row.original.reference.value];
           return (
             <>
               {part ? (
@@ -192,8 +234,7 @@ export const ManageTerritoryReferencesModal: React.FC<
       {
         Header: "Document",
         Cell: ({ row }: CellType) => {
-          const { documentId } = row.original;
-          const document = documents?.find((d) => d.id === documentId);
+          const { document } = row.original;
           return (
             <>
               <p
@@ -203,7 +244,7 @@ export const ManageTerritoryReferencesModal: React.FC<
                   alignItems: "center",
                 }}
               >
-                {documentId ? (
+                {document ? (
                   <>
                     <HiOutlineDocumentText size={16} />
                     {document?.title}
@@ -219,19 +260,11 @@ export const ManageTerritoryReferencesModal: React.FC<
       {
         Header: "Anchor",
         Cell: ({ row }: CellType) => {
-          const { documentId } = row.original;
-          const document = documents?.find((d) => d.id === documentId);
-
+          const { document } = row.original;
           return (
             <>
-              {documentId && (
-                <p
-                  style={{
-                    whiteSpace: "nowrap",
-                    display: "flex",
-                    alignItems: "center",
-                  }}
-                >
+              {document && (
+                <StyledAnchorText>
                   {document?.referencedEntityIds &&
                   document.referencedEntityIds.length > 0 ? (
                     <>
@@ -241,7 +274,7 @@ export const ManageTerritoryReferencesModal: React.FC<
                   ) : (
                     <LuLink2Off size={16} />
                   )}
-                </p>
+                </StyledAnchorText>
               )}
             </>
           );
@@ -265,7 +298,7 @@ export const ManageTerritoryReferencesModal: React.FC<
         },
       },
     ],
-    [managedTerritory, resourcesWithDocuments, documents, resources, editedRow]
+    [entities, newArrayWithOneReferencedId, editedRow]
   );
 
   const [replaceSection, setReplaceSection] = useState(false);
@@ -341,7 +374,7 @@ export const ManageTerritoryReferencesModal: React.FC<
         <div style={{ display: "flex" }}>
           <Table
             columns={columns}
-            data={resourcesWithDocuments}
+            data={newArrayWithOneReferencedId}
             disableHeading
           />
 
