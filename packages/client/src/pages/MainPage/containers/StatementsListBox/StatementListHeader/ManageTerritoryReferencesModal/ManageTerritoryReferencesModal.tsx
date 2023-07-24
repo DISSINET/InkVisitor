@@ -15,6 +15,7 @@ import {
   ModalFooter,
   ModalHeader,
   Table,
+  Tooltip,
 } from "components";
 import {
   AttributeButtonGroup,
@@ -27,7 +28,11 @@ import { HiOutlineDocument, HiOutlineDocumentText } from "react-icons/hi";
 import { LuLink2, LuLink2Off } from "react-icons/lu";
 import { TbReplace } from "react-icons/tb";
 import { CellProps, Column } from "react-table";
-import { StyledAnchorText } from "./ManageTerritoryReferencesModalStyles";
+import {
+  StyledAnchorText,
+  StyledAnchorWrapper,
+} from "./ManageTerritoryReferencesModalStyles";
+import { ManageTerritoryReferencesAnchorText } from "./ManageTerritoryReferencesAnchorText";
 
 // IResponseDocument
 type ResourceWithDocument = {
@@ -126,8 +131,6 @@ export const ManageTerritoryReferencesModal: React.FC<
     return result;
   }, [resourcesWithDocuments]);
 
-  console.log(newArrayWithOneReferencedId);
-
   const [showModal, setShowModal] = useState(false);
   useEffect(() => {
     setShowModal(true);
@@ -169,6 +172,18 @@ export const ManageTerritoryReferencesModal: React.FC<
   };
 
   const [editedRow, setEditedRow] = useState<false | number>(false);
+
+  function extractTextBetweenTags(text: string, id: string) {
+    const regex = new RegExp(`<${id}>(.*?)</${id}>`, "g");
+    const matches = [];
+    let match;
+
+    while ((match = regex.exec(text)) !== null) {
+      matches.push(match[1]);
+    }
+
+    return matches;
+  }
 
   const columns = useMemo<Column<ResourceWithDocument>[]>(
     () => [
@@ -263,10 +278,30 @@ export const ManageTerritoryReferencesModal: React.FC<
         Header: "Anchor",
         Cell: ({ row }: CellType) => {
           const { document } = row.original;
+          if (document && document.referencedEntityIds.length > 0) {
+            const { content, referencedEntityIds } = document;
+
+            const extractedText = extractTextBetweenTags(
+              content,
+              referencedEntityIds[0]
+            );
+
+            return (
+              <>
+                <StyledAnchorWrapper>
+                  <LuLink2 size={16} />
+                  <ManageTerritoryReferencesAnchorText
+                    extractedText={extractedText}
+                  />
+                </StyledAnchorWrapper>
+              </>
+            );
+          }
+
           return (
             <>
               {document && (
-                <StyledAnchorText>
+                <StyledAnchorWrapper>
                   {document?.referencedEntityIds &&
                   document.referencedEntityIds.length > 0 ? (
                     <>
@@ -276,7 +311,7 @@ export const ManageTerritoryReferencesModal: React.FC<
                   ) : (
                     <LuLink2Off size={16} />
                   )}
-                </StyledAnchorText>
+                </StyledAnchorWrapper>
               )}
             </>
           );
