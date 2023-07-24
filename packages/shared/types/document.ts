@@ -12,6 +12,7 @@ export interface IDocument {
 export interface IResponseDocument {
   id: string;
   title: string;
+  content: string;
   createdAt?: Date;
   updatedAt?: Date;
   referencedEntityIds: string[];
@@ -22,5 +23,5 @@ export interface IResponseDocumentDetail extends IResponseDocument {
   content: string;
 }
 
-export type IRequestDocument = IRequest<{ documentId?: string}>
-export type IRequestDocuments = IRequest<{}, {}, { ids?: string[]}>
+export type IRequestDocument = IRequest<{ documentId?: string }>;
+export type IRequestDocuments = IRequest<{}, {}, { ids?: string[] }>;

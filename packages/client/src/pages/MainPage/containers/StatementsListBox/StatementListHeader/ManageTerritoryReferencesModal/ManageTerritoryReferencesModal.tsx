@@ -126,6 +126,8 @@ export const ManageTerritoryReferencesModal: React.FC<
     return result;
   }, [resourcesWithDocuments]);
 
+  console.log(newArrayWithOneReferencedId);
+
   const [showModal, setShowModal] = useState(false);
   useEffect(() => {
     setShowModal(true);
