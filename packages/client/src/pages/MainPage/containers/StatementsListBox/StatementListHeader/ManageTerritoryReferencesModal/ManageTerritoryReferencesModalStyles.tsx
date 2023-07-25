@@ -1,6 +1,6 @@
 import styled from "styled-components";
 
-export const StyledAnchorWrapper = styled.div`
+export const StyledTextWrapper = styled.div`
   white-space: nowrap;
   display: flex;
   align-items: center;

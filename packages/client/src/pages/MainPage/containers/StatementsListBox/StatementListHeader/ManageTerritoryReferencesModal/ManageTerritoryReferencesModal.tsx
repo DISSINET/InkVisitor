@@ -15,7 +15,6 @@ import {
   ModalFooter,
   ModalHeader,
   Table,
-  Tooltip,
 } from "components";
 import {
   AttributeButtonGroup,
@@ -23,16 +22,14 @@ import {
   EntityTag,
 } from "components/advanced";
 import React, { useEffect, useMemo, useState } from "react";
+import { BiRefresh } from "react-icons/bi";
 import { FaClone, FaEdit, FaPlus, FaTrashAlt } from "react-icons/fa";
 import { HiOutlineDocument, HiOutlineDocumentText } from "react-icons/hi";
 import { LuLink2, LuLink2Off } from "react-icons/lu";
 import { TbReplace } from "react-icons/tb";
 import { CellProps, Column } from "react-table";
-import {
-  StyledAnchorText,
-  StyledAnchorWrapper,
-} from "./ManageTerritoryReferencesModalStyles";
 import { ManageTerritoryReferencesAnchorText } from "./ManageTerritoryReferencesAnchorText";
+import { StyledTextWrapper } from "./ManageTerritoryReferencesModalStyles";
 
 // IResponseDocument
 type ResourceWithDocument = {
@@ -147,6 +144,7 @@ export const ManageTerritoryReferencesModal: React.FC<
       onSuccess: (data, variables) => {
         queryClient.invalidateQueries(["resourcesWithDocuments"]);
         queryClient.invalidateQueries(["documents"]);
+        queryClient.invalidateQueries(["territory", "statement-list"]);
       },
     }
   );
@@ -254,13 +252,7 @@ export const ManageTerritoryReferencesModal: React.FC<
           const { document } = row.original;
           return (
             <>
-              <p
-                style={{
-                  whiteSpace: "nowrap",
-                  display: "flex",
-                  alignItems: "center",
-                }}
-              >
+              <StyledTextWrapper>
                 {document ? (
                   <>
                     <HiOutlineDocumentText size={16} />
@@ -269,7 +261,7 @@ export const ManageTerritoryReferencesModal: React.FC<
                 ) : (
                   <HiOutlineDocument size={16} />
                 )}
-              </p>
+              </StyledTextWrapper>
             </>
           );
         },
@@ -288,12 +280,12 @@ export const ManageTerritoryReferencesModal: React.FC<
 
             return (
               <>
-                <StyledAnchorWrapper>
+                <StyledTextWrapper>
                   <LuLink2 size={16} />
                   <ManageTerritoryReferencesAnchorText
                     extractedText={extractedText}
                   />
-                </StyledAnchorWrapper>
+                </StyledTextWrapper>
               </>
             );
           }
@@ -301,7 +293,7 @@ export const ManageTerritoryReferencesModal: React.FC<
           return (
             <>
               {document && (
-                <StyledAnchorWrapper>
+                <StyledTextWrapper>
                   {document?.referencedEntityIds &&
                   document.referencedEntityIds.length > 0 ? (
                     <>
@@ -311,7 +303,7 @@ export const ManageTerritoryReferencesModal: React.FC<
                   ) : (
                     <LuLink2Off size={16} />
                   )}
-                </StyledAnchorWrapper>
+                </StyledTextWrapper>
               )}
             </>
           );
@@ -405,6 +397,15 @@ export const ManageTerritoryReferencesModal: React.FC<
             disableCreate
             inputWidth={65}
             placeholder="parent T"
+          />
+          <Button
+            icon={<BiRefresh />}
+            onClick={() => {
+              queryClient.invalidateQueries(["resourcesWithDocuments"]);
+              queryClient.invalidateQueries(["documents"]);
+              queryClient.invalidateQueries(["territory", "statement-list"]);
+              queryClient.invalidateQueries();
+            }}
           />
         </ButtonGroup>
 
