@@ -105,16 +105,16 @@ export default class EntityWarnings {
     }
     conceptIds = Array.from(new Set(conceptIds));
 
-    // find SCL relations with checked entities on 1 index
+    // find SCL relations with checked entities on 0 index
     const scls = await Superclass.findForEntities(
       conn,
       conceptIds,
       RelationEnums.Type.Superclass,
-      1
+      0
     );
 
     // all concepts in the cloud should have these base superclasses
-    const scBaseIds = Array.from(new Set(scls.map((s) => s.entityIds[0])));
+    const superIds = Array.from(new Set(scls.map((s) => s.entityIds[1])));
 
     // generate list of base superclasses grouped by each concept
     const baseIdsPerConcept: Record<string, string[]> = {};
@@ -123,15 +123,15 @@ export default class EntityWarnings {
     }
 
     for (const scl of scls) {
-      const specClassId = scl.entityIds[1];
-      const baseClassId = scl.entityIds[0];
-      const index = baseIdsPerConcept[specClassId].indexOf(baseClassId);
+      const specClassId = scl.entityIds[0];
+      const superClassId = scl.entityIds[1];
+      const index = baseIdsPerConcept[specClassId].indexOf(superClassId);
       if (index === -1) {
-        baseIdsPerConcept[specClassId].push(baseClassId);
+        baseIdsPerConcept[specClassId].push(superClassId);
       }
     }
 
-    for (const requiredBaseClassId of scBaseIds) {
+    for (const requiredBaseClassId of superIds) {
       for (const baseClassIds of Object.values(baseIdsPerConcept)) {
         if (baseClassIds.indexOf(requiredBaseClassId) === -1) {
           // required base class is not present for this concept

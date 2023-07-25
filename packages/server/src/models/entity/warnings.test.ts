@@ -71,9 +71,9 @@ describe("models/entity/warnings", function () {
     synCloud2.entityIds = [entityWithSCSyn1.id, entityWithSCSyn2.id];
     const equalSc = "someabstractsc1";
     const [, sc1] = prepareRelation(RelationEnums.Type.Superclass);
-    sc1.entityIds = [equalSc, entityWithSCSyn1.id];
+    sc1.entityIds = [entityWithSCSyn1.id, equalSc];
     const [, sc2] = prepareRelation(RelationEnums.Type.Superclass);
-    sc2.entityIds = [equalSc, entityWithSCSyn2.id];
+    sc2.entityIds = [entityWithSCSyn2.id, equalSc];
 
     const [, entityInequalSCSyn1] = prepareEntity(EntityEnums.Class.Concept);
     entityInequalSCSyn1.id = "entityInequalSCSyn1";
@@ -83,7 +83,7 @@ describe("models/entity/warnings", function () {
     synCloud3.entityIds = [entityInequalSCSyn1.id, entityInequalSCSyn2.id];
     const equalSc2 = "someabstractsc2";
     const [, sc3] = prepareRelation(RelationEnums.Type.Superclass);
-    sc3.entityIds = [equalSc2, entityInequalSCSyn1.id];
+    sc3.entityIds = [entityInequalSCSyn1.id, equalSc2];
 
     beforeAll(async () => {
       await db.initDb();
