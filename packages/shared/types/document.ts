@@ -1,5 +1,3 @@
-import { IRequest } from "src/custom_typings/request";
-
 export interface IDocument {
   id: string;
   content: string;
@@ -23,5 +21,5 @@ export interface IResponseDocumentDetail extends IResponseDocument {
   content: string;
 }
 
-export type IRequestDocument = IRequest<{ documentId?: string }>;
-export type IRequestDocuments = IRequest<{}, {}, { ids?: string[] }>;
+export interface IRequestDocumentParams { documentId?: string };
+export interface IRequestDocumentsQuery { ids?: string[] };

@@ -1,9 +1,4 @@
-import {
-  IDocument,
-  IResponseDocument,
-  IResponseDocumentDetail,
-  IResponseGeneric,
-} from "@shared/types";
+import { IResponseDocumentDetail, IResponseGeneric } from "@shared/types";
 import {
   BadParams,
   DocumentDoesNotExist,
@@ -17,7 +12,10 @@ import { mergeDeep } from "@common/functions";
 import { IRequest } from "src/custom_typings/request";
 import Document from "@models/document/document";
 import ResponseDocument from "@models/document/response";
-import { IRequestDocument, IRequestDocuments } from "@shared/types/document";
+import {
+  IRequestDocumentParams,
+  IRequestDocumentsQuery,
+} from "@shared/types/document";
 
 export default Router()
   /**
@@ -28,13 +26,9 @@ export default Router()
    *     tags:
    *       - documents
    *     parameters:
-   *       - in: query
-   *         name: search params
-   *         schema:
-   *           $ref: "#/components/schemas/IRequestDocuments"
-   *         required: true
-   *         description: search options for the query
-   *         style: form
+   *       - in: ids
+   *         name: search by document ids
+   *         description: values separated by comma
    *         explode: true
    *     responses:
    *       200:
@@ -49,7 +43,7 @@ export default Router()
   .get(
     "/",
     asyncRouteHandler<IResponseDocumentDetail[]>(
-      async (request: IRequestDocuments) => {
+      async (request: IRequest<unknown, unknown, IRequestDocumentsQuery>) => {
         const docs = await Document.getAll(
           request.db.connection,
           typeof request.query.ids === "string"
@@ -74,13 +68,6 @@ export default Router()
    *           type: string
    *         required: true
    *         description: ID of the document entry
-   *     requestBody:
-   *       description: Document object
-   *       content:
-   *         application/json:
-   *           schema:
-   *             allOf:
-   *               - $ref: "#/components/schemas/IDocument"
    *     responses:
    *       200:
    *         description: Returns generic response
@@ -92,7 +79,7 @@ export default Router()
   .get(
     "/:documentId?",
     asyncRouteHandler<IResponseDocumentDetail>(
-      async (request: IRequestDocument) => {
+      async (request: IRequest<IRequestDocumentParams, unknown, unknown>) => {
         const id = request.params.documentId;
 
         if (!id) {
