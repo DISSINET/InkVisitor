@@ -1,5 +1,6 @@
 import { EntityEnums } from "@shared/enums";
 import {
+  IEntity,
   IReference,
   IResponseDocument,
   IResponseTerritory,
@@ -380,23 +381,30 @@ export const ManageTerritoryReferencesModal: React.FC<
           <Button
             icon={<FaClone />}
             label="parent T"
-            // disabled={!previousStatement}
             tooltipLabel={`copy rows from parent`}
             inverted
+            disabled
             // onClick={() =>
             // handleCopyFromStatement(previousStatement, section, replaceSection)
             // }
           />
           <EntitySuggester
             categoryTypes={[EntityEnums.Class.Territory]}
-            // onPicked={(entity: IEntity) =>
-            //   handleCopyFromStatement(entity as IStatement, section, replaceSection)
-            // }
+            onPicked={(entity: IEntity) => {
+              if (replaceSection) {
+                updateEntityMutation.mutate(entity.references);
+              } else {
+                updateEntityMutation.mutate([
+                  ...references,
+                  ...entity.references,
+                ]);
+              }
+            }}
             excludedActantIds={[managedTerritory.id]}
             disableTemplatesAccept
             disableCreate
             inputWidth={65}
-            placeholder="parent T"
+            placeholder="another T"
           />
           <Button
             icon={<BiRefresh />}
@@ -404,16 +412,16 @@ export const ManageTerritoryReferencesModal: React.FC<
               queryClient.invalidateQueries(["resourcesWithDocuments"]);
               queryClient.invalidateQueries(["documents"]);
               queryClient.invalidateQueries(["territory", "statement-list"]);
-              queryClient.invalidateQueries();
             }}
           />
         </ButtonGroup>
 
-        <div style={{ display: "flex" }}>
+        <div style={{ display: "flex", flexDirection: "column" }}>
           <Table
             columns={columns}
             data={newArrayWithOneReferencedId}
             disableHeading
+            perPage={20}
           />
 
           {editedRow !== false && (
