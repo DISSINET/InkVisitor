@@ -1,20 +1,5 @@
 import "ts-jest";
-import Statement, {
-  StatementActant,
-  StatementAction,
-  StatementClassification,
-  StatementData,
-  StatementIdentification,
-} from "@models/statement/statement";
-import { ResponseEntityDetail } from "./response";
 import { EntityEnums, RelationEnums } from "@shared/enums";
-import Entity from "./entity";
-import { prepareStatement } from "@models/statement/statement.test";
-import {
-  IResponseUsedInStatementClassification,
-  IResponseUsedInStatementIdentification,
-} from "@shared/types/response-detail";
-import { IActionData, IStatement } from "@shared/types";
 import { prepareEntity } from "./entity.test";
 import { Db } from "@service/RethinkDB";
 import { clean } from "@modules/common.test";
@@ -29,7 +14,7 @@ describe("models/entity/warnings", function () {
     const [, sclmEntity] = prepareEntity(EntityEnums.Class.Concept);
     const [, entityWithSC] = prepareEntity(EntityEnums.Class.Concept);
     const [, superclass] = prepareRelation(RelationEnums.Type.Superclass);
-    superclass.entityIds = ["random", entityWithSC.id];
+    superclass.entityIds = [entityWithSC.id, "random"];
 
     beforeAll(async () => {
       await db.initDb();
@@ -195,6 +180,7 @@ describe("models/entity/warnings", function () {
           a2: "",
           s: "",
         },
+        pos: EntityEnums.ActionPartOfSpeech.Verb,
       },
     });
 
