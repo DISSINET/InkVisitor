@@ -383,10 +383,26 @@ export const ManageTerritoryReferencesModal: React.FC<
             label="parent T"
             tooltipLabel={`copy rows from parent`}
             inverted
-            disabled
-            // onClick={() =>
-            // handleCopyFromStatement(previousStatement, section, replaceSection)
-            // }
+            disabled={
+              managedTerritory.data.parent &&
+              !managedTerritory.data.parent.territoryId
+            }
+            onClick={() => {
+              if (managedTerritory.data.parent) {
+                api
+                  .entitiesGet(managedTerritory.data.parent.territoryId)
+                  .then((data) => {
+                    if (replaceSection) {
+                      updateEntityMutation.mutate(data.data.references);
+                    } else {
+                      updateEntityMutation.mutate([
+                        ...references,
+                        ...data.data.references,
+                      ]);
+                    }
+                  });
+              }
+            }}
           />
           <EntitySuggester
             categoryTypes={[EntityEnums.Class.Territory]}
