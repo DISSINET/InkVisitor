@@ -49,6 +49,7 @@ interface EntityTooltip {
   tagHovered: boolean;
 
   referenceElement: HTMLDivElement | null;
+  disableTooltipFetch?: boolean;
 }
 export const EntityTooltip: React.FC<EntityTooltip> = ({
   // entity
@@ -67,6 +68,7 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
   tagHovered,
   //
   referenceElement,
+  disableTooltipFetch = false,
 }) => {
   const [tooltipData, setTooltipData] = useState<
     EntityTooltipNamespace.IResponse | false
@@ -75,14 +77,15 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
   const [allowFetch, setAllowFetch] = useState(false);
 
   useEffect(() => {
-    if (tagHovered) {
+    if (tagHovered && !disableTooltipFetch) {
+      console.log("here");
       const timer = setTimeout(() => setAllowFetch(true), 500);
       return () => {
         setAllowFetch(false);
         clearTimeout(timer);
       };
     }
-  }, [tagHovered]);
+  }, [tagHovered, disableTooltipFetch]);
 
   const { data, isFetching, isSuccess } = useQuery(
     ["tooltip", entityId, allowFetch],

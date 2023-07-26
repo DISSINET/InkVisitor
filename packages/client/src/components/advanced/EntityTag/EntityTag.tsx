@@ -30,6 +30,7 @@ interface EntityTag {
   disableTooltip?: boolean;
   disableDoubleClick?: boolean;
   disableDrag?: boolean;
+  disableTooltipFetch?: boolean;
   tooltipPosition?: Placement;
   updateOrderFn?: (item: EntityDragItem) => void;
   lvl?: number;
@@ -54,6 +55,7 @@ export const EntityTag: React.FC<EntityTag> = ({
   disableTooltip = false,
   disableDrag = false,
   disableDoubleClick = false,
+  disableTooltipFetch,
   tooltipPosition,
   updateOrderFn,
   lvl,
@@ -127,6 +129,7 @@ export const EntityTag: React.FC<EntityTag> = ({
             }
             tagHovered={tagHovered}
             referenceElement={referenceElement}
+            disableTooltipFetch={disableTooltipFetch}
           />
         )}
         <Tag

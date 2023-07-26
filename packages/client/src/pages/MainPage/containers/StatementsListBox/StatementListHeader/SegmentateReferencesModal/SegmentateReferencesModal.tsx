@@ -108,7 +108,7 @@ export const SegmentateReferencesModal: React.FC<SegmentateReferencesModal> = ({
           return (
             <>
               {user ? (
-                <div style={{ display: "grid" }}>
+                <div style={{ display: "grid", width: "fit-content" }}>
                   <EntityTag
                     entity={CEntity(
                       user?.options,
@@ -119,6 +119,7 @@ export const SegmentateReferencesModal: React.FC<SegmentateReferencesModal> = ({
                     tooltipText={row.original.text}
                     disableDrag
                     disableDoubleClick
+                    disableTooltipFetch
                   />
                 </div>
               ) : (
