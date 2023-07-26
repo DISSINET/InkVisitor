@@ -1,16 +1,28 @@
+import { EntityEnums } from "@shared/enums";
 import { IResponseDocument, IResponseTerritory } from "@shared/types";
+import { useQuery } from "@tanstack/react-query";
+import api from "api";
 import {
   Button,
+  ButtonGroup,
   Dropdown,
   Modal,
   ModalContent,
   ModalFooter,
   ModalHeader,
+  Table,
 } from "components";
 import { EntityTag } from "components/advanced";
-import React, { useEffect, useState } from "react";
+import { CEntity } from "constructors";
+import React, { useEffect, useMemo, useState } from "react";
+import { AiOutlineFileSearch } from "react-icons/ai";
+import { FaTrashAlt } from "react-icons/fa";
 import { TfiLayoutAccordionList } from "react-icons/tfi";
+import { CellProps, Column } from "react-table";
 import { DropdownItem, ResourceWithDocument } from "types";
+
+type SegmentedText = { text: string };
+type CellType = CellProps<SegmentedText>;
 
 interface SegmentateReferencesModal {
   managedTerritory: IResponseTerritory;
@@ -22,6 +34,24 @@ export const SegmentateReferencesModal: React.FC<SegmentateReferencesModal> = ({
   resourcesWithDocuments,
   onClose,
 }) => {
+  // get user data
+  const userId = localStorage.getItem("userid");
+  const {
+    status: statusUser,
+    data: user,
+    error: errorUser,
+    isFetching: isFetchingUser,
+  } = useQuery(
+    ["user", userId],
+    async () => {
+      if (userId) {
+        const res = await api.usersGet(userId);
+        return res.data;
+      }
+    },
+    { enabled: !!userId && api.isLoggedIn() }
+  );
+
   const [showModal, setShowModal] = useState(false);
   useEffect(() => {
     setShowModal(true);
@@ -35,7 +65,8 @@ export const SegmentateReferencesModal: React.FC<SegmentateReferencesModal> = ({
     IResponseDocument | false
   >(false);
 
-  const [segmentedStatements, setSegmentedStatements] = useState<string[]>();
+  const [segmentedStatements, setSegmentedStatements] =
+    useState<SegmentedText[]>();
 
   useEffect(() => {
     if (selectedOption) {
@@ -46,12 +77,12 @@ export const SegmentateReferencesModal: React.FC<SegmentateReferencesModal> = ({
       if (document) {
         setCurrentDocument(document);
         const sentences = document.content.split(".");
-        const sentencesWithDot = sentences.map(
-          (sentence) => sentence.trim() + "."
-        );
+        sentences.pop();
+        const sentencesWithDot = sentences.map((sentence) => {
+          return { text: sentence.trim() + "." };
+        });
 
         setSegmentedStatements(sentencesWithDot);
-        console.log(sentencesWithDot);
       }
     }
   }, [selectedOption]);
@@ -68,6 +99,50 @@ export const SegmentateReferencesModal: React.FC<SegmentateReferencesModal> = ({
       };
     });
 
+  const columns: Column<SegmentedText>[] = useMemo(() => {
+    return [
+      {
+        Header: "",
+        id: "Statement",
+        Cell: ({ row }: CellType) => {
+          return (
+            <>
+              {user ? (
+                <div style={{ display: "grid" }}>
+                  <EntityTag
+                    entity={CEntity(
+                      user?.options,
+                      EntityEnums.Class.Statement,
+                      row.original.text
+                    )}
+                    fullWidth
+                    tooltipText={row.original.text}
+                    disableDrag
+                    disableDoubleClick
+                  />
+                </div>
+              ) : (
+                <></>
+              )}
+            </>
+          );
+        },
+      },
+      {
+        Header: "",
+        id: "buttons",
+        Cell: ({ row }: CellType) => {
+          return (
+            <ButtonGroup>
+              <Button icon={<FaTrashAlt />} color="danger" />
+              <Button icon={<AiOutlineFileSearch />} color="warning" />
+            </ButtonGroup>
+          );
+        },
+      },
+    ];
+  }, []);
+
   return (
     <Modal showModal={showModal} onClose={onClose}>
       <ModalHeader
@@ -78,7 +153,7 @@ export const SegmentateReferencesModal: React.FC<SegmentateReferencesModal> = ({
           </div>
         }
       />
-      <ModalContent column>
+      <ModalContent column enableScroll>
         <div>
           Resource
           <Dropdown
@@ -94,6 +169,9 @@ export const SegmentateReferencesModal: React.FC<SegmentateReferencesModal> = ({
             icon={<TfiLayoutAccordionList />}
           />
         </div>
+        {segmentedStatements && (
+          <Table perPage={10} data={segmentedStatements} columns={columns} />
+        )}
       </ModalContent>
       <ModalFooter>
         <Button color="warning" label="Close" onClick={onClose} />

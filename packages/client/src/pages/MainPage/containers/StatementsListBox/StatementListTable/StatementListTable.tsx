@@ -235,7 +235,13 @@ export const StatementListTable: React.FC<StatementListTable> = ({
         id: "Statement",
         Cell: ({ row }: CellType) => {
           const statement = row.original;
-          return <EntityTag entity={statement as IEntity} showOnly="entity" />;
+          return (
+            <EntityTag
+              entity={statement as IEntity}
+              showOnly="entity"
+              tooltipText={statement.data.text}
+            />
+          );
         },
       },
       {
