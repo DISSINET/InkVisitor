@@ -2411,9 +2411,129 @@
     }
   },
   {
-    "id": "c-abstract",
+    "id": "c-has-sclm-warning",
     "class": "C",
-    "label": "abstract",
+    "label": "has-sclm-warning",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "createdAt": "2021-12-05T19:10:15.739Z",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {
+      "pos": ""
+    }
+  },
+  {
+    "id": "c-hasnt-isync-1",
+    "class": "C",
+    "label": "hasnt-isync-1 (is in syn cloud, has SCL) ",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "createdAt": "2021-12-05T19:10:15.739Z",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {
+      "pos": ""
+    }
+  },
+  {
+    "id": "c-hasnt-isync-2",
+    "class": "C",
+    "label": "hasnt-isync-2 (is in syn cloud, has SCL) ",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "createdAt": "2021-12-05T19:10:15.739Z",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {
+      "pos": ""
+    }
+  },
+  {
+    "id": "c-has-isync-1",
+    "class": "C",
+    "label": "has-isync-1 (is in syn cloud, but has first SCL) ",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "createdAt": "2021-12-05T19:10:15.739Z",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {
+      "pos": ""
+    }
+  },
+  {
+    "id": "c-has-isync-2",
+    "class": "C",
+    "label": "has-isync-2 (is in syn cloud, but has first SCL) ",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "createdAt": "2021-12-05T19:10:15.739Z",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {
+      "pos": ""
+    }
+  },
+  {
+    "id": "c-has-isync-3",
+    "class": "C",
+    "label": "has-isync-3 (is in syn cloud, but has second SCL) ",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "createdAt": "2021-12-05T19:10:15.739Z",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {
+      "pos": ""
+    }
+  },
+  {
+    "id": "c-has-isync-4",
+    "class": "C",
+    "label": "has-isync-4 (is in syn cloud, but without SCL) ",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "createdAt": "2021-12-05T19:10:15.739Z",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {
+      "pos": ""
+    }
+  },
+  {
+    "id": "c-isync-superclass-1",
+    "class": "C",
+    "label": "isync-superclass-1",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "createdAt": "2021-12-05T19:10:15.739Z",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {
+      "pos": ""
+    }
+  },
+  {
+    "id": "c-isync-superclass-2",
+    "class": "C",
+    "label": "isync-superclass-2",
     "detail": "",
     "status": "1",
     "language": "eng",
