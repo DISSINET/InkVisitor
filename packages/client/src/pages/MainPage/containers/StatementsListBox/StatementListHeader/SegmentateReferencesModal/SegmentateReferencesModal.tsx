@@ -135,14 +135,22 @@ export const SegmentateReferencesModal: React.FC<SegmentateReferencesModal> = ({
         Cell: ({ row }: CellType) => {
           return (
             <ButtonGroup>
-              <Button icon={<FaTrashAlt />} color="danger" />
+              <Button
+                icon={<FaTrashAlt />}
+                color="danger"
+                onClick={() => {
+                  const newArray = segmentedStatements?.slice();
+                  newArray?.splice(row.index, 1);
+                  setSegmentedStatements(newArray);
+                }}
+              />
               <Button icon={<AiOutlineFileSearch />} color="warning" />
             </ButtonGroup>
           );
         },
       },
     ];
-  }, []);
+  }, [segmentedStatements]);
 
   return (
     <Modal showModal={showModal} onClose={onClose}>
