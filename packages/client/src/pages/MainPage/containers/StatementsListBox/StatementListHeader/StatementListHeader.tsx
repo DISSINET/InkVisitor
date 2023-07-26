@@ -20,7 +20,7 @@ import { Button, ButtonGroup, Dropdown } from "components";
 import { BreadcrumbItem, EntitySuggester } from "components/advanced";
 import { CStatement } from "constructors";
 import { useSearchParams } from "hooks";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { BiRefresh } from "react-icons/bi";
 import { FaPlus } from "react-icons/fa";
 import {
@@ -32,7 +32,7 @@ import { TbFileSettings } from "react-icons/tb";
 import { TfiLayoutAccordionList } from "react-icons/tfi";
 import { setLastClickedIndex } from "redux/features/statementList/lastClickedIndexSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { DropdownItem } from "types";
+import { DropdownItem, ResourceWithDocument } from "types";
 import { collectTerritoryChildren, searchTree } from "utils";
 import { v4 as uuidv4 } from "uuid";
 import {
@@ -293,10 +293,59 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
   const [batchAction, setBatchAction] = useState<DropdownItem>(batchOptions[0]);
 
   const [showManageReferencesModal, setShowManageReferencesModal] =
-    useState(true);
+    useState(false);
 
   const [showSegmentateReferencesModal, setShowSegmentateReferencesModal] =
-    useState(false);
+    useState(true);
+
+  const {
+    data: documents,
+    error,
+    isFetching,
+  } = useQuery(
+    ["documents"],
+    async () => {
+      const res = await api.documentsGet({});
+      return res.data;
+    },
+    {
+      enabled: api.isLoggedIn(),
+    }
+  );
+
+  const {
+    data: resources,
+    error: resourcesError,
+    isFetching: resourcesIsFetching,
+  } = useQuery(
+    ["resourcesWithDocuments"],
+    async () => {
+      const res = await api.entitiesSearch({
+        resourceHasDocument: true,
+      });
+      return res.data;
+    },
+    {
+      enabled: api.isLoggedIn(),
+    }
+  );
+
+  const { references } = data;
+
+  const resourcesWithDocuments: ResourceWithDocument[] = useMemo(() => {
+    return references
+      ? references.map((reference) => {
+          const documentId = resources?.find((r) => r.id === reference.resource)
+            ?.data.documentId;
+          const document = documents?.find((d) => d.id === documentId);
+
+          return {
+            reference: reference,
+            document: document ?? false,
+          };
+        })
+      : [];
+  }, [resources, documents, references]);
 
   return (
     <StyledHeader>
@@ -458,12 +507,15 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
       {showManageReferencesModal && (
         <ManageTerritoryReferencesModal
           managedTerritory={data}
+          resourcesWithDocuments={resourcesWithDocuments}
           onClose={() => setShowManageReferencesModal(false)}
+          showLoader={isFetching || resourcesIsFetching}
         />
       )}
       {showSegmentateReferencesModal && (
         <SegmentateReferencesModal
           managedTerritory={data}
+          resourcesWithDocuments={resourcesWithDocuments}
           onClose={() => setShowSegmentateReferencesModal(false)}
         />
       )}

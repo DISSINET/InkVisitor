@@ -1,5 +1,11 @@
 import { EntityEnums } from "@shared/enums";
-import { IEntity, IStatementActant, IStatementAction } from "@shared/types";
+import {
+  IEntity,
+  IReference,
+  IResponseDocument,
+  IStatementActant,
+  IStatementAction,
+} from "@shared/types";
 import { ThemeColor } from "Theme/theme";
 
 export const Colors = [
@@ -331,3 +337,8 @@ export interface FilteredActionObject {
   id: number;
   data: { action?: IEntity; sAction: IStatementAction };
 }
+
+export type ResourceWithDocument = {
+  reference: IReference;
+  document: false | IResponseDocument;
+};

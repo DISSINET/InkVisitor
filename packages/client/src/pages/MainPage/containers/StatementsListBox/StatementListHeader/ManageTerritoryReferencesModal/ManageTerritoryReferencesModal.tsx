@@ -1,16 +1,12 @@
 import { EntityEnums } from "@shared/enums";
-import {
-  IEntity,
-  IReference,
-  IResponseDocument,
-  IResponseTerritory,
-} from "@shared/types";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { IEntity, IReference, IResponseTerritory } from "@shared/types";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import {
   Button,
   ButtonGroup,
   Input,
+  Loader,
   Modal,
   ModalContent,
   ModalFooter,
@@ -29,72 +25,27 @@ import { HiOutlineDocument, HiOutlineDocumentText } from "react-icons/hi";
 import { LuLink2, LuLink2Off } from "react-icons/lu";
 import { TbReplace } from "react-icons/tb";
 import { CellProps, Column } from "react-table";
+import { ResourceWithDocument } from "types";
 import { ManageTerritoryReferencesAnchorText } from "./ManageTerritoryReferencesAnchorText";
 import { StyledTextWrapper } from "./ManageTerritoryReferencesModalStyles";
 
-// IResponseDocument
-type ResourceWithDocument = {
-  reference: IReference;
-  document: false | IResponseDocument;
-  referencedId?: string;
-};
 type CellType = CellProps<ResourceWithDocument>;
 
 interface ManageTerritoryReferencesModal {
   managedTerritory: IResponseTerritory;
+  resourcesWithDocuments: ResourceWithDocument[];
   onClose: () => void;
+  showLoader?: boolean;
 }
 export const ManageTerritoryReferencesModal: React.FC<
   ManageTerritoryReferencesModal
-> = ({ managedTerritory, onClose }) => {
-  const {
-    data: documents,
-    error,
-    isFetching,
-  } = useQuery(
-    ["documents"],
-    async () => {
-      const res = await api.documentsGet({});
-      return res.data;
-    },
-    {
-      enabled: api.isLoggedIn(),
-    }
-  );
-
-  const {
-    data: resources,
-    error: resourcesError,
-    isFetching: resourcesIsFetching,
-  } = useQuery(
-    ["resourcesWithDocuments"],
-    async () => {
-      const res = await api.entitiesSearch({
-        resourceHasDocument: true,
-      });
-      return res.data;
-    },
-    {
-      enabled: api.isLoggedIn(),
-    }
-  );
-
+> = ({
+  managedTerritory,
+  resourcesWithDocuments,
+  onClose,
+  showLoader = false,
+}) => {
   const { references, entities } = managedTerritory;
-
-  const resourcesWithDocuments: ResourceWithDocument[] = useMemo(() => {
-    return references
-      ? references.map((reference) => {
-          const documentId = resources?.find((r) => r.id === reference.resource)
-            ?.data.documentId;
-          const document = documents?.find((d) => d.id === documentId);
-
-          return {
-            reference: reference,
-            document: document ?? false,
-          };
-        })
-      : [];
-  }, [resources, documents, references]);
 
   const newArrayWithOneReferencedId: ResourceWithDocument[] = useMemo(() => {
     const createObjectsWithOneReferencedId = (
@@ -350,12 +301,12 @@ export const ManageTerritoryReferencesModal: React.FC<
           style={{ marginLeft: "0.5rem", marginRight: "1rem" }}
         >
           <Button
-            // disabled={!hasEntities()}
+            disabled={!newArrayWithOneReferencedId.length}
             icon={<FaTrashAlt />}
             inverted
             color="danger"
             tooltipLabel={`remove all rows`}
-            // onClick={() => setShowSubmitSection(section)}
+            onClick={() => updateEntityMutation.mutate([])}
           />
           <div
             style={{ borderRight: "1px dashed black", marginLeft: "0.3rem" }}
@@ -452,6 +403,8 @@ export const ManageTerritoryReferencesModal: React.FC<
       <ModalFooter>
         <Button color="warning" label="Close" onClick={onClose} />
       </ModalFooter>
+
+      <Loader show={showLoader} />
     </Modal>
   );
 };
