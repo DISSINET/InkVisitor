@@ -26,6 +26,7 @@ import {
   StyledHeaderRow,
   StyledHeading,
 } from "./SegmentateReferencesModalStyles";
+import { HiMiniBarsArrowUp } from "react-icons/hi2";
 
 type SegmentedText = { text: string };
 type CellType = CellProps<SegmentedText>;
@@ -67,8 +68,9 @@ export const SegmentateReferencesModal: React.FC<SegmentateReferencesModal> = ({
     DropdownItem | undefined
   >();
 
-  const [segmentedStatements, setSegmentedStatements] =
-    useState<SegmentedText[]>();
+  const [segmentedStatements, setSegmentedStatements] = useState<
+    SegmentedText[]
+  >([]);
 
   const handleApplySegmentation = () => {
     if (selectedOption) {
@@ -91,14 +93,10 @@ export const SegmentateReferencesModal: React.FC<SegmentateReferencesModal> = ({
         const sentencesWithDot = sentences.map((sentence) => {
           return { text: sentence.trim() + "." };
         });
-        if (replaceSection) {
+        if (replaceSegmentation) {
           setSegmentedStatements(sentencesWithDot);
         } else {
-          setSegmentedStatements(
-            segmentedStatements
-              ? segmentedStatements.concat(sentencesWithDot)
-              : sentencesWithDot
-          );
+          setSegmentedStatements(segmentedStatements.concat(sentencesWithDot));
         }
       }
     }
@@ -169,7 +167,8 @@ export const SegmentateReferencesModal: React.FC<SegmentateReferencesModal> = ({
     ];
   }, [segmentedStatements]);
 
-  const [replaceSection, setReplaceSection] = useState(false);
+  const [replaceSegmentation, setReplaceSegmentation] = useState(false);
+  const [replaceInsert, setReplaceInsert] = useState(false);
 
   return (
     <Modal showModal={showModal} onClose={onClose}>
@@ -197,15 +196,15 @@ export const SegmentateReferencesModal: React.FC<SegmentateReferencesModal> = ({
               {
                 longValue: "append",
                 shortValue: "",
-                onClick: () => setReplaceSection(false),
-                selected: !replaceSection,
+                onClick: () => setReplaceSegmentation(false),
+                selected: !replaceSegmentation,
                 shortIcon: <FaPlus />,
               },
               {
                 longValue: "replace",
                 shortValue: "",
-                onClick: () => setReplaceSection(true),
-                selected: replaceSection,
+                onClick: () => setReplaceSegmentation(true),
+                selected: replaceSegmentation,
                 shortIcon: <TbReplace />,
               },
             ]}
@@ -216,17 +215,48 @@ export const SegmentateReferencesModal: React.FC<SegmentateReferencesModal> = ({
             onClick={handleApplySegmentation}
           />
         </StyledHeaderRow>
-        {segmentedStatements && (
-          <Table
-            perPage={10}
-            data={segmentedStatements}
-            columns={columns}
-            entityTitle={{ singular: "statement", plural: "statements" }}
-          />
-        )}
+
+        <Table
+          perPage={10}
+          data={segmentedStatements}
+          columns={columns}
+          entityTitle={{ singular: "statement", plural: "statements" }}
+        />
       </ModalContent>
       <ModalFooter>
-        <Button color="warning" label="Close" onClick={onClose} />
+        <AttributeButtonGroup
+          options={[
+            {
+              longValue: "append",
+              shortValue: "",
+              onClick: () => setReplaceInsert(false),
+              selected: !replaceInsert,
+              shortIcon: <FaPlus />,
+            },
+            {
+              longValue: "replace",
+              shortValue: "",
+              onClick: () => setReplaceInsert(true),
+              selected: replaceInsert,
+              shortIcon: <TbReplace />,
+            },
+          ]}
+        />
+        <ButtonGroup>
+          <Button
+            color="primary"
+            icon={
+              <HiMiniBarsArrowUp
+                size={14}
+                style={{ transform: "rotate(90deg)" }}
+              />
+            }
+            label="Insert statements"
+            onClick={onClose}
+            disabled={!segmentedStatements?.length}
+          />
+          <Button color="warning" label="Close" onClick={onClose} />
+        </ButtonGroup>
       </ModalFooter>
     </Modal>
   );
