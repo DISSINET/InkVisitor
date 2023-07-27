@@ -61,10 +61,6 @@ export const SegmentateReferencesModal: React.FC<SegmentateReferencesModal> = ({
     DropdownItem | undefined
   >();
 
-  const [currentDocument, setCurrentDocument] = useState<
-    IResponseDocument | false
-  >(false);
-
   const [segmentedStatements, setSegmentedStatements] =
     useState<SegmentedText[]>();
 
@@ -75,8 +71,7 @@ export const SegmentateReferencesModal: React.FC<SegmentateReferencesModal> = ({
       )?.document;
 
       if (document) {
-        setCurrentDocument(document);
-        const sentences = document.content.split(".");
+        const sentences = document.content.replace(/<[^>]+>/g, "").split(".");
         sentences.pop();
         const sentencesWithDot = sentences.map((sentence) => {
           return { text: sentence.trim() + "." };
