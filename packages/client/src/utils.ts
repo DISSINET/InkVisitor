@@ -208,3 +208,15 @@ export const getRelationInvertedRules = (
 export const isValidEntityClass = (entityClass: EntityEnums.Class) => {
   return classesAll.includes(entityClass);
 };
+
+export function extractTextBetweenTags(text: string, id: string) {
+  const regex = new RegExp(`<${id}>(.*?)</${id}>`, "g");
+  const matches = [];
+  let match;
+
+  while ((match = regex.exec(text)) !== null) {
+    matches.push(match[1]);
+  }
+
+  return matches;
+}

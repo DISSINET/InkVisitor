@@ -12,14 +12,20 @@ import {
   ModalHeader,
   Table,
 } from "components";
-import { EntityTag } from "components/advanced";
+import { AttributeButtonGroup, EntityTag } from "components/advanced";
 import { CEntity } from "constructors";
 import React, { useEffect, useMemo, useState } from "react";
 import { AiOutlineFileSearch } from "react-icons/ai";
-import { FaTrashAlt } from "react-icons/fa";
+import { FaPlus, FaTrashAlt } from "react-icons/fa";
+import { TbReplace } from "react-icons/tb";
 import { TfiLayoutAccordionList } from "react-icons/tfi";
 import { CellProps, Column } from "react-table";
 import { DropdownItem, ResourceWithDocument } from "types";
+import { extractTextBetweenTags } from "utils";
+import {
+  StyledHeaderRow,
+  StyledHeading,
+} from "./SegmentateReferencesModalStyles";
 
 type SegmentedText = { text: string };
 type CellType = CellProps<SegmentedText>;
@@ -64,23 +70,39 @@ export const SegmentateReferencesModal: React.FC<SegmentateReferencesModal> = ({
   const [segmentedStatements, setSegmentedStatements] =
     useState<SegmentedText[]>();
 
-  useEffect(() => {
+  const handleApplySegmentation = () => {
     if (selectedOption) {
       const document = resourcesWithDocuments.find(
         (r) => r.reference.id === selectedOption.value
       )?.document;
 
       if (document) {
-        const sentences = document.content.replace(/<[^>]+>/g, "").split(".");
+        const { content } = document;
+        const selectedContent = extractTextBetweenTags(
+          content,
+          managedTerritory.id
+        );
+
+        const sentences =
+          selectedContent.length > 0
+            ? selectedContent[0].replace(/<[^>]+>/g, "").split(".")
+            : [];
         sentences.pop();
         const sentencesWithDot = sentences.map((sentence) => {
           return { text: sentence.trim() + "." };
         });
-
-        setSegmentedStatements(sentencesWithDot);
+        if (replaceSection) {
+          setSegmentedStatements(sentencesWithDot);
+        } else {
+          setSegmentedStatements(
+            segmentedStatements
+              ? segmentedStatements.concat(sentencesWithDot)
+              : sentencesWithDot
+          );
+        }
       }
     }
-  }, [selectedOption]);
+  };
 
   const { entities } = managedTerritory;
 
@@ -147,6 +169,8 @@ export const SegmentateReferencesModal: React.FC<SegmentateReferencesModal> = ({
     ];
   }, [segmentedStatements]);
 
+  const [replaceSection, setReplaceSection] = useState(false);
+
   return (
     <Modal showModal={showModal} onClose={onClose}>
       <ModalHeader
@@ -158,23 +182,47 @@ export const SegmentateReferencesModal: React.FC<SegmentateReferencesModal> = ({
         }
       />
       <ModalContent column enableScroll>
-        <div>
-          Resource
+        <StyledHeaderRow>
+          <StyledHeading>Resource:</StyledHeading>
           <Dropdown
-            width={200}
+            width={160}
             onChange={(selectedOption) => setSelectedOption(selectedOption[0])}
             value={selectedOption}
             options={arrayOfDocReference.map((obj) => {
               return { value: obj.id, label: obj.entity.label };
             })}
           />
+          <AttributeButtonGroup
+            options={[
+              {
+                longValue: "append",
+                shortValue: "",
+                onClick: () => setReplaceSection(false),
+                selected: !replaceSection,
+                shortIcon: <FaPlus />,
+              },
+              {
+                longValue: "replace",
+                shortValue: "",
+                onClick: () => setReplaceSection(true),
+                selected: replaceSection,
+                shortIcon: <TbReplace />,
+              },
+            ]}
+          />
           <Button
             label="Apply segmentation"
             icon={<TfiLayoutAccordionList />}
+            onClick={handleApplySegmentation}
           />
-        </div>
+        </StyledHeaderRow>
         {segmentedStatements && (
-          <Table perPage={10} data={segmentedStatements} columns={columns} />
+          <Table
+            perPage={10}
+            data={segmentedStatements}
+            columns={columns}
+            entityTitle={{ singular: "statement", plural: "statements" }}
+          />
         )}
       </ModalContent>
       <ModalFooter>
