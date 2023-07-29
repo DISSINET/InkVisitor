@@ -18,7 +18,6 @@ interface UnlinkButton {
 }
 interface EntityTag {
   entity: IEntity;
-  tooltipText?: string;
   parentId?: string;
   mode?: "selected" | "disabled" | "invalid" | false;
   showOnly?: "entity" | "label";
@@ -43,7 +42,6 @@ interface EntityTag {
 
 export const EntityTag: React.FC<EntityTag> = ({
   entity,
-  tooltipText,
   parentId,
   showOnly,
   fullWidth = false,
@@ -117,10 +115,10 @@ export const EntityTag: React.FC<EntityTag> = ({
           <EntityTooltip
             entityId={entity.id}
             entityClass={entity.class}
-            label={getEntityLabel(entity)}
+            label={entity.label || ""}
             language={entity.language}
             detail={entity.detail}
-            text={tooltipText}
+            text={entity.data.text ? entity.data.text : undefined}
             itemsCount={statementsCount}
             position={tooltipPosition}
             disabled={

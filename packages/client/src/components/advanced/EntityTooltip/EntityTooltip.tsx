@@ -102,7 +102,7 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
   const renderEntityInfo = useMemo(
     () => (
       <>
-        {(text || detail || label) && (
+        {(text || detail || label !== undefined) && (
           <>
             <StyledRow>
               <StyledIconWrap>

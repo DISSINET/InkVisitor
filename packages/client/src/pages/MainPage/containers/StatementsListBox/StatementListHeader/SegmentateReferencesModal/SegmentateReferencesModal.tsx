@@ -1,5 +1,9 @@
 import { EntityEnums } from "@shared/enums";
-import { IResponseDocument, IResponseTerritory } from "@shared/types";
+import {
+  IResponseDocument,
+  IResponseTerritory,
+  IStatement,
+} from "@shared/types";
 import { useQuery } from "@tanstack/react-query";
 import api from "api";
 import {
@@ -13,7 +17,7 @@ import {
   Table,
 } from "components";
 import { AttributeButtonGroup, EntityTag } from "components/advanced";
-import { CEntity } from "constructors";
+import { CEntity, CStatement } from "constructors";
 import React, { useEffect, useMemo, useState } from "react";
 import { AiOutlineFileSearch } from "react-icons/ai";
 import { FaPlus, FaTrashAlt } from "react-icons/fa";
@@ -28,8 +32,7 @@ import {
 } from "./SegmentateReferencesModalStyles";
 import { HiMiniBarsArrowUp } from "react-icons/hi2";
 
-type SegmentedText = { text: string };
-type CellType = CellProps<SegmentedText>;
+type CellType = CellProps<IStatement>;
 
 interface SegmentateReferencesModal {
   managedTerritory: IResponseTerritory;
@@ -68,9 +71,9 @@ export const SegmentateReferencesModal: React.FC<SegmentateReferencesModal> = ({
     DropdownItem | undefined
   >();
 
-  const [segmentedStatements, setSegmentedStatements] = useState<
-    SegmentedText[]
-  >([]);
+  const [segmentedStatements, setSegmentedStatements] = useState<IStatement[]>(
+    []
+  );
 
   const handleApplySegmentation = () => {
     if (selectedOption) {
@@ -90,13 +93,29 @@ export const SegmentateReferencesModal: React.FC<SegmentateReferencesModal> = ({
             ? selectedContent[0].replace(/<[^>]+>/g, "").split(".")
             : [];
         sentences.pop();
-        const sentencesWithDot = sentences.map((sentence) => {
-          return { text: sentence.trim() + "." };
-        });
-        if (replaceSegmentation) {
-          setSegmentedStatements(sentencesWithDot);
-        } else {
-          setSegmentedStatements(segmentedStatements.concat(sentencesWithDot));
+
+        const sentencesWithDot = sentences.map(
+          (sentence) => sentence.trim() + "."
+        );
+
+        if (user) {
+          const segmentedObjects = sentencesWithDot.map((sentence) => {
+            return CStatement(
+              user.role,
+              user.options,
+              "",
+              "",
+              undefined,
+              sentence
+            );
+          });
+          if (replaceSegmentation) {
+            setSegmentedStatements(segmentedObjects);
+          } else {
+            setSegmentedStatements(
+              segmentedStatements.concat(segmentedObjects)
+            );
+          }
         }
       }
     }
@@ -114,7 +133,7 @@ export const SegmentateReferencesModal: React.FC<SegmentateReferencesModal> = ({
       };
     });
 
-  const columns: Column<SegmentedText>[] = useMemo(() => {
+  const columns: Column<IStatement>[] = useMemo(() => {
     return [
       {
         Header: "",
@@ -125,13 +144,8 @@ export const SegmentateReferencesModal: React.FC<SegmentateReferencesModal> = ({
               {user ? (
                 <div style={{ display: "grid", width: "fit-content" }}>
                   <EntityTag
-                    entity={CEntity(
-                      user?.options,
-                      EntityEnums.Class.Statement,
-                      row.original.text
-                    )}
+                    entity={row.original}
                     fullWidth
-                    tooltipText={row.original.text}
                     disableDrag
                     disableDoubleClick
                     disableTooltipFetch
@@ -169,6 +183,8 @@ export const SegmentateReferencesModal: React.FC<SegmentateReferencesModal> = ({
 
   const [replaceSegmentation, setReplaceSegmentation] = useState(false);
   const [replaceInsert, setReplaceInsert] = useState(false);
+
+  const handleInsertStatements = () => {};
 
   return (
     <Modal showModal={showModal} onClose={onClose}>
@@ -252,7 +268,7 @@ export const SegmentateReferencesModal: React.FC<SegmentateReferencesModal> = ({
               />
             }
             label="Insert statements"
-            onClick={onClose}
+            onClick={handleInsertStatements}
             disabled={!segmentedStatements?.length}
           />
           <Button color="warning" label="Close" onClick={onClose} />

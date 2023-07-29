@@ -524,7 +524,8 @@ export const CStatement = (
   userOptions: UserOptions,
   label?: string,
   detail?: string,
-  territoryId?: string
+  territoryId?: string,
+  text?: string
 ): IStatement => {
   const newStatement: IStatement = {
     id: uuidv4(),
@@ -535,7 +536,7 @@ export const CStatement = (
     notes: [],
     data: {
       actions: [],
-      text: "",
+      text: text ? text : "",
       actants: [],
       tags: [],
     },

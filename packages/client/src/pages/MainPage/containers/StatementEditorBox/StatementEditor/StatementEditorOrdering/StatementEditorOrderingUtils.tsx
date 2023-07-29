@@ -27,12 +27,7 @@ export const renderOrderingEntityTag = (
       {entity ? (
         <StyledTableTextGridCell>
           <StyledTagWrap>
-            <EntityTag
-              key={entity.id}
-              entity={entity}
-              tooltipText={entity.label}
-              // fullWidth
-            />
+            <EntityTag key={entity.id} entity={entity} />
           </StyledTagWrap>
         </StyledTableTextGridCell>
       ) : (
