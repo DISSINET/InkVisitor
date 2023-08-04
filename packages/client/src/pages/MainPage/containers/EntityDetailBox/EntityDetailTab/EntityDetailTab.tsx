@@ -43,7 +43,7 @@ export const EntityDetailTab: React.FC<EntityDetailTab> = ({
         >
           {entity?.class && (
             <TypeBar
-              entityLetter={entity?.class}
+              entityClass={entity?.class}
               isTemplate={entity.isTemplate}
               noMargin
               dimColor={!isSelected}
