@@ -278,7 +278,7 @@ export const Suggester: React.FC<Suggester> = ({
             disabled={disabled}
             autoFocus={categories.length > 1 && autoFocus}
           />
-          <TypeBar entityClass={category.value} />
+          <TypeBar entityClass={category.value as EntityEnums.Class} />
 
           <div ref={refs.setReference}>
             <Input

@@ -1,8 +1,9 @@
 import React from "react";
 import { StyledTypeBar } from "./TypeBarStyles";
+import { EntityEnums } from "@shared/enums";
 
 interface TypeBar {
-  entityClass: string;
+  entityClass: EntityEnums.ExtendedClass;
   noMargin?: boolean;
   isTemplate?: boolean;
   dimColor?: boolean;
@@ -15,7 +16,7 @@ export const TypeBar: React.FC<TypeBar> = ({
 }) => {
   return (
     <StyledTypeBar
-      entity={`entity${entityClass}`}
+      entityColor={`entity${entityClass}`}
       noMargin={noMargin}
       isTemplate={isTemplate}
       dimColor={dimColor}

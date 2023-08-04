@@ -283,7 +283,7 @@ export const EntitySearchBox: React.FC = () => {
               });
             }}
           />
-          <TypeBar entityClass={(classOption as DropdownItem).value} />
+          <TypeBar entityClass={classOption.value as EntityEnums.Class} />
         </div>
       </StyledRow>
 
@@ -311,7 +311,7 @@ export const EntitySearchBox: React.FC = () => {
               });
             }}
           />
-          <TypeBar entityClass={(classOption as DropdownItem).value} />
+          <TypeBar entityClass={classOption.value as EntityEnums.Class} />
         </div>
       </StyledRow>
 
@@ -329,7 +329,7 @@ export const EntitySearchBox: React.FC = () => {
               });
             }}
           />
-          <TypeBar entityClass={(classOption as DropdownItem).value} />
+          <TypeBar entityClass={classOption.value as EntityEnums.Class} />
         </div>
       </StyledRow>
 
