@@ -101,11 +101,11 @@ const theme = {
     },
 
     // tag status
-    0: "#a0aec0", // pending
-    1: "#000", //approved
-    2: "#BA2525", //discouraged
-    3: "#D8AA37", //warning
-    4: "#f27a43", //unfinished
+    "0": "#a0aec0", // pending
+    "1": "#000", //approved
+    "2": "#BA2525", //discouraged
+    "3": "#D8AA37", //warning
+    "4": "#f27a43", //unfinished
   },
   space: {
     px: "1px",
