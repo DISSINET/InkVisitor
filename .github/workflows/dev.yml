@@ -341,8 +341,8 @@ jobs:
         run: sudo openvpn --config muni-linux.ovpn --auth-user-pass pass.txt --daemon
 
       - name: Wait for a VPN connection
-        timeout-minutes: 2
-        run: until ping -w 2 ${{ secrets.SSH_HOST }}; do sleep 2; done
+        timeout-minutes: 5
+        run: until ping -w 5 ${{ secrets.SSH_HOST }}; do sleep 2; done
 
       - name: Upload image staging
         run: scp inkvisitor-staging.tar.gz ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/var/www/html/apps
