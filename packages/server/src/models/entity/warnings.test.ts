@@ -268,4 +268,29 @@ describe("models/entity/warnings", function () {
       expect(maee).toBeFalsy();
     });
   });
+
+  describe("test hasAVAL", function () {
+    const db = new Db();
+    const [, actionEntity] = prepareEntity(EntityEnums.Class.Action);
+    const [, aee] = prepareRelation(RelationEnums.Type.ActionEventEquivalent);
+    aee.entityIds = [actionEntity.id, "random"];
+
+    beforeAll(async () => {
+      await db.initDb();
+      await aee.save(db.connection);
+      await actionEntity.save(db.connection);
+    });
+
+    afterAll(async () => {
+      await clean(db);
+    });
+
+    it("should test 1", async () => {
+      const sclm = await new EntityWarnings(
+        actionEntity.id,
+        actionEntity.class
+      ).hasAVAL(db.connection);
+      expect(sclm).toBeFalsy();
+    });
+  });
 });

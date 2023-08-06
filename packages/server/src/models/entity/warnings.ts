@@ -51,6 +51,11 @@ export default class EntityWarnings {
       warnings.push(mvalWarning);
     }
 
+    const avalWarning = await this.hasAVAL(conn);
+    if (avalWarning) {
+      warnings.push(avalWarning);
+    }
+
     const maeeWarning = await this.hasMAEE(conn);
     if (maeeWarning) {
       warnings.push(maeeWarning);
@@ -167,6 +172,19 @@ export default class EntityWarnings {
         action.data.entities.s === undefined)
     ) {
       return this.newWarning(WarningTypeEnums.MVAL);
+    }
+
+    return null;
+  }
+
+  /**
+   * Tests if there is AVAL warning and returns it
+   * @param conn
+   * @returns
+   */
+  async hasAVAL(conn: Connection): Promise<IWarning | null> {
+    if (this.class !== EntityEnums.Class.Action) {
+      return null;
     }
 
     return null;
