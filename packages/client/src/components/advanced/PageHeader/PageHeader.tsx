@@ -1,12 +1,12 @@
 import { heightHeader } from "Theme/constants";
 import { PingColor } from "Theme/theme";
 import LogoInkvisitor from "assets/logos/inkvisitor.svg";
-import { Loader } from "components";
+import { Button, ButtonGroup, Loader } from "components";
 import React, { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useLocation } from "react-router";
 import { toast } from "react-toastify";
-import { useAppSelector } from "redux/hooks";
+import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { Menu } from "..";
 import packageJson from "../../../../package.json";
 import {
@@ -25,6 +25,7 @@ import {
   StyledUser,
   StyledUsername,
 } from "./PageHeaderStyles";
+import { setZoom } from "redux/features/layout/zoomSlice";
 
 interface LeftHeader {
   tempLocation: string | false;
@@ -137,6 +138,9 @@ export const RightHeader: React.FC<RightHeader> = React.memo(
       ""
     );
 
+    const dispatch = useAppDispatch();
+    const zoom = useAppSelector((state) => state.layout.zoom);
+
     return (
       <>
         {env === "sandbox" && (
@@ -150,6 +154,20 @@ export const RightHeader: React.FC<RightHeader> = React.memo(
           </>
         )}
         <StyledRightHeader>
+          <ButtonGroup style={{ marginRight: "0.5rem" }}>
+            <Button
+              label="-"
+              color="warning"
+              onClick={() => dispatch(setZoom(zoom - 1))}
+              inverted
+            />
+            <Button
+              label="+"
+              color="warning"
+              onClick={() => dispatch(setZoom(zoom + 1))}
+              inverted
+            />
+          </ButtonGroup>
           {userName.length > 0 ? (
             <StyledUser>
               <StyledText>logged as</StyledText>

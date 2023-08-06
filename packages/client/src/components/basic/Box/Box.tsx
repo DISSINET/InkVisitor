@@ -42,7 +42,7 @@ export const Box: React.FC<Box> = ({
     contentBackgroundColor: isExpanded
       ? theme.color["gray"]["200"]
       : theme.color["gray"]["300"],
-    boxHeight: `${height / 10}rem`,
+    boxHeight: `${height}px`,
     onRest: () => {
       isExpanded ? setShowContentLabel(false) : setHideContent(true);
     },

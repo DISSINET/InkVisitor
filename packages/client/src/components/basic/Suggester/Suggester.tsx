@@ -315,7 +315,7 @@ export const Suggester: React.FC<Suggester> = ({
           {!disableCreate && (
             <StyledSuggesterButton>
               <Button
-                icon={<FaPlus style={{ fontSize: "16px", padding: "2px" }} />}
+                icon={<FaPlus style={{ fontSize: "1.6rem", padding: "2px" }} />}
                 tooltipLabel="create new entity"
                 color="primary"
                 inverted={selected !== -1}

@@ -21,6 +21,7 @@ import lastClickedIndexSlice from "./features/statementList/lastClickedIndexSlic
 import disableStatementListScrollSlice from "./features/statementList/disableStatementListScrollSlice";
 import disableTreeScrollSlice from "./features/territoryTree/disableTreeScrollSlice";
 import pingSlice from "./features/pingSlice";
+import zoomSlice from "./features/layout/zoomSlice";
 
 const store: Store = configureStore({
   reducer: {
@@ -43,6 +44,7 @@ const store: Store = configureStore({
       draggedActantRow: draggedActantRowSlice,
     }),
     layout: combineReducers({
+      zoom: zoomSlice,
       layoutWidth: layoutWidthSlice,
       contentHeight: contentHeightSlice,
       panelWidths: panelWidthsSlice,

@@ -6,10 +6,24 @@ import { ThemeType } from "./theme";
 interface GlobalStyle {
   theme: ThemeType;
   disableUserSelect?: boolean;
+  zoom: number;
 }
+const getFontSize = (zoom: number) => {
+  switch (zoom) {
+    case 0:
+      return 50;
+    case 1:
+      return 65;
+    case 2:
+      return 70;
+    default:
+      return 62.5;
+  }
+};
 const GlobalStyle = createGlobalStyle<GlobalStyle>`
   html {
-    font-size: 62.5%;
+    font-size: ${({ zoom }) => `${getFontSize(zoom)}%`};
+    /* font-size: 62.5%; */
   }
   body {
     font-family: "Roboto", sans-serif;

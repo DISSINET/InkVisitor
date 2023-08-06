@@ -80,6 +80,7 @@ export const App: React.FC = () => {
   const disableUserSelect = useAppSelector(
     (state) => state.layout.disableUserSelect
   );
+  const zoom = useAppSelector((state) => state.layout.zoom);
 
   const [debouncedWidth, debouncedHeight] = useDebounce(useWindowSize(), 50);
 
@@ -88,7 +89,7 @@ export const App: React.FC = () => {
       const heightContent = debouncedHeight - heightHeader;
       dispatch(setContentHeight(heightContent));
     }
-  }, [debouncedHeight]);
+  }, [debouncedHeight, zoom]);
 
   useEffect(() => {
     if (debouncedWidth > 0) {
@@ -149,7 +150,7 @@ export const App: React.FC = () => {
       dispatch(setPanelWidths(panels));
       dispatch(setSeparatorXPosition(panels[0] + panels[1]));
     }
-  }, [debouncedWidth]);
+  }, [debouncedWidth, zoom]);
 
   return (
     <>
@@ -158,7 +159,7 @@ export const App: React.FC = () => {
         <title>InkVisitor</title>
       </Helmet>
       <ThemeProvider theme={theme}>
-        <GlobalStyle disableUserSelect={disableUserSelect} />
+        <GlobalStyle disableUserSelect={disableUserSelect} zoom={zoom} />
         <QueryClientProvider client={queryClient}>
           <ReactQueryDevtools initialIsOpen={false} />
           <DndProvider backend={HTML5Backend}>

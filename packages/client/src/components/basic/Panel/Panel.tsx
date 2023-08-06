@@ -9,7 +9,7 @@ interface Panel {
 }
 export const Panel: React.FC<Panel> = ({ width, children }) => {
   const animatedWidth = useSpring({
-    width: `${width / 10}rem`,
+    width: `${width}px`,
     config: springConfig.panelExpand,
   });
   return (

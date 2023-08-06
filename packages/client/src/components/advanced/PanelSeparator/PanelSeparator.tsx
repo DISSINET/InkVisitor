@@ -35,7 +35,7 @@ export const PanelSeparator: React.FC<PanelSeparator> = ({}) => {
   const [hovered, setHovered] = useState(false);
 
   const animatedSeparator = useSpring({
-    left: `${(leftWidth - 1) / 10}rem`,
+    left: `${leftWidth - 1}px`,
     config: springConfig.separatorXPosition,
   });
 
