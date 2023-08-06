@@ -2595,5 +2595,35 @@
     "data": {
       "pos": "verb"
     }
+  },
+  {
+    "id": "a-has-maee",
+    "class": "A",
+    "label": "a-has-maee",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "createdAt": "2021-12-05T19:10:15.739Z",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {
+      "pos": "verb"
+    }
+  },
+  {
+    "id": "a-has-not-maee",
+    "class": "A",
+    "label": "a-has-not-maee",
+    "detail": "",
+    "status": "1",
+    "language": "eng",
+    "createdAt": "2021-12-05T19:10:15.739Z",
+    "notes": [],
+    "props": [],
+    "references": [],
+    "data": {
+      "pos": "verb"
+    }
   }
 ]

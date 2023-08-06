@@ -182,10 +182,12 @@ export default class EntityWarnings {
       return null;
     }
 
+    // get AEE relation for entityId (entityId has AEE)
     const aee = await Relation.findForEntity(
       conn,
       this.entityId,
-      RelationEnums.Type.ActionEventEquivalent
+      RelationEnums.Type.ActionEventEquivalent,
+      0
     );
 
     if (!aee || !aee.length) {

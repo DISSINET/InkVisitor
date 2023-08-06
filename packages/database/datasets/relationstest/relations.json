@@ -625,5 +625,10 @@
     "type": "SCL",
     "entityIds": ["c-has-isync-3", "c-isync-superclass-2"],
     "order": 1
+  },
+  {
+    "type": "AEE",
+    "entityIds": ["a-has-not-maee", "c901"],
+    "order": 1
   }
 ]
