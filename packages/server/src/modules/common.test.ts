@@ -7,6 +7,7 @@ import { Db } from "@service/RethinkDB";
 import {
   createEntity,
   deleteAudits,
+  deleteDocuments,
   deleteEntities,
   deleteRelations,
   deleteUser,
@@ -235,7 +236,8 @@ export async function clean(db: Db): Promise<void> {
   await deleteEntities(db);
   await deleteAudits(db);
   await deleteRelations(db);
-  await deleteUsers(db);
+  //await deleteUsers(db);
+  await deleteDocuments(db);
 
   await db.close();
 }

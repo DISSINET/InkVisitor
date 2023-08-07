@@ -2,7 +2,7 @@ import { IDbModel, UnknownObject, fillFlatObject } from "@models/common";
 import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
 import { IAudit } from "@shared/types";
 import { InternalServerError } from "@shared/types/errors";
-import { IRequest } from "src/custom_typings/request";
+import { IRequest } from "../../custom_typings/request";
 import { DbEnums } from "@shared/enums";
 
 export default class Audit implements IAudit, IDbModel {
@@ -14,7 +14,7 @@ export default class Audit implements IAudit, IDbModel {
   date: Date = new Date();
   changes: object = {};
 
-  constructor(data: Partial<IAudit>) {
+  constructor(data: UnknownObject) {
     if (!data) {
       return;
     }
@@ -60,7 +60,7 @@ export default class Audit implements IAudit, IDbModel {
    * @param db rethinkdb Connection
    * @param updateData Promise<WriteResult>
    */
-  async delete(db: Connection | undefined): Promise<WriteResult> {
+  async delete(db: Connection): Promise<WriteResult> {
     throw new InternalServerError("Audit entry cannot be deleted");
   }
 
@@ -132,20 +132,6 @@ export default class Audit implements IAudit, IDbModel {
       .run(db);
 
     return result && result.length ? new Audit(result[0]) : null;
-  }
-
-  /**
-   * Retrieves Audit instance by id.
-   * @param db rethinkdb Connection
-   * @param auditId string
-   * @returns Promise<Audit | null>
-   */
-  static async findAuditById(
-    db: Connection,
-    auditId: string
-  ): Promise<Audit | null> {
-    const result = await rethink.table(Audit.table).get(auditId).run(db);
-    return result ? new Audit(result) : null;
   }
 
   /**

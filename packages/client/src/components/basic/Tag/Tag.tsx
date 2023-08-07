@@ -16,9 +16,10 @@ import {
   EntityDragItem,
   ItemTypes,
 } from "types";
-import { dndHoverFn, isValidEntityClass } from "utils";
+import { dndHoverFn } from "utils";
 import {
   StyledButtonWrapper,
+  StyledElvlWrapper,
   StyledEntityTag,
   StyledLabel,
   StyledTagWrapper,
@@ -38,6 +39,7 @@ interface TagProps {
   mode?: "selected" | "disabled" | "invalid" | false;
   borderStyle?: "solid" | "dashed" | "dotted";
   button?: ReactNode;
+  elvlButtonGroup?: ReactNode | false;
   invertedLabel?: boolean;
   showOnly?: "entity" | "label";
   fullWidth?: boolean;
@@ -69,6 +71,7 @@ export const Tag: React.FC<TagProps> = ({
   mode = false,
   borderStyle = "solid",
   button,
+  elvlButtonGroup,
   invertedLabel,
   showOnly,
   fullWidth = false,
@@ -94,7 +97,7 @@ export const Tag: React.FC<TagProps> = ({
 
   const ref = useRef<HTMLDivElement>(null);
 
-  const [, drop] = useDrop({
+  const [, drop] = useDrop<EntityDragItem>({
     accept: ItemTypes.TAG,
     hover(item: EntityDragItem, monitor: DropTargetMonitor) {
       // TODO: debounce?
@@ -109,9 +112,13 @@ export const Tag: React.FC<TagProps> = ({
     [entityClass, disableDrag]
   );
 
-  const [{ isDragging }, drag] = useDrag({
+  const [{ isDragging }, drag] = useDrag<
+    EntityDragItem,
+    unknown,
+    { isDragging: boolean }
+  >({
+    type: ItemTypes.TAG,
     item: {
-      type: ItemTypes.TAG,
       id: propId,
       index,
       entityClass: entityClass as EntityEnums.Class,
@@ -140,7 +147,7 @@ export const Tag: React.FC<TagProps> = ({
 
   const renderEntityTag = () => (
     <StyledEntityTag
-      color={
+      $color={
         entityClass !== EntityEnums.Extension.Invalid
           ? EntityColors[entityClass].color
           : "white"
@@ -149,6 +156,10 @@ export const Tag: React.FC<TagProps> = ({
     >
       {entityClass}
     </StyledEntityTag>
+  );
+
+  const renderElvl = () => (
+    <StyledElvlWrapper>{elvlButtonGroup}</StyledElvlWrapper>
   );
 
   const renderButton = () => (
@@ -207,6 +218,7 @@ export const Tag: React.FC<TagProps> = ({
         >
           {label}
         </StyledLabel>
+        {elvlButtonGroup && renderElvl()}
         {button && renderButton()}
       </>
     );

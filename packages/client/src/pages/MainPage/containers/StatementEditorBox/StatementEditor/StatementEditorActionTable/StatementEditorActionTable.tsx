@@ -1,9 +1,10 @@
 import { IResponseStatement, IStatementAction } from "@shared/types";
 import update from "immutability-helper";
 import React, { useCallback, useEffect, useState } from "react";
-import { UseMutationResult } from "react-query";
+import { UseMutationResult } from "@tanstack/react-query";
 import { FilteredActionObject } from "types";
 import { StatementEditorActionTableRow } from "./StatementEditorActionTableRow";
+import { StyledEditorActionTableWrapper } from "./StatementEditorActionTableStyles";
 
 interface StatementEditorActionTable {
   statement: IResponseStatement;
@@ -72,29 +73,32 @@ export const StatementEditorActionTable: React.FC<
   );
 
   return (
-    <>
-      {filteredActions.length > 0 &&
-        filteredActions.map((filteredAction, key) => {
-          return (
-            <StatementEditorActionTableRow
-              key={key}
-              index={key}
-              filteredAction={filteredAction}
-              statement={statement}
-              moveRow={moveRow}
-              userCanEdit={userCanEdit}
-              updateOrderFn={updateActionOrder}
-              updateActionsMutation={updateActionsMutation}
-              addProp={addProp}
-              updateProp={updateProp}
-              removeProp={removeProp}
-              movePropToIndex={movePropToIndex}
-              territoryParentId={territoryParentId}
-              territoryActants={territoryActants}
-              hasOrder={filteredActions.length > 1}
-            />
-          );
-        })}
-    </>
+    <div style={{ overflow: "auto" }}>
+      {filteredActions.length > 0 && (
+        <StyledEditorActionTableWrapper>
+          {filteredActions.map((filteredAction, key) => {
+            return (
+              <StatementEditorActionTableRow
+                key={key}
+                index={key}
+                filteredAction={filteredAction}
+                statement={statement}
+                moveRow={moveRow}
+                userCanEdit={userCanEdit}
+                updateOrderFn={updateActionOrder}
+                updateActionsMutation={updateActionsMutation}
+                addProp={addProp}
+                updateProp={updateProp}
+                removeProp={removeProp}
+                movePropToIndex={movePropToIndex}
+                territoryParentId={territoryParentId}
+                territoryActants={territoryActants}
+                hasOrder={filteredActions.length > 1}
+              />
+            );
+          })}
+        </StyledEditorActionTableWrapper>
+      )}
+    </div>
   );
 };

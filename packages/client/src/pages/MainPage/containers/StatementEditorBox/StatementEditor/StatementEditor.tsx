@@ -6,8 +6,23 @@ import {
   IStatementActant,
   IStatementAction,
 } from "@shared/types";
+import {
+  UseMutationResult,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { excludedSuggesterEntities } from "Theme/constants";
+import theme from "Theme/theme";
 import api from "api";
-import { Dropdown, Input, Loader, MultiInput, Submit } from "components";
+import {
+  Button,
+  Dropdown,
+  Input,
+  Loader,
+  Message,
+  MultiInput,
+  Submit,
+} from "components";
 import {
   ApplyTemplateModal,
   AuditTable,
@@ -26,17 +41,14 @@ import {
 import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
 import { AiOutlineWarning } from "react-icons/ai";
-import { UseMutationResult, useQuery, useQueryClient } from "react-query";
+import { FaRegCopy } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { useAppSelector } from "redux/hooks";
-import { excludedSuggesterEntities } from "Theme/constants";
-import theme from "Theme/theme";
-import { classesEditorActants, classesEditorTags, DropdownItem } from "types";
+import { DropdownItem, classesEditorActants, classesEditorTags } from "types";
 import { getEntityLabel, getShortLabelByLetterCount } from "utils";
 import { EntityReferenceTable } from "../../EntityReferenceTable/EntityReferenceTable";
 import {
   StyledBreadcrumbWrap,
-  StyledEditorActantTableWrapper,
   StyledEditorContentRow,
   StyledEditorContentRowLabel,
   StyledEditorContentRowValue,
@@ -58,6 +70,7 @@ import { StatementEditorActantTable } from "./StatementEditorActantTable/Stateme
 import { StatementEditorActionTable } from "./StatementEditorActionTable/StatementEditorActionTable";
 import { StatementEditorOrdering } from "./StatementEditorOrdering/StatementEditorOrdering";
 import { StatementEditorSectionButtons } from "./StatementEditorSectionButtons/StatementEditorSectionButtons";
+import { TiWarningOutline } from "react-icons/ti";
 
 interface StatementEditor {
   statement: IResponseStatement;
@@ -105,13 +118,11 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     error: errorUser,
     isFetching: isFetchingUser,
   } = useQuery(
-    ["user", username],
+    ["user", userId],
     async () => {
       if (userId) {
         const res = await api.usersGet(userId);
         return res.data;
-      } else {
-        return false;
       }
     },
     { enabled: !!userId && api.isLoggedIn() }
@@ -210,7 +221,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
   // refetch audit when statement changes
   useEffect(() => {
-    queryClient.invalidateQueries("audit");
+    queryClient.invalidateQueries(["audit"]);
   }, [statement]);
 
   // stores territory id
@@ -360,43 +371,81 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   };
 
   const updateProp = (propId: string, changes: any) => {
+    console.log("updating props", changes);
     if (propId) {
-      const newStatementData = { ...statement.data };
+      if (
+        changes.type &&
+        changes.type.entityId &&
+        changes.type.elvl !== EntityEnums.Elvl.Inferential &&
+        user &&
+        user.options.defaultStatementLanguage
+      ) {
+        checkTypeEntityLanguage(propId, changes);
+      } else {
+        applyPropChanges(propId, changes);
+      }
+    }
+  };
 
-      // this is probably an overkill
-      [...newStatementData.actants, ...newStatementData.actions].forEach(
-        (actant: IStatementActant | IStatementAction) => {
-          actant.props.forEach((prop1, pi1) => {
-            // 1st level
-            if (prop1.id === propId) {
-              actant.props[pi1] = { ...actant.props[pi1], ...changes };
+  // checking if the language is not different from user.options.defaultStatementLanguage -> in that case, switch elvl to EntityEnums.Elvl.Inferential
+  const checkTypeEntityLanguage = (propId: string, changes: any) => {
+    console.log("checking type entity language");
+    if (user) {
+      const statementLanguage = user.options.defaultStatementLanguage;
+      api.entitiesGet(changes.type.entityId).then((typeEntity) => {
+        if (typeEntity.data) {
+          const entityLanguage = typeEntity.data.language;
+          if (entityLanguage !== statementLanguage) {
+            console.log(
+              `changing elvl of prop type as user language is ${statementLanguage} and entity has language ${entityLanguage}`
+            );
+            changes.type.elvl = EntityEnums.Elvl.Inferential;
+            applyPropChanges(propId, {
+              changes,
+            });
+            toast.info(
+              `The epistemic level of property type's involvement changed to "inferential"`
+            );
+          }
+        }
+      });
+    }
+    applyPropChanges(propId, changes);
+  };
+
+  const applyPropChanges = (propId: string, changes: any) => {
+    const newStatementData = { ...statement.data };
+    [...newStatementData.actants, ...newStatementData.actions].forEach(
+      (actant: IStatementActant | IStatementAction) => {
+        actant.props.forEach((prop1, pi1) => {
+          // 1st level
+          if (prop1.id === propId) {
+            actant.props[pi1] = { ...actant.props[pi1], ...changes };
+          }
+
+          // 2nd level
+          actant.props[pi1].children.forEach((prop2, pi2) => {
+            if (prop2.id === propId) {
+              actant.props[pi1].children[pi2] = {
+                ...actant.props[pi1].children[pi2],
+                ...changes,
+              };
             }
 
-            // 2nd level
-            actant.props[pi1].children.forEach((prop2, pi2) => {
-              if (prop2.id === propId) {
-                actant.props[pi1].children[pi2] = {
-                  ...actant.props[pi1].children[pi2],
+            // 3rd level
+            actant.props[pi1].children[pi2].children.forEach((prop3, pi3) => {
+              if (prop3.id === propId) {
+                actant.props[pi1].children[pi2].children[pi3] = {
+                  ...actant.props[pi1].children[pi2].children[pi3],
                   ...changes,
                 };
               }
-
-              // 3rd level
-              actant.props[pi1].children[pi2].children.forEach((prop3, pi3) => {
-                if (prop3.id === propId) {
-                  actant.props[pi1].children[pi2].children[pi3] = {
-                    ...actant.props[pi1].children[pi2].children[pi3],
-                    ...changes,
-                  };
-                }
-              });
             });
           });
-        }
-      );
-
-      updateStatementDataMutation.mutate(newStatementData);
-    }
+        });
+      }
+    );
+    updateStatementDataMutation.mutate(newStatementData);
   };
 
   const removeProp = (propId: string) => {
@@ -503,6 +552,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   const [showSubmitSection, setShowSubmitSection] = useState<
     "actants" | "actions" | "references" | false
   >(false);
+  const [showWarnings, setShowWarnings] = useState(false);
 
   return (
     <>
@@ -511,6 +561,19 @@ export const StatementEditor: React.FC<StatementEditor> = ({
           <StyledEditorStatementInfo>
             <StyledHeaderTagWrap>
               <EntityTag entity={statement} fullWidth />
+              <div style={{ marginLeft: "0.5rem", marginRight: "0.5rem" }}>
+                <Button
+                  inverted
+                  tooltipLabel="copy statement ID"
+                  color="primary"
+                  label=""
+                  icon={<FaRegCopy />}
+                  onClick={async () => {
+                    await navigator.clipboard.writeText(statement.id);
+                    toast.info("ID copied to clipboard");
+                  }}
+                />
+              </div>
             </StyledHeaderTagWrap>
             {userCanEdit && (
               <div style={{ display: "flex" }}>
@@ -589,7 +652,6 @@ export const StatementEditor: React.FC<StatementEditor> = ({
               <StyledEditorContentRowValue>
                 <Dropdown
                   disabled={!userCanEdit}
-                  isMulti={false}
                   width="full"
                   options={templateOptions}
                   value={templateOptions[0]}
@@ -608,8 +670,9 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         >
           <StyledEditorSectionContent firstSection>
             <Input
-              disabled={!userCanEdit}
               type="textarea"
+              rows={5}
+              disabled={!userCanEdit}
               width="full"
               noBorder
               placeholder="Insert statement text here"
@@ -626,8 +689,38 @@ export const StatementEditor: React.FC<StatementEditor> = ({
           </StyledEditorSectionContent>
         </StyledEditorSection>
 
+        {statement.warnings.length > 0 && (
+          <StyledEditorSection>
+            <Button
+              icon={<TiWarningOutline size={16} />}
+              label={`${statement.warnings.length}`}
+              onClick={() => setShowWarnings(!showWarnings)}
+              color="warning"
+              tooltipLabel={showWarnings ? "hide warnings" : "show warnings"}
+              inverted={!showWarnings}
+              tooltipPosition="right"
+            />
+            {showWarnings &&
+              statement.warnings
+                .sort((a, b) => a.type.localeCompare(b.type))
+                .map((warning, key) => {
+                  return (
+                    <Message
+                      key={key}
+                      warning={warning}
+                      entities={statement.entities}
+                    />
+                  );
+                })}
+          </StyledEditorSection>
+        )}
+
         {/* Actions */}
-        <StyledEditorSection metaSection key="editor-section-actions">
+        <StyledEditorSection
+          metaSection
+          key="editor-section-actions"
+          id="action-section"
+        >
           <StyledEditorSectionHeader>
             <StyledEditorSectionHeading>Actions</StyledEditorSectionHeading>
 
@@ -643,20 +736,17 @@ export const StatementEditor: React.FC<StatementEditor> = ({
             )}
           </StyledEditorSectionHeader>
           <StyledEditorSectionContent>
-            <StyledEditorActantTableWrapper>
-              <StatementEditorActionTable
-                userCanEdit={userCanEdit}
-                statement={statement}
-                updateActionsMutation={updateStatementDataMutation}
-                addProp={addProp}
-                updateProp={updateProp}
-                removeProp={removeProp}
-                movePropToIndex={movePropToIndex}
-                territoryParentId={statementTerritoryId}
-                territoryActants={territoryActants}
-              />
-            </StyledEditorActantTableWrapper>
-
+            <StatementEditorActionTable
+              userCanEdit={userCanEdit}
+              statement={statement}
+              updateActionsMutation={updateStatementDataMutation}
+              addProp={addProp}
+              updateProp={updateProp}
+              removeProp={removeProp}
+              movePropToIndex={movePropToIndex}
+              territoryParentId={statementTerritoryId}
+              territoryActants={territoryActants}
+            />
             {userCanEdit && (
               <EntitySuggester
                 territoryActants={territoryActants}
@@ -665,7 +755,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                   addAction(newSelectedId);
                 }}
                 categoryTypes={[EntityEnums.Class.Action]}
-                excludedEntities={excludedSuggesterEntities}
+                excludedEntityClasses={excludedSuggesterEntities}
                 placeholder={"add action"}
                 isInsideTemplate={statement.isTemplate}
                 territoryParentId={statementTerritoryId}
@@ -675,7 +765,11 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         </StyledEditorSection>
 
         {/* Actants */}
-        <StyledEditorSection metaSection key="editor-section-actants">
+        <StyledEditorSection
+          metaSection
+          key="editor-section-actants"
+          id="actant-section"
+        >
           <StyledEditorSectionHeader>
             <StyledEditorSectionHeading>Actants</StyledEditorSectionHeading>
 
@@ -691,22 +785,20 @@ export const StatementEditor: React.FC<StatementEditor> = ({
             )}
           </StyledEditorSectionHeader>
           <StyledEditorSectionContent>
-            <StyledEditorActantTableWrapper>
-              <StatementEditorActantTable
-                statement={statement}
-                userCanEdit={userCanEdit}
-                classEntitiesActant={classesEditorActants}
-                updateStatementDataMutation={updateStatementDataMutation}
-                addProp={addProp}
-                updateProp={updateProp}
-                removeProp={removeProp}
-                movePropToIndex={movePropToIndex}
-                territoryParentId={statementTerritoryId}
-                addClassification={addClassification}
-                addIdentification={addIdentification}
-                territoryActants={territoryActants}
-              />
-            </StyledEditorActantTableWrapper>
+            <StatementEditorActantTable
+              statement={statement}
+              userCanEdit={userCanEdit}
+              classEntitiesActant={classesEditorActants}
+              updateStatementDataMutation={updateStatementDataMutation}
+              addProp={addProp}
+              updateProp={updateProp}
+              removeProp={removeProp}
+              movePropToIndex={movePropToIndex}
+              territoryParentId={statementTerritoryId}
+              addClassification={addClassification}
+              addIdentification={addIdentification}
+              territoryActants={territoryActants}
+            />
             {userCanEdit && (
               <EntitySuggester
                 territoryActants={territoryActants}
@@ -716,7 +808,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 }}
                 categoryTypes={classesEditorActants}
                 placeholder={"add actant"}
-                excludedEntities={excludedSuggesterEntities}
+                excludedEntityClasses={excludedSuggesterEntities}
                 isInsideTemplate={statement.isTemplate}
                 territoryParentId={statementTerritoryId}
                 excludedActantIds={[statement.id]}
@@ -761,7 +853,6 @@ export const StatementEditor: React.FC<StatementEditor> = ({
           <StyledEditorSectionContent>
             <EntityReferenceTable
               openDetailOnCreate
-              entities={statement.entities}
               references={statement.references}
               onChange={(newReferences: IReference[]) => {
                 updateStatementMutation.mutate({ references: newReferences });
@@ -769,6 +860,8 @@ export const StatementEditor: React.FC<StatementEditor> = ({
               disabled={!userCanEdit}
               isInsideTemplate={statement.isTemplate || false}
               territoryParentId={statementTerritoryId}
+              entities={statement.entities ?? {}}
+              entityId={statement.id}
             />
           </StyledEditorSectionContent>
         </StyledEditorSection>
@@ -815,7 +908,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 disableTemplatesAccept
                 categoryTypes={classesEditorTags}
                 placeholder={"add new tag"}
-                excludedEntities={excludedSuggesterEntities}
+                excludedEntityClasses={excludedSuggesterEntities}
                 excludedActantIds={statement.data.tags}
                 isInsideTemplate={statement.isTemplate}
                 territoryParentId={statementTerritoryId}

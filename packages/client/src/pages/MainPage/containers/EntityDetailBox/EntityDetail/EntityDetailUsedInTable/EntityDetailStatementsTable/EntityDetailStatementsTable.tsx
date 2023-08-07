@@ -11,11 +11,13 @@ import { EntityTag } from "components/advanced";
 import { useSearchParams } from "hooks";
 import React, { useMemo } from "react";
 import { FaEdit } from "react-icons/fa";
-import { Cell, Column } from "react-table";
+import { CellProps, Column } from "react-table";
 import {
   StyledShortenedText,
   StyledTableTextGridCell,
 } from "../EntityDetailUsedInTableStyles";
+
+type CellType = CellProps<IResponseUsedInStatement<EntityEnums.UsedInPosition>>;
 
 interface EntityDetailStatementsTable {
   title: { singular: string; plural: string };
@@ -30,14 +32,15 @@ export const EntityDetailStatementsTable: React.FC<
 
   const data = useMemo(() => (useCases ? useCases : []), [useCases]);
 
-  const columns: Column<{}>[] = React.useMemo(
+  const columns = useMemo<
+    Column<IResponseUsedInStatement<EntityEnums.UsedInPosition>>[]
+  >(
     () => [
       {
         Header: "",
-        accessor: "data",
-        Cell: ({ row }: Cell) => {
-          const useCase =
-            row.original as IResponseUsedInStatement<EntityEnums.UsedInPosition>;
+        id: "entity",
+        Cell: ({ row }: CellType) => {
+          const useCase = row.original;
           const entityId = useCase.statement?.id;
           const entity = entityId ? entities[entityId] : false;
           return (
@@ -56,9 +59,8 @@ export const EntityDetailStatementsTable: React.FC<
       },
       {
         Header: "Subj",
-        Cell: ({ row }: Cell) => {
-          const useCase =
-            row.original as IResponseUsedInStatement<EntityEnums.UsedInPosition>;
+        Cell: ({ row }: CellType) => {
+          const useCase = row.original;
           const subjectIds = useCase.statement.data.actants
             .filter((a: IStatementActant) => a.position === "s")
             .map((a: IStatementActant) => a.entityId);
@@ -80,9 +82,8 @@ export const EntityDetailStatementsTable: React.FC<
       },
       {
         Header: "Actions",
-        Cell: ({ row }: Cell) => {
-          const useCase =
-            row.original as IResponseUsedInStatement<EntityEnums.UsedInPosition>;
+        Cell: ({ row }: CellType) => {
+          const useCase = row.original;
           const { actions } = useCase.statement.data;
           const actionIds = actions.map((a: IStatementAction) => a.actionId);
           const actionObjects = actionIds.map((actionId: string) => {
@@ -102,9 +103,8 @@ export const EntityDetailStatementsTable: React.FC<
       },
       {
         Header: "Objects",
-        Cell: ({ row }: Cell) => {
-          const useCase =
-            row.original as IResponseUsedInStatement<EntityEnums.UsedInPosition>;
+        Cell: ({ row }: CellType) => {
+          const useCase = row.original;
 
           const actantIds = useCase.statement.data.actants
             .filter((a: IStatementActant) => a.position !== "s")
@@ -127,9 +127,8 @@ export const EntityDetailStatementsTable: React.FC<
       },
       {
         Header: "Text",
-        Cell: ({ row }: Cell) => {
-          const useCase =
-            row.original as IResponseUsedInStatement<EntityEnums.UsedInPosition>;
+        Cell: ({ row }: CellType) => {
+          const useCase = row.original;
           const entityId = useCase.statement?.id;
           const entity = entityId ? entities[entityId] : false;
 
@@ -152,9 +151,8 @@ export const EntityDetailStatementsTable: React.FC<
       },
       {
         id: "edit",
-        Cell: ({ row }: Cell) => {
-          const useCase =
-            row.original as IResponseUsedInStatement<EntityEnums.UsedInPosition>;
+        Cell: ({ row }: CellType) => {
+          const useCase = row.original;
           const entityId = useCase.statement?.id;
           const entity = entityId ? entities[entityId] : false;
 

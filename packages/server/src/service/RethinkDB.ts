@@ -1,7 +1,7 @@
 import { Connection, r as rethink } from "rethinkdb-ts";
 import { Response } from "express";
 import { Mutex, Awaiter } from "./mutex";
-import { IRequest } from "src/custom_typings/request";
+import { IRequest } from "../custom_typings/request";
 
 export const rethinkConfig = {
   db: process.env.DB_NAME,
@@ -20,7 +20,6 @@ export class Db {
   // wrapped db sonnection
   connection: Connection = {} as Connection;
 
-
   constructor() {
     if (!rethinkConfig.db || !rethinkConfig.host || !rethinkConfig.port) {
       throw new Error("Missing db params, check env vars");
@@ -33,7 +32,7 @@ export class Db {
   async initDb(): Promise<void> {
     this.connection = await rethink.connect({
       ...rethinkConfig,
-      timeout: 5, // important -  close will wait for this seconds
+      timeout: 30, // important -  close will wait for this seconds
     });
   }
 

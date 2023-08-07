@@ -18,7 +18,7 @@ import {
 import { CBookmarkFolder } from "constructors";
 import React, { useMemo, useState } from "react";
 import { FaPlus } from "react-icons/fa";
-import { useMutation, useQuery, useQueryClient } from "react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { useAppSelector } from "redux/hooks";
 import {
@@ -231,6 +231,7 @@ export const EntityBookmarkBox: React.FC = () => {
         showModal={!!editingFolder}
         width="thin"
         onEnterPress={() => acceptEditingFolderMutation.mutate()}
+        onClose={cancelEditingFolder}
       >
         <ModalHeader title="Bookmark Folder" />
         <ModalContent>
@@ -250,9 +251,7 @@ export const EntityBookmarkBox: React.FC = () => {
               key="cancel"
               label="Cancel"
               color="warning"
-              onClick={() => {
-                cancelEditingFolder();
-              }}
+              onClick={cancelEditingFolder}
             />
             <Button
               key="submit"

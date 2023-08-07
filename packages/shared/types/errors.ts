@@ -312,6 +312,21 @@ class RelationDoesNotExist extends CustomError {
 }
 
 /**
+ * DocumentDoesNotExist will be thrown when attempting to retrieve document by id, which does not exist
+ */
+class DocumentDoesNotExist extends CustomError {
+  public static code = 400;
+  public static title = "Cannot get Document entry";
+  public static message = "Document $1 does not exist";
+
+  static forId(id: string): DocumentDoesNotExist {
+    return new DocumentDoesNotExist(
+      DocumentDoesNotExist.message.replace("$1", id)
+    );
+  }
+}
+
+/**
  * UnknownError works as a backup
  */
 class UnknownError extends CustomError {
@@ -343,6 +358,7 @@ const allErrors: Record<string, any> = {
   StatementInvalidMove,
   EmailError,
   RelationDoesNotExist,
+  DocumentDoesNotExist,
 };
 
 export interface IErrorSignature {
@@ -379,4 +395,5 @@ export {
   StatementInvalidMove,
   EmailError,
   RelationDoesNotExist,
+  DocumentDoesNotExist,
 };

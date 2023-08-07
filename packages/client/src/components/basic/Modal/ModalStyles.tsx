@@ -1,17 +1,9 @@
-import { animated } from "react-spring";
+import { animated } from "@react-spring/web";
 import styled from "styled-components";
-import {
-  space1,
-  space2,
-  space3,
-  space4,
-  space5,
-  space6,
-  space7,
-} from "Theme/constants";
-import { Colors } from "types";
+import { space2, space4, space5, space6, space7 } from "Theme/constants";
+import { ThemeColor } from "Theme/theme";
 
-interface ModalWrap { }
+interface ModalWrap {}
 export const StyledModalWrap = styled.div<ModalWrap>`
   display: flex;
   flex-direction: column;
@@ -36,6 +28,7 @@ export const StyledBackground = styled(animated.div)`
 
 interface Card {
   width: "full" | "fat" | "normal" | "thin" | number;
+  $fullHeight: boolean;
 }
 const getWidth = (width: "full" | "fat" | "normal" | "thin" | number) => {
   if (typeof width === "number") {
@@ -53,11 +46,12 @@ const getWidth = (width: "full" | "fat" | "normal" | "thin" | number) => {
     }
   }
 };
-export const StyledCard = styled(animated.div) <Card>`
+export const StyledCard = styled(animated.div)<Card>`
   width: ${({ width }) => getWidth(width)};
+  height: ${({ $fullHeight }) => ($fullHeight ? "100%" : "")};
   display: flex;
   flex-direction: column;
-  max-height: calc(100vh - 40px);
+  max-height: calc(100vh - 8rem);
   z-index: 50;
   background-color: ${({ theme }) => theme.color["gray"][100]};
   color: ${({ theme }) => theme.color["black"]};
@@ -66,7 +60,7 @@ export const StyledCard = styled(animated.div) <Card>`
 `;
 
 interface StyledCardHeader {
-  color?: typeof Colors[number];
+  $color?: keyof ThemeColor;
 }
 export const StyledCardHeader = styled.header<StyledCardHeader>`
   display: flex;
@@ -94,15 +88,16 @@ interface StyledCardBody {
 }
 export const StyledCardBody = styled.section<StyledCardBody>`
   display: flex;
+  height: 100%;
   flex-direction: ${({ column }) => (column ? "column" : "row")};
   padding: ${space5} ${space7};
   overflow: ${({ enableScroll }) => (enableScroll ? "auto" : "initial")};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
   * {
     user-select: text;
-  };
+  }
 `;
-interface StyledFooter { }
+interface StyledFooter {}
 export const StyledFooter = styled.div<StyledFooter>`
   border-top-style: solid;
   border-top-width: ${({ theme }) => theme.borderWidth["default"]};

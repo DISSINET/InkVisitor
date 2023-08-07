@@ -6,6 +6,8 @@ import {
   IResponseStatement,
   IStatement,
 } from "@shared/types";
+import { UseMutationResult } from "@tanstack/react-query";
+import theme from "Theme/theme";
 import { AxiosResponse } from "axios";
 import { Button, ButtonGroup, TagGroup } from "components";
 import { EntityTag } from "components/advanced";
@@ -24,23 +26,29 @@ import {
   MdOutlineCheckBox,
   MdOutlineCheckBoxOutlineBlank,
 } from "react-icons/md";
-import { UseMutationResult } from "react-query";
-import { Cell, Column, useExpanded, useRowSelect, useTable } from "react-table";
+import {
+  CellProps,
+  Column,
+  useExpanded,
+  useRowSelect,
+  useTable,
+} from "react-table";
 import { setLastClickedIndex } from "redux/features/statementList/lastClickedIndexSlice";
 import { setRowsExpanded } from "redux/features/statementList/rowsExpandedSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import theme from "Theme/theme";
 import { StatementListContextMenu } from "../StatementListContextMenu/StatementListContextMenu";
 import { StyledText } from "../StatementLitBoxStyles";
 import { StatementListRow } from "./StatementListRow";
 import {
   StyledCheckboxWrapper,
   StyledFocusedCircle,
+  StyledTHead,
   StyledTable,
   StyledTdLastEdit,
   StyledTh,
-  StyledTHead,
 } from "./StatementListTableStyles";
+
+type CellType = CellProps<IResponseStatement>;
 
 interface StatementListTable {
   statements: IResponseStatement[];
@@ -57,7 +65,12 @@ interface StatementListTable {
   entities: { [key: string]: IEntity };
   right: UserEnums.RoleMode;
 
-  duplicateStatement: (statementToDuplicate: IResponseStatement) => void;
+  cloneStatementMutation: UseMutationResult<
+    AxiosResponse<IResponseGeneric<any>>,
+    unknown,
+    string,
+    unknown
+  >;
   setStatementToDelete: React.Dispatch<
     React.SetStateAction<IStatement | undefined>
   >;
@@ -74,7 +87,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
   entities,
   right,
 
-  duplicateStatement,
+  cloneStatementMutation,
   setStatementToDelete,
   setShowSubmit,
   addStatementAtCertainIndex,
@@ -103,7 +116,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
     setStatementsLocal(statements);
   }, [statements]);
 
-  const getRowId = useCallback((row): string => {
+  const getRowId = useCallback((row: IResponseStatement): string => {
     return row.id;
   }, []);
 
@@ -145,7 +158,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
       },
       {
         id: "selection",
-        Cell: ({ row }: Cell) => {
+        Cell: ({ row }: CellType) => {
           const size = 18;
           const checked = selectedRows.includes(row.id);
           const isFocused = lastClickedIndex === row.index;
@@ -213,28 +226,21 @@ export const StatementListTable: React.FC<StatementListTable> = ({
       },
       {
         id: "move",
-        Cell: ({ row }: Cell) => {
+        Cell: ({ row }: CellType) => {
           return false;
         },
       },
       {
         Header: "",
         id: "Statement",
-        Cell: ({ row }: Cell) => {
+        Cell: ({ row }: CellType) => {
           const statement = row.original as IStatement;
-          return (
-            <EntityTag
-              entity={statement as IEntity}
-              showOnly="entity"
-              tooltipText={statement.data.text}
-            />
-          );
+          return <EntityTag entity={statement as IEntity} showOnly="entity" />;
         },
       },
       {
         Header: "Subj.",
-        accessor: "data",
-        Cell: ({ row }: Cell) => {
+        Cell: ({ row }: CellType) => {
           const subjectIds: string[] = row.values.data?.actants
             ? row.values.data.actants
                 .filter((a: any) => a.position === "s")
@@ -258,7 +264,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
       },
       {
         Header: "Actions",
-        Cell: ({ row }: Cell) => {
+        Cell: ({ row }: CellType) => {
           const actionIds = row.values.data?.actions
             ? row.values.data.actions.map((a: any) => a.actionId)
             : [];
@@ -280,7 +286,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
       },
       {
         Header: "Objects",
-        Cell: ({ row }: Cell) => {
+        Cell: ({ row }: CellType) => {
           const actantIds = row.values.data?.actants
             ? row.values.data.actants
                 .filter((a: any) => a.position !== "s")
@@ -304,7 +310,8 @@ export const StatementListTable: React.FC<StatementListTable> = ({
       },
       {
         Header: "Text",
-        Cell: ({ row }: Cell) => {
+        accessor: "data",
+        Cell: ({ row }: CellType) => {
           const { text } = row.values.data;
           const maxWordsCount = 20;
           const trimmedText = text.split(" ").slice(0, maxWordsCount).join(" ");
@@ -317,7 +324,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
       {
         id: "lastEdit",
         Header: "Edited",
-        Cell: ({ row }: Cell) => {
+        Cell: ({ row }: CellType) => {
           const { updatedAt, createdAt } = row.original as IResponseStatement;
           const lastEditDate: Date | undefined = updatedAt || createdAt;
           if (!lastEditDate) {
@@ -349,7 +356,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
         Header: "",
         id: "expander",
         width: 300,
-        Cell: ({ row }: Cell) => {
+        Cell: ({ row }: CellType) => {
           return (
             <ButtonGroup>
               {right !== UserEnums.RoleMode.Read && (
@@ -373,7 +380,9 @@ export const StatementListTable: React.FC<StatementListTable> = ({
                       color="warning"
                       tooltipLabel="duplicate"
                       onClick={() => {
-                        duplicateStatement(row.original as IResponseStatement);
+                        cloneStatementMutation.mutate(
+                          (row.original as IResponseStatement).id
+                        );
                       }}
                     />,
                     <Button

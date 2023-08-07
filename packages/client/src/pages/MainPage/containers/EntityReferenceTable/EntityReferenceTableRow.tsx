@@ -1,5 +1,6 @@
 import { EntityEnums } from "@shared/enums";
-import { IEntity, IReference } from "@shared/types";
+import { IEntity, IReference, IResponseDocument } from "@shared/types";
+import { excludedSuggesterEntities } from "Theme/constants";
 import { Button } from "components";
 import {
   EntityDropzone,
@@ -7,12 +8,16 @@ import {
   EntityTag,
 } from "components/advanced";
 import React from "react";
-import { FaExternalLinkAlt, FaTrashAlt, FaUnlink } from "react-icons/fa";
-import { excludedSuggesterEntities } from "Theme/constants";
+import { FaExternalLinkAlt, FaTrashAlt } from "react-icons/fa";
 import {
+  GrDocument,
+  GrDocumentMissing,
+  GrDocumentVerified,
+} from "react-icons/gr";
+import {
+  StyledReferenceValuePartLabel,
   StyledReferencesListButtons,
   StyledReferencesListColumn,
-  StyledReferenceValuePartLabel,
 } from "./EntityReferenceTableStyles";
 
 interface EntityReferenceTableRow {
@@ -26,6 +31,8 @@ interface EntityReferenceTableRow {
   openDetailOnCreate?: boolean;
   isInsideTemplate: boolean;
   territoryParentId?: string;
+  document: IResponseDocument | undefined;
+  entityId: string;
 }
 
 export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
@@ -39,6 +46,8 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
   openDetailOnCreate = false,
   isInsideTemplate = false,
   territoryParentId,
+  document = undefined,
+  entityId,
 }) => {
   return (
     <React.Fragment>
@@ -100,7 +109,7 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
               handleChangeValue(reference.id, newSelectedId);
             }}
             categoryTypes={[EntityEnums.Class.Value]}
-            excludedEntities={excludedSuggesterEntities}
+            excludedEntityClasses={excludedSuggesterEntities}
             isInsideTemplate={isInsideTemplate}
             territoryParentId={territoryParentId}
             excludedActantIds={[value.id]}
@@ -128,12 +137,46 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
                   handleChangeValue(reference.id, newSelectedId);
                 }}
                 categoryTypes={[EntityEnums.Class.Value]}
-                excludedEntities={excludedSuggesterEntities}
                 isInsideTemplate={isInsideTemplate}
                 territoryParentId={territoryParentId}
               />
             </div>
           )
+        )}
+      </StyledReferencesListColumn>
+
+      {/* text reference */}
+      <StyledReferencesListColumn>
+        {resource ? (
+          resource.data.documentId ? (
+            document?.referencedEntityIds.includes(entityId) ? (
+              <Button
+                tooltipLabel="with entity"
+                icon={<GrDocumentVerified />}
+                inverted
+                color="primary"
+                noBorder
+              />
+            ) : (
+              <Button
+                tooltipLabel="no reference in document found"
+                icon={<GrDocument />}
+                inverted
+                color="plain"
+                noBorder
+              />
+            )
+          ) : (
+            <Button
+              icon={<GrDocumentMissing />}
+              tooltipLabel="no document assigned for this resource"
+              color="danger"
+              noBorder
+              inverted
+            />
+          )
+        ) : (
+          <></>
         )}
       </StyledReferencesListColumn>
 

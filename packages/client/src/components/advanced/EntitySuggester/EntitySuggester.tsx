@@ -1,33 +1,27 @@
 import { EntityEnums, UserEnums } from "@shared/enums";
-import {
-  IEntity,
-  IResponseTerritory,
-  IStatement,
-  ITerritory,
-} from "@shared/types";
+import { IEntity, IStatement, ITerritory } from "@shared/types";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { DropdownAny, wildCardChar } from "Theme/constants";
 import api from "api";
 import { Suggester } from "components";
-import { CEntity, CStatement, CTerritory, InstTemplate } from "constructors";
+import { CEntity, InstTemplate } from "constructors";
 import { useDebounce, useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
 import { FaHome } from "react-icons/fa";
-import { useMutation, useQuery, useQueryClient } from "react-query";
-import { OptionTypeBase, ValueType } from "react-select";
-import { DropdownAny, rootTerritoryId, wildCardChar } from "Theme/constants";
 import { DropdownItem, EntityDragItem, SuggesterItemToCreate } from "types";
-import { AddTerritoryModal } from "..";
+import { AddTerritoryModal, EntityCreateModal } from "..";
 
 interface EntitySuggester {
   categoryTypes: EntityEnums.ExtendedClass[];
-  onSelected: (id: string) => void;
+  onSelected?: (id: string) => void;
   onPicked?: (entity: IEntity) => void;
-  onChangeCategory?: (selectedOption: ValueType<OptionTypeBase, any>) => void;
+  onChangeCategory?: (selectedOption: DropdownItem) => void;
   onTyped?: (newType: string) => void;
   placeholder?: string;
   inputWidth?: number | "full";
   openDetailOnCreate?: boolean;
   territoryActants?: string[];
-  excludedEntities?: EntityEnums.Class[];
+  excludedEntityClasses?: EntityEnums.Class[];
   excludedActantIds?: string[];
   filterEditorRights?: boolean;
   isInsideTemplate?: boolean;
@@ -39,14 +33,18 @@ interface EntitySuggester {
   disableWildCard?: boolean;
   disableTemplatesAccept?: boolean;
   disableButtons?: boolean;
+  disableEnter?: boolean;
   autoFocus?: boolean;
+
+  initTyped?: string;
+  initCategory?: DropdownItem;
 
   disabled?: boolean;
 }
 
 export const EntitySuggester: React.FC<EntitySuggester> = ({
   categoryTypes,
-  onSelected,
+  onSelected = () => {},
   onPicked = () => {},
   onChangeCategory,
   onTyped,
@@ -54,7 +52,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
   inputWidth,
   openDetailOnCreate = false,
   territoryActants,
-  excludedEntities = [],
+  excludedEntityClasses = [],
   filterEditorRights = false,
   excludedActantIds = [],
   isInsideTemplate = false,
@@ -66,13 +64,17 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
   disableWildCard = false,
   disableTemplatesAccept = false,
   disableButtons = false,
+  disableEnter,
   autoFocus,
+
+  initTyped,
+  initCategory,
 
   disabled = false,
 }) => {
-  const [typed, setTyped] = useState<string>("");
+  const [typed, setTyped] = useState<string>(initTyped ?? "");
   const debouncedTyped = useDebounce(typed, 100);
-  const [selectedCategory, setSelectedCategory] = useState<any>();
+  const [selectedCategory, setSelectedCategory] = useState<DropdownItem>();
   const [allCategories, setAllCategories] = useState<DropdownItem[]>();
 
   const { appendDetailId } = useSearchParams();
@@ -91,8 +93,6 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
       if (userId) {
         const res = await api.usersGet(userId);
         return res.data;
-      } else {
-        return false;
       }
     },
     { enabled: !!userId && api.isLoggedIn() }
@@ -105,15 +105,17 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
     error: errorStatement,
     isFetching: isFetchingStatement,
   } = useQuery(
-    ["suggestion", debouncedTyped, selectedCategory, excludedEntities],
+    ["suggestion", debouncedTyped, selectedCategory, excludedEntityClasses],
     async () => {
       const resSuggestions = await api.entitiesSearch({
         label: debouncedTyped + wildCardChar,
         class:
           selectedCategory?.value === DropdownAny
-            ? false
-            : selectedCategory?.value,
-        excluded: excludedEntities.length ? excludedEntities : undefined,
+            ? undefined
+            : (selectedCategory?.value as EntityEnums.Class),
+        excluded: excludedEntityClasses.length
+          ? excludedEntityClasses
+          : undefined,
       });
 
       const suggestions = resSuggestions.data;
@@ -165,7 +167,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
       enabled:
         debouncedTyped.length > 1 &&
         !!selectedCategory &&
-        !excludedEntities
+        !excludedEntityClasses
           .map((key) => key.valueOf())
           .includes(selectedCategory?.value) &&
         api.isLoggedIn(),
@@ -194,26 +196,30 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
     }
     if (categories.length) {
       setAllCategories(categories);
-      setSelectedCategory(categories[0]);
+      setSelectedCategory(initCategory ?? categories[0]);
     }
   }, [categoryTypes]);
 
   const queryClient = useQueryClient();
+
+  const onMutationSuccess = (entity: IEntity) => {
+    onSelected(entity.id);
+    onPicked(entity);
+    handleClean();
+    if (openDetailOnCreate && entity.class !== EntityEnums.Class.Value) {
+      appendDetailId(entity.id);
+    }
+    if (entity.class === EntityEnums.Class.Territory) {
+      queryClient.invalidateQueries(["tree"]);
+    }
+  };
 
   const entityCreateMutation = useMutation(
     async (newActant: IEntity | IStatement | ITerritory) =>
       await api.entityCreate(newActant),
     {
       onSuccess: (data, variables) => {
-        onSelected(variables.id);
-        onPicked(variables);
-        handleClean();
-        if (openDetailOnCreate && variables.class !== EntityEnums.Class.Value) {
-          appendDetailId(variables.id);
-        }
-        if (variables.class === EntityEnums.Class.Territory) {
-          queryClient.invalidateQueries("tree");
-        }
+        onMutationSuccess(variables);
       },
     }
   );
@@ -222,53 +228,20 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
     label: string;
     entityClass: EntityEnums.Class;
     detail?: string;
-    language?: EntityEnums.Language;
+    language: EntityEnums.Language | false;
     territoryId?: string;
   }) => {
     if (user) {
-      if (
-        newCreated.entityClass === EntityEnums.Class.Statement &&
-        newCreated.territoryId
-      ) {
-        const newStatement = CStatement(
-          localStorage.getItem("userrole") as UserEnums.Role,
-          {
-            ...user.options,
-            defaultLanguage:
-              newCreated.language || user.options.defaultLanguage,
-          },
-          newCreated.label,
-          newCreated.detail,
-          newCreated.territoryId
-        );
-        entityCreateMutation.mutate(newStatement);
-      } else if (newCreated.entityClass === EntityEnums.Class.Territory) {
-        const newTerritory = CTerritory(
-          localStorage.getItem("userrole") as UserEnums.Role,
-          {
-            ...user.options,
-            defaultLanguage:
-              newCreated.language || user.options.defaultLanguage,
-          },
-          newCreated.label,
-          newCreated.detail || "",
-          newCreated.territoryId ? newCreated.territoryId : rootTerritoryId,
-          -1
-        );
-        entityCreateMutation.mutate(newTerritory);
-      } else {
-        const newEntity = CEntity(
-          {
-            ...user.options,
-            defaultLanguage:
-              newCreated.language || user.options.defaultLanguage,
-          },
-          newCreated.entityClass,
-          newCreated.label,
-          newCreated.detail
-        );
-        entityCreateMutation.mutate(newEntity);
-      }
+      const newEntity = CEntity(
+        {
+          ...user.options,
+          defaultLanguage: newCreated.language || user.options.defaultLanguage,
+        },
+        newCreated.entityClass,
+        newCreated.label,
+        newCreated.detail
+      );
+      entityCreateMutation.mutate(newEntity);
     }
   };
 
@@ -319,7 +292,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
         appendDetailId(newEntityId);
       }
       if (templateToDuplicate.class === EntityEnums.Class.Territory) {
-        queryClient.invalidateQueries("tree");
+        queryClient.invalidateQueries(["tree"]);
       }
     }
   };
@@ -354,11 +327,11 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
   const handleHoverred = (newHoverred: EntityDragItem) => {
     const hoverredCategory = newHoverred.entityClass;
     if (
-      !categoryTypes.includes(hoverredCategory) ||
+      !allCategories?.map((c) => c.value).includes(hoverredCategory) ||
       (disableTemplatesAccept && newHoverred.isTemplate) ||
       newHoverred.isDiscouraged ||
       excludedActantIds.includes(newHoverred.id) ||
-      excludedEntities.includes(newHoverred.entityClass) ||
+      excludedEntityClasses.includes(newHoverred.entityClass) ||
       // Is T or S template inside S template
       ((newHoverred.entityClass === EntityEnums.Class.Territory ||
         newHoverred.entityClass === EntityEnums.Class.Statement) &&
@@ -373,6 +346,8 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
     }
   };
 
+  const [showCreateModal, setShowCreateModal] = useState(false);
+
   return selectedCategory && allCategories && user ? (
     <>
       <Suggester
@@ -383,7 +358,6 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
         typed={typed} // input value
         category={selectedCategory} // selected category
         categories={allCategories} // all possible categories
-        suggestionListPosition={""} // todo not implemented yet
         onCancel={() => {
           handleClean();
         }}
@@ -391,9 +365,9 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
           setTyped(newType);
           onTyped && onTyped(newType);
         }}
-        onChangeCategory={(option: ValueType<OptionTypeBase, any> | null) => {
-          setSelectedCategory(option);
-          onChangeCategory && onChangeCategory(option);
+        onChangeCategory={(option: DropdownItem[]) => {
+          setSelectedCategory(option[0]);
+          onChangeCategory && onChangeCategory(option[0]);
         }}
         onCreate={(newCreated: SuggesterItemToCreate) => {
           handleCreate(newCreated);
@@ -412,12 +386,15 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
         isWrongDropCategory={isWrongDropCategory}
         disableCreate={disableCreate}
         disableButtons={disableButtons}
+        disableEnter={disableEnter}
         inputWidth={inputWidth}
         isInsideTemplate={isInsideTemplate}
         territoryParentId={territoryParentId}
         userOptions={user.options}
         autoFocus={autoFocus}
         disabled={disabled}
+        showCreateModal={showCreateModal}
+        setShowCreateModal={setShowCreateModal}
       />
       {showAddTerritoryModal && (
         <AddTerritoryModal
@@ -433,11 +410,21 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
               if (openDetailOnCreate) {
                 appendDetailId(newEntityId);
               }
-              queryClient.invalidateQueries("tree");
+              queryClient.invalidateQueries(["tree"]);
             }
             setTempTemplateToInstantiate(false);
           }}
           onClose={() => setShowAddTerritoryModal(false)}
+        />
+      )}
+
+      {showCreateModal && (
+        <EntityCreateModal
+          labelTyped={typed}
+          categorySelected={selectedCategory}
+          categories={allCategories.slice(1)}
+          closeModal={() => setShowCreateModal(false)}
+          onMutationSuccess={(entity) => onMutationSuccess(entity)}
         />
       )}
     </>

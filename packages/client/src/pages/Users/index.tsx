@@ -2,9 +2,7 @@ import React from "react";
 import { UserList } from "./containers";
 import { StyledBoxWrap, StyledContent, StyledWrapper } from "./UsersPageStyles";
 
-interface UsersPageProps {}
-
-const UsersPage: React.FC<UsersPageProps> = ({}) => {
+const UsersPage: React.FC = ({}) => {
   return (
     <StyledContent>
       <StyledBoxWrap>

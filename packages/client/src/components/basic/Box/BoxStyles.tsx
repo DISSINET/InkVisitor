@@ -1,4 +1,5 @@
-import { animated } from "react-spring";
+import { animated } from "@react-spring/web";
+import { ThemeColor } from "Theme/theme";
 import styled from "styled-components";
 
 interface StyledBox {
@@ -12,14 +13,14 @@ export const StyledBox = styled(animated.div)<StyledBox>`
 `;
 
 interface StyledHead {
-  color: string;
-  $borderColor: string;
+  $color?: keyof ThemeColor;
+  $borderColor?: keyof ThemeColor;
   $noPadding: boolean;
   $isExpanded: boolean;
 }
 export const StyledHead = styled(animated.div)<StyledHead>`
   height: 3.2rem;
-  background-color: ${({ theme, color }) => (color ? color : "")};
+  background-color: ${({ theme, $color }) => ($color ? $color : "")};
   color: ${({ theme }) => theme.color["gray"]["600"]};
   padding: ${({ theme }) => theme.space[2]};
   font-size: ${({ theme }) => theme.fontSize["base"]};
@@ -45,8 +46,8 @@ export const StyledButtonWrap = styled.div<StyledButtonWrap>`
 `;
 interface StyledContent {
   $noPadding: boolean;
-  color: string;
-  $borderColor?: string;
+  $color?: keyof ThemeColor;
+  $borderColor?: keyof ThemeColor;
   $isExpanded: boolean;
 }
 export const StyledContent = styled(animated.div)<StyledContent>`

@@ -33,8 +33,8 @@ export const AttributeButtonGroup: React.FC<AttributeButtonGroup> = ({
     <StyledPropButtonGroup
       leftMargin={!noMargin}
       rightMargin={!noMargin}
-      border={true}
-      round={true}
+      border
+      round
     >
       {options.map((option, oi) => {
         const firstInRow = oi === 0;

@@ -12,7 +12,7 @@ import { Dropdown, Input } from "components";
 import { EntitySuggester } from "components/advanced";
 import update from "immutability-helper";
 import React, { useCallback, useEffect, useState } from "react";
-import { UseMutationResult } from "react-query";
+import { UseMutationResult } from "@tanstack/react-query";
 import { v4 as uuidv4 } from "uuid";
 import { EntityDetailRelationRow } from "../../EntityDetailRelations/EntityDetailRelationTypeBlock/EntityDetailRelationRow/EntityDetailRelationRow";
 import { EntityDetailRelationTypeIcon } from "../../EntityDetailRelations/EntityDetailRelationTypeBlock/EntityDetailRelationTypeIcon/EntityDetailRelationTypeIcon";
@@ -160,14 +160,14 @@ export const EntityDetailValencySection: React.FC<
   };
 
   const getEntityTypeValue = () =>
-  valencyEntitiesOptions.filter((i: any) => {
+    valencyEntitiesOptions.filter((i: any) => {
       switch (relationType) {
         case RelationEnums.Type.SubjectSemantics:
-          return (entity as IAction).data.entities?.s.includes(i.value);
+          return (entity as IAction).data.entities?.s?.includes(i.value);
         case RelationEnums.Type.Actant1Semantics:
-          return (entity as IAction).data.entities?.a1.includes(i.value);
+          return (entity as IAction).data.entities?.a1?.includes(i.value);
         case RelationEnums.Type.Actant2Semantics:
-          return (entity as IAction).data.entities?.a2.includes(i.value);
+          return (entity as IAction).data.entities?.a2?.includes(i.value);
       }
     });
 
@@ -203,7 +203,7 @@ export const EntityDetailValencySection: React.FC<
           width="full"
           noOptionsMessage={"no entity"}
           placeholder={"no entity"}
-          onChange={(newValue: any) => {
+          onChange={(selectedOptions) => {
             const oldData = { ...entity.data };
             updateEntityMutation.mutate({
               data: {
@@ -212,15 +212,15 @@ export const EntityDetailValencySection: React.FC<
                   entities: {
                     s:
                       relationType === RelationEnums.Type.SubjectSemantics
-                        ? handleDropdownNewValue(newValue)
+                        ? handleDropdownNewValue(selectedOptions)
                         : entity.data.entities.s,
                     a1:
                       relationType === RelationEnums.Type.Actant1Semantics
-                        ? handleDropdownNewValue(newValue)
+                        ? handleDropdownNewValue(selectedOptions)
                         : entity.data.entities.a1,
                     a2:
                       relationType === RelationEnums.Type.Actant2Semantics
-                        ? handleDropdownNewValue(newValue)
+                        ? handleDropdownNewValue(selectedOptions)
                         : entity.data.entities.a2,
                   },
                 },
@@ -232,7 +232,7 @@ export const EntityDetailValencySection: React.FC<
 
       {/* SEMANTICS ROW */}
       <StyledRelationTypeIconWrapper>
-        <EntityDetailRelationTypeIcon relationType={relationType} />
+        <EntityDetailRelationTypeIcon relationType={relationType} hideLabel />
       </StyledRelationTypeIconWrapper>
 
       <StyledSemanticsWrapper>
@@ -270,7 +270,7 @@ export const EntityDetailValencySection: React.FC<
       {/* VALENCY ROW */}
       <div />
       <StyledLabelInputWrapper>
-        <StyledLabel>Grammatical valency</StyledLabel>
+        <StyledLabel>Morphosyntactic valency</StyledLabel>
         <Input
           disabled={!userCanEdit}
           value={getValencyValue()}

@@ -1,3 +1,4 @@
+import { ThemeColor } from "Theme/theme";
 import styled from "styled-components";
 
 interface StyledTagWrapper {
@@ -22,14 +23,14 @@ export const StyledTagWrapper = styled.div<StyledTagWrapper>`
 `;
 
 interface StyledEntityTag {
-  color: string;
+  $color: keyof ThemeColor;
   isTemplate: boolean;
 }
 export const StyledEntityTag = styled.div<StyledEntityTag>`
-  background: ${({ color, isTemplate, theme }) =>
+  background: ${({ $color, isTemplate, theme }) =>
     isTemplate
-      ? `linear-gradient(-45deg, ${theme.color[color]} 0%, ${theme.color[color]} 50%, ${theme.color["gray"][100]} 50%)`
-      : theme.color[color]};
+      ? `linear-gradient(-45deg, ${theme.color[$color]} 0%, ${theme.color[$color]} 50%, ${theme.color["gray"][100]} 50%)`
+      : theme.color[$color]};
   display: flex;
   justify-content: center;
   align-items: center;
@@ -86,6 +87,15 @@ export const StyledButtonWrapper = styled.div<StyledButtonWrapper>`
     border-width: 0;
     border-left-width: ${({ theme }) => theme.borderWidth[2]};
     border-left-color: ${({ theme, status }) => theme.color[status]};
+    border-left-style: solid;
+  }
+`;
+export const StyledElvlWrapper = styled.div`
+  display: flex;
+  > div {
+    border-width: 0;
+    border-left-width: ${({ theme }) => theme.borderWidth[1]};
+    border-left-color: ${({ theme }) => theme.color["black"]};
     border-left-style: solid;
   }
 `;

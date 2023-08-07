@@ -60,6 +60,43 @@ const GlobalStyle = createGlobalStyle<GlobalStyle>`
     font-size: ${({ theme }) => theme.fontSize["base"]};
     line-height: 1.3;
   }
+
+  /* react-select portal */
+  .react-select__menu-portal {
+    font-size: ${({ theme }) => theme.fontSize["xs"]};
+    .react-select__menu {
+      border-radius: 0;
+      box-shadow: ${({ theme }) => theme.boxShadow["normal"]};
+      width: 100%;
+      transform: translate(0, -6px);
+    }
+    .react-select__menu-list {
+      max-height: 18rem;
+    }
+    .react-select__option {
+      margin: 0;
+    }
+    .react-select__option--is-selected {
+      font-weight: bold;
+      color: ${({ theme }) => theme.color["primary"]};
+      background-color: white;
+      :hover {
+        background-color: ${({ theme }) =>
+          theme.color["invertedBg"]["primary"]};
+      }
+    }
+    .react-select__option--is-focused {
+      background-color: ${({ theme }) => theme.color["invertedBg"]["primary"]};
+    }
+  }
+
+  .react-select__entity-dropdown {
+    .react-select__option {
+      padding: 2px;
+      padding-left: 0;
+      height: 2.5rem;
+    }
+  }
 `;
 
 export default GlobalStyle;

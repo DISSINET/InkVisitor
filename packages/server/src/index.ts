@@ -3,6 +3,7 @@ import "./settings"; // Must be the first import
 import fs from "fs";
 import https from "https";
 import http from "http";
+import { Server as SocketIO, Socket } from "socket.io";
 import server from "./Server";
 import { prepareTreeCache } from "@service/treeCache";
 import "@service/mailer";
@@ -25,6 +26,20 @@ import "@service/mailer";
   } else {
     httpServer = http.createServer(server);
   }
+
+  const socketio = new SocketIO(httpServer, {
+    cors: {
+      origin: "*",
+    },
+    path: "/socket.io/",
+  });
+
+  socketio.on("connection", (socket: Socket) => {
+    console.log("new socket.io connection");
+    socket.on("ping", (callback) => {
+      callback();
+    });
+  });
 
   httpServer.listen(port, () => {
     console.log(

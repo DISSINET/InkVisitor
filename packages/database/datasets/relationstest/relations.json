@@ -274,11 +274,6 @@
   {
     "type": "SOL",
     "entityIds": ["l1", "l6"],
-    "order": 1
-  },
-  {
-    "type": "SOL",
-    "entityIds": ["l1", "l6"],
     "order": 2
   },
   {
@@ -594,6 +589,46 @@
   {
     "type": "REL",
     "entityIds": ["p1", "p12", "p1"],
+    "order": 1
+  },
+  {
+    "type": "SYN",
+    "entityIds": ["c-hasnt-isync-1", "c-hasnt-isync-2"],
+    "order": 1
+  },
+  {
+    "type": "SCL",
+    "entityIds": ["c-hasnt-isync-1", "c-isync-superclass-1"],
+    "order": 1
+  },
+  {
+    "type": "SCL",
+    "entityIds": ["c-hasnt-isync-2", "c-isync-superclass-1"],
+    "order": 1
+  },
+  {
+    "type": "SYN",
+    "entityIds": ["c-has-isync-1", "c-has-isync-2", "c-has-isync-3", "c-has-isync-4"],
+    "order": 1
+  },
+  {
+    "type": "SCL",
+    "entityIds": ["c-has-isync-1", "c-isync-superclass-1"],
+    "order": 1
+  },
+  {
+    "type": "SCL",
+    "entityIds": ["c-has-isync-2", "c-isync-superclass-1"],
+    "order": 1
+  },
+  {
+    "type": "SCL",
+    "entityIds": ["c-has-isync-3", "c-isync-superclass-2"],
+    "order": 1
+  },
+  {
+    "type": "AEE",
+    "entityIds": ["a-has-not-maee", "c901"],
     "order": 1
   }
 ]

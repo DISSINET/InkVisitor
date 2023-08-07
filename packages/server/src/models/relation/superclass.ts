@@ -1,7 +1,6 @@
-import { EntityEnums, RelationEnums } from "@shared/enums";
+import { EntityEnums as Entities, RelationEnums } from "@shared/enums";
 import Relation from "./relation";
 import { Relation as RelationTypes } from "@shared/types";
-import { InternalServerError, ModelNotValidError } from "@shared/types/errors";
 import { Connection } from "rethinkdb-ts";
 
 export default class Superclass
@@ -16,13 +15,13 @@ export default class Superclass
     super(data);
     this.entityIds = data.entityIds as [string, string];
     this.type = RelationEnums.Type.Superclass;
-    this.order = data.order === undefined ? EntityEnums.Order.Last : data.order;
+    this.order = data.order === undefined ? Entities.Order.Last : data.order;
   }
 
   static async getSuperclassForwardConnections(
     conn: Connection,
     parentId: string,
-    asClass: EntityEnums.Class,
+    asClass: Entities.Class,
     maxNestLvl: number,
     nestLvl: number
   ): Promise<RelationTypes.IConnection<RelationTypes.ISuperclass>[]> {
@@ -35,8 +34,7 @@ export default class Superclass
     let relations: RelationTypes.IRelation[] = [];
 
     if (
-      [EntityEnums.Class.Concept, EntityEnums.Class.Action].indexOf(asClass) !==
-      -1
+      Entities.IsClass(asClass, Entities.Class.Concept, Entities.Class.Action)
     ) {
       relations = await Relation.findForEntity(
         conn,
@@ -44,7 +42,7 @@ export default class Superclass
         RelationEnums.Type.Superclass,
         0
       );
-    } else if (EntityEnums.PLOGESTR.indexOf(asClass) !== -1) {
+    } else if (Entities.IsPLOGESTR(asClass)) {
       relations = await Relation.findForEntity(
         conn,
         parentId,
@@ -56,8 +54,8 @@ export default class Superclass
     // sort by order
     relations.sort(
       (a, b) =>
-        (a.order === undefined ? EntityEnums.Order.Last : a.order) -
-        (b.order === undefined ? EntityEnums.Order.Last : b.order)
+        (a.order === undefined ? Entities.Order.Last : a.order) -
+        (b.order === undefined ? Entities.Order.Last : b.order)
     );
 
     for (const relation of relations) {
@@ -70,7 +68,7 @@ export default class Superclass
       connection.subtrees = await Superclass.getSuperclassForwardConnections(
         conn,
         subparentId,
-        EntityEnums.Class.Concept,
+        Entities.Class.Concept,
         maxNestLvl,
         nestLvl + 1
       );
@@ -83,13 +81,12 @@ export default class Superclass
   static async getSuperclassInverseConnections(
     conn: Connection,
     parentId: string,
-    asClass: EntityEnums.Class
+    asClass: Entities.Class
   ): Promise<RelationTypes.ISuperclass[]> {
     let out: RelationTypes.ISuperclass[] = [];
 
     if (
-      asClass === EntityEnums.Class.Action ||
-      asClass === EntityEnums.Class.Concept
+      Entities.IsClass(asClass, Entities.Class.Action, Entities.Class.Concept)
     ) {
       out = await Relation.findForEntity(
         conn,
@@ -102,8 +99,8 @@ export default class Superclass
     // sort by order
     out.sort(
       (a, b) =>
-        (a.order === undefined ? EntityEnums.Order.Last : a.order) -
-        (b.order === undefined ? EntityEnums.Order.Last : b.order)
+        (a.order === undefined ? Entities.Order.Last : a.order) -
+        (b.order === undefined ? Entities.Order.Last : b.order)
     );
 
     return out;

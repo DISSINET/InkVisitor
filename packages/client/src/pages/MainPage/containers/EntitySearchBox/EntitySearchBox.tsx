@@ -13,8 +13,7 @@ import {
 import { useDebounce } from "hooks";
 import React, { useMemo, useState } from "react";
 import { RiCloseFill } from "react-icons/ri";
-import { useQuery } from "react-query";
-import { OptionTypeBase, ValueType } from "react-select";
+import { useQuery } from "@tanstack/react-query";
 import { wildCardChar } from "Theme/constants";
 import { DropdownItem } from "types";
 import useResizeObserver from "use-resize-observer";
@@ -71,7 +70,7 @@ export const EntitySearchBox: React.FC = () => {
   const [classOption, setClassOption] =
     useState<DropdownItem>(defaultClassOption);
   const [templateOption, setTemplateOption] =
-    useState<ValueType<OptionTypeBase, any>>(defaultClassOption);
+    useState<DropdownItem>(defaultClassOption);
   const [searchData, setSearchData] = useState<IRequestSearch>(initValues);
   const debouncedValues = useDebounce<IRequestSearch>(searchData, debounceTime);
 
@@ -188,17 +187,12 @@ export const EntitySearchBox: React.FC = () => {
   );
 
   const classOptions: DropdownItem[] = entitiesDict.filter(
-    (e) => e.value !== "A" && e.value !== "R" && e.value !== "X"
+    (e) => e.value !== "R" && e.value !== "X"
   );
 
   // apply changes to search parameters
   const handleChange = (changes: {
-    [key: string]:
-      | string
-      | false
-      | true
-      | undefined
-      | ValueType<OptionTypeBase, any>;
+    [key: string]: string | false | true | undefined | DropdownItem | Date | string[];
   }) => {
     const newSearch = {
       ...searchData,
@@ -273,17 +267,27 @@ export const EntitySearchBox: React.FC = () => {
             entityDropdown
             options={[defaultClassOption].concat(classOptions)}
             value={classOption}
-            onChange={(option: ValueType<OptionTypeBase, any>) => {
-              setClassOption(option as DropdownItem);
+            onChange={(selectedOption) => {
+              setClassOption(selectedOption[0]);
               setTemplateOption(defaultClassOption);
               handleChange({
-                class: (option as DropdownItem).value,
+                class: selectedOption[0].value,
                 usedTemplate: defaultClassOption.value,
               });
             }}
           />
           <TypeBar entityLetter={(classOption as DropdownItem).value} />
         </div>
+      </StyledRow>
+
+      <StyledRow>
+        <StyledRowHeader>ID</StyledRowHeader>
+        <Input
+          width={150}
+          placeholder="ID"
+          changeOnType
+          onChangeFn={(value: string) => handleChange({ entityIds: [value] })}
+        />
       </StyledRow>
 
       <StyledRow>
@@ -294,9 +298,9 @@ export const EntitySearchBox: React.FC = () => {
             width={150}
             options={statusOptions}
             value={statusOptionSelected}
-            onChange={(option: ValueType<OptionTypeBase, any>) => {
+            onChange={(selectedOption) => {
               handleChange({
-                status: (option as DropdownItem).value,
+                status: selectedOption[0].value,
               });
             }}
           />
@@ -312,9 +316,9 @@ export const EntitySearchBox: React.FC = () => {
             width={150}
             options={languageOptions}
             value={languageOptionSelected}
-            onChange={(option: ValueType<OptionTypeBase, any>) => {
+            onChange={(selectedOption) => {
               handleChange({
-                language: (option as DropdownItem).value,
+                language: selectedOption[0].value,
               });
             }}
           />
@@ -329,9 +333,9 @@ export const EntitySearchBox: React.FC = () => {
           width={150}
           options={[defaultClassOption].concat(templateOptions)}
           value={templateOption}
-          onChange={(option: ValueType<OptionTypeBase, any>) => {
+          onChange={(selectedOption) => {
             setTemplateOption(option);
-            handleChange({ usedTemplate: (option as DropdownItem).value });
+            handleChange({ usedTemplate: (selectedOption[0]).value });
           }}
         />
       </StyledRow> */}
@@ -511,7 +515,6 @@ export const EntitySearchBox: React.FC = () => {
             name="updated-date"
             onChange={(e) => {
               const updatedDate = new Date(e.target.value);
-              console.log(updatedDate);
               handleChange({ updatedDate });
             }}
           />

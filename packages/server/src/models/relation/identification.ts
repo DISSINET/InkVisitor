@@ -39,9 +39,9 @@ export default class Identification
   static async getIdentificationForwardConnections(
     conn: Connection,
     entityId: string,
-    requiredCertainty: EntityEnums.Certainty,
     maxNestLvl: number,
-    nestLvl: number
+    nestLvl: number,
+    processedRelations: string[]
   ): Promise<RelationTypes.IConnection<RelationTypes.IIdentification>[]> {
     const out: RelationTypes.IConnection<RelationTypes.IIdentification>[] = [];
 
@@ -55,43 +55,32 @@ export default class Identification
         entityId,
         RelationEnums.Type.Identification
       );
-    let thresholdReached = false;
-
-    if (requiredCertainty !== EntityEnums.Certainty.Empty) {
-      // if non-empty certainty, then some lvl of certainty needs to be respected
-      relations = relations.filter(
-        (r) => r.certainty === EntityEnums.Certainty.Certain
-      );
-    } else {
-      // empty certainty will end the search below
-      thresholdReached = true;
-    }
 
     for (const relation of relations) {
-      const subparentId = relation.entityIds[1];
-      const connection: RelationTypes.IConnection<RelationTypes.IIdentification> =
-        {
-          ...relation,
-          subtrees: [],
-        };
+      const relatedEntityId =
+        relation.entityIds[entityId === relation.entityIds[0] ? 1 : 0];
 
-      if (!thresholdReached) {
-        // either continue with Certain or use Empty
-        const nextThreshold =
-          relation.certainty === EntityEnums.Certainty.Certain
-            ? EntityEnums.Certainty.Certain
-            : EntityEnums.Certainty.Empty;
-        connection.subtrees =
-          await Identification.getIdentificationForwardConnections(
-            conn,
-            subparentId,
-            nextThreshold,
-            maxNestLvl,
-            nestLvl + 1
-          );
+      if (!processedRelations.includes(relation.id)) {
+        const connection: RelationTypes.IConnection<RelationTypes.IIdentification> =
+          {
+            ...relation,
+            subtrees: [],
+          };
+        processedRelations.push(relation.id);
+
+        if (relation.certainty === EntityEnums.Certainty.Certain) {
+          connection.subtrees =
+            await Identification.getIdentificationForwardConnections(
+              conn,
+              relatedEntityId,
+              maxNestLvl,
+              nestLvl + 1,
+              processedRelations
+            );
+        }
+
+        out.push(connection);
       }
-
-      out.push(connection);
     }
 
     return out;

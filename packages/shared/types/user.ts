@@ -21,7 +21,12 @@ export interface IUserRight {
 
 export interface IUserOptions {
   defaultTerritory: string;
+
+  // the language for the newly created entities
   defaultLanguage: EntityEnums.Language;
+
+  // the language of the source documents
+  defaultStatementLanguage?: EntityEnums.Language;
   searchLanguages: EntityEnums.Language[];
   hideStatementElementsOrderTable?: boolean;
 }

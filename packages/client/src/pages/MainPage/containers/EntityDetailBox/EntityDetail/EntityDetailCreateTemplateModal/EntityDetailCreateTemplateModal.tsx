@@ -15,7 +15,11 @@ import {
 import { CTemplateEntity } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useState } from "react";
-import { useMutation, UseMutationResult, useQueryClient } from "react-query";
+import {
+  useMutation,
+  UseMutationResult,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import {
   StyledDetailForm,
@@ -56,10 +60,10 @@ export const EntityDetailCreateTemplateModal: React.FC<
       onSuccess: (data, variables) => {
         queryClient.invalidateQueries(["templates"]);
         if (statementId && variables.class === EntityEnums.Class.Statement) {
-          queryClient.invalidateQueries("statement-templates");
+          queryClient.invalidateQueries(["statement-templates"]);
         }
         if (selectedDetailId) {
-          queryClient.invalidateQueries("entity-templates");
+          queryClient.invalidateQueries(["entity-templates"]);
         }
         updateEntityMutation.mutate({ usedTemplate: variables.id });
 

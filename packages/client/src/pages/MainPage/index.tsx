@@ -1,5 +1,11 @@
+import { useQueryClient } from "@tanstack/react-query";
+import {
+  collapsedPanelWidth,
+  fourthPanelBoxesHeightThirds,
+  hiddenBoxHeight,
+} from "Theme/constants";
 import { Box, Button, Panel } from "components";
-import { PanelSeparator } from "components/advanced";
+import { EntityCreateModal, PanelSeparator } from "components/advanced";
 import { useSearchParams } from "hooks";
 import ScrollHandler from "hooks/ScrollHandler";
 import React, { useState } from "react";
@@ -8,33 +14,27 @@ import { BsSquareFill, BsSquareHalf } from "react-icons/bs";
 import { FaPlus } from "react-icons/fa";
 import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
 import { VscCloseAll } from "react-icons/vsc";
-import { useQueryClient } from "react-query";
 import { setFirstPanelExpanded } from "redux/features/layout/firstPanelExpandedSlice";
 import { setFourthPanelBoxesOpened } from "redux/features/layout/fourthPanelBoxesOpenedSlice";
 import { setFourthPanelExpanded } from "redux/features/layout/fourthPanelExpandedSlice";
 import { setStatementListOpened } from "redux/features/layout/statementListOpenedSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import {
-  collapsedPanelWidth,
-  fourthPanelBoxesHeightThirds,
-  hiddenBoxHeight,
-} from "Theme/constants";
 
 import { MemoizedEntityBookmarkBox } from "./containers/EntityBookmarkBox/EntityBookmarkBox";
 import { MemoizedEntityDetailBox } from "./containers/EntityDetailBox/EntityDetailBox";
-import { EntityCreateModal } from "./containers/EntityDetailBox/EntityCreateModal/EntityCreateModal";
 import { MemoizedEntitySearchBox } from "./containers/EntitySearchBox/EntitySearchBox";
 import { MemoizedStatementEditorBox } from "./containers/StatementEditorBox/StatementEditorBox";
 import { MemoizedStatementListBox } from "./containers/StatementsListBox/StatementListBox";
 import { MemoizedTemplateListBox } from "./containers/TemplateListBox/TemplateListBox";
 import { MemoizedTerritoryTreeBox } from "./containers/TerritoryTreeBox/TerritoryTreeBox";
+import { EntityEnums } from "@shared/enums";
 
 type FourthPanelBoxes = "search" | "bookmarks" | "templates";
 
 interface MainPage {}
 
 const MainPage: React.FC<MainPage> = ({}) => {
-  const { detailIdArray, clearAllDetailIds, selectedDetailId } =
+  const { detailIdArray, clearAllDetailIds, selectedDetailId, appendDetailId } =
     useSearchParams();
 
   const dispatch = useAppDispatch();
@@ -147,7 +147,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
             icon={<BiRefresh />}
             onClick={() => {
               queriesToRefresh.forEach((queryToRefresh) => {
-                queryClient.invalidateQueries(queryToRefresh);
+                queryClient.invalidateQueries([queryToRefresh]);
               });
             }}
           />
@@ -295,6 +295,14 @@ const MainPage: React.FC<MainPage> = ({}) => {
         {showEntityCreateModal && (
           <EntityCreateModal
             closeModal={() => setShowEntityCreateModal(false)}
+            onMutationSuccess={(entity) => {
+              if (entity.class !== EntityEnums.Class.Value) {
+                appendDetailId(entity.id);
+              }
+              if (entity.class === EntityEnums.Class.Territory) {
+                queryClient.invalidateQueries(["tree"]);
+              }
+            }}
           />
         )}
       </Panel>

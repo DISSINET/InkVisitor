@@ -1,6 +1,4 @@
-import { DotLoader } from "react-spinners";
 import styled from "styled-components";
-import { Colors } from "types";
 
 interface StyledLoaderWrap {
   show: boolean;
@@ -15,4 +13,5 @@ export const StyledLoaderWrap = styled.div<StyledLoaderWrap>`
   top: 0;
   left: 0;
   background-color: ${({ theme }) => theme.color["primaryTransparent"]};
+  z-index: 20;
 `;

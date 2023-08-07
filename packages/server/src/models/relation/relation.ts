@@ -5,7 +5,7 @@ import { DbEnums, EntityEnums, RelationEnums, UserEnums } from "@shared/enums";
 import { EnumValidators } from "@shared/enums";
 import { InternalServerError, ModelNotValidError } from "@shared/types/errors";
 import User from "@models/user/user";
-import { IRequest } from "src/custom_typings/request";
+import { IRequest } from "../../custom_typings/request";
 import { nonenumerable } from "@common/decorators";
 import Entity from "@models/entity/entity";
 
@@ -259,7 +259,7 @@ export default class Relation implements IRelationModel {
    * @param updateData
    * @returns
    */
-  async delete(db: Connection | undefined): Promise<WriteResult> {
+  async delete(db: Connection): Promise<WriteResult> {
     if (!this.id) {
       throw new InternalServerError(
         "delete called on relation with undefined id"
@@ -369,7 +369,7 @@ export default class Relation implements IRelationModel {
   }
 
   /**
-   * Searches for relation assigned for entityId, filtered by optional relation type
+   * Searches for relations assigned for entityId, filtered by optional relation type
    * @param db
    * @param entityId
    * @param relType
@@ -395,6 +395,37 @@ export default class Relation implements IRelationModel {
   }
 
   /**
+   * Searches for relations assigned for multiple entity ids, filtered by optional relation type
+   * @param db
+   * @param entityId array of entity ids
+   * @param relType
+   * @param position - position in entityIds
+   * @returns array of relation interfaces
+   */
+  static async findForEntities<T extends RelationTypes.IRelation>(
+    db: Connection,
+    entityIds: string[],
+    relType?: RelationEnums.Type,
+    position?: number
+  ): Promise<T[]> {
+    const items: T[] = await rethink
+      .table(Relation.table)
+      .getAll.call(undefined, ...entityIds, {
+        index: DbEnums.Indexes.RelationsEntityIds,
+      })
+      .filter(relType ? { type: relType } : {})
+      .distinct()
+      .run(db);
+
+    if (position !== undefined) {
+      return items.filter(
+        (d) => entityIds.indexOf(d.entityIds[position]) !== -1
+      );
+    }
+    return items;
+  }
+
+  /**
    * Retrieves all relation entries filtered by basic parameters like type
    * @param db
    * @param relType
@@ -412,6 +443,35 @@ export default class Relation implements IRelationModel {
     return items;
   }
 
+  static async copyMany(
+    request: IRequest,
+    relations: Relation[],
+    originalEntityId: string,
+    targetEntityId: string
+  ): Promise<number> {
+    let relationsCopied = 0;
+
+    for (const relation of relations) {
+      // replace original entity id with cloned id
+      relation.entityIds = relation.entityIds.map((id) =>
+        id === originalEntityId ? targetEntityId : id
+      );
+      // remove original relation id - should be created anew
+      relation.id = "";
+
+      try {
+        await relation.beforeSave(request);
+        await relation.save(request.db.connection);
+        await relation.afterSave(request);
+        console.log("relation copied", relation.entityIds);
+        relationsCopied++;
+      } catch (e) {
+        console.log("[Relation.copyMany]: failed to copy relation", e);
+      }
+    }
+
+    return relationsCopied;
+  }
   /**
    * Removes multiple relation entries
    * @param request

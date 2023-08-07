@@ -34,7 +34,8 @@ export class UserRight implements IUserRight {
 
 export class UserOptions implements IUserOptions {
   defaultTerritory = "";
-  defaultLanguage: EntityEnums.Language = EntityEnums.Language.English;
+  defaultStatementLanguage: EntityEnums.Language = EntityEnums.Language.Empty;
+  defaultLanguage: EntityEnums.Language = EntityEnums.Language.Empty;
   searchLanguages: EntityEnums.Language[] = [];
   hideStatementElementsOrderTable?: boolean = false;
 
@@ -164,7 +165,7 @@ export default class User implements IUser, IDbModel {
       .run(dbInstance);
   }
 
-  delete(dbInstance: Connection | undefined): Promise<WriteResult> {
+  delete(dbInstance: Connection): Promise<WriteResult> {
     return rethink.table(User.table).get(this.id).delete().run(dbInstance);
   }
 
@@ -183,6 +184,18 @@ export default class User implements IUser, IDbModel {
     }
 
     return true;
+  }
+
+  canBeCreatedByUser(user: User): boolean {
+    return user.role === UserEnums.Role.Admin;
+  }
+
+  canBeEditedByUser(user: User): boolean {
+    return user.role === UserEnums.Role.Admin || user.id == this.id;
+  }
+
+  canBeDeletedByUser(user: User): boolean {
+    return user.role === UserEnums.Role.Admin;
   }
 
   generatePassword(): string {

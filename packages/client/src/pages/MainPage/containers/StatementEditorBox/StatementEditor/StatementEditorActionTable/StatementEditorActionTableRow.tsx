@@ -1,13 +1,25 @@
+import { certaintyDict, moodDict, operatorDict } from "@shared/dictionaries";
+import { allEntities } from "@shared/dictionaries/entity";
 import { EntityEnums } from "@shared/enums";
 import { IProp, IResponseStatement } from "@shared/types";
-import { AttributeIcon, Button, ButtonGroup, Dropzone } from "components";
+import { excludedSuggesterEntities } from "Theme/constants";
 import {
+  AttributeIcon,
+  BundleButtonGroup,
+  Button,
+  ButtonGroup,
+  Dropdown,
+} from "components";
+import {
+  ElvlButtonGroup,
   EntityDropzone,
   EntitySuggester,
   EntityTag,
+  LogicButtonGroup,
+  MoodVariantButtonGroup,
 } from "components/advanced";
 import { useSearchParams } from "hooks";
-import AttributesEditor from "pages/MainPage/containers/AttributesEditor/AttributesEditor";
+import { TooltipAttributes } from "pages/MainPage/containers";
 import { PropGroup } from "pages/MainPage/containers/PropGroup/PropGroup";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -16,20 +28,23 @@ import {
   useDrag,
   useDrop,
 } from "react-dnd";
-import { FaGripVertical, FaPlus, FaTrashAlt, FaUnlink } from "react-icons/fa";
-import { UseMutationResult } from "react-query";
+import { FaGripVertical, FaPlus, FaTrashAlt } from "react-icons/fa";
+import { TbSettingsAutomation, TbSettingsFilled } from "react-icons/tb";
+import { UseMutationResult } from "@tanstack/react-query";
 import { setDraggedActantRow } from "redux/features/rowDnd/draggedActantRowSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { excludedSuggesterEntities } from "Theme/constants";
 import {
+  DragItem,
   DraggedActantRowItem,
   DraggedPropRowCategory,
-  DragItem,
   FilteredActionObject,
   ItemTypes,
 } from "types";
 import { dndHoverFn } from "utils";
 import {
+  StyledBorderLeft,
+  StyledExpandedRow,
+  StyledFlexStart,
   StyledGrid,
   StyledGridColumn,
 } from "./StatementEditorActionTableStyles";
@@ -71,6 +86,7 @@ export const StatementEditorActionTableRow: React.FC<
 }) => {
   const isInsideTemplate = statement.isTemplate || false;
   const { statementId, territoryId } = useSearchParams();
+  const { action, sAction } = filteredAction.data;
 
   const dropRef = useRef<HTMLTableRowElement>(null);
   const dragRef = useRef<HTMLTableCellElement>(null);
@@ -94,7 +110,7 @@ export const StatementEditorActionTableRow: React.FC<
     }
   };
 
-  const [, drop] = useDrop({
+  const [, drop] = useDrop<DragItem>({
     accept: ItemTypes.ACTION_ROW,
     hover(item: DragItem, monitor: DropTargetMonitor) {
       dndHoverFn(item, index, monitor, dropRef, moveRow);
@@ -102,8 +118,8 @@ export const StatementEditorActionTableRow: React.FC<
   });
 
   const [{ isDragging }, drag, preview] = useDrag({
+    type: ItemTypes.ACTION_ROW,
     item: {
-      type: ItemTypes.ACTION_ROW,
       index,
       id: filteredAction.id.toString(),
     },
@@ -121,7 +137,6 @@ export const StatementEditorActionTableRow: React.FC<
   drag(dragRef);
 
   const renderActionCell = () => {
-    const { action, sAction } = filteredAction.data;
     return action ? (
       <EntityDropzone
         onSelected={(newSelectedId: string) => {
@@ -131,7 +146,7 @@ export const StatementEditorActionTableRow: React.FC<
         }}
         isInsideTemplate={isInsideTemplate}
         categoryTypes={[EntityEnums.Class.Action]}
-        excludedEntities={excludedSuggesterEntities}
+        excludedEntityClasses={excludedSuggesterEntities}
         territoryParentId={territoryParentId}
         excludedActantIds={[action.id]}
       >
@@ -147,6 +162,17 @@ export const StatementEditorActionTableRow: React.FC<
               },
             }
           }
+          elvlButtonGroup={
+            <ElvlButtonGroup
+              value={sAction.elvl}
+              onChange={(elvl) =>
+                updateAction(sAction.id, {
+                  elvl: elvl,
+                })
+              }
+              disabled={!userCanEdit}
+            />
+          }
         />
       </EntityDropzone>
     ) : (
@@ -159,7 +185,7 @@ export const StatementEditorActionTableRow: React.FC<
           }}
           openDetailOnCreate
           categoryTypes={[EntityEnums.Class.Action]}
-          excludedEntities={excludedSuggesterEntities}
+          excludedEntityClasses={excludedSuggesterEntities}
           placeholder={"add action"}
           isInsideTemplate={isInsideTemplate}
           territoryParentId={territoryParentId}
@@ -169,44 +195,11 @@ export const StatementEditorActionTableRow: React.FC<
     );
   };
 
-  const [modalOpen, setModalOpen] = useState<boolean>(false);
-
   const renderButtonsCell = () => {
-    const { action, sAction } = filteredAction.data;
     const { actionId: propOriginId, id: rowId } = sAction;
 
     return (
       <ButtonGroup noMarginRight height={19}>
-        {sAction && (
-          <AttributesEditor
-            modalOpen={modalOpen}
-            setModalOpen={setModalOpen}
-            modalTitle={`Action attribute`}
-            entity={action}
-            disabledAllAttributes={!userCanEdit}
-            data={{
-              elvl: sAction.elvl,
-              certainty: sAction.certainty,
-              logic: sAction.logic,
-              mood: sAction.mood,
-              moodvariant: sAction.moodvariant,
-              bundleOperator: sAction.bundleOperator,
-              bundleStart: sAction.bundleStart,
-              bundleEnd: sAction.bundleEnd,
-            }}
-            handleUpdate={(newData) => {
-              updateAction(sAction.id, newData);
-            }}
-            updateActantId={(newId: string) => {
-              updateAction(sAction.id, { actionId: newId });
-            }}
-            userCanEdit={userCanEdit}
-            classEntitiesActant={[EntityEnums.Class.Action]}
-            loading={updateActionsMutation.isLoading}
-            isInsideTemplate={isInsideTemplate}
-            territoryParentId={territoryParentId}
-          />
-        )}
         {userCanEdit && (
           <Button
             key="d"
@@ -241,18 +234,6 @@ export const StatementEditorActionTableRow: React.FC<
             inverted
             noBorder
             icon={<AttributeIcon attributeName={"negation"} />}
-            onClick={() => setModalOpen(true)}
-          />
-        )}
-        {sAction.bundleOperator && (
-          <Button
-            key="oper"
-            tooltipLabel="Logical operator type"
-            color="success"
-            inverted
-            noBorder
-            icon={sAction.bundleOperator}
-            onClick={() => setModalOpen(true)}
           />
         )}
       </ButtonGroup>
@@ -269,6 +250,14 @@ export const StatementEditorActionTableRow: React.FC<
       dispatch(
         setDraggedActantRow({ category: DraggedPropRowCategory.ACTION })
       );
+      const boxContentEditor = document.getElementById(`box-content-editor`);
+      const actionTable = document.getElementById(`action-section`);
+      if (boxContentEditor) {
+        boxContentEditor.scrollTo({
+          behavior: "smooth",
+          top: actionTable ? actionTable.offsetTop - 30 : 0,
+        });
+      }
     } else {
       dispatch(setDraggedActantRow({}));
     }
@@ -302,27 +291,172 @@ export const StatementEditorActionTableRow: React.FC<
     [statement]
   );
 
+  const isDraggingAction =
+    draggedActantRow.category &&
+    draggedActantRow.category === DraggedPropRowCategory.ACTION;
+
+  const [isExpanded, setIsExpanded] = useState(false);
+
   return (
     <React.Fragment key={index}>
-      <StyledGrid ref={dropRef} style={{ opacity }} hasOrder={hasOrder}>
+      <StyledFlexStart ref={dropRef}>
         {userCanEdit && hasOrder ? (
           <StyledGridColumn ref={dragRef} style={{ cursor: "move" }}>
-            <FaGripVertical />
+            <FaGripVertical style={{ marginTop: "0.3rem" }} />
           </StyledGridColumn>
         ) : (
           <StyledGridColumn />
         )}
-        <StyledGridColumn>{renderActionCell()}</StyledGridColumn>
-        <StyledGridColumn>{renderButtonsCell()}</StyledGridColumn>
-      </StyledGrid>
 
-      {!(
-        draggedActantRow.category &&
-        draggedActantRow.category === DraggedPropRowCategory.ACTION
-      ) &&
+        <StyledBorderLeft>
+          <StyledGrid style={{ opacity }}>
+            <StyledGridColumn>{renderActionCell()}</StyledGridColumn>
+            <StyledGridColumn>
+              {
+                <LogicButtonGroup
+                  border
+                  value={sAction.logic}
+                  onChange={(logic) =>
+                    updateAction(sAction.id, { logic: logic })
+                  }
+                  disabled={!userCanEdit}
+                />
+              }
+            </StyledGridColumn>
+            <StyledGridColumn>
+              <Dropdown
+                width={131}
+                isMulti
+                disabled={!userCanEdit}
+                placeholder="mood"
+                tooltipLabel="mood"
+                icon={<AttributeIcon attributeName="mood" />}
+                options={moodDict}
+                value={[allEntities]
+                  .concat(moodDict)
+                  .filter((i) =>
+                    sAction.mood.includes(i.value as EntityEnums.Mood)
+                  )}
+                onChange={(selectedOptions) => {
+                  updateAction(sAction.id, {
+                    mood: selectedOptions
+                      ? selectedOptions.map((v: any) => v.value)
+                      : [],
+                  });
+                }}
+                attributeDropdown
+              />
+            </StyledGridColumn>
+            <StyledGridColumn>
+              <MoodVariantButtonGroup
+                border
+                onChange={(moodvariant) =>
+                  updateAction(sAction.id, {
+                    moodvariant: moodvariant,
+                  })
+                }
+                value={sAction.moodvariant}
+                disabled={!userCanEdit}
+              />
+            </StyledGridColumn>
+            <StyledGridColumn>{renderButtonsCell()}</StyledGridColumn>
+            <StyledGridColumn>
+              <Button
+                inverted
+                onClick={() => setIsExpanded(!isExpanded)}
+                icon={
+                  isExpanded ? (
+                    <TbSettingsFilled size={16} />
+                  ) : (
+                    <TbSettingsAutomation
+                      size={16}
+                      style={{ transform: "rotate(90deg)" }}
+                    />
+                  )
+                }
+                tooltipContent={
+                  <TooltipAttributes
+                    data={{
+                      elvl: sAction.elvl,
+                      certainty: sAction.certainty,
+                      logic: sAction.logic,
+                      mood: sAction.mood,
+                      moodvariant: sAction.moodvariant,
+                      bundleOperator: sAction.bundleOperator,
+                      bundleStart: sAction.bundleStart,
+                      bundleEnd: sAction.bundleEnd,
+                    }}
+                  />
+                }
+              />
+            </StyledGridColumn>
+          </StyledGrid>
+
+          {/* Expanded row */}
+          {isExpanded && !isDraggingAction && (
+            <StyledExpandedRow>
+              <div>
+                <Dropdown
+                  width={70}
+                  placeholder="logical operator"
+                  tooltipLabel="logical operator"
+                  icon={<AttributeIcon attributeName="bundleOperator" />}
+                  disabled={!userCanEdit}
+                  options={operatorDict}
+                  value={operatorDict.find(
+                    (i: any) => sAction.bundleOperator === i.value
+                  )}
+                  onChange={(selectedOption) => {
+                    updateAction(sAction.id, {
+                      bundleOperator: selectedOption[0].value,
+                    });
+                  }}
+                />
+              </div>
+              <div>
+                <BundleButtonGroup
+                  bundleStart={sAction.bundleStart}
+                  onBundleStartChange={(bundleStart) =>
+                    updateAction(sAction.id, {
+                      bundleStart: bundleStart,
+                    })
+                  }
+                  bundleEnd={sAction.bundleEnd}
+                  onBundleEndChange={(bundleEnd) =>
+                    updateAction(sAction.id, {
+                      bundleEnd: bundleEnd,
+                    })
+                  }
+                />
+              </div>
+              <div>
+                <Dropdown
+                  width={122}
+                  placeholder="certainty"
+                  tooltipLabel="certainty"
+                  icon={<AttributeIcon attributeName="certainty" />}
+                  disabled={!userCanEdit}
+                  options={certaintyDict}
+                  value={certaintyDict.find(
+                    (i: any) => sAction.certainty === i.value
+                  )}
+                  onChange={(selectedOption) => {
+                    updateAction(sAction.id, {
+                      certainty: selectedOption[0].value,
+                    });
+                  }}
+                />
+              </div>
+            </StyledExpandedRow>
+          )}
+        </StyledBorderLeft>
+      </StyledFlexStart>
+
+      {/* Prop groups */}
+      {!isDraggingAction &&
         renderPropGroup(
-          filteredAction.data.sAction.actionId,
-          filteredAction.data.sAction.props,
+          sAction.actionId,
+          sAction.props,
           DraggedPropRowCategory.ACTION
         )}
     </React.Fragment>

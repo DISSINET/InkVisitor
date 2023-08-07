@@ -336,6 +336,13 @@ export const DStatement = (
   duplicatedStatement.data.actants.forEach((a) => {
     a.id = uuidv4();
     a.props = DProps(a.props);
+
+    a.identifications.forEach((i) => {
+      i.id = uuidv4();
+    });
+    a.classifications.forEach((c) => {
+      c.id = uuidv4();
+    });
   });
 
   duplicatedStatement.data.actions.forEach((a) => {

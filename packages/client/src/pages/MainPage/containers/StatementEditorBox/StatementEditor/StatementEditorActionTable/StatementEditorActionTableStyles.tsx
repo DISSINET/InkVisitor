@@ -1,16 +1,18 @@
 import styled from "styled-components";
 
+export const StyledEditorActionTableWrapper = styled.div`
+  margin-bottom: ${({ theme }) => theme.space[4]};
+  min-width: 56rem;
+`;
+
 interface StyledGrid {
   tempDisabled?: boolean;
-  hasOrder?: boolean;
 }
 export const StyledGrid = styled.div<StyledGrid>`
   display: grid;
-
   align-items: center;
   padding-left: ${({ theme }) => theme.space[0]};
-  grid-template-columns: ${({ theme, hasOrder }) =>
-    `${hasOrder ? theme.space[8] : theme.space[2]} auto auto`};
+  grid-template-columns: repeat(6, auto);
   width: fit-content;
   grid-template-rows: auto;
   grid-auto-flow: row;
@@ -25,4 +27,22 @@ export const StyledGridColumn = styled.div<StyledGridColumn>`
   margin: ${({ theme }) => theme.space[1]};
   display: grid;
   align-items: center;
+`;
+
+export const StyledExpandedRow = styled.div`
+  display: grid;
+  align-items: center;
+  margin-left: 3rem;
+  grid-template-columns: repeat(3, auto) 1fr;
+  grid-column-gap: 1rem;
+  font-size: 1.4rem;
+`;
+export const StyledBorderLeft = styled.div`
+  border-left: 3px solid ${({ theme }) => theme.color.elementType.action};
+  margin-bottom: ${({ theme }) => theme.space[4]};
+`;
+
+export const StyledFlexStart = styled.div`
+  display: flex;
+  align-items: flex-start;
 `;

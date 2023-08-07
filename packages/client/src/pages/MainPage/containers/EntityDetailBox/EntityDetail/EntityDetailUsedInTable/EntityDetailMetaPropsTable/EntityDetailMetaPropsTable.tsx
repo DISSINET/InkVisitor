@@ -1,8 +1,10 @@
 import { IEntity, IResponseUsedInMetaProp } from "@shared/types";
 import { Table } from "components";
 import React, { useMemo } from "react";
-import { Cell, Column } from "react-table";
+import { CellProps, Column } from "react-table";
 import { renderEntityTag } from "../EntityDetailUsedInTableUtils";
+
+type CellType = CellProps<IResponseUsedInMetaProp>;
 
 interface EntityDetailMetaPropsTable {
   title: { singular: string; plural: string };
@@ -15,13 +17,12 @@ export const EntityDetailMetaPropsTable: React.FC<
 > = ({ title, entities, useCases, perPage = 5 }) => {
   const data = useMemo(() => (useCases ? useCases : []), [useCases]);
 
-  const columns: Column<{}>[] = React.useMemo(
+  const columns = useMemo<Column<IResponseUsedInMetaProp>[]>(
     () => [
       {
         Header: "Origin",
-        accesor: "data",
-        Cell: ({ row }: Cell) => {
-          const useCase = row.original as IResponseUsedInMetaProp;
+        Cell: ({ row }: CellType) => {
+          const useCase = row.original;
           const entityId = useCase.originId;
           const entity = entityId ? entities[entityId] : false;
           return <>{entity && renderEntityTag(entity)}</>;
@@ -29,8 +30,8 @@ export const EntityDetailMetaPropsTable: React.FC<
       },
       {
         Header: "Type",
-        Cell: ({ row }: Cell) => {
-          const useCase = row.original as IResponseUsedInMetaProp;
+        Cell: ({ row }: CellType) => {
+          const useCase = row.original;
           const entityId = useCase.typeId;
           const entity = entityId ? entities[entityId] : false;
           return <>{entity && renderEntityTag(entity)}</>;
@@ -38,8 +39,8 @@ export const EntityDetailMetaPropsTable: React.FC<
       },
       {
         Header: "Value",
-        Cell: ({ row }: Cell) => {
-          const useCase = row.original as IResponseUsedInMetaProp;
+        Cell: ({ row }: CellType) => {
+          const useCase = row.original;
           const entityId = useCase.valueId;
           const entity = entityId ? entities[entityId] : false;
           return <>{entity && renderEntityTag(entity)}</>;

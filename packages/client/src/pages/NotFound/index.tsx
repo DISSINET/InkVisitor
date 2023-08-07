@@ -1,7 +1,12 @@
 import React from "react";
-import { StyledBoxWrapper, StyledContent, StyledError, StyledText } from "./NotFoundStyles";
+import {
+  StyledBoxWrapper,
+  StyledContent,
+  StyledError,
+  StyledText,
+} from "./NotFoundStyles";
 
-const NotFoundPage: React.FC<any> = ({}) => {
+const NotFoundPage: React.FC = ({}) => {
   return (
     <StyledContent>
       <StyledBoxWrapper>

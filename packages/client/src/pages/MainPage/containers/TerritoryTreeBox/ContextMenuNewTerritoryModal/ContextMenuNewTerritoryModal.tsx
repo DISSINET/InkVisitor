@@ -14,7 +14,7 @@ import {
 import { CTerritory } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { setTreeInitialized } from "redux/features/territoryTree/treeInitializeSlice";
 import { useAppDispatch } from "redux/hooks";
@@ -47,8 +47,6 @@ export const ContextMenuNewTerritoryModal: React.FC<
       if (userId) {
         const res = await api.usersGet(userId);
         return res.data;
-      } else {
-        return false;
       }
     },
     { enabled: !!userId && api.isLoggedIn() }
@@ -62,7 +60,7 @@ export const ContextMenuNewTerritoryModal: React.FC<
     {
       onSuccess: (data, variables) => {
         onClose();
-        queryClient.invalidateQueries("tree");
+        queryClient.invalidateQueries(["tree"]);
 
         dispatch(setTreeInitialized(false));
         setTerritoryId(variables.id);

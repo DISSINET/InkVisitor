@@ -1,11 +1,5 @@
 import { IEntity, IProp } from "@shared/types";
 import { AttributeIcon, Button, ButtonGroup } from "components";
-import {
-  EntityDropzone,
-  EntitySuggester,
-  EntityTag,
-} from "components/advanced";
-import { StyledPropButtonGroup } from "components/advanced/AttributeButtonGroup/AttributeButtonGroupStyles";
 import React, { useEffect, useRef, useState } from "react";
 import {
   DragSourceMonitor,
@@ -13,28 +7,30 @@ import {
   useDrag,
   useDrop,
 } from "react-dnd";
-import { FaPlus, FaTrashAlt, FaUnlink } from "react-icons/fa";
+import { FaPlus, FaTrashAlt } from "react-icons/fa";
+import { TbSettingsAutomation, TbSettingsFilled } from "react-icons/tb";
 import { setDraggedPropRow } from "redux/features/rowDnd/draggedPropRowSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { excludedSuggesterEntities } from "Theme/constants";
 import {
-  classesPropType,
-  classesPropValue,
+  DragItem,
   DraggedPropRowCategory,
   DraggedPropRowItem,
-  DragItem,
   ItemTypes,
   PropAttributeFilter,
-  PropAttributeGroupDataObject,
 } from "types";
 import { dndHoverFn } from "utils";
-import { AttributesGroupEditor } from "../../AttributesEditor/AttributesGroupEditor";
+import { TooltipAttributesGroup } from "../..";
+import { PropGroupRowStatementAttributes } from "./PropGroupRowStatementAttributes";
 import {
+  StyledBorderLeft,
   StyledFaGripVertical,
   StyledGrid,
-  StyledNoEntity,
   StyledPropLineColumn,
-} from "../PropGroupStyles";
+} from "./PropGroupRowStyles";
+import { PropGroupRowType } from "./PropGroupRowType";
+import { PropGroupRowValue } from "./PropGroupRowValue";
+
+export declare type Identifier = string | symbol;
 
 interface PropGroupRow {
   prop: IProp;
@@ -111,7 +107,11 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
   const dropRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<HTMLDivElement>(null);
 
-  const [{ handlerId }, drop] = useDrop({
+  const [{ handlerId }, drop] = useDrop<
+    DragItem,
+    void,
+    { handlerId: Identifier | null }
+  >({
     accept: itemType ? itemType : ItemTypes.PROP_ROW,
     collect(monitor) {
       return {
@@ -127,7 +127,8 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
   });
 
   const [{ isDragging }, drag, preview] = useDrag({
-    item: { type: itemType ? itemType : ItemTypes.PROP_ROW, id, index },
+    type: itemType ? itemType : ItemTypes.PROP_ROW,
+    item: { id, index },
     collect: (monitor: DragSourceMonitor) => ({
       isDragging: monitor.isDragging(),
     }),
@@ -154,284 +155,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
     }
   }, [isDragging]);
 
-  const [modalOpen, setModalOpen] = useState<boolean>(false);
-
-  const renderPropRow = () => {
-    return (
-      <StyledGrid
-        key={level + "|" + index + "|" + id}
-        tempDisabled={tempDisabled && category === draggedPropRow.category}
-      >
-        <StyledPropLineColumn level={level} lowIdent={lowIdent} isTag={false}>
-          {userCanEdit && hasOrder ? (
-            <div ref={dragRef} style={{ width: "2rem" }}>
-              <StyledFaGripVertical />
-            </div>
-          ) : (
-            <div style={{ width: "2rem" }} />
-          )}
-        </StyledPropLineColumn>
-        <StyledPropLineColumn
-          level={level}
-          lowIdent={lowIdent}
-          isTag={propTypeEntity ? true : false}
-        >
-          {propTypeEntity ? (
-            <>
-              <EntityDropzone
-                onSelected={(newSelectedId: string) => {
-                  updateProp(prop.id, {
-                    type: {
-                      ...prop.type,
-                      ...{ entityId: newSelectedId },
-                    },
-                  });
-                }}
-                categoryTypes={classesPropType}
-                excludedEntities={excludedSuggesterEntities}
-                isInsideTemplate={isInsideTemplate}
-                territoryParentId={territoryParentId}
-                excludedActantIds={[propTypeEntity.id]}
-              >
-                <EntityTag
-                  entity={propTypeEntity}
-                  fullWidth
-                  tooltipPosition="right"
-                  unlinkButton={
-                    userCanEdit && {
-                      onClick: () => {
-                        updateProp(prop.id, {
-                          type: {
-                            ...prop.type,
-                            ...{ entityId: "" },
-                          },
-                        });
-                      },
-                    }
-                  }
-                />
-              </EntityDropzone>
-              <StyledPropButtonGroup>
-                {prop.type.logic == "2" && (
-                  <Button
-                    key="neg"
-                    tooltipLabel="Negative logic"
-                    color="danger"
-                    inverted
-                    noBorder
-                    onClick={() => setModalOpen(true)}
-                    icon={<AttributeIcon attributeName={"negation"} />}
-                  />
-                )}
-              </StyledPropButtonGroup>
-            </>
-          ) : userCanEdit ? (
-            <EntitySuggester
-              territoryActants={territoryActants}
-              onSelected={(newSelectedId: string) => {
-                updateProp(prop.id, {
-                  type: {
-                    ...prop.type,
-                    ...{ entityId: newSelectedId },
-                  },
-                });
-              }}
-              placeholder="type"
-              openDetailOnCreate={openDetailOnCreate}
-              categoryTypes={classesPropType}
-              inputWidth={80}
-              excludedEntities={excludedSuggesterEntities}
-              isInsideTemplate={isInsideTemplate}
-              territoryParentId={territoryParentId}
-            />
-          ) : (
-            <StyledNoEntity>-</StyledNoEntity>
-          )}
-        </StyledPropLineColumn>
-        <StyledPropLineColumn isTag={propValueEntity ? true : false}>
-          {propValueEntity ? (
-            <>
-              <EntityDropzone
-                onSelected={(newSelectedId: string) => {
-                  updateProp(prop.id, {
-                    value: {
-                      ...prop.type,
-                      ...{ entityId: newSelectedId },
-                    },
-                  });
-                }}
-                categoryTypes={classesPropValue}
-                excludedEntities={excludedSuggesterEntities}
-                isInsideTemplate={isInsideTemplate}
-                territoryParentId={territoryParentId}
-                excludedActantIds={[propValueEntity.id]}
-              >
-                <EntityTag
-                  entity={propValueEntity}
-                  fullWidth
-                  tooltipPosition="right"
-                  unlinkButton={
-                    userCanEdit && {
-                      onClick: () => {
-                        updateProp(prop.id, {
-                          value: {
-                            ...prop.value,
-                            ...{ entityId: "" },
-                          },
-                        });
-                      },
-                    }
-                  }
-                />
-              </EntityDropzone>
-
-              <StyledPropButtonGroup>
-                {prop.value.logic == "2" && (
-                  <Button
-                    key="neg"
-                    tooltipLabel="Negative logic"
-                    color="danger"
-                    inverted
-                    noBorder
-                    onClick={() => setModalOpen(true)}
-                    icon={<AttributeIcon attributeName={"negation"} />}
-                  />
-                )}
-              </StyledPropButtonGroup>
-            </>
-          ) : userCanEdit ? (
-            <EntitySuggester
-              territoryActants={territoryActants}
-              onSelected={(newSelectedId: string) => {
-                updateProp(prop.id, {
-                  value: {
-                    ...prop.type,
-                    ...{ entityId: newSelectedId },
-                  },
-                });
-              }}
-              placeholder="value"
-              openDetailOnCreate={openDetailOnCreate}
-              categoryTypes={classesPropValue}
-              inputWidth={80}
-              excludedEntities={excludedSuggesterEntities}
-              isInsideTemplate={isInsideTemplate}
-              territoryParentId={territoryParentId}
-            />
-          ) : (
-            <StyledNoEntity>-</StyledNoEntity>
-          )}
-        </StyledPropLineColumn>
-
-        <StyledPropLineColumn>
-          <ButtonGroup height={19} noMarginRight>
-            <AttributesGroupEditor
-              modalTitle={`Property attributes`}
-              modalOpen={modalOpen}
-              setModalOpen={setModalOpen}
-              disabledAllAttributes={!userCanEdit}
-              disabledAttributes={disabledAttributes}
-              propTypeActant={propTypeEntity}
-              propValueActant={propValueEntity}
-              excludedSuggesterEntities={excludedSuggesterEntities}
-              classesPropType={classesPropType}
-              classesPropValue={classesPropValue}
-              updateProp={updateProp}
-              statementId={prop.id}
-              data={{
-                statement: {
-                  elvl: prop.elvl,
-                  certainty: prop.certainty,
-                  logic: prop.logic,
-                  mood: prop.mood,
-                  moodvariant: prop.moodvariant,
-                  bundleOperator: prop.bundleOperator,
-                  bundleStart: prop.bundleStart,
-                  bundleEnd: prop.bundleEnd,
-                },
-                type: {
-                  elvl: prop.type.elvl,
-                  logic: prop.type.logic,
-                  virtuality: prop.type.virtuality,
-                  partitivity: prop.type.partitivity,
-                },
-                value: {
-                  elvl: prop.value.elvl,
-                  logic: prop.value.logic,
-                  virtuality: prop.value.virtuality,
-                  partitivity: prop.value.partitivity,
-                },
-              }}
-              handleUpdate={(newData: PropAttributeGroupDataObject) => {
-                const newDataObject = {
-                  ...newData.statement,
-                  ...newData,
-                };
-                const { statement, ...statementPropObject } = newDataObject;
-                updateProp(prop.id, statementPropObject);
-              }}
-              userCanEdit={userCanEdit}
-              isInsideTemplate={isInsideTemplate}
-              territoryParentId={territoryParentId}
-            />
-
-            {userCanEdit && (
-              <Button
-                key="delete"
-                icon={<FaTrashAlt />}
-                tooltipLabel="remove prop row"
-                color="plain"
-                inverted
-                onClick={() => {
-                  removeProp(prop.id);
-                }}
-              />
-            )}
-            {(level === 1 || level === 2) && userCanEdit && (
-              <Button
-                key="add"
-                icon={<FaPlus />}
-                label="p"
-                noIconMargin
-                color="primary"
-                inverted
-                tooltipLabel="add child prop"
-                onClick={() => {
-                  addProp(prop.id);
-                }}
-              />
-            )}
-            {prop.logic == "2" ? (
-              <Button
-                key="neg"
-                tooltipLabel="Negative logic"
-                color="danger"
-                inverted
-                noBorder
-                onClick={() => setModalOpen(true)}
-                icon={<AttributeIcon attributeName={"negation"} />}
-              />
-            ) : (
-              <div />
-            )}
-            {prop.bundleOperator ? (
-              <Button
-                key="oper"
-                tooltipLabel="Logical operator type"
-                color="success"
-                inverted
-                noBorder
-                onClick={() => setModalOpen(true)}
-                icon={prop.bundleOperator}
-              />
-            ) : (
-              <div />
-            )}
-          </ButtonGroup>
-        </StyledPropLineColumn>
-      </StyledGrid>
-    );
-  };
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const opacity = isDragging ? 0.5 : 1;
 
@@ -442,7 +166,158 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
         data-handler-id={handlerId}
         style={{ opacity: opacity }}
       >
-        {renderPropRow()}
+        <StyledGrid
+          key={level + "|" + index + "|" + id}
+          tempDisabled={tempDisabled && category === draggedPropRow.category}
+        >
+          <StyledPropLineColumn level={level} lowIdent={lowIdent}>
+            {userCanEdit && hasOrder ? (
+              <div ref={dragRef} style={{ width: "2rem" }}>
+                <StyledFaGripVertical style={{ marginTop: "0.3rem" }} />
+              </div>
+            ) : (
+              <div style={{ width: "2rem" }} />
+            )}
+          </StyledPropLineColumn>
+          <StyledPropLineColumn level={level} lowIdent={lowIdent}>
+            <StyledBorderLeft>
+              <PropGroupRowType
+                propTypeEntity={propTypeEntity}
+                prop={prop}
+                isExpanded={isExpanded}
+                disabledAttributes={disabledAttributes}
+                isInsideTemplate={isInsideTemplate}
+                openDetailOnCreate={openDetailOnCreate}
+                territoryActants={territoryActants}
+                territoryParentId={territoryParentId}
+                updateProp={updateProp}
+                userCanEdit={userCanEdit}
+              />
+            </StyledBorderLeft>
+          </StyledPropLineColumn>
+          <StyledPropLineColumn>
+            <PropGroupRowValue
+              propValueEntity={propValueEntity}
+              prop={prop}
+              isExpanded={isExpanded}
+              disabledAttributes={disabledAttributes}
+              isInsideTemplate={isInsideTemplate}
+              openDetailOnCreate={openDetailOnCreate}
+              territoryActants={territoryActants}
+              territoryParentId={territoryParentId}
+              updateProp={updateProp}
+              userCanEdit={userCanEdit}
+            />
+          </StyledPropLineColumn>
+          <StyledPropLineColumn>
+            <PropGroupRowStatementAttributes
+              prop={prop}
+              updateProp={updateProp}
+              isExpanded={isExpanded}
+              disabledAttributes={disabledAttributes}
+              userCanEdit={userCanEdit}
+              buttons={
+                <>
+                  <ButtonGroup height={19} noMarginRight>
+                    {userCanEdit && (
+                      <Button
+                        key="delete"
+                        icon={<FaTrashAlt />}
+                        tooltipLabel="remove prop row"
+                        color="plain"
+                        inverted
+                        onClick={() => {
+                          removeProp(prop.id);
+                        }}
+                      />
+                    )}
+                    {(level === 1 || level === 2) && userCanEdit && (
+                      <Button
+                        key="add"
+                        icon={<FaPlus />}
+                        label="p"
+                        noIconMargin
+                        color="primary"
+                        inverted
+                        tooltipLabel="add child prop"
+                        onClick={() => {
+                          addProp(prop.id);
+                        }}
+                      />
+                    )}
+                    {prop.logic == "2" ? (
+                      <Button
+                        key="neg"
+                        tooltipLabel="Negative logic"
+                        color="danger"
+                        inverted
+                        noBorder
+                        icon={<AttributeIcon attributeName={"negation"} />}
+                      />
+                    ) : (
+                      <div />
+                    )}
+                    {prop.bundleOperator ? (
+                      <Button
+                        key="oper"
+                        tooltipLabel="Logical operator type"
+                        color="success"
+                        inverted
+                        noBorder
+                        icon={prop.bundleOperator}
+                      />
+                    ) : (
+                      <div />
+                    )}
+                  </ButtonGroup>
+                  <Button
+                    inverted
+                    onClick={() => setIsExpanded(!isExpanded)}
+                    icon={
+                      isExpanded ? (
+                        <TbSettingsFilled size={16} />
+                      ) : (
+                        <TbSettingsAutomation
+                          size={16}
+                          style={{ transform: "rotate(90deg)" }}
+                        />
+                      )
+                    }
+                    tooltipContent={
+                      <TooltipAttributesGroup
+                        data={{
+                          statement: {
+                            elvl: prop.elvl,
+                            certainty: prop.certainty,
+                            logic: prop.logic,
+                            mood: prop.mood,
+                            moodvariant: prop.moodvariant,
+                            bundleOperator: prop.bundleOperator,
+                            bundleStart: prop.bundleStart,
+                            bundleEnd: prop.bundleEnd,
+                          },
+                          type: {
+                            elvl: prop.type.elvl,
+                            logic: prop.type.logic,
+                            virtuality: prop.type.virtuality,
+                            partitivity: prop.type.partitivity,
+                          },
+                          value: {
+                            elvl: prop.value.elvl,
+                            logic: prop.value.logic,
+                            virtuality: prop.value.virtuality,
+                            partitivity: prop.value.partitivity,
+                          },
+                        }}
+                        disabledAttributes={disabledAttributes}
+                      />
+                    }
+                  />
+                </>
+              }
+            />
+          </StyledPropLineColumn>
+        </StyledGrid>
       </div>
     </>
   );

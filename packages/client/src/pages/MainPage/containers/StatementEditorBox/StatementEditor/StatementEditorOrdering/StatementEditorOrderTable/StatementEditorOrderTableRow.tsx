@@ -12,11 +12,11 @@ import { dndHoverFn } from "utils";
 import { StyledTd, StyledTr } from "../StatementEditorOrderingStyles";
 
 interface StatementEditorOrderTableRow {
-  row: Row<{}>;
+  row: Row<OrderType>;
   index: number;
   moveRow: (dragIndex: number, hoverIndex: number) => void;
   moveEndRow: (elementIdToMove: string, index: number) => void;
-  visibleColumns: ColumnInstance<{}>[];
+  visibleColumns: ColumnInstance<OrderType>[];
   entities: { [key: string]: IEntity };
 }
 export const StatementEditorOrderTableRow: React.FC<
@@ -26,7 +26,7 @@ export const StatementEditorOrderTableRow: React.FC<
 
   const ref = useRef<HTMLTableRowElement>(null);
 
-  const [, drop] = useDrop({
+  const [, drop] = useDrop<DragItem>({
     accept: ItemTypes.STATEMENT_ORDER_ROW,
     hover(item: DragItem, monitor: DropTargetMonitor) {
       dndHoverFn(item, index, monitor, ref, moveRow);
@@ -34,8 +34,8 @@ export const StatementEditorOrderTableRow: React.FC<
   });
 
   const [{ isDragging }, drag, preview] = useDrag({
+    type: ItemTypes.STATEMENT_ORDER_ROW,
     item: {
-      type: ItemTypes.STATEMENT_ORDER_ROW,
       index,
       id: elementId,
     },
@@ -59,7 +59,7 @@ export const StatementEditorOrderTableRow: React.FC<
         opacity={opacity}
         borderColor={(row.original as OrderType).type}
       >
-        {row.cells.map((cell: Cell) => {
+        {row.cells.map((cell: Cell<OrderType>) => {
           return (
             <StyledTd {...cell.getCellProps()}>{cell.render("Cell")}</StyledTd>
           );

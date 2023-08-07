@@ -20,6 +20,8 @@ export class SearchQuery {
   connection: Connection;
   query: RTable<any>;
 
+  filterUsed?: boolean;
+
   constructor(conn: Connection) {
     this.connection = conn;
     this.query = r.table(Entity.table);
@@ -73,6 +75,7 @@ export class SearchQuery {
       class: entityClass,
     });
 
+    this.filterUsed = true;
     return this;
   }
 
@@ -86,6 +89,7 @@ export class SearchQuery {
       status: status,
     });
 
+    this.filterUsed = true;
     return this;
   }
 
@@ -96,15 +100,10 @@ export class SearchQuery {
    */
   whereNotClass(entityClass: EntityEnums.Class[]): SearchQuery {
     this.query = this.query.filter(function (row: RDatum) {
-      return r.and.apply(
-        r,
-        entityClass.map((c) => row("class").ne(c)) as [
-          RDatum<boolean>,
-          ...RDatum<boolean>[]
-        ]
-      );
+      return r.expr(entityClass).contains(row("class")).not();
     });
 
+    this.filterUsed = true;
     return this;
   }
 
@@ -118,6 +117,7 @@ export class SearchQuery {
       usedTemplate: tpl,
     });
 
+    this.filterUsed = true;
     return this;
   }
 
@@ -130,6 +130,22 @@ export class SearchQuery {
       isTemplate: true,
     });
 
+    this.filterUsed = true;
+    return this;
+  }
+
+  /**
+   * adds condition to limit results to resources with documentId
+   * @returns
+   */
+  whereResourcesHasDocument(): SearchQuery {
+    this.query = this.query.filter(function (row: RDatum) {
+      return r.and(
+        row("class").eq(EntityEnums.Class.Resource),
+        row.hasFields({ data: { documentId: true } }),
+        row("data")("documentId").ne("")
+      );
+    });
     return this;
   }
 
@@ -142,6 +158,7 @@ export class SearchQuery {
       language: language,
     });
 
+    this.filterUsed = true;
     return this;
   }
 
@@ -178,6 +195,7 @@ export class SearchQuery {
       );
     });
 
+    this.filterUsed = true;
     return this;
   }
 
@@ -234,12 +252,19 @@ export class SearchQuery {
 
   /**
    * adds condition to limit the query only to selected ids.
+   * According to previous filters, it will use filter or getAll method.
    * Note: this filter should be applied last.
    * @param entityIds
    * @returns
    */
   whereEntityIds(entityIds: string[]): SearchQuery {
-    this.query = this.query.getAll(r.args(entityIds)) as any;
+    if (this.filterUsed) {
+      this.query = this.query.filter((row: RDatum) =>
+        r.expr(entityIds).contains(row("id"))
+      );
+    } else {
+      this.query = this.query.getAll(r.args(entityIds)) as any;
+    }
     return this;
   }
 
@@ -337,6 +362,10 @@ export class SearchQuery {
 
     if (req.onlyTemplates) {
       this.whereIsTemplate();
+    }
+
+    if (req.resourceHasDocument) {
+      this.whereResourcesHasDocument();
     }
 
     if (req.excluded) {

@@ -1,25 +1,27 @@
+import { ElementTypeColor } from "Theme/theme";
 import styled from "styled-components";
+
+export const StyledEditorActantTableWrapper = styled.div`
+  margin-bottom: ${({ theme }) => theme.space[4]};
+  min-width: 58rem;
+`;
 
 interface StyledRow {
   marginBottom?: boolean;
 }
 export const StyledRow = styled.div<StyledRow>`
-  margin-bottom: ${({ marginBottom }) => (marginBottom ? "1rem" : "")};
+  margin-bottom: ${({ marginBottom }) => (marginBottom ? "2rem" : "")};
 `;
 interface StyledGrid {
   tempDisabled?: boolean;
-  hasOrder?: boolean;
   hasActant?: boolean;
 }
 export const StyledGrid = styled.div<StyledGrid>`
   display: grid;
-
   align-items: center;
   padding-left: ${({ theme }) => theme.space[0]};
-  grid-template-columns: ${({ theme, hasOrder, hasActant }) =>
-    `${hasOrder ? theme.space[8] : theme.space[2]} minmax(${
-      hasActant ? "7rem" : "14.5rem"
-    }, auto) auto auto`};
+  grid-template-columns: ${({ hasActant }) =>
+    ` minmax(${hasActant ? "7rem" : "14.5rem"}, auto) repeat(4, auto)`};
   width: fit-content;
   grid-auto-flow: row;
   padding-bottom: ${({ theme }) => theme.space[1]};
@@ -60,8 +62,34 @@ export const StyledCIHeading = styled.p`
 export const StyledCIGrid = styled.div`
   margin-bottom: 0.5rem;
   display: grid;
-  grid-template-columns: auto auto;
+  grid-template-columns: repeat(4, auto);
+  grid-column-gap: 1rem;
   width: fit-content;
   max-width: 100%;
   align-items: center;
+`;
+
+export const StyledExpandedRow = styled.div`
+  display: grid;
+  align-items: center;
+  margin-left: 3rem;
+  grid-template-columns: repeat(3, auto) 1fr;
+  grid-column-gap: 1rem;
+  font-size: 1.4rem;
+`;
+interface StyledBorderLeft {
+  borderColor: keyof ElementTypeColor;
+  padding?: boolean;
+  marginBottom?: boolean;
+}
+export const StyledBorderLeft = styled.div<StyledBorderLeft>`
+  border-left: 3px solid
+    ${({ theme, borderColor }) => theme.color.elementType[borderColor]};
+  padding-left: ${({ theme, padding }) => (padding ? theme.space[1] : "")};
+  margin-bottom: ${({ theme, marginBottom }) =>
+    marginBottom ? theme.space[4] : ""};
+`;
+export const StyledFlexStart = styled.div`
+  display: flex;
+  align-items: flex-start;
 `;

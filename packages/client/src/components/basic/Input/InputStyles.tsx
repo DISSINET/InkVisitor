@@ -1,5 +1,6 @@
 import styled from "styled-components";
 import { space1, space2 } from "Theme/constants";
+import { ThemeFontSize } from "Theme/theme";
 
 interface IValueStyle {
   inverted?: boolean;
@@ -15,8 +16,12 @@ const getWidth = (width?: number | "full") => {
     return "auto";
   }
 };
-export const Wrapper = styled.div`
+interface Wrapper {
+  fullHeightTextArea: boolean;
+}
+export const Wrapper = styled.div<Wrapper>`
   display: flex;
+  height: ${({ fullHeightTextArea }) => (fullHeightTextArea ? "100%" : "")};
 `;
 export const Label = styled.span`
   text-align: right;
@@ -57,46 +62,13 @@ export const StyledInput = styled.input<IValueStyle>`
     border-width: ${({ theme }) => theme.borderWidth[1]};
   }
 `;
-export const StyledSelect = styled.select<IValueStyle>`
-  height: ${({ theme }) => theme.space[10]};
-  text-align: left;
-  background-color: ${({ inverted, theme }) =>
-    inverted ? theme.color["gray"][200] : theme.color["white"]};
-  border-width: ${({ theme }) => theme.borderWidth[1]};
-  border-color: ${({ suggester, theme }) =>
-    suggester ? theme.color["primary"] : theme.color["gray"][500]};
-  font-size: ${({ theme }) => theme.fontSize["xs"]};
-  font-weight: bold;
-  width: ${({ width }) => getWidth(width)};
-  padding-left: ${({ theme }) => theme.space[3]};
-  background: ${({ disabled, theme }) =>
-    disabled ? theme.background["stripes"] : ""};
-  cursor: ${({ disabled }) => (disabled ? "not-allowed" : "default")};
-  resize: none;
-  :focus {
-    outline: 0;
-  }
-`;
 
-export const StyledSelectReadonly = styled.input<IValueStyle>`
-  width: ${({ width }) => getWidth(width)};
-  background-color: ${({ inverted, theme }) =>
-    inverted ? theme.color["gray"][200] : theme.color["white"]};
-  border-color: ${({ suggester, theme }) =>
-    suggester ? theme.color["primary"] : theme.color["gray"][400]};
-  border-width: ${({ theme }) => theme.borderWidth[1]};
-  font-weight: bold;
-  font-size: ${({ theme }) => theme.fontSize["xs"]};
-  padding-left: ${({ theme }) => theme.space[3]};
-  cursor: default;
-  border-right: none;
-
-  :focus {
-    outline: 0;
-  }
-`;
-
-export const StyledTextArea = styled.textarea<IValueStyle>`
+interface StyledTextArea extends IValueStyle {
+  fullHeightTextArea: boolean;
+  fontSizeTextArea: keyof ThemeFontSize;
+}
+export const StyledTextArea = styled.textarea<StyledTextArea>`
+  height: ${({ fullHeightTextArea }) => (fullHeightTextArea ? "100%" : "")};
   font-family: inherit;
   text-align: left;
   color: ${({ inverted, theme }) =>
@@ -106,7 +78,8 @@ export const StyledTextArea = styled.textarea<IValueStyle>`
   border-color: ${({ theme }) => theme.color["gray"]["400"]};
   border-width: ${({ theme, inverted, noBorder }) =>
     inverted || noBorder ? 0 : theme.borderWidth[1]};
-  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  font-size: ${({ theme, fontSizeTextArea }) =>
+    theme.fontSize[fontSizeTextArea]};
   width: ${({ width }) => getWidth(width)};
   padding: ${space1};
   background: ${({ disabled, theme }) =>

@@ -8,7 +8,7 @@ import {
   Relation,
 } from "@shared/types";
 import api from "api";
-import { Button, Loader, Submit } from "components";
+import { Button, Loader, Message, Submit } from "components";
 import {
   ApplyTemplateModal,
   AuditTable,
@@ -19,7 +19,7 @@ import { CMetaProp } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
 import { FaPlus } from "react-icons/fa";
-import { useMutation, useQuery, useQueryClient } from "react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import {
   DraggedPropRowCategory,
@@ -197,7 +197,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
   // refetch audit when statement changes
   useEffect(() => {
     if (entity !== undefined) {
-      queryClient.invalidateQueries("audit");
+      queryClient.invalidateQueries(["audit"]);
     }
   }, [entity]);
 
@@ -225,10 +225,10 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
       onSuccess: (data, variables) => {
         // TODO - check this
         queryClient.invalidateQueries(["entity"]);
-        queryClient.invalidateQueries("statement");
+        queryClient.invalidateQueries(["statement"]);
 
         if (statementId === detailId) {
-          queryClient.invalidateQueries("statement");
+          queryClient.invalidateQueries(["statement"]);
         }
         if (
           variables.references !== undefined ||
@@ -238,16 +238,16 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
           variables.data?.logicalType
         ) {
           if (entity?.class === EntityEnums.Class.Territory) {
-            queryClient.invalidateQueries("tree");
+            queryClient.invalidateQueries(["tree"]);
           }
-          queryClient.invalidateQueries("territory");
-          queryClient.invalidateQueries("bookmarks");
+          queryClient.invalidateQueries(["territory"]);
+          queryClient.invalidateQueries(["bookmarks"]);
         }
         if (variables.label !== undefined) {
-          queryClient.invalidateQueries("detail-tab-entities");
+          queryClient.invalidateQueries(["detail-tab-entities"]);
         }
         if (entity?.isTemplate) {
-          queryClient.invalidateQueries("templates");
+          queryClient.invalidateQueries(["templates"]);
         }
       },
     }
@@ -260,14 +260,14 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
       onSuccess: (data, variables) => {
         setShowTypeSubmit(false);
         queryClient.invalidateQueries(["entity"]);
-        queryClient.invalidateQueries("statement");
+        queryClient.invalidateQueries(["statement"]);
         if (variables === EntityEnums.Class.Territory) {
-          queryClient.invalidateQueries("tree");
+          queryClient.invalidateQueries(["tree"]);
         }
-        queryClient.invalidateQueries("territory");
-        queryClient.invalidateQueries("bookmarks");
+        queryClient.invalidateQueries(["territory"]);
+        queryClient.invalidateQueries(["bookmarks"]);
         if (entity?.isTemplate) {
-          queryClient.invalidateQueries("templates");
+          queryClient.invalidateQueries(["templates"]);
         }
       },
     }
@@ -276,7 +276,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
   const deleteEntityMutation = useMutation(
     (entityId: string) => api.entityDelete(entityId),
     {
-      onSuccess: async (response, entityId) => {
+      onSuccess: async (data, entityId) => {
         toast.info(`Entity removed!`);
 
         // hide selected territory if T removed
@@ -287,7 +287,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
         ) {
           setTerritoryId("");
         } else {
-          queryClient.invalidateQueries("territory");
+          queryClient.invalidateQueries(["territory"]);
         }
 
         // hide editor box if the removed entity was also opened in the editor
@@ -298,18 +298,10 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
         ) {
           setStatementId("");
         } else {
-          queryClient.invalidateQueries("statement");
+          queryClient.invalidateQueries(["statement"]);
         }
 
-        if (response) {
-          toast.info("Click here to restore the entity", {
-            autoClose: 6000,
-            pauseOnHover: true,
-            onClick: api.entityRestore.bind(api, entityId, response.data.data)
-          });
-        }
-
-        queryClient.invalidateQueries("tree");
+        queryClient.invalidateQueries(["tree"]);
 
         removeDetailId(entityId);
       },
@@ -529,7 +521,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
       await api.relationCreate(newRelation),
     {
       onSuccess: (data, variables) => {
-        queryClient.invalidateQueries("entity");
+        queryClient.invalidateQueries(["entity"]);
       },
     }
   );
@@ -542,7 +534,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
       ),
     {
       onSuccess: (data, variables) => {
-        queryClient.invalidateQueries("entity");
+        queryClient.invalidateQueries(["entity"]);
       },
     }
   );
@@ -550,7 +542,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
     async (relationId: string) => await api.relationDelete(relationId),
     {
       onSuccess: (data, variables) => {
-        queryClient.invalidateQueries("entity");
+        queryClient.invalidateQueries(["entity"]);
       },
     }
   );
@@ -609,6 +601,10 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
             {/* Relations */}
             <StyledDetailSection>
               <StyledDetailSectionHeader>Relations</StyledDetailSectionHeader>
+              {entity.warnings &&
+                entity.warnings.map((warning, key) => {
+                  return <Message key={key} warning={warning} />;
+                })}
               <StyledDetailSectionContent>
                 <EntityDetailRelations
                   entity={entity}
@@ -680,8 +676,9 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
               <StyledDetailSectionContent>
                 <EntityReferenceTable
                   disabled={!userCanEdit}
-                  references={entity.references || []}
+                  references={entity.references ?? []}
                   entities={entity.entities}
+                  entityId={entity.id}
                   onChange={(newValues: IReference[]) => {
                     updateEntityMutation.mutate({ references: newValues });
                   }}

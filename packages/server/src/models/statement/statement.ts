@@ -26,10 +26,11 @@ import {
   ROOT_TERRITORY_ID,
   StatementObject,
 } from "@shared/types/statement";
+import { randomUUID } from "crypto";
 
 export class StatementClassification implements IStatementClassification {
-  id: string = "";
-  entityId: string = "";
+  id = "";
+  entityId = "";
   elvl: EntityEnums.Elvl = EntityEnums.Elvl.Textual;
   logic: EntityEnums.Logic = EntityEnums.Logic.Positive;
   certainty: EntityEnums.Certainty = EntityEnums.Certainty.AlmostCertain;
@@ -46,8 +47,8 @@ export class StatementClassification implements IStatementClassification {
 }
 
 export class StatementIdentification implements IStatementClassification {
-  id: string = "";
-  entityId: string = "";
+  id = "";
+  entityId = "";
   elvl: EntityEnums.Elvl = EntityEnums.Elvl.Textual;
   logic: EntityEnums.Logic = EntityEnums.Logic.Positive;
   certainty: EntityEnums.Certainty = EntityEnums.Certainty.AlmostCertain;
@@ -72,8 +73,8 @@ export class StatementActant implements IStatementActant, IModel {
   virtuality: EntityEnums.Virtuality = EntityEnums.Virtuality.Reality;
   partitivity: EntityEnums.Partitivity = EntityEnums.Partitivity.Unison;
   bundleOperator: EntityEnums.Operator = EntityEnums.Operator.And;
-  bundleStart: boolean = false;
-  bundleEnd: boolean = false;
+  bundleStart = false;
+  bundleEnd = false;
   props: Prop[] = [];
   statementOrder: number | false = false;
 
@@ -104,6 +105,20 @@ export class StatementActant implements IStatementActant, IModel {
   isValid(): boolean {
     return true;
   }
+
+  /**
+   * Resets IDs of nested objects
+   */
+  resetIds() {
+    this.id = randomUUID();
+    this.props.forEach((p) => p.resetIds());
+    this.identifications.forEach((i) => {
+      i.id = randomUUID();
+    });
+    this.classifications.forEach((c) => {
+      c.id = randomUUID();
+    });
+  }
 }
 
 export class StatementTerritory implements IStatementDataTerritory {
@@ -132,15 +147,15 @@ export class StatementTerritory implements IStatementDataTerritory {
 
 export class StatementAction implements IStatementAction {
   id = "";
-  actionId: string = "";
+  actionId = "";
   elvl: EntityEnums.Elvl = EntityEnums.Elvl.Textual;
   certainty: EntityEnums.Certainty = EntityEnums.Certainty.Empty;
   logic: EntityEnums.Logic = EntityEnums.Logic.Positive;
   mood: EntityEnums.Mood[];
   moodvariant: EntityEnums.MoodVariant = EntityEnums.MoodVariant.Realis;
   bundleOperator: EntityEnums.Operator = EntityEnums.Operator.And;
-  bundleStart: boolean = false;
-  bundleEnd: boolean = false;
+  bundleStart = false;
+  bundleEnd = false;
   props: Prop[] = [];
   statementOrder: number | false = false;
 
@@ -163,6 +178,14 @@ export class StatementAction implements IStatementAction {
     }
 
     return true;
+  }
+
+  /**
+   * Resets IDs of nested objects
+   */
+  resetIds() {
+    this.id = randomUUID();
+    this.props.forEach((p) => p.resetIds());
   }
 }
 
@@ -292,7 +315,10 @@ class Statement extends Entity implements IStatement {
     }
 
     // draft or meta statement - always can be viewed
-    if (!this.data.territory || this.data.territory.territoryId === ROOT_TERRITORY_ID) {
+    if (
+      !this.data.territory ||
+      this.data.territory.territoryId === ROOT_TERRITORY_ID
+    ) {
       return true;
     }
 
@@ -398,13 +424,13 @@ class Statement extends Entity implements IStatement {
     return result;
   }
 
-  async delete(db: Connection | undefined): Promise<WriteResult> {
+  async delete(db: Connection): Promise<WriteResult> {
     const result = await super.delete(db);
 
     await treeCache.initialize();
 
     return result;
-  };
+  }
 
   /**
    * Finds statements that are stored under the same territory (while not being
@@ -551,7 +577,7 @@ class Statement extends Entity implements IStatement {
   }
 
   static extractIdsFromReference(references: IReference[]): string[] {
-    let out: string[] = [];
+    const out: string[] = [];
     for (const reference of references) {
       out.push(reference.resource);
       out.push(reference.value);
@@ -574,14 +600,14 @@ class Statement extends Entity implements IStatement {
       .table(Entity.table)
       .getAll.apply(
         undefined,
-        (territoryIds as (string | { index: string; })[]).concat({
+        (territoryIds as (string | { index: string })[]).concat({
           index: DbEnums.Indexes.StatementTerritory,
         })
       )
       .run(db);
 
     return list.map((data) => new Statement(data));
-  };
+  }
 
   /**
    * getEntitiesIdsForMany wrapped in foreach cycle
@@ -624,7 +650,7 @@ class Statement extends Entity implements IStatement {
     return statements.sort((a, b) => {
       return a.data.territory.order - b.data.territory.order;
     });
-  };
+  }
 
   /**
    * finds statements which are linked to different entity
@@ -651,7 +677,7 @@ class Statement extends Entity implements IStatement {
         return a.data.territory.order - b.data.territory.order;
       }
     });
-  };
+  }
 
   /**
    * finds statements that are using provided entityId in their
@@ -668,7 +694,7 @@ class Statement extends Entity implements IStatement {
       .table(Entity.table)
       .getAll(entityId, { index: DbEnums.Indexes.StatementActantsCI })
       .run(db);
-  };
+  }
 
   /**
    * reduces findByDataEntityId results to list of ids
@@ -725,52 +751,15 @@ class Statement extends Entity implements IStatement {
     });
   }
 
-  static events: EventMapSingle = {
-    [EventTypes.BEFORE_ENTITY_DELETE]: async (
-      db: Connection,
-      actantId: string
-    ): Promise<void> => {
-      const linkedToActant = await rethink
-        .table(Entity.table)
-        .filter({ class: EntityEnums.Class.Statement })
-        .filter((row: any) => {
-          return row("data")("actants").contains((actantElement: any) =>
-            actantElement("entityId").eq(actantId)
-          );
-        })
-        .run(db);
+  /**
+   * Resets IDs of nested objects
+   */
+  resetIds() {
+    super.resetIds();
 
-      for (const stData of linkedToActant) {
-        const st = new Statement({ ...stData });
-        await st.unlinkActantId(db, actantId);
-      }
-
-      const linkedToProps = await rethink
-        .table(Entity.table)
-        .filter({ class: EntityEnums.Class.Statement })
-        .filter((row: any) => {
-          return row("data")("props").contains((actantElement: any) =>
-            actantElement("origin").eq(actantId)
-          );
-        })
-        .run(db);
-
-      const linkedToActions = await rethink
-        .table(Entity.table)
-        .filter({ class: EntityEnums.Class.Statement })
-        .filter((row: any) => {
-          return row("data")("actions").contains((actantElement: any) =>
-            actantElement("actionId").eq(actantId)
-          );
-        })
-        .run(db);
-
-      for (const stData of linkedToActions) {
-        const st = new Statement({ ...stData });
-        await st.unlinkActionId(db, actantId);
-      }
-    },
-  };
+    this.data.actants.forEach((a) => a.resetIds());
+    this.data.actions.forEach((a) => a.resetIds());
+  }
 }
 
 export default Statement;

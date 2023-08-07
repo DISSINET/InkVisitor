@@ -1,6 +1,8 @@
 export type ThemeType = typeof theme;
 export type ThemeColor = typeof theme.color;
 export type ElementTypeColor = typeof theme.color.elementType;
+export type ThemeFontSize = typeof theme.fontSize;
+export type PingColor = typeof theme.color.ping;
 
 const theme = {
   color: {
@@ -77,6 +79,9 @@ const theme = {
     // seda
     entityV: "#BAB0AC",
 
+    warningMessage: "#FFE089",
+    warningText: "#ffbb00",
+
     elementType: {
       action: "#EB6B6B",
       actant: "#7E9BFF",
@@ -85,12 +90,22 @@ const theme = {
       ident: "#EAE3A3",
     },
 
+    ping: {
+      "-1": "black",
+      "0": "#d73027",
+      "1": "#fc8d59",
+      "2": "#fee08b",
+      "3": "#d9ef8b",
+      "4": "#91cf60",
+      "5": "#1a9850",
+    },
+
     // tag status
-    0: "#a0aec0", // pending
-    1: "#000", //approved
-    2: "#BA2525", //discouraged
-    3: "#D8AA37", //warning
-    4: "#f27a43", //unfinished
+    "0": "#a0aec0", // pending
+    "1": "#000", //approved
+    "2": "#BA2525", //discouraged
+    "3": "#D8AA37", //warning
+    "4": "#f27a43", //unfinished
   },
   space: {
     px: "1px",
@@ -163,7 +178,7 @@ const theme = {
     sm: "0.5rem",
     default: "0.75rem",
     md: "1rem",
-    lg: "0.5rem",
+    lg: "1.5rem",
     full: "9999px",
   },
   borderStyle: {

@@ -1,14 +1,14 @@
-import { animated } from "react-spring";
+import { animated } from "@react-spring/web";
+import { ThemeColor } from "Theme/theme";
 import styled from "styled-components";
-import { Colors } from "types";
 
 interface StyledContainer {
-  color: typeof Colors[number];
+  $color: keyof ThemeColor;
   arrowoffset: number;
 }
 export const StyledContainer = styled(animated.div)<StyledContainer>`
   color: ${({ theme }) => theme.color["white"]};
-  background-color: ${({ theme, color }) => theme.color[color]};
+  background-color: ${({ theme, $color }) => theme.color[$color]};
   min-width: ${({ theme }) => theme.space[8]};
   font-size: ${({ theme }) => theme.fontSize["xxs"]};
 
@@ -63,7 +63,7 @@ export const StyledArrow = styled.div`
 
 interface StyledContent {
   tagGroup?: boolean;
-  color: typeof Colors[number];
+  $color: keyof ThemeColor;
 }
 export const StyledContent = styled.div<StyledContent>`
   margin: ${({ theme, tagGroup }) =>

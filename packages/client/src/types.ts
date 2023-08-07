@@ -1,5 +1,6 @@
 import { EntityEnums } from "@shared/enums";
 import { IEntity, IStatementActant, IStatementAction } from "@shared/types";
+import { ThemeColor } from "Theme/theme";
 
 export const Colors = [
   "black",
@@ -26,7 +27,7 @@ export const Colors = [
 
 interface IEntityColor {
   entityClass: EntityEnums.ExtendedClass;
-  color: typeof Colors[number];
+  color: keyof ThemeColor;
 }
 
 // Use for colors, for dropdowns use entity.ts dictionary
@@ -96,7 +97,7 @@ export const EntityColors: { [key: string]: IEntityColor } = {
 export type EntityKeys = keyof typeof EntityColors;
 
 export interface IPage {
-  id: "main" | "users" | "acl" | "about";
+  id: "main" | "users" | "acl" | "about" | "documents";
   label: string;
   color: "info" | "success" | "danger" | "warning";
   href: string;
@@ -113,8 +114,6 @@ export enum ItemTypes {
   TAG = "TAG",
   STATEMENT_ROW = "STATEMENT_ROW",
   STATEMENT_ORDER_ROW = "STATEMENT_ORDER_ROW",
-
-  // should be removed
   ACTANT_ROW = "ACTANT_ROW",
   ENTITY_ROW = "ENTITY_ROW",
   ACTION_ROW = "ACTION_ROW",
@@ -128,7 +127,6 @@ export enum ItemTypes {
 export type DragItem = {
   index: number;
   id: string;
-  type: ItemTypes;
 };
 export interface EntityDragItem extends DragItem {
   entity: IEntity | false;
@@ -322,7 +320,7 @@ export interface SuggesterItemToCreate {
   entityClass: EntityEnums.Class;
   detail?: string;
   territoryId?: string;
-  language?: EntityEnums.Language;
+  language: EntityEnums.Language | false;
 }
 
 export interface FilteredActantObject {

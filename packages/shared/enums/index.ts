@@ -5,6 +5,7 @@ import { DbEnums } from "./database";
 import { EnumValidators } from "./validators";
 import { HttpMethods } from "./request";
 import { StatementEnums } from "./statement";
+import { WarningTypeEnums } from "./warning";
 
 export {
   EntityEnums,
@@ -14,4 +15,5 @@ export {
   EnumValidators,
   HttpMethods,
   StatementEnums,
+  WarningTypeEnums,
 };

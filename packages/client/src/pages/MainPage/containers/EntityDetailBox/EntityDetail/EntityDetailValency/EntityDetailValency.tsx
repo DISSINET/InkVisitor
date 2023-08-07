@@ -2,7 +2,7 @@ import { RelationEnums } from "@shared/enums";
 import { IResponseDetail, IResponseGeneric, Relation } from "@shared/types";
 import { AxiosResponse } from "axios";
 import React from "react";
-import { UseMutationResult } from "react-query";
+import { UseMutationResult } from "@tanstack/react-query";
 import { EntityDetailValencySection } from "./EntityDetailValencySection/EntityDetailValencySection";
 import {
   StyledGrid,

@@ -1,9 +1,9 @@
 import styled from "styled-components";
-
 import { space3, space10 } from "Theme/constants";
+import { ThemeColor } from "Theme/theme";
 
 interface StyledHeader {
-  bgColor: string;
+  $color: keyof ThemeColor;
   paddingX?: number;
   paddingY?: number;
   height?: number;
@@ -12,10 +12,11 @@ interface StyledHeader {
 export const StyledHeader = styled.div<StyledHeader>`
   height: ${({ height }) => (height ? `${height / 10}rem` : "auto")};
   padding: ${({ paddingX, paddingY }) =>
-    `${paddingY || paddingY === 0 ? `${paddingY / 10}rem` : space10} ${paddingX || paddingX === 0 ? `${paddingX / 10}rem` : space3
+    `${paddingY || paddingY === 0 ? `${paddingY / 10}rem` : space10} ${
+      paddingX || paddingX === 0 ? `${paddingX / 10}rem` : space3
     }`};
   width: ${({ layoutWidth }) => (layoutWidth > 0 ? layoutWidth : "100%")};
-  background-color: ${({ theme, bgColor }) => theme.color[bgColor]};
+  background-color: ${({ theme, $color }) => theme.color[$color]};
   color: ${({ theme }) => theme.color["white"]};
   display: flex;
   position: relative;

@@ -1,5 +1,6 @@
+import { ThemeColor } from "Theme/theme";
 import { FaChevronDown } from "react-icons/fa";
-import Select from "react-select";
+import Select, { components } from "react-select";
 import styled from "styled-components";
 
 const getWidth = (width?: number | "full") => {
@@ -11,6 +12,7 @@ const getWidth = (width?: number | "full") => {
 };
 interface StyledSelectWrapper {
   width?: number | "full";
+  ref?: any;
 }
 export const StyledSelectWrapper = styled.div<StyledSelectWrapper>`
   display: inline-flex;
@@ -25,10 +27,12 @@ interface StyledSelect {
   suggester?: boolean;
   entityDropdown?: boolean;
   wildCardChar?: boolean;
+  isMulti: boolean;
+  attributeDropdown?: boolean;
+  icon?: JSX.Element;
 }
-export const StyledSelect = styled(Select)`
+export const StyledSelect = styled(Select)<StyledSelect>`
   display: inline-flex;
-  min-height: ${({ theme }) => theme.space[10]};
   vertical-align: bottom;
   font-size: ${({ theme }) => theme.fontSize["xs"]};
 
@@ -102,38 +106,13 @@ export const StyledSelect = styled(Select)`
   .react-select__indicator-separator {
     display: none;
   }
-  .react-select__menu {
-    border-radius: 0;
-    box-shadow: ${({ theme }) => theme.boxShadow["normal"]};
-    width: 100%;
-    transform: translate(0, -6px);
+  .react-select__multi-value__label {
+    padding: 0.2rem;
   }
-  .react-select__menu-list {
-    max-height: 18rem;
-  }
-  .react-select__option {
-    margin: 0;
-    padding: ${({ entityDropdown }) => (entityDropdown ? "2px" : "")};
-    padding-left: ${({ entityDropdown }) => (entityDropdown ? 0 : "")};
-    height: ${({ entityDropdown }) => (entityDropdown ? "2.5rem" : "")};
-
-    :hover {
-    }
-  }
-  .react-select__option--is-selected {
-    font-weight: bold;
-    color: ${({ theme }) => theme.color["primary"]};
-    background-color: white;
-    :hover {
-      background-color: ${({ theme }) => theme.color["invertedBg"]["primary"]};
-    }
-  }
-  .react-select__option--is-focused {
-    background-color: ${({ theme }) => theme.color["invertedBg"]["primary"]};
-  }
+  // portal menu style is in global stylesheet
 `;
 interface StyledEntityValue {
-  color?: string;
+  color?: keyof ThemeColor;
 }
 export const StyledEntityValue = styled.div<StyledEntityValue>`
   border-left-style: solid;
@@ -145,4 +124,10 @@ export const StyledEntityValue = styled.div<StyledEntityValue>`
 export const StyledFaChevronDown = styled(FaChevronDown)`
   margin-right: 4px;
   margin-left: 1px;
+`;
+
+export const StyledIconWrap = styled.div`
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
+  margin-left: ${({ theme }) => theme.space[1]};
+  color: ${({ theme }) => theme.color["greyer"]};
 `;

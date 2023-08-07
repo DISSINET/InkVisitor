@@ -8,8 +8,7 @@ import { Button, Dropdown, Input, Loader, TypeBar } from "components";
 import { EntityTag } from "components/advanced";
 import React, { useMemo, useState } from "react";
 import { FaPlus, FaTrash } from "react-icons/fa";
-import { useQuery } from "react-query";
-import { OptionTypeBase, ValueType } from "react-select";
+import { useQuery } from "@tanstack/react-query";
 import { useAppSelector } from "redux/hooks";
 import { DropdownItem } from "types";
 import {
@@ -124,8 +123,8 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
                     value: filterByClass.value,
                   }}
                   options={allEntityOptions}
-                  onChange={(option: ValueType<OptionTypeBase, any>) => {
-                    setFilterByClass(option as DropdownItem);
+                  onChange={(selectedOption) => {
+                    setFilterByClass(selectedOption[0]);
                   }}
                   width="full"
                   entityDropdown

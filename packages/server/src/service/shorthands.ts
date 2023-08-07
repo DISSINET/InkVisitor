@@ -8,6 +8,7 @@ import Entity from "@models/entity/entity";
 import User from "@models/user/user";
 import Relation from "@models/relation/relation";
 import Audit from "@models/audit/audit";
+import Document from "@models/document/document";
 
 export async function deleteUser(db: Db, userId: string): Promise<WriteResult> {
   return rethink.table(User.table).get(userId).delete().run(db.connection);
@@ -59,4 +60,8 @@ export async function deleteUsers(db: Db): Promise<WriteResult> {
     })
     .delete()
     .run(db.connection);
+}
+
+export async function deleteDocuments(db: Db): Promise<WriteResult> {
+  return rethink.table(Document.table).delete().run(db.connection);
 }

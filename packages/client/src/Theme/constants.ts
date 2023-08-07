@@ -1,6 +1,8 @@
 import { EntityEnums } from "@shared/enums";
 import theme from "./theme";
 
+export const defaultPing = -2;
+
 export const DropdownAny = "any";
 export const wildCardChar = "*";
 
@@ -10,7 +12,6 @@ export const scrollOverscanCount = 10;
 
 // layout
 export const heightHeader = 70;
-export const heightFooter = 30;
 
 export const minLayoutWidth = 1440;
 export const layoutWidthBreakpoint = 1400;

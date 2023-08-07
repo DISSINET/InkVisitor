@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useSpring } from "react-spring";
+import { useSpring } from "@react-spring/web";
 import { setDisableUserSelect } from "redux/features/layout/disableUserSelectSlice";
 import { setPanelWidths } from "redux/features/layout/panelWidthsSlice";
 import { setSeparatorXPosition } from "redux/features/layout/separatorXPositionSlice";

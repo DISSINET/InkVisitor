@@ -5,8 +5,31 @@ import { apiPath } from "@common/constants";
 import app from "../../Server";
 import { successfulGenericResponse } from "../common.test";
 import { supertestConfig } from "..";
+import User from "@models/user/user";
+import { Db } from "@service/RethinkDB";
+import { checkPassword, generateAccessToken, hashPassword } from "@common/auth";
+import { r } from "rethinkdb-ts";
+import { clear } from "console";
+import { deleteEntities } from "@service/shorthands";
 
 describe("Users update", function () {
+  let db: Db;
+  const updateUser = new User({
+    email: `user${Math.random()}}`,
+    active: true,
+    name: `user${Math.random()}}`,
+  });
+
+  beforeAll(async () => {
+    db = new Db();
+    await db.initDb();
+    await updateUser.save(db.connection);
+  });
+
+  afterAll(async () => {
+    await db.close();
+  });
+
   describe("empty data", () => {
     it("should return a BadParams error wrapped in IResponseGeneric", (done) => {
       return request(app)
@@ -17,6 +40,7 @@ describe("Users update", function () {
         .then(() => done());
     });
   });
+
   describe("faulty data ", () => {
     it("should return a BadParams error wrapped in IResponseGeneric", (done) => {
       return request(app)
@@ -28,6 +52,7 @@ describe("Users update", function () {
         .then(() => done());
     });
   });
+
   describe("not existing user ", () => {
     it("should return a UserDoesNotExits error wrapped in IResponseGeneric", (done) => {
       return request(app)
@@ -41,6 +66,7 @@ describe("Users update", function () {
         .then(() => done());
     });
   });
+
   describe("ok data", () => {
     it("should return a 200 code with successful response", (done) => {
       return request(app)
@@ -50,6 +76,44 @@ describe("Users update", function () {
         .expect("Content-Type", /json/)
         .expect(successfulGenericResponse)
         .expect(200, done);
+    });
+  });
+  describe("password data", () => {
+    it("should fail if attempting to update non-owned user", async () => {
+      const data = await request(app)
+        .get(`${apiPath}/users/me`)
+        .set("authorization", "Bearer " + supertestConfig.token)
+        .expect("Content-Type", /json/);
+
+      const adminId = data.body.id;
+      const newPassword = "test" + Math.random().toFixed();
+      const viewerAccessToken = generateAccessToken(updateUser);
+
+      await request(app)
+        .put(`${apiPath}/users/${adminId}`)
+        .set("authorization", "Bearer " + viewerAccessToken)
+        .send({ password: newPassword })
+        .expect("Content-Type", /json/)
+        .expect(403);
+    });
+    it("should return a 200 code with successful response and update password", async () => {
+      const newPassword = "test" + Math.random();
+
+      await request(app)
+        .put(`${apiPath}/users/${updateUser.id}`)
+        .set("authorization", "Bearer " + supertestConfig.token)
+        .send({ password: newPassword })
+        .expect("Content-Type", /json/)
+        .expect(successfulGenericResponse)
+        .expect(200);
+
+      const userData = await r
+        .table(User.table)
+        .get(updateUser.id)
+        .run(db.connection);
+
+      expect(checkPassword(newPassword, userData?.password || "")).toBeTruthy();
+      await db.close();
     });
   });
 });

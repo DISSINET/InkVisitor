@@ -19,8 +19,7 @@ import {
 import { CEntity, CStatement, CTemplateEntity } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "react-query";
-import { OptionTypeBase, ValueType } from "react-select";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { DropdownItem } from "types";
 
@@ -71,8 +70,6 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
       if (userId) {
         const res = await api.usersGet(userId);
         return res.data;
-      } else {
-        return false;
       }
     },
     { enabled: !!userId && api.isLoggedIn() }
@@ -87,7 +84,7 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
         );
         queryClient.invalidateQueries(["templates"]);
         if (selectedDetailId) {
-          queryClient.invalidateQueries("entity-templates");
+          queryClient.invalidateQueries(["entity-templates"]);
         }
         if (variables.class === EntityEnums.Class.Statement) {
           setStatementId(variables.id);
@@ -171,8 +168,8 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
                 value: createModalEntityClass.value,
               }}
               options={entitiesDict}
-              onChange={(option: ValueType<OptionTypeBase, any>) => {
-                setCreateModalEntityClass(option as DropdownItem);
+              onChange={(selectedOption) => {
+                setCreateModalEntityClass(selectedOption[0]);
               }}
               width={100}
               entityDropdown

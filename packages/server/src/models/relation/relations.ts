@@ -1,6 +1,6 @@
 import { nonenumerable } from "@common/decorators";
 import { EntityEnums, RelationEnums } from "@shared/enums";
-import { Relation as RelationTypes } from "@shared/types";
+import { IWarning, Relation as RelationTypes } from "@shared/types";
 import { Connection } from "rethinkdb-ts";
 import { IRequest } from "src/custom_typings/request";
 import Actant1Semantics from "./actant1-semantics";
@@ -41,9 +41,9 @@ export class UsedRelations implements RelationTypes.IUsedRelations {
   @nonenumerable
   entityClass: EntityEnums.Class;
   @nonenumerable
-  maxNestLvl: number = 3;
+  maxNestLvl = 10;
   @nonenumerable
-  maxListLen: number = 10;
+  maxListLen = 10;
 
   [RelationEnums.Type.Superclass]?: RelationTypes.IDetailType<ISuperclass>;
   [RelationEnums.Type
@@ -73,10 +73,12 @@ export class UsedRelations implements RelationTypes.IUsedRelations {
   [RelationEnums.Type
     .Actant2Semantics]?: RelationTypes.IDetailType<IActant2Semantics>;
   [RelationEnums.Type.Related]?: RelationTypes.IDetailType<IRelated>;
+  warnings: IWarning[];
 
   constructor(forEntityId: string, forEntityClass: EntityEnums.Class) {
     this.entityId = forEntityId;
     this.entityClass = forEntityClass;
+    this.warnings = [];
   }
 
   async prepareSuperclasses(dbConn: Connection): Promise<void> {
@@ -211,9 +213,9 @@ export class UsedRelations implements RelationTypes.IUsedRelations {
       connections: await Identification.getIdentificationForwardConnections(
         dbConn,
         this.entityId,
-        EntityEnums.Certainty.Empty,
         this.maxNestLvl,
-        0
+        0,
+        []
       ),
     };
   }
