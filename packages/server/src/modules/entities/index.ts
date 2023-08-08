@@ -20,6 +20,7 @@ import {
   InternalServerError,
   ModelNotValidError,
   PermissionDeniedError,
+  AuditDoesNotExist,
 } from "@shared/types/errors";
 import { Router } from "express";
 import { asyncRouteHandler } from "../index";
@@ -290,6 +291,43 @@ export default Router()
             ? "There has been at least one conflict while copying relations"
             : undefined,
         data: clone,
+      };
+    })
+  )
+  .post(
+    "/:entityId/restore",
+    asyncRouteHandler<IResponseGeneric<object>>(async (request: IRequest<{entityId?: string}, {}, {}>) => {
+      const entityId = request.params.entityId || "";
+      const audit = await Audit.getLastForEntity(request.db.connection, entityId);
+      if (!audit) {
+        throw new AuditDoesNotExist(
+          "cannot restore entity - auditdoes not exist",
+          entityId
+        );
+      }
+
+      const restoration = getEntityClass({
+        ...audit,
+      } as Partial<IEntity>);
+      if (!restoration.isValid()) {
+        throw new ModelNotValidError("");
+      }
+
+      if (!restoration.canBeCreatedByUser(request.getUserOrFail())) {
+        throw new PermissionDeniedError("entity cannot be restored");
+      }
+
+      await request.db.lock();
+
+      const saved = await restoration.save(request.db.connection);
+      if (!saved) {
+        throw new InternalServerError("cannot restore entity");
+      }
+
+      return {
+        result: true,
+        message: "Entity restored",
+        data: audit.changes,
       };
     })
   )
