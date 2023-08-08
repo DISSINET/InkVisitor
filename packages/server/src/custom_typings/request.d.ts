@@ -3,7 +3,11 @@ import Acl from "../middlewares/acl";
 import { IUser } from "../../../shared/types";
 import User from "@models/user/user";
 
-export interface IRequest {
+export interface IRequest<
+  TParams = Record<string, any>,
+  TBody = Record<string, any>,
+  TQuery = Record<string, any>
+> {
   db: Db;
   acl: Acl;
   user?: {
@@ -13,13 +17,14 @@ export interface IRequest {
   baseUrl: string;
   route: { path: string };
   method: string;
-  params: Record<string, any>;
-  body: Record<string, any>;
-  query: Record<string, any>;
+  params: TParams;
+  body: TBody;
+  query: TQuery;
 }
 
 declare global {
   namespace Express {
-    export interface Request extends IRequest { }
+    // eslint-disable-next-line @typescript-eslint/no-empty-interface
+    export interface Request extends IRequest {}
   }
 }
