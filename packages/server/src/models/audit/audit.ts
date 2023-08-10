@@ -10,7 +10,7 @@ export default class Audit implements IAudit, IDbModel {
 
   id = "";
   entityId = "";
-  user = "";
+  userId = "";
   date: Date = new Date();
   changes: object = {};
 

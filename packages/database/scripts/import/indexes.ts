@@ -137,6 +137,7 @@ const entitiesIndexes: ((table: RTable) => any)[] = [
 
 const auditsIndexes: ((table: RTable) => any)[] = [
   (table: RTable) => table.indexCreate(DbEnums.Indexes.AuditEntityId),
+  (table: RTable) => table.indexCreate(DbEnums.Indexes.AuditUserId),
 ];
 
 const relationsIndexes: ((table: RTable) => any)[] = [

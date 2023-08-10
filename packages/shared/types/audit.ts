@@ -1,7 +1,7 @@
 export interface IAudit {
   id: string;
   entityId: string;
-  user: string;
+  userId: string;
   date: Date;
   changes: object;
 }

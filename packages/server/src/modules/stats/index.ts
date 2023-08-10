@@ -1,13 +1,13 @@
 import { asyncRouteHandler } from "../index";
 import { Router } from "express";
-import { IResponseStats } from "@shared/types";
-import { ResponseStats } from "@models/stats/response";
+import { IResponseUsersStats } from "@shared/types";
+import { ResponseUsersStats } from "@models/stats/response";
 import { IRequest } from "src/custom_typings/request";
 
 export default Router().get(
-  "/",
-  asyncRouteHandler<IResponseStats>(async (request: IRequest) => {
-    const resp = new ResponseStats();
+  "/users",
+  asyncRouteHandler<IResponseUsersStats>(async (request: IRequest) => {
+    const resp = new ResponseUsersStats();
 
     await resp.prepare(request);
 
