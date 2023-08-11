@@ -90,7 +90,12 @@ export const ModalCard: FC<ModalCard> = ({
   fullHeight,
 }) => {
   return (
-    <StyledCard style={animatedMount} width={width} $fullHeight={fullHeight}>
+    <StyledCard
+      data-cy="modal"
+      style={animatedMount}
+      width={width}
+      $fullHeight={fullHeight}
+    >
       {children}
       <Loader show={isLoading} />
     </StyledCard>

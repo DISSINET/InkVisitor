@@ -54,7 +54,7 @@ export const Box: React.FC<Box> = ({
 
   return (
     <StyledBox
-      data-cy="box"
+      data-cy={`${label}-box`}
       style={{ height: animatedExpand.boxHeight as any }}
       height={height}
     >
