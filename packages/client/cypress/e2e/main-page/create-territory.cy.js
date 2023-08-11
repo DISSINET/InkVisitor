@@ -3,7 +3,7 @@ describe("open T", () => {
     cy.login("admin", "admin");
   });
 
-  it("opens territory", () => {
+  it("creates territory", () => {
     cy.contains("new territory").click();
     const label = "test T";
     cy.get("[data-cy=modal]").find("input").type(label);

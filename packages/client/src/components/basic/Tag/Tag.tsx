@@ -187,6 +187,7 @@ export const Tag: React.FC<TagProps> = ({
         ) : (
           <>
             <StyledLabel
+              data-cy="tag-label"
               invertedLabel={invertedLabel}
               status={status}
               borderStyle={borderStyle}
@@ -209,6 +210,7 @@ export const Tag: React.FC<TagProps> = ({
       <>
         {renderEntityTag()}
         <StyledLabel
+          data-cy="tag-label"
           invertedLabel={invertedLabel}
           status={status}
           borderStyle={borderStyle}

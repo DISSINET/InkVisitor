@@ -64,6 +64,7 @@ export const TerritoryTreeContextMenu: React.FC<TerritoryTreeContextMenu> = ({
     <>
       <StyledWrapper
         ref={ref}
+        data-cy="territory-context-menu"
         onMouseEnter={() => {
           if (!showMenu) {
             setDivPosition();

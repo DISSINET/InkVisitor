@@ -3,7 +3,7 @@ describe("open T", () => {
     cy.login("admin", "admin");
   });
 
-  it("opens territory", () => {
+  it("creates statement", () => {
     cy.get("[data-cy=tree-node-0]").click();
     cy.contains("new statement").click();
     const label = "test S";

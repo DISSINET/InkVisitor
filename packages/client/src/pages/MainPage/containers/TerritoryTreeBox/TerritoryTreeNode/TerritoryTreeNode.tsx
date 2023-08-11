@@ -249,8 +249,8 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
         {id !== rootTerritoryId && (
           <>
             {!tempDisabled ? (
-              <StyledTerritoryTagWrap id={`territory${id}`}>
-                <StyledIconWrap data-cy={`tree-node-${index}`}>
+              <StyledTerritoryTagWrap id={`territory${id}`} data-cy="tree-node">
+                <StyledIconWrap>
                   {hasChildren ? (
                     <>{renderArrowIcon()}</>
                   ) : (
