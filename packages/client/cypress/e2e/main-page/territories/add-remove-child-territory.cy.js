@@ -3,22 +3,22 @@ describe("context menu", () => {
     cy.login("admin", "admin");
   });
 
-  it("creates T", () => {
-    // TODO: create T only if not existing
+  it("adds T, adds child T, removes child T, removes T", () => {
     cy.contains("new territory").click();
-    const label = "test T";
-    cy.get("[data-cy=modal]").find("input").type(label);
+    const rootLabel = "test T";
+    cy.get("[data-cy=modal]").find("input").type(rootLabel);
     cy.contains("Save").click();
 
-    cy.get("[data-cy=Territories-box]").contains(label).should("be.visible");
-    cy.get("[data-cy=Statements-box]").contains(`T: ${label}`);
-    cy.get("[data-cy=Detail-box]").contains(`${label}`);
-  });
+    cy.get("[data-cy=Territories-box]")
+      .contains(rootLabel)
+      .should("be.visible");
+    cy.get("[data-cy=Statements-box]").contains(`T: ${rootLabel}`);
+    cy.get("[data-cy=Detail-box]").contains(`${rootLabel}`);
 
-  it("adds child territory", () => {
     const label = "test child T";
-    cy.get("[data-cy=tree-node]").first().as("treenode");
+    cy.get("[data-cy=tree-node]").as("treenode");
     cy.get("@treenode")
+      .first()
       .find("[data-cy=territory-context-menu-trigger]")
       .trigger("mouseover");
     cy.get("#page")
@@ -30,11 +30,9 @@ describe("context menu", () => {
     cy.get("[data-cy=modal]").find("input").type(label);
     cy.contains("Save").click();
     cy.get("[data-cy=Territories-box]").contains(label).should("be.visible");
-  });
 
-  it("removes child territory", () => {
-    const label = "test child T";
-    cy.get("[data-cy=tree-node]")
+    // REMOVE
+    cy.get("@treenode")
       .last()
       .find("[data-cy=territory-context-menu-trigger]")
       .trigger("mouseover");
@@ -43,8 +41,19 @@ describe("context menu", () => {
       .find("button")
       .last()
       .click();
-
     cy.contains("Submit").click();
     cy.get("[data-cy=Territories-box]").should("not.contain", label);
+
+    cy.get("@treenode")
+      .first()
+      .find("[data-cy=territory-context-menu-trigger]")
+      .trigger("mouseover");
+    cy.get("#page")
+      .find("[data-cy=territory-context-menu]")
+      .find("button")
+      .last()
+      .click();
+    cy.contains("Submit").click();
+    cy.get("[data-cy=Territories-box]").should("not.contain", rootLabel);
   });
 });
