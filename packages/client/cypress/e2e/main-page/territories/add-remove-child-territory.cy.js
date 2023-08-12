@@ -1,9 +1,21 @@
-describe("open T", () => {
+describe("context menu", () => {
   beforeEach(() => {
     cy.login("admin", "admin");
   });
 
-  it("adds and removes child territory", () => {
+  it("creates T", () => {
+    // TODO: create T only if not existing
+    cy.contains("new territory").click();
+    const label = "test T";
+    cy.get("[data-cy=modal]").find("input").type(label);
+    cy.contains("Save").click();
+
+    cy.get("[data-cy=Territories-box]").contains(label).should("be.visible");
+    cy.get("[data-cy=Statements-box]").contains(`T: ${label}`);
+    cy.get("[data-cy=Detail-box]").contains(`${label}`);
+  });
+
+  it("adds child territory", () => {
     const label = "test child T";
     cy.get("[data-cy=tree-node]").first().as("treenode");
     cy.get("@treenode")
@@ -15,12 +27,13 @@ describe("open T", () => {
       .first()
       .click();
 
-    // modal input
     cy.get("[data-cy=modal]").find("input").type(label);
     cy.contains("Save").click();
     cy.get("[data-cy=Territories-box]").contains(label).should("be.visible");
+  });
 
-    // remove child
+  it("removes child territory", () => {
+    const label = "test child T";
     cy.get("[data-cy=tree-node]")
       .last()
       .find("[data-cy=territory-context-menu-trigger]")
