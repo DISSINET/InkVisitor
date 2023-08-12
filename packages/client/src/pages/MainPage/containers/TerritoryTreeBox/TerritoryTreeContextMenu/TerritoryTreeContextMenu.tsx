@@ -12,6 +12,7 @@ import {
   StyledContextButtonGroup,
   StyledWrapper,
 } from "./TerritoryTreeContextMenuStyles";
+import { FloatingPortal } from "@floating-ui/react";
 
 interface TerritoryTreeContextMenu {
   territoryActant: IEntity;
@@ -64,7 +65,7 @@ export const TerritoryTreeContextMenu: React.FC<TerritoryTreeContextMenu> = ({
     <>
       <StyledWrapper
         ref={ref}
-        data-cy="territory-context-menu"
+        data-cy="territory-context-menu-trigger"
         onMouseEnter={() => {
           if (!showMenu) {
             setDivPosition();
@@ -79,75 +80,78 @@ export const TerritoryTreeContextMenu: React.FC<TerritoryTreeContextMenu> = ({
       >
         <StyledCgMenuBoxed size={18} />
         {showMenu && (
-          <StyledContextButtonGroup
-            $clientX={currentPosition.x}
-            $clientY={currentPosition.y}
-            height={currentPosition.height}
-            style={animatedMount}
-          >
-            {right !== UserEnums.RoleMode.Read && (
+          <FloatingPortal id="page">
+            <StyledContextButtonGroup
+              data-cy="territory-context-menu"
+              $clientX={currentPosition.x}
+              $clientY={currentPosition.y}
+              height={currentPosition.height}
+              style={animatedMount}
+            >
+              {right !== UserEnums.RoleMode.Read && (
+                <Button
+                  key="add"
+                  tooltipLabel="add child territory"
+                  icon={<FaPlus size={14} />}
+                  color="info"
+                  onClick={() => {
+                    // add child
+                    setShowCreate(true);
+                    setShowMenu(false);
+                    onMenuClose();
+                  }}
+                />
+              )}
               <Button
-                key="add"
-                tooltipLabel="add child territory"
-                icon={<FaPlus size={14} />}
-                color="info"
-                onClick={() => {
-                  // add child
-                  setShowCreate(true);
-                  setShowMenu(false);
-                  onMenuClose();
-                }}
-              />
-            )}
-            <Button
-              key="favorites"
-              tooltipLabel={
-                isFavorited ? "remove from favorites" : "add to favorites"
-              }
-              icon={<FaStar size={14} />}
-              color={isFavorited ? "grey" : "warning"}
-              onClick={() => {
-                if (isFavorited) {
-                  // remove from favorites
-                  const index = storedTerritories.indexOf(territoryActant.id);
-                  if (index > -1) {
-                    storedTerritories.splice(index, 1).slice;
-                  }
-                  const newStored = [
-                    ...storedTerritories.map((storedTerritory) => ({
-                      territoryId: storedTerritory,
-                    })),
-                  ];
-                  updateUserMutation.mutate({ storedTerritories: newStored });
-                } else {
-                  // add to favorites
-                  const newStored = [
-                    ...storedTerritories.map((storedTerritory) => ({
-                      territoryId: storedTerritory,
-                    })),
-                    { territoryId: territoryActant.id },
-                  ];
-                  updateUserMutation.mutate({ storedTerritories: newStored });
+                key="favorites"
+                tooltipLabel={
+                  isFavorited ? "remove from favorites" : "add to favorites"
                 }
-                setShowMenu(false);
-                onMenuClose();
-              }}
-            />
-            {((right === UserEnums.RoleMode.Admin && empty) ||
-              (right === UserEnums.RoleMode.Write && empty)) && (
-              <Button
-                key="delete"
-                tooltipLabel="delete territory"
-                icon={<FaTrashAlt size={14} />}
-                color="danger"
+                icon={<FaStar size={14} />}
+                color={isFavorited ? "grey" : "warning"}
                 onClick={() => {
-                  setShowSubmit(true);
+                  if (isFavorited) {
+                    // remove from favorites
+                    const index = storedTerritories.indexOf(territoryActant.id);
+                    if (index > -1) {
+                      storedTerritories.splice(index, 1).slice;
+                    }
+                    const newStored = [
+                      ...storedTerritories.map((storedTerritory) => ({
+                        territoryId: storedTerritory,
+                      })),
+                    ];
+                    updateUserMutation.mutate({ storedTerritories: newStored });
+                  } else {
+                    // add to favorites
+                    const newStored = [
+                      ...storedTerritories.map((storedTerritory) => ({
+                        territoryId: storedTerritory,
+                      })),
+                      { territoryId: territoryActant.id },
+                    ];
+                    updateUserMutation.mutate({ storedTerritories: newStored });
+                  }
                   setShowMenu(false);
                   onMenuClose();
                 }}
               />
-            )}
-          </StyledContextButtonGroup>
+              {((right === UserEnums.RoleMode.Admin && empty) ||
+                (right === UserEnums.RoleMode.Write && empty)) && (
+                <Button
+                  key="delete"
+                  tooltipLabel="delete territory"
+                  icon={<FaTrashAlt size={14} />}
+                  color="danger"
+                  onClick={() => {
+                    setShowSubmit(true);
+                    setShowMenu(false);
+                    onMenuClose();
+                  }}
+                />
+              )}
+            </StyledContextButtonGroup>
+          </FloatingPortal>
         )}
       </StyledWrapper>
 
