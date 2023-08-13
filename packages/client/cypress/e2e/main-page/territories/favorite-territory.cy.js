@@ -3,6 +3,30 @@ describe("context menu", () => {
     cy.login("admin", "admin");
   });
 
+  after(() => {
+    // REMOVE
+    cy.get("@treenode")
+      .last()
+      .find("[data-cy=territory-context-menu-trigger]")
+      .trigger("mouseover");
+    cy.get("#page")
+      .find("[data-cy=territory-context-menu]")
+      .find("button")
+      .last()
+      .click();
+    cy.contains("Submit").click();
+    cy.get("@treenode")
+      .first()
+      .find("[data-cy=territory-context-menu-trigger]")
+      .trigger("mouseover");
+    cy.get("#page")
+      .find("[data-cy=territory-context-menu]")
+      .find("button")
+      .last()
+      .click();
+    cy.contains("Submit").click();
+  });
+
   it("adds T, favorites T, removes from T favorites", () => {
     cy.contains("new territory").click();
     const rootLabel1 = "test T 1";
@@ -24,10 +48,11 @@ describe("context menu", () => {
       .find("button")
       .eq(1)
       .click();
-
     // TODO: check if T in tree is yellow color?
 
     // TODO: check if T has star in S list
+
+    // remove from favorites
     cy.get("@treenode")
       .first()
       .find("[data-cy=territory-context-menu-trigger]")
@@ -37,20 +62,5 @@ describe("context menu", () => {
       .find("button")
       .eq(1)
       .click();
-
-    // TODO: remove from favorites
-
-    // REMOVE
-    // cy.get("@treenode")
-    //   .last()
-    //   .find("[data-cy=territory-context-menu-trigger]")
-    //   .trigger("mouseover");
-    // cy.get("#page")
-    //   .find("[data-cy=territory-context-menu]")
-    //   .find("button")
-    //   .last()
-    //   .click();
-    // cy.contains("Submit").click();
-    // cy.get("[data-cy=Territories-box]").should("not.contain", label);
   });
 });

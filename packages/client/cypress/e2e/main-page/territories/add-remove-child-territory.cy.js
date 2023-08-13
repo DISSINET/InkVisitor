@@ -32,9 +32,9 @@ describe("context menu", () => {
     cy.get("[data-cy=Territories-box]").contains(label).should("be.visible");
 
     // REMOVE
-    // TODO: remove by label
     cy.get("@treenode")
-      .last()
+      .contains(label)
+      .parents("[data-cy=tree-node]")
       .find("[data-cy=territory-context-menu-trigger]")
       .trigger("mouseover");
     cy.get("#page")
