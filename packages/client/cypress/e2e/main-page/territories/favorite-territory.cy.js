@@ -51,15 +51,12 @@ describe("context menu", () => {
 
     // tag color check
     cy.window().then((win) => {
-      console.log(win.appTheme.color.warning);
       const yellowColor = win.appTheme.color.warning;
 
-      // TODO: rewrite theme colors to rgb or convert hex to rgb in tests
       cy.get("[data-cy=tree-node]")
         .first()
         .find("[data-cy=tag-label]")
-        .should("have.css", "background-color", "rgb(216, 170, 55)");
-      // .should("have.css", "background-color", yellowColor);
+        .should("have.css", "background-color", yellowColor);
     });
 
     // TODO: check if T has star in S list?

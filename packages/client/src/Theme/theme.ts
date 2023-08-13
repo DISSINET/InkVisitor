@@ -48,7 +48,7 @@ const theme = {
     text: "#383737",
     primary: "#091034",
     success: "#6174C2",
-    warning: "#D8AA37",
+    warning: "rgb(216, 170, 55)",
     danger: "#99103B",
     info: "#324185",
     plain: "#4a5568", // gray 700
