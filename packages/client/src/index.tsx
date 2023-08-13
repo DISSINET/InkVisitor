@@ -6,6 +6,7 @@ import store from "redux/store";
 import { App } from "app";
 
 import "./ensure-basename";
+import theme from "Theme/theme";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
@@ -15,3 +16,11 @@ root.render(
     <App />
   </Provider>
 );
+
+declare global {
+  interface Window {
+    appTheme: typeof theme;
+  }
+}
+
+window.appTheme = theme;

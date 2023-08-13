@@ -48,9 +48,21 @@ describe("context menu", () => {
       .find("button")
       .eq(1)
       .click();
-    // TODO: check if T in tree is yellow color?
 
-    // TODO: check if T has star in S list
+    // tag color check
+    cy.window().then((win) => {
+      console.log(win.appTheme.color.warning);
+      const yellowColor = win.appTheme.color.warning;
+
+      // TODO: rewrite theme colors to rgb or convert hex to rgb in tests
+      cy.get("[data-cy=tree-node]")
+        .first()
+        .find("[data-cy=tag-label]")
+        .should("have.css", "background-color", "rgb(216, 170, 55)");
+      // .should("have.css", "background-color", yellowColor);
+    });
+
+    // TODO: check if T has star in S list?
 
     // remove from favorites
     cy.get("@treenode")
