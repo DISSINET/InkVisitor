@@ -1,6 +1,16 @@
 describe("context menu", () => {
   beforeEach(() => {
     cy.login("admin", "admin");
+
+    cy.contains("new territory").click();
+    const rootLabel1 = "test T 1";
+    cy.get("[data-cy=modal]").find("input").type(rootLabel1);
+    cy.contains("Save").click();
+
+    cy.contains("new territory").click();
+    const rootLabel2 = "test T 2";
+    cy.get("[data-cy=modal]").find("input").type(rootLabel2);
+    cy.contains("Save").click();
   });
 
   after(() => {
@@ -28,16 +38,6 @@ describe("context menu", () => {
   });
 
   it("adds T, favorites T, removes from T favorites", () => {
-    cy.contains("new territory").click();
-    const rootLabel1 = "test T 1";
-    cy.get("[data-cy=modal]").find("input").type(rootLabel1);
-    cy.contains("Save").click();
-
-    cy.contains("new territory").click();
-    const rootLabel2 = "test T 2";
-    cy.get("[data-cy=modal]").find("input").type(rootLabel2);
-    cy.contains("Save").click();
-
     cy.get("[data-cy=tree-node]").as("treenode");
     cy.get("@treenode")
       .first()
