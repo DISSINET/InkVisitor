@@ -86,7 +86,7 @@ export const AuditTableRow: React.FC<AuditTableRow> = ({
       <StyledAuditRow>
         <StyledAuditColumn>
           <FaUser />
-          {userData && userData.name}
+          {(userData && userData.name) || "Removed user"}
         </StyledAuditColumn>
         <StyledAuditColumn>
           <FaRegCalendarAlt />
