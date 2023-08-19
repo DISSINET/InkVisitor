@@ -195,6 +195,23 @@ export default class Audit implements IAudit, IDbModel {
   }
 
   /**
+   * Returns number of audit entries for user
+   * @param db
+   * @param userId
+   * @returns
+   */
+  static async getCountForUser(
+    db: Connection,
+    userId: string
+  ): Promise<number> {
+    return await rethink
+      .table(Audit.table)
+      .getAll(userId, { index: DbEnums.Indexes.AuditUserId })
+      .count()
+      .run(db);
+  }
+
+  /**
    * Retrieved Audit entries that are last entries for respective entity, effectively searching for entities updated
    * on particular date
    * @param db rethinkdb Connection

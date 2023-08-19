@@ -55,7 +55,7 @@ import {
 import { IResponseStoredTerritory, IResponseUser } from "./response-user";
 
 import { IResponseEntity } from "./response-entity";
-import { IResponseStats } from "./response-stats";
+import { IResponseUsersStats } from "./response-stats";
 import {
   IBookmarkFolder,
   IStoredTerritory,
@@ -123,7 +123,7 @@ export type {
   IResponseStoredTerritory,
   IResponseGeneric,
   IResponsePermission,
-  IResponseStats,
+  IResponseUsersStats,
   EntityTooltip,
   OrderType,
   EntityOrder,
