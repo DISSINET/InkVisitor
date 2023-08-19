@@ -60,11 +60,12 @@ const parseJwt = (token: string) => {
 };
 
 class Api {
+  private baseUrl: string;
   private apiUrl: string;
   private headers: object;
   private connection: AxiosInstance;
   private token: string;
-  private ws: Socket;
+  private ws?: Socket;
   private ping: number;
 
   constructor() {
@@ -72,12 +73,28 @@ class Api {
       throw new Error("APIURL is not set");
     }
 
-    const baseUrl = process.env.APIURL;
-    this.apiUrl = baseUrl + "/api/v1";
+    this.baseUrl = process.env.APIURL;
+    this.apiUrl = this.baseUrl + "/api/v1";
 
     this.ping = defaultPing;
 
-    const url = new URL(baseUrl);
+    this.headers = {
+      "Content-Type": "application/json",
+      //"Content-Encoding": "gzip",
+    };
+
+    this.connection = axios.create({
+      baseURL: this.apiUrl,
+      timeout: 8000,
+      responseType: "json",
+      headers: this.headers,
+    });
+
+    this.token = "";
+  }
+
+  initWs() {
+    const url = new URL(this.baseUrl);
 
     this.ws = io(url.origin, {
       path: (url.pathname + "/socket.io").replace(`//`, "/"),
@@ -103,7 +120,7 @@ class Api {
     setInterval(() => {
       const start = Date.now();
 
-      this.ws.emit("ping", (ack: any) => {
+      (this.ws as Socket).emit("ping", (ack: any) => {
         if (ack instanceof Error) {
           console.error("Socket ping error:", ack);
         } else {
@@ -112,19 +129,9 @@ class Api {
         }
       });
     }, 5000);
+  }
 
-    this.headers = {
-      "Content-Type": "application/json",
-      //"Content-Encoding": "gzip",
-    };
-
-    this.connection = axios.create({
-      baseURL: this.apiUrl,
-      timeout: 8000,
-      responseType: "json",
-      headers: this.headers,
-    });
-
+  useDefaultInterceptors() {
     // each request to api will be by default authorized
     this.connection.interceptors.request.use((config) => {
       config.headers.Authorization = `Bearer ${this.token}`;
@@ -147,9 +154,6 @@ class Api {
         return Promise.reject(error);
       }
     );
-
-    this.token = "";
-    this.checkLogin();
   }
 
   getPing() {
@@ -195,7 +199,6 @@ class Api {
   /**
    * Authentication
    */
-
   checkLogin() {
     let storedToken = localStorage.getItem("token");
     let storedUsername = localStorage.getItem("username");
@@ -225,6 +228,12 @@ class Api {
     localStorage.setItem("userid", newUserId);
     localStorage.setItem("userrole", newUserRole);
     this.token = newToken;
+  }
+
+  withoutInterceptors() {
+    const newApi = new Api()
+    newApi.token = newApi.token
+    return newApi
   }
 
   async signIn(username: string, password: string): Promise<any> {
@@ -872,4 +881,9 @@ class Api {
   }
 }
 
-export default new Api();
+const apiSingleton = new Api();
+apiSingleton.initWs()
+apiSingleton.checkLogin();
+apiSingleton.useDefaultInterceptors();
+
+export default apiSingleton

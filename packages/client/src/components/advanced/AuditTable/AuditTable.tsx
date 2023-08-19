@@ -55,7 +55,7 @@ export const AuditTableRow: React.FC<AuditTableRow> = ({
   } = useQuery(
     ["user", user],
     async () => {
-      const res = await api.usersGet(user as string, { ignoreErrorToast: true});
+      const res = await api.withoutInterceptors().usersGet(user as string);
       return res.data;
     },
     {
