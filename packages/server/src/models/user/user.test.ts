@@ -1,7 +1,7 @@
 import "ts-jest";
 import { Db } from "@service/RethinkDB";
 import { clean } from "@modules/common.test";
-import User, { BookmarkFolder } from "@models/user/user";
+import User, { BookmarkFolder, StoredTerritory } from "@models/user/user";
 import { IUser } from "@shared/types";
 import { EntityEnums, UserEnums } from "@shared/enums";
 
@@ -78,7 +78,7 @@ describe("models/user", function () {
     });
   });
 
-  describe("User.removeBookmarksForEntity", function () {
+  describe("User.removeBookmarkedEntity", function () {
     let db: Db;
     const user1 = prepareUser();
     user1.bookmarks.push(
@@ -118,7 +118,7 @@ describe("models/user", function () {
 
     describe("not existing entity id", () => {
       it("should not change anything", async () => {
-        await User.removeBookmarksForEntity(db.connection, "notexists");
+        await User.removeBookmarkedEntity(db.connection, "notexists");
         const user1After = await User.findUserById(db.connection, user1.id);
         const user2After = await User.findUserById(db.connection, user2.id);
 
@@ -136,13 +136,81 @@ describe("models/user", function () {
 
     describe("existing id in both users", () => {
       it("should remove from both users", async () => {
-        await User.removeBookmarksForEntity(db.connection, "11");
+        await User.removeBookmarkedEntity(db.connection, "11");
         const user1After = await User.findUserById(db.connection, user1.id);
         const user2After = await User.findUserById(db.connection, user2.id);
 
         expect(user1After?.bookmarks[0].entityIds).toHaveLength(2); // 22, 33
         expect(user1After?.bookmarks[1].entityIds).toHaveLength(0);
         expect(user2After?.bookmarks[0].entityIds).toHaveLength(0);
+      });
+    });
+  });
+
+  describe("User.removeStoredTerritory", function () {
+    let db: Db;
+    const user1 = prepareUser();
+    user1.storedTerritories.push(
+      new StoredTerritory({
+        territoryId: Math.random().toString(),
+      })
+    );
+    user1.storedTerritories.push(
+      new StoredTerritory({
+        territoryId: Math.random().toString(),
+      })
+    );
+
+    const user2 = prepareUser();
+    user2.storedTerritories.push(
+      new StoredTerritory({
+        territoryId: user1.storedTerritories[0].territoryId,
+      })
+    );
+
+    beforeAll(async () => {
+      db = new Db();
+      await db.initDb();
+      await user1.save(db.connection);
+      await user2.save(db.connection);
+    });
+
+    afterAll(async () => {
+      await clean(db);
+    });
+
+    describe("not existing territory id", () => {
+      it("should not change anything", async () => {
+        await User.removeStoredTerritory(db.connection, "notexists");
+        const user1After = await User.findUserById(db.connection, user1.id);
+        const user2After = await User.findUserById(db.connection, user2.id);
+
+        expect(user1After).toBeTruthy();
+        expect(user2After).toBeTruthy();
+
+        expect(JSON.stringify(user1After?.storedTerritories)).toEqual(
+          JSON.stringify(user1.storedTerritories)
+        );
+        expect(JSON.stringify(user2After?.storedTerritories)).toEqual(
+          JSON.stringify(user2.storedTerritories)
+        );
+      });
+    });
+
+    describe("existing id in both users", () => {
+      it("should remove from both users", async () => {
+        await User.removeStoredTerritory(
+          db.connection,
+          user1.storedTerritories[0].territoryId
+        );
+        const user1After = await User.findUserById(db.connection, user1.id);
+        const user2After = await User.findUserById(db.connection, user2.id);
+
+        expect(user1After?.storedTerritories).toHaveLength(1);
+        expect(user1After?.storedTerritories[0].territoryId).toEqual(
+          user1.storedTerritories[1].territoryId
+        );
+        expect(user2After?.storedTerritories).toHaveLength(0);
       });
     });
   });
