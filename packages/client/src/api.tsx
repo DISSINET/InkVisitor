@@ -93,6 +93,9 @@ class Api {
     this.token = "";
   }
 
+  /**
+   * Initializes websocket logic
+   */
   initWs() {
     const url = new URL(this.baseUrl);
 
@@ -131,13 +134,21 @@ class Api {
     }, 5000);
   }
 
-  useDefaultInterceptors() {
+  /**
+   * Uses default request interceptors - mainly adding jwt token for requests
+   */
+  useDefaultRequestInterceptors() {
     // each request to api will be by default authorized
     this.connection.interceptors.request.use((config) => {
       config.headers.Authorization = `Bearer ${this.token}`;
       return config;
     });
+  }
 
+  /**
+   * Uses default response interceptors - mainly checking for error and shows the toaster
+   */
+  useDefaultResponseInterceptors() {
     this.connection.interceptors.response.use(
       function (response) {
         // Any status code that lie within the range of 2xx cause this function to trigger
@@ -230,9 +241,14 @@ class Api {
     this.token = newToken;
   }
 
-  withoutInterceptors() {
+  /**
+   * Clones the api wrapper with basic functionality without response interceptors
+   * @returns Api
+   */
+  withoutToaster() {
     const newApi = new Api()
-    newApi.token = newApi.token
+    newApi.token = this.token
+    newApi.useDefaultRequestInterceptors(); // required for login
     return newApi
   }
 
@@ -884,6 +900,7 @@ class Api {
 const apiSingleton = new Api();
 apiSingleton.initWs()
 apiSingleton.checkLogin();
-apiSingleton.useDefaultInterceptors();
+apiSingleton.useDefaultRequestInterceptors();
+apiSingleton.useDefaultResponseInterceptors();
 
 export default apiSingleton
