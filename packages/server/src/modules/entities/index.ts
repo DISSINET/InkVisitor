@@ -490,7 +490,10 @@ export default Router()
       }
 
       // if bookmarks are linked to this entity, the bookmarks should be removed also
-      await User.removeBookmarksForEntity(request.db.connection, entityId);
+      await User.removeBookmarkedEntity(request.db.connection, entityId);
+      if (model.class === EntityEnums.Class.Territory) {
+        await User.removeStoredTerritory(request.db.connection, entityId);
+      }
 
       const result = await model.delete(request.db.connection);
       if (result.deleted === 1) {

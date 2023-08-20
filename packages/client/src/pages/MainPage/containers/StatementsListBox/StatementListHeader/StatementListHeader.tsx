@@ -415,6 +415,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
               onClick={() => {
                 queryClient.invalidateQueries(["territory"]);
                 queryClient.invalidateQueries(["statement"]);
+                queryClient.invalidateQueries(["user"]);
               }}
             />
           </ButtonGroup>

@@ -297,7 +297,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
                   onMenuOpen={() => setContextMenuOpen(true)}
                   onMenuClose={() => setContextMenuOpen(false)}
                   right={right}
-                  empty={empty || false}
+                  empty={(empty && !children.length) || false}
                   storedTerritories={storedTerritories}
                   updateUserMutation={updateUserMutation}
                   isFavorited={isFavorited}
