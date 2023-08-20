@@ -19,6 +19,7 @@ import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { StatementListHeader } from "./StatementListHeader/StatementListHeader";
 import { StatementListTable } from "./StatementListTable/StatementListTable";
 import { StyledEmptyState, StyledTableWrapper } from "./StatementLitBoxStyles";
+import ToastWithLink from "components/basic/Toast/Link";
 
 const initialData: {
   statements: IResponseStatement[];
@@ -124,7 +125,15 @@ export const StatementListBox: React.FC = () => {
     },
     {
       onSuccess: (data, sId) => {
-        toast.info(`Statement removed!`);
+        toast.info(<ToastWithLink
+          children={`Statement removed!`}
+          linkText={"Restore"}
+          onLinkClick={async () => {
+            const response = await api.entityRestore(sId)
+            toast.info("Statement restored");
+            queryClient.invalidateQueries(["detail-tab-entities"]);
+          }}
+        />);
         if (detailIdArray.includes(sId)) {
           removeDetailId(sId);
           queryClient.invalidateQueries(["detail-tab-entities"]);
@@ -301,8 +310,7 @@ export const StatementListBox: React.FC = () => {
         queryClient.invalidateQueries(["territory"]);
         queryClient.invalidateQueries(["tree"]);
         toast.info(
-          `${data.statements.length} statement${
-            data.statements.length > 1 ? "s" : ""
+          `${data.statements.length} statement${data.statements.length > 1 ? "s" : ""
           } moved`
         );
         setSelectedRows([]);
@@ -319,8 +327,7 @@ export const StatementListBox: React.FC = () => {
         queryClient.invalidateQueries(["territory"]);
         queryClient.invalidateQueries(["tree"]);
         toast.info(
-          `${data.statements.length} statement${
-            data.statements.length > 1 ? "s" : ""
+          `${data.statements.length} statement${data.statements.length > 1 ? "s" : ""
           } duplicated`
         );
         setSelectedRows([]);
@@ -406,11 +413,10 @@ export const StatementListBox: React.FC = () => {
 
       <Submit
         title="Delete statement"
-        text={`Do you really want to delete statement [${
-          statementToDelete?.label
-            ? statementToDelete.label
-            : statementToDelete?.id
-        }]?`}
+        text={`Do you really want to delete statement [${statementToDelete?.label
+          ? statementToDelete.label
+          : statementToDelete?.id
+          }]?`}
         show={showSubmit}
         onCancel={() => {
           setShowSubmit(false);

@@ -50,6 +50,7 @@ import { EntityDetailMetaPropsTable } from "./EntityDetailUsedInTable/EntityDeta
 import { EntityDetailStatementPropsTable } from "./EntityDetailUsedInTable/EntityDetailStatementPropsTable/EntityDetailStatementPropsTable";
 import { EntityDetailStatementsTable } from "./EntityDetailUsedInTable/EntityDetailStatementsTable/EntityDetailStatementsTable";
 import { EntityDetailValency } from "./EntityDetailValency/EntityDetailValency";
+import ToastWithLink from "components/basic/Toast/Link";
 
 const allowedEntityChangeClasses = [
   EntityEnums.Class.Value,
@@ -277,7 +278,24 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
     (entityId: string) => api.entityDelete(entityId),
     {
       onSuccess: async (data, entityId) => {
-        toast.info(`Entity removed!`);
+        toast.info(<ToastWithLink
+          children={`Entity removed!`}
+          linkText={"Restore"}
+          onLinkClick={async () => {
+            const response = await api.entityRestore(entityId)
+            toast.info("Entity restored");
+            queryClient.invalidateQueries(["entity"]);
+            queryClient.invalidateQueries(["statement"]);
+            if (entity?.class === EntityEnums.Class.Territory) {
+              queryClient.invalidateQueries(["tree"]);
+            }
+            queryClient.invalidateQueries(["territory"]);
+            queryClient.invalidateQueries(["bookmarks"]);
+            if (entity?.isTemplate) {
+              queryClient.invalidateQueries(["templates"]);
+            }
+          }}
+        />);
 
         // hide selected territory if T removed
         if (
@@ -603,7 +621,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
               <StyledDetailSectionHeader>Relations</StyledDetailSectionHeader>
               {entity.warnings &&
                 entity.warnings.map((warning, key) => {
-                  return <Message key={key} warning={warning} />;
+                  return <Message key={key} warning={warning} entities={{}} />;
                 })}
               <StyledDetailSectionContent>
                 <EntityDetailRelations
