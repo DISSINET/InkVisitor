@@ -1,11 +1,10 @@
 import { IEntity } from "@shared/types";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import { Submit } from "components";
+import { Submit, ToastWithLink } from "components";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
-import ToastWithLink from "components/basic/Toast/Link";
 
 interface ContextMenuSubmitDelete {
   territoryActant: IEntity;
@@ -34,17 +33,19 @@ export const ContextMenuSubmitDelete: React.FC<ContextMenuSubmitDelete> = ({
     async () => await api.entityDelete(territoryActant.id),
     {
       onSuccess: () => {
-        toast.info(<ToastWithLink
-          children={`Territory [${territoryActant.label}] deleted!`}
-          linkText="Restore"
-          onLinkClick={async () => {
-            const response = await api.entityRestore(territoryActant.id)
-            toast.info("Entity restored");
-            queryClient.invalidateQueries(["tree"]);
-            queryClient.invalidateQueries(["detail-tab-entities"]);
-            queryClient.invalidateQueries(["statement"]);
-          }}
-        />);
+        toast.info(
+          <ToastWithLink
+            children={`Territory [${territoryActant.label}] deleted!`}
+            linkText="Restore"
+            onLinkClick={async () => {
+              const response = await api.entityRestore(territoryActant.id);
+              toast.info("Entity restored");
+              queryClient.invalidateQueries(["tree"]);
+              queryClient.invalidateQueries(["detail-tab-entities"]);
+              queryClient.invalidateQueries(["statement"]);
+            }}
+          />
+        );
 
         if (territoryId === territoryActant.id) {
           setTerritoryId("");

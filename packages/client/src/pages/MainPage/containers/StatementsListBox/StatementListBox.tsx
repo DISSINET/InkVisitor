@@ -5,13 +5,13 @@ import {
   IResponseStatement,
   IStatement,
 } from "@shared/types";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import { Loader, Submit } from "components";
-import { CStatement, DStatement } from "constructors";
+import { Loader, Submit, ToastWithLink } from "components";
+import { CStatement } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
 import { BsInfoCircle } from "react-icons/bs";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { setStatementListOpened } from "redux/features/layout/statementListOpenedSlice";
 import { setRowsExpanded } from "redux/features/statementList/rowsExpandedSlice";
@@ -19,7 +19,6 @@ import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { StatementListHeader } from "./StatementListHeader/StatementListHeader";
 import { StatementListTable } from "./StatementListTable/StatementListTable";
 import { StyledEmptyState, StyledTableWrapper } from "./StatementLitBoxStyles";
-import ToastWithLink from "components/basic/Toast/Link";
 
 const initialData: {
   statements: IResponseStatement[];
@@ -125,15 +124,20 @@ export const StatementListBox: React.FC = () => {
     },
     {
       onSuccess: (data, sId) => {
-        toast.info(<ToastWithLink
-          children={`Statement removed!`}
-          linkText={"Restore"}
-          onLinkClick={async () => {
-            const response = await api.entityRestore(sId)
-            toast.info("Statement restored");
-            queryClient.invalidateQueries(["detail-tab-entities"]);
-          }}
-        />);
+        toast.info(
+          <ToastWithLink
+            children={`Statement removed!`}
+            linkText={"Restore"}
+            onLinkClick={async () => {
+              const response = await api.entityRestore(sId);
+              toast.info("Statement restored");
+              queryClient.invalidateQueries(["detail-tab-entities"]);
+              queryClient.invalidateQueries(["tree"]);
+              queryClient.invalidateQueries(["territory"]);
+            }}
+          />
+        );
+
         if (detailIdArray.includes(sId)) {
           removeDetailId(sId);
           queryClient.invalidateQueries(["detail-tab-entities"]);
@@ -310,7 +314,8 @@ export const StatementListBox: React.FC = () => {
         queryClient.invalidateQueries(["territory"]);
         queryClient.invalidateQueries(["tree"]);
         toast.info(
-          `${data.statements.length} statement${data.statements.length > 1 ? "s" : ""
+          `${data.statements.length} statement${
+            data.statements.length > 1 ? "s" : ""
           } moved`
         );
         setSelectedRows([]);
@@ -327,7 +332,8 @@ export const StatementListBox: React.FC = () => {
         queryClient.invalidateQueries(["territory"]);
         queryClient.invalidateQueries(["tree"]);
         toast.info(
-          `${data.statements.length} statement${data.statements.length > 1 ? "s" : ""
+          `${data.statements.length} statement${
+            data.statements.length > 1 ? "s" : ""
           } duplicated`
         );
         setSelectedRows([]);
@@ -413,10 +419,11 @@ export const StatementListBox: React.FC = () => {
 
       <Submit
         title="Delete statement"
-        text={`Do you really want to delete statement [${statementToDelete?.label
-          ? statementToDelete.label
-          : statementToDelete?.id
-          }]?`}
+        text={`Do you really want to delete statement [${
+          statementToDelete?.label
+            ? statementToDelete.label
+            : statementToDelete?.id
+        }]?`}
         show={showSubmit}
         onCancel={() => {
           setShowSubmit(false);

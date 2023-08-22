@@ -27,3 +27,11 @@ export const StyledToastContainer = styled(ToastContainer)`
     background-color: ${({ theme }) => theme.color["danger"]};
   }
 `;
+
+export const StyledLink = styled.a`
+  color: ${({ theme }) => theme.color["blue"][50]};
+  margin-left: 0.5rem;
+`;
+export const StyledWrap = styled.div`
+  display: flex;
+`;

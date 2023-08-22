@@ -7,8 +7,9 @@ import {
   IResponseDetail,
   Relation,
 } from "@shared/types";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import { Button, Loader, Message, Submit } from "components";
+import { Button, Loader, Message, Submit, ToastWithLink } from "components";
 import {
   ApplyTemplateModal,
   AuditTable,
@@ -19,7 +20,6 @@ import { CMetaProp } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
 import { FaPlus } from "react-icons/fa";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import {
   DraggedPropRowCategory,
@@ -50,7 +50,6 @@ import { EntityDetailMetaPropsTable } from "./EntityDetailUsedInTable/EntityDeta
 import { EntityDetailStatementPropsTable } from "./EntityDetailUsedInTable/EntityDetailStatementPropsTable/EntityDetailStatementPropsTable";
 import { EntityDetailStatementsTable } from "./EntityDetailUsedInTable/EntityDetailStatementsTable/EntityDetailStatementsTable";
 import { EntityDetailValency } from "./EntityDetailValency/EntityDetailValency";
-import ToastWithLink from "components/basic/Toast/Link";
 
 const allowedEntityChangeClasses = [
   EntityEnums.Class.Value,
@@ -278,24 +277,26 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
     (entityId: string) => api.entityDelete(entityId),
     {
       onSuccess: async (data, entityId) => {
-        toast.info(<ToastWithLink
-          children={`Entity removed!`}
-          linkText={"Restore"}
-          onLinkClick={async () => {
-            const response = await api.entityRestore(entityId)
-            toast.info("Entity restored");
-            queryClient.invalidateQueries(["entity"]);
-            queryClient.invalidateQueries(["statement"]);
-            if (entity?.class === EntityEnums.Class.Territory) {
-              queryClient.invalidateQueries(["tree"]);
-            }
-            queryClient.invalidateQueries(["territory"]);
-            queryClient.invalidateQueries(["bookmarks"]);
-            if (entity?.isTemplate) {
-              queryClient.invalidateQueries(["templates"]);
-            }
-          }}
-        />);
+        toast.info(
+          <ToastWithLink
+            children={`Entity removed!`}
+            linkText={"Restore"}
+            onLinkClick={async () => {
+              const response = await api.entityRestore(entityId);
+              toast.info("Entity restored");
+              queryClient.invalidateQueries(["entity"]);
+              queryClient.invalidateQueries(["statement"]);
+              if (entity?.class === EntityEnums.Class.Territory) {
+                queryClient.invalidateQueries(["tree"]);
+              }
+              queryClient.invalidateQueries(["territory"]);
+              queryClient.invalidateQueries(["bookmarks"]);
+              if (entity?.isTemplate) {
+                queryClient.invalidateQueries(["templates"]);
+              }
+            }}
+          />
+        );
 
         // hide selected territory if T removed
         if (
