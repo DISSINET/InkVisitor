@@ -21,6 +21,7 @@ import {
   ModelNotValidError,
   PermissionDeniedError,
   AuditDoesNotExist,
+  InvalidDeleteError,
 } from "@shared/types/errors";
 import { Router } from "express";
 import { asyncRouteHandler } from "../index";
@@ -468,30 +469,17 @@ export default Router()
       }
 
       // if relations are linked to this entity, the delete should not be allowed
-      const linkedRelations = await Relation.findForEntity(
-        request.db.connection,
+      const [entityIds, relIds] = await Relation.getLinkedForEntity(
+        request,
         entityId
       );
-      if (linkedRelations && linkedRelations.length) {
-        const entityIds = Array.from(
-          new Set(
-            linkedRelations.reduce<string[]>((acc, r) => {
-              acc = acc.concat(r.entityIds);
-              return acc;
-            }, [])
-          )
-        ).filter((id) => id != entityId);
-        const data = Array.from(new Set(linkedRelations.map((r) => r.id)));
-        const spec = data[0];
-        if (data.length > 1) {
-          spec + ` + ${data.length - 1} others`;
-        }
-        return {
-          result: false,
-          error: "InvalidDeleteError",
-          message: `Cannot be deleted while linked to relations (${spec})`,
-          data: entityIds,
-        };
+      if (relIds.length) {
+        throw new InvalidDeleteError(
+          `Cannot be deleted while linked to relations (${
+            relIds[0] +
+            (relIds.length > 1 ? " + " + (relIds.length - 1) + " others" : "")
+          })`
+        ).withData(entityIds);
       }
 
       // if bookmarks are linked to this entity, the bookmarks should be removed also
@@ -500,8 +488,10 @@ export default Router()
         await User.removeStoredTerritory(request.db.connection, entityId);
       }
 
-      const result = await model.delete(request.db.connection);
-      if (result.deleted === 1) {
+      // create last audit snapshot
+      await Audit.createNew(request, model.id, model);
+
+      if ((await model.delete(request.db.connection)).deleted === 1) {
         return {
           result: true,
         };
