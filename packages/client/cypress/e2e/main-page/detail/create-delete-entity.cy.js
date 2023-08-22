@@ -32,6 +32,9 @@ describe("create entity", () => {
       .first()
       .click();
     cy.get("[data-cy=modal]").get("button").contains("Remove").click();
+
+    // TODO: check deletion
+
     cy.get("[data-cy=Detail-box]")
       .find("[data-cy=actant-header-row]")
       .find("button")
