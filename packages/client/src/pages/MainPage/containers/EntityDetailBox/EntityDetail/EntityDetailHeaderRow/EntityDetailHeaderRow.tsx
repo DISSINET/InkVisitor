@@ -91,7 +91,7 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
 
   return (
     <>
-      <StyledActantHeaderRow>
+      <StyledActantHeaderRow data-cy="actant-header-row">
         <StyledTagWrap>
           <EntityTag entity={entity} fullWidth />
         </StyledTagWrap>
