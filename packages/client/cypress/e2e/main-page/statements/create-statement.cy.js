@@ -1,9 +1,9 @@
 describe("open T", () => {
+  const rootLabel1 = "test T 1";
   beforeEach(() => {
     cy.login("admin", "admin");
 
     cy.contains("new territory").click();
-    const rootLabel1 = "test T 1";
     cy.get("[data-cy=modal]").find("input").type(rootLabel1);
     cy.contains("Save").click();
   });
@@ -18,7 +18,8 @@ describe("open T", () => {
 
     // REMOVE T
     cy.get("[data-cy=tree-node]")
-      .first()
+      .contains(rootLabel1)
+      .parents("[data-cy=tree-node]")
       .find("[data-cy=territory-context-menu-trigger]")
       .trigger("mouseover");
     cy.get("#page")

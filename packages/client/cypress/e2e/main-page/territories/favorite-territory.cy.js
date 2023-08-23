@@ -1,14 +1,14 @@
 describe("context menu", () => {
+  const rootLabel1 = "test T 1";
+  const rootLabel2 = "test T 2";
   beforeEach(() => {
     cy.login("admin", "admin");
 
     cy.contains("new territory").click();
-    const rootLabel1 = "test T 1";
     cy.get("[data-cy=modal]").find("input").type(rootLabel1);
     cy.contains("Save").click();
 
     cy.contains("new territory").click();
-    const rootLabel2 = "test T 2";
     cy.get("[data-cy=modal]").find("input").type(rootLabel2);
     cy.contains("Save").click();
   });
@@ -16,7 +16,8 @@ describe("context menu", () => {
   after(() => {
     // REMOVE
     cy.get("@treenode")
-      .last()
+      .contains(rootLabel1)
+      .parents("[data-cy=tree-node]")
       .find("[data-cy=territory-context-menu-trigger]")
       .trigger("mouseover");
     cy.get("#page")
@@ -25,8 +26,10 @@ describe("context menu", () => {
       .last()
       .click();
     cy.contains("Submit").click();
+
     cy.get("@treenode")
-      .first()
+      .contains(rootLabel2)
+      .parents("[data-cy=tree-node]")
       .find("[data-cy=territory-context-menu-trigger]")
       .trigger("mouseover");
     cy.get("#page")
@@ -40,7 +43,8 @@ describe("context menu", () => {
   it("adds T, favorites T, removes from T favorites", () => {
     cy.get("[data-cy=tree-node]").as("treenode");
     cy.get("@treenode")
-      .first()
+      .contains(rootLabel1)
+      .parents("[data-cy=tree-node]")
       .find("[data-cy=territory-context-menu-trigger]")
       .trigger("mouseover");
     cy.get("#page")
@@ -54,7 +58,8 @@ describe("context menu", () => {
       const yellowColor = win.appTheme.color.warning;
 
       cy.get("[data-cy=tree-node]")
-        .first()
+        .contains(rootLabel1)
+        .parents("[data-cy=tree-node]")
         .find("[data-cy=tag-label]")
         .should("have.css", "background-color", yellowColor);
     });
@@ -63,7 +68,8 @@ describe("context menu", () => {
 
     // remove from favorites
     cy.get("@treenode")
-      .first()
+      .contains(rootLabel1)
+      .parents("[data-cy=tree-node]")
       .find("[data-cy=territory-context-menu-trigger]")
       .trigger("mouseover");
     cy.get("#page")
