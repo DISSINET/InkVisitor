@@ -625,7 +625,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
               <StyledDetailSectionHeader>Relations</StyledDetailSectionHeader>
               {entity.warnings &&
                 entity.warnings.map((warning, key) => {
-                  return <Message key={key} warning={warning} entities={{}} />;
+                  return <Message key={key} warning={warning} />;
                 })}
               <StyledDetailSectionContent>
                 <EntityDetailRelations
