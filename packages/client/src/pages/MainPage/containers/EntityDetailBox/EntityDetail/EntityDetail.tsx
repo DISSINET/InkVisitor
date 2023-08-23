@@ -296,7 +296,10 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
                 queryClient.invalidateQueries(["templates"]);
               }
             }}
-          />
+          />,
+          {
+            autoClose: 5000,
+          }
         );
 
         // hide selected territory if T removed
@@ -334,7 +337,6 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
           const { data } = error as any;
           toast.info("Click to open conflicting entity in detail", {
             autoClose: 6000,
-            pauseOnHover: true,
             onClick: () => {
               appendDetailId(data[0]);
             },

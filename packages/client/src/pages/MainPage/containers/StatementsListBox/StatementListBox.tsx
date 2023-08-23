@@ -135,7 +135,10 @@ export const StatementListBox: React.FC = () => {
               queryClient.invalidateQueries(["tree"]);
               queryClient.invalidateQueries(["territory"]);
             }}
-          />
+          />,
+          {
+            autoClose: 5000,
+          }
         );
 
         if (detailIdArray.includes(sId)) {
@@ -157,7 +160,6 @@ export const StatementListBox: React.FC = () => {
           const { data } = error as any;
           toast.info("Click to open conflicting entity in detail", {
             autoClose: 6000,
-            pauseOnHover: true,
             onClick: () => {
               appendDetailId(data[0]);
             },

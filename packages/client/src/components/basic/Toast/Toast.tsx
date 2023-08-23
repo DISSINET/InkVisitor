@@ -10,6 +10,7 @@ export const Toast: React.FC<Toast> = () => {
       closeButton={false}
       position={"top-center"}
       autoClose={2500}
+      pauseOnHover
     />
   );
 };

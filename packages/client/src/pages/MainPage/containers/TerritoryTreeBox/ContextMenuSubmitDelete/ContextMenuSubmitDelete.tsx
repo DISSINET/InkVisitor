@@ -44,7 +44,10 @@ export const ContextMenuSubmitDelete: React.FC<ContextMenuSubmitDelete> = ({
               queryClient.invalidateQueries(["detail-tab-entities"]);
               queryClient.invalidateQueries(["statement"]);
             }}
-          />
+          />,
+          {
+            autoClose: 5000,
+          }
         );
 
         if (territoryId === territoryActant.id) {
@@ -66,7 +69,6 @@ export const ContextMenuSubmitDelete: React.FC<ContextMenuSubmitDelete> = ({
           const { data } = error as any;
           toast.info("Click to open conflicting entity in detail", {
             autoClose: 6000,
-            pauseOnHover: true,
             onClick: () => {
               appendDetailId(data[0]);
             },

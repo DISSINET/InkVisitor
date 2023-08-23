@@ -75,7 +75,6 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
 
         toast.info(message, {
           autoClose: 6000,
-          pauseOnHover: true,
           closeOnClick: false,
           onClick: () => {
             navigator.clipboard.writeText(message ? message.split("'")[1] : "");
