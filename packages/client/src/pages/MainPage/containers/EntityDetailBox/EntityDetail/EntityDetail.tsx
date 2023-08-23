@@ -284,6 +284,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
             onLinkClick={async () => {
               const response = await api.entityRestore(entityId);
               toast.info("Entity restored");
+              appendDetailId(entityId);
               queryClient.invalidateQueries(["entity"]);
               queryClient.invalidateQueries(["statement"]);
               if (entity?.class === EntityEnums.Class.Territory) {
