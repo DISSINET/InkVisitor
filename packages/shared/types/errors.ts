@@ -10,6 +10,7 @@ export class CustomError extends Error {
   public loggable: boolean = false; // errors could be logged into console as warn messages
   public log: string = ""; // same as first constructor argument - wont be thrown in realtime, but it will be printed as warning
   public title: string = ""; // represents the error class in readable form
+  public data: any; // arbitrary data
 
   // the following is commented, it should be inherited from base Error
   //public name: string = ""; // Stands for class name, replaces default 'Error' string from parent constructor
@@ -31,6 +32,11 @@ export class CustomError extends Error {
 
   shouldLog(): boolean {
     return this.loggable;
+  }
+
+  withData(data: any): CustomError {
+    this.data = data
+    return this;
   }
 }
 
@@ -116,6 +122,42 @@ class EntityDoesNotExist extends CustomError {
   public static code = 400;
   public static title = "Missing entity";
   public static message = "Entity $1 does not exist";
+
+  constructor(m: string, entityId?: string) {
+    super(m);
+    if (entityId) {
+      this.message = this.message.replace("$1", entityId);
+    } else {
+      this.message = this.message.replace(" $1 ", " ");
+    }
+  }
+}
+
+/**
+ * EntityDoesExist will be thrown when attempting to restore the entity entry, which still does exist
+ */
+class EntityDoesExist extends CustomError {
+  public static code = 400;
+  public static title = "Entity still exists";
+  public static message = "Entity $1 does exist";
+
+  constructor(m: string, entityId?: string) {
+    super(m);
+    if (entityId) {
+      this.message = this.message.replace("$1", entityId);
+    } else {
+      this.message = this.message.replace(" $1 ", " ");
+    }
+  }
+}
+
+/**
+ * AuditDoesNotExist will be thrown when attempting to retrieve entry by id, which does not exist
+ */
+class AuditDoesNotExist extends CustomError {
+  public static code = 400;
+  public static title = "Missing audit";
+  public static message = "Audit $1 does not exist";
 
   constructor(m: string, entityId?: string) {
     super(m);
@@ -305,6 +347,8 @@ const allErrors: Record<string, any> = {
   UserDoesNotExits,
   UserNotActiveError,
   EntityDoesNotExist,
+  EntityDoesExist,
+  AuditDoesNotExist,
   AuditsDoNotExist,
   StatementDoesNotExits,
   PermissionDoesNotExits,
@@ -340,6 +384,8 @@ export {
   UserDoesNotExits,
   UserNotActiveError,
   EntityDoesNotExist,
+  EntityDoesExist,
+  AuditDoesNotExist,
   AuditsDoNotExist,
   StatementDoesNotExits,
   PermissionDoesNotExits,

@@ -150,8 +150,8 @@ export const StatementListTable: React.FC<StatementListTable> = ({
     return selectedStatements.map((statement) => statement.id);
   };
 
-  const columns: Column<IResponseStatement>[] = useMemo(() => {
-    return [
+  const columns = useMemo<Column<IResponseStatement>[]>(
+    () => [
       {
         Header: "ID",
         accessor: "id",
@@ -234,7 +234,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
         Header: "",
         id: "Statement",
         Cell: ({ row }: CellType) => {
-          const statement = row.original as IStatement;
+          const statement = row.original;
           return <EntityTag entity={statement as IEntity} showOnly="entity" />;
         },
       },
@@ -325,7 +325,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
         id: "lastEdit",
         Header: "Edited",
         Cell: ({ row }: CellType) => {
-          const { updatedAt, createdAt } = row.original as IResponseStatement;
+          const { updatedAt, createdAt } = row.original;
           const lastEditDate: Date | undefined = updatedAt || createdAt;
           if (!lastEditDate) {
             return "";
@@ -368,9 +368,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
                       color="danger"
                       tooltipLabel="delete"
                       onClick={() => {
-                        setStatementToDelete(
-                          row.original as IResponseStatement
-                        );
+                        setStatementToDelete(row.original);
                         setShowSubmit(true);
                       }}
                     />,
@@ -380,9 +378,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
                       color="warning"
                       tooltipLabel="duplicate"
                       onClick={() => {
-                        cloneStatementMutation.mutate(
-                          (row.original as IResponseStatement).id
-                        );
+                        cloneStatementMutation.mutate(row.original.id);
                       }}
                     />,
                     <Button
@@ -442,8 +438,9 @@ export const StatementListTable: React.FC<StatementListTable> = ({
           );
         },
       },
-    ];
-  }, [statementsLocal, rowsExpanded, right, selectedRows, lastClickedIndex]);
+    ],
+    [statementsLocal, rowsExpanded, right, selectedRows, lastClickedIndex]
+  );
 
   const {
     getTableProps,

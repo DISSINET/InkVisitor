@@ -7,8 +7,9 @@ import {
   IResponseDetail,
   Relation,
 } from "@shared/types";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import { Button, Loader, Message, Submit } from "components";
+import { Button, Loader, Message, Submit, ToastWithLink } from "components";
 import {
   ApplyTemplateModal,
   AuditTable,
@@ -19,7 +20,6 @@ import { CMetaProp } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
 import { FaPlus } from "react-icons/fa";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import {
   DraggedPropRowCategory,
@@ -277,7 +277,30 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
     (entityId: string) => api.entityDelete(entityId),
     {
       onSuccess: async (data, entityId) => {
-        toast.info(`Entity removed!`);
+        toast.info(
+          <ToastWithLink
+            children={`Entity removed!`}
+            linkText={"Restore"}
+            onLinkClick={async () => {
+              const response = await api.entityRestore(entityId);
+              toast.info("Entity restored");
+              appendDetailId(entityId);
+              queryClient.invalidateQueries(["entity"]);
+              queryClient.invalidateQueries(["statement"]);
+              if (entity?.class === EntityEnums.Class.Territory) {
+                queryClient.invalidateQueries(["tree"]);
+              }
+              queryClient.invalidateQueries(["territory"]);
+              queryClient.invalidateQueries(["bookmarks"]);
+              if (entity?.isTemplate) {
+                queryClient.invalidateQueries(["templates"]);
+              }
+            }}
+          />,
+          {
+            autoClose: 5000,
+          }
+        );
 
         // hide selected territory if T removed
         if (
@@ -314,7 +337,6 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
           const { data } = error as any;
           toast.info("Click to open conflicting entity in detail", {
             autoClose: 6000,
-            pauseOnHover: true,
             onClick: () => {
               appendDetailId(data[0]);
             },

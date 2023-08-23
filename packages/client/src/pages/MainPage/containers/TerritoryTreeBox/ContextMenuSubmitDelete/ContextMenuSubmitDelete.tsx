@@ -1,9 +1,9 @@
 import { IEntity } from "@shared/types";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import { Submit } from "components";
+import { Submit, ToastWithLink } from "components";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 
 interface ContextMenuSubmitDelete {
@@ -33,7 +33,23 @@ export const ContextMenuSubmitDelete: React.FC<ContextMenuSubmitDelete> = ({
     async () => await api.entityDelete(territoryActant.id),
     {
       onSuccess: () => {
-        toast.info(`Territory [${territoryActant.label}] deleted!`);
+        toast.info(
+          <ToastWithLink
+            children={`Territory [${territoryActant.label}] deleted!`}
+            linkText="Restore"
+            onLinkClick={async () => {
+              const response = await api.entityRestore(territoryActant.id);
+              toast.info("Entity restored");
+              queryClient.invalidateQueries(["tree"]);
+              queryClient.invalidateQueries(["detail-tab-entities"]);
+              queryClient.invalidateQueries(["statement"]);
+            }}
+          />,
+          {
+            autoClose: 5000,
+          }
+        );
+
         if (territoryId === territoryActant.id) {
           setTerritoryId("");
         }
@@ -53,7 +69,6 @@ export const ContextMenuSubmitDelete: React.FC<ContextMenuSubmitDelete> = ({
           const { data } = error as any;
           toast.info("Click to open conflicting entity in detail", {
             autoClose: 6000,
-            pauseOnHover: true,
             onClick: () => {
               appendDetailId(data[0]);
             },
