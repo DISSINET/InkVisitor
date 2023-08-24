@@ -17,6 +17,12 @@ import { TerritoryTreeFilter } from "./TerritoryTreeFilter/TerritoryTreeFilter";
 import { BsFilter } from "react-icons/bs";
 import { ITerritoryFilter } from "types";
 import { setTreeInitialized } from "redux/features/territoryTree/treeInitializeSlice";
+import {
+  filterTreeByFavorites,
+  filterTreeByLabel,
+  filterTreeNonEmpty,
+  filterTreeWithWriteRights,
+} from "./TerritoryTreeFilterUtils";
 
 const initFilterSettings: ITerritoryFilter = {
   nonEmpty: false,
@@ -90,52 +96,6 @@ export const TerritoryTreeBox: React.FC = () => {
     (state) => state.territoryTree.selectedTerritoryPath
   );
 
-  function filterTreeNonEmpty(root: IResponseTree): IResponseTree | null {
-    if (root.empty === true) {
-      return null; // Exclude nodes with empty = true
-    }
-
-    const filteredChildren = root.children
-      .map((child) => filterTreeNonEmpty(child))
-      .filter((filteredChild) => filteredChild !== null) as IResponseTree[];
-
-    return { ...root, children: filteredChildren };
-  }
-
-  function filterTreeWithWriteRights(
-    root: IResponseTree | null
-  ): IResponseTree | null {
-    if (!root) {
-      return null;
-    }
-
-    const hasWriteDescendant = root.children.some((child) =>
-      hasWriteRightRecursively(child)
-    );
-
-    if (root.right === UserEnums.RoleMode.Write || hasWriteDescendant) {
-      const filteredChildren = root.children
-        .map((child) => filterTreeWithWriteRights(child))
-        .filter((filteredChild) => filteredChild !== null);
-
-      return { ...root, children: filteredChildren } as IResponseTree;
-    }
-
-    return null;
-  }
-
-  function hasWriteRightRecursively(node: IResponseTree | null): boolean {
-    if (!node) {
-      return false;
-    }
-
-    if (node.right === UserEnums.RoleMode.Write) {
-      return true;
-    }
-
-    return node.children.some((child) => hasWriteRightRecursively(child));
-  }
-
   const [filterSettings, setFilterSettings] =
     useState<ITerritoryFilter>(initFilterSettings);
   const [filteredTreeData, setFilteredTreeData] =
@@ -164,6 +124,29 @@ export const TerritoryTreeBox: React.FC = () => {
       case "editorRights":
         if (value === true) {
           treeData && setFilteredTreeData(filterTreeWithWriteRights(treeData));
+        } else {
+          setFilteredTreeData(treeData);
+        }
+        return;
+      case "starred":
+        if (value === true) {
+          treeData &&
+            userData &&
+            setFilteredTreeData(
+              filterTreeByFavorites(
+                treeData,
+                userData.storedTerritories.map((t) => t.territory.id)
+              )
+            );
+        } else {
+          setFilteredTreeData(treeData);
+        }
+        return;
+      case "filter":
+        if ((value as string).length > 0) {
+          console.log(value);
+          treeData &&
+            setFilteredTreeData(filterTreeByLabel(treeData, value as string));
         } else {
           setFilteredTreeData(treeData);
         }
