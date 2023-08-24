@@ -5,6 +5,7 @@ import {
   StyledFilterList,
   StyledFilterWrap,
 } from "./TerritoryTreeFilterStyles";
+import { UserEnums } from "@shared/enums";
 
 interface TerritoryTreeFilter {
   filterData: ITerritoryFilter;
@@ -12,10 +13,12 @@ interface TerritoryTreeFilter {
     key: keyof ITerritoryFilter,
     value: boolean | string
   ) => void;
+  userRole: string | null;
 }
 export const TerritoryTreeFilter: React.FC<TerritoryTreeFilter> = ({
   filterData,
   handleFilterChange,
+  userRole,
 }) => {
   return (
     <StyledFilterWrap>
@@ -30,13 +33,16 @@ export const TerritoryTreeFilter: React.FC<TerritoryTreeFilter> = ({
           value={filterData.starred}
           onChangeFn={(value: boolean) => handleFilterChange("starred", value)}
         />
-        <Checkbox
-          label="editor rights"
-          value={filterData.editorRights}
-          onChangeFn={(value: boolean) =>
-            handleFilterChange("editorRights", value)
-          }
-        />
+        {/* Only for non admin users! */}
+        {userRole !== UserEnums.Role.Admin && (
+          <Checkbox
+            label="editor rights"
+            value={filterData.editorRights}
+            onChangeFn={(value: boolean) =>
+              handleFilterChange("editorRights", value)
+            }
+          />
+        )}
         <Input
           value={filterData.filter}
           onChangeFn={(value: string) => handleFilterChange("filter", value)}

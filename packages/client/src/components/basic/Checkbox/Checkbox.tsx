@@ -47,7 +47,7 @@ export const Checkbox: React.FC<Checkbox> = ({
           }}
         />
       )}
-      <StyledLabel>{label}</StyledLabel>
+      <StyledLabel onClick={() => setChecked(!checked)}>{label}</StyledLabel>
     </StyledCheckboxWrapper>
   );
 };

@@ -16,6 +16,7 @@ import { IResponseTree } from "@shared/types";
 import { TerritoryTreeFilter } from "./TerritoryTreeFilter/TerritoryTreeFilter";
 import { BsFilter } from "react-icons/bs";
 import { ITerritoryFilter } from "types";
+import { setTreeInitialized } from "redux/features/territoryTree/treeInitializeSlice";
 
 const initFilterSettings: ITerritoryFilter = {
   nonEmpty: false,
@@ -101,6 +102,40 @@ export const TerritoryTreeBox: React.FC = () => {
     return { ...root, children: filteredChildren };
   }
 
+  function filterTreeWithWriteRights(
+    root: IResponseTree | null
+  ): IResponseTree | null {
+    if (!root) {
+      return null;
+    }
+
+    const hasWriteDescendant = root.children.some((child) =>
+      hasWriteRightRecursively(child)
+    );
+
+    if (root.right === UserEnums.RoleMode.Write || hasWriteDescendant) {
+      const filteredChildren = root.children
+        .map((child) => filterTreeWithWriteRights(child))
+        .filter((filteredChild) => filteredChild !== null);
+
+      return { ...root, children: filteredChildren } as IResponseTree;
+    }
+
+    return null;
+  }
+
+  function hasWriteRightRecursively(node: IResponseTree | null): boolean {
+    if (!node) {
+      return false;
+    }
+
+    if (node.right === UserEnums.RoleMode.Write) {
+      return true;
+    }
+
+    return node.children.some((child) => hasWriteRightRecursively(child));
+  }
+
   const [filterSettings, setFilterSettings] =
     useState<ITerritoryFilter>(initFilterSettings);
   const [filteredTreeData, setFilteredTreeData] =
@@ -122,6 +157,13 @@ export const TerritoryTreeBox: React.FC = () => {
       case "nonEmpty":
         if (value === true) {
           treeData && setFilteredTreeData(filterTreeNonEmpty(treeData));
+        } else {
+          setFilteredTreeData(treeData);
+        }
+        return;
+      case "editorRights":
+        if (value === true) {
+          treeData && setFilteredTreeData(filterTreeWithWriteRights(treeData));
         } else {
           setFilteredTreeData(treeData);
         }
@@ -169,6 +211,7 @@ export const TerritoryTreeBox: React.FC = () => {
         <TerritoryTreeFilter
           filterData={filterSettings}
           handleFilterChange={(key, value) => handleFilterChange(key, value)}
+          userRole={userRole}
         />
       )}
 

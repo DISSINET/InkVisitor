@@ -23,4 +23,5 @@ export const StyledLabel = styled.label`
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   margin-left: ${({ theme }) => theme.space[1]};
   user-select: none;
+  cursor: pointer;
 `;
