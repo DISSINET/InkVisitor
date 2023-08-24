@@ -101,7 +101,10 @@ export function filterTreeByLabel(
     hasLabelRecursively(child, targetLabel)
   );
 
-  if (root.territory.label.startsWith(targetLabel) || hasLabelDescendant) {
+  if (
+    root.territory.label.toLowerCase().startsWith(targetLabel.toLowerCase()) ||
+    hasLabelDescendant
+  ) {
     const filteredChildren = root.children
       .map((child) => filterTreeByLabel(child, targetLabel))
       .filter((filteredChild) => filteredChild !== null);
@@ -120,7 +123,9 @@ function hasLabelRecursively(
     return false;
   }
 
-  if (node.territory.label.startsWith(targetLabel)) {
+  if (
+    node.territory.label.toLowerCase().startsWith(targetLabel.toLowerCase())
+  ) {
     return true;
   }
 

@@ -33,7 +33,7 @@ export const TerritoryTreeFilter: React.FC<TerritoryTreeFilter> = ({
           value={filterData.starred}
           onChangeFn={(value: boolean) => handleFilterChange("starred", value)}
         />
-        {/* Only for non admin users! */}
+        {/* Only for non admin users */}
         {userRole !== UserEnums.Role.Admin && (
           <Checkbox
             label="editor rights"
@@ -47,6 +47,7 @@ export const TerritoryTreeFilter: React.FC<TerritoryTreeFilter> = ({
           value={filterData.filter}
           onChangeFn={(value: string) => handleFilterChange("filter", value)}
           changeOnType
+          width="full"
         />
       </StyledFilterList>
     </StyledFilterWrap>

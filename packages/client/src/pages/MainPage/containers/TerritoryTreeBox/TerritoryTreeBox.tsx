@@ -185,6 +185,8 @@ export const TerritoryTreeBox: React.FC = () => {
               inverted={!filterIsOpen}
               fullWidth
               icon={<BsFilter />}
+              tooltipLabel={filterIsOpen ? "hide filter" : "show filter"}
+              tooltipPosition="right"
             />
           </div>
         </ButtonGroup>
