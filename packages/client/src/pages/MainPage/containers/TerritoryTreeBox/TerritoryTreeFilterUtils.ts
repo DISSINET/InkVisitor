@@ -102,7 +102,7 @@ export function filterTreeByLabel(
   );
 
   if (
-    root.territory.label.toLowerCase().startsWith(targetLabel.toLowerCase()) ||
+    root.territory.label.toLowerCase().includes(targetLabel.toLowerCase()) ||
     hasLabelDescendant
   ) {
     const filteredChildren = root.children
@@ -123,9 +123,7 @@ function hasLabelRecursively(
     return false;
   }
 
-  if (
-    node.territory.label.toLowerCase().startsWith(targetLabel.toLowerCase())
-  ) {
+  if (node.territory.label.toLowerCase().includes(targetLabel.toLowerCase())) {
     return true;
   }
 
