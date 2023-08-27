@@ -11,7 +11,7 @@
     "start": "ENV_FILE=development nodemon",
     "build": "tsc --build tsconfig.prod.json",
     "start:dist": "node -r module-alias/register ./dist/server/src",
-    "jwt": "ts-node -r tsconfig-paths/register ./src/scripts/jwt.ts",
+    "jwt": "ENV_FILE=test ts-node -r tsconfig-paths/register ./src/scripts/jwt.ts",
     "swagger": "ts-node -r tsconfig-paths/register ./src/scripts/swagger.ts"
   },
   "nodemonConfig": {

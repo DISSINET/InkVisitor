@@ -1,10 +1,13 @@
-import { testErroneousResponse } from "@modules/common.test";
+import { clean, testErroneousResponse } from "@modules/common.test";
 import { BadParams } from "@shared/types/errors";
 import request from "supertest";
 import { apiPath } from "@common/constants";
 import app from "../../Server";
 import { successfulGenericResponse } from "@modules/common.test";
 import { supertestConfig } from "..";
+import { Db } from "@service/RethinkDB";
+import User from "@models/user/user";
+import { deleteUser, deleteUsers } from "@service/shorthands";
 
 describe("Users create", function () {
   describe("empty data", () => {
@@ -29,14 +32,30 @@ describe("Users create", function () {
     });
   });
   describe("ok data", () => {
-    it("should return a 200 code with successful response", (done) => {
-      return request(app)
+    const db = new Db();
+
+    beforeAll(async () => {
+      await db.initDb();
+    });
+
+    afterAll(async () => {
+      await deleteUsers(db);
+      await db.close();
+    });
+
+    it("should return a 200 code with successful response", async () => {
+      const email = `${Math.random()}@dissinet.cz`;
+      await request(app)
         .post(`${apiPath}/users`)
         .set("authorization", "Bearer " + supertestConfig.token)
-        .send({ name: "tester", email: "tester@dissinet.cz", password: "pass" })
+        .send({ name: "tester", email: email, password: "pass" })
         .expect("Content-Type", /json/)
         .expect(successfulGenericResponse)
-        .expect(200, done);
+        .expect(200);
+
+      const createdUser = await User.findUserByLabel(db.connection, email);
+      expect(createdUser).toBeTruthy();
+      expect(createdUser?.active).toEqual(true);
     });
   });
 });
