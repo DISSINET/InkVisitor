@@ -173,7 +173,7 @@ export const TerritoryTreeBox: React.FC = () => {
       {userRole === UserEnums.RoleMode.Admin && (
         <ButtonGroup>
           <Button
-            label="new territory"
+            label="new T"
             icon={<FaPlus />}
             onClick={() => setShowCreate(true)}
             fullWidth
@@ -181,7 +181,7 @@ export const TerritoryTreeBox: React.FC = () => {
           <div style={{ display: "flex", alignItems: "center" }}>
             <Button
               onClick={() => setFilterIsOpen(!filterIsOpen)}
-              color="info"
+              color="danger"
               inverted={!filterIsOpen}
               fullWidth
               icon={<BsFilter />}
