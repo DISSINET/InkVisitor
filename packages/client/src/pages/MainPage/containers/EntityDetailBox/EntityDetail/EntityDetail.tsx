@@ -223,22 +223,21 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
     async (changes: any) => await api.entityUpdate(detailId, changes),
     {
       onSuccess: (data, variables) => {
-        // TODO - check this
         queryClient.invalidateQueries(["entity"]);
-        queryClient.invalidateQueries(["statement"]);
 
-        if (statementId === detailId) {
-          queryClient.invalidateQueries(["statement"]);
-        }
         if (
           variables.references !== undefined ||
           variables.detail !== undefined ||
           variables.label !== undefined ||
           variables.status ||
+          variables.language !== undefined ||
           variables.data?.logicalType
         ) {
           if (entity?.class === EntityEnums.Class.Territory) {
             queryClient.invalidateQueries(["tree"]);
+          }
+          if (entity?.class === EntityEnums.Class.Statement) {
+            queryClient.invalidateQueries(["statement"]);
           }
           queryClient.invalidateQueries(["territory"]);
           queryClient.invalidateQueries(["bookmarks"]);
