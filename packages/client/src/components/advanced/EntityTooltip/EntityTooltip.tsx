@@ -36,7 +36,7 @@ interface EntityTooltip {
   // entity
   entityId: string;
   entityClass: EntityEnums.Class;
-  label?: string;
+  label?: string | JSX.Element;
   language: EntityEnums.Language;
   detail?: string;
   text?: string;

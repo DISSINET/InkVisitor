@@ -46,12 +46,7 @@ export const EntityDetailStatementsTable: React.FC<
           return (
             <>
               {entity && (
-                <EntityTag
-                  key={entity.id}
-                  entity={entity}
-                  showOnly="entity"
-                  tooltipText={entity.label}
-                />
+                <EntityTag key={entity.id} entity={entity} showOnly="entity" />
               )}
             </>
           );

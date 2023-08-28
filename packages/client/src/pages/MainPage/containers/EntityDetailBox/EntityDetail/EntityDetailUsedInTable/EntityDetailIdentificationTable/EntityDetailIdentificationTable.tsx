@@ -28,17 +28,7 @@ export const EntityDetailIdentificationTable: React.FC<
           const useCase = row.original;
           const entityId = useCase.statementId;
           const entity = entityId ? entities[entityId] : false;
-          return (
-            <>
-              {entity && (
-                <EntityTag
-                  key={entity.id}
-                  entity={entity}
-                  tooltipText={entity.label}
-                />
-              )}
-            </>
-          );
+          return <>{entity && <EntityTag key={entity.id} entity={entity} />}</>;
         },
       },
       {
