@@ -12,17 +12,23 @@ describe("open T", () => {
   });
 
   after(() => {
-    // cy.get("@table-tr")
-    //   .find("[data-cy=statement-context-menu-trigger]")
-    //   .trigger("mouseover");
-    // cy.get("[data-cy=statement-context-menu]").find("button").first().click();
-    // cy.contains("Submit").click();
+    cy.wait(200);
 
-    // cy.get("@table-tr")
-    //   .find("[data-cy=statement-context-menu-trigger]")
-    //   .trigger("mouseover");
-    // cy.get("[data-cy=statement-context-menu]").find("button").first().click();
-    // cy.contains("Submit").click();
+    cy.get("[data-cy=statement-list-tr]")
+      .first()
+      .find("[data-cy=statement-context-menu-trigger]")
+      .trigger("mouseover");
+    cy.get("[data-cy=statement-context-menu]").find("button").first().click();
+    cy.contains("Submit").click();
+
+    cy.wait(200);
+
+    cy.get("[data-cy=statement-list-tr]")
+      .first()
+      .find("[data-cy=statement-context-menu-trigger]")
+      .trigger("mouseover");
+    cy.get("[data-cy=statement-context-menu]").find("button").first().click();
+    cy.contains("Submit").click();
 
     cy.get("[data-cy=tree-node]")
       .contains(rootLabel1)
@@ -47,18 +53,10 @@ describe("open T", () => {
       .trigger("mouseover");
     cy.get("[data-cy=statement-context-menu]").find("button").eq(1).click();
 
-    cy.get("[data-cy=Statements-box]").get("tr").should("have.length", 2);
+    cy.wait(200);
 
-    cy.get("[data-cy=statement-list-tr]")
-      .find("[data-cy=statement-context-menu-trigger]")
-      .trigger("mouseover");
-    cy.get("[data-cy=statement-context-menu]").find("button").first().click();
-    cy.contains("Submit").click();
-
-    cy.get("[data-cy=statement-list-tr]")
-      .find("[data-cy=statement-context-menu-trigger]")
-      .trigger("mouseover");
-    cy.get("[data-cy=statement-context-menu]").find("button").first().click();
-    cy.contains("Submit").click();
+    cy.get("[data-cy=Statements-box]")
+      .get("[data-cy=statement-list-tr]")
+      .should("have.length", 2);
   });
 });
