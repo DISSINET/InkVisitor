@@ -69,7 +69,7 @@ export const Box: React.FC<Box> = ({
         )}
         <StyledButtonWrap>
           {button && (
-            <ButtonGroup>
+            <ButtonGroup data-cy="box-header-button-group">
               {button.map((b, key) => (
                 <React.Fragment key={key}>{b}</React.Fragment>
               ))}

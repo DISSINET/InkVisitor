@@ -24,6 +24,18 @@ describe("open entity in detail - double click", () => {
   });
 
   it("opens T (entity) in detail", () => {
-    cy.get("[data-cy=tree-node]").contains(rootLabel).dblclick().blur();
+    cy.get("[data-cy=Detail-box]")
+      .find("[data-cy=box-header-button-group]")
+      .find("button")
+      .last()
+      .click();
+
+    cy.wait(200);
+
+    cy.get("[data-cy=tree-node]").contains(rootLabel).dblclick();
+    cy.get("[data-cy=tree-node]").contains(rootLabel).trigger("mouseout");
+
+    cy.get("[data-cy=Detail-box]").should("exist");
+    cy.get("[data-cy=Detail-box]").contains(rootLabel).should("exist");
   });
 });
