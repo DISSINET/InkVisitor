@@ -31,6 +31,12 @@ export const StyledToastContainer = styled(ToastContainer)`
 export const StyledLink = styled.a`
   color: ${({ theme }) => theme.color["blue"][50]};
   margin-left: 0.5rem;
+
+  display: flex;
+  flex-grow: 1;
+  justify-content: flex-end;
+  align-items: center;
+  white-space: nowrap;
 `;
 export const StyledWrap = styled.div`
   display: flex;
