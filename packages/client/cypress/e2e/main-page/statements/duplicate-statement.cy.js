@@ -1,4 +1,4 @@
-describe("open T", () => {
+describe("duplicate S", () => {
   const rootLabel1 = "test T 1";
   const statementLabel = "test statement label";
   const statementText =

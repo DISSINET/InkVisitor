@@ -19,7 +19,6 @@ describe("create entity", () => {
     cy.get("[data-cy=modal]").find("input").eq(2).type(detailText);
     cy.get("[data-cy=modal]").find(".react-select__control").last().click();
     cy.get(".react-select__option").contains(language).click();
-
     cy.get("button").contains("Create").click();
 
     cy.get("[data-cy=Detail-box]").contains(`${label}`);
