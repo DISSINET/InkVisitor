@@ -1,8 +1,7 @@
-import { IAudit, IEntity } from "@shared/types";
-import { r, Connection, RDatum, } from "rethinkdb-ts";
-import { ITask } from ".";
+import { r, Connection } from "rethinkdb-ts";
+import { IJob } from ".";
 
-const printDeletedEntities: ITask = async (db: Connection): Promise<void> => {
+const printDeletedEntitiesJob: IJob = async (db: Connection): Promise<void> => {
   const entityIdsFromRelations = (await r.table("relations").pluck("entityIds", "id").run(db)) as { entityIds: string[], id: string}[];
   const idsMap = entityIdsFromRelations.reduce<Record<string, {relationIds: string[]}>>((acc, curr) => {
     for(const id of curr.entityIds) {
@@ -31,4 +30,4 @@ const printDeletedEntities: ITask = async (db: Connection): Promise<void> => {
   }
 }
 
-export default printDeletedEntities;
+export default printDeletedEntitiesJob;
