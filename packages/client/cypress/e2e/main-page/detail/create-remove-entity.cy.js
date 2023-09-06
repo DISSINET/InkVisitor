@@ -1,11 +1,12 @@
 describe("create entity", () => {
+  const territoryLabel = "test T";
   beforeEach(() => {
     cy.login("admin", "admin");
   });
 
   it("creates entity from detail", () => {
     cy.contains("new territory").click();
-    cy.get("[data-cy=modal]").find("input").type("test T");
+    cy.get("[data-cy=modal]").find("input").type(territoryLabel);
     cy.contains("Save").click();
 
     const label = "Action";
@@ -32,13 +33,13 @@ describe("create entity", () => {
       .click();
     cy.get("[data-cy=modal]").get("button").contains("Remove").click();
 
-    // TODO: check deletion
-
     cy.get("[data-cy=Detail-box]")
       .find("[data-cy=actant-header-row]")
       .find("button")
       .first()
       .click();
     cy.get("[data-cy=modal]").get("button").contains("Remove").click();
+
+    cy.get("[data-cy=Territories-box]").should("not.contain", territoryLabel);
   });
 });
