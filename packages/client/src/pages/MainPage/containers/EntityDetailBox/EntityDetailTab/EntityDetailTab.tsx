@@ -29,6 +29,7 @@ export const EntityDetailTab: React.FC<EntityDetailTab> = ({
   return (
     <>
       <StyledTab
+        data-cy="detail-tab"
         isSelected={isSelected}
         ref={setReferenceElement}
         onMouseEnter={() => setShowTooltip(true)}
