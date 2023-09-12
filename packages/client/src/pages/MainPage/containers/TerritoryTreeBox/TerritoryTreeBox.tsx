@@ -1,28 +1,27 @@
 import { UserEnums } from "@shared/enums";
+import { IResponseTree } from "@shared/types";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { rootTerritoryId } from "Theme/constants";
 import api from "api";
 import { Button, ButtonGroup, Loader } from "components";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
+import { BsFilter } from "react-icons/bs";
 import { FaPlus } from "react-icons/fa";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { setSelectedTerritoryPath } from "redux/features/territoryTree/selectedTerritoryPathSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { rootTerritoryId } from "Theme/constants";
+import { ITerritoryFilter } from "types";
 import { searchTree } from "utils";
 import { ContextMenuNewTerritoryModal } from "./ContextMenuNewTerritoryModal/ContextMenuNewTerritoryModal";
 import { StyledTreeWrapper } from "./TerritoryTreeBoxStyles";
-import { TerritoryTreeNode } from "./TerritoryTreeNode/TerritoryTreeNode";
-import { IResponseTree } from "@shared/types";
 import { TerritoryTreeFilter } from "./TerritoryTreeFilter/TerritoryTreeFilter";
-import { BsFilter } from "react-icons/bs";
-import { ITerritoryFilter } from "types";
-import { setTreeInitialized } from "redux/features/territoryTree/treeInitializeSlice";
 import {
   filterTreeByFavorites,
   filterTreeByLabel,
   filterTreeNonEmpty,
   filterTreeWithWriteRights,
 } from "./TerritoryTreeFilterUtils";
+import { TerritoryTreeNode } from "./TerritoryTreeNode/TerritoryTreeNode";
 
 const initFilterSettings: ITerritoryFilter = {
   nonEmpty: false,

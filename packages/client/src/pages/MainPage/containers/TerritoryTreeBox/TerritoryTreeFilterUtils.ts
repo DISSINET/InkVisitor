@@ -2,36 +2,40 @@ import { UserEnums } from "@shared/enums";
 import { IResponseTree } from "@shared/types";
 
 // Filter NON EMPTY
-export function filterTreeNonEmpty(root: IResponseTree): IResponseTree | null {
-  if (root.empty === true) {
-    return null; // Exclude nodes with empty = true
+export function filterTreeNonEmpty(node: IResponseTree): IResponseTree | null {
+  if (node.empty === true) {
+    return null;
   }
 
-  const filteredChildren = root.children
-    .map((child) => filterTreeNonEmpty(child))
+  const filteredChildren = node.children
+    .map((child) => (child.empty ? filterTreeNonEmpty(child) : child))
     .filter((filteredChild) => filteredChild !== null) as IResponseTree[];
 
-  return { ...root, children: filteredChildren };
+  return { ...node, children: filteredChildren };
 }
 
 // Filter EDITOR RIGHTS
 export function filterTreeWithWriteRights(
-  root: IResponseTree | null
+  node: IResponseTree | null
 ): IResponseTree | null {
-  if (!root) {
+  if (!node) {
     return null;
   }
 
-  const hasWriteDescendant = root.children.some((child) =>
+  const hasWriteDescendant = node.children.some((child) =>
     hasWriteRightRecursively(child)
   );
 
-  if (root.right === UserEnums.RoleMode.Write || hasWriteDescendant) {
-    const filteredChildren = root.children
-      .map((child) => filterTreeWithWriteRights(child))
+  if (node.right === UserEnums.RoleMode.Write || hasWriteDescendant) {
+    const filteredChildren = node.children
+      .map((child) =>
+        child.right === UserEnums.RoleMode.Write
+          ? child
+          : filterTreeWithWriteRights(child)
+      )
       .filter((filteredChild) => filteredChild !== null);
 
-    return { ...root, children: filteredChildren } as IResponseTree;
+    return { ...node, children: filteredChildren } as IResponseTree;
   }
 
   return null;
@@ -49,23 +53,27 @@ function hasWriteRightRecursively(node: IResponseTree | null): boolean {
 
 // filter FAVORITED
 export function filterTreeByFavorites(
-  root: IResponseTree | null,
+  node: IResponseTree | null,
   favoriteIds: string[]
 ): IResponseTree | null {
-  if (!root) {
+  if (!node) {
     return null;
   }
 
-  const hasFavoriteDescendant = root.children.some((child) =>
+  const hasFavoriteDescendant = node.children.some((child) =>
     hasFavoriteRecursively(child, favoriteIds)
   );
 
-  if (favoriteIds.includes(root.territory.id) || hasFavoriteDescendant) {
-    const filteredChildren = root.children
-      .map((child) => filterTreeByFavorites(child, favoriteIds))
+  if (favoriteIds.includes(node.territory.id) || hasFavoriteDescendant) {
+    const filteredChildren = node.children
+      .map((child) =>
+        favoriteIds.includes(child.territory.id)
+          ? child
+          : filterTreeByFavorites(child, favoriteIds)
+      )
       .filter((filteredChild) => filteredChild !== null);
 
-    return { ...root, children: filteredChildren } as IResponseTree;
+    return { ...node, children: filteredChildren } as IResponseTree;
   }
 
   return null;
@@ -90,26 +98,30 @@ function hasFavoriteRecursively(
 
 // Filter BY LABEL
 export function filterTreeByLabel(
-  root: IResponseTree | null,
+  node: IResponseTree | null,
   targetLabel: string
 ): IResponseTree | null {
-  if (!root) {
+  if (!node) {
     return null;
   }
 
-  const hasLabelDescendant = root.children.some((child) =>
+  const hasLabelDescendant = node.children.some((child) =>
     hasLabelRecursively(child, targetLabel)
   );
 
   if (
-    root.territory.label.toLowerCase().includes(targetLabel.toLowerCase()) ||
+    node.territory.label.toLowerCase().includes(targetLabel.toLowerCase()) ||
     hasLabelDescendant
   ) {
-    const filteredChildren = root.children
-      .map((child) => filterTreeByLabel(child, targetLabel))
+    const filteredChildren = node.children
+      .map((child) =>
+        child.territory.label.toLowerCase().includes(targetLabel.toLowerCase())
+          ? child
+          : filterTreeByLabel(child, targetLabel)
+      )
       .filter((filteredChild) => filteredChild !== null);
 
-    return { ...root, children: filteredChildren } as IResponseTree;
+    return { ...node, children: filteredChildren } as IResponseTree;
   }
 
   return null;
