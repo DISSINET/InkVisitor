@@ -169,27 +169,37 @@ export const TerritoryTreeBox: React.FC = () => {
 
   return (
     <>
-      {userRole === UserEnums.RoleMode.Admin && (
-        <ButtonGroup>
+      {/* {userRole === UserEnums.RoleMode.Admin && ( */}
+      <ButtonGroup>
+        {userRole === UserEnums.RoleMode.Admin && (
           <Button
             label="new T"
             icon={<FaPlus />}
             onClick={() => setShowCreate(true)}
             fullWidth
           />
-          <div style={{ display: "flex", alignItems: "center" }}>
-            <Button
-              onClick={() => setFilterIsOpen(!filterIsOpen)}
-              color="danger"
-              inverted={!filterIsOpen}
-              fullWidth
-              icon={<BsFilter />}
-              tooltipLabel={filterIsOpen ? "hide filter" : "show filter"}
-              tooltipPosition="right"
-            />
-          </div>
-        </ButtonGroup>
-      )}
+        )}
+        <div style={{ display: "flex", alignItems: "center" }}>
+          <Button
+            onClick={() => {
+              if (filterIsOpen) {
+                setFilterIsOpen(false);
+                setFilteredTreeData(treeData);
+                setFilterSettings(initFilterSettings);
+              } else {
+                setFilterIsOpen(true);
+              }
+            }}
+            color="danger"
+            inverted={!filterIsOpen}
+            fullWidth
+            icon={<BsFilter />}
+            tooltipLabel={filterIsOpen ? "hide filter" : "show filter"}
+            tooltipPosition="right"
+          />
+        </div>
+      </ButtonGroup>
+      {/* )} */}
 
       {filterIsOpen && (
         <TerritoryTreeFilter
