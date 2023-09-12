@@ -2,16 +2,38 @@ import { UserEnums } from "@shared/enums";
 import { IResponseTree } from "@shared/types";
 
 // Filter NON EMPTY
-export function filterTreeNonEmpty(node: IResponseTree): IResponseTree | null {
-  if (node.empty === true) {
+export function filterTreeNonEmpty(
+  node: IResponseTree | null
+): IResponseTree | null {
+  if (!node) {
     return null;
   }
 
-  const filteredChildren = node.children
-    .map((child) => (child.empty ? filterTreeNonEmpty(child) : child))
-    .filter((filteredChild) => filteredChild !== null) as IResponseTree[];
+  const hasNonEmptyDescendant = node.children.some((child) =>
+    hasNonEmptyRecursively(child)
+  );
 
-  return { ...node, children: filteredChildren };
+  if (node.statementsCount > 0 || hasNonEmptyDescendant) {
+    const filteredChildren = node.children
+      .map((child) =>
+        child.statementsCount > 0 ? child : filterTreeNonEmpty(child)
+      )
+      .filter((filteredChild) => filteredChild !== null);
+
+    return { ...node, children: filteredChildren } as IResponseTree;
+  }
+
+  return null;
+}
+
+function hasNonEmptyRecursively(node: IResponseTree | null): boolean {
+  if (!node) {
+    return false;
+  }
+  if (node.statementsCount > 0) {
+    return true;
+  }
+  return node.children.some((child) => hasNonEmptyRecursively(child));
 }
 
 // Filter EDITOR RIGHTS
