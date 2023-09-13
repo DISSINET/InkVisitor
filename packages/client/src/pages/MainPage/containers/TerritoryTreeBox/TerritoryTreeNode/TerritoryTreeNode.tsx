@@ -44,6 +44,7 @@ interface TerritoryTreeNode {
   index?: number;
   moveFn?: (dragIndex: number, hoverIndex: number) => void;
   empty?: boolean;
+  foundByRecursion?: boolean;
   right: UserEnums.RoleMode;
   storedTerritories: string[];
   updateUserMutation: UseMutationResult<void, unknown, object, unknown>;
@@ -58,6 +59,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
   index,
   moveFn,
   empty,
+  foundByRecursion,
   right,
   storedTerritories,
   updateUserMutation,
@@ -250,7 +252,12 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
         {id !== rootTerritoryId && (
           <>
             {!tempDisabled ? (
-              <StyledTerritoryTagWrap id={`territory${id}`}>
+              <StyledTerritoryTagWrap
+                id={`territory${id}`}
+                style={{
+                  backgroundColor: foundByRecursion ? "lightblue" : "",
+                }}
+              >
                 <StyledIconWrap>
                   {hasChildren ? (
                     <>{renderArrowIcon()}</>
@@ -332,6 +339,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
                 statementsCount={child.statementsCount}
                 initExpandedNodes={initExpandedNodes}
                 empty={child.empty}
+                foundByRecursion={child.foundByRecursion}
                 moveFn={moveChildFn}
                 storedTerritories={storedTerritories}
                 updateUserMutation={updateUserMutation}

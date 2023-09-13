@@ -20,6 +20,7 @@ import {
   filterTreeByLabel,
   filterTreeNonEmpty,
   filterTreeWithWriteRights,
+  markNodesWithStatementsCount,
 } from "./TerritoryTreeFilterUtils";
 import { TerritoryTreeNode } from "./TerritoryTreeNode/TerritoryTreeNode";
 
@@ -102,68 +103,70 @@ export const TerritoryTreeBox: React.FC = () => {
 
   useEffect(() => {
     if (treeData) {
-      setFilteredTreeData(treeData);
+      if (
+        JSON.stringify(filterSettings) === JSON.stringify(initFilterSettings)
+      ) {
+        setFilteredTreeData(treeData);
+      } else {
+        // use filter - fn that returns new object with filtered tree and set to state
+        setFilteredTreeData(getFilteredTreeData());
+      }
     }
-  }, [treeData]);
+  }, [treeData, filterSettings]);
 
   const handleFilterChange = (
     key: keyof ITerritoryFilter,
     value: boolean | string
-  ) => {
-    setFilterSettings({ ...filterSettings, [key]: value });
+  ) => setFilterSettings({ ...filterSettings, [key]: value });
 
-    switch (key) {
-      case "nonEmpty":
-        if (value === true) {
-          treeData && setFilteredTreeData(filterTreeNonEmpty(treeData));
-        } else {
-          setFilteredTreeData(treeData);
+  const getFilteredTreeData = () => {
+    if (treeData) {
+      let newFilteredTreeData: IResponseTree | null = treeData;
+
+      if (filterSettings.nonEmpty) {
+        // NON EMPTY
+        const nonEmptyTreeData = filterTreeNonEmpty(newFilteredTreeData);
+        newFilteredTreeData = nonEmptyTreeData
+          ? markNodesWithStatementsCount(nonEmptyTreeData)
+          : null;
+      }
+      if (filterSettings.starred) {
+        // STARED
+        if (userData) {
+          const starredTreeData = filterTreeByFavorites(
+            newFilteredTreeData,
+            userData.storedTerritories.map((t) => t.territory.id)
+          );
+          newFilteredTreeData = starredTreeData;
         }
-        return;
-      case "editorRights":
-        if (value === true) {
-          treeData && setFilteredTreeData(filterTreeWithWriteRights(treeData));
-        } else {
-          setFilteredTreeData(treeData);
-        }
-        return;
-      case "starred":
-        if (value === true) {
-          treeData &&
-            userData &&
-            setFilteredTreeData(
-              filterTreeByFavorites(
-                treeData,
-                userData.storedTerritories.map((t) => t.territory.id)
-              )
-            );
-        } else {
-          setFilteredTreeData(treeData);
-        }
-        return;
-      case "filter":
-        if ((value as string).length > 0) {
-          console.log(value);
-          treeData &&
-            setFilteredTreeData(filterTreeByLabel(treeData, value as string));
-        } else {
-          setFilteredTreeData(treeData);
-        }
-        return;
-      default:
-        setFilteredTreeData(treeData);
-        return;
+      }
+      if (filterSettings.editorRights) {
+        // EDITOR RIGHTS
+        const editorRightsTreeData =
+          filterTreeWithWriteRights(newFilteredTreeData);
+        newFilteredTreeData = editorRightsTreeData;
+      }
+      if (filterSettings.filter.length > 0) {
+        // LABEL FILTER
+        const labelFilterTreeData = filterTreeByLabel(
+          newFilteredTreeData,
+          filterSettings.filter
+        );
+        newFilteredTreeData = labelFilterTreeData;
+      }
+
+      return newFilteredTreeData;
     }
   };
 
   useEffect(() => {
-    if (treeData) {
-      const foundTerritory = searchTree(treeData, territoryId);
+    if (filteredTreeData) {
+      const foundTerritory = searchTree(filteredTreeData, territoryId);
       if (foundTerritory) {
         dispatch(setSelectedTerritoryPath(foundTerritory.path));
       }
     }
-  }, [treeData, territoryId]);
+  }, [filteredTreeData, territoryId]);
 
   const [filterIsOpen, setFilterIsOpen] = useState(true);
 

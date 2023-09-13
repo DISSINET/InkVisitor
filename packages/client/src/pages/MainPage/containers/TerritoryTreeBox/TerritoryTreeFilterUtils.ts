@@ -1,6 +1,10 @@
 import { UserEnums } from "@shared/enums";
 import { IResponseTree } from "@shared/types";
 
+interface IExtendedResponseTree extends IResponseTree {
+  foundByRecursion?: boolean;
+}
+
 // Filter NON EMPTY
 export function filterTreeNonEmpty(
   node: IResponseTree | null
@@ -16,11 +20,15 @@ export function filterTreeNonEmpty(
   if (node.statementsCount > 0 || hasNonEmptyDescendant) {
     const filteredChildren = node.children
       .map((child) =>
+        // stop recursion with this condition to keep children of filtered nodes
         child.statementsCount > 0 ? child : filterTreeNonEmpty(child)
       )
       .filter((filteredChild) => filteredChild !== null);
 
-    return { ...node, children: filteredChildren } as IResponseTree;
+    return {
+      ...node,
+      children: filteredChildren,
+    } as IResponseTree;
   }
 
   return null;
@@ -34,6 +42,22 @@ function hasNonEmptyRecursively(node: IResponseTree | null): boolean {
     return true;
   }
   return node.children.some((child) => hasNonEmptyRecursively(child));
+}
+
+export function markNodesWithStatementsCount(
+  root: IResponseTree
+): IExtendedResponseTree {
+  const expandedRoot: IExtendedResponseTree = {
+    ...root,
+    foundByRecursion: root.statementsCount > 0,
+    children: [],
+  };
+
+  expandedRoot.children = root.children.map((child) =>
+    markNodesWithStatementsCount(child)
+  );
+
+  return expandedRoot;
 }
 
 // Filter EDITOR RIGHTS
