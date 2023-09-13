@@ -1,5 +1,10 @@
 import { EntityEnums } from "@shared/enums";
-import { IEntity, IStatementActant, IStatementAction } from "@shared/types";
+import {
+  IEntity,
+  IResponseTree,
+  IStatementActant,
+  IStatementAction,
+} from "@shared/types";
 import { ThemeColor } from "Theme/theme";
 
 export const Colors = [
@@ -337,4 +342,8 @@ export interface ITerritoryFilter {
   starred: boolean;
   editorRights: boolean;
   filter: string;
+}
+
+export interface IExtendedResponseTree extends IResponseTree {
+  foundByRecursion?: boolean;
 }

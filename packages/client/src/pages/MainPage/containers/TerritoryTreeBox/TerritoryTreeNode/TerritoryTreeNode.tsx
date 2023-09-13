@@ -1,6 +1,14 @@
+import { animated, config, useSpring } from "@react-spring/web";
 import { UserEnums } from "@shared/enums";
-import { IResponseTreeTerritoryComponent, ITerritory } from "@shared/types";
+import { ITerritory } from "@shared/types";
 import { IParentTerritory } from "@shared/types/territory";
+import {
+  UseMutationResult,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { rootTerritoryId } from "Theme/constants";
+import theme from "Theme/theme";
 import api from "api";
 import { EntityTag } from "components/advanced";
 import { useSearchParams } from "hooks";
@@ -12,18 +20,14 @@ import {
   BsCaretRight,
   BsCaretRightFill,
 } from "react-icons/bs";
-import {
-  useMutation,
-  UseMutationResult,
-  useQueryClient,
-} from "@tanstack/react-query";
-import { animated, config, useSpring } from "@react-spring/web";
 import { setDisableTreeScroll } from "redux/features/territoryTree/disableTreeScrollSlice";
 import { setTreeInitialized } from "redux/features/territoryTree/treeInitializeSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { rootTerritoryId } from "Theme/constants";
-import theme from "Theme/theme";
-import { DraggedEntityReduxItem, EntityDragItem } from "types";
+import {
+  DraggedEntityReduxItem,
+  EntityDragItem,
+  IExtendedResponseTree,
+} from "types";
 import { TerritoryTreeContextMenu } from "../TerritoryTreeContextMenu/TerritoryTreeContextMenu";
 import {
   StyledChildrenWrap,
@@ -36,7 +40,7 @@ import {
 
 interface TerritoryTreeNode {
   territory: ITerritory;
-  children: IResponseTreeTerritoryComponent[];
+  children: IExtendedResponseTree[];
   lvl: number;
   statementsCount: number;
   initExpandedNodes?: string[];
@@ -75,7 +79,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
   const [isExpanded, setIsExpanded] = useState(false);
   const [contextMenuOpen, setContextMenuOpen] = useState(false);
   const [childTerritories, setChildTerritories] = useState<
-    IResponseTreeTerritoryComponent[]
+    IExtendedResponseTree[]
   >([]);
   const animatedStyle = useSpring({
     opacity: contextMenuOpen ? 0.6 : 1,
@@ -326,26 +330,24 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
       <StyledChildrenWrap noIndent={lvl === 0}>
         {!hideChildTerritories &&
           isExpanded &&
-          childTerritories.map(
-            (child: IResponseTreeTerritoryComponent, key: number) => (
-              <TerritoryTreeNode
-                key={key}
-                index={key}
-                propId={child.territory.id}
-                territory={child.territory}
-                children={child.children}
-                right={child.right}
-                lvl={child.lvl}
-                statementsCount={child.statementsCount}
-                initExpandedNodes={initExpandedNodes}
-                empty={child.empty}
-                foundByRecursion={child.foundByRecursion}
-                moveFn={moveChildFn}
-                storedTerritories={storedTerritories}
-                updateUserMutation={updateUserMutation}
-              />
-            )
-          )}
+          childTerritories.map((child: IExtendedResponseTree, key: number) => (
+            <TerritoryTreeNode
+              key={key}
+              index={key}
+              propId={child.territory.id}
+              territory={child.territory}
+              children={child.children}
+              right={child.right}
+              lvl={child.lvl}
+              statementsCount={child.statementsCount}
+              initExpandedNodes={initExpandedNodes}
+              empty={child.empty}
+              foundByRecursion={child.foundByRecursion}
+              moveFn={moveChildFn}
+              storedTerritories={storedTerritories}
+              updateUserMutation={updateUserMutation}
+            />
+          ))}
       </StyledChildrenWrap>
     </>
   );

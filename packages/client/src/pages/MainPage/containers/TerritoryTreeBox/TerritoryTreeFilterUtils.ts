@@ -1,9 +1,6 @@
 import { UserEnums } from "@shared/enums";
 import { IResponseTree } from "@shared/types";
-
-interface IExtendedResponseTree extends IResponseTree {
-  foundByRecursion?: boolean;
-}
+import { IExtendedResponseTree } from "types";
 
 // Filter NON EMPTY
 export function filterTreeNonEmpty(
@@ -186,4 +183,23 @@ function hasLabelRecursively(
   }
 
   return node.children.some((child) => hasLabelRecursively(child, targetLabel));
+}
+
+export function markNodesWithSpecificText(
+  root: IResponseTree,
+  targetLabel: string
+): IExtendedResponseTree {
+  const expandedRoot: IExtendedResponseTree = {
+    ...root,
+    foundByRecursion: root.territory.label
+      .toLowerCase()
+      .includes(targetLabel.toLowerCase()),
+    children: [],
+  };
+
+  expandedRoot.children = root.children.map((child) =>
+    markNodesWithSpecificText(child, targetLabel)
+  );
+
+  return expandedRoot;
 }

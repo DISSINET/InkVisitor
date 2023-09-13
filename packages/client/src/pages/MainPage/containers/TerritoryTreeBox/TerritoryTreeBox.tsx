@@ -20,9 +20,11 @@ import {
   filterTreeByLabel,
   filterTreeNonEmpty,
   filterTreeWithWriteRights,
+  markNodesWithSpecificText,
   markNodesWithStatementsCount,
 } from "./TerritoryTreeFilterUtils";
 import { TerritoryTreeNode } from "./TerritoryTreeNode/TerritoryTreeNode";
+import { setTreeInitialized } from "redux/features/territoryTree/treeInitializeSlice";
 
 const initFilterSettings: ITerritoryFilter = {
   nonEmpty: false,
@@ -152,8 +154,15 @@ export const TerritoryTreeBox: React.FC = () => {
           newFilteredTreeData,
           filterSettings.filter
         );
-        newFilteredTreeData = labelFilterTreeData;
+        newFilteredTreeData = labelFilterTreeData
+          ? markNodesWithSpecificText(
+              labelFilterTreeData,
+              filterSettings.filter
+            )
+          : null;
       }
+
+      // TODO: mark filtered nodes with all conditions only after building new tree data
 
       return newFilteredTreeData;
     }
@@ -189,6 +198,7 @@ export const TerritoryTreeBox: React.FC = () => {
                 setFilterIsOpen(false);
                 setFilteredTreeData(treeData);
                 setFilterSettings(initFilterSettings);
+                dispatch(setTreeInitialized(false));
               } else {
                 setFilterIsOpen(true);
               }
