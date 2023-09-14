@@ -41,22 +41,6 @@ function hasNonEmptyRecursively(node: IResponseTree | null): boolean {
   return node.children.some((child) => hasNonEmptyRecursively(child));
 }
 
-export function markNodesWithStatementsCount(
-  root: IResponseTree
-): IExtendedResponseTree {
-  const expandedRoot: IExtendedResponseTree = {
-    ...root,
-    foundByRecursion: root.statementsCount > 0,
-    children: [],
-  };
-
-  expandedRoot.children = root.children.map((child) =>
-    markNodesWithStatementsCount(child)
-  );
-
-  return expandedRoot;
-}
-
 // Filter EDITOR RIGHTS
 export function filterTreeWithWriteRights(
   node: IResponseTree | null
@@ -185,21 +169,56 @@ function hasLabelRecursively(
   return node.children.some((child) => hasLabelRecursively(child, targetLabel));
 }
 
-export function markNodesWithSpecificText(
-  root: IResponseTree,
-  targetLabel: string
+export function markNodesWithFilters(
+  node: IResponseTree,
+  filters: {
+    nonEmpty: boolean;
+    starred: boolean;
+    editorRights: boolean;
+    filter: string;
+  },
+  favoriteIds: string[]
 ): IExtendedResponseTree {
-  const expandedRoot: IExtendedResponseTree = {
-    ...root,
-    foundByRecursion: root.territory.label
-      .toLowerCase()
-      .includes(targetLabel.toLowerCase()),
+  const extendedNode: IExtendedResponseTree = {
+    ...node,
+    foundByRecursion: isNodeMatchingFilters(node, filters, favoriteIds),
     children: [],
   };
 
-  expandedRoot.children = root.children.map((child) =>
-    markNodesWithSpecificText(child, targetLabel)
+  extendedNode.children = node.children.map((child) =>
+    markNodesWithFilters(child, filters, favoriteIds)
   );
 
-  return expandedRoot;
+  return extendedNode;
+}
+
+function isNodeMatchingFilters(
+  node: IResponseTree,
+  filters: {
+    nonEmpty: boolean;
+    starred: boolean;
+    editorRights: boolean;
+    filter: string;
+  },
+  favoriteIds: string[]
+): boolean {
+  const { nonEmpty, starred, editorRights, filter: targetLabel } = filters;
+
+  const meetsNonEmptyCondition = nonEmpty ? node.statementsCount > 0 : true;
+  const meetsStarredCondition = starred
+    ? favoriteIds.includes(node.territory.id)
+    : true;
+  const meetsEditorRightsCondition = editorRights
+    ? node.right === UserEnums.RoleMode.Write
+    : true;
+  const meetsFilterCondition =
+    targetLabel.length === 0 ||
+    node.territory.label.toLowerCase().includes(targetLabel.toLowerCase());
+
+  return (
+    meetsNonEmptyCondition &&
+    meetsStarredCondition &&
+    meetsEditorRightsCondition &&
+    meetsFilterCondition
+  );
 }

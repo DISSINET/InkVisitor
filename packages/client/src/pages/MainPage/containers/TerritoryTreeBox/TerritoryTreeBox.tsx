@@ -9,6 +9,7 @@ import React, { useEffect, useState } from "react";
 import { BsFilter } from "react-icons/bs";
 import { FaPlus } from "react-icons/fa";
 import { setSelectedTerritoryPath } from "redux/features/territoryTree/selectedTerritoryPathSlice";
+import { setTreeInitialized } from "redux/features/territoryTree/treeInitializeSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { ITerritoryFilter } from "types";
 import { searchTree } from "utils";
@@ -20,11 +21,9 @@ import {
   filterTreeByLabel,
   filterTreeNonEmpty,
   filterTreeWithWriteRights,
-  markNodesWithSpecificText,
-  markNodesWithStatementsCount,
+  markNodesWithFilters,
 } from "./TerritoryTreeFilterUtils";
 import { TerritoryTreeNode } from "./TerritoryTreeNode/TerritoryTreeNode";
-import { setTreeInitialized } from "redux/features/territoryTree/treeInitializeSlice";
 
 const initFilterSettings: ITerritoryFilter = {
   nonEmpty: false,
@@ -114,7 +113,7 @@ export const TerritoryTreeBox: React.FC = () => {
         setFilteredTreeData(getFilteredTreeData());
       }
     }
-  }, [treeData, filterSettings]);
+  }, [treeData, filterSettings, userData]);
 
   const handleFilterChange = (
     key: keyof ITerritoryFilter,
@@ -128,9 +127,7 @@ export const TerritoryTreeBox: React.FC = () => {
       if (filterSettings.nonEmpty) {
         // NON EMPTY
         const nonEmptyTreeData = filterTreeNonEmpty(newFilteredTreeData);
-        newFilteredTreeData = nonEmptyTreeData
-          ? markNodesWithStatementsCount(nonEmptyTreeData)
-          : null;
+        newFilteredTreeData = nonEmptyTreeData;
       }
       if (filterSettings.starred) {
         // STARED
@@ -154,15 +151,18 @@ export const TerritoryTreeBox: React.FC = () => {
           newFilteredTreeData,
           filterSettings.filter
         );
-        newFilteredTreeData = labelFilterTreeData
-          ? markNodesWithSpecificText(
-              labelFilterTreeData,
-              filterSettings.filter
-            )
-          : null;
+        newFilteredTreeData = labelFilterTreeData;
       }
 
-      // TODO: mark filtered nodes with all conditions only after building new tree data
+      // Mark tree data when all selected conditions are satisfied
+      if (newFilteredTreeData && userData) {
+        const markedTreeData = markNodesWithFilters(
+          newFilteredTreeData,
+          filterSettings,
+          userData.storedTerritories.map((t) => t.territory.id)
+        );
+        return markedTreeData;
+      }
 
       return newFilteredTreeData;
     }
