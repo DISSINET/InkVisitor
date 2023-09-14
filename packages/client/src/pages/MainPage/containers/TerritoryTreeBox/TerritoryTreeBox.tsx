@@ -177,11 +177,10 @@ export const TerritoryTreeBox: React.FC = () => {
     }
   }, [filteredTreeData, territoryId]);
 
-  const [filterIsOpen, setFilterIsOpen] = useState(true);
+  const [filterIsOpen, setFilterIsOpen] = useState(false);
 
   return (
     <>
-      {/* {userRole === UserEnums.RoleMode.Admin && ( */}
       <ButtonGroup>
         {userRole === UserEnums.RoleMode.Admin && (
           <Button
@@ -203,8 +202,8 @@ export const TerritoryTreeBox: React.FC = () => {
                 setFilterIsOpen(true);
               }
             }}
-            color="danger"
-            inverted={!filterIsOpen}
+            color="success"
+            inverted={filterIsOpen}
             fullWidth
             icon={<BsFilter />}
             tooltipLabel={filterIsOpen ? "hide filter" : "show filter"}
@@ -212,7 +211,6 @@ export const TerritoryTreeBox: React.FC = () => {
           />
         </div>
       </ButtonGroup>
-      {/* )} */}
 
       {filterIsOpen && (
         <TerritoryTreeFilter

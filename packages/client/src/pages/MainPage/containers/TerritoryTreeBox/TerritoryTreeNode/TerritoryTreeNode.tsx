@@ -259,7 +259,9 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
               <StyledTerritoryTagWrap
                 id={`territory${id}`}
                 style={{
-                  backgroundColor: foundByRecursion ? "lightblue" : "",
+                  backgroundColor: foundByRecursion
+                    ? theme.color.blue["200"]
+                    : "",
                 }}
               >
                 <StyledIconWrap>
