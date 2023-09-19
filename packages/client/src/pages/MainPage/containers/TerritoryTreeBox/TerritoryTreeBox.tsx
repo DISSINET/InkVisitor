@@ -14,7 +14,7 @@ import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { ITerritoryFilter } from "types";
 import { searchTree } from "utils";
 import { ContextMenuNewTerritoryModal } from "./ContextMenuNewTerritoryModal/ContextMenuNewTerritoryModal";
-import { StyledTreeWrapper } from "./TerritoryTreeBoxStyles";
+import { StyledNoResults, StyledTreeWrapper } from "./TerritoryTreeBoxStyles";
 import { TerritoryTreeFilter } from "./TerritoryTreeFilter/TerritoryTreeFilter";
 import {
   filterTreeByFavorites,
@@ -24,6 +24,7 @@ import {
   markNodesWithFilters,
 } from "./TerritoryTreeFilterUtils";
 import { TerritoryTreeNode } from "./TerritoryTreeNode/TerritoryTreeNode";
+import { setFilterOpen } from "redux/features/territoryTree/filterOpenSlice";
 
 const initFilterSettings: ITerritoryFilter = {
   nonEmpty: false,
@@ -177,7 +178,10 @@ export const TerritoryTreeBox: React.FC = () => {
     }
   }, [filteredTreeData, territoryId]);
 
-  const [filterIsOpen, setFilterIsOpen] = useState(false);
+  // const [filterIsOpen, setFilterIsOpen] = useState(false);
+  const treeFilterOpen: boolean = useAppSelector(
+    (state) => state.territoryTree.filterOpen
+  );
 
   return (
     <>
@@ -193,26 +197,28 @@ export const TerritoryTreeBox: React.FC = () => {
         <div style={{ display: "flex", alignItems: "center" }}>
           <Button
             onClick={() => {
-              if (filterIsOpen) {
-                setFilterIsOpen(false);
+              if (treeFilterOpen) {
+                dispatch(setFilterOpen(false));
+                // setFilterIsOpen(false);
                 setFilteredTreeData(treeData);
                 setFilterSettings(initFilterSettings);
                 dispatch(setTreeInitialized(false));
               } else {
-                setFilterIsOpen(true);
+                // setFilterIsOpen(true);
+                dispatch(setFilterOpen(true));
               }
             }}
             color="success"
-            inverted={filterIsOpen}
+            inverted={treeFilterOpen}
             fullWidth
             icon={<BsFilter />}
-            tooltipLabel={filterIsOpen ? "hide filter" : "show filter"}
+            tooltipLabel={treeFilterOpen ? "hide filter" : "show filter"}
             tooltipPosition="right"
           />
         </div>
       </ButtonGroup>
 
-      {filterIsOpen && (
+      {treeFilterOpen && (
         <TerritoryTreeFilter
           filterData={filterSettings}
           handleFilterChange={(key, value) => handleFilterChange(key, value)}
@@ -234,16 +240,10 @@ export const TerritoryTreeBox: React.FC = () => {
             updateUserMutation={updateUserMutation}
           />
         )}
-        {filterIsOpen && !filteredTreeData && (
-          <p
-            style={{
-              fontStyle: "italic",
-              fontSize: "1.4rem",
-              margin: "0.5rem",
-            }}
-          >
-            {"No results"}
-          </p>
+
+        {/* No results */}
+        {treeFilterOpen && !filteredTreeData && (
+          <StyledNoResults>{"No results"}</StyledNoResults>
         )}
       </StyledTreeWrapper>
 
