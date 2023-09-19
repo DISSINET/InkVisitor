@@ -2,6 +2,7 @@ import Viewport from "./Viewport";
 import Cursor from "./Cursor";
 import Text from "./Text";
 import Scroller from "./Scroller";
+import { Lines } from "./Lines";
 
 // DrawingOptions bundles required sizes shared by multiple components while drawing into canvas
 export interface DrawingOptions {
@@ -33,6 +34,7 @@ export class Canvas {
   cursor: Cursor;
   text: Text;
   scroller?: Scroller;
+  lines?: Lines;
 
   // to control highlightChangeCb callback
   lastHighlightedText = "";
@@ -242,6 +244,10 @@ export class Canvas {
     this.draw();
   }
 
+  addLines(canvasElement: HTMLCanvasElement): void {
+    this.lines = new Lines(canvasElement, this.lineHeight, this.charWidth);
+  }
+
   /**
    * addScroller adds optional Scroller component to stack
    * @param e
@@ -302,6 +308,9 @@ export class Canvas {
         this.viewport.lineEnd,
         this.text.noLines
       );
+    }
+    if (this.lines) {
+      this.lines.draw(this.viewport);
     }
   }
 }

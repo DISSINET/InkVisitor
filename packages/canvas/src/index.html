@@ -14,6 +14,13 @@
         >
           <div style="display: flex">
             <canvas
+              id="lines"
+              class="lines"
+              width="50px"
+              height="400px"
+              style="outline: none"
+            ></canvas>
+            <canvas
               tabindex="0"
               id="canvas"
               width="400px"
@@ -51,9 +58,11 @@
     <script>
       const customWrapper = new Canvas(
         document.getElementById("canvas"),
-        generateText(1)
+        generateText(100)
       );
       customWrapper.addScroller(document.getElementById("scroller"));
+      customWrapper.addLines(document.getElementById("lines"));
+
       customWrapper.onHighlightChange((text) => {
         document.getElementById("highlight-container").innerHTML = text;
       });
