@@ -2,10 +2,12 @@ import { Checkbox, Input } from "components";
 import React from "react";
 import { ITerritoryFilter } from "types";
 import {
+  StyledCancelButton,
   StyledFilterList,
   StyledFilterWrap,
 } from "./TerritoryTreeFilterStyles";
 import { UserEnums } from "@shared/enums";
+import { MdCancel } from "react-icons/md";
 
 interface TerritoryTreeFilter {
   filterData: ITerritoryFilter;
@@ -43,12 +45,22 @@ export const TerritoryTreeFilter: React.FC<TerritoryTreeFilter> = ({
             }
           />
         )}
-        <Input
-          value={filterData.filter}
-          onChangeFn={(value: string) => handleFilterChange("filter", value)}
-          changeOnType
-          width="full"
-        />
+        <div style={{ position: "relative" }}>
+          <Input
+            value={filterData.filter}
+            onChangeFn={(value: string) => handleFilterChange("filter", value)}
+            changeOnType
+            width="full"
+          />
+          {filterData.filter.length > 0 && (
+            <StyledCancelButton>
+              <MdCancel
+                size={16}
+                onClick={() => handleFilterChange("filter", "")}
+              />
+            </StyledCancelButton>
+          )}
+        </div>
       </StyledFilterList>
     </StyledFilterWrap>
   );

@@ -234,6 +234,17 @@ export const TerritoryTreeBox: React.FC = () => {
             updateUserMutation={updateUserMutation}
           />
         )}
+        {filterIsOpen && !filteredTreeData && (
+          <p
+            style={{
+              fontStyle: "italic",
+              fontSize: "1.4rem",
+              margin: "0.5rem",
+            }}
+          >
+            {"No results"}
+          </p>
+        )}
       </StyledTreeWrapper>
 
       {showCreate && (

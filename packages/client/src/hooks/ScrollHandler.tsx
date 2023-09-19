@@ -74,6 +74,7 @@ const ScrollHandler = () => {
             `Territories-box-content`
           );
 
+          // TODO: filter opened to choose scroll offset
           if (territoryBox && territoryInTree) {
             territoryBox?.scrollTo({
               behavior: territoryInTree ? "smooth" : "auto",
