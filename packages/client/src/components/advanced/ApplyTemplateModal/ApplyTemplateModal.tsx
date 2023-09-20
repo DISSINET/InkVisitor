@@ -41,6 +41,7 @@ export const ApplyTemplateModal: React.FC<ApplyTemplateModal> = ({
 }) => {
   const handleApplyTemplate = async () => {
     if (templateToApply) {
+      console.log(entity.data);
       const entityAfterTemplateApplied = await applyTemplate(
         templateToApply,
         entity,
