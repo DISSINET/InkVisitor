@@ -19,7 +19,7 @@ import { toast } from "react-toastify";
 interface ApplyTemplateModal {
   showModal: boolean;
   setShowApplyTemplateModal: React.Dispatch<React.SetStateAction<boolean>>;
-  entity?: IEntity;
+  entity: IEntity;
   // TODO: check consistency of mutations from different containers
   updateEntityMutation: UseMutationResult<
     void | AxiosResponse<IResponseGeneric>,

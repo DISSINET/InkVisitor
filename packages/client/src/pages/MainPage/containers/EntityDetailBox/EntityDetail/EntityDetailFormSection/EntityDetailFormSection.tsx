@@ -164,8 +164,8 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                 width="full"
                 options={templateOptions}
                 value={templateOptions[0]}
-                onChange={(templateToApply: any) => {
-                  handleAskForTemplateApply(templateToApply);
+                onChange={(templateToApply) => {
+                  handleAskForTemplateApply(templateToApply[0]);
                 }}
               />
             </StyledDetailContentRowValue>
@@ -177,12 +177,12 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                 Applied Template
               </StyledDetailContentRowLabel>
               <StyledDetailContentRowValue>
-                <div style={{ display: "grid" }}>
+                <StyledTagWrap>
                   <EntityTag
                     entity={entity.entities[entity.usedTemplate]}
                     fullWidth
                   />
-                </div>
+                </StyledTagWrap>
               </StyledDetailContentRowValue>
             </StyledDetailContentRow>
           )}
@@ -241,21 +241,19 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
               </StyledDetailContentRowLabel>
               <StyledDetailContentRowValue>
                 <StyledTagWrap>
-                  <div>
-                    <EntityTag
-                      fullWidth
-                      entity={entity.entities[entity.data.parent.territoryId]}
-                      disableDoubleClick={
-                        entity.data.parent.territoryId === rootTerritoryId
-                      }
-                      disableDrag={
-                        entity.data.parent.territoryId === rootTerritoryId
-                      }
-                      disableTooltip={
-                        entity.data.parent.territoryId === rootTerritoryId
-                      }
-                    />
-                  </div>
+                  <EntityTag
+                    fullWidth
+                    entity={entity.entities[entity.data.parent.territoryId]}
+                    disableDoubleClick={
+                      entity.data.parent.territoryId === rootTerritoryId
+                    }
+                    disableDrag={
+                      entity.data.parent.territoryId === rootTerritoryId
+                    }
+                    disableTooltip={
+                      entity.data.parent.territoryId === rootTerritoryId
+                    }
+                  />
                 </StyledTagWrap>
               </StyledDetailContentRowValue>
             </StyledDetailContentRow>

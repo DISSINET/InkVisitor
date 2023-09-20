@@ -722,7 +722,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
                   <StyledDetailSectionEntityList>
                     {entity.usedAsTemplate.map((entityId) => (
                       <React.Fragment key={entityId}>
-                        <div style={{ display: "grid" }}>
+                        <div style={{ display: "inline-grid" }}>
                           <EntityTag
                             entity={entity.entities[entityId]}
                             fullWidth
@@ -849,22 +849,26 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
         }
       />
 
-      <ApplyTemplateModal
-        showModal={showApplyTemplateModal}
-        entity={entity}
-        setShowApplyTemplateModal={setShowApplyTemplateModal}
-        updateEntityMutation={updateEntityMutation}
-        templateToApply={templateToApply}
-        setTemplateToApply={setTemplateToApply}
-      />
+      {entity && (
+        <ApplyTemplateModal
+          showModal={showApplyTemplateModal}
+          entity={entity}
+          setShowApplyTemplateModal={setShowApplyTemplateModal}
+          updateEntityMutation={updateEntityMutation}
+          templateToApply={templateToApply}
+          setTemplateToApply={setTemplateToApply}
+        />
+      )}
 
-      <EntityDetailCreateTemplateModal
-        setCreateTemplateModal={setCreateTemplateModal}
-        entity={entity}
-        showModal={createTemplateModal}
-        userCanEdit={userCanEdit}
-        updateEntityMutation={updateEntityMutation}
-      />
+      {entity && (
+        <EntityDetailCreateTemplateModal
+          setCreateTemplateModal={setCreateTemplateModal}
+          entity={entity}
+          showModal={createTemplateModal}
+          userCanEdit={userCanEdit}
+          updateEntityMutation={updateEntityMutation}
+        />
+      )}
     </>
   );
 };

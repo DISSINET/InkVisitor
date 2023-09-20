@@ -27,10 +27,11 @@ import {
   StyledDetailContentRowLabel,
   StyledDetailContentRowValue,
 } from "../EntityDetailStyles";
+import { getShortLabelByLetterCount } from "utils";
 
 interface EntityDetailCreateTemplateModal {
   showModal: boolean;
-  entity?: IEntity;
+  entity: IEntity;
   userCanEdit: boolean;
   setCreateTemplateModal: React.Dispatch<React.SetStateAction<boolean>>;
   updateEntityMutation: UseMutationResult<
@@ -71,7 +72,13 @@ export const EntityDetailCreateTemplateModal: React.FC<
         setCreateTemplateLabel("");
 
         toast.info(
-          `Template [${variables.class}]: "${variables.label}" created from entity "${entity?.label}"`
+          `Template [${variables.class}]: "${getShortLabelByLetterCount(
+            variables.label,
+            120
+          )}" created from entity "${getShortLabelByLetterCount(
+            entity?.label ?? "[]",
+            120
+          )}"`
         );
       },
     }
