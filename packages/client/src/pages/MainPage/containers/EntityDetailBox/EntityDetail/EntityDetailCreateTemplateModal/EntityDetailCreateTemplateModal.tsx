@@ -76,7 +76,7 @@ export const EntityDetailCreateTemplateModal: React.FC<
             variables.label,
             120
           )}" created from entity "${getShortLabelByLetterCount(
-            entity?.label ?? "[]",
+            entity.label,
             120
           )}"`
         );
@@ -86,14 +86,12 @@ export const EntityDetailCreateTemplateModal: React.FC<
 
   const handleCreateTemplate = () => {
     // create template as a copy of the entity
-    if (entity) {
-      const templateEntity = CTemplateEntity(
-        localStorage.getItem("userrole") as UserEnums.Role,
-        entity,
-        createTemplateLabel
-      );
-      templateCreateMutation.mutate(templateEntity);
-    }
+    const templateEntity = CTemplateEntity(
+      localStorage.getItem("userrole") as UserEnums.Role,
+      entity,
+      createTemplateLabel
+    );
+    templateCreateMutation.mutate(templateEntity);
   };
 
   const handleCancelCreateTemplate = () => {

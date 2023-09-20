@@ -840,6 +840,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
         onCancel={() => setShowTypeSubmit(false)}
         show={showTypeSubmit}
       />
+
       <Loader
         show={
           isFetching ||
