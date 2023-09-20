@@ -178,7 +178,6 @@ export const TerritoryTreeBox: React.FC = () => {
     }
   }, [filteredTreeData, territoryId]);
 
-  // const [filterIsOpen, setFilterIsOpen] = useState(false);
   const treeFilterOpen: boolean = useAppSelector(
     (state) => state.territoryTree.filterOpen
   );
@@ -194,25 +193,23 @@ export const TerritoryTreeBox: React.FC = () => {
             fullWidth
           />
         )}
-        <div style={{ display: "flex", alignItems: "center" }}>
+        <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
           <Button
+            label="filter"
             onClick={() => {
               if (treeFilterOpen) {
                 dispatch(setFilterOpen(false));
-                // setFilterIsOpen(false);
                 setFilteredTreeData(treeData);
                 setFilterSettings(initFilterSettings);
                 dispatch(setTreeInitialized(false));
               } else {
-                // setFilterIsOpen(true);
                 dispatch(setFilterOpen(true));
               }
             }}
             color="success"
-            inverted={treeFilterOpen}
+            inverted={!treeFilterOpen}
             fullWidth
             icon={<BsFilter />}
-            tooltipLabel={treeFilterOpen ? "hide filter" : "show filter"}
             tooltipPosition="right"
           />
         </div>
