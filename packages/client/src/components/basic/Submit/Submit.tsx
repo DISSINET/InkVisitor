@@ -1,17 +1,19 @@
+import { IEntity } from "@shared/types";
 import {
   Button,
   ButtonGroup,
-  Loader,
   Modal,
   ModalContent,
   ModalFooter,
   ModalHeader,
 } from "components";
+import { EntityTag } from "components/advanced";
 import React from "react";
 
 interface Submit {
   title?: string;
   text?: string;
+  entityToSubmit?: IEntity;
   show: boolean;
   onSubmit: () => void;
   onCancel: () => void;
@@ -21,6 +23,7 @@ interface Submit {
 export const Submit: React.FC<Submit> = ({
   title,
   text,
+  entityToSubmit,
   show,
   onSubmit,
   onCancel,
@@ -38,7 +41,9 @@ export const Submit: React.FC<Submit> = ({
       >
         <ModalHeader title={title} />
         <ModalContent>
-          <p>{text}</p>
+          <p>
+            {text} {entityToSubmit && <EntityTag entity={entityToSubmit} />}
+          </p>
         </ModalContent>
         <ModalFooter>
           <ButtonGroup>

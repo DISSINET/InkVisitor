@@ -16,6 +16,7 @@ import React, { useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { StyledModalContent } from "../TemplateListBoxStyles";
+import { getShortLabelByLetterCount } from "utils";
 
 interface TemplateListRemoveModal {
   removeEntityId: string;
@@ -47,7 +48,10 @@ export const TemplateListRemoveModal: React.FC<TemplateListRemoveModal> = ({
         }
         entityToRemove &&
           toast.warning(
-            `Template [${entityToRemove.class}]: ${entityToRemove.label} was removed`
+            `Template [${entityToRemove.class}]: "${getShortLabelByLetterCount(
+              entityToRemove.label,
+              120
+            )}" was removed`
           );
         queryClient.invalidateQueries(["templates"]);
         if (selectedDetailId) {
@@ -73,7 +77,7 @@ export const TemplateListRemoveModal: React.FC<TemplateListRemoveModal> = ({
 
   return (
     <Modal
-      key="remove"
+      key="delete"
       showModal={showModal}
       width="thin"
       onEnterPress={() => {
@@ -84,11 +88,13 @@ export const TemplateListRemoveModal: React.FC<TemplateListRemoveModal> = ({
       }}
       isLoading={templateRemoveMutation.isLoading}
     >
-      <ModalHeader title="Remove Template" />
+      <ModalHeader title="Delete Template" />
       <ModalContent>
         <StyledModalContent>
-          Remove template entity?
-          {entityToRemove && <EntityTag entity={entityToRemove} />}
+          <p>
+            {"Delete template entity?"}{" "}
+            {entityToRemove && <EntityTag entity={entityToRemove} />}
+          </p>
         </StyledModalContent>
       </ModalContent>
       <ModalFooter>
@@ -103,8 +109,8 @@ export const TemplateListRemoveModal: React.FC<TemplateListRemoveModal> = ({
             }}
           />
           <Button
-            key="remove"
-            label="Remove"
+            key="delete"
+            label="Delete"
             color="danger"
             onClick={() => {
               handleRemoveTemplateAccept();

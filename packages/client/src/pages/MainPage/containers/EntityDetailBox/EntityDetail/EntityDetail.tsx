@@ -817,9 +817,10 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
       )}
 
       <Submit
-        title="Remove entity"
-        text="Do you really want to remove this entity?"
-        submitLabel="Remove"
+        title="Delete entity"
+        text="Do you really want to delete this entity?"
+        submitLabel="Delete"
+        entityToSubmit={entity}
         onSubmit={() => {
           deleteEntityMutation.mutate(detailId);
           setShowRemoveSubmit(false);

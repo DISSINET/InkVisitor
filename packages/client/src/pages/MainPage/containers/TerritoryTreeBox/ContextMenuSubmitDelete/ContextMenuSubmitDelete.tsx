@@ -5,6 +5,7 @@ import { Submit, ToastWithLink } from "components";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
+import { getShortLabelByLetterCount } from "utils";
 
 interface ContextMenuSubmitDelete {
   territoryActant: IEntity;
@@ -35,7 +36,10 @@ export const ContextMenuSubmitDelete: React.FC<ContextMenuSubmitDelete> = ({
       onSuccess: () => {
         toast.info(
           <ToastWithLink
-            children={`Territory [${territoryActant.label}] deleted!`}
+            children={`Territory [${getShortLabelByLetterCount(
+              territoryActant.label,
+              120
+            )}] deleted!`}
             linkText="Restore"
             onLinkClick={async () => {
               const response = await api.entityRestore(territoryActant.id);
@@ -86,7 +90,8 @@ export const ContextMenuSubmitDelete: React.FC<ContextMenuSubmitDelete> = ({
   return (
     <Submit
       title={"Delete Territory"}
-      text={`Do you really want do delete Territory [${territoryActant.label}]?`}
+      text={`Do you really want do delete Territory?`}
+      entityToSubmit={territoryActant}
       show={showModal}
       onSubmit={() => onSubmitDelete()}
       onCancel={() => onClose()}
