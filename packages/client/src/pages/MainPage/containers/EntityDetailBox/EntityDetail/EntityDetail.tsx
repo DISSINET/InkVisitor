@@ -177,7 +177,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
         });
     }
     return options;
-  }, [templates]);
+  }, [templates, entity]);
 
   // Audit query
   const {
