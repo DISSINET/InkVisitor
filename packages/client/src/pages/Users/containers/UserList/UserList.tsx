@@ -269,12 +269,13 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
                     }}
                     categoryTypes={[EntityEnums.Class.Territory]}
                     placeholder={"assign a territory"}
+                    excludedActantIds={readTerritories.map((r) => r.territory)}
                   />
                   <StyledTerritoryList>
                     {readTerritories.length && territoryActants ? (
                       readTerritories.map((right: IUserRight) => {
                         const territoryActant = territoryActants.find(
-                          (t: any) => t.territory.id === right.territory
+                          (t) => t.territory.id === right.territory
                         );
 
                         return territoryActant && territoryActant.territory ? (
@@ -347,12 +348,15 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
                       }}
                       categoryTypes={[EntityEnums.Class.Territory]}
                       placeholder={"assign a territory"}
+                      excludedActantIds={writeTerritories.map(
+                        (r) => r.territory
+                      )}
                     />
                     <StyledTerritoryList>
                       {writeTerritories.length && territoryActants ? (
                         writeTerritories.map((right: IUserRight) => {
                           const territoryActant = territoryActants.find(
-                            (t: any) => t.territory.id === right.territory
+                            (t) => t.territory.id === right.territory
                           );
 
                           return territoryActant &&
@@ -513,7 +517,7 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
 
       <Submit
         title={`Delete User ${removingUser ? removingUser.name : ""}`}
-        text={`Do you really want do delete User ${
+        text={`Do you really want to delete User ${
           removingUser ? removingUser.name : ""
         }?`}
         show={removingUser != false}

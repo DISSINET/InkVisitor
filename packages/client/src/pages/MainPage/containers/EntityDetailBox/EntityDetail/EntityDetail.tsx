@@ -177,7 +177,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
         });
     }
     return options;
-  }, [templates]);
+  }, [templates, entity]);
 
   // Audit query
   const {
@@ -722,7 +722,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
                   <StyledDetailSectionEntityList>
                     {entity.usedAsTemplate.map((entityId) => (
                       <React.Fragment key={entityId}>
-                        <div style={{ display: "grid" }}>
+                        <div style={{ display: "inline-grid" }}>
                           <EntityTag
                             entity={entity.entities[entityId]}
                             fullWidth
@@ -817,9 +817,10 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
       )}
 
       <Submit
-        title="Remove entity"
-        text="Do you really want to remove this entity?"
-        submitLabel="Remove"
+        title="Delete entity"
+        text="Do you really want to delete this entity?"
+        submitLabel="Delete"
+        entityToSubmit={entity}
         onSubmit={() => {
           deleteEntityMutation.mutate(detailId);
           setShowRemoveSubmit(false);
@@ -840,6 +841,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
         onCancel={() => setShowTypeSubmit(false)}
         show={showTypeSubmit}
       />
+
       <Loader
         show={
           isFetching ||
@@ -849,22 +851,26 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
         }
       />
 
-      <ApplyTemplateModal
-        showModal={showApplyTemplateModal}
-        entity={entity}
-        setShowApplyTemplateModal={setShowApplyTemplateModal}
-        updateEntityMutation={updateEntityMutation}
-        templateToApply={templateToApply}
-        setTemplateToApply={setTemplateToApply}
-      />
+      {entity && (
+        <ApplyTemplateModal
+          showModal={showApplyTemplateModal}
+          entity={entity}
+          setShowApplyTemplateModal={setShowApplyTemplateModal}
+          updateEntityMutation={updateEntityMutation}
+          templateToApply={templateToApply}
+          setTemplateToApply={setTemplateToApply}
+        />
+      )}
 
-      <EntityDetailCreateTemplateModal
-        setCreateTemplateModal={setCreateTemplateModal}
-        entity={entity}
-        showModal={createTemplateModal}
-        userCanEdit={userCanEdit}
-        updateEntityMutation={updateEntityMutation}
-      />
+      {entity && (
+        <EntityDetailCreateTemplateModal
+          setCreateTemplateModal={setCreateTemplateModal}
+          entity={entity}
+          showModal={createTemplateModal}
+          userCanEdit={userCanEdit}
+          updateEntityMutation={updateEntityMutation}
+        />
+      )}
     </>
   );
 };

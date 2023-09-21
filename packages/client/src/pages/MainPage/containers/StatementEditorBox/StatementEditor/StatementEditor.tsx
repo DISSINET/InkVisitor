@@ -217,7 +217,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         });
     }
     return options;
-  }, [templates]);
+  }, [templates, statement]);
 
   // refetch audit when statement changes
   useEffect(() => {

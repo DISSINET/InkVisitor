@@ -427,6 +427,7 @@ export const StatementListBox: React.FC = () => {
             : statementToDelete?.id
         }]?`}
         show={showSubmit}
+        entityToSubmit={statementToDelete}
         onCancel={() => {
           setShowSubmit(false);
           setStatementToDelete(undefined);
