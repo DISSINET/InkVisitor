@@ -253,6 +253,9 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
             role: userRole,
           } = row.original;
 
+          console.log("rights", rights);
+          console.log("territoryActants", territoryActants);
+
           const readTerritories = rights.filter(
             (r: IUserRight) => r.mode === "read"
           );
@@ -269,12 +272,13 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
                     }}
                     categoryTypes={[EntityEnums.Class.Territory]}
                     placeholder={"assign a territory"}
+                    excludedActantIds={readTerritories.map((r) => r.territory)}
                   />
                   <StyledTerritoryList>
                     {readTerritories.length && territoryActants ? (
                       readTerritories.map((right: IUserRight) => {
                         const territoryActant = territoryActants.find(
-                          (t: any) => t.territory.id === right.territory
+                          (t) => t.territory.id === right.territory
                         );
 
                         return territoryActant && territoryActant.territory ? (
@@ -347,12 +351,15 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
                       }}
                       categoryTypes={[EntityEnums.Class.Territory]}
                       placeholder={"assign a territory"}
+                      excludedActantIds={writeTerritories.map(
+                        (r) => r.territory
+                      )}
                     />
                     <StyledTerritoryList>
                       {writeTerritories.length && territoryActants ? (
                         writeTerritories.map((right: IUserRight) => {
                           const territoryActant = territoryActants.find(
-                            (t: any) => t.territory.id === right.territory
+                            (t) => t.territory.id === right.territory
                           );
 
                           return territoryActant &&
