@@ -22,6 +22,7 @@ import React, { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { DropdownItem } from "types";
+import { getShortLabelByLetterCount } from "utils";
 
 interface TemplateListCreateModal {
   showCreateModal: boolean;
@@ -80,7 +81,10 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
     {
       onSuccess: (data, variables) => {
         toast.info(
-          `Template [${variables.class}]: "${variables.label}" was created`
+          `Template [${variables.class}]: "${getShortLabelByLetterCount(
+            variables.label,
+            120
+          )}" was created`
         );
         queryClient.invalidateQueries(["templates"]);
         if (selectedDetailId) {
@@ -88,6 +92,7 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
         }
         if (variables.class === EntityEnums.Class.Statement) {
           setStatementId(variables.id);
+          queryClient.invalidateQueries(["statement-templates"]);
         } else {
           appendDetailId(variables.id);
         }

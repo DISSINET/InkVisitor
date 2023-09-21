@@ -27,10 +27,11 @@ import {
   StyledDetailContentRowLabel,
   StyledDetailContentRowValue,
 } from "../EntityDetailStyles";
+import { getShortLabelByLetterCount } from "utils";
 
 interface EntityDetailCreateTemplateModal {
   showModal: boolean;
-  entity?: IEntity;
+  entity: IEntity;
   userCanEdit: boolean;
   setCreateTemplateModal: React.Dispatch<React.SetStateAction<boolean>>;
   updateEntityMutation: UseMutationResult<
@@ -71,7 +72,13 @@ export const EntityDetailCreateTemplateModal: React.FC<
         setCreateTemplateLabel("");
 
         toast.info(
-          `Template [${variables.class}]: "${variables.label}" created from entity "${entity?.label}"`
+          `Template [${variables.class}]: "${getShortLabelByLetterCount(
+            variables.label,
+            120
+          )}" created from entity "${getShortLabelByLetterCount(
+            entity.label,
+            120
+          )}"`
         );
       },
     }
@@ -79,14 +86,12 @@ export const EntityDetailCreateTemplateModal: React.FC<
 
   const handleCreateTemplate = () => {
     // create template as a copy of the entity
-    if (entity) {
-      const templateEntity = CTemplateEntity(
-        localStorage.getItem("userrole") as UserEnums.Role,
-        entity,
-        createTemplateLabel
-      );
-      templateCreateMutation.mutate(templateEntity);
-    }
+    const templateEntity = CTemplateEntity(
+      localStorage.getItem("userrole") as UserEnums.Role,
+      entity,
+      createTemplateLabel
+    );
+    templateCreateMutation.mutate(templateEntity);
   };
 
   const handleCancelCreateTemplate = () => {

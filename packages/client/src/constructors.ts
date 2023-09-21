@@ -284,8 +284,9 @@ export const applyTemplate = async (
       }
 
       newEntity.data.territory = entity.data.territory;
-    } else {
-      // entity is not a statement
+    } else if (templateEntity.class === EntityEnums.Class.Territory) {
+      // entity is territory
+      newEntity.data.parent = { ...entity.data.parent };
     }
 
     if (newEntity) {

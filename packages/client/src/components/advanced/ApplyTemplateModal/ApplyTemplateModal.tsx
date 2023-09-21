@@ -15,11 +15,12 @@ import { applyTemplate } from "constructors";
 import React from "react";
 import { UseMutationResult } from "@tanstack/react-query";
 import { toast } from "react-toastify";
+import { getShortLabelByLetterCount } from "utils";
 
 interface ApplyTemplateModal {
   showModal: boolean;
   setShowApplyTemplateModal: React.Dispatch<React.SetStateAction<boolean>>;
-  entity?: IEntity;
+  entity: IEntity;
   // TODO: check consistency of mutations from different containers
   updateEntityMutation: UseMutationResult<
     void | AxiosResponse<IResponseGeneric>,
@@ -39,15 +40,22 @@ export const ApplyTemplateModal: React.FC<ApplyTemplateModal> = ({
   setTemplateToApply,
 }) => {
   const handleApplyTemplate = async () => {
-    if (templateToApply && entity) {
+    if (templateToApply) {
       const entityAfterTemplateApplied = await applyTemplate(
         templateToApply,
         entity,
         localStorage.getItem("userrole") as UserEnums.Role
       );
 
+      // TODO: optimally react with toast only to succesfull creation
       toast.info(
-        `Template "${templateToApply.label}" applied to Statement "${entity.label}"`
+        `Template "${getShortLabelByLetterCount(
+          templateToApply.label,
+          120
+        )}" applied to Statement "${getShortLabelByLetterCount(
+          entity.label,
+          120
+        )}"`
       );
 
       updateEntityMutation.mutate(entityAfterTemplateApplied);
