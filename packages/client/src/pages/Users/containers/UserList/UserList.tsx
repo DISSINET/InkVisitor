@@ -253,9 +253,6 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
             role: userRole,
           } = row.original;
 
-          console.log("rights", rights);
-          console.log("territoryActants", territoryActants);
-
           const readTerritories = rights.filter(
             (r: IUserRight) => r.mode === "read"
           );
