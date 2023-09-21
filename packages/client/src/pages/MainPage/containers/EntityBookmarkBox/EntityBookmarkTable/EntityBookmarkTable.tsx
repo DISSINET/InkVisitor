@@ -5,6 +5,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { CellProps, Column, Row, useTable } from "react-table";
 import { EntityBookmarkTableRow } from "./EntityBookmarkTableRow";
 import { StyledTable, StyledTagWrap } from "./EntityBookmarkTableStyles";
+import { FaTrash } from "react-icons/fa";
 
 type CellType = CellProps<IEntity>;
 
@@ -42,6 +43,8 @@ export const EntityBookmarkTable: React.FC<EntityBookmarkTable> = ({
                   onClick: () => {
                     removeBookmark(folder.id, entity.id);
                   },
+                  tooltipLabel: "delete bookmark",
+                  icon: <FaTrash />,
                 }}
               />
             </StyledTagWrap>

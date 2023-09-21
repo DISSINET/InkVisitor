@@ -513,7 +513,7 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
 
       <Submit
         title={`Delete User ${removingUser ? removingUser.name : ""}`}
-        text={`Do you really want do delete User ${
+        text={`Do you really want to delete User ${
           removingUser ? removingUser.name : ""
         }?`}
         show={removingUser != false}

@@ -13,7 +13,7 @@ import React from "react";
 interface Submit {
   title?: string;
   text?: string;
-  entityToSubmit?: IEntity;
+  entityToSubmit?: IEntity | false;
   show: boolean;
   onSubmit: () => void;
   onCancel: () => void;
@@ -38,12 +38,20 @@ export const Submit: React.FC<Submit> = ({
         showModal={show}
         disableBgClick
         isLoading={loading}
+        width="thin"
       >
         <ModalHeader title={title} />
         <ModalContent>
-          <p>
-            {text} {entityToSubmit && <EntityTag entity={entityToSubmit} />}
-          </p>
+          <div>
+            {text}{" "}
+            {entityToSubmit && (
+              <EntityTag
+                entity={entityToSubmit}
+                disableDoubleClick
+                disableDrag
+              />
+            )}
+          </div>
         </ModalContent>
         <ModalFooter>
           <ButtonGroup>
