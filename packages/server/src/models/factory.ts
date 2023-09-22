@@ -27,7 +27,7 @@ import Holonym from "./relation/holonym";
 import Implication from "./relation/implication";
 import Related from "./relation/related";
 import Superclass from "./relation/superclass";
-import SuperordinateLocation from "./relation/superordinate-location";
+import SuperordinateEntity from "./relation/superordinate-location";
 import PropertyReciprocal from "./relation/property-reciprocal";
 import ActionEventEquivalent from "./relation/action-event-equivalent";
 import SubjectActant1Reciprocal from "./relation/subject-actant1-reciprocal";
@@ -97,8 +97,8 @@ export function getRelationClass(data: UnknownObject): Relation {
       return new Related(data);
     case RelationEnums.Type.Superclass:
       return new Superclass(data);
-    case RelationEnums.Type.SuperordinateLocation:
-      return new SuperordinateLocation(data);
+    case RelationEnums.Type.SuperordinateEntity:
+      return new SuperordinateEntity(data);
     case RelationEnums.Type.Identification:
       return new Identification(data);
     case RelationEnums.Type.Synonym:

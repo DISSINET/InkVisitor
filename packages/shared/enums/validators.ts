@@ -10,7 +10,7 @@ export namespace EnumValidators {
     return (
       [
         RelationEnums.Type.Superclass,
-        RelationEnums.Type.SuperordinateLocation,
+        RelationEnums.Type.SuperordinateEntity,
         RelationEnums.Type.Synonym,
         RelationEnums.Type.Antonym,
         RelationEnums.Type.PropertyReciprocal,
