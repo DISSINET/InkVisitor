@@ -8,7 +8,7 @@ import request from "supertest";
 import { supertestConfig } from "..";
 import { apiPath } from "@common/constants";
 import app from "../../Server";
-import { Db } from "@service/RethinkDB";
+import { Db } from "@service/rethink";
 import { findEntityById } from "@service/shorthands";
 import Statement, { StatementTerritory } from "@models/statement/statement";
 import treeCache from "@service/treeCache";

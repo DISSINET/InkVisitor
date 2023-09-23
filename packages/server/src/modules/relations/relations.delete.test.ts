@@ -4,7 +4,7 @@ import {
   testErroneousResponse,
 } from "@modules/common.test";
 import { RelationDoesNotExist } from "@shared/types/errors";
-import { Db } from "@service/RethinkDB";
+import { Db } from "@service/rethink";
 import request from "supertest";
 import { apiPath } from "@common/constants";
 import app from "../../Server";
@@ -30,7 +30,9 @@ describe("Relations delete", function () {
       const db = new Db();
       await db.initDb();
 
-      const relationEntry = new Relation({ type: RelationEnums.Type.Superclass });
+      const relationEntry = new Relation({
+        type: RelationEnums.Type.Superclass,
+      });
       await relationEntry.save(db.connection);
 
       await request(app)

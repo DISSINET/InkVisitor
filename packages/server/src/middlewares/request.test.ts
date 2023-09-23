@@ -3,7 +3,7 @@ import { UserNotActiveError } from "@shared/types/errors";
 import request from "supertest";
 import { apiPath } from "@common/constants";
 import app from "../Server";
-import { Db } from "@service/RethinkDB";
+import { Db } from "@service/rethink";
 import User from "@models/user/user";
 import { generateAccessToken } from "@common/auth";
 

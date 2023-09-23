@@ -7,7 +7,7 @@ import app from "../../Server";
 import { supertestConfig } from "..";
 import Statement, { StatementTerritory } from "@models/statement/statement";
 import { findEntityById } from "@service/shorthands";
-import { Db } from "@service/RethinkDB";
+import { Db } from "@service/rethink";
 import { prepareEntity } from "@models/entity/entity.test";
 import { prepareRelation } from "@models/relation/relation.test";
 import { RelationEnums } from "@shared/enums";

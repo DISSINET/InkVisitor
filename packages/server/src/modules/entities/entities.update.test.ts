@@ -4,10 +4,13 @@ import request from "supertest";
 import { apiPath } from "@common/constants";
 import app from "../../Server";
 import { supertestConfig } from "..";
-import { Db } from "@service/RethinkDB";
+import { Db } from "@service/rethink";
 import { findEntityById } from "@service/shorthands";
 import { IEntity } from "@shared/types";
-import Statement, { StatementData, StatementTerritory } from "@models/statement/statement";
+import Statement, {
+  StatementData,
+  StatementTerritory,
+} from "@models/statement/statement";
 import { successfulGenericResponse } from "@modules/common.test";
 
 describe("Entities update", function () {

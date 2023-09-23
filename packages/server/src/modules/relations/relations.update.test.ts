@@ -12,7 +12,7 @@ import request from "supertest";
 import { apiPath } from "@common/constants";
 import app from "../../Server";
 import { supertestConfig } from "..";
-import { Db } from "@service/RethinkDB";
+import { Db } from "@service/rethink";
 import { successfulGenericResponse } from "@modules/common.test";
 import Relation from "@models/relation/relation";
 import { RelationEnums } from "@shared/enums";
@@ -81,7 +81,7 @@ describe("Relations update", function () {
       const changeTypeTo: RelationEnums.Type = RelationEnums.Type.Antonym;
       const relationEntry = new Relation({
         type: RelationEnums.Type.Superclass,
-        entityIds: ["1"]
+        entityIds: ["1"],
       });
 
       await relationEntry.save(db.connection);

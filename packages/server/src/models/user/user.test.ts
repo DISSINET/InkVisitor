@@ -1,5 +1,5 @@
 import "ts-jest";
-import { Db } from "@service/RethinkDB";
+import { Db } from "@service/rethink";
 import { clean } from "@modules/common.test";
 import User, { BookmarkFolder, StoredTerritory } from "@models/user/user";
 import { IUser } from "@shared/types";

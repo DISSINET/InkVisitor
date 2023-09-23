@@ -1,5 +1,5 @@
 import "ts-jest";
-import { Db } from "@service/RethinkDB";
+import { Db } from "@service/rethink";
 import { newMockRequest } from "@modules/common.test";
 import { prepareEntity } from "@models/entity/entity.test";
 import Entity from "@models/entity/entity";
@@ -16,36 +16,45 @@ describe("test Synonym.beforeSave", function () {
   beforeAll(async () => {
     await db.initDb();
     request = newMockRequest(db);
-  })
+  });
 
   afterAll(async () => {
     await db.close();
-  })
+  });
 
   test("ok relations", async () => {
     let entities = [new Entity({ id: "1", class: EntityEnums.Class.Action })];
-    const okRelation1 = new Synonym({ entityIds: entities.map(e => e.id) });
+    const okRelation1 = new Synonym({ entityIds: entities.map((e) => e.id) });
     okRelation1.entities = entities;
     await expect(okRelation1.beforeSave(request)).resolves.not.toThrowError();
 
     entities = [new Entity({ id: "2", class: EntityEnums.Class.Concept })];
-    const okRelation2 = new Synonym({ entityIds: entities.map(e => e.id) });
+    const okRelation2 = new Synonym({ entityIds: entities.map((e) => e.id) });
     okRelation2.entities = entities;
     await expect(okRelation1.beforeSave(request)).resolves.not.toThrowError();
   });
 
   test("bad relation", async () => {
-    const entities = [new Entity({ id: "1", class: EntityEnums.Class.Location })];
-    const badRelation = new Synonym({ entityIds: entities.map(e => e.id) });
+    const entities = [
+      new Entity({ id: "1", class: EntityEnums.Class.Location }),
+    ];
+    const badRelation = new Synonym({ entityIds: entities.map((e) => e.id) });
     badRelation.entities = entities;
-    await expect(badRelation.beforeSave(request)).rejects.toBeInstanceOf(ModelNotValidError);
-  })
+    await expect(badRelation.beforeSave(request)).rejects.toBeInstanceOf(
+      ModelNotValidError
+    );
+  });
 
   test("ok classes, but no equal", async () => {
-    const entities = [new Entity({ id: "1", class: EntityEnums.Class.Action }), new Entity({ id: "2", class: EntityEnums.Class.Concept })];
-    const badRelation = new Synonym({ entityIds: entities.map(e => e.id) });
+    const entities = [
+      new Entity({ id: "1", class: EntityEnums.Class.Action }),
+      new Entity({ id: "2", class: EntityEnums.Class.Concept }),
+    ];
+    const badRelation = new Synonym({ entityIds: entities.map((e) => e.id) });
     badRelation.entities = entities;
 
-    await expect(badRelation.beforeSave(request)).rejects.toBeInstanceOf(ModelNotValidError);
-  })
+    await expect(badRelation.beforeSave(request)).rejects.toBeInstanceOf(
+      ModelNotValidError
+    );
+  });
 });

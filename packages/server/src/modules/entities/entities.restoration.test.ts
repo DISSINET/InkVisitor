@@ -24,7 +24,7 @@ import {
   findEntityById,
   getEntitiesDataByClass,
 } from "@service/shorthands";
-import { Db } from "@service/RethinkDB";
+import { Db } from "@service/rethink";
 import Territory from "@models/territory/territory";
 import "ts-jest";
 import { ITerritory } from "@shared/types";

@@ -10,7 +10,7 @@ import { apiPath } from "@common/constants";
 import app from "../../Server";
 import Territory from "@models/territory/territory";
 import { IResponseTree, IStatement, ITerritory } from "@shared/types";
-import { Db } from "@service/RethinkDB";
+import { Db } from "@service/rethink";
 
 const findSubtreeInTree = (
   territories: IResponseTree,

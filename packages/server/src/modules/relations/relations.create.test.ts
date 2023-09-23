@@ -8,7 +8,7 @@ import request from "supertest";
 import { apiPath } from "@common/constants";
 import app from "../../Server";
 import { supertestConfig } from "..";
-import { Db } from "@service/RethinkDB";
+import { Db } from "@service/rethink";
 import "ts-jest";
 import Relation from "@models/relation/relation";
 import { RelationEnums } from "@shared/enums";
@@ -68,7 +68,7 @@ describe("Relations create", function () {
 
       const prepared = new Relation({
         type: RelationEnums.Type.Superclass,
-        entityIds: ["1"]
+        entityIds: ["1"],
       });
 
       await prepared.save(db.connection);
@@ -76,7 +76,7 @@ describe("Relations create", function () {
       const newRelation = new Relation({
         id: prepared.id,
         type: RelationEnums.Type.Superclass,
-        entityIds: ["1"]
+        entityIds: ["1"],
       });
 
       await request(app)

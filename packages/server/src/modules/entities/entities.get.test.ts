@@ -4,8 +4,11 @@ import request from "supertest";
 import { supertestConfig } from "..";
 import { apiPath } from "@common/constants";
 import app from "../../Server";
-import Statement, { StatementData, StatementTerritory } from "@models/statement/statement";
-import { Db } from "@service/RethinkDB";
+import Statement, {
+  StatementData,
+  StatementTerritory,
+} from "@models/statement/statement";
+import { Db } from "@service/rethink";
 
 describe("Entities get method", function () {
   describe("Empty param", () => {

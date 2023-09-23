@@ -1,8 +1,9 @@
 import { Response, Request, NextFunction } from "express";
-import { createConnection, closeConnection, Db } from "@service/RethinkDB";
-import { IRequest } from "src/custom_typings/request";
-import { newMockRequest } from "@modules/common.test";
+import { rethinkConfig } from "@service/rethink";
 import { InternalServerError } from "@shared/types/errors";
+import DbPool from "@service/rethink-pool";
+
+const pool = new DbPool(rethinkConfig);
 
 export default async function dbMiddleware(
   req: Request,
@@ -10,17 +11,18 @@ export default async function dbMiddleware(
   next: NextFunction
 ): Promise<void> {
   try {
-    await createConnection(req);
+    req.db = await pool.acquire();
   } catch (e) {
     next(new InternalServerError("database timeout"));
     return;
   }
 
-  res.on('close', function () {
+  res.on("close", async function () {
     if (req.db.lockInstance) {
       req.db.lockInstance.onError(new Error("client closed the connection"));
     }
-    closeConnection(req);
+
+    await pool.release(req.db);
   });
 
   next();
