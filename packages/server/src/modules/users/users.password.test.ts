@@ -5,7 +5,7 @@ import { apiPath } from "@common/constants";
 import app from "../../Server";
 import { supertestConfig } from "..";
 import mailer, { EmailSubject } from "@service/mailer";
-import { createConnection, Db } from "@service/RethinkDB";
+import { createConnection, Db } from "@service/rethink";
 import User from "@models/user/user";
 import { checkPassword } from "@common/auth";
 import { IResponseGeneric } from "@shared/types";
@@ -17,7 +17,12 @@ describe("Users password", function () {
         .patch(`${apiPath}/users/random/password`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
-        .expect(testErroneousResponse.bind(undefined, new UserDoesNotExits("", "random")))
+        .expect(
+          testErroneousResponse.bind(
+            undefined,
+            new UserDoesNotExits("", "random")
+          )
+        )
         .then(() => done());
     });
   });
@@ -34,10 +39,18 @@ describe("Users password", function () {
           const req = newMockRequest(new Db());
           await createConnection(req);
 
-          const user = await User.findUserByLabel(req.db.connection, supertestConfig.username);
+          const user = await User.findUserByLabel(
+            req.db.connection,
+            supertestConfig.username
+          );
           expect(user).not.toBeNull();
           if (user) {
-            expect(checkPassword(mailer.lastEmailData.rawPassword, user.password || "")).toBeTruthy();
+            expect(
+              checkPassword(
+                mailer.lastEmailData.rawPassword,
+                user.password || ""
+              )
+            ).toBeTruthy();
           }
 
           await req.db.close();
@@ -64,10 +77,15 @@ describe("Users password", function () {
 
           expect(mailer.lastEmailSubject).toBe(EmailSubject.PasswordReset);
 
-          const user = await User.findUserByLabel(req.db.connection, supertestConfig.username);
+          const user = await User.findUserByLabel(
+            req.db.connection,
+            supertestConfig.username
+          );
           expect(user).not.toBeNull();
           if (user) {
-            expect(checkPassword(body.data as string, user.password || "")).toBeTruthy();
+            expect(
+              checkPassword(body.data as string, user.password || "")
+            ).toBeTruthy();
           }
         });
 

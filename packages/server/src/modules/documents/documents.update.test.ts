@@ -4,7 +4,7 @@ import request from "supertest";
 import { apiPath } from "@common/constants";
 import app from "../../Server";
 import { supertestConfig } from "..";
-import { Db } from "@service/RethinkDB";
+import { Db } from "@service/rethink";
 import { successfulGenericResponse } from "@modules/common.test";
 import Document from "@models/document/document";
 

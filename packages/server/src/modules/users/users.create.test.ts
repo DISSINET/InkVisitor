@@ -5,7 +5,7 @@ import { apiPath } from "@common/constants";
 import app from "../../Server";
 import { successfulGenericResponse } from "@modules/common.test";
 import { supertestConfig } from "..";
-import { Db } from "@service/RethinkDB";
+import { Db } from "@service/rethink";
 import User from "@models/user/user";
 import { deleteUser, deleteUsers } from "@service/shorthands";
 

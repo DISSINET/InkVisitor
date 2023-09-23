@@ -1,7 +1,7 @@
 import { apiPath } from "@common/constants";
 import { StatementActant, StatementAction } from "@models/statement/statement";
 import { testErroneousResponse } from "@modules/common.test";
-import { Db } from "@service/RethinkDB";
+import { Db } from "@service/rethink";
 import { deleteEntities } from "@service/shorthands";
 import { EntityEnums } from "@shared/enums";
 import { BadParams } from "@shared/types/errors";

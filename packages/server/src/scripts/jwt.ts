@@ -2,7 +2,7 @@ import "../settings"; // Must be the first import
 
 import { generateAccessToken } from "@common/auth";
 import User from "@models/user/user";
-import { Db } from "@service/RethinkDB";
+import { Db } from "@service/rethink";
 
 (async () => {
   const db = new Db();

@@ -6,7 +6,7 @@ import app from "../../Server";
 import { successfulGenericResponse } from "../common.test";
 import { supertestConfig } from "..";
 import User from "@models/user/user";
-import { Db } from "@service/RethinkDB";
+import { Db } from "@service/rethink";
 import { checkPassword, generateAccessToken, hashPassword } from "@common/auth";
 import { r } from "rethinkdb-ts";
 import { clear } from "console";

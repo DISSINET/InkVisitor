@@ -4,9 +4,12 @@ import request from "supertest";
 import { supertestConfig } from "..";
 import { apiPath } from "@common/constants";
 import app from "../../Server";
-import { Db } from "@service/RethinkDB";
+import { Db } from "@service/rethink";
 import { createEntity } from "@service/shorthands";
-import Statement, { StatementData, StatementTerritory } from "@models/statement/statement";
+import Statement, {
+  StatementData,
+  StatementTerritory,
+} from "@models/statement/statement";
 
 const testValidStatement = (res: any) => {
   expect(res.body).toBeTruthy();
@@ -52,7 +55,9 @@ describe("Statements get", function () {
         db,
         new Statement({
           id: randomId,
-          data: new StatementData({ territory: new StatementTerritory({ territoryId: "2" }) })
+          data: new StatementData({
+            territory: new StatementTerritory({ territoryId: "2" }),
+          }),
         })
       );
       await request(app)
