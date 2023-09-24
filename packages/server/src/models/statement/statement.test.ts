@@ -5,7 +5,7 @@ import Statement, {
   StatementData,
   StatementTerritory,
 } from "./statement";
-import { Db } from "@service/RethinkDB";
+import { Db } from "@service/rethink";
 import { deleteEntities, findEntityById } from "@service/shorthands";
 import Territory from "@models/territory/territory";
 import {

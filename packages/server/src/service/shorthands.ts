@@ -1,6 +1,6 @@
 import { Connection, r as rethink, RDatum, WriteResult } from "rethinkdb-ts";
 import { IEntity, IUser } from "@shared/types";
-import { Db } from "./RethinkDB";
+import { Db } from "./rethink";
 import { IDbModel } from "@models/common";
 import { ModelNotValidError } from "@shared/types/errors";
 import { DbEnums, EntityEnums } from "@shared/enums";

@@ -4,24 +4,28 @@ import request from "supertest";
 import { apiPath } from "@common/constants";
 import app from "../../Server";
 import { supertestConfig } from "..";
-import { Db } from "@service/RethinkDB";
+import { Db } from "@service/rethink";
 import { successfulGenericResponse } from "@modules/common.test";
 import Document from "@models/document/document";
+import { pool } from "@middlewares/db";
 
 describe("modules/documents UPDATE", function () {
+  afterAll(async () => {
+    await pool.end();
+  });
+
   describe("empty data", () => {
-    it("should return a BadParams error wrapped in IResponseGeneric", (done) => {
-      return request(app)
+    it("should return a BadParams error wrapped in IResponseGeneric", async () => {
+      await request(app)
         .put(`${apiPath}/documents/random1345`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
-        .expect(testErroneousResponse.bind(undefined, new BadParams("")))
-        .then(() => done());
+        .expect(testErroneousResponse.bind(undefined, new BadParams("")));
     });
   });
   describe("faulty data ", () => {
-    it("should return an DocumentDoesNotExist error wrapped in IResponseGeneric", (done) => {
-      return request(app)
+    it("should return an DocumentDoesNotExist error wrapped in IResponseGeneric", async () => {
+      await request(app)
         .put(`${apiPath}/documents/random13545`)
         .send({ test: "" })
         .set("authorization", "Bearer " + supertestConfig.token)
@@ -31,8 +35,7 @@ describe("modules/documents UPDATE", function () {
             undefined,
             new DocumentDoesNotExist("", "")
           )
-        )
-        .then(() => done());
+        );
     });
   });
   describe("ok data", () => {

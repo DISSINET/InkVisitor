@@ -35,6 +35,9 @@ dependencies:
   express-jwt:
     specifier: 8.4.1
     version: 8.4.1
+  generic-pool:
+    specifier: ^3.9.0
+    version: 3.9.0
   helmet:
     specifier: ^3.23.1
     version: 3.23.3
@@ -2998,6 +3001,11 @@ packages:
       string-width: 4.2.3
       strip-ansi: 6.0.1
       wide-align: 1.1.5
+    dev: false
+
+  /generic-pool@3.9.0:
+    resolution: {integrity: sha512-hymDOu5B53XvN4QT9dBmZxPX4CWhBPPLguTZ9MMFeFa/Kg0xWVfylOVNlJji/E7yTZWFd/q9GO5TxDLq156D7g==}
+    engines: {node: '>= 4'}
     dev: false
 
   /gensync@1.0.0-beta.2:
