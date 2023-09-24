@@ -6,7 +6,7 @@ export default class DbPool {
   options: RConnectionOptions;
   pool: Pool<Db>;
 
-  constructor(options: RConnectionOptions) {
+  constructor(options: RConnectionOptions & { max: number }) {
     this.options = options;
 
     const factory = {
@@ -15,7 +15,7 @@ export default class DbPool {
       validate: this.validate.bind(this),
     };
 
-    this.pool = createPool<Db>(factory, { ...options, max: 0 });
+    this.pool = createPool<Db>(factory, { ...options });
   }
 
   acquire(): Promise<Db> {

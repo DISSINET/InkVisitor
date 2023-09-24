@@ -1,13 +1,13 @@
 import { Connection, r as rethink } from "rethinkdb-ts";
 import { Response } from "express";
 import { Mutex, Awaiter } from "./mutex";
-import { IRequest } from "../custom_typings/request";
 
 export const rethinkConfig = {
   db: process.env.DB_NAME,
   host: process.env.DB_HOST,
   port: parseInt(process?.env?.DB_PORT || "28015"),
   password: process.env.DB_AUTH,
+  max: parseInt(process.env.DB_POOL_CONNECTIONS || "0") || 0,
 };
 
 export class Db {
