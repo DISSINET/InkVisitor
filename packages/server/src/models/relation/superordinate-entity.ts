@@ -32,7 +32,7 @@ export default class SuperordinateEntity
       return out;
     }
 
-    if (asClass === EntityEnums.Class.Location) {
+    if (EntityEnums.LOESBV.indexOf(asClass) !== -1) {
       const relations: RelationTypes.ISuperordinateEntity[] =
         await Relation.findForEntity(
           conn,
@@ -79,7 +79,7 @@ export default class SuperordinateEntity
   ): Promise<RelationTypes.ISuperordinateEntity[]> {
     let out: RelationTypes.ISuperordinateEntity[] = [];
 
-    if (asClass === EntityEnums.Class.Location) {
+    if (EntityEnums.LOESBV.indexOf(asClass) !== -1) {
       out = await Relation.findForEntity(
         conn,
         parentId,

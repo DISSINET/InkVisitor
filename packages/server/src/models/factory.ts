@@ -27,7 +27,7 @@ import Holonym from "./relation/holonym";
 import Implication from "./relation/implication";
 import Related from "./relation/related";
 import Superclass from "./relation/superclass";
-import SuperordinateEntity from "./relation/superordinate-location";
+import SuperordinateEntity from "./relation/superordinate-entity";
 import PropertyReciprocal from "./relation/property-reciprocal";
 import ActionEventEquivalent from "./relation/action-event-equivalent";
 import SubjectActant1Reciprocal from "./relation/subject-actant1-reciprocal";

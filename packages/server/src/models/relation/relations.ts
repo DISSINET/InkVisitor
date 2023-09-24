@@ -16,7 +16,7 @@ import Related from "./related";
 import SubjectActant1Reciprocal from "./subject-actant1-reciprocal";
 import SubjectSemantics from "./subject-semantics";
 import Superclass from "./superclass";
-import SuperordinateEntity from "./superordinate-location";
+import SuperordinateEntity from "./superordinate-entity";
 import Synonym from "./synonym";
 
 type ISuperclass = RelationTypes.ISuperclass;
