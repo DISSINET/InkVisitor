@@ -12,35 +12,38 @@ import { Db } from "@service/rethink";
 import "ts-jest";
 import Relation from "@models/relation/relation";
 import { RelationEnums } from "@shared/enums";
+import { pool } from "@middlewares/db";
 
 describe("Relations create", function () {
+  afterAll(async () => {
+    await pool.end();
+  });
+
   describe("empty data", () => {
-    it("should return a ModelNotValid", (done) => {
-      return request(app)
+    it("should return a ModelNotValid", async () => {
+      await request(app)
         .post(`${apiPath}/relations`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(
           testErroneousResponse.bind(undefined, new ModelNotValidError(""))
-        )
-        .then(() => done());
+        );
     });
   });
   describe("faulty data ", () => {
-    it("should return a ModelNotValid", (done) => {
-      return request(app)
+    it("should return a ModelNotValid", async () => {
+      await request(app)
         .post(`${apiPath}/relations`)
         .send({ test: "" })
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(
           testErroneousResponse.bind(undefined, new ModelNotValidError(""))
-        )
-        .then(() => done());
+        );
     });
   });
   describe("ok data", () => {
-    it("should return a 200 code with successful response", async (done) => {
+    it("should return a 200 code with successful response", async () => {
       const db = new Db();
       await db.initDb();
 
@@ -58,11 +61,10 @@ describe("Relations create", function () {
         .expect(successfulGenericResponse);
 
       await clean(db);
-      done();
     });
   });
   describe("duplicated id", () => {
-    it("should return a ModelNotValidError", async (done) => {
+    it("should return a ModelNotValidError", async () => {
       const db = new Db();
       await db.initDb();
 
@@ -90,7 +92,6 @@ describe("Relations create", function () {
         );
 
       await clean(db);
-      done();
     });
   });
 });

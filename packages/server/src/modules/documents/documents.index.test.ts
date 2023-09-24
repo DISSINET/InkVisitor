@@ -6,6 +6,7 @@ import app from "../../Server";
 import { Db } from "@service/rethink";
 import Document from "@models/document/document";
 import { deleteDocuments } from "@service/shorthands";
+import { pool } from "@middlewares/db";
 
 describe("modules/documents INDEX", function () {
   const db = new Db();
@@ -26,7 +27,10 @@ describe("modules/documents INDEX", function () {
     await document2.save(db.connection);
   });
 
-  afterAll(async () => await clean(db));
+  afterAll(async () => {
+    await clean(db);
+    await pool.end();
+  });
 
   it("should return a 200 code", async () => {
     await request(app)

@@ -3,7 +3,7 @@ import { rethinkConfig } from "@service/rethink";
 import { InternalServerError } from "@shared/types/errors";
 import DbPool from "@service/rethink-pool";
 
-const pool = new DbPool(rethinkConfig);
+export const pool = new DbPool(rethinkConfig);
 
 export default async function dbMiddleware(
   req: Request,

@@ -11,6 +11,7 @@ import app from "../../Server";
 import Territory from "@models/territory/territory";
 import { IResponseTree, IStatement, ITerritory } from "@shared/types";
 import { Db } from "@service/rethink";
+import { pool } from "@middlewares/db";
 
 const findSubtreeInTree = (
   territories: IResponseTree,
@@ -103,7 +104,11 @@ const testCorrectPaths = (mockTerritories: ITerritory[], res: any) => {
 };
 
 describe("Tree get", function () {
-  it("should return a 200 code with IResponseTree response", async (done) => {
+  afterAll(async () => {
+    await pool.end();
+  });
+
+  it("should return a 200 code with IResponseTree response", async () => {
     const db = new Db();
     await db.initDb();
     const randSuffix = "tree-get" + Math.random().toString();
@@ -154,6 +159,5 @@ describe("Tree get", function () {
       );
 
     await clean(db);
-    return done();
   });
 });

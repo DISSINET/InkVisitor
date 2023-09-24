@@ -1,5 +1,4 @@
 import {
-  clean,
   successfulGenericResponse,
   testErroneousResponse,
 } from "@modules/common.test";
@@ -7,54 +6,41 @@ import {
   AuditDoesNotExist,
   BadParams,
   EntityDoesExist,
-  EntityDoesNotExist,
-  InternalServerError,
-  ModelNotValidError,
 } from "@shared/types/errors";
 import request from "supertest";
 import { apiPath } from "@common/constants";
 import app from "../../Server";
 import { supertestConfig } from "..";
-import Statement, {
-  StatementData,
-  StatementTerritory,
-} from "@models/statement/statement";
-import {
-  deleteEntities,
-  findEntityById,
-  getEntitiesDataByClass,
-} from "@service/shorthands";
+import { findEntityById } from "@service/shorthands";
 import { Db } from "@service/rethink";
-import Territory from "@models/territory/territory";
 import "ts-jest";
-import { ITerritory } from "@shared/types";
 import { prepareEntity } from "@models/entity/entity.test";
-import { EntityEnums, RelationEnums } from "@shared/enums";
-import { prepareRelation } from "@models/relation/relation.test";
-import Relation from "@models/relation/relation";
 import Audit from "@models/audit/audit";
+import { pool } from "@middlewares/db";
 
 describe("Entities restoration", function () {
+  afterAll(async () => {
+    await pool.end();
+  });
+
   describe("empty fromAuditId", () => {
-    it("should return a BadParams error wrapped in IResponseGeneric", (done) => {
-      return request(app)
+    it("should return a BadParams error wrapped in IResponseGeneric", async () => {
+      await request(app)
         .post(`${apiPath}/entities/1/restoration?fromAuditId=`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
-        .expect(testErroneousResponse.bind(undefined, new BadParams("")))
-        .then(() => done());
+        .expect(testErroneousResponse.bind(undefined, new BadParams("")));
     });
   });
   describe("non existing entities", () => {
-    it("should return a AuditDoesNotExist error wrapped in IResponseGeneric", (done) => {
-      return request(app)
+    it("should return a AuditDoesNotExist error wrapped in IResponseGeneric", async () => {
+      await request(app)
         .post(`${apiPath}/entities/random/restoration?fromAuditId=random`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(
           testErroneousResponse.bind(undefined, new AuditDoesNotExist(""))
-        )
-        .then(() => done());
+        );
     });
   });
   describe("ok statement data", () => {
