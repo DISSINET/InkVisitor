@@ -12,6 +12,7 @@ import {
   findEntityById,
 } from "@service/shorthands";
 import { EntityEnums } from "@shared/enums";
+import { pool } from "@middlewares/db";
 
 describe("Tree moveTerritory", function () {
   const db = new Db();
@@ -22,6 +23,7 @@ describe("Tree moveTerritory", function () {
 
   afterAll(async () => {
     await clean(db);
+    await pool.end();
   });
 
   describe("Move T1 after T2", () => {
@@ -42,7 +44,7 @@ describe("Tree moveTerritory", function () {
       expect(t1_2.data.parent ? t1_2.data.parent.order : -1).toEqual(1);
     });
 
-    it("should return a 200 code with IResponseGeneric success response", async (done) => {
+    it("should return a 200 code with IResponseGeneric success response", async () => {
       await request(app)
         .patch(`${apiPath}/tree/${t1.id}/position`)
         .send({
@@ -58,8 +60,6 @@ describe("Tree moveTerritory", function () {
 
       expect(t1.data.parent ? t1.data.parent.order : -1).toEqual(2); // pushed to the end
       expect(t2.data.parent ? t2.data.parent.order : 0).toEqual(1); // remains the same
-
-      return done();
     });
 
     afterAll(async () => {
@@ -96,7 +96,7 @@ describe("Tree moveTerritory", function () {
       expect(t2_2.data.parent ? t2_2.data.parent.order : -1).toEqual(1);
     });
 
-    it("should return a 200 code with IResponseGeneric success response", async (done) => {
+    it("should return a 200 code with IResponseGeneric success response", async () => {
       await request(app)
         .patch(`${apiPath}/tree/${t1_1.id}/position`)
         .send({
@@ -135,8 +135,6 @@ describe("Tree moveTerritory", function () {
       expect(new_t1_1.data.parent ? new_t1_1.data.parent.order : -1).toEqual(
         t2_2.data.parent ? t2_2.data.parent.order + 1 : -1
       );
-
-      return done();
     });
 
     afterAll(async () => {

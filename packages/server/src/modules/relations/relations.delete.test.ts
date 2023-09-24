@@ -11,22 +11,26 @@ import app from "../../Server";
 import { supertestConfig } from "..";
 import Relation from "@models/relation/relation";
 import { RelationEnums } from "@shared/enums";
+import { pool } from "@middlewares/db";
 
 describe("Relations delete", function () {
+  afterAll(async () => {
+    await pool.end();
+  });
+
   describe("bad id", () => {
-    it("should return a RelationDoesNotExist error wrapped in IResponseGeneric", (done) => {
-      return request(app)
+    it("should return a RelationDoesNotExist error wrapped in IResponseGeneric", async () => {
+      await request(app)
         .delete(`${apiPath}/relations/randomid12345`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(
           testErroneousResponse.bind(undefined, new RelationDoesNotExist(""))
-        )
-        .then(() => done());
+        );
     });
   });
   describe("ok data", () => {
-    it("should return a 200 code with successful response", async (done) => {
+    it("should return a 200 code with successful response", async () => {
       const db = new Db();
       await db.initDb();
 
@@ -49,7 +53,6 @@ describe("Relations delete", function () {
         });
 
       await clean(db);
-      done();
     });
   });
 });

@@ -11,20 +11,25 @@ import Territory from "@models/territory/territory";
 import Classification from "@models/relation/classification";
 import Person from "@models/person/person";
 import Concept from "@models/concept/concept";
+import { pool } from "@middlewares/db";
 
 describe("Entities delete", function () {
+  afterAll(async () => {
+    await pool.end();
+  });
+
   describe("faulty data", () => {
-    it("should return a EntityDoesNotExist error wrapped in IResponseGeneric", (done) => {
-      return request(app)
+    it("should return a EntityDoesNotExist error wrapped in IResponseGeneric", async () => {
+      await request(app)
         .delete(`${apiPath}/entities/randomid12345`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(
           testErroneousResponse.bind(undefined, new EntityDoesNotExist("", ""))
-        )
-        .then(() => done());
+        );
     });
   });
+
   describe("ok data", () => {
     const db = new Db();
     const rand = Math.random().toString();
@@ -49,7 +54,6 @@ describe("Entities delete", function () {
       await personEntity.save(db.connection);
       await conceptEntity.save(db.connection);
       await relation.save(db.connection);
-      console.log("done");
     });
 
     afterAll(async () => await clean(db));

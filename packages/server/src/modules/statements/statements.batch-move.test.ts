@@ -16,25 +16,30 @@ import { Db } from "@service/rethink";
 import { findEntityById } from "@service/shorthands";
 import Statement, { StatementTerritory } from "@models/statement/statement";
 import treeCache from "@service/treeCache";
+import { pool } from "@middlewares/db";
 
 describe("statements/batch-move", function () {
+  afterAll(async () => {
+    await pool.end();
+  });
+
   describe("Empty/Invalid params", () => {
-    it("should return a BadParams error wrapped in IResponseGeneric for empty params", () => {
-      return request(app)
+    it("should return a BadParams error wrapped in IResponseGeneric for empty params", async () => {
+      await request(app)
         .put(`${apiPath}/statements/batch-move`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect(testErroneousResponse.bind(undefined, new BadParams("")));
     });
 
-    it("should return a BadParams error wrapped in IResponseGeneric for missing territory id", () => {
-      return request(app)
+    it("should return a BadParams error wrapped in IResponseGeneric for missing territory id", async () => {
+      await request(app)
         .put(`${apiPath}/statements/batch-move?ids=1,2,3`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect(testErroneousResponse.bind(undefined, new BadParams("")));
     });
 
-    it("should return a BadParams error wrapped in IResponseGeneric for missing ids", () => {
-      return request(app)
+    it("should return a BadParams error wrapped in IResponseGeneric for missing ids", async () => {
+      await request(app)
         .put(`${apiPath}/statements/batch-move`)
         .send({ territoryId: "1" })
         .set("authorization", "Bearer " + supertestConfig.token)
@@ -56,14 +61,12 @@ describe("statements/batch-move", function () {
       T1Id = `T1-${randSuffix}`;
     });
 
-    beforeEach(async () => {});
-
     afterAll(async () => {
       await db.close();
     });
 
     it("should return a TerritoryDoesNotExits error wrapped in IResponseGeneric for invalid id", async () => {
-      return request(app)
+      await request(app)
         .put(`${apiPath}/statements/batch-move?ids=1`)
         .send({ territoryId: "random-something" })
         .set("authorization", "Bearer " + supertestConfig.token)
@@ -76,7 +79,7 @@ describe("statements/batch-move", function () {
     });
 
     it("should return a StatementDoesNotExits error wrapped in IResponseGeneric for invalid id", async () => {
-      return request(app)
+      await request(app)
         .put(`${apiPath}/statements/batch-move?ids=1`)
         .send({ territoryId: treeCache.tree.parentMap[""][0].id })
         .set("authorization", "Bearer " + supertestConfig.token)
@@ -100,7 +103,7 @@ describe("statements/batch-move", function () {
       await statement1.save(db.connection);
       await statement2.save(db.connection);
 
-      return await request(app)
+      await request(app)
         .put(
           `${apiPath}/statements/batch-move?ids=${statement1.id},${statement2.id}`
         )

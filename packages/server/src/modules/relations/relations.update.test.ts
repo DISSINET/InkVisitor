@@ -16,44 +16,46 @@ import { Db } from "@service/rethink";
 import { successfulGenericResponse } from "@modules/common.test";
 import Relation from "@models/relation/relation";
 import { RelationEnums } from "@shared/enums";
+import { pool } from "@middlewares/db";
 
 describe("Relations update", function () {
+  afterAll(async () => {
+    await pool.end();
+  });
+
   describe("empty data", () => {
-    it("should return a BadParams error wrapped in IResponseGeneric", (done) => {
-      return request(app)
+    it("should return a BadParams error wrapped in IResponseGeneric", async () => {
+      await request(app)
         .put(`${apiPath}/relations/1`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
-        .expect(testErroneousResponse.bind(undefined, new BadParams("")))
-        .then(() => done());
+        .expect(testErroneousResponse.bind(undefined, new BadParams("")));
     });
   });
   describe("bad id", () => {
-    it("should return an RelationDoesNotExist error wrapped in IResponseGeneric", (done) => {
-      return request(app)
+    it("should return an RelationDoesNotExist error wrapped in IResponseGeneric", async () => {
+      await request(app)
         .put(`${apiPath}/relations/___`)
         .send({ test: "" })
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(
           testErroneousResponse.bind(undefined, new RelationDoesNotExist(""))
-        )
-        .then(() => done());
+        );
     });
   });
   describe("faulty data", () => {
-    it("should return an BadParams error wrapped in IResponseGeneric", (done) => {
-      return request(app)
+    it("should return an BadParams error wrapped in IResponseGeneric", async () => {
+      await request(app)
         .put(`${apiPath}/relations/___`)
         .send({})
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
-        .expect(testErroneousResponse.bind(undefined, new BadParams("")))
-        .then(() => done());
+        .expect(testErroneousResponse.bind(undefined, new BadParams("")));
     });
   });
   describe("faulty data - bad type", () => {
-    it("should return an ModelNotValidError error wrapped in IResponseGeneric", async (done) => {
+    it("should return an ModelNotValidError error wrapped in IResponseGeneric", async () => {
       const db = new Db();
       await db.initDb();
 
@@ -70,11 +72,10 @@ describe("Relations update", function () {
         );
 
       await clean(db);
-      done();
     });
   });
   describe("ok data", () => {
-    it("should return a 200 code with successful response", async (done) => {
+    it("should return a 200 code with successful response", async () => {
       const db = new Db();
       await db.initDb();
 
@@ -102,7 +103,6 @@ describe("Relations update", function () {
         });
 
       await clean(db);
-      done();
     });
   });
 });

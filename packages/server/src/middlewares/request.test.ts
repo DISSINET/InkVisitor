@@ -6,6 +6,7 @@ import app from "../Server";
 import { Db } from "@service/rethink";
 import User from "@models/user/user";
 import { generateAccessToken } from "@common/auth";
+import { pool } from "./db";
 
 describe("Test valid/invalid user", function () {
   const db = new Db();
@@ -30,12 +31,11 @@ describe("Test valid/invalid user", function () {
     inactiveUserToken = generateAccessToken(inactiveUser);
   });
 
-  beforeEach(async () => {});
-
   afterAll(async () => {
     await activeUser.delete(db.connection);
     await inactiveUser.delete(db.connection);
     await clean(db);
+    await pool.end();
   });
 
   it("should return a 200 response for active user", async () => {

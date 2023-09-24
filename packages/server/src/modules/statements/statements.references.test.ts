@@ -1,46 +1,45 @@
-import { testErroneousResponse, createMockTree } from "@modules/common.test";
-import {
-  BadParams,
-  StatementDoesNotExits,
-  TerritoryDoesNotExits,
-} from "@shared/types/errors";
+import { testErroneousResponse } from "@modules/common.test";
+import { BadParams, StatementDoesNotExits } from "@shared/types/errors";
 import request from "supertest";
 import { supertestConfig } from "..";
 import { apiPath } from "@common/constants";
 import app from "../../Server";
 import { Db } from "@service/rethink";
 import { findEntityById } from "@service/shorthands";
-import Statement, { StatementTerritory } from "@models/statement/statement";
-import treeCache from "@service/treeCache";
+import Statement from "@models/statement/statement";
 import { IReference } from "@shared/types";
-import { prepareStatement } from "@models/statement/statement.test";
+import { pool } from "@middlewares/db";
 
 describe("statements/references", function () {
+  afterAll(async () => {
+    await pool.end();
+  });
+
   describe("Empty/Invalid params", () => {
-    it("should return a BadParams error wrapped in IResponseGeneric for empty params", () => {
-      return request(app)
+    it("should return a BadParams error wrapped in IResponseGeneric for empty params", async () => {
+      await request(app)
         .put(`${apiPath}/statements/references`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect(testErroneousResponse.bind(undefined, new BadParams("")));
     });
 
-    it("should return a BadParams error wrapped in IResponseGeneric for missing json data", () => {
-      return request(app)
+    it("should return a BadParams error wrapped in IResponseGeneric for missing json data", async () => {
+      await request(app)
         .put(`${apiPath}/statements/references?ids=1,2,3`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect(testErroneousResponse.bind(undefined, new BadParams("")));
     });
 
-    it("should return a BadParams error wrapped in IResponseGeneric for missing ids", () => {
-      return request(app)
+    it("should return a BadParams error wrapped in IResponseGeneric for missing ids", async () => {
+      await request(app)
         .put(`${apiPath}/statements/references`)
         .send([{ id: "1", resource: "res", value: "val" } as IReference])
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect(testErroneousResponse.bind(undefined, new BadParams("")));
     });
 
-    it("should return a BadParams error wrapped in IResponseGeneric for bad reference data", () => {
-      return request(app)
+    it("should return a BadParams error wrapped in IResponseGeneric for bad reference data", async () => {
+      await request(app)
         .put(`${apiPath}/statements/references?ids=1,2,3`)
         .send([{ id: "", resource: "res", value: "val" } as IReference]) // empty id
         .set("authorization", "Bearer " + supertestConfig.token)
@@ -56,14 +55,12 @@ describe("statements/references", function () {
       await db.initDb();
     });
 
-    beforeEach(async () => {});
-
     afterAll(async () => {
       await db.close();
     });
 
     it("should return a StatementDoesNotExits error wrapped in IResponseGeneric for invalid statements", async () => {
-      return request(app)
+      await request(app)
         .put(
           `${apiPath}/statements/references?ids=shouldnotexist&action=replace`
         )

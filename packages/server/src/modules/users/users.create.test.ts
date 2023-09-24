@@ -1,4 +1,4 @@
-import { clean, testErroneousResponse } from "@modules/common.test";
+import { testErroneousResponse } from "@modules/common.test";
 import { BadParams } from "@shared/types/errors";
 import request from "supertest";
 import { apiPath } from "@common/constants";
@@ -7,28 +7,31 @@ import { successfulGenericResponse } from "@modules/common.test";
 import { supertestConfig } from "..";
 import { Db } from "@service/rethink";
 import User from "@models/user/user";
-import { deleteUser, deleteUsers } from "@service/shorthands";
+import { deleteUsers } from "@service/shorthands";
+import { pool } from "@middlewares/db";
 
 describe("Users create", function () {
+  afterAll(async () => {
+    await pool.end();
+  });
+
   describe("empty data", () => {
-    it("should return a BadParams error wrapped in IResponseGeneric", (done) => {
-      return request(app)
+    it("should return a BadParams error wrapped in IResponseGeneric", async () => {
+      await request(app)
         .post(`${apiPath}/users`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
-        .expect(testErroneousResponse.bind(undefined, new BadParams("")))
-        .then(() => done());
+        .expect(testErroneousResponse.bind(undefined, new BadParams("")));
     });
   });
   describe("faulty data ", () => {
-    it("should return a BadParams error wrapped in IResponseGeneric", (done) => {
-      return request(app)
+    it("should return a BadParams error wrapped in IResponseGeneric", async () => {
+      await request(app)
         .post(`${apiPath}/users`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .send({ test: "" })
         .expect("Content-Type", /json/)
-        .expect(testErroneousResponse.bind(undefined, new BadParams("")))
-        .then(() => done());
+        .expect(testErroneousResponse.bind(undefined, new BadParams("")));
     });
   });
   describe("ok data", () => {

@@ -9,30 +9,34 @@ import Statement, {
   StatementData,
   StatementTerritory,
 } from "@models/statement/statement";
+import { pool } from "@middlewares/db";
 
 describe("Entities detail", function () {
+  afterAll(async () => {
+    await pool.end();
+  });
+
   describe("Empty param", () => {
-    it("should return a BadParams error wrapped in IResponseGeneric", (done) => {
-      return request(app)
+    it("should return a BadParams error wrapped in IResponseGeneric", async () => {
+      await request(app)
         .get(`${apiPath}/entities//detail`)
         .set("authorization", "Bearer " + supertestConfig.token)
-        .expect(testErroneousResponse.bind(undefined, new BadParams("")))
-        .then(() => done());
+        .expect(testErroneousResponse.bind(undefined, new BadParams("")));
     });
   });
+
   describe("Wrong param", () => {
-    it("should return a EntityDoesNotExist error wrapped in IResponseGeneric", (done) => {
-      return request(app)
+    it("should return a EntityDoesNotExist error wrapped in IResponseGeneric", async () => {
+      await request(app)
         .get(`${apiPath}/entities/123/detail`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect(
           testErroneousResponse.bind(undefined, new EntityDoesNotExist("", ""))
-        )
-        .then(() => done());
+        );
     });
   });
   describe("Correct param", () => {
-    it("should return a 200 code with user response", async (done) => {
+    it("should return a 200 code with user response", async () => {
       const db = new Db();
       await db.initDb();
 
@@ -58,7 +62,6 @@ describe("Entities detail", function () {
         });
 
       await clean(db);
-      done();
     });
   });
 });

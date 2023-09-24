@@ -11,31 +11,34 @@ import { supertestConfig } from "..";
 import { Db } from "@service/rethink";
 import "ts-jest";
 import Document from "@models/document/document";
+import { pool } from "@middlewares/db";
 
 describe("modules/documents create", function () {
+  afterAll(async () => {
+    await pool.end();
+  });
+
   describe("empty data", () => {
-    it("should return a ModelNotValid", (done) => {
-      return request(app)
+    it("should return a ModelNotValid", async () => {
+      await request(app)
         .post(`${apiPath}/documents`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(
           testErroneousResponse.bind(undefined, new ModelNotValidError(""))
-        )
-        .then(() => done());
+        );
     });
   });
   describe("faulty data ", () => {
-    it("should return a ModelNotValid", (done) => {
-      return request(app)
+    it("should return a ModelNotValid", async () => {
+      await request(app)
         .post(`${apiPath}/documents`)
         .send({ test: "" })
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(
           testErroneousResponse.bind(undefined, new ModelNotValidError(""))
-        )
-        .then(() => done());
+        );
     });
   });
   describe("ok data", () => {

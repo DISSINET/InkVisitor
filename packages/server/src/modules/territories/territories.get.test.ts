@@ -8,20 +8,24 @@ import { apiPath } from "@common/constants";
 import app from "../../Server";
 import Statement, { StatementData } from "@models/statement/statement";
 import { supertestConfig } from "..";
+import { pool } from "@middlewares/db";
 
 describe("Territories get query", function () {
+  afterAll(async () => {
+    await pool.end();
+  });
+
   describe("Empty param", () => {
-    it("should return a BadParams error wrapped in IResponseGeneric", (done) => {
-      return request(app)
+    it("should return a BadParams error wrapped in IResponseGeneric", async () => {
+      await request(app)
         .get(`${apiPath}/territories`)
         .set("authorization", "Bearer " + supertestConfig.token)
-        .expect(testErroneousResponse.bind(undefined, new BadParams("")))
-        .then(() => done());
+        .expect(testErroneousResponse.bind(undefined, new BadParams("")));
     });
   });
   describe("Wrong param", () => {
-    it("should return a TerritoryDoesNotExits error wrapped in IResponseGeneric", (done) => {
-      return request(app)
+    it("should return a TerritoryDoesNotExits error wrapped in IResponseGeneric", async () => {
+      await request(app)
         .get(`${apiPath}/territories/123`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect(
@@ -29,12 +33,11 @@ describe("Territories get query", function () {
             undefined,
             new TerritoryDoesNotExits("", "")
           )
-        )
-        .then(() => done());
+        );
     });
   });
   describe("Correct param", () => {
-    it("should return a 200 code with IResponseTerritory response", async (done) => {
+    it("should return a 200 code with IResponseTerritory response", async () => {
       const db = new Db();
       await db.initDb();
       await deleteEntities(db);
@@ -85,7 +88,6 @@ describe("Territories get query", function () {
         });
 
       await clean(db);
-      return done();
     });
   });
 });

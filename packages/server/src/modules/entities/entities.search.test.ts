@@ -11,46 +11,51 @@ import "ts-jest";
 import { supertestConfig } from "..";
 import app from "../../Server";
 import { prepareStatement } from "@models/statement/statement.test";
+import { pool } from "@middlewares/db";
 
 describe("Entities search (requests)", function () {
+  afterAll(async () => {
+    await pool.end();
+  });
+
   describe("empty data", () => {
-    it("should return a BadParams error wrapped in IResponseGeneric", (done) => {
-      return request(app)
+    it("should return a BadParams error wrapped in IResponseGeneric", async () => {
+      await request(app)
         .post(`${apiPath}/entities/search`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
-        .expect(testErroneousResponse.bind(undefined, new BadParams("")))
-        .then(() => done());
+        .expect(testErroneousResponse.bind(undefined, new BadParams("")));
     });
   });
   describe("invalid request data(only class)", () => {
-    it("should return a BadParams error wrapped in IResponseGeneric", (done) => {
-      return request(app)
+    it("should return a BadParams error wrapped in IResponseGeneric", async () => {
+      await request(app)
         .post(`${apiPath}/entities/search`)
         .send({ class: EntityEnums.Class.Concept })
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
-        .expect(testErroneousResponse.bind(undefined, new BadParams("")))
-        .then(() => done());
+        .expect(testErroneousResponse.bind(undefined, new BadParams("")));
     });
   });
   describe("invalid class data", () => {
-    it("should return a BadParams error wrapped in IResponseGeneric", (done) => {
-      return request(app)
+    it("should return a BadParams error wrapped in IResponseGeneric", async () => {
+      await request(app)
         .post(`${apiPath}/entities/search`)
         .send({ class: "something", label: "mnop" })
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
-        .expect(testErroneousResponse.bind(undefined, new BadParams("")))
-        .then(() => done());
+        .expect(testErroneousResponse.bind(undefined, new BadParams("")));
     });
   });
 });
 
 describe("Entities search (params)", function () {
+  afterAll(async () => {
+    await pool.end();
+  });
+
   describe("search by params", () => {
     let db: Db;
-    const rand = Math.random().toString();
 
     const [, entity] = prepareEntity();
     entity.label = "entity";
@@ -95,7 +100,7 @@ describe("Entities search (params)", function () {
     });
 
     describe("search only class + by existing label", () => {
-      it("should return a 200 code with successful response", async (done) => {
+      it("should return a 200 code with successful response", async () => {
         await request(app)
           .post(`${apiPath}/entities/search`)
           .send({ class: entity.class, label: entity.label })
@@ -105,13 +110,11 @@ describe("Entities search (params)", function () {
           .expect((res: Response) => {
             expect(res.body[0].entityId).toEqual(entity.id);
           });
-
-        done();
       });
     });
 
     describe("search only by non-existing label", () => {
-      it("should return a 400 code with successful response for invalid label", async (done) => {
+      it("should return a 400 code with successful response for invalid label", async () => {
         await request(app)
           .post(`${apiPath}/entities/search`)
           .send({ label: entity.label + "xxxx" })
@@ -121,13 +124,11 @@ describe("Entities search (params)", function () {
           .expect((res: Response) => {
             expect(res.body).toHaveLength(0);
           });
-
-        done();
       });
     });
 
     describe("search only by class + existing entity in statement", () => {
-      it("should return a 200 code with successful response", async (done) => {
+      it("should return a 200 code with successful response", async () => {
         await request(app)
           .post(`${apiPath}/entities/search`)
           .send({
@@ -141,13 +142,11 @@ describe("Entities search (params)", function () {
             expect(res.body).toHaveLength(1);
             expect(res.body[0].entityId).toEqual(linkedEntity.id);
           });
-
-        done();
       });
     });
 
     describe("search only by non-existing entity in statement", () => {
-      it("should return a 200 code with successful response", async (done) => {
+      it("should return a 200 code with successful response", async () => {
         await request(app)
           .post(`${apiPath}/entities/search`)
           .send({
@@ -159,13 +158,11 @@ describe("Entities search (params)", function () {
           .expect((res: Response) => {
             expect(res.body).toHaveLength(0);
           });
-
-        done();
       });
     });
 
     describe("search only by class + existing action in statement", () => {
-      it("should return a 200 code with successful response", async (done) => {
+      it("should return a 200 code with successful response", async () => {
         await request(app)
           .post(`${apiPath}/entities/search`)
           .send({
@@ -179,13 +176,11 @@ describe("Entities search (params)", function () {
             expect(res.body).toHaveLength(1);
             expect(res.body[0].entityId).toEqual(linkedEntity.id);
           });
-
-        done();
       });
     });
 
     describe("search only by non-existing action in statement", () => {
-      it("should return a 200 code with empty response", async (done) => {
+      it("should return a 200 code with empty response", async () => {
         await request(app)
           .post(`${apiPath}/entities/search`)
           .send({
@@ -197,14 +192,12 @@ describe("Entities search (params)", function () {
           .expect((res: Response) => {
             expect(res.body).toHaveLength(0);
           });
-
-        done();
       });
     });
 
     describe("search by all params", () => {
       describe("using entity id", () => {
-        it("should return a 200 code with successful response", async (done) => {
+        it("should return a 200 code with successful response", async () => {
           await request(app)
             .post(`${apiPath}/entities/search`)
             .send({
@@ -218,13 +211,11 @@ describe("Entities search (params)", function () {
             .expect((res: Response) => {
               expect(res.body[0].entityId).toEqual(linkedEntity.id);
             });
-
-          done();
         });
       });
 
       describe("using action id", () => {
-        it("should return a 200 code with successful response", async (done) => {
+        it("should return a 200 code with successful response", async () => {
           await request(app)
             .post(`${apiPath}/entities/search`)
             .send({
@@ -238,15 +229,13 @@ describe("Entities search (params)", function () {
             .expect((res: Response) => {
               expect(res.body[0].entityId).toEqual(linkedEntity.id);
             });
-
-          done();
         });
       });
     });
 
     describe("search by all params + misused label", () => {
       describe("using entity id", () => {
-        it("should return a 200 code with empty response", async (done) => {
+        it("should return a 200 code with empty response", async () => {
           await request(app)
             .post(`${apiPath}/entities/search`)
             .send({
@@ -260,13 +249,11 @@ describe("Entities search (params)", function () {
             .expect((res: Response) => {
               expect(res.body).toHaveLength(0);
             });
-
-          done();
         });
       });
 
       describe("using action id", () => {
-        it("should return a 200 code with empty response", async (done) => {
+        it("should return a 200 code with empty response", async () => {
           await request(app)
             .post(`${apiPath}/entities/search`)
             .send({
@@ -280,8 +267,6 @@ describe("Entities search (params)", function () {
             .expect((res: Response) => {
               expect(res.body).toHaveLength(0);
             });
-
-          done();
         });
       });
     });

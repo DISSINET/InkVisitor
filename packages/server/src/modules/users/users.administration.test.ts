@@ -3,11 +3,16 @@ import request from "supertest";
 import { apiPath } from "@common/constants";
 import app from "../../Server";
 import { supertestConfig } from "..";
+import { pool } from "@middlewares/db";
 
 describe("Users administration", function () {
+  afterAll(async () => {
+    await pool.end();
+  });
+
   describe("Default check", () => {
-    it("should return a 200 code", () => {
-      return request(app)
+    it("should return a 200 code", async () => {
+      await request(app)
         .get(`${apiPath}/users/administration`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect(200)
