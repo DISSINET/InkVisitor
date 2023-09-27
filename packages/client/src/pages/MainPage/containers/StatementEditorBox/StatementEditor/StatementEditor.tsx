@@ -655,8 +655,8 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                   width="full"
                   options={templateOptions}
                   value={templateOptions[0]}
-                  onChange={(templateToApply: any) => {
-                    handleAskForTemplateApply(templateToApply);
+                  onChange={(templateToApply) => {
+                    handleAskForTemplateApply(templateToApply[0]);
                   }}
                 />
               </StyledEditorContentRowValue>
