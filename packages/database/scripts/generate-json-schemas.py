@@ -31,7 +31,7 @@ files_and_classes = [
     {'file': input_path + 'types/relation.ts', 'class': 'Relation.IRelated'},
     {'file': input_path + 'types/relation.ts', 'class': 'Relation.IActionEventEquivalent'},
     {'file': input_path + 'types/relation.ts', 'class': 'Relation.ISubjectActant1Reciprocal'},
-    {'file': input_path + 'types/relation.ts', 'class': 'Relation.ISuperordinateLocation'},
+    {'file': input_path + 'types/relation.ts', 'class': 'Relation.ISuperordinateEntity'},
     {'file': input_path + 'types/relation.ts', 'class': 'Relation.IPropertyReciprocal'},
     {'file': input_path + 'types/relation.ts', 'class': 'Relation.ISuperclass'},
     {'file': input_path + 'types/relation.ts', 'class': 'Relation.IHolonym'},
@@ -52,7 +52,7 @@ files_and_classes = [
 #  {'file': input_path + 'types/actant.ts', 'class': 'IActant'},
 #  {'file': input_path + 'types/relation.ts', 'class': 'Relation.IClassification'},
  # {'file': input_path + 'types/relation.ts', 'class': 'Relation.ISubjectActant1Reciprocal'},
-# {'file': input_path + 'types/relation.ts', 'class': 'Relation.ISuperordinateLocation'},
+# {'file': input_path + 'types/relation.ts', 'class': 'Relation.ISuperordinateEntity'},
 #]
 
 for case in files_and_classes:

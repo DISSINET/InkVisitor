@@ -1,7 +1,8 @@
 export namespace RelationEnums {
   export enum Type {
     Superclass = "SCL",
-    SuperordinateLocation = "SOL",
+    // SuperordinateEntity = "SOL",
+    SuperordinateEntity = "SOE",
     Synonym = "SYN",
     Antonym = "ANT",
     Holonym = "HOL",
@@ -18,7 +19,7 @@ export namespace RelationEnums {
   }
   export const AllTypes: Type[] = [
     Type.Superclass,
-    Type.SuperordinateLocation,
+    Type.SuperordinateEntity,
     Type.Synonym,
     Type.Antonym,
     Type.Holonym,
@@ -36,7 +37,7 @@ export namespace RelationEnums {
   // Used in detail relations section => Preserves order (excludes Action types)
   export const EntityDetailTypes: Type[] = [
     Type.Superclass,
-    Type.SuperordinateLocation,
+    Type.SuperordinateEntity,
     Type.Synonym,
     Type.Antonym,
     Type.Holonym,
@@ -51,7 +52,7 @@ export namespace RelationEnums {
   // Used in tooltip => Preserves order
   export const TooltipTypes: Type[] = [
     Type.Superclass,
-    Type.SuperordinateLocation,
+    Type.SuperordinateEntity,
     Type.Synonym,
     Type.ActionEventEquivalent,
     Type.Classification,
