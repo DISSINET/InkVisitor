@@ -55,6 +55,14 @@ export namespace EntityEnums {
     Class.Resource,
     Class.Being,
   ];
+  export const LOESBV = [
+    Class.Location,
+    Class.Object,
+    Class.Event,
+    Class.Statement,
+    Class.Being,
+    Class.Value,
+  ];
 
   export enum Extension {
     Any = "*",
