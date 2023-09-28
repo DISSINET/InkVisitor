@@ -54,7 +54,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
   const [selectedCategory, setSelectedCategory] = useState<DropdownItem>(
     categorySelected && categorySelected.value !== DropdownAny
       ? categorySelected
-      : categories[0]
+      : { value: categories[0].value, label: categories[0].value }
   );
 
   const [selectedLanguage, setSelectedLanguage] = useState<
