@@ -40,11 +40,41 @@ export const StyledUsername = styled.div`
 export const StyledRightHeader = styled.div`
   display: flex;
 `;
+export const StyledThemeSwitcher = styled.div`
+  display: inline-flex;
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+  margin-right: 10px;
+  border-width: 2px;
+  border-style: solid;
+  border-color: ${({ theme }) => theme.color.gray["800"]};
+`;
+
+interface StyledThemeSwitcherIcon {
+  selected: boolean;
+}
+export const StyledThemeSwitcherIcon = styled.div<StyledThemeSwitcherIcon>`
+  padding: 5px 10px;
+  font-size: 16px;
+  transition: 0.3s all;
+  background-color: ${({ theme, selected }) =>
+    selected ? theme.color.gray["800"] : theme.color.gray["600"]};
+  color: ${({ theme, selected }) =>
+    selected ? "white" : theme.color.gray["400"]};
+`;
+
 export const StyledUser = styled.div`
   display: flex;
   align-items: center;
   margin-right: ${({ theme }) => theme.space[4]};
 `;
+
+export const StyledMenu = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
 export const StyledLoaderWrap = styled.div`
   height: 1rem;
   width: 1rem;

@@ -87,9 +87,6 @@ export const App: React.FC = () => {
     (state) => state.theme
   );
 
-  const handleThemeChange = (newTheme: string) => {
-    dispatch(setTheme(newTheme));
-  }
 
   const themeConfig = useMemo<ThemeType>(() => {
     if (selectedThemeId === "dark") {

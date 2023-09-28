@@ -7,7 +7,7 @@ import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { BeatLoader } from "react-spinners";
 import { toast } from "react-toastify";
-import { useAppSelector } from "redux/hooks";
+import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { Menu } from "..";
 import packageJson from "../../../../package.json";
 import {
@@ -25,7 +25,12 @@ import {
   StyledText,
   StyledUser,
   StyledUsername,
+  StyledThemeSwitcher,
+  StyledThemeSwitcherIcon,
+  StyledMenu,
 } from "./PageHeaderStyles";
+import { setTheme } from "redux/features/themeSlice";
+import { MdDarkMode, MdSunny } from "react-icons/md";
 
 interface LeftHeader {
   tempLocation: string | false;
@@ -161,6 +166,13 @@ export const RightHeader: React.FC<RightHeader> = React.memo(
       ""
     );
 
+    const dispatch = useAppDispatch();
+    const selectedThemeId = useAppSelector((state) => state.theme);
+
+    const handleThemeChange = (newTheme: string) => {
+      dispatch(setTheme(newTheme));
+    };
+
     return (
       <>
         {env === "sandbox" && (
@@ -174,6 +186,19 @@ export const RightHeader: React.FC<RightHeader> = React.memo(
           </>
         )}
         <StyledRightHeader>
+          <StyledThemeSwitcher
+            onClick={() => {
+              handleThemeChange(selectedThemeId === "light" ? "dark" : "light");
+            }}
+          >
+            <StyledThemeSwitcherIcon selected={selectedThemeId === "light"}>
+              <MdSunny />
+            </StyledThemeSwitcherIcon>
+            <StyledThemeSwitcherIcon selected={selectedThemeId === "dark"}>
+              <MdDarkMode />
+            </StyledThemeSwitcherIcon>
+          </StyledThemeSwitcher>
+
           {userName.length > 0 ? (
             <StyledUser>
               <StyledText>logged as</StyledText>
@@ -197,12 +222,14 @@ export const RightHeader: React.FC<RightHeader> = React.memo(
               <Loader size={10} show />
             </div>
           )}
-          <Menu
-            userRole={userRole}
-            tempLocation={tempLocation}
-            setTempLocation={setTempLocation}
-            handleLogOut={handleLogOut}
-          />
+          <StyledMenu>
+            <Menu
+              userRole={userRole}
+              tempLocation={tempLocation}
+              setTempLocation={setTempLocation}
+              handleLogOut={handleLogOut}
+            />
+          </StyledMenu>
         </StyledRightHeader>
       </>
     );
