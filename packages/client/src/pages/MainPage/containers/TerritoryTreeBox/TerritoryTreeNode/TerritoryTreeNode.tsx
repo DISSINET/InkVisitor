@@ -260,7 +260,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
                 id={`territory${id}`}
                 style={{
                   backgroundColor: foundByRecursion
-                    ? theme.color.blue["200"]
+                    ? theme.color.foundByTreeFilter
                     : "",
                 }}
               >

@@ -55,6 +55,7 @@ const theme = {
     primaryTransparent: "rgba(9,16,52,0.2)",
     modalBg: "rgba(9,16,52,0.3)",
 
+    foundByTreeFilter: "#b4c0e8",
     tableSelection: "#bce5ff",
     tableSelectionHover: "#e0f3ff",
     focusedCheckbox: "rgba(9,16,52,0.1)",
