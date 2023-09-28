@@ -1,5 +1,6 @@
 import { EntityEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
+import theme from "Theme/theme";
 import { useSearchParams } from "hooks";
 import React, { ReactNode, useEffect, useMemo, useRef } from "react";
 import {
@@ -8,6 +9,7 @@ import {
   useDrag,
   useDrop,
 } from "react-dnd";
+import { FaStar } from "react-icons/fa";
 import { setDraggedEntity } from "redux/features/territoryTree/draggedEntitySlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import {
@@ -22,6 +24,8 @@ import {
   StyledElvlWrapper,
   StyledEntityTag,
   StyledLabel,
+  StyledLabelWrap,
+  StyledStarWrap,
   StyledTagWrapper,
 } from "./TagStyles";
 
@@ -72,7 +76,7 @@ export const Tag: React.FC<TagProps> = ({
   borderStyle = "solid",
   button,
   elvlButtonGroup,
-  invertedLabel,
+  invertedLabel = false,
   showOnly,
   fullWidth = false,
   index = -1,
@@ -179,45 +183,50 @@ export const Tag: React.FC<TagProps> = ({
     !disableDoubleClick && appendDetailId(propId);
   };
 
-  const getShortTag = () => {
+  const renderLabel = (labelOnly: boolean = false) => {
     return (
-      <>
-        {showOnly === "entity" ? (
-          <>{renderEntityTag()}</>
-        ) : (
-          <>
-            <StyledLabel
-              invertedLabel={invertedLabel}
-              status={status}
-              borderStyle={borderStyle}
-              fullWidth={fullWidth}
-              isFavorited={isFavorited}
-              labelOnly
-              isItalic={labelItalic}
-            >
-              {label}
-            </StyledLabel>
-          </>
+      <StyledLabelWrap invertedLabel={invertedLabel}>
+        {isFavorited && (
+          <StyledStarWrap>
+            <FaStar
+              color={theme.color["warning"]}
+              style={{ marginBottom: "0.1rem" }}
+            />
+          </StyledStarWrap>
         )}
-        {button && renderButton()}
-      </>
-    );
-  };
-
-  const getFullTag = () => {
-    return (
-      <>
-        {renderEntityTag()}
         <StyledLabel
           invertedLabel={invertedLabel}
           status={status}
           borderStyle={borderStyle}
           fullWidth={fullWidth}
           isFavorited={isFavorited}
+          labelOnly={labelOnly}
           isItalic={labelItalic}
         >
           {label}
         </StyledLabel>
+      </StyledLabelWrap>
+    );
+  };
+
+  const renderShortTag = () => {
+    return (
+      <>
+        {showOnly === "entity" ? (
+          <>{renderEntityTag()}</>
+        ) : (
+          <>{renderLabel(true)}</>
+        )}
+        {button && renderButton()}
+      </>
+    );
+  };
+
+  const renderFullTag = () => {
+    return (
+      <>
+        {renderEntityTag()}
+        {renderLabel()}
         {elvlButtonGroup && renderElvl()}
         {button && renderButton()}
       </>
@@ -236,7 +245,7 @@ export const Tag: React.FC<TagProps> = ({
         onClick={(e: React.MouseEvent) => e.stopPropagation()}
         onDoubleClick={(e: React.MouseEvent) => onDoubleClick(e)}
       >
-        {showOnly ? <>{getShortTag()}</> : <>{getFullTag()}</>}
+        {showOnly ? <>{renderShortTag()}</> : <>{renderFullTag()}</>}
       </StyledTagWrapper>
     </>
   );
