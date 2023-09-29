@@ -7,7 +7,7 @@ interface StyledContainer {
   arrowoffset: number;
 }
 export const StyledContainer = styled(animated.div)<StyledContainer>`
-  color: ${({ theme }) => theme.color["white"]};
+  color: ${({ theme }) => theme.color.tooltipColor};
   background-color: ${({ theme, $color }) => theme.color[$color]};
   min-width: ${({ theme }) => theme.space[8]};
   font-size: ${({ theme }) => theme.fontSize["xxs"]};
@@ -55,7 +55,8 @@ export const StyledArrow = styled.div`
   height: 10px;
   &:after {
     content: "";
-    background-color: ${({ theme }) => theme.color["black"]};
+    /* background-color: ${({ theme }) => theme.color["black"]}; */
+    background-color: black;
     position: absolute;
     left: 0;
     transform: rotate(45deg);

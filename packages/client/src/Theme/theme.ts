@@ -83,6 +83,8 @@ const theme = {
     warningMessage: "#FFE089",
     warningText: "#ffbb00",
 
+    tooltipColor: "#fff",
+    tooltipBackground: "#000",
     tooltipBoxShadow: "rgba(0, 0, 0, 0.3)",
     tooltipArrowBoxShadow: "rgba(0, 0, 0, 0.1)",
 

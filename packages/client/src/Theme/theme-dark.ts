@@ -49,19 +49,6 @@ const darkTheme = {
     development: "#9eaad7",
     sandbox: "#e59857",
 
-    // entityC: "#7c4344",
-    // entityE: "#27454b",
-    // entityG: "#294136",
-    // entityL: "#774c77",
-    // entityO: "#065769",
-    // entityP: "#075466",
-    // entityB: "#000812",
-    // entityR: "#612c23",
-    // entityS: "#002545",
-    // entityA: "#12031a",
-    // entityT: "hsl(212, 22%, 50%)",
-    // entityV: "#454545",
-
     entityC: "#83BCB6",
     entityE: "#D8B5A5",
     entityG: "#D6A5C9",
@@ -77,9 +64,6 @@ const darkTheme = {
     // seda
     entityV: "#BAB0AC",
 
-    tooltipBoxShadow: "rgba(255, 255, 255, 0.3)",
-    tooltipArrowBoxShadow: "rgba(255, 255, 255, 0.1)",
-
     elementType: {
       action: "#145",
       actant: "#589",
@@ -87,16 +71,6 @@ const darkTheme = {
       class: "#b79",
       ident: "#dac",
     },
-
-    // ping: {
-    //   "-1": "white",
-    //   "0": "#22b",
-    //   "1": "#349",
-    //   "2": "#46a",
-    //   "3": "#57b",
-    //   "4": "#68c",
-    //   "5": "#79d",
-    // },
 
     0: "#5f6c7b",
     1: "#fff",
