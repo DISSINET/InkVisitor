@@ -4,7 +4,7 @@ import {
   MdOutlineCheckBoxOutlineBlank,
 } from "react-icons/md";
 import theme from "Theme/theme";
-import { StyledCheckboxWrapper } from "./CheckboxStyles";
+import { StyledCheckboxWrapper, StyledLabel } from "./CheckboxStyles";
 
 interface Checkbox {
   value: boolean;
@@ -15,6 +15,7 @@ interface Checkbox {
 export const Checkbox: React.FC<Checkbox> = ({
   value,
   onChangeFn,
+  label,
   size = 18,
 }) => {
   const [checked, setChecked] = useState(value);
@@ -46,6 +47,7 @@ export const Checkbox: React.FC<Checkbox> = ({
           }}
         />
       )}
+      <StyledLabel onClick={() => setChecked(!checked)}>{label}</StyledLabel>
     </StyledCheckboxWrapper>
   );
 };

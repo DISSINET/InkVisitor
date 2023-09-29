@@ -18,6 +18,9 @@ const ScrollHandler = () => {
   const disableTreeScroll: boolean = useAppSelector(
     (state) => state.territoryTree.disableTreeScroll
   );
+  const treeFilterOpen: boolean = useAppSelector(
+    (state) => state.territoryTree.filterOpen
+  );
 
   const dispatch = useAppDispatch();
 
@@ -74,10 +77,13 @@ const ScrollHandler = () => {
             `Territories-box-content`
           );
 
+          // TODO: filter opened to choose scroll offset
           if (territoryBox && territoryInTree) {
             territoryBox?.scrollTo({
               behavior: territoryInTree ? "smooth" : "auto",
-              top: territoryInTree ? territoryInTree.offsetTop - 103 : 0,
+              top: territoryInTree
+                ? territoryInTree.offsetTop - (treeFilterOpen ? 165 : 104)
+                : 0,
             });
           }
         }, 200);
@@ -85,7 +91,7 @@ const ScrollHandler = () => {
         dispatch(setDisableTreeScroll(false));
       }
     }
-  }, [territoryId, treeStatus, isFetchingTree]);
+  }, [territoryId, treeStatus, isFetchingTree, treeFilterOpen]);
 
   return null;
 };

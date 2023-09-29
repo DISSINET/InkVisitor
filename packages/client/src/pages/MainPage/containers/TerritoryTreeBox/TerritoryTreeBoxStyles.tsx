@@ -6,3 +6,8 @@ export const StyledTreeWrapper = styled.div`
   flex-direction: column;
   overflow: auto;
 `;
+export const StyledNoResults = styled.p`
+  font-style: italic;
+  font-size: 1.4rem;
+  margin: 0.5rem;
+`;
