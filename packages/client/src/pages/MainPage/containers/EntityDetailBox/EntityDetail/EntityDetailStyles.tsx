@@ -43,6 +43,7 @@ export const StyledDetailWarnings = styled.div`
 `;
 
 export const StyledDetailContentRowValueID = styled.div`
+  color: ${({ theme }) => theme.color["primary"]};
   display: inline-flex;
   font-style: italic;
   font-size: ${({ theme }) => theme.fontSize["xs"]};
