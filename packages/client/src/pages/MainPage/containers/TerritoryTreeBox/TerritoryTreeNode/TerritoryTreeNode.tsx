@@ -95,13 +95,14 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
     config: config.stiff,
   });
 
+  const themeId = useAppSelector((state) => state.theme);
   const themeContext = useContext(ThemeContext);
 
   const symbolColor = useMemo(() => {
     return right === UserEnums.RoleMode.Read
       ? themeContext.color.gray[600]
       : themeContext.color.gray[800];
-  }, [right]);
+  }, [right, themeId]);
 
   useEffect(() => {
     setChildTerritories(children);

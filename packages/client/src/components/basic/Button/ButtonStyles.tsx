@@ -41,7 +41,7 @@ export const StyledButton = styled.button.attrs(({ ref }) => ({
     noBackground
       ? "none"
       : disabled
-      ? "repeating-linear-gradient(-45deg,#cbd5e0,#cbd5e0,1px,#fff 1px,#fff 12px)"
+      ? `repeating-linear-gradient(-45deg,#cbd5e0,#cbd5e0,1px, ${theme.color["white"]} 1px,${theme.color["white"]} 12px)`
       : inverted
       ? theme.color["invertedBg"][$color]
       : theme.color[$color]};
