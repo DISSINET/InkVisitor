@@ -2,6 +2,7 @@ import styled from "styled-components";
 import { space1 } from "Theme/constants";
 
 export const StyledCheckboxWrapper = styled.div`
+  color: ${({ theme }) => theme.color["black"]};
   display: flex;
   align-items: center;
 `;
