@@ -83,6 +83,9 @@ const theme = {
     warningMessage: "#FFE089",
     warningText: "#ffbb00",
 
+    tooltipBoxShadow: "rgba(0, 0, 0, 0.3)",
+    tooltipArrowBoxShadow: "rgba(0, 0, 0, 0.1)",
+
     elementType: {
       action: "#EB6B6B",
       actant: "#7E9BFF",

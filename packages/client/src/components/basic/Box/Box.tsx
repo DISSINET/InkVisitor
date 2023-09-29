@@ -43,9 +43,6 @@ export const Box: React.FC<Box> = ({
   const animatedExpand = useSpring({
     opacity: isExpanded ? 1 : 0,
     contentLabelOpacity: isExpanded ? 0 : 1,
-    contentBackgroundColor: isExpanded
-      ? theme.color["gray"]["200"]
-      : theme.color["gray"]["300"],
     boxHeight: `${height / 10}rem`,
     onRest: () => {
       isExpanded ? setShowContentLabel(false) : setHideContent(true);
@@ -90,9 +87,6 @@ export const Box: React.FC<Box> = ({
         $borderColor={borderColor}
         $noPadding={noPadding}
         $isExpanded={isExpanded}
-        style={{
-          backgroundColor: animatedExpand.contentBackgroundColor as any,
-        }}
       >
         <StyledContentAnimationWrap
           $hideContent={hideContent}

@@ -8,12 +8,17 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { rootTerritoryId } from "Theme/constants";
-import theme from "Theme/theme";
 import api from "api";
 import { EntityTag } from "components/advanced";
 import { useSearchParams } from "hooks";
 import update from "immutability-helper";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import {
   BsCaretDown,
   BsCaretDownFill,
@@ -37,6 +42,8 @@ import {
   StyledIconWrap,
   StyledTerritoryTagWrap,
 } from "./TerritoryTreeNodeStyles";
+import { ThemeContext, useTheme } from "styled-components";
+import { ThemeType } from "Theme/theme";
 
 interface TerritoryTreeNode {
   territory: ITerritory;
@@ -88,10 +95,12 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
     config: config.stiff,
   });
 
+  const themeContext = useContext(ThemeContext);
+
   const symbolColor = useMemo(() => {
     return right === UserEnums.RoleMode.Read
-      ? theme.color.gray[600]
-      : theme.color.gray[800];
+      ? themeContext.color.gray[600]
+      : themeContext.color.gray[800];
   }, [right]);
 
   useEffect(() => {
@@ -260,7 +269,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
                 id={`territory${id}`}
                 style={{
                   backgroundColor: foundByRecursion
-                    ? theme.color.foundByTreeFilter
+                    ? themeContext.color.foundByTreeFilter
                     : "",
                 }}
               >

@@ -21,6 +21,8 @@ import {
   thirdPanelMinWidth,
 } from "Theme/constants";
 import GlobalStyle from "Theme/global";
+import theme, { ThemeType } from "Theme/theme";
+import { darkTheme } from "Theme/theme-dark";
 import { Page } from "components/advanced";
 import { useDebounce } from "hooks";
 import { AboutPage } from "pages/About";
@@ -31,13 +33,10 @@ import { setContentHeight } from "redux/features/layout/contentHeightSlice";
 import { setLayoutWidth } from "redux/features/layout/layoutWidthSlice";
 import { setPanelWidths } from "redux/features/layout/panelWidthsSlice";
 import { setSeparatorXPosition } from "redux/features/layout/separatorXPositionSlice";
-import theme, { ThemeType } from "Theme/theme";
-import { darkTheme } from "Theme/theme-dark";
 
+import { DocumentsPage } from "pages/Documents";
 import AclPage from "./pages/Acl";
 import MainPage from "./pages/MainPage";
-import { DocumentsPage } from "pages/Documents";
-import { setTheme } from "redux/features/themeSlice";
 
 const clockPerformance = (
   profilerId: any,
@@ -83,18 +82,14 @@ export const App: React.FC = () => {
   const disableUserSelect = useAppSelector(
     (state) => state.layout.disableUserSelect
   );
-  const selectedThemeId = useAppSelector(
-    (state) => state.theme
-  );
-
+  const selectedThemeId = useAppSelector((state) => state.theme);
 
   const themeConfig = useMemo<ThemeType>(() => {
     if (selectedThemeId === "dark") {
-      return darkTheme
-    } 
-    return theme
-  }, [selectedThemeId])
-
+      return darkTheme;
+    }
+    return theme;
+  }, [selectedThemeId]);
 
   const [debouncedWidth, debouncedHeight] = useDebounce(useWindowSize(), 50);
 

@@ -12,7 +12,7 @@ export const StyledContainer = styled(animated.div)<StyledContainer>`
   min-width: ${({ theme }) => theme.space[8]};
   font-size: ${({ theme }) => theme.fontSize["xxs"]};
 
-  box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 5px ${({ theme }) => theme.color.tooltipBoxShadow};
   border-radius: ${({ theme }) => theme.borderRadius["sm"]};
   z-index: 888;
 
@@ -24,25 +24,28 @@ export const StyledContainer = styled(animated.div)<StyledContainer>`
   &[data-popper-placement^="bottom"] > #arrow {
     top: ${({ arrowoffset }) => `${arrowoffset + 2}px`};
     :after {
-      box-shadow: -1px -1px 1px rgba(0, 0, 0, 0.1);
+      box-shadow: -1px -1px 1px ${({ theme }) => theme.color.tooltipArrowBoxShadow};
     }
   }
   &[data-popper-placement^="top"] > #arrow {
     bottom: ${({ arrowoffset }) => `${arrowoffset + 2}px`};
     :after {
-      box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.1);
+      box-shadow: 1px 1px 1px
+        ${({ theme }) => theme.color.tooltipArrowBoxShadow};
     }
   }
   &[data-popper-placement^="left"] > #arrow {
     right: ${({ arrowoffset }) => `${arrowoffset + 2}px`};
     :after {
-      box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.1);
+      box-shadow: 1px 1px 1px
+        ${({ theme }) => theme.color.tooltipArrowBoxShadow};
     }
   }
   &[data-popper-placement^="right"] > #arrow {
     left: ${({ arrowoffset }) => `${arrowoffset + 2}px`};
     :after {
-      box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.1);
+      box-shadow: 1px 1px 1px
+        ${({ theme }) => theme.color.tooltipArrowBoxShadow};
     }
   }
 `;
@@ -52,7 +55,7 @@ export const StyledArrow = styled.div`
   height: 10px;
   &:after {
     content: "";
-    background-color: black;
+    background-color: ${({ theme }) => theme.color["black"]};
     position: absolute;
     left: 0;
     transform: rotate(45deg);

@@ -9,6 +9,7 @@ export const StyledTerritoryTagWrap = styled(animated.div)`
 `;
 export const StyledIconWrap = styled.div`
   cursor: pointer;
+  color: ${({ theme }) => theme.color["primary"]};
 `;
 interface StyledChildrenWrap {
   noIndent?: boolean;
