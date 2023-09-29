@@ -99,6 +99,8 @@ export const StyledLabel = styled.div<StyledLabel>`
   border-left-color: ${({ theme, status }) => theme.color[status]};
   max-width: ${({ theme, fullWidth }) =>
     fullWidth ? "100%" : theme.space[30]};
+  font-weight: ${({ theme, invertedLabel }) =>
+    invertedLabel ? theme.fontWeight["bold"] : theme.fontWeight["normal"]};
 `;
 
 interface StyledButtonWrapper {
