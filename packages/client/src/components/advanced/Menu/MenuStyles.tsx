@@ -17,7 +17,7 @@ export const StyledMenuGroupWrapper = styled.div`
 export const StyledMenuGroup = styled.div`
   border: ${({ theme }) => "3px solid " + theme.color["primary"]};
 
-  box-shadow: ${({ theme }) => "-5px 5px 5px " + theme.color["black"]};
+  box-shadow: ${({ theme }) => "-5px 5px 5px " + theme.color.menuShadow};
   border-radius: ${({ theme }) => theme.space[2]};
 `;
 

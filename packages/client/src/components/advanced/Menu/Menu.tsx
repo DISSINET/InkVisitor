@@ -9,6 +9,7 @@ import { IPage } from "types";
 import { MenuItem } from "./MenuItem";
 import { StyledMenuGroup, StyledMenuGroupWrapper } from "./MenuStyles";
 import { GrDocumentText } from "react-icons/gr";
+import { CgFileDocument } from "react-icons/cg";
 
 interface Menu {
   userRole: string;
@@ -60,7 +61,7 @@ export const Menu: React.FC<Menu> = ({
       color: "info",
       href: "/documents",
       admin: true,
-      icon: <GrDocumentText />,
+      icon: <CgFileDocument size={18} />,
     },
   ];
 
@@ -75,6 +76,7 @@ export const Menu: React.FC<Menu> = ({
 
   return (
     <div
+      id="#hover-me"
       onClick={() => setMenuOpen(!menuOpen)}
       onMouseLeave={() => setMenuOpen(false)}
       onMouseEnter={() => setMenuOpen(true)}
@@ -82,7 +84,7 @@ export const Menu: React.FC<Menu> = ({
       <Button
         icon={
           <animated.div style={rotateMenuIcon}>
-            <FaBars size={14}/>
+            <FaBars size={14} />
           </animated.div>
         }
         label="Menu"

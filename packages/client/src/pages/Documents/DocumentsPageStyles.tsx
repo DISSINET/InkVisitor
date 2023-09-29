@@ -1,4 +1,5 @@
 import { animated } from "@react-spring/web";
+import { FaDotCircle } from "react-icons/fa";
 import styled from "styled-components";
 
 export const StyledContent = styled.div`
@@ -32,6 +33,9 @@ export const StyledGrid = styled.div`
   overflow: auto;
 `;
 
+export const StyledFaDotCircle = styled(FaDotCircle)`
+  color: ${({ theme }) => theme.color["black"]};
+`;
 export const StyledTitleWrap = styled.div`
   min-width: 18rem;
   cursor: pointer;
@@ -39,6 +43,7 @@ export const StyledTitleWrap = styled.div`
   padding: 0 1rem 0 0.8rem;
 `;
 export const StyledTitle = styled.div`
+  color: ${({ theme }) => theme.color["black"]};
   max-width: 100%;
   display: inline-block;
   vertical-align: middle;
@@ -54,12 +59,14 @@ export const StyledReference = styled.div`
   padding: 0.2rem 1rem;
 `;
 export const StyledHeading = styled.div`
+  color: ${({ theme }) => theme.color["black"]};
   font-size: ${({ theme }) => theme.fontSize["lg"]};
   text-decoration: underline;
   font-weight: ${({ theme }) => theme.fontWeight["bold"]};
   margin-bottom: ${({ theme }) => theme.space[2]};
 `;
 export const StyledCount = styled.div`
+  color: ${({ theme }) => theme.color["black"]};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
 `;
 

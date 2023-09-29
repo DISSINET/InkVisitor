@@ -10,11 +10,12 @@ import { AxiosResponse } from "axios";
 import { Button, ButtonGroup, Input } from "components";
 import { EntitySuggester, EntityTag } from "components/advanced";
 import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
-import { FaDotCircle, FaTrash } from "react-icons/fa";
+import { FaTrash } from "react-icons/fa";
 import { RiFileEditFill } from "react-icons/ri";
 import useResizeObserver from "use-resize-observer";
 import {
   StyledCount,
+  StyledFaDotCircle,
   StyledReference,
   StyledTitle,
   StyledTitleWrap,
@@ -94,7 +95,7 @@ export const DocumentRow: React.FC<DocumentRow> = ({
 
   return (
     <>
-      <FaDotCircle size={10} />
+      <StyledFaDotCircle size={10} />
       <StyledTitleWrap ref={titleRef} onClick={setEditMode}>
         {editMode ? (
           <Input
