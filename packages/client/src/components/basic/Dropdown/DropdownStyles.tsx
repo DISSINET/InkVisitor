@@ -59,17 +59,8 @@ export const StyledSelect = styled(Select)<StyledSelect>`
     }
   }
   .react-select__control--is-disabled {
-    background: ${({ isOneOptionSingleEntitySelect }) =>
-      isOneOptionSingleEntitySelect
-        ? ""
-        : `repeating-linear-gradient(
-      -45deg,
-      #cbd5e0,
-      #cbd5e0,
-      1px,
-      #fff 1px,
-      #fff 12px
-    )`};
+    background: ${({ theme, isOneOptionSingleEntitySelect }) =>
+      isOneOptionSingleEntitySelect ? "" : theme.background["stripes"]};
   }
   .react-select__control--is-focused {
     box-shadow: none;
