@@ -1,13 +1,7 @@
+import { ThemeFontSize } from "Theme/theme";
 import React, { useEffect, useState } from "react";
 import { DropdownItem } from "types";
-import {
-  Label,
-  StyledInput,
-  StyledSelect,
-  StyledSelectReadonly,
-  StyledTextArea,
-  Wrapper,
-} from "./InputStyles";
+import { Label, StyledInput, StyledTextArea, Wrapper } from "./InputStyles";
 
 interface Input {
   label?: string;
@@ -15,7 +9,6 @@ interface Input {
   inverted?: boolean;
   suggester?: boolean;
   type?: "text" | "textarea" | "select";
-  options?: DropdownItem[];
   rows?: number;
   cols?: number;
   width?: number | "full";
@@ -33,6 +26,10 @@ interface Input {
   autoFocus?: boolean;
   disabled?: boolean;
   noBorder?: boolean;
+
+  // TextArea props
+  fullHeightTextArea?: boolean;
+  fontSizeTextArea?: keyof ThemeFontSize;
 }
 
 export const Input: React.FC<Input> = ({
@@ -41,7 +38,6 @@ export const Input: React.FC<Input> = ({
   suggester = false,
   value = "",
   type = "text",
-  options = [],
   rows = 3,
   cols = 50,
   width,
@@ -55,6 +51,9 @@ export const Input: React.FC<Input> = ({
   noBorder = false,
   onFocus = () => {},
   onBlur = () => {},
+
+  fullHeightTextArea = false,
+  fontSizeTextArea = "xs",
 }) => {
   const [displayValue, setDisplayValue] = useState(value);
   useEffect(() => {
@@ -62,7 +61,7 @@ export const Input: React.FC<Input> = ({
   }, [value]);
 
   return (
-    <Wrapper>
+    <Wrapper fullHeightTextArea={type === "textarea" && fullHeightTextArea}>
       {label && <Label className="label">{label}</Label>}
       {type === "text" && (
         <StyledInput
@@ -79,18 +78,17 @@ export const Input: React.FC<Input> = ({
               onChangeFn(e.currentTarget.value);
             }
           }}
-          onKeyPress={(event: React.KeyboardEvent) => {
+          onKeyDown={(event: React.KeyboardEvent) => {
             switch (event.key) {
               case "Enter":
                 onEnterPressFn();
-            }
-          }}
-          onKeyDown={(event: React.KeyboardEvent) => {
-            switch (event.key) {
+                return;
               case "ArrowUp":
                 event.preventDefault();
+                return;
               case "ArrowDown":
                 event.preventDefault();
+                return;
             }
           }}
           onFocus={(event: React.FocusEvent<HTMLInputElement>) =>
@@ -108,6 +106,7 @@ export const Input: React.FC<Input> = ({
       )}
       {type === "textarea" && (
         <StyledTextArea
+          fullHeightTextArea={fullHeightTextArea}
           disabled={disabled}
           className="value"
           placeholder={placeholder}
@@ -131,56 +130,11 @@ export const Input: React.FC<Input> = ({
             }
             onBlur();
           }}
-          onKeyPress={(event: React.KeyboardEvent) => {
-            if (event.key === "Enter") {
-              onEnterPressFn();
-            }
-          }}
           inverted={inverted}
           noBorder={noBorder}
           suggester={suggester}
+          fontSizeTextArea={fontSizeTextArea}
         />
-      )}
-      {type === "select" && options && (
-        <>
-          {options.length > 2 ? (
-            <StyledSelect
-              disabled={disabled}
-              className="value"
-              value={value}
-              width={width}
-              autoFocus={autoFocus}
-              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                onChangeFn(e.target.value);
-              }}
-              onKeyPress={(event: React.KeyboardEvent) => {
-                if (event.key === "Enter") {
-                  onEnterPressFn();
-                }
-              }}
-              inverted={inverted}
-              suggester={suggester}
-              onFocus={(event: React.FocusEvent<HTMLSelectElement>) =>
-                onFocus(event)
-              }
-              onBlur={() => onBlur()}
-            >
-              {options.map((option, oi) => (
-                <option key={oi} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </StyledSelect>
-          ) : (
-            <StyledSelectReadonly
-              readOnly
-              width={suggester ? 36 : width}
-              value={displayValue}
-              inverted={inverted}
-              suggester={suggester}
-            />
-          )}
-        </>
       )}
     </Wrapper>
   );

@@ -6,9 +6,9 @@ import {
   VirtualElement,
 } from "@popperjs/core";
 import { useSpring } from "@react-spring/web";
+import { ThemeColor } from "Theme/theme";
 import React, { ReactElement, useEffect, useState } from "react";
 import { usePopper } from "react-popper";
-import { Colors } from "types";
 import {
   StyledArrow,
   StyledContainer,
@@ -26,7 +26,7 @@ interface Tooltip {
   content?: ReactElement[] | ReactElement;
   tagGroup?: boolean;
   // style
-  color?: (typeof Colors)[number];
+  color?: keyof ThemeColor;
   position?: AutoPlacement | BasePlacement | VariationPlacement;
   noArrow?: boolean;
   offsetX?: number;
@@ -113,7 +113,7 @@ export const Tooltip: React.FC<Tooltip> = ({
             <StyledContainer
               ref={setPopperElement}
               style={{ ...styles.popper, ...animatedTooltip }}
-              color={color}
+              $color={color}
               onMouseLeave={() => {
                 onMouseLeave();
                 setTooltipHovered(false);
@@ -133,14 +133,14 @@ export const Tooltip: React.FC<Tooltip> = ({
               )}
               <div>
                 {label && (
-                  <StyledContent color={color}>
+                  <StyledContent $color={color}>
                     <StyledRow>
                       <StyledLabel>{label}</StyledLabel>
                     </StyledRow>
                   </StyledContent>
                 )}
                 {content && (
-                  <StyledContent color={color} tagGroup={tagGroup}>
+                  <StyledContent $color={color} tagGroup={tagGroup}>
                     {content}
                   </StyledContent>
                 )}

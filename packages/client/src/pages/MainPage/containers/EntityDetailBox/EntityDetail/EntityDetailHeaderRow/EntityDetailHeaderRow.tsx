@@ -1,15 +1,16 @@
 import { EntityEnums, UserEnums } from "@shared/enums";
-import { IEntity, IResponseTerritory, IStatement } from "@shared/types";
+import { IEntity, IStatement } from "@shared/types";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Button, ButtonGroup } from "components";
 import { AddTerritoryModal, EntityTag } from "components/advanced";
-import { DEntity, InstTemplate } from "constructors";
+import { InstTemplate } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useState } from "react";
+import { AiOutlineLink } from "react-icons/ai";
 import { CgListTree } from "react-icons/cg";
 import { FaClone, FaEdit, FaTrashAlt } from "react-icons/fa";
 import { GrClone } from "react-icons/gr";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import {
   StyledActantHeaderRow,
@@ -92,7 +93,7 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
     <>
       <StyledActantHeaderRow>
         <StyledTagWrap>
-          <EntityTag entity={entity} tooltipText={entity.data.text} fullWidth />
+          <EntityTag entity={entity} fullWidth />
         </StyledTagWrap>
         <ButtonGroup style={{ marginTop: "1rem" }}>
           {userCanEdit && (
@@ -102,8 +103,8 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
               disabled={!mayBeRemoved}
               tooltipLabel={
                 mayBeRemoved
-                  ? "remove entity"
-                  : "entity cannot be removed while it is linked elsewhere"
+                  ? "delete entity"
+                  : "entity cannot be deleted while it is linked elsewhere"
               }
               inverted
               onClick={() => {
@@ -197,6 +198,20 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
                 setTerritoryId(entity.id);
               }}
               disabled={entity.isTemplate}
+            />
+          )}
+          {userCanEdit && (
+            <Button
+              color="primary"
+              icon={<AiOutlineLink size={16} />}
+              tooltipLabel={"copy link to detail"}
+              inverted
+              onClick={async () => {
+                await navigator.clipboard.writeText(
+                  `${window.location.host}${window.location.pathname}#selectedDetail=${entity.id}&detail=${entity.id}`
+                );
+                toast.info("Link to detail copied to clipboard");
+              }}
             />
           )}
         </ButtonGroup>

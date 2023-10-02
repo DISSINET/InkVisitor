@@ -1,3 +1,4 @@
+import { ThemeColor } from "Theme/theme";
 import { FaChevronDown } from "react-icons/fa";
 import Select, { components } from "react-select";
 import styled from "styled-components";
@@ -111,7 +112,7 @@ export const StyledSelect = styled(Select)<StyledSelect>`
   // portal menu style is in global stylesheet
 `;
 interface StyledEntityValue {
-  color?: string;
+  color?: keyof ThemeColor;
 }
 export const StyledEntityValue = styled.div<StyledEntityValue>`
   border-left-style: solid;

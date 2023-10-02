@@ -1,5 +1,5 @@
 import "ts-jest";
-import { Db } from "@service/RethinkDB";
+import { Db } from "@service/rethink";
 import { newMockRequest } from "@modules/common.test";
 import { prepareEntity } from "@models/entity/entity.test";
 import Entity from "@models/entity/entity";
@@ -24,21 +24,27 @@ describe("test SubjectSemantics.beforeSave", function () {
     await entity2.save(db.connection);
     entities.push(entity2);
     request = newMockRequest(db);
-  })
+  });
 
   afterAll(async () => {
     await db.close();
-  })
+  });
 
   test("ok relation", async () => {
-    const okRelation = new SubjectSemantics({ entityIds: [entities[0].id, entities[1].id] });
+    const okRelation = new SubjectSemantics({
+      entityIds: [entities[0].id, entities[1].id],
+    });
 
     await expect(okRelation.beforeSave(request)).resolves.not.toThrowError();
   });
 
   test("bad relation", async () => {
-    const badRelation = new SubjectSemantics({ entityIds: [entities[1].id, entities[0].id] });
+    const badRelation = new SubjectSemantics({
+      entityIds: [entities[1].id, entities[0].id],
+    });
 
-    await expect(badRelation.beforeSave(request)).rejects.toBeInstanceOf(ModelNotValidError);
-  })
+    await expect(badRelation.beforeSave(request)).rejects.toBeInstanceOf(
+      ModelNotValidError
+    );
+  });
 });

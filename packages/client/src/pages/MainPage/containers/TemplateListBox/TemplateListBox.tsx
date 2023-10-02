@@ -123,8 +123,8 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
                     value: filterByClass.value,
                   }}
                   options={allEntityOptions}
-                  onChange={(option) => {
-                    setFilterByClass(option as DropdownItem);
+                  onChange={(selectedOption) => {
+                    setFilterByClass(selectedOption[0]);
                   }}
                   width="full"
                   entityDropdown
@@ -162,7 +162,7 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
                       onClick: () => {
                         handleAskRemoveTemplate(templateEntity.id);
                       },
-                      tooltipLabel: "remove template",
+                      tooltipLabel: "delete template",
                       icon: <FaTrash />,
                     }}
                   />

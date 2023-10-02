@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { defaultPing } from "Theme/constants";
 
-const initialState: number = -1;
+const initialState: number = defaultPing;
 
 const pingSlice = createSlice({
   name: "ping",

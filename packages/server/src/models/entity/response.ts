@@ -8,6 +8,7 @@ import {
   IResponseUsedInMetaProp,
   IResponseUsedInStatement,
   IStatement,
+  IWarning,
 } from "@shared/types";
 import Entity from "./entity";
 import Statement from "@models/statement/statement";
@@ -24,6 +25,7 @@ import {
   IStatementIdentification,
 } from "@shared/types/statement";
 import { UsedRelations } from "@models/relation/relations";
+import EntityWarnings from "./warnings";
 
 export class ResponseEntity extends Entity implements IResponseEntity {
   // map of entity ids that should be populated in subsequent methods and used in fetching
@@ -117,6 +119,7 @@ export class ResponseEntityDetail
   usedInStatementClassifications: IResponseUsedInStatementClassification[];
 
   relations: UsedRelations;
+  warnings: IWarning[];
 
   constructor(entity: Entity) {
     super(entity);
@@ -127,6 +130,7 @@ export class ResponseEntityDetail
     this.usedInStatementClassifications = [];
     this.usedInStatementIdentifications = [];
     this.relations = new UsedRelations(entity.id, entity.class);
+    this.warnings = [];
 
     this.addLinkedEntities(this.getEntitiesIds());
   }
@@ -185,6 +189,10 @@ export class ResponseEntityDetail
     this.entities = await this.populateEntitiesMap(conn);
 
     await this.processTemplateData(conn);
+
+    this.warnings = await new EntityWarnings(this.id, this.class).getWarnings(
+      req.db.connection
+    );
   }
 
   /**
@@ -410,7 +418,7 @@ export class ResponseEntityDetail
   walkStatementsDataProps(statements: IStatement[]) {
     for (const statement of statements) {
       for (const action of statement.data.actions) {
-        this.walkStatementDataRecursiveProps( 
+        this.walkStatementDataRecursiveProps(
           statement,
           action.actionId,
           action.props

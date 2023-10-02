@@ -6,32 +6,112 @@ on:
       - master
 
 jobs:
-  production-build:
-    name: Build the production docker image
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
+  preinstall-client:
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        node-version: [16]
     steps:
-      - name: Checkout InkVisitor
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
+          cache-dependency-path: packages/client/pnpm-lock.yaml
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+      - uses: actions/cache@v3
+        name: Setup pnpm cache
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('packages/client/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+      - name: Install dependencies
+        run: |
+          cd packages/client
+          pnpm install --frozen-lockfile
 
+  build-client-production:
+    needs: [preinstall-client]
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        node-version: [16]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
+          cache-dependency-path: packages/client/pnpm-lock.yaml
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+      - uses: actions/cache@v3
+        name: Setup pnpm cache
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('packages/client/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+      - name: Install dependencies
+        run: |
+          cd packages/client
+          pnpm install --frozen-lockfile
       - name: Create env file for client
         run: |
           touch packages/client/env/.env.production
           echo "$CLIENT_ENV" >> packages/client/env/.env.production
         env:
           CLIENT_ENV: ${{secrets.CLIENT_ENV_PRODUCTION}}
+      - name: Set current date as env variable
+        run: echo "BUILD_TIMESTAMP=$(date +'%Y-%m-%dT%H:%M:%S')" >> $GITHUB_ENV
+      - name: Build
+        run: |
+          cd packages/client
+          pnpm build:production
+      - uses: actions/cache@v3
+        with:
+          path: packages/client/dist
+          key: client-production-${{ github.sha }}
+
+  build-production:
+    needs: [build-client-production]
+    name: Build the production docker image
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - uses: actions/cache@v3
+        with:
+          path: packages/client/dist
+          key: client-production-${{ github.sha }}
 
       - name: Generate certificates
         run: |
           mkdir -p ./packages/server/secret
           openssl req -x509 -newkey rsa:2048 -nodes -out ./packages/server/secret/cert.pem -keyout ./packages/server/secret/key.pem -days 365 -subj "/C=FR/O=krkr/OU=Domain Control Validated/CN=*"
 
-      # Pull the latest image to build, and avoid caching pull-only images.
-      # (docker pull is faster than caching in most cases.)
-      - run: docker-compose pull
-
       - name: Run docker build task
-        run: docker-compose build inkvisitor-production
+        run: docker build -f Dockerfile.cached -t inkvisitor:production .
 
       - name: Save docker-compose stack
         run: docker save inkvisitor:production | gzip > inkvisitor-production.tar.gz
@@ -43,15 +123,15 @@ jobs:
           key: inkvisitor-production-${{ github.sha }}.tar.gz
 
   deploy:
-    needs: [production-build]
-    name: Deploy to production environment
+    needs: [build-production]
+    name: Deploy
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - name: Checkout InkVisitor
         uses: actions/checkout@v2
 
-      - name: Restore cache
+      - name: Restore cached production
         uses: actions/cache@v2
         with:
           path: inkvisitor-production.tar.gz
@@ -62,13 +142,6 @@ jobs:
         with:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           known_hosts: ${{ secrets.KNOWN_HOSTS }}
-
-      - name: Create env file for server
-        run: |
-          touch packages/server/env/.env.production
-          echo "$SERVER_ENV" >> packages/server/env/.env.production
-        env:
-          SERVER_ENV: ${{secrets.SERVER_ENV_PRODUCTION}}
 
       - name: Update packages
         run: |
@@ -97,13 +170,13 @@ jobs:
       - name: Upload image production
         run: scp inkvisitor-production.tar.gz ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/var/www/html/apps
 
-      - name: Load image
+      - name: Restart containers
         run: |
           ssh -tt ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}  -- "sh -c '
           podman container prune -f &&
           podman image prune -f &&
           rm -rf /var/tmp/docker-tar* &&
-          podman rm inkvisitor-production --force || true && 
-          podman load -i /var/www/html/apps/inkvisitor-production.tar.gz && 
+          podman rm inkvisitor-production --force || true &&
+          podman load -i /var/www/html/apps/inkvisitor-production.tar.gz &&
           podman-compose -f /var/www/html/apps/docker-compose.yml up -d inkvisitor-production
           '"

@@ -121,7 +121,7 @@ export const StatementEditorActantTableRow: React.FC<
   const dropRef = useRef<HTMLTableRowElement>(null);
   const dragRef = useRef<HTMLTableCellElement>(null);
 
-  const [, drop] = useDrop({
+  const [, drop] = useDrop<DragItem>({
     accept: ItemTypes.ACTANT_ROW,
     hover(item: DragItem, monitor: DropTargetMonitor) {
       dndHoverFn(item, index, monitor, dropRef, moveRow);
@@ -129,8 +129,8 @@ export const StatementEditorActantTableRow: React.FC<
   });
 
   const [{ isDragging }, drag, preview] = useDrag({
+    type: ItemTypes.ACTANT_ROW,
     item: {
-      type: ItemTypes.ACTANT_ROW,
       index,
       id: filteredActant.id.toString(),
     },
@@ -195,7 +195,7 @@ export const StatementEditorActantTableRow: React.FC<
             });
           }}
           categoryTypes={classEntitiesActant}
-          excludedEntities={excludedSuggesterEntities}
+          excludedEntityClasses={excludedSuggesterEntities}
           isInsideTemplate={isInsideTemplate}
           territoryParentId={territoryParentId}
           excludedActantIds={[actant.id]}
@@ -236,7 +236,7 @@ export const StatementEditorActantTableRow: React.FC<
           }}
           categoryTypes={classEntitiesActant}
           openDetailOnCreate
-          excludedEntities={excludedSuggesterEntities}
+          excludedEntityClasses={excludedSuggesterEntities}
           excludedActantIds={[statement.id]}
           isInsideTemplate={isInsideTemplate}
           territoryParentId={territoryParentId}
@@ -454,8 +454,10 @@ export const StatementEditorActantTableRow: React.FC<
                   value={virtualityDict.find(
                     (i: any) => sActant.virtuality === i.value
                   )}
-                  onChange={(newValue: any) => {
-                    updateActant(sActant.id, { virtuality: newValue.value });
+                  onChange={(selectedOption) => {
+                    updateActant(sActant.id, {
+                      virtuality: selectedOption[0].value,
+                    });
                   }}
                 />
               </div>
@@ -470,8 +472,10 @@ export const StatementEditorActantTableRow: React.FC<
                   value={partitivityDict.find(
                     (i: any) => sActant.partitivity === i.value
                   )}
-                  onChange={(newValue: any) => {
-                    updateActant(sActant.id, { partitivity: newValue.value });
+                  onChange={(selectedOption) => {
+                    updateActant(sActant.id, {
+                      partitivity: selectedOption[0].value,
+                    });
                   }}
                 />
               </div>
@@ -486,9 +490,9 @@ export const StatementEditorActantTableRow: React.FC<
                   value={operatorDict.find(
                     (i: any) => sActant.bundleOperator === i.value
                   )}
-                  onChange={(newValue: any) => {
+                  onChange={(selectedOption) => {
                     updateActant(sActant.id, {
-                      bundleOperator: newValue.value,
+                      bundleOperator: selectedOption[0].value,
                     });
                   }}
                 />

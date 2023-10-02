@@ -10,11 +10,11 @@ export namespace Relation {
 
   export interface ISuperclass extends IRelation {
     type: RelationEnums.Type.Superclass;
-    entityIds: [string, string];
+    entityIds: [string, string]; // `entity HAS superclass -> 0 element id abstract class, 1 element is super class`
     order: number;
   }
-  export interface ISuperordinateLocation extends IRelation {
-    type: RelationEnums.Type.SuperordinateLocation;
+  export interface ISuperordinateEntity extends IRelation {
+    type: RelationEnums.Type.SuperordinateEntity;
     entityIds: [string, string];
     order: number;
   }
@@ -92,7 +92,7 @@ export namespace Relation {
   export interface IUsedRelations {
     [RelationEnums.Type.Superclass]?: IDetailType<ISuperclass>;
     [RelationEnums.Type
-      .SuperordinateLocation]?: IDetailType<ISuperordinateLocation>;
+      .SuperordinateEntity]?: IDetailType<ISuperordinateEntity>;
     [RelationEnums.Type.Synonym]?: IDetailType<ISynonym>;
     [RelationEnums.Type.Antonym]?: IDetailType<IAntonym>;
     [RelationEnums.Type.Holonym]?: IDetailType<IHolonym>;
@@ -123,6 +123,7 @@ export namespace Relation {
     label: string;
     inverseLabel: false | string;
     allowedEntitiesPattern: EntityEnums.Class[][];
+    disabledEntities?: EntityEnums.Class[];
     allowedSameEntityClassesOnly: boolean;
     asymmetrical: boolean;
     multiple: boolean;
@@ -131,6 +132,7 @@ export namespace Relation {
     attributes: any[];
     order: boolean;
     selfLoop: boolean;
+    graph?: boolean;
   };
 
   export const RelationRules: { [key in RelationEnums.Type]?: RelationRule } =
@@ -152,12 +154,18 @@ export namespace Relation {
     attributes: [],
     order: true,
     selfLoop: false,
+    graph: true,
   };
-  RelationRules[RelationEnums.Type.SuperordinateLocation] = {
-    label: "Superordinate Location",
-    inverseLabel: "Subordinate Locations",
+  RelationRules[RelationEnums.Type.SuperordinateEntity] = {
+    label: "Superordinate Entity",
+    inverseLabel: "Subordinate Entities",
     allowedEntitiesPattern: [
       [EntityEnums.Class.Location, EntityEnums.Class.Location],
+      [EntityEnums.Class.Object, EntityEnums.Class.Object],
+      [EntityEnums.Class.Event, EntityEnums.Class.Event],
+      [EntityEnums.Class.Statement, EntityEnums.Class.Statement],
+      [EntityEnums.Class.Being, EntityEnums.Class.Being],
+      [EntityEnums.Class.Value, EntityEnums.Class.Value],
     ],
     allowedSameEntityClassesOnly: true,
     asymmetrical: true,
@@ -167,6 +175,7 @@ export namespace Relation {
     attributes: [],
     order: true,
     selfLoop: false,
+    graph: true,
   };
   RelationRules[RelationEnums.Type.Synonym] = {
     label: "Synonym",
@@ -214,6 +223,7 @@ export namespace Relation {
     attributes: [],
     order: true,
     selfLoop: false,
+    graph: true,
   };
   RelationRules[RelationEnums.Type.PropertyReciprocal] = {
     label: "Property Reciprocal",
@@ -259,6 +269,7 @@ export namespace Relation {
     attributes: [],
     order: false,
     selfLoop: false,
+    graph: true,
   };
   RelationRules[RelationEnums.Type.Classification] = {
     label: "Classification",
@@ -282,11 +293,13 @@ export namespace Relation {
     attributes: [],
     order: true,
     selfLoop: false,
+    graph: true,
   };
   RelationRules[RelationEnums.Type.Identification] = {
     label: "Identification",
     inverseLabel: false,
     allowedEntitiesPattern: [], // any combination is allowed
+    disabledEntities: [EntityEnums.Class.Action, EntityEnums.Class.Concept],
     allowedSameEntityClassesOnly: false,
     asymmetrical: false,
     multiple: true,
@@ -295,6 +308,7 @@ export namespace Relation {
     attributes: [EntityEnums.Certainty],
     order: false,
     selfLoop: false,
+    graph: true,
   };
   RelationRules[RelationEnums.Type.Implication] = {
     label: "Implication",
@@ -310,6 +324,7 @@ export namespace Relation {
     attributes: [],
     order: true,
     selfLoop: false,
+    graph: true,
   };
   RelationRules[RelationEnums.Type.SubjectSemantics] = {
     label: "Subject Semantics",

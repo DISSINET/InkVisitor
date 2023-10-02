@@ -24,6 +24,7 @@ export const StyledMenuGroup = styled.div`
 interface StyledMenuItem {}
 export const StyledMenuItem = styled(animated.div)<StyledMenuItem>`
   padding: ${({ theme }) => theme.space[3]};
+  cursor: pointer;
   svg {
     margin-right: ${({ theme }) => theme.space[2]};
     vertical-align: middle;

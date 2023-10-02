@@ -6,8 +6,23 @@ import {
   IStatementActant,
   IStatementAction,
 } from "@shared/types";
+import {
+  UseMutationResult,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { excludedSuggesterEntities } from "Theme/constants";
+import theme from "Theme/theme";
 import api from "api";
-import { Dropdown, Input, Loader, MultiInput, Submit } from "components";
+import {
+  Button,
+  Dropdown,
+  Input,
+  Loader,
+  Message,
+  MultiInput,
+  Submit,
+} from "components";
 import {
   ApplyTemplateModal,
   AuditTable,
@@ -26,22 +41,14 @@ import {
 import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
 import { AiOutlineWarning } from "react-icons/ai";
-import {
-  UseMutationResult,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { FaRegCopy } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { useAppSelector } from "redux/hooks";
-import { excludedSuggesterEntities } from "Theme/constants";
-import theme from "Theme/theme";
-import { classesEditorActants, classesEditorTags, DropdownItem } from "types";
+import { DropdownItem, classesEditorActants, classesEditorTags } from "types";
 import { getEntityLabel, getShortLabelByLetterCount } from "utils";
 import { EntityReferenceTable } from "../../EntityReferenceTable/EntityReferenceTable";
 import {
   StyledBreadcrumbWrap,
-  StyledEditorActantTableWrapper,
-  StyledEditorActionTableWrapper,
   StyledEditorContentRow,
   StyledEditorContentRowLabel,
   StyledEditorContentRowValue,
@@ -63,6 +70,7 @@ import { StatementEditorActantTable } from "./StatementEditorActantTable/Stateme
 import { StatementEditorActionTable } from "./StatementEditorActionTable/StatementEditorActionTable";
 import { StatementEditorOrdering } from "./StatementEditorOrdering/StatementEditorOrdering";
 import { StatementEditorSectionButtons } from "./StatementEditorSectionButtons/StatementEditorSectionButtons";
+import { TiWarningOutline } from "react-icons/ti";
 
 interface StatementEditor {
   statement: IResponseStatement;
@@ -209,7 +217,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         });
     }
     return options;
-  }, [templates]);
+  }, [templates, statement]);
 
   // refetch audit when statement changes
   useEffect(() => {
@@ -544,6 +552,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   const [showSubmitSection, setShowSubmitSection] = useState<
     "actants" | "actions" | "references" | false
   >(false);
+  const [showWarnings, setShowWarnings] = useState(false);
 
   return (
     <>
@@ -552,6 +561,19 @@ export const StatementEditor: React.FC<StatementEditor> = ({
           <StyledEditorStatementInfo>
             <StyledHeaderTagWrap>
               <EntityTag entity={statement} fullWidth />
+              <div style={{ marginLeft: "0.5rem", marginRight: "0.5rem" }}>
+                <Button
+                  inverted
+                  tooltipLabel="copy statement ID"
+                  color="primary"
+                  label=""
+                  icon={<FaRegCopy />}
+                  onClick={async () => {
+                    await navigator.clipboard.writeText(statement.id);
+                    toast.info("ID copied to clipboard");
+                  }}
+                />
+              </div>
             </StyledHeaderTagWrap>
             {userCanEdit && (
               <div style={{ display: "flex" }}>
@@ -633,8 +655,8 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                   width="full"
                   options={templateOptions}
                   value={templateOptions[0]}
-                  onChange={(templateToApply: any) => {
-                    handleAskForTemplateApply(templateToApply);
+                  onChange={(templateToApply) => {
+                    handleAskForTemplateApply(templateToApply[0]);
                   }}
                 />
               </StyledEditorContentRowValue>
@@ -667,6 +689,32 @@ export const StatementEditor: React.FC<StatementEditor> = ({
           </StyledEditorSectionContent>
         </StyledEditorSection>
 
+        {statement.warnings.length > 0 && (
+          <StyledEditorSection>
+            <Button
+              icon={<TiWarningOutline size={16} />}
+              label={`${statement.warnings.length}`}
+              onClick={() => setShowWarnings(!showWarnings)}
+              color="warning"
+              tooltipLabel={showWarnings ? "hide warnings" : "show warnings"}
+              inverted={!showWarnings}
+              tooltipPosition="right"
+            />
+            {showWarnings &&
+              statement.warnings
+                .sort((a, b) => a.type.localeCompare(b.type))
+                .map((warning, key) => {
+                  return (
+                    <Message
+                      key={key}
+                      warning={warning}
+                      entities={statement.entities}
+                    />
+                  );
+                })}
+          </StyledEditorSection>
+        )}
+
         {/* Actions */}
         <StyledEditorSection
           metaSection
@@ -688,21 +736,17 @@ export const StatementEditor: React.FC<StatementEditor> = ({
             )}
           </StyledEditorSectionHeader>
           <StyledEditorSectionContent>
-            <div style={{ overflow: "auto" }}>
-              <StyledEditorActionTableWrapper>
-                <StatementEditorActionTable
-                  userCanEdit={userCanEdit}
-                  statement={statement}
-                  updateActionsMutation={updateStatementDataMutation}
-                  addProp={addProp}
-                  updateProp={updateProp}
-                  removeProp={removeProp}
-                  movePropToIndex={movePropToIndex}
-                  territoryParentId={statementTerritoryId}
-                  territoryActants={territoryActants}
-                />
-              </StyledEditorActionTableWrapper>
-            </div>
+            <StatementEditorActionTable
+              userCanEdit={userCanEdit}
+              statement={statement}
+              updateActionsMutation={updateStatementDataMutation}
+              addProp={addProp}
+              updateProp={updateProp}
+              removeProp={removeProp}
+              movePropToIndex={movePropToIndex}
+              territoryParentId={statementTerritoryId}
+              territoryActants={territoryActants}
+            />
             {userCanEdit && (
               <EntitySuggester
                 territoryActants={territoryActants}
@@ -711,7 +755,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                   addAction(newSelectedId);
                 }}
                 categoryTypes={[EntityEnums.Class.Action]}
-                excludedEntities={excludedSuggesterEntities}
+                excludedEntityClasses={excludedSuggesterEntities}
                 placeholder={"add action"}
                 isInsideTemplate={statement.isTemplate}
                 territoryParentId={statementTerritoryId}
@@ -741,24 +785,20 @@ export const StatementEditor: React.FC<StatementEditor> = ({
             )}
           </StyledEditorSectionHeader>
           <StyledEditorSectionContent>
-            <div style={{ overflow: "auto" }}>
-              <StyledEditorActantTableWrapper>
-                <StatementEditorActantTable
-                  statement={statement}
-                  userCanEdit={userCanEdit}
-                  classEntitiesActant={classesEditorActants}
-                  updateStatementDataMutation={updateStatementDataMutation}
-                  addProp={addProp}
-                  updateProp={updateProp}
-                  removeProp={removeProp}
-                  movePropToIndex={movePropToIndex}
-                  territoryParentId={statementTerritoryId}
-                  addClassification={addClassification}
-                  addIdentification={addIdentification}
-                  territoryActants={territoryActants}
-                />
-              </StyledEditorActantTableWrapper>
-            </div>
+            <StatementEditorActantTable
+              statement={statement}
+              userCanEdit={userCanEdit}
+              classEntitiesActant={classesEditorActants}
+              updateStatementDataMutation={updateStatementDataMutation}
+              addProp={addProp}
+              updateProp={updateProp}
+              removeProp={removeProp}
+              movePropToIndex={movePropToIndex}
+              territoryParentId={statementTerritoryId}
+              addClassification={addClassification}
+              addIdentification={addIdentification}
+              territoryActants={territoryActants}
+            />
             {userCanEdit && (
               <EntitySuggester
                 territoryActants={territoryActants}
@@ -768,7 +808,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 }}
                 categoryTypes={classesEditorActants}
                 placeholder={"add actant"}
-                excludedEntities={excludedSuggesterEntities}
+                excludedEntityClasses={excludedSuggesterEntities}
                 isInsideTemplate={statement.isTemplate}
                 territoryParentId={statementTerritoryId}
                 excludedActantIds={[statement.id]}
@@ -813,7 +853,6 @@ export const StatementEditor: React.FC<StatementEditor> = ({
           <StyledEditorSectionContent>
             <EntityReferenceTable
               openDetailOnCreate
-              entities={statement.entities}
               references={statement.references}
               onChange={(newReferences: IReference[]) => {
                 updateStatementMutation.mutate({ references: newReferences });
@@ -821,6 +860,8 @@ export const StatementEditor: React.FC<StatementEditor> = ({
               disabled={!userCanEdit}
               isInsideTemplate={statement.isTemplate || false}
               territoryParentId={statementTerritoryId}
+              entities={statement.entities ?? {}}
+              entityId={statement.id}
             />
           </StyledEditorSectionContent>
         </StyledEditorSection>
@@ -867,7 +908,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 disableTemplatesAccept
                 categoryTypes={classesEditorTags}
                 placeholder={"add new tag"}
-                excludedEntities={excludedSuggesterEntities}
+                excludedEntityClasses={excludedSuggesterEntities}
                 excludedActantIds={statement.data.tags}
                 isInsideTemplate={statement.isTemplate}
                 territoryParentId={statementTerritoryId}

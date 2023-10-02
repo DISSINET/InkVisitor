@@ -1,15 +1,7 @@
 import { animated } from "@react-spring/web";
 import styled from "styled-components";
-import {
-  space1,
-  space2,
-  space3,
-  space4,
-  space5,
-  space6,
-  space7,
-} from "Theme/constants";
-import { Colors } from "types";
+import { space2, space4, space5, space6, space7 } from "Theme/constants";
+import { ThemeColor } from "Theme/theme";
 
 interface ModalWrap {}
 export const StyledModalWrap = styled.div<ModalWrap>`
@@ -36,6 +28,7 @@ export const StyledBackground = styled(animated.div)`
 
 interface Card {
   width: "full" | "fat" | "normal" | "thin" | number;
+  $fullHeight: boolean;
 }
 const getWidth = (width: "full" | "fat" | "normal" | "thin" | number) => {
   if (typeof width === "number") {
@@ -43,7 +36,7 @@ const getWidth = (width: "full" | "fat" | "normal" | "thin" | number) => {
   } else {
     switch (width) {
       case "full":
-        return "calc(100vw - 40px)";
+        return "calc(100vw - 4rem)";
       case "normal":
         return "50rem";
       case "fat":
@@ -55,9 +48,11 @@ const getWidth = (width: "full" | "fat" | "normal" | "thin" | number) => {
 };
 export const StyledCard = styled(animated.div)<Card>`
   width: ${({ width }) => getWidth(width)};
+  height: ${({ $fullHeight }) => ($fullHeight ? "100%" : "")};
   display: flex;
   flex-direction: column;
-  max-height: calc(100vh - 40px);
+  margin: ${({ theme }) => `0 ${theme.space[8]}`};
+  max-height: calc(100vh - 8rem);
   z-index: 50;
   background-color: ${({ theme }) => theme.color["gray"][100]};
   color: ${({ theme }) => theme.color["black"]};
@@ -66,7 +61,7 @@ export const StyledCard = styled(animated.div)<Card>`
 `;
 
 interface StyledCardHeader {
-  color?: (typeof Colors)[number];
+  $color?: keyof ThemeColor;
 }
 export const StyledCardHeader = styled.header<StyledCardHeader>`
   display: flex;
@@ -94,6 +89,7 @@ interface StyledCardBody {
 }
 export const StyledCardBody = styled.section<StyledCardBody>`
   display: flex;
+  height: 100%;
   flex-direction: ${({ column }) => (column ? "column" : "row")};
   padding: ${space5} ${space7};
   overflow: ${({ enableScroll }) => (enableScroll ? "auto" : "initial")};

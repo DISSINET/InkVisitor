@@ -1,6 +1,7 @@
 import { userRoleDict } from "@shared/dictionaries";
 import { EntityEnums, UserEnums } from "@shared/enums";
-import { IResponseUser, IUser, IUserRight } from "@shared/types";
+import { IResponseUser, IUserRight } from "@shared/types";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Button, ButtonGroup, Input, Loader, Submit } from "components";
 import {
@@ -9,22 +10,16 @@ import {
   EntityTag,
 } from "components/advanced";
 import React, { useCallback, useMemo, useState } from "react";
-import {
-  FaKey,
-  FaToggleOff,
-  FaToggleOn,
-  FaTrashAlt,
-  FaUnlink,
-} from "react-icons/fa";
+import { FaKey, FaToggleOff, FaToggleOn, FaTrashAlt } from "react-icons/fa";
 import {
   RiUserSearchFill,
   RiUserSettingsFill,
   RiUserStarFill,
 } from "react-icons/ri";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Cell, Column, Row, useTable } from "react-table";
+import { CellProps, Column, Row, useTable } from "react-table";
 import { toast } from "react-toastify";
 import {
+  StyledTHead,
   StyledTable,
   StyledTableWrapper,
   StyledTerritoryColumn,
@@ -33,13 +28,14 @@ import {
   StyledTerritoryListItem,
   StyledTerritoryListItemMissing,
   StyledTh,
-  StyledTHead,
   StyledUserNameColumn,
   StyledUserNameColumnIcon,
   StyledUserNameColumnText,
 } from "./UserListStyles";
 import { UserListTableRow } from "./UserListTableRow/UserListTableRow";
 import { UsersUtils } from "./UsersUtils";
+
+type CellType = CellProps<IResponseUser>;
 
 interface UserList {
   heightContent?: number;
@@ -81,7 +77,6 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
 
         toast.info(message, {
           autoClose: 6000,
-          pauseOnHover: true,
           closeOnClick: false,
           onClick: () => {
             navigator.clipboard.writeText(message ? message.split("'")[1] : "");
@@ -134,18 +129,18 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
     }
   };
 
-  const getRowId = useCallback((row) => {
+  const getRowId = useCallback((row: IResponseUser) => {
     return row.id;
   }, []);
 
-  const columns: Column<{}>[] = useMemo(() => {
-    return [
+  const columns = useMemo<Column<IResponseUser>[]>(
+    () => [
       {
         Header: "",
         id: "Name",
         accessor: "name",
-        Cell: ({ row }: Cell) => {
-          const { name, email, role } = row.original as any;
+        Cell: ({ row }: CellType) => {
+          const { name, email, role } = row.original;
           let icon = <RiUserSearchFill />;
           if (role === UserEnums.Role.Admin) {
             icon = <RiUserStarFill />;
@@ -167,8 +162,8 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
       {
         Header: "Username",
         id: "Username",
-        Cell: ({ row }: Cell) => {
-          const { id, name, email, role } = row.original as any;
+        Cell: ({ row }: CellType) => {
+          const { id, name, email, role } = row.original;
           return (
             <Input
               value={name}
@@ -185,8 +180,8 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
       {
         Header: "Email",
         id: "Email",
-        Cell: ({ row }: Cell) => {
-          const { id, name, email, role } = row.original as any;
+        Cell: ({ row }: CellType) => {
+          const { id, name, email, role } = row.original;
           return (
             <Input
               value={email}
@@ -203,8 +198,8 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
       {
         Header: "Role",
         id: "Role",
-        Cell: ({ row }: Cell) => {
-          const { id, name, email, role } = row.original as any;
+        Cell: ({ row }: CellType) => {
+          const { id, name, email, role } = row.original;
           return (
             <AttributeButtonGroup
               disabled={id === localStorage.getItem("userid")}
@@ -250,13 +245,13 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
       {
         Header: "Read Territories",
         id: "territories-read",
-        Cell: ({ row }: Cell) => {
+        Cell: ({ row }: CellType) => {
           const {
             id: userId,
             rights,
             territoryRights: territoryActants,
             role: userRole,
-          } = row.original as any;
+          } = row.original;
 
           const readTerritories = rights.filter(
             (r: IUserRight) => r.mode === "read"
@@ -274,12 +269,13 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
                     }}
                     categoryTypes={[EntityEnums.Class.Territory]}
                     placeholder={"assign a territory"}
+                    excludedActantIds={readTerritories.map((r) => r.territory)}
                   />
                   <StyledTerritoryList>
                     {readTerritories.length && territoryActants ? (
                       readTerritories.map((right: IUserRight) => {
                         const territoryActant = territoryActants.find(
-                          (t: any) => t.territory.id === right.territory
+                          (t) => t.territory.id === right.territory
                         );
 
                         return territoryActant && territoryActant.territory ? (
@@ -327,13 +323,13 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
       {
         Header: "Write Territories",
         id: "territories-write",
-        Cell: ({ row }: Cell) => {
+        Cell: ({ row }: CellType) => {
           const {
             id: userId,
             rights,
             territoryRights: territoryActants,
             role: userRole,
-          } = row.original as any;
+          } = row.original;
 
           const writeTerritories = rights.filter(
             (r: IUserRight) => r.mode === "write"
@@ -352,12 +348,15 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
                       }}
                       categoryTypes={[EntityEnums.Class.Territory]}
                       placeholder={"assign a territory"}
+                      excludedActantIds={writeTerritories.map(
+                        (r) => r.territory
+                      )}
                     />
                     <StyledTerritoryList>
                       {writeTerritories.length && territoryActants ? (
                         writeTerritories.map((right: IUserRight) => {
                           const territoryActant = territoryActants.find(
-                            (t: any) => t.territory.id === right.territory
+                            (t) => t.territory.id === right.territory
                           );
 
                           return territoryActant &&
@@ -416,14 +415,13 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
       {
         Header: "",
         id: "actions",
-        accessor: "actions",
-        Cell: ({ row }: Cell) => {
+        Cell: ({ row }: CellType) => {
           const {
             id: userId,
             rights,
             territoryRights: territoryActants,
-          } = row.original as any;
-          const active = (row.original as IUser).active;
+          } = row.original;
+          const active = row.original.active;
           return (
             <ButtonGroup noMarginRight>
               <Button
@@ -462,8 +460,9 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
           );
         },
       },
-    ];
-  }, [data]);
+    ],
+    [data]
+  );
 
   const {
     getTableProps,
@@ -499,7 +498,7 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
                 ))}
               </StyledTHead>
               <tbody {...getTableBodyProps()}>
-                {rows.map((row: Row, i: number) => {
+                {rows.map((row: Row<IResponseUser>, i: number) => {
                   prepareRow(row);
                   return (
                     <UserListTableRow
@@ -518,7 +517,7 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
 
       <Submit
         title={`Delete User ${removingUser ? removingUser.name : ""}`}
-        text={`Do you really want do delete User ${
+        text={`Do you really want to delete User ${
           removingUser ? removingUser.name : ""
         }?`}
         show={removingUser != false}

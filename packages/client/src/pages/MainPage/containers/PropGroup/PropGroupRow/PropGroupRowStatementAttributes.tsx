@@ -49,52 +49,54 @@ export const PropGroupRowStatementAttributes: React.FC<
             disabled={!userCanEdit}
           />
         )}
-        {/* Logic */}
-        {!disabledAttributes.statement?.includes("logic") && (
-          <LogicButtonGroup
+        {!disabledAttributes.statement?.includes("mood") && (
+          <Dropdown
+            width={131}
+            isMulti
+            disabled={!userCanEdit}
+            placeholder="mood"
+            tooltipLabel="mood"
+            icon={<AttributeIcon attributeName="mood" />}
+            options={moodDict}
+            value={[allEntities]
+              .concat(moodDict)
+              .filter((i: any) => prop.mood.includes(i.value))}
+            onChange={(selectedOptions) => {
+              updateProp(prop.id, {
+                ...prop,
+                mood: selectedOptions
+                  ? selectedOptions.map((v) => v.value)
+                  : [],
+              });
+            }}
+            attributeDropdown
+          />
+        )}
+        {!disabledAttributes.statement?.includes("moodvariant") && (
+          <MoodVariantButtonGroup
             border
-            value={prop.logic}
-            onChange={(logic) => updateProp(prop.id, { logic: logic })}
+            value={prop.moodvariant}
+            onChange={(moodvariant) =>
+              updateProp(prop.id, {
+                ...prop,
+                moodvariant: moodvariant,
+              })
+            }
             disabled={!userCanEdit}
           />
         )}
         {buttons}
       </StyledAttributesFlexRow>
+      {/* )} */}
       {isExpanded && (
         <>
           <StyledAttributesFlexRow>
-            {/* mood */}
-            {!disabledAttributes.statement?.includes("mood") && (
-              <Dropdown
-                width={131}
-                isMulti
-                disabled={!userCanEdit}
-                placeholder="mood"
-                tooltipLabel="mood"
-                icon={<AttributeIcon attributeName="mood" />}
-                options={moodDict}
-                value={[allEntities]
-                  .concat(moodDict)
-                  .filter((i: any) => prop.mood.includes(i.value))}
-                onChange={(newValue: any) => {
-                  updateProp(prop.id, {
-                    ...prop,
-                    mood: newValue ? newValue.map((v: any) => v.value) : [],
-                  });
-                }}
-                attributeDropdown
-              />
-            )}
-            {!disabledAttributes.statement?.includes("moodvariant") && (
-              <MoodVariantButtonGroup
+            {/* Logic */}
+            {!disabledAttributes.statement?.includes("logic") && (
+              <LogicButtonGroup
                 border
-                value={prop.moodvariant}
-                onChange={(moodvariant) =>
-                  updateProp(prop.id, {
-                    ...prop,
-                    moodvariant: moodvariant,
-                  })
-                }
+                value={prop.logic}
+                onChange={(logic) => updateProp(prop.id, { logic: logic })}
                 disabled={!userCanEdit}
               />
             )}
@@ -109,18 +111,15 @@ export const PropGroupRowStatementAttributes: React.FC<
                 value={operatorDict.find(
                   (i: any) => prop.bundleOperator === i.value
                 )}
-                onChange={(newValue: any) => {
+                onChange={(selectedOption) => {
                   updateProp(prop.id, {
                     ...prop,
-                    bundleOperator: newValue.value,
+                    bundleOperator: selectedOption[0].value,
                   });
                 }}
               />
             )}
-          </StyledAttributesFlexRow>
-
-          {/* ROW */}
-          <StyledAttributesFlexRow>
+            {/* Bundle start|end */}
             <BundleButtonGroup
               bundleStart={prop.bundleStart}
               onBundleStartChange={(bundleStart) =>
@@ -137,6 +136,10 @@ export const PropGroupRowStatementAttributes: React.FC<
                 })
               }
             />
+          </StyledAttributesFlexRow>
+
+          {/* ROW */}
+          <StyledAttributesFlexRow>
             {!disabledAttributes.statement?.includes("certainty") && (
               <Dropdown
                 width={122}
@@ -145,11 +148,12 @@ export const PropGroupRowStatementAttributes: React.FC<
                 icon={<AttributeIcon attributeName="certainty" />}
                 disabled={!userCanEdit}
                 options={certaintyDict}
-                value={certaintyDict.find(
-                  (i: any) => prop.certainty === i.value
-                )}
-                onChange={(newValue: any) => {
-                  updateProp(prop.id, { ...prop, certainty: newValue.value });
+                value={certaintyDict.find((i) => prop.certainty === i.value)}
+                onChange={(selectedOption) => {
+                  updateProp(prop.id, {
+                    ...prop,
+                    certainty: selectedOption[0].value,
+                  });
                 }}
               />
             )}

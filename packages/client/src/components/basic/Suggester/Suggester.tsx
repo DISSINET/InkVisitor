@@ -31,7 +31,6 @@ import {
   ItemTypes,
   SuggesterItemToCreate,
 } from "types";
-import { SuggesterCreateModal } from "./SuggesterCreateModal/SuggesterCreateModal";
 import { SuggesterKeyPress } from "./SuggesterKeyPress";
 import {
   StyledAiOutlineWarning,
@@ -55,17 +54,15 @@ interface Suggester {
   typed: string; // input value
   category: DropdownItem; // selected category
   categories: DropdownItem[]; // all possible categories
-  suggestionListPosition?: string; // todo not implemented yet
   disabled?: boolean; // todo not implemented yet
   inputWidth?: number | "full";
   disableCreate?: boolean;
   disableButtons?: boolean;
-  allowDrop?: boolean;
   isFetching?: boolean;
 
   // events
   onType: (newType: string) => void;
-  onChangeCategory: (selectedOption: DropdownItem | DropdownItem[]) => void;
+  onChangeCategory: (selectedOption: DropdownItem[]) => void;
   onCreate: (item: SuggesterItemToCreate) => void;
   onPick: (entity: IEntity, instantiateTemplate?: boolean) => void;
   onDrop: (item: EntityDragItem, instantiateTemplate?: boolean) => void;
@@ -78,6 +75,9 @@ interface Suggester {
   userOptions?: IUserOptions;
   autoFocus?: boolean;
   disableEnter?: boolean;
+
+  showCreateModal: boolean;
+  setShowCreateModal: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export const Suggester: React.FC<Suggester> = ({
@@ -87,12 +87,10 @@ export const Suggester: React.FC<Suggester> = ({
   typed,
   category,
   categories,
-  suggestionListPosition,
   disabled,
   inputWidth = 80,
   disableCreate = false,
   disableButtons = false,
-  allowDrop = false,
 
   // events
   onType,
@@ -110,12 +108,14 @@ export const Suggester: React.FC<Suggester> = ({
   userOptions,
   autoFocus,
   disableEnter,
+
+  showCreateModal,
+  setShowCreateModal,
 }) => {
   const [selected, setSelected] = useState(-1);
   const [isFocused, setIsFocused] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
-  const [showCreateModal, setShowCreateModal] = useState(false);
   const [showTemplateModal, setShowTemplateModal] = useState(false);
   const [tempDropItem, setTempDropItem] = useState<EntityDragItem | false>(
     false
@@ -144,6 +144,7 @@ export const Suggester: React.FC<Suggester> = ({
           onDrop(item, true);
         } else if (item.isTemplate && isInsideTemplate) {
           if (item.entityClass === EntityEnums.Class.Territory) {
+            // this option is now unused - not allowed to add T template to S template
             onDrop(item);
             // TODO: notification why not instantiated - used because of missing parent
           } else {
@@ -174,6 +175,7 @@ export const Suggester: React.FC<Suggester> = ({
           label: typed,
           entityClass:
             entitiesDictKeys[category.value as EntityEnums.Class].value,
+          language: false,
         });
       }
     } else if (selected > -1) {
@@ -208,6 +210,7 @@ export const Suggester: React.FC<Suggester> = ({
           label: typed,
           entityClass:
             entitiesDictKeys[category.value as EntityEnums.Class].value,
+          language: false,
         });
       }
     } else {
@@ -349,32 +352,24 @@ export const Suggester: React.FC<Suggester> = ({
                   {renderEntitySuggestions()}
                   <Loader size={30} show={isFetching} />
                 </StyledRelativePosition>
-                <SuggesterKeyPress
-                  onArrowDown={() => {
-                    if (selected < suggestions.length - 1)
-                      setSelected(selected + 1);
-                  }}
-                  onArrowUp={() => {
-                    if (selected > -1) setSelected(selected - 1);
-                  }}
-                  dependencyArr={[selected]}
-                />
+                {!disableEnter && (
+                  <SuggesterKeyPress
+                    onArrowDown={() => {
+                      if (selected < suggestions.length - 1)
+                        setSelected(selected + 1);
+                    }}
+                    onArrowUp={() => {
+                      if (selected > -1) setSelected(selected - 1);
+                    }}
+                    dependencyArr={[selected]}
+                  />
+                )}
               </StyledSuggesterList>
             </FloatingPortal>
           </>
         ) : null}
       </StyledSuggester>
 
-      {showCreateModal && (
-        <SuggesterCreateModal
-          typed={typed}
-          category={category}
-          categories={categories.slice(1)}
-          defaultLanguage={userOptions ? userOptions.defaultLanguage : false}
-          onCreate={onCreate}
-          closeModal={() => setShowCreateModal(false)}
-        />
-      )}
       {showTemplateModal && (
         <TemplateActionModal
           onClose={() => {

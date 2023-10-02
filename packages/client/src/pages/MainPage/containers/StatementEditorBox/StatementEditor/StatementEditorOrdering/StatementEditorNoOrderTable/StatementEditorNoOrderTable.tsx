@@ -2,7 +2,7 @@ import { IEntity, OrderType } from "@shared/types";
 import { Tooltip } from "components";
 import React, { useMemo, useState } from "react";
 import { CgPlayListAdd } from "react-icons/cg";
-import { Cell, Column, Row, useTable } from "react-table";
+import { Cell, CellProps, Column, Row, useTable } from "react-table";
 import theme from "Theme/theme";
 import {
   StyledTable,
@@ -14,6 +14,8 @@ import {
   renderOrderingMainColumn,
 } from "../StatementEditorOrderingUtils";
 
+type CellType = CellProps<OrderType>;
+
 interface StatementEditorNoOrderTable {
   elements: OrderType[];
   entities: { [key: string]: IEntity };
@@ -24,12 +26,11 @@ export const StatementEditorNoOrderTable: React.FC<
 > = ({ elements, entities, addToOrdering }) => {
   const data = useMemo(() => elements, [elements]);
 
-  const columns: Column<{}>[] = React.useMemo(
+  const columns = useMemo<Column<OrderType>[]>(
     () => [
       {
         id: "buttons",
-        accesor: "data",
-        Cell: ({ row }: Cell) => {
+        Cell: ({ row }: CellType) => {
           const orderObject = row.original as OrderType;
 
           const [referenceElement, setReferenceElement] =
@@ -62,17 +63,16 @@ export const StatementEditorNoOrderTable: React.FC<
       },
       {
         id: "main",
-        accessor: "data",
-        Cell: ({ row }: Cell) => {
-          const orderObject = row.original as OrderType;
+        Cell: ({ row }: CellType) => {
+          const orderObject = row.original;
 
           return renderOrderingMainColumn(orderObject, entities);
         },
       },
       {
         id: "info",
-        Cell: ({ row }: Cell) => {
-          const orderObject = row.original as OrderType;
+        Cell: ({ row }: CellType) => {
+          const orderObject = row.original;
 
           return renderOrderingInfoColumn(orderObject, entities);
         },
@@ -93,15 +93,15 @@ export const StatementEditorNoOrderTable: React.FC<
   return (
     <StyledTable {...getTableProps()}>
       <tbody {...getTableBodyProps()}>
-        {rows.map((row: Row, i: number) => {
+        {rows.map((row: Row<OrderType>, i: number) => {
           prepareRow(row);
           return (
             <StyledTr
-              key={(row.original as OrderType).elementId}
+              key={row.original.elementId}
               noOrder
-              borderColor={(row.original as OrderType).type}
+              borderColor={row.original.type}
             >
-              {row.cells.map((cell: Cell) => {
+              {row.cells.map((cell: Cell<OrderType>) => {
                 return (
                   <StyledTd {...cell.getCellProps()}>
                     {cell.render("Cell")}

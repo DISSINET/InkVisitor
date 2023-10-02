@@ -30,8 +30,8 @@ export namespace EntityTooltip {
     subtrees: ISuperclassTree[];
   };
 
-  // This should work the same way as ISuperclassTree but only for L and relation of type SuperordinateLocation
-  export type ISuperordinateLocationTree = ISuperclassTree;
+  // This should work the same way as ISuperclassTree but only for L and relation of type SuperordinateEntity
+  export type ISuperordinateEntityTree = ISuperclassTree;
 
   // only for C and A
   // this is much simpler - its only about IRelationSynonym relation "clouds" where entityId is within `entityIds`

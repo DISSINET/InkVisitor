@@ -1,14 +1,17 @@
 version: "3.6"
 
+x-logging: &logging
+  logging:
+    options:
+      max-size: "10m"
+      max-file: "2"
+
 services:
   database:
     image: rethinkdb
     container_name: "inkvisitor-database"
     restart: always
-    logging:
-      options:
-        max-size: "10m"
-        max-file: "2"
+    <<: *logging
     volumes:
       - ./database_data:/data
     networks:
@@ -26,13 +29,9 @@ services:
     image: inkvisitor:production
     container_name: inkvisitor-production
     restart: always
-    logging:
-      options:
-        max-size: "10m"
-        max-file: "2"
-    # needs to be present when building
-    # env_file:
-    #  - ./packages/server/env/.env.production
+    <<: *logging
+    env_file:
+     - ./packages/server/env/.env.production
     ports:
       - "3000:3000"
     volumes:
@@ -49,17 +48,36 @@ services:
     image: inkvisitor:staging
     container_name: inkvisitor-staging
     restart: always
+    <<: *logging
+    env_file:
+      - ./packages/server/env/.env.staging
+    ports:
+      - "3011:3000"
+    volumes:
+      - ./inkvisitor-staging-client:/app/client/dist
+    networks:
+      - inkvisitor
+
+  inkvisitor-sandbox:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        ENV: sandbox
+    image: inkvisitor:sandbox
+    container_name: inkvisitor-sandbox
+    restart: always
     logging:
       options:
         max-size: "10m"
         max-file: "2"
     # needs to be present when building
     # env_file:
-    #  - ./packages/server/env/.env.staging
+    #  - ./packages/server/env/.env.sandbox
     ports:
       - "3011:3000"
     volumes:
-      - ./inkvisitor-staging-client:/app/client/dist
+      - ./inkvisitor-sandbox-client:/app/client/dist
     networks:
       - inkvisitor
 
@@ -72,13 +90,9 @@ services:
     image: inkvisitor:data-import
     container_name: inkvisitor-data-import
     restart: always
-    logging:
-      options:
-        max-size: "10m"
-        max-file: "2"
-    # needs to be present when building
-    # env_file:
-    #  - ./packages/server/env/.env.data-import
+    <<: *logging
+    env_file:
+      - ./packages/server/env/.env.data-import
     ports:
       - "3011:3000"
     volumes:

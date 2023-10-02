@@ -21,6 +21,13 @@ export default function errorsMiddleware(
   res: Response,
   next: NextFunction
 ): void {
+  // in any case, the error should be wrapper in IResponseGeneric
+  const genericResponse: IResponseGeneric = {
+    result: false,
+    error: err.constructor.name as errorTypes,
+    message: err.message,
+  };
+
   // should expect customized errors, unknown unhandled errors, or errors thrown from some lib
   const isCustomError = typeof (err as CustomError).statusCode === "function";
   if (!isCustomError) {
@@ -39,14 +46,11 @@ export default function errorsMiddleware(
     console.error(
       red(`[Error] ${(err as CustomError).name}: ${(err as CustomError).log}`)
     );
-  }
 
-  // in any case, the error should be wrapper in IResponseGeneric
-  const genericResponse: IResponseGeneric = {
-    result: false,
-    error: err.constructor.name as errorTypes,
-    message: err.message,
-  };
+    if ((err as CustomError).data) {
+      genericResponse.data = (err as CustomError).data;
+    }
+  }
 
   res.status((err as CustomError).statusCode()).json(genericResponse);
 }

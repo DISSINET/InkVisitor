@@ -31,6 +31,7 @@ export const StyledFaUserAlt = styled(FaUserAlt)`
 `;
 export const StyledText = styled.div`
   font-size: ${({ theme }) => theme.fontSize["sm"]};
+  white-space: nowrap;
 `;
 export const StyledUsername = styled.div`
   cursor: pointer;
@@ -76,4 +77,15 @@ export const StyledFlexRow = styled.div`
   display: flex;
   flex-direction: row;
   align-items: center;
+`;
+
+export const StyledSandboxText = styled.div`
+  max-width: 40rem;
+  font-size: ${({ theme }) => theme.fontSize["xxs"]};
+  display: flex;
+  color: ${({ theme }) => theme.color["danger"]};
+`;
+export const StyledSpace = styled.div`
+  display: flex;
+  flex-grow: 1;
 `;

@@ -6,8 +6,10 @@ import { EntityTag } from "components/advanced";
 import { useSearchParams } from "hooks";
 import React, { useMemo } from "react";
 import { FaEdit } from "react-icons/fa";
-import { Cell, Column } from "react-table";
+import { CellProps, Column } from "react-table";
 import { renderEntityTag } from "../EntityDetailUsedInTableUtils";
+
+type CellType = CellProps<IResponseUsedInStatementProps>;
 
 interface EntityDetailStatementPropsTable {
   title: { singular: string; plural: string };
@@ -22,33 +24,21 @@ export const EntityDetailStatementPropsTable: React.FC<
 
   const data = useMemo(() => (useCases ? useCases : []), [useCases]);
 
-  const columns: Column<{}>[] = React.useMemo(
+  const columns = useMemo<Column<IResponseUsedInStatementProps>[]>(
     () => [
       {
         Header: "Statement",
-        accessor: "data",
-        Cell: ({ row }: Cell) => {
-          const useCase = row.original as IResponseUsedInStatementProps;
+        Cell: ({ row }: CellType) => {
+          const useCase = row.original;
           const entityId = useCase.statementId;
           const entity = entityId ? entities[entityId] : false;
-          return (
-            <>
-              {entity && (
-                <EntityTag
-                  key={entity.id}
-                  entity={entity}
-                  tooltipText={entity.label}
-                />
-              )}
-            </>
-          );
+          return <>{entity && <EntityTag key={entity.id} entity={entity} />}</>;
         },
       },
       {
         Header: "Origin",
-        accesor: "data",
-        Cell: ({ row }: Cell) => {
-          const useCase = row.original as IResponseUsedInStatementProps;
+        Cell: ({ row }: CellType) => {
+          const useCase = row.original;
           const entityId = useCase.originId;
           const entity = entityId ? entities[entityId] : false;
           return <>{entity && renderEntityTag(entity)}</>;
@@ -56,8 +46,8 @@ export const EntityDetailStatementPropsTable: React.FC<
       },
       {
         Header: "Type",
-        Cell: ({ row }: Cell) => {
-          const useCase = row.original as IResponseUsedInStatementProps;
+        Cell: ({ row }: CellType) => {
+          const useCase = row.original;
           const entityId = useCase.typeId;
           const entity = entityId ? entities[entityId] : false;
           return <>{entity && renderEntityTag(entity)}</>;
@@ -65,8 +55,8 @@ export const EntityDetailStatementPropsTable: React.FC<
       },
       {
         Header: "Value",
-        Cell: ({ row }: Cell) => {
-          const useCase = row.original as IResponseUsedInStatementProps;
+        Cell: ({ row }: CellType) => {
+          const useCase = row.original;
           const entityId = useCase.valueId;
           const entity = entityId ? entities[entityId] : false;
           return <>{entity && renderEntityTag(entity)}</>;
@@ -74,8 +64,8 @@ export const EntityDetailStatementPropsTable: React.FC<
       },
       {
         id: "edit",
-        Cell: ({ row }: Cell) => {
-          const useCase = row.original as IResponseUsedInStatementProps;
+        Cell: ({ row }: CellType) => {
+          const useCase = row.original;
           const entityId = useCase.statementId;
           const entity = entityId ? entities[entityId] : false;
 

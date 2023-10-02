@@ -26,6 +26,7 @@ import {
   ROOT_TERRITORY_ID,
   StatementObject,
 } from "@shared/types/statement";
+import { randomUUID } from "crypto";
 
 export class StatementClassification implements IStatementClassification {
   id = "";
@@ -104,6 +105,20 @@ export class StatementActant implements IStatementActant, IModel {
   isValid(): boolean {
     return true;
   }
+
+  /**
+   * Resets IDs of nested objects
+   */
+  resetIds() {
+    this.id = randomUUID();
+    this.props.forEach((p) => p.resetIds());
+    this.identifications.forEach((i) => {
+      i.id = randomUUID();
+    });
+    this.classifications.forEach((c) => {
+      c.id = randomUUID();
+    });
+  }
 }
 
 export class StatementTerritory implements IStatementDataTerritory {
@@ -163,6 +178,14 @@ export class StatementAction implements IStatementAction {
     }
 
     return true;
+  }
+
+  /**
+   * Resets IDs of nested objects
+   */
+  resetIds() {
+    this.id = randomUUID();
+    this.props.forEach((p) => p.resetIds());
   }
 }
 
@@ -401,7 +424,7 @@ class Statement extends Entity implements IStatement {
     return result;
   }
 
-  async delete(db: Connection | undefined): Promise<WriteResult> {
+  async delete(db: Connection): Promise<WriteResult> {
     const result = await super.delete(db);
 
     await treeCache.initialize();
@@ -728,52 +751,15 @@ class Statement extends Entity implements IStatement {
     });
   }
 
-  static events: EventMapSingle = {
-    [EventTypes.BEFORE_ENTITY_DELETE]: async (
-      db: Connection,
-      actantId: string
-    ): Promise<void> => {
-      const linkedToActant = await rethink
-        .table(Entity.table)
-        .filter({ class: EntityEnums.Class.Statement })
-        .filter((row: any) => {
-          return row("data")("actants").contains((actantElement: any) =>
-            actantElement("entityId").eq(actantId)
-          );
-        })
-        .run(db);
+  /**
+   * Resets IDs of nested objects
+   */
+  resetIds() {
+    super.resetIds();
 
-      for (const stData of linkedToActant) {
-        const st = new Statement({ ...stData });
-        await st.unlinkActantId(db, actantId);
-      }
-
-      const linkedToProps = await rethink
-        .table(Entity.table)
-        .filter({ class: EntityEnums.Class.Statement })
-        .filter((row: any) => {
-          return row("data")("props").contains((actantElement: any) =>
-            actantElement("origin").eq(actantId)
-          );
-        })
-        .run(db);
-
-      const linkedToActions = await rethink
-        .table(Entity.table)
-        .filter({ class: EntityEnums.Class.Statement })
-        .filter((row: any) => {
-          return row("data")("actions").contains((actantElement: any) =>
-            actantElement("actionId").eq(actantId)
-          );
-        })
-        .run(db);
-
-      for (const stData of linkedToActions) {
-        const st = new Statement({ ...stData });
-        await st.unlinkActionId(db, actantId);
-      }
-    },
-  };
+    this.data.actants.forEach((a) => a.resetIds());
+    this.data.actions.forEach((a) => a.resetIds());
+  }
 }
 
 export default Statement;

@@ -6,6 +6,12 @@ import {
   IEntity,
   Relation,
 } from "@shared/types";
+import { useQuery } from "@tanstack/react-query";
+import {
+  maxTooltipMultiRelations,
+  tooltipLabelSeparator,
+} from "Theme/constants";
+import { ThemeColor } from "Theme/theme";
 import api from "api";
 import { LetterIcon, Tooltip } from "components";
 import React, { useEffect, useMemo, useState } from "react";
@@ -13,12 +19,6 @@ import { AiOutlineTag } from "react-icons/ai";
 import { BiCommentDetail } from "react-icons/bi";
 import { BsCardText } from "react-icons/bs";
 import { ImListNumbered } from "react-icons/im";
-import { useQuery } from "@tanstack/react-query";
-import {
-  maxTooltipMultiRelations,
-  tooltipLabelSeparator,
-} from "Theme/constants";
-import { Colors } from "types";
 import { getEntityRelationRules, getShortLabelByLetterCount } from "utils";
 import { EntityTooltipRelationTreeTable } from "./EntityTooltipRelationTreeTable/EntityTooltipRelationTreeTable";
 import {
@@ -27,8 +27,8 @@ import {
   StyledIconWrap,
   StyledLabel,
   StyledLetterIconWrap,
-  StyledRelations,
   StyledRelationTypeBlock,
+  StyledRelations,
   StyledRow,
 } from "./EntityTooltipStyles";
 
@@ -36,14 +36,14 @@ interface EntityTooltip {
   // entity
   entityId: string;
   entityClass: EntityEnums.Class;
-  label?: string;
+  label?: string | JSX.Element;
   language: EntityEnums.Language;
   detail?: string;
   text?: string;
   itemsCount?: number;
   // settings
   position?: Placement;
-  color?: (typeof Colors)[number];
+  color?: keyof ThemeColor;
   disabled?: boolean;
 
   tagHovered: boolean;

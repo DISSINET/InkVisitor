@@ -1,7 +1,7 @@
 import api from "api";
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Redirect } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { StyledText } from "./ActivateStyles";
 
@@ -23,7 +23,7 @@ const ActivatePage: React.FC<ActivationPage> = ({}) => {
   );
 
   if (status === "success") {
-    return <Redirect to={`/login`} />;
+    return <Navigate to={`/login`} />;
   }
 
   return <StyledText>{"Activating..."}</StyledText>;

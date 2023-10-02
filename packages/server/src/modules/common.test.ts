@@ -3,10 +3,11 @@ import "@models/events/register";
 import Statement, { StatementData } from "@models/statement/statement";
 import Territory from "@models/territory/territory";
 import User from "@models/user/user";
-import { Db } from "@service/RethinkDB";
+import { Db } from "@service/rethink";
 import {
   createEntity,
   deleteAudits,
+  deleteDocuments,
   deleteEntities,
   deleteRelations,
   deleteUser,
@@ -236,6 +237,7 @@ export async function clean(db: Db): Promise<void> {
   await deleteAudits(db);
   await deleteRelations(db);
   //await deleteUsers(db);
+  await deleteDocuments(db);
 
   await db.close();
 }

@@ -10,6 +10,9 @@ import {
   IResponseGeneric,
   RequestSearch,
   EntityTooltip,
+  IProp,
+  IStatementActant,
+  IStatementAction,
 } from "@shared/types";
 import {
   EntityDoesNotExist,
@@ -17,6 +20,8 @@ import {
   InternalServerError,
   ModelNotValidError,
   PermissionDeniedError,
+  AuditDoesNotExist,
+  InvalidDeleteError,
 } from "@shared/types/errors";
 import { Router } from "express";
 import { asyncRouteHandler } from "../index";
@@ -27,8 +32,10 @@ import { ResponseTooltip } from "@models/entity/response-tooltip";
 import { IRequest } from "src/custom_typings/request";
 import Relation from "@models/relation/relation";
 import User from "@models/user/user";
-import { RelationEnums } from "@shared/enums";
+import { EntityEnums, RelationEnums } from "@shared/enums";
+import { Relation as RelationType } from "@shared/types";
 import { copyRelations } from "@models/relation/functions";
+import { randomUUID } from "crypto";
 
 export default Router()
   /**
@@ -236,8 +243,12 @@ export default Router()
         );
       }
 
-      // clone the entry without id - should be created anew
-      const clone = getEntityClass({ ...original, id: "" });
+      // clone the entry without id and with recreated ids - should be created anew
+      const clone = getEntityClass({
+        ...original,
+        id: "",
+        legacyId: undefined,
+      } as Partial<IEntity>);
       if (!clone.isValid()) {
         throw new ModelNotValidError("");
       }
@@ -245,6 +256,8 @@ export default Router()
       if (!clone.canBeCreatedByUser(request.getUserOrFail())) {
         throw new PermissionDeniedError("entity cannot be copied");
       }
+
+      clone.resetIds();
 
       await request.db.lock();
 
@@ -255,10 +268,19 @@ export default Router()
 
       const rels = (
         await Relation.findForEntity(request.db.connection, originalId)
-      ).map((r) => getRelationClass(r));
+      ).filter((rel) => {
+        const relType = RelationType.RelationRules[rel.type];
+        if (!relType?.asymmetrical) {
+          return true;
+        } else {
+          return rel.entityIds.indexOf(originalId) === 0;
+        }
+      });
+
+      const relsWithClas = rels.map((r) => getRelationClass(r));
       const relsCopied = await Relation.copyMany(
         request,
-        rels,
+        relsWithClas,
         originalId,
         clone.id
       );
@@ -266,12 +288,54 @@ export default Router()
       return {
         result: true,
         message:
-          relsCopied !== rels.length
+          relsCopied !== relsWithClas.length
             ? "There has been at least one conflict while copying relations"
             : undefined,
         data: clone,
       };
     })
+  )
+  .post(
+    "/:entityId/restore",
+    asyncRouteHandler<IResponseGeneric<object>>(
+      async (request: IRequest<{ entityId?: string }, {}, {}>) => {
+        const entityId = request.params.entityId || "";
+        const audit = await Audit.getLastForEntity(
+          request.db.connection,
+          entityId
+        );
+        if (!audit) {
+          throw new AuditDoesNotExist(
+            "cannot restore entity - audit does not exist",
+            entityId
+          );
+        }
+
+        const restoration = getEntityClass({
+          ...audit.changes,
+        } as Partial<IEntity>);
+        if (!restoration.isValid()) {
+          throw new ModelNotValidError("");
+        }
+
+        if (!restoration.canBeCreatedByUser(request.getUserOrFail())) {
+          throw new PermissionDeniedError("entity cannot be restored");
+        }
+
+        await request.db.lock();
+
+        const saved = await restoration.save(request.db.connection);
+        if (!saved) {
+          throw new InternalServerError("cannot restore entity");
+        }
+
+        return {
+          result: true,
+          message: "Entity restored",
+          data: audit.changes,
+        };
+      }
+    )
   )
   /**
    * @openapi
@@ -405,37 +469,29 @@ export default Router()
       }
 
       // if relations are linked to this entity, the delete should not be allowed
-      const linkedRelations = await Relation.findForEntity(
-        request.db.connection,
+      const [entityIds, relIds] = await Relation.getLinkedForEntity(
+        request,
         entityId
       );
-      if (linkedRelations && linkedRelations.length) {
-        const entityIds = Array.from(
-          new Set(
-            linkedRelations.reduce<string[]>((acc, r) => {
-              acc = acc.concat(r.entityIds);
-              return acc;
-            }, [])
-          )
-        ).filter((id) => id != entityId);
-        const data = Array.from(new Set(linkedRelations.map((r) => r.id)));
-        const spec = data[0];
-        if (data.length > 1) {
-          spec + ` + ${data.length - 1} others`;
-        }
-        return {
-          result: false,
-          error: "InvalidDeleteError",
-          message: `Cannot be deleted while linked to relations (${spec})`,
-          data: entityIds,
-        };
+      if (relIds.length) {
+        throw new InvalidDeleteError(
+          `Cannot be deleted while linked to relations (${
+            relIds[0] +
+            (relIds.length > 1 ? " + " + (relIds.length - 1) + " others" : "")
+          })`
+        ).withData(entityIds);
       }
 
       // if bookmarks are linked to this entity, the bookmarks should be removed also
-      await User.removeBookmarksForEntity(request.db.connection, entityId);
+      await User.removeBookmarkedEntity(request.db.connection, entityId);
+      if (model.class === EntityEnums.Class.Territory) {
+        await User.removeStoredTerritory(request.db.connection, entityId);
+      }
 
-      const result = await model.delete(request.db.connection);
-      if (result.deleted === 1) {
+      // create last audit snapshot
+      await Audit.createNew(request, model.id, model);
+
+      if ((await model.delete(request.db.connection)).deleted === 1) {
         return {
           result: true,
         };

@@ -20,6 +20,7 @@ import disableUserSelectSlice from "./features/layout/disableUserSelectSlice";
 import lastClickedIndexSlice from "./features/statementList/lastClickedIndexSlice";
 import disableStatementListScrollSlice from "./features/statementList/disableStatementListScrollSlice";
 import disableTreeScrollSlice from "./features/territoryTree/disableTreeScrollSlice";
+import filterOpenSlice from "./features/territoryTree/filterOpenSlice";
 import pingSlice from "./features/pingSlice";
 
 const store: Store = configureStore({
@@ -31,6 +32,7 @@ const store: Store = configureStore({
       selectedTerritoryPath: selectedTerritoryPathSlice,
       treeInitialized: treeInitializeSlice,
       disableTreeScroll: disableTreeScrollSlice,
+      filterOpen: filterOpenSlice,
     }),
     statementList: combineReducers({
       rowsExpanded: rowsExpandedSlice,

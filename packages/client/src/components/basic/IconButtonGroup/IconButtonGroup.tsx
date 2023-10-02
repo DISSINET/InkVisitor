@@ -19,6 +19,7 @@ type IconButtonGroup<TValue extends ValueTypes> = {
   icons: { [key in TValue]: JSX.Element };
   disabled?: boolean;
 };
+
 export const IconButtonGroup = <TValue extends ValueTypes>({
   attributeName,
   border,
@@ -50,7 +51,7 @@ export const IconButtonGroup = <TValue extends ValueTypes>({
                 }
                 noBorder
                 inverted
-                color={option.value === value ? "primary" : "greyer"}
+                color={option.value === value ? "primary" : "grey"}
                 onClick={() => {
                   if (option.value !== value) {
                     onChange(option.value);

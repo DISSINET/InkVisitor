@@ -28,7 +28,7 @@ Follow tutorials on [official page](https://rethinkdb.com/docs/install/)
 
 Warning: the following script will remove all tables and recreates them with basic mock data!
 
-For creating base schema with mock data, please use [import.ts](./scripts/import.ts) script. Usage: `npm run import-<suffix>`. Each import run task calls `import.ts` script with
+For creating base schema with mock data, please use [import.ts](./scripts/import.ts) script. Usage: `pnpm import-<suffix>`. Each import run task calls `import.ts` script with
 arguments `dataset name` and `env name`.
 
 `dataset` identifies the configuration - which file to import, which indexes to prepare, how to transform data before importing.
@@ -40,9 +40,17 @@ To switch between local -> remote host, just provide `SSH*` variables. If provid
 
 ### Example usage
 
-- `npm run import-local`
-- `npm run import-remote`
+- `pnpm import:remote`
+- `pnpm import:remote-data-import`
 - etc
+
+Then, follow the instructions in the command line.
+
+### Jobs
+
+- You can run specialized jobs by typing "J":
+  - **Restore Dates**
+  - **Print Deleted Entities**
 
 ## Backup
 
@@ -72,3 +80,28 @@ Sync it like `rclone sync archives remote:inkvisitor-backup` - see [sync.sh](./s
 ## Generating import data
 
 TODO
+
+# Neo4j
+
+Deployment files are stored in `$APPS_DIR/neo4j`:
+
+- `docker-compose.yml` for easier containerized deployment using `podman-compose` utility
+- `plugins` dir for optional plugins, namely [APOC](https://neo4j.com/developer/neo4j-apoc/)
+
+Container uses 2 volumes by default:
+
+- neo4jdata (`/data-disks/dbds/neo4j`) for core db data, mounted in `/data` directory inside the container
+- neo4jplugins (`$APPS_DIR/neo4j/plugins`) for plugins, mounted in `/plugins` directory inside the container
+
+These volumes should not be removed, but if required, use `podman volume rm <name>`, where name is hashed string (podman does not work with named volumes as required). To retrieve info about volume, use `podman volume list` and `podman volume inspect <name>` to retrieve details.
+
+## Run & Stop
+
+`podman-compose up -d neo4j`
+`podman-compose stop neo4j` + `podman container prune` (optional)
+
+Don't remove
+
+## Web app
+
+Use `http://<machine ip>:7474/browser/`. Default user is `neo4j`.

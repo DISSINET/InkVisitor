@@ -16,6 +16,15 @@
     "paths": {
       "@shared/*": [
         "./../shared/*"
+      ],
+      "@models/*": [
+        "./../server/src/models/*"
+      ],
+      "@service/*": [
+        "./../server/src/service/*"
+      ],
+      "@common/*": [
+        "./../server/src/common/*"
       ]
     },
     "types": [
@@ -25,7 +34,9 @@
       "node_modules/@types"
     ]
   },
+  "files": ["./../server/src/custom_typings/request.d.ts"],
   "include": [
+    "./../server/src/custom_typings/**/*",
     "./types/**/*",
     "./scripts/**/*",
     "./datasets/**/*.ts"

@@ -1,7 +1,13 @@
 import { entitiesDictKeys, languageDict } from "@shared/dictionaries";
-import { classesAll } from "@shared/dictionaries/entity";
+import { classesAll, entitiesDict } from "@shared/dictionaries/entity";
 import { EntityEnums, UserEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import {
+  DropdownAny,
+  excludedSuggesterEntities,
+  rootTerritoryId,
+} from "Theme/constants";
 import api from "api";
 import {
   Button,
@@ -18,39 +24,42 @@ import {
 } from "components";
 import { EntitySuggester, EntityTag } from "components/advanced";
 import { CEntity, CStatement, CTerritory } from "constructors";
-import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
-import { excludedSuggesterEntities, rootTerritoryId } from "Theme/constants";
 import { DropdownItem } from "types";
 import { StyledContent, StyledNote } from "./EntityCreateModalStyles";
 
 interface EntityCreateModal {
   closeModal: () => void;
+  onMutationSuccess?: (entity: IEntity) => void;
+
+  labelTyped?: string;
+  categorySelected?: DropdownItem;
+  categories?: DropdownItem[];
 }
-const allowedEntityClasses: EntityEnums.Class[] = classesAll.filter(
-  (c) => !excludedSuggesterEntities.includes(c)
-);
 export const EntityCreateModal: React.FC<EntityCreateModal> = ({
   closeModal,
+  onMutationSuccess = () => {},
+  labelTyped = "",
+  categorySelected,
+  categories = entitiesDict,
 }) => {
-  const userRole = localStorage.getItem("userrole") as UserEnums.Role;
-
-  const [detailTyped, setDetailTyped] = useState("");
-  const [selectedLanguage, setSelectedLanguage] = useState<any>(false);
-  const [selectedCategory, setSelectedCategory] = useState<DropdownItem>({
-    value: entitiesDictKeys[allowedEntityClasses[0]].value,
-    label: entitiesDictKeys[allowedEntityClasses[0]].label,
-  });
-  const [labelTyped, setLabelTyped] = useState("");
-  const [territoryId, setTerritoryId] = useState<string>("");
-  const { appendDetailId } = useSearchParams();
   const [showModal, setShowModal] = useState(false);
-
   useEffect(() => {
     setShowModal(true);
   }, []);
+
+  const [label, setLabel] = useState(labelTyped);
+  const [detailTyped, setDetailTyped] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<DropdownItem>(
+    categorySelected && categorySelected.value !== DropdownAny
+      ? categorySelected
+      : { value: categories[0].value, label: categories[0].value }
+  );
+
+  const [selectedLanguage, setSelectedLanguage] = useState<
+    EntityEnums.Language | false
+  >(false);
 
   const userId = localStorage.getItem("userid");
   const {
@@ -68,55 +77,35 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
     },
     { enabled: !!userId && api.isLoggedIn() }
   );
-
   useEffect(() => {
     if (user) {
       setSelectedLanguage(user.options.defaultLanguage);
     }
   }, [user]);
 
-  const {
-    status,
-    data: territory,
-    error,
-    isFetching,
-  } = useQuery(
-    ["territory", territoryId],
-    async () => {
-      if (territoryId) {
-        const res = await api.territoryGet(territoryId);
-        return res.data;
-      }
-    },
-    {
-      enabled: !!territoryId && api.isLoggedIn(),
-    }
-  );
-
-  const queryClient = useQueryClient();
+  const [territoryId, setTerritoryId] = useState<string>("");
 
   const entityCreateMutation = useMutation(
     async (newEntity: IEntity) => await api.entityCreate(newEntity),
     {
       onSuccess: (data, variables) => {
+        onMutationSuccess(variables);
         closeModal();
-        appendDetailId(variables.id);
-        if (variables.class === EntityEnums.Class.Territory) {
-          queryClient.invalidateQueries(["tree"]);
-        }
       },
     }
   );
+
+  const userRole = localStorage.getItem("userrole") as UserEnums.Role;
 
   const handleCreateActant = () => {
     const newCreated: {
       label: string;
       entityClass: EntityEnums.Class;
       detail?: string;
-      language?: EntityEnums.Language;
+      language: EntityEnums.Language | false;
       territoryId?: string;
     } = {
-      label: labelTyped,
+      label: label,
       entityClass:
         entitiesDictKeys[selectedCategory.value as EntityEnums.Class].value,
       detail: detailTyped,
@@ -130,7 +119,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
         newCreated.territoryId
       ) {
         const newStatement = CStatement(
-          localStorage.getItem("userrole") as UserEnums.Role,
+          userRole,
           {
             ...user.options,
             defaultLanguage:
@@ -143,7 +132,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
         entityCreateMutation.mutate(newStatement);
       } else if (newCreated.entityClass === EntityEnums.Class.Territory) {
         const newTerritory = CTerritory(
-          localStorage.getItem("userrole") as UserEnums.Role,
+          userRole,
           {
             ...user.options,
             defaultLanguage:
@@ -171,8 +160,26 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
     }
   };
 
+  const {
+    status,
+    data: territory,
+    error,
+    isFetching,
+  } = useQuery(
+    ["territory", territoryId],
+    async () => {
+      if (territoryId) {
+        const res = await api.territoryGet(territoryId);
+        return res.data;
+      }
+    },
+    {
+      enabled: !!territoryId && api.isLoggedIn(),
+    }
+  );
+
   const handleCheckOnSubmit = () => {
-    if (labelTyped.length < 2) {
+    if (label.length < 2) {
       toast.info("fill at least 2 characters");
     } else if (selectedCategory.value === "S" && !territoryId) {
       toast.warning("Territory is required!");
@@ -202,14 +209,15 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
             <ModalInputLabel>{"Class & Label: "}</ModalInputLabel>
             <ModalInputWrap>
               <EntitySuggester
-                categoryTypes={allowedEntityClasses}
-                excludedEntities={excludedSuggesterEntities}
-                onSelected={() => console.log("cannot select")}
+                initTyped={label}
+                initCategory={selectedCategory}
+                categoryTypes={classesAll}
+                excludedEntityClasses={excludedSuggesterEntities}
                 onChangeCategory={(selectedOption) => {
                   if (selectedOption)
                     setSelectedCategory(selectedOption as DropdownItem);
                 }}
-                onTyped={(newType: string) => setLabelTyped(newType)}
+                onTyped={(newType: string) => setLabel(newType)}
                 disableCreate
                 disableTemplatesAccept
                 disableWildCard
@@ -233,11 +241,11 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
               <Dropdown
                 width="full"
                 options={languageDict}
-                value={languageDict.find(
-                  (i: any) => i.value === selectedLanguage
-                )}
-                onChange={(newValue: any) => {
-                  setSelectedLanguage(newValue.value);
+                value={languageDict.find((i) => i.value === selectedLanguage)}
+                onChange={(newValue) => {
+                  setSelectedLanguage(
+                    newValue[0].value as EntityEnums.Language
+                  );
                 }}
               />
             </ModalInputWrap>

@@ -231,6 +231,7 @@ export const EntityBookmarkBox: React.FC = () => {
         showModal={!!editingFolder}
         width="thin"
         onEnterPress={() => acceptEditingFolderMutation.mutate()}
+        onClose={cancelEditingFolder}
       >
         <ModalHeader title="Bookmark Folder" />
         <ModalContent>
@@ -250,9 +251,7 @@ export const EntityBookmarkBox: React.FC = () => {
               key="cancel"
               label="Cancel"
               color="warning"
-              onClick={() => {
-                cancelEditingFolder();
-              }}
+              onClick={cancelEditingFolder}
             />
             <Button
               key="submit"

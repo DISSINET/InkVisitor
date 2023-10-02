@@ -7,8 +7,9 @@ import {
   IResponseDetail,
   Relation,
 } from "@shared/types";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import { Button, Loader, Submit } from "components";
+import { Button, Loader, Message, Submit, ToastWithLink } from "components";
 import {
   ApplyTemplateModal,
   AuditTable,
@@ -19,7 +20,6 @@ import { CMetaProp } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
 import { FaPlus } from "react-icons/fa";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import {
   DraggedPropRowCategory,
@@ -177,7 +177,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
         });
     }
     return options;
-  }, [templates]);
+  }, [templates, entity]);
 
   // Audit query
   const {
@@ -223,22 +223,21 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
     async (changes: any) => await api.entityUpdate(detailId, changes),
     {
       onSuccess: (data, variables) => {
-        // TODO - check this
         queryClient.invalidateQueries(["entity"]);
-        queryClient.invalidateQueries(["statement"]);
 
-        if (statementId === detailId) {
-          queryClient.invalidateQueries(["statement"]);
-        }
         if (
           variables.references !== undefined ||
           variables.detail !== undefined ||
           variables.label !== undefined ||
           variables.status ||
+          variables.language !== undefined ||
           variables.data?.logicalType
         ) {
           if (entity?.class === EntityEnums.Class.Territory) {
             queryClient.invalidateQueries(["tree"]);
+          }
+          if (entity?.class === EntityEnums.Class.Statement) {
+            queryClient.invalidateQueries(["statement"]);
           }
           queryClient.invalidateQueries(["territory"]);
           queryClient.invalidateQueries(["bookmarks"]);
@@ -277,7 +276,30 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
     (entityId: string) => api.entityDelete(entityId),
     {
       onSuccess: async (data, entityId) => {
-        toast.info(`Entity removed!`);
+        toast.info(
+          <ToastWithLink
+            children={`Entity removed!`}
+            linkText={"Restore"}
+            onLinkClick={async () => {
+              const response = await api.entityRestore(entityId);
+              toast.info("Entity restored");
+              appendDetailId(entityId);
+              queryClient.invalidateQueries(["entity"]);
+              queryClient.invalidateQueries(["statement"]);
+              if (entity?.class === EntityEnums.Class.Territory) {
+                queryClient.invalidateQueries(["tree"]);
+              }
+              queryClient.invalidateQueries(["territory"]);
+              queryClient.invalidateQueries(["bookmarks"]);
+              if (entity?.isTemplate) {
+                queryClient.invalidateQueries(["templates"]);
+              }
+            }}
+          />,
+          {
+            autoClose: 5000,
+          }
+        );
 
         // hide selected territory if T removed
         if (
@@ -314,7 +336,6 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
           const { data } = error as any;
           toast.info("Click to open conflicting entity in detail", {
             autoClose: 6000,
-            pauseOnHover: true,
             onClick: () => {
               appendDetailId(data[0]);
             },
@@ -601,6 +622,10 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
             {/* Relations */}
             <StyledDetailSection>
               <StyledDetailSectionHeader>Relations</StyledDetailSectionHeader>
+              {entity.warnings &&
+                entity.warnings.map((warning, key) => {
+                  return <Message key={key} warning={warning} />;
+                })}
               <StyledDetailSectionContent>
                 <EntityDetailRelations
                   entity={entity}
@@ -672,8 +697,9 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
               <StyledDetailSectionContent>
                 <EntityReferenceTable
                   disabled={!userCanEdit}
-                  references={entity.references || []}
+                  references={entity.references ?? []}
                   entities={entity.entities}
+                  entityId={entity.id}
                   onChange={(newValues: IReference[]) => {
                     updateEntityMutation.mutate({ references: newValues });
                   }}
@@ -696,7 +722,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
                   <StyledDetailSectionEntityList>
                     {entity.usedAsTemplate.map((entityId) => (
                       <React.Fragment key={entityId}>
-                        <div style={{ display: "grid" }}>
+                        <div style={{ display: "inline-grid" }}>
                           <EntityTag
                             entity={entity.entities[entityId]}
                             fullWidth
@@ -791,9 +817,10 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
       )}
 
       <Submit
-        title="Remove entity"
-        text="Do you really want to remove this entity?"
-        submitLabel="Remove"
+        title="Delete entity"
+        text="Do you really want to delete this entity?"
+        submitLabel="Delete"
+        entityToSubmit={entity}
         onSubmit={() => {
           deleteEntityMutation.mutate(detailId);
           setShowRemoveSubmit(false);
@@ -814,6 +841,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
         onCancel={() => setShowTypeSubmit(false)}
         show={showTypeSubmit}
       />
+
       <Loader
         show={
           isFetching ||
@@ -823,22 +851,26 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
         }
       />
 
-      <ApplyTemplateModal
-        showModal={showApplyTemplateModal}
-        entity={entity}
-        setShowApplyTemplateModal={setShowApplyTemplateModal}
-        updateEntityMutation={updateEntityMutation}
-        templateToApply={templateToApply}
-        setTemplateToApply={setTemplateToApply}
-      />
+      {entity && (
+        <ApplyTemplateModal
+          showModal={showApplyTemplateModal}
+          entity={entity}
+          setShowApplyTemplateModal={setShowApplyTemplateModal}
+          updateEntityMutation={updateEntityMutation}
+          templateToApply={templateToApply}
+          setTemplateToApply={setTemplateToApply}
+        />
+      )}
 
-      <EntityDetailCreateTemplateModal
-        setCreateTemplateModal={setCreateTemplateModal}
-        entity={entity}
-        showModal={createTemplateModal}
-        userCanEdit={userCanEdit}
-        updateEntityMutation={updateEntityMutation}
-      />
+      {entity && (
+        <EntityDetailCreateTemplateModal
+          setCreateTemplateModal={setCreateTemplateModal}
+          entity={entity}
+          showModal={createTemplateModal}
+          userCanEdit={userCanEdit}
+          updateEntityMutation={updateEntityMutation}
+        />
+      )}
     </>
   );
 };

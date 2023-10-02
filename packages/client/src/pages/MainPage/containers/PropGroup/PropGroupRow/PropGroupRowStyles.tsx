@@ -73,6 +73,7 @@ export const StyledAttributesFlexColumn = styled.div`
   display: inline-flex;
   flex-direction: column;
   gap: 0.5rem;
+  min-width: 13rem;
 `;
 
 interface StyledAttributesFlexRow {

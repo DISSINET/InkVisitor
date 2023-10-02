@@ -1,21 +1,23 @@
+import { ThemeColor } from "Theme/theme";
 import React from "react";
-import { Colors } from "types";
 import { StyledCircle, StyledLetter } from "./LetterIconStyles";
 
 interface LetterIcon {
   letter: string;
-  color?: typeof Colors[number];
+  color?: keyof ThemeColor;
+  bgColor?: keyof ThemeColor;
   size?: number;
 }
 export const LetterIcon: React.FC<LetterIcon> = ({
   letter = "X",
   color = "black",
+  bgColor,
   size = 16,
 }) => {
   return (
     <div>
-      <StyledCircle color={color} size={size}>
-        <StyledLetter size={size} color={color}>
+      <StyledCircle $color={color} size={size} bgColor={bgColor}>
+        <StyledLetter size={size} $color={color}>
           {letter}
         </StyledLetter>
       </StyledCircle>

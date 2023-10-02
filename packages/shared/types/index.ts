@@ -1,3 +1,4 @@
+import { IWarning, IWarningPosition } from "./warning";
 import { IAudit } from "./audit";
 import { ILabel } from "./label";
 import { IReference } from "./reference";
@@ -62,6 +63,11 @@ import {
   IUserOptions,
   IUserRight,
 } from "./user";
+import {
+  IDocument,
+  IResponseDocument,
+  IResponseDocumentDetail,
+} from "./document";
 
 export type {
   IAudit,
@@ -122,7 +128,12 @@ export type {
   OrderType,
   EntityOrder,
   PropOrder,
+  IWarning,
+  IWarningPosition,
   ClassificationOrder,
   IdentificationOrder,
+  IDocument,
+  IResponseDocument,
+  IResponseDocumentDetail,
 };
 export { RequestSearch, RequestPermissionUpdate, Relation };

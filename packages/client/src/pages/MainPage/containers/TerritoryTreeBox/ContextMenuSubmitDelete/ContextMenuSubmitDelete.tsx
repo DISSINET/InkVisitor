@@ -1,10 +1,11 @@
 import { IEntity } from "@shared/types";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import { Submit } from "components";
+import { Submit, ToastWithLink } from "components";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
+import { getShortLabelByLetterCount } from "utils";
 
 interface ContextMenuSubmitDelete {
   territoryActant: IEntity;
@@ -33,7 +34,26 @@ export const ContextMenuSubmitDelete: React.FC<ContextMenuSubmitDelete> = ({
     async () => await api.entityDelete(territoryActant.id),
     {
       onSuccess: () => {
-        toast.info(`Territory [${territoryActant.label}] deleted!`);
+        toast.info(
+          <ToastWithLink
+            children={`Territory [${getShortLabelByLetterCount(
+              territoryActant.label,
+              120
+            )}] deleted!`}
+            linkText="Restore"
+            onLinkClick={async () => {
+              const response = await api.entityRestore(territoryActant.id);
+              toast.info("Entity restored");
+              queryClient.invalidateQueries(["tree"]);
+              queryClient.invalidateQueries(["detail-tab-entities"]);
+              queryClient.invalidateQueries(["statement"]);
+            }}
+          />,
+          {
+            autoClose: 5000,
+          }
+        );
+
         if (territoryId === territoryActant.id) {
           setTerritoryId("");
         }
@@ -53,7 +73,6 @@ export const ContextMenuSubmitDelete: React.FC<ContextMenuSubmitDelete> = ({
           const { data } = error as any;
           toast.info("Click to open conflicting entity in detail", {
             autoClose: 6000,
-            pauseOnHover: true,
             onClick: () => {
               appendDetailId(data[0]);
             },
@@ -71,7 +90,8 @@ export const ContextMenuSubmitDelete: React.FC<ContextMenuSubmitDelete> = ({
   return (
     <Submit
       title={"Delete Territory"}
-      text={`Do you really want do delete Territory [${territoryActant.label}]?`}
+      text={`Do you really want to delete Territory?`}
+      entityToSubmit={territoryActant}
       show={showModal}
       onSubmit={() => onSubmitDelete()}
       onCancel={() => onClose()}

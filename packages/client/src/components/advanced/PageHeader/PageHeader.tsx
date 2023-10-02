@@ -4,7 +4,7 @@ import LogoInkvisitor from "assets/logos/inkvisitor.svg";
 import { Loader } from "components";
 import React, { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { useHistory, useLocation } from "react-router";
+import { useNavigate, useLocation } from "react-router";
 import { toast } from "react-toastify";
 import { useAppSelector } from "redux/hooks";
 import { Menu } from "..";
@@ -19,6 +19,8 @@ import {
   StyledPingColor,
   StyledPingText,
   StyledRightHeader,
+  StyledSandboxText,
+  StyledSpace,
   StyledText,
   StyledUser,
   StyledUsername,
@@ -37,7 +39,7 @@ export const LeftHeader: React.FC<LeftHeader> = React.memo(
       env ? ` | ${env}` : ``
     } | built: ${process.env.BUILD_TIMESTAMP}`;
     const location = useLocation();
-    const history = useHistory();
+    const navigate = useNavigate();
 
     const queryClient = useQueryClient();
 
@@ -79,7 +81,7 @@ export const LeftHeader: React.FC<LeftHeader> = React.memo(
           alt="Inkvisitor Logo"
           onClick={async () => {
             if (location.pathname !== "/") {
-              history.push({
+              navigate({
                 pathname: "/",
                 hash: tempLocation ? tempLocation : "",
               });
@@ -99,10 +101,12 @@ export const LeftHeader: React.FC<LeftHeader> = React.memo(
           </StyledHeaderTag>
           <StyledFlexRow>
             <StyledPingText style={{ marginLeft: "0.3rem" }}>
-              {ping > -1 ? `Server connection latency:` : "Server is down"}
+              {ping === -2 && "loading..."}
+              {ping === -1 && "Server is down"}
+              {ping >= 0 && `Server connection latency:`}
             </StyledPingText>
-            <StyledPingColor pingColor={pingColor} />
-            {ping > -1 && <StyledPingText>{ping}ms</StyledPingText>}
+            {ping >= -1 && <StyledPingColor pingColor={pingColor} />}
+            {ping >= 0 && <StyledPingText>{ping}ms</StyledPingText>}
           </StyledFlexRow>
         </StyledFlexColumn>
       </StyledHeader>
@@ -128,38 +132,55 @@ export const RightHeader: React.FC<RightHeader> = React.memo(
     setTempLocation,
     handleLogOut,
   }) => {
+    const env = (process.env.ROOT_URL || "").replace(
+      /apps\/inkvisitor[-]?/,
+      ""
+    );
+
     return (
-      <StyledRightHeader>
-        {userName.length > 0 ? (
-          <StyledUser>
-            <StyledText>logged as</StyledText>
-            <StyledFaUserAlt
-              size={14}
-              onClick={() => setUserCustomizationOpen(true)}
-            />
-            <StyledUsername onClick={() => setUserCustomizationOpen(true)}>
-              {userName}
-            </StyledUsername>
-          </StyledUser>
-        ) : (
-          <div
-            style={{
-              height: "1rem",
-              width: "1rem",
-              position: "relative",
-              marginRight: "2rem",
-            }}
-          >
-            <Loader size={10} show />
-          </div>
+      <>
+        {env === "sandbox" && (
+          <>
+            <StyledSandboxText>
+              {
+                "This is a sandbox version of InkVisitor, to be used for testing only. Do not store important data here; your data stored here can be deleted without previous notice."
+              }
+            </StyledSandboxText>
+            <StyledSpace />
+          </>
         )}
-        <Menu
-          userRole={userRole}
-          tempLocation={tempLocation}
-          setTempLocation={setTempLocation}
-          handleLogOut={handleLogOut}
-        />
-      </StyledRightHeader>
+        <StyledRightHeader>
+          {userName.length > 0 ? (
+            <StyledUser>
+              <StyledText>logged as</StyledText>
+              <StyledFaUserAlt
+                size={14}
+                onClick={() => setUserCustomizationOpen(true)}
+              />
+              <StyledUsername onClick={() => setUserCustomizationOpen(true)}>
+                {userName}
+              </StyledUsername>
+            </StyledUser>
+          ) : (
+            <div
+              style={{
+                height: "1rem",
+                width: "1rem",
+                position: "relative",
+                marginRight: "2rem",
+              }}
+            >
+              <Loader size={10} show />
+            </div>
+          )}
+          <Menu
+            userRole={userRole}
+            tempLocation={tempLocation}
+            setTempLocation={setTempLocation}
+            handleLogOut={handleLogOut}
+          />
+        </StyledRightHeader>
+      </>
     );
   }
 );

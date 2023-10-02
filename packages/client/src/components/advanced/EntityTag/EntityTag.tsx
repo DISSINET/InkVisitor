@@ -1,23 +1,23 @@
 import { Placement } from "@popperjs/core";
 import { EntityEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
+import { ThemeColor } from "Theme/theme";
 import { Button, Tag } from "components";
 import { EntityTooltip } from "components/advanced";
 import React, { ReactNode, useState } from "react";
 import { FaUnlink } from "react-icons/fa";
 import { useAppSelector } from "redux/hooks";
-import { Colors, DraggedEntityReduxItem, EntityDragItem } from "types";
+import { DraggedEntityReduxItem, EntityDragItem } from "types";
 import { getEntityLabel, isValidEntityClass } from "utils";
 
 interface UnlinkButton {
   onClick: () => void;
-  color?: typeof Colors[number];
+  color?: keyof ThemeColor;
   tooltipLabel?: string;
   icon?: JSX.Element;
 }
 interface EntityTag {
   entity: IEntity;
-  tooltipText?: string;
   parentId?: string;
   mode?: "selected" | "disabled" | "invalid" | false;
   showOnly?: "entity" | "label";
@@ -41,7 +41,6 @@ interface EntityTag {
 
 export const EntityTag: React.FC<EntityTag> = ({
   entity,
-  tooltipText,
   parentId,
   showOnly,
   fullWidth = false,
@@ -114,10 +113,14 @@ export const EntityTag: React.FC<EntityTag> = ({
           <EntityTooltip
             entityId={entity.id}
             entityClass={entity.class}
-            label={getEntityLabel(entity)}
+            label={entity.label || <i>{"no label"}</i>}
             language={entity.language}
             detail={entity.detail}
-            text={tooltipText}
+            text={
+              entity.class === EntityEnums.Class.Statement
+                ? entity.data.text
+                : undefined
+            }
             itemsCount={statementsCount}
             position={tooltipPosition}
             disabled={

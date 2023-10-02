@@ -3,9 +3,10 @@ import { IResponseUsedInStatementClassification } from "@shared/types/response-d
 import { Table } from "components";
 import { EntityTag } from "components/advanced";
 import React, { useMemo } from "react";
-import { Cell, Column } from "react-table";
+import { CellProps, Column } from "react-table";
 import { renderEntityTag } from "../EntityDetailUsedInTableUtils";
 
+type CellType = CellProps<IResponseUsedInStatementClassification>;
 interface EntityDetailClassificationTable {
   title: { singular: string; plural: string };
   entities: { [key: string]: IEntity };
@@ -17,35 +18,23 @@ export const EntityDetailClassificationTable: React.FC<
 > = ({ title, entities, useCases, perPage = 5 }) => {
   const data = useMemo(() => (useCases ? useCases : []), [useCases]);
 
-  const columns: Column<{}>[] = React.useMemo(
+  const columns = useMemo<Column<IResponseUsedInStatementClassification>[]>(
     () => [
       {
         Header: "Statement",
         accessor: "data",
-        Cell: ({ row }: Cell) => {
-          const useCase =
-            row.original as IResponseUsedInStatementClassification;
+        Cell: ({ row }: CellType) => {
+          const useCase = row.original;
           const entityId = useCase.statementId;
           const entity = entityId ? entities[entityId] : false;
-          return (
-            <>
-              {entity && (
-                <EntityTag
-                  key={entity.id}
-                  entity={entity}
-                  tooltipText={entity.label}
-                />
-              )}
-            </>
-          );
+          return <>{entity && <EntityTag key={entity.id} entity={entity} />}</>;
         },
       },
       {
         Header: "Actant",
         accesor: "data",
-        Cell: ({ row }: Cell) => {
-          const useCase =
-            row.original as IResponseUsedInStatementClassification;
+        Cell: ({ row }: CellType) => {
+          const useCase = row.original;
           const entityId = useCase.actantEntityId;
           const entity = entityId ? entities[entityId] : false;
           return <>{entity && renderEntityTag(entity)}</>;
@@ -53,9 +42,8 @@ export const EntityDetailClassificationTable: React.FC<
       },
       {
         Header: "Classification",
-        Cell: ({ row }: Cell) => {
-          const useCase =
-            row.original as IResponseUsedInStatementClassification;
+        Cell: ({ row }: CellType) => {
+          const useCase = row.original;
           const entityId = useCase.relationEntityId;
           const entity = entityId ? entities[entityId] : false;
           return <>{entity && renderEntityTag(entity)}</>;

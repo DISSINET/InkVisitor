@@ -6,6 +6,7 @@ export const StyledContent = styled.div`
   justify-content: center;
   flex-direction: row;
 `;
+
 interface StyledBoxWrap {}
 export const StyledBoxWrap = styled.div<StyledBoxWrap>`
   max-width: 100%;

@@ -13,6 +13,7 @@ import { IconFont } from "./basic/IconFont/IconFont";
 import { Input } from "./basic/Input/Input";
 import { LetterIcon } from "./basic/LetterIcon/LetterIcon";
 import { Loader } from "./basic/Loader/Loader";
+import { Message } from "./basic/Message/Message";
 import {
   Modal,
   ModalCard,
@@ -32,6 +33,7 @@ import { Tag } from "./basic/Tag/Tag";
 import { TagGroup } from "./basic/TagGroup/TagGroup";
 import { TemplateActionModal } from "./basic/TemplateActionModal/TemplateActionModal";
 import { Toast } from "./basic/Toast/Toast";
+import ToastWithLink from "./basic/Toast/ToastWithLink";
 import { Tooltip } from "./basic/Tooltip/Tooltip";
 import { TypeBar } from "./basic/TypeBar/TypeBar";
 
@@ -50,6 +52,7 @@ export {
   IconFont,
   Input,
   Loader,
+  Message,
   MultiInput,
   Panel,
   Tag,
@@ -69,6 +72,7 @@ export {
   ModalInputWrap,
   Submit,
   TemplateActionModal,
+  ToastWithLink,
   TypeBar,
   Tooltip,
 };

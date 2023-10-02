@@ -2,7 +2,7 @@ import { IEntity, OrderType } from "@shared/types";
 import { Tooltip } from "components";
 import update from "immutability-helper";
 import React, { useCallback, useMemo, useState } from "react";
-import { Cell, Column, Row, useTable } from "react-table";
+import { CellProps, Column, Row, useTable } from "react-table";
 import {
   StyledButtonsWrap,
   StyledCgPlayListRemove,
@@ -15,6 +15,8 @@ import {
   renderOrderingMainColumn,
 } from "../StatementEditorOrderingUtils";
 import { StatementEditorOrderTableRow } from "./StatementEditorOrderTableRow";
+
+type CellType = CellProps<OrderType>;
 
 interface StatementEditorOrderTable {
   elements: OrderType[];
@@ -32,13 +34,12 @@ export const StatementEditorOrderTable: React.FC<StatementEditorOrderTable> = ({
 }) => {
   const data = useMemo(() => elements, [elements]);
 
-  const columns: Column<{}>[] = React.useMemo(
+  const columns = useMemo<Column<OrderType>[]>(
     () => [
       {
         id: "buttons",
-        accesor: "data",
-        Cell: ({ row }: Cell) => {
-          const orderObject = row.original as OrderType;
+        Cell: ({ row }: CellType) => {
+          const orderObject = row.original;
           const isFirst = row.index === 0;
           const isLast = row.index === elements.length - 1;
 
@@ -88,17 +89,16 @@ export const StatementEditorOrderTable: React.FC<StatementEditorOrderTable> = ({
       },
       {
         id: "main",
-        accessor: "data",
-        Cell: ({ row }: Cell) => {
-          const orderObject = row.original as OrderType;
+        Cell: ({ row }: CellType) => {
+          const orderObject = row.original;
 
           return renderOrderingMainColumn(orderObject, entities);
         },
       },
       {
         id: "info",
-        Cell: ({ row }: Cell) => {
-          const orderObject = row.original as OrderType;
+        Cell: ({ row }: CellType) => {
+          const orderObject = row.original;
 
           return renderOrderingInfoColumn(orderObject, entities);
         },
@@ -134,7 +134,7 @@ export const StatementEditorOrderTable: React.FC<StatementEditorOrderTable> = ({
   return (
     <StyledTable {...getTableProps()}>
       <tbody {...getTableBodyProps()}>
-        {rows.map((row: Row, i: number) => {
+        {rows.map((row: Row<OrderType>, i: number) => {
           prepareRow(row);
           return (
             <StatementEditorOrderTableRow

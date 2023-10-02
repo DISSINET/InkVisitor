@@ -1,12 +1,13 @@
 import { IEntity, IResponseBookmarkFolder } from "@shared/types";
-import { Button } from "components";
 import { EntityTag } from "components/advanced";
 import update from "immutability-helper";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { FaUnlink } from "react-icons/fa";
-import { Cell, Column, Row, useTable } from "react-table";
+import { CellProps, Column, Row, useTable } from "react-table";
 import { EntityBookmarkTableRow } from "./EntityBookmarkTableRow";
 import { StyledTable, StyledTagWrap } from "./EntityBookmarkTableStyles";
+import { FaTrash } from "react-icons/fa";
+
+type CellType = CellProps<IEntity>;
 
 interface EntityBookmarkTable {
   folder: IResponseBookmarkFolder;
@@ -24,38 +25,37 @@ export const EntityBookmarkTable: React.FC<EntityBookmarkTable> = ({
     setFolderEntitys(folder.entities);
   }, [folder]);
 
-  const columns: Column<{}>[] = useMemo(() => {
-    return [
-      {
-        id: "id",
-        accessor: "id",
-      },
+  const columns = useMemo<Column<IEntity>[]>(
+    () => [
       {
         id: "Action",
         accessor: "data",
-        Cell: ({ row }: Cell) => {
-          const entity = row.original as IEntity;
+        Cell: ({ row }: CellType) => {
+          const entity = row.original;
 
           return (
             <StyledTagWrap>
               <EntityTag
-                entity={entity as IEntity}
+                entity={entity}
                 tooltipPosition="left"
                 fullWidth
                 unlinkButton={{
                   onClick: () => {
                     removeBookmark(folder.id, entity.id);
                   },
+                  tooltipLabel: "delete bookmark",
+                  icon: <FaTrash />,
                 }}
               />
             </StyledTagWrap>
           );
         },
       },
-    ];
-  }, [folder]);
+    ],
+    [folder]
+  );
 
-  const getRowId = useCallback((row) => {
+  const getRowId = useCallback((row: IEntity) => {
     return row.id;
   }, []);
 
@@ -68,11 +68,8 @@ export const EntityBookmarkTable: React.FC<EntityBookmarkTable> = ({
     visibleColumns,
   } = useTable({
     columns,
-    data: folderEntitys || [],
+    data: useMemo(() => folderEntitys || [], [folderEntitys]),
     getRowId,
-    initialState: {
-      hiddenColumns: ["id"],
-    },
   });
 
   const updateFolderItemOrder = () => {
@@ -100,7 +97,7 @@ export const EntityBookmarkTable: React.FC<EntityBookmarkTable> = ({
   return (
     <StyledTable {...getTableProps()}>
       <tbody {...getTableBodyProps()}>
-        {rows.map((row: Row, i: number) => {
+        {rows.map((row: Row<IEntity>, i: number) => {
           prepareRow(row);
           return (
             <EntityBookmarkTableRow

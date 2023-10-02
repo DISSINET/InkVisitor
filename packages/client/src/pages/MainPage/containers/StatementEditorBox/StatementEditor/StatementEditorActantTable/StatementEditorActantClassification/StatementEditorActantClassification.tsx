@@ -188,9 +188,11 @@ export const StatementEditorActantClassification: React.FC<
               value={[allEntities]
                 .concat(moodDict)
                 .filter((i: any) => classification.mood.includes(i.value))}
-              onChange={(newValue: any) => {
+              onChange={(selectedOptions) => {
                 handleUpdate({
-                  mood: newValue ? newValue.map((v: any) => v.value) : [],
+                  mood: selectedOptions
+                    ? selectedOptions.map((v: any) => v.value)
+                    : [],
                 });
               }}
               attributeDropdown
@@ -215,8 +217,10 @@ export const StatementEditorActantClassification: React.FC<
               value={certaintyDict.find(
                 (i: any) => classification.certainty === i.value
               )}
-              onChange={(newValue: any) => {
-                handleUpdate({ certainty: newValue.value });
+              onChange={(selectedOption) => {
+                handleUpdate({
+                  certainty: selectedOption[0].value as EntityEnums.Certainty,
+                });
               }}
             />
           </div>

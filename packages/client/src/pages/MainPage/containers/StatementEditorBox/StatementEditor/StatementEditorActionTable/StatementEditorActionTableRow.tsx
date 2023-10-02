@@ -110,7 +110,7 @@ export const StatementEditorActionTableRow: React.FC<
     }
   };
 
-  const [, drop] = useDrop({
+  const [, drop] = useDrop<DragItem>({
     accept: ItemTypes.ACTION_ROW,
     hover(item: DragItem, monitor: DropTargetMonitor) {
       dndHoverFn(item, index, monitor, dropRef, moveRow);
@@ -118,8 +118,8 @@ export const StatementEditorActionTableRow: React.FC<
   });
 
   const [{ isDragging }, drag, preview] = useDrag({
+    type: ItemTypes.ACTION_ROW,
     item: {
-      type: ItemTypes.ACTION_ROW,
       index,
       id: filteredAction.id.toString(),
     },
@@ -146,7 +146,7 @@ export const StatementEditorActionTableRow: React.FC<
         }}
         isInsideTemplate={isInsideTemplate}
         categoryTypes={[EntityEnums.Class.Action]}
-        excludedEntities={excludedSuggesterEntities}
+        excludedEntityClasses={excludedSuggesterEntities}
         territoryParentId={territoryParentId}
         excludedActantIds={[action.id]}
       >
@@ -185,7 +185,7 @@ export const StatementEditorActionTableRow: React.FC<
           }}
           openDetailOnCreate
           categoryTypes={[EntityEnums.Class.Action]}
-          excludedEntities={excludedSuggesterEntities}
+          excludedEntityClasses={excludedSuggesterEntities}
           placeholder={"add action"}
           isInsideTemplate={isInsideTemplate}
           territoryParentId={territoryParentId}
@@ -334,13 +334,29 @@ export const StatementEditorActionTableRow: React.FC<
                 options={moodDict}
                 value={[allEntities]
                   .concat(moodDict)
-                  .filter((i: any) => sAction.mood.includes(i.value))}
-                onChange={(newValue: any) => {
+                  .filter((i) =>
+                    sAction.mood.includes(i.value as EntityEnums.Mood)
+                  )}
+                onChange={(selectedOptions) => {
                   updateAction(sAction.id, {
-                    mood: newValue ? newValue.map((v: any) => v.value) : [],
+                    mood: selectedOptions
+                      ? selectedOptions.map((v: any) => v.value)
+                      : [],
                   });
                 }}
                 attributeDropdown
+              />
+            </StyledGridColumn>
+            <StyledGridColumn>
+              <MoodVariantButtonGroup
+                border
+                onChange={(moodvariant) =>
+                  updateAction(sAction.id, {
+                    moodvariant: moodvariant,
+                  })
+                }
+                value={sAction.moodvariant}
+                disabled={!userCanEdit}
               />
             </StyledGridColumn>
             <StyledGridColumn>{renderButtonsCell()}</StyledGridColumn>
@@ -379,16 +395,6 @@ export const StatementEditorActionTableRow: React.FC<
           {/* Expanded row */}
           {isExpanded && !isDraggingAction && (
             <StyledExpandedRow>
-              <MoodVariantButtonGroup
-                border
-                onChange={(moodvariant) =>
-                  updateAction(sAction.id, {
-                    moodvariant: moodvariant,
-                  })
-                }
-                value={sAction.moodvariant}
-                disabled={!userCanEdit}
-              />
               <div>
                 <Dropdown
                   width={70}
@@ -400,9 +406,9 @@ export const StatementEditorActionTableRow: React.FC<
                   value={operatorDict.find(
                     (i: any) => sAction.bundleOperator === i.value
                   )}
-                  onChange={(newValue: any) => {
+                  onChange={(selectedOption) => {
                     updateAction(sAction.id, {
-                      bundleOperator: newValue.value,
+                      bundleOperator: selectedOption[0].value,
                     });
                   }}
                 />
@@ -434,8 +440,10 @@ export const StatementEditorActionTableRow: React.FC<
                   value={certaintyDict.find(
                     (i: any) => sAction.certainty === i.value
                   )}
-                  onChange={(newValue: any) => {
-                    updateAction(sAction.id, { certainty: newValue.value });
+                  onChange={(selectedOption) => {
+                    updateAction(sAction.id, {
+                      certainty: selectedOption[0].value,
+                    });
                   }}
                 />
               </div>

@@ -284,8 +284,9 @@ export const applyTemplate = async (
       }
 
       newEntity.data.territory = entity.data.territory;
-    } else {
-      // entity is not a statement
+    } else if (templateEntity.class === EntityEnums.Class.Territory) {
+      // entity is territory
+      newEntity.data.parent = { ...entity.data.parent };
     }
 
     if (newEntity) {
@@ -336,6 +337,13 @@ export const DStatement = (
   duplicatedStatement.data.actants.forEach((a) => {
     a.id = uuidv4();
     a.props = DProps(a.props);
+
+    a.identifications.forEach((i) => {
+      i.id = uuidv4();
+    });
+    a.classifications.forEach((c) => {
+      c.id = uuidv4();
+    });
   });
 
   duplicatedStatement.data.actions.forEach((a) => {

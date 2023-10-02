@@ -1,5 +1,10 @@
 import styled from "styled-components";
 
+export const StyledEditorActionTableWrapper = styled.div`
+  margin-bottom: ${({ theme }) => theme.space[4]};
+  min-width: 56rem;
+`;
+
 interface StyledGrid {
   tempDisabled?: boolean;
 }
@@ -7,7 +12,7 @@ export const StyledGrid = styled.div<StyledGrid>`
   display: grid;
   align-items: center;
   padding-left: ${({ theme }) => theme.space[0]};
-  grid-template-columns: repeat(5, auto);
+  grid-template-columns: repeat(6, auto);
   width: fit-content;
   grid-template-rows: auto;
   grid-auto-flow: row;

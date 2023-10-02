@@ -272,63 +272,58 @@
   },
 
   {
-    "type": "SOL",
-    "entityIds": ["l1", "l6"],
-    "order": 1
-  },
-  {
-    "type": "SOL",
+    "type": "SOE",
     "entityIds": ["l1", "l6"],
     "order": 2
   },
   {
-    "type": "SOL",
+    "type": "SOE",
     "entityIds": ["l1", "l10"],
     "order": 3
   },
   {
-    "type": "SOL",
+    "type": "SOE",
     "entityIds": ["l1", "l8"],
     "order": 4
   },
   {
-    "type": "SOL",
+    "type": "SOE",
     "entityIds": ["l6", "l9"],
     "order": 1
   },
   {
-    "type": "SOL",
+    "type": "SOE",
     "entityIds": ["l10", "l8"],
     "order": 1
   },
   {
-    "type": "SOL",
+    "type": "SOE",
     "entityIds": ["l8", "l9"],
     "order": 1
   },
 
   {
-    "type": "SOL",
+    "type": "SOE",
     "entityIds": ["l1200", "l1201"],
     "order": 1
   },
   {
-    "type": "SOL",
+    "type": "SOE",
     "entityIds": ["l1201", "l1202"],
     "order": 1
   },
   {
-    "type": "SOL",
+    "type": "SOE",
     "entityIds": ["l1201", "l1204"],
     "order": 2
   },
   {
-    "type": "SOL",
+    "type": "SOE",
     "entityIds": ["l1204", "l1"],
     "order": 1
   },
   {
-    "type": "SOL",
+    "type": "SOE",
     "entityIds": ["l1202", "l1203"],
     "order": 1
   },
@@ -594,6 +589,51 @@
   {
     "type": "REL",
     "entityIds": ["p1", "p12", "p1"],
+    "order": 1
+  },
+  {
+    "type": "SYN",
+    "entityIds": ["c-hasnt-isync-1", "c-hasnt-isync-2"],
+    "order": 1
+  },
+  {
+    "type": "SCL",
+    "entityIds": ["c-hasnt-isync-1", "c-isync-superclass-1"],
+    "order": 1
+  },
+  {
+    "type": "SCL",
+    "entityIds": ["c-hasnt-isync-2", "c-isync-superclass-1"],
+    "order": 1
+  },
+  {
+    "type": "SYN",
+    "entityIds": [
+      "c-has-isync-1",
+      "c-has-isync-2",
+      "c-has-isync-3",
+      "c-has-isync-4"
+    ],
+    "order": 1
+  },
+  {
+    "type": "SCL",
+    "entityIds": ["c-has-isync-1", "c-isync-superclass-1"],
+    "order": 1
+  },
+  {
+    "type": "SCL",
+    "entityIds": ["c-has-isync-2", "c-isync-superclass-1"],
+    "order": 1
+  },
+  {
+    "type": "SCL",
+    "entityIds": ["c-has-isync-3", "c-isync-superclass-2"],
+    "order": 1
+  },
+  {
+    "type": "AEE",
+    "entityIds": ["a-has-not-maee", "c901"],
     "order": 1
   }
 ]

@@ -5,10 +5,9 @@ import { DbEnums, EntityEnums, RelationEnums, UserEnums } from "@shared/enums";
 import { EnumValidators } from "@shared/enums";
 import { InternalServerError, ModelNotValidError } from "@shared/types/errors";
 import User from "@models/user/user";
-import { IRequest } from "src/custom_typings/request";
+import { IRequest } from "../../custom_typings/request";
 import { nonenumerable } from "@common/decorators";
 import Entity from "@models/entity/entity";
-import { getRelationClass } from "@models/factory";
 
 export interface IRelationModel extends RelationTypes.IRelation, IDbModel {
   beforeSave(request: IRequest): Promise<void>;
@@ -260,7 +259,7 @@ export default class Relation implements IRelationModel {
    * @param updateData
    * @returns
    */
-  async delete(db: Connection | undefined): Promise<WriteResult> {
+  async delete(db: Connection): Promise<WriteResult> {
     if (!this.id) {
       throw new InternalServerError(
         "delete called on relation with undefined id"
@@ -370,7 +369,7 @@ export default class Relation implements IRelationModel {
   }
 
   /**
-   * Searches for relation assigned for entityId, filtered by optional relation type
+   * Searches for relations assigned for entityId, filtered by optional relation type
    * @param db
    * @param entityId
    * @param relType
@@ -391,6 +390,71 @@ export default class Relation implements IRelationModel {
 
     if (position !== undefined) {
       return items.filter((d) => d.entityIds[position] === entityId);
+    }
+    return items;
+  }
+
+  /**
+   * searches for relations with specific entity id and returns both relation ids and connected entity ids
+   * @param request IRequest
+   * @param entityId string
+   * @returns promise with both entity/relation ids
+   */
+  static async getLinkedForEntity(
+    request: IRequest,
+    entityId: string
+  ): Promise<[string[], string[]]> {
+    const linkedRelations = await Relation.findForEntity(
+      request.db.connection,
+      entityId
+    );
+    let entityIds: string[], linkedRelationIds: string[];
+
+    if (linkedRelations && linkedRelations.length) {
+      entityIds = Array.from(
+        new Set(
+          linkedRelations.reduce<string[]>((acc, r) => {
+            acc = acc.concat(r.entityIds);
+            return acc;
+          }, [])
+        )
+      ).filter((id) => id != entityId);
+      linkedRelationIds = Array.from(new Set(linkedRelations.map((r) => r.id)));
+    } else {
+      entityIds = [];
+      linkedRelationIds = [];
+    }
+
+    return [entityIds, linkedRelationIds];
+  }
+
+  /**
+   * Searches for relations assigned for multiple entity ids, filtered by optional relation type
+   * @param db
+   * @param entityId array of entity ids
+   * @param relType
+   * @param position - position in entityIds
+   * @returns array of relation interfaces
+   */
+  static async findForEntities<T extends RelationTypes.IRelation>(
+    db: Connection,
+    entityIds: string[],
+    relType?: RelationEnums.Type,
+    position?: number
+  ): Promise<T[]> {
+    const items: T[] = await rethink
+      .table(Relation.table)
+      .getAll.call(undefined, ...entityIds, {
+        index: DbEnums.Indexes.RelationsEntityIds,
+      })
+      .filter(relType ? { type: relType } : {})
+      .distinct()
+      .run(db);
+
+    if (position !== undefined) {
+      return items.filter(
+        (d) => entityIds.indexOf(d.entityIds[position]) !== -1
+      );
     }
     return items;
   }

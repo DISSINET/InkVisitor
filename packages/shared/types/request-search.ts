@@ -20,6 +20,7 @@ export interface IRequestSearch {
   status?: EntityEnums.Status;
   createdDate?: Date;
   updatedDate?: Date;
+  resourceHasDocument?: boolean;
 }
 
 export class RequestSearch {
@@ -36,6 +37,7 @@ export class RequestSearch {
   status?: EntityEnums.Status;
   createdDate?: Date;
   updatedDate?: Date;
+  resourceHasDocument?: boolean;
 
   constructor(requestData: IRequestSearch) {
     this.class = requestData.class;
@@ -70,6 +72,7 @@ export class RequestSearch {
     this.territoryId = requestData.territoryId || undefined;
     this.language = requestData.language || undefined;
     this.subTerritorySearch = !!requestData.subTerritorySearch;
+    this.resourceHasDocument = !!requestData.resourceHasDocument;
   }
 
   /**
@@ -85,14 +88,24 @@ export class RequestSearch {
       this.excluded !== undefined &&
       this.excluded.constructor.name !== "Array"
     ) {
-      return new BadParams("excluded needs to be an array");
+      // attempt to fix the string => array with one element
+      if (typeof  this.excluded === "string") {
+        this.excluded = (this.excluded as string).split(",") as EntityEnums.Class[]
+      } else {
+        return new BadParams("excluded needs to be an array");
+      }
     }
 
     if (
       this.entityIds !== undefined &&
       this.entityIds.constructor.name !== "Array"
     ) {
-      return new BadParams("entityIds needs to be an array");
+      // attempt to fix the string => array with one element
+      if (typeof this.entityIds === "string") {
+        this.entityIds = (this.entityIds as string).split(",")
+      } else {
+        return new BadParams("entityIds needs to be an array");
+      }
     }
 
     // check dates
@@ -119,6 +132,7 @@ export class RequestSearch {
       !this.label &&
       !this.class &&
       !this.onlyTemplates &&
+      !this.resourceHasDocument &&
       !this.cooccurrenceId &&
       !this.usedTemplate &&
       !this.territoryId &&

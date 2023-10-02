@@ -1,3 +1,4 @@
+import { ThemeColor } from "Theme/theme";
 import styled from "styled-components";
 
 interface StyledTagWrapper {
@@ -22,14 +23,14 @@ export const StyledTagWrapper = styled.div<StyledTagWrapper>`
 `;
 
 interface StyledEntityTag {
-  color: string;
+  $color: keyof ThemeColor;
   isTemplate: boolean;
 }
 export const StyledEntityTag = styled.div<StyledEntityTag>`
-  background: ${({ color, isTemplate, theme }) =>
+  background: ${({ $color, isTemplate, theme }) =>
     isTemplate
-      ? `linear-gradient(-45deg, ${theme.color[color]} 0%, ${theme.color[color]} 50%, ${theme.color["gray"][100]} 50%)`
-      : theme.color[color]};
+      ? `linear-gradient(-45deg, ${theme.color[$color]} 0%, ${theme.color[$color]} 50%, ${theme.color["gray"][100]} 50%)`
+      : theme.color[$color]};
   display: flex;
   justify-content: center;
   align-items: center;
@@ -38,14 +39,47 @@ export const StyledEntityTag = styled.div<StyledEntityTag>`
   width: ${({ theme }) => theme.space[7]};
 `;
 
+const getColor = (
+  invertedLabel: boolean,
+  isFavorited: boolean,
+  isItalic: boolean
+): string => {
+  if (invertedLabel) {
+    if (isFavorited) {
+      return "warning";
+    } else {
+      return isItalic ? "grey" : "white";
+    }
+  } else {
+    return isItalic ? "greyer" : "black";
+  }
+};
+
+interface StyledLabelWrap {
+  invertedLabel: boolean;
+}
+export const StyledLabelWrap = styled.div<StyledLabelWrap>`
+  display: inline-flex;
+  overflow: hidden;
+  background-color: ${({ theme, invertedLabel }) =>
+    invertedLabel ? theme.color["primary"] : theme.color["white"]};
+`;
+interface StyledStarWrap {}
+export const StyledStarWrap = styled.div<StyledStarWrap>`
+  display: inline-flex;
+  align-items: center;
+  height: 100%;
+  margin-left: 0.2rem;
+`;
+
 interface StyledLabel {
-  invertedLabel?: boolean;
+  invertedLabel: boolean;
   borderStyle: "solid" | "dashed" | "dotted";
   fullWidth: boolean;
   status: string;
   isFavorited: boolean;
   labelOnly?: boolean;
-  isItalic?: boolean;
+  isItalic: boolean;
 }
 export const StyledLabel = styled.div<StyledLabel>`
   display: inline-block;
@@ -54,27 +88,19 @@ export const StyledLabel = styled.div<StyledLabel>`
   overflow: hidden !important;
   text-overflow: ellipsis;
   padding: ${({ theme }) => `${theme.space[1]} ${theme.space[2]}`};
+  padding-left: ${({ theme, isFavorited }) =>
+    isFavorited ? theme.space[1] : ""};
   font-style: ${({ isItalic }) => `${isItalic ? "italic" : "normal"}`};
-  background-color: ${({ theme, invertedLabel, isFavorited }) =>
-    invertedLabel
-      ? theme.color["primary"]
-      : isFavorited
-      ? theme.color["warning"]
-      : theme.color["white"]};
-  color: ${({ theme, invertedLabel, isItalic }) =>
-    invertedLabel
-      ? isItalic
-        ? theme.color["grey"]
-        : theme.color["white"]
-      : isItalic
-      ? theme.color["greyer"]
-      : theme.color["black"]};
+  color: ${({ theme, invertedLabel, isItalic, isFavorited }) =>
+    theme.color[getColor(invertedLabel, isFavorited, isItalic)]};
   border-left-width: ${({ theme, labelOnly }) =>
     labelOnly ? 0 : theme.borderWidth[2]};
   border-left-style: ${({ borderStyle }) => borderStyle};
   border-left-color: ${({ theme, status }) => theme.color[status]};
   max-width: ${({ theme, fullWidth }) =>
     fullWidth ? "100%" : theme.space[30]};
+  font-weight: ${({ theme, invertedLabel }) =>
+    invertedLabel ? theme.fontWeight["bold"] : theme.fontWeight["normal"]};
 `;
 
 interface StyledButtonWrapper {

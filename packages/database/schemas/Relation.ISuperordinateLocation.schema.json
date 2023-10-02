@@ -1,8 +1,8 @@
 {
-  "$ref": "#/definitions/Relation.ISuperordinateLocation",
+  "$ref": "#/definitions/Relation.ISuperordinateEntity",
   "$schema": "http://json-schema.org/draft-07/schema#",
   "definitions": {
-    "Relation.ISuperordinateLocation": {
+    "Relation.ISuperordinateEntity": {
       "additionalProperties": false,
       "properties": {
         "entityIds": {

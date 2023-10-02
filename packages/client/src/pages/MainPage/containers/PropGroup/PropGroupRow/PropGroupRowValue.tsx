@@ -57,7 +57,7 @@ export const PropGroupRowValue: React.FC<PropGroupRowValue> = ({
                 });
               }}
               categoryTypes={classesPropValue}
-              excludedEntities={excludedSuggesterEntities}
+              excludedEntityClasses={excludedSuggesterEntities}
               isInsideTemplate={isInsideTemplate}
               territoryParentId={territoryParentId}
               excludedActantIds={[propValueEntity.id]}
@@ -123,7 +123,7 @@ export const PropGroupRowValue: React.FC<PropGroupRowValue> = ({
             openDetailOnCreate={openDetailOnCreate}
             categoryTypes={classesPropValue}
             inputWidth={80}
-            excludedEntities={excludedSuggesterEntities}
+            excludedEntityClasses={excludedSuggesterEntities}
             isInsideTemplate={isInsideTemplate}
             territoryParentId={territoryParentId}
           />
@@ -160,32 +160,40 @@ export const PropGroupRowValue: React.FC<PropGroupRowValue> = ({
                 value={virtualityDict.find(
                   (i: any) => prop.value.virtuality === i.value
                 )}
-                onChange={(newValue: any) => {
+                onChange={(selectedOption) => {
                   updateProp(prop.id, {
-                    value: { ...prop.value, virtuality: newValue.value },
+                    value: {
+                      ...prop.value,
+                      virtuality: selectedOption[0].value,
+                    },
                   });
                 }}
               />
             )}
           </StyledAttributesFlexRow>
-          {!disabledAttributes.value?.includes("partitivity") && (
-            <Dropdown
-              width={150}
-              placeholder="partitivity"
-              tooltipLabel="partitivity"
-              icon={<AttributeIcon attributeName="partitivity" />}
-              disabled={!userCanEdit}
-              options={partitivityDict}
-              value={partitivityDict.find(
-                (i: any) => prop.value.partitivity === i.value
-              )}
-              onChange={(newValue: any) => {
-                updateProp(prop.id, {
-                  value: { ...prop.value, partitivity: newValue.value },
-                });
-              }}
-            />
-          )}
+          <StyledAttributesFlexRow>
+            {!disabledAttributes.value?.includes("partitivity") && (
+              <Dropdown
+                width={150}
+                placeholder="partitivity"
+                tooltipLabel="partitivity"
+                icon={<AttributeIcon attributeName="partitivity" />}
+                disabled={!userCanEdit}
+                options={partitivityDict}
+                value={partitivityDict.find(
+                  (i: any) => prop.value.partitivity === i.value
+                )}
+                onChange={(selectedOption) => {
+                  updateProp(prop.id, {
+                    value: {
+                      ...prop.value,
+                      partitivity: selectedOption[0].value,
+                    },
+                  });
+                }}
+              />
+            )}
+          </StyledAttributesFlexRow>
         </>
       )}
     </StyledAttributesFlexColumn>

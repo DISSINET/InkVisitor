@@ -1,6 +1,6 @@
 import Territory from "@models/territory/territory";
 import User, { UserRight } from "@models/user/user";
-import { Db } from "@service/RethinkDB";
+import { Db } from "@service/rethink";
 import { getEntitiesDataByClass } from "@service/shorthands";
 import { EntityEnums, UserEnums } from "@shared/enums";
 import { IResponseTree, IStatement, ITerritory } from "@shared/types";
@@ -225,9 +225,9 @@ export class TreeCache {
   /**
    * Attemts to find closest right for child subtrees.
    * This method uses leftmost tree search.
-   * @param terId 
-   * @param rights 
-   * @returns 
+   * @param terId
+   * @param rights
+   * @returns
    */
   findRightInChildTerritory(
     terId: string,
@@ -262,9 +262,9 @@ export class TreeCache {
 
   /**
    * Attempts to find closest right applicable to territory
-   * @param terId 
-   * @param rights 
-   * @returns 
+   * @param terId
+   * @param rights
+   * @returns
    */
   getRightForTerritory(
     terId: string,
@@ -282,7 +282,7 @@ export class TreeCache {
       return derivedRight;
     }
 
-    // searching for right derived from some child territory 
+    // searching for right derived from some child territory
     derivedRight = this.findRightInChildTerritory(terId, rights);
     if (derivedRight) {
       // if the right is found - it must be changed to VIEW right

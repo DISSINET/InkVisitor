@@ -165,7 +165,7 @@ export default class User implements IUser, IDbModel {
       .run(dbInstance);
   }
 
-  delete(dbInstance: Connection | undefined): Promise<WriteResult> {
+  delete(dbInstance: Connection): Promise<WriteResult> {
     return rethink.table(User.table).get(this.id).delete().run(dbInstance);
   }
 
@@ -184,6 +184,18 @@ export default class User implements IUser, IDbModel {
     }
 
     return true;
+  }
+
+  canBeCreatedByUser(user: User): boolean {
+    return user.role === UserEnums.Role.Admin;
+  }
+
+  canBeEditedByUser(user: User): boolean {
+    return user.role === UserEnums.Role.Admin || user.id == this.id;
+  }
+
+  canBeDeletedByUser(user: User): boolean {
+    return user.role === UserEnums.Role.Admin;
   }
 
   generatePassword(): string {
@@ -276,12 +288,12 @@ export default class User implements IUser, IDbModel {
   }
 
   /**
-   * Searches for users associated with entities via any User field, currently only bookmarks
+   * Searches for users associated with bookmarked entity
    * @param db
    * @param entityId
    * @returns array of IUser interfaces
    */
-  static async findForEntity(
+  static async findByBookmarkedEntity(
     db: Connection,
     entityId: string
   ): Promise<IUser[]> {
@@ -298,19 +310,63 @@ export default class User implements IUser, IDbModel {
   }
 
   /**
-   * Removed bookmarks with entityId from all user
+   * Searches for users associated with stored territory
+   * @param db
+   * @param territoryId
+   * @returns array of IUser interfaces
+   */
+  static async findByStoredTerritory(
+    db: Connection,
+    territoryId: string
+  ): Promise<IUser[]> {
+    const users: IUser[] = await rethink
+      .table(User.table)
+      .filter(function (user: RDatum<IUser>) {
+        return user("storedTerritories").contains(
+          (stored: RDatum<IStoredTerritory>) =>
+            stored("territoryId").eq(territoryId)
+        );
+      })
+      .run(db);
+
+    return users;
+  }
+
+  /**
+   * Removed bookmarks with entityId from all users
    * @param db
    * @param entityId
    */
-  static async removeBookmarksForEntity(
+  static async removeBookmarkedEntity(
     db: Connection,
     entityId: string
   ): Promise<void> {
-    const userEntries = await User.findForEntity(db, entityId);
+    const userEntries = await User.findByBookmarkedEntity(db, entityId);
     for (const userData of userEntries) {
       const userModel = new User(userData);
       userModel.bookmarks.forEach((b) => b.removeEntity(entityId));
       await userModel.update(db, { bookmarks: userModel.bookmarks });
+    }
+  }
+
+  /**
+   * Removed stored territory with territoryId from all users
+   * @param db
+   * @param territoryId
+   */
+  static async removeStoredTerritory(
+    db: Connection,
+    territoryId: string
+  ): Promise<void> {
+    const userEntries = await User.findByStoredTerritory(db, territoryId);
+    for (const userData of userEntries) {
+      const userModel = new User(userData);
+      userModel.storedTerritories = userModel.storedTerritories.filter(
+        (s) => s.territoryId !== territoryId
+      );
+      await userModel.update(db, {
+        storedTerritories: userModel.storedTerritories,
+      });
     }
   }
 }

@@ -145,7 +145,7 @@ class Territory extends Entity implements ITerritory {
     return result;
   }
 
-  async delete(db: Connection | undefined): Promise<WriteResult> {
+  async delete(db: Connection): Promise<WriteResult> {
     if (!this.id) {
       throw new InvalidDeleteError(
         "delete called on territory with undefined id"

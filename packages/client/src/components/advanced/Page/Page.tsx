@@ -1,3 +1,4 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Header, Loader, Toast } from "components";
 import {
@@ -9,15 +10,15 @@ import { useSearchParams } from "hooks";
 import useKeyLift from "hooks/useKeyLift";
 import useKeypress from "hooks/useKeyPress";
 import React, { useEffect, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useLocation, useHistory } from "react-router";
-import { toast } from "react-toastify";
+import { useLocation, useNavigate } from "react-router";
+import { Id, toast } from "react-toastify";
 import { setDisableUserSelect } from "redux/features/layout/disableUserSelectSlice";
+import { setPing } from "redux/features/pingSlice";
 import { setLastClickedIndex } from "redux/features/statementList/lastClickedIndexSlice";
 import { setUsername } from "redux/features/usernameSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { StyledPageContent, StyledPage } from "./PageStyles";
-import { setPing } from "redux/features/pingSlice";
+import { StyledPage, StyledPageContent } from "./PageStyles";
+import { ThemeColor } from "Theme/theme";
 
 interface Page {
   children?: React.ReactNode;
@@ -43,19 +44,17 @@ export const Page: React.FC<Page> = ({ children }) => {
   );
 
   const location = useLocation();
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const disableRightHeader: boolean =
-    location.pathname !== "/users" &&
-    location.pathname !== "/acl" &&
-    location.pathname !== "/about" &&
-    location.pathname !== "/";
+    location.pathname === "/login" || location.pathname === "/activate";
 
   const {
     status: statusUser,
     data: user,
     error: errorUser,
     isFetching: isFetchingUser,
+    isPaused,
   } = useQuery(
     ["user", userId],
     async () => {
@@ -67,6 +66,25 @@ export const Page: React.FC<Page> = ({ children }) => {
     { enabled: api.isLoggedIn() && !disableRightHeader }
   );
 
+  const toastId = React.useRef<Id | null>(null);
+  const notify = () =>
+    (toastId.current = toast.dark("you're offline", { autoClose: false }));
+  const dismiss = () => {
+    if (toastId.current) {
+      toast.dismiss(toastId.current);
+    }
+  };
+
+  useEffect(() => {
+    if (isPaused) {
+      notify();
+    } else {
+      if (toastId.current && toast.isActive(toastId.current)) {
+        dismiss();
+      }
+    }
+  }, [isPaused]);
+
   const logOutMutation = useMutation(async () => await api.signOut(), {
     onSuccess: (data, variables) => {
       dispatch(setUsername(""));
@@ -75,7 +93,7 @@ export const Page: React.FC<Page> = ({ children }) => {
       //
       cleanAllParams();
 
-      history.push("/");
+      navigate("/login");
     },
   });
 
@@ -109,7 +127,7 @@ export const Page: React.FC<Page> = ({ children }) => {
         paddingX={10}
         color={
           ["production", ""].indexOf(environmentName) === -1
-            ? environmentName
+            ? (environmentName as keyof ThemeColor)
             : "primary"
         }
         left={<LeftHeader tempLocation={tempLocation} />}

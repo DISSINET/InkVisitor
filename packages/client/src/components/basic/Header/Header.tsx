@@ -1,7 +1,7 @@
+import { heightHeader } from "Theme/constants";
+import { ThemeColor } from "Theme/theme";
 import React from "react";
 import { useAppSelector } from "redux/hooks";
-import { heightHeader } from "Theme/constants";
-import { Colors } from "types";
 import { StyledHeader, TextLeft, TextRight } from "./HeaderStyles";
 
 interface HeaderProps {
@@ -10,7 +10,7 @@ interface HeaderProps {
   height?: number;
   left?: JSX.Element;
   right?: JSX.Element;
-  color?: typeof Colors[number];
+  color?: keyof ThemeColor;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -27,7 +27,7 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <StyledHeader
-      bgColor={color}
+      $color={color}
       height={height}
       paddingX={paddingX}
       paddingY={paddingY}
