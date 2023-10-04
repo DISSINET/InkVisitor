@@ -15,7 +15,12 @@ export function getRandomElements<T>(arr: T[], numberOfItems: number): T[] {
     }
   }
 
-  return [arr[randomIndexes[0]], arr[randomIndexes[1]]].filter(t => !!t);
+  const out = [];
+  for (const index of randomIndexes) {
+    out.push(arr[index])
+  }
+
+  return out;
 }
 
 export function getRandomNumber(min: number, max: number): number {
