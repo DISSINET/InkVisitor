@@ -5,6 +5,7 @@ import * as fs from "fs"
 import * as path from "path"
 import EntitiesGenerator from "./entities";
 import RelationsGenerator from "./relations";
+import { getRandomElements } from "./utils";
 
 class Generator {
   static DIRECTORY = "datasets"
