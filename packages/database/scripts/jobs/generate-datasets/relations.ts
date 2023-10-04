@@ -46,9 +46,9 @@ export default class RelationsGenerator {
     this.generateSuperclasses(superclassesSize, entities);
     remainingSize -= superclassesSize
 
-    const superordinateLocationsSize = getRandomNumber(0, Math.min(maxAllocatableSize, remainingSize * 0.5))
-    this.generateSuperordinateLocations(superordinateLocationsSize, entities);
-    remainingSize -= superordinateLocationsSize
+    const superordinateEntitiesSize = getRandomNumber(0, Math.min(maxAllocatableSize, remainingSize * 0.5))
+    this.generateSuperordinateEntities(superordinateEntitiesSize, entities);
+    remainingSize -= superordinateEntitiesSize
 
     const synonymsSize = getRandomNumber(0, Math.min(maxAllocatableSize, remainingSize * 0.5))
     this.generateSynonyms(synonymsSize, entities);
@@ -122,16 +122,17 @@ export default class RelationsGenerator {
     }
   }
 
-  generateSuperordinateLocations(relSize: number, entities: Record<EntityEnums.Class, IEntity[]> ) {
-    console.log(`Creating ${relSize} superordinate locations`)
+  generateSuperordinateEntities(relSize: number, entities: Record<EntityEnums.Class, IEntity[]> ) {
+    console.log(`Creating ${relSize} superordinate entities`)
 
     const rels = this.relations[RelationEnums.Type.SuperordinateEntity]
-    const locations = entities[EntityEnums.Class.Location]
 
     for (let i = 0; i < relSize; i++) {
+      const classType = getRandomElements<EntityEnums.Class>([EntityEnums.Class.Location, EntityEnums.Class.Object, EntityEnums.Class.Event, EntityEnums.Class.Statement, EntityEnums.Class.Value, EntityEnums.Class.Being], 1)
+      const entitiesContainer = entities[classType[0]]
       rels.push(new SuperordinateEntity({
         id: getNextId(),
-        entityIds: getRandomElements<IEntity>(locations, 2).map(e => e.id) as [string, string],
+        entityIds: getRandomElements<IEntity>(entitiesContainer, 2).map(e => e.id) as [string, string],
       }));
     }
   }
