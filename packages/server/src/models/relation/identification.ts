@@ -49,7 +49,7 @@ export default class Identification
       return out;
     }
 
-    let relations: RelationTypes.IIdentification[] =
+    const relations: RelationTypes.IIdentification[] =
       await Relation.findForEntity(
         conn,
         entityId,

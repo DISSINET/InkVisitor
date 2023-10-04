@@ -162,7 +162,7 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
                       onClick: () => {
                         handleAskRemoveTemplate(templateEntity.id);
                       },
-                      tooltipLabel: "remove template",
+                      tooltipLabel: "delete template",
                       icon: <FaTrash />,
                     }}
                   />

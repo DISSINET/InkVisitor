@@ -144,6 +144,7 @@ export const Suggester: React.FC<Suggester> = ({
           onDrop(item, true);
         } else if (item.isTemplate && isInsideTemplate) {
           if (item.entityClass === EntityEnums.Class.Territory) {
+            // this option is now unused - not allowed to add T template to S template
             onDrop(item);
             // TODO: notification why not instantiated - used because of missing parent
           } else {

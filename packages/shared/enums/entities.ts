@@ -55,6 +55,14 @@ export namespace EntityEnums {
     Class.Resource,
     Class.Being,
   ];
+  export const LOESBV = [
+    Class.Location,
+    Class.Object,
+    Class.Event,
+    Class.Statement,
+    Class.Being,
+    Class.Value,
+  ];
 
   export enum Extension {
     Any = "*",
@@ -140,6 +148,7 @@ export namespace EntityEnums {
     Allegation = "12",
     Semblance = "13",
     Rectitude = "14",
+    Expectation = "15",
   }
 
   export enum MoodVariant {

@@ -18,6 +18,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { setTreeInitialized } from "redux/features/territoryTree/treeInitializeSlice";
 import { useAppDispatch } from "redux/hooks";
+import { getShortLabelByLetterCount } from "utils";
 
 interface ContextMenuNewTerritoryModal {
   territoryActantId: string;
@@ -68,7 +69,12 @@ export const ContextMenuNewTerritoryModal: React.FC<
         appendDetailId(variables.id);
       },
       onError: () => {
-        toast.error(`Error: Territory [${territoryName}] not created!`);
+        toast.error(
+          `Error: Territory [${getShortLabelByLetterCount(
+            territoryName,
+            120
+          )}] not created!`
+        );
       },
     }
   );

@@ -1,7 +1,7 @@
 import "ts-jest";
 import { ResponseStats } from "./response";
 import Acl from "@middlewares/acl";
-import { Db } from "@service/RethinkDB";
+import { Db } from "@service/rethink";
 import User from "@models/user/user";
 import { IRequest } from "src/custom_typings/request";
 import { newMockRequest } from "@modules/common.test";

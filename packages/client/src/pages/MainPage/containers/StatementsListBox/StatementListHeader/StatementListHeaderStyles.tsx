@@ -19,6 +19,7 @@ export const StyledFaStar = styled(FaStar)`
   float: left;
   margin-top: 0.5rem;
   margin-right: 0.3rem;
+  color: ${({ theme }) => theme.color["warning"]};
 `;
 export const StyledMoveToParent = styled.div`
   font-size: ${({ theme }) => theme.fontSize["sm"]};

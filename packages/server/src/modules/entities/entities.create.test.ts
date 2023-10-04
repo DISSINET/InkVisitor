@@ -21,7 +21,7 @@ import {
   findEntityById,
   getEntitiesDataByClass,
 } from "@service/shorthands";
-import { Db } from "@service/RethinkDB";
+import { Db } from "@service/rethink";
 import Territory from "@models/territory/territory";
 import "ts-jest";
 import { ITerritory } from "@shared/types";
@@ -29,35 +29,38 @@ import { prepareEntity } from "@models/entity/entity.test";
 import { EntityEnums, RelationEnums } from "@shared/enums";
 import { prepareRelation } from "@models/relation/relation.test";
 import Relation from "@models/relation/relation";
+import { pool } from "@middlewares/db";
 
 describe("Entities create", function () {
+  afterAll(async () => {
+    await pool.end();
+  });
+
   describe("empty data", () => {
-    it("should return a ModelNotValid error wrapped in IResponseGeneric", (done) => {
-      return request(app)
+    it("should return a ModelNotValid error wrapped in IResponseGeneric", async () => {
+      await request(app)
         .post(`${apiPath}/entities`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(
           testErroneousResponse.bind(undefined, new ModelNotValidError(""))
-        )
-        .then(() => done());
+        );
     });
   });
   describe("faulty data ", () => {
-    it("should return a ModelNotValid error wrapped in IResponseGeneric", (done) => {
-      return request(app)
+    it("should return a ModelNotValid error wrapped in IResponseGeneric", async () => {
+      await request(app)
         .post(`${apiPath}/entities`)
         .send({ test: "" })
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(
           testErroneousResponse.bind(undefined, new ModelNotValidError(""))
-        )
-        .then(() => done());
+        );
     });
   });
   describe("ok statement data", () => {
-    it("should return a 200 code with successful responsedsd", async (done) => {
+    it("should return a 200 code with successful responsedsd", async () => {
       const db = new Db();
       await db.initDb();
 
@@ -78,11 +81,10 @@ describe("Entities create", function () {
         .expect(successfulGenericResponse);
 
       await clean(db);
-      done();
     });
   });
   describe("create territory data with predefined id", () => {
-    it("should create the entry with provided id", async (done) => {
+    it("should create the entry with provided id", async () => {
       const db = new Db();
       await db.initDb();
 
@@ -103,12 +105,11 @@ describe("Entities create", function () {
       expect(createdEntityData).not.toBeNull();
 
       await clean(db);
-      done();
     });
   });
 
   describe("create territory data without predefined id", () => {
-    it("should create the entry with new id", async (done) => {
+    it("should create the entry with new id", async () => {
       const db = new Db();
       await db.initDb();
       await deleteEntities(db);
@@ -129,7 +130,6 @@ describe("Entities create", function () {
       expect(allEnt[0].label).toBe(ent.label);
 
       await clean(db);
-      done();
     });
   });
 

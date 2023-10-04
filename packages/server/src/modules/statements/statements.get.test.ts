@@ -4,9 +4,13 @@ import request from "supertest";
 import { supertestConfig } from "..";
 import { apiPath } from "@common/constants";
 import app from "../../Server";
-import { Db } from "@service/RethinkDB";
+import { Db } from "@service/rethink";
 import { createEntity } from "@service/shorthands";
-import Statement, { StatementData, StatementTerritory } from "@models/statement/statement";
+import Statement, {
+  StatementData,
+  StatementTerritory,
+} from "@models/statement/statement";
+import { pool } from "@middlewares/db";
 
 const testValidStatement = (res: any) => {
   expect(res.body).toBeTruthy();
@@ -20,18 +24,21 @@ const testValidStatement = (res: any) => {
 };
 
 describe("Statements get", function () {
+  afterAll(async () => {
+    await pool.end();
+  });
+
   describe("Empty param", () => {
-    it("should return a BadParams error wrapped in IResponseGeneric", (done) => {
-      return request(app)
+    it("should return a BadParams error wrapped in IResponseGeneric", async () => {
+      await request(app)
         .get(`${apiPath}/statements`)
         .set("authorization", "Bearer " + supertestConfig.token)
-        .expect(testErroneousResponse.bind(undefined, new BadParams("")))
-        .then(() => done());
+        .expect(testErroneousResponse.bind(undefined, new BadParams("")));
     });
   });
   describe("Wrong param", () => {
-    it("should return a StatementDoesNotExits error wrapped in IResponseGeneric", (done) => {
-      return request(app)
+    it("should return a StatementDoesNotExits error wrapped in IResponseGeneric", async () => {
+      await request(app)
         .get(`${apiPath}/statements/invalidId12345`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect(
@@ -39,12 +46,11 @@ describe("Statements get", function () {
             undefined,
             new StatementDoesNotExits("", "")
           )
-        )
-        .then(() => done());
+        );
     });
   });
   describe("Correct param", () => {
-    it("should return a 200 code with IResponseStatement response", async (done) => {
+    it("should return a 200 code with IResponseStatement response", async () => {
       const db = new Db();
       await db.initDb();
       const randomId = Math.random().toString();
@@ -52,7 +58,9 @@ describe("Statements get", function () {
         db,
         new Statement({
           id: randomId,
-          data: new StatementData({ territory: new StatementTerritory({ territoryId: "2" }) })
+          data: new StatementData({
+            territory: new StatementTerritory({ territoryId: "2" }),
+          }),
         })
       );
       await request(app)
@@ -62,7 +70,6 @@ describe("Statements get", function () {
         .expect(testValidStatement);
 
       await clean(db);
-      done();
     });
   });
 });
