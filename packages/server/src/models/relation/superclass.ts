@@ -11,7 +11,7 @@ export default class Superclass
   entityIds: [string, string];
   order: number;
 
-  constructor(data: Partial<RelationTypes.IIdentification>) {
+  constructor(data: Partial<RelationTypes.ISuperclass>) {
     super(data);
     this.entityIds = data.entityIds as [string, string];
     this.type = RelationEnums.Type.Superclass;

@@ -1,16 +1,18 @@
-import { r, Connection, } from "rethinkdb-ts";
-import restoreDates from "./restore-dates"
-import printDeletedEntities from "./print-deleted-entities"
-import fixDuplicatedElementsTask from "./fix-duplicated-array-elements";
-import addPosFieldTask from "./add-pos-field";
+import { Connection, } from "rethinkdb-ts";
+import restoreDatesJob from "./restore-dates"
+import printDeletedEntitiesJob from "./print-deleted-entities"
+import fixDuplicatedElementsJob from "./fix-duplicated-array-elements";
+import addPosFieldJob from "./add-pos-field";
+import generateDatasetJob from "./generate-datasets/generate-dataset";
 
-export type ITask = (db: Connection) => Promise<void>
+export type IJob = (db: Connection) => Promise<void>
 
-const alljobs: Record<string, ITask> = {
-  restoreDates,
-  printDeletedEntities,
-  fixDuplicatedElementsTask,
-  addPosFieldTask
+const alljobs: Record<string, IJob> = {
+  restoreDatesJob,
+  printDeletedEntitiesJob,
+  fixDuplicatedElementsJob,
+  addPosFieldJob,
+  generateDatasetJob
 }
 
 export default alljobs;

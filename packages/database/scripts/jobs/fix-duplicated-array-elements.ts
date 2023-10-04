@@ -1,8 +1,7 @@
-import { IAudit, IEntity, IProp, IStatement } from "@shared/types";
-import { r, Connection, RDatum, } from "rethinkdb-ts";
-import { ITask } from ".";
+import { IEntity, IProp, IStatement } from "@shared/types";
+import { r, Connection } from "rethinkdb-ts";
+import { IJob } from ".";
 import { EntityEnums } from "@shared/enums";
-import Statement from "@models/statement/statement"
 import Entity from "@models/entity/entity";
 
 function hasDuplicates(arr: any[]): boolean {
@@ -94,9 +93,9 @@ const fixStatements = async (db: Connection): Promise<void> => {
   }
 }
 
-const fixDuplicatedElementsTask: ITask = async (db: Connection): Promise<void> => {
+const fixDuplicatedElementsJob: IJob = async (db: Connection): Promise<void> => {
   await fixStatements(db)
   await fixEntities(db)
 }
 
-export default fixDuplicatedElementsTask;
+export default fixDuplicatedElementsJob;
