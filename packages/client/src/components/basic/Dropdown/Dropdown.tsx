@@ -76,7 +76,8 @@ export const Dropdown: React.FC<Dropdown> = ({
   allowAny = false,
 }) => {
   const optionsWithIterator = options[Symbol.iterator]();
-  const isOneOptionSingleSelect = options.length < 2 && !isMulti;
+  const isOneOptionSingleEntitySelect =
+    options.length < 2 && !isMulti && entityDropdown;
 
   const [displayValue, setDisplayValue] = useState(value);
   useEffect(() => {
@@ -102,8 +103,8 @@ export const Dropdown: React.FC<Dropdown> = ({
           autoFocus={autoFocus}
           onBlur={onBlur}
           isMulti={isMulti}
-          isDisabled={disabled || isOneOptionSingleSelect}
-          isOneOptionSingleSelect={isOneOptionSingleSelect}
+          isDisabled={disabled || isOneOptionSingleEntitySelect}
+          isOneOptionSingleEntitySelect={isOneOptionSingleEntitySelect}
           entityDropdown={entityDropdown}
           wildCardChar={(value as DropdownItem)?.label === "*"}
           className="react-select-container"
@@ -129,10 +130,12 @@ export const Dropdown: React.FC<Dropdown> = ({
             dropdownIndicator: () => {
               return {
                 display:
-                  noDropDownIndicator || isOneOptionSingleSelect ? "none" : "",
+                  noDropDownIndicator || isOneOptionSingleEntitySelect
+                    ? "none"
+                    : "",
               };
             },
-            menuPortal: (base: any) => ({
+            menuPortal: (base) => ({
               ...base,
               marginTop: `${-heightHeader}px`,
               zIndex: 9999,
@@ -144,6 +147,10 @@ export const Dropdown: React.FC<Dropdown> = ({
             const selectedOptions: DropdownItem[] = Array.isArray(selected)
               ? selected
               : [selected];
+
+            if (!isMulti) {
+              return onChange(selectedOptions);
+            }
 
             if (selectedOptions !== null && selectedOptions.length > 0) {
               // kdyz je neco vybrany = aspon jeden option
