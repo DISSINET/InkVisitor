@@ -3,7 +3,7 @@ import restoreDatesJob from "./restore-dates"
 import printDeletedEntitiesJob from "./print-deleted-entities"
 import fixDuplicatedElementsJob from "./fix-duplicated-array-elements";
 import addPosFieldJob from "./add-pos-field";
-import generateDatasetJob from "./generate-dataset";
+import generateDatasetJob from "./generate-datasets/generate-dataset";
 
 export type IJob = (db: Connection) => Promise<void>
 
