@@ -17,7 +17,7 @@ import Location from "@models/location/location"
 import Value from "@models/value/value"
 import Event from "@models/event/event"
 import Superclass from "@models/relation/superclass"
-import SuperordinateLocation from "@models/relation/superordinate-location"
+import SuperordinateEntity from "@models/relation/superordinate-entity"
 import Synonym from "@models/relation/synonym"
 import Antonym from "@models/relation/antonym"
 import Holonym  from "@models/relation/holonym"
@@ -77,7 +77,7 @@ class Generator {
 
   relations: Record<RelationEnums.Type, RelationTypes.IRelation[]> = {
     [RelationEnums.Type.Superclass]: [],
-    [RelationEnums.Type.SuperordinateLocation]: [],
+    [RelationEnums.Type.SuperordinateEntity]: [],
     [RelationEnums.Type.Synonym]: [],
     [RelationEnums.Type.Antonym]: [],
     [RelationEnums.Type.Holonym]: [],
@@ -161,48 +161,49 @@ class Generator {
 
   generateEntities() {
     let remainingSize = this.entitiesSize
+    const maxAllocatableSize = this.entitiesSize / 4
 
     const territoriesSize = Math.ceil(remainingSize / 10)
     this.generateTerritories(territoriesSize)
     remainingSize -= territoriesSize
 
-    const actionsSize = getRandomNumber(0, remainingSize)
+    const actionsSize = getRandomNumber(0, Math.min(maxAllocatableSize, remainingSize * 0.5))
     this.generateActions(actionsSize)
     remainingSize -= actionsSize
 
-    const statementsSize = getRandomNumber(0, remainingSize)
+    const statementsSize = getRandomNumber(0, Math.min(maxAllocatableSize, remainingSize * 0.5))
     this.generateStatements(statementsSize)
     remainingSize -= statementsSize
 
-    const resourcesSize = getRandomNumber(0, remainingSize)
+    const resourcesSize = getRandomNumber(0, Math.min(maxAllocatableSize, remainingSize * 0.5))
     this.generateResources(resourcesSize)
     remainingSize -= resourcesSize
 
-    const personsSize = getRandomNumber(0, remainingSize)
+    const personsSize = getRandomNumber(0, Math.min(maxAllocatableSize, remainingSize * 0.5))
     this.generatePersons(personsSize)
     remainingSize -= personsSize
 
-    const beingsSize = getRandomNumber(0, remainingSize)
+    const beingsSize = getRandomNumber(0, Math.min(maxAllocatableSize, remainingSize * 0.5))
     this.generateBeings(beingsSize)
     remainingSize -= beingsSize
 
-    const groupsSize = getRandomNumber(0, remainingSize)
+    const groupsSize = getRandomNumber(0, Math.min(maxAllocatableSize, remainingSize * 0.5))
     this.generateGroups(groupsSize)
     remainingSize -= groupsSize
 
-    const objectsSize = getRandomNumber(0, remainingSize)
+    const objectsSize = getRandomNumber(0, Math.min(maxAllocatableSize, remainingSize * 0.5))
     this.generateObjects(objectsSize)
     remainingSize -= objectsSize
 
-    const conceptsSize = getRandomNumber(0, remainingSize)
+    const conceptsSize = getRandomNumber(0, Math.min(maxAllocatableSize, remainingSize * 0.5))
     this.generateConcepts(conceptsSize)
     remainingSize -= conceptsSize
 
-    const locationsSize = getRandomNumber(0, remainingSize)
+    const locationsSize = getRandomNumber(0, Math.min(maxAllocatableSize, remainingSize * 0.5))
     this.generateLocations(locationsSize)
     remainingSize -= locationsSize
 
-    const valuesSize = getRandomNumber(0, remainingSize)
+    const valuesSize = getRandomNumber(0, Math.min(maxAllocatableSize, remainingSize * 0.5))
     this.generateValues(valuesSize)
     remainingSize -= valuesSize
 
@@ -399,56 +400,57 @@ class Generator {
 
   generateRelations() {
     let remainingSize = this.relationsSize
+    const maxAllocatableSize = this.relationsSize / 4
 
-    const superclassesSize = getRandomNumber(0, remainingSize)
+    const superclassesSize = getRandomNumber(0, Math.min(maxAllocatableSize, remainingSize * 0.5))
     this.generateSuperclasses(superclassesSize);
     remainingSize -= superclassesSize
 
-    const superordinateLocationsSize = getRandomNumber(0, remainingSize)
+    const superordinateLocationsSize = getRandomNumber(0, Math.min(maxAllocatableSize, remainingSize * 0.5))
     this.generateSuperordinateLocations(superordinateLocationsSize);
     remainingSize -= superordinateLocationsSize
 
-    const synonymsSize = getRandomNumber(0, remainingSize)
+    const synonymsSize = getRandomNumber(0, Math.min(maxAllocatableSize, remainingSize * 0.5))
     this.generateSynonyms(synonymsSize);
     remainingSize -= synonymsSize
 
-    const antonymsSize = getRandomNumber(0, remainingSize)
+    const antonymsSize = getRandomNumber(0, Math.min(maxAllocatableSize, remainingSize * 0.5))
     this.generateAntonyms(antonymsSize);
     remainingSize -= antonymsSize
 
-    const holonymsSize = getRandomNumber(0, remainingSize)
+    const holonymsSize = getRandomNumber(0, Math.min(maxAllocatableSize, remainingSize * 0.5))
     this.generateHolonyms(holonymsSize);
     remainingSize -= holonymsSize
 
-    const propertyReciprocalsSize = getRandomNumber(0, remainingSize)
+    const propertyReciprocalsSize = getRandomNumber(0, Math.min(maxAllocatableSize, remainingSize * 0.5))
     this.generatePropertyReciprocals(propertyReciprocalsSize);
     remainingSize -= propertyReciprocalsSize
 
-    const subjectActant1ReciprocalsSize = getRandomNumber(0, remainingSize)
+    const subjectActant1ReciprocalsSize = getRandomNumber(0, Math.min(maxAllocatableSize, remainingSize * 0.5))
     this.generateSubjectActant1Reciprocals(subjectActant1ReciprocalsSize);
     remainingSize -= subjectActant1ReciprocalsSize
 
-    const classificationsSize = getRandomNumber(0, remainingSize)
+    const classificationsSize = getRandomNumber(0, Math.min(maxAllocatableSize, remainingSize * 0.5))
     this.generateClassifications(classificationsSize);
     remainingSize -= classificationsSize
 
-    const identificationsSize = getRandomNumber(0, remainingSize)
+    const identificationsSize = getRandomNumber(0, Math.min(maxAllocatableSize, remainingSize * 0.5))
     this.generateIdentifications(identificationsSize);
     remainingSize -= identificationsSize
 
-    const implicationsSize = getRandomNumber(0, remainingSize)
+    const implicationsSize = getRandomNumber(0, Math.min(maxAllocatableSize, remainingSize * 0.5))
     this.generateImplications(implicationsSize);
     remainingSize -= implicationsSize
 
-    const subjectSemanticsSize = getRandomNumber(0, remainingSize)
+    const subjectSemanticsSize = getRandomNumber(0, Math.min(maxAllocatableSize, remainingSize * 0.5))
     this.generateSubjectSemantics(subjectSemanticsSize);
     remainingSize -= subjectSemanticsSize
 
-    const actant1SemanticsSize = getRandomNumber(0, remainingSize)
+    const actant1SemanticsSize = getRandomNumber(0, Math.min(maxAllocatableSize, remainingSize * 0.5))
     this.generateActant1Semantics(actant1SemanticsSize);
     remainingSize -= actant1SemanticsSize
 
-    const actant2SemanticsSize = getRandomNumber(0, remainingSize)
+    const actant2SemanticsSize = getRandomNumber(0, Math.min(maxAllocatableSize, remainingSize * 0.5))
     this.generateActant2Semantics(actant2SemanticsSize);
     remainingSize -= actant2SemanticsSize
 
@@ -483,11 +485,11 @@ class Generator {
   generateSuperordinateLocations(relSize: number) {
     console.log(`Creating ${relSize} superordinate locations`)
 
-    const rels = this.relations[RelationEnums.Type.SuperordinateLocation]
+    const rels = this.relations[RelationEnums.Type.SuperordinateEntity]
     const locations = this.entities[EntityEnums.Class.Location]
 
     for (let i = 0; i < relSize; i++) {
-      rels.push(new SuperordinateLocation({
+      rels.push(new SuperordinateEntity({
         id: this.getNextId(),
         entityIds: getRandomElements<IEntity>(locations, 2).map(e => e.id) as [string, string],
       }));
