@@ -3,8 +3,11 @@ import {
   MdOutlineCheckBox,
   MdOutlineCheckBoxOutlineBlank,
 } from "react-icons/md";
-import theme from "Theme/theme";
-import { StyledCheckboxWrapper, StyledLabel } from "./CheckboxStyles";
+import {
+  StyledCheckbox,
+  StyledCheckboxWrapper,
+  StyledLabel,
+} from "./CheckboxStyles";
 
 interface Checkbox {
   value: boolean;
@@ -25,8 +28,8 @@ export const Checkbox: React.FC<Checkbox> = ({
   }, [checked]);
 
   return (
-    <StyledCheckboxWrapper>
-      <span style={{ cursor: "pointer" }}>
+    <StyledCheckbox>
+      <StyledCheckboxWrapper style={{ cursor: "pointer" }}>
         {checked ? (
           <MdOutlineCheckBox
             size={size}
@@ -44,8 +47,8 @@ export const Checkbox: React.FC<Checkbox> = ({
             }}
           />
         )}
-      </span>
+      </StyledCheckboxWrapper>
       <StyledLabel onClick={() => setChecked(!checked)}>{label}</StyledLabel>
-    </StyledCheckboxWrapper>
+    </StyledCheckbox>
   );
 };

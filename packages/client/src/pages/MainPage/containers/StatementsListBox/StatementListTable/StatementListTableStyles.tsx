@@ -88,4 +88,6 @@ export const StyledCheckboxWrapper = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
+  color: ${({ theme }) => theme.color["black"]};
+  cursor: pointer;
 `;

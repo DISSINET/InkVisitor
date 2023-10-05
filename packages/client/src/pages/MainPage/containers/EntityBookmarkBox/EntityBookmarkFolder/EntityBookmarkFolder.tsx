@@ -191,7 +191,7 @@ export const EntityBookmarkFolder: React.FC<EntityBookmarkFolder> = ({
             <Button
               key="edit"
               icon={<FaEdit size={12} />}
-              color="plain"
+              color="warning"
               inverted
               onClick={(e: React.MouseEvent) => {
                 e.stopPropagation();
