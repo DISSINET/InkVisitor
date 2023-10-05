@@ -14,6 +14,7 @@ import { GrClone } from "react-icons/gr";
 import { toast } from "react-toastify";
 import {
   StyledActantHeaderRow,
+  StyledGrClone,
   StyledTagWrap,
 } from "./EntityDetailHeaderRowStyles";
 
@@ -128,7 +129,7 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
               />
               <Button
                 key="instantiate-template"
-                icon={<GrClone size={14} />}
+                icon={<StyledGrClone size={14} $color={"black"} />}
                 tooltipLabel="create entity from template"
                 inverted
                 color="primary"

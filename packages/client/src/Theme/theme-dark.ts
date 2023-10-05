@@ -56,9 +56,9 @@ const darkTheme = {
     tableSelectionHover: "#2c638c",
     focusedCheckbox: "rgba(246,246,255,0.1)",
 
-    staging: "#ffefef",
+    staging: "#911111",
     "data-import": "#ff6aaf",
-    development: "#9eaad7",
+    development: "#6174C2",
     sandbox: "#e59857",
 
     entityC: "#83BCB6",

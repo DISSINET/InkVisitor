@@ -1,3 +1,5 @@
+import { ThemeColor } from "Theme/theme";
+import { GrClone } from "react-icons/gr";
 import styled from "styled-components";
 
 interface StyledActantHeaderRow {}
@@ -17,4 +19,13 @@ export const StyledTagWrap = styled.div`
   display: inline-flex;
   overflow: hidden;
   max-width: 100%;
+`;
+
+interface StyledGrClone {
+  $color: keyof ThemeColor;
+}
+export const StyledGrClone = styled(GrClone)<StyledGrClone>`
+  & path {
+    stroke: ${({ theme, $color }) => theme.color[$color]};
+  }
 `;
