@@ -195,27 +195,15 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   );
 
   const templateOptions: DropdownItem[] = useMemo(() => {
-    const options = [
-      {
-        value: "",
-        label: "select template",
-      },
-    ];
-
-    if (templates) {
-      templates
-        .filter((template) => template.id !== statement.id)
-        .forEach((template) => {
-          const maxLetterCount = 200;
-          options.push({
+    const options = templates
+      ? templates
+          .filter((template) => template.id !== statement.id)
+          .map((template) => ({
             value: template.id,
-            label: getShortLabelByLetterCount(
-              getEntityLabel(template),
-              maxLetterCount
-            ),
-          });
-        });
-    }
+            label: getShortLabelByLetterCount(getEntityLabel(template), 200),
+          }))
+      : [];
+
     return options;
   }, [templates, statement]);
 
@@ -651,10 +639,11 @@ export const StatementEditor: React.FC<StatementEditor> = ({
               </StyledEditorContentRowLabel>
               <StyledEditorContentRowValue>
                 <Dropdown
-                  disabled={!userCanEdit}
+                  placeholder="select template.."
+                  disabled={!userCanEdit || templateOptions.length === 0}
                   width="full"
+                  value={null}
                   options={templateOptions}
-                  value={templateOptions[0]}
                   onChange={(templateToApply) => {
                     handleAskForTemplateApply(templateToApply[0]);
                   }}
