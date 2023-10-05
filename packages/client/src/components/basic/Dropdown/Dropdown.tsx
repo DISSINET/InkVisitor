@@ -23,7 +23,7 @@ import { Tooltip } from "components";
 
 interface Dropdown {
   options?: DropdownItem[];
-  value?: DropdownItem | DropdownItem[];
+  value?: DropdownItem | DropdownItem[] | null;
   onChange: (selectedOption: DropdownItem[]) => void;
   components?: any;
   ref?: React.RefObject<ReactNode>;
