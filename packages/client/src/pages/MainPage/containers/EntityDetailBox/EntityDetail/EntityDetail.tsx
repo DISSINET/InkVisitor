@@ -155,27 +155,16 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
   );
 
   const templateOptions: DropdownItem[] = useMemo(() => {
-    const options = [
-      {
-        value: "",
-        label: "select template",
-      },
-    ];
+    const options =
+      entity !== undefined && templates
+        ? templates
+            .filter((template) => template.id !== entity.id)
+            .map((template) => ({
+              value: template.id,
+              label: getShortLabelByLetterCount(getEntityLabel(template), 200),
+            }))
+        : [];
 
-    if (entity !== undefined && templates) {
-      templates
-        .filter((template) => template.id !== entity.id)
-        .forEach((template) => {
-          const maxLetterCount = 200;
-          options.push({
-            value: template.id,
-            label: getShortLabelByLetterCount(
-              getEntityLabel(template),
-              maxLetterCount
-            ),
-          });
-        });
-    }
     return options;
   }, [templates, entity]);
 
@@ -247,6 +236,10 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
         }
         if (entity?.isTemplate) {
           queryClient.invalidateQueries(["templates"]);
+          queryClient.invalidateQueries(["entity-templates"]);
+          if (entity?.class === EntityEnums.Class.Statement) {
+            queryClient.invalidateQueries(["statement-templates"]);
+          }
         }
       },
     }
