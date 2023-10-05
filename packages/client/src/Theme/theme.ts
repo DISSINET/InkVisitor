@@ -42,7 +42,6 @@ const theme = {
     },
     black: "#000",
     white: "#fff",
-    whiteTransparent: "rgba(255,255,255,0.3)",
     grey: "#C4C4C4",
     greyer: "#4a5568",
     text: "#383737",

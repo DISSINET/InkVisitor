@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { BsArrowsCollapse, BsArrowsExpand } from "react-icons/bs";
 import ReactJson from "react-json-view";
 import { StyledJSONExplorerWrapper } from "./JSONExplorerStyles";
+import { useAppSelector } from "redux/hooks";
 
 interface IJSONDisplay {
   data: object;
@@ -10,6 +11,7 @@ interface IJSONDisplay {
 
 export const JSONExplorer: React.FC<IJSONDisplay> = ({ data = {} }) => {
   const [collapsed, setCollapsed] = useState<boolean>(true);
+  const selectedThemeId = useAppSelector((state) => state.theme);
 
   return (
     <StyledJSONExplorerWrapper>
@@ -33,6 +35,7 @@ export const JSONExplorer: React.FC<IJSONDisplay> = ({ data = {} }) => {
         collapsed={collapsed}
         displayDataTypes={false}
         sortKeys={true}
+        theme={selectedThemeId === "dark" ? "bright" : "rjv-default"}
       />
     </StyledJSONExplorerWrapper>
   );
