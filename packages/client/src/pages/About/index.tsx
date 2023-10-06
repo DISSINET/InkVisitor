@@ -205,6 +205,9 @@ export const AboutPage: React.FC<IAboutPage> = ({}) => {
               Application for the Collection of Structured Relational Data from
               Texts”, 2022–2023)
             </StyledTextListItem>
+            <StyledTextListItem>
+              <b>Ministry of Education, Youth and Sports</b>
+            </StyledTextListItem>
           </StyledTextList>
 
           <StyledHeader>Cite InkVisitor</StyledHeader>
