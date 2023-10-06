@@ -65,7 +65,9 @@ export const StyledPropLineColumn = styled.div<StyledPropLineColumn>`
 `;
 
 export const StyledFaGripVertical = styled(FaGripVertical)`
+  color: ${({ theme }) => theme.color.black};
   margin-right: ${({ theme }) => theme.space[2]};
+  margin-top: 0.3rem;
   cursor: move;
 `;
 

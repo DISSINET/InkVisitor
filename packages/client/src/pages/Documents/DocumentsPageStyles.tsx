@@ -21,7 +21,7 @@ export const StyledBackground = styled.div`
   overflow: auto;
   margin: 2rem;
   padding: 1rem;
-  border: 1px dashed black;
+  border: 1px dashed ${({ theme }) => theme.color["black"]};
   background-color: ${({ theme }) => theme.color["white"]};
   box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.3);
   position: relative;
@@ -71,6 +71,7 @@ export const StyledCount = styled.div`
 `;
 
 export const StyledInputWrap = styled.div`
+  color: ${({ theme }) => theme.color["black"]};
   height: 5rem;
   min-width: 40rem;
   margin-top: 1rem;
@@ -81,19 +82,11 @@ export const StyledInputWrap = styled.div`
   border-radius: ${({ theme }) => theme.borderRadius["default"]};
   cursor: pointer;
   font-size: ${({ theme }) => theme.fontSize["sm"]};
-  background: repeating-linear-gradient(
-    -45deg,
-    #fff,
-    #fff,
-    2px,
-    #ccd5f4 1px,
-    #ccd5f4 12px
-  );
   background: ${({ theme }) => `
     repeating-linear-gradient(
     -45deg,
-    #fff,
-    #fff,
+    ${theme.color.white},
+    ${theme.color.white},
     2px,
     ${theme.color["blue"][100]} 1px,
     ${theme.color["blue"][100]} 12px

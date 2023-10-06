@@ -39,7 +39,9 @@ const darkTheme = {
       warning: "#4a3c10",
     },
     black: "#fff",
-    white: "#000",
+    // InkVisitor primary color instead of black
+    white: "#050a1e",
+    // white: "#091034",
     grey: "#3b3b3b",
     greyer: "#b5b5b5",
     text: "#c7c7c7",
@@ -92,7 +94,7 @@ const darkTheme = {
   },
   background: {
     stripes:
-      "repeating-linear-gradient( -45deg, #4a5568, #4a5568, 1px, #000 1px, #000 12px)",
+      "repeating-linear-gradient( -45deg, #4a5568, #4a5568, 1px, #091034 1px, #091034 12px)",
   },
   boxShadow: {
     normal: "1px 1px 3px rgba(255, 255, 255, 0.4)",
