@@ -4,7 +4,7 @@ import { IEntity, IResponseGeneric, Relation } from "@shared/types";
 import { AxiosResponse } from "axios";
 import { Button, Dropdown } from "components";
 import { EntityTag } from "components/advanced";
-import React, { useRef } from "react";
+import React, { useContext, useRef } from "react";
 import {
   DragSourceMonitor,
   DropTargetMonitor,
@@ -19,6 +19,7 @@ import {
   StyledGrid,
   StyledGridColumn,
 } from "../EntityDetailRelationTypeBlockStyles";
+import { ThemeContext } from "styled-components";
 
 interface EntityDetailRelationRow {
   relation: Relation.IRelation;
@@ -125,6 +126,8 @@ export const EntityDetailRelationRow: React.FC<EntityDetailRelationRow> = ({
 
   const uniqueRelationIds = [...new Set(relation.entityIds)];
 
+  const themeContext = useContext(ThemeContext);
+
   return (
     <StyledGrid
       ref={dropRef}
@@ -147,7 +150,7 @@ export const EntityDetailRelationRow: React.FC<EntityDetailRelationRow> = ({
                         cursor: "move",
                       }}
                     >
-                      <FaGripVertical />
+                      <FaGripVertical color={themeContext.color.black} />
                     </StyledGridColumn>
                   )}
                   <StyledGridColumn key={key}>

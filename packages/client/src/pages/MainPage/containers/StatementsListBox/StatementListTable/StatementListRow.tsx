@@ -5,7 +5,7 @@ import {
   IStatement,
 } from "@shared/types";
 import { useSearchParams } from "hooks";
-import React, { useEffect, useRef } from "react";
+import React, { useContext, useEffect, useRef } from "react";
 import {
   DragSourceMonitor,
   DropTargetMonitor,
@@ -20,6 +20,7 @@ import { DragItem, ItemTypes } from "types";
 import { dndHoverFn } from "utils";
 import { StatementListRowExpanded } from "./StatementListRowExpanded/StatementListRowExpanded";
 import { StyledTd, StyledTdMove, StyledTr } from "./StatementListTableStyles";
+import { ThemeContext } from "styled-components";
 
 interface StatementListRow {
   row: Row<IResponseStatement>;
@@ -84,6 +85,8 @@ export const StatementListRow: React.FC<StatementListRow> = ({
   preview(drop(dropRef));
   drag(dragRef);
 
+  const themeContext = useContext(ThemeContext);
+
   return (
     <React.Fragment key={row.original.data.territory?.order}>
       <StyledTr
@@ -105,7 +108,7 @@ export const StatementListRow: React.FC<StatementListRow> = ({
                 ref={dragRef}
                 onClick={(e: React.MouseEvent) => e.stopPropagation()}
               >
-                <FaGripVertical />
+                <FaGripVertical color={themeContext.color.black} />
               </StyledTdMove>
             );
           } else {

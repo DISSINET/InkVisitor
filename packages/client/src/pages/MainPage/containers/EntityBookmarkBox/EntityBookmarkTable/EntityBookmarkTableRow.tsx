@@ -1,5 +1,5 @@
 import { IEntity, IResponseBookmarkFolder } from "@shared/types";
-import React, { useRef } from "react";
+import React, { useContext, useRef } from "react";
 import {
   DragSourceMonitor,
   DropTargetMonitor,
@@ -11,6 +11,7 @@ import { ColumnInstance, Row } from "react-table";
 import { DragItem, ItemTypes } from "types";
 import { dndHoverFn } from "utils";
 import { StyledTd, StyledTr } from "./EntityBookmarkTableStyles";
+import { ThemeContext } from "styled-components";
 
 interface EntityBookmarkTableRow {
   row: Row<IEntity>;
@@ -57,12 +58,14 @@ export const EntityBookmarkTableRow: React.FC<EntityBookmarkTableRow> = ({
   preview(drop(dropRef));
   drag(dragRef);
 
+  const themeContext = useContext(ThemeContext);
+
   return (
     <React.Fragment key={index}>
       <StyledTr ref={dropRef} opacity={opacity} isOdd={Boolean(index % 2)}>
         {hasOrder ? (
           <td ref={dragRef} style={{ cursor: "move" }}>
-            <FaGripVertical />
+            <FaGripVertical color={themeContext.color.black} />
           </td>
         ) : (
           <td style={{ width: "2rem" }} />
