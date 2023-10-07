@@ -318,7 +318,7 @@ export default class Entity implements IEntity, IDbModel {
    * @param db
    * @returns
    */
-  async findFromTemplate(db: Connection): Promise<IEntity[]> {
+  async findDerived(db: Connection): Promise<IEntity[]> {
     const data = await rethink
       .table(Entity.table)
       .getAll(this.id, { index: DbEnums.Indexes.EntityUsedTemplate })

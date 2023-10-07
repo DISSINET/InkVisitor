@@ -12,7 +12,6 @@ import { IEntity, IEvent, IStatement } from "@shared/types";
 import Prop from "@models/prop/prop";
 import { EntityEnums } from "@shared/enums";
 import { getEntityClass } from "@models/factory";
-import entities from "@modules/entities";
 import Reference from "./reference";
 import { InvalidDeleteError } from "@shared/types/errors";
 
@@ -223,7 +222,7 @@ describe("test Entity.getEntitiesIds", function () {
   });
 });
 
-describe("test Entity.findFromTemplate", function () {
+describe("test Entity.findDerived", function () {
   const db = new Db();
 
   beforeAll(async () => {
@@ -241,7 +240,7 @@ describe("test Entity.findFromTemplate", function () {
       await template.save(db.connection);
       await cast1.save(db.connection);
 
-      const foundCasts = await template.findFromTemplate(db.connection);
+      const foundCasts = await template.findDerived(db.connection);
 
       expect(foundCasts.length).toEqual(1);
       expect(foundCasts[0].id).toEqual(cast1Id);

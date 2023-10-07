@@ -18,7 +18,7 @@ export interface IResponseDetail extends IResponseEntity {
   usedInStatementIdentifications: IResponseUsedInStatementIdentification[]; // statement.data.actants[].identifications + from usedInStatements field if actant.entityId = detailId
   usedInStatementClassifications: IResponseUsedInStatementClassification[]; // statement.data.actants[].classifications + from usedInStatements field if actant.entityId = detailId
 
-  usedAsTemplate?: string[];
+  usedAsTemplate: string[];
 
   relations: Relation.IUsedRelations;
 

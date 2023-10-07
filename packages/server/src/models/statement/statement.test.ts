@@ -1400,7 +1400,7 @@ describe("test Entity.findFromTemplate", function () {
       await template.save(db.connection);
       await cast1.save(db.connection);
 
-      const foundCasts = await template.findFromTemplate(db.connection);
+      const foundCasts = await template.findDerived(db.connection);
 
       expect(foundCasts.length).toEqual(1);
       expect(foundCasts[0].id).toEqual(cast1Id);

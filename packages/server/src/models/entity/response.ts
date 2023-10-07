@@ -39,8 +39,8 @@ export class ResponseEntity extends Entity implements IResponseEntity {
   constructor(entity: Entity) {
     super({});
 
-    // using proxy to use the original entity - not the parent class which is used only to
-    // satisfy the interface
+    // passed entity here is used as in composition - ResponseEntity is just a wrapper
+    // to remove this proxy, add required IEntity fields to ResponseEntity and fill those fields
     return new Proxy(this, {
       ownKeys(target) {
         return [
@@ -88,7 +88,7 @@ export class ResponseEntity extends Entity implements IResponseEntity {
   }
 
   /**
-   * populated linked entities map with either single id or list of ids
+   * populates linked entities map with either single id or list of ids
    * @param idOrIds
    */
   addLinkedEntities(idOrIds: undefined | string | string[]) {
@@ -114,7 +114,7 @@ export class ResponseEntityDetail
   usedInStatements: IResponseUsedInStatement<EntityEnums.UsedInPosition>[];
   usedInStatementProps: IResponseUsedInStatementProps[];
   usedInMetaProps: IResponseUsedInMetaProp[];
-  usedAsTemplate?: string[] | undefined;
+  usedAsTemplate: string[];
   usedInStatementIdentifications: IResponseUsedInStatementIdentification[];
   usedInStatementClassifications: IResponseUsedInStatementClassification[];
 
@@ -129,6 +129,7 @@ export class ResponseEntityDetail
     this.usedInMetaProps = [];
     this.usedInStatementClassifications = [];
     this.usedInStatementIdentifications = [];
+    this.usedAsTemplate = [];
     this.relations = new UsedRelations(entity.id, entity.class);
     this.warnings = [];
 
@@ -175,8 +176,6 @@ export class ResponseEntityDetail
 
     this.walkStatementsDataProps(statementsByPropsValueType);
 
-    this.addLinkedEntities(this.usedAsTemplate);
-
     await this.populateInStatementsRelations(
       await Statement.findByDataActantsCI(conn, this.id)
     );
@@ -186,9 +185,10 @@ export class ResponseEntityDetail
       this.addLinkedEntities(this.relations.getEntityIdsFromType(type));
     }
 
-    this.entities = await this.populateEntitiesMap(conn);
-
     await this.processTemplateData(conn);
+
+    // finally retrieve all entities by stored id
+    this.entities = await this.populateEntitiesMap(conn);
 
     this.warnings = await new EntityWarnings(this.id, this.class).getWarnings(
       req.db.connection
@@ -315,10 +315,8 @@ export class ResponseEntityDetail
    * @param conn
    */
   async processTemplateData(conn: Connection): Promise<void> {
-    const casts = await this.findFromTemplate(conn);
-    this.usedAsTemplate = casts.map((c) => c.id);
-
-    casts.forEach((c) => (this.entities[c.id] = c));
+    this.usedAsTemplate = (await this.findDerived(conn)).map((c) => c.id);
+    this.addLinkedEntities(this.usedAsTemplate);
   }
 
   /**
