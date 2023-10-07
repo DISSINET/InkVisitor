@@ -250,9 +250,9 @@ export default Router()
     asyncRouteHandler<IResponseGeneric>(async (request: IRequest) => {
       const userData = request.body as IUser;
 
-      // force empty password + inactive status
+      // force empty password + active status
       delete userData.password;
-      userData.active = false;
+      userData.active = true;
 
       const user = new User(userData);
       if (!user.isValid()) {
@@ -261,23 +261,8 @@ export default Router()
 
       await request.db.lock();
 
-      const hash = user.generateHash();
-      const saved = await user.save(request.db.connection);
-      if (!saved) {
+      if (!(await user.save(request.db.connection))) {
         throw new InternalServerError("cannot create user");
-      }
-
-      try {
-        await mailer.sendTemplate(
-          user.email,
-          userCreatedTemplate(
-            user.name,
-            domainName(),
-            `${hostUrl()}/activate?hash=${hash}`
-          )
-        );
-      } catch (e) {
-        throw new EmailError("please check the logs", (e as Error).toString());
       }
 
       return {

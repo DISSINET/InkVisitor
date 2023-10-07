@@ -212,7 +212,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
           label="Territories"
           isExpanded={firstPanelExpanded}
           button={[
-            refreshBoxButton(["tree"], !firstPanelExpanded),
+            refreshBoxButton(["tree", "user"], !firstPanelExpanded),
             firstPanelButton(),
           ]}
           noPadding
@@ -256,7 +256,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
                 label="new entity"
                 onClick={() => setShowEntityCreateModal(true)}
               />,
-              refreshBoxButton(["entity"], false),
+              refreshBoxButton(["entity", "user"], false),
               <Button
                 inverted
                 tooltipLabel={

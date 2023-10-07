@@ -304,9 +304,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
       </StyledHeaderBreadcrumbRow>
 
       <StyledHeaderRow>
-        {isFavorited && (
-          <StyledFaStar size={18} color={theme.color["warning"]} />
-        )}
+        {isFavorited && <StyledFaStar size={18} />}
         <StyledHeading>
           {territoryId
             ? `T:\xa0${trimTerritoryLabel(data.label)}`
@@ -415,6 +413,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
               onClick={() => {
                 queryClient.invalidateQueries(["territory"]);
                 queryClient.invalidateQueries(["statement"]);
+                queryClient.invalidateQueries(["user"]);
               }}
             />
           </ButtonGroup>

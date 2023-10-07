@@ -16,11 +16,11 @@ import Related from "./related";
 import SubjectActant1Reciprocal from "./subject-actant1-reciprocal";
 import SubjectSemantics from "./subject-semantics";
 import Superclass from "./superclass";
-import SuperordinateLocation from "./superordinate-location";
+import SuperordinateEntity from "./superordinate-entity";
 import Synonym from "./synonym";
 
 type ISuperclass = RelationTypes.ISuperclass;
-type ISuperordinateLocation = RelationTypes.ISuperordinateLocation;
+type ISuperordinateEntity = RelationTypes.ISuperordinateEntity;
 type ISynonym = RelationTypes.ISynonym;
 type IAntonym = RelationTypes.IAntonym;
 type IHolonym = RelationTypes.IHolonym;
@@ -47,7 +47,7 @@ export class UsedRelations implements RelationTypes.IUsedRelations {
 
   [RelationEnums.Type.Superclass]?: RelationTypes.IDetailType<ISuperclass>;
   [RelationEnums.Type
-    .SuperordinateLocation]?: RelationTypes.IDetailType<ISuperordinateLocation>;
+    .SuperordinateEntity]?: RelationTypes.IDetailType<ISuperordinateEntity>;
   [RelationEnums.Type.Synonym]?: RelationTypes.IDetailType<ISynonym>;
   [RelationEnums.Type.Antonym]?: RelationTypes.IDetailType<IAntonym>;
   [RelationEnums.Type.Holonym]?: RelationTypes.IDetailType<IHolonym>;
@@ -98,10 +98,10 @@ export class UsedRelations implements RelationTypes.IUsedRelations {
     };
   }
 
-  async prepareSuperordinateLocations(dbConn: Connection): Promise<void> {
-    this[RelationEnums.Type.SuperordinateLocation] = {
+  async prepareSuperordinateEntitys(dbConn: Connection): Promise<void> {
+    this[RelationEnums.Type.SuperordinateEntity] = {
       connections:
-        await SuperordinateLocation.getSuperordinateLocationForwardConnections(
+        await SuperordinateEntity.getSuperordinateEntityForwardConnections(
           dbConn,
           this.entityId,
           this.entityClass,
@@ -109,7 +109,7 @@ export class UsedRelations implements RelationTypes.IUsedRelations {
           0
         ),
       iConnections:
-        await SuperordinateLocation.getSuperordinateLocationInverseConnections(
+        await SuperordinateEntity.getSuperordinateEntityInverseConnections(
           dbConn,
           this.entityId,
           this.entityClass
@@ -297,8 +297,8 @@ export class UsedRelations implements RelationTypes.IUsedRelations {
       await this.prepareSuperclasses(req.db.connection);
     }
 
-    if (types.indexOf(RelationEnums.Type.SuperordinateLocation) != -1) {
-      await this.prepareSuperordinateLocations(req.db.connection);
+    if (types.indexOf(RelationEnums.Type.SuperordinateEntity) != -1) {
+      await this.prepareSuperordinateEntitys(req.db.connection);
     }
 
     if (types.indexOf(RelationEnums.Type.Synonym) != -1) {

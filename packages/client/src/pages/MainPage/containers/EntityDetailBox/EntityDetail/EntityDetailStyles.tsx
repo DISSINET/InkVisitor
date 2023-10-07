@@ -154,7 +154,7 @@ export const StyledDetailForm = styled.div`
 `;
 
 export const StyledTagWrap = styled.div`
-  display: grid;
+  display: inline-grid;
   overflow: hidden;
   max-width: 100%;
 `;

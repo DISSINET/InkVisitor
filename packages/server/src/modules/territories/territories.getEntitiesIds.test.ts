@@ -4,11 +4,12 @@ import { supertestConfig } from "..";
 import { apiPath } from "@common/constants";
 import app from "../../Server";
 import { IStatement } from "@shared/types";
-import { Db } from "@service/RethinkDB";
+import { Db } from "@service/rethink";
 import { deleteEntities } from "@service/shorthands";
 import Territory from "@models/territory/territory";
 import Statement from "@models/statement/statement";
 import { IRequest } from "src/custom_typings/request";
+import { pool } from "@middlewares/db";
 
 describe("Territories getEntityIds", () => {
   let db: Db;
@@ -24,10 +25,11 @@ describe("Territories getEntityIds", () => {
 
   afterAll(async () => {
     await db.close();
+    await pool.end();
   });
 
   describe("one territory, two linked statement via territory.id and tags at once", () => {
-    it("should return empty array", async (done) => {
+    it("should return empty array", async () => {
       const territory = new Territory({});
       await territory.save(db.connection);
 
@@ -57,8 +59,6 @@ describe("Territories getEntityIds", () => {
           expect(res.body?.constructor.name).toEqual("Array");
           expect(res.body).toHaveLength(3);
         });
-
-      done();
     });
   });
 });

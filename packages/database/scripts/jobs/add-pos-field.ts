@@ -1,8 +1,7 @@
-import { IAction, IAudit, IConcept, IEntity, IProp, IStatement } from "@shared/types";
-import { r, Connection, RDatum, } from "rethinkdb-ts";
-import { ITask } from ".";
+import { IAction, IConcept } from "@shared/types";
+import { r, Connection, } from "rethinkdb-ts";
+import { IJob } from ".";
 import { EntityEnums } from "@shared/enums";
-import Statement from "@models/statement/statement"
 import Entity from "@models/entity/entity";
 
 const fixActions = async (db: Connection): Promise<void> => {
@@ -28,9 +27,9 @@ const fixConcepts = async (db: Connection): Promise<void> => {
     }
   }
 }
-const addPosFieldTask: ITask = async (db: Connection): Promise<void> => {
+const addPosFieldJob: IJob = async (db: Connection): Promise<void> => {
   await fixActions(db)
   await fixConcepts(db)
 }
 
-export default addPosFieldTask;
+export default addPosFieldJob;

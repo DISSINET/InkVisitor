@@ -27,7 +27,7 @@ export default class Entity implements IEntity, IDbModel {
   data: any = {};
   label = "";
   detail = "";
-  language: EntityEnums.Language = EntityEnums.Language.Latin;
+  language: EntityEnums.Language = EntityEnums.Language.Empty;
   notes: string[] = [];
   props: Prop[] = [];
   references: Reference[] = [];

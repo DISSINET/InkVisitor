@@ -93,7 +93,7 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
     <>
       <StyledActantHeaderRow>
         <StyledTagWrap>
-          <EntityTag entity={entity} tooltipText={entity.data.text} fullWidth />
+          <EntityTag entity={entity} fullWidth />
         </StyledTagWrap>
         <ButtonGroup style={{ marginTop: "1rem" }}>
           {userCanEdit && (
@@ -103,8 +103,8 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
               disabled={!mayBeRemoved}
               tooltipLabel={
                 mayBeRemoved
-                  ? "remove entity"
-                  : "entity cannot be removed while it is linked elsewhere"
+                  ? "delete entity"
+                  : "entity cannot be deleted while it is linked elsewhere"
               }
               inverted
               onClick={() => {

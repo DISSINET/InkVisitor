@@ -33,6 +33,7 @@ import { Tag } from "./basic/Tag/Tag";
 import { TagGroup } from "./basic/TagGroup/TagGroup";
 import { TemplateActionModal } from "./basic/TemplateActionModal/TemplateActionModal";
 import { Toast } from "./basic/Toast/Toast";
+import ToastWithLink from "./basic/Toast/ToastWithLink";
 import { Tooltip } from "./basic/Tooltip/Tooltip";
 import { TypeBar } from "./basic/TypeBar/TypeBar";
 
@@ -71,6 +72,7 @@ export {
   ModalInputWrap,
   Submit,
   TemplateActionModal,
+  ToastWithLink,
   TypeBar,
   Tooltip,
 };

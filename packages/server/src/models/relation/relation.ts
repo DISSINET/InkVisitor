@@ -395,6 +395,40 @@ export default class Relation implements IRelationModel {
   }
 
   /**
+   * searches for relations with specific entity id and returns both relation ids and connected entity ids
+   * @param request IRequest
+   * @param entityId string
+   * @returns promise with both entity/relation ids
+   */
+  static async getLinkedForEntity(
+    request: IRequest,
+    entityId: string
+  ): Promise<[string[], string[]]> {
+    const linkedRelations = await Relation.findForEntity(
+      request.db.connection,
+      entityId
+    );
+    let entityIds: string[], linkedRelationIds: string[];
+
+    if (linkedRelations && linkedRelations.length) {
+      entityIds = Array.from(
+        new Set(
+          linkedRelations.reduce<string[]>((acc, r) => {
+            acc = acc.concat(r.entityIds);
+            return acc;
+          }, [])
+        )
+      ).filter((id) => id != entityId);
+      linkedRelationIds = Array.from(new Set(linkedRelations.map((r) => r.id)));
+    } else {
+      entityIds = [];
+      linkedRelationIds = [];
+    }
+
+    return [entityIds, linkedRelationIds];
+  }
+
+  /**
    * Searches for relations assigned for multiple entity ids, filtered by optional relation type
    * @param db
    * @param entityId array of entity ids

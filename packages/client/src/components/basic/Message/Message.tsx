@@ -6,7 +6,7 @@ import { StyledMessage } from "./MessateStyles";
 
 interface Message {
   warning: IWarning;
-  entities: {
+  entities?: {
     [key: string]: IEntity;
   };
 }

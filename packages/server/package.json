@@ -1,6 +1,6 @@
 {
   "name": "inkvisitor-server",
-  "version": "1.3.1",
+  "version": "1.3.3",
   "engines": {
     "npm": ">=8.19.2",
     "node": ">=16.18.0"
@@ -11,7 +11,7 @@
     "start": "ENV_FILE=development nodemon",
     "build": "tsc --build tsconfig.prod.json",
     "start:dist": "node -r module-alias/register ./dist/server/src",
-    "jwt": "ts-node -r tsconfig-paths/register ./src/scripts/jwt.ts",
+    "jwt": "ENV_FILE=test ts-node -r tsconfig-paths/register ./src/scripts/jwt.ts",
     "swagger": "ts-node -r tsconfig-paths/register ./src/scripts/swagger.ts"
   },
   "nodemonConfig": {
@@ -44,6 +44,7 @@
     "express": "^4.17.3",
     "express-async-errors": "^3.1.1",
     "express-jwt": "8.4.1",
+    "generic-pool": "^3.9.0",
     "helmet": "^3.23.1",
     "http": "0.0.1-security",
     "http-status-codes": "^1.4.0",
