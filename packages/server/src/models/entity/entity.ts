@@ -336,4 +336,29 @@ export default class Entity implements IEntity, IDbModel {
     this.props.forEach((p) => p.resetIds());
     this.references.forEach((p) => p.resetIds());
   }
+
+  /**
+   * Retrieve entities which were created between two dates (gte / lt applied)
+   * @param db rethinkdb Connection
+   * @param dateFrom created date (gte)
+   * @param dateTo created date (lt)
+   * @returns Promise<IEntity[]> list of entries
+   */
+  static async getGroupedByDate(
+    db: Connection,
+    dateFrom: string,
+    dateTo: string
+  ): Promise<Record<string, IEntity[]>> {
+    const entries = await rethink
+      .table(Entity.table)
+      .filter(function (row: RDatum) {
+        return row("createdAt").typeOf().eq("STRING");
+      })
+      .group(function (row: RDatum) {
+        return (row as any).ISO8601(row("createdAt"));
+      })
+      .run(db);
+
+    return entries;
+  }
 }
