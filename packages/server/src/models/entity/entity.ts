@@ -355,10 +355,19 @@ export default class Entity implements IEntity, IDbModel {
         return row("createdAt").typeOf().eq("STRING");
       })
       .group(function (row: RDatum) {
-        return (row as any).ISO8601(row("createdAt"));
+        return (rethink as any).ISO8601(row("createdAt"));
       })
       .run(db);
 
-    return entries;
+    const out: Record<string, any> = {};
+    for (const group of entries) {
+      const isoDate = (group.group as Date).toISOString();
+      if (!out[isoDate]) {
+        out[isoDate] = [];
+      }
+      out[isoDate] = group.reduction;
+    }
+
+    return out;
   }
 }
