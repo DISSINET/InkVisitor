@@ -346,13 +346,19 @@ export default class Entity implements IEntity, IDbModel {
    */
   static async getGroupedByDate(
     db: Connection,
-    dateFrom: string,
-    dateTo: string
+    dateFrom: Date,
+    dateTo: Date
   ): Promise<Record<string, IEntity[]>> {
     const entries = await rethink
       .table(Entity.table)
       .filter(function (row: RDatum) {
         return row("createdAt").typeOf().eq("STRING");
+      })
+      .filter(function (row: RDatum) {
+        return rethink.and(
+          row("createdAt").ge(dateFrom.toISOString()),
+          row("createdAt").lt(dateTo.toISOString())
+        );
       })
       .group(function (row: RDatum) {
         return (rethink as any).ISO8601(row("createdAt"));
