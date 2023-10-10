@@ -1,6 +1,8 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-const initialState: string = "dark";
+const initialState: string = localStorage.getItem("theme")
+  ? (localStorage.getItem("theme") as string)
+  : "light";
 
 const themeSlice = createSlice({
   name: "theme",

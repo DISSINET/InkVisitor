@@ -171,6 +171,7 @@ export const RightHeader: React.FC<RightHeader> = React.memo(
 
     const handleThemeChange = (newTheme: string) => {
       dispatch(setTheme(newTheme));
+      localStorage.setItem("theme", newTheme);
     };
 
     return (
