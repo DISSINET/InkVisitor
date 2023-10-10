@@ -55,6 +55,7 @@ const theme = {
     modalBg: "rgba(9,16,52,0.3)",
 
     foundByTreeFilter: "#b4c0e8",
+    tableOpened: "#F2EBFE",
     tableSelection: "#bce5ff",
     tableSelectionHover: "#e0f3ff",
     focusedCheckbox: "rgba(9,16,52,0.1)",
@@ -110,7 +111,7 @@ const theme = {
 
     // tag status
     "0": "#a0aec0", // pending
-    "1": "#000", //approved
+    "1": "#000", // approved
     "2": "#BA2525", //discouraged
     "3": "#D8AA37", //warning
     "4": "#f27a43", //unfinished

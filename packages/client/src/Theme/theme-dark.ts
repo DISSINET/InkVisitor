@@ -39,9 +39,8 @@ const darkTheme = {
       warning: "#4a3c10",
     },
     black: "#fff",
-    // InkVisitor primary color instead of black
-    white: "#050a1e",
-    // white: "#091034",
+    // between InkVisitor primary color and black
+    white: "#060c26",
     grey: "#3b3b3b",
     greyer: "#b5b5b5",
     text: "#c7c7c7",
@@ -54,6 +53,7 @@ const darkTheme = {
     primaryTransparent: "rgba(9,16,52,0.2)",
     modalBg: "rgba(9,16,52,0.5)",
 
+    tableOpened: "#0b3a59",
     tableSelection: "#4c82a1",
     tableSelectionHover: "#2c638c",
     focusedCheckbox: "rgba(246,246,255,0.1)",
@@ -79,22 +79,23 @@ const darkTheme = {
     entityV: "#BAB0AC",
 
     elementType: {
-      action: "#145",
-      actant: "#589",
-      prop: "#6a8",
-      class: "#b79",
-      ident: "#dac",
+      action: "#EB6B6B",
+      actant: "#7E9BFF",
+      prop: "#91BB93",
+      class: "#E28FBB",
+      ident: "#EAE3A3",
     },
 
-    0: "#5f6c7b",
-    1: "#fff",
-    2: "#451919",
-    3: "#271918",
-    4: "#0d2121",
+    // tag status
+    0: "#5f6c7b", // pending
+    1: "#ddd", // approved
+    2: "#7F1D1D", // discouraged
+    3: "#9F7F1D", // warning
+    4: "#a6593a", // unfinished
   },
   background: {
     stripes:
-      "repeating-linear-gradient( -45deg, #4a5568, #4a5568, 1px, #091034 1px, #091034 12px)",
+      "repeating-linear-gradient( -45deg, #4a5568, #4a5568, 1px, #060c26 1px, #060c26 12px)",
   },
   boxShadow: {
     normal: "1px 1px 3px rgba(255, 255, 255, 0.4)",

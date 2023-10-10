@@ -32,7 +32,7 @@ interface StyledTr {
 export const StyledTr = styled.tr<StyledTr>`
   background-color: ${({ theme, isOpened, isSelected }) =>
     isOpened
-      ? theme.color["invertedBg"]["info"]
+      ? theme.color["tableOpened"]
       : isSelected
       ? theme.color["tableSelection"]
       : theme.color["white"]};
