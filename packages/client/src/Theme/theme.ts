@@ -80,8 +80,9 @@ const theme = {
     // seda
     entityV: "#BAB0AC",
 
+    warningText: "#99103B",
     warningMessage: "#FFE089",
-    warningText: "#ffbb00",
+    warningBorder: "#ffbb00",
 
     tooltipColor: "#fff",
     tooltipBackground: "#000",

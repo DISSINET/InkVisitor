@@ -78,6 +78,8 @@ const darkTheme = {
     // seda
     entityV: "#BAB0AC",
 
+    warningText: "#e84c6e",
+
     elementType: {
       action: "#EB6B6B",
       actant: "#7E9BFF",

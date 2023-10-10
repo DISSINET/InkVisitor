@@ -1,4 +1,5 @@
 import { animated } from "@react-spring/web";
+import { GrDocumentText } from "react-icons/gr";
 import styled from "styled-components";
 import { heightHeader } from "Theme/constants";
 

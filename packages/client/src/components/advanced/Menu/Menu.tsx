@@ -1,15 +1,14 @@
+import { animated, config, useSpring } from "@react-spring/web";
 import { UserEnums } from "@shared/enums";
 import { Button } from "components/basic/Button/Button";
 import React, { useState } from "react";
 import { BiLogOut } from "react-icons/bi";
+import { CgFileDocument } from "react-icons/cg";
 import { FaBars, FaBookOpen, FaInfo, FaUsers } from "react-icons/fa";
-import { useNavigate, useLocation } from "react-router";
-import { animated, config, useSpring } from "@react-spring/web";
+import { useLocation, useNavigate } from "react-router";
 import { IPage } from "types";
 import { MenuItem } from "./MenuItem";
 import { StyledMenuGroup, StyledMenuGroupWrapper } from "./MenuStyles";
-import { GrDocumentText } from "react-icons/gr";
-import { CgFileDocument } from "react-icons/cg";
 
 interface Menu {
   userRole: string;
