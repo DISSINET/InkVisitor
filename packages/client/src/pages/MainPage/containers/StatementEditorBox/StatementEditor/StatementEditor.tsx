@@ -87,12 +87,21 @@ interface StatementEditor {
     unknown
   >;
   moveStatementMutation: UseMutationResult<void, unknown, string, unknown>;
+
+  handleAttributeChange: (attribute: string, value: string | boolean) => void;
+  handleDataAttributeChange: (
+    attribute: string,
+    value: string | boolean
+  ) => void;
 }
 export const StatementEditor: React.FC<StatementEditor> = ({
   statement,
   updateStatementMutation,
   updateStatementDataMutation,
   moveStatementMutation,
+
+  handleAttributeChange,
+  handleDataAttributeChange,
 }) => {
   const {
     statementId,
@@ -595,7 +604,8 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                     type="text"
                     value={statement.label}
                     onChangeFn={(newValue: string) => {
-                      updateStatementMutation.mutate({ label: newValue });
+                      handleAttributeChange("label", newValue);
+                      // updateStatementMutation.mutate({ label: newValue });
                     }}
                   />
                 </StyledEditorHeaderInputWrap>
@@ -691,7 +701,8 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                   const newData = {
                     text: newValue,
                   };
-                  updateStatementDataMutation.mutate(newData);
+                  // updateStatementDataMutation.mutate(newData);
+                  handleDataAttributeChange("text", newValue);
                 }
               }}
               value={statement.data.text}

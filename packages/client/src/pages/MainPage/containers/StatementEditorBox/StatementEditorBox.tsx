@@ -1,12 +1,13 @@
 import { EntityEnums } from "@shared/enums";
 import api from "api";
 import { Loader } from "components";
-import { useSearchParams } from "hooks";
-import React, { useEffect } from "react";
+import { useDebounce, useDebouncedFunction, useSearchParams } from "hooks";
+import React, { useEffect, useState } from "react";
 import { BsInfoCircle } from "react-icons/bs";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { StatementEditor } from "./StatementEditor/StatementEditor";
 import { StyledEditorEmptyState } from "./StatementEditorBoxStyles";
+import { IResponseStatement, IStatement } from "@shared/types";
 
 export const StatementEditorBox: React.FC = () => {
   const { statementId, setStatementId, selectedDetailId, setTerritoryId } =
@@ -102,6 +103,54 @@ export const StatementEditorBox: React.FC = () => {
     }
   );
 
+  // State to manage your object
+  const [tempObject, setTempObject] = useState<IStatement>();
+
+  useEffect(() => {
+    setTempObject(statement);
+  }, [statement]);
+
+  // const [changesPending, setChangesPending] = useState(false);
+
+  // Function to send changes to the backend
+  const sendChangesToBackend = (changes: any) => {
+    if (changes) {
+      updateStatementMutation.mutate(changes);
+      console.log("Sending changes to the backend:", changes);
+    }
+  };
+
+  const debouncedSendChanges = useDebouncedFunction(sendChangesToBackend, 3000);
+
+  // Function to handle changes to the object
+  const handleAttributeChange = (
+    attribute: string,
+    value: string | boolean
+  ) => {
+    if (tempObject) {
+      setTempObject({
+        ...tempObject,
+        [attribute]: value,
+      });
+    }
+
+    debouncedSendChanges(tempObject);
+  };
+
+  const handleDataAttributeChange = (attribute: string, value: any) => {
+    if (tempObject) {
+      setTempObject({
+        ...tempObject,
+        data: {
+          ...tempObject.data,
+          [attribute]: value,
+        },
+      });
+    }
+
+    debouncedSendChanges(tempObject);
+  };
+
   return (
     <>
       {statement ? (
@@ -110,6 +159,8 @@ export const StatementEditorBox: React.FC = () => {
           updateStatementMutation={updateStatementMutation}
           updateStatementDataMutation={updateStatementDataMutation}
           moveStatementMutation={moveStatementMutation}
+          handleAttributeChange={handleAttributeChange}
+          handleDataAttributeChange={handleDataAttributeChange}
         />
       ) : (
         <>
