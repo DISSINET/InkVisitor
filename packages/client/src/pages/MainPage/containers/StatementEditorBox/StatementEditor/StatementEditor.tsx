@@ -3,8 +3,10 @@ import {
   IEntity,
   IReference,
   IResponseStatement,
+  IStatement,
   IStatementActant,
   IStatementAction,
+  IStatementData,
 } from "@shared/types";
 import {
   UseMutationResult,
@@ -88,10 +90,13 @@ interface StatementEditor {
   >;
   moveStatementMutation: UseMutationResult<void, unknown, string, unknown>;
 
-  handleAttributeChange: (attribute: string, value: string | boolean) => void;
+  handleAttributeChange: (
+    changes: Partial<IStatement>,
+    instantUpdate?: boolean
+  ) => void;
   handleDataAttributeChange: (
-    attribute: string,
-    value: string | boolean
+    changes: Partial<IStatementData>,
+    instantUpdate?: boolean
   ) => void;
 }
 export const StatementEditor: React.FC<StatementEditor> = ({
@@ -378,7 +383,6 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   };
 
   const updateProp = (propId: string, changes: any) => {
-    console.log("updating props", changes);
     if (propId) {
       if (
         changes.type &&
@@ -452,7 +456,8 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         });
       }
     );
-    updateStatementDataMutation.mutate(newStatementData);
+    // updateStatementDataMutation.mutate(newStatementData);
+    handleDataAttributeChange(newStatementData);
   };
 
   const removeProp = (propId: string) => {
@@ -604,7 +609,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                     type="text"
                     value={statement.label}
                     onChangeFn={(newValue: string) => {
-                      handleAttributeChange("label", newValue);
+                      handleAttributeChange({ label: newValue });
                       // updateStatementMutation.mutate({ label: newValue });
                     }}
                   />
@@ -698,11 +703,8 @@ export const StatementEditor: React.FC<StatementEditor> = ({
               placeholder="Insert statement text here"
               onChangeFn={(newValue: string) => {
                 if (newValue !== statement.data.text) {
-                  const newData = {
-                    text: newValue,
-                  };
-                  // updateStatementDataMutation.mutate(newData);
-                  handleDataAttributeChange("text", newValue);
+                  // updateStatementDataMutation.mutate({text: newValue});
+                  handleDataAttributeChange({ text: newValue });
                 }
               }}
               value={statement.data.text}
@@ -766,6 +768,8 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 updateStatementMutation={updateStatementMutation}
                 updateStatementDataMutation={updateStatementDataMutation}
                 setShowSubmitSection={setShowSubmitSection}
+                handleAttributeChange={handleAttributeChange}
+                handleDataAttributeChange={handleDataAttributeChange}
               />
             )}
           </StyledEditorSectionHeader>
@@ -780,6 +784,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
               movePropToIndex={movePropToIndex}
               territoryParentId={statementTerritoryId}
               territoryActants={territoryActants}
+              handleDataAttributeChange={handleDataAttributeChange}
             />
             {userCanEdit && (
               <EntitySuggester
@@ -815,6 +820,8 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 updateStatementMutation={updateStatementMutation}
                 updateStatementDataMutation={updateStatementDataMutation}
                 setShowSubmitSection={setShowSubmitSection}
+                handleAttributeChange={handleAttributeChange}
+                handleDataAttributeChange={handleDataAttributeChange}
               />
             )}
           </StyledEditorSectionHeader>
@@ -832,6 +839,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
               addClassification={addClassification}
               addIdentification={addIdentification}
               territoryActants={territoryActants}
+              handleDataAttributeChange={handleDataAttributeChange}
             />
             {userCanEdit && (
               <EntitySuggester
@@ -881,6 +889,8 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 updateStatementMutation={updateStatementMutation}
                 updateStatementDataMutation={updateStatementDataMutation}
                 setShowSubmitSection={setShowSubmitSection}
+                handleAttributeChange={handleAttributeChange}
+                handleDataAttributeChange={handleDataAttributeChange}
               />
             )}
           </StyledEditorSectionHeader>
@@ -889,7 +899,8 @@ export const StatementEditor: React.FC<StatementEditor> = ({
               openDetailOnCreate
               references={statement.references}
               onChange={(newReferences: IReference[]) => {
-                updateStatementMutation.mutate({ references: newReferences });
+                // updateStatementMutation.mutate({ references: newReferences });
+                handleAttributeChange({ references: newReferences }, true);
               }}
               disabled={!userCanEdit}
               isInsideTemplate={statement.isTemplate || false}

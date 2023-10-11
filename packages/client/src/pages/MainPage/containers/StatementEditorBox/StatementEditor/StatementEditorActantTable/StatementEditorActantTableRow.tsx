@@ -9,6 +9,7 @@ import {
   IProp,
   IResponseStatement,
   IStatementActant,
+  IStatementData,
 } from "@shared/types";
 import { excludedSuggesterEntities } from "Theme/constants";
 import {
@@ -81,6 +82,11 @@ interface StatementEditorActantTableRow {
   addIdentification: (originId: string) => void;
   territoryActants?: string[];
   hasOrder?: boolean;
+
+  handleDataAttributeChange: (
+    changes: Partial<IStatementData>,
+    instantUpdate?: boolean
+  ) => void;
 }
 
 export const StatementEditorActantTableRow: React.FC<
@@ -103,6 +109,8 @@ export const StatementEditorActantTableRow: React.FC<
   addIdentification,
   territoryActants,
   hasOrder,
+
+  handleDataAttributeChange,
 }) => {
   const isInsideTemplate = statement.isTemplate || false;
   const { statementId, territoryId } = useSearchParams();
@@ -165,23 +173,27 @@ export const StatementEditorActantTableRow: React.FC<
     }
   }, [isDragging]);
 
-  const updateActant = (statementActantId: string, changes: any) => {
+  const updateActant = (
+    statementActantId: string,
+    changes: any,
+    instantUpdate?: boolean
+  ) => {
     if (statement && statementActantId) {
       const updatedActants = statement.data.actants.map((a) =>
         a.id === statementActantId ? { ...a, ...changes } : a
       );
-      const newData = { actants: updatedActants };
-      updateStatementDataMutation.mutate(newData);
+      // updateStatementDataMutation.mutate({ actants: updatedActants });
+      handleDataAttributeChange({ actants: updatedActants }, instantUpdate);
     }
   };
 
-  const removeActant = (statementActantId: string) => {
+  const removeActant = (statementActantId: string, instantUpdate?: boolean) => {
     if (statement) {
       const updatedActants = statement.data.actants.filter(
         (a) => a.id !== statementActantId
       );
-      const newData = { actants: updatedActants };
-      updateStatementDataMutation.mutate(newData);
+      // updateStatementDataMutation.mutate({ actants: updatedActants });
+      handleDataAttributeChange({ actants: updatedActants }, instantUpdate);
     }
   };
 
@@ -190,9 +202,13 @@ export const StatementEditorActantTableRow: React.FC<
       <StyledTagWrapper>
         <EntityDropzone
           onSelected={(newSelectedId: string) => {
-            updateActant(sActant.id, {
-              entityId: newSelectedId,
-            });
+            updateActant(
+              sActant.id,
+              {
+                entityId: newSelectedId,
+              },
+              true
+            );
           }}
           categoryTypes={classEntitiesActant}
           excludedEntityClasses={excludedSuggesterEntities}
@@ -230,9 +246,13 @@ export const StatementEditorActantTableRow: React.FC<
       userCanEdit && (
         <EntitySuggester
           onSelected={(newSelectedId: string) => {
-            updateActant(sActant.id, {
-              entityId: newSelectedId,
-            });
+            updateActant(
+              sActant.id,
+              {
+                entityId: newSelectedId,
+              },
+              true
+            );
           }}
           categoryTypes={classEntitiesActant}
           openDetailOnCreate

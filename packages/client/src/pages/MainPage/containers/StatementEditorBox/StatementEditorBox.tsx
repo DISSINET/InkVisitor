@@ -1,13 +1,13 @@
 import { EntityEnums } from "@shared/enums";
+import { IResponseStatement, IStatement, IStatementData } from "@shared/types";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Loader } from "components";
-import { useDebounce, useDebouncedFunction, useSearchParams } from "hooks";
+import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
 import { BsInfoCircle } from "react-icons/bs";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { StatementEditor } from "./StatementEditor/StatementEditor";
 import { StyledEditorEmptyState } from "./StatementEditorBoxStyles";
-import { IResponseStatement, IStatement } from "@shared/types";
 
 export const StatementEditorBox: React.FC = () => {
   const { statementId, setStatementId, selectedDetailId, setTerritoryId } =
@@ -104,15 +104,12 @@ export const StatementEditorBox: React.FC = () => {
   );
 
   // State to manage your object
-  const [tempObject, setTempObject] = useState<IStatement>();
+  const [tempObject, setTempObject] = useState<IResponseStatement>();
 
   useEffect(() => {
     setTempObject(statement);
   }, [statement]);
 
-  // const [changesPending, setChangesPending] = useState(false);
-
-  // Function to send changes to the backend
   const sendChangesToBackend = (changes: any) => {
     if (changes) {
       updateStatementMutation.mutate(changes);
@@ -120,42 +117,67 @@ export const StatementEditorBox: React.FC = () => {
     }
   };
 
-  const debouncedSendChanges = useDebouncedFunction(sendChangesToBackend, 3000);
+  const [changesPending, setChangesPending] = useState(false);
 
-  // Function to handle changes to the object
+  useEffect(() => {
+    const timerId = setTimeout(() => {
+      if (changesPending) {
+        sendChangesToBackend(tempObject);
+        setChangesPending(false);
+      }
+    }, 3000);
+
+    return () => clearTimeout(timerId);
+  }, [tempObject, changesPending]);
+
   const handleAttributeChange = (
-    attribute: string,
-    value: string | boolean
+    changes: Partial<IStatement>,
+    instantUpdate?: boolean
   ) => {
     if (tempObject) {
-      setTempObject({
+      const newData = {
         ...tempObject,
-        [attribute]: value,
-      });
-    }
+        ...changes,
+      };
+      setTempObject(newData);
 
-    debouncedSendChanges(tempObject);
+      if (instantUpdate) {
+        sendChangesToBackend(tempObject);
+        setChangesPending(false);
+      } else {
+        setChangesPending(true);
+      }
+    }
   };
 
-  const handleDataAttributeChange = (attribute: string, value: any) => {
+  const handleDataAttributeChange = (
+    changes: Partial<IStatementData>,
+    instantUpdate?: boolean
+  ) => {
     if (tempObject) {
-      setTempObject({
+      const newData = {
         ...tempObject,
         data: {
           ...tempObject.data,
-          [attribute]: value,
+          ...changes,
         },
-      });
-    }
+      };
+      setTempObject(newData);
 
-    debouncedSendChanges(tempObject);
+      if (instantUpdate) {
+        sendChangesToBackend(newData);
+        setChangesPending(false);
+      } else {
+        setChangesPending(true);
+      }
+    }
   };
 
   return (
     <>
-      {statement ? (
+      {tempObject ? (
         <StatementEditor
-          statement={statement}
+          statement={tempObject}
           updateStatementMutation={updateStatementMutation}
           updateStatementDataMutation={updateStatementDataMutation}
           moveStatementMutation={moveStatementMutation}

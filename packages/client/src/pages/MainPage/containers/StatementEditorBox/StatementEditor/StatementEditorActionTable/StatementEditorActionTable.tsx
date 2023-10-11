@@ -1,4 +1,8 @@
-import { IResponseStatement, IStatementAction } from "@shared/types";
+import {
+  IResponseStatement,
+  IStatementAction,
+  IStatementData,
+} from "@shared/types";
 import update from "immutability-helper";
 import React, { useCallback, useEffect, useState } from "react";
 import { UseMutationResult } from "@tanstack/react-query";
@@ -16,6 +20,8 @@ interface StatementEditorActionTable {
   movePropToIndex: (propId: string, oldIndex: number, newIndex: number) => void;
   territoryParentId?: string;
   territoryActants?: string[];
+
+  handleDataAttributeChange: (changes: Partial<IStatementData>) => void;
 }
 export const StatementEditorActionTable: React.FC<
   StatementEditorActionTable
@@ -29,11 +35,14 @@ export const StatementEditorActionTable: React.FC<
   movePropToIndex,
   territoryParentId,
   territoryActants,
+
+  handleDataAttributeChange,
 }) => {
   const [filteredActions, setFilteredActions] = useState<
     FilteredActionObject[]
   >([]);
 
+  // TODO: how to temporarily show action from suggester before it comes from BE
   useEffect(() => {
     const filteredActions: FilteredActionObject[] = statement.data.actions.map(
       (sAction, key) => {
@@ -94,6 +103,7 @@ export const StatementEditorActionTable: React.FC<
                 territoryParentId={territoryParentId}
                 territoryActants={territoryActants}
                 hasOrder={filteredActions.length > 1}
+                handleDataAttributeChange={handleDataAttributeChange}
               />
             );
           })}

@@ -1,5 +1,9 @@
 import { EntityEnums } from "@shared/enums";
-import { IResponseStatement, IStatementActant } from "@shared/types";
+import {
+  IResponseStatement,
+  IStatementActant,
+  IStatementData,
+} from "@shared/types";
 import { UseMutationResult } from "@tanstack/react-query";
 import update from "immutability-helper";
 import React, { useCallback, useMemo, useState } from "react";
@@ -20,6 +24,8 @@ interface StatementEditorActantTable {
   addClassification: (originId: string) => void;
   addIdentification: (originId: string) => void;
   territoryActants?: string[];
+
+  handleDataAttributeChange: (changes: Partial<IStatementData>) => void;
 }
 export const StatementEditorActantTable: React.FC<
   StatementEditorActantTable
@@ -36,6 +42,8 @@ export const StatementEditorActantTable: React.FC<
   addClassification,
   addIdentification,
   territoryActants,
+
+  handleDataAttributeChange,
 }) => {
   const [filteredActants, setFilteredActants] = useState<
     FilteredActantObject[]
@@ -102,6 +110,7 @@ export const StatementEditorActantTable: React.FC<
                 addIdentification={addIdentification}
                 territoryActants={territoryActants}
                 hasOrder={filteredActants.length > 1}
+                handleDataAttributeChange={handleDataAttributeChange}
               />
             );
           })}
