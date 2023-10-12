@@ -142,7 +142,7 @@ export const StatementEditorBox: React.FC = () => {
       setTempObject(newData);
 
       if (instantUpdate) {
-        sendChangesToBackend(tempObject);
+        sendChangesToBackend(newData);
         setChangesPending(false);
       } else {
         setChangesPending(true);
