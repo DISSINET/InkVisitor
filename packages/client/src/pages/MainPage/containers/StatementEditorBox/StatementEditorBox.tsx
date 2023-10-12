@@ -103,25 +103,25 @@ export const StatementEditorBox: React.FC = () => {
     }
   );
 
-  // State to manage your object
   const [tempObject, setTempObject] = useState<IResponseStatement>();
 
   useEffect(() => {
     setTempObject(statement);
   }, [statement]);
 
-  const sendChangesToBackend = (changes: any) => {
-    if (changes) {
-      updateStatementMutation.mutate(changes);
-      console.log("Sending changes to the backend:", changes);
-    }
+  const sendChangesToBackend = (changes: IStatement) => {
+    // TODO: comparsion not working
+    // if (JSON.stringify(statement) !== JSON.stringify(changes)) {
+    updateStatementMutation.mutate(changes);
+    console.log("Sending changes to the backend:", changes);
+    // }
   };
 
   const [changesPending, setChangesPending] = useState(false);
 
   useEffect(() => {
     const timerId = setTimeout(() => {
-      if (changesPending) {
+      if (changesPending && tempObject) {
         sendChangesToBackend(tempObject);
         setChangesPending(false);
       }

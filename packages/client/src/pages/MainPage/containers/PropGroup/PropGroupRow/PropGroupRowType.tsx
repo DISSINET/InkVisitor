@@ -21,7 +21,7 @@ import { partitivityDict, virtualityDict } from "@shared/dictionaries";
 interface PropGroupRowType {
   prop: IProp;
   propTypeEntity?: IEntity;
-  updateProp: (propId: string, changes: any) => void;
+  updateProp: (propId: string, changes: any, instantUpdate?: boolean) => void;
   userCanEdit: boolean;
   isInsideTemplate: boolean;
   territoryParentId?: string;
@@ -49,12 +49,16 @@ export const PropGroupRowType: React.FC<PropGroupRowType> = ({
           <>
             <EntityDropzone
               onSelected={(newSelectedId: string) => {
-                updateProp(prop.id, {
-                  type: {
-                    ...prop.type,
-                    entityId: newSelectedId,
+                updateProp(
+                  prop.id,
+                  {
+                    type: {
+                      ...prop.type,
+                      entityId: newSelectedId,
+                    },
                   },
-                });
+                  true
+                );
               }}
               categoryTypes={classesPropType}
               excludedEntityClasses={excludedSuggesterEntities}
@@ -112,12 +116,16 @@ export const PropGroupRowType: React.FC<PropGroupRowType> = ({
           <EntitySuggester
             territoryActants={territoryActants}
             onSelected={(newSelectedId: string) => {
-              updateProp(prop.id, {
-                type: {
-                  ...prop.type,
-                  entityId: newSelectedId,
+              updateProp(
+                prop.id,
+                {
+                  type: {
+                    ...prop.type,
+                    entityId: newSelectedId,
+                  },
                 },
-              });
+                true
+              );
             }}
             placeholder="type"
             openDetailOnCreate={openDetailOnCreate}

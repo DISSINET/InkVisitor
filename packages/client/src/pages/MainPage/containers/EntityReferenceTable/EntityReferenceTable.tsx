@@ -66,10 +66,6 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
     { enabled: !!entityId && api.isLoggedIn() }
   );
 
-  const sendChanges = (newValues: IReference[]) => {
-    onChange(newValues);
-  };
-
   const handleChangeResource = (refId: string, newReSourceId: string) => {
     const newReferences = [...references];
     newReferences.forEach((ref: IReference) => {
@@ -77,7 +73,7 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
         ref.resource = newReSourceId;
       }
     });
-    sendChanges(newReferences);
+    onChange(newReferences);
   };
 
   const handleChangeValue = (refId: string, newValueId: string) => {
@@ -87,20 +83,20 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
         ref.value = newValueId;
       }
     });
-    sendChanges(newReferences);
+    onChange(newReferences);
   };
 
   const handleRemove = (refId: string) => {
     const newReferences = [...references].filter(
       (ref: IReference) => ref.id !== refId
     );
-    sendChanges(newReferences);
+    onChange(newReferences);
   };
 
   const handleAdd = () => {
     const newReferences = [...references];
     newReferences.push(CReference());
-    sendChanges(newReferences);
+    onChange(newReferences);
   };
 
   return (

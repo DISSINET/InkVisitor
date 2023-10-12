@@ -59,9 +59,10 @@ export const StatementEditorActionTable: React.FC<
         (filteredAction) => filteredAction.data.sAction
       );
       if (JSON.stringify(statement.data.actions) !== JSON.stringify(actions)) {
-        updateActionsMutation.mutate({
-          actions: actions,
-        });
+        // updateActionsMutation.mutate({
+        //   actions: actions,
+        // });
+        handleDataAttributeChange({ actions });
       }
     }
   };

@@ -38,7 +38,7 @@ interface PropGroupRow {
   level: 1 | 2 | 3;
   hasOrder: boolean;
 
-  updateProp: (propId: string, changes: any) => void;
+  updateProp: (propId: string, changes: any, instantUpdate?: boolean) => void;
   removeProp: (propId: string) => void;
   addProp: (originId: string) => void;
   moveProp: (dragIndex: number, hoverIndex: number) => void;
