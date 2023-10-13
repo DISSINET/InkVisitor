@@ -81,11 +81,10 @@ import { StatementEditorSectionButtons } from "./StatementEditorSectionButtons/S
 
 interface StatementEditor {
   statement: IResponseStatement;
-  updateStatementMutation: UseMutationResult<void, unknown, object, unknown>;
-  updateStatementDataMutation: UseMutationResult<
+  updateStatementMutation: UseMutationResult<
     void,
     unknown,
-    object,
+    IStatement,
     unknown
   >;
   moveStatementMutation: UseMutationResult<void, unknown, string, unknown>;
@@ -102,7 +101,6 @@ interface StatementEditor {
 export const StatementEditor: React.FC<StatementEditor> = ({
   statement,
   updateStatementMutation,
-  updateStatementDataMutation,
   moveStatementMutation,
 
   handleAttributeChange,
@@ -552,7 +550,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
       ...dataWithoutActants,
     };
 
-    handleDataAttributeChange(newStatementData);
+    handleDataAttributeChange(newStatementData, true);
   };
 
   //tags
@@ -617,7 +615,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                     type="text"
                     value={statement.label}
                     onChangeFn={(newValue: string) => {
-                      handleAttributeChange({ label: newValue });
+                      handleAttributeChange({ label: newValue }, true);
                     }}
                   />
                 </StyledEditorHeaderInputWrap>
@@ -771,8 +769,6 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 section="actions"
                 statement={statement}
                 previousStatement={previousStatement}
-                updateStatementMutation={updateStatementMutation}
-                updateStatementDataMutation={updateStatementDataMutation}
                 setShowSubmitSection={setShowSubmitSection}
                 handleAttributeChange={handleAttributeChange}
                 handleDataAttributeChange={handleDataAttributeChange}
@@ -783,7 +779,6 @@ export const StatementEditor: React.FC<StatementEditor> = ({
             <StatementEditorActionTable
               userCanEdit={userCanEdit}
               statement={statement}
-              updateActionsMutation={updateStatementDataMutation}
               addProp={addProp}
               updateProp={updateProp}
               removeProp={removeProp}
@@ -823,8 +818,6 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 section="actants"
                 statement={statement}
                 previousStatement={previousStatement}
-                updateStatementMutation={updateStatementMutation}
-                updateStatementDataMutation={updateStatementDataMutation}
                 setShowSubmitSection={setShowSubmitSection}
                 handleAttributeChange={handleAttributeChange}
                 handleDataAttributeChange={handleDataAttributeChange}
@@ -836,7 +829,6 @@ export const StatementEditor: React.FC<StatementEditor> = ({
               statement={statement}
               userCanEdit={userCanEdit}
               classEntitiesActant={classesEditorActants}
-              updateStatementDataMutation={updateStatementDataMutation}
               addProp={addProp}
               updateProp={updateProp}
               removeProp={removeProp}
@@ -892,8 +884,6 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 section="references"
                 statement={statement}
                 previousStatement={previousStatement}
-                updateStatementMutation={updateStatementMutation}
-                updateStatementDataMutation={updateStatementDataMutation}
                 setShowSubmitSection={setShowSubmitSection}
                 handleAttributeChange={handleAttributeChange}
                 handleDataAttributeChange={handleDataAttributeChange}
@@ -1026,10 +1016,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
           }
           setShowSubmitSection(false);
         }}
-        loading={
-          updateStatementMutation.isLoading ||
-          updateStatementDataMutation.isLoading
-        }
+        loading={updateStatementMutation.isLoading}
         onCancel={() => setShowSubmitSection(false)}
       />
     </>

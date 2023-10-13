@@ -8,7 +8,6 @@ import {
   IEntity,
   IProp,
   IResponseStatement,
-  IStatement,
   IStatementActant,
   IStatementData,
 } from "@shared/types";
@@ -39,7 +38,6 @@ import {
 } from "react-dnd";
 import { FaGripVertical, FaPlus, FaTrashAlt } from "react-icons/fa";
 import { TbSettingsAutomation, TbSettingsFilled } from "react-icons/tb";
-import { UseMutationResult } from "@tanstack/react-query";
 import { setDraggedActantRow } from "redux/features/rowDnd/draggedActantRowSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import {
@@ -77,7 +75,6 @@ interface StatementEditorActantTableRow {
   movePropToIndex: (propId: string, oldIndex: number, newIndex: number) => void;
   statement: IResponseStatement;
   classEntitiesActant: EntityEnums.Class[];
-  updateStatementDataMutation: UseMutationResult<any, unknown, object, unknown>;
   territoryParentId?: string;
   addClassification: (originId: string) => void;
   addIdentification: (originId: string) => void;
@@ -100,7 +97,6 @@ export const StatementEditorActantTableRow: React.FC<
   userCanEdit = false,
   updateOrderFn,
   classEntitiesActant,
-  updateStatementDataMutation,
   addProp,
   updateProp,
   removeProp,

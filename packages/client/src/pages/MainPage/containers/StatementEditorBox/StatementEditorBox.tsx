@@ -41,7 +41,7 @@ export const StatementEditorBox: React.FC = () => {
 
   // MUTATIONS
   const updateStatementMutation = useMutation(
-    async (changes: object) => {
+    async (changes: IStatement) => {
       await api.entityUpdate(statementId, changes);
     },
     {
@@ -49,23 +49,21 @@ export const StatementEditorBox: React.FC = () => {
         if (selectedDetailId === statementId) {
           queryClient.invalidateQueries(["entity"]);
         }
-        if (statement && statement.isTemplate) {
-          queryClient.invalidateQueries(["templates"]);
-        }
+        queryClient.invalidateQueries(["statement"]);
+        queryClient.invalidateQueries(["territory"]);
         if (variables.label !== undefined) {
           queryClient.invalidateQueries(["detail-tab-entities"]);
         }
-        queryClient.invalidateQueries(["statement"]);
-        queryClient.invalidateQueries(["territory"]);
-
-        queryClient.invalidateQueries(["statement-templates"]);
-        queryClient.invalidateQueries(["entity-templates"]);
+        if (statement && statement.isTemplate) {
+          queryClient.invalidateQueries(["templates"]);
+          queryClient.invalidateQueries(["entity-templates"]);
+        }
       },
     }
   );
 
   const updateStatementDataMutation = useMutation(
-    async (changes: object) => {
+    async (changes: IStatementData) => {
       await api.entityUpdate(statementId, {
         data: changes,
       });
@@ -113,7 +111,6 @@ export const StatementEditorBox: React.FC = () => {
     // TODO: comparsion not working
     // if (JSON.stringify(statement) !== JSON.stringify(changes)) {
     updateStatementMutation.mutate(changes);
-    console.log("Sending changes to the backend:", changes);
     // }
   };
 
@@ -130,6 +127,18 @@ export const StatementEditorBox: React.FC = () => {
     return () => clearTimeout(timerId);
   }, [tempObject, changesPending]);
 
+  const updateChangesAndPendingState = (
+    newData: IStatement,
+    instantUpdate?: boolean
+  ) => {
+    if (instantUpdate) {
+      sendChangesToBackend(newData);
+      setChangesPending(false);
+    } else {
+      setChangesPending(true);
+    }
+  };
+
   const handleAttributeChange = (
     changes: Partial<IStatement>,
     instantUpdate?: boolean
@@ -140,13 +149,7 @@ export const StatementEditorBox: React.FC = () => {
         ...changes,
       };
       setTempObject(newData);
-
-      if (instantUpdate) {
-        sendChangesToBackend(newData);
-        setChangesPending(false);
-      } else {
-        setChangesPending(true);
-      }
+      updateChangesAndPendingState(newData, instantUpdate);
     }
   };
 
@@ -163,13 +166,7 @@ export const StatementEditorBox: React.FC = () => {
         },
       };
       setTempObject(newData);
-
-      if (instantUpdate) {
-        sendChangesToBackend(newData);
-        setChangesPending(false);
-      } else {
-        setChangesPending(true);
-      }
+      updateChangesAndPendingState(newData, instantUpdate);
     }
   };
 
@@ -179,7 +176,6 @@ export const StatementEditorBox: React.FC = () => {
         <StatementEditor
           statement={tempObject}
           updateStatementMutation={updateStatementMutation}
-          updateStatementDataMutation={updateStatementDataMutation}
           moveStatementMutation={moveStatementMutation}
           handleAttributeChange={handleAttributeChange}
           handleDataAttributeChange={handleDataAttributeChange}
@@ -197,9 +193,8 @@ export const StatementEditorBox: React.FC = () => {
 
       <Loader
         show={
-          isFetchingStatement ||
-          updateStatementMutation.isLoading ||
-          updateStatementDataMutation.isLoading
+          isFetchingStatement || updateStatementMutation.isLoading
+          // updateStatementDataMutation.isLoading
         }
       />
     </>

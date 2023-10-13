@@ -5,7 +5,6 @@ import {
 } from "@shared/types";
 import update from "immutability-helper";
 import React, { useCallback, useEffect, useState } from "react";
-import { UseMutationResult } from "@tanstack/react-query";
 import { FilteredActionObject } from "types";
 import { StatementEditorActionTableRow } from "./StatementEditorActionTableRow";
 import { StyledEditorActionTableWrapper } from "./StatementEditorActionTableStyles";
@@ -13,7 +12,6 @@ import { StyledEditorActionTableWrapper } from "./StatementEditorActionTableStyl
 interface StatementEditorActionTable {
   statement: IResponseStatement;
   userCanEdit?: boolean;
-  updateActionsMutation: UseMutationResult<any, unknown, object, unknown>;
   addProp: (originId: string) => void;
   updateProp: (propId: string, changes: any) => void;
   removeProp: (propId: string) => void;
@@ -21,14 +19,16 @@ interface StatementEditorActionTable {
   territoryParentId?: string;
   territoryActants?: string[];
 
-  handleDataAttributeChange: (changes: Partial<IStatementData>) => void;
+  handleDataAttributeChange: (
+    changes: Partial<IStatementData>,
+    instantUpdate?: boolean
+  ) => void;
 }
 export const StatementEditorActionTable: React.FC<
   StatementEditorActionTable
 > = ({
   statement,
   userCanEdit = false,
-  updateActionsMutation,
   addProp,
   updateProp,
   removeProp,
@@ -59,7 +59,7 @@ export const StatementEditorActionTable: React.FC<
         (filteredAction) => filteredAction.data.sAction
       );
       if (JSON.stringify(statement.data.actions) !== JSON.stringify(actions)) {
-        handleDataAttributeChange({ actions });
+        handleDataAttributeChange({ actions }, true);
       }
     }
   };
@@ -93,7 +93,6 @@ export const StatementEditorActionTable: React.FC<
                 moveRow={moveRow}
                 userCanEdit={userCanEdit}
                 updateOrderFn={updateActionOrder}
-                updateActionsMutation={updateActionsMutation}
                 addProp={addProp}
                 updateProp={updateProp}
                 removeProp={removeProp}
