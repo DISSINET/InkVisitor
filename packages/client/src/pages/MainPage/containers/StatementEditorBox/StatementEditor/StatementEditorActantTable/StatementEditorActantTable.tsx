@@ -65,7 +65,6 @@ export const StatementEditorActantTable: React.FC<
         (filteredActant) => filteredActant.data.sActant
       );
       if (JSON.stringify(statement.data.actants) !== JSON.stringify(actants)) {
-        // updateStatementDataMutation.mutate({ actants });
         handleDataAttributeChange({ actants });
       }
     }

@@ -107,8 +107,6 @@ export const StatementEditorActionTableRow: React.FC<
       const updatedActions = statement.data.actions.map((a) =>
         a.id === statementActionId ? { ...a, ...changes } : a
       );
-      // updateActionsMutation.mutate({ actions: updatedActions });
-
       handleDataAttributeChange({ actions: updatedActions }, instantUpdate);
     }
   };
@@ -117,7 +115,6 @@ export const StatementEditorActionTableRow: React.FC<
       const updatedActions = statement.data.actions.filter(
         (a) => a.id !== statementActionId
       );
-      // updateActionsMutation.mutate({ actions: updatedActions });
       handleDataAttributeChange({ actions: updatedActions }, instantUpdate);
     }
   };

@@ -70,9 +70,6 @@ export const StatementEditorSectionButtons: React.FC<
                 ...statement.data.actions,
                 ...DStatementActions(selectedStatement.data.actions),
               ];
-          // updateStatementDataMutation.mutate({
-          //   actions: newActions,
-          // });
           handleDataAttributeChange({ actions: newActions }, true);
           return;
         case "actants":
@@ -82,9 +79,6 @@ export const StatementEditorSectionButtons: React.FC<
                 ...statement.data.actants,
                 ...DStatementActants(selectedStatement.data.actants),
               ];
-          // updateStatementDataMutation.mutate({
-          //   actants: newActants,
-          // });
           handleDataAttributeChange({ actants: newActants }, true);
           return;
         case "references":
@@ -94,7 +88,6 @@ export const StatementEditorSectionButtons: React.FC<
                 ...statement.references,
                 ...DReferences(selectedStatement.references),
               ];
-          // updateStatementMutation.mutate({ references: newReferences });
           handleAttributeChange({ references: newReferences }, true);
           return;
       }

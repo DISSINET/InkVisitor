@@ -25,9 +25,17 @@ interface EntityReferenceTableRow {
   resource: IEntity | undefined;
   value: IEntity | undefined;
   disabled?: boolean;
-  handleRemove: (refId: string) => void;
-  handleChangeResource: (refId: string, newResource: string) => void;
-  handleChangeValue: (refId: string, newValue: string) => void;
+  handleRemove: (refId: string, instantUpdate?: boolean) => void;
+  handleChangeResource: (
+    refId: string,
+    newResource: string,
+    instantUpdate?: boolean
+  ) => void;
+  handleChangeValue: (
+    refId: string,
+    newValue: string,
+    instantUpdate?: boolean
+  ) => void;
   openDetailOnCreate?: boolean;
   isInsideTemplate: boolean;
   territoryParentId?: string;
@@ -56,7 +64,7 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
         {resource ? (
           <EntityDropzone
             onSelected={(newSelectedId: string) => {
-              handleChangeResource(reference.id, newSelectedId);
+              handleChangeResource(reference.id, newSelectedId, true);
             }}
             disableTemplatesAccept
             categoryTypes={[EntityEnums.Class.Resource]}
@@ -84,7 +92,7 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
                 openDetailOnCreate={openDetailOnCreate}
                 territoryActants={[]}
                 onSelected={(newSelectedId: string) => {
-                  handleChangeResource(reference.id, newSelectedId);
+                  handleChangeResource(reference.id, newSelectedId, true);
                 }}
                 disableTemplatesAccept
                 categoryTypes={[EntityEnums.Class.Resource]}
@@ -106,7 +114,7 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
         {value ? (
           <EntityDropzone
             onSelected={(newSelectedId: string) => {
-              handleChangeValue(reference.id, newSelectedId);
+              handleChangeValue(reference.id, newSelectedId, true);
             }}
             categoryTypes={[EntityEnums.Class.Value]}
             excludedEntityClasses={excludedSuggesterEntities}
@@ -134,7 +142,7 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
                 openDetailOnCreate={openDetailOnCreate}
                 territoryActants={[]}
                 onSelected={(newSelectedId: string) => {
-                  handleChangeValue(reference.id, newSelectedId);
+                  handleChangeValue(reference.id, newSelectedId, true);
                 }}
                 categoryTypes={[EntityEnums.Class.Value]}
                 isInsideTemplate={isInsideTemplate}

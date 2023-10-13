@@ -183,7 +183,6 @@ export const StatementEditorActantTableRow: React.FC<
       const updatedActants = statement.data.actants.map((a) =>
         a.id === statementActantId ? { ...a, ...changes } : a
       );
-      // updateStatementDataMutation.mutate({ actants: updatedActants });
       handleDataAttributeChange({ actants: updatedActants }, instantUpdate);
     }
   };
@@ -193,7 +192,6 @@ export const StatementEditorActantTableRow: React.FC<
       const updatedActants = statement.data.actants.filter(
         (a) => a.id !== statementActantId
       );
-      // updateStatementDataMutation.mutate({ actants: updatedActants });
       handleDataAttributeChange({ actants: updatedActants }, instantUpdate);
     }
   };

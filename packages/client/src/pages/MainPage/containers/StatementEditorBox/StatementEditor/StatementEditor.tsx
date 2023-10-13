@@ -304,7 +304,6 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     const newData = {
       actions: [...statement.data.actions, newStatementAction],
     };
-    // updateStatementDataMutation.mutate(newData);
     handleDataAttributeChange(newData, true);
   };
 
@@ -316,7 +315,6 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     const newData = {
       actants: [...statement.data.actants, newStatementActant],
     };
-    // updateStatementDataMutation.mutate(newData);
     handleDataAttributeChange(newData, true);
   };
 
@@ -356,7 +354,6 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     );
 
     handleDataAttributeChange(newStatementData);
-    // updateStatementDataMutation.mutate(newStatementData);
   };
 
   const addClassification = (rowId: string) => {
@@ -370,7 +367,6 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     });
 
     handleDataAttributeChange(newStatementData);
-    // updateStatementDataMutation.mutate(newStatementData);
   };
 
   const addIdentification = (rowId: string) => {
@@ -384,7 +380,6 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     });
 
     handleDataAttributeChange(newStatementData);
-    // updateStatementDataMutation.mutate(newStatementData);
   };
 
   const updateProp = (
@@ -470,7 +465,6 @@ export const StatementEditor: React.FC<StatementEditor> = ({
       }
     );
 
-    // updateStatementDataMutation.mutate(newStatementData);
     handleDataAttributeChange(newStatementData, instantUpdate);
   };
 
@@ -502,7 +496,6 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         }
       );
 
-      // updateStatementDataMutation.mutate(newStatementData);
       handleDataAttributeChange(newStatementData);
     }
   };
@@ -559,7 +552,6 @@ export const StatementEditor: React.FC<StatementEditor> = ({
       ...dataWithoutActants,
     };
 
-    // updateStatementDataMutation.mutate(newStatementData);
     handleDataAttributeChange(newStatementData);
   };
 
@@ -567,15 +559,13 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   const addTag = (tagId: string) => {
     if (tagId) {
       const newData = { tags: [...statement.data.tags, tagId] };
-      // updateStatementDataMutation.mutate(newData);
       handleDataAttributeChange(newData, true);
     }
   };
   const removeTag = (tagId: string) => {
     if (tagId) {
       const newData = { tags: statement.data.tags.filter((p) => p !== tagId) };
-      // updateStatementDataMutation.mutate(newData);
-      handleDataAttributeChange(newData, true);
+      handleDataAttributeChange(newData);
     }
   };
 
@@ -628,7 +618,6 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                     value={statement.label}
                     onChangeFn={(newValue: string) => {
                       handleAttributeChange({ label: newValue });
-                      // updateStatementMutation.mutate({ label: newValue });
                     }}
                   />
                 </StyledEditorHeaderInputWrap>
@@ -721,7 +710,6 @@ export const StatementEditor: React.FC<StatementEditor> = ({
               placeholder="Insert statement text here"
               onChangeFn={(newValue: string) => {
                 if (newValue !== statement.data.text) {
-                  // updateStatementDataMutation.mutate({text: newValue});
                   handleDataAttributeChange({ text: newValue });
                 }
               }}
@@ -916,9 +904,14 @@ export const StatementEditor: React.FC<StatementEditor> = ({
             <EntityReferenceTable
               openDetailOnCreate
               references={statement.references}
-              onChange={(newReferences: IReference[]) => {
-                // updateStatementMutation.mutate({ references: newReferences });
-                handleAttributeChange({ references: newReferences }, true);
+              onChange={(
+                newReferences: IReference[],
+                instantUpdate?: boolean
+              ) => {
+                handleAttributeChange(
+                  { references: newReferences },
+                  instantUpdate
+                );
               }}
               disabled={!userCanEdit}
               isInsideTemplate={statement.isTemplate || false}
@@ -989,7 +982,6 @@ export const StatementEditor: React.FC<StatementEditor> = ({
               disabled={!userCanEdit}
               values={statement.notes}
               onChange={(newValues: string[]) => {
-                // updateStatementMutation.mutate({ notes: newValues });
                 handleAttributeChange({ notes: newValues });
               }}
             />
@@ -1029,10 +1021,8 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         onSubmit={() => {
           if (showSubmitSection === "references") {
             handleAttributeChange({ references: [] });
-            // updateStatementMutation.mutate({ references: [] });
           } else if (showSubmitSection !== false) {
             handleDataAttributeChange({ [showSubmitSection]: [] });
-            // updateStatementDataMutation.mutate({ [showSubmitSection]: [] });
           }
           setShowSubmitSection(false);
         }}
