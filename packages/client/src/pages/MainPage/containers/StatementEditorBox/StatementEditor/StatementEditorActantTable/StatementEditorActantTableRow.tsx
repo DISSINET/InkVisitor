@@ -8,6 +8,7 @@ import {
   IEntity,
   IProp,
   IResponseStatement,
+  IStatement,
   IStatementActant,
   IStatementData,
 } from "@shared/types";
@@ -564,7 +565,6 @@ export const StatementEditorActantTableRow: React.FC<
                     territoryParentId={territoryParentId}
                     isInsideTemplate={isInsideTemplate}
                     updateActant={updateActant}
-                    updateStatementDataMutation={updateStatementDataMutation}
                     userCanEdit={userCanEdit}
                     territoryActants={territoryActants}
                   />
@@ -587,7 +587,6 @@ export const StatementEditorActantTableRow: React.FC<
                     territoryParentId={territoryParentId}
                     isInsideTemplate={isInsideTemplate}
                     updateActant={updateActant}
-                    updateStatementDataMutation={updateStatementDataMutation}
                     userCanEdit={userCanEdit}
                     classEntitiesActant={classEntitiesActant}
                     territoryActants={territoryActants}
