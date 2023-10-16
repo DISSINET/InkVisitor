@@ -108,10 +108,9 @@ export const StatementEditorBox: React.FC = () => {
   }, [statement]);
 
   const sendChangesToBackend = (changes: IStatement) => {
-    // TODO: comparsion not working
-    // if (JSON.stringify(statement) !== JSON.stringify(changes)) {
-    updateStatementMutation.mutate(changes);
-    // }
+    if (JSON.stringify(statement) !== JSON.stringify(changes)) {
+      updateStatementMutation.mutate(changes);
+    }
   };
 
   const [changesPending, setChangesPending] = useState(false);

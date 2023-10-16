@@ -52,7 +52,7 @@ import { toast } from "react-toastify";
 import { setShowWarnings } from "redux/features/statementEditor/showWarningsSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { DropdownItem, classesEditorActants, classesEditorTags } from "types";
-import { getEntityLabel, getShortLabelByLetterCount } from "utils";
+import { deepCopy, getEntityLabel, getShortLabelByLetterCount } from "utils";
 import { EntityReferenceTable } from "../../EntityReferenceTable/EntityReferenceTable";
 import {
   StyledBreadcrumbWrap,
@@ -319,7 +319,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   // Props handling
   const addProp = (rowId: string) => {
     const newProp = CProp(statement.elementsOrders.length);
-    const newStatementData = { ...statement.data };
+    const newStatementData = deepCopy(statement.data);
 
     [...newStatementData.actants, ...newStatementData.actions].forEach(
       (actant: IStatementActant | IStatementAction) => {
@@ -356,7 +356,8 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
   const addClassification = (rowId: string) => {
     const newClassification = CClassification(statement.elementsOrders.length);
-    const newStatementData = { ...statement.data };
+
+    const newStatementData = deepCopy(statement.data);
 
     [...newStatementData.actants].forEach((actant: IStatementActant) => {
       if (actant.id === rowId) {
@@ -369,7 +370,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
   const addIdentification = (rowId: string) => {
     const newIdentification = CIdentification(statement.elementsOrders.length);
-    const newStatementData = { ...statement.data };
+    const newStatementData = deepCopy(statement.data);
 
     [...newStatementData.actants].forEach((actant: IStatementActant) => {
       if (actant.id === rowId) {
@@ -431,7 +432,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     changes: any,
     instantUpdate?: boolean
   ) => {
-    const newStatementData = { ...statement.data };
+    const newStatementData = deepCopy(statement.data);
     [...newStatementData.actants, ...newStatementData.actions].forEach(
       (actant: IStatementActant | IStatementAction) => {
         actant.props.forEach((prop1, pi1) => {
@@ -468,7 +469,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
   const removeProp = (propId: string) => {
     if (propId) {
-      const newStatementData = { ...statement.data };
+      const newStatementData = deepCopy(statement.data);
 
       [...newStatementData.actants, ...newStatementData.actions].forEach(
         (actant: IStatementActant | IStatementAction) => {
@@ -541,12 +542,22 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     newIndex: number
   ) => {
     const { actions, actants, ...dataWithoutActants } = statement.data;
-    changeOrder(propId, actions, oldIndex, newIndex);
-    changeOrder(propId, actants, oldIndex, newIndex);
+    const newActions = changeOrder(
+      propId,
+      deepCopy(actions),
+      oldIndex,
+      newIndex
+    );
+    const newActants = changeOrder(
+      propId,
+      deepCopy(actants),
+      oldIndex,
+      newIndex
+    );
 
     const newStatementData = {
-      actions,
-      actants,
+      newActions,
+      newActants,
       ...dataWithoutActants,
     };
 
