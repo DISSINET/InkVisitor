@@ -1,6 +1,13 @@
-## InkVisitor 1.3.1 - 1.3.3 notes
+## InkVisitor 1.3.x notes
 
 Throughout versions 1.3.1 to 1.3.3, the InkVisitor application has seen a series of improvements, both in functionality and user experience. While new features have consistently been added to simplify data handling and improve interface usability, there's been a strong emphasis on fixing identified bugs to ensure smooth operations. Simultaneously, the underlying code has undergone regular refactoring to optimize performance and incorporate the latest tech updates.
+Besides minor improvements and a number of bug fixes, the main enhancements in the 1.3.x versions are:
+
+- New filtering on the Territory tree.
+- Actants are now validated based on valency rules.
+- Relations in Entities are now validated based on logical constraints.
+- Modals in the Statement editor have been redesigned to use a system of toggles and buttons.
+- Batch actions have been added for the Statement list and Statement Editor.
 
 ### InkVisitor Update Summary for each minor version
 
