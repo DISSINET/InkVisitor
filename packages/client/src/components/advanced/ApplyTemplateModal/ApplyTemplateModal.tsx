@@ -1,5 +1,11 @@
 import { UserEnums } from "@shared/enums";
-import { IEntity, IResponseGeneric } from "@shared/types";
+import {
+  IEntity,
+  IResponseDetail,
+  IResponseGeneric,
+  IResponseStatement,
+} from "@shared/types";
+import { UseMutationResult } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
 import {
   Button,
@@ -13,14 +19,13 @@ import {
 import { EntityTag } from "components/advanced";
 import { applyTemplate } from "constructors";
 import React from "react";
-import { UseMutationResult } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { getShortLabelByLetterCount } from "utils";
 
 interface ApplyTemplateModal {
   showModal: boolean;
   setShowApplyTemplateModal: React.Dispatch<React.SetStateAction<boolean>>;
-  entity: IEntity;
+  entity: IResponseDetail | IResponseStatement;
   // TODO: check consistency of mutations from different containers
   updateEntityMutation: UseMutationResult<
     void | AxiosResponse<IResponseGeneric>,
@@ -76,14 +81,39 @@ export const ApplyTemplateModal: React.FC<ApplyTemplateModal> = ({
       }}
     >
       <ModalHeader title="Apply Template" />
-      <ModalContent>
-        <ModalInputForm>{`Apply template?`}</ModalInputForm>
-        <div style={{ marginLeft: "0.5rem" }}>
-          {templateToApply && (
-            <EntityTag disableDrag entity={templateToApply} />
-          )}
+      <ModalContent column>
+        <div style={{ display: "flex", flexDirection: "row" }}>
+          <ModalInputForm>{`Apply template?`}</ModalInputForm>
+          <div style={{ marginLeft: "0.5rem" }}>
+            {templateToApply && (
+              <EntityTag disableDrag entity={templateToApply} />
+            )}
+          </div>
         </div>
-        {/* here goes the info about template #951 */}
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            marginTop: "1rem",
+          }}
+        >
+          {/* here goes the info about template #951 */}
+          <span>
+            <i>Used as a template:</i>{" "}
+            <b>{entity.usedAsTemplate && entity.usedAsTemplate.length}</b>
+          </span>
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            {entity.usedAsTemplate &&
+              entity.usedAsTemplate.map((entityId) => (
+                <div
+                  key={entityId}
+                  style={{ display: "inline-grid", marginBottom: "0.5rem" }}
+                >
+                  <EntityTag entity={entity.entities[entityId]} fullWidth />
+                </div>
+              ))}
+          </div>
+        </div>
       </ModalContent>
       <ModalFooter>
         <ButtonGroup>
