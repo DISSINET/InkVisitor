@@ -2,7 +2,7 @@
  * type of the GET /statement {id} and POST /statement {id[]} response
  */
 
-import { IEntity, IStatement, IWarning } from ".";
+import { IEntity, IResponseEntity, IStatement, IWarning } from ".";
 import { StatementEnums, UserEnums, WarningTypeEnums } from "../enums";
 
 export interface EntityOrder {
@@ -43,10 +43,10 @@ export type OrderType = (
   type: StatementEnums.ElementType;
 };
 
-export interface IResponseStatement extends IStatement {
+export interface IResponseStatement extends IResponseEntity<IStatement> {
   entities: { [key: string]: IEntity }; // all entities (IEntity) used in actions/actants, actions/actants.props.type/value, territory, references, tags, actant identifications and classifications
   elementsOrders: OrderType[];
   // usedIn?: IStatement[];
   warnings: IWarning[];
-  right?: UserEnums.RoleMode;
+  usedAsTemplate: string[];
 }

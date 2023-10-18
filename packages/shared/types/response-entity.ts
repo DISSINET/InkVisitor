@@ -5,8 +5,8 @@
 import { IEntity } from ".";
 import { UserEnums } from "../enums";
 
-export interface IResponseEntity extends IEntity {
+export type IResponseEntity<T extends IEntity = IEntity> = {
   // usedCount?: number;
   // usedIn?: IStatement[];
   right?: UserEnums.RoleMode;
-}
+} & T;

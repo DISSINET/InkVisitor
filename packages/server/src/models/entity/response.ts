@@ -311,7 +311,7 @@ export class ResponseEntityDetail
   }
 
   /**
-   * loads casts for this entity (template) and fills usedAsTemplate array & entities map with retrieved data
+   * loads derived entites for this entity (template) and fills usedAsTemplate array & entities map with retrieved data
    * @param conn
    */
   async processTemplateData(conn: Connection): Promise<void> {

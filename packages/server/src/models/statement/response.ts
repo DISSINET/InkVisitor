@@ -23,28 +23,36 @@ export class ResponseStatement extends Statement implements IResponseStatement {
   elementsOrders: OrderType[];
   right: UserEnums.RoleMode = UserEnums.RoleMode.Read;
   warnings: IWarning[];
+  usedAsTemplate: string[];
 
   constructor(entity: IStatement) {
     super(entity);
     this.entities = {};
     this.elementsOrders = [];
     this.warnings = [];
+    this.usedAsTemplate = [];
   }
 
   async prepare(req: IRequest) {
     this.right = this.getUserRoleMode(req.getUserOrFail());
+    await this.processTemplateData(req.db.connection);
     await this.prepareEntities(req.db.connection);
     this.elementsOrders = this.prepareElementsOrders();
     this.warnings = this.getWarnings();
   }
 
   /**
-   * Prepares the entities map
-   * @param db
+   * gathered ids from previous calls should be used to populate entities map
+   * @param conn
    */
-  async prepareEntities(db: Connection): Promise<void> {
-    const entities = await this.getEntities(db);
-    this.entities = Object.assign({}, ...entities.map((x) => ({ [x.id]: x })));
+  async prepareEntities(conn: Connection): Promise<void> {
+    const dependentEntities = await Entity.findEntitiesByIds(
+      conn,
+      this.getEntitiesIds().concat(this.usedAsTemplate)
+    );
+    for (const entity of dependentEntities) {
+      this.entities[entity.id] = entity;
+    }
   }
 
   /**
@@ -342,6 +350,14 @@ export class ResponseStatement extends Statement implements IResponseStatement {
     }
 
     return ResponseStatement.sortListOfStatementItems(temp);
+  }
+
+  /**
+   * loads derived entites for this entity (template) and fills usedAsTemplate array & entities map with retrieved data
+   * @param conn
+   */
+  async processTemplateData(conn: Connection): Promise<void> {
+    this.usedAsTemplate = (await this.findDerived(conn)).map((c) => c.id);
   }
 
   /**
