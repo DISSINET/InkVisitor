@@ -499,12 +499,12 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     }
   };
 
-  const changeOrder = (
+  const changeOrder = <T extends IStatementActant | IStatementAction>(
     propId: string,
-    actants: IStatementActant[] | IStatementAction[],
+    actants: T[],
     oldIndex: number,
     newIndex: number
-  ) => {
+  ): T[] => {
     for (let actant of actants) {
       for (let prop of actant.props) {
         if (prop.id === propId) {
@@ -556,8 +556,8 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     );
 
     const newStatementData = {
-      newActions,
-      newActants,
+      actions: newActions,
+      actants: newActants,
       ...dataWithoutActants,
     };
 
