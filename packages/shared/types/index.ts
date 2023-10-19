@@ -27,6 +27,7 @@ import { IProp, IPropSpec } from "./prop";
 import { Relation } from "./relation";
 import { RequestPermissionUpdate } from "./request-permission";
 import { RequestSearch } from "./request-search";
+import { IResponseSearchEntity } from "./response-search";
 import { IResource, IResourceData } from "./resource";
 
 import { IResponseAdministration } from "./response-administration";
@@ -124,6 +125,7 @@ export type {
   IResponseGeneric,
   IResponsePermission,
   IResponseStats,
+  IResponseSearchEntity,
   EntityTooltip,
   OrderType,
   EntityOrder,

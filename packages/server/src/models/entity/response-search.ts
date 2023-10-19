@@ -1,5 +1,5 @@
 import { EntityEnums } from "@shared/enums";
-import { IEntity, RequestSearch } from "@shared/types";
+import { IEntity, IResponseSearchEntity, RequestSearch } from "@shared/types";
 import { regExpEscape } from "@common/functions";
 import Entity from "./entity";
 import Statement from "@models/statement/statement";
@@ -392,6 +392,29 @@ export class SearchQuery {
   }
 }
 
+export class ResponseSearchEntity
+  extends ResponseEntity
+  implements IResponseSearchEntity
+{
+  usedAsTemplate: string[];
+
+  constructor(entity: Entity) {
+    super(entity);
+    this.usedAsTemplate = [];
+  }
+
+  /**
+   * Loads additional fields to satisfy the IResponseSearchEntity interface
+   * @param request
+   */
+  async prepare(request: IRequest): Promise<void> {
+    super.prepare(request);
+    this.usedAsTemplate = (await this.findDerived(request.db.connection)).map(
+      (c) => c.id
+    );
+  }
+}
+
 export class ResponseSearch {
   request: RequestSearch;
 
@@ -403,7 +426,7 @@ export class ResponseSearch {
    * Prepares asynchronously results data
    * @param db
    */
-  async prepare(httpRequest: IRequest): Promise<ResponseEntity[]> {
+  async prepare(httpRequest: IRequest): Promise<ResponseSearchEntity[]> {
     const query = new SearchQuery(httpRequest.db.connection);
     await query.fromRequest(this.request);
     let entities = await query.do();
@@ -414,9 +437,9 @@ export class ResponseSearch {
       entities = sortByWordMatch(sortByLength(entities), query.usedLabel);
     }
 
-    const out: ResponseEntity[] = [];
+    const out: ResponseSearchEntity[] = [];
     for (const entityData of entities) {
-      const response = new ResponseEntity(getEntityClass(entityData));
+      const response = new ResponseSearchEntity(getEntityClass(entityData));
       await response.prepare(httpRequest);
       out.push(response);
     }
