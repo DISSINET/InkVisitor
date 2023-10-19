@@ -43,10 +43,10 @@ export type OrderType = (
   type: StatementEnums.ElementType;
 };
 
-export interface IResponseStatement extends IResponseEntity<IStatement> {
+export interface IResponseStatement extends IStatement {
   entities: { [key: string]: IEntity }; // all entities (IEntity) used in actions/actants, actions/actants.props.type/value, territory, references, tags, actant identifications and classifications
   elementsOrders: OrderType[];
   // usedIn?: IStatement[];
   warnings: IWarning[];
-  usedAsTemplate: string[];
+  right?: UserEnums.RoleMode;
 }
