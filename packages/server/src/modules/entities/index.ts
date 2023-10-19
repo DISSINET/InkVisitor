@@ -13,6 +13,7 @@ import {
   IProp,
   IStatementActant,
   IStatementAction,
+  IResponseSearchEntity,
 } from "@shared/types";
 import {
   EntityDoesNotExist,
@@ -140,20 +141,22 @@ export default Router()
    */
   .get(
     "/",
-    asyncRouteHandler<IResponseEntity[]>(async (httpRequest: IRequest) => {
-      const req = new RequestSearch(httpRequest.query as IRequestSearch);
-      if (req.label && req.label.length < 2) {
-        return [];
-      }
+    asyncRouteHandler<IResponseSearchEntity[]>(
+      async (httpRequest: IRequest) => {
+        const req = new RequestSearch(httpRequest.query as IRequestSearch);
+        if (req.label && req.label.length < 2) {
+          return [];
+        }
 
-      const err = req.validate();
-      if (err) {
-        throw err;
-      }
+        const err = req.validate();
+        if (err) {
+          throw err;
+        }
 
-      const response = new ResponseSearch(req);
-      return await response.prepare(httpRequest);
-    })
+        const response = new ResponseSearch(req);
+        return await response.prepare(httpRequest);
+      }
+    )
   )
   /**
    * @openapi

@@ -426,7 +426,7 @@ export class ResponseSearch {
    * Prepares asynchronously results data
    * @param db
    */
-  async prepare(httpRequest: IRequest): Promise<ResponseSearchEntity[]> {
+  async prepare(httpRequest: IRequest): Promise<IResponseSearchEntity[]> {
     const query = new SearchQuery(httpRequest.db.connection);
     await query.fromRequest(this.request);
     let entities = await query.do();
