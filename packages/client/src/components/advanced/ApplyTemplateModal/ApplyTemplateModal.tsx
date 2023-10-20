@@ -3,6 +3,7 @@ import {
   IEntity,
   IResponseDetail,
   IResponseGeneric,
+  IResponseSearchEntity,
   IResponseStatement,
 } from "@shared/types";
 import { UseMutationResult } from "@tanstack/react-query";
@@ -33,8 +34,10 @@ interface ApplyTemplateModal {
     any,
     unknown
   >;
-  templateToApply: false | IEntity;
-  setTemplateToApply: React.Dispatch<React.SetStateAction<false | IEntity>>;
+  templateToApply: false | IResponseSearchEntity;
+  setTemplateToApply: React.Dispatch<
+    React.SetStateAction<false | IResponseSearchEntity>
+  >;
 }
 export const ApplyTemplateModal: React.FC<ApplyTemplateModal> = ({
   showModal,
@@ -100,11 +103,11 @@ export const ApplyTemplateModal: React.FC<ApplyTemplateModal> = ({
           {/* here goes the info about template #951 */}
           <span>
             <i>Used as a template:</i>{" "}
-            <b>{entity.usedAsTemplate && entity.usedAsTemplate.length}</b>
+            <b>{templateToApply && templateToApply.usedAsTemplate.length}</b>
           </span>
           <div style={{ display: "flex", flexDirection: "column" }}>
-            {entity.usedAsTemplate &&
-              entity.usedAsTemplate.map((entityId) => (
+            {templateToApply &&
+              templateToApply.usedAsTemplate.map((entityId) => (
                 <div
                   key={entityId}
                   style={{ display: "inline-grid", marginBottom: "0.5rem" }}

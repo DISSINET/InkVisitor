@@ -2,6 +2,7 @@ import { EntityEnums, UserEnums } from "@shared/enums";
 import {
   IEntity,
   IReference,
+  IResponseSearchEntity,
   IResponseStatement,
   IStatement,
   IStatementActant,
@@ -177,9 +178,9 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   // TEMPLATES
   const [showApplyTemplateModal, setShowApplyTemplateModal] =
     useState<boolean>(false);
-  const [templateToApply, setTemplateToApply] = useState<IEntity | false>(
-    false
-  );
+  const [templateToApply, setTemplateToApply] = useState<
+    IResponseSearchEntity | false
+  >(false);
 
   const handleAskForTemplateApply = (templateOptionToApply: DropdownItem) => {
     if (templates) {

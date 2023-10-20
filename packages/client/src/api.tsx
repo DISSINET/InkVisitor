@@ -1,25 +1,26 @@
 import {
+  EntityTooltip,
+  IDocument,
   IEntity,
-  IResponseEntity,
+  IReference,
   IResponseAdministration,
   IResponseAudit,
   IResponseBookmarkFolder,
   IResponseDetail,
+  IResponseDocument,
+  IResponseDocumentDetail,
+  IResponseEntity,
   IResponseGeneric,
   IResponsePermission,
+  IResponseSearchEntity,
   IResponseStatement,
   IResponseTerritory,
   IResponseTree,
   IResponseUser,
-  RequestPermissionUpdate,
   IStatement,
   ITerritory,
   Relation,
-  EntityTooltip,
-  IReference,
-  IResponseDocument,
-  IDocument,
-  IResponseDocumentDetail,
+  RequestPermissionUpdate,
 } from "@shared/types";
 import * as errors from "@shared/types/errors";
 import { IRequestSearch } from "@shared/types/request-search";
@@ -513,7 +514,7 @@ class Api {
   async entitiesSearch(
     filter: IRequestSearch,
     options?: IApiOptions
-  ): Promise<AxiosResponse<IResponseEntity[]>> {
+  ): Promise<AxiosResponse<IResponseSearchEntity[]>> {
     try {
       if (!filter.class) {
         delete filter.class;

@@ -5,6 +5,7 @@ import {
   IProp,
   IReference,
   IResponseDetail,
+  IResponseSearchEntity,
   Relation,
 } from "@shared/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -106,9 +107,9 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
   const [showTypeSubmit, setShowTypeSubmit] = useState(false);
   const [showApplyTemplateModal, setShowApplyTemplateModal] =
     useState<boolean>(false);
-  const [templateToApply, setTemplateToApply] = useState<IEntity | false>(
-    false
-  );
+  const [templateToApply, setTemplateToApply] = useState<
+    IResponseSearchEntity | false
+  >(false);
 
   const selectedEntityTypeLabel: string = useMemo(() => {
     return selectedEntityType ? entitiesDictKeys[selectedEntityType].label : "";
