@@ -1014,14 +1014,16 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         </StyledEditorSection>
       </React.Fragment>
 
-      <ApplyTemplateModal
-        showModal={showApplyTemplateModal}
-        setShowApplyTemplateModal={setShowApplyTemplateModal}
-        updateEntityMutation={updateStatementMutation}
-        templateToApply={templateToApply}
-        setTemplateToApply={setTemplateToApply}
-        entity={statement}
-      />
+      {templateToApply && (
+        <ApplyTemplateModal
+          showModal={showApplyTemplateModal}
+          setShowApplyTemplateModal={setShowApplyTemplateModal}
+          updateEntityMutation={updateStatementMutation}
+          templateToApply={templateToApply}
+          setTemplateToApply={setTemplateToApply}
+          entity={statement}
+        />
+      )}
 
       <Submit
         show={showSubmitSection !== false}

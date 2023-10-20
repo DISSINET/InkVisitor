@@ -1,12 +1,12 @@
 import { UserEnums } from "@shared/enums";
 import {
-  IEntity,
   IResponseDetail,
   IResponseGeneric,
   IResponseSearchEntity,
   IResponseStatement,
 } from "@shared/types";
-import { UseMutationResult } from "@tanstack/react-query";
+import { UseMutationResult, useQuery } from "@tanstack/react-query";
+import api from "api";
 import { AxiosResponse } from "axios";
 import {
   Button,
@@ -22,6 +22,13 @@ import { applyTemplate } from "constructors";
 import React from "react";
 import { toast } from "react-toastify";
 import { getShortLabelByLetterCount } from "utils";
+import {
+  StyledApplyTemplate,
+  StyledTagList,
+  StyledTagWrap,
+  StyledUsedAsHeading,
+  StyledUsedAsSection,
+} from "./ApplyTemplateModalStyles";
 
 interface ApplyTemplateModal {
   showModal: boolean;
@@ -34,7 +41,7 @@ interface ApplyTemplateModal {
     any,
     unknown
   >;
-  templateToApply: false | IResponseSearchEntity;
+  templateToApply: IResponseSearchEntity;
   setTemplateToApply: React.Dispatch<
     React.SetStateAction<false | IResponseSearchEntity>
   >;
@@ -47,6 +54,18 @@ export const ApplyTemplateModal: React.FC<ApplyTemplateModal> = ({
   templateToApply,
   setTemplateToApply,
 }) => {
+  const { status, data, error, isFetching } = useQuery(
+    ["usedAsTemplate"],
+    async () => {
+      const res = await api.entitiesSearch({
+        entityIds: templateToApply.usedAsTemplate,
+      });
+
+      return res.data;
+    },
+    { enabled: !!templateToApply.usedAsTemplate.length && api.isLoggedIn() }
+  );
+
   const handleApplyTemplate = async () => {
     if (templateToApply) {
       const entityAfterTemplateApplied = await applyTemplate(
@@ -85,38 +104,28 @@ export const ApplyTemplateModal: React.FC<ApplyTemplateModal> = ({
     >
       <ModalHeader title="Apply Template" />
       <ModalContent column>
-        <div style={{ display: "flex", flexDirection: "row" }}>
+        <StyledApplyTemplate>
           <ModalInputForm>{`Apply template?`}</ModalInputForm>
           <div style={{ marginLeft: "0.5rem" }}>
             {templateToApply && (
               <EntityTag disableDrag entity={templateToApply} />
             )}
           </div>
-        </div>
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            marginTop: "1rem",
-          }}
-        >
-          {/* here goes the info about template #951 */}
-          <span>
+        </StyledApplyTemplate>
+        <StyledUsedAsSection>
+          <StyledUsedAsHeading>
             <i>Used as a template:</i>{" "}
-            <b>{templateToApply && templateToApply.usedAsTemplate.length}</b>
-          </span>
-          <div style={{ display: "flex", flexDirection: "column" }}>
-            {templateToApply &&
-              templateToApply.usedAsTemplate.map((entityId) => (
-                <div
-                  key={entityId}
-                  style={{ display: "inline-grid", marginBottom: "0.5rem" }}
-                >
-                  <EntityTag entity={entity.entities[entityId]} fullWidth />
-                </div>
+            <b>{templateToApply.usedAsTemplate.length}</b>
+          </StyledUsedAsHeading>
+          <StyledTagList>
+            {data &&
+              data.map((entity) => (
+                <StyledTagWrap key={entity.id}>
+                  <EntityTag entity={entity} fullWidth />
+                </StyledTagWrap>
               ))}
-          </div>
-        </div>
+          </StyledTagList>
+        </StyledUsedAsSection>
       </ModalContent>
       <ModalFooter>
         <ButtonGroup>

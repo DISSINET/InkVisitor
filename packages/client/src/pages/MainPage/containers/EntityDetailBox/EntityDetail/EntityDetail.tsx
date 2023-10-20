@@ -890,7 +890,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
         }
       />
 
-      {entity && (
+      {entity && templateToApply && (
         <ApplyTemplateModal
           showModal={showApplyTemplateModal}
           entity={entity}
