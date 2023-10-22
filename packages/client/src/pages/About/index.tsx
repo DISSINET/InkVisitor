@@ -191,22 +191,26 @@ export const AboutPage: React.FC<IAboutPage> = ({}) => {
             <StyledTextListItem>
               <b>European Research Council</b> (project No. 101000442 “Networks
               of Dissent: Computational Modelling of Dissident and Inquisitorial
-              Cultures in Medieval Europe (DISSINET)”, 2021–2026)
+              Cultures in Medieval Europe (DISSINET)”, 9/2021–8/2026)
             </StyledTextListItem>
             <StyledTextListItem>
               <b>Czech Science Foundation</b> (EXPRO project No. GX19-26975X
               “Dissident Religious Cultures in Medieval Europe from the
               Perspective of Social Network Analysis and Geographic Information
-              Systems”, 2019–2021)
+              Systems”, 1/2019–8/2021)
             </StyledTextListItem>
             <StyledTextListItem>
               <b>Masaryk University, Faculty of Arts</b> (project “InkVisitor
               Development: Towards a Project-Neutral Open-Source Research
               Application for the Collection of Structured Relational Data from
-              Texts”, 2022–2023)
+              Texts”, 7/2022–8/2023)
             </StyledTextListItem>
             <StyledTextListItem>
-              <b>Ministry of Education, Youth and Sports</b>
+              <b>
+                Czech Ministry of Education, Youth and Sports & European Union
+              </b>{" "}
+              (project “Beyond Security: Role of Conflict in
+              Resilience-Building”, 9/2023–6/2028)
             </StyledTextListItem>
           </StyledTextList>
 
