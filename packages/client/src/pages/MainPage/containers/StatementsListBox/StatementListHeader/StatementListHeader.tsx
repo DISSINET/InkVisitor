@@ -296,7 +296,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
     useState(false);
 
   const [showSegmentateReferencesModal, setShowSegmentateReferencesModal] =
-    useState(true);
+    useState(false);
 
   const {
     data: documents,
