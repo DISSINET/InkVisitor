@@ -190,12 +190,7 @@ export const StatementEditorBox: React.FC = () => {
         </>
       )}
 
-      <Loader
-        show={
-          isFetchingStatement || updateStatementMutation.isLoading
-          // updateStatementDataMutation.isLoading
-        }
-      />
+      <Loader show={isFetchingStatement || updateStatementMutation.isLoading} />
     </>
   );
 };
