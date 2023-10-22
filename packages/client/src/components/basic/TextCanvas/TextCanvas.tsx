@@ -127,16 +127,11 @@ const TextCanvas: React.FC<TextCanvasProps> = ({ text, width, height }) => {
       // TODO rerenders the cursor
       const cursorX = cursorChar * charWidth;
       const cursorY = (cursorLine - scrollLine) * lineHeight;
-<<<<<<< HEAD
       ctx!.fillRect(cursorX, cursorY, 2, lineHeight + 5);
-=======
-      ctx!.fillRect(cursorX, cursorY, 2, lineHeight);
->>>>>>> c44a7e61 (Update text canvas component)
     }
   }, [currentText, scrollLine, cursorChar, cursorLine, width, height]);
 
   /**
-<<<<<<< HEAD
    * This function checks if the scrolled viewport is not off the current cursor
    */
   useEffect(() => {
@@ -147,19 +142,6 @@ const TextCanvas: React.FC<TextCanvasProps> = ({ text, width, height }) => {
       setScrollLine(cursorLine);
     }
   }, [cursorChar, cursorLine]);
-=======
-   * This function checks if the scrolled viewport is not off the current cursor 
-   */
-  useEffect( ()=> {
-    if (cursorLine >= viewPort[1]) {
-        setScrollLine(cursorLine -  numberOfLines + 1)
-    } 
-    if (cursorLine < viewPort[0]) {
-        setScrollLine(cursorLine)
-    } 
-  }, [cursorChar, cursorLine]
-  )  
->>>>>>> c44a7e61 (Update text canvas component)
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLCanvasElement>) => {
     e.preventDefault();
@@ -182,14 +164,11 @@ const TextCanvas: React.FC<TextCanvasProps> = ({ text, width, height }) => {
           setCursorChar(lineMap[cursorLine - 1].text.length);
         }
         break;
-<<<<<<< HEAD
       case "PageDown":
         setCursorLine(
           cursorLine < lineMap.length - 50 ? cursorLine + 50 : lineMap.length - 50
         );
         break;
-=======
->>>>>>> c44a7e61 (Update text canvas component)
 
       case "ArrowRight":
         if (cursorChar < lineMap[cursorLine].text.length) {
@@ -207,7 +186,6 @@ const TextCanvas: React.FC<TextCanvasProps> = ({ text, width, height }) => {
 
   return (
     <div style={{ padding: "20px" }}>
-<<<<<<< HEAD
       <div className="textarea" style={{    display: "flex", flexDirection: "row"}}>
         <div className="canvasses-wrapper" style={{
             border: "1px solid black",
@@ -257,38 +235,6 @@ const TextCanvas: React.FC<TextCanvasProps> = ({ text, width, height }) => {
         </div>
       </div>
       <div className="info-container"
-=======
-      <div
-        style={{
-          position: "relative",
-          width: `${width}px`,
-          height: `${height}px`,
-          border: "2px solid black",
-        }}
-      >
-        {/* canvas for text */}
-        <canvas
-          ref={canvasTextRef}
-          width={width}
-          height={height}
-          style={{ position: "absolute", top: "0", left: "0" }}
-          onKeyDown={handleKeyDown}
-          tabIndex={0}
-        ></canvas>
-
-        {/* canvas for cursor */}
-        <canvas
-          ref={canvasCursorRef}
-          width={width}
-          height={height}
-          style={{ position: "absolute", top: "0", left: "0", zIndex: 1 }}
-          onKeyDown={handleKeyDown}
-          tabIndex={0}
-        ></canvas>
-      </div>
-      <div>
-        <div
->>>>>>> c44a7e61 (Update text canvas component)
           style={{
             padding: "10px",
             border: "1px solid black",
@@ -301,10 +247,6 @@ const TextCanvas: React.FC<TextCanvasProps> = ({ text, width, height }) => {
           <p>
             Scroll Line: {scrollLine + 1} / {lineMap.length}
           </p>
-<<<<<<< HEAD
-=======
-        </div>
->>>>>>> c44a7e61 (Update text canvas component)
       </div>
     </div>
   );
