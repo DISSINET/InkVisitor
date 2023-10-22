@@ -1,47 +1,54 @@
+import { space5, space7 } from "Theme/constants";
 import styled from "styled-components";
-import theme from "Theme/theme";
 
-export const StyledModalContentWrapper = styled.div`
-  display: block;
+export const StyledContentWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  overflow: auto;
   width: 100%;
-  overflow-x: visible;
-  overflow-y: visible;
+`;
+export const StyledContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: ${space5} ${space7};
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
 `;
 
-export const StyledModalLogo = styled.div`
+export const StyledLogo = styled.div`
   background-color: ${({ theme }) => theme.color.primary};
   padding: ${({ theme }) => theme.space[8]};
 `;
-export const StyledModalTitle = styled.div`
+export const StyledTitle = styled.div`
   font-size: ${({ theme }) => theme.fontSize["3xl"]};
   font-weight: ${({ theme }) => theme.fontWeight["bold"]};
 `;
-export const StyledModalSubTitle = styled.div`
+export const StyledSubTitle = styled.div`
   font-size: ${({ theme }) => theme.fontSize["xl"]};
   font-weight: ${({ theme }) => theme.fontWeight["italic"]};
-  `;
-export const StyledModalContent = styled.div``;
-export const StyledModalHeader = styled.div`
+`;
+export const StyledHeader = styled.div`
   font-family: Muni;
   font-size: ${({ theme }) => theme.fontSize["xl"]};
   color: ${({ theme }) => theme.color["primary"]};
   padding-top: ${({ theme }) => theme.space[4]};
 `;
 
-export const StyledModalText = styled.div`
+export const StyledText = styled.div`
   padding-bottom: ${({ theme }) => theme.space[2]};
 `;
 
-export const StyledModalTextList = styled.ul`
-padding-left: ${({ theme }) => theme.space[10]};
+export const StyledTextList = styled.ul`
+  padding-left: ${({ theme }) => theme.space[10]};
 `;
 
-export const StyledModalTextListItem = styled.li`
-padding-top: ${({ theme }) => theme.space[2]};
+export const StyledTextListItem = styled.li`
+  padding-top: ${({ theme }) => theme.space[2]};
 `;
 
-export const StyledModalPerson = styled.div``;
-export const StyledModalLink = styled.span`
+export const StyledPerson = styled.div``;
+export const StyledLink = styled.span`
   display: inline;
   margin-left: ${({ theme }) => theme.space[1]};
   margin-right: ${({ theme }) => theme.space[0]};
@@ -55,9 +62,9 @@ export const StyledModalLink = styled.span`
   }
 `;
 
-export const StyledModalAcknowledgement = styled.div``;
+export const StyledAcknowledgement = styled.div``;
 
-export const StyledModalAcknowledgementLogo = styled.img`
-  margin:${({ theme }) => theme.space[4]};
-  padding:${({ theme }) => theme.space[2]};
+export const StyledAcknowledgementLogo = styled.img`
+  margin: ${({ theme }) => theme.space[4]};
+  padding: ${({ theme }) => theme.space[2]};
 `;

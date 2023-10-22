@@ -94,9 +94,6 @@ export const StyledCardBody = styled.section<StyledCardBody>`
   padding: ${space5} ${space7};
   overflow: ${({ enableScroll }) => (enableScroll ? "auto" : "initial")};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
-  * {
-    user-select: text;
-  }
 `;
 interface StyledFooter {}
 export const StyledFooter = styled.div<StyledFooter>`
