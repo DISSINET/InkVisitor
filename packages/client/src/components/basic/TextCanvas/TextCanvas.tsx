@@ -145,6 +145,8 @@ const TextCanvas: React.FC<TextCanvasProps> = ({ text, width, height }) => {
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLCanvasElement>) => {
     e.preventDefault();
+
+    const pageJump = 50
     switch (e.key) {
       case "ArrowUp":
         setCursorLine(cursorLine > 0 ? cursorLine - 1 : 0);
@@ -164,9 +166,16 @@ const TextCanvas: React.FC<TextCanvasProps> = ({ text, width, height }) => {
           setCursorChar(lineMap[cursorLine - 1].text.length);
         }
         break;
+
+      // page up + down
       case "PageDown":
         setCursorLine(
-          cursorLine < lineMap.length - 50 ? cursorLine + 50 : lineMap.length - 50
+          cursorLine > pageJump ? cursorLine - pageJump : 0
+        );
+        break;
+      case "PageDown":
+        setCursorLine(
+          cursorLine < lineMap.length - pageJump ? cursorLine + pageJump : lineMap.length
         );
         break;
 
@@ -180,6 +189,8 @@ const TextCanvas: React.FC<TextCanvasProps> = ({ text, width, height }) => {
         break;
 
       default:
+        // writing to text
+        console.log(e.key)
         break;
     }
   };
