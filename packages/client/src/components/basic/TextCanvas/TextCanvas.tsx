@@ -46,7 +46,6 @@ const TextCanvas: React.FC<TextCanvasProps> = ({ text, width, height }) => {
     return [scrollLine, scrollLine + canvasNoLines];
   }, [scrollLine, lineHeight]);
 
-  
   const charWidth = useMemo<number>(() => {
     const canvas = document.createElement("canvas");
     const txt = "Rando text";
@@ -66,8 +65,8 @@ const TextCanvas: React.FC<TextCanvasProps> = ({ text, width, height }) => {
   };
 
   const xToCharI = (x: number): number => {
-    return Math.floor(x / charWidth)
-  }
+    return Math.floor(x / charWidth);
+  };
 
   const lineMap = useMemo<ILine[]>(() => {
     const time1 = new Date();
@@ -120,10 +119,26 @@ const TextCanvas: React.FC<TextCanvasProps> = ({ text, width, height }) => {
 
     // Add any remaining text
     if (lineStart < text.length) {
+      const words: IWord[] = [];
+
+      // Split the lineText into words
+      const lineText = text.slice(lineStart)
+      const wordMatches = lineText.match(/\b\w+\b/g);
+
+      if (wordMatches) {
+        let wordStart = 0;
+        wordMatches.forEach((word) => {
+          const wordIndex = lineText.indexOf(word, wordStart);
+          const wordEnd = wordIndex + word.length;
+          words.push({ text: word, iFrom: wordIndex, iTo: wordEnd });
+          wordStart = wordEnd;
+        });
+      }
+
       lines.push({
         lineI: lines.length,
-        text: text.slice(lineStart),
-        words: [],
+        text: lineText,
+        words,
       });
     }
 
@@ -137,7 +152,11 @@ const TextCanvas: React.FC<TextCanvasProps> = ({ text, width, height }) => {
   }, [text, charWidth]);
 
   const cursorLine = useMemo<ILine>(() => {
-    return lineMap[cursorLineI];
+    if (lineMap[cursorLineI]) {
+      return lineMap[cursorLineI];
+    } else {
+      return lineMap[0]
+    }
   }, [cursorLineI, lineMap]);
 
   const cursorLineNext = useMemo<ILine | undefined>(() => {
@@ -265,12 +284,11 @@ const TextCanvas: React.FC<TextCanvasProps> = ({ text, width, height }) => {
     // @ts-ignore
     const [x, y] = [e.nativeEvent.layerX, e.nativeEvent.layerY];
 
-    const newLineI = yToLineI(y)
-    setCursorLineI(newLineI)
-    
-    const newCharI = xToCharI(x)
-    setCursorChar(newCharI)
-    
+    const newLineI = yToLineI(y);
+    setCursorLineI(newLineI);
+
+    const newCharI = xToCharI(x);
+    setCursorChar(newCharI);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLCanvasElement>) => {
@@ -336,14 +354,16 @@ const TextCanvas: React.FC<TextCanvasProps> = ({ text, width, height }) => {
 
       // page up + down
       case "PageUp":
-        setCursorLineI(cursorLineI > pageJump ? cursorLineI - pageJump : 0);
+        const lLineIAfterPgUp = cursorLineI > pageJump ? cursorLineI - pageJump : 0
+        setCursorLineI(lLineIAfterPgUp);
         break;
       case "PageDown":
-        setCursorLineI(
-          cursorLineI < lineMap.length - pageJump
+        const lineIAfterPgDown =
+          cursorLineI + pageJump < lineMap.length
             ? cursorLineI + pageJump
-            : lineMap.length
-        );
+            : lineMap.length - 1;
+
+        setCursorLineI(lineIAfterPgDown);
         break;
 
       default:
