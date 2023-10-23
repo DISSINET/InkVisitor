@@ -1,4 +1,5 @@
 // TextCanvas.tsx
+import theme from "Theme/theme";
 import React, { useState, useRef, useEffect, useMemo } from "react";
 
 interface TextCanvasProps {
@@ -21,7 +22,7 @@ const TextCanvas: React.FC<TextCanvasProps> = ({ text, width, height }) => {
   const [cursorLineI, setCursorLineI] = useState<number>(0); // line position of the cursor
   const [cursorChar, setCursorChar] = useState<number>(0); // position of the cursor within line
 
-  const [scrollLine, setScrollLine] = useState<number>(0);
+  const [scrollLineI, setScrollLineI] = useState<number>(0);
 
   const [currentText, setCurrentText] = useState<string>(text);
 
@@ -43,8 +44,8 @@ const TextCanvas: React.FC<TextCanvasProps> = ({ text, width, height }) => {
    * the first and last line displayed in the canvas
    */
   const viewPort = useMemo<[number, number]>(() => {
-    return [scrollLine, scrollLine + canvasNoLines];
-  }, [scrollLine, lineHeight]);
+    return [scrollLineI, scrollLineI + canvasNoLines];
+  }, [scrollLineI, lineHeight]);
 
   const charWidth = useMemo<number>(() => {
     const canvas = document.createElement("canvas");
@@ -67,6 +68,13 @@ const TextCanvas: React.FC<TextCanvasProps> = ({ text, width, height }) => {
   const xToCharI = (x: number): number => {
     return Math.floor(x / charWidth);
   };
+
+  // handle cursorLineI when viewport is moved away
+  useEffect( () => {
+    if (cursorLineI < viewPort[0] || cursorLineI > viewPort[1]) {
+      setCursorLineI(viewPort[0])
+    }
+   }, [viewPort, cursorLineI]) 
 
   const lineMap = useMemo<ILine[]>(() => {
     const time1 = new Date();
@@ -122,7 +130,7 @@ const TextCanvas: React.FC<TextCanvasProps> = ({ text, width, height }) => {
       const words: IWord[] = [];
 
       // Split the lineText into words
-      const lineText = text.slice(lineStart)
+      const lineText = text.slice(lineStart);
       const wordMatches = lineText.match(/\b\w+\b/g);
 
       if (wordMatches) {
@@ -155,7 +163,7 @@ const TextCanvas: React.FC<TextCanvasProps> = ({ text, width, height }) => {
     if (lineMap[cursorLineI]) {
       return lineMap[cursorLineI];
     } else {
-      return lineMap[0]
+      return lineMap[0];
     }
   }, [cursorLineI, lineMap]);
 
@@ -242,13 +250,13 @@ const TextCanvas: React.FC<TextCanvasProps> = ({ text, width, height }) => {
 
       // TODO rerenders the text into canvas
       for (let i = 0; i < lineMap.length && i * lineHeight < height; i++) {
-        const line = lineMap[i + scrollLine];
+        const line = lineMap[i + scrollLineI];
         if (line) {
           ctx!.fillText(line.text, 0, (i + 1) * lineHeight);
         }
       }
     }
-  }, [currentText, scrollLine, lineMap, width, height]);
+  }, [currentText, scrollLineI, lineMap, width, height]);
 
   // drawing cursor pointer
   useEffect(() => {
@@ -258,25 +266,33 @@ const TextCanvas: React.FC<TextCanvasProps> = ({ text, width, height }) => {
       const ctx = canvas.getContext("2d");
 
       ctx!.clearRect(0, 0, width, height);
-      if (focused) {
+
         ctx!.font = FONT;
         // TODO rerenders the cursor
         const cursorX = cursorChar * charWidth;
-        const cursorY = (cursorLineI - scrollLine) * lineHeight;
+        const cursorY = (cursorLineI - scrollLineI) * lineHeight;
         ctx!.fillRect(cursorX, cursorY, 2, lineHeight + 5);
-      }
+      
     }
-  }, [currentText, scrollLine, cursorChar, cursorLine, width, height, focused]);
+  }, [
+    currentText,
+    scrollLineI,
+    cursorChar,
+    cursorLine,
+    width,
+    height,
+    focused,
+  ]);
 
   /**
    * This function checks if the scrolled viewport is not off the current cursor
    */
   useEffect(() => {
     if (cursorLineI >= viewPort[1]) {
-      setScrollLine(cursorLineI - canvasNoLines + 1);
+      setScrollLineI(cursorLineI - canvasNoLines + 1);
     }
     if (cursorLineI < viewPort[0]) {
-      setScrollLine(cursorLineI);
+      setScrollLineI(cursorLineI);
     }
   }, [cursorChar, cursorLineI]);
 
@@ -289,6 +305,15 @@ const TextCanvas: React.FC<TextCanvasProps> = ({ text, width, height }) => {
 
     const newCharI = xToCharI(x);
     setCursorChar(newCharI);
+  };
+
+  const handleScrollClick = (e: React.MouseEvent) => {
+
+    // @ts-ignore
+    const y = e.nativeEvent.layerY;
+    const newScrollI = Math.floor((y / height) * lineMap.length);
+
+    setScrollLineI(newScrollI)
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLCanvasElement>) => {
@@ -354,7 +379,8 @@ const TextCanvas: React.FC<TextCanvasProps> = ({ text, width, height }) => {
 
       // page up + down
       case "PageUp":
-        const lLineIAfterPgUp = cursorLineI > pageJump ? cursorLineI - pageJump : 0
+        const lLineIAfterPgUp =
+          cursorLineI > pageJump ? cursorLineI - pageJump : 0;
         setCursorLineI(lLineIAfterPgUp);
         break;
       case "PageDown":
@@ -424,18 +450,52 @@ const TextCanvas: React.FC<TextCanvasProps> = ({ text, width, height }) => {
           className="scroller"
           style={{
             display: "flex",
-            flexDirection: "column",
             position: "relative",
-            marginBottom: "15px",
+          }}
+          onClick={(e) => {
+            handleScrollClick(e);
           }}
         >
+          <div
+            className="scroller-wrapper"
+            style={{
+              position: "absolute",
+              width: "10px",
+              border: "1px solid black",
+              backgroundColor: theme.color.blue[100],
+              top: 0,
+              bottom: 0,
+            }}
+          />
+          <div
+            className="scroller-viewport"
+            style={{
+              position: "absolute",
+              width: "10px",
+              top: `calc(${((viewPort[0] + 1) / lineMap.length) * 100}%)`,
+              bottom: `calc(${
+                ((lineMap.length - viewPort[1] + 1) / lineMap.length) * 100
+              }%)`,
+              backgroundColor: theme.color.blue[300],
+            }}
+          />
+          <div
+            className="scroller-cursor"
+            style={{
+              position: "absolute",
+              height: "1px",
+              width: "15px",
+              top: `calc(${((viewPort[0] + 1) / lineMap.length) * 100}%)`,
+              backgroundColor: theme.color.blue[500],
+            }}
+          />
+
           <span
             style={{
               position: "absolute",
-              top: `calc(${((cursorLineI + 1) / lineMap.length) * 100}%)`,
-              height: `15px`,
-              background: "pink",
-              border: "1px solid blue",
+              left: "15px",
+              color: theme.color.blue[500],
+              top: `calc(${((cursorLineI + 1) / lineMap.length) * 100}% - 7px)`,
             }}
           >
             {(((cursorLineI + 1) / lineMap.length) * 100).toFixed(0)}%
@@ -454,7 +514,7 @@ const TextCanvas: React.FC<TextCanvasProps> = ({ text, width, height }) => {
         {/* +1 to make it 1-based instead of 0-based */}
         <p>Cursor Char: {cursorChar}</p>
         <p>
-          Scroll Line: {scrollLine} / {lineMap.length}
+          Scroll Line: {scrollLineI} / {lineMap.length}
         </p>
         <p>
           {`Active word: ${cursorWord.text} (${cursorWord.iFrom} - ${cursorWord.iTo}) `}{" "}
