@@ -25,6 +25,8 @@ const TextCanvas: React.FC<TextCanvasProps> = ({ text, width, height }) => {
 
   const [currentText, setCurrentText] = useState<string>(text);
 
+  const [focused, setFocused] = useState<boolean>();
+
   const lineHeight = 15; // one line pixels
 
   const FONT = "12px Monospace";
@@ -33,7 +35,7 @@ const TextCanvas: React.FC<TextCanvasProps> = ({ text, width, height }) => {
   const canvasTextRef = useRef<HTMLCanvasElement>(null);
   const canvasCursorRef = useRef<HTMLCanvasElement>(null);
 
-  const numberOfLines = useMemo<number>(() => {
+  const canvasNoLines = useMemo<number>(() => {
     return Math.floor(height / lineHeight);
   }, [height, lineHeight]);
 
@@ -41,9 +43,10 @@ const TextCanvas: React.FC<TextCanvasProps> = ({ text, width, height }) => {
    * the first and last line displayed in the canvas
    */
   const viewPort = useMemo<[number, number]>(() => {
-    return [scrollLine, scrollLine + numberOfLines];
+    return [scrollLine, scrollLine + canvasNoLines];
   }, [scrollLine, lineHeight]);
 
+  
   const charWidth = useMemo<number>(() => {
     const canvas = document.createElement("canvas");
     const txt = "Rando text";
@@ -57,6 +60,14 @@ const TextCanvas: React.FC<TextCanvasProps> = ({ text, width, height }) => {
     }
     return 8;
   }, []);
+
+  const yToLineI = (y: number): number => {
+    return viewPort[0] + Math.floor(y / lineHeight);
+  };
+
+  const xToCharI = (x: number): number => {
+    return Math.floor(x / charWidth)
+  }
 
   const lineMap = useMemo<ILine[]>(() => {
     const time1 = new Date();
@@ -109,7 +120,11 @@ const TextCanvas: React.FC<TextCanvasProps> = ({ text, width, height }) => {
 
     // Add any remaining text
     if (lineStart < text.length) {
-      lines.push({ lineI: lines.length, text: text.slice(lineStart), words: [] });
+      lines.push({
+        lineI: lines.length,
+        text: text.slice(lineStart),
+        words: [],
+      });
     }
 
     const time2 = new Date();
@@ -148,7 +163,7 @@ const TextCanvas: React.FC<TextCanvasProps> = ({ text, width, height }) => {
 
   // next word at the cursor position
   const cursorWordNext = useMemo<[IWord, number] | undefined>(() => {
-    let foundWord: [IWord, number] | undefined = undefined
+    let foundWord: [IWord, number] | undefined = undefined;
 
     // const lastWordInCurLine = cursorLine.words[cursorLine.words.length - 1]
     // lastWordInCurLine.iTo
@@ -158,7 +173,7 @@ const TextCanvas: React.FC<TextCanvasProps> = ({ text, width, height }) => {
       if (wordNext) {
         if (word.iFrom <= cursorChar && word.iTo >= cursorChar) {
           foundWord = [wordNext, cursorLineI];
-          return 
+          return;
         }
       }
     });
@@ -174,7 +189,7 @@ const TextCanvas: React.FC<TextCanvasProps> = ({ text, width, height }) => {
 
   // prev word at the cursor position
   const cursorWordPrev = useMemo<[IWord, number] | undefined>(() => {
-    let foundWord: [IWord, number] | undefined = undefined
+    let foundWord: [IWord, number] | undefined = undefined;
 
     cursorLine.words.forEach((word, wi) => {
       const wordPrev = cursorLine.words[wi - 1];
@@ -188,7 +203,10 @@ const TextCanvas: React.FC<TextCanvasProps> = ({ text, width, height }) => {
     if (!foundWord) {
       // a word from prev line
       if (cursorLinePrev) {
-        return [cursorLinePrev.words[cursorLinePrev.words.length - 1], cursorLinePrev.lineI]
+        return [
+          cursorLinePrev.words[cursorLinePrev.words.length - 1],
+          cursorLinePrev.lineI,
+        ];
       }
     }
 
@@ -213,6 +231,7 @@ const TextCanvas: React.FC<TextCanvasProps> = ({ text, width, height }) => {
     }
   }, [currentText, scrollLine, lineMap, width, height]);
 
+  // drawing cursor pointer
   useEffect(() => {
     const canvas = canvasCursorRef.current;
 
@@ -220,26 +239,39 @@ const TextCanvas: React.FC<TextCanvasProps> = ({ text, width, height }) => {
       const ctx = canvas.getContext("2d");
 
       ctx!.clearRect(0, 0, width, height);
-      ctx!.font = FONT;
-
-      // TODO rerenders the cursor
-      const cursorX = cursorChar * charWidth;
-      const cursorY = (cursorLineI - scrollLine) * lineHeight;
-      ctx!.fillRect(cursorX, cursorY, 2, lineHeight + 5);
+      if (focused) {
+        ctx!.font = FONT;
+        // TODO rerenders the cursor
+        const cursorX = cursorChar * charWidth;
+        const cursorY = (cursorLineI - scrollLine) * lineHeight;
+        ctx!.fillRect(cursorX, cursorY, 2, lineHeight + 5);
+      }
     }
-  }, [currentText, scrollLine, cursorChar, cursorLine, width, height]);
+  }, [currentText, scrollLine, cursorChar, cursorLine, width, height, focused]);
 
   /**
    * This function checks if the scrolled viewport is not off the current cursor
    */
   useEffect(() => {
     if (cursorLineI >= viewPort[1]) {
-      setScrollLine(cursorLineI - numberOfLines + 1);
+      setScrollLine(cursorLineI - canvasNoLines + 1);
     }
     if (cursorLineI < viewPort[0]) {
       setScrollLine(cursorLineI);
     }
   }, [cursorChar, cursorLineI]);
+
+  const handleClick = (e: React.MouseEvent) => {
+    // @ts-ignore
+    const [x, y] = [e.nativeEvent.layerX, e.nativeEvent.layerY];
+
+    const newLineI = yToLineI(y)
+    setCursorLineI(newLineI)
+    
+    const newCharI = xToCharI(x)
+    setCursorChar(newCharI)
+    
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLCanvasElement>) => {
     e.preventDefault();
@@ -269,7 +301,7 @@ const TextCanvas: React.FC<TextCanvasProps> = ({ text, width, height }) => {
 
             // reaching prev line
             if (cursorWord.iFrom < cursorWordPrev[0].iFrom) {
-              setCursorLineI(cursorWordPrev[1])
+              setCursorLineI(cursorWordPrev[1]);
             }
           } else {
             setCursorChar(cursorWord.iFrom);
@@ -282,17 +314,17 @@ const TextCanvas: React.FC<TextCanvasProps> = ({ text, width, height }) => {
         }
         break;
 
-        case "ArrowRight":
-          if (ctrlKey) {
-            // Ctrl + Arrow Right: Move to the right by a whole word
-            if (cursorChar === cursorWord.iTo && cursorWordNext) {
-              setCursorChar(cursorWordNext[0].iTo);
-              // reaching next line
-              if (cursorWord.iFrom > cursorWordNext[0].iFrom) {
-                setCursorLineI(cursorWordNext[1])
-              }
-            } else {
-              setCursorChar(cursorWord.iTo);
+      case "ArrowRight":
+        if (ctrlKey) {
+          // Ctrl + Arrow Right: Move to the right by a whole word
+          if (cursorChar === cursorWord.iTo && cursorWordNext) {
+            setCursorChar(cursorWordNext[0].iTo);
+            // reaching next line
+            if (cursorWord.iFrom > cursorWordNext[0].iFrom) {
+              setCursorLineI(cursorWordNext[1]);
+            }
+          } else {
+            setCursorChar(cursorWord.iTo);
           }
         } else if (cursorChar < lineMap[cursorLineI].text.length) {
           setCursorChar(cursorChar + 1);
@@ -358,6 +390,12 @@ const TextCanvas: React.FC<TextCanvasProps> = ({ text, width, height }) => {
               height={height}
               style={{ position: "absolute", top: "0", left: "0", zIndex: 1 }}
               onKeyDown={handleKeyDown}
+              onMouseDown={(e) => {
+                handleClick(e);
+              }}
+              onFocus={() => {
+                setFocused(true);
+              }}
               tabIndex={0}
             ></canvas>
           </div>
