@@ -75,10 +75,10 @@ const TextCanvas: React.FC<TextCanvasProps> = ({ text, width, height }) => {
     return Math.floor(x / charWidth);
   };
 
-  // handle cursorLineI when viewport is moved away
+  // handle scrollLineI when cursor is out of viewport
   useEffect(() => {
     if (cursorLineI < viewPort[0] || cursorLineI > viewPort[1]) {
-      setCursorLineI(viewPort[0]);
+      setScrollLineI(cursorLineI);
     }
   }, [viewPort, cursorLineI]);
 
@@ -330,7 +330,7 @@ const TextCanvas: React.FC<TextCanvasProps> = ({ text, width, height }) => {
     const y = e.nativeEvent.layerY;
     const newScrollI = Math.floor((y / height) * linesNo);
 
-    setScrollLineI(newScrollI);
+    setCursorLineI(newScrollI);
   };
 
   const handleScrollOver = (e: React.MouseEvent) => {
