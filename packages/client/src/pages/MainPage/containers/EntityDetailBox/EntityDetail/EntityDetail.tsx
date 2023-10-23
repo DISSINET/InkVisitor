@@ -208,11 +208,34 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
     );
   }, [entity]);
 
+  const {
+    status: statusStatement,
+    data: statement,
+    error: statementError,
+    isFetching: isFetchingStatement,
+  } = useQuery(
+    ["statement", statementId],
+    async () => {
+      const res = await api.statementGet(statementId);
+      return res.data;
+    },
+    { enabled: !!statementId && api.isLoggedIn() }
+  );
+
   const updateEntityMutation = useMutation(
     async (changes: any) => await api.entityUpdate(detailId, changes),
     {
       onSuccess: (data, variables) => {
         queryClient.invalidateQueries(["entity"]);
+
+        if (
+          statementId &&
+          statement?.entities &&
+          entity &&
+          Object.keys(statement.entities).includes(entity.id)
+        ) {
+          queryClient.invalidateQueries(["statement"]);
+        }
 
         if (
           variables.references !== undefined ||
@@ -225,9 +248,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
           if (entity?.class === EntityEnums.Class.Territory) {
             queryClient.invalidateQueries(["tree"]);
           }
-          if (entity?.class === EntityEnums.Class.Statement) {
-            queryClient.invalidateQueries(["statement"]);
-          }
+
           queryClient.invalidateQueries(["territory"]);
           queryClient.invalidateQueries(["bookmarks"]);
         }
