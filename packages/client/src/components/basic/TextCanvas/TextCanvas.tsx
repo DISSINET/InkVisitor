@@ -7,6 +7,7 @@ interface TextCanvasProps {
   height: number;
 }
 interface ILine {
+  lineI: number;
   text: string; // textual content of the particular line
   words: IWord[];
 }
@@ -100,7 +101,7 @@ const TextCanvas: React.FC<TextCanvasProps> = ({ text, width, height }) => {
             });
           }
 
-          lines.push({ text: lineText, words });
+          lines.push({ lineI: lines.length, text: lineText, words });
           lineStart = splitAt + 1;
         }
       }
@@ -108,7 +109,7 @@ const TextCanvas: React.FC<TextCanvasProps> = ({ text, width, height }) => {
 
     // Add any remaining text
     if (lineStart < text.length) {
-      lines.push({ text: text.slice(lineStart), words: [] });
+      lines.push({ lineI: lines.length, text: text.slice(lineStart), words: [] });
     }
 
     const time2 = new Date();
@@ -146,8 +147,8 @@ const TextCanvas: React.FC<TextCanvasProps> = ({ text, width, height }) => {
   }, [cursorChar, cursorLine, lineMap]);
 
   // next word at the cursor position
-  const cursorWordNext = useMemo<IWord | undefined>(() => {
-    let foundWord: IWord | undefined = undefined;
+  const cursorWordNext = useMemo<[IWord, number] | undefined>(() => {
+    let foundWord: [IWord, number] | undefined = undefined
 
     // const lastWordInCurLine = cursorLine.words[cursorLine.words.length - 1]
     // lastWordInCurLine.iTo
@@ -156,18 +157,15 @@ const TextCanvas: React.FC<TextCanvasProps> = ({ text, width, height }) => {
       const wordNext = cursorLine.words[wi + 1];
       if (wordNext) {
         if (word.iFrom <= cursorChar && word.iTo >= cursorChar) {
-          foundWord = wordNext;
+          foundWord = [wordNext, cursorLineI];
           return 
         }
-      } else {
-        
       }
     });
     if (!foundWord) {
       // a word from the next line
       if (cursorLineNext) {
-        console.log('next line')
-        foundWord = cursorLineNext.words[0];
+        foundWord = [cursorLineNext.words[0], cursorLineNext.lineI];
       }
     }
 
@@ -175,21 +173,22 @@ const TextCanvas: React.FC<TextCanvasProps> = ({ text, width, height }) => {
   }, [cursorChar, cursorLine, lineMap]);
 
   // prev word at the cursor position
-  const cursorWordPrev = useMemo<IWord | undefined>(() => {
-    let foundWord: IWord | undefined = undefined;
+  const cursorWordPrev = useMemo<[IWord, number] | undefined>(() => {
+    let foundWord: [IWord, number] | undefined = undefined
+
     cursorLine.words.forEach((word, wi) => {
       const wordPrev = cursorLine.words[wi - 1];
       if (wordPrev) {
         if (word.iFrom <= cursorChar && word.iTo >= cursorChar) {
-          foundWord = wordPrev;
+          foundWord = [wordPrev, cursorLineI];
         }
       }
     });
 
     if (!foundWord) {
+      // a word from prev line
       if (cursorLinePrev) {
-        console.log('prev line')
-        return cursorLinePrev.words[cursorLinePrev.words.length - 1]
+        return [cursorLinePrev.words[cursorLinePrev.words.length - 1], cursorLinePrev.lineI]
       }
     }
 
@@ -266,11 +265,11 @@ const TextCanvas: React.FC<TextCanvasProps> = ({ text, width, height }) => {
         if (ctrlKey) {
           // Ctrl + Arrow Left: Move to the left by a whole word
           if (cursorChar === cursorWord.iFrom && cursorWordPrev) {
-            setCursorChar(cursorWordPrev.iFrom);
+            setCursorChar(cursorWordPrev[0].iFrom);
 
             // reaching prev line
-            if (cursorWord.iFrom < cursorWordPrev.iFrom) {
-              setCursorLineI(cursorLineI - 1)
+            if (cursorWord.iFrom < cursorWordPrev[0].iFrom) {
+              setCursorLineI(cursorWordPrev[1])
             }
           } else {
             setCursorChar(cursorWord.iFrom);
@@ -287,10 +286,10 @@ const TextCanvas: React.FC<TextCanvasProps> = ({ text, width, height }) => {
           if (ctrlKey) {
             // Ctrl + Arrow Right: Move to the right by a whole word
             if (cursorChar === cursorWord.iTo && cursorWordNext) {
-              setCursorChar(cursorWordNext.iTo);
+              setCursorChar(cursorWordNext[0].iTo);
               // reaching next line
-              if (cursorWord.iFrom > cursorWordNext.iFrom) {
-                setCursorLineI(cursorLineI + 1)
+              if (cursorWord.iFrom > cursorWordNext[0].iFrom) {
+                setCursorLineI(cursorWordNext[1])
               }
             } else {
               setCursorChar(cursorWord.iTo);
