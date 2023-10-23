@@ -158,6 +158,19 @@ export class ResponseStatement extends Statement implements IResponseStatement {
       position
     );
 
+    if (!actants.length) {
+      if (actions.length === 1) {
+        if (!(rules.allowsEmpty() || rules.allUndefined)) {
+          warnings.push(
+            this.newStatementWarning(WarningTypeEnums.MA, {
+              section: `${position}`,
+            })
+          );
+        }
+        return warnings;
+      }
+    }
+
     rules.undefinedActions.forEach((actionId) => {
       warnings.push(
         this.newStatementWarning(WarningTypeEnums.AVU, {
@@ -167,12 +180,8 @@ export class ResponseStatement extends Statement implements IResponseStatement {
       );
     });
 
-    if (!actants.length && !rules.allEmpty) {
-      warnings.push(
-        this.newStatementWarning(WarningTypeEnums.MA, {
-          section: `${position}`,
-        })
-      );
+    if (rules.allUndefined) {
+      return warnings;
     }
 
     if (rules.mismatch) {
@@ -199,7 +208,7 @@ export class ResponseStatement extends Statement implements IResponseStatement {
 
         if (!actionRules) {
           // action rules undefined for this position - only common warning should be returned (AVU)
-        } else if (PositionRules.isRuleEmpty(actionRules)) {
+        } else if (PositionRules.allowsOnlyEmpty(actionRules)) {
           warnings.push(
             this.newStatementWarning(WarningTypeEnums.ANA, {
               section: `${position}`,

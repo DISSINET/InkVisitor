@@ -5,39 +5,66 @@ import { IAction } from "@shared/types";
 export class PositionRules {
   classes: EntityEnums.ExtendedClass[] = [];
   undefinedActions: string[] = [];
-  allEmpty = true;
+  allUndefined = true;
   mismatch = false;
 
   constructor(actions: IAction[], position: EntityEnums.Position) {
     for (const action of actions) {
       const rules = ActionEntity.toRules(action.data.entities)[position];
-      if (!rules) {
+      const emptyRules = !rules || !rules.length;
+      if (emptyRules) {
         this.undefinedActions.push(action.id);
       }
-      this.allEmpty = this.allEmpty && PositionRules.isRuleEmpty(rules);
 
-      if (!this.mismatch) {
-        if (this.classes.length) {
-          this.mismatch = true;
-          for (const rule of rules || []) {
-            if (this.classes.indexOf(rule) !== -1) {
-              this.mismatch = false;
-              break;
-            }
-          }
-        }
-      }
+      this.allUndefined = this.allUndefined && emptyRules;
+
       this.classes = this.classes.concat(rules || []);
     }
   }
 
-  static isRuleEmpty(rules: EntityEnums.ExtendedClass[] | undefined): boolean {
-    if (!rules) {
-      return false;
+  /**
+   * Predicate for testing if current rules-set allows empty actant
+   * @returns
+   */
+  allowsEmpty(): boolean {
+    return this.classes.includes(EntityEnums.Extension.Empty);
+  }
+
+  /**
+   * Tests if arrays of allowed classes across actions has any intersection
+   * @param rules
+   * @returns
+   */
+  static hasIntersection(
+    rules: (EntityEnums.ExtendedClass[] | undefined)[]
+  ): boolean {
+    if (!Array.isArray(rules) || rules.length < 2) {
+      return true;
     }
 
+    let intersection = rules[0] || [];
+
+    for (let i = 1; i < rules.length; i++) {
+      const currentArray = rules[i] || [];
+
+      intersection = (intersection || []).filter((element) =>
+        currentArray.includes(element)
+      );
+    }
+
+    return intersection.length > 0;
+  }
+
+  /**
+   * Tests if some rule disallows any actant
+   * @param rules
+   * @returns
+   */
+  static allowsOnlyEmpty(
+    rules: EntityEnums.ExtendedClass[] | undefined
+  ): boolean {
     return (
-      !rules.length || !!rules.find((r) => r === EntityEnums.Extension.Empty)
+      !!rules && rules.length === 1 && rules[0] === EntityEnums.Extension.Empty
     );
   }
 }

@@ -163,13 +163,97 @@ describe("models/statement/response", function () {
             ws.find(
               (w) =>
                 w.type === WarningTypeEnums.WA &&
-                w.position.entityId === location.id
+                w.position?.entityId === location.id
             )
           ).toBeTruthy();
         });
       });
 
       describe("empty", () => {
+        it("should return OK for no actant", () => {
+          const response = MockResponse.new();
+          response.addAction({
+            [EntityEnums.Position.Subject]: [EntityEnums.Extension.Empty],
+          });
+          const ws = response.getWarningsForPosition(
+            EntityEnums.Position.Subject
+          );
+          expect(ws).toHaveLength(0);
+        });
+
+        it("should return ANA for P actant", () => {
+          const response = MockResponse.new();
+          response.addAction({
+            [EntityEnums.Position.Subject]: [EntityEnums.Extension.Empty],
+          });
+          const act1 = response.addActant(
+            new Person({ id: "person" }),
+            EntityEnums.Position.Subject
+          );
+          const ws = response.getWarningsForPosition(
+            EntityEnums.Position.Subject
+          );
+          expect(
+            ws.filter((w) => w.type === WarningTypeEnums.ANA)
+          ).toHaveLength(1);
+          expect(ws).toHaveLength(1);
+        });
+
+        it("should return ANA for P/G actants", () => {
+          const response = MockResponse.new();
+          response.addAction({
+            [EntityEnums.Position.Subject]: [EntityEnums.Extension.Empty],
+          });
+          const act1 = response.addActant(
+            new Person({ id: "person" }),
+            EntityEnums.Position.Subject
+          );
+          const act2 = response.addActant(
+            new Group({ id: "group" }),
+            EntityEnums.Position.Subject
+          );
+          const ws = response.getWarningsForPosition(
+            EntityEnums.Position.Subject
+          );
+          expect(
+            ws.filter(
+              (w) =>
+                w.type === WarningTypeEnums.ANA &&
+                w.position?.entityId === act1.id
+            )
+          ).toHaveLength(1);
+          expect(
+            ws.filter(
+              (w) =>
+                w.type === WarningTypeEnums.ANA &&
+                w.position?.entityId === act2.id
+            )
+          ).toHaveLength(1);
+          expect(ws).toHaveLength(2);
+        });
+      });
+
+      describe("[empty, P]", () => {
+        it("should return OK for no actant", () => {
+          const response = MockResponse.new();
+          response.addAction({
+            [EntityEnums.Position.Subject]: [
+              EntityEnums.Extension.Empty,
+              EntityEnums.Class.Person,
+            ],
+          });
+          const act1 = response.addActant(
+            new Person({ id: "person" }),
+            EntityEnums.Position.Subject
+          );
+          const ws = response.getWarningsForPosition(
+            EntityEnums.Position.Subject
+          );
+          expect(ws).toHaveLength(0);
+        });
+      });
+
+      describe("undefined", () => {
         it("should return OK for no actant", () => {
           const response = MockResponse.new();
           response.addAction({ [EntityEnums.Position.Subject]: [] });
@@ -179,7 +263,7 @@ describe("models/statement/response", function () {
           expect(ws).toHaveLength(0);
         });
 
-        it("should return ANA for empty rules", () => {
+        it("should return AVU for empty rules", () => {
           const response = MockResponse.new();
           response.addAction({ [EntityEnums.Position.Subject]: [] });
           const act1 = response.addActant(
@@ -195,14 +279,9 @@ describe("models/statement/response", function () {
             EntityEnums.Position.Subject
           );
           expect(
-            ws.filter(
-              (w) =>
-                (w.type === WarningTypeEnums.ANA &&
-                  w.position.entityId === act1.id) ||
-                w.position.entityId === act2.id
-            )
-          ).toHaveLength(2);
-          expect(ws).toHaveLength(2);
+            ws.filter((w) => w.type === WarningTypeEnums.AVU)
+          ).toHaveLength(1);
+          expect(ws).toHaveLength(1);
         });
       });
     });
@@ -291,7 +370,7 @@ describe("models/statement/response", function () {
               ws.find(
                 (w) =>
                   w.type === WarningTypeEnums.WA &&
-                  w.position.entityId === group.id
+                  w.position?.entityId === group.id
               )
             ).toBeTruthy();
           });
@@ -320,7 +399,7 @@ describe("models/statement/response", function () {
               ws.find(
                 (w) =>
                   w.type === WarningTypeEnums.WA &&
-                  w.position.entityId === group.id
+                  w.position?.entityId === group.id
               )
             ).toBeTruthy();
           });
