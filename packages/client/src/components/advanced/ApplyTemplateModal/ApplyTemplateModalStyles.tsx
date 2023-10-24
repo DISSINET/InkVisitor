@@ -18,7 +18,3 @@ export const StyledTagList = styled.div`
   display: flex;
   flex-direction: column;
 `;
-export const StyledTagWrap = styled.div`
-  display: inline-grid;
-  margin-bottom: 0.3rem;
-`;

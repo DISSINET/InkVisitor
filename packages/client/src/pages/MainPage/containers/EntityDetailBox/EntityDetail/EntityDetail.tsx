@@ -267,6 +267,10 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
             queryClient.invalidateQueries(["statement-templates"]);
           }
         }
+
+        if (variables.label !== undefined || variables.detail !== undefined) {
+          queryClient.invalidateQueries(["usedAsTemplate"]);
+        }
       },
     }
   );

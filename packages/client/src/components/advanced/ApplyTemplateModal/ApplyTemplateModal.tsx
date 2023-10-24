@@ -25,7 +25,6 @@ import { getShortLabelByLetterCount } from "utils";
 import {
   StyledApplyTemplate,
   StyledTagList,
-  StyledTagWrap,
   StyledUsedAsHeading,
   StyledUsedAsSection,
 } from "./ApplyTemplateModalStyles";
@@ -120,9 +119,9 @@ export const ApplyTemplateModal: React.FC<ApplyTemplateModal> = ({
           <StyledTagList>
             {data &&
               data.map((entity) => (
-                <StyledTagWrap key={entity.id}>
-                  <EntityTag entity={entity} fullWidth />
-                </StyledTagWrap>
+                <div key={entity.id} style={{ marginBottom: "0.3rem" }}>
+                  <EntityTag entity={entity} />
+                </div>
               ))}
           </StyledTagList>
         </StyledUsedAsSection>
