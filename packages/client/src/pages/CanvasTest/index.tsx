@@ -21,7 +21,7 @@ const CanvasTestPage: React.FC<ILoginPage> = ({}) => {
 
   return (
     <div>
-      <TextCanvas text={veryLongText} width={500} height={400} />
+      <TextCanvas inputText={veryLongText} width={500} height={400} />
     </div>
   );
 };
