@@ -597,7 +597,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
   return (
     <>
-      <div style={{ marginBottom: "4rem" }} key={statement.id}>
+      <React.Fragment key={statement.id}>
         <StyledEditorPreSection>
           <StyledEditorStatementInfo>
             <StyledHeaderTagWrap>
@@ -1004,7 +1004,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
             {statement && <JSONExplorer data={statement} />}
           </StyledEditorSectionContent>
         </StyledEditorSection>
-      </div>
+      </React.Fragment>
 
       <ApplyTemplateModal
         showModal={showApplyTemplateModal}

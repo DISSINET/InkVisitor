@@ -62,23 +62,23 @@ export const StatementEditorBox: React.FC = () => {
     }
   );
 
-  const updateStatementDataMutation = useMutation(
-    async (changes: IStatementData) => {
-      await api.entityUpdate(statementId, {
-        data: changes,
-      });
-    },
-    {
-      onSuccess: (data, variables: any) => {
-        queryClient.invalidateQueries(["entity"]);
-        queryClient.invalidateQueries(["statement"]);
-        queryClient.invalidateQueries(["territory"]);
-        if (variables.text !== undefined) {
-          queryClient.invalidateQueries(["detail-tab-entities"]);
-        }
-      },
-    }
-  );
+  // const updateStatementDataMutation = useMutation(
+  //   async (changes: IStatementData) => {
+  //     await api.entityUpdate(statementId, {
+  //       data: changes,
+  //     });
+  //   },
+  //   {
+  //     onSuccess: (data, variables: any) => {
+  //       queryClient.invalidateQueries(["entity"]);
+  //       queryClient.invalidateQueries(["statement"]);
+  //       queryClient.invalidateQueries(["territory"]);
+  //       if (variables.text !== undefined) {
+  //         queryClient.invalidateQueries(["detail-tab-entities"]);
+  //       }
+  //     },
+  //   }
+  // );
 
   const moveStatementMutation = useMutation(
     async (newTerritoryId: string) => {
@@ -172,13 +172,18 @@ export const StatementEditorBox: React.FC = () => {
   return (
     <>
       {tempObject ? (
-        <StatementEditor
-          statement={tempObject}
-          updateStatementMutation={updateStatementMutation}
-          moveStatementMutation={moveStatementMutation}
-          handleAttributeChange={handleAttributeChange}
-          handleDataAttributeChange={handleDataAttributeChange}
-        />
+        <div
+          onMouseLeave={() => sendChangesToBackend(tempObject)}
+          style={{ marginBottom: "4rem" }}
+        >
+          <StatementEditor
+            statement={tempObject}
+            updateStatementMutation={updateStatementMutation}
+            moveStatementMutation={moveStatementMutation}
+            handleAttributeChange={handleAttributeChange}
+            handleDataAttributeChange={handleDataAttributeChange}
+          />
+        </div>
       ) : (
         <>
           <StyledEditorEmptyState>
