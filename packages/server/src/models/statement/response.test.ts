@@ -242,6 +242,20 @@ describe("models/statement/response", function () {
               EntityEnums.Class.Person,
             ],
           });
+          const ws = response.getWarningsForPosition(
+            EntityEnums.Position.Subject
+          );
+          expect(ws).toHaveLength(0);
+        });
+
+        it("should return OK for P actant", () => {
+          const response = MockResponse.new();
+          response.addAction({
+            [EntityEnums.Position.Subject]: [
+              EntityEnums.Extension.Empty,
+              EntityEnums.Class.Person,
+            ],
+          });
           const act1 = response.addActant(
             new Person({ id: "person" }),
             EntityEnums.Position.Subject
@@ -250,6 +264,57 @@ describe("models/statement/response", function () {
             EntityEnums.Position.Subject
           );
           expect(ws).toHaveLength(0);
+        });
+
+        it("should return OK for P actants", () => {
+          const response = MockResponse.new();
+          response.addAction({
+            [EntityEnums.Position.Subject]: [
+              EntityEnums.Extension.Empty,
+              EntityEnums.Class.Person,
+            ],
+          });
+          const act1 = response.addActant(
+            new Person({ id: "person" }),
+            EntityEnums.Position.Subject
+          );
+          const act2 = response.addActant(
+            new Person({ id: "person2" }),
+            EntityEnums.Position.Subject
+          );
+          const ws = response.getWarningsForPosition(
+            EntityEnums.Position.Subject
+          );
+          expect(ws).toHaveLength(0);
+        });
+
+        it("should return WA for one other actant", () => {
+          const response = MockResponse.new();
+          response.addAction({
+            [EntityEnums.Position.Subject]: [
+              EntityEnums.Extension.Empty,
+              EntityEnums.Class.Person,
+            ],
+          });
+          const grp1 = response.addActant(
+            new Group({ id: "group" }),
+            EntityEnums.Position.Subject
+          );
+          const act2 = response.addActant(
+            new Person({ id: "person2" }),
+            EntityEnums.Position.Subject
+          );
+          const ws = response.getWarningsForPosition(
+            EntityEnums.Position.Subject
+          );
+          expect(
+            ws.filter(
+              (w) =>
+                w.type === WarningTypeEnums.WA &&
+                w.position?.entityId === grp1.id
+            )
+          ).toHaveLength(1);
+          expect(ws).toHaveLength(1);
         });
       });
 
