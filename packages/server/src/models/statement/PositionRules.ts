@@ -11,15 +11,19 @@ export class PositionRules {
   constructor(actions: IAction[], position: EntityEnums.Position) {
     for (const action of actions) {
       const rules = ActionEntity.toRules(action.data.entities)[position];
-      const emptyRules = !rules || !rules.length;
-      if (emptyRules) {
+      const undefinedRules = !rules || !rules.length;
+      if (undefinedRules) {
         this.undefinedActions.push(action.id);
       }
 
-      this.allUndefined = this.allUndefined && emptyRules;
+      this.allUndefined = this.allUndefined && undefinedRules;
 
       this.classes = this.classes.concat(rules || []);
     }
+
+    this.mismatch = !PositionRules.hasIntersection(
+      actions.map((a) => ActionEntity.toRules(a.data.entities)[position])
+    );
   }
 
   /**

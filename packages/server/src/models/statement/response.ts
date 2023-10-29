@@ -158,15 +158,22 @@ export class ResponseStatement extends Statement implements IResponseStatement {
       position
     );
 
-    if (!actants.length) {
-      if (actions.length === 1) {
-        if (!(rules.allowsEmpty() || rules.allUndefined)) {
-          warnings.push(
-            this.newStatementWarning(WarningTypeEnums.MA, {
-              section: `${position}`,
-            })
-          );
-        }
+    if (rules.mismatch) {
+      warnings.push(
+        this.newStatementWarning(WarningTypeEnums.WAC, {
+          section: `${position}`,
+        })
+      );
+    }
+
+    if (!rules.mismatch && !actants.length) {
+      if (!rules.allowsEmpty() && !rules.allUndefined) {
+        warnings.push(
+          this.newStatementWarning(WarningTypeEnums.MA, {
+            section: `${position}`,
+          })
+        );
+      } else if (rules.allUndefined) {
         return warnings;
       }
     }
@@ -180,20 +187,7 @@ export class ResponseStatement extends Statement implements IResponseStatement {
       );
     });
 
-    if (rules.allUndefined) {
-      return warnings;
-    }
-
-    if (rules.mismatch) {
-      const MAindex = warnings.findIndex((w) => w.type === WarningTypeEnums.MA);
-      if (MAindex !== -1) {
-        warnings.splice(MAindex, 1);
-      }
-      warnings.push(
-        this.newStatementWarning(WarningTypeEnums.WAC, {
-          section: `${position}`,
-        })
-      );
+    if (rules.allUndefined || rules.mismatch) {
       return warnings;
     }
 

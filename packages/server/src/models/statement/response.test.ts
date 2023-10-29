@@ -17,7 +17,7 @@ class MockResponse extends ResponseStatement {
   }
 
   // @ts-ignore
-  addAction(map: { [key: EntityEnums.Position]: EntityEnums.Class[] }) {
+  addAction(map: { [key: EntityEnums.Position]: EntityEnums.ExtendedClass[] }) {
     const action = new Action({
       id: `action-${this.data.actions.length + 1}`,
     });
@@ -169,7 +169,7 @@ describe("models/statement/response", function () {
         });
       });
 
-      describe("empty", () => {
+      describe("[empty]", () => {
         it("should return OK for no actant", () => {
           const response = MockResponse.new();
           response.addAction({
@@ -352,7 +352,7 @@ describe("models/statement/response", function () {
     });
 
     describe("2 actions", () => {
-      describe("any + any", () => {
+      describe("[any] + [any]", () => {
         const prepareResponse = () => {
           const response = MockResponse.new();
           response.addAction({
@@ -387,7 +387,7 @@ describe("models/statement/response", function () {
         });
       });
 
-      describe("any + P", () => {
+      describe("[any] + [P]", () => {
         const prepareResponse = () => {
           const response = MockResponse.new();
           response.addAction({
@@ -471,25 +471,21 @@ describe("models/statement/response", function () {
         });
       });
 
-      describe("any + empty", () => {
+      describe("[any] + [empty]", () => {
         const prepareResponse = () => {
           const response = MockResponse.new();
           response.addAction({
             [EntityEnums.Position.Subject]: EntityEnums.PLOGESTRB,
           });
           response.addAction({
-            [EntityEnums.Position.Subject]: [],
+            [EntityEnums.Position.Subject]: [EntityEnums.Extension.Empty],
           });
 
           return response;
         };
 
-        it("should return WAC for P", () => {
+        it("should return WAC for no actant", () => {
           const response = prepareResponse();
-          response.addActant(
-            new Person({ id: "person1" }),
-            EntityEnums.Position.Subject
-          );
           const ws = response.getWarningsForPosition(
             EntityEnums.Position.Subject
           );
@@ -497,8 +493,12 @@ describe("models/statement/response", function () {
           expect(ws.find((w) => w.type === WarningTypeEnums.WAC)).toBeTruthy();
         });
 
-        it("should return WAC for no actant", () => {
+        it("should return WAC for P", () => {
           const response = prepareResponse();
+          response.addActant(
+            new Person({ id: "person1" }),
+            EntityEnums.Position.Subject
+          );
           const ws = response.getWarningsForPosition(
             EntityEnums.Position.Subject
           );
@@ -524,7 +524,7 @@ describe("models/statement/response", function () {
         });
       });
 
-      describe("P + [A,G]", () => {
+      describe("[P] + [A,G]", () => {
         const prepareResponse = () => {
           const response = MockResponse.new();
           response.addAction({
@@ -575,7 +575,7 @@ describe("models/statement/response", function () {
         });
       });
 
-      describe("P + [P,G]", () => {
+      describe("[P] + [P,G]", () => {
         const prepareResponse = () => {
           const response = MockResponse.new();
           response.addAction({
@@ -644,13 +644,15 @@ describe("models/statement/response", function () {
         });
       });
 
-      describe("P + undefined", () => {
+      describe("[P] + [undefined]", () => {
         const prepareResponse = () => {
           const response = MockResponse.new();
           response.addAction({
             [EntityEnums.Position.Subject]: [EntityEnums.Class.Person],
           });
-          response.addAction({});
+          response.addAction({
+            [EntityEnums.Position.Subject]: [],
+          });
           return response;
         };
 
@@ -697,11 +699,11 @@ describe("models/statement/response", function () {
         });
       });
 
-      describe("empty + empty", () => {
+      describe("[empty] + [empty]", () => {
         const prepareResponse = () => {
           const response = MockResponse.new();
           response.addAction({
-            [EntityEnums.Position.Subject]: [],
+            [EntityEnums.Position.Subject]: [EntityEnums.Extension.Empty],
           });
           response.addAction({
             [EntityEnums.Position.Subject]: [EntityEnums.Extension.Empty],
