@@ -176,8 +176,7 @@ const TextCanvas: React.FC<TextCanvasProps> = ({
 
     const time2 = new Date();
     console.log(
-      `text of length ${text.length} parsed into ${lines.length} lines in ${
-        time2.valueOf() - time1.valueOf()
+      `text of length ${text.length} parsed into ${lines.length} lines in ${time2.valueOf() - time1.valueOf()
       }ms `
     );
     setLineMap(lines);
@@ -220,8 +219,8 @@ const TextCanvas: React.FC<TextCanvasProps> = ({
   const cursorWord = useMemo<IWord | undefined>(() => {
     return cursorLine
       ? cursorLine.words.find((word) => {
-          return word.iFrom <= cursorCharI && word.iTo >= cursorCharI;
-        })
+        return word.iFrom <= cursorCharI && word.iTo >= cursorCharI;
+      })
       : undefined;
   }, [cursorCharI, cursorLine, lineMap]);
 
@@ -369,6 +368,14 @@ const TextCanvas: React.FC<TextCanvasProps> = ({
     setCursorGhostLineI(false);
   };
 
+  const handleScroll = (e: React.WheelEvent<HTMLCanvasElement>) => {
+    const up = e.deltaY < 0 ? -1 : 1;
+    if (cursorLineI + up < 0 || cursorLineI + up > linesNo - 1) {
+      return
+    }
+    setCursorLineI(cursorLineI + up);
+  }
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLCanvasElement>) => {
     e.preventDefault();
 
@@ -507,6 +514,7 @@ const TextCanvas: React.FC<TextCanvasProps> = ({
               onMouseDown={(e) => {
                 handleClick(e);
               }}
+              onWheel={handleScroll}
               onFocus={() => {
                 setFocused(true);
               }}
@@ -548,7 +556,6 @@ const TextCanvas: React.FC<TextCanvasProps> = ({
               width: `${scrollerW}px`,
               top: `calc(${((viewPort[0] + 1) / linesNo) * 100}%)`,
               bottom: `calc(${((linesNo - viewPort[1] + 1) / linesNo) * 100}%)`,
-              backgroundColor: theme.color.blue[300],
             }}
           />
           <div
@@ -576,7 +583,6 @@ const TextCanvas: React.FC<TextCanvasProps> = ({
             {/* {`${cursorLineI}/${linesNo}`} */}
             {`${cursorLineP.toFixed(0)}%`}
           </span>
-
           {cursorGhostLineI && (
             <>
               <div
@@ -597,9 +603,8 @@ const TextCanvas: React.FC<TextCanvasProps> = ({
                   fontSize: "12px",
                   fontWeight: "500",
                   color: theme.color.gray[500],
-                  top: `calc(${
-                    ((cursorGhostLineI + 1) / linesNo) * 100
-                  }% - 6px)`,
+                  top: `calc(${((cursorGhostLineI + 1) / linesNo) * 100
+                    }% - 6px)`,
                 }}
               >
                 {/* {`${cursorLineI}/${linesNo}`} */}
