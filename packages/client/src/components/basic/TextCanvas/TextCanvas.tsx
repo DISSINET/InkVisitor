@@ -349,18 +349,16 @@ const TextCanvas: React.FC<TextCanvasProps> = ({
   };
 
   const handleScrollClick = (e: React.MouseEvent) => {
-    // @ts-ignore
-    const y = e.nativeEvent.layerY;
-    const newScrollI = Math.floor((y / height) * linesNo);
-
+    const currentTargetRect = e.currentTarget.getBoundingClientRect();
+    const event_offsetY = e.pageY - currentTargetRect.top;
+    const newScrollI = Math.floor((event_offsetY / currentTargetRect.height) * linesNo);
     setCursorLineI(newScrollI);
   };
 
   const handleScrollOver = (e: React.MouseEvent) => {
-    // @ts-ignore
-    const y = e.nativeEvent.layerY;
-    const newScrollI = Math.floor((y / height) * linesNo);
-
+    const currentTargetRect = e.currentTarget.getBoundingClientRect();
+    const event_offsetY = e.pageY - currentTargetRect.top;
+    const newScrollI = Math.floor((event_offsetY / currentTargetRect.height) * linesNo);
     setCursorGhostLineI(newScrollI);
   };
 
@@ -531,15 +529,9 @@ const TextCanvas: React.FC<TextCanvasProps> = ({
         >
           <div
             className="scroller-wrapper"
-            onMouseDown={(e) => {
-              handleScrollClick(e);
-            }}
-            onMouseMove={(e) => {
-              handleScrollOver(e);
-            }}
-            onMouseOut={(e) => {
-              handleScrollOut();
-            }}
+            onMouseDown={handleScrollClick}
+            onMouseMove={handleScrollOver}
+            onMouseOut={handleScrollOut}
             style={{
               position: "absolute",
               width: `${scrollerW}px`,
@@ -591,8 +583,9 @@ const TextCanvas: React.FC<TextCanvasProps> = ({
                   position: "absolute",
                   height: "1px",
                   width: `${scrollerW + 5}px`,
-                  top: `${cursorGhostLineP}%`,
+                  top: `${Math.min(100, cursorGhostLineP)}%`,
                   backgroundColor: theme.color.gray[500],
+                  pointerEvents: "none",
                 }}
               />
               <span
