@@ -88,13 +88,9 @@ services:
     image: inkvisitor:sandbox
     container_name: inkvisitor-sandbox
     restart: always
-    logging:
-      options:
-        max-size: "10m"
-        max-file: "2"
-    # needs to be present when building
-    # env_file:
-    #  - ./packages/server/env/.env.sandbox
+    <<: *logging
+    env_file:
+      - ./packages/server/env/.env.sandbox
     ports:
       - "3011:3000"
     volumes:
