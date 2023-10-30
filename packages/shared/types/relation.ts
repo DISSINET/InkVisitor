@@ -169,7 +169,7 @@ export namespace Relation {
       [EntityEnums.Class.Being, EntityEnums.Class.Being],
       [EntityEnums.Class.Value, EntityEnums.Class.Value],
     ],
-    allowedSameEntityClassesOnly: true,
+    allowedSameEntityClassesOnly: false,
     asymmetrical: true,
     multiple: true,
     cloudType: false,
