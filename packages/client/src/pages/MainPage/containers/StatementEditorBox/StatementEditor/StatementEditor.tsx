@@ -612,7 +612,6 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                   )}
                 </>
               )}
-              <Loader size={20} show={isFetchingTerritory} />
             </StyledBreadcrumbWrap>
           )}
         </StyledEditorPreSection>

@@ -230,9 +230,10 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
 
         if (
           statementId &&
-          statement?.entities &&
-          entity &&
-          Object.keys(statement.entities).includes(entity.id)
+          (statementId === entity?.id ||
+            (statement?.entities &&
+              entity &&
+              Object.keys(statement.entities).includes(entity.id)))
         ) {
           queryClient.invalidateQueries(["statement"]);
         }
