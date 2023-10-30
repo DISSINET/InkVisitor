@@ -46,7 +46,9 @@ import {
   StyledTable,
   StyledTdLastEdit,
   StyledTh,
+  StyledWarnings,
 } from "./StatementListTableStyles";
+import { TiWarningOutline } from "react-icons/ti";
 
 type CellType = CellProps<IResponseStatement>;
 
@@ -319,6 +321,24 @@ export const StatementListTable: React.FC<StatementListTable> = ({
             return <StyledText>{trimmedText}...</StyledText>;
           }
           return <StyledText>{trimmedText}</StyledText>;
+        },
+      },
+      {
+        Header: "Warnings",
+        id: "warnings",
+        Cell: ({ row }: CellType) => {
+          const { warnings } = row.original;
+          console.log(warnings);
+
+          return (
+            <>
+              {warnings.length > 0 && (
+                <StyledWarnings>
+                  <TiWarningOutline size={20} /> {warnings.length}
+                </StyledWarnings>
+              )}
+            </>
+          );
         },
       },
       {

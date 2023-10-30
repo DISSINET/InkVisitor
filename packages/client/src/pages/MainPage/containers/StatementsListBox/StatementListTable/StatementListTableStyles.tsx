@@ -89,3 +89,9 @@ export const StyledCheckboxWrapper = styled.div`
   justify-content: center;
   align-items: center;
 `;
+export const StyledWarnings = styled.div`
+  display: flex;
+  align-items: center;
+  column-gap: 0.3rem;
+  color: ${({ theme }) => theme.color["warning"]};
+`;
