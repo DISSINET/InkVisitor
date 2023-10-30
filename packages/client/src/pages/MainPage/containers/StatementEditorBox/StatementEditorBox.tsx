@@ -45,6 +45,23 @@ export const StatementEditorBox: React.FC = () => {
       await api.entityUpdate(statementId, changes);
     },
     {
+      onMutate: async (newStatement) => {
+        // Cancel any outgoing refetches
+        // (so they don't overwrite our optimistic update)
+        await queryClient.cancelQueries({
+          queryKey: ["statement", statementId],
+        });
+
+        // Snapshot the previous value
+        const previousStatement: IStatement | undefined =
+          queryClient.getQueryData(["statement", statementId]);
+
+        // Optimistically update to the new value
+        queryClient.setQueryData(["statement", statementId], newStatement);
+
+        // Return a context with the previous and new todo
+        return { previousStatement, newStatement };
+      },
       onSuccess: (data, variables: any) => {
         if (selectedDetailId === statementId) {
           queryClient.invalidateQueries(["entity"]);
@@ -59,26 +76,14 @@ export const StatementEditorBox: React.FC = () => {
           queryClient.invalidateQueries(["entity-templates"]);
         }
       },
+      onError: (err, newTodo, context) => {
+        queryClient.setQueryData(
+          ["statement", context?.newStatement.id],
+          context?.previousStatement
+        );
+      },
     }
   );
-
-  // const updateStatementDataMutation = useMutation(
-  //   async (changes: IStatementData) => {
-  //     await api.entityUpdate(statementId, {
-  //       data: changes,
-  //     });
-  //   },
-  //   {
-  //     onSuccess: (data, variables: any) => {
-  //       queryClient.invalidateQueries(["entity"]);
-  //       queryClient.invalidateQueries(["statement"]);
-  //       queryClient.invalidateQueries(["territory"]);
-  //       if (variables.text !== undefined) {
-  //         queryClient.invalidateQueries(["detail-tab-entities"]);
-  //       }
-  //     },
-  //   }
-  // );
 
   const moveStatementMutation = useMutation(
     async (newTerritoryId: string) => {
@@ -143,6 +148,9 @@ export const StatementEditorBox: React.FC = () => {
     instantUpdate?: boolean
   ) => {
     if (tempObject) {
+      queryClient.cancelQueries({
+        queryKey: ["statement", statementId],
+      });
       const newData = {
         ...tempObject,
         ...changes,
@@ -157,6 +165,9 @@ export const StatementEditorBox: React.FC = () => {
     instantUpdate?: boolean
   ) => {
     if (tempObject) {
+      queryClient.cancelQueries({
+        queryKey: ["statement", statementId],
+      });
       const newData = {
         ...tempObject,
         data: {
@@ -195,7 +206,7 @@ export const StatementEditorBox: React.FC = () => {
         </>
       )}
 
-      <Loader show={isFetchingStatement || updateStatementMutation.isLoading} />
+      {/* <Loader show={isFetchingStatement || updateStatementMutation.isLoading} /> */}
     </>
   );
 };
