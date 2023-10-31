@@ -243,8 +243,8 @@ export const StatementListTable: React.FC<StatementListTable> = ({
       {
         Header: "Subj.",
         Cell: ({ row }: CellType) => {
-          const subjectIds: string[] = row.values.data?.actants
-            ? row.values.data.actants
+          const subjectIds: string[] = row.original.data?.actants
+            ? row.original.data.actants
                 .filter((a: any) => a.position === "s")
                 .map((a: any) => a.entityId)
             : [];
@@ -267,10 +267,10 @@ export const StatementListTable: React.FC<StatementListTable> = ({
       {
         Header: "Actions",
         Cell: ({ row }: CellType) => {
-          const actionIds = row.values.data?.actions
-            ? row.values.data.actions.map((a: any) => a.actionId)
+          const actionIds = row.original.data?.actions
+            ? row.original.data.actions.map((a) => a.actionId)
             : [];
-          const actionObjects: IAction[] = actionIds.map(
+          const actionObjects = actionIds.map(
             (actionId: string) => entities[actionId]
           );
           const definedActions = actionObjects.filter((a) => a !== undefined);
@@ -289,10 +289,10 @@ export const StatementListTable: React.FC<StatementListTable> = ({
       {
         Header: "Objects",
         Cell: ({ row }: CellType) => {
-          const actantIds = row.values.data?.actants
-            ? row.values.data.actants
-                .filter((a: any) => a.position !== "s")
-                .map((a: any) => a.entityId)
+          const actantIds = row.original.data?.actants
+            ? row.original.data.actants
+                .filter((a) => a.position !== "s")
+                .map((a) => a.entityId)
             : [];
           const actantObjects: IEntity[] = actantIds.map(
             (actantId: string) => entities[actantId]
@@ -314,10 +314,10 @@ export const StatementListTable: React.FC<StatementListTable> = ({
         Header: "Text",
         accessor: "data",
         Cell: ({ row }: CellType) => {
-          const { text } = row.values.data;
+          const { text } = row.original.data;
           const maxWordsCount = 20;
           const trimmedText = text.split(" ").slice(0, maxWordsCount).join(" ");
-          if (text?.match(/(\w+)/g)?.length > maxWordsCount) {
+          if ((text.match(/(\w+)/g) ?? []).length > maxWordsCount) {
             return <StyledText>{trimmedText}...</StyledText>;
           }
           return <StyledText>{trimmedText}</StyledText>;
@@ -452,12 +452,12 @@ export const StatementListTable: React.FC<StatementListTable> = ({
                   e.stopPropagation();
                   const newObject = {
                     ...rowsExpanded,
-                    [row.values.id]: !rowsExpanded[row.values.id],
+                    [row.original.id]: !rowsExpanded[row.original.id],
                   };
                   dispatch(setRowsExpanded(newObject));
                 }}
               >
-                {rowsExpanded[row.values.id] ? (
+                {rowsExpanded[row.original.id] ? (
                   <FaChevronCircleUp />
                 ) : (
                   <FaChevronCircleDown />
