@@ -26,6 +26,7 @@ import {
   MdOutlineCheckBox,
   MdOutlineCheckBoxOutlineBlank,
 } from "react-icons/md";
+import { TiWarningOutline } from "react-icons/ti";
 import {
   CellProps,
   Column,
@@ -46,9 +47,7 @@ import {
   StyledTable,
   StyledTdLastEdit,
   StyledTh,
-  StyledWarnings,
 } from "./StatementListTableStyles";
-import { TiWarningOutline } from "react-icons/ti";
 
 type CellType = CellProps<IResponseStatement>;
 
@@ -324,7 +323,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
         },
       },
       {
-        Header: "Warnings",
+        Header: "Warn.",
         id: "warnings",
         Cell: ({ row }: CellType) => {
           const { warnings } = row.original;
@@ -333,9 +332,14 @@ export const StatementListTable: React.FC<StatementListTable> = ({
           return (
             <>
               {warnings.length > 0 && (
-                <StyledWarnings>
-                  <TiWarningOutline size={20} /> {warnings.length}
-                </StyledWarnings>
+                <Button
+                  icon={<TiWarningOutline size={20} />}
+                  label={warnings.length.toString()}
+                  color="warning"
+                  inverted
+                  noBorder
+                  noBackground
+                />
               )}
             </>
           );
