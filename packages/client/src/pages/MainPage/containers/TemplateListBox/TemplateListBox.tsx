@@ -101,7 +101,7 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
         <StyledTemplateSectionHeader>
           <Button
             key="add-statement"
-            icon={<FaPlus size={14} />}
+            icon={<FaPlus />}
             color="primary"
             label="new Template"
             onClick={() => {

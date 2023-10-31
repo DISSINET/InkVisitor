@@ -395,7 +395,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
             {data.right !== UserEnums.RoleMode.Read && (
               <Button
                 key="add"
-                icon={<FaPlus size={14} />}
+                icon={<FaPlus />}
                 tooltipLabel="add new statement at the end of the list"
                 color="primary"
                 label="new statement"

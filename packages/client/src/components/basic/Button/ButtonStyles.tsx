@@ -59,5 +59,5 @@ export const StyledButtonLabel = styled.span<{
   noIconMargin?: boolean;
 }>`
   margin-left: ${({ theme, hasIcon = false, noIconMargin = false }) =>
-    hasIcon ? (noIconMargin ? 0 : theme.space[2]) : 0};
+    hasIcon ? (noIconMargin ? 0 : "0.3rem") : 0};
 `;

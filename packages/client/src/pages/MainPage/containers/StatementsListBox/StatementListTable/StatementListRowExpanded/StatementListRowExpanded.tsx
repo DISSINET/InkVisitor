@@ -157,7 +157,7 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
   };
 
   const renderRowSubComponent = React.useCallback(
-    ({ row }) => {
+    ({ row }: { row: Row<IResponseStatement> }) => {
       const {
         actions,
         actants,
@@ -210,7 +210,7 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
 
       return (
         <>
-          <StyledSubRow id={`statement${row.values.id}`}>
+          <StyledSubRow id={`statement${row.original.id}`}>
             <br />
             <StyledGrid>
               {actionObjects.map((action, key) => (
