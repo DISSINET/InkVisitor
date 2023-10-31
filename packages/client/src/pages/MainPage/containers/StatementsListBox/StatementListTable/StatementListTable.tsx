@@ -48,6 +48,7 @@ import {
   StyledTdLastEdit,
   StyledTh,
 } from "./StatementListTableStyles";
+import { setShowWarnings } from "redux/features/statementEditor/showWarningsSlice";
 
 type CellType = CellProps<IResponseStatement>;
 
@@ -97,7 +98,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
   setSelectedRows,
 }) => {
   const dispatch = useAppDispatch();
-  const { territoryId } = useSearchParams();
+  const { territoryId, setStatementId } = useSearchParams();
   const rowsExpanded: { [key: string]: boolean } = useAppSelector(
     (state) => state.statementList.rowsExpanded
   );
@@ -327,7 +328,6 @@ export const StatementListTable: React.FC<StatementListTable> = ({
         id: "warnings",
         Cell: ({ row }: CellType) => {
           const { warnings } = row.original;
-          console.log(warnings);
 
           return (
             <>
@@ -339,6 +339,11 @@ export const StatementListTable: React.FC<StatementListTable> = ({
                   inverted
                   noBorder
                   noBackground
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setStatementId(row.id);
+                    dispatch(setShowWarnings(true));
+                  }}
                 />
               )}
             </>

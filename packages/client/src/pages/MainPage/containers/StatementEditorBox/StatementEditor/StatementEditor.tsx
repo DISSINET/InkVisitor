@@ -18,7 +18,6 @@ import {
   Button,
   Dropdown,
   Input,
-  Loader,
   Message,
   MultiInput,
   Submit,
@@ -42,8 +41,10 @@ import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
 import { AiOutlineWarning } from "react-icons/ai";
 import { FaRegCopy } from "react-icons/fa";
+import { TiWarningOutline } from "react-icons/ti";
 import { toast } from "react-toastify";
-import { useAppSelector } from "redux/hooks";
+import { setShowWarnings } from "redux/features/statementEditor/showWarningsSlice";
+import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { DropdownItem, classesEditorActants, classesEditorTags } from "types";
 import { getEntityLabel, getShortLabelByLetterCount } from "utils";
 import { EntityReferenceTable } from "../../EntityReferenceTable/EntityReferenceTable";
@@ -70,7 +71,6 @@ import { StatementEditorActantTable } from "./StatementEditorActantTable/Stateme
 import { StatementEditorActionTable } from "./StatementEditorActionTable/StatementEditorActionTable";
 import { StatementEditorOrdering } from "./StatementEditorOrdering/StatementEditorOrdering";
 import { StatementEditorSectionButtons } from "./StatementEditorSectionButtons/StatementEditorSectionButtons";
-import { TiWarningOutline } from "react-icons/ti";
 
 interface StatementEditor {
   statement: IResponseStatement;
@@ -540,7 +540,11 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   const [showSubmitSection, setShowSubmitSection] = useState<
     "actants" | "actions" | "references" | false
   >(false);
-  const [showWarnings, setShowWarnings] = useState(false);
+
+  const showWarnings = useAppSelector(
+    (state) => state.statementEditor.showWarnings
+  );
+  const dispatch = useAppDispatch();
 
   return (
     <>
@@ -682,7 +686,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
             <Button
               icon={<TiWarningOutline size={16} />}
               label={`${statement.warnings.length}`}
-              onClick={() => setShowWarnings(!showWarnings)}
+              onClick={() => dispatch(setShowWarnings(!showWarnings))}
               color="warning"
               tooltipLabel={showWarnings ? "hide warnings" : "show warnings"}
               inverted={!showWarnings}

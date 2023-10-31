@@ -19,6 +19,7 @@ import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { StatementListHeader } from "./StatementListHeader/StatementListHeader";
 import { StatementListTable } from "./StatementListTable/StatementListTable";
 import { StyledEmptyState, StyledTableWrapper } from "./StatementLitBoxStyles";
+import { setShowWarnings } from "redux/features/statementEditor/showWarningsSlice";
 
 const initialData: {
   statements: IResponseStatement[];
@@ -391,6 +392,7 @@ export const StatementListBox: React.FC = () => {
           <StatementListTable
             statements={statements}
             handleRowClick={(rowId: string) => {
+              dispatch(setShowWarnings(false));
               setStatementId(rowId);
             }}
             actantsUpdateMutation={statementUpdateMutation}
