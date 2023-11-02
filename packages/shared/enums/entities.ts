@@ -34,6 +34,14 @@ export namespace EntityEnums {
     Event = "E",
   }
 
+  export enum Extension {
+    Any = "*",
+    Empty = "empty",
+    NoClass = "X",
+    Invalid = "?",
+  }
+
+
   export const PLOGESTR = [
     Class.Person,
     Class.Location,
@@ -55,13 +63,31 @@ export namespace EntityEnums {
     Class.Resource,
     Class.Being,
   ];
+  export const ExtendedClasses = [
+    Class.Action,
+    Class.Territory,
+    Class.Statement,
+    Class.Resource,
+    Class.Person,
+    Class.Being,
+    Class.Group,
+    Class.Object,
+    Class.Concept,
+    Class.Location,
+    Class.Value,
+    Class.Event,
+    Extension.Empty,
+  ];
 
-  export enum Extension {
-    Any = "*",
-    Empty = "empty",
-    NoClass = "X",
-    Invalid = "?",
-  }
+  export const LOESBV = [
+    Class.Location,
+    Class.Object,
+    Class.Event,
+    Class.Statement,
+    Class.Being,
+    Class.Value,
+  ];
+
 
   export type ExtendedClass = Class | Extension;
 
@@ -140,6 +166,7 @@ export namespace EntityEnums {
     Allegation = "12",
     Semblance = "13",
     Rectitude = "14",
+    Expectation = "15",
   }
 
   export enum MoodVariant {

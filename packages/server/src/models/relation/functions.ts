@@ -174,22 +174,22 @@ export const getIdentifications = async (
  * recursively search for superordinate location relations
  * @param conn
  */
-export const getSuperordinateLocationTree = async (
+export const getSuperordinateEntityTree = async (
   conn: Connection,
   asClass: EntityEnums.Class,
   parentId: string
-): Promise<EntityTooltip.ISuperordinateLocationTree> => {
-  const out: EntityTooltip.ISuperordinateLocationTree = {
+): Promise<EntityTooltip.ISuperordinateEntityTree> => {
+  const out: EntityTooltip.ISuperordinateEntityTree = {
     entityId: parentId,
     subtrees: [],
   };
 
   if (asClass === EntityEnums.Class.Location) {
-    const locations: RelationTypes.ISuperordinateLocation[] =
+    const locations: RelationTypes.ISuperordinateEntity[] =
       await Relation.findForEntity(
         conn,
         parentId,
-        RelationEnums.Type.SuperordinateLocation,
+        RelationEnums.Type.SuperordinateEntity,
         0
       );
 
@@ -200,7 +200,7 @@ export const getSuperordinateLocationTree = async (
 
     for (const subparentId of subrootIds) {
       out.subtrees.push(
-        await getSuperordinateLocationTree(conn, asClass, subparentId)
+        await getSuperordinateEntityTree(conn, asClass, subparentId)
       );
     }
   }
@@ -209,7 +209,7 @@ export const getSuperordinateLocationTree = async (
 };
 
 export const getEntityIdsFromTree = (
-  tree: EntityTooltip.ISuperordinateLocationTree
+  tree: EntityTooltip.ISuperordinateEntityTree
 ): string[] => {
   const out: string[] = [tree.entityId];
 

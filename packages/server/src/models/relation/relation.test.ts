@@ -1,5 +1,5 @@
 import "ts-jest";
-import { Db } from "@service/RethinkDB";
+import { Db } from "@service/rethink";
 import Relation from "./relation";
 import { clean, newMockRequest } from "@modules/common.test";
 import { prepareEntity } from "@models/entity/entity.test";

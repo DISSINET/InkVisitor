@@ -3,10 +3,11 @@ import { IEntity, IWarning } from "@shared/types";
 import React, { useEffect, useState } from "react";
 import { TiWarningOutline } from "react-icons/ti";
 import { StyledMessage } from "./MessateStyles";
+import { getShortLabelByLetterCount } from "utils";
 
 interface Message {
   warning: IWarning;
-  entities: {
+  entities?: {
     [key: string]: IEntity;
   };
 }
@@ -59,7 +60,11 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
           <span>
             <b>{`Actant's entity type does not match the Action`}</b>
             {position?.section && ` - ${positionObject[position?.section]}`}
-            {entity && ` - [${entity.class}: ${entity.label}]`}
+            {entity &&
+              ` - [${entity.class}: ${getShortLabelByLetterCount(
+                entity.label,
+                200
+              )}]`}
           </span>
         );
       case WarningTypeEnums.ANA:
@@ -67,7 +72,11 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
           <span>
             <b>{`This actant position allows no actant`}</b>
             {position?.section && ` - ${positionObject[position?.section]}`}
-            {entity && ` - [${entity.class}: ${entity.label}]`}
+            {entity &&
+              ` - [${entity.class}: ${getShortLabelByLetterCount(
+                entity.label,
+                200
+              )}]`}
           </span>
         );
       case WarningTypeEnums.WAC:
@@ -82,7 +91,11 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
           <span>
             <b>{`Action valency not defined`}</b>
             {position?.section && ` - ${positionObject[position?.section]}`}
-            {entity && ` - [${entity.class}: ${entity.label}]`}
+            {entity &&
+              ` - [${entity.class}: ${getShortLabelByLetterCount(
+                entity.label,
+                200
+              )}]`}
           </span>
         );
 
@@ -108,7 +121,9 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
 
   return (
     <StyledMessage>
-      <TiWarningOutline size={20} style={{ marginRight: "0.5rem" }} />
+      <div style={{ width: "3rem" }}>
+        <TiWarningOutline size={20} style={{ marginRight: "0.5rem" }} />
+      </div>
       {getWarningMessage(warning)}
     </StyledMessage>
   );

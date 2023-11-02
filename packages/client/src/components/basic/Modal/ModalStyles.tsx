@@ -36,7 +36,7 @@ const getWidth = (width: "full" | "fat" | "normal" | "thin" | number) => {
   } else {
     switch (width) {
       case "full":
-        return "calc(100vw - 40px)";
+        return "calc(100vw - 4rem)";
       case "normal":
         return "50rem";
       case "fat":
@@ -51,6 +51,7 @@ export const StyledCard = styled(animated.div)<Card>`
   height: ${({ $fullHeight }) => ($fullHeight ? "100%" : "")};
   display: flex;
   flex-direction: column;
+  margin: ${({ theme }) => `0 ${theme.space[8]}`};
   max-height: calc(100vh - 8rem);
   z-index: 50;
   background-color: ${({ theme }) => theme.color["gray"][100]};
@@ -93,9 +94,6 @@ export const StyledCardBody = styled.section<StyledCardBody>`
   padding: ${space5} ${space7};
   overflow: ${({ enableScroll }) => (enableScroll ? "auto" : "initial")};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
-  * {
-    user-select: text;
-  }
 `;
 interface StyledFooter {}
 export const StyledFooter = styled.div<StyledFooter>`

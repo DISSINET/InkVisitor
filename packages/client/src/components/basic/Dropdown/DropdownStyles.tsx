@@ -1,3 +1,4 @@
+import { ThemeColor } from "Theme/theme";
 import { FaChevronDown } from "react-icons/fa";
 import Select, { components } from "react-select";
 import styled from "styled-components";
@@ -22,7 +23,7 @@ export const StyledSelectWrapper = styled.div<StyledSelectWrapper>`
 interface StyledSelect {
   width?: number | "full";
   disabled?: boolean;
-  isOneOptionSingleSelect?: boolean;
+  isOneOptionSingleEntitySelect?: boolean;
   suggester?: boolean;
   entityDropdown?: boolean;
   wildCardChar?: boolean;
@@ -56,8 +57,8 @@ export const StyledSelect = styled(Select)<StyledSelect>`
     }
   }
   .react-select__control--is-disabled {
-    background: ${({ isOneOptionSingleSelect }) =>
-      isOneOptionSingleSelect
+    background: ${({ isOneOptionSingleEntitySelect }) =>
+      isOneOptionSingleEntitySelect
         ? ""
         : `repeating-linear-gradient(
       -45deg,
@@ -111,7 +112,7 @@ export const StyledSelect = styled(Select)<StyledSelect>`
   // portal menu style is in global stylesheet
 `;
 interface StyledEntityValue {
-  color?: string;
+  color?: keyof ThemeColor;
 }
 export const StyledEntityValue = styled.div<StyledEntityValue>`
   border-left-style: solid;

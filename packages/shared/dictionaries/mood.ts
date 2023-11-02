@@ -37,6 +37,11 @@ export const moodDict = [
     info: "",
   },
   {
+    value: EntityEnums.Mood.Expectation,
+    label: "expectation",
+    info: "",
+  },
+  {
     value: EntityEnums.Mood.Order,
     label: "order",
     info: "",

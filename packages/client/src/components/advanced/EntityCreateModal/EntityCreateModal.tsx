@@ -54,7 +54,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
   const [selectedCategory, setSelectedCategory] = useState<DropdownItem>(
     categorySelected && categorySelected.value !== DropdownAny
       ? categorySelected
-      : categories[0]
+      : { value: categories[0].value, label: categories[0].value }
   );
 
   const [selectedLanguage, setSelectedLanguage] = useState<
@@ -241,9 +241,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
               <Dropdown
                 width="full"
                 options={languageDict}
-                value={languageDict.find(
-                  (i: any) => i.value === selectedLanguage
-                )}
+                value={languageDict.find((i) => i.value === selectedLanguage)}
                 onChange={(newValue) => {
                   setSelectedLanguage(
                     newValue[0].value as EntityEnums.Language

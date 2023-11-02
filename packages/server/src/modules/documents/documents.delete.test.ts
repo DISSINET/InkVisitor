@@ -1,16 +1,21 @@
 import { clean, testErroneousResponse } from "@modules/common.test";
 import { DocumentDoesNotExist } from "@shared/types/errors";
-import { Db } from "@service/RethinkDB";
+import { Db } from "@service/rethink";
 import request from "supertest";
 import { apiPath } from "@common/constants";
 import app from "../../Server";
 import { supertestConfig } from "..";
 import Document from "@models/document/document";
+import { pool } from "@middlewares/db";
 
 describe("modules/documents DELETE", function () {
+  afterAll(async () => {
+    await pool.end();
+  });
+
   describe("faulty data", () => {
-    it("should return a DocumentDoesNotExist error wrapped in IResponseGeneric", (done) => {
-      return request(app)
+    it("should return a DocumentDoesNotExist error wrapped in IResponseGeneric", async () => {
+      await request(app)
         .delete(`${apiPath}/documents/randomid12345`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
@@ -19,8 +24,7 @@ describe("modules/documents DELETE", function () {
             undefined,
             new DocumentDoesNotExist("", "")
           )
-        )
-        .then(() => done());
+        );
     });
   });
   describe("ok data", () => {

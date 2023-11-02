@@ -4,31 +4,34 @@ import request from "supertest";
 import { apiPath } from "@common/constants";
 import app from "../../Server";
 import { supertestConfig } from "..";
+import { pool } from "@middlewares/db";
 
 describe("Users get", function () {
+  afterAll(async () => {
+    await pool.end();
+  });
+
   describe("Empty param", () => {
-    it("should return a BadParams error wrapped in IResponseGeneric", (done) => {
-      return request(app)
+    it("should return a BadParams error wrapped in IResponseGeneric", async () => {
+      await request(app)
         .get(`${apiPath}/users/`)
         .set("authorization", "Bearer " + supertestConfig.token)
-        .expect(testErroneousResponse.bind(undefined, new BadParams("")))
-        .then(() => done());
+        .expect(testErroneousResponse.bind(undefined, new BadParams("")));
     });
   });
   describe("Wrong param", () => {
-    it("should return a UserDoesNotExits error wrapped in IResponseGeneric", (done) => {
-      return request(app)
+    it("should return a UserDoesNotExits error wrapped in IResponseGeneric", async () => {
+      await request(app)
         .get(`${apiPath}/users/123`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect(
           testErroneousResponse.bind(undefined, new UserDoesNotExits("", ""))
-        )
-        .then(() => done());
+        );
     });
   });
   describe("Correct param", () => {
-    it("should return a 200 code with user response", (done) => {
-      return request(app)
+    it("should return a 200 code with user response", async () => {
+      await request(app)
         .get(`${apiPath}/users/1`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect((res) => {
@@ -37,7 +40,7 @@ describe("Users get", function () {
           res.body.should.have.property("id");
           res.body.id.should.not.empty;
         })
-        .expect(200, done);
+        .expect(200);
     });
   });
 });

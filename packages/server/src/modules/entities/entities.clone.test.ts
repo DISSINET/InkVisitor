@@ -7,25 +7,30 @@ import app from "../../Server";
 import { supertestConfig } from "..";
 import Statement, { StatementTerritory } from "@models/statement/statement";
 import { findEntityById } from "@service/shorthands";
-import { Db } from "@service/RethinkDB";
+import { Db } from "@service/rethink";
 import { prepareEntity } from "@models/entity/entity.test";
 import { prepareRelation } from "@models/relation/relation.test";
 import { RelationEnums } from "@shared/enums";
 import Relation from "@models/relation/relation";
+import { pool } from "@middlewares/db";
 
 describe("Entities clone", function () {
+  afterAll(async () => {
+    await pool.end();
+  });
+
   describe("non existing original entity", () => {
-    it("should return a ModelNotValid error wrapped in IResponseGeneric", (done) => {
-      return request(app)
+    it("should return a ModelNotValid error wrapped in IResponseGeneric", async () => {
+      await request(app)
         .post(`${apiPath}/entities/doesnotexist/clone`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(
           testErroneousResponse.bind(undefined, new EntityDoesNotExist("", ""))
-        )
-        .then(() => done());
+        );
     });
   });
+
   describe("existing invalid source entity", () => {
     const db = new Db();
 
@@ -52,6 +57,7 @@ describe("Entities clone", function () {
         );
     });
   });
+
   describe("existing valid source entity", () => {
     const db = new Db();
     const [, entity] = prepareEntity();

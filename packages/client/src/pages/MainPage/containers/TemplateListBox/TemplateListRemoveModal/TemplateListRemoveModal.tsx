@@ -1,21 +1,12 @@
 import { EntityEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import {
-  Button,
-  ButtonGroup,
-  Loader,
-  Modal,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-} from "components";
-import { EntityTag } from "components/advanced";
+import { Submit } from "components";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
-import { StyledModalContent } from "../TemplateListBoxStyles";
+import { getShortLabelByLetterCount } from "utils";
 
 interface TemplateListRemoveModal {
   removeEntityId: string;
@@ -47,7 +38,10 @@ export const TemplateListRemoveModal: React.FC<TemplateListRemoveModal> = ({
         }
         entityToRemove &&
           toast.warning(
-            `Template [${entityToRemove.class}]: ${entityToRemove.label} was removed`
+            `Template [${entityToRemove.class}]: "${getShortLabelByLetterCount(
+              entityToRemove.label,
+              120
+            )}" was removed`
           );
         queryClient.invalidateQueries(["templates"]);
         if (selectedDetailId) {
@@ -72,46 +66,15 @@ export const TemplateListRemoveModal: React.FC<TemplateListRemoveModal> = ({
   };
 
   return (
-    <Modal
-      key="remove"
-      showModal={showModal}
-      width="thin"
-      onEnterPress={() => {
-        handleRemoveTemplateAccept();
-      }}
-      onClose={() => {
-        setRemoveEntityId(false);
-      }}
-      isLoading={templateRemoveMutation.isLoading}
-    >
-      <ModalHeader title="Remove Template" />
-      <ModalContent>
-        <StyledModalContent>
-          Remove template entity?
-          {entityToRemove && <EntityTag entity={entityToRemove} />}
-        </StyledModalContent>
-      </ModalContent>
-      <ModalFooter>
-        <ButtonGroup>
-          <Button
-            key="cancel"
-            label="Cancel"
-            color="greyer"
-            inverted
-            onClick={() => {
-              setRemoveEntityId(false);
-            }}
-          />
-          <Button
-            key="remove"
-            label="Remove"
-            color="danger"
-            onClick={() => {
-              handleRemoveTemplateAccept();
-            }}
-          />
-        </ButtonGroup>
-      </ModalFooter>
-    </Modal>
+    <Submit
+      show={showModal}
+      onSubmit={handleRemoveTemplateAccept}
+      onCancel={() => setRemoveEntityId(false)}
+      entityToSubmit={entityToRemove && entityToRemove}
+      loading={templateRemoveMutation.isLoading}
+      title="Delete template"
+      text="Delete template entity?"
+      submitLabel="Delete"
+    />
   );
 };

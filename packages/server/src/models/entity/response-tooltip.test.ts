@@ -1,5 +1,5 @@
 import "ts-jest";
-import { Db } from "@service/RethinkDB";
+import { Db } from "@service/rethink";
 import { clean, newMockRequest } from "@modules/common.test";
 import { prepareEntity } from "@models/entity/entity.test";
 import Entity from "@models/entity/entity";
@@ -23,7 +23,9 @@ describe("test ResponseTooltip.getActionEventNodes", function () {
 
     console.log("entity saved");
     // search for AEE
-    const [, relation1] = prepareRelation(RelationEnums.Type.ActionEventEquivalent);
+    const [, relation1] = prepareRelation(
+      RelationEnums.Type.ActionEventEquivalent
+    );
     relation1.entityIds = [entity.id, "2"];
     console.log("relation1", relation1.type, relation1.entityIds);
     await relation1.save(db.connection);
@@ -62,15 +64,23 @@ describe("test ResponseTooltip.getActionEventNodes", function () {
   test("bad class for relation", async () => {
     const entity = new Entity({ class: EntityEnums.Class.Concept });
     const response = new ResponseTooltip(entity);
-    await response.relations.prepare(request, [RelationEnums.Type.ActionEventEquivalent]);
-    expect(response.relations[RelationEnums.Type.ActionEventEquivalent]?.connections).toHaveLength(0);
+    await response.relations.prepare(request, [
+      RelationEnums.Type.ActionEventEquivalent,
+    ]);
+    expect(
+      response.relations[RelationEnums.Type.ActionEventEquivalent]?.connections
+    ).toHaveLength(0);
   });
 
   test("full tree available", async () => {
     const response = new ResponseTooltip(entity);
-    await response.relations.prepare(request, [RelationEnums.Type.ActionEventEquivalent]);
+    await response.relations.prepare(request, [
+      RelationEnums.Type.ActionEventEquivalent,
+    ]);
 
-    const connections = response.relations[RelationEnums.Type.ActionEventEquivalent]?.connections || [];
+    const connections =
+      response.relations[RelationEnums.Type.ActionEventEquivalent]
+        ?.connections || [];
 
     // AEE
     expect(connections).toHaveLength(1); // relation1

@@ -93,8 +93,8 @@ export default Router()
       }
 
       await model.beforeSave(request);
-      const saved = await model.save(request.db.connection);
-      if (!saved) {
+      
+      if (!(await model.save(request.db.connection))) {
         throw new InternalServerError("cannot create relation");
       }
 

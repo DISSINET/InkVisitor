@@ -4,13 +4,18 @@ import request from "supertest";
 import { supertestConfig } from "..";
 import { apiPath } from "@common/constants";
 import app from "../../Server";
-import { Db } from "@service/RethinkDB";
+import { Db } from "@service/rethink";
 import Document from "@models/document/document";
+import { pool } from "@middlewares/db";
 
 describe("modules/documents GET", function () {
+  afterAll(async () => {
+    await pool.end();
+  });
+
   describe("Wrong param", () => {
-    it("should return an DocumentDoesNotExist error wrapped in IResponseGeneric", () => {
-      return request(app)
+    it("should return an DocumentDoesNotExist error wrapped in IResponseGeneric", async () => {
+      await request(app)
         .get(`${apiPath}/documents/123`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect(

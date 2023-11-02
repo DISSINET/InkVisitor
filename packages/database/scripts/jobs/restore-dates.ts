@@ -1,8 +1,8 @@
 import { IAudit, IEntity } from "@shared/types";
-import { r, Connection, RDatum, } from "rethinkdb-ts";
-import { ITask } from ".";
+import { r, Connection } from "rethinkdb-ts";
+import { IJob } from ".";
 
-const restoreDatesTask: ITask = async (db: Connection): Promise<void> => {
+const restoreDatesJob: IJob = async (db: Connection): Promise<void> => {
   const entitiesWithoutCreatedAt = await r.table("entities").
   //filter(function (e: RDatum) {
    // return e.hasFields("createdAt").not()
@@ -30,4 +30,4 @@ const restoreDatesTask: ITask = async (db: Connection): Promise<void> => {
   }
 }
 
-export default restoreDatesTask;
+export default restoreDatesJob;

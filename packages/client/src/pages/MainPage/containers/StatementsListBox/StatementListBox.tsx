@@ -5,13 +5,13 @@ import {
   IResponseStatement,
   IStatement,
 } from "@shared/types";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import { Loader, Submit } from "components";
-import { CStatement, DStatement } from "constructors";
+import { Loader, Submit, ToastWithLink } from "components";
+import { CStatement } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
 import { BsInfoCircle } from "react-icons/bs";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { setStatementListOpened } from "redux/features/layout/statementListOpenedSlice";
 import { setRowsExpanded } from "redux/features/statementList/rowsExpandedSlice";
@@ -124,7 +124,23 @@ export const StatementListBox: React.FC = () => {
     },
     {
       onSuccess: (data, sId) => {
-        toast.info(`Statement removed!`);
+        toast.info(
+          <ToastWithLink
+            children={`Statement removed!`}
+            linkText={"Restore"}
+            onLinkClick={async () => {
+              const response = await api.entityRestore(sId);
+              toast.info("Statement restored");
+              queryClient.invalidateQueries(["detail-tab-entities"]);
+              queryClient.invalidateQueries(["tree"]);
+              queryClient.invalidateQueries(["territory"]);
+            }}
+          />,
+          {
+            autoClose: 5000,
+          }
+        );
+
         if (detailIdArray.includes(sId)) {
           removeDetailId(sId);
           queryClient.invalidateQueries(["detail-tab-entities"]);
@@ -144,7 +160,6 @@ export const StatementListBox: React.FC = () => {
           const { data } = error as any;
           toast.info("Click to open conflicting entity in detail", {
             autoClose: 6000,
-            pauseOnHover: true,
             onClick: () => {
               appendDetailId(data[0]);
             },
@@ -412,6 +427,7 @@ export const StatementListBox: React.FC = () => {
             : statementToDelete?.id
         }]?`}
         show={showSubmit}
+        entityToSubmit={statementToDelete}
         onCancel={() => {
           setShowSubmit(false);
           setStatementToDelete(undefined);

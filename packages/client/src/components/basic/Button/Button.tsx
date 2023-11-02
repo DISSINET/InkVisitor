@@ -51,7 +51,7 @@ export const Button: React.FC<ButtonProps> = ({
     // do nothing
   },
   fullWidth = false,
-  tooltipPosition = "auto",
+  tooltipPosition = "bottom",
 }) => {
   const [referenceElement, setReferenceElement] =
     useState<HTMLButtonElement | null>(null);

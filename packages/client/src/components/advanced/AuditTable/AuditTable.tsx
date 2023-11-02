@@ -55,7 +55,7 @@ export const AuditTableRow: React.FC<AuditTableRow> = ({
   } = useQuery(
     ["user", user],
     async () => {
-      const res = await api.usersGet(user as string);
+      const res = await api.withoutToaster().usersGet(user as string);
       return res.data;
     },
     {
@@ -86,7 +86,7 @@ export const AuditTableRow: React.FC<AuditTableRow> = ({
       <StyledAuditRow>
         <StyledAuditColumn>
           <FaUser />
-          {userData && userData.name}
+          {userData ? userData.name : <i>{"removed user"}</i>}
         </StyledAuditColumn>
         <StyledAuditColumn>
           <FaRegCalendarAlt />

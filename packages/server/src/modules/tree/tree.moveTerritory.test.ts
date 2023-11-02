@@ -4,12 +4,17 @@ import { supertestConfig } from "..";
 import { apiPath } from "@common/constants";
 import app from "../../Server";
 import { ITerritory } from "@shared/types";
-import { Db } from "@service/RethinkDB";
-import { deleteAudits, deleteEntities, deleteRelations, findEntityById } from "@service/shorthands";
+import { Db } from "@service/rethink";
+import {
+  deleteAudits,
+  deleteEntities,
+  deleteRelations,
+  findEntityById,
+} from "@service/shorthands";
 import { EntityEnums } from "@shared/enums";
+import { pool } from "@middlewares/db";
 
 describe("Tree moveTerritory", function () {
-
   const db = new Db();
 
   beforeAll(async () => {
@@ -18,6 +23,7 @@ describe("Tree moveTerritory", function () {
 
   afterAll(async () => {
     await clean(db);
+    await pool.end();
   });
 
   describe("Move T1 after T2", () => {
@@ -38,7 +44,7 @@ describe("Tree moveTerritory", function () {
       expect(t1_2.data.parent ? t1_2.data.parent.order : -1).toEqual(1);
     });
 
-    it("should return a 200 code with IResponseGeneric success response", async (done) => {
+    it("should return a 200 code with IResponseGeneric success response", async () => {
       await request(app)
         .patch(`${apiPath}/tree/${t1.id}/position`)
         .send({
@@ -54,20 +60,23 @@ describe("Tree moveTerritory", function () {
 
       expect(t1.data.parent ? t1.data.parent.order : -1).toEqual(2); // pushed to the end
       expect(t2.data.parent ? t2.data.parent.order : 0).toEqual(1); // remains the same
-
-      return done();
     });
 
     afterAll(async () => {
       await deleteEntities(db);
       await deleteAudits(db);
-      await deleteRelations(db);;
+      await deleteRelations(db);
     });
   });
 
   describe("Move T1-1 under T2", () => {
     const randSuffix = "tree-moveTerritory-" + Math.random().toString();
-    let t1: ITerritory, t2: ITerritory, t1_1: ITerritory, t1_2: ITerritory, t2_1: ITerritory, t2_2: ITerritory;
+    let t1: ITerritory,
+      t2: ITerritory,
+      t1_1: ITerritory,
+      t1_2: ITerritory,
+      t2_1: ITerritory,
+      t2_2: ITerritory;
 
     it("should create valid tree", async () => {
       await createMockTree(db, randSuffix);
@@ -87,7 +96,7 @@ describe("Tree moveTerritory", function () {
       expect(t2_2.data.parent ? t2_2.data.parent.order : -1).toEqual(1);
     });
 
-    it("should return a 200 code with IResponseGeneric success response", async (done) => {
+    it("should return a 200 code with IResponseGeneric success response", async () => {
       await request(app)
         .patch(`${apiPath}/tree/${t1_1.id}/position`)
         .send({
@@ -106,23 +115,32 @@ describe("Tree moveTerritory", function () {
       const new_t2_2 = await findEntityById<ITerritory>(db, t2_2.id);
 
       // should remain unchanged
-      expect(new_t1.data.parent ? new_t1.data.parent.order : -1).toEqual(t1.data.parent ? t1.data.parent.order : -1);
-      expect(new_t1_2.data.parent ? new_t1_2.data.parent.order : -1).toEqual(t1_2.data.parent ? t1_2.data.parent.order : -1);
-      expect(new_t2.data.parent ? new_t2.data.parent.order : -1).toEqual(t2.data.parent ? t2.data.parent.order : -1);
-      expect(new_t2_1.data.parent ? new_t2_1.data.parent.order : -1).toEqual(t2_1.data.parent ? t2_1.data.parent.order : -1);
-      expect(new_t2_2.data.parent ? new_t2_2.data.parent.order : -1).toEqual(t2_2.data.parent ? t2_2.data.parent.order : -1);
+      expect(new_t1.data.parent ? new_t1.data.parent.order : -1).toEqual(
+        t1.data.parent ? t1.data.parent.order : -1
+      );
+      expect(new_t1_2.data.parent ? new_t1_2.data.parent.order : -1).toEqual(
+        t1_2.data.parent ? t1_2.data.parent.order : -1
+      );
+      expect(new_t2.data.parent ? new_t2.data.parent.order : -1).toEqual(
+        t2.data.parent ? t2.data.parent.order : -1
+      );
+      expect(new_t2_1.data.parent ? new_t2_1.data.parent.order : -1).toEqual(
+        t2_1.data.parent ? t2_1.data.parent.order : -1
+      );
+      expect(new_t2_2.data.parent ? new_t2_2.data.parent.order : -1).toEqual(
+        t2_2.data.parent ? t2_2.data.parent.order : -1
+      );
 
       // should be last child under T2
-      expect(new_t1_1.data.parent ? new_t1_1.data.parent.order : -1).toEqual(t2_2.data.parent ? t2_2.data.parent.order + 1 : -1);
-
-      return done();
+      expect(new_t1_1.data.parent ? new_t1_1.data.parent.order : -1).toEqual(
+        t2_2.data.parent ? t2_2.data.parent.order + 1 : -1
+      );
     });
 
     afterAll(async () => {
       await deleteEntities(db);
       await deleteAudits(db);
-      await deleteRelations(db);;
+      await deleteRelations(db);
     });
   });
-
 });

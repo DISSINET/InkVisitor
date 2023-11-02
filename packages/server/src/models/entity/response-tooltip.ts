@@ -28,7 +28,7 @@ export class ResponseTooltip
 
     await this.relations.prepare(request, [
       RelationEnums.Type.Superclass,
-      RelationEnums.Type.SuperordinateLocation,
+      RelationEnums.Type.SuperordinateEntity,
       RelationEnums.Type.Synonym,
       RelationEnums.Type.ActionEventEquivalent,
       RelationEnums.Type.Classification,
@@ -43,7 +43,7 @@ export class ResponseTooltip
     );
     this.addLinkedEntities(
       this.relations.getEntityIdsFromType(
-        RelationEnums.Type.SuperordinateLocation
+        RelationEnums.Type.SuperordinateEntity
       )
     );
     this.addLinkedEntities(
