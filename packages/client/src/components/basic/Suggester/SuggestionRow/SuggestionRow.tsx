@@ -71,7 +71,6 @@ const EntityRow: React.FC<EntityRow> = ({ data, index, style }) => {
             inverted
             noBorder
             noBackground
-            color="none"
             key="link entity"
             noIconMargin
             icon={

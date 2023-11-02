@@ -836,6 +836,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 territoryParentId={statementTerritoryId}
                 excludedActantIds={[statement.id]}
                 isInsideStatement
+                preSuggestions={Object.values(statement.entities)}
               />
             )}
           </StyledEditorSectionContent>

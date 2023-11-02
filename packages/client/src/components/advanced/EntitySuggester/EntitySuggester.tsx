@@ -28,6 +28,8 @@ interface EntitySuggester {
   isInsideStatement?: boolean;
   territoryParentId?: string;
 
+  preSuggestions?: IEntity[];
+
   disableCreate?: boolean;
   disableTemplateInstantiation?: boolean;
   disableWildCard?: boolean;
@@ -58,6 +60,8 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
   isInsideTemplate = false,
   isInsideStatement = false,
   territoryParentId,
+
+  preSuggestions,
 
   disableCreate,
   disableTemplateInstantiation = false,
@@ -354,6 +358,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
         isFetching={isFetchingStatement}
         marginTop={false}
         suggestions={suggestions || []}
+        preSuggestions={preSuggestions}
         placeholder={placeholder}
         typed={typed} // input value
         category={selectedCategory} // selected category

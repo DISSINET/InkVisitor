@@ -60,6 +60,8 @@ interface Suggester {
   disableButtons?: boolean;
   isFetching?: boolean;
 
+  preSuggestions?: IEntity[];
+
   // events
   onType: (newType: string) => void;
   onChangeCategory: (selectedOption: DropdownItem[]) => void;
@@ -91,6 +93,8 @@ export const Suggester: React.FC<Suggester> = ({
   inputWidth = 80,
   disableCreate = false,
   disableButtons = false,
+
+  preSuggestions,
 
   // events
   onType,
@@ -219,6 +223,39 @@ export const Suggester: React.FC<Suggester> = ({
     setSelected(-1);
   };
 
+  const renderEntityPreSuggestions = () => {
+    const itemData: SuggestionRowEntityItemData = createItemData(
+      preSuggestions?.map((preS) => {
+        return {
+          entity: preS,
+        };
+      }),
+      onPick,
+      selected,
+      isInsideTemplate,
+      territoryParentId,
+      disableButtons
+    );
+    const rowHeight = 25;
+    const preSuggestionLength = (preSuggestions ?? []).length;
+    return (
+      <List
+        itemData={itemData as SuggestionRowEntityItemData}
+        height={
+          preSuggestionLength > 7
+            ? rowHeight * 8
+            : rowHeight * preSuggestionLength
+        }
+        itemCount={preSuggestionLength}
+        itemSize={rowHeight}
+        width="100%"
+        overscanCount={scrollOverscanCount}
+      >
+        {MemoizedEntityRow}
+      </List>
+    );
+  };
+
   const renderEntitySuggestions = () => {
     const itemData: SuggestionRowEntityItemData = createItemData(
       suggestions as EntitySuggestion[],
@@ -288,7 +325,7 @@ export const Suggester: React.FC<Suggester> = ({
               onChangeFn={(newType: string) => onTypeFn(newType)}
               placeholder={placeholder}
               suggester
-              changeOnType={true}
+              changeOnType
               width={inputWidth}
               onFocus={() => {
                 setIsFocused(true);
@@ -356,6 +393,42 @@ export const Suggester: React.FC<Suggester> = ({
                   <SuggesterKeyPress
                     onArrowDown={() => {
                       if (selected < suggestions.length - 1)
+                        setSelected(selected + 1);
+                    }}
+                    onArrowUp={() => {
+                      if (selected > -1) setSelected(selected - 1);
+                    }}
+                    dependencyArr={[selected]}
+                  />
+                )}
+              </StyledSuggesterList>
+            </FloatingPortal>
+          </>
+        ) : null}
+
+        {(isFocused || isHovered) &&
+        preSuggestions?.length &&
+        !middlewareData.hide?.referenceHidden &&
+        typed.length === 0 ? (
+          <>
+            <FloatingPortal id="page">
+              <StyledSuggesterList
+                ref={refs.setFloating}
+                noLeftMargin={categories.length === 1}
+                onMouseEnter={() => setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)}
+                style={{
+                  ...floatingStyles,
+                }}
+              >
+                <StyledRelativePosition>
+                  {renderEntityPreSuggestions()}
+                  <Loader size={30} show={isFetching} />
+                </StyledRelativePosition>
+                {!disableEnter && (
+                  <SuggesterKeyPress
+                    onArrowDown={() => {
+                      if (selected < preSuggestions.length - 1)
                         setSelected(selected + 1);
                     }}
                     onArrowUp={() => {
