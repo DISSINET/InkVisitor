@@ -39,7 +39,11 @@ import {
 } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
-import { AiOutlineWarning } from "react-icons/ai";
+import {
+  AiFillCaretRight,
+  AiOutlineCaretDown,
+  AiOutlineWarning,
+} from "react-icons/ai";
 import { FaRegCopy } from "react-icons/fa";
 import { TiWarningOutline } from "react-icons/ti";
 import { toast } from "react-toastify";
@@ -683,27 +687,33 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
         {statement.warnings.length > 0 && (
           <StyledEditorSection>
-            <Button
-              icon={<TiWarningOutline size={16} />}
-              label={`${statement.warnings.length}`}
-              onClick={() => dispatch(setShowWarnings(!showWarnings))}
-              color="warning"
-              tooltipLabel={showWarnings ? "hide warnings" : "show warnings"}
-              inverted={!showWarnings}
-              tooltipPosition="right"
-            />
-            {showWarnings &&
-              statement.warnings
-                .sort((a, b) => a.type.localeCompare(b.type))
-                .map((warning, key) => {
-                  return (
-                    <Message
-                      key={key}
-                      warning={warning}
-                      entities={statement.entities}
-                    />
-                  );
-                })}
+            <StyledEditorSectionHeading>
+              {statement.warnings.length} Warnings{" "}
+              <TiWarningOutline size={16} style={{ marginLeft: "3px" }} />
+            </StyledEditorSectionHeading>
+            <StyledEditorSectionContent>
+              <Button
+                iconRight={
+                  showWarnings ? <AiOutlineCaretDown /> : <AiFillCaretRight />
+                }
+                label={showWarnings ? "hide warnings" : "show warnings"}
+                onClick={() => dispatch(setShowWarnings(!showWarnings))}
+                color="warning"
+                tooltipPosition="right"
+              />
+              {showWarnings &&
+                statement.warnings
+                  .sort((a, b) => a.type.localeCompare(b.type))
+                  .map((warning, key) => {
+                    return (
+                      <Message
+                        key={key}
+                        warning={warning}
+                        entities={statement.entities}
+                      />
+                    );
+                  })}
+            </StyledEditorSectionContent>
           </StyledEditorSection>
         )}
 

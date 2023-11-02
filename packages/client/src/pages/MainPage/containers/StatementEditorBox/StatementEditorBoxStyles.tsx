@@ -72,6 +72,8 @@ export const StyledEditorSectionHeader = styled.div<StyledEditorSectionHeader>`
 `;
 export const StyledEditorSectionHeading = styled.div`
   margin-right: ${({ theme }) => theme.space[2]};
+  align-items: center;
+  display: flex;
 `;
 interface StyledEditorSectionContent {
   firstSection?: boolean;
