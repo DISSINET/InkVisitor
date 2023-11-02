@@ -89,8 +89,13 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   updateStatementDataMutation,
   moveStatementMutation,
 }) => {
-  const { statementId, territoryId, setTerritoryId, appendDetailId } =
-    useSearchParams();
+  const {
+    statementId,
+    territoryId,
+    setTerritoryId,
+    appendDetailId,
+    appendMultipleDetailIds,
+  } = useSearchParams();
 
   const queryClient = useQueryClient();
 
@@ -545,6 +550,14 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     (state) => state.statementEditor.showWarnings
   );
   const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    if (showWarnings && statement.data.actions.length > 0) {
+      appendMultipleDetailIds(
+        Array.from(new Set(statement.data.actions.map((a) => a.actionId)))
+      );
+    }
+  }, [showWarnings]);
 
   return (
     <>
