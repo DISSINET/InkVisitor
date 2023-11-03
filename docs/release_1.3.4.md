@@ -4,6 +4,8 @@
 - Added a new funding body (Czech Ministry of Education, Youth and Sports & European Union) (#1844)
 - Added interactive warning indicators for Statements right into the statement list (#1855)
 - Added functionality to open the detail of the relevant Action when unfolding the warning toggle in the statement editor (#1857)
+- Integrated new warning type - AVAL (Asymmetrical valency)
+
 
 ### Bug fixes and improvements:
 
@@ -12,6 +14,7 @@
 - Improved visuals of the warning messages and general user experience
 - Improved the select template dropdown (#1845)
 - Allowed Superordinate Entity (SOE) to be used between Events and Statements, and vice versa (#1868)
+- Warnings in detail are divided into two sections - Valency and Relations
 
 ### Code refactor:
 
