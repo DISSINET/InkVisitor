@@ -561,7 +561,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         Array.from(new Set(statement.data.actions.map((a) => a.actionId)))
       );
     }
-  }, [showWarnings]);
+  }, [showWarnings, statementId]);
 
   return (
     <>
