@@ -150,12 +150,36 @@ export default class EntityWarnings {
     return null;
   }
 
+  async hasMVAL(conn: Connection): Promise<IWarning | null> {
+    if (this.class !== EntityEnums.Class.Action) {
+      return null;
+    }
+
+    const action = await findEntityById<IAction>(conn, this.entityId);
+    if (!action) {
+      throw new InternalServerError(
+        "action not found while checking MVAL warning"
+      );
+    }
+
+    if (
+      !action.data.entities ||
+      (action.data.entities.a1 === undefined &&
+        action.data.entities.a2 === undefined &&
+        action.data.entities.s === undefined)
+    ) {
+      return this.newWarning(WarningTypeEnums.MVAL);
+    }
+
+    return null;
+  }
+
   /**
-   * Tests if there is MVAL warning and returns it
+   * Tests if there is AVAL warning and returns it
    * @param conn
    * @returns
    */
-  async hasMVAL(conn: Connection): Promise<IWarning | null> {
+  async hasAVAL(conn: Connection): Promise<IWarning | null> {
     if (this.class !== EntityEnums.Class.Action) {
       return null;
     }
@@ -218,19 +242,6 @@ export default class EntityWarnings {
       }
 
       return this.newWarning(WarningTypeEnums.AVAL);
-    }
-
-    return null;
-  }
-
-  /**
-   * Tests if there is AVAL warning and returns it
-   * @param conn
-   * @returns
-   */
-  async hasAVAL(conn: Connection): Promise<IWarning | null> {
-    if (this.class !== EntityEnums.Class.Action) {
-      return null;
     }
 
     return null;
