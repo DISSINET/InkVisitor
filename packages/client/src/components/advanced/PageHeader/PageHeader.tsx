@@ -47,8 +47,17 @@ export const LeftHeader: React.FC<LeftHeader> = React.memo(
     const ping: number = useAppSelector((state) => state.ping);
 
     const [pingColor, setPingColor] = useState<keyof PingColor>("0");
+    const [waitingForServerRestart, setWaitingForServerRestart] =
+      useState(false);
 
     useEffect(() => {
+      if ((ping === -1 || ping === -2) && !waitingForServerRestart) {
+        setWaitingForServerRestart(true);
+      } else if (ping >= 0 && waitingForServerRestart) {
+        queryClient.invalidateQueries();
+        setWaitingForServerRestart(false);
+      }
+
       switch (true) {
         case ping === -2:
           setPingColor("-2");
@@ -113,8 +122,8 @@ export const LeftHeader: React.FC<LeftHeader> = React.memo(
             {ping === -10 && (
               <BeatLoader
                 size={6}
-                margin={5}
-                style={{ marginLeft: "0.2rem", marginTop: "0.1rem" }}
+                margin={4}
+                style={{ marginLeft: "0.3rem", marginTop: "0.1rem" }}
                 color="white"
               />
             )}
