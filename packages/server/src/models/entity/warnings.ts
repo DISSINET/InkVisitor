@@ -3,8 +3,10 @@ import Superclass from "@models/relation/superclass";
 import { findEntityById } from "@service/shorthands";
 import { EntityEnums, RelationEnums, WarningTypeEnums } from "@shared/enums";
 import { IAction, IWarning } from "@shared/types";
+import { IActionValency } from "@shared/types/action";
 import { InternalServerError } from "@shared/types/errors";
 import { Connection } from "rethinkdb-ts";
+import Entity from "./entity";
 
 export default class EntityWarnings {
   entityId: string;
@@ -165,13 +167,57 @@ export default class EntityWarnings {
       );
     }
 
-    if (
-      !action.data.entities ||
-      (action.data.entities.a1 === undefined &&
-        action.data.entities.a2 === undefined &&
-        action.data.entities.s === undefined)
-    ) {
-      return this.newWarning(WarningTypeEnums.MVAL);
+    const relations = (
+      await Relation.findForEntity(conn, this.entityId)
+    ).filter(
+      (r) =>
+        [
+          RelationEnums.Type.SubjectSemantics,
+          RelationEnums.Type.Actant1Semantics,
+          RelationEnums.Type.Actant2Semantics,
+        ].indexOf(r.type) !== -1
+    );
+
+    for (const pos of Object.keys(
+      action.data.valencies
+    ) as (keyof IActionValency)[]) {
+      const types = action.data.entities[pos];
+      const valency = action.data.valencies[pos];
+      const morphosValid = valency && valency.length > 0;
+      const relIds = relations
+        .filter((r) => {
+          if (pos === "s") {
+            return r.type === RelationEnums.Type.SubjectSemantics;
+          } else if (pos === "a1") {
+            return r.type === RelationEnums.Type.Actant1Semantics;
+          } else {
+            return r.type === RelationEnums.Type.Actant2Semantics;
+          }
+        })
+        .reduce((acc, curr) => {
+          acc = acc.concat(curr.entityIds);
+          return acc;
+        }, [] as string[])
+        .filter((id) => id !== this.entityId);
+      const semantFilled = relIds.length > 0;
+      const onlyEmptyAllowed =
+        !types ||
+        !types.length ||
+        (types.length === 1 && types[0] === EntityEnums.Extension.Empty);
+      if (!morphosValid && onlyEmptyAllowed && !relIds.length) {
+        continue;
+      }
+
+      const entitiesSet =
+        relIds.length > 0 &&
+        (types || []).length > 0 &&
+        types?.find((t) => t !== EntityEnums.Extension.Empty);
+
+      if (morphosValid && semantFilled && entitiesSet) {
+        continue;
+      }
+
+      return this.newWarning(WarningTypeEnums.AVAL);
     }
 
     return null;
