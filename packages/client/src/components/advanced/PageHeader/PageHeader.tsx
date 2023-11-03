@@ -118,8 +118,7 @@ export const LeftHeader: React.FC<LeftHeader> = React.memo(
                 color="white"
               />
             )}
-            {ping === -2 && <StyledPingColor pingColor={pingColor} />}
-            {ping >= -1 && <StyledPingColor pingColor={pingColor} />}
+            {ping >= -2 && <StyledPingColor pingColor={pingColor} />}
             {ping >= 0 && <StyledPingText>{ping}ms</StyledPingText>}
           </StyledFlexRow>
         </StyledFlexColumn>
