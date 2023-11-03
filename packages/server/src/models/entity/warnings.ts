@@ -23,10 +23,16 @@ export default class EntityWarnings {
    * @param relId
    * @returns new instance of warning
    */
-  newWarning(warningType: WarningTypeEnums, relId?: string): IWarning {
+  newWarning(
+    warningType: WarningTypeEnums,
+    pos?: keyof IActionValency
+  ): IWarning {
     return {
       type: warningType,
-      origin: relId || "",
+      position: {
+        section: pos,
+      },
+      origin: "",
     };
   }
 
@@ -241,7 +247,7 @@ export default class EntityWarnings {
         continue;
       }
 
-      return this.newWarning(WarningTypeEnums.AVAL);
+      return this.newWarning(WarningTypeEnums.AVAL, pos);
     }
 
     return null;
