@@ -10,6 +10,9 @@ deploy-dev-backend:
 deploy-dev-frontend:
 	git checkout master && git pull && cd ./packages/client && npm run build && cd ../.. && ./deploy-dev-frontend.sh
 
+build-production:
+	docker build -f Dockerfile -t inkvisitor:production --build-arg="ENV=production" . && docker save inkvisitor:production -o inkvisitor-production.tar
+
 build-staging:
 	docker build -f Dockerfile -t inkvisitor:staging --build-arg="ENV=staging" . && docker save inkvisitor:staging -o inkvisitor-staging.tar
 
