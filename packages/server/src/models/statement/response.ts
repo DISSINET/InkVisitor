@@ -7,16 +7,16 @@ import {
   IStatement,
 } from "@shared/types";
 import { OrderType } from "@shared/types/response-statement";
-import { IWarning, IWarningPosition } from "@shared/types/warning";
+import { IWarning, IWarningPosition, IWarningPositionSection } from "@shared/types/warning";
 
+import { ActionEntity } from "@models/action/action";
 import { WarningTypeEnums } from "@shared/enums";
+import { InternalServerError } from "@shared/types/errors";
 import { Connection } from "rethinkdb-ts";
 import { IRequest } from "src/custom_typings/request";
-import Statement from "./statement";
 import Entity from "../entity/entity";
-import { InternalServerError } from "@shared/types/errors";
-import { ActionEntity } from "@models/action/action";
 import { PositionRules } from "./PositionRules";
+import Statement from "./statement";
 
 export class ResponseStatement extends Statement implements IResponseStatement {
   entities: { [key: string]: IEntity };
@@ -128,7 +128,8 @@ export class ResponseStatement extends Statement implements IResponseStatement {
         if (entity && !allowedClasses.includes(entity.class)) {
           warnings.push(
             this.newStatementWarning(warningType, {
-              section: `${position}`,
+              section: IWarningPositionSection.Statement,
+              subSection: `${position}`,
               entityId: a.entityId,
               actantId: a.id,
             })
@@ -158,33 +159,39 @@ export class ResponseStatement extends Statement implements IResponseStatement {
       position
     );
 
+    if (rules.mismatch) {
+      warnings.push(
+        this.newStatementWarning(WarningTypeEnums.WAC, {
+          section: IWarningPositionSection.Statement,
+          subSection: `${position}`,
+        })
+      );
+    }
+
+    if (!rules.mismatch && !actants.length) {
+      if (!rules.allowsEmpty() && !rules.allUndefined) {
+        warnings.push(
+          this.newStatementWarning(WarningTypeEnums.MA, {
+            section: IWarningPositionSection.Statement,
+            subSection: `${position}`,
+          })
+        );
+      } else if (rules.allUndefined) {
+        return warnings;
+      }
+    }
+
     rules.undefinedActions.forEach((actionId) => {
       warnings.push(
         this.newStatementWarning(WarningTypeEnums.AVU, {
-          section: position,
+          section: IWarningPositionSection.Statement,
+          subSection: position,
           entityId: actionId,
         })
       );
     });
 
-    if (!actants.length && !rules.allEmpty) {
-      warnings.push(
-        this.newStatementWarning(WarningTypeEnums.MA, {
-          section: `${position}`,
-        })
-      );
-    }
-
-    if (rules.mismatch) {
-      const MAindex = warnings.findIndex((w) => w.type === WarningTypeEnums.MA);
-      if (MAindex !== -1) {
-        warnings.splice(MAindex, 1);
-      }
-      warnings.push(
-        this.newStatementWarning(WarningTypeEnums.WAC, {
-          section: `${position}`,
-        })
-      );
+    if (rules.allUndefined || rules.mismatch) {
       return warnings;
     }
 
@@ -199,10 +206,11 @@ export class ResponseStatement extends Statement implements IResponseStatement {
 
         if (!actionRules) {
           // action rules undefined for this position - only common warning should be returned (AVU)
-        } else if (PositionRules.isRuleEmpty(actionRules)) {
+        } else if (PositionRules.allowsOnlyEmpty(actionRules)) {
           warnings.push(
             this.newStatementWarning(WarningTypeEnums.ANA, {
-              section: `${position}`,
+              section: IWarningPositionSection.Statement,
+              subSection: `${position}`,
               actantId: stActant.id,
               entityId: stActant.entityId,
             })
@@ -210,7 +218,8 @@ export class ResponseStatement extends Statement implements IResponseStatement {
         } else if (!actionRules.includes(actant.class)) {
           warnings.push(
             this.newStatementWarning(WarningTypeEnums.WA, {
-              section: `${position}`,
+              section: IWarningPositionSection.Statement,
+              subSection: `${position}`,
               actantId: stActant.id,
               entityId: stActant.entityId,
             })

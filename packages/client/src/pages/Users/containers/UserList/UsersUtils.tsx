@@ -69,7 +69,7 @@ export const UsersUtils: React.FC<UsersUtils> = React.memo(({}) => {
           label="new user"
           tooltipLabel="create user"
           disabled={!(validNewUserEmail() && validNewUserName)}
-          icon={<FaPlus size={14} />}
+          icon={<FaPlus />}
           color="primary"
           onClick={() => {
             createNewUserMutataion.mutate();

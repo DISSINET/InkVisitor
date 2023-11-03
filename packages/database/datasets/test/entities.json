@@ -1,0 +1,200 @@
+[
+    {
+        "id": "0.07956077734737166",
+        "class": "A",
+        "status": "1",
+        "data": {
+            "status": "0",
+            "pos": "verb",
+            "valencies": {
+                "a1": "",
+                "a2": "",
+                "s": ""
+            },
+            "entities": {}
+        },
+        "label": "Action 1",
+        "detail": "",
+        "language": "",
+        "notes": [],
+        "props": [],
+        "references": []
+    },
+    {
+        "id": "0.14773065892513793",
+        "class": "A",
+        "status": "1",
+        "data": {
+            "status": "0",
+            "pos": "verb",
+            "valencies": {
+                "a1": "",
+                "a2": "",
+                "s": ""
+            },
+            "entities": {}
+        },
+        "label": "Action 2",
+        "detail": "",
+        "language": "",
+        "notes": [],
+        "props": [],
+        "references": []
+    },
+    {
+        "id": "0.9198268479493097",
+        "class": "A",
+        "status": "1",
+        "data": {
+            "status": "0",
+            "pos": "verb",
+            "valencies": {
+                "a1": "",
+                "a2": "",
+                "s": ""
+            },
+            "entities": {}
+        },
+        "label": "Action 3",
+        "detail": "",
+        "language": "",
+        "notes": [],
+        "props": [],
+        "references": []
+    },
+    {
+        "id": "0.36838502478796054",
+        "class": "A",
+        "status": "1",
+        "data": {
+            "status": "0",
+            "pos": "verb",
+            "valencies": {
+                "a1": "",
+                "a2": "",
+                "s": ""
+            },
+            "entities": {}
+        },
+        "label": "Action 4",
+        "detail": "",
+        "language": "",
+        "notes": [],
+        "props": [],
+        "references": []
+    },
+    {
+        "id": "0.43562994650453146",
+        "class": "A",
+        "status": "1",
+        "data": {
+            "status": "0",
+            "pos": "verb",
+            "valencies": {
+                "a1": "",
+                "a2": "",
+                "s": ""
+            },
+            "entities": {}
+        },
+        "label": "Action 5",
+        "detail": "",
+        "language": "",
+        "notes": [],
+        "props": [],
+        "references": []
+    },
+    {
+        "id": "0.9785122627887828",
+        "class": "A",
+        "status": "1",
+        "data": {
+            "status": "0",
+            "pos": "verb",
+            "valencies": {
+                "a1": "",
+                "a2": "",
+                "s": ""
+            },
+            "entities": {}
+        },
+        "label": "Action 6",
+        "detail": "",
+        "language": "",
+        "notes": [],
+        "props": [],
+        "references": []
+    },
+    {
+        "id": "T0",
+        "class": "T",
+        "status": "1",
+        "data": {
+            "parent": false
+        },
+        "label": "Territory root",
+        "detail": "",
+        "language": "",
+        "notes": [],
+        "props": [],
+        "references": []
+    },
+    {
+        "id": "0.6803061625862785",
+        "class": "S",
+        "status": "1",
+        "data": {
+            "text": "",
+            "actions": [],
+            "actants": [],
+            "tags": [],
+            "territory": {
+                "territoryId": "T0",
+                "order": -1
+            }
+        },
+        "label": "Statement 1",
+        "detail": "",
+        "language": "",
+        "notes": [],
+        "props": [],
+        "references": []
+    },
+    {
+        "id": "0.2806822650387928",
+        "class": "S",
+        "status": "1",
+        "data": {
+            "text": "",
+            "actions": [],
+            "actants": [],
+            "tags": [],
+            "territory": {
+                "territoryId": "T0",
+                "order": -1
+            }
+        },
+        "label": "Statement 2",
+        "detail": "",
+        "language": "",
+        "notes": [],
+        "props": [],
+        "references": []
+    },
+    {
+        "id": "0.8586537029736159",
+        "class": "R",
+        "status": "1",
+        "data": {
+            "url": "",
+            "partValueLabel": "",
+            "partValueBaseURL": ""
+        },
+        "label": "Resource 1",
+        "detail": "",
+        "language": "",
+        "notes": [],
+        "props": [],
+        "references": []
+    }
+]

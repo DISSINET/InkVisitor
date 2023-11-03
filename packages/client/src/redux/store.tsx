@@ -22,6 +22,7 @@ import disableStatementListScrollSlice from "./features/statementList/disableSta
 import disableTreeScrollSlice from "./features/territoryTree/disableTreeScrollSlice";
 import filterOpenSlice from "./features/territoryTree/filterOpenSlice";
 import pingSlice from "./features/pingSlice";
+import showWarningsSlice from "./features/statementEditor/showWarningsSlice";
 
 const store: Store = configureStore({
   reducer: {
@@ -39,6 +40,9 @@ const store: Store = configureStore({
       draggedRowId: draggedRowIdSlice,
       lastClickedIndex: lastClickedIndexSlice,
       disableStatementListScroll: disableStatementListScrollSlice,
+    }),
+    statementEditor: combineReducers({
+      showWarnings: showWarningsSlice,
     }),
     rowDnd: combineReducers({
       draggedPropRow: draggedPropRowSlice,

@@ -1,21 +1,22 @@
 import {
   actantLogicalTypeDict,
+  actionPartOfSpeechDict,
+  conceptPartOfSpeechDict,
   entitiesDictKeys,
   entityStatusDict,
   languageDict,
-  conceptPartOfSpeechDict,
-  actionPartOfSpeechDict,
 } from "@shared/dictionaries";
 import { EntityEnums } from "@shared/enums";
 import { IResponseDetail, IResponseGeneric } from "@shared/types";
+import { UseMutationResult, useQuery } from "@tanstack/react-query";
+import { rootTerritoryId } from "Theme/constants";
+import api from "api";
 import { AxiosResponse } from "axios";
 import { Button, Dropdown, Input, MultiInput, TypeBar } from "components";
 import { AttributeButtonGroup, EntityTag } from "components/advanced";
 import React, { useMemo } from "react";
 import { FaRegCopy } from "react-icons/fa";
-import { UseMutationResult, useQuery } from "@tanstack/react-query";
 import { toast } from "react-toastify";
-import { rootTerritoryId } from "Theme/constants";
 import { DropdownItem } from "types";
 import {
   StyledDetailContentRow,
@@ -27,7 +28,6 @@ import {
   StyledRelativePosition,
   StyledTagWrap,
 } from "../EntityDetailStyles";
-import api from "api";
 
 interface EntityDetailFormSection {
   entity: IResponseDetail;
@@ -160,10 +160,11 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
             </StyledDetailContentRowLabel>
             <StyledDetailContentRowValue>
               <Dropdown
-                disabled={!userCanEdit}
+                placeholder="select template.."
+                disabled={!userCanEdit || templateOptions.length === 0}
                 width="full"
+                value={null}
                 options={templateOptions}
-                value={templateOptions[0]}
                 onChange={(templateToApply) => {
                   handleAskForTemplateApply(templateToApply[0]);
                 }}

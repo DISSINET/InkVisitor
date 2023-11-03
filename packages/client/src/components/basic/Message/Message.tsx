@@ -3,6 +3,7 @@ import { IEntity, IWarning } from "@shared/types";
 import React, { useEffect, useState } from "react";
 import { TiWarningOutline } from "react-icons/ti";
 import { StyledMessage } from "./MessateStyles";
+import { getShortLabelByLetterCount } from "utils";
 
 interface Message {
   warning: IWarning;
@@ -48,7 +49,9 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
           <span>
             <b style={{ whiteSpace: "nowrap" }}>
               Missing{" "}
-              {position?.section ? positionObject[position?.section] : "actant"}
+              {position?.subSection
+                ? positionObject[position?.subSection]
+                : "actant"}
               :{" "}
             </b>
             {"at least one actant of a matching type should be used"}
@@ -58,31 +61,47 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
         return (
           <span>
             <b>{`Actant's entity type does not match the Action`}</b>
-            {position?.section && ` - ${positionObject[position?.section]}`}
-            {entity && ` - [${entity.class}: ${entity.label}]`}
+            {position?.subSection &&
+              ` - ${positionObject[position?.subSection]}`}
+            {entity &&
+              ` - [${entity.class}: ${getShortLabelByLetterCount(
+                entity.label,
+                200
+              )}]`}
           </span>
         );
       case WarningTypeEnums.ANA:
         return (
           <span>
             <b>{`This actant position allows no actant`}</b>
-            {position?.section && ` - ${positionObject[position?.section]}`}
-            {entity && ` - [${entity.class}: ${entity.label}]`}
+            {position?.subSection &&
+              ` - ${positionObject[position?.subSection]}`}
+            {entity &&
+              ` - [${entity.class}: ${getShortLabelByLetterCount(
+                entity.label,
+                200
+              )}]`}
           </span>
         );
       case WarningTypeEnums.WAC:
         return (
           <span>
             <b>{`Entity type valencies of the actions not matching`}</b>
-            {position?.section && ` - ${positionObject[position?.section]}`}
+            {position?.subSection &&
+              ` - ${positionObject[position?.subSection]}`}
           </span>
         );
       case WarningTypeEnums.AVU:
         return (
           <span>
             <b>{`Action valency not defined`}</b>
-            {position?.section && ` - ${positionObject[position?.section]}`}
-            {entity && ` - [${entity.class}: ${entity.label}]`}
+            {position?.subSection &&
+              ` - ${positionObject[position?.subSection]}`}
+            {entity &&
+              ` - [${entity.class}: ${getShortLabelByLetterCount(
+                entity.label,
+                200
+              )}]`}
           </span>
         );
 
@@ -98,7 +117,13 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
       case WarningTypeEnums.MVAL:
         return <b>Missing at least one entity-type valency</b>;
       case WarningTypeEnums.AVAL:
-        return <b>Asymmetrical valency</b>;
+        return (
+          <span>
+            <b>Asymmetrical valency </b>
+            {position?.subSection &&
+              ` - ${positionObject[position?.subSection]}`}
+          </span>
+        );
       case WarningTypeEnums.MAEE:
         return <b>Missing action/event equivalent</b>;
       default:
@@ -108,7 +133,9 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
 
   return (
     <StyledMessage>
-      <TiWarningOutline size={20} style={{ marginRight: "0.5rem" }} />
+      <div style={{ width: "3rem" }}>
+        <TiWarningOutline size={20} style={{ marginRight: "0.5rem" }} />
+      </div>
       {getWarningMessage(warning)}
     </StyledMessage>
   );

@@ -44,7 +44,7 @@ export const StatementListRow: React.FC<StatementListRow> = ({
 }) => {
   const dispatch = useAppDispatch();
 
-  const rowsExpanded: boolean[] = useAppSelector(
+  const rowsExpanded: { [key: string]: boolean } = useAppSelector(
     (state) => state.statementList.rowsExpanded
   );
   const draggedRowId: string = useAppSelector(
@@ -77,7 +77,7 @@ export const StatementListRow: React.FC<StatementListRow> = ({
 
   useEffect(() => {
     isDragging
-      ? dispatch(setDraggedRowId(row.values.id))
+      ? dispatch(setDraggedRowId(row.original.id))
       : dispatch(setDraggedRowId(""));
   }, [isDragging]);
 
@@ -91,7 +91,7 @@ export const StatementListRow: React.FC<StatementListRow> = ({
         opacity={opacity}
         isOpened={row.original.id === statementId}
         isSelected={isSelected}
-        onClick={(e: any) => {
+        onClick={(e) => {
           handleClick(row.original.id);
           e.stopPropagation();
         }}
@@ -117,7 +117,7 @@ export const StatementListRow: React.FC<StatementListRow> = ({
           }
         })}
       </StyledTr>
-      {rowsExpanded[row.values.id] && !draggedRowId ? (
+      {rowsExpanded[row.original.id] && !draggedRowId ? (
         <StatementListRowExpanded
           row={row}
           visibleColumns={visibleColumns}

@@ -20,6 +20,27 @@ services:
       - "8080:8080" # required only for public access
       - "28015:28015" # dashboard - required only for public access
 
+  inkvisitor-development:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        ENV: development
+    image: inkvisitor:development
+    container_name: inkvisitor-development
+    restart: always
+    <<: *logging
+    env_file:
+      - ./packages/server/env/.env.development
+    environment:
+      - DB_HOST=database
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./inkvisitor-development-client:/app/client/dist
+    networks:
+      - inkvisitor
+
   inkvisitor-production:
     build:
       context: .
@@ -67,13 +88,9 @@ services:
     image: inkvisitor:sandbox
     container_name: inkvisitor-sandbox
     restart: always
-    logging:
-      options:
-        max-size: "10m"
-        max-file: "2"
-    # needs to be present when building
-    # env_file:
-    #  - ./packages/server/env/.env.sandbox
+    <<: *logging
+    env_file:
+      - ./packages/server/env/.env.sandbox
     ports:
       - "3011:3000"
     volumes:

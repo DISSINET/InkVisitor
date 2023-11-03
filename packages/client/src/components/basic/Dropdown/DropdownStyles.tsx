@@ -23,7 +23,7 @@ export const StyledSelectWrapper = styled.div<StyledSelectWrapper>`
 interface StyledSelect {
   width?: number | "full";
   disabled?: boolean;
-  isOneOptionSingleSelect?: boolean;
+  isOneOptionSingleEntitySelect?: boolean;
   suggester?: boolean;
   entityDropdown?: boolean;
   wildCardChar?: boolean;
@@ -57,8 +57,8 @@ export const StyledSelect = styled(Select)<StyledSelect>`
     }
   }
   .react-select__control--is-disabled {
-    background: ${({ isOneOptionSingleSelect }) =>
-      isOneOptionSingleSelect
+    background: ${({ isOneOptionSingleEntitySelect }) =>
+      isOneOptionSingleEntitySelect
         ? ""
         : `repeating-linear-gradient(
       -45deg,

@@ -17,7 +17,7 @@ class MockResponse extends ResponseStatement {
   }
 
   // @ts-ignore
-  addAction(map: { [key: EntityEnums.Position]: EntityEnums.Class[] }) {
+  addAction(map: { [key: EntityEnums.Position]: EntityEnums.ExtendedClass[] }) {
     const action = new Action({
       id: `action-${this.data.actions.length + 1}`,
     });
@@ -163,13 +163,162 @@ describe("models/statement/response", function () {
             ws.find(
               (w) =>
                 w.type === WarningTypeEnums.WA &&
-                w.position.entityId === location.id
+                w.position?.entityId === location.id
             )
           ).toBeTruthy();
         });
       });
 
-      describe("empty", () => {
+      describe("[empty]", () => {
+        it("should return OK for no actant", () => {
+          const response = MockResponse.new();
+          response.addAction({
+            [EntityEnums.Position.Subject]: [EntityEnums.Extension.Empty],
+          });
+          const ws = response.getWarningsForPosition(
+            EntityEnums.Position.Subject
+          );
+          expect(ws).toHaveLength(0);
+        });
+
+        it("should return ANA for P actant", () => {
+          const response = MockResponse.new();
+          response.addAction({
+            [EntityEnums.Position.Subject]: [EntityEnums.Extension.Empty],
+          });
+          const act1 = response.addActant(
+            new Person({ id: "person" }),
+            EntityEnums.Position.Subject
+          );
+          const ws = response.getWarningsForPosition(
+            EntityEnums.Position.Subject
+          );
+          expect(
+            ws.filter((w) => w.type === WarningTypeEnums.ANA)
+          ).toHaveLength(1);
+          expect(ws).toHaveLength(1);
+        });
+
+        it("should return ANA for P/G actants", () => {
+          const response = MockResponse.new();
+          response.addAction({
+            [EntityEnums.Position.Subject]: [EntityEnums.Extension.Empty],
+          });
+          const act1 = response.addActant(
+            new Person({ id: "person" }),
+            EntityEnums.Position.Subject
+          );
+          const act2 = response.addActant(
+            new Group({ id: "group" }),
+            EntityEnums.Position.Subject
+          );
+          const ws = response.getWarningsForPosition(
+            EntityEnums.Position.Subject
+          );
+          expect(
+            ws.filter(
+              (w) =>
+                w.type === WarningTypeEnums.ANA &&
+                w.position?.entityId === act1.id
+            )
+          ).toHaveLength(1);
+          expect(
+            ws.filter(
+              (w) =>
+                w.type === WarningTypeEnums.ANA &&
+                w.position?.entityId === act2.id
+            )
+          ).toHaveLength(1);
+          expect(ws).toHaveLength(2);
+        });
+      });
+
+      describe("[empty, P]", () => {
+        it("should return OK for no actant", () => {
+          const response = MockResponse.new();
+          response.addAction({
+            [EntityEnums.Position.Subject]: [
+              EntityEnums.Extension.Empty,
+              EntityEnums.Class.Person,
+            ],
+          });
+          const ws = response.getWarningsForPosition(
+            EntityEnums.Position.Subject
+          );
+          expect(ws).toHaveLength(0);
+        });
+
+        it("should return OK for P actant", () => {
+          const response = MockResponse.new();
+          response.addAction({
+            [EntityEnums.Position.Subject]: [
+              EntityEnums.Extension.Empty,
+              EntityEnums.Class.Person,
+            ],
+          });
+          const act1 = response.addActant(
+            new Person({ id: "person" }),
+            EntityEnums.Position.Subject
+          );
+          const ws = response.getWarningsForPosition(
+            EntityEnums.Position.Subject
+          );
+          expect(ws).toHaveLength(0);
+        });
+
+        it("should return OK for P actants", () => {
+          const response = MockResponse.new();
+          response.addAction({
+            [EntityEnums.Position.Subject]: [
+              EntityEnums.Extension.Empty,
+              EntityEnums.Class.Person,
+            ],
+          });
+          const act1 = response.addActant(
+            new Person({ id: "person" }),
+            EntityEnums.Position.Subject
+          );
+          const act2 = response.addActant(
+            new Person({ id: "person2" }),
+            EntityEnums.Position.Subject
+          );
+          const ws = response.getWarningsForPosition(
+            EntityEnums.Position.Subject
+          );
+          expect(ws).toHaveLength(0);
+        });
+
+        it("should return WA for one other actant", () => {
+          const response = MockResponse.new();
+          response.addAction({
+            [EntityEnums.Position.Subject]: [
+              EntityEnums.Extension.Empty,
+              EntityEnums.Class.Person,
+            ],
+          });
+          const grp1 = response.addActant(
+            new Group({ id: "group" }),
+            EntityEnums.Position.Subject
+          );
+          const act2 = response.addActant(
+            new Person({ id: "person2" }),
+            EntityEnums.Position.Subject
+          );
+          const ws = response.getWarningsForPosition(
+            EntityEnums.Position.Subject
+          );
+          expect(
+            ws.filter(
+              (w) =>
+                w.type === WarningTypeEnums.WA &&
+                w.position?.entityId === grp1.id
+            )
+          ).toHaveLength(1);
+          expect(ws).toHaveLength(1);
+        });
+      });
+
+      describe("undefined", () => {
         it("should return OK for no actant", () => {
           const response = MockResponse.new();
           response.addAction({ [EntityEnums.Position.Subject]: [] });
@@ -179,7 +328,7 @@ describe("models/statement/response", function () {
           expect(ws).toHaveLength(0);
         });
 
-        it("should return ANA for empty rules", () => {
+        it("should return AVU for empty rules", () => {
           const response = MockResponse.new();
           response.addAction({ [EntityEnums.Position.Subject]: [] });
           const act1 = response.addActant(
@@ -195,20 +344,15 @@ describe("models/statement/response", function () {
             EntityEnums.Position.Subject
           );
           expect(
-            ws.filter(
-              (w) =>
-                (w.type === WarningTypeEnums.ANA &&
-                  w.position.entityId === act1.id) ||
-                w.position.entityId === act2.id
-            )
-          ).toHaveLength(2);
-          expect(ws).toHaveLength(2);
+            ws.filter((w) => w.type === WarningTypeEnums.AVU)
+          ).toHaveLength(1);
+          expect(ws).toHaveLength(1);
         });
       });
     });
 
     describe("2 actions", () => {
-      describe("any + any", () => {
+      describe("[any] + [any]", () => {
         const prepareResponse = () => {
           const response = MockResponse.new();
           response.addAction({
@@ -243,7 +387,7 @@ describe("models/statement/response", function () {
         });
       });
 
-      describe("any + P", () => {
+      describe("[any] + [P]", () => {
         const prepareResponse = () => {
           const response = MockResponse.new();
           response.addAction({
@@ -291,7 +435,7 @@ describe("models/statement/response", function () {
               ws.find(
                 (w) =>
                   w.type === WarningTypeEnums.WA &&
-                  w.position.entityId === group.id
+                  w.position?.entityId === group.id
               )
             ).toBeTruthy();
           });
@@ -320,32 +464,28 @@ describe("models/statement/response", function () {
               ws.find(
                 (w) =>
                   w.type === WarningTypeEnums.WA &&
-                  w.position.entityId === group.id
+                  w.position?.entityId === group.id
               )
             ).toBeTruthy();
           });
         });
       });
 
-      describe("any + empty", () => {
+      describe("[any] + [empty]", () => {
         const prepareResponse = () => {
           const response = MockResponse.new();
           response.addAction({
             [EntityEnums.Position.Subject]: EntityEnums.PLOGESTRB,
           });
           response.addAction({
-            [EntityEnums.Position.Subject]: [],
+            [EntityEnums.Position.Subject]: [EntityEnums.Extension.Empty],
           });
 
           return response;
         };
 
-        it("should return WAC for P", () => {
+        it("should return WAC for no actant", () => {
           const response = prepareResponse();
-          response.addActant(
-            new Person({ id: "person1" }),
-            EntityEnums.Position.Subject
-          );
           const ws = response.getWarningsForPosition(
             EntityEnums.Position.Subject
           );
@@ -353,8 +493,12 @@ describe("models/statement/response", function () {
           expect(ws.find((w) => w.type === WarningTypeEnums.WAC)).toBeTruthy();
         });
 
-        it("should return WAC for no actant", () => {
+        it("should return WAC for P", () => {
           const response = prepareResponse();
+          response.addActant(
+            new Person({ id: "person1" }),
+            EntityEnums.Position.Subject
+          );
           const ws = response.getWarningsForPosition(
             EntityEnums.Position.Subject
           );
@@ -380,7 +524,7 @@ describe("models/statement/response", function () {
         });
       });
 
-      describe("P + [A,G]", () => {
+      describe("[P] + [A,G]", () => {
         const prepareResponse = () => {
           const response = MockResponse.new();
           response.addAction({
@@ -431,7 +575,7 @@ describe("models/statement/response", function () {
         });
       });
 
-      describe("P + [P,G]", () => {
+      describe("[P] + [P,G]", () => {
         const prepareResponse = () => {
           const response = MockResponse.new();
           response.addAction({
@@ -500,13 +644,15 @@ describe("models/statement/response", function () {
         });
       });
 
-      describe("P + undefined", () => {
+      describe("[P] + [undefined]", () => {
         const prepareResponse = () => {
           const response = MockResponse.new();
           response.addAction({
             [EntityEnums.Position.Subject]: [EntityEnums.Class.Person],
           });
-          response.addAction({});
+          response.addAction({
+            [EntityEnums.Position.Subject]: [],
+          });
           return response;
         };
 
@@ -553,11 +699,11 @@ describe("models/statement/response", function () {
         });
       });
 
-      describe("empty + empty", () => {
+      describe("[empty] + [empty]", () => {
         const prepareResponse = () => {
           const response = MockResponse.new();
           response.addAction({
-            [EntityEnums.Position.Subject]: [],
+            [EntityEnums.Position.Subject]: [EntityEnums.Extension.Empty],
           });
           response.addAction({
             [EntityEnums.Position.Subject]: [EntityEnums.Extension.Empty],

@@ -7,13 +7,13 @@ import {
   useDrop,
 } from "react-dnd";
 import { FaGripVertical } from "react-icons/fa";
-import { Cell, ColumnInstance } from "react-table";
+import { ColumnInstance, Row } from "react-table";
 import { DragItem, ItemTypes } from "types";
 import { dndHoverFn } from "utils";
 import { StyledTd, StyledTr } from "./EntityBookmarkTableStyles";
 
 interface EntityBookmarkTableRow {
-  row: any;
+  row: Row<IEntity>;
   index: number;
   moveRow: (dragIndex: number, hoverIndex: number) => void;
   folder: IResponseBookmarkFolder;
@@ -67,7 +67,7 @@ export const EntityBookmarkTableRow: React.FC<EntityBookmarkTableRow> = ({
         ) : (
           <td style={{ width: "2rem" }} />
         )}
-        {row.cells.map((cell: Cell) => {
+        {row.cells.map((cell) => {
           return (
             <StyledTd {...cell.getCellProps()}>{cell.render("Cell")}</StyledTd>
           );

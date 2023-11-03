@@ -1,9 +1,10 @@
 import { EntityEnums, RelationEnums } from "@shared/enums";
 import Relation from "./relation";
 import { Relation as RelationTypes } from "@shared/types";
-import { IRequest } from "src/custom_typings/request";
+
 import { nonenumerable } from "@common/decorators";
 import { Connection } from "rethinkdb-ts";
+import { IRequest } from "../../custom_typings/request";
 
 export default class Synonym
   extends Relation

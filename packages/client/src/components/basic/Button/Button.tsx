@@ -19,6 +19,7 @@ interface ButtonProps {
   tooltipContent?: ReactElement[] | ReactElement;
   label?: string;
   icon?: JSX.Element | EntityEnums.Operator;
+  iconRight?: JSX.Element | EntityEnums.Operator;
   noIconMargin?: boolean;
   noBackground?: boolean;
   inverted?: boolean;
@@ -38,6 +39,7 @@ export const Button: React.FC<ButtonProps> = ({
   tooltipContent,
   label = "",
   icon,
+  iconRight,
   noIconMargin = false,
   inverted = false,
   noBorder = false,
@@ -82,6 +84,7 @@ export const Button: React.FC<ButtonProps> = ({
             {label}
           </StyledButtonLabel>
         )}
+        {iconRight}
       </StyledButton>
 
       {(tooltipLabel || tooltipContent) && (

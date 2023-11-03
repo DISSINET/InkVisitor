@@ -1,6 +1,6 @@
 # Database
 
-App uses [rethinkdb](https://rethinkdb.com/) database to store data. Given the nature of models in the project (mostly json-based, schemaless structure with set of conditions), a nosql database provides more pros thans cons. Currently the app uses following tables:
+App uses [rethinkdb](https://rethinkdb.com/) database to store data. Given the nature of models in the project (mostly json-based, schemaless structure with set of in-app conditions), a nosql database provides more pros thans cons. Currently the app uses following tables:
 
 - users
   - user data: login, password, starred territories
@@ -9,11 +9,15 @@ App uses [rethinkdb](https://rethinkdb.com/) database to store data. Given the n
   - more fine grained permissions (ownerships) over entities are defined in respective user entries
 - entities
   - holds data mentioned in [section](### Entity types).
+- relations
+  - various implementations of logic between multiple (2-n) entities, ie. synonyms
 - audits
   - log entries for changes made to entities table
   - each entity entry has 0-n audit entries
+- documents
+  - large blobs of text data with encoded tags for referencing entities
 
-Project uses several environments and each of them has dedicated database namespace.
+Project uses several environments and each of them has dedicated database namespace (`inkvisitor`, `inkvisitor_staging` etc).
 
 ## Run in docker (recommended)
 
@@ -26,31 +30,30 @@ Follow tutorials on [official page](https://rethinkdb.com/docs/install/)
 
 ## Initialization
 
-Warning: the following script will remove all tables and recreates them with basic mock data!
+Database main script is built as `CLI` application which will guide you through the import process.
+Run `pnpm start` to run the app and by entering respective `key` from the menu choose the desired action.
 
-For creating base schema with mock data, please use [import.ts](./scripts/import.ts) script. Usage: `pnpm import-<suffix>`. Each import run task calls `import.ts` script with
-arguments `dataset name` and `env name`.
+Before you start, copy [.env.example](packages/database/env/.env.example) into your local [.env](packages/database/env/.env) file and fill variables inside (`SSH*` optional).
 
-`dataset` identifies the configuration - which file to import, which indexes to prepare, how to transform data before importing.
-`env` identifies set of environmental variables stored in [env](./env) directory in appropriate files. For creating your own environment or to supply predefined, just copy [.env.example](./env/.env.example) file to `.env.<env name>` and fill in variables.
+Import example (this will remove and import the database anew):
+- If prompted whether to use `SSH connection`, use `n` + `<enter>` to stay in local environment
+- choose dataset by entering `D` + `<enter>`, then choose one of the datasets by entering respective number or name (ie. `1`), confirm with `<enter>`
+- use `X` + `<enter>` to run the import
 
 ### Importing locally / remotely
 
 To switch between local -> remote host, just provide `SSH*` variables. If provided successfully, you will be prompted to confirm that you are in fact connecting via ssh tunnel.
 
-### Example usage
+### Jobs
+
+You can run specialized jobs by typing `J`. These jobs are single purpose actions, ie. fixing bad import dates.
+
+
+### Direct import scripts (DEPRECATED)
 
 - `pnpm import:remote`
 - `pnpm import:remote-data-import`
 - etc
-
-Then, follow the instructions in the command line.
-
-### Jobs
-
-- You can run specialized jobs by typing "J":
-  - **Restore Dates**
-  - **Print Deleted Entities**
 
 ## Backup
 

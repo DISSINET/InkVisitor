@@ -1,7 +1,6 @@
 export namespace RelationEnums {
   export enum Type {
     Superclass = "SCL",
-    // SuperordinateEntity = "SOL",
     SuperordinateEntity = "SOE",
     Synonym = "SYN",
     Antonym = "ANT",

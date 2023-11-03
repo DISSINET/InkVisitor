@@ -23,6 +23,7 @@ const INITIAL_CONTEXT = {
   selectedDetailId: "",
   setSelectedDetailId: UNINITIALISED,
   appendDetailId: UNINITIALISED,
+  appendMultipleDetailIds: UNINITIALISED,
   removeDetailId: UNINITIALISED,
   clearAllDetailIds: UNINITIALISED,
   cleanAllParams: UNINITIALISED,
@@ -36,6 +37,7 @@ interface SearchParamsContext {
   selectedDetailId: string;
   setSelectedDetailId: (id: string) => void;
   appendDetailId: (id: string) => void;
+  appendMultipleDetailIds: (ids: string[]) => void;
   removeDetailId: (id: string) => void;
   clearAllDetailIds: () => void;
   cleanAllParams: () => void;
@@ -112,6 +114,34 @@ export const SearchParamsProvider = ({
       setDetailId(newDetailIdArray.join(arrJoinChar));
     }
     setTimeout(() => setSelectedDetailId(id), 100);
+  };
+
+  const appendMultipleDetailIds = (ids: string[]) => {
+    const detailIdArray = getDetailIdArray();
+    let newDetailIdArray: string[] = [];
+
+    if (ids.length === 10) {
+      // use as it is
+      newDetailIdArray = ids;
+    } else if (ids.length > 10) {
+      // cut and use the first 10
+      newDetailIdArray = ids.slice(0, maxTabCount);
+    } else {
+      // merge with existing
+      // remove already added ids and add them at the end
+      const filteredArray: string[] = detailIdArray.filter(
+        (id) => !ids.includes(id)
+      );
+      newDetailIdArray = filteredArray.concat(ids);
+      if (newDetailIdArray.length > maxTabCount) {
+        newDetailIdArray = newDetailIdArray.slice(
+          newDetailIdArray.length - maxTabCount
+        );
+      }
+    }
+
+    setDetailId(newDetailIdArray.join(arrJoinChar));
+    setTimeout(() => setSelectedDetailId(ids[0]), 100);
   };
 
   const removeDetailId = (id: string) => {
@@ -228,6 +258,7 @@ export const SearchParamsProvider = ({
         selectedDetailId,
         setSelectedDetailId,
         appendDetailId,
+        appendMultipleDetailIds,
         removeDetailId,
         clearAllDetailIds,
         cleanAllParams,

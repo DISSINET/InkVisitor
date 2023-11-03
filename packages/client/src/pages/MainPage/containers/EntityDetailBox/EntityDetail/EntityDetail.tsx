@@ -39,6 +39,7 @@ import {
   StyledDetailSectionContentUsedIn,
   StyledDetailSectionEntityList,
   StyledDetailSectionHeader,
+  StyledDetailWarnings,
   StyledDetailWrapper,
   StyledPropGroupWrap,
   StyledUsedAsHeading,
@@ -50,6 +51,7 @@ import { EntityDetailMetaPropsTable } from "./EntityDetailUsedInTable/EntityDeta
 import { EntityDetailStatementPropsTable } from "./EntityDetailUsedInTable/EntityDetailStatementPropsTable/EntityDetailStatementPropsTable";
 import { EntityDetailStatementsTable } from "./EntityDetailUsedInTable/EntityDetailStatementsTable/EntityDetailStatementsTable";
 import { EntityDetailValency } from "./EntityDetailValency/EntityDetailValency";
+import { IWarningPositionSection } from "@shared/types/warning";
 
 const allowedEntityChangeClasses = [
   EntityEnums.Class.Value,
@@ -155,27 +157,16 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
   );
 
   const templateOptions: DropdownItem[] = useMemo(() => {
-    const options = [
-      {
-        value: "",
-        label: "select template",
-      },
-    ];
+    const options =
+      entity !== undefined && templates
+        ? templates
+            .filter((template) => template.id !== entity.id)
+            .map((template) => ({
+              value: template.id,
+              label: getShortLabelByLetterCount(getEntityLabel(template), 200),
+            }))
+        : [];
 
-    if (entity !== undefined && templates) {
-      templates
-        .filter((template) => template.id !== entity.id)
-        .forEach((template) => {
-          const maxLetterCount = 200;
-          options.push({
-            value: template.id,
-            label: getShortLabelByLetterCount(
-              getEntityLabel(template),
-              maxLetterCount
-            ),
-          });
-        });
-    }
     return options;
   }, [templates, entity]);
 
@@ -219,11 +210,35 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
     );
   }, [entity]);
 
+  const {
+    status: statusStatement,
+    data: statement,
+    error: statementError,
+    isFetching: isFetchingStatement,
+  } = useQuery(
+    ["statement", statementId],
+    async () => {
+      const res = await api.statementGet(statementId);
+      return res.data;
+    },
+    { enabled: !!statementId && api.isLoggedIn() }
+  );
+
   const updateEntityMutation = useMutation(
     async (changes: any) => await api.entityUpdate(detailId, changes),
     {
       onSuccess: (data, variables) => {
         queryClient.invalidateQueries(["entity"]);
+
+        if (
+          statementId &&
+          (statementId === entity?.id ||
+            (statement?.entities &&
+              entity &&
+              Object.keys(statement.entities).includes(entity.id)))
+        ) {
+          queryClient.invalidateQueries(["statement"]);
+        }
 
         if (
           variables.references !== undefined ||
@@ -236,9 +251,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
           if (entity?.class === EntityEnums.Class.Territory) {
             queryClient.invalidateQueries(["tree"]);
           }
-          if (entity?.class === EntityEnums.Class.Statement) {
-            queryClient.invalidateQueries(["statement"]);
-          }
+
           queryClient.invalidateQueries(["territory"]);
           queryClient.invalidateQueries(["bookmarks"]);
         }
@@ -247,6 +260,10 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
         }
         if (entity?.isTemplate) {
           queryClient.invalidateQueries(["templates"]);
+          queryClient.invalidateQueries(["entity-templates"]);
+          if (entity?.class === EntityEnums.Class.Statement) {
+            queryClient.invalidateQueries(["statement-templates"]);
+          }
         }
       },
     }
@@ -606,6 +623,18 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
             {entity.class === EntityEnums.Class.Action && (
               <StyledDetailSection>
                 <StyledDetailSectionHeader>Valency</StyledDetailSectionHeader>
+                <StyledDetailWarnings>
+                  {entity.warnings &&
+                    entity.warnings
+                      .filter(
+                        (w) =>
+                          w.position?.section ===
+                          IWarningPositionSection.Valencies
+                      )
+                      .map((warning, key) => {
+                        return <Message key={key} warning={warning} />;
+                      })}
+                </StyledDetailWarnings>
                 <StyledDetailSectionContent>
                   <EntityDetailValency
                     entity={entity}
@@ -622,10 +651,18 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
             {/* Relations */}
             <StyledDetailSection>
               <StyledDetailSectionHeader>Relations</StyledDetailSectionHeader>
-              {entity.warnings &&
-                entity.warnings.map((warning, key) => {
-                  return <Message key={key} warning={warning} />;
-                })}
+              <StyledDetailWarnings>
+                {entity.warnings &&
+                  entity.warnings
+                    .filter(
+                      (w) =>
+                        w.position?.section ===
+                        IWarningPositionSection.Relations
+                    )
+                    .map((warning, key) => {
+                      return <Message key={key} warning={warning} />;
+                    })}
+              </StyledDetailWarnings>
               <StyledDetailSectionContent>
                 <EntityDetailRelations
                   entity={entity}
