@@ -1,4 +1,5 @@
 import { WarningTypeEnums } from "../enums";
+import { IActionValency } from "./action";
 
 export interface IWarning {
   type: WarningTypeEnums;
@@ -8,6 +9,7 @@ export interface IWarning {
 
 export interface IWarningPosition {
   section?: string;
+  subSection?: keyof IActionValency;
   entityId?: string;
   actantId?: string;
 }

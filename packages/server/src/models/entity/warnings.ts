@@ -25,12 +25,14 @@ export default class EntityWarnings {
    */
   newWarning(
     warningType: WarningTypeEnums,
+    section: "Valency" | "Relations",
     pos?: keyof IActionValency
   ): IWarning {
     return {
       type: warningType,
       position: {
-        section: pos,
+        section: section,
+        subSection: pos,
       },
       origin: "",
     };
@@ -91,7 +93,7 @@ export default class EntityWarnings {
     );
 
     const gotSCL = !!scls.find((s) => s.entityIds[0] === this.entityId);
-    return gotSCL ? null : this.newWarning(WarningTypeEnums.SCLM);
+    return gotSCL ? null : this.newWarning(WarningTypeEnums.SCLM, "Relations");
   }
 
   /**
@@ -148,7 +150,7 @@ export default class EntityWarnings {
       for (const baseClassIds of Object.values(baseIdsPerConcept)) {
         if (baseClassIds.indexOf(requiredBaseClassId) === -1) {
           // required base class is not present for this concept
-          return this.newWarning(WarningTypeEnums.ISYNC);
+          return this.newWarning(WarningTypeEnums.ISYNC, "Relations");
         }
       }
     }
@@ -174,7 +176,7 @@ export default class EntityWarnings {
         action.data.entities.a2 === undefined &&
         action.data.entities.s === undefined)
     ) {
-      return this.newWarning(WarningTypeEnums.MVAL);
+      return this.newWarning(WarningTypeEnums.MVAL, "Valency");
     }
 
     return null;
@@ -247,7 +249,7 @@ export default class EntityWarnings {
         continue;
       }
 
-      return this.newWarning(WarningTypeEnums.AVAL, pos);
+      return this.newWarning(WarningTypeEnums.AVAL, "Valency", pos);
     }
 
     return null;
@@ -272,7 +274,7 @@ export default class EntityWarnings {
     );
 
     if (!aee || !aee.length) {
-      return this.newWarning(WarningTypeEnums.MAEE);
+      return this.newWarning(WarningTypeEnums.MAEE, "Relations");
     }
 
     return null;
