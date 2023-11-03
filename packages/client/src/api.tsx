@@ -73,6 +73,8 @@ class Api {
   private ws?: Socket;
   private ping: number;
 
+  private lastError: any = null;
+
   constructor() {
     if (!process.env.APIURL) {
       throw new Error("APIURL is not set");
@@ -165,12 +167,25 @@ class Api {
         if (!error.config.ignoreErrorToast) {
           // Any status codes that falls outside the range of 2xx cause this function to trigger
           // Do something with response error
-          this.showErrorToast(error);
+          if (this.shouldShowErrorToast(error)) {
+            this.showErrorToast(error);
+          }
         }
 
         return Promise.reject(error);
       }
     );
+  }
+
+  shouldShowErrorToast(error: any) {
+    if (this.lastError && this.lastError.message === error.message) {
+      // Same error as the last one, debounce it
+      return false;
+    }
+
+    // Update the last error to the current error
+    this.lastError = error;
+    return true;
   }
 
   getPing() {
@@ -183,9 +198,16 @@ class Api {
       message: "",
     };
 
-    if (responseData instanceof AxiosError && (responseData as AxiosError).code === AxiosError.ERR_NETWORK) {
-      out.error = errors.NetworkError.name
-    } else if (responseData && (responseData as any).response && (responseData as any).response.data) {
+    if (
+      responseData instanceof AxiosError &&
+      (responseData as AxiosError).code === AxiosError.ERR_NETWORK
+    ) {
+      out.error = errors.NetworkError.name;
+    } else if (
+      responseData &&
+      (responseData as any).response &&
+      (responseData as any).response.data
+    ) {
       out.error = (responseData as Record<string, string>).error;
       out.message = (responseData as Record<string, string>).message;
     }
@@ -194,9 +216,7 @@ class Api {
   }
 
   showErrorToast(err: any) {
-    const hydratedError = errors.getErrorByCode(
-      this.responseToError(err)
-    );
+    const hydratedError = errors.getErrorByCode(this.responseToError(err));
 
     toast.error(
       <div>
