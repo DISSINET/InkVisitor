@@ -110,7 +110,14 @@ export const LeftHeader: React.FC<LeftHeader> = React.memo(
               {ping === -1 && "Server is down"}
               {ping >= 0 && `Server connection latency:`}
             </StyledPingText>
-            {ping === -10 && <BeatLoader size={8} margin={5} color="white" />}
+            {ping === -10 && (
+              <BeatLoader
+                size={6}
+                margin={5}
+                style={{ marginLeft: "0.2rem", marginTop: "0.1rem" }}
+                color="white"
+              />
+            )}
             {ping === -2 && <StyledPingColor pingColor={pingColor} />}
             {ping >= -1 && <StyledPingColor pingColor={pingColor} />}
             {ping >= 0 && <StyledPingText>{ping}ms</StyledPingText>}
