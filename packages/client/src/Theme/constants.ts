@@ -1,7 +1,7 @@
 import { EntityEnums } from "@shared/enums";
 import theme from "./theme";
 
-export const defaultPing = -2;
+export const defaultPing = -10;
 
 export const DropdownAny = "any";
 export const wildCardChar = "*";
