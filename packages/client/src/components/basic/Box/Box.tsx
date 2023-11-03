@@ -34,7 +34,9 @@ export const Box: React.FC<Box> = ({
   children,
 }) => {
   const [hideContent, setHideContent] = useState<boolean>(false);
-  const [showContentLabel, setShowContentLabel] = useState<boolean>(false);
+  const [showContentLabel, setShowContentLabel] = useState<boolean>(
+    !isExpanded
+  );
 
   const animatedExpand = useSpring({
     opacity: isExpanded ? 1 : 0,
