@@ -40,8 +40,8 @@ import {
 import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
 import {
-  AiFillCaretRight,
   AiOutlineCaretDown,
+  AiOutlineCaretUp,
   AiOutlineWarning,
 } from "react-icons/ai";
 import { FaRegCopy } from "react-icons/fa";
@@ -700,20 +700,24 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
         {statement.warnings.length > 0 && (
           <StyledEditorSection>
-            <StyledEditorSectionHeading>
-              {statement.warnings.length} Warnings{" "}
-              <TiWarningOutline size={16} style={{ marginLeft: "3px" }} />
-            </StyledEditorSectionHeading>
-            <StyledEditorSectionContent>
+            <StyledEditorSectionHeader>
+              <StyledEditorSectionHeading>
+                {statement.warnings.length} Warnings{" "}
+                {statement.warnings.length > 0 && (
+                  <TiWarningOutline size={16} style={{ marginLeft: "3px" }} />
+                )}
+              </StyledEditorSectionHeading>
               <Button
                 iconRight={
-                  showWarnings ? <AiOutlineCaretDown /> : <AiFillCaretRight />
+                  showWarnings ? <AiOutlineCaretUp /> : <AiOutlineCaretDown />
                 }
                 label={showWarnings ? "hide warnings" : "show warnings"}
                 onClick={() => dispatch(setShowWarnings(!showWarnings))}
                 color="warning"
                 tooltipPosition="right"
               />
+            </StyledEditorSectionHeader>
+            <StyledEditorSectionContent>
               {showWarnings &&
                 statement.warnings
                   .sort((a, b) => a.type.localeCompare(b.type))
