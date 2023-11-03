@@ -3,18 +3,20 @@ import { IActionValency } from "./action";
 
 export interface IWarning {
   type: WarningTypeEnums;
-  position?: IWarningPosition;
+  position?: IWarningPosition
   origin: string;
 }
 
 export interface IWarningPosition {
+  
   section?: IWarningPositionSection;
-  subSection?: keyof IActionValency;
+  subSection?: string;
   entityId?: string;
   actantId?: string;
 }
 
 export enum IWarningPositionSection {
   Relations = "Relations",
-  Valencies = "Valencies"
+  Valencies = "Valencies",
+  Statement = "Statement",
 }
