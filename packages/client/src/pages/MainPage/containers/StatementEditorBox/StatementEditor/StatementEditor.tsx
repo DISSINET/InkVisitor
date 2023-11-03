@@ -39,11 +39,16 @@ import {
 } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
-import { AiOutlineWarning } from "react-icons/ai";
+import {
+  AiOutlineCaretDown,
+  AiOutlineCaretUp,
+  AiOutlineWarning,
+} from "react-icons/ai";
 import { FaRegCopy } from "react-icons/fa";
 import { TiWarningOutline } from "react-icons/ti";
 import { toast } from "react-toastify";
-import { useAppSelector } from "redux/hooks";
+import { setShowWarnings } from "redux/features/statementEditor/showWarningsSlice";
+import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { DropdownItem, classesEditorActants, classesEditorTags } from "types";
 import { getEntityLabel, getShortLabelByLetterCount } from "utils";
 import { EntityReferenceTable } from "../../EntityReferenceTable/EntityReferenceTable";
@@ -89,8 +94,13 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   updateStatementDataMutation,
   moveStatementMutation,
 }) => {
-  const { statementId, territoryId, setTerritoryId, appendDetailId } =
-    useSearchParams();
+  const {
+    statementId,
+    territoryId,
+    setTerritoryId,
+    appendDetailId,
+    appendMultipleDetailIds,
+  } = useSearchParams();
 
   const queryClient = useQueryClient();
 
@@ -540,7 +550,19 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   const [showSubmitSection, setShowSubmitSection] = useState<
     "actants" | "actions" | "references" | false
   >(false);
-  const [showWarnings, setShowWarnings] = useState(false);
+
+  const showWarnings = useAppSelector(
+    (state) => state.statementEditor.showWarnings
+  );
+  const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    if (showWarnings && statement.data.actions.length > 0) {
+      appendMultipleDetailIds(
+        Array.from(new Set(statement.data.actions.map((a) => a.actionId)))
+      );
+    }
+  }, [showWarnings, statementId]);
 
   return (
     <>
@@ -679,16 +701,26 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
         {statement.warnings.length > 0 && (
           <StyledEditorSection>
-            <Button
-              icon={<TiWarningOutline size={16} />}
-              label={`${statement.warnings.length}`}
-              onClick={() => setShowWarnings(!showWarnings)}
-              color="warning"
-              tooltipLabel={showWarnings ? "hide warnings" : "show warnings"}
-              inverted={!showWarnings}
-              tooltipPosition="right"
-            />
-            <StyledDetailWarnings>
+
+            <StyledEditorSectionHeader>
+              <StyledEditorSectionHeading>
+                {statement.warnings.length} Warnings{" "}
+                {statement.warnings.length > 0 && (
+                  <TiWarningOutline size={16} style={{ marginLeft: "3px" }} />
+                )}
+              </StyledEditorSectionHeading>
+              <Button
+                iconRight={
+                  showWarnings ? <AiOutlineCaretUp /> : <AiOutlineCaretDown />
+                }
+                label={showWarnings ? "hide warnings" : "show warnings"}
+                onClick={() => dispatch(setShowWarnings(!showWarnings))}
+                color="warning"
+                tooltipPosition="right"
+              />
+            </StyledEditorSectionHeader>
+            <StyledEditorSectionContent>
+              <StyledDetailWarnings>
               {showWarnings &&
                 statement.warnings
                   .sort((a, b) => a.type.localeCompare(b.type))
@@ -702,6 +734,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                     );
                   })}
             </StyledDetailWarnings>
+            </StyledEditorSectionContent>
           </StyledEditorSection>
         )}
 

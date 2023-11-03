@@ -92,6 +92,7 @@ const theme = {
     },
 
     ping: {
+      "-2": "black",
       "-1": "black",
       "0": "#d73027",
       "1": "#fc8d59",
