@@ -54,6 +54,7 @@ import { getEntityLabel, getShortLabelByLetterCount } from "utils";
 import { EntityReferenceTable } from "../../EntityReferenceTable/EntityReferenceTable";
 import {
   StyledBreadcrumbWrap,
+  StyledDetailWarnings,
   StyledEditorContentRow,
   StyledEditorContentRowLabel,
   StyledEditorContentRowValue,
@@ -700,6 +701,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
         {statement.warnings.length > 0 && (
           <StyledEditorSection>
+
             <StyledEditorSectionHeader>
               <StyledEditorSectionHeading>
                 {statement.warnings.length} Warnings{" "}
@@ -718,6 +720,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
               />
             </StyledEditorSectionHeader>
             <StyledEditorSectionContent>
+              <StyledDetailWarnings>
               {showWarnings &&
                 statement.warnings
                   .sort((a, b) => a.type.localeCompare(b.type))
@@ -730,6 +733,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                       />
                     );
                   })}
+            </StyledDetailWarnings>
             </StyledEditorSectionContent>
           </StyledEditorSection>
         )}

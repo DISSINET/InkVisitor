@@ -49,7 +49,9 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
           <span>
             <b style={{ whiteSpace: "nowrap" }}>
               Missing{" "}
-              {position?.section ? positionObject[position?.section] : "actant"}
+              {position?.subSection
+                ? positionObject[position?.subSection]
+                : "actant"}
               :{" "}
             </b>
             {"at least one actant of a matching type should be used"}
@@ -59,7 +61,8 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
         return (
           <span>
             <b>{`Actant's entity type does not match the Action`}</b>
-            {position?.section && ` - ${positionObject[position?.section]}`}
+            {position?.subSection &&
+              ` - ${positionObject[position?.subSection]}`}
             {entity &&
               ` - [${entity.class}: ${getShortLabelByLetterCount(
                 entity.label,
@@ -71,7 +74,8 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
         return (
           <span>
             <b>{`This actant position allows no actant`}</b>
-            {position?.section && ` - ${positionObject[position?.section]}`}
+            {position?.subSection &&
+              ` - ${positionObject[position?.subSection]}`}
             {entity &&
               ` - [${entity.class}: ${getShortLabelByLetterCount(
                 entity.label,
@@ -83,14 +87,16 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
         return (
           <span>
             <b>{`Entity type valencies of the actions not matching`}</b>
-            {position?.section && ` - ${positionObject[position?.section]}`}
+            {position?.subSection &&
+              ` - ${positionObject[position?.subSection]}`}
           </span>
         );
       case WarningTypeEnums.AVU:
         return (
           <span>
             <b>{`Action valency not defined`}</b>
-            {position?.section && ` - ${positionObject[position?.section]}`}
+            {position?.subSection &&
+              ` - ${positionObject[position?.subSection]}`}
             {entity &&
               ` - [${entity.class}: ${getShortLabelByLetterCount(
                 entity.label,
@@ -111,7 +117,13 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
       case WarningTypeEnums.MVAL:
         return <b>Missing at least one entity-type valency</b>;
       case WarningTypeEnums.AVAL:
-        return <b>Asymmetrical valency</b>;
+        return (
+          <span>
+            <b>Asymmetrical valency </b>
+            {position?.subSection &&
+              ` - ${positionObject[position?.subSection]}`}
+          </span>
+        );
       case WarningTypeEnums.MAEE:
         return <b>Missing action/event equivalent</b>;
       default:

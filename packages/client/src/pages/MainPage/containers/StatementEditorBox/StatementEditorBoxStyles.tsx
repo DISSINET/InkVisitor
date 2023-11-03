@@ -61,6 +61,12 @@ export const StyledEditorSection = styled.div<StyledEditorSection>`
   }
 `;
 
+export const StyledDetailWarnings = styled.div`
+  display: grid;
+  grid-gap: ${({ theme }) => theme.space["1"]};
+  grid-auto-flow: row;
+`;
+
 interface StyledEditorSectionHeader {}
 export const StyledEditorSectionHeader = styled.div<StyledEditorSectionHeader>`
   display: flex;
