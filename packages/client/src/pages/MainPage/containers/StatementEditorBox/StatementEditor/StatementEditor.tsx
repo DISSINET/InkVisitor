@@ -18,7 +18,6 @@ import {
   Button,
   Dropdown,
   Input,
-  Loader,
   Message,
   MultiInput,
   Submit,
@@ -42,6 +41,7 @@ import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
 import { AiOutlineWarning } from "react-icons/ai";
 import { FaRegCopy } from "react-icons/fa";
+import { TiWarningOutline } from "react-icons/ti";
 import { toast } from "react-toastify";
 import { useAppSelector } from "redux/hooks";
 import { DropdownItem, classesEditorActants, classesEditorTags } from "types";
@@ -49,6 +49,7 @@ import { getEntityLabel, getShortLabelByLetterCount } from "utils";
 import { EntityReferenceTable } from "../../EntityReferenceTable/EntityReferenceTable";
 import {
   StyledBreadcrumbWrap,
+  StyledDetailWarnings,
   StyledEditorContentRow,
   StyledEditorContentRowLabel,
   StyledEditorContentRowValue,
@@ -70,7 +71,6 @@ import { StatementEditorActantTable } from "./StatementEditorActantTable/Stateme
 import { StatementEditorActionTable } from "./StatementEditorActionTable/StatementEditorActionTable";
 import { StatementEditorOrdering } from "./StatementEditorOrdering/StatementEditorOrdering";
 import { StatementEditorSectionButtons } from "./StatementEditorSectionButtons/StatementEditorSectionButtons";
-import { TiWarningOutline } from "react-icons/ti";
 
 interface StatementEditor {
   statement: IResponseStatement;
@@ -688,18 +688,20 @@ export const StatementEditor: React.FC<StatementEditor> = ({
               inverted={!showWarnings}
               tooltipPosition="right"
             />
-            {showWarnings &&
-              statement.warnings
-                .sort((a, b) => a.type.localeCompare(b.type))
-                .map((warning, key) => {
-                  return (
-                    <Message
-                      key={key}
-                      warning={warning}
-                      entities={statement.entities}
-                    />
-                  );
-                })}
+            <StyledDetailWarnings>
+              {showWarnings &&
+                statement.warnings
+                  .sort((a, b) => a.type.localeCompare(b.type))
+                  .map((warning, key) => {
+                    return (
+                      <Message
+                        key={key}
+                        warning={warning}
+                        entities={statement.entities}
+                      />
+                    );
+                  })}
+            </StyledDetailWarnings>
           </StyledEditorSection>
         )}
 
