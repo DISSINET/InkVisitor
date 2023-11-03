@@ -8,6 +8,7 @@ import { useNavigate, useLocation } from "react-router";
 import { toast } from "react-toastify";
 import { useAppSelector } from "redux/hooks";
 import { Menu } from "..";
+import { BeatLoader } from "react-spinners";
 import packageJson from "../../../../package.json";
 import {
   StyledFaUserAlt,
@@ -101,10 +102,11 @@ export const LeftHeader: React.FC<LeftHeader> = React.memo(
           </StyledHeaderTag>
           <StyledFlexRow>
             <StyledPingText style={{ marginLeft: "0.3rem" }}>
-              {ping === -2 && "loading..."}
+              {ping === -2 && "loading"}
               {ping === -1 && "Server is down"}
               {ping >= 0 && `Server connection latency:`}
             </StyledPingText>
+            {ping === -2 && <BeatLoader size={10} margin={3} color="white" />}
             {ping >= -1 && <StyledPingColor pingColor={pingColor} />}
             {ping >= 0 && <StyledPingText>{ping}ms</StyledPingText>}
           </StyledFlexRow>
