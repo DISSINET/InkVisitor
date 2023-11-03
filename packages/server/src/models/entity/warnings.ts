@@ -61,9 +61,9 @@ export default class EntityWarnings {
       warnings.push(mvalWarning);
     }
 
-    const avalWarning = await this.hasAVAL(conn);
-    if (avalWarning) {
-      warnings.push(avalWarning);
+    const avalWarnings = await this.hasAVAL(conn);
+    if (avalWarnings) {
+      avalWarnings.forEach((w) => warnings.push(w));
     }
 
     const maeeWarning = await this.hasMAEE(conn);
@@ -187,7 +187,7 @@ export default class EntityWarnings {
    * @param conn
    * @returns
    */
-  async hasAVAL(conn: Connection): Promise<IWarning | null> {
+  async hasAVAL(conn: Connection): Promise<IWarning[] | null> {
     if (this.class !== EntityEnums.Class.Action) {
       return null;
     }
@@ -209,6 +209,7 @@ export default class EntityWarnings {
           RelationEnums.Type.Actant2Semantics,
         ].indexOf(r.type) !== -1
     );
+    const warnings = []
 
     for (const pos of Object.keys(
       action.data.valencies
@@ -231,7 +232,8 @@ export default class EntityWarnings {
           return acc;
         }, [] as string[])
         .filter((id) => id !== this.entityId);
-      const semantFilled = relIds.length > 0;
+      
+        const semantFilled = relIds.length > 0;
       const onlyEmptyAllowed =
         !types ||
         !types.length ||
@@ -249,10 +251,11 @@ export default class EntityWarnings {
         continue;
       }
 
-      return this.newWarning(WarningTypeEnums.AVAL, IWarningPositionSection.Valencies, pos);
+       const newWarning = this.newWarning(WarningTypeEnums.AVAL, IWarningPositionSection.Valencies, pos);
+       warnings.push(newWarning)
     }
 
-    return null;
+    return warnings;
   }
 
   /**
