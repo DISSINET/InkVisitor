@@ -5,8 +5,8 @@ import { EntityEnums, RelationEnums, WarningTypeEnums } from "@shared/enums";
 import { IAction, IWarning } from "@shared/types";
 import { IActionValency } from "@shared/types/action";
 import { InternalServerError } from "@shared/types/errors";
+import { IWarningPositionSection } from "@shared/types/warning";
 import { Connection } from "rethinkdb-ts";
-import Entity from "./entity";
 
 export default class EntityWarnings {
   entityId: string;
@@ -25,7 +25,7 @@ export default class EntityWarnings {
    */
   newWarning(
     warningType: WarningTypeEnums,
-    section: "Valency" | "Relations",
+    section: IWarningPositionSection,
     pos?: keyof IActionValency
   ): IWarning {
     return {
@@ -93,7 +93,7 @@ export default class EntityWarnings {
     );
 
     const gotSCL = !!scls.find((s) => s.entityIds[0] === this.entityId);
-    return gotSCL ? null : this.newWarning(WarningTypeEnums.SCLM, "Relations");
+    return gotSCL ? null : this.newWarning(WarningTypeEnums.SCLM, IWarningPositionSection.Relations);
   }
 
   /**
@@ -150,7 +150,7 @@ export default class EntityWarnings {
       for (const baseClassIds of Object.values(baseIdsPerConcept)) {
         if (baseClassIds.indexOf(requiredBaseClassId) === -1) {
           // required base class is not present for this concept
-          return this.newWarning(WarningTypeEnums.ISYNC, "Relations");
+          return this.newWarning(WarningTypeEnums.ISYNC, IWarningPositionSection.Relations);
         }
       }
     }
@@ -176,7 +176,7 @@ export default class EntityWarnings {
         action.data.entities.a2 === undefined &&
         action.data.entities.s === undefined)
     ) {
-      return this.newWarning(WarningTypeEnums.MVAL, "Valency");
+      return this.newWarning(WarningTypeEnums.MVAL, IWarningPositionSection.Valencies);
     }
 
     return null;
@@ -249,7 +249,7 @@ export default class EntityWarnings {
         continue;
       }
 
-      return this.newWarning(WarningTypeEnums.AVAL, "Valency", pos);
+      return this.newWarning(WarningTypeEnums.AVAL, IWarningPositionSection.Valencies, pos);
     }
 
     return null;
@@ -274,7 +274,7 @@ export default class EntityWarnings {
     );
 
     if (!aee || !aee.length) {
-      return this.newWarning(WarningTypeEnums.MAEE, "Relations");
+      return this.newWarning(WarningTypeEnums.MAEE, IWarningPositionSection.Relations);
     }
 
     return null;

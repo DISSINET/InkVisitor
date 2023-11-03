@@ -8,8 +8,13 @@ export interface IWarning {
 }
 
 export interface IWarningPosition {
-  section?: string;
+  section?: IWarningPositionSection;
   subSection?: keyof IActionValency;
   entityId?: string;
   actantId?: string;
+}
+
+export enum IWarningPositionSection {
+  Relations = "Relations",
+  Valencies = "Valencies"
 }
