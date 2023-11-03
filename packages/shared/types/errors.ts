@@ -335,6 +335,12 @@ class UnknownError extends CustomError {
   public static message = "Mysterious";
 }
 
+class NetworkError extends CustomError {
+  public static code = 500;
+  public static title = "Connection to server lost";
+  public static message = "Please check your network connection. Otherwise contact the administrator";
+}
+
 const allErrors: Record<string, any> = {
   InvalidDeleteError,
   UnauthorizedError,
@@ -359,6 +365,7 @@ const allErrors: Record<string, any> = {
   EmailError,
   RelationDoesNotExist,
   DocumentDoesNotExist,
+  NetworkError,
 };
 
 export interface IErrorSignature {
@@ -396,4 +403,5 @@ export {
   EmailError,
   RelationDoesNotExist,
   DocumentDoesNotExist,
+  NetworkError
 };

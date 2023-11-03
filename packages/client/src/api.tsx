@@ -183,7 +183,9 @@ class Api {
       message: "",
     };
 
-    if (responseData && typeof responseData === "object") {
+    if (responseData instanceof AxiosError && (responseData as AxiosError).code === AxiosError.ERR_NETWORK) {
+      out.error = errors.NetworkError.name
+    } else if (responseData && (responseData as any).response && (responseData as any).response.data) {
       out.error = (responseData as Record<string, string>).error;
       out.message = (responseData as Record<string, string>).message;
     }
@@ -193,7 +195,7 @@ class Api {
 
   showErrorToast(err: any) {
     const hydratedError = errors.getErrorByCode(
-      this.responseToError(err.response?.data)
+      this.responseToError(err)
     );
 
     toast.error(
