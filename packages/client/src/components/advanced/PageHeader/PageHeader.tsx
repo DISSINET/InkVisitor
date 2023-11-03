@@ -1,10 +1,11 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { heightHeader } from "Theme/constants";
 import { PingColor } from "Theme/theme";
 import LogoInkvisitor from "assets/logos/inkvisitor.svg";
 import { Loader } from "components";
 import React, { useEffect, useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
-import { useNavigate, useLocation } from "react-router";
+import { useLocation, useNavigate } from "react-router";
+import { BeatLoader } from "react-spinners";
 import { toast } from "react-toastify";
 import { useAppSelector } from "redux/hooks";
 import { Menu } from "..";
@@ -49,6 +50,9 @@ export const LeftHeader: React.FC<LeftHeader> = React.memo(
 
     useEffect(() => {
       switch (true) {
+        case ping === -2:
+          setPingColor("-2");
+          return;
         case ping === -1:
           setPingColor("-1");
           return;
@@ -101,10 +105,20 @@ export const LeftHeader: React.FC<LeftHeader> = React.memo(
           </StyledHeaderTag>
           <StyledFlexRow>
             <StyledPingText style={{ marginLeft: "0.3rem" }}>
-              {ping === -2 && "loading..."}
+              {ping === -10 && "loading"}
+              {ping === -2 && "Connection to server failed"}
               {ping === -1 && "Server is down"}
               {ping >= 0 && `Server connection latency:`}
             </StyledPingText>
+            {ping === -10 && (
+              <BeatLoader
+                size={6}
+                margin={5}
+                style={{ marginLeft: "0.2rem", marginTop: "0.1rem" }}
+                color="white"
+              />
+            )}
+            {ping === -2 && <StyledPingColor pingColor={pingColor} />}
             {ping >= -1 && <StyledPingColor pingColor={pingColor} />}
             {ping >= 0 && <StyledPingText>{ping}ms</StyledPingText>}
           </StyledFlexRow>
