@@ -32,13 +32,15 @@ interface LeftHeader {
 }
 export const LeftHeader: React.FC<LeftHeader> = React.memo(
   ({ tempLocation }) => {
-    const env = (process.env.ROOT_URL || "").replace(
+    let env = (process.env.ROOT_URL || "").replace(
       /apps\/inkvisitor[-]?/,
       ""
     );
-    const versionText = `v. ${packageJson.version}${
-      env ? ` | ${env}` : ``
-    } | built: ${process.env.BUILD_TIMESTAMP}`;
+    if (env === "/") {
+      env = ""
+    }
+
+    const versionText = `v. ${packageJson.version}${env ? ` | ${env}` : ``} | built: ${process.env.BUILD_TIMESTAMP}`;
     const location = useLocation();
     const navigate = useNavigate();
 

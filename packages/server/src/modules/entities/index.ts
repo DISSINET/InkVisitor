@@ -216,6 +216,31 @@ export default Router()
       return out;
     })
   )
+  .post(
+    "/:entityId/restore",
+    asyncRouteHandler<IResponseGeneric>(async (request: IRequest) => {
+      const model = new Document(request.body as Record<string, unknown>);
+
+      if (!model.isValid()) {
+        throw new ModelNotValidError("");
+      }
+
+      if (!model.canBeCreatedByUser(request.getUserOrFail())) {
+        throw new PermissionDeniedError("document cannot be created");
+      }
+
+       await request.db.lock();
+
+      const saved = await model.save(request.db.connection);
+      if (!saved) {
+        throw new InternalServerError("cannot create document");
+      }
+
+      const out: IResponseGeneric = { result: true };
+
+      return out;
+    })
+  )
   /**
    * @openapi
    * /entities/:entityId/clone:

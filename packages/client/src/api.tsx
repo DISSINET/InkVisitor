@@ -76,11 +76,7 @@ class Api {
   private lastError: any = null;
 
   constructor() {
-    if (!process.env.APIURL) {
-      throw new Error("APIURL is not set");
-    }
-
-    this.baseUrl = process.env.APIURL;
+    this.baseUrl = process.env.APIURL || window.location.origin;
     this.apiUrl = this.baseUrl + "/api/v1";
 
     this.ping = defaultPing;

@@ -12,6 +12,7 @@
     "preinstall": "npx only-allow pnpm",
     "test": "jest",
     "start": "webpack-dev-server --open --config webpack.development.js",
+    "build:latest": "webpack --config webpack.js",
     "build:development": "webpack --config webpack.development.js",
     "build:production": "webpack --config webpack.production.js",
     "build:sandbox": "webpack --config webpack.sandbox.js",
