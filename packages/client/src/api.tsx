@@ -218,14 +218,17 @@ class Api {
   showErrorToast(err: any) {
     const hydratedError = errors.getErrorByCode(this.responseToError(err));
 
-    toast.error(
-      <div>
-        {hydratedError.title}
-        {hydratedError.message ? (
-          <p style={{ fontSize: "1rem" }}>{hydratedError.message}</p>
-        ) : null}
-      </div>
-    );
+    // delay is necessary to resolve toast duplicities before firing the toast
+    setTimeout(() => {
+      toast.error(
+        <div>
+          {hydratedError.title}
+          {hydratedError.message ? (
+            <p style={{ fontSize: "1rem" }}>{hydratedError.message}</p>
+          ) : null}
+        </div>
+      );
+    }, 50);
   }
 
   isLoggedIn = () => {
