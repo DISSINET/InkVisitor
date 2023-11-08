@@ -4,6 +4,7 @@ import printDeletedEntitiesJob from "./print-deleted-entities"
 import fixDuplicatedElementsJob from "./fix-duplicated-array-elements";
 import addPosFieldJob from "./add-pos-field";
 import generateDatasetJob from "./generate-datasets/generate-dataset";
+import exportACR from "./export-a-c-r";
 
 export type IJob = (db: Connection) => Promise<void>
 
@@ -12,7 +13,8 @@ const alljobs: Record<string, IJob> = {
   printDeletedEntitiesJob,
   fixDuplicatedElementsJob,
   addPosFieldJob,
-  generateDatasetJob
+  generateDatasetJob,
+  exportACR,
 }
 
 export default alljobs;

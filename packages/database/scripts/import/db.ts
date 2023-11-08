@@ -50,6 +50,7 @@ export
     if (this.dbConfig.name) {
       this.useDb(this.dbConfig.name);
     }
+    console.log("connected")
   }
 
   /**

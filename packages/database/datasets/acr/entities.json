@@ -1,0 +1,1720 @@
+[
+    {
+        "class": "A",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": "verb"
+        },
+        "detail": "",
+        "id": "a-has-not-maee",
+        "label": "a-has-not-maee",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "A",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": "verb"
+        },
+        "detail": "",
+        "id": "a-has-mval-2",
+        "label": "a-has-mval-2",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "A",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "entities": {
+                "a1": [],
+                "a2": [],
+                "s": []
+            },
+            "pos": "verb",
+            "valencies": {
+                "a1": "",
+                "a2": "",
+                "s": ""
+            }
+        },
+        "detail": "",
+        "id": "a501",
+        "label": "drink beverage",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "A",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "entities": {},
+            "pos": "verb"
+        },
+        "detail": "",
+        "id": "a-has-mval-1",
+        "label": "a-has-mval-1",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "A",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "entities": {
+                "a1": [],
+                "a2": [],
+                "s": []
+            },
+            "pos": "verb",
+            "valencies": {
+                "a1": "",
+                "a2": "",
+                "s": ""
+            }
+        },
+        "detail": "",
+        "id": "a11",
+        "label": "listen",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "A",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": "verb"
+        },
+        "detail": "",
+        "id": "a-has-maee",
+        "label": "a-has-maee",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "A",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "entities": {
+                "a1": [],
+                "a2": [],
+                "s": [
+                    "empty"
+                ]
+            },
+            "pos": "verb",
+            "valencies": {
+                "a1": "",
+                "a2": "",
+                "s": ""
+            }
+        },
+        "detail": "",
+        "id": "a1",
+        "label": "told",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "A",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "entities": {
+                "a1": [],
+                "a2": [],
+                "s": []
+            },
+            "pos": "verb"
+        },
+        "detail": "",
+        "id": "a-hasnt-mval",
+        "label": "a-hasnt-mval",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "A",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "entities": {
+                "a1": [],
+                "a2": [],
+                "s": []
+            },
+            "pos": "verb",
+            "valencies": {
+                "a1": "",
+                "a2": "",
+                "s": ""
+            }
+        },
+        "detail": "",
+        "id": "a34",
+        "label": "being sacrificed",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "A",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "entities": {
+                "a1": [],
+                "a2": [],
+                "s": []
+            },
+            "pos": "verb",
+            "valencies": {
+                "a1": "",
+                "a2": "",
+                "s": ""
+            }
+        },
+        "detail": "",
+        "id": "a506",
+        "label": "take coffee",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "A",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "entities": {
+                "a1": [],
+                "a2": [],
+                "s": []
+            },
+            "pos": "verb",
+            "valencies": {
+                "a1": "",
+                "a2": "",
+                "s": ""
+            }
+        },
+        "detail": "",
+        "id": "a2",
+        "label": "is possessed",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "A",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "entities": {
+                "a1": [],
+                "a2": [],
+                "s": []
+            },
+            "pos": "verb",
+            "valencies": {
+                "a1": "",
+                "a2": "",
+                "s": ""
+            }
+        },
+        "detail": "",
+        "id": "a5",
+        "label": "drink coffee",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "A",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "entities": {
+                "a1": [],
+                "a2": [],
+                "s": []
+            },
+            "pos": "verb",
+            "valencies": {
+                "a1": "",
+                "a2": "",
+                "s": ""
+            }
+        },
+        "detail": "",
+        "id": "a3",
+        "label": "sacrifice",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "A",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "entities": {
+                "a1": [],
+                "a2": [],
+                "s": []
+            },
+            "pos": "verb",
+            "valencies": {
+                "a1": "",
+                "a2": "",
+                "s": ""
+            }
+        },
+        "detail": "",
+        "id": "a4",
+        "label": "take place",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "A",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "entities": {
+                "a1": [],
+                "a2": [],
+                "s": []
+            },
+            "pos": "verb",
+            "valencies": {
+                "a1": "",
+                "a2": "",
+                "s": ""
+            }
+        },
+        "detail": "",
+        "id": "a31",
+        "label": "kill",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "A",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "entities": {
+                "a1": [],
+                "a2": [],
+                "s": []
+            },
+            "pos": "verb",
+            "valencies": {
+                "a1": "",
+                "a2": "",
+                "s": ""
+            }
+        },
+        "detail": "",
+        "id": "a32",
+        "label": "murder",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "A",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "entities": {
+                "a1": [],
+                "a2": [],
+                "s": []
+            },
+            "pos": "verb",
+            "valencies": {
+                "a1": "",
+                "a2": "",
+                "s": ""
+            }
+        },
+        "detail": "",
+        "id": "a33",
+        "label": "die",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "A",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "entities": {
+                "a1": [],
+                "a2": [],
+                "s": []
+            },
+            "pos": "verb",
+            "valencies": {
+                "a1": "",
+                "a2": "",
+                "s": ""
+            }
+        },
+        "detail": "",
+        "id": "a502",
+        "label": "consume",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "A",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "entities": {
+                "a1": [],
+                "a2": [],
+                "s": []
+            },
+            "pos": "verb",
+            "valencies": {
+                "a1": "",
+                "a2": "",
+                "s": ""
+            }
+        },
+        "detail": "",
+        "id": "a503",
+        "label": "have fun",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "A",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "entities": {
+                "a1": [],
+                "a2": [],
+                "s": []
+            },
+            "pos": "verb",
+            "valencies": {
+                "a1": "",
+                "a2": "",
+                "s": ""
+            }
+        },
+        "detail": "",
+        "id": "a507",
+        "label": "sip coffee from a cup",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "A",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "entities": {
+                "a1": [],
+                "a2": [],
+                "s": []
+            },
+            "pos": "verb",
+            "valencies": {
+                "a1": "",
+                "a2": "",
+                "s": ""
+            }
+        },
+        "detail": "",
+        "id": "a504",
+        "label": "entertain or relax",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "A",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "entities": {
+                "a1": [],
+                "a2": [],
+                "s": []
+            },
+            "pos": "verb",
+            "valencies": {
+                "a1": "",
+                "a2": "",
+                "s": ""
+            }
+        },
+        "detail": "",
+        "id": "a505",
+        "label": "have coffee",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "A",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "entities": {
+                "a1": [],
+                "a2": [],
+                "s": []
+            },
+            "pos": "verb",
+            "valencies": {
+                "a1": "",
+                "a2": "",
+                "s": ""
+            }
+        },
+        "detail": "",
+        "id": "a508",
+        "label": "have a coffee as a first thing in the morning",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c-has-isync-1",
+        "label": "has-isync-1 (is in syn cloud, but has first SCL) ",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c1000",
+        "label": "nickname",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c-has-isync-2",
+        "label": "has-isync-2 (is in syn cloud, but has first SCL) ",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c1003",
+        "label": "religious symbol",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c1105",
+        "label": "workshop place",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c-has-isync-4",
+        "label": "has-isync-4 (is in syn cloud, but without SCL) ",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c-has-isync-3",
+        "label": "has-isync-3 (is in syn cloud, but has second SCL) ",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c-isync-superclass-1",
+        "label": "isync-superclass-1",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c-has-sclm-warning",
+        "label": "has-sclm-warning",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c1102",
+        "label": "room",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c1106",
+        "label": "work-related place",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c1101",
+        "label": "office",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c404",
+        "label": "geographical localization",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c-isync-superclass-2",
+        "label": "isync-superclass-2",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c-hasnt-isync-1",
+        "label": "hasnt-isync-1 (is in syn cloud, has SCL) ",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c1002",
+        "label": "symbol",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c-hasnt-isync-2",
+        "label": "hasnt-isync-2 (is in syn cloud, has SCL) ",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c211a",
+        "label": "mops",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2023-09-24T12:24:10.436Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c214",
+        "label": "hund",
+        "language": "de",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c211c",
+        "label": "carlino",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c42",
+        "label": "religious character",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c1001",
+        "label": "name",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c1107",
+        "label": "event location",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c1108",
+        "label": "dog",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c1",
+        "label": "everyhing",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c213",
+        "label": "doggie",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c3",
+        "label": "occupation",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c23",
+        "label": "animal",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c46",
+        "label": "abstract things",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c1103",
+        "label": "study room",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c2",
+        "label": "priest",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c211",
+        "label": "pug",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c1104",
+        "label": "university section",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c31",
+        "label": "sacrifice",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c41",
+        "label": "evil",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c32",
+        "label": "religious act",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c524",
+        "label": "sacred place",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c212",
+        "label": "dog",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c215",
+        "label": "dog owner",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c211b",
+        "label": "carlin",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c24",
+        "label": "living being",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c401",
+        "label": "village",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c44",
+        "label": "morality metaphor",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c402",
+        "label": "region",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c53",
+        "label": "temple tower",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c301",
+        "label": "unemployment",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c45",
+        "label": "force",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c22",
+        "label": "manmal",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c52",
+        "label": "temple gate",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c5",
+        "label": "mountain",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c55",
+        "label": "temple walls",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c501",
+        "label": "hill",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c57",
+        "label": "temple complex",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c4",
+        "label": "city",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c504",
+        "label": "valley",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c33",
+        "label": "event",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c56",
+        "label": "temple",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c502",
+        "label": "cliff",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c523",
+        "label": "building",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c60",
+        "label": "south of",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c503",
+        "label": "mount",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c51",
+        "label": "temple sanctuary",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c61",
+        "label": "north of",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c521",
+        "label": "gate",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c403",
+        "label": "country",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c907",
+        "label": "relaxation",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c71",
+        "label": "son of",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c903",
+        "label": "consumation",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c54",
+        "label": "temple garden",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c70",
+        "label": "father of",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c902",
+        "label": "drinking",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c522",
+        "label": "religious building",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c80",
+        "label": "localization",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c904",
+        "label": "coffein intake",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c6",
+        "label": "kingdom",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c908",
+        "label": "entertainment",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c901",
+        "label": "having coffee",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c905",
+        "label": "energy gain",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    },
+    {
+        "class": "C",
+        "createdAt": "2021-12-05T19:10:15.739Z",
+        "data": {
+            "pos": ""
+        },
+        "detail": "",
+        "id": "c906",
+        "label": "energetic transmission",
+        "language": "eng",
+        "notes": [],
+        "props": [],
+        "references": [],
+        "status": "1"
+    }
+]
