@@ -1,4 +1,4 @@
-import { IAction, IConcept, IResource } from "@shared/types";
+import { IAction, IConcept, IReference, IResource } from "@shared/types";
 import { Connection, r as rethink, RDatum, WriteResult } from "rethinkdb-ts";
 import { IJob } from ".";
 import { DbEnums, EntityEnums, RelationEnums } from "@shared/enums";
@@ -10,6 +10,8 @@ import { question } from "scripts/import/prompts";
 import * as fs from "fs"
 import * as path from "path"
 import Entity from "@models/entity/entity";
+import Resource from "@models/resource/resource";
+import { v4 as uuidv4 } from "uuid";
 
 export async function getEntitiesDataByClass<T>(
   db: Connection,
@@ -44,6 +46,19 @@ export async function getEntitiesDataByClass<T>(
   }
   return items;
 }
+
+const exampleR = new Resource({
+  id: "dissinet-resource",
+  data: {
+    partValueBaseURL: "" ,
+    partValueLabel: "" ,
+    url: "https://dissinet.cz/",
+  } ,
+  label: "DISSINET Database (DDB1)",
+  language: EntityEnums.Language.English,
+  notes: [] ,
+  status: EntityEnums.Status.Approved
+})
 
 class ACRGenerator extends Generator {
   getPath(filename?: string) {
@@ -81,16 +96,48 @@ const exportACR: IJob = async (db: Connection): Promise<void> => {
   const generator = new ACRGenerator();
   await generator.getUserInfo()
 
-  const actions = await getEntitiesDataByClass<IAction>(db, EntityEnums.Class.Action);
-  const concepts = await getEntitiesDataByClass<IConcept>(db, EntityEnums.Class.Concept);
+  const actions = (await getEntitiesDataByClass<IAction>(db, EntityEnums.Class.Action)).map(a => {
+    a.references.push({
+      id: uuidv4(),
+      resource: exampleR.id,
+      value: a.id,
+    } as IReference);
+    return a
+  });
+  const concepts = (await getEntitiesDataByClass<IConcept>(db, EntityEnums.Class.Concept)).map(a => {
+    a.references.push({
+      id: uuidv4(),
+      resource: exampleR.id,
+      value: a.id,
+    } as IReference);
+    return a
+  });
   const resources = await getEntitiesDataByClass<IResource>(db, EntityEnums.Class.Resource);
 
-  const actionRels = await findForEntities(db, actions.map(a => a.id))
-  const conceptRels = await findForEntities(db, concepts.map(c => c.id))
+  const allIds = actions.map(a => a.id).concat(concepts.map(c => c.id)).concat(resources.map(r => r.id));
 
-  generator.entities.entities.A = actions
-  generator.entities.entities.C = concepts
-  generator.entities.entities.R = resources
+  const rels = (await findForEntities(db, allIds)).filter(r => {
+    let matches = 0;
+    for (const entityId of r.entityIds) {
+      for (const allid of allIds) {
+        if (entityId === allid) {
+          matches++;
+          break;
+        }
+      }
+
+      if (matches === r.entityIds.length) {
+        return true;
+      }
+    }
+
+    return false;
+  })
+
+  generator.entities.entities.A = [exampleR]
+  //generator.entities.entities.C = concepts
+  //generator.entities.entities.R = resources
+  //generator.relations.relations.A1S = rels;
 
   generator.output()
 }

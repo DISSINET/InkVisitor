@@ -289,6 +289,41 @@ const datasets: Record<string, DbSchema> = {
       transform: function () {},
     },
   },
+  acr: {
+    users: {
+      tableName: "users",
+      data: null,
+      transform: function () {},
+    },
+    aclPermissions: {
+      tableName: "acl_permissions",
+      data: null,
+      transform: function () {},
+    },
+    entities: {
+      tableName: "entities",
+      data: require("../datasets/acr/entities.json"),
+      transform: function () {},
+      indexes: entitiesIndexes,
+    },
+    audits: {
+      tableName: "audits",
+      data: null,
+      transform: function () {},
+      indexes: auditsIndexes,
+    },
+    relations: {
+      tableName: "relations",
+      data: require("../datasets/acr/relations.json"),
+      transform: function () {},
+      indexes: relationsIndexes,
+    },
+    documents: {
+      tableName: "documents",
+      data: null,
+      transform: function () {},
+    },
+  },
 };
 
 enum MODES {

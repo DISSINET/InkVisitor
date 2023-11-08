@@ -86,7 +86,6 @@ class Generator {
     for (const entities of Object.values(this.entities.entities)) {
       allEntities = allEntities.concat(entities)
     }
-    console.log(allEntities)
     fs.writeFileSync(this.getPath("entities.json"), JSON.stringify(allEntities, null, 4))
 
     let allRelations: RelationTypes.IRelation[] = []
