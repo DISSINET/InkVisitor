@@ -248,6 +248,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
           variables.language !== undefined ||
           variables.data?.logicalType
         ) {
+          queryClient.invalidateQueries(["suggestion"]);
           if (entity?.class === EntityEnums.Class.Territory) {
             queryClient.invalidateQueries(["tree"]);
           }
