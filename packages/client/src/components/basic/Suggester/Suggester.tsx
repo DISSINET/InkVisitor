@@ -60,7 +60,7 @@ interface Suggester {
   disableButtons?: boolean;
   isFetching?: boolean;
 
-  preSuggestions?: IEntity[];
+  preSuggestions?: EntitySuggestion[];
 
   // events
   onType: (newType: string) => void;
@@ -223,40 +223,7 @@ export const Suggester: React.FC<Suggester> = ({
     setSelected(-1);
   };
 
-  const renderEntityPreSuggestions = () => {
-    const itemData: SuggestionRowEntityItemData = createItemData(
-      preSuggestions?.map((preS) => {
-        return {
-          entity: preS,
-        };
-      }),
-      onPick,
-      selected,
-      isInsideTemplate,
-      territoryParentId,
-      disableButtons
-    );
-    const rowHeight = 25;
-    const preSuggestionLength = (preSuggestions ?? []).length;
-    return (
-      <List
-        itemData={itemData as SuggestionRowEntityItemData}
-        height={
-          preSuggestionLength > 7
-            ? rowHeight * 8
-            : rowHeight * preSuggestionLength
-        }
-        itemCount={preSuggestionLength}
-        itemSize={rowHeight}
-        width="100%"
-        overscanCount={scrollOverscanCount}
-      >
-        {MemoizedEntityRow}
-      </List>
-    );
-  };
-
-  const renderEntitySuggestions = () => {
+  const renderEntitySuggestions = (suggestions: EntitySuggestion[]) => {
     const itemData: SuggestionRowEntityItemData = createItemData(
       suggestions as EntitySuggestion[],
       onPick,
@@ -386,7 +353,7 @@ export const Suggester: React.FC<Suggester> = ({
                 }}
               >
                 <StyledRelativePosition>
-                  {renderEntitySuggestions()}
+                  {renderEntitySuggestions(suggestions)}
                   <Loader size={30} show={isFetching} />
                 </StyledRelativePosition>
                 {!disableEnter && (
@@ -406,6 +373,7 @@ export const Suggester: React.FC<Suggester> = ({
           </>
         ) : null}
 
+        {/* PRE-SUGGESTIONS */}
         {(isFocused || isHovered) &&
         preSuggestions?.length &&
         !middlewareData.hide?.referenceHidden &&
@@ -422,7 +390,7 @@ export const Suggester: React.FC<Suggester> = ({
                 }}
               >
                 <StyledRelativePosition>
-                  {renderEntityPreSuggestions()}
+                  {renderEntitySuggestions(preSuggestions)}
                   <Loader size={30} show={isFetching} />
                 </StyledRelativePosition>
                 {!disableEnter && (

@@ -1,5 +1,10 @@
 import { EntityEnums, UserEnums } from "@shared/enums";
-import { IEntity, IStatement, ITerritory } from "@shared/types";
+import {
+  IEntity,
+  IResponseEntity,
+  IStatement,
+  ITerritory,
+} from "@shared/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { DropdownAny, wildCardChar } from "Theme/constants";
 import api from "api";
@@ -10,6 +15,7 @@ import React, { useEffect, useState } from "react";
 import { FaHome } from "react-icons/fa";
 import { DropdownItem, EntityDragItem, SuggesterItemToCreate } from "types";
 import { AddTerritoryModal, EntityCreateModal } from "..";
+import { deepCopy } from "utils";
 
 interface EntitySuggester {
   categoryTypes: EntityEnums.ExtendedClass[];
@@ -122,50 +128,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
           : undefined,
       });
 
-      const suggestions = resSuggestions.data;
-      suggestions.sort((a, b) => {
-        if (a.status === EntityEnums.Status.Discouraged) {
-          return 1;
-        } else {
-          return -1;
-        }
-      });
-      return (
-        resSuggestions.data
-          .filter((s) =>
-            filterEditorRights && userRole !== UserEnums.Role.Admin
-              ? s.right === UserEnums.RoleMode.Write
-              : s
-          )
-          .filter((s) =>
-            excludedActantIds.length ? !excludedActantIds.includes(s.id) : s
-          )
-          .filter((s) => (disableTemplatesAccept ? !s.isTemplate : s))
-          // filter T or S template inside S template
-          .filter(
-            (s) =>
-              !(
-                (s.class === EntityEnums.Class.Territory ||
-                  s.class === EntityEnums.Class.Statement) &&
-                s.isTemplate &&
-                isInsideStatement &&
-                isInsideTemplate
-              )
-          )
-          .filter((s) => categoryTypes.includes(s.class))
-          .map((entity: IEntity) => {
-            const icons: React.ReactNode[] = [];
-
-            if (territoryActants?.includes(entity.id)) {
-              icons.push(<FaHome key={entity.id} color="" />);
-            }
-
-            return {
-              entity: entity,
-              icons: icons,
-            };
-          })
-      );
+      return filterSuggestions(resSuggestions.data);
     },
     {
       enabled:
@@ -177,6 +140,52 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
         api.isLoggedIn(),
     }
   );
+
+  const filterSuggestions = (suggestions: IResponseEntity[]) => {
+    return (
+      deepCopy(suggestions)
+        .sort((a, b) => {
+          if (a.status === EntityEnums.Status.Discouraged) {
+            return 1;
+          } else {
+            return -1;
+          }
+        })
+        .filter((s) =>
+          filterEditorRights && userRole !== UserEnums.Role.Admin
+            ? s.right === UserEnums.RoleMode.Write
+            : s
+        )
+        .filter((s) =>
+          excludedActantIds.length ? !excludedActantIds.includes(s.id) : s
+        )
+        .filter((s) => (disableTemplatesAccept ? !s.isTemplate : s))
+        // filter T or S template inside S template
+        .filter(
+          (s) =>
+            !(
+              (s.class === EntityEnums.Class.Territory ||
+                s.class === EntityEnums.Class.Statement) &&
+              s.isTemplate &&
+              isInsideStatement &&
+              isInsideTemplate
+            )
+        )
+        .filter((s) => categoryTypes.includes(s.class))
+        .map((entity: IEntity) => {
+          const icons: React.ReactNode[] = [];
+
+          if (territoryActants?.includes(entity.id)) {
+            icons.push(<FaHome key={entity.id} color="" />);
+          }
+
+          return {
+            entity: entity,
+            icons: icons,
+          };
+        })
+    );
+  };
 
   const handleClean = () => {
     setTyped("");
@@ -358,7 +367,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
         isFetching={isFetchingStatement}
         marginTop={false}
         suggestions={suggestions || []}
-        preSuggestions={preSuggestions}
+        preSuggestions={preSuggestions && filterSuggestions(preSuggestions)}
         placeholder={placeholder}
         typed={typed} // input value
         category={selectedCategory} // selected category
