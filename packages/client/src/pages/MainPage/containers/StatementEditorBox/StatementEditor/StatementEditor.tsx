@@ -701,7 +701,6 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
         {statement.warnings.length > 0 && (
           <StyledEditorSection>
-
             <StyledEditorSectionHeader>
               <StyledEditorSectionHeading>
                 {statement.warnings.length} Warnings{" "}
@@ -721,19 +720,19 @@ export const StatementEditor: React.FC<StatementEditor> = ({
             </StyledEditorSectionHeader>
             <StyledEditorSectionContent>
               <StyledDetailWarnings>
-              {showWarnings &&
-                statement.warnings
-                  .sort((a, b) => a.type.localeCompare(b.type))
-                  .map((warning, key) => {
-                    return (
-                      <Message
-                        key={key}
-                        warning={warning}
-                        entities={statement.entities}
-                      />
-                    );
-                  })}
-            </StyledDetailWarnings>
+                {showWarnings &&
+                  statement.warnings
+                    .sort((a, b) => a.type.localeCompare(b.type))
+                    .map((warning, key) => {
+                      return (
+                        <Message
+                          key={key}
+                          warning={warning}
+                          entities={statement.entities}
+                        />
+                      );
+                    })}
+              </StyledDetailWarnings>
             </StyledEditorSectionContent>
           </StyledEditorSection>
         )}
@@ -782,6 +781,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 placeholder={"add action"}
                 isInsideTemplate={statement.isTemplate}
                 territoryParentId={statementTerritoryId}
+                preSuggestions={Object.values(statement.entities)}
               />
             )}
           </StyledEditorSectionContent>
@@ -936,6 +936,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 excludedActantIds={statement.data.tags}
                 isInsideTemplate={statement.isTemplate}
                 territoryParentId={statementTerritoryId}
+                preSuggestions={Object.values(statement.entities)}
               />
             )}
           </StyledEditorSectionContent>

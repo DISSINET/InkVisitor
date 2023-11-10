@@ -361,13 +361,35 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
 
   const [showCreateModal, setShowCreateModal] = useState(false);
 
+  const getClassFilteredPreSuggestions = (suggestions: IEntity[]) => {
+    let filteredSuggestions;
+    if (selectedCategory?.value !== DropdownAny) {
+      filteredSuggestions = suggestions.filter(
+        (s) => s.class === selectedCategory?.value
+      );
+    } else {
+      filteredSuggestions = suggestions;
+    }
+
+    if (excludedEntityClasses.length) {
+      filteredSuggestions = filteredSuggestions.filter(
+        (entity) => !excludedEntityClasses.includes(entity.class)
+      );
+    }
+
+    return filteredSuggestions;
+  };
+
   return selectedCategory && allCategories && user ? (
     <>
       <Suggester
         isFetching={isFetchingStatement}
         marginTop={false}
         suggestions={suggestions || []}
-        preSuggestions={preSuggestions && filterSuggestions(preSuggestions)}
+        preSuggestions={
+          preSuggestions &&
+          filterSuggestions(getClassFilteredPreSuggestions(preSuggestions))
+        }
         placeholder={placeholder}
         typed={typed} // input value
         category={selectedCategory} // selected category
