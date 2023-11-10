@@ -5,10 +5,18 @@ import React, { MouseEventHandler, useState } from "react";
 import { getEntityLabel } from "utils";
 import {
   StyledCgClose,
-  StyledClose,
+  StyledIconWrap,
   StyledLabel,
   StyledTab,
 } from "./EntityDetailTabStyles";
+import { FiMove } from "react-icons/fi";
+import { EntityTag } from "components/advanced";
+import {
+  FloatingPortal,
+  autoUpdate,
+  offset,
+  useFloating,
+} from "@floating-ui/react";
 
 interface EntityDetailTab {
   entity: IResponseEntity;
@@ -25,14 +33,29 @@ export const EntityDetailTab: React.FC<EntityDetailTab> = ({
   const [referenceElement, setReferenceElement] =
     useState<HTMLDivElement | null>(null);
   const [showTooltip, setShowTooltip] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  const [showTag, setShowTag] = useState(false);
+
+  const { refs, floatingStyles } = useFloating({
+    placement: "left",
+    whileElementsMounted: autoUpdate,
+    middleware: [offset({ mainAxis: -14 })],
+  });
 
   return (
     <>
       <StyledTab
         isSelected={isSelected}
         ref={setReferenceElement}
-        onMouseEnter={() => setShowTooltip(true)}
-        onMouseLeave={() => setShowTooltip(false)}
+        onMouseEnter={() => {
+          setShowTooltip(true);
+          setIsHovered(true);
+        }}
+        onMouseLeave={() => {
+          setShowTooltip(false);
+          setIsHovered(false);
+          setShowTag(false);
+        }}
       >
         <StyledLabel
           isSelected={isSelected}
@@ -52,9 +75,34 @@ export const EntityDetailTab: React.FC<EntityDetailTab> = ({
           {!entity ? "..." : getEntityLabel(entity)}
         </StyledLabel>
 
-        <StyledClose onClick={onClose}>
+        {isHovered && (
+          <StyledIconWrap
+            onMouseDown={() => {
+              setShowTag(true);
+              setShowTooltip(false);
+            }}
+            ref={refs.setReference}
+          >
+            <FiMove size={13} style={{ cursor: "move" }} />
+          </StyledIconWrap>
+        )}
+
+        {showTag && (
+          <FloatingPortal id="page">
+            <div
+              ref={refs.setFloating}
+              style={{
+                ...floatingStyles,
+              }}
+            >
+              <EntityTag entity={entity} />
+            </div>
+          </FloatingPortal>
+        )}
+
+        <StyledIconWrap onClick={onClose}>
           <StyledCgClose size={13} strokeWidth={0.5} />
-        </StyledClose>
+        </StyledIconWrap>
       </StyledTab>
 
       <Tooltip
