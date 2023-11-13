@@ -15,6 +15,7 @@ export const StyledRow = styled.div`
   grid-template-columns: ${({ theme }) => theme.space["32"]} auto;
   align-items: center;
   margin-bottom: ${({ theme }) => theme.space[2]};
+  margin-right: ${({ theme }) => theme.space[4]};
 `;
 export const StyledRowHeader = styled.div`
   display: block;
@@ -52,24 +53,22 @@ export const StyledTagLoaderWrap = styled.div`
   min-height: 3rem;
 `;
 
-export const StyledDatePicker = styled(StyledInput)`
-`;
+export const StyledDatePicker = styled(StyledInput)``;
 
 export const StyledDateTag = styled.div`
-  background-color: ${({theme}) => theme.color['gray'][600]};
-  padding: ${({theme}) => theme.space[2] + " " + theme.space[4]};
-  border-radius: ${({theme}) => theme.space[2]};
+  background-color: ${({ theme }) => theme.color["gray"][600]};
+  padding: ${({ theme }) => theme.space[2] + " " + theme.space[4]};
+  border-radius: ${({ theme }) => theme.space[2]};
   width: 150px;
   display: grid;
-  grid-template-columns: ${({ theme }) => "auto " + theme.space["6"]} ;
+  grid-template-columns: ${({ theme }) => "auto " + theme.space["6"]};
 `;
 
 export const StyledDateTagText = styled.div`
   font-size: ${({ theme }) => theme.fontSize.xs};
-  color: ${({ theme }) => theme.color['white']};
-  margin-right: ${({theme}) => theme.space[4]};
+  color: ${({ theme }) => theme.color["white"]};
+  margin-right: ${({ theme }) => theme.space[4]};
   align-self: center;
 `;
 
-export const StyledDateTagButton = styled(Button)`
-`;
+export const StyledDateTagButton = styled(Button)``;

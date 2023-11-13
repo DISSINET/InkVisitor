@@ -258,7 +258,7 @@ export const EntitySearchBox: React.FC = () => {
       <StyledRow>
         <StyledRowHeader>Label (at least 2 characters)</StyledRowHeader>
         <Input
-          width={150}
+          width="full"
           placeholder="search"
           changeOnType
           onChangeFn={(value: string) => {
@@ -269,7 +269,6 @@ export const EntitySearchBox: React.FC = () => {
         />
         <div>
           <Button
-            // label={showAdvancedOptions ? "hide options" : "show options"}
             icon={<BsFilter />}
             onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}
           />
@@ -284,7 +283,7 @@ export const EntitySearchBox: React.FC = () => {
             <div style={{ position: "relative" }}>
               <Dropdown
                 placeholder={""}
-                width={150}
+                width="full"
                 entityDropdown
                 options={[defaultClassOption].concat(classOptions)}
                 value={classOption}
@@ -303,7 +302,7 @@ export const EntitySearchBox: React.FC = () => {
           <StyledRow>
             <StyledRowHeader>ID</StyledRowHeader>
             <Input
-              width={150}
+              width="full"
               placeholder="ID"
               changeOnType
               onChangeFn={(value: string) =>
@@ -316,7 +315,7 @@ export const EntitySearchBox: React.FC = () => {
             <div style={{ position: "relative" }}>
               <Dropdown
                 placeholder={""}
-                width={150}
+                width="full"
                 options={statusOptions}
                 value={statusOptionSelected}
                 onChange={(selectedOption) => {
@@ -333,7 +332,7 @@ export const EntitySearchBox: React.FC = () => {
             <div style={{ position: "relative" }}>
               <Dropdown
                 placeholder={""}
-                width={150}
+                width="full"
                 options={languageOptions}
                 value={languageOptionSelected}
                 onChange={(selectedOption) => {
@@ -349,7 +348,7 @@ export const EntitySearchBox: React.FC = () => {
           <StyledRowHeader>Limit by template</StyledRowHeader>
           <Dropdown
             placeholder={""}
-            width={150}
+            width="full"
             options={[defaultClassOption].concat(templateOptions)}
             value={templateOption}
             onChange={(selectedOption) => {
@@ -390,7 +389,7 @@ export const EntitySearchBox: React.FC = () => {
                   }}
                   placeholder={"territory"}
                   disableCreate
-                  inputWidth={114}
+                  inputWidth="full"
                 />
               </div>
             )}
@@ -464,7 +463,7 @@ export const EntitySearchBox: React.FC = () => {
                   }}
                   placeholder={"entity"}
                   disableCreate
-                  inputWidth={114}
+                  inputWidth="full"
                 />
               </div>
             )}
@@ -493,7 +492,7 @@ export const EntitySearchBox: React.FC = () => {
               <StyledDatePicker
                 type="date"
                 id="created-date"
-                width={150}
+                width="full"
                 name="created-date"
                 onChange={(e) => {
                   const createdDate = new Date(e.target.value);
@@ -526,7 +525,7 @@ export const EntitySearchBox: React.FC = () => {
               <StyledDatePicker
                 type="date"
                 id="updated-date"
-                width={150}
+                width="full"
                 name="updated-date"
                 onChange={(e) => {
                   const updatedDate = new Date(e.target.value);
