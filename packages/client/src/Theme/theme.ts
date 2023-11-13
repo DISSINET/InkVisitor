@@ -60,6 +60,7 @@ const theme = {
     tableSelectionHover: "#e0f3ff",
     focusedCheckbox: "rgba(9,16,52,0.1)",
 
+    muni: "#091034",
     staging: "#911111",
     "data-import": "#99004C",
     development: "#6174C2",

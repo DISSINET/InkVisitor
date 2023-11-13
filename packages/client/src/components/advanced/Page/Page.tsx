@@ -43,7 +43,7 @@ export const Page: React.FC<Page> = ({ children }) => {
     ""
   );
   if (environmentName === "/") {
-    environmentName = ""
+    environmentName = "";
   }
 
   const location = useLocation();
@@ -131,7 +131,7 @@ export const Page: React.FC<Page> = ({ children }) => {
         color={
           ["production", ""].indexOf(environmentName) === -1
             ? (environmentName as keyof ThemeColor)
-            : "primary"
+            : "muni"
         }
         left={<LeftHeader tempLocation={tempLocation} />}
         right={
