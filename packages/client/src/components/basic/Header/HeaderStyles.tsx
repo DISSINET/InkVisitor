@@ -17,7 +17,7 @@ export const StyledHeader = styled.div<StyledHeader>`
     }`};
   width: ${({ layoutWidth }) => (layoutWidth > 0 ? layoutWidth : "100%")};
   background-color: ${({ theme, $color }) => theme.color[$color]};
-  color: ${({ theme }) => theme.color["white"]};
+  color: ${({ theme }) => theme.color.headerTextColor};
   display: flex;
   position: relative;
 `;
