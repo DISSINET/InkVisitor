@@ -719,7 +719,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
               placeholder="Insert statement text here"
               onChangeFn={(newValue: string) => {
                 if (newValue !== statement.data.text) {
-                  handleDataAttributeChange({ text: newValue });
+                  handleDataAttributeChange({ text: newValue }, true);
                 }
               }}
               value={statement.data.text}
@@ -729,7 +729,6 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
         {statement.warnings.length > 0 && (
           <StyledEditorSection>
-
             <StyledEditorSectionHeader>
               <StyledEditorSectionHeading>
                 {statement.warnings.length} Warnings{" "}
@@ -749,19 +748,19 @@ export const StatementEditor: React.FC<StatementEditor> = ({
             </StyledEditorSectionHeader>
             <StyledEditorSectionContent>
               <StyledDetailWarnings>
-              {showWarnings &&
-                statement.warnings
-                  .sort((a, b) => a.type.localeCompare(b.type))
-                  .map((warning, key) => {
-                    return (
-                      <Message
-                        key={key}
-                        warning={warning}
-                        entities={statement.entities}
-                      />
-                    );
-                  })}
-            </StyledDetailWarnings>
+                {showWarnings &&
+                  statement.warnings
+                    .sort((a, b) => a.type.localeCompare(b.type))
+                    .map((warning, key) => {
+                      return (
+                        <Message
+                          key={key}
+                          warning={warning}
+                          entities={statement.entities}
+                        />
+                      );
+                    })}
+              </StyledDetailWarnings>
             </StyledEditorSectionContent>
           </StyledEditorSection>
         )}
