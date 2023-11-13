@@ -39,7 +39,11 @@ import {
 } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
-import { AiOutlineWarning } from "react-icons/ai";
+import {
+  AiOutlineCaretDown,
+  AiOutlineCaretUp,
+  AiOutlineWarning,
+} from "react-icons/ai";
 import { FaRegCopy } from "react-icons/fa";
 import { TiWarningOutline } from "react-icons/ti";
 import { toast } from "react-toastify";
@@ -50,6 +54,7 @@ import { getEntityLabel, getShortLabelByLetterCount } from "utils";
 import { EntityReferenceTable } from "../../EntityReferenceTable/EntityReferenceTable";
 import {
   StyledBreadcrumbWrap,
+  StyledDetailWarnings,
   StyledEditorContentRow,
   StyledEditorContentRowLabel,
   StyledEditorContentRowValue,
@@ -89,8 +94,13 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   updateStatementDataMutation,
   moveStatementMutation,
 }) => {
-  const { statementId, territoryId, setTerritoryId, appendDetailId } =
-    useSearchParams();
+  const {
+    statementId,
+    territoryId,
+    setTerritoryId,
+    appendDetailId,
+    appendMultipleDetailIds,
+  } = useSearchParams();
 
   const queryClient = useQueryClient();
 
@@ -546,6 +556,14 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   );
   const dispatch = useAppDispatch();
 
+  useEffect(() => {
+    if (showWarnings && statement.data.actions.length > 0) {
+      appendMultipleDetailIds(
+        Array.from(new Set(statement.data.actions.map((a) => a.actionId)))
+      );
+    }
+  }, [showWarnings, statementId]);
+
   return (
     <>
       <div style={{ marginBottom: "4rem" }} key={statement.id}>
@@ -683,27 +701,40 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
         {statement.warnings.length > 0 && (
           <StyledEditorSection>
-            <Button
-              icon={<TiWarningOutline size={16} />}
-              label={`${statement.warnings.length}`}
-              onClick={() => dispatch(setShowWarnings(!showWarnings))}
-              color="warning"
-              tooltipLabel={showWarnings ? "hide warnings" : "show warnings"}
-              inverted={!showWarnings}
-              tooltipPosition="right"
-            />
-            {showWarnings &&
-              statement.warnings
-                .sort((a, b) => a.type.localeCompare(b.type))
-                .map((warning, key) => {
-                  return (
-                    <Message
-                      key={key}
-                      warning={warning}
-                      entities={statement.entities}
-                    />
-                  );
-                })}
+
+            <StyledEditorSectionHeader>
+              <StyledEditorSectionHeading>
+                {statement.warnings.length} Warnings{" "}
+                {statement.warnings.length > 0 && (
+                  <TiWarningOutline size={16} style={{ marginLeft: "3px" }} />
+                )}
+              </StyledEditorSectionHeading>
+              <Button
+                iconRight={
+                  showWarnings ? <AiOutlineCaretUp /> : <AiOutlineCaretDown />
+                }
+                label={showWarnings ? "hide warnings" : "show warnings"}
+                onClick={() => dispatch(setShowWarnings(!showWarnings))}
+                color="warning"
+                tooltipPosition="right"
+              />
+            </StyledEditorSectionHeader>
+            <StyledEditorSectionContent>
+              <StyledDetailWarnings>
+              {showWarnings &&
+                statement.warnings
+                  .sort((a, b) => a.type.localeCompare(b.type))
+                  .map((warning, key) => {
+                    return (
+                      <Message
+                        key={key}
+                        warning={warning}
+                        entities={statement.entities}
+                      />
+                    );
+                  })}
+            </StyledDetailWarnings>
+            </StyledEditorSectionContent>
           </StyledEditorSection>
         )}
 

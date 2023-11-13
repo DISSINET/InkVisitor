@@ -39,6 +39,7 @@ import {
   StyledDetailSectionContentUsedIn,
   StyledDetailSectionEntityList,
   StyledDetailSectionHeader,
+  StyledDetailWarnings,
   StyledDetailWrapper,
   StyledPropGroupWrap,
   StyledUsedAsHeading,
@@ -50,6 +51,7 @@ import { EntityDetailMetaPropsTable } from "./EntityDetailUsedInTable/EntityDeta
 import { EntityDetailStatementPropsTable } from "./EntityDetailUsedInTable/EntityDetailStatementPropsTable/EntityDetailStatementPropsTable";
 import { EntityDetailStatementsTable } from "./EntityDetailUsedInTable/EntityDetailStatementsTable/EntityDetailStatementsTable";
 import { EntityDetailValency } from "./EntityDetailValency/EntityDetailValency";
+import { IWarningPositionSection } from "@shared/types/warning";
 
 const allowedEntityChangeClasses = [
   EntityEnums.Class.Value,
@@ -246,6 +248,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
           variables.language !== undefined ||
           variables.data?.logicalType
         ) {
+          queryClient.invalidateQueries(["suggestion"]);
           if (entity?.class === EntityEnums.Class.Territory) {
             queryClient.invalidateQueries(["tree"]);
           }
@@ -621,6 +624,18 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
             {entity.class === EntityEnums.Class.Action && (
               <StyledDetailSection>
                 <StyledDetailSectionHeader>Valency</StyledDetailSectionHeader>
+                <StyledDetailWarnings>
+                  {entity.warnings &&
+                    entity.warnings
+                      .filter(
+                        (w) =>
+                          w.position?.section ===
+                          IWarningPositionSection.Valencies
+                      )
+                      .map((warning, key) => {
+                        return <Message key={key} warning={warning} />;
+                      })}
+                </StyledDetailWarnings>
                 <StyledDetailSectionContent>
                   <EntityDetailValency
                     entity={entity}
@@ -637,10 +652,18 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
             {/* Relations */}
             <StyledDetailSection>
               <StyledDetailSectionHeader>Relations</StyledDetailSectionHeader>
-              {entity.warnings &&
-                entity.warnings.map((warning, key) => {
-                  return <Message key={key} warning={warning} />;
-                })}
+              <StyledDetailWarnings>
+                {entity.warnings &&
+                  entity.warnings
+                    .filter(
+                      (w) =>
+                        w.position?.section ===
+                        IWarningPositionSection.Relations
+                    )
+                    .map((warning, key) => {
+                      return <Message key={key} warning={warning} />;
+                    })}
+              </StyledDetailWarnings>
               <StyledDetailSectionContent>
                 <EntityDetailRelations
                   entity={entity}

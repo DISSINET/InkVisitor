@@ -36,6 +36,12 @@ export const StyledDetailSectionHeader = styled.div<StyledDetailSectionHeader>`
   color: ${({ theme }) => theme.color["primary"]};
 `;
 
+export const StyledDetailWarnings = styled.div`
+  display: grid;
+  grid-gap: ${({ theme }) => theme.space["1"]};
+  grid-auto-flow: row;
+`;
+
 export const StyledDetailContentRowValueID = styled.div`
   display: inline-flex;
   font-style: italic;

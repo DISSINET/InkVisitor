@@ -15,13 +15,14 @@ export async function deleteUser(db: Db, userId: string): Promise<WriteResult> {
 }
 
 export async function getEntitiesDataByClass<T>(
-  db: Db,
+  db: Connection,
   entityClass: EntityEnums.Class
 ): Promise<T[]> {
+  const connection = db instanceof Db ? db.connection : db;
   return rethink
     .table(Entity.table)
     .getAll(entityClass, { index: DbEnums.Indexes.Class })
-    .run(db.connection);
+    .run(connection);
 }
 
 export async function findEntityById<T extends IEntity>(

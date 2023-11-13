@@ -41,6 +41,25 @@ services:
     networks:
       - inkvisitor
 
+  inkvisitor:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        ENV: latest
+    image: inkvisitor:latest
+    container_name: inkvisitor
+    restart: always
+    <<: *logging
+    env_file:
+      - ./packages/server/env/.env
+    environment:
+      - DB_HOST=database
+    ports:
+      - "3000:3000"
+    networks:
+      - inkvisitor
+
   inkvisitor-production:
     build:
       context: .

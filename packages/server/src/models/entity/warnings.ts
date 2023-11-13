@@ -3,7 +3,9 @@ import Superclass from "@models/relation/superclass";
 import { findEntityById } from "@service/shorthands";
 import { EntityEnums, RelationEnums, WarningTypeEnums } from "@shared/enums";
 import { IAction, IWarning } from "@shared/types";
+import { IActionValency } from "@shared/types/action";
 import { InternalServerError } from "@shared/types/errors";
+import { IWarningPositionSection } from "@shared/types/warning";
 import { Connection } from "rethinkdb-ts";
 
 export default class EntityWarnings {
@@ -21,10 +23,18 @@ export default class EntityWarnings {
    * @param relId
    * @returns new instance of warning
    */
-  newWarning(warningType: WarningTypeEnums, relId?: string): IWarning {
+  newWarning(
+    warningType: WarningTypeEnums,
+    section: IWarningPositionSection,
+    pos?: keyof IActionValency
+  ): IWarning {
     return {
       type: warningType,
-      origin: relId || "",
+      position: {
+        section: section,
+        subSection: pos,
+      },
+      origin: "",
     };
   }
 
@@ -49,6 +59,11 @@ export default class EntityWarnings {
     const mvalWarning = await this.hasMVAL(conn);
     if (mvalWarning) {
       warnings.push(mvalWarning);
+    }
+
+    const avalWarnings = await this.hasAVAL(conn);
+    if (avalWarnings) {
+      avalWarnings.forEach((w) => warnings.push(w));
     }
 
     const maeeWarning = await this.hasMAEE(conn);
@@ -78,7 +93,7 @@ export default class EntityWarnings {
     );
 
     const gotSCL = !!scls.find((s) => s.entityIds[0] === this.entityId);
-    return gotSCL ? null : this.newWarning(WarningTypeEnums.SCLM);
+    return gotSCL ? null : this.newWarning(WarningTypeEnums.SCLM, IWarningPositionSection.Relations);
   }
 
   /**
@@ -135,7 +150,7 @@ export default class EntityWarnings {
       for (const baseClassIds of Object.values(baseIdsPerConcept)) {
         if (baseClassIds.indexOf(requiredBaseClassId) === -1) {
           // required base class is not present for this concept
-          return this.newWarning(WarningTypeEnums.ISYNC);
+          return this.newWarning(WarningTypeEnums.ISYNC, IWarningPositionSection.Relations);
         }
       }
     }
@@ -143,11 +158,6 @@ export default class EntityWarnings {
     return null;
   }
 
-  /**
-   * Tests if there is MVAL warning and returns it
-   * @param conn
-   * @returns
-   */
   async hasMVAL(conn: Connection): Promise<IWarning | null> {
     if (this.class !== EntityEnums.Class.Action) {
       return null;
@@ -166,10 +176,86 @@ export default class EntityWarnings {
         action.data.entities.a2 === undefined &&
         action.data.entities.s === undefined)
     ) {
-      return this.newWarning(WarningTypeEnums.MVAL);
+      return this.newWarning(WarningTypeEnums.MVAL, IWarningPositionSection.Valencies);
     }
 
     return null;
+  }
+
+  /**
+   * Tests if there is AVAL warning and returns it
+   * @param conn
+   * @returns
+   */
+  async hasAVAL(conn: Connection): Promise<IWarning[] | null> {
+    if (this.class !== EntityEnums.Class.Action) {
+      return null;
+    }
+
+    const action = await findEntityById<IAction>(conn, this.entityId);
+    if (!action) {
+      throw new InternalServerError(
+        "action not found while checking MVAL warning"
+      );
+    }
+
+    const relations = (
+      await Relation.findForEntity(conn, this.entityId)
+    ).filter(
+      (r) =>
+        [
+          RelationEnums.Type.SubjectSemantics,
+          RelationEnums.Type.Actant1Semantics,
+          RelationEnums.Type.Actant2Semantics,
+        ].indexOf(r.type) !== -1
+    );
+    const warnings = []
+
+    for (const pos of Object.keys(
+      action.data.valencies
+    ) as (keyof IActionValency)[]) {
+      const types = action.data.entities[pos];
+      const valency = action.data.valencies[pos];
+      const morphosValid = valency && valency.length > 0;
+      const relIds = relations
+        .filter((r) => {
+          if (pos === "s") {
+            return r.type === RelationEnums.Type.SubjectSemantics;
+          } else if (pos === "a1") {
+            return r.type === RelationEnums.Type.Actant1Semantics;
+          } else {
+            return r.type === RelationEnums.Type.Actant2Semantics;
+          }
+        })
+        .reduce((acc, curr) => {
+          acc = acc.concat(curr.entityIds);
+          return acc;
+        }, [] as string[])
+        .filter((id) => id !== this.entityId);
+      
+        const semantFilled = relIds.length > 0;
+      const onlyEmptyAllowed =
+        !types ||
+        !types.length ||
+        (types.length === 1 && types[0] === EntityEnums.Extension.Empty);
+      if (!morphosValid && onlyEmptyAllowed && !relIds.length) {
+        continue;
+      }
+
+      const entitiesSet =
+        relIds.length > 0 &&
+        (types || []).length > 0 &&
+        types?.find((t) => t !== EntityEnums.Extension.Empty);
+
+      if (morphosValid && semantFilled && entitiesSet) {
+        continue;
+      }
+
+       const newWarning = this.newWarning(WarningTypeEnums.AVAL, IWarningPositionSection.Valencies, pos);
+       warnings.push(newWarning)
+    }
+
+    return warnings;
   }
 
   /**
@@ -191,7 +277,7 @@ export default class EntityWarnings {
     );
 
     if (!aee || !aee.length) {
-      return this.newWarning(WarningTypeEnums.MAEE);
+      return this.newWarning(WarningTypeEnums.MAEE, IWarningPositionSection.Relations);
     }
 
     return null;

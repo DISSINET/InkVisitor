@@ -42,15 +42,15 @@ export const StyledLabel = styled.div<StyledLabel>`
   font-style: ${({ isItalic }) => (isItalic ? "italic" : "")};
 `;
 
-export const StyledClose = styled.span`
+export const StyledIconWrap = styled.span`
   display: flex;
   align-items: center;
   height: 100%;
-  margin: 0 0.2rem;
+  margin-right: 0.2rem;
 `;
 
 export const StyledCgClose = styled(CgClose)`
-  border-radius: 5px;
+  border-radius: 10px;
   padding: 1px;
   :hover {
     background-color: ${({ theme }) => theme.color["gray"][300]};
