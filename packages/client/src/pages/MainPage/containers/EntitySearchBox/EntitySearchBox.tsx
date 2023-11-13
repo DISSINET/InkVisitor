@@ -4,7 +4,7 @@ import { EntityEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
 import { IRequestSearch } from "@shared/types/request-search";
 import api from "api";
-import { Dropdown, Input, Loader, TypeBar } from "components";
+import { Button, Dropdown, Input, Loader, TypeBar } from "components";
 import {
   AttributeButtonGroup,
   EntitySuggester,
@@ -29,6 +29,7 @@ import {
   StyledRowHeader,
 } from "./EntitySearchBoxStyles";
 import { EntitySearchResults } from "./EntitySearchResults/EntitySearchResults";
+import { BsFilter } from "react-icons/bs";
 
 const initValues: IRequestSearch = {
   label: "",
@@ -192,7 +193,14 @@ export const EntitySearchBox: React.FC = () => {
 
   // apply changes to search parameters
   const handleChange = (changes: {
-    [key: string]: string | false | true | undefined | DropdownItem | Date | string[];
+    [key: string]:
+      | string
+      | false
+      | true
+      | undefined
+      | DropdownItem
+      | Date
+      | string[];
   }) => {
     const newSearch = {
       ...searchData,
@@ -243,6 +251,8 @@ export const EntitySearchBox: React.FC = () => {
     return options;
   }, [templates]);
 
+  const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
+
   return (
     <StyledBoxContent>
       <StyledRow>
@@ -257,269 +267,276 @@ export const EntitySearchBox: React.FC = () => {
               : handleChange({ label: value });
           }}
         />
-      </StyledRow>
-      <StyledRow>
-        <StyledRowHeader>Limit by class</StyledRowHeader>
-        <div style={{ position: "relative" }}>
-          <Dropdown
-            placeholder={""}
-            width={150}
-            entityDropdown
-            options={[defaultClassOption].concat(classOptions)}
-            value={classOption}
-            onChange={(selectedOption) => {
-              setClassOption(selectedOption[0]);
-              setTemplateOption(defaultClassOption);
-              handleChange({
-                class: selectedOption[0].value,
-                usedTemplate: defaultClassOption.value,
-              });
-            }}
+        <div>
+          <Button
+            // label={showAdvancedOptions ? "hide options" : "show options"}
+            icon={<BsFilter />}
+            onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}
           />
-          <TypeBar entityLetter={(classOption as DropdownItem).value} />
         </div>
       </StyledRow>
 
-      <StyledRow>
-        <StyledRowHeader>ID</StyledRowHeader>
-        <Input
-          width={150}
-          placeholder="ID"
-          changeOnType
-          onChangeFn={(value: string) => handleChange({ entityIds: [value] })}
-        />
-      </StyledRow>
-
-      <StyledRow>
-        <StyledRowHeader>Limit by status</StyledRowHeader>
-        <div style={{ position: "relative" }}>
-          <Dropdown
-            placeholder={""}
-            width={150}
-            options={statusOptions}
-            value={statusOptionSelected}
-            onChange={(selectedOption) => {
-              handleChange({
-                status: selectedOption[0].value,
-              });
-            }}
-          />
-          <TypeBar entityLetter={(classOption as DropdownItem).value} />
-        </div>
-      </StyledRow>
-
-      <StyledRow>
-        <StyledRowHeader>Limit by language</StyledRowHeader>
-        <div style={{ position: "relative" }}>
-          <Dropdown
-            placeholder={""}
-            width={150}
-            options={languageOptions}
-            value={languageOptionSelected}
-            onChange={(selectedOption) => {
-              handleChange({
-                language: selectedOption[0].value,
-              });
-            }}
-          />
-          <TypeBar entityLetter={(classOption as DropdownItem).value} />
-        </div>
-      </StyledRow>
-
-      {/* <StyledRow>
-        <StyledRowHeader>Limit by template</StyledRowHeader>
-        <Dropdown
-          placeholder={""}
-          width={150}
-          options={[defaultClassOption].concat(templateOptions)}
-          value={templateOption}
-          onChange={(selectedOption) => {
-            setTemplateOption(option);
-            handleChange({ usedTemplate: (selectedOption[0]).value });
-          }}
-        />
-      </StyledRow> */}
-
-      <StyledRow>
-        <StyledRowHeader>Limit by territory</StyledRowHeader>
-        {debouncedValues.territoryId && searchTerritoryEntity ? (
-          <>
-            <Loader size={26} show={searchTerritoryEntityIsFetching} />
-            {searchTerritoryEntity && (
-              <EntityTag
-                entity={searchTerritoryEntity}
-                tooltipPosition={"left"}
-                unlinkButton={{
-                  onClick: () => {
-                    handleChange({
-                      territoryId: "",
-                      subTerritorySearch: undefined,
-                    });
-                  },
-                  color: "danger",
-                  icon: <RiCloseFill />,
+      {showAdvancedOptions && (
+        <>
+          {" "}
+          <StyledRow>
+            <StyledRowHeader>Limit by class</StyledRowHeader>
+            <div style={{ position: "relative" }}>
+              <Dropdown
+                placeholder={""}
+                width={150}
+                entityDropdown
+                options={[defaultClassOption].concat(classOptions)}
+                value={classOption}
+                onChange={(selectedOption) => {
+                  setClassOption(selectedOption[0]);
+                  setTemplateOption(defaultClassOption);
+                  handleChange({
+                    class: selectedOption[0].value,
+                    usedTemplate: defaultClassOption.value,
+                  });
                 }}
               />
+              <TypeBar entityLetter={(classOption as DropdownItem).value} />
+            </div>
+          </StyledRow>
+          <StyledRow>
+            <StyledRowHeader>ID</StyledRowHeader>
+            <Input
+              width={150}
+              placeholder="ID"
+              changeOnType
+              onChangeFn={(value: string) =>
+                handleChange({ entityIds: [value] })
+              }
+            />
+          </StyledRow>
+          <StyledRow>
+            <StyledRowHeader>Limit by status</StyledRowHeader>
+            <div style={{ position: "relative" }}>
+              <Dropdown
+                placeholder={""}
+                width={150}
+                options={statusOptions}
+                value={statusOptionSelected}
+                onChange={(selectedOption) => {
+                  handleChange({
+                    status: selectedOption[0].value,
+                  });
+                }}
+              />
+              <TypeBar entityLetter={(classOption as DropdownItem).value} />
+            </div>
+          </StyledRow>
+          <StyledRow>
+            <StyledRowHeader>Limit by language</StyledRowHeader>
+            <div style={{ position: "relative" }}>
+              <Dropdown
+                placeholder={""}
+                width={150}
+                options={languageOptions}
+                value={languageOptionSelected}
+                onChange={(selectedOption) => {
+                  handleChange({
+                    language: selectedOption[0].value,
+                  });
+                }}
+              />
+              <TypeBar entityLetter={(classOption as DropdownItem).value} />
+            </div>
+          </StyledRow>
+          {/* <StyledRow>
+          <StyledRowHeader>Limit by template</StyledRowHeader>
+          <Dropdown
+            placeholder={""}
+            width={150}
+            options={[defaultClassOption].concat(templateOptions)}
+            value={templateOption}
+            onChange={(selectedOption) => {
+              setTemplateOption(option);
+              handleChange({ usedTemplate: (selectedOption[0]).value });
+            }}
+          />
+        </StyledRow> */}
+          <StyledRow>
+            <StyledRowHeader>Limit by territory</StyledRowHeader>
+            {debouncedValues.territoryId && searchTerritoryEntity ? (
+              <>
+                <Loader size={26} show={searchTerritoryEntityIsFetching} />
+                {searchTerritoryEntity && (
+                  <EntityTag
+                    entity={searchTerritoryEntity}
+                    tooltipPosition={"left"}
+                    unlinkButton={{
+                      onClick: () => {
+                        handleChange({
+                          territoryId: "",
+                          subTerritorySearch: undefined,
+                        });
+                      },
+                      color: "danger",
+                      icon: <RiCloseFill />,
+                    }}
+                  />
+                )}
+              </>
+            ) : (
+              <div>
+                <EntitySuggester
+                  disableTemplatesAccept
+                  categoryTypes={[EntityEnums.Class.Territory]}
+                  onSelected={(newSelectedId: string) => {
+                    handleChange({ territoryId: newSelectedId });
+                  }}
+                  placeholder={"territory"}
+                  disableCreate
+                  inputWidth={114}
+                />
+              </div>
             )}
-          </>
-        ) : (
-          <div>
-            <EntitySuggester
-              disableTemplatesAccept
-              categoryTypes={[EntityEnums.Class.Territory]}
-              onSelected={(newSelectedId: string) => {
-                handleChange({ territoryId: newSelectedId });
-              }}
-              placeholder={"territory"}
-              disableCreate
-              inputWidth={114}
-            />
-          </div>
-        )}
-      </StyledRow>
-
-      {debouncedValues.territoryId && (
-        <StyledRow>
-          <StyledRowHeader>Territory children</StyledRowHeader>
-          {searchTerritoryEntity && (
-            <AttributeButtonGroup
-              options={[
-                {
-                  longValue: "included",
-                  shortValue: "included",
-                  onClick: () => {
-                    handleChange({ subTerritorySearch: true });
-                  },
-                  selected: debouncedValues.subTerritorySearch === true,
-                },
-                {
-                  longValue: "not included",
-                  shortValue: "not included",
-                  onClick: () => {
-                    handleChange({ subTerritorySearch: undefined });
-                  },
-                  selected: debouncedValues.subTerritorySearch !== true,
-                },
-              ]}
-            />
+          </StyledRow>
+          {debouncedValues.territoryId && (
+            <StyledRow>
+              <StyledRowHeader>Territory children</StyledRowHeader>
+              {searchTerritoryEntity && (
+                <AttributeButtonGroup
+                  options={[
+                    {
+                      longValue: "included",
+                      shortValue: "included",
+                      onClick: () => {
+                        handleChange({ subTerritorySearch: true });
+                      },
+                      selected: debouncedValues.subTerritorySearch === true,
+                    },
+                    {
+                      longValue: "not included",
+                      shortValue: "not included",
+                      onClick: () => {
+                        handleChange({ subTerritorySearch: undefined });
+                      },
+                      selected: debouncedValues.subTerritorySearch !== true,
+                    },
+                  ]}
+                />
+              )}
+            </StyledRow>
           )}
-        </StyledRow>
-      )}
-
-      <StyledRow>
-        <StyledRowHeader>Limit by co-occurrence</StyledRowHeader>
-        {debouncedValues.cooccurrenceId ? (
-          <>
-            <Loader size={26} show={cooccurrenceIsFetching} />
-            {cooccurrenceEntity && (
-              <EntityTag
-                entity={cooccurrenceEntity}
-                tooltipPosition="left"
-                unlinkButton={{
-                  onClick: () => {
-                    handleChange({ cooccurrenceId: "" });
-                  },
-                  color: "danger",
-                  icon: <RiCloseFill />,
+          <StyledRow>
+            <StyledRowHeader>Limit by co-occurrence</StyledRowHeader>
+            {debouncedValues.cooccurrenceId ? (
+              <>
+                <Loader size={26} show={cooccurrenceIsFetching} />
+                {cooccurrenceEntity && (
+                  <EntityTag
+                    entity={cooccurrenceEntity}
+                    tooltipPosition="left"
+                    unlinkButton={{
+                      onClick: () => {
+                        handleChange({ cooccurrenceId: "" });
+                      },
+                      color: "danger",
+                      icon: <RiCloseFill />,
+                    }}
+                  />
+                )}
+              </>
+            ) : (
+              <div>
+                <EntitySuggester
+                  disableTemplatesAccept
+                  categoryTypes={[
+                    EntityEnums.Class.Statement,
+                    EntityEnums.Class.Action,
+                    EntityEnums.Class.Territory,
+                    EntityEnums.Class.Resource,
+                    EntityEnums.Class.Person,
+                    EntityEnums.Class.Being,
+                    EntityEnums.Class.Group,
+                    EntityEnums.Class.Object,
+                    EntityEnums.Class.Concept,
+                    EntityEnums.Class.Location,
+                    EntityEnums.Class.Value,
+                    EntityEnums.Class.Event,
+                  ]}
+                  onSelected={(newSelectedId: string) => {
+                    handleChange({ cooccurrenceId: newSelectedId });
+                  }}
+                  placeholder={"entity"}
+                  disableCreate
+                  inputWidth={114}
+                />
+              </div>
+            )}
+          </StyledRow>
+          <StyledRow>
+            <StyledRowHeader>Created at</StyledRowHeader>
+            {debouncedValues.createdDate ? (
+              <StyledDateTag>
+                <StyledDateTagText>
+                  {debouncedValues.createdDate.toDateString()}
+                </StyledDateTagText>
+                <StyledDateTagButton
+                  key="d"
+                  icon={<RiCloseFill />}
+                  color="white"
+                  noBorder
+                  noBackground
+                  inverted
+                  tooltipLabel="remove date"
+                  onClick={() => {
+                    handleChange({ createdDate: undefined });
+                  }}
+                />
+              </StyledDateTag>
+            ) : (
+              <StyledDatePicker
+                type="date"
+                id="created-date"
+                width={150}
+                name="created-date"
+                onChange={(e) => {
+                  const createdDate = new Date(e.target.value);
+                  handleChange({ createdDate });
                 }}
               />
             )}
-          </>
-        ) : (
-          <div>
-            <EntitySuggester
-              disableTemplatesAccept
-              categoryTypes={[
-                EntityEnums.Class.Statement,
-                EntityEnums.Class.Action,
-                EntityEnums.Class.Territory,
-                EntityEnums.Class.Resource,
-                EntityEnums.Class.Person,
-                EntityEnums.Class.Being,
-                EntityEnums.Class.Group,
-                EntityEnums.Class.Object,
-                EntityEnums.Class.Concept,
-                EntityEnums.Class.Location,
-                EntityEnums.Class.Value,
-                EntityEnums.Class.Event,
-              ]}
-              onSelected={(newSelectedId: string) => {
-                handleChange({ cooccurrenceId: newSelectedId });
-              }}
-              placeholder={"entity"}
-              disableCreate
-              inputWidth={114}
-            />
-          </div>
-        )}
-      </StyledRow>
-      <StyledRow>
-        <StyledRowHeader>Created at</StyledRowHeader>
-        {debouncedValues.createdDate ? (
-          <StyledDateTag>
-            <StyledDateTagText>
-              {debouncedValues.createdDate.toDateString()}
-            </StyledDateTagText>
-            <StyledDateTagButton
-              key="d"
-              icon={<RiCloseFill />}
-              color="white"
-              noBorder
-              noBackground
-              inverted
-              tooltipLabel="remove date"
-              onClick={() => {
-                handleChange({ createdDate: undefined });
-              }}
-            />
-          </StyledDateTag>
-        ) : (
-          <StyledDatePicker
-            type="date"
-            id="created-date"
-            width={150}
-            name="created-date"
-            onChange={(e) => {
-              const createdDate = new Date(e.target.value);
-              handleChange({ createdDate });
-            }}
-          />
-        )}
-      </StyledRow>
-
-      <StyledRow>
-        <StyledRowHeader>Udpated at</StyledRowHeader>
-        {debouncedValues.updatedDate ? (
-          <StyledDateTag>
-            <StyledDateTagText>
-              {debouncedValues.updatedDate.toDateString()}
-            </StyledDateTagText>
-            <StyledDateTagButton
-              key="d"
-              icon={<RiCloseFill />}
-              color="white"
-              noBorder
-              noBackground
-              inverted
-              tooltipLabel="remove date"
-              onClick={() => {
-                handleChange({ updatedDate: undefined });
-              }}
-            />
-          </StyledDateTag>
-        ) : (
-          <StyledDatePicker
-            type="date"
-            id="updated-date"
-            width={150}
-            name="updated-date"
-            onChange={(e) => {
-              const updatedDate = new Date(e.target.value);
-              handleChange({ updatedDate });
-            }}
-          />
-        )}
-      </StyledRow>
+          </StyledRow>
+          <StyledRow>
+            <StyledRowHeader>Udpated at</StyledRowHeader>
+            {debouncedValues.updatedDate ? (
+              <StyledDateTag>
+                <StyledDateTagText>
+                  {debouncedValues.updatedDate.toDateString()}
+                </StyledDateTagText>
+                <StyledDateTagButton
+                  key="d"
+                  icon={<RiCloseFill />}
+                  color="white"
+                  noBorder
+                  noBackground
+                  inverted
+                  tooltipLabel="remove date"
+                  onClick={() => {
+                    handleChange({ updatedDate: undefined });
+                  }}
+                />
+              </StyledDateTag>
+            ) : (
+              <StyledDatePicker
+                type="date"
+                id="updated-date"
+                width={150}
+                name="updated-date"
+                onChange={(e) => {
+                  const updatedDate = new Date(e.target.value);
+                  handleChange({ updatedDate });
+                }}
+              />
+            )}
+          </StyledRow>
+        </>
+      )}
 
       <StyledResultsHeader>
         {sortedEntities.length > 0 && (
