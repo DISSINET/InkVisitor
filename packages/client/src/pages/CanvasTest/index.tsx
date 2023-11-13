@@ -7,12 +7,12 @@ interface ILoginPage {}
 
 const lorem = new LoremIpsum({
   sentencesPerParagraph: {
-    max: 8,
-    min: 4,
+    max: 40,
+    min: 20,
   },
   wordsPerSentence: {
-    max: 16,
-    min: 4,
+    max: 25,
+    min: 10,
   },
 });
 
