@@ -92,13 +92,14 @@ const TextCanvas: React.FC<TextCanvasProps> = ({
 
   const [lineMap, setLineMap] = useState<ILine[]>([]);
 
+  // parse text into lines
   useEffect(() => {
     const time1 = new Date();
 
     const lines: ILine[] = [];
     let lineStart = 0;
 
-    const charsInLine = (width - 80) / charWidth;
+    const charsInLine = Math.floor((width - 80) / charWidth);
     console.log("characters in one line", charsInLine);
 
     for (let charI = 0; charI < text.length; charI++) {
@@ -176,7 +177,8 @@ const TextCanvas: React.FC<TextCanvasProps> = ({
 
     const time2 = new Date();
     console.log(
-      `text of length ${text.length} parsed into ${lines.length} lines in ${time2.valueOf() - time1.valueOf()
+      `text of length ${text.length} parsed into ${lines.length} lines in ${
+        time2.valueOf() - time1.valueOf()
       }ms `
     );
     setLineMap(lines);
@@ -219,8 +221,8 @@ const TextCanvas: React.FC<TextCanvasProps> = ({
   const cursorWord = useMemo<IWord | undefined>(() => {
     return cursorLine
       ? cursorLine.words.find((word) => {
-        return word.iFrom <= cursorCharI && word.iTo >= cursorCharI;
-      })
+          return word.iFrom <= cursorCharI && word.iTo >= cursorCharI;
+        })
       : undefined;
   }, [cursorCharI, cursorLine, lineMap]);
 
@@ -351,14 +353,18 @@ const TextCanvas: React.FC<TextCanvasProps> = ({
   const handleScrollClick = (e: React.MouseEvent) => {
     const currentTargetRect = e.currentTarget.getBoundingClientRect();
     const event_offsetY = e.pageY - currentTargetRect.top;
-    const newScrollI = Math.floor((event_offsetY / currentTargetRect.height) * linesNo);
+    const newScrollI = Math.floor(
+      (event_offsetY / currentTargetRect.height) * linesNo
+    );
     setCursorLineI(newScrollI);
   };
 
   const handleScrollOver = (e: React.MouseEvent) => {
     const currentTargetRect = e.currentTarget.getBoundingClientRect();
     const event_offsetY = e.pageY - currentTargetRect.top;
-    const newScrollI = Math.floor((event_offsetY / currentTargetRect.height) * linesNo);
+    const newScrollI = Math.floor(
+      (event_offsetY / currentTargetRect.height) * linesNo
+    );
     setCursorGhostLineI(newScrollI);
   };
 
@@ -369,10 +375,10 @@ const TextCanvas: React.FC<TextCanvasProps> = ({
   const handleScroll = (e: React.WheelEvent<HTMLCanvasElement>) => {
     const up = e.deltaY < 0 ? -1 : 1;
     if (cursorLineI + up < 0 || cursorLineI + up > linesNo - 1) {
-      return
+      return;
     }
     setCursorLineI(cursorLineI + up);
-  }
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLCanvasElement>) => {
     e.preventDefault();
@@ -448,26 +454,35 @@ const TextCanvas: React.FC<TextCanvasProps> = ({
         setCursorLineI(lineIAfterPgDown);
         break;
 
+      // remove character
+      case "Backspace":
+        if (cursorLine) {
+          const deleteI = cursorLine.iFrom + cursorCharI - 1;
+          setText(text.slice(0, deleteI) + text.slice(deleteI + 1));
+          setcursorCharI(cursorCharI - 1);
+        }
+        break;
+
       default:
         // writing to text
-        console.log(e.key);
-        if (e.key === "Backspace") {
+        const key = e.key;
+        const nonCharKeys = [
+          "CapsLock",
+          "Shift",
+          "Control",
+          "Alt",
+          "Tab",
+          "Escape",
+          "Enter",
+        ];
+
+        if (!nonCharKeys.includes(key))
           if (cursorLine) {
-            const deleteI = cursorLine.iFrom + cursorCharI - 1;
-            setText(text.slice(0, deleteI) + text.slice(deleteI + 1));
-            setcursorCharI(cursorCharI - 1);
+            const addI = cursorLine.iFrom + cursorCharI;
+            setText(text.slice(0, addI) + key + text.slice(addI));
+            setcursorCharI(cursorCharI + 1);
           }
-        }
 
-        //   const newLineMap = [...lineMap]
-
-        //   newLineMap[cursorLineI].words.map(word => {
-        //     if (word.iFrom < cursorCharI && word.iTo > cursorCharI) {
-        //       return word.text
-        //     }
-        //     return word
-        //   })
-        // }
         break;
     }
   };
@@ -596,8 +611,9 @@ const TextCanvas: React.FC<TextCanvasProps> = ({
                   fontSize: "12px",
                   fontWeight: "500",
                   color: theme.color.gray[500],
-                  top: `calc(${((cursorGhostLineI + 1) / linesNo) * 100
-                    }% - 6px)`,
+                  top: `calc(${
+                    ((cursorGhostLineI + 1) / linesNo) * 100
+                  }% - 6px)`,
                 }}
               >
                 {/* {`${cursorLineI}/${linesNo}`} */}
