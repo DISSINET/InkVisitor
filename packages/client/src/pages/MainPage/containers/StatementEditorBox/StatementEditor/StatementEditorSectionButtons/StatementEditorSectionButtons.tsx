@@ -1,30 +1,36 @@
 import { EntityEnums } from "@shared/enums";
-import { IEntity, IResponseStatement, IStatement } from "@shared/types";
-import { Button, ButtonGroup, Submit } from "components";
+import {
+  IEntity,
+  IResponseStatement,
+  IStatement,
+  IStatementData,
+} from "@shared/types";
+import { Button, ButtonGroup } from "components";
 import { AttributeButtonGroup, EntitySuggester } from "components/advanced";
 import {
+  DReferences,
   DStatementActants,
   DStatementActions,
-  DReferences,
 } from "constructors";
 import React, { useState } from "react";
 import { FaClone, FaPlus, FaTrashAlt } from "react-icons/fa";
 import { TbReplace } from "react-icons/tb";
-import { UseMutationResult } from "@tanstack/react-query";
 
 interface StatementEditorSectionButtons {
   section: "actions" | "actants" | "references";
   statement: IResponseStatement;
   previousStatement: IResponseStatement | false;
-  updateStatementMutation: UseMutationResult<void, unknown, object, unknown>;
-  updateStatementDataMutation: UseMutationResult<
-    void,
-    unknown,
-    object,
-    unknown
-  >;
   setShowSubmitSection: (
     value: React.SetStateAction<false | "actants" | "references" | "actions">
+  ) => void;
+
+  handleAttributeChange: (
+    changes: Partial<IStatement>,
+    instantUpdate: boolean
+  ) => void;
+  handleDataAttributeChange: (
+    changes: Partial<IStatementData>,
+    instantUpdate: boolean
   ) => void;
 }
 export const StatementEditorSectionButtons: React.FC<
@@ -33,9 +39,10 @@ export const StatementEditorSectionButtons: React.FC<
   section,
   statement,
   previousStatement,
-  updateStatementMutation,
-  updateStatementDataMutation,
   setShowSubmitSection,
+
+  handleAttributeChange,
+  handleDataAttributeChange,
 }) => {
   const [replaceSection, setReplaceSection] = useState(false);
 
@@ -53,9 +60,7 @@ export const StatementEditorSectionButtons: React.FC<
                 ...statement.data.actions,
                 ...DStatementActions(selectedStatement.data.actions),
               ];
-          updateStatementDataMutation.mutate({
-            actions: newActions,
-          });
+          handleDataAttributeChange({ actions: newActions }, true);
           return;
         case "actants":
           const newActants = replaceSection
@@ -64,9 +69,7 @@ export const StatementEditorSectionButtons: React.FC<
                 ...statement.data.actants,
                 ...DStatementActants(selectedStatement.data.actants),
               ];
-          updateStatementDataMutation.mutate({
-            actants: newActants,
-          });
+          handleDataAttributeChange({ actants: newActants }, true);
           return;
         case "references":
           const newReferences = replaceSection
@@ -75,7 +78,7 @@ export const StatementEditorSectionButtons: React.FC<
                 ...statement.references,
                 ...DReferences(selectedStatement.references),
               ];
-          updateStatementMutation.mutate({ references: newReferences });
+          handleAttributeChange({ references: newReferences }, true);
           return;
       }
     }

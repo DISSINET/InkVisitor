@@ -9,6 +9,7 @@ import {
   IProp,
   IResponseStatement,
   IStatementActant,
+  IStatementData,
 } from "@shared/types";
 import { excludedSuggesterEntities } from "Theme/constants";
 import {
@@ -37,7 +38,6 @@ import {
 } from "react-dnd";
 import { FaGripVertical, FaPlus, FaTrashAlt } from "react-icons/fa";
 import { TbSettingsAutomation, TbSettingsFilled } from "react-icons/tb";
-import { UseMutationResult } from "@tanstack/react-query";
 import { setDraggedActantRow } from "redux/features/rowDnd/draggedActantRowSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import {
@@ -75,12 +75,16 @@ interface StatementEditorActantTableRow {
   movePropToIndex: (propId: string, oldIndex: number, newIndex: number) => void;
   statement: IResponseStatement;
   classEntitiesActant: EntityEnums.Class[];
-  updateStatementDataMutation: UseMutationResult<any, unknown, object, unknown>;
   territoryParentId?: string;
   addClassification: (originId: string) => void;
   addIdentification: (originId: string) => void;
   territoryActants?: string[];
   hasOrder?: boolean;
+
+  handleDataAttributeChange: (
+    changes: Partial<IStatementData>,
+    instantUpdate?: boolean
+  ) => void;
 }
 
 export const StatementEditorActantTableRow: React.FC<
@@ -93,7 +97,6 @@ export const StatementEditorActantTableRow: React.FC<
   userCanEdit = false,
   updateOrderFn,
   classEntitiesActant,
-  updateStatementDataMutation,
   addProp,
   updateProp,
   removeProp,
@@ -103,6 +106,8 @@ export const StatementEditorActantTableRow: React.FC<
   addIdentification,
   territoryActants,
   hasOrder,
+
+  handleDataAttributeChange,
 }) => {
   const isInsideTemplate = statement.isTemplate || false;
   const { statementId, territoryId } = useSearchParams();
@@ -165,23 +170,25 @@ export const StatementEditorActantTableRow: React.FC<
     }
   }, [isDragging]);
 
-  const updateActant = (statementActantId: string, changes: any) => {
+  const updateActant = (
+    statementActantId: string,
+    changes: any,
+    instantUpdate?: boolean
+  ) => {
     if (statement && statementActantId) {
       const updatedActants = statement.data.actants.map((a) =>
         a.id === statementActantId ? { ...a, ...changes } : a
       );
-      const newData = { actants: updatedActants };
-      updateStatementDataMutation.mutate(newData);
+      handleDataAttributeChange({ actants: updatedActants }, instantUpdate);
     }
   };
 
-  const removeActant = (statementActantId: string) => {
+  const removeActant = (statementActantId: string, instantUpdate?: boolean) => {
     if (statement) {
       const updatedActants = statement.data.actants.filter(
         (a) => a.id !== statementActantId
       );
-      const newData = { actants: updatedActants };
-      updateStatementDataMutation.mutate(newData);
+      handleDataAttributeChange({ actants: updatedActants }, instantUpdate);
     }
   };
 
@@ -190,9 +197,13 @@ export const StatementEditorActantTableRow: React.FC<
       <StyledTagWrapper>
         <EntityDropzone
           onSelected={(newSelectedId: string) => {
-            updateActant(sActant.id, {
-              entityId: newSelectedId,
-            });
+            updateActant(
+              sActant.id,
+              {
+                entityId: newSelectedId,
+              },
+              true
+            );
           }}
           categoryTypes={classEntitiesActant}
           excludedEntityClasses={excludedSuggesterEntities}
@@ -230,9 +241,13 @@ export const StatementEditorActantTableRow: React.FC<
       userCanEdit && (
         <EntitySuggester
           onSelected={(newSelectedId: string) => {
-            updateActant(sActant.id, {
-              entityId: newSelectedId,
-            });
+            updateActant(
+              sActant.id,
+              {
+                entityId: newSelectedId,
+              },
+              true
+            );
           }}
           categoryTypes={classEntitiesActant}
           openDetailOnCreate
@@ -544,7 +559,6 @@ export const StatementEditorActantTableRow: React.FC<
                     territoryParentId={territoryParentId}
                     isInsideTemplate={isInsideTemplate}
                     updateActant={updateActant}
-                    updateStatementDataMutation={updateStatementDataMutation}
                     userCanEdit={userCanEdit}
                     territoryActants={territoryActants}
                   />
@@ -567,7 +581,6 @@ export const StatementEditorActantTableRow: React.FC<
                     territoryParentId={territoryParentId}
                     isInsideTemplate={isInsideTemplate}
                     updateActant={updateActant}
-                    updateStatementDataMutation={updateStatementDataMutation}
                     userCanEdit={userCanEdit}
                     classEntitiesActant={classEntitiesActant}
                     territoryActants={territoryActants}

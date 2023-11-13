@@ -1,10 +1,11 @@
 import { EntityEnums } from "@shared/enums";
+import { IResponseStatement, IStatement, IStatementData } from "@shared/types";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Loader } from "components";
 import { useSearchParams } from "hooks";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { BsInfoCircle } from "react-icons/bs";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { StatementEditor } from "./StatementEditor/StatementEditor";
 import { StyledEditorEmptyState } from "./StatementEditorBoxStyles";
 
@@ -40,43 +41,46 @@ export const StatementEditorBox: React.FC = () => {
 
   // MUTATIONS
   const updateStatementMutation = useMutation(
-    async (changes: object) => {
+    async (changes: IStatement) => {
       await api.entityUpdate(statementId, changes);
     },
     {
+      onMutate: async (newStatement) => {
+        // Cancel any outgoing refetches
+        // (so they don't overwrite our optimistic update)
+        await queryClient.cancelQueries({
+          queryKey: ["statement", statementId],
+        });
+
+        // Snapshot the previous value
+        const previousStatement: IStatement | undefined =
+          queryClient.getQueryData(["statement", statementId]);
+
+        // Optimistically update to the new value
+        queryClient.setQueryData(["statement", statementId], newStatement);
+
+        // Return a context with the previous and new todo
+        return { previousStatement, newStatement };
+      },
       onSuccess: (data, variables: any) => {
         if (selectedDetailId === statementId) {
           queryClient.invalidateQueries(["entity"]);
         }
-        if (statement && statement.isTemplate) {
-          queryClient.invalidateQueries(["templates"]);
-        }
+        queryClient.invalidateQueries(["statement"]);
+        queryClient.invalidateQueries(["territory"]);
         if (variables.label !== undefined) {
           queryClient.invalidateQueries(["detail-tab-entities"]);
         }
-        queryClient.invalidateQueries(["statement"]);
-        queryClient.invalidateQueries(["territory"]);
-
-        queryClient.invalidateQueries(["statement-templates"]);
-        queryClient.invalidateQueries(["entity-templates"]);
-      },
-    }
-  );
-
-  const updateStatementDataMutation = useMutation(
-    async (changes: object) => {
-      await api.entityUpdate(statementId, {
-        data: changes,
-      });
-    },
-    {
-      onSuccess: (data, variables: any) => {
-        queryClient.invalidateQueries(["entity"]);
-        queryClient.invalidateQueries(["statement"]);
-        queryClient.invalidateQueries(["territory"]);
-        if (variables.text !== undefined) {
-          queryClient.invalidateQueries(["detail-tab-entities"]);
+        if (statement && statement.isTemplate) {
+          queryClient.invalidateQueries(["templates"]);
+          queryClient.invalidateQueries(["entity-templates"]);
         }
+      },
+      onError: (err, newTodo, context) => {
+        queryClient.setQueryData(
+          ["statement", context?.newStatement.id],
+          context?.previousStatement
+        );
       },
     }
   );
@@ -102,15 +106,95 @@ export const StatementEditorBox: React.FC = () => {
     }
   );
 
+  const [tempObject, setTempObject] = useState<IResponseStatement>();
+
+  useEffect(() => {
+    setTempObject(statement);
+  }, [statement]);
+
+  const sendChangesToBackend = (changes: IStatement) => {
+    if (JSON.stringify(statement) !== JSON.stringify(changes)) {
+      updateStatementMutation.mutate(changes);
+    }
+  };
+
+  const [changesPending, setChangesPending] = useState(false);
+
+  useEffect(() => {
+    const timerId = setTimeout(() => {
+      if (changesPending && tempObject) {
+        sendChangesToBackend(tempObject);
+        setChangesPending(false);
+      }
+    }, 3000);
+
+    return () => clearTimeout(timerId);
+  }, [tempObject, changesPending]);
+
+  const updateChangesAndPendingState = (
+    newData: IStatement,
+    instantUpdate?: boolean
+  ) => {
+    if (instantUpdate) {
+      sendChangesToBackend(newData);
+      setChangesPending(false);
+    } else {
+      setChangesPending(true);
+    }
+  };
+
+  const handleAttributeChange = (
+    changes: Partial<IStatement>,
+    instantUpdate?: boolean
+  ) => {
+    if (tempObject) {
+      queryClient.cancelQueries({
+        queryKey: ["statement", statementId],
+      });
+      const newData = {
+        ...tempObject,
+        ...changes,
+      };
+      setTempObject(newData);
+      updateChangesAndPendingState(newData, instantUpdate);
+    }
+  };
+
+  const handleDataAttributeChange = (
+    changes: Partial<IStatementData>,
+    instantUpdate?: boolean
+  ) => {
+    if (tempObject) {
+      queryClient.cancelQueries({
+        queryKey: ["statement", statementId],
+      });
+      const newData = {
+        ...tempObject,
+        data: {
+          ...tempObject.data,
+          ...changes,
+        },
+      };
+      setTempObject(newData);
+      updateChangesAndPendingState(newData, instantUpdate);
+    }
+  };
+
   return (
     <>
-      {statement ? (
-        <StatementEditor
-          statement={statement}
-          updateStatementMutation={updateStatementMutation}
-          updateStatementDataMutation={updateStatementDataMutation}
-          moveStatementMutation={moveStatementMutation}
-        />
+      {tempObject ? (
+        <div
+          onMouseLeave={() => sendChangesToBackend(tempObject)}
+          style={{ marginBottom: "4rem" }}
+        >
+          <StatementEditor
+            statement={tempObject}
+            updateStatementMutation={updateStatementMutation}
+            moveStatementMutation={moveStatementMutation}
+            handleAttributeChange={handleAttributeChange}
+            handleDataAttributeChange={handleDataAttributeChange}
+          />
+        </div>
       ) : (
         <>
           <StyledEditorEmptyState>
@@ -122,13 +206,7 @@ export const StatementEditorBox: React.FC = () => {
         </>
       )}
 
-      <Loader
-        show={
-          isFetchingStatement ||
-          updateStatementMutation.isLoading ||
-          updateStatementDataMutation.isLoading
-        }
-      />
+      <Loader show={isFetchingStatement || updateStatementMutation.isLoading} />
     </>
   );
 };

@@ -1,7 +1,10 @@
-import { IResponseStatement, IStatementAction } from "@shared/types";
+import {
+  IResponseStatement,
+  IStatementAction,
+  IStatementData,
+} from "@shared/types";
 import update from "immutability-helper";
 import React, { useCallback, useEffect, useState } from "react";
-import { UseMutationResult } from "@tanstack/react-query";
 import { FilteredActionObject } from "types";
 import { StatementEditorActionTableRow } from "./StatementEditorActionTableRow";
 import { StyledEditorActionTableWrapper } from "./StatementEditorActionTableStyles";
@@ -9,31 +12,37 @@ import { StyledEditorActionTableWrapper } from "./StatementEditorActionTableStyl
 interface StatementEditorActionTable {
   statement: IResponseStatement;
   userCanEdit?: boolean;
-  updateActionsMutation: UseMutationResult<any, unknown, object, unknown>;
   addProp: (originId: string) => void;
   updateProp: (propId: string, changes: any) => void;
   removeProp: (propId: string) => void;
   movePropToIndex: (propId: string, oldIndex: number, newIndex: number) => void;
   territoryParentId?: string;
   territoryActants?: string[];
+
+  handleDataAttributeChange: (
+    changes: Partial<IStatementData>,
+    instantUpdate?: boolean
+  ) => void;
 }
 export const StatementEditorActionTable: React.FC<
   StatementEditorActionTable
 > = ({
   statement,
   userCanEdit = false,
-  updateActionsMutation,
   addProp,
   updateProp,
   removeProp,
   movePropToIndex,
   territoryParentId,
   territoryActants,
+
+  handleDataAttributeChange,
 }) => {
   const [filteredActions, setFilteredActions] = useState<
     FilteredActionObject[]
   >([]);
 
+  // TODO: how to temporarily show action from suggester before it comes from BE
   useEffect(() => {
     const filteredActions: FilteredActionObject[] = statement.data.actions.map(
       (sAction, key) => {
@@ -50,9 +59,7 @@ export const StatementEditorActionTable: React.FC<
         (filteredAction) => filteredAction.data.sAction
       );
       if (JSON.stringify(statement.data.actions) !== JSON.stringify(actions)) {
-        updateActionsMutation.mutate({
-          actions: actions,
-        });
+        handleDataAttributeChange({ actions }, true);
       }
     }
   };
@@ -86,7 +93,6 @@ export const StatementEditorActionTable: React.FC<
                 moveRow={moveRow}
                 userCanEdit={userCanEdit}
                 updateOrderFn={updateActionOrder}
-                updateActionsMutation={updateActionsMutation}
                 addProp={addProp}
                 updateProp={updateProp}
                 removeProp={removeProp}
@@ -94,6 +100,7 @@ export const StatementEditorActionTable: React.FC<
                 territoryParentId={territoryParentId}
                 territoryActants={territoryActants}
                 hasOrder={filteredActions.length > 1}
+                handleDataAttributeChange={handleDataAttributeChange}
               />
             );
           })}

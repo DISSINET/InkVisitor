@@ -1,9 +1,6 @@
-import {
-  IEntity,
-  IReference,
-  IResponseDetail,
-  IResponseDocument,
-} from "@shared/types";
+import { IEntity, IReference } from "@shared/types";
+import { useQuery } from "@tanstack/react-query";
+import api from "api";
 import { Button } from "components";
 import { CReference } from "constructors";
 import React from "react";
@@ -13,8 +10,6 @@ import {
   StyledListHeaderColumn,
   StyledReferencesList,
 } from "./EntityReferenceTableStyles";
-import api from "api";
-import { useQuery } from "@tanstack/react-query";
 
 interface EntityReferenceTable {
   entityId: string;
@@ -22,7 +17,7 @@ interface EntityReferenceTable {
     [key: string]: IEntity;
   };
   references: IReference[];
-  onChange: (newRefefences: IReference[]) => void;
+  onChange: (newRefefences: IReference[], instantUpdate?: boolean) => void;
   disabled: boolean;
   openDetailOnCreate?: boolean;
   isInsideTemplate: boolean;
@@ -66,41 +61,45 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
     { enabled: !!entityId && api.isLoggedIn() }
   );
 
-  const sendChanges = (newValues: IReference[]) => {
-    onChange(newValues);
-  };
-
-  const handleChangeResource = (refId: string, newReSourceId: string) => {
+  const handleChangeResource = (
+    refId: string,
+    newReSourceId: string,
+    instantUpdate?: boolean
+  ) => {
     const newReferences = [...references];
     newReferences.forEach((ref: IReference) => {
       if (ref.id === refId) {
         ref.resource = newReSourceId;
       }
     });
-    sendChanges(newReferences);
+    onChange(newReferences, instantUpdate);
   };
 
-  const handleChangeValue = (refId: string, newValueId: string) => {
+  const handleChangeValue = (
+    refId: string,
+    newValueId: string,
+    instantUpdate?: boolean
+  ) => {
     const newReferences = [...references];
     newReferences.forEach((ref: IReference) => {
       if (ref.id === refId) {
         ref.value = newValueId;
       }
     });
-    sendChanges(newReferences);
+    onChange(newReferences, instantUpdate);
   };
 
-  const handleRemove = (refId: string) => {
+  const handleRemove = (refId: string, instantUpdate?: boolean) => {
     const newReferences = [...references].filter(
       (ref: IReference) => ref.id !== refId
     );
-    sendChanges(newReferences);
+    onChange(newReferences, instantUpdate);
   };
 
   const handleAdd = () => {
     const newReferences = [...references];
     newReferences.push(CReference());
-    sendChanges(newReferences);
+    onChange(newReferences);
   };
 
   return (

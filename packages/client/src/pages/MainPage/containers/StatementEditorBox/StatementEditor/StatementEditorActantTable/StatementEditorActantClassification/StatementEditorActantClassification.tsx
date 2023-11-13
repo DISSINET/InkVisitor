@@ -15,27 +15,29 @@ import {
   LogicButtonGroup,
   MoodVariantButtonGroup,
 } from "components/advanced";
+import { TooltipAttributes } from "pages/MainPage/containers";
 import React, { useState } from "react";
 import { FaTrashAlt } from "react-icons/fa";
 import { TbSettingsAutomation, TbSettingsFilled } from "react-icons/tb";
-import { UseMutationResult } from "@tanstack/react-query";
 import { AttributeData } from "types";
 import {
   StyledBorderLeft,
   StyledCIGrid,
   StyledExpandedRow,
 } from "../StatementEditorActantTableStyles";
-import { TooltipAttributes } from "pages/MainPage/containers";
 
 interface StatementEditorActantClassification {
   classifications: IStatementClassification[];
   classification: IStatementClassification;
-  updateActant: (statementActantId: string, changes: any) => void;
+  updateActant: (
+    statementActantId: string,
+    changes: any,
+    instantUpdate?: boolean
+  ) => void;
   statement: IResponseStatement;
   userCanEdit: boolean;
   isInsideTemplate: boolean;
   territoryParentId?: string;
-  updateStatementDataMutation: UseMutationResult<any, unknown, object, unknown>;
   sActant: IStatementActant;
   territoryActants?: string[];
 }
@@ -50,17 +52,23 @@ export const StatementEditorActantClassification: React.FC<
   userCanEdit,
   isInsideTemplate,
   territoryParentId,
-  updateStatementDataMutation,
   territoryActants,
 }) => {
   const entity = statement.entities[classification.entityId];
 
-  const handleUpdate = (newData: AttributeData & { entityId?: string }) => {
-    updateActant(sActant.id, {
-      classifications: classifications.map((c) =>
-        c.id === classification.id ? { ...c, ...newData } : { ...c }
-      ),
-    });
+  const handleUpdate = (
+    newData: AttributeData & { entityId?: string },
+    instantUpdate?: boolean
+  ) => {
+    updateActant(
+      sActant.id,
+      {
+        classifications: classifications.map((c) =>
+          c.id === classification.id ? { ...c, ...newData } : { ...c }
+        ),
+      },
+      instantUpdate
+    );
   };
 
   const [isExpanded, setIsExpanded] = useState(false);
@@ -72,7 +80,7 @@ export const StatementEditorActantClassification: React.FC<
           <EntityDropzone
             categoryTypes={[EntityEnums.Class.Concept]}
             onSelected={(entityId: string) => {
-              handleUpdate({ entityId });
+              handleUpdate({ entityId }, true);
             }}
             isInsideTemplate={isInsideTemplate}
             excludedActantIds={[entity.id]}
@@ -103,7 +111,7 @@ export const StatementEditorActantClassification: React.FC<
           <EntitySuggester
             categoryTypes={[EntityEnums.Class.Concept]}
             onSelected={(entityId: string) => {
-              handleUpdate({ entityId });
+              handleUpdate({ entityId }, true);
             }}
             openDetailOnCreate
             isInsideTemplate={isInsideTemplate}

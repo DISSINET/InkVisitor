@@ -1,7 +1,7 @@
 import { certaintyDict, moodDict, operatorDict } from "@shared/dictionaries";
 import { allEntities } from "@shared/dictionaries/entity";
 import { EntityEnums } from "@shared/enums";
-import { IProp, IResponseStatement } from "@shared/types";
+import { IProp, IResponseStatement, IStatementData } from "@shared/types";
 import { excludedSuggesterEntities } from "Theme/constants";
 import {
   AttributeIcon,
@@ -30,7 +30,6 @@ import {
 } from "react-dnd";
 import { FaGripVertical, FaPlus, FaTrashAlt } from "react-icons/fa";
 import { TbSettingsAutomation, TbSettingsFilled } from "react-icons/tb";
-import { UseMutationResult } from "@tanstack/react-query";
 import { setDraggedActantRow } from "redux/features/rowDnd/draggedActantRowSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import {
@@ -60,10 +59,14 @@ interface StatementEditorActionTableRow {
   updateProp: (propId: string, changes: any) => void;
   removeProp: (propId: string) => void;
   movePropToIndex: (propId: string, oldIndex: number, newIndex: number) => void;
-  updateActionsMutation: UseMutationResult<any, unknown, object, unknown>;
   territoryParentId?: string;
   territoryActants?: string[];
   hasOrder?: boolean;
+
+  handleDataAttributeChange: (
+    changes: Partial<IStatementData>,
+    instantUpdate?: boolean
+  ) => void;
 }
 
 export const StatementEditorActionTableRow: React.FC<
@@ -79,10 +82,11 @@ export const StatementEditorActionTableRow: React.FC<
   updateProp,
   removeProp,
   movePropToIndex,
-  updateActionsMutation,
   territoryParentId,
   territoryActants,
   hasOrder,
+
+  handleDataAttributeChange,
 }) => {
   const isInsideTemplate = statement.isTemplate || false;
   const { statementId, territoryId } = useSearchParams();
@@ -91,22 +95,24 @@ export const StatementEditorActionTableRow: React.FC<
   const dropRef = useRef<HTMLTableRowElement>(null);
   const dragRef = useRef<HTMLTableCellElement>(null);
 
-  const updateAction = (statementActionId: string, changes: any) => {
+  const updateAction = (
+    statementActionId: string,
+    changes: any,
+    instantUpdate?: boolean
+  ) => {
     if (statement && statementActionId) {
       const updatedActions = statement.data.actions.map((a) =>
         a.id === statementActionId ? { ...a, ...changes } : a
       );
-      const newData = { actions: updatedActions };
-      updateActionsMutation.mutate(newData);
+      handleDataAttributeChange({ actions: updatedActions }, instantUpdate);
     }
   };
-  const removeAction = (statementActionId: string) => {
+  const removeAction = (statementActionId: string, instantUpdate?: boolean) => {
     if (statement) {
       const updatedActions = statement.data.actions.filter(
         (a) => a.id !== statementActionId
       );
-      const newData = { actions: updatedActions };
-      updateActionsMutation.mutate(newData);
+      handleDataAttributeChange({ actions: updatedActions }, instantUpdate);
     }
   };
 
@@ -140,9 +146,13 @@ export const StatementEditorActionTableRow: React.FC<
     return action ? (
       <EntityDropzone
         onSelected={(newSelectedId: string) => {
-          updateAction(sAction.id, {
-            actionId: newSelectedId,
-          });
+          updateAction(
+            sAction.id,
+            {
+              actionId: newSelectedId,
+            },
+            true
+          );
         }}
         isInsideTemplate={isInsideTemplate}
         categoryTypes={[EntityEnums.Class.Action]}
@@ -179,10 +189,15 @@ export const StatementEditorActionTableRow: React.FC<
       userCanEdit && (
         <EntitySuggester
           onSelected={(newSelectedId: string) => {
-            updateAction(sAction.id, {
-              actionId: newSelectedId,
-            });
+            updateAction(
+              sAction.id,
+              {
+                actionId: newSelectedId,
+              },
+              true
+            );
           }}
+          onPicked={(entity) => console.log("entity to temp use", entity)}
           openDetailOnCreate
           categoryTypes={[EntityEnums.Class.Action]}
           excludedEntityClasses={excludedSuggesterEntities}

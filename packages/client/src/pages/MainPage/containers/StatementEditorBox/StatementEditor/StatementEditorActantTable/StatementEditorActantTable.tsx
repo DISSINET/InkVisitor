@@ -1,6 +1,9 @@
 import { EntityEnums } from "@shared/enums";
-import { IResponseStatement, IStatementActant } from "@shared/types";
-import { UseMutationResult } from "@tanstack/react-query";
+import {
+  IResponseStatement,
+  IStatementActant,
+  IStatementData,
+} from "@shared/types";
 import update from "immutability-helper";
 import React, { useCallback, useMemo, useState } from "react";
 import { FilteredActantObject } from "types";
@@ -11,7 +14,6 @@ interface StatementEditorActantTable {
   statement: IResponseStatement;
   userCanEdit?: boolean;
   classEntitiesActant: EntityEnums.Class[];
-  updateStatementDataMutation: UseMutationResult<any, unknown, object, unknown>;
   addProp: (originId: string) => void;
   updateProp: (propId: string, changes: any) => void;
   removeProp: (propId: string) => void;
@@ -20,6 +22,11 @@ interface StatementEditorActantTable {
   addClassification: (originId: string) => void;
   addIdentification: (originId: string) => void;
   territoryActants?: string[];
+
+  handleDataAttributeChange: (
+    changes: Partial<IStatementData>,
+    instantUpdate?: boolean
+  ) => void;
 }
 export const StatementEditorActantTable: React.FC<
   StatementEditorActantTable
@@ -27,7 +34,6 @@ export const StatementEditorActantTable: React.FC<
   statement,
   userCanEdit = false,
   classEntitiesActant,
-  updateStatementDataMutation,
   addProp,
   updateProp,
   removeProp,
@@ -36,6 +42,8 @@ export const StatementEditorActantTable: React.FC<
   addClassification,
   addIdentification,
   territoryActants,
+
+  handleDataAttributeChange,
 }) => {
   const [filteredActants, setFilteredActants] = useState<
     FilteredActantObject[]
@@ -57,7 +65,7 @@ export const StatementEditorActantTable: React.FC<
         (filteredActant) => filteredActant.data.sActant
       );
       if (JSON.stringify(statement.data.actants) !== JSON.stringify(actants)) {
-        updateStatementDataMutation.mutate({ actants });
+        handleDataAttributeChange({ actants }, true);
       }
     }
   };
@@ -92,7 +100,6 @@ export const StatementEditorActantTable: React.FC<
                 userCanEdit={userCanEdit}
                 updateOrderFn={updateActantsOrder}
                 classEntitiesActant={classEntitiesActant}
-                updateStatementDataMutation={updateStatementDataMutation}
                 addProp={addProp}
                 updateProp={updateProp}
                 removeProp={removeProp}
@@ -102,6 +109,7 @@ export const StatementEditorActantTable: React.FC<
                 addIdentification={addIdentification}
                 territoryActants={territoryActants}
                 hasOrder={filteredActants.length > 1}
+                handleDataAttributeChange={handleDataAttributeChange}
               />
             );
           })}

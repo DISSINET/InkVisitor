@@ -31,12 +31,15 @@ import { TooltipAttributes } from "pages/MainPage/containers";
 interface StatementEditorActantIdentification {
   identifications: IStatementIdentification[];
   identification: IStatementIdentification;
-  updateActant: (statementActantId: string, changes: any) => void;
+  updateActant: (
+    statementActantId: string,
+    changes: any,
+    instantUpdate?: boolean
+  ) => void;
   statement: IResponseStatement;
   userCanEdit: boolean;
   isInsideTemplate: boolean;
   territoryParentId?: string;
-  updateStatementDataMutation: UseMutationResult<any, unknown, object, unknown>;
   sActant: IStatementActant;
   classEntitiesActant: EntityEnums.Class[];
   territoryActants?: string[];
@@ -51,19 +54,25 @@ export const StatementEditorActantIdentification: React.FC<
   userCanEdit,
   isInsideTemplate,
   territoryParentId,
-  updateStatementDataMutation,
   sActant,
   classEntitiesActant,
   territoryActants,
 }) => {
   const entity = statement.entities[identification.entityId];
 
-  const handleUpdate = (newData: AttributeData & { entityId?: string }) => {
-    updateActant(sActant.id, {
-      identifications: identifications.map((c) =>
-        c.id === identification.id ? { ...c, ...newData } : { ...c }
-      ),
-    });
+  const handleUpdate = (
+    newData: AttributeData & { entityId?: string },
+    instantUpdate?: boolean
+  ) => {
+    updateActant(
+      sActant.id,
+      {
+        identifications: identifications.map((c) =>
+          c.id === identification.id ? { ...c, ...newData } : { ...c }
+        ),
+      },
+      instantUpdate
+    );
   };
 
   const [isExpanded, setIsExpanded] = useState(false);
@@ -75,7 +84,7 @@ export const StatementEditorActantIdentification: React.FC<
           <EntityDropzone
             categoryTypes={classEntitiesActant}
             onSelected={(entityId: string) => {
-              handleUpdate({ entityId });
+              handleUpdate({ entityId }, true);
             }}
             isInsideTemplate={isInsideTemplate}
             excludedActantIds={[entity.id]}
@@ -107,7 +116,7 @@ export const StatementEditorActantIdentification: React.FC<
           <EntitySuggester
             categoryTypes={classEntitiesActant}
             onSelected={(entityId: string) => {
-              handleUpdate({ entityId });
+              handleUpdate({ entityId }, true);
             }}
             openDetailOnCreate
             isInsideTemplate={isInsideTemplate}

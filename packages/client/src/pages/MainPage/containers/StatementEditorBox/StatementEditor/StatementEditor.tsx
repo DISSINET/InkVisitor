@@ -3,8 +3,10 @@ import {
   IEntity,
   IReference,
   IResponseStatement,
+  IStatement,
   IStatementActant,
   IStatementAction,
+  IStatementData,
 } from "@shared/types";
 import {
   UseMutationResult,
@@ -50,7 +52,7 @@ import { toast } from "react-toastify";
 import { setShowWarnings } from "redux/features/statementEditor/showWarningsSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { DropdownItem, classesEditorActants, classesEditorTags } from "types";
-import { getEntityLabel, getShortLabelByLetterCount } from "utils";
+import { deepCopy, getEntityLabel, getShortLabelByLetterCount } from "utils";
 import { EntityReferenceTable } from "../../EntityReferenceTable/EntityReferenceTable";
 import {
   StyledBreadcrumbWrap,
@@ -79,20 +81,30 @@ import { StatementEditorSectionButtons } from "./StatementEditorSectionButtons/S
 
 interface StatementEditor {
   statement: IResponseStatement;
-  updateStatementMutation: UseMutationResult<void, unknown, object, unknown>;
-  updateStatementDataMutation: UseMutationResult<
+  updateStatementMutation: UseMutationResult<
     void,
     unknown,
-    object,
+    IStatement,
     unknown
   >;
   moveStatementMutation: UseMutationResult<void, unknown, string, unknown>;
+
+  handleAttributeChange: (
+    changes: Partial<IStatement>,
+    instantUpdate?: boolean
+  ) => void;
+  handleDataAttributeChange: (
+    changes: Partial<IStatementData>,
+    instantUpdate?: boolean
+  ) => void;
 }
 export const StatementEditor: React.FC<StatementEditor> = ({
   statement,
   updateStatementMutation,
-  updateStatementDataMutation,
   moveStatementMutation,
+
+  handleAttributeChange,
+  handleDataAttributeChange,
 }) => {
   const {
     statementId,
@@ -290,7 +302,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     const newData = {
       actions: [...statement.data.actions, newStatementAction],
     };
-    updateStatementDataMutation.mutate(newData);
+    handleDataAttributeChange(newData, true);
   };
 
   const addActant = (newStatementActantId: string) => {
@@ -301,13 +313,13 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     const newData = {
       actants: [...statement.data.actants, newStatementActant],
     };
-    updateStatementDataMutation.mutate(newData);
+    handleDataAttributeChange(newData, true);
   };
 
   // Props handling
   const addProp = (rowId: string) => {
     const newProp = CProp(statement.elementsOrders.length);
-    const newStatementData = { ...statement.data };
+    const newStatementData = deepCopy(statement.data);
 
     [...newStatementData.actants, ...newStatementData.actions].forEach(
       (actant: IStatementActant | IStatementAction) => {
@@ -339,12 +351,13 @@ export const StatementEditor: React.FC<StatementEditor> = ({
       }
     );
 
-    updateStatementDataMutation.mutate(newStatementData);
+    handleDataAttributeChange(newStatementData);
   };
 
   const addClassification = (rowId: string) => {
     const newClassification = CClassification(statement.elementsOrders.length);
-    const newStatementData = { ...statement.data };
+
+    const newStatementData = deepCopy(statement.data);
 
     [...newStatementData.actants].forEach((actant: IStatementActant) => {
       if (actant.id === rowId) {
@@ -352,12 +365,12 @@ export const StatementEditor: React.FC<StatementEditor> = ({
       }
     });
 
-    updateStatementDataMutation.mutate(newStatementData);
+    handleDataAttributeChange(newStatementData);
   };
 
   const addIdentification = (rowId: string) => {
     const newIdentification = CIdentification(statement.elementsOrders.length);
-    const newStatementData = { ...statement.data };
+    const newStatementData = deepCopy(statement.data);
 
     [...newStatementData.actants].forEach((actant: IStatementActant) => {
       if (actant.id === rowId) {
@@ -365,11 +378,14 @@ export const StatementEditor: React.FC<StatementEditor> = ({
       }
     });
 
-    updateStatementDataMutation.mutate(newStatementData);
+    handleDataAttributeChange(newStatementData);
   };
 
-  const updateProp = (propId: string, changes: any) => {
-    console.log("updating props", changes);
+  const updateProp = (
+    propId: string,
+    changes: any,
+    instantUpdate?: boolean
+  ) => {
     if (propId) {
       if (
         changes.type &&
@@ -380,7 +396,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
       ) {
         checkTypeEntityLanguage(propId, changes);
       } else {
-        applyPropChanges(propId, changes);
+        applyPropChanges(propId, changes, instantUpdate);
       }
     }
   };
@@ -411,8 +427,12 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     applyPropChanges(propId, changes);
   };
 
-  const applyPropChanges = (propId: string, changes: any) => {
-    const newStatementData = { ...statement.data };
+  const applyPropChanges = (
+    propId: string,
+    changes: any,
+    instantUpdate?: boolean
+  ) => {
+    const newStatementData = deepCopy(statement.data);
     [...newStatementData.actants, ...newStatementData.actions].forEach(
       (actant: IStatementActant | IStatementAction) => {
         actant.props.forEach((prop1, pi1) => {
@@ -443,12 +463,13 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         });
       }
     );
-    updateStatementDataMutation.mutate(newStatementData);
+
+    handleDataAttributeChange(newStatementData, instantUpdate);
   };
 
   const removeProp = (propId: string) => {
     if (propId) {
-      const newStatementData = { ...statement.data };
+      const newStatementData = deepCopy(statement.data);
 
       [...newStatementData.actants, ...newStatementData.actions].forEach(
         (actant: IStatementActant | IStatementAction) => {
@@ -474,16 +495,16 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         }
       );
 
-      updateStatementDataMutation.mutate(newStatementData);
+      handleDataAttributeChange(newStatementData);
     }
   };
 
-  const changeOrder = (
+  const changeOrder = <T extends IStatementActant | IStatementAction>(
     propId: string,
-    actants: IStatementActant[] | IStatementAction[],
+    actants: T[],
     oldIndex: number,
     newIndex: number
-  ) => {
+  ): T[] => {
     for (let actant of actants) {
       for (let prop of actant.props) {
         if (prop.id === propId) {
@@ -521,29 +542,39 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     newIndex: number
   ) => {
     const { actions, actants, ...dataWithoutActants } = statement.data;
-    changeOrder(propId, actions, oldIndex, newIndex);
-    changeOrder(propId, actants, oldIndex, newIndex);
+    const newActions = changeOrder(
+      propId,
+      deepCopy(actions),
+      oldIndex,
+      newIndex
+    );
+    const newActants = changeOrder(
+      propId,
+      deepCopy(actants),
+      oldIndex,
+      newIndex
+    );
 
     const newStatementData = {
-      actions,
-      actants,
+      actions: newActions,
+      actants: newActants,
       ...dataWithoutActants,
     };
 
-    updateStatementDataMutation.mutate(newStatementData);
+    handleDataAttributeChange(newStatementData, true);
   };
 
   //tags
   const addTag = (tagId: string) => {
     if (tagId) {
       const newData = { tags: [...statement.data.tags, tagId] };
-      updateStatementDataMutation.mutate(newData);
+      handleDataAttributeChange(newData, true);
     }
   };
   const removeTag = (tagId: string) => {
     if (tagId) {
       const newData = { tags: statement.data.tags.filter((p) => p !== tagId) };
-      updateStatementDataMutation.mutate(newData);
+      handleDataAttributeChange(newData);
     }
   };
 
@@ -566,7 +597,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
   return (
     <>
-      <div style={{ marginBottom: "4rem" }} key={statement.id}>
+      <React.Fragment key={statement.id}>
         <StyledEditorPreSection>
           <StyledEditorStatementInfo>
             <StyledHeaderTagWrap>
@@ -595,7 +626,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                     type="text"
                     value={statement.label}
                     onChangeFn={(newValue: string) => {
-                      updateStatementMutation.mutate({ label: newValue });
+                      handleAttributeChange({ label: newValue }, true);
                     }}
                   />
                 </StyledEditorHeaderInputWrap>
@@ -688,10 +719,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
               placeholder="Insert statement text here"
               onChangeFn={(newValue: string) => {
                 if (newValue !== statement.data.text) {
-                  const newData = {
-                    text: newValue,
-                  };
-                  updateStatementDataMutation.mutate(newData);
+                  handleDataAttributeChange({ text: newValue });
                 }
               }}
               value={statement.data.text}
@@ -752,9 +780,9 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 section="actions"
                 statement={statement}
                 previousStatement={previousStatement}
-                updateStatementMutation={updateStatementMutation}
-                updateStatementDataMutation={updateStatementDataMutation}
                 setShowSubmitSection={setShowSubmitSection}
+                handleAttributeChange={handleAttributeChange}
+                handleDataAttributeChange={handleDataAttributeChange}
               />
             )}
           </StyledEditorSectionHeader>
@@ -762,13 +790,13 @@ export const StatementEditor: React.FC<StatementEditor> = ({
             <StatementEditorActionTable
               userCanEdit={userCanEdit}
               statement={statement}
-              updateActionsMutation={updateStatementDataMutation}
               addProp={addProp}
               updateProp={updateProp}
               removeProp={removeProp}
               movePropToIndex={movePropToIndex}
               territoryParentId={statementTerritoryId}
               territoryActants={territoryActants}
+              handleDataAttributeChange={handleDataAttributeChange}
             />
             {userCanEdit && (
               <EntitySuggester
@@ -801,9 +829,9 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 section="actants"
                 statement={statement}
                 previousStatement={previousStatement}
-                updateStatementMutation={updateStatementMutation}
-                updateStatementDataMutation={updateStatementDataMutation}
                 setShowSubmitSection={setShowSubmitSection}
+                handleAttributeChange={handleAttributeChange}
+                handleDataAttributeChange={handleDataAttributeChange}
               />
             )}
           </StyledEditorSectionHeader>
@@ -812,7 +840,6 @@ export const StatementEditor: React.FC<StatementEditor> = ({
               statement={statement}
               userCanEdit={userCanEdit}
               classEntitiesActant={classesEditorActants}
-              updateStatementDataMutation={updateStatementDataMutation}
               addProp={addProp}
               updateProp={updateProp}
               removeProp={removeProp}
@@ -821,6 +848,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
               addClassification={addClassification}
               addIdentification={addIdentification}
               territoryActants={territoryActants}
+              handleDataAttributeChange={handleDataAttributeChange}
             />
             {userCanEdit && (
               <EntitySuggester
@@ -867,9 +895,9 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 section="references"
                 statement={statement}
                 previousStatement={previousStatement}
-                updateStatementMutation={updateStatementMutation}
-                updateStatementDataMutation={updateStatementDataMutation}
                 setShowSubmitSection={setShowSubmitSection}
+                handleAttributeChange={handleAttributeChange}
+                handleDataAttributeChange={handleDataAttributeChange}
               />
             )}
           </StyledEditorSectionHeader>
@@ -877,8 +905,14 @@ export const StatementEditor: React.FC<StatementEditor> = ({
             <EntityReferenceTable
               openDetailOnCreate
               references={statement.references}
-              onChange={(newReferences: IReference[]) => {
-                updateStatementMutation.mutate({ references: newReferences });
+              onChange={(
+                newReferences: IReference[],
+                instantUpdate?: boolean
+              ) => {
+                handleAttributeChange(
+                  { references: newReferences },
+                  instantUpdate
+                );
               }}
               disabled={!userCanEdit}
               isInsideTemplate={statement.isTemplate || false}
@@ -949,7 +983,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
               disabled={!userCanEdit}
               values={statement.notes}
               onChange={(newValues: string[]) => {
-                updateStatementMutation.mutate({ notes: newValues });
+                handleAttributeChange({ notes: newValues });
               }}
             />
           </StyledEditorSectionContent>
@@ -970,7 +1004,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
             {statement && <JSONExplorer data={statement} />}
           </StyledEditorSectionContent>
         </StyledEditorSection>
-      </div>
+      </React.Fragment>
 
       <ApplyTemplateModal
         showModal={showApplyTemplateModal}
@@ -987,16 +1021,13 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         title={`Remove ${showSubmitSection}`}
         onSubmit={() => {
           if (showSubmitSection === "references") {
-            updateStatementMutation.mutate({ references: [] });
+            handleAttributeChange({ references: [] });
           } else if (showSubmitSection !== false) {
-            updateStatementDataMutation.mutate({ [showSubmitSection]: [] });
+            handleDataAttributeChange({ [showSubmitSection]: [] });
           }
           setShowSubmitSection(false);
         }}
-        loading={
-          updateStatementMutation.isLoading ||
-          updateStatementDataMutation.isLoading
-        }
+        loading={updateStatementMutation.isLoading}
         onCancel={() => setShowSubmitSection(false)}
       />
     </>
