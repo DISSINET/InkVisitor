@@ -231,26 +231,26 @@ export const EntitySearchBox: React.FC = () => {
     return [];
   }, [entities]);
 
-  // const templateOptions: DropdownItem[] = useMemo(() => {
-  //   const options: DropdownItem[] = [anyTemplate];
+  const templateOptions: DropdownItem[] = useMemo(() => {
+    const options: DropdownItem[] = [anyTemplate];
 
-  //   if (templates) {
-  //     templates.forEach((template) => {
-  //       if (template.label.length > 20) {
-  //         options.push({
-  //           value: template.id,
-  //           label: template.label.substring(0, 20) + "...",
-  //         });
-  //       } else {
-  //         options.push({
-  //           value: template.id,
-  //           label: template.label,
-  //         });
-  //       }
-  //     });
-  //   }
-  //   return options;
-  // }, [templates]);
+    if (templates) {
+      templates.forEach((template) => {
+        if (template.label.length > 20) {
+          options.push({
+            value: template.id,
+            label: template.label.substring(0, 20) + "...",
+          });
+        } else {
+          options.push({
+            value: template.id,
+            label: template.label,
+          });
+        }
+      });
+    }
+    return options;
+  }, [templates]);
 
   const showAdvancedOptions: boolean = useAppSelector(
     (state) => state.searchBox.showAdvancedOptions
