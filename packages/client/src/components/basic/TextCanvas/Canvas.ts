@@ -19,27 +19,117 @@ interface TextCanvasProps {
     iTo: number; // where the word ends
   }
 
+class Cursor {
+  x: number = -1;
+  y: number = -1;
+
+  constructor() {
+  }
+
+  yToLineI(y: number, lineHeight: number): number {
+    return Math.floor(y / lineHeight);
+  };
+
+  xToCharI(x: number, charWidth: number): number {
+    return Math.floor(x / charWidth);
+  };
+
+  onMouseClick(e: MouseEvent, lineHeight: number, charWidth: number) {
+    const [x, y] = [e.offsetX, e.offsetY];
+    this.x = this.xToCharI(x, charWidth);
+    this.y = this.yToLineI(y, lineHeight);
+  }
+
+  move(xDelta: number, yDelta: number) {
+    if (this.x === -1 && this.y === -1 || (!xDelta && !yDelta)) {
+      return
+    }
+
+    this.x += xDelta
+    this.y += yDelta    
+  }
+
+  draw(ctx: CanvasRenderingContext2D,  lineHeight: number, charWidth: number) {
+    if (this.x === -1 && this.y === -1) {
+      return
+    }
+    
+    ctx.fillRect(this.x * charWidth,this.y * lineHeight + 2, 3, lineHeight)
+  }
+}
+
+class Viewport {
+  lineStart: number; 
+  lineEnd: number;
+
+  constructor(lineStart: number, lineEnd: number) {
+    this.lineStart = lineStart;
+    this.lineEnd = lineEnd;
+  }
+}
+
 class Canvas {
     element: HTMLCanvasElement;
+    ctx: CanvasRenderingContext2D;
     font = "12px Monospace";
     charWidth: number = 0;
     lineHeight: number = 15;
     width: number = 0;
     height: number = 0;
-    viewport: { lineStart: number; lineEnd: number} = { lineStart: -1, lineEnd: -1};
+    viewport: Viewport;
+    cursor: Cursor;
     text?: string;
     lines: ILine[] = [];
 
     constructor(element: HTMLCanvasElement) {
         this.element = element;
+        const ctx = this.element.getContext("2d");
+        if (!ctx) {
+          throw new Error("Cannot get 2d context")
+        }
+        this.ctx = ctx;
         this.width = this.element.width
         this.height = this.element.height;
-        this.element.onwheel = this.onWheel.bind(this)
+        this.setCharWidth("abcdefghijklmnopqrstuvwxyz0123456789")
+        this.viewport = new Viewport(-1, -1);
+        this.cursor = new Cursor();
+
+        this.element.onwheel = this.onWheel.bind(this);
+        this.element.onmouseup = this.onMouseUp.bind(this);
+        this.element.onkeydown = this.onKeyDown.bind(this);
+    }
+
+    onKeyDown(e: KeyboardEvent) {
+      e.preventDefault();
+
+      switch (e.key) {
+        case "ArrowUp":
+          this.cursor.move(0, -1)
+          break;
+  
+        case "ArrowDown":
+          this.cursor.move(0, 1)
+          break;
+  
+        case "ArrowLeft":
+          this.cursor.move(-1, 0)
+          break;
+
+        case "ArrowRight":
+          this.cursor.move(1, 0)
+          break;
+      }
+
+      this.draw();
+    }
+
+    onMouseUp(e: MouseEvent) {
+      this.cursor.onMouseClick(e, this.lineHeight, this.charWidth);
+      this.draw();
     }
 
     onWheel(e: any) {
         const up = e.deltaY < 0 ? false: true;
-        console.log(e)
         if (up && this.viewport.lineEnd < this.lines.length) {            
             this.viewport.lineStart++
             this.viewport.lineEnd++;
@@ -54,7 +144,6 @@ class Canvas {
 
     initialize() {
         console.log('Custom logic executed!');
-        this.setCharWidth("abcdefghijklmnopqrstuvwxyz0123456789")
     }
 
     prepareText(text: string) {
@@ -64,7 +153,6 @@ class Canvas {
         let lineStart = 0;
     
         const charsInLine = Math.floor((this.width - 80) / this.charWidth);
-        console.log("characters in one line", charsInLine);
     
         for (let charI = 0; charI < text.length; charI++) {
           // If we've hit a space or are at the end of the text
@@ -148,10 +236,13 @@ class Canvas {
     }
 
     setCharWidth(txt: string) {
-        const ctx = this.element.getContext("2d");
-        ctx!.font = this.font;
-        const textW = ctx!.measureText(txt).width;
+        this.ctx.font = this.font;
+        const textW = this.ctx.measureText(txt).width;
         this.charWidth =  textW / txt.length;
+    }
+
+    printCursor() {
+
     }
 
     writeText(text: string) {
@@ -160,14 +251,20 @@ class Canvas {
             this.viewport = {lineStart: 0, lineEnd: Math.floor(this.height / this.lineHeight)}
             this.prepareText(text);
         }
-        const ctx = this.element.getContext("2d");
-        ctx?.reset()
-        ctx!.font = this.font;
   
-        for (let renderLine = 0; renderLine < this.viewport.lineEnd - this.viewport.lineStart; renderLine++) {
-            const textLine = this.lines[this.viewport.lineStart + renderLine];
-            ctx!.fillText(textLine.text, 0, (renderLine + 1) * this.lineHeight);
-        }
+        this.draw();
+    }
+
+    draw() {
+      this.ctx.reset();
+      this.ctx.font = this.font;
+
+      for (let renderLine = 0; renderLine < this.viewport.lineEnd - this.viewport.lineStart; renderLine++) {
+        const textLine = this.lines[this.viewport.lineStart + renderLine];
+        this.ctx.fillText(textLine.text, 0, (renderLine + 1) * this.lineHeight);
+      }
+
+      this.cursor.draw(this.ctx, this.lineHeight, this.charWidth);
     }
 }
 

@@ -38,7 +38,7 @@ const CanvasTestPage: React.FC<ILoginPage> = ({ }) => {
 
   return (
     <div>
-      <canvas ref={myDivRef} width="500" height="400" style={{ border: "1px solid black", margin: "5px" }} />
+      <canvas tabindex="0" ref={myDivRef} width="500" height="400" style={{ border: "1px solid black", margin: "5px" }} />
     </div>
   );
 };
