@@ -59,7 +59,7 @@ const TextCanvas: React.FC<TextCanvasProps> = ({
    */
   const viewPort = useMemo<[number, number]>(() => {
     return [scrollLineI, scrollLineI + canvasNoLines];
-  }, [scrollLineI, lineHeight]);
+  }, [scrollLineI, canvasNoLines]);
 
   const charWidth = useMemo<number>(() => {
     const canvas = document.createElement("canvas");
@@ -177,8 +177,7 @@ const TextCanvas: React.FC<TextCanvasProps> = ({
 
     const time2 = new Date();
     console.log(
-      `text of length ${text.length} parsed into ${lines.length} lines in ${
-        time2.valueOf() - time1.valueOf()
+      `text of length ${text.length} parsed into ${lines.length} lines in ${time2.valueOf() - time1.valueOf()
       }ms `
     );
     setLineMap(lines);
@@ -221,8 +220,8 @@ const TextCanvas: React.FC<TextCanvasProps> = ({
   const cursorWord = useMemo<IWord | undefined>(() => {
     return cursorLine
       ? cursorLine.words.find((word) => {
-          return word.iFrom <= cursorCharI && word.iTo >= cursorCharI;
-        })
+        return word.iFrom <= cursorCharI && word.iTo >= cursorCharI;
+      })
       : undefined;
   }, [cursorCharI, cursorLine, lineMap]);
 
@@ -611,9 +610,8 @@ const TextCanvas: React.FC<TextCanvasProps> = ({
                   fontSize: "12px",
                   fontWeight: "500",
                   color: theme.color.gray[500],
-                  top: `calc(${
-                    ((cursorGhostLineI + 1) / linesNo) * 100
-                  }% - 6px)`,
+                  top: `calc(${((cursorGhostLineI + 1) / linesNo) * 100
+                    }% - 6px)`,
                 }}
               >
                 {/* {`${cursorLineI}/${linesNo}`} */}

@@ -1,9 +1,9 @@
-import { MemoizedLoginModal } from "components/advanced";
 import TextCanvas from "components/basic/TextCanvas/TextCanvas";
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { LoremIpsum } from "lorem-ipsum";
+import Canvas from "components/basic/TextCanvas/Canvas";
 
-interface ILoginPage {}
+interface ILoginPage { }
 
 const lorem = new LoremIpsum({
   sentencesPerParagraph: {
@@ -16,12 +16,29 @@ const lorem = new LoremIpsum({
   },
 });
 
-const CanvasTestPage: React.FC<ILoginPage> = ({}) => {
+const CanvasTestPage: React.FC<ILoginPage> = ({ }) => {
   const veryLongText = lorem.generateParagraphs(700);
+  const myDivRef = useRef<HTMLCanvasElement>(null);
+
+  // useEffect hook to run logic after the component is mounted
+  useEffect(() => {
+    // Initialize the CustomWrapper with the <div> element reference
+    if (myDivRef.current) {
+      const customWrapper = new Canvas(myDivRef.current);
+      customWrapper.initialize()
+      customWrapper.writeText(veryLongText)
+    }
+
+
+    // Cleanup logic if needed
+    return () => {
+      // Add cleanup logic here if needed
+    };
+  }, []); // Empty dependency array ensures that the effect runs only once after mount
 
   return (
     <div>
-      <TextCanvas inputText={veryLongText} width={500} height={400} />
+      <canvas ref={myDivRef} width="500" height="400" style={{ border: "1px solid black", margin: "5px" }} />
     </div>
   );
 };
