@@ -19,7 +19,7 @@ interface Box {
   height?: number;
   noPadding?: boolean;
   isExpanded?: boolean;
-  button?: ReactNode[];
+  buttons?: ReactNode[];
   children?: ReactNode;
   onHeaderClick?: () => void;
 }
@@ -31,7 +31,7 @@ export const Box: React.FC<Box> = ({
   height = 0,
   noPadding = false,
   isExpanded = true,
-  button,
+  buttons,
   children,
   onHeaderClick,
 }) => {
@@ -75,9 +75,9 @@ export const Box: React.FC<Box> = ({
           <animated.div style={animatedExpand}>{label}</animated.div>
         )}
         <StyledButtonWrap>
-          {button && (
+          {buttons && (
             <ButtonGroup>
-              {button.map((b, key) => (
+              {buttons.map((b, key) => (
                 <React.Fragment key={key}>{b}</React.Fragment>
               ))}
             </ButtonGroup>

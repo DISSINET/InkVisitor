@@ -30,6 +30,7 @@ import {
 } from "./EntitySearchBoxStyles";
 import { EntitySearchResults } from "./EntitySearchResults/EntitySearchResults";
 import { BsFilter } from "react-icons/bs";
+import { useAppSelector } from "redux/hooks";
 
 const initValues: IRequestSearch = {
   label: "",
@@ -230,28 +231,30 @@ export const EntitySearchBox: React.FC = () => {
     return [];
   }, [entities]);
 
-  const templateOptions: DropdownItem[] = useMemo(() => {
-    const options: DropdownItem[] = [anyTemplate];
+  // const templateOptions: DropdownItem[] = useMemo(() => {
+  //   const options: DropdownItem[] = [anyTemplate];
 
-    if (templates) {
-      templates.forEach((template) => {
-        if (template.label.length > 20) {
-          options.push({
-            value: template.id,
-            label: template.label.substring(0, 20) + "...",
-          });
-        } else {
-          options.push({
-            value: template.id,
-            label: template.label,
-          });
-        }
-      });
-    }
-    return options;
-  }, [templates]);
+  //   if (templates) {
+  //     templates.forEach((template) => {
+  //       if (template.label.length > 20) {
+  //         options.push({
+  //           value: template.id,
+  //           label: template.label.substring(0, 20) + "...",
+  //         });
+  //       } else {
+  //         options.push({
+  //           value: template.id,
+  //           label: template.label,
+  //         });
+  //       }
+  //     });
+  //   }
+  //   return options;
+  // }, [templates]);
 
-  const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
+  const showAdvancedOptions: boolean = useAppSelector(
+    (state) => state.searchBox.showAdvancedOptions
+  );
 
   return (
     <StyledBoxContent>
@@ -267,12 +270,6 @@ export const EntitySearchBox: React.FC = () => {
               : handleChange({ label: value });
           }}
         />
-        <div>
-          <Button
-            icon={<BsFilter />}
-            onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}
-          />
-        </div>
       </StyledRow>
 
       {showAdvancedOptions && (

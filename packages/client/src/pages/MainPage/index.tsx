@@ -1,3 +1,4 @@
+import { EntityEnums } from "@shared/enums";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   collapsedPanelWidth,
@@ -11,6 +12,7 @@ import ScrollHandler from "hooks/ScrollHandler";
 import React, { useState } from "react";
 import { BiHide, BiRefresh, BiShow } from "react-icons/bi";
 import { BsSquareFill, BsSquareHalf } from "react-icons/bs";
+import { CgOptions } from "react-icons/cg";
 import { FaPlus } from "react-icons/fa";
 import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
 import { VscCloseAll } from "react-icons/vsc";
@@ -18,8 +20,8 @@ import { setFirstPanelExpanded } from "redux/features/layout/firstPanelExpandedS
 import { setFourthPanelBoxesOpened } from "redux/features/layout/fourthPanelBoxesOpenedSlice";
 import { setFourthPanelExpanded } from "redux/features/layout/fourthPanelExpandedSlice";
 import { setStatementListOpened } from "redux/features/layout/statementListOpenedSlice";
+import { setShowAdvancedOptions } from "redux/features/searchBox/showAdvancedOptionsSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-
 import { MemoizedEntityBookmarkBox } from "./containers/EntityBookmarkBox/EntityBookmarkBox";
 import { MemoizedEntityDetailBox } from "./containers/EntityDetailBox/EntityDetailBox";
 import { MemoizedEntitySearchBox } from "./containers/EntitySearchBox/EntitySearchBox";
@@ -27,7 +29,6 @@ import { MemoizedStatementEditorBox } from "./containers/StatementEditorBox/Stat
 import { MemoizedStatementListBox } from "./containers/StatementsListBox/StatementListBox";
 import { MemoizedTemplateListBox } from "./containers/TemplateListBox/TemplateListBox";
 import { MemoizedTerritoryTreeBox } from "./containers/TerritoryTreeBox/TerritoryTreeBox";
-import { EntityEnums } from "@shared/enums";
 
 type FourthPanelBoxes = "search" | "bookmarks" | "templates";
 
@@ -224,7 +225,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
           height={contentHeight}
           label="Territories"
           isExpanded={firstPanelExpanded}
-          button={[
+          buttons={[
             refreshBoxButton(["tree", "user"], !firstPanelExpanded),
             firstPanelButton(),
           ]}
@@ -267,7 +268,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
                 ? contentHeight / 2 + 20
                 : contentHeight - hiddenBoxHeight
             }
-            button={[
+            buttons={[
               <Button
                 icon={<FaPlus />}
                 label="new entity"
@@ -339,7 +340,18 @@ const MainPage: React.FC<MainPage> = ({}) => {
           label="Search"
           color="white"
           isExpanded={fourthPanelExpanded}
-          button={[
+          buttons={[
+            <>
+              {fourthPanelExpanded && (
+                <Button
+                  label="advanced"
+                  icon={<CgOptions />}
+                  onClick={() =>
+                    dispatch(setShowAdvancedOptions(!showAdvancedOptions))
+                  }
+                />
+              )}
+            </>,
             refreshBoxButton(
               ["search-templates", "search"],
               !fourthPanelExpanded
@@ -356,7 +368,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
           label="Bookmarks"
           color="white"
           isExpanded={fourthPanelExpanded}
-          button={[
+          buttons={[
             refreshBoxButton(["bookmarks"], !fourthPanelExpanded),
             hideBoxButton("bookmarks"),
             hideFourthPanelButton(),
@@ -370,7 +382,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
           label="Templates"
           color="white"
           isExpanded={fourthPanelExpanded}
-          button={[
+          buttons={[
             refreshBoxButton(["templates"], !fourthPanelExpanded),
             hideBoxButton("templates"),
             hideFourthPanelButton(),
