@@ -3,18 +3,19 @@ import { entitiesDict } from "@shared/dictionaries/entity";
 import { EntityEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
 import { IRequestSearch } from "@shared/types/request-search";
+import { useQuery } from "@tanstack/react-query";
+import { wildCardChar } from "Theme/constants";
 import api from "api";
-import { Button, Dropdown, Input, Loader, TypeBar } from "components";
+import { Dropdown, Input, Loader, TypeBar } from "components";
 import {
   AttributeButtonGroup,
   EntitySuggester,
   EntityTag,
 } from "components/advanced";
 import { useDebounce } from "hooks";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { RiCloseFill } from "react-icons/ri";
-import { useQuery } from "@tanstack/react-query";
-import { wildCardChar } from "Theme/constants";
+import { useAppSelector } from "redux/hooks";
 import { DropdownItem } from "types";
 import useResizeObserver from "use-resize-observer";
 import {
@@ -29,8 +30,6 @@ import {
   StyledRowHeader,
 } from "./EntitySearchBoxStyles";
 import { EntitySearchResults } from "./EntitySearchResults/EntitySearchResults";
-import { BsFilter } from "react-icons/bs";
-import { useAppSelector } from "redux/hooks";
 
 const initValues: IRequestSearch = {
   label: "",
@@ -255,6 +254,15 @@ export const EntitySearchBox: React.FC = () => {
   const showAdvancedOptions: boolean = useAppSelector(
     (state) => state.searchBox.showAdvancedOptions
   );
+
+  useEffect(() => {
+    if (!showAdvancedOptions) {
+      setSearchData({
+        label: searchData.label,
+      });
+      setClassOption(defaultClassOption);
+    }
+  }, [showAdvancedOptions]);
 
   return (
     <StyledBoxContent>
