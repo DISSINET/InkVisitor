@@ -29,6 +29,7 @@ import { MemoizedStatementEditorBox } from "./containers/StatementEditorBox/Stat
 import { MemoizedStatementListBox } from "./containers/StatementsListBox/StatementListBox";
 import { MemoizedTemplateListBox } from "./containers/TemplateListBox/TemplateListBox";
 import { MemoizedTerritoryTreeBox } from "./containers/TerritoryTreeBox/TerritoryTreeBox";
+import { animated, config, useSpring } from "@react-spring/web";
 
 type FourthPanelBoxes = "search" | "bookmarks" | "templates";
 
@@ -214,6 +215,11 @@ const MainPage: React.FC<MainPage> = ({}) => {
     dispatch(setStatementListOpened(!statementListOpened));
   };
 
+  const rotateOptionsIcon = useSpring({
+    transform: showAdvancedOptions ? "rotate(90deg)" : "rotate(0deg)",
+    config: config.stiff,
+  });
+
   return (
     <>
       <ScrollHandler />
@@ -345,7 +351,11 @@ const MainPage: React.FC<MainPage> = ({}) => {
               {fourthPanelExpanded && (
                 <Button
                   label="advanced"
-                  icon={<CgOptions />}
+                  icon={
+                    <animated.div style={rotateOptionsIcon}>
+                      <CgOptions />
+                    </animated.div>
+                  }
                   onClick={() =>
                     dispatch(setShowAdvancedOptions(!showAdvancedOptions))
                   }

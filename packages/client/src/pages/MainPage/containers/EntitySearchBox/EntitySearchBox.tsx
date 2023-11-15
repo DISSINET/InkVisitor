@@ -282,7 +282,6 @@ export const EntitySearchBox: React.FC = () => {
 
       {showAdvancedOptions && (
         <>
-          {" "}
           <StyledRow>
             <StyledRowHeader>Limit by class</StyledRowHeader>
             <div style={{ position: "relative" }}>
