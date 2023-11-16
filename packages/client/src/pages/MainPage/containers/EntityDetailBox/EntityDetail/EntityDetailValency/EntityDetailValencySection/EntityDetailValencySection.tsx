@@ -24,14 +24,16 @@ import {
   StyledSectionHeading,
   StyledSemanticsWrapper,
 } from "./EntityDetailValencySectionStyles";
+import { DropdownItem } from "types";
+import { DropdownEmpty } from "Theme/constants";
 
 const valencyEntitiesOptions = [
-  ...entitiesDict,
   {
     value: EntityEnums.Extension.Empty,
-    label: "empty",
+    label: DropdownEmpty,
     info: "",
   },
+  ...entitiesDict,
 ];
 
 interface EntityDetailValencySection {
@@ -160,7 +162,7 @@ export const EntityDetailValencySection: React.FC<
   };
 
   const getEntityTypeValue = () =>
-    valencyEntitiesOptions.filter((i: any) => {
+    [allEntities].concat(valencyEntitiesOptions).filter((i: any) => {
       switch (relationType) {
         case RelationEnums.Type.SubjectSemantics:
           return (entity as IAction).data.entities?.s?.includes(i.value);
@@ -171,8 +173,8 @@ export const EntityDetailValencySection: React.FC<
       }
     });
 
-  const handleDropdownNewValue = (newValue: any) =>
-    newValue ? (newValue as string[]).map((v: any) => v.value) : [];
+  const handleDropdownNewValue = (newValue: DropdownItem[]) =>
+    newValue ? newValue.map((v) => v.value) : [];
 
   const getValencyValue = () => {
     switch (relationType) {
@@ -195,7 +197,7 @@ export const EntityDetailValencySection: React.FC<
       <StyledLabelInputWrapper>
         <StyledLabel>Entity type</StyledLabel>
         <Dropdown
-          allowAny
+          entityDropdown
           disabled={!userCanEdit}
           isMulti
           options={valencyEntitiesOptions}

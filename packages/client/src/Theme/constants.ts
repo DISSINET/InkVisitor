@@ -5,6 +5,7 @@ export const defaultPing = -10;
 
 export const DropdownAny = "any";
 export const wildCardChar = "*";
+export const DropdownEmpty = EntityEnums.Extension.Empty;
 
 export const rootTerritoryId = "T0";
 export const excludedSuggesterEntities = [EntityEnums.Class.Value];

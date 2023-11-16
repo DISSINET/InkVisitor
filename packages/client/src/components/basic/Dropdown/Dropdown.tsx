@@ -10,7 +10,12 @@ import {
   DropdownIndicatorProps,
   ActionMeta,
 } from "react-select";
-import { DropdownAny, heightHeader } from "Theme/constants";
+import {
+  DropdownAny,
+  DropdownEmpty,
+  heightHeader,
+  wildCardChar,
+} from "Theme/constants";
 import { DropdownItem, EntityColors } from "types";
 import {
   StyledEntityValue,
@@ -35,7 +40,6 @@ interface Dropdown {
   noOptionsMessage?: string;
   isClearable?: boolean;
   isMulti?: boolean;
-  entityDropdown?: boolean;
   onFocus?: () => void;
   onBlur?: () => void;
   autoFocus?: boolean;
@@ -44,6 +48,8 @@ interface Dropdown {
 
   icon?: JSX.Element;
   tooltipLabel?: string;
+
+  entityDropdown?: boolean;
   attributeDropdown?: boolean;
 
   // TODO: not implemented yet
@@ -62,7 +68,6 @@ export const Dropdown: React.FC<Dropdown> = ({
   isClearable = false,
   isMulti = false,
   disabled = false,
-  entityDropdown = false,
   onFocus = () => {},
   onBlur = () => {},
   autoFocus = false,
@@ -71,6 +76,7 @@ export const Dropdown: React.FC<Dropdown> = ({
 
   icon,
   tooltipLabel,
+  entityDropdown = false,
   attributeDropdown,
 
   allowAny = false,
@@ -105,6 +111,7 @@ export const Dropdown: React.FC<Dropdown> = ({
           isMulti={isMulti}
           isDisabled={disabled || isOneOptionSingleEntitySelect}
           isOneOptionSingleEntitySelect={isOneOptionSingleEntitySelect}
+          attributeDropdown={attributeDropdown}
           entityDropdown={entityDropdown}
           wildCardChar={(value as DropdownItem)?.label === "*"}
           className="react-select-container"
@@ -125,7 +132,6 @@ export const Dropdown: React.FC<Dropdown> = ({
           isSearchable={!disableTyping}
           value={displayValue}
           icon={icon}
-          attributeDropdown={attributeDropdown}
           styles={{
             dropdownIndicator: () => {
               return {
@@ -236,11 +242,15 @@ const SingleValue = (props: SingleValueProps<any>): React.ReactElement => {
 
 const Option = ({ ...props }: OptionProps | any): React.ReactElement => {
   const { entityDropdown } = props.selectProps;
+
   return (
     <>
       {entityDropdown ? (
         <>
-          {props.value && props.value !== DropdownAny ? (
+          {props.value &&
+          props.value !== DropdownAny &&
+          props.value !== wildCardChar &&
+          props.value !== DropdownEmpty ? (
             <components.Option {...props}>
               <StyledEntityValue color={EntityColors[props.value].color}>
                 {props.label}
@@ -264,7 +274,8 @@ const Option = ({ ...props }: OptionProps | any): React.ReactElement => {
 const MultiValue = (props: MultiValueProps<any>): React.ReactElement => {
   let labelToBeDisplayed = `${props.data.label}`;
   // @ts-ignore
-  const { attributeDropdown, isMulti, value, options } = props.selectProps;
+  const { attributeDropdown, entityDropdown, isMulti, value, options } =
+    props.selectProps;
 
   if (attributeDropdown && isMulti && value.length > 1) {
     if (value.length === options?.length) {
@@ -272,6 +283,12 @@ const MultiValue = (props: MultiValueProps<any>): React.ReactElement => {
     } else {
       labelToBeDisplayed = `${value.length} selected`;
     }
+  } else if (
+    entityDropdown &&
+    isMulti &&
+    props.data.value === allEntities.value
+  ) {
+    // TODO:
   } else if (props.data.value === allEntities.value) {
     labelToBeDisplayed = "All options selected";
   }
