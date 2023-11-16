@@ -23,7 +23,6 @@ import disableTreeScrollSlice from "./features/territoryTree/disableTreeScrollSl
 import filterOpenSlice from "./features/territoryTree/filterOpenSlice";
 import pingSlice from "./features/pingSlice";
 import showWarningsSlice from "./features/statementEditor/showWarningsSlice";
-import showAdvancedOptionsSlice from "./features/searchBox/showAdvancedOptionsSlice";
 
 const store: Store = configureStore({
   reducer: {
@@ -44,9 +43,6 @@ const store: Store = configureStore({
     }),
     statementEditor: combineReducers({
       showWarnings: showWarningsSlice,
-    }),
-    searchBox: combineReducers({
-      showAdvancedOptions: showAdvancedOptionsSlice,
     }),
     rowDnd: combineReducers({
       draggedPropRow: draggedPropRowSlice,

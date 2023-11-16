@@ -74,3 +74,20 @@ export const StyledDateTagText = styled.div`
 `;
 
 export const StyledDateTagButton = styled(Button)``;
+
+export const StyledLine = styled.div`
+  width: 100%;
+  height: 2px;
+  border-bottom: 2px solid ${({ theme }) => theme.color.primary};
+`;
+
+export const StyledAdvancedOptionsSign = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid ${({ theme }) => theme.color.gray[500]};
+  font-size: ${({ theme }) => theme.fontSize.xxs};
+  white-space: nowrap;
+  column-gap: 0.2rem;
+  padding: 0 0.2rem;
+`;

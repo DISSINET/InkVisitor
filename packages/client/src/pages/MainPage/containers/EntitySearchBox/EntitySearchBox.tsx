@@ -6,7 +6,7 @@ import { IRequestSearch } from "@shared/types/request-search";
 import { useQuery } from "@tanstack/react-query";
 import { wildCardChar } from "Theme/constants";
 import api from "api";
-import { Dropdown, Input, Loader, TypeBar } from "components";
+import { Button, Dropdown, Input, Loader, TypeBar } from "components";
 import {
   AttributeButtonGroup,
   EntitySuggester,
@@ -19,17 +19,25 @@ import { useAppSelector } from "redux/hooks";
 import { DropdownItem } from "types";
 import useResizeObserver from "use-resize-observer";
 import {
+  StyledAdvancedOptionsSign,
   StyledBoxContent,
   StyledDatePicker,
   StyledDateTag,
   StyledDateTagButton,
   StyledDateTagText,
+  StyledLine,
   StyledResultsHeader,
   StyledResultsWrapper,
   StyledRow,
   StyledRowHeader,
 } from "./EntitySearchBoxStyles";
 import { EntitySearchResults } from "./EntitySearchResults/EntitySearchResults";
+import { animated, config, useSpring } from "@react-spring/web";
+import { CgOptions } from "react-icons/cg";
+import {
+  IoIosArrowDropdownCircle,
+  IoMdArrowDropdownCircle,
+} from "react-icons/io";
 
 const initValues: IRequestSearch = {
   label: "",
@@ -248,9 +256,7 @@ export const EntitySearchBox: React.FC = () => {
     return options;
   }, [templates]);
 
-  const showAdvancedOptions: boolean = useAppSelector(
-    (state) => state.searchBox.showAdvancedOptions
-  );
+  const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
 
   useEffect(() => {
     if (!showAdvancedOptions) {
@@ -261,13 +267,18 @@ export const EntitySearchBox: React.FC = () => {
     }
   }, [showAdvancedOptions]);
 
+  const rotateOptionsIcon = useSpring({
+    transform: showAdvancedOptions ? "rotate(180deg)" : "rotate(0deg)",
+    config: config.stiff,
+  });
+
   return (
     <StyledBoxContent>
       <StyledRow>
-        <StyledRowHeader>Label (at least 2 characters)</StyledRowHeader>
+        <StyledRowHeader>label</StyledRowHeader>
         <Input
           width="full"
-          placeholder="search"
+          placeholder="(at least 2 characters)"
           changeOnType
           onChangeFn={(value: string) => {
             value.length
@@ -277,10 +288,34 @@ export const EntitySearchBox: React.FC = () => {
         />
       </StyledRow>
 
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          marginBottom: "0.5rem",
+        }}
+      >
+        <div>
+          <StyledAdvancedOptionsSign>
+            <CgOptions /> <p>advanced options</p>
+          </StyledAdvancedOptionsSign>
+        </div>
+        <StyledLine />
+        <Button
+          label={showAdvancedOptions ? "hide" : "show"}
+          icon={
+            <animated.div style={rotateOptionsIcon}>
+              <IoMdArrowDropdownCircle size={16} />
+            </animated.div>
+          }
+          onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}
+        />
+      </div>
+
       {showAdvancedOptions && (
         <>
           <StyledRow>
-            <StyledRowHeader>Limit by class</StyledRowHeader>
+            <StyledRowHeader>class</StyledRowHeader>
             <div style={{ position: "relative" }}>
               <Dropdown
                 placeholder={""}
@@ -312,7 +347,7 @@ export const EntitySearchBox: React.FC = () => {
             />
           </StyledRow>
           <StyledRow>
-            <StyledRowHeader>Limit by status</StyledRowHeader>
+            <StyledRowHeader>status</StyledRowHeader>
             <div style={{ position: "relative" }}>
               <Dropdown
                 placeholder={""}
@@ -329,7 +364,7 @@ export const EntitySearchBox: React.FC = () => {
             </div>
           </StyledRow>
           <StyledRow>
-            <StyledRowHeader>Limit by language</StyledRowHeader>
+            <StyledRowHeader>language</StyledRowHeader>
             <div style={{ position: "relative" }}>
               <Dropdown
                 placeholder={""}
@@ -346,7 +381,7 @@ export const EntitySearchBox: React.FC = () => {
             </div>
           </StyledRow>
           {/* <StyledRow>
-          <StyledRowHeader>Limit by template</StyledRowHeader>
+          <StyledRowHeader>template</StyledRowHeader>
           <Dropdown
             placeholder={""}
             width="full"
@@ -359,7 +394,7 @@ export const EntitySearchBox: React.FC = () => {
           />
         </StyledRow> */}
           <StyledRow>
-            <StyledRowHeader>Limit by territory</StyledRowHeader>
+            <StyledRowHeader>territory</StyledRowHeader>
             {debouncedValues.territoryId && searchTerritoryEntity ? (
               <>
                 <Loader size={26} show={searchTerritoryEntityIsFetching} />
@@ -423,7 +458,7 @@ export const EntitySearchBox: React.FC = () => {
             </StyledRow>
           )}
           <StyledRow>
-            <StyledRowHeader>Limit by co-occurrence</StyledRowHeader>
+            <StyledRowHeader>co-occurrence</StyledRowHeader>
             {debouncedValues.cooccurrenceId ? (
               <>
                 <Loader size={26} show={cooccurrenceIsFetching} />
@@ -470,7 +505,7 @@ export const EntitySearchBox: React.FC = () => {
             )}
           </StyledRow>
           <StyledRow>
-            <StyledRowHeader>Created at</StyledRowHeader>
+            <StyledRowHeader>created at</StyledRowHeader>
             {debouncedValues.createdDate ? (
               <StyledDateTag>
                 <StyledDateTagText>
@@ -503,7 +538,7 @@ export const EntitySearchBox: React.FC = () => {
             )}
           </StyledRow>
           <StyledRow>
-            <StyledRowHeader>Udpated at</StyledRowHeader>
+            <StyledRowHeader>udpated at</StyledRowHeader>
             {debouncedValues.updatedDate ? (
               <StyledDateTag>
                 <StyledDateTagText>

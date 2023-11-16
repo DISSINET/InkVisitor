@@ -12,7 +12,6 @@ import ScrollHandler from "hooks/ScrollHandler";
 import React, { useState } from "react";
 import { BiHide, BiRefresh, BiShow } from "react-icons/bi";
 import { BsSquareFill, BsSquareHalf } from "react-icons/bs";
-import { CgOptions } from "react-icons/cg";
 import { FaPlus } from "react-icons/fa";
 import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
 import { VscCloseAll } from "react-icons/vsc";
@@ -20,7 +19,6 @@ import { setFirstPanelExpanded } from "redux/features/layout/firstPanelExpandedS
 import { setFourthPanelBoxesOpened } from "redux/features/layout/fourthPanelBoxesOpenedSlice";
 import { setFourthPanelExpanded } from "redux/features/layout/fourthPanelExpandedSlice";
 import { setStatementListOpened } from "redux/features/layout/statementListOpenedSlice";
-import { setShowAdvancedOptions } from "redux/features/searchBox/showAdvancedOptionsSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { MemoizedEntityBookmarkBox } from "./containers/EntityBookmarkBox/EntityBookmarkBox";
 import { MemoizedEntityDetailBox } from "./containers/EntityDetailBox/EntityDetailBox";
@@ -29,7 +27,6 @@ import { MemoizedStatementEditorBox } from "./containers/StatementEditorBox/Stat
 import { MemoizedStatementListBox } from "./containers/StatementsListBox/StatementListBox";
 import { MemoizedTemplateListBox } from "./containers/TemplateListBox/TemplateListBox";
 import { MemoizedTerritoryTreeBox } from "./containers/TerritoryTreeBox/TerritoryTreeBox";
-import { animated, config, useSpring } from "@react-spring/web";
 
 type FourthPanelBoxes = "search" | "bookmarks" | "templates";
 
@@ -215,11 +212,6 @@ const MainPage: React.FC<MainPage> = ({}) => {
     dispatch(setStatementListOpened(!statementListOpened));
   };
 
-  const rotateOptionsIcon = useSpring({
-    transform: showAdvancedOptions ? "rotate(90deg)" : "rotate(0deg)",
-    config: config.stiff,
-  });
-
   return (
     <>
       <ScrollHandler />
@@ -347,21 +339,6 @@ const MainPage: React.FC<MainPage> = ({}) => {
           color="white"
           isExpanded={fourthPanelExpanded}
           buttons={[
-            <>
-              {fourthPanelExpanded && (
-                <Button
-                  label="advanced"
-                  icon={
-                    <animated.div style={rotateOptionsIcon}>
-                      <CgOptions />
-                    </animated.div>
-                  }
-                  onClick={() =>
-                    dispatch(setShowAdvancedOptions(!showAdvancedOptions))
-                  }
-                />
-              )}
-            </>,
             refreshBoxButton(
               ["search-templates", "search"],
               !fourthPanelExpanded
