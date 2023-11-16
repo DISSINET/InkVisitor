@@ -1,3 +1,4 @@
+import { MIN_SEARCH_RESULT_HEIGHT } from "Theme/constants";
 import { Button } from "components";
 import { StyledInput } from "components/basic/Input/InputStyles";
 import styled from "styled-components";
@@ -29,6 +30,7 @@ export const StyledRowContent = styled.div`
 export const StyledResultsWrapper = styled.div`
   display: inline-flex;
   flex-direction: column;
+  min-height: ${MIN_SEARCH_RESULT_HEIGHT}px;
   height: 100%;
   max-height: 100%;
   max-width: 100%;

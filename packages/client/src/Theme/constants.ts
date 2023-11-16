@@ -30,6 +30,9 @@ export const fourthPanelBoxesHeightThirds = {
   templates: 33,
 };
 
+// the minimum pixels for the results section height
+export const MIN_SEARCH_RESULT_HEIGHT = 100;
+
 // LIMITS
 export const maxTabCount = 10;
 export const maxTooltipTreeForks = 2;
