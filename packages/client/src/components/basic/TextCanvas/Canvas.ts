@@ -88,7 +88,7 @@ class Canvas {
     this.cursor = new Cursor();
 
     this.element.onwheel = this.onWheel.bind(this);
-    this.element.onmouseup = this.onMouseUp.bind(this);
+    this.element.onmousedown = this.onMouseDown.bind(this);
     this.element.onkeydown = this.onKeyDown.bind(this);
   }
 
@@ -130,7 +130,7 @@ class Canvas {
     this.draw();
   }
 
-  onMouseUp(e: MouseEvent) {
+  onMouseDown(e: MouseEvent) {
     this.cursor.onMouseClick(e, this.lineHeight, this.charWidth);
     this.draw();
   }
