@@ -23,13 +23,40 @@ interface IWord {
 
 class Scroller {
   element: HTMLDivElement;
+  runner: HTMLDivElement;
+  onChangeCb?: (percentage: number) => void;
 
   constructor(element: HTMLDivElement) {
     this.element = element;
+    const runner = element.firstChild
+    if (!runner) {
+      throw new Error("Runner for Scroller not found")
+    }
+    this.runner = runner as HTMLDivElement
+    this.element.onmousedown = this.onMouseDown.bind(this);
+    this.runner.onmousedown = this.onRunnerMouseDown.bind(this);
   }
   
-  update() {
-    
+  update(startLine: number, endLine: number, totalLines: number) {
+    const viewportLines = endLine - startLine + 1;
+    const percentage = startLine * 100 / (totalLines - viewportLines);
+    const availableHeight = this.element.clientHeight - this.runner.clientHeight;
+    this.runner.style["top"] = `${availableHeight / 100 * percentage}px`;
+  }
+
+  onRunnerMouseDown(e: MouseEvent) {
+    e.stopPropagation();
+  }
+
+  onMouseDown(e: MouseEvent) {
+    const availableHeight = this.element.clientHeight;
+    if (this.onChangeCb) {
+      this.onChangeCb( e.offsetY * 100 / availableHeight)
+    }
+  }
+
+  onChange(cb: (percentage: number) => void) {
+    this.onChangeCb = cb
   }
 }
 
@@ -79,10 +106,9 @@ class Canvas {
 
       case "ArrowDown":
         this.cursor.move(0, 1)
-        if (this.cursor.y >= this.viewport.lineEnd - this.viewport.lineStart) {
-          this.viewport.scrollTo(this.viewport.lineStart + this.cursor.y, this.lines.length);
+        if (this.cursor.y > this.viewport.lineEnd - this.viewport.lineStart) {
+          this.viewport.scrollTo(this.viewport.lineStart + 1, this.lines.length);
           this.cursor.y = this.viewport.lineEnd - this.viewport.lineStart;
-          console.log("setting again", this.viewport, this.cursor.y )
         }
         break;
 
@@ -127,6 +153,11 @@ class Canvas {
 
   addScroller(scrollerDiv: HTMLDivElement) {
     this.scroller = new Scroller(scrollerDiv)
+    this.scroller.onChange((percentage: number) => {
+      const toLine = Math.floor((this.lines.length - (this.viewport.lineEnd - this.viewport.lineStart)) /100 * percentage)
+      this.viewport.scrollTo(toLine, this.lines.length)
+      this.draw();
+    })
   } 
 
   prepareText(text: string) {
@@ -240,7 +271,6 @@ class Canvas {
     this.ctx.font = this.font;
 
     for (let renderLine = 0; renderLine <= this.viewport.lineEnd - this.viewport.lineStart; renderLine++) {
-      console.log("render", )
       const textLine = this.lines[this.viewport.lineStart + renderLine];
       this.ctx.fillText(textLine.text, 0, (renderLine + 1) * this.lineHeight);
     }
@@ -248,8 +278,9 @@ class Canvas {
     this.cursor.draw(this.ctx, this.lineHeight, this.charWidth);
 
     if (this.scroller) {
-      this.scroller.update();
+      this.scroller.update(this.viewport.lineStart, this.viewport.lineEnd, this.lines.length);
     }
+    console.log("render")
   }
 }
 

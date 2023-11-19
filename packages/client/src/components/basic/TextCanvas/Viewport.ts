@@ -26,14 +26,13 @@ export default class Viewport {
   
     scrollTo(textLine: number, maxLines: number) {
       console.log(this.lineStart, this.lineEnd, textLine)
-      if (this.lineStart <= textLine && this.lineEnd >= textLine) {
-        return; // no need to scroll
-      }
   
-      if (this.lineStart > textLine) {
+      if (textLine > this.lineStart) {
+        console.log("scroll down", this.lineStart, textLine)
+        this.scrollDown(textLine - this.lineStart, maxLines)
+      } else if (textLine < this.lineStart) {
+        console.log("scroll up", this.lineStart, textLine)
         this.scrollUp(this.lineStart - textLine);
-      } else if (this.lineEnd < textLine) {
-        this.scrollDown(textLine - this.lineEnd, maxLines)
       }
     }
   }

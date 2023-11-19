@@ -58,46 +58,34 @@ const TextCanvas: React.FC<TextCanvasProps> = ({
             padding: "2px",
           }}
         >
-          <div
-            style={{
-              position: "relative",
-              width: `${width}px`,
-              height: `${height}px`,
-            }}
-          >
+          <div style={{display: "flex"}}>
             <canvas
               tabIndex={0}
               ref={canvasRef} 
               width={width}
               height={height}
-              style={{ position: "absolute", top: "0", left: "0", outline: "none" }}
+              style={{ outline: "none" }}
             />
+            <div
+              className="scroller-viewport"
+                ref={scrollerRef} 
+              style={{
+                background: "#ccc",
+                position: "relative",
+                width: `${10}px`,
+              }}
+            >
+              <div
+                className="scroller-cursor"
+                style={{
+                  position: "absolute",
+                  height: "10px",
+                  width: `10px`,
+                  backgroundColor: theme.color.blue[500],
+                }}
+              />
+            </div>
           </div>
-        </div>
-        <div
-          className="scroller"
-          style={{
-            display: "flex",
-            position: "relative",
-          }}
-        >
-          <div
-            className="scroller-viewport"
-              ref={scrollerRef} 
-            style={{
-              position: "absolute",
-              width: `${10}px`,
-            }}
-          />
-          <div
-            className="scroller-cursor"
-            style={{
-              position: "absolute",
-              height: "1px",
-              width: `${15}px`,
-              backgroundColor: theme.color.blue[500],
-            }}
-          />
         </div>
       </div>
       <div
