@@ -17,7 +17,7 @@ const lorem = new LoremIpsum({
 });
 
 const CanvasTestPage: React.FC<ILoginPage> = ({ }) => {
-  const veryLongText = lorem.generateParagraphs(700);
+  const veryLongText = lorem.generateParagraphs(1);
   const myDivRef = useRef<HTMLCanvasElement>(null);
 
   // useEffect hook to run logic after the component is mounted

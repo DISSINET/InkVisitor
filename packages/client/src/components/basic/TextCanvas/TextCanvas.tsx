@@ -44,7 +44,7 @@ const TextCanvas: React.FC<TextCanvasProps> = ({
   // scroller
   const scrollerW = 15;
 
-  const FONT = "12px Monospace";
+  const FONT = "12px Monospace"
 
   // canvases
   const canvasTextRef = useRef<HTMLCanvasElement>(null);
@@ -411,10 +411,10 @@ const TextCanvas: React.FC<TextCanvasProps> = ({
             setcursorCharI(cursorWord.iFrom);
           }
         } else if (cursorCharI > 0) {
-          setcursorCharI(cursorCharI - 1);
+          setcursorCharI(cursorCharI - 1)
         } else if (cursorLineI > 0) {
-          setCursorLineI(cursorLineI - 1);
-          setcursorCharI(lineMap[cursorLineI - 1].text.length);
+          setCursorLineI(cursorLineI - 1)
+          setcursorCharI(lineMap[cursorLineI - 1].text.length)
         }
         break;
 
@@ -456,7 +456,7 @@ const TextCanvas: React.FC<TextCanvasProps> = ({
       // remove character
       case "Backspace":
         if (cursorLine) {
-          const deleteI = cursorLine.iFrom + cursorCharI - 1;
+          const deleteI = cursorLine.iFrom + cursorCharI - 1
           setText(text.slice(0, deleteI) + text.slice(deleteI + 1));
           setcursorCharI(cursorCharI - 1);
         }
