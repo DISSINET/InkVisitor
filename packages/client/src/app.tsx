@@ -184,6 +184,14 @@ export const App: React.FC = () => {
                         </PublicPath>
                       }
                     />
+                     <Route
+                      path="/canvas"
+                      element={
+                        <PublicPath>
+                          <CanvasTestPage />
+                        </PublicPath>
+                      }
+                    />
                     {/* PRIVATE */}
                     <Route
                       path="/"
@@ -225,14 +233,7 @@ export const App: React.FC = () => {
                         </RequireAuth>
                       }
                     />
-                    <Route
-                      path="/canvas"
-                      element={
-                        <RequireAuth>
-                          <CanvasTestPage />
-                        </RequireAuth>
-                      }
-                    />
+                   
                     <Route path="*" element={<NotFoundPage />} />
                   </Routes>
                 </Page>

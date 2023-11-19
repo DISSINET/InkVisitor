@@ -1,5 +1,7 @@
 import { MutableRefObject, RefObject } from "react";
 import { render } from "react-dom";
+import Viewport from "./Viewport";
+import Cursor from "./Cursor";
 
 interface TextCanvasProps {
   inputText: string;
@@ -19,85 +21,15 @@ interface IWord {
   iTo: number; // where the word ends
 }
 
-/**
- * Cursor represents active position in the viewport
- */
-class Cursor {
-  x: number = -1;
-  y: number = -1
+class Scroller {
+  element: HTMLDivElement;
 
-  constructor() {
+  constructor(element: HTMLDivElement) {
+    this.element = element;
   }
-
-  yToLineI(y: number, lineHeight: number): number {
-    return Math.floor(y / lineHeight);
-  };
-
-  xToCharI(x: number, charWidth: number): number {
-    return Math.floor(x / charWidth);
-  };
-
-  onMouseClick(e: MouseEvent, lineHeight: number, charWidth: number) {
-    const [x, y] = [e.offsetX, e.offsetY];
-    this.x = this.xToCharI(x, charWidth);
-    this.y = this.yToLineI(y, lineHeight);
-  }
-
-  move(xDelta: number, yDelta: number) {
-    if (this.x === -1 && this.y === -1 || (!xDelta && !yDelta)) {
-      return
-    }
-
-    this.x += xDelta
-    this.y += yDelta
-  }
-
-  draw(ctx: CanvasRenderingContext2D, lineHeight: number, charWidth: number) {
-    if (this.x === -1 && this.y === -1) {
-      return
-    }
-
-    ctx.fillRect(this.x * charWidth, this.y * lineHeight + 2, 3, lineHeight)
-  }
-}
-
-/**
- * Viewpoer represents currently visible part of the rendered text
- */
-class Viewport {
-  lineStart: number
-  lineEnd: number
-
-  constructor(lineStart: number, lineEnd: number) {
-    this.lineStart = lineStart;
-    this.lineEnd = lineEnd;
-  }
-
-  scrollDown(step: number, maxLines: number) {
-    if (this.lineEnd + step < maxLines) {
-      this.lineStart+=step;
-      this.lineEnd+=step;
-    }
-  }
-
-  scrollUp(step: number) {
-    if(this.lineStart - step >= 0) {
-      this.lineStart-=step;
-      this.lineEnd-=step;
-    }
-  }
-
-  scrollTo(textLine: number, maxLines: number) {
-    console.log(this.lineStart, this.lineEnd, textLine)
-    if (this.lineStart <= textLine && this.lineEnd >= textLine) {
-      return; // no need to scroll
-    }
-
-    if (this.lineStart > textLine) {
-      this.scrollUp(this.lineStart - textLine);
-    } else if (this.lineEnd < textLine) {
-      this.scrollDown(textLine - this.lineEnd, maxLines)
-    }
+  
+  update() {
+    
   }
 }
 
@@ -113,6 +45,7 @@ class Canvas {
   cursor: Cursor;
   text?: string;
   lines: ILine[] = [];
+  scroller?: Scroller;
 
   constructor(element: HTMLCanvasElement) {
     this.element = element;
@@ -191,6 +124,10 @@ class Canvas {
   initialize() {
     console.log('Custom logic executed!');
   }
+
+  addScroller(scrollerDiv: HTMLDivElement) {
+    this.scroller = new Scroller(scrollerDiv)
+  } 
 
   prepareText(text: string) {
     const time1 = new Date();
@@ -309,6 +246,10 @@ class Canvas {
     }
 
     this.cursor.draw(this.ctx, this.lineHeight, this.charWidth);
+
+    if (this.scroller) {
+      this.scroller.update();
+    }
   }
 }
 
