@@ -54,6 +54,11 @@ const theme = {
     primaryTransparent: "rgba(9,16,52,0.2)",
     modalBg: "rgba(9,16,52,0.3)",
 
+    tagBackground: "#fff",
+    tagColor: "#091034",
+    tagSelectedBackground: "#091034",
+    tagSelectedColor: "#fff",
+
     foundByTreeFilter: "#b4c0e8",
     tableOpened: "#F2EBFE",
     tableSelection: "#bce5ff",

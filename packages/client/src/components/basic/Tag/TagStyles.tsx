@@ -48,10 +48,10 @@ const getColor = (
     if (isFavorited) {
       return "warning";
     } else {
-      return isItalic ? "grey" : "white";
+      return isItalic ? "grey" : "tagSelectedColor";
     }
   } else {
-    return isItalic ? "greyer" : "black";
+    return isItalic ? "greyer" : "tagColor";
   }
 };
 
@@ -62,7 +62,9 @@ export const StyledLabelWrap = styled.div<StyledLabelWrap>`
   display: inline-flex;
   overflow: hidden;
   background-color: ${({ theme, invertedLabel }) =>
-    invertedLabel ? theme.color["primary"] : theme.color["white"]};
+    invertedLabel
+      ? theme.color.tagSelectedBackground
+      : theme.color.tagBackground};
 `;
 interface StyledStarWrap {}
 export const StyledStarWrap = styled.div<StyledStarWrap>`

@@ -53,6 +53,11 @@ const darkTheme = {
     primaryTransparent: "rgba(9,16,52,0.2)",
     modalBg: "rgba(9,16,52,0.5)",
 
+    tagBackground: "#f6f6ff",
+    tagColor: "#060c26",
+    tagSelectedBackground: "#060c26",
+    tagSelectedColor: "#f6f6ff",
+
     tableOpened: "#0b3a59",
     tableSelection: "#4c82a1",
     tableSelectionHover: "#2c638c",
