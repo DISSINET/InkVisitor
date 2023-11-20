@@ -595,6 +595,11 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     }
   }, [showWarnings, statementId]);
 
+  const preSuggestions = useMemo(
+    () => territoryData && Object.values(territoryData.entities),
+    [territoryData]
+  );
+
   return (
     <>
       <React.Fragment key={statement.id}>
@@ -809,6 +814,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 placeholder={"add action"}
                 isInsideTemplate={statement.isTemplate}
                 territoryParentId={statementTerritoryId}
+                preSuggestions={preSuggestions}
               />
             )}
           </StyledEditorSectionContent>
@@ -863,6 +869,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 territoryParentId={statementTerritoryId}
                 excludedActantIds={[statement.id]}
                 isInsideStatement
+                preSuggestions={preSuggestions}
               />
             )}
           </StyledEditorSectionContent>
@@ -968,6 +975,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 excludedActantIds={statement.data.tags}
                 isInsideTemplate={statement.isTemplate}
                 territoryParentId={statementTerritoryId}
+                preSuggestions={preSuggestions}
               />
             )}
           </StyledEditorSectionContent>

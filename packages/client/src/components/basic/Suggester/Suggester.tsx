@@ -60,6 +60,8 @@ interface Suggester {
   disableButtons?: boolean;
   isFetching?: boolean;
 
+  preSuggestions?: EntitySuggestion[];
+
   // events
   onType: (newType: string) => void;
   onChangeCategory: (selectedOption: DropdownItem[]) => void;
@@ -91,6 +93,8 @@ export const Suggester: React.FC<Suggester> = ({
   inputWidth = 80,
   disableCreate = false,
   disableButtons = false,
+
+  preSuggestions,
 
   // events
   onType,
@@ -219,7 +223,7 @@ export const Suggester: React.FC<Suggester> = ({
     setSelected(-1);
   };
 
-  const renderEntitySuggestions = () => {
+  const renderEntitySuggestions = (suggestions: EntitySuggestion[]) => {
     const itemData: SuggestionRowEntityItemData = createItemData(
       suggestions as EntitySuggestion[],
       onPick,
@@ -288,7 +292,7 @@ export const Suggester: React.FC<Suggester> = ({
               onChangeFn={(newType: string) => onTypeFn(newType)}
               placeholder={placeholder}
               suggester
-              changeOnType={true}
+              changeOnType
               width={inputWidth}
               onFocus={() => {
                 setIsFocused(true);
@@ -333,41 +337,62 @@ export const Suggester: React.FC<Suggester> = ({
           <StyledAiOutlineWarning size={22} color={theme.color["warning"]} />
         )}
 
-        {((isFocused || isHovered) &&
-          suggestions.length &&
-          !middlewareData.hide?.referenceHidden) ||
-        (isFetching && isFocused) ? (
-          <>
-            <FloatingPortal id="page">
-              <StyledSuggesterList
-                ref={refs.setFloating}
-                noLeftMargin={categories.length === 1}
-                onMouseEnter={() => setIsHovered(true)}
-                onMouseLeave={() => setIsHovered(false)}
-                style={{
-                  ...floatingStyles,
-                }}
-              >
-                <StyledRelativePosition>
-                  {renderEntitySuggestions()}
-                  <Loader size={30} show={isFetching} />
-                </StyledRelativePosition>
-                {!disableEnter && (
-                  <SuggesterKeyPress
-                    onArrowDown={() => {
-                      if (selected < suggestions.length - 1)
-                        setSelected(selected + 1);
-                    }}
-                    onArrowUp={() => {
-                      if (selected > -1) setSelected(selected - 1);
-                    }}
-                    dependencyArr={[selected]}
-                  />
-                )}
-              </StyledSuggesterList>
-            </FloatingPortal>
-          </>
-        ) : null}
+        {(isFocused || isHovered) && !middlewareData.hide?.referenceHidden && (
+          <FloatingPortal id="page">
+            <StyledSuggesterList
+              ref={refs.setFloating}
+              noLeftMargin={categories.length === 1}
+              onMouseEnter={() => setIsHovered(true)}
+              onMouseLeave={() => setIsHovered(false)}
+              style={{
+                ...floatingStyles,
+              }}
+            >
+              {suggestions.length || (isFetching && isFocused) ? (
+                <>
+                  <StyledRelativePosition>
+                    {renderEntitySuggestions(suggestions)}
+                    <Loader size={30} show={isFetching} />
+                  </StyledRelativePosition>
+                  {!disableEnter && (
+                    <SuggesterKeyPress
+                      onArrowDown={() => {
+                        if (selected < suggestions.length - 1)
+                          setSelected(selected + 1);
+                      }}
+                      onArrowUp={() => {
+                        if (selected > -1) setSelected(selected - 1);
+                      }}
+                      dependencyArr={[selected]}
+                    />
+                  )}
+                </>
+              ) : null}
+
+              {/* PRE-SUGGESTIONS */}
+              {preSuggestions?.length && typed.length === 0 ? (
+                <>
+                  <StyledRelativePosition>
+                    {renderEntitySuggestions(preSuggestions)}
+                    <Loader size={30} show={isFetching} />
+                  </StyledRelativePosition>
+                  {!disableEnter && (
+                    <SuggesterKeyPress
+                      onArrowDown={() => {
+                        if (selected < preSuggestions.length - 1)
+                          setSelected(selected + 1);
+                      }}
+                      onArrowUp={() => {
+                        if (selected > -1) setSelected(selected - 1);
+                      }}
+                      dependencyArr={[selected]}
+                    />
+                  )}
+                </>
+              ) : null}
+            </StyledSuggesterList>
+          </FloatingPortal>
+        )}
       </StyledSuggester>
 
       {showTemplateModal && (
