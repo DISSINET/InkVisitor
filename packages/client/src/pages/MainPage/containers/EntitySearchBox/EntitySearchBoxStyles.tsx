@@ -10,13 +10,21 @@ export const StyledBoxContent = styled.div`
   background-color: ${({ theme }) => theme.color["white"]};
   overflow: auto;
 `;
+
+export const StyledOptions = styled.div`
+  margin-right: ${({ theme }) => theme.space[4]};
+`;
 export const StyledRow = styled.div`
   position: relative;
   display: grid;
   grid-template-columns: ${({ theme }) => theme.space["32"]} auto;
   align-items: center;
   margin-bottom: ${({ theme }) => theme.space[2]};
-  margin-right: ${({ theme }) => theme.space[4]};
+`;
+export const StyledAdvancedOptions = styled.div`
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
 `;
 export const StyledRowHeader = styled.div`
   display: block;
