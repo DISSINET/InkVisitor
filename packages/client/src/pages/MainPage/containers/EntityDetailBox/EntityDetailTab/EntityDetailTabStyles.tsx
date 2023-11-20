@@ -47,6 +47,7 @@ export const StyledIconWrap = styled.span`
   align-items: center;
   height: 100%;
   margin-right: 0.2rem;
+  color: ${({ theme }) => theme.color["black"]};
 `;
 
 export const StyledCgClose = styled(CgClose)`
