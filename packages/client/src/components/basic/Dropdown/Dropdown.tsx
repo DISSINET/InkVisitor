@@ -1,30 +1,26 @@
 import { allEntities } from "@shared/dictionaries/entity";
+import { heightHeader } from "Theme/constants";
+import { Tooltip } from "components";
 import React, { ReactNode, useEffect, useState } from "react";
 import {
-  components,
+  ActionMeta,
   ControlProps,
+  DropdownIndicatorProps,
   MultiValueProps,
+  OptionProps,
   SingleValueProps,
   ValueContainerProps,
-  OptionProps,
-  DropdownIndicatorProps,
-  ActionMeta,
+  components,
 } from "react-select";
-import {
-  DropdownAny,
-  DropdownEmpty,
-  heightHeader,
-  wildCardChar,
-} from "Theme/constants";
 import { DropdownItem, EntityColors } from "types";
 import {
+  StyledEntityMultiValue,
   StyledEntityValue,
   StyledFaChevronDown,
   StyledIconWrap,
   StyledSelect,
   StyledSelectWrapper,
 } from "./DropdownStyles";
-import { Tooltip } from "components";
 
 interface Dropdown {
   options?: DropdownItem[];
@@ -246,24 +242,13 @@ const Option = ({ ...props }: OptionProps | any): React.ReactElement => {
   return (
     <>
       {entityDropdown ? (
-        <>
-          {props.value &&
-          props.value !== DropdownAny &&
-          props.value !== wildCardChar &&
-          props.value !== DropdownEmpty ? (
-            <components.Option {...props}>
-              <StyledEntityValue color={EntityColors[props.value].color}>
-                {props.label}
-              </StyledEntityValue>
-            </components.Option>
-          ) : (
-            <components.Option {...props}>
-              <StyledEntityValue color={"transparent"}>
-                {props.label}
-              </StyledEntityValue>
-            </components.Option>
-          )}
-        </>
+        <components.Option {...props}>
+          <StyledEntityValue
+            color={EntityColors[props.value]?.color ?? "transparent"}
+          >
+            {props.label}
+          </StyledEntityValue>
+        </components.Option>
       ) : (
         <components.Option {...props} />
       )}
@@ -271,27 +256,47 @@ const Option = ({ ...props }: OptionProps | any): React.ReactElement => {
   );
 };
 
+// If the values are not merged (-> all options), this component is rendered separately for every single value
 const MultiValue = (props: MultiValueProps<any>): React.ReactElement => {
   let labelToBeDisplayed = `${props.data.label}`;
   // @ts-ignore
-  const { attributeDropdown, entityDropdown, isMulti, value, options } =
+  const { attributeDropdown, entityDropdown, value, options } =
     props.selectProps;
 
-  if (attributeDropdown && isMulti && value.length > 1) {
+  if (attributeDropdown && value.length > 1) {
     if (value.length === options?.length) {
       labelToBeDisplayed = `${value.length - 1} selected`;
     } else {
       labelToBeDisplayed = `${value.length} selected`;
     }
-  } else if (
-    entityDropdown &&
-    isMulti &&
-    props.data.value === allEntities.value
-  ) {
+  } else if (entityDropdown && props.data.value === allEntities.value) {
     // TODO:
+    // console.log(props.data)
   } else if (props.data.value === allEntities.value) {
     labelToBeDisplayed = "All options selected";
   }
+
+  if (entityDropdown) {
+    return (
+      <components.MultiValue
+        {...props}
+        className="react-select__entity-multi-value"
+      >
+        <StyledEntityMultiValue
+          $color={EntityColors[props.data.value]?.color ?? "transparent"}
+        >
+          {labelToBeDisplayed}
+        </StyledEntityMultiValue>
+      </components.MultiValue>
+    );
+  } else if (attributeDropdown) {
+    return (
+      <components.MultiValue {...props}>
+        <span>{labelToBeDisplayed}</span>
+      </components.MultiValue>
+    );
+  }
+
   return (
     <components.MultiValue {...props}>
       <span>{labelToBeDisplayed}</span>

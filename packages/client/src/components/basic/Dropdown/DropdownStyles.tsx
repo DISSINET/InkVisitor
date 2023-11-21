@@ -103,6 +103,11 @@ export const StyledSelect = styled(Select)<StyledSelect>`
     color: ${({ theme }) => theme.color["black"]};
     padding: 0.2rem;
   }
+  .react-select__entity-multi-value {
+    padding: 0;
+    background-color: ${({ theme }) => theme.color.white};
+    font-weight: bold;
+  }
   // portal menu style is in global stylesheet
 `;
 interface StyledEntityValue {
@@ -115,6 +120,17 @@ export const StyledEntityValue = styled.div<StyledEntityValue>`
   height: 100%;
   padding: 5px;
 `;
+interface StyledEntityMultiValue {
+  $color?: keyof ThemeColor;
+}
+export const StyledEntityMultiValue = styled.div<StyledEntityMultiValue>`
+  padding-left: 0.3rem;
+  border-left-style: solid;
+  border-left-width: 4px;
+  border-left-color: ${({ theme, $color }) =>
+    $color ? theme.color[$color] : ""};
+  border-radius: 1px;
+`;
 export const StyledFaChevronDown = styled(FaChevronDown)`
   margin-right: 4px;
   margin-left: 1px;
@@ -125,3 +141,6 @@ export const StyledIconWrap = styled.div`
   margin-left: ${({ theme }) => theme.space[1]};
   color: ${({ theme }) => theme.color["greyer"]};
 `;
+
+// TODO: consider this solution
+export const StyledMultiValue = styled(components.MultiValue)``;
