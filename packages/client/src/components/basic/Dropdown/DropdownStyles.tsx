@@ -25,10 +25,10 @@ interface StyledSelect {
   disabled?: boolean;
   isOneOptionSingleEntitySelect?: boolean;
   suggester?: boolean;
-  entityDropdown?: boolean;
-  wildCardChar?: boolean;
   isMulti: boolean;
+  entityDropdown?: boolean;
   attributeDropdown?: boolean;
+  wildCardChar?: boolean;
   icon?: JSX.Element;
 }
 export const StyledSelect = styled(Select)<StyledSelect>`
@@ -86,7 +86,10 @@ export const StyledSelect = styled(Select)<StyledSelect>`
     vertical-align: middle;
   }
   .react-select__multi-value {
-    background-color: ${({ theme }) => theme.color["invertedBg"]["primary"]};
+    background-color: ${({ theme, entityDropdown }) =>
+      entityDropdown
+        ? theme.color["white"]
+        : theme.color["invertedBg"]["primary"]};
     color: ${({ theme }) => theme.color["gray"][700]};
     border: 1px solid ${({ theme }) => theme.color["blue"][300]};
   }
@@ -101,13 +104,13 @@ export const StyledSelect = styled(Select)<StyledSelect>`
   }
   .react-select__multi-value__label {
     color: ${({ theme }) => theme.color["black"]};
-    padding: 0.2rem;
+    padding: ${({ entityDropdown }) => (entityDropdown ? "0" : "0.2rem")};
+    font-weight: ${({ entityDropdown }) => (entityDropdown ? "bold" : "")};
+    border-radius: 1px;
   }
-  .react-select__entity-multi-value {
-    padding: 0;
-    background-color: ${({ theme }) => theme.color.white};
-    border-radius: 2px;
-    font-weight: bold;
+  .react-select__multi-value__remove {
+    padding-left: ${({ entityDropdown }) => (entityDropdown ? "0.2rem" : "")};
+    padding-right: ${({ entityDropdown }) => (entityDropdown ? "0.2rem" : "")};
   }
   // portal menu style is in global stylesheet
 `;
@@ -115,17 +118,20 @@ interface StyledEntityValue {
   color?: keyof ThemeColor;
 }
 export const StyledEntityValue = styled.div<StyledEntityValue>`
+  display: flex;
+  align-items: center;
+  height: 100%;
+  padding: 5px;
   border-left-style: solid;
   border-left-width: 4px;
   border-left-color: ${({ theme, color }) => (color ? theme.color[color] : "")};
-  height: 100%;
-  padding: 5px;
 `;
 interface StyledEntityMultiValue {
   $color?: keyof ThemeColor;
 }
 export const StyledEntityMultiValue = styled.div<StyledEntityMultiValue>`
-  padding: 0.2rem 0rem 0.2rem 0.3rem;
+  padding: 0.2rem 0.2rem 0.2rem;
+  padding-left: 0.3rem;
   border-left-style: solid;
   border-left-width: 4px;
   border-left-color: ${({ theme, $color }) =>
@@ -142,6 +148,3 @@ export const StyledIconWrap = styled.div`
   margin-left: ${({ theme }) => theme.space[1]};
   color: ${({ theme }) => theme.color["greyer"]};
 `;
-
-// TODO: consider this solution
-export const StyledMultiValue = styled(components.MultiValue)``;

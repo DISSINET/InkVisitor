@@ -1,7 +1,9 @@
 import { allEntities } from "@shared/dictionaries/entity";
+import { EntityEnums } from "@shared/enums";
 import { heightHeader } from "Theme/constants";
-import { Checkbox, Tooltip, TypeBar } from "components";
+import { Tooltip } from "components";
 import React, { ReactNode, useEffect, useState } from "react";
+import { FaCheckSquare, FaRegSquare } from "react-icons/fa";
 import {
   ActionMeta,
   ControlProps,
@@ -21,7 +23,6 @@ import {
   StyledSelect,
   StyledSelectWrapper,
 } from "./DropdownStyles";
-import { EntityEnums } from "@shared/enums";
 
 interface Dropdown {
   options?: DropdownItem[];
@@ -259,19 +260,29 @@ const Option = ({ ...props }: OptionProps | any): React.ReactElement => {
     );
     return (
       <components.Option {...props}>
-        <div style={{ display: "flex", alignItems: "center" }}>
-          <Checkbox value={props.isSelected} />
+        <div
+          style={{ display: "flex", alignItems: "center", height: "2.5rem" }}
+        >
+          <span style={{ margin: "0 0.2rem" }}>
+            {props.isSelected ? <FaCheckSquare /> : <FaRegSquare />}
+          </span>
           <div
             style={{
               display: "flex",
               justifyContent: "center",
+              alignItems: "center",
               width: "1.5rem",
             }}
           >
             {isEntityClass && props.value}
           </div>
           <StyledEntityValue
-            color={EntityColors[props.value]?.color ?? "transparent"}
+            color={
+              props.value === EntityEnums.Extension.Empty
+                ? "transparent"
+                : EntityColors[props.value]?.color ?? "transparent"
+            }
+            style={{ fontWeight: "normal" }}
           >
             {isEntityClass ? props.label : <i>{props.label}</i>}
           </StyledEntityValue>
@@ -305,10 +316,7 @@ const MultiValue = (props: MultiValueProps<any>): React.ReactElement => {
 
   if (entityDropdown) {
     return (
-      <components.MultiValue
-        {...props}
-        className="react-select__entity-multi-value"
-      >
+      <components.MultiValue {...props}>
         <StyledEntityMultiValue
           $color={EntityColors[props.data.value]?.color ?? "transparent"}
         >

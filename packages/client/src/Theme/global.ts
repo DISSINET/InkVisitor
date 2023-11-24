@@ -97,7 +97,8 @@ const GlobalStyle = createGlobalStyle<GlobalStyle>`
     .react-select__option {
       padding: 2px;
       padding-left: 0;
-      height: 2.5rem;
+    }
+    .react-select__option--is-selected {
     }
   }
 `;
