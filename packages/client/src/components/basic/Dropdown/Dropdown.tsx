@@ -1,6 +1,6 @@
 import { allEntities } from "@shared/dictionaries/entity";
 import { heightHeader } from "Theme/constants";
-import { Tooltip } from "components";
+import { Checkbox, Tooltip, TypeBar } from "components";
 import React, { ReactNode, useEffect, useState } from "react";
 import {
   ActionMeta,
@@ -21,6 +21,7 @@ import {
   StyledSelect,
   StyledSelectWrapper,
 } from "./DropdownStyles";
+import { EntityEnums } from "@shared/enums";
 
 interface Dropdown {
   options?: DropdownItem[];
@@ -100,6 +101,7 @@ export const Dropdown: React.FC<Dropdown> = ({
         onClick={() => setShowTooltip(false)}
       >
         <StyledSelect
+          // menuIsOpen={entityDropdown && isMulti}
           suggester={suggester}
           onFocus={onFocus}
           autoFocus={autoFocus}
@@ -237,23 +239,48 @@ const SingleValue = (props: SingleValueProps<any>): React.ReactElement => {
 };
 
 const Option = ({ ...props }: OptionProps | any): React.ReactElement => {
-  const { entityDropdown } = props.selectProps;
+  const { entityDropdown, isMulti } = props.selectProps;
 
-  return (
-    <>
-      {entityDropdown ? (
-        <components.Option {...props}>
+  if (entityDropdown && !isMulti) {
+    // SINGLE ENTITY DROPDOWN
+    return (
+      <components.Option {...props}>
+        <StyledEntityValue
+          color={EntityColors[props.value]?.color ?? "transparent"}
+        >
+          {props.label}
+        </StyledEntityValue>
+      </components.Option>
+    );
+  } else if (entityDropdown && isMulti) {
+    // MULTI ENTITY DROPDOWN
+    const isEntityClass = Object.values(EntityEnums.Class).includes(
+      props.value
+    );
+    return (
+      <components.Option {...props}>
+        <div style={{ display: "flex", alignItems: "center" }}>
+          <Checkbox value={props.isSelected} />
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              width: "1.5rem",
+            }}
+          >
+            {isEntityClass && props.value}
+          </div>
           <StyledEntityValue
             color={EntityColors[props.value]?.color ?? "transparent"}
           >
-            {props.label}
+            {isEntityClass ? props.label : <i>{props.label}</i>}
           </StyledEntityValue>
-        </components.Option>
-      ) : (
-        <components.Option {...props} />
-      )}
-    </>
-  );
+        </div>
+      </components.Option>
+    );
+  }
+
+  return <components.Option {...props} />;
 };
 
 // If the values are not merged (-> all options), this component is rendered separately for every single value

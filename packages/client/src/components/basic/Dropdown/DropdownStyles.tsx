@@ -106,6 +106,7 @@ export const StyledSelect = styled(Select)<StyledSelect>`
   .react-select__entity-multi-value {
     padding: 0;
     background-color: ${({ theme }) => theme.color.white};
+    border-radius: 2px;
     font-weight: bold;
   }
   // portal menu style is in global stylesheet
@@ -124,12 +125,12 @@ interface StyledEntityMultiValue {
   $color?: keyof ThemeColor;
 }
 export const StyledEntityMultiValue = styled.div<StyledEntityMultiValue>`
-  padding-left: 0.3rem;
+  padding: 0.2rem 0rem 0.2rem 0.3rem;
   border-left-style: solid;
   border-left-width: 4px;
   border-left-color: ${({ theme, $color }) =>
     $color ? theme.color[$color] : ""};
-  border-radius: 1px;
+  border-radius: 0px;
 `;
 export const StyledFaChevronDown = styled(FaChevronDown)`
   margin-right: 4px;
