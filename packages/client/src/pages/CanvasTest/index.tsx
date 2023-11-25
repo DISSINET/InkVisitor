@@ -1,8 +1,8 @@
 import TextCanvas from "components/basic/TextCanvas/TextCanvas";
-import React from "react";
+import React, { useEffect } from "react";
 import { LoremIpsum } from "lorem-ipsum";
 
-interface ILoginPage { }
+interface ILoginPage {}
 
 const lorem = new LoremIpsum({
   sentencesPerParagraph: {
@@ -15,8 +15,8 @@ const lorem = new LoremIpsum({
   },
 });
 
-const CanvasTestPage: React.FC<ILoginPage> = ({ }) => {
-  const veryLongText = lorem.generateParagraphs(1);
+const CanvasTestPage: React.FC<ILoginPage> = ({}) => {
+  const veryLongText = lorem.generateParagraphs(100);
 
   return (
     <div>
