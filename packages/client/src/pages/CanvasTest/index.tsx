@@ -5,18 +5,19 @@ import { LoremIpsum } from "lorem-ipsum";
 interface ILoginPage {}
 
 const lorem = new LoremIpsum({
+  // one page = 500 words
   sentencesPerParagraph: {
-    max: 40,
+    max: 20,
     min: 20,
   },
   wordsPerSentence: {
     max: 25,
-    min: 10,
+    min: 25,
   },
 });
 
 const CanvasTestPage: React.FC<ILoginPage> = ({}) => {
-  const veryLongText = lorem.generateParagraphs(100);
+  const veryLongText = lorem.generateParagraphs(1000);
 
   return (
     <div>

@@ -19,37 +19,56 @@ class Text {
   }
 
   get lines(): string[] {
-    return this.value.split("\n");
-  }
-
-  getViewportText(viewport: Viewport): string[] {
-    console.log("getViewportText", viewport);
-
     const time1 = performance.now();
     const words = this.value.split(" ");
     const lines = [];
-    let currentLine = "";
-
-    words.forEach((word) => {
-      if ((currentLine + word).length > this.charsAtLine) {
-        lines.push(currentLine.trim());
-        currentLine = word + " ";
+    let currentLine: string[] = [];
+    let currentLineLength = 0;
+  
+    words.forEach(word => {
+      const wordLength = word.length;
+  
+      if (currentLineLength + wordLength > this.charsAtLine) {
+        // Join the current line into a string and push it to lines
+        lines.push(currentLine.join(' '));
+        currentLine = [word]; // Start a new line with the current word
+        currentLineLength = wordLength + 1; // Reset the length (+1 for the space)
       } else {
-        currentLine += word + " ";
+        currentLine.push(word);
+        currentLineLength += wordLength + 1; // +1 for the space
       }
     });
+  
+    // Add the last line if it's not empty
+    if (currentLine.length > 0) {
+      lines.push(currentLine.join(' '));
+    }
+  
+    const time2 = performance.now();
+    console.log(`${time2 - time1} ms `);
+  
+    return lines;
+  }
 
-    // Adding the last line if it's not empty
-    if (currentLine.trim().length > 0) {
-      lines.push(currentLine.trim());
+  // This method calculates the index of the text value at the start of given line
+  lineToIndex(line: number): number {
+    const lines = this.lines;
+    let index = 0;
+    for (let i = 0; i < line; i++) {
+      index += lines[i].length + 1;
+    }
+    return index;
+  }
+
+
+  cursorToIndex(viewport: Viewport, cursor: Cursor): number {
+return this.lineToIndex(cursor.y + viewport.lineStart) + cursor.x;
     }
 
+  getViewportText(viewport: Viewport): string[] {
     const lineStart = viewport.lineStart;
     const lineEnd = lineStart + viewport.noLines;
-    const time2 = performance.now();
-
-    console.log(`${time2 - time1} ms `);
-
+    const lines = this.lines;
     return lines.slice(lineStart, lineEnd);
   }
 
@@ -66,9 +85,13 @@ class Text {
 
   deleteText(
     viewport: Viewport,
-    cursorPositionFrom: [number, number],
+    cursorPositionFrom: Cursor,
     cursorPositionTo: [number, number]
-  ): void {}
+  ): void {
+    const deleteFromI = this.cursorToIndex(viewport, cursorPositionFrom);
+    this.value = this.value.slice(0, deleteFromI) + this.value.slice(deleteFromI + 1);
+
+  }
 }
 
 export default Text;

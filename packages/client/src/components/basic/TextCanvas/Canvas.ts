@@ -142,6 +142,11 @@ class Canvas {
           this.cursor.x--;
         }
         break;
+
+      case "Backspace":
+        this.text.deleteText(this.viewport, this.cursor, [0, 0]);
+        this.cursor.move(-1, 0)
+        break;
     }
 
     this.draw();
