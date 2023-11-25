@@ -32,9 +32,8 @@ const TextCanvas: React.FC<TextCanvasProps> = ({
   // useEffect hook to run logic after the component is mounted
   useEffect(() => {
     if (canvasRef.current && scrollerRef.current) {
-      const customWrapper = new Canvas(canvasRef.current);
-      customWrapper.initialize()
-      customWrapper.writeText(inputText)
+      const customWrapper = new Canvas(canvasRef.current, inputText);
+      customWrapper.initialize();
       customWrapper.addScroller(scrollerRef.current);
     }
 
@@ -42,8 +41,7 @@ const TextCanvas: React.FC<TextCanvasProps> = ({
     return () => {
       // Add cleanup logic here if needed
     };
-  }, []); 
-
+  }, []);
 
   return (
     <div style={{ padding: "20px" }}>
@@ -58,17 +56,17 @@ const TextCanvas: React.FC<TextCanvasProps> = ({
             padding: "2px",
           }}
         >
-          <div style={{display: "flex"}}>
+          <div style={{ display: "flex" }}>
             <canvas
               tabIndex={0}
-              ref={canvasRef} 
+              ref={canvasRef}
               width={width}
               height={height}
               style={{ outline: "none" }}
             />
             <div
               className="scroller-viewport"
-                ref={scrollerRef} 
+              ref={scrollerRef}
               style={{
                 background: "#ccc",
                 position: "relative",
@@ -95,8 +93,7 @@ const TextCanvas: React.FC<TextCanvasProps> = ({
           border: "1px solid black",
           marginTop: "10px",
         }}
-      >
-      </div>
+      ></div>
     </div>
   );
 };

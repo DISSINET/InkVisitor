@@ -2,30 +2,32 @@
  * Viewpoer represents currently visible part of the rendered text
  */
 export default class Viewport {
-    lineStart: number
-    lineEnd: number
+    lineStart: number;
+    noLines: number
   
     constructor(lineStart: number, lineEnd: number) {
       this.lineStart = lineStart;
-      this.lineEnd = lineEnd;
+      this.noLines = lineEnd;
     }
   
+
+    get lineEnd(): number {
+      return this.lineStart + this.noLines;
+    }
+
     scrollDown(step: number, maxLines: number) {
-      if (this.lineEnd + step < maxLines) {
+      if (this.lineStart + this.noLines + step < maxLines) {
         this.lineStart+=step;
-        this.lineEnd+=step;
       }
     }
   
     scrollUp(step: number) {
       if(this.lineStart - step >= 0) {
         this.lineStart-=step;
-        this.lineEnd-=step;
       }
     }
   
     scrollTo(textLine: number, maxLines: number) {
-      console.log(this.lineStart, this.lineEnd, textLine)
   
       if (textLine > this.lineStart) {
         console.log("scroll down", this.lineStart, textLine)
