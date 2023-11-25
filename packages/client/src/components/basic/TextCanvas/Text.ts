@@ -4,10 +4,12 @@ import Cursor from "./Cursor";
 class Text {
   value: string;
   charsAtLine: number;
+  _lines: string[] = [];
 
   constructor(value: string, charsAtLine: number) {
     this.value = value;
     this.charsAtLine = charsAtLine;
+    this.calculateLines();
   }
 
   get length() {
@@ -19,18 +21,22 @@ class Text {
   }
 
   get lines(): string[] {
+    return this._lines;
+  }
+
+  calculateLines(): void {
     const time1 = performance.now();
     const words = this.value.split(" ");
     const lines = [];
     let currentLine: string[] = [];
     let currentLineLength = 0;
-  
-    words.forEach(word => {
+
+    words.forEach((word) => {
       const wordLength = word.length;
-  
+
       if (currentLineLength + wordLength > this.charsAtLine) {
         // Join the current line into a string and push it to lines
-        lines.push(currentLine.join(' '));
+        lines.push(currentLine.join(" "));
         currentLine = [word]; // Start a new line with the current word
         currentLineLength = wordLength + 1; // Reset the length (+1 for the space)
       } else {
@@ -38,16 +44,16 @@ class Text {
         currentLineLength += wordLength + 1; // +1 for the space
       }
     });
-  
+
     // Add the last line if it's not empty
     if (currentLine.length > 0) {
-      lines.push(currentLine.join(' '));
+      lines.push(currentLine.join(" "));
     }
-  
+
     const time2 = performance.now();
     console.log(`${time2 - time1} ms `);
-  
-    return lines;
+
+    this._lines = lines;
   }
 
   // This method calculates the index of the text value at the start of given line
@@ -60,10 +66,9 @@ class Text {
     return index;
   }
 
-
   cursorToIndex(viewport: Viewport, cursor: Cursor): number {
-return this.lineToIndex(cursor.y + viewport.lineStart) + cursor.x;
-    }
+    return this.lineToIndex(cursor.y + viewport.lineStart) + cursor.x - 1 ;
+  }
 
   getViewportText(viewport: Viewport): string[] {
     const lineStart = viewport.lineStart;
@@ -86,11 +91,13 @@ return this.lineToIndex(cursor.y + viewport.lineStart) + cursor.x;
   deleteText(
     viewport: Viewport,
     cursorPositionFrom: Cursor,
-    cursorPositionTo: [number, number]
+    chartsToDelete: number
   ): void {
     const deleteFromI = this.cursorToIndex(viewport, cursorPositionFrom);
-    this.value = this.value.slice(0, deleteFromI) + this.value.slice(deleteFromI + 1);
-
+    this.value =
+      this.value.slice(0, deleteFromI) + this.value.slice(deleteFromI + chartsToDelete);
+      
+    this.calculateLines();
   }
 }
 

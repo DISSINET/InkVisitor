@@ -144,7 +144,7 @@ class Canvas {
         break;
 
       case "Backspace":
-        this.text.deleteText(this.viewport, this.cursor, [0, 0]);
+        this.text.deleteText(this.viewport, this.cursor, 1);
         this.cursor.move(-1, 0)
         break;
     }
