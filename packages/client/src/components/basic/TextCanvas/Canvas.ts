@@ -29,20 +29,21 @@ class Scroller {
 
   constructor(element: HTMLDivElement) {
     this.element = element;
-    const runner = element.firstChild
+    const runner = element.firstChild;
     if (!runner) {
-      throw new Error("Runner for Scroller not found")
+      throw new Error("Runner for Scroller not found");
     }
-    this.runner = runner as HTMLDivElement
+    this.runner = runner as HTMLDivElement;
     this.element.onmousedown = this.onMouseDown.bind(this);
     this.runner.onmousedown = this.onRunnerMouseDown.bind(this);
   }
-  
+
   update(startLine: number, endLine: number, totalLines: number) {
     const viewportLines = endLine - startLine + 1;
-    const percentage = startLine * 100 / (totalLines - viewportLines);
-    const availableHeight = this.element.clientHeight - this.runner.clientHeight;
-    this.runner.style["top"] = `${availableHeight / 100 * percentage}px`;
+    const percentage = (startLine * 100) / (totalLines - viewportLines);
+    const availableHeight =
+      this.element.clientHeight - this.runner.clientHeight;
+    this.runner.style["top"] = `${(availableHeight / 100) * percentage}px`;
   }
 
   onRunnerMouseDown(e: MouseEvent) {
@@ -52,12 +53,12 @@ class Scroller {
   onMouseDown(e: MouseEvent) {
     const availableHeight = this.element.clientHeight;
     if (this.onChangeCb) {
-      this.onChangeCb( e.offsetY * 100 / availableHeight)
+      this.onChangeCb((e.offsetY * 100) / availableHeight);
     }
   }
 
   onChange(cb: (percentage: number) => void) {
-    this.onChangeCb = cb
+    this.onChangeCb = cb;
   }
 }
 
@@ -65,7 +66,7 @@ class Canvas {
   element: HTMLCanvasElement;
   ctx: CanvasRenderingContext2D;
 
-  font: string = "12px Monospace"
+  font: string = "12px Monospace";
   charWidth: number = 0;
   lineHeight: number = 15;
   width: number = 0;
@@ -81,23 +82,21 @@ class Canvas {
     this.element = element;
     const ctx = this.element.getContext("2d");
     if (!ctx) {
-      throw new Error("Cannot get 2d context")
+      throw new Error("Cannot get 2d context");
     }
     this.ctx = ctx;
-    this.width = this.element.width
+    this.width = this.element.width;
     this.height = this.element.height;
-    this.setCharWidth("abcdefghijklmnopqrstuvwxyz0123456789")
+    this.setCharWidth("abcdefghijklmnopqrstuvwxyz0123456789");
 
-
-    console.log('constructor', this.width, this.charWidth)
-    const charsAtLine = Math.floor((this.width) / this.charWidth);
-
+    console.log("constructor", this.width, this.charWidth);
+    const charsAtLine = Math.floor(this.width / this.charWidth);
 
     const noLinesViewport = Math.floor(this.height / this.lineHeight) - 1;
     this.viewport = new Viewport(0, noLinesViewport);
     this.cursor = new Cursor();
 
-    this.text = new Text(inputText, charsAtLine)
+    this.text = new Text(inputText, charsAtLine);
 
     this.element.onwheel = this.onWheel.bind(this);
     this.element.onmousedown = this.onMouseDown.bind(this);
@@ -105,8 +104,8 @@ class Canvas {
   }
 
   initialize() {
-    console.log('Custom logic executed!');
-    this.draw()
+    console.log("Custom logic executed!");
+    this.draw();
   }
 
   onKeyDown(e: KeyboardEvent) {
@@ -114,39 +113,63 @@ class Canvas {
 
     switch (e.key) {
       case "ArrowUp":
-        this.cursor.move(0, -1)
-        if (this.cursor.y < 0) {          
-          this.viewport.scrollTo(this.viewport.lineStart + this.cursor.y, this.text.noLines);
+        this.cursor.move(0, -1);
+        if (this.cursor.y < 0) {
+          this.viewport.scrollTo(
+            this.viewport.lineStart + this.cursor.y,
+            this.text.noLines
+          );
           this.cursor.y = 0;
         }
         break;
 
       case "ArrowDown":
-        this.cursor.move(0, 1)
+        this.cursor.move(0, 1);
         if (this.cursor.y > this.viewport.lineEnd - this.viewport.lineStart) {
-          this.viewport.scrollTo(this.viewport.lineStart + 1, this.text.noLines);
+          this.viewport.scrollTo(
+            this.viewport.lineStart + 1,
+            this.text.noLines
+          );
           this.cursor.y = this.viewport.lineEnd - this.viewport.lineStart;
         }
         break;
 
       case "ArrowLeft":
-        this.cursor.move(-1, 0)
+        this.cursor.move(-1, 0);
         if (this.cursor.x < 0) {
           this.cursor.x = 0;
         }
         break;
 
       case "ArrowRight":
-        this.cursor.move(1, 0)
-        if (this.cursor.x > Math.floor((this.width) / this.charWidth)) {
+        this.cursor.move(1, 0);
+        if (this.cursor.x > Math.floor(this.width / this.charWidth)) {
           this.cursor.x--;
         }
         break;
 
       case "Backspace":
         this.text.deleteText(this.viewport, this.cursor, 1);
-        this.cursor.move(-1, 0)
+        this.cursor.move(-1, 0);
         break;
+        
+      default:
+        // writing to text
+        const key = e.key;
+        const nonCharKeys = [
+          "CapsLock",
+          "Shift",
+          "Control",
+          "Alt",
+          "Tab",
+          "Escape",
+          "Enter",
+        ];
+        
+        if (!nonCharKeys.includes(key)) {
+          this.text.insertText(this.viewport, this.cursor, key);
+          this.cursor.move(+1, 0);
+        }
     }
 
     this.draw();
@@ -160,9 +183,9 @@ class Canvas {
   onWheel(e: any) {
     const up = e.deltaY < 0 ? false : true;
     if (up) {
-      this.viewport.scrollDown(1, this.text.noLines)
+      this.viewport.scrollDown(1, this.text.noLines);
     } else if (!up) {
-      this.viewport.scrollUp(1)
+      this.viewport.scrollUp(1);
     }
 
     e.preventDefault();
@@ -170,13 +193,18 @@ class Canvas {
   }
 
   addScroller(scrollerDiv: HTMLDivElement) {
-    this.scroller = new Scroller(scrollerDiv)
+    this.scroller = new Scroller(scrollerDiv);
     this.scroller.onChange((percentage: number) => {
-      const toLine = Math.floor((this.text.noLines - (this.viewport.lineEnd - this.viewport.lineStart)) /100 * percentage)
-      this.viewport.scrollTo(toLine, this.text.noLines)
+      const toLine = Math.floor(
+        ((this.text.noLines -
+          (this.viewport.lineEnd - this.viewport.lineStart)) /
+          100) *
+          percentage
+      );
+      this.viewport.scrollTo(toLine, this.text.noLines);
       this.draw();
-    })
-  } 
+    });
+  }
 
   // prepareText(text: string) {
   //   const time1 = new Date();
@@ -289,7 +317,11 @@ class Canvas {
     this.ctx.font = this.font;
 
     const textToRender = this.text.getViewportText(this.viewport);
-    for (let renderLine = 0; renderLine <= this.viewport.lineEnd - this.viewport.lineStart; renderLine++) {
+    for (
+      let renderLine = 0;
+      renderLine <= this.viewport.lineEnd - this.viewport.lineStart;
+      renderLine++
+    ) {
       const textLine = textToRender[renderLine];
       if (textLine) {
         this.ctx.fillText(textLine, 0, (renderLine + 1) * this.lineHeight);
@@ -299,10 +331,14 @@ class Canvas {
     this.cursor.draw(this.ctx, this.lineHeight, this.charWidth);
 
     if (this.scroller) {
-      this.scroller.update(this.viewport.lineStart, this.viewport.lineEnd, this.text.noLines);
+      this.scroller.update(
+        this.viewport.lineStart,
+        this.viewport.lineEnd,
+        this.text.noLines
+      );
     }
-    console.log("render")
+    console.log("render");
   }
 }
 
-export default Canvas
+export default Canvas;

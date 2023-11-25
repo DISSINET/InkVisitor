@@ -81,19 +81,18 @@ class Text {
     return "";
   }
 
-  insertText(textToInsert: string, index: number): void {
-    if (textToInsert.length === 1) {
-    } else {
-      //paste
-    }
+  insertText(viewport: Viewport, cursorPosition: Cursor, textToInsert: string): void {
+    const insertAtI = this.cursorToIndex(viewport, cursorPosition);
+    this.value = this.value.slice(0, insertAtI + 1) + textToInsert + this.value.slice(insertAtI + 1);
+    this.calculateLines();
   }
 
   deleteText(
     viewport: Viewport,
-    cursorPositionFrom: Cursor,
+    cursorPosition: Cursor,
     chartsToDelete: number
   ): void {
-    const deleteFromI = this.cursorToIndex(viewport, cursorPositionFrom);
+    const deleteFromI = this.cursorToIndex(viewport, cursorPosition);
     this.value =
       this.value.slice(0, deleteFromI) + this.value.slice(deleteFromI + chartsToDelete);
       
