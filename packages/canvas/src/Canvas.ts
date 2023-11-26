@@ -96,6 +96,8 @@ export class Canvas {
 
     this.element.onwheel = this.onWheel.bind(this);
     this.element.onmousedown = this.onMouseDown.bind(this);
+    this.element.onmouseup = this.onMouseUp.bind(this);
+    this.element.onmousemove = this.onMouseMove.bind(this);
     this.element.onkeydown = this.onKeyDown.bind(this);
   }
 
@@ -110,37 +112,37 @@ export class Canvas {
     switch (e.key) {
       case "ArrowUp":
         this.cursor.move(0, -1);
-        if (this.cursor.y < 0) {
+        if (this.cursor.yLine < 0) {
           this.viewport.scrollTo(
-            this.viewport.lineStart + this.cursor.y,
+            this.viewport.lineStart + this.cursor.yLine,
             this.text.noLines
           );
-          this.cursor.y = 0;
+          this.cursor.yLine = 0;
         }
         break;
 
       case "ArrowDown":
         this.cursor.move(0, 1);
-        if (this.cursor.y > this.viewport.lineEnd - this.viewport.lineStart) {
+        if (this.cursor.yLine > this.viewport.lineEnd - this.viewport.lineStart) {
           this.viewport.scrollTo(
             this.viewport.lineStart + 1,
             this.text.noLines
           );
-          this.cursor.y = this.viewport.lineEnd - this.viewport.lineStart;
+          this.cursor.yLine = this.viewport.lineEnd - this.viewport.lineStart;
         }
         break;
 
       case "ArrowLeft":
         this.cursor.move(-1, 0);
-        if (this.cursor.x < 0) {
-          this.cursor.x = 0;
+        if (this.cursor.xLine < 0) {
+          this.cursor.xLine = 0;
         }
         break;
 
       case "ArrowRight":
         this.cursor.move(1, 0);
-        if (this.cursor.x > Math.floor(this.width / this.charWidth)) {
-          this.cursor.x--;
+        if (this.cursor.xLine > Math.floor(this.width / this.charWidth)) {
+          this.cursor.xLine--;
         }
         break;
 
@@ -172,8 +174,23 @@ export class Canvas {
   }
 
   onMouseDown(e: MouseEvent) {
-    this.cursor.onMouseClick(e, this.lineHeight, this.charWidth);
+    this.cursor.setPosition(e.offsetX, e.offsetY, this.lineHeight, this.charWidth);
+    this.cursor.startHighlight();
     this.draw();
+  }
+
+  onMouseUp(e: MouseEvent) {
+    this.cursor.setPosition(e.offsetX, e.offsetY, this.lineHeight, this.charWidth);
+    this.cursor.endHighlight();
+    this.draw();
+  }
+
+  onMouseMove(e: MouseEvent) {
+    if (this.cursor.highlighting) {
+      this.cursor.setPosition(e.offsetX, e.offsetY, this.lineHeight, this.charWidth);
+      this.cursor.startHighlight();
+      this.draw();
+    }
   }
 
   onWheel(e: any) {
@@ -326,6 +343,41 @@ export class Canvas {
     }
 
     this.cursor.draw(this.ctx, this.lineHeight, this.charWidth);
+
+    if (this.cursor.highlightStart && this.cursor.highlightEnd ) {
+      const hStart = this.cursor.highlightStart;
+      const hEnd = this.cursor.highlightEnd;
+
+      this.ctx.fillStyle = "blue"
+      this.ctx.globalAlpha = 0.2;
+
+      for (let i= 0; i <= this.viewport.lineEnd - this.viewport.lineStart; i++) {
+        const currentAbsLine = this.viewport.lineStart + i
+        if (hStart.yLine <= currentAbsLine && hEnd.yLine >= currentAbsLine) {
+          // first line
+          if (hStart.yLine === currentAbsLine) {
+            if(hStart.yLine === hEnd.yLine) {
+              // ending line === starting line - fill only from start X -> end X
+              this.ctx.fillRect(hStart.xLine * this.charWidth, i * this.lineHeight,(hEnd.xLine - hStart.xLine) * this.charWidth, this.lineHeight)
+            } else {
+              // not ending line - fill from up to the last character in the line
+              this.ctx.fillRect(hStart.xLine * this.charWidth, i * this.lineHeight, this.charWidth * this.text.charsAtLine, this.lineHeight)
+            }
+         // last line
+         } else if (hEnd.yLine === currentAbsLine) {
+              // fill from start to X position
+              this.ctx.fillRect(0, i * this.lineHeight, hEnd.xLine * this.charWidth, this.lineHeight)
+          } else {
+            // not first/last line - fill completely
+            this.ctx.fillRect(0, i * this.lineHeight, this.charWidth * this.text.charsAtLine, this.lineHeight)
+          }
+        }
+
+        console.log(`Highlighted text: ${this.text.getRangeText(this.cursor.highlightStart, this.cursor.highlightEnd)}`)
+      }
+
+      this.ctx.globalAlpha = 1;
+    }
 
     if (this.scroller) {
       this.scroller.update(

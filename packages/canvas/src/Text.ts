@@ -1,5 +1,5 @@
 import Viewport from "./Viewport";
-import Cursor from "./Cursor";
+import Cursor, { IAbsCoordinates } from "./Cursor";
 
 class Text {
   value: string;
@@ -67,7 +67,7 @@ class Text {
   }
 
   cursorToIndex(viewport: Viewport, cursor: Cursor): number {
-    return this.lineToIndex(cursor.y + viewport.lineStart) + cursor.x - 1 ;
+    return this.lineToIndex(cursor.yLine + viewport.lineStart) + cursor.xLine - 1 ;
   }
 
   getViewportText(viewport: Viewport): string[] {
@@ -97,6 +97,10 @@ class Text {
       this.value.slice(0, deleteFromI) + this.value.slice(deleteFromI + chartsToDelete);
       
     this.calculateLines();
+  }
+
+  getRangeText(start: IAbsCoordinates, end: IAbsCoordinates): string {
+    return ""
   }
 }
 
