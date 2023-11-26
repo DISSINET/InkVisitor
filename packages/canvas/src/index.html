@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Canvas dev</title>
+  </head>
+  <body>
+    <div style="padding: 20px">
+      <div class="textarea" style="display: flex; flex-direction: row">
+        <div
+          class="canvasses-wrapper"
+          style="border: 1px solid black; padding: 2px"
+        >
+          <div style="display: flex">
+            <canvas
+              tabindex="0"
+              id="canvas"
+              width="400px"
+              height="400px"
+              style="outline: none"
+            >
+            </canvas>
+            <div
+              className="scroller-viewport"
+              id="scroller"
+              style="background: #ccc; position: relative; width: 10px"
+            >
+              <div
+                className="scroller-cursor"
+                style="
+                  position: absolute;
+                  height: 10px;
+                  width: 10px;
+                  background-color: blue;
+                "
+              ></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        className="info-container"
+        style="padding: 10px; border: 1px solid black; margin-top: 10px"
+      ></div>
+    </div>
+
+    <script src="bundle.js"></script>
+
+    <script>
+      const customWrapper = new Canvas(
+        document.getElementById("canvas"),
+        "Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet"
+      );
+      customWrapper.initialize();
+      customWrapper.addScroller(document.getElementById("scroller"));
+    </script>
+  </body>
+</html>

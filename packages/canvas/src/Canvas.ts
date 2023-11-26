@@ -1,5 +1,3 @@
-import { MutableRefObject, RefObject } from "react";
-import { render } from "react-dom";
 import Viewport from "./Viewport";
 import Cursor from "./Cursor";
 import Text from "./Text";
@@ -43,7 +41,10 @@ class Scroller {
     const percentage = (startLine * 100) / (totalLines - viewportLines);
     const availableHeight =
       this.element.clientHeight - this.runner.clientHeight;
+      console.log("here 1", this.runner)
     this.runner.style["top"] = `${(availableHeight / 100) * percentage}px`;
+    console.log("here 2", this.runner)
+
   }
 
   onRunnerMouseDown(e: MouseEvent) {
@@ -62,7 +63,7 @@ class Scroller {
   }
 }
 
-class Canvas {
+export class Canvas {
   element: HTMLCanvasElement;
   ctx: CanvasRenderingContext2D;
 
@@ -89,7 +90,6 @@ class Canvas {
     this.height = this.element.height;
     this.setCharWidth("abcdefghijklmnopqrstuvwxyz0123456789");
 
-    console.log("constructor", this.width, this.charWidth);
     const charsAtLine = Math.floor(this.width / this.charWidth);
 
     const noLinesViewport = Math.floor(this.height / this.lineHeight) - 1;
@@ -341,4 +341,3 @@ class Canvas {
   }
 }
 
-export default Canvas;
