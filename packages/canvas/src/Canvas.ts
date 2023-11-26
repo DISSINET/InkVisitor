@@ -39,12 +39,8 @@ class Scroller {
   update(startLine: number, endLine: number, totalLines: number) {
     const viewportLines = endLine - startLine + 1;
     const percentage = (startLine * 100) / (totalLines - viewportLines);
-    const availableHeight =
-      this.element.clientHeight - this.runner.clientHeight;
-      console.log("here 1", this.runner)
+    const availableHeight = this.element.clientHeight - this.runner.clientHeight;
     this.runner.style["top"] = `${(availableHeight / 100) * percentage}px`;
-    console.log("here 2", this.runner)
-
   }
 
   onRunnerMouseDown(e: MouseEvent) {
@@ -189,7 +185,8 @@ export class Canvas {
     }
 
     e.preventDefault();
-    // this.writeText("");
+    this.draw();
+
   }
 
   addScroller(scrollerDiv: HTMLDivElement) {
@@ -337,7 +334,6 @@ export class Canvas {
         this.text.noLines
       );
     }
-    console.log("render");
   }
 }
 
