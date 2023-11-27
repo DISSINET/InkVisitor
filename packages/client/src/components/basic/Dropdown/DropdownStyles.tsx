@@ -30,6 +30,7 @@ interface StyledSelect {
   attributeDropdown?: boolean;
   wildCardChar?: boolean;
   icon?: JSX.Element;
+  loggerId?: string;
 }
 export const StyledSelect = styled(Select)<StyledSelect>`
   display: inline-flex;

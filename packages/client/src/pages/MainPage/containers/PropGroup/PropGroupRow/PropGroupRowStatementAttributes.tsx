@@ -13,6 +13,7 @@ import {
   StyledAttributesFlexColumn,
   StyledAttributesFlexRow,
 } from "./PropGroupRowStyles";
+import { EntityEnums } from "@shared/enums";
 
 interface PropGroupRowStatementAttributes {
   prop: IProp;
@@ -60,7 +61,7 @@ export const PropGroupRowStatementAttributes: React.FC<
             options={moodDict}
             value={[allEntities]
               .concat(moodDict)
-              .filter((i: any) => prop.mood.includes(i.value))}
+              .filter((i) => prop.mood.includes(i.value as EntityEnums.Mood))}
             onChange={(selectedOptions) => {
               updateProp(prop.id, {
                 ...prop,

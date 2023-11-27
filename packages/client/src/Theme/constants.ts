@@ -4,8 +4,8 @@ import theme from "./theme";
 export const defaultPing = -10;
 
 export const DropdownAny = "any";
+// wild card char used in search
 export const wildCardChar = "*";
-export const DropdownEmpty = EntityEnums.Extension.Empty;
 
 export const rootTerritoryId = "T0";
 export const excludedSuggesterEntities = [EntityEnums.Class.Value];

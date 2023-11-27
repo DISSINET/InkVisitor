@@ -1,4 +1,4 @@
-import { allEntities } from "@shared/dictionaries/entity";
+import { allEntities, empty } from "@shared/dictionaries/entity";
 import { EntityEnums } from "@shared/enums";
 import { heightHeader } from "Theme/constants";
 import { Tooltip } from "components";
@@ -50,6 +50,9 @@ interface Dropdown {
   entityDropdown?: boolean;
   attributeDropdown?: boolean;
 
+  // for logging purposes
+  loggerId?: string;
+
   // TODO: not implemented yet
   allowAny?: boolean;
 }
@@ -76,6 +79,8 @@ export const Dropdown: React.FC<Dropdown> = ({
   tooltipLabel,
   entityDropdown = false,
   attributeDropdown,
+
+  loggerId,
 
   allowAny = false,
 }) => {
@@ -112,7 +117,9 @@ export const Dropdown: React.FC<Dropdown> = ({
           isOneOptionSingleEntitySelect={isOneOptionSingleEntitySelect}
           attributeDropdown={attributeDropdown}
           entityDropdown={entityDropdown}
-          wildCardChar={(value as DropdownItem)?.label === "*"}
+          wildCardChar={
+            (value as DropdownItem)?.label === EntityEnums.Extension.Any
+          }
           className="react-select-container"
           classNamePrefix="react-select"
           placeholder={placeholder}
@@ -186,9 +193,17 @@ export const Dropdown: React.FC<Dropdown> = ({
             }
             return onChange(selectedOptions);
           }}
-          options={isMulti ? [allEntities, ...optionsWithIterator] : options}
+          // TODO: condition - allEntities only when any necessary
+          options={
+            isMulti
+              ? entityDropdown
+                ? [empty, allEntities, ...optionsWithIterator]
+                : [allEntities, ...optionsWithIterator]
+              : options
+          }
           width={width}
           hideSelectedOptions={hideSelectedOptions}
+          loggerId={loggerId}
         />
       </StyledSelectWrapper>
 
@@ -293,7 +308,7 @@ const Option = ({ ...props }: OptionProps | any): React.ReactElement => {
   return <components.Option {...props} />;
 };
 
-// If the values are not merged (-> all options), this component is rendered separately for every single value
+// If multiple values are not merged into all options, this component is rendered separately for every single value
 const MultiValue = (props: MultiValueProps<any>): React.ReactElement => {
   let labelToBeDisplayed = `${props.data.label}`;
   // @ts-ignore
@@ -306,9 +321,6 @@ const MultiValue = (props: MultiValueProps<any>): React.ReactElement => {
     } else {
       labelToBeDisplayed = `${value.length} selected`;
     }
-  } else if (entityDropdown && props.data.value === allEntities.value) {
-    // TODO:
-    // console.log(props.data)
   } else if (props.data.value === allEntities.value) {
     labelToBeDisplayed = "All options selected";
   }
@@ -346,14 +358,33 @@ const ValueContainer = ({
   any,
   any
 >): React.ReactElement => {
-  const currentValues: DropdownItem[] = props.getValue().map((v) => v);
+  // @ts-ignore
+  const { value, entityDropdown, isMulti, attributeDropdown, loggerId } =
+    props.selectProps;
+
+  const currentValues: DropdownItem[] = [...props.getValue()];
   let toBeRendered = children;
-  if (
-    currentValues.some((val) => val.value === allEntities.value) ||
-    // @ts-ignore
-    (props.selectProps.attributeDropdown && props.selectProps.value.length > 1)
-  ) {
-    toBeRendered = [[children[0][0]], children[1]];
+
+  if (loggerId === "subject-entity-type") {
+    // console.log("currentValues", currentValues);
+  }
+
+  if (isMulti) {
+    if (
+      (!entityDropdown &&
+        currentValues.some((val) => val.value === allEntities.value)) ||
+      // @ts-ignore
+      (attributeDropdown && currentValues.length > 1)
+    ) {
+      toBeRendered = [children[0][0], children[1]];
+    } else if (entityDropdown && currentValues.length > 0) {
+      toBeRendered = [
+        children[0].filter(
+          (ch: any) => ch.key !== `${allEntities.label}-${allEntities.value}`
+        ),
+        children[1],
+      ];
+    }
   }
 
   return (

@@ -7,6 +7,12 @@ export const allEntities: DropdownItem = {
   info: "",
 };
 
+export const empty: DropdownItem = {
+  value: EntityEnums.Extension.Empty,
+  label: "Empty",
+  info: "",
+};
+
 export const entitiesDictKeys = {
   A: {
     value: EntityEnums.Class.Action,
