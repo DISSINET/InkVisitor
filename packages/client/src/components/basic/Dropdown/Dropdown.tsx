@@ -282,7 +282,6 @@ const Option = ({ ...props }: OptionProps | any): React.ReactElement => {
                 ? "transparent"
                 : EntityColors[props.value]?.color ?? "transparent"
             }
-            style={{ fontWeight: "normal" }}
           >
             {isEntityClass ? props.label : <i>{props.label}</i>}
           </StyledEntityValue>
