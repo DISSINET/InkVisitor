@@ -124,7 +124,6 @@ export namespace Relation {
     inverseLabel: false | string;
     allowedEntitiesPattern: EntityEnums.Class[][];
     disabledEntities?: EntityEnums.Class[];
-    allowedSameEntityClassesOnly: boolean;
     asymmetrical: boolean;
     multiple: boolean;
     cloudType: boolean;
@@ -146,7 +145,6 @@ export namespace Relation {
       [EntityEnums.Class.Action, EntityEnums.Class.Action],
       [EntityEnums.Class.Concept, EntityEnums.Class.Concept],
     ],
-    allowedSameEntityClassesOnly: true,
     asymmetrical: true,
     multiple: true,
     cloudType: false,
@@ -170,7 +168,6 @@ export namespace Relation {
       [EntityEnums.Class.Being, EntityEnums.Class.Being],
       [EntityEnums.Class.Value, EntityEnums.Class.Value],
     ],
-    allowedSameEntityClassesOnly: false,
     asymmetrical: true,
     multiple: true,
     cloudType: false,
@@ -187,7 +184,6 @@ export namespace Relation {
       [EntityEnums.Class.Action],
       [EntityEnums.Class.Concept],
     ],
-    allowedSameEntityClassesOnly: true,
     asymmetrical: false,
     multiple: false,
     cloudType: true,
@@ -203,7 +199,6 @@ export namespace Relation {
       [EntityEnums.Class.Action, EntityEnums.Class.Action],
       [EntityEnums.Class.Concept, EntityEnums.Class.Concept],
     ],
-    allowedSameEntityClassesOnly: true,
     asymmetrical: false,
     multiple: true,
     cloudType: false,
@@ -218,7 +213,6 @@ export namespace Relation {
     allowedEntitiesPattern: [
       [EntityEnums.Class.Concept, EntityEnums.Class.Concept],
     ],
-    allowedSameEntityClassesOnly: true,
     asymmetrical: true,
     multiple: true,
     cloudType: false,
@@ -234,7 +228,6 @@ export namespace Relation {
     allowedEntitiesPattern: [
       [EntityEnums.Class.Concept, EntityEnums.Class.Concept],
     ],
-    allowedSameEntityClassesOnly: true,
     asymmetrical: false,
     multiple: false,
     cloudType: false,
@@ -249,7 +242,6 @@ export namespace Relation {
     allowedEntitiesPattern: [
       [EntityEnums.Class.Action, EntityEnums.Class.Action],
     ],
-    allowedSameEntityClassesOnly: true,
     asymmetrical: false,
     multiple: false,
     cloudType: false,
@@ -264,7 +256,6 @@ export namespace Relation {
     allowedEntitiesPattern: [
       [EntityEnums.Class.Action, EntityEnums.Class.Concept],
     ],
-    allowedSameEntityClassesOnly: false,
     asymmetrical: true,
     multiple: false,
     cloudType: false,
@@ -288,7 +279,6 @@ export namespace Relation {
       [EntityEnums.Class.Territory, EntityEnums.Class.Concept],
       [EntityEnums.Class.Resource, EntityEnums.Class.Concept],
     ],
-    allowedSameEntityClassesOnly: false,
     asymmetrical: true,
     multiple: true,
     cloudType: false,
@@ -303,7 +293,6 @@ export namespace Relation {
     inverseLabel: false,
     allowedEntitiesPattern: [], // any combination is allowed
     disabledEntities: [EntityEnums.Class.Action, EntityEnums.Class.Concept],
-    allowedSameEntityClassesOnly: false,
     asymmetrical: false,
     multiple: true,
     cloudType: false,
@@ -319,7 +308,6 @@ export namespace Relation {
     allowedEntitiesPattern: [
       [EntityEnums.Class.Action, EntityEnums.Class.Action],
     ],
-    allowedSameEntityClassesOnly: true,
     asymmetrical: true,
     multiple: true,
     cloudType: false,
@@ -335,7 +323,6 @@ export namespace Relation {
     allowedEntitiesPattern: [
       [EntityEnums.Class.Action, EntityEnums.Class.Concept],
     ],
-    allowedSameEntityClassesOnly: false,
     asymmetrical: true,
     multiple: true,
     cloudType: false,
@@ -350,7 +337,6 @@ export namespace Relation {
     allowedEntitiesPattern: [
       [EntityEnums.Class.Action, EntityEnums.Class.Concept],
     ],
-    allowedSameEntityClassesOnly: false,
     asymmetrical: true,
     multiple: true,
     cloudType: false,
@@ -365,7 +351,6 @@ export namespace Relation {
     allowedEntitiesPattern: [
       [EntityEnums.Class.Action, EntityEnums.Class.Concept],
     ],
-    allowedSameEntityClassesOnly: false,
     asymmetrical: true,
     multiple: true,
     cloudType: false,
@@ -378,7 +363,6 @@ export namespace Relation {
     label: "Related",
     inverseLabel: false,
     allowedEntitiesPattern: [], // any combination is allowed
-    allowedSameEntityClassesOnly: false,
     asymmetrical: false,
     multiple: true,
     cloudType: false,

@@ -123,11 +123,20 @@ export default class Relation implements IRelationModel {
       );
     }
 
-    // check if same-classes-only is required
-    let patternFound =
-      !rules.allowedSameEntityClassesOnly || this.areEntitiesSameClass();
-    if (!patternFound) {
-      return new ModelNotValidError("Entities must have the same class");
+    let patternFound = false;
+
+    if (rules?.disabledEntities) {
+      for (const i in this.entityIds) {
+        for (const disallowedClass of rules.disabledEntities) {
+          if (this.hasEntityCorrectClass(this.entityIds[i], disallowedClass)) {
+            return new ModelNotValidError("Not allowed entity-class pattern");
+          }
+        }
+      }
+    }
+
+    if (rules?.allowedEntitiesPattern.length === 0) {
+      return null;
     }
 
     for (const pattern of rules?.allowedEntitiesPattern) {
