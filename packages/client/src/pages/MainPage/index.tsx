@@ -143,6 +143,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
         {queriesToRefresh.length && (
           <Button
             key="refresh queries"
+            tooltipLabel="refresh data"
             inverted
             icon={<BiRefresh />}
             onClick={() => {
