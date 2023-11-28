@@ -64,33 +64,38 @@ const MainPage: React.FC<MainPage> = ({}) => {
     (state) => state.layout.statementListOpened
   );
 
+  const toggleFirstPanel = () => {
+    if (firstPanelExpanded) {
+      dispatch(setFirstPanelExpanded(false));
+      localStorage.setItem("firstPanelExpanded", "false");
+    } else {
+      dispatch(setFirstPanelExpanded(true));
+      localStorage.setItem("firstPanelExpanded", "true");
+    }
+  };
+
   const firstPanelButton = () => (
     <Button
-      onClick={() => {
-        if (firstPanelExpanded) {
-          dispatch(setFirstPanelExpanded(false));
-          localStorage.setItem("firstPanelExpanded", "false");
-        } else {
-          dispatch(setFirstPanelExpanded(true));
-          localStorage.setItem("firstPanelExpanded", "true");
-        }
-      }}
+      onClick={toggleFirstPanel}
       inverted
       icon={firstPanelExpanded ? <RiMenuFoldFill /> : <RiMenuUnfoldFill />}
     />
   );
+
+  const toggleFourthPanel = () => {
+    if (fourthPanelExpanded) {
+      dispatch(setFourthPanelExpanded(false));
+      localStorage.setItem("fourthPanelExpanded", "false");
+    } else {
+      dispatch(setFourthPanelExpanded(true));
+      localStorage.setItem("fourthPanelExpanded", "true");
+    }
+  };
+
   const hideFourthPanelButton = () => (
     <Button
       key="hide"
-      onClick={() => {
-        if (fourthPanelExpanded) {
-          dispatch(setFourthPanelExpanded(false));
-          localStorage.setItem("fourthPanelExpanded", "false");
-        } else {
-          dispatch(setFourthPanelExpanded(true));
-          localStorage.setItem("fourthPanelExpanded", "true");
-        }
-      }}
+      onClick={toggleFourthPanel}
       inverted
       icon={fourthPanelExpanded ? <RiMenuUnfoldFill /> : <RiMenuFoldFill />}
     />
@@ -201,12 +206,19 @@ const MainPage: React.FC<MainPage> = ({}) => {
 
   const [showEntityCreateModal, setShowEntityCreateModal] = useState(false);
 
+  const toggleStatementListOpen = () => {
+    statementListOpened
+      ? localStorage.setItem("statementListOpened", "false")
+      : localStorage.setItem("statementListOpened", "true");
+    dispatch(setStatementListOpened(!statementListOpened));
+  };
+
   return (
     <>
       <ScrollHandler />
       {separatorXPosition > 0 && <PanelSeparator />}
-      {/* FIRST PANEL */}
 
+      {/* FIRST PANEL */}
       <Panel width={firstPanelExpanded ? panelWidths[0] : collapsedPanelWidth}>
         <Box
           height={contentHeight}
@@ -217,10 +229,12 @@ const MainPage: React.FC<MainPage> = ({}) => {
             firstPanelButton(),
           ]}
           noPadding
+          onHeaderClick={toggleFirstPanel}
         >
           <MemoizedTerritoryTreeBox />
         </Box>
       </Panel>
+
       {/* SECOND PANEL */}
       <Panel
         width={
@@ -230,7 +244,9 @@ const MainPage: React.FC<MainPage> = ({}) => {
         }
       >
         <Box
+          label="Statements"
           borderColor="white"
+          onHeaderClick={toggleStatementListOpen}
           height={
             detailIdArray.length
               ? statementListOpened
@@ -238,19 +254,19 @@ const MainPage: React.FC<MainPage> = ({}) => {
                 : hiddenBoxHeight
               : contentHeight
           }
-          label="Statements"
         >
           <MemoizedStatementListBox />
         </Box>
         {(selectedDetailId || detailIdArray.length > 0) && (
           <Box
+            label="Detail"
             borderColor="white"
+            onHeaderClick={toggleStatementListOpen}
             height={
               statementListOpened
                 ? contentHeight / 2 + 20
                 : contentHeight - hiddenBoxHeight
             }
-            label="Detail"
             button={[
               <Button
                 icon={<FaPlus />}
@@ -272,12 +288,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
                     <BsSquareHalf style={{ transform: "rotate(270deg)" }} />
                   )
                 }
-                onClick={() => {
-                  statementListOpened
-                    ? localStorage.setItem("statementListOpened", "false")
-                    : localStorage.setItem("statementListOpened", "true");
-                  dispatch(setStatementListOpened(!statementListOpened));
-                }}
+                onClick={toggleStatementListOpen}
               />,
               <Button
                 inverted
@@ -307,6 +318,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
           />
         )}
       </Panel>
+
       {/* THIRD PANEL */}
       <Panel
         width={
@@ -319,6 +331,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
           <MemoizedStatementEditorBox />
         </Box>
       </Panel>
+
       {/* FOURTH PANEL */}
       <Panel width={fourthPanelExpanded ? panelWidths[3] : collapsedPanelWidth}>
         <Box
@@ -334,6 +347,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
             hideBoxButton("search"),
             hideFourthPanelButton(),
           ]}
+          onHeaderClick={toggleFourthPanel}
         >
           <MemoizedEntitySearchBox />
         </Box>
@@ -347,6 +361,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
             hideBoxButton("bookmarks"),
             hideFourthPanelButton(),
           ]}
+          onHeaderClick={toggleFourthPanel}
         >
           <MemoizedEntityBookmarkBox />
         </Box>
@@ -360,6 +375,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
             hideBoxButton("templates"),
             hideFourthPanelButton(),
           ]}
+          onHeaderClick={toggleFourthPanel}
         >
           <MemoizedTemplateListBox />
         </Box>
