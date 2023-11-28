@@ -79,16 +79,6 @@ export namespace EntityEnums {
     Extension.Empty,
   ];
 
-  export const LOESBV = [
-    Class.Location,
-    Class.Object,
-    Class.Event,
-    Class.Statement,
-    Class.Being,
-    Class.Value,
-  ];
-
-
   export type ExtendedClass = Class | Extension;
 
   /**
