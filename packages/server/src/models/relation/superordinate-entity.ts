@@ -32,41 +32,39 @@ export default class SuperordinateEntity
       return out;
     }
 
-    if (EntityEnums.LOESBV.indexOf(asClass) !== -1) {
-      const relations: RelationTypes.ISuperordinateEntity[] =
-        await Relation.findForEntity(
-          conn,
-          parentId,
-          RelationEnums.Type.SuperordinateEntity,
-          0
-        );
-
-      // sort by order
-      relations.sort(
-        (a, b) =>
-          (a.order === undefined ? EntityEnums.Order.Last : a.order) -
-          (b.order === undefined ? EntityEnums.Order.Last : b.order)
+    const relations: RelationTypes.ISuperordinateEntity[] =
+      await Relation.findForEntity(
+        conn,
+        parentId,
+        RelationEnums.Type.SuperordinateEntity,
+        0
       );
 
-      for (const relation of relations) {
-        const subparentId = relation.entityIds[1];
-        const connection: RelationTypes.IConnection<RelationTypes.ISuperordinateEntity> =
-          {
-            ...relation,
-            subtrees: [],
-          };
+    // sort by order
+    relations.sort(
+      (a, b) =>
+        (a.order === undefined ? EntityEnums.Order.Last : a.order) -
+        (b.order === undefined ? EntityEnums.Order.Last : b.order)
+    );
 
-        connection.subtrees =
-          await SuperordinateEntity.getSuperordinateEntityForwardConnections(
-            conn,
-            subparentId,
-            asClass,
-            maxNestLvl,
-            nestLvl + 1
-          );
+    for (const relation of relations) {
+      const subparentId = relation.entityIds[1];
+      const connection: RelationTypes.IConnection<RelationTypes.ISuperordinateEntity> =
+        {
+          ...relation,
+          subtrees: [],
+        };
 
-        out.push(connection);
-      }
+      connection.subtrees =
+        await SuperordinateEntity.getSuperordinateEntityForwardConnections(
+          conn,
+          subparentId,
+          asClass,
+          maxNestLvl,
+          nestLvl + 1
+        );
+
+      out.push(connection);
     }
 
     return out;
@@ -79,14 +77,12 @@ export default class SuperordinateEntity
   ): Promise<RelationTypes.ISuperordinateEntity[]> {
     let out: RelationTypes.ISuperordinateEntity[] = [];
 
-    if (EntityEnums.LOESBV.indexOf(asClass) !== -1) {
-      out = await Relation.findForEntity(
-        conn,
-        parentId,
-        RelationEnums.Type.SuperordinateEntity,
-        1
-      );
-    }
+    out = await Relation.findForEntity(
+      conn,
+      parentId,
+      RelationEnums.Type.SuperordinateEntity,
+      1
+    );
 
     // sort by order
     out.sort(

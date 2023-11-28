@@ -163,6 +163,7 @@ export namespace Relation {
       [EntityEnums.Class.Location, EntityEnums.Class.Location],
       [EntityEnums.Class.Object, EntityEnums.Class.Object],
       [EntityEnums.Class.Event, EntityEnums.Class.Event],
+      [EntityEnums.Class.Group, EntityEnums.Class.Group],
       [EntityEnums.Class.Statement, EntityEnums.Class.Statement],
       [EntityEnums.Class.Statement, EntityEnums.Class.Event],
       [EntityEnums.Class.Event, EntityEnums.Class.Statement],
