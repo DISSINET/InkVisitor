@@ -21,6 +21,7 @@ interface Box {
   isExpanded?: boolean;
   button?: ReactNode[];
   children?: ReactNode;
+  onHeaderClick?: () => void;
 }
 
 export const Box: React.FC<Box> = ({
@@ -32,6 +33,7 @@ export const Box: React.FC<Box> = ({
   isExpanded = true,
   button,
   children,
+  onHeaderClick,
 }) => {
   const [hideContent, setHideContent] = useState<boolean>(false);
   const [showContentLabel, setShowContentLabel] = useState<boolean>(
@@ -58,12 +60,16 @@ export const Box: React.FC<Box> = ({
     <StyledBox
       style={{ height: animatedExpand.boxHeight as any }}
       height={height}
+      onClick={() => !isExpanded && onHeaderClick && onHeaderClick()}
+      isClickable={!isExpanded && onHeaderClick !== undefined}
     >
       <StyledHead
         $borderColor={borderColor}
         $isExpanded={isExpanded}
         $color={color}
         $noPadding={noPadding}
+        hasHeaderClick={onHeaderClick !== undefined}
+        onClick={onHeaderClick}
       >
         {!hideContent && (
           <animated.div style={animatedExpand}>{label}</animated.div>

@@ -4,12 +4,14 @@ import styled from "styled-components";
 
 interface StyledBox {
   height?: number;
+  isClickable?: boolean;
 }
 export const StyledBox = styled(animated.div)<StyledBox>`
   position: relative;
   display: flex;
   flex-direction: column;
   height: ${({ height }) => (height ? `${height / 10}rem` : "100%")};
+  cursor: ${({ isClickable }) => (isClickable ? "pointer" : "")};
 `;
 
 interface StyledHead {
@@ -17,6 +19,7 @@ interface StyledHead {
   $borderColor?: keyof ThemeColor;
   $noPadding: boolean;
   $isExpanded: boolean;
+  hasHeaderClick: boolean;
 }
 export const StyledHead = styled(animated.div)<StyledHead>`
   height: 3.2rem;
@@ -37,6 +40,7 @@ export const StyledHead = styled(animated.div)<StyledHead>`
   border-right-style: solid;
   border-width: ${({ theme, $noPadding, $isExpanded }) =>
     $noPadding || !$isExpanded ? theme.borderWidth[1] : theme.borderWidth[4]};
+  cursor: ${({ hasHeaderClick }) => (hasHeaderClick ? "pointer" : "")};
 `;
 interface StyledButtonWrap {}
 export const StyledButtonWrap = styled.div<StyledButtonWrap>`
