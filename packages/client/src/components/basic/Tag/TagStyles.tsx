@@ -39,22 +39,6 @@ export const StyledEntityTag = styled.div<StyledEntityTag>`
   width: ${({ theme }) => theme.space[7]};
 `;
 
-const getColor = (
-  invertedLabel: boolean,
-  isFavorited: boolean,
-  isItalic: boolean
-): string => {
-  if (invertedLabel) {
-    if (isFavorited) {
-      return "warning";
-    } else {
-      return isItalic ? "grey" : "tagSelectedColor";
-    }
-  } else {
-    return isItalic ? "greyer" : "tagColor";
-  }
-};
-
 interface StyledLabelWrap {
   invertedLabel: boolean;
 }
@@ -73,6 +57,22 @@ export const StyledStarWrap = styled.div<StyledStarWrap>`
   height: 100%;
   margin-left: 0.2rem;
 `;
+
+const getColor = (
+  invertedLabel: boolean,
+  isFavorited: boolean,
+  isItalic: boolean
+): string => {
+  if (invertedLabel) {
+    if (isFavorited) {
+      return "warning";
+    } else {
+      return isItalic ? "tagItalic" : "tagSelectedColor";
+    }
+  } else {
+    return isItalic ? "tagItalic" : "tagColor";
+  }
+};
 
 interface StyledLabel {
   invertedLabel: boolean;

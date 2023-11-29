@@ -58,6 +58,7 @@ const theme = {
     tagColor: "#091034",
     tagSelectedBackground: "#091034",
     tagSelectedColor: "#fff",
+    tagItalic: "#4a5568",
 
     foundByTreeFilter: "#b4c0e8",
     tableOpened: "#F2EBFE",
