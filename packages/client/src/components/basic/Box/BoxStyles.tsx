@@ -12,7 +12,6 @@ export const StyledBox = styled(animated.div)<StyledBox>`
   flex-direction: column;
   height: ${({ height }) => (height ? `${height / 10}rem` : "100%")};
   cursor: ${({ isClickable }) => (isClickable ? "pointer" : "")};
-  overflow: hidden;
 `;
 
 interface StyledHead {
