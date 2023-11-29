@@ -4,10 +4,12 @@ import { space2, space4 } from "Theme/constants";
 
 interface StyledSuggester {
   marginTop?: boolean;
+  fullWidth?: boolean;
 }
 export const StyledSuggester = styled.div<StyledSuggester>`
   position: relative;
-  display: inline-flex;
+  display: ${({ fullWidth }) => (fullWidth ? "flex" : "inline-flex")};
+
   margin-top: ${({ marginTop }) => (marginTop ? space2 : 0)};
 `;
 
@@ -20,7 +22,8 @@ interface InputWrapper {
 export const StyledInputWrapper = styled.div<InputWrapper>`
   display: flex;
   opacity: ${({ isOver }) => isOver && "50%"};
-  max-width: 16.1rem;
+  width: 100%;
+  /* max-width: 16.1rem; */
   input {
     padding-right: ${({ theme, hasText }) =>
       hasText ? theme.space[7] : theme.space[1]};

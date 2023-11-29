@@ -260,7 +260,7 @@ export const Suggester: React.FC<Suggester> = ({
   return (
     // div is necessary for flex to work and render the clear button properly
     <div>
-      <StyledSuggester marginTop={marginTop}>
+      <StyledSuggester marginTop={marginTop} fullWidth={inputWidth === "full"}>
         <StyledInputWrapper
           ref={dropRef}
           hasButton={!disableCreate}
@@ -285,7 +285,7 @@ export const Suggester: React.FC<Suggester> = ({
           />
           <TypeBar entityLetter={category.value} />
 
-          <div ref={refs.setReference}>
+          <div ref={refs.setReference} style={{ width: "100%" }}>
             <Input
               type="text"
               value={typed}
