@@ -25,6 +25,7 @@ export const StyledTagWrapper = styled.div<StyledTagWrapper>`
 interface StyledEntityTag {
   $color: keyof ThemeColor;
   isTemplate: boolean;
+  darkTheme?: boolean;
 }
 export const StyledEntityTag = styled.div<StyledEntityTag>`
   background: ${({ $color, isTemplate, theme }) =>
@@ -35,7 +36,8 @@ export const StyledEntityTag = styled.div<StyledEntityTag>`
   justify-content: center;
   align-items: center;
   flex-shrink: 0;
-  font-weight: ${({ theme }) => theme.fontWeight["normal"]};
+  font-weight: ${({ theme, darkTheme }) =>
+    darkTheme ? theme.fontWeight["bold"] : theme.fontWeight["normal"]};
   width: ${({ theme }) => theme.space[7]};
 `;
 
@@ -67,7 +69,7 @@ const getColor = (
     if (isFavorited) {
       return "warning";
     } else {
-      return isItalic ? "tagItalic" : "tagSelectedColor";
+      return "tagSelectedColor";
     }
   } else {
     return isItalic ? "tagItalic" : "tagColor";

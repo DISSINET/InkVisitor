@@ -1,5 +1,5 @@
 import { animated, config, useSpring } from "@react-spring/web";
-import { UserEnums } from "@shared/enums";
+import { InterfaceEnums, UserEnums } from "@shared/enums";
 import { ITerritory } from "@shared/types";
 import { IParentTerritory } from "@shared/types/territory";
 import {
@@ -95,14 +95,16 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
     config: config.stiff,
   });
 
-  const themeId = useAppSelector((state) => state.theme);
+  const selectedThemeId: InterfaceEnums.Theme = useAppSelector(
+    (state) => state.theme
+  );
   const themeContext = useContext(ThemeContext);
 
   const symbolColor = useMemo(() => {
     return right === UserEnums.RoleMode.Read
       ? themeContext.color.gray[600]
       : themeContext.color.gray[800];
-  }, [right, themeId]);
+  }, [right, selectedThemeId]);
 
   useEffect(() => {
     setChildTerritories(children);

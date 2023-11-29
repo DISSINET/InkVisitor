@@ -4,6 +4,7 @@ import { BsArrowsCollapse, BsArrowsExpand } from "react-icons/bs";
 import ReactJson from "react-json-view";
 import { StyledJSONExplorerWrapper } from "./JSONExplorerStyles";
 import { useAppSelector } from "redux/hooks";
+import { InterfaceEnums } from "@shared/enums";
 
 interface IJSONDisplay {
   data: object;
@@ -11,7 +12,9 @@ interface IJSONDisplay {
 
 export const JSONExplorer: React.FC<IJSONDisplay> = ({ data = {} }) => {
   const [collapsed, setCollapsed] = useState<boolean>(true);
-  const selectedThemeId = useAppSelector((state) => state.theme);
+  const selectedThemeId: InterfaceEnums.Theme = useAppSelector(
+    (state) => state.theme
+  );
 
   return (
     <StyledJSONExplorerWrapper>

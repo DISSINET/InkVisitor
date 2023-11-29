@@ -31,21 +31,21 @@ import {
 } from "./PageHeaderStyles";
 import { setTheme } from "redux/features/themeSlice";
 import { MdDarkMode, MdSunny } from "react-icons/md";
+import { InterfaceEnums } from "@shared/enums";
 
 interface LeftHeader {
   tempLocation: string | false;
 }
 export const LeftHeader: React.FC<LeftHeader> = React.memo(
   ({ tempLocation }) => {
-    let env = (process.env.ROOT_URL || "").replace(
-      /apps\/inkvisitor[-]?/,
-      ""
-    );
+    let env = (process.env.ROOT_URL || "").replace(/apps\/inkvisitor[-]?/, "");
     if (env === "/") {
-      env = ""
+      env = "";
     }
 
-    const versionText = `v. ${packageJson.version}${env ? ` | ${env}` : ``} | built: ${process.env.BUILD_TIMESTAMP}`;
+    const versionText = `v. ${packageJson.version}${
+      env ? ` | ${env}` : ``
+    } | built: ${process.env.BUILD_TIMESTAMP}`;
     const location = useLocation();
     const navigate = useNavigate();
 
@@ -167,9 +167,11 @@ export const RightHeader: React.FC<RightHeader> = React.memo(
     );
 
     const dispatch = useAppDispatch();
-    const selectedThemeId = useAppSelector((state) => state.theme);
+    const selectedThemeId: InterfaceEnums.Theme = useAppSelector(
+      (state) => state.theme
+    );
 
-    const handleThemeChange = (newTheme: string) => {
+    const handleThemeChange = (newTheme: InterfaceEnums.Theme) => {
       dispatch(setTheme(newTheme));
       localStorage.setItem("theme", newTheme);
     };
@@ -189,13 +191,21 @@ export const RightHeader: React.FC<RightHeader> = React.memo(
         <StyledRightHeader>
           <StyledThemeSwitcher
             onClick={() => {
-              handleThemeChange(selectedThemeId === "light" ? "dark" : "light");
+              handleThemeChange(
+                selectedThemeId === InterfaceEnums.Theme.Light
+                  ? InterfaceEnums.Theme.Dark
+                  : InterfaceEnums.Theme.Light
+              );
             }}
           >
-            <StyledThemeSwitcherIcon selected={selectedThemeId === "light"}>
+            <StyledThemeSwitcherIcon
+              selected={selectedThemeId === InterfaceEnums.Theme.Light}
+            >
               <MdSunny />
             </StyledThemeSwitcherIcon>
-            <StyledThemeSwitcherIcon selected={selectedThemeId === "dark"}>
+            <StyledThemeSwitcherIcon
+              selected={selectedThemeId === InterfaceEnums.Theme.Dark}
+            >
               <MdDarkMode />
             </StyledThemeSwitcherIcon>
           </StyledThemeSwitcher>

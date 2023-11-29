@@ -37,6 +37,7 @@ import { setSeparatorXPosition } from "redux/features/layout/separatorXPositionS
 import { DocumentsPage } from "pages/Documents";
 import AclPage from "./pages/Acl";
 import MainPage from "./pages/MainPage";
+import { InterfaceEnums } from "@shared/enums";
 
 const clockPerformance = (
   profilerId: any,
@@ -82,7 +83,9 @@ export const App: React.FC = () => {
   const disableUserSelect = useAppSelector(
     (state) => state.layout.disableUserSelect
   );
-  const selectedThemeId = useAppSelector((state) => state.theme);
+  const selectedThemeId: InterfaceEnums.Theme = useAppSelector(
+    (state) => state.theme
+  );
 
   const themeConfig = useMemo<ThemeType>(() => {
     if (selectedThemeId === "dark") {
