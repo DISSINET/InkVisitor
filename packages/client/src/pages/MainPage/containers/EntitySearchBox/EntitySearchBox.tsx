@@ -1,3 +1,4 @@
+import { animated, config, useSpring } from "@react-spring/web";
 import { entityStatusDict, languageDict } from "@shared/dictionaries";
 import { entitiesDict } from "@shared/dictionaries/entity";
 import { EntityEnums } from "@shared/enums";
@@ -14,8 +15,9 @@ import {
 } from "components/advanced";
 import { useDebounce } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
+import { CgOptions } from "react-icons/cg";
+import { IoMdArrowDropdownCircle } from "react-icons/io";
 import { RiCloseFill } from "react-icons/ri";
-import { useAppSelector } from "redux/hooks";
 import { DropdownItem } from "types";
 import useResizeObserver from "use-resize-observer";
 import {
@@ -26,7 +28,6 @@ import {
   StyledDateTag,
   StyledDateTagButton,
   StyledDateTagText,
-  StyledLine,
   StyledOptions,
   StyledResultsHeader,
   StyledResultsWrapper,
@@ -34,12 +35,6 @@ import {
   StyledRowHeader,
 } from "./EntitySearchBoxStyles";
 import { EntitySearchResults } from "./EntitySearchResults/EntitySearchResults";
-import { animated, config, useSpring } from "@react-spring/web";
-import { CgOptions } from "react-icons/cg";
-import {
-  IoIosArrowDropdownCircle,
-  IoMdArrowDropdownCircle,
-} from "react-icons/io";
 
 const initValues: IRequestSearch = {
   label: "",
@@ -292,24 +287,28 @@ export const EntitySearchBox: React.FC = () => {
         </StyledRow>
 
         <StyledAdvancedOptions>
-          <StyledAdvancedOptionsSign>
-            <CgOptions /> <p>advanced options</p>
-          </StyledAdvancedOptionsSign>
-          <StyledLine />
-          <Button
-            icon={
-              <div style={{ display: "inline-flex", alignItems: "center" }}>
-                <p style={{ margin: "0 0.3rem" }}>
-                  {showAdvancedOptions ? "hide" : "show"}
-                </p>
-                <animated.div style={rotateOptionsIcon}>
-                  <IoMdArrowDropdownCircle size={16} />
-                </animated.div>
-              </div>
-            }
-            onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}
-            inverted
-          />
+          <div style={{ height: "100%", width: "100%" }}>
+            <StyledAdvancedOptionsSign>
+              <CgOptions />
+              <i>advanced options</i>
+            </StyledAdvancedOptionsSign>
+          </div>
+          <div>
+            <Button
+              icon={
+                <div style={{ display: "inline-flex", alignItems: "center" }}>
+                  <p style={{ margin: "0 0.3rem" }}>
+                    {showAdvancedOptions ? "hide" : "show"}
+                  </p>
+                  <animated.div style={rotateOptionsIcon}>
+                    <IoMdArrowDropdownCircle size={16} />
+                  </animated.div>
+                </div>
+              }
+              onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}
+              inverted
+            />
+          </div>
         </StyledAdvancedOptions>
 
         {showAdvancedOptions && (
