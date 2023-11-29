@@ -63,7 +63,10 @@ export const Button: React.FC<ButtonProps> = ({
     <>
       <StyledButton
         ref={setReferenceElement}
-        onClick={onClick}
+        onClick={(e) => {
+          e.stopPropagation();
+          onClick(e);
+        }}
         hasIcon={icon && true}
         $color={color}
         inverted={inverted}
