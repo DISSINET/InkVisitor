@@ -278,6 +278,7 @@ export namespace Relation {
       [EntityEnums.Class.Statement, EntityEnums.Class.Concept],
       [EntityEnums.Class.Territory, EntityEnums.Class.Concept],
       [EntityEnums.Class.Resource, EntityEnums.Class.Concept],
+      [EntityEnums.Class.Value, EntityEnums.Class.Concept],
     ],
     asymmetrical: true,
     multiple: true,

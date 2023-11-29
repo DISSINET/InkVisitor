@@ -63,6 +63,18 @@ export namespace EntityEnums {
     Class.Resource,
     Class.Being,
   ];
+  export const PLOGESTRBV = [
+    Class.Person,
+    Class.Location,
+    Class.Object,
+    Class.Group,
+    Class.Event,
+    Class.Statement,
+    Class.Territory,
+    Class.Resource,
+    Class.Being,
+    Class.Value
+  ];
   export const ExtendedClasses = [
     Class.Action,
     Class.Territory,

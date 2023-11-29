@@ -70,7 +70,7 @@ export default class Classification
 
     let relations: RelationTypes.IClassification[] = [];
 
-    if (nestLvl === 0 && EntityEnums.PLOGESTRB.indexOf(asClass) !== -1) {
+    if (nestLvl === 0 && EntityEnums.PLOGESTRBV.indexOf(asClass) !== -1) {
       relations = await Relation.findForEntity(
         conn,
         entityId,
