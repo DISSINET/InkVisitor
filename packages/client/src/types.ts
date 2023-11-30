@@ -7,29 +7,6 @@ import {
 } from "@shared/types";
 import { ThemeColor } from "Theme/theme";
 
-export const Colors = [
-  "black",
-  "white",
-  "grey",
-  "primary",
-  "success",
-  "warning",
-  "danger",
-  "info",
-  "text",
-  "entityT",
-  "entityR",
-  "entityA",
-  "entityS",
-  "entityC",
-  "entityE",
-  "entityG",
-  "entityL",
-  "entityO",
-  "entityP",
-  "entityV",
-];
-
 interface IEntityColor {
   entityClass: EntityEnums.ExtendedClass;
   color: keyof ThemeColor;

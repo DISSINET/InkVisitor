@@ -41,7 +41,7 @@ const darkTheme = {
     black: "#fff",
     // between InkVisitor primary color and black
     white: "#060c26",
-    grey: "#3b3b3b",
+    grey: "#6b6b6b",
     greyer: "#b5b5b5",
     text: "#c7c7c7",
     primary: "#f6f6ff",

@@ -68,7 +68,7 @@ export const StyledContent = styled(animated.div)<StyledContent>`
       ? $borderColor
         ? theme.color[$borderColor]
         : theme.color["gray"]["200"]
-      : theme.color["grey"]};
+      : ""};
   border-style: ${({ $isExpanded }) => ($isExpanded ? "solid" : "")};
   border-width: ${({ theme, $noPadding, $isExpanded }) =>
     $noPadding || !$isExpanded ? theme.borderWidth[1] : theme.borderWidth[4]};

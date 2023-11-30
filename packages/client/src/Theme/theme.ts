@@ -60,6 +60,8 @@ const theme = {
     tagSelectedColor: "#fff",
     tagItalic: "#4a5568",
 
+    iconButtonGroupColor: "#C4C4C4",
+
     foundByTreeFilter: "#b4c0e8",
     tableOpened: "#F2EBFE",
     tableSelection: "#bce5ff",
