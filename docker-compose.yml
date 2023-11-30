@@ -20,6 +20,25 @@ services:
       - "8080:8080" # required only for public access
       - "28015:28015" # dashboard - required only for public access
 
+  inkvisitor:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        ENV: production
+    image: inkvisitor:production
+    container_name: inkvisitor
+    restart: always
+    <<: *logging
+    env_file:
+      - ./packages/server/env/.env.production
+    environment:
+      - DB_HOST=database
+    ports:
+      - "3000:3000"
+    networks:
+      - inkvisitor
+
   inkvisitor-development:
     build:
       context: .
