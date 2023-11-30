@@ -32,6 +32,7 @@ interface ButtonProps {
   onClick?: MouseEventHandler<HTMLElement>;
   fullWidth?: boolean;
   tooltipPosition?: AutoPlacement | BasePlacement | VariationPlacement;
+  hideTooltipOnClick?: boolean;
 }
 
 export const Button: React.FC<ButtonProps> = ({
@@ -54,6 +55,7 @@ export const Button: React.FC<ButtonProps> = ({
   },
   fullWidth = false,
   tooltipPosition = "bottom",
+  hideTooltipOnClick = false,
 }) => {
   const [referenceElement, setReferenceElement] =
     useState<HTMLButtonElement | null>(null);
@@ -65,6 +67,7 @@ export const Button: React.FC<ButtonProps> = ({
         ref={setReferenceElement}
         onClick={(e) => {
           e.stopPropagation();
+          hideTooltipOnClick && setShowTooltip(false);
           onClick(e);
         }}
         hasIcon={icon && true}

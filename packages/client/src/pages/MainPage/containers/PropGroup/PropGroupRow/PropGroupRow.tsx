@@ -283,6 +283,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
                         />
                       )
                     }
+                    hideTooltipOnClick
                     tooltipContent={
                       <TooltipAttributesGroup
                         data={{
