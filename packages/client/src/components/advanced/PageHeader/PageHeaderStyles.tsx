@@ -42,11 +42,11 @@ export const StyledRightHeader = styled.div`
 `;
 export const StyledThemeSwitcher = styled.div`
   display: inline-flex;
-  border-radius: 10px;
+  border-radius: 1rem;
   overflow: hidden;
   cursor: pointer;
-  margin-right: 10px;
-  border-width: 2px;
+  margin-right: 1rem;
+  border-width: 0.2rem;
   border-style: solid;
   border-color: ${({ theme }) => theme.color.gray["800"]};
 `;
@@ -55,13 +55,13 @@ interface StyledThemeSwitcherIcon {
   selected: boolean;
 }
 export const StyledThemeSwitcherIcon = styled.div<StyledThemeSwitcherIcon>`
-  padding: 5px 10px;
-  font-size: 16px;
+  padding: 0.4rem 0.7rem;
+  font-size: 15px;
   transition: 0.3s all;
   background-color: ${({ theme, selected }) =>
-    selected ? theme.color.gray["800"] : theme.color.gray["600"]};
+    selected ? theme.color.gray[800] : theme.color.gray[600]};
   color: ${({ theme, selected }) =>
-    selected ? "white" : theme.color.gray["400"]};
+    selected ? "white" : theme.color.gray[400]};
 `;
 
 export const StyledUser = styled.div`

@@ -1,6 +1,7 @@
 import { languageDict, userRoleDict } from "@shared/dictionaries";
 import { EntityEnums, UserEnums } from "@shared/enums";
 import { IResponseUser } from "@shared/types";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import {
   Button,
@@ -23,8 +24,8 @@ import {
 } from "components/advanced";
 import React, { useEffect, useMemo, useState } from "react";
 import { BiHide, BiShow } from "react-icons/bi";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
+import { DropdownItem } from "types";
 import {
   StyledButtonWrap,
   StyledRightsHeading,
@@ -34,7 +35,6 @@ import {
   StyledUserRights,
 } from "./UserCustomizationModalStyles";
 import { UserRightItem } from "./UserRightItem/UserRightItem";
-import { DropdownItem } from "types";
 
 interface DataObject {
   name: string;
@@ -388,6 +388,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
               </ModalInputWrap>
 
               <ModalInputLabel>{"ordering table in Editor"}</ModalInputLabel>
+
               <ModalInputWrap width={165}>
                 <AttributeButtonGroup
                   noMargin
