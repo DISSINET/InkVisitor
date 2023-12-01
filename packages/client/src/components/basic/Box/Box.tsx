@@ -61,14 +61,14 @@ export const Box: React.FC<Box> = ({
       style={{ height: animatedExpand.boxHeight as any }}
       height={height}
       onClick={() => !isExpanded && onHeaderClick && onHeaderClick()}
-      isClickable={!isExpanded && onHeaderClick !== undefined}
+      $isClickable={!isExpanded && onHeaderClick !== undefined}
     >
       <StyledHead
         $borderColor={borderColor}
         $isExpanded={isExpanded}
         $color={color}
         $noPadding={noPadding}
-        hasHeaderClick={onHeaderClick !== undefined}
+        $hasHeaderClick={onHeaderClick !== undefined}
         onClick={onHeaderClick}
       >
         {!hideContent && (
