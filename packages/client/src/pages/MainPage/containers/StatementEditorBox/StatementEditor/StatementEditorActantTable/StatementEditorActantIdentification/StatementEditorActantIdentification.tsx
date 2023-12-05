@@ -9,6 +9,8 @@ import {
 import { excludedSuggesterEntities } from "Theme/constants";
 import { AttributeIcon, Button, ButtonGroup, Dropdown } from "components";
 import {
+  AttributeMultiDropdown,
+  BasicDropdown,
   ElvlButtonGroup,
   EntityDropzone,
   EntitySuggester,
@@ -16,17 +18,16 @@ import {
   LogicButtonGroup,
   MoodVariantButtonGroup,
 } from "components/advanced";
+import { TooltipAttributes } from "pages/MainPage/containers";
 import React, { useState } from "react";
 import { FaTrashAlt } from "react-icons/fa";
 import { TbSettingsAutomation, TbSettingsFilled } from "react-icons/tb";
-import { UseMutationResult } from "@tanstack/react-query";
 import { AttributeData } from "types";
 import {
   StyledBorderLeft,
   StyledCIGrid,
   StyledExpandedRow,
 } from "../StatementEditorActantTableStyles";
-import { TooltipAttributes } from "pages/MainPage/containers";
 
 interface StatementEditorActantIdentification {
   identifications: IStatementIdentification[];
@@ -191,7 +192,21 @@ export const StatementEditorActantIdentification: React.FC<
       {isExpanded && (
         <StyledExpandedRow>
           <div>
-            <Dropdown
+            <AttributeMultiDropdown
+              width={130}
+              disabled={!userCanEdit}
+              placeholder="mood"
+              tooltipLabel="mood"
+              icon={<AttributeIcon attributeName="mood" />}
+              options={moodDict}
+              value={identification.mood}
+              onChange={(newValues) => {
+                handleUpdate({
+                  mood: newValues,
+                });
+              }}
+            />
+            {/* <Dropdown
               width={130}
               isMulti
               disabled={!userCanEdit}
@@ -210,7 +225,7 @@ export const StatementEditorActantIdentification: React.FC<
                 });
               }}
               attributeDropdown
-            />
+            /> */}
           </div>
           <div>
             <MoodVariantButtonGroup
@@ -221,7 +236,21 @@ export const StatementEditorActantIdentification: React.FC<
             />
           </div>
           <div>
-            <Dropdown
+            <BasicDropdown
+              width={110}
+              placeholder="certainty"
+              tooltipLabel="certainty"
+              icon={<AttributeIcon attributeName="certainty" />}
+              disabled={!userCanEdit}
+              options={certaintyDict}
+              value={identification.certainty}
+              onChange={(newValue) => {
+                handleUpdate({
+                  certainty: newValue,
+                });
+              }}
+            />
+            {/* <Dropdown
               width={110}
               placeholder="certainty"
               tooltipLabel="certainty"
@@ -236,7 +265,7 @@ export const StatementEditorActantIdentification: React.FC<
                   certainty: selectedOption[0].value as EntityEnums.Certainty,
                 });
               }}
-            />
+            /> */}
           </div>
         </StyledExpandedRow>
       )}

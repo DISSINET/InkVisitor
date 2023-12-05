@@ -1,5 +1,4 @@
 import { certaintyDict, moodDict, operatorDict } from "@shared/dictionaries";
-import { allEntities } from "@shared/dictionaries/entity";
 import { EntityEnums } from "@shared/enums";
 import { IProp, IResponseStatement, IStatementData } from "@shared/types";
 import { excludedSuggesterEntities } from "Theme/constants";
@@ -8,9 +7,10 @@ import {
   BundleButtonGroup,
   Button,
   ButtonGroup,
-  Dropdown,
 } from "components";
 import {
+  AttributeMultiDropdown,
+  BasicDropdown,
   ElvlButtonGroup,
   EntityDropzone,
   EntitySuggester,
@@ -351,7 +351,7 @@ export const StatementEditorActionTableRow: React.FC<
               }
             </StyledGridColumn>
             <StyledGridColumn>
-              <Dropdown
+              {/* <Dropdown
                 width={131}
                 isMulti
                 disabled={!userCanEdit}
@@ -372,6 +372,20 @@ export const StatementEditorActionTableRow: React.FC<
                   });
                 }}
                 attributeDropdown
+              /> */}
+              <AttributeMultiDropdown
+                width={131}
+                disabled={!userCanEdit}
+                placeholder="mood"
+                tooltipLabel="mood"
+                icon={<AttributeIcon attributeName="mood" />}
+                options={moodDict}
+                value={sAction.mood}
+                onChange={(newValues) => {
+                  updateAction(sAction.id, {
+                    mood: newValues,
+                  });
+                }}
               />
             </StyledGridColumn>
             <StyledGridColumn>
@@ -423,7 +437,7 @@ export const StatementEditorActionTableRow: React.FC<
           {isExpanded && !isDraggingAction && (
             <StyledExpandedRow>
               <div>
-                <Dropdown
+                {/* <Dropdown
                   width={70}
                   placeholder="logical operator"
                   tooltipLabel="logical operator"
@@ -436,6 +450,20 @@ export const StatementEditorActionTableRow: React.FC<
                   onChange={(selectedOption) => {
                     updateAction(sAction.id, {
                       bundleOperator: selectedOption[0].value,
+                    });
+                  }}
+                /> */}
+                <BasicDropdown
+                  width={70}
+                  placeholder="logical operator"
+                  tooltipLabel="logical operator"
+                  icon={<AttributeIcon attributeName="bundleOperator" />}
+                  disabled={!userCanEdit}
+                  options={operatorDict}
+                  value={sAction.bundleOperator}
+                  onChange={(newValue) => {
+                    updateAction(sAction.id, {
+                      bundleOperator: newValue,
                     });
                   }}
                 />
@@ -457,7 +485,7 @@ export const StatementEditorActionTableRow: React.FC<
                 />
               </div>
               <div>
-                <Dropdown
+                {/* <Dropdown
                   width={122}
                   placeholder="certainty"
                   tooltipLabel="certainty"
@@ -470,6 +498,20 @@ export const StatementEditorActionTableRow: React.FC<
                   onChange={(selectedOption) => {
                     updateAction(sAction.id, {
                       certainty: selectedOption[0].value,
+                    });
+                  }}
+                /> */}
+                <BasicDropdown
+                  width={122}
+                  placeholder="certainty"
+                  tooltipLabel="certainty"
+                  icon={<AttributeIcon attributeName="certainty" />}
+                  disabled={!userCanEdit}
+                  options={certaintyDict}
+                  value={sAction.certainty}
+                  onChange={(newValue) => {
+                    updateAction(sAction.id, {
+                      certainty: newValue,
                     });
                   }}
                 />

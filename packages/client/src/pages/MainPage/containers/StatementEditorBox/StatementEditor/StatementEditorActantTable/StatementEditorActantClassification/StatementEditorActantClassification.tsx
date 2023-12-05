@@ -8,6 +8,8 @@ import {
 } from "@shared/types/statement";
 import { AttributeIcon, Button, ButtonGroup, Dropdown } from "components";
 import {
+  AttributeMultiDropdown,
+  BasicDropdown,
   ElvlButtonGroup,
   EntityDropzone,
   EntitySuggester,
@@ -185,7 +187,22 @@ export const StatementEditorActantClassification: React.FC<
       {isExpanded && (
         <StyledExpandedRow>
           <div>
-            <Dropdown
+            <AttributeMultiDropdown
+              width={130}
+              disabled={!userCanEdit}
+              placeholder="mood"
+              tooltipLabel="mood"
+              icon={<AttributeIcon attributeName="mood" />}
+              options={moodDict}
+              value={classification.mood}
+              onChange={(newValues) => {
+                handleUpdate({
+                  mood: newValues,
+                });
+              }}
+            />
+
+            {/* <Dropdown
               width={130}
               isMulti
               disabled={!userCanEdit}
@@ -204,7 +221,7 @@ export const StatementEditorActantClassification: React.FC<
                 });
               }}
               attributeDropdown
-            />
+            /> */}
           </div>
           <div>
             <MoodVariantButtonGroup
@@ -215,7 +232,21 @@ export const StatementEditorActantClassification: React.FC<
             />
           </div>
           <div>
-            <Dropdown
+            <BasicDropdown
+              width={110}
+              placeholder="certainty"
+              tooltipLabel="certainty"
+              icon={<AttributeIcon attributeName="certainty" />}
+              disabled={!userCanEdit}
+              options={certaintyDict}
+              value={classification.certainty}
+              onChange={(newValue) => {
+                handleUpdate({
+                  certainty: newValue,
+                });
+              }}
+            />
+            {/* <Dropdown
               width={110}
               placeholder="certainty"
               tooltipLabel="certainty"
@@ -230,7 +261,7 @@ export const StatementEditorActantClassification: React.FC<
                   certainty: selectedOption[0].value as EntityEnums.Certainty,
                 });
               }}
-            />
+            /> */}
           </div>
         </StyledExpandedRow>
       )}

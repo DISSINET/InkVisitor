@@ -52,9 +52,6 @@ interface Dropdown {
 
   // for logging purposes
   loggerId?: string;
-
-  // TODO: not implemented yet
-  allowAny?: boolean;
 }
 export const Dropdown: React.FC<Dropdown> = ({
   options = [],
@@ -81,17 +78,14 @@ export const Dropdown: React.FC<Dropdown> = ({
   attributeDropdown,
 
   loggerId,
-
-  allowAny = false,
 }) => {
-  const optionsWithIterator = options[Symbol.iterator]();
   const isOneOptionSingleEntitySelect =
     options.length < 2 && !isMulti && entityDropdown;
 
-  const [displayValue, setDisplayValue] = useState(value);
-  useEffect(() => {
-    setDisplayValue(value);
-  }, [value]);
+  // const [displayValue, setDisplayValue] = useState(value);
+  // useEffect(() => {
+  //   setDisplayValue(value);
+  // }, [value]);
 
   const [referenceElement, setReferenceElement] =
     useState<HTMLButtonElement | null>(null);
@@ -136,7 +130,7 @@ export const Dropdown: React.FC<Dropdown> = ({
             MenuPortal,
           }}
           isSearchable={!disableTyping}
-          value={displayValue}
+          value={value}
           icon={icon}
           styles={{
             dropdownIndicator: () => {
@@ -174,10 +168,12 @@ export const Dropdown: React.FC<Dropdown> = ({
                 allEntities.value
               ) {
                 // kdyz vyberu all option
-                return onChange([allEntities, ...options]);
+                return onChange(options);
+                // return onChange([allEntities, ...options]);
               }
               let result: DropdownItem[] = [];
-              if (selectedOptions.length === options.length) {
+              // TODO: -1 depends on any / empty -> has to be custom
+              if (selectedOptions.length === options.length - 1) {
                 // kdyz jsou vybrany vsechny
                 if (selectedOptions.includes(allEntities)) {
                   //
@@ -186,7 +182,8 @@ export const Dropdown: React.FC<Dropdown> = ({
                       option.value !== allEntities.value
                   );
                 } else if (event.action === "select-option") {
-                  result = [allEntities, ...options];
+                  result = options;
+                  // result = [allEntities, ...options];
                 }
                 return onChange(result);
               }
@@ -195,11 +192,12 @@ export const Dropdown: React.FC<Dropdown> = ({
           }}
           // TODO: condition - allEntities only when any necessary
           options={
-            isMulti
-              ? entityDropdown
-                ? [empty, allEntities, ...optionsWithIterator]
-                : [allEntities, ...optionsWithIterator]
-              : options
+            options
+            // isMulti
+            //   ? entityDropdown
+            //     ? [empty, allEntities, ...options]
+            //     : [allEntities, ...options]
+            //   : options
           }
           width={width}
           hideSelectedOptions={hideSelectedOptions}
@@ -333,12 +331,6 @@ const MultiValue = (props: MultiValueProps<any>): React.ReactElement => {
         >
           {labelToBeDisplayed}
         </StyledEntityMultiValue>
-      </components.MultiValue>
-    );
-  } else if (attributeDropdown) {
-    return (
-      <components.MultiValue {...props}>
-        <span>{labelToBeDisplayed}</span>
       </components.MultiValue>
     );
   }

@@ -2,6 +2,7 @@ import { IEntity, IProp } from "@shared/types";
 import { excludedSuggesterEntities } from "Theme/constants";
 import { AttributeIcon, Button, Dropdown } from "components";
 import {
+  BasicDropdown,
   ElvlButtonGroup,
   EntityDropzone,
   EntitySuggester,
@@ -155,45 +156,76 @@ export const PropGroupRowType: React.FC<PropGroupRowType> = ({
               />
             )}
             {!disabledAttributes.type?.includes("virtuality") && (
-              <Dropdown
+              <BasicDropdown
                 width={100}
                 placeholder="virtuality"
                 tooltipLabel="virtuality"
                 icon={<AttributeIcon attributeName="virtuality" />}
                 disabled={!userCanEdit}
                 options={virtualityDict}
-                value={virtualityDict.find(
-                  (i: any) => prop.type.virtuality === i.value
-                )}
-                onChange={(selectedOption) => {
+                value={prop.type.virtuality}
+                onChange={(newValue) => {
                   updateProp(prop.id, {
-                    type: { ...prop.type, virtuality: selectedOption[0].value },
+                    type: { ...prop.type, virtuality: newValue },
                   });
                 }}
               />
+              // <Dropdown
+              //   width={100}
+              //   placeholder="virtuality"
+              //   tooltipLabel="virtuality"
+              //   icon={<AttributeIcon attributeName="virtuality" />}
+              //   disabled={!userCanEdit}
+              //   options={virtualityDict}
+              //   value={virtualityDict.find(
+              //     (i: any) => prop.type.virtuality === i.value
+              //   )}
+              //   onChange={(selectedOption) => {
+              //     updateProp(prop.id, {
+              //       type: { ...prop.type, virtuality: selectedOption[0].value },
+              //     });
+              //   }}
+              // />
             )}
           </StyledAttributesFlexRow>
           <StyledAttributesFlexRow>
             {!disabledAttributes.type?.includes("partitivity") && (
-              <Dropdown
+              <BasicDropdown
                 width={150}
                 placeholder="partitivity"
                 tooltipLabel="partitivity"
                 icon={<AttributeIcon attributeName="partitivity" />}
                 disabled={!userCanEdit}
                 options={partitivityDict}
-                value={partitivityDict.find(
-                  (i) => prop.type.partitivity === i.value
-                )}
-                onChange={(selectedOption) => {
+                value={prop.type.partitivity}
+                onChange={(newValue) => {
                   updateProp(prop.id, {
                     type: {
                       ...prop.type,
-                      partitivity: selectedOption[0].value,
+                      partitivity: newValue,
                     },
                   });
                 }}
               />
+              // <Dropdown
+              //   width={150}
+              //   placeholder="partitivity"
+              //   tooltipLabel="partitivity"
+              //   icon={<AttributeIcon attributeName="partitivity" />}
+              //   disabled={!userCanEdit}
+              //   options={partitivityDict}
+              //   value={partitivityDict.find(
+              //     (i) => prop.type.partitivity === i.value
+              //   )}
+              //   onChange={(selectedOption) => {
+              //     updateProp(prop.id, {
+              //       type: {
+              //         ...prop.type,
+              //         partitivity: selectedOption[0].value,
+              //       },
+              //     });
+              //   }}
+              // />
             )}
           </StyledAttributesFlexRow>
         </>

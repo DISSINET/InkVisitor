@@ -20,6 +20,7 @@ import {
   Dropdown,
 } from "components";
 import {
+  BasicDropdown,
   ElvlButtonGroup,
   EntityDropzone,
   EntitySuggester,
@@ -471,7 +472,21 @@ export const StatementEditorActantTableRow: React.FC<
           {isExpanded && !isDraggingActant && (
             <StyledExpandedRow>
               <div>
-                <Dropdown
+                <BasicDropdown
+                  width={90}
+                  placeholder="virtuality"
+                  tooltipLabel="virtuality"
+                  icon={<AttributeIcon attributeName="virtuality" />}
+                  disabled={!userCanEdit}
+                  options={virtualityDict}
+                  value={sActant.virtuality}
+                  onChange={(newValue) => {
+                    updateActant(sActant.id, {
+                      virtuality: newValue,
+                    });
+                  }}
+                />
+                {/* <Dropdown
                   width={90}
                   placeholder="virtuality"
                   tooltipLabel="virtuality"
@@ -479,17 +494,31 @@ export const StatementEditorActantTableRow: React.FC<
                   disabled={!userCanEdit}
                   options={virtualityDict}
                   value={virtualityDict.find(
-                    (i: any) => sActant.virtuality === i.value
+                    (i) => sActant.virtuality === i.value
                   )}
                   onChange={(selectedOption) => {
                     updateActant(sActant.id, {
                       virtuality: selectedOption[0].value,
                     });
                   }}
-                />
+                /> */}
               </div>
               <div>
-                <Dropdown
+                <BasicDropdown
+                  width={120}
+                  placeholder="partitivity"
+                  tooltipLabel="partitivity"
+                  icon={<AttributeIcon attributeName="partitivity" />}
+                  disabled={!userCanEdit}
+                  options={partitivityDict}
+                  value={sActant.partitivity}
+                  onChange={(newValue) => {
+                    updateActant(sActant.id, {
+                      partitivity: newValue,
+                    });
+                  }}
+                />
+                {/* <Dropdown
                   width={120}
                   placeholder="partitivity"
                   tooltipLabel="partitivity"
@@ -504,10 +533,24 @@ export const StatementEditorActantTableRow: React.FC<
                       partitivity: selectedOption[0].value,
                     });
                   }}
-                />
+                /> */}
               </div>
               <div>
-                <Dropdown
+                <BasicDropdown
+                  width={70}
+                  placeholder="logical operator"
+                  tooltipLabel="logical operator"
+                  icon={<AttributeIcon attributeName="bundleOperator" />}
+                  disabled={!userCanEdit}
+                  options={operatorDict}
+                  value={sActant.bundleOperator}
+                  onChange={(newValue) => {
+                    updateActant(sActant.id, {
+                      bundleOperator: newValue,
+                    });
+                  }}
+                />
+                {/* <Dropdown
                   width={70}
                   placeholder="logical operator"
                   tooltipLabel="logical operator"
@@ -522,7 +565,7 @@ export const StatementEditorActantTableRow: React.FC<
                       bundleOperator: selectedOption[0].value,
                     });
                   }}
-                />
+                /> */}
               </div>
               <div>
                 <BundleButtonGroup

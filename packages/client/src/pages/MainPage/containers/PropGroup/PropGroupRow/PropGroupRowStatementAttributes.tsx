@@ -3,6 +3,8 @@ import { allEntities } from "@shared/dictionaries/entity";
 import { IProp } from "@shared/types";
 import { AttributeIcon, BundleButtonGroup, Dropdown } from "components";
 import {
+  AttributeMultiDropdown,
+  BasicDropdown,
   ElvlButtonGroup,
   LogicButtonGroup,
   MoodVariantButtonGroup,
@@ -51,27 +53,42 @@ export const PropGroupRowStatementAttributes: React.FC<
           />
         )}
         {!disabledAttributes.statement?.includes("mood") && (
-          <Dropdown
+          <AttributeMultiDropdown
             width={131}
-            isMulti
             disabled={!userCanEdit}
             placeholder="mood"
             tooltipLabel="mood"
             icon={<AttributeIcon attributeName="mood" />}
             options={moodDict}
-            value={[allEntities]
-              .concat(moodDict)
-              .filter((i) => prop.mood.includes(i.value as EntityEnums.Mood))}
-            onChange={(selectedOptions) => {
+            value={prop.mood}
+            onChange={(newValues) => {
               updateProp(prop.id, {
                 ...prop,
-                mood: selectedOptions
-                  ? selectedOptions.map((v) => v.value)
-                  : [],
+                mood: newValues,
               });
             }}
-            attributeDropdown
           />
+          // <Dropdown
+          //   width={131}
+          //   isMulti
+          //   disabled={!userCanEdit}
+          //   placeholder="mood"
+          //   tooltipLabel="mood"
+          //   icon={<AttributeIcon attributeName="mood" />}
+          //   options={moodDict}
+          //   value={[allEntities]
+          //     .concat(moodDict)
+          //     .filter((i) => prop.mood.includes(i.value as EntityEnums.Mood))}
+          //   onChange={(selectedOptions) => {
+          //     updateProp(prop.id, {
+          //       ...prop,
+          //       mood: selectedOptions
+          //         ? selectedOptions.map((v) => v.value)
+          //         : [],
+          //     });
+          //   }}
+          //   attributeDropdown
+          // />
         )}
         {!disabledAttributes.statement?.includes("moodvariant") && (
           <MoodVariantButtonGroup
@@ -102,23 +119,38 @@ export const PropGroupRowStatementAttributes: React.FC<
               />
             )}
             {!disabledAttributes.statement?.includes("bundleOperator") && (
-              <Dropdown
+              <BasicDropdown
                 width={70}
                 placeholder="logical operator"
                 tooltipLabel="logical operator"
                 icon={<AttributeIcon attributeName="bundleOperator" />}
                 disabled={!userCanEdit}
                 options={operatorDict}
-                value={operatorDict.find(
-                  (i: any) => prop.bundleOperator === i.value
-                )}
-                onChange={(selectedOption) => {
+                value={prop.bundleOperator}
+                onChange={(newValue) => {
                   updateProp(prop.id, {
                     ...prop,
-                    bundleOperator: selectedOption[0].value,
+                    bundleOperator: newValue,
                   });
                 }}
               />
+              // <Dropdown
+              //   width={70}
+              //   placeholder="logical operator"
+              //   tooltipLabel="logical operator"
+              //   icon={<AttributeIcon attributeName="bundleOperator" />}
+              //   disabled={!userCanEdit}
+              //   options={operatorDict}
+              //   value={operatorDict.find(
+              //     (i: any) => prop.bundleOperator === i.value
+              //   )}
+              //   onChange={(selectedOption) => {
+              //     updateProp(prop.id, {
+              //       ...prop,
+              //       bundleOperator: selectedOption[0].value,
+              //     });
+              //   }}
+              // />
             )}
             {/* Bundle start|end */}
             <BundleButtonGroup
@@ -142,21 +174,36 @@ export const PropGroupRowStatementAttributes: React.FC<
           {/* ROW */}
           <StyledAttributesFlexRow>
             {!disabledAttributes.statement?.includes("certainty") && (
-              <Dropdown
+              <BasicDropdown
                 width={122}
                 placeholder="certainty"
                 tooltipLabel="certainty"
                 icon={<AttributeIcon attributeName="certainty" />}
                 disabled={!userCanEdit}
                 options={certaintyDict}
-                value={certaintyDict.find((i) => prop.certainty === i.value)}
-                onChange={(selectedOption) => {
+                value={prop.certainty}
+                onChange={(newValue) => {
                   updateProp(prop.id, {
                     ...prop,
-                    certainty: selectedOption[0].value,
+                    certainty: newValue,
                   });
                 }}
               />
+              // <Dropdown
+              //   width={122}
+              //   placeholder="certainty"
+              //   tooltipLabel="certainty"
+              //   icon={<AttributeIcon attributeName="certainty" />}
+              //   disabled={!userCanEdit}
+              //   options={certaintyDict}
+              //   value={certaintyDict.find((i) => prop.certainty === i.value)}
+              //   onChange={(selectedOption) => {
+              //     updateProp(prop.id, {
+              //       ...prop,
+              //       certainty: selectedOption[0].value,
+              //     });
+              //   }}
+              // />
             )}
           </StyledAttributesFlexRow>
         </>

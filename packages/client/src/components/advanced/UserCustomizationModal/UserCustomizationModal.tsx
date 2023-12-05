@@ -19,6 +19,8 @@ import {
 } from "components";
 import {
   AttributeButtonGroup,
+  AttributeMultiDropdown,
+  BasicDropdown,
   EntitySuggester,
   EntityTag,
 } from "components/advanced";
@@ -39,27 +41,9 @@ import { UserRightItem } from "./UserRightItem/UserRightItem";
 interface DataObject {
   name: string;
   email: string;
-  defaultLanguage:
-    | {
-        label: string;
-        value: EntityEnums.Language;
-      }
-    | undefined;
-  defaultStatementLanguage:
-    | {
-        label: string;
-        value: EntityEnums.Language;
-      }
-    | undefined;
-  searchLanguages:
-    | (
-        | {
-            label: string;
-            value: EntityEnums.Language;
-          }
-        | undefined
-      )[]
-    | [];
+  defaultLanguage: EntityEnums.Language;
+  defaultStatementLanguage: EntityEnums.Language;
+  searchLanguages: EntityEnums.Language[];
   defaultTerritory?: string | null;
   hideStatementElementsOrderTable?: boolean;
 }
@@ -72,7 +56,6 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
   onClose = () => {},
 }) => {
   const [showModal, setShowModal] = useState(false);
-
   useEffect(() => {
     setShowModal(true);
   }, []);
@@ -80,22 +63,23 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
   const initialValues: DataObject = useMemo(() => {
     const { options, name, email } = user;
 
-    const defaultLanguageObject = languageDict.find(
-      (i: any) => i.value === options.defaultLanguage
-    );
-    const defaultStatementLanguageObject = languageDict.find(
-      (i: any) => i.value === options.defaultStatementLanguage
-    );
-    const searchLanguagesObject = options.searchLanguages.map((sL) => {
-      return languageDict.find((i: any) => i.value === sL);
-    });
+    // const defaultLanguageObject =
+    //   languageDict.find((i) => i.value === options.defaultLanguage) ??
+    //   {label: , value: EntityEnums.Language.Empty};
+    // const defaultStatementLanguageObject =
+    //   languageDict.find((i) => i.value === options.defaultStatementLanguage) ??
+    //   {label: , value: EntityEnums.Language.Empty};
+    // const searchLanguagesObject = options.searchLanguages.map((sL) => {
+    //   return languageDict.find((i) => i.value === sL);
+    // });
 
     return {
       name: name,
       email: email,
-      defaultLanguage: defaultLanguageObject,
-      defaultStatementLanguage: defaultStatementLanguageObject,
-      searchLanguages: searchLanguagesObject,
+      defaultLanguage: options.defaultLanguage ?? EntityEnums.Language.Empty,
+      defaultStatementLanguage:
+        options.defaultStatementLanguage ?? EntityEnums.Language.Empty,
+      searchLanguages: options.searchLanguages,
       defaultTerritory: options.defaultTerritory,
       hideStatementElementsOrderTable: options.hideStatementElementsOrderTable,
     };
@@ -172,11 +156,9 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
         name: data.name,
         email: data.email,
         options: {
-          defaultLanguage:
-            data.defaultLanguage?.value || EntityEnums.Language.Empty,
-          defaultStatementLanguage:
-            data.defaultStatementLanguage?.value || EntityEnums.Language.Empty,
-          searchLanguages: data.searchLanguages?.map((sL) => sL?.value),
+          defaultLanguage: data.defaultLanguage,
+          defaultStatementLanguage: data.defaultStatementLanguage,
+          searchLanguages: data.searchLanguages.map((sL) => sL),
           defaultTerritory: data.defaultTerritory,
           hideStatementElementsOrderTable: data.hideStatementElementsOrderTable,
         },
@@ -326,32 +308,49 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
             <ModalInputForm>
               <ModalInputLabel>{"default language"}</ModalInputLabel>
               <ModalInputWrap width={165}>
-                <Dropdown
+                <BasicDropdown
+                  width="full"
+                  value={defaultLanguage}
+                  onChange={(newValue) =>
+                    handleChange("defaultLanguage", newValue)
+                  }
+                  options={languageDict}
+                />
+                {/* <Dropdown
                   width="full"
                   value={defaultLanguage}
                   onChange={(selectedOption) =>
                     handleChange("defaultLanguage", selectedOption[0])
                   }
                   options={languageDict}
-                />
+                /> */}
               </ModalInputWrap>
               <ModalInputLabel>{"statement language"}</ModalInputLabel>
               <ModalInputWrap width={165}>
-                <Dropdown
+                <BasicDropdown
+                  width="full"
+                  value={defaultStatementLanguage}
+                  onChange={(newValue) =>
+                    handleChange("defaultStatementLanguage", newValue)
+                  }
+                  options={languageDict}
+                />
+                {/* <Dropdown
                   width="full"
                   value={defaultStatementLanguage}
                   onChange={(selectedOption) =>
                     handleChange("defaultStatementLanguage", selectedOption[0])
                   }
                   options={languageDict}
-                />
+                /> */}
               </ModalInputWrap>
+
+              {/* NOT USED NOW */}
               {/* <ModalInputLabel>{"search languages"}</ModalInputLabel>
                 <ModalInputWrap width={165}>
-                  <Dropdown
+                  <AttributeMultiDropdown
                     value={data.searchLanguages}
                     width="full"
-                    isMulti
                     onChange={(selectedOption) =>
                       handleChange("searchLanguages", selectedOption)
                     }
@@ -360,6 +359,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                     )}
                   />
                 </ModalInputWrap> */}
+
               <ModalInputLabel>{"default territory"}</ModalInputLabel>
               <ModalInputWrap width={165}>
                 {territory ? (

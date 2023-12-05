@@ -22,7 +22,7 @@ import {
   ModalInputLabel,
   ModalInputWrap,
 } from "components";
-import { EntitySuggester, EntityTag } from "components/advanced";
+import { BasicDropdown, EntitySuggester, EntityTag } from "components/advanced";
 import { CEntity, CStatement, CTerritory } from "constructors";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
@@ -57,9 +57,8 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
       : { value: categories[0].value, label: categories[0].value }
   );
 
-  const [selectedLanguage, setSelectedLanguage] = useState<
-    EntityEnums.Language | false
-  >(false);
+  const [selectedLanguage, setSelectedLanguage] =
+    useState<EntityEnums.Language>(EntityEnums.Language.Empty);
 
   const userId = localStorage.getItem("userid");
   const {
@@ -102,7 +101,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
       label: string;
       entityClass: EntityEnums.Class;
       detail?: string;
-      language: EntityEnums.Language | false;
+      language: EntityEnums.Language | null;
       territoryId?: string;
     } = {
       label: label,
@@ -238,7 +237,15 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
             </ModalInputWrap>
             <ModalInputLabel>{"Language: "}</ModalInputLabel>
             <ModalInputWrap>
-              <Dropdown
+              <BasicDropdown
+                width="full"
+                options={languageDict}
+                value={selectedLanguage}
+                onChange={(newValue) => {
+                  setSelectedLanguage(newValue as EntityEnums.Language);
+                }}
+              />
+              {/* <Dropdown
                 width="full"
                 options={languageDict}
                 value={languageDict.find((i) => i.value === selectedLanguage)}
@@ -247,7 +254,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
                     newValue[0].value as EntityEnums.Language
                   );
                 }}
-              />
+              /> */}
             </ModalInputWrap>
             {/* Suggester territory */}
             {(selectedCategory.value === "T" ||
