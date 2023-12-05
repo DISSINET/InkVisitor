@@ -1,4 +1,4 @@
-import { Dropdown } from "components";
+import { BaseDropdown } from "components";
 import React from "react";
 
 interface EntitySingleDropdown<T = string> {
@@ -32,7 +32,7 @@ export const EntitySingleDropdown = <T extends string>({
   loggerId,
 }: EntitySingleDropdown<T>) => {
   return (
-    <Dropdown
+    <BaseDropdown
       entityDropdown
       width={width}
       value={options.find((o) => o.value === value)}

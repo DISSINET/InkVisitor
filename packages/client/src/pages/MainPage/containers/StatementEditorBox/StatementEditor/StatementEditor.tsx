@@ -17,14 +17,14 @@ import { excludedSuggesterEntities } from "Theme/constants";
 import theme from "Theme/theme";
 import api from "api";
 import {
+  BaseDropdown,
   Button,
-  Dropdown,
   Input,
   Message,
   MultiInput,
   Submit,
 } from "components";
-import {
+import Dropdown, {
   ApplyTemplateModal,
   AuditTable,
   BreadcrumbItem,
@@ -695,7 +695,17 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 Apply Template
               </StyledEditorContentRowLabel>
               <StyledEditorContentRowValue>
-                <Dropdown
+                {/* <Dropdown.Single.Basic
+                  placeholder="select template.."
+                  disabled={!userCanEdit || templateOptions.length === 0}
+                  width="full"
+                  value={null}
+                  options={templateOptions}
+                  onChange={(templateToApply) => {
+                    handleAskForTemplateApply(templateToApply);
+                  }}
+                /> */}
+                <BaseDropdown
                   placeholder="select template.."
                   disabled={!userCanEdit || templateOptions.length === 0}
                   width="full"

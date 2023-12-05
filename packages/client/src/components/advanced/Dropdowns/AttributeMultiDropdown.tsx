@@ -1,6 +1,6 @@
 import { allEntities } from "@shared/dictionaries/entity";
 import { EntityEnums } from "@shared/enums";
-import { Dropdown } from "components";
+import { BaseDropdown } from "components";
 import React from "react";
 
 interface AttributeMultiDropdown<T = string> {
@@ -28,7 +28,7 @@ export const AttributeMultiDropdown = <T extends string>({
   loggerId,
 }: AttributeMultiDropdown<T>) => {
   return (
-    <Dropdown
+    <BaseDropdown
       // TODO: hopefully get rid of this prop
       attributeDropdown
       isMulti

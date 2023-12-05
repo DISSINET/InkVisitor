@@ -1,8 +1,8 @@
-import { allEntities, empty } from "@shared/dictionaries/entity";
+import { allEntities } from "@shared/dictionaries/entity";
 import { EntityEnums } from "@shared/enums";
 import { heightHeader } from "Theme/constants";
 import { Tooltip } from "components";
-import React, { ReactNode, useEffect, useState } from "react";
+import React, { ReactNode, useState } from "react";
 import { FaCheckSquare, FaRegSquare } from "react-icons/fa";
 import {
   ActionMeta,
@@ -22,9 +22,9 @@ import {
   StyledIconWrap,
   StyledSelect,
   StyledSelectWrapper,
-} from "./DropdownStyles";
+} from "./BaseDropdownStyles";
 
-interface Dropdown {
+interface BaseDropdown {
   options?: DropdownItem[];
   value?: DropdownItem | DropdownItem[] | null;
   onChange: (selectedOption: DropdownItem[]) => void;
@@ -53,7 +53,7 @@ interface Dropdown {
   // for logging purposes
   loggerId?: string;
 }
-export const Dropdown: React.FC<Dropdown> = ({
+export const BaseDropdown: React.FC<BaseDropdown> = ({
   options = [],
   value,
   onChange,

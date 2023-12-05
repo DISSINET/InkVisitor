@@ -7,10 +7,9 @@ import { IRequestSearch } from "@shared/types/request-search";
 import { useQuery } from "@tanstack/react-query";
 import { wildCardChar } from "Theme/constants";
 import api from "api";
-import { Button, Dropdown, Input, Loader, TypeBar } from "components";
-import {
+import { BaseDropdown, Button, Input, Loader, TypeBar } from "components";
+import Dropdown, {
   AttributeButtonGroup,
-  EntitySingleDropdown,
   EntitySuggester,
   EntityTag,
 } from "components/advanced";
@@ -71,8 +70,11 @@ const anyTemplate: DropdownItem = {
 const debounceTime: number = 500;
 
 export const EntitySearchBox: React.FC = () => {
-  const [classOption, setClassOption] =
-    useState<DropdownItem>(defaultClassOption);
+  const [classOption, setClassOption] = useState<EntityEnums.Class>(
+    defaultClassOption.value as EntityEnums.Class
+  );
+  // const [classOption, setClassOption] =
+  //   useState<DropdownItem>(defaultClassOption);
   const [templateOption, setTemplateOption] =
     useState<DropdownItem>(defaultClassOption);
   const [searchData, setSearchData] = useState<IRequestSearch>(initValues);
@@ -190,8 +192,8 @@ export const EntitySearchBox: React.FC = () => {
     { enabled: api.isLoggedIn() }
   );
 
-  const classOptions: DropdownItem[] = entitiesDict.filter(
-    (e) => e.value !== "R" && e.value !== "X"
+  const classOptions = entitiesDict.filter(
+    (e) => e.value !== EntityEnums.Class.Resource
   );
 
   // apply changes to search parameters
@@ -261,7 +263,7 @@ export const EntitySearchBox: React.FC = () => {
       setSearchData({
         label: searchData.label,
       });
-      setClassOption(defaultClassOption);
+      setClassOption(defaultClassOption.value as EntityEnums.Class);
     }
   }, [showAdvancedOptions]);
 
@@ -317,21 +319,21 @@ export const EntitySearchBox: React.FC = () => {
             <StyledRow>
               <StyledRowHeader>class</StyledRowHeader>
               <div style={{ position: "relative" }}>
-                {/* <EntitySingleDropdown
+                <Dropdown.Single.Entity
                   placeholder={""}
                   width="full"
                   options={[defaultClassOption].concat(classOptions)}
-                  value={classOption.value}
+                  value={classOption}
                   onChange={(selectedOption) => {
-                    setClassOption(selectedOption);
+                    setClassOption(selectedOption as EntityEnums.Class);
                     setTemplateOption(defaultClassOption);
                     handleChange({
-                      class: selectedOption[0].value,
+                      class: selectedOption,
                       usedTemplate: defaultClassOption.value,
                     });
                   }}
-                /> */}
-                <Dropdown
+                />
+                {/* <BaseDropdown
                   placeholder={""}
                   width="full"
                   entityDropdown
@@ -345,8 +347,8 @@ export const EntitySearchBox: React.FC = () => {
                       usedTemplate: defaultClassOption.value,
                     });
                   }}
-                />
-                <TypeBar entityLetter={(classOption as DropdownItem).value} />
+                /> */}
+                <TypeBar entityLetter={classOption} />
               </div>
             </StyledRow>
             <StyledRow>
@@ -363,7 +365,7 @@ export const EntitySearchBox: React.FC = () => {
             <StyledRow>
               <StyledRowHeader>status</StyledRowHeader>
               <div style={{ position: "relative" }}>
-                <Dropdown
+                <BaseDropdown
                   placeholder={""}
                   width="full"
                   options={statusOptions}
@@ -374,13 +376,13 @@ export const EntitySearchBox: React.FC = () => {
                     });
                   }}
                 />
-                <TypeBar entityLetter={(classOption as DropdownItem).value} />
+                <TypeBar entityLetter={classOption} />
               </div>
             </StyledRow>
             <StyledRow>
               <StyledRowHeader>language</StyledRowHeader>
               <div style={{ position: "relative" }}>
-                <Dropdown
+                <BaseDropdown
                   placeholder={""}
                   width="full"
                   options={languageOptions}
@@ -391,12 +393,12 @@ export const EntitySearchBox: React.FC = () => {
                     });
                   }}
                 />
-                <TypeBar entityLetter={(classOption as DropdownItem).value} />
+                <TypeBar entityLetter={classOption} />
               </div>
             </StyledRow>
             {/* <StyledRow>
             <StyledRowHeader>template</StyledRowHeader>
-            <Dropdown
+            <BaseDropdown
               placeholder={""}
               width="full"
               options={[defaultClassOption].concat(templateOptions)}

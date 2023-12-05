@@ -1,5 +1,5 @@
 import { allEntities, empty } from "@shared/dictionaries/entity";
-import { Dropdown } from "components";
+import { BaseDropdown } from "components";
 import React from "react";
 
 interface EntityMultiDropdown<T = string> {
@@ -25,7 +25,7 @@ export const EntityMultiDropdown = <T extends string>({
   loggerId,
 }: EntityMultiDropdown<T>) => {
   return (
-    <Dropdown
+    <BaseDropdown
       entityDropdown
       width={width}
       isMulti

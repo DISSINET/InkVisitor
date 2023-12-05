@@ -91,6 +91,4 @@ export const classesAll = [
   EntityEnums.Class.Value,
 ];
 
-export const entitiesDict: DropdownItem[] = classesAll.map(
-  (c) => entitiesDictKeys[c]
-);
+export const entitiesDict = classesAll.map((c) => entitiesDictKeys[c]);

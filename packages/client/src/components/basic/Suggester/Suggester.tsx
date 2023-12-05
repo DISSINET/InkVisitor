@@ -10,8 +10,8 @@ import { IEntity, IUserOptions } from "@shared/types";
 import { DropdownAny, scrollOverscanCount } from "Theme/constants";
 import theme from "Theme/theme";
 import {
+  BaseDropdown,
   Button,
-  Dropdown,
   Input,
   Loader,
   TemplateActionModal,
@@ -267,7 +267,7 @@ export const Suggester: React.FC<Suggester> = ({
           isOver={isOver}
           hasText={typed.length > 0}
         >
-          <Dropdown
+          <BaseDropdown
             value={{ label: category.label, value: category.value }}
             options={categories}
             onChange={onChangeCategory}

@@ -5,7 +5,6 @@ import api from "api";
 import {
   Button,
   ButtonGroup,
-  Dropdown,
   Input,
   Modal,
   ModalContent,
@@ -23,6 +22,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { DropdownItem } from "types";
 import { getShortLabelByLetterCount } from "utils";
+import Dropdown from "components/advanced";
 
 interface TemplateListCreateModal {
   showCreateModal: boolean;
@@ -41,7 +41,7 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
   } = useSearchParams();
 
   const [createModalEntityClass, setCreateModalEntityClass] =
-    useState<DropdownItem>(entitiesDict[0]);
+    useState<EntityEnums.Class>(entitiesDict[0].value);
   const [createModalEntityLabel, setCreateModalEntityLabel] =
     useState<string>("");
   const [createModalEntityDetail, setCreateModalEntityDetail] =
@@ -50,7 +50,7 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
   const resetCreateModal = () => {
     setCreateModalEntityLabel("");
     setCreateModalEntityDetail("");
-    setCreateModalEntityClass(entitiesDict[0]);
+    setCreateModalEntityClass(entitiesDict[0].value);
   };
 
   const handleCloseCreateModal = () => {
@@ -119,7 +119,7 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
     if (user) {
       const newTemplate = CEntity(
         user.options,
-        createModalEntityClass.value as EntityEnums.Class,
+        createModalEntityClass,
         createModalEntityLabel,
         createModalEntityDetail
       );
@@ -133,7 +133,7 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
   const handleCreateTemplate = () => {
     if (user) {
       const entity =
-        createModalEntityClass.value === EntityEnums.Class.Statement
+        createModalEntityClass === EntityEnums.Class.Statement
           ? handleCreateNewStatementTemplate()
           : handleCreateNewEntityTemplate();
 
@@ -167,7 +167,17 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
         <ModalInputForm>
           <ModalInputLabel>{"Entity type: "}</ModalInputLabel>
           <ModalInputWrap>
-            <Dropdown
+            <Dropdown.Single.Entity
+              value={createModalEntityClass}
+              options={entitiesDict}
+              onChange={(selectedOption) => {
+                setCreateModalEntityClass(selectedOption);
+              }}
+              width={100}
+              disableTyping
+              autoFocus
+            />
+            {/* <Dropdown
               value={{
                 label: createModalEntityClass.label,
                 value: createModalEntityClass.value,
@@ -180,8 +190,8 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
               entityDropdown
               disableTyping
               autoFocus
-            />
-            <TypeBar entityLetter={createModalEntityClass.value} />
+            /> */}
+            <TypeBar entityLetter={createModalEntityClass} />
           </ModalInputWrap>
           <ModalInputLabel>{"Label: "}</ModalInputLabel>
           <ModalInputWrap>

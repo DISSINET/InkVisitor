@@ -12,7 +12,7 @@ import { UseMutationResult, useQuery } from "@tanstack/react-query";
 import { rootTerritoryId } from "Theme/constants";
 import api from "api";
 import { AxiosResponse } from "axios";
-import { Button, Dropdown, Input, MultiInput, TypeBar } from "components";
+import { BaseDropdown, Button, Input, MultiInput, TypeBar } from "components";
 import { AttributeButtonGroup, EntityTag } from "components/advanced";
 import React, { useMemo } from "react";
 import { FaRegCopy } from "react-icons/fa";
@@ -129,7 +129,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
               </StyledDetailContentRowLabel>
               <StyledDetailContentRowValue>
                 <StyledRelativePosition>
-                  <Dropdown
+                  <BaseDropdown
                     value={{
                       label: entitiesDictKeys[entity.class].label,
                       value: entitiesDictKeys[entity.class].value,
@@ -159,7 +159,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
               Apply Template
             </StyledDetailContentRowLabel>
             <StyledDetailContentRowValue>
-              <Dropdown
+              <BaseDropdown
                 placeholder="select template.."
                 disabled={!userCanEdit || templateOptions.length === 0}
                 width="full"
@@ -299,7 +299,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
               Label language
             </StyledDetailContentRowLabel>
             <StyledDetailContentRowValue>
-              <Dropdown
+              <BaseDropdown
                 disabled={!userCanEdit}
                 width="full"
                 options={languageDict}
@@ -324,7 +324,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                 Part of Speech
               </StyledDetailContentRowLabel>
               <StyledDetailContentRowValue>
-                <Dropdown
+                <BaseDropdown
                   disabled={!userCanEdit}
                   width="full"
                   options={actionPartOfSpeechDict}
@@ -352,7 +352,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                 Part of Speech
               </StyledDetailContentRowLabel>
               <StyledDetailContentRowValue>
-                <Dropdown
+                <BaseDropdown
                   disabled={!userCanEdit}
                   width="full"
                   options={conceptPartOfSpeechDict}
@@ -524,7 +524,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                   Linked Document
                 </StyledDetailContentRowLabel>
                 <StyledDetailContentRowValue>
-                  <Dropdown
+                  <BaseDropdown
                     disabled={!userCanEdit}
                     value={selectedDocumentOption}
                     width="full"

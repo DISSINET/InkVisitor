@@ -1,10 +1,10 @@
-import { Dropdown } from "components";
+import { BaseDropdown } from "components";
 import React from "react";
 
 interface BasicDropdown<T = string> {
   // TODO: maybe could be generic enum value as well
   width?: number | "full";
-  value: T;
+  value: T | null;
   onChange: (value: T) => void;
   options: { label: string; value: T }[];
   icon?: JSX.Element;
@@ -27,7 +27,7 @@ export const BasicDropdown = <T extends string>({
   loggerId,
 }: BasicDropdown<T>) => {
   return (
-    <Dropdown
+    <BaseDropdown
       width={width}
       value={options.find((o) => o.value === value)}
       onChange={(value) => onChange(value[0].value as T)}
