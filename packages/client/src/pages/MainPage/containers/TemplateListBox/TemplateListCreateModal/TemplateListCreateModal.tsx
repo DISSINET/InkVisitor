@@ -1,6 +1,7 @@
 import { entitiesDict } from "@shared/dictionaries";
 import { EntityEnums, UserEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import {
   Button,
@@ -15,14 +16,12 @@ import {
   ModalInputWrap,
   TypeBar,
 } from "components";
+import Dropdown from "components/advanced";
 import { CEntity, CStatement, CTemplateEntity } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
-import { DropdownItem } from "types";
 import { getShortLabelByLetterCount } from "utils";
-import Dropdown from "components/advanced";
 
 interface TemplateListCreateModal {
   showCreateModal: boolean;

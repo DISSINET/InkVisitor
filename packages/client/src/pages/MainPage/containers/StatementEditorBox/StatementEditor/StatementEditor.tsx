@@ -181,10 +181,10 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     false
   );
 
-  const handleAskForTemplateApply = (templateOptionToApply: DropdownItem) => {
+  const handleAskForTemplateApply = (templateOptionToApply: string) => {
     if (templates) {
       const templateThatIsGoingToBeApplied = templates.find(
-        (template: IEntity) => template.id === templateOptionToApply.value
+        (template: IEntity) => template.id === templateOptionToApply
       );
 
       if (templateThatIsGoingToBeApplied) {
@@ -695,7 +695,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 Apply Template
               </StyledEditorContentRowLabel>
               <StyledEditorContentRowValue>
-                {/* <Dropdown.Single.Basic
+                <Dropdown.Single.Basic
                   placeholder="select template.."
                   disabled={!userCanEdit || templateOptions.length === 0}
                   width="full"
@@ -704,8 +704,8 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                   onChange={(templateToApply) => {
                     handleAskForTemplateApply(templateToApply);
                   }}
-                /> */}
-                <BaseDropdown
+                />
+                {/* <BaseDropdown
                   placeholder="select template.."
                   disabled={!userCanEdit || templateOptions.length === 0}
                   width="full"
@@ -714,7 +714,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                   onChange={(templateToApply) => {
                     handleAskForTemplateApply(templateToApply[0]);
                   }}
-                />
+                /> */}
               </StyledEditorContentRowValue>
             </StyledEditorContentRow>
           </StyledEditorTemplateSection>
