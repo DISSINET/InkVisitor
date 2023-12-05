@@ -1,10 +1,7 @@
 import { certaintyDict, moodDict, operatorDict } from "@shared/dictionaries";
-import { allEntities } from "@shared/dictionaries/entity";
 import { IProp } from "@shared/types";
-import { AttributeIcon, BundleButtonGroup, Dropdown } from "components";
-import {
-  AttributeMultiDropdown,
-  BasicDropdown,
+import { AttributeIcon, BundleButtonGroup } from "components";
+import Dropdown, {
   ElvlButtonGroup,
   LogicButtonGroup,
   MoodVariantButtonGroup,
@@ -15,7 +12,6 @@ import {
   StyledAttributesFlexColumn,
   StyledAttributesFlexRow,
 } from "./PropGroupRowStyles";
-import { EntityEnums } from "@shared/enums";
 
 interface PropGroupRowStatementAttributes {
   prop: IProp;
@@ -53,7 +49,7 @@ export const PropGroupRowStatementAttributes: React.FC<
           />
         )}
         {!disabledAttributes.statement?.includes("mood") && (
-          <AttributeMultiDropdown
+          <Dropdown.Multi.Attribute
             width={131}
             disabled={!userCanEdit}
             placeholder="mood"
@@ -119,7 +115,7 @@ export const PropGroupRowStatementAttributes: React.FC<
               />
             )}
             {!disabledAttributes.statement?.includes("bundleOperator") && (
-              <BasicDropdown
+              <Dropdown.Single.Basic
                 width={70}
                 placeholder="logical operator"
                 tooltipLabel="logical operator"
@@ -174,7 +170,7 @@ export const PropGroupRowStatementAttributes: React.FC<
           {/* ROW */}
           <StyledAttributesFlexRow>
             {!disabledAttributes.statement?.includes("certainty") && (
-              <BasicDropdown
+              <Dropdown.Single.Basic
                 width={122}
                 placeholder="certainty"
                 tooltipLabel="certainty"

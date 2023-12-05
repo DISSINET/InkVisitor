@@ -1,18 +1,17 @@
 import { certaintyDict } from "@shared/dictionaries";
 import { RelationEnums } from "@shared/enums";
 import { IEntity, IResponseGeneric, Relation } from "@shared/types";
+import { UseMutationResult } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
-import { Button, Dropdown } from "components";
-import { EntityTag } from "components/advanced";
 import React, { useContext, useRef } from "react";
+import Dropdown, { EntityTag } from "components/advanced";
 import {
   DragSourceMonitor,
   DropTargetMonitor,
   useDrag,
   useDrop,
 } from "react-dnd";
-import { FaGripVertical, FaUnlink } from "react-icons/fa";
-import { UseMutationResult } from "@tanstack/react-query";
+import { FaGripVertical } from "react-icons/fa";
 import { DragItem, ItemTypes } from "types";
 import { dndHoverFn } from "utils";
 import {
@@ -22,7 +21,7 @@ import {
 import { ThemeContext } from "styled-components";
 
 interface EntityDetailRelationRow {
-  relation: Relation.IRelation;
+  relation: Relation.IRelation | Relation.IIdentification;
   entityId: string;
   relationRule: Relation.RelationRule;
   relationType: RelationEnums.Type;
@@ -72,9 +71,21 @@ export const EntityDetailRelationRow: React.FC<EntityDetailRelationRow> = ({
   const shouldBeRendered = (key: number) =>
     !relationRule.asymmetrical || (relationRule.asymmetrical && key > 0);
 
-  const renderCertainty = (relation: Relation.IRelation) => (
+  const renderCertainty = (relation: Relation.IIdentification) => (
     <div>
-      <Dropdown
+      <Dropdown.Single.Basic
+        width={105}
+        placeholder="certainty"
+        options={certaintyDict}
+        value={relation.certainty}
+        onChange={(newValue) => {
+          relationUpdateMutation.mutate({
+            relationId: relation.id,
+            changes: { certainty: newValue },
+          });
+        }}
+      />
+      {/* <Dropdown
         width={105}
         placeholder="certainty"
         options={certaintyDict}
@@ -92,7 +103,7 @@ export const EntityDetailRelationRow: React.FC<EntityDetailRelationRow> = ({
             changes: { certainty: selectedOption[0].value as string },
           });
         }}
-      />
+      /> */}
     </div>
   );
 
@@ -171,7 +182,7 @@ export const EntityDetailRelationRow: React.FC<EntityDetailRelationRow> = ({
 
       {/* Certainty (Identification) */}
       {relationType === RelationEnums.Type.Identification &&
-        renderCertainty(relation)}
+        renderCertainty(relation as Relation.IIdentification)}
     </StyledGrid>
   );
 };

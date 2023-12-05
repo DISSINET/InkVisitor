@@ -6,7 +6,6 @@ import api from "api";
 import {
   Button,
   ButtonGroup,
-  Dropdown,
   Input,
   Loader,
   Modal,
@@ -17,10 +16,8 @@ import {
   ModalInputLabel,
   ModalInputWrap,
 } from "components";
-import {
+import Dropdown, {
   AttributeButtonGroup,
-  AttributeMultiDropdown,
-  BasicDropdown,
   EntitySuggester,
   EntityTag,
 } from "components/advanced";
@@ -308,7 +305,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
             <ModalInputForm>
               <ModalInputLabel>{"default language"}</ModalInputLabel>
               <ModalInputWrap width={165}>
-                <BasicDropdown
+                <Dropdown.Single.Basic
                   width="full"
                   value={defaultLanguage}
                   onChange={(newValue) =>
@@ -327,7 +324,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
               </ModalInputWrap>
               <ModalInputLabel>{"statement language"}</ModalInputLabel>
               <ModalInputWrap width={165}>
-                <BasicDropdown
+                <Dropdown.Single.Basic
                   width="full"
                   value={defaultStatementLanguage}
                   onChange={(newValue) =>
@@ -348,7 +345,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
               {/* NOT USED NOW */}
               {/* <ModalInputLabel>{"search languages"}</ModalInputLabel>
                 <ModalInputWrap width={165}>
-                  <AttributeMultiDropdown
+                  <Dropdown.Multi.Attribute
                     value={data.searchLanguages}
                     width="full"
                     onChange={(selectedOption) =>

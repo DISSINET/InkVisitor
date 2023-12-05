@@ -1,15 +1,12 @@
 import { certaintyDict, moodDict } from "@shared/dictionaries";
-import { allEntities } from "@shared/dictionaries/entity";
 import { EntityEnums } from "@shared/enums";
 import { IResponseStatement } from "@shared/types";
 import {
   IStatementActant,
   IStatementClassification,
 } from "@shared/types/statement";
-import { AttributeIcon, Button, ButtonGroup, Dropdown } from "components";
-import {
-  AttributeMultiDropdown,
-  BasicDropdown,
+import { AttributeIcon, Button, ButtonGroup } from "components";
+import Dropdown, {
   ElvlButtonGroup,
   EntityDropzone,
   EntitySuggester,
@@ -187,7 +184,7 @@ export const StatementEditorActantClassification: React.FC<
       {isExpanded && (
         <StyledExpandedRow>
           <div>
-            <AttributeMultiDropdown
+            <Dropdown.Multi.Attribute
               width={130}
               disabled={!userCanEdit}
               placeholder="mood"
@@ -232,7 +229,7 @@ export const StatementEditorActantClassification: React.FC<
             />
           </div>
           <div>
-            <BasicDropdown
+            <Dropdown.Single.Basic
               width={110}
               placeholder="certainty"
               tooltipLabel="certainty"

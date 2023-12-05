@@ -17,10 +17,8 @@ import {
   BundleButtonGroup,
   Button,
   ButtonGroup,
-  Dropdown,
 } from "components";
-import {
-  BasicDropdown,
+import Dropdown, {
   ElvlButtonGroup,
   EntityDropzone,
   EntitySuggester,
@@ -472,7 +470,7 @@ export const StatementEditorActantTableRow: React.FC<
           {isExpanded && !isDraggingActant && (
             <StyledExpandedRow>
               <div>
-                <BasicDropdown
+                <Dropdown.Single.Basic
                   width={90}
                   placeholder="virtuality"
                   tooltipLabel="virtuality"
@@ -504,7 +502,7 @@ export const StatementEditorActantTableRow: React.FC<
                 /> */}
               </div>
               <div>
-                <BasicDropdown
+                <Dropdown.Single.Basic
                   width={120}
                   placeholder="partitivity"
                   tooltipLabel="partitivity"
@@ -536,7 +534,7 @@ export const StatementEditorActantTableRow: React.FC<
                 /> */}
               </div>
               <div>
-                <BasicDropdown
+                <Dropdown.Single.Basic
                   width={70}
                   placeholder="logical operator"
                   tooltipLabel="logical operator"

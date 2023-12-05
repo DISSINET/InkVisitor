@@ -1,8 +1,7 @@
 import { IEntity, IProp } from "@shared/types";
 import { excludedSuggesterEntities } from "Theme/constants";
-import { AttributeIcon, Button, Dropdown } from "components";
-import {
-  BasicDropdown,
+import { AttributeIcon, Button } from "components";
+import Dropdown, {
   ElvlButtonGroup,
   EntityDropzone,
   EntitySuggester,
@@ -159,7 +158,7 @@ export const PropGroupRowValue: React.FC<PropGroupRowValue> = ({
               />
             )}
             {!disabledAttributes.value?.includes("virtuality") && (
-              <BasicDropdown
+              <Dropdown.Single.Basic
                 width={100}
                 placeholder="virtuality"
                 tooltipLabel="virtuality"
@@ -199,7 +198,7 @@ export const PropGroupRowValue: React.FC<PropGroupRowValue> = ({
           </StyledAttributesFlexRow>
           <StyledAttributesFlexRow>
             {!disabledAttributes.value?.includes("partitivity") && (
-              <BasicDropdown
+              <Dropdown.Single.Basic
                 width={150}
                 placeholder="partitivity"
                 tooltipLabel="partitivity"

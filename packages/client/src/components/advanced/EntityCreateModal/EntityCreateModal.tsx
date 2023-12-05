@@ -12,7 +12,6 @@ import api from "api";
 import {
   Button,
   ButtonGroup,
-  Dropdown,
   Input,
   Modal,
   ModalContent,
@@ -22,7 +21,7 @@ import {
   ModalInputLabel,
   ModalInputWrap,
 } from "components";
-import { BasicDropdown, EntitySuggester, EntityTag } from "components/advanced";
+import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
 import { CEntity, CStatement, CTerritory } from "constructors";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
@@ -237,7 +236,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
             </ModalInputWrap>
             <ModalInputLabel>{"Language: "}</ModalInputLabel>
             <ModalInputWrap>
-              <BasicDropdown
+              <Dropdown.Single.Basic
                 width="full"
                 options={languageDict}
                 value={selectedLanguage}

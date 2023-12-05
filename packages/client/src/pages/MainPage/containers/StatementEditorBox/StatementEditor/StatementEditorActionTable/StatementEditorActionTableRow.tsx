@@ -8,9 +8,7 @@ import {
   Button,
   ButtonGroup,
 } from "components";
-import {
-  AttributeMultiDropdown,
-  BasicDropdown,
+import Dropdown, {
   ElvlButtonGroup,
   EntityDropzone,
   EntitySuggester,
@@ -373,7 +371,7 @@ export const StatementEditorActionTableRow: React.FC<
                 }}
                 attributeDropdown
               /> */}
-              <AttributeMultiDropdown
+              <Dropdown.Multi.Attribute
                 width={131}
                 disabled={!userCanEdit}
                 placeholder="mood"
@@ -453,7 +451,7 @@ export const StatementEditorActionTableRow: React.FC<
                     });
                   }}
                 /> */}
-                <BasicDropdown
+                <Dropdown.Single.Basic
                   width={70}
                   placeholder="logical operator"
                   tooltipLabel="logical operator"
@@ -501,7 +499,7 @@ export const StatementEditorActionTableRow: React.FC<
                     });
                   }}
                 /> */}
-                <BasicDropdown
+                <Dropdown.Single.Basic
                   width={122}
                   placeholder="certainty"
                   tooltipLabel="certainty"

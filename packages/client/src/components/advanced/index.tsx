@@ -26,20 +26,28 @@ import { LeftHeader, RightHeader } from "./PageHeader/PageHeader";
 import { PanelSeparator } from "./PanelSeparator/PanelSeparator";
 import { UserCustomizationModal } from "./UserCustomizationModal/UserCustomizationModal";
 
+const Dropdown = {
+  Single: {
+    Basic: BasicDropdown,
+    Entity: EntitySingleDropdown,
+  },
+  Multi: {
+    Attribute: AttributeMultiDropdown,
+    Entity: EntityMultiDropdown,
+  },
+};
+export default Dropdown;
+
 export {
   AddTerritoryModal,
   ApplyTemplateModal,
   AttributeButtonGroup,
-  AttributeMultiDropdown,
-  BasicDropdown,
   AuditTable,
   BreadcrumbItem,
   DocumentModal,
   EmptyTag,
   EntityCreateModal,
   EntityDropzone,
-  EntityMultiDropdown,
-  EntitySingleDropdown,
   EntitySuggester,
   EntityTag,
   EntityTooltip,

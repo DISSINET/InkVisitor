@@ -15,8 +15,8 @@ import {
 } from "@tanstack/react-query";
 import api from "api";
 import { AxiosResponse } from "axios";
-import { Button, ButtonGroup, Dropdown } from "components";
-import { BreadcrumbItem, EntitySuggester } from "components/advanced";
+import { Button, ButtonGroup } from "components";
+import Dropdown, { BreadcrumbItem, EntitySuggester } from "components/advanced";
 import { CStatement } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
@@ -332,7 +332,18 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
           {
             <>
               <StyledDropdownWrap>
-                <Dropdown
+                <Dropdown.Single.Basic
+                  width={78}
+                  disabled={selectedRows.length === 0}
+                  value={batchAction.value}
+                  onChange={(selectedOption) =>
+                    setBatchAction(
+                      batchOptions.find((o) => o.value === selectedOption)!
+                    )
+                  }
+                  options={batchOptions}
+                />
+                {/* <Dropdown
                   width={78}
                   disabled={selectedRows.length === 0}
                   value={batchAction}
@@ -340,7 +351,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
                     setBatchAction(selectedOption[0])
                   }
                   options={batchOptions}
-                />
+                /> */}
               </StyledDropdownWrap>
               <EntitySuggester
                 placeholder={batchAction.info === "T" ? "to territory" : ""}

@@ -3,14 +3,13 @@ import { EntityEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
 import { IRequestSearch } from "@shared/types/request-search";
 import api from "api";
-import { Button, Dropdown, Input, Loader, TypeBar } from "components";
+import { Button, Input, Loader, TypeBar } from "components";
 
-import { EntityTag } from "components/advanced";
+import { useQuery } from "@tanstack/react-query";
+import Dropdown, { EntityTag } from "components/advanced";
 import React, { useMemo, useState } from "react";
 import { FaPlus, FaTrash } from "react-icons/fa";
-import { useQuery } from "@tanstack/react-query";
 import { useAppSelector } from "redux/hooks";
-import { DropdownItem } from "types";
 import {
   StyledBoxContent,
   StyledTemplateFilter,
@@ -30,8 +29,9 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
   const allEntityOption = { value: "all", label: "all" };
   const allEntityOptions = [allEntityOption, ...entitiesDict] as any;
 
-  const [filterByClass, setFilterByClass] =
-    useState<DropdownItem>(allEntityOption);
+  const [filterByClass, setFilterByClass] = useState<string>(
+    allEntityOption.value
+  );
   const [filterByLabel, setFilterByLabel] = useState<string>("");
 
   const fourthPanelBoxesOpened: { [key: string]: boolean } = useAppSelector(
@@ -49,8 +49,8 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
       const filters: IRequestSearch = {
         onlyTemplates: true,
       };
-      if (filterByClass.value !== "all") {
-        filters.class = filterByClass.value as EntityEnums.Class;
+      if (filterByClass !== "all") {
+        filters.class = filterByClass as EntityEnums.Class;
       }
       if (filterByLabel.length) {
         filters.label = filterByLabel + "*";
@@ -117,7 +117,16 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
             </StyledTemplateFilterInputLabel>
             <StyledTemplateFilterInputValue>
               <div style={{ position: "relative" }}>
-                <Dropdown
+                <Dropdown.Single.Entity
+                  value={filterByClass}
+                  options={allEntityOptions}
+                  onChange={(selectedOption) => {
+                    setFilterByClass(selectedOption);
+                  }}
+                  width="full"
+                  disableTyping
+                />
+                {/* <Dropdown
                   value={{
                     label: filterByClass.label,
                     value: filterByClass.value,
@@ -129,8 +138,8 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
                   width="full"
                   entityDropdown
                   disableTyping
-                />
-                <TypeBar entityLetter={filterByClass.value} />
+                /> */}
+                <TypeBar entityLetter={filterByClass} />
               </div>
             </StyledTemplateFilterInputValue>
           </StyledTemplateFilterInputRow>

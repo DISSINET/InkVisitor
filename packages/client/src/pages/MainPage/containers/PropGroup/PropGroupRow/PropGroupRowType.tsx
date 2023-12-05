@@ -1,8 +1,8 @@
+import { partitivityDict, virtualityDict } from "@shared/dictionaries";
 import { IEntity, IProp } from "@shared/types";
 import { excludedSuggesterEntities } from "Theme/constants";
-import { AttributeIcon, Button, Dropdown } from "components";
-import {
-  BasicDropdown,
+import { AttributeIcon, Button } from "components";
+import Dropdown, {
   ElvlButtonGroup,
   EntityDropzone,
   EntitySuggester,
@@ -17,7 +17,6 @@ import {
   StyledNoEntity,
   StyledTagGrid,
 } from "./PropGroupRowStyles";
-import { partitivityDict, virtualityDict } from "@shared/dictionaries";
 
 interface PropGroupRowType {
   prop: IProp;
@@ -156,7 +155,7 @@ export const PropGroupRowType: React.FC<PropGroupRowType> = ({
               />
             )}
             {!disabledAttributes.type?.includes("virtuality") && (
-              <BasicDropdown
+              <Dropdown.Single.Basic
                 width={100}
                 placeholder="virtuality"
                 tooltipLabel="virtuality"
@@ -190,7 +189,7 @@ export const PropGroupRowType: React.FC<PropGroupRowType> = ({
           </StyledAttributesFlexRow>
           <StyledAttributesFlexRow>
             {!disabledAttributes.type?.includes("partitivity") && (
-              <BasicDropdown
+              <Dropdown.Single.Basic
                 width={150}
                 placeholder="partitivity"
                 tooltipLabel="partitivity"

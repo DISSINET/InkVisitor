@@ -10,6 +10,7 @@ import api from "api";
 import { Button, Dropdown, Input, Loader, TypeBar } from "components";
 import {
   AttributeButtonGroup,
+  EntitySingleDropdown,
   EntitySuggester,
   EntityTag,
 } from "components/advanced";
@@ -316,6 +317,20 @@ export const EntitySearchBox: React.FC = () => {
             <StyledRow>
               <StyledRowHeader>class</StyledRowHeader>
               <div style={{ position: "relative" }}>
+                {/* <EntitySingleDropdown
+                  placeholder={""}
+                  width="full"
+                  options={[defaultClassOption].concat(classOptions)}
+                  value={classOption.value}
+                  onChange={(selectedOption) => {
+                    setClassOption(selectedOption);
+                    setTemplateOption(defaultClassOption);
+                    handleChange({
+                      class: selectedOption[0].value,
+                      usedTemplate: defaultClassOption.value,
+                    });
+                  }}
+                /> */}
                 <Dropdown
                   placeholder={""}
                   width="full"
