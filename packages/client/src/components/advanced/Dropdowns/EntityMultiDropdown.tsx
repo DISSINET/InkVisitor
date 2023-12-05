@@ -30,12 +30,9 @@ export const EntityMultiDropdown = <T extends string>({
       width={width}
       isMulti
       options={[empty, allEntities, ...options]}
-      value={[
-        { label: empty.label, value: empty.value as T },
-        { label: allEntities.label, value: allEntities.value as T },
-      ]
+      value={[empty, allEntities]
         .concat(options)
-        .filter((o) => value.includes(o.value))}
+        .filter((o) => value.includes(o.value as T))}
       onChange={(items) => onChange(items.map((i) => i.value as T))}
       placeholder={placeholder}
       noOptionsMessage={noOptionsMessage}

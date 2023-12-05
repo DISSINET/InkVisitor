@@ -7,7 +7,7 @@ interface AttributeMultiDropdown<T = string> {
   width?: number | "full";
   value: T[];
   onChange: (value: T[]) => void;
-  options: { label: string; value: T }[];
+  options: { label: string; value: T | EntityEnums.Extension.Any }[];
   icon?: JSX.Element;
   placeholder?: string;
   tooltipLabel?: string;
@@ -37,9 +37,9 @@ export const AttributeMultiDropdown = <T extends string>({
       tooltipLabel={tooltipLabel}
       icon={icon}
       options={[allEntities, ...options]}
-      value={[{ label: allEntities.label, value: allEntities.value as T }]
+      value={[allEntities]
         .concat(options)
-        .filter((o) => value.includes(o.value))}
+        .filter((o) => value.includes(o.value as T))}
       onChange={(items) => onChange(items.map((i) => i.value as T))}
       disabled={disabled}
       loggerId={loggerId}
