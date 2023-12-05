@@ -8,6 +8,7 @@ import React, { useEffect, useState } from "react";
 import { BsInfoCircle } from "react-icons/bs";
 import { StatementEditor } from "./StatementEditor/StatementEditor";
 import { StyledEditorEmptyState } from "./StatementEditorBoxStyles";
+import { toast } from "react-toastify";
 
 export const StatementEditorBox: React.FC = () => {
   const { statementId, setStatementId, selectedDetailId, setTerritoryId } =
@@ -45,23 +46,6 @@ export const StatementEditorBox: React.FC = () => {
       await api.entityUpdate(statementId, changes);
     },
     {
-      onMutate: async (newStatement) => {
-        // Cancel any outgoing refetches
-        // (so they don't overwrite our optimistic update)
-        await queryClient.cancelQueries({
-          queryKey: ["statement", statementId],
-        });
-
-        // Snapshot the previous value
-        const previousStatement: IStatement | undefined =
-          queryClient.getQueryData(["statement", statementId]);
-
-        // Optimistically update to the new value
-        queryClient.setQueryData(["statement", statementId], newStatement);
-
-        // Return a context with the previous and new todo
-        return { previousStatement, newStatement };
-      },
       onSuccess: (data, variables: any) => {
         if (selectedDetailId === statementId) {
           queryClient.invalidateQueries(["entity"]);
@@ -77,10 +61,7 @@ export const StatementEditorBox: React.FC = () => {
         }
       },
       onError: (err, newTodo, context) => {
-        queryClient.setQueryData(
-          ["statement", context?.newStatement.id],
-          context?.previousStatement
-        );
+        toast.error("Statement not updated");
       },
     }
   );
