@@ -1,12 +1,14 @@
+import { EntityEnums } from "@shared/enums";
 import { BaseDropdown } from "components";
 import React from "react";
+import { EntityDropdownItem } from "types";
 
-interface EntitySingleDropdown<T = string> {
+interface EntitySingleDropdown {
   width?: number | "full";
-  options: { label: string; value: T }[];
-  value: T;
+  options: EntityDropdownItem[];
+  value: EntityEnums.Class;
   placeholder?: string;
-  onChange: (value: T) => void;
+  onChange: (value: EntityEnums.Class) => void;
   onFocus?: () => void;
   onBlur?: () => void;
   autoFocus?: boolean;
@@ -16,7 +18,7 @@ interface EntitySingleDropdown<T = string> {
 
   loggerId?: string;
 }
-export const EntitySingleDropdown = <T extends string>({
+export const EntitySingleDropdown: React.FC<EntitySingleDropdown> = ({
   width,
   options,
   value,
@@ -30,14 +32,14 @@ export const EntitySingleDropdown = <T extends string>({
   disabled,
 
   loggerId,
-}: EntitySingleDropdown<T>) => {
+}) => {
   return (
     <BaseDropdown
       entityDropdown
       width={width}
       value={options.find((o) => o.value === value)}
       options={options}
-      onChange={(value) => onChange(value[0].value as T)}
+      onChange={(value) => onChange(value[0].value as EntityEnums.Class)}
       placeholder={placeholder}
       onFocus={onFocus}
       onBlur={onBlur}

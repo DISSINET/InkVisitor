@@ -26,10 +26,10 @@ import { TemplateListRemoveModal } from "./TemplateListRemoveModal/TemplateListR
 interface TemplateListBox {}
 export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
   // FILTER;
-  const allEntityOption = { value: "all", label: "all" };
-  const allEntityOptions = [allEntityOption, ...entitiesDict] as any;
+  const allEntityOption = { value: "all" as EntityEnums.Class, label: "all" };
+  const allEntityOptions = [allEntityOption, ...entitiesDict];
 
-  const [filterByClass, setFilterByClass] = useState<string>(
+  const [filterByClass, setFilterByClass] = useState<EntityEnums.Class>(
     allEntityOption.value
   );
   const [filterByLabel, setFilterByLabel] = useState<string>("");
@@ -49,7 +49,7 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
       const filters: IRequestSearch = {
         onlyTemplates: true,
       };
-      if (filterByClass !== "all") {
+      if (filterByClass !== allEntityOption.value) {
         filters.class = filterByClass as EntityEnums.Class;
       }
       if (filterByLabel.length) {

@@ -221,6 +221,9 @@ interface IUsedEntityStatement {
 }
 
 export type DropdownItem = { value: string; label: string; info?: string };
+export interface EntityDropdownItem extends DropdownItem {
+  value: EntityEnums.Class;
+}
 
 export type SearchParams = {
   territory?: string;

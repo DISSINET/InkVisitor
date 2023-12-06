@@ -114,10 +114,10 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
     return selectedEntityType ? entitiesDictKeys[selectedEntityType].label : "";
   }, [selectedEntityType]);
 
-  const handleAskForTemplateApply = (templateOptionToApply: DropdownItem) => {
+  const handleAskForTemplateApply = (templateIdToApply: string) => {
     if (templates) {
       const templateThatIsGoingToBeApplied = templates.find(
-        (template: IEntity) => template.id === templateOptionToApply.value
+        (template: IEntity) => template.id === templateIdToApply
       );
 
       if (templateThatIsGoingToBeApplied) {

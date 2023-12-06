@@ -7,13 +7,13 @@ import {
   languageDict,
 } from "@shared/dictionaries";
 import { EntityEnums } from "@shared/enums";
-import { IResponseDetail, IResponseGeneric } from "@shared/types";
+import { IActionData, IResponseDetail, IResponseGeneric } from "@shared/types";
 import { UseMutationResult, useQuery } from "@tanstack/react-query";
 import { rootTerritoryId } from "Theme/constants";
 import api from "api";
 import { AxiosResponse } from "axios";
 import { BaseDropdown, Button, Input, MultiInput, TypeBar } from "components";
-import { AttributeButtonGroup, EntityTag } from "components/advanced";
+import Dropdown, { AttributeButtonGroup, EntityTag } from "components/advanced";
 import React, { useMemo } from "react";
 import { FaRegCopy } from "react-icons/fa";
 import { toast } from "react-toastify";
@@ -28,6 +28,7 @@ import {
   StyledRelativePosition,
   StyledTagWrap,
 } from "../EntityDetailStyles";
+import { IConceptData } from "@shared/types/concept";
 
 interface EntityDetailFormSection {
   entity: IResponseDetail;
@@ -47,7 +48,7 @@ interface EntityDetailFormSection {
     value: React.SetStateAction<EntityEnums.Class | undefined>
   ) => void;
   setShowTypeSubmit: (value: React.SetStateAction<boolean>) => void;
-  handleAskForTemplateApply: (templateOptionToApply: DropdownItem) => void;
+  handleAskForTemplateApply: (templateIdToApply: string) => void;
   isTerritoryWithParent: (entity: IResponseDetail) => boolean;
   isStatementWithTerritory: (entity: IResponseDetail) => boolean;
 }
@@ -90,11 +91,8 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
     return options;
   }, [documents]);
 
-  const selectedDocumentOption: DropdownItem = useMemo(() => {
-    return (
-      documentOptions?.find((doc) => doc.value === entity.data.documentId) ??
-      noDocumentLinkedItem
-    );
+  const selectedDocumentOption: string = useMemo(() => {
+    return entity.data.documentId ?? noDocumentLinkedItem.value;
   }, [documentOptions, entity.data.documentId]);
 
   return (
@@ -129,7 +127,19 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
               </StyledDetailContentRowLabel>
               <StyledDetailContentRowValue>
                 <StyledRelativePosition>
-                  <BaseDropdown
+                  <Dropdown.Single.Entity
+                    value={entity.class}
+                    options={allowedEntityChangeClasses.map(
+                      (c) => entitiesDictKeys[c]
+                    )}
+                    onChange={(selectedOption) => {
+                      setSelectedEntityType(selectedOption);
+                      setShowTypeSubmit(true);
+                    }}
+                    width={200}
+                    disableTyping
+                  />
+                  {/* <BaseDropdown
                     value={{
                       label: entitiesDictKeys[entity.class].label,
                       value: entitiesDictKeys[entity.class].value,
@@ -146,7 +156,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                     width={200}
                     entityDropdown
                     disableTyping
-                  />
+                  /> */}
                   <TypeBar entityLetter={entity.class} />
                 </StyledRelativePosition>
               </StyledDetailContentRowValue>
@@ -159,7 +169,17 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
               Apply Template
             </StyledDetailContentRowLabel>
             <StyledDetailContentRowValue>
-              <BaseDropdown
+              <Dropdown.Single.Basic
+                placeholder="select template.."
+                disabled={!userCanEdit || templateOptions.length === 0}
+                width="full"
+                value={null}
+                options={templateOptions}
+                onChange={(templateToApply) => {
+                  handleAskForTemplateApply(templateToApply);
+                }}
+              />
+              {/* <BaseDropdown
                 placeholder="select template.."
                 disabled={!userCanEdit || templateOptions.length === 0}
                 width="full"
@@ -168,7 +188,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                 onChange={(templateToApply) => {
                   handleAskForTemplateApply(templateToApply[0]);
                 }}
-              />
+              /> */}
             </StyledDetailContentRowValue>
           </StyledDetailContentRow>
 
@@ -299,7 +319,18 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
               Label language
             </StyledDetailContentRowLabel>
             <StyledDetailContentRowValue>
-              <BaseDropdown
+              <Dropdown.Single.Basic
+                disabled={!userCanEdit}
+                width="full"
+                options={languageDict}
+                value={entity.language}
+                onChange={(selectedOption) => {
+                  updateEntityMutation.mutate({
+                    language: selectedOption || EntityEnums.Language.Empty,
+                  });
+                }}
+              />
+              {/* <BaseDropdown
                 disabled={!userCanEdit}
                 width="full"
                 options={languageDict}
@@ -312,7 +343,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                       selectedOption[0].value || EntityEnums.Language.Empty,
                   });
                 }}
-              />
+              /> */}
             </StyledDetailContentRowValue>
           </StyledDetailContentRow>
 
@@ -324,7 +355,24 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                 Part of Speech
               </StyledDetailContentRowLabel>
               <StyledDetailContentRowValue>
-                <BaseDropdown
+                <Dropdown.Single.Basic
+                  disabled={!userCanEdit}
+                  width="full"
+                  options={actionPartOfSpeechDict}
+                  value={(entity.data as IActionData).pos}
+                  onChange={(selectedOption) => {
+                    const oldData = { ...entity.data };
+                    updateEntityMutation.mutate({
+                      data: {
+                        ...oldData,
+                        ...{
+                          pos: selectedOption,
+                        },
+                      },
+                    });
+                  }}
+                />
+                {/* <BaseDropdown
                   disabled={!userCanEdit}
                   width="full"
                   options={actionPartOfSpeechDict}
@@ -342,7 +390,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                       },
                     });
                   }}
-                />
+                /> */}
               </StyledDetailContentRowValue>
             </StyledDetailContentRow>
           )}
@@ -352,7 +400,24 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                 Part of Speech
               </StyledDetailContentRowLabel>
               <StyledDetailContentRowValue>
-                <BaseDropdown
+                <Dropdown.Single.Basic
+                  disabled={!userCanEdit}
+                  width="full"
+                  options={conceptPartOfSpeechDict}
+                  value={(entity.data as IConceptData).pos}
+                  onChange={(selectedOption) => {
+                    const oldData = { ...entity.data };
+                    updateEntityMutation.mutate({
+                      data: {
+                        ...oldData,
+                        ...{
+                          pos: selectedOption,
+                        },
+                      },
+                    });
+                  }}
+                />
+                {/* <BaseDropdown
                   disabled={!userCanEdit}
                   width="full"
                   options={conceptPartOfSpeechDict}
@@ -370,7 +435,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                       },
                     });
                   }}
-                />
+                /> */}
               </StyledDetailContentRowValue>
             </StyledDetailContentRow>
           )}
@@ -524,7 +589,24 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                   Linked Document
                 </StyledDetailContentRowLabel>
                 <StyledDetailContentRowValue>
-                  <BaseDropdown
+                  <Dropdown.Single.Basic
+                    disabled={!userCanEdit}
+                    value={selectedDocumentOption}
+                    width="full"
+                    options={documentOptions}
+                    onChange={(selectedOption) => {
+                      const oldData = { ...entity.data };
+                      updateEntityMutation.mutate({
+                        data: {
+                          ...oldData,
+                          ...{
+                            documentId: selectedOption,
+                          },
+                        },
+                      });
+                    }}
+                  />
+                  {/* <BaseDropdown
                     disabled={!userCanEdit}
                     value={selectedDocumentOption}
                     width="full"
@@ -540,7 +622,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                         },
                       });
                     }}
-                  />
+                  /> */}
                 </StyledDetailContentRowValue>
               </StyledDetailContentRow>
             </React.Fragment>
