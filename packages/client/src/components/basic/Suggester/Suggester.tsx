@@ -5,9 +5,10 @@ import {
   useFloating,
 } from "@floating-ui/react";
 import { entitiesDictKeys } from "@shared/dictionaries";
+import { dropdownWildCard } from "@shared/dictionaries/entity";
 import { EntityEnums } from "@shared/enums";
 import { IEntity, IUserOptions } from "@shared/types";
-import { DropdownAny, scrollOverscanCount } from "Theme/constants";
+import { scrollOverscanCount } from "Theme/constants";
 import theme from "Theme/theme";
 import {
   BaseDropdown,
@@ -169,7 +170,7 @@ export const Suggester: React.FC<Suggester> = ({
   const handleEnterPress = () => {
     if (selected === -1 && typed.length > 0) {
       if (
-        category.value === DropdownAny ||
+        category.value === dropdownWildCard.value ||
         category.value === EntityEnums.Class.Statement ||
         category.value === EntityEnums.Class.Territory
       ) {
@@ -204,7 +205,7 @@ export const Suggester: React.FC<Suggester> = ({
   const handleAddBtnClick = () => {
     if (typed.length > 0) {
       if (
-        category.value === DropdownAny ||
+        category.value === dropdownWildCard.value ||
         category.value === EntityEnums.Class.Statement ||
         category.value === EntityEnums.Class.Territory
       ) {

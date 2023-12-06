@@ -6,7 +6,7 @@ import {
   ITerritory,
 } from "@shared/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { DropdownAny, wildCardChar } from "Theme/constants";
+import { wildCardChar } from "Theme/constants";
 import api from "api";
 import { Suggester } from "components";
 import { CEntity, InstTemplate } from "constructors";
@@ -16,6 +16,7 @@ import { FaHome } from "react-icons/fa";
 import { DropdownItem, EntityDragItem, SuggesterItemToCreate } from "types";
 import { AddTerritoryModal, EntityCreateModal } from "..";
 import { deepCopy } from "utils";
+import { dropdownWildCard } from "@shared/dictionaries/entity";
 
 interface EntitySuggester {
   categoryTypes: EntityEnums.ExtendedClass[];
@@ -120,7 +121,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
       const resSuggestions = await api.entitiesSearch({
         label: debouncedTyped + wildCardChar,
         class:
-          selectedCategory?.value === DropdownAny
+          selectedCategory?.value === dropdownWildCard.value
             ? undefined
             : (selectedCategory?.value as EntityEnums.Class),
         excluded: excludedEntityClasses.length
@@ -204,7 +205,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
     if (categories.length > 1 && !disableWildCard) {
       categories.unshift({
         label: EntityEnums.Extension.Any,
-        value: DropdownAny,
+        value: dropdownWildCard.value,
       });
     }
     if (categories.length) {
@@ -363,7 +364,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
 
   const getClassFilteredPreSuggestions = (suggestions: IEntity[]) => {
     let filteredSuggestions;
-    if (selectedCategory?.value !== DropdownAny) {
+    if (selectedCategory?.value !== dropdownWildCard.value) {
       filteredSuggestions = suggestions.filter(
         (s) => s.class === selectedCategory?.value
       );

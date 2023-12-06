@@ -8,6 +8,7 @@ import {
   ActionMeta,
   ControlProps,
   DropdownIndicatorProps,
+  GroupBase,
   MultiValueProps,
   OptionProps,
   SingleValueProps,
@@ -23,12 +24,13 @@ import {
   StyledSelect,
   StyledSelectWrapper,
 } from "./BaseDropdownStyles";
+import { SelectComponents } from "react-select/dist/declarations/src/components";
 
 interface BaseDropdown {
   options?: DropdownItem[];
   value?: DropdownItem | DropdownItem[] | null;
   onChange: (selectedOption: DropdownItem[]) => void;
-  components?: any;
+  components?: Partial<SelectComponents<unknown, boolean, GroupBase<unknown>>>;
   ref?: React.RefObject<ReactNode>;
   width?: number | "full";
   disabled?: boolean;
@@ -169,7 +171,6 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
               ) {
                 // kdyz vyberu all option
                 return onChange(options);
-                // return onChange([allEntities, ...options]);
               }
               let result: DropdownItem[] = [];
               // TODO: -1 depends on any / empty -> has to be custom
@@ -183,22 +184,13 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
                   );
                 } else if (event.action === "select-option") {
                   result = options;
-                  // result = [allEntities, ...options];
                 }
                 return onChange(result);
               }
             }
             return onChange(selectedOptions);
           }}
-          // TODO: condition - allEntities only when any necessary
-          options={
-            options
-            // isMulti
-            //   ? entityDropdown
-            //     ? [empty, allEntities, ...options]
-            //     : [allEntities, ...options]
-            //   : options
-          }
+          options={options}
           width={width}
           hideSelectedOptions={hideSelectedOptions}
           loggerId={loggerId}
@@ -244,7 +236,7 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
   );
 };
 
-const SingleValue = (props: SingleValueProps<any>): React.ReactElement => {
+const SingleValue = (props: SingleValueProps): React.ReactElement => {
   return (
     <>
       <components.SingleValue {...props}></components.SingleValue>

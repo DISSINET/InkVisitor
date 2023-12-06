@@ -1,13 +1,13 @@
 import { entitiesDictKeys, languageDict } from "@shared/dictionaries";
-import { classesAll, entitiesDict } from "@shared/dictionaries/entity";
+import {
+  classesAll,
+  dropdownWildCard,
+  entitiesDict,
+} from "@shared/dictionaries/entity";
 import { EntityEnums, UserEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import {
-  DropdownAny,
-  excludedSuggesterEntities,
-  rootTerritoryId,
-} from "Theme/constants";
+import { excludedSuggesterEntities, rootTerritoryId } from "Theme/constants";
 import api from "api";
 import {
   Button,
@@ -51,7 +51,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
   const [label, setLabel] = useState(labelTyped);
   const [detailTyped, setDetailTyped] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<DropdownItem>(
-    categorySelected && categorySelected.value !== DropdownAny
+    categorySelected && categorySelected.value !== dropdownWildCard.value
       ? categorySelected
       : { value: categories[0].value, label: categories[0].value }
   );
