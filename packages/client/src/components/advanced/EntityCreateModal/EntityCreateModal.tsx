@@ -43,7 +43,6 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
 
   const [label, setLabel] = useState(labelTyped);
   const [detailTyped, setDetailTyped] = useState("");
-  // TODO: nefunguje
   const [selectedCategory, setSelectedCategory] =
     useState<EntityEnums.Class>(categorySelected);
 
@@ -205,8 +204,10 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
                 categoryTypes={classesAll}
                 excludedEntityClasses={excludedSuggesterEntities}
                 onChangeCategory={(selectedOption) => {
-                  if (selectedOption)
-                    setSelectedCategory(selectedOption as EntityEnums.Class);
+                  // Any not allowed here - this condition makes it type safe
+                  if (selectedOption !== EntityEnums.Extension.Any) {
+                    setSelectedCategory(selectedOption);
+                  }
                 }}
                 onTyped={(newType: string) => setLabel(newType)}
                 disableCreate

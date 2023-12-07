@@ -219,11 +219,15 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
           };
         })
       );
-      setSelectedCategory(
-        initCategory ?? (!disableWildCard && categoryTypes.length > 1)
-          ? EntityEnums.Extension.Any
-          : categoryTypes[0]
-      );
+      if (initCategory) {
+        setSelectedCategory(initCategory);
+      } else {
+        setSelectedCategory(
+          !disableWildCard && categoryTypes.length > 1
+            ? EntityEnums.Extension.Any
+            : categoryTypes[0]
+        );
+      }
     }
   }, [categoryTypes]);
 
