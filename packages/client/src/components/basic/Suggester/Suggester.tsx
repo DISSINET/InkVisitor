@@ -4,20 +4,19 @@ import {
   flip,
   useFloating,
 } from "@floating-ui/react";
-import { entitiesDictKeys } from "@shared/dictionaries";
 import { dropdownWildCard } from "@shared/dictionaries/entity";
 import { EntityEnums } from "@shared/enums";
 import { IEntity, IUserOptions } from "@shared/types";
 import { scrollOverscanCount } from "Theme/constants";
 import theme from "Theme/theme";
 import {
-  BaseDropdown,
   Button,
   Input,
   Loader,
   TemplateActionModal,
   TypeBar,
 } from "components";
+import Dropdown from "components/advanced";
 import useKeypress from "hooks/useKeyPress";
 import React, { useState } from "react";
 import { DropTargetMonitor, useDrop } from "react-dnd";
@@ -26,8 +25,8 @@ import { MdCancel } from "react-icons/md";
 import { toast } from "react-toastify";
 import { FixedSizeList as List } from "react-window";
 import {
-  DropdownItem,
   EntityDragItem,
+  EntityDropdownItem,
   EntitySuggestion,
   ItemTypes,
   SuggesterItemToCreate,
@@ -53,8 +52,8 @@ interface Suggester {
   suggestions: EntitySuggestion[];
   placeholder?: string; // text to display when typed === ""
   typed: string; // input value
-  category: DropdownItem; // selected category
-  categories: DropdownItem[]; // all possible categories
+  category: EntityEnums.Class | EntityEnums.Extension.Any; // selected category
+  categories: EntityDropdownItem[]; // all possible categories
   disabled?: boolean; // todo not implemented yet
   inputWidth?: number | "full";
   disableCreate?: boolean;
@@ -65,7 +64,9 @@ interface Suggester {
 
   // events
   onType: (newType: string) => void;
-  onChangeCategory: (selectedOption: DropdownItem[]) => void;
+  onChangeCategory: (
+    selectedOption: EntityEnums.Class | EntityEnums.Extension.Any
+  ) => void;
   onCreate: (item: SuggesterItemToCreate) => void;
   onPick: (entity: IEntity, instantiateTemplate?: boolean) => void;
   onDrop: (item: EntityDragItem, instantiateTemplate?: boolean) => void;
@@ -78,6 +79,7 @@ interface Suggester {
   userOptions?: IUserOptions;
   autoFocus?: boolean;
   disableEnter?: boolean;
+  disableWildCard?: boolean;
 
   showCreateModal: boolean;
   setShowCreateModal: React.Dispatch<React.SetStateAction<boolean>>;
@@ -113,6 +115,7 @@ export const Suggester: React.FC<Suggester> = ({
   userOptions,
   autoFocus,
   disableEnter,
+  disableWildCard,
 
   showCreateModal,
   setShowCreateModal,
@@ -170,16 +173,15 @@ export const Suggester: React.FC<Suggester> = ({
   const handleEnterPress = () => {
     if (selected === -1 && typed.length > 0) {
       if (
-        category.value === dropdownWildCard.value ||
-        category.value === EntityEnums.Class.Statement ||
-        category.value === EntityEnums.Class.Territory
+        category === dropdownWildCard.value ||
+        category === EntityEnums.Class.Statement ||
+        category === EntityEnums.Class.Territory
       ) {
         setShowCreateModal(true);
       } else {
         onCreate({
           label: typed,
-          entityClass:
-            entitiesDictKeys[category.value as EntityEnums.Class].value,
+          entityClass: category as EntityEnums.Class,
           language: false,
         });
       }
@@ -205,16 +207,15 @@ export const Suggester: React.FC<Suggester> = ({
   const handleAddBtnClick = () => {
     if (typed.length > 0) {
       if (
-        category.value === dropdownWildCard.value ||
-        category.value === EntityEnums.Class.Statement ||
-        category.value === EntityEnums.Class.Territory
+        category === dropdownWildCard.value ||
+        category === EntityEnums.Class.Statement ||
+        category === EntityEnums.Class.Territory
       ) {
         setShowCreateModal(true);
       } else {
         onCreate({
           label: typed,
-          entityClass:
-            entitiesDictKeys[category.value as EntityEnums.Class].value,
+          entityClass: category as EntityEnums.Class,
           language: false,
         });
       }
@@ -268,12 +269,16 @@ export const Suggester: React.FC<Suggester> = ({
           isOver={isOver}
           hasText={typed.length > 0}
         >
-          <BaseDropdown
-            value={{ label: category.label, value: category.value }}
-            options={categories}
+          <Dropdown.Single.Entity
+            value={category}
+            options={
+              disableWildCard
+                ? [...categories]
+                : [dropdownWildCard, ...categories]
+            }
             onChange={onChangeCategory}
             width={36}
-            entityDropdown
+            // entityDropdown
             onFocus={() => {
               setSelected(-1);
               setIsFocused(true);
@@ -284,7 +289,7 @@ export const Suggester: React.FC<Suggester> = ({
             disabled={disabled}
             autoFocus={categories.length > 1 && autoFocus}
           />
-          <TypeBar entityLetter={category.value} />
+          <TypeBar entityLetter={category} />
 
           <div ref={refs.setReference} style={{ width: "100%" }}>
             <Input

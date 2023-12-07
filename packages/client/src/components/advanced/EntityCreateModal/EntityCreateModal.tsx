@@ -1,9 +1,5 @@
-import { entitiesDictKeys, languageDict } from "@shared/dictionaries";
-import {
-  classesAll,
-  dropdownWildCard,
-  entitiesDict,
-} from "@shared/dictionaries/entity";
+import { languageDict } from "@shared/dictionaries";
+import { classesAll } from "@shared/dictionaries/entity";
 import { EntityEnums, UserEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -25,23 +21,21 @@ import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
 import { CEntity, CStatement, CTerritory } from "constructors";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { DropdownItem } from "types";
 import { StyledContent, StyledNote } from "./EntityCreateModalStyles";
+import { EntityDropdownItem } from "types";
 
 interface EntityCreateModal {
   closeModal: () => void;
   onMutationSuccess?: (entity: IEntity) => void;
 
   labelTyped?: string;
-  categorySelected?: DropdownItem;
-  categories?: DropdownItem[];
+  categorySelected: EntityEnums.Class;
 }
 export const EntityCreateModal: React.FC<EntityCreateModal> = ({
   closeModal,
   onMutationSuccess = () => {},
   labelTyped = "",
   categorySelected,
-  categories = entitiesDict,
 }) => {
   const [showModal, setShowModal] = useState(false);
   useEffect(() => {
@@ -50,11 +44,8 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
 
   const [label, setLabel] = useState(labelTyped);
   const [detailTyped, setDetailTyped] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<DropdownItem>(
-    categorySelected && categorySelected.value !== dropdownWildCard.value
-      ? categorySelected
-      : { value: categories[0].value, label: categories[0].value }
-  );
+  const [selectedCategory, setSelectedCategory] =
+    useState<EntityEnums.Class>(categorySelected);
 
   const [selectedLanguage, setSelectedLanguage] =
     useState<EntityEnums.Language>(EntityEnums.Language.Empty);
@@ -104,8 +95,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
       territoryId?: string;
     } = {
       label: label,
-      entityClass:
-        entitiesDictKeys[selectedCategory.value as EntityEnums.Class].value,
+      entityClass: selectedCategory,
       detail: detailTyped,
       language: selectedLanguage,
       territoryId: territoryId,
@@ -179,10 +169,13 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
   const handleCheckOnSubmit = () => {
     if (label.length < 2) {
       toast.info("fill at least 2 characters");
-    } else if (selectedCategory.value === "S" && !territoryId) {
+    } else if (
+      selectedCategory === EntityEnums.Class.Statement &&
+      !territoryId
+    ) {
       toast.warning("Territory is required!");
     } else if (
-      selectedCategory.value === "T" &&
+      selectedCategory === EntityEnums.Class.Territory &&
       !territoryId &&
       userRole !== UserEnums.Role.Admin
     ) {
@@ -213,7 +206,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
                 excludedEntityClasses={excludedSuggesterEntities}
                 onChangeCategory={(selectedOption) => {
                   if (selectedOption)
-                    setSelectedCategory(selectedOption as DropdownItem);
+                    setSelectedCategory(selectedOption as EntityEnums.Class);
                 }}
                 onTyped={(newType: string) => setLabel(newType)}
                 disableCreate
@@ -256,11 +249,11 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
               /> */}
             </ModalInputWrap>
             {/* Suggester territory */}
-            {(selectedCategory.value === "T" ||
-              selectedCategory.value === "S") && (
+            {(selectedCategory === EntityEnums.Class.Territory ||
+              selectedCategory === EntityEnums.Class.Statement) && (
               <>
                 <ModalInputLabel>
-                  {selectedCategory.value === "T"
+                  {selectedCategory === EntityEnums.Class.Territory
                     ? "Parent territory: "
                     : "Territory: "}
                 </ModalInputLabel>
@@ -293,7 +286,8 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
           </ModalInputForm>
           {userRole === UserEnums.Role.Admin && (
             <>
-              {selectedCategory.value === "T" && !territoryId ? (
+              {selectedCategory === EntityEnums.Class.Territory &&
+              !territoryId ? (
                 <StyledNote>
                   {"Territory will be added under root"}
                   <br />

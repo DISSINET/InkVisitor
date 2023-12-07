@@ -1,3 +1,4 @@
+import { dropdownWildCard } from "@shared/dictionaries/entity";
 import { EntityEnums } from "@shared/enums";
 import { BaseDropdown } from "components";
 import React from "react";
@@ -6,9 +7,9 @@ import { EntityDropdownItem } from "types";
 interface EntitySingleDropdown {
   width?: number | "full";
   options: EntityDropdownItem[];
-  value: EntityEnums.Class;
+  value: EntityEnums.Class | EntityEnums.Extension.Any;
   placeholder?: string;
-  onChange: (value: EntityEnums.Class) => void;
+  onChange: (value: EntityEnums.Class | EntityEnums.Extension.Any) => void;
   onFocus?: () => void;
   onBlur?: () => void;
   autoFocus?: boolean;

@@ -1,8 +1,8 @@
-import { DropdownItem } from "types";
+import { DropdownItem, EntityDropdownItem } from "types";
 import { EntityEnums } from "../enums";
 
 // for single entity dropdown
-export const dropdownWildCard = {
+export const dropdownWildCard: EntityDropdownItem = {
   value: EntityEnums.Extension.Any,
   label: "*",
   info: "",
