@@ -22,7 +22,6 @@ import { CEntity, CStatement, CTerritory } from "constructors";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { StyledContent, StyledNote } from "./EntityCreateModalStyles";
-import { EntityDropdownItem } from "types";
 
 interface EntityCreateModal {
   closeModal: () => void;
@@ -44,6 +43,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
 
   const [label, setLabel] = useState(labelTyped);
   const [detailTyped, setDetailTyped] = useState("");
+  // TODO: nefunguje
   const [selectedCategory, setSelectedCategory] =
     useState<EntityEnums.Class>(categorySelected);
 

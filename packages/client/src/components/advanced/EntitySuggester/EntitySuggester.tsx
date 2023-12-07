@@ -31,7 +31,9 @@ interface EntitySuggester {
   categoryTypes: EntityEnums.Class[];
   onSelected?: (id: string) => void;
   onPicked?: (entity: IEntity) => void;
-  onChangeCategory?: (selectedOption: EntityEnums.ExtendedClass) => void;
+  onChangeCategory?: (
+    selectedOption: EntityEnums.Class | EntityEnums.Extension.Any
+  ) => void;
   onTyped?: (newType: string) => void;
   placeholder?: string;
   inputWidth?: number | "full";
@@ -208,8 +210,20 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
   // initial load of categories
   useEffect(() => {
     if (categoryTypes.length) {
-      setAllCategories(categoryTypes.map((c) => entitiesDictKeys[c]));
-      setSelectedCategory(initCategory ?? categoryTypes[0]);
+      setAllCategories(
+        categoryTypes.map((c) => {
+          return {
+            value: entitiesDictKeys[c].value,
+            label: entitiesDictKeys[c].value,
+            info: entitiesDictKeys[c].info,
+          };
+        })
+      );
+      setSelectedCategory(
+        initCategory ?? (!disableWildCard && categoryTypes.length > 1)
+          ? EntityEnums.Extension.Any
+          : categoryTypes[0]
+      );
     }
   }, [categoryTypes]);
 
@@ -431,7 +445,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
         disabled={disabled}
         showCreateModal={showCreateModal}
         setShowCreateModal={setShowCreateModal}
-        disableWildCard={disableWildCard}
+        disableWildCard={disableWildCard || allCategories.length < 2}
       />
       {showAddTerritoryModal && (
         <AddTerritoryModal
