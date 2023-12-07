@@ -85,25 +85,6 @@ export const EntityDetailRelationRow: React.FC<EntityDetailRelationRow> = ({
           });
         }}
       />
-      {/* <Dropdown
-        width={105}
-        placeholder="certainty"
-        options={certaintyDict}
-        value={{
-          value: (relation as Relation.IIdentification).certainty,
-          label:
-            certaintyDict.find(
-              (c) =>
-                c.value === (relation as Relation.IIdentification).certainty
-            )?.label ?? "",
-        }}
-        onChange={(selectedOption) => {
-          relationUpdateMutation.mutate({
-            relationId: relation.id,
-            changes: { certainty: selectedOption[0].value as string },
-          });
-        }}
-      /> */}
     </div>
   );
 

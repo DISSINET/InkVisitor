@@ -1,5 +1,4 @@
 import {
-  classesAll,
   dropdownWildCard,
   entitiesDictKeys,
 } from "@shared/dictionaries/entity";
@@ -18,12 +17,7 @@ import { CEntity, InstTemplate } from "constructors";
 import { useDebounce, useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
 import { FaHome } from "react-icons/fa";
-import {
-  DropdownItem,
-  EntityDragItem,
-  EntityDropdownItem,
-  SuggesterItemToCreate,
-} from "types";
+import { EntityDragItem, SuggesterItemToCreate } from "types";
 import { deepCopy } from "utils";
 import { AddTerritoryModal, EntityCreateModal } from "..";
 

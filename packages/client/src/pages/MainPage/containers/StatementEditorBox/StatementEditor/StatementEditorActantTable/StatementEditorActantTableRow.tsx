@@ -484,22 +484,6 @@ export const StatementEditorActantTableRow: React.FC<
                     });
                   }}
                 />
-                {/* <Dropdown
-                  width={90}
-                  placeholder="virtuality"
-                  tooltipLabel="virtuality"
-                  icon={<AttributeIcon attributeName="virtuality" />}
-                  disabled={!userCanEdit}
-                  options={virtualityDict}
-                  value={virtualityDict.find(
-                    (i) => sActant.virtuality === i.value
-                  )}
-                  onChange={(selectedOption) => {
-                    updateActant(sActant.id, {
-                      virtuality: selectedOption[0].value,
-                    });
-                  }}
-                /> */}
               </div>
               <div>
                 <Dropdown.Single.Basic
@@ -516,22 +500,6 @@ export const StatementEditorActantTableRow: React.FC<
                     });
                   }}
                 />
-                {/* <Dropdown
-                  width={120}
-                  placeholder="partitivity"
-                  tooltipLabel="partitivity"
-                  icon={<AttributeIcon attributeName="partitivity" />}
-                  disabled={!userCanEdit}
-                  options={partitivityDict}
-                  value={partitivityDict.find(
-                    (i: any) => sActant.partitivity === i.value
-                  )}
-                  onChange={(selectedOption) => {
-                    updateActant(sActant.id, {
-                      partitivity: selectedOption[0].value,
-                    });
-                  }}
-                /> */}
               </div>
               <div>
                 <Dropdown.Single.Basic
@@ -548,22 +516,6 @@ export const StatementEditorActantTableRow: React.FC<
                     });
                   }}
                 />
-                {/* <Dropdown
-                  width={70}
-                  placeholder="logical operator"
-                  tooltipLabel="logical operator"
-                  icon={<AttributeIcon attributeName="bundleOperator" />}
-                  disabled={!userCanEdit}
-                  options={operatorDict}
-                  value={operatorDict.find(
-                    (i: any) => sActant.bundleOperator === i.value
-                  )}
-                  onChange={(selectedOption) => {
-                    updateActant(sActant.id, {
-                      bundleOperator: selectedOption[0].value,
-                    });
-                  }}
-                /> */}
               </div>
               <div>
                 <BundleButtonGroup

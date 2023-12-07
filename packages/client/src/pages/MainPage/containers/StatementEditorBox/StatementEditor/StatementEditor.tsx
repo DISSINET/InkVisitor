@@ -705,16 +705,6 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                     handleAskForTemplateApply(templateToApply);
                   }}
                 />
-                {/* <BaseDropdown
-                  placeholder="select template.."
-                  disabled={!userCanEdit || templateOptions.length === 0}
-                  width="full"
-                  value={null}
-                  options={templateOptions}
-                  onChange={(templateToApply) => {
-                    handleAskForTemplateApply(templateToApply[0]);
-                  }}
-                /> */}
               </StyledEditorContentRowValue>
             </StyledEditorContentRow>
           </StyledEditorTemplateSection>

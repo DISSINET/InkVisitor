@@ -313,14 +313,6 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                   }
                   options={languageDict}
                 />
-                {/* <Dropdown
-                  width="full"
-                  value={defaultLanguage}
-                  onChange={(selectedOption) =>
-                    handleChange("defaultLanguage", selectedOption[0])
-                  }
-                  options={languageDict}
-                /> */}
               </ModalInputWrap>
               <ModalInputLabel>{"statement language"}</ModalInputLabel>
               <ModalInputWrap width={165}>
@@ -332,14 +324,6 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                   }
                   options={languageDict}
                 />
-                {/* <Dropdown
-                  width="full"
-                  value={defaultStatementLanguage}
-                  onChange={(selectedOption) =>
-                    handleChange("defaultStatementLanguage", selectedOption[0])
-                  }
-                  options={languageDict}
-                /> */}
               </ModalInputWrap>
 
               {/* NOT USED NOW */}

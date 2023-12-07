@@ -320,21 +320,6 @@ export const EntitySearchBox: React.FC = () => {
                     });
                   }}
                 />
-                {/* <BaseDropdown
-                  placeholder={""}
-                  width="full"
-                  entityDropdown
-                  options={[defaultClassOption].concat(classOptions)}
-                  value={classOption}
-                  onChange={(selectedOption) => {
-                    setClassOption(selectedOption[0]);
-                    setTemplateOption(defaultClassOption);
-                    handleChange({
-                      class: selectedOption[0].value,
-                      usedTemplate: defaultClassOption.value,
-                    });
-                  }}
-                /> */}
                 <TypeBar entityLetter={classOption} />
               </div>
             </StyledRow>
@@ -363,17 +348,6 @@ export const EntitySearchBox: React.FC = () => {
                     });
                   }}
                 />
-                {/* <BaseDropdown
-                  placeholder={""}
-                  width="full"
-                  options={statusOptions}
-                  value={statusOptionSelected}
-                  onChange={(selectedOption) => {
-                    handleChange({
-                      status: selectedOption[0].value,
-                    });
-                  }}
-                /> */}
                 <TypeBar entityLetter={classOption} />
               </div>
             </StyledRow>
@@ -391,17 +365,6 @@ export const EntitySearchBox: React.FC = () => {
                     });
                   }}
                 />
-                {/* <BaseDropdown
-                  placeholder={""}
-                  width="full"
-                  options={languageOptions}
-                  value={languageOptionSelected}
-                  onChange={(selectedOption) => {
-                    handleChange({
-                      language: selectedOption[0].value,
-                    });
-                  }}
-                /> */}
                 <TypeBar entityLetter={classOption} />
               </div>
             </StyledRow>

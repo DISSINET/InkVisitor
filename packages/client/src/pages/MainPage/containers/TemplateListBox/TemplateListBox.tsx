@@ -24,14 +24,17 @@ import { TemplateListCreateModal } from "./TemplateListCreateModal/TemplateListC
 import { TemplateListRemoveModal } from "./TemplateListRemoveModal/TemplateListRemoveModal";
 
 interface TemplateListBox {}
-export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
+export const TemplateListBox: React.FC<TemplateListBox> = () => {
   // FILTER;
-  const allEntityOption = { value: "all" as EntityEnums.Class, label: "all" };
+  const allEntityOption = {
+    value: EntityEnums.Extension.Any,
+    label: "all",
+  } as { value: EntityEnums.Extension.Any; label: string };
   const allEntityOptions = [allEntityOption, ...entitiesDict];
 
-  const [filterByClass, setFilterByClass] = useState<EntityEnums.Class>(
-    allEntityOption.value
-  );
+  const [filterByClass, setFilterByClass] = useState<
+    EntityEnums.Class | EntityEnums.Extension.Any
+  >(EntityEnums.Extension.Any);
   const [filterByLabel, setFilterByLabel] = useState<string>("");
 
   const fourthPanelBoxesOpened: { [key: string]: boolean } = useAppSelector(
@@ -126,19 +129,6 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
                   width="full"
                   disableTyping
                 />
-                {/* <Dropdown
-                  value={{
-                    label: filterByClass.label,
-                    value: filterByClass.value,
-                  }}
-                  options={allEntityOptions}
-                  onChange={(selectedOption) => {
-                    setFilterByClass(selectedOption[0]);
-                  }}
-                  width="full"
-                  entityDropdown
-                  disableTyping
-                /> */}
                 <TypeBar entityLetter={filterByClass} />
               </div>
             </StyledTemplateFilterInputValue>

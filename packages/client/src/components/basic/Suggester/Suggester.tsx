@@ -26,7 +26,7 @@ import { toast } from "react-toastify";
 import { FixedSizeList as List } from "react-window";
 import {
   EntityDragItem,
-  EntityDropdownItem,
+  EntitySingleDropdownItem,
   EntitySuggestion,
   ItemTypes,
   SuggesterItemToCreate,
@@ -53,7 +53,7 @@ interface Suggester {
   placeholder?: string; // text to display when typed === ""
   typed: string; // input value
   category: EntityEnums.Class | EntityEnums.Extension.Any; // selected category
-  categories: EntityDropdownItem[]; // all possible categories
+  categories: EntitySingleDropdownItem[]; // all possible categories
   disabled?: boolean; // todo not implemented yet
   inputWidth?: number | "full";
   disableCreate?: boolean;
@@ -278,7 +278,6 @@ export const Suggester: React.FC<Suggester> = ({
             }
             onChange={onChangeCategory}
             width={36}
-            // entityDropdown
             onFocus={() => {
               setSelected(-1);
               setIsFocused(true);

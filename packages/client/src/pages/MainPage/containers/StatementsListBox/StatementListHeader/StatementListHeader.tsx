@@ -135,22 +135,22 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
     {
       value: BatchOption.move_S,
       label: `move`,
-      info: "T",
+      info: EntityEnums.Class.Territory,
     },
     {
       value: BatchOption.duplicate_S,
       label: `duplicate`,
-      info: "T",
+      info: EntityEnums.Class.Territory,
     },
     {
       value: BatchOption.replace_R,
       label: `replace R`,
-      info: "R",
+      info: EntityEnums.Class.Resource,
     },
     {
       value: BatchOption.append_R,
       label: `append R`,
-      info: "R",
+      info: EntityEnums.Class.Resource,
     },
   ];
 
@@ -343,18 +343,13 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
                   }
                   options={batchOptions}
                 />
-                {/* <Dropdown
-                  width={78}
-                  disabled={selectedRows.length === 0}
-                  value={batchAction}
-                  onChange={(selectedOption) =>
-                    setBatchAction(selectedOption[0])
-                  }
-                  options={batchOptions}
-                /> */}
               </StyledDropdownWrap>
               <EntitySuggester
-                placeholder={batchAction.info === "T" ? "to territory" : ""}
+                placeholder={
+                  batchAction.info === EntityEnums.Class.Territory
+                    ? "to territory"
+                    : ""
+                }
                 disableTemplatesAccept
                 inputWidth={70}
                 disableCreate

@@ -203,26 +203,6 @@ export const StatementEditorActantIdentification: React.FC<
                 });
               }}
             />
-            {/* <Dropdown
-              width={130}
-              isMulti
-              disabled={!userCanEdit}
-              placeholder="mood"
-              tooltipLabel="mood"
-              icon={<AttributeIcon attributeName="mood" />}
-              options={moodDict}
-              value={[allEntities]
-                .concat(moodDict)
-                .filter((i: any) => identification.mood.includes(i.value))}
-              onChange={(selectedOptions) => {
-                handleUpdate({
-                  mood: selectedOptions
-                    ? selectedOptions.map((v: any) => v.value)
-                    : [],
-                });
-              }}
-              attributeDropdown
-            /> */}
           </div>
           <div>
             <MoodVariantButtonGroup
@@ -247,22 +227,6 @@ export const StatementEditorActantIdentification: React.FC<
                 });
               }}
             />
-            {/* <Dropdown
-              width={110}
-              placeholder="certainty"
-              tooltipLabel="certainty"
-              icon={<AttributeIcon attributeName="certainty" />}
-              disabled={!userCanEdit}
-              options={certaintyDict}
-              value={certaintyDict.find(
-                (i: any) => identification.certainty === i.value
-              )}
-              onChange={(selectedOption) => {
-                handleUpdate({
-                  certainty: selectedOption[0].value as EntityEnums.Certainty,
-                });
-              }}
-            /> */}
           </div>
         </StyledExpandedRow>
       )}

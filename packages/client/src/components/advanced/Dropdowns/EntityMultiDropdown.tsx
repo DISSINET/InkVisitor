@@ -1,21 +1,19 @@
 import { allEntities, empty } from "@shared/dictionaries/entity";
-import { EntityEnums } from "@shared/enums";
 import { BaseDropdown } from "components";
 import React from "react";
-import { EntityDropdownItem } from "types";
 
-interface EntityMultiDropdown {
+interface EntityMultiDropdown<T = string> {
   width?: number | "full";
-  value: EntityEnums.Class[];
-  onChange: (value: EntityEnums.Class[]) => void;
-  options: EntityDropdownItem[];
+  value: T[];
+  onChange: (value: T[]) => void;
+  options: { label: string; value: T }[];
   placeholder?: string;
   noOptionsMessage?: string;
   disabled?: boolean;
 
   loggerId?: string;
 }
-export const EntityMultiDropdown: React.FC<EntityMultiDropdown> = ({
+export const EntityMultiDropdown = <T extends string>({
   width,
   value,
   onChange,
@@ -25,7 +23,7 @@ export const EntityMultiDropdown: React.FC<EntityMultiDropdown> = ({
   disabled,
 
   loggerId,
-}) => {
+}: EntityMultiDropdown<T>) => {
   return (
     <BaseDropdown
       entityDropdown
@@ -34,10 +32,8 @@ export const EntityMultiDropdown: React.FC<EntityMultiDropdown> = ({
       options={[empty, allEntities, ...options]}
       value={[empty, allEntities]
         .concat(options)
-        .filter((o) => value.includes(o.value as EntityEnums.Class))}
-      onChange={(items) =>
-        onChange(items.map((i) => i.value as EntityEnums.Class))
-      }
+        .filter((o) => value.includes(o.value as T))}
+      onChange={(items) => onChange(items.map((i) => i.value as T))}
       placeholder={placeholder}
       noOptionsMessage={noOptionsMessage}
       disabled={disabled}

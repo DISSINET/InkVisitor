@@ -238,16 +238,6 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
                   setSelectedLanguage(newValue as EntityEnums.Language);
                 }}
               />
-              {/* <Dropdown
-                width="full"
-                options={languageDict}
-                value={languageDict.find((i) => i.value === selectedLanguage)}
-                onChange={(newValue) => {
-                  setSelectedLanguage(
-                    newValue[0].value as EntityEnums.Language
-                  );
-                }}
-              /> */}
             </ModalInputWrap>
             {/* Suggester territory */}
             {(selectedCategory === EntityEnums.Class.Territory ||

@@ -175,25 +175,6 @@ export const PropGroupRowValue: React.FC<PropGroupRowValue> = ({
                   });
                 }}
               />
-              // <Dropdown
-              //   width={100}
-              //   placeholder="virtuality"
-              //   tooltipLabel="virtuality"
-              //   icon={<AttributeIcon attributeName="virtuality" />}
-              //   disabled={!userCanEdit}
-              //   options={virtualityDict}
-              //   value={virtualityDict.find(
-              //     (i: any) => prop.value.virtuality === i.value
-              //   )}
-              //   onChange={(selectedOption) => {
-              //     updateProp(prop.id, {
-              //       value: {
-              //         ...prop.value,
-              //         virtuality: selectedOption[0].value,
-              //       },
-              //     });
-              //   }}
-              // />
             )}
           </StyledAttributesFlexRow>
           <StyledAttributesFlexRow>
@@ -215,25 +196,6 @@ export const PropGroupRowValue: React.FC<PropGroupRowValue> = ({
                   });
                 }}
               />
-              // <Dropdown
-              //   width={150}
-              //   placeholder="partitivity"
-              //   tooltipLabel="partitivity"
-              //   icon={<AttributeIcon attributeName="partitivity" />}
-              //   disabled={!userCanEdit}
-              //   options={partitivityDict}
-              //   value={partitivityDict.find(
-              //     (i: any) => prop.value.partitivity === i.value
-              //   )}
-              //   onChange={(selectedOption) => {
-              //     updateProp(prop.id, {
-              //       value: {
-              //         ...prop.value,
-              //         partitivity: selectedOption[0].value,
-              //       },
-              //     });
-              //   }}
-              // />
             )}
           </StyledAttributesFlexRow>
         </>
