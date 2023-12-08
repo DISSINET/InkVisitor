@@ -319,25 +319,18 @@ const ValueContainer = ({
   any
 >): React.ReactElement => {
   // @ts-ignore
-  const { value, entityDropdown, isMulti, attributeDropdown, loggerId } =
+  const { value, entityDropdown, isMulti, attributeDropdown } =
     props.selectProps;
 
   const currentValues: DropdownItem[] = [...props.getValue()];
   let toBeRendered = children;
 
-  if (loggerId === "subject-entity-type") {
-    // console.log("currentValues", currentValues);
-  }
-
   if (isMulti) {
-    if (
-      (!entityDropdown &&
-        currentValues.some((val) => val.value === allEntities.value)) ||
-      // @ts-ignore
-      (attributeDropdown && currentValues.length > 1)
-    ) {
+    if (attributeDropdown && currentValues.length > 1) {
+      // show only one merged value
       toBeRendered = [children[0][0], children[1]];
     } else if (entityDropdown && currentValues.length > 0) {
+      // filter ANY out of the values array
       toBeRendered = [
         children[0].filter(
           (ch: any) => ch.key !== `${allEntities.label}-${allEntities.value}`
