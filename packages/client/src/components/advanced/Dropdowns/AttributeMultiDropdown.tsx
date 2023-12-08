@@ -72,7 +72,7 @@ export const AttributeMultiDropdown = <T extends string>({
           else if (allWithoutAnySelected && event?.action === "select-option") {
             return onChange(getValues([allEntities, ...options]));
           }
-          // something was deselected from all selected (needed to deselect ANY)
+          // something was deselected from all selected (need to deselect ANY)
           else if (
             event?.action === "deselect-option" &&
             selectedOptions.includes(allEntities)

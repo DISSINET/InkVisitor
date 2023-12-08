@@ -44,7 +44,7 @@ export const EntityMultiDropdown = <T extends string>({
         // (possible to add && !disableEmpty for possibility to turn off empty)
         const includesEmpty = selectedOptions.includes(empty);
         const includesAny = selectedOptions.includes(allEntities);
-        // kdyz je neco vybrany = aspon jeden option
+        // when something is selected = at least one option
         if (selectedOptions !== null && selectedOptions.length > 0) {
           if (allClassesSelected && event?.action === "deselect-option") {
             // empty was deselected
@@ -56,16 +56,18 @@ export const EntityMultiDropdown = <T extends string>({
               return onChange(includesEmpty ? [empty.value as T] : []);
             }
           }
-          // kdyz vyberu all option (kliknuti na ANY)
+          // when all option selected -> ANY is clicked
           else if (
             selectedOptions[selectedOptions.length - 1].value ===
             allEntities.value
           ) {
-            if (includesEmpty) {
-              return onChange(getValues([empty, allEntities, ...options]));
-            } else {
-              return onChange(getValues([allEntities, ...options]));
-            }
+            return onChange(
+              getValues(
+                includesEmpty
+                  ? [empty, allEntities, ...options]
+                  : [allEntities, ...options]
+              )
+            );
           }
           // all are selected without ANY -> highlight also ANY option (direct click on ANY is resolved earlier)
           else if (allClassesSelected && event?.action === "select-option") {
@@ -77,7 +79,7 @@ export const EntityMultiDropdown = <T extends string>({
               )
             );
           }
-          // something was deselected from all selected (needed to deselect ANY)
+          // something was deselected from all selected (need to deselect ANY)
           else if (
             event?.action === "deselect-option" &&
             includesAny &&
