@@ -39,9 +39,8 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
     setSelectedDetailId,
   } = useSearchParams();
 
-  const [createModalEntityClass, setCreateModalEntityClass] = useState<
-    EntityEnums.Class | EntityEnums.Extension.Any
-  >(entitiesDict[0].value);
+  const [createModalEntityClass, setCreateModalEntityClass] =
+    useState<EntityEnums.Class>(entitiesDict[0].value);
   const [createModalEntityLabel, setCreateModalEntityLabel] =
     useState<string>("");
   const [createModalEntityDetail, setCreateModalEntityDetail] =
@@ -116,7 +115,7 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
     }
   };
   const handleCreateNewEntityTemplate = (): IEntity | false => {
-    if (user && createModalEntityClass !== EntityEnums.Extension.Any) {
+    if (user) {
       const newTemplate = CEntity(
         user.options,
         createModalEntityClass,

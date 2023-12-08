@@ -29,7 +29,10 @@ import { SelectComponents } from "react-select/dist/declarations/src/components"
 interface BaseDropdown {
   options?: DropdownItem[];
   value?: DropdownItem | DropdownItem[] | null;
-  onChange: (selectedOption: DropdownItem[]) => void;
+  onChange: (
+    selectedOption: DropdownItem[],
+    event?: ActionMeta<unknown>
+  ) => void;
   components?: Partial<SelectComponents<unknown, boolean, GroupBase<unknown>>>;
   ref?: React.RefObject<ReactNode>;
   width?: number | "full";
@@ -83,11 +86,6 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
 }) => {
   const isOneOptionSingleEntitySelect =
     options.length < 2 && !isMulti && entityDropdown;
-
-  // const [displayValue, setDisplayValue] = useState(value);
-  // useEffect(() => {
-  //   setDisplayValue(value);
-  // }, [value]);
 
   const [referenceElement, setReferenceElement] =
     useState<HTMLButtonElement | null>(null);
@@ -158,37 +156,9 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
 
             if (!isMulti) {
               return onChange(selectedOptions);
+            } else {
+              return onChange(selectedOptions, event);
             }
-
-            if (selectedOptions !== null && selectedOptions.length > 0) {
-              // kdyz je neco vybrany = aspon jeden option
-              if (attributeDropdown && event.action === "remove-value") {
-                return onChange([]);
-              }
-              if (
-                selectedOptions[selectedOptions.length - 1].value ===
-                allEntities.value
-              ) {
-                // kdyz vyberu all option
-                return onChange(options);
-              }
-              let result: DropdownItem[] = [];
-              // TODO: -1 depends on any / empty -> has to be custom
-              if (selectedOptions.length === options.length - 1) {
-                // kdyz jsou vybrany vsechny
-                if (selectedOptions.includes(allEntities)) {
-                  //
-                  result = selectedOptions.filter(
-                    (option: { label: string; value: string }) =>
-                      option.value !== allEntities.value
-                  );
-                } else if (event.action === "select-option") {
-                  result = options;
-                }
-                return onChange(result);
-              }
-            }
-            return onChange(selectedOptions);
           }}
           options={options}
           width={width}
