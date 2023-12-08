@@ -61,7 +61,7 @@ export const AttributeMultiDropdown = <T extends string>({
           ) {
             return onChange([]);
           }
-          // when all option selected -> ANY is clicked
+          // when all option selected (ANY is clicked)
           else if (
             selectedOptions[selectedOptions.length - 1].value ===
             allEntities.value

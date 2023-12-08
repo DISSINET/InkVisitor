@@ -2,7 +2,6 @@ import { BaseDropdown } from "components";
 import React from "react";
 
 interface BasicDropdown<T = string> {
-  // TODO: maybe could be generic enum value as well
   width?: number | "full";
   value: T | null;
   onChange: (value: T) => void;

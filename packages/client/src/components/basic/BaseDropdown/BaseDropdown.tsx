@@ -101,7 +101,7 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
         onClick={() => setShowTooltip(false)}
       >
         <StyledSelect
-          // menuIsOpen={entityDropdown && isMulti}
+          // menuIsOpen={attributeDropdown && isMulti}
           suggester={suggester}
           onFocus={onFocus}
           autoFocus={autoFocus}
@@ -215,7 +215,7 @@ const SingleValue = (props: SingleValueProps): React.ReactElement => {
 };
 
 const Option = ({ ...props }: OptionProps | any): React.ReactElement => {
-  const { entityDropdown, isMulti } = props.selectProps;
+  const { entityDropdown, attributeDropdown, isMulti } = props.selectProps;
 
   if (entityDropdown && !isMulti) {
     // SINGLE ENTITY DROPDOWN
@@ -261,6 +261,12 @@ const Option = ({ ...props }: OptionProps | any): React.ReactElement => {
             {isEntityClass ? props.label : <i>{props.label}</i>}
           </StyledEntityValue>
         </div>
+      </components.Option>
+    );
+  } else if (isMulti && attributeDropdown) {
+    return (
+      <components.Option {...props}>
+        {props.value !== allEntities.value ? props.label : <i>{props.label}</i>}
       </components.Option>
     );
   }

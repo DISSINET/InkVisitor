@@ -37,13 +37,13 @@ export const EntityMultiDropdown = <T extends string>({
         .concat(options)
         .filter((o) => value.includes(o.value as T))}
       onChange={(selectedOptions, event) => {
-        console.log(selectedOptions);
         const allClassesSelected = options.every((option) =>
           selectedOptions.includes(option)
         );
         // (possible to add && !disableEmpty for possibility to turn off empty)
         const includesEmpty = selectedOptions.includes(empty);
         const includesAny = selectedOptions.includes(allEntities);
+
         // when something is selected = at least one option
         if (selectedOptions !== null && selectedOptions.length > 0) {
           if (allClassesSelected && event?.action === "deselect-option") {
@@ -56,7 +56,7 @@ export const EntityMultiDropdown = <T extends string>({
               return onChange(includesEmpty ? [empty.value as T] : []);
             }
           }
-          // when all option selected -> ANY is clicked
+          // when all option selected (ANY is clicked)
           else if (
             selectedOptions[selectedOptions.length - 1].value ===
             allEntities.value
