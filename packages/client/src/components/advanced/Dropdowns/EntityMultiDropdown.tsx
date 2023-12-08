@@ -7,7 +7,7 @@ interface EntityMultiDropdown<T = string> {
   width?: number | "full";
   value: T[];
   onChange: (value: T[]) => void;
-  options: { label: string; value: T }[];
+  options: { value: T; label: string; info?: string }[];
   placeholder?: string;
   noOptionsMessage?: string;
   disabled?: boolean;
@@ -37,24 +37,29 @@ export const EntityMultiDropdown = <T extends string>({
         .concat(options)
         .filter((o) => value.includes(o.value as T))}
       onChange={(selectedOptions, event) => {
+        console.log(selectedOptions);
         // kdyz je neco vybrany = aspon jeden option
         if (selectedOptions !== null && selectedOptions.length > 0) {
           if (
             selectedOptions[selectedOptions.length - 1].value ===
             allEntities.value
           ) {
-            // kdyz vyberu all option
-            return onChange(getValues(options));
+            // kdyz vyberu all option (kliknuti na ANY)
+            if (selectedOptions.includes(empty)) {
+              return onChange(getValues([empty, allEntities, ...options]));
+            } else {
+              return onChange(getValues([allEntities, ...options]));
+            }
           }
           let result: DropdownItem[] = [];
+          // TODO: kdyz to obsahuje vsechny CLASS options, misto jsou vybrany vsechny
           // jsou vybrany vsechny
-          if (selectedOptions.length === options.length) {
+          if (options.every((option) => selectedOptions.includes(option))) {
             // kdyz jsou vybrany vsechny
             if (selectedOptions.includes(allEntities)) {
               //
               result = selectedOptions.filter(
-                (option: { label: string; value: string }) =>
-                  option.value !== allEntities.value
+                (option) => option.value !== allEntities.value
               );
             } else if (event?.action === "select-option") {
               result = options;

@@ -8,7 +8,11 @@ interface AttributeMultiDropdown<T = string> {
   width?: number | "full";
   value: T[];
   onChange: (value: T[]) => void;
-  options: { label: string; value: T | EntityEnums.Extension.Any }[];
+  options: {
+    value: T | EntityEnums.Extension.Any;
+    label: string;
+    info?: string;
+  }[];
   icon?: JSX.Element;
   placeholder?: string;
   tooltipLabel?: string;
@@ -44,31 +48,38 @@ export const AttributeMultiDropdown = <T extends string>({
         .concat(options)
         .filter((o) => value.includes(o.value as T))}
       onChange={(selectedOptions, event) => {
-        // kdyz je neco vybrany = aspon jeden option
+        console.log(selectedOptions);
+        const allWithoutAnySelected = options.every((option) =>
+          selectedOptions.includes(option)
+        );
+        // when something is selected = at least one option
         if (selectedOptions !== null && selectedOptions.length > 0) {
-          if (event?.action === "remove-value") {
+          // deselect ANY or remove button was clicked
+          if (
+            event?.action === "remove-value" ||
+            (allWithoutAnySelected && event?.action === "deselect-option")
+          ) {
             return onChange([]);
           }
-          if (
+          // when all option selected -> ANY is clicked
+          else if (
             selectedOptions[selectedOptions.length - 1].value ===
             allEntities.value
           ) {
-            // kdyz vyberu all option
-            return onChange(getValues(options));
+            return onChange(getValues([allEntities, ...options]));
           }
-          let result: DropdownItem[] = [];
-          // jsou vybrany vsechny
-          if (selectedOptions.length === options.length) {
-            // kdyz jsou vybrany vsechny
-            if (selectedOptions.includes(allEntities)) {
-              //
-              result = selectedOptions.filter(
-                (option: { label: string; value: string }) =>
-                  option.value !== allEntities.value
-              );
-            } else if (event?.action === "select-option") {
-              result = options;
-            }
+          // all are selected without ANY -> click on ANY is resolved earlier
+          else if (allWithoutAnySelected && event?.action === "select-option") {
+            return onChange(getValues([allEntities, ...options]));
+          }
+          // something was deselected from all selected (needed to deselect ANY)
+          else if (
+            event?.action === "deselect-option" &&
+            selectedOptions.includes(allEntities)
+          ) {
+            const result = selectedOptions.filter(
+              (option) => option.value !== allEntities.value
+            );
             return onChange(getValues(result));
           }
         }

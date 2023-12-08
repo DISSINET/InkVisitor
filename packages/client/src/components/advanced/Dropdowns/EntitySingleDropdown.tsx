@@ -3,7 +3,7 @@ import React from "react";
 
 interface EntitySingleDropdown<T = string> {
   width?: number | "full";
-  options: { label: string; value: T }[];
+  options: { value: T; label: string; info?: string }[];
   value: T;
   placeholder?: string;
   onChange: (value: T) => void;
