@@ -48,13 +48,13 @@ export const AttributeMultiDropdown = <T extends string>({
         .concat(options)
         .filter((o) => value.includes(o.value as T))}
       onChange={(selectedOptions, event) => {
-        console.log(selectedOptions);
+        // all options selected independently of ANY
         const allWithoutAnySelected = options.every((option) =>
           selectedOptions.includes(option)
         );
         // when something is selected = at least one option
         if (selectedOptions !== null && selectedOptions.length > 0) {
-          // deselect ANY or remove button was clicked
+          // deselect ANY or remove all button was clicked
           if (
             event?.action === "remove-value" ||
             (allWithoutAnySelected && event?.action === "deselect-option")
@@ -68,7 +68,7 @@ export const AttributeMultiDropdown = <T extends string>({
           ) {
             return onChange(getValues([allEntities, ...options]));
           }
-          // all are selected without ANY -> click on ANY is resolved earlier
+          // all are selected without ANY -> highlight also ANY option (direct click on ANY is resolved earlier)
           else if (allWithoutAnySelected && event?.action === "select-option") {
             return onChange(getValues([allEntities, ...options]));
           }
