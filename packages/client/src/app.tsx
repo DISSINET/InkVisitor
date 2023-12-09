@@ -35,7 +35,6 @@ import theme from "./Theme/theme";
 import AclPage from "./pages/Acl";
 import MainPage from "./pages/MainPage";
 import { DocumentsPage } from "pages/Documents";
-import CanvasTestPage from "pages/CanvasTest";
 
 const clockPerformance = (
   profilerId: any,
@@ -184,14 +183,6 @@ export const App: React.FC = () => {
                         </PublicPath>
                       }
                     />
-                     <Route
-                      path="/canvas"
-                      element={
-                        <PublicPath>
-                          <CanvasTestPage />
-                        </PublicPath>
-                      }
-                    />
                     {/* PRIVATE */}
                     <Route
                       path="/"
@@ -233,7 +224,7 @@ export const App: React.FC = () => {
                         </RequireAuth>
                       }
                     />
-                   
+
                     <Route path="*" element={<NotFoundPage />} />
                   </Routes>
                 </Page>
