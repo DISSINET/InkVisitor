@@ -168,14 +168,6 @@ export const App: React.FC = () => {
                   <Routes>
                     {/* PUBLIC */}
                     <Route
-                      path="/canvas"
-                      element={
-                        <PublicPath>
-                          <CanvasTestPage />
-                        </PublicPath>
-                      }
-                    />
-                    <Route
                       path="/login"
                       element={
                         <PublicPath>
