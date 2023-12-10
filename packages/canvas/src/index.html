@@ -39,10 +39,11 @@
           </div>
         </div>
       </div>
-      <div
-        className="info-container"
+      <div style="margin-top: 10px">Highlighted:</div>
+      <pre
+        id="highlight-container"
         style="padding: 10px; border: 1px solid black; margin-top: 10px"
-      ></div>
+      ></pre>
     </div>
 
     <script src="bundle.js"></script>
@@ -54,6 +55,9 @@
       );
       customWrapper.initialize();
       customWrapper.addScroller(document.getElementById("scroller"));
+      customWrapper.onHighlightChange((text) => {
+        document.getElementById("highlight-container").innerHTML = text;
+      });
     </script>
   </body>
 </html>

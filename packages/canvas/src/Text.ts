@@ -67,7 +67,9 @@ class Text {
   }
 
   cursorToIndex(viewport: Viewport, cursor: Cursor): number {
-    return this.lineToIndex(cursor.yLine + viewport.lineStart) + cursor.xLine - 1 ;
+    return (
+      this.lineToIndex(cursor.yLine + viewport.lineStart) + cursor.xLine - 1
+    );
   }
 
   getViewportText(viewport: Viewport): string[] {
@@ -81,9 +83,16 @@ class Text {
     return "";
   }
 
-  insertText(viewport: Viewport, cursorPosition: Cursor, textToInsert: string): void {
+  insertText(
+    viewport: Viewport,
+    cursorPosition: Cursor,
+    textToInsert: string
+  ): void {
     const insertAtI = this.cursorToIndex(viewport, cursorPosition);
-    this.value = this.value.slice(0, insertAtI + 1) + textToInsert + this.value.slice(insertAtI + 1);
+    this.value =
+      this.value.slice(0, insertAtI + 1) +
+      textToInsert +
+      this.value.slice(insertAtI + 1);
     this.calculateLines();
   }
 
@@ -94,13 +103,28 @@ class Text {
   ): void {
     const deleteFromI = this.cursorToIndex(viewport, cursorPosition);
     this.value =
-      this.value.slice(0, deleteFromI) + this.value.slice(deleteFromI + chartsToDelete);
-      
+      this.value.slice(0, deleteFromI) +
+      this.value.slice(deleteFromI + chartsToDelete);
+
     this.calculateLines();
   }
 
   getRangeText(start: IAbsCoordinates, end: IAbsCoordinates): string {
-    return ""
+    // swap in case start is after end
+    if (
+      start.yLine > end.yLine ||
+      (start.yLine === end.yLine && start.xLine > end.xLine)
+    ) {
+      const tempStart = start;
+      start = end;
+      end = tempStart;
+    }
+
+    const rangeLines = this.lines.slice(start.yLine, end.yLine + 1);
+    const linesSize = rangeLines.length;
+    rangeLines[linesSize - 1] = rangeLines[linesSize - 1].slice(0, end.xLine);
+    rangeLines[0] = rangeLines[0].slice(start.xLine, rangeLines[0].length + 1);
+    return rangeLines.join("\n");
   }
 }
 

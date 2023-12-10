@@ -24,6 +24,11 @@ export class Canvas {
   text: Text;
   scroller?: Scroller;
 
+  lastHighlightedText = "";
+
+  // callbacks
+  highlightChangeCb?: (text: string) => void;
+
   constructor(element: HTMLCanvasElement, inputText: string) {
     this.element = element;
     const ctx = this.element.getContext("2d");
@@ -55,9 +60,22 @@ export class Canvas {
     this.draw();
   }
 
+  onHighlightChange(cb: (text: string) => void) {
+    this.lastHighlightedText = "";
+    this.highlightChangeCb = (text: string) => {
+      if (text === this.lastHighlightedText) {
+        return;
+      }
+      this.lastHighlightedText = text;
+      cb(this.lastHighlightedText);
+    };
+  }
+
   onKeyDown(e: KeyboardEvent) {
     e.preventDefault();
-
+    if (e.ctrlKey) {
+      console.log("ctr active");
+    }
     switch (e.key) {
       case "ArrowUp":
         this.cursor.move(0, -1);
@@ -104,6 +122,19 @@ export class Canvas {
         break;
 
       default:
+        if (e.ctrlKey) {
+          if (e.key === "c") {
+            window.navigator.clipboard.writeText(this.lastHighlightedText);
+          }
+          if (e.key === "v") {
+            window.navigator.clipboard.readText().then((clipText: string) => {
+              this.text.insertText(this.viewport, this.cursor, clipText);
+              this.draw();
+            });
+          }
+          break;
+        }
+
         // writing to text
         const key = e.key;
         const nonCharKeys = [
@@ -214,6 +245,12 @@ export class Canvas {
       charsAtLine: this.text.charsAtLine,
     });
 
+    if (this.highlightChangeCb && this.cursor.isHighlighted()) {
+      const [start, end] = this.cursor.getHighlighted();
+      if (start && end) {
+        this.highlightChangeCb(this.text.getRangeText(start, end));
+      }
+    }
     if (this.scroller) {
       this.scroller.update(
         this.viewport.lineStart,

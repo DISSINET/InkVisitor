@@ -1,5 +1,4 @@
 import { DrawingOptions } from "./Canvas";
-import Text from "./Text";
 import Viewport from "./Viewport";
 
 export interface IAbsCoordinates {
@@ -16,6 +15,8 @@ export default class Cursor implements IAbsCoordinates {
   private highlighting: boolean = false;
   private highlightStart?: IAbsCoordinates;
   private highlightEnd?: IAbsCoordinates;
+
+  static Width = 3;
 
   yToLineI(y: number, lineHeight: number): number {
     return Math.floor(y / lineHeight);
@@ -37,6 +38,10 @@ export default class Cursor implements IAbsCoordinates {
 
   isHighlighting(): boolean {
     return this.highlighting;
+  }
+
+  isHighlighted(): boolean {
+    return !!this.highlightStart && !!this.highlightEnd;
   }
 
   getHighlighted(): [IAbsCoordinates | undefined, IAbsCoordinates | undefined] {
@@ -80,7 +85,7 @@ export default class Cursor implements IAbsCoordinates {
     ctx.fillRect(
       this.xLine * charWidth,
       this.yLine * lineHeight + 2,
-      3,
+      Cursor.Width,
       lineHeight
     );
 
