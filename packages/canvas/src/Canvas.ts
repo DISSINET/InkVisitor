@@ -1,63 +1,7 @@
 import Viewport from "./Viewport";
 import Cursor from "./Cursor";
 import Text from "./Text";
-
-interface TextCanvasProps {
-  inputText: string;
-  width: number;
-  height: number;
-}
-interface ILine {
-  lineI: number;
-  iFrom: number;
-  iTo: number;
-  text: string; // textual  content of the particular line
-  words: IWord[];
-}
-interface IWord {
-  text: string; // actual word
-  iFrom: number; // where the word starts
-  iTo: number; // where the word ends
-}
-
-class Scroller {
-  element: HTMLDivElement;
-  runner: HTMLDivElement;
-  onChangeCb?: (percentage: number) => void;
-
-  constructor(element: HTMLDivElement) {
-    this.element = element;
-    const runner = element.firstElementChild;
-    if (!runner) {
-      throw new Error("Runner for Scroller not found");
-    }
-    this.runner = runner as HTMLDivElement;
-    this.element.onmousedown = this.onMouseDown.bind(this);
-    this.runner.onmousedown = this.onRunnerMouseDown.bind(this);
-  }
-
-  update(startLine: number, endLine: number, totalLines: number) {
-    const viewportLines = endLine - startLine + 1;
-    const percentage = (startLine * 100) / (totalLines - viewportLines);
-    const availableHeight = this.element.clientHeight - this.runner.clientHeight;
-    this.runner.style["top"] = `${(availableHeight / 100) * percentage}px`;
-  }
-
-  onRunnerMouseDown(e: MouseEvent) {
-    e.stopPropagation();
-  }
-
-  onMouseDown(e: MouseEvent) {
-    const availableHeight = this.element.clientHeight;
-    if (this.onChangeCb) {
-      this.onChangeCb((e.offsetY * 100) / availableHeight);
-    }
-  }
-
-  onChange(cb: (percentage: number) => void) {
-    this.onChangeCb = cb;
-  }
-}
+import Scroller from "./Scroller";
 
 export class Canvas {
   element: HTMLCanvasElement;
@@ -72,7 +16,6 @@ export class Canvas {
   viewport: Viewport;
   cursor: Cursor;
   text: Text;
-  lines: ILine[] = [];
   scroller?: Scroller;
 
   constructor(element: HTMLCanvasElement, inputText: string) {
@@ -219,95 +162,6 @@ export class Canvas {
       this.draw();
     });
   }
-
-  // prepareText(text: string) {
-  //   const time1 = new Date();
-
-  //   const lines: ILine[] = [];
-  //   let lineStart = 0;
-
-  //   const charsInLine = Math.floor((this.width - 80) / this.charWidth);
-
-  //   for (let charI = 0; charI < text.length; charI++) {
-  //     // If we've hit a space or are at the end of the text
-  //     if (text[charI] === " " || charI === text.length - 1) {
-  //       if (charI - lineStart >= charsInLine) {
-  //         // Find last space or punctuation to avoid breaking words
-  //         let splitAt = charI;
-  //         while (
-  //           splitAt > lineStart &&
-  //           ![" ", ",", ".", ";", "!", "?"].includes(text[splitAt])
-  //         ) {
-  //           splitAt--;
-  //         }
-
-  //         // If no space or punctuation is found, just split at the current position
-  //         if (splitAt === lineStart) {
-  //           splitAt = charI;
-  //         }
-
-  //         const lineText = text.slice(lineStart, splitAt);
-  //         const words: IWord[] = [];
-
-  //         // Split the lineText into words
-  //         const wordMatches = lineText.match(/\b\w+\b/g);
-
-  //         if (wordMatches) {
-  //           let wordStart = 0;
-  //           wordMatches.forEach((word) => {
-  //             const wordIndex = lineText.indexOf(word, wordStart);
-  //             const wordEnd = wordIndex + word.length;
-  //             words.push({ text: word, iFrom: wordIndex, iTo: wordEnd });
-  //             wordStart = wordEnd;
-  //           });
-  //         }
-
-  //         lines.push({
-  //           lineI: lines.length,
-  //           iFrom: lineStart,
-  //           iTo: lineStart + lineText.length,
-  //           text: lineText,
-  //           words,
-  //         });
-  //         lineStart = splitAt + 1;
-  //       }
-  //     }
-  //   }
-
-  //   // Add any remaining text
-  //   if (lineStart < text.length) {
-  //     const words: IWord[] = [];
-
-  //     // Split the lineText into words
-  //     const lineText = text.slice(lineStart);
-  //     const wordMatches = lineText.match(/\b\w+\b/g);
-
-  //     if (wordMatches) {
-  //       let wordStart = 0;
-  //       wordMatches.forEach((word) => {
-  //         const wordIndex = lineText.indexOf(word, wordStart);
-  //         const wordEnd = wordIndex + word.length;
-  //         words.push({ text: word, iFrom: wordIndex, iTo: wordEnd });
-  //         wordStart = wordEnd;
-  //       });
-  //     }
-
-  //     lines.push({
-  //       lineI: lines.length,
-  //       text: lineText,
-  //       iFrom: lineStart,
-  //       iTo: lineStart + lineText.length,
-  //       words,
-  //     });
-  //   }
-
-  //   const time2 = new Date();
-  //   console.log(
-  //     `text of length ${text.length} parsed into ${lines.length} lines in ${time2.valueOf() - time1.valueOf()
-  //     }ms `
-  //   );
-  //   this.lines = lines
-  // }
 
   setCharWidth(txt: string) {
     this.ctx.font = this.font;
