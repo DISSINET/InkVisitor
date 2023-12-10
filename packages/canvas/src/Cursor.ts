@@ -84,9 +84,13 @@ export default class Cursor implements IAbsCoordinates {
       lineHeight
     );
 
-    const [hStart, hEnd] = this.getHighlighted();
-
+    let [hStart, hEnd] = this.getHighlighted();
     if (hStart && hEnd) {
+      if (hStart.yLine > hEnd.yLine) {
+        const tmpSwitch = hStart;
+        hStart = hEnd;
+        hEnd = tmpSwitch;
+      }
       ctx.fillStyle = "blue";
       ctx.globalAlpha = 0.2;
 
