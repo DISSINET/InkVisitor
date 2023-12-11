@@ -1,13 +1,12 @@
 import { certaintyDict, moodDict } from "@shared/dictionaries";
-import { allEntities } from "@shared/dictionaries/entity";
 import { EntityEnums } from "@shared/enums";
 import { IResponseStatement } from "@shared/types";
 import {
   IStatementActant,
   IStatementClassification,
 } from "@shared/types/statement";
-import { AttributeIcon, Button, ButtonGroup, Dropdown } from "components";
-import {
+import { AttributeIcon, Button, ButtonGroup } from "components";
+import Dropdown, {
   ElvlButtonGroup,
   EntityDropzone,
   EntitySuggester,
@@ -185,25 +184,19 @@ export const StatementEditorActantClassification: React.FC<
       {isExpanded && (
         <StyledExpandedRow>
           <div>
-            <Dropdown
+            <Dropdown.Multi.Attribute
               width={130}
-              isMulti
               disabled={!userCanEdit}
               placeholder="mood"
               tooltipLabel="mood"
               icon={<AttributeIcon attributeName="mood" />}
               options={moodDict}
-              value={[allEntities]
-                .concat(moodDict)
-                .filter((i: any) => classification.mood.includes(i.value))}
-              onChange={(selectedOptions) => {
+              value={classification.mood}
+              onChange={(newValues) => {
                 handleUpdate({
-                  mood: selectedOptions
-                    ? selectedOptions.map((v: any) => v.value)
-                    : [],
+                  mood: newValues,
                 });
               }}
-              attributeDropdown
             />
           </div>
           <div>
@@ -215,19 +208,17 @@ export const StatementEditorActantClassification: React.FC<
             />
           </div>
           <div>
-            <Dropdown
+            <Dropdown.Single.Basic
               width={110}
               placeholder="certainty"
               tooltipLabel="certainty"
               icon={<AttributeIcon attributeName="certainty" />}
               disabled={!userCanEdit}
               options={certaintyDict}
-              value={certaintyDict.find(
-                (i: any) => classification.certainty === i.value
-              )}
-              onChange={(selectedOption) => {
+              value={classification.certainty}
+              onChange={(newValue) => {
                 handleUpdate({
-                  certainty: selectedOption[0].value as EntityEnums.Certainty,
+                  certainty: newValue,
                 });
               }}
             />

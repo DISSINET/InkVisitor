@@ -3,14 +3,13 @@ import { EntityEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
 import { IRequestSearch } from "@shared/types/request-search";
 import api from "api";
-import { Button, Dropdown, Input, Loader, TypeBar } from "components";
+import { Button, Input, Loader, TypeBar } from "components";
 
-import { EntityTag } from "components/advanced";
+import { useQuery } from "@tanstack/react-query";
+import Dropdown, { EntityTag } from "components/advanced";
 import React, { useMemo, useState } from "react";
 import { FaPlus, FaTrash } from "react-icons/fa";
-import { useQuery } from "@tanstack/react-query";
 import { useAppSelector } from "redux/hooks";
-import { DropdownItem } from "types";
 import {
   StyledBoxContent,
   StyledTemplateFilter,
@@ -25,13 +24,17 @@ import { TemplateListCreateModal } from "./TemplateListCreateModal/TemplateListC
 import { TemplateListRemoveModal } from "./TemplateListRemoveModal/TemplateListRemoveModal";
 
 interface TemplateListBox {}
-export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
+export const TemplateListBox: React.FC<TemplateListBox> = () => {
   // FILTER;
-  const allEntityOption = { value: "all", label: "all" };
-  const allEntityOptions = [allEntityOption, ...entitiesDict] as any;
+  const allEntityOption = {
+    value: EntityEnums.Extension.Any,
+    label: "all",
+  } as { value: EntityEnums.Extension.Any; label: string };
+  const allEntityOptions = [allEntityOption, ...entitiesDict];
 
-  const [filterByClass, setFilterByClass] =
-    useState<DropdownItem>(allEntityOption);
+  const [filterByClass, setFilterByClass] = useState<
+    EntityEnums.Class | EntityEnums.Extension.Any
+  >(EntityEnums.Extension.Any);
   const [filterByLabel, setFilterByLabel] = useState<string>("");
 
   const fourthPanelBoxesOpened: { [key: string]: boolean } = useAppSelector(
@@ -49,8 +52,8 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
       const filters: IRequestSearch = {
         onlyTemplates: true,
       };
-      if (filterByClass.value !== "all") {
-        filters.class = filterByClass.value as EntityEnums.Class;
+      if (filterByClass !== allEntityOption.value) {
+        filters.class = filterByClass as EntityEnums.Class;
       }
       if (filterByLabel.length) {
         filters.label = filterByLabel + "*";
@@ -117,20 +120,16 @@ export const TemplateListBox: React.FC<TemplateListBox> = ({}) => {
             </StyledTemplateFilterInputLabel>
             <StyledTemplateFilterInputValue>
               <div style={{ position: "relative" }}>
-                <Dropdown
-                  value={{
-                    label: filterByClass.label,
-                    value: filterByClass.value,
-                  }}
+                <Dropdown.Single.Entity
+                  value={filterByClass}
                   options={allEntityOptions}
                   onChange={(selectedOption) => {
-                    setFilterByClass(selectedOption[0]);
+                    setFilterByClass(selectedOption);
                   }}
                   width="full"
-                  entityDropdown
                   disableTyping
                 />
-                <TypeBar entityLetter={filterByClass.value} />
+                <TypeBar entityLetter={filterByClass} />
               </div>
             </StyledTemplateFilterInputValue>
           </StyledTemplateFilterInputRow>

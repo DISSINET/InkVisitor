@@ -3,7 +3,7 @@ import theme from "./theme";
 
 export const defaultPing = -10;
 
-export const DropdownAny = "any";
+// wild card char used in search
 export const wildCardChar = "*";
 
 export const rootTerritoryId = "T0";

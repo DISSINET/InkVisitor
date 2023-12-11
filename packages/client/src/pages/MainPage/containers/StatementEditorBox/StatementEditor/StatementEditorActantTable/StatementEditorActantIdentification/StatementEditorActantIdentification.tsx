@@ -1,5 +1,4 @@
 import { certaintyDict, moodDict } from "@shared/dictionaries";
-import { allEntities } from "@shared/dictionaries/entity";
 import { EntityEnums } from "@shared/enums";
 import { IResponseStatement } from "@shared/types";
 import {
@@ -7,8 +6,8 @@ import {
   IStatementIdentification,
 } from "@shared/types/statement";
 import { excludedSuggesterEntities } from "Theme/constants";
-import { AttributeIcon, Button, ButtonGroup, Dropdown } from "components";
-import {
+import { AttributeIcon, Button, ButtonGroup } from "components";
+import Dropdown, {
   ElvlButtonGroup,
   EntityDropzone,
   EntitySuggester,
@@ -16,17 +15,16 @@ import {
   LogicButtonGroup,
   MoodVariantButtonGroup,
 } from "components/advanced";
+import { TooltipAttributes } from "pages/MainPage/containers";
 import React, { useState } from "react";
 import { FaTrashAlt } from "react-icons/fa";
 import { TbSettingsAutomation, TbSettingsFilled } from "react-icons/tb";
-import { UseMutationResult } from "@tanstack/react-query";
 import { AttributeData } from "types";
 import {
   StyledBorderLeft,
   StyledCIGrid,
   StyledExpandedRow,
 } from "../StatementEditorActantTableStyles";
-import { TooltipAttributes } from "pages/MainPage/containers";
 
 interface StatementEditorActantIdentification {
   identifications: IStatementIdentification[];
@@ -191,25 +189,19 @@ export const StatementEditorActantIdentification: React.FC<
       {isExpanded && (
         <StyledExpandedRow>
           <div>
-            <Dropdown
+            <Dropdown.Multi.Attribute
               width={130}
-              isMulti
               disabled={!userCanEdit}
               placeholder="mood"
               tooltipLabel="mood"
               icon={<AttributeIcon attributeName="mood" />}
               options={moodDict}
-              value={[allEntities]
-                .concat(moodDict)
-                .filter((i: any) => identification.mood.includes(i.value))}
-              onChange={(selectedOptions) => {
+              value={identification.mood}
+              onChange={(newValues) => {
                 handleUpdate({
-                  mood: selectedOptions
-                    ? selectedOptions.map((v: any) => v.value)
-                    : [],
+                  mood: newValues,
                 });
               }}
-              attributeDropdown
             />
           </div>
           <div>
@@ -221,19 +213,17 @@ export const StatementEditorActantIdentification: React.FC<
             />
           </div>
           <div>
-            <Dropdown
+            <Dropdown.Single.Basic
               width={110}
               placeholder="certainty"
               tooltipLabel="certainty"
               icon={<AttributeIcon attributeName="certainty" />}
               disabled={!userCanEdit}
               options={certaintyDict}
-              value={certaintyDict.find(
-                (i: any) => identification.certainty === i.value
-              )}
-              onChange={(selectedOption) => {
+              value={identification.certainty}
+              onChange={(newValue) => {
                 handleUpdate({
-                  certainty: selectedOption[0].value as EntityEnums.Certainty,
+                  certainty: newValue,
                 });
               }}
             />

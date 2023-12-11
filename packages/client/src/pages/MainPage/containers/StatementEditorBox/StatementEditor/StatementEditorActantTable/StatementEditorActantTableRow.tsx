@@ -17,9 +17,8 @@ import {
   BundleButtonGroup,
   Button,
   ButtonGroup,
-  Dropdown,
 } from "components";
-import {
+import Dropdown, {
   ElvlButtonGroup,
   EntityDropzone,
   EntitySuggester,
@@ -471,55 +470,49 @@ export const StatementEditorActantTableRow: React.FC<
           {isExpanded && !isDraggingActant && (
             <StyledExpandedRow>
               <div>
-                <Dropdown
+                <Dropdown.Single.Basic
                   width={90}
                   placeholder="virtuality"
                   tooltipLabel="virtuality"
                   icon={<AttributeIcon attributeName="virtuality" />}
                   disabled={!userCanEdit}
                   options={virtualityDict}
-                  value={virtualityDict.find(
-                    (i: any) => sActant.virtuality === i.value
-                  )}
-                  onChange={(selectedOption) => {
+                  value={sActant.virtuality}
+                  onChange={(newValue) => {
                     updateActant(sActant.id, {
-                      virtuality: selectedOption[0].value,
+                      virtuality: newValue,
                     });
                   }}
                 />
               </div>
               <div>
-                <Dropdown
+                <Dropdown.Single.Basic
                   width={120}
                   placeholder="partitivity"
                   tooltipLabel="partitivity"
                   icon={<AttributeIcon attributeName="partitivity" />}
                   disabled={!userCanEdit}
                   options={partitivityDict}
-                  value={partitivityDict.find(
-                    (i: any) => sActant.partitivity === i.value
-                  )}
-                  onChange={(selectedOption) => {
+                  value={sActant.partitivity}
+                  onChange={(newValue) => {
                     updateActant(sActant.id, {
-                      partitivity: selectedOption[0].value,
+                      partitivity: newValue,
                     });
                   }}
                 />
               </div>
               <div>
-                <Dropdown
+                <Dropdown.Single.Basic
                   width={70}
                   placeholder="logical operator"
                   tooltipLabel="logical operator"
                   icon={<AttributeIcon attributeName="bundleOperator" />}
                   disabled={!userCanEdit}
                   options={operatorDict}
-                  value={operatorDict.find(
-                    (i: any) => sActant.bundleOperator === i.value
-                  )}
-                  onChange={(selectedOption) => {
+                  value={sActant.bundleOperator}
+                  onChange={(newValue) => {
                     updateActant(sActant.id, {
-                      bundleOperator: selectedOption[0].value,
+                      bundleOperator: newValue,
                     });
                   }}
                 />

@@ -4,6 +4,10 @@ import { AttributeButtonGroup } from "./AttributeButtonGroup/AttributeButtonGrou
 import { AuditTable } from "./AuditTable/AuditTable";
 import { BreadcrumbItem } from "./BreadcrumbItem/BreadcrumbItem";
 import { DocumentModal } from "./DocumentModal/DocumentModal";
+import { AttributeMultiDropdown } from "./Dropdowns/AttributeMultiDropdown";
+import { BasicDropdown } from "./Dropdowns/BasicDropdown";
+import { EntityMultiDropdown } from "./Dropdowns/EntityMultiDropdown";
+import { EntitySingleDropdown } from "./Dropdowns/EntitySingleDropdown";
 import { EmptyTag } from "./EmptyTag/EmptyTag";
 import { EntityCreateModal } from "./EntityCreateModal/EntityCreateModal";
 import { EntityDropzone } from "./EntityDropzone/EntityDropzone";
@@ -21,6 +25,18 @@ import { Page } from "./Page/Page";
 import { LeftHeader, RightHeader } from "./PageHeader/PageHeader";
 import { PanelSeparator } from "./PanelSeparator/PanelSeparator";
 import { UserCustomizationModal } from "./UserCustomizationModal/UserCustomizationModal";
+
+const Dropdown = {
+  Single: {
+    Basic: BasicDropdown,
+    Entity: EntitySingleDropdown,
+  },
+  Multi: {
+    Attribute: AttributeMultiDropdown,
+    Entity: EntityMultiDropdown,
+  },
+};
+export default Dropdown;
 
 export {
   AddTerritoryModal,

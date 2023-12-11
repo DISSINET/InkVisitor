@@ -1,18 +1,13 @@
-import { entitiesDictKeys, languageDict } from "@shared/dictionaries";
-import { classesAll, entitiesDict } from "@shared/dictionaries/entity";
+import { languageDict } from "@shared/dictionaries";
+import { classesAll } from "@shared/dictionaries/entity";
 import { EntityEnums, UserEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import {
-  DropdownAny,
-  excludedSuggesterEntities,
-  rootTerritoryId,
-} from "Theme/constants";
+import { excludedSuggesterEntities, rootTerritoryId } from "Theme/constants";
 import api from "api";
 import {
   Button,
   ButtonGroup,
-  Dropdown,
   Input,
   Modal,
   ModalContent,
@@ -22,11 +17,10 @@ import {
   ModalInputLabel,
   ModalInputWrap,
 } from "components";
-import { EntitySuggester, EntityTag } from "components/advanced";
+import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
 import { CEntity, CStatement, CTerritory } from "constructors";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { DropdownItem } from "types";
 import { StyledContent, StyledNote } from "./EntityCreateModalStyles";
 
 interface EntityCreateModal {
@@ -34,15 +28,13 @@ interface EntityCreateModal {
   onMutationSuccess?: (entity: IEntity) => void;
 
   labelTyped?: string;
-  categorySelected?: DropdownItem;
-  categories?: DropdownItem[];
+  categorySelected: EntityEnums.Class;
 }
 export const EntityCreateModal: React.FC<EntityCreateModal> = ({
   closeModal,
   onMutationSuccess = () => {},
   labelTyped = "",
   categorySelected,
-  categories = entitiesDict,
 }) => {
   const [showModal, setShowModal] = useState(false);
   useEffect(() => {
@@ -51,15 +43,11 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
 
   const [label, setLabel] = useState(labelTyped);
   const [detailTyped, setDetailTyped] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<DropdownItem>(
-    categorySelected && categorySelected.value !== DropdownAny
-      ? categorySelected
-      : { value: categories[0].value, label: categories[0].value }
-  );
+  const [selectedCategory, setSelectedCategory] =
+    useState<EntityEnums.Class>(categorySelected);
 
-  const [selectedLanguage, setSelectedLanguage] = useState<
-    EntityEnums.Language | false
-  >(false);
+  const [selectedLanguage, setSelectedLanguage] =
+    useState<EntityEnums.Language>(EntityEnums.Language.Empty);
 
   const userId = localStorage.getItem("userid");
   const {
@@ -102,12 +90,11 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
       label: string;
       entityClass: EntityEnums.Class;
       detail?: string;
-      language: EntityEnums.Language | false;
+      language: EntityEnums.Language | null;
       territoryId?: string;
     } = {
       label: label,
-      entityClass:
-        entitiesDictKeys[selectedCategory.value as EntityEnums.Class].value,
+      entityClass: selectedCategory,
       detail: detailTyped,
       language: selectedLanguage,
       territoryId: territoryId,
@@ -181,10 +168,13 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
   const handleCheckOnSubmit = () => {
     if (label.length < 2) {
       toast.info("fill at least 2 characters");
-    } else if (selectedCategory.value === "S" && !territoryId) {
+    } else if (
+      selectedCategory === EntityEnums.Class.Statement &&
+      !territoryId
+    ) {
       toast.warning("Territory is required!");
     } else if (
-      selectedCategory.value === "T" &&
+      selectedCategory === EntityEnums.Class.Territory &&
       !territoryId &&
       userRole !== UserEnums.Role.Admin
     ) {
@@ -214,8 +204,10 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
                 categoryTypes={classesAll}
                 excludedEntityClasses={excludedSuggesterEntities}
                 onChangeCategory={(selectedOption) => {
-                  if (selectedOption)
-                    setSelectedCategory(selectedOption as DropdownItem);
+                  // Any not allowed here - this condition makes it type safe
+                  if (selectedOption !== EntityEnums.Extension.Any) {
+                    setSelectedCategory(selectedOption);
+                  }
                 }}
                 onTyped={(newType: string) => setLabel(newType)}
                 disableCreate
@@ -238,23 +230,21 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
             </ModalInputWrap>
             <ModalInputLabel>{"Language: "}</ModalInputLabel>
             <ModalInputWrap>
-              <Dropdown
+              <Dropdown.Single.Basic
                 width="full"
                 options={languageDict}
-                value={languageDict.find((i) => i.value === selectedLanguage)}
+                value={selectedLanguage}
                 onChange={(newValue) => {
-                  setSelectedLanguage(
-                    newValue[0].value as EntityEnums.Language
-                  );
+                  setSelectedLanguage(newValue as EntityEnums.Language);
                 }}
               />
             </ModalInputWrap>
             {/* Suggester territory */}
-            {(selectedCategory.value === "T" ||
-              selectedCategory.value === "S") && (
+            {(selectedCategory === EntityEnums.Class.Territory ||
+              selectedCategory === EntityEnums.Class.Statement) && (
               <>
                 <ModalInputLabel>
-                  {selectedCategory.value === "T"
+                  {selectedCategory === EntityEnums.Class.Territory
                     ? "Parent territory: "
                     : "Territory: "}
                 </ModalInputLabel>
@@ -287,7 +277,8 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
           </ModalInputForm>
           {userRole === UserEnums.Role.Admin && (
             <>
-              {selectedCategory.value === "T" && !territoryId ? (
+              {selectedCategory === EntityEnums.Class.Territory &&
+              !territoryId ? (
                 <StyledNote>
                   {"Territory will be added under root"}
                   <br />

@@ -1,5 +1,4 @@
 import { entitiesDict } from "@shared/dictionaries";
-import { allEntities } from "@shared/dictionaries/entity";
 import { EntityEnums, RelationEnums } from "@shared/enums";
 import {
   IAction,
@@ -7,32 +6,23 @@ import {
   IResponseGeneric,
   Relation,
 } from "@shared/types";
+import { UseMutationResult } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
-import { Dropdown, Input } from "components";
-import { EntitySuggester } from "components/advanced";
+import { Input } from "components";
+import Dropdown, { EntitySuggester } from "components/advanced";
 import update from "immutability-helper";
 import React, { useCallback, useEffect, useState } from "react";
-import { UseMutationResult } from "@tanstack/react-query";
 import { v4 as uuidv4 } from "uuid";
 import { EntityDetailRelationRow } from "../../EntityDetailRelations/EntityDetailRelationTypeBlock/EntityDetailRelationRow/EntityDetailRelationRow";
 import { EntityDetailRelationTypeIcon } from "../../EntityDetailRelations/EntityDetailRelationTypeBlock/EntityDetailRelationTypeIcon/EntityDetailRelationTypeIcon";
 import {
   StyledLabel,
   StyledLabelInputWrapper,
-  StyledRelationsWrapper,
   StyledRelationTypeIconWrapper,
+  StyledRelationsWrapper,
   StyledSectionHeading,
   StyledSemanticsWrapper,
 } from "./EntityDetailValencySectionStyles";
-
-const valencyEntitiesOptions = [
-  ...entitiesDict,
-  {
-    value: EntityEnums.Extension.Empty,
-    label: "empty",
-    info: "",
-  },
-];
 
 interface EntityDetailValencySection {
   entity: IResponseDetail;
@@ -159,20 +149,16 @@ export const EntityDetailValencySection: React.FC<
     });
   };
 
-  const getEntityTypeValue = () =>
-    valencyEntitiesOptions.filter((i: any) => {
-      switch (relationType) {
-        case RelationEnums.Type.SubjectSemantics:
-          return (entity as IAction).data.entities?.s?.includes(i.value);
-        case RelationEnums.Type.Actant1Semantics:
-          return (entity as IAction).data.entities?.a1?.includes(i.value);
-        case RelationEnums.Type.Actant2Semantics:
-          return (entity as IAction).data.entities?.a2?.includes(i.value);
-      }
-    });
-
-  const handleDropdownNewValue = (newValue: any) =>
-    newValue ? (newValue as string[]).map((v: any) => v.value) : [];
+  const getEntityTypeValue = () => {
+    switch (relationType) {
+      case RelationEnums.Type.SubjectSemantics:
+        return (entity as IAction).data.entities?.s;
+      case RelationEnums.Type.Actant1Semantics:
+        return (entity as IAction).data.entities?.a1;
+      case RelationEnums.Type.Actant2Semantics:
+        return (entity as IAction).data.entities?.a2;
+    }
+  };
 
   const getValencyValue = () => {
     switch (relationType) {
@@ -194,16 +180,19 @@ export const EntityDetailValencySection: React.FC<
 
       <StyledLabelInputWrapper>
         <StyledLabel>Entity type</StyledLabel>
-        <Dropdown
-          allowAny
+        <Dropdown.Multi.Entity
+          loggerId={
+            relationType === RelationEnums.Type.SubjectSemantics
+              ? "subject-entity-type"
+              : ""
+          }
           disabled={!userCanEdit}
-          isMulti
-          options={valencyEntitiesOptions}
-          value={getEntityTypeValue()}
+          options={entitiesDict}
+          value={getEntityTypeValue() ?? []}
           width="full"
           noOptionsMessage={"no entity"}
           placeholder={"no entity"}
-          onChange={(selectedOptions) => {
+          onChange={(newValues) => {
             const oldData = { ...entity.data };
             updateEntityMutation.mutate({
               data: {
@@ -212,15 +201,15 @@ export const EntityDetailValencySection: React.FC<
                   entities: {
                     s:
                       relationType === RelationEnums.Type.SubjectSemantics
-                        ? handleDropdownNewValue(selectedOptions)
+                        ? newValues
                         : entity.data.entities.s,
                     a1:
                       relationType === RelationEnums.Type.Actant1Semantics
-                        ? handleDropdownNewValue(selectedOptions)
+                        ? newValues
                         : entity.data.entities.a1,
                     a2:
                       relationType === RelationEnums.Type.Actant2Semantics
-                        ? handleDropdownNewValue(selectedOptions)
+                        ? newValues
                         : entity.data.entities.a2,
                   },
                 },

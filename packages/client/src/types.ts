@@ -76,6 +76,21 @@ export const EntityColors: { [key: string]: IEntityColor } = {
   },
 };
 
+export const ExtentedEntityColors: { [key: string]: IEntityColor } = {
+  X: {
+    entityClass: EntityEnums.Extension.NoClass,
+    color: "white",
+  },
+  empty: {
+    entityClass: EntityEnums.Extension.Empty,
+    color: "white",
+  },
+  all: {
+    entityClass: EntityEnums.Extension.Any,
+    color: "white",
+  },
+};
+
 export type EntityKeys = keyof typeof EntityColors;
 
 export interface IPage {
@@ -206,6 +221,17 @@ interface IUsedEntityStatement {
 }
 
 export type DropdownItem = { value: string; label: string; info?: string };
+
+export interface EntitySingleDropdownItem extends DropdownItem {
+  value: EntityEnums.Class | EntityEnums.Extension.Any;
+}
+
+export interface EntityMultiDropdownItem extends DropdownItem {
+  value:
+    | EntityEnums.Class
+    | EntityEnums.Extension.Any
+    | EntityEnums.Extension.Empty;
+}
 
 export type SearchParams = {
   territory?: string;

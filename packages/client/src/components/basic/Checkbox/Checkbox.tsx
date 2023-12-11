@@ -11,13 +11,13 @@ import {
 
 interface Checkbox {
   value: boolean;
-  onChangeFn: (value: boolean) => void;
+  onChangeFn?: (value: boolean) => void;
   label?: string;
   size?: number;
 }
 export const Checkbox: React.FC<Checkbox> = ({
   value,
-  onChangeFn,
+  onChangeFn = () => {},
   label,
   size = 18,
 }) => {

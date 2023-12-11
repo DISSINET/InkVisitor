@@ -7,8 +7,8 @@ import { IRequestSearch } from "@shared/types/request-search";
 import { useQuery } from "@tanstack/react-query";
 import { wildCardChar } from "Theme/constants";
 import api from "api";
-import { Button, Dropdown, Input, Loader, TypeBar } from "components";
-import {
+import { Button, Input, Loader, TypeBar } from "components";
+import Dropdown, {
   AttributeButtonGroup,
   EntitySuggester,
   EntityTag,
@@ -40,26 +40,22 @@ const initValues: IRequestSearch = {
   label: "",
   cooccurrenceId: "",
 };
-const defaultClassOption: DropdownItem = {
+const defaultClassOption = {
   label: "*",
-  value: "",
+  value: "" as EntityEnums.Class,
 };
 
-const defaultStatusOption: DropdownItem = {
+const defaultStatusOption = {
   label: "all",
-  value: "",
+  value: "" as EntityEnums.Status,
 };
-const statusOptions: DropdownItem[] = [defaultStatusOption].concat(
-  entityStatusDict
-);
+const statusOptions = [defaultStatusOption].concat(entityStatusDict);
 
-const defaultLanguageOption: DropdownItem = {
+const defaultLanguageOption = {
   label: "all",
-  value: "",
+  value: "" as EntityEnums.Language,
 };
-const languageOptions: DropdownItem[] = [defaultLanguageOption].concat(
-  languageDict
-);
+const languageOptions = [defaultLanguageOption].concat(languageDict);
 
 const anyTemplate: DropdownItem = {
   value: "Any",
@@ -70,8 +66,9 @@ const anyTemplate: DropdownItem = {
 const debounceTime: number = 500;
 
 export const EntitySearchBox: React.FC = () => {
-  const [classOption, setClassOption] =
-    useState<DropdownItem>(defaultClassOption);
+  const [classOption, setClassOption] = useState<EntityEnums.Class>(
+    defaultClassOption.value as EntityEnums.Class
+  );
   const [templateOption, setTemplateOption] =
     useState<DropdownItem>(defaultClassOption);
   const [searchData, setSearchData] = useState<IRequestSearch>(initValues);
@@ -81,26 +78,18 @@ export const EntitySearchBox: React.FC = () => {
 
   const debouncedResultsHeight = useDebounce(height, 20);
 
-  const statusOptionSelected: DropdownItem = useMemo(() => {
+  const statusOptionSelected: EntityEnums.Status = useMemo(() => {
     if (!!debouncedValues.status) {
-      return (
-        statusOptions.find((option) => {
-          return option.value === debouncedValues.status;
-        }) || defaultStatusOption
-      );
+      return debouncedValues.status || defaultStatusOption.value;
     }
-    return defaultStatusOption;
+    return defaultStatusOption.value;
   }, [debouncedValues.status]);
 
-  const languageOptionSelected: DropdownItem = useMemo(() => {
+  const languageOptionSelected: EntityEnums.Language = useMemo(() => {
     if (!!debouncedValues.language) {
-      return (
-        languageOptions.find((option) => {
-          return option.value === debouncedValues.language;
-        }) || defaultLanguageOption
-      );
+      return debouncedValues.language || defaultLanguageOption.value;
     }
-    return defaultLanguageOption;
+    return defaultLanguageOption.value;
   }, [debouncedValues.language]);
 
   // check whether the search should be executed
@@ -189,8 +178,8 @@ export const EntitySearchBox: React.FC = () => {
     { enabled: api.isLoggedIn() }
   );
 
-  const classOptions: DropdownItem[] = entitiesDict.filter(
-    (e) => e.value !== "R" && e.value !== "X"
+  const classOptions = entitiesDict.filter(
+    (e) => e.value !== EntityEnums.Class.Resource
   );
 
   // apply changes to search parameters
@@ -232,26 +221,27 @@ export const EntitySearchBox: React.FC = () => {
     return [];
   }, [entities]);
 
-  const templateOptions: DropdownItem[] = useMemo(() => {
-    const options: DropdownItem[] = [anyTemplate];
+  // RELATED TO UNUSED TEMPLATE DROPDOWN
+  // const templateOptions: DropdownItem[] = useMemo(() => {
+  //   const options: DropdownItem[] = [anyTemplate];
 
-    if (templates) {
-      templates.forEach((template) => {
-        if (template.label.length > 20) {
-          options.push({
-            value: template.id,
-            label: template.label.substring(0, 20) + "...",
-          });
-        } else {
-          options.push({
-            value: template.id,
-            label: template.label,
-          });
-        }
-      });
-    }
-    return options;
-  }, [templates]);
+  //   if (templates) {
+  //     templates.forEach((template) => {
+  //       if (template.label.length > 20) {
+  //         options.push({
+  //           value: template.id,
+  //           label: template.label.substring(0, 20) + "...",
+  //         });
+  //       } else {
+  //         options.push({
+  //           value: template.id,
+  //           label: template.label,
+  //         });
+  //       }
+  //     });
+  //   }
+  //   return options;
+  // }, [templates]);
 
   const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
 
@@ -260,7 +250,7 @@ export const EntitySearchBox: React.FC = () => {
       setSearchData({
         label: searchData.label,
       });
-      setClassOption(defaultClassOption);
+      setClassOption(defaultClassOption.value as EntityEnums.Class);
     }
   }, [showAdvancedOptions]);
 
@@ -316,22 +306,21 @@ export const EntitySearchBox: React.FC = () => {
             <StyledRow>
               <StyledRowHeader>class</StyledRowHeader>
               <div style={{ position: "relative" }}>
-                <Dropdown
+                <Dropdown.Single.Entity
                   placeholder={""}
                   width="full"
-                  entityDropdown
                   options={[defaultClassOption].concat(classOptions)}
                   value={classOption}
                   onChange={(selectedOption) => {
-                    setClassOption(selectedOption[0]);
+                    setClassOption(selectedOption as EntityEnums.Class);
                     setTemplateOption(defaultClassOption);
                     handleChange({
-                      class: selectedOption[0].value,
+                      class: selectedOption,
                       usedTemplate: defaultClassOption.value,
                     });
                   }}
                 />
-                <TypeBar entityLetter={(classOption as DropdownItem).value} />
+                <TypeBar entityLetter={classOption} />
               </div>
             </StyledRow>
             <StyledRow>
@@ -348,40 +337,41 @@ export const EntitySearchBox: React.FC = () => {
             <StyledRow>
               <StyledRowHeader>status</StyledRowHeader>
               <div style={{ position: "relative" }}>
-                <Dropdown
+                <Dropdown.Single.Basic
                   placeholder={""}
                   width="full"
                   options={statusOptions}
                   value={statusOptionSelected}
                   onChange={(selectedOption) => {
                     handleChange({
-                      status: selectedOption[0].value,
+                      status: selectedOption,
                     });
                   }}
                 />
-                <TypeBar entityLetter={(classOption as DropdownItem).value} />
+                <TypeBar entityLetter={classOption} />
               </div>
             </StyledRow>
             <StyledRow>
               <StyledRowHeader>language</StyledRowHeader>
               <div style={{ position: "relative" }}>
-                <Dropdown
+                <Dropdown.Single.Basic
                   placeholder={""}
                   width="full"
                   options={languageOptions}
                   value={languageOptionSelected}
                   onChange={(selectedOption) => {
                     handleChange({
-                      language: selectedOption[0].value,
+                      language: selectedOption,
                     });
                   }}
                 />
-                <TypeBar entityLetter={(classOption as DropdownItem).value} />
+                <TypeBar entityLetter={classOption} />
               </div>
             </StyledRow>
+            {/* NOT USED NOW */}
             {/* <StyledRow>
             <StyledRowHeader>template</StyledRowHeader>
-            <Dropdown
+             <Dropdown.Single.Attribute
               placeholder={""}
               width="full"
               options={[defaultClassOption].concat(templateOptions)}

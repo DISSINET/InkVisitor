@@ -15,8 +15,8 @@ import {
 } from "@tanstack/react-query";
 import api from "api";
 import { AxiosResponse } from "axios";
-import { Button, ButtonGroup, Dropdown } from "components";
-import { BreadcrumbItem, EntitySuggester } from "components/advanced";
+import { Button, ButtonGroup } from "components";
+import Dropdown, { BreadcrumbItem, EntitySuggester } from "components/advanced";
 import { CStatement } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
@@ -135,22 +135,22 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
     {
       value: BatchOption.move_S,
       label: `move`,
-      info: "T",
+      info: EntityEnums.Class.Territory,
     },
     {
       value: BatchOption.duplicate_S,
       label: `duplicate`,
-      info: "T",
+      info: EntityEnums.Class.Territory,
     },
     {
       value: BatchOption.replace_R,
       label: `replace R`,
-      info: "R",
+      info: EntityEnums.Class.Resource,
     },
     {
       value: BatchOption.append_R,
       label: `append R`,
-      info: "R",
+      info: EntityEnums.Class.Resource,
     },
   ];
 
@@ -332,18 +332,24 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
           {
             <>
               <StyledDropdownWrap>
-                <Dropdown
+                <Dropdown.Single.Basic
                   width={78}
                   disabled={selectedRows.length === 0}
-                  value={batchAction}
+                  value={batchAction.value}
                   onChange={(selectedOption) =>
-                    setBatchAction(selectedOption[0])
+                    setBatchAction(
+                      batchOptions.find((o) => o.value === selectedOption)!
+                    )
                   }
                   options={batchOptions}
                 />
               </StyledDropdownWrap>
               <EntitySuggester
-                placeholder={batchAction.info === "T" ? "to territory" : ""}
+                placeholder={
+                  batchAction.info === EntityEnums.Class.Territory
+                    ? "to territory"
+                    : ""
+                }
                 disableTemplatesAccept
                 inputWidth={70}
                 disableCreate

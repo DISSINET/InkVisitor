@@ -1,7 +1,8 @@
+import { partitivityDict, virtualityDict } from "@shared/dictionaries";
 import { IEntity, IProp } from "@shared/types";
 import { excludedSuggesterEntities } from "Theme/constants";
-import { AttributeIcon, Button, Dropdown } from "components";
-import {
+import { AttributeIcon, Button } from "components";
+import Dropdown, {
   ElvlButtonGroup,
   EntityDropzone,
   EntitySuggester,
@@ -16,7 +17,6 @@ import {
   StyledNoEntity,
   StyledTagGrid,
 } from "./PropGroupRowStyles";
-import { partitivityDict, virtualityDict } from "@shared/dictionaries";
 
 interface PropGroupRowType {
   prop: IProp;
@@ -155,19 +155,17 @@ export const PropGroupRowType: React.FC<PropGroupRowType> = ({
               />
             )}
             {!disabledAttributes.type?.includes("virtuality") && (
-              <Dropdown
+              <Dropdown.Single.Basic
                 width={100}
                 placeholder="virtuality"
                 tooltipLabel="virtuality"
                 icon={<AttributeIcon attributeName="virtuality" />}
                 disabled={!userCanEdit}
                 options={virtualityDict}
-                value={virtualityDict.find(
-                  (i: any) => prop.type.virtuality === i.value
-                )}
-                onChange={(selectedOption) => {
+                value={prop.type.virtuality}
+                onChange={(newValue) => {
                   updateProp(prop.id, {
-                    type: { ...prop.type, virtuality: selectedOption[0].value },
+                    type: { ...prop.type, virtuality: newValue },
                   });
                 }}
               />
@@ -175,21 +173,19 @@ export const PropGroupRowType: React.FC<PropGroupRowType> = ({
           </StyledAttributesFlexRow>
           <StyledAttributesFlexRow>
             {!disabledAttributes.type?.includes("partitivity") && (
-              <Dropdown
+              <Dropdown.Single.Basic
                 width={150}
                 placeholder="partitivity"
                 tooltipLabel="partitivity"
                 icon={<AttributeIcon attributeName="partitivity" />}
                 disabled={!userCanEdit}
                 options={partitivityDict}
-                value={partitivityDict.find(
-                  (i) => prop.type.partitivity === i.value
-                )}
-                onChange={(selectedOption) => {
+                value={prop.type.partitivity}
+                onChange={(newValue) => {
                   updateProp(prop.id, {
                     type: {
                       ...prop.type,
-                      partitivity: selectedOption[0].value,
+                      partitivity: newValue,
                     },
                   });
                 }}

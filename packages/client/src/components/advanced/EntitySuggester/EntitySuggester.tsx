@@ -1,3 +1,7 @@
+import {
+  dropdownWildCard,
+  entitiesDictKeys,
+} from "@shared/dictionaries/entity";
 import { EntityEnums, UserEnums } from "@shared/enums";
 import {
   IEntity,
@@ -6,22 +10,24 @@ import {
   ITerritory,
 } from "@shared/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { DropdownAny, wildCardChar } from "Theme/constants";
+import { wildCardChar } from "Theme/constants";
 import api from "api";
 import { Suggester } from "components";
 import { CEntity, InstTemplate } from "constructors";
 import { useDebounce, useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
 import { FaHome } from "react-icons/fa";
-import { DropdownItem, EntityDragItem, SuggesterItemToCreate } from "types";
-import { AddTerritoryModal, EntityCreateModal } from "..";
+import { EntityDragItem, SuggesterItemToCreate } from "types";
 import { deepCopy } from "utils";
+import { AddTerritoryModal, EntityCreateModal } from "..";
 
 interface EntitySuggester {
-  categoryTypes: EntityEnums.ExtendedClass[];
+  categoryTypes: EntityEnums.Class[];
   onSelected?: (id: string) => void;
   onPicked?: (entity: IEntity) => void;
-  onChangeCategory?: (selectedOption: DropdownItem) => void;
+  onChangeCategory?: (
+    selectedOption: EntityEnums.Class | EntityEnums.Extension.Any
+  ) => void;
   onTyped?: (newType: string) => void;
   placeholder?: string;
   inputWidth?: number | "full";
@@ -45,7 +51,7 @@ interface EntitySuggester {
   autoFocus?: boolean;
 
   initTyped?: string;
-  initCategory?: DropdownItem;
+  initCategory?: EntityEnums.Class;
 
   disabled?: boolean;
 }
@@ -84,8 +90,11 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
 }) => {
   const [typed, setTyped] = useState<string>(initTyped ?? "");
   const debouncedTyped = useDebounce(typed, 100);
-  const [selectedCategory, setSelectedCategory] = useState<DropdownItem>();
-  const [allCategories, setAllCategories] = useState<DropdownItem[]>();
+  const [selectedCategory, setSelectedCategory] = useState<
+    EntityEnums.Class | EntityEnums.Extension.Any
+  >();
+  const [allCategories, setAllCategories] =
+    useState<{ value: EntityEnums.Class; label: string; info?: string }[]>();
 
   const { appendDetailId } = useSearchParams();
   const userRole = localStorage.getItem("userrole");
@@ -120,9 +129,9 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
       const resSuggestions = await api.entitiesSearch({
         label: debouncedTyped + wildCardChar,
         class:
-          selectedCategory?.value === DropdownAny
+          selectedCategory === dropdownWildCard.value
             ? undefined
-            : (selectedCategory?.value as EntityEnums.Class),
+            : (selectedCategory as EntityEnums.Class),
         excluded: excludedEntityClasses.length
           ? excludedEntityClasses
           : undefined,
@@ -136,7 +145,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
         !!selectedCategory &&
         !excludedEntityClasses
           .map((key) => key.valueOf())
-          .includes(selectedCategory?.value) &&
+          .includes(selectedCategory) &&
         api.isLoggedIn(),
     }
   );
@@ -194,22 +203,25 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
 
   // initial load of categories
   useEffect(() => {
-    const categories: DropdownItem[] = [];
-    categoryTypes.forEach((category) => {
-      categories.push({
-        label: category.valueOf(),
-        value: category.valueOf(),
-      });
-    });
-    if (categories.length > 1 && !disableWildCard) {
-      categories.unshift({
-        label: EntityEnums.Extension.Any,
-        value: DropdownAny,
-      });
-    }
-    if (categories.length) {
-      setAllCategories(categories);
-      setSelectedCategory(initCategory ?? categories[0]);
+    if (categoryTypes.length) {
+      setAllCategories(
+        categoryTypes.map((c) => {
+          return {
+            value: entitiesDictKeys[c].value,
+            label: entitiesDictKeys[c].value,
+            info: entitiesDictKeys[c].info,
+          };
+        })
+      );
+      if (initCategory) {
+        setSelectedCategory(initCategory);
+      } else {
+        setSelectedCategory(
+          !disableWildCard && categoryTypes.length > 1
+            ? EntityEnums.Extension.Any
+            : categoryTypes[0]
+        );
+      }
     }
   }, [categoryTypes]);
 
@@ -363,9 +375,9 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
 
   const getClassFilteredPreSuggestions = (suggestions: IEntity[]) => {
     let filteredSuggestions;
-    if (selectedCategory?.value !== DropdownAny) {
+    if (selectedCategory !== dropdownWildCard.value) {
       filteredSuggestions = suggestions.filter(
-        (s) => s.class === selectedCategory?.value
+        (s) => s.class === selectedCategory
       );
     } else {
       filteredSuggestions = suggestions;
@@ -401,9 +413,9 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
           setTyped(newType);
           onTyped && onTyped(newType);
         }}
-        onChangeCategory={(option: DropdownItem[]) => {
-          setSelectedCategory(option[0]);
-          onChangeCategory && onChangeCategory(option[0]);
+        onChangeCategory={(option) => {
+          setSelectedCategory(option);
+          onChangeCategory && onChangeCategory(option);
         }}
         onCreate={(newCreated: SuggesterItemToCreate) => {
           handleCreate(newCreated);
@@ -431,6 +443,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
         disabled={disabled}
         showCreateModal={showCreateModal}
         setShowCreateModal={setShowCreateModal}
+        disableWildCard={disableWildCard || allCategories.length < 2}
       />
       {showAddTerritoryModal && (
         <AddTerritoryModal
@@ -457,8 +470,11 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
       {showCreateModal && (
         <EntityCreateModal
           labelTyped={typed}
-          categorySelected={selectedCategory}
-          categories={allCategories.slice(1)}
+          categorySelected={
+            selectedCategory !== EntityEnums.Extension.Any
+              ? selectedCategory
+              : allCategories[0].value
+          }
           closeModal={() => setShowCreateModal(false)}
           onMutationSuccess={(entity) => onMutationSuccess(entity)}
         />
