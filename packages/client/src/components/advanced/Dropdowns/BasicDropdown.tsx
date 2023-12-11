@@ -9,6 +9,7 @@ interface BasicDropdown<T = string> {
   icon?: JSX.Element;
   placeholder?: string;
   tooltipLabel?: string;
+  disableTyping?: boolean;
   disabled?: boolean;
 
   loggerId?: string;
@@ -21,6 +22,7 @@ export const BasicDropdown = <T extends string>({
   icon,
   placeholder,
   tooltipLabel,
+  disableTyping = false,
   disabled,
 
   loggerId,
@@ -34,6 +36,7 @@ export const BasicDropdown = <T extends string>({
       placeholder={placeholder}
       tooltipLabel={tooltipLabel}
       icon={icon}
+      disableTyping={disableTyping}
       disabled={disabled}
       loggerId={loggerId}
     />

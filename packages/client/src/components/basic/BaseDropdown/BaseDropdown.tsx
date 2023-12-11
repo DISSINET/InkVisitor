@@ -2,7 +2,7 @@ import { allEntities } from "@shared/dictionaries/entity";
 import { EntityEnums } from "@shared/enums";
 import { heightHeader } from "Theme/constants";
 import { Tooltip } from "components";
-import React, { ReactNode, useState } from "react";
+import React, { useState } from "react";
 import { FaCheckSquare, FaRegSquare } from "react-icons/fa";
 import {
   ActionMeta,
@@ -15,6 +15,7 @@ import {
   ValueContainerProps,
   components,
 } from "react-select";
+import { SelectComponents } from "react-select/dist/declarations/src/components";
 import { DropdownItem, EntityColors } from "types";
 import {
   StyledEntityMultiValue,
@@ -24,7 +25,6 @@ import {
   StyledSelect,
   StyledSelectWrapper,
 } from "./BaseDropdownStyles";
-import { SelectComponents } from "react-select/dist/declarations/src/components";
 
 interface BaseDropdown {
   options?: DropdownItem[];
@@ -33,30 +33,32 @@ interface BaseDropdown {
     selectedOption: DropdownItem[],
     event?: ActionMeta<unknown>
   ) => void;
-  components?: Partial<SelectComponents<unknown, boolean, GroupBase<unknown>>>;
-  ref?: React.RefObject<ReactNode>;
+  // appearance props
   width?: number | "full";
-  disabled?: boolean;
-  hideSelectedOptions?: boolean;
-  noDropDownIndicator?: boolean;
   placeholder?: string;
   noOptionsMessage?: string;
-  isClearable?: boolean;
-  isMulti?: boolean;
+  icon?: JSX.Element;
+  tooltipLabel?: string;
+  // single entity dropdown props
   onFocus?: () => void;
   onBlur?: () => void;
   autoFocus?: boolean;
-  disableTyping?: boolean;
   suggester?: boolean;
-
-  icon?: JSX.Element;
-  tooltipLabel?: string;
-
+  // dropdown type settings
+  isMulti?: boolean;
   entityDropdown?: boolean;
   attributeDropdown?: boolean;
-
-  // for logging purposes
+  //
+  disableTyping?: boolean;
+  disabled?: boolean;
+  // override lib components
+  components?: Partial<SelectComponents<unknown, boolean, GroupBase<unknown>>>;
+  // for logging / debugging purposes
   loggerId?: string;
+  // currently unused props
+  isClearable?: boolean;
+  hideSelectedOptions?: boolean;
+  noDropDownIndicator?: boolean;
 }
 export const BaseDropdown: React.FC<BaseDropdown> = ({
   options = [],

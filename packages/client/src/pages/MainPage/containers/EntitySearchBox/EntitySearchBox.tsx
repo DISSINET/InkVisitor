@@ -371,7 +371,7 @@ export const EntitySearchBox: React.FC = () => {
             {/* NOT USED NOW */}
             {/* <StyledRow>
             <StyledRowHeader>template</StyledRowHeader>
-             <BaseDropdown
+             <Dropdown.Single.Attribute
               placeholder={""}
               width="full"
               options={[defaultClassOption].concat(templateOptions)}

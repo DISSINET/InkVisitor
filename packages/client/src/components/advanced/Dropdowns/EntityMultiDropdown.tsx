@@ -10,6 +10,7 @@ interface EntityMultiDropdown<T = string> {
   options: { value: T; label: string; info?: string }[];
   placeholder?: string;
   noOptionsMessage?: string;
+  disableTyping?: boolean;
   disabled?: boolean;
 
   loggerId?: string;
@@ -21,6 +22,7 @@ export const EntityMultiDropdown = <T extends string>({
   options,
   placeholder,
   noOptionsMessage,
+  disableTyping = false,
   disabled,
 
   loggerId,
@@ -95,6 +97,7 @@ export const EntityMultiDropdown = <T extends string>({
       }}
       placeholder={placeholder}
       noOptionsMessage={noOptionsMessage}
+      disableTyping={disableTyping}
       disabled={disabled}
       loggerId={loggerId}
     />

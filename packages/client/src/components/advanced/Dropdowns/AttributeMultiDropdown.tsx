@@ -1,5 +1,4 @@
 import { allEntities } from "@shared/dictionaries/entity";
-import { EntityEnums } from "@shared/enums";
 import { BaseDropdown } from "components";
 import React from "react";
 import { DropdownItem } from "types";
@@ -9,13 +8,14 @@ interface AttributeMultiDropdown<T = string> {
   value: T[];
   onChange: (value: T[]) => void;
   options: {
-    value: T | EntityEnums.Extension.Any;
+    value: T;
     label: string;
     info?: string;
   }[];
   icon?: JSX.Element;
   placeholder?: string;
   tooltipLabel?: string;
+  disableTyping?: boolean;
   disabled?: boolean;
 
   loggerId?: string;
@@ -28,6 +28,7 @@ export const AttributeMultiDropdown = <T extends string>({
   icon,
   placeholder,
   tooltipLabel,
+  disableTyping = false,
   disabled,
 
   loggerId,
@@ -85,6 +86,7 @@ export const AttributeMultiDropdown = <T extends string>({
         }
         return onChange(getValues(selectedOptions));
       }}
+      disableTyping={disableTyping}
       disabled={disabled}
       loggerId={loggerId}
     />
