@@ -21,9 +21,12 @@ import {
   StyledEntityMultiValue,
   StyledEntityValue,
   StyledFaChevronDown,
-  StyledIconWrap,
+  StyledValueIconWrap,
+  StyledOptionRow,
   StyledSelect,
   StyledSelectWrapper,
+  StyledOptionIconWrap,
+  StyledEntityOptionClass,
 } from "./BaseDropdownStyles";
 
 interface BaseDropdown {
@@ -237,22 +240,13 @@ const Option = ({ ...props }: OptionProps | any): React.ReactElement => {
     );
     return (
       <components.Option {...props}>
-        <div
-          style={{ display: "flex", alignItems: "center", height: "2.5rem" }}
-        >
-          <span style={{ margin: "0 0.2rem" }}>
+        <StyledOptionRow>
+          <StyledOptionIconWrap>
             {props.isSelected ? <FaCheckSquare /> : <FaRegSquare />}
-          </span>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              width: "1.5rem",
-            }}
-          >
+          </StyledOptionIconWrap>
+          <StyledEntityOptionClass>
             {isEntityClass && props.value}
-          </div>
+          </StyledEntityOptionClass>
           <StyledEntityValue
             color={
               props.value === EntityEnums.Extension.Empty
@@ -262,7 +256,7 @@ const Option = ({ ...props }: OptionProps | any): React.ReactElement => {
           >
             {isEntityClass ? props.label : <i>{props.label}</i>}
           </StyledEntityValue>
-        </div>
+        </StyledOptionRow>
       </components.Option>
     );
   } else if (isMulti && attributeDropdown) {
@@ -365,7 +359,7 @@ const Control = ({ children, ...props }: ControlProps<any, false>) => {
 
   return (
     <components.Control {...props}>
-      {icon && <StyledIconWrap>{icon}</StyledIconWrap>}
+      {icon && <StyledValueIconWrap>{icon}</StyledValueIconWrap>}
       {children}
     </components.Control>
   );

@@ -1,6 +1,6 @@
 import { ThemeColor } from "Theme/theme";
 import { FaChevronDown } from "react-icons/fa";
-import Select, { components } from "react-select";
+import Select from "react-select";
 import styled from "styled-components";
 
 const getWidth = (width?: number | "full") => {
@@ -144,8 +144,23 @@ export const StyledFaChevronDown = styled(FaChevronDown)`
   margin-left: 1px;
 `;
 
-export const StyledIconWrap = styled.div`
+export const StyledValueIconWrap = styled.div`
   font-size: ${({ theme }) => theme.fontSize["sm"]};
   margin-left: ${({ theme }) => theme.space[1]};
   color: ${({ theme }) => theme.color["greyer"]};
+`;
+
+export const StyledOptionRow = styled.div`
+  display: flex;
+  align-items: center;
+  height: 2.5rem;
+`;
+export const StyledOptionIconWrap = styled.div`
+  margin: 0 0.2rem;
+`;
+export const StyledEntityOptionClass = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 1.5rem;
 `;
