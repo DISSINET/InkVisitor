@@ -75,7 +75,7 @@ const darkTheme = {
     entityL: "#88D27A",
     entityO: "#F29C97",
     entityP: "#F8BE78",
-    entityB: "#ffed6f",
+    entityB: "#f4dd44",
     entityR: "#9ECAE9",
     // vyssi kategorie
     entityS: "#ff93ac",

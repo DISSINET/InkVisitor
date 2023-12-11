@@ -38,7 +38,9 @@ export const StyledTemplateSectionList = styled.div`
 `;
 
 export const StyledTemplateFilterInputRow = styled.div``;
-export const StyledTemplateFilterInputLabel = styled.div``;
+export const StyledTemplateFilterInputLabel = styled.div`
+  color: ${({ theme }) => theme.color["black"]};
+`;
 export const StyledTemplateFilterInputValue = styled.div``;
 
 export const StyledTemplateFilter = styled.div`

@@ -42,7 +42,7 @@ export const StyledRightHeader = styled.div`
 `;
 export const StyledThemeSwitcher = styled.div`
   display: inline-flex;
-  border-radius: 1rem;
+  border-radius: 1.2rem;
   overflow: hidden;
   cursor: pointer;
   margin-right: 1rem;
@@ -55,7 +55,7 @@ interface StyledThemeSwitcherIcon {
   selected: boolean;
 }
 export const StyledThemeSwitcherIcon = styled.div<StyledThemeSwitcherIcon>`
-  padding: 0.4rem 0.7rem;
+  padding: 0.5rem 0.8rem;
   font-size: 15px;
   transition: 0.3s all;
   background-color: ${({ theme, selected }) =>
