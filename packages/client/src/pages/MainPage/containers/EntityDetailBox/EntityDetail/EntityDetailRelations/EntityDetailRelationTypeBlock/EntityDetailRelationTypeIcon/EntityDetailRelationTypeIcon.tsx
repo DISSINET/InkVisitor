@@ -6,7 +6,10 @@ import React from "react";
 import { BiNetworkChart } from "react-icons/bi";
 import { TbArrowNarrowRight, TbArrowsHorizontal } from "react-icons/tb";
 import { StyledLabel } from "../EntityDetailRelationTypeBlockStyles";
-import { StyledRelationType } from "./EntityDetailRelationTypeIconStyles";
+import {
+  StyledArrow,
+  StyledRelationType,
+} from "./EntityDetailRelationTypeIconStyles";
 
 interface EntityDetailRelationTypeIcon {
   relationType: RelationEnums.Type;
@@ -28,11 +31,13 @@ export const EntityDetailRelationTypeIcon: React.FC<
     <StyledRelationType>
       <LetterIcon letter={relationType} color="info" />
       {!hideLabel && <StyledLabel>{relationRule.label}</StyledLabel>}
-      {relationRule.inverseLabel ? (
-        <TbArrowsHorizontal color={theme.color["info"]} />
-      ) : (
-        <TbArrowNarrowRight color={theme.color["info"]} />
-      )}
+      <StyledArrow>
+        {relationRule.inverseLabel ? (
+          <TbArrowsHorizontal />
+        ) : (
+          <TbArrowNarrowRight />
+        )}
+      </StyledArrow>
       {relationRule.graph && (
         <Button
           icon={<BiNetworkChart />}

@@ -33,6 +33,7 @@ export const StyledMoveToParent = styled.div`
   margin-top: 0.3rem;
 `;
 export const StyledHeading = styled.span`
+  color: ${({ theme }) => theme.color["black"]};
   word-wrap: break-word;
 `;
 export const StyledSuggesterRow = styled.div`
@@ -50,8 +51,12 @@ export const StyledActionsWrapper = styled.div`
 export const StyledCounter = styled.div`
   white-space: nowrap;
   margin-left: 0.5rem;
-  color: black;
+  color: ${({ theme }) => theme.color["black"]};
 `;
 export const StyledDropdownWrap = styled.div`
   margin: 0 0.5rem;
+`;
+export const StyledCheckboxWrapper = styled.div`
+  color: ${({ theme }) => theme.color["black"]};
+  cursor: pointer;
 `;

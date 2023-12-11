@@ -8,7 +8,11 @@ import {
   IResponseTree,
   IStatement,
 } from "@shared/types";
-import theme from "Theme/theme";
+import {
+  UseMutationResult,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import api from "api";
 import { AxiosResponse } from "axios";
 import { Button, ButtonGroup, Dropdown } from "components";
@@ -23,11 +27,6 @@ import {
   MdOutlineCheckBoxOutlineBlank,
   MdOutlineIndeterminateCheckBox,
 } from "react-icons/md";
-import {
-  UseMutationResult,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
 import { setLastClickedIndex } from "redux/features/statementList/lastClickedIndexSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { DropdownItem } from "types";
@@ -35,6 +34,7 @@ import { collectTerritoryChildren, searchTree } from "utils";
 import { v4 as uuidv4 } from "uuid";
 import {
   StyledActionsWrapper,
+  StyledCheckboxWrapper,
   StyledCounter,
   StyledDropdownWrap,
   StyledFaStar,
@@ -247,13 +247,11 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
 
   const renderCheckBox = () => {
     const size = 18;
-    const color = theme.color.black;
+
     if (isAllSelected) {
       return (
         <MdOutlineCheckBox
           size={size}
-          color={color}
-          style={{ cursor: "pointer" }}
           onClick={() => {
             handleSelectAll(false);
             dispatch(setLastClickedIndex(-1));
@@ -265,8 +263,6 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
       return (
         <MdOutlineIndeterminateCheckBox
           size={size}
-          color={color}
-          style={{ cursor: "pointer" }}
           onClick={() => {
             handleSelectAll(false);
             dispatch(setLastClickedIndex(-1));
@@ -277,8 +273,6 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
       return (
         <MdOutlineCheckBoxOutlineBlank
           size={size}
-          color={color}
-          style={{ cursor: "pointer" }}
           onClick={() => handleSelectAll(true)}
         />
       );
@@ -329,7 +323,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
 
       <StyledSuggesterRow>
         <StyledActionsWrapper>
-          {renderCheckBox()}
+          <StyledCheckboxWrapper>{renderCheckBox()}</StyledCheckboxWrapper>
 
           {selectedRows.length > 0 && (
             <StyledCounter>{`${selectedRows.length}/${data.statements.length}`}</StyledCounter>

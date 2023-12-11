@@ -245,7 +245,9 @@ const MainPage: React.FC<MainPage> = ({}) => {
         <Box
           label="Statements"
           borderColor="white"
-          onHeaderClick={toggleStatementListOpen}
+          onHeaderClick={
+            !statementListOpened ? toggleStatementListOpen : undefined
+          }
           height={
             detailIdArray.length
               ? statementListOpened

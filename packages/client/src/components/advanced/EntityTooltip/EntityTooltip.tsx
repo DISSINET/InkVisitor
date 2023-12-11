@@ -203,7 +203,10 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
                     {hasConnection && (
                       <>
                         <StyledLetterIconWrap>
-                          <LetterIcon color="white" letter={relationType} />
+                          <LetterIcon
+                            color="tooltipColor"
+                            letter={relationType}
+                          />
                         </StyledLetterIconWrap>
                         {relationRule.cloudType &&
                         currentRelations[0]?.entityIds ? (

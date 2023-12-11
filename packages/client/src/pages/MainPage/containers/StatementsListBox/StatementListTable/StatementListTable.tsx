@@ -7,7 +7,6 @@ import {
   IStatement,
 } from "@shared/types";
 import { UseMutationResult } from "@tanstack/react-query";
-import theme from "Theme/theme";
 import { AxiosResponse } from "axios";
 import { Button, ButtonGroup, TagGroup } from "components";
 import { EntityTag } from "components/advanced";
@@ -171,8 +170,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
               {checked ? (
                 <MdOutlineCheckBox
                   size={size}
-                  color={theme.color.black}
-                  style={{ cursor: "pointer", zIndex: 2 }}
+                  style={{ zIndex: 2 }}
                   onClick={(e) => {
                     e.stopPropagation();
                     if (
@@ -198,8 +196,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
               ) : (
                 <MdOutlineCheckBoxOutlineBlank
                   size={size}
-                  color={theme.color.black}
-                  style={{ cursor: "pointer", zIndex: 2 }}
+                  style={{ zIndex: 2 }}
                   onClick={(e) => {
                     e.stopPropagation();
                     if (

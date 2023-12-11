@@ -17,7 +17,7 @@ export const StyledContent = styled.div`
 `;
 
 export const StyledLogo = styled.div`
-  background-color: ${({ theme }) => theme.color.primary};
+  background-color: ${({ theme }) => theme.color.muni};
   padding: ${({ theme }) => theme.space[8]};
 `;
 export const StyledTitle = styled.div`
@@ -35,12 +35,10 @@ export const StyledHeader = styled.div`
   padding-top: ${({ theme }) => theme.space[4]};
 `;
 
-export const StyledText = styled.div`
-  padding-bottom: ${({ theme }) => theme.space[2]};
-`;
-
 export const StyledTextList = styled.ul`
   padding-left: ${({ theme }) => theme.space[10]};
+  color: ${({ theme }) => theme.color["black"]};
+  padding-bottom: ${({ theme }) => theme.space[2]};
 `;
 
 export const StyledTextListItem = styled.li`

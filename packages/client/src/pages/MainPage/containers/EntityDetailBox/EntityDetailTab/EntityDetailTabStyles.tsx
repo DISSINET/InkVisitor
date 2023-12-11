@@ -30,7 +30,7 @@ interface StyledLabel {
 export const StyledLabel = styled.div<StyledLabel>`
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   color: ${({ theme, isSelected }) =>
-    isSelected ? "" : theme.color["gray"][700]};
+    isSelected ? theme.color["black"] : theme.color["gray"][700]};
   padding: ${({ theme }) => theme.space[1]};
   display: inline-block;
   overflow: hidden;
@@ -47,6 +47,7 @@ export const StyledIconWrap = styled.span`
   align-items: center;
   height: 100%;
   margin-right: 0.2rem;
+  color: ${({ theme }) => theme.color["black"]};
 `;
 
 export const StyledCgClose = styled(CgClose)`

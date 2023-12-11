@@ -50,24 +50,17 @@ export const StyledSelect = styled(Select)<StyledSelect>`
     border-right: ${({ suggester }) => (suggester ? "none" : "")};
     border-radius: 0;
     background-color: ${({ theme, entityDropdown, suggester }) =>
-      entityDropdown && suggester ? theme.color["gray"][200] : ""};
+      entityDropdown && suggester
+        ? theme.color["gray"][200]
+        : theme.color["white"]};
     :hover {
       border-color: ${({ theme }) => theme.color["info"]};
       border-width: 1px;
     }
   }
   .react-select__control--is-disabled {
-    background: ${({ isOneOptionSingleEntitySelect }) =>
-      isOneOptionSingleEntitySelect
-        ? ""
-        : `repeating-linear-gradient(
-      -45deg,
-      #cbd5e0,
-      #cbd5e0,
-      1px,
-      #fff 1px,
-      #fff 12px
-    )`};
+    background: ${({ theme, isOneOptionSingleEntitySelect }) =>
+      isOneOptionSingleEntitySelect ? "" : theme.background["stripes"]};
   }
   .react-select__control--is-focused {
     box-shadow: none;
@@ -107,6 +100,7 @@ export const StyledSelect = styled(Select)<StyledSelect>`
     display: none;
   }
   .react-select__multi-value__label {
+    color: ${({ theme }) => theme.color["black"]};
     padding: 0.2rem;
   }
   // portal menu style is in global stylesheet

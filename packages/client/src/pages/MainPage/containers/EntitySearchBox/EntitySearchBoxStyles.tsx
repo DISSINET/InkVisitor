@@ -29,6 +29,7 @@ export const StyledAdvancedOptions = styled.div`
   margin-left: 0.7rem;
 `;
 export const StyledRowHeader = styled.div`
+  color: ${({ theme }) => theme.color["black"]};
   display: block;
   margin-right: ${({ theme }) => theme.space[2]};
   font-size: ${({ theme }) => theme.fontSize["xxs"]};

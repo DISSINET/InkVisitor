@@ -23,7 +23,8 @@ interface StyledHead {
 }
 export const StyledHead = styled(animated.div)<StyledHead>`
   height: 3.2rem;
-  background-color: ${({ theme, $color }) => ($color ? $color : "")};
+  background-color: ${({ theme, $color }) =>
+    $color ? theme.color[$color] : ""};
   color: ${({ theme }) => theme.color["gray"]["600"]};
   padding: ${({ theme }) => theme.space[2]};
   font-size: ${({ theme }) => theme.fontSize["base"]};
@@ -67,7 +68,7 @@ export const StyledContent = styled(animated.div)<StyledContent>`
       ? $borderColor
         ? theme.color[$borderColor]
         : theme.color["gray"]["200"]
-      : theme.color["grey"]};
+      : ""};
   border-style: ${({ $isExpanded }) => ($isExpanded ? "solid" : "")};
   border-width: ${({ theme, $noPadding, $isExpanded }) =>
     $noPadding || !$isExpanded ? theme.borderWidth[1] : theme.borderWidth[4]};

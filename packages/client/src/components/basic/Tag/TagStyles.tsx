@@ -25,6 +25,7 @@ export const StyledTagWrapper = styled.div<StyledTagWrapper>`
 interface StyledEntityTag {
   $color: keyof ThemeColor;
   isTemplate: boolean;
+  darkTheme?: boolean;
 }
 export const StyledEntityTag = styled.div<StyledEntityTag>`
   background: ${({ $color, isTemplate, theme }) =>
@@ -35,8 +36,28 @@ export const StyledEntityTag = styled.div<StyledEntityTag>`
   justify-content: center;
   align-items: center;
   flex-shrink: 0;
-  font-weight: ${({ theme }) => theme.fontWeight["normal"]};
+  font-weight: ${({ theme, darkTheme }) =>
+    darkTheme ? theme.fontWeight["bold"] : theme.fontWeight["normal"]};
   width: ${({ theme }) => theme.space[7]};
+`;
+
+interface StyledLabelWrap {
+  invertedLabel: boolean;
+}
+export const StyledLabelWrap = styled.div<StyledLabelWrap>`
+  display: inline-flex;
+  overflow: hidden;
+  background-color: ${({ theme, invertedLabel }) =>
+    invertedLabel
+      ? theme.color.tagSelectedBackground
+      : theme.color.tagBackground};
+`;
+interface StyledStarWrap {}
+export const StyledStarWrap = styled.div<StyledStarWrap>`
+  display: inline-flex;
+  align-items: center;
+  height: 100%;
+  margin-left: 0.2rem;
 `;
 
 const getColor = (
@@ -48,29 +69,12 @@ const getColor = (
     if (isFavorited) {
       return "warning";
     } else {
-      return isItalic ? "grey" : "white";
+      return "tagSelectedColor";
     }
   } else {
-    return isItalic ? "greyer" : "black";
+    return isItalic ? "tagItalic" : "tagColor";
   }
 };
-
-interface StyledLabelWrap {
-  invertedLabel: boolean;
-}
-export const StyledLabelWrap = styled.div<StyledLabelWrap>`
-  display: inline-flex;
-  overflow: hidden;
-  background-color: ${({ theme, invertedLabel }) =>
-    invertedLabel ? theme.color["primary"] : theme.color["white"]};
-`;
-interface StyledStarWrap {}
-export const StyledStarWrap = styled.div<StyledStarWrap>`
-  display: inline-flex;
-  align-items: center;
-  height: 100%;
-  margin-left: 0.2rem;
-`;
 
 interface StyledLabel {
   invertedLabel: boolean;

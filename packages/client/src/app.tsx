@@ -1,6 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import { Helmet } from "react-helmet";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
@@ -21,6 +21,8 @@ import {
   thirdPanelMinWidth,
 } from "Theme/constants";
 import GlobalStyle from "Theme/global";
+import theme, { ThemeType } from "Theme/theme";
+import { darkTheme } from "Theme/theme-dark";
 import { Page } from "components/advanced";
 import { useDebounce } from "hooks";
 import { AboutPage } from "pages/About";
@@ -31,10 +33,11 @@ import { setContentHeight } from "redux/features/layout/contentHeightSlice";
 import { setLayoutWidth } from "redux/features/layout/layoutWidthSlice";
 import { setPanelWidths } from "redux/features/layout/panelWidthsSlice";
 import { setSeparatorXPosition } from "redux/features/layout/separatorXPositionSlice";
-import theme from "./Theme/theme";
+
+import { DocumentsPage } from "pages/Documents";
 import AclPage from "./pages/Acl";
 import MainPage from "./pages/MainPage";
-import { DocumentsPage } from "pages/Documents";
+import { InterfaceEnums } from "@shared/enums";
 
 const clockPerformance = (
   profilerId: any,
@@ -80,6 +83,16 @@ export const App: React.FC = () => {
   const disableUserSelect = useAppSelector(
     (state) => state.layout.disableUserSelect
   );
+  const selectedThemeId: InterfaceEnums.Theme = useAppSelector(
+    (state) => state.theme
+  );
+
+  const themeConfig = useMemo<ThemeType>(() => {
+    if (selectedThemeId === "dark") {
+      return darkTheme;
+    }
+    return theme;
+  }, [selectedThemeId]);
 
   const [debouncedWidth, debouncedHeight] = useDebounce(useWindowSize(), 50);
 
@@ -157,7 +170,7 @@ export const App: React.FC = () => {
         <meta charSet="utf-8" />
         <title>InkVisitor</title>
       </Helmet>
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={themeConfig}>
         <GlobalStyle disableUserSelect={disableUserSelect} />
         <QueryClientProvider client={queryClient}>
           <ReactQueryDevtools initialIsOpen={false} />

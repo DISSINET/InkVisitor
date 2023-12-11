@@ -1,24 +1,18 @@
-import theme from "Theme/theme";
-import React from "react";
+import React, { useContext } from "react";
 import { DotLoader } from "react-spinners";
+import { ThemeContext } from "styled-components";
 import { StyledLoaderWrap } from "./LoaderStyles";
 
 interface Loader {
   show?: boolean;
   size?: number;
-  inverted?: boolean;
 }
-export const Loader: React.FC<Loader> = ({
-  show = false,
-  size = 60,
-  inverted = false,
-}) => {
+export const Loader: React.FC<Loader> = ({ show = false, size = 60 }) => {
+  const themeContext = useContext(ThemeContext);
+
   return (
     <StyledLoaderWrap show={show}>
-      <DotLoader
-        color={inverted ? theme.color["white"] : theme.color["primary"]}
-        size={size}
-      />
+      <DotLoader color={themeContext.color["primary"]} size={size} />
     </StyledLoaderWrap>
   );
 };

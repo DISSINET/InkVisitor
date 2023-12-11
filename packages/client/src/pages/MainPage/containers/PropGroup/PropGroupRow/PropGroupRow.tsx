@@ -173,7 +173,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
           <StyledPropLineColumn level={level} lowIdent={lowIdent}>
             {userCanEdit && hasOrder ? (
               <div ref={dragRef} style={{ width: "2rem" }}>
-                <StyledFaGripVertical style={{ marginTop: "0.3rem" }} />
+                <StyledFaGripVertical />
               </div>
             ) : (
               <div style={{ width: "2rem" }} />
@@ -283,6 +283,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
                         />
                       )
                     }
+                    hideTooltipOnClick
                     tooltipContent={
                       <TooltipAttributesGroup
                         data={{

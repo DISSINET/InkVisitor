@@ -45,7 +45,7 @@ export const Tooltip: React.FC<Tooltip> = ({
   content,
   tagGroup = false,
   // style
-  color = "black",
+  color = "tooltipBackground",
   position = "bottom",
   noArrow = false,
   offsetX = 0,

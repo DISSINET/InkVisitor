@@ -7,7 +7,6 @@ import {
   StyledHeader,
   StyledLink,
   StyledLogo,
-  StyledText,
   StyledTextList,
   StyledTextListItem,
 } from "./AboutStyles";
@@ -89,73 +88,70 @@ export const AboutPage: React.FC<IAboutPage> = ({}) => {
 
         <div>
           <StyledHeader>About</StyledHeader>
-          <StyledText>
-            <StyledTextList>
-              <StyledTextListItem>
-                InkVisitor is an{" "}
-                <b>
-                  open-source, browser-based research environment for linked
-                  data
-                </b>
-                . It is designed to assist researchers in the humanities and
-                social sciences in{" "}
-                <b>
-                  transforming texts into complex structured data for further
-                  exploration and analysis.
-                </b>
-              </StyledTextListItem>
-              <StyledTextListItem>
-                InkVisitor implements a specific method of text-oriented data
-                collection:{" "}
-                <b>Computer-Assisted Semantic Text Modelling (CASTEMO)</b>.
-                CASTEMO is{" "}
-                <b>
-                  highly attentive to semantic detail and the qualities of
-                  original expression.
-                </b>
-              </StyledTextListItem>
-              <StyledTextListItem>
-                The data are entered in the form of <b>entities</b> and{" "}
-                <b>statements</b>. Statements relate entities of various types
-                into <b>semantic quadruples</b> (subject, verb, object 1, object
-                2) following the syntactic structure of texts.
-              </StyledTextListItem>
-              <StyledTextListItem>
-                InkVisitor serves as a data-entry front-end for JSON-format{" "}
-                <b>research databases</b> (
-                <LinkWithIcon label="RethinkDB" url="https://rethinkdb.com" />
-                ). These databases allow for complex queries and render the data
-                available for various kinds of computational analyses.
-              </StyledTextListItem>
-              <StyledTextListItem>
-                InkVisitor has been developed by the{" "}
-                <b>ERC-funded Dissident Networks Project</b> (
-                <LinkWithIcon url="https://dissinet.cz" label="DISSINET" />
-                ).
-              </StyledTextListItem>
-              <StyledTextListItem>
-                InkVisitor is distributed under an <b>open license</b> (the{" "}
-                <LinkWithIcon
-                  url="https://opensource.org/licenses/BSD-3-Clause"
-                  label="BSD 3-Clause License"
-                />
-                ).
-              </StyledTextListItem>
-              <StyledTextListItem>
-                Please post feature requests and report bugs on our{" "}
-                <LinkWithIcon
-                  url="https://github.com/DISSINET/InkVisitor/issues"
-                  label="GitHub"
-                />
-                .
-              </StyledTextListItem>
-            </StyledTextList>
+          <StyledTextList>
+            <StyledTextListItem>
+              InkVisitor is an{" "}
+              <b>
+                open-source, browser-based research environment for linked data
+              </b>
+              . It is designed to assist researchers in the humanities and
+              social sciences in{" "}
+              <b>
+                transforming texts into complex structured data for further
+                exploration and analysis.
+              </b>
+            </StyledTextListItem>
+            <StyledTextListItem>
+              InkVisitor implements a specific method of text-oriented data
+              collection:{" "}
+              <b>Computer-Assisted Semantic Text Modelling (CASTEMO)</b>.
+              CASTEMO is{" "}
+              <b>
+                highly attentive to semantic detail and the qualities of
+                original expression.
+              </b>
+            </StyledTextListItem>
+            <StyledTextListItem>
+              The data are entered in the form of <b>entities</b> and{" "}
+              <b>statements</b>. Statements relate entities of various types
+              into <b>semantic quadruples</b> (subject, verb, object 1, object
+              2) following the syntactic structure of texts.
+            </StyledTextListItem>
+            <StyledTextListItem>
+              InkVisitor serves as a data-entry front-end for JSON-format{" "}
+              <b>research databases</b> (
+              <LinkWithIcon label="RethinkDB" url="https://rethinkdb.com" />
+              ). These databases allow for complex queries and render the data
+              available for various kinds of computational analyses.
+            </StyledTextListItem>
+            <StyledTextListItem>
+              InkVisitor has been developed by the{" "}
+              <b>ERC-funded Dissident Networks Project</b> (
+              <LinkWithIcon url="https://dissinet.cz" label="DISSINET" />
+              ).
+            </StyledTextListItem>
+            <StyledTextListItem>
+              InkVisitor is distributed under an <b>open license</b> (the{" "}
+              <LinkWithIcon
+                url="https://opensource.org/licenses/BSD-3-Clause"
+                label="BSD 3-Clause License"
+              />
+              ).
+            </StyledTextListItem>
+            <StyledTextListItem>
+              Please post feature requests and report bugs on our{" "}
+              <LinkWithIcon
+                url="https://github.com/DISSINET/InkVisitor/issues"
+                label="GitHub"
+              />
+              .
+            </StyledTextListItem>
+          </StyledTextList>
 
-            {/* <IMailWithIcon
+          {/* <IMailWithIcon
                     url="david.zbiral@post.cz"
                     label="email adress of the projects PI"
                   /> */}
-          </StyledText>
 
           <StyledHeader>Credits</StyledHeader>
 
@@ -218,16 +214,13 @@ export const AboutPage: React.FC<IAboutPage> = ({}) => {
 
           <StyledTextList>
             <StyledTextListItem>
-              <StyledText>
-                Zbíral, David; Mertel, Adam; Hanák, Petr; Mertel, Ján; Ondrejka,
-                Peter; Hampejs, Tomáš; and Shaw, Robert L. J. (2022).
-                InkVisitor. Available online at:
-                <LinkWithIcon
-                  url="https://github.com/DISSINET/InkVisitor"
-                  label="https://github.com/DISSINET/InkVisitor"
-                />
-                .
-              </StyledText>
+              Zbíral, David; Mertel, Adam; Hanák, Petr; Mertel, Ján; Ondrejka,
+              Peter; Hampejs, Tomáš; and Shaw, Robert L. J. (2022). InkVisitor.
+              Available online at:
+              <LinkWithIcon
+                url="https://github.com/DISSINET/InkVisitor"
+                label="https://github.com/DISSINET/InkVisitor"
+              />
             </StyledTextListItem>
           </StyledTextList>
 
@@ -235,15 +228,13 @@ export const AboutPage: React.FC<IAboutPage> = ({}) => {
 
           <StyledTextList>
             <StyledTextListItem>
-              <StyledText>
-                Zbíral, David; Shaw, Robert L. J.; Hampejs, Tomáš; & Mertel,
-                Adam. (2022). Model the source first! Towards Computer-Assisted
-                Semantic Text Modelling and source criticism 2.0. Zenodo.
-                <LinkWithIcon
-                  url="https://doi.org/10.5281/zenodo.6963579"
-                  label="https://doi.org/10.5281/zenodo.6963579"
-                />
-              </StyledText>
+              Zbíral, David; Shaw, Robert L. J.; Hampejs, Tomáš; & Mertel, Adam.
+              (2022). Model the source first! Towards Computer-Assisted Semantic
+              Text Modelling and source criticism 2.0. Zenodo.
+              <LinkWithIcon
+                url="https://doi.org/10.5281/zenodo.6963579"
+                label="https://doi.org/10.5281/zenodo.6963579"
+              />
             </StyledTextListItem>
           </StyledTextList>
         </div>

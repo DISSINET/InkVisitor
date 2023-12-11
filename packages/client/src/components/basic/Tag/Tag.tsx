@@ -1,4 +1,4 @@
-import { EntityEnums } from "@shared/enums";
+import { EntityEnums, InterfaceEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
 import theme from "Theme/theme";
 import { useSearchParams } from "hooks";
@@ -98,6 +98,9 @@ export const Tag: React.FC<TagProps> = ({
   const draggedEntity: DraggedEntityReduxItem = useAppSelector(
     (state) => state.draggedEntity
   );
+  const selectedThemeId: InterfaceEnums.Theme = useAppSelector(
+    (state) => state.theme
+  );
 
   const ref = useRef<HTMLDivElement>(null);
 
@@ -157,6 +160,7 @@ export const Tag: React.FC<TagProps> = ({
           : "white"
       }
       isTemplate={isTemplate}
+      darkTheme={selectedThemeId === InterfaceEnums.Theme.Dark}
     >
       {entityClass}
     </StyledEntityTag>

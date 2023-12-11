@@ -29,7 +29,13 @@ import {
 } from "components/advanced";
 import { useSearchParams } from "hooks";
 import { TooltipAttributes } from "pages/MainPage/containers";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import {
   DragSourceMonitor,
   DropTargetMonitor,
@@ -62,6 +68,7 @@ import {
   StyledRow,
   StyledTagWrapper,
 } from "./StatementEditorActantTableStyles";
+import { ThemeContext } from "styled-components";
 
 interface StatementEditorActantTableRow {
   filteredActant: FilteredActantObject;
@@ -387,6 +394,8 @@ export const StatementEditorActantTableRow: React.FC<
 
   const { classifications, identifications } = filteredActant.data.sActant;
 
+  const themeContext = useContext(ThemeContext);
+
   return (
     <StyledRow
       key={index}
@@ -396,7 +405,10 @@ export const StatementEditorActantTableRow: React.FC<
         {/* Order */}
         {userCanEdit && hasOrder ? (
           <StyledGridColumn ref={dragRef} style={{ cursor: "move" }}>
-            <FaGripVertical style={{ marginTop: "0.3rem" }} />
+            <FaGripVertical
+              style={{ marginTop: "0.3rem" }}
+              color={themeContext.color.black}
+            />
           </StyledGridColumn>
         ) : (
           <StyledGridColumn />

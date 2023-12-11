@@ -10,10 +10,10 @@ import React, { useState } from "react";
 import { AiOutlineLink } from "react-icons/ai";
 import { CgListTree } from "react-icons/cg";
 import { FaClone, FaEdit, FaTrashAlt } from "react-icons/fa";
-import { GrClone } from "react-icons/gr";
 import { toast } from "react-toastify";
 import {
   StyledActantHeaderRow,
+  StyledGrClone,
   StyledTagWrap,
 } from "./EntityDetailHeaderRowStyles";
 
@@ -128,7 +128,7 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
               />
               <Button
                 key="instantiate-template"
-                icon={<GrClone size={14} />}
+                icon={<StyledGrClone size={14} $color={"black"} />}
                 tooltipLabel="create entity from template"
                 inverted
                 color="primary"
@@ -159,7 +159,7 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
               />
               <Button
                 key="entity-create-template"
-                icon={<GrClone size={14} />}
+                icon={<StyledGrClone size={14} $color={"black"} />}
                 tooltipLabel="create template from entity"
                 inverted
                 color="primary"

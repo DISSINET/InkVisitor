@@ -10,4 +10,5 @@ export const StyledNoResults = styled.p`
   font-style: italic;
   font-size: 1.4rem;
   margin: 0.5rem;
+  color: ${({ theme }) => theme.color.black};
 `;
