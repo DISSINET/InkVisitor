@@ -1,21 +1,29 @@
 import { DrawingOptions } from "./Canvas";
 import Viewport from "./Viewport";
 
+// Absolute coordinates point to virtual position not limited by viewport - first line is first line of input
 export interface IAbsCoordinates {
   xLine: number;
   yLine: number;
 }
 
+// Relative coordinates point to position relative to viewport - first line is topmost rendered line
+export interface IRelativeCoordinates extends IAbsCoordinates {}
+
 /**
- * Cursor represents active position in the viewport
+ * Cursor represents active position in the viewport with highlighting capabilities (marking start - end in absolute coordinates)
  */
-export default class Cursor implements IAbsCoordinates {
+export default class Cursor implements IRelativeCoordinates {
+  // relative!
   xLine: number = -1;
   yLine: number = -1;
+
+  // highlighted area must use absolute coordinates - highlighted area stays in position while scrolling
   private highlighting: boolean = false;
   private highlightStart?: IAbsCoordinates;
   private highlightEnd?: IAbsCoordinates;
 
+  // Width of cursor point in px
   static Width = 3;
 
   yToLineI(y: number, lineHeight: number): number {
@@ -36,18 +44,34 @@ export default class Cursor implements IAbsCoordinates {
     this.yLine = this.yToLineI(offsetY, lineHeight);
   }
 
+  /**
+   * isHighlighting is predicate for testing if any mouse-move event should update highlighted area (click+move)
+   * @returns
+   */
   isHighlighting(): boolean {
     return this.highlighting;
   }
 
+  /**
+   * isHighlighted is predicate for testing if highlighted area has been set - should be drawn
+   * @returns
+   */
   isHighlighted(): boolean {
     return !!this.highlightStart && !!this.highlightEnd;
   }
 
+  /**
+   * getHighlighted is getter for absolute highlighted coordinates
+   * @returns
+   */
   getHighlighted(): [IAbsCoordinates | undefined, IAbsCoordinates | undefined] {
     return [this.highlightStart, this.highlightEnd];
   }
 
+  /**
+   * highlight updates highlighted area's coordinates, either both start/end (set initial position) or just end (moving)
+   * @param yOffset
+   */
   highlight(yOffset: number) {
     if (!this.highlighting) {
       this.highlightStart = { xLine: this.xLine, yLine: yOffset + this.yLine };
@@ -58,10 +82,19 @@ export default class Cursor implements IAbsCoordinates {
     }
   }
 
+  /**
+   * endHighlight marks final position for highlighted area by setting control flag to false
+   */
   endHighlight() {
     this.highlighting = false;
   }
 
+  /**
+   * move alters the cursor position by provided delta increments
+   * @param xDelta
+   * @param yDelta
+   * @returns
+   */
   move(xDelta: number, yDelta: number) {
     if ((this.xLine === -1 && this.yLine === -1) || (!xDelta && !yDelta)) {
       return;
@@ -71,6 +104,14 @@ export default class Cursor implements IAbsCoordinates {
     this.yLine += yDelta;
   }
 
+  /**
+   * drawLine is shorthand around drawing highlighted ares simply by providing relative coordinates
+   * @param ctx
+   * @param relLine
+   * @param xStart
+   * @param xEnd
+   * @param options
+   */
   drawLine(
     ctx: CanvasRenderingContext2D,
     relLine: number,
@@ -88,6 +129,13 @@ export default class Cursor implements IAbsCoordinates {
     );
   }
 
+  /**
+   * draw places cursor and optionally highlighted area into the canvas
+   * @param ctx
+   * @param viewport
+   * @param options
+   * @returns
+   */
   draw(
     ctx: CanvasRenderingContext2D,
     viewport: Viewport,

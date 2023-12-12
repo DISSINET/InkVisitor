@@ -1,6 +1,9 @@
 import Viewport from "./Viewport";
 import Cursor, { IAbsCoordinates } from "./Cursor";
 
+/**
+ * Text provides more abstract control over the provided raw text
+ */
 class Text {
   value: string;
   charsAtLine: number;
@@ -24,6 +27,10 @@ class Text {
     return this._lines;
   }
 
+  /**
+   * calculateLines processes the raw text by splitting it into lines
+   * TODO provide more optimized approach so this method does not have to recalculate everyting after writing single characted
+   */
   calculateLines(): void {
     const time1 = performance.now();
     const words = this.value.split(" ");
@@ -56,7 +63,11 @@ class Text {
     this._lines = lines;
   }
 
-  // This method calculates the index of the text value at the start of given line
+  /**
+   * lineToIndex calculates the index of the text value at the start of given line
+   * @param line
+   * @returns
+   */
   lineToIndex(line: number): number {
     const lines = this.lines;
     let index = 0;
@@ -66,12 +77,22 @@ class Text {
     return index;
   }
 
+  /**
+   * cursorToIndex calculates index position of the text from cursor position
+   * @param line
+   * @returns
+   */
   cursorToIndex(viewport: Viewport, cursor: Cursor): number {
     return (
       this.lineToIndex(cursor.yLine + viewport.lineStart) + cursor.xLine - 1
     );
   }
 
+  /**
+   * getViewportText returns visible text to be rendered by Viewport
+   * @param viewport
+   * @returns
+   */
   getViewportText(viewport: Viewport): string[] {
     const lineStart = viewport.lineStart;
     const lineEnd = lineStart + viewport.noLines;
@@ -79,10 +100,21 @@ class Text {
     return lines.slice(lineStart, lineEnd);
   }
 
+  /**
+   * getCursorWord returns current word under active cursor
+   * @param cursor
+   * @returns
+   */
   getCursorWord(cursor: Cursor): string {
     return "";
   }
 
+  /**
+   * insertText adds text to cursor position
+   * @param viewport
+   * @param cursorPosition
+   * @param textToInsert
+   */
   insertText(
     viewport: Viewport,
     cursorPosition: Cursor,
@@ -96,6 +128,12 @@ class Text {
     this.calculateLines();
   }
 
+  /**
+   * deleteText removes specific number of charactes from cursor position
+   * @param viewport
+   * @param cursorPosition
+   * @param chartsToDelete
+   */
   deleteText(
     viewport: Viewport,
     cursorPosition: Cursor,
@@ -109,6 +147,12 @@ class Text {
     this.calculateLines();
   }
 
+  /**
+   * getRangeText returns text delimited by provided absolute range
+   * @param start
+   * @param end
+   * @returns
+   */
   getRangeText(start: IAbsCoordinates, end: IAbsCoordinates): string {
     // swap in case start is after end
     if (

@@ -3,27 +3,38 @@ import Cursor from "./Cursor";
 import Text from "./Text";
 import Scroller from "./Scroller";
 
+// DrawingOptions bundles required sizes shared by multiple components while drawing into canvas
 export interface DrawingOptions {
   charWidth: number;
   lineHeight: number;
   charsAtLine: number;
 }
 
+/**
+ * Canvas is main wrapping class around HTMLCanvasElement
+ */
 export class Canvas {
+  // canvas element
   element: HTMLCanvasElement;
+  // cached canvas contex
   ctx: CanvasRenderingContext2D;
 
+  // TODO: different font, different sizes
   font: string = "12px Monospace";
   charWidth: number = 0;
   lineHeight: number = 15;
+
+  // size for virtual area inside the canvas element
   width: number = 0;
   height: number = 0;
 
+  // components here
   viewport: Viewport;
   cursor: Cursor;
   text: Text;
   scroller?: Scroller;
 
+  // to control highlightChangeCb callback
   lastHighlightedText = "";
 
   // callbacks
@@ -55,11 +66,11 @@ export class Canvas {
     this.element.onkeydown = this.onKeyDown.bind(this);
   }
 
-  initialize() {
-    console.log("Custom logic executed!");
-    this.draw();
-  }
-
+  /**
+   * onHighlightChange stores callback for changed highlighted area
+   * Will be used only if text really changes
+   * @param cb
+   */
   onHighlightChange(cb: (text: string) => void) {
     this.lastHighlightedText = "";
     this.highlightChangeCb = (text: string) => {
@@ -71,11 +82,13 @@ export class Canvas {
     };
   }
 
+  /**
+   * onKeyDown is handler for pressed key event
+   * @param e
+   */
   onKeyDown(e: KeyboardEvent) {
     e.preventDefault();
-    if (e.ctrlKey) {
-      console.log("ctr active");
-    }
+
     switch (e.key) {
       case "ArrowUp":
         this.cursor.move(0, -1);
@@ -156,6 +169,21 @@ export class Canvas {
     this.draw();
   }
 
+  /**
+   * setCharWidth sets the initial size for characted
+   * This is true for monospace font
+   * @param txt
+   */
+  setCharWidth(txt: string) {
+    this.ctx.font = this.font;
+    const textW = this.ctx.measureText(txt).width;
+    this.charWidth = textW / txt.length;
+  }
+
+  /**
+   * onMouseDown is handler for pressed mouse-key event
+   * @param e
+   */
   onMouseDown(e: MouseEvent) {
     this.cursor.setPosition(
       e.offsetX,
@@ -167,6 +195,10 @@ export class Canvas {
     this.draw();
   }
 
+  /**
+   * onMouseUp is handler for released mouse-key event
+   * @param e
+   */
   onMouseUp(e: MouseEvent) {
     this.cursor.setPosition(
       e.offsetX,
@@ -178,6 +210,10 @@ export class Canvas {
     this.draw();
   }
 
+  /**
+   * onMouseMove is handler for moving mouse-event
+   * @param e
+   */
   onMouseMove(e: MouseEvent) {
     if (this.cursor.isHighlighting()) {
       this.cursor.setPosition(
@@ -191,6 +227,10 @@ export class Canvas {
     }
   }
 
+  /**
+   * onWheel is handler for mouse-wheel-event
+   * @param e
+   */
   onWheel(e: any) {
     const up = e.deltaY < 0 ? false : true;
     if (up) {
@@ -203,6 +243,10 @@ export class Canvas {
     this.draw();
   }
 
+  /**
+   * addScroller adds optional Scroller component to stack
+   * @param e
+   */
   addScroller(scrollerDiv: HTMLDivElement) {
     this.scroller = new Scroller(scrollerDiv);
     this.scroller.onChange((percentage: number) => {
@@ -217,12 +261,11 @@ export class Canvas {
     });
   }
 
-  setCharWidth(txt: string) {
-    this.ctx.font = this.font;
-    const textW = this.ctx.measureText(txt).width;
-    this.charWidth = textW / txt.length;
-  }
-
+  /**
+   * draw resets the canvas and redraws the scene anew.
+   * First draw lines with text, then allow each component to draw their own logic.
+   * TODO - this should be done in conjunction with requestAnimationFrame
+   */
   draw() {
     this.ctx.reset();
     this.ctx.font = this.font;
