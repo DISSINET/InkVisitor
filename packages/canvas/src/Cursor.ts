@@ -48,13 +48,13 @@ export default class Cursor implements IAbsCoordinates {
     return [this.highlightStart, this.highlightEnd];
   }
 
-  startHighlight() {
+  highlight(yOffset: number) {
     if (!this.highlighting) {
-      this.highlightStart = { xLine: this.xLine, yLine: this.yLine };
-      this.highlightEnd = { xLine: this.xLine, yLine: this.yLine };
+      this.highlightStart = { xLine: this.xLine, yLine: yOffset + this.yLine };
+      this.highlightEnd = { xLine: this.xLine, yLine: yOffset + this.yLine };
       this.highlighting = true;
     } else {
-      this.highlightEnd = { xLine: this.xLine, yLine: this.yLine };
+      this.highlightEnd = { xLine: this.xLine, yLine: yOffset + this.yLine };
     }
   }
 
@@ -69,6 +69,23 @@ export default class Cursor implements IAbsCoordinates {
 
     this.xLine += xDelta;
     this.yLine += yDelta;
+  }
+
+  drawLine(
+    ctx: CanvasRenderingContext2D,
+    relLine: number,
+    xStart: number,
+    xEnd: number,
+    options: DrawingOptions
+  ) {
+    const { charWidth, lineHeight } = options;
+
+    ctx.fillRect(
+      xStart * charWidth,
+      relLine * lineHeight,
+      (xEnd - xStart) * charWidth,
+      lineHeight
+    );
   }
 
   draw(
@@ -100,39 +117,24 @@ export default class Cursor implements IAbsCoordinates {
       ctx.globalAlpha = 0.2;
 
       for (let i = 0; i <= viewport.lineEnd - viewport.lineStart; i++) {
-        const currentAbsLine = viewport.lineStart + i;
-        if (hStart.yLine <= currentAbsLine && hEnd.yLine >= currentAbsLine) {
+        const absY = viewport.lineStart + i;
+        if (hStart.yLine <= absY && hEnd.yLine >= absY) {
           // first line
-          if (hStart.yLine === currentAbsLine) {
+          if (hStart.yLine === absY) {
             if (hStart.yLine === hEnd.yLine) {
               // ending line === starting line - fill only from start X -> end X
-              ctx.fillRect(
-                hStart.xLine * charWidth,
-                i * lineHeight,
-                (hEnd.xLine - hStart.xLine) * charWidth,
-                lineHeight
-              );
+              this.drawLine(ctx, i, hStart.xLine, hEnd.xLine, options);
             } else {
               // not ending line - fill from up to the last character in the line
-              ctx.fillRect(
-                hStart.xLine * charWidth,
-                i * lineHeight,
-                charWidth * charsAtLine,
-                lineHeight
-              );
+              this.drawLine(ctx, i, hStart.xLine, charsAtLine, options);
             }
             // last line
-          } else if (hEnd.yLine === currentAbsLine) {
+          } else if (hEnd.yLine === absY) {
             // fill from start to X position
-            ctx.fillRect(0, i * lineHeight, hEnd.xLine * charWidth, lineHeight);
+            this.drawLine(ctx, i, 0, hEnd.xLine, options);
           } else {
             // not first/last line - fill completely
-            ctx.fillRect(
-              0,
-              i * lineHeight,
-              charWidth * charsAtLine,
-              lineHeight
-            );
+            this.drawLine(ctx, i, 0, charsAtLine, options);
           }
         }
       }

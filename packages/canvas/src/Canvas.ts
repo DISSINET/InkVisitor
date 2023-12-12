@@ -163,7 +163,7 @@ export class Canvas {
       this.lineHeight,
       this.charWidth
     );
-    this.cursor.startHighlight();
+    this.cursor.highlight(this.viewport.lineStart);
     this.draw();
   }
 
@@ -186,7 +186,7 @@ export class Canvas {
         this.lineHeight,
         this.charWidth
       );
-      this.cursor.startHighlight();
+      this.cursor.highlight(this.viewport.lineStart);
       this.draw();
     }
   }
