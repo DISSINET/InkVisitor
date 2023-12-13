@@ -79,7 +79,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
   };
 
   // For suggester
-  const getCategoryTypes = (): EntityEnums.ExtendedClass[] | undefined => {
+  const getCategoryTypes = (): EntityEnums.Class[] => {
     const entitiesPattern = relationRule.allowedEntitiesPattern;
 
     if (entitiesPattern.length > 0) {
@@ -96,18 +96,14 @@ export const EntityDetailRelationTypeBlock: React.FC<
     } else {
       // Multiple - all entities
       if (!relationRule.disabledEntities?.length) {
-        return entitiesDict.map((e) => e.value as EntityEnums.Class);
+        return entitiesDict.map((e) => e.value);
       } else {
         return entitiesDict
-          .filter(
-            (e) =>
-              !relationRule.disabledEntities?.includes(
-                e.value as EntityEnums.Class
-              )
-          )
-          .map((e) => e.value as EntityEnums.Class);
+          .filter((e) => !relationRule.disabledEntities?.includes(e.value))
+          .map((e) => e.value);
       }
     }
+    return [];
   };
 
   const handleMultiSelected = (selectedId: string) => {
@@ -303,12 +299,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
               <EntitySuggester
                 inputWidth={80}
                 disableTemplatesAccept
-                categoryTypes={
-                  getCategoryTypes() ||
-                  ([EntityEnums.Extension.NoClass] as [
-                    EntityEnums.ExtendedClass
-                  ])
-                }
+                categoryTypes={getCategoryTypes()}
                 onSelected={(selectedId: string) => {
                   if (isCloudType) {
                     setTempCloudEntityId(selectedId);

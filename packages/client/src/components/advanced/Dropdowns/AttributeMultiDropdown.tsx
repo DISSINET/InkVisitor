@@ -37,7 +37,6 @@ export const AttributeMultiDropdown = <T extends string>({
 
   return (
     <BaseDropdown
-      // TODO: hopefully get rid of this prop
       attributeDropdown
       isMulti
       width={width}

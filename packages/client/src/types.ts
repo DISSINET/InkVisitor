@@ -223,7 +223,7 @@ interface IUsedEntityStatement {
 export type DropdownItem = { value: string; label: string; info?: string };
 
 export interface EntitySingleDropdownItem extends DropdownItem {
-  value: EntityEnums.Class | EntityEnums.Extension.Any;
+  value: EntityEnums.Class;
 }
 
 export interface EntityMultiDropdownItem extends DropdownItem {

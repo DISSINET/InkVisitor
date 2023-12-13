@@ -17,7 +17,11 @@ import { CEntity, InstTemplate } from "constructors";
 import { useDebounce, useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
 import { FaHome } from "react-icons/fa";
-import { EntityDragItem, SuggesterItemToCreate } from "types";
+import {
+  EntityDragItem,
+  EntitySingleDropdownItem,
+  SuggesterItemToCreate,
+} from "types";
 import { deepCopy } from "utils";
 import { AddTerritoryModal, EntityCreateModal } from "..";
 
@@ -94,13 +98,38 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
     EntityEnums.Class | EntityEnums.Extension.Any
   >();
   const [allCategories, setAllCategories] =
-    useState<{ value: EntityEnums.Class; label: string; info?: string }[]>();
+    useState<EntitySingleDropdownItem[]>();
+
+  // initial load of categories
+  useEffect(() => {
+    if (categoryTypes.length) {
+      setAllCategories(
+        categoryTypes.map((c) => {
+          return {
+            value: c,
+            label: c,
+            info: entitiesDictKeys[c]?.info,
+          };
+        })
+      );
+      if (initCategory) {
+        setSelectedCategory(initCategory);
+      } else {
+        setSelectedCategory(
+          !disableWildCard && categoryTypes.length > 1
+            ? EntityEnums.Extension.Any
+            : categoryTypes[0]
+        );
+      }
+    }
+  }, [categoryTypes]);
 
   const { appendDetailId } = useSearchParams();
-  const userRole = localStorage.getItem("userrole");
 
   // get user data
   const userId = localStorage.getItem("userid");
+  const userRole = localStorage.getItem("userrole");
+
   const {
     status: statusUser,
     data: user,
@@ -200,30 +229,6 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
     setTyped("");
     onTyped && onTyped("");
   };
-
-  // initial load of categories
-  useEffect(() => {
-    if (categoryTypes.length) {
-      setAllCategories(
-        categoryTypes.map((c) => {
-          return {
-            value: entitiesDictKeys[c].value,
-            label: entitiesDictKeys[c].value,
-            info: entitiesDictKeys[c].info,
-          };
-        })
-      );
-      if (initCategory) {
-        setSelectedCategory(initCategory);
-      } else {
-        setSelectedCategory(
-          !disableWildCard && categoryTypes.length > 1
-            ? EntityEnums.Extension.Any
-            : categoryTypes[0]
-        );
-      }
-    }
-  }, [categoryTypes]);
 
   const queryClient = useQueryClient();
 
