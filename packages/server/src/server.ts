@@ -78,7 +78,7 @@ if (process.env.STATIC_PATH && process.env.STATIC_PATH !== "") {
   );
   server.get(/^\/(?!api).*/, function (req, res) {
     res.sendFile("index.html", {
-      root: path.join(__dirname, "../../client/dist/"),
+      root: path.join(__dirname, "../../../../client/dist"),
     });
   });
 }
