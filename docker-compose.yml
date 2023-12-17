@@ -20,34 +20,13 @@ services:
       - "8080:8080" # required only for public access
       - "28015:28015" # dashboard - required only for public access
 
-  inkvisitor-development:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        ENV: development
-    image: inkvisitor:development
-    container_name: inkvisitor-development
-    restart: always
-    <<: *logging
-    env_file:
-      - ./packages/server/env/.env.development
-    environment:
-      - DB_HOST=database
-    ports:
-      - "3000:3000"
-    volumes:
-      - ./inkvisitor-development-client:/app/client/dist
-    networks:
-      - inkvisitor
-
   inkvisitor:
     build:
       context: .
       dockerfile: Dockerfile
       args:
         ENV: latest
-    image: inkvisitor:latest
+    image: jancimertel/inkvisitor:latest
     container_name: inkvisitor
     restart: always
     <<: *logging
@@ -57,82 +36,6 @@ services:
       - DB_HOST=database
     ports:
       - "3000:3000"
-    networks:
-      - inkvisitor
-
-  inkvisitor-production:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        ENV: production
-    image: inkvisitor:production
-    container_name: inkvisitor-production
-    restart: always
-    <<: *logging
-    env_file:
-     - ./packages/server/env/.env.production
-    ports:
-      - "3000:3000"
-    volumes:
-      - ./inkvisitor-production-client:/app/client/dist
-    networks:
-      - inkvisitor
-
-  inkvisitor-staging:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        ENV: staging
-    image: inkvisitor:staging
-    container_name: inkvisitor-staging
-    restart: always
-    <<: *logging
-    env_file:
-      - ./packages/server/env/.env.staging
-    ports:
-      - "3011:3000"
-    volumes:
-      - ./inkvisitor-staging-client:/app/client/dist
-    networks:
-      - inkvisitor
-
-  inkvisitor-sandbox:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        ENV: sandbox
-    image: inkvisitor:sandbox
-    container_name: inkvisitor-sandbox
-    restart: always
-    <<: *logging
-    env_file:
-      - ./packages/server/env/.env.sandbox
-    ports:
-      - "3011:3000"
-    volumes:
-      - ./inkvisitor-sandbox-client:/app/client/dist
-    networks:
-      - inkvisitor
-
-  inkvisitor-data-import:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        ENV: data-import
-    image: inkvisitor:data-import
-    container_name: inkvisitor-data-import
-    restart: always
-    <<: *logging
-    env_file:
-      - ./packages/server/env/.env.data-import
-    ports:
-      - "3011:3000"
-    volumes:
-      - ./inkvisitor-data-import-client:/app/client/dist
     networks:
       - inkvisitor
 
