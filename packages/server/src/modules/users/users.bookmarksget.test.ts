@@ -2,7 +2,7 @@ import { testErroneousResponse } from "@modules/common.test";
 import { UserDoesNotExits } from "@shared/types/errors";
 import request from "supertest";
 import { apiPath } from "@common/constants";
-import app from "../../Server";
+import app from "../../server";
 import { createEntity } from "@service/shorthands";
 import { Db } from "@service/rethink";
 import Statement, {

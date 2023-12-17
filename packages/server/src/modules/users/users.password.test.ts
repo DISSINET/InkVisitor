@@ -2,7 +2,7 @@ import { testErroneousResponse } from "@modules/common.test";
 import { UserDoesNotExits } from "@shared/types/errors";
 import request, { Response } from "supertest";
 import { apiPath } from "@common/constants";
-import app from "../../Server";
+import app from "../../server";
 import { supertestConfig } from "..";
 import mailer, { EmailSubject } from "@service/mailer";
 import { Db } from "@service/rethink";

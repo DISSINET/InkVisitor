@@ -3,7 +3,7 @@ import { EntityDoesNotExist, InvalidDeleteError } from "@shared/types/errors";
 import { Db } from "@service/rethink";
 import request from "supertest";
 import { apiPath } from "@common/constants";
-import app from "../../Server";
+import app from "../../server";
 import { findEntityById } from "@service/shorthands";
 import { supertestConfig } from "..";
 import { IEntity } from "@shared/types";

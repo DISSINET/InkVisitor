@@ -4,7 +4,7 @@ import fs from "fs";
 import https from "https";
 import http from "http";
 import { Server as SocketIO, Socket } from "socket.io";
-import server from "./Server";
+import server from "./server";
 import { prepareTreeCache } from "@service/treeCache";
 import "@service/mailer";
 

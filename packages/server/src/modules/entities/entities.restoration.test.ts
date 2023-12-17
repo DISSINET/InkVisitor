@@ -9,7 +9,7 @@ import {
 } from "@shared/types/errors";
 import request from "supertest";
 import { apiPath } from "@common/constants";
-import app from "../../Server";
+import app from "../../server";
 import { supertestConfig } from "..";
 import { findEntityById } from "@service/shorthands";
 import { Db } from "@service/rethink";

@@ -3,7 +3,7 @@ import { clean, testErroneousResponse } from "@modules/common.test";
 import { EntityDoesNotExist, ModelNotValidError } from "@shared/types/errors";
 import request from "supertest";
 import { apiPath } from "@common/constants";
-import app from "../../Server";
+import app from "../../server";
 import { supertestConfig } from "..";
 import Statement, { StatementTerritory } from "@models/statement/statement";
 import { findEntityById } from "@service/shorthands";

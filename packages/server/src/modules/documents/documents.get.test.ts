@@ -3,7 +3,7 @@ import { DocumentDoesNotExist } from "@shared/types/errors";
 import request from "supertest";
 import { supertestConfig } from "..";
 import { apiPath } from "@common/constants";
-import app from "../../Server";
+import app from "../../server";
 import { Db } from "@service/rethink";
 import Document from "@models/document/document";
 import { pool } from "@middlewares/db";

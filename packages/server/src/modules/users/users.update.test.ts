@@ -2,7 +2,7 @@ import { testErroneousResponse } from "@modules/common.test";
 import { BadParams, UserDoesNotExits } from "@shared/types/errors";
 import request from "supertest";
 import { apiPath } from "@common/constants";
-import app from "../../Server";
+import app from "../../server";
 import { successfulGenericResponse } from "../common.test";
 import { supertestConfig } from "..";
 import User from "@models/user/user";
