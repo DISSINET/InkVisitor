@@ -23,8 +23,8 @@ export default class DbPool {
   }
 
   release(instance: Db): Promise<void> {
-    if (instance.lockInstance) {
-      Db.mutex.unlock(instance.lockInstance);
+    if (instance.lockAwaiter) {
+      Db.mutex.unlock(instance.lockAwaiter);
     }
     return this.pool.release(instance);
   }

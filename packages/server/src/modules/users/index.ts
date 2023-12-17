@@ -26,8 +26,9 @@ import mailer, {
   userCreatedTemplate,
 } from "@service/mailer";
 import { ResponseUser } from "@models/user/response";
-import { domainName, hostUrl } from "@common/functions";
+import { domainName, hostUrl, timeout } from "@common/functions";
 import { IRequest } from "src/custom_typings/request";
+import { Db } from "@service/rethink";
 
 export default Router()
   /**
