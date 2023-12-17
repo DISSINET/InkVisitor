@@ -24,6 +24,7 @@ import * as swaggerUi from "swagger-ui-express";
 
 import "@models/events/register";
 import { readFileSync } from "fs";
+import * as path from "path";
 
 const server = express();
 
@@ -34,16 +35,6 @@ server.use(
 );
 
 server.use(cors());
-
-if (process.env.STATIC_PATH && process.env.STATIC_PATH !== "") {
-  server.use(
-    process.env.STATIC_PATH as string,
-    express.static("../client/dist")
-  );
-}
-
-server.use(express.json());
-server.use(express.urlencoded({ extended: true }));
 
 // Show routes called in console during development
 if (process.env.NODE_ENV === "development") {
@@ -78,6 +69,23 @@ if (process.env.SWAGGER_FILE) {
     swaggerUi.setup(JSON.parse(swaggerFileData.toString()))
   );
 }
+
+// Static files - frontend
+if (process.env.STATIC_PATH && process.env.STATIC_PATH !== "") {
+  server.use(
+    process.env.STATIC_PATH as string,
+    express.static("../client/dist", { redirect: false })
+  );
+  server.get(/^\/(?!api).*/, function (req, res) {
+    res.sendFile("index.html", {
+      root: path.join(__dirname, "../../client/dist/"),
+    });
+  });
+}
+
+// Api routes below
+server.use(express.json());
+server.use(express.urlencoded({ extended: true }));
 
 server.use(profilerMiddleware);
 
