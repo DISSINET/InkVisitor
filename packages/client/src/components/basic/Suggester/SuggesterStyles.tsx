@@ -94,6 +94,7 @@ export const StyledSuggestionLineIcons = styled.div<Column>`
   height: 100%;
   align-items: center;
   justify-content: center;
+  color: ${({ theme }) => theme.color["black"]};
 `;
 export const StyledTagWrapper = styled.div`
   display: inline-flex;
