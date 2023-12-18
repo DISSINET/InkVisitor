@@ -119,7 +119,7 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
         onClick={() => setShowTooltip(false)}
       >
         <StyledSelect
-          // menuIsOpen={attributeDropdown && isMulti}
+          // menuIsOpen={loggerId === ""}
           suggester={suggester}
           onFocus={onFocus}
           autoFocus={autoFocus}
@@ -228,76 +228,32 @@ const Option = ({ ...props }: OptionProps | any): React.ReactElement => {
   return <components.Option {...props} />;
 };
 
-// If multiple values are not merged into all options, this component is rendered separately for every single value
-const MultiValue = (
-  props: MultiValueProps<any> & { selectProps: StyledSelect }
-): React.ReactElement => {
-  let labelToBeDisplayed = `${props.data.label}`;
-  const { attributeDropdown, entityDropdown, value, options } =
-    props.selectProps;
-
-  if (attributeDropdown && value.length > 1) {
-    if (value.length === options?.length) {
-      labelToBeDisplayed = `${value.length - 1} selected`;
-    } else {
-      labelToBeDisplayed = `${value.length} selected`;
-    }
-  } else if (props.data.value === allEntities.value) {
-    labelToBeDisplayed = "All options selected";
-  }
-
-  if (entityDropdown) {
-    return (
-      <components.MultiValue {...props}>
-        <StyledEntityMultiValue
-          $color={EntityColors[props.data.value]?.color ?? "transparent"}
-        >
-          {labelToBeDisplayed}
-        </StyledEntityMultiValue>
-      </components.MultiValue>
-    );
-  }
-
-  return (
-    <components.MultiValue {...props}>
-      <span>{labelToBeDisplayed}</span>
-    </components.MultiValue>
-  );
-};
-
 const ValueContainer = ({
   children,
   ...props
 }: { children: any } & ValueContainerProps<any, any, any> & {
     selectProps: StyledSelect;
   }): React.ReactElement => {
-  const { value, entityDropdown, isMulti, attributeDropdown } =
-    props.selectProps;
-
   const currentValues: DropdownItem[] = [...props.getValue()];
   let toBeRendered = children;
 
-  if (isMulti) {
-    if (attributeDropdown && currentValues.length > 1) {
-      // show only one merged value
-      toBeRendered = [children[0][0], children[1]];
-    } else if (entityDropdown && currentValues.length > 0) {
-      // filter ANY out of the values array
-      toBeRendered = [
-        children[0].filter(
-          (ch: any) => ch.key !== `${allEntities.label}-${allEntities.value}`
-        ),
-        children[1],
-      ];
-    }
-  }
+  return (
+    <components.ValueContainer {...props}>
+      {toBeRendered}
+    </components.ValueContainer>
+  );
+};
+
+// If multiple, values are not merged into all options, this component is rendered separately for every single value
+const MultiValue = (
+  props: MultiValueProps<any> & { selectProps: StyledSelect }
+): React.ReactElement => {
+  let labelToBeDisplayed = `${props.data.label}`;
 
   return (
-    <>
-      <components.ValueContainer {...props}>
-        {toBeRendered}
-      </components.ValueContainer>
-    </>
+    <components.MultiValue {...props}>
+      <span>{labelToBeDisplayed}</span>
+    </components.MultiValue>
   );
 };
 

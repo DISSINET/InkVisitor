@@ -6,10 +6,17 @@ import {
   StyledOptionIconWrap,
   StyledEntityOptionClass,
   StyledEntityValue,
+  StyledEntityMultiValue,
+  StyledSelect,
 } from "components/basic/BaseDropdown/BaseDropdownStyles";
 import React from "react";
 import { FaCheckSquare, FaRegSquare } from "react-icons/fa";
-import { OptionProps, components } from "react-select";
+import {
+  MultiValueProps,
+  OptionProps,
+  ValueContainerProps,
+  components,
+} from "react-select";
 import { DropdownItem, EntityColors } from "types";
 
 interface EntityMultiDropdown<T = string> {
@@ -109,8 +116,48 @@ export const EntityMultiDropdown = <T extends string>({
       disableTyping={disableTyping}
       disabled={disabled}
       loggerId={loggerId}
-      customComponents={{ Option }}
+      customComponents={{ Option, MultiValue, ValueContainer }}
     />
+  );
+};
+
+const ValueContainer = ({
+  children,
+  ...props
+}: { children: any } & ValueContainerProps<any, any, any> & {
+    selectProps: StyledSelect;
+  }): React.ReactElement => {
+  const currentValues: DropdownItem[] = [...props.getValue()];
+  let toBeRendered = children;
+
+  if (currentValues.length > 0) {
+    // filter ANY out of the values array
+    toBeRendered = [
+      children[0].filter(
+        (ch: any) => ch.key !== `${allEntities.label}-${allEntities.value}`
+      ),
+      children[1],
+    ];
+  }
+
+  return (
+    <components.ValueContainer {...props}>
+      {toBeRendered}
+    </components.ValueContainer>
+  );
+};
+
+const MultiValue = (
+  props: MultiValueProps<any> & { selectProps: StyledSelect }
+): React.ReactElement => {
+  return (
+    <components.MultiValue {...props}>
+      <StyledEntityMultiValue
+        $color={EntityColors[props.data.value]?.color ?? "transparent"}
+      >
+        {props.data.label}
+      </StyledEntityMultiValue>
+    </components.MultiValue>
   );
 };
 

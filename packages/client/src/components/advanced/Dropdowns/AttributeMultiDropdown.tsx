@@ -1,7 +1,13 @@
 import { allEntities } from "@shared/dictionaries/entity";
 import { BaseDropdown } from "components";
+import { StyledSelect } from "components/basic/BaseDropdown/BaseDropdownStyles";
 import React from "react";
-import { OptionProps, components } from "react-select";
+import {
+  MultiValueProps,
+  OptionProps,
+  ValueContainerProps,
+  components,
+} from "react-select";
 import { DropdownItem } from "types";
 
 interface AttributeMultiDropdown<T = string> {
@@ -89,8 +95,50 @@ export const AttributeMultiDropdown = <T extends string>({
       disableTyping={disableTyping}
       disabled={disabled}
       loggerId={loggerId}
-      customComponents={{ Option }}
+      customComponents={{ Option, MultiValue, ValueContainer }}
     />
+  );
+};
+
+const ValueContainer = ({
+  children,
+  ...props
+}: { children: any } & ValueContainerProps<any, any, any> & {
+    selectProps: StyledSelect;
+  }): React.ReactElement => {
+  const currentValues: DropdownItem[] = [...props.getValue()];
+  let toBeRendered = children;
+
+  if (currentValues.length > 1) {
+    // show only one merged value
+    toBeRendered = [children[0][0], children[1]];
+  }
+
+  return (
+    <components.ValueContainer {...props}>
+      {toBeRendered}
+    </components.ValueContainer>
+  );
+};
+
+const MultiValue = (
+  props: MultiValueProps<any> & { selectProps: StyledSelect }
+): React.ReactElement => {
+  let labelToBeDisplayed = `${props.data.label}`;
+  const { value, options } = props.selectProps;
+
+  if (value.length > 1) {
+    if (value.length === options?.length) {
+      labelToBeDisplayed = `${value.length - 1} selected`;
+    } else {
+      labelToBeDisplayed = `${value.length} selected`;
+    }
+  }
+
+  return (
+    <components.MultiValue {...props}>
+      <span>{labelToBeDisplayed}</span>
+    </components.MultiValue>
   );
 };
 
