@@ -9,6 +9,9 @@ class Scroller {
   // for triggering scroll event from Scroller -> Canvas
   onChangeCb?: (percentage: number) => void;
 
+  dragging: boolean = false;
+  dragStart: any;
+
   constructor(element: HTMLDivElement) {
     this.element = element;
     const runner = element.firstElementChild;
@@ -18,6 +21,8 @@ class Scroller {
     this.runner = runner as HTMLDivElement;
     this.element.onmousedown = this.onMouseDown.bind(this);
     this.runner.onmousedown = this.onRunnerMouseDown.bind(this);
+    this.element.onmousemove = this.onRunnerMouseMove.bind(this);
+    window.addEventListener('mouseup', this.onRunnerMouseUp.bind(this))
   }
 
   /**
@@ -40,6 +45,39 @@ class Scroller {
    */
   onRunnerMouseDown(e: MouseEvent) {
     e.stopPropagation();
+    this.dragging = true;
+    this.dragStart = this.runner.offsetTop;
+  }
+
+  onRunnerMouseMove(e: MouseEvent) {
+    if (!this.dragging) {
+      return
+    }
+
+    this.dragStart += e.movementY
+
+    const availableHeight = this.element.clientHeight;
+    if (this.onChangeCb) {
+      this.onChangeCb(((this.dragStart) * 100) / availableHeight);
+    }
+  }
+
+  /**
+   * onRunnerMouseUp is handler for released mouse-key event on the runner element
+   * @param e
+   */
+  onRunnerMouseUp(e: MouseEvent) {
+    e.stopPropagation();
+    if (!this.dragging) {
+      return
+    }
+
+    this.dragging = false;
+    const availableHeight = this.element.clientHeight;
+    if (this.onChangeCb) {
+      this.onChangeCb((e.offsetY * 100) / availableHeight);
+    }
+    this.dragStart = undefined;
   }
 
   /**

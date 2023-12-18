@@ -29,8 +29,9 @@
               <div
                 className="scroller-cursor"
                 style="
+                  cursor: move;
                   position: absolute;
-                  height: 10px;
+                  height: 30px;
                   width: 10px;
                   background-color: blue;
                 "
@@ -57,6 +58,7 @@
       customWrapper.onHighlightChange((text) => {
         document.getElementById("highlight-container").innerHTML = text;
       });
+      customWrapper.draw();
     </script>
   </body>
 </html>
