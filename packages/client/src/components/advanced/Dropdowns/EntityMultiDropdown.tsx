@@ -1,7 +1,16 @@
 import { allEntities, empty } from "@shared/dictionaries/entity";
+import { EntityEnums } from "@shared/enums";
 import { BaseDropdown } from "components";
+import {
+  StyledOptionRow,
+  StyledOptionIconWrap,
+  StyledEntityOptionClass,
+  StyledEntityValue,
+} from "components/basic/BaseDropdown/BaseDropdownStyles";
 import React from "react";
-import { DropdownItem } from "types";
+import { FaCheckSquare, FaRegSquare } from "react-icons/fa";
+import { OptionProps, components } from "react-select";
+import { DropdownItem, EntityColors } from "types";
 
 interface EntityMultiDropdown<T = string> {
   width?: number | "full";
@@ -100,6 +109,32 @@ export const EntityMultiDropdown = <T extends string>({
       disableTyping={disableTyping}
       disabled={disabled}
       loggerId={loggerId}
+      customComponents={{ Option }}
     />
+  );
+};
+
+const Option = ({ ...props }: OptionProps | any): React.ReactElement => {
+  const isEntityClass = Object.values(EntityEnums.Class).includes(props.value);
+  return (
+    <components.Option {...props}>
+      <StyledOptionRow>
+        <StyledOptionIconWrap>
+          {props.isSelected ? <FaCheckSquare /> : <FaRegSquare />}
+        </StyledOptionIconWrap>
+        <StyledEntityOptionClass>
+          {isEntityClass && props.value}
+        </StyledEntityOptionClass>
+        <StyledEntityValue
+          color={
+            props.value === EntityEnums.Extension.Empty
+              ? "transparent"
+              : EntityColors[props.value]?.color ?? "transparent"
+          }
+        >
+          {isEntityClass ? props.label : <i>{props.label}</i>}
+        </StyledEntityValue>
+      </StyledOptionRow>
+    </components.Option>
   );
 };

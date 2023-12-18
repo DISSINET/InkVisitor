@@ -28,6 +28,7 @@ import {
   StyledOptionIconWrap,
   StyledEntityOptionClass,
 } from "./BaseDropdownStyles";
+import { MenuPortalProps } from "react-select/dist/declarations/src/components/Menu";
 
 interface BaseDropdown {
   options?: DropdownItem[];
@@ -55,7 +56,9 @@ interface BaseDropdown {
   disableTyping?: boolean;
   disabled?: boolean;
   // override lib components
-  components?: Partial<SelectComponents<unknown, boolean, GroupBase<unknown>>>;
+  customComponents?: Partial<
+    SelectComponents<unknown, boolean, GroupBase<unknown>>
+  >;
   // for logging / debugging purposes
   loggerId?: string;
   // currently unused props
@@ -67,7 +70,7 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
   options = [],
   value,
   onChange,
-  components = undefined,
+  customComponents = undefined,
   width,
   hideSelectedOptions = false,
   noDropDownIndicator = false,
@@ -95,6 +98,16 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
   const [referenceElement, setReferenceElement] =
     useState<HTMLButtonElement | null>(null);
   const [showTooltip, setShowTooltip] = useState(false);
+
+  const localCustomComponents = {
+    Option,
+    SingleValue,
+    MultiValue,
+    ValueContainer,
+    DropdownIndicator,
+    Control,
+    MenuPortal,
+  };
 
   return (
     <>
@@ -125,15 +138,7 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
           noOptionsMessage={() => noOptionsMessage}
           isClearable={isClearable}
           captureMenuScroll={false}
-          components={{
-            Option,
-            SingleValue,
-            MultiValue,
-            ValueContainer,
-            DropdownIndicator,
-            Control,
-            MenuPortal,
-          }}
+          components={{ ...localCustomComponents, ...customComponents }}
           isSearchable={!disableTyping}
           value={value}
           icon={icon}
@@ -220,60 +225,14 @@ const SingleValue = (props: SingleValueProps): React.ReactElement => {
 };
 
 const Option = ({ ...props }: OptionProps | any): React.ReactElement => {
-  const { entityDropdown, attributeDropdown, isMulti } = props.selectProps;
-
-  if (entityDropdown && !isMulti) {
-    // SINGLE ENTITY DROPDOWN
-    return (
-      <components.Option {...props}>
-        <StyledEntityValue
-          color={EntityColors[props.value]?.color ?? "transparent"}
-        >
-          {props.label}
-        </StyledEntityValue>
-      </components.Option>
-    );
-  } else if (entityDropdown && isMulti) {
-    // MULTI ENTITY DROPDOWN
-    const isEntityClass = Object.values(EntityEnums.Class).includes(
-      props.value
-    );
-    return (
-      <components.Option {...props}>
-        <StyledOptionRow>
-          <StyledOptionIconWrap>
-            {props.isSelected ? <FaCheckSquare /> : <FaRegSquare />}
-          </StyledOptionIconWrap>
-          <StyledEntityOptionClass>
-            {isEntityClass && props.value}
-          </StyledEntityOptionClass>
-          <StyledEntityValue
-            color={
-              props.value === EntityEnums.Extension.Empty
-                ? "transparent"
-                : EntityColors[props.value]?.color ?? "transparent"
-            }
-          >
-            {isEntityClass ? props.label : <i>{props.label}</i>}
-          </StyledEntityValue>
-        </StyledOptionRow>
-      </components.Option>
-    );
-  } else if (isMulti && attributeDropdown) {
-    return (
-      <components.Option {...props}>
-        {props.value !== allEntities.value ? props.label : <i>{props.label}</i>}
-      </components.Option>
-    );
-  }
-
   return <components.Option {...props} />;
 };
 
 // If multiple values are not merged into all options, this component is rendered separately for every single value
-const MultiValue = (props: MultiValueProps<any>): React.ReactElement => {
+const MultiValue = (
+  props: MultiValueProps<any> & { selectProps: StyledSelect }
+): React.ReactElement => {
   let labelToBeDisplayed = `${props.data.label}`;
-  // @ts-ignore
   const { attributeDropdown, entityDropdown, value, options } =
     props.selectProps;
 
@@ -309,12 +268,9 @@ const MultiValue = (props: MultiValueProps<any>): React.ReactElement => {
 const ValueContainer = ({
   children,
   ...props
-}: { children: any } & ValueContainerProps<
-  any,
-  any,
-  any
->): React.ReactElement => {
-  // @ts-ignore
+}: { children: any } & ValueContainerProps<any, any, any> & {
+    selectProps: StyledSelect;
+  }): React.ReactElement => {
   const { value, entityDropdown, isMulti, attributeDropdown } =
     props.selectProps;
 
@@ -353,8 +309,10 @@ const DropdownIndicator = (props: DropdownIndicatorProps) => {
   );
 };
 
-const Control = ({ children, ...props }: ControlProps<any, false>) => {
-  // @ts-ignore
+const Control = ({
+  children,
+  ...props
+}: ControlProps<any, any, any> & { selectProps: StyledSelect }) => {
   const { icon } = props.selectProps;
 
   return (
@@ -365,8 +323,9 @@ const Control = ({ children, ...props }: ControlProps<any, false>) => {
   );
 };
 
-const MenuPortal: typeof components.MenuPortal = (props) => {
-  // @ts-ignore
+const MenuPortal: typeof components.MenuPortal = (
+  props: MenuPortalProps<any, any, any> & { selectProps: StyledSelect }
+) => {
   const { entityDropdown } = props.selectProps;
 
   return (

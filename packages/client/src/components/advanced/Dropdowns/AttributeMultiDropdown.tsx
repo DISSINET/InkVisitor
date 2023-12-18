@@ -1,6 +1,7 @@
 import { allEntities } from "@shared/dictionaries/entity";
 import { BaseDropdown } from "components";
 import React from "react";
+import { OptionProps, components } from "react-select";
 import { DropdownItem } from "types";
 
 interface AttributeMultiDropdown<T = string> {
@@ -88,6 +89,15 @@ export const AttributeMultiDropdown = <T extends string>({
       disableTyping={disableTyping}
       disabled={disabled}
       loggerId={loggerId}
+      customComponents={{ Option }}
     />
+  );
+};
+
+const Option = ({ ...props }: OptionProps | any): React.ReactElement => {
+  return (
+    <components.Option {...props}>
+      {props.value !== allEntities.value ? props.label : <i>{props.label}</i>}
+    </components.Option>
   );
 };
