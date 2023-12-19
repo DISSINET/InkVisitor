@@ -1,5 +1,8 @@
 import { BaseDropdown } from "components";
+import { StyledEntityValue } from "components/basic/BaseDropdown/BaseDropdownStyles";
 import React from "react";
+import { OptionProps, components } from "react-select";
+import { EntityColors } from "types";
 
 interface EntitySingleDropdown<T = string> {
   width?: number | "full";
@@ -46,6 +49,19 @@ export const EntitySingleDropdown = <T extends string>({
       disabled={disabled}
       autoFocus={autoFocus}
       loggerId={loggerId}
+      customComponents={{ Option }}
     />
+  );
+};
+
+const Option = ({ ...props }: OptionProps | any): React.ReactElement => {
+  return (
+    <components.Option {...props}>
+      <StyledEntityValue
+        color={EntityColors[props.value]?.color ?? "transparent"}
+      >
+        {props.label}
+      </StyledEntityValue>
+    </components.Option>
   );
 };

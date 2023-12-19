@@ -1,7 +1,23 @@
 import { allEntities, empty } from "@shared/dictionaries/entity";
+import { EntityEnums } from "@shared/enums";
 import { BaseDropdown } from "components";
+import {
+  StyledOptionRow,
+  StyledOptionIconWrap,
+  StyledEntityOptionClass,
+  StyledEntityValue,
+  StyledEntityMultiValue,
+  StyledSelect,
+} from "components/basic/BaseDropdown/BaseDropdownStyles";
 import React from "react";
-import { DropdownItem } from "types";
+import { FaCheckSquare, FaRegSquare } from "react-icons/fa";
+import {
+  MultiValueProps,
+  OptionProps,
+  ValueContainerProps,
+  components,
+} from "react-select";
+import { DropdownItem, EntityColors } from "types";
 
 interface EntityMultiDropdown<T = string> {
   width?: number | "full";
@@ -100,6 +116,72 @@ export const EntityMultiDropdown = <T extends string>({
       disableTyping={disableTyping}
       disabled={disabled}
       loggerId={loggerId}
+      customComponents={{ Option, MultiValue, ValueContainer }}
     />
+  );
+};
+
+const ValueContainer = ({
+  children,
+  ...props
+}: { children: any } & ValueContainerProps<any, any, any> & {
+    selectProps: StyledSelect;
+  }): React.ReactElement => {
+  const currentValues: DropdownItem[] = [...props.getValue()];
+  let toBeRendered = children;
+
+  if (currentValues.length > 0) {
+    // filter ANY out of the values array
+    toBeRendered = [
+      children[0].filter(
+        (ch: any) => ch.key !== `${allEntities.label}-${allEntities.value}`
+      ),
+      children[1],
+    ];
+  }
+
+  return (
+    <components.ValueContainer {...props}>
+      {toBeRendered}
+    </components.ValueContainer>
+  );
+};
+
+const MultiValue = (
+  props: MultiValueProps<any> & { selectProps: StyledSelect }
+): React.ReactElement => {
+  return (
+    <components.MultiValue {...props}>
+      <StyledEntityMultiValue
+        $color={EntityColors[props.data.value]?.color ?? "transparent"}
+      >
+        {props.data.label}
+      </StyledEntityMultiValue>
+    </components.MultiValue>
+  );
+};
+
+const Option = ({ ...props }: OptionProps | any): React.ReactElement => {
+  const isEntityClass = Object.values(EntityEnums.Class).includes(props.value);
+  return (
+    <components.Option {...props}>
+      <StyledOptionRow>
+        <StyledOptionIconWrap>
+          {props.isSelected ? <FaCheckSquare /> : <FaRegSquare />}
+        </StyledOptionIconWrap>
+        <StyledEntityOptionClass>
+          {isEntityClass && props.value}
+        </StyledEntityOptionClass>
+        <StyledEntityValue
+          color={
+            props.value === EntityEnums.Extension.Empty
+              ? "transparent"
+              : EntityColors[props.value]?.color ?? "transparent"
+          }
+        >
+          {isEntityClass ? props.label : <i>{props.label}</i>}
+        </StyledEntityValue>
+      </StyledOptionRow>
+    </components.Option>
   );
 };

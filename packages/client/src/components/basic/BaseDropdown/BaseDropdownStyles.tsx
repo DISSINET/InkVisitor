@@ -20,7 +20,7 @@ export const StyledSelectWrapper = styled.div<StyledSelectWrapper>`
   max-width: 100%;
   width: ${({ width }) => getWidth(width)};
 `;
-interface StyledSelect {
+export interface StyledSelect {
   width?: number | "full";
   disabled?: boolean;
   isOneOptionSingleEntitySelect?: boolean;
