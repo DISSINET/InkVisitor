@@ -1,8 +1,8 @@
 import { BaseDropdown } from "components";
-import { StyledEntityValue } from "components/basic/BaseDropdown/BaseDropdownStyles";
 import React from "react";
 import { OptionProps, components } from "react-select";
 import { EntityColors } from "types";
+import { StyledEntityValue } from "./DropdownStyles";
 
 interface EntitySingleDropdown<T = string> {
   width?: number | "full";
