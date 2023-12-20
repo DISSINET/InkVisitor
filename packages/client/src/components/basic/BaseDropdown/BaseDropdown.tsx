@@ -3,7 +3,6 @@ import { EntityEnums } from "@shared/enums";
 import { heightHeader } from "Theme/constants";
 import { Tooltip } from "components";
 import React, { useState } from "react";
-import { FaCheckSquare, FaRegSquare } from "react-icons/fa";
 import {
   ActionMeta,
   ControlProps,
@@ -16,17 +15,12 @@ import {
   components,
 } from "react-select";
 import { SelectComponents } from "react-select/dist/declarations/src/components";
-import { DropdownItem, EntityColors } from "types";
+import { DropdownItem } from "types";
 import {
-  StyledEntityMultiValue,
-  StyledEntityValue,
   StyledFaChevronDown,
   StyledValueIconWrap,
-  StyledOptionRow,
   StyledSelect,
   StyledSelectWrapper,
-  StyledOptionIconWrap,
-  StyledEntityOptionClass,
 } from "./BaseDropdownStyles";
 import { MenuPortalProps } from "react-select/dist/declarations/src/components/Menu";
 

@@ -1,14 +1,7 @@
 import { allEntities, empty } from "@shared/dictionaries/entity";
 import { EntityEnums } from "@shared/enums";
 import { BaseDropdown } from "components";
-import {
-  StyledOptionRow,
-  StyledOptionIconWrap,
-  StyledEntityOptionClass,
-  StyledEntityValue,
-  StyledEntityMultiValue,
-  StyledSelect,
-} from "components/basic/BaseDropdown/BaseDropdownStyles";
+import { StyledSelect } from "components/basic/BaseDropdown/BaseDropdownStyles";
 import React from "react";
 import { FaCheckSquare, FaRegSquare } from "react-icons/fa";
 import {
@@ -18,6 +11,13 @@ import {
   components,
 } from "react-select";
 import { DropdownItem, EntityColors } from "types";
+import {
+  StyledEntityMultiValue,
+  StyledEntityOptionClass,
+  StyledEntityValue,
+  StyledOptionIconWrap,
+  StyledOptionRow,
+} from "./DropdownStyles";
 
 interface EntityMultiDropdown<T = string> {
   width?: number | "full";
