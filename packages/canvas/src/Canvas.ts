@@ -259,6 +259,9 @@ export class Canvas {
       this.viewport.scrollTo(toLine, this.text.noLines);
       this.draw();
     });
+    this.scroller?.setRunnerSize(
+      (this.viewport.noLines / this.text.noLines) * 100
+    );
   }
 
   /**

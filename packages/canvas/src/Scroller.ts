@@ -23,6 +23,9 @@ class Scroller {
     this.runner.onmousedown = this.onRunnerMouseDown.bind(this);
     this.element.onmousemove = this.onRunnerMouseMove.bind(this);
     window.addEventListener('mouseup', this.onRunnerMouseUp.bind(this))
+
+  setRunnerSize(percentSize: number): void {
+    this.runner.style.height = `${percentSize}%`;
   }
 
   /**

@@ -20,7 +20,7 @@ class Text {
   }
 
   get noLines(): number {
-    return 100;
+    return this._lines.length;
   }
 
   get lines(): string[] {
@@ -38,9 +38,9 @@ class Text {
     let currentLine: string[] = [];
     let currentLineLength = 0;
 
-    words.forEach((word) => {
+    for (let i = 0; i < words.length; i++) {
+      const word = words[i];
       const wordLength = word.length;
-
       if (currentLineLength + wordLength > this.charsAtLine) {
         // Join the current line into a string and push it to lines
         lines.push(currentLine.join(" "));
@@ -50,7 +50,7 @@ class Text {
         currentLine.push(word);
         currentLineLength += wordLength + 1; // +1 for the space
       }
-    });
+    }
 
     // Add the last line if it's not empty
     if (currentLine.length > 0) {

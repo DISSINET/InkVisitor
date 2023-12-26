@@ -31,7 +31,6 @@
                 style="
                   cursor: move;
                   position: absolute;
-                  height: 30px;
                   width: 10px;
                   background-color: blue;
                 "
@@ -52,7 +51,7 @@
     <script>
       const customWrapper = new Canvas(
         document.getElementById("canvas"),
-        generateText(100)
+        generateText(1)
       );
       customWrapper.addScroller(document.getElementById("scroller"));
       customWrapper.onHighlightChange((text) => {
