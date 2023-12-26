@@ -22,7 +22,8 @@ class Scroller {
     this.element.onmousedown = this.onMouseDown.bind(this);
     this.runner.onmousedown = this.onRunnerMouseDown.bind(this);
     this.element.onmousemove = this.onRunnerMouseMove.bind(this);
-    window.addEventListener('mouseup', this.onRunnerMouseUp.bind(this))
+    window.addEventListener("mouseup", this.onRunnerMouseUp.bind(this));
+  }
 
   setRunnerSize(percentSize: number): void {
     this.runner.style.height = `${percentSize}%`;
@@ -54,7 +55,7 @@ class Scroller {
 
   onRunnerMouseMove(e: MouseEvent) {
     if (!this.dragging) {
-      return
+      return;
     }
 
     this.dragStart += e.movementY
@@ -72,7 +73,7 @@ class Scroller {
   onRunnerMouseUp(e: MouseEvent) {
     e.stopPropagation();
     if (!this.dragging) {
-      return
+      return;
     }
 
     this.dragging = false;

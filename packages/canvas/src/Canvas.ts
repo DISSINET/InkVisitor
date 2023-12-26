@@ -88,6 +88,17 @@ export class Canvas {
    */
   onKeyDown(e: KeyboardEvent) {
     e.preventDefault();
+    // writing to text
+    const key = e.key;
+    const nonCharKeys = [
+      "CapsLock",
+      "Shift",
+      "Control",
+      "Alt",
+      "Tab",
+      "Escape",
+      "Enter",
+    ];
 
     switch (e.key) {
       case "ArrowUp":
@@ -147,18 +158,6 @@ export class Canvas {
           }
           break;
         }
-
-        // writing to text
-        const key = e.key;
-        const nonCharKeys = [
-          "CapsLock",
-          "Shift",
-          "Control",
-          "Alt",
-          "Tab",
-          "Escape",
-          "Enter",
-        ];
 
         if (!nonCharKeys.includes(key)) {
           this.text.insertText(this.viewport, this.cursor, key);
@@ -231,7 +230,7 @@ export class Canvas {
    * onWheel is handler for mouse-wheel-event
    * @param e
    */
-  onWheel(e: any) {
+  onWheel(e: WheelEvent) {
     const up = e.deltaY < 0 ? false : true;
     if (up) {
       this.viewport.scrollDown(1, this.text.noLines);
