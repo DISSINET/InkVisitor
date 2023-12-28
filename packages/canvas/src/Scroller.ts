@@ -10,7 +10,10 @@ class Scroller {
   onChangeCb?: (percentage: number) => void;
 
   dragging: boolean = false;
-  dragStart: any;
+  // mouse position when drag started
+  runnerDragStart: number = 0;
+  // offset of runner element when drag started
+  runnerDragOffset: number = 0;
 
   constructor(element: HTMLDivElement) {
     this.element = element;
@@ -20,8 +23,8 @@ class Scroller {
     }
     this.runner = runner as HTMLDivElement;
     this.element.onmousedown = this.onMouseDown.bind(this);
+    this.element.onmousemove = this.onMouseMove.bind(this);
     this.runner.onmousedown = this.onRunnerMouseDown.bind(this);
-    this.element.onmousemove = this.onRunnerMouseMove.bind(this);
     window.addEventListener("mouseup", this.onRunnerMouseUp.bind(this));
   }
 
@@ -50,19 +53,32 @@ class Scroller {
   onRunnerMouseDown(e: MouseEvent) {
     e.stopPropagation();
     this.dragging = true;
-    this.dragStart = this.runner.offsetTop;
+    document.body.style.cursor = "move";
+    this.runnerDragStart = e.clientY;
+    this.runnerDragOffset = this.runner.offsetTop;
   }
 
-  onRunnerMouseMove(e: MouseEvent) {
+  /**
+   * onMouseMove is handler for mouse-move event on the wrapping element
+   * @param e
+   * @returns
+   */
+  onMouseMove(e: MouseEvent) {
     if (!this.dragging) {
       return;
     }
 
-    this.dragStart += e.movementY
+    let move: number;
 
-    const availableHeight = this.element.clientHeight;
+    if (e.target !== this.element) {
+      const dragDiff = e.clientY - this.runnerDragStart + this.runnerDragOffset;
+      move = this.runner.clientHeight * dragDiff;
+    } else {
+      move = e.offsetY * 100;
+    }
+
     if (this.onChangeCb) {
-      this.onChangeCb(((this.dragStart) * 100) / availableHeight);
+      this.onChangeCb(move / this.element.clientHeight);
     }
   }
 
@@ -77,11 +93,7 @@ class Scroller {
     }
 
     this.dragging = false;
-    const availableHeight = this.element.clientHeight;
-    if (this.onChangeCb) {
-      this.onChangeCb((e.offsetY * 100) / availableHeight);
-    }
-    this.dragStart = undefined;
+    document.body.style.cursor = "initial";
   }
 
   /**
