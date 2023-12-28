@@ -53,7 +53,7 @@ export class Canvas {
 
     const charsAtLine = Math.floor(this.width / this.charWidth);
 
-    const noLinesViewport = Math.floor(this.height / this.lineHeight) - 1;
+    const noLinesViewport = Math.ceil(this.height / this.lineHeight) - 1;
     this.viewport = new Viewport(0, noLinesViewport);
     this.cursor = new Cursor();
 
