@@ -1,4 +1,5 @@
 import { FaLock, FaUserAlt } from "react-icons/fa";
+import { TbMailFilled } from "react-icons/tb";
 import styled from "styled-components";
 
 export const StyledContentWrap = styled.div`
@@ -28,7 +29,13 @@ export const StyledFaLock = styled(FaLock)`
   margin-right: ${({ theme }) => theme.space[2]};
   color: ${({ theme }) => theme.color["primary"]};
 `;
+export const StyledTbMailFilled = styled(TbMailFilled)`
+  margin-right: ${({ theme }) => theme.space[2]};
+  color: ${({ theme }) => theme.color["primary"]};
+`;
 export const StyledButtonWrap = styled.div`
+  display: flex;
+  justify-content: center;
   margin-top: 1rem;
   width: 100%;
 `;
