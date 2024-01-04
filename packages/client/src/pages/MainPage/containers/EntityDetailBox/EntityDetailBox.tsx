@@ -1,11 +1,12 @@
 import { IResponseEntity } from "@shared/types";
 import api from "api";
 import { useSearchParams } from "hooks";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { EntityDetail } from "./EntityDetail/EntityDetail";
 import { StyledTabGroup } from "./EntityDetailBoxStyles";
 import { EntityDetailTab } from "./EntityDetailTab/EntityDetailTab";
+import update from "immutability-helper";
 
 interface EntityDetailBox {}
 export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
@@ -77,6 +78,21 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
     removeDetailId(entityId);
   };
 
+  const moveRow = useCallback(
+    (dragIndex: number, hoverIndex: number) => {
+      const dragRecord = entities[dragIndex];
+      const newlySortedEntities = update(entities, {
+        $splice: [
+          [dragIndex, 1],
+          [hoverIndex, 0, dragRecord],
+        ],
+      });
+
+      setEntities(newlySortedEntities);
+    },
+    [entities]
+  );
+
   return (
     <>
       <StyledTabGroup>
@@ -85,10 +101,12 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
           entities?.map((entity, key) => (
             <EntityDetailTab
               key={key}
+              index={key}
               entity={entity}
               onClick={() => setSelectedDetailId(entity.id)}
               onClose={() => handleClose(entity.id)}
               isSelected={selectedDetailId === entity.id}
+              moveRow={moveRow}
             />
           ))}
       </StyledTabGroup>

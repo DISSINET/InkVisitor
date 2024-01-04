@@ -1,8 +1,8 @@
 import { EntityEnums } from "@shared/enums";
 import { IResponseEntity } from "@shared/types";
 import { Tooltip, TypeBar } from "components";
-import React, { MouseEventHandler, useState } from "react";
-import { getEntityLabel } from "utils";
+import React, { MouseEventHandler, useRef, useState } from "react";
+import { dndHoverFn, getEntityLabel } from "utils";
 import {
   StyledCgClose,
   StyledIconWrap,
@@ -17,18 +17,29 @@ import {
   offset,
   useFloating,
 } from "@floating-ui/react";
+import { DragItem, ItemTypes } from "types";
+import {
+  DragSourceMonitor,
+  DropTargetMonitor,
+  useDrag,
+  useDrop,
+} from "react-dnd";
 
 interface EntityDetailTab {
   entity: IResponseEntity;
   onClick?: MouseEventHandler<HTMLElement>;
   onClose?: () => void;
   isSelected?: boolean;
+  index: number;
+  moveRow: (dragIndex: number, hoverIndex: number) => void;
 }
 export const EntityDetailTab: React.FC<EntityDetailTab> = ({
   entity,
   onClick,
   onClose,
   isSelected = false,
+  index,
+  moveRow,
 }) => {
   const [referenceElement, setReferenceElement] =
     useState<HTMLDivElement | null>(null);
@@ -42,11 +53,33 @@ export const EntityDetailTab: React.FC<EntityDetailTab> = ({
     middleware: [offset({ mainAxis: -14 })],
   });
 
+  const ref = useRef<HTMLDivElement>(null);
+
+  const [, drop] = useDrop<DragItem>({
+    accept: ItemTypes.DETAIL_TAB,
+    hover(item: DragItem, monitor: DropTargetMonitor) {
+      dndHoverFn(item, index, monitor, ref, moveRow);
+    },
+  });
+
+  const [{ isDragging }, drag, preview] = useDrag({
+    type: ItemTypes.DETAIL_TAB,
+    item: { index, id: entity.id },
+    collect: (monitor: DragSourceMonitor) => ({
+      isDragging: monitor.isDragging(),
+    }),
+    end: (item: DragItem | undefined, monitor: DragSourceMonitor) => {
+      if (item) console.log(item);
+    },
+  });
+
+  drag(drop(ref));
+
   return (
     <>
       <StyledTab
-        isSelected={isSelected}
         ref={setReferenceElement}
+        isSelected={isSelected}
         onMouseEnter={() => {
           setShowTooltip(true);
           setIsHovered(true);
@@ -58,6 +91,7 @@ export const EntityDetailTab: React.FC<EntityDetailTab> = ({
         }}
       >
         <StyledLabel
+          ref={ref}
           isSelected={isSelected}
           isItalic={
             entity?.class === EntityEnums.Class.Statement && !entity?.label

@@ -133,11 +133,9 @@ export const dndHoverFn = (
   if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) {
     return;
   }
-
   if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) {
     return;
   }
-
   moveFn(dragIndex, hoverIndex);
   item.index = hoverIndex;
 };
