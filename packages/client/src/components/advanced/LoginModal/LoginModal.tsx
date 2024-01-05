@@ -11,6 +11,7 @@ import { AttributeButtonGroup } from "..";
 import {
   StyledButtonWrap,
   StyledContentWrap,
+  StyledErrorText,
   StyledFaLock,
   StyledFaUserAlt,
   StyledHeading,
@@ -24,6 +25,9 @@ export const LoginModal: React.FC = () => {
   const [password, setPassword] = useState("");
   const [redirectToMain, setRedirectToMain] = useState(false);
   const [emailLocal, setEmailLocal] = useState("");
+
+  const [credentialsError, setCredentialsError] = useState(false);
+  const [emailError, setEmailError] = useState(false);
 
   const handleLogIn = async () => {
     if (usernameLocal.length === 0) {
@@ -41,6 +45,7 @@ export const LoginModal: React.FC = () => {
         setRedirectToMain(true);
       }
     } catch (err) {
+      setCredentialsError(true);
       console.log(err);
     }
   };
@@ -57,11 +62,11 @@ export const LoginModal: React.FC = () => {
     <Modal showModal disableBgClick width="thin" onEnterPress={handleLogIn}>
       <StyledContentWrap>
         <StyledHeading>{"Log In"}</StyledHeading>
-        <div style={{ marginBottom: "1rem" }}>
+        <div style={{ marginBottom: "1.5rem" }}>
           <AttributeButtonGroup
             options={[
               {
-                shortIcon: <FiLogIn />,
+                icon: <FiLogIn />,
                 longValue: "Log In",
                 shortValue: "Log In",
                 onClick: () => {
@@ -70,7 +75,7 @@ export const LoginModal: React.FC = () => {
                 selected: logInSelected,
               },
               {
-                shortIcon: <IoReloadCircle />,
+                icon: <IoReloadCircle />,
                 longValue: "Password recover",
                 shortValue: "Password recover",
                 onClick: () => {
@@ -84,50 +89,60 @@ export const LoginModal: React.FC = () => {
         {logInSelected ? (
           <>
             <StyledInputRow>
-              <StyledFaUserAlt size={14} />
+              <StyledFaUserAlt size={14} isError={credentialsError} />
               <Input
                 placeholder="username"
                 onChangeFn={(text: string) => setUsernameLocal(text)}
                 value={usernameLocal}
                 changeOnType
                 autoFocus
-                noBorder
+                borderColor={credentialsError ? "danger" : undefined}
               />
             </StyledInputRow>
             <StyledInputRow>
-              <StyledFaLock size={14} />
+              <StyledFaLock size={14} isError={credentialsError} />
               <Input
                 placeholder="password"
                 password
                 onChangeFn={(text: string) => setPassword(text)}
                 value={password}
                 changeOnType
-                noBorder
+                borderColor={credentialsError ? "danger" : undefined}
               />
             </StyledInputRow>
+            {credentialsError && (
+              <StyledErrorText>
+                Wrong username or password. Please try again.
+              </StyledErrorText>
+            )}
             <StyledButtonWrap>
-              <Button
-                fullWidth
-                icon={<FiLogIn />}
-                label="Log In"
-                color="success"
-                onClick={() => handleLogIn()}
-              />
+              <div>
+                <Button
+                  fullWidth
+                  icon={<FiLogIn />}
+                  label="Log In"
+                  color="success"
+                  onClick={() => handleLogIn()}
+                />
+              </div>
             </StyledButtonWrap>
           </>
         ) : (
           <>
             <StyledInputRow>
-              <StyledTbMailFilled size={14} />
+              <StyledTbMailFilled size={14} isError={emailError} />
               <Input
                 placeholder="email"
                 onChangeFn={(text: string) => setEmailLocal(text)}
                 value={emailLocal}
                 changeOnType
                 autoFocus
-                noBorder
+                borderColor={emailError ? "danger" : undefined}
               />
             </StyledInputRow>
+            {emailError && (
+              <StyledErrorText>Invalid email entered.</StyledErrorText>
+            )}
             <StyledButtonWrap>
               <div>
                 <Button

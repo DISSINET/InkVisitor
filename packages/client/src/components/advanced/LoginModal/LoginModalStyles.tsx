@@ -17,25 +17,36 @@ export const StyledInputRow = styled.div`
   display: flex;
   flex-direction: row;
   align-items: center;
-  border-bottom: 1px solid;
+  /* border-bottom: 1px solid; */
   border-bottom-color: ${({ theme }) => theme.color["gray"][400]};
   margin-bottom: 1rem;
 `;
-export const StyledFaUserAlt = styled(FaUserAlt)`
+interface StyledIcon {
+  isError?: boolean;
+}
+export const StyledFaUserAlt = styled(FaUserAlt)<StyledIcon>`
   margin-right: ${({ theme }) => theme.space[2]};
-  color: ${({ theme }) => theme.color["primary"]};
+  color: ${({ theme, isError }) =>
+    isError ? theme.color["danger"] : theme.color["primary"]};
 `;
-export const StyledFaLock = styled(FaLock)`
+export const StyledFaLock = styled(FaLock)<StyledIcon>`
   margin-right: ${({ theme }) => theme.space[2]};
-  color: ${({ theme }) => theme.color["primary"]};
+  color: ${({ theme, isError }) =>
+    isError ? theme.color["danger"] : theme.color["primary"]};
 `;
-export const StyledTbMailFilled = styled(TbMailFilled)`
+export const StyledTbMailFilled = styled(TbMailFilled)<StyledIcon>`
   margin-right: ${({ theme }) => theme.space[2]};
-  color: ${({ theme }) => theme.color["primary"]};
+  color: ${({ theme, isError }) =>
+    isError ? theme.color["danger"] : theme.color["primary"]};
 `;
+
 export const StyledButtonWrap = styled.div`
   display: flex;
   justify-content: center;
   margin-top: 1rem;
   width: 100%;
+`;
+export const StyledErrorText = styled.p`
+  color: ${({ theme }) => theme.color["danger"]};
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
 `;

@@ -1,6 +1,5 @@
-import { ThemeFontSize } from "Theme/theme";
+import { ThemeColor, ThemeFontSize } from "Theme/theme";
 import React, { useEffect, useState } from "react";
-import { DropdownItem } from "types";
 import { Label, StyledInput, StyledTextArea, Wrapper } from "./InputStyles";
 
 interface Input {
@@ -25,9 +24,10 @@ interface Input {
   password?: boolean;
   autoFocus?: boolean;
   disabled?: boolean;
-  noBorder?: boolean;
+  borderColor?: keyof ThemeColor;
 
   // TextArea props
+  noBorder?: boolean;
   fullHeightTextArea?: boolean;
   fontSizeTextArea?: keyof ThemeFontSize;
 }
@@ -49,6 +49,7 @@ export const Input: React.FC<Input> = ({
   autoFocus = false,
   disabled = false,
   noBorder = false,
+  borderColor,
   onFocus = () => {},
   onBlur = () => {},
 
@@ -102,6 +103,7 @@ export const Input: React.FC<Input> = ({
           }}
           inverted={inverted}
           suggester={suggester}
+          borderColor={borderColor}
         />
       )}
       {type === "textarea" && (
@@ -134,6 +136,7 @@ export const Input: React.FC<Input> = ({
           noBorder={noBorder}
           suggester={suggester}
           fontSizeTextArea={fontSizeTextArea}
+          borderColor={borderColor}
         />
       )}
     </Wrapper>
