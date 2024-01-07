@@ -29,7 +29,6 @@ import { RequestPermissionUpdate } from "./request-permission";
 import { RequestSearch } from "./request-search";
 import { IResource, IResourceData } from "./resource";
 
-import { IResponseAdministration } from "./response-administration";
 import { IResponseAudit } from "./response-audit";
 import { IResponseBookmarkFolder } from "./response-bookmarks";
 import {
@@ -114,7 +113,6 @@ export type {
   IResponseUsedInMetaProp,
   IResponseUsedInStatement,
   IResponseBookmarkFolder,
-  IResponseAdministration,
   IResponseStatement,
   IResponseTerritory,
   IResponseTree,
