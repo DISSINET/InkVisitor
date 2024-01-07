@@ -1,7 +1,6 @@
 import {
   IEntity,
   IResponseEntity,
-  IResponseAdministration,
   IResponseAudit,
   IResponseBookmarkFolder,
   IResponseDetail,
@@ -447,24 +446,6 @@ class Api {
     try {
       const response = await this.connection.get(
         `/users/me/emails/test?email=${testEmail}`
-      );
-      return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
-    }
-  }
-
-  /**
-   * Administration
-   * Administration container
-   */
-  async administrationGet(
-    options?: IApiOptions
-  ): Promise<AxiosResponse<IResponseAdministration>> {
-    try {
-      const response = await this.connection.get(
-        `/users/administration`,
-        options
       );
       return response;
     } catch (err: any | AxiosError) {

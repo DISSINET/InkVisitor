@@ -16,7 +16,6 @@ import { asyncRouteHandler } from "..";
 import {
   IResponseBookmarkFolder,
   IResponseUser,
-  IResponseAdministration,
   IResponseGeneric,
 } from "@shared/types";
 import mailer, { passwordResetTemplate, testTemplate } from "@service/mailer";
@@ -80,39 +79,6 @@ export default Router()
       return {
         token: generateAccessToken(user),
       };
-    })
-  )
-  /**
-   * @openapi
-   * /users/administration:
-   *   get:
-   *     description: Attempts to signin
-   *     tags:
-   *       - users
-   *     responses:
-   *       200:
-   *         description: Returns object containing users
-   *         content:
-   *           application/json:
-   *             schema:
-   *               type: array
-   *               items:
-   *                 $ref: "#/components/schemas/IResponseAdministration"
-   */
-  .get(
-    "/administration",
-    asyncRouteHandler<IResponseAdministration>(async (request: IRequest) => {
-      const out: IResponseAdministration = {
-        users: [],
-      };
-
-      for (const user of await User.findAllUsers(request.db.connection)) {
-        const response = new ResponseUser(user);
-        await response.unwindAll(request);
-        out.users.push(response);
-      }
-
-      return out;
     })
   )
   /**
@@ -208,15 +174,26 @@ export default Router()
    */
   .get(
     "/",
-    asyncRouteHandler<IUser[]>(async (request: IRequest) => {
+    asyncRouteHandler<IResponseUser[]>(async (request: IRequest) => {
       const label = (request.query.label as string) || "";
 
+      let userModels: User[];
       if (!label) {
-        return await User.findAllUsers(request.db.connection);
+        userModels = await User.findAllUsers(request.db.connection);
       } else if (label.length < 2) {
         return [];
+      } else {
+        userModels = await User.findUsersByLabel(request.db.connection, label);
       }
-      return await User.findUsersByLabel(request.db.connection, label);
+
+      const out: IResponseUser[] = [];
+      for (const user of userModels) {
+        const response = new ResponseUser(user);
+        await response.unwindAll(request);
+        out.push(response);
+      }
+
+      return out;
     })
   )
   /**

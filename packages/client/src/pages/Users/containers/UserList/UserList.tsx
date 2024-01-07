@@ -49,8 +49,8 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
   const { status, data, error, isFetching } = useQuery(
     ["users"],
     async () => {
-      const res = await api.administrationGet();
-      return res.data.users.sort((a, b) => (a.id > b.id ? 1 : -1));
+      const res = await api.usersGetMore({});
+      return res.data.sort((a, b) => (a.id > b.id ? 1 : -1));
     },
     { enabled: api.isLoggedIn() }
   );
