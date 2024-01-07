@@ -17,13 +17,117 @@ import {
   IResponseBookmarkFolder,
   IResponseUser,
   IResponseGeneric,
+  IRequestPasswordReset,
+  IRequestPasswordResetData,
 } from "@shared/types";
-import mailer, { passwordResetTemplate, testTemplate } from "@service/mailer";
+import mailer, {
+  passwordResetRequestTemplate,
+  passwordResetTemplate,
+  testTemplate,
+} from "@service/mailer";
 import { ResponseUser } from "@models/user/response";
 import { domainName } from "@common/functions";
 import { IRequest } from "src/custom_typings/request";
 
 export default Router()
+  /**
+   * @openapi
+   * /users/password_reset:
+   *   post:
+   *     description: Creates new hash-based password reset for user specified by email
+   *     tags:
+   *       - users
+   *     requestBody:
+   *       description: User object
+   *       content:
+   *         application/json:
+   *           schema:
+   *             $ref: "#/components/schemas/IUser"
+   *     responses:
+   *       200:
+   *         description: Returns generic response
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/IResponseGeneric"
+   */
+  .post(
+    "/password_reset",
+    asyncRouteHandler<IResponseGeneric>(
+      async (request: IRequest<any, IRequestPasswordReset, any>) => {
+        const email = request.body.email;
+        if (!email) {
+          throw new BadParams("email has to be set");
+        }
+
+        const user = await User.getUserByEmail(request.db.connection, email);
+        if (!user) {
+          throw new UserDoesNotExits("user does not exist", "");
+        }
+
+        user.generateHash();
+
+        await user.update(request.db.connection, { hash: user.hash });
+
+        try {
+          await mailer.sendTemplate(
+            email,
+            passwordResetRequestTemplate(user.email, domainName())
+          );
+        } catch (e) {
+          throw new EmailError(
+            "please check the logs",
+            (e as Error).toString()
+          );
+        }
+
+        return {
+          result: true,
+          message: `Please check your email ${email} to continue with password reset`,
+        };
+      }
+    )
+  )
+  .put(
+    "/password_reset",
+    asyncRouteHandler<IResponseGeneric>(
+      async (request: IRequest<any, IRequestPasswordResetData, any>) => {
+        const hash = request.query.hash;
+        const password = request.body.password;
+        const passwordRepeat = request.body.passwordRepeat;
+
+        if (!hash) {
+          throw new BadParams("hash is required");
+        }
+
+        if (!password || password !== passwordRepeat) {
+          throw new BadParams("mismatched or empty passwords");
+        }
+
+        const user = await User.getUserByHash(request.db.connection, hash);
+        if (!user) {
+          throw new UserDoesNotExits("user for provided hash not found", "");
+        }
+
+        try {
+          await mailer.sendTemplate(
+            user.email,
+            passwordResetTemplate(user.email, domainName())
+          );
+        } catch (e) {
+          throw new EmailError(
+            "please check the logs",
+            (e as Error).toString()
+          );
+        }
+
+        return {
+          result: true,
+          message: "Your password has been reset",
+        };
+      }
+    )
+  )
   /**
    * @openapi
    * /users/signin:

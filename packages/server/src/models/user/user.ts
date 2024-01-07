@@ -222,6 +222,21 @@ export default class User implements IUser, IDbModel {
     return null;
   }
 
+  static async getUserByEmail(
+    dbInstance: Connection | undefined,
+    email: string
+  ): Promise<User | null> {
+    const data = await rethink
+      .table(User.table)
+      .filter({ email })
+      .limit(1)
+      .run(dbInstance);
+    if (data) {
+      return new User(data[0]);
+    }
+    return null;
+  }
+
   static async getUserByHash(
     dbInstance: Connection | undefined,
     hash: string

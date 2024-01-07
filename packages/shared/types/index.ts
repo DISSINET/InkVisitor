@@ -68,6 +68,11 @@ import {
   IResponseDocumentDetail,
 } from "./document";
 
+import {
+  IRequestPasswordReset,
+  IRequestPasswordResetData
+} from "./request-password-reset"
+
 export type {
   IAudit,
   IEntity,
@@ -133,5 +138,8 @@ export type {
   IDocument,
   IResponseDocument,
   IResponseDocumentDetail,
+  IRequestPasswordReset,
+  IRequestPasswordResetData,
 };
+
 export { RequestSearch, RequestPermissionUpdate, Relation };
