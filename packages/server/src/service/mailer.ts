@@ -4,12 +4,14 @@ import sendgrid from "@sendgrid/mail";
 export enum TplIds {
   UserCreated = "d-5b941a639a544c848f11240dfc3fc565",
   PasswordReset = "d-a67dbe3a40234b6b8dc929f559553fe3",
+  PasswordResetRequest = "d-a67dbe3a40234b6b8dc929f559553fe3",
   Test = "d-382f8760c7be4ec4aba6bd8caf252eed",
 }
 
 // codenames for email subjects
 export enum EmailSubject {
   Test = "Test mail",
+  PasswordResetRequest = "Password reset request",
   PasswordReset = "Password reset",
   AccountCreated = "Account created",
 }
@@ -36,17 +38,29 @@ export function userCreatedTemplate(
   };
 }
 
+export function passwordResetRequestTemplate(
+  email: string,
+  domain: string
+): DynamicTplRequest {
+  return {
+    id: TplIds.PasswordResetRequest,
+    data: {
+      email,
+      domain,
+    },
+    subject: EmailSubject.PasswordReset,
+  };
+}
+
 export function passwordResetTemplate(
-  username: string,
-  domain: string,
-  rawPassword: string
+  email: string,
+  domain: string
 ): DynamicTplRequest {
   return {
     id: TplIds.PasswordReset,
     data: {
-      username,
+      email,
       domain,
-      rawPassword,
     },
     subject: EmailSubject.PasswordReset,
   };
@@ -65,7 +79,7 @@ export function testTemplate(domain: string): DynamicTplRequest {
 class Mailer {
   lastEmailSubject?: string;
   lastEmailData?: any;
-  devMode: boolean = true;
+  devMode = true;
 
   constructor() {
     if (process.env.NODEMAILER_API_KEY && process.env.MAILER_SENDER) {
