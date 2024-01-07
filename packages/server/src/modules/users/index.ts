@@ -1,7 +1,6 @@
 import { Router } from "express";
 import { IUser } from "@shared/types/user";
 import User from "@models/user/user";
-import { deleteUser } from "@service/shorthands";
 import {
   BadCredentialsError,
   BadParams,
@@ -20,15 +19,10 @@ import {
   IResponseAdministration,
   IResponseGeneric,
 } from "@shared/types";
-import mailer, {
-  passwordResetTemplate,
-  testTemplate,
-  userCreatedTemplate,
-} from "@service/mailer";
+import mailer, { passwordResetTemplate, testTemplate } from "@service/mailer";
 import { ResponseUser } from "@models/user/response";
-import { domainName, hostUrl, timeout } from "@common/functions";
+import { domainName } from "@common/functions";
 import { IRequest } from "src/custom_typings/request";
-import { Db } from "@service/rethink";
 
 export default Router()
   /**
@@ -305,7 +299,7 @@ export default Router()
       const userId =
         request.params.userId !== "me"
           ? request.params.userId
-          : (request as any).user.user.id;
+          : request.getUserOrFail().id;
       const userData = request.body as IUser;
 
       if (!userId || !userData || Object.keys(userData).length === 0) {
@@ -386,7 +380,7 @@ export default Router()
         );
       }
 
-      const result = await deleteUser(request.db, userId);
+      const result = await existingUser.delete(request.db.connection);
 
       if (result.deleted === 1) {
         return {
