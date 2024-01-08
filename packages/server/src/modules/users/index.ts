@@ -21,12 +21,11 @@ import {
   IRequestPasswordResetData,
 } from "@shared/types";
 import mailer, {
+  passwordAdminResetTemplate,
   passwordResetRequestTemplate,
-  passwordResetTemplate,
   testTemplate,
 } from "@service/mailer";
 import { ResponseUser } from "@models/user/response";
-import { domainName } from "@common/functions";
 import { IRequest } from "src/custom_typings/request";
 
 export default Router()
@@ -72,7 +71,10 @@ export default Router()
         try {
           await mailer.sendTemplate(
             email,
-            passwordResetRequestTemplate(user.email, domainName())
+            passwordResetRequestTemplate(
+              user.email,
+              `/password_reset?hash=${user.hash}`
+            )
           );
         } catch (e) {
           throw new EmailError(
@@ -107,18 +109,6 @@ export default Router()
         const user = await User.getUserByHash(request.db.connection, hash);
         if (!user) {
           throw new UserDoesNotExits("user for provided hash not found", "");
-        }
-
-        try {
-          await mailer.sendTemplate(
-            user.email,
-            passwordResetTemplate(user.email, domainName())
-          );
-        } catch (e) {
-          throw new EmailError(
-            "please check the logs",
-            (e as Error).toString()
-          );
         }
 
         return {
@@ -526,15 +516,6 @@ export default Router()
 
       console.log(`User activated: ${existingUser.email}`);
 
-      try {
-        await mailer.sendTemplate(
-          existingUser.email,
-          passwordResetTemplate(existingUser.name, domainName(), rawPassword)
-        );
-      } catch (e) {
-        throw new EmailError("please check the logs", (e as Error).toString());
-      }
-
       return {
         result: true,
         message:
@@ -653,7 +634,7 @@ export default Router()
       try {
         await mailer.sendTemplate(
           user.email,
-          passwordResetTemplate(user.name, domainName(), rawPassword)
+          passwordAdminResetTemplate(user.name, rawPassword)
         );
       } catch (e) {
         throw new EmailError("please check the logs", (e as Error).toString());
@@ -698,7 +679,7 @@ export default Router()
       }
 
       try {
-        await mailer.sendTemplate(email, testTemplate(domainName()));
+        await mailer.sendTemplate(email, testTemplate());
       } catch (e) {
         throw new EmailError("please check the logs", (e as Error).toString());
       }
