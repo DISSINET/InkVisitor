@@ -317,6 +317,46 @@ class Api {
   /**
    * Users
    */
+
+  async passwordChangeRequest(
+    email: string,
+    options?: IApiOptions
+  ): Promise<AxiosResponse<IResponseGeneric>> {
+    try {
+      const response = await this.connection.post(
+        `/users/password_reset`,
+        {
+          email,
+        },
+        options
+      );
+      return response;
+    } catch (err: any | AxiosError) {
+      throw { ...err.response.data };
+    }
+  }
+
+  async passwordSetRequest(
+    hash: string,
+    password: string,
+    passwordRepeat: string,
+    options?: IApiOptions
+  ): Promise<AxiosResponse<IResponseGeneric>> {
+    try {
+      const response = await this.connection.put(
+        `/users/password_reset?hash=${hash}`,
+        {
+          password,
+          passwordRepeat
+        },
+        options
+      );
+      return response;
+    } catch (err: any | AxiosError) {
+      throw { ...err.response.data };
+    }
+  }
+
   async usersGet(
     userId: string,
     options?: IApiOptions
