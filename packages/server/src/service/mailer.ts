@@ -1,10 +1,11 @@
+import { domainName, hostUrl } from "@common/functions";
 import sendgrid from "@sendgrid/mail";
 
 // ids for sendgrid templates
 export enum TplIds {
   UserCreated = "d-5b941a639a544c848f11240dfc3fc565",
-  PasswordReset = "d-a67dbe3a40234b6b8dc929f559553fe3",
-  PasswordResetRequest = "d-a67dbe3a40234b6b8dc929f559553fe3",
+  PasswordAdminReset = "d-a67dbe3a40234b6b8dc929f559553fe3",
+  PasswordResetRequest = "d-9a386304d7eb45b6beba7fe1becba08d",
   Test = "d-382f8760c7be4ec4aba6bd8caf252eed",
 }
 
@@ -22,55 +23,74 @@ interface DynamicTplRequest {
   subject: EmailSubject;
 }
 
+/**
+ * Template which should be sent to the new user email after registration
+ * @param username
+ * @param link
+ * @returns
+ */
 export function userCreatedTemplate(
   username: string,
-  domain: string,
   link: string
 ): DynamicTplRequest {
   return {
     id: TplIds.UserCreated,
     data: {
       username,
-      domain,
+      domain: domainName(),
       link,
     },
     subject: EmailSubject.AccountCreated,
   };
 }
 
+/**
+ * Template which should be sent to the email which requested new password
+ * @param email
+ * @param link
+ * @returns
+ */
 export function passwordResetRequestTemplate(
   email: string,
-  domain: string
+  link: string
 ): DynamicTplRequest {
   return {
     id: TplIds.PasswordResetRequest,
     data: {
       email,
-      domain,
+      link: `${hostUrl()}${link}`,
+      domain: domainName(),
     },
     subject: EmailSubject.PasswordReset,
   };
 }
 
-export function passwordResetTemplate(
-  email: string,
-  domain: string
+/**
+ * Template which should be sent to the user for which an admin reset their password
+ * @param username
+ * @param rawPassword
+ * @returns
+ */
+export function passwordAdminResetTemplate(
+  username: string,
+  rawPassword: string
 ): DynamicTplRequest {
   return {
-    id: TplIds.PasswordReset,
+    id: TplIds.PasswordAdminReset,
     data: {
-      email,
-      domain,
+      username,
+      rawPassword,
+      domain: domainName(),
     },
     subject: EmailSubject.PasswordReset,
   };
 }
 
-export function testTemplate(domain: string): DynamicTplRequest {
+export function testTemplate(): DynamicTplRequest {
   return {
     id: TplIds.Test,
     data: {
-      domain,
+      domain: domainName(),
     },
     subject: EmailSubject.Test,
   };
