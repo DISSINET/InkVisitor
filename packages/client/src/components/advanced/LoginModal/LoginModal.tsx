@@ -18,6 +18,7 @@ import {
   StyledInputRow,
   StyledTbMailFilled,
 } from "./LoginModalStyles";
+import { errorTypes } from "@shared/types/response-generic";
 
 export const LoginModal: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -45,13 +46,27 @@ export const LoginModal: React.FC = () => {
         setRedirectToMain(true);
       }
     } catch (err) {
-      setCredentialsError(true);
+      if (err && err.error === "UserDoesNotExits") {
+        // wrong username
+        setCredentialsError(true);
+      } else if (err && err.error === "BadCredentialsError") {
+        // wrong password
+        setCredentialsError(true);
+      }
       console.log(err);
     }
   };
 
-  const handlePasswordReset = () => {
-    console.log("password reset");
+  const handlePasswordReset = async () => {
+    try {
+      const res = await api.usersGetByEmail({ email: emailLocal });
+      if (res.status === 200) {
+        api.resetPassword(emailLocal, { ignoreErrorToast: true });
+      }
+    } catch (err) {
+      console.log(err);
+      setEmailError(true);
+    }
   };
 
   const [logInSelected, setLogInSelected] = useState(true);
@@ -150,6 +165,7 @@ export const LoginModal: React.FC = () => {
                   icon={<IoReloadCircle />}
                   label="Recover password"
                   color="success"
+                  // TODO: only send if it looks like email
                   onClick={() => handlePasswordReset()}
                 />
               </div>

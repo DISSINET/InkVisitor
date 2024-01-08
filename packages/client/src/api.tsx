@@ -40,6 +40,7 @@ interface IApiOptions extends AxiosRequestConfig<any> {
 
 type IFilterUsers = {
   label?: string;
+  email?: string;
 };
 
 type IFilterDocuments = {
@@ -323,6 +324,21 @@ class Api {
   ): Promise<AxiosResponse<IResponseUser>> {
     try {
       const response = await this.connection.get(`/users/${userId}`, options);
+      return response;
+    } catch (err: any | AxiosError) {
+      throw { ...err.response.data };
+    }
+  }
+
+  async usersGetByEmail(
+    filters: IFilterUsers,
+    options?: IApiOptions
+  ): Promise<AxiosResponse<IResponseUser[]>> {
+    try {
+      const response = await this.connection.get(
+        `/users?email=${filters.email}`,
+        options
+      );
       return response;
     } catch (err: any | AxiosError) {
       throw { ...err.response.data };
