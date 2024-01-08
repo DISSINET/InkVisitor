@@ -374,7 +374,7 @@ class Api {
   ): Promise<AxiosResponse<IResponseUser[]>> {
     try {
       const response = await this.connection.get(
-        `/users?label=${filters.label}`,
+        `/users?label=${filters.label || ""}`,
         options
       );
       return response;
