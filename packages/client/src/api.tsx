@@ -39,7 +39,6 @@ interface IApiOptions extends AxiosRequestConfig<any> {
 
 type IFilterUsers = {
   label?: string;
-  email?: string;
 };
 
 type IFilterDocuments = {
@@ -347,7 +346,7 @@ class Api {
         `/users/password_reset?hash=${hash}`,
         {
           password,
-          passwordRepeat
+          passwordRepeat,
         },
         options
       );
