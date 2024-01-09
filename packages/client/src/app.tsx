@@ -38,6 +38,7 @@ import { DocumentsPage } from "pages/Documents";
 import AclPage from "./pages/Acl";
 import MainPage from "./pages/MainPage";
 import { InterfaceEnums } from "@shared/enums";
+import { PasswordResetPage } from "pages/PasswordReset";
 
 const clockPerformance = (
   profilerId: any,
@@ -193,6 +194,14 @@ export const App: React.FC = () => {
                       element={
                         <PublicPath>
                           <ActivatePage />
+                        </PublicPath>
+                      }
+                    />
+                    <Route
+                      path="/password_reset"
+                      element={
+                        <PublicPath>
+                          <PasswordResetPage />
                         </PublicPath>
                       }
                     />

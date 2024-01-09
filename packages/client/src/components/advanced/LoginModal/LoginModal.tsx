@@ -119,8 +119,8 @@ export const LoginModal: React.FC = () => {
             <StyledInputRow>
               <StyledFaLock size={14} isError={credentialsError} />
               <Input
+                type="password"
                 placeholder="password"
-                password
                 onChangeFn={(text: string) => setPassword(text)}
                 value={password}
                 changeOnType

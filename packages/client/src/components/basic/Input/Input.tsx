@@ -7,7 +7,7 @@ interface Input {
   value?: string;
   inverted?: boolean;
   suggester?: boolean;
-  type?: "text" | "textarea" | "select";
+  type?: "text" | "textarea" | "select" | "password";
   rows?: number;
   cols?: number;
   width?: number | "full";
@@ -21,7 +21,6 @@ interface Input {
   onBlur?: () => void;
   placeholder?: string;
   changeOnType?: boolean;
-  password?: boolean;
   autoFocus?: boolean;
   disabled?: boolean;
   borderColor?: keyof ThemeColor;
@@ -45,7 +44,6 @@ export const Input: React.FC<Input> = ({
   onEnterPressFn = () => {},
   onChangeFn,
   placeholder,
-  password = false,
   autoFocus = false,
   disabled = false,
   noBorder = false,
@@ -64,10 +62,10 @@ export const Input: React.FC<Input> = ({
   return (
     <Wrapper fullHeightTextArea={type === "textarea" && fullHeightTextArea}>
       {label && <Label className="label">{label}</Label>}
-      {type === "text" && (
+      {(type === "text" || type === "password") && (
         <StyledInput
           disabled={disabled}
-          type={password ? "password" : "text"}
+          type={type}
           width={width}
           autoFocus={autoFocus}
           className="value"
