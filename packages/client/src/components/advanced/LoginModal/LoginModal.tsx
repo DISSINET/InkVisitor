@@ -46,10 +46,10 @@ export const LoginModal: React.FC = () => {
         setRedirectToMain(true);
       }
     } catch (err) {
-      if (err && err.error === "UserDoesNotExits") {
+      if (err && (err as any).error === "UserDoesNotExits") {
         // wrong username
         setCredentialsError(true);
-      } else if (err && err.error === "BadCredentialsError") {
+      } else if (err && (err as any).error === "BadCredentialsError") {
         // wrong password
         setCredentialsError(true);
       }
@@ -57,19 +57,21 @@ export const LoginModal: React.FC = () => {
     }
   };
 
+  const [logInPage, setLogInPage] = useState(true);
+
   const handlePasswordReset = async () => {
     try {
-      const res = await api.usersGetByEmail({ email: emailLocal });
+      const res = await api.passwordChangeRequest(emailLocal);
       if (res.status === 200) {
-        api.resetPassword(emailLocal, { ignoreErrorToast: true });
+        setEmailError(false);
+        setLogInPage(true);
+        toast.success("Password sent successfully");
       }
     } catch (err) {
       console.log(err);
       setEmailError(true);
     }
   };
-
-  const [logInSelected, setLogInSelected] = useState(true);
 
   return redirectToMain ? (
     <Navigate to="/" />
@@ -85,23 +87,23 @@ export const LoginModal: React.FC = () => {
                 longValue: "Log In",
                 shortValue: "Log In",
                 onClick: () => {
-                  setLogInSelected(true);
+                  setLogInPage(true);
                 },
-                selected: logInSelected,
+                selected: logInPage,
               },
               {
                 icon: <IoReloadCircle />,
                 longValue: "Password recover",
                 shortValue: "Password recover",
                 onClick: () => {
-                  setLogInSelected(false);
+                  setLogInPage(false);
                 },
-                selected: !logInSelected,
+                selected: !logInPage,
               },
             ]}
           />
         </div>
-        {logInSelected ? (
+        {logInPage ? (
           <>
             <StyledInputRow>
               <StyledFaUserAlt size={14} isError={credentialsError} />
