@@ -369,21 +369,6 @@ class Api {
     }
   }
 
-  async usersGetByEmail(
-    filters: IFilterUsers,
-    options?: IApiOptions
-  ): Promise<AxiosResponse<IResponseUser[]>> {
-    try {
-      const response = await this.connection.get(
-        `/users?email=${filters.email}`,
-        options
-      );
-      return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
-    }
-  }
-
   async usersGetMore(
     filters: IFilterUsers,
     options?: IApiOptions
