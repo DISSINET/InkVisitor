@@ -63,13 +63,16 @@ export const LoginModal: React.FC = () => {
     try {
       const res = await api.passwordChangeRequest(emailLocal);
       if (res.status === 200) {
+        setEmailLocal("");
         setEmailError(false);
         setLogInPage(true);
         toast.success("Password sent successfully");
       }
     } catch (err) {
       console.log(err);
-      setEmailError(true);
+      if (err && (err as any).error === "UserDoesNotExits") {
+        setEmailError(true);
+      }
     }
   };
 
