@@ -18,7 +18,6 @@ import {
   StyledInputRow,
   StyledTbMailFilled,
 } from "./LoginModalStyles";
-import { errorTypes } from "@shared/types/response-generic";
 
 export const LoginModal: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -53,7 +52,6 @@ export const LoginModal: React.FC = () => {
         // wrong password
         setCredentialsError(true);
       }
-      console.log(err);
     }
   };
 
@@ -69,7 +67,6 @@ export const LoginModal: React.FC = () => {
         toast.success("Password sent successfully");
       }
     } catch (err) {
-      console.log(err);
       if (err && (err as any).error === "UserDoesNotExits") {
         setEmailError(true);
       }
