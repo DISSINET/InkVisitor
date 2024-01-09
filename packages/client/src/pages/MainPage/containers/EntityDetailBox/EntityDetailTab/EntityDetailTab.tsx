@@ -1,29 +1,29 @@
-import { EntityEnums } from "@shared/enums";
-import { IResponseEntity } from "@shared/types";
-import { Tooltip, TypeBar } from "components";
-import React, { MouseEventHandler, useRef, useState } from "react";
-import { dndHoverFn, getEntityLabel } from "utils";
-import {
-  StyledCgClose,
-  StyledIconWrap,
-  StyledLabel,
-  StyledTab,
-} from "./EntityDetailTabStyles";
-import { FiMove } from "react-icons/fi";
-import { EntityTag } from "components/advanced";
 import {
   FloatingPortal,
   autoUpdate,
   offset,
   useFloating,
 } from "@floating-ui/react";
-import { DragItem, ItemTypes } from "types";
+import { EntityEnums } from "@shared/enums";
+import { IResponseEntity } from "@shared/types";
+import { Tooltip, TypeBar } from "components";
+import { EntityTag } from "components/advanced";
+import React, { MouseEventHandler, useRef, useState } from "react";
 import {
   DragSourceMonitor,
   DropTargetMonitor,
   useDrag,
   useDrop,
 } from "react-dnd";
+import { FiMove } from "react-icons/fi";
+import { DragItem, ItemTypes } from "types";
+import { dndHoverFnHorizontal, getEntityLabel } from "utils";
+import {
+  StyledCgClose,
+  StyledIconWrap,
+  StyledLabel,
+  StyledTab,
+} from "./EntityDetailTabStyles";
 
 interface EntityDetailTab {
   entity: IResponseEntity;
@@ -58,7 +58,7 @@ export const EntityDetailTab: React.FC<EntityDetailTab> = ({
   const [, drop] = useDrop<DragItem>({
     accept: ItemTypes.DETAIL_TAB,
     hover(item: DragItem, monitor: DropTargetMonitor) {
-      dndHoverFn(item, index, monitor, ref, moveRow);
+      dndHoverFnHorizontal(item, index, monitor, ref, moveRow);
     },
   });
 
@@ -78,7 +78,8 @@ export const EntityDetailTab: React.FC<EntityDetailTab> = ({
   return (
     <>
       <StyledTab
-        ref={setReferenceElement}
+        // ref={setReferenceElement}
+        ref={ref}
         isSelected={isSelected}
         onMouseEnter={() => {
           setShowTooltip(true);
@@ -91,7 +92,8 @@ export const EntityDetailTab: React.FC<EntityDetailTab> = ({
         }}
       >
         <StyledLabel
-          ref={ref}
+          ref={setReferenceElement}
+          // ref={ref}
           isSelected={isSelected}
           isItalic={
             entity?.class === EntityEnums.Class.Statement && !entity?.label
