@@ -29,6 +29,9 @@ interface Input {
   noBorder?: boolean;
   fullHeightTextArea?: boolean;
   fontSizeTextArea?: keyof ThemeFontSize;
+
+  autocomplete?: string;
+  required?: boolean;
 }
 
 export const Input: React.FC<Input> = ({
@@ -53,6 +56,9 @@ export const Input: React.FC<Input> = ({
 
   fullHeightTextArea = false,
   fontSizeTextArea = "xs",
+
+  autocomplete = "",
+  required = false,
 }) => {
   const [displayValue, setDisplayValue] = useState(value);
   useEffect(() => {
@@ -102,6 +108,8 @@ export const Input: React.FC<Input> = ({
           inverted={inverted}
           suggester={suggester}
           borderColor={borderColor}
+          autocomplete={autocomplete}
+          required={required}
         />
       )}
       {type === "textarea" && (

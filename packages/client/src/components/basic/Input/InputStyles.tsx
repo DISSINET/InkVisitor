@@ -9,6 +9,7 @@ interface IValueStyle {
   width?: number | "full";
   noBorder?: boolean;
   borderColor?: keyof ThemeColor;
+  autocomplete?: string;
 }
 const getWidth = (width?: number | "full") => {
   if (width) {

@@ -64,7 +64,7 @@ export const LoginModal: React.FC = () => {
         setEmailLocal("");
         setEmailError(false);
         setLogInPage(true);
-        toast.success("Password sent successfully");
+        toast.success("Link to password recover sent successfully");
       }
     } catch (err) {
       if (err && (err as any).error === "UserDoesNotExits") {
@@ -133,15 +133,12 @@ export const LoginModal: React.FC = () => {
               </StyledErrorText>
             )}
             <StyledButtonWrap>
-              <div>
-                <Button
-                  fullWidth
-                  icon={<FiLogIn />}
-                  label="Log In"
-                  color="success"
-                  onClick={() => handleLogIn()}
-                />
-              </div>
+              <Button
+                icon={<FiLogIn />}
+                label="Log In"
+                color="success"
+                onClick={() => handleLogIn()}
+              />
             </StyledButtonWrap>
           </>
         ) : (

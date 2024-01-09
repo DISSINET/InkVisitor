@@ -44,7 +44,6 @@ export const StyledButtonWrap = styled.div`
   display: flex;
   justify-content: center;
   margin-top: 1rem;
-  width: 100%;
 `;
 export const StyledErrorText = styled.p`
   color: ${({ theme }) => theme.color["danger"]};
