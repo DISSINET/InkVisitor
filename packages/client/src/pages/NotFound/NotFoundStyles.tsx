@@ -17,4 +17,5 @@ export const StyledBoxWrapper = styled.div`
   margin: 2rem 3rem;
   display: flex;
   flex-direction: column;
+  color: ${({ theme }) => theme.color.black};
 `;
