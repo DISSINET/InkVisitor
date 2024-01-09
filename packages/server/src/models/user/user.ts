@@ -231,7 +231,7 @@ export default class User implements IUser, IDbModel {
       .filter({ email })
       .limit(1)
       .run(dbInstance);
-    if (data) {
+    if (data && data.length) {
       return new User(data[0]);
     }
     return null;
