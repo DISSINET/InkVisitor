@@ -57,6 +57,11 @@ export const LoginModal: React.FC = () => {
 
   const [logInPage, setLogInPage] = useState(true);
 
+  const validateEmail = (email: string) => {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(email);
+  };
+
   const handlePasswordReset = async () => {
     try {
       const res = await api.passwordChangeRequest(emailLocal);
@@ -164,8 +169,14 @@ export const LoginModal: React.FC = () => {
                   icon={<IoReloadCircle />}
                   label="Recover password"
                   color="success"
-                  // TODO: only send if it looks like email
-                  onClick={() => handlePasswordReset()}
+                  onClick={() => {
+                    if (validateEmail(emailLocal)) {
+                      handlePasswordReset();
+                    } else {
+                      setEmailError(true);
+                    }
+                  }}
+                  disabled={emailLocal.length === 0}
                 />
               </div>
             </StyledButtonWrap>
