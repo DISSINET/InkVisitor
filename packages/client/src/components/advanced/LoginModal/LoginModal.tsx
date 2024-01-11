@@ -68,7 +68,6 @@ export const LoginModal: React.FC = () => {
       if (res.status === 200) {
         setEmailLocal("");
         setEmailError(false);
-        setLogInPage(true);
         toast.success("Link to password recover sent successfully");
       }
     } catch (err) {

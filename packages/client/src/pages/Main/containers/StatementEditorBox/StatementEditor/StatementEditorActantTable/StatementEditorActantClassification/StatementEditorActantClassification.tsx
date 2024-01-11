@@ -3,9 +3,8 @@ import { EntityEnums } from "@shared/enums";
 import { IResponseStatement } from "@shared/types";
 import {
   IStatementActant,
-  IStatementIdentification,
+  IStatementClassification,
 } from "@shared/types/statement";
-import { excludedSuggesterEntities } from "Theme/constants";
 import { AttributeIcon, Button, ButtonGroup } from "components";
 import Dropdown, {
   ElvlButtonGroup,
@@ -15,7 +14,7 @@ import Dropdown, {
   LogicButtonGroup,
   MoodVariantButtonGroup,
 } from "components/advanced";
-import { TooltipAttributes } from "pages/MainPage/containers";
+import { TooltipAttributes } from "pages/Main/containers";
 import React, { useState } from "react";
 import { FaTrashAlt } from "react-icons/fa";
 import { TbSettingsAutomation, TbSettingsFilled } from "react-icons/tb";
@@ -26,9 +25,9 @@ import {
   StyledExpandedRow,
 } from "../StatementEditorActantTableStyles";
 
-interface StatementEditorActantIdentification {
-  identifications: IStatementIdentification[];
-  identification: IStatementIdentification;
+interface StatementEditorActantClassification {
+  classifications: IStatementClassification[];
+  classification: IStatementClassification;
   updateActant: (
     statementActantId: string,
     changes: any,
@@ -39,24 +38,22 @@ interface StatementEditorActantIdentification {
   isInsideTemplate: boolean;
   territoryParentId?: string;
   sActant: IStatementActant;
-  classEntitiesActant: EntityEnums.Class[];
   territoryActants?: string[];
 }
-export const StatementEditorActantIdentification: React.FC<
-  StatementEditorActantIdentification
+export const StatementEditorActantClassification: React.FC<
+  StatementEditorActantClassification
 > = ({
-  identifications,
-  identification,
-  statement,
+  classifications,
+  classification,
   updateActant,
+  sActant,
+  statement,
   userCanEdit,
   isInsideTemplate,
   territoryParentId,
-  sActant,
-  classEntitiesActant,
   territoryActants,
 }) => {
-  const entity = statement.entities[identification.entityId];
+  const entity = statement.entities[classification.entityId];
 
   const handleUpdate = (
     newData: AttributeData & { entityId?: string },
@@ -65,8 +62,8 @@ export const StatementEditorActantIdentification: React.FC<
     updateActant(
       sActant.id,
       {
-        identifications: identifications.map((c) =>
-          c.id === identification.id ? { ...c, ...newData } : { ...c }
+        classifications: classifications.map((c) =>
+          c.id === classification.id ? { ...c, ...newData } : { ...c }
         ),
       },
       instantUpdate
@@ -76,17 +73,16 @@ export const StatementEditorActantIdentification: React.FC<
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
-    <StyledBorderLeft borderColor="ident" padding marginBottom>
+    <StyledBorderLeft borderColor="class" padding marginBottom>
       <StyledCIGrid>
         {entity ? (
           <EntityDropzone
-            categoryTypes={classEntitiesActant}
+            categoryTypes={[EntityEnums.Class.Concept]}
             onSelected={(entityId: string) => {
               handleUpdate({ entityId }, true);
             }}
             isInsideTemplate={isInsideTemplate}
             excludedActantIds={[entity.id]}
-            excludedEntityClasses={excludedSuggesterEntities}
           >
             <EntityTag
               entity={entity}
@@ -96,12 +92,12 @@ export const StatementEditorActantIdentification: React.FC<
                   onClick: () => {
                     handleUpdate({ entityId: "" });
                   },
-                  tooltipLabel: "unlink identification",
+                  tooltipLabel: "unlink classification",
                 }
               }
               elvlButtonGroup={
                 <ElvlButtonGroup
-                  value={identification.elvl}
+                  value={classification.elvl}
                   onChange={(elvl) => {
                     handleUpdate({ elvl });
                   }}
@@ -112,20 +108,19 @@ export const StatementEditorActantIdentification: React.FC<
           </EntityDropzone>
         ) : (
           <EntitySuggester
-            categoryTypes={classEntitiesActant}
+            categoryTypes={[EntityEnums.Class.Concept]}
             onSelected={(entityId: string) => {
               handleUpdate({ entityId }, true);
             }}
             openDetailOnCreate
             isInsideTemplate={isInsideTemplate}
             territoryActants={territoryActants}
-            excludedEntityClasses={excludedSuggesterEntities}
           />
         )}
 
         <LogicButtonGroup
           border
-          value={identification.logic}
+          value={classification.logic}
           onChange={(logic) => handleUpdate({ logic })}
           disabled={!userCanEdit}
         />
@@ -137,17 +132,17 @@ export const StatementEditorActantIdentification: React.FC<
               icon={<FaTrashAlt />}
               color="plain"
               inverted
-              tooltipLabel="remove identification row"
+              tooltipLabel="remove classification row"
               onClick={() => {
                 updateActant(sActant.id, {
-                  identifications: identifications.filter(
-                    (c) => c.id !== identification.id
+                  classifications: classifications.filter(
+                    (c) => c.id !== classification.id
                   ),
                 });
               }}
             />
           )}
-          {identification.logic === "2" && (
+          {classification.logic === "2" && (
             <Button
               key="neg"
               tooltipLabel="Negative logic"
@@ -174,11 +169,11 @@ export const StatementEditorActantIdentification: React.FC<
           tooltipContent={
             <TooltipAttributes
               data={{
-                elvl: identification.elvl,
-                logic: identification.logic,
-                certainty: identification.certainty,
-                mood: identification.mood,
-                moodvariant: identification.moodvariant,
+                elvl: classification.elvl,
+                logic: classification.logic,
+                certainty: classification.certainty,
+                mood: classification.mood,
+                moodvariant: classification.moodvariant,
               }}
             />
           }
@@ -196,7 +191,7 @@ export const StatementEditorActantIdentification: React.FC<
               tooltipLabel="mood"
               icon={<AttributeIcon attributeName="mood" />}
               options={moodDict}
-              value={identification.mood}
+              value={classification.mood}
               onChange={(newValues) => {
                 handleUpdate({
                   mood: newValues,
@@ -207,7 +202,7 @@ export const StatementEditorActantIdentification: React.FC<
           <div>
             <MoodVariantButtonGroup
               border
-              value={identification.moodvariant}
+              value={classification.moodvariant}
               onChange={(moodvariant) => handleUpdate({ moodvariant })}
               disabled={!userCanEdit}
             />
@@ -220,7 +215,7 @@ export const StatementEditorActantIdentification: React.FC<
               icon={<AttributeIcon attributeName="certainty" />}
               disabled={!userCanEdit}
               options={certaintyDict}
-              value={identification.certainty}
+              value={classification.certainty}
               onChange={(newValue) => {
                 handleUpdate({
                   certainty: newValue,

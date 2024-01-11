@@ -10,7 +10,7 @@ import api from "api";
 import { SearchParamsProvider } from "hooks/useParamsContext";
 import { useWindowSize } from "hooks/useWindowSize";
 import ActivatePage from "pages/Activate/ActivatePage";
-import LoginPage from "pages/Login";
+import LoginPage from "pages/Login/LoginPage";
 import UsersPage from "pages/Users";
 
 import {
@@ -36,7 +36,7 @@ import { setSeparatorXPosition } from "redux/features/layout/separatorXPositionS
 
 import { DocumentsPage } from "pages/Documents";
 import AclPage from "./pages/Acl";
-import MainPage from "./pages/MainPage";
+import MainPage from "./pages/Main/MainPage";
 import { InterfaceEnums } from "@shared/enums";
 import { PasswordResetPage } from "pages/PasswordReset/PasswordResetPage";
 

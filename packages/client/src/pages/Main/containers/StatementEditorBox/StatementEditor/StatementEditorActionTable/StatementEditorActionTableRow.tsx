@@ -17,8 +17,8 @@ import Dropdown, {
   MoodVariantButtonGroup,
 } from "components/advanced";
 import { useSearchParams } from "hooks";
-import { TooltipAttributes } from "pages/MainPage/containers";
-import { PropGroup } from "pages/MainPage/containers/PropGroup/PropGroup";
+import { TooltipAttributes } from "pages/Main/containers";
+import { PropGroup } from "pages/Main/containers/PropGroup/PropGroup";
 import React, {
   useCallback,
   useContext,

@@ -21,14 +21,14 @@ import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
 import { CEntity, CStatement, CTerritory } from "constructors";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { StyledContent, StyledNote } from "./EntityCreateModalStyles";
+import { StyledNote } from "./EntityCreateModalStyles";
 
 interface EntityCreateModal {
   closeModal: () => void;
   onMutationSuccess?: (entity: IEntity) => void;
 
   labelTyped?: string;
-  categorySelected: EntityEnums.Class;
+  categorySelected?: EntityEnums.Class;
 }
 export const EntityCreateModal: React.FC<EntityCreateModal> = ({
   closeModal,
@@ -43,8 +43,9 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
 
   const [label, setLabel] = useState(labelTyped);
   const [detailTyped, setDetailTyped] = useState("");
-  const [selectedCategory, setSelectedCategory] =
-    useState<EntityEnums.Class>(categorySelected);
+  const [selectedCategory, setSelectedCategory] = useState<EntityEnums.Class>(
+    categorySelected || classesAll[0]
+  );
 
   const [selectedLanguage, setSelectedLanguage] =
     useState<EntityEnums.Language>(EntityEnums.Language.Empty);

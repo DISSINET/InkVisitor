@@ -56,7 +56,13 @@ export const PasswordResetPage: React.FC<PasswordResetPage> = ({}) => {
               icon={<FaKey />}
               label="Reset Password"
               color="success"
-              onClick={() => handleReset()}
+              onClick={() => {
+                if (password.length > 0 || passwordRepeat.length > 0) {
+                  handleReset();
+                } else {
+                  toast.info("Fill both fields");
+                }
+              }}
             />
           </StyledButtonWrap>
         </ModalContent>
