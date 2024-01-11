@@ -7,7 +7,7 @@ import { Navigate } from "react-router";
 import { toast } from "react-toastify";
 import { setUsername } from "redux/features/usernameSlice";
 import { useAppDispatch } from "redux/hooks";
-import { AttributeButtonGroup } from "..";
+import { AttributeButtonGroup } from "../../../components/advanced";
 import {
   StyledButtonWrap,
   StyledContentWrap,

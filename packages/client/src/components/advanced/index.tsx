@@ -19,7 +19,6 @@ import { LogicButtonGroup } from "./IconButtonGroups/LogicButtonGroup";
 import { MoodVariantButtonGroup } from "./IconButtonGroups/MoodVariantButtonGroup";
 import { PositionButtonGroup } from "./IconButtonGroups/PositionButtonGroup";
 import { JSONExplorer } from "./JSONExplorer/JSONExplorer";
-import { LoginModal, MemoizedLoginModal } from "./LoginModal/LoginModal";
 import { Menu } from "./Menu/Menu";
 import { Page } from "./Page/Page";
 import { LeftHeader, RightHeader } from "./PageHeader/PageHeader";
@@ -52,8 +51,6 @@ export {
   EntityTag,
   EntityTooltip,
   JSONExplorer,
-  LoginModal,
-  MemoizedLoginModal,
   Menu,
   Page,
   LeftHeader,

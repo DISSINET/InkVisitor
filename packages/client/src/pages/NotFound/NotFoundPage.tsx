@@ -4,7 +4,7 @@ import {
   StyledContent,
   StyledError,
   StyledText,
-} from "./NotFoundStyles";
+} from "./NotFoundPageStyles";
 
 const NotFoundPage: React.FC = ({}) => {
   return (

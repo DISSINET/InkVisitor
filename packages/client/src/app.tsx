@@ -11,7 +11,7 @@ import { SearchParamsProvider } from "hooks/useParamsContext";
 import { useWindowSize } from "hooks/useWindowSize";
 import ActivatePage from "pages/Activate/ActivatePage";
 import LoginPage from "pages/Login/LoginPage";
-import UsersPage from "pages/Users";
+import UsersPage from "pages/Users/UsersPage";
 
 import {
   heightHeader,
@@ -25,8 +25,8 @@ import theme, { ThemeType } from "Theme/theme";
 import { darkTheme } from "Theme/theme-dark";
 import { Page } from "components/advanced";
 import { useDebounce } from "hooks";
-import { AboutPage } from "pages/About";
-import NotFoundPage from "pages/NotFound";
+import { AboutPage } from "pages/About/AboutPage";
+import NotFoundPage from "pages/NotFound/NotFoundPage";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { setContentHeight } from "redux/features/layout/contentHeightSlice";
@@ -34,8 +34,8 @@ import { setLayoutWidth } from "redux/features/layout/layoutWidthSlice";
 import { setPanelWidths } from "redux/features/layout/panelWidthsSlice";
 import { setSeparatorXPosition } from "redux/features/layout/separatorXPositionSlice";
 
-import { DocumentsPage } from "pages/Documents";
-import AclPage from "./pages/Acl";
+import { DocumentsPage } from "pages/Documents/DocumentsPage";
+import AclPage from "./pages/Acl/AclPage";
 import MainPage from "./pages/Main/MainPage";
 import { InterfaceEnums } from "@shared/enums";
 import { PasswordResetPage } from "pages/PasswordReset/PasswordResetPage";

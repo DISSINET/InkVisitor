@@ -9,7 +9,7 @@ import {
   StyledLogo,
   StyledTextList,
   StyledTextListItem,
-} from "./AboutStyles";
+} from "./AboutPageStyles";
 
 import LogoInkvisitor from "assets/logos/inkvisitor-full.svg";
 import { FaUserAlt } from "react-icons/fa";

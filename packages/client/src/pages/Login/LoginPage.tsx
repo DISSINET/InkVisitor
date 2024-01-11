@@ -1,6 +1,6 @@
-import { MemoizedLoginModal } from "components/advanced";
 import React from "react";
 import { StyledText } from "./LoginPageStyles";
+import { MemoizedLoginModal } from "./LoginModal/LoginModal";
 
 interface ILoginPage {}
 

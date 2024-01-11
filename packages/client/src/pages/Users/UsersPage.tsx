@@ -1,6 +1,6 @@
 import React from "react";
+import { StyledBoxWrap, StyledContent } from "./UsersPageStyles";
 import { UserList } from "./containers";
-import { StyledBoxWrap, StyledContent, StyledWrapper } from "./UsersPageStyles";
 
 const UsersPage: React.FC = ({}) => {
   return (
