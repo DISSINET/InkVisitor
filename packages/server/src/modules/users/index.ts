@@ -10,6 +10,7 @@ import {
   PermissionDeniedError,
   UserDoesNotExits,
   UserNotActiveError,
+  UserNotUnique,
 } from "@shared/types/errors";
 import { checkPassword, generateAccessToken, hashPassword } from "@common/auth";
 import { asyncRouteHandler } from "..";
@@ -330,6 +331,13 @@ export default Router()
 
       await request.db.lock();
 
+      if (await User.findUserByLogin(request.db.connection, userData.email)) {
+        throw new UserNotUnique("email is in use");
+      }
+      if (await User.findUserByLogin(request.db.connection, userData.name)) {
+        throw new UserNotUnique("username is in use");
+      }
+
       if (!(await user.save(request.db.connection))) {
         throw new InternalServerError("cannot create user");
       }
@@ -397,6 +405,15 @@ export default Router()
 
       if (userData.password) {
         userData.password = hashPassword(userData.password);
+      }
+
+      await request.db.lock();
+
+      if (await User.findUserByLogin(request.db.connection, userData.email)) {
+        throw new UserNotUnique("email is in use");
+      }
+      if (await User.findUserByLogin(request.db.connection, userData.name)) {
+        throw new UserNotUnique("username is in use");
       }
 
       const result = await existingUser.update(request.db.connection, {
