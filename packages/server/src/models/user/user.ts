@@ -17,6 +17,7 @@ import { ModelNotValidError } from "@shared/types/errors";
 import { generateRandomString, generateUuid, hashPassword } from "@common/auth";
 import { regExpEscape } from "@common/functions";
 import { nonenumerable } from "@common/decorators";
+import { Db } from "@service/rethink";
 
 export class UserRight implements IUserRight {
   territory = "";
@@ -272,7 +273,7 @@ export default class User implements IUser, IDbModel {
    * @returns
    */
   static async findUserByLogin(
-    dbInstance: Connection | undefined,
+    dbInstance: Db,
     login: string
   ): Promise<User | null> {
     const data = await rethink
@@ -284,7 +285,7 @@ export default class User implements IUser, IDbModel {
         );
       })
       .limit(1)
-      .run(dbInstance);
+      .run(dbInstance.connection);
     return data.length == 0 ? null : new User(data[0]);
   }
 

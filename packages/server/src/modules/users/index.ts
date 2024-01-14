@@ -161,7 +161,7 @@ export default Router()
         throw new BadParams("login and password have to be set");
       }
 
-      const user = await User.findUserByLogin(request.db.connection, login);
+      const user = await User.findUserByLogin(request.db, login);
       if (!user) {
         throw new UserDoesNotExits(`user ${name} was not found`, login);
       }
@@ -331,10 +331,10 @@ export default Router()
 
       await request.db.lock();
 
-      if (await User.findUserByLogin(request.db.connection, userData.email)) {
+      if (await User.findUserByLogin(request.db, userData.email)) {
         throw new UserNotUnique("email is in use");
       }
-      if (await User.findUserByLogin(request.db.connection, userData.name)) {
+      if (await User.findUserByLogin(request.db, userData.name)) {
         throw new UserNotUnique("username is in use");
       }
 
@@ -377,57 +377,57 @@ export default Router()
    */
   .put(
     "/:userId",
-    asyncRouteHandler<IResponseGeneric>(async (request: IRequest) => {
-      const userId =
-        request.params.userId !== "me"
-          ? request.params.userId
-          : request.getUserOrFail().id;
-      const userData = request.body as IUser;
+    asyncRouteHandler<IResponseGeneric>(
+      async (req: IRequest<{ userId: string }, Partial<IUser>>) => {
+        const userId =
+          req.params.userId !== "me"
+            ? req.params.userId
+            : req.getUserOrFail().id;
+        const data = req.body;
 
-      if (!userId || !userData || Object.keys(userData).length === 0) {
-        throw new BadParams("user id and data have to be set");
+        if (!userId || !data || Object.keys(data).length === 0) {
+          throw new BadParams("user id and data have to be set");
+        }
+
+        const existingUser = await User.findUserById(req.db.connection, userId);
+        if (!existingUser) {
+          throw new UserDoesNotExits(
+            `user with id ${userId} does not exist`,
+            userId
+          );
+        }
+
+        if (!existingUser.canBeEditedByUser(req.getUserOrFail())) {
+          throw new PermissionDeniedError("user cannot be saved");
+        }
+
+        if (data.password) {
+          data.password = hashPassword(data.password);
+        }
+
+        await req.db.lock();
+
+        if (data.email && (await User.findUserByLogin(req.db, data.email))) {
+          throw new UserNotUnique("email is in use");
+        }
+
+        if (data.name && (await User.findUserByLogin(req.db, data.name))) {
+          throw new UserNotUnique("username is in use");
+        }
+
+        const result = await existingUser.update(req.db.connection, {
+          ...data,
+        });
+
+        if (result.replaced || result.unchanged) {
+          return {
+            result: true,
+          };
+        } else {
+          throw new InternalServerError(`cannot update user ${userId}`);
+        }
       }
-
-      const existingUser = await User.findUserById(
-        request.db.connection,
-        userId
-      );
-      if (!existingUser) {
-        throw new UserDoesNotExits(
-          `user with id ${userId} does not exist`,
-          userId
-        );
-      }
-
-      if (!existingUser.canBeEditedByUser(request.getUserOrFail())) {
-        throw new PermissionDeniedError("user cannot be saved");
-      }
-
-      if (userData.password) {
-        userData.password = hashPassword(userData.password);
-      }
-
-      await request.db.lock();
-
-      if (await User.findUserByLogin(request.db.connection, userData.email)) {
-        throw new UserNotUnique("email is in use");
-      }
-      if (await User.findUserByLogin(request.db.connection, userData.name)) {
-        throw new UserNotUnique("username is in use");
-      }
-
-      const result = await existingUser.update(request.db.connection, {
-        ...userData,
-      });
-
-      if (result.replaced || result.unchanged) {
-        return {
-          result: true,
-        };
-      } else {
-        throw new InternalServerError(`cannot update user ${userId}`);
-      }
-    })
+    )
   )
   /**
    * @openapi
