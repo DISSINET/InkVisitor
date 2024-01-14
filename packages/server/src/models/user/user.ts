@@ -265,16 +265,22 @@ export default class User implements IUser, IDbModel {
     return data.map((d) => new User(d));
   }
 
-  static async findUserByLabel(
+  /**
+   * Method searches for user by email or username (login)
+   * @param dbInstance
+   * @param label
+   * @returns
+   */
+  static async findUserByLogin(
     dbInstance: Connection | undefined,
-    label: string
+    login: string
   ): Promise<User | null> {
     const data = await rethink
       .table(User.table)
       .filter(function (user: any) {
         return rethink.or(
-          rethink.row("name").eq(label),
-          rethink.row("email").eq(label)
+          rethink.row("name").eq(login),
+          rethink.row("email").eq(login)
         );
       })
       .limit(1)

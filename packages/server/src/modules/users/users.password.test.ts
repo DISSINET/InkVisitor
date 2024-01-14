@@ -47,7 +47,7 @@ describe("Users password", function () {
         .expect(200)
         .then(async () => {
           expect(mailer.lastEmailSubject).toBe(EmailSubject.PasswordReset);
-          const user = await User.findUserByLabel(
+          const user = await User.findUserByLogin(
             db.connection,
             supertestConfig.username
           );
@@ -80,7 +80,7 @@ describe("Users password", function () {
 
           expect(mailer.lastEmailSubject).toBe(EmailSubject.PasswordReset);
 
-          const user = await User.findUserByLabel(
+          const user = await User.findUserByLogin(
             db.connection,
             supertestConfig.username
           );

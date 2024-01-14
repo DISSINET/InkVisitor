@@ -278,13 +278,13 @@ class Api {
     return newApi;
   }
 
-  async signIn(username: string, password: string): Promise<any> {
+  async signIn(login: string, password: string): Promise<any> {
     try {
       const response = (await this.connection.post(
         "/users/signin",
         {
-          username: username,
-          password: password,
+          login,
+          password,
         },
         {}
       )) as AxiosResponse;

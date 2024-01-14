@@ -153,16 +153,16 @@ export default Router()
   .post(
     "/signin",
     asyncRouteHandler<unknown>(async (request: IRequest) => {
-      const name = request.body.username;
+      const login = request.body.login;
       const rawPassword = request.body.password;
 
-      if (!name || !rawPassword) {
-        throw new BadParams("name and password have to be set");
+      if (!login || !rawPassword) {
+        throw new BadParams("login and password have to be set");
       }
 
-      const user = await User.findUserByLabel(request.db.connection, name);
+      const user = await User.findUserByLogin(request.db.connection, login);
       if (!user) {
-        throw new UserDoesNotExits(`user ${name} was not found`, name);
+        throw new UserDoesNotExits(`user ${name} was not found`, login);
       }
 
       if (!user.active) {
