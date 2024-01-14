@@ -200,6 +200,10 @@ export default class User implements IUser, IDbModel {
 
   generatePassword(): string {
     const raw = generateRandomString(10);
+    return this.setPassword(raw);
+  }
+
+  setPassword(raw: string): string {
     this.password = hashPassword(raw);
     return raw;
   }

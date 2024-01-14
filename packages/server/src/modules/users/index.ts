@@ -111,6 +111,9 @@ export default Router()
           throw new UserDoesNotExits("user for provided hash not found", "");
         }
 
+        user.setPassword(password);
+        await user.update(request.db.connection, { password: user.password });
+
         return {
           result: true,
           message: "Your password has been reset",
