@@ -18,15 +18,18 @@ import {
   StyledInputRow,
   StyledTbMailFilled,
 } from "./LoginModalStyles";
+import { LoginScreen } from "./LoginScreens/LoginScreen";
+import { PasswordRecoverScreen } from "./LoginScreens/PasswordRecoverScreen";
 
 export const LoginModal: React.FC = () => {
   const dispatch = useAppDispatch();
+  const [redirectToMain, setRedirectToMain] = useState(false);
+
   const [usernameLocal, setUsernameLocal] = useState("");
   const [password, setPassword] = useState("");
-  const [redirectToMain, setRedirectToMain] = useState(false);
-  const [emailLocal, setEmailLocal] = useState("");
-
   const [credentialsError, setCredentialsError] = useState(false);
+
+  const [emailLocal, setEmailLocal] = useState("");
   const [emailError, setEmailError] = useState(false);
 
   const handleLogIn = async () => {
@@ -55,13 +58,6 @@ export const LoginModal: React.FC = () => {
     }
   };
 
-  const [logInPage, setLogInPage] = useState(true);
-
-  const validateEmail = (email: string) => {
-    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return regex.test(email);
-  };
-
   const handlePasswordReset = async () => {
     try {
       const res = await api.passwordChangeRequest(emailLocal);
@@ -77,10 +73,17 @@ export const LoginModal: React.FC = () => {
     }
   };
 
+  const [logInPage, setLogInPage] = useState(true);
+
   return redirectToMain ? (
     <Navigate to="/" />
   ) : (
-    <Modal showModal disableBgClick width="thin" onEnterPress={handleLogIn}>
+    <Modal
+      showModal
+      disableBgClick
+      width="thin"
+      onEnterPress={logInPage ? handleLogIn : handlePasswordReset}
+    >
       <StyledContentWrap>
         <StyledHeading>{"Log In"}</StyledHeading>
         <div style={{ marginBottom: "1.5rem" }}>
@@ -108,78 +111,22 @@ export const LoginModal: React.FC = () => {
           />
         </div>
         {logInPage ? (
-          <>
-            <StyledInputRow>
-              <StyledFaUserAlt size={14} isError={credentialsError} />
-              <Input
-                placeholder="username"
-                onChangeFn={(text: string) => setUsernameLocal(text)}
-                value={usernameLocal}
-                changeOnType
-                autoFocus
-                borderColor={credentialsError ? "danger" : undefined}
-              />
-            </StyledInputRow>
-            <StyledInputRow>
-              <StyledFaLock size={14} isError={credentialsError} />
-              <Input
-                type="password"
-                placeholder="password"
-                onChangeFn={(text: string) => setPassword(text)}
-                value={password}
-                changeOnType
-                borderColor={credentialsError ? "danger" : undefined}
-              />
-            </StyledInputRow>
-            {credentialsError && (
-              <StyledErrorText>
-                Wrong username or password. Please try again.
-              </StyledErrorText>
-            )}
-            <StyledButtonWrap>
-              <Button
-                icon={<FiLogIn />}
-                label="Log In"
-                color="success"
-                onClick={() => handleLogIn()}
-              />
-            </StyledButtonWrap>
-          </>
+          <LoginScreen
+            usernameLocal={usernameLocal}
+            setUsernameLocal={setUsernameLocal}
+            password={password}
+            setPassword={setPassword}
+            credentialsError={credentialsError}
+            handleLogIn={handleLogIn}
+          />
         ) : (
-          <>
-            <StyledInputRow>
-              <StyledTbMailFilled size={14} isError={emailError} />
-              <Input
-                placeholder="email"
-                onChangeFn={(text: string) => setEmailLocal(text)}
-                value={emailLocal}
-                changeOnType
-                autoFocus
-                borderColor={emailError ? "danger" : undefined}
-              />
-            </StyledInputRow>
-            {emailError && (
-              <StyledErrorText>Invalid email entered.</StyledErrorText>
-            )}
-            <StyledButtonWrap>
-              <div>
-                <Button
-                  fullWidth
-                  icon={<IoReloadCircle />}
-                  label="Recover password"
-                  color="success"
-                  onClick={() => {
-                    if (validateEmail(emailLocal)) {
-                      handlePasswordReset();
-                    } else {
-                      setEmailError(true);
-                    }
-                  }}
-                  disabled={emailLocal.length === 0}
-                />
-              </div>
-            </StyledButtonWrap>
-          </>
+          <PasswordRecoverScreen
+            emailLocal={emailLocal}
+            setEmailLocal={setEmailLocal}
+            emailError={emailError}
+            handlePasswordReset={handlePasswordReset}
+            setEmailError={setEmailError}
+          />
         )}
       </StyledContentWrap>
     </Modal>
