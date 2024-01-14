@@ -115,14 +115,20 @@ interface ModalContent {
   column?: boolean;
   children?: ReactNode;
   enableScroll?: boolean;
+  centered?: boolean;
 }
 export const ModalContent: FC<ModalContent> = ({
   children,
   column,
   enableScroll = false,
+  centered,
 }) => {
   return (
-    <StyledCardBody column={column} enableScroll={enableScroll}>
+    <StyledCardBody
+      column={column}
+      enableScroll={enableScroll}
+      centered={centered}
+    >
       {children}
     </StyledCardBody>
   );

@@ -86,11 +86,14 @@ export const StyledCardTitle = styled.h2`
 interface StyledCardBody {
   column?: boolean;
   enableScroll: boolean;
+  centered?: boolean;
 }
 export const StyledCardBody = styled.section<StyledCardBody>`
   display: flex;
   height: 100%;
   flex-direction: ${({ column }) => (column ? "column" : "row")};
+  align-items: ${({ centered }) => (centered ? "center" : "")};
+  justify-content: ${({ centered }) => (centered ? "center" : "")};
   padding: ${space5} ${space7};
   overflow: ${({ enableScroll }) => (enableScroll ? "auto" : "initial")};
   font-size: ${({ theme }) => theme.fontSize["sm"]};

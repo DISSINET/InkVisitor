@@ -4,8 +4,13 @@ import React, { useState } from "react";
 import { FaKey } from "react-icons/fa";
 import { useNavigate } from "react-router";
 import { toast } from "react-toastify";
-import { StyledButtonWrap, StyledInputRow } from "./PasswordResetPageStyles";
-import { TbLockExclamation, TbLockPlus } from "react-icons/tb";
+import {
+  StyledButtonWrap,
+  StyledDescription,
+  StyledInputRow,
+  StyledMail,
+} from "./PasswordResetPageStyles";
+import { TbLockExclamation, TbLockPlus, TbMailFilled } from "react-icons/tb";
 
 interface PasswordResetPage {}
 export const PasswordResetPage: React.FC<PasswordResetPage> = ({}) => {
@@ -25,8 +30,17 @@ export const PasswordResetPage: React.FC<PasswordResetPage> = ({}) => {
 
   return (
     <div>
-      <Modal showModal disableBgClick width="thin" onEnterPress={handleReset}>
-        <ModalContent column>
+      <Modal showModal disableBgClick width={300} onEnterPress={handleReset}>
+        <ModalContent column centered>
+          <p>Enter a new safe password for the user</p>
+          <StyledMail>
+            <TbMailFilled size={14} style={{ marginRight: "0.5rem" }} />
+            {"mail"}
+          </StyledMail>
+          <StyledDescription>
+            A safe password: at least 12 characters, a combination of uppercase
+            letters, lowercase letters, numbers, and symbols.
+          </StyledDescription>
           <form>
             <ModalInputWrap>
               <StyledInputRow>
