@@ -73,7 +73,7 @@ export default Router()
             email,
             passwordResetRequestTemplate(
               user.email,
-              `/password_reset?hash=${user.hash}`
+              `/password_reset?hash=${user.hash}&email=${user.email}`
             )
           );
         } catch (e) {
