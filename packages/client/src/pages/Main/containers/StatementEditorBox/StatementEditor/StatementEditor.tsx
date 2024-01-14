@@ -73,7 +73,7 @@ import {
   StyledMissingTerritory,
   StyledTagsList,
   StyledTagsListItem,
-} from "./../StatementEditorBoxStyles";
+} from "../StatementEditorBoxStyles";
 import { StatementEditorActantTable } from "./StatementEditorActantTable/StatementEditorActantTable";
 import { StatementEditorActionTable } from "./StatementEditorActionTable/StatementEditorActionTable";
 import { StatementEditorOrdering } from "./StatementEditorOrdering/StatementEditorOrdering";

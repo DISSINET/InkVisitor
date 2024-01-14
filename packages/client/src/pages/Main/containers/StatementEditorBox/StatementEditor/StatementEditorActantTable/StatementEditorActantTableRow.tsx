@@ -27,7 +27,7 @@ import Dropdown, {
   PositionButtonGroup,
 } from "components/advanced";
 import { useSearchParams } from "hooks";
-import { TooltipAttributes } from "pages/MainPage/containers";
+import { TooltipAttributes } from "pages/Main/containers";
 import React, {
   useCallback,
   useContext,

@@ -10,6 +10,7 @@ interface AttributeButtonGroup {
     longValue: string;
     shortValue: string;
     shortIcon?: JSX.Element;
+    icon?: JSX.Element;
     onClick: () => void;
     selected: boolean;
   }[];
@@ -44,7 +45,9 @@ export const AttributeButtonGroup: React.FC<AttributeButtonGroup> = ({
             key={oi}
             label={option.selected ? option.longValue : option.shortValue}
             icon={
-              !option.selected && option.shortIcon
+              option.icon
+                ? option.icon
+                : !option.selected && option.shortIcon
                 ? option.shortIcon
                 : undefined
             }

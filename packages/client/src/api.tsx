@@ -346,7 +346,7 @@ class Api {
         `/users/password_reset?hash=${hash}`,
         {
           password,
-          passwordRepeat
+          passwordRepeat,
         },
         options
       );

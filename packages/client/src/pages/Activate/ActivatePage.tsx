@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Navigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { StyledText } from "./ActivateStyles";
+import { StyledText } from "./ActivatePageStyles";
 
 interface ActivationPage {}
 
