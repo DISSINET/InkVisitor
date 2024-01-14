@@ -4,7 +4,8 @@ import React, { useState } from "react";
 import { FaKey } from "react-icons/fa";
 import { useNavigate } from "react-router";
 import { toast } from "react-toastify";
-import { StyledButtonWrap } from "./PasswordResetPageStyles";
+import { StyledButtonWrap, StyledInputRow } from "./PasswordResetPageStyles";
+import { TbLockExclamation, TbLockPlus } from "react-icons/tb";
 
 interface PasswordResetPage {}
 export const PasswordResetPage: React.FC<PasswordResetPage> = ({}) => {
@@ -28,27 +29,36 @@ export const PasswordResetPage: React.FC<PasswordResetPage> = ({}) => {
         <ModalContent column>
           <form>
             <ModalInputWrap>
-              <Input
-                type="password"
-                placeholder="new password"
-                onChangeFn={(text: string) => setPassword(text)}
-                value={password}
-                changeOnType
-                autoFocus
-                autocomplete="new-password"
-                required
-              />
+              <StyledInputRow>
+                <TbLockPlus size={16} style={{ marginRight: "0.3rem" }} />
+                <Input
+                  type="password"
+                  placeholder="new password"
+                  onChangeFn={(text: string) => setPassword(text)}
+                  value={password}
+                  changeOnType
+                  autoFocus
+                  autocomplete="new-password"
+                  required
+                />
+              </StyledInputRow>
             </ModalInputWrap>
             <ModalInputWrap>
-              <Input
-                type="password"
-                placeholder="repeat password"
-                onChangeFn={(text: string) => setPasswordRepeat(text)}
-                value={passwordRepeat}
-                changeOnType
-                autocomplete="new-password"
-                required
-              />
+              <StyledInputRow>
+                <TbLockExclamation
+                  size={16}
+                  style={{ marginRight: "0.3rem" }}
+                />
+                <Input
+                  type="password"
+                  placeholder="repeat password"
+                  onChangeFn={(text: string) => setPasswordRepeat(text)}
+                  value={passwordRepeat}
+                  changeOnType
+                  autocomplete="new-password"
+                  required
+                />
+              </StyledInputRow>
             </ModalInputWrap>
           </form>
           <StyledButtonWrap>

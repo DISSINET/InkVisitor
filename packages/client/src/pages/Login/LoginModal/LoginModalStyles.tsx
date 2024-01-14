@@ -17,7 +17,6 @@ export const StyledInputRow = styled.div`
   display: flex;
   flex-direction: row;
   align-items: center;
-  border-bottom-color: ${({ theme }) => theme.color["gray"][400]};
   margin-bottom: 1rem;
 `;
 interface StyledIcon {
