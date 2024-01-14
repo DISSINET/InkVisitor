@@ -17,6 +17,7 @@ export const PasswordResetPage: React.FC<PasswordResetPage> = ({}) => {
   const navigate = useNavigate();
   const urlParams = new URLSearchParams(window.location.search);
   const [hash] = useState(urlParams.get("hash") || "");
+  const [email] = useState(urlParams.get("email") || "");
   const [password, setPassword] = useState("");
   const [passwordRepeat, setPasswordRepeat] = useState("");
 
@@ -35,7 +36,7 @@ export const PasswordResetPage: React.FC<PasswordResetPage> = ({}) => {
           <p>Enter a new safe password for the user</p>
           <StyledMail>
             <TbMailFilled size={14} style={{ marginRight: "0.5rem" }} />
-            {"mail"}
+            {email}
           </StyledMail>
           <StyledDescription>
             A safe password: at least 12 characters, a combination of uppercase
