@@ -14,7 +14,7 @@ const ActivatePage: React.FC<ActivationPage> = ({}) => {
     ["activate"],
     async () => {
       return await api
-        .activate(urlParams.get("hash") || "")
+        .activation(urlParams.get("hash") || "", "", "")
         .then((response) => {
           toast.success(response.data.message);
           return response.data;

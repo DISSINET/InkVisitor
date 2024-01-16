@@ -20,6 +20,7 @@ import {
   IResponseGeneric,
   IRequestPasswordReset,
   IRequestPasswordResetData,
+  IRequestActivationData,
 } from "@shared/types";
 import mailer, {
   passwordAdminResetTemplate,
@@ -488,9 +489,9 @@ export default Router()
   )
   /**
    * @openapi
-   * /users/active:
-   *   patch:
-   *     description: Validates the activation hash and switch user to active state
+   * /users/activation:
+   *   post:
+   *     description: Validates the activation hash, switch user to active state and setup initial password
    *     tags:
    *       - users
    *     parameters:
@@ -500,6 +501,12 @@ export default Router()
    *           type: string
    *         required: true
    *         description: Hash for identyfing the user for which this activation should be done
+   *     requestBody:
+   *       description: data for password setup
+   *       content:
+   *         application/json:
+   *           schema:
+   *             $ref: "#/components/schemas/IRequestActivationData"
    *     responses:
    *       200:
    *         description: Returns IResponseGeneric object
@@ -508,40 +515,51 @@ export default Router()
    *             schema:
    *               $ref: "#/components/schemas/IResponseGeneric"
    */
-  .patch(
-    "/active",
-    asyncRouteHandler<IResponseGeneric>(async (request: IRequest) => {
-      const hash = (request.query.hash as string) || "";
-      if (!hash) {
-        throw new BadParams("hash is required");
+  .post(
+    "/activation",
+    asyncRouteHandler<IResponseGeneric>(
+      async (
+        request: IRequest<
+          any,
+          Partial<IRequestActivationData>,
+          { hash: string }
+        >
+      ) => {
+        const hash = request.query.hash;
+        const password = request.body.password;
+        const passwordRepeat = request.body.passwordRepeat;
+
+        if (!hash) {
+          throw new BadParams("hash is required");
+        }
+
+        if (!password || password !== passwordRepeat) {
+          throw new BadParams("mismatched or empty passwords");
+        }
+
+        const user = await User.getUserByHash(request.db.connection, hash);
+        if (!user) {
+          throw new UserDoesNotExits("user for provided hash not found", "");
+        }
+
+        user.setPassword(password);
+        await user.update(request.db.connection, {
+          password: user.password,
+          active: true,
+        });
+        //if (!result.replaced && !result.unchanged) {
+        //  throw new InternalServerError(
+        //     `cannot update user ${existingUser.id}`
+        //   );
+        // }
+
+        return {
+          result: true,
+          message:
+            "User activated. An email with the password has been sent to your email address",
+        };
       }
-
-      const existingUser = await User.getUserByHash(
-        request.db.connection,
-        hash
-      );
-      if (!existingUser) {
-        throw new UserDoesNotExits(UserDoesNotExits.message, "");
-      }
-
-      const rawPassword = existingUser.generatePassword();
-
-      const result = await existingUser.update(request.db.connection, {
-        active: true,
-        password: existingUser.password,
-      });
-      if (!result.replaced && !result.unchanged) {
-        throw new InternalServerError(`cannot update user ${existingUser.id}`);
-      }
-
-      console.log(`User activated: ${existingUser.email}`);
-
-      return {
-        result: true,
-        message:
-          "User activated. An email with the password has been sent to your email address",
-      };
-    })
+    )
   )
   /**
    * @openapi
