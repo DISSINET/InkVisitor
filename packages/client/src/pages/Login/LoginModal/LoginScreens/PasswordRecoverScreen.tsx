@@ -1,13 +1,19 @@
+import { config, useSpring } from "@react-spring/web";
 import { Button, Input } from "components";
 import React, { useState } from "react";
 import { IoReloadCircle } from "react-icons/io5";
 import {
+  StyledButtonWrap,
+  StyledErrorText,
   StyledInputRow,
   StyledTbMailFilled,
-  StyledErrorText,
-  StyledButtonWrap,
 } from "../LoginModalStyles";
-import { StyledEmailSent } from "./ScreensStyles";
+import {
+  StyledAnimatedIconWrap,
+  StyledDescription,
+  StyledEmailSent,
+  StyledIoReloadCircle,
+} from "./ScreensStyles";
 
 interface PasswordRecoverScreen {
   emailLocal: string;
@@ -28,12 +34,23 @@ export const PasswordRecoverScreen: React.FC<PasswordRecoverScreen> = ({
     return emailRegex.test(email);
   };
 
-  const [restartScreen, setRestartScreen] = useState(true);
+  const [restartScreen, setRestartScreen] = useState(false);
+  const [iconHovered, setIconHovered] = useState(false);
+
+  const rotateIcon = useSpring({
+    transform: iconHovered ? "rotate(0deg)" : "rotate(-360deg)",
+    config: config.stiff,
+  });
 
   return (
     <>
       {!restartScreen ? (
         <>
+          <StyledDescription>
+            Please enter your email.
+            <br /> A link to reset your password will be sent to you
+            <br /> within couple of minutes.
+          </StyledDescription>
           <StyledInputRow>
             <StyledTbMailFilled size={14} isError={emailError} />
             <Input
@@ -72,21 +89,18 @@ export const PasswordRecoverScreen: React.FC<PasswordRecoverScreen> = ({
         <>
           <StyledEmailSent>{`A reset link was sent to email`}</StyledEmailSent>
           <StyledEmailSent>{`${emailLocal}`}</StyledEmailSent>
-          <IoReloadCircle
-            size={30}
-            style={{
-              cursor: "pointer",
-              marginTop: "1rem",
-              marginBottom: "2rem",
-            }}
-            onClick={() => {
-              setRestartScreen(false);
-              setEmailLocal("");
-            }}
-          />
-          <p style={{ fontSize: "1.0rem" }}>
-            {`In case of any problems, please contact the administrator at <email>`}
-          </p>
+          <StyledAnimatedIconWrap style={rotateIcon}>
+            <StyledIoReloadCircle
+              onMouseOver={() => setIconHovered(true)}
+              onMouseOut={() => setIconHovered(false)}
+              size={30}
+              onClick={() => {
+                setRestartScreen(false);
+                setEmailLocal("");
+              }}
+            />
+          </StyledAnimatedIconWrap>
+          {/* TODO: generalize!!! */}
         </>
       )}
     </>

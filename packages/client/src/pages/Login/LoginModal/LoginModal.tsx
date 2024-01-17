@@ -9,7 +9,9 @@ import { setUsername } from "redux/features/usernameSlice";
 import { useAppDispatch } from "redux/hooks";
 import { AttributeButtonGroup } from "../../../components/advanced";
 import {
+  StyledAttrBtnGroupWrap,
   StyledButtonWrap,
+  StyledContactAdmin,
   StyledContentWrap,
   StyledErrorText,
   StyledFaLock,
@@ -85,7 +87,7 @@ export const LoginModal: React.FC = () => {
     >
       <StyledContentWrap>
         <StyledHeading>{"Log In"}</StyledHeading>
-        <div style={{ marginBottom: "1.5rem" }}>
+        <StyledAttrBtnGroupWrap>
           <AttributeButtonGroup
             options={[
               {
@@ -99,8 +101,8 @@ export const LoginModal: React.FC = () => {
               },
               {
                 icon: <IoReloadCircle />,
-                longValue: "Password recover",
-                shortValue: "Password recover",
+                longValue: "Password reset",
+                shortValue: "Password reset",
                 onClick: () => {
                   setLogInPage(false);
                 },
@@ -108,7 +110,7 @@ export const LoginModal: React.FC = () => {
               },
             ]}
           />
-        </div>
+        </StyledAttrBtnGroupWrap>
         {logInPage ? (
           <LoginScreen
             usernameLocal={usernameLocal}
@@ -127,6 +129,9 @@ export const LoginModal: React.FC = () => {
             setEmailError={setEmailError}
           />
         )}
+        <StyledContactAdmin>
+          {`In case of any problems, please contact the administrator at <email>`}
+        </StyledContactAdmin>
       </StyledContentWrap>
     </Modal>
   );

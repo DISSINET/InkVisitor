@@ -13,6 +13,9 @@ export const StyledHeading = styled.h5`
   font-weight: ${({ theme }) => theme.fontWeight["normal"]};
   margin-bottom: 1.5rem;
 `;
+export const StyledAttrBtnGroupWrap = styled.div`
+  margin-bottom: 1rem;
+`;
 export const StyledInputRow = styled.div`
   display: flex;
   flex-direction: row;
@@ -46,4 +49,9 @@ export const StyledButtonWrap = styled.div`
 export const StyledErrorText = styled.p`
   color: ${({ theme }) => theme.color["danger"]};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
+`;
+
+export const StyledContactAdmin = styled.p`
+  font-size: ${({ theme }) => theme.fontSize["xxs"]};
+  margin-top: 1rem;
 `;
