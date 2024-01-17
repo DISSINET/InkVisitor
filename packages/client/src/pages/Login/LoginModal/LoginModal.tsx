@@ -32,7 +32,7 @@ export const LoginModal: React.FC = () => {
   const [credentialsError, setCredentialsError] = useState(false);
 
   const [emailLocal, setEmailLocal] = useState("");
-  const [emailError, setEmailError] = useState(false);
+  const [emailError, setEmailError] = useState<false | string>(false);
 
   const handleLogIn = async () => {
     if (usernameLocal.length === 0) {
@@ -62,19 +62,23 @@ export const LoginModal: React.FC = () => {
 
   const handlePasswordReset = async () => {
     try {
-      const res = await api.passwordChangeRequest(emailLocal);
+      const res = await api.passwordChangeRequest(emailLocal, {
+        ignoreErrorToast: true,
+      });
       if (res.status === 200) {
         setEmailError(false);
         toast.success("Link to password recover sent successfully");
+        setRestartScreen(true);
       }
     } catch (err) {
       if (err && (err as any).error === "UserDoesNotExits") {
-        setEmailError(true);
+        setEmailError("User with this email does not exist");
       }
     }
   };
 
   const [logInPage, setLogInPage] = useState(true);
+  const [restartScreen, setRestartScreen] = useState(false);
 
   return redirectToMain ? (
     <Navigate to="/" />
@@ -83,7 +87,7 @@ export const LoginModal: React.FC = () => {
       showModal
       disableBgClick
       width="thin"
-      // onEnterPress={logInPage ? handleLogIn : handlePasswordReset}
+      onEnterPress={logInPage ? handleLogIn : handlePasswordReset}
     >
       <StyledContentWrap>
         <StyledHeading>{"Log In"}</StyledHeading>
@@ -127,6 +131,8 @@ export const LoginModal: React.FC = () => {
             emailError={emailError}
             handlePasswordReset={handlePasswordReset}
             setEmailError={setEmailError}
+            restartScreen={restartScreen}
+            setRestartScreen={setRestartScreen}
           />
         )}
         <StyledContactAdmin>

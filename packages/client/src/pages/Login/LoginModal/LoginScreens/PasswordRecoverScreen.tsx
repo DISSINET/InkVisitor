@@ -3,9 +3,9 @@ import { Button, Input } from "components";
 import React, { useState } from "react";
 import { IoReloadCircle } from "react-icons/io5";
 import {
+  StyledInputRow,
   StyledButtonWrap,
   StyledErrorText,
-  StyledInputRow,
   StyledTbMailFilled,
 } from "../LoginModalStyles";
 import {
@@ -18,9 +18,11 @@ import {
 interface PasswordRecoverScreen {
   emailLocal: string;
   setEmailLocal: React.Dispatch<React.SetStateAction<string>>;
-  emailError: boolean;
-  setEmailError: React.Dispatch<React.SetStateAction<boolean>>;
+  emailError: string | false;
+  setEmailError: React.Dispatch<React.SetStateAction<string | false>>;
   handlePasswordReset: () => Promise<void>;
+  restartScreen: boolean;
+  setRestartScreen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 export const PasswordRecoverScreen: React.FC<PasswordRecoverScreen> = ({
   emailLocal,
@@ -28,13 +30,14 @@ export const PasswordRecoverScreen: React.FC<PasswordRecoverScreen> = ({
   emailError,
   setEmailError,
   handlePasswordReset,
+  restartScreen,
+  setRestartScreen,
 }) => {
   const validateEmail = (email: string): boolean => {
     const emailRegex: RegExp = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
 
-  const [restartScreen, setRestartScreen] = useState(false);
   const [iconHovered, setIconHovered] = useState(false);
 
   const rotateIcon = useSpring({
@@ -52,7 +55,7 @@ export const PasswordRecoverScreen: React.FC<PasswordRecoverScreen> = ({
             <br /> within couple of minutes.
           </StyledDescription>
           <StyledInputRow>
-            <StyledTbMailFilled size={14} isError={emailError} />
+            <StyledTbMailFilled size={14} $isError={emailError !== false} />
             <Input
               placeholder="email"
               onChangeFn={(text: string) => setEmailLocal(text)}
@@ -62,8 +65,8 @@ export const PasswordRecoverScreen: React.FC<PasswordRecoverScreen> = ({
               borderColor={emailError ? "danger" : undefined}
             />
           </StyledInputRow>
-          {emailError && (
-            <StyledErrorText>Invalid email entered.</StyledErrorText>
+          {emailError !== false && (
+            <StyledErrorText>{emailError}</StyledErrorText>
           )}
           <StyledButtonWrap>
             <div>
@@ -75,9 +78,8 @@ export const PasswordRecoverScreen: React.FC<PasswordRecoverScreen> = ({
                 onClick={() => {
                   if (validateEmail(emailLocal)) {
                     handlePasswordReset();
-                    setRestartScreen(true);
                   } else {
-                    setEmailError(true);
+                    setEmailError("Invalid email entered");
                   }
                 }}
                 disabled={emailLocal.length === 0}
@@ -100,7 +102,6 @@ export const PasswordRecoverScreen: React.FC<PasswordRecoverScreen> = ({
               }}
             />
           </StyledAnimatedIconWrap>
-          {/* TODO: generalize!!! */}
         </>
       )}
     </>

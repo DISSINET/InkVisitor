@@ -30,7 +30,7 @@ export const LoginScreen: React.FC<LoginScreen> = ({
   return (
     <>
       <StyledInputRow>
-        <StyledFaUserAlt size={14} isError={credentialsError} />
+        <StyledFaUserAlt size={14} $isError={credentialsError} />
         <Input
           placeholder="username"
           onChangeFn={(text: string) => setUsernameLocal(text)}
@@ -41,7 +41,7 @@ export const LoginScreen: React.FC<LoginScreen> = ({
         />
       </StyledInputRow>
       <StyledInputRow>
-        <StyledFaLock size={14} isError={credentialsError} />
+        <StyledFaLock size={14} $isError={credentialsError} />
         <Input
           type="password"
           placeholder="password"

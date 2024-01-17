@@ -23,22 +23,22 @@ export const StyledInputRow = styled.div`
   margin-bottom: 1rem;
 `;
 interface StyledIcon {
-  isError?: boolean;
+  $isError?: boolean;
 }
 export const StyledFaUserAlt = styled(FaUserAlt)<StyledIcon>`
   margin-right: ${({ theme }) => theme.space[2]};
-  color: ${({ theme, isError }) =>
-    isError ? theme.color["danger"] : theme.color["primary"]};
+  color: ${({ theme, $isError }) =>
+    $isError ? theme.color["danger"] : theme.color["primary"]};
 `;
 export const StyledFaLock = styled(FaLock)<StyledIcon>`
   margin-right: ${({ theme }) => theme.space[2]};
-  color: ${({ theme, isError }) =>
-    isError ? theme.color["danger"] : theme.color["primary"]};
+  color: ${({ theme, $isError }) =>
+    $isError ? theme.color["danger"] : theme.color["primary"]};
 `;
 export const StyledTbMailFilled = styled(TbMailFilled)<StyledIcon>`
   margin-right: ${({ theme }) => theme.space[2]};
-  color: ${({ theme, isError }) =>
-    isError ? theme.color["danger"] : theme.color["primary"]};
+  color: ${({ theme, $isError }) =>
+    $isError ? theme.color["danger"] : theme.color["primary"]};
 `;
 
 export const StyledButtonWrap = styled.div`
