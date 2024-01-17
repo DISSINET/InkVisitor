@@ -62,7 +62,6 @@ export const LoginModal: React.FC = () => {
     try {
       const res = await api.passwordChangeRequest(emailLocal);
       if (res.status === 200) {
-        setEmailLocal("");
         setEmailError(false);
         toast.success("Link to password recover sent successfully");
       }
@@ -82,7 +81,7 @@ export const LoginModal: React.FC = () => {
       showModal
       disableBgClick
       width="thin"
-      onEnterPress={logInPage ? handleLogIn : handlePasswordReset}
+      // onEnterPress={logInPage ? handleLogIn : handlePasswordReset}
     >
       <StyledContentWrap>
         <StyledHeading>{"Log In"}</StyledHeading>
