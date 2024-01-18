@@ -7,13 +7,14 @@ import {
   ModalContent,
   ModalInputWrap,
 } from "components";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FaKey } from "react-icons/fa";
 import { useNavigate } from "react-router";
 import { toast } from "react-toastify";
 import {
   StyledButtonWrap,
   StyledDescription,
+  StyledErrorText,
   StyledInputRow,
   StyledMail,
 } from "./PasswordResetPageStyles";
@@ -27,6 +28,7 @@ export const PasswordResetPage: React.FC<PasswordResetPage> = ({}) => {
   const [email] = useState(urlParams.get("email") || "");
   const [password, setPassword] = useState("");
   const [passwordRepeat, setPasswordRepeat] = useState("");
+  const [error, setError] = useState<false | string>(false);
 
   const handleReset = async () => {
     const res = await api.passwordSetRequest(hash, password, passwordRepeat);
@@ -36,9 +38,47 @@ export const PasswordResetPage: React.FC<PasswordResetPage> = ({}) => {
     }
   };
 
+  function isSafePassword(password: string) {
+    // Check if the password is at least 12 characters long
+    if (password.length < 12) {
+      return false;
+    }
+
+    // Check if the password contains at least one uppercase letter
+    if (!/[A-Z]/.test(password)) {
+      return false;
+    }
+
+    // Check if the password contains at least one lowercase letter
+    if (!/[a-z]/.test(password)) {
+      return false;
+    }
+
+    // Check if the password contains at least one digit
+    if (!/\d/.test(password)) {
+      return false;
+    }
+
+    // Check if the password contains at least one symbol
+    if (!/[!@#$%^&*()_+{}\[\]:;<>,.?/~\\-]/.test(password)) {
+      return false;
+    }
+
+    // If all conditions are met, the password is considered safe
+    return true;
+  }
+
+  useEffect(() => {
+    if (password.length > 0 && !isSafePassword(password)) {
+      setError("The entered password is not safe.");
+    } else {
+      setError(false);
+    }
+  }, [password]);
+
   return (
     <div>
-      <Modal showModal disableBgClick width="auto" onEnterPress={handleReset}>
+      <Modal showModal disableBgClick width={300} onEnterPress={handleReset}>
         <ModalContent column centered>
           <p>Enter a new safe password for the user</p>
           <StyledMail>
@@ -83,6 +123,7 @@ export const PasswordResetPage: React.FC<PasswordResetPage> = ({}) => {
               </StyledInputRow>
             </ModalInputWrap>
           </form>
+          {error !== false && <StyledErrorText>{error}</StyledErrorText>}
           <StyledButtonWrap>
             <Button
               icon={<FaKey />}
