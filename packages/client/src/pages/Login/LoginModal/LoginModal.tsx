@@ -1,5 +1,5 @@
 import api from "api";
-import { Button, Input, Modal } from "components";
+import { ContactAdminFooting, Modal } from "components";
 import React, { useState } from "react";
 import { FiLogIn } from "react-icons/fi";
 import { IoReloadCircle } from "react-icons/io5";
@@ -10,15 +10,8 @@ import { useAppDispatch } from "redux/hooks";
 import { AttributeButtonGroup } from "../../../components/advanced";
 import {
   StyledAttrBtnGroupWrap,
-  StyledButtonWrap,
-  StyledContactAdmin,
   StyledContentWrap,
-  StyledErrorText,
-  StyledFaLock,
-  StyledFaUserAlt,
   StyledHeading,
-  StyledInputRow,
-  StyledTbMailFilled,
 } from "./LoginModalStyles";
 import { LoginScreen } from "./LoginScreens/LoginScreen";
 import { PasswordRecoverScreen } from "./LoginScreens/PasswordRecoverScreen";
@@ -86,7 +79,7 @@ export const LoginModal: React.FC = () => {
     <Modal
       showModal
       disableBgClick
-      width="thin"
+      width="auto"
       onEnterPress={logInPage ? handleLogIn : handlePasswordReset}
     >
       <StyledContentWrap>
@@ -135,9 +128,7 @@ export const LoginModal: React.FC = () => {
             setRestartScreen={setRestartScreen}
           />
         )}
-        <StyledContactAdmin>
-          {`In case of any problems, please contact the administrator at <email>`}
-        </StyledContactAdmin>
+        <ContactAdminFooting />
       </StyledContentWrap>
     </Modal>
   );

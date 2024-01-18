@@ -1,5 +1,12 @@
 import api from "api";
-import { Button, Input, Modal, ModalContent, ModalInputWrap } from "components";
+import {
+  Button,
+  ContactAdminFooting,
+  Input,
+  Modal,
+  ModalContent,
+  ModalInputWrap,
+} from "components";
 import React, { useState } from "react";
 import { FaKey } from "react-icons/fa";
 import { useNavigate } from "react-router";
@@ -31,7 +38,7 @@ export const PasswordResetPage: React.FC<PasswordResetPage> = ({}) => {
 
   return (
     <div>
-      <Modal showModal disableBgClick width={300} onEnterPress={handleReset}>
+      <Modal showModal disableBgClick width="auto" onEnterPress={handleReset}>
         <ModalContent column centered>
           <p>Enter a new safe password for the user</p>
           <StyledMail>
@@ -90,6 +97,7 @@ export const PasswordResetPage: React.FC<PasswordResetPage> = ({}) => {
               }}
             />
           </StyledButtonWrap>
+          <ContactAdminFooting />
         </ModalContent>
       </Modal>
     </div>

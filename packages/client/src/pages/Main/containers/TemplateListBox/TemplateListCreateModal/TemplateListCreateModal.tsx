@@ -151,7 +151,7 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
   return (
     <Modal
       showModal={showCreateModal}
-      width="thin"
+      width="auto"
       key="create"
       onEnterPress={() => {
         handleCreateTemplate();

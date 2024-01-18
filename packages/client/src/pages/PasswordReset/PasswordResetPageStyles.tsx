@@ -4,7 +4,7 @@ export const StyledMail = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: 0.5rem;
+  margin-top: 0.3rem;
   margin-bottom: 1rem;
 `;
 export const StyledDescription = styled.p`

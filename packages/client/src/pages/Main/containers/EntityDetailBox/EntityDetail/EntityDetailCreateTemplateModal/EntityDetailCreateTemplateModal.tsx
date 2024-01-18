@@ -102,7 +102,7 @@ export const EntityDetailCreateTemplateModal: React.FC<
   return (
     <Modal
       showModal={showModal}
-      width="thin"
+      width="auto"
       onEnterPress={() => {
         handleCreateTemplate();
       }}

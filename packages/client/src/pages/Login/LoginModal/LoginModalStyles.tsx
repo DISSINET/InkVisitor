@@ -50,8 +50,3 @@ export const StyledErrorText = styled.p`
   color: ${({ theme }) => theme.color["danger"]};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
 `;
-
-export const StyledContactAdmin = styled.p`
-  font-size: ${({ theme }) => theme.fontSize["xxs"]};
-  margin-top: 1rem;
-`;
