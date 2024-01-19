@@ -55,7 +55,7 @@ export const PasswordRecoverScreen: React.FC<PasswordRecoverScreen> = ({
             <br /> within couple of minutes.
           </StyledDescription>
           <StyledInputRow>
-            <StyledTbMailFilled size={14} $isError={emailError !== false} />
+            <StyledTbMailFilled size={15} $isError={emailError !== false} />
             <Input
               placeholder="email"
               onChangeFn={(text: string) => setEmailLocal(text)}

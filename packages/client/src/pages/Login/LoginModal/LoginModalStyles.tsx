@@ -8,11 +8,6 @@ export const StyledContentWrap = styled.div`
   align-items: center;
   margin: 2rem 3rem;
 `;
-export const StyledHeading = styled.h5`
-  color: ${({ theme }) => theme.color["primary"]};
-  font-weight: ${({ theme }) => theme.fontWeight["normal"]};
-  margin-bottom: 1.5rem;
-`;
 export const StyledAttrBtnGroupWrap = styled.div`
   margin-bottom: 1rem;
 `;
@@ -20,7 +15,8 @@ export const StyledInputRow = styled.div`
   display: flex;
   flex-direction: row;
   align-items: center;
-  margin-bottom: 1rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
 `;
 interface StyledIcon {
   $isError?: boolean;
@@ -44,7 +40,7 @@ export const StyledTbMailFilled = styled(TbMailFilled)<StyledIcon>`
 export const StyledButtonWrap = styled.div`
   display: flex;
   justify-content: center;
-  margin-top: 1rem;
+  margin-top: 1.5rem;
 `;
 export const StyledErrorText = styled.p`
   color: ${({ theme }) => theme.color["danger"]};

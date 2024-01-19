@@ -8,11 +8,7 @@ import { toast } from "react-toastify";
 import { setUsername } from "redux/features/usernameSlice";
 import { useAppDispatch } from "redux/hooks";
 import { AttributeButtonGroup } from "../../../components/advanced";
-import {
-  StyledAttrBtnGroupWrap,
-  StyledContentWrap,
-  StyledHeading,
-} from "./LoginModalStyles";
+import { StyledAttrBtnGroupWrap, StyledContentWrap } from "./LoginModalStyles";
 import { LoginScreen } from "./LoginScreens/LoginScreen";
 import { PasswordRecoverScreen } from "./LoginScreens/PasswordRecoverScreen";
 
@@ -28,16 +24,10 @@ export const LoginModal: React.FC = () => {
   const [emailError, setEmailError] = useState<false | string>(false);
 
   const handleLogIn = async () => {
-    if (usernameLocal.length === 0) {
-      toast.warn("Fill username");
-      return;
-    }
-    if (password.length === 0) {
-      toast.warn("Fill password");
-      return;
-    }
     try {
-      const res = await api.signIn(usernameLocal, password);
+      const res = await api.signIn(usernameLocal, password, {
+        ignoreErrorToast: true,
+      });
       if (res?.token) {
         await dispatch(setUsername(usernameLocal));
         setRedirectToMain(true);
@@ -83,7 +73,6 @@ export const LoginModal: React.FC = () => {
       onEnterPress={logInPage ? handleLogIn : handlePasswordReset}
     >
       <StyledContentWrap>
-        <StyledHeading>{"Log In"}</StyledHeading>
         <StyledAttrBtnGroupWrap>
           <AttributeButtonGroup
             options={[

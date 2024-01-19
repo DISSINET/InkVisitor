@@ -58,6 +58,7 @@ export const LoginScreen: React.FC<LoginScreen> = ({
       )}
       <StyledButtonWrap>
         <Button
+          disabled={usernameLocal.length === 0 || password.length === 0}
           icon={<FiLogIn />}
           label="Log In"
           color="success"

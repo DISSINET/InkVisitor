@@ -278,16 +278,20 @@ class Api {
     return newApi;
   }
 
-  async signIn(username: string, password: string): Promise<any> {
+  async signIn(
+    username: string,
+    password: string,
+    options?: IApiOptions
+  ): Promise<any> {
     try {
-      const response = (await this.connection.post(
+      const response = await this.connection.post(
         "/users/signin",
         {
           username: username,
           password: password,
         },
-        {}
-      )) as AxiosResponse;
+        options
+      );
 
       if (response.status === 200) {
         const parsed = parseJwt(response.data.token);
