@@ -17,9 +17,11 @@ import React, { useState } from "react";
 import { FaTag, FaUserTag } from "react-icons/fa";
 import { TbMailFilled } from "react-icons/tb";
 
-const USERNAME_ALREADY_USED_ERROR = `Username <username> is already used. 
+const USERNAME_ALREADY_USED_ERROR = `Username is already used. 
 Please select a new one`;
-const USERNAME_LENGTH_NOT_VALID_ERROR = `Username <username> is too short | too long. 
+const USERNAME_TOO_SHORT_ERROR = `Username is too short.
+Please select a new one`;
+const USERNAME_TOO_LONG_ERROR = `Username too long.
 Please select a new one`;
 
 interface UsernamePage {}
@@ -30,12 +32,18 @@ export const UsernamePage: React.FC<UsernamePage> = ({}) => {
   const [error, setError] = useState<false | string>(false);
 
   const handleActivation = () => {
-    // TODO: handle activation
-    // const res = await api.activate(hash, password, passwordRepeat);
-    // if (res.status === 200) {
-    //   toast.success("user activated");
-    //   navigate("/username");
-    // }
+    if (username.length < 2) {
+      setError(USERNAME_TOO_SHORT_ERROR);
+    } else if (username.length > 10) {
+      setError(USERNAME_TOO_LONG_ERROR);
+    } else {
+      // TODO: handle activation
+      // const res = await api.activate(hash, password, passwordRepeat);
+      // if (res.status === 200) {
+      //   toast.success("user activated");
+      //   navigate("/username");
+      // }
+    }
   };
 
   return (
@@ -44,7 +52,7 @@ export const UsernamePage: React.FC<UsernamePage> = ({}) => {
         showModal
         disableBgClick
         width={300}
-        // onEnterPress={handleActivation}
+        onEnterPress={handleActivation}
       >
         <ModalContent column centered>
           <p>Choose username for user</p>

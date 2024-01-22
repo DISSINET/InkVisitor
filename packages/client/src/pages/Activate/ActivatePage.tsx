@@ -51,6 +51,7 @@ const ActivatePage: React.FC<ActivationPage> = ({}) => {
       // if (res.status === 200) {
       //   toast.success("user activated");
       //   navigate("/username");
+      navigate(`/username?email=${email}`);
       // }
     }
   };

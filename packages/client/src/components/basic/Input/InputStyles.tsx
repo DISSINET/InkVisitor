@@ -56,7 +56,7 @@ export const StyledInput = styled.input<IValueStyle>`
   min-width: 6rem;
   background: ${({ disabled, theme }) =>
     disabled ? theme.background["stripes"] : ""};
-  cursor: ${({ disabled }) => (disabled ? "not-allowed" : "default")};
+  cursor: ${({ disabled }) => (disabled ? "not-allowed" : "")};
   resize: none;
   :hover {
     border-color: ${({ theme }) => theme.color["info"]};
