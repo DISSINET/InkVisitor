@@ -16,20 +16,24 @@ import {
 import React, { useState } from "react";
 import { FaTag, FaUserTag } from "react-icons/fa";
 import { TbMailFilled } from "react-icons/tb";
+import { useNavigate } from "react-router";
+import { StyledUserActivatedDescription } from "./UsernamePageStyles";
 
 const USERNAME_ALREADY_USED_ERROR = `Username is already used. 
 Please select a new one`;
 const USERNAME_TOO_SHORT_ERROR = `Username is too short.
 Please select a new one`;
-const USERNAME_TOO_LONG_ERROR = `Username too long.
+const USERNAME_TOO_LONG_ERROR = `Username is too long.
 Please select a new one`;
 
 interface UsernamePage {}
 export const UsernamePage: React.FC<UsernamePage> = ({}) => {
+  const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const urlParams = new URLSearchParams(window.location.search);
   const [email] = useState(urlParams.get("email") || "");
   const [error, setError] = useState<false | string>(false);
+  const [continueScreen, setContinueScreen] = useState(false);
 
   const handleActivation = () => {
     if (username.length < 2) {
@@ -37,12 +41,13 @@ export const UsernamePage: React.FC<UsernamePage> = ({}) => {
     } else if (username.length > 10) {
       setError(USERNAME_TOO_LONG_ERROR);
     } else {
-      // TODO: handle activation
+      // TODO: handle set username
       // const res = await api.activate(hash, password, passwordRepeat);
       // if (res.status === 200) {
       //   toast.success("user activated");
       //   navigate("/username");
       // }
+      setContinueScreen(true);
     }
   };
 
@@ -55,38 +60,62 @@ export const UsernamePage: React.FC<UsernamePage> = ({}) => {
         onEnterPress={handleActivation}
       >
         <ModalContent column centered>
-          <p>Choose username for user</p>
-          <StyledMail>
-            <TbMailFilled size={14} style={{ marginRight: "0.5rem" }} />
-            {email}
-          </StyledMail>
-          <StyledDescription>
-            The username has to be unique and <br />
-            between 2 and 10 characters long.
-          </StyledDescription>
-          <ModalInputWrap>
-            <StyledInputRow>
-              <FaTag size={14} style={{ marginRight: "0.7rem" }} />
-              <Input
-                placeholder="username"
-                onChangeFn={(text: string) => setUsername(text)}
-                value={username}
-                changeOnType
-                autoFocus
-                required
-              />
-            </StyledInputRow>
-          </ModalInputWrap>
-          {error !== false && <StyledErrorText>{error}</StyledErrorText>}
-          <StyledButtonWrap>
-            <Button
-              disabled={username.length < 2}
-              icon={<FaUserTag />}
-              label="Set username"
-              color="success"
-              onClick={handleActivation}
-            />
-          </StyledButtonWrap>
+          {!continueScreen ? (
+            <>
+              <p>Choose username for user</p>
+              <StyledMail>
+                <TbMailFilled size={14} style={{ marginRight: "0.5rem" }} />
+                {email}
+              </StyledMail>
+              <StyledDescription>
+                The username has to be unique and <br />
+                between 2 and 10 characters long.
+              </StyledDescription>
+              <ModalInputWrap>
+                <StyledInputRow>
+                  <FaTag size={14} style={{ marginRight: "0.7rem" }} />
+                  <Input
+                    placeholder="username"
+                    onChangeFn={(text: string) => setUsername(text)}
+                    value={username}
+                    changeOnType
+                    autoFocus
+                    required
+                  />
+                </StyledInputRow>
+              </ModalInputWrap>
+              {error !== false && <StyledErrorText>{error}</StyledErrorText>}
+              <StyledButtonWrap>
+                <Button
+                  disabled={username.length < 2}
+                  icon={<FaUserTag />}
+                  label="Set username"
+                  color="success"
+                  onClick={handleActivation}
+                />
+              </StyledButtonWrap>
+            </>
+          ) : (
+            <>
+              <p>User</p>
+              <StyledMail>
+                <FaUserTag size={14} style={{ marginRight: "0.5rem" }} />
+                {username}
+              </StyledMail>
+              <StyledUserActivatedDescription>
+                has been activated.
+                <br />
+                We wish you happy coding.
+              </StyledUserActivatedDescription>
+              <StyledButtonWrap>
+                <Button
+                  label="continue"
+                  color="success"
+                  onClick={() => navigate("/login")}
+                />
+              </StyledButtonWrap>
+            </>
+          )}
           <ContactAdminFooting />
         </ModalContent>
       </Modal>
