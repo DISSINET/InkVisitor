@@ -2,7 +2,6 @@ import {
   PASSWORDS_DONT_MATCH_ERROR,
   UNSAFE_PASSWORD_ERROR,
 } from "Theme/constants";
-import api from "api";
 import {
   Button,
   ContactAdminFooting,
@@ -19,10 +18,9 @@ import {
   StyledMail,
 } from "pages/PasswordReset/PasswordResetPageStyles";
 import React, { useEffect, useState } from "react";
-import { FaKey, FaUserPlus } from "react-icons/fa";
+import { FaUserPlus } from "react-icons/fa";
 import { TbLockExclamation, TbLockPlus, TbMailFilled } from "react-icons/tb";
 import { useNavigate } from "react-router";
-import { toast } from "react-toastify";
 import { isSafePassword } from "utils";
 
 interface ActivationPage {}
@@ -45,12 +43,16 @@ const ActivatePage: React.FC<ActivationPage> = ({}) => {
   }, [password]);
 
   const handleActivation = async () => {
-    // TODO: connect api
-    // const res = await api.activate(hash, password, passwordRepeat);
-    // if (res.status === 200) {
-    //   toast.success("user activated");
-    //   navigate("/login");
-    // }
+    if (password !== passwordRepeat) {
+      setError(PASSWORDS_DONT_MATCH_ERROR);
+    } else {
+      // TODO: connect api
+      // const res = await api.activate(hash, password, passwordRepeat);
+      // if (res.status === 200) {
+      //   toast.success("user activated");
+      //   navigate("/username");
+      // }
+    }
   };
 
   return (
@@ -109,20 +111,14 @@ const ActivatePage: React.FC<ActivationPage> = ({}) => {
           <StyledButtonWrap>
             <Button
               disabled={
-                error === UNSAFE_PASSWORD_ERROR || password.length === 0
+                error === UNSAFE_PASSWORD_ERROR ||
+                password.length === 0 ||
+                passwordRepeat.length === 0
               }
               icon={<FaUserPlus />}
               label="Activate user"
               color="success"
-              onClick={() => {
-                if (password.length === 0 || passwordRepeat.length === 0) {
-                  toast.info("Fill both fields");
-                } else if (password !== passwordRepeat) {
-                  setError(PASSWORDS_DONT_MATCH_ERROR);
-                } else {
-                  handleActivation();
-                }
-              }}
+              onClick={handleActivation}
             />
           </StyledButtonWrap>
           <ContactAdminFooting />

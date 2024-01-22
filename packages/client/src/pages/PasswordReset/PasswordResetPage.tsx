@@ -36,10 +36,14 @@ export const PasswordResetPage: React.FC<PasswordResetPage> = ({}) => {
   const [error, setError] = useState<false | string>(false);
 
   const handleReset = async () => {
-    const res = await api.passwordSetRequest(hash, password, passwordRepeat);
-    if (res.status === 200) {
-      toast.success("password changed");
-      navigate("/login");
+    if (password !== passwordRepeat) {
+      setError(PASSWORDS_DONT_MATCH_ERROR);
+    } else {
+      const res = await api.passwordSetRequest(hash, password, passwordRepeat);
+      if (res.status === 200) {
+        toast.success("password changed");
+        navigate("/login");
+      }
     }
   };
 
@@ -102,20 +106,14 @@ export const PasswordResetPage: React.FC<PasswordResetPage> = ({}) => {
           <StyledButtonWrap>
             <Button
               disabled={
-                error === UNSAFE_PASSWORD_ERROR || password.length === 0
+                error === UNSAFE_PASSWORD_ERROR ||
+                password.length === 0 ||
+                passwordRepeat.length === 0
               }
               icon={<FaKey />}
               label="Reset Password"
               color="success"
-              onClick={() => {
-                if (password.length === 0 || passwordRepeat.length === 0) {
-                  toast.info("Fill both fields");
-                } else if (password !== passwordRepeat) {
-                  setError(PASSWORDS_DONT_MATCH_ERROR);
-                } else {
-                  handleReset();
-                }
-              }}
+              onClick={handleReset}
             />
           </StyledButtonWrap>
           <ContactAdminFooting />
