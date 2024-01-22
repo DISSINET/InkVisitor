@@ -19,9 +19,11 @@ import {
   StyledMail,
 } from "./PasswordResetPageStyles";
 import { TbLockExclamation, TbLockPlus, TbMailFilled } from "react-icons/tb";
-
-const UNSAFE_PASSWORD_ERROR = "The entered password is not safe.";
-const PASSWORDS_DONT_MATCH_ERROR = "Passwords do not match.";
+import { isSafePassword } from "utils";
+import {
+  UNSAFE_PASSWORD_ERROR,
+  PASSWORDS_DONT_MATCH_ERROR,
+} from "Theme/constants";
 
 interface PasswordResetPage {}
 export const PasswordResetPage: React.FC<PasswordResetPage> = ({}) => {
@@ -40,31 +42,6 @@ export const PasswordResetPage: React.FC<PasswordResetPage> = ({}) => {
       navigate("/login");
     }
   };
-
-  function isSafePassword(password: string) {
-    // Check if the password is at least 12 characters long
-    if (password.length < 12) {
-      return false;
-    }
-    // Check if the password contains at least one uppercase letter
-    if (!/[A-Z]/.test(password)) {
-      return false;
-    }
-    // Check if the password contains at least one lowercase letter
-    if (!/[a-z]/.test(password)) {
-      return false;
-    }
-    // Check if the password contains at least one digit
-    if (!/\d/.test(password)) {
-      return false;
-    }
-    // Check if the password contains at least one symbol
-    if (!/[!@#$%^&*()_+{}\[\]:;<>,.?/~\\-]/.test(password)) {
-      return false;
-    }
-    // If all conditions are met, the password is considered safe
-    return true;
-  }
 
   useEffect(() => {
     if (password.length > 0 && !isSafePassword(password)) {
