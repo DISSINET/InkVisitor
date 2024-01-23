@@ -3,7 +3,7 @@ import sendgrid from "@sendgrid/mail";
 
 // ids for sendgrid templates
 export enum TplIds {
-  UserCreated = "d-5b941a639a544c848f11240dfc3fc565",
+  AccountCreated = "d-5b941a639a544c848f11240dfc3fc565",
   PasswordAdminReset = "d-a67dbe3a40234b6b8dc929f559553fe3",
   PasswordResetRequest = "d-9a386304d7eb45b6beba7fe1becba08d",
   Test = "d-382f8760c7be4ec4aba6bd8caf252eed",
@@ -29,12 +29,12 @@ interface DynamicTplRequest {
  * @param link
  * @returns
  */
-export function userCreatedTemplate(
+export function accountCreatedTemplate(
   username: string,
   link: string
 ): DynamicTplRequest {
   return {
-    id: TplIds.UserCreated,
+    id: TplIds.AccountCreated,
     data: {
       username,
       domain: domainName(),

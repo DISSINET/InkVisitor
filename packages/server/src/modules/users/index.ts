@@ -23,6 +23,7 @@ import {
   IRequestActivationData,
 } from "@shared/types";
 import mailer, {
+  accountCreatedTemplate,
   passwordAdminResetTemplate,
   passwordResetRequestTemplate,
   testTemplate,
@@ -321,9 +322,9 @@ export default Router()
     asyncRouteHandler<IResponseGeneric>(async (request: IRequest) => {
       const userData = request.body as IUser;
 
-      // force empty password + active status
+      // force empty password + inactive status
       delete userData.password;
-      userData.active = true;
+      userData.active = false;
 
       const user = new User(userData);
       if (!user.isValid()) {
@@ -339,8 +340,21 @@ export default Router()
         throw new UserNotUnique("username is in use");
       }
 
+      const hash = user.generateHash();
       if (!(await user.save(request.db.connection))) {
         throw new InternalServerError("cannot create user");
+      }
+
+      try {
+        await mailer.sendTemplate(
+          user.email,
+          accountCreatedTemplate(
+            user.name,
+            `/activation?hash=${hash}&email=${user.email}`
+          )
+        );
+      } catch (e) {
+        throw new EmailError("please check the logs", (e as Error).toString());
       }
 
       return {
@@ -543,20 +557,18 @@ export default Router()
         }
 
         user.setPassword(password);
-        await user.update(request.db.connection, {
+        const results = await user.update(request.db.connection, {
           password: user.password,
+          hash: undefined,
           active: true,
         });
-        //if (!result.replaced && !result.unchanged) {
-        //  throw new InternalServerError(
-        //     `cannot update user ${existingUser.id}`
-        //   );
-        // }
+        if (!results.replaced && !results.unchanged) {
+          throw new InternalServerError("cannot update user");
+        }
 
         return {
           result: true,
-          message:
-            "User activated. An email with the password has been sent to your email address",
+          message: "User activated.",
         };
       }
     )
