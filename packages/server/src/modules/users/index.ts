@@ -516,7 +516,7 @@ export default Router()
    *         required: true
    *         description: Hash for identyfing the user for which this activation should be done
    *     requestBody:
-   *       description: data for password setup
+   *       description: data for password setup + username
    *       content:
    *         application/json:
    *           schema:
@@ -542,6 +542,7 @@ export default Router()
         const hash = request.query.hash;
         const password = request.body.password;
         const passwordRepeat = request.body.passwordRepeat;
+        const username = request.body.username;
 
         if (!hash) {
           throw new BadParams("hash is required");
@@ -551,9 +552,17 @@ export default Router()
           throw new BadParams("mismatched or empty passwords");
         }
 
+        if (!username) {
+          throw new BadParams("username is required");
+        }
+
         const user = await User.getUserByHash(request.db.connection, hash);
         if (!user) {
           throw new UserDoesNotExits("user for provided hash not found", "");
+        }
+
+        if (await User.findUserByLogin(request.db, username)) {
+          throw new UserNotUnique("username is in use");
         }
 
         user.setPassword(password);
@@ -561,6 +570,7 @@ export default Router()
           password: user.password,
           hash: undefined,
           active: true,
+          name: username,
         });
         if (!results.replaced && !results.unchanged) {
           throw new InternalServerError("cannot update user");

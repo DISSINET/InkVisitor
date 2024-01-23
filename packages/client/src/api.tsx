@@ -906,6 +906,7 @@ class Api {
     hash: string,
     password: string,
     passwordRepeat: string,
+    username: string,
     options?: IApiOptions
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
@@ -913,7 +914,8 @@ class Api {
         `/users/activation?hash=${hash}`,
         {
           password,
-          passwordRepeat
+          passwordRepeat,
+          username,
         },
         options
       );
