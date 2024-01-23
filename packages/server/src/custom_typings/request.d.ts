@@ -3,11 +3,7 @@ import Acl from "../middlewares/acl";
 import { IUser } from "../../../shared/types";
 import User from "@models/user/user";
 
-export interface IRequest<
-  TParams = Record<string, any>,
-  TBody = Record<string, any>,
-  TQuery = Record<string, any>
-> {
+export interface IRequest<TParams = any, TBody = any, TQuery = any> {
   db: Db;
   acl: Acl;
   user?: {

@@ -10,6 +10,7 @@ import {
   PermissionDeniedError,
   UserDoesNotExits,
   UserNotActiveError,
+  UserNotUnique,
 } from "@shared/types/errors";
 import { checkPassword, generateAccessToken, hashPassword } from "@common/auth";
 import { asyncRouteHandler } from "..";
@@ -19,8 +20,10 @@ import {
   IResponseGeneric,
   IRequestPasswordReset,
   IRequestPasswordResetData,
+  IRequestActivationData,
 } from "@shared/types";
 import mailer, {
+  accountCreatedTemplate,
   passwordAdminResetTemplate,
   passwordResetRequestTemplate,
   testTemplate,
@@ -153,16 +156,16 @@ export default Router()
   .post(
     "/signin",
     asyncRouteHandler<unknown>(async (request: IRequest) => {
-      const name = request.body.username;
+      const login = request.body.login;
       const rawPassword = request.body.password;
 
-      if (!name || !rawPassword) {
-        throw new BadParams("name and password have to be set");
+      if (!login || !rawPassword) {
+        throw new BadParams("login and password have to be set");
       }
 
-      const user = await User.findUserByLabel(request.db.connection, name);
+      const user = await User.findUserByLogin(request.db, login);
       if (!user) {
-        throw new UserDoesNotExits(`user ${name} was not found`, name);
+        throw new UserDoesNotExits(`user ${name} was not found`, login);
       }
 
       if (!user.active) {
@@ -319,9 +322,9 @@ export default Router()
     asyncRouteHandler<IResponseGeneric>(async (request: IRequest) => {
       const userData = request.body as IUser;
 
-      // force empty password + active status
+      // force empty password + inactive status
       delete userData.password;
-      userData.active = true;
+      userData.active = false;
 
       const user = new User(userData);
       if (!user.isValid()) {
@@ -330,8 +333,28 @@ export default Router()
 
       await request.db.lock();
 
+      if (await User.findUserByLogin(request.db, userData.email)) {
+        throw new UserNotUnique("email is in use");
+      }
+      if (await User.findUserByLogin(request.db, userData.name)) {
+        throw new UserNotUnique("username is in use");
+      }
+
+      const hash = user.generateHash();
       if (!(await user.save(request.db.connection))) {
         throw new InternalServerError("cannot create user");
+      }
+
+      try {
+        await mailer.sendTemplate(
+          user.email,
+          accountCreatedTemplate(
+            user.name,
+            `/activation?hash=${hash}&email=${user.email}`
+          )
+        );
+      } catch (e) {
+        throw new EmailError("please check the logs", (e as Error).toString());
       }
 
       return {
@@ -369,48 +392,57 @@ export default Router()
    */
   .put(
     "/:userId",
-    asyncRouteHandler<IResponseGeneric>(async (request: IRequest) => {
-      const userId =
-        request.params.userId !== "me"
-          ? request.params.userId
-          : request.getUserOrFail().id;
-      const userData = request.body as IUser;
+    asyncRouteHandler<IResponseGeneric>(
+      async (req: IRequest<{ userId: string }, Partial<IUser>>) => {
+        const userId =
+          req.params.userId !== "me"
+            ? req.params.userId
+            : req.getUserOrFail().id;
+        const data = req.body;
 
-      if (!userId || !userData || Object.keys(userData).length === 0) {
-        throw new BadParams("user id and data have to be set");
+        if (!userId || !data || Object.keys(data).length === 0) {
+          throw new BadParams("user id and data have to be set");
+        }
+
+        const existingUser = await User.findUserById(req.db.connection, userId);
+        if (!existingUser) {
+          throw new UserDoesNotExits(
+            `user with id ${userId} does not exist`,
+            userId
+          );
+        }
+
+        if (!existingUser.canBeEditedByUser(req.getUserOrFail())) {
+          throw new PermissionDeniedError("user cannot be saved");
+        }
+
+        if (data.password) {
+          data.password = hashPassword(data.password);
+        }
+
+        await req.db.lock();
+
+        if (data.email && (await User.findUserByLogin(req.db, data.email))) {
+          throw new UserNotUnique("email is in use");
+        }
+
+        if (data.name && (await User.findUserByLogin(req.db, data.name))) {
+          throw new UserNotUnique("username is in use");
+        }
+
+        const result = await existingUser.update(req.db.connection, {
+          ...data,
+        });
+
+        if (result.replaced || result.unchanged) {
+          return {
+            result: true,
+          };
+        } else {
+          throw new InternalServerError(`cannot update user ${userId}`);
+        }
       }
-
-      const existingUser = await User.findUserById(
-        request.db.connection,
-        userId
-      );
-      if (!existingUser) {
-        throw new UserDoesNotExits(
-          `user with id ${userId} does not exist`,
-          userId
-        );
-      }
-
-      if (!existingUser.canBeEditedByUser(request.getUserOrFail())) {
-        throw new PermissionDeniedError("user cannot be saved");
-      }
-
-      if (userData.password) {
-        userData.password = hashPassword(userData.password);
-      }
-
-      const result = await existingUser.update(request.db.connection, {
-        ...userData,
-      });
-
-      if (result.replaced || result.unchanged) {
-        return {
-          result: true,
-        };
-      } else {
-        throw new InternalServerError(`cannot update user ${userId}`);
-      }
-    })
+    )
   )
   /**
    * @openapi
@@ -471,9 +503,9 @@ export default Router()
   )
   /**
    * @openapi
-   * /users/active:
-   *   patch:
-   *     description: Validates the activation hash and switch user to active state
+   * /users/activation:
+   *   post:
+   *     description: Validates the activation hash, switch user to active state and setup initial password
    *     tags:
    *       - users
    *     parameters:
@@ -483,6 +515,12 @@ export default Router()
    *           type: string
    *         required: true
    *         description: Hash for identyfing the user for which this activation should be done
+   *     requestBody:
+   *       description: data for password setup
+   *       content:
+   *         application/json:
+   *           schema:
+   *             $ref: "#/components/schemas/IRequestActivationData"
    *     responses:
    *       200:
    *         description: Returns IResponseGeneric object
@@ -491,40 +529,49 @@ export default Router()
    *             schema:
    *               $ref: "#/components/schemas/IResponseGeneric"
    */
-  .patch(
-    "/active",
-    asyncRouteHandler<IResponseGeneric>(async (request: IRequest) => {
-      const hash = (request.query.hash as string) || "";
-      if (!hash) {
-        throw new BadParams("hash is required");
+  .post(
+    "/activation",
+    asyncRouteHandler<IResponseGeneric>(
+      async (
+        request: IRequest<
+          any,
+          Partial<IRequestActivationData>,
+          { hash: string }
+        >
+      ) => {
+        const hash = request.query.hash;
+        const password = request.body.password;
+        const passwordRepeat = request.body.passwordRepeat;
+
+        if (!hash) {
+          throw new BadParams("hash is required");
+        }
+
+        if (!password || password !== passwordRepeat) {
+          throw new BadParams("mismatched or empty passwords");
+        }
+
+        const user = await User.getUserByHash(request.db.connection, hash);
+        if (!user) {
+          throw new UserDoesNotExits("user for provided hash not found", "");
+        }
+
+        user.setPassword(password);
+        const results = await user.update(request.db.connection, {
+          password: user.password,
+          hash: undefined,
+          active: true,
+        });
+        if (!results.replaced && !results.unchanged) {
+          throw new InternalServerError("cannot update user");
+        }
+
+        return {
+          result: true,
+          message: "User activated.",
+        };
       }
-
-      const existingUser = await User.getUserByHash(
-        request.db.connection,
-        hash
-      );
-      if (!existingUser) {
-        throw new UserDoesNotExits(UserDoesNotExits.message, "");
-      }
-
-      const rawPassword = existingUser.generatePassword();
-
-      const result = await existingUser.update(request.db.connection, {
-        active: true,
-        password: existingUser.password,
-      });
-      if (!result.replaced && !result.unchanged) {
-        throw new InternalServerError(`cannot update user ${existingUser.id}`);
-      }
-
-      console.log(`User activated: ${existingUser.email}`);
-
-      return {
-        result: true,
-        message:
-          "User activated. An email with the password has been sent to your email address",
-      };
-    })
+    )
   )
   /**
    * @openapi

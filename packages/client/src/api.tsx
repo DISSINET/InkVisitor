@@ -287,8 +287,8 @@ class Api {
       const response = await this.connection.post(
         "/users/signin",
         {
-          username: username,
-          password: password,
+          login,
+          password,
         },
         options
       );
@@ -902,14 +902,19 @@ class Api {
     }
   }
 
-  async activate(
+  async activation(
     hash: string,
+    password: string,
+    passwordRepeat: string,
     options?: IApiOptions
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
-      const response = await this.connection.patch(
-        `/users/active?hash=${hash}`,
-        undefined,
+      const response = await this.connection.post(
+        `/users/activation?hash=${hash}`,
+        {
+          password,
+          passwordRepeat
+        },
         options
       );
       return response;

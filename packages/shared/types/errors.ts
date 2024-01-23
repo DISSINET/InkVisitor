@@ -8,7 +8,7 @@
 export class CustomError extends Error {
   public static code: number = 400; // html code
   public loggable: boolean = false; // errors could be logged into console as warn messages
-  public log: string = ""; // same as first constructor argument - wont be thrown in realtime, but it will be printed as warning
+  public log: string = ""; // same as first constructor argument - wont be thrown as API response, but it will be printed as warning
   public title: string = ""; // represents the error class in readable form
   public data: any; // arbitrary data
 
@@ -114,6 +114,16 @@ class UserNotActiveError extends CustomError {
     this.message = this.message.replace("$1", userId);
   }
 }
+
+/**
+ * UserNotUnique will be thrown when attempting to add/update the user entry to login, which is already in the db
+ */
+class UserNotUnique extends CustomError {
+  public static code = 409;
+  public static title = "User with this login already exists";
+  public static message = "Either email or username is in use";
+}
+
 
 /**
  * EntityDoesNotExist will be thrown when attempting to remove/update the entity entry, which does not exist
@@ -351,6 +361,7 @@ const allErrors: Record<string, any> = {
   NotFound,
   BadParams,
   UserDoesNotExits,
+  UserNotUnique,
   UserNotActiveError,
   EntityDoesNotExist,
   EntityDoesExist,
@@ -389,6 +400,7 @@ export {
   NotFound,
   BadParams,
   UserDoesNotExits,
+  UserNotUnique,
   UserNotActiveError,
   EntityDoesNotExist,
   EntityDoesExist,

@@ -73,6 +73,10 @@ import {
   IRequestPasswordResetData
 } from "./request-password-reset"
 
+import {
+  IRequestActivationData
+} from "./request-activation"
+
 export type {
   IAudit,
   IEntity,
@@ -140,6 +144,7 @@ export type {
   IResponseDocumentDetail,
   IRequestPasswordReset,
   IRequestPasswordResetData,
+  IRequestActivationData,
 };
 
 export { RequestSearch, RequestPermissionUpdate, Relation };
