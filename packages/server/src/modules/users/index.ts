@@ -350,7 +350,7 @@ export default Router()
           user.email,
           accountCreatedTemplate(
             user.name,
-            `/activation?hash=${hash}&email=${user.email}`
+            `/activate?hash=${hash}&email=${user.email}`
           )
         );
       } catch (e) {
