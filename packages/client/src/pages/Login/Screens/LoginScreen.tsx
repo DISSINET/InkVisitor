@@ -1,13 +1,20 @@
 import { Button, Input } from "components";
-import React from "react";
-import { FiLogIn } from "react-icons/fi";
+
 import {
   StyledInputRow,
-  StyledFaUserAlt,
-  StyledFaLock,
   StyledErrorText,
   StyledButtonWrap,
-} from "../LoginModalStyles";
+} from "pages/PasswordReset/PasswordResetPageStyles";
+import React from "react";
+import { FiLogIn } from "react-icons/fi";
+import { StyledFaLock, StyledFaUserAlt } from "./LoginScreensStyles";
+// import {
+//   StyledInputRow,
+//   StyledFaUserAlt,
+//   StyledFaLock,
+//   StyledErrorText,
+//   StyledButtonWrap,
+// } from "../LoginModal/LoginModalStyles";
 
 interface LoginScreen {
   usernameLocal: string;

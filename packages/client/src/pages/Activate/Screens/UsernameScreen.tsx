@@ -7,11 +7,11 @@ import {
   StyledInputRow,
   StyledMail,
 } from "pages/PasswordReset/PasswordResetPageStyles";
-import { StyledUserActivatedDescription } from "pages/Username/UsernamePageStyles";
 import React, { useState } from "react";
 import { FaTag, FaUserTag } from "react-icons/fa";
 import { TbMailFilled } from "react-icons/tb";
 import { useNavigate } from "react-router";
+import { StyledUserActivatedDescription } from "./ActivateSreensStyles";
 
 const USERNAME_ALREADY_USED_ERROR = `Username is already used. 
 Please select a new one`;
@@ -44,9 +44,20 @@ export const UsernameScreen: React.FC<UsernameScreen> = ({
     } else if (username.length > 10) {
       setError(USERNAME_TOO_LONG_ERROR);
     } else {
-      const res: any = api.activation(hash, password, passwordRepeat, username);
-      if (res.status === 200) {
-        setContinueScreen(true);
+      try {
+        const res: any = api.activation(
+          hash,
+          password,
+          passwordRepeat,
+          username
+        );
+        if (res.status === 200) {
+          setContinueScreen(true);
+        }
+      } catch (err) {
+        if (err && (err as any).error === "UserNotUnique") {
+          setError(USERNAME_ALREADY_USED_ERROR);
+        }
       }
     }
   };

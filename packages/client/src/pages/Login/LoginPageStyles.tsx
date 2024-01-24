@@ -1,6 +1,11 @@
 import styled from "styled-components";
 
-export const StyledText = styled.div`
+export const StyledContentWrap = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   margin: 2rem 3rem;
-  font-size: ${({ theme }) => theme.fontSize["xl"]};
+`;
+export const StyledAttrBtnGroupWrap = styled.div`
+  margin-bottom: 1rem;
 `;
