@@ -8,13 +8,6 @@ import {
 import React from "react";
 import { FiLogIn } from "react-icons/fi";
 import { StyledFaLock, StyledFaUserAlt } from "./LoginScreensStyles";
-// import {
-//   StyledInputRow,
-//   StyledFaUserAlt,
-//   StyledFaLock,
-//   StyledErrorText,
-//   StyledButtonWrap,
-// } from "../LoginModal/LoginModalStyles";
 
 interface LoginScreen {
   usernameLocal: string;

@@ -2,12 +2,6 @@ import { config, useSpring } from "@react-spring/web";
 import { Button, Input } from "components";
 import React, { useState } from "react";
 import { IoReloadCircle } from "react-icons/io5";
-// import {
-//   StyledInputRow,
-//   StyledButtonWrap,
-//   StyledErrorText,
-//   StyledTbMailFilled,
-// } from "../LoginModal/LoginModalStyles";
 import {
   StyledAnimatedIconWrap,
   StyledDescription,

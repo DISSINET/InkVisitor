@@ -13,12 +13,7 @@ const ActivatePage: React.FC = ({}) => {
 
   return (
     <div>
-      <Modal
-        showModal
-        disableBgClick
-        width={350}
-        // onEnterPress={handleContinue}
-      >
+      <Modal showModal disableBgClick width={350}>
         <ModalContent column centered>
           {!usernameScreen ? (
             <PasswordScreen
