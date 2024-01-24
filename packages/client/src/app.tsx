@@ -34,12 +34,11 @@ import { setLayoutWidth } from "redux/features/layout/layoutWidthSlice";
 import { setPanelWidths } from "redux/features/layout/panelWidthsSlice";
 import { setSeparatorXPosition } from "redux/features/layout/separatorXPositionSlice";
 
+import { InterfaceEnums } from "@shared/enums";
 import { DocumentsPage } from "pages/Documents/DocumentsPage";
+import { PasswordResetPage } from "pages/PasswordReset/PasswordResetPage";
 import AclPage from "./pages/Acl/AclPage";
 import MainPage from "./pages/Main/MainPage";
-import { InterfaceEnums } from "@shared/enums";
-import { PasswordResetPage } from "pages/PasswordReset/PasswordResetPage";
-import { UsernamePage } from "pages/Username/UsernamePage";
 
 const clockPerformance = (
   profilerId: any,
@@ -195,14 +194,6 @@ export const App: React.FC = () => {
                       element={
                         <PublicPath>
                           <ActivatePage />
-                        </PublicPath>
-                      }
-                    />
-                    <Route
-                      path="/username"
-                      element={
-                        <PublicPath>
-                          <UsernamePage />
                         </PublicPath>
                       }
                     />

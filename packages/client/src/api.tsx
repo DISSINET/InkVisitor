@@ -287,7 +287,7 @@ class Api {
       const response = await this.connection.post(
         "/users/signin",
         {
-          login,
+          username,
           password,
         },
         options
