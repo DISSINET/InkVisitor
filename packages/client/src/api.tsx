@@ -279,7 +279,7 @@ class Api {
   }
 
   async signIn(
-    username: string,
+    login: string,
     password: string,
     options?: IApiOptions
   ): Promise<any> {
@@ -287,7 +287,7 @@ class Api {
       const response = await this.connection.post(
         "/users/signin",
         {
-          username,
+          login,
           password,
         },
         options
