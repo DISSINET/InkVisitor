@@ -11,7 +11,10 @@ import React, { useState } from "react";
 import { FaTag, FaUserTag } from "react-icons/fa";
 import { TbMailFilled } from "react-icons/tb";
 import { useNavigate } from "react-router";
-import { StyledUserActivatedDescription } from "./ActivateSreensStyles";
+import {
+  StyledFaTag,
+  StyledUserActivatedDescription,
+} from "./ActivateSreensStyles";
 
 const USERNAME_ALREADY_USED_ERROR = `Username is already used. 
 Please select a new one`;
@@ -77,7 +80,7 @@ export const UsernameScreen: React.FC<UsernameScreen> = ({
           </StyledDescription>
           <ModalInputWrap>
             <StyledInputRow>
-              <FaTag size={14} style={{ marginRight: "0.7rem" }} />
+              <StyledFaTag size={14} $isError={error !== false} />
               <Input
                 placeholder="username"
                 onChangeFn={(text: string) => setUsername(text)}
@@ -85,6 +88,7 @@ export const UsernameScreen: React.FC<UsernameScreen> = ({
                 changeOnType
                 autoFocus
                 required
+                borderColor={error !== false ? "danger" : "primary"}
               />
             </StyledInputRow>
           </ModalInputWrap>

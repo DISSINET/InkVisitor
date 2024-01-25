@@ -2,19 +2,22 @@ import {
   PASSWORDS_DONT_MATCH_ERROR,
   UNSAFE_PASSWORD_ERROR,
 } from "Theme/constants";
-import { ModalInputWrap, Button, Input } from "components";
-import { error } from "console";
+import { Button, Input, ModalInputWrap } from "components";
 import {
-  StyledMail,
-  StyledDescription,
-  StyledInputRow,
-  StyledErrorText,
   StyledButtonWrap,
+  StyledDescription,
+  StyledErrorText,
+  StyledInputRow,
+  StyledMail,
 } from "pages/PasswordReset/PasswordResetPageStyles";
 import React, { useEffect, useState } from "react";
 import { FaUserPlus } from "react-icons/fa";
-import { TbMailFilled, TbLockPlus, TbLockExclamation } from "react-icons/tb";
+import { TbLockExclamation, TbLockPlus, TbMailFilled } from "react-icons/tb";
 import { isSafePassword } from "utils";
+import {
+  StyledTbLockExclamation,
+  StyledTbLockPlus,
+} from "./ActivateSreensStyles";
 
 interface PasswordScreen {
   email: string;
@@ -64,7 +67,7 @@ export const PasswordScreen: React.FC<PasswordScreen> = ({
       <form>
         <ModalInputWrap>
           <StyledInputRow>
-            <TbLockPlus size={16} style={{ marginRight: "0.3rem" }} />
+            <StyledTbLockPlus size={16} $isError={error !== false} />
             <Input
               type="password"
               placeholder="new password"
@@ -74,12 +77,13 @@ export const PasswordScreen: React.FC<PasswordScreen> = ({
               autoFocus
               autocomplete="new-password"
               required
+              borderColor={error !== false ? "danger" : "primary"}
             />
           </StyledInputRow>
         </ModalInputWrap>
         <ModalInputWrap>
           <StyledInputRow>
-            <TbLockExclamation size={16} style={{ marginRight: "0.3rem" }} />
+            <StyledTbLockExclamation size={16} $isError={error !== false} />
             <Input
               type="password"
               placeholder="repeat password"
@@ -88,6 +92,7 @@ export const PasswordScreen: React.FC<PasswordScreen> = ({
               changeOnType
               autocomplete="new-password"
               required
+              borderColor={error !== false ? "danger" : "primary"}
             />
           </StyledInputRow>
         </ModalInputWrap>

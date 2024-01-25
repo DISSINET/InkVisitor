@@ -14,25 +14,26 @@ import {
   StyledErrorText,
   StyledInputRow,
 } from "pages/PasswordReset/PasswordResetPageStyles";
+import api from "api";
+import { toast } from "react-toastify";
+
+const USER_DONT_EXIST_ERROR = "User with this email does not exist";
+const INVALID_EMAIL_ERROR = "Invalid email entered";
 
 interface PasswordRecoverScreen {
   emailLocal: string;
   setEmailLocal: React.Dispatch<React.SetStateAction<string>>;
-  emailError: string | false;
-  setEmailError: React.Dispatch<React.SetStateAction<string | false>>;
-  handlePasswordReset: () => Promise<void>;
   restartScreen: boolean;
   setRestartScreen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 export const PasswordRecoverScreen: React.FC<PasswordRecoverScreen> = ({
   emailLocal,
   setEmailLocal,
-  emailError,
-  setEmailError,
-  handlePasswordReset,
   restartScreen,
   setRestartScreen,
 }) => {
+  const [error, setError] = useState<string | false>(false);
+
   const validateEmail = (email: string): boolean => {
     const emailRegex: RegExp = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
@@ -45,6 +46,23 @@ export const PasswordRecoverScreen: React.FC<PasswordRecoverScreen> = ({
     config: config.stiff,
   });
 
+  const handlePasswordReset = async () => {
+    try {
+      const res = await api.passwordChangeRequest(emailLocal, {
+        ignoreErrorToast: true,
+      });
+      if (res.status === 200) {
+        setError(false);
+        toast.success("Link to password recover sent successfully");
+        setRestartScreen(true);
+      }
+    } catch (err) {
+      if (err && (err as any).error === "UserDoesNotExits") {
+        setError(USER_DONT_EXIST_ERROR);
+      }
+    }
+  };
+
   return (
     <>
       {!restartScreen ? (
@@ -55,19 +73,17 @@ export const PasswordRecoverScreen: React.FC<PasswordRecoverScreen> = ({
             <br /> within couple of minutes.
           </StyledDescription>
           <StyledInputRow>
-            <StyledTbMailFilled size={15} $isError={emailError !== false} />
+            <StyledTbMailFilled size={15} $isError={error !== false} />
             <Input
               placeholder="email"
               onChangeFn={(text: string) => setEmailLocal(text)}
               value={emailLocal}
               changeOnType
               autoFocus
-              borderColor={emailError ? "danger" : undefined}
+              borderColor={error !== false ? "danger" : undefined}
             />
           </StyledInputRow>
-          {emailError !== false && (
-            <StyledErrorText>{emailError}</StyledErrorText>
-          )}
+          {error !== false && <StyledErrorText>{error}</StyledErrorText>}
           <StyledButtonWrap>
             <div>
               <Button
@@ -79,7 +95,7 @@ export const PasswordRecoverScreen: React.FC<PasswordRecoverScreen> = ({
                   if (validateEmail(emailLocal)) {
                     handlePasswordReset();
                   } else {
-                    setEmailError("Invalid email entered");
+                    setError(INVALID_EMAIL_ERROR);
                   }
                 }}
                 disabled={emailLocal.length === 0}

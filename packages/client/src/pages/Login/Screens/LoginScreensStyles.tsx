@@ -9,6 +9,13 @@ export const StyledDescription = styled.p`
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   margin-bottom: 1rem;
 `;
+export const StyledInputRow = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+`;
 export const StyledEmailSent = styled.p`
   font-size: ${({ theme }) => theme.fontSize["sm"]};
 `;
