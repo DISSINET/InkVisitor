@@ -98,8 +98,8 @@
   },
   {
     "controller": "users",
-    "route": "active",
-    "method": "PATCH",
+    "route": "activation",
+    "method": "POST",
     "roles": [],
     "public": true
   },

@@ -38,7 +38,7 @@ export function accountCreatedTemplate(
     data: {
       username,
       domain: domainName(),
-      link,
+      link: `${hostUrl()}${link}`,
     },
     subject: EmailSubject.AccountCreated,
   };
