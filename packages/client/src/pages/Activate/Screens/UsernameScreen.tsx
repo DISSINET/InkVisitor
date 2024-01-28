@@ -8,7 +8,7 @@ import {
   StyledMail,
 } from "pages/PasswordReset/PasswordResetPageStyles";
 import React, { useState } from "react";
-import { FaTag, FaUserTag } from "react-icons/fa";
+import { FaUserTag } from "react-icons/fa";
 import { TbMailFilled } from "react-icons/tb";
 import { useNavigate } from "react-router";
 import {

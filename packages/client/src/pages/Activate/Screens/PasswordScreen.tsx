@@ -12,7 +12,7 @@ import {
 } from "pages/PasswordReset/PasswordResetPageStyles";
 import React, { useEffect, useState } from "react";
 import { FaUserPlus } from "react-icons/fa";
-import { TbLockExclamation, TbLockPlus, TbMailFilled } from "react-icons/tb";
+import { TbMailFilled } from "react-icons/tb";
 import { isSafePassword } from "utils";
 import {
   StyledTbLockExclamation,
