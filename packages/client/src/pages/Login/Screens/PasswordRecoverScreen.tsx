@@ -1,21 +1,20 @@
-import { config, useSpring } from "@react-spring/web";
+import api from "api";
 import { Button, Input } from "components";
-import React, { useState } from "react";
-import { IoReloadCircle } from "react-icons/io5";
-import {
-  StyledAnimatedIconWrap,
-  StyledDescription,
-  StyledEmailSent,
-  StyledIoReloadCircle,
-  StyledTbMailFilled,
-} from "./LoginScreensStyles";
 import {
   StyledButtonWrap,
   StyledErrorText,
   StyledInputRow,
 } from "pages/PasswordReset/PasswordResetPageStyles";
-import api from "api";
+import React, { useState } from "react";
+import { BsEnvelopeArrowUpFill } from "react-icons/bs";
+import { IoReloadCircle } from "react-icons/io5";
+import { TbArrowForwardUp } from "react-icons/tb";
 import { toast } from "react-toastify";
+import {
+  StyledDescription,
+  StyledEmailSent,
+  StyledTbMailFilled,
+} from "./LoginScreensStyles";
 
 const USER_DONT_EXIST_ERROR = "User with this email does not exist";
 const INVALID_EMAIL_ERROR = "Invalid email entered";
@@ -38,13 +37,6 @@ export const PasswordRecoverScreen: React.FC<PasswordRecoverScreen> = ({
     const emailRegex: RegExp = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
-
-  const [iconHovered, setIconHovered] = useState(false);
-
-  const rotateIcon = useSpring({
-    transform: iconHovered ? "rotate(0deg)" : "rotate(-360deg)",
-    config: config.stiff,
-  });
 
   const handlePasswordReset = async () => {
     try {
@@ -107,17 +99,19 @@ export const PasswordRecoverScreen: React.FC<PasswordRecoverScreen> = ({
         <>
           <StyledEmailSent>{`A reset link was sent to email`}</StyledEmailSent>
           <StyledEmailSent>{`${emailLocal}`}</StyledEmailSent>
-          <StyledAnimatedIconWrap style={rotateIcon}>
-            <StyledIoReloadCircle
-              onMouseOver={() => setIconHovered(true)}
-              onMouseOut={() => setIconHovered(false)}
-              size={30}
-              onClick={() => {
-                setRestartScreen(false);
-                setEmailLocal("");
-              }}
-            />
-          </StyledAnimatedIconWrap>
+
+          <BsEnvelopeArrowUpFill
+            size={24}
+            style={{ margin: "0.5rem 0 1.5rem 0" }}
+          />
+          <Button
+            label="return"
+            icon={<TbArrowForwardUp style={{ transform: "rotate(180deg)" }} />}
+            onClick={() => {
+              setRestartScreen(false);
+              setEmailLocal("");
+            }}
+          />
         </>
       )}
     </>

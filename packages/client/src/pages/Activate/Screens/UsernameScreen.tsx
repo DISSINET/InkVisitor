@@ -42,7 +42,7 @@ export const UsernameScreen: React.FC<UsernameScreen> = ({
   const [username, setUsername] = useState("");
 
   const handleActivation = () => {
-    if (username.length < 2) {
+    if (username.length < 4) {
       setError(USERNAME_TOO_SHORT_ERROR);
     } else if (username.length > 10) {
       setError(USERNAME_TOO_LONG_ERROR);
@@ -76,7 +76,7 @@ export const UsernameScreen: React.FC<UsernameScreen> = ({
           </StyledMail>
           <StyledDescription>
             The username has to be unique and <br />
-            between 2 and 10 characters long.
+            between 4 and 10 characters long.
           </StyledDescription>
           <ModalInputWrap>
             <StyledInputRow>

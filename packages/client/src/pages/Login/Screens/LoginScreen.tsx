@@ -9,6 +9,7 @@ import {
   StyledFaLock,
   StyledFaUserAlt,
   StyledInputRow,
+  StyledTbMailFilled,
 } from "./LoginScreensStyles";
 import { useAppDispatch } from "redux/hooks";
 import api from "api";
@@ -43,7 +44,8 @@ export const LoginScreen: React.FC<LoginScreen> = ({
         setRedirectToMain(true);
       }
     } catch (err) {
-      if (err && (err as any).error === "UserDoesNotExits") {
+      // if (err && (err as any).error === "UserDoesNotExits") {
+      if (err && (err as any).error === "ReferenceError") {
         // wrong username
         setError(CREDENTIALS_ERROR);
       } else if (err && (err as any).error === "BadCredentialsError") {
@@ -56,9 +58,9 @@ export const LoginScreen: React.FC<LoginScreen> = ({
   return (
     <>
       <StyledInputRow>
-        <StyledFaUserAlt size={14} $isError={error !== false} />
+        <StyledTbMailFilled size={14} $isError={error !== false} />
         <Input
-          placeholder="username"
+          placeholder="email or username"
           onChangeFn={(text: string) => setUsernameLocal(text)}
           value={usernameLocal}
           changeOnType

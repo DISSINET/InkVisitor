@@ -17,14 +17,11 @@ export const StyledInputRow = styled.div`
   margin-bottom: 0.5rem;
 `;
 export const StyledEmailSent = styled.p`
-  font-size: ${({ theme }) => theme.fontSize["sm"]};
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
 `;
 export const StyledAnimatedIconWrap = styled(animated.div)`
   margin-top: 1rem;
   margin-bottom: 2rem;
-`;
-export const StyledIoReloadCircle = styled(IoReloadCircle)`
-  cursor: pointer;
 `;
 interface StyledIcon {
   $isError?: boolean;
