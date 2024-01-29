@@ -319,50 +319,55 @@ export default Router()
    */
   .post(
     "/",
-    asyncRouteHandler<IResponseGeneric>(async (request: IRequest) => {
-      const userData = request.body as IUser;
+    asyncRouteHandler<IResponseGeneric>(
+      async (request: IRequest<unknown, IUser>) => {
+        const userData = request.body;
 
-      // force empty password + inactive status
-      delete userData.password;
-      userData.active = false;
+        // force empty password + inactive status
+        delete userData.password;
+        userData.active = false;
 
-      const user = new User(userData);
-      if (!user.isValid()) {
-        throw new ModelNotValidError("invalid model");
-      }
-
-      await request.db.lock();
-
-      if (await User.findUserByLogin(request.db, userData.email)) {
-        throw new UserNotUnique("email is in use");
-      }
-      if (userData.name) {
-        if (await User.findUserByLogin(request.db, userData.name)) {
-          throw new UserNotUnique("username is in use");
+        const user = new User(userData);
+        if (!user.isValid()) {
+          throw new ModelNotValidError("invalid model");
         }
-      }
 
-      const hash = user.generateHash();
-      if (!(await user.save(request.db.connection))) {
-        throw new InternalServerError("cannot create user");
-      }
+        await request.db.lock();
 
-      try {
-        await mailer.sendTemplate(
-          user.email,
-          accountCreatedTemplate(
+        if (await User.findUserByLogin(request.db, userData.email)) {
+          throw new UserNotUnique("email is in use");
+        }
+        if (userData.name) {
+          if (await User.findUserByLogin(request.db, userData.name)) {
+            throw new UserNotUnique("username is in use");
+          }
+        }
+
+        const hash = user.generateHash();
+        if (!(await user.save(request.db.connection))) {
+          throw new InternalServerError("cannot create user");
+        }
+
+        try {
+          await mailer.sendTemplate(
             user.email,
-            `/activate?hash=${hash}&email=${user.email}`
-          )
-        );
-      } catch (e) {
-        throw new EmailError("please check the logs", (e as Error).toString());
-      }
+            accountCreatedTemplate(
+              user.email,
+              `/activate?hash=${hash}&email=${user.email}`
+            )
+          );
+        } catch (e) {
+          throw new EmailError(
+            "please check the logs",
+            (e as Error).toString()
+          );
+        }
 
-      return {
-        result: true,
-      };
-    })
+        return {
+          result: true,
+        };
+      }
+    )
   )
   /**
    * @openapi
@@ -470,38 +475,35 @@ export default Router()
    */
   .delete(
     "/:userId",
-    asyncRouteHandler<IResponseGeneric>(async (request: IRequest) => {
-      const userId = request.params.userId;
+    asyncRouteHandler<IResponseGeneric>(
+      async (request: IRequest<{ userId: string }>) => {
+        const userId = request.params.userId;
 
-      if (!userId) {
-        throw new BadParams("user id has to be set");
-      }
+        if (!userId) {
+          throw new BadParams("user id has to be set");
+        }
 
-      const existingUser = await User.findUserById(
-        request.db.connection,
-        userId
-      );
-      if (!existingUser) {
-        throw new UserDoesNotExits(
-          `user with id ${userId} does not exist`,
+        const existingUser = await User.findUserById(
+          request.db.connection,
           userId
         );
-      }
+        if (!existingUser) {
+          throw new UserDoesNotExits(
+            `user with id ${userId} does not exist`,
+            userId
+          );
+        }
 
-      const result = await existingUser.delete(request.db.connection);
+        const result = await existingUser.delete(request.db.connection);
+        if (!result.deleted) {
+          throw new InternalServerError(`user ${userId} could not be removed`);
+        }
 
-      if (result.deleted === 1) {
         return {
           result: true,
         };
-      } else {
-        return {
-          result: false,
-          error: "InternalServerError",
-          message: `user ${userId} could not be removed`,
-        };
       }
-    })
+    )
   )
   /**
    * @openapi
@@ -536,7 +538,7 @@ export default Router()
     asyncRouteHandler<IResponseGeneric>(
       async (
         request: IRequest<
-          any,
+          unknown,
           Partial<IRequestActivationData>,
           { hash: string }
         >
@@ -611,33 +613,31 @@ export default Router()
    */
   .get(
     "/:userId/bookmarks",
-    asyncRouteHandler<IResponseBookmarkFolder[]>(async (request: IRequest) => {
-      if (!(request as any).user) {
-        throw new BadParams("not logged");
+    asyncRouteHandler<IResponseBookmarkFolder[]>(
+      async (request: IRequest<{ userId: string }>) => {
+        const userId =
+          request.params.userId !== "me"
+            ? request.params.userId
+            : request.user?.user.id;
+
+        if (!userId) {
+          throw new BadParams("user id has to be set");
+        }
+
+        const user = await User.findUserById(request.db.connection, userId);
+        if (!user) {
+          throw new UserDoesNotExits(
+            `user with id ${userId} does not exist`,
+            userId
+          );
+        }
+
+        const response = new ResponseUser(user);
+        await response.unwindBookmarks(request);
+
+        return response.bookmarks;
       }
-
-      const userId =
-        request.params.userId !== "me"
-          ? request.params.userId
-          : (request as any).user.user.id;
-
-      if (!userId) {
-        throw new BadParams("user id has to be set");
-      }
-
-      const user = await User.findUserById(request.db.connection, userId);
-      if (!user) {
-        throw new UserDoesNotExits(
-          `user with id ${userId} does not exist`,
-          userId
-        );
-      }
-
-      const response = new ResponseUser(user);
-      await response.unwindBookmarks(request);
-
-      return response.bookmarks;
-    })
+    )
   )
   /**
    * @openapi
@@ -663,51 +663,56 @@ export default Router()
    */
   .patch(
     "/:userId/password",
-    asyncRouteHandler<IResponseGeneric>(async (request: IRequest) => {
-      const userId = request.params.userId;
+    asyncRouteHandler<IResponseGeneric>(
+      async (request: IRequest<{ userId: string }>) => {
+        const userId = request.params.userId;
 
-      if (!userId) {
-        throw new BadParams("userId has to be set");
+        if (!userId) {
+          throw new BadParams("userId has to be set");
+        }
+
+        let user: User | null;
+
+        if (userId === "me") {
+          user = request.getUserOrFail();
+        } else {
+          user = await User.findUserById(request.db.connection, userId);
+        }
+
+        if (!user) {
+          throw new UserDoesNotExits(`user ${userId} was not found`, userId);
+        }
+
+        const rawPassword = user.generatePassword();
+        const result = await user.update(request.db.connection, {
+          password: user.password,
+        });
+
+        if (!result.replaced && !result.unchanged) {
+          throw new InternalServerError(`cannot update user ${userId}`);
+        }
+
+        console.log(`Password reset for ${user.email}`);
+
+        try {
+          await mailer.sendTemplate(
+            user.email,
+            passwordAdminResetTemplate(user.name, rawPassword)
+          );
+        } catch (e) {
+          throw new EmailError(
+            "please check the logs",
+            (e as Error).toString()
+          );
+        }
+
+        return {
+          result: true,
+          message: `Email with the new password has been sent. Click to copy the new password: '${rawPassword}'.`,
+          data: rawPassword,
+        };
       }
-
-      let user: User | null;
-
-      if (userId === "me") {
-        user = request.getUserOrFail();
-      } else {
-        user = await User.findUserById(request.db.connection, userId);
-      }
-
-      if (!user) {
-        throw new UserDoesNotExits(`user ${userId} was not found`, userId);
-      }
-
-      const rawPassword = user.generatePassword();
-      const result = await user.update(request.db.connection, {
-        password: user.password,
-      });
-
-      if (!result.replaced && !result.unchanged) {
-        throw new InternalServerError(`cannot update user ${userId}`);
-      }
-
-      console.log(`Password reset for ${user.email}`);
-
-      try {
-        await mailer.sendTemplate(
-          user.email,
-          passwordAdminResetTemplate(user.name, rawPassword)
-        );
-      } catch (e) {
-        throw new EmailError("please check the logs", (e as Error).toString());
-      }
-
-      return {
-        result: true,
-        message: `Email with the new password has been sent. Click to copy the new password: '${rawPassword}'.`,
-        data: rawPassword,
-      };
-    })
+    )
   )
   /**
    * @openapi
@@ -733,22 +738,26 @@ export default Router()
    */
   .get(
     "/me/emails/test",
-    asyncRouteHandler<IResponseGeneric>(async (request: IRequest) => {
-      const user = request.getUserOrFail();
-      const email = request.query.email as string;
-      if (!email) {
-        throw new BadParams("email has to be set");
-      }
+    asyncRouteHandler<IResponseGeneric>(
+      async (request: IRequest<unknown, unknown, { email: string }>) => {
+        const email = request.query.email;
+        if (!email) {
+          throw new BadParams("email has to be set");
+        }
 
-      try {
-        await mailer.sendTemplate(email, testTemplate());
-      } catch (e) {
-        throw new EmailError("please check the logs", (e as Error).toString());
-      }
+        try {
+          await mailer.sendTemplate(email, testTemplate());
+        } catch (e) {
+          throw new EmailError(
+            "please check the logs",
+            (e as Error).toString()
+          );
+        }
 
-      return {
-        result: true,
-        message: `Test email sent to ${email}`,
-      };
-    })
+        return {
+          result: true,
+          message: `Test email sent to ${email}`,
+        };
+      }
+    )
   );
