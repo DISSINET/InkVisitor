@@ -336,8 +336,10 @@ export default Router()
       if (await User.findUserByLogin(request.db, userData.email)) {
         throw new UserNotUnique("email is in use");
       }
-      if (await User.findUserByLogin(request.db, userData.name)) {
-        throw new UserNotUnique("username is in use");
+      if (userData.name) {
+        if (await User.findUserByLogin(request.db, userData.name)) {
+          throw new UserNotUnique("username is in use");
+        }
       }
 
       const hash = user.generateHash();
@@ -349,7 +351,7 @@ export default Router()
         await mailer.sendTemplate(
           user.email,
           accountCreatedTemplate(
-            user.name,
+            user.email,
             `/activate?hash=${hash}&email=${user.email}`
           )
         );

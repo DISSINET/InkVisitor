@@ -25,18 +25,18 @@ interface DynamicTplRequest {
 
 /**
  * Template which should be sent to the new user email after registration
- * @param username
+ * @param email
  * @param link
  * @returns
  */
 export function accountCreatedTemplate(
-  username: string,
+  email: string,
   link: string
 ): DynamicTplRequest {
   return {
     id: TplIds.AccountCreated,
     data: {
-      username,
+      email,
       domain: domainName(),
       link: `${hostUrl()}${link}`,
     },

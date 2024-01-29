@@ -171,7 +171,7 @@ export default class User implements IUser, IDbModel {
   }
 
   isValid(): boolean {
-    if (this.email == "" || this.name == "") {
+    if (this.email == "") {
       return false;
     }
 
