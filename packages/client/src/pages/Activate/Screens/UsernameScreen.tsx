@@ -9,6 +9,7 @@ import {
 } from "pages/PasswordReset/PasswordResetPageStyles";
 import React, { useState } from "react";
 import { FaUserTag } from "react-icons/fa";
+import { FiLogIn } from "react-icons/fi";
 import { TbMailFilled } from "react-icons/tb";
 import { useNavigate } from "react-router";
 import {
@@ -36,7 +37,6 @@ export const UsernameScreen: React.FC<UsernameScreen> = ({
   passwordRepeat,
 }) => {
   const navigate = useNavigate();
-
   const [error, setError] = useState<false | string>(false);
   const [continueScreen, setContinueScreen] = useState(false);
   const [username, setUsername] = useState("");
@@ -48,20 +48,28 @@ export const UsernameScreen: React.FC<UsernameScreen> = ({
       setError(USERNAME_TOO_LONG_ERROR);
     } else {
       try {
-        const res: any = api.activation(
-          hash,
-          password,
-          passwordRepeat,
-          username
-        );
-        if (res.status === 200) {
-          setContinueScreen(true);
-        }
+        const res: any = api
+          .activation(hash, password, passwordRepeat, username)
+          .then((res) => {
+            if (res.status === 200) {
+              setContinueScreen(true);
+            }
+          });
       } catch (err) {
         if (err && (err as any).error === "UserNotUnique") {
           setError(USERNAME_ALREADY_USED_ERROR);
         }
       }
+    }
+  };
+
+  const handleLogin = () => {
+    try {
+      api.signIn(username, password).then((res) => {
+        navigate("/");
+      });
+    } catch (err) {
+      console.log(err);
     }
   };
 
@@ -107,19 +115,23 @@ export const UsernameScreen: React.FC<UsernameScreen> = ({
         <>
           <p>User</p>
           <StyledMail>
-            <FaUserTag size={14} style={{ marginRight: "0.5rem" }} />
+            <span style={{ width: "100%" }}>
+              <FaUserTag size={14} style={{ marginRight: "0.5rem" }} />
+            </span>
             {username}
           </StyledMail>
-          <StyledUserActivatedDescription>
+          <StyledUserActivatedDescription style={{ marginBottom: "2rem" }}>
             has been activated.
-            <br />
+          </StyledUserActivatedDescription>
+          <StyledUserActivatedDescription style={{ marginBottom: "1rem" }}>
             We wish you happy coding.
           </StyledUserActivatedDescription>
           <StyledButtonWrap>
             <Button
-              label="continue"
+              icon={<FiLogIn />}
+              label="login continue"
               color="success"
-              onClick={() => navigate("/login")}
+              onClick={handleLogin}
             />
           </StyledButtonWrap>
         </>

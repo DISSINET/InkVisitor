@@ -5,7 +5,7 @@ export const StyledMail = styled.div`
   justify-content: center;
   align-items: center;
   margin-top: 0.2rem;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
 `;
 export const StyledDescription = styled.p`
   text-align: center;
