@@ -40,10 +40,12 @@ export const PasswordScreen: React.FC<PasswordScreen> = ({
   useEffect(() => {
     if (password.length > 0 && !isSafePassword(password)) {
       setError(UNSAFE_PASSWORD_ERROR);
+    } else if (passwordRepeat.length > 0 && password !== passwordRepeat) {
+      setError(PASSWORDS_DONT_MATCH_ERROR);
     } else {
       setError(false);
     }
-  }, [password]);
+  }, [password, passwordRepeat]);
 
   const handleContinue = async () => {
     if (password !== passwordRepeat) {

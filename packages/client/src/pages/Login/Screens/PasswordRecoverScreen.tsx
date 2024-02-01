@@ -5,11 +5,10 @@ import {
   StyledErrorText,
   StyledInputRow,
 } from "pages/PasswordReset/PasswordResetPageStyles";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { BsEnvelopeArrowUpFill } from "react-icons/bs";
 import { IoReloadCircle } from "react-icons/io5";
 import { TbArrowForwardUp } from "react-icons/tb";
-import { toast } from "react-toastify";
 import {
   StyledDescription,
   StyledEmailSent,
@@ -45,7 +44,6 @@ export const PasswordRecoverScreen: React.FC<PasswordRecoverScreen> = ({
       });
       if (res.status === 200) {
         setError(false);
-        toast.success("Link to password recover sent successfully");
         setRestartScreen(true);
       }
     } catch (err) {
@@ -54,6 +52,12 @@ export const PasswordRecoverScreen: React.FC<PasswordRecoverScreen> = ({
       }
     }
   };
+
+  useEffect(() => {
+    if (error !== false) {
+      setError(false);
+    }
+  }, [emailLocal]);
 
   return (
     <>

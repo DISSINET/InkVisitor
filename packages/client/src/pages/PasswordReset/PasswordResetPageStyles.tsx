@@ -5,11 +5,11 @@ export const StyledMail = styled.div`
   justify-content: center;
   align-items: center;
   margin-top: 0.2rem;
-  margin-bottom: 0.5rem;
 `;
 export const StyledDescription = styled.p`
   text-align: center;
   font-size: ${({ theme }) => theme.fontSize["xxs"]};
+  margin-top: 0.5rem;
   margin-bottom: 1rem;
 `;
 export const StyledInputRow = styled.div`
@@ -25,4 +25,7 @@ export const StyledButtonWrap = styled.div`
 export const StyledErrorText = styled.p`
   color: ${({ theme }) => theme.color["danger"]};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
+`;
+export const StyledText = styled.p`
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
 `;

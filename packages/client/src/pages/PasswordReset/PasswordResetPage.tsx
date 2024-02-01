@@ -1,3 +1,7 @@
+import {
+  PASSWORDS_DONT_MATCH_ERROR,
+  UNSAFE_PASSWORD_ERROR,
+} from "Theme/constants";
 import api from "api";
 import {
   Button,
@@ -8,22 +12,24 @@ import {
   ModalInputWrap,
 } from "components";
 import React, { useEffect, useState } from "react";
-import { FaKey } from "react-icons/fa";
+import { BsEnvelopeArrowUpFill } from "react-icons/bs";
+import { RiRotateLockLine } from "react-icons/ri";
+import {
+  TbArrowForwardUp,
+  TbLockExclamation,
+  TbLockPlus,
+  TbMailFilled,
+} from "react-icons/tb";
 import { useNavigate } from "react-router";
-import { toast } from "react-toastify";
+import { isSafePassword } from "utils";
 import {
   StyledButtonWrap,
   StyledDescription,
   StyledErrorText,
   StyledInputRow,
   StyledMail,
+  StyledText,
 } from "./PasswordResetPageStyles";
-import { TbLockExclamation, TbLockPlus, TbMailFilled } from "react-icons/tb";
-import { isSafePassword } from "utils";
-import {
-  UNSAFE_PASSWORD_ERROR,
-  PASSWORDS_DONT_MATCH_ERROR,
-} from "Theme/constants";
 
 interface PasswordResetPage {}
 export const PasswordResetPage: React.FC<PasswordResetPage> = ({}) => {
@@ -34,6 +40,7 @@ export const PasswordResetPage: React.FC<PasswordResetPage> = ({}) => {
   const [password, setPassword] = useState("");
   const [passwordRepeat, setPasswordRepeat] = useState("");
   const [error, setError] = useState<false | string>(false);
+  const [passwordSent, setPasswordSent] = useState(false);
 
   const handleReset = async () => {
     if (password !== passwordRepeat) {
@@ -41,8 +48,7 @@ export const PasswordResetPage: React.FC<PasswordResetPage> = ({}) => {
     } else {
       const res = await api.passwordSetRequest(hash, password, passwordRepeat);
       if (res.status === 200) {
-        toast.success("password changed");
-        navigate("/login");
+        setPasswordSent(true);
       }
     }
   };
@@ -50,72 +56,98 @@ export const PasswordResetPage: React.FC<PasswordResetPage> = ({}) => {
   useEffect(() => {
     if (password.length > 0 && !isSafePassword(password)) {
       setError(UNSAFE_PASSWORD_ERROR);
+    } else if (passwordRepeat.length > 0 && password !== passwordRepeat) {
+      setError(PASSWORDS_DONT_MATCH_ERROR);
     } else {
       setError(false);
     }
-  }, [password]);
+  }, [password, passwordRepeat]);
 
   return (
     <div>
       <Modal showModal disableBgClick width={300} onEnterPress={handleReset}>
         <ModalContent column centered>
-          <p>Enter a new safe password for the user</p>
-          <StyledMail>
-            <TbMailFilled size={14} style={{ marginRight: "0.5rem" }} />
-            {email}
-          </StyledMail>
-          <StyledDescription>
-            A safe password: at least 12 characters, a combination of uppercase
-            letters, lowercase letters, numbers, and symbols.
-          </StyledDescription>
-          <form>
-            <ModalInputWrap>
-              <StyledInputRow>
-                <TbLockPlus size={16} style={{ marginRight: "0.3rem" }} />
-                <Input
-                  type="password"
-                  placeholder="new password"
-                  onChangeFn={(text: string) => setPassword(text)}
-                  value={password}
-                  changeOnType
-                  autoFocus
-                  autocomplete="new-password"
-                  required
+          {!passwordSent ? (
+            <>
+              <p>Enter a new safe password for the user</p>
+              <StyledMail>
+                <TbMailFilled size={14} style={{ marginRight: "0.5rem" }} />
+                {email}
+              </StyledMail>
+              <StyledDescription>
+                A safe password: at least 12 characters, a combination of
+                uppercase letters, lowercase letters, numbers, and symbols.
+              </StyledDescription>
+              <form>
+                <ModalInputWrap>
+                  <StyledInputRow>
+                    <TbLockPlus size={16} style={{ marginRight: "0.3rem" }} />
+                    <Input
+                      type="password"
+                      placeholder="new password"
+                      onChangeFn={(text: string) => setPassword(text)}
+                      value={password}
+                      changeOnType
+                      autoFocus
+                      autocomplete="new-password"
+                      required
+                    />
+                  </StyledInputRow>
+                </ModalInputWrap>
+                <ModalInputWrap>
+                  <StyledInputRow>
+                    <TbLockExclamation
+                      size={16}
+                      style={{ marginRight: "0.3rem" }}
+                    />
+                    <Input
+                      type="password"
+                      placeholder="repeat password"
+                      onChangeFn={(text: string) => setPasswordRepeat(text)}
+                      value={passwordRepeat}
+                      changeOnType
+                      autocomplete="new-password"
+                      required
+                    />
+                  </StyledInputRow>
+                </ModalInputWrap>
+              </form>
+              {error !== false && <StyledErrorText>{error}</StyledErrorText>}
+              <StyledButtonWrap>
+                <Button
+                  disabled={
+                    error === UNSAFE_PASSWORD_ERROR ||
+                    error === PASSWORDS_DONT_MATCH_ERROR ||
+                    password.length === 0 ||
+                    passwordRepeat.length === 0
+                  }
+                  icon={<BsEnvelopeArrowUpFill />}
+                  label="Reset Password"
+                  color="success"
+                  onClick={handleReset}
                 />
-              </StyledInputRow>
-            </ModalInputWrap>
-            <ModalInputWrap>
-              <StyledInputRow>
-                <TbLockExclamation
-                  size={16}
-                  style={{ marginRight: "0.3rem" }}
-                />
-                <Input
-                  type="password"
-                  placeholder="repeat password"
-                  onChangeFn={(text: string) => setPasswordRepeat(text)}
-                  value={passwordRepeat}
-                  changeOnType
-                  autocomplete="new-password"
-                  required
-                />
-              </StyledInputRow>
-            </ModalInputWrap>
-          </form>
-          {error !== false && <StyledErrorText>{error}</StyledErrorText>}
-          <StyledButtonWrap>
-            <Button
-              disabled={
-                error === UNSAFE_PASSWORD_ERROR ||
-                password.length === 0 ||
-                passwordRepeat.length === 0
-              }
-              icon={<FaKey />}
-              label="Reset Password"
-              color="success"
-              onClick={handleReset}
-            />
-          </StyledButtonWrap>
+              </StyledButtonWrap>
+            </>
+          ) : (
+            <>
+              <StyledText>{`The password for the user`}</StyledText>
+              <StyledMail>
+                <TbMailFilled size={14} style={{ marginRight: "0.5rem" }} />
+                {`${email}`}
+              </StyledMail>
+              <StyledText>{"was resetted."}</StyledText>
+              <RiRotateLockLine size={30} style={{ margin: "1.5rem" }} />
+              <Button
+                icon={
+                  <TbArrowForwardUp style={{ transform: "rotate(180deg)" }} />
+                }
+                label="Back to login"
+                color="success"
+                onClick={() => navigate("/login")}
+              />
+            </>
+          )}
+
           <ContactAdminFooting />
         </ModalContent>
       </Modal>
