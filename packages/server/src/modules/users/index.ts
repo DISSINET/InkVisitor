@@ -572,7 +572,7 @@ export default Router()
         user.setPassword(password);
         const results = await user.update(request.db.connection, {
           password: user.password,
-          hash: undefined,
+          hash: null,
           active: true,
           name: username,
         });
