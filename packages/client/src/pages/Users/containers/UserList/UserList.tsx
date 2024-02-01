@@ -511,6 +511,7 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
               </tbody>
             </StyledTable>
           </StyledTableWrapper>
+          {/* NEW USER | TEST EMAIL */}
           <UsersUtils />
         </>
       )}

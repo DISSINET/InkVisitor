@@ -31,6 +31,9 @@ import {
   StyledText,
 } from "./PasswordResetPageStyles";
 
+const INVALID_LINK_ERROR =
+  "Password reset unsuccessful. Please verify the validity of the recovery link and try again. If the problem persists, contact our support team for assistance.";
+
 interface PasswordResetPage {}
 export const PasswordResetPage: React.FC<PasswordResetPage> = ({}) => {
   const navigate = useNavigate();
@@ -46,9 +49,17 @@ export const PasswordResetPage: React.FC<PasswordResetPage> = ({}) => {
     if (password !== passwordRepeat) {
       setError(PASSWORDS_DONT_MATCH_ERROR);
     } else {
-      const res = await api.passwordSetRequest(hash, password, passwordRepeat);
-      if (res.status === 200) {
-        setPasswordSent(true);
+      try {
+        const res = await api.passwordSetRequest(
+          hash,
+          password,
+          passwordRepeat
+        );
+        if (res.status === 200) {
+          setPasswordSent(true);
+        }
+      } catch (err) {
+        setError(INVALID_LINK_ERROR);
       }
     }
   };

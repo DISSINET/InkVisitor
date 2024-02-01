@@ -389,7 +389,6 @@ class Api {
 
   async usersCreate(
     userData: {
-      name: string;
       email: string;
     },
     options?: IApiOptions

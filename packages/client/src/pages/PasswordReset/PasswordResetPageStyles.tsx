@@ -23,6 +23,7 @@ export const StyledButtonWrap = styled.div`
   margin-top: 1rem;
 `;
 export const StyledErrorText = styled.p`
+  text-align: center;
   color: ${({ theme }) => theme.color["danger"]};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
 `;

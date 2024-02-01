@@ -18,11 +18,12 @@ import {
 } from "./ActivateSreensStyles";
 
 const USERNAME_ALREADY_USED_ERROR = `Username is already used. 
-Please select a new one`;
+Please select a new one.`;
 const USERNAME_TOO_SHORT_ERROR = `Username is too short.
-Please select a new one`;
+Please select a new one.`;
 const USERNAME_TOO_LONG_ERROR = `Username is too long.
-Please select a new one`;
+Please select a new one.`;
+const INVALID_ACTION_LINK = `User activation unsuccessful. Please verify the validity of the activation link and try again. If the problem persists, contact our support team for assistance.`;
 
 interface UsernameScreen {
   hash: string;
@@ -41,23 +42,27 @@ export const UsernameScreen: React.FC<UsernameScreen> = ({
   const [continueScreen, setContinueScreen] = useState(false);
   const [username, setUsername] = useState("");
 
-  const handleActivation = () => {
+  const handleActivation = async () => {
     if (username.length < 4) {
       setError(USERNAME_TOO_SHORT_ERROR);
     } else if (username.length > 10) {
       setError(USERNAME_TOO_LONG_ERROR);
     } else {
       try {
-        const res: any = api
-          .activation(hash, password, passwordRepeat, username)
-          .then((res) => {
-            if (res.status === 200) {
-              setContinueScreen(true);
-            }
-          });
+        const res: any = await api.activation(
+          hash,
+          password,
+          passwordRepeat,
+          username
+        );
+        if (res.status === 200) {
+          setContinueScreen(true);
+        }
       } catch (err) {
         if (err && (err as any).error === "UserNotUnique") {
           setError(USERNAME_ALREADY_USED_ERROR);
+        } else {
+          setError(INVALID_ACTION_LINK);
         }
       }
     }
