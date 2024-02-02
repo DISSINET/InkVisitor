@@ -15,7 +15,8 @@ import { useAppDispatch } from "redux/hooks";
 import api from "api";
 import { setUsername } from "redux/features/usernameSlice";
 
-const CREDENTIALS_ERROR = "Wrong username or password. Please try again.";
+const WRONG_USERNAME_ERROR = "Wrong username. Please try again.";
+const WRONG_PASSWORD_ERROR = "Wrong password. Please try again.";
 
 interface LoginScreen {
   usernameLocal: string;
@@ -47,10 +48,10 @@ export const LoginScreen: React.FC<LoginScreen> = ({
       // if (err && (err as any).error === "UserDoesNotExits") {
       if (err && (err as any).error === "ReferenceError") {
         // wrong username
-        setError(CREDENTIALS_ERROR);
+        setError(WRONG_USERNAME_ERROR);
       } else if (err && (err as any).error === "BadCredentialsError") {
         // wrong password
-        setError(CREDENTIALS_ERROR);
+        setError(WRONG_PASSWORD_ERROR);
       }
     }
   };

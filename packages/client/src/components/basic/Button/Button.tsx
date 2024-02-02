@@ -33,6 +33,7 @@ interface ButtonProps {
   fullWidth?: boolean;
   tooltipPosition?: AutoPlacement | BasePlacement | VariationPlacement;
   hideTooltipOnClick?: boolean;
+  paddingX?: boolean;
 }
 
 export const Button: React.FC<ButtonProps> = ({
@@ -56,6 +57,7 @@ export const Button: React.FC<ButtonProps> = ({
   fullWidth = false,
   tooltipPosition = "bottom",
   hideTooltipOnClick = false,
+  paddingX,
 }) => {
   const [referenceElement, setReferenceElement] =
     useState<HTMLButtonElement | null>(null);

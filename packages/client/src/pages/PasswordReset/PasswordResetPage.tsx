@@ -102,6 +102,7 @@ export const PasswordResetPage: React.FC<PasswordResetPage> = ({}) => {
                       autoFocus
                       autocomplete="new-password"
                       required
+                      borderColor={error !== false ? "danger" : undefined}
                     />
                   </StyledInputRow>
                 </ModalInputWrap>
@@ -119,6 +120,7 @@ export const PasswordResetPage: React.FC<PasswordResetPage> = ({}) => {
                       changeOnType
                       autocomplete="new-password"
                       required
+                      borderColor={error !== false ? "danger" : undefined}
                     />
                   </StyledInputRow>
                 </ModalInputWrap>
