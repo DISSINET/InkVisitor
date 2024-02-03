@@ -165,7 +165,7 @@ export default Router()
 
       const user = await User.findUserByLogin(request.db, login);
       if (!user) {
-        throw new UserDoesNotExits(`user ${name} was not found`, login);
+        throw new UserDoesNotExits(`user ${login} was not found`, login);
       }
 
       if (!user.active) {
