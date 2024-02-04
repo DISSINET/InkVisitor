@@ -94,7 +94,7 @@ Go to all three folders in `packages` (`client`, `server`, `database`) and run `
 
 ## Deploy
 
-To deploy the Inkvisitor instance, you can use Docker (or Podman) or build and deploy the packages separately.
+To deploy the Inkvisitor instance, you can use Docker (or Podman), host it on Kubernetes cluster, or build and deploy the packages separately.
 
 ### Deploy with Docker
 
@@ -108,6 +108,10 @@ To use docker to deploy the InkVisitor application:
 6.  Run the database - either as a service or containerized using `docker-compose up -d database`.
 7.  Build app image (will also be done in next step if not available) `docker-compose build inkvisitor` (or `inkvisitor-<env>`).
 8.  Run the containerized application with the command `docker-compose up inkvisitor` (or `inkvisitor-<env>`).
+
+### Kubernetes
+
+See [kube](./kube) directory for examples. Please, check your cluster's capabilities as the setup could differ.
 
 ### Deploy by packages
 

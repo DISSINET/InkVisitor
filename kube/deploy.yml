@@ -1,0 +1,63 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: inkvisitor-data
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  volumeMode: Filesystem
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: inkvisitor
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: inkvisitor
+  template:
+    metadata:
+      labels:
+        app: inkvisitor
+    spec:
+      volumes:
+        - name: data-volume
+          persistentVolumeClaim:
+            claimName: inkvisitor-data
+      hostname: inkvisitor
+      containers:
+        - name: inkvisitor-app
+          image: jancimertel/inkvisitor:latest
+          ports:
+            - containerPort: 3000
+          envFrom:
+            - configMapRef:
+                name: inkvisitor-config
+          env:
+            - name: DOMAIN
+              value: inkvisitor
+        - name: rethinkdb
+          image: rethinkdb:latest
+          volumeMounts:
+            - mountPath: /data/rethinkdb_data
+              name: data-volume
+          ports:
+            - containerPort: 28015
+            - containerPort: 29015
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: inkvisitor
+spec:
+  selector:
+    app: inkvisitor
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 3000
+  type: LoadBalancer
