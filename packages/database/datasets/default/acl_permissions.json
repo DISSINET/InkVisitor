@@ -105,6 +105,13 @@
   },
   {
     "controller": "users",
+    "route": "activation/:hash",
+    "method": "GET",
+    "roles": [],
+    "public": true
+  },
+  {
+    "controller": "users",
     "route": "password_reset",
     "method": "POST",
     "roles": [],

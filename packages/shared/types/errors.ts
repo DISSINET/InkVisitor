@@ -102,6 +102,24 @@ class UserDoesNotExits extends CustomError {
 }
 
 /**
+ * UserAlreadyActivated will be thrown when attempting to activate user, that has been already activated or the hash which governs the activation does not exist
+ */
+class UserAlreadyActivated extends CustomError {
+  public static code = 400;
+  public static title = "User already activated user";
+  public static message = "Already activated or activation link expired";
+}
+
+/**
+ * UserBadActivationHash will be thrown if searching for invalid activation hash
+ */
+class UserBadActivationHash extends CustomError {
+  public static code = 400;
+  public static title = "Invalid activation hash";
+  public static message = "Already activated or activation link expired";
+}
+
+/**
  * UserDoesNotExits will be thrown when attempting to remove/update the user entry, which does not exist
  */
 class UserNotActiveError extends CustomError {
@@ -361,6 +379,8 @@ const allErrors: Record<string, any> = {
   NotFound,
   BadParams,
   UserDoesNotExits,
+  UserAlreadyActivated,
+  UserBadActivationHash,
   UserNotUnique,
   UserNotActiveError,
   EntityDoesNotExist,
@@ -400,6 +420,8 @@ export {
   NotFound,
   BadParams,
   UserDoesNotExits,
+  UserAlreadyActivated,
+  UserBadActivationHash,
   UserNotUnique,
   UserNotActiveError,
   EntityDoesNotExist,

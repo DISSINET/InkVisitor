@@ -8,6 +8,8 @@ import {
   InternalServerError,
   ModelNotValidError,
   PermissionDeniedError,
+  UserAlreadyActivated,
+  UserBadActivationHash,
   UserDoesNotExits,
   UserNotActiveError,
   UserNotUnique,
@@ -562,7 +564,7 @@ export default Router()
 
         const user = await User.getUserByHash(request.db.connection, hash);
         if (!user) {
-          throw new UserDoesNotExits("user for provided hash not found", "");
+          throw new UserAlreadyActivated();
         }
 
         if (await User.findUserByLogin(request.db, username)) {
@@ -574,6 +576,7 @@ export default Router()
           password: user.password,
           hash: null,
           active: true,
+          verified: true,
           name: username,
         });
         if (!results.replaced && !results.unchanged) {
@@ -583,6 +586,49 @@ export default Router()
         return {
           result: true,
           message: "User activated.",
+        };
+      }
+    )
+  )
+  /**
+   * @openapi
+   * /users/activation/:hash
+   *   post:
+   *     description: Checks the validity of activation hash
+   *     tags:
+   *       - users
+   *     parameters:
+   *       - in: path
+   *         name: hash
+   *         schema:
+   *           type: string
+   *         required: true
+   *         description: hash value for activation representation
+   *     responses:
+   *       200:
+   *         description: Returns IResponseGeneric object
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/IResponseGeneric"
+   */
+  .get(
+    "/activation/:hash",
+    asyncRouteHandler<IResponseGeneric>(
+      async (request: IRequest<{ hash: string }>) => {
+        const hash = request.params.hash;
+
+        if (!hash) {
+          throw new BadParams("hash is required");
+        }
+
+        const user = await User.getUserByHash(request.db.connection, hash);
+        if (!user) {
+          throw new UserBadActivationHash();
+        }
+
+        return {
+          result: true,
         };
       }
     )
@@ -680,7 +726,7 @@ export default Router()
         }
 
         if (!user) {
-          throw new UserDoesNotExits(`user ${userId} was not found`, userId);
+          throw new UserDoesNotExits(`user ${userId} not found`, userId);
         }
 
         const rawPassword = user.generatePassword();

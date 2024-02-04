@@ -6,12 +6,7 @@ import {
   IUserRight,
 } from "@shared/types";
 import { r as rethink, Connection, WriteResult, RDatum } from "rethinkdb-ts";
-import {
-  IDbModel,
-  fillArray,
-  fillFlatObject,
-  UnknownObject,
-} from "@models/common";
+import { IDbModel, fillArray, fillFlatObject } from "@models/common";
 import { EntityEnums, UserEnums } from "@shared/enums";
 import { ModelNotValidError } from "@shared/types/errors";
 import { generateRandomString, generateUuid, hashPassword } from "@common/auth";
@@ -111,6 +106,7 @@ export default class User implements IUser, IDbModel {
   name = "";
   role: UserEnums.Role = UserEnums.Role.Viewer;
   active = false;
+  verified = false;
   options: UserOptions = new UserOptions({});
   bookmarks: BookmarkFolder[] = [];
   storedTerritories: StoredTerritory[] = [];
