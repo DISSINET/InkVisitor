@@ -924,6 +924,21 @@ class Api {
     }
   }
 
+  async activationExists(
+    hash: string,
+    options?: IApiOptions
+  ): Promise<AxiosResponse<IResponseGeneric>> {
+    try {
+      const response = await this.connection.get(
+        `/users/activation/${hash}`,
+        options
+      );
+      return response;
+    } catch (err: any | AxiosError) {
+      throw { ...err.response.data };
+    }
+  }
+
   /**
    * Relations
    */
