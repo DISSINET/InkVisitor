@@ -5,8 +5,8 @@ import { FiLogIn } from "react-icons/fi";
 import { IoReloadCircle } from "react-icons/io5";
 import { Navigate } from "react-router";
 import { StyledAttrBtnGroupWrap, StyledContentWrap } from "./LoginPageStyles";
-import { LoginScreen } from "./Screens/LoginScreen";
-import { PasswordRecoverScreen } from "./Screens/PasswordRecoverScreen";
+import { LoginScreen } from "./screens/LoginScreen";
+import { PasswordRecoverScreen } from "./screens/PasswordRecoverScreen";
 
 export const LoginPage: React.FC = () => {
   const [usernameLocal, setUsernameLocal] = useState("");
@@ -21,7 +21,7 @@ export const LoginPage: React.FC = () => {
   return redirectToMain ? (
     <Navigate to="/" />
   ) : (
-    <Modal showModal disableBgClick width="auto">
+    <Modal showModal disableBgClick width={320}>
       <StyledContentWrap>
         <StyledAttrBtnGroupWrap>
           <AttributeButtonGroup

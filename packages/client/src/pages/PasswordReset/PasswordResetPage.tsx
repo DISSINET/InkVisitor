@@ -76,7 +76,7 @@ export const PasswordResetPage: React.FC<PasswordResetPage> = ({}) => {
 
   return (
     <div>
-      <Modal showModal disableBgClick width={300} onEnterPress={handleReset}>
+      <Modal showModal disableBgClick width={320} onEnterPress={handleReset}>
         <ModalContent column centered>
           {!passwordSent ? (
             <>
@@ -148,7 +148,7 @@ export const PasswordResetPage: React.FC<PasswordResetPage> = ({}) => {
                 <TbMailFilled size={14} style={{ marginRight: "0.5rem" }} />
                 {`${email}`}
               </StyledMail>
-              <StyledText>{"was resetted."}</StyledText>
+              <StyledText>{"was changed."}</StyledText>
               <RiRotateLockLine size={30} style={{ margin: "1.5rem" }} />
               <Button
                 icon={

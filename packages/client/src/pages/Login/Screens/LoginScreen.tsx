@@ -1,22 +1,21 @@
+import api from "api";
 import { Button, Input } from "components";
 import {
-  StyledErrorText,
   StyledButtonWrap,
+  StyledErrorText,
 } from "pages/PasswordReset/PasswordResetPageStyles";
 import React, { useState } from "react";
 import { FiLogIn } from "react-icons/fi";
+import { setUsername } from "redux/features/usernameSlice";
+import { useAppDispatch } from "redux/hooks";
 import {
   StyledFaLock,
-  StyledFaUserAlt,
   StyledInputRow,
   StyledTbMailFilled,
 } from "./LoginScreensStyles";
-import { useAppDispatch } from "redux/hooks";
-import api from "api";
-import { setUsername } from "redux/features/usernameSlice";
 
-const WRONG_USERNAME_ERROR = "Wrong username. Please try again.";
-const WRONG_PASSWORD_ERROR = "Wrong password. Please try again.";
+const WRONG_USERNAME_ERROR = "wrong email / username";
+const WRONG_PASSWORD_ERROR = "wrong password";
 
 interface LoginScreen {
   usernameLocal: string;
@@ -61,6 +60,7 @@ export const LoginScreen: React.FC<LoginScreen> = ({
       <StyledInputRow>
         <StyledTbMailFilled size={14} $isError={error !== false} />
         <Input
+          width={200}
           placeholder="email or username"
           onChangeFn={(text: string) => setUsernameLocal(text)}
           value={usernameLocal}
@@ -72,6 +72,7 @@ export const LoginScreen: React.FC<LoginScreen> = ({
       <StyledInputRow>
         <StyledFaLock size={14} $isError={error !== false} />
         <Input
+          width={200}
           type="password"
           placeholder="password"
           onChangeFn={(text: string) => setPassword(text)}

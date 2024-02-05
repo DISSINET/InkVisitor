@@ -23,7 +23,9 @@ export const UsersUtils: React.FC<UsersUtils> = React.memo(({}) => {
       }),
     {
       onSuccess(data, variables) {
-        toast.success(`User ${newUserEmail} created!`);
+        toast.success(
+          `User created! \n Verification email sent to ${newUserEmail}.`
+        );
         setNewUserEmail("");
         queryClient.invalidateQueries(["users"]);
       },

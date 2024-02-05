@@ -65,12 +65,13 @@ export const PasswordRecoverScreen: React.FC<PasswordRecoverScreen> = ({
         <>
           <StyledDescription>
             Please enter your email.
-            <br /> A link to reset your password will be sent to you
-            <br /> within couple of minutes.
+            <br /> A link to reset your password will be sent
+            <br /> to you within couple of minutes.
           </StyledDescription>
           <StyledInputRow>
             <StyledTbMailFilled size={15} $isError={error !== false} />
             <Input
+              width={200}
               placeholder="email"
               onChangeFn={(text: string) => setEmailLocal(text)}
               value={emailLocal}

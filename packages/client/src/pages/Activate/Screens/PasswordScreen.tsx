@@ -104,6 +104,7 @@ export const PasswordScreen: React.FC<PasswordScreen> = ({
         <Button
           disabled={
             error === UNSAFE_PASSWORD_ERROR ||
+            error === PASSWORDS_DONT_MATCH_ERROR ||
             password.length === 0 ||
             passwordRepeat.length === 0
           }

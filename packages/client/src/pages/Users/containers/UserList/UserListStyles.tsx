@@ -94,8 +94,12 @@ export const StyledTerritoryListItemMissing = styled.div`
   color: ${({ theme }) => theme.color.white};
   font-size: ${({ theme }) => theme.fontSize.xxs};
 `;
-
-export const StyledUserNameColumn = styled.div`
+interface StyledUserNameColumn {
+  active: boolean;
+}
+export const StyledUserNameColumn = styled.div<StyledUserNameColumn>`
+  color: ${({ theme, active }) =>
+    active ? theme.color.black : theme.color.grey};
   display: inline-flex;
 `;
 export const StyledUserNameColumnIcon = styled.div`

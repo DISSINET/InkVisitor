@@ -140,7 +140,7 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
         id: "Name",
         accessor: "name",
         Cell: ({ row }: CellType) => {
-          const { name, email, role } = row.original;
+          const { name, email, role, active } = row.original;
           let icon = <RiUserSearchFill />;
           if (role === UserEnums.Role.Admin) {
             icon = <RiUserStarFill />;
@@ -149,7 +149,7 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
             icon = <RiUserSettingsFill />;
           }
           return (
-            <StyledUserNameColumn>
+            <StyledUserNameColumn active={active}>
               <StyledUserNameColumnIcon>{icon}</StyledUserNameColumnIcon>
               <StyledUserNameColumnText>
                 <b>{name}</b>

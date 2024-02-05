@@ -1,7 +1,7 @@
 import { ContactAdminFooting, Modal, ModalContent } from "components";
 import React, { useState } from "react";
-import { PasswordScreen } from "./Screens/PasswordScreen";
-import { UsernameScreen } from "./Screens/UsernameScreen";
+import { PasswordScreen } from "./screens/PasswordScreen";
+import { UsernameScreen } from "./screens/UsernameScreen";
 import api from "api";
 import { toast } from "react-toastify";
 import { IErrorSignature, getErrorByCode } from "@shared/types/errors";
@@ -17,43 +17,45 @@ const ActivatePage: React.FC = ({}) => {
 
   const testHash = async () => {
     try {
-      const res = await api.activationExists(hash, { ignoreErrorToast: true})
+      const res = await api.activationExists(hash, { ignoreErrorToast: true });
       if (res.data.result) {
-        setHashOk(true)
+        setHashOk(true);
       }
       toast.warning("Activation hash invalid");
-    } catch(e) {
+    } catch (e) {
       toast.warning(getErrorByCode(e as IErrorSignature).message);
     }
-  }
+  };
 
-  testHash()
+  testHash();
 
-  return hashOk && (
-    <div>
-      <Modal showModal disableBgClick width={350}>
-        <ModalContent column centered>
-          {!usernameScreen ? (
-            <PasswordScreen
-              email={email}
-              password={password}
-              setPassword={setPassword}
-              passwordRepeat={passwordRepeat}
-              setPasswordRepeat={setPasswordRepeat}
-              setUsernameScreen={setUsernameScreen}
-            />
-          ) : (
-            <UsernameScreen
-              hash={hash}
-              email={email}
-              password={password}
-              passwordRepeat={passwordRepeat}
-            />
-          )}
-          <ContactAdminFooting />
-        </ModalContent>
-      </Modal>
-    </div>
+  return (
+    hashOk && (
+      <div>
+        <Modal showModal disableBgClick width={350}>
+          <ModalContent column centered>
+            {!usernameScreen ? (
+              <PasswordScreen
+                email={email}
+                password={password}
+                setPassword={setPassword}
+                passwordRepeat={passwordRepeat}
+                setPasswordRepeat={setPasswordRepeat}
+                setUsernameScreen={setUsernameScreen}
+              />
+            ) : (
+              <UsernameScreen
+                hash={hash}
+                email={email}
+                password={password}
+                passwordRepeat={passwordRepeat}
+              />
+            )}
+            <ContactAdminFooting />
+          </ModalContent>
+        </Modal>
+      </div>
+    )
   );
 };
 

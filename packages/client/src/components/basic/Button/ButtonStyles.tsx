@@ -60,4 +60,5 @@ export const StyledButtonLabel = styled.span<{
 }>`
   margin-left: ${({ theme, hasIcon = false, noIconMargin = false }) =>
     hasIcon ? (noIconMargin ? 0 : "0.3rem") : 0};
+  text-transform: lowercase;
 `;
