@@ -35,7 +35,7 @@ export class CustomError extends Error {
   }
 
   withData(data: any): CustomError {
-    this.data = data
+    this.data = data;
     return this;
   }
 }
@@ -107,7 +107,7 @@ class UserDoesNotExits extends CustomError {
 class UserAlreadyActivated extends CustomError {
   public static code = 400;
   public static title = "User already activated user";
-  public static message = "Already activated or activation link expired";
+  public static message = "User already activated or activation link expired";
 }
 
 /**
@@ -116,7 +116,7 @@ class UserAlreadyActivated extends CustomError {
 class UserBadActivationHash extends CustomError {
   public static code = 400;
   public static title = "Invalid activation hash";
-  public static message = "Already activated or activation link expired";
+  public static message = "User already activated or activation link expired";
 }
 
 /**
@@ -141,7 +141,6 @@ class UserNotUnique extends CustomError {
   public static title = "User with this login already exists";
   public static message = "Either email or username is in use";
 }
-
 
 /**
  * EntityDoesNotExist will be thrown when attempting to remove/update the entity entry, which does not exist
@@ -366,7 +365,8 @@ class UnknownError extends CustomError {
 class NetworkError extends CustomError {
   public static code = 500;
   public static title = "Connection to server lost";
-  public static message = "Please check your network connection. Otherwise contact the administrator.";
+  public static message =
+    "Please check your network connection. Otherwise contact the administrator.";
 }
 
 const allErrors: Record<string, any> = {
@@ -407,7 +407,7 @@ export interface IErrorSignature {
 export function getErrorByCode(errSig: IErrorSignature): CustomError {
   return allErrors[errSig.error]
     ? new allErrors[errSig.error](errSig.message)
-    : new UnknownError(errSig.message || "Unknown error occured")
+    : new UnknownError(errSig.message || "Unknown error occured");
 }
 
 export {
@@ -437,5 +437,5 @@ export {
   EmailError,
   RelationDoesNotExist,
   DocumentDoesNotExist,
-  NetworkError
+  NetworkError,
 };
