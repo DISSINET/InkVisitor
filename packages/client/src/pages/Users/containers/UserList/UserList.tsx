@@ -163,17 +163,21 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
         Header: "Username",
         id: "Username",
         Cell: ({ row }: CellType) => {
-          const { id, name, email, role } = row.original;
+          const { id, name, email, role, verified } = row.original;
           return (
-            <Input
-              value={name}
-              onChangeFn={async (newValue: string) => {
-                userMutation.mutate({
-                  id: id,
-                  name: newValue,
-                });
-              }}
-            />
+            <>
+              {verified && (
+                <Input
+                  value={name}
+                  onChangeFn={async (newValue: string) => {
+                    userMutation.mutate({
+                      id: id,
+                      name: newValue,
+                    });
+                  }}
+                />
+              )}
+            </>
           );
         },
       },
@@ -512,7 +516,7 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
             </StyledTable>
           </StyledTableWrapper>
           {/* NEW USER | TEST EMAIL */}
-          <UsersUtils />
+          <UsersUtils users={data} />
         </>
       )}
 

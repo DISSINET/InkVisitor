@@ -7,6 +7,8 @@ import { toast } from "react-toastify";
 import { IErrorSignature, getErrorByCode } from "@shared/types/errors";
 import { StyledError } from "./ActivatePageStyles";
 
+const HASH_INVALID_ERROR = "Activation hash invalid";
+
 const ActivatePage: React.FC = ({}) => {
   const urlParams = new URLSearchParams(window.location.search);
   const [hash] = useState(urlParams.get("hash") || "");
@@ -22,8 +24,9 @@ const ActivatePage: React.FC = ({}) => {
       const res = await api.activationExists(hash, { ignoreErrorToast: true });
       if (res.data.result) {
         setHashOk(true);
+      } else {
+        toast.warning(HASH_INVALID_ERROR);
       }
-      toast.warning("Activation hash invalid");
     } catch (e) {
       setHashOk(false);
       setError(getErrorByCode(e as IErrorSignature).message);

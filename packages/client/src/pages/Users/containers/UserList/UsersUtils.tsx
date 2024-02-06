@@ -6,10 +6,13 @@ import { FaPlus } from "react-icons/fa";
 import api from "api";
 import { Button, ButtonGroup, Input } from "components";
 import { StyledUserEditorForm, StyledUtils } from "./UserListStyles";
+import { IResponseUser } from "@shared/types";
 
-interface UsersUtils {}
+interface UsersUtils {
+  users: IResponseUser[];
+}
 
-export const UsersUtils: React.FC<UsersUtils> = React.memo(({}) => {
+export const UsersUtils: React.FC<UsersUtils> = React.memo(({ users }) => {
   // const [newUserName, setNewUserName] = useState<string>("");
   const [newUserEmail, setNewUserEmail] = useState<string>("");
   const [testEmail, setTestEmail] = useState<string>("");
@@ -61,7 +64,11 @@ export const UsersUtils: React.FC<UsersUtils> = React.memo(({}) => {
           icon={<FaPlus />}
           color="primary"
           onClick={() => {
-            createNewUserMutataion.mutate();
+            if (!users.some((user) => user.email === newUserEmail)) {
+              createNewUserMutataion.mutate();
+            } else {
+              toast.warning("Email already in use");
+            }
           }}
         />
       </StyledUserEditorForm>
