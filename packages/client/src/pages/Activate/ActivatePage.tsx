@@ -1,4 +1,4 @@
-import { ContactAdminFooting, Modal, ModalContent } from "components";
+import { Button, ContactAdminFooting, Modal, ModalContent } from "components";
 import React, { useEffect, useState } from "react";
 import { PasswordScreen } from "./screens/PasswordScreen";
 import { UsernameScreen } from "./screens/UsernameScreen";
@@ -6,10 +6,13 @@ import api from "api";
 import { toast } from "react-toastify";
 import { IErrorSignature, getErrorByCode } from "@shared/types/errors";
 import { StyledError } from "./ActivatePageStyles";
+import { useNavigate } from "react-router";
+import { TbArrowForwardUp } from "react-icons/tb";
 
 const HASH_INVALID_ERROR = "Activation hash invalid";
 
 const ActivatePage: React.FC = ({}) => {
+  const navigate = useNavigate();
   const urlParams = new URLSearchParams(window.location.search);
   const [hash] = useState(urlParams.get("hash") || "");
   const [email] = useState(urlParams.get("email") || "");
@@ -30,7 +33,6 @@ const ActivatePage: React.FC = ({}) => {
     } catch (e) {
       setHashOk(false);
       setError(getErrorByCode(e as IErrorSignature).message);
-      // toast.warning(getErrorByCode(e as IErrorSignature).message);
     }
   };
 
@@ -64,7 +66,20 @@ const ActivatePage: React.FC = ({}) => {
             </>
           )}
 
-          {error && <StyledError>{error}</StyledError>}
+          {error && (
+            <>
+              <StyledError>{error}</StyledError>
+              <Button
+                color="success"
+                icon={
+                  <TbArrowForwardUp style={{ transform: "rotate(180deg)" }} />
+                }
+                label="back to login"
+                onClick={() => navigate("/login")}
+              />
+            </>
+          )}
+
           <ContactAdminFooting />
         </ModalContent>
       </Modal>

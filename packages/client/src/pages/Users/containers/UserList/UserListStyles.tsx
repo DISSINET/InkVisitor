@@ -96,10 +96,15 @@ export const StyledTerritoryListItemMissing = styled.div`
 `;
 interface StyledUserNameColumn {
   active: boolean;
+  verified: boolean;
 }
 export const StyledUserNameColumn = styled.div<StyledUserNameColumn>`
-  color: ${({ theme, active }) =>
-    active ? theme.color.black : theme.color.grey};
+  color: ${({ theme, active, verified }) =>
+    !verified
+      ? theme.color.warning
+      : active
+      ? theme.color.black
+      : theme.color.grey};
   display: inline-flex;
 `;
 export const StyledUserNameColumnIcon = styled.div`
@@ -149,4 +154,8 @@ export const StyledUtils = styled.div`
   align-items: center;
   background-color: ${({ theme }) => theme.color["blue"][50]};
   width: 100%;
+`;
+export const StyledItalic = styled.i`
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
+  color: ${({ theme }) => theme.color.warning};
 `;

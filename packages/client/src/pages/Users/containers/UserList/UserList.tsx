@@ -19,6 +19,7 @@ import {
 import { CellProps, Column, Row, useTable } from "react-table";
 import { toast } from "react-toastify";
 import {
+  StyledItalic,
   StyledTHead,
   StyledTable,
   StyledTableWrapper,
@@ -140,7 +141,7 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
         id: "Name",
         accessor: "name",
         Cell: ({ row }: CellType) => {
-          const { name, email, role, active } = row.original;
+          const { name, email, role, active, verified } = row.original;
           let icon = <RiUserSearchFill />;
           if (role === UserEnums.Role.Admin) {
             icon = <RiUserStarFill />;
@@ -149,7 +150,7 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
             icon = <RiUserSettingsFill />;
           }
           return (
-            <StyledUserNameColumn active={active}>
+            <StyledUserNameColumn active={active} verified={verified}>
               <StyledUserNameColumnIcon>{icon}</StyledUserNameColumnIcon>
               <StyledUserNameColumnText>
                 <b>{name}</b>
@@ -166,7 +167,9 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
           const { id, name, email, role, verified } = row.original;
           return (
             <>
-              {verified && (
+              {!verified ? (
+                <StyledItalic>{"not activated yet"}</StyledItalic>
+              ) : (
                 <Input
                   value={name}
                   onChangeFn={async (newValue: string) => {
@@ -424,8 +427,9 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
             id: userId,
             rights,
             territoryRights: territoryActants,
+            active,
           } = row.original;
-          const active = row.original.active;
+
           return (
             <ButtonGroup noMarginRight>
               <Button
