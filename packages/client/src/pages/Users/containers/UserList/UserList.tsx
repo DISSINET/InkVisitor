@@ -19,7 +19,7 @@ import {
 import { CellProps, Column, Row, useTable } from "react-table";
 import { toast } from "react-toastify";
 import {
-  StyledItalic,
+  StyledNotActiveText,
   StyledTHead,
   StyledTable,
   StyledTableWrapper,
@@ -168,7 +168,7 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
           return (
             <>
               {!verified ? (
-                <StyledItalic>{"not activated yet"}</StyledItalic>
+                <StyledNotActiveText>{"not activated yet"}</StyledNotActiveText>
               ) : (
                 <Input
                   value={name}

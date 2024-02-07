@@ -113,6 +113,10 @@ export const StyledUserNameColumnIcon = styled.div`
   margin-right: 0.5em;
 `;
 export const StyledUserNameColumnText = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
   * {
     display: block;
   }
@@ -155,7 +159,11 @@ export const StyledUtils = styled.div`
   background-color: ${({ theme }) => theme.color["blue"][50]};
   width: 100%;
 `;
-export const StyledItalic = styled.i`
-  font-size: ${({ theme }) => theme.fontSize["sm"]};
-  color: ${({ theme }) => theme.color.warning};
+export const StyledNotActiveText = styled.p`
+  display: inline-flex;
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  color: ${({ theme }) => theme.color.muni};
+  background-color: ${({ theme }) => theme.color.warning};
+  padding: 0.5rem 1rem;
+  border-radius: ${({ theme }) => theme.borderRadius.full};
 `;
