@@ -10,7 +10,13 @@ import {
   EntityTag,
 } from "components/advanced";
 import React, { useCallback, useMemo, useState } from "react";
-import { FaKey, FaToggleOff, FaToggleOn, FaTrashAlt } from "react-icons/fa";
+import {
+  FaEnvelopeOpenText,
+  FaKey,
+  FaToggleOff,
+  FaToggleOn,
+  FaTrashAlt,
+} from "react-icons/fa";
 import {
   RiUserSearchFill,
   RiUserSettingsFill,
@@ -149,13 +155,23 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
           if (role === UserEnums.Role.Editor) {
             icon = <RiUserSettingsFill />;
           }
+          if (!verified) {
+            icon = <FaEnvelopeOpenText size={16} />;
+          }
           return (
             <StyledUserNameColumn active={active} verified={verified}>
               <StyledUserNameColumnIcon>{icon}</StyledUserNameColumnIcon>
-              <StyledUserNameColumnText>
-                <b>{name}</b>
-                <span>{email}</span>
-              </StyledUserNameColumnText>
+
+              {!verified ? (
+                <div style={{ width: "100%", textAlign: "center" }}>
+                  <StyledNotActiveText>{"not activated"}</StyledNotActiveText>
+                </div>
+              ) : (
+                <StyledUserNameColumnText>
+                  <b>{name}</b>
+                  <span>{email}</span>
+                </StyledUserNameColumnText>
+              )}
             </StyledUserNameColumn>
           );
         },
@@ -168,7 +184,9 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
           return (
             <>
               {!verified ? (
-                <StyledNotActiveText>{"not activated yet"}</StyledNotActiveText>
+                <div style={{ width: "100%", textAlign: "center" }}>
+                  {/* <StyledNotActiveText>{"not activated"}</StyledNotActiveText> */}
+                </div>
               ) : (
                 <Input
                   value={name}

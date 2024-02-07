@@ -106,20 +106,22 @@ export const StyledUserNameColumn = styled.div<StyledUserNameColumn>`
       ? theme.color.black
       : theme.color.grey};
   display: inline-flex;
+  width: 100%;
 `;
 export const StyledUserNameColumnIcon = styled.div`
-  font-size: 1.5em;
-  margin: auto;
-  margin-right: 0.5em;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+  font-size: 2.5rem;
+  margin-right: 0.8rem;
+  width: 3rem;
 `;
 export const StyledUserNameColumnText = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: center;
   width: 100%;
-  * {
-    display: block;
-  }
 `;
 export const StyledUserEditor = styled.div`
   columns: auto auto;
@@ -162,7 +164,7 @@ export const StyledUtils = styled.div`
 export const StyledNotActiveText = styled.p`
   display: inline-flex;
   font-size: ${({ theme }) => theme.fontSize["xs"]};
-  color: ${({ theme }) => theme.color.muni};
+  color: ${({ theme }) => theme.color.white};
   background-color: ${({ theme }) => theme.color.warning};
   padding: 0.5rem 1rem;
   border-radius: ${({ theme }) => theme.borderRadius.full};
