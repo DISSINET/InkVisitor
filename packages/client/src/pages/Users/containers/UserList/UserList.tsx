@@ -3,7 +3,16 @@ import { EntityEnums, UserEnums } from "@shared/enums";
 import { IResponseUser, IUserRight } from "@shared/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import { Button, ButtonGroup, Input, Loader, Submit } from "components";
+import {
+  Button,
+  ButtonGroup,
+  Input,
+  Loader,
+  Modal,
+  ModalContent,
+  ModalFooter,
+  Submit,
+} from "components";
 import {
   AttributeButtonGroup,
   EntitySuggester,
@@ -41,14 +50,13 @@ import {
 } from "./UserListStyles";
 import { UserListTableRow } from "./UserListTableRow/UserListTableRow";
 import { UsersUtils } from "./UsersUtils";
+import { TiWarning } from "react-icons/ti";
 
 type CellType = CellProps<IResponseUser>;
 
-interface UserList {
-  heightContent?: number;
-}
+interface UserList {}
 
-export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
+export const UserList: React.FC<UserList> = React.memo(() => {
   const [removingUserId, setRemovingUserId] = useState<false | string>("");
 
   const queryClient = useQueryClient();
@@ -140,6 +148,8 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
     return row.id;
   }, []);
 
+  const [showReactivationModal, setShowReactivationModal] = useState(false);
+
   const columns = useMemo<Column<IResponseUser>[]>(
     () => [
       {
@@ -163,9 +173,7 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
               <StyledUserNameColumnIcon>{icon}</StyledUserNameColumnIcon>
 
               {!verified ? (
-                <div style={{ width: "100%", textAlign: "center" }}>
-                  <StyledNotActiveText>{"not activated"}</StyledNotActiveText>
-                </div>
+                <StyledNotActiveText>{"not activated"}</StyledNotActiveText>
               ) : (
                 <StyledUserNameColumnText>
                   <b>{name}</b>
@@ -183,11 +191,7 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
           const { id, name, email, role, verified } = row.original;
           return (
             <>
-              {!verified ? (
-                <div style={{ width: "100%", textAlign: "center" }}>
-                  {/* <StyledNotActiveText>{"not activated"}</StyledNotActiveText> */}
-                </div>
-              ) : (
+              {verified && (
                 <Input
                   value={name}
                   onChangeFn={async (newValue: string) => {
@@ -206,15 +210,20 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
         Header: "Email",
         id: "Email",
         Cell: ({ row }: CellType) => {
-          const { id, name, email, role } = row.original;
+          const { id, name, email, role, verified } = row.original;
           return (
             <Input
               value={email}
               onChangeFn={async (newValue: string) => {
-                userMutation.mutate({
-                  id: id,
-                  email: newValue,
-                });
+                if (!verified) {
+                  setShowReactivationModal(true);
+                  // setEmailTemp(email);
+                } else {
+                  userMutation.mutate({
+                    id: id,
+                    email: newValue,
+                  });
+                }
               }}
             />
           );
@@ -541,6 +550,41 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
           <UsersUtils users={data} />
         </>
       )}
+
+      <Modal
+        showModal={showReactivationModal}
+        onClose={() => setShowReactivationModal(false)}
+      >
+        <ModalContent>
+          <div style={{ display: "flex", alignItems: "center" }}>
+            <span style={{ width: "14rem" }}>
+              <TiWarning size={40} />
+            </span>
+            <p>
+              After changing the email address, a new activation email will be
+              sent. The old activation mail will not be valid anymore. Do you
+              want to proceed and change the email for this user?
+            </p>
+          </div>
+        </ModalContent>
+        <ModalFooter>
+          <ButtonGroup>
+            <Button
+              label="cancel"
+              color="success"
+              onClick={() => {
+                queryClient.invalidateQueries(["users"]);
+                setShowReactivationModal(false);
+              }}
+            />
+            <Button
+              label="submit"
+              color="danger"
+              // onClick={() => api.activation()}
+            />
+          </ButtonGroup>
+        </ModalFooter>
+      </Modal>
 
       <Submit
         title={`Delete User ${removingUser ? removingUser.name : ""}`}
