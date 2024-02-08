@@ -439,11 +439,35 @@ export default Router()
           throw new UserNotUnique("username is in use");
         }
 
+        // email changed for non-verified user - regenerate hash & send activation email again
+        const initialEmailChanged = data.email && data.email !== existingUser.email && !existingUser.verified;
+        if (initialEmailChanged) {
+          data.hash = existingUser.generateHash();
+          existingUser.email = data.email as string; // condition passed above
+        }
+
         const result = await existingUser.update(req.db.connection, {
           ...data,
         });
-
+      
         if (result.replaced || result.unchanged) {
+          if (initialEmailChanged) {
+            try {
+              await mailer.sendTemplate(
+                existingUser.email,
+                accountCreatedTemplate(
+                  existingUser.email,
+                  `/activate?hash=${existingUser.hash}&email=${existingUser.email}`
+                )
+              );
+            } catch (e) {
+              throw new EmailError(
+                "please check the logs",
+                (e as Error).toString()
+              );
+            }
+          }
+          
           return {
             result: true,
           };
