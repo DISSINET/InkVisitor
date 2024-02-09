@@ -243,7 +243,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                   <ModalInputLabel>{"new password"}</ModalInputLabel>
                   <ModalInputWrap width={165}>
                     <Input
-                      password
+                      type="password"
                       width="full"
                       changeOnType
                       value={newPassword}
@@ -253,7 +253,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                   <ModalInputLabel>{"repeat password"}</ModalInputLabel>
                   <ModalInputWrap width={165}>
                     <Input
-                      password
+                      type="password"
                       width="full"
                       changeOnType
                       value={repeatPassword}
