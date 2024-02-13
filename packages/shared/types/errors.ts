@@ -120,7 +120,7 @@ class UserBadActivationHash extends CustomError {
 }
 
 /**
- * UserDoesNotExits will be thrown when attempting to remove/update the user entry, which does not exist
+ * UserNotActiveError
  */
 class UserNotActiveError extends CustomError {
   public static code = 403;

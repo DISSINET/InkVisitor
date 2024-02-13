@@ -14,6 +14,7 @@ import {
   StyledEmailSent,
   StyledTbMailFilled,
 } from "./LoginScreensStyles";
+import { IErrorSignature, getErrorByCode } from "@shared/types/errors";
 
 const USER_DONT_EXIST_ERROR = "User with this email does not exist";
 const INVALID_EMAIL_ERROR = "Invalid email entered";
@@ -47,9 +48,10 @@ export const PasswordRecoverScreen: React.FC<PasswordRecoverScreen> = ({
         setRestartScreen(true);
       }
     } catch (err) {
-      if (err && (err as any).error === "UserDoesNotExits") {
-        setError(USER_DONT_EXIST_ERROR);
-      }
+      setError(getErrorByCode(err as IErrorSignature).message);
+      // if (err && (err as any).error === "UserDoesNotExits") {
+      //   setError(USER_DONT_EXIST_ERROR);
+      // }
     }
   };
 

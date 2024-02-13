@@ -66,7 +66,7 @@ export default Router()
 
         const user = await User.getUserByEmail(request.db.connection, email);
         if (!user) {
-          throw new UserDoesNotExits("user does not exist", "");
+          throw new UserDoesNotExits("User with this email does not exist", "");
         }
 
         user.generateHash();
@@ -440,7 +440,10 @@ export default Router()
         }
 
         // email changed for non-verified user - regenerate hash & send activation email again
-        const initialEmailChanged = data.email && data.email !== existingUser.email && !existingUser.verified;
+        const initialEmailChanged =
+          data.email &&
+          data.email !== existingUser.email &&
+          !existingUser.verified;
         if (initialEmailChanged) {
           data.hash = existingUser.generateHash();
           existingUser.email = data.email as string; // condition passed above
@@ -449,7 +452,7 @@ export default Router()
         const result = await existingUser.update(req.db.connection, {
           ...data,
         });
-      
+
         if (result.replaced || result.unchanged) {
           if (initialEmailChanged) {
             try {
@@ -467,7 +470,7 @@ export default Router()
               );
             }
           }
-          
+
           return {
             result: true,
           };

@@ -57,7 +57,7 @@ export const Button: React.FC<ButtonProps> = ({
   fullWidth = false,
   tooltipPosition = "bottom",
   hideTooltipOnClick = false,
-  paddingX,
+  paddingX = false,
 }) => {
   const [referenceElement, setReferenceElement] =
     useState<HTMLButtonElement | null>(null);
@@ -85,6 +85,7 @@ export const Button: React.FC<ButtonProps> = ({
         onMouseEnter={() => setShowTooltip(true)}
         onMouseLeave={() => setShowTooltip(false)}
         onKeyPress={(e: KeyboardEvent<HTMLButtonElement>) => e.preventDefault()}
+        paddingX={paddingX}
       >
         {icon}
         {label && (

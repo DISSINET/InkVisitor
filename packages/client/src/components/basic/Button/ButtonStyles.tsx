@@ -13,6 +13,7 @@ interface IButtonStyle {
   disabled?: boolean;
   radiusLeft?: boolean;
   radiusRight?: boolean;
+  paddingX: boolean;
 }
 export const StyledButton = styled.button.attrs(({ ref }) => ({
   ref: ref,
@@ -25,6 +26,8 @@ export const StyledButton = styled.button.attrs(({ ref }) => ({
   font-weight: ${({ disabled, textRegular }) =>
     disabled ? 400 : textRegular ? 500 : 900};
   padding: ${space1} ${({ hasIcon }) => (hasIcon ? space1 : space2)};
+  padding-left: ${({ paddingX }) => (paddingX ? "0.5rem" : "")};
+  padding-right: ${({ paddingX }) => (paddingX ? "0.5rem" : "")};
   border-color: ${({ theme, disabled, $color }) =>
     disabled ? theme.color["gray"][400] : theme.color[$color]};
   border-width: ${({ noBorder }) => (noBorder ? 0 : "thin")};

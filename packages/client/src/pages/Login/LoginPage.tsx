@@ -45,6 +45,7 @@ export const LoginPage: React.FC = () => {
                 selected: !logInPage,
               },
             ]}
+            paddingX
           />
         </StyledAttrBtnGroupWrap>
         {logInPage ? (

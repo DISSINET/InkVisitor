@@ -16,19 +16,18 @@ interface AttributeButtonGroup {
   }[];
   disabled?: boolean;
   noMargin?: boolean;
+  paddingX?: boolean;
 }
 
 export const AttributeButtonGroup: React.FC<AttributeButtonGroup> = ({
   options = [],
   disabled = false,
   noMargin = false,
+  paddingX = false,
 }) => {
   return disabled ? (
     <StyledButtonWrap leftMargin={!noMargin} rightMargin={!noMargin}>
-      <Button
-        disabled
-        label={options.find((o) => o.selected)?.longValue}
-      ></Button>
+      <Button disabled label={options.find((o) => o.selected)?.longValue} />
     </StyledButtonWrap>
   ) : (
     <StyledPropButtonGroup
@@ -67,6 +66,7 @@ export const AttributeButtonGroup: React.FC<AttributeButtonGroup> = ({
                 option.onClick();
               }
             }}
+            paddingX={paddingX}
           />
         );
       })}

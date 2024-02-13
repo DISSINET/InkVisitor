@@ -13,6 +13,7 @@ import {
   StyledInputRow,
   StyledTbMailFilled,
 } from "./LoginScreensStyles";
+import { IErrorSignature, getErrorByCode } from "@shared/types/errors";
 
 const WRONG_USERNAME_ERROR = "wrong email / username";
 const WRONG_PASSWORD_ERROR = "wrong password";
@@ -44,8 +45,8 @@ export const LoginScreen: React.FC<LoginScreen> = ({
         setRedirectToMain(true);
       }
     } catch (err) {
-      // if (err && (err as any).error === "UserDoesNotExits") {
-      if (err && (err as any).error === "ReferenceError") {
+      // setError(getErrorByCode(err as IErrorSignature).message);
+      if (err && (err as any).error === "UserDoesNotExits") {
         // wrong username
         setError(WRONG_USERNAME_ERROR);
       } else if (err && (err as any).error === "BadCredentialsError") {

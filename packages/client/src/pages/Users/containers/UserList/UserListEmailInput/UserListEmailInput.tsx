@@ -45,7 +45,6 @@ export const UserListEmailInput: React.FC<UserListEmailInput> = ({
       }
     } catch (err) {
       console.log(err);
-      console.log(localEmail);
     }
   };
 

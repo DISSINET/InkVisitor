@@ -16,6 +16,7 @@ import {
   StyledFaTag,
   StyledUserActivatedDescription,
 } from "./ActivateSreensStyles";
+import { IErrorSignature, getErrorByCode } from "@shared/types/errors";
 
 const USERNAME_ALREADY_USED_ERROR = `Username is already used. 
 Please select a new one.`;
@@ -59,11 +60,15 @@ export const UsernameScreen: React.FC<UsernameScreen> = ({
           setContinueScreen(true);
         }
       } catch (err) {
-        if (err && (err as any).error === "UserNotUnique") {
-          setError(USERNAME_ALREADY_USED_ERROR);
-        } else {
-          setError(INVALID_ACTION_LINK);
-        }
+        // TODO: does it handles INVALID_ACTION_LINK?
+        // TODO2: UserNotUnique should point only to username already used
+        setError(getErrorByCode(err as IErrorSignature).message);
+
+        // if (err && (err as any).error === "UserNotUnique") {
+        //   setError(USERNAME_ALREADY_USED_ERROR);
+        // } else {
+        //   setError(INVALID_ACTION_LINK);
+        // }
       }
     }
   };
