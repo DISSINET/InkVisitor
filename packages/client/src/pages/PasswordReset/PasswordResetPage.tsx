@@ -1,7 +1,7 @@
 import {
-  PASSWORDS_DONT_MATCH_ERROR,
-  UNSAFE_PASSWORD_ERROR,
-} from "Theme/constants";
+  PasswordDoesNotMatchError,
+  UnsafePasswordError,
+} from "@shared/types/errors";
 import api from "api";
 import {
   Button,
@@ -47,7 +47,7 @@ export const PasswordResetPage: React.FC<PasswordResetPage> = ({}) => {
 
   const handleReset = async () => {
     if (password !== passwordRepeat) {
-      setError(PASSWORDS_DONT_MATCH_ERROR);
+      setError(PasswordDoesNotMatchError.message);
     } else {
       try {
         const res = await api.passwordSetRequest(
@@ -59,6 +59,7 @@ export const PasswordResetPage: React.FC<PasswordResetPage> = ({}) => {
           setPasswordSent(true);
         }
       } catch (err) {
+        // TODO: how to distinguish invalid link error from e.g. server is down
         setError(INVALID_LINK_ERROR);
       }
     }
@@ -66,9 +67,9 @@ export const PasswordResetPage: React.FC<PasswordResetPage> = ({}) => {
 
   useEffect(() => {
     if (password.length > 0 && !isSafePassword(password)) {
-      setError(UNSAFE_PASSWORD_ERROR);
+      setError(UnsafePasswordError.message);
     } else if (passwordRepeat.length > 0 && password !== passwordRepeat) {
-      setError(PASSWORDS_DONT_MATCH_ERROR);
+      setError(PasswordDoesNotMatchError.message);
     } else {
       setError(false);
     }
@@ -129,8 +130,8 @@ export const PasswordResetPage: React.FC<PasswordResetPage> = ({}) => {
               <StyledButtonWrap>
                 <Button
                   disabled={
-                    error === UNSAFE_PASSWORD_ERROR ||
-                    error === PASSWORDS_DONT_MATCH_ERROR ||
+                    error === UnsafePasswordError.message ||
+                    error === PasswordDoesNotMatchError.message ||
                     password.length === 0 ||
                     passwordRepeat.length === 0
                   }

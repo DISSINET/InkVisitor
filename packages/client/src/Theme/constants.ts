@@ -40,10 +40,6 @@ export const maxTooltipMultiRelations = 5;
 
 export const tooltipLabelSeparator = " • ";
 
-// ERRORS
-export const UNSAFE_PASSWORD_ERROR = "The entered password is not safe.";
-export const PASSWORDS_DONT_MATCH_ERROR = "Passwords do not match.";
-
 // animations
 export const springConfig: { [key: string]: {} } = {
   panelExpand: { tension: 195, friction: 31 },

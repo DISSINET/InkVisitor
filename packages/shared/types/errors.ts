@@ -354,6 +354,34 @@ class DocumentDoesNotExist extends CustomError {
 }
 
 /**
+ * Will be thrown when passwords is not safe
+ */
+class UnsafePasswordError extends CustomError {
+  public static code = 400;
+  public static title = "Unsafe password";
+  public static message = "The entered password is not safe.";
+}
+
+/**
+ * Will be thrown when passwords don't match
+ */
+class PasswordDoesNotMatchError extends CustomError {
+  public static code = 400;
+  public static title = "Unsafe password";
+  public static message = "Passwords do not match.";
+}
+
+/**
+ * Will be thrown when hash is invalid
+ */
+class InvalidLinkError extends CustomError {
+  public static code = 400;
+  public static title = "Invalid link";
+  public static message =
+    "Password reset unsuccessful. Please verify the validity of the recovery link and try again. If the problem persists, contact our support team for assistance.";
+}
+
+/**
  * UnknownError works as a backup
  */
 class UnknownError extends CustomError {
@@ -397,6 +425,9 @@ const allErrors: Record<string, any> = {
   RelationDoesNotExist,
   DocumentDoesNotExist,
   NetworkError,
+  UnsafePasswordError,
+  PasswordDoesNotMatchError,
+  InvalidLinkError,
 };
 
 export interface IErrorSignature {
@@ -438,4 +469,7 @@ export {
   RelationDoesNotExist,
   DocumentDoesNotExist,
   NetworkError,
+  UnsafePasswordError,
+  PasswordDoesNotMatchError,
+  InvalidLinkError,
 };

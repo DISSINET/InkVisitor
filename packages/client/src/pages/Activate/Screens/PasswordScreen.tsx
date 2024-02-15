@@ -1,7 +1,7 @@
 import {
-  PASSWORDS_DONT_MATCH_ERROR,
-  UNSAFE_PASSWORD_ERROR,
-} from "Theme/constants";
+  PasswordDoesNotMatchError,
+  UnsafePasswordError,
+} from "@shared/types/errors";
 import { Button, Input, ModalInputWrap } from "components";
 import {
   StyledButtonWrap,
@@ -39,9 +39,9 @@ export const PasswordScreen: React.FC<PasswordScreen> = ({
 
   useEffect(() => {
     if (password.length > 0 && !isSafePassword(password)) {
-      setError(UNSAFE_PASSWORD_ERROR);
+      setError(UnsafePasswordError.message);
     } else if (passwordRepeat.length > 0 && password !== passwordRepeat) {
-      setError(PASSWORDS_DONT_MATCH_ERROR);
+      setError(PasswordDoesNotMatchError.message);
     } else {
       setError(false);
     }
@@ -49,7 +49,7 @@ export const PasswordScreen: React.FC<PasswordScreen> = ({
 
   const handleContinue = async () => {
     if (password !== passwordRepeat) {
-      setError(PASSWORDS_DONT_MATCH_ERROR);
+      setError(PasswordDoesNotMatchError.message);
     } else {
       setUsernameScreen(true);
     }
@@ -103,8 +103,8 @@ export const PasswordScreen: React.FC<PasswordScreen> = ({
       <StyledButtonWrap>
         <Button
           disabled={
-            error === UNSAFE_PASSWORD_ERROR ||
-            error === PASSWORDS_DONT_MATCH_ERROR ||
+            error === UnsafePasswordError.message ||
+            error === PasswordDoesNotMatchError.message ||
             password.length === 0 ||
             passwordRepeat.length === 0
           }
