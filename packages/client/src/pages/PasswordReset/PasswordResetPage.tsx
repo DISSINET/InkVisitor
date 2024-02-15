@@ -45,6 +45,25 @@ export const PasswordResetPage: React.FC<PasswordResetPage> = ({}) => {
   const [error, setError] = useState<false | string>(false);
   const [passwordSent, setPasswordSent] = useState(false);
 
+  // TODO: test hash
+  // const testHash = async () => {
+  //   try {
+  //     const res = await api.activationExists(hash, { ignoreErrorToast: true });
+  //     if (res.data.result) {
+  //       setHashOk(true);
+  //     } else {
+  //       toast.warning(HASH_INVALID_ERROR);
+  //     }
+  //   } catch (e) {
+  //     setHashOk(false);
+  //     setError(getErrorByCode(e as IErrorSignature).message);
+  //   }
+  // };
+
+  // useEffect(() => {
+  //   testHash();
+  // }, []);
+
   const handleReset = async () => {
     if (password !== passwordRepeat) {
       setError(PasswordDoesNotMatchError.message);

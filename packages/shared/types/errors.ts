@@ -371,6 +371,12 @@ class PasswordDoesNotMatchError extends CustomError {
   public static message = "Passwords do not match.";
 }
 
+class ActivationHashInvalidError extends CustomError {
+  public static code = 400;
+  public static title = "Invalid hash";
+  public static message = "Activation hash invalid";
+}
+
 /**
  * Will be thrown when hash is invalid
  */
@@ -428,6 +434,7 @@ const allErrors: Record<string, any> = {
   UnsafePasswordError,
   PasswordDoesNotMatchError,
   InvalidLinkError,
+  ActivationHashInvalidError,
 };
 
 export interface IErrorSignature {
@@ -472,4 +479,5 @@ export {
   UnsafePasswordError,
   PasswordDoesNotMatchError,
   InvalidLinkError,
+  ActivationHashInvalidError,
 };

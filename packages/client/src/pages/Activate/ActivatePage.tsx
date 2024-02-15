@@ -4,12 +4,15 @@ import { PasswordScreen } from "./screens/PasswordScreen";
 import { UsernameScreen } from "./screens/UsernameScreen";
 import api from "api";
 import { toast } from "react-toastify";
-import { IErrorSignature, getErrorByCode } from "@shared/types/errors";
+import {
+  ActivationHashInvalidError,
+  IErrorSignature,
+  UserBadActivationHash,
+  getErrorByCode,
+} from "@shared/types/errors";
 import { StyledError } from "./ActivatePageStyles";
 import { useNavigate } from "react-router";
 import { TbArrowForwardUp } from "react-icons/tb";
-
-const HASH_INVALID_ERROR = "Activation hash invalid";
 
 const ActivatePage: React.FC = ({}) => {
   const navigate = useNavigate();
@@ -28,7 +31,8 @@ const ActivatePage: React.FC = ({}) => {
       if (res.data.result) {
         setHashOk(true);
       } else {
-        toast.warning(HASH_INVALID_ERROR);
+        // const HASH_INVALID_ERROR = "Activation hash invalid"
+        toast.warning(ActivationHashInvalidError.message);
       }
     } catch (e) {
       setHashOk(false);
@@ -69,14 +73,17 @@ const ActivatePage: React.FC = ({}) => {
           {error && (
             <>
               <StyledError>{error}</StyledError>
-              <Button
-                color="success"
-                icon={
-                  <TbArrowForwardUp style={{ transform: "rotate(180deg)" }} />
-                }
-                label="back to login"
-                onClick={() => navigate("/login")}
-              />
+              {/* TODO: jak zajistit ze to vzdy prijde z BE jako UserBadActivationHash */}
+              {error === UserBadActivationHash.message && (
+                <Button
+                  color="success"
+                  icon={
+                    <TbArrowForwardUp style={{ transform: "rotate(180deg)" }} />
+                  }
+                  label="back to login"
+                  onClick={() => navigate("/login")}
+                />
+              )}
             </>
           )}
 

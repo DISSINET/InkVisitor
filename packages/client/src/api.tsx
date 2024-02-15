@@ -21,6 +21,7 @@ import {
   IResponseDocumentDetail,
 } from "@shared/types";
 import * as errors from "@shared/types/errors";
+import { NetworkError } from "@shared/types/errors";
 import { IRequestSearch } from "@shared/types/request-search";
 import { defaultPing } from "Theme/constants";
 import axios, {
@@ -187,6 +188,14 @@ class Api {
     return this.ping;
   }
 
+  handleError = (err: any | AxiosError) => {
+    if (axios.isAxiosError(err)) {
+      return err.response?.data || new NetworkError();
+    } else {
+      return new NetworkError();
+    }
+  };
+
   responseToError(responseData: unknown): errors.IErrorSignature {
     const out = {
       error: "",
@@ -304,8 +313,8 @@ class Api {
         toast.success("Logged in");
       }
       return { ...response.data };
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -334,8 +343,8 @@ class Api {
         options
       );
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -355,8 +364,8 @@ class Api {
         options
       );
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -367,8 +376,8 @@ class Api {
     try {
       const response = await this.connection.get(`/users/${userId}`, options);
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -382,8 +391,8 @@ class Api {
         options
       );
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -396,8 +405,8 @@ class Api {
     try {
       const response = await this.connection.post(`/users`, userData, options);
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -413,8 +422,8 @@ class Api {
         options
       );
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -428,8 +437,8 @@ class Api {
         options
       );
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -447,8 +456,8 @@ class Api {
         options
       );
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -470,8 +479,8 @@ class Api {
         options
       );
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -491,8 +500,8 @@ class Api {
         `/users/me/emails/test?email=${testEmail}`
       );
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -510,8 +519,8 @@ class Api {
         options
       );
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -529,8 +538,8 @@ class Api {
         options
       );
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -547,8 +556,8 @@ class Api {
         params: filter,
       });
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -563,9 +572,8 @@ class Api {
         options
       );
       return response;
-    } catch (err: any | AxiosError) {
-      console.log(err);
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -580,9 +588,8 @@ class Api {
         options
       );
       return response;
-    } catch (err: any | AxiosError) {
-      console.log(err);
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -598,8 +605,8 @@ class Api {
         options
       );
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -613,8 +620,8 @@ class Api {
         options
       );
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -626,8 +633,8 @@ class Api {
         `/entities/${entityId}/restore`
       );
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -645,8 +652,8 @@ class Api {
         options
       );
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -658,8 +665,8 @@ class Api {
     try {
       const response = await this.connection.get(`/tree`, options);
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -680,8 +687,8 @@ class Api {
         options
       );
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -699,8 +706,8 @@ class Api {
         options
       );
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -718,8 +725,8 @@ class Api {
         options
       );
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -737,8 +744,8 @@ class Api {
         options
       );
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -755,8 +762,8 @@ class Api {
         options
       );
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -774,8 +781,8 @@ class Api {
         options
       );
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -791,8 +798,8 @@ class Api {
         options
       );
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -810,8 +817,8 @@ class Api {
         options
       );
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -830,8 +837,8 @@ class Api {
       );
       // response.data.data should have list of new ids
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -847,8 +854,8 @@ class Api {
         options
       );
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -864,8 +871,8 @@ class Api {
         options
       );
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -879,8 +886,8 @@ class Api {
     try {
       const response = await this.connection.get(`/acls`, options);
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -896,8 +903,8 @@ class Api {
         options
       );
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -919,8 +926,8 @@ class Api {
         options
       );
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -934,8 +941,8 @@ class Api {
         options
       );
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -954,8 +961,8 @@ class Api {
         options
       );
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -970,8 +977,8 @@ class Api {
         options
       );
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -985,8 +992,8 @@ class Api {
         options
       );
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -1004,8 +1011,8 @@ class Api {
         params: filter,
       });
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -1019,8 +1026,8 @@ class Api {
         options
       );
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -1034,8 +1041,8 @@ class Api {
         options
       );
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -1053,8 +1060,8 @@ class Api {
         options
       );
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -1073,8 +1080,8 @@ class Api {
         options
       );
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 }
