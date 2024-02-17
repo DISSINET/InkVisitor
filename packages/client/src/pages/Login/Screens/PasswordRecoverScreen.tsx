@@ -49,9 +49,6 @@ export const PasswordRecoverScreen: React.FC<PasswordRecoverScreen> = ({
       }
     } catch (err) {
       setError(getErrorByCode(err as IErrorSignature).message);
-      // if (err && (err as any).error === "UserDoesNotExits") {
-      //   setError(USER_DONT_EXIST_ERROR);
-      // }
     }
   };
 

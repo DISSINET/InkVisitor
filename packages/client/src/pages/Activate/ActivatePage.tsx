@@ -31,12 +31,14 @@ const ActivatePage: React.FC = ({}) => {
       if (res.data.result) {
         setHashOk(true);
       } else {
-        // const HASH_INVALID_ERROR = "Activation hash invalid"
-        toast.warning(ActivationHashInvalidError.message);
+        setError(ActivationHashInvalidError.message);
+        setHashOk(false);
       }
     } catch (e) {
+      // TODO: could be also network error
       setHashOk(false);
       setError(getErrorByCode(e as IErrorSignature).message);
+      // setError(ActivationHashInvalidError.message);
     }
   };
 
@@ -73,8 +75,7 @@ const ActivatePage: React.FC = ({}) => {
           {error && (
             <>
               <StyledError>{error}</StyledError>
-              {/* TODO: jak zajistit ze to vzdy prijde z BE jako UserBadActivationHash */}
-              {error === UserBadActivationHash.message && (
+              {!hashOk && (
                 <Button
                   color="success"
                   icon={

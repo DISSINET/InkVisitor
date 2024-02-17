@@ -371,16 +371,20 @@ class PasswordDoesNotMatchError extends CustomError {
   public static message = "Passwords do not match.";
 }
 
+/**
+ * Will be thrown when activation is unsuccessful due to invalid hash
+ */
 class ActivationHashInvalidError extends CustomError {
   public static code = 400;
   public static title = "Invalid hash";
-  public static message = "Activation hash invalid";
+  public static message =
+    "User activation unsuccessful. Please verify the validity of the actionation link and try again. If the problem persists, contact our support team for assistance.";
 }
 
 /**
- * Will be thrown when hash is invalid
+ * Will be thrown when password reset is unsuccessful due to invalid hash
  */
-class InvalidLinkError extends CustomError {
+class PasswordResetHashError extends CustomError {
   public static code = 400;
   public static title = "Invalid link";
   public static message =
@@ -433,7 +437,7 @@ const allErrors: Record<string, any> = {
   NetworkError,
   UnsafePasswordError,
   PasswordDoesNotMatchError,
-  InvalidLinkError,
+  PasswordResetHashError,
   ActivationHashInvalidError,
 };
 
@@ -478,6 +482,6 @@ export {
   NetworkError,
   UnsafePasswordError,
   PasswordDoesNotMatchError,
-  InvalidLinkError,
+  PasswordResetHashError,
   ActivationHashInvalidError,
 };

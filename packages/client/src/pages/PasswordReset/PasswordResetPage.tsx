@@ -1,6 +1,9 @@
 import {
+  IErrorSignature,
   PasswordDoesNotMatchError,
+  PasswordResetHashError,
   UnsafePasswordError,
+  getErrorByCode,
 } from "@shared/types/errors";
 import api from "api";
 import {
@@ -44,25 +47,27 @@ export const PasswordResetPage: React.FC<PasswordResetPage> = ({}) => {
   const [passwordRepeat, setPasswordRepeat] = useState("");
   const [error, setError] = useState<false | string>(false);
   const [passwordSent, setPasswordSent] = useState(false);
+  const [hashOk, setHashOk] = useState(false);
 
-  // TODO: test hash
-  // const testHash = async () => {
-  //   try {
-  //     const res = await api.activationExists(hash, { ignoreErrorToast: true });
-  //     if (res.data.result) {
-  //       setHashOk(true);
-  //     } else {
-  //       toast.warning(HASH_INVALID_ERROR);
-  //     }
-  //   } catch (e) {
-  //     setHashOk(false);
-  //     setError(getErrorByCode(e as IErrorSignature).message);
-  //   }
-  // };
+  const testHash = async () => {
+    try {
+      const res = await api.activationExists(hash, { ignoreErrorToast: true });
+      if (res.data.result) {
+        setHashOk(true);
+      } else {
+        setError(PasswordResetHashError.message);
+        setHashOk(false);
+      }
+    } catch (e) {
+      // TODO: distinguish e.g. network error (problem is that the error message is set to user activation)
+      setHashOk(false);
+      setError(PasswordResetHashError.message);
+    }
+  };
 
-  // useEffect(() => {
-  //   testHash();
-  // }, []);
+  useEffect(() => {
+    testHash();
+  }, []);
 
   const handleReset = async () => {
     if (password !== passwordRepeat) {
@@ -78,8 +83,7 @@ export const PasswordResetPage: React.FC<PasswordResetPage> = ({}) => {
           setPasswordSent(true);
         }
       } catch (err) {
-        // TODO: how to distinguish invalid link error from e.g. server is down
-        setError(INVALID_LINK_ERROR);
+        setError(getErrorByCode(err as IErrorSignature).message);
       }
     }
   };
@@ -100,65 +104,87 @@ export const PasswordResetPage: React.FC<PasswordResetPage> = ({}) => {
         <ModalContent column centered>
           {!passwordSent ? (
             <>
-              <p>Enter a new safe password for the user</p>
-              <StyledMail>
-                <TbMailFilled size={14} style={{ marginRight: "0.5rem" }} />
-                {email}
-              </StyledMail>
-              <StyledDescription>
-                A safe password: at least 12 characters, a combination of
-                uppercase letters, lowercase letters, numbers, and symbols.
-              </StyledDescription>
-              <form>
-                <ModalInputWrap>
-                  <StyledInputRow>
-                    <TbLockPlus size={16} style={{ marginRight: "0.3rem" }} />
-                    <Input
-                      type="password"
-                      placeholder="new password"
-                      onChangeFn={(text: string) => setPassword(text)}
-                      value={password}
-                      changeOnType
-                      autoFocus
-                      autocomplete="new-password"
-                      required
-                      borderColor={error !== false ? "danger" : undefined}
-                    />
-                  </StyledInputRow>
-                </ModalInputWrap>
-                <ModalInputWrap>
-                  <StyledInputRow>
-                    <TbLockExclamation
-                      size={16}
-                      style={{ marginRight: "0.3rem" }}
-                    />
-                    <Input
-                      type="password"
-                      placeholder="repeat password"
-                      onChangeFn={(text: string) => setPasswordRepeat(text)}
-                      value={passwordRepeat}
-                      changeOnType
-                      autocomplete="new-password"
-                      required
-                      borderColor={error !== false ? "danger" : undefined}
-                    />
-                  </StyledInputRow>
-                </ModalInputWrap>
-              </form>
+              {hashOk && (
+                <>
+                  <p>Enter a new safe password for the user</p>
+                  <StyledMail>
+                    <TbMailFilled size={14} style={{ marginRight: "0.5rem" }} />
+                    {email}
+                  </StyledMail>
+                  <StyledDescription>
+                    A safe password: at least 12 characters, a combination of
+                    uppercase letters, lowercase letters, numbers, and symbols.
+                  </StyledDescription>
+                  <form>
+                    <ModalInputWrap>
+                      <StyledInputRow>
+                        <TbLockPlus
+                          size={16}
+                          style={{ marginRight: "0.3rem" }}
+                        />
+                        <Input
+                          type="password"
+                          placeholder="new password"
+                          onChangeFn={(text: string) => setPassword(text)}
+                          value={password}
+                          changeOnType
+                          autoFocus
+                          autocomplete="new-password"
+                          required
+                          borderColor={error !== false ? "danger" : undefined}
+                        />
+                      </StyledInputRow>
+                    </ModalInputWrap>
+                    <ModalInputWrap>
+                      <StyledInputRow>
+                        <TbLockExclamation
+                          size={16}
+                          style={{ marginRight: "0.3rem" }}
+                        />
+                        <Input
+                          type="password"
+                          placeholder="repeat password"
+                          onChangeFn={(text: string) => setPasswordRepeat(text)}
+                          value={passwordRepeat}
+                          changeOnType
+                          autocomplete="new-password"
+                          required
+                          borderColor={error !== false ? "danger" : undefined}
+                        />
+                      </StyledInputRow>
+                    </ModalInputWrap>
+                  </form>
+                </>
+              )}
+
               {error !== false && <StyledErrorText>{error}</StyledErrorText>}
+
               <StyledButtonWrap>
-                <Button
-                  disabled={
-                    error === UnsafePasswordError.message ||
-                    error === PasswordDoesNotMatchError.message ||
-                    password.length === 0 ||
-                    passwordRepeat.length === 0
-                  }
-                  icon={<BsEnvelopeArrowUpFill />}
-                  label="Reset Password"
-                  color="success"
-                  onClick={handleReset}
-                />
+                {hashOk ? (
+                  <Button
+                    disabled={
+                      error === UnsafePasswordError.message ||
+                      error === PasswordDoesNotMatchError.message ||
+                      password.length === 0 ||
+                      passwordRepeat.length === 0
+                    }
+                    icon={<BsEnvelopeArrowUpFill />}
+                    label="Reset Password"
+                    color="success"
+                    onClick={handleReset}
+                  />
+                ) : (
+                  <Button
+                    color="success"
+                    icon={
+                      <TbArrowForwardUp
+                        style={{ transform: "rotate(180deg)" }}
+                      />
+                    }
+                    label="back to login"
+                    onClick={() => navigate("/login")}
+                  />
+                )}
               </StyledButtonWrap>
             </>
           ) : (
