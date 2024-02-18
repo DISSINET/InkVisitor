@@ -1,16 +1,24 @@
 import Viewport from "./Viewport";
 import Cursor, { IAbsCoordinates } from "./Cursor";
 
+interface Segment {
+  lineStart: number; // incl.
+  lineEnd: number; // incl.
+  text: string;
+  lines: string[];
+}
 /**
  * Text provides more abstract control over the provided raw text
  */
 class Text {
+  segments: Segment[];
   value: string;
   charsAtLine: number;
-  _lines: string[] = [];
 
   constructor(value: string, charsAtLine: number) {
     this.value = value;
+    this.segments = [];
+    this.prepareSegments();
     this.charsAtLine = charsAtLine;
     this.calculateLines();
   }
@@ -20,11 +28,28 @@ class Text {
   }
 
   get noLines(): number {
-    return this._lines.length;
+    return this.segments.reduce<number>((a, c) => a + c.lines.length, 0);
   }
 
   get lines(): string[] {
-    return this._lines;
+    return this.segments.reduce<string[]>((a, cur) => a.concat(cur.lines), []);
+  }
+
+  prepareSegments() {
+    const segmentsArray = this.value.split("\n");
+    const segments: Segment[] = [];
+
+    for (let i = 0; i < segmentsArray.length; i++) {
+      const segmentText = segmentsArray[i];
+      segments.push({
+        text: segmentText,
+        lineEnd: -1,
+        lineStart: -1,
+        lines: [],
+      });
+    }
+
+    this.segments = segments;
   }
 
   /**
@@ -33,34 +58,39 @@ class Text {
    */
   calculateLines(): void {
     const time1 = performance.now();
-    const words = this.value.split(" ");
-    const lines = [];
-    let currentLine: string[] = [];
-    let currentLineLength = 0;
+    const currentLineNumber: number = 0;
+    for (const segment of this.segments) {
+      segment.lineStart = currentLineNumber;
+      segment.lines = [];
 
-    for (let i = 0; i < words.length; i++) {
-      const word = words[i];
-      const wordLength = word.length;
-      if (currentLineLength + wordLength > this.charsAtLine) {
-        // Join the current line into a string and push it to lines
-        lines.push(currentLine.join(" "));
-        currentLine = [word]; // Start a new line with the current word
-        currentLineLength = wordLength + 1; // Reset the length (+1 for the space)
-      } else {
-        currentLine.push(word);
-        currentLineLength += wordLength + 1; // +1 for the space
+      const words = segment.text.split(" ");
+      let currentLine: string[] = [];
+      let currentLineLength = 0;
+
+      for (let i = 0; i < words.length; i++) {
+        const word = words[i];
+        const wordLength = word.length;
+        if (currentLineLength + wordLength > this.charsAtLine) {
+          // Join the current line into a string and push it to lines
+          segment.lines.push(currentLine.join(" "));
+          currentLine = [word]; // Start a new line with the current word
+          currentLineLength = wordLength + 1; // Reset the length (+1 for the space)
+        } else {
+          currentLine.push(word);
+          currentLineLength += wordLength + 1; // +1 for the space
+        }
+
+        if (i + 1 === words.length) {
+          // Add the last line if it's not empty
+          if (currentLine.length > 0) {
+            segment.lines.push(currentLine.join(" "));
+          }
+        }
       }
-    }
-
-    // Add the last line if it's not empty
-    if (currentLine.length > 0) {
-      lines.push(currentLine.join(" "));
     }
 
     const time2 = performance.now();
     console.log(`${time2 - time1} ms `);
-
-    this._lines = lines;
   }
 
   /**
@@ -105,7 +135,7 @@ class Text {
    * @param cursor
    * @returns
    */
-  getCursorWord(cursor: Cursor): string {
+  getCursorWord(cursor?: Cursor): string {
     return "";
   }
 

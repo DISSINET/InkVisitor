@@ -103,6 +103,10 @@ export class Canvas {
     ];
 
     switch (e.key) {
+      case "Enter":
+        this.text.insertText(this.viewport, this.cursor, "\n");
+        break;
+
       case "ArrowUp":
         this.cursor.move(0, -1);
         if (this.cursor.yLine < 0) {
