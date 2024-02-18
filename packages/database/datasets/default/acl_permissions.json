@@ -119,7 +119,14 @@
   },
   {
     "controller": "users",
-    "route": "password_reset",
+    "route": "password_reset/:hash",
+    "method": "GET",
+    "roles": [],
+    "public": true
+  },
+  {
+    "controller": "users",
+    "route": "password_reset/:hash",
     "method": "PUT",
     "roles": [],
     "public": true

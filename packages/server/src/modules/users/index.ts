@@ -78,7 +78,7 @@ export default Router()
             email,
             passwordResetRequestTemplate(
               user.email,
-              `/password_reset?hash=${user.hash}&email=${user.email}`
+              `/password_reset/${user.hash}?email=${user.email}`
             )
           );
         } catch (e) {
@@ -96,9 +96,11 @@ export default Router()
     )
   )
   .put(
-    "/password_reset",
+    "/password_reset/:hash",
     asyncRouteHandler<IResponseGeneric>(
-      async (request: IRequest<any, IRequestPasswordResetData, any>) => {
+      async (
+        request: IRequest<unknown, IRequestPasswordResetData, { hash: string }>
+      ) => {
         const hash = request.query.hash;
         const password = request.body.password;
         const passwordRepeat = request.body.passwordRepeat;
@@ -122,6 +124,60 @@ export default Router()
         return {
           result: true,
           message: "Your password has been reset",
+        };
+      }
+    )
+  )
+  .put(
+    "/password_reset/:hash",
+    asyncRouteHandler<IResponseGeneric>(
+      async (
+        request: IRequest<unknown, IRequestPasswordResetData, { hash: string }>
+      ) => {
+        const hash = request.query.hash;
+        const password = request.body.password;
+        const passwordRepeat = request.body.passwordRepeat;
+
+        if (!hash) {
+          throw new BadParams("hash is required");
+        }
+
+        if (!password || password !== passwordRepeat) {
+          throw new BadParams("mismatched or empty passwords");
+        }
+
+        const user = await User.getUserByHash(request.db.connection, hash);
+        if (!user) {
+          throw new UserDoesNotExits("user for provided hash not found", "");
+        }
+
+        user.setPassword(password);
+        await user.update(request.db.connection, { password: user.password });
+
+        return {
+          result: true,
+          message: "Your password has been reset",
+        };
+      }
+    )
+  )
+  .get(
+    "/password_reset/:hash",
+    asyncRouteHandler<IResponseGeneric>(
+      async (request: IRequest<{ hash: string }>) => {
+        const hash = request.params.hash;
+
+        if (!hash) {
+          throw new BadParams("hash is required");
+        }
+
+        if (!hash) {
+          throw new BadParams("empty hash parameter");
+        }
+
+        const user = await User.getUserByHash(request.db.connection, hash);
+        return {
+          result: !!user,
         };
       }
     )

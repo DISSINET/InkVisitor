@@ -356,7 +356,7 @@ class Api {
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
       const response = await this.connection.put(
-        `/users/password_reset?hash=${hash}`,
+        `/users/password_reset/${hash}`,
         {
           password,
           passwordRepeat,
@@ -366,6 +366,21 @@ class Api {
       return response;
     } catch (err) {
       throw this.handleError(err);
+    }
+  }
+
+  async passwordTestRequest(
+    hash: string,
+    options?: IApiOptions
+  ): Promise<AxiosResponse<IResponseGeneric>> {
+    try {
+      const response = await this.connection.get(
+        `/users/password_reset/${hash}`,
+        options
+      );
+      return response;
+    } catch (err: any | AxiosError) {
+      throw { ...err.response.data };
     }
   }
 
