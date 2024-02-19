@@ -126,6 +126,13 @@
   },
   {
     "controller": "users",
+    "route": "password_reset",
+    "method": "GET",
+    "roles": [],
+    "public": true
+  },
+  {
+    "controller": "users",
     "route": ":userId/bookmarks",
     "method": "GET",
     "roles": ["*"]
