@@ -60,7 +60,6 @@ export const UsernameScreen: React.FC<UsernameScreen> = ({
           setContinueScreen(true);
         }
       } catch (err) {
-        // TODO: does it handles INVALID_ACTION_LINK?
         // TODO2: UserNotUnique should point only to username already used
         setError(getErrorByCode(err as IErrorSignature).message);
 
