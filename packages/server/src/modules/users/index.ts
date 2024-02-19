@@ -37,6 +37,132 @@ import { IRequest } from "src/custom_typings/request";
 export default Router()
   /**
    * @openapi
+   * /users/activation
+   *   post:
+   *     description: Validates the activation hash, switch user to active state and setup initial password
+   *     tags:
+   *       - users
+   *     parameters:
+   *       - in: query
+   *         name: hash
+   *         schema:
+   *           type: string
+   *         required: true
+   *         description: Hash for identyfing the user for which this activation should be done
+   *     requestBody:
+   *       description: data for password setup + username
+   *       content:
+   *         application/json:
+   *           schema:
+   *             $ref: "#/components/schemas/IRequestActivationData"
+   *     responses:
+   *       200:
+   *         description: Returns IResponseGeneric object
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/IResponseGeneric"
+   */
+  .post(
+    "/activation",
+    asyncRouteHandler<IResponseGeneric>(
+      async (
+        request: IRequest<
+          unknown,
+          Partial<IRequestActivationData>,
+          { hash: string }
+        >
+      ) => {
+        const hash = request.query.hash;
+        const password = request.body.password;
+        const passwordRepeat = request.body.passwordRepeat;
+        const username = request.body.username;
+
+        if (!hash) {
+          throw new BadParams("hash is required");
+        }
+
+        if (!password || password !== passwordRepeat) {
+          throw new BadParams("mismatched or empty passwords");
+        }
+
+        if (!username) {
+          throw new BadParams("username is required");
+        }
+
+        const user = await User.getUserByHash(request.db.connection, hash);
+        if (!user) {
+          throw new UserAlreadyActivated();
+        }
+
+        if (await User.findUserByLogin(request.db, username)) {
+          throw new UserNotUnique("username is in use");
+        }
+
+        user.setPassword(password);
+        const results = await user.update(request.db.connection, {
+          password: user.password,
+          hash: null,
+          active: true,
+          verified: true,
+          name: username,
+        });
+        if (!results.replaced && !results.unchanged) {
+          throw new InternalServerError("cannot update user");
+        }
+
+        return {
+          result: true,
+          message: "User activated.",
+        };
+      }
+    )
+  )
+  /**
+   * @openapi
+   * /users/activation
+   *   post:
+   *     description: Checks the validity of activation hash
+   *     tags:
+   *       - users
+   *     parameters:
+   *       - in: query
+   *         name: hash
+   *         schema:
+   *           type: string
+   *         required: true
+   *         description: hash value for activation representation
+   *     responses:
+   *       200:
+   *         description: Returns IResponseGeneric object
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/IResponseGeneric"
+   */
+  .get(
+    "/activation",
+    asyncRouteHandler<IResponseGeneric>(
+      async (request: IRequest<unknown, unknown, { hash: string }>) => {
+        const hash = request.query.hash;
+
+        if (!hash) {
+          throw new BadParams("hash is required");
+        }
+
+        const user = await User.getUserByHash(request.db.connection, hash);
+        if (!user) {
+          throw new UserBadActivationHash();
+        }
+
+        return {
+          result: true,
+        };
+      }
+    )
+  )
+  /**
+   * @openapi
    * /users/password_reset:
    *   post:
    *     description: Creates new hash-based password reset for user specified by email
@@ -572,132 +698,6 @@ export default Router()
         const result = await existingUser.delete(request.db.connection);
         if (!result.deleted) {
           throw new InternalServerError(`user ${userId} could not be removed`);
-        }
-
-        return {
-          result: true,
-        };
-      }
-    )
-  )
-  /**
-   * @openapi
-   * /users/activation
-   *   post:
-   *     description: Validates the activation hash, switch user to active state and setup initial password
-   *     tags:
-   *       - users
-   *     parameters:
-   *       - in: query
-   *         name: hash
-   *         schema:
-   *           type: string
-   *         required: true
-   *         description: Hash for identyfing the user for which this activation should be done
-   *     requestBody:
-   *       description: data for password setup + username
-   *       content:
-   *         application/json:
-   *           schema:
-   *             $ref: "#/components/schemas/IRequestActivationData"
-   *     responses:
-   *       200:
-   *         description: Returns IResponseGeneric object
-   *         content:
-   *           application/json:
-   *             schema:
-   *               $ref: "#/components/schemas/IResponseGeneric"
-   */
-  .post(
-    "/activation",
-    asyncRouteHandler<IResponseGeneric>(
-      async (
-        request: IRequest<
-          unknown,
-          Partial<IRequestActivationData>,
-          { hash: string }
-        >
-      ) => {
-        const hash = request.query.hash;
-        const password = request.body.password;
-        const passwordRepeat = request.body.passwordRepeat;
-        const username = request.body.username;
-
-        if (!hash) {
-          throw new BadParams("hash is required");
-        }
-
-        if (!password || password !== passwordRepeat) {
-          throw new BadParams("mismatched or empty passwords");
-        }
-
-        if (!username) {
-          throw new BadParams("username is required");
-        }
-
-        const user = await User.getUserByHash(request.db.connection, hash);
-        if (!user) {
-          throw new UserAlreadyActivated();
-        }
-
-        if (await User.findUserByLogin(request.db, username)) {
-          throw new UserNotUnique("username is in use");
-        }
-
-        user.setPassword(password);
-        const results = await user.update(request.db.connection, {
-          password: user.password,
-          hash: null,
-          active: true,
-          verified: true,
-          name: username,
-        });
-        if (!results.replaced && !results.unchanged) {
-          throw new InternalServerError("cannot update user");
-        }
-
-        return {
-          result: true,
-          message: "User activated.",
-        };
-      }
-    )
-  )
-  /**
-   * @openapi
-   * /users/activation
-   *   post:
-   *     description: Checks the validity of activation hash
-   *     tags:
-   *       - users
-   *     parameters:
-   *       - in: query
-   *         name: hash
-   *         schema:
-   *           type: string
-   *         required: true
-   *         description: hash value for activation representation
-   *     responses:
-   *       200:
-   *         description: Returns IResponseGeneric object
-   *         content:
-   *           application/json:
-   *             schema:
-   *               $ref: "#/components/schemas/IResponseGeneric"
-   */
-  .get(
-    "/activation",
-    asyncRouteHandler<IResponseGeneric>(
-      async (request: IRequest<unknown, unknown, { hash: string }>) => {
-        const hash = request.query.hash;
-
-        if (!hash) {
-          throw new BadParams("hash is required");
-        }
-
-        const user = await User.getUserByHash(request.db.connection, hash);
-        if (!user) {
-          throw new UserBadActivationHash();
         }
 
         return {
