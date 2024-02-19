@@ -7,6 +7,7 @@ import {
   EmailError,
   InternalServerError,
   ModelNotValidError,
+  PasswordResetHashError,
   PermissionDeniedError,
   UserAlreadyActivated,
   UserBadActivationHash,
@@ -78,7 +79,7 @@ export default Router()
             email,
             passwordResetRequestTemplate(
               user.email,
-              `/password_reset/${user.hash}?email=${user.email}`
+              `/password_reset?hash=${user.hash}&email=${user.email}`
             )
           );
         } catch (e) {
@@ -96,7 +97,7 @@ export default Router()
     )
   )
   .put(
-    "/password_reset/:hash",
+    "/password_reset",
     asyncRouteHandler<IResponseGeneric>(
       async (
         request: IRequest<unknown, IRequestPasswordResetData, { hash: string }>
@@ -128,56 +129,45 @@ export default Router()
       }
     )
   )
-  .put(
-    "/password_reset/:hash",
-    asyncRouteHandler<IResponseGeneric>(
-      async (
-        request: IRequest<unknown, IRequestPasswordResetData, { hash: string }>
-      ) => {
-        const hash = request.query.hash;
-        const password = request.body.password;
-        const passwordRepeat = request.body.passwordRepeat;
-
-        if (!hash) {
-          throw new BadParams("hash is required");
-        }
-
-        if (!password || password !== passwordRepeat) {
-          throw new BadParams("mismatched or empty passwords");
-        }
-
-        const user = await User.getUserByHash(request.db.connection, hash);
-        if (!user) {
-          throw new UserDoesNotExits("user for provided hash not found", "");
-        }
-
-        user.setPassword(password);
-        await user.update(request.db.connection, { password: user.password });
-
-        return {
-          result: true,
-          message: "Your password has been reset",
-        };
-      }
-    )
-  )
+    /**
+   * @openapi
+   * /users/password_reset
+   *   post:
+   *     description: Checks the validity of password reset hash
+   *     tags:
+   *       - users
+   *     parameters:
+   *       - in: query
+   *         name: hash
+   *         schema:
+   *           type: string
+   *         required: true
+   *         description: hash value for reset representation
+   *     responses:
+   *       200:
+   *         description: Returns IResponseGeneric object
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/IResponseGeneric"
+   */
   .get(
-    "/password_reset/:hash",
+    "/password_reset",
     asyncRouteHandler<IResponseGeneric>(
-      async (request: IRequest<{ hash: string }>) => {
-        const hash = request.params.hash;
+      async (request: IRequest<unknown, unknown, { hash: string }>) => {
+        const hash = request.query.hash;
 
         if (!hash) {
           throw new BadParams("hash is required");
         }
 
-        if (!hash) {
-          throw new BadParams("empty hash parameter");
+        const user = await User.getUserByHash(request.db.connection, hash);
+        if (!user) {
+          throw new PasswordResetHashError();
         }
 
-        const user = await User.getUserByHash(request.db.connection, hash);
         return {
-          result: !!user,
+          result: true,
         };
       }
     )
@@ -592,7 +582,7 @@ export default Router()
   )
   /**
    * @openapi
-   * /users/activation:
+   * /users/activation
    *   post:
    *     description: Validates the activation hash, switch user to active state and setup initial password
    *     tags:
@@ -675,13 +665,13 @@ export default Router()
   )
   /**
    * @openapi
-   * /users/activation/:hash
+   * /users/activation
    *   post:
    *     description: Checks the validity of activation hash
    *     tags:
    *       - users
    *     parameters:
-   *       - in: path
+   *       - in: query
    *         name: hash
    *         schema:
    *           type: string
@@ -696,10 +686,10 @@ export default Router()
    *               $ref: "#/components/schemas/IResponseGeneric"
    */
   .get(
-    "/activation/:hash",
+    "/activation",
     asyncRouteHandler<IResponseGeneric>(
-      async (request: IRequest<{ hash: string }>) => {
-        const hash = request.params.hash;
+      async (request: IRequest<unknown, unknown, { hash: string }>) => {
+        const hash = request.query.hash;
 
         if (!hash) {
           throw new BadParams("hash is required");

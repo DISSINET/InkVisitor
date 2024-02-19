@@ -105,7 +105,7 @@
   },
   {
     "controller": "users",
-    "route": "activation/:hash",
+    "route": "activation",
     "method": "GET",
     "roles": [],
     "public": true
@@ -119,14 +119,7 @@
   },
   {
     "controller": "users",
-    "route": "password_reset/:hash",
-    "method": "GET",
-    "roles": [],
-    "public": true
-  },
-  {
-    "controller": "users",
-    "route": "password_reset/:hash",
+    "route": "password_reset",
     "method": "PUT",
     "roles": [],
     "public": true
