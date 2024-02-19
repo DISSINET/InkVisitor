@@ -51,7 +51,7 @@ export const PasswordResetPage: React.FC<PasswordResetPage> = ({}) => {
 
   const testHash = async () => {
     try {
-      const res = await api.passwordTestRequest(hash, {
+      const res = await api.passwordResetExists(hash, {
         ignoreErrorToast: true,
       });
       if (res.data.result) {
@@ -62,7 +62,7 @@ export const PasswordResetPage: React.FC<PasswordResetPage> = ({}) => {
       }
     } catch (e) {
       setHashOk(false);
-      setError(PasswordResetHashError.message);
+      setError(getErrorByCode(e as IErrorSignature).message);
     }
   };
 
