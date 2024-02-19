@@ -369,6 +369,21 @@ class Api {
     }
   }
 
+  async passwordResetExists(
+    hash: string,
+    options?: IApiOptions
+  ): Promise<AxiosResponse<IResponseGeneric>> {
+    try {
+      const response = await this.connection.get(
+        `/users/password_reset?hash=${hash}`,
+        options
+      );
+      return response;
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+
   async usersGet(
     userId: string,
     options?: IApiOptions
