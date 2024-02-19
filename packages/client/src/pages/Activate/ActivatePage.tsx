@@ -1,18 +1,16 @@
-import { Button, ContactAdminFooting, Modal, ModalContent } from "components";
-import React, { useEffect, useState } from "react";
-import { PasswordScreen } from "./screens/PasswordScreen";
-import { UsernameScreen } from "./screens/UsernameScreen";
-import api from "api";
-import { toast } from "react-toastify";
 import {
   ActivationHashInvalidError,
   IErrorSignature,
-  UserBadActivationHash,
   getErrorByCode,
 } from "@shared/types/errors";
-import { StyledError } from "./ActivatePageStyles";
-import { useNavigate } from "react-router";
+import api from "api";
+import { Button, ContactAdminFooting, Modal, ModalContent } from "components";
+import React, { useEffect, useState } from "react";
 import { TbArrowForwardUp } from "react-icons/tb";
+import { useNavigate } from "react-router";
+import { StyledError } from "./ActivatePageStyles";
+import { PasswordScreen } from "./screens/PasswordScreen";
+import { UsernameScreen } from "./screens/UsernameScreen";
 
 const ActivatePage: React.FC = ({}) => {
   const navigate = useNavigate();

@@ -51,7 +51,9 @@ export const PasswordResetPage: React.FC<PasswordResetPage> = ({}) => {
 
   const testHash = async () => {
     try {
-      const res = await api.activationExists(hash, { ignoreErrorToast: true });
+      const res = await api.passwordTestRequest(hash, {
+        ignoreErrorToast: true,
+      });
       if (res.data.result) {
         setHashOk(true);
       } else {
@@ -59,7 +61,6 @@ export const PasswordResetPage: React.FC<PasswordResetPage> = ({}) => {
         setHashOk(false);
       }
     } catch (e) {
-      // TODO: distinguish e.g. network error (problem is that the error message is set to user activation)
       setHashOk(false);
       setError(PasswordResetHashError.message);
     }
