@@ -45,14 +45,15 @@ export const LoginScreen: React.FC<LoginScreen> = ({
         setRedirectToMain(true);
       }
     } catch (err) {
-      // setError(getErrorByCode(err as IErrorSignature).message);
-      if (err && (err as any).error === "UserDoesNotExits") {
-        // wrong username
-        setError(WRONG_USERNAME_ERROR);
-      } else if (err && (err as any).error === "BadCredentialsError") {
-        // wrong password
-        setError(WRONG_PASSWORD_ERROR);
-      }
+      setError(getErrorByCode(err as IErrorSignature).message);
+
+      // if (err && (err as any).error === "UserDoesNotExits") {
+      //   // wrong username
+      //   setError(WRONG_USERNAME_ERROR);
+      // } else if (err && (err as any).error === "BadCredentialsError") {
+      //   // wrong password
+      //   setError(WRONG_PASSWORD_ERROR);
+      // }
     }
   };
 

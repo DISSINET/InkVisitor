@@ -33,10 +33,8 @@ const ActivatePage: React.FC = ({}) => {
         setHashOk(false);
       }
     } catch (e) {
-      // TODO: could be also network error
       setHashOk(false);
       setError(getErrorByCode(e as IErrorSignature).message);
-      // setError(ActivationHashInvalidError.message);
     }
   };
 

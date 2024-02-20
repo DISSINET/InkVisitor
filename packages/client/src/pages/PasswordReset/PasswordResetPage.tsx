@@ -34,9 +34,6 @@ import {
   StyledText,
 } from "./PasswordResetPageStyles";
 
-const INVALID_LINK_ERROR =
-  "Password reset unsuccessful. Please verify the validity of the recovery link and try again. If the problem persists, contact our support team for assistance.";
-
 interface PasswordResetPage {}
 export const PasswordResetPage: React.FC<PasswordResetPage> = ({}) => {
   const navigate = useNavigate();
