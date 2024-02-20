@@ -339,7 +339,7 @@ export default Router()
 
       const user = await User.findUserByLogin(request.db, login);
       if (!user) {
-        throw new UserDoesNotExits(`user ${login} was not found`, login);
+        throw new BadCredentialsError(`user ${login} was not found`, login);
       }
 
       if (!user.active) {
@@ -347,7 +347,7 @@ export default Router()
       }
 
       if (!checkPassword(rawPassword, user.password || "")) {
-        throw new BadCredentialsError("unknown credentials");
+        throw new BadCredentialsError("wrong password");
       }
 
       return {
