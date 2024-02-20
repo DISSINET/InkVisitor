@@ -19,6 +19,7 @@ import {
   StyledReferencesListButtons,
   StyledReferencesListColumn,
 } from "./EntityReferenceTableStyles";
+import { normalizeURL } from "utils";
 
 interface EntityReferenceTableRow {
   reference: IReference;
@@ -193,14 +194,17 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
           {resource && value && resource.data.partValueBaseURL && (
             <Button
               key="url"
-              tooltipLabel={""}
+              tooltipLabel="external link"
               inverted
               icon={<FaExternalLinkAlt />}
               color="plain"
+              // TODO: doplnit lomitko na konci!!!
               onClick={() => {
                 const url = resource.data.partValueBaseURL.includes("http")
-                  ? resource.data.partValueBaseURL + value.label
-                  : "//" + resource.data.partValueBaseURL + value.label;
+                  ? normalizeURL(resource.data.partValueBaseURL) + value.label
+                  : "//" +
+                    normalizeURL(resource.data.partValueBaseURL) +
+                    value.label;
                 window.open(url, "_blank");
               }}
             />
