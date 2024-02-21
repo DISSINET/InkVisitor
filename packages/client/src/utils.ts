@@ -231,3 +231,10 @@ export function deepCopy<T>(obj: T): T {
 
   return objCopy as T;
 }
+
+export const normalizeURL = (url: string) => {
+  if (!url.endsWith("/")) {
+    return url + "/";
+  }
+  return url;
+};

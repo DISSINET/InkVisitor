@@ -47,4 +47,5 @@ export const StyledReferenceValuePartLabel = styled.div`
   display: inline;
   font-size: ${({ theme }) => theme.fontSize["sm"]};
   margin-right: ${({ theme }) => theme.space[4]};
+  color: ${({ theme }) => theme.color.black};
 `;

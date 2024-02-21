@@ -14,6 +14,7 @@ import {
   GrDocumentMissing,
   GrDocumentVerified,
 } from "react-icons/gr";
+import { normalizeURL } from "utils";
 import {
   StyledReferenceValuePartLabel,
   StyledReferencesListButtons,
@@ -193,14 +194,16 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
           {resource && value && resource.data.partValueBaseURL && (
             <Button
               key="url"
-              tooltipLabel={""}
+              tooltipLabel="external link"
               inverted
               icon={<FaExternalLinkAlt />}
               color="plain"
               onClick={() => {
                 const url = resource.data.partValueBaseURL.includes("http")
-                  ? resource.data.partValueBaseURL + value.label
-                  : "//" + resource.data.partValueBaseURL + value.label;
+                  ? normalizeURL(resource.data.partValueBaseURL) + value.label
+                  : "//" +
+                    normalizeURL(resource.data.partValueBaseURL) +
+                    value.label;
                 window.open(url, "_blank");
               }}
             />

@@ -10,6 +10,7 @@ import {
   StyledListHeaderColumn,
   StyledReferencesList,
 } from "./EntityReferenceTableStyles";
+import { deepCopy } from "utils";
 
 interface EntityReferenceTable {
   entityId: string;
@@ -66,7 +67,7 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
     newReSourceId: string,
     instantUpdate?: boolean
   ) => {
-    const newReferences = [...references];
+    const newReferences = deepCopy(references);
     newReferences.forEach((ref: IReference) => {
       if (ref.id === refId) {
         ref.resource = newReSourceId;
@@ -80,7 +81,7 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
     newValueId: string,
     instantUpdate?: boolean
   ) => {
-    const newReferences = [...references];
+    const newReferences = deepCopy(references);
     newReferences.forEach((ref: IReference) => {
       if (ref.id === refId) {
         ref.value = newValueId;
@@ -97,7 +98,7 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
   };
 
   const handleAdd = () => {
-    const newReferences = [...references];
+    const newReferences = deepCopy(references);
     newReferences.push(CReference());
     onChange(newReferences);
   };
