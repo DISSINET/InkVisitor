@@ -8,19 +8,18 @@ import {
   EntityTag,
 } from "components/advanced";
 import React from "react";
-import { FaExternalLinkAlt, FaRegCopy, FaTrashAlt } from "react-icons/fa";
+import { FaExternalLinkAlt, FaTrashAlt } from "react-icons/fa";
 import {
   GrDocument,
   GrDocumentMissing,
   GrDocumentVerified,
 } from "react-icons/gr";
+import { normalizeURL } from "utils";
 import {
   StyledReferenceValuePartLabel,
   StyledReferencesListButtons,
   StyledReferencesListColumn,
 } from "./EntityReferenceTableStyles";
-import { normalizeURL } from "utils";
-import { toast } from "react-toastify";
 
 interface EntityReferenceTableRow {
   reference: IReference;

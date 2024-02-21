@@ -1,6 +1,5 @@
 import { EntityEnums, InterfaceEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
-import theme from "Theme/theme";
 import { useSearchParams } from "hooks";
 import React, {
   ReactNode,
@@ -17,8 +16,10 @@ import {
   useDrop,
 } from "react-dnd";
 import { FaStar } from "react-icons/fa";
+import { toast } from "react-toastify";
 import { setDraggedEntity } from "redux/features/territoryTree/draggedEntitySlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
+import { ThemeContext } from "styled-components";
 import {
   DraggedEntityReduxItem,
   EntityColors,
@@ -35,8 +36,6 @@ import {
   StyledStarWrap,
   StyledTagWrapper,
 } from "./TagStyles";
-import { toast } from "react-toastify";
-import { ThemeContext } from "styled-components";
 
 interface TagProps {
   propId: string;
