@@ -26,7 +26,7 @@ import {
   EntityDragItem,
   ItemTypes,
 } from "types";
-import { dndHoverFn } from "utils";
+import { dndHoverFn, getShortLabelByLetterCount } from "utils";
 import {
   StyledButtonWrapper,
   StyledElvlWrapper,
@@ -57,6 +57,7 @@ interface TagProps {
   fullWidth?: boolean;
   index?: number;
   moveFn?: (dragIndex: number, hoverIndex: number) => void;
+  disableCopyLabel?: boolean;
   disableDoubleClick?: boolean;
   disableDrag?: boolean;
   updateOrderFn?: (item: EntityDragItem) => void;
@@ -89,6 +90,7 @@ export const Tag: React.FC<TagProps> = ({
   fullWidth = false,
   index = -1,
   moveFn,
+  disableCopyLabel = false,
   disableDoubleClick = false,
   disableDrag = false,
   updateOrderFn = () => {},
@@ -166,7 +168,12 @@ export const Tag: React.FC<TagProps> = ({
     if (clickedOnce) {
       const timeout = setTimeout(() => {
         navigator.clipboard.writeText(label);
-        toast.info("label copied to clipboard");
+        toast.info(
+          `label [${getShortLabelByLetterCount(
+            label,
+            200
+          )}] copied to clipboard`
+        );
         setClickedOnce(false);
       }, 500);
 
@@ -273,7 +280,9 @@ export const Tag: React.FC<TagProps> = ({
         borderStyle={borderStyle}
         onClick={(e: React.MouseEvent) => {
           e.stopPropagation();
-          setClickedOnce(true);
+          if (!disableCopyLabel) {
+            setClickedOnce(true);
+          }
         }}
         onDoubleClick={(e: React.MouseEvent) => onDoubleClick(e)}
       >
