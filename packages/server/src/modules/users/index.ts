@@ -255,7 +255,7 @@ export default Router()
       }
     )
   )
-    /**
+  /**
    * @openapi
    * /users/password_reset
    *   post:
@@ -339,7 +339,7 @@ export default Router()
 
       const user = await User.findUserByLogin(request.db, login);
       if (!user) {
-        throw new BadCredentialsError(`user ${login} was not found`, login);
+        throw new BadCredentialsError("wrong email / username");
       }
 
       if (!user.active) {

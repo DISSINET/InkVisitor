@@ -15,9 +15,6 @@ import {
 } from "./LoginScreensStyles";
 import { IErrorSignature, getErrorByCode } from "@shared/types/errors";
 
-const WRONG_USERNAME_ERROR = "wrong email / username";
-const WRONG_PASSWORD_ERROR = "wrong password";
-
 interface LoginScreen {
   usernameLocal: string;
   setUsernameLocal: React.Dispatch<React.SetStateAction<string>>;
@@ -46,14 +43,6 @@ export const LoginScreen: React.FC<LoginScreen> = ({
       }
     } catch (err) {
       setError(getErrorByCode(err as IErrorSignature).message);
-
-      // if (err && (err as any).error === "UserDoesNotExits") {
-      //   // wrong username
-      //   setError(WRONG_USERNAME_ERROR);
-      // } else if (err && (err as any).error === "BadCredentialsError") {
-      //   // wrong password
-      //   setError(WRONG_PASSWORD_ERROR);
-      // }
     }
   };
 
