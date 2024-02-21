@@ -8,7 +8,7 @@ import {
   EntityTag,
 } from "components/advanced";
 import React from "react";
-import { FaExternalLinkAlt, FaTrashAlt } from "react-icons/fa";
+import { FaExternalLinkAlt, FaRegCopy, FaTrashAlt } from "react-icons/fa";
 import {
   GrDocument,
   GrDocumentMissing,
@@ -20,6 +20,7 @@ import {
   StyledReferencesListColumn,
 } from "./EntityReferenceTableStyles";
 import { normalizeURL } from "utils";
+import { toast } from "react-toastify";
 
 interface EntityReferenceTableRow {
   reference: IReference;
@@ -191,6 +192,19 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
 
       <StyledReferencesListColumn>
         <StyledReferencesListButtons>
+          {value && (
+            <Button
+              inverted
+              tooltipLabel="copy value"
+              color="primary"
+              label=""
+              icon={<FaRegCopy />}
+              onClick={async () => {
+                await navigator.clipboard.writeText(value.label);
+                toast.info("value copied to clipboard");
+              }}
+            />
+          )}
           {resource && value && resource.data.partValueBaseURL && (
             <Button
               key="url"
@@ -198,7 +212,6 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
               inverted
               icon={<FaExternalLinkAlt />}
               color="plain"
-              // TODO: doplnit lomitko na konci!!!
               onClick={() => {
                 const url = resource.data.partValueBaseURL.includes("http")
                   ? normalizeURL(resource.data.partValueBaseURL) + value.label
