@@ -2,7 +2,14 @@ import { EntityEnums, InterfaceEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
 import theme from "Theme/theme";
 import { useSearchParams } from "hooks";
-import React, { ReactNode, useEffect, useMemo, useRef } from "react";
+import React, {
+  ReactNode,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   DragSourceMonitor,
   DropTargetMonitor,
@@ -28,6 +35,8 @@ import {
   StyledStarWrap,
   StyledTagWrapper,
 } from "./TagStyles";
+import { toast } from "react-toastify";
+import { ThemeContext } from "styled-components";
 
 interface TagProps {
   propId: string;
@@ -152,6 +161,20 @@ export const Tag: React.FC<TagProps> = ({
 
   drag(drop(ref));
 
+  const [clickedOnce, setClickedOnce] = useState(false);
+
+  useEffect(() => {
+    if (clickedOnce) {
+      const timeout = setTimeout(() => {
+        navigator.clipboard.writeText(label);
+        toast.info("label copied to clipboard");
+        setClickedOnce(false);
+      }, 500);
+
+      return () => clearTimeout(timeout);
+    }
+  }, [clickedOnce]);
+
   const renderEntityTag = () => (
     <StyledEntityTag
       $color={
@@ -183,9 +206,12 @@ export const Tag: React.FC<TagProps> = ({
 
   const onDoubleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
+    setClickedOnce(false);
 
     !disableDoubleClick && appendDetailId(propId);
   };
+
+  const themeContext = useContext(ThemeContext);
 
   const renderLabel = (labelOnly: boolean = false) => {
     return (
@@ -193,7 +219,7 @@ export const Tag: React.FC<TagProps> = ({
         {isFavorited && (
           <StyledStarWrap>
             <FaStar
-              color={theme.color["warning"]}
+              color={themeContext.color.warning}
               style={{ marginBottom: "0.1rem" }}
             />
           </StyledStarWrap>
@@ -246,7 +272,10 @@ export const Tag: React.FC<TagProps> = ({
         status={status}
         ltype={ltype}
         borderStyle={borderStyle}
-        onClick={(e: React.MouseEvent) => e.stopPropagation()}
+        onClick={(e: React.MouseEvent) => {
+          e.stopPropagation();
+          setClickedOnce(true);
+        }}
         onDoubleClick={(e: React.MouseEvent) => onDoubleClick(e)}
       >
         {showOnly ? <>{renderShortTag()}</> : <>{renderFullTag()}</>}

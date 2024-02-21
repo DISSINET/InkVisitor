@@ -192,19 +192,6 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
 
       <StyledReferencesListColumn>
         <StyledReferencesListButtons>
-          {value && (
-            <Button
-              inverted
-              tooltipLabel="copy value"
-              color="primary"
-              label=""
-              icon={<FaRegCopy />}
-              onClick={async () => {
-                await navigator.clipboard.writeText(value.label);
-                toast.info("value copied to clipboard");
-              }}
-            />
-          )}
           {resource && value && resource.data.partValueBaseURL && (
             <Button
               key="url"
