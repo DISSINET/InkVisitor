@@ -245,7 +245,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
       return true;
     }
     return isMultiple || selectedRelations.length < 1;
-  }, []);
+  }, [selectedRelations]);
 
   return (
     <StyledRelationBlock>
