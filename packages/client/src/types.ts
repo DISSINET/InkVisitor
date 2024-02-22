@@ -170,7 +170,7 @@ export interface IRequestSearchEntity {
   status?: EntityEnums.Status; // izy
   language?: EntityEnums.Language; //izy
   logicalType?: EntityEnums.LogicalType;
-  hasProps?: IEntityHasProps[]; //this should be checked within meta props and within all statements where the entity is used as the prop origin
+  hasProps?: IEntityHasProps[]; //this should be checked within metaprops and within all statements where the entity is used as the prop origin
   usedInTerritories?: IEntityUsedInTerritory[]; // this is probably little bit complicated
   usedInStatements?: IEntityUsedInStatementWith[]; // and this is supposed to be complicated as well
 }

@@ -674,10 +674,10 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
               </StyledDetailSectionContent>
             </StyledDetailSection>
 
-            {/* meta props section */}
+            {/* metaprops section */}
             <StyledDetailSection metaSection>
               <StyledDetailSectionHeader>
-                Meta properties
+                Metaproperties
               </StyledDetailSectionHeader>
               <StyledDetailSectionContent>
                 <StyledPropGroupWrap>
@@ -716,7 +716,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
                 {userCanEdit && (
                   <Button
                     color="primary"
-                    label="create new meta property"
+                    label="new metaproperty"
                     icon={<FaPlus />}
                     onClick={async () => {
                       const newProp = CMetaProp();
@@ -776,8 +776,8 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
               {!entity.isTemplate && (
                 <EntityDetailMetaPropsTable
                   title={{
-                    singular: "Meta Property",
-                    plural: "Meta Properties",
+                    singular: "Metaproperty",
+                    plural: "Metaproperties",
                   }}
                   entities={entity.entities}
                   useCases={entity.usedInMetaProps}
