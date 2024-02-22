@@ -6,25 +6,24 @@ import {
   IResponseGeneric,
   Relation,
 } from "@shared/types";
+import { UseMutationResult, useQuery } from "@tanstack/react-query";
+import { excludedSuggesterEntities } from "Theme/constants";
 import api from "api";
 import { AxiosResponse } from "axios";
 import { EntitySuggester } from "components/advanced";
 import update from "immutability-helper";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { UseMutationResult, useQuery } from "@tanstack/react-query";
 import { v4 as uuidv4 } from "uuid";
 import { EntityDetailCloudRelation } from "./EntityDetailCloudRelation/EntityDetailCloudRelation";
+import { EntityDetailRelationGraph } from "./EntityDetailGraph/EntityDetailGraph";
 import { EntityDetailRelationRow } from "./EntityDetailRelationRow/EntityDetailRelationRow";
 import {
-  StyledLabel,
   StyledLabelSuggester,
   StyledRelationBlock,
   StyledRelationValues,
   StyledSuggesterWrapper,
 } from "./EntityDetailRelationTypeBlockStyles";
-import { Button } from "components";
 import { EntityDetailRelationTypeIcon } from "./EntityDetailRelationTypeIcon/EntityDetailRelationTypeIcon";
-import { EntityDetailRelationGraph } from "./EntityDetailGraph/EntityDetailGraph";
 
 // relations for one type
 interface EntityDetailRelationTypeBlock {
@@ -293,10 +292,10 @@ export const EntityDetailRelationTypeBlock: React.FC<
         </StyledRelationValues>
 
         <StyledLabelSuggester>
-          {/* <StyledLabel>{relationRule.label}</StyledLabel> */}
           {hasSuggester && (
             <StyledSuggesterWrapper>
               <EntitySuggester
+                excludedEntityClasses={excludedSuggesterEntities}
                 inputWidth={80}
                 disableTemplatesAccept
                 categoryTypes={getCategoryTypes()}

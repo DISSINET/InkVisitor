@@ -41,10 +41,6 @@ export const StyledLabelSuggester = styled.div`
   display: flex;
   flex-direction: column;
 `;
-export const StyledLabel = styled.div`
-  color: ${({ theme }) => theme.color["info"]};
-  font-size: ${({ theme }) => theme.fontSize["s"]};
-`;
 interface StyledRelationValues {
   hasSuggester: boolean;
 }
