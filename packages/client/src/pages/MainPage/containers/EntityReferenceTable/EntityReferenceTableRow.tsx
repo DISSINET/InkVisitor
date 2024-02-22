@@ -140,6 +140,7 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
           !disabled && (
             <div>
               <EntitySuggester
+                excludedEntityClasses={excludedSuggesterEntities}
                 openDetailOnCreate={openDetailOnCreate}
                 territoryActants={[]}
                 onSelected={(newSelectedId: string) => {

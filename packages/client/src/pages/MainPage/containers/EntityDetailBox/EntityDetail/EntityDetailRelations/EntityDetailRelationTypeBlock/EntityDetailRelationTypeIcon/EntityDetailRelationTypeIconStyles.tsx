@@ -14,3 +14,7 @@ export const StyledArrow = styled.span`
   align-items: center;
   color: ${({ theme }) => theme.color["info"]};
 `;
+export const StyledLabel = styled.div`
+  color: ${({ theme }) => theme.color["info"]};
+  font-size: ${({ theme }) => theme.fontSize["s"]};
+`;
