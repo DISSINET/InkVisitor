@@ -96,7 +96,9 @@ export default Router()
         }
 
         if (await User.findUserByLogin(request.db, username)) {
-          throw new UserNotUnique("username is in use");
+          throw new UserNotUnique(
+            "Username is already used. Please select a new one."
+          );
         }
 
         user.setPassword(password);
@@ -513,7 +515,7 @@ export default Router()
         }
         if (userData.name) {
           if (await User.findUserByLogin(request.db, userData.name)) {
-            throw new UserNotUnique("username is in use");
+            throw new UserNotUnique("username is aready used");
           }
         }
 
@@ -608,7 +610,7 @@ export default Router()
         }
 
         if (data.name && (await User.findUserByLogin(req.db, data.name))) {
-          throw new UserNotUnique("username is in use");
+          throw new UserNotUnique("username is already used");
         }
 
         // email changed for non-verified user - regenerate hash & send activation email again

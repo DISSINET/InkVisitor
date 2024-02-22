@@ -16,15 +16,12 @@ import {
   StyledFaTag,
   StyledUserActivatedDescription,
 } from "./ActivateSreensStyles";
-import { IErrorSignature, getErrorByCode } from "@shared/types/errors";
-
-const USERNAME_ALREADY_USED_ERROR = `Username is already used. 
-Please select a new one.`;
-const USERNAME_TOO_SHORT_ERROR = `Username is too short.
-Please select a new one.`;
-const USERNAME_TOO_LONG_ERROR = `Username is too long.
-Please select a new one.`;
-const INVALID_ACTION_LINK = `User activation unsuccessful. Please verify the validity of the activation link and try again. If the problem persists, contact our support team for assistance.`;
+import {
+  IErrorSignature,
+  UsernameTooLongError,
+  UsernameTooShortError,
+  getErrorByCode,
+} from "@shared/types/errors";
 
 interface UsernameScreen {
   hash: string;
@@ -45,29 +42,23 @@ export const UsernameScreen: React.FC<UsernameScreen> = ({
 
   const handleActivation = async () => {
     if (username.length < 4) {
-      setError(USERNAME_TOO_SHORT_ERROR);
+      setError(UsernameTooShortError.message);
     } else if (username.length > 10) {
-      setError(USERNAME_TOO_LONG_ERROR);
+      setError(UsernameTooLongError.message);
     } else {
       try {
-        const res: any = await api.activation(
+        const res = await api.activation(
           hash,
           password,
           passwordRepeat,
-          username
+          username,
+          { ignoreErrorToast: true }
         );
         if (res.status === 200) {
           setContinueScreen(true);
         }
       } catch (err) {
-        // TODO2: UserNotUnique should point only to username already used
         setError(getErrorByCode(err as IErrorSignature).message);
-
-        // if (err && (err as any).error === "UserNotUnique") {
-        //   setError(USERNAME_ALREADY_USED_ERROR);
-        // } else {
-        //   setError(INVALID_ACTION_LINK);
-        // }
       }
     }
   };

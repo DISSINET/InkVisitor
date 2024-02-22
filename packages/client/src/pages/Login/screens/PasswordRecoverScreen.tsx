@@ -14,10 +14,11 @@ import {
   StyledEmailSent,
   StyledTbMailFilled,
 } from "./LoginScreensStyles";
-import { IErrorSignature, getErrorByCode } from "@shared/types/errors";
-
-const USER_DONT_EXIST_ERROR = "User with this email does not exist";
-const INVALID_EMAIL_ERROR = "Invalid email entered";
+import {
+  IErrorSignature,
+  InvalidEmailError,
+  getErrorByCode,
+} from "@shared/types/errors";
 
 interface PasswordRecoverScreen {
   emailLocal: string;
@@ -91,7 +92,7 @@ export const PasswordRecoverScreen: React.FC<PasswordRecoverScreen> = ({
                   if (validateEmail(emailLocal)) {
                     handlePasswordReset();
                   } else {
-                    setError(INVALID_EMAIL_ERROR);
+                    setError(InvalidEmailError.message);
                   }
                 }}
                 disabled={emailLocal.length === 0}

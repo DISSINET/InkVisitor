@@ -11,9 +11,7 @@ import { PasswordRecoverScreen } from "./screens/PasswordRecoverScreen";
 export const LoginPage: React.FC = () => {
   const [usernameLocal, setUsernameLocal] = useState("");
   const [password, setPassword] = useState("");
-
   const [emailLocal, setEmailLocal] = useState("");
-
   const [logInPage, setLogInPage] = useState(true);
   const [restartScreen, setRestartScreen] = useState(false);
   const [redirectToMain, setRedirectToMain] = useState(false);

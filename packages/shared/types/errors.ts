@@ -116,7 +116,8 @@ class UserAlreadyActivated extends CustomError {
 class UserBadActivationHash extends CustomError {
   public static code = 400;
   public static title = "Invalid activation hash";
-  public static message = "User already activated or activation link expired";
+  public static message =
+    "User activation unsuccessful. Please verify the validity of the activation link and try again. If the problem persists, contact our support team for assistance.";
 }
 
 /**
@@ -139,7 +140,7 @@ class UserNotActiveError extends CustomError {
 class UserNotUnique extends CustomError {
   public static code = 409;
   public static title = "User with this login already exists";
-  public static message = "Either email or username is in use";
+  public static message = "Either email or username is already used";
 }
 
 /**
@@ -392,6 +393,33 @@ class PasswordResetHashError extends CustomError {
 }
 
 /**
+ * Will be thrown when username is too short
+ */
+class UsernameTooShortError extends CustomError {
+  public static code = 400;
+  public static title = "Username too short";
+  public static message = "Username is too short. Please select a new one.";
+}
+
+/**
+ * Will be thrown when username is too short
+ */
+class UsernameTooLongError extends CustomError {
+  public static code = 400;
+  public static title = "Username too long";
+  public static message = "Username is too long. Please select a new one.";
+}
+
+/**
+ * Will be thrown when username is too short
+ */
+class InvalidEmailError extends CustomError {
+  public static code = 400;
+  public static title = "Invalid email";
+  public static message = "Invalid email entered";
+}
+
+/**
  * UnknownError works as a backup
  */
 class UnknownError extends CustomError {
@@ -439,6 +467,9 @@ const allErrors: Record<string, any> = {
   PasswordDoesNotMatchError,
   PasswordResetHashError,
   ActivationHashInvalidError,
+  UsernameTooShortError,
+  UsernameTooLongError,
+  InvalidEmailError,
 };
 
 export interface IErrorSignature {
@@ -484,4 +515,7 @@ export {
   PasswordDoesNotMatchError,
   PasswordResetHashError,
   ActivationHashInvalidError,
+  UsernameTooShortError,
+  UsernameTooLongError,
+  InvalidEmailError,
 };
