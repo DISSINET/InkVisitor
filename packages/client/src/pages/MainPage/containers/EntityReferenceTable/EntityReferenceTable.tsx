@@ -404,7 +404,7 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
         </tbody>
       </StyledTable>
 
-      <div style={{ marginTop: "1rem" }}>
+      <div style={{ marginTop: "1.5rem" }}>
         {!disabled && (
           <Button
             icon={<FaPlus />}
@@ -413,51 +413,6 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
           />
         )}
       </div>
-
-      {/* {localReferences && localReferences.length > 0 && (
-        <StyledReferencesList>
-          <React.Fragment>
-            <StyledListHeaderColumn></StyledListHeaderColumn>
-            <StyledListHeaderColumn>Resource</StyledListHeaderColumn>
-            <StyledListHeaderColumn>Part</StyledListHeaderColumn>
-            <StyledListHeaderColumn></StyledListHeaderColumn>
-            <StyledListHeaderColumn></StyledListHeaderColumn>
-          </React.Fragment>
-
-          {localReferences &&
-            localReferences.map((reference: IReference, ri: number) => {
-              const resourceEntity = entities[reference.resource];
-              const valueEntity = entities[reference.value];
-
-              const document =
-                resourceEntity && documents
-                  ? documents.find(
-                      (doc) => doc.id === resourceEntity.data.documentId
-                    )
-                  : undefined;
-              return (
-                <EntityReferenceTableRow
-                  key={ri}
-                  index={ri}
-                  reference={reference}
-                  document={document}
-                  entityId={entityId}
-                  resource={resourceEntity}
-                  value={valueEntity}
-                  disabled={disabled}
-                  handleRemove={handleRemove}
-                  handleChangeResource={handleChangeResource}
-                  handleChangeValue={handleChangeValue}
-                  openDetailOnCreate={openDetailOnCreate}
-                  isInsideTemplate={isInsideTemplate}
-                  territoryParentId={territoryParentId}
-                  updateOrderFn={() => console.log("new order to BE")}
-                  moveRow={moveRow}
-                />
-              );
-            })}
-        </StyledReferencesList>
-      )} */}
     </React.Fragment>
   );
 };
