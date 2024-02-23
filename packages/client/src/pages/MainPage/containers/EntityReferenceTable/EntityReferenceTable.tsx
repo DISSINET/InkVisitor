@@ -369,7 +369,7 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
   const getRowId = useCallback((row: IReference) => {
     return row.id;
   }, []);
-
+  9;
   const {
     getTableProps,
     getTableBodyProps,
@@ -394,7 +394,7 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
                 index={i}
                 row={row}
                 moveRow={moveRow}
-                updateOrderFn={() => console.log("new order to BE")}
+                updateOrderFn={() => onChange(localReferences, true)}
                 visibleColumns={visibleColumns}
                 hasOrder={rows.length > 1}
                 {...row.getRowProps()}
