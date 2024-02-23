@@ -1,16 +1,33 @@
+import { EntityEnums } from "@shared/enums";
 import { IEntity, IReference } from "@shared/types";
 import { useQuery } from "@tanstack/react-query";
+import { excludedSuggesterEntities } from "Theme/constants";
 import api from "api";
 import { Button } from "components";
+import {
+  EntityDropzone,
+  EntitySuggester,
+  EntityTag,
+} from "components/advanced";
 import { CReference } from "constructors";
-import React from "react";
-import { FaPlus } from "react-icons/fa";
+import update from "immutability-helper";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { FaExternalLinkAlt, FaPlus, FaTrashAlt } from "react-icons/fa";
+import {
+  GrDocument,
+  GrDocumentMissing,
+  GrDocumentVerified,
+} from "react-icons/gr";
+import { CellProps, Column, Row, useTable } from "react-table";
+import { deepCopy, normalizeURL } from "utils";
 import { EntityReferenceTableRow } from "./EntityReferenceTableRow";
 import {
-  StyledListHeaderColumn,
-  StyledReferencesList,
+  StyledReferenceValuePartLabel,
+  StyledReferencesListButtons,
+  StyledTable,
 } from "./EntityReferenceTableStyles";
-import { deepCopy } from "utils";
+
+type CellType = CellProps<IReference>;
 
 interface EntityReferenceTable {
   entityId: string;
@@ -91,7 +108,7 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
   };
 
   const handleRemove = (refId: string, instantUpdate?: boolean) => {
-    const newReferences = [...references].filter(
+    const newReferences = deepCopy(references).filter(
       (ref: IReference) => ref.id !== refId
     );
     onChange(newReferences, instantUpdate);
@@ -103,19 +120,312 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
     onChange(newReferences);
   };
 
+  const [localReferences, setLocalReferences] = useState<IReference[]>([]);
+
+  useEffect(() => {
+    setLocalReferences(references);
+  }, [references]);
+
+  const moveRow = useCallback(
+    (dragIndex: number, hoverIndex: number) => {
+      const dragRecord = localReferences[dragIndex];
+      const newLocalReferences = update(localReferences, {
+        $splice: [
+          [dragIndex, 1],
+          [hoverIndex, 0, dragRecord],
+        ],
+      });
+
+      setLocalReferences(newLocalReferences);
+    },
+    [localReferences]
+  );
+
+  const columns = useMemo<Column<IReference>[]>(
+    () => [
+      {
+        Header: "Resource",
+        Cell: ({ row }: CellType) => {
+          const reference = row.original;
+          const resourceEntity = entities[reference.resource];
+
+          return (
+            <>
+              {resourceEntity ? (
+                <EntityDropzone
+                  onSelected={(newSelectedId: string) => {
+                    handleChangeResource(reference.id, newSelectedId, true);
+                  }}
+                  disableTemplatesAccept
+                  categoryTypes={[EntityEnums.Class.Resource]}
+                  isInsideTemplate={isInsideTemplate}
+                  territoryParentId={territoryParentId}
+                  excludedActantIds={[resourceEntity.id]}
+                >
+                  <EntityTag
+                    entity={resourceEntity}
+                    fullWidth
+                    unlinkButton={
+                      !disabled && {
+                        onClick: () => {
+                          handleChangeResource(reference.id, "");
+                        },
+                        tooltipLabel: "unlink resource",
+                      }
+                    }
+                  />
+                </EntityDropzone>
+              ) : (
+                !disabled && (
+                  <div>
+                    <EntitySuggester
+                      openDetailOnCreate={openDetailOnCreate}
+                      territoryActants={[]}
+                      onSelected={(newSelectedId: string) => {
+                        handleChangeResource(reference.id, newSelectedId, true);
+                      }}
+                      disableTemplatesAccept
+                      categoryTypes={[EntityEnums.Class.Resource]}
+                      isInsideTemplate={isInsideTemplate}
+                      territoryParentId={territoryParentId}
+                    />
+                  </div>
+                )
+              )}
+            </>
+          );
+        },
+      },
+      {
+        Header: "Part",
+        Cell: ({ row }: CellType) => {
+          const reference = row.original;
+          const resourceEntity = entities[reference.resource];
+          const valueEntity = entities[reference.value];
+
+          return (
+            <div style={{ display: "flex", alignItems: "center" }}>
+              {resourceEntity && resourceEntity.data.partValueLabel && (
+                <StyledReferenceValuePartLabel>
+                  ({resourceEntity.data.partValueLabel})
+                </StyledReferenceValuePartLabel>
+              )}
+              {valueEntity ? (
+                <EntityDropzone
+                  onSelected={(newSelectedId: string) => {
+                    handleChangeValue(reference.id, newSelectedId, true);
+                  }}
+                  categoryTypes={[EntityEnums.Class.Value]}
+                  excludedEntityClasses={excludedSuggesterEntities}
+                  isInsideTemplate={isInsideTemplate}
+                  territoryParentId={territoryParentId}
+                  excludedActantIds={[valueEntity.id]}
+                >
+                  <EntityTag
+                    entity={valueEntity}
+                    fullWidth
+                    unlinkButton={
+                      !disabled && {
+                        onClick: () => {
+                          handleChangeValue(reference.id, "");
+                        },
+                        tooltipLabel: "unlink value",
+                      }
+                    }
+                  />
+                </EntityDropzone>
+              ) : (
+                !disabled && (
+                  <div>
+                    <EntitySuggester
+                      excludedEntityClasses={excludedSuggesterEntities}
+                      openDetailOnCreate={openDetailOnCreate}
+                      territoryActants={[]}
+                      onSelected={(newSelectedId: string) => {
+                        handleChangeValue(reference.id, newSelectedId, true);
+                      }}
+                      categoryTypes={[EntityEnums.Class.Value]}
+                      isInsideTemplate={isInsideTemplate}
+                      territoryParentId={territoryParentId}
+                    />
+                  </div>
+                )
+              )}
+            </div>
+          );
+        },
+      },
+      {
+        id: "text reference",
+        Cell: ({ row }: CellType) => {
+          const reference = row.original;
+          const resourceEntity = entities[reference.resource];
+
+          const document =
+            resourceEntity && documents
+              ? documents.find(
+                  (doc) => doc.id === resourceEntity.data.documentId
+                )
+              : undefined;
+
+          return (
+            <>
+              {resourceEntity ? (
+                resourceEntity.data.documentId ? (
+                  document?.referencedEntityIds.includes(entityId) ? (
+                    <Button
+                      tooltipLabel="with entity"
+                      icon={<GrDocumentVerified />}
+                      inverted
+                      color="primary"
+                      noBorder
+                    />
+                  ) : (
+                    <Button
+                      tooltipLabel="no reference in document found"
+                      icon={<GrDocument />}
+                      inverted
+                      color="plain"
+                      noBorder
+                    />
+                  )
+                ) : (
+                  <Button
+                    icon={<GrDocumentMissing />}
+                    tooltipLabel="no document assigned for this resource"
+                    color="danger"
+                    noBorder
+                    inverted
+                  />
+                )
+              ) : (
+                <></>
+              )}
+            </>
+          );
+        },
+      },
+      {
+        id: "reference buttons",
+        Cell: ({ row }: CellType) => {
+          const reference = row.original;
+          const resourceEntity = entities[reference.resource];
+          const valueEntity = entities[reference.value];
+
+          return (
+            <>
+              <StyledReferencesListButtons>
+                {resourceEntity &&
+                  valueEntity &&
+                  resourceEntity.data.partValueBaseURL && (
+                    <Button
+                      key="url"
+                      tooltipLabel="external link"
+                      inverted
+                      icon={<FaExternalLinkAlt />}
+                      color="plain"
+                      onClick={() => {
+                        const url =
+                          resourceEntity.data.partValueBaseURL.includes("http")
+                            ? normalizeURL(
+                                resourceEntity.data.partValueBaseURL
+                              ) + valueEntity.label
+                            : "//" +
+                              normalizeURL(
+                                resourceEntity.data.partValueBaseURL
+                              ) +
+                              valueEntity.label;
+                        window.open(url, "_blank");
+                      }}
+                    />
+                  )}
+                {!disabled && (
+                  <Button
+                    key="delete"
+                    tooltipLabel="remove reference row"
+                    inverted
+                    icon={<FaTrashAlt />}
+                    color="plain"
+                    onClick={() => {
+                      handleRemove(reference.id);
+                    }}
+                  />
+                )}
+              </StyledReferencesListButtons>
+            </>
+          );
+        },
+      },
+    ],
+    [
+      entities,
+      documents,
+      isInsideTemplate,
+      territoryParentId,
+      openDetailOnCreate,
+    ]
+  );
+
+  const getRowId = useCallback((row: IReference) => {
+    return row.id;
+  }, []);
+
+  const {
+    getTableProps,
+    getTableBodyProps,
+    headerGroups,
+    rows,
+    prepareRow,
+    visibleColumns,
+  } = useTable({
+    columns,
+    data: useMemo(() => localReferences || [], [localReferences]),
+    getRowId,
+  });
+
   return (
     <React.Fragment>
-      {references && references.length > 0 && (
+      <StyledTable {...getTableProps()}>
+        <tbody {...getTableBodyProps()}>
+          {rows.map((row: Row<IReference>, i: number) => {
+            prepareRow(row);
+            return (
+              <EntityReferenceTableRow
+                index={i}
+                row={row}
+                moveRow={moveRow}
+                updateOrderFn={() => console.log("new order to BE")}
+                visibleColumns={visibleColumns}
+                hasOrder={rows.length > 1}
+                {...row.getRowProps()}
+              />
+            );
+          })}
+        </tbody>
+      </StyledTable>
+
+      <div style={{ marginTop: "1rem" }}>
+        {!disabled && (
+          <Button
+            icon={<FaPlus />}
+            label={"new reference"}
+            onClick={() => handleAdd()}
+          />
+        )}
+      </div>
+
+      {/* {localReferences && localReferences.length > 0 && (
         <StyledReferencesList>
           <React.Fragment>
+            <StyledListHeaderColumn></StyledListHeaderColumn>
             <StyledListHeaderColumn>Resource</StyledListHeaderColumn>
             <StyledListHeaderColumn>Part</StyledListHeaderColumn>
             <StyledListHeaderColumn></StyledListHeaderColumn>
             <StyledListHeaderColumn></StyledListHeaderColumn>
           </React.Fragment>
 
-          {references &&
-            references.map((reference: IReference, ri: number) => {
+          {localReferences &&
+            localReferences.map((reference: IReference, ri: number) => {
               const resourceEntity = entities[reference.resource];
               const valueEntity = entities[reference.value];
 
@@ -128,6 +438,7 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
               return (
                 <EntityReferenceTableRow
                   key={ri}
+                  index={ri}
                   reference={reference}
                   document={document}
                   entityId={entityId}
@@ -140,18 +451,13 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
                   openDetailOnCreate={openDetailOnCreate}
                   isInsideTemplate={isInsideTemplate}
                   territoryParentId={territoryParentId}
+                  updateOrderFn={() => console.log("new order to BE")}
+                  moveRow={moveRow}
                 />
               );
             })}
         </StyledReferencesList>
-      )}
-      {!disabled && (
-        <Button
-          icon={<FaPlus />}
-          label={"new reference"}
-          onClick={() => handleAdd()}
-        />
-      )}
+      )} */}
     </React.Fragment>
   );
 };

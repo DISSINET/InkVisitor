@@ -909,7 +909,6 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 newReferences: IReference[],
                 instantUpdate?: boolean
               ) => {
-                console.log(newReferences, instantUpdate);
                 handleAttributeChange(
                   { references: newReferences },
                   instantUpdate
