@@ -128,7 +128,6 @@ export const StatementEditorBox: React.FC = () => {
     changes: Partial<IStatement>,
     instantUpdate?: boolean
   ) => {
-    console.log(changes);
     if (tempObject) {
       queryClient.cancelQueries({
         queryKey: ["statement", statementId],
