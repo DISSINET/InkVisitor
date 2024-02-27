@@ -17,6 +17,7 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
     setSelectedDetailId,
     appendDetailId,
     clearAllDetailIds,
+    replaceDetailIds,
   } = useSearchParams();
 
   useEffect(() => {
@@ -26,6 +27,10 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
       appendDetailId(selectedDetailId);
     }
   }, [selectedDetailId, detailIdArray]);
+
+  useEffect(() => {
+    console.log(selectedDetailId);
+  }, [selectedDetailId]);
 
   const [entities, setEntities] = useState<IResponseEntity[]>([]);
 
@@ -107,6 +112,9 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
               onClose={() => handleClose(entity.id)}
               isSelected={selectedDetailId === entity.id}
               moveRow={moveRow}
+              onDragEnd={() => {
+                replaceDetailIds(entities.map((e) => e.id));
+              }}
             />
           ))}
       </StyledTabGroup>

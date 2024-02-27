@@ -32,6 +32,7 @@ interface EntityDetailTab {
   isSelected?: boolean;
   index: number;
   moveRow: (dragIndex: number, hoverIndex: number) => void;
+  onDragEnd?: () => void;
 }
 export const EntityDetailTab: React.FC<EntityDetailTab> = ({
   entity,
@@ -40,6 +41,7 @@ export const EntityDetailTab: React.FC<EntityDetailTab> = ({
   isSelected = false,
   index,
   moveRow,
+  onDragEnd,
 }) => {
   const [referenceElement, setReferenceElement] =
     useState<HTMLDivElement | null>(null);
@@ -69,7 +71,7 @@ export const EntityDetailTab: React.FC<EntityDetailTab> = ({
       isDragging: monitor.isDragging(),
     }),
     end: (item: DragItem | undefined, monitor: DragSourceMonitor) => {
-      if (item) console.log(item);
+      if (item) onDragEnd && onDragEnd();
     },
   });
 
