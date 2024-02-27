@@ -205,11 +205,6 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
 
           return (
             <div style={{ display: "flex", alignItems: "center" }}>
-              {/* {resourceEntity && resourceEntity.data.partValueLabel && (
-                <StyledReferenceValuePartLabel>
-                  ({resourceEntity.data.partValueLabel})
-                </StyledReferenceValuePartLabel>
-              )} */}
               {valueEntity ? (
                 <EntityDropzone
                   onSelected={(newSelectedId: string) => {
