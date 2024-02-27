@@ -73,7 +73,9 @@ export const LoginScreen: React.FC<LoginScreen> = ({
         />
       </StyledInputRow>
 
-      {error !== false && <StyledErrorText>{error}</StyledErrorText>}
+      <div style={{ minHeight: "2em" }}>
+        {error !== false && <StyledErrorText>{error}</StyledErrorText>}
+      </div>
 
       <StyledButtonWrap>
         <Button

@@ -80,7 +80,11 @@ export const PasswordRecoverScreen: React.FC<PasswordRecoverScreen> = ({
               borderColor={error !== false ? "danger" : undefined}
             />
           </StyledInputRow>
-          {error !== false && <StyledErrorText>{error}</StyledErrorText>}
+
+          <div style={{ minHeight: "2rem" }}>
+            {error !== false && <StyledErrorText>{error}</StyledErrorText>}
+          </div>
+
           <StyledButtonWrap>
             <div>
               <Button

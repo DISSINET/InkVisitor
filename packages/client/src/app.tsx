@@ -78,6 +78,8 @@ const queryClient = new QueryClient({
     queries: {
       refetchOnWindowFocus: false,
       retry: false,
+      // turn on for airplane / offline work
+      // networkMode: "always",
     },
   },
 });
