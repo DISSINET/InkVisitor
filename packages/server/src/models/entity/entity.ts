@@ -140,7 +140,7 @@ export default class Entity implements IEntity, IDbModel {
   }
 
   isValid(): boolean {
-    return true;
+    return !!this.language;
   }
 
   canBeViewedByUser(user: User): boolean {

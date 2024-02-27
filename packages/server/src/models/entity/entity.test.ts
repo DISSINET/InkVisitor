@@ -35,6 +35,18 @@ export const prepareEntity = (
   return [id, ent];
 };
 
+describe("test Entity.isValid", () => {
+  test("test empty language", async () => {
+  const entity = new Entity({});
+    expect(entity.isValid()).toBeFalsy();
+  });
+
+  test("test eng language", async () => {
+    const entity = new Entity({ language: EntityEnums.Language.English});
+    expect(entity.isValid()).toBeTruthy();
+  });
+});
+
 describe("test Entity.save", () => {
   let db: Db;
   const entity = new Entity({});
