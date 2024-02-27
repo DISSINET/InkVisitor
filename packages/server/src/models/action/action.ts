@@ -104,7 +104,7 @@ class ActionData implements IActionData, IModel {
   }
 
   isValid(): boolean {
-    return this.valencies.isValid() && this.entities.isValid();
+    return this.valencies.isValid() && this.entities.isValid() && !!this.pos;
   }
 }
 
