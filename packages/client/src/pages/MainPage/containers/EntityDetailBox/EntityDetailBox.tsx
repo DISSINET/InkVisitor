@@ -28,10 +28,6 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
     }
   }, [selectedDetailId, detailIdArray]);
 
-  useEffect(() => {
-    console.log(selectedDetailId);
-  }, [selectedDetailId]);
-
   const [entities, setEntities] = useState<IResponseEntity[]>([]);
 
   const { data, error } = useQuery(
