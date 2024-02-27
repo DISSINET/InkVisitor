@@ -205,11 +205,11 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
 
           return (
             <div style={{ display: "flex", alignItems: "center" }}>
-              {resourceEntity && resourceEntity.data.partValueLabel && (
+              {/* {resourceEntity && resourceEntity.data.partValueLabel && (
                 <StyledReferenceValuePartLabel>
                   ({resourceEntity.data.partValueLabel})
                 </StyledReferenceValuePartLabel>
-              )}
+              )} */}
               {valueEntity ? (
                 <EntityDropzone
                   onSelected={(newSelectedId: string) => {
@@ -223,6 +223,12 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
                 >
                   <EntityTag
                     entity={valueEntity}
+                    customTooltipAttributes={
+                      resourceEntity &&
+                      resourceEntity.data.partValueLabel && {
+                        partLabel: resourceEntity.data.partValueLabel,
+                      }
+                    }
                     fullWidth
                     unlinkButton={
                       !disabled && {
@@ -238,6 +244,7 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
                 !disabled && (
                   <div>
                     <EntitySuggester
+                      placeholder={resourceEntity?.data?.partValueLabel}
                       excludedEntityClasses={excludedSuggesterEntities}
                       openDetailOnCreate={openDetailOnCreate}
                       territoryActants={[]}
