@@ -24,13 +24,6 @@ export const StyledListHeaderColumn = styled.div<StyledListHeaderColumn>`
   font-style: italic;
 `;
 
-interface StyledReferencesListColumn {}
-export const StyledReferencesListColumn = styled.div<StyledReferencesListColumn>`
-  margin: ${({ theme }) => theme.space[1]};
-  display: grid;
-  align-items: center;
-`;
-
 export const StyledReferencesListButtons = styled.div`
   button {
     display: inline-flex;
