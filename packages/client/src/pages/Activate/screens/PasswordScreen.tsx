@@ -99,7 +99,11 @@ export const PasswordScreen: React.FC<PasswordScreen> = ({
           </StyledInputRow>
         </ModalInputWrap>
       </form>
-      {error !== false && <StyledErrorText>{error}</StyledErrorText>}
+
+      <div style={{ minHeight: "2rem" }}>
+        {error !== false && <StyledErrorText>{error}</StyledErrorText>}
+      </div>
+
       <StyledButtonWrap>
         <Button
           disabled={

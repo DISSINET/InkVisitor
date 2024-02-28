@@ -100,7 +100,11 @@ export const UsernameScreen: React.FC<UsernameScreen> = ({
               />
             </StyledInputRow>
           </ModalInputWrap>
-          {error !== false && <StyledErrorText>{error}</StyledErrorText>}
+
+          <div style={{ minHeight: "2rem" }}>
+            {error !== false && <StyledErrorText>{error}</StyledErrorText>}
+          </div>
+
           <StyledButtonWrap>
             <Button
               disabled={username.length < 2}

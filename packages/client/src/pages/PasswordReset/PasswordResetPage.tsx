@@ -155,7 +155,9 @@ export const PasswordResetPage: React.FC<PasswordResetPage> = ({}) => {
                 </>
               )}
 
-              {error !== false && <StyledErrorText>{error}</StyledErrorText>}
+              <div style={{ minHeight: "2rem" }}>
+                {error !== false && <StyledErrorText>{error}</StyledErrorText>}
+              </div>
 
               <StyledButtonWrap>
                 {hashOk ? (
