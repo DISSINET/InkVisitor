@@ -24,6 +24,7 @@ const INITIAL_CONTEXT = {
   setSelectedDetailId: UNINITIALISED,
   appendDetailId: UNINITIALISED,
   appendMultipleDetailIds: UNINITIALISED,
+  replaceDetailIds: UNINITIALISED,
   removeDetailId: UNINITIALISED,
   clearAllDetailIds: UNINITIALISED,
   cleanAllParams: UNINITIALISED,
@@ -38,6 +39,7 @@ interface SearchParamsContext {
   setSelectedDetailId: (id: string) => void;
   appendDetailId: (id: string) => void;
   appendMultipleDetailIds: (ids: string[]) => void;
+  replaceDetailIds: (ids: string[]) => void;
   removeDetailId: (id: string) => void;
   clearAllDetailIds: () => void;
   cleanAllParams: () => void;
@@ -142,6 +144,10 @@ export const SearchParamsProvider = ({
 
     setDetailId(newDetailIdArray.join(arrJoinChar));
     setTimeout(() => setSelectedDetailId(ids[0]), 100);
+  };
+
+  const replaceDetailIds = (ids: string[]) => {
+    setDetailId(ids.join(arrJoinChar));
   };
 
   const removeDetailId = (id: string) => {
@@ -259,6 +265,7 @@ export const SearchParamsProvider = ({
         setSelectedDetailId,
         appendDetailId,
         appendMultipleDetailIds,
+        replaceDetailIds,
         removeDetailId,
         clearAllDetailIds,
         cleanAllParams,

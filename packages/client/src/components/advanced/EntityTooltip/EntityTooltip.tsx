@@ -194,7 +194,6 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
         relations[t]?.connections ? relations[t]!.connections.length : 0
       );
       const hasRelations = relationsCount.some((count) => count > 0);
-      // => some relations has non related connections in data-import
 
       return (
         <>

@@ -120,6 +120,7 @@ export enum ItemTypes {
   PROP_ROW3 = "PROP_ROW3",
   REFERENCE_ROW = "REFERENCE_ROW",
   MULTI_RELATION = "MULTI_RELATION",
+  DETAIL_TAB = "DETAIL_TAB",
 }
 
 export type DragItem = {

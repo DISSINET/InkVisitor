@@ -7,7 +7,7 @@ interface StyledTab {
 export const StyledTab = styled.div<StyledTab>`
   display: inline-flex;
   justify-content: space-between;
-  align-items: flex-end;
+  align-items: center;
   cursor: pointer;
   background-color: ${({ theme, isSelected }) =>
     isSelected ? "transparent" : theme.color["gray"][100]};

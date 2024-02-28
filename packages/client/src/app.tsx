@@ -7,7 +7,6 @@ import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { ThemeProvider } from "styled-components";
 
 import api from "api";
-import { SearchParamsProvider } from "hooks/useParamsContext";
 import { useWindowSize } from "hooks/useWindowSize";
 import ActivatePage from "pages/Activate";
 import LoginPage from "pages/Login";
@@ -38,6 +37,7 @@ import { DocumentsPage } from "pages/Documents";
 import AclPage from "./pages/Acl";
 import MainPage from "./pages/MainPage";
 import { InterfaceEnums } from "@shared/enums";
+import { SearchParamsProvider } from "hooks/useSearchParamsContext";
 
 const clockPerformance = (
   profilerId: any,
