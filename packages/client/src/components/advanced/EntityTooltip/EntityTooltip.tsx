@@ -31,6 +31,7 @@ import {
   StyledRelations,
   StyledRow,
 } from "./EntityTooltipStyles";
+import { MdOutlineLabel } from "react-icons/md";
 
 interface EntityTooltip {
   // entity
@@ -49,6 +50,7 @@ interface EntityTooltip {
   tagHovered: boolean;
 
   referenceElement: HTMLDivElement | null;
+  customTooltipAttributes?: { partLabel?: string };
 }
 export const EntityTooltip: React.FC<EntityTooltip> = ({
   // entity
@@ -67,6 +69,7 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
   tagHovered,
   //
   referenceElement,
+  customTooltipAttributes,
 }) => {
   const [tooltipData, setTooltipData] = useState<
     EntityTooltipNamespace.IResponse | false
@@ -110,6 +113,14 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
                 {` (${languageDict.find((l) => l.value === language)?.label})`}
               </StyledLabel>
             </StyledRow>
+            {customTooltipAttributes?.partLabel && (
+              <StyledRow>
+                <StyledIconWrap>
+                  <MdOutlineLabel />
+                </StyledIconWrap>
+                <StyledDetail>{customTooltipAttributes.partLabel}</StyledDetail>
+              </StyledRow>
+            )}
             {text && (
               <StyledRow>
                 <StyledIconWrap>{<BsCardText />}</StyledIconWrap>
@@ -183,8 +194,6 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
         relations[t]?.connections ? relations[t]!.connections.length : 0
       );
       const hasRelations = relationsCount.some((count) => count > 0);
-      // => some relations has non related connections in data-import
-      console.log(filteredTypes);
 
       return (
         <>

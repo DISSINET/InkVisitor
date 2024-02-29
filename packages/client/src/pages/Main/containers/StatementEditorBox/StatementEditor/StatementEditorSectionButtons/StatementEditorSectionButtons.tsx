@@ -15,6 +15,7 @@ import {
 import React, { useState } from "react";
 import { FaClone, FaPlus, FaTrashAlt } from "react-icons/fa";
 import { TbReplace } from "react-icons/tb";
+import { StyledSectionButtonsBorder } from "./StatementEditorSectionButtonsStyles";
 
 interface StatementEditorSectionButtons {
   section: "actions" | "actants" | "references";
@@ -109,9 +110,7 @@ export const StatementEditorSectionButtons: React.FC<
           tooltipLabel={`remove all ${section} from statement`}
           onClick={() => setShowSubmitSection(section)}
         />
-        <div
-          style={{ borderRight: "1px dashed black", marginLeft: "0.3rem" }}
-        />
+        <StyledSectionButtonsBorder />
         <AttributeButtonGroup
           options={[
             {

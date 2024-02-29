@@ -118,7 +118,9 @@ export enum ItemTypes {
   PROP_ROW1 = "PROP_ROW1",
   PROP_ROW2 = "PROP_ROW2",
   PROP_ROW3 = "PROP_ROW3",
+  REFERENCE_ROW = "REFERENCE_ROW",
   MULTI_RELATION = "MULTI_RELATION",
+  DETAIL_TAB = "DETAIL_TAB",
 }
 
 export type DragItem = {
@@ -170,7 +172,7 @@ export interface IRequestSearchEntity {
   status?: EntityEnums.Status; // izy
   language?: EntityEnums.Language; //izy
   logicalType?: EntityEnums.LogicalType;
-  hasProps?: IEntityHasProps[]; //this should be checked within meta props and within all statements where the entity is used as the prop origin
+  hasProps?: IEntityHasProps[]; //this should be checked within metaprops and within all statements where the entity is used as the prop origin
   usedInTerritories?: IEntityUsedInTerritory[]; // this is probably little bit complicated
   usedInStatements?: IEntityUsedInStatementWith[]; // and this is supposed to be complicated as well
 }

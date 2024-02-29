@@ -133,11 +133,44 @@ export const dndHoverFn = (
   if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) {
     return;
   }
-
   if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) {
     return;
   }
+  moveFn(dragIndex, hoverIndex);
+  item.index = hoverIndex;
+};
 
+export const dndHoverFnHorizontal = (
+  item: EntityDragItem | DragItem,
+  index: number,
+  monitor: DropTargetMonitor,
+  ref: React.RefObject<HTMLDivElement>,
+  moveFn: (dragIndex: number, hoverIndex: number) => void
+) => {
+  if (!ref.current) {
+    return;
+  }
+
+  const dragIndex: number = item.index;
+  const hoverIndex: number | undefined = index;
+
+  if (dragIndex === hoverIndex) {
+    return;
+  }
+
+  const hoverBoundingRect = ref.current?.getBoundingClientRect();
+  const hoverMiddleY = (hoverBoundingRect.right - hoverBoundingRect.left) / 2;
+  const clientOffset = monitor.getClientOffset();
+  const hoverClientY = (clientOffset as XYCoord).x - hoverBoundingRect.left;
+  if (hoverIndex === undefined) {
+    return;
+  }
+  if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) {
+    return;
+  }
+  if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) {
+    return;
+  }
   moveFn(dragIndex, hoverIndex);
   item.index = hoverIndex;
 };
@@ -256,3 +289,9 @@ export function isSafePassword(password: string) {
   // If all conditions are met, the password is considered safe
   return true;
 }
+export const normalizeURL = (url: string) => {
+  if (!url.endsWith("/")) {
+    return url + "/";
+  }
+  return url;
+};

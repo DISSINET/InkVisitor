@@ -26,6 +26,9 @@ export const StyledToastContainer = styled(ToastContainer)`
   .Toastify__toast--error {
     background-color: ${({ theme }) => theme.color["danger"]};
   }
+  .Toastify__toast-icon svg {
+    fill: ${({ theme }) => theme.color.white};
+  }
 `;
 
 export const StyledLink = styled.a`

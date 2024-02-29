@@ -1,13 +1,12 @@
 import { RelationEnums } from "@shared/enums";
 import { Relation } from "@shared/types";
-import theme from "Theme/theme";
 import { Button, LetterIcon } from "components";
 import React from "react";
 import { BiNetworkChart } from "react-icons/bi";
 import { TbArrowNarrowRight, TbArrowsHorizontal } from "react-icons/tb";
-import { StyledLabel } from "../EntityDetailRelationTypeBlockStyles";
 import {
   StyledArrow,
+  StyledLabel,
   StyledRelationType,
 } from "./EntityDetailRelationTypeIconStyles";
 

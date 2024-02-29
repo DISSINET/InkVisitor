@@ -18,13 +18,13 @@ export default class DbPool {
   }
 
   async acquire(): Promise<Db> {
-    console.log(
-      `Acquiring db connection, available=${this.pool.available}, size=${this.pool.size}`
-    );
+    //console.log(
+    //  `Acquiring db connection, available=${this.pool.available}, size=${this.pool.size}`
+    //);
     const db = this.pool.acquire();
-    console.log(
-      `Acquired db connection, available=${this.pool.available}, size=${this.pool.size}`
-    );
+    //console.log(
+    //  `Acquired db connection, available=${this.pool.available}, size=${this.pool.size}`
+    //);
     return db;
   }
 
@@ -32,13 +32,13 @@ export default class DbPool {
     if (instance.lockAwaiter) {
       Db.mutex.unlock(instance.lockAwaiter);
     }
-    console.log(
-      `Releasing db connection, available=${this.pool.available}, size=${this.pool.size}`
-    );
+    //console.log(
+    //  `Releasing db connection, available=${this.pool.available}, size=${this.pool.size}`
+    //);
     await this.pool.release(instance);
-    console.log(
-      `Released db connection, available=${this.pool.available}, size=${this.pool.size}`
-    );
+    //console.log(
+    //  `Released db connection, available=${this.pool.available}, size=${this.pool.size}`
+    //);
   }
 
   async end(): Promise<void> {
@@ -47,18 +47,18 @@ export default class DbPool {
   }
 
   async create(): Promise<Db> {
-    console.log(
-      `Creating db connection, available=${this.pool.available}, size=${this.pool.size}`
-    );
+    //console.log(
+    //  `Creating db connection, available=${this.pool.available}, size=${this.pool.size}`
+    //);
     const instance = new Db();
     await instance.initDb();
     return instance;
   }
 
   async destroy(instance: Db): Promise<void> {
-    console.log(
-      `Destroying db connection, used=${this.pool.size}/${this.pool.max}`
-    );
+    //console.log(
+    //  `Destroying db connection, used=${this.pool.size}/${this.pool.max}`
+    //);
     return instance.close();
   }
 

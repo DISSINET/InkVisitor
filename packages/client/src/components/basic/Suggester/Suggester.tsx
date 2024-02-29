@@ -8,7 +8,6 @@ import { dropdownWildCard } from "@shared/dictionaries/entity";
 import { EntityEnums } from "@shared/enums";
 import { IEntity, IUserOptions } from "@shared/types";
 import { scrollOverscanCount } from "Theme/constants";
-import theme from "Theme/theme";
 import {
   Button,
   Input,
@@ -18,12 +17,13 @@ import {
 } from "components";
 import Dropdown from "components/advanced";
 import useKeypress from "hooks/useKeyPress";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { DropTargetMonitor, useDrop } from "react-dnd";
 import { FaPlus } from "react-icons/fa";
 import { MdCancel } from "react-icons/md";
 import { toast } from "react-toastify";
 import { FixedSizeList as List } from "react-window";
+import { ThemeContext } from "styled-components";
 import {
   EntityDragItem,
   EntitySingleDropdownItem,
@@ -259,6 +259,8 @@ export const Suggester: React.FC<Suggester> = ({
     middleware: [flip({ padding: 10 })],
   });
 
+  const themeContext = useContext(ThemeContext);
+
   return (
     // div is necessary for flex to work and render the clear button properly
     <div>
@@ -339,7 +341,10 @@ export const Suggester: React.FC<Suggester> = ({
         </StyledInputWrapper>
 
         {isWrongDropCategory && isOver && (
-          <StyledAiOutlineWarning size={22} color={theme.color["warning"]} />
+          <StyledAiOutlineWarning
+            size={22}
+            color={themeContext.color.warning}
+          />
         )}
 
         {(isFocused || isHovered) && !middlewareData.hide?.referenceHidden && (

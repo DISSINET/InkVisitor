@@ -37,6 +37,7 @@ interface EntityTag {
   elvlButtonGroup?: ReactNode | false;
 
   unlinkButton?: UnlinkButton | false;
+  customTooltipAttributes?: { partLabel?: string };
 }
 
 export const EntityTag: React.FC<EntityTag> = ({
@@ -61,6 +62,7 @@ export const EntityTag: React.FC<EntityTag> = ({
   elvlButtonGroup = false,
 
   unlinkButton,
+  customTooltipAttributes,
 }) => {
   const draggedEntity: DraggedEntityReduxItem = useAppSelector(
     (state) => state.draggedEntity
@@ -129,6 +131,7 @@ export const EntityTag: React.FC<EntityTag> = ({
             }
             tagHovered={tagHovered}
             referenceElement={referenceElement}
+            customTooltipAttributes={customTooltipAttributes}
           />
         )}
         <Tag

@@ -14,16 +14,8 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { excludedSuggesterEntities } from "Theme/constants";
-import theme from "Theme/theme";
 import api from "api";
-import {
-  BaseDropdown,
-  Button,
-  Input,
-  Message,
-  MultiInput,
-  Submit,
-} from "components";
+import { Button, Input, Message, MultiInput, Submit } from "components";
 import Dropdown, {
   ApplyTemplateModal,
   AuditTable,
@@ -40,7 +32,7 @@ import {
   CStatementAction,
 } from "constructors";
 import { useSearchParams } from "hooks";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import {
   AiOutlineCaretDown,
   AiOutlineCaretUp,
@@ -78,6 +70,7 @@ import { StatementEditorActantTable } from "./StatementEditorActantTable/Stateme
 import { StatementEditorActionTable } from "./StatementEditorActionTable/StatementEditorActionTable";
 import { StatementEditorOrdering } from "./StatementEditorOrdering/StatementEditorOrdering";
 import { StatementEditorSectionButtons } from "./StatementEditorSectionButtons/StatementEditorSectionButtons";
+import { ThemeContext } from "styled-components";
 
 interface StatementEditor {
   statement: IResponseStatement;
@@ -115,6 +108,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   } = useSearchParams();
 
   const queryClient = useQueryClient();
+  const themeContext = useContext(ThemeContext);
 
   // Audit query
   const {
@@ -661,7 +655,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                     <div style={{ display: "flex", alignItems: "flex-end" }}>
                       <AiOutlineWarning
                         size={22}
-                        color={theme.color["warning"]}
+                        color={themeContext.color.warning}
                       />
                       <StyledMissingTerritory>
                         {"missing territory"}

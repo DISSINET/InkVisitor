@@ -7,7 +7,6 @@ import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { ThemeProvider } from "styled-components";
 
 import api from "api";
-import { SearchParamsProvider } from "hooks/useParamsContext";
 import { useWindowSize } from "hooks/useWindowSize";
 import {
   heightHeader,
@@ -41,6 +40,7 @@ import {
   DocumentsPage,
   NotFoundPage,
 } from "pages";
+import { SearchParamsProvider } from "hooks/useSearchParamsContext";
 
 const clockPerformance = (
   profilerId: any,
