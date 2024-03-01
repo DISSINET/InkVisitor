@@ -50,7 +50,9 @@ export const Page: React.FC<Page> = ({ children }) => {
   const navigate = useNavigate();
 
   const disableRightHeader: boolean =
-    location.pathname === "/login" || location.pathname === "/activate";
+    location.pathname === "/login" ||
+    location.pathname === "/activate" ||
+    location.pathname === "/password_reset";
 
   const {
     status: statusUser,

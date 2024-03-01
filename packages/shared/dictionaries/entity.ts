@@ -1,4 +1,4 @@
-import { DropdownItem, EntitySingleDropdownItem } from "types";
+import { DropdownItem } from "types";
 import { EntityEnums } from "../enums";
 
 // for single entity dropdown

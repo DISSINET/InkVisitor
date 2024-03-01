@@ -1,6 +1,6 @@
 import { IEntity, Relation } from "@shared/types";
 import React from "react";
-import { getRelationTreeDepth, getShortLabelByLetterCount } from "utils";
+import { getRelationTreeDepth, getShortLabelByLetterCount } from "utils/utils";
 import {
   StyledFlexColumn,
   StyledGridRowHalf,

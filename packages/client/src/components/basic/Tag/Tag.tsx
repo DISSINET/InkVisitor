@@ -26,7 +26,7 @@ import {
   EntityDragItem,
   ItemTypes,
 } from "types";
-import { dndHoverFn, getShortLabelByLetterCount } from "utils";
+import { dndHoverFn, getShortLabelByLetterCount } from "utils/utils";
 import {
   StyledButtonWrapper,
   StyledElvlWrapper,

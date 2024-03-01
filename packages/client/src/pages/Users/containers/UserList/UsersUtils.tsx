@@ -6,11 +6,14 @@ import { FaPlus } from "react-icons/fa";
 import api from "api";
 import { Button, ButtonGroup, Input } from "components";
 import { StyledUserEditorForm, StyledUtils } from "./UserListStyles";
+import { IResponseUser } from "@shared/types";
 
-interface UsersUtils {}
+interface UsersUtils {
+  users: IResponseUser[];
+}
 
-export const UsersUtils: React.FC<UsersUtils> = React.memo(({}) => {
-  const [newUserName, setNewUserName] = useState<string>("");
+export const UsersUtils: React.FC<UsersUtils> = React.memo(({ users }) => {
+  // const [newUserName, setNewUserName] = useState<string>("");
   const [newUserEmail, setNewUserEmail] = useState<string>("");
   const [testEmail, setTestEmail] = useState<string>("");
 
@@ -19,13 +22,13 @@ export const UsersUtils: React.FC<UsersUtils> = React.memo(({}) => {
   const createNewUserMutataion = useMutation(
     async () =>
       await api.usersCreate({
-        name: newUserName,
         email: newUserEmail,
       }),
     {
       onSuccess(data, variables) {
-        toast.success(`User ${newUserName} created!`);
-        setNewUserName("");
+        toast.success(
+          `User created! \n Verification email sent to ${newUserEmail}.`
+        );
         setNewUserEmail("");
         queryClient.invalidateQueries(["users"]);
       },
@@ -41,20 +44,9 @@ export const UsersUtils: React.FC<UsersUtils> = React.memo(({}) => {
     return re.test(String(newUserEmail).toLowerCase());
   };
 
-  const validNewUserName = newUserName.length > 3;
-
   return (
     <StyledUtils>
       <StyledUserEditorForm>
-        <Input
-          width={200}
-          value={newUserName}
-          placeholder="username"
-          changeOnType
-          onChangeFn={async (newValue: string) => {
-            setNewUserName(newValue);
-          }}
-        />
         <Input
           width={200}
           value={newUserEmail}
@@ -68,11 +60,15 @@ export const UsersUtils: React.FC<UsersUtils> = React.memo(({}) => {
           key="add"
           label="new user"
           tooltipLabel="create user"
-          disabled={!(validNewUserEmail() && validNewUserName)}
+          disabled={!validNewUserEmail()}
           icon={<FaPlus />}
           color="primary"
           onClick={() => {
-            createNewUserMutataion.mutate();
+            if (!users.some((user) => user.email === newUserEmail)) {
+              createNewUserMutataion.mutate();
+            } else {
+              toast.warning("Email already in use");
+            }
           }}
         />
       </StyledUserEditorForm>

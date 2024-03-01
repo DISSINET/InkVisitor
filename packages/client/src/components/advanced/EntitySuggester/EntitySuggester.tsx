@@ -22,7 +22,7 @@ import {
   EntitySingleDropdownItem,
   SuggesterItemToCreate,
 } from "types";
-import { deepCopy } from "utils";
+import { deepCopy } from "utils/utils";
 import { AddTerritoryModal, EntityCreateModal } from "..";
 
 interface EntitySuggester {

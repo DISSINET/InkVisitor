@@ -26,7 +26,7 @@ export const AddTerritoryModal: React.FC<AddTerritoryModal> = ({
 
   return (
     <>
-      <Modal showModal={showModal} width="thin" onClose={onClose}>
+      <Modal showModal={showModal} width="auto" onClose={onClose}>
         <ModalHeader title="Select parent territory" />
         <ModalContent>
           <EntitySuggester

@@ -33,6 +33,7 @@ interface ButtonProps {
   fullWidth?: boolean;
   tooltipPosition?: AutoPlacement | BasePlacement | VariationPlacement;
   hideTooltipOnClick?: boolean;
+  paddingX?: boolean;
 }
 
 export const Button: React.FC<ButtonProps> = ({
@@ -56,6 +57,7 @@ export const Button: React.FC<ButtonProps> = ({
   fullWidth = false,
   tooltipPosition = "bottom",
   hideTooltipOnClick = false,
+  paddingX = false,
 }) => {
   const [referenceElement, setReferenceElement] =
     useState<HTMLButtonElement | null>(null);
@@ -83,6 +85,7 @@ export const Button: React.FC<ButtonProps> = ({
         onMouseEnter={() => setShowTooltip(true)}
         onMouseLeave={() => setShowTooltip(false)}
         onKeyPress={(e: KeyboardEvent<HTMLButtonElement>) => e.preventDefault()}
+        paddingX={paddingX}
       >
         {icon}
         {label && (

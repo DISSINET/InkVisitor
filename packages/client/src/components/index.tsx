@@ -36,6 +36,7 @@ import { Toast } from "./basic/Toast/Toast";
 import ToastWithLink from "./basic/Toast/ToastWithLink";
 import { Tooltip } from "./basic/Tooltip/Tooltip";
 import { TypeBar } from "./basic/TypeBar/TypeBar";
+import { ContactAdminFooting } from "./basic/ContactAdminFooting/ContactAdminFooting";
 
 export {
   AttributeIcon,
@@ -46,6 +47,7 @@ export {
   ButtonGroup,
   ButtonGroups,
   Checkbox,
+  ContactAdminFooting,
   Cloud,
   Dropzone,
   Header,

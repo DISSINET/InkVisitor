@@ -8,10 +8,6 @@ import { ThemeProvider } from "styled-components";
 
 import api from "api";
 import { useWindowSize } from "hooks/useWindowSize";
-import ActivatePage from "pages/Activate";
-import LoginPage from "pages/Login";
-import UsersPage from "pages/Users";
-
 import {
   heightHeader,
   percentPanelWidths,
@@ -24,8 +20,7 @@ import theme, { ThemeType } from "Theme/theme";
 import { darkTheme } from "Theme/theme-dark";
 import { Page } from "components/advanced";
 import { useDebounce } from "hooks";
-import { AboutPage } from "pages/About";
-import NotFoundPage from "pages/NotFound";
+
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { setContentHeight } from "redux/features/layout/contentHeightSlice";
@@ -33,10 +28,18 @@ import { setLayoutWidth } from "redux/features/layout/layoutWidthSlice";
 import { setPanelWidths } from "redux/features/layout/panelWidthsSlice";
 import { setSeparatorXPosition } from "redux/features/layout/separatorXPositionSlice";
 
-import { DocumentsPage } from "pages/Documents";
-import AclPage from "./pages/Acl";
-import MainPage from "./pages/MainPage";
 import { InterfaceEnums } from "@shared/enums";
+import {
+  LoginPage,
+  ActivatePage,
+  PasswordResetPage,
+  MainPage,
+  AclPage,
+  AboutPage,
+  UsersPage,
+  DocumentsPage,
+  NotFoundPage,
+} from "pages";
 import { SearchParamsProvider } from "hooks/useSearchParamsContext";
 
 const clockPerformance = (
@@ -75,6 +78,8 @@ const queryClient = new QueryClient({
     queries: {
       refetchOnWindowFocus: false,
       retry: false,
+      // turn on for airplane / offline work
+      // networkMode: "always",
     },
   },
 });
@@ -193,6 +198,14 @@ export const App: React.FC = () => {
                       element={
                         <PublicPath>
                           <ActivatePage />
+                        </PublicPath>
+                      }
+                    />
+                    <Route
+                      path="/password_reset"
+                      element={
+                        <PublicPath>
+                          <PasswordResetPage />
                         </PublicPath>
                       }
                     />

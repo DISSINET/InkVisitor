@@ -6,6 +6,7 @@ interface StyledPropButtonGroup {
   border?: boolean;
   round?: boolean;
   width?: number;
+  padding?: boolean;
 }
 export const StyledPropButtonGroup = styled.div<StyledPropButtonGroup>`
   margin-left: ${({ theme, leftMargin }) =>
