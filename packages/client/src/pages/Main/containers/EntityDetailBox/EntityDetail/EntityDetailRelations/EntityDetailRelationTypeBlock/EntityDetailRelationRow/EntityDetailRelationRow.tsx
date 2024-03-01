@@ -13,7 +13,7 @@ import {
 } from "react-dnd";
 import { FaGripVertical } from "react-icons/fa";
 import { DragItem, ItemTypes } from "types";
-import { dndHoverFn } from "utils";
+import { dndHoverFn } from "utils/utils";
 import {
   StyledGrid,
   StyledGridColumn,

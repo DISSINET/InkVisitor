@@ -8,7 +8,7 @@ import {
 } from "react-dnd";
 import { Cell, ColumnInstance, Row } from "react-table";
 import { DragItem, ItemTypes } from "types";
-import { dndHoverFn } from "utils";
+import { dndHoverFn } from "utils/utils";
 import { StyledTd, StyledTr } from "../StatementEditorOrderingStyles";
 
 interface StatementEditorOrderTableRow {

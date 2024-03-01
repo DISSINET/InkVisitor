@@ -19,7 +19,10 @@ import { AiOutlineTag } from "react-icons/ai";
 import { BiCommentDetail } from "react-icons/bi";
 import { BsCardText } from "react-icons/bs";
 import { ImListNumbered } from "react-icons/im";
-import { getEntityRelationRules, getShortLabelByLetterCount } from "utils";
+import {
+  getEntityRelationRules,
+  getShortLabelByLetterCount,
+} from "utils/utils";
 import { EntityTooltipRelationTreeTable } from "./EntityTooltipRelationTreeTable/EntityTooltipRelationTreeTable";
 import {
   StyledBold,

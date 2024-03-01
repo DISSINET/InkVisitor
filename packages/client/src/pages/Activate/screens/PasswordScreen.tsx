@@ -13,7 +13,7 @@ import {
 import React, { useEffect, useState } from "react";
 import { FaUserPlus } from "react-icons/fa";
 import { TbMailFilled } from "react-icons/tb";
-import { isSafePassword } from "utils";
+import { isSafePassword } from "utils/utils";
 import {
   StyledTbLockExclamation,
   StyledTbLockPlus,

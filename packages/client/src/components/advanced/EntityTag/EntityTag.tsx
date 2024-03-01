@@ -8,7 +8,7 @@ import React, { ReactNode, useState } from "react";
 import { FaUnlink } from "react-icons/fa";
 import { useAppSelector } from "redux/hooks";
 import { DraggedEntityReduxItem, EntityDragItem } from "types";
-import { getEntityLabel, isValidEntityClass } from "utils";
+import { getEntityLabel, isValidEntityClass } from "utils/utils";
 
 interface UnlinkButton {
   onClick: () => void;

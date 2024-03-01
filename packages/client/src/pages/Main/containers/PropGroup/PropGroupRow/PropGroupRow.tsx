@@ -18,7 +18,7 @@ import {
   ItemTypes,
   PropAttributeFilter,
 } from "types";
-import { dndHoverFn } from "utils";
+import { dndHoverFn } from "utils/utils";
 import { TooltipAttributesGroup } from "../..";
 import { PropGroupRowStatementAttributes } from "./PropGroupRowStatementAttributes";
 import {

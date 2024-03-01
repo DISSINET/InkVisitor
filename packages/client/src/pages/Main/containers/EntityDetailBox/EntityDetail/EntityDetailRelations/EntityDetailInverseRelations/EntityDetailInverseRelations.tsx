@@ -1,7 +1,7 @@
 import { RelationEnums } from "@shared/enums";
 import { IResponseDetail, Relation } from "@shared/types";
 import React, { useEffect, useState } from "react";
-import { getRelationInvertedRules } from "utils";
+import { getRelationInvertedRules } from "utils/utils";
 import {
   StyledDetailSectionContent,
   StyledDetailSectionHeader,

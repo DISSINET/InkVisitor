@@ -3,7 +3,7 @@ import { IResponseDetail, IResponseGeneric, Relation } from "@shared/types";
 import { AxiosResponse } from "axios";
 import React, { useEffect, useState } from "react";
 import { UseMutationResult } from "@tanstack/react-query";
-import { getEntityRelationRules } from "utils";
+import { getEntityRelationRules } from "utils/utils";
 import { EntityDetailInverseRelations } from "./EntityDetailInverseRelations/EntityDetailInverseRelations";
 import { StyledRelationsGrid } from "./EntityDetailRelationsStyles";
 import { EntityDetailRelationTypeBlock } from "./EntityDetailRelationTypeBlock/EntityDetailRelationTypeBlock";

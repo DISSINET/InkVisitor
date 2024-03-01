@@ -24,7 +24,7 @@ import {
   TbMailFilled,
 } from "react-icons/tb";
 import { useNavigate } from "react-router";
-import { isSafePassword } from "utils";
+import { isSafePassword } from "utils/utils";
 import {
   StyledButtonWrap,
   StyledDescription,

@@ -12,7 +12,7 @@ import { setSelectedTerritoryPath } from "redux/features/territoryTree/selectedT
 import { setTreeInitialized } from "redux/features/territoryTree/treeInitializeSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { ITerritoryFilter } from "types";
-import { searchTree } from "utils";
+import { searchTree } from "utils/utils";
 import { ContextMenuNewTerritoryModal } from "./ContextMenuNewTerritoryModal/ContextMenuNewTerritoryModal";
 import { StyledNoResults, StyledTreeWrapper } from "./TerritoryTreeBoxStyles";
 import { TerritoryTreeFilter } from "./TerritoryTreeFilter/TerritoryTreeFilter";

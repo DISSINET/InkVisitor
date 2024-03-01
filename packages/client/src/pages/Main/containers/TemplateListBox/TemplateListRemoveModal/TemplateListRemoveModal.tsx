@@ -6,7 +6,7 @@ import { Submit } from "components";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { getShortLabelByLetterCount } from "utils";
+import { getShortLabelByLetterCount } from "utils/utils";
 
 interface TemplateListRemoveModal {
   removeEntityId: string;

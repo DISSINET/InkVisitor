@@ -3,7 +3,7 @@ import { IEntity, IWarning } from "@shared/types";
 import React, { useEffect, useState } from "react";
 import { TiWarningOutline } from "react-icons/ti";
 import { StyledMessage } from "./MessateStyles";
-import { getShortLabelByLetterCount } from "utils";
+import { getShortLabelByLetterCount } from "utils/utils";
 
 interface Message {
   warning: IWarning;

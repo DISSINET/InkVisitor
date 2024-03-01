@@ -19,7 +19,7 @@ import {
   GrDocumentVerified,
 } from "react-icons/gr";
 import { CellProps, Column, Row, useTable } from "react-table";
-import { deepCopy, normalizeURL } from "utils";
+import { deepCopy, normalizeURL } from "utils/utils";
 import { EntityReferenceTableRow } from "./EntityReferenceTableRow";
 import {
   StyledReferenceValuePartLabel,

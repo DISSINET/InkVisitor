@@ -52,7 +52,7 @@ import {
   FilteredActantObject,
   ItemTypes,
 } from "types";
-import { dndHoverFn } from "utils";
+import { dndHoverFn } from "utils/utils";
 import { PropGroup } from "../../../PropGroup/PropGroup";
 import { StatementEditorActantClassification } from "./StatementEditorActantClassification/StatementEditorActantClassification";
 import { StatementEditorActantIdentification } from "./StatementEditorActantIdentification/StatementEditorActantIdentification";

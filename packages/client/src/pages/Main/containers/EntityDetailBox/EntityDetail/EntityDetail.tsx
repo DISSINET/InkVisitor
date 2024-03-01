@@ -26,7 +26,7 @@ import {
   DropdownItem,
   PropAttributeFilter,
 } from "types";
-import { getEntityLabel, getShortLabelByLetterCount } from "utils";
+import { getEntityLabel, getShortLabelByLetterCount } from "utils/utils";
 import { EntityReferenceTable } from "../../EntityReferenceTable/EntityReferenceTable";
 import { PropGroup } from "../../PropGroup/PropGroup";
 import { EntityDetailCreateTemplateModal } from "./EntityDetailCreateTemplateModal/EntityDetailCreateTemplateModal";

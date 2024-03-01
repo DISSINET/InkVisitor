@@ -17,7 +17,7 @@ import {
 } from "react-dnd";
 import { FiMove } from "react-icons/fi";
 import { DragItem, ItemTypes } from "types";
-import { dndHoverFnHorizontal, getEntityLabel } from "utils";
+import { dndHoverFnHorizontal, getEntityLabel } from "utils/utils";
 import {
   StyledCgClose,
   StyledIconWrap,

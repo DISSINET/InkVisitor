@@ -30,7 +30,7 @@ import {
 import { setLastClickedIndex } from "redux/features/statementList/lastClickedIndexSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { DropdownItem } from "types";
-import { collectTerritoryChildren, searchTree } from "utils";
+import { collectTerritoryChildren, searchTree } from "utils/utils";
 import { v4 as uuidv4 } from "uuid";
 import {
   StyledActionsWrapper,

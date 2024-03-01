@@ -18,7 +18,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { setTreeInitialized } from "redux/features/territoryTree/treeInitializeSlice";
 import { useAppDispatch } from "redux/hooks";
-import { getShortLabelByLetterCount } from "utils";
+import { getShortLabelByLetterCount } from "utils/utils";
 
 interface ContextMenuNewTerritoryModal {
   territoryActantId: string;

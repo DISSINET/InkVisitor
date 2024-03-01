@@ -14,7 +14,7 @@ import {
 import React, { useEffect, useState } from "react";
 import { FaMinus, FaPlus } from "react-icons/fa";
 import { toast } from "react-toastify";
-import { getShortLabelByLetterCount } from "utils";
+import { getShortLabelByLetterCount } from "utils/utils";
 
 interface DocumentModal {
   entityId?: string;

@@ -21,7 +21,7 @@ import { CEntity, CStatement, CTemplateEntity } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useState } from "react";
 import { toast } from "react-toastify";
-import { getShortLabelByLetterCount } from "utils";
+import { getShortLabelByLetterCount } from "utils/utils";
 
 interface TemplateListCreateModal {
   showCreateModal: boolean;

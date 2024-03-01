@@ -17,7 +17,7 @@ import { Cell, ColumnInstance, Row } from "react-table";
 import { setDraggedRowId } from "redux/features/statementList/draggedRowIdSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { DragItem, ItemTypes } from "types";
-import { dndHoverFn } from "utils";
+import { dndHoverFn } from "utils/utils";
 import { StatementListRowExpanded } from "./StatementListRowExpanded/StatementListRowExpanded";
 import { StyledTd, StyledTdMove, StyledTr } from "./StatementListTableStyles";
 import { ThemeContext } from "styled-components";

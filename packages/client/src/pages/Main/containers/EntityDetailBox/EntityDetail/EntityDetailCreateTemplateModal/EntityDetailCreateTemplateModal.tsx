@@ -27,7 +27,7 @@ import {
   StyledDetailContentRowLabel,
   StyledDetailContentRowValue,
 } from "../EntityDetailStyles";
-import { getShortLabelByLetterCount } from "utils";
+import { getShortLabelByLetterCount } from "utils/utils";
 
 interface EntityDetailCreateTemplateModal {
   showModal: boolean;

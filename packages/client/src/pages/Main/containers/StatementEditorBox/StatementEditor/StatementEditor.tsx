@@ -44,7 +44,11 @@ import { toast } from "react-toastify";
 import { setShowWarnings } from "redux/features/statementEditor/showWarningsSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { DropdownItem, classesEditorActants, classesEditorTags } from "types";
-import { deepCopy, getEntityLabel, getShortLabelByLetterCount } from "utils";
+import {
+  deepCopy,
+  getEntityLabel,
+  getShortLabelByLetterCount,
+} from "utils/utils";
 import { EntityReferenceTable } from "../../EntityReferenceTable/EntityReferenceTable";
 import {
   StyledBreadcrumbWrap,

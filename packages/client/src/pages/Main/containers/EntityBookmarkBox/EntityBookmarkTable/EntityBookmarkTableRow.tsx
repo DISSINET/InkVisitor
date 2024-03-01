@@ -9,7 +9,7 @@ import {
 import { FaGripVertical } from "react-icons/fa";
 import { ColumnInstance, Row } from "react-table";
 import { DragItem, ItemTypes } from "types";
-import { dndHoverFn } from "utils";
+import { dndHoverFn } from "utils/utils";
 import { StyledTd, StyledTr } from "./EntityBookmarkTableStyles";
 import { ThemeContext } from "styled-components";
 
