@@ -1,12 +1,5 @@
 import api from "api";
 import { Button, Input, ModalInputWrap } from "components";
-import {
-  StyledButtonWrap,
-  StyledDescription,
-  StyledErrorText,
-  StyledInputRow,
-  StyledMail,
-} from "pages/PasswordReset/PasswordResetPageStyles";
 import React, { useState } from "react";
 import { FaUserTag } from "react-icons/fa";
 import { FiLogIn } from "react-icons/fi";
@@ -22,6 +15,13 @@ import {
   UsernameTooShortError,
   getErrorByCode,
 } from "@shared/types/errors";
+import {
+  StyledButtonWrap,
+  StyledDescription,
+  StyledErrorText,
+  StyledInputRow,
+  StyledMail,
+} from "pages/AuthModalStyles";
 
 interface UsernameScreen {
   hash: string;

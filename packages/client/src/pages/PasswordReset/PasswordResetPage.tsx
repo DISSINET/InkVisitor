@@ -14,6 +14,14 @@ import {
   ModalContent,
   ModalInputWrap,
 } from "components";
+import {
+  StyledButtonWrap,
+  StyledDescription,
+  StyledErrorText,
+  StyledInputRow,
+  StyledMail,
+  StyledText,
+} from "pages/AuthModalStyles";
 import React, { useEffect, useState } from "react";
 import { BsEnvelopeArrowUpFill } from "react-icons/bs";
 import { RiRotateLockLine } from "react-icons/ri";
@@ -25,14 +33,6 @@ import {
 } from "react-icons/tb";
 import { useNavigate } from "react-router";
 import { isSafePassword } from "utils/utils";
-import {
-  StyledButtonWrap,
-  StyledDescription,
-  StyledErrorText,
-  StyledInputRow,
-  StyledMail,
-  StyledText,
-} from "./PasswordResetPageStyles";
 
 interface PasswordResetPage {}
 export const PasswordResetPage: React.FC<PasswordResetPage> = ({}) => {

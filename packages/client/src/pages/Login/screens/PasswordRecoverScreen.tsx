@@ -1,10 +1,5 @@
 import api from "api";
 import { Button, Input } from "components";
-import {
-  StyledButtonWrap,
-  StyledErrorText,
-  StyledInputRow,
-} from "pages/PasswordReset/PasswordResetPageStyles";
 import React, { useEffect, useState } from "react";
 import { BsEnvelopeArrowUpFill } from "react-icons/bs";
 import { IoReloadCircle } from "react-icons/io5";
@@ -19,6 +14,11 @@ import {
   InvalidEmailError,
   getErrorByCode,
 } from "@shared/types/errors";
+import {
+  StyledButtonWrap,
+  StyledErrorText,
+  StyledInputRow,
+} from "pages/AuthModalStyles";
 
 interface PasswordRecoverScreen {
   emailLocal: string;

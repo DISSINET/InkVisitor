@@ -8,9 +8,9 @@ import { Button, ContactAdminFooting, Modal, ModalContent } from "components";
 import React, { useEffect, useState } from "react";
 import { TbArrowForwardUp } from "react-icons/tb";
 import { useNavigate } from "react-router";
-import { StyledError } from "./ActivatePageStyles";
 import { PasswordScreen } from "./screens/PasswordScreen";
 import { UsernameScreen } from "./screens/UsernameScreen";
+import { StyledErrorText } from "pages/AuthModalStyles";
 
 const ActivatePage: React.FC = ({}) => {
   const navigate = useNavigate();
@@ -70,7 +70,7 @@ const ActivatePage: React.FC = ({}) => {
 
           {error && (
             <>
-              <StyledError>{error}</StyledError>
+              <StyledErrorText>{error}</StyledErrorText>
               {!hashOk && (
                 <Button
                   color="success"

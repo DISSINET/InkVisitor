@@ -1,9 +1,5 @@
 import api from "api";
 import { Button, Input } from "components";
-import {
-  StyledButtonWrap,
-  StyledErrorText,
-} from "pages/PasswordReset/PasswordResetPageStyles";
 import React, { useState } from "react";
 import { FiLogIn } from "react-icons/fi";
 import { setUsername } from "redux/features/usernameSlice";
@@ -14,6 +10,7 @@ import {
   StyledTbMailFilled,
 } from "./LoginScreensStyles";
 import { IErrorSignature, getErrorByCode } from "@shared/types/errors";
+import { StyledButtonWrap, StyledErrorText } from "pages/AuthModalStyles";
 
 interface LoginScreen {
   usernameLocal: string;

@@ -3,13 +3,6 @@ import {
   UnsafePasswordError,
 } from "@shared/types/errors";
 import { Button, Input, ModalInputWrap } from "components";
-import {
-  StyledButtonWrap,
-  StyledDescription,
-  StyledErrorText,
-  StyledInputRow,
-  StyledMail,
-} from "pages/PasswordReset/PasswordResetPageStyles";
 import React, { useEffect, useState } from "react";
 import { FaUserPlus } from "react-icons/fa";
 import { TbMailFilled } from "react-icons/tb";
@@ -18,6 +11,13 @@ import {
   StyledTbLockExclamation,
   StyledTbLockPlus,
 } from "./ActivateSreensStyles";
+import {
+  StyledButtonWrap,
+  StyledDescription,
+  StyledErrorText,
+  StyledInputRow,
+  StyledMail,
+} from "pages/AuthModalStyles";
 
 interface PasswordScreen {
   email: string;
