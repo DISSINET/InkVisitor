@@ -10,7 +10,7 @@ import { TbArrowForwardUp } from "react-icons/tb";
 import { useNavigate } from "react-router";
 import { PasswordScreen } from "./screens/PasswordScreen";
 import { UsernameScreen } from "./screens/UsernameScreen";
-import { StyledErrorText } from "pages/AuthModalStyles";
+import { StyledButtonWrap, StyledErrorText } from "pages/AuthModalSharedStyles";
 
 const ActivatePage: React.FC = ({}) => {
   const navigate = useNavigate();
@@ -71,16 +71,20 @@ const ActivatePage: React.FC = ({}) => {
           {error && (
             <>
               <StyledErrorText>{error}</StyledErrorText>
-              {!hashOk && (
-                <Button
-                  color="success"
-                  icon={
-                    <TbArrowForwardUp style={{ transform: "rotate(180deg)" }} />
-                  }
-                  label="back to login"
-                  onClick={() => navigate("/login")}
-                />
-              )}
+              <StyledButtonWrap>
+                {!hashOk && (
+                  <Button
+                    color="success"
+                    icon={
+                      <TbArrowForwardUp
+                        style={{ transform: "rotate(180deg)" }}
+                      />
+                    }
+                    label="back to login"
+                    onClick={() => navigate("/login")}
+                  />
+                )}
+              </StyledButtonWrap>
             </>
           )}
 

@@ -10,7 +10,7 @@ import {
   StyledTbMailFilled,
 } from "./LoginScreensStyles";
 import { IErrorSignature, getErrorByCode } from "@shared/types/errors";
-import { StyledButtonWrap, StyledErrorText } from "pages/AuthModalStyles";
+import { StyledButtonWrap, StyledErrorText } from "pages/AuthModalSharedStyles";
 
 interface LoginScreen {
   usernameLocal: string;

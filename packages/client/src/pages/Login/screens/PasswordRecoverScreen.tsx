@@ -18,7 +18,7 @@ import {
   StyledButtonWrap,
   StyledErrorText,
   StyledInputRow,
-} from "pages/AuthModalStyles";
+} from "pages/AuthModalSharedStyles";
 
 interface PasswordRecoverScreen {
   emailLocal: string;

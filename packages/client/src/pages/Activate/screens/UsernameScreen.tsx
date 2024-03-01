@@ -21,7 +21,7 @@ import {
   StyledErrorText,
   StyledInputRow,
   StyledMail,
-} from "pages/AuthModalStyles";
+} from "pages/AuthModalSharedStyles";
 
 interface UsernameScreen {
   hash: string;

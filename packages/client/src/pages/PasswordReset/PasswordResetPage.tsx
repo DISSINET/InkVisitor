@@ -21,7 +21,7 @@ import {
   StyledInputRow,
   StyledMail,
   StyledText,
-} from "pages/AuthModalStyles";
+} from "pages/AuthModalSharedStyles";
 import React, { useEffect, useState } from "react";
 import { BsEnvelopeArrowUpFill } from "react-icons/bs";
 import { RiRotateLockLine } from "react-icons/ri";
@@ -196,14 +196,16 @@ export const PasswordResetPage: React.FC<PasswordResetPage> = ({}) => {
               </StyledMail>
               <StyledText>{"was changed."}</StyledText>
               <RiRotateLockLine size={30} style={{ margin: "1.5rem" }} />
-              <Button
-                icon={
-                  <TbArrowForwardUp style={{ transform: "rotate(180deg)" }} />
-                }
-                label="Back to login"
-                color="success"
-                onClick={() => navigate("/login")}
-              />
+              <StyledButtonWrap>
+                <Button
+                  icon={
+                    <TbArrowForwardUp style={{ transform: "rotate(180deg)" }} />
+                  }
+                  label="Back to login"
+                  color="success"
+                  onClick={() => navigate("/login")}
+                />
+              </StyledButtonWrap>
             </>
           )}
 

@@ -17,7 +17,7 @@ import {
   StyledErrorText,
   StyledInputRow,
   StyledMail,
-} from "pages/AuthModalStyles";
+} from "pages/AuthModalSharedStyles";
 
 interface PasswordScreen {
   email: string;
