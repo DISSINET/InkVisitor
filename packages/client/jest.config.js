@@ -1,25 +1,21 @@
 const tsconfig = require("./tsconfig.json");
 
-// const dotenv = require("dotenv");
-// dotenv.config({ path: "./env/.env.test" });
-
 const paths = Object.keys(tsconfig.compilerOptions.paths).reduce(
   (prev, curr) => {
     const split = curr.split("/");
-    prev[`${split[0]}/(.*)`] = `<rootDir>/${tsconfig.compilerOptions.paths[
+    const rootDirPath = `<rootDir>/${tsconfig.compilerOptions.paths[
       curr
     ][0].replace("*", "$1")}`;
+    // because in tsconfig we set ./src as baseUrl, we need to go one directory back
+    const adjustedPath = rootDirPath.replace("../", "");
+    prev[`${split[0]}/(.*)`] = adjustedPath;
     return prev;
   },
   {}
 );
-console.log(paths);
 
 module.exports = {
   preset: "ts-jest",
   testEnvironment: "node",
-  moduleNameMapper: {
-    "@shared/(.*)": "<rootDir>/../shared/$1",
-    "@dictionaries/(.*)": "<rootDir>/../shared/dictionaries/index.ts",
-  },
+  moduleNameMapper: paths,
 };
