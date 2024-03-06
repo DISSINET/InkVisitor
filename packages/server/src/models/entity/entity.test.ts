@@ -3,16 +3,14 @@ import { Db } from "@service/rethink";
 import Entity from "./entity";
 import Statement, {
   StatementActant,
-  StatementAction,
   StatementTerritory,
 } from "@models/statement/statement";
 import { clean } from "@modules/common.test";
 import { findEntityById } from "@service/shorthands";
-import { IEntity, IEvent, IStatement } from "@shared/types";
+import { IEvent, IStatement } from "@shared/types";
 import Prop from "@models/prop/prop";
 import { EntityEnums } from "@shared/enums";
 import { getEntityClass } from "@models/factory";
-import entities from "@modules/entities";
 import Reference from "./reference";
 import { InvalidDeleteError } from "@shared/types/errors";
 

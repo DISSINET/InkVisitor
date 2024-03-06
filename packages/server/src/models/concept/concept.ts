@@ -14,7 +14,7 @@ class ConceptData implements IConceptData, IModel {
   }
 
   isValid(): boolean {
-    return !!this.pos;
+    return true;
   }
 }
 

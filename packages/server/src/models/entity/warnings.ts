@@ -7,8 +7,6 @@ import { IActionValency } from "@shared/types/action";
 import { InternalServerError } from "@shared/types/errors";
 import { IWarningPositionSection } from "@shared/types/warning";
 import { Connection } from "rethinkdb-ts";
-import Entity from "./entity";
-import Concept from "@models/concept/concept";
 
 export default class EntityWarnings {
   entityId: string;

@@ -1,5 +1,4 @@
 import { WarningTypeEnums } from "../enums";
-import { IActionValency } from "./action";
 
 export interface IWarning {
   type: WarningTypeEnums;
