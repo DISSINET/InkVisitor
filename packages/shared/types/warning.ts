@@ -19,4 +19,5 @@ export enum IWarningPositionSection {
   Relations = "Relations",
   Valencies = "Valencies",
   Statement = "Statement",
+  Entity = "Entity",
 }

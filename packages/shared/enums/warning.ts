@@ -16,4 +16,6 @@ export enum WarningTypeEnums {
   MVAL = "MVAL", // Missing at least one entity-type valency
   AVAL = "AVAL", // Asymmetrical valency
   MAEE = "MAEE", // Missing action/event equivalent
+  PSM = "PSM", // Part of speech is empty
+  LM = "LM", // Language is missing
 }

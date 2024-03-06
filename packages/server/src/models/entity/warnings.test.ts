@@ -6,6 +6,7 @@ import { clean } from "@modules/common.test";
 import EntityWarnings from "./warnings";
 import { prepareRelation } from "@models/relation/relation.test";
 import Action from "@models/action/action";
+import Concept from "@models/concept/concept";
 
 describe("models/entity/warnings", function () {
   describe("test hasSCLM", function () {
@@ -291,6 +292,86 @@ describe("models/entity/warnings", function () {
         actionEntity.class
       ).hasAVAL(db.connection);
       expect(sclm).toBeFalsy();
+    });
+  });
+
+  describe("test hasPSM", function () {
+    const db = new Db();
+    const conceptEntityWithEmptyPos = new Concept({
+      data: { pos: EntityEnums.ConceptPartOfSpeech.Empty },
+    });
+    const conceptEntityWithoutEmptyPos = new Concept({
+      data: { pos: EntityEnums.ConceptPartOfSpeech.Adj },
+    });
+    const [, actionInvalid] = prepareEntity(EntityEnums.Class.Action);
+
+    beforeAll(async () => {
+      await db.initDb();
+      await conceptEntityWithEmptyPos.save(db.connection);
+      await conceptEntityWithoutEmptyPos.save(db.connection);
+      await actionInvalid.save(db.connection);
+    });
+
+    afterAll(async () => {
+      await clean(db);
+    });
+
+    it("should ignore PSM for non-concept entity", async () => {
+      const psm = await new EntityWarnings(
+        actionInvalid.id,
+        actionInvalid.class
+      ).hasPSM(db.connection);
+      expect(psm).toBeFalsy();
+    });
+
+    it("should have PSM for concept entity with empty pos", async () => {
+      const psm = await new EntityWarnings(
+        conceptEntityWithEmptyPos.id,
+        conceptEntityWithEmptyPos.class
+      ).hasPSM(db.connection);
+      expect(psm).toBeTruthy();
+    });
+
+    it("should have not PSM for concept entity with filled pos", async () => {
+      const psm = await new EntityWarnings(
+        conceptEntityWithoutEmptyPos.id,
+        conceptEntityWithoutEmptyPos.class
+      ).hasPSM(db.connection);
+      expect(psm).toBeFalsy();
+    });
+  });
+
+  describe("test hasLM", function () {
+    const db = new Db();
+    const [, actionWithEmptyLanguage] = prepareEntity(EntityEnums.Class.Action);
+    actionWithEmptyLanguage.language = EntityEnums.Language.Empty;
+    const [, conceptWithSetLanguage] = prepareEntity(EntityEnums.Class.Concept);
+    conceptWithSetLanguage.language = EntityEnums.Language.English;
+
+    beforeAll(async () => {
+      await db.initDb();
+      await actionWithEmptyLanguage.save(db.connection);
+      await conceptWithSetLanguage.save(db.connection);
+    });
+
+    afterAll(async () => {
+      await clean(db);
+    });
+
+    it("should have LM for entity without language", async () => {
+      const psm = await new EntityWarnings(
+        actionWithEmptyLanguage.id,
+        actionWithEmptyLanguage.class
+      ).hasLM(db.connection);
+      expect(psm).toBeTruthy();
+    });
+
+    it("should have not LM for entity with language", async () => {
+      const psm = await new EntityWarnings(
+        conceptWithSetLanguage.id,
+        conceptWithSetLanguage.class
+      ).hasLM(db.connection);
+      expect(psm).toBeFalsy();
     });
   });
 });
