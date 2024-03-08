@@ -47,7 +47,8 @@ export async function getEntitiesDataByClass<T>(
   return items;
 }
 
-const exampleR = new Resource({
+// each exported entity should have referene to this Resoure, which point to original dissinet source
+const originResource = new Resource({
   id: "dissinet-resource",
   data: {
     partValueBaseURL: "" ,
@@ -73,7 +74,6 @@ class ACRGenerator extends Generator {
     return path.join.apply(undefined, parts)
   }
 
-
   async getUserInfo() {
     this.datasetName = await question<string>(
        "Name of the dataset?",
@@ -96,18 +96,26 @@ const exportACR: IJob = async (db: Connection): Promise<void> => {
   const generator = new ACRGenerator();
   await generator.getUserInfo()
 
+  // retrieve all actions and push origin resource into list of references
+  // +
+  // replace original label with the id
   const actions = (await getEntitiesDataByClass<IAction>(db, EntityEnums.Class.Action)).map(a => {
     a.references.push({
       id: uuidv4(),
-      resource: exampleR.id,
+      resource: originResource.id,
       value: a.id,
     } as IReference);
+
     return a
   });
+
+  // retrieve all concepts and push origin resource into list of references
+  // +
+  // replace original label with the id
   const concepts = (await getEntitiesDataByClass<IConcept>(db, EntityEnums.Class.Concept)).map(a => {
     a.references.push({
       id: uuidv4(),
-      resource: exampleR.id,
+      resource: originResource.id,
       value: a.id,
     } as IReference);
     return a
@@ -116,6 +124,7 @@ const exportACR: IJob = async (db: Connection): Promise<void> => {
 
   const allIds = actions.map(a => a.id).concat(concepts.map(c => c.id)).concat(resources.map(r => r.id));
 
+  // allow only relations, which have all entities in lists above
   const rels = (await findForEntities(db, allIds)).filter(r => {
     let matches = 0;
     for (const entityId of r.entityIds) {
@@ -134,10 +143,10 @@ const exportACR: IJob = async (db: Connection): Promise<void> => {
     return false;
   })
 
-  generator.entities.entities.A = [exampleR]
-  //generator.entities.entities.C = concepts
-  //generator.entities.entities.R = resources
-  //generator.relations.relations.A1S = rels;
+  generator.entities.entities.A = actions
+  generator.entities.entities.C = concepts
+  generator.entities.entities.R = [originResource, ...resources]
+  generator.relations.relations.A1S = rels;
 
   generator.output()
 }

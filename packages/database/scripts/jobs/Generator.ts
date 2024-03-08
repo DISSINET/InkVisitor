@@ -1,32 +1,17 @@
 import { IEntity, Relation as RelationTypes } from "@shared/types";
 import { question } from "scripts/import/prompts";
-import * as fs from "fs"
-import * as path from "path"
 import EntitiesGenerator from "./generate-datasets/entities";
 import RelationsGenerator from "./generate-datasets/relations";
+import Dataset from "./Dataset";
 
-class Generator {
-  static DIRECTORY = "datasets"
-  datasetName: string = "";
-
+class Generator extends Dataset {
   entities: EntitiesGenerator;
   relations: RelationsGenerator;
 
   constructor() {
+    super();
     this.entities = new EntitiesGenerator();
     this.relations = new RelationsGenerator();
-  }
-
-  getPath(filename?: string) {
-    if (!this.datasetName) {
-      throw new Error("Dataset name not yet set, cannot create the path to directory")
-    }
-
-    let parts = [__dirname, "..", "..", "..", Generator.DIRECTORY, this.datasetName]
-    if (filename) {
-      parts.push(filename)
-    }
-    return path.join.apply(undefined, parts)
   }
 
   async getUserInfo() {
@@ -39,10 +24,6 @@ class Generator {
     );
     if (!this.datasetName) {
       throw new Error("Dataset name should not be empty")
-    }
-    const datasetPath = this.getPath()
-    if(fs.existsSync(datasetPath)) {
-      throw new Error(`The dataset path (${datasetPath}) already exists`)
     }
 
     const entitiesTotalSize = await question<number>(
@@ -79,21 +60,18 @@ class Generator {
     this.relations.generate(this.entities.entities)
   }
 
-  output() {
-    fs.mkdirSync(this.getPath())
-
+  async output() {
     let allEntities: IEntity[] = []
     for (const entities of Object.values(this.entities.entities)) {
       allEntities = allEntities.concat(entities)
     }
-    fs.writeFileSync(this.getPath("entities.json"), JSON.stringify(allEntities, null, 4))
+    await this.writeFile("entities.json", JSON.stringify(allEntities, null, 4))
 
     let allRelations: RelationTypes.IRelation[] = []
     for (const relations of Object.values(this.relations.relations)) {
       allRelations = allRelations.concat(relations)
     }
-
-    fs.writeFileSync(this.getPath("relations.json"), JSON.stringify(allRelations, null, 4))
+    await this.writeFile("relations.json", JSON.stringify(allRelations, null, 4))
   }
 }
 
