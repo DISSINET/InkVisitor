@@ -602,6 +602,17 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
             {/* form section */}
             <StyledDetailSection firstSection>
               <StyledDetailSectionContent firstSection>
+                <StyledDetailWarnings>
+                  {entity.warnings &&
+                    entity.warnings
+                      .filter(
+                        (w) =>
+                          w.position?.section === IWarningPositionSection.Entity
+                      )
+                      .map((warning, key) => {
+                        return <Message key={key} warning={warning} />;
+                      })}
+                </StyledDetailWarnings>
                 <EntityDetailFormSection
                   entity={entity}
                   userCanEdit={userCanEdit}
