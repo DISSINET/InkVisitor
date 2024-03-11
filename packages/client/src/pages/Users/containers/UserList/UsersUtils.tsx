@@ -19,24 +19,22 @@ export const UsersUtils: React.FC<UsersUtils> = React.memo(({ users }) => {
 
   const queryClient = useQueryClient();
 
-  const createNewUserMutataion = useMutation(
-    async () =>
+  const createNewUserMutataion = useMutation({
+    mutationFn: async () =>
       await api.usersCreate({
         email: newUserEmail,
       }),
-    {
-      onSuccess(data, variables) {
-        toast.success(
-          `User created! \n Verification email sent to ${newUserEmail}.`
-        );
-        setNewUserEmail("");
-        queryClient.invalidateQueries(["users"]);
-      },
-      onError() {
-        toast.warning(`problem creating user!`);
-      },
-    }
-  );
+    onSuccess(data, variables) {
+      toast.success(
+        `User created! \n Verification email sent to ${newUserEmail}.`
+      );
+      setNewUserEmail("");
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+    },
+    onError() {
+      toast.warning(`problem creating user!`);
+    },
+  });
 
   const validNewUserEmail = () => {
     const re =
