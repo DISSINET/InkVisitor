@@ -54,6 +54,12 @@ export const GraphEdge: React.FC<EdgeProps> = ({
 
   const scaleLabel = 0.75;
 
+  const relType =
+    Relation.RelationRules[data.relationType as RelationEnums.Type];
+
+  // if the relation is assymetric, the edge has only one arrow
+  const relAssymetric = relType?.asymmetrical;
+
   const edgeStyle = useMemo(() => {
     if (data.certainty) {
       return certaintyStyles[data.certainty as EntityEnums.Certainty];
@@ -94,13 +100,7 @@ export const GraphEdge: React.FC<EdgeProps> = ({
         <Tooltip
           content={
             <>
-              <div>
-                {
-                  Relation.RelationRules[
-                    data.relationType as RelationEnums.Type
-                  ]?.label
-                }{" "}
-              </div>
+              <div>{relType?.label}</div>
 
               {data.certainty && (
                 <div>
@@ -125,6 +125,7 @@ export const GraphEdge: React.FC<EdgeProps> = ({
           stroke={edgeStyle.stroke}
           style={{}}
           markerEnd={`url(#arrowhead-${id})`}
+          markerStart={relAssymetric ? "none" : `url(#arrowhead-${id})`}
         />
         {/* tooltip interaction path */}
         <path
