@@ -64,7 +64,7 @@ const EntityRow: React.FC<EntityRow> = ({ data, index, style }) => {
 
   const renderIcons = () => {
     return (
-      <ButtonGroup noMarginRight>
+      <ButtonGroup $noMarginRight>
         {!entity.isTemplate && (
           <Button
             tooltipLabel="link entity"

@@ -2,25 +2,25 @@ import styled from "styled-components";
 import { ThemeColor } from "Theme/theme";
 
 interface StyledTable {
-  noBorder: boolean;
+  $noBorder: boolean;
 }
 export const StyledTable = styled.table<StyledTable>`
   width: 100%;
   border-spacing: 0;
   border-collapse: collapse;
-  border-width: ${({ theme, noBorder }) =>
-    noBorder ? 0 : theme.borderWidth[1]};
+  border-width: ${({ theme, $noBorder }) =>
+    $noBorder ? 0 : theme.borderWidth[1]};
   border-style: solid;
   border-color: ${({ theme }) => theme.color["gray"][500]};
-  box-shadow: ${({ theme, noBorder }) =>
-    noBorder ? "none" : theme.boxShadow["subtle"]};
+  box-shadow: ${({ theme, $noBorder }) =>
+    $noBorder ? "none" : theme.boxShadow["subtle"]};
 `;
 interface StyledTHead {
-  noBorder: boolean;
+  $noBorder: boolean;
 }
 export const StyledTHead = styled.thead<StyledTHead>`
-  border-width: ${({ theme, noBorder }) =>
-    noBorder ? 0 : theme.borderWidth[1]};
+  border-width: ${({ theme, $noBorder }) =>
+    $noBorder ? 0 : theme.borderWidth[1]};
   border-style: solid;
   border-color: ${({ theme }) => theme.color["gray"][500]};
   background: ${({ theme }) => theme.color["gray"][100]};
@@ -35,49 +35,48 @@ export const StyledTh = styled.th`
 `;
 
 interface StyledTableHeader {
-  position: "top" | "bottom";
-  pagingUseless?: boolean;
+  $position: "top" | "bottom";
 }
 export const StyledTableHeader = styled.div<StyledTableHeader>`
   display: flex;
   align-items: center;
-  margin-bottom: ${({ position }) => (position === "top" ? "0.3rem" : "")};
-  margin-top: ${({ position }) => (position === "bottom" ? "0.5rem" : "")};
+  margin-bottom: ${({ $position }) => ($position === "top" ? "0.3rem" : "")};
+  margin-top: ${({ $position }) => ($position === "bottom" ? "0.5rem" : "")};
 `;
 
 interface StyledTr {
   opacity?: number;
-  noBorder: boolean;
-  fullWidthColumn: number;
-  firstColumnMinWidth: boolean;
-  lastColumnMinWidth: boolean;
+  $noBorder: boolean;
+  $fullWidthColumn: number;
+  $firstColumnMinWidth: boolean;
+  $lastColumnMinWidth: boolean;
 }
 export const StyledTr = styled.tr<StyledTr>`
   background-color: ${({ theme }) => theme.color["white"]};
   color: ${({ theme }) => theme.color["black"]};
   opacity: ${({ opacity }) => (opacity ? opacity : 1)};
-  border-top: ${({ theme, noBorder }) =>
-    noBorder ? "" : `1px solid ${theme.color["gray"][500]}`};
+  border-top: ${({ theme, $noBorder }) =>
+    $noBorder ? "" : `1px solid ${theme.color["gray"][500]}`};
 
   :hover {
-    background-color: ${({ theme, noBorder }) =>
-      noBorder ? "" : theme.color["gray"][100]};
+    background-color: ${({ theme, $noBorder }) =>
+      $noBorder ? "" : theme.color["gray"][100]};
   }
-  td:not(:nth-child(${({ fullWidthColumn }) => fullWidthColumn})) {
-    width: ${({ fullWidthColumn }) => (fullWidthColumn > 0 ? "1%" : "")};
+  td:not(:nth-child(${({ $fullWidthColumn }) => $fullWidthColumn})) {
+    width: ${({ $fullWidthColumn }) => ($fullWidthColumn > 0 ? "1%" : "")};
   }
   td:first-child {
-    width: ${({ firstColumnMinWidth }) => (firstColumnMinWidth ? "1%" : "")};
+    width: ${({ $firstColumnMinWidth }) => ($firstColumnMinWidth ? "1%" : "")};
   }
   td:last-child {
-    width: ${({ lastColumnMinWidth }) => (lastColumnMinWidth ? "1%" : "")};
+    width: ${({ $lastColumnMinWidth }) => ($lastColumnMinWidth ? "1%" : "")};
   }
 `;
 interface StyledTd {
-  noBorder: boolean;
+  $noBorder: boolean;
 }
 export const StyledTd = styled.td<StyledTd>`
-  padding: ${({ theme, noBorder }) => (noBorder ? "1px" : theme.space[2])};
+  padding: ${({ theme, $noBorder }) => ($noBorder ? "1px" : theme.space[2])};
   padding-left: ${({ theme }) => theme.space[4]};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
 `;

@@ -15,10 +15,10 @@ export const TypeBar: React.FC<TypeBar> = ({
 }) => {
   return (
     <StyledTypeBar
-      entity={`entity${entityLetter}`}
-      noMargin={noMargin}
-      isTemplate={isTemplate}
-      dimColor={dimColor}
+      $entity={`entity${entityLetter}`}
+      $noMargin={noMargin}
+      $isTemplate={isTemplate}
+      $dimColor={dimColor}
     />
   );
 };

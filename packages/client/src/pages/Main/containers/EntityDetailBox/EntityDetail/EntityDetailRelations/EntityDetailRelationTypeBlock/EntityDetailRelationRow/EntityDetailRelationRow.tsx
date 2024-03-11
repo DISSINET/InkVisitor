@@ -124,8 +124,8 @@ export const EntityDetailRelationRow: React.FC<EntityDetailRelationRow> = ({
     <StyledGrid
       ref={dropRef}
       style={{ opacity }}
-      hasAttribute={relationRule.attributes.length > 0}
-      hasOrder={hasOrder}
+      $hasAttribute={relationRule.attributes.length > 0}
+      $hasOrder={hasOrder}
     >
       {uniqueRelationIds.map((relationEntityId, key) => {
         const relationEntity = entities[relationEntityId];

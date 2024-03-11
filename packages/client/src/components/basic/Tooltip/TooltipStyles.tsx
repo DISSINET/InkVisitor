@@ -66,12 +66,12 @@ export const StyledArrow = styled.div`
 `;
 
 interface StyledContent {
-  tagGroup?: boolean;
+  $tagGroup?: boolean;
   $color: keyof ThemeColor;
 }
 export const StyledContent = styled.div<StyledContent>`
-  margin: ${({ theme, tagGroup }) =>
-    `${theme.space[2]} ${tagGroup ? theme.space[2] : theme.space[3]}`};
+  margin: ${({ theme, $tagGroup }) =>
+    `${theme.space[2]} ${$tagGroup ? theme.space[2] : theme.space[3]}`};
 `;
 
 export const StyledRow = styled.div`

@@ -704,11 +704,11 @@ export const StatementEditor: React.FC<StatementEditor> = ({
           </StyledEditorTemplateSection>
         )}
         <StyledEditorSection
-          firstSection
+          $firstSection
           key="editor-section-summary"
-          marginRight
+          $marginRight
         >
-          <StyledEditorSectionContent firstSection>
+          <StyledEditorSectionContent $firstSection>
             <Input
               type="textarea"
               rows={5}
@@ -766,7 +766,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
         {/* Actions */}
         <StyledEditorSection
-          metaSection
+          $metaSection
           key="editor-section-actions"
           id="action-section"
         >
@@ -816,7 +816,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
         {/* Actants */}
         <StyledEditorSection
-          metaSection
+          $metaSection
           key="editor-section-actants"
           id="actant-section"
         >
@@ -976,7 +976,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         </StyledEditorSection>
 
         {/* Notes */}
-        <StyledEditorSection key="editor-section-notes" lastSection>
+        <StyledEditorSection key="editor-section-notes" $lastSection>
           <StyledEditorSectionHeader>Notes</StyledEditorSectionHeader>
           <StyledEditorSectionContent>
             <MultiInput

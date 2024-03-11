@@ -123,7 +123,7 @@ export const Page: React.FC<Page> = ({ children }) => {
 
   return (
     <StyledPage
-      layoutWidth={layoutWidth}
+      $layoutWidth={layoutWidth}
       onClick={() => dispatch(setLastClickedIndex(-1))}
     >
       <Header

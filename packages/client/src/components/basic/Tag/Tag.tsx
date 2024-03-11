@@ -188,8 +188,8 @@ export const Tag: React.FC<TagProps> = ({
           ? EntityColors[entityClass].color
           : "white"
       }
-      isTemplate={isTemplate}
-      darkTheme={selectedThemeId === InterfaceEnums.Theme.Dark}
+      $isTemplate={isTemplate}
+      $darkTheme={selectedThemeId === InterfaceEnums.Theme.Dark}
     >
       {entityClass}
     </StyledEntityTag>
@@ -201,7 +201,7 @@ export const Tag: React.FC<TagProps> = ({
 
   const renderButton = () => (
     <StyledButtonWrapper
-      status={status}
+      $status={status}
       onMouseEnter={onButtonOver}
       onMouseLeave={onButtonOut}
       onClick={onBtnClick}
@@ -221,7 +221,7 @@ export const Tag: React.FC<TagProps> = ({
 
   const renderLabel = (labelOnly: boolean = false) => {
     return (
-      <StyledLabelWrap invertedLabel={invertedLabel}>
+      <StyledLabelWrap $invertedLabel={invertedLabel}>
         {isFavorited && (
           <StyledStarWrap>
             <FaStar
@@ -231,13 +231,13 @@ export const Tag: React.FC<TagProps> = ({
           </StyledStarWrap>
         )}
         <StyledLabel
-          invertedLabel={invertedLabel}
-          status={status}
-          borderStyle={borderStyle}
-          fullWidth={fullWidth}
-          isFavorited={isFavorited}
-          labelOnly={labelOnly}
-          isItalic={labelItalic}
+          $invertedLabel={invertedLabel}
+          $status={status}
+          $borderStyle={borderStyle}
+          $fullWidth={fullWidth}
+          $isFavorited={isFavorited}
+          $labelOnly={labelOnly}
+          $isItalic={labelItalic}
         >
           {label}
         </StyledLabel>
@@ -274,10 +274,10 @@ export const Tag: React.FC<TagProps> = ({
       <StyledTagWrapper
         className="tag"
         ref={ref}
-        dragDisabled={!canDrag}
-        status={status}
-        ltype={ltype}
-        borderStyle={borderStyle}
+        $dragDisabled={!canDrag}
+        $status={status}
+        $ltype={ltype}
+        $borderStyle={borderStyle}
         onClick={(e: React.MouseEvent) => {
           e.stopPropagation();
           if (!disableCopyLabel) {

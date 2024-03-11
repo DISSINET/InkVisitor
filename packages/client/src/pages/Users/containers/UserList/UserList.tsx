@@ -449,7 +449,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
           } = row.original;
 
           return (
-            <ButtonGroup noMarginRight>
+            <ButtonGroup $noMarginRight>
               <Button
                 key="r"
                 icon={<FaTrashAlt size={14} />}

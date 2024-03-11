@@ -9,16 +9,16 @@ export const StyledDetailWrapper = styled.div<StyledDetailWrapper>`
 `;
 
 interface StyledDetailSection {
-  firstSection?: boolean;
-  lastSection?: boolean;
-  metaSection?: boolean;
+  $firstSection?: boolean;
+  $lastSection?: boolean;
+  $metaSection?: boolean;
 }
 export const StyledDetailSection = styled.div<StyledDetailSection>`
   padding: ${({ theme }) => theme.space[6]};
-  padding-right: ${({ metaSection }) => (metaSection ? 0 : "")};
-  padding-top: ${({ firstSection }) => (firstSection ? 0 : "")};
-  border-bottom-width: ${({ theme, lastSection = false }) =>
-    lastSection ? theme.borderWidth[0] : theme.borderWidth[1]};
+  padding-right: ${({ $metaSection }) => ($metaSection ? 0 : "")};
+  padding-top: ${({ $firstSection }) => ($firstSection ? 0 : "")};
+  border-bottom-width: ${({ theme, $lastSection = false }) =>
+    $lastSection ? theme.borderWidth[0] : theme.borderWidth[1]};
   border-bottom-color: ${({ theme }) => theme.color["gray"][500]};
   background-color: ${({ theme }) => theme.color["gray"][200]};
   border-bottom-style: solid;
@@ -76,16 +76,13 @@ export const StyledDetailHeaderColumn = styled.div<StyledDetailHeaderColumn>`
 `;
 
 interface StyledDetailSectionContent {
-  firstSection?: boolean;
-}
-interface StyledDetailSectionContent {
-  firstSection?: boolean;
+  $firstSection?: boolean;
 }
 export const StyledDetailSectionContent = styled.div<StyledDetailSectionContent>`
-  padding-left: ${({ theme, firstSection = false }) =>
-    firstSection ? "" : theme.space[4]};
-  padding-top: ${({ theme, firstSection }) =>
-    firstSection ? 0 : theme.space[4]};
+  padding-left: ${({ theme, $firstSection = false }) =>
+    $firstSection ? "" : theme.space[4]};
+  padding-top: ${({ theme, $firstSection }) =>
+    $firstSection ? 0 : theme.space[4]};
 `;
 
 // usedIn section

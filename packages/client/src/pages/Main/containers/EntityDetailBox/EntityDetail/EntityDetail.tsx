@@ -593,8 +593,8 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
 
           <StyledDetailWrapper>
             {/* form section */}
-            <StyledDetailSection firstSection>
-              <StyledDetailSectionContent firstSection>
+            <StyledDetailSection $firstSection>
+              <StyledDetailSectionContent $firstSection>
                 <EntityDetailFormSection
                   entity={entity}
                   userCanEdit={userCanEdit}
@@ -668,7 +668,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
             </StyledDetailSection>
 
             {/* metaprops section */}
-            <StyledDetailSection metaSection>
+            <StyledDetailSection $metaSection>
               <StyledDetailSectionHeader>
                 Metaproperties
               </StyledDetailSectionHeader>

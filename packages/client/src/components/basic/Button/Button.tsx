@@ -72,24 +72,24 @@ export const Button: React.FC<ButtonProps> = ({
           hideTooltipOnClick && setShowTooltip(false);
           onClick(e);
         }}
-        hasIcon={icon && true}
+        $hasIcon={icon && true}
         $color={color}
-        inverted={inverted}
-        textRegular={textRegular}
-        noBorder={noBorder}
-        noBackground={noBackground}
-        radiusLeft={radiusLeft}
-        radiusRight={radiusRight}
-        fullWidth={fullWidth}
+        $inverted={inverted}
+        $textRegular={textRegular}
+        $noBorder={noBorder}
+        $noBackground={noBackground}
+        $radiusLeft={radiusLeft}
+        $radiusRight={radiusRight}
+        $fullWidth={fullWidth}
         disabled={disabled}
         onMouseEnter={() => setShowTooltip(true)}
         onMouseLeave={() => setShowTooltip(false)}
         onKeyPress={(e: KeyboardEvent<HTMLButtonElement>) => e.preventDefault()}
-        paddingX={paddingX}
+        $paddingX={paddingX}
       >
         {icon}
         {label && (
-          <StyledButtonLabel hasIcon={!!icon} noIconMargin={noIconMargin}>
+          <StyledButtonLabel $hasIcon={!!icon} $noIconMargin={noIconMargin}>
             {label}
           </StyledButtonLabel>
         )}

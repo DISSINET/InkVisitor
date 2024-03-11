@@ -30,7 +30,7 @@ export const IconButtonGroup = <TValue extends ValueTypes>({
   disabled = false,
 }: IconButtonGroup<TValue>) => {
   return (
-    <StyledWrapper border={border}>
+    <StyledWrapper $border={border}>
       {options.map((option, key) => {
         return (
           <React.Fragment key={key}>

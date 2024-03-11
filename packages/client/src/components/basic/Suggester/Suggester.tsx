@@ -264,12 +264,15 @@ export const Suggester: React.FC<Suggester> = ({
   return (
     // div is necessary for flex to work and render the clear button properly
     <div>
-      <StyledSuggester marginTop={marginTop} fullWidth={inputWidth === "full"}>
+      <StyledSuggester
+        $marginTop={marginTop}
+        $fullWidth={inputWidth === "full"}
+      >
         <StyledInputWrapper
           ref={dropRef}
-          hasButton={!disableCreate}
-          isOver={isOver}
-          hasText={typed.length > 0}
+          $hasButton={!disableCreate}
+          $isOver={isOver}
+          $hasText={typed.length > 0}
         >
           <Dropdown.Single.Entity
             value={category}
@@ -319,7 +322,7 @@ export const Suggester: React.FC<Suggester> = ({
             />
           </div>
           {typed.length > 0 && (
-            <StyledSuggestionCancelButton hasButton={!disableCreate}>
+            <StyledSuggestionCancelButton $hasButton={!disableCreate}>
               <MdCancel size={16} onClick={() => onCancel()} />
             </StyledSuggestionCancelButton>
           )}

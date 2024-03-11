@@ -258,7 +258,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
         />
 
         {/* Values column */}
-        <StyledRelationValues hasSuggester={hasSuggester}>
+        <StyledRelationValues $hasSuggester={hasSuggester}>
           {currentRelations.map((relation, key) =>
             isCloudType ? (
               <EntityDetailCloudRelation

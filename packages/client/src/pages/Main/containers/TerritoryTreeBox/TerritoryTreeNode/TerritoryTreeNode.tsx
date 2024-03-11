@@ -339,7 +339,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
     <>
       {renderTreeNode()}
 
-      <StyledChildrenWrap noIndent={lvl === 0}>
+      <StyledChildrenWrap $noIndent={lvl === 0}>
         {!hideChildTerritories &&
           isExpanded &&
           childTerritories.map((child: IExtendedResponseTree, key: number) => (
