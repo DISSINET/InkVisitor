@@ -120,14 +120,14 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     data: audit,
     error: auditError,
     isFetching: isFetchingAudit,
-  } = useQuery(
-    ["audit", statementId],
-    async () => {
+  } = useQuery({
+    queryKey: ["audit", statementId],
+    queryFn: async () => {
       const res = await api.auditGet(statementId);
       return res.data;
     },
-    { enabled: !!statementId && api.isLoggedIn() }
-  );
+    enabled: !!statementId && api.isLoggedIn(),
+  });
 
   // user query
   const username: string = useAppSelector((state) => state.username);
@@ -137,16 +137,16 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     data: user,
     error: errorUser,
     isFetching: isFetchingUser,
-  } = useQuery(
-    ["user", userId],
-    async () => {
+  } = useQuery({
+    queryKey: ["user", userId],
+    queryFn: async () => {
       if (userId) {
         const res = await api.usersGet(userId);
         return res.data;
       }
     },
-    { enabled: !!userId && api.isLoggedIn() }
-  );
+    enabled: !!userId && api.isLoggedIn(),
+  });
 
   // territory query
   const {
@@ -154,9 +154,9 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     data: territoryActants,
     error,
     isFetching,
-  } = useQuery(
-    ["territoryActants", statement.data.territory?.territoryId],
-    async () => {
+  } = useQuery({
+    queryKey: ["territoryActants", statement.data.territory?.territoryId],
+    queryFn: async () => {
       if (statement.data.territory?.territoryId) {
         const res = await api.entityIdsInTerritory(
           statement.data.territory.territoryId
@@ -166,11 +166,9 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         return [];
       }
     },
-    {
-      initialData: [],
-      enabled: !!statement.data.territory?.territoryId && api.isLoggedIn(),
-    }
-  );
+    initialData: [],
+    enabled: !!statement.data.territory?.territoryId && api.isLoggedIn(),
+  });
 
   // TEMPLATES
   const [showApplyTemplateModal, setShowApplyTemplateModal] =
@@ -197,9 +195,9 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     data: templates,
     error: templateError,
     isFetching: isFetchingTemplates,
-  } = useQuery(
-    ["statement-templates"],
-    async () => {
+  } = useQuery({
+    queryKey: ["statement-templates"],
+    queryFn: async () => {
       const res = await api.entitiesSearch({
         onlyTemplates: true,
         class: EntityEnums.Class.Statement,
@@ -211,8 +209,8 @@ export const StatementEditor: React.FC<StatementEditor> = ({
       );
       return templates;
     },
-    { enabled: !!statement && api.isLoggedIn() }
-  );
+    enabled: !!statement && api.isLoggedIn(),
+  });
 
   const templateOptions: DropdownItem[] = useMemo(() => {
     const options = templates
@@ -229,7 +227,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
   // refetch audit when statement changes
   useEffect(() => {
-    queryClient.invalidateQueries(["audit"]);
+    queryClient.invalidateQueries({ queryKey: ["audit"] });
   }, [statement]);
 
   // stores territory id
@@ -249,16 +247,14 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     data: territoryData,
     error: territoryError,
     isFetching: isFetchingTerritory,
-  } = useQuery(
-    ["territory", "statement-editor", statementTerritoryId],
-    async () => {
+  } = useQuery({
+    queryKey: ["territory", "statement-editor", statementTerritoryId],
+    queryFn: async () => {
       const res = await api.territoryGet(statementTerritoryId as string);
       return res.data;
     },
-    {
-      enabled: !!statementId && !!statementTerritoryId,
-    }
-  );
+    enabled: !!statementId && !!statementTerritoryId,
+  });
 
   // get data for the previous statement
   const previousStatement: false | IResponseStatement = useMemo(() => {
@@ -659,7 +655,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                     <div style={{ display: "flex", alignItems: "flex-end" }}>
                       <AiOutlineWarning
                         size={22}
-                        color={themeContext.color.warning}
+                        color={themeContext?.color.warning}
                       />
                       <StyledMissingTerritory>
                         {"missing territory"}
@@ -1032,7 +1028,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
           }
           setShowSubmitSection(false);
         }}
-        loading={updateStatementMutation.isLoading}
+        loading={updateStatementMutation.isPending}
         onCancel={() => setShowSubmitSection(false)}
       />
     </>

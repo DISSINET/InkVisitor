@@ -18,8 +18,8 @@ dependencies:
     specifier: ^1.9.7
     version: 1.9.7(react-redux@8.1.3)(react@18.2.0)
   '@tanstack/react-query':
-    specifier: ^4.36.1
-    version: 4.36.1(react-dom@18.2.0)(react-native@0.73.5)(react@18.2.0)
+    specifier: ^5.26.3
+    version: 5.26.3(react@18.2.0)
   '@types/react-router':
     specifier: ^5.1.20
     version: 5.1.20
@@ -58,7 +58,7 @@ dependencies:
     version: 2.3.0(@popperjs/core@2.11.8)(react-dom@18.2.0)(react@18.2.0)
   react-redux:
     specifier: ^8.1.3
-    version: 8.1.3(@types/react-dom@18.2.21)(@types/react@18.2.64)(react-dom@18.2.0)(react-native@0.73.5)(react@18.2.0)(redux@4.2.1)
+    version: 8.1.3(@types/react-dom@18.2.21)(@types/react@18.2.64)(react-dom@18.2.0)(react-native@0.73.6)(react@18.2.0)(redux@4.2.1)
   react-router:
     specifier: ^6.22.3
     version: 6.22.3(react@18.2.0)
@@ -113,8 +113,8 @@ devDependencies:
     specifier: ^3.3.0
     version: 3.3.0(redux@4.2.1)
   '@tanstack/react-query-devtools':
-    specifier: ^4.36.1
-    version: 4.36.1(@tanstack/react-query@4.36.1)(react-dom@18.2.0)(react@18.2.0)
+    specifier: ^5.26.3
+    version: 5.26.3(@tanstack/react-query@5.26.3)(react@18.2.0)
   '@testing-library/jest-dom':
     specifier: ^6.4.2
     version: 6.4.2(@types/jest@29.5.12)(jest@29.7.0)
@@ -189,7 +189,7 @@ devDependencies:
     version: 29.7.0(@types/node@20.11.25)
   react-spring:
     specifier: ^9.7.3
-    version: 9.7.3(@react-three/fiber@8.15.19)(konva@9.3.6)(react-dom@18.2.0)(react-konva@18.2.10)(react-native@0.73.5)(react-zdog@1.2.2)(react@18.2.0)(three@0.162.0)(zdog@1.1.3)
+    version: 9.7.3(@react-three/fiber@8.15.19)(konva@9.3.6)(react-dom@18.2.0)(react-konva@18.2.10)(react-native@0.73.6)(react-zdog@1.2.2)(react@18.2.0)(three@0.162.0)(zdog@1.1.3)
   socket.io-client:
     specifier: ^4.7.4
     version: 4.7.4
@@ -2452,7 +2452,7 @@ packages:
   /@react-native/normalize-colors@0.73.2:
     resolution: {integrity: sha512-bRBcb2T+I88aG74LMVHaKms2p/T8aQd8+BZ7LuuzXlRfog1bMWWn/C5i0HVuvW4RPtXQYgIlGiXVDy9Ir1So/w==}
 
-  /@react-native/virtualized-lists@0.73.4(react-native@0.73.5):
+  /@react-native/virtualized-lists@0.73.4(react-native@0.73.6):
     resolution: {integrity: sha512-HpmLg1FrEiDtrtAbXiwCgXFYyloK/dOIPIuWW3fsqukwJEWAiTzm1nXGJ7xPU5XTHiWZ4sKup5Ebaj8z7iyWog==}
     engines: {node: '>=18'}
     peerDependencies:
@@ -2460,7 +2460,7 @@ packages:
     dependencies:
       invariant: 2.2.4
       nullthrows: 1.1.1
-      react-native: 0.73.5(@babel/core@7.24.0)(@babel/preset-env@7.24.0)(react@18.2.0)
+      react-native: 0.73.6(@babel/core@7.24.0)(@babel/preset-env@7.24.0)(react@18.2.0)
 
   /@react-spring/animated@9.7.3(react@18.2.0):
     resolution: {integrity: sha512-5CWeNJt9pNgyvuSzQH+uy2pvTg8Y4/OisoscZIR8/ZNLIOI+CatFBhGZpDGTF/OzdNFsAoGk3wiUYTwoJ0YIvw==}
@@ -2497,7 +2497,7 @@ packages:
       react-konva: 18.2.10(konva@9.3.6)(react-dom@18.2.0)(react@18.2.0)
     dev: true
 
-  /@react-spring/native@9.7.3(react-native@0.73.5)(react@18.2.0):
+  /@react-spring/native@9.7.3(react-native@0.73.6)(react@18.2.0):
     resolution: {integrity: sha512-4mpxX3FuEBCUT6ae2fjhxcJW6bhr2FBwFf274eXB7n+U30Gdg8Wo2qYwcUnmiAA0S3dvP8vLTazx3+CYWFShnA==}
     peerDependencies:
       react: ^16.8.0  || >=17.0.0 || >=18.0.0
@@ -2508,7 +2508,7 @@ packages:
       '@react-spring/shared': 9.7.3(react@18.2.0)
       '@react-spring/types': 9.7.3
       react: 18.2.0
-      react-native: 0.73.5(@babel/core@7.24.0)(@babel/preset-env@7.24.0)(react@18.2.0)
+      react-native: 0.73.6(@babel/core@7.24.0)(@babel/preset-env@7.24.0)(react@18.2.0)
     dev: true
 
   /@react-spring/shared@9.7.3(react@18.2.0):
@@ -2530,7 +2530,7 @@ packages:
       '@react-spring/core': 9.7.3(react@18.2.0)
       '@react-spring/shared': 9.7.3(react@18.2.0)
       '@react-spring/types': 9.7.3
-      '@react-three/fiber': 8.15.19(react-dom@18.2.0)(react-native@0.73.5)(react@18.2.0)(three@0.162.0)
+      '@react-three/fiber': 8.15.19(react-dom@18.2.0)(react-native@0.73.6)(react@18.2.0)(three@0.162.0)
       react: 18.2.0
       three: 0.162.0
     dev: true
@@ -2569,7 +2569,7 @@ packages:
       zdog: 1.1.3
     dev: true
 
-  /@react-three/fiber@8.15.19(react-dom@18.2.0)(react-native@0.73.5)(react@18.2.0)(three@0.162.0):
+  /@react-three/fiber@8.15.19(react-dom@18.2.0)(react-native@0.73.6)(react@18.2.0)(three@0.162.0):
     resolution: {integrity: sha512-WbFU7T6485v8Onnp+JJnrzKFvvGP7OFyJmHlqXiXc2RcXl9Sax+ykJxiNwEXWjGjcgF9/KTfv0+pAVkP0vZlKg==}
     peerDependencies:
       expo: '>=43.0'
@@ -2602,7 +2602,7 @@ packages:
       its-fine: 1.1.1(react@18.2.0)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
-      react-native: 0.73.5(@babel/core@7.24.0)(@babel/preset-env@7.24.0)(react@18.2.0)
+      react-native: 0.73.6(@babel/core@7.24.0)(@babel/preset-env@7.24.0)(react@18.2.0)
       react-reconciler: 0.27.0(react@18.2.0)
       react-use-measure: 2.1.1(react-dom@18.2.0)(react@18.2.0)
       scheduler: 0.21.0
@@ -2742,7 +2742,7 @@ packages:
     dependencies:
       immer: 9.0.21
       react: 18.2.0
-      react-redux: 8.1.3(@types/react-dom@18.2.21)(@types/react@18.2.64)(react-dom@18.2.0)(react-native@0.73.5)(react@18.2.0)(redux@4.2.1)
+      react-redux: 8.1.3(@types/react-dom@18.2.21)(@types/react@18.2.64)(react-dom@18.2.0)(react-native@0.73.6)(react@18.2.0)(redux@4.2.1)
       redux: 4.2.1
       redux-thunk: 2.4.2(redux@4.2.1)
       reselect: 4.1.8
@@ -2781,48 +2781,31 @@ packages:
     resolution: {integrity: sha512-+9jVqKhRSpsc591z5vX+X5Yyw+he/HCB4iQ/RYxw35CEPaY1gnsNE43nf9n9AaYjAQrTiI/mOwKUKdUs9vf7Xg==}
     dev: true
 
-  /@tanstack/match-sorter-utils@8.11.8:
-    resolution: {integrity: sha512-3VPh0SYMGCa5dWQEqNab87UpCMk+ANWHDP4ALs5PeEW9EpfTAbrezzaOk/OiM52IESViefkoAOYuxdoa04p6aA==}
-    engines: {node: '>=12'}
-    dependencies:
-      remove-accents: 0.4.2
+  /@tanstack/query-core@5.26.3:
+    resolution: {integrity: sha512-kKv7VHIleC7cwpMS3M63mWUFFbdiRo7JZMVUyZ4z/79RZoAi7/vGTVkCrnNqyKl+zwBRkumYL+eiYtyShGZd0A==}
+
+  /@tanstack/query-devtools@5.24.0:
+    resolution: {integrity: sha512-pThim455t69zrZaQKa7IRkEIK8UBTS+gHVAdNfhO72Xh4rWpMc63ovRje5/n6iw63+d6QiJzVadsJVdPoodSeQ==}
     dev: true
 
-  /@tanstack/query-core@4.36.1:
-    resolution: {integrity: sha512-DJSilV5+ytBP1FbFcEJovv4rnnm/CokuVvrBEtW/Va9DvuJ3HksbXUJEpI0aV1KtuL4ZoO9AVE6PyNLzF7tLeA==}
-
-  /@tanstack/react-query-devtools@4.36.1(@tanstack/react-query@4.36.1)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-WYku83CKP3OevnYSG8Y/QO9g0rT75v1om5IvcWUwiUZJ4LanYGLVCZ8TdFG5jfsq4Ej/lu2wwDAULEUnRIMBSw==}
+  /@tanstack/react-query-devtools@5.26.3(@tanstack/react-query@5.26.3)(react@18.2.0):
+    resolution: {integrity: sha512-byhbST7CDC8cH1tPLPYG/lNMr/QcYMMqxG9+jayiz7H//QScp9+B7cpSItp9QPaN30fCj7pIAlbCifWDcLC4/A==}
     peerDependencies:
-      '@tanstack/react-query': ^4.36.1
-      react: ^16.8.0 || ^17.0.0 || ^18.0.0
-      react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
+      '@tanstack/react-query': ^5.26.3
+      react: ^18.0.0
     dependencies:
-      '@tanstack/match-sorter-utils': 8.11.8
-      '@tanstack/react-query': 4.36.1(react-dom@18.2.0)(react-native@0.73.5)(react@18.2.0)
+      '@tanstack/query-devtools': 5.24.0
+      '@tanstack/react-query': 5.26.3(react@18.2.0)
       react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-      superjson: 1.13.3
-      use-sync-external-store: 1.2.0(react@18.2.0)
     dev: true
 
-  /@tanstack/react-query@4.36.1(react-dom@18.2.0)(react-native@0.73.5)(react@18.2.0):
-    resolution: {integrity: sha512-y7ySVHFyyQblPl3J3eQBWpXZkliroki3ARnBKsdJchlgt7yJLRDUcf4B8soufgiYt3pEQIkBWBx1N9/ZPIeUWw==}
+  /@tanstack/react-query@5.26.3(react@18.2.0):
+    resolution: {integrity: sha512-fP/kEu8aVLb6ln0ySazaeyivVkSQ9EnFfA5kQ7yIQNklx5JCW7otHVY6GVjZtd/3wK6QU99yvdSH0rN0LV2vmA==}
     peerDependencies:
-      react: ^16.8.0 || ^17.0.0 || ^18.0.0
-      react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
-      react-native: '*'
-    peerDependenciesMeta:
-      react-dom:
-        optional: true
-      react-native:
-        optional: true
+      react: ^18.0.0
     dependencies:
-      '@tanstack/query-core': 4.36.1
+      '@tanstack/query-core': 5.26.3
       react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-      react-native: 0.73.5(@babel/core@7.24.0)(@babel/preset-env@7.24.0)(react@18.2.0)
-      use-sync-external-store: 1.2.0(react@18.2.0)
 
   /@testing-library/dom@9.3.4:
     resolution: {integrity: sha512-FlS4ZWlp97iiNWig0Muq8p+3rVDjRiYE+YKGbAqXOu9nwJFFOdL00kFpz42M+4huzYi86vAK1sOOfyOG45muIQ==}
@@ -4400,13 +4383,6 @@ packages:
   /cookie@0.5.0:
     resolution: {integrity: sha512-YZ3GUyn/o8gfKJlnlX7g7xq4gyO6OSuhGPKaaGssGB2qgDUS0gPgtTvoyZLTt9Ab6dC4hfc9dV5arkvc/OCmrw==}
     engines: {node: '>= 0.6'}
-    dev: true
-
-  /copy-anything@3.0.5:
-    resolution: {integrity: sha512-yCEafptTtb4bk7GLEQoM8KVJpxAfdBJYaXyzQEgQQQgYrZiDp8SJmGKlYza6CYjEDNstAdNdKA3UuoULlEbS6w==}
-    engines: {node: '>=12.13'}
-    dependencies:
-      is-what: 4.1.16
     dev: true
 
   /core-js-compat@3.36.0:
@@ -6081,11 +6057,6 @@ packages:
     dependencies:
       call-bind: 1.0.7
       get-intrinsic: 1.2.4
-    dev: true
-
-  /is-what@4.1.16:
-    resolution: {integrity: sha512-ZhMwEosbFJkA0YhFnNDgTM4ZxDRsS6HqTo7qsZM08fehyRYIYa0yHu5R6mgo1n/8MgaPBXiPimPD77baVFYg+A==}
-    engines: {node: '>=12.13'}
     dev: true
 
   /is-wsl@1.1.0:
@@ -7896,8 +7867,8 @@ packages:
     resolution: {integrity: sha512-fBASbA6LnOU9dOU2eW7aQ8xmYBSXUIWr+UmF9b1efZBazGNO+rcXT/icdKnYm2pTwcRylVUYwW7H1PHfLekVzA==}
     dev: false
 
-  /react-native@0.73.5(@babel/core@7.24.0)(@babel/preset-env@7.24.0)(react@18.2.0):
-    resolution: {integrity: sha512-iHgDArmF4CrhL0qTj+Rn+CBN5pZWUL9lUGl8ub+V9Hwu/vnzQQh8rTMVSwVd2sV6N76KjpE5a4TfIAHkpIHhKg==}
+  /react-native@0.73.6(@babel/core@7.24.0)(@babel/preset-env@7.24.0)(react@18.2.0):
+    resolution: {integrity: sha512-oqmZe8D2/VolIzSPZw+oUd6j/bEmeRHwsLn1xLA5wllEYsZ5zNuMsDus235ONOnCRwexqof/J3aztyQswSmiaA==}
     engines: {node: '>=18'}
     hasBin: true
     peerDependencies:
@@ -7913,7 +7884,7 @@ packages:
       '@react-native/gradle-plugin': 0.73.4
       '@react-native/js-polyfills': 0.73.1
       '@react-native/normalize-colors': 0.73.2
-      '@react-native/virtualized-lists': 0.73.4(react-native@0.73.5)
+      '@react-native/virtualized-lists': 0.73.4(react-native@0.73.6)
       abort-controller: 3.0.0
       anser: 1.4.10
       ansi-regex: 5.0.1
@@ -7986,7 +7957,7 @@ packages:
       scheduler: 0.23.0
     dev: true
 
-  /react-redux@8.1.3(@types/react-dom@18.2.21)(@types/react@18.2.64)(react-dom@18.2.0)(react-native@0.73.5)(react@18.2.0)(redux@4.2.1):
+  /react-redux@8.1.3(@types/react-dom@18.2.21)(@types/react@18.2.64)(react-dom@18.2.0)(react-native@0.73.6)(react@18.2.0)(redux@4.2.1):
     resolution: {integrity: sha512-n0ZrutD7DaX/j9VscF+uTALI3oUPa/pO4Z3soOBIjuRn/FzVu6aehhysxZCLi6y7duMf52WNZGMl7CtuK5EnRw==}
     peerDependencies:
       '@types/react': ^16.8 || ^17.0 || ^18.0
@@ -8016,7 +7987,7 @@ packages:
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
       react-is: 18.2.0
-      react-native: 0.73.5(@babel/core@7.24.0)(@babel/preset-env@7.24.0)(react@18.2.0)
+      react-native: 0.73.6(@babel/core@7.24.0)(@babel/preset-env@7.24.0)(react@18.2.0)
       redux: 4.2.1
       use-sync-external-store: 1.2.0(react@18.2.0)
     dev: false
@@ -8096,7 +8067,7 @@ packages:
       react-dom: 18.2.0(react@18.2.0)
     dev: false
 
-  /react-spring@9.7.3(@react-three/fiber@8.15.19)(konva@9.3.6)(react-dom@18.2.0)(react-konva@18.2.10)(react-native@0.73.5)(react-zdog@1.2.2)(react@18.2.0)(three@0.162.0)(zdog@1.1.3):
+  /react-spring@9.7.3(@react-three/fiber@8.15.19)(konva@9.3.6)(react-dom@18.2.0)(react-konva@18.2.10)(react-native@0.73.6)(react-zdog@1.2.2)(react@18.2.0)(three@0.162.0)(zdog@1.1.3):
     resolution: {integrity: sha512-oTxDpFV5gzq7jQX6+bU0SVq+vX8VnuuT5c8Zwn6CpDErOPvCmV+DRkPiEBtaL3Ozgzwiy5yFx83N0h303j/r3A==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
@@ -8104,7 +8075,7 @@ packages:
     dependencies:
       '@react-spring/core': 9.7.3(react@18.2.0)
       '@react-spring/konva': 9.7.3(konva@9.3.6)(react-konva@18.2.10)(react@18.2.0)
-      '@react-spring/native': 9.7.3(react-native@0.73.5)(react@18.2.0)
+      '@react-spring/native': 9.7.3(react-native@0.73.6)(react@18.2.0)
       '@react-spring/three': 9.7.3(@react-three/fiber@8.15.19)(react@18.2.0)(three@0.162.0)
       '@react-spring/web': 9.7.3(react-dom@18.2.0)(react@18.2.0)
       '@react-spring/zdog': 9.7.3(react-dom@18.2.0)(react-zdog@1.2.2)(react@18.2.0)(zdog@1.1.3)
@@ -8340,10 +8311,6 @@ packages:
   /relateurl@0.2.7:
     resolution: {integrity: sha512-G08Dxvm4iDN3MLM0EsP62EDV9IuhXPR6blNz6Utcp7zyV3tr4HVNINt6MpaRWbxoOHT3Q7YN2P+jaHX8vUbgog==}
     engines: {node: '>= 0.10'}
-    dev: true
-
-  /remove-accents@0.4.2:
-    resolution: {integrity: sha512-7pXIJqJOq5tFgG1A2Zxti3Ht8jJF337m4sowbuHsW30ZnkQFnDzy9qBNhgzX8ZLW4+UBcXiiR7SwR6pokHsxiA==}
     dev: true
 
   /renderkid@3.0.0:
@@ -8903,13 +8870,6 @@ packages:
   /sudo-prompt@9.2.1:
     resolution: {integrity: sha512-Mu7R0g4ig9TUuGSxJavny5Rv0egCEtpZRNMrZaYS1vxkiIxGiGUwoezU3LazIQ+KE04hTrTfNPgxU5gzi7F5Pw==}
 
-  /superjson@1.13.3:
-    resolution: {integrity: sha512-mJiVjfd2vokfDxsQPOwJ/PtanO87LhpYY88ubI5dUB1Ab58Txbyje3+jpm+/83R/fevaq/107NNhtYBLuoTrFg==}
-    engines: {node: '>=10'}
-    dependencies:
-      copy-anything: 3.0.5
-    dev: true
-
   /supports-color@5.5.0:
     resolution: {integrity: sha512-QjVjwdXIt408MIiAqCX4oUKsgU2EqAGzs2Ppkm4aQYbjm+ZEWEcW4SfFNTr4uMNZma0ey4f5lgLrkB0aX0QMow==}
     engines: {node: '>=4'}
@@ -9249,6 +9209,7 @@ packages:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
     dependencies:
       react: 18.2.0
+    dev: false
 
   /util-deprecate@1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}

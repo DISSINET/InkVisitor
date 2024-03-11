@@ -67,14 +67,14 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
   isTerritoryWithParent,
   isStatementWithTerritory,
 }) => {
-  const { status: documentsStatus, data: documents } = useQuery(
-    ["documents"],
-    async () => {
+  const { status: documentsStatus, data: documents } = useQuery({
+    queryKey: ["documents"],
+    queryFn: async () => {
       const res = await api.documentsGet({});
       return res.data;
     },
-    { enabled: actantMode === "resource" && api.isLoggedIn() }
-  );
+    enabled: actantMode === "resource" && api.isLoggedIn(),
+  });
 
   const noDocumentLinkedItem: DropdownItem = {
     value: "",

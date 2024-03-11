@@ -56,16 +56,16 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
     data: user,
     error: errorUser,
     isFetching: isFetchingUser,
-  } = useQuery(
-    ["user", userId],
-    async () => {
+  } = useQuery({
+    queryKey: ["user", userId],
+    queryFn: async () => {
       if (userId) {
         const res = await api.usersGet(userId);
         return res.data;
       }
     },
-    { enabled: !!userId && api.isLoggedIn() }
-  );
+    enabled: !!userId && api.isLoggedIn(),
+  });
   useEffect(() => {
     if (user) {
       setSelectedLanguage(user.options.defaultLanguage);
@@ -74,15 +74,13 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
 
   const [territoryId, setTerritoryId] = useState<string>("");
 
-  const entityCreateMutation = useMutation(
-    async (newEntity: IEntity) => await api.entityCreate(newEntity),
-    {
-      onSuccess: (data, variables) => {
-        onMutationSuccess(variables);
-        closeModal();
-      },
-    }
-  );
+  const entityCreateMutation = useMutation({
+    mutationFn: async (newEntity: IEntity) => await api.entityCreate(newEntity),
+    onSuccess: (data, variables) => {
+      onMutationSuccess(variables);
+      closeModal();
+    },
+  });
 
   const userRole = localStorage.getItem("userrole") as UserEnums.Role;
 
@@ -153,18 +151,16 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
     data: territory,
     error,
     isFetching,
-  } = useQuery(
-    ["territory", territoryId],
-    async () => {
+  } = useQuery({
+    queryKey: ["territory", territoryId],
+    queryFn: async () => {
       if (territoryId) {
         const res = await api.territoryGet(territoryId);
         return res.data;
       }
     },
-    {
-      enabled: !!territoryId && api.isLoggedIn(),
-    }
-  );
+    enabled: !!territoryId && api.isLoggedIn(),
+  });
 
   const handleCheckOnSubmit = () => {
     if (label.length < 2) {
@@ -189,7 +185,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
     <Modal
       showModal={showModal}
       width="auto"
-      isLoading={entityCreateMutation.isLoading}
+      isLoading={entityCreateMutation.isPending}
       onEnterPress={handleCheckOnSubmit}
       onClose={closeModal}
     >

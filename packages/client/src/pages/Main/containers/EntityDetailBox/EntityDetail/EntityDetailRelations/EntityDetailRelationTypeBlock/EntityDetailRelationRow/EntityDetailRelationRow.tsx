@@ -142,7 +142,7 @@ export const EntityDetailRelationRow: React.FC<EntityDetailRelationRow> = ({
                         cursor: "move",
                       }}
                     >
-                      <FaGripVertical color={themeContext.color.black} />
+                      <FaGripVertical color={themeContext?.color.black} />
                     </StyledGridColumn>
                   )}
                   <StyledGridColumn key={key}>

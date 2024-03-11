@@ -85,16 +85,14 @@ export const SearchParamsProvider = ({
     return detailId.length > 0 ? detailId.split(arrJoinChar) : [];
   };
 
-  const { data } = useQuery(
-    ["detail-tab-entities", getDetailIdArray()],
-    async () => {
+  const { data } = useQuery({
+    queryKey: ["detail-tab-entities", getDetailIdArray()],
+    queryFn: async () => {
       const res = await api.entitiesSearch({ entityIds: getDetailIdArray() });
       return res.data;
     },
-    {
-      enabled: api.isLoggedIn() && getDetailIdArray().length > 9,
-    }
-  );
+    enabled: api.isLoggedIn() && getDetailIdArray().length > 9,
+  });
 
   const appendDetailId = (id: string) => {
     const detailIdArray = getDetailIdArray();

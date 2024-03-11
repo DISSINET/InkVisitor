@@ -406,7 +406,7 @@ export const StatementEditorActantTableRow: React.FC<
           <StyledGridColumn ref={dragRef} style={{ cursor: "move" }}>
             <FaGripVertical
               style={{ marginTop: "0.3rem" }}
-              color={themeContext.color.black}
+              color={themeContext?.color.black}
             />
           </StyledGridColumn>
         ) : (

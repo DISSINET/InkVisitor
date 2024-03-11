@@ -343,7 +343,7 @@ export const Suggester: React.FC<Suggester> = ({
         {isWrongDropCategory && isOver && (
           <StyledAiOutlineWarning
             size={22}
-            color={themeContext.color.warning}
+            color={themeContext?.color.warning}
           />
         )}
 

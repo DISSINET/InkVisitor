@@ -225,7 +225,7 @@ export const Tag: React.FC<TagProps> = ({
         {isFavorited && (
           <StyledStarWrap>
             <FaStar
-              color={themeContext.color.warning}
+              color={themeContext?.color.warning}
               style={{ marginBottom: "0.1rem" }}
             />
           </StyledStarWrap>

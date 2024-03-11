@@ -152,7 +152,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
             icon={<BiRefresh />}
             onClick={() => {
               queriesToRefresh.forEach((queryToRefresh) => {
-                queryClient.invalidateQueries([queryToRefresh]);
+                queryClient.invalidateQueries({ queryKey: [queryToRefresh] });
               });
             }}
           />
@@ -313,7 +313,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
                 appendDetailId(entity.id);
               }
               if (entity.class === EntityEnums.Class.Territory) {
-                queryClient.invalidateQueries(["tree"]);
+                queryClient.invalidateQueries({ queryKey: ["tree"] });
               }
             }}
           />

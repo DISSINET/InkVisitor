@@ -22,14 +22,14 @@ export const StatementEditorBox: React.FC = () => {
     data: statement,
     error: statementError,
     isFetching: isFetchingStatement,
-  } = useQuery(
-    ["statement", statementId],
-    async () => {
+  } = useQuery({
+    queryKey: ["statement", statementId],
+    queryFn: async () => {
       const res = await api.statementGet(statementId);
       return res.data;
     },
-    { enabled: !!statementId && api.isLoggedIn() }
-  );
+    enabled: !!statementId && api.isLoggedIn(),
+  });
 
   useEffect(() => {
     if (
@@ -41,33 +41,31 @@ export const StatementEditorBox: React.FC = () => {
   }, [statementError]);
 
   // MUTATIONS
-  const updateStatementMutation = useMutation(
-    async (changes: IStatement) => {
+  const updateStatementMutation = useMutation({
+    mutationFn: async (changes: IStatement) => {
       await api.entityUpdate(statementId, changes);
     },
-    {
-      onSuccess: (data, variables: any) => {
-        if (selectedDetailId === statementId) {
-          queryClient.invalidateQueries(["entity"]);
-        }
-        queryClient.invalidateQueries(["statement"]);
-        queryClient.invalidateQueries(["territory"]);
-        if (variables.label !== undefined) {
-          queryClient.invalidateQueries(["detail-tab-entities"]);
-        }
-        if (statement && statement.isTemplate) {
-          queryClient.invalidateQueries(["templates"]);
-          queryClient.invalidateQueries(["entity-templates"]);
-        }
-      },
-      onError: (err, newTodo, context) => {
-        toast.error("Statement not updated");
-      },
-    }
-  );
+    onSuccess: (data, variables: any) => {
+      if (selectedDetailId === statementId) {
+        queryClient.invalidateQueries({ queryKey: ["entity"] });
+      }
+      queryClient.invalidateQueries({ queryKey: ["statement"] });
+      queryClient.invalidateQueries({ queryKey: ["territory"] });
+      if (variables.label !== undefined) {
+        queryClient.invalidateQueries({ queryKey: ["detail-tab-entities"] });
+      }
+      if (statement && statement.isTemplate) {
+        queryClient.invalidateQueries({ queryKey: ["templates"] });
+        queryClient.invalidateQueries({ queryKey: ["entity-templates"] });
+      }
+    },
+    onError: (err, newTodo, context) => {
+      toast.error("Statement not updated");
+    },
+  });
 
-  const moveStatementMutation = useMutation(
-    async (newTerritoryId: string) => {
+  const moveStatementMutation = useMutation({
+    mutationFn: async (newTerritoryId: string) => {
       await api.entityUpdate(statementId, {
         data: {
           territory: {
@@ -77,15 +75,13 @@ export const StatementEditorBox: React.FC = () => {
         },
       });
     },
-    {
-      onSuccess: (data, variables) => {
-        setTerritoryId(variables);
-        queryClient.invalidateQueries(["statement"]);
-        queryClient.invalidateQueries(["tree"]);
-        queryClient.invalidateQueries(["territory"]);
-      },
-    }
-  );
+    onSuccess: (data, variables) => {
+      setTerritoryId(variables);
+      queryClient.invalidateQueries({ queryKey: ["statement"] });
+      queryClient.invalidateQueries({ queryKey: ["tree"] });
+      queryClient.invalidateQueries({ queryKey: ["territory"] });
+    },
+  });
 
   const [tempObject, setTempObject] = useState<IResponseStatement>();
 
@@ -187,7 +183,7 @@ export const StatementEditorBox: React.FC = () => {
         </>
       )}
 
-      <Loader show={isFetchingStatement || updateStatementMutation.isLoading} />
+      <Loader show={isFetchingStatement || updateStatementMutation.isPending} />
     </>
   );
 };

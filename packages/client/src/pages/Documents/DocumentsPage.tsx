@@ -29,33 +29,29 @@ export const DocumentsPage: React.FC = ({}) => {
     data: documents,
     error,
     isFetching,
-  } = useQuery(
-    ["documents"],
-    async () => {
+  } = useQuery({
+    queryKey: ["documents"],
+    queryFn: async () => {
       const res = await api.documentsGet({});
       return res.data;
     },
-    {
-      enabled: api.isLoggedIn(),
-    }
-  );
+    enabled: api.isLoggedIn(),
+  });
 
   const {
     data: resources,
     error: resourcesError,
     isFetching: resourcesIsFetching,
-  } = useQuery(
-    ["resourcesWithDocuments"],
-    async () => {
+  } = useQuery({
+    queryKey: ["resourcesWithDocuments"],
+    queryFn: async () => {
       const res = await api.entitiesSearch({
         resourceHasDocument: true,
       });
       return res.data;
     },
-    {
-      enabled: api.isLoggedIn(),
-    }
-  );
+    enabled: api.isLoggedIn(),
+  });
 
   const documentsWithResources: DocumentWithResource[] = useMemo(() => {
     return documents
@@ -70,25 +66,21 @@ export const DocumentsPage: React.FC = ({}) => {
       : [];
   }, [resources, documents]);
 
-  const uploadDocumentMutation = useMutation(
-    async (doc: IDocument) => api.documentUpload(doc),
-    {
-      onSuccess: (variables, data) => {
-        queryClient.invalidateQueries(["documents"]);
-      },
-    }
-  );
+  const uploadDocumentMutation = useMutation({
+    mutationFn: async (doc: IDocument) => api.documentUpload(doc),
+    onSuccess: (variables, data) => {
+      queryClient.invalidateQueries({ queryKey: ["documents"] });
+    },
+  });
 
-  const updateDocumentMutation = useMutation(
-    async (data: { id: string; doc: Partial<IDocument> }) =>
+  const updateDocumentMutation = useMutation({
+    mutationFn: async (data: { id: string; doc: Partial<IDocument> }) =>
       api.documentUpdate(data.id, data.doc),
-    {
-      onSuccess: (variables, data) => {
-        setEditMode(false);
-        queryClient.invalidateQueries(["documents"]);
-      },
-    }
-  );
+    onSuccess: (variables, data) => {
+      setEditMode(false);
+      queryClient.invalidateQueries({ queryKey: ["documents"] });
+    },
+  });
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -126,15 +118,13 @@ export const DocumentsPage: React.FC = ({}) => {
     setOpenedDocumentId(false);
   };
 
-  const documentDeleteMutation = useMutation(
-    async (id: string) => await api.documentDelete(id),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries(["documents"]);
-        setDocToDelete(false);
-      },
-    }
-  );
+  const documentDeleteMutation = useMutation({
+    mutationFn: async (id: string) => await api.documentDelete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["documents"] });
+      setDocToDelete(false);
+    },
+  });
 
   const [docToDelete, setDocToDelete] = useState<string | false>(false);
   const [editMode, setEditMode] = useState<false | number>(false);

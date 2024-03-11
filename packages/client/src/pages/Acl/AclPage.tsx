@@ -22,14 +22,14 @@ const AclPage: React.FC<AclPage> = ({}) => {
   const [currentCtrlName, setCtrl] = useState("");
   const [currentMethod, setMethod] = useState("");
 
-  const { status, data, error, isFetching } = useQuery(
-    ["permissions"],
-    async () => {
+  const { status, data, error, isFetching } = useQuery({
+    queryKey: ["permissions"],
+    queryFn: async () => {
       const res = await api.getAclPermissions();
       return res.data;
     },
-    { initialData: initialData }
-  );
+    initialData: initialData,
+  });
 
   const handleSave = async (
     permissionId: string,

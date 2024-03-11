@@ -40,14 +40,14 @@ export const TerritoryTreeBox: React.FC = () => {
     data: treeData,
     error,
     isFetching,
-  } = useQuery(
-    ["tree"],
-    async () => {
+  } = useQuery({
+    queryKey: ["tree"],
+    queryFn: async () => {
       const res = await api.treeGet();
       return res.data;
     },
-    { enabled: api.isLoggedIn() }
-  );
+    enabled: api.isLoggedIn(),
+  });
   const userId = localStorage.getItem("userid");
 
   const {
@@ -55,16 +55,16 @@ export const TerritoryTreeBox: React.FC = () => {
     data: userData,
     error: userError,
     isFetching: userIsFetching,
-  } = useQuery(
-    ["user", userId],
-    async () => {
+  } = useQuery({
+    queryKey: ["user", userId],
+    queryFn: async () => {
       if (userId) {
         const res = await api.usersGet(userId);
         return res.data;
       }
     },
-    { enabled: api.isLoggedIn() && !!userId }
-  );
+    enabled: api.isLoggedIn() && !!userId,
+  });
 
   const [storedTerritoryIds, setStoredTerritoryIds] = useState<string[]>([]);
   useEffect(() => {
@@ -75,19 +75,17 @@ export const TerritoryTreeBox: React.FC = () => {
     }
   }, [userData?.storedTerritories]);
 
-  const updateUserMutation = useMutation(
-    async (changes: object) => {
+  const updateUserMutation = useMutation({
+    mutationFn: async (changes: object) => {
       if (userId) {
         await api.usersUpdate(userId, changes);
       }
     },
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries(["tree"]);
-        queryClient.invalidateQueries(["user"]);
-      },
-    }
-  );
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tree"] });
+      queryClient.invalidateQueries({ queryKey: ["user"] });
+    },
+  });
 
   const userRole = localStorage.getItem("userrole");
   const { territoryId } = useSearchParams();
@@ -250,7 +248,7 @@ export const TerritoryTreeBox: React.FC = () => {
           territoryActantId={rootTerritoryId}
         />
       )}
-      <Loader show={isFetching || updateUserMutation.isLoading} />
+      <Loader show={isFetching || updateUserMutation.isPending} />
     </>
   );
 };

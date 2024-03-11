@@ -108,7 +108,7 @@ export const StatementListRow: React.FC<StatementListRow> = ({
                 ref={dragRef}
                 onClick={(e: React.MouseEvent) => e.stopPropagation()}
               >
-                <FaGripVertical color={themeContext.color.black} />
+                <FaGripVertical color={themeContext?.color.black} />
               </StyledTdMove>
             );
           } else {

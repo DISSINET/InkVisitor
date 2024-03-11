@@ -13,14 +13,14 @@ export const UserRightItem: React.FC<UserRightItem> = ({ territoryId }) => {
     data: territoryData,
     error: territoryError,
     isFetching: territoryIsFetching,
-  } = useQuery(
-    ["territory", territoryId],
-    async () => {
+  } = useQuery({
+    queryKey: ["territory", territoryId],
+    queryFn: async () => {
       const res = await api.territoryGet(territoryId);
       return res.data;
     },
-    { enabled: !!territoryId && api.isLoggedIn() }
-  );
+    enabled: !!territoryId && api.isLoggedIn(),
+  });
 
   return (
     <StyledRightItem>
