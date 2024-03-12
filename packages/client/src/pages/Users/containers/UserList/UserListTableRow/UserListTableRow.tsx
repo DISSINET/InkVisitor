@@ -16,7 +16,7 @@ export const UserListTableRow: React.FC<UserListTableRow> = ({
 }) => {
   return (
     <React.Fragment key={index}>
-      <StyledTr isOdd={Boolean(index % 2)} isSelected={isSelected}>
+      <StyledTr $isOdd={Boolean(index % 2)} $isSelected={isSelected}>
         {row.cells.map((cell) => {
           return (
             <StyledTd {...cell.getCellProps()}>{cell.render("Cell")}</StyledTd>

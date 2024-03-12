@@ -157,7 +157,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
             icon = <FaEnvelopeOpenText size={16} />;
           }
           return (
-            <StyledUserNameColumn active={active} verified={verified}>
+            <StyledUserNameColumn $active={active} $verified={verified}>
               <StyledUserNameColumnIcon>{icon}</StyledUserNameColumnIcon>
 
               {!verified ? (
