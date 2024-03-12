@@ -1,5 +1,5 @@
 import { userRoleDict } from "@shared/dictionaries";
-import { UserEnums } from "@shared/enums";
+import { HttpMethods, UserEnums } from "@shared/enums";
 import { IResponsePermission, RequestPermissionUpdate } from "@shared/types";
 import api from "api";
 import { Box } from "components";
@@ -14,7 +14,9 @@ const initialData: IResponsePermission[] = [
     id: "",
     controller: "",
     route: "",
+    method: HttpMethods.Get, // Assuming a default method for demonstration
     roles: [],
+    public: false,
   },
 ];
 
