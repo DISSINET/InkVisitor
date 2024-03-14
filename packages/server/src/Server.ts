@@ -12,6 +12,7 @@ import AclRouter from "@modules/acls";
 import StatementsRouter from "@modules/statements";
 import TreeRouter from "@modules/tree";
 import StatsRouter from "@modules/stats";
+import PythonApiRouter from "@modules/pythondata";
 import DocumentsRouter from "@modules/documents";
 import Acl from "@middlewares/acl";
 import customizeRequest from "@middlewares/request";
@@ -91,6 +92,7 @@ server.use(
       /api\/v1\/users\/signin/,
       /api\/v1\/users\/activation/,
       /api\/v1\/users\/password/,
+      /api\/v1\/pythondata/,
     ],
   })
 );
@@ -116,6 +118,7 @@ routerV1.use("/statements", StatementsRouter);
 routerV1.use("/tree", TreeRouter);
 routerV1.use("/stats", StatsRouter);
 routerV1.use("/documents", DocumentsRouter);
+routerV1.use("/pythondata", PythonApiRouter);
 
 // unknown paths (after jwt check) should return 404
 server.all("*", catchAll);
