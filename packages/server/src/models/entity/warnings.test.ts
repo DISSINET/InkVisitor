@@ -297,7 +297,9 @@ describe("models/entity/warnings", function () {
   describe("test VETV", function () {
     const db = new Db();
     const [, actionEntity0] = prepareEntity(EntityEnums.Class.Action);
+    actionEntity0.data.entities= {};    
     const [, actionEntity1] = prepareEntity(EntityEnums.Class.Action);
+    actionEntity1.data.entities= {};
     const [, actionEntity2] = prepareEntity(EntityEnums.Class.Action);
     actionEntity1.data = {
       entities: {
