@@ -19,7 +19,6 @@ interface UnlinkButton {
 interface EntityTag {
   entity: IEntity;
   parentId?: string;
-  mode?: "selected" | "disabled" | "invalid" | false;
   showOnly?: "entity" | "label";
   fullWidth?: boolean;
   button?: ReactNode;
@@ -45,7 +44,6 @@ export const EntityTag: React.FC<EntityTag> = ({
   parentId,
   showOnly,
   fullWidth = false,
-  mode,
   button = false,
   index,
   moveFn,
@@ -149,7 +147,6 @@ export const EntityTag: React.FC<EntityTag> = ({
           }
           moveFn={moveFn}
           entityClass={classId}
-          mode={mode}
           borderStyle="solid"
           invertedLabel={isSelected}
           index={index}

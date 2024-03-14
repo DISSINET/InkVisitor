@@ -48,7 +48,6 @@ interface TagProps {
   ltype?: string;
   entity?: IEntity;
 
-  mode?: "selected" | "disabled" | "invalid" | false;
   borderStyle?: "solid" | "dashed" | "dotted";
   button?: ReactNode;
   elvlButtonGroup?: ReactNode | false;
@@ -81,7 +80,6 @@ export const Tag: React.FC<TagProps> = ({
   status = "1",
   ltype = "1",
   entity,
-  mode = false,
   borderStyle = "solid",
   button,
   elvlButtonGroup,
