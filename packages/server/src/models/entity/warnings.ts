@@ -328,7 +328,6 @@ export default class EntityWarnings {
     for (const pos of Object.keys(
       action.data.entities
     ) as (keyof IActionValency)[]) {
-      console.log("!!!!", action.data);
       if (action.data.entities[pos]?.length === 0) {
         const newWarning = this.newWarning(
           WarningTypeEnums.VETM,
