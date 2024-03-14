@@ -34,6 +34,7 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
     const positionName = position?.subSection
       ? ` - ${positionObject[position.subSection]}`
       : "";
+
     switch (type) {
       case WarningTypeEnums.SValency:
         return <b>Subject Valency</b>;
@@ -64,8 +65,7 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
         return (
           <span>
             <b>{`Actant's entity type does not match the Action`}</b>
-            {position?.subSection &&
-              ` - ${positionObject[position?.subSection]}`}
+            {positionName}
             {entity &&
               ` - [${entity.class}: ${getShortLabelByLetterCount(
                 entity.label,
@@ -77,8 +77,7 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
         return (
           <span>
             <b>{`This actant position allows no actant`}</b>
-            {position?.subSection &&
-              ` - ${positionObject[position?.subSection]}`}
+            {positionName}
             {entity &&
               ` - [${entity.class}: ${getShortLabelByLetterCount(
                 entity.label,
@@ -90,16 +89,14 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
         return (
           <span>
             <b>{`Entity type valencies of the actions not matching`}</b>
-            {position?.subSection &&
-              ` - ${positionObject[position?.subSection]}`}
+            {positionName}
           </span>
         );
       case WarningTypeEnums.AVU:
         return (
           <span>
             <b>{`Action valency not defined`}</b>
-            {position?.subSection &&
-              ` - ${positionObject[position?.subSection]}`}
+            {positionName}
             {entity &&
               ` - [${entity.class}: ${getShortLabelByLetterCount(
                 entity.label,
