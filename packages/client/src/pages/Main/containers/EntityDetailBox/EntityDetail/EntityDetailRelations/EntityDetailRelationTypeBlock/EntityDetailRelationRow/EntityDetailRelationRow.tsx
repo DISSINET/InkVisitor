@@ -124,8 +124,8 @@ export const EntityDetailRelationRow: React.FC<EntityDetailRelationRow> = ({
     <StyledGrid
       ref={dropRef}
       style={{ opacity }}
-      hasAttribute={relationRule.attributes.length > 0}
-      hasOrder={hasOrder}
+      $hasAttribute={relationRule.attributes.length > 0}
+      $hasOrder={hasOrder}
     >
       {uniqueRelationIds.map((relationEntityId, key) => {
         const relationEntity = entities[relationEntityId];
@@ -142,7 +142,7 @@ export const EntityDetailRelationRow: React.FC<EntityDetailRelationRow> = ({
                         cursor: "move",
                       }}
                     >
-                      <FaGripVertical color={themeContext.color.black} />
+                      <FaGripVertical color={themeContext?.color.black} />
                     </StyledGridColumn>
                   )}
                   <StyledGridColumn key={key}>

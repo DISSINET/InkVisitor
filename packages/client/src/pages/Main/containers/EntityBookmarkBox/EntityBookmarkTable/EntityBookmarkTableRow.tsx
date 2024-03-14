@@ -65,7 +65,7 @@ export const EntityBookmarkTableRow: React.FC<EntityBookmarkTableRow> = ({
       <StyledTr ref={dropRef} opacity={opacity} isOdd={Boolean(index % 2)}>
         {hasOrder ? (
           <td ref={dragRef} style={{ cursor: "move" }}>
-            <FaGripVertical color={themeContext.color.black} />
+            <FaGripVertical color={themeContext?.color.black} />
           </td>
         ) : (
           <td style={{ width: "2rem" }} />

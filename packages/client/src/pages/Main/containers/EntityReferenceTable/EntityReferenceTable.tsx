@@ -58,9 +58,9 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
     data: documents,
     error: documentsError,
     isFetching: DocumentsIsFetching,
-  } = useQuery(
-    ["documents", references],
-    async () => {
+  } = useQuery({
+    queryKey: ["documents", references],
+    queryFn: async () => {
       const documentIds: string[] = [];
 
       references
@@ -76,8 +76,8 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
       const res = await api.documentsGet({ documentIds: documentIds });
       return res.data;
     },
-    { enabled: !!entityId && api.isLoggedIn() }
-  );
+    enabled: !!entityId && api.isLoggedIn(),
+  });
 
   const handleChangeResource = (
     refId: string,

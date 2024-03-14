@@ -47,15 +47,15 @@ export const EntityBookmarkBox: React.FC = () => {
     data: bookmarkFolders,
     error: errorStatement,
     isFetching: isFetching,
-  } = useQuery(
-    ["bookmarks"],
-    async () => {
+  } = useQuery({
+    queryKey: ["bookmarks"],
+    queryFn: async () => {
       const res = await api.bookmarksGet("me");
       res.data.sort((a, b) => (a.name > b.name ? 1 : -1));
       return res.data;
     },
-    { enabled: api.isLoggedIn() && fourthPanelBoxesOpened["bookmarks"] }
-  );
+    enabled: api.isLoggedIn() && fourthPanelBoxesOpened["bookmarks"],
+  });
 
   const removingFolderName = useMemo(() => {
     if (bookmarkFolders) {
@@ -109,8 +109,8 @@ export const EntityBookmarkBox: React.FC = () => {
     setRemovingFolder(folderId);
   };
 
-  const acceptEditingFolderMutation = useMutation(
-    async () => {
+  const acceptEditingFolderMutation = useMutation({
+    mutationFn: async () => {
       const newBookmarks: IBookmarkFolder[] | false = getBookmarksCopy();
       if (newBookmarks) {
         const newBookmarksAfterEdit = newBookmarks.map((b) => {
@@ -125,18 +125,17 @@ export const EntityBookmarkBox: React.FC = () => {
         });
       }
     },
-    {
-      onSuccess: () => {
-        toast.info("Bookmark edited");
-        queryClient.invalidateQueries(["bookmarks"]);
-        setEditingFolderName("");
-        setEditingFolder(false);
-      },
-    }
-  );
 
-  const acceptRemoveFolderMutation = useMutation(
-    async () => {
+    onSuccess: () => {
+      toast.info("Bookmark edited");
+      queryClient.invalidateQueries({ queryKey: ["bookmarks"] });
+      setEditingFolderName("");
+      setEditingFolder(false);
+    },
+  });
+
+  const acceptRemoveFolderMutation = useMutation({
+    mutationFn: async () => {
       const newBookmarks: IBookmarkFolder[] | false = getBookmarksCopy();
       if (newBookmarks) {
         const newBookmarksAfterRemove = newBookmarks.filter(
@@ -149,13 +148,11 @@ export const EntityBookmarkBox: React.FC = () => {
 
       setRemovingFolder(false);
     },
-    {
-      onSuccess: () => {
-        toast.warning("Bookmark folder removed");
-        queryClient.invalidateQueries(["bookmarks"]);
-      },
-    }
-  );
+    onSuccess: () => {
+      toast.warning("Bookmark folder removed");
+      queryClient.invalidateQueries({ queryKey: ["bookmarks"] });
+    },
+  });
   const cancelRemoveFolder = () => {
     setRemovingFolder(false);
   };
@@ -165,8 +162,8 @@ export const EntityBookmarkBox: React.FC = () => {
     setCreatingFolder(false);
   };
 
-  const createFolderMutation = useMutation(
-    async () => {
+  const createFolderMutation = useMutation({
+    mutationFn: async () => {
       if (bookmarkFolders) {
         const newBookmarkFolder: IBookmarkFolder =
           CBookmarkFolder(editingFolderName);
@@ -178,15 +175,13 @@ export const EntityBookmarkBox: React.FC = () => {
         }
       }
     },
-    {
-      onSuccess: () => {
-        toast.success("Bookmark folder created");
-        setEditingFolderName("");
-        setCreatingFolder(false);
-        queryClient.invalidateQueries(["bookmarks"]);
-      },
-    }
-  );
+    onSuccess: () => {
+      toast.success("Bookmark folder created");
+      setEditingFolderName("");
+      setCreatingFolder(false);
+      queryClient.invalidateQueries({ queryKey: ["bookmarks"] });
+    },
+  });
 
   return (
     <StyledContent>
@@ -311,8 +306,8 @@ export const EntityBookmarkBox: React.FC = () => {
         </ModalFooter>
         <Loader
           show={
-            createFolderMutation.isLoading ||
-            acceptEditingFolderMutation.isLoading
+            createFolderMutation.isPending ||
+            acceptEditingFolderMutation.isPending
           }
         />
       </Modal>
@@ -323,7 +318,7 @@ export const EntityBookmarkBox: React.FC = () => {
         show={removingFolder != false}
         onSubmit={() => acceptRemoveFolderMutation.mutate()}
         onCancel={() => cancelRemoveFolder()}
-        loading={acceptRemoveFolderMutation.isLoading}
+        loading={acceptRemoveFolderMutation.isPending}
       />
     </StyledContent>
   );

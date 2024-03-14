@@ -11,8 +11,8 @@ export const Loader: React.FC<Loader> = ({ show = false, size = 60 }) => {
   const themeContext = useContext(ThemeContext);
 
   return (
-    <StyledLoaderWrap show={show}>
-      <DotLoader color={themeContext.color["primary"]} size={size} />
+    <StyledLoaderWrap $show={show}>
+      <DotLoader color={themeContext?.color["primary"]} size={size} />
     </StyledLoaderWrap>
   );
 };

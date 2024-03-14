@@ -20,11 +20,11 @@ export const MenuItem: React.FC<MenuItem> = ({
 
   const [isHovered, setIsHovered] = useState(false);
 
-  const selectedColor = themeContext.color[color];
+  const selectedColor = themeContext?.color[color];
 
   const animatedBackground = useSpring({
-    color: isHovered ? themeContext.color["white"] : selectedColor,
-    backgroundColor: isHovered ? selectedColor : themeContext.color["white"],
+    color: isHovered ? themeContext?.color["white"] : selectedColor,
+    backgroundColor: isHovered ? selectedColor : themeContext?.color["white"],
     config: config.stiff,
   });
 

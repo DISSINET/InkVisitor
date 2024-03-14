@@ -52,16 +52,14 @@ export const AuditTableRow: React.FC<AuditTableRow> = ({
     data: userData,
     error: userError,
     isFetching: isFetchingUser,
-  } = useQuery(
-    ["user", user],
-    async () => {
+  } = useQuery({
+    queryKey: ["user", user],
+    queryFn: async () => {
       const res = await api.withoutToaster().usersGet(user as string);
       return res.data;
     },
-    {
-      enabled: !!user,
-    }
-  );
+    enabled: !!user,
+  });
 
   const changedKeys =
     Object.keys(changes).length === 1 && Object.keys(changes)[0] === "data"

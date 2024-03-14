@@ -102,8 +102,8 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
 
   const symbolColor = useMemo(() => {
     return right === UserEnums.RoleMode.Read
-      ? themeContext.color.gray[600]
-      : themeContext.color.gray[800];
+      ? themeContext?.color.gray[600]
+      : themeContext?.color.gray[800];
   }, [right, selectedThemeId]);
 
   useEffect(() => {
@@ -143,20 +143,18 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
     [childTerritories]
   );
 
-  const moveTerritoryMutation = useMutation(
-    async (item: EntityDragItem) => {
+  const moveTerritoryMutation = useMutation({
+    mutationFn: async (item: EntityDragItem) => {
       if (territory.data.parent && item.index !== -1) {
         const parent = territory.data.parent as IParentTerritory;
         await api.treeMoveTerritory(item.id, parent.territoryId, item.index);
       }
     },
-    {
-      onSuccess: () => {
-        dispatch(setDisableTreeScroll(true));
-        queryClient.invalidateQueries(["tree"]);
-      },
-    }
-  );
+    onSuccess: () => {
+      dispatch(setDisableTreeScroll(true));
+      queryClient.invalidateQueries({ queryKey: ["tree"] });
+    },
+  });
 
   const onCaretClick = (id: string) => {
     setTerritoryId(id);
@@ -272,7 +270,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
                 id={`territory${id}`}
                 style={{
                   backgroundColor: foundByRecursion
-                    ? themeContext.color.foundByTreeFilter
+                    ? themeContext?.color.foundByTreeFilter
                     : "",
                 }}
               >
@@ -341,7 +339,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
     <>
       {renderTreeNode()}
 
-      <StyledChildrenWrap noIndent={lvl === 0}>
+      <StyledChildrenWrap $noIndent={lvl === 0}>
         {!hideChildTerritories &&
           isExpanded &&
           childTerritories.map((child: IExtendedResponseTree, key: number) => (

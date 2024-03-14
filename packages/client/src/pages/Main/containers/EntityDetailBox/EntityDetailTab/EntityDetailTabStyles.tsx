@@ -2,15 +2,15 @@ import { CgClose } from "react-icons/cg";
 import styled from "styled-components";
 
 interface StyledTab {
-  isSelected?: boolean;
+  $isSelected?: boolean;
 }
 export const StyledTab = styled.div<StyledTab>`
   display: inline-flex;
   justify-content: space-between;
   align-items: center;
   cursor: pointer;
-  background-color: ${({ theme, isSelected }) =>
-    isSelected ? "transparent" : theme.color["gray"][100]};
+  background-color: ${({ theme, $isSelected }) =>
+    $isSelected ? "transparent" : theme.color["gray"][100]};
   margin-right: 1px;
   padding-left: ${({ theme }) => theme.space[2]};
   position: relative;
@@ -18,19 +18,19 @@ export const StyledTab = styled.div<StyledTab>`
   border-top-left-radius: 5px;
   border-top-right-radius: 5px;
   border: 1px solid ${({ theme }) => theme.color["gray"][500]};
-  border-bottom: ${({ isSelected }) => (isSelected ? "none" : "")};
+  border-bottom: ${({ $isSelected }) => ($isSelected ? "none" : "")};
 
   width: 100%;
   overflow: hidden;
 `;
 interface StyledLabel {
-  isItalic?: boolean;
-  isSelected?: boolean;
+  $isItalic?: boolean;
+  $isSelected?: boolean;
 }
 export const StyledLabel = styled.div<StyledLabel>`
   font-size: ${({ theme }) => theme.fontSize["xs"]};
-  color: ${({ theme, isSelected }) =>
-    isSelected ? theme.color["black"] : theme.color["gray"][700]};
+  color: ${({ theme, $isSelected }) =>
+    $isSelected ? theme.color["black"] : theme.color["gray"][700]};
   padding: ${({ theme }) => theme.space[1]};
   display: inline-block;
   overflow: hidden;
@@ -39,7 +39,7 @@ export const StyledLabel = styled.div<StyledLabel>`
   text-overflow: ellipsis;
   width: 100%;
   height: 100%;
-  font-style: ${({ isItalic }) => (isItalic ? "italic" : "")};
+  font-style: ${({ $isItalic }) => ($isItalic ? "italic" : "")};
 `;
 
 export const StyledIconWrap = styled.span`

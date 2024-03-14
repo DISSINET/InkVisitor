@@ -35,22 +35,20 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
 
   const { setStatementId, setTerritoryId, appendDetailId } = useSearchParams();
 
-  const cloneEntityMutation = useMutation(
-    async (entityId: string) => await api.entityClone(entityId),
-    {
-      onSuccess: (data, variables) => {
-        appendDetailId(data.data.data.id);
-        toast.info(`Entity duplicated!`);
-        queryClient.invalidateQueries(["templates"]);
-        if (data.data.data.class === EntityEnums.Class.Territory) {
-          queryClient.invalidateQueries(["tree"]);
-        }
-      },
-      onError: () => {
-        toast.error(`Error: Entity not duplicated!`);
-      },
-    }
-  );
+  const cloneEntityMutation = useMutation({
+    mutationFn: async (entityId: string) => await api.entityClone(entityId),
+    onSuccess: (data, variables) => {
+      appendDetailId(data.data.data.id);
+      toast.info(`Entity duplicated!`);
+      queryClient.invalidateQueries({ queryKey: ["templates"] });
+      if (data.data.data.class === EntityEnums.Class.Territory) {
+        queryClient.invalidateQueries({ queryKey: ["tree"] });
+      }
+    },
+    onError: () => {
+      toast.error(`Error: Entity not duplicated!`);
+    },
+  });
 
   const instantiateTemplate = async (territoryParentId?: string) => {
     let newInstanceId;
@@ -82,7 +80,7 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
         });
       }
       if (entity.class === EntityEnums.Class.Territory) {
-        queryClient.invalidateQueries(["tree"]);
+        queryClient.invalidateQueries({ queryKey: ["tree"] });
       }
     }
   };

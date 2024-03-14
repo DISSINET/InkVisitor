@@ -63,7 +63,7 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
       <StyledTr ref={dropRef} opacity={opacity}>
         {hasOrder ? (
           <td ref={dragRef} style={{ cursor: "move" }}>
-            <FaGripVertical color={themeContext.color.black} />
+            <FaGripVertical color={themeContext?.color.black} />
           </td>
         ) : (
           <td style={{ width: "2rem" }} />

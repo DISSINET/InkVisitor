@@ -70,25 +70,21 @@ export const DocumentRow: React.FC<DocumentRow> = ({
 
   const queryClient = useQueryClient();
 
-  const updateResourceMutation = useMutation(
-    async (resourceId: string) =>
+  const updateResourceMutation = useMutation({
+    mutationFn: async (resourceId: string) =>
       api.entityUpdate(resourceId, { data: { documentId: document.id } }),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries(["resourcesWithDocuments"]);
-      },
-    }
-  );
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["resourcesWithDocuments"] });
+    },
+  });
 
-  const removeResourceMutation = useMutation(
-    async (resourceId: string) =>
+  const removeResourceMutation = useMutation({
+    mutationFn: async (resourceId: string) =>
       api.entityUpdate(resourceId, { data: { documentId: "" } }),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries(["resourcesWithDocuments"]);
-      },
-    }
-  );
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["resourcesWithDocuments"] });
+    },
+  });
 
   const { ref: titleRef, width: titleWidth = 0 } =
     useResizeObserver<HTMLDivElement>();

@@ -75,15 +75,13 @@ export const EntityBookmarkFolder: React.FC<EntityBookmarkFolder> = ({
     }
   };
 
-  const changeBookmarksMutation = useMutation(
-    async (newBookmarks: IBookmarkFolder[]) =>
+  const changeBookmarksMutation = useMutation({
+    mutationFn: async (newBookmarks: IBookmarkFolder[]) =>
       await api.usersUpdate("me", { bookmarks: newBookmarks }),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries(["bookmarks"]);
-      },
-    }
-  );
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["bookmarks"] });
+    },
+  });
 
   const addBookmark = async (folderId: string, bookmarkId: string) => {
     const newBookmarks: IBookmarkFolder[] | false = getBookmarksCopy();

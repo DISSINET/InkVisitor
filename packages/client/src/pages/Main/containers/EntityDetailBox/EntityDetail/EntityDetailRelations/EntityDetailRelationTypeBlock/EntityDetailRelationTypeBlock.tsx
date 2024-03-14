@@ -139,9 +139,9 @@ export const EntityDetailRelationTypeBlock: React.FC<
   const [tempCloudEntityId, setTempCloudEntityId] = useState<string | false>(
     false
   );
-  const { isLoading, isFetching } = useQuery(
-    ["relation-entity-temp", tempCloudEntityId],
-    async () => {
+  const { isLoading, isFetching } = useQuery({
+    queryKey: ["relation-entity-temp", tempCloudEntityId],
+    queryFn: async () => {
       if (tempCloudEntityId) {
         const res = await api.detailGet(tempCloudEntityId);
         if (res.data) {
@@ -151,10 +151,8 @@ export const EntityDetailRelationTypeBlock: React.FC<
         return res.data;
       }
     },
-    {
-      enabled: api.isLoggedIn() && !!tempCloudEntityId,
-    }
-  );
+    enabled: api.isLoggedIn() && !!tempCloudEntityId,
+  });
   const addToCloud = (cloudEntity: IResponseDetail) => {
     const selectedEntityRelation =
       cloudEntity.relations[relationType]?.connections;
@@ -260,7 +258,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
         />
 
         {/* Values column */}
-        <StyledRelationValues hasSuggester={hasSuggester}>
+        <StyledRelationValues $hasSuggester={hasSuggester}>
           {currentRelations.map((relation, key) =>
             isCloudType ? (
               <EntityDetailCloudRelation

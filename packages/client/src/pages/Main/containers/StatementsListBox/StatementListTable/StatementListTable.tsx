@@ -1,6 +1,5 @@
 import { UserEnums } from "@shared/enums";
 import {
-  IAction,
   IEntity,
   IResponseGeneric,
   IResponseStatement,
@@ -33,6 +32,7 @@ import {
   useRowSelect,
   useTable,
 } from "react-table";
+import { setShowWarnings } from "redux/features/statementEditor/showWarningsSlice";
 import { setLastClickedIndex } from "redux/features/statementList/lastClickedIndexSlice";
 import { setRowsExpanded } from "redux/features/statementList/rowsExpandedSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
@@ -47,7 +47,6 @@ import {
   StyledTdLastEdit,
   StyledTh,
 } from "./StatementListTableStyles";
-import { setShowWarnings } from "redux/features/statementEditor/showWarningsSlice";
 
 type CellType = CellProps<IResponseStatement>;
 

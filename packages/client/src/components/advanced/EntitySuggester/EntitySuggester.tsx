@@ -135,16 +135,16 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
     data: user,
     error: errorUser,
     isFetching: isFetchingUser,
-  } = useQuery(
-    ["user", userId],
-    async () => {
+  } = useQuery({
+    queryKey: ["user", userId],
+    queryFn: async () => {
       if (userId) {
         const res = await api.usersGet(userId);
         return res.data;
       }
     },
-    { enabled: !!userId && api.isLoggedIn() }
-  );
+    enabled: !!userId && api.isLoggedIn(),
+  });
 
   // Suggesions query
   const {
@@ -152,9 +152,14 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
     data: suggestions,
     error: errorStatement,
     isFetching: isFetchingStatement,
-  } = useQuery(
-    ["suggestion", debouncedTyped, selectedCategory, excludedEntityClasses],
-    async () => {
+  } = useQuery({
+    queryKey: [
+      "suggestion",
+      debouncedTyped,
+      selectedCategory,
+      excludedEntityClasses,
+    ],
+    queryFn: async () => {
       const resSuggestions = await api.entitiesSearch({
         label: debouncedTyped + wildCardChar,
         class:
@@ -168,16 +173,14 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
 
       return filterSuggestions(resSuggestions.data);
     },
-    {
-      enabled:
-        debouncedTyped.length > 1 &&
-        !!selectedCategory &&
-        !excludedEntityClasses
-          .map((key) => key.valueOf())
-          .includes(selectedCategory) &&
-        api.isLoggedIn(),
-    }
-  );
+    enabled:
+      debouncedTyped.length > 1 &&
+      !!selectedCategory &&
+      !excludedEntityClasses
+        .map((key) => key.valueOf())
+        .includes(selectedCategory) &&
+      api.isLoggedIn(),
+  });
 
   const filterSuggestions = (suggestions: IResponseEntity[]) => {
     return (
@@ -240,19 +243,17 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
       appendDetailId(entity.id);
     }
     if (entity.class === EntityEnums.Class.Territory) {
-      queryClient.invalidateQueries(["tree"]);
+      queryClient.invalidateQueries({ queryKey: ["tree"] });
     }
   };
 
-  const entityCreateMutation = useMutation(
-    async (newActant: IEntity | IStatement | ITerritory) =>
+  const entityCreateMutation = useMutation({
+    mutationFn: async (newActant: IEntity | IStatement | ITerritory) =>
       await api.entityCreate(newActant),
-    {
-      onSuccess: (data, variables) => {
-        onMutationSuccess(variables);
-      },
-    }
-  );
+    onSuccess: (data, variables) => {
+      onMutationSuccess(variables);
+    },
+  });
 
   const handleCreate = (newCreated: {
     label: string;
@@ -322,7 +323,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
         appendDetailId(newEntityId);
       }
       if (templateToDuplicate.class === EntityEnums.Class.Territory) {
-        queryClient.invalidateQueries(["tree"]);
+        queryClient.invalidateQueries({ queryKey: ["tree"] });
       }
     }
   };
@@ -464,7 +465,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
               if (openDetailOnCreate) {
                 appendDetailId(newEntityId);
               }
-              queryClient.invalidateQueries(["tree"]);
+              queryClient.invalidateQueries({ queryKey: ["tree"] });
             }
             setTempTemplateToInstantiate(false);
           }}

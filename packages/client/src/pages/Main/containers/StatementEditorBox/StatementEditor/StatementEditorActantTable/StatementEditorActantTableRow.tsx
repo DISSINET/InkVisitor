@@ -288,7 +288,7 @@ export const StatementEditorActantTableRow: React.FC<
     const { entityId: propOriginId, id: propRowId } = sActant;
 
     return (
-      <ButtonGroup noMarginRight height={19}>
+      <ButtonGroup $noMarginRight height={19}>
         {userCanEdit && (
           <Button
             key="d"
@@ -398,7 +398,7 @@ export const StatementEditorActantTableRow: React.FC<
   return (
     <StyledRow
       key={index}
-      marginBottom={classifications.length > 0 || identifications.length > 0}
+      $marginBottom={classifications.length > 0 || identifications.length > 0}
     >
       <StyledFlexStart ref={dropRef}>
         {/* Order */}
@@ -406,17 +406,17 @@ export const StatementEditorActantTableRow: React.FC<
           <StyledGridColumn ref={dragRef} style={{ cursor: "move" }}>
             <FaGripVertical
               style={{ marginTop: "0.3rem" }}
-              color={themeContext.color.black}
+              color={themeContext?.color.black}
             />
           </StyledGridColumn>
         ) : (
           <StyledGridColumn />
         )}
 
-        <StyledBorderLeft borderColor="actant" marginBottom>
+        <StyledBorderLeft $borderColor="actant" $marginBottom>
           <StyledGrid
             style={{ opacity }}
-            hasActant={!!filteredActant.data.actant}
+            $hasActant={!!filteredActant.data.actant}
           >
             <StyledGridColumn>{renderActantCell()}</StyledGridColumn>
             <StyledGridColumn>

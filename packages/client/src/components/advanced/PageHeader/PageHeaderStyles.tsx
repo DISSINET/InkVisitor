@@ -83,14 +83,14 @@ export const StyledLoaderWrap = styled.div`
 `;
 
 interface StyledPingColor {
-  pingColor: keyof PingColor;
+  $pingColor: keyof PingColor;
 }
 export const StyledPingColor = styled.div<StyledPingColor>`
   width: 1rem;
   height: 1rem;
   border: 0.5px solid rgba(255, 255, 255, 0.8);
   border-radius: 50%;
-  background-color: ${({ theme, pingColor }) => theme.color.ping[pingColor]};
+  background-color: ${({ theme, $pingColor }) => theme.color.ping[$pingColor]};
   margin-right: 0.3rem;
   margin-left: 0.3rem;
 `;

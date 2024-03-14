@@ -107,45 +107,39 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
     }
   };
 
-  const passwordUpdateMutation = useMutation(
-    async () => await api.updatePassword("me", newPassword),
-    {
-      onSuccess: () => {
-        toast.info("Password changed");
-      },
-    }
-  );
+  const passwordUpdateMutation = useMutation({
+    mutationFn: async () => await api.updatePassword("me", newPassword),
+    onSuccess: () => {
+      toast.info("Password changed");
+    },
+  });
 
   const {
     status,
     data: territory,
     error,
     isFetching,
-  } = useQuery(
-    ["territory", data.defaultTerritory],
-    async () => {
+  } = useQuery({
+    queryKey: ["territory", data.defaultTerritory],
+    queryFn: async () => {
       if (data.defaultTerritory) {
         const res = await api.territoryGet(data.defaultTerritory);
         return res.data;
       }
     },
-    {
-      enabled: !!data.defaultTerritory && api.isLoggedIn(),
-    }
-  );
+    enabled: !!data.defaultTerritory && api.isLoggedIn(),
+  });
 
   const queryClient = useQueryClient();
 
-  const updateUserMutation = useMutation(
-    async (changes: any) => await api.usersUpdate(user.id, changes),
-    {
-      onSuccess: (data, variables) => {
-        queryClient.invalidateQueries(["user"]);
-        toast.info("User updated!");
-        //onClose();
-      },
-    }
-  );
+  const updateUserMutation = useMutation({
+    mutationFn: async (changes: any) => await api.usersUpdate(user.id, changes),
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["user"] });
+      toast.info("User updated!");
+      //onClose();
+    },
+  });
 
   const handleSubmit = () => {
     if (JSON.stringify(data) !== JSON.stringify(initialValues)) {
@@ -459,7 +453,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
               </StyledUserRightItem>
             </StyledUserRights>
 
-            <Loader show={passwordUpdateMutation.isLoading} />
+            <Loader show={passwordUpdateMutation.isPending} />
           </div>
         </ModalContent>
 

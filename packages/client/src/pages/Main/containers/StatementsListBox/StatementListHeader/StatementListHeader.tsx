@@ -165,16 +165,16 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
     data: user,
     error: errorUser,
     isFetching: isFetchingUser,
-  } = useQuery(
-    ["user", userId],
-    async () => {
+  } = useQuery({
+    queryKey: ["user", userId],
+    queryFn: async () => {
       if (userId) {
         const res = await api.usersGet(userId);
         return res.data;
       }
     },
-    { enabled: !!userId && api.isLoggedIn() }
-  );
+    enabled: !!userId && api.isLoggedIn(),
+  });
 
   const [excludedMoveTerritories, setExcludedMoveTerritories] = useState<
     string[]
@@ -411,9 +411,9 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
               inverted
               color="primary"
               onClick={() => {
-                queryClient.invalidateQueries(["territory"]);
-                queryClient.invalidateQueries(["statement"]);
-                queryClient.invalidateQueries(["user"]);
+                queryClient.invalidateQueries({ queryKey: ["territory"] });
+                queryClient.invalidateQueries({ queryKey: ["statement"] });
+                queryClient.invalidateQueries({ queryKey: ["user"] });
               }}
             />
           </ButtonGroup>

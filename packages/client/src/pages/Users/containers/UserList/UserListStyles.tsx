@@ -31,15 +31,15 @@ export const StyledTh = styled.th`
 `;
 
 interface StyledTr {
-  isOdd?: boolean;
-  isSelected?: boolean;
+  $isOdd?: boolean;
+  $isSelected?: boolean;
   opacity?: number;
 }
 export const StyledTr = styled.tr<StyledTr>`
-  background-color: ${({ theme, isSelected }) =>
-    isSelected ? theme.color["invertedBg"]["info"] : theme.color["white"]};
-  color: ${({ theme, isSelected }) =>
-    isSelected ? theme.color["primary"] : theme.color["black"]};
+  background-color: ${({ theme, $isSelected }) =>
+    $isSelected ? theme.color["invertedBg"]["info"] : theme.color["white"]};
+  color: ${({ theme, $isSelected }) =>
+    $isSelected ? theme.color["primary"] : theme.color["black"]};
   opacity: ${({ opacity }) => (opacity ? opacity : 1)};
   padding: ${({ theme }) => theme.space[1]};
   border: 1px solid ${({ theme }) => theme.color["gray"][400]};
@@ -95,14 +95,14 @@ export const StyledTerritoryListItemMissing = styled.div`
   font-size: ${({ theme }) => theme.fontSize.xxs};
 `;
 interface StyledUserNameColumn {
-  active: boolean;
-  verified: boolean;
+  $active: boolean;
+  $verified: boolean;
 }
 export const StyledUserNameColumn = styled.div<StyledUserNameColumn>`
-  color: ${({ theme, active, verified }) =>
-    !verified
+  color: ${({ theme, $active, $verified }) =>
+    !$verified
       ? theme.color.warning
-      : active
+      : $active
       ? theme.color.black
       : theme.color.grey};
   display: inline-flex;

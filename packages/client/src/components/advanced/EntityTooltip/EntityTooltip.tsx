@@ -90,17 +90,15 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
     }
   }, [tagHovered]);
 
-  const { data, isFetching, isSuccess } = useQuery(
-    ["tooltip", entityId, allowFetch],
-    async () => {
+  const { data, isFetching, isSuccess } = useQuery({
+    queryKey: ["tooltip", entityId, allowFetch],
+    queryFn: async () => {
       const res = await api.tooltipGet(entityId);
       setTooltipData(res.data);
       return res.data;
     },
-    {
-      enabled: api.isLoggedIn() && !!entityId && allowFetch,
-    }
-  );
+    enabled: api.isLoggedIn() && !!entityId && allowFetch,
+  });
 
   const renderEntityInfo = useMemo(
     () => (

@@ -76,10 +76,7 @@ export const Table: React.FC<Table<any>> = ({
   );
 
   const renderPagination = (position: "top" | "bottom"): ReactNode => (
-    <StyledTableHeader
-      position={position}
-      pagingUseless={pageSize > data.length}
-    >
+    <StyledTableHeader $position={position}>
       {!disableHeading && position === "top" && (
         <StyledHeading>
           {
@@ -138,9 +135,9 @@ export const Table: React.FC<Table<any>> = ({
     <>
       {!disablePaging && renderPagination("top")}
       <StyledTableContainer>
-        <StyledTable {...getTableProps()} noBorder={noBorder}>
+        <StyledTable {...getTableProps()} $noBorder={noBorder}>
           {!disableHeader && data.length > 0 && (
-            <StyledTHead noBorder={noBorder}>
+            <StyledTHead $noBorder={noBorder}>
               {headerGroups.map((headerGroup, key) => (
                 <tr {...headerGroup.getHeaderGroupProps()} key={key}>
                   {headerGroup.headers.map((column, key) => (
@@ -170,17 +167,17 @@ export const Table: React.FC<Table<any>> = ({
                 <StyledTr
                   {...row.getRowProps()}
                   key={key}
-                  noBorder={noBorder}
-                  fullWidthColumn={fullWidthColumn}
-                  firstColumnMinWidth={firstColumnMinWidth}
-                  lastColumnMinWidth={lastColumnMinWidth}
+                  $noBorder={noBorder}
+                  $fullWidthColumn={fullWidthColumn}
+                  $firstColumnMinWidth={firstColumnMinWidth}
+                  $lastColumnMinWidth={lastColumnMinWidth}
                 >
                   {row.cells.map((cell, key) => {
                     return (
                       <StyledTd
                         {...cell.getCellProps()}
                         key={key}
-                        noBorder={noBorder}
+                        $noBorder={noBorder}
                       >
                         {cell.render("Cell")}
                       </StyledTd>
