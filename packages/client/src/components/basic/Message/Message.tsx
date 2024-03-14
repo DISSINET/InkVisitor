@@ -31,6 +31,9 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
   }, [warning, entities]);
 
   function getWarningMessage({ type, position }: IWarning): JSX.Element {
+    const positionName = position?.subSection
+      ? ` - ${positionObject[position.subSection]}`
+      : "";
     switch (type) {
       case WarningTypeEnums.SValency:
         return <b>Subject Valency</b>;
@@ -120,8 +123,14 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
         return (
           <span>
             <b>Asymmetrical valency </b>
-            {position?.subSection &&
-              ` - ${positionObject[position?.subSection]}`}
+            {positionName}
+          </span>
+        );
+      case WarningTypeEnums.VETM:
+        return (
+          <span>
+            <b>Missing entity type valency</b>
+            {positionName}
           </span>
         );
       case WarningTypeEnums.MAEE:
