@@ -71,6 +71,11 @@ export default class EntityWarnings {
       warnings.push(maeeWarning);
     }
 
+    const vetmWarnings = await this.hasVETM(conn);
+    if (vetmWarnings) {
+      vetmWarnings.forEach((w) => warnings.push(w));
+    }
+
     return warnings;
   }
 
@@ -93,7 +98,12 @@ export default class EntityWarnings {
     );
 
     const gotSCL = !!scls.find((s) => s.entityIds[0] === this.entityId);
-    return gotSCL ? null : this.newWarning(WarningTypeEnums.SCLM, IWarningPositionSection.Relations);
+    return gotSCL
+      ? null
+      : this.newWarning(
+          WarningTypeEnums.SCLM,
+          IWarningPositionSection.Relations
+        );
   }
 
   /**
@@ -150,7 +160,10 @@ export default class EntityWarnings {
       for (const baseClassIds of Object.values(baseIdsPerConcept)) {
         if (baseClassIds.indexOf(requiredBaseClassId) === -1) {
           // required base class is not present for this concept
-          return this.newWarning(WarningTypeEnums.ISYNC, IWarningPositionSection.Relations);
+          return this.newWarning(
+            WarningTypeEnums.ISYNC,
+            IWarningPositionSection.Relations
+          );
         }
       }
     }
@@ -176,7 +189,10 @@ export default class EntityWarnings {
         action.data.entities.a2 === undefined &&
         action.data.entities.s === undefined)
     ) {
-      return this.newWarning(WarningTypeEnums.MVAL, IWarningPositionSection.Valencies);
+      return this.newWarning(
+        WarningTypeEnums.MVAL,
+        IWarningPositionSection.Valencies
+      );
     }
 
     return null;
@@ -209,7 +225,7 @@ export default class EntityWarnings {
           RelationEnums.Type.Actant2Semantics,
         ].indexOf(r.type) !== -1
     );
-    const warnings = []
+    const warnings = [];
 
     for (const pos of Object.keys(
       action.data.valencies
@@ -232,8 +248,8 @@ export default class EntityWarnings {
           return acc;
         }, [] as string[])
         .filter((id) => id !== this.entityId);
-      
-        const semantFilled = relIds.length > 0;
+
+      const semantFilled = relIds.length > 0;
       const onlyEmptyAllowed =
         !types ||
         !types.length ||
@@ -251,8 +267,12 @@ export default class EntityWarnings {
         continue;
       }
 
-       const newWarning = this.newWarning(WarningTypeEnums.AVAL, IWarningPositionSection.Valencies, pos);
-       warnings.push(newWarning)
+      const newWarning = this.newWarning(
+        WarningTypeEnums.AVAL,
+        IWarningPositionSection.Valencies,
+        pos
+      );
+      warnings.push(newWarning);
     }
 
     return warnings;
@@ -277,9 +297,48 @@ export default class EntityWarnings {
     );
 
     if (!aee || !aee.length) {
-      return this.newWarning(WarningTypeEnums.MAEE, IWarningPositionSection.Relations);
+      return this.newWarning(
+        WarningTypeEnums.MAEE,
+        IWarningPositionSection.Relations
+      );
     }
 
     return null;
+  }
+
+  /**
+   * Tests if there is VETM warning and returns it
+   * @param conn
+   * @returns
+   */
+  async hasVETM(conn: Connection): Promise<IWarning[] | null> {
+    if (this.class !== EntityEnums.Class.Action) {
+      return null;
+    }
+
+    const action = await findEntityById<IAction>(conn, this.entityId);
+    if (!action) {
+      throw new InternalServerError(
+        "action not found while checking MVAL warning"
+      );
+    }
+
+    const warnings: IWarning[] = [];
+
+    for (const pos of Object.keys(
+      action.data.entities
+    ) as (keyof IActionValency)[]) {
+      console.log("!!!!", action.data);
+      if (action.data.entities[pos]?.length === 0) {
+        const newWarning = this.newWarning(
+          WarningTypeEnums.VETM,
+          IWarningPositionSection.Valencies,
+          pos
+        );
+        warnings.push(newWarning);
+      }
+    }
+
+    return warnings;
   }
 }
