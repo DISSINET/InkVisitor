@@ -352,7 +352,7 @@ export const StatementListBox: React.FC = () => {
     <>
       {data && (
         <StatementListHeader
-          data={data}
+          territory={data}
           addStatementAtTheEndMutation={addStatementAtTheEndMutation}
           moveTerritoryMutation={moveTerritoryMutation}
           updateTerritoryMutation={updateTerritoryMutation}
