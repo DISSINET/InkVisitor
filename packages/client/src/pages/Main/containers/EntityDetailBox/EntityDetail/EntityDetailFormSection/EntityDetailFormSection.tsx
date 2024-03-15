@@ -8,7 +8,11 @@ import {
 } from "@shared/dictionaries";
 import { EntityEnums } from "@shared/enums";
 import { IActionData, IResponseDetail, IResponseGeneric } from "@shared/types";
-import { UseMutationResult, useQuery } from "@tanstack/react-query";
+import {
+  UseMutationResult,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { rootTerritoryId } from "Theme/constants";
 import api from "api";
 import { AxiosResponse } from "axios";
@@ -94,6 +98,8 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
   const selectedDocumentOption: string = useMemo(() => {
     return entity.data.documentId ?? noDocumentLinkedItem.value;
   }, [documentOptions, entity.data.documentId]);
+
+  const queryClient = useQueryClient();
 
   return (
     <>
@@ -196,15 +202,21 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
           <StyledDetailContentRow>
             <StyledDetailContentRowLabel>Label</StyledDetailContentRowLabel>
             <StyledDetailContentRowValue>
+              {/* TODO: changeOnType, implement onBlur & value state in this container */}
               <Input
                 disabled={!userCanEdit}
                 width="full"
                 value={entity.label}
                 onChangeFn={async (newLabel: string) => {
                   if (newLabel !== entity.label) {
-                    updateEntityMutation.mutate({
-                      label: newLabel,
-                    });
+                    if (newLabel.length >= 2) {
+                      updateEntityMutation.mutate({
+                        label: newLabel,
+                      });
+                    } else {
+                      toast.warning("fill at least 2 characters for label");
+                      queryClient.invalidateQueries({ queryKey: ["entity"] });
+                    }
                   }
                 }}
               />
