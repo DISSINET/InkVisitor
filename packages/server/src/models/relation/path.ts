@@ -1,6 +1,5 @@
 import { RelationEnums } from "@shared/enums";
-import { IRequest } from "src/custom_typings/request";
-import Relation from "./relation";
+import { IRelationModel } from "./relation";
 
 interface PathTree {
     mainId: string;
@@ -10,15 +9,16 @@ interface PathTree {
 export default class Path {
     type: RelationEnums.Type;
     trees: Record<string, PathTree>
+
     constructor(type: RelationEnums.Type) {
         this.type = type;
         this.trees = {};
     }
+    
 
-    async build(request: IRequest): Promise<void> {
-        const entries = await Relation.getByType(request.db.connection, this.type);
+    async build(entries: IRelationModel[]) {
         this.trees = {};
-        for (const entry of entries) {
+        for (const entry of entries.filter(e => e.type === this.type)) {
             this.trees[entry.entityIds[0]] = {
                 mainId: entry.entityIds[0],
                 ids: entry.entityIds,

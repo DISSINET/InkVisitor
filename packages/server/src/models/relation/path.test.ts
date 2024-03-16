@@ -1,37 +1,23 @@
 import "ts-jest";
-import { Db } from "@service/RethinkDB";
-import { newMockRequest } from "@modules/common.test";
-import { IRequest } from "src/custom_typings/request";
 import Superclass from "./superclass";
 import Path from "./path";
 import { RelationEnums } from "@shared/enums";
-import { deleteRelations } from "@service/shorthands";
+import { IRelationModel } from "./relation";
+import Synonym from "./synonym";
 
-describe("test Path", () => {
-  const db = new Db();
-  let request: IRequest;
+describe("test Path for superclasses", () => {
   let pathInstance = new Path(RelationEnums.Type.Superclass);
-  let entries = [];
-  beforeAll(async () => {
-    await db.initDb();
-    await deleteRelations(db);
-    request = newMockRequest(db);
+  let entries: IRelationModel[] = [];
 
+  beforeAll(async () => {
     const ab = new Superclass({ entityIds: ["A", "B"] })
     const bc = new Superclass({ entityIds: ["B", "C"] });
     const cd = new Superclass({ entityIds: ["C", "D"] });
     entries = [ab, bc, cd];
-    for (const entry of entries) {
-      await entry.save(db.connection);
-    }
-  })
-
-  afterAll(async () => {
-    await db.close();
   })
 
   test("test Path.build", async () => {
-    await pathInstance.build(request);
+    pathInstance.build(entries);
     expect(Object.keys(pathInstance.trees)).toHaveLength(entries.length);
   })
 
@@ -42,5 +28,29 @@ describe("test Path", () => {
   test("test existing path D -> A", () => {
     expect(pathInstance.pathExists("D", "A")).toBeFalsy();
   })
+});
 
+describe("test Path for synonyms & superclass", () => {
+  let pathInstance = new Path(RelationEnums.Type.Synonym);
+  let entries: IRelationModel[] = [];
+
+  beforeAll(async () => {
+    const ab = new Synonym({ entityIds: ["A", "B"] })
+    const bc = new Synonym({ entityIds: ["B", "C"] });
+    const cd = new Superclass({ entityIds: ["C", "D"] });
+    entries = [ab, bc, cd];
+  })
+
+  test("test Path.build", async () => {
+    pathInstance.build(entries);
+    expect(Object.keys(pathInstance.trees)).toHaveLength(2); // only two synonyms
+  })
+
+  test("test existing path from A->D", () => {
+    expect(pathInstance.pathExists("A", "D")).toBeFalsy();
+  })
+
+  test("test existing path D -> A", () => {
+    expect(pathInstance.pathExists("D", "A")).toBeFalsy();
+  })
 });
