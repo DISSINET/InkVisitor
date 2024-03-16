@@ -8,6 +8,13 @@ export interface ITerritory extends IEntity {
 
 export interface ITerritoryData {
   parent: IParentTerritory | false;
+  protocols?: IStatementProtocol[];
+}
+
+export interface IStatementProtocol {
+  type: string; // C class entity assigned
+  detail: string;
+  values?: string[]; // this is a list of entity ids that would be possible to assign to this protocol prop value
 }
 
 export interface IParentTerritory {
