@@ -339,6 +339,22 @@ class RelationDoesNotExist extends CustomError {
   }
 }
 
+
+/**
+ * RelationAsymetricalPathExist will be thrown when attempting to add asymetrical relation while there could already be path from A -> B
+ */
+class RelationAsymetricalPathExist extends CustomError {
+  public static code = 400;
+  public static title = "Asymetrical constraint check failed";
+  public static message = "Relation cannot be created";
+
+  static forId(id: string): RelationAsymetricalPathExist {
+    return new RelationAsymetricalPathExist(
+      RelationAsymetricalPathExist.message.replace("$1", id)
+    );
+  }
+}
+
 /**
  * DocumentDoesNotExist will be thrown when attempting to retrieve document by id, which does not exist
  */
@@ -461,6 +477,7 @@ const allErrors: Record<string, any> = {
   StatementInvalidMove,
   EmailError,
   RelationDoesNotExist,
+  RelationAsymetricalPathExist,
   DocumentDoesNotExist,
   NetworkError,
   UnsafePasswordError,
@@ -509,6 +526,7 @@ export {
   StatementInvalidMove,
   EmailError,
   RelationDoesNotExist,
+  RelationAsymetricalPathExist,
   DocumentDoesNotExist,
   NetworkError,
   UnsafePasswordError,
