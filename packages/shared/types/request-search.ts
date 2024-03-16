@@ -21,6 +21,7 @@ export interface IRequestSearch {
   createdDate?: Date;
   updatedDate?: Date;
   resourceHasDocument?: boolean;
+  hasReferenceIn?: string;
 }
 
 export class RequestSearch {
@@ -38,6 +39,7 @@ export class RequestSearch {
   createdDate?: Date;
   updatedDate?: Date;
   resourceHasDocument?: boolean;
+  hasReferenceIn?: string;
 
   constructor(requestData: IRequestSearch) {
     this.class = requestData.class;
