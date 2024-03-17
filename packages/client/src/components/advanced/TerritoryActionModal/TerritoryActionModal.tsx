@@ -4,12 +4,17 @@ import {
   Modal,
   ModalContent,
   ModalFooter,
+  ModalHeader,
 } from "components";
 import React, { useEffect, useState } from "react";
 import { AttributeButtonGroup } from "../AttributeButtonGroup/AttributeButtonGroup";
 import { EntityTag } from "../EntityTag/EntityTag";
 import { IEntity } from "@shared/types";
-import { StyledGrid, StyledHeadingColumn } from "./TerritoryActionModalStyles";
+import {
+  StyledFlexRow,
+  StyledGrid,
+  StyledHeadingColumn,
+} from "./TerritoryActionModalStyles";
 import { useQuery } from "@tanstack/react-query";
 import api from "api";
 import { EntitySuggester } from "..";
@@ -35,6 +40,7 @@ export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
   const [includeChildren, setIncludeChildren] = useState(true);
 
   const [newParentId, setNewParentId] = useState<false | string>(false);
+  const [newParentEntity, setNewParentEntity] = useState<IEntity[]>([]);
 
   useEffect(() => {
     if (selectedParentId) {
@@ -59,105 +65,123 @@ export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
     enabled: !!oldParentTerritoryId && api.isLoggedIn(),
   });
 
-  const {
-    data: newParentTerritory,
-    error: newParentError,
-    isFetching: newParentIsFetching,
-  } = useQuery({
-    queryKey: ["territory", newParentId],
-    queryFn: async () => {
-      if (newParentId) {
-        const res = await api.territoryGet(newParentId);
-        return res.data;
-      }
-    },
-    enabled: !!newParentId && api.isLoggedIn(),
-  });
+  // const {
+  //   data: newParentTerritory,
+  //   error: newParentError,
+  //   isFetching: newParentIsFetching,
+  // } = useQuery({
+  //   queryKey: ["territory", newParentId],
+  //   queryFn: async () => {
+  //     if (newParentId) {
+  //       const res = await api.territoryGet(newParentId);
+  //       return res.data;
+  //     }
+  //   },
+  //   enabled: !!newParentId && api.isLoggedIn(),
+  // });
 
   return (
     <Modal showModal={showModal} onClose={onClose}>
+      <ModalHeader title="Manage territory" />
       <ModalContent column>
         <StyledGrid>
           {territory && (
             <>
-              <StyledHeadingColumn>moving territory</StyledHeadingColumn>{" "}
+              <StyledHeadingColumn>
+                <AttributeButtonGroup
+                  options={[
+                    {
+                      longValue: "Move",
+                      shortValue: "Move",
+                      onClick: () => {
+                        setaction("move");
+                      },
+                      selected: action === "move",
+                    },
+                    {
+                      longValue: "Duplicate",
+                      shortValue: "Duplicate",
+                      onClick: () => {
+                        setaction("duplicate");
+                      },
+                      selected: action === "duplicate",
+                    },
+                  ]}
+                />
+              </StyledHeadingColumn>
               <EntityTag entity={territory} />
             </>
           )}
-          <StyledHeadingColumn>action</StyledHeadingColumn>
-          <AttributeButtonGroup
-            options={[
-              {
-                longValue: "Move",
-                shortValue: "Move",
-                onClick: () => {
-                  setaction("move");
-                },
-                selected: action === "move",
-              },
-              {
-                longValue: "Duplicate",
-                shortValue: "Duplicate",
-                onClick: () => {
-                  setaction("duplicate");
-                },
-                selected: action === "duplicate",
-              },
-            ]}
-          />
-          <StyledHeadingColumn>include children T</StyledHeadingColumn>
-          <AttributeButtonGroup
-            options={[
-              {
-                longValue: "Yes",
-                shortValue: "Yes",
-                onClick: () => {
-                  setIncludeChildren(true);
-                },
-                selected: includeChildren === true,
-              },
-              {
-                longValue: "No",
-                shortValue: "No",
-                onClick: () => {
-                  setIncludeChildren(false);
-                },
-                selected: includeChildren === false,
-              },
-            ]}
-          />
         </StyledGrid>
 
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            justifyContent: "space-around",
-            marginTop: "1rem",
-          }}
-        >
+        <StyledFlexRow>
           <div>
             <p>Old parent T</p>
             {oldParentTerritory && <EntityTag entity={oldParentTerritory} />}
           </div>
 
           <div>
-            <p>New parent T</p>
-            {newParentTerritory ? (
-              <EntityTag entity={newParentTerritory} />
+            <p>{`New parent(s) T (${newParentEntity.length} T selected)`}</p>
+            {newParentEntity.length ? (
+              <>
+                {newParentEntity.map((e) => {
+                  return (
+                    <EntityTag
+                      entity={e}
+                      unlinkButton={{
+                        onClick: () =>
+                          setNewParentEntity(
+                            newParentEntity.filter((et) => et.id !== e.id)
+                          ),
+                      }}
+                    />
+                  );
+                })}
+              </>
             ) : (
-              <EntitySuggester
-                categoryTypes={[EntityEnums.Class.Territory]}
-                onSelected={(id) => setNewParentId(id)}
-              />
+              <i>{"select T.."}</i>
             )}
           </div>
-        </div>
+        </StyledFlexRow>
+
+        <StyledGrid>
+          <StyledHeadingColumn>
+            <AttributeButtonGroup
+              options={[
+                {
+                  longValue: "Move children",
+                  shortValue: "Move children",
+                  onClick: () => {
+                    setIncludeChildren(true);
+                  },
+                  selected: includeChildren === true,
+                },
+                {
+                  longValue: "Don't move children",
+                  shortValue: "Don't move children",
+                  onClick: () => {
+                    setIncludeChildren(false);
+                  },
+                  selected: includeChildren === false,
+                },
+              ]}
+            />
+          </StyledHeadingColumn>
+          <EntitySuggester
+            placeholder="new parent"
+            categoryTypes={[EntityEnums.Class.Territory]}
+            excludedActantIds={newParentEntity.map((entity) => entity.id)}
+            // onSelected={(id) => setNewParentId(id)}
+            onPicked={(entity) => {
+              setNewParentEntity([...newParentEntity, entity]);
+            }}
+          />
+        </StyledGrid>
       </ModalContent>
       <ModalFooter>
         <ButtonGroup>
           <Button label="cancel" onClick={onClose} />
-          <Button
+          {/* <Button
             disabled={!newParentTerritory}
             label={action}
             onClick={() => {
@@ -172,7 +196,7 @@ export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
               }
             }}
             color="success"
-          />
+          /> */}
         </ButtonGroup>
       </ModalFooter>
     </Modal>

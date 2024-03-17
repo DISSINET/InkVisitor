@@ -325,9 +325,11 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
               disableCreate
               categoryTypes={[EntityEnums.Class.Territory]}
               onSelected={(newSelectedId: string) => {
-                // moveTerritoryMutation.mutate(newSelectedId);
-                setShowTActionModal(true);
                 setMoveToParentId(newSelectedId);
+                setShowTActionModal(true);
+              }}
+              onPicked={(selectedEntity) => {
+                // TODO: work with entity instead of ID
               }}
               excludedActantIds={excludedMoveTerritories}
             />
@@ -435,14 +437,16 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
         </StyledSuggesterRow>
       </StyledHeader>
 
-      <TerritoryActionModal
-        onClose={() => setShowTActionModal(false)}
-        selectedParentId={moveToParentId}
-        showModal={showTActionModal}
-        territory={territory}
-        onMoveT={(newParentT) => moveTerritoryMutation.mutate(newParentT)}
-        onDuplicateT={() => console.log("duplicate T")}
-      />
+      {showTActionModal && (
+        <TerritoryActionModal
+          onClose={() => setShowTActionModal(false)}
+          selectedParentId={moveToParentId}
+          showModal={showTActionModal}
+          territory={territory}
+          onMoveT={(newParentT) => moveTerritoryMutation.mutate(newParentT)}
+          onDuplicateT={() => console.log("duplicate T")}
+        />
+      )}
     </>
   );
 };
