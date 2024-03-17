@@ -1,14 +1,18 @@
-import { ThemeFontSize } from "Theme/theme";
+import { ThemeColor, ThemeFontSize } from "Theme/theme";
 import React, { useEffect, useState } from "react";
-import { DropdownItem } from "types";
-import { Label, StyledInput, StyledTextArea, Wrapper } from "./InputStyles";
+import {
+  Label,
+  StyledInput,
+  StyledTextArea,
+  StyledWrapper,
+} from "./InputStyles";
 
 interface Input {
   label?: string;
   value?: string;
   inverted?: boolean;
   suggester?: boolean;
-  type?: "text" | "textarea" | "select";
+  type?: "text" | "textarea" | "select" | "password";
   rows?: number;
   cols?: number;
   width?: number | "full";
@@ -22,14 +26,17 @@ interface Input {
   onBlur?: () => void;
   placeholder?: string;
   changeOnType?: boolean;
-  password?: boolean;
   autoFocus?: boolean;
   disabled?: boolean;
-  noBorder?: boolean;
+  borderColor?: keyof ThemeColor;
 
   // TextArea props
+  noBorder?: boolean;
   fullHeightTextArea?: boolean;
   fontSizeTextArea?: keyof ThemeFontSize;
+
+  autocomplete?: string;
+  required?: boolean;
 }
 
 export const Input: React.FC<Input> = ({
@@ -45,15 +52,18 @@ export const Input: React.FC<Input> = ({
   onEnterPressFn = () => {},
   onChangeFn,
   placeholder,
-  password = false,
   autoFocus = false,
   disabled = false,
   noBorder = false,
+  borderColor,
   onFocus = () => {},
   onBlur = () => {},
 
   fullHeightTextArea = false,
   fontSizeTextArea = "xs",
+
+  autocomplete = "",
+  required = false,
 }) => {
   const [displayValue, setDisplayValue] = useState(value);
   useEffect(() => {
@@ -61,12 +71,14 @@ export const Input: React.FC<Input> = ({
   }, [value]);
 
   return (
-    <Wrapper fullHeightTextArea={type === "textarea" && fullHeightTextArea}>
+    <StyledWrapper
+      $fullHeightTextArea={type === "textarea" && fullHeightTextArea}
+    >
       {label && <Label className="label">{label}</Label>}
-      {type === "text" && (
+      {(type === "text" || type === "password") && (
         <StyledInput
           disabled={disabled}
-          type={password ? "password" : "text"}
+          type={type}
           width={width}
           autoFocus={autoFocus}
           className="value"
@@ -100,13 +112,16 @@ export const Input: React.FC<Input> = ({
             }
             onBlur();
           }}
-          inverted={inverted}
-          suggester={suggester}
+          $inverted={inverted}
+          $suggester={suggester}
+          borderColor={borderColor}
+          $autocomplete={autocomplete}
+          required={required}
         />
       )}
       {type === "textarea" && (
         <StyledTextArea
-          fullHeightTextArea={fullHeightTextArea}
+          $fullHeightTextArea={fullHeightTextArea}
           disabled={disabled}
           className="value"
           placeholder={placeholder}
@@ -130,12 +145,13 @@ export const Input: React.FC<Input> = ({
             }
             onBlur();
           }}
-          inverted={inverted}
-          noBorder={noBorder}
-          suggester={suggester}
-          fontSizeTextArea={fontSizeTextArea}
+          $inverted={inverted}
+          $noBorder={noBorder}
+          $suggester={suggester}
+          $fontSizeTextArea={fontSizeTextArea}
+          borderColor={borderColor}
         />
       )}
-    </Wrapper>
+    </StyledWrapper>
   );
 };

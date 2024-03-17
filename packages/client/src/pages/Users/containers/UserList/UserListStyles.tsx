@@ -31,15 +31,15 @@ export const StyledTh = styled.th`
 `;
 
 interface StyledTr {
-  isOdd?: boolean;
-  isSelected?: boolean;
+  $isOdd?: boolean;
+  $isSelected?: boolean;
   opacity?: number;
 }
 export const StyledTr = styled.tr<StyledTr>`
-  background-color: ${({ theme, isSelected }) =>
-    isSelected ? theme.color["invertedBg"]["info"] : theme.color["white"]};
-  color: ${({ theme, isSelected }) =>
-    isSelected ? theme.color["primary"] : theme.color["black"]};
+  background-color: ${({ theme, $isSelected }) =>
+    $isSelected ? theme.color["invertedBg"]["info"] : theme.color["white"]};
+  color: ${({ theme, $isSelected }) =>
+    $isSelected ? theme.color["primary"] : theme.color["black"]};
   opacity: ${({ opacity }) => (opacity ? opacity : 1)};
   padding: ${({ theme }) => theme.space[1]};
   border: 1px solid ${({ theme }) => theme.color["gray"][400]};
@@ -94,19 +94,34 @@ export const StyledTerritoryListItemMissing = styled.div`
   color: ${({ theme }) => theme.color.white};
   font-size: ${({ theme }) => theme.fontSize.xxs};
 `;
-
-export const StyledUserNameColumn = styled.div`
+interface StyledUserNameColumn {
+  $active: boolean;
+  $verified: boolean;
+}
+export const StyledUserNameColumn = styled.div<StyledUserNameColumn>`
+  color: ${({ theme, $active, $verified }) =>
+    !$verified
+      ? theme.color.warning
+      : $active
+      ? theme.color.black
+      : theme.color.grey};
   display: inline-flex;
+  width: 100%;
 `;
 export const StyledUserNameColumnIcon = styled.div`
-  font-size: 1.5em;
-  margin: auto;
-  margin-right: 0.5em;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+  font-size: 2.5rem;
+  margin-right: 0.8rem;
+  width: 3rem;
 `;
 export const StyledUserNameColumnText = styled.div`
-  * {
-    display: block;
-  }
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
 `;
 export const StyledUserEditor = styled.div`
   columns: auto auto;
@@ -145,4 +160,12 @@ export const StyledUtils = styled.div`
   align-items: center;
   background-color: ${({ theme }) => theme.color["blue"][50]};
   width: 100%;
+`;
+export const StyledNotActiveText = styled.p`
+  display: inline-flex;
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  color: ${({ theme }) => theme.color.white};
+  background-color: ${({ theme }) => theme.color.warning};
+  padding: 0.5rem 1rem;
+  border-radius: ${({ theme }) => theme.borderRadius.full};
 `;

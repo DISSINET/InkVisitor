@@ -37,17 +37,15 @@ export const BreadcrumbItem: React.FC<BreadcrumbItem> = ({
 
   const dispatch = useAppDispatch();
 
-  const { status, data, error, isFetching } = useQuery(
-    ["territory", territoryId],
-    async () => {
+  const { status, data, error, isFetching } = useQuery({
+    queryKey: ["territory", territoryId],
+    queryFn: async () => {
       const res = await api.territoryGet(territoryId);
       return res.data;
     },
-    {
-      enabled:
-        !!territoryId && api.isLoggedIn() && paramsTerritoryId !== territoryId,
-    }
-  );
+    enabled:
+      !!territoryId && api.isLoggedIn() && paramsTerritoryId !== territoryId,
+  });
 
   return (
     <>

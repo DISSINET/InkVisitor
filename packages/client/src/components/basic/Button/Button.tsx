@@ -32,6 +32,8 @@ interface ButtonProps {
   onClick?: MouseEventHandler<HTMLElement>;
   fullWidth?: boolean;
   tooltipPosition?: AutoPlacement | BasePlacement | VariationPlacement;
+  hideTooltipOnClick?: boolean;
+  paddingX?: boolean;
 }
 
 export const Button: React.FC<ButtonProps> = ({
@@ -54,6 +56,8 @@ export const Button: React.FC<ButtonProps> = ({
   },
   fullWidth = false,
   tooltipPosition = "bottom",
+  hideTooltipOnClick = false,
+  paddingX = false,
 }) => {
   const [referenceElement, setReferenceElement] =
     useState<HTMLButtonElement | null>(null);
@@ -63,24 +67,29 @@ export const Button: React.FC<ButtonProps> = ({
     <>
       <StyledButton
         ref={setReferenceElement}
-        onClick={onClick}
-        hasIcon={icon && true}
+        onClick={(e) => {
+          e.stopPropagation();
+          hideTooltipOnClick && setShowTooltip(false);
+          onClick(e);
+        }}
+        $hasIcon={icon && true}
         $color={color}
-        inverted={inverted}
-        textRegular={textRegular}
-        noBorder={noBorder}
-        noBackground={noBackground}
-        radiusLeft={radiusLeft}
-        radiusRight={radiusRight}
-        fullWidth={fullWidth}
+        $inverted={inverted}
+        $textRegular={textRegular}
+        $noBorder={noBorder}
+        $noBackground={noBackground}
+        $radiusLeft={radiusLeft}
+        $radiusRight={radiusRight}
+        $fullWidth={fullWidth}
         disabled={disabled}
         onMouseEnter={() => setShowTooltip(true)}
         onMouseLeave={() => setShowTooltip(false)}
         onKeyPress={(e: KeyboardEvent<HTMLButtonElement>) => e.preventDefault()}
+        $paddingX={paddingX}
       >
         {icon}
         {label && (
-          <StyledButtonLabel hasIcon={!!icon} noIconMargin={noIconMargin}>
+          <StyledButtonLabel $hasIcon={!!icon} $noIconMargin={noIconMargin}>
             {label}
           </StyledButtonLabel>
         )}

@@ -10,31 +10,31 @@ interface AttributeButtonGroup {
     longValue: string;
     shortValue: string;
     shortIcon?: JSX.Element;
+    icon?: JSX.Element;
     onClick: () => void;
     selected: boolean;
   }[];
   disabled?: boolean;
   noMargin?: boolean;
+  paddingX?: boolean;
 }
 
 export const AttributeButtonGroup: React.FC<AttributeButtonGroup> = ({
   options = [],
   disabled = false,
   noMargin = false,
+  paddingX = false,
 }) => {
   return disabled ? (
-    <StyledButtonWrap leftMargin={!noMargin} rightMargin={!noMargin}>
-      <Button
-        disabled
-        label={options.find((o) => o.selected)?.longValue}
-      ></Button>
+    <StyledButtonWrap $leftMargin={!noMargin} $rightMargin={!noMargin}>
+      <Button disabled label={options.find((o) => o.selected)?.longValue} />
     </StyledButtonWrap>
   ) : (
     <StyledPropButtonGroup
-      leftMargin={!noMargin}
-      rightMargin={!noMargin}
-      border
-      round
+      $leftMargin={!noMargin}
+      $rightMargin={!noMargin}
+      $border
+      $round
     >
       {options.map((option, oi) => {
         const firstInRow = oi === 0;
@@ -44,11 +44,17 @@ export const AttributeButtonGroup: React.FC<AttributeButtonGroup> = ({
             key={oi}
             label={option.selected ? option.longValue : option.shortValue}
             icon={
-              !option.selected && option.shortIcon
+              option.icon
+                ? option.icon
+                : !option.selected && option.shortIcon
                 ? option.shortIcon
                 : undefined
             }
-            tooltipLabel={option.longValue}
+            tooltipLabel={
+              option.longValue === option.shortValue
+                ? undefined
+                : option.longValue
+            }
             noBorder
             inverted
             color={option.selected ? "primary" : "greyer"}
@@ -60,6 +66,7 @@ export const AttributeButtonGroup: React.FC<AttributeButtonGroup> = ({
                 option.onClick();
               }
             }}
+            paddingX={paddingX}
           />
         );
       })}

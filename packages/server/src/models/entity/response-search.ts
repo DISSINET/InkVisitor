@@ -380,7 +380,7 @@ export class SearchQuery {
       this.whereEntityIds(req.entityIds);
     }
 
-    console.log(this.query.toString());
+    //console.log(this.query.toString());
   }
 
   /**

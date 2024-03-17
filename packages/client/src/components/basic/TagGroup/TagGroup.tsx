@@ -1,7 +1,7 @@
 import { IEntity } from "@shared/types";
 import { Tooltip } from "components";
 import { EntityTag } from "components/advanced";
-import { StyledDots } from "pages/MainPage/containers/StatementsListBox/StatementLitBoxStyles";
+import { StyledDots } from "pages/Main/containers/StatementsListBox/StatementLitBoxStyles";
 import React, { useState } from "react";
 import { StyledTagGroup } from "./TagGroupStyles";
 

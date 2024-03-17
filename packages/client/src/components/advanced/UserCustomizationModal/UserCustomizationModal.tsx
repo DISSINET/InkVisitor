@@ -1,11 +1,11 @@
 import { languageDict, userRoleDict } from "@shared/dictionaries";
 import { EntityEnums, UserEnums } from "@shared/enums";
 import { IResponseUser } from "@shared/types";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import {
   Button,
   ButtonGroup,
-  Dropdown,
   Input,
   Loader,
   Modal,
@@ -16,15 +16,15 @@ import {
   ModalInputLabel,
   ModalInputWrap,
 } from "components";
-import {
+import Dropdown, {
   AttributeButtonGroup,
   EntitySuggester,
   EntityTag,
 } from "components/advanced";
 import React, { useEffect, useMemo, useState } from "react";
 import { BiHide, BiShow } from "react-icons/bi";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
+import { DropdownItem } from "types";
 import {
   StyledButtonWrap,
   StyledRightsHeading,
@@ -34,32 +34,13 @@ import {
   StyledUserRights,
 } from "./UserCustomizationModalStyles";
 import { UserRightItem } from "./UserRightItem/UserRightItem";
-import { DropdownItem } from "types";
 
 interface DataObject {
   name: string;
   email: string;
-  defaultLanguage:
-    | {
-        label: string;
-        value: EntityEnums.Language;
-      }
-    | undefined;
-  defaultStatementLanguage:
-    | {
-        label: string;
-        value: EntityEnums.Language;
-      }
-    | undefined;
-  searchLanguages:
-    | (
-        | {
-            label: string;
-            value: EntityEnums.Language;
-          }
-        | undefined
-      )[]
-    | [];
+  defaultLanguage: EntityEnums.Language;
+  defaultStatementLanguage: EntityEnums.Language;
+  searchLanguages: EntityEnums.Language[];
   defaultTerritory?: string | null;
   hideStatementElementsOrderTable?: boolean;
 }
@@ -72,7 +53,6 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
   onClose = () => {},
 }) => {
   const [showModal, setShowModal] = useState(false);
-
   useEffect(() => {
     setShowModal(true);
   }, []);
@@ -80,22 +60,23 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
   const initialValues: DataObject = useMemo(() => {
     const { options, name, email } = user;
 
-    const defaultLanguageObject = languageDict.find(
-      (i: any) => i.value === options.defaultLanguage
-    );
-    const defaultStatementLanguageObject = languageDict.find(
-      (i: any) => i.value === options.defaultStatementLanguage
-    );
-    const searchLanguagesObject = options.searchLanguages.map((sL) => {
-      return languageDict.find((i: any) => i.value === sL);
-    });
+    // const defaultLanguageObject =
+    //   languageDict.find((i) => i.value === options.defaultLanguage) ??
+    //   {label: , value: EntityEnums.Language.Empty};
+    // const defaultStatementLanguageObject =
+    //   languageDict.find((i) => i.value === options.defaultStatementLanguage) ??
+    //   {label: , value: EntityEnums.Language.Empty};
+    // const searchLanguagesObject = options.searchLanguages.map((sL) => {
+    //   return languageDict.find((i) => i.value === sL);
+    // });
 
     return {
       name: name,
       email: email,
-      defaultLanguage: defaultLanguageObject,
-      defaultStatementLanguage: defaultStatementLanguageObject,
-      searchLanguages: searchLanguagesObject,
+      defaultLanguage: options.defaultLanguage ?? EntityEnums.Language.Empty,
+      defaultStatementLanguage:
+        options.defaultStatementLanguage ?? EntityEnums.Language.Empty,
+      searchLanguages: options.searchLanguages,
       defaultTerritory: options.defaultTerritory,
       hideStatementElementsOrderTable: options.hideStatementElementsOrderTable,
     };
@@ -126,45 +107,39 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
     }
   };
 
-  const passwordUpdateMutation = useMutation(
-    async () => await api.updatePassword("me", newPassword),
-    {
-      onSuccess: () => {
-        toast.info("Password changed");
-      },
-    }
-  );
+  const passwordUpdateMutation = useMutation({
+    mutationFn: async () => await api.updatePassword("me", newPassword),
+    onSuccess: () => {
+      toast.info("Password changed");
+    },
+  });
 
   const {
     status,
     data: territory,
     error,
     isFetching,
-  } = useQuery(
-    ["territory", data.defaultTerritory],
-    async () => {
+  } = useQuery({
+    queryKey: ["territory", data.defaultTerritory],
+    queryFn: async () => {
       if (data.defaultTerritory) {
         const res = await api.territoryGet(data.defaultTerritory);
         return res.data;
       }
     },
-    {
-      enabled: !!data.defaultTerritory && api.isLoggedIn(),
-    }
-  );
+    enabled: !!data.defaultTerritory && api.isLoggedIn(),
+  });
 
   const queryClient = useQueryClient();
 
-  const updateUserMutation = useMutation(
-    async (changes: any) => await api.usersUpdate(user.id, changes),
-    {
-      onSuccess: (data, variables) => {
-        queryClient.invalidateQueries(["user"]);
-        toast.info("User updated!");
-        //onClose();
-      },
-    }
-  );
+  const updateUserMutation = useMutation({
+    mutationFn: async (changes: any) => await api.usersUpdate(user.id, changes),
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["user"] });
+      toast.info("User updated!");
+      //onClose();
+    },
+  });
 
   const handleSubmit = () => {
     if (JSON.stringify(data) !== JSON.stringify(initialValues)) {
@@ -172,11 +147,9 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
         name: data.name,
         email: data.email,
         options: {
-          defaultLanguage:
-            data.defaultLanguage?.value || EntityEnums.Language.Empty,
-          defaultStatementLanguage:
-            data.defaultStatementLanguage?.value || EntityEnums.Language.Empty,
-          searchLanguages: data.searchLanguages?.map((sL) => sL?.value),
+          defaultLanguage: data.defaultLanguage,
+          defaultStatementLanguage: data.defaultStatementLanguage,
+          searchLanguages: data.searchLanguages.map((sL) => sL),
           defaultTerritory: data.defaultTerritory,
           hideStatementElementsOrderTable: data.hideStatementElementsOrderTable,
         },
@@ -204,7 +177,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
     <div>
       <Modal
         showModal={showModal}
-        width="thin"
+        width="auto"
         onEnterPress={handleSubmit}
         onClose={onClose}
       >
@@ -264,7 +237,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                   <ModalInputLabel>{"new password"}</ModalInputLabel>
                   <ModalInputWrap width={165}>
                     <Input
-                      password
+                      type="password"
                       width="full"
                       changeOnType
                       value={newPassword}
@@ -274,7 +247,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                   <ModalInputLabel>{"repeat password"}</ModalInputLabel>
                   <ModalInputWrap width={165}>
                     <Input
-                      password
+                      type="password"
                       width="full"
                       changeOnType
                       value={repeatPassword}
@@ -326,32 +299,33 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
             <ModalInputForm>
               <ModalInputLabel>{"default language"}</ModalInputLabel>
               <ModalInputWrap width={165}>
-                <Dropdown
+                <Dropdown.Single.Basic
                   width="full"
                   value={defaultLanguage}
-                  onChange={(selectedOption) =>
-                    handleChange("defaultLanguage", selectedOption[0])
+                  onChange={(newValue) =>
+                    handleChange("defaultLanguage", newValue)
                   }
                   options={languageDict}
                 />
               </ModalInputWrap>
               <ModalInputLabel>{"statement language"}</ModalInputLabel>
               <ModalInputWrap width={165}>
-                <Dropdown
+                <Dropdown.Single.Basic
                   width="full"
                   value={defaultStatementLanguage}
-                  onChange={(selectedOption) =>
-                    handleChange("defaultStatementLanguage", selectedOption[0])
+                  onChange={(newValue) =>
+                    handleChange("defaultStatementLanguage", newValue)
                   }
                   options={languageDict}
                 />
               </ModalInputWrap>
+
+              {/* NOT USED NOW */}
               {/* <ModalInputLabel>{"search languages"}</ModalInputLabel>
                 <ModalInputWrap width={165}>
-                  <Dropdown
+                  <Dropdown.Multi.Attribute
                     value={data.searchLanguages}
                     width="full"
-                    isMulti
                     onChange={(selectedOption) =>
                       handleChange("searchLanguages", selectedOption)
                     }
@@ -360,6 +334,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                     )}
                   />
                 </ModalInputWrap> */}
+
               <ModalInputLabel>{"default territory"}</ModalInputLabel>
               <ModalInputWrap width={165}>
                 {territory ? (
@@ -388,6 +363,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
               </ModalInputWrap>
 
               <ModalInputLabel>{"ordering table in Editor"}</ModalInputLabel>
+
               <ModalInputWrap width={165}>
                 <AttributeButtonGroup
                   noMargin
@@ -477,7 +453,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
               </StyledUserRightItem>
             </StyledUserRights>
 
-            <Loader show={passwordUpdateMutation.isLoading} />
+            <Loader show={passwordUpdateMutation.isPending} />
           </div>
         </ModalContent>
 

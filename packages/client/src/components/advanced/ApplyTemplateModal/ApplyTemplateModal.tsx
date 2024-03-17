@@ -15,7 +15,7 @@ import { applyTemplate } from "constructors";
 import React from "react";
 import { UseMutationResult } from "@tanstack/react-query";
 import { toast } from "react-toastify";
-import { getShortLabelByLetterCount } from "utils";
+import { getShortLabelByLetterCount } from "utils/utils";
 
 interface ApplyTemplateModal {
   showModal: boolean;
@@ -66,7 +66,7 @@ export const ApplyTemplateModal: React.FC<ApplyTemplateModal> = ({
   return (
     <Modal
       showModal={showModal}
-      width="thin"
+      width="auto"
       onEnterPress={() => {
         setShowApplyTemplateModal(false);
         handleApplyTemplate();

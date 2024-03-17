@@ -14,7 +14,7 @@ import {
 import React, { useEffect, useState } from "react";
 import { FaMinus, FaPlus } from "react-icons/fa";
 import { toast } from "react-toastify";
-import { getShortLabelByLetterCount } from "utils";
+import { getShortLabelByLetterCount } from "utils/utils";
 
 interface DocumentModal {
   entityId?: string;
@@ -36,30 +36,26 @@ export const DocumentModal: React.FC<DocumentModal> = ({
     data: document,
     error: documentError,
     isFetching: documentIsFetching,
-  } = useQuery(
-    ["openedDocument"],
-    async () => {
+  } = useQuery({
+    queryKey: ["openedDocument"],
+    queryFn: async () => {
       const res = await api.documentGet(documentId);
       return res.data;
     },
-    {
-      enabled: api.isLoggedIn(),
-    }
-  );
+    enabled: api.isLoggedIn(),
+  });
 
   const queryClient = useQueryClient();
 
-  const updateDocumentMutation = useMutation(
-    async (data: { id: string; doc: Partial<IDocument> }) =>
+  const updateDocumentMutation = useMutation({
+    mutationFn: async (data: { id: string; doc: Partial<IDocument> }) =>
       api.documentUpdate(data.id, data.doc),
-    {
-      onSuccess: (variables, data) => {
-        queryClient.invalidateQueries(["openedDocument"]);
-        queryClient.invalidateQueries(["documents"]);
-        toast.info("Document saved");
-      },
-    }
-  );
+    onSuccess: (variables, data) => {
+      queryClient.invalidateQueries({ queryKey: ["openedDocument"] });
+      queryClient.invalidateQueries({ queryKey: ["documents"] });
+      toast.info("Document saved");
+    },
+  });
 
   const [localContent, setLocalContent] = useState<string>("");
   useEffect(() => {

@@ -7,8 +7,8 @@
         ["@babel/preset-typescript"]
       ],
       "plugins": [
-        "require-context-hook",
-        "macros"
+        "macros",
+        "babel-plugin-require-context-hook"
       ]
     }
   },

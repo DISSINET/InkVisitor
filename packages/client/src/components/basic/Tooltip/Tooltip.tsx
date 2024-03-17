@@ -45,7 +45,7 @@ export const Tooltip: React.FC<Tooltip> = ({
   content,
   tagGroup = false,
   // style
-  color = "black",
+  color = "tooltipBackground",
   position = "bottom",
   noArrow = false,
   offsetX = 0,
@@ -140,7 +140,7 @@ export const Tooltip: React.FC<Tooltip> = ({
                   </StyledContent>
                 )}
                 {content && (
-                  <StyledContent $color={color} tagGroup={tagGroup}>
+                  <StyledContent $color={color} $tagGroup={tagGroup}>
                     {content}
                   </StyledContent>
                 )}

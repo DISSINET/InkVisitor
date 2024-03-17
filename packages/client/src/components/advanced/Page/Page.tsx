@@ -43,14 +43,16 @@ export const Page: React.FC<Page> = ({ children }) => {
     ""
   );
   if (environmentName === "/") {
-    environmentName = ""
+    environmentName = "";
   }
 
   const location = useLocation();
   const navigate = useNavigate();
 
   const disableRightHeader: boolean =
-    location.pathname === "/login" || location.pathname === "/activate";
+    location.pathname === "/login" ||
+    location.pathname === "/activate" ||
+    location.pathname === "/password_reset";
 
   const {
     status: statusUser,
@@ -58,16 +60,16 @@ export const Page: React.FC<Page> = ({ children }) => {
     error: errorUser,
     isFetching: isFetchingUser,
     isPaused,
-  } = useQuery(
-    ["user", userId],
-    async () => {
+  } = useQuery({
+    queryKey: ["user", userId],
+    queryFn: async () => {
       if (userId) {
         const res = await api.usersGet(userId);
         return res.data;
       }
     },
-    { enabled: api.isLoggedIn() && !disableRightHeader }
-  );
+    enabled: api.isLoggedIn() && !disableRightHeader,
+  });
 
   const toastId = React.useRef<Id | null>(null);
   const notify = () =>
@@ -88,7 +90,8 @@ export const Page: React.FC<Page> = ({ children }) => {
     }
   }, [isPaused]);
 
-  const logOutMutation = useMutation(async () => await api.signOut(), {
+  const logOutMutation = useMutation({
+    mutationFn: async () => await api.signOut(),
     onSuccess: (data, variables) => {
       dispatch(setUsername(""));
       queryClient.removeQueries();
@@ -108,21 +111,19 @@ export const Page: React.FC<Page> = ({ children }) => {
 
   useKeyLift("Shift", () => dispatch(setDisableUserSelect(false)));
 
-  useQuery(
-    ["ping"],
-    async () => {
+  useQuery({
+    queryKey: ["ping"],
+    queryFn: async () => {
       const localPing = api.getPing();
       if (localPing) dispatch(setPing(localPing));
       return localPing;
     },
-    {
-      refetchInterval: 5000,
-    }
-  );
+    refetchInterval: 5000,
+  });
 
   return (
     <StyledPage
-      layoutWidth={layoutWidth}
+      $layoutWidth={layoutWidth}
       onClick={() => dispatch(setLastClickedIndex(-1))}
     >
       <Header
@@ -131,7 +132,7 @@ export const Page: React.FC<Page> = ({ children }) => {
         color={
           ["production", ""].indexOf(environmentName) === -1
             ? (environmentName as keyof ThemeColor)
-            : "primary"
+            : "muni"
         }
         left={<LeftHeader tempLocation={tempLocation} />}
         right={

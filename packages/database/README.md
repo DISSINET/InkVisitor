@@ -1,53 +1,54 @@
 # Database
 
-App uses [rethinkdb](https://rethinkdb.com/) database to store data. Given the nature of models in the project (mostly json-based, schemaless structure with set of in-app conditions), a nosql database provides more pros thans cons. Currently the app uses following tables:
+InkVisitor uses [rethinkdb](https://rethinkdb.com/) for storing data. This no-SQL open-source database was considered mainly based on the nature of data models in the project (mostly JSON, schemaless structures with sets of in-app customized conditions).
+Currently, the database stores the following collections (tables):
 
-- users
+- **users**
   - user data: login, password, starred territories
-- acl_permissions
+- **acl_permissions**
   - consists of rules for accessing resources (endpoints) by different requestors (groups)
-  - more fine grained permissions (ownerships) over entities are defined in respective user entries
-- entities
+  - more fine-grained permissions (ownerships) over entities are defined in respective user entries
+- **entities**
   - holds data mentioned in [section](### Entity types).
-- relations
+- **relations**
   - various implementations of logic between multiple (2-n) entities, ie. synonyms
-- audits
-  - log entries for changes made to entities table
+- **audits**
+  - log entries for changes made to the entities table
   - each entity entry has 0-n audit entries
-- documents
+- **documents**
   - large blobs of text data with encoded tags for referencing entities
 
-Project uses several environments and each of them has dedicated database namespace (`inkvisitor`, `inkvisitor_staging` etc).
+The project uses several environments (`./env/X.env`) and each of them has a dedicated database namespace (`inkvisitor`, `inkvisitor_staging` etc). The database can be run in two possible ways - 1) inside the docker or 2) as a separate process / service.
 
-## Run in docker (recommended)
+### 1) Run inside docker (recommended)
 
-Rethinkdb can be run as containerized instance. Installed [docker](https://docs.docker.com/get-docker/) + [docker compose](https://docs.docker.com/compose/install/) are prerequirements.
-Run in by `docker-compose up -d inkvisitor-database` from the root directory.
+Rethinkdb can be run as a containerized instance. Installed [docker](https://docs.docker.com/get-docker/) + [docker [compose](https://docs.docker.com/compose/install/) are requirements.
+Run `docker-compose up -d database` from the root directory.
 
-## Install & run on machine
+### 2) Install & run as a separate service
 
-Follow tutorials on [official page](https://rethinkdb.com/docs/install/)
+Follow tutorials on [the official page](https://rethinkdb.com/docs/install/).
 
 ## Initialization
 
-Database main script is built as `CLI` application which will guide you through the import process.
-Run `pnpm start` to run the app and by entering respective `key` from the menu choose the desired action.
+The database main script is built as `CLI` application which will guide you through the import process.
+If you are running the import for the first time, make sure all the packages are installed by typing `pnpm i`. Then, run `pnpm start` in this folder to run the app and by entering the respective `key` from the menu choose the desired action.
 
-Before you start, copy [.env.example](packages/database/env/.env.example) into your local [.env](packages/database/env/.env) file and fill variables inside (`SSH*` optional).
+Before you start, copy the [`.env.example`](packages/database/env/.env.example) into your local [.env](packages/database/env/.env) file and fill variables inside (`SSH*` variables are optional).
 
 Import example (this will remove and import the database anew):
-- If prompted whether to use `SSH connection`, use `n` + `<enter>` to stay in local environment
-- choose dataset by entering `D` + `<enter>`, then choose one of the datasets by entering respective number or name (ie. `1`), confirm with `<enter>`
+
+- if prompted whether to use the **SSH connection**, use `n` + `<enter>` to stay in the local environment
+- choose dataset by entering `D` + `<enter>`, then choose one of the datasets by entering the respective number or name (ie. `1`), confirm with `<enter>`
 - use `X` + `<enter>` to run the import
 
 ### Importing locally / remotely
 
-To switch between local -> remote host, just provide `SSH*` variables. If provided successfully, you will be prompted to confirm that you are in fact connecting via ssh tunnel.
+To switch between local -> remote hosts, just provide `SSH*` variables. If provided successfully, you will be prompted to confirm that you are connecting via an SSH tunnel.
 
 ### Jobs
 
-You can run specialized jobs by typing `J`. These jobs are single purpose actions, ie. fixing bad import dates.
-
+You can run specialized jobs by typing `J`. These jobs are single purposes actions, ie. fixing bad import dates.
 
 ### Direct import scripts (DEPRECATED)
 
@@ -59,25 +60,25 @@ You can run specialized jobs by typing `J`. These jobs are single purpose action
 
 ### Datasets
 
-In [datasets](./datasets) directory you can find different groups of import data. Respective files are referenced in scripts.
+In the [datasets](./datasets) directory, you can find different groups of import data. Respective files are referenced in scripts.
 For common data (acl entries/users), you can use files stored in [default](./datasets/default) directory.
 
 # Backup
 
-`rethinkdb` comes with `rethinkdb-dump` tool, which creates snapshot according to provided arguments. Normally you would need to call this tool periodically in `crontab`. You can use script [backup.sh](./scripts/backup.sh) for this, which do the following:
+`Rethinkdb` comes with the `rethinkdb-dump` tool, which creates a snapshot according to the provided arguments. Normally you would need to call this tool periodically in `crontab`. You can use script [`backup.sh`](./scripts/backup.sh), which does the following:
 
-- delete outdated backup files older than 3 days but keep files for first day of each month
-- run in cycle for each database (names are provided in named array) and create snapshot with name `backup_YYYY_MM_DD_DBNAME.tar.gz`
+- deletes outdated backup files older than 3 days but keeps files for the first day of each month
+- runs in cycle for each database (names are provided in the named array) and creates a snapshot with name `backup_YYYY_MM_DD_DBNAME.tar.gz`
 
-Cron can be setup like thisTo be sure:
+Cron can be set like this:
 
 - `crontab -e`
 - add line `0 0 * * * <path to sh script> >> <path to logfile> 2>&1`
 
-## Gcloud
+## Google Cloud
 
 To be sure our backup files are stored securely, we can use some cloud storage.
-To keep it simple, we are using gcloud and a free tool - [rclone](https://rclone.org/).
+To keep it simple, we are using `gcloud` in combination with a free tool - [rclone](https://rclone.org/).
 Sync it like `rclone sync archives remote:inkvisitor-backup` - see [sync.sh](./sync.sh) script, which could be also called with cron.
 
 ## Generating import data

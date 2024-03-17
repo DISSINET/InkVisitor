@@ -6,17 +6,13 @@ import {
   IUserRight,
 } from "@shared/types";
 import { r as rethink, Connection, WriteResult, RDatum } from "rethinkdb-ts";
-import {
-  IDbModel,
-  fillArray,
-  fillFlatObject,
-  UnknownObject,
-} from "@models/common";
+import { IDbModel, fillArray, fillFlatObject } from "@models/common";
 import { EntityEnums, UserEnums } from "@shared/enums";
 import { ModelNotValidError } from "@shared/types/errors";
 import { generateRandomString, generateUuid, hashPassword } from "@common/auth";
 import { regExpEscape } from "@common/functions";
 import { nonenumerable } from "@common/decorators";
+import { Db } from "@service/rethink";
 
 export class UserRight implements IUserRight {
   territory = "";
@@ -110,6 +106,7 @@ export default class User implements IUser, IDbModel {
   name = "";
   role: UserEnums.Role = UserEnums.Role.Viewer;
   active = false;
+  verified = false;
   options: UserOptions = new UserOptions({});
   bookmarks: BookmarkFolder[] = [];
   storedTerritories: StoredTerritory[] = [];
@@ -170,7 +167,7 @@ export default class User implements IUser, IDbModel {
   }
 
   isValid(): boolean {
-    if (this.email == "" || this.name == "") {
+    if (this.email == "") {
       return false;
     }
 
@@ -200,6 +197,10 @@ export default class User implements IUser, IDbModel {
 
   generatePassword(): string {
     const raw = generateRandomString(10);
+    return this.setPassword(raw);
+  }
+
+  setPassword(raw: string): string {
     this.password = hashPassword(raw);
     return raw;
   }
@@ -218,6 +219,21 @@ export default class User implements IUser, IDbModel {
     if (data) {
       delete data.password;
       return new User(data);
+    }
+    return null;
+  }
+
+  static async getUserByEmail(
+    dbInstance: Connection | undefined,
+    email: string
+  ): Promise<User | null> {
+    const data = await rethink
+      .table(User.table)
+      .filter({ email })
+      .limit(1)
+      .run(dbInstance);
+    if (data && data.length) {
+      return new User(data[0]);
     }
     return null;
   }
@@ -246,20 +262,26 @@ export default class User implements IUser, IDbModel {
     return data.map((d) => new User(d));
   }
 
-  static async findUserByLabel(
-    dbInstance: Connection | undefined,
-    label: string
+  /**
+   * Method searches for user by email or username (login)
+   * @param dbInstance
+   * @param label
+   * @returns
+   */
+  static async findUserByLogin(
+    dbInstance: Db,
+    login: string
   ): Promise<User | null> {
     const data = await rethink
       .table(User.table)
       .filter(function (user: any) {
         return rethink.or(
-          rethink.row("name").eq(label),
-          rethink.row("email").eq(label)
+          rethink.row("name").eq(login),
+          rethink.row("email").eq(login)
         );
       })
       .limit(1)
-      .run(dbInstance);
+      .run(dbInstance.connection);
     return data.length == 0 ? null : new User(data[0]);
   }
 

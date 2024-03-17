@@ -10,7 +10,13 @@ import {
   EntityTag,
 } from "components/advanced";
 import React, { useCallback, useMemo, useState } from "react";
-import { FaKey, FaToggleOff, FaToggleOn, FaTrashAlt } from "react-icons/fa";
+import {
+  FaEnvelopeOpenText,
+  FaKey,
+  FaToggleOff,
+  FaToggleOn,
+  FaTrashAlt,
+} from "react-icons/fa";
 import {
   RiUserSearchFill,
   RiUserSettingsFill,
@@ -18,7 +24,9 @@ import {
 } from "react-icons/ri";
 import { CellProps, Column, Row, useTable } from "react-table";
 import { toast } from "react-toastify";
+import { UserListEmailInput } from "./UserListEmailInput/UserListEmailInput";
 import {
+  StyledNotActiveText,
   StyledTHead,
   StyledTable,
   StyledTableWrapper,
@@ -37,64 +45,58 @@ import { UsersUtils } from "./UsersUtils";
 
 type CellType = CellProps<IResponseUser>;
 
-interface UserList {
-  heightContent?: number;
-}
+interface UserList {}
 
-export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
+export const UserList: React.FC<UserList> = React.memo(() => {
   const [removingUserId, setRemovingUserId] = useState<false | string>("");
 
   const queryClient = useQueryClient();
 
-  const { status, data, error, isFetching } = useQuery(
-    ["users"],
-    async () => {
-      const res = await api.administrationGet();
-      return res.data.users.sort((a, b) => (a.id > b.id ? 1 : -1));
+  const { status, data, error, isFetching } = useQuery({
+    queryKey: ["users"],
+    queryFn: async () => {
+      const res = await api.usersGetMore({});
+      return res.data.sort((a, b) => (a.id > b.id ? 1 : -1));
     },
-    { enabled: api.isLoggedIn() }
-  );
+    enabled: api.isLoggedIn(),
+  });
 
   const removingUser = useMemo(() => {
     return removingUserId ? data?.find((d) => d.id === removingUserId) : false;
   }, [removingUserId]);
 
-  const userMutation = useMutation(
-    async (userChanges: any) =>
+  const userMutation = useMutation({
+    mutationFn: async (userChanges: any) =>
       await api.usersUpdate(userChanges.id, userChanges),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries(["users"]);
-      },
-    }
-  );
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+    },
+  });
 
-  const resetPasswordMutation = useMutation(
-    async (userId: string) => await api.resetPassword(userId),
-    {
-      onSuccess: (data, variables) => {
-        const { message } = data.data;
+  const resetPasswordMutation = useMutation({
+    mutationFn: async (userId: string) => await api.resetPassword(userId),
+    onSuccess: (data, variables) => {
+      const { message } = data.data;
 
-        toast.info(message, {
-          autoClose: 6000,
-          closeOnClick: false,
-          onClick: () => {
-            navigator.clipboard.writeText(message ? message.split("'")[1] : "");
-            toast.info("Password copied to clipboard");
-          },
-          closeButton: true,
-          draggable: false,
-        });
-      },
-    }
-  );
+      toast.info(message, {
+        autoClose: 6000,
+        closeOnClick: false,
+        onClick: () => {
+          navigator.clipboard.writeText(message ? message.split("'")[1] : "");
+          toast.info("Password copied to clipboard");
+        },
+        closeButton: true,
+        draggable: false,
+      });
+    },
+  });
 
   const removeUser = async () => {
     if (removingUser) {
       const res: any = await api.usersDelete(removingUser.id);
       if (res.status === 200) {
         toast.warning(`User ${removingUser.name} removed!`);
-        queryClient.invalidateQueries(["users"]);
+        queryClient.invalidateQueries({ queryKey: ["users"] });
         setRemovingUserId(false);
       }
     }
@@ -133,6 +135,9 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
     return row.id;
   }, []);
 
+  // const [showReactivationModal, setShowReactivationModal] = useState(false);
+  // const [tempUser, setTempUser] = useState<false | IResponseUser>(false);
+
   const columns = useMemo<Column<IResponseUser>[]>(
     () => [
       {
@@ -140,7 +145,7 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
         id: "Name",
         accessor: "name",
         Cell: ({ row }: CellType) => {
-          const { name, email, role } = row.original;
+          const { name, email, role, active, verified } = row.original;
           let icon = <RiUserSearchFill />;
           if (role === UserEnums.Role.Admin) {
             icon = <RiUserStarFill />;
@@ -148,13 +153,21 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
           if (role === UserEnums.Role.Editor) {
             icon = <RiUserSettingsFill />;
           }
+          if (!verified) {
+            icon = <FaEnvelopeOpenText size={16} />;
+          }
           return (
-            <StyledUserNameColumn>
+            <StyledUserNameColumn $active={active} $verified={verified}>
               <StyledUserNameColumnIcon>{icon}</StyledUserNameColumnIcon>
-              <StyledUserNameColumnText>
-                <b>{name}</b>
-                <span>{email}</span>
-              </StyledUserNameColumnText>
+
+              {!verified ? (
+                <StyledNotActiveText>{"not activated"}</StyledNotActiveText>
+              ) : (
+                <StyledUserNameColumnText>
+                  <b>{name}</b>
+                  <span>{email}</span>
+                </StyledUserNameColumnText>
+              )}
             </StyledUserNameColumn>
           );
         },
@@ -163,17 +176,21 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
         Header: "Username",
         id: "Username",
         Cell: ({ row }: CellType) => {
-          const { id, name, email, role } = row.original;
+          const { id, name, email, role, verified } = row.original;
           return (
-            <Input
-              value={name}
-              onChangeFn={async (newValue: string) => {
-                userMutation.mutate({
-                  id: id,
-                  name: newValue,
-                });
-              }}
-            />
+            <>
+              {verified && (
+                <Input
+                  value={name}
+                  onChangeFn={async (newValue: string) => {
+                    userMutation.mutate({
+                      id: id,
+                      name: newValue,
+                    });
+                  }}
+                />
+              )}
+            </>
           );
         },
       },
@@ -181,16 +198,10 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
         Header: "Email",
         id: "Email",
         Cell: ({ row }: CellType) => {
-          const { id, name, email, role } = row.original;
           return (
-            <Input
-              value={email}
-              onChangeFn={async (newValue: string) => {
-                userMutation.mutate({
-                  id: id,
-                  email: newValue,
-                });
-              }}
+            <UserListEmailInput
+              user={row.original}
+              userMutation={userMutation}
             />
           );
         },
@@ -420,10 +431,11 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
             id: userId,
             rights,
             territoryRights: territoryActants,
+            active,
           } = row.original;
-          const active = row.original.active;
+
           return (
-            <ButtonGroup noMarginRight>
+            <ButtonGroup $noMarginRight>
               <Button
                 key="r"
                 icon={<FaTrashAlt size={14} />}
@@ -461,7 +473,7 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
         },
       },
     ],
-    [data]
+    []
   );
 
   const {
@@ -511,7 +523,8 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
               </tbody>
             </StyledTable>
           </StyledTableWrapper>
-          <UsersUtils />
+          {/* NEW USER | TEST EMAIL */}
+          <UsersUtils users={data} />
         </>
       )}
 

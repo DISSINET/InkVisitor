@@ -22,7 +22,7 @@ interface Modal {
   onEnterPress?: () => void;
   showModal: boolean;
   disableBgClick?: boolean;
-  width?: "full" | "fat" | "normal" | "thin" | number;
+  width?: "full" | "fat" | "normal" | "auto" | number;
   disableEscapeClose?: boolean;
   disableBackground?: boolean;
   isLoading?: boolean;
@@ -77,7 +77,7 @@ export const Modal: FC<Modal> = ({
 
 interface ModalCard {
   children?: ReactNode;
-  width: "full" | "fat" | "normal" | "thin" | number;
+  width: "full" | "fat" | "normal" | "auto" | number;
   animatedMount: any;
   isLoading?: boolean;
   fullHeight: boolean;
@@ -115,14 +115,20 @@ interface ModalContent {
   column?: boolean;
   children?: ReactNode;
   enableScroll?: boolean;
+  centered?: boolean;
 }
 export const ModalContent: FC<ModalContent> = ({
   children,
   column,
   enableScroll = false,
+  centered,
 }) => {
   return (
-    <StyledCardBody column={column} enableScroll={enableScroll}>
+    <StyledCardBody
+      $column={column}
+      $enableScroll={enableScroll}
+      centered={centered}
+    >
       {children}
     </StyledCardBody>
   );

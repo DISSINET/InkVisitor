@@ -3,7 +3,7 @@ import theme from "./theme";
 
 export const defaultPing = -10;
 
-export const DropdownAny = "any";
+// wild card char used in search
 export const wildCardChar = "*";
 
 export const rootTerritoryId = "T0";
@@ -29,6 +29,9 @@ export const fourthPanelBoxesHeightThirds = {
   bookmarks: 27,
   templates: 33,
 };
+
+// the minimum pixels for the results section height
+export const MIN_SEARCH_RESULT_HEIGHT = 100;
 
 // LIMITS
 export const maxTabCount = 10;

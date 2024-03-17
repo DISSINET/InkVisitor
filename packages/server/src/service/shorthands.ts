@@ -10,10 +10,6 @@ import Relation from "@models/relation/relation";
 import Audit from "@models/audit/audit";
 import Document from "@models/document/document";
 
-export async function deleteUser(db: Db, userId: string): Promise<WriteResult> {
-  return rethink.table(User.table).get(userId).delete().run(db.connection);
-}
-
 export async function getEntitiesDataByClass<T>(
   db: Connection,
   entityClass: EntityEnums.Class

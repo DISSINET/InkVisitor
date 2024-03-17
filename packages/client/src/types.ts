@@ -7,29 +7,6 @@ import {
 } from "@shared/types";
 import { ThemeColor } from "Theme/theme";
 
-export const Colors = [
-  "black",
-  "white",
-  "grey",
-  "primary",
-  "success",
-  "warning",
-  "danger",
-  "info",
-  "text",
-  "entityT",
-  "entityR",
-  "entityA",
-  "entityS",
-  "entityC",
-  "entityE",
-  "entityG",
-  "entityL",
-  "entityO",
-  "entityP",
-  "entityV",
-];
-
 interface IEntityColor {
   entityClass: EntityEnums.ExtendedClass;
   color: keyof ThemeColor;
@@ -99,6 +76,21 @@ export const EntityColors: { [key: string]: IEntityColor } = {
   },
 };
 
+export const ExtentedEntityColors: { [key: string]: IEntityColor } = {
+  X: {
+    entityClass: EntityEnums.Extension.NoClass,
+    color: "white",
+  },
+  empty: {
+    entityClass: EntityEnums.Extension.Empty,
+    color: "white",
+  },
+  all: {
+    entityClass: EntityEnums.Extension.Any,
+    color: "white",
+  },
+};
+
 export type EntityKeys = keyof typeof EntityColors;
 
 export interface IPage {
@@ -126,7 +118,9 @@ export enum ItemTypes {
   PROP_ROW1 = "PROP_ROW1",
   PROP_ROW2 = "PROP_ROW2",
   PROP_ROW3 = "PROP_ROW3",
+  REFERENCE_ROW = "REFERENCE_ROW",
   MULTI_RELATION = "MULTI_RELATION",
+  DETAIL_TAB = "DETAIL_TAB",
 }
 
 export type DragItem = {
@@ -178,7 +172,7 @@ export interface IRequestSearchEntity {
   status?: EntityEnums.Status; // izy
   language?: EntityEnums.Language; //izy
   logicalType?: EntityEnums.LogicalType;
-  hasProps?: IEntityHasProps[]; //this should be checked within meta props and within all statements where the entity is used as the prop origin
+  hasProps?: IEntityHasProps[]; //this should be checked within metaprops and within all statements where the entity is used as the prop origin
   usedInTerritories?: IEntityUsedInTerritory[]; // this is probably little bit complicated
   usedInStatements?: IEntityUsedInStatementWith[]; // and this is supposed to be complicated as well
 }
@@ -229,6 +223,17 @@ interface IUsedEntityStatement {
 }
 
 export type DropdownItem = { value: string; label: string; info?: string };
+
+export interface EntitySingleDropdownItem extends DropdownItem {
+  value: EntityEnums.Class;
+}
+
+export interface EntityMultiDropdownItem extends DropdownItem {
+  value:
+    | EntityEnums.Class
+    | EntityEnums.Extension.Any
+    | EntityEnums.Extension.Empty;
+}
 
 export type SearchParams = {
   territory?: string;

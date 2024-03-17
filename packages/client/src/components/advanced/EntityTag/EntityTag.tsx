@@ -8,7 +8,7 @@ import React, { ReactNode, useState } from "react";
 import { FaUnlink } from "react-icons/fa";
 import { useAppSelector } from "redux/hooks";
 import { DraggedEntityReduxItem, EntityDragItem } from "types";
-import { getEntityLabel, isValidEntityClass } from "utils";
+import { getEntityLabel, isValidEntityClass } from "utils/utils";
 
 interface UnlinkButton {
   onClick: () => void;
@@ -19,7 +19,6 @@ interface UnlinkButton {
 interface EntityTag {
   entity: IEntity;
   parentId?: string;
-  mode?: "selected" | "disabled" | "invalid" | false;
   showOnly?: "entity" | "label";
   fullWidth?: boolean;
   button?: ReactNode;
@@ -37,6 +36,7 @@ interface EntityTag {
   elvlButtonGroup?: ReactNode | false;
 
   unlinkButton?: UnlinkButton | false;
+  customTooltipAttributes?: { partLabel?: string };
 }
 
 export const EntityTag: React.FC<EntityTag> = ({
@@ -44,7 +44,6 @@ export const EntityTag: React.FC<EntityTag> = ({
   parentId,
   showOnly,
   fullWidth = false,
-  mode,
   button = false,
   index,
   moveFn,
@@ -61,6 +60,7 @@ export const EntityTag: React.FC<EntityTag> = ({
   elvlButtonGroup = false,
 
   unlinkButton,
+  customTooltipAttributes,
 }) => {
   const draggedEntity: DraggedEntityReduxItem = useAppSelector(
     (state) => state.draggedEntity
@@ -129,6 +129,7 @@ export const EntityTag: React.FC<EntityTag> = ({
             }
             tagHovered={tagHovered}
             referenceElement={referenceElement}
+            customTooltipAttributes={customTooltipAttributes}
           />
         )}
         <Tag
@@ -146,7 +147,6 @@ export const EntityTag: React.FC<EntityTag> = ({
           }
           moveFn={moveFn}
           entityClass={classId}
-          mode={mode}
           borderStyle="solid"
           invertedLabel={isSelected}
           index={index}

@@ -19,7 +19,10 @@ import { AiOutlineTag } from "react-icons/ai";
 import { BiCommentDetail } from "react-icons/bi";
 import { BsCardText } from "react-icons/bs";
 import { ImListNumbered } from "react-icons/im";
-import { getEntityRelationRules, getShortLabelByLetterCount } from "utils";
+import {
+  getEntityRelationRules,
+  getShortLabelByLetterCount,
+} from "utils/utils";
 import { EntityTooltipRelationTreeTable } from "./EntityTooltipRelationTreeTable/EntityTooltipRelationTreeTable";
 import {
   StyledBold,
@@ -31,6 +34,7 @@ import {
   StyledRelations,
   StyledRow,
 } from "./EntityTooltipStyles";
+import { MdOutlineLabel } from "react-icons/md";
 
 interface EntityTooltip {
   // entity
@@ -49,6 +53,7 @@ interface EntityTooltip {
   tagHovered: boolean;
 
   referenceElement: HTMLDivElement | null;
+  customTooltipAttributes?: { partLabel?: string };
 }
 export const EntityTooltip: React.FC<EntityTooltip> = ({
   // entity
@@ -67,6 +72,7 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
   tagHovered,
   //
   referenceElement,
+  customTooltipAttributes,
 }) => {
   const [tooltipData, setTooltipData] = useState<
     EntityTooltipNamespace.IResponse | false
@@ -84,17 +90,15 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
     }
   }, [tagHovered]);
 
-  const { data, isFetching, isSuccess } = useQuery(
-    ["tooltip", entityId, allowFetch],
-    async () => {
+  const { data, isFetching, isSuccess } = useQuery({
+    queryKey: ["tooltip", entityId, allowFetch],
+    queryFn: async () => {
       const res = await api.tooltipGet(entityId);
       setTooltipData(res.data);
       return res.data;
     },
-    {
-      enabled: api.isLoggedIn() && !!entityId && allowFetch,
-    }
-  );
+    enabled: api.isLoggedIn() && !!entityId && allowFetch,
+  });
 
   const renderEntityInfo = useMemo(
     () => (
@@ -110,6 +114,14 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
                 {` (${languageDict.find((l) => l.value === language)?.label})`}
               </StyledLabel>
             </StyledRow>
+            {customTooltipAttributes?.partLabel && (
+              <StyledRow>
+                <StyledIconWrap>
+                  <MdOutlineLabel />
+                </StyledIconWrap>
+                <StyledDetail>{customTooltipAttributes.partLabel}</StyledDetail>
+              </StyledRow>
+            )}
             {text && (
               <StyledRow>
                 <StyledIconWrap>{<BsCardText />}</StyledIconWrap>
@@ -183,7 +195,6 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
         relations[t]?.connections ? relations[t]!.connections.length : 0
       );
       const hasRelations = relationsCount.some((count) => count > 0);
-      // => some relations has non related connections in data-import
 
       return (
         <>
@@ -203,7 +214,10 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
                     {hasConnection && (
                       <>
                         <StyledLetterIconWrap>
-                          <LetterIcon color="white" letter={relationType} />
+                          <LetterIcon
+                            color="tooltipColor"
+                            letter={relationType}
+                          />
                         </StyledLetterIconWrap>
                         {relationRule.cloudType &&
                         currentRelations[0]?.entityIds ? (

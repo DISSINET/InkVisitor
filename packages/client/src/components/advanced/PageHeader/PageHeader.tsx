@@ -7,7 +7,7 @@ import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { BeatLoader } from "react-spinners";
 import { toast } from "react-toastify";
-import { useAppSelector } from "redux/hooks";
+import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { Menu } from "..";
 import packageJson from "../../../../package.json";
 import {
@@ -25,22 +25,27 @@ import {
   StyledText,
   StyledUser,
   StyledUsername,
+  StyledThemeSwitcher,
+  StyledThemeSwitcherIcon,
+  StyledMenu,
 } from "./PageHeaderStyles";
+import { setTheme } from "redux/features/themeSlice";
+import { MdDarkMode, MdSunny } from "react-icons/md";
+import { InterfaceEnums } from "@shared/enums";
 
 interface LeftHeader {
   tempLocation: string | false;
 }
 export const LeftHeader: React.FC<LeftHeader> = React.memo(
   ({ tempLocation }) => {
-    let env = (process.env.ROOT_URL || "").replace(
-      /apps\/inkvisitor[-]?/,
-      ""
-    );
+    let env = (process.env.ROOT_URL || "").replace(/apps\/inkvisitor[-]?/, "");
     if (env === "/") {
-      env = ""
+      env = "";
     }
 
-    const versionText = `v. ${packageJson.version}${env ? ` | ${env}` : ``} | built: ${process.env.BUILD_TIMESTAMP}`;
+    const versionText = `v. ${packageJson.version}${
+      env ? ` | ${env}` : ``
+    } | built: ${process.env.BUILD_TIMESTAMP}`;
     const location = useLocation();
     const navigate = useNavigate();
 
@@ -129,7 +134,7 @@ export const LeftHeader: React.FC<LeftHeader> = React.memo(
                 color="white"
               />
             )}
-            {ping >= -2 && <StyledPingColor pingColor={pingColor} />}
+            {ping >= -2 && <StyledPingColor $pingColor={pingColor} />}
             {ping >= 0 && <StyledPingText>{ping}ms</StyledPingText>}
           </StyledFlexRow>
         </StyledFlexColumn>
@@ -161,6 +166,16 @@ export const RightHeader: React.FC<RightHeader> = React.memo(
       ""
     );
 
+    const dispatch = useAppDispatch();
+    const selectedThemeId: InterfaceEnums.Theme = useAppSelector(
+      (state) => state.theme
+    );
+
+    const handleThemeChange = (newTheme: InterfaceEnums.Theme) => {
+      dispatch(setTheme(newTheme));
+      localStorage.setItem("theme", newTheme);
+    };
+
     return (
       <>
         {env === "sandbox" && (
@@ -174,6 +189,27 @@ export const RightHeader: React.FC<RightHeader> = React.memo(
           </>
         )}
         <StyledRightHeader>
+          <StyledThemeSwitcher
+            onClick={() => {
+              handleThemeChange(
+                selectedThemeId === InterfaceEnums.Theme.Light
+                  ? InterfaceEnums.Theme.Dark
+                  : InterfaceEnums.Theme.Light
+              );
+            }}
+          >
+            <StyledThemeSwitcherIcon
+              selected={selectedThemeId === InterfaceEnums.Theme.Light}
+            >
+              <MdSunny />
+            </StyledThemeSwitcherIcon>
+            <StyledThemeSwitcherIcon
+              selected={selectedThemeId === InterfaceEnums.Theme.Dark}
+            >
+              <MdDarkMode />
+            </StyledThemeSwitcherIcon>
+          </StyledThemeSwitcher>
+
           {userName.length > 0 ? (
             <StyledUser>
               <StyledText>logged as</StyledText>
@@ -197,12 +233,14 @@ export const RightHeader: React.FC<RightHeader> = React.memo(
               <Loader size={10} show />
             </div>
           )}
-          <Menu
-            userRole={userRole}
-            tempLocation={tempLocation}
-            setTempLocation={setTempLocation}
-            handleLogOut={handleLogOut}
-          />
+          <StyledMenu>
+            <Menu
+              userRole={userRole}
+              tempLocation={tempLocation}
+              setTempLocation={setTempLocation}
+              handleLogOut={handleLogOut}
+            />
+          </StyledMenu>
         </StyledRightHeader>
       </>
     );

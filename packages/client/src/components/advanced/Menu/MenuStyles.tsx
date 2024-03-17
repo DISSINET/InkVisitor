@@ -1,4 +1,5 @@
 import { animated } from "@react-spring/web";
+import { GrDocumentText } from "react-icons/gr";
 import styled from "styled-components";
 import { heightHeader } from "Theme/constants";
 
@@ -17,7 +18,7 @@ export const StyledMenuGroupWrapper = styled.div`
 export const StyledMenuGroup = styled.div`
   border: ${({ theme }) => "3px solid " + theme.color["primary"]};
 
-  box-shadow: ${({ theme }) => "-5px 5px 5px " + theme.color["black"]};
+  box-shadow: ${({ theme }) => "-5px 5px 5px " + theme.color.menuShadow};
   border-radius: ${({ theme }) => theme.space[2]};
 `;
 

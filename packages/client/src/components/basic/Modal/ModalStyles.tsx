@@ -27,10 +27,10 @@ export const StyledBackground = styled(animated.div)`
 `;
 
 interface Card {
-  width: "full" | "fat" | "normal" | "thin" | number;
+  width: "full" | "fat" | "normal" | "auto" | number;
   $fullHeight: boolean;
 }
-const getWidth = (width: "full" | "fat" | "normal" | "thin" | number) => {
+const getWidth = (width: "full" | "fat" | "normal" | "auto" | number) => {
   if (typeof width === "number") {
     return `${width / 10}rem`;
   } else {
@@ -41,7 +41,7 @@ const getWidth = (width: "full" | "fat" | "normal" | "thin" | number) => {
         return "50rem";
       case "fat":
         return "100rem";
-      case "thin":
+      case "auto":
         return "auto";
     }
   }
@@ -84,15 +84,18 @@ export const StyledCardTitle = styled.h2`
   font-size: ${({ theme }) => theme.fontSize["xl"]};
 `;
 interface StyledCardBody {
-  column?: boolean;
-  enableScroll: boolean;
+  $column?: boolean;
+  $enableScroll: boolean;
+  centered?: boolean;
 }
 export const StyledCardBody = styled.section<StyledCardBody>`
   display: flex;
   height: 100%;
-  flex-direction: ${({ column }) => (column ? "column" : "row")};
+  flex-direction: ${({ $column }) => ($column ? "column" : "row")};
+  align-items: ${({ centered }) => (centered ? "center" : "")};
+  justify-content: ${({ centered }) => (centered ? "center" : "")};
   padding: ${space5} ${space7};
-  overflow: ${({ enableScroll }) => (enableScroll ? "auto" : "initial")};
+  overflow: ${({ $enableScroll }) => ($enableScroll ? "auto" : "initial")};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
 `;
 interface StyledFooter {}

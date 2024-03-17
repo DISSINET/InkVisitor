@@ -5,6 +5,7 @@
     "email": "import@inkvisitor.com",
     "password": "import",
     "active": false,
+    "verified": true,
     "options": {
       "defaultTerritory": "",
       "defaultLanguage": "",
@@ -20,6 +21,7 @@
     "email": "admin@admin.com",
     "password": "admin",
     "active": true,
+    "verified": true,
     "options": {
       "defaultTerritory": "",
       "defaultLanguage": "",
@@ -40,6 +42,7 @@
     "email": "editor@inkvisitor.com",
     "password": "abc",
     "active": true,
+    "verified": true,
     "options": {
       "defaultTerritory": "",
       "defaultLanguage": "",
@@ -64,6 +67,7 @@
     "email": "editor2@inkvisitor.com",
     "password": "def",
     "active": true,
+    "verified": true,
     "options": {
       "defaultTerritory": "",
       "defaultLanguage": "",
@@ -84,6 +88,7 @@
     "email": "viewer1@inkvisitor.com",
     "password": "viewer",
     "active": true,
+    "verified": true,
     "options": {
       "defaultTerritory": "",
       "defaultLanguage": "",
@@ -104,6 +109,7 @@
     "email": "inactive@inkvisitor.com",
     "password": "inactive",
     "active": false,
+    "verified": true,
     "options": {
       "defaultTerritory": "",
       "defaultLanguage": "",

@@ -24,6 +24,7 @@ export class ResponseUser implements IResponseUser {
   options: IUserOptions;
   rights: IUserRight[];
   active: boolean;
+  verified: boolean;
 
   @nonenumerable
   _userBookmarks: IBookmarkFolder[];
@@ -43,6 +44,7 @@ export class ResponseUser implements IResponseUser {
     this.options = user.options;
     this.rights = user.rights;
     this.active = user.active;
+    this.verified = user.verified;
 
     this._userBookmarks = user.bookmarks;
     this._userStoredTerritories = user.storedTerritories;

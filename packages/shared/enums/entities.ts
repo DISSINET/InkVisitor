@@ -15,9 +15,12 @@ export namespace EntityEnums {
   };
 
   // Predicate for testing if input value is one of accepted class values
-  export const IsClass = function(input: unknown, ...accepted: Class[]): boolean {
-    return accepted.indexOf(input as Class) !== -1
-  }
+  export const IsClass = function (
+    input: unknown,
+    ...accepted: Class[]
+  ): boolean {
+    return accepted.indexOf(input as Class) !== -1;
+  };
 
   export enum Class {
     Action = "A",
@@ -41,6 +44,7 @@ export namespace EntityEnums {
     Invalid = "?",
   }
 
+  export type ExtendedClass = Class | Extension;
 
   export const PLOGESTR = [
     Class.Person,
@@ -63,6 +67,18 @@ export namespace EntityEnums {
     Class.Resource,
     Class.Being,
   ];
+  export const PLOGESTRBV = [
+    Class.Person,
+    Class.Location,
+    Class.Object,
+    Class.Group,
+    Class.Event,
+    Class.Statement,
+    Class.Territory,
+    Class.Resource,
+    Class.Being,
+    Class.Value,
+  ];
   export const ExtendedClasses = [
     Class.Action,
     Class.Territory,
@@ -79,26 +95,17 @@ export namespace EntityEnums {
     Extension.Empty,
   ];
 
-  export const LOESBV = [
-    Class.Location,
-    Class.Object,
-    Class.Event,
-    Class.Statement,
-    Class.Being,
-    Class.Value,
-  ];
-
-
-  export type ExtendedClass = Class | Extension;
-
   /**
    * Helper function for testing if input value is valid extended class value
    * @param input
    * @returns
    */
   export const IsExtendedClass = (input: unknown): boolean => {
-    return Object.values(Class).indexOf(input as any) !== -1 || Object.values(Extension).indexOf(input as any) !== -1
-  }
+    return (
+      Object.values(Class).indexOf(input as any) !== -1 ||
+      Object.values(Extension).indexOf(input as any) !== -1
+    );
+  };
 
   export enum LogicalType {
     Definite = "1",

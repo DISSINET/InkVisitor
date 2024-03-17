@@ -5,8 +5,20 @@ import { apiPath } from "@common/constants";
 import app from "../../Server";
 import { supertestConfig } from "..";
 import { pool } from "@middlewares/db";
+import { Db } from "@service/rethink";
+import User from "@models/user/user";
+import { IUser } from "@shared/types";
 
 describe("Users getMore", function () {
+  let allUsers: User[];
+
+  beforeAll(async () => {
+    const db = new Db();
+    await db.initDb();
+    allUsers = await User.findAllUsers(db.connection);
+    await db.close();
+  });
+
   afterAll(async () => {
     await pool.end();
   });
@@ -17,7 +29,11 @@ describe("Users getMore", function () {
         .get(`${apiPath}/users?label=`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
-        .expect(testErroneousResponse.bind(undefined, new BadParams("")));
+        .expect(200)
+        .expect((res) => {
+          expect(res.body).toBeInstanceOf(Array);
+          expect(res.body).toHaveLength(allUsers.length);
+        });
     });
   });
   describe("Ok body with ok label", () => {
@@ -27,11 +43,11 @@ describe("Users getMore", function () {
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect((res) => {
-          res.body.should.not.empty;
-          res.body.should.be.a("array");
-          res.body.should.have.lengthOf.above(0);
-          res.body[0].should.have.property("id");
-          res.body[0].id.should.not.empty;
+          expect(res.body).toBeInstanceOf(Array);
+          expect(res.body).toHaveLength(
+            allUsers.filter((u) => u.name === "admin").length
+          );
+          expect(res.body[0]).toHaveProperty("id");
         })
         .expect(200);
     });

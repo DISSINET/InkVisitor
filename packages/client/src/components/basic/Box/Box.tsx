@@ -19,8 +19,9 @@ interface Box {
   height?: number;
   noPadding?: boolean;
   isExpanded?: boolean;
-  button?: ReactNode[];
+  buttons?: ReactNode[];
   children?: ReactNode;
+  onHeaderClick?: () => void;
 }
 
 export const Box: React.FC<Box> = ({
@@ -30,8 +31,9 @@ export const Box: React.FC<Box> = ({
   height = 0,
   noPadding = false,
   isExpanded = true,
-  button,
+  buttons,
   children,
+  onHeaderClick,
 }) => {
   const [hideContent, setHideContent] = useState<boolean>(false);
   const [showContentLabel, setShowContentLabel] = useState<boolean>(
@@ -41,9 +43,6 @@ export const Box: React.FC<Box> = ({
   const animatedExpand = useSpring({
     opacity: isExpanded ? 1 : 0,
     contentLabelOpacity: isExpanded ? 0 : 1,
-    contentBackgroundColor: isExpanded
-      ? theme.color["gray"]["200"]
-      : theme.color["gray"]["300"],
     boxHeight: `${height / 10}rem`,
     onRest: () => {
       isExpanded ? setShowContentLabel(false) : setHideContent(true);
@@ -58,20 +57,24 @@ export const Box: React.FC<Box> = ({
     <StyledBox
       style={{ height: animatedExpand.boxHeight as any }}
       height={height}
+      onClick={() => !isExpanded && onHeaderClick && onHeaderClick()}
+      $isClickable={!isExpanded && onHeaderClick !== undefined}
     >
       <StyledHead
         $borderColor={borderColor}
         $isExpanded={isExpanded}
         $color={color}
         $noPadding={noPadding}
+        $hasHeaderClick={onHeaderClick !== undefined}
+        onClick={onHeaderClick}
       >
         {!hideContent && (
           <animated.div style={animatedExpand}>{label}</animated.div>
         )}
         <StyledButtonWrap>
-          {button && (
+          {buttons && (
             <ButtonGroup>
-              {button.map((b, key) => (
+              {buttons.map((b, key) => (
                 <React.Fragment key={key}>{b}</React.Fragment>
               ))}
             </ButtonGroup>
@@ -84,9 +87,6 @@ export const Box: React.FC<Box> = ({
         $borderColor={borderColor}
         $noPadding={noPadding}
         $isExpanded={isExpanded}
-        style={{
-          backgroundColor: animatedExpand.contentBackgroundColor as any,
-        }}
       >
         <StyledContentAnimationWrap
           $hideContent={hideContent}

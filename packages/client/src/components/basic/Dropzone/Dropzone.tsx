@@ -1,7 +1,7 @@
 import { TemplateActionModal } from "components";
-import React, { ReactElement, useState } from "react";
+import React, { ReactElement, useContext, useState } from "react";
 import { DropTargetMonitor, useDrop } from "react-dnd";
-import theme from "Theme/theme";
+import { ThemeContext } from "styled-components";
 import { EntityDragItem, ItemTypes } from "types";
 import {
   StyledAiOutlineWarning,
@@ -54,6 +54,8 @@ export const Dropzone: React.FC<Dropzone> = ({
 
   const opacity = isOver ? 0.5 : 1;
 
+  const themeContext = useContext(ThemeContext);
+
   return (
     <>
       <div style={{ display: "inline-flex", overflow: "hidden" }}>
@@ -62,7 +64,10 @@ export const Dropzone: React.FC<Dropzone> = ({
         </StyledDropzone>
         <StyledIconWrap>
           {isWrongDropCategory && isOver && (
-            <StyledAiOutlineWarning size={22} color={theme.color["warning"]} />
+            <StyledAiOutlineWarning
+              size={22}
+              color={themeContext?.color.warning}
+            />
           )}
         </StyledIconWrap>
       </div>

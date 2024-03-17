@@ -3,31 +3,34 @@ import styled from "styled-components";
 import { space2, space4 } from "Theme/constants";
 
 interface StyledSuggester {
-  marginTop?: boolean;
+  $marginTop?: boolean;
+  $fullWidth?: boolean;
 }
 export const StyledSuggester = styled.div<StyledSuggester>`
   position: relative;
-  display: inline-flex;
-  margin-top: ${({ marginTop }) => (marginTop ? space2 : 0)};
+  display: ${({ $fullWidth }) => ($fullWidth ? "flex" : "inline-flex")};
+
+  margin-top: ${({ $marginTop }) => ($marginTop ? space2 : 0)};
 `;
 
 interface Column {}
 interface InputWrapper {
-  isOver: boolean;
-  hasButton: boolean;
-  hasText?: boolean;
+  $isOver: boolean;
+  $hasButton: boolean;
+  $hasText?: boolean;
 }
 export const StyledInputWrapper = styled.div<InputWrapper>`
   display: flex;
-  opacity: ${({ isOver }) => isOver && "50%"};
-  max-width: 16.1rem;
+  opacity: ${({ $isOver }) => $isOver && "50%"};
+  width: 100%;
+  /* max-width: 16.1rem; */
   input {
-    padding-right: ${({ theme, hasText }) =>
-      hasText ? theme.space[7] : theme.space[1]};
+    padding-right: ${({ theme, $hasText }) =>
+      $hasText ? theme.space[7] : theme.space[1]};
   }
   input[type="text"] {
     border-left-width: 0;
-    border-right-width: ${({ hasButton }) => (hasButton ? 0 : "")};
+    border-right-width: ${({ $hasButton }) => ($hasButton ? 0 : "")};
   }
   select {
     border-right-width: 0;
@@ -37,12 +40,12 @@ export const StyledSuggesterButton = styled.div`
   border: 1px solid ${({ theme }) => theme.color["primary"]};
 `;
 interface StyledSuggestionCancelButton {
-  hasButton: boolean;
+  $hasButton: boolean;
 }
 export const StyledSuggestionCancelButton = styled.div<StyledSuggestionCancelButton>`
   position: absolute;
-  right: ${({ theme, hasButton }) =>
-    hasButton ? theme.space[10] : theme.space[1]};
+  right: ${({ theme, $hasButton }) =>
+    $hasButton ? theme.space[10] : theme.space[1]};
   top: 4px;
   svg {
     color: ${({ theme }) => theme.color["danger"]};
@@ -91,6 +94,7 @@ export const StyledSuggestionLineIcons = styled.div<Column>`
   height: 100%;
   align-items: center;
   justify-content: center;
+  color: ${({ theme }) => theme.color["black"]};
 `;
 export const StyledTagWrapper = styled.div`
   display: inline-flex;

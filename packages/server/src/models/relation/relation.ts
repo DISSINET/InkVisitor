@@ -3,11 +3,12 @@ import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
 import { IEntity, Relation as RelationTypes } from "@shared/types";
 import { DbEnums, EntityEnums, RelationEnums, UserEnums } from "@shared/enums";
 import { EnumValidators } from "@shared/enums";
-import { InternalServerError, ModelNotValidError } from "@shared/types/errors";
+import { InternalServerError, ModelNotValidError, RelationAsymetricalPathExist } from "@shared/types/errors";
 import User from "@models/user/user";
 import { IRequest } from "../../custom_typings/request";
 import { nonenumerable } from "@common/decorators";
 import Entity from "@models/entity/entity";
+import Path from "./path";
 
 export interface IRelationModel extends RelationTypes.IRelation, IDbModel {
   beforeSave(request: IRequest): Promise<void>;
@@ -123,11 +124,20 @@ export default class Relation implements IRelationModel {
       );
     }
 
-    // check if same-classes-only is required
-    let patternFound =
-      !rules.allowedSameEntityClassesOnly || this.areEntitiesSameClass();
-    if (!patternFound) {
-      return new ModelNotValidError("Entities must have the same class");
+    let patternFound = false;
+
+    if (rules?.disabledEntities) {
+      for (const i in this.entityIds) {
+        for (const disallowedClass of rules.disabledEntities) {
+          if (this.hasEntityCorrectClass(this.entityIds[i], disallowedClass)) {
+            return new ModelNotValidError("Not allowed entity-class pattern");
+          }
+        }
+      }
+    }
+
+    if (rules?.allowedEntitiesPattern.length === 0) {
+      return null;
     }
 
     for (const pattern of rules?.allowedEntitiesPattern) {
@@ -169,6 +179,15 @@ export default class Relation implements IRelationModel {
    * @param request
    */
   async beforeSave(request: IRequest): Promise<void> {
+    if (RelationTypes.RelationRules[this.type]?.asymmetrical) {
+      const pathHelper = new Path(this.type);
+      await pathHelper.build(await Relation.getByType(request.db.connection, this.type))
+    
+      if (pathHelper.pathExists(this.entityIds[1], this.entityIds[0])) {
+        throw new RelationAsymetricalPathExist();
+      }
+    }
+
     if (!this.entities || this.entities.length !== this.entityIds.length) {
       this.entities = await Entity.findEntitiesByIds(
         request.db.connection,
@@ -391,6 +410,15 @@ export default class Relation implements IRelationModel {
     if (position !== undefined) {
       return items.filter((d) => d.entityIds[position] === entityId);
     }
+    return items;
+  }
+
+  static async getByType<T extends RelationTypes.IRelation>(db: Connection, relType: RelationEnums.Type): Promise<T[]> {
+    const items: T[] = await rethink
+      .table(Relation.table)
+      .filter({ type: relType })
+      .run(db)
+
     return items;
   }
 

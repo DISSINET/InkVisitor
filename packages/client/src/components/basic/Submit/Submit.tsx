@@ -38,7 +38,7 @@ export const Submit: React.FC<Submit> = ({
         showModal={show}
         disableBgClick
         isLoading={loading}
-        width="thin"
+        width="auto"
       >
         <ModalHeader title={title} />
         <ModalContent>

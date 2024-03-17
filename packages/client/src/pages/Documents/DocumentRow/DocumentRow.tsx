@@ -10,11 +10,12 @@ import { AxiosResponse } from "axios";
 import { Button, ButtonGroup, Input } from "components";
 import { EntitySuggester, EntityTag } from "components/advanced";
 import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
-import { FaDotCircle, FaTrash } from "react-icons/fa";
+import { FaTrash } from "react-icons/fa";
 import { RiFileEditFill } from "react-icons/ri";
 import useResizeObserver from "use-resize-observer";
 import {
   StyledCount,
+  StyledFaDotCircle,
   StyledReference,
   StyledTitle,
   StyledTitleWrap,
@@ -69,32 +70,28 @@ export const DocumentRow: React.FC<DocumentRow> = ({
 
   const queryClient = useQueryClient();
 
-  const updateResourceMutation = useMutation(
-    async (resourceId: string) =>
+  const updateResourceMutation = useMutation({
+    mutationFn: async (resourceId: string) =>
       api.entityUpdate(resourceId, { data: { documentId: document.id } }),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries(["resourcesWithDocuments"]);
-      },
-    }
-  );
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["resourcesWithDocuments"] });
+    },
+  });
 
-  const removeResourceMutation = useMutation(
-    async (resourceId: string) =>
+  const removeResourceMutation = useMutation({
+    mutationFn: async (resourceId: string) =>
       api.entityUpdate(resourceId, { data: { documentId: "" } }),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries(["resourcesWithDocuments"]);
-      },
-    }
-  );
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["resourcesWithDocuments"] });
+    },
+  });
 
   const { ref: titleRef, width: titleWidth = 0 } =
     useResizeObserver<HTMLDivElement>();
 
   return (
     <>
-      <FaDotCircle size={10} />
+      <StyledFaDotCircle size={10} />
       <StyledTitleWrap ref={titleRef} onClick={setEditMode}>
         {editMode ? (
           <Input

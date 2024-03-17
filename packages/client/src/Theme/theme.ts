@@ -42,7 +42,6 @@ const theme = {
     },
     black: "#000",
     white: "#fff",
-    whiteTransparent: "rgba(255,255,255,0.3)",
     grey: "#C4C4C4",
     greyer: "#4a5568",
     text: "#383737",
@@ -55,11 +54,22 @@ const theme = {
     primaryTransparent: "rgba(9,16,52,0.2)",
     modalBg: "rgba(9,16,52,0.3)",
 
+    tagBackground: "#fff",
+    tagColor: "#091034",
+    tagSelectedBackground: "#091034",
+    tagSelectedColor: "#fff",
+    tagItalic: "#4a5568",
+
+    iconButtonGroupColor: "#C4C4C4",
+
     foundByTreeFilter: "#b4c0e8",
+    tableOpened: "#F2EBFE",
     tableSelection: "#bce5ff",
     tableSelectionHover: "#e0f3ff",
     focusedCheckbox: "rgba(9,16,52,0.1)",
 
+    headerTextColor: " #fff",
+    muni: "#091034",
     staging: "#911111",
     "data-import": "#99004C",
     development: "#6174C2",
@@ -80,8 +90,16 @@ const theme = {
     // seda
     entityV: "#BAB0AC",
 
+    warningText: "#99103B",
     warningMessage: "#FFE089",
-    warningText: "#ffbb00",
+    warningBorder: "#ffbb00",
+
+    tooltipColor: "#fff",
+    tooltipBackground: "#000",
+    tooltipBoxShadow: "rgba(0, 0, 0, 0.3)",
+    tooltipArrowBoxShadow: "rgba(0, 0, 0, 0.1)",
+
+    menuShadow: "rgba(0, 0, 0, 0.3)",
 
     elementType: {
       action: "#EB6B6B",
@@ -104,7 +122,7 @@ const theme = {
 
     // tag status
     "0": "#a0aec0", // pending
-    "1": "#000", //approved
+    "1": "#000", // approved
     "2": "#BA2525", //discouraged
     "3": "#D8AA37", //warning
     "4": "#f27a43", //unfinished

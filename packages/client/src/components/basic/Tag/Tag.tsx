@@ -1,8 +1,14 @@
-import { EntityEnums } from "@shared/enums";
+import { EntityEnums, InterfaceEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
-import theme from "Theme/theme";
 import { useSearchParams } from "hooks";
-import React, { ReactNode, useEffect, useMemo, useRef } from "react";
+import React, {
+  ReactNode,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   DragSourceMonitor,
   DropTargetMonitor,
@@ -10,15 +16,17 @@ import {
   useDrop,
 } from "react-dnd";
 import { FaStar } from "react-icons/fa";
+import { toast } from "react-toastify";
 import { setDraggedEntity } from "redux/features/territoryTree/draggedEntitySlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
+import { ThemeContext } from "styled-components";
 import {
   DraggedEntityReduxItem,
   EntityColors,
   EntityDragItem,
   ItemTypes,
 } from "types";
-import { dndHoverFn } from "utils";
+import { dndHoverFn, getShortLabelByLetterCount } from "utils/utils";
 import {
   StyledButtonWrapper,
   StyledElvlWrapper,
@@ -40,7 +48,6 @@ interface TagProps {
   ltype?: string;
   entity?: IEntity;
 
-  mode?: "selected" | "disabled" | "invalid" | false;
   borderStyle?: "solid" | "dashed" | "dotted";
   button?: ReactNode;
   elvlButtonGroup?: ReactNode | false;
@@ -49,6 +56,7 @@ interface TagProps {
   fullWidth?: boolean;
   index?: number;
   moveFn?: (dragIndex: number, hoverIndex: number) => void;
+  disableCopyLabel?: boolean;
   disableDoubleClick?: boolean;
   disableDrag?: boolean;
   updateOrderFn?: (item: EntityDragItem) => void;
@@ -72,7 +80,6 @@ export const Tag: React.FC<TagProps> = ({
   status = "1",
   ltype = "1",
   entity,
-  mode = false,
   borderStyle = "solid",
   button,
   elvlButtonGroup,
@@ -81,6 +88,7 @@ export const Tag: React.FC<TagProps> = ({
   fullWidth = false,
   index = -1,
   moveFn,
+  disableCopyLabel = false,
   disableDoubleClick = false,
   disableDrag = false,
   updateOrderFn = () => {},
@@ -97,6 +105,9 @@ export const Tag: React.FC<TagProps> = ({
   const dispatch = useAppDispatch();
   const draggedEntity: DraggedEntityReduxItem = useAppSelector(
     (state) => state.draggedEntity
+  );
+  const selectedThemeId: InterfaceEnums.Theme = useAppSelector(
+    (state) => state.theme
   );
 
   const ref = useRef<HTMLDivElement>(null);
@@ -149,6 +160,25 @@ export const Tag: React.FC<TagProps> = ({
 
   drag(drop(ref));
 
+  const [clickedOnce, setClickedOnce] = useState(false);
+
+  useEffect(() => {
+    if (clickedOnce) {
+      const timeout = setTimeout(() => {
+        navigator.clipboard.writeText(label);
+        toast.info(
+          `label [${getShortLabelByLetterCount(
+            label,
+            200
+          )}] copied to clipboard`
+        );
+        setClickedOnce(false);
+      }, 500);
+
+      return () => clearTimeout(timeout);
+    }
+  }, [clickedOnce]);
+
   const renderEntityTag = () => (
     <StyledEntityTag
       $color={
@@ -156,7 +186,8 @@ export const Tag: React.FC<TagProps> = ({
           ? EntityColors[entityClass].color
           : "white"
       }
-      isTemplate={isTemplate}
+      $isTemplate={isTemplate}
+      $darkTheme={selectedThemeId === InterfaceEnums.Theme.Dark}
     >
       {entityClass}
     </StyledEntityTag>
@@ -168,7 +199,7 @@ export const Tag: React.FC<TagProps> = ({
 
   const renderButton = () => (
     <StyledButtonWrapper
-      status={status}
+      $status={status}
       onMouseEnter={onButtonOver}
       onMouseLeave={onButtonOut}
       onClick={onBtnClick}
@@ -179,29 +210,32 @@ export const Tag: React.FC<TagProps> = ({
 
   const onDoubleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
+    setClickedOnce(false);
 
     !disableDoubleClick && appendDetailId(propId);
   };
 
+  const themeContext = useContext(ThemeContext);
+
   const renderLabel = (labelOnly: boolean = false) => {
     return (
-      <StyledLabelWrap invertedLabel={invertedLabel}>
+      <StyledLabelWrap $invertedLabel={invertedLabel}>
         {isFavorited && (
           <StyledStarWrap>
             <FaStar
-              color={theme.color["warning"]}
+              color={themeContext?.color.warning}
               style={{ marginBottom: "0.1rem" }}
             />
           </StyledStarWrap>
         )}
         <StyledLabel
-          invertedLabel={invertedLabel}
-          status={status}
-          borderStyle={borderStyle}
-          fullWidth={fullWidth}
-          isFavorited={isFavorited}
-          labelOnly={labelOnly}
-          isItalic={labelItalic}
+          $invertedLabel={invertedLabel}
+          $status={status}
+          $borderStyle={borderStyle}
+          $fullWidth={fullWidth}
+          $isFavorited={isFavorited}
+          $labelOnly={labelOnly}
+          $isItalic={labelItalic}
         >
           {label}
         </StyledLabel>
@@ -238,11 +272,16 @@ export const Tag: React.FC<TagProps> = ({
       <StyledTagWrapper
         className="tag"
         ref={ref}
-        dragDisabled={!canDrag}
-        status={status}
-        ltype={ltype}
-        borderStyle={borderStyle}
-        onClick={(e: React.MouseEvent) => e.stopPropagation()}
+        $dragDisabled={!canDrag}
+        $status={status}
+        $ltype={ltype}
+        $borderStyle={borderStyle}
+        onClick={(e: React.MouseEvent) => {
+          e.stopPropagation();
+          if (!disableCopyLabel) {
+            setClickedOnce(true);
+          }
+        }}
         onDoubleClick={(e: React.MouseEvent) => onDoubleClick(e)}
       >
         {showOnly ? <>{renderShortTag()}</> : <>{renderFullTag()}</>}

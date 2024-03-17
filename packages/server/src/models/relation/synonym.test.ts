@@ -58,3 +58,94 @@ describe("test Synonym.beforeSave", function () {
     );
   });
 });
+
+describe("test Synonym.validateEntities", function () {
+  test("deny [A] only [A] or [C]", () => {
+    const relation = new Synonym({ entityIds: ["1", "2"] });
+    relation.entities = [
+      new Entity({ id: "1", class: EntityEnums.Class.Action }),
+      new Entity({ id: "2", class: EntityEnums.Class.Action }),
+    ];
+
+    let result = relation.validateEntities();
+    expect(result).toBeNull();
+
+    relation.entities = [
+      new Entity({ id: "1", class: EntityEnums.Class.Concept }),
+      new Entity({ id: "2", class: EntityEnums.Class.Concept }),
+    ];
+
+    result = relation.validateEntities();
+    expect(result).toBeNull();
+  });
+
+  test("deny [L] or [G]", () => {
+    const relation = new Synonym({ entityIds: ["1", "2"] });
+    relation.entities = [
+      new Entity({ id: "1", class: EntityEnums.Class.Location }),
+      new Entity({ id: "2", class: EntityEnums.Class.Location }),
+    ];
+
+    let result = relation.validateEntities();
+    expect(result).not.toBeNull();
+
+    relation.entities = [
+      new Entity({ id: "1", class: EntityEnums.Class.Group }),
+      new Entity({ id: "2", class: EntityEnums.Class.Group }),
+    ];
+
+    result = relation.validateEntities();
+    expect(result).not.toBeNull();
+  });
+
+  test("deny AC / CA or LA/AL or GC/CG", () => {
+    const relation = new Synonym({ entityIds: ["1", "2"] });
+    relation.entities = [
+      new Entity({ id: "1", class: EntityEnums.Class.Action }),
+      new Entity({ id: "2", class: EntityEnums.Class.Concept }),
+    ];
+
+    let result = relation.validateEntities();
+    expect(result).not.toBeNull();
+
+    relation.entities = [
+      new Entity({ id: "1", class: EntityEnums.Class.Concept }),
+      new Entity({ id: "2", class: EntityEnums.Class.Action }),
+    ];
+
+    result = relation.validateEntities();
+    expect(result).not.toBeNull();
+
+    relation.entities = [
+      new Entity({ id: "1", class: EntityEnums.Class.Location }),
+      new Entity({ id: "2", class: EntityEnums.Class.Action }),
+    ];
+
+    result = relation.validateEntities();
+    expect(result).not.toBeNull();
+
+    relation.entities = [
+      new Entity({ id: "1", class: EntityEnums.Class.Action }),
+      new Entity({ id: "2", class: EntityEnums.Class.Location }),
+    ];
+
+    result = relation.validateEntities();
+    expect(result).not.toBeNull();
+
+    relation.entities = [
+      new Entity({ id: "1", class: EntityEnums.Class.Group }),
+      new Entity({ id: "2", class: EntityEnums.Class.Concept }),
+    ];
+
+    result = relation.validateEntities();
+    expect(result).not.toBeNull();
+
+    relation.entities = [
+      new Entity({ id: "1", class: EntityEnums.Class.Concept }),
+      new Entity({ id: "2", class: EntityEnums.Class.Group }),
+    ];
+
+    result = relation.validateEntities();
+    expect(result).not.toBeNull();
+  });
+});
