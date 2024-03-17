@@ -100,6 +100,7 @@ export class Canvas {
       "Tab",
       "Escape",
       "Enter",
+      "Delete",
     ];
 
     switch (e.key) {
@@ -149,6 +150,11 @@ export class Canvas {
       case "Backspace":
         this.text.deleteText(this.viewport, this.cursor, 1);
         this.cursor.move(-1, 0);
+        break;
+
+      case "Delete":
+        this.text.deleteText(this.viewport, this.cursor, -1);
+        this.cursor.move(0, 0);
         break;
 
       default:

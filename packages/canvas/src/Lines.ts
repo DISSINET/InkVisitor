@@ -38,7 +38,6 @@ export class Lines {
   draw(viewport: Viewport) {
     this.ctx.reset();
     this.ctx.font = this.font;
-    console.log("wat");
     for (
       let renderLine = 1;
       renderLine <= viewport.lineEnd - viewport.lineStart;
