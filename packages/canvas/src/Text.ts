@@ -20,9 +20,10 @@ interface SegmentPosition {
  */
 class Text {
   segments: Segment[];
+  dirtySegment?: number;
   value: string;
   charsAtLine: number;
-
+  
   constructor(value: string, charsAtLine: number) {
     this.value = value;
     this.segments = [];
@@ -42,6 +43,7 @@ class Text {
   get lines(): string[] {
     return this.segments.reduce<string[]>((a, cur) => a.concat(cur.lines), []);
   }
+
 
   prepareSegments() {
     const segmentsArray = this.value.split("\n");
@@ -67,7 +69,14 @@ class Text {
   calculateLines(): void {
     const time1 = performance.now();
     let currentLineNumber: number = 0;
-    for (const segment of this.segments) {
+    for (const segmentIndex in this.segments) {
+      const segment= this.segments[segmentIndex]
+      
+      if (this.dirtySegment !== undefined && parseInt(segmentIndex) < this.dirtySegment) {
+        currentLineNumber += segment.lines.length
+        continue;
+      }
+
       segment.lineStart = currentLineNumber;
       segment.lines = [];
 
@@ -206,6 +215,8 @@ class Text {
       return
     }
 
+    this.dirtySegment = segmentPosition.segmentIndex;
+
     const segment = this.segments[segmentPosition.segmentIndex]
     segment.text = segment.text.slice(0, segmentPosition.textCharIndex) + textToInsert + segment.text.slice(segmentPosition.textCharIndex );
     this.calculateLines();
@@ -227,10 +238,12 @@ class Text {
       return
     }
     
-    const xAlterPos = segmentPosition.textCharIndex - ( chartsToDelete > 0 ? 1 : 0)
+    this.dirtySegment = segmentPosition.segmentIndex;
 
+    const xAlterPos = segmentPosition.textCharIndex - ( chartsToDelete > 0 ? 1 : 0)
     const segment = this.segments[segmentPosition.segmentIndex]
     segment.text = segment.text.slice(0, xAlterPos) + segment.text.slice(xAlterPos + 1);
+
     this.calculateLines();    
   }
 
