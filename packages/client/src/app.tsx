@@ -256,6 +256,7 @@ export const App: React.FC = () => {
                         </RequireAuth>
                       }
                     />
+
                     <Route path="*" element={<NotFoundPage />} />
                   </Routes>
                 </Page>

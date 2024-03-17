@@ -25,7 +25,7 @@ export default Router()
    *           application/json:
    *             schema:
    *               type: array
-   *               items: 
+   *               items:
    *                 $ref: "#/components/schemas/IResponseGeneric"
    */
   .get(
@@ -53,11 +53,11 @@ export default Router()
    *         description: ID of the acl entry
    *     requestBody:
    *       description: Acl object
-   *       content: 
+   *       content:
    *         application/json:
    *           schema:
    *             allOf:
-   *               - $ref: "#/components/schemas/Acl"               
+   *               - $ref: "#/components/schemas/Acl"
    *     responses:
    *       200:
    *         description: Returns generic response
@@ -127,7 +127,7 @@ export default Router()
    *         schema:
    *           type: string
    *         required: true
-   *         description: ID of the acl entry             
+   *         description: ID of the acl entry
    *     responses:
    *       200:
    *         description: Returns generic response
