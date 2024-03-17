@@ -192,6 +192,8 @@ export default Router()
 
       await request.db.lock();
 
+      await model.beforeSave(request.db.connection);
+      
       const saved = await model.save(request.db.connection);
       if (!saved) {
         throw new InternalServerError("cannot create entity");
@@ -403,6 +405,8 @@ export default Router()
       if (!model.canBeEditedByUser(request.getUserOrFail())) {
         throw new PermissionDeniedError("entity cannot be saved");
       }
+
+      await model.beforeSave(request.db.connection);
 
       // update only the required fields
       const result = await model.update(request.db.connection, entityData);
