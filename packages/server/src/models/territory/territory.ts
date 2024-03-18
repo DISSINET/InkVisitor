@@ -12,7 +12,31 @@ import User from "@models/user/user";
 import treeCache from "@service/treeCache";
 import { nonenumerable } from "@common/decorators";
 import { ROOT_TERRITORY_ID } from "@shared/types/statement";
+import { ECASTEMOVariant, ITerritoryCampaign } from "@shared/types/territory";
 
+export class TerritoryCampaign implements ITerritoryCampaign, IModel {
+  project: string;
+  guidelinesVersion: string;
+  guidelinesURL: string;
+  variant: ECASTEMOVariant;
+  description: string;
+  startDate: string;
+  endDate: string;
+
+  constructor(data: Partial<ITerritoryCampaign>) {
+    this.project = data?.project as string;
+    this.guidelinesVersion = data?.guidelinesVersion as string;
+    this.guidelinesURL = data?.guidelinesURL as string;
+    this.variant = data?.variant as ECASTEMOVariant;
+    this.description = data?.description as string;
+    this.startDate = data?.startDate as string;
+    this.endDate = data?.endDate as string;
+  }
+
+  isValid(): boolean {
+    return true;
+  }
+}
 export class TerritoryParent implements IParentTerritory, IModel {
   territoryId: string;
   order: number;
@@ -33,10 +57,14 @@ export class TerritoryParent implements IParentTerritory, IModel {
 
 export class TerritoryData implements ITerritoryData, IModel {
   parent: TerritoryParent | false = false;
+  campaign: ITerritoryCampaign | undefined = undefined;
 
   constructor(data: Partial<ITerritoryData>) {
     if (data.parent) {
       this.parent = new TerritoryParent(data.parent || {});
+    }
+    if (data.campaign) {
+      this.campaign = new TerritoryCampaign(data.campaign || {});
     }
   }
 
