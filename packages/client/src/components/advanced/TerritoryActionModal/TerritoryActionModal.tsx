@@ -11,9 +11,12 @@ import { AttributeButtonGroup } from "../AttributeButtonGroup/AttributeButtonGro
 import { EntityTag } from "../EntityTag/EntityTag";
 import { IEntity } from "@shared/types";
 import {
-  StyledFlexRow,
+  StyledBlueText,
+  StyledParentRow,
+  StyledGreyText,
   StyledGrid,
   StyledHeadingColumn,
+  StyledFlexRow,
 } from "./TerritoryActionModalStyles";
 import { useQuery } from "@tanstack/react-query";
 import api from "api";
@@ -84,10 +87,10 @@ export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
     <Modal showModal={showModal} onClose={onClose}>
       <ModalHeader title="Manage territory" />
       <ModalContent column>
-        <StyledGrid>
+        <StyledFlexRow>
           {territory && (
             <>
-              <StyledHeadingColumn>
+              <span>
                 <AttributeButtonGroup
                   options={[
                     {
@@ -108,20 +111,20 @@ export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
                     },
                   ]}
                 />
-              </StyledHeadingColumn>
-              <EntityTag entity={territory} />
+              </span>
+              <EntityTag entity={territory} fullWidth />
             </>
           )}
-        </StyledGrid>
+        </StyledFlexRow>
 
-        <StyledFlexRow>
+        <StyledParentRow>
           <div>
-            <p>Old parent T</p>
+            <StyledBlueText>Old parent T</StyledBlueText>
             {oldParentTerritory && <EntityTag entity={oldParentTerritory} />}
           </div>
 
           <div>
-            <p>{`New parent(s) T (${newParentEntity.length} T selected)`}</p>
+            <StyledGreyText>{`New parent(s) T (${newParentEntity.length} T selected)`}</StyledGreyText>
             {newParentEntity.length ? (
               <>
                 {newParentEntity.map((e) => {
@@ -142,30 +145,32 @@ export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
               <i>{"select T.."}</i>
             )}
           </div>
-        </StyledFlexRow>
+        </StyledParentRow>
 
         <StyledGrid>
           <StyledHeadingColumn>
-            <AttributeButtonGroup
-              options={[
-                {
-                  longValue: "Move children",
-                  shortValue: "Move children",
-                  onClick: () => {
-                    setIncludeChildren(true);
+            <span>
+              <AttributeButtonGroup
+                options={[
+                  {
+                    longValue: "Move children",
+                    shortValue: "Move children",
+                    onClick: () => {
+                      setIncludeChildren(true);
+                    },
+                    selected: includeChildren === true,
                   },
-                  selected: includeChildren === true,
-                },
-                {
-                  longValue: "Don't move children",
-                  shortValue: "Don't move children",
-                  onClick: () => {
-                    setIncludeChildren(false);
+                  {
+                    longValue: "Don't move children",
+                    shortValue: "Don't move children",
+                    onClick: () => {
+                      setIncludeChildren(false);
+                    },
+                    selected: includeChildren === false,
                   },
-                  selected: includeChildren === false,
-                },
-              ]}
-            />
+                ]}
+              />
+            </span>
           </StyledHeadingColumn>
           <EntitySuggester
             placeholder="new parent"
@@ -178,7 +183,7 @@ export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
           />
         </StyledGrid>
       </ModalContent>
-      <ModalFooter>
+      <ModalFooter column>
         <ButtonGroup>
           <Button label="cancel" onClick={onClose} />
           {/* <Button
@@ -198,6 +203,15 @@ export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
             color="success"
           /> */}
         </ButtonGroup>
+        <div style={{ marginTop: "2rem" }}>
+          {/* notes */}
+          {/* this note will appear if we are duplicating T (with or without children) that have at least 1 S */}
+          <p>{`Note:  Statements are not going to be duplicated`}</p>
+
+          {/* this note will appear if we are moving T and more than one T is selected
+              <T label> is the label of the first T in the list */}
+          <p>{`Note:  Statements will be moved only to the first selected T (<T label>)`}</p>
+        </div>
       </ModalFooter>
     </Modal>
   );

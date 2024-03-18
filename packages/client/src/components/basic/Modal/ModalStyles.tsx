@@ -98,7 +98,9 @@ export const StyledCardBody = styled.section<StyledCardBody>`
   overflow: ${({ $enableScroll }) => ($enableScroll ? "auto" : "initial")};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
 `;
-interface StyledFooter {}
+interface StyledFooter {
+  column?: boolean;
+}
 export const StyledFooter = styled.div<StyledFooter>`
   border-top-style: solid;
   border-top-width: ${({ theme }) => theme.borderWidth["default"]};
@@ -108,6 +110,7 @@ export const StyledFooter = styled.div<StyledFooter>`
   display: flex;
   flex-shrink: 0;
   justify-content: flex-end;
+  flex-direction: ${({ column }) => (column ? "column" : "row")};
   padding: ${({ theme }) => theme.space[4]};
 `;
 
