@@ -35,7 +35,7 @@ interface TerritoryActionModal {
   showModal?: boolean;
   onMoveT: (newParentT: string) => void;
   onDuplicateT: (newParentT: string) => void;
-  selectedParentId?: string;
+  selectedParentEntity?: IEntity;
 }
 export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
   showModal = false,
@@ -43,7 +43,7 @@ export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
   territory,
   onMoveT,
   onDuplicateT,
-  selectedParentId,
+  selectedParentEntity,
 }) => {
   const [action, setaction] = useState<"move" | "duplicate">("move");
   const [includeChildren, setIncludeChildren] = useState(true);
@@ -52,8 +52,8 @@ export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
   const [newParentEntity, setNewParentEntity] = useState<IEntity[]>([]);
 
   useEffect(() => {
-    if (selectedParentId) {
-      setNewParentId(selectedParentId);
+    if (selectedParentEntity) {
+      setNewParentEntity([selectedParentEntity]);
     }
   }, []);
 

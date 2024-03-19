@@ -1,6 +1,7 @@
 import { entitiesDictKeys } from "@shared/dictionaries";
 import { EntityEnums, UserEnums } from "@shared/enums";
 import {
+  IEntity,
   IReference,
   IResponseGeneric,
   IResponseStatement,
@@ -286,7 +287,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
 
   const [batchAction, setBatchAction] = useState<DropdownItem>(batchOptions[0]);
   const [showTActionModal, setShowTActionModal] = useState(true);
-  const [moveToParentId, setMoveToParentId] = useState<string>();
+  const [moveToParentEntity, setMoveToParentEntity] = useState<IEntity>();
 
   return (
     <>
@@ -317,19 +318,16 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
           </StyledHeading>
 
           <StyledMoveToParent>
-            {"Move to parent:\xa0"}
             <EntitySuggester
+              placeholder="new parent"
               disableTemplatesAccept
               filterEditorRights
               inputWidth={96}
               disableCreate
               categoryTypes={[EntityEnums.Class.Territory]}
-              onSelected={(newSelectedId: string) => {
-                setMoveToParentId(newSelectedId);
-                setShowTActionModal(true);
-              }}
               onPicked={(selectedEntity) => {
-                // TODO: work with entity instead of ID
+                setMoveToParentEntity(selectedEntity);
+                setShowTActionModal(true);
               }}
               excludedActantIds={excludedMoveTerritories}
             />
@@ -444,7 +442,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
       {showTActionModal && (
         <TerritoryActionModal
           onClose={() => setShowTActionModal(false)}
-          selectedParentId={moveToParentId}
+          selectedParentEntity={moveToParentEntity}
           showModal={showTActionModal}
           territory={territory}
           onMoveT={(newParentT) => moveTerritoryMutation.mutate(newParentT)}
