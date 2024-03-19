@@ -20,7 +20,6 @@ export const StyledFlexRow = styled.div`
 export const StyledParentRow = styled.div`
   display: flex;
   flex-direction: row;
-  /* justify-content: space-around; */
   margin-top: 1rem;
 `;
 
@@ -30,7 +29,7 @@ export const StyledBlueText = styled.p`
   margin-bottom: 0.2rem;
 `;
 export const StyledGreyText = styled.p`
-  color: ${({ theme }) => theme.color.gray[500]};
+  color: ${({ theme }) => theme.color.greyer};
   font-weight: bold;
   margin-bottom: 0.2rem;
 `;

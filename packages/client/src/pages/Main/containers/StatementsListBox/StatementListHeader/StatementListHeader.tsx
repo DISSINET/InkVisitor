@@ -445,8 +445,8 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
           selectedParentEntity={moveToParentEntity}
           showModal={showTActionModal}
           territory={territory}
-          onMoveT={(newParentT) => moveTerritoryMutation.mutate(newParentT)}
-          onDuplicateT={() => console.log("duplicate T")}
+          onMoveT={(newParentEntities) => console.log(newParentEntities)}
+          onDuplicateT={(newParentEntities) => console.log(newParentEntities)}
         />
       )}
     </>

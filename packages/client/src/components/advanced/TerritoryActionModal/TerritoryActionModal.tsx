@@ -1,3 +1,5 @@
+import { EntityEnums } from "@shared/enums";
+import { IEntity, IResponseTerritory } from "@shared/types";
 import {
   Button,
   ButtonGroup,
@@ -7,34 +9,30 @@ import {
   ModalHeader,
 } from "components";
 import React, { useEffect, useState } from "react";
+import { EntitySuggester } from "..";
 import { AttributeButtonGroup } from "../AttributeButtonGroup/AttributeButtonGroup";
 import { EntityTag } from "../EntityTag/EntityTag";
-import { IEntity } from "@shared/types";
 import {
+  StyledArrowContainer,
+  StyledArrowHead,
+  StyledArrowShaft,
+  StyledArrowWrapper,
   StyledBlueText,
-  StyledParentRow,
+  StyledFlexRow,
   StyledGreyText,
   StyledGrid,
   StyledHeadingColumn,
-  StyledFlexRow,
-  StyledArrowContainer,
-  StyledArrowShaft,
-  StyledArrowHead,
-  StyledArrowWrapper,
-  StyledTagList,
   StyledNotes,
+  StyledParentRow,
+  StyledTagList,
 } from "./TerritoryActionModalStyles";
-import { useQuery } from "@tanstack/react-query";
-import api from "api";
-import { EntitySuggester } from "..";
-import { EntityEnums } from "@shared/enums";
 
 interface TerritoryActionModal {
-  territory?: IEntity;
+  territory?: IResponseTerritory;
   onClose: () => void;
   showModal?: boolean;
-  onMoveT: (newParentT: string) => void;
-  onDuplicateT: (newParentT: string) => void;
+  onMoveT: (newParentEntities: IEntity[]) => void;
+  onDuplicateT: (newParentEntities: IEntity[]) => void;
   selectedParentEntity?: IEntity;
 }
 export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
@@ -48,31 +46,30 @@ export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
   const [action, setaction] = useState<"move" | "duplicate">("move");
   const [includeChildren, setIncludeChildren] = useState(true);
 
-  const [newParentId, setNewParentId] = useState<false | string>(false);
-  const [newParentEntity, setNewParentEntity] = useState<IEntity[]>([]);
+  const [newParentEntities, setNewParentEntities] = useState<IEntity[]>([]);
 
   useEffect(() => {
     if (selectedParentEntity) {
-      setNewParentEntity([selectedParentEntity]);
+      setNewParentEntities([selectedParentEntity]);
     }
   }, []);
 
-  const { territoryId: oldParentTerritoryId } = territory?.data.parent;
+  // const { territoryId: oldParentTerritoryId } = territory?.data.parent;
 
-  const {
-    data: oldParentTerritory,
-    error: oldParentError,
-    isFetching: oldParentIsFetching,
-  } = useQuery({
-    queryKey: ["territory", oldParentTerritoryId],
-    queryFn: async () => {
-      if (oldParentTerritoryId) {
-        const res = await api.territoryGet(oldParentTerritoryId);
-        return res.data;
-      }
-    },
-    enabled: !!oldParentTerritoryId && api.isLoggedIn(),
-  });
+  // const {
+  //   data: oldParentTerritory,
+  //   error: oldParentError,
+  //   isFetching: oldParentIsFetching,
+  // } = useQuery({
+  //   queryKey: ["territory", oldParentTerritoryId],
+  //   queryFn: async () => {
+  //     if (oldParentTerritoryId) {
+  //       const res = await api.territoryGet(oldParentTerritoryId);
+  //       return res.data;
+  //     }
+  //   },
+  //   enabled: !!oldParentTerritoryId && api.isLoggedIn(),
+  // });
 
   return (
     <Modal showModal={showModal} onClose={onClose}>
@@ -111,7 +108,7 @@ export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
         <StyledParentRow>
           <div>
             <StyledBlueText>Old parent T</StyledBlueText>
-            {oldParentTerritory && <EntityTag entity={oldParentTerritory} />}
+            {territory && <EntityTag entity={territory} />}
           </div>
 
           <StyledArrowWrapper>
@@ -123,18 +120,18 @@ export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
           </StyledArrowWrapper>
 
           <div>
-            <StyledGreyText>{`New parent(s) T (${newParentEntity.length} T selected)`}</StyledGreyText>
-            {newParentEntity.length ? (
+            <StyledGreyText>{`New parent(s) T (${newParentEntities.length} T selected)`}</StyledGreyText>
+            {newParentEntities.length ? (
               <StyledTagList>
-                {newParentEntity.map((e) => {
+                {newParentEntities.map((e) => {
                   return (
                     <div style={{ marginBottom: "0.2rem" }}>
                       <EntityTag
                         entity={e}
                         unlinkButton={{
                           onClick: () =>
-                            setNewParentEntity(
-                              newParentEntity.filter((et) => et.id !== e.id)
+                            setNewParentEntities(
+                              newParentEntities.filter((et) => et.id !== e.id)
                             ),
                         }}
                       />
@@ -176,10 +173,10 @@ export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
           <EntitySuggester
             placeholder="new parent"
             categoryTypes={[EntityEnums.Class.Territory]}
-            excludedActantIds={newParentEntity.map((entity) => entity.id)}
+            excludedActantIds={newParentEntities.map((entity) => entity.id)}
             // onSelected={(id) => setNewParentId(id)}
             onPicked={(entity) => {
-              setNewParentEntity([...newParentEntity, entity]);
+              setNewParentEntities([...newParentEntities, entity]);
             }}
           />
         </StyledGrid>
@@ -187,34 +184,40 @@ export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
       <ModalFooter column>
         <ButtonGroup>
           <Button label="cancel" onClick={onClose} />
-          {/* <Button
-            disabled={!newParentTerritory}
+          <Button
+            disabled={!newParentEntities.length}
             label={action}
             onClick={() => {
-              if (newParentTerritory) {
-                if (action === "move" && newParentId) {
-                  onMoveT(newParentId);
+              if (newParentEntities.length) {
+                if (action === "move") {
+                  onMoveT(newParentEntities);
                   onClose();
-                } else if (action === "duplicate" && newParentId) {
-                  onDuplicateT(newParentId);
+                } else if (action === "duplicate") {
+                  onDuplicateT(newParentEntities);
                   onClose();
                 }
               }
             }}
-            color="success"
-          /> */}
+            color={"success"}
+          />
         </ButtonGroup>
         <StyledNotes>
           {/* this note will appear if we are duplicating T (with or without children) that have at least 1 S */}
-          <p>
-            <i>{`Note:  Statements are not going to be duplicated`}</i>
-          </p>
+          {action === "duplicate" &&
+            territory &&
+            territory.statements.length > 0 && (
+              <p>
+                <i>{`Note: Statements are not going to be duplicated`}</i>
+              </p>
+            )}
 
           {/* this note will appear if we are moving T and more than one T is selected
               <T label> is the label of the first T in the list */}
-          <p>
-            <i>{`Note:  Statements will be moved only to the first selected T (<T label>)`}</i>
-          </p>
+          {action === "move" && newParentEntities.length > 1 && (
+            <p>
+              <i>{`Note: Statements will be moved only to the first selected T (<T ${newParentEntities[0].label}>)`}</i>
+            </p>
+          )}
         </StyledNotes>
       </ModalFooter>
     </Modal>
