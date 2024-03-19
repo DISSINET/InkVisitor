@@ -49,7 +49,7 @@ import {
   StyledMoveToParent,
   StyledSuggesterRow,
 } from "./StatementListHeaderStyles";
-import { rootTerritoryId } from "Theme/constants";
+import { TbHomeMove } from "react-icons/tb";
 
 interface StatementListHeader {
   territory: IResponseTerritory;
@@ -332,6 +332,10 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
                 // TODO: work with entity instead of ID
               }}
               excludedActantIds={excludedMoveTerritories}
+            />
+            <Button
+              icon={<TbHomeMove />}
+              onClick={() => setShowTActionModal(true)}
             />
           </StyledMoveToParent>
         </StyledHeaderRow>

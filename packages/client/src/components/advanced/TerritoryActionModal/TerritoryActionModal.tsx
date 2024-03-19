@@ -17,6 +17,12 @@ import {
   StyledGrid,
   StyledHeadingColumn,
   StyledFlexRow,
+  StyledArrowContainer,
+  StyledArrowShaft,
+  StyledArrowHead,
+  StyledArrowWrapper,
+  StyledTagList,
+  StyledNotes,
 } from "./TerritoryActionModalStyles";
 import { useQuery } from "@tanstack/react-query";
 import api from "api";
@@ -68,21 +74,6 @@ export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
     enabled: !!oldParentTerritoryId && api.isLoggedIn(),
   });
 
-  // const {
-  //   data: newParentTerritory,
-  //   error: newParentError,
-  //   isFetching: newParentIsFetching,
-  // } = useQuery({
-  //   queryKey: ["territory", newParentId],
-  //   queryFn: async () => {
-  //     if (newParentId) {
-  //       const res = await api.territoryGet(newParentId);
-  //       return res.data;
-  //     }
-  //   },
-  //   enabled: !!newParentId && api.isLoggedIn(),
-  // });
-
   return (
     <Modal showModal={showModal} onClose={onClose}>
       <ModalHeader title="Manage territory" />
@@ -123,24 +114,34 @@ export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
             {oldParentTerritory && <EntityTag entity={oldParentTerritory} />}
           </div>
 
+          <StyledArrowWrapper>
+            <i>into</i>
+            <StyledArrowContainer>
+              <StyledArrowShaft />
+              <StyledArrowHead />
+            </StyledArrowContainer>
+          </StyledArrowWrapper>
+
           <div>
             <StyledGreyText>{`New parent(s) T (${newParentEntity.length} T selected)`}</StyledGreyText>
             {newParentEntity.length ? (
-              <>
+              <StyledTagList>
                 {newParentEntity.map((e) => {
                   return (
-                    <EntityTag
-                      entity={e}
-                      unlinkButton={{
-                        onClick: () =>
-                          setNewParentEntity(
-                            newParentEntity.filter((et) => et.id !== e.id)
-                          ),
-                      }}
-                    />
+                    <div style={{ marginBottom: "0.2rem" }}>
+                      <EntityTag
+                        entity={e}
+                        unlinkButton={{
+                          onClick: () =>
+                            setNewParentEntity(
+                              newParentEntity.filter((et) => et.id !== e.id)
+                            ),
+                        }}
+                      />
+                    </div>
                   );
                 })}
-              </>
+              </StyledTagList>
             ) : (
               <i>{"select T.."}</i>
             )}
@@ -203,15 +204,18 @@ export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
             color="success"
           /> */}
         </ButtonGroup>
-        <div style={{ marginTop: "2rem" }}>
-          {/* notes */}
+        <StyledNotes>
           {/* this note will appear if we are duplicating T (with or without children) that have at least 1 S */}
-          <p>{`Note:  Statements are not going to be duplicated`}</p>
+          <p>
+            <i>{`Note:  Statements are not going to be duplicated`}</i>
+          </p>
 
           {/* this note will appear if we are moving T and more than one T is selected
               <T label> is the label of the first T in the list */}
-          <p>{`Note:  Statements will be moved only to the first selected T (<T label>)`}</p>
-        </div>
+          <p>
+            <i>{`Note:  Statements will be moved only to the first selected T (<T label>)`}</i>
+          </p>
+        </StyledNotes>
       </ModalFooter>
     </Modal>
   );
