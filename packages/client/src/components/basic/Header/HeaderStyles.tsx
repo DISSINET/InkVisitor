@@ -10,7 +10,7 @@ interface StyledHeader {
   $layoutWidth: number;
 }
 export const StyledHeader = styled.div<StyledHeader>`
-  $height: ${({ $height }) => ($height ? `${$height / 10}rem` : "auto")};
+  height: ${({ $height }) => ($height ? `${$height / 10}rem` : "auto")};
   padding: ${({ $paddingX, $paddingY }) =>
     `${$paddingY || $paddingY === 0 ? `${$paddingY / 10}rem` : space10} ${
       $paddingX || $paddingX === 0 ? `${$paddingX / 10}rem` : space3
