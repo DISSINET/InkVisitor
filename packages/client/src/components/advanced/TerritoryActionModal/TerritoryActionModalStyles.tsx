@@ -20,7 +20,7 @@ export const StyledFlexRow = styled.div`
 export const StyledParentRow = styled.div`
   display: flex;
   flex-direction: row;
-  margin-top: 1rem;
+  margin: 1rem;
 `;
 
 export const StyledBlueText = styled.p`
@@ -72,6 +72,10 @@ export const StyledTagList = styled.div`
 `;
 
 export const StyledNotes = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
   margin-top: 2rem;
   font-size: ${({ theme }) => theme.fontSize["sm"]};
 `;
