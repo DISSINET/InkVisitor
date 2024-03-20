@@ -45,6 +45,7 @@ import {
   StyledMoveToParent,
   StyledSuggesterRow,
 } from "./StatementListHeaderStyles";
+import { rootTerritoryId } from "Theme/constants";
 
 interface StatementListHeader {
   data: IResponseTerritory;
@@ -305,20 +306,22 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
             : "no territory selected"}
         </StyledHeading>
 
-        <StyledMoveToParent>
-          {"Move to parent:\xa0"}
-          <EntitySuggester
-            disableTemplatesAccept
-            filterEditorRights
-            inputWidth={96}
-            disableCreate
-            categoryTypes={[EntityEnums.Class.Territory]}
-            onSelected={(newSelectedId: string) => {
-              moveTerritoryMutation.mutate(newSelectedId);
-            }}
-            excludedActantIds={excludedMoveTerritories}
-          />
-        </StyledMoveToParent>
+        {territoryId !== rootTerritoryId && (
+          <StyledMoveToParent>
+            {"Move to parent:\xa0"}
+            <EntitySuggester
+              disableTemplatesAccept
+              filterEditorRights
+              inputWidth={96}
+              disableCreate
+              categoryTypes={[EntityEnums.Class.Territory]}
+              onSelected={(newSelectedId: string) => {
+                moveTerritoryMutation.mutate(newSelectedId);
+              }}
+              excludedActantIds={excludedMoveTerritories}
+            />
+          </StyledMoveToParent>
+        )}
       </StyledHeaderRow>
 
       <StyledSuggesterRow>
