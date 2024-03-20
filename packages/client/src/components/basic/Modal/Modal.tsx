@@ -8,6 +8,7 @@ import {
   StyledCard,
   StyledCardBody,
   StyledCardHeader,
+  StyledCardIcon,
   StyledCardTitle,
   StyledFooter,
   StyledModalInputForm,
@@ -100,11 +101,13 @@ export const ModalCard: FC<ModalCard> = ({
 interface ModalHeader {
   title?: string | React.ReactElement;
   color?: keyof ThemeColor;
+  icon?: React.ReactNode;
 }
-export const ModalHeader: FC<ModalHeader> = ({ title, color }) => {
+export const ModalHeader: FC<ModalHeader> = ({ title, color, icon }) => {
   return (
     <>
       <StyledCardHeader $color={color}>
+        {icon && <StyledCardIcon>{icon}</StyledCardIcon>}
         <StyledCardTitle>{title}</StyledCardTitle>
       </StyledCardHeader>
     </>
@@ -139,7 +142,7 @@ interface ModalFooter {
   column?: boolean;
 }
 export const ModalFooter: FC<ModalFooter> = ({ children, column = false }) => {
-  return <StyledFooter column={column}>{children}</StyledFooter>;
+  return <StyledFooter $column={column}>{children}</StyledFooter>;
 };
 
 // Input form helpers

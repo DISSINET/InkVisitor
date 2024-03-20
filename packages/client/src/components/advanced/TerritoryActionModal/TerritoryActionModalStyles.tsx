@@ -7,7 +7,7 @@ export const StyledGrid = styled.div`
   /* row-gap: 1rem; */
   margin-top: 1rem;
 `;
-export const StyledHeadingColumn = styled.p`
+export const StyledHeadingColumn = styled.div`
   display: grid;
   justify-items: end;
   align-items: center;

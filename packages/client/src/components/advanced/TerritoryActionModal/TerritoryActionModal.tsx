@@ -26,6 +26,7 @@ import {
   StyledParentRow,
   StyledTagList,
 } from "./TerritoryActionModalStyles";
+import { TbHomeMove } from "react-icons/tb";
 
 interface TerritoryActionModal {
   territory?: IResponseTerritory;
@@ -54,26 +55,9 @@ export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
     }
   }, []);
 
-  // const { territoryId: oldParentTerritoryId } = territory?.data.parent;
-
-  // const {
-  //   data: oldParentTerritory,
-  //   error: oldParentError,
-  //   isFetching: oldParentIsFetching,
-  // } = useQuery({
-  //   queryKey: ["territory", oldParentTerritoryId],
-  //   queryFn: async () => {
-  //     if (oldParentTerritoryId) {
-  //       const res = await api.territoryGet(oldParentTerritoryId);
-  //       return res.data;
-  //     }
-  //   },
-  //   enabled: !!oldParentTerritoryId && api.isLoggedIn(),
-  // });
-
   return (
     <Modal showModal={showModal} onClose={onClose}>
-      <ModalHeader title="Manage territory" />
+      <ModalHeader title="Manage territory" icon={<TbHomeMove />} />
       <ModalContent column>
         <StyledFlexRow>
           {territory && (
