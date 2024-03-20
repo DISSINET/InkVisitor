@@ -263,73 +263,69 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
 
     return (
       <>
-        {id !== rootTerritoryId && (
-          <>
-            {!tempDisabled ? (
-              <StyledTerritoryTagWrap
-                id={`territory${id}`}
-                style={{
-                  backgroundColor: foundByRecursion
-                    ? themeContext?.color.foundByTreeFilter
-                    : "",
-                }}
-              >
-                <StyledIconWrap>
-                  {hasChildren ? (
-                    <>{renderArrowIcon()}</>
+        {!tempDisabled ? (
+          <StyledTerritoryTagWrap
+            id={`territory${id}`}
+            style={{
+              backgroundColor: foundByRecursion
+                ? themeContext?.color.foundByTreeFilter
+                : "",
+            }}
+          >
+            <StyledIconWrap>
+              {hasChildren ? (
+                <>{renderArrowIcon()}</>
+              ) : (
+                <>
+                  {statementsCount > 0 ? (
+                    <StyledFaCircle
+                      size={11}
+                      color={symbolColor}
+                      onClick={() => {
+                        setTerritoryId(id);
+                      }}
+                    />
                   ) : (
-                    <>
-                      {statementsCount > 0 ? (
-                        <StyledFaCircle
-                          size={11}
-                          color={symbolColor}
-                          onClick={() => {
-                            setTerritoryId(id);
-                          }}
-                        />
-                      ) : (
-                        <StyledFaDotCircle
-                          size={11}
-                          color={symbolColor}
-                          onClick={() => {
-                            setTerritoryId(id);
-                          }}
-                        />
-                      )}
-                    </>
+                    <StyledFaDotCircle
+                      size={11}
+                      color={symbolColor}
+                      onClick={() => {
+                        setTerritoryId(id);
+                      }}
+                    />
                   )}
-                </StyledIconWrap>
-                <animated.div style={animatedStyle}>
-                  <EntityTag
-                    entity={territory}
-                    parentId={parent.territoryId}
-                    lvl={lvl}
-                    isSelected={isSelected}
-                    index={index}
-                    fullWidth
-                    moveFn={moveFn}
-                    updateOrderFn={moveTerritoryMutation.mutate}
-                    statementsCount={statementsCount}
-                    isFavorited={isFavorited}
-                    showOnly="label"
-                    tooltipPosition="right"
-                  />
-                </animated.div>
-                <TerritoryTreeContextMenu
-                  territoryActant={territory}
-                  onMenuOpen={() => setContextMenuOpen(true)}
-                  onMenuClose={() => setContextMenuOpen(false)}
-                  right={right}
-                  empty={(empty && !children.length) || false}
-                  storedTerritories={storedTerritories}
-                  updateUserMutation={updateUserMutation}
-                  isFavorited={isFavorited}
-                />
-              </StyledTerritoryTagWrap>
-            ) : (
-              <StyledDisabledTag />
-            )}
-          </>
+                </>
+              )}
+            </StyledIconWrap>
+            <animated.div style={animatedStyle}>
+              <EntityTag
+                entity={territory}
+                parentId={parent.territoryId}
+                lvl={lvl}
+                isSelected={isSelected}
+                index={index}
+                fullWidth
+                moveFn={moveFn}
+                updateOrderFn={moveTerritoryMutation.mutate}
+                statementsCount={statementsCount}
+                isFavorited={isFavorited}
+                showOnly="label"
+                tooltipPosition="right"
+              />
+            </animated.div>
+            <TerritoryTreeContextMenu
+              territoryActant={territory}
+              onMenuOpen={() => setContextMenuOpen(true)}
+              onMenuClose={() => setContextMenuOpen(false)}
+              right={right}
+              empty={(empty && !children.length) || false}
+              storedTerritories={storedTerritories}
+              updateUserMutation={updateUserMutation}
+              isFavorited={isFavorited}
+            />
+          </StyledTerritoryTagWrap>
+        ) : (
+          <StyledDisabledTag />
         )}
       </>
     );
@@ -339,7 +335,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
     <>
       {renderTreeNode()}
 
-      <StyledChildrenWrap $noIndent={lvl === 0}>
+      <StyledChildrenWrap>
         {!hideChildTerritories &&
           isExpanded &&
           childTerritories.map((child: IExtendedResponseTree, key: number) => (
