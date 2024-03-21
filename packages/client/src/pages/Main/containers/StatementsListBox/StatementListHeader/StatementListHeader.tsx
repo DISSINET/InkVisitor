@@ -446,6 +446,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
           showModal={showTActionModal}
           territory={territory}
           updateTerritoryMutation={updateTerritoryMutation}
+          excludedMoveTerritories={excludedMoveTerritories}
         />
       )}
     </>

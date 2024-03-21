@@ -47,6 +47,7 @@ interface TerritoryActionModal {
   showModal?: boolean;
   selectedParentEntity: IEntity | false;
   setMoveToParentEntity: React.Dispatch<React.SetStateAction<IEntity | false>>;
+  excludedMoveTerritories: string[];
 
   updateTerritoryMutation: UseMutationResult<
     AxiosResponse<IResponseGeneric<any>, any>,
@@ -64,6 +65,7 @@ export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
   territory,
   selectedParentEntity,
   setMoveToParentEntity,
+  excludedMoveTerritories,
 
   updateTerritoryMutation,
 }) => {
@@ -177,25 +179,23 @@ export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
               })}
             </StyledTagList>
 
-            <EntitySuggester
-              placeholder="new parent"
-              categoryTypes={[EntityEnums.Class.Territory]}
-              excludedActantIds={
-                oldParentId
-                  ? [
-                      oldParentId,
-                      territory.id,
-                      ...newParentEntities.map((entity) => entity.id),
-                    ]
-                  : [
-                      territory.id,
-                      ...newParentEntities.map((entity) => entity.id),
-                    ]
-              }
-              onPicked={(entity) => {
-                setNewParentEntities([...newParentEntities, entity]);
-              }}
-            />
+            {oldParentId && (
+              <EntitySuggester
+                placeholder="new parent"
+                categoryTypes={[EntityEnums.Class.Territory]}
+                excludedActantIds={[
+                  oldParentId,
+                  ...excludedMoveTerritories,
+                  ...newParentEntities.map((entity) => entity.id),
+                ]}
+                onPicked={(entity) => {
+                  setNewParentEntities([...newParentEntities, entity]);
+                }}
+                disableTemplatesAccept
+                filterEditorRights
+                disableCreate
+              />
+            )}
           </div>
         </StyledParentRow>
 
@@ -271,7 +271,7 @@ export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
               <T label> is the label of the first T in the list */}
             {showMoveNote && (
               <p>
-                <i>{`Note: Statements will be moved only to the first selected T (<T ${getShortLabelByLetterCount(
+                <i>{`Note: Territory will be moved only to the first selected T (<T ${getShortLabelByLetterCount(
                   newParentEntities[0].label,
                   40
                 )}>)`}</i>
