@@ -52,6 +52,7 @@ import {
   StyledSuggesterRow,
 } from "./StatementListHeaderStyles";
 import { TbHomeMove } from "react-icons/tb";
+import { rootTerritoryId } from "Theme/constants";
 
 interface StatementListHeader {
   territory: IResponseTerritory;
@@ -316,25 +317,27 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
               : "no territory selected"}
           </StyledHeading>
 
-          <StyledMoveToParent>
-            <EntitySuggester
-              placeholder="new parent"
-              disableTemplatesAccept
-              filterEditorRights
-              inputWidth={96}
-              disableCreate
-              categoryTypes={[EntityEnums.Class.Territory]}
-              onPicked={(selectedEntity) => {
-                setMoveToParentEntity(selectedEntity);
-                setShowTActionModal(true);
-              }}
-              excludedActantIds={excludedMoveTerritories}
-            />
-            <Button
-              icon={<TbHomeMove />}
-              onClick={() => setShowTActionModal(true)}
-            />
-          </StyledMoveToParent>
+          {territory.id !== rootTerritoryId && (
+            <StyledMoveToParent>
+              <EntitySuggester
+                placeholder="new parent"
+                disableTemplatesAccept
+                filterEditorRights
+                inputWidth={96}
+                disableCreate
+                categoryTypes={[EntityEnums.Class.Territory]}
+                onPicked={(selectedEntity) => {
+                  setMoveToParentEntity(selectedEntity);
+                  setShowTActionModal(true);
+                }}
+                excludedActantIds={excludedMoveTerritories}
+              />
+              <Button
+                icon={<TbHomeMove />}
+                onClick={() => setShowTActionModal(true)}
+              />
+            </StyledMoveToParent>
+          )}
         </StyledHeaderRow>
 
         <StyledSuggesterRow>
