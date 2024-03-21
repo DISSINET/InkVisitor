@@ -4,6 +4,7 @@ import {
   IReference,
   IResponseStatement,
   IStatement,
+  ITerritory,
 } from "@shared/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
@@ -14,12 +15,12 @@ import React, { useEffect, useState } from "react";
 import { BsInfoCircle } from "react-icons/bs";
 import { toast } from "react-toastify";
 import { setStatementListOpened } from "redux/features/layout/statementListOpenedSlice";
+import { setShowWarnings } from "redux/features/statementEditor/showWarningsSlice";
 import { setRowsExpanded } from "redux/features/statementList/rowsExpandedSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { StatementListHeader } from "./StatementListHeader/StatementListHeader";
 import { StatementListTable } from "./StatementListTable/StatementListTable";
 import { StyledEmptyState, StyledTableWrapper } from "./StatementLitBoxStyles";
-import { setShowWarnings } from "redux/features/statementEditor/showWarningsSlice";
 
 const initialData: {
   statements: IResponseStatement[];
@@ -272,28 +273,6 @@ export const StatementListBox: React.FC = () => {
     },
   });
 
-  const moveTerritoryMutation = useMutation({
-    mutationFn: async (newParentId: string) =>
-      await api.treeMoveTerritory(territoryId, newParentId, 0),
-    onSuccess: (data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["tree"] });
-      queryClient.invalidateQueries({ queryKey: ["territory"] });
-    },
-  });
-
-  const updateTerritoryMutation = useMutation({
-    mutationFn: async (tObject: {
-      territoryId: string;
-      statements: IResponseStatement[];
-    }) =>
-      await api.entityUpdate(tObject.territoryId, {
-        statements: tObject.statements,
-      }),
-    onSuccess: (data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["territory"] });
-    },
-  });
-
   const moveStatementsMutation = useMutation({
     mutationFn: async (data: {
       statements: string[];
@@ -348,14 +327,23 @@ export const StatementListBox: React.FC = () => {
     },
   });
 
+  const updateTerritoryMutation = useMutation({
+    mutationFn: async (tObject: {
+      territoryId: string;
+      changes: Partial<ITerritory>;
+    }) => await api.entityUpdate(tObject.territoryId, tObject.changes),
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["tree"] });
+      queryClient.invalidateQueries({ queryKey: ["territory"] });
+    },
+  });
+
   return (
     <>
       {data && (
         <StatementListHeader
           territory={data}
           addStatementAtTheEndMutation={addStatementAtTheEndMutation}
-          moveTerritoryMutation={moveTerritoryMutation}
-          updateTerritoryMutation={updateTerritoryMutation}
           isFavorited={isFavorited}
           selectedRows={selectedRows}
           setSelectedRows={setSelectedRows}
@@ -366,6 +354,7 @@ export const StatementListBox: React.FC = () => {
           duplicateStatementsMutation={duplicateStatementsMutation}
           replaceReferencesMutation={replaceReferencesMutation}
           appendReferencesMutation={appendReferencesMutation}
+          updateTerritoryMutation={updateTerritoryMutation}
         />
       )}
       {statements ? (
@@ -431,10 +420,10 @@ export const StatementListBox: React.FC = () => {
           addStatementAtTheEndMutation.isPending ||
           actantsCreateMutation.isPending ||
           statementUpdateMutation.isPending ||
-          moveTerritoryMutation.isPending ||
           moveStatementsMutation.isPending ||
           duplicateStatementsMutation.isPending ||
-          cloneStatementMutation.isPending
+          cloneStatementMutation.isPending ||
+          updateTerritoryMutation.isPending
         }
       />
     </>

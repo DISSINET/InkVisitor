@@ -1,5 +1,16 @@
 import { EntityEnums } from "@shared/enums";
-import { IEntity, IResponseTerritory } from "@shared/types";
+import {
+  IEntity,
+  IResponseGeneric,
+  IResponseTerritory,
+  ITerritory,
+} from "@shared/types";
+import {
+  UseMutationResult,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
+import api from "api";
 import {
   Button,
   ButtonGroup,
@@ -26,24 +37,33 @@ import {
   StyledParentRow,
   StyledTagList,
 } from "./TerritoryActionModalStyles";
-import { useQuery } from "@tanstack/react-query";
-import api from "api";
+import { AxiosResponse } from "axios";
 
 interface TerritoryActionModal {
   territory: IResponseTerritory;
   onClose: () => void;
   showModal?: boolean;
-  onMoveT: (newParentEntities: IEntity[]) => void;
-  onDuplicateT: (newParentEntities: IEntity[]) => void;
-  selectedParentEntity?: IEntity;
+  selectedParentEntity: IEntity | false;
+  setMoveToParentEntity: React.Dispatch<React.SetStateAction<IEntity | false>>;
+
+  updateTerritoryMutation: UseMutationResult<
+    AxiosResponse<IResponseGeneric<any>, any>,
+    Error,
+    {
+      territoryId: string;
+      changes: Partial<ITerritory>;
+    },
+    unknown
+  >;
 }
 export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
   showModal = false,
   onClose,
   territory,
-  onMoveT,
-  onDuplicateT,
   selectedParentEntity,
+  setMoveToParentEntity,
+
+  updateTerritoryMutation,
 }) => {
   const [action, setaction] = useState<"move" | "duplicate">("move");
   const [includeChildren, setIncludeChildren] = useState(true);
@@ -53,6 +73,7 @@ export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
   useEffect(() => {
     if (selectedParentEntity) {
       setNewParentEntities([selectedParentEntity]);
+      setMoveToParentEntity(false);
     }
   }, []);
 
@@ -209,12 +230,21 @@ export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
               disabled={!newParentEntities.length}
               label={action}
               onClick={() => {
-                if (newParentEntities.length) {
+                if (newParentEntities.length > 0) {
                   if (action === "move") {
-                    onMoveT(newParentEntities);
+                    updateTerritoryMutation.mutate({
+                      territoryId: territory.id,
+                      changes: {
+                        data: {
+                          parent: {
+                            territoryId: newParentEntities[0].id,
+                            order: EntityEnums.Order.First,
+                          },
+                        },
+                      },
+                    });
                     onClose();
                   } else if (action === "duplicate") {
-                    onDuplicateT(newParentEntities);
                     onClose();
                   }
                 }

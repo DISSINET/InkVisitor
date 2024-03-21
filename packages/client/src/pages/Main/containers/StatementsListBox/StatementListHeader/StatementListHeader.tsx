@@ -8,6 +8,7 @@ import {
   IResponseTerritory,
   IResponseTree,
   IStatement,
+  ITerritory,
 } from "@shared/types";
 import {
   UseMutationResult,
@@ -60,27 +61,13 @@ interface StatementListHeader {
     IStatement,
     unknown
   >;
-  moveTerritoryMutation: UseMutationResult<
-    AxiosResponse<IResponseGeneric>,
-    unknown,
-    string,
-    unknown
-  >;
-  updateTerritoryMutation: UseMutationResult<
-    AxiosResponse<IResponseGeneric>,
-    unknown,
-    {
-      territoryId: string;
-      statements: IResponseStatement[];
-    },
-    unknown
-  >;
   isFavorited?: boolean;
 
   isAllSelected: boolean;
   selectedRows: string[];
   setSelectedRows: React.Dispatch<React.SetStateAction<string[]>>;
 
+  // Statements batch actions
   moveStatementsMutation: UseMutationResult<
     AxiosResponse<IResponseGeneric>,
     unknown,
@@ -111,11 +98,19 @@ interface StatementListHeader {
     IReference[],
     unknown
   >;
+  updateTerritoryMutation: UseMutationResult<
+    AxiosResponse<IResponseGeneric<any>, any>,
+    Error,
+    {
+      territoryId: string;
+      changes: Partial<ITerritory>;
+    },
+    unknown
+  >;
 }
 export const StatementListHeader: React.FC<StatementListHeader> = ({
   territory,
   addStatementAtTheEndMutation,
-  moveTerritoryMutation,
 
   isFavorited,
   isAllSelected,
@@ -126,6 +121,8 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
   duplicateStatementsMutation,
   replaceReferencesMutation,
   appendReferencesMutation,
+
+  updateTerritoryMutation,
 }) => {
   const dispatch = useAppDispatch();
   const queryClient = useQueryClient();
@@ -287,7 +284,9 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
 
   const [batchAction, setBatchAction] = useState<DropdownItem>(batchOptions[0]);
   const [showTActionModal, setShowTActionModal] = useState(true);
-  const [moveToParentEntity, setMoveToParentEntity] = useState<IEntity>();
+  const [moveToParentEntity, setMoveToParentEntity] = useState<IEntity | false>(
+    false
+  );
 
   return (
     <>
@@ -443,10 +442,10 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
         <TerritoryActionModal
           onClose={() => setShowTActionModal(false)}
           selectedParentEntity={moveToParentEntity}
+          setMoveToParentEntity={setMoveToParentEntity}
           showModal={showTActionModal}
           territory={territory}
-          onMoveT={(newParentEntities) => console.log(newParentEntities)}
-          onDuplicateT={(newParentEntities) => console.log(newParentEntities)}
+          updateTerritoryMutation={updateTerritoryMutation}
         />
       )}
     </>
