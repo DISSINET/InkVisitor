@@ -36,8 +36,10 @@ import {
   StyledNotes,
   StyledParentRow,
   StyledTagList,
+  StyledTagWrap,
 } from "./TerritoryActionModalStyles";
 import { AxiosResponse } from "axios";
+import { getShortLabelByLetterCount } from "utils/utils";
 
 interface TerritoryActionModal {
   territory: IResponseTerritory;
@@ -65,9 +67,8 @@ export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
 
   updateTerritoryMutation,
 }) => {
-  const [action, setaction] = useState<"move" | "duplicate">("move");
+  const [action, setAction] = useState<"move" | "duplicate">("move");
   const [includeChildren, setIncludeChildren] = useState(true);
-
   const [newParentEntities, setNewParentEntities] = useState<IEntity[]>([]);
 
   useEffect(() => {
@@ -100,6 +101,12 @@ export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
 
   const showMoveNote = action === "move" && newParentEntities.length > 1;
 
+  useEffect(() => {
+    if (newParentEntities.length > 1 && action === "move") {
+      setAction("duplicate");
+    }
+  }, [newParentEntities]);
+
   return (
     <Modal showModal={showModal} onClose={onClose}>
       <ModalHeader title="Manage territory" icon={<TbHomeMove />} />
@@ -114,7 +121,7 @@ export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
                       longValue: "Move",
                       shortValue: "Move",
                       onClick: () => {
-                        setaction("move");
+                        setAction("move");
                         setIncludeChildren(true);
                       },
                       selected: action === "move",
@@ -123,7 +130,7 @@ export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
                       longValue: "Duplicate",
                       shortValue: "Duplicate",
                       onClick: () => {
-                        setaction("duplicate");
+                        setAction("duplicate");
                       },
                       selected: action === "duplicate",
                     },
@@ -151,27 +158,44 @@ export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
 
           <div>
             <StyledGreyText>{`New parent(s) T (${newParentEntities.length} T selected)`}</StyledGreyText>
-            {newParentEntities.length ? (
-              <StyledTagList>
-                {newParentEntities.map((e, key) => {
-                  return (
-                    <div key={key} style={{ marginBottom: "0.2rem" }}>
-                      <EntityTag
-                        entity={e}
-                        unlinkButton={{
-                          onClick: () =>
-                            setNewParentEntities(
-                              newParentEntities.filter((et) => et.id !== e.id)
-                            ),
-                        }}
-                      />
-                    </div>
-                  );
-                })}
-              </StyledTagList>
-            ) : (
-              <i>{"select T.."}</i>
-            )}
+
+            <StyledTagList>
+              {newParentEntities.map((e, key) => {
+                return (
+                  <StyledTagWrap key={key}>
+                    <EntityTag
+                      entity={e}
+                      unlinkButton={{
+                        onClick: () =>
+                          setNewParentEntities(
+                            newParentEntities.filter((et) => et.id !== e.id)
+                          ),
+                      }}
+                    />
+                  </StyledTagWrap>
+                );
+              })}
+            </StyledTagList>
+
+            <EntitySuggester
+              placeholder="new parent"
+              categoryTypes={[EntityEnums.Class.Territory]}
+              excludedActantIds={
+                oldParentId
+                  ? [
+                      oldParentId,
+                      territory.id,
+                      ...newParentEntities.map((entity) => entity.id),
+                    ]
+                  : [
+                      territory.id,
+                      ...newParentEntities.map((entity) => entity.id),
+                    ]
+              }
+              onPicked={(entity) => {
+                setNewParentEntities([...newParentEntities, entity]);
+              }}
+            />
           </div>
         </StyledParentRow>
 
@@ -201,25 +225,6 @@ export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
               />
             </span>
           </StyledHeadingColumn>
-          <EntitySuggester
-            placeholder="new parent"
-            categoryTypes={[EntityEnums.Class.Territory]}
-            excludedActantIds={
-              oldParentId
-                ? [
-                    oldParentId,
-                    territory.id,
-                    ...newParentEntities.map((entity) => entity.id),
-                  ]
-                : [
-                    territory.id,
-                    ...newParentEntities.map((entity) => entity.id),
-                  ]
-            }
-            onPicked={(entity) => {
-              setNewParentEntities([...newParentEntities, entity]);
-            }}
-          />
         </StyledFlexRow>
       </ModalContent>
       <ModalFooter column>
@@ -266,7 +271,10 @@ export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
               <T label> is the label of the first T in the list */}
             {showMoveNote && (
               <p>
-                <i>{`Note: Statements will be moved only to the first selected T (<T ${newParentEntities[0].label}>)`}</i>
+                <i>{`Note: Statements will be moved only to the first selected T (<T ${getShortLabelByLetterCount(
+                  newParentEntities[0].label,
+                  40
+                )}>)`}</i>
               </p>
             )}
           </StyledNotes>

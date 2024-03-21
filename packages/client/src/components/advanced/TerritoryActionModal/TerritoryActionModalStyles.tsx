@@ -68,7 +68,11 @@ export const StyledArrowHead = styled.div`
 
 export const StyledTagList = styled.div`
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
+`;
+export const StyledTagWrap = styled.div`
+  margin-bottom: 0.3rem;
+  margin-right: 0.3rem;
 `;
 
 export const StyledNotes = styled.div`
