@@ -1,5 +1,5 @@
-import { IEntity } from "./entity";
 import { EntityEnums } from "../enums";
+import { IEntity } from "./entity";
 
 export interface ITerritory extends IEntity {
   class: EntityEnums.Class.Territory;
@@ -19,17 +19,20 @@ export interface IParentTerritory {
 export interface ITerritoryProtocol {
   entityClasses: EntityEnums.Class[];
   classifications: string[];
-  tieType: EProtocolTieType;
-  propType?: string[]; // only in case of MetaProp and InStatementProp tie
-  allowedClasses?: EntityEnums.Class[];
-  allowedEntities?: string[];
+  tieType: EProtocolTieType; // default is property
+  tieLevel?: {
+    // relevant only in case of Classification or Property is selected as a tie
+    levelStatement: boolean; // default is true
+    levelMeta: boolean; // default is true
+  };
+  propType?: string[]; // relevant only in case of Property is selected as a tie
+  allowedClasses?: EntityEnums.Class[]; // not relevant if allowedEntities is set
+  allowedEntities?: string[]; //
   detail: string;
 }
 
 export enum EProtocolTieType {
-  MetaProp = "MetaProp",
-  InStatementProp = "InStatementProp",
-  CLARelation = "CLARelation",
-  InStatementCLARelation = "InStatementCLARelation",
+  Property = "Property",
+  Classification = "Classification",
   Reference = "Reference",
 }
