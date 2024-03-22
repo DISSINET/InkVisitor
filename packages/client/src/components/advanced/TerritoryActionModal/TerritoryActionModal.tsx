@@ -118,6 +118,9 @@ export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
             <>
               <span>
                 <AttributeButtonGroup
+                  disabled={newParentEntities.length > 1}
+                  fullSizeDisabled
+                  disabledBtnsTooltip="cannot move to multiple Territories"
                   options={[
                     {
                       longValue: "Move",
@@ -181,6 +184,7 @@ export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
 
             {oldParentId && (
               <EntitySuggester
+                autoFocus
                 placeholder="new parent"
                 categoryTypes={[EntityEnums.Class.Territory]}
                 excludedActantIds={[
@@ -204,6 +208,7 @@ export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
             <span>
               <AttributeButtonGroup
                 disabled={action === "move"}
+                fullSizeDisabled
                 options={[
                   {
                     longValue: "Move children",

@@ -81,7 +81,7 @@ export const Button: React.FC<ButtonProps> = ({
         $radiusLeft={radiusLeft}
         $radiusRight={radiusRight}
         $fullWidth={fullWidth}
-        disabled={disabled}
+        $disabled={disabled}
         onMouseEnter={() => setShowTooltip(true)}
         onMouseLeave={() => setShowTooltip(false)}
         onKeyPress={(e: KeyboardEvent<HTMLButtonElement>) => e.preventDefault()}
