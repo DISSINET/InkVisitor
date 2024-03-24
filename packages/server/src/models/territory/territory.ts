@@ -7,12 +7,14 @@ import {
   InternalServerError,
   InvalidDeleteError,
   ModelNotValidError,
+  TerritoryDoesNotExits,
 } from "@shared/types/errors";
 import User from "@models/user/user";
 import treeCache from "@service/treeCache";
 import { nonenumerable } from "@common/decorators";
 import { ROOT_TERRITORY_ID } from "@shared/types/statement";
 import { ECASTEMOVariant, ITerritoryCampaign } from "@shared/types/territory";
+import { findEntityById } from "@service/shorthands";
 
 export class TerritoryCampaign implements ITerritoryCampaign, IModel {
   project: string;
@@ -57,7 +59,7 @@ export class TerritoryParent implements IParentTerritory, IModel {
 
 export class TerritoryData implements ITerritoryData, IModel {
   parent: TerritoryParent | false = false;
-  campaign: ITerritoryCampaign | undefined = undefined;
+  campaign?: ITerritoryCampaign;
 
   constructor(data: Partial<ITerritoryData>) {
     if (data.parent) {
@@ -100,6 +102,32 @@ class Territory extends Entity implements ITerritory {
 
   setSiblings(childsMap: Record<number, ITerritory>) {
     this._siblings = childsMap;
+  }
+
+  /**
+   * Use this method for doing asynchronous operation/checks before the save operation
+   * @param db db connection
+   */
+  async beforeSave(db: Connection): Promise<void> {
+    await super.beforeSave(db);
+
+    // fix campaign if creating new T and if campaign is missing
+    if (this.id || this.data.campaign || !this.data.parent) {
+      return;
+    }
+
+    const parentTerritory = await findEntityById<ITerritory>(
+      db,
+      this.data.parent.territoryId
+    );
+    if (!parentTerritory) {
+      throw new TerritoryDoesNotExits(
+        TerritoryDoesNotExits.title,
+        this.data.parent.territoryId
+      );
+    }
+
+    this.data.campaign = parentTerritory.data.campaign;
   }
 
   /**
