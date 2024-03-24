@@ -7,12 +7,12 @@ export interface ITerritory extends IEntity {
 }
 
 export interface ITerritoryData {
-  parent: IParentTerritory | false;
+  parent: IParentTerritory | false; // TODO should be optional instead of false
   protocols?: ITerritoryProtocol[];
 }
 
 export interface IParentTerritory {
-  territoryId: string; // '' in case of root
+  territoryId: string;
   order: number;
 }
 
