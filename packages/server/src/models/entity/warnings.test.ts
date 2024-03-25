@@ -352,6 +352,46 @@ describe("models/entity/warnings", function () {
       await db.initDb();
       await actionWithEmptyLanguage.save(db.connection);
       await conceptWithSetLanguage.save(db.connection);
+      
+  describe("test VETV", function () {
+    const db = new Db();
+
+    const [, actionEntity0] = prepareEntity(EntityEnums.Class.Action);
+    const [, actionEntity1] = prepareEntity(EntityEnums.Class.Action);
+    const [, actionEntity2] = prepareEntity(EntityEnums.Class.Action);
+
+    actionEntity0.data = {
+      entities: {
+        a1: [EntityEnums.Extension.Empty],
+        a2: [EntityEnums.Extension.Any],
+        s: [EntityEnums.Class.Action],
+      },
+    };
+
+    actionEntity1.data = {
+      entities: {
+        a1: [EntityEnums.Extension.Empty],
+        a2: [],
+        s: [EntityEnums.Class.Action],
+      },
+    };
+    actionEntity2.data = {
+      entities: {
+        a1: [
+          EntityEnums.Extension.Empty,
+          EntityEnums.Extension.Any,
+          EntityEnums.Class.Action,
+        ],
+        a2: [],
+        s: [],
+      },
+    };
+
+    beforeAll(async () => {
+      await db.initDb();
+      await actionEntity0.save(db.connection);
+      await actionEntity1.save(db.connection);
+      await actionEntity2.save(db.connection);
     });
 
     afterAll(async () => {
@@ -372,6 +412,28 @@ describe("models/entity/warnings", function () {
         conceptWithSetLanguage.class
       ).hasLM(db.connection);
       expect(psm).toBeFalsy();
+      
+    it("should return 0 warnings", async () => {
+      const warnings = await new EntityWarnings(
+        actionEntity0.id,
+        actionEntity0.class
+      ).hasVETM(db.connection);
+      expect(warnings).toHaveLength(0);
+    });
+
+    it("should return 1 warning", async () => {
+      const warnings = await new EntityWarnings(
+        actionEntity1.id,
+        actionEntity1.class
+      ).hasVETM(db.connection);
+      expect(warnings).toHaveLength(1);
+    });
+    it("should return 2 warnings", async () => {
+      const warnings = await new EntityWarnings(
+        actionEntity2.id,
+        actionEntity2.class
+      ).hasVETM(db.connection);
+      expect(warnings).toHaveLength(2);
     });
   });
 });

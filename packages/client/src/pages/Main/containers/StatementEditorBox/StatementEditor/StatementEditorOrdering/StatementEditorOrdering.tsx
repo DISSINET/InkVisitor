@@ -29,20 +29,16 @@ export const StatementEditorOrdering: React.FC<StatementEditorOrdering> = ({
     setWithoutOrder(elementsWithoutOrder);
   }, [elementsOrders]);
 
-  const orderElementsMutation = useMutation(
-    async (elementsWithOrdering: string[]) =>
+  const orderElementsMutation = useMutation({
+    mutationFn: async (elementsWithOrdering: string[]) =>
       await api.statementReorderElements(statementId, elementsWithOrdering),
-    {
-      onSuccess: (data, variables) => {
-        queryClient.invalidateQueries(["statement"]);
-        queryClient.invalidateQueries([
-          "territory",
-          "statement-list",
-          "audits",
-        ]);
-      },
-    }
-  );
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["statement"] });
+      queryClient.invalidateQueries({
+        queryKey: ["territory", "statement-list", "audits"],
+      });
+    },
+  });
 
   const addToOrdering = (elementId: string) => {
     orderElementsMutation.mutate([

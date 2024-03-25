@@ -102,8 +102,8 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
 
   const symbolColor = useMemo(() => {
     return right === UserEnums.RoleMode.Read
-      ? themeContext.color.gray[600]
-      : themeContext.color.gray[800];
+      ? themeContext?.color.gray[600]
+      : themeContext?.color.gray[800];
   }, [right, selectedThemeId]);
 
   useEffect(() => {
@@ -143,20 +143,18 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
     [childTerritories]
   );
 
-  const moveTerritoryMutation = useMutation(
-    async (item: EntityDragItem) => {
+  const moveTerritoryMutation = useMutation({
+    mutationFn: async (item: EntityDragItem) => {
       if (territory.data.parent && item.index !== -1) {
         const parent = territory.data.parent as IParentTerritory;
         await api.treeMoveTerritory(item.id, parent.territoryId, item.index);
       }
     },
-    {
-      onSuccess: () => {
-        dispatch(setDisableTreeScroll(true));
-        queryClient.invalidateQueries(["tree"]);
-      },
-    }
-  );
+    onSuccess: () => {
+      dispatch(setDisableTreeScroll(true));
+      queryClient.invalidateQueries({ queryKey: ["tree"] });
+    },
+  });
 
   const onCaretClick = (id: string) => {
     setTerritoryId(id);
@@ -265,73 +263,69 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
 
     return (
       <>
-        {id !== rootTerritoryId && (
-          <>
-            {!tempDisabled ? (
-              <StyledTerritoryTagWrap
-                id={`territory${id}`}
-                style={{
-                  backgroundColor: foundByRecursion
-                    ? themeContext.color.foundByTreeFilter
-                    : "",
-                }}
-              >
-                <StyledIconWrap>
-                  {hasChildren ? (
-                    <>{renderArrowIcon()}</>
+        {!tempDisabled ? (
+          <StyledTerritoryTagWrap
+            id={`territory${id}`}
+            style={{
+              backgroundColor: foundByRecursion
+                ? themeContext?.color.foundByTreeFilter
+                : "",
+            }}
+          >
+            <StyledIconWrap>
+              {hasChildren ? (
+                <>{renderArrowIcon()}</>
+              ) : (
+                <>
+                  {statementsCount > 0 ? (
+                    <StyledFaCircle
+                      size={11}
+                      color={symbolColor}
+                      onClick={() => {
+                        setTerritoryId(id);
+                      }}
+                    />
                   ) : (
-                    <>
-                      {statementsCount > 0 ? (
-                        <StyledFaCircle
-                          size={11}
-                          color={symbolColor}
-                          onClick={() => {
-                            setTerritoryId(id);
-                          }}
-                        />
-                      ) : (
-                        <StyledFaDotCircle
-                          size={11}
-                          color={symbolColor}
-                          onClick={() => {
-                            setTerritoryId(id);
-                          }}
-                        />
-                      )}
-                    </>
+                    <StyledFaDotCircle
+                      size={11}
+                      color={symbolColor}
+                      onClick={() => {
+                        setTerritoryId(id);
+                      }}
+                    />
                   )}
-                </StyledIconWrap>
-                <animated.div style={animatedStyle}>
-                  <EntityTag
-                    entity={territory}
-                    parentId={parent.territoryId}
-                    lvl={lvl}
-                    isSelected={isSelected}
-                    index={index}
-                    fullWidth
-                    moveFn={moveFn}
-                    updateOrderFn={moveTerritoryMutation.mutate}
-                    statementsCount={statementsCount}
-                    isFavorited={isFavorited}
-                    showOnly="label"
-                    tooltipPosition="right"
-                  />
-                </animated.div>
-                <TerritoryTreeContextMenu
-                  territoryActant={territory}
-                  onMenuOpen={() => setContextMenuOpen(true)}
-                  onMenuClose={() => setContextMenuOpen(false)}
-                  right={right}
-                  empty={(empty && !children.length) || false}
-                  storedTerritories={storedTerritories}
-                  updateUserMutation={updateUserMutation}
-                  isFavorited={isFavorited}
-                />
-              </StyledTerritoryTagWrap>
-            ) : (
-              <StyledDisabledTag />
-            )}
-          </>
+                </>
+              )}
+            </StyledIconWrap>
+            <animated.div style={animatedStyle}>
+              <EntityTag
+                entity={territory}
+                parentId={parent.territoryId}
+                lvl={lvl}
+                isSelected={isSelected}
+                index={index}
+                fullWidth
+                moveFn={moveFn}
+                updateOrderFn={moveTerritoryMutation.mutate}
+                statementsCount={statementsCount}
+                isFavorited={isFavorited}
+                showOnly="label"
+                tooltipPosition="right"
+              />
+            </animated.div>
+            <TerritoryTreeContextMenu
+              territoryActant={territory}
+              onMenuOpen={() => setContextMenuOpen(true)}
+              onMenuClose={() => setContextMenuOpen(false)}
+              right={right}
+              empty={(empty && !children.length) || false}
+              storedTerritories={storedTerritories}
+              updateUserMutation={updateUserMutation}
+              isFavorited={isFavorited}
+            />
+          </StyledTerritoryTagWrap>
+        ) : (
+          <StyledDisabledTag />
         )}
       </>
     );
@@ -341,7 +335,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
     <>
       {renderTreeNode()}
 
-      <StyledChildrenWrap noIndent={lvl === 0}>
+      <StyledChildrenWrap>
         {!hideChildTerritories &&
           isExpanded &&
           childTerritories.map((child: IExtendedResponseTree, key: number) => (

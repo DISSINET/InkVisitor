@@ -60,9 +60,9 @@ export const PropGroup: React.FC<PropGroup> = ({
     data: territoryActants,
     error,
     isFetching,
-  } = useQuery(
-    ["territoryActants", territoryId],
-    async () => {
+  } = useQuery({
+    queryKey: ["territoryActants", territoryId],
+    queryFn: async () => {
       if (territoryId) {
         const res = await api.entityIdsInTerritory(territoryId);
         return res.data;
@@ -70,11 +70,9 @@ export const PropGroup: React.FC<PropGroup> = ({
         return [];
       }
     },
-    {
-      initialData: [],
-      enabled: !!territoryId && api.isLoggedIn(),
-    }
-  );
+    initialData: [],
+    enabled: !!territoryId && api.isLoggedIn(),
+  });
 
   const renderFirsLevelPropRow = useCallback(
     (

@@ -92,8 +92,8 @@ export const StatementListRow: React.FC<StatementListRow> = ({
       <StyledTr
         ref={dropRef}
         opacity={opacity}
-        isOpened={row.original.id === statementId}
-        isSelected={isSelected}
+        $isOpened={row.original.id === statementId}
+        $isSelected={isSelected}
         onClick={(e) => {
           handleClick(row.original.id);
           e.stopPropagation();
@@ -108,7 +108,7 @@ export const StatementListRow: React.FC<StatementListRow> = ({
                 ref={dragRef}
                 onClick={(e: React.MouseEvent) => e.stopPropagation()}
               >
-                <FaGripVertical color={themeContext.color.black} />
+                <FaGripVertical color={themeContext?.color.black} />
               </StyledTdMove>
             );
           } else {

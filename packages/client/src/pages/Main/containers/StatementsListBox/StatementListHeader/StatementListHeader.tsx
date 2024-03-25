@@ -45,6 +45,7 @@ import {
   StyledMoveToParent,
   StyledSuggesterRow,
 } from "./StatementListHeaderStyles";
+import { rootTerritoryId } from "Theme/constants";
 
 interface StatementListHeader {
   data: IResponseTerritory;
@@ -165,16 +166,16 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
     data: user,
     error: errorUser,
     isFetching: isFetchingUser,
-  } = useQuery(
-    ["user", userId],
-    async () => {
+  } = useQuery({
+    queryKey: ["user", userId],
+    queryFn: async () => {
       if (userId) {
         const res = await api.usersGet(userId);
         return res.data;
       }
     },
-    { enabled: !!userId && api.isLoggedIn() }
-  );
+    enabled: !!userId && api.isLoggedIn(),
+  });
 
   const [excludedMoveTerritories, setExcludedMoveTerritories] = useState<
     string[]
@@ -305,20 +306,22 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
             : "no territory selected"}
         </StyledHeading>
 
-        <StyledMoveToParent>
-          {"Move to parent:\xa0"}
-          <EntitySuggester
-            disableTemplatesAccept
-            filterEditorRights
-            inputWidth={96}
-            disableCreate
-            categoryTypes={[EntityEnums.Class.Territory]}
-            onSelected={(newSelectedId: string) => {
-              moveTerritoryMutation.mutate(newSelectedId);
-            }}
-            excludedActantIds={excludedMoveTerritories}
-          />
-        </StyledMoveToParent>
+        {territoryId !== rootTerritoryId && (
+          <StyledMoveToParent>
+            {"Move to parent:\xa0"}
+            <EntitySuggester
+              disableTemplatesAccept
+              filterEditorRights
+              inputWidth={96}
+              disableCreate
+              categoryTypes={[EntityEnums.Class.Territory]}
+              onSelected={(newSelectedId: string) => {
+                moveTerritoryMutation.mutate(newSelectedId);
+              }}
+              excludedActantIds={excludedMoveTerritories}
+            />
+          </StyledMoveToParent>
+        )}
       </StyledHeaderRow>
 
       <StyledSuggesterRow>
@@ -411,9 +414,9 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
               inverted
               color="primary"
               onClick={() => {
-                queryClient.invalidateQueries(["territory"]);
-                queryClient.invalidateQueries(["statement"]);
-                queryClient.invalidateQueries(["user"]);
+                queryClient.invalidateQueries({ queryKey: ["territory"] });
+                queryClient.invalidateQueries({ queryKey: ["statement"] });
+                queryClient.invalidateQueries({ queryKey: ["user"] });
               }}
             />
           </ButtonGroup>

@@ -26,15 +26,15 @@ export const AttributeButtonGroup: React.FC<AttributeButtonGroup> = ({
   paddingX = false,
 }) => {
   return disabled ? (
-    <StyledButtonWrap leftMargin={!noMargin} rightMargin={!noMargin}>
+    <StyledButtonWrap $leftMargin={!noMargin} $rightMargin={!noMargin}>
       <Button disabled label={options.find((o) => o.selected)?.longValue} />
     </StyledButtonWrap>
   ) : (
     <StyledPropButtonGroup
-      leftMargin={!noMargin}
-      rightMargin={!noMargin}
-      border
-      round
+      $leftMargin={!noMargin}
+      $rightMargin={!noMargin}
+      $border
+      $round
     >
       {options.map((option, oi) => {
         const firstInRow = oi === 0;

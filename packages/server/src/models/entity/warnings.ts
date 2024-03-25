@@ -79,6 +79,11 @@ export default class EntityWarnings {
     const lmWarning = await this.hasLM(conn);
     if (lmWarning) {
       warnings.push(lmWarning);
+
+    const vetmWarnings = await this.hasVETM(conn);
+    if (vetmWarnings) {
+      vetmWarnings.forEach((w) => warnings.push(w));
+
     }
 
     return warnings;
@@ -355,5 +360,40 @@ export default class EntityWarnings {
     }
 
     return null;
+  }
+
+  /**
+   * Tests if there is VETM warning and returns it
+   * @param conn
+   * @returns
+   */
+  async hasVETM(conn: Connection): Promise<IWarning[] | null> {
+    if (this.class !== EntityEnums.Class.Action) {
+      return null;
+    }
+
+    const action = await findEntityById<IAction>(conn, this.entityId);
+    if (!action) {
+      throw new InternalServerError(
+        "action not found while checking MVAL warning"
+      );
+    }
+
+    const warnings: IWarning[] = [];
+
+    for (const pos of Object.keys(
+      action.data.entities
+    ) as (keyof IActionValency)[]) {
+      if (action.data.entities[pos]?.length === 0) {
+        const newWarning = this.newWarning(
+          WarningTypeEnums.VETM,
+          IWarningPositionSection.Valencies,
+          pos
+        );
+        warnings.push(newWarning);
+      }
+    }
+
+    return warnings;
   }
 }

@@ -125,8 +125,8 @@ export const ModalContent: FC<ModalContent> = ({
 }) => {
   return (
     <StyledCardBody
-      column={column}
-      enableScroll={enableScroll}
+      $column={column}
+      $enableScroll={enableScroll}
       centered={centered}
     >
       {children}

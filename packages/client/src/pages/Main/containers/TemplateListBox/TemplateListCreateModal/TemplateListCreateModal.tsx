@@ -64,41 +64,39 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
     data: user,
     error: errorUser,
     isFetching: isFetchingUser,
-  } = useQuery(
-    ["user", userId],
-    async () => {
+  } = useQuery({
+    queryKey: ["user", userId],
+    queryFn: async () => {
       if (userId) {
         const res = await api.usersGet(userId);
         return res.data;
       }
     },
-    { enabled: !!userId && api.isLoggedIn() }
-  );
+    enabled: !!userId && api.isLoggedIn(),
+  });
 
-  const templateCreateMutation = useMutation(
-    async (newEntity: IEntity) => await api.entityCreate(newEntity),
-    {
-      onSuccess: (data, variables) => {
-        toast.info(
-          `Template [${variables.class}]: "${getShortLabelByLetterCount(
-            variables.label,
-            120
-          )}" was created`
-        );
-        queryClient.invalidateQueries(["templates"]);
-        if (selectedDetailId) {
-          queryClient.invalidateQueries(["entity-templates"]);
-        }
-        if (variables.class === EntityEnums.Class.Statement) {
-          setStatementId(variables.id);
-          queryClient.invalidateQueries(["statement-templates"]);
-        } else {
-          appendDetailId(variables.id);
-        }
-        handleCloseCreateModal();
-      },
-    }
-  );
+  const templateCreateMutation = useMutation({
+    mutationFn: async (newEntity: IEntity) => await api.entityCreate(newEntity),
+    onSuccess: (data, variables) => {
+      toast.info(
+        `Template [${variables.class}]: "${getShortLabelByLetterCount(
+          variables.label,
+          120
+        )}" was created`
+      );
+      queryClient.invalidateQueries({ queryKey: ["templates"] });
+      if (selectedDetailId) {
+        queryClient.invalidateQueries({ queryKey: ["entity-templates"] });
+      }
+      if (variables.class === EntityEnums.Class.Statement) {
+        setStatementId(variables.id);
+        queryClient.invalidateQueries({ queryKey: ["statement-templates"] });
+      } else {
+        appendDetailId(variables.id);
+      }
+      handleCloseCreateModal();
+    },
+  });
 
   const handleCreateNewStatementTemplate = (): IEntity | false => {
     if (user) {
@@ -159,7 +157,7 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
       onClose={() => {
         handleCloseCreateModal();
       }}
-      isLoading={templateCreateMutation.isLoading}
+      isLoading={templateCreateMutation.isPending}
     >
       <ModalHeader title="Create Template" />
       <ModalContent>

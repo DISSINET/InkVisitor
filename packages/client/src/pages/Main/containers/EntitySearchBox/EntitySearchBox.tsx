@@ -102,44 +102,40 @@ export const EntitySearchBox: React.FC = () => {
 
   // get the co-occurence entity
   const { data: cooccurrenceEntity, isFetching: cooccurrenceIsFetching } =
-    useQuery(
-      ["search-cooccurrence", searchData.cooccurrenceId],
-      async () => {
+    useQuery({
+      queryKey: ["search-cooccurrence", searchData.cooccurrenceId],
+      queryFn: async () => {
         if (searchData?.cooccurrenceId) {
           const res = await api.entitiesGet(searchData.cooccurrenceId);
           return res.data;
         }
       },
-      {
-        enabled: !!searchData?.cooccurrenceId,
-      }
-    );
+      enabled: !!searchData?.cooccurrenceId,
+    });
 
   // get the searchByTerritory entity
   const {
     data: searchTerritoryEntity,
     isFetching: searchTerritoryEntityIsFetching,
-  } = useQuery(
-    ["search-territory", searchData.territoryId],
-    async () => {
+  } = useQuery({
+    queryKey: ["search-territory", searchData.territoryId],
+    queryFn: async () => {
       if (searchData?.territoryId) {
         const res = await api.entitiesGet(searchData.territoryId);
         return res.data;
       }
     },
-    {
-      enabled: !!searchData?.territoryId,
-    }
-  );
+    enabled: !!searchData?.territoryId,
+  });
 
   const {
     status,
     data: entities,
     error,
     isFetching,
-  } = useQuery(
-    ["search", debouncedValues],
-    async () => {
+  } = useQuery({
+    queryKey: ["search", debouncedValues],
+    queryFn: async () => {
       if (debouncedValues.usedTemplate === "Any") {
         const { usedTemplate, ...filters } = debouncedValues;
         filters.onlyTemplates = true;
@@ -149,10 +145,8 @@ export const EntitySearchBox: React.FC = () => {
       const res = await api.entitiesSearch(debouncedValues);
       return res.data;
     },
-    {
-      enabled: api.isLoggedIn() && validSearch,
-    }
-  );
+    enabled: api.isLoggedIn() && validSearch,
+  });
 
   // get all templates for the "limit by template" option
   const {
@@ -160,9 +154,9 @@ export const EntitySearchBox: React.FC = () => {
     data: templates,
     error: templateError,
     isFetching: isFetchingTemplates,
-  } = useQuery(
-    ["search-templates", searchData, classOption],
-    async () => {
+  } = useQuery({
+    queryKey: ["search-templates", searchData, classOption],
+    queryFn: async () => {
       const res = await api.entitiesSearch({
         onlyTemplates: true,
         class: searchData.class,
@@ -175,8 +169,8 @@ export const EntitySearchBox: React.FC = () => {
       );
       return templates;
     },
-    { enabled: api.isLoggedIn() }
-  );
+    enabled: api.isLoggedIn(),
+  });
 
   const classOptions = entitiesDict.filter(
     (e) => e.value !== EntityEnums.Class.Resource

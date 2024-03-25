@@ -176,9 +176,15 @@ export const App: React.FC = () => {
         <title>InkVisitor</title>
       </Helmet>
       <ThemeProvider theme={themeConfig}>
-        <GlobalStyle disableUserSelect={disableUserSelect} />
+        <GlobalStyle
+          theme={themeConfig}
+          disableUserSelect={disableUserSelect}
+        />
         <QueryClientProvider client={queryClient}>
-          <ReactQueryDevtools initialIsOpen={false} />
+          <div style={{ fontSize: "16px" }}>
+            {/* fontSize zooms query devtools to normal size */}
+            <ReactQueryDevtools initialIsOpen={false} />
+          </div>
           <DndProvider backend={HTML5Backend}>
             <BrowserRouter basename={process.env.ROOT_URL}>
               <SearchParamsProvider>

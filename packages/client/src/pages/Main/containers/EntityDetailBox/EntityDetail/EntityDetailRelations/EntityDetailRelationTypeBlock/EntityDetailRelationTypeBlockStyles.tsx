@@ -19,15 +19,15 @@ export const StyledCloudEntityWrapper = styled.div`
   margin: ${({ theme }) => theme.space[1]};
 `;
 interface StyledGrid {
-  hasAttribute?: boolean;
-  hasOrder: boolean;
+  $hasAttribute?: boolean;
+  $hasOrder: boolean;
 }
 export const StyledGrid = styled.div<StyledGrid>`
   display: grid;
-  grid-template-columns: ${({ hasAttribute, hasOrder }) =>
-    `${hasOrder ? "2rem" : ""} ${
-      hasAttribute ? "minmax(7rem, auto)" : "auto"
-    } ${hasAttribute ? "10.5rem" : ""}`};
+  grid-template-columns: ${({ $hasAttribute, $hasOrder }) =>
+    `${$hasOrder ? "2rem" : ""} ${
+      $hasAttribute ? "minmax(7rem, auto)" : "auto"
+    } ${$hasAttribute ? "10.5rem" : ""}`};
   max-width: 100%;
   align-items: center;
   width: fit-content;
@@ -42,11 +42,11 @@ export const StyledLabelSuggester = styled.div`
   flex-direction: column;
 `;
 interface StyledRelationValues {
-  hasSuggester: boolean;
+  $hasSuggester: boolean;
 }
 export const StyledRelationValues = styled.div<StyledRelationValues>`
-  margin-top: ${({ theme, hasSuggester }) =>
-    hasSuggester ? theme.space[2] : theme.space[1]};
+  margin-top: ${({ theme, $hasSuggester }) =>
+    $hasSuggester ? theme.space[2] : theme.space[1]};
 `;
 export const StyledSuggesterWrapper = styled.div`
   margin-top: ${({ theme }) => theme.space[1]};

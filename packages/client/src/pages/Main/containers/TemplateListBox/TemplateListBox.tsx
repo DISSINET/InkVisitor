@@ -46,9 +46,9 @@ export const TemplateListBox: React.FC<TemplateListBox> = () => {
     data: templatesData,
     error,
     isFetching: isFetchingTemplates,
-  } = useQuery(
-    ["templates", filterByClass, filterByLabel],
-    async () => {
+  } = useQuery({
+    queryKey: ["templates", filterByClass, filterByLabel],
+    queryFn: async () => {
       const filters: IRequestSearch = {
         onlyTemplates: true,
       };
@@ -67,11 +67,9 @@ export const TemplateListBox: React.FC<TemplateListBox> = () => {
       );
       return templates;
     },
-    {
-      enabled: api.isLoggedIn() && fourthPanelBoxesOpened["templates"],
-      initialData: [],
-    }
-  );
+    enabled: api.isLoggedIn() && fourthPanelBoxesOpened["templates"],
+    initialData: [],
+  });
 
   // CREATE MODAL
   const [showCreateModal, setShowCreateModal] = useState<boolean>(false);

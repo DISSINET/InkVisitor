@@ -3,16 +3,7 @@ import { EntityEnums, UserEnums } from "@shared/enums";
 import { IResponseUser, IUserRight } from "@shared/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import {
-  Button,
-  ButtonGroup,
-  Input,
-  Loader,
-  Modal,
-  ModalContent,
-  ModalFooter,
-  Submit,
-} from "components";
+import { Button, ButtonGroup, Input, Loader, Submit } from "components";
 import {
   AttributeButtonGroup,
   EntitySuggester,
@@ -33,6 +24,7 @@ import {
 } from "react-icons/ri";
 import { CellProps, Column, Row, useTable } from "react-table";
 import { toast } from "react-toastify";
+import { UserListEmailInput } from "./UserListEmailInput/UserListEmailInput";
 import {
   StyledNotActiveText,
   StyledTHead,
@@ -50,8 +42,6 @@ import {
 } from "./UserListStyles";
 import { UserListTableRow } from "./UserListTableRow/UserListTableRow";
 import { UsersUtils } from "./UsersUtils";
-import { TiWarning } from "react-icons/ti";
-import { UserListEmailInput } from "./UserListEmailInput/UserListEmailInput";
 
 type CellType = CellProps<IResponseUser>;
 
@@ -62,55 +52,51 @@ export const UserList: React.FC<UserList> = React.memo(() => {
 
   const queryClient = useQueryClient();
 
-  const { status, data, error, isFetching } = useQuery(
-    ["users"],
-    async () => {
+  const { status, data, error, isFetching } = useQuery({
+    queryKey: ["users"],
+    queryFn: async () => {
       const res = await api.usersGetMore({});
       return res.data.sort((a, b) => (a.id > b.id ? 1 : -1));
     },
-    { enabled: api.isLoggedIn() }
-  );
+    enabled: api.isLoggedIn(),
+  });
 
   const removingUser = useMemo(() => {
     return removingUserId ? data?.find((d) => d.id === removingUserId) : false;
   }, [removingUserId]);
 
-  const userMutation = useMutation(
-    async (userChanges: any) =>
+  const userMutation = useMutation({
+    mutationFn: async (userChanges: any) =>
       await api.usersUpdate(userChanges.id, userChanges),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries(["users"]);
-      },
-    }
-  );
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+    },
+  });
 
-  const resetPasswordMutation = useMutation(
-    async (userId: string) => await api.resetPassword(userId),
-    {
-      onSuccess: (data, variables) => {
-        const { message } = data.data;
+  const resetPasswordMutation = useMutation({
+    mutationFn: async (userId: string) => await api.resetPassword(userId),
+    onSuccess: (data, variables) => {
+      const { message } = data.data;
 
-        toast.info(message, {
-          autoClose: 6000,
-          closeOnClick: false,
-          onClick: () => {
-            navigator.clipboard.writeText(message ? message.split("'")[1] : "");
-            toast.info("Password copied to clipboard");
-          },
-          closeButton: true,
-          draggable: false,
-        });
-      },
-    }
-  );
+      toast.info(message, {
+        autoClose: 6000,
+        closeOnClick: false,
+        onClick: () => {
+          navigator.clipboard.writeText(message ? message.split("'")[1] : "");
+          toast.info("Password copied to clipboard");
+        },
+        closeButton: true,
+        draggable: false,
+      });
+    },
+  });
 
   const removeUser = async () => {
     if (removingUser) {
       const res: any = await api.usersDelete(removingUser.id);
       if (res.status === 200) {
         toast.warning(`User ${removingUser.name} removed!`);
-        queryClient.invalidateQueries(["users"]);
+        queryClient.invalidateQueries({ queryKey: ["users"] });
         setRemovingUserId(false);
       }
     }
@@ -171,7 +157,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
             icon = <FaEnvelopeOpenText size={16} />;
           }
           return (
-            <StyledUserNameColumn active={active} verified={verified}>
+            <StyledUserNameColumn $active={active} $verified={verified}>
               <StyledUserNameColumnIcon>{icon}</StyledUserNameColumnIcon>
 
               {!verified ? (
@@ -449,7 +435,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
           } = row.original;
 
           return (
-            <ButtonGroup noMarginRight>
+            <ButtonGroup $noMarginRight>
               <Button
                 key="r"
                 icon={<FaTrashAlt size={14} />}

@@ -55,34 +55,33 @@ export const EntityDetailCreateTemplateModal: React.FC<
 
   const { statementId, selectedDetailId } = useSearchParams();
 
-  const templateCreateMutation = useMutation(
-    async (templateEntity: IEntity) => await api.entityCreate(templateEntity),
-    {
-      onSuccess: (data, variables) => {
-        queryClient.invalidateQueries(["templates"]);
-        if (statementId && variables.class === EntityEnums.Class.Statement) {
-          queryClient.invalidateQueries(["statement-templates"]);
-        }
-        if (selectedDetailId) {
-          queryClient.invalidateQueries(["entity-templates"]);
-        }
-        updateEntityMutation.mutate({ usedTemplate: variables.id });
+  const templateCreateMutation = useMutation({
+    mutationFn: async (templateEntity: IEntity) =>
+      await api.entityCreate(templateEntity),
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["templates"] });
+      if (statementId && variables.class === EntityEnums.Class.Statement) {
+        queryClient.invalidateQueries({ queryKey: ["statement-templates"] });
+      }
+      if (selectedDetailId) {
+        queryClient.invalidateQueries({ queryKey: ["entity-templates"] });
+      }
+      updateEntityMutation.mutate({ usedTemplate: variables.id });
 
-        setCreateTemplateModal(false);
-        setCreateTemplateLabel("");
+      setCreateTemplateModal(false);
+      setCreateTemplateLabel("");
 
-        toast.info(
-          `Template [${variables.class}]: "${getShortLabelByLetterCount(
-            variables.label,
-            120
-          )}" created from entity "${getShortLabelByLetterCount(
-            entity.label,
-            120
-          )}"`
-        );
-      },
-    }
-  );
+      toast.info(
+        `Template [${variables.class}]: "${getShortLabelByLetterCount(
+          variables.label,
+          120
+        )}" created from entity "${getShortLabelByLetterCount(
+          entity.label,
+          120
+        )}"`
+      );
+    },
+  });
 
   const handleCreateTemplate = () => {
     // create template as a copy of the entity

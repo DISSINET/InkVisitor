@@ -66,7 +66,7 @@ export const Dropzone: React.FC<Dropzone> = ({
           {isWrongDropCategory && isOver && (
             <StyledAiOutlineWarning
               size={22}
-              color={themeContext.color.warning}
+              color={themeContext?.color.warning}
             />
           )}
         </StyledIconWrap>

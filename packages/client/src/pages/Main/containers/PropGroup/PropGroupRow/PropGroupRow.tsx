@@ -168,9 +168,9 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
       >
         <StyledGrid
           key={level + "|" + index + "|" + id}
-          tempDisabled={tempDisabled && category === draggedPropRow.category}
+          $tempDisabled={tempDisabled && category === draggedPropRow.category}
         >
-          <StyledPropLineColumn level={level} lowIdent={lowIdent}>
+          <StyledPropLineColumn $level={level} $lowIdent={lowIdent}>
             {userCanEdit && hasOrder ? (
               <div ref={dragRef} style={{ width: "2rem" }}>
                 <StyledFaGripVertical />
@@ -179,7 +179,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
               <div style={{ width: "2rem" }} />
             )}
           </StyledPropLineColumn>
-          <StyledPropLineColumn level={level} lowIdent={lowIdent}>
+          <StyledPropLineColumn $level={level} $lowIdent={lowIdent}>
             <StyledBorderLeft>
               <PropGroupRowType
                 propTypeEntity={propTypeEntity}
@@ -218,7 +218,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
               userCanEdit={userCanEdit}
               buttons={
                 <>
-                  <ButtonGroup height={19} noMarginRight>
+                  <ButtonGroup height={19} $noMarginRight>
                     {userCanEdit && (
                       <Button
                         key="delete"
