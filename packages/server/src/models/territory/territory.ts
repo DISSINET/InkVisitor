@@ -12,7 +12,10 @@ import User from "@models/user/user";
 import treeCache from "@service/treeCache";
 import { nonenumerable } from "@common/decorators";
 import { ROOT_TERRITORY_ID } from "@shared/types/statement";
-import { EProtocolTieType, ITerritoryProtocol } from "@shared/types/territory";
+import {
+  EProtocolTieType,
+  ITerritoryValidation,
+} from "@shared/types/territory";
 
 export class TerritoryParent implements IParentTerritory, IModel {
   territoryId: string;
@@ -34,14 +37,16 @@ export class TerritoryParent implements IParentTerritory, IModel {
 
 export class TerritoryData implements ITerritoryData, IModel {
   parent: TerritoryParent | false = false;
-  protocols?: TerritoryProtocol[];
+  validations?: TerritoryValidation[];
 
   constructor(data: Partial<ITerritoryData>) {
     if (data.parent) {
       this.parent = new TerritoryParent(data.parent || {});
     }
-    if (data.protocols) {
-      this.protocols = data.protocols.map(p => new TerritoryProtocol(p));
+    if (data.validations) {
+      this.validations = data.validations.map(
+        (p) => new TerritoryValidation(p)
+      );
     }
   }
 
@@ -50,17 +55,17 @@ export class TerritoryData implements ITerritoryData, IModel {
       return this.parent.isValid();
     }
 
-    if (this.protocols) {
-      if (this.protocols.find(p => !p.isValid())) {
+    if (this.validations) {
+      if (this.validations.find((p) => !p.isValid())) {
         return false;
       }
     }
-    
+
     return true;
   }
 }
 
-export class TerritoryProtocol implements ITerritoryProtocol {
+export class TerritoryValidation implements ITerritoryValidation {
   entityClasses: EntityEnums.Class[];
   classifications: string[];
   tieType: EProtocolTieType; // default is property
@@ -74,7 +79,7 @@ export class TerritoryProtocol implements ITerritoryProtocol {
   allowedEntities?: string[]; //
   detail: string;
 
-  constructor(data: Partial<ITerritoryProtocol>) {
+  constructor(data: Partial<ITerritoryValidation>) {
     this.entityClasses = data.entityClasses || [];
     this.classifications = data.classifications || [];
     this.tieType = data.tieType || EProtocolTieType.Property;
@@ -82,7 +87,7 @@ export class TerritoryProtocol implements ITerritoryProtocol {
       this.tieLevel = {
         levelStatement: data.tieLevel.levelStatement,
         levelMeta: data.tieLevel.levelMeta,
-      }
+      };
     }
     this.propType = data.propType;
     this.allowedClasses = data.allowedClasses;

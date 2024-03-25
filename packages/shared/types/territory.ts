@@ -8,7 +8,7 @@ export interface ITerritory extends IEntity {
 
 export interface ITerritoryData {
   parent: IParentTerritory | false; // TODO should be optional instead of false
-  protocols?: ITerritoryProtocol[];
+  validations?: ITerritoryValidation[];
 }
 
 export interface IParentTerritory {
@@ -16,7 +16,7 @@ export interface IParentTerritory {
   order: number;
 }
 
-export interface ITerritoryProtocol {
+export interface ITerritoryValidation {
   entityClasses: EntityEnums.Class[];
   classifications: string[];
   tieType: EProtocolTieType; // default is property
