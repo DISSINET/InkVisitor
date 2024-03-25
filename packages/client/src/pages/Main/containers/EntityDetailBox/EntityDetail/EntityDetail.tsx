@@ -593,8 +593,8 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
 
           <StyledDetailWrapper>
             {/* form section */}
-            <StyledDetailSection firstSection>
-              <StyledDetailSectionContent firstSection>
+            <StyledDetailSection $firstSection>
+              <StyledDetailSectionContent $firstSection>
                 <StyledDetailWarnings>
                   {entity.warnings &&
                     entity.warnings

@@ -79,6 +79,7 @@ export default class EntityWarnings {
     const lmWarning = await this.hasLM(conn);
     if (lmWarning) {
       warnings.push(lmWarning);
+    }
 
     const vetmWarnings = await this.hasVETM(conn);
     if (vetmWarnings) {
@@ -349,10 +350,7 @@ export default class EntityWarnings {
   async hasLM(conn: Connection): Promise<IWarning | null> {
     const entity = await findEntityById(conn, this.entityId);
 
-    if (
-      !entity ||
-      entity.language === EntityEnums.Language.Empty
-    ) {
+    if (!entity || entity.language === EntityEnums.Language.Empty) {
       return this.newWarning(
         WarningTypeEnums.LM,
         IWarningPositionSection.Entity
