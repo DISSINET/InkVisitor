@@ -19,7 +19,7 @@ export interface IParentTerritory {
 export interface ITerritoryProtocol {
   project: string;
   guidelinesVersion: string;
-  guidelinesURL: string;
+  guidelinesResource: string; // R class entity
   variant: ECASTEMOVariant;
   description: string;
   startDate: string; // V class entity

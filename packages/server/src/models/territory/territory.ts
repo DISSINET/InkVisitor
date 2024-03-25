@@ -19,7 +19,7 @@ import { findEntityById } from "@service/shorthands";
 export class TerritoryProtocol implements ITerritoryProtocol, IModel {
   project: string;
   guidelinesVersion: string;
-  guidelinesURL: string;
+  guidelinesResource: string;
   variant: ECASTEMOVariant;
   description: string;
   startDate: string;
@@ -28,7 +28,7 @@ export class TerritoryProtocol implements ITerritoryProtocol, IModel {
   constructor(data: Partial<ITerritoryProtocol>) {
     this.project = data?.project as string;
     this.guidelinesVersion = data?.guidelinesVersion as string;
-    this.guidelinesURL = data?.guidelinesURL as string;
+    this.guidelinesResource = data?.guidelinesResource as string;
     this.variant = data?.variant as ECASTEMOVariant;
     this.description = data?.description as string;
     this.startDate = data?.startDate as string;
