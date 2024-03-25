@@ -132,6 +132,10 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
         );
       case WarningTypeEnums.MAEE:
         return <b>Missing action/event equivalent</b>;
+      case WarningTypeEnums.LM:
+        return <b>Label language missing</b>;
+      case WarningTypeEnums.PSM:
+        return <b>Part of speech missing</b>;
       default:
         return <></>;
     }

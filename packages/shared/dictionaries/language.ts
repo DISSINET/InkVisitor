@@ -1,7 +1,7 @@
 import { EntityEnums } from "../enums";
 
 export const languageDict = [
-  { label: "-", value: EntityEnums.Language.Empty },
+  { label: "empty", value: EntityEnums.Language.Empty },
   { label: "Latin", value: EntityEnums.Language.Latin },
   { label: "English", value: EntityEnums.Language.English },
   { label: "Middle English", value: EntityEnums.Language.MiddleEnglish },
