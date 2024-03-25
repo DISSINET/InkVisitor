@@ -600,8 +600,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
                     entity.warnings
                       .filter(
                         (w) =>
-                          w.position?.section ===
-                          IWarningPositionSection.Relations
+                          w.position?.section === IWarningPositionSection.Entity
                       )
                       .map((warning, key) => {
                         return <Message key={key} warning={warning} />;

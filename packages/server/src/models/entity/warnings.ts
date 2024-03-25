@@ -84,6 +84,7 @@ export default class EntityWarnings {
     const vetmWarnings = await this.hasVETM(conn);
     if (vetmWarnings) {
       vetmWarnings.forEach((w) => warnings.push(w));
+
     }
 
     return warnings;
@@ -111,9 +112,9 @@ export default class EntityWarnings {
     return gotSCL
       ? null
       : this.newWarning(
-          WarningTypeEnums.SCLM,
-          IWarningPositionSection.Relations
-        );
+        WarningTypeEnums.SCLM,
+        IWarningPositionSection.Relations
+      );
   }
 
   /**

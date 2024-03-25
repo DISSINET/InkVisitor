@@ -9,8 +9,6 @@ import {
   ModelNotValidError,
 } from "@shared/types/errors";
 import User from "@models/user/user";
-import emitter from "@models/events/emitter";
-import { EventTypes } from "@models/events/types";
 import Prop from "@models/prop/prop";
 import { findEntityById } from "@service/shorthands";
 import { IRequest } from "../../custom_typings/request";
