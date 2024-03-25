@@ -3,18 +3,16 @@ import { Db } from "@service/rethink";
 import Entity from "./entity";
 import Statement, {
   StatementActant,
-  StatementAction,
   StatementTerritory,
 } from "@models/statement/statement";
 import { clean } from "@modules/common.test";
 import { findEntityById } from "@service/shorthands";
-import { IEntity, IEvent, IStatement } from "@shared/types";
-import Prop from "@models/prop/prop";
+import { IEvent, IReference, IStatement } from "@shared/types";
+import Prop, { PropSpec } from "@models/prop/prop";
 import { EntityEnums } from "@shared/enums";
 import { getEntityClass } from "@models/factory";
-import entities from "@modules/entities";
 import Reference from "./reference";
-import { InvalidDeleteError } from "@shared/types/errors";
+import { InvalidDeleteError, ModelNotValidError } from "@shared/types/errors";
 
 export const prepareEntity = (
   classValue: EntityEnums.Class = EntityEnums.Class.Concept
@@ -62,6 +60,87 @@ describe("test Entity.save", () => {
 
   test("updatedAt timestamp should be empty after initial save", async () => {
     expect(entity.updatedAt).toBeUndefined();
+  });
+});
+
+describe("test Entity.beforeSave", () => {
+  let db: Db;
+
+  const tpl = new Entity({ isTemplate: true });
+  const notTpl = new Entity({ isTemplate: false });
+
+  beforeAll(async () => {
+    db = new Db();
+    await db.initDb();
+    await tpl.save(db.connection);
+    await notTpl.save(db.connection);
+  });
+
+  afterAll(async () => {
+    await tpl.delete(db.connection);
+    await notTpl.delete(db.connection);
+    await db.close();
+  });
+
+  test("before save should not throw anything if linked-entities are empty", async () => {
+    const entity = new Entity({});
+    expect(async () => {
+      await entity.beforeSave(db.connection);
+    }).not.toThrowError();
+  });
+
+  test("before save should not throw anything if linked-entities are non-tpls", async () => {
+    const entityRef = new Entity({
+      references: [
+        { id: "rand", resource: "res", value: notTpl.id },
+      ] as IReference[],
+    });
+    const statementAction = new Statement({});
+    statementAction.data.actions.push(
+      new StatementAction({
+        props: [
+          new Prop({
+            type: new PropSpec({
+              entityId: notTpl.id
+            }),
+          }),
+        ],
+      })
+    );
+
+    expect(async () => {
+      await entityRef.beforeSave(db.connection);
+    }).not.toThrowError();
+    expect(async () => {
+      await statementAction.beforeSave(db.connection);
+    }).not.toThrowError();
+  });
+
+  test("before save should throw an error if tpl is used in various places", async () => {
+    const entityRef = new Entity({
+      references: [
+        { id: "rand", resource: "res", value: tpl.id },
+      ] as IReference[],
+    });
+    const statementAction = new Statement({});
+    statementAction.data.actions.push(
+      new StatementAction({
+        props: [
+          new Prop({
+            type: new PropSpec({
+              entityId: tpl.id
+            }),
+          }),
+        ],
+      })
+    );
+
+    expect(async () => {
+      await entityRef.beforeSave(db.connection);
+    }).rejects.toThrowError(ModelNotValidError);
+    expect(async () => {
+      await statementAction.beforeSave(db.connection);
+    }).rejects.toThrowError(ModelNotValidError);
   });
 });
 

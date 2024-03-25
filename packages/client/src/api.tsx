@@ -212,8 +212,8 @@ class Api {
       (responseData as any).response &&
       (responseData as any).response.data
     ) {
-      out.error = (responseData as Record<string, string>).error;
-      out.message = (responseData as Record<string, string>).message;
+      out.error = (responseData as any).response.data.error;
+      out.message = (responseData as any).response.data.message;
     }
 
     return out;

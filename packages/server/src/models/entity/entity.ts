@@ -9,13 +9,12 @@ import {
   ModelNotValidError,
 } from "@shared/types/errors";
 import User from "@models/user/user";
-import emitter from "@models/events/emitter";
-import { EventTypes } from "@models/events/types";
 import Prop from "@models/prop/prop";
 import { findEntityById } from "@service/shorthands";
 import { IRequest } from "../../custom_typings/request";
 import { sanitizeText } from "@common/functions";
 import Reference from "./reference";
+import { link } from "fs";
 
 export default class Entity implements IEntity, IDbModel {
   static table = "entities";
@@ -89,6 +88,17 @@ export default class Entity implements IEntity, IDbModel {
     }
 
     return result.inserted === 1;
+  }
+
+  /**
+   * Use this method for doing asynchronous operation/checks before the save operation
+   * @param db db connection
+   */
+  async beforeSave(db: Connection): Promise<void> {
+    const linkedEntities = await Entity.findEntitiesByIds(db, this.getEntitiesIds())
+    if (linkedEntities.find(e => e.isTemplate)) {
+      throw new ModelNotValidError("cannot use template in entity instance")
+    }
   }
 
   update(
@@ -221,11 +231,6 @@ export default class Entity implements IEntity, IDbModel {
    */
   getEntitiesIds(): string[] {
     const entityIds: Record<string, null> = {};
-
-    // get usedTemplate entity
-    if (this.usedTemplate) {
-      entityIds[this.usedTemplate] = null;
-    }
 
     Entity.extractIdsFromProps(this.props).forEach((element) => {
       if (element) {

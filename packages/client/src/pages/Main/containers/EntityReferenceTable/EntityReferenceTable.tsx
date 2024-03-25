@@ -257,56 +257,56 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
           );
         },
       },
-      {
-        id: "text reference",
-        Cell: ({ row }: CellType) => {
-          const reference = row.original;
-          const resourceEntity = entities[reference.resource];
+      // {
+      //   id: "text reference",
+      //   Cell: ({ row }: CellType) => {
+      //     const reference = row.original;
+      //     const resourceEntity = entities[reference.resource];
 
-          const document =
-            resourceEntity && documents
-              ? documents.find(
-                  (doc) => doc.id === resourceEntity.data.documentId
-                )
-              : undefined;
+      //     const document =
+      //       resourceEntity && documents
+      //         ? documents.find(
+      //             (doc) => doc.id === resourceEntity.data.documentId
+      //           )
+      //         : undefined;
 
-          return (
-            <>
-              {resourceEntity ? (
-                resourceEntity.data.documentId ? (
-                  document?.referencedEntityIds.includes(entityId) ? (
-                    <Button
-                      tooltipLabel="with entity"
-                      icon={<GrDocumentVerified />}
-                      inverted
-                      color="primary"
-                      noBorder
-                    />
-                  ) : (
-                    <Button
-                      tooltipLabel="no reference in document found"
-                      icon={<GrDocument />}
-                      inverted
-                      color="plain"
-                      noBorder
-                    />
-                  )
-                ) : (
-                  <Button
-                    icon={<GrDocumentMissing />}
-                    tooltipLabel="no document assigned for this resource"
-                    color="danger"
-                    noBorder
-                    inverted
-                  />
-                )
-              ) : (
-                <></>
-              )}
-            </>
-          );
-        },
-      },
+      //     return (
+      //       <>
+      //         {resourceEntity ? (
+      //           resourceEntity.data.documentId ? (
+      //             document?.referencedEntityIds.includes(entityId) ? (
+      //               <Button
+      //                 tooltipLabel="with entity"
+      //                 icon={<GrDocumentVerified />}
+      //                 inverted
+      //                 color="primary"
+      //                 noBorder
+      //               />
+      //             ) : (
+      //               <Button
+      //                 tooltipLabel="no reference in document found"
+      //                 icon={<GrDocument />}
+      //                 inverted
+      //                 color="plain"
+      //                 noBorder
+      //               />
+      //             )
+      //           ) : (
+      //             <Button
+      //               icon={<GrDocumentMissing />}
+      //               tooltipLabel="no document assigned for this resource"
+      //               color="danger"
+      //               noBorder
+      //               inverted
+      //             />
+      //           )
+      //         ) : (
+      //           <></>
+      //         )}
+      //       </>
+      //     );
+      //   },
+      // },
       {
         id: "reference buttons",
         Cell: ({ row }: CellType) => {
