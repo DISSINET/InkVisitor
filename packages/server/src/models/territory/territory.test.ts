@@ -6,6 +6,7 @@ import { findEntityById, deleteEntities } from "@service/shorthands";
 import { IParentTerritory, ITerritory } from "@shared/types";
 import { EntityEnums } from "@shared/enums";
 import { ECASTEMOVariant } from "@shared/types/territory";
+import { randomUUID } from "crypto";
 
 describe("models/territory", function () {
   describe("Territory constructor test", function () {
@@ -78,7 +79,7 @@ describe("models/territory", function () {
         const db = new Db();
         await db.initDb();
 
-        const root = new Territory({});
+        const root = new Territory({ id: `root-${randomUUID()}` });
         await root.save(db.connection);
         const child = new Territory({
           data: { parent: { territoryId: root.id, order: 0 } },
@@ -96,7 +97,7 @@ describe("models/territory", function () {
         const db = new Db();
         await db.initDb();
 
-        const root = new Territory({});
+        const root = new Territory({ id: `root-${randomUUID()}` });
         await root.save(db.connection);
         const child = new Territory({
           data: { parent: { territoryId: root.id, order: 0 } },
