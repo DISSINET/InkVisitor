@@ -13,10 +13,10 @@ import User from "@models/user/user";
 import treeCache from "@service/treeCache";
 import { nonenumerable } from "@common/decorators";
 import { ROOT_TERRITORY_ID } from "@shared/types/statement";
-import { ECASTEMOVariant, ITerritoryCampaign } from "@shared/types/territory";
+import { ECASTEMOVariant, ITerritoryProtocol } from "@shared/types/territory";
 import { findEntityById } from "@service/shorthands";
 
-export class TerritoryCampaign implements ITerritoryCampaign, IModel {
+export class TerritoryProtocol implements ITerritoryProtocol, IModel {
   project: string;
   guidelinesVersion: string;
   guidelinesURL: string;
@@ -25,7 +25,7 @@ export class TerritoryCampaign implements ITerritoryCampaign, IModel {
   startDate: string;
   endDate: string;
 
-  constructor(data: Partial<ITerritoryCampaign>) {
+  constructor(data: Partial<ITerritoryProtocol>) {
     this.project = data?.project as string;
     this.guidelinesVersion = data?.guidelinesVersion as string;
     this.guidelinesURL = data?.guidelinesURL as string;
@@ -59,14 +59,14 @@ export class TerritoryParent implements IParentTerritory, IModel {
 
 export class TerritoryData implements ITerritoryData, IModel {
   parent: TerritoryParent | false = false;
-  campaign?: ITerritoryCampaign;
+  protocol?: ITerritoryProtocol;
 
   constructor(data: Partial<ITerritoryData>) {
     if (data.parent) {
       this.parent = new TerritoryParent(data.parent || {});
     }
-    if (data.campaign) {
-      this.campaign = new TerritoryCampaign(data.campaign || {});
+    if (data.protocol) {
+      this.protocol = new TerritoryProtocol(data.protocol || {});
     }
   }
 
@@ -111,8 +111,8 @@ class Territory extends Entity implements ITerritory {
   async beforeSave(db: Connection): Promise<void> {
     await super.beforeSave(db);
 
-    // fix campaign if creating new T and if campaign is missing
-    if (this.id || this.data.campaign || !this.data.parent) {
+    // fix protocol if creating new T and if protocol is missing
+    if (this.id || this.data.protocol || !this.data.parent) {
       return;
     }
 
@@ -127,7 +127,7 @@ class Territory extends Entity implements ITerritory {
       );
     }
 
-    this.data.campaign = parentTerritory.data.campaign;
+    this.data.protocol = parentTerritory.data.protocol;
   }
 
   /**

@@ -8,7 +8,7 @@ export interface ITerritory extends IEntity {
 
 export interface ITerritoryData {
   parent: IParentTerritory | false;
-  campaign?: ITerritoryCampaign;
+  protocol?: ITerritoryProtocol;
 }
 
 export interface IParentTerritory {
@@ -16,7 +16,7 @@ export interface IParentTerritory {
   order: number;
 }
 
-export interface ITerritoryCampaign {
+export interface ITerritoryProtocol {
   project: string;
   guidelinesVersion: string;
   guidelinesURL: string;

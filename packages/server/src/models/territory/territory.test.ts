@@ -322,8 +322,8 @@ describe("models/territory", function () {
   describe("Territory - beforeSave", function () {
     let db: Db;
     let t0: Territory;
-    let twithoutCampaign: Territory;
-    let twithCampaign: Territory;
+    let twithoutProtocol: Territory;
+    let twithProtocol: Territory;
 
     beforeAll(async () => {
       db = new Db();
@@ -336,7 +336,7 @@ describe("models/territory", function () {
         id: "T0",
         data: {
           parent: false,
-          campaign: {
+          protocol: {
             project: "T0",
             description: "",
             endDate: "",
@@ -347,24 +347,24 @@ describe("models/territory", function () {
           },
         },
       });
-      twithoutCampaign = new Territory({
-        id: "twithoutCampaign",
+      twithoutProtocol = new Territory({
+        id: "twithoutProtocol",
         data: {
           parent: {
             order: 0,
-            territoryId: "T0"
+            territoryId: "T0",
           },
         },
       });
-      twithCampaign = new Territory({
-        id: "twithCampaign",
+      twithProtocol = new Territory({
+        id: "twithProtocol",
         data: {
           parent: {
             order: 1,
-            territoryId: "T0"
+            territoryId: "T0",
           },
-          campaign: {
-            project: "twithCampaign",
+          protocol: {
+            project: "twithProtocol",
             description: "",
             endDate: "",
             guidelinesURL: "",
@@ -375,66 +375,68 @@ describe("models/territory", function () {
         },
       });
       await t0.save(db.connection);
-      await twithoutCampaign.save(db.connection);
-      await twithCampaign.save(db.connection);
+      await twithoutProtocol.save(db.connection);
+      await twithProtocol.save(db.connection);
     });
 
     afterAll(async () => {
       await db.close();
     });
 
-    describe("territory should receive campaign from parent", () => {
-      it("should have filled campaign from twithCampaign", async () => {
+    describe("territory should receive protocol from parent", () => {
+      it("should have filled protocol from twithProtocol", async () => {
         const tNew = new Territory({
           data: {
             parent: {
               order: 0,
-              territoryId: twithCampaign.id
+              territoryId: twithProtocol.id,
             },
           },
         });
         await tNew.beforeSave(db.connection);
-        expect(tNew.data.campaign?.project).toEqual(twithCampaign.data.campaign?.project)
+        expect(tNew.data.protocol?.project).toEqual(
+          twithProtocol.data.protocol?.project
+        );
       });
     });
 
-    describe("territory should retain campaign", () => {
-      it("should have original campaign", async () => {
-        const customProject = "dont change"
+    describe("territory should retain protocol", () => {
+      it("should have original protocol", async () => {
+        const customProject = "dont change";
         const tNew = new Territory({
           data: {
             parent: {
               order: 0,
-              territoryId: twithCampaign.id
+              territoryId: twithProtocol.id,
             },
-            campaign: {
+            protocol: {
               description: "",
               endDate: "",
               guidelinesURL: "",
               guidelinesVersion: "",
-              project:customProject,
+              project: customProject,
               startDate: "",
-              variant: ECASTEMOVariant.FullCASTEMO
-            }
-          },
-        });
-        await tNew.beforeSave(db.connection);
-        expect(tNew.data.campaign?.project).toEqual(customProject)
-      });
-    });
-
-    describe("territory should receive empty campaign if parent has none", () => {
-      it("should have empty campaign", async () => {
-        const tNew = new Territory({
-          data: {
-            parent: {
-              order: 0,
-              territoryId: twithoutCampaign.id
+              variant: ECASTEMOVariant.FullCASTEMO,
             },
           },
         });
         await tNew.beforeSave(db.connection);
-        expect(tNew.data.campaign).toEqual(undefined)
+        expect(tNew.data.protocol?.project).toEqual(customProject);
+      });
+    });
+
+    describe("territory should receive empty protocol if parent has none", () => {
+      it("should have empty protocol", async () => {
+        const tNew = new Territory({
+          data: {
+            parent: {
+              order: 0,
+              territoryId: twithoutProtocol.id,
+            },
+          },
+        });
+        await tNew.beforeSave(db.connection);
+        expect(tNew.data.protocol).toEqual(undefined);
       });
     });
   });
