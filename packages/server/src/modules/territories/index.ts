@@ -148,16 +148,18 @@ export default Router()
 
         await request.db.lock();
 
-        const territory = await findEntityById<ITerritory>(
+        const territoryData = await findEntityById<ITerritory>(
           request.db,
           territoryId
         );
-        if (!territory || territory.class !== EntityEnums.Class.Territory) {
+        if (!territoryData || territoryData.class !== EntityEnums.Class.Territory) {
           throw new TerritoryDoesNotExits(
             `territory ${territoryId} was not found`,
             territoryId
           );
         }
+
+        const territory = new Territory(territoryData);
 
         const withChildren = !!request.body.withChildren;
         const targetIds = request.body.targets || [];
@@ -171,17 +173,19 @@ export default Router()
             targetIds.join(",")
           );
         }
+        
+        const childs = await territory.findChilds(request.db.connection);
 
         const copyUnderTarget = async (
           targetId: string,
-          original: ITerritory
+          original: ITerritory,
+          childs: ITerritory[]
         ) => {
           const targetT = new Territory({ id: targetId });
-          const childs = await targetT.findChilds(request.db.connection);
-          const lastOrder = Object.keys(childs)
+          const targetChilds = await targetT.findChilds(request.db.connection);
+          const lastOrder = Object.keys(targetChilds)
             .filter((key) => !isNaN(parseInt(key)))
             .reduce((max, key) => Math.max(max, parseInt(key)), -Infinity);
-
 
           const newT = new Territory({
             ...original,
@@ -197,14 +201,14 @@ export default Router()
           await newT.save(request.db.connection);
 
           if (withChildren) {
-            for (const child of Object.values(childs)) {
-              await copyUnderTarget(newT.id, child);            
+            for (const child of childs) {
+              await copyUnderTarget(newT.id, child, []);            
             }
           }
         };
 
         for (const target of tgts) {
-          await copyUnderTarget(target.id, territory);
+          await copyUnderTarget(target.id, territory, Object.values(childs));
         }
 
         return {
