@@ -5,12 +5,9 @@ import {
   IResponseTerritory,
   ITerritory,
 } from "@shared/types";
-import {
-  UseMutationResult,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { UseMutationResult, useQuery } from "@tanstack/react-query";
 import api from "api";
+import { AxiosResponse } from "axios";
 import {
   Button,
   ButtonGroup,
@@ -21,6 +18,7 @@ import {
 } from "components";
 import React, { useEffect, useState } from "react";
 import { TbHomeMove } from "react-icons/tb";
+import { getShortLabelByLetterCount } from "utils/utils";
 import { EntitySuggester } from "..";
 import { AttributeButtonGroup } from "../AttributeButtonGroup/AttributeButtonGroup";
 import { EntityTag } from "../EntityTag/EntityTag";
@@ -38,8 +36,6 @@ import {
   StyledTagList,
   StyledTagWrap,
 } from "./TerritoryActionModalStyles";
-import { AxiosResponse } from "axios";
-import { getShortLabelByLetterCount } from "utils/utils";
 
 interface TerritoryActionModal {
   territory: IResponseTerritory;
@@ -58,6 +54,16 @@ interface TerritoryActionModal {
     },
     unknown
   >;
+  duplicateTerritoryMutation: UseMutationResult<
+    AxiosResponse<IResponseGeneric<any>, any>,
+    Error,
+    {
+      territoryId: string;
+      targets: string[];
+      withChildren: boolean;
+    },
+    unknown
+  >;
 }
 export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
   showModal = false,
@@ -68,6 +74,7 @@ export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
   excludedMoveTerritories,
 
   updateTerritoryMutation,
+  duplicateTerritoryMutation,
 }) => {
   const [action, setAction] = useState<"move" | "duplicate">("move");
   const [includeChildren, setIncludeChildren] = useState(true);
@@ -242,6 +249,7 @@ export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
               onClick={() => {
                 if (newParentEntities.length > 0) {
                   if (action === "move") {
+                    // MOVE
                     updateTerritoryMutation.mutate({
                       territoryId: territory.id,
                       changes: {
@@ -255,6 +263,12 @@ export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
                     });
                     onClose();
                   } else if (action === "duplicate") {
+                    // DUPLICATE
+                    duplicateTerritoryMutation.mutate({
+                      territoryId: territory.id,
+                      targets: newParentEntities.map((e) => e.id),
+                      withChildren: includeChildren,
+                    });
                     onClose();
                   }
                 }

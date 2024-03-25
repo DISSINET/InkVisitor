@@ -108,6 +108,16 @@ interface StatementListHeader {
     },
     unknown
   >;
+  duplicateTerritoryMutation: UseMutationResult<
+    AxiosResponse<IResponseGeneric<any>, any>,
+    Error,
+    {
+      territoryId: string;
+      targets: string[];
+      withChildren: boolean;
+    },
+    unknown
+  >;
 }
 export const StatementListHeader: React.FC<StatementListHeader> = ({
   territory,
@@ -124,6 +134,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
   appendReferencesMutation,
 
   updateTerritoryMutation,
+  duplicateTerritoryMutation,
 }) => {
   const dispatch = useAppDispatch();
   const queryClient = useQueryClient();
@@ -284,7 +295,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
   };
 
   const [batchAction, setBatchAction] = useState<DropdownItem>(batchOptions[0]);
-  const [showTActionModal, setShowTActionModal] = useState(true);
+  const [showTActionModal, setShowTActionModal] = useState(false);
   const [moveToParentEntity, setMoveToParentEntity] = useState<IEntity | false>(
     false
   );
@@ -450,6 +461,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
           territory={territory}
           updateTerritoryMutation={updateTerritoryMutation}
           excludedMoveTerritories={excludedMoveTerritories}
+          duplicateTerritoryMutation={duplicateTerritoryMutation}
         />
       )}
     </>

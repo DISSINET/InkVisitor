@@ -338,6 +338,23 @@ export const StatementListBox: React.FC = () => {
     },
   });
 
+  const duplicateTerritoryMutation = useMutation({
+    mutationFn: async (tObject: {
+      territoryId: string;
+      targets: string[];
+      withChildren: boolean;
+    }) =>
+      await api.territoriesCopy(
+        tObject.territoryId,
+        tObject.targets,
+        tObject.withChildren
+      ),
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["tree"] });
+      queryClient.invalidateQueries({ queryKey: ["territory"] });
+    },
+  });
+
   return (
     <>
       {data && (
@@ -355,6 +372,7 @@ export const StatementListBox: React.FC = () => {
           replaceReferencesMutation={replaceReferencesMutation}
           appendReferencesMutation={appendReferencesMutation}
           updateTerritoryMutation={updateTerritoryMutation}
+          duplicateTerritoryMutation={duplicateTerritoryMutation}
         />
       )}
       {statements ? (
@@ -423,7 +441,8 @@ export const StatementListBox: React.FC = () => {
           moveStatementsMutation.isPending ||
           duplicateStatementsMutation.isPending ||
           cloneStatementMutation.isPending ||
-          updateTerritoryMutation.isPending
+          updateTerritoryMutation.isPending ||
+          duplicateTerritoryMutation.isPending
         }
       />
     </>
