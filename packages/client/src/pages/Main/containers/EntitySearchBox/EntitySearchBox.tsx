@@ -237,7 +237,7 @@ export const EntitySearchBox: React.FC = () => {
   //   return options;
   // }, [templates]);
 
-  const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
+  const [showAdvancedOptions, setShowAdvancedOptions] = useState(true);
 
   useEffect(() => {
     if (!showAdvancedOptions) {
@@ -486,6 +486,17 @@ export const EntitySearchBox: React.FC = () => {
                   />
                 </div>
               )}
+            </StyledRow>
+            <StyledRow>
+              <StyledRowHeader>referenced to</StyledRowHeader>
+              <EntitySuggester
+                disableCreate
+                onPicked={(entity) => console.log(entity)}
+                disableTemplatesAccept
+                categoryTypes={[EntityEnums.Class.Resource]}
+                inputWidth="full"
+                placeholder="resource"
+              />
             </StyledRow>
             <StyledRow>
               <StyledRowHeader>created at</StyledRowHeader>
