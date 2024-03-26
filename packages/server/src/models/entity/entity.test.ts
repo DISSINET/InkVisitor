@@ -3,7 +3,6 @@ import { Db } from "@service/rethink";
 import Entity from "./entity";
 import Statement, {
   StatementActant,
-  StatementAction,
   StatementTerritory,
 } from "@models/statement/statement";
 import { clean } from "@modules/common.test";

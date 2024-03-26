@@ -2,7 +2,7 @@ import Relation from "@models/relation/relation";
 import Superclass from "@models/relation/superclass";
 import { findEntityById } from "@service/shorthands";
 import { EntityEnums, RelationEnums, WarningTypeEnums } from "@shared/enums";
-import { IAction, IWarning } from "@shared/types";
+import { IAction, IConcept, IWarning } from "@shared/types";
 import { IActionValency } from "@shared/types/action";
 import { InternalServerError } from "@shared/types/errors";
 import { IWarningPositionSection } from "@shared/types/warning";
@@ -71,9 +71,20 @@ export default class EntityWarnings {
       warnings.push(maeeWarning);
     }
 
+    const psmWarning = await this.hasPSM(conn);
+    if (psmWarning) {
+      warnings.push(psmWarning);
+    }
+
+    const lmWarning = await this.hasLM(conn);
+    if (lmWarning) {
+      warnings.push(lmWarning);
+    }
+
     const vetmWarnings = await this.hasVETM(conn);
     if (vetmWarnings) {
       vetmWarnings.forEach((w) => warnings.push(w));
+
     }
 
     return warnings;
@@ -101,9 +112,9 @@ export default class EntityWarnings {
     return gotSCL
       ? null
       : this.newWarning(
-          WarningTypeEnums.SCLM,
-          IWarningPositionSection.Relations
-        );
+        WarningTypeEnums.SCLM,
+        IWarningPositionSection.Relations
+      );
   }
 
   /**
@@ -300,6 +311,49 @@ export default class EntityWarnings {
       return this.newWarning(
         WarningTypeEnums.MAEE,
         IWarningPositionSection.Relations
+      );
+    }
+
+    return null;
+  }
+
+  /**
+   * Tests if there is PSM warning and returns it
+   * @param conn
+   * @returns
+   */
+  async hasPSM(conn: Connection): Promise<IWarning | null> {
+    if (this.class !== EntityEnums.Class.Concept) {
+      return null;
+    }
+
+    const concept = await findEntityById<IConcept>(conn, this.entityId);
+
+    if (
+      !concept ||
+      concept.data.pos === EntityEnums.ConceptPartOfSpeech.Empty
+    ) {
+      return this.newWarning(
+        WarningTypeEnums.PSM,
+        IWarningPositionSection.Entity
+      );
+    }
+
+    return null;
+  }
+
+  /**
+   * Tests if there is LM warning and returns it
+   * @param conn
+   * @returns
+   */
+  async hasLM(conn: Connection): Promise<IWarning | null> {
+    const entity = await findEntityById(conn, this.entityId);
+
+    if (!entity || entity.language === EntityEnums.Language.Empty) {
+      return this.newWarning(
+        WarningTypeEnums.LM,
+        IWarningPositionSection.Entity
       );
     }
 

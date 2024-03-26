@@ -126,12 +126,16 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
       case WarningTypeEnums.VETM:
         return (
           <span>
-            <b>Missing entity type valency</b>
+            <b>Entity type not filled in for all valencies</b>
             {positionName}
           </span>
         );
       case WarningTypeEnums.MAEE:
-        return <b>Missing action/event equivalent</b>;
+        return <b>Missing Action/event equivalent</b>;
+      case WarningTypeEnums.LM:
+        return <b>Missing part of speech attribute</b>;
+      case WarningTypeEnums.PSM:
+        return <b>Missing label language attribute</b>;
       default:
         return <></>;
     }

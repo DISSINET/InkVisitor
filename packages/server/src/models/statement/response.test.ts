@@ -31,11 +31,11 @@ class MockResponse extends ResponseStatement {
     this.entities[action.id] = action;
   }
 
-  addActant(actant: IEntity, pos: EntityEnums.Position) {
+  addActant(actant: IEntity, position: EntityEnums.Position) {
     this.data.actants.push(
       new StatementActant({
         entityId: actant.id,
-        position: pos,
+        position,
       })
     );
     this.entities[actant.id] = actant;
