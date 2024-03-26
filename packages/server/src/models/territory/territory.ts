@@ -12,6 +12,10 @@ import User from "@models/user/user";
 import treeCache from "@service/treeCache";
 import { nonenumerable } from "@common/decorators";
 import { ROOT_TERRITORY_ID } from "@shared/types/statement";
+import {
+  EProtocolTieType,
+  ITerritoryValidation,
+} from "@shared/types/territory";
 
 export class TerritoryParent implements IParentTerritory, IModel {
   territoryId: string;
@@ -33,10 +37,16 @@ export class TerritoryParent implements IParentTerritory, IModel {
 
 export class TerritoryData implements ITerritoryData, IModel {
   parent: TerritoryParent | false = false;
+  validations?: TerritoryValidation[];
 
   constructor(data: Partial<ITerritoryData>) {
     if (data.parent) {
       this.parent = new TerritoryParent(data.parent || {});
+    }
+    if (data.validations) {
+      this.validations = data.validations.map(
+        (p) => new TerritoryValidation(p)
+      );
     }
   }
 
@@ -45,6 +55,42 @@ export class TerritoryData implements ITerritoryData, IModel {
       return this.parent.isValid();
     }
 
+    if (this.validations) {
+      if (this.validations.find((p) => !p.isValid())) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+}
+
+export class TerritoryValidation implements ITerritoryValidation {
+  entityClasses: EntityEnums.Class[];
+  classifications: string[];
+  tieType: EProtocolTieType; // default is property
+  tieLevel?: {
+    // relevant only in case of Classification or Property is selected as a tie
+    levelStatement: boolean; // default is true
+    levelMeta: boolean; // default is true
+  };
+  propType?: string[]; // relevant only in case of Property is selected as a tie
+  allowedClasses?: EntityEnums.Class[]; // not relevant if allowedEntities is set
+  allowedEntities?: string[]; //
+  detail: string;
+
+  constructor(data: Partial<ITerritoryValidation>) {
+    this.entityClasses = data.entityClasses || [];
+    this.classifications = data.classifications || [];
+    this.tieType = data.tieType || EProtocolTieType.Property;
+
+    this.propType = data.propType;
+    this.allowedClasses = data.allowedClasses;
+    this.allowedEntities = data.allowedEntities;
+    this.detail = data.detail || "";
+  }
+
+  isValid(): boolean {
     return true;
   }
 }
