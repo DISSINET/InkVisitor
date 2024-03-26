@@ -33,9 +33,11 @@ export const StyledGreyText = styled.p`
   font-weight: bold;
   margin-bottom: 0.2rem;
 `;
+export const StyledInto = styled.i`
+  margin-bottom: 0.5rem;
+`;
 export const StyledArrowWrapper = styled.div`
   margin: 0 1rem;
-  margin-top: 0.5rem;
   display: flex;
   flex-direction: column;
   align-items: center;

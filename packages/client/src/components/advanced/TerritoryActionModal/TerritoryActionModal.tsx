@@ -31,6 +31,7 @@ import {
   StyledFlexRow,
   StyledGreyText,
   StyledHeadingColumn,
+  StyledInto,
   StyledNotes,
   StyledParentRow,
   StyledTagList,
@@ -156,12 +157,12 @@ export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
 
         <StyledParentRow>
           <div>
-            <StyledBlueText>Old parent T</StyledBlueText>
+            <StyledBlueText>from old parent T</StyledBlueText>
             {oldParentTerritory && <EntityTag entity={oldParentTerritory} />}
           </div>
 
           <StyledArrowWrapper>
-            <i>into</i>
+            <StyledInto>into</StyledInto>
             <StyledArrowContainer>
               <StyledArrowShaft />
               <StyledArrowHead />
@@ -169,7 +170,7 @@ export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
           </StyledArrowWrapper>
 
           <div>
-            <StyledGreyText>{`New parent(s) T (${newParentEntities.length} T selected)`}</StyledGreyText>
+            <StyledGreyText>{`new parent(s) T (${newParentEntities.length} T selected)`}</StyledGreyText>
 
             <StyledTagList>
               {newParentEntities.map((e, key) => {
@@ -283,17 +284,6 @@ export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
             {showDuplicateNote && (
               <p>
                 <i>{`Note: Statements are not going to be duplicated`}</i>
-              </p>
-            )}
-
-            {/* this note will appear if we are moving T and more than one T is selected
-              <T label> is the label of the first T in the list */}
-            {showMoveNote && (
-              <p>
-                <i>{`Note: Territory will be moved only to the first selected T (<T ${getShortLabelByLetterCount(
-                  newParentEntities[0].label,
-                  40
-                )}>)`}</i>
               </p>
             )}
           </StyledNotes>

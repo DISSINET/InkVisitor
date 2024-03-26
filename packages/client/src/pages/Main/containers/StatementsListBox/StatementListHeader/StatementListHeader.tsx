@@ -342,10 +342,12 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
                   setShowTActionModal(true);
                 }}
                 excludedActantIds={excludedMoveTerritories}
-              />
-              <Button
-                icon={<TbHomeMove />}
-                onClick={() => setShowTActionModal(true)}
+                button={
+                  <Button
+                    icon={<TbHomeMove size={14} />}
+                    onClick={() => setShowTActionModal(true)}
+                  />
+                }
               />
             </StyledMoveToParent>
           )}

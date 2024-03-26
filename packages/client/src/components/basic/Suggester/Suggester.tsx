@@ -83,6 +83,7 @@ interface Suggester {
 
   showCreateModal: boolean;
   setShowCreateModal: React.Dispatch<React.SetStateAction<boolean>>;
+  button?: React.ReactNode;
 }
 
 export const Suggester: React.FC<Suggester> = ({
@@ -119,6 +120,7 @@ export const Suggester: React.FC<Suggester> = ({
 
   showCreateModal,
   setShowCreateModal,
+  button,
 }) => {
   const [selected, setSelected] = useState(-1);
   const [isFocused, setIsFocused] = useState(false);
@@ -341,6 +343,7 @@ export const Suggester: React.FC<Suggester> = ({
               />
             </StyledSuggesterButton>
           )}
+          {button}
         </StyledInputWrapper>
 
         {isWrongDropCategory && isOver && (
