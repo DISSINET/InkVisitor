@@ -39,11 +39,6 @@ export interface ITerritoryValidation {
   entityClasses: EntityEnums.Class[];
   classifications: string[];
   tieType: EProtocolTieType; // default is property
-  tieLevel?: {
-    // relevant only in case of Classification or Property is selected as a tie
-    levelStatement: boolean; // default is true
-    levelMeta: boolean; // default is true
-  };
   propType?: string[]; // relevant only in case of Property is selected as a tie
   allowedClasses?: EntityEnums.Class[]; // not relevant if allowedEntities is set
   allowedEntities?: string[]; //
