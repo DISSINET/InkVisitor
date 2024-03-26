@@ -83,12 +83,7 @@ export class TerritoryValidation implements ITerritoryValidation {
     this.entityClasses = data.entityClasses || [];
     this.classifications = data.classifications || [];
     this.tieType = data.tieType || EProtocolTieType.Property;
-    if (data.tieLevel) {
-      this.tieLevel = {
-        levelStatement: data.tieLevel.levelStatement,
-        levelMeta: data.tieLevel.levelMeta,
-      };
-    }
+
     this.propType = data.propType;
     this.allowedClasses = data.allowedClasses;
     this.allowedEntities = data.allowedEntities;
