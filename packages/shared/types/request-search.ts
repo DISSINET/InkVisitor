@@ -1,7 +1,3 @@
-/**
- * Deprecated
- */
-
 import { EntityEnums } from "../enums";
 import { EnumValidators } from "../enums/validators";
 import { BadParams } from "./errors";
@@ -21,6 +17,7 @@ export interface IRequestSearch {
   createdDate?: Date;
   updatedDate?: Date;
   resourceHasDocument?: boolean;
+  haveReferenceTo?: string;
 }
 
 export class RequestSearch {
@@ -38,6 +35,7 @@ export class RequestSearch {
   createdDate?: Date;
   updatedDate?: Date;
   resourceHasDocument?: boolean;
+  haveReferenceTo?: string;
 
   constructor(requestData: IRequestSearch) {
     this.class = requestData.class;
@@ -73,6 +71,7 @@ export class RequestSearch {
     this.language = requestData.language || undefined;
     this.subTerritorySearch = !!requestData.subTerritorySearch;
     this.resourceHasDocument = !!requestData.resourceHasDocument;
+    this.haveReferenceTo = requestData.haveReferenceTo || undefined;
   }
 
   /**
@@ -140,7 +139,8 @@ export class RequestSearch {
       !this.language &&
       !this.createdDate &&
       !this.updatedDate &&
-      (this.entityIds === undefined || !this.entityIds.length)
+      (this.entityIds === undefined || !this.entityIds.length) &&
+      !this.haveReferenceTo
     ) {
       return new BadParams("one of the search field has to be set");
     }

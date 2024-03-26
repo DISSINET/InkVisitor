@@ -172,11 +172,23 @@ export const EntitySearchBox: React.FC = () => {
     enabled: api.isLoggedIn(),
   });
 
+  const [referencedTo, setReferencedTo] = useState<IEntity | false>(false);
+
   const classOptions = entitiesDict.filter(
     (e) => e.value !== EntityEnums.Class.Resource
   );
 
   // apply changes to search parameters
+  // const handleChange = (changes: {
+  //   [key: string]:
+  //     | string
+  //     | false
+  //     | true
+  //     | undefined
+  //     | DropdownItem
+  //     | Date
+  //     | string[];
+  // }) => {
   const handleChange = (changes: {
     [key: string]:
       | string
@@ -485,6 +497,32 @@ export const EntitySearchBox: React.FC = () => {
                     inputWidth="full"
                   />
                 </div>
+              )}
+            </StyledRow>
+            <StyledRow>
+              <StyledRowHeader>referenced to</StyledRowHeader>
+              {referencedTo ? (
+                <EntityTag
+                  entity={referencedTo}
+                  unlinkButton={{
+                    onClick: () => {
+                      setReferencedTo(false);
+                      handleChange({ haveReferenceTo: undefined });
+                    },
+                  }}
+                />
+              ) : (
+                <EntitySuggester
+                  disableCreate
+                  onPicked={(entity) => {
+                    setReferencedTo(entity);
+                    handleChange({ haveReferenceTo: entity.id });
+                  }}
+                  disableTemplatesAccept
+                  categoryTypes={[EntityEnums.Class.Resource]}
+                  inputWidth="full"
+                  placeholder="resource"
+                />
               )}
             </StyledRow>
             <StyledRow>
