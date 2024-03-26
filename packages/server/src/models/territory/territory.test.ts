@@ -4,6 +4,9 @@ import { Db } from "@service/rethink";
 import { clean, getITerritoryMock } from "@modules/common.test";
 import { findEntityById, deleteEntities } from "@service/shorthands";
 import { IParentTerritory, ITerritory } from "@shared/types";
+import { EntityEnums } from "@shared/enums";
+import { ECASTEMOVariant } from "@shared/types/territory";
+import { randomUUID } from "crypto";
 
 describe("models/territory", function () {
   describe("Territory constructor test", function () {
@@ -76,7 +79,7 @@ describe("models/territory", function () {
         const db = new Db();
         await db.initDb();
 
-        const root = new Territory({});
+        const root = new Territory({ id: `root-${randomUUID()}` });
         await root.save(db.connection);
         const child = new Territory({
           data: { parent: { territoryId: root.id, order: 0 } },
@@ -94,7 +97,7 @@ describe("models/territory", function () {
         const db = new Db();
         await db.initDb();
 
-        const root = new Territory({});
+        const root = new Territory({ id: `root-${randomUUID()}` });
         await root.save(db.connection);
         const child = new Territory({
           data: { parent: { territoryId: root.id, order: 0 } },
@@ -316,6 +319,129 @@ describe("models/territory", function () {
       });
     });
   });
+
+  describe("Territory - beforeSave", function () {
+    let db: Db;
+    let t0: Territory;
+    let twithoutProtocol: Territory;
+    let twithProtocol: Territory;
+
+    beforeAll(async () => {
+      db = new Db();
+      await db.initDb();
+    });
+
+    beforeEach(async () => {
+      await deleteEntities(db);
+      t0 = new Territory({
+        id: "T0",
+        data: {
+          parent: false,
+          protocol: {
+            project: "T0",
+            description: "",
+            endDate: "",
+            guidelinesResource: "",
+            guidelinesVersion: "",
+            startDate: "",
+            variant: ECASTEMOVariant.FullCASTEMO,
+          },
+        },
+      });
+      twithoutProtocol = new Territory({
+        id: "twithoutProtocol",
+        data: {
+          parent: {
+            order: 0,
+            territoryId: "T0",
+          },
+        },
+      });
+      twithProtocol = new Territory({
+        id: "twithProtocol",
+        data: {
+          parent: {
+            order: 1,
+            territoryId: "T0",
+          },
+          protocol: {
+            project: "twithProtocol",
+            description: "",
+            endDate: "",
+            guidelinesResource: "",
+            guidelinesVersion: "",
+            startDate: "",
+            variant: ECASTEMOVariant.FullCASTEMO,
+          },
+        },
+      });
+      await t0.save(db.connection);
+      await twithoutProtocol.save(db.connection);
+      await twithProtocol.save(db.connection);
+    });
+
+    afterAll(async () => {
+      await db.close();
+    });
+
+    describe("territory should receive protocol from parent", () => {
+      it("should have filled protocol from twithProtocol", async () => {
+        const tNew = new Territory({
+          data: {
+            parent: {
+              order: 0,
+              territoryId: twithProtocol.id,
+            },
+          },
+        });
+        await tNew.beforeSave(db.connection);
+        expect(tNew.data.protocol?.project).toEqual(
+          twithProtocol.data.protocol?.project
+        );
+      });
+    });
+
+    describe("territory should retain protocol", () => {
+      it("should have original protocol", async () => {
+        const customProject = "dont change";
+        const tNew = new Territory({
+          data: {
+            parent: {
+              order: 0,
+              territoryId: twithProtocol.id,
+            },
+            protocol: {
+              description: "",
+              endDate: "",
+              guidelinesResource: "",
+              guidelinesVersion: "",
+              project: customProject,
+              startDate: "",
+              variant: ECASTEMOVariant.FullCASTEMO,
+            },
+          },
+        });
+        await tNew.beforeSave(db.connection);
+        expect(tNew.data.protocol?.project).toEqual(customProject);
+      });
+    });
+
+    describe("territory should receive empty protocol if parent has none", () => {
+      it("should have empty protocol", async () => {
+        const tNew = new Territory({
+          data: {
+            parent: {
+              order: 0,
+              territoryId: twithoutProtocol.id,
+            },
+          },
+        });
+        await tNew.beforeSave(db.connection);
+        expect(tNew.data.protocol).toEqual(undefined);
+      });
+    });
+  });
+
   /*
   describe("Territory - test getClosestRight", function () {
     describe("no input rights", () => {

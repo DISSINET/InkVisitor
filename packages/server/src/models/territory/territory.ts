@@ -7,16 +7,42 @@ import {
   InternalServerError,
   InvalidDeleteError,
   ModelNotValidError,
+  TerritoryDoesNotExits,
 } from "@shared/types/errors";
 import User from "@models/user/user";
 import treeCache from "@service/treeCache";
 import { nonenumerable } from "@common/decorators";
 import { ROOT_TERRITORY_ID } from "@shared/types/statement";
+import { ECASTEMOVariant, ITerritoryProtocol } from "@shared/types/territory";
+import { findEntityById } from "@service/shorthands";
 import {
   EProtocolTieType,
   ITerritoryValidation,
 } from "@shared/types/territory";
 
+export class TerritoryProtocol implements ITerritoryProtocol, IModel {
+  project: string;
+  guidelinesVersion: string;
+  guidelinesResource: string;
+  variant: ECASTEMOVariant;
+  description: string;
+  startDate: string;
+  endDate: string;
+
+  constructor(data: Partial<ITerritoryProtocol>) {
+    this.project = data?.project as string;
+    this.guidelinesVersion = data?.guidelinesVersion as string;
+    this.guidelinesResource = data?.guidelinesResource as string;
+    this.variant = data?.variant as ECASTEMOVariant;
+    this.description = data?.description as string;
+    this.startDate = data?.startDate as string;
+    this.endDate = data?.endDate as string;
+  }
+
+  isValid(): boolean {
+    return true;
+  }
+}
 export class TerritoryParent implements IParentTerritory, IModel {
   territoryId: string;
   order: number;
@@ -37,16 +63,20 @@ export class TerritoryParent implements IParentTerritory, IModel {
 
 export class TerritoryData implements ITerritoryData, IModel {
   parent: TerritoryParent | false = false;
+  protocol?: ITerritoryProtocol;
   validations?: TerritoryValidation[];
 
   constructor(data: Partial<ITerritoryData>) {
     if (data.parent) {
       this.parent = new TerritoryParent(data.parent || {});
     }
-    if (data.validations) {
-      this.validations = data.validations.map(
-        (p) => new TerritoryValidation(p)
-      );
+    if (data.protocol) {
+      this.protocol = new TerritoryProtocol(data.protocol || {});
+      if (data.validations) {
+        this.validations = data.validations.map(
+          (p) => new TerritoryValidation(p)
+        );
+      }
     }
   }
 
@@ -118,6 +148,32 @@ class Territory extends Entity implements ITerritory {
 
   setSiblings(childsMap: Record<number, ITerritory>) {
     this._siblings = childsMap;
+  }
+
+  /**
+   * Use this method for doing asynchronous operation/checks before the save operation
+   * @param db db connection
+   */
+  async beforeSave(db: Connection): Promise<void> {
+    await super.beforeSave(db);
+
+    // fix protocol if creating new T and if protocol is missing
+    if (this.id || this.data.protocol || !this.data.parent) {
+      return;
+    }
+
+    const parentTerritory = await findEntityById<ITerritory>(
+      db,
+      this.data.parent.territoryId
+    );
+    if (!parentTerritory) {
+      throw new TerritoryDoesNotExits(
+        TerritoryDoesNotExits.title,
+        this.data.parent.territoryId
+      );
+    }
+
+    this.data.protocol = parentTerritory.data.protocol;
   }
 
   /**

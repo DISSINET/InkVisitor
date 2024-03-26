@@ -7,6 +7,7 @@ export interface ITerritory extends IEntity {
 }
 
 export interface ITerritoryData {
+  protocol?: ITerritoryProtocol;
   parent: IParentTerritory | false; // TODO should be optional instead of false
   validations?: ITerritoryValidation[];
 }
@@ -14,6 +15,24 @@ export interface ITerritoryData {
 export interface IParentTerritory {
   territoryId: string;
   order: number;
+}
+
+export interface ITerritoryProtocol {
+  project: string;
+  guidelinesVersion: string;
+  guidelinesResource: string; // R class entity
+  variant: ECASTEMOVariant;
+  description: string;
+  startDate: string; // V class entity
+  endDate: string; // V class entity
+}
+
+export enum ECASTEMOVariant {
+  SumCASTEMO = "SumCASTEMO",
+  NoCASTEMO = "NoCASTEMO",
+  SelCASTEMO = "SelCASTEMO",
+  FullCASTEMO = "FullCASTEMO",
+  MGSTEMO = "MGSTEMO",
 }
 
 export interface ITerritoryValidation {
