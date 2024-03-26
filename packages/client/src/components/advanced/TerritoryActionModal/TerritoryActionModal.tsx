@@ -120,7 +120,7 @@ export const TerritoryActionModal: React.FC<TerritoryActionModal> = ({
   return (
     <Modal showModal={showModal} onClose={onClose}>
       <ModalHeader title="Manage territory" icon={<TbHomeMove />} />
-      <ModalContent column>
+      <ModalContent column enableScroll>
         <StyledFlexRow>
           {territory && (
             <>
