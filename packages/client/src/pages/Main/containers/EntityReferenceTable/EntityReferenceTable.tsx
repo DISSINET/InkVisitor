@@ -181,7 +181,7 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
                     <EntitySuggester
                       openDetailOnCreate={openDetailOnCreate}
                       territoryActants={[]}
-                      onSelected={(newSelectedId: string) => {
+                      onSelected={(newSelectedId) => {
                         handleChangeResource(reference.id, newSelectedId, true);
                       }}
                       disableTemplatesAccept

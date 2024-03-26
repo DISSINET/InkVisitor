@@ -52,6 +52,7 @@ import { EntityDetailStatementPropsTable } from "./EntityDetailUsedInTable/Entit
 import { EntityDetailStatementsTable } from "./EntityDetailUsedInTable/EntityDetailStatementsTable/EntityDetailStatementsTable";
 import { EntityDetailValency } from "./EntityDetailValency/EntityDetailValency";
 import { IWarningPositionSection } from "@shared/types/warning";
+import { EntityDetailProtocol } from "./EntityDetailProtocol/EntityDetailProtocol";
 
 const allowedEntityChangeClasses = [
   EntityEnums.Class.Value,
@@ -623,6 +624,15 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
                 />
               </StyledDetailSectionContent>
             </StyledDetailSection>
+
+            {entity.class === EntityEnums.Class.Territory && (
+              <StyledDetailSection>
+                <StyledDetailSectionHeader>Protocol</StyledDetailSectionHeader>
+                <StyledDetailSectionContent>
+                  <EntityDetailProtocol territory={entity} />
+                </StyledDetailSectionContent>
+              </StyledDetailSection>
+            )}
 
             {/* Valency (A) */}
             {entity.class === EntityEnums.Class.Action && (
