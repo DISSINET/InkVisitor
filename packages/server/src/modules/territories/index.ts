@@ -173,13 +173,13 @@ export default Router()
             targetIds.join(",")
           );
         }
-        
+
         const childs = await territory.findChilds(request.db.connection);
 
         const copyUnderTarget = async (
           targetId: string,
           original: ITerritory,
-          childs: ITerritory[]
+          childs: Territory[]
         ) => {
           const targetT = new Territory({ id: targetId });
           const targetChilds = await targetT.findChilds(request.db.connection);
@@ -202,13 +202,14 @@ export default Router()
 
           if (withChildren) {
             for (const child of childs) {
-              await copyUnderTarget(newT.id, child, []);            
+              const nestedChilds = await child.findChilds(request.db.connection);
+              await copyUnderTarget(newT.id, child, Object.values(nestedChilds).map(data => new Territory(data)));
             }
           }
         };
 
         for (const target of tgts) {
-          await copyUnderTarget(target.id, territory, Object.values(childs));
+          await copyUnderTarget(target.id, territory, Object.values(childs).map(data => new Territory(data)));
         }
 
         return {
