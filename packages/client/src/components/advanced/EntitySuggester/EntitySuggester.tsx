@@ -44,6 +44,7 @@ interface EntitySuggester {
   isInsideStatement?: boolean;
   territoryParentId?: string;
 
+  button?: React.ReactNode;
   preSuggestions?: IEntity[];
 
   disableCreate?: boolean;
@@ -77,6 +78,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
   isInsideStatement = false,
   territoryParentId,
 
+  button,
   preSuggestions,
 
   disableCreate,
@@ -450,6 +452,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
         showCreateModal={showCreateModal}
         setShowCreateModal={setShowCreateModal}
         disableWildCard={disableWildCard || allCategories.length < 2}
+        button={button}
       />
       {showAddTerritoryModal && (
         <AddTerritoryModal

@@ -180,7 +180,7 @@ export const getEntityLabel = (entity?: IResponseEntity) =>
 
 export const getShortLabelByLetterCount = (
   label: string,
-  maxLetterCount: number
+  maxLetterCount: number = 200
 ) => {
   const isOversized = label.length > maxLetterCount;
   return isOversized ? label.slice(0, maxLetterCount).concat("...") : label;

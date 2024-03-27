@@ -745,6 +745,27 @@ class Api {
     }
   }
 
+  async territoriesCopy(
+    territoryId: string,
+    targets: string[],
+    withChildren: boolean,
+    options?: IApiOptions
+  ): Promise<AxiosResponse<IResponseGeneric>> {
+    try {
+      const response = await this.connection.post(
+        `/territories/${territoryId}/copy`,
+        {
+          targets,
+          withChildren
+        },
+        options
+      );
+      return response;
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+
   /**
    * Tooltips
    */

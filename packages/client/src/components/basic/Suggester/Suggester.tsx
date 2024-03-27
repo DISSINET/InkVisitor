@@ -83,6 +83,7 @@ interface Suggester {
 
   showCreateModal: boolean;
   setShowCreateModal: React.Dispatch<React.SetStateAction<boolean>>;
+  button?: React.ReactNode;
 }
 
 export const Suggester: React.FC<Suggester> = ({
@@ -119,6 +120,7 @@ export const Suggester: React.FC<Suggester> = ({
 
   showCreateModal,
   setShowCreateModal,
+  button,
 }) => {
   const [selected, setSelected] = useState(-1);
   const [isFocused, setIsFocused] = useState(false);
@@ -341,6 +343,7 @@ export const Suggester: React.FC<Suggester> = ({
               />
             </StyledSuggesterButton>
           )}
+          {button}
         </StyledInputWrapper>
 
         {isWrongDropCategory && isOver && (
@@ -354,7 +357,7 @@ export const Suggester: React.FC<Suggester> = ({
           <FloatingPortal id="page">
             <StyledSuggesterList
               ref={refs.setFloating}
-              noLeftMargin={categories.length === 1}
+              $noLeftMargin={categories.length === 1}
               onMouseEnter={() => setIsHovered(true)}
               onMouseLeave={() => setIsHovered(false)}
               style={{
