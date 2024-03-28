@@ -625,11 +625,16 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
               </StyledDetailSectionContent>
             </StyledDetailSection>
 
+            {/* Protocol */}
             {entity.class === EntityEnums.Class.Territory && (
               <StyledDetailSection>
                 <StyledDetailSectionHeader>Protocol</StyledDetailSectionHeader>
                 <StyledDetailSectionContent>
-                  <EntityDetailProtocol territory={entity} />
+                  <EntityDetailProtocol
+                    territory={entity}
+                    updateEntityMutation={updateEntityMutation}
+                    entities={entity.entities}
+                  />
                 </StyledDetailSectionContent>
               </StyledDetailSection>
             )}
