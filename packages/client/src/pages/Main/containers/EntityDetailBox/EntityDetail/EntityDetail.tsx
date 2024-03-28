@@ -7,6 +7,11 @@ import {
   IResponseDetail,
   Relation,
 } from "@shared/types";
+import {
+  EProtocolTieType,
+  ITerritoryValidation,
+} from "@shared/types/territory";
+import { IWarningPositionSection } from "@shared/types/warning";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Button, Loader, Message, Submit, ToastWithLink } from "components";
@@ -51,8 +56,14 @@ import { EntityDetailMetaPropsTable } from "./EntityDetailUsedInTable/EntityDeta
 import { EntityDetailStatementPropsTable } from "./EntityDetailUsedInTable/EntityDetailStatementPropsTable/EntityDetailStatementPropsTable";
 import { EntityDetailStatementsTable } from "./EntityDetailUsedInTable/EntityDetailStatementsTable/EntityDetailStatementsTable";
 import { EntityDetailValency } from "./EntityDetailValency/EntityDetailValency";
-import { IWarningPositionSection } from "@shared/types/warning";
+import { EntityDetailValidation } from "./EntityDetailValidation/EntityDetailValidation";
 
+const initValidation: ITerritoryValidation = {
+  detail: "",
+  entityClasses: [],
+  classifications: [],
+  tieType: EProtocolTieType.Property,
+};
 const allowedEntityChangeClasses = [
   EntityEnums.Class.Value,
   EntityEnums.Class.Person,
@@ -579,6 +590,16 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
     },
   });
 
+  const initValidationRule = () => {
+    updateEntityMutation.mutate({
+      data: {
+        validations: entity?.data.validations
+          ? [...entity?.data.validations, initValidation]
+          : [initValidation],
+      },
+    });
+  };
+
   return (
     <>
       {entity && (
@@ -623,6 +644,39 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
                 />
               </StyledDetailSectionContent>
             </StyledDetailSection>
+
+            {/* Validation rules */}
+            {entity.class === EntityEnums.Class.Territory && (
+              <StyledDetailSection>
+                <StyledDetailSectionHeader>
+                  Validation rules
+                  {userCanEdit && (
+                    <span style={{ marginLeft: "1rem" }}>
+                      <Button
+                        color="primary"
+                        label="new validation rule"
+                        icon={<FaPlus />}
+                        onClick={async () => {
+                          initValidationRule();
+                        }}
+                      />
+                    </span>
+                  )}
+                </StyledDetailSectionHeader>
+
+                {(entity.data.validations as ITerritoryValidation[]).map(
+                  (validation, key) => {
+                    return (
+                      <EntityDetailValidation
+                        key={key}
+                        validation={validation}
+                        entities={entity.entities}
+                      />
+                    );
+                  }
+                )}
+              </StyledDetailSection>
+            )}
 
             {/* Valency (A) */}
             {entity.class === EntityEnums.Class.Action && (

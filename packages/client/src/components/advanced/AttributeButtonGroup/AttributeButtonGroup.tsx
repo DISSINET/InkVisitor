@@ -8,7 +8,7 @@ import {
 interface AttributeButtonGroup {
   options: {
     longValue: string;
-    shortValue: string;
+    shortValue?: string;
     shortIcon?: JSX.Element;
     icon?: JSX.Element;
     onClick: () => void;
@@ -42,7 +42,11 @@ export const AttributeButtonGroup: React.FC<AttributeButtonGroup> = ({
         return (
           <Button
             key={oi}
-            label={option.selected ? option.longValue : option.shortValue}
+            label={
+              option.selected
+                ? option.longValue
+                : option.shortValue || option.longValue
+            }
             icon={
               option.icon
                 ? option.icon
@@ -51,7 +55,7 @@ export const AttributeButtonGroup: React.FC<AttributeButtonGroup> = ({
                 : undefined
             }
             tooltipLabel={
-              option.longValue === option.shortValue
+              option.longValue === option.shortValue || !option.shortValue
                 ? undefined
                 : option.longValue
             }
