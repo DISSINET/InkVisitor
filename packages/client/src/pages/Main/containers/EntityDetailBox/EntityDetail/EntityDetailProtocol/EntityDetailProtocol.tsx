@@ -10,7 +10,7 @@ import { AxiosResponse } from "axios";
 import { Input } from "components";
 import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
 import React, { useEffect, useState } from "react";
-import { StyledLabel } from "./EntityDetailProtocolStyles";
+import { StyledGrid, StyledLabel } from "./EntityDetailProtocolStyles";
 
 const initialProtocol: ITerritoryProtocol = {
   project: "",
@@ -75,20 +75,20 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
   };
 
   return (
-    <>
-      <StyledLabel>project</StyledLabel>
+    <StyledGrid>
+      <StyledLabel>Project</StyledLabel>
       <Input
         value={project}
         onChangeFn={(text) => updateProtocol({ project: text })}
       />
 
-      <StyledLabel>guidelinesVersion</StyledLabel>
+      <StyledLabel>Guidelines version</StyledLabel>
       <Input
         value={guidelinesVersion}
         onChangeFn={(text) => updateProtocol({ guidelinesVersion: text })}
       />
 
-      <StyledLabel>guidelinesResource</StyledLabel>
+      <StyledLabel>Guidelines resource</StyledLabel>
       {guidelinesResource.length > 0 && entities[guidelinesResource] ? (
         <EntityTag
           entity={entities[guidelinesResource]}
@@ -109,7 +109,7 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
         />
       )}
 
-      <StyledLabel>variant</StyledLabel>
+      <StyledLabel>Variant</StyledLabel>
       <Dropdown.Single.Basic
         onChange={(value) => updateProtocol({ variant: value })}
         value={variant}
@@ -119,13 +119,13 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
         }))}
       />
 
-      <StyledLabel>description</StyledLabel>
+      <StyledLabel>Description</StyledLabel>
       <Input
         value={description}
         onChangeFn={(text) => updateProtocol({ description: text })}
       />
 
-      <StyledLabel>startDate</StyledLabel>
+      <StyledLabel>Start date</StyledLabel>
       {startDate.length > 0 && entities[startDate] ? (
         <EntityTag
           entity={entities[startDate]}
@@ -144,7 +144,7 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
         />
       )}
 
-      <StyledLabel>endDate</StyledLabel>
+      <StyledLabel>End date</StyledLabel>
       {endDate.length > 0 && entities[endDate] ? (
         <EntityTag
           entity={entities[endDate]}
@@ -162,6 +162,6 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
           // isInsideTemplate={isInsideTemplate}
         />
       )}
-    </>
+    </StyledGrid>
   );
 };
