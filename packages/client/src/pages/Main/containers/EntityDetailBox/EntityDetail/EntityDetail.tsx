@@ -31,7 +31,11 @@ import {
   DropdownItem,
   PropAttributeFilter,
 } from "types";
-import { getEntityLabel, getShortLabelByLetterCount } from "utils/utils";
+import {
+  deepCopy,
+  getEntityLabel,
+  getShortLabelByLetterCount,
+} from "utils/utils";
 import { EntityReferenceTable } from "../../EntityReferenceTable/EntityReferenceTable";
 import { PropGroup } from "../../PropGroup/PropGroup";
 import { EntityDetailCreateTemplateModal } from "./EntityDetailCreateTemplateModal/EntityDetailCreateTemplateModal";
@@ -667,24 +671,50 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
                 </StyledDetailSectionHeader>
 
                 {/* TODO: move to new component EntityDetailValidationSection */}
-                <StyledValidationList>
-                  {(entity.data.validations as ITerritoryValidation[]).map(
-                    (validation, key) => {
-                      return (
-                        <>
-                          <EntityDetailValidation
-                            key={key}
-                            validation={validation}
-                            entities={entity.entities}
-                          />
-                          {key !== entity.data.validations.length - 1 && (
-                            <StyledBlockSeparator />
-                          )}
-                        </>
-                      );
-                    }
-                  )}
-                </StyledValidationList>
+                {entity.data.validations && (
+                  <StyledValidationList>
+                    {(entity.data.validations as ITerritoryValidation[]).map(
+                      (validation, key) => {
+                        return (
+                          <React.Fragment key={key}>
+                            <EntityDetailValidation
+                              key={key}
+                              validation={validation}
+                              entities={entity.entities}
+                              updateValidationRule={(
+                                changes: Partial<ITerritoryValidation>
+                              ) => {
+                                const validations = deepCopy(
+                                  entity.data
+                                    .validations as ITerritoryValidation[]
+                                );
+                                if (validations[key]) {
+                                  const updatedObject: ITerritoryValidation = {
+                                    ...validations[key],
+                                    ...changes,
+                                  };
+                                  const newArray = [
+                                    ...validations.slice(0, key),
+                                    updatedObject,
+                                    ...validations.slice(key + 1),
+                                  ];
+                                  updateEntityMutation.mutate({
+                                    data: {
+                                      validations: newArray,
+                                    },
+                                  });
+                                }
+                              }}
+                            />
+                            {key !== entity.data.validations.length - 1 && (
+                              <StyledBlockSeparator />
+                            )}
+                          </React.Fragment>
+                        );
+                      }
+                    )}
+                  </StyledValidationList>
+                )}
               </StyledDetailSection>
             )}
 

@@ -23,10 +23,12 @@ import { classesAll } from "@shared/dictionaries/entity";
 interface EntityDetailValidation {
   validation: ITerritoryValidation;
   entities: Record<string, IEntity>;
+  updateValidationRule: (changes: Partial<ITerritoryValidation>) => void;
 }
 export const EntityDetailValidation: React.FC<EntityDetailValidation> = ({
   validation,
   entities,
+  updateValidationRule,
 }) => {
   return (
     <StyledBorderLeft>
@@ -36,13 +38,13 @@ export const EntityDetailValidation: React.FC<EntityDetailValidation> = ({
         <Input
           width="full"
           value={validation.detail}
-          onChangeFn={(value) => console.log(value)}
+          onChangeFn={(value) => updateValidationRule({ detail: value })}
         />
         <StyledLabel>Entity types</StyledLabel>
         <Dropdown.Multi.Entity
           width="full"
-          value={[]}
-          onChange={(values) => console.log(values)}
+          value={validation.entityClasses}
+          onChange={(values) => updateValidationRule({ entityClasses: values })}
           options={entitiesDict}
           // disabled={!userCanEdit}
         />
@@ -56,17 +58,22 @@ export const EntityDetailValidation: React.FC<EntityDetailValidation> = ({
           options={[
             {
               longValue: EProtocolTieType.Property,
-              onClick: () => console.log(EProtocolTieType.Property),
+              onClick: () =>
+                updateValidationRule({ tieType: EProtocolTieType.Property }),
               selected: validation.tieType === EProtocolTieType.Property,
             },
             {
               longValue: EProtocolTieType.Classification,
-              onClick: () => console.log(EProtocolTieType.Classification),
+              onClick: () =>
+                updateValidationRule({
+                  tieType: EProtocolTieType.Classification,
+                }),
               selected: validation.tieType === EProtocolTieType.Classification,
             },
             {
               longValue: EProtocolTieType.Reference,
-              onClick: () => console.log(EProtocolTieType.Reference),
+              onClick: () =>
+                updateValidationRule({ tieType: EProtocolTieType.Reference }),
               selected: validation.tieType === EProtocolTieType.Reference,
             },
           ]}
@@ -79,17 +86,21 @@ export const EntityDetailValidation: React.FC<EntityDetailValidation> = ({
             </StyledFlexList>
           </>
         )}
+        {/* Allowed classes */}
         <StyledLabel>Allowed E types</StyledLabel>
         <Dropdown.Multi.Entity
           width="full"
-          value={validation.allowedEntities || []}
-          onChange={(values) => console.log(values)}
+          value={validation.allowedClasses || []}
+          onChange={(values) =>
+            updateValidationRule({ allowedClasses: values })
+          }
           options={entitiesDict}
           disabled={
             validation.allowedEntities && validation.allowedEntities.length > 0
           }
           // disabled={!userCanEdit}
         />
+        {/* Allowed entities */}
         <StyledLabel>Allowed E values</StyledLabel>
         <StyledFlexList>
           <EntitySuggester categoryTypes={classesAll} />

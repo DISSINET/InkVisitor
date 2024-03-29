@@ -112,6 +112,9 @@ export const StyledSelect = styled(Select)<StyledSelect>`
     padding-left: ${({ entityDropdown }) => (entityDropdown ? "0.2rem" : "")};
     padding-right: ${({ entityDropdown }) => (entityDropdown ? "0.2rem" : "")};
   }
+  .react-select__input-container {
+    color: ${({ theme }) => theme.color["black"]};
+  }
   // portal menu style is in global stylesheet
 `;
 
