@@ -10,7 +10,11 @@ import { AxiosResponse } from "axios";
 import { Input } from "components";
 import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
 import React, { useEffect, useState } from "react";
-import { StyledGrid, StyledLabel } from "./EntityDetailProtocolStyles";
+import {
+  StyledGrid,
+  StyledLabel,
+  StyledTagWrap,
+} from "./EntityDetailProtocolStyles";
 
 const initialProtocol: ITerritoryProtocol = {
   project: "",
@@ -63,12 +67,6 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
     endDate,
   } = protocol;
 
-  // const [guidelinesResourceEntity, setGuidelinesResourceEntity] = useState<IEntity | false>(
-  //   false
-  // );
-  // const [startDate, setStartDate] = useState<IEntity | false>(false);
-  // const [endDate, setEndDate] = useState<IEntity | false>(false);
-
   const updateProtocol = (changes: Partial<ITerritoryProtocol>) => {
     updateEntityMutation.mutate({ data: { protocol: changes } });
   };
@@ -91,15 +89,14 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
 
       <StyledLabel>Guidelines resource</StyledLabel>
       {guidelinesResource.length > 0 ? (
-        // <EntityTag
-        //   entity={entities[guidelinesResource]}
-        //   unlinkButton={{
-        //     onClick: () => updateProtocol({ guidelinesResource: "" }),
-        //   }}
-        // />
-        <span onClick={() => updateProtocol({ guidelinesResource: "" })}>
-          {guidelinesResource}
-        </span>
+        <StyledTagWrap>
+          <EntityTag
+            entity={entities[guidelinesResource]}
+            unlinkButton={{
+              onClick: () => updateProtocol({ guidelinesResource: "" }),
+            }}
+          />
+        </StyledTagWrap>
       ) : (
         <EntitySuggester
           onPicked={(newPicked) => {
@@ -133,13 +130,12 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
 
       <StyledLabel>Start date</StyledLabel>
       {startDate.length > 0 ? (
-        // <EntityTag
-        //   entity={entities[startDate]}
-        //   unlinkButton={{ onClick: () => updateProtocol({ startDate: "" }) }}
-        // />
-        <span onClick={() => updateProtocol({ startDate: "" })}>
-          {startDate}
-        </span>
+        <StyledTagWrap>
+          <EntityTag
+            entity={entities[startDate]}
+            unlinkButton={{ onClick: () => updateProtocol({ startDate: "" }) }}
+          />
+        </StyledTagWrap>
       ) : (
         <EntitySuggester
           onPicked={(newPicked) => {
@@ -155,11 +151,12 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
 
       <StyledLabel>End date</StyledLabel>
       {endDate.length > 0 ? (
-        // <EntityTag
-        //   entity={entities[endDate]}
-        //   unlinkButton={{ onClick: () => updateProtocol({ endDate: "" }) }}
-        // />
-        <span onClick={() => updateProtocol({ endDate: "" })}>{endDate}</span>
+        <StyledTagWrap>
+          <EntityTag
+            entity={entities[endDate]}
+            unlinkButton={{ onClick: () => updateProtocol({ endDate: "" }) }}
+          />
+        </StyledTagWrap>
       ) : (
         <EntitySuggester
           onPicked={(newPicked) => {

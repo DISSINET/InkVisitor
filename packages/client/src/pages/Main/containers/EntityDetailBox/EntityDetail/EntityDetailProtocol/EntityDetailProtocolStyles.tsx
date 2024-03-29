@@ -14,3 +14,8 @@ export const StyledLabel = styled.div`
   color: ${({ theme }) => theme.color["info"]};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
 `;
+export const StyledTagWrap = styled.div`
+  display: inline-flex;
+  overflow: hidden;
+  max-width: 100%;
+`;

@@ -1,8 +1,19 @@
+import { entitiesDict } from "@shared/dictionaries";
+import { classesAll } from "@shared/dictionaries/entity";
+import { EntityEnums } from "@shared/enums";
+import { IEntity } from "@shared/types";
 import {
   EProtocolTieType,
   ITerritoryValidation,
 } from "@shared/types/territory";
+import { Button, Input } from "components";
+import Dropdown, {
+  AttributeButtonGroup,
+  EntitySuggester,
+  EntityTag,
+} from "components/advanced";
 import React from "react";
+import { FaTrashAlt } from "react-icons/fa";
 import {
   StyledBorderLeft,
   StyledFlexList,
@@ -10,26 +21,18 @@ import {
   StyledLabel,
   StyledSentence,
 } from "./EntityDetailValidationStyles";
-import { IEntity } from "@shared/types";
-import { Button, Input } from "components";
-import Dropdown, {
-  AttributeButtonGroup,
-  EntitySuggester,
-  EntityTag,
-} from "components/advanced";
-import { entitiesDict } from "@shared/dictionaries";
-import { EntityEnums } from "@shared/enums";
-import { classesAll } from "@shared/dictionaries/entity";
 
 interface EntityDetailValidation {
   validation: ITerritoryValidation;
   entities: Record<string, IEntity>;
   updateValidationRule: (changes: Partial<ITerritoryValidation>) => void;
+  removeValidationRule: () => void;
 }
 export const EntityDetailValidation: React.FC<EntityDetailValidation> = ({
   validation,
   entities,
   updateValidationRule,
+  removeValidationRule,
 }) => {
   const {
     detail,
@@ -66,22 +69,22 @@ export const EntityDetailValidation: React.FC<EntityDetailValidation> = ({
         <StyledLabel>..classified as</StyledLabel>
         <StyledFlexList>
           {classifications.map((classification, key) => (
-            <>
-              <span
-                onClick={() =>
+            <EntityTag
+              flexListMargin
+              entity={entities[classification]}
+              unlinkButton={{
+                onClick() {
                   updateValidationRule({
                     classifications: classifications.filter(
                       (c) => c !== classification
                     ),
-                  })
-                }
-              >
-                {classification}
-              </span>
-              {/* <EntityTag entity={entities[classification]} /> */}
-            </>
+                  });
+                },
+              }}
+            />
           ))}
           <EntitySuggester
+            excludedActantIds={classifications}
             categoryTypes={[EntityEnums.Class.Concept]}
             onPicked={(entity) =>
               updateValidationRule({
@@ -124,14 +127,28 @@ export const EntityDetailValidation: React.FC<EntityDetailValidation> = ({
           <>
             <StyledLabel>Prop type</StyledLabel>
             <StyledFlexList>
-              {propType?.map((entityId) => {
-                return (
-                  <>
-                    <EntityTag entity={entities[entityId]} />
-                  </>
-                );
-              })}
-              <EntitySuggester categoryTypes={[EntityEnums.Class.Concept]} />
+              {propType?.map((entityId) => (
+                <EntityTag
+                  flexListMargin
+                  entity={entities[entityId]}
+                  unlinkButton={{
+                    onClick() {
+                      updateValidationRule({
+                        propType: propType?.filter((pTiD) => pTiD !== entityId),
+                      });
+                    },
+                  }}
+                />
+              ))}
+              <EntitySuggester
+                categoryTypes={[EntityEnums.Class.Concept]}
+                excludedActantIds={propType}
+                onPicked={(entity) =>
+                  updateValidationRule({
+                    propType: [...(propType || []), entity.id],
+                  })
+                }
+              />
             </StyledFlexList>
           </>
         )}
@@ -153,12 +170,33 @@ export const EntityDetailValidation: React.FC<EntityDetailValidation> = ({
         <StyledLabel>Allowed E values</StyledLabel>
         <StyledFlexList>
           {allowedEntities?.map((entityId) => (
-            <EntityTag entity={entities[entityId]} />
+            <EntityTag flexListMargin entity={entities[entityId]} />
           ))}
-          <EntitySuggester categoryTypes={classesAll} />
+          <EntitySuggester
+            categoryTypes={classesAll}
+            excludedActantIds={allowedEntities}
+            onPicked={(entity) =>
+              updateValidationRule({
+                allowedEntities: [...(allowedEntities || []), entity.id],
+              })
+            }
+          />
         </StyledFlexList>
       </StyledGrid>
-      {/* <Button label="remove validation rule" onClick={() => } /> */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "flex-end",
+          width: "100%",
+          marginTop: "1rem",
+        }}
+      >
+        <Button
+          color="danger"
+          icon={<FaTrashAlt />}
+          onClick={removeValidationRule}
+        />
+      </div>
     </StyledBorderLeft>
   );
 };

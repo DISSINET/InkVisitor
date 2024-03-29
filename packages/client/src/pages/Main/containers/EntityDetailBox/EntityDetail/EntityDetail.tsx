@@ -7,10 +7,6 @@ import {
   IResponseDetail,
   Relation,
 } from "@shared/types";
-import {
-  EProtocolTieType,
-  ITerritoryValidation,
-} from "@shared/types/territory";
 import { IWarningPositionSection } from "@shared/types/warning";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
@@ -31,19 +27,15 @@ import {
   DropdownItem,
   PropAttributeFilter,
 } from "types";
-import {
-  deepCopy,
-  getEntityLabel,
-  getShortLabelByLetterCount,
-} from "utils/utils";
+import { getEntityLabel, getShortLabelByLetterCount } from "utils/utils";
 import { EntityReferenceTable } from "../../EntityReferenceTable/EntityReferenceTable";
 import { PropGroup } from "../../PropGroup/PropGroup";
 import { EntityDetailCreateTemplateModal } from "./EntityDetailCreateTemplateModal/EntityDetailCreateTemplateModal";
 import { EntityDetailFormSection } from "./EntityDetailFormSection/EntityDetailFormSection";
 import { EntityDetailHeaderRow } from "./EntityDetailHeaderRow/EntityDetailHeaderRow";
+import { EntityDetailProtocol } from "./EntityDetailProtocol/EntityDetailProtocol";
 import { EntityDetailRelations } from "./EntityDetailRelations/EntityDetailRelations";
 import {
-  StyledBlockSeparator,
   StyledDetailSection,
   StyledDetailSectionContent,
   StyledDetailSectionContentUsedIn,
@@ -54,7 +46,6 @@ import {
   StyledPropGroupWrap,
   StyledUsedAsHeading,
   StyledUsedAsTitle,
-  StyledValidationList,
 } from "./EntityDetailStyles";
 import { EntityDetailClassificationTable } from "./EntityDetailUsedInTable/EntityDetailClassificationTable/EntityDetailClassificationTable";
 import { EntityDetailIdentificationTable } from "./EntityDetailUsedInTable/EntityDetailIdentificationTable/EntityDetailIdentificationTable";
@@ -62,15 +53,9 @@ import { EntityDetailMetaPropsTable } from "./EntityDetailUsedInTable/EntityDeta
 import { EntityDetailStatementPropsTable } from "./EntityDetailUsedInTable/EntityDetailStatementPropsTable/EntityDetailStatementPropsTable";
 import { EntityDetailStatementsTable } from "./EntityDetailUsedInTable/EntityDetailStatementsTable/EntityDetailStatementsTable";
 import { EntityDetailValency } from "./EntityDetailValency/EntityDetailValency";
-import { EntityDetailValidation } from "./EntityDetailValidation/EntityDetailValidation";
-import { EntityDetailProtocol } from "./EntityDetailProtocol/EntityDetailProtocol";
+import { EntityDetailValidationSection } from "./EntityDetailValidationSection/EntityDetailValidationSection";
+import { ITerritoryValidation } from "@shared/types/territory";
 
-const initValidation: ITerritoryValidation = {
-  detail: "",
-  entityClasses: [],
-  classifications: [],
-  tieType: EProtocolTieType.Property,
-};
 const allowedEntityChangeClasses = [
   EntityEnums.Class.Value,
   EntityEnums.Class.Person,
@@ -597,16 +582,6 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
     },
   });
 
-  const initValidationRule = () => {
-    updateEntityMutation.mutate({
-      data: {
-        validations: entity?.data.validations
-          ? [...entity?.data.validations, initValidation]
-          : [initValidation],
-      },
-    });
-  };
-
   return (
     <>
       {entity && (
@@ -669,67 +644,16 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
             {/* Validation rules */}
             {entity.class === EntityEnums.Class.Territory && (
               <StyledDetailSection>
-                <StyledDetailSectionHeader>
-                  Validation rules
-                  {userCanEdit && (
-                    <span style={{ marginLeft: "1rem" }}>
-                      <Button
-                        color="primary"
-                        label="new validation rule"
-                        icon={<FaPlus />}
-                        onClick={async () => {
-                          initValidationRule();
-                        }}
-                      />
-                    </span>
-                  )}
-                </StyledDetailSectionHeader>
-
-                {/* TODO: move to new component EntityDetailValidationSection */}
-                {entity.data.validations && (
-                  <StyledValidationList>
-                    {(entity.data.validations as ITerritoryValidation[]).map(
-                      (validation, key) => {
-                        return (
-                          <React.Fragment key={key}>
-                            <EntityDetailValidation
-                              key={key}
-                              validation={validation}
-                              entities={entity.entities}
-                              updateValidationRule={(
-                                changes: Partial<ITerritoryValidation>
-                              ) => {
-                                const validations = deepCopy(
-                                  entity.data
-                                    .validations as ITerritoryValidation[]
-                                );
-                                if (validations[key]) {
-                                  const updatedObject: ITerritoryValidation = {
-                                    ...validations[key],
-                                    ...changes,
-                                  };
-                                  const newArray = [
-                                    ...validations.slice(0, key),
-                                    updatedObject,
-                                    ...validations.slice(key + 1),
-                                  ];
-                                  updateEntityMutation.mutate({
-                                    data: {
-                                      validations: newArray,
-                                    },
-                                  });
-                                }
-                              }}
-                            />
-                            {key !== entity.data.validations.length - 1 && (
-                              <StyledBlockSeparator />
-                            )}
-                          </React.Fragment>
-                        );
-                      }
-                    )}
-                  </StyledValidationList>
-                )}
+                <EntityDetailValidationSection
+                  validations={
+                    entity.data.validations as
+                      | ITerritoryValidation[]
+                      | undefined
+                  }
+                  entities={entity.entities}
+                  updateEntityMutation={updateEntityMutation}
+                  userCanEdit={userCanEdit}
+                />
               </StyledDetailSection>
             )}
 
