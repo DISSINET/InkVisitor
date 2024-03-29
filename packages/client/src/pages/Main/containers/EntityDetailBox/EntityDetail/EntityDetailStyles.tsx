@@ -166,3 +166,15 @@ export const StyledTagWrap = styled.div`
 export const StyledPropGroupWrap = styled.div`
   margin-bottom: ${({ theme }) => theme.space[5]};
 `;
+
+export const StyledBlockSeparator = styled.div`
+  width: 100%;
+  grid-column: span 2;
+  border-top: 1px dashed grey;
+`;
+
+export const StyledValidationList = styled.div`
+  display: flex;
+  flex-direction: column;
+  row-gap: 1.5rem;
+`;

@@ -55,7 +55,7 @@ export const AttributeButtonGroup: React.FC<AttributeButtonGroup> = ({
                 : undefined
             }
             tooltipLabel={
-              option.longValue === option.shortValue || !option.shortValue
+              !option.shortValue || option.longValue === option.shortValue
                 ? undefined
                 : option.longValue
             }

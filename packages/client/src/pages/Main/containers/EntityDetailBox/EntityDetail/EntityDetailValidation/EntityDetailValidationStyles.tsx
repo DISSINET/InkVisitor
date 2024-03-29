@@ -1,10 +1,20 @@
 import styled from "styled-components";
 
+export const StyledBorderLeft = styled.div`
+  border-left: 2px solid;
+  border-left-color: ${({ theme }) => theme.color["danger"]};
+  padding-left: 1rem;
+  padding-right: 2rem;
+`;
 export const StyledGrid = styled.div`
   display: grid;
   grid-template-columns: auto 1fr;
   grid-gap: 1rem;
-  padding-right: 2rem;
+`;
+export const StyledSentence = styled.p`
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  color: ${({ theme }) => theme.color["danger"]};
+  margin-bottom: 2rem;
 `;
 export const StyledLabel = styled.div`
   display: grid;

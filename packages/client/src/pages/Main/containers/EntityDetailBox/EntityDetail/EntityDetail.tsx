@@ -39,6 +39,7 @@ import { EntityDetailFormSection } from "./EntityDetailFormSection/EntityDetailF
 import { EntityDetailHeaderRow } from "./EntityDetailHeaderRow/EntityDetailHeaderRow";
 import { EntityDetailRelations } from "./EntityDetailRelations/EntityDetailRelations";
 import {
+  StyledBlockSeparator,
   StyledDetailSection,
   StyledDetailSectionContent,
   StyledDetailSectionContentUsedIn,
@@ -49,6 +50,7 @@ import {
   StyledPropGroupWrap,
   StyledUsedAsHeading,
   StyledUsedAsTitle,
+  StyledValidationList,
 } from "./EntityDetailStyles";
 import { EntityDetailClassificationTable } from "./EntityDetailUsedInTable/EntityDetailClassificationTable/EntityDetailClassificationTable";
 import { EntityDetailIdentificationTable } from "./EntityDetailUsedInTable/EntityDetailIdentificationTable/EntityDetailIdentificationTable";
@@ -664,17 +666,25 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
                   )}
                 </StyledDetailSectionHeader>
 
-                {(entity.data.validations as ITerritoryValidation[]).map(
-                  (validation, key) => {
-                    return (
-                      <EntityDetailValidation
-                        key={key}
-                        validation={validation}
-                        entities={entity.entities}
-                      />
-                    );
-                  }
-                )}
+                {/* TODO: move to new component EntityDetailValidationSection */}
+                <StyledValidationList>
+                  {(entity.data.validations as ITerritoryValidation[]).map(
+                    (validation, key) => {
+                      return (
+                        <>
+                          <EntityDetailValidation
+                            key={key}
+                            validation={validation}
+                            entities={entity.entities}
+                          />
+                          {key !== entity.data.validations.length - 1 && (
+                            <StyledBlockSeparator />
+                          )}
+                        </>
+                      );
+                    }
+                  )}
+                </StyledValidationList>
               </StyledDetailSection>
             )}
 
