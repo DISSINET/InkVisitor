@@ -18,7 +18,6 @@ import {
 } from "components";
 import React, { useEffect, useState } from "react";
 import { TbHomeMove } from "react-icons/tb";
-import { getShortLabelByLetterCount } from "utils/utils";
 import { EntitySuggester } from "..";
 import { AttributeButtonGroup } from "../AttributeButtonGroup/AttributeButtonGroup";
 import { EntityTag } from "../EntityTag/EntityTag";
