@@ -300,6 +300,8 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
     false
   );
 
+  const userCanEdit = territory.right !== UserEnums.RoleMode.Read;
+
   return (
     <>
       <StyledHeader>
@@ -328,7 +330,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
               : "no territory selected"}
           </StyledHeading>
 
-          {territory.id !== rootTerritoryId && (
+          {territory.id !== rootTerritoryId && userCanEdit && (
             <StyledMoveToParent>
               <EntitySuggester
                 placeholder="new parent"
@@ -425,7 +427,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
 
           {territoryId && (
             <ButtonGroup>
-              {territory.right !== UserEnums.RoleMode.Read && (
+              {userCanEdit && (
                 <Button
                   key="add"
                   icon={<FaPlus />}
