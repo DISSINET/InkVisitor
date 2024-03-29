@@ -1,22 +1,23 @@
 import { Button } from "components";
 import React from "react";
-import {
-  StyledButtonWrap,
-  StyledPropButtonGroup,
-} from "./AttributeButtonGroupStyles";
+import { StyledPropButtonGroup } from "./AttributeButtonGroupStyles";
 
+type Option = {
+  longValue: string;
+  shortValue: string;
+  shortIcon?: JSX.Element;
+  icon?: JSX.Element;
+  onClick: () => void;
+  selected: boolean;
+};
 interface AttributeButtonGroup {
-  options: {
-    longValue: string;
-    shortValue: string;
-    shortIcon?: JSX.Element;
-    icon?: JSX.Element;
-    onClick: () => void;
-    selected: boolean;
-  }[];
+  options: Option[];
   disabled?: boolean;
   noMargin?: boolean;
   paddingX?: boolean;
+
+  fullSizeDisabled?: boolean;
+  disabledBtnsTooltip?: string;
 }
 
 export const AttributeButtonGroup: React.FC<AttributeButtonGroup> = ({
@@ -24,11 +25,36 @@ export const AttributeButtonGroup: React.FC<AttributeButtonGroup> = ({
   disabled = false,
   noMargin = false,
   paddingX = false,
+
+  fullSizeDisabled = false,
+  disabledBtnsTooltip,
 }) => {
-  return disabled ? (
-    <StyledButtonWrap $leftMargin={!noMargin} $rightMargin={!noMargin}>
-      <Button disabled label={options.find((o) => o.selected)?.longValue} />
-    </StyledButtonWrap>
+  const getTooltipLabel = (option: Option) => {
+    if (!disabled) {
+      return option.longValue === option.shortValue
+        ? undefined
+        : !option.selected
+        ? option.longValue
+        : undefined;
+    } else if (disabled && !option.selected && disabledBtnsTooltip) {
+      return disabledBtnsTooltip;
+    }
+  };
+  return disabled && !fullSizeDisabled ? (
+    <StyledPropButtonGroup
+      $border
+      $round
+      $leftMargin={!noMargin}
+      $rightMargin={!noMargin}
+    >
+      <Button
+        disabled
+        label={options.find((o) => o.selected)?.longValue}
+        noBorder
+        radiusLeft
+        radiusRight
+      />
+    </StyledPropButtonGroup>
   ) : (
     <StyledPropButtonGroup
       $leftMargin={!noMargin}
@@ -41,6 +67,7 @@ export const AttributeButtonGroup: React.FC<AttributeButtonGroup> = ({
         const lastInRow = oi === options.length - 1;
         return (
           <Button
+            disabled={disabled && !option.selected}
             key={oi}
             label={option.selected ? option.longValue : option.shortValue}
             icon={
@@ -50,11 +77,7 @@ export const AttributeButtonGroup: React.FC<AttributeButtonGroup> = ({
                 ? option.shortIcon
                 : undefined
             }
-            tooltipLabel={
-              option.longValue === option.shortValue
-                ? undefined
-                : option.longValue
-            }
+            tooltipLabel={getTooltipLabel(option)}
             noBorder
             inverted
             color={option.selected ? "primary" : "greyer"}
