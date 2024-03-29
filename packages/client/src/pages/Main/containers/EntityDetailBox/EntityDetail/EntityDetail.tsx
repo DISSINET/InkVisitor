@@ -63,6 +63,7 @@ import { EntityDetailStatementPropsTable } from "./EntityDetailUsedInTable/Entit
 import { EntityDetailStatementsTable } from "./EntityDetailUsedInTable/EntityDetailStatementsTable/EntityDetailStatementsTable";
 import { EntityDetailValency } from "./EntityDetailValency/EntityDetailValency";
 import { EntityDetailValidation } from "./EntityDetailValidation/EntityDetailValidation";
+import { EntityDetailProtocol } from "./EntityDetailProtocol/EntityDetailProtocol";
 
 const initValidation: ITerritoryValidation = {
   detail: "",
@@ -650,6 +651,87 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
                 />
               </StyledDetailSectionContent>
             </StyledDetailSection>
+
+            {/* Protocol */}
+            {entity.class === EntityEnums.Class.Territory && (
+              <StyledDetailSection>
+                <StyledDetailSectionHeader>Protocol</StyledDetailSectionHeader>
+                <StyledDetailSectionContent>
+                  <EntityDetailProtocol
+                    territory={entity}
+                    updateEntityMutation={updateEntityMutation}
+                    entities={entity.entities}
+                  />
+                </StyledDetailSectionContent>
+              </StyledDetailSection>
+            )}
+
+            {/* Validation rules */}
+            {entity.class === EntityEnums.Class.Territory && (
+              <StyledDetailSection>
+                <StyledDetailSectionHeader>
+                  Validation rules
+                  {userCanEdit && (
+                    <span style={{ marginLeft: "1rem" }}>
+                      <Button
+                        color="primary"
+                        label="new validation rule"
+                        icon={<FaPlus />}
+                        onClick={async () => {
+                          initValidationRule();
+                        }}
+                      />
+                    </span>
+                  )}
+                </StyledDetailSectionHeader>
+
+                {/* TODO: move to new component EntityDetailValidationSection */}
+                {entity.data.validations && (
+                  <StyledValidationList>
+                    {(entity.data.validations as ITerritoryValidation[]).map(
+                      (validation, key) => {
+                        return (
+                          <React.Fragment key={key}>
+                            <EntityDetailValidation
+                              key={key}
+                              validation={validation}
+                              entities={entity.entities}
+                              updateValidationRule={(
+                                changes: Partial<ITerritoryValidation>
+                              ) => {
+                                const validations = deepCopy(
+                                  entity.data
+                                    .validations as ITerritoryValidation[]
+                                );
+                                if (validations[key]) {
+                                  const updatedObject: ITerritoryValidation = {
+                                    ...validations[key],
+                                    ...changes,
+                                  };
+                                  const newArray = [
+                                    ...validations.slice(0, key),
+                                    updatedObject,
+                                    ...validations.slice(key + 1),
+                                  ];
+                                  updateEntityMutation.mutate({
+                                    data: {
+                                      validations: newArray,
+                                    },
+                                  });
+                                }
+                              }}
+                            />
+                            {key !== entity.data.validations.length - 1 && (
+                              <StyledBlockSeparator />
+                            )}
+                          </React.Fragment>
+                        );
+                      }
+                    )}
+                  </StyledValidationList>
+                )}
+              </StyledDetailSection>
+            )}
 
             {/* Valency (A) */}
             {entity.class === EntityEnums.Class.Action && (
