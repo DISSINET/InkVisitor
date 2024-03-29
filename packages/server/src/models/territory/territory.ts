@@ -387,6 +387,12 @@ class Territory extends Entity implements ITerritory {
       });
     }
 
+    if (this.data.protocol) {
+      entityIds.push(this.data.protocol.guidelinesResource);
+      entityIds.push(this.data.protocol.startDate);
+      entityIds.push(this.data.protocol.endDate);
+    }
+
     return entityIds;
   }
 }
