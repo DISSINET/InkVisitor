@@ -66,7 +66,6 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
   // const [guidelinesResourceEntity, setGuidelinesResourceEntity] = useState<IEntity | false>(
   //   false
   // );
-  // const [castemo, setCastemo] = useState(ECASTEMOVariant.SumCASTEMO);
   // const [startDate, setStartDate] = useState<IEntity | false>(false);
   // const [endDate, setEndDate] = useState<IEntity | false>(false);
 
@@ -78,24 +77,29 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
     <StyledGrid>
       <StyledLabel>Project</StyledLabel>
       <Input
+        width="full"
         value={project}
         onChangeFn={(text) => updateProtocol({ project: text })}
       />
 
       <StyledLabel>Guidelines version</StyledLabel>
       <Input
+        width="full"
         value={guidelinesVersion}
         onChangeFn={(text) => updateProtocol({ guidelinesVersion: text })}
       />
 
       <StyledLabel>Guidelines resource</StyledLabel>
-      {guidelinesResource.length > 0 && entities[guidelinesResource] ? (
-        <EntityTag
-          entity={entities[guidelinesResource]}
-          unlinkButton={{
-            onClick: () => updateProtocol({ guidelinesResource: "" }),
-          }}
-        />
+      {guidelinesResource.length > 0 ? (
+        // <EntityTag
+        //   entity={entities[guidelinesResource]}
+        //   unlinkButton={{
+        //     onClick: () => updateProtocol({ guidelinesResource: "" }),
+        //   }}
+        // />
+        <span onClick={() => updateProtocol({ guidelinesResource: "" })}>
+          {guidelinesResource}
+        </span>
       ) : (
         <EntitySuggester
           onPicked={(newPicked) => {
@@ -111,6 +115,7 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
 
       <StyledLabel>Variant</StyledLabel>
       <Dropdown.Single.Basic
+        width="full"
         onChange={(value) => updateProtocol({ variant: value })}
         value={variant}
         options={Object.keys(ECASTEMOVariant).map((key) => ({
@@ -121,16 +126,20 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
 
       <StyledLabel>Description</StyledLabel>
       <Input
+        width="full"
         value={description}
         onChangeFn={(text) => updateProtocol({ description: text })}
       />
 
       <StyledLabel>Start date</StyledLabel>
-      {startDate.length > 0 && entities[startDate] ? (
-        <EntityTag
-          entity={entities[startDate]}
-          unlinkButton={{ onClick: () => updateProtocol({ startDate: "" }) }}
-        />
+      {startDate.length > 0 ? (
+        // <EntityTag
+        //   entity={entities[startDate]}
+        //   unlinkButton={{ onClick: () => updateProtocol({ startDate: "" }) }}
+        // />
+        <span onClick={() => updateProtocol({ startDate: "" })}>
+          {startDate}
+        </span>
       ) : (
         <EntitySuggester
           onPicked={(newPicked) => {
@@ -145,11 +154,12 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
       )}
 
       <StyledLabel>End date</StyledLabel>
-      {endDate.length > 0 && entities[endDate] ? (
-        <EntityTag
-          entity={entities[endDate]}
-          unlinkButton={{ onClick: () => updateProtocol({ endDate: "" }) }}
-        />
+      {endDate.length > 0 ? (
+        // <EntityTag
+        //   entity={entities[endDate]}
+        //   unlinkButton={{ onClick: () => updateProtocol({ endDate: "" }) }}
+        // />
+        <span onClick={() => updateProtocol({ endDate: "" })}>{endDate}</span>
       ) : (
         <EntitySuggester
           onPicked={(newPicked) => {

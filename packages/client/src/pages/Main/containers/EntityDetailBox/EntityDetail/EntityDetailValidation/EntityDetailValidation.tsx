@@ -11,10 +11,11 @@ import {
   StyledSentence,
 } from "./EntityDetailValidationStyles";
 import { IEntity } from "@shared/types";
-import { Input } from "components";
+import { Button, Input } from "components";
 import Dropdown, {
   AttributeButtonGroup,
   EntitySuggester,
+  EntityTag,
 } from "components/advanced";
 import { entitiesDict } from "@shared/dictionaries";
 import { EntityEnums } from "@shared/enums";
@@ -30,28 +31,67 @@ export const EntityDetailValidation: React.FC<EntityDetailValidation> = ({
   entities,
   updateValidationRule,
 }) => {
+  const {
+    detail,
+    entityClasses,
+    classifications,
+    tieType,
+    propType,
+    allowedClasses,
+    allowedEntities,
+  } = validation;
   return (
     <StyledBorderLeft>
       <StyledSentence>{`Generated sentence than will include CAPS LOCK and <tags>`}</StyledSentence>
       <StyledGrid>
+        {/* Detail */}
         <StyledLabel>Detail</StyledLabel>
         <Input
           width="full"
-          value={validation.detail}
+          value={detail}
           onChangeFn={(value) => updateValidationRule({ detail: value })}
         />
+
+        {/* Entity classes */}
         <StyledLabel>Entity types</StyledLabel>
         <Dropdown.Multi.Entity
           width="full"
-          value={validation.entityClasses}
+          value={entityClasses}
           onChange={(values) => updateValidationRule({ entityClasses: values })}
           options={entitiesDict}
           // disabled={!userCanEdit}
         />
+
+        {/* Classifications */}
         <StyledLabel>..classified as</StyledLabel>
         <StyledFlexList>
-          <EntitySuggester categoryTypes={[EntityEnums.Class.Concept]} />
+          {classifications.map((classification, key) => (
+            <>
+              <span
+                onClick={() =>
+                  updateValidationRule({
+                    classifications: classifications.filter(
+                      (c) => c !== classification
+                    ),
+                  })
+                }
+              >
+                {classification}
+              </span>
+              {/* <EntityTag entity={entities[classification]} /> */}
+            </>
+          ))}
+          <EntitySuggester
+            categoryTypes={[EntityEnums.Class.Concept]}
+            onPicked={(entity) =>
+              updateValidationRule({
+                classifications: [...classifications, entity.id],
+              })
+            }
+          />
         </StyledFlexList>
+
+        {/* Tie type */}
         <StyledLabel>Tie type</StyledLabel>
         <AttributeButtonGroup
           noMargin
@@ -60,7 +100,7 @@ export const EntityDetailValidation: React.FC<EntityDetailValidation> = ({
               longValue: EProtocolTieType.Property,
               onClick: () =>
                 updateValidationRule({ tieType: EProtocolTieType.Property }),
-              selected: validation.tieType === EProtocolTieType.Property,
+              selected: tieType === EProtocolTieType.Property,
             },
             {
               longValue: EProtocolTieType.Classification,
@@ -68,44 +108,57 @@ export const EntityDetailValidation: React.FC<EntityDetailValidation> = ({
                 updateValidationRule({
                   tieType: EProtocolTieType.Classification,
                 }),
-              selected: validation.tieType === EProtocolTieType.Classification,
+              selected: tieType === EProtocolTieType.Classification,
             },
             {
               longValue: EProtocolTieType.Reference,
               onClick: () =>
                 updateValidationRule({ tieType: EProtocolTieType.Reference }),
-              selected: validation.tieType === EProtocolTieType.Reference,
+              selected: tieType === EProtocolTieType.Reference,
             },
           ]}
         />
-        {validation.tieType === EProtocolTieType.Property && (
+
+        {/* Prop type */}
+        {tieType === EProtocolTieType.Property && (
           <>
             <StyledLabel>Prop type</StyledLabel>
             <StyledFlexList>
+              {propType?.map((entityId) => {
+                return (
+                  <>
+                    <EntityTag entity={entities[entityId]} />
+                  </>
+                );
+              })}
               <EntitySuggester categoryTypes={[EntityEnums.Class.Concept]} />
             </StyledFlexList>
           </>
         )}
+
         {/* Allowed classes */}
         <StyledLabel>Allowed E types</StyledLabel>
         <Dropdown.Multi.Entity
           width="full"
-          value={validation.allowedClasses || []}
+          value={allowedClasses || []}
           onChange={(values) =>
             updateValidationRule({ allowedClasses: values })
           }
           options={entitiesDict}
-          disabled={
-            validation.allowedEntities && validation.allowedEntities.length > 0
-          }
+          disabled={allowedEntities && allowedEntities.length > 0}
           // disabled={!userCanEdit}
         />
+
         {/* Allowed entities */}
         <StyledLabel>Allowed E values</StyledLabel>
         <StyledFlexList>
+          {allowedEntities?.map((entityId) => (
+            <EntityTag entity={entities[entityId]} />
+          ))}
           <EntitySuggester categoryTypes={classesAll} />
         </StyledFlexList>
       </StyledGrid>
+      {/* <Button label="remove validation rule" onClick={() => } /> */}
     </StyledBorderLeft>
   );
 };

@@ -4,6 +4,7 @@ export const StyledGrid = styled.div`
   display: grid;
   grid-template-columns: auto 1fr;
   grid-gap: 1rem;
+  padding-right: 2rem;
 `;
 export const StyledLabel = styled.div`
   display: grid;
