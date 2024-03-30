@@ -1,4 +1,4 @@
-lockfileVersion: '6.1'
+lockfileVersion: '6.0'
 
 settings:
   autoInstallPeers: true
@@ -8,6 +8,9 @@ dependencies:
   '@floating-ui/react':
     specifier: ^0.26.9
     version: 0.26.9(react-dom@18.2.0)(react@18.2.0)
+  '@inkvisitor/canvas':
+    specifier: file:../canvas
+    version: file:../canvas
   '@popperjs/core':
     specifier: ^2.11.8
     version: 2.11.8
@@ -26,6 +29,9 @@ dependencies:
   axios:
     specifier: ^1.6.7
     version: 1.6.7
+  canvas:
+    specifier: link:../canvas
+    version: link:../canvas
   immutability-helper:
     specifier: ^3.1.1
     version: 3.1.1
@@ -6940,6 +6946,14 @@ packages:
     dependencies:
       js-tokens: 4.0.0
 
+  /lorem-ipsum@2.0.8:
+    resolution: {integrity: sha512-5RIwHuCb979RASgCJH0VKERn9cQo/+NcAi2BMe9ddj+gp7hujl6BI+qdOG4nVsLDpwWEJwTVYXNKP6BGgbcoGA==}
+    engines: {node: '>= 8.x', npm: '>= 5.x'}
+    hasBin: true
+    dependencies:
+      commander: 9.5.0
+    dev: false
+
   /lower-case@2.0.2:
     resolution: {integrity: sha512-7fm3l3NAF9WfN6W3JOmf5drwpVqX78JtoGJ3A6W0a6ZnldM41w2fV5D490psKFTpMds8TJse/eHLFFsNHHjHgg==}
     dependencies:
@@ -9916,4 +9930,12 @@ packages:
       '@types/react': 18.2.64
       react: 18.2.0
       use-sync-external-store: 1.2.0(react@18.2.0)
+    dev: false
+
+  file:../canvas:
+    resolution: {directory: ../canvas, type: directory}
+    name: canvas
+    dependencies:
+      lorem-ipsum: 2.0.8
+      react: 18.2.0
     dev: false

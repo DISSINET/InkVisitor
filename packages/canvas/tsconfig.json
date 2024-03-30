@@ -1,11 +1,18 @@
 {
   "compilerOptions": {
     "declaration": true,
-    "lib": ["es6", "dom", "es2016"],
-    "target": "es5",
-    "module": "commonjs",
+    "target": "es6",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "module": "esnext",
+    "moduleResolution": "node",
     "outDir": "./dist",
-    "strict": true
+    "strict": true,
+    "jsx": "react"
   },
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules"]

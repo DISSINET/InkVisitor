@@ -14,7 +14,7 @@ export interface DrawingOptions {
 /**
  * Canvas is main wrapping class around HTMLCanvasElement
  */
-export class Canvas {
+export class CanvasLib {
   // canvas element
   element: HTMLCanvasElement;
   // cached canvas contex
@@ -285,6 +285,7 @@ export class Canvas {
    * TODO - this should be done in conjunction with requestAnimationFrame
    */
   draw() {
+    // @ts-ignore
     this.ctx.reset();
     this.ctx.font = this.font;
 

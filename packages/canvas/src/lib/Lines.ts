@@ -36,6 +36,7 @@ export class Lines {
   }
 
   draw(viewport: Viewport) {
+    // @ts-ignore
     this.ctx.reset();
     this.ctx.font = this.font;
     for (

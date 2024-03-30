@@ -16,6 +16,7 @@ import {
 } from "./DocumentsPageStyles";
 import { useSpring } from "@react-spring/web";
 import { springConfig } from "Theme/constants";
+import { Canvas} from "../../components/advanced/Canvas/Canvas"
 
 type DocumentWithResource = {
   document: IResponseDocument;
@@ -156,6 +157,7 @@ export const DocumentsPage: React.FC = ({}) => {
                 }
               )}
             </StyledGrid>
+            <Canvas />
             <StyledInputWrap onClick={() => inputRef.current?.click()}>
               Upload document
               <input
