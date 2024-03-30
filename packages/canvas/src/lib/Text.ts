@@ -11,7 +11,7 @@ interface Segment {
 interface SegmentPosition {
   segmentIndex: number;
   lineIndex: number;
-  charIndex: number;
+  charInLineIndex: number;
   textCharIndex: number; 
 }
 
@@ -32,10 +32,6 @@ class Text {
     this.calculateLines();
   }
 
-  get length() {
-    return this.value.length;
-  }
-
   get noLines(): number {
     return this.segments.reduce<number>((a, c) => a + c.lines.length, 0);
   }
@@ -43,7 +39,6 @@ class Text {
   get lines(): string[] {
     return this.segments.reduce<string[]>((a, cur) => a.concat(cur.lines), []);
   }
-
 
   prepareSegments() {
     const segmentsArray = this.value.split("\n");
@@ -143,7 +138,7 @@ class Text {
     return {
       segmentIndex,
       lineIndex,
-      charIndex,
+      charInLineIndex: charIndex,
       textCharIndex,
     };
   }
@@ -157,7 +152,7 @@ class Text {
     return {
       segmentIndex: this.segments.length - 1,
       lineIndex: lastSegment.lines.length - 1,
-      charIndex: 0,
+      charInLineIndex: 0,
       textCharIndex: 0,
     };
   }
@@ -215,10 +210,32 @@ class Text {
       return
     }
 
-    this.dirtySegment = segmentPosition.segmentIndex;
-
     const segment = this.segments[segmentPosition.segmentIndex]
     segment.text = segment.text.slice(0, segmentPosition.textCharIndex) + textToInsert + segment.text.slice(segmentPosition.textCharIndex );
+    this.calculateLines();
+  }
+
+  insertNewline(
+    viewport: Viewport,
+    cursorPosition: Cursor,
+    textToInsert: string
+  ): void {
+    const segmentPosition = this.cursorToIndex(viewport, cursorPosition);
+    if(!segmentPosition) {
+      return
+    }
+
+    let indexPosition = segmentPosition.textCharIndex;
+    for (let i = 0; i < segmentPosition.segmentIndex; i++) {
+      indexPosition += this.segments[i].lines.reduce((acc, cur) => {
+        return acc + cur.length;
+      }, 1) // 1 because of newline 
+    }
+
+    this.value = this.value.slice(0, indexPosition)
+    + '\n' + this.value.slice(indexPosition);
+
+    this.prepareSegments();
     this.calculateLines();
   }
 

@@ -101,11 +101,13 @@ export class CanvasLib {
       "Escape",
       "Enter",
       "Delete",
+      "Meta",
     ];
 
     switch (e.key) {
       case "Enter":
-        this.text.insertText(this.viewport, this.cursor, "\n");
+        this.text.insertNewline(this.viewport, this.cursor, "\n");
+        this.cursor.moveToNewline();
         break;
 
       case "ArrowUp":

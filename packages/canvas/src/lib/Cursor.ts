@@ -105,6 +105,14 @@ export default class Cursor implements IRelativeCoordinates {
   }
 
   /**
+   * move the cursor to start of the next line
+   */
+  moveToNewline() {
+    this.xLine = 0;
+    this.yLine += 1;
+  }
+
+  /**
    * drawLine is shorthand around drawing highlighted ares simply by providing relative coordinates
    * @param ctx
    * @param relLine

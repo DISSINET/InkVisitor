@@ -1,9 +1,10 @@
 export * from "./Cursor"
 export * from "./Viewport"
 export * from "./CanvasLib"
-export * from "./Canvas"
 
 import { LoremIpsum } from "lorem-ipsum";
+
+const exampleText = require("./example.txt");
 
 const lorem = new LoremIpsum({
     // one page = 500 words
@@ -19,3 +20,4 @@ const lorem = new LoremIpsum({
 
   
 export const generateText = lorem.generateParagraphs.bind(lorem);
+export const example = exampleText.default;

@@ -29,7 +29,7 @@ class Scroller {
   }
 
   setRunnerSize(percentSize: number): void {
-    this.runner.style.height = `${percentSize}%`;
+    this.runner.style.height = `${Math.min(100, percentSize)}%`;
   }
 
   /**
