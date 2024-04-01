@@ -12,7 +12,7 @@ interface SegmentPosition {
   segmentIndex: number;
   lineIndex: number;
   charInLineIndex: number;
-  textCharIndex: number; 
+  textCharIndex: number;
 }
 
 /**
@@ -23,7 +23,7 @@ class Text {
   dirtySegment?: number;
   value: string;
   charsAtLine: number;
-  
+
   constructor(value: string, charsAtLine: number) {
     this.value = value;
     this.segments = [];
@@ -65,10 +65,13 @@ class Text {
     const time1 = performance.now();
     let currentLineNumber: number = 0;
     for (const segmentIndex in this.segments) {
-      const segment= this.segments[segmentIndex]
-      
-      if (this.dirtySegment !== undefined && parseInt(segmentIndex) < this.dirtySegment) {
-        currentLineNumber += segment.lines.length
+      const segment = this.segments[segmentIndex];
+
+      if (
+        this.dirtySegment !== undefined &&
+        parseInt(segmentIndex) < this.dirtySegment
+      ) {
+        currentLineNumber += segment.lines.length;
         continue;
       }
 
@@ -117,11 +120,17 @@ class Text {
    * @returns
    */
   cursorToIndex(viewport: Viewport, cursor: Cursor): SegmentPosition | null {
-    const pos = this.getSegmentPosition(cursor.yLine + viewport.lineStart, cursor.xLine);
+    const pos = this.getSegmentPosition(
+      cursor.yLine + viewport.lineStart,
+      cursor.xLine
+    );
     return pos;
   }
 
-  getSegmentPosition(absLineIndex: number, charIndex: number = 0): SegmentPosition | null {
+  getSegmentPosition(
+    absLineIndex: number,
+    charIndex: number = 0
+  ): SegmentPosition | null {
     const segmentIndex = this.segments.findIndex(
       (s) => s.lineStart <= absLineIndex && s.lineEnd > absLineIndex
     );
@@ -129,8 +138,12 @@ class Text {
       return null;
     }
 
-    let textCharIndex = charIndex
     const lineIndex = absLineIndex - this.segments[segmentIndex].lineStart;
+    charIndex = Math.min(
+      charIndex,
+      this.segments[segmentIndex].lines[lineIndex].length
+    );
+    let textCharIndex = charIndex;
     for (let i = 0; i < lineIndex; i++) {
       textCharIndex += this.segments[segmentIndex].lines[i].length + 1;
     }
@@ -164,7 +177,9 @@ class Text {
    */
   getViewportText(viewport: Viewport): string[] {
     const posStart = this.getSegmentPosition(viewport.lineStart);
-    const posEnd = this.getSegmentPosition(viewport.lineEnd) || this.getLastSegmentPosition();
+    const posEnd =
+      this.getSegmentPosition(viewport.lineEnd) ||
+      this.getLastSegmentPosition();
 
     if (!posStart || !posEnd) {
       return [];
@@ -173,14 +188,13 @@ class Text {
     const out: string[] = [];
     for (let i = posStart.segmentIndex; i <= posEnd.segmentIndex; i++) {
       if (i === posStart.segmentIndex) {
-        out.push(...this.segments[i].lines.slice(posStart.lineIndex))        
+        out.push(...this.segments[i].lines.slice(posStart.lineIndex));
       } else if (i === posEnd.segmentIndex) {
-        out.push(...this.segments[i].lines.slice(0, posEnd.lineIndex + 1))              
+        out.push(...this.segments[i].lines.slice(0, posEnd.lineIndex + 1));
       } else {
-        out.push(...this.segments[i].lines)
+        out.push(...this.segments[i].lines);
       }
     }
-
 
     return out;
   }
@@ -206,34 +220,52 @@ class Text {
     textToInsert: string
   ): void {
     const segmentPosition = this.cursorToIndex(viewport, cursorPosition);
-    if(!segmentPosition) {
-      return
-    }
-
-    const segment = this.segments[segmentPosition.segmentIndex]
-    segment.text = segment.text.slice(0, segmentPosition.textCharIndex) + textToInsert + segment.text.slice(segmentPosition.textCharIndex );
-    this.calculateLines();
-  }
-
-  insertNewline(
-    viewport: Viewport,
-    cursorPosition: Cursor,
-    textToInsert: string
-  ): void {
-    const segmentPosition = this.cursorToIndex(viewport, cursorPosition);
-    if(!segmentPosition) {
-      return
+    if (!segmentPosition) {
+      return;
     }
 
     let indexPosition = segmentPosition.textCharIndex;
     for (let i = 0; i < segmentPosition.segmentIndex; i++) {
-      indexPosition += this.segments[i].lines.reduce((acc, cur) => {
-        return acc + cur.length;
-      }, 1) // 1 because of newline 
+      indexPosition += this.segments[i].lines.length + 1;
     }
 
-    this.value = this.value.slice(0, indexPosition)
-    + '\n' + this.value.slice(indexPosition);
+    this.value =
+      this.value.slice(0, indexPosition) +
+      textToInsert +
+      this.value.slice(indexPosition);
+
+    const segment = this.segments[segmentPosition.segmentIndex];
+    segment.text =
+      segment.text.slice(0, segmentPosition.textCharIndex) +
+      textToInsert +
+      segment.text.slice(segmentPosition.textCharIndex);
+
+    this.calculateLines();
+  }
+
+  /**
+   * adds newline character on current cursor position, creating new segment in the process
+   * @param viewport 
+   * @param cursorPosition 
+   * @returns 
+   */
+  insertNewline(viewport: Viewport, cursorPosition: Cursor): void {
+    const segmentPosition = this.cursorToIndex(viewport, cursorPosition);
+    if (!segmentPosition) {
+      return;
+    }
+
+    let indexPosition = segmentPosition.textCharIndex;
+
+    for (let i = 0; i < segmentPosition.segmentIndex; i++) {
+      indexPosition++; // each segment should receive +1 character no matter what (newline)
+      indexPosition += this.segments[i].text.length;
+    }
+
+    this.value =
+      this.value.slice(0, indexPosition) +
+      "\n" +
+      this.value.slice(indexPosition);
 
     this.prepareSegments();
     this.calculateLines();
@@ -251,17 +283,19 @@ class Text {
     chartsToDelete: number
   ): void {
     const segmentPosition = this.cursorToIndex(viewport, cursorPosition);
-    if(!segmentPosition) {
-      return
+    if (!segmentPosition) {
+      return;
     }
-    
+
     this.dirtySegment = segmentPosition.segmentIndex;
 
-    const xAlterPos = segmentPosition.textCharIndex - ( chartsToDelete > 0 ? 1 : 0)
-    const segment = this.segments[segmentPosition.segmentIndex]
-    segment.text = segment.text.slice(0, xAlterPos) + segment.text.slice(xAlterPos + 1);
+    const xAlterPos =
+      segmentPosition.textCharIndex - (chartsToDelete > 0 ? 1 : 0);
+    const segment = this.segments[segmentPosition.segmentIndex];
+    segment.text =
+      segment.text.slice(0, xAlterPos) + segment.text.slice(xAlterPos + 1);
 
-    this.calculateLines();    
+    this.calculateLines();
   }
 
   /**

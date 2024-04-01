@@ -106,7 +106,7 @@ export class CanvasLib {
 
     switch (e.key) {
       case "Enter":
-        this.text.insertNewline(this.viewport, this.cursor, "\n");
+        this.text.insertNewline(this.viewport, this.cursor);
         this.cursor.moveToNewline();
         if (!this.text.cursorToIndex(this.viewport, this.cursor)) {
           this.cursor.move(0, -1);
