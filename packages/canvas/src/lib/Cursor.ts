@@ -35,13 +35,12 @@ export default class Cursor implements IRelativeCoordinates {
   }
 
   setPosition(
-    offsetX: number,
-    offsetY: number,
+    evt: MouseEvent,
     lineHeight: number,
     charWidth: number
   ) {
-    this.xLine = this.xToCharI(offsetX, charWidth);
-    this.yLine = this.yToLineI(offsetY, lineHeight);
+    this.xLine = this.xToCharI(evt.offsetX, charWidth);
+    this.yLine = this.yToLineI(evt.offsetY, lineHeight);
   }
 
   /**

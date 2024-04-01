@@ -108,6 +108,9 @@ export class CanvasLib {
       case "Enter":
         this.text.insertNewline(this.viewport, this.cursor, "\n");
         this.cursor.moveToNewline();
+        if (!this.text.cursorToIndex(this.viewport, this.cursor)) {
+          this.cursor.move(0, -1);
+        }
         break;
 
       case "ArrowUp":
@@ -198,12 +201,7 @@ export class CanvasLib {
    * @param e
    */
   onMouseDown(e: MouseEvent) {
-    this.cursor.setPosition(
-      e.offsetX,
-      e.offsetY,
-      this.lineHeight,
-      this.charWidth
-    );
+    this.cursor.setPosition(e, this.lineHeight, this.charWidth);
     this.cursor.highlight(this.viewport.lineStart);
     this.draw();
   }
@@ -213,12 +211,7 @@ export class CanvasLib {
    * @param e
    */
   onMouseUp(e: MouseEvent) {
-    this.cursor.setPosition(
-      e.offsetX,
-      e.offsetY,
-      this.lineHeight,
-      this.charWidth
-    );
+    this.cursor.setPosition(e, this.lineHeight, this.charWidth);
     this.cursor.endHighlight();
     this.draw();
   }
@@ -229,12 +222,7 @@ export class CanvasLib {
    */
   onMouseMove(e: MouseEvent) {
     if (this.cursor.isHighlighting()) {
-      this.cursor.setPosition(
-        e.offsetX,
-        e.offsetY,
-        this.lineHeight,
-        this.charWidth
-      );
+      this.cursor.setPosition(e, this.lineHeight, this.charWidth);
       this.cursor.highlight(this.viewport.lineStart);
       this.draw();
     }
@@ -302,12 +290,18 @@ export class CanvasLib {
         this.ctx.fillText(textLine, 0, (renderLine + 1) * this.lineHeight);
       }
     }
-
-    this.cursor.draw(this.ctx, this.viewport, {
-      lineHeight: this.lineHeight,
-      charWidth: this.charWidth,
-      charsAtLine: this.text.charsAtLine,
-    });
+    
+    const textSegment = this.text.cursorToIndex(this.viewport, this.cursor);
+    if (textSegment) {
+      // fix cursor position to end of the line (cursor.xLine could be virtually infinity)
+      this.cursor.xLine = textSegment.charInLineIndex;
+      
+      this.cursor.draw(this.ctx, this.viewport, {
+        lineHeight: this.lineHeight,
+        charWidth: this.charWidth,
+        charsAtLine: this.text.charsAtLine,
+      });
+    }
 
     if (this.highlightChangeCb && this.cursor.isHighlighted()) {
       const [start, end] = this.cursor.getHighlighted();
