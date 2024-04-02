@@ -170,16 +170,28 @@ export const EntityDetailValidation: React.FC<EntityDetailValidation> = ({
         <StyledLabel>Allowed E values</StyledLabel>
         <StyledFlexList>
           {allowedEntities?.map((entityId) => (
-            <EntityTag flexListMargin entity={entities[entityId]} />
+            <EntityTag
+              flexListMargin
+              entity={entities[entityId]}
+              unlinkButton={{
+                onClick: () =>
+                  updateValidationRule({
+                    allowedEntities: allowedEntities.filter(
+                      (aE) => aE !== entityId
+                    ),
+                  }),
+              }}
+            />
           ))}
           <EntitySuggester
             categoryTypes={classesAll}
             excludedActantIds={allowedEntities}
-            onPicked={(entity) =>
+            onPicked={(entity) => {
               updateValidationRule({
                 allowedEntities: [...(allowedEntities || []), entity.id],
-              })
-            }
+                allowedClasses: [],
+              });
+            }}
           />
         </StyledFlexList>
       </StyledGrid>
