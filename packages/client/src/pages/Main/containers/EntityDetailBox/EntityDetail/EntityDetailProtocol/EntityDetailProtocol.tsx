@@ -27,7 +27,6 @@ const initialProtocol: ITerritoryProtocol = {
 };
 interface EntityDetailProtocol {
   territory: IResponseDetail;
-  entities: Record<string, IEntity>;
   updateEntityMutation: UseMutationResult<
     AxiosResponse<IResponseGeneric<any>, any>,
     Error,
@@ -37,9 +36,9 @@ interface EntityDetailProtocol {
 }
 export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
   territory,
-  entities,
   updateEntityMutation,
 }) => {
+  const { entities } = territory;
   const { protocol } = territory.data as ITerritoryData;
 
   useEffect(() => {

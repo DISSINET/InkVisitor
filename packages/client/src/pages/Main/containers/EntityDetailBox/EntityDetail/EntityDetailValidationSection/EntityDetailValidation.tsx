@@ -45,7 +45,29 @@ export const EntityDetailValidation: React.FC<EntityDetailValidation> = ({
   } = validation;
   return (
     <StyledBorderLeft>
-      <StyledSentence>{`Generated sentence than will include CAPS LOCK and <tags>`}</StyledSentence>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          width: "100%",
+          paddingTop: "0.2rem",
+          paddingBottom: "1.5rem",
+        }}
+      >
+        <StyledSentence>
+          {/* TODO: sentence generator */}
+          {`Generated sentence than will include CAPS LOCK and <tags>`}
+        </StyledSentence>
+        <span>
+          <Button
+            color="danger"
+            icon={<FaTrashAlt />}
+            onClick={removeValidationRule}
+            inverted
+            tooltipLabel="remove validation rule"
+          />
+        </span>
+      </div>
       <StyledGrid>
         {/* Detail */}
         <StyledLabel>Detail</StyledLabel>
@@ -101,22 +123,29 @@ export const EntityDetailValidation: React.FC<EntityDetailValidation> = ({
           options={[
             {
               longValue: EProtocolTieType.Property,
+              shortValue: EProtocolTieType.Property,
               onClick: () =>
                 updateValidationRule({ tieType: EProtocolTieType.Property }),
               selected: tieType === EProtocolTieType.Property,
             },
             {
               longValue: EProtocolTieType.Classification,
+              shortValue: EProtocolTieType.Classification,
               onClick: () =>
                 updateValidationRule({
                   tieType: EProtocolTieType.Classification,
+                  propType: [],
                 }),
               selected: tieType === EProtocolTieType.Classification,
             },
             {
               longValue: EProtocolTieType.Reference,
+              shortValue: EProtocolTieType.Reference,
               onClick: () =>
-                updateValidationRule({ tieType: EProtocolTieType.Reference }),
+                updateValidationRule({
+                  tieType: EProtocolTieType.Reference,
+                  propType: [],
+                }),
               selected: tieType === EProtocolTieType.Reference,
             },
           ]}
@@ -195,20 +224,6 @@ export const EntityDetailValidation: React.FC<EntityDetailValidation> = ({
           />
         </StyledFlexList>
       </StyledGrid>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "flex-end",
-          width: "100%",
-          marginTop: "1rem",
-        }}
-      >
-        <Button
-          color="danger"
-          icon={<FaTrashAlt />}
-          onClick={removeValidationRule}
-        />
-      </div>
     </StyledBorderLeft>
   );
 };

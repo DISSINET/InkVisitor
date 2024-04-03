@@ -20,6 +20,9 @@ const initValidation: ITerritoryValidation = {
   detail: "",
   entityClasses: [],
   classifications: [],
+  allowedEntities: [],
+  allowedClasses: [],
+  propType: [],
   tieType: EProtocolTieType.Property,
 };
 
@@ -64,9 +67,7 @@ export const EntityDetailValidationSection: React.FC<
               color="primary"
               label="new validation rule"
               icon={<FaPlus />}
-              onClick={async () => {
-                initValidationRule();
-              }}
+              onClick={initValidationRule}
             />
           </span>
         )}

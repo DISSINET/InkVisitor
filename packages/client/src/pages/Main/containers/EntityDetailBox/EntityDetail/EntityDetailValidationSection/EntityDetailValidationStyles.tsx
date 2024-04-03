@@ -12,9 +12,9 @@ export const StyledGrid = styled.div`
   grid-gap: 1rem;
 `;
 export const StyledSentence = styled.p`
+  margin-top: 0.1rem;
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   color: ${({ theme }) => theme.color["danger"]};
-  margin-bottom: 2rem;
 `;
 export const StyledLabel = styled.div`
   display: grid;

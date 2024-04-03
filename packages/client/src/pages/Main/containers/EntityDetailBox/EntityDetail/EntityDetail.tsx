@@ -635,7 +635,6 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
                   <EntityDetailProtocol
                     territory={entity}
                     updateEntityMutation={updateEntityMutation}
-                    entities={entity.entities}
                   />
                 </StyledDetailSectionContent>
               </StyledDetailSection>
