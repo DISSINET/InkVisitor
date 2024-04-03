@@ -107,7 +107,7 @@ export const EntityTag: React.FC<EntityTag> = ({
   return (
     <>
       <StyledEntityTagWrap
-        flexListMargin={flexListMargin}
+        $flexListMargin={flexListMargin}
         ref={setReferenceElement}
         onMouseEnter={() => setTagHovered(true)}
         onMouseLeave={() => setTagHovered(false)}

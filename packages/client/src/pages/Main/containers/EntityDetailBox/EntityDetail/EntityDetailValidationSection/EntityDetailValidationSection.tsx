@@ -36,10 +36,19 @@ interface EntityDetailValidationSection {
     unknown
   >;
   userCanEdit: boolean;
+  isInsideTemplate: boolean;
+  territoryParentId: string | undefined;
 }
 export const EntityDetailValidationSection: React.FC<
   EntityDetailValidationSection
-> = ({ validations, entities, updateEntityMutation, userCanEdit }) => {
+> = ({
+  validations,
+  entities,
+  updateEntityMutation,
+  userCanEdit,
+  isInsideTemplate,
+  territoryParentId,
+}) => {
   const initValidationRule = () => {
     updateEntityMutation.mutate({
       data: {
@@ -106,6 +115,8 @@ export const EntityDetailValidationSection: React.FC<
                     }
                   }}
                   removeValidationRule={() => removeValidationRule(key)}
+                  isInsideTemplate={isInsideTemplate}
+                  territoryParentId={territoryParentId}
                 />
                 {key !== validations.length - 1 && <StyledBlockSeparator />}
               </React.Fragment>

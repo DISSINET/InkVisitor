@@ -27,12 +27,16 @@ interface EntityDetailValidation {
   entities: Record<string, IEntity>;
   updateValidationRule: (changes: Partial<ITerritoryValidation>) => void;
   removeValidationRule: () => void;
+  isInsideTemplate: boolean;
+  territoryParentId: string | undefined;
 }
 export const EntityDetailValidation: React.FC<EntityDetailValidation> = ({
   validation,
   entities,
   updateValidationRule,
   removeValidationRule,
+  isInsideTemplate,
+  territoryParentId,
 }) => {
   const {
     detail,
@@ -92,6 +96,7 @@ export const EntityDetailValidation: React.FC<EntityDetailValidation> = ({
         <StyledFlexList>
           {classifications.map((classification, key) => (
             <EntityTag
+              key={key}
               flexListMargin
               entity={entities[classification]}
               unlinkButton={{
@@ -156,8 +161,9 @@ export const EntityDetailValidation: React.FC<EntityDetailValidation> = ({
           <>
             <StyledLabel>Prop type</StyledLabel>
             <StyledFlexList>
-              {propType?.map((entityId) => (
+              {propType?.map((entityId, key) => (
                 <EntityTag
+                  key={key}
                   flexListMargin
                   entity={entities[entityId]}
                   unlinkButton={{
@@ -198,8 +204,9 @@ export const EntityDetailValidation: React.FC<EntityDetailValidation> = ({
         {/* Allowed entities */}
         <StyledLabel>Allowed E values</StyledLabel>
         <StyledFlexList>
-          {allowedEntities?.map((entityId) => (
+          {allowedEntities?.map((entityId, key) => (
             <EntityTag
+              key={key}
               flexListMargin
               entity={entities[entityId]}
               unlinkButton={{
@@ -221,6 +228,8 @@ export const EntityDetailValidation: React.FC<EntityDetailValidation> = ({
                 allowedClasses: [],
               });
             }}
+            isInsideTemplate={isInsideTemplate}
+            territoryParentId={territoryParentId}
           />
         </StyledFlexList>
       </StyledGrid>

@@ -33,10 +33,12 @@ interface EntityDetailProtocol {
     any,
     unknown
   >;
+  isInsideTemplate: boolean;
 }
 export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
   territory,
   updateEntityMutation,
+  isInsideTemplate,
 }) => {
   const { entities } = territory;
   const { protocol } = territory.data as ITerritoryData;
@@ -101,11 +103,9 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
           onPicked={(newPicked) => {
             updateProtocol({ guidelinesResource: newPicked.id });
           }}
-          disableTemplatesAccept
           categoryTypes={[EntityEnums.Class.Resource]}
           territoryParentId={territory.data.parent.territoryId}
-          // openDetailOnCreate
-          // isInsideTemplate={isInsideTemplate}
+          isInsideTemplate={isInsideTemplate}
         />
       )}
 
@@ -142,9 +142,7 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
           }}
           categoryTypes={[EntityEnums.Class.Value]}
           territoryParentId={territory.data.parent.territoryId}
-          disableTemplatesAccept
-          // openDetailOnCreate
-          // isInsideTemplate={isInsideTemplate}
+          isInsideTemplate={isInsideTemplate}
         />
       )}
 
@@ -163,9 +161,7 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
           }}
           categoryTypes={[EntityEnums.Class.Value]}
           territoryParentId={territory.data.parent.territoryId}
-          disableTemplatesAccept
-          // openDetailOnCreate
-          // isInsideTemplate={isInsideTemplate}
+          isInsideTemplate={isInsideTemplate}
         />
       )}
     </StyledGrid>

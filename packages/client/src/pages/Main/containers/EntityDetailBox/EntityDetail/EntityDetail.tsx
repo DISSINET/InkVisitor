@@ -582,6 +582,8 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
     },
   });
 
+  const isInsideTemplate = entity?.isTemplate || false;
+
   return (
     <>
       {entity && (
@@ -635,6 +637,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
                   <EntityDetailProtocol
                     territory={entity}
                     updateEntityMutation={updateEntityMutation}
+                    isInsideTemplate={isInsideTemplate}
                   />
                 </StyledDetailSectionContent>
               </StyledDetailSection>
@@ -652,6 +655,8 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
                   entities={entity.entities}
                   updateEntityMutation={updateEntityMutation}
                   userCanEdit={userCanEdit}
+                  isInsideTemplate={isInsideTemplate}
+                  territoryParentId={getTerritoryId(entity)}
                 />
               </StyledDetailSection>
             )}
@@ -744,7 +749,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
                         value: ["elvl", "logic", "virtuality", "partitivity"],
                       } as PropAttributeFilter
                     }
-                    isInsideTemplate={entity.isTemplate || false}
+                    isInsideTemplate={isInsideTemplate}
                     territoryParentId={getTerritoryId(entity)}
                     lowIdent
                   />
@@ -777,7 +782,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
                   onChange={(newValues: IReference[]) => {
                     updateEntityMutation.mutate({ references: newValues });
                   }}
-                  isInsideTemplate={entity.isTemplate || false}
+                  isInsideTemplate={isInsideTemplate}
                 />
               </StyledDetailSectionContent>
             </StyledDetailSection>

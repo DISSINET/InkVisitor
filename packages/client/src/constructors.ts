@@ -124,9 +124,9 @@ export const InstProps: any = async (
 
       if (typeEntityReq && typeEntityReq.data) {
         if (typeEntityReq.data.isTemplate) {
-          const newTypeEId = await InstTemplate(typeEntityReq.data, userRole);
-          if (newTypeEId) {
-            prop.type.entityId = newTypeEId;
+          const newTypeE = await InstTemplate(typeEntityReq.data, userRole);
+          if (newTypeE) {
+            prop.type.entityId = newTypeE.id;
           }
         }
       }
@@ -138,9 +138,9 @@ export const InstProps: any = async (
 
       if (valueEntityReq && valueEntityReq.data) {
         if (valueEntityReq.data.isTemplate) {
-          const newValueEId = await InstTemplate(valueEntityReq.data, userRole);
-          if (newValueEId) {
-            prop.value.entityId = newValueEId;
+          const newValueE = await InstTemplate(valueEntityReq.data, userRole);
+          if (newValueE) {
+            prop.value.entityId = newValueE.id;
           }
         }
       }
@@ -173,10 +173,10 @@ export const InstActant = async (
     const actantE = eReq.data;
 
     if (actantE && actantE.isTemplate) {
-      const instActantId = await InstTemplate(actantE, userRole);
+      const instActant = await InstTemplate(actantE, userRole);
 
-      if (instActantId) {
-        actant.entityId = instActantId;
+      if (instActant) {
+        actant.entityId = instActant.id;
       }
     }
   }
@@ -195,10 +195,10 @@ export const InstAction: any = async (
     const actionE = eReq.data;
 
     if (actionE && actionE.isTemplate) {
-      const instActionId = await InstTemplate(actionE, userRole);
+      const instAction = await InstTemplate(actionE, userRole);
 
-      if (instActionId) {
-        action.actionId = instActionId;
+      if (instAction) {
+        action.actionId = instAction.id;
       }
     }
   }
@@ -212,7 +212,7 @@ export const InstTemplate = async (
   templateEntity: IEntity | IStatement | ITerritory,
   userRole: UserEnums.Role,
   territoryParentId?: string
-): Promise<string | false> => {
+): Promise<IEntity | false> => {
   if (templateEntity.isTemplate) {
     let iEntity: false | IEntity = false;
     if (templateEntity.class === EntityEnums.Class.Statement) {
@@ -258,7 +258,7 @@ export const InstTemplate = async (
 
     const createReq = await api.entityCreate(iEntity);
     if (createReq) {
-      return iEntity.id;
+      return iEntity;
     }
   }
 
