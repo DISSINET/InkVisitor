@@ -21,8 +21,8 @@ import {
   StyledLabel,
   StyledSentence,
   StyledSentenceEntity,
-} from "./EntityDetailValidationStyles";
-import { EntityDetailValidationTextSection } from "./EntityDetailValidationTextSection";
+} from "../EntityDetailValidationStyles";
+import { EntityDetailValidationText } from "../EntityDetailValidationText";
 
 interface EntityDetailValidation {
   validation: ITerritoryValidation;
@@ -54,18 +54,23 @@ export const EntityDetailValidation: React.FC<EntityDetailValidation> = ({
     return allowedEntities !== undefined && allowedEntities.length > 0;
   }, [allowedEntities]);
 
+  const allowedEntitiesIncludesResource =
+    allowedEntities &&
+    allowedEntities.some(
+      (eId) => entities[eId].class === EntityEnums.Class.Resource
+    );
+
   return (
     <StyledBorderLeft>
       <div
         style={{
           display: "flex",
-          justifyContent: "space-between",
           width: "100%",
           paddingTop: "0.2rem",
           paddingBottom: "1.5rem",
         }}
       >
-        <EntityDetailValidationTextSection
+        <EntityDetailValidationText
           validation={validation}
           entities={entities}
         />
@@ -179,19 +184,27 @@ export const EntityDetailValidation: React.FC<EntityDetailValidation> = ({
         )}
 
         {/* Allowed classes */}
-        <StyledLabel>Allowed E types</StyledLabel>
-        <Dropdown.Multi.Entity
-          width="full"
-          value={allowedClasses || []}
-          onChange={(values) =>
-            updateValidationRule({ allowedClasses: values })
-          }
-          options={entitiesDict}
-          disabled={disabledEntityClassesSection}
-        />
+        {!allowedEntitiesIncludesResource && (
+          <>
+            <StyledLabel>Allowed E types</StyledLabel>
+            <Dropdown.Multi.Entity
+              width="full"
+              value={allowedClasses || []}
+              onChange={(values) =>
+                updateValidationRule({ allowedClasses: values })
+              }
+              options={entitiesDict}
+              disabled={disabledEntityClassesSection}
+            />
+          </>
+        )}
 
         {/* Allowed entities */}
-        <StyledLabel>Allowed E values</StyledLabel>
+        <StyledLabel>
+          {!allowedEntitiesIncludesResource
+            ? "Allowed E values"
+            : "Allowed Resources"}
+        </StyledLabel>
         <StyledFlexList>
           {allowedEntities?.map((entityId, key) => (
             <EntityTag
@@ -209,7 +222,11 @@ export const EntityDetailValidation: React.FC<EntityDetailValidation> = ({
             />
           ))}
           <EntitySuggester
-            categoryTypes={classesAll}
+            categoryTypes={
+              !allowedEntitiesIncludesResource
+                ? classesAll
+                : [EntityEnums.Class.Resource]
+            }
             excludedActantIds={allowedEntities}
             onPicked={(entity) => {
               updateValidationRule({
@@ -241,7 +258,6 @@ export const EntityDetailValidation: React.FC<EntityDetailValidation> = ({
           onClick={removeValidationRule}
           inverted
           label="remove validation rule"
-          tooltipLabel="remove validation rule"
         />
       </div>
     </StyledBorderLeft>

@@ -11,13 +11,13 @@ import {
   StyledSentenceEntity,
 } from "./EntityDetailValidationStyles";
 
-interface EntityDetailValidation {
+interface EntityDetailValidationText {
   validation: ITerritoryValidation;
   entities: Record<string, IEntity>;
 }
 
-export const EntityDetailValidationTextSection: React.FC<
-  EntityDetailValidation
+export const EntityDetailValidationText: React.FC<
+  EntityDetailValidationText
 > = ({ validation, entities }) => {
   const {
     detail,

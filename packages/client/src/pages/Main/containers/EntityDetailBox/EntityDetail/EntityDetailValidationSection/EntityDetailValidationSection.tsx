@@ -11,7 +11,7 @@ import {
 import { Button } from "components";
 import { FaPlus } from "react-icons/fa";
 import { deepCopy } from "utils/utils";
-import { EntityDetailValidation } from "./EntityDetailValidation";
+import { EntityDetailValidation } from "./EntityDetailValidation/EntityDetailValidation";
 import { IEntity, IResponseGeneric } from "@shared/types";
 import { UseMutationResult } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
