@@ -15,11 +15,22 @@ export const StyledSentence = styled.p`
   margin-top: 0.1rem;
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   color: ${({ theme }) => theme.color["danger"]};
+  &:before: {
+    content: '"';
+  }
+  &:after: {
+    content: '"';
+  }
 `;
+export const StyledSentenceEntity = styled.span`
+  font-weight: bold;
+`;
+
 export const StyledLabel = styled.div`
   display: grid;
   text-align: right;
-  align-items: center;
+  align-items: start;
+  line-height: 2rem;
   color: ${({ theme }) => theme.color["info"]};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
 `;

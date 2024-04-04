@@ -1,5 +1,5 @@
 import { entitiesDict } from "@shared/dictionaries";
-import { classesAll } from "@shared/dictionaries/entity";
+import { classesAll, entitiesDictKeys } from "@shared/dictionaries/entity";
 import { EntityEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
 import {
@@ -12,7 +12,7 @@ import Dropdown, {
   EntitySuggester,
   EntityTag,
 } from "components/advanced";
-import React from "react";
+import React, { useMemo } from "react";
 import { FaTrashAlt } from "react-icons/fa";
 import {
   StyledBorderLeft,
@@ -20,7 +20,9 @@ import {
   StyledGrid,
   StyledLabel,
   StyledSentence,
+  StyledSentenceEntity,
 } from "./EntityDetailValidationStyles";
+import { EntityDetailValidationTextSection } from "./EntityDetailValidationTextSection";
 
 interface EntityDetailValidation {
   validation: ITerritoryValidation;
@@ -47,6 +49,11 @@ export const EntityDetailValidation: React.FC<EntityDetailValidation> = ({
     allowedClasses,
     allowedEntities,
   } = validation;
+
+  const disabledEntityClassesSection = useMemo<boolean>(() => {
+    return allowedEntities !== undefined && allowedEntities.length > 0;
+  }, [allowedEntities]);
+
   return (
     <StyledBorderLeft>
       <div
@@ -58,29 +65,12 @@ export const EntityDetailValidation: React.FC<EntityDetailValidation> = ({
           paddingBottom: "1.5rem",
         }}
       >
-        <StyledSentence>
-          {/* TODO: sentence generator */}
-          {`Generated sentence than will include CAPS LOCK and <tags>`}
-        </StyledSentence>
-        <span>
-          <Button
-            color="danger"
-            icon={<FaTrashAlt />}
-            onClick={removeValidationRule}
-            inverted
-            tooltipLabel="remove validation rule"
-          />
-        </span>
+        <EntityDetailValidationTextSection
+          validation={validation}
+          entities={entities}
+        />
       </div>
       <StyledGrid>
-        {/* Detail */}
-        <StyledLabel>Detail</StyledLabel>
-        <Input
-          width="full"
-          value={detail}
-          onChangeFn={(value) => updateValidationRule({ detail: value })}
-        />
-
         {/* Entity classes */}
         <StyledLabel>Entity types</StyledLabel>
         <Dropdown.Multi.Entity
@@ -197,8 +187,7 @@ export const EntityDetailValidation: React.FC<EntityDetailValidation> = ({
             updateValidationRule({ allowedClasses: values })
           }
           options={entitiesDict}
-          disabled={allowedEntities && allowedEntities.length > 0}
-          // disabled={!userCanEdit}
+          disabled={disabledEntityClassesSection}
         />
 
         {/* Allowed entities */}
@@ -232,7 +221,29 @@ export const EntityDetailValidation: React.FC<EntityDetailValidation> = ({
             territoryParentId={territoryParentId}
           />
         </StyledFlexList>
+        {/* Detail */}
+        <StyledLabel>Detail / Notes</StyledLabel>
+        <Input
+          width="full"
+          value={detail}
+          onChangeFn={(value) => updateValidationRule({ detail: value })}
+        />
       </StyledGrid>
+      <div
+        style={{
+          paddingTop: "1.5rem",
+          paddingBottom: ".5rem",
+        }}
+      >
+        <Button
+          color="danger"
+          icon={<FaTrashAlt />}
+          onClick={removeValidationRule}
+          inverted
+          label="remove validation rule"
+          tooltipLabel="remove validation rule"
+        />
+      </div>
     </StyledBorderLeft>
   );
 };
