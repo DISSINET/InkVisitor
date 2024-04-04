@@ -10,6 +10,7 @@ import {
   StyledSentence,
   StyledSentenceEntity,
 } from "./EntityDetailValidationRuleStyles";
+import { getEntityLabel, getShortLabelByLetterCount } from "utils/utils";
 
 interface EntityDetailValidationText {
   validation: ITerritoryValidation;
@@ -48,7 +49,9 @@ export const EntityDetailValidationText: React.FC<
         const last: boolean = index === entitiesIdList.length - 1;
         return (
           <span key={entityId}>
-            <StyledSentenceEntity>{entity.label}</StyledSentenceEntity>
+            <StyledSentenceEntity>
+              {getShortLabelByLetterCount(getEntityLabel(entity), 15)}
+            </StyledSentenceEntity>
             {!last && " or "}
           </span>
         );
