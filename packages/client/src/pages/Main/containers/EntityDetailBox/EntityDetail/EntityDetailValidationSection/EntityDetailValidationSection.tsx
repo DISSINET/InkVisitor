@@ -5,8 +5,8 @@ import {
 } from "@shared/types/territory";
 import { UseMutationResult } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
-import { Button } from "components";
-import React from "react";
+import { Button, Submit } from "components";
+import React, { useState } from "react";
 import { FaPlus } from "react-icons/fa";
 import { deepCopy } from "utils/utils";
 import {
@@ -49,6 +49,10 @@ export const EntityDetailValidationSection: React.FC<
   isInsideTemplate,
   territoryParentId,
 }) => {
+  const [tempIndexToRemove, setTempIndexToRemove] = useState<false | number>(
+    false
+  );
+
   const initValidationRule = () => {
     updateEntityMutation.mutate({
       data: {
@@ -58,12 +62,14 @@ export const EntityDetailValidationSection: React.FC<
       },
     });
   };
+
   const removeValidationRule = (indexToRemove: number) => {
     updateEntityMutation.mutate({
       data: {
         validations: validations?.filter((_, index) => index !== indexToRemove),
       },
     });
+    setTempIndexToRemove(false);
   };
 
   return (
@@ -114,7 +120,7 @@ export const EntityDetailValidationSection: React.FC<
                       });
                     }
                   }}
-                  removeValidationRule={() => removeValidationRule(key)}
+                  removeValidationRule={() => setTempIndexToRemove(key)}
                   isInsideTemplate={isInsideTemplate}
                   territoryParentId={territoryParentId}
                 />
@@ -124,6 +130,16 @@ export const EntityDetailValidationSection: React.FC<
           })}
         </StyledValidationList>
       )}
+
+      <Submit
+        show={tempIndexToRemove !== false}
+        title="Remove validation rule"
+        text="Do you really want to remove this validation rule?"
+        onSubmit={() =>
+          tempIndexToRemove && removeValidationRule(tempIndexToRemove)
+        }
+        onCancel={() => setTempIndexToRemove(false)}
+      />
     </>
   );
 };
