@@ -1,20 +1,20 @@
+import { IEntity, IResponseGeneric } from "@shared/types";
+import {
+  EProtocolTieType,
+  ITerritoryValidation,
+} from "@shared/types/territory";
+import { UseMutationResult } from "@tanstack/react-query";
+import { AxiosResponse } from "axios";
+import { Button } from "components";
 import React from "react";
+import { FaPlus } from "react-icons/fa";
+import { deepCopy } from "utils/utils";
 import {
   StyledBlockSeparator,
   StyledDetailSectionHeader,
   StyledValidationList,
 } from "../EntityDetailStyles";
-import {
-  EProtocolTieType,
-  ITerritoryValidation,
-} from "@shared/types/territory";
-import { Button } from "components";
-import { FaPlus } from "react-icons/fa";
-import { deepCopy } from "utils/utils";
-import { EntityDetailValidation } from "./EntityDetailValidation/EntityDetailValidation";
-import { IEntity, IResponseGeneric } from "@shared/types";
-import { UseMutationResult } from "@tanstack/react-query";
-import { AxiosResponse } from "axios";
+import { EntityDetailValidationRule } from "./EntityDetailValidationRule/EntityDetailValidationRule";
 
 const initValidation: ITerritoryValidation = {
   detail: "",
@@ -87,7 +87,7 @@ export const EntityDetailValidationSection: React.FC<
           {(validations as ITerritoryValidation[]).map((validation, key) => {
             return (
               <React.Fragment key={key}>
-                <EntityDetailValidation
+                <EntityDetailValidationRule
                   key={key}
                   validation={validation}
                   entities={entities}

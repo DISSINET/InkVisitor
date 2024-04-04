@@ -1,5 +1,5 @@
 import { entitiesDict } from "@shared/dictionaries";
-import { classesAll, entitiesDictKeys } from "@shared/dictionaries/entity";
+import { classesAll } from "@shared/dictionaries/entity";
 import { EntityEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
 import {
@@ -19,12 +19,10 @@ import {
   StyledFlexList,
   StyledGrid,
   StyledLabel,
-  StyledSentence,
-  StyledSentenceEntity,
-} from "../EntityDetailValidationStyles";
-import { EntityDetailValidationText } from "../EntityDetailValidationText";
+} from "./EntityDetailValidationRuleStyles";
+import { EntityDetailValidationText } from "./EntityDetailValidationText";
 
-interface EntityDetailValidation {
+interface EntityDetailValidationRule {
   validation: ITerritoryValidation;
   entities: Record<string, IEntity>;
   updateValidationRule: (changes: Partial<ITerritoryValidation>) => void;
@@ -32,7 +30,9 @@ interface EntityDetailValidation {
   isInsideTemplate: boolean;
   territoryParentId: string | undefined;
 }
-export const EntityDetailValidation: React.FC<EntityDetailValidation> = ({
+export const EntityDetailValidationRule: React.FC<
+  EntityDetailValidationRule
+> = ({
   validation,
   entities,
   updateValidationRule,

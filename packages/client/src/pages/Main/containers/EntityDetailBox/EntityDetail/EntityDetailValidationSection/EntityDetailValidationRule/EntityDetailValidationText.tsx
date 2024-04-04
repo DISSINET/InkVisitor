@@ -9,7 +9,7 @@ import React, { useCallback, useMemo } from "react";
 import {
   StyledSentence,
   StyledSentenceEntity,
-} from "./EntityDetailValidationStyles";
+} from "./EntityDetailValidationRuleStyles";
 
 interface EntityDetailValidationText {
   validation: ITerritoryValidation;
