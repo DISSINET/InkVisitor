@@ -20,7 +20,7 @@ import {
   StyledGrid,
   StyledLabel,
 } from "./EntityDetailValidationRuleStyles";
-import { EntityDetailValidationText } from "./EntityDetailValidationText";
+import { EntityDetailValidationText } from "./EntityDetailValidationText/EntityDetailValidationText";
 
 interface EntityDetailValidationRule {
   validation: ITerritoryValidation;
