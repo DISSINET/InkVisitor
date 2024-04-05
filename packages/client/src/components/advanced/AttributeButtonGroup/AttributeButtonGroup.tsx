@@ -19,8 +19,6 @@ interface AttributeButtonGroup {
   // currently means no horizontal margin
   noMargin?: boolean;
   paddingX?: boolean;
-  // adds vertical margin for same height as inputs
-  formValueAttr?: boolean;
 }
 
 export const AttributeButtonGroup: React.FC<AttributeButtonGroup> = ({
@@ -28,10 +26,9 @@ export const AttributeButtonGroup: React.FC<AttributeButtonGroup> = ({
   disabled = false,
   noMargin = false,
   paddingX = false,
-  formValueAttr,
 }) => {
   return (
-    <StyledWrap $formValueAttr={formValueAttr}>
+    <StyledWrap>
       {disabled ? (
         <StyledButtonWrap $leftMargin={!noMargin} $rightMargin={!noMargin}>
           <Button disabled label={options.find((o) => o.selected)?.longValue} />

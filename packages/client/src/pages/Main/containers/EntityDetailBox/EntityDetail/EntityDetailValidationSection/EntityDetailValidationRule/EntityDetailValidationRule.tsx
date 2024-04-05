@@ -119,7 +119,6 @@ export const EntityDetailValidationRule: React.FC<
         {/* Tie type */}
         <StyledLabel>Tie type</StyledLabel>
         <AttributeButtonGroup
-          formValueAttr
           noMargin
           options={[
             {
