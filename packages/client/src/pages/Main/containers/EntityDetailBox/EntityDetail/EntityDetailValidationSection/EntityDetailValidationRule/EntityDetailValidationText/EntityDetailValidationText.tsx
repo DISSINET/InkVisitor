@@ -49,6 +49,7 @@ export const EntityDetailValidationText: React.FC<
         const last: boolean = index === entitiesIdList.length - 1;
         return (
           <EntityDetailValidationSentenceEntity
+            key={index}
             entity={entity}
             entityId={entityId}
             last={last}
@@ -77,7 +78,9 @@ export const EntityDetailValidationText: React.FC<
         const last: boolean = index === classList.length - 1;
         return (
           <span key={classId}>
-            <StyledSentenceEntity>{classLabel}</StyledSentenceEntity>
+            <StyledSentenceEntity key={index}>
+              {classLabel}
+            </StyledSentenceEntity>
             {!last && " or "}
           </span>
         );

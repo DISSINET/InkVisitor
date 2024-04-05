@@ -14,6 +14,7 @@ import {
   StyledGrid,
   StyledLabel,
   StyledTagWrap,
+  StyledValue,
 } from "./EntityDetailProtocolStyles";
 
 const initialProtocol: ITerritoryProtocol = {
@@ -75,95 +76,111 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
   return (
     <StyledGrid>
       <StyledLabel>Project</StyledLabel>
-      <Input
-        width="full"
-        value={project}
-        onChangeFn={(text) => updateProtocol({ project: text })}
-      />
+      <StyledValue>
+        <Input
+          width="full"
+          value={project}
+          onChangeFn={(text) => updateProtocol({ project: text })}
+        />
+      </StyledValue>
 
       <StyledLabel>Guidelines version</StyledLabel>
-      <Input
-        width="full"
-        value={guidelinesVersion}
-        onChangeFn={(text) => updateProtocol({ guidelinesVersion: text })}
-      />
+      <StyledValue>
+        <Input
+          width="full"
+          value={guidelinesVersion}
+          onChangeFn={(text) => updateProtocol({ guidelinesVersion: text })}
+        />
+      </StyledValue>
 
       <StyledLabel>Guidelines resource</StyledLabel>
-      {guidelinesResource.length > 0 ? (
-        <StyledTagWrap>
-          <EntityTag
-            entity={entities[guidelinesResource]}
-            unlinkButton={{
-              onClick: () => updateProtocol({ guidelinesResource: "" }),
+      <StyledValue>
+        {guidelinesResource.length > 0 ? (
+          <StyledTagWrap>
+            <EntityTag
+              entity={entities[guidelinesResource]}
+              unlinkButton={{
+                onClick: () => updateProtocol({ guidelinesResource: "" }),
+              }}
+            />
+          </StyledTagWrap>
+        ) : (
+          <EntitySuggester
+            onPicked={(newPicked) => {
+              updateProtocol({ guidelinesResource: newPicked.id });
             }}
+            categoryTypes={[EntityEnums.Class.Resource]}
+            territoryParentId={territory.data.parent.territoryId}
+            isInsideTemplate={isInsideTemplate}
           />
-        </StyledTagWrap>
-      ) : (
-        <EntitySuggester
-          onPicked={(newPicked) => {
-            updateProtocol({ guidelinesResource: newPicked.id });
-          }}
-          categoryTypes={[EntityEnums.Class.Resource]}
-          territoryParentId={territory.data.parent.territoryId}
-          isInsideTemplate={isInsideTemplate}
-        />
-      )}
+        )}
+      </StyledValue>
 
       <StyledLabel>Variant</StyledLabel>
-      <Dropdown.Single.Basic
-        width="full"
-        onChange={(value) => updateProtocol({ variant: value })}
-        value={variant}
-        options={Object.keys(ECASTEMOVariant).map((key) => ({
-          value: ECASTEMOVariant[key as keyof typeof ECASTEMOVariant],
-          label: ECASTEMOVariant[key as keyof typeof ECASTEMOVariant],
-        }))}
-      />
+      <StyledValue>
+        <Dropdown.Single.Basic
+          width="full"
+          onChange={(value) => updateProtocol({ variant: value })}
+          value={variant}
+          options={Object.keys(ECASTEMOVariant).map((key) => ({
+            value: ECASTEMOVariant[key as keyof typeof ECASTEMOVariant],
+            label: ECASTEMOVariant[key as keyof typeof ECASTEMOVariant],
+          }))}
+        />
+      </StyledValue>
 
       <StyledLabel>Description</StyledLabel>
-      <Input
-        width="full"
-        value={description}
-        onChangeFn={(text) => updateProtocol({ description: text })}
-      />
+      <StyledValue>
+        <Input
+          width="full"
+          value={description}
+          onChangeFn={(text) => updateProtocol({ description: text })}
+        />
+      </StyledValue>
 
       <StyledLabel>Start date</StyledLabel>
-      {startDate.length > 0 ? (
-        <StyledTagWrap>
-          <EntityTag
-            entity={entities[startDate]}
-            unlinkButton={{ onClick: () => updateProtocol({ startDate: "" }) }}
+      <StyledValue>
+        {startDate.length > 0 ? (
+          <StyledTagWrap>
+            <EntityTag
+              entity={entities[startDate]}
+              unlinkButton={{
+                onClick: () => updateProtocol({ startDate: "" }),
+              }}
+            />
+          </StyledTagWrap>
+        ) : (
+          <EntitySuggester
+            onPicked={(newPicked) => {
+              updateProtocol({ startDate: newPicked.id });
+            }}
+            categoryTypes={[EntityEnums.Class.Value]}
+            territoryParentId={territory.data.parent.territoryId}
+            isInsideTemplate={isInsideTemplate}
           />
-        </StyledTagWrap>
-      ) : (
-        <EntitySuggester
-          onPicked={(newPicked) => {
-            updateProtocol({ startDate: newPicked.id });
-          }}
-          categoryTypes={[EntityEnums.Class.Value]}
-          territoryParentId={territory.data.parent.territoryId}
-          isInsideTemplate={isInsideTemplate}
-        />
-      )}
+        )}
+      </StyledValue>
 
       <StyledLabel>End date</StyledLabel>
-      {endDate.length > 0 ? (
-        <StyledTagWrap>
-          <EntityTag
-            entity={entities[endDate]}
-            unlinkButton={{ onClick: () => updateProtocol({ endDate: "" }) }}
+      <StyledValue>
+        {endDate.length > 0 ? (
+          <StyledTagWrap>
+            <EntityTag
+              entity={entities[endDate]}
+              unlinkButton={{ onClick: () => updateProtocol({ endDate: "" }) }}
+            />
+          </StyledTagWrap>
+        ) : (
+          <EntitySuggester
+            onPicked={(newPicked) => {
+              updateProtocol({ endDate: newPicked.id });
+            }}
+            categoryTypes={[EntityEnums.Class.Value]}
+            territoryParentId={territory.data.parent.territoryId}
+            isInsideTemplate={isInsideTemplate}
           />
-        </StyledTagWrap>
-      ) : (
-        <EntitySuggester
-          onPicked={(newPicked) => {
-            updateProtocol({ endDate: newPicked.id });
-          }}
-          categoryTypes={[EntityEnums.Class.Value]}
-          territoryParentId={territory.data.parent.territoryId}
-          isInsideTemplate={isInsideTemplate}
-        />
-      )}
+        )}
+      </StyledValue>
     </StyledGrid>
   );
 };

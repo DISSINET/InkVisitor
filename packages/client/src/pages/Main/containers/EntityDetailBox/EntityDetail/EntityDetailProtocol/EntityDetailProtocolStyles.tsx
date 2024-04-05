@@ -10,9 +10,11 @@ export const StyledLabel = styled.div`
   display: grid;
   align-items: center;
   text-align: right;
-  margin-bottom: ${({ theme }) => theme.space[1]};
   color: ${({ theme }) => theme.color["info"]};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
+`;
+export const StyledValue = styled.div`
+  display: grid;
 `;
 export const StyledTagWrap = styled.div`
   display: inline-flex;

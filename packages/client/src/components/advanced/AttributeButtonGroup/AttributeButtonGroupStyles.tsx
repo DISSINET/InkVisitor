@@ -1,5 +1,11 @@
 import styled from "styled-components";
 
+interface StyledWrap {
+  $formValueAttr?: boolean;
+}
+export const StyledWrap = styled.div<StyledWrap>`
+  margin: ${({ $formValueAttr }) => ($formValueAttr ? "2px 0" : "")};
+`;
 interface StyledPropButtonGroup {
   $leftMargin?: boolean;
   $rightMargin?: boolean;

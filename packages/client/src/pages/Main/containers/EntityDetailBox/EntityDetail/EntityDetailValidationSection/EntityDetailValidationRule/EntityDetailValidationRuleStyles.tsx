@@ -30,7 +30,7 @@ export const StyledLabel = styled.div`
   display: grid;
   text-align: right;
   align-items: start;
-  line-height: 2rem;
+  line-height: 2.5rem;
   color: ${({ theme }) => theme.color["info"]};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
 `;

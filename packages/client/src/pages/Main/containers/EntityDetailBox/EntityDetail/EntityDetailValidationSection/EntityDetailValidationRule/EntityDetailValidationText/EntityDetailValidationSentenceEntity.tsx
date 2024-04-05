@@ -12,6 +12,7 @@ interface EntityDetailValidationSentenceEntity {
 export const EntityDetailValidationSentenceEntity: React.FC<
   EntityDetailValidationSentenceEntity
 > = ({ entity, entityId, last }) => {
+  const maxLetterCount = 15;
   const [isHovered, setIsHovered] = useState(false);
   const [referenceElement, setReferenceElement] =
     useState<HTMLSpanElement | null>(null);
@@ -23,10 +24,10 @@ export const EntityDetailValidationSentenceEntity: React.FC<
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        {getShortLabelByLetterCount(getEntityLabel(entity), 15)}
+        {getShortLabelByLetterCount(getEntityLabel(entity), maxLetterCount)}
       </StyledSentenceEntity>
       <Tooltip
-        visible={isHovered}
+        visible={getEntityLabel(entity).length > maxLetterCount && isHovered}
         referenceElement={referenceElement}
         label={getEntityLabel(entity)}
       />

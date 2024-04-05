@@ -3,6 +3,7 @@ import React from "react";
 import {
   StyledButtonWrap,
   StyledPropButtonGroup,
+  StyledWrap,
 } from "./AttributeButtonGroupStyles";
 
 interface AttributeButtonGroup {
@@ -15,8 +16,11 @@ interface AttributeButtonGroup {
     selected: boolean;
   }[];
   disabled?: boolean;
+  // currently means no horizontal margin
   noMargin?: boolean;
   paddingX?: boolean;
+  // adds vertical margin for same height as inputs
+  formValueAttr?: boolean;
 }
 
 export const AttributeButtonGroup: React.FC<AttributeButtonGroup> = ({
@@ -24,59 +28,64 @@ export const AttributeButtonGroup: React.FC<AttributeButtonGroup> = ({
   disabled = false,
   noMargin = false,
   paddingX = false,
+  formValueAttr,
 }) => {
-  return disabled ? (
-    <StyledButtonWrap $leftMargin={!noMargin} $rightMargin={!noMargin}>
-      <Button disabled label={options.find((o) => o.selected)?.longValue} />
-    </StyledButtonWrap>
-  ) : (
-    <StyledPropButtonGroup
-      $leftMargin={!noMargin}
-      $rightMargin={!noMargin}
-      $border
-      $round
-    >
-      {options.map((option, oi) => {
-        const firstInRow = oi === 0;
-        const lastInRow = oi === options.length - 1;
-        return (
-          <Button
-            key={oi}
-            label={
-              option.selected
-                ? option.longValue
-                : option.shortValue !== undefined
-                ? option.shortValue
-                : option.longValue
-            }
-            icon={
-              option.icon
-                ? option.icon
-                : !option.selected && option.shortIcon
-                ? option.shortIcon
-                : undefined
-            }
-            tooltipLabel={
-              !option.selected &&
-              (option.longValue !== option.shortValue || option.icon)
-                ? option.longValue
-                : undefined
-            }
-            noBorder
-            inverted
-            color={option.selected ? "primary" : "greyer"}
-            textRegular={option.selected ? false : true}
-            radiusLeft={firstInRow}
-            radiusRight={lastInRow}
-            onClick={() => {
-              if (!option.selected && !disabled) {
-                option.onClick();
-              }
-            }}
-            paddingX={paddingX}
-          />
-        );
-      })}
-    </StyledPropButtonGroup>
+  return (
+    <StyledWrap $formValueAttr={formValueAttr}>
+      {disabled ? (
+        <StyledButtonWrap $leftMargin={!noMargin} $rightMargin={!noMargin}>
+          <Button disabled label={options.find((o) => o.selected)?.longValue} />
+        </StyledButtonWrap>
+      ) : (
+        <StyledPropButtonGroup
+          $leftMargin={!noMargin}
+          $rightMargin={!noMargin}
+          $border
+          $round
+        >
+          {options.map((option, oi) => {
+            const firstInRow = oi === 0;
+            const lastInRow = oi === options.length - 1;
+            return (
+              <Button
+                key={oi}
+                label={
+                  option.selected
+                    ? option.longValue
+                    : option.shortValue !== undefined
+                    ? option.shortValue
+                    : option.longValue
+                }
+                icon={
+                  option.icon
+                    ? option.icon
+                    : !option.selected && option.shortIcon
+                    ? option.shortIcon
+                    : undefined
+                }
+                tooltipLabel={
+                  !option.selected &&
+                  (option.longValue !== option.shortValue || option.icon)
+                    ? option.longValue
+                    : undefined
+                }
+                noBorder
+                inverted
+                color={option.selected ? "primary" : "greyer"}
+                textRegular={option.selected ? false : true}
+                radiusLeft={firstInRow}
+                radiusRight={lastInRow}
+                onClick={() => {
+                  if (!option.selected && !disabled) {
+                    option.onClick();
+                  }
+                }}
+                paddingX={paddingX}
+              />
+            );
+          })}
+        </StyledPropButtonGroup>
+      )}
+    </StyledWrap>
   );
 };
