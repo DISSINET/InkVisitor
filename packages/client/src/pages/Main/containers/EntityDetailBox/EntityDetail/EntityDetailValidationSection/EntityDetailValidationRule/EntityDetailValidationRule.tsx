@@ -54,11 +54,12 @@ export const EntityDetailValidationRule: React.FC<
     return allowedEntities !== undefined && allowedEntities.length > 0;
   }, [allowedEntities]);
 
-  const allowedEntitiesIncludesResource =
-    allowedEntities &&
-    allowedEntities.some(
-      (eId) => entities[eId].class === EntityEnums.Class.Resource
-    );
+  const onlyResourceAllowed =
+    (allowedEntities &&
+      allowedEntities.some(
+        (eId) => entities[eId].class === EntityEnums.Class.Resource
+      )) ||
+    tieType === EProtocolTieType.Reference;
 
   return (
     <StyledBorderLeft>
@@ -145,6 +146,8 @@ export const EntityDetailValidationRule: React.FC<
                 updateValidationRule({
                   tieType: EProtocolTieType.Reference,
                   propType: [],
+                  allowedClasses: [],
+                  allowedEntities: [],
                 }),
               selected: tieType === EProtocolTieType.Reference,
             },
@@ -184,7 +187,7 @@ export const EntityDetailValidationRule: React.FC<
         )}
 
         {/* Allowed classes */}
-        {!allowedEntitiesIncludesResource && (
+        {!onlyResourceAllowed && (
           <>
             <StyledLabel>Allowed E types</StyledLabel>
             <Dropdown.Multi.Entity
@@ -201,9 +204,7 @@ export const EntityDetailValidationRule: React.FC<
 
         {/* Allowed entities */}
         <StyledLabel>
-          {!allowedEntitiesIncludesResource
-            ? "Allowed E values"
-            : "Allowed Resources"}
+          {!onlyResourceAllowed ? "Allowed E values" : "Allowed Resources"}
         </StyledLabel>
         <StyledFlexList>
           {allowedEntities?.map((entityId, key) => (
@@ -223,9 +224,7 @@ export const EntityDetailValidationRule: React.FC<
           ))}
           <EntitySuggester
             categoryTypes={
-              !allowedEntitiesIncludesResource
-                ? classesAll
-                : [EntityEnums.Class.Resource]
+              !onlyResourceAllowed ? classesAll : [EntityEnums.Class.Resource]
             }
             excludedActantIds={allowedEntities}
             onPicked={(entity) => {
