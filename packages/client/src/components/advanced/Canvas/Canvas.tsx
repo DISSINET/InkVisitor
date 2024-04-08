@@ -7,24 +7,34 @@ import {
   StyledScrollerCursor,
   StyledScrollerViewport,
 } from "./CanvasStyles";
+import { Button } from "components/basic/Button/Button";
+import { useCanvas } from "./CanvasContext";
 
 export const Canvas = () => {
+  const canvasApi = useCanvas();
+
   const mainCanvas = useRef(null);
   const scroller = useRef(null);
   const lines = useRef(null);
   const [highlighted, setHighlighted] = useState("");
+  const [useRawText, setUseRawText] = useState(false);
 
   useEffect(() => {
     if (!mainCanvas.current || !scroller.current || !lines.current) {
       return;
     }
 
-    const customWrapper = new CanvasLib(mainCanvas.current, generateText(100));
-    customWrapper.addScroller(scroller.current);
-    customWrapper.addLines(lines.current);
-    customWrapper.onHighlightChange(setHighlighted);
-    customWrapper.draw();
+    const customCanvasWrapper = new CanvasLib(mainCanvas.current, generateText(100));
+    customCanvasWrapper.addScroller(scroller.current);
+    customCanvasWrapper.addLines(lines.current);
+    customCanvasWrapper.onHighlightChange(setHighlighted);
+    customCanvasWrapper.draw();
+    canvasApi.setApi(customCanvasWrapper)
   }, []);
+
+  useEffect(() => {
+   // customCanvasWrapper.showRaw(useRawText);
+  }, [useRawText]);
 
   return (
     <div style={{ padding: "20px" }}>
@@ -48,6 +58,7 @@ export const Canvas = () => {
       </StyledCanvasWrapper>
       <div style={{ marginTop: "10px" }}>Highlighted:</div>
       <StyledHightlightedText>{highlighted}</StyledHightlightedText>
+      <Button label="Toggle raw" onClick={() => setUseRawText(!useRawText)}/>
     </div>
   );
 };

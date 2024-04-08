@@ -17,6 +17,7 @@ import {
 import { useSpring } from "@react-spring/web";
 import { springConfig } from "Theme/constants";
 import { Canvas} from "../../components/advanced/Canvas/Canvas"
+import CanvasProvider from "components/advanced/Canvas/CanvasProvider";
 
 type DocumentWithResource = {
   document: IResponseDocument;
@@ -129,9 +130,8 @@ export const DocumentsPage: React.FC = ({}) => {
 
   const [docToDelete, setDocToDelete] = useState<string | false>(false);
   const [editMode, setEditMode] = useState<false | number>(false);
-
   const inputRef = useRef<HTMLInputElement>(null);
-
+  
   return (
     <>
       <StyledContent>
@@ -157,7 +157,11 @@ export const DocumentsPage: React.FC = ({}) => {
                 }
               )}
             </StyledGrid>
-            <Canvas />
+            <CanvasProvider>
+            <Canvas
+            
+            />
+            </CanvasProvider>
             <StyledInputWrap onClick={() => inputRef.current?.click()}>
               Upload document
               <input
