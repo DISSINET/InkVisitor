@@ -30,12 +30,13 @@ export const StyledLabel = styled.div`
   display: grid;
   text-align: right;
   align-items: start;
-  margin-top: 0.3rem;
+  margin-top: 0.2rem;
   color: ${({ theme }) => theme.color["info"]};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
 `;
 export const StyledValue = styled.div`
   display: grid;
+  align-items: center;
 `;
 export const StyledFlexList = styled.div`
   display: flex;
