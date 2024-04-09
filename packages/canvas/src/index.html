@@ -52,6 +52,7 @@
         style="padding: 10px; border: 1px solid black; margin-top: 10px"
       ></pre>
       <textarea></textarea>
+      <button id="mode">Switch raw/highlighted</button>
     </div>
 
     <script src="bundle.js"></script>
@@ -67,6 +68,11 @@
       customWrapper.onHighlightChange((text) => {
         document.getElementById("highlight-container").innerHTML = text;
       });
+
+      document.getElementById("mode").onclick = () => {
+        customWrapper.text.setMode(customWrapper.text.mode === "raw" ? "highlight" : "raw");
+        customWrapper.draw();
+      }
       customWrapper.draw();
     </script>
   </body>

@@ -1,11 +1,42 @@
 import Viewport from "./Viewport";
 import Cursor, { IAbsCoordinates } from "./Cursor";
 
-interface Segment {
-  lineStart: number; // incl.
-  lineEnd: number; // incl.
-  text: string;
-  lines: string[];
+type Mode = "raw"|"highlight";
+
+class Segment {
+  lineStart: number = -1; // incl.
+  lineEnd: number = -1; // incl.
+  raw: string;
+  parsed: string = "";
+  openingTags: string[] = [];
+  closingTags: string[] = [];
+  lines: string[] = [];
+
+  constructor(text: string) {
+    this.raw = text;
+   this.parseText()
+  }
+
+  parseText() {
+    this.openingTags = [];
+    this.closingTags = [];
+    const openingTagsRegex = /<([^<>]+?)>/g;
+    const closingTagsRegex = /<\/([^<>]+?)>/g;
+  
+    // Find opening tags
+    let match;
+    while ((match = openingTagsRegex.exec(this.raw)) !== null) {
+      this.openingTags.push(match[1]);
+    }
+  
+    // Find closing tags
+    while ((match = closingTagsRegex.exec(this.raw)) !== null) {
+      this.closingTags.push(match[1]);
+    }
+  
+    // Remove tags from the text
+    this.parsed = this.raw.replace(/<\/?[^<>]+?>/g, '');
+  }
 }
 
 interface SegmentPosition {
@@ -19,6 +50,7 @@ interface SegmentPosition {
  * Text provides more abstract control over the provided raw text
  */
 class Text {
+  mode: Mode= "raw";
   segments: Segment[];
   dirtySegment?: number;
   value: string;
@@ -40,18 +72,19 @@ class Text {
     return this.segments.reduce<string[]>((a, cur) => a.concat(cur.lines), []);
   }
 
+  setMode(mode: Mode) {
+    this.mode = mode;
+    this.prepareSegments();
+    this.calculateLines();
+  }
+
   prepareSegments() {
     const segmentsArray = this.value.split("\n");
     const segments: Segment[] = [];
 
     for (let i = 0; i < segmentsArray.length; i++) {
       const segmentText = segmentsArray[i];
-      segments.push({
-        text: segmentText,
-        lineEnd: -1,
-        lineStart: -1,
-        lines: [],
-      });
+      segments.push(new Segment(segmentText));
     }
 
     this.segments = segments;
@@ -78,7 +111,12 @@ class Text {
       segment.lineStart = currentLineNumber;
       segment.lines = [];
 
-      const words = segment.text.split(" ");
+      let text = segment.raw;
+      if (this.mode === "highlight") {
+        text = segment.parsed;
+        console.log("using parsed", text)
+      }
+      const words = text.split(" ");
       let currentLine: string[] = [];
       let currentLineLength = 0;
 
@@ -105,7 +143,6 @@ class Text {
           }
         }
       }
-
       segment.lineEnd = currentLineNumber;
     }
 
@@ -195,7 +232,7 @@ class Text {
         out.push(...this.segments[i].lines);
       }
     }
-
+    console.log(out)
     return out;
   }
 
@@ -235,10 +272,10 @@ class Text {
       this.value.slice(indexPosition);
 
     const segment = this.segments[segmentPosition.segmentIndex];
-    segment.text =
-      segment.text.slice(0, segmentPosition.textCharIndex) +
+    segment.raw =
+      segment.raw.slice(0, segmentPosition.textCharIndex) +
       textToInsert +
-      segment.text.slice(segmentPosition.textCharIndex);
+      segment.raw.slice(segmentPosition.textCharIndex);
 
     this.calculateLines();
   }
@@ -259,7 +296,7 @@ class Text {
 
     for (let i = 0; i < segmentPosition.segmentIndex; i++) {
       indexPosition++; // each segment should receive +1 character no matter what (newline)
-      indexPosition += this.segments[i].text.length;
+      indexPosition += this.segments[i].raw.length;
     }
 
     this.value =
@@ -292,8 +329,8 @@ class Text {
     const xAlterPos =
       segmentPosition.textCharIndex - (chartsToDelete > 0 ? 1 : 0);
     const segment = this.segments[segmentPosition.segmentIndex];
-    segment.text =
-      segment.text.slice(0, xAlterPos) + segment.text.slice(xAlterPos + 1);
+    segment.raw =
+      segment.raw.slice(0, xAlterPos) + segment.raw.slice(xAlterPos + 1);
 
     this.calculateLines();
   }
