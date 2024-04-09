@@ -19,10 +19,10 @@ export const EntityBookmarkTable: React.FC<EntityBookmarkTable> = ({
   updateFolderEntitys,
   removeBookmark,
 }) => {
-  const [folderEntitys, setFolderEntitys] = useState(folder.entities);
+  const [folderEntities, setFolderEntities] = useState(folder.entities);
 
   useEffect(() => {
-    setFolderEntitys(folder.entities);
+    setFolderEntities(folder.entities);
   }, [folder]);
 
   const columns = useMemo<Column<IEntity>[]>(
@@ -68,30 +68,29 @@ export const EntityBookmarkTable: React.FC<EntityBookmarkTable> = ({
     visibleColumns,
   } = useTable({
     columns,
-    data: useMemo(() => folderEntitys || [], [folderEntitys]),
+    data: useMemo(() => folderEntities || [], [folderEntities]),
     getRowId,
   });
 
   const updateFolderItemOrder = () => {
     updateFolderEntitys(
-      folderEntitys.map((a) => a.id),
+      folderEntities.map((a) => a.id),
       folder.id
     );
   };
 
   const moveRow = useCallback(
     (dragIndex: number, hoverIndex: number) => {
-      const dragRecord = folderEntitys[dragIndex];
-      const newlySortedEntitys = update(folderEntitys, {
+      const dragRecord = folderEntities[dragIndex];
+      const newlySortedEntities = update(folderEntities, {
         $splice: [
           [dragIndex, 1],
           [hoverIndex, 0, dragRecord],
         ],
       });
-
-      setFolderEntitys(newlySortedEntitys);
+      setFolderEntities(newlySortedEntities);
     },
-    [folderEntitys]
+    [folderEntities]
   );
 
   return (

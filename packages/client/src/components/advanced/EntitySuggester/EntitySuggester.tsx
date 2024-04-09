@@ -52,6 +52,8 @@ interface EntitySuggester {
   disableWildCard?: boolean;
   disableTemplatesAccept?: boolean;
   disableButtons?: boolean;
+
+  // TODO: remove and implement properly disableCreate including enter, but don't block enter on selecting
   disableEnter?: boolean;
   autoFocus?: boolean;
 
