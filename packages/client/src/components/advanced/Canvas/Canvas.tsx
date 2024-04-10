@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import React from "react";
-import { CanvasLib, generateText } from "@inkvisitor/canvas";
+import { CanvasLib, generateText } from "@inkvisitor/canvas/src/lib";
 import {
   StyledCanvasWrapper,
   StyledHightlightedText,

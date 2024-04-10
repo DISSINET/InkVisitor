@@ -1,4 +1,4 @@
-import { CanvasLib } from '@inkvisitor/canvas';
+import { CanvasLib } from '@inkvisitor/canvas/src/lib';
 import { createContext, useContext } from 'react';
 
 interface CanvasApi {

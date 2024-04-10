@@ -1,7 +1,7 @@
 import Viewport from "./Viewport";
 import Cursor, { IAbsCoordinates } from "./Cursor";
 
-type Mode = "raw"|"highlight";
+export type Mode = "raw"|"highlight";
 
 class Segment {
   lineStart: number = -1; // incl.
