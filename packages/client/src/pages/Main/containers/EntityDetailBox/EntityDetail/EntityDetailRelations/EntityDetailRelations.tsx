@@ -31,6 +31,7 @@ interface EntityDetailRelations {
     string,
     unknown
   >;
+  userCanEdit: boolean;
 }
 
 export const EntityDetailRelations: React.FC<EntityDetailRelations> = ({
@@ -38,6 +39,7 @@ export const EntityDetailRelations: React.FC<EntityDetailRelations> = ({
   relationCreateMutation,
   relationUpdateMutation,
   relationDeleteMutation,
+  userCanEdit,
 }) => {
   const [filteredRelationTypes, setFilteredRelationTypes] = useState<
     RelationEnums.Type[]
@@ -69,6 +71,7 @@ export const EntityDetailRelations: React.FC<EntityDetailRelations> = ({
               relationUpdateMutation={relationUpdateMutation}
               relationDeleteMutation={relationDeleteMutation}
               entity={entity}
+              userCanEdit={userCanEdit}
             />
           );
         })}

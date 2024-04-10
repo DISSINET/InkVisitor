@@ -52,6 +52,7 @@ interface EntityDetailRelationTypeBlock {
     unknown
   >;
   entity: IResponseDetail;
+  userCanEdit: boolean;
 }
 export const EntityDetailRelationTypeBlock: React.FC<
   EntityDetailRelationTypeBlock
@@ -63,6 +64,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
   relationUpdateMutation,
   relationDeleteMutation,
   entity,
+  userCanEdit,
 }) => {
   const relationRule = Relation.RelationRules[relationType]!;
   const {
@@ -269,6 +271,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
                 entities={entities}
                 relationUpdateMutation={relationUpdateMutation}
                 relationDeleteMutation={relationDeleteMutation}
+                userCanEdit={userCanEdit}
               />
             ) : (
               <EntityDetailRelationRow
@@ -284,6 +287,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
                 hasOrder={hasOrder && currentRelations.length > 1}
                 moveRow={moveRow}
                 updateOrderFn={updateOrderFn}
+                userCanEdit={userCanEdit}
               />
             )
           )}
@@ -305,6 +309,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
                   }
                 }}
                 excludedActantIds={usedEntityIds}
+                disabled={!userCanEdit}
               />
             </StyledSuggesterWrapper>
           )}
