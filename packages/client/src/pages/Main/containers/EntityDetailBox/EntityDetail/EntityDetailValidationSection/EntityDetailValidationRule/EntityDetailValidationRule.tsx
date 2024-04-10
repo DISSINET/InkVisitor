@@ -104,7 +104,7 @@ export const EntityDetailValidationRule: React.FC<
               }
             />
           ))}
-          {userCanEdit && (
+          {!(!userCanEdit && classifications.length > 0) && (
             <EntitySuggester
               excludedActantIds={classifications}
               categoryTypes={[EntityEnums.Class.Concept]}
@@ -178,7 +178,7 @@ export const EntityDetailValidationRule: React.FC<
                   }
                 />
               ))}
-              {userCanEdit && (
+              {!(!userCanEdit && propType && propType.length > 0) && (
                 <EntitySuggester
                   categoryTypes={[EntityEnums.Class.Concept]}
                   excludedActantIds={propType}
@@ -232,7 +232,7 @@ export const EntityDetailValidationRule: React.FC<
               }
             />
           ))}
-          {userCanEdit && (
+          {!(!userCanEdit && allowedEntities && allowedEntities.length > 0) && (
             <EntitySuggester
               categoryTypes={
                 !onlyResourceAllowed ? classesAll : [EntityEnums.Class.Resource]
@@ -259,20 +259,22 @@ export const EntityDetailValidationRule: React.FC<
           disabled={!userCanEdit}
         />
       </StyledGrid>
-      <div
-        style={{
-          paddingTop: "1.5rem",
-          paddingBottom: ".5rem",
-        }}
-      >
-        <Button
-          color="danger"
-          icon={<FaTrashAlt />}
-          onClick={removeValidationRule}
-          inverted
-          label="remove validation rule"
-        />
-      </div>
+      {userCanEdit && (
+        <div
+          style={{
+            paddingTop: "1.5rem",
+            paddingBottom: ".5rem",
+          }}
+        >
+          <Button
+            color="danger"
+            icon={<FaTrashAlt />}
+            onClick={removeValidationRule}
+            inverted
+            label="remove validation rule"
+          />
+        </div>
+      )}
     </StyledBorderLeft>
   );
 };

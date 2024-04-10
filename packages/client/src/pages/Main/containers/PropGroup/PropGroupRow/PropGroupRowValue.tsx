@@ -13,7 +13,6 @@ import { PropAttributeFilter, classesPropValue } from "types";
 import {
   StyledAttributesFlexColumn,
   StyledAttributesFlexRow,
-  StyledNoEntity,
   StyledTagGrid,
 } from "./PropGroupRowStyles";
 import { partitivityDict, virtualityDict } from "@shared/dictionaries";
@@ -112,7 +111,7 @@ export const PropGroupRowValue: React.FC<PropGroupRowValue> = ({
               />
             )}
           </>
-        ) : userCanEdit ? (
+        ) : (
           <EntitySuggester
             territoryActants={territoryActants}
             onSelected={(newSelectedId: string) => {
@@ -134,9 +133,8 @@ export const PropGroupRowValue: React.FC<PropGroupRowValue> = ({
             excludedEntityClasses={excludedSuggesterEntities}
             isInsideTemplate={isInsideTemplate}
             territoryParentId={territoryParentId}
+            disabled={!userCanEdit}
           />
-        ) : (
-          <StyledNoEntity>-</StyledNoEntity>
         )}
       </StyledTagGrid>
       {isExpanded && (

@@ -34,6 +34,7 @@ import {
 import { SuggesterKeyPress } from "./SuggesterKeyPress";
 import {
   StyledAiOutlineWarning,
+  StyledDash,
   StyledInputWrapper,
   StyledRelativePosition,
   StyledSuggester,
@@ -264,6 +265,8 @@ export const Suggester: React.FC<Suggester> = ({
   });
 
   const themeContext = useContext(ThemeContext);
+
+  if (disabled) return <StyledDash>-</StyledDash>;
 
   return (
     // div is necessary for flex to work and render the clear button properly

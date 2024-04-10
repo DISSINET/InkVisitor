@@ -64,6 +64,7 @@ export const EntityDetailValidationSection: React.FC<
   };
 
   const removeValidationRule = (indexToRemove: number) => {
+    console.log(indexToRemove);
     updateEntityMutation.mutate({
       data: {
         validations: validations?.filter((_, index) => index !== indexToRemove),
@@ -136,9 +137,10 @@ export const EntityDetailValidationSection: React.FC<
         show={tempIndexToRemove !== false}
         title="Remove validation rule"
         text="Do you really want to remove this validation rule?"
-        onSubmit={() =>
-          tempIndexToRemove && removeValidationRule(tempIndexToRemove)
-        }
+        onSubmit={() => {
+          tempIndexToRemove !== false &&
+            removeValidationRule(tempIndexToRemove);
+        }}
         onCancel={() => setTempIndexToRemove(false)}
       />
     </>

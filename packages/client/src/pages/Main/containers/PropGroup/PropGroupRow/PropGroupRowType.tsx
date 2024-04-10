@@ -14,7 +14,6 @@ import { PropAttributeFilter, classesPropType } from "types";
 import {
   StyledAttributesFlexColumn,
   StyledAttributesFlexRow,
-  StyledNoEntity,
   StyledTagGrid,
 } from "./PropGroupRowStyles";
 
@@ -112,7 +111,7 @@ export const PropGroupRowType: React.FC<PropGroupRowType> = ({
               />
             )}
           </>
-        ) : userCanEdit ? (
+        ) : (
           <EntitySuggester
             territoryActants={territoryActants}
             onSelected={(newSelectedId: string) => {
@@ -134,9 +133,8 @@ export const PropGroupRowType: React.FC<PropGroupRowType> = ({
             excludedEntityClasses={excludedSuggesterEntities}
             isInsideTemplate={isInsideTemplate}
             territoryParentId={territoryParentId}
+            disabled={!userCanEdit}
           />
-        ) : (
-          <StyledNoEntity>-</StyledNoEntity>
         )}
       </StyledTagGrid>
       {isExpanded && (
