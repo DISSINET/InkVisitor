@@ -56,12 +56,7 @@ export const EntityDetailValidationRule: React.FC<
     return allowedEntities !== undefined && allowedEntities.length > 0;
   }, [allowedEntities]);
 
-  const onlyResourceAllowed =
-    (allowedEntities &&
-      allowedEntities.some(
-        (eId) => entities[eId].class === EntityEnums.Class.Resource
-      )) ||
-    tieType === EProtocolTieType.Reference;
+  const onlyResourceAllowed = tieType === EProtocolTieType.Reference;
 
   return (
     <StyledBorderLeft>
@@ -109,16 +104,18 @@ export const EntityDetailValidationRule: React.FC<
               }
             />
           ))}
-          <EntitySuggester
-            excludedActantIds={classifications}
-            categoryTypes={[EntityEnums.Class.Concept]}
-            onPicked={(entity) =>
-              updateValidationRule({
-                classifications: [...classifications, entity.id],
-              })
-            }
-            disabled={!userCanEdit}
-          />
+          {userCanEdit && (
+            <EntitySuggester
+              excludedActantIds={classifications}
+              categoryTypes={[EntityEnums.Class.Concept]}
+              onPicked={(entity) =>
+                updateValidationRule({
+                  classifications: [...classifications, entity.id],
+                })
+              }
+              disabled={!userCanEdit}
+            />
+          )}
         </StyledFlexList>
 
         {/* Tie type */}
@@ -181,16 +178,18 @@ export const EntityDetailValidationRule: React.FC<
                   }
                 />
               ))}
-              <EntitySuggester
-                categoryTypes={[EntityEnums.Class.Concept]}
-                excludedActantIds={propType}
-                onPicked={(entity) =>
-                  updateValidationRule({
-                    propType: [...(propType || []), entity.id],
-                  })
-                }
-                disabled={!userCanEdit}
-              />
+              {userCanEdit && (
+                <EntitySuggester
+                  categoryTypes={[EntityEnums.Class.Concept]}
+                  excludedActantIds={propType}
+                  onPicked={(entity) =>
+                    updateValidationRule({
+                      propType: [...(propType || []), entity.id],
+                    })
+                  }
+                  disabled={!userCanEdit}
+                />
+              )}
             </StyledFlexList>
           </>
         )}
@@ -233,21 +232,23 @@ export const EntityDetailValidationRule: React.FC<
               }
             />
           ))}
-          <EntitySuggester
-            categoryTypes={
-              !onlyResourceAllowed ? classesAll : [EntityEnums.Class.Resource]
-            }
-            excludedActantIds={allowedEntities}
-            onPicked={(entity) => {
-              updateValidationRule({
-                allowedEntities: [...(allowedEntities || []), entity.id],
-                allowedClasses: [],
-              });
-            }}
-            isInsideTemplate={isInsideTemplate}
-            territoryParentId={territoryParentId}
-            disabled={!userCanEdit}
-          />
+          {userCanEdit && (
+            <EntitySuggester
+              categoryTypes={
+                !onlyResourceAllowed ? classesAll : [EntityEnums.Class.Resource]
+              }
+              excludedActantIds={allowedEntities}
+              onPicked={(entity) => {
+                updateValidationRule({
+                  allowedEntities: [...(allowedEntities || []), entity.id],
+                  allowedClasses: [],
+                });
+              }}
+              isInsideTemplate={isInsideTemplate}
+              territoryParentId={territoryParentId}
+              disabled={!userCanEdit}
+            />
+          )}
         </StyledFlexList>
         {/* Detail */}
         <StyledLabel>Detail / Notes</StyledLabel>

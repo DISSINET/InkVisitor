@@ -638,6 +638,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
                     territory={entity}
                     updateEntityMutation={updateEntityMutation}
                     isInsideTemplate={isInsideTemplate}
+                    userCanEdit={userCanEdit}
                   />
                 </StyledDetailSectionContent>
               </StyledDetailSection>
