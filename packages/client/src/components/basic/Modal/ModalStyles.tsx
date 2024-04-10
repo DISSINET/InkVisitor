@@ -121,13 +121,13 @@ export const StyledFooter = styled.div<StyledFooter>`
 export const StyledModalInputForm = styled.div`
   display: grid;
   grid-template-columns: auto auto;
+  grid-row-gap: ${({ theme }) => theme.space[1]};
 `;
 export const StyledModalInputLabel = styled.p`
   display: grid;
   justify-content: flex-end;
   align-items: center;
-  margin-right: ${({ theme }) => theme.space[2]};
-  margin-bottom: ${({ theme }) => theme.space[1]};
+  margin-right: ${({ theme }) => theme.space[4]};
 `;
 interface StyledModalInputWrap {
   width?: number;

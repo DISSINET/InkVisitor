@@ -52,9 +52,7 @@ export const StyledSuggestionCancelButton = styled.div<StyledSuggestionCancelBut
   }
 `;
 
-interface StyledSuggesterList {
-  $noLeftMargin?: boolean;
-}
+interface StyledSuggesterList {}
 export const StyledSuggesterList = styled.div<StyledSuggesterList>`
   z-index: 100;
 `;
@@ -103,4 +101,8 @@ export const StyledTagWrapper = styled.div`
 export const StyledAiOutlineWarning = styled(AiOutlineWarning)`
   margin-top: 0.1rem;
   margin-left: 0.5rem;
+`;
+export const StyledDash = styled.div`
+  font-size: ${({ theme }) => theme.fontSize["base"]};
+  color: ${({ theme }) => theme.color["black"]};
 `;

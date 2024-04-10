@@ -269,6 +269,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
             <StyledDetailContentRowLabel>Status</StyledDetailContentRowLabel>
             <StyledDetailContentRowValue>
               <AttributeButtonGroup
+                noMargin
                 disabled={!userCanAdmin}
                 options={entityStatusDict.map((entityStatusOption) => {
                   return {

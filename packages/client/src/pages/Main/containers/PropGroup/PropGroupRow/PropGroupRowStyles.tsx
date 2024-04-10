@@ -22,10 +22,6 @@ export const StyledGrid = styled.div<StyledGrid>`
   margin-bottom: ${({ theme }) => theme.space[2]};
 `;
 
-export const StyledNoEntity = styled.div`
-  margin-left: ${({ theme }) => theme.space[4]};
-`;
-
 interface StyledListHeaderColumn {
   leftMargin?: boolean;
 }

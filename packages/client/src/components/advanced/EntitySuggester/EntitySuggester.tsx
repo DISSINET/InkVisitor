@@ -52,6 +52,8 @@ interface EntitySuggester {
   disableWildCard?: boolean;
   disableTemplatesAccept?: boolean;
   disableButtons?: boolean;
+
+  // TODO: remove and implement properly disableCreate including enter, but don't block enter on selecting
   disableEnter?: boolean;
   autoFocus?: boolean;
 
@@ -286,7 +288,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
   const instantiateTerritory = async (
     territoryToInst: ITerritory,
     territoryParentId?: string
-  ): Promise<string | false> => {
+  ): Promise<IEntity | false> => {
     return await InstTemplate(
       territoryToInst,
       localStorage.getItem("userrole") as UserEnums.Role,
@@ -297,10 +299,10 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
   const handleInstantiateTemplate = async (
     templateToDuplicate: IEntity | IStatement | ITerritory
   ) => {
-    let newEntityId: string | false;
+    let newEntity: IEntity | false;
     if (templateToDuplicate.class === EntityEnums.Class.Territory) {
       if (territoryParentId) {
-        newEntityId = await instantiateTerritory(
+        newEntity = await instantiateTerritory(
           templateToDuplicate as ITerritory,
           territoryParentId
         );
@@ -310,19 +312,20 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
         return;
       }
     } else {
-      newEntityId = await InstTemplate(
+      newEntity = await InstTemplate(
         templateToDuplicate,
         localStorage.getItem("userrole") as UserEnums.Role
       );
     }
-    if (newEntityId) {
-      onSelected(newEntityId);
+    if (newEntity) {
+      onSelected(newEntity.id);
+      onPicked(newEntity);
       handleClean();
       if (
         openDetailOnCreate &&
         templateToDuplicate.class !== EntityEnums.Class.Value
       ) {
-        appendDetailId(newEntityId);
+        appendDetailId(newEntity.id);
       }
       if (templateToDuplicate.class === EntityEnums.Class.Territory) {
         queryClient.invalidateQueries({ queryKey: ["tree"] });
@@ -458,15 +461,16 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
         <AddTerritoryModal
           onSubmit={async (territoryId: string) => {
             setShowAddTerritoryModal(false);
-            const newEntityId = await instantiateTerritory(
+            const newEntity = await instantiateTerritory(
               tempTemplateToInstantiate as ITerritory,
               territoryId
             );
-            if (newEntityId) {
-              onSelected(newEntityId);
+            if (newEntity) {
+              onSelected(newEntity.id);
+              onPicked(newEntity);
               handleClean();
               if (openDetailOnCreate) {
-                appendDetailId(newEntityId);
+                appendDetailId(newEntity.id);
               }
               queryClient.invalidateQueries({ queryKey: ["tree"] });
             }

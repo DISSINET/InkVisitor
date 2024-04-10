@@ -7,6 +7,7 @@ import {
   IResponseDetail,
   Relation,
 } from "@shared/types";
+import { IWarningPositionSection } from "@shared/types/warning";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Button, Loader, Message, Submit, ToastWithLink } from "components";
@@ -32,6 +33,7 @@ import { PropGroup } from "../../PropGroup/PropGroup";
 import { EntityDetailCreateTemplateModal } from "./EntityDetailCreateTemplateModal/EntityDetailCreateTemplateModal";
 import { EntityDetailFormSection } from "./EntityDetailFormSection/EntityDetailFormSection";
 import { EntityDetailHeaderRow } from "./EntityDetailHeaderRow/EntityDetailHeaderRow";
+import { EntityDetailProtocol } from "./EntityDetailProtocol/EntityDetailProtocol";
 import { EntityDetailRelations } from "./EntityDetailRelations/EntityDetailRelations";
 import {
   StyledDetailSection,
@@ -51,7 +53,8 @@ import { EntityDetailMetaPropsTable } from "./EntityDetailUsedInTable/EntityDeta
 import { EntityDetailStatementPropsTable } from "./EntityDetailUsedInTable/EntityDetailStatementPropsTable/EntityDetailStatementPropsTable";
 import { EntityDetailStatementsTable } from "./EntityDetailUsedInTable/EntityDetailStatementsTable/EntityDetailStatementsTable";
 import { EntityDetailValency } from "./EntityDetailValency/EntityDetailValency";
-import { IWarningPositionSection } from "@shared/types/warning";
+import { EntityDetailValidationSection } from "./EntityDetailValidationSection/EntityDetailValidationSection";
+import { ITerritoryValidation } from "@shared/types/territory";
 
 const allowedEntityChangeClasses = [
   EntityEnums.Class.Value,
@@ -579,6 +582,8 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
     },
   });
 
+  const isInsideTemplate = entity?.isTemplate || false;
+
   return (
     <>
       {entity && (
@@ -623,6 +628,39 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
                 />
               </StyledDetailSectionContent>
             </StyledDetailSection>
+
+            {/* Protocol */}
+            {entity.class === EntityEnums.Class.Territory && (
+              <StyledDetailSection>
+                <StyledDetailSectionHeader>Protocol</StyledDetailSectionHeader>
+                <StyledDetailSectionContent>
+                  <EntityDetailProtocol
+                    territory={entity}
+                    updateEntityMutation={updateEntityMutation}
+                    isInsideTemplate={isInsideTemplate}
+                    userCanEdit={userCanEdit}
+                  />
+                </StyledDetailSectionContent>
+              </StyledDetailSection>
+            )}
+
+            {/* Validation rules */}
+            {entity.class === EntityEnums.Class.Territory && (
+              <StyledDetailSection>
+                <EntityDetailValidationSection
+                  validations={
+                    entity.data.validations as
+                      | ITerritoryValidation[]
+                      | undefined
+                  }
+                  entities={entity.entities}
+                  updateEntityMutation={updateEntityMutation}
+                  userCanEdit={userCanEdit}
+                  isInsideTemplate={isInsideTemplate}
+                  territoryParentId={getTerritoryId(entity)}
+                />
+              </StyledDetailSection>
+            )}
 
             {/* Valency (A) */}
             {entity.class === EntityEnums.Class.Action && (
@@ -712,7 +750,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
                         value: ["elvl", "logic", "virtuality", "partitivity"],
                       } as PropAttributeFilter
                     }
-                    isInsideTemplate={entity.isTemplate || false}
+                    isInsideTemplate={isInsideTemplate}
                     territoryParentId={getTerritoryId(entity)}
                     lowIdent
                   />
@@ -745,7 +783,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
                   onChange={(newValues: IReference[]) => {
                     updateEntityMutation.mutate({ references: newValues });
                   }}
-                  isInsideTemplate={entity.isTemplate || false}
+                  isInsideTemplate={isInsideTemplate}
                 />
               </StyledDetailSectionContent>
             </StyledDetailSection>

@@ -379,6 +379,20 @@ class Territory extends Entity implements ITerritory {
       entityIds.push(this.data.parent.territoryId);
     }
 
+    if (this.data.validations) {
+      this.data.validations.forEach((v) => {
+        entityIds.push.apply(entityIds, v.classifications || []);
+        entityIds.push.apply(entityIds, v.propType || []);
+        entityIds.push.apply(entityIds, v.allowedEntities || []);
+      });
+    }
+
+    if (this.data.protocol) {
+      entityIds.push(this.data.protocol.guidelinesResource);
+      entityIds.push(this.data.protocol.startDate);
+      entityIds.push(this.data.protocol.endDate);
+    }
+
     return entityIds;
   }
 }

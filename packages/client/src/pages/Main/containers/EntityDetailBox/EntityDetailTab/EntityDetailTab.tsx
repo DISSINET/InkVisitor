@@ -80,7 +80,6 @@ export const EntityDetailTab: React.FC<EntityDetailTab> = ({
   return (
     <>
       <StyledTab
-        // ref={setReferenceElement}
         ref={ref}
         $isSelected={isSelected}
         onMouseEnter={() => {
@@ -95,7 +94,6 @@ export const EntityDetailTab: React.FC<EntityDetailTab> = ({
       >
         <StyledLabel
           ref={setReferenceElement}
-          // ref={ref}
           $isSelected={isSelected}
           $isItalic={
             entity?.class === EntityEnums.Class.Statement && !entity?.label

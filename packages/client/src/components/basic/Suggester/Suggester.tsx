@@ -34,6 +34,7 @@ import {
 import { SuggesterKeyPress } from "./SuggesterKeyPress";
 import {
   StyledAiOutlineWarning,
+  StyledDash,
   StyledInputWrapper,
   StyledRelativePosition,
   StyledSuggester,
@@ -174,18 +175,20 @@ export const Suggester: React.FC<Suggester> = ({
 
   const handleEnterPress = () => {
     if (selected === -1 && typed.length > 0) {
-      if (
-        category === dropdownWildCard.value ||
-        category === EntityEnums.Class.Statement ||
-        category === EntityEnums.Class.Territory
-      ) {
-        setShowCreateModal(true);
-      } else {
-        onCreate({
-          label: typed,
-          entityClass: category as EntityEnums.Class,
-          language: false,
-        });
+      if (!disableCreate) {
+        if (
+          category === dropdownWildCard.value ||
+          category === EntityEnums.Class.Statement ||
+          category === EntityEnums.Class.Territory
+        ) {
+          setShowCreateModal(true);
+        } else {
+          onCreate({
+            label: typed,
+            entityClass: category as EntityEnums.Class,
+            language: false,
+          });
+        }
       }
     } else if (selected > -1) {
       const entity = suggestions[selected].entity;
@@ -263,6 +266,8 @@ export const Suggester: React.FC<Suggester> = ({
 
   const themeContext = useContext(ThemeContext);
 
+  if (disabled) return <StyledDash>-</StyledDash>;
+
   return (
     // div is necessary for flex to work and render the clear button properly
     <div>
@@ -314,11 +319,7 @@ export const Suggester: React.FC<Suggester> = ({
                 setIsFocused(false);
                 setSelected(-1);
               }}
-              onEnterPressFn={() => {
-                if (!disableEnter) {
-                  handleEnterPress();
-                }
-              }}
+              onEnterPressFn={handleEnterPress}
               autoFocus={categories.length === 1 && autoFocus}
               disabled={disabled}
             />
@@ -357,7 +358,6 @@ export const Suggester: React.FC<Suggester> = ({
           <FloatingPortal id="page">
             <StyledSuggesterList
               ref={refs.setFloating}
-              $noLeftMargin={categories.length === 1}
               onMouseEnter={() => setIsHovered(true)}
               onMouseLeave={() => setIsHovered(false)}
               style={{
@@ -370,18 +370,16 @@ export const Suggester: React.FC<Suggester> = ({
                     {renderEntitySuggestions(suggestions)}
                     <Loader size={30} show={isFetching} />
                   </StyledRelativePosition>
-                  {!disableEnter && (
-                    <SuggesterKeyPress
-                      onArrowDown={() => {
-                        if (selected < suggestions.length - 1)
-                          setSelected(selected + 1);
-                      }}
-                      onArrowUp={() => {
-                        if (selected > -1) setSelected(selected - 1);
-                      }}
-                      dependencyArr={[selected]}
-                    />
-                  )}
+                  <SuggesterKeyPress
+                    onArrowDown={() => {
+                      if (selected < suggestions.length - 1)
+                        setSelected(selected + 1);
+                    }}
+                    onArrowUp={() => {
+                      if (selected > -1) setSelected(selected - 1);
+                    }}
+                    dependencyArr={[selected]}
+                  />
                 </>
               ) : null}
 
@@ -392,18 +390,16 @@ export const Suggester: React.FC<Suggester> = ({
                     {renderEntitySuggestions(preSuggestions)}
                     <Loader size={30} show={isFetching} />
                   </StyledRelativePosition>
-                  {!disableEnter && (
-                    <SuggesterKeyPress
-                      onArrowDown={() => {
-                        if (selected < preSuggestions.length - 1)
-                          setSelected(selected + 1);
-                      }}
-                      onArrowUp={() => {
-                        if (selected > -1) setSelected(selected - 1);
-                      }}
-                      dependencyArr={[selected]}
-                    />
-                  )}
+                  <SuggesterKeyPress
+                    onArrowDown={() => {
+                      if (selected < preSuggestions.length - 1)
+                        setSelected(selected + 1);
+                    }}
+                    onArrowUp={() => {
+                      if (selected > -1) setSelected(selected - 1);
+                    }}
+                    dependencyArr={[selected]}
+                  />
                 </>
               ) : null}
             </StyledSuggesterList>

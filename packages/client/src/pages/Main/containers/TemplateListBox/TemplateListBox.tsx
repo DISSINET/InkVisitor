@@ -1,5 +1,5 @@
 import { entitiesDict } from "@shared/dictionaries";
-import { EntityEnums } from "@shared/enums";
+import { EntityEnums, UserEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
 import { IRequestSearch } from "@shared/types/request-search";
 import api from "api";
@@ -96,19 +96,38 @@ export const TemplateListBox: React.FC<TemplateListBox> = () => {
     }
   }, [removeEntityId]);
 
+  const userId = localStorage.getItem("userid");
+  const {
+    status: userStatus,
+    data: userData,
+    error: userError,
+    isFetching: userIsFetching,
+  } = useQuery({
+    queryKey: ["user", userId],
+    queryFn: async () => {
+      if (userId) {
+        const res = await api.usersGet(userId);
+        return res.data;
+      }
+    },
+    enabled: api.isLoggedIn() && !!userId,
+  });
+
   return (
     <StyledBoxContent>
       <StyledTemplateSection>
         <StyledTemplateSectionHeader>
-          <Button
-            key="add-statement"
-            icon={<FaPlus />}
-            color="primary"
-            label="new Template"
-            onClick={() => {
-              handleAskCreateTemplate();
-            }}
-          />
+          {userData?.role !== UserEnums.Role.Viewer && (
+            <Button
+              key="add-template"
+              icon={<FaPlus />}
+              color="primary"
+              label="new Template"
+              onClick={() => {
+                handleAskCreateTemplate();
+              }}
+            />
+          )}
         </StyledTemplateSectionHeader>
 
         <StyledTemplateFilter>
@@ -155,13 +174,15 @@ export const TemplateListBox: React.FC<TemplateListBox> = () => {
                     entity={templateEntity}
                     fullWidth
                     tooltipPosition="left"
-                    unlinkButton={{
-                      onClick: () => {
-                        handleAskRemoveTemplate(templateEntity.id);
-                      },
-                      tooltipLabel: "delete template",
-                      icon: <FaTrash />,
-                    }}
+                    unlinkButton={
+                      userData?.role !== UserEnums.Role.Viewer && {
+                        onClick: () => {
+                          handleAskRemoveTemplate(templateEntity.id);
+                        },
+                        tooltipLabel: "delete template",
+                        icon: <FaTrash />,
+                      }
+                    }
                   />
                 </React.Fragment>
               );
