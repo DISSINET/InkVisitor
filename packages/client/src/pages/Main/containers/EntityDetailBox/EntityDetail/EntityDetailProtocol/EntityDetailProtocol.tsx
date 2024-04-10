@@ -35,11 +35,13 @@ interface EntityDetailProtocol {
     unknown
   >;
   isInsideTemplate: boolean;
+  userCanEdit: boolean;
 }
 export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
   territory,
   updateEntityMutation,
   isInsideTemplate,
+  userCanEdit,
 }) => {
   const { entities } = territory;
   const { protocol } = territory.data as ITerritoryData;
@@ -81,6 +83,7 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
           width="full"
           value={project}
           onChangeFn={(text) => updateProtocol({ project: text })}
+          disabled={!userCanEdit}
         />
       </StyledValue>
 
@@ -90,6 +93,7 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
           width="full"
           value={guidelinesVersion}
           onChangeFn={(text) => updateProtocol({ guidelinesVersion: text })}
+          disabled={!userCanEdit}
         />
       </StyledValue>
 
@@ -99,9 +103,11 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
           <StyledTagWrap>
             <EntityTag
               entity={entities[guidelinesResource]}
-              unlinkButton={{
-                onClick: () => updateProtocol({ guidelinesResource: "" }),
-              }}
+              unlinkButton={
+                userCanEdit && {
+                  onClick: () => updateProtocol({ guidelinesResource: "" }),
+                }
+              }
             />
           </StyledTagWrap>
         ) : (
@@ -112,6 +118,7 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
             categoryTypes={[EntityEnums.Class.Resource]}
             territoryParentId={territory.data.parent.territoryId}
             isInsideTemplate={isInsideTemplate}
+            disabled={!userCanEdit}
           />
         )}
       </StyledValue>
@@ -126,6 +133,7 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
             value: ECASTEMOVariant[key as keyof typeof ECASTEMOVariant],
             label: ECASTEMOVariant[key as keyof typeof ECASTEMOVariant],
           }))}
+          disabled={!userCanEdit}
         />
       </StyledValue>
 
@@ -135,6 +143,7 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
           width="full"
           value={description}
           onChangeFn={(text) => updateProtocol({ description: text })}
+          disabled={!userCanEdit}
         />
       </StyledValue>
 
@@ -144,9 +153,11 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
           <StyledTagWrap>
             <EntityTag
               entity={entities[startDate]}
-              unlinkButton={{
-                onClick: () => updateProtocol({ startDate: "" }),
-              }}
+              unlinkButton={
+                userCanEdit && {
+                  onClick: () => updateProtocol({ startDate: "" }),
+                }
+              }
             />
           </StyledTagWrap>
         ) : (
@@ -157,6 +168,7 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
             categoryTypes={[EntityEnums.Class.Value]}
             territoryParentId={territory.data.parent.territoryId}
             isInsideTemplate={isInsideTemplate}
+            disabled={!userCanEdit}
           />
         )}
       </StyledValue>
@@ -167,7 +179,11 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
           <StyledTagWrap>
             <EntityTag
               entity={entities[endDate]}
-              unlinkButton={{ onClick: () => updateProtocol({ endDate: "" }) }}
+              unlinkButton={
+                userCanEdit && {
+                  onClick: () => updateProtocol({ endDate: "" }),
+                }
+              }
             />
           </StyledTagWrap>
         ) : (
@@ -178,6 +194,7 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
             categoryTypes={[EntityEnums.Class.Value]}
             territoryParentId={territory.data.parent.territoryId}
             isInsideTemplate={isInsideTemplate}
+            disabled={!userCanEdit}
           />
         )}
       </StyledValue>

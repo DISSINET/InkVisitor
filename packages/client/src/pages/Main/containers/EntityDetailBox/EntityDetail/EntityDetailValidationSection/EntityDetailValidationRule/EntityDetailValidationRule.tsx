@@ -29,6 +29,7 @@ interface EntityDetailValidationRule {
   removeValidationRule: () => void;
   isInsideTemplate: boolean;
   territoryParentId: string | undefined;
+  userCanEdit: boolean;
 }
 export const EntityDetailValidationRule: React.FC<
   EntityDetailValidationRule
@@ -39,6 +40,7 @@ export const EntityDetailValidationRule: React.FC<
   removeValidationRule,
   isInsideTemplate,
   territoryParentId,
+  userCanEdit,
 }) => {
   const {
     detail,
@@ -84,7 +86,7 @@ export const EntityDetailValidationRule: React.FC<
           value={entityClasses}
           onChange={(values) => updateValidationRule({ entityClasses: values })}
           options={entitiesDict}
-          // disabled={!userCanEdit}
+          disabled={!userCanEdit}
         />
 
         {/* Classifications */}
@@ -95,15 +97,16 @@ export const EntityDetailValidationRule: React.FC<
               key={key}
               flexListMargin
               entity={entities[classification]}
-              unlinkButton={{
-                onClick() {
-                  updateValidationRule({
-                    classifications: classifications.filter(
-                      (c) => c !== classification
-                    ),
-                  });
-                },
-              }}
+              unlinkButton={
+                userCanEdit && {
+                  onClick: () =>
+                    updateValidationRule({
+                      classifications: classifications.filter(
+                        (c) => c !== classification
+                      ),
+                    }),
+                }
+              }
             />
           ))}
           <EntitySuggester
@@ -114,12 +117,14 @@ export const EntityDetailValidationRule: React.FC<
                 classifications: [...classifications, entity.id],
               })
             }
+            disabled={!userCanEdit}
           />
         </StyledFlexList>
 
         {/* Tie type */}
         <StyledLabel>Tie type</StyledLabel>
         <AttributeButtonGroup
+          disabled={!userCanEdit}
           noMargin
           options={[
             {
@@ -164,13 +169,16 @@ export const EntityDetailValidationRule: React.FC<
                   key={key}
                   flexListMargin
                   entity={entities[entityId]}
-                  unlinkButton={{
-                    onClick() {
-                      updateValidationRule({
-                        propType: propType?.filter((pTiD) => pTiD !== entityId),
-                      });
-                    },
-                  }}
+                  unlinkButton={
+                    userCanEdit && {
+                      onClick: () =>
+                        updateValidationRule({
+                          propType: propType?.filter(
+                            (pTiD) => pTiD !== entityId
+                          ),
+                        }),
+                    }
+                  }
                 />
               ))}
               <EntitySuggester
@@ -181,6 +189,7 @@ export const EntityDetailValidationRule: React.FC<
                     propType: [...(propType || []), entity.id],
                   })
                 }
+                disabled={!userCanEdit}
               />
             </StyledFlexList>
           </>
@@ -197,7 +206,7 @@ export const EntityDetailValidationRule: React.FC<
                 updateValidationRule({ allowedClasses: values })
               }
               options={entitiesDict}
-              disabled={disabledEntityClassesSection}
+              disabled={disabledEntityClassesSection || !userCanEdit}
             />
           </>
         )}
@@ -212,14 +221,16 @@ export const EntityDetailValidationRule: React.FC<
               key={key}
               flexListMargin
               entity={entities[entityId]}
-              unlinkButton={{
-                onClick: () =>
-                  updateValidationRule({
-                    allowedEntities: allowedEntities.filter(
-                      (aE) => aE !== entityId
-                    ),
-                  }),
-              }}
+              unlinkButton={
+                userCanEdit && {
+                  onClick: () =>
+                    updateValidationRule({
+                      allowedEntities: allowedEntities.filter(
+                        (aE) => aE !== entityId
+                      ),
+                    }),
+                }
+              }
             />
           ))}
           <EntitySuggester
@@ -235,6 +246,7 @@ export const EntityDetailValidationRule: React.FC<
             }}
             isInsideTemplate={isInsideTemplate}
             territoryParentId={territoryParentId}
+            disabled={!userCanEdit}
           />
         </StyledFlexList>
         {/* Detail */}
@@ -243,6 +255,7 @@ export const EntityDetailValidationRule: React.FC<
           width="full"
           value={detail}
           onChangeFn={(value) => updateValidationRule({ detail: value })}
+          disabled={!userCanEdit}
         />
       </StyledGrid>
       <div

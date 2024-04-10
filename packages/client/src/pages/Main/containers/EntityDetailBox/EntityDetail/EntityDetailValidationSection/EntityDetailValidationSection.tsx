@@ -123,6 +123,7 @@ export const EntityDetailValidationSection: React.FC<
                   removeValidationRule={() => setTempIndexToRemove(key)}
                   isInsideTemplate={isInsideTemplate}
                   territoryParentId={territoryParentId}
+                  userCanEdit={userCanEdit}
                 />
                 {key !== validations.length - 1 && <StyledBlockSeparator />}
               </React.Fragment>
