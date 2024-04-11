@@ -224,7 +224,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
   const handleCreateStatement = () => {
     if (user) {
       const newStatement: IStatement = CStatement(
-        localStorage.getItem("userrole") as UserEnums.Role,
+        user.role,
         user.options,
         "",
         "",

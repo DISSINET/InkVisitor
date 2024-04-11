@@ -84,6 +84,7 @@ export const StatementEditorActantClassification: React.FC<
             }}
             isInsideTemplate={isInsideTemplate}
             excludedActantIds={[entity.id]}
+            disabled={!userCanEdit}
           >
             <EntityTag
               entity={entity}

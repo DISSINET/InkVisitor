@@ -67,3 +67,8 @@ export const StyledTd = styled.td`
   padding-left: 0;
   font-size: ${({ theme }) => theme.fontSize["sm"]};
 `;
+export const StyledSuggesterWrapper = styled.span`
+  display: inline-flex;
+  overflow: hidden;
+  min-width: 13rem;
+`;

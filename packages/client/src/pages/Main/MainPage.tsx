@@ -213,7 +213,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
     dispatch(setStatementListOpened(!statementListOpened));
   };
 
-  const userrole = localStorage.getItem("userrole") as UserEnums.Role;
+  const userRole = localStorage.getItem("userrole") as UserEnums.Role;
 
   return (
     <>
@@ -273,7 +273,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
             }
             buttons={[
               <>
-                {userrole !== UserEnums.Role.Viewer && (
+                {userRole !== UserEnums.Role.Viewer && (
                   <Button
                     icon={<FaPlus />}
                     label="new entity"

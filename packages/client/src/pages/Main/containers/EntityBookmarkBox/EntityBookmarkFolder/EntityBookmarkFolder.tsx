@@ -121,7 +121,7 @@ export const EntityBookmarkFolder: React.FC<EntityBookmarkFolder> = ({
     useState<HTMLDivElement | null>(null);
   const [showTooltip, setShowTooltip] = useState(false);
 
-  const userrole = localStorage.getItem("userrole") as UserEnums.Role;
+  const userRole = localStorage.getItem("userrole") as UserEnums.Role;
 
   return (
     <StyledFolderWrapper
@@ -202,7 +202,7 @@ export const EntityBookmarkFolder: React.FC<EntityBookmarkFolder> = ({
           <StyledFolderSuggester>
             <EntitySuggester
               disableTemplateInstantiation
-              disableCreate={userrole === UserEnums.Role.Viewer}
+              disableCreate={userRole === UserEnums.Role.Viewer}
               openDetailOnCreate
               onSelected={(bookmarkId: string) => {
                 addBookmark(bookmarkFolder.id, bookmarkId);

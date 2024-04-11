@@ -1,4 +1,4 @@
-import { EntityEnums } from "@shared/enums";
+import { EntityEnums, UserEnums } from "@shared/enums";
 import { IEntity, IReference } from "@shared/types";
 import { useQuery } from "@tanstack/react-query";
 import { excludedSuggesterEntities } from "Theme/constants";
@@ -24,6 +24,7 @@ import { EntityReferenceTableRow } from "./EntityReferenceTableRow";
 import {
   StyledReferenceValuePartLabel,
   StyledReferencesListButtons,
+  StyledSuggesterWrapper,
   StyledTable,
 } from "./EntityReferenceTableStyles";
 
@@ -161,6 +162,7 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
                   isInsideTemplate={isInsideTemplate}
                   territoryParentId={territoryParentId}
                   excludedActantIds={[resourceEntity.id]}
+                  disabled={disabled}
                 >
                   <EntityTag
                     entity={resourceEntity}
@@ -176,21 +178,20 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
                   />
                 </EntityDropzone>
               ) : (
-                !disabled && (
-                  <div>
-                    <EntitySuggester
-                      openDetailOnCreate={openDetailOnCreate}
-                      territoryActants={[]}
-                      onSelected={(newSelectedId) => {
-                        handleChangeResource(reference.id, newSelectedId, true);
-                      }}
-                      disableTemplatesAccept
-                      categoryTypes={[EntityEnums.Class.Resource]}
-                      isInsideTemplate={isInsideTemplate}
-                      territoryParentId={territoryParentId}
-                    />
-                  </div>
-                )
+                <StyledSuggesterWrapper>
+                  <EntitySuggester
+                    openDetailOnCreate={openDetailOnCreate}
+                    territoryActants={[]}
+                    onSelected={(newSelectedId) => {
+                      handleChangeResource(reference.id, newSelectedId, true);
+                    }}
+                    disableTemplatesAccept
+                    categoryTypes={[EntityEnums.Class.Resource]}
+                    isInsideTemplate={isInsideTemplate}
+                    territoryParentId={territoryParentId}
+                    disabled={disabled}
+                  />
+                </StyledSuggesterWrapper>
               )}
             </>
           );
@@ -215,6 +216,7 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
                   isInsideTemplate={isInsideTemplate}
                   territoryParentId={territoryParentId}
                   excludedActantIds={[valueEntity.id]}
+                  disabled={disabled}
                 >
                   <EntityTag
                     entity={valueEntity}
@@ -236,22 +238,21 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
                   />
                 </EntityDropzone>
               ) : (
-                !disabled && (
-                  <div>
-                    <EntitySuggester
-                      placeholder={resourceEntity?.data?.partValueLabel}
-                      excludedEntityClasses={excludedSuggesterEntities}
-                      openDetailOnCreate={openDetailOnCreate}
-                      territoryActants={[]}
-                      onSelected={(newSelectedId: string) => {
-                        handleChangeValue(reference.id, newSelectedId, true);
-                      }}
-                      categoryTypes={[EntityEnums.Class.Value]}
-                      isInsideTemplate={isInsideTemplate}
-                      territoryParentId={territoryParentId}
-                    />
-                  </div>
-                )
+                <StyledSuggesterWrapper>
+                  <EntitySuggester
+                    placeholder={resourceEntity?.data?.partValueLabel}
+                    excludedEntityClasses={excludedSuggesterEntities}
+                    openDetailOnCreate={openDetailOnCreate}
+                    territoryActants={[]}
+                    onSelected={(newSelectedId: string) => {
+                      handleChangeValue(reference.id, newSelectedId, true);
+                    }}
+                    categoryTypes={[EntityEnums.Class.Value]}
+                    isInsideTemplate={isInsideTemplate}
+                    territoryParentId={territoryParentId}
+                    disabled={disabled}
+                  />
+                </StyledSuggesterWrapper>
               )}
             </div>
           );

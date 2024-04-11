@@ -165,6 +165,7 @@ export const StatementEditorActionTableRow: React.FC<
         excludedEntityClasses={excludedSuggesterEntities}
         territoryParentId={territoryParentId}
         excludedActantIds={[action.id]}
+        disabled={!userCanEdit}
       >
         <EntityTag
           fullWidth

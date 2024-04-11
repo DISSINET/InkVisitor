@@ -96,13 +96,13 @@ export const TemplateListBox: React.FC<TemplateListBox> = () => {
     }
   }, [removeEntityId]);
 
-  const userrole = localStorage.getItem("userrole") as UserEnums.Role;
+  const userRole = localStorage.getItem("userrole") as UserEnums.Role;
 
   return (
     <StyledBoxContent>
       <StyledTemplateSection>
         <StyledTemplateSectionHeader>
-          {userrole !== UserEnums.Role.Viewer && (
+          {userRole !== UserEnums.Role.Viewer && (
             <Button
               key="add-template"
               icon={<FaPlus />}
@@ -160,7 +160,7 @@ export const TemplateListBox: React.FC<TemplateListBox> = () => {
                     fullWidth
                     tooltipPosition="left"
                     unlinkButton={
-                      userrole !== UserEnums.Role.Viewer && {
+                      userRole !== UserEnums.Role.Viewer && {
                         onClick: () => {
                           handleAskRemoveTemplate(templateEntity.id);
                         },

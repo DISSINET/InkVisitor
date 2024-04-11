@@ -217,6 +217,7 @@ export const StatementEditorActantTableRow: React.FC<
           isInsideTemplate={isInsideTemplate}
           territoryParentId={territoryParentId}
           excludedActantIds={[actant.id]}
+          disabled={!userCanEdit}
         >
           <EntityTag
             entity={actant}
