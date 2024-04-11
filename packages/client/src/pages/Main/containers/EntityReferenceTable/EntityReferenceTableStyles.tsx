@@ -24,6 +24,12 @@ export const StyledListHeaderColumn = styled.div<StyledListHeaderColumn>`
   font-style: italic;
 `;
 
+export const StyledReferencesListColumn = styled.div`
+  margin: ${({ theme }) => theme.space[1]};
+  display: grid;
+  align-items: center;
+`;
+
 export const StyledReferencesListButtons = styled.div`
   button {
     display: inline-flex;
@@ -67,8 +73,8 @@ export const StyledTd = styled.td`
   padding-left: 0;
   font-size: ${({ theme }) => theme.fontSize["sm"]};
 `;
-export const StyledSuggesterWrapper = styled.span`
+export const StyledGrid = styled.div`
   display: inline-flex;
   overflow: hidden;
-  min-width: 13rem;
+  align-items: center;
 `;

@@ -22,9 +22,9 @@ import { CellProps, Column, Row, useTable } from "react-table";
 import { deepCopy, normalizeURL } from "utils/utils";
 import { EntityReferenceTableRow } from "./EntityReferenceTableRow";
 import {
+  StyledGrid,
   StyledReferenceValuePartLabel,
   StyledReferencesListButtons,
-  StyledSuggesterWrapper,
   StyledTable,
 } from "./EntityReferenceTableStyles";
 
@@ -151,7 +151,7 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
           const resourceEntity = entities[reference.resource];
 
           return (
-            <>
+            <StyledGrid>
               {resourceEntity ? (
                 <EntityDropzone
                   onSelected={(newSelectedId: string) => {
@@ -178,22 +178,20 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
                   />
                 </EntityDropzone>
               ) : (
-                <StyledSuggesterWrapper>
-                  <EntitySuggester
-                    openDetailOnCreate={openDetailOnCreate}
-                    territoryActants={[]}
-                    onSelected={(newSelectedId) => {
-                      handleChangeResource(reference.id, newSelectedId, true);
-                    }}
-                    disableTemplatesAccept
-                    categoryTypes={[EntityEnums.Class.Resource]}
-                    isInsideTemplate={isInsideTemplate}
-                    territoryParentId={territoryParentId}
-                    disabled={disabled}
-                  />
-                </StyledSuggesterWrapper>
+                <EntitySuggester
+                  openDetailOnCreate={openDetailOnCreate}
+                  territoryActants={[]}
+                  onSelected={(newSelectedId) => {
+                    handleChangeResource(reference.id, newSelectedId, true);
+                  }}
+                  disableTemplatesAccept
+                  categoryTypes={[EntityEnums.Class.Resource]}
+                  isInsideTemplate={isInsideTemplate}
+                  territoryParentId={territoryParentId}
+                  disabled={disabled}
+                />
               )}
-            </>
+            </StyledGrid>
           );
         },
       },
@@ -205,7 +203,7 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
           const valueEntity = entities[reference.value];
 
           return (
-            <div style={{ display: "flex", alignItems: "center" }}>
+            <StyledGrid>
               {valueEntity ? (
                 <EntityDropzone
                   onSelected={(newSelectedId: string) => {
@@ -238,23 +236,21 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
                   />
                 </EntityDropzone>
               ) : (
-                <StyledSuggesterWrapper>
-                  <EntitySuggester
-                    placeholder={resourceEntity?.data?.partValueLabel}
-                    excludedEntityClasses={excludedSuggesterEntities}
-                    openDetailOnCreate={openDetailOnCreate}
-                    territoryActants={[]}
-                    onSelected={(newSelectedId: string) => {
-                      handleChangeValue(reference.id, newSelectedId, true);
-                    }}
-                    categoryTypes={[EntityEnums.Class.Value]}
-                    isInsideTemplate={isInsideTemplate}
-                    territoryParentId={territoryParentId}
-                    disabled={disabled}
-                  />
-                </StyledSuggesterWrapper>
+                <EntitySuggester
+                  placeholder={resourceEntity?.data?.partValueLabel}
+                  excludedEntityClasses={excludedSuggesterEntities}
+                  openDetailOnCreate={openDetailOnCreate}
+                  territoryActants={[]}
+                  onSelected={(newSelectedId: string) => {
+                    handleChangeValue(reference.id, newSelectedId, true);
+                  }}
+                  categoryTypes={[EntityEnums.Class.Value]}
+                  isInsideTemplate={isInsideTemplate}
+                  territoryParentId={territoryParentId}
+                  disabled={disabled}
+                />
               )}
-            </div>
+            </StyledGrid>
           );
         },
       },

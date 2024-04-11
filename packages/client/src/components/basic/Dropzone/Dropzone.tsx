@@ -58,25 +58,23 @@ export const Dropzone: React.FC<Dropzone> = ({
 
   return (
     <>
-      <div style={{ display: "inline-flex", overflow: "hidden" }}>
-        {!disabled ? (
-          <>
-            <StyledDropzone ref={dropRef} style={{ opacity: opacity }}>
-              {children}
-            </StyledDropzone>
-            <StyledIconWrap>
-              {isWrongDropCategory && isOver && (
-                <StyledAiOutlineWarning
-                  size={22}
-                  color={themeContext?.color.warning}
-                />
-              )}
-            </StyledIconWrap>
-          </>
-        ) : (
-          <>{children}</>
-        )}
-      </div>
+      {!disabled ? (
+        <>
+          <StyledDropzone ref={dropRef} style={{ opacity: opacity }}>
+            {children}
+          </StyledDropzone>
+          <StyledIconWrap>
+            {isWrongDropCategory && isOver && (
+              <StyledAiOutlineWarning
+                size={22}
+                color={themeContext?.color.warning}
+              />
+            )}
+          </StyledIconWrap>
+        </>
+      ) : (
+        <>{children}</>
+      )}
 
       {showTemplateModal && (
         <TemplateActionModal

@@ -534,6 +534,7 @@ export const StatementEditorActantTableRow: React.FC<
                       bundleEnd: bundleEnd,
                     })
                   }
+                  disabled={!userCanEdit}
                 />
               </div>
             </StyledExpandedRow>
