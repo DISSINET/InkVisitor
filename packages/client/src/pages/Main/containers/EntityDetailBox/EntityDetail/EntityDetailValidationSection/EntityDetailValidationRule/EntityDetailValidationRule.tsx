@@ -56,7 +56,15 @@ export const EntityDetailValidationRule: React.FC<
     return allowedEntities !== undefined && allowedEntities.length > 0;
   }, [allowedEntities]);
 
-  const onlyResourceAllowed = tieType === EProtocolTieType.Reference;
+  const allowedEntitiesClasses = useMemo<EntityEnums.Class[]>(() => {
+    if (tieType === EProtocolTieType.Classification) {
+      return [EntityEnums.Class.Concept];
+    }
+    if (tieType === EProtocolTieType.Reference) {
+      return [EntityEnums.Class.Resource];
+    }
+    return classesAll;
+  }, [tieType]);
 
   return (
     <StyledBorderLeft>
@@ -138,6 +146,8 @@ export const EntityDetailValidationRule: React.FC<
                 updateValidationRule({
                   tieType: EProtocolTieType.Classification,
                   propType: [],
+                  allowedClasses: [],
+                  allowedEntities: [],
                 }),
               selected: tieType === EProtocolTieType.Classification,
             },
@@ -195,7 +205,7 @@ export const EntityDetailValidationRule: React.FC<
         )}
 
         {/* Allowed classes */}
-        {!onlyResourceAllowed && (
+        {tieType === EProtocolTieType.Property && (
           <>
             <StyledLabel>Allowed E types</StyledLabel>
             <Dropdown.Multi.Entity
@@ -212,7 +222,9 @@ export const EntityDetailValidationRule: React.FC<
 
         {/* Allowed entities */}
         <StyledLabel>
-          {!onlyResourceAllowed ? "Allowed E values" : "Allowed Resources"}
+          {tieType === EProtocolTieType.Classification && "Allowed Concepts"}
+          {tieType === EProtocolTieType.Reference && "Allowed Resources"}
+          {tieType === EProtocolTieType.Property && "Allowed E values"}
         </StyledLabel>
         <StyledFlexList>
           {allowedEntities?.map((entityId, key) => (
@@ -234,9 +246,7 @@ export const EntityDetailValidationRule: React.FC<
           ))}
           {!(!userCanEdit && allowedEntities && allowedEntities.length > 0) && (
             <EntitySuggester
-              categoryTypes={
-                !onlyResourceAllowed ? classesAll : [EntityEnums.Class.Resource]
-              }
+              categoryTypes={allowedEntitiesClasses}
               excludedActantIds={allowedEntities}
               onPicked={(entity) => {
                 updateValidationRule({
@@ -250,6 +260,7 @@ export const EntityDetailValidationRule: React.FC<
             />
           )}
         </StyledFlexList>
+
         {/* Detail */}
         <StyledLabel>Detail / Notes</StyledLabel>
         <Input
