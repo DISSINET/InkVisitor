@@ -712,6 +712,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
                   relationCreateMutation={relationCreateMutation}
                   relationUpdateMutation={relationUpdateMutation}
                   relationDeleteMutation={relationDeleteMutation}
+                  userCanEdit={userCanEdit}
                 />
               </StyledDetailSectionContent>
             </StyledDetailSection>

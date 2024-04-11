@@ -23,6 +23,7 @@ import {
   StyledBorderLeft,
   StyledCIGrid,
   StyledExpandedRow,
+  StyledSuggesterWrap,
 } from "../StatementEditorActantTableStyles";
 
 interface StatementEditorActantClassification {
@@ -107,15 +108,18 @@ export const StatementEditorActantClassification: React.FC<
             />
           </EntityDropzone>
         ) : (
-          <EntitySuggester
-            categoryTypes={[EntityEnums.Class.Concept]}
-            onSelected={(entityId: string) => {
-              handleUpdate({ entityId }, true);
-            }}
-            openDetailOnCreate
-            isInsideTemplate={isInsideTemplate}
-            territoryActants={territoryActants}
-          />
+          <StyledSuggesterWrap>
+            <EntitySuggester
+              categoryTypes={[EntityEnums.Class.Concept]}
+              onSelected={(entityId: string) => {
+                handleUpdate({ entityId }, true);
+              }}
+              openDetailOnCreate
+              isInsideTemplate={isInsideTemplate}
+              territoryActants={territoryActants}
+              disabled={!userCanEdit}
+            />
+          </StyledSuggesterWrap>
         )}
 
         <LogicButtonGroup

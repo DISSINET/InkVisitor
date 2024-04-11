@@ -52,6 +52,7 @@ import {
   StyledGridColumn,
 } from "./StatementEditorActionTableStyles";
 import { ThemeContext } from "styled-components";
+import { StyledSuggesterWrap } from "../StatementEditorActantTable/StatementEditorActantTableStyles";
 
 interface StatementEditorActionTableRow {
   filteredAction: FilteredActionObject;
@@ -191,7 +192,7 @@ export const StatementEditorActionTableRow: React.FC<
         />
       </EntityDropzone>
     ) : (
-      userCanEdit && (
+      <StyledSuggesterWrap>
         <EntitySuggester
           onSelected={(newSelectedId: string) => {
             updateAction(
@@ -210,8 +211,9 @@ export const StatementEditorActionTableRow: React.FC<
           isInsideTemplate={isInsideTemplate}
           territoryParentId={territoryParentId}
           territoryActants={territoryActants}
+          disabled={!userCanEdit}
         />
-      )
+      </StyledSuggesterWrap>
     );
   };
 

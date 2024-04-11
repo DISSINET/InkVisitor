@@ -96,28 +96,13 @@ export const TemplateListBox: React.FC<TemplateListBox> = () => {
     }
   }, [removeEntityId]);
 
-  const userId = localStorage.getItem("userid");
-  const {
-    status: userStatus,
-    data: userData,
-    error: userError,
-    isFetching: userIsFetching,
-  } = useQuery({
-    queryKey: ["user", userId],
-    queryFn: async () => {
-      if (userId) {
-        const res = await api.usersGet(userId);
-        return res.data;
-      }
-    },
-    enabled: api.isLoggedIn() && !!userId,
-  });
+  const userrole = localStorage.getItem("userrole") as UserEnums.Role;
 
   return (
     <StyledBoxContent>
       <StyledTemplateSection>
         <StyledTemplateSectionHeader>
-          {userData?.role !== UserEnums.Role.Viewer && (
+          {userrole !== UserEnums.Role.Viewer && (
             <Button
               key="add-template"
               icon={<FaPlus />}
@@ -175,7 +160,7 @@ export const TemplateListBox: React.FC<TemplateListBox> = () => {
                     fullWidth
                     tooltipPosition="left"
                     unlinkButton={
-                      userData?.role !== UserEnums.Role.Viewer && {
+                      userrole !== UserEnums.Role.Viewer && {
                         onClick: () => {
                           handleAskRemoveTemplate(templateEntity.id);
                         },

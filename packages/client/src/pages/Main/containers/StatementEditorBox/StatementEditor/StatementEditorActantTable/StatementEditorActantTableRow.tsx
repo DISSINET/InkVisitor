@@ -65,6 +65,7 @@ import {
   StyledGrid,
   StyledGridColumn,
   StyledRow,
+  StyledSuggesterWrap,
   StyledTagWrapper,
 } from "./StatementEditorActantTableStyles";
 import { ThemeContext } from "styled-components";
@@ -244,7 +245,7 @@ export const StatementEditorActantTableRow: React.FC<
         </EntityDropzone>
       </StyledTagWrapper>
     ) : (
-      userCanEdit && (
+      <StyledSuggesterWrap>
         <EntitySuggester
           onSelected={(newSelectedId: string) => {
             updateActant(
@@ -264,8 +265,9 @@ export const StatementEditorActantTableRow: React.FC<
           territoryActants={territoryActants}
           placeholder={"add actant"}
           isInsideStatement
+          disabled={!userCanEdit}
         />
-      )
+      </StyledSuggesterWrap>
     );
   };
 

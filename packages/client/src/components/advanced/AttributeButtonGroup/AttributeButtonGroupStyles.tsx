@@ -6,7 +6,6 @@ interface StyledPropButtonGroup {
   $leftMargin?: boolean;
   $rightMargin?: boolean;
   $border?: boolean;
-  $round?: boolean;
   width?: number;
   padding?: boolean;
 }
@@ -17,7 +16,7 @@ export const StyledPropButtonGroup = styled.div<StyledPropButtonGroup>`
     $rightMargin ? theme.space[3] : theme.space[0]};
   vertical-align: middle;
   display: inline-flex;
-  border-radius: ${({ $round }) => ($round ? "8px" : "0")};
+  border-radius: 8px;
   border: ${({ $border }) => ($border ? "1px" : 0)} solid
     ${({ theme }) => theme.color["gray"][600]};
   max-width: fit-content;
