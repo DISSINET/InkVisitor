@@ -99,7 +99,7 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
 
       <StyledLabel>Guidelines resource</StyledLabel>
       <StyledValue>
-        {guidelinesResource.length > 0 ? (
+        {guidelinesResource && guidelinesResource.length > 0 ? (
           <StyledTagWrap>
             <EntityTag
               entity={entities[guidelinesResource]}
