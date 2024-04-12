@@ -1,12 +1,9 @@
-import { CanvasLib } from '@inkvisitor/canvas/src/lib';
 import { createContext, useContext } from 'react';
-
-interface CanvasApi {
-  setApi: (lib: CanvasLib) => void;
-}
+import { CanvasLib } from '@inkvisitor/canvas/src/lib';
 
 interface CanvasContextType {
-  canvasApi: CanvasApi;
+  canvas: CanvasLib | null;
+  setCanvas: (instance: CanvasLib) => void;
 }
 
 const CanvasContext = createContext<CanvasContextType | null>(null);
@@ -16,7 +13,7 @@ export const useCanvas = () => {
   if (!canvasContext) {
     throw new Error('useCanvas must be used within a CanvasProvider');
   }
-  return canvasContext.canvasApi;
+  return { canvas: canvasContext.canvas, setCanvas: canvasContext.setCanvas}
 };
 
 export default CanvasContext;

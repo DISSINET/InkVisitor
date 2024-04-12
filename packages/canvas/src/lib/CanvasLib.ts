@@ -4,6 +4,13 @@ import Text from "./Text";
 import Scroller from "./Scroller";
 import { Lines } from "./Lines";
 
+export interface HighlightSchema {
+  mode: "background";
+  style: {
+    color: string;
+  };
+}
+
 // DrawingOptions bundles required sizes shared by multiple components while drawing into canvas
 export interface DrawingOptions {
   charWidth: number;
@@ -40,7 +47,8 @@ export class CanvasLib {
   lastHighlightedText = "";
 
   // callbacks
-  highlightChangeCb?: (text: string) => void;
+  onSelectTextCb?: (text: string) => void;
+  onHighlightCb?: (entityId: string) => HighlightSchema | void;
 
   constructor(element: HTMLCanvasElement, inputText: string) {
     this.element = element;
@@ -68,14 +76,18 @@ export class CanvasLib {
     this.element.onkeydown = this.onKeyDown.bind(this);
   }
 
+  onHighlight(cb: (entityId: string) => HighlightSchema | void): void {
+    this.onHighlightCb = cb;
+  }
+
   /**
-   * onHighlightChange stores callback for changed highlighted area
+   * onSelectText stores callback for changed highlighted area
    * Will be used only if text really changes
    * @param cb
    */
-  onHighlightChange(cb: (text: string) => void) {
+  onSelectText(cb: (text: string) => void) {
     this.lastHighlightedText = "";
-    this.highlightChangeCb = (text: string) => {
+    this.onSelectTextCb = (text: string) => {
       if (text === this.lastHighlightedText) {
         return;
       }
@@ -290,12 +302,12 @@ export class CanvasLib {
         this.ctx.fillText(textLine, 0, (renderLine + 1) * this.lineHeight);
       }
     }
-    
+
     const textSegment = this.text.cursorToIndex(this.viewport, this.cursor);
     if (textSegment) {
       // fix cursor position to end of the line (cursor.xLine could be virtually infinity)
       this.cursor.xLine = textSegment.charInLineIndex;
-      
+
       this.cursor.draw(this.ctx, this.viewport, {
         lineHeight: this.lineHeight,
         charWidth: this.charWidth,
@@ -303,10 +315,10 @@ export class CanvasLib {
       });
     }
 
-    if (this.highlightChangeCb && this.cursor.isHighlighted()) {
+    if (this.onSelectTextCb && this.cursor.isHighlighted()) {
       const [start, end] = this.cursor.getHighlighted();
       if (start && end) {
-        this.highlightChangeCb(this.text.getRangeText(start, end));
+        this.onSelectTextCb(this.text.getRangeText(start, end));
       }
     }
     if (this.scroller) {

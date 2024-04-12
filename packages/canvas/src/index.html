@@ -64,8 +64,20 @@
       );
       customWrapper.addScroller(document.getElementById("scroller"));
       customWrapper.addLines(document.getElementById("lines"));
+      customWrapper.onHighlight((entityId) => {
+        console.log("highlighted", entityId)
+        return {
+          mode: "background",
+          style: {
+            color: "pink"
+          }
+        }
+      })
+      customWrapper.onSelectText((text) => {
+        document.getElementById("highlight-container").innerHTML = text;
+      });
 
-      customWrapper.onHighlightChange((text) => {
+      customWrapper.onHighlight((entity) => {
         document.getElementById("highlight-container").innerHTML = text;
       });
 

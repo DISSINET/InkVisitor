@@ -11,7 +11,7 @@ export const Canvas = () => {
         );
         customWrapper.addScroller(document.getElementById("scroller") as HTMLDivElement);
         customWrapper.addLines(document.getElementById("lines") as HTMLCanvasElement);
-        customWrapper.onHighlightChange((text) => {
+        customWrapper.onSelectText((text) => {
           (document.getElementById("highlight-container") as HTMLElement).innerHTML = text;
         });
         customWrapper.draw();

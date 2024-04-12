@@ -111,6 +111,7 @@ class Text {
       segment.lineStart = currentLineNumber;
       segment.lines = [];
 
+      console.log("calclate", this.mode)
       let text = segment.raw;
       if (this.mode === "highlight") {
         text = segment.parsed;

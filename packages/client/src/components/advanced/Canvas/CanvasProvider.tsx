@@ -1,22 +1,12 @@
-import React, { createContext, useState } from "react";
+import React, { useState } from "react";
 import CanvasContext from "./CanvasContext";
-import { CanvasLib } from "@inkvisitor/canvas";
-
-const createCanvasApi = () => {
-  let instance: CanvasLib | null = null;
-
-  const setApi = (newInst: CanvasLib) => {
-    instance = newInst;
-  };
-
-  return { setApi, instance };
-};
+import { CanvasLib } from "@inkvisitor/canvas/src/lib";
 
 const CanvasProvider: React.FC<any> = ({ children }) => {
-  const [canvasApi] = useState(createCanvasApi());
+  const [canvas, setCanvas] = useState<CanvasLib|null>(null);
 
   return (
-    <CanvasContext.Provider value={{ canvasApi }}>
+    <CanvasContext.Provider value={{canvas, setCanvas}} da={1}>
       {children}
     </CanvasContext.Provider>
   );
