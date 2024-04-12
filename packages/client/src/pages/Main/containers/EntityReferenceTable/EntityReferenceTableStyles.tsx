@@ -63,7 +63,7 @@ export const StyledTr = styled.tr<StyledTr>`
     padding-right: ${({ theme }) => theme.space[2]};
   }
   td:not(:last-child) {
-    width: 1%;
+    /* width: 1%; */
   }
 `;
 export const StyledTd = styled.td`
@@ -74,7 +74,6 @@ export const StyledTd = styled.td`
   font-size: ${({ theme }) => theme.fontSize["sm"]};
 `;
 export const StyledGrid = styled.div`
-  display: inline-flex;
-  overflow: hidden;
+  display: grid;
   align-items: center;
 `;

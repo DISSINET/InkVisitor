@@ -164,18 +164,20 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
                   excludedActantIds={[resourceEntity.id]}
                   disabled={disabled}
                 >
-                  <EntityTag
-                    entity={resourceEntity}
-                    fullWidth
-                    unlinkButton={
-                      !disabled && {
-                        onClick: () => {
-                          handleChangeResource(reference.id, "");
-                        },
-                        tooltipLabel: "unlink resource",
+                  <>
+                    <EntityTag
+                      entity={resourceEntity}
+                      fullWidth
+                      unlinkButton={
+                        !disabled && {
+                          onClick: () => {
+                            handleChangeResource(reference.id, "");
+                          },
+                          tooltipLabel: "unlink resource",
+                        }
                       }
-                    }
-                  />
+                    />
+                  </>
                 </EntityDropzone>
               ) : (
                 <EntitySuggester

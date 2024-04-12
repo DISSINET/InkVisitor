@@ -930,7 +930,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
           </StyledEditorSectionHeader>
 
           <StyledEditorSectionContent>
-            <StyledTagsList>
+            <StyledTagsList $paddingBottom={statement.data.tags.length > 0}>
               {statement.data.tags.map((tag: string, key: number) => {
                 const tagActant = statement?.entities[tag];
                 return (
