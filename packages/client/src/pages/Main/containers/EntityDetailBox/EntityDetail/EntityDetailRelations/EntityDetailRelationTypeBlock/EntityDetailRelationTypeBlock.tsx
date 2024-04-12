@@ -241,11 +241,14 @@ export const EntityDetailRelationTypeBlock: React.FC<
   };
 
   const hasSuggester = useMemo(() => {
+    if (!userCanEdit && selectedRelations.length > 0) {
+      return false;
+    }
     if (isCloudType) {
       return true;
     }
     return isMultiple || selectedRelations.length < 1;
-  }, [selectedRelations]);
+  }, [selectedRelations, userCanEdit]);
 
   return (
     <StyledRelationBlock>
