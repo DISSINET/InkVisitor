@@ -919,6 +919,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
               territoryParentId={statementTerritoryId}
               entities={statement.entities ?? {}}
               entityId={statement.id}
+              userCanEdit={userCanEdit}
             />
           </StyledEditorSectionContent>
         </StyledEditorSection>

@@ -41,6 +41,7 @@ interface EntityReferenceTable {
   openDetailOnCreate?: boolean;
   isInsideTemplate: boolean;
   territoryParentId?: string;
+  userCanEdit: boolean;
 }
 
 export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
@@ -52,6 +53,7 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
   openDetailOnCreate,
   isInsideTemplate,
   territoryParentId,
+  userCanEdit,
 }) => {
   // Documents query
   const {
@@ -398,6 +400,7 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
                 updateOrderFn={() => onChange(localReferences, true)}
                 visibleColumns={visibleColumns}
                 hasOrder={rows.length > 1}
+                userCanEdit={userCanEdit}
                 {...row.getRowProps()}
               />
             );
