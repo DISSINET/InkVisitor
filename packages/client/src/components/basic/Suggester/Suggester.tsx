@@ -191,16 +191,18 @@ export const Suggester: React.FC<Suggester> = ({
         }
       }
     } else if (selected > -1) {
-      const entity = suggestions[selected].entity;
-      if (entity.status !== EntityEnums.Status.Discouraged) {
-        if (!entity.isTemplate) {
-          onPick(entity);
-        } else if (entity.isTemplate && !isInsideTemplate) {
-          onPick(entity, true);
-        } else if (entity.isTemplate && isInsideTemplate) {
-          // TODO: open modal to ask use / duplicate
-          // setTempDropItem(entity);
-          setShowTemplateModal(true);
+      if (!disableEnter) {
+        const entity = suggestions[selected].entity;
+        if (entity.status !== EntityEnums.Status.Discouraged) {
+          if (!entity.isTemplate) {
+            onPick(entity);
+          } else if (entity.isTemplate && !isInsideTemplate) {
+            onPick(entity, true);
+          } else if (entity.isTemplate && isInsideTemplate) {
+            // TODO: open modal to ask use / duplicate
+            // setTempDropItem(entity);
+            setShowTemplateModal(true);
+          }
         }
       }
     } else {

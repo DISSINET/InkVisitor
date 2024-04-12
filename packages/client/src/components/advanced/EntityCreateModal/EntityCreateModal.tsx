@@ -39,12 +39,14 @@ interface EntityCreateModal {
 
   labelTyped?: string;
   categorySelected?: EntityEnums.Class;
+  languageSelected?: EntityEnums.Language;
 }
 export const EntityCreateModal: React.FC<EntityCreateModal> = ({
   closeModal,
   onMutationSuccess = () => {},
   labelTyped = "",
   categorySelected,
+  languageSelected,
 }) => {
   const [showModal, setShowModal] = useState(false);
   useEffect(() => {
@@ -57,7 +59,9 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
     categorySelected || classesAll[0]
   );
   const [selectedLanguage, setSelectedLanguage] =
-    useState<EntityEnums.Language>(EntityEnums.Language.Empty);
+    useState<EntityEnums.Language>(
+      languageSelected || EntityEnums.Language.Empty
+    );
   const [actionPos, setActionPos] = useState<EntityEnums.ActionPartOfSpeech>(
     EntityEnums.ActionPartOfSpeech.Verb
   );
@@ -81,8 +85,9 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
     },
     enabled: !!userId && api.isLoggedIn(),
   });
+
   useEffect(() => {
-    if (user) {
+    if (user && !languageSelected) {
       setSelectedLanguage(user.options.defaultLanguage);
     }
   }, [user]);
