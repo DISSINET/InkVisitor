@@ -1,7 +1,7 @@
 export * from "./Cursor"
 export * from "./Viewport"
 export * from "./Text"
-export * from "./CanvasLib"
+export * from "./Annotator"
 
 import { LoremIpsum } from "lorem-ipsum";
 

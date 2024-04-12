@@ -1,11 +1,11 @@
 import { useEffect } from "react";
 import React from 'react'
-import { CanvasLib } from "./CanvasLib";
+import { Annotator } from "./Annotator";
 import { generateText } from "./index";
 
 export const Canvas = () => {
     useEffect(() => {
-        const customWrapper = new CanvasLib(
+        const customWrapper = new Annotator(
           document.getElementById("canvas") as HTMLCanvasElement,
           generateText(100)
         );

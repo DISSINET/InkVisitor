@@ -1,17 +1,17 @@
 import { useEffect, useRef, useState } from "react";
 import React from "react";
-import { CanvasLib, example, Mode } from "@inkvisitor/canvas/src/lib";
+import { Annotator, example, Mode } from "@inkvisitor/annotator/src/lib";
 import {
   StyledCanvasWrapper,
   StyledHightlightedText,
   StyledScrollerCursor,
   StyledScrollerViewport,
-} from "./CanvasStyles";
+} from "./AnnotatorStyles";
 import { Button } from "components/basic/Button/Button";
-import { useCanvas } from "./CanvasContext";
+import { useAnnotator } from "./AnnotatorContext";
 
 export const Canvas = () => {
-  const {canvas, setCanvas } = useCanvas();
+  const {annotator, setAnnotator } = useAnnotator();
 
   const mainCanvas = useRef(null);
   const scroller = useRef(null);
@@ -23,15 +23,14 @@ export const Canvas = () => {
       return;
     }
 
-    const customCanvasWrapper = new CanvasLib(mainCanvas.current, example);
-    customCanvasWrapper.addScroller(scroller.current);
-    customCanvasWrapper.addLines(lines.current);
-    customCanvasWrapper.onSelectText(setHighlighted);
-    customCanvasWrapper.draw();
-    setCanvas(customCanvasWrapper);
+    const annotatorInstance = new Annotator(mainCanvas.current, example);
+    annotatorInstance.addScroller(scroller.current);
+    annotatorInstance.addLines(lines.current);
+    annotatorInstance.onSelectText(setHighlighted);
+    annotatorInstance.draw();
+    setAnnotator(annotatorInstance);
   }, []);
 
-  console.log(canvas)
   return (
     <div style={{ padding: "20px" }}>
       <StyledCanvasWrapper>
@@ -54,8 +53,8 @@ export const Canvas = () => {
       </StyledCanvasWrapper>
       <div style={{ marginTop: "10px" }}>Highlighted:</div>
       <StyledHightlightedText>{highlighted}</StyledHightlightedText>
-      {canvas && (
-        <Button label="Toggle raw" onClick={() => {canvas.text.setMode(canvas.text.mode === "raw"? "highlight" : "raw"); canvas.draw()}}/>
+      {annotator && (
+        <Button label="Toggle raw" onClick={() => {annotator.text.setMode(annotator.text.mode === "raw"? "highlight" : "raw"); annotator.draw()}}/>
       )}
     </div>
   );

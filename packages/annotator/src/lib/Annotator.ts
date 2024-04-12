@@ -19,9 +19,9 @@ export interface DrawingOptions {
 }
 
 /**
- * Canvas is main wrapping class around HTMLCanvasElement
+ * Annotator is main wrapping class around HTMLCanvasElement
  */
-export class CanvasLib {
+export class Annotator {
   // canvas element
   element: HTMLCanvasElement;
   // cached canvas contex

@@ -8,9 +8,9 @@ dependencies:
   '@floating-ui/react':
     specifier: ^0.26.9
     version: 0.26.9(react-dom@18.2.0)(react@18.2.0)
-  '@inkvisitor/canvas':
-    specifier: file:../canvas
-    version: file:../canvas
+  '@inkvisitor/annotator':
+    specifier: file:../annotator
+    version: file:../annotator
   '@popperjs/core':
     specifier: ^2.11.8
     version: 2.11.8
@@ -29,9 +29,9 @@ dependencies:
   axios:
     specifier: ^1.6.7
     version: 1.6.7
-  canvas:
-    specifier: link:../canvas
-    version: link:../canvas
+  annotator:
+    specifier: link:../annotator
+    version: link:../annotator
   immutability-helper:
     specifier: ^3.1.1
     version: 3.1.1
@@ -9946,9 +9946,9 @@ packages:
       use-sync-external-store: 1.2.0(react@18.2.0)
     dev: false
 
-  file:../canvas:
-    resolution: {directory: ../canvas, type: directory}
-    name: canvas
+  file:../annotator:
+    resolution: {directory: ../annotator, type: directory}
+    name: annotator
     dependencies:
       lorem-ipsum: 2.0.8
       react: 18.2.0

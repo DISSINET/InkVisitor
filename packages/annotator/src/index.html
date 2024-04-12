@@ -58,13 +58,13 @@
     <script src="bundle.js"></script>
 
     <script>
-      const customWrapper = new CanvasLib(
+      const annotator = new Annotator(
         document.getElementById("canvas"),
         example
       );
-      customWrapper.addScroller(document.getElementById("scroller"));
-      customWrapper.addLines(document.getElementById("lines"));
-      customWrapper.onHighlight((entityId) => {
+      annotator.addScroller(document.getElementById("scroller"));
+      annotator.addLines(document.getElementById("lines"));
+      annotator.onHighlight((entityId) => {
         console.log("highlighted", entityId)
         return {
           mode: "background",
@@ -73,19 +73,19 @@
           }
         }
       })
-      customWrapper.onSelectText((text) => {
+      annotator.onSelectText((text) => {
         document.getElementById("highlight-container").innerHTML = text;
       });
 
-      customWrapper.onHighlight((entity) => {
+      annotator.onHighlight((entity) => {
         document.getElementById("highlight-container").innerHTML = text;
       });
 
       document.getElementById("mode").onclick = () => {
-        customWrapper.text.setMode(customWrapper.text.mode === "raw" ? "highlight" : "raw");
-        customWrapper.draw();
+        annotator.text.setMode(annotator.text.mode === "raw" ? "highlight" : "raw");
+        annotator.draw();
       }
-      customWrapper.draw();
+      annotator.draw();
     </script>
   </body>
 </html>

@@ -1,4 +1,4 @@
-import { DrawingOptions } from "./CanvasLib";
+import { DrawingOptions } from "./Annotator";
 import Viewport from "./Viewport";
 
 // Absolute coordinates point to virtual position not limited by viewport - first line is first line of input
