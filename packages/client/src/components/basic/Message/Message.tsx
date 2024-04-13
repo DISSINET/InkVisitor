@@ -136,6 +136,23 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
         return <b>Missing part of speech attribute</b>;
       case WarningTypeEnums.PSM:
         return <b>Missing label language attribute</b>;
+
+      // T-based validations
+      case WarningTypeEnums.TVEP:
+        return <b>T-based validations: Property missing</b>;
+      case WarningTypeEnums.TVEPT:
+        return <b>T-based validations: Property wrong type</b>;
+      case WarningTypeEnums.TVEPV:
+        return <b>T-based validations: Property wrong value</b>;
+      case WarningTypeEnums.TVEC:
+        return <b>T-based validations: Classification missing</b>;
+      case WarningTypeEnums.TVECE:
+        return <b>T-based validations: Classification wrong entity</b>;
+      case WarningTypeEnums.TVER:
+        return <b>T-based validations: Reference missing</b>;
+      case WarningTypeEnums.TVERE:
+        return <b>T-based validations: Reference wrong entity</b>;
+
       default:
         return <></>;
     }
