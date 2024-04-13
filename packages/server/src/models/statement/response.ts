@@ -5,11 +5,17 @@ import {
   IProp,
   IResponseStatement,
   IStatement,
+  ITerritory,
 } from "@shared/types";
 import { OrderType } from "@shared/types/response-statement";
-import { IWarning, IWarningPosition, IWarningPositionSection } from "@shared/types/warning";
+import {
+  IWarning,
+  IWarningPosition,
+  IWarningPositionSection,
+} from "@shared/types/warning";
 
 import { ActionEntity } from "@models/action/action";
+import treeCache from "@service/treeCache";
 import { WarningTypeEnums } from "@shared/enums";
 import { InternalServerError } from "@shared/types/errors";
 import { Connection } from "rethinkdb-ts";
@@ -17,6 +23,12 @@ import { IRequest } from "src/custom_typings/request";
 import Entity from "../entity/entity";
 import { PositionRules } from "./PositionRules";
 import Statement from "./statement";
+import {
+  EProtocolTieType,
+  ITerritoryValidation,
+} from "@shared/types/territory";
+import { ResponseEntityDetail } from "@models/entity/response";
+import { getEntityClass } from "@models/factory";
 
 export class ResponseStatement extends Statement implements IResponseStatement {
   entities: { [key: string]: IEntity };
@@ -35,7 +47,7 @@ export class ResponseStatement extends Statement implements IResponseStatement {
     this.right = this.getUserRoleMode(req.getUserOrFail());
     await this.prepareEntities(req.db.connection);
     this.elementsOrders = this.prepareElementsOrders();
-    this.warnings = this.getWarnings();
+    this.warnings = await this.getWarnings(req);
   }
 
   /**
@@ -74,11 +86,13 @@ export class ResponseStatement extends Statement implements IResponseStatement {
    */
   newStatementWarning(
     warningType: WarningTypeEnums,
-    position: IWarningPosition
+    position: IWarningPosition,
+    validation?: ITerritoryValidation
   ): IWarning {
     return {
       type: warningType,
       origin: this.id,
+      validation,
       position,
     };
   }
@@ -137,6 +151,202 @@ export class ResponseStatement extends Statement implements IResponseStatement {
         }
       });
 
+    return warnings;
+  }
+
+  /**
+   * check all avalidation warnings for single entity
+   */
+  async getTValidationWarnings(req: IRequest): Promise<IWarning[]> {
+    let warnings: IWarning[] = [];
+
+    console.log("");
+    console.log("!!! VALIDATION !!!", this.id);
+
+    const parentTId = this.data.territory?.territoryId as string;
+
+    const entitiesFull: ResponseEntityDetail[] = [];
+
+    for (const ai in this.data.actants) {
+      const actant = this.data.actants[ai];
+      const entityData = this.getEntity(actant.entityId);
+      const entityModel = getEntityClass({ ...entityData });
+      const entity = new ResponseEntityDetail(entityModel);
+      await entity.prepare(req);
+
+      entitiesFull.push(entity);
+    }
+
+    if (parentTId) {
+      const lineageTIds = [parentTId, ...treeCache.tree.idMap[parentTId].path];
+
+      lineageTIds.forEach((tId) => {
+        const tEntity = this.getEntity(tId) as ITerritory;
+        const tValidations = tEntity.data.validations;
+
+        tValidations?.forEach((tValidation) => {
+          const {
+            detail,
+            entityClasses,
+            classifications,
+            tieType,
+            propType,
+            allowedClasses,
+            allowedEntities,
+          } = tValidation;
+
+          const addNewValidationWarning = (
+            entityId: string,
+            code: WarningTypeEnums
+          ) => {
+            warnings.push(
+              this.newStatementWarning(
+                code,
+                {
+                  section: IWarningPositionSection.Statement,
+                  subSection: `statement`,
+                  entityId: entityId,
+                },
+                tValidation
+              )
+            );
+          };
+
+          entitiesFull
+            .filter((entity) => {
+              // falls under entity Classes
+              if (!entityClasses || !entityClasses.length) {
+                // no entity class condition
+                return true;
+              }
+
+              return entityClasses.includes(entity.class);
+            })
+            .filter((entity) => {
+              // falls under classification condition
+              if (!classifications || !classifications.length) {
+                // there is no classification condition
+                return true;
+              }
+              const claEntities = entity.relations.CLA?.connections?.map(
+                (c) => entity.entities[c.entityIds[1]]
+              );
+
+              // at least one required classifications is fullfilled
+              return classifications.some((classCondition) =>
+                claEntities?.map((c) => c.id).includes(classCondition)
+              );
+            })
+            .forEach((entity) => {
+              // CLASSIFICATION TIE
+              console.log("to be validated", entity.label);
+              if (tieType === EProtocolTieType.Classification) {
+                if (!allowedEntities || !allowedEntities.length) {
+                  // no condition set, so we need at least one classification
+                  if (!entity.relations.CLA?.connections?.length) {
+                    addNewValidationWarning(entity.id, WarningTypeEnums.TVEC);
+                  }
+                } else {
+                  // classifications of the entity
+                  const claEntities = entity.relations.CLA?.connections?.map(
+                    (c) => entity.entities[c.entityIds[1]]
+                  );
+                  if (
+                    !allowedEntities.some((classCondition) =>
+                      claEntities?.map((c) => c.id).includes(classCondition)
+                    )
+                  ) {
+                    addNewValidationWarning(entity.id, WarningTypeEnums.TVECE);
+                  }
+                }
+              }
+
+              // REFERENCE TIE
+              else if (tieType === EProtocolTieType.Reference) {
+                const eReferences = entity.references;
+                // at least one reference (any) needs to be assigned to the E
+                if (!allowedEntities || !allowedEntities.length) {
+                  if (eReferences.length === 0) {
+                    addNewValidationWarning(entity.id, WarningTypeEnums.TVER);
+                  } else {
+                    // at least one reference needs to be of the allowed entity
+                    if (
+                      !eReferences.some((r) =>
+                        allowedEntities?.includes(r.resource)
+                      )
+                    ) {
+                      addNewValidationWarning(
+                        entity.id,
+                        WarningTypeEnums.TVERE
+                      );
+                    }
+                  }
+                }
+              }
+              // PROPERTY TIE
+              else if (tieType === EProtocolTieType.Property) {
+                // at least one property needs to be assigned to the E
+                if (
+                  (!allowedClasses || !allowedClasses.length) &&
+                  (!allowedEntities || !allowedEntities.length) &&
+                  (!propType || !propType.length)
+                ) {
+                  if (entity.props.length === 0) {
+                    addNewValidationWarning(entity.id, WarningTypeEnums.TVEP);
+                  }
+                }
+
+                // type is defined but value is empty
+                else if (
+                  propType?.length &&
+                  !allowedEntities?.length &&
+                  !allowedClasses?.length
+                ) {
+                  if (
+                    !entity.props.some((p) =>
+                      propType?.includes(p.type.entityId)
+                    )
+                  ) {
+                    addNewValidationWarning(entity.id, WarningTypeEnums.TVEPT);
+                  }
+                }
+
+                // type is defined, and value classes are defined
+                else if (propType?.length && allowedClasses?.length) {
+                  if (
+                    !entity.props.some((p) => {
+                      const propTypeEntityId = p.type.entityId;
+
+                      const propTypeEntity = this.getEntity(propTypeEntityId);
+                      const propTypeEntityClass = propTypeEntity.class;
+                      return (
+                        propType?.includes(p.type.entityId) &&
+                        allowedClasses.includes(propTypeEntityClass)
+                      );
+                    })
+                  ) {
+                    addNewValidationWarning(entity.id, WarningTypeEnums.TVEPV);
+                  }
+                }
+                // type is defined, and value entities are defined
+                else if (propType?.length && allowedEntities?.length) {
+                  if (
+                    !entity.props.some(
+                      (p) =>
+                        propType?.includes(p.type.entityId) &&
+                        allowedEntities.includes(p.value.entityId)
+                    )
+                  ) {
+                    addNewValidationWarning(entity.id, WarningTypeEnums.TVEPV);
+                  }
+                }
+              }
+            });
+        });
+      });
+    }
+
+    console.log("warnings", warnings);
     return warnings;
   }
 
@@ -235,8 +445,11 @@ export class ResponseStatement extends Statement implements IResponseStatement {
    * get a list of all warnings for actions -> actants relations
    * @returns list of warnings
    */
-  getWarnings(): IWarning[] {
+  async getWarnings(req: IRequest): Promise<IWarning[]> {
     let warnings: IWarning[] = [];
+
+    const tbasedWarnings = await this.getTValidationWarnings(req);
+    warnings = warnings.concat(tbasedWarnings);
 
     if (!this.data.actions.length) {
       warnings.push(this.newStatementWarning(WarningTypeEnums.NA, {}));
