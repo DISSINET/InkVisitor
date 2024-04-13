@@ -500,12 +500,18 @@ class Statement extends Entity implements IStatement {
       });
     });
 
-    if (this.data.territory) {
-      entitiesIds[this.data.territory.territoryId] = null;
+    // append territory lineage to the root T
+    const parentT = this.data.territory?.territoryId;
+    if (parentT) {
+      const lineageTIds = [parentT, ...treeCache.tree.idMap[parentT]?.path];
+      if (lineageTIds) {
+        lineageTIds.forEach((tid) => {
+          entitiesIds[tid] = null;
+        });
+      }
     }
 
     this.data.tags.forEach((t) => (entitiesIds[t] = null));
-
     return Object.keys(entitiesIds).filter((id) => !!id);
   }
 
