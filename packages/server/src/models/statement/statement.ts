@@ -503,7 +503,11 @@ class Statement extends Entity implements IStatement {
     // append territory lineage to the root T
     const parentT = this.data.territory?.territoryId;
     if (parentT) {
-      const lineageTIds = [parentT, ...treeCache.tree.idMap[parentT]?.path];
+      const treeCacheInstance = treeCache.tree.idMap[parentT];
+      const lineageTIds = [
+        parentT,
+        ...(treeCacheInstance ? treeCacheInstance.path : []),
+      ];
       if (lineageTIds) {
         lineageTIds.forEach((tid) => {
           entitiesIds[tid] = null;
