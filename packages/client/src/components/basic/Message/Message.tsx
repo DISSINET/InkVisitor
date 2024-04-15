@@ -10,6 +10,7 @@ import {
   StyledMessage,
   StyledMessageTValidationContent,
 } from "./MessageStyles";
+import theme from "Theme/theme";
 
 interface Message {
   warning: IWarning;
@@ -117,10 +118,21 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
       return (
         <>
           {entityClasses.map((entityClass, index) => {
-            const color = EntityColors[entityClass]?.color ?? "transparent";
+            const classItem = EntityColors[entityClass];
+            const colorName = classItem?.color ?? "transparent";
+            const color = theme.color[colorName] as string;
+
             return (
               <span key={index}>
-                <span style={{ backgroundColor: color }}>{entityClass}</span>
+                <span
+                  style={{
+                    backgroundColor: color,
+                    paddingLeft: "2px",
+                    paddingRight: "2px",
+                  }}
+                >
+                  {classItem.entityClass}
+                </span>
                 {index < entityClasses.length - 1 ? ", " : ""}
               </span>
             );
