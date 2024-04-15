@@ -1,5 +1,10 @@
 import { Placement } from "@popperjs/core";
-import { certaintyDict, languageDict } from "@shared/dictionaries";
+import {
+  actionPartOfSpeechDict,
+  certaintyDict,
+  conceptPartOfSpeechDict,
+  languageDict,
+} from "@shared/dictionaries";
 import { EntityEnums, RelationEnums } from "@shared/enums";
 import {
   EntityTooltip as EntityTooltipNamespace,
@@ -19,6 +24,7 @@ import { AiOutlineTag } from "react-icons/ai";
 import { BiCommentDetail } from "react-icons/bi";
 import { BsCardText } from "react-icons/bs";
 import { ImListNumbered } from "react-icons/im";
+import { MdOutlineLabel } from "react-icons/md";
 import {
   getEntityRelationRules,
   getShortLabelByLetterCount,
@@ -34,7 +40,6 @@ import {
   StyledRelations,
   StyledRow,
 } from "./EntityTooltipStyles";
-import { MdOutlineLabel } from "react-icons/md";
 
 interface EntityTooltip {
   // entity
@@ -45,6 +50,9 @@ interface EntityTooltip {
   detail?: string;
   text?: string;
   itemsCount?: number;
+  partOfSpeech?:
+    | EntityEnums.ActionPartOfSpeech
+    | EntityEnums.ConceptPartOfSpeech;
   // settings
   position?: Placement;
   color?: keyof ThemeColor;
@@ -64,6 +72,7 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
   detail,
   text,
   itemsCount,
+  partOfSpeech,
   // settings
   position,
   color,
@@ -110,8 +119,28 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
                 <AiOutlineTag />
               </StyledIconWrap>
               <StyledLabel>
-                <StyledBold>{label}</StyledBold>
-                {` (${languageDict.find((l) => l.value === language)?.label})`}
+                <>
+                  <StyledBold>{label}</StyledBold>
+                  {` (${languageDict.find((l) => l.value === language)?.label}${
+                    partOfSpeech ? ", " : ""
+                  }
+                  ${
+                    (entityClass === EntityEnums.Class.Action &&
+                      partOfSpeech &&
+                      actionPartOfSpeechDict.find(
+                        (i) => i.value === partOfSpeech
+                      )?.label) ||
+                    ""
+                  }
+                  ${
+                    (entityClass === EntityEnums.Class.Concept &&
+                      partOfSpeech &&
+                      conceptPartOfSpeechDict.find(
+                        (i) => i.value === partOfSpeech
+                      )?.label) ||
+                    ""
+                  })`}
+                </>
               </StyledLabel>
             </StyledRow>
             {customTooltipAttributes?.partLabel && (
