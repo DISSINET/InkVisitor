@@ -20,4 +20,13 @@ export enum WarningTypeEnums {
   PSM = "PSM", // Part of speech is empty
   LM = "LM", // Language is missing
   VETM = "VETM", // Empty valency for Action
+
+  // T-based validations
+  TVEP = "TVEP", // Property missing
+  TVEPT = "TVEPT", // Property wrong type
+  TVEPV = "TVEPV", // Property wrong value
+  TVEC = "TVEC", // Classification missing
+  TVECE = "TVECE", // Classification wrong entity
+  TVER = "TVER", // Reference missing
+  TVERE = "TVERE", // Reference wrong entity
 }

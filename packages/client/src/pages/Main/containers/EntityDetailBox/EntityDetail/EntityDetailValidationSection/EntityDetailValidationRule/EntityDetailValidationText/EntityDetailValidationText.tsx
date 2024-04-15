@@ -63,7 +63,7 @@ export const EntityDetailValidationText: React.FC<
   const renderEntityClassList = useCallback(
     (classList: EntityEnums.ExtendedClass[]) => {
       if (classList.includes(EntityEnums.Extension.Any)) {
-        return <StyledSentenceEntity key={"any"}>Any</StyledSentenceEntity>;
+        return <StyledSentenceEntity key={"any"}></StyledSentenceEntity>;
       }
       if (
         classList.includes(EntityEnums.Extension.Empty) ||

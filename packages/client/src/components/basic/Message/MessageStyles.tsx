@@ -14,3 +14,8 @@ export const StyledMessage = styled.div<StyledMessage>`
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   border: 1.5px solid ${({ theme }) => theme.color["warningBorder"]};
 `;
+
+export const StyledMessageTValidationContent = styled.div`
+  display: inline;
+  items-align: center;
+`;
