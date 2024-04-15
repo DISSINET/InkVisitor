@@ -11,18 +11,30 @@ export const StyledScrollerCursor = styled.div`
   position: absolute;
   width: 10px;
   background-color: blue;
-`
+`;
 
 export const StyledHightlightedText = styled.pre`
   padding: 10px;
   border: 1px solid black;
   margin-top: 10px;
-`
-
+`;
 
 export const StyledCanvasWrapper = styled.div`
   border: 1px solid black;
   padding: 2px;
-  display: flex; 
-`
+  display: flex;
+`;
 
+export const StyledMainCanvas = styled.canvas`
+  outline: none;
+  &.raw {
+    cursor: text;
+  }
+  &.highlight {
+    cursor: hand;
+  }
+`;
+
+export const StyledLinesCanvas = styled.canvas`
+  outline: none;
+`;

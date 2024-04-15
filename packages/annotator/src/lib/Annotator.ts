@@ -1,8 +1,9 @@
 import Viewport from "./Viewport";
 import Cursor from "./Cursor";
-import Text from "./Text";
+import Text, { Mode } from "./Text";
 import Scroller from "./Scroller";
 import { Lines } from "./Lines";
+import { start } from "repl";
 
 export interface HighlightSchema {
   mode: "background";
@@ -214,7 +215,7 @@ export class Annotator {
    */
   onMouseDown(e: MouseEvent) {
     this.cursor.setPosition(e, this.lineHeight, this.charWidth);
-    this.cursor.highlight(this.viewport.lineStart);
+    this.cursor.selectArea(this.viewport.lineStart);
     this.draw();
   }
 
@@ -233,9 +234,9 @@ export class Annotator {
    * @param e
    */
   onMouseMove(e: MouseEvent) {
-    if (this.cursor.isHighlighting()) {
+    if (this.cursor.isSelecting()) {
       this.cursor.setPosition(e, this.lineHeight, this.charWidth);
-      this.cursor.highlight(this.viewport.lineStart);
+      this.cursor.selectArea(this.viewport.lineStart);
       this.draw();
     }
   }
@@ -258,6 +259,38 @@ export class Annotator {
 
   addLines(canvasElement: HTMLCanvasElement): void {
     this.lines = new Lines(canvasElement, this.lineHeight, this.charWidth);
+  }
+
+  getAnnotations(): string[] {
+    const segmentPosition = this.text.cursorToIndex(this.viewport, this.cursor);
+    if (!segmentPosition) {
+      return [];
+    }
+
+    // remaining opened tags - true = open, false = closed
+    const tags: Record<string, boolean> = {};
+
+    for (let i = 0; i <= segmentPosition.segmentIndex; i++) {
+      const segment = this.text.segments[i];
+      if (i !== segmentPosition.segmentIndex) {
+        for (const tag of segment.openingTags) {
+          tags[tag.tag] = true;
+        }
+        for (const tag of segment.closingTags) {
+          tags[tag.tag] = false;
+        }
+      } else {
+        const [segOpened, segClosed] = segment.getTagsForPosition(segmentPosition);
+        for (const tag of segOpened) {
+          tags[tag.tag] = true;
+        }
+        for (const tag of segClosed) {
+          tags[tag.tag] = false;
+        }
+      }
+    }  
+
+    return Object.keys(tags).filter(tag => tags[tag])
   }
 
   /**
@@ -315,12 +348,53 @@ export class Annotator {
       });
     }
 
-    if (this.onSelectTextCb && this.cursor.isHighlighted()) {
-      const [start, end] = this.cursor.getHighlighted();
+    if (this.onSelectTextCb && this.cursor.isSelected()) {
+      const [start, end] = this.cursor.getSelected();
       if (start && end) {
         this.onSelectTextCb(this.text.getRangeText(start, end));
       }
     }
+
+    if (this.onHighlightCb) {
+      const annotated = this.getAnnotations();
+      if (annotated.length > 0) {
+        const tag = annotated.pop() as string
+        const highlight = this.onHighlightCb(tag);
+        if (highlight) {
+          const [startLine, endLine] = this.text.getTagPosition(tag)
+          if (startLine && endLine) {
+            this.ctx.strokeStyle = highlight.style.color;
+
+            for (let currentYLine = startLine.yLine; currentYLine <= endLine.yLine; currentYLine++) {
+              if (this.viewport.lineStart <= currentYLine && this.viewport.lineEnd >= currentYLine) {
+                this.ctx.beginPath();
+
+                const yPos = currentYLine - this.viewport.lineStart + this.lineHeight;
+                if (currentYLine === startLine.yLine) {
+                  this.ctx.moveTo(startLine.xLine, yPos);
+                } else if (currentYLine === endLine.yLine) {
+                  this.ctx.moveTo(endLine.xLine, yPos);
+                } else {
+                  this.ctx.moveTo(0, yPos);
+                }
+
+                if (startLine.yLine === endLine.yLine) {
+                  console.log(endLine.xLine * this.charWidth, yPos)
+                  this.ctx.lineTo(endLine.xLine * this.charWidth, yPos);
+                } else if (currentYLine === startLine.yLine) {
+                  this.ctx.lineTo(this.charWidth, yPos);
+                } else if (currentYLine === endLine.yLine) {
+                  this.ctx.lineTo(endLine.xLine * this.charWidth, yPos);
+                }
+
+                this.ctx.stroke();
+              }
+            }
+          }
+        }
+      }
+    }
+
     if (this.scroller) {
       this.scroller.update(
         this.viewport.lineStart,
@@ -331,5 +405,14 @@ export class Annotator {
     if (this.lines) {
       this.lines.draw(this.viewport);
     }
+  }
+
+  setMode(mode: Mode) {
+    this.element.classList.remove(this.text.mode)
+    this.element.classList.add(mode)
+
+    this.text.mode = mode;
+    this.text.prepareSegments();
+    this.text.calculateLines();
   }
 }

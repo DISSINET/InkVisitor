@@ -82,7 +82,7 @@
       });
 
       document.getElementById("mode").onclick = () => {
-        annotator.text.setMode(annotator.text.mode === "raw" ? "highlight" : "raw");
+        annotator.setMode(annotator.text.mode === "raw" ? "highlight" : "raw");
         annotator.draw();
       }
       annotator.draw();

@@ -19,9 +19,9 @@ export default class Cursor implements IRelativeCoordinates {
   yLine: number = -1;
 
   // highlighted area must use absolute coordinates - highlighted area stays in position while scrolling
-  private highlighting: boolean = false;
-  private highlightStart?: IAbsCoordinates;
-  private highlightEnd?: IAbsCoordinates;
+  private selecting: boolean = false;
+  private selectStart?: IAbsCoordinates;
+  private selectEnd?: IAbsCoordinates;
 
   // Width of cursor point in px
   static Width = 3;
@@ -44,40 +44,40 @@ export default class Cursor implements IRelativeCoordinates {
   }
 
   /**
-   * isHighlighting is predicate for testing if any mouse-move event should update highlighted area (click+move)
+   * isSelecting is predicate for testing if any mouse-move event should update selected area (click+move)
    * @returns
    */
-  isHighlighting(): boolean {
-    return this.highlighting;
+  isSelecting(): boolean {
+    return this.selecting;
   }
 
   /**
-   * isHighlighted is predicate for testing if highlighted area has been set - should be drawn
+   * isSelected is predicate for testing if selected area has been set - should be drawn
    * @returns
    */
-  isHighlighted(): boolean {
-    return !!this.highlightStart && !!this.highlightEnd;
+  isSelected(): boolean {
+    return !!this.selectStart && !!this.selectEnd;
   }
 
   /**
-   * getHighlighted is getter for absolute highlighted coordinates
+   * getSelected is getter for absolute selected coordinates
    * @returns
    */
-  getHighlighted(): [IAbsCoordinates | undefined, IAbsCoordinates | undefined] {
-    return [this.highlightStart, this.highlightEnd];
+  getSelected(): [IAbsCoordinates | undefined, IAbsCoordinates | undefined] {
+    return [this.selectStart, this.selectEnd];
   }
 
   /**
-   * highlight updates highlighted area's coordinates, either both start/end (set initial position) or just end (moving)
+   * selectArea updates selected area's coordinates, either both start/end (set initial position) or just end (moving)
    * @param yOffset
    */
-  highlight(yOffset: number) {
-    if (!this.highlighting) {
-      this.highlightStart = { xLine: this.xLine, yLine: yOffset + this.yLine };
-      this.highlightEnd = { xLine: this.xLine, yLine: yOffset + this.yLine };
-      this.highlighting = true;
+  selectArea(yOffset: number) {
+    if (!this.selecting) {
+      this.selectStart = { xLine: this.xLine, yLine: yOffset + this.yLine };
+      this.selectEnd = { xLine: this.xLine, yLine: yOffset + this.yLine };
+      this.selecting = true;
     } else {
-      this.highlightEnd = { xLine: this.xLine, yLine: yOffset + this.yLine };
+      this.selectEnd = { xLine: this.xLine, yLine: yOffset + this.yLine };
     }
   }
 
@@ -85,7 +85,7 @@ export default class Cursor implements IRelativeCoordinates {
    * endHighlight marks final position for highlighted area by setting control flag to false
    */
   endHighlight() {
-    this.highlighting = false;
+    this.selecting = false;
   }
 
   /**
@@ -161,7 +161,7 @@ export default class Cursor implements IRelativeCoordinates {
       lineHeight
     );
 
-    let [hStart, hEnd] = this.getHighlighted();
+    let [hStart, hEnd] = this.getSelected();
     if (hStart && hEnd) {
       if (hStart.yLine > hEnd.yLine) {
         const tmpSwitch = hStart;
