@@ -29,6 +29,7 @@ import {
 } from "@shared/types/territory";
 import { ResponseEntityDetail } from "@models/entity/response";
 import { getEntityClass } from "@models/factory";
+import { findEntityById } from "@service/shorthands";
 
 export class ResponseStatement extends Statement implements IResponseStatement {
   entities: { [key: string]: IEntity };
@@ -104,6 +105,7 @@ export class ResponseStatement extends Statement implements IResponseStatement {
    */
   getEntity(id: string): IEntity {
     const entity = this.entities[id];
+
     if (!entity) {
       throw new InternalServerError(`Entity ${id} not preloaded`);
     }
@@ -167,11 +169,17 @@ export class ResponseStatement extends Statement implements IResponseStatement {
 
     const entitiesFull: ResponseEntityDetail[] = [];
 
-    for (const ai in this.data.actants) {
-      const actant = this.data.actants[ai];
-      const entityData = this.getEntity(actant.entityId);
+    const allEntities = [
+      ...this.data.actants.map((a) => a.entityId),
+      ...this.data.actions.map((a) => a.actionId),
+    ];
+
+    for (const ai in allEntities) {
+      const entityId = allEntities[ai];
+      const entityData = this.getEntity(entityId);
       const entityModel = getEntityClass({ ...entityData });
       const entity = new ResponseEntityDetail(entityModel);
+
       await entity.prepare(req);
 
       entitiesFull.push(entity);
@@ -180,11 +188,11 @@ export class ResponseStatement extends Statement implements IResponseStatement {
     if (parentTId) {
       const lineageTIds = [parentTId, ...treeCache.tree.idMap[parentTId].path];
 
-      lineageTIds.forEach((tId) => {
+      for (const tId of lineageTIds) {
         const tEntity = this.getEntity(tId) as ITerritory;
         const tValidations = tEntity.data.validations;
 
-        tValidations?.forEach((tValidation) => {
+        for (const tValidation of tValidations ?? []) {
           const {
             detail,
             entityClasses,
@@ -212,7 +220,7 @@ export class ResponseStatement extends Statement implements IResponseStatement {
             );
           };
 
-          entitiesFull
+          const entitiesToCheck = entitiesFull
             .filter((entity) => {
               // falls under entity Classes
               if (!entityClasses || !entityClasses.length) {
@@ -236,117 +244,119 @@ export class ResponseStatement extends Statement implements IResponseStatement {
               return classifications.some((classCondition) =>
                 claEntities?.map((c) => c.id).includes(classCondition)
               );
-            })
-            .forEach((entity) => {
-              // CLASSIFICATION TIE
-              console.log("to be validated", entity.label);
-              if (tieType === EProtocolTieType.Classification) {
-                if (!allowedEntities || !allowedEntities.length) {
-                  // no condition set, so we need at least one classification
-                  if (!entity.relations.CLA?.connections?.length) {
-                    addNewValidationWarning(entity.id, WarningTypeEnums.TVEC);
-                  }
-                } else {
-                  // classifications of the entity
-                  const claEntities = entity.relations.CLA?.connections?.map(
-                    (c) => entity.entities[c.entityIds[1]]
-                  );
-                  if (
-                    !allowedEntities.some((classCondition) =>
-                      claEntities?.map((c) => c.id).includes(classCondition)
-                    )
-                  ) {
-                    addNewValidationWarning(entity.id, WarningTypeEnums.TVECE);
-                  }
-                }
-              }
-
-              // REFERENCE TIE
-              else if (tieType === EProtocolTieType.Reference) {
-                const eReferences = entity.references;
-                // at least one reference (any) needs to be assigned to the E
-                if (!allowedEntities || !allowedEntities.length) {
-                  if (eReferences.length === 0) {
-                    addNewValidationWarning(entity.id, WarningTypeEnums.TVER);
-                  } else {
-                    // at least one reference needs to be of the allowed entity
-                    if (
-                      !eReferences.some((r) =>
-                        allowedEntities?.includes(r.resource)
-                      )
-                    ) {
-                      addNewValidationWarning(
-                        entity.id,
-                        WarningTypeEnums.TVERE
-                      );
-                    }
-                  }
-                }
-              }
-              // PROPERTY TIE
-              else if (tieType === EProtocolTieType.Property) {
-                // at least one property needs to be assigned to the E
-                if (
-                  (!allowedClasses || !allowedClasses.length) &&
-                  (!allowedEntities || !allowedEntities.length) &&
-                  (!propType || !propType.length)
-                ) {
-                  if (entity.props.length === 0) {
-                    addNewValidationWarning(entity.id, WarningTypeEnums.TVEP);
-                  }
-                }
-
-                // type is defined but value is empty
-                else if (
-                  propType?.length &&
-                  !allowedEntities?.length &&
-                  !allowedClasses?.length
-                ) {
-                  if (
-                    !entity.props.some((p) =>
-                      propType?.includes(p.type.entityId)
-                    )
-                  ) {
-                    addNewValidationWarning(entity.id, WarningTypeEnums.TVEPT);
-                  }
-                }
-
-                // type is defined, and value classes are defined
-                else if (propType?.length && allowedClasses?.length) {
-                  if (
-                    !entity.props.some((p) => {
-                      const propTypeEntityId = p.type.entityId;
-
-                      const propTypeEntity = this.getEntity(propTypeEntityId);
-                      const propTypeEntityClass = propTypeEntity.class;
-                      return (
-                        propType?.includes(p.type.entityId) &&
-                        allowedClasses.includes(propTypeEntityClass)
-                      );
-                    })
-                  ) {
-                    addNewValidationWarning(entity.id, WarningTypeEnums.TVEPV);
-                  }
-                }
-                // type is defined, and value entities are defined
-                else if (propType?.length && allowedEntities?.length) {
-                  if (
-                    !entity.props.some(
-                      (p) =>
-                        propType?.includes(p.type.entityId) &&
-                        allowedEntities.includes(p.value.entityId)
-                    )
-                  ) {
-                    addNewValidationWarning(entity.id, WarningTypeEnums.TVEPV);
-                  }
-                }
-              }
             });
-        });
-      });
+
+          for (const ei in entitiesToCheck) {
+            const entity = entitiesToCheck[ei];
+            // CLASSIFICATION TIE
+            if (tieType === EProtocolTieType.Classification) {
+              if (!allowedEntities || !allowedEntities.length) {
+                // no condition set, so we need at least one classification
+                if (!entity.relations.CLA?.connections?.length) {
+                  addNewValidationWarning(entity.id, WarningTypeEnums.TVEC);
+                }
+              } else {
+                // classifications of the entity
+                const claEntities = entity.relations.CLA?.connections?.map(
+                  (c) => entity.entities[c.entityIds[1]]
+                );
+                if (
+                  !allowedEntities.some((classCondition) =>
+                    claEntities?.map((c) => c.id).includes(classCondition)
+                  )
+                ) {
+                  addNewValidationWarning(entity.id, WarningTypeEnums.TVECE);
+                }
+              }
+            }
+
+            // REFERENCE TIE
+            else if (tieType === EProtocolTieType.Reference) {
+              const eReferences = entity.references;
+              // at least one reference (any) needs to be assigned to the E
+              if (!allowedEntities || !allowedEntities.length) {
+                if (eReferences.length === 0) {
+                  addNewValidationWarning(entity.id, WarningTypeEnums.TVER);
+                }
+              } else {
+                // at least one reference needs to be of the allowed entity
+                if (
+                  !eReferences.some((r) =>
+                    allowedEntities?.includes(r.resource)
+                  )
+                ) {
+                  addNewValidationWarning(entity.id, WarningTypeEnums.TVERE);
+                }
+              }
+            }
+
+            // PROPERTY TIE
+            else if (tieType === EProtocolTieType.Property) {
+              // at least one property needs to be assigned to the E
+              if (
+                (!allowedClasses || !allowedClasses.length) &&
+                (!allowedEntities || !allowedEntities.length) &&
+                (!propType || !propType.length)
+              ) {
+                if (entity.props.length === 0) {
+                  addNewValidationWarning(entity.id, WarningTypeEnums.TVEP);
+                }
+              }
+
+              // type is defined but value is empty
+              else if (
+                propType?.length &&
+                !allowedEntities?.length &&
+                !allowedClasses?.length
+              ) {
+                if (
+                  !entity.props.some((p) => propType?.includes(p.type.entityId))
+                ) {
+                  addNewValidationWarning(entity.id, WarningTypeEnums.TVEPT);
+                }
+              }
+
+              // type is defined, and value classes are defined
+              else if (propType?.length && allowedClasses?.length) {
+                let passed = true;
+                for (const pi in entity.props) {
+                  const p = entity.props[pi];
+                  const propValueEntityId = p.value.entityId;
+                  const propValueEntity = await findEntityById(
+                    req.db,
+                    propValueEntityId
+                  );
+                  console.log(allowedClasses, propValueEntity);
+                  if (
+                    propType?.includes(p.type.entityId) &&
+                    !allowedClasses?.includes(propValueEntity.class)
+                  ) {
+                    passed = false;
+                  }
+                }
+                if (!passed) {
+                  addNewValidationWarning(entity.id, WarningTypeEnums.TVEPV);
+                }
+              }
+              // type is defined, and value entities are defined
+              else if (propType?.length && allowedEntities?.length) {
+                console.log(entity.props, propType, allowedEntities);
+                if (
+                  !entity.props.some(
+                    (p) =>
+                      propType?.includes(p.type.entityId) &&
+                      allowedEntities.includes(p.value.entityId)
+                  )
+                ) {
+                  addNewValidationWarning(entity.id, WarningTypeEnums.TVEPV);
+                }
+              }
+            }
+          }
+        }
+      }
     }
 
-    console.log("warnings", warnings);
     return warnings;
   }
 
@@ -577,4 +587,7 @@ export class ResponseStatement extends Statement implements IResponseStatement {
       return a.order - b.order;
     });
   }
+}
+function findEntity(propValueEntityId: string) {
+  throw new Error("Function not implemented.");
 }

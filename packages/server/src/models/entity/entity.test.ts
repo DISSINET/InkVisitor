@@ -3,6 +3,7 @@ import { Db } from "@service/rethink";
 import Entity from "./entity";
 import Statement, {
   StatementActant,
+  StatementAction,
   StatementTerritory,
 } from "@models/statement/statement";
 import { clean } from "@modules/common.test";
@@ -101,7 +102,7 @@ describe("test Entity.beforeSave", () => {
         props: [
           new Prop({
             type: new PropSpec({
-              entityId: notTpl.id
+              entityId: notTpl.id,
             }),
           }),
         ],
@@ -128,7 +129,7 @@ describe("test Entity.beforeSave", () => {
         props: [
           new Prop({
             type: new PropSpec({
-              entityId: tpl.id
+              entityId: tpl.id,
             }),
           }),
         ],
