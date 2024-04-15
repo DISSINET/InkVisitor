@@ -52,7 +52,7 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
   }
   function renderValidationLabel(warning: IWarning): JSX.Element {
     if (warning.validation?.detail) {
-      return <span>[warning.validation?.detail]</span>;
+      return <span>[{warning.validation?.detail}]</span>;
     } else {
       return <></>;
     }
@@ -179,8 +179,8 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
           <span>
             T-based validations: Entity{" "}
             {renderEntityTags([warning?.position?.entityId])} is missing a
-            required property with{" "}
-            {renderEntityTags(warning.validation?.propType ?? [])}{" "}
+            required property with type{" "}
+            {renderEntityTags(warning.validation?.propType ?? [])}
             {renderValidationLabel(warning)}
           </span>
         );
