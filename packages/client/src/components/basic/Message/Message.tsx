@@ -1,9 +1,15 @@
 import { WarningTypeEnums } from "@shared/enums";
 import { IEntity, IWarning } from "@shared/types";
+import api from "api";
+import { EntityTag } from "components/advanced";
 import React, { useEffect, useState } from "react";
 import { TiWarningOutline } from "react-icons/ti";
+import { EntityColors } from "types";
 import { getShortLabelByLetterCount } from "utils/utils";
-import { StyledMessage } from "./MessateStyles";
+import {
+  StyledMessage,
+  StyledMessageTValidationContent,
+} from "./MessageStyles";
 
 interface Message {
   warning: IWarning;
@@ -18,6 +24,46 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
     a2: "Actant2",
     pa: "Pseudo-Actant",
   };
+
+  const [extendedEntities, setExtendedEntities] = useState<
+    Record<string, IEntity>
+  >(entities ?? {});
+
+  useEffect((): void => {
+    const entitiesOut = [];
+    const newEntityIds: string[] = [];
+
+    async function getEntities(eids: string[]) {
+      const extractedEntities: Record<string, IEntity> = { ...entities };
+      for (const eid of eids) {
+        const entityRes = await api.entitiesGet(eid);
+        if (entityRes?.data && !entities?.[eid]) {
+          extractedEntities[eid] = entityRes.data;
+        }
+      }
+      setExtendedEntities(extractedEntities);
+    }
+
+    const isInEntities = (eid: string) => {
+      return entities && entities[eid] ? true : false;
+    };
+
+    warning?.validation?.propType?.forEach((eid) => {
+      if (eid && !isInEntities(eid)) {
+        newEntityIds.push(eid);
+      }
+    });
+
+    warning?.validation?.allowedEntities?.forEach((eid) => {
+      if (eid && !isInEntities(eid)) {
+        newEntityIds.push(eid);
+      }
+    });
+
+    if (newEntityIds.length > 0) {
+      getEntities(newEntityIds);
+    }
+  }, [warning, entities]);
 
   const [entity, setEntity] = useState<IEntity | undefined>(undefined);
 
@@ -37,28 +83,57 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
       <>
         {entityIds.map((eid) => {
           if (eid) {
-            const entity = entities?.[eid];
-            return (
-              <span key={eid}>
-                <b>{`<${entity ? entity.label : eid}>`}</b>{" "}
-              </span>
-            );
-          } else {
-            return <></>;
+            const entity = extendedEntities?.[eid];
+            if (entity) {
+              return (
+                <div style={{ marginRight: "2px", display: "inline-flex" }}>
+                  <EntityTag key={entity.id} entity={entity} />
+                </div>
+              );
+            }
           }
+          return <>{eid}</>;
         })}
       </>
     );
   }
   function renderValidationLabel(warning: IWarning): JSX.Element {
     if (warning.validation?.detail) {
-      return <span>[{warning.validation?.detail}]</span>;
+      return (
+        <span>
+          {" "}
+          [<i>{warning.validation?.detail}</i>]
+        </span>
+      );
     } else {
       return <></>;
     }
   }
 
-  function getWarningMessage({ type, position }: IWarning): JSX.Element {
+  function renderEntityClasses(
+    entityClasses: string[] | undefined
+  ): JSX.Element {
+    if (entityClasses) {
+      return (
+        <>
+          {entityClasses.map((entityClass, index) => {
+            const color = EntityColors[entityClass]?.color ?? "transparent";
+            return (
+              <span key={index}>
+                <span style={{ backgroundColor: color }}>{entityClass}</span>
+                {index < entityClasses.length - 1 ? ", " : ""}
+              </span>
+            );
+          })}
+        </>
+      );
+    } else {
+      return <></>;
+    }
+  }
+
+  function getWarningMessage(): JSX.Element {
+    const { type, position } = warning;
     const positionName = position?.subSection
       ? ` - ${positionObject[position.subSection]}`
       : "";
@@ -168,63 +243,73 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
       // T-based validations
       case WarningTypeEnums.TVEP:
         return (
-          <span>
-            T-based validations: Entity{" "}
+          <StyledMessageTValidationContent>
             {renderEntityTags([warning?.position?.entityId])} should have a
             property {renderValidationLabel(warning)}
-          </span>
+          </StyledMessageTValidationContent>
         );
       case WarningTypeEnums.TVEPT:
         return (
-          <span>
-            T-based validations: Entity{" "}
+          <StyledMessageTValidationContent>
+            T-based validations:
             {renderEntityTags([warning?.position?.entityId])} is missing a
             required property with type{" "}
             {renderEntityTags(warning.validation?.propType ?? [])}
             {renderValidationLabel(warning)}
-          </span>
+          </StyledMessageTValidationContent>
         );
       case WarningTypeEnums.TVEPV:
+        const classAllowed =
+          warning.validation?.allowedClasses &&
+          warning.validation?.allowedClasses.length > 0;
         return (
-          <span>
-            T-based validations: Entity{" "}
+          <StyledMessageTValidationContent>
             {renderEntityTags([warning?.position?.entityId])} has a wrong
-            property value ([value-label]) assigned to [class-label]{" "}
+            property type {renderEntityTags(warning.validation?.propType ?? [])}
+            {classAllowed && (
+              <>
+                - should be of type{" "}
+                {renderEntityClasses(warning.validation?.allowedClasses)}
+              </>
+            )}
+            {!classAllowed && (
+              <>
+                - should be of values{" "}
+                {renderEntityTags(warning.validation?.allowedEntities ?? [])}
+              </>
+            )}
             {renderValidationLabel(warning)}
-          </span>
+          </StyledMessageTValidationContent>
         );
       case WarningTypeEnums.TVEC:
         return (
-          <span>
-            T-based validations: Entity{" "}
+          <StyledMessageTValidationContent>
             {renderEntityTags([warning?.position?.entityId])} should have a
             classification {renderValidationLabel(warning)}
-          </span>
+          </StyledMessageTValidationContent>
         );
       case WarningTypeEnums.TVECE:
         return (
-          <span>
-            T-based validations: Entity{" "}
+          <StyledMessageTValidationContent>
             {renderEntityTags([warning?.position?.entityId])} is not classified
-            to valid entity [classification-label]{" "}
+            with valid entity{" "}
+            {renderEntityClasses(warning.validation?.allowedClasses)}{" "}
             {renderValidationLabel(warning)}
-          </span>
+          </StyledMessageTValidationContent>
         );
       case WarningTypeEnums.TVER:
         return (
-          <span>
-            T-based validations: Entity{" "}
+          <StyledMessageTValidationContent>
             {renderEntityTags([warning?.position?.entityId])} should have a
             reference {renderValidationLabel(warning)}
-          </span>
+          </StyledMessageTValidationContent>
         );
       case WarningTypeEnums.TVERE:
         return (
-          <span>
-            T-based validations: Entity{" "}
+          <StyledMessageTValidationContent>
             {renderEntityTags([warning?.position?.entityId])} is not referenced
             to a valid entity {renderValidationLabel(warning)}
-          </span>
+          </StyledMessageTValidationContent>
         );
 
       default:
@@ -237,7 +322,7 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
       <div style={{ width: "3rem" }}>
         <TiWarningOutline size={20} style={{ marginRight: "0.5rem" }} />
       </div>
-      {getWarningMessage(warning)}
+      {getWarningMessage()}
     </StyledMessage>
   );
 };
