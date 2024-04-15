@@ -109,6 +109,12 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
     enabled: api.isLoggedIn() && !!entityId && allowFetch,
   });
 
+  const getActionPartOfSpeech = () =>
+    actionPartOfSpeechDict.find((i) => i.value === partOfSpeech)?.label ?? "";
+
+  const getConceptPartOfSpeech = () =>
+    conceptPartOfSpeechDict.find((i) => i.value === partOfSpeech)?.label ?? "";
+
   const renderEntityInfo = useMemo(
     () => (
       <>
@@ -121,25 +127,16 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
               <StyledLabel>
                 <>
                   <StyledBold>{label}</StyledBold>
-                  {` (${languageDict.find((l) => l.value === language)?.label}${
-                    partOfSpeech ? ", " : ""
-                  }
-                  ${
-                    (entityClass === EntityEnums.Class.Action &&
-                      partOfSpeech &&
-                      actionPartOfSpeechDict.find(
-                        (i) => i.value === partOfSpeech
-                      )?.label) ||
-                    ""
-                  }
-                  ${
-                    (entityClass === EntityEnums.Class.Concept &&
-                      partOfSpeech &&
-                      conceptPartOfSpeechDict.find(
-                        (i) => i.value === partOfSpeech
-                      )?.label) ||
-                    ""
-                  })`}
+                  {" ("}
+                  {languageDict.find((l) => l.value === language)?.label}
+                  {partOfSpeech ? ", " : ""}
+                  {entityClass === EntityEnums.Class.Action &&
+                    partOfSpeech &&
+                    getActionPartOfSpeech()}
+                  {entityClass === EntityEnums.Class.Concept &&
+                    partOfSpeech &&
+                    getConceptPartOfSpeech()}
+                  {")"}
                 </>
               </StyledLabel>
             </StyledRow>
