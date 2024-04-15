@@ -19,6 +19,9 @@ interface AttributeButtonGroup {
   // currently means no horizontal margin
   noMargin?: boolean;
   paddingX?: boolean;
+
+  fullSizeDisabled?: boolean;
+  disabledBtnsTooltip?: string;
 }
 
 export const AttributeButtonGroup: React.FC<AttributeButtonGroup> = ({
@@ -26,19 +29,25 @@ export const AttributeButtonGroup: React.FC<AttributeButtonGroup> = ({
   disabled = false,
   noMargin = false,
   paddingX = false,
+  fullSizeDisabled = false,
+  disabledBtnsTooltip,
 }) => {
   return (
     <StyledWrap>
-      {disabled ? (
+      {disabled && !fullSizeDisabled ? (
         <StyledButtonWrap $leftMargin={!noMargin} $rightMargin={!noMargin}>
-          <Button disabled label={options.find((o) => o.selected)?.longValue} />
+          <Button
+            disabled
+            radiusLeft
+            radiusRight
+            label={options.find((o) => o.selected)?.longValue}
+          />
         </StyledButtonWrap>
       ) : (
         <StyledPropButtonGroup
           $leftMargin={!noMargin}
           $rightMargin={!noMargin}
           $border
-          $round
         >
           {options.map((option, oi) => {
             const firstInRow = oi === 0;
@@ -46,6 +55,7 @@ export const AttributeButtonGroup: React.FC<AttributeButtonGroup> = ({
             return (
               <Button
                 key={oi}
+                disabled={disabled && !option.selected}
                 label={
                   option.selected
                     ? option.longValue

@@ -105,4 +105,5 @@ export const StyledAiOutlineWarning = styled(AiOutlineWarning)`
 export const StyledDash = styled.div`
   font-size: ${({ theme }) => theme.fontSize["base"]};
   color: ${({ theme }) => theme.color["black"]};
+  padding-left: 0.3rem;
 `;

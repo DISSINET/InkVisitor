@@ -234,6 +234,7 @@ export const EntityDetailValencySection: React.FC<
               handleMultiSelected(selectedId, relationType);
             }}
             excludedActantIds={usedEntityIds}
+            disabled={!userCanEdit}
           />
         </StyledLabelInputWrapper>
         <StyledRelationsWrapper>
@@ -251,6 +252,7 @@ export const EntityDetailValencySection: React.FC<
               hasOrder={relationRule.order && currentRelations.length > 1}
               moveRow={moveRow}
               updateOrderFn={updateOrderFn}
+              userCanEdit={userCanEdit}
             />
           ))}
         </StyledRelationsWrapper>

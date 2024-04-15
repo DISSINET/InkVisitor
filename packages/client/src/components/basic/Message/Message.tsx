@@ -247,10 +247,12 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
         );
       case WarningTypeEnums.MAEE:
         return <b>Missing Action/event equivalent</b>;
+      
       case WarningTypeEnums.LM:
-        return <b>Missing part of speech attribute</b>;
-      case WarningTypeEnums.PSM:
         return <b>Missing label language attribute</b>;
+        
+      case WarningTypeEnums.PSM:
+        return <b>Missing part of speech attribute</b>;
 
       // T-based validations
       case WarningTypeEnums.TVEP:
@@ -323,7 +325,6 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
             to a valid entity {renderValidationLabel(warning)}
           </StyledMessageTValidationContent>
         );
-
       default:
         return <></>;
     }

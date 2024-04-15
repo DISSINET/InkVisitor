@@ -1,4 +1,4 @@
-import { EntityEnums } from "@shared/enums";
+import { EntityEnums, UserEnums } from "@shared/enums";
 import { IEntity, IReference } from "@shared/types";
 import { useQuery } from "@tanstack/react-query";
 import { excludedSuggesterEntities } from "Theme/constants";
@@ -22,6 +22,7 @@ import { CellProps, Column, Row, useTable } from "react-table";
 import { deepCopy, normalizeURL } from "utils/utils";
 import { EntityReferenceTableRow } from "./EntityReferenceTableRow";
 import {
+  StyledGrid,
   StyledReferenceValuePartLabel,
   StyledReferencesListButtons,
   StyledTable,
@@ -40,6 +41,7 @@ interface EntityReferenceTable {
   openDetailOnCreate?: boolean;
   isInsideTemplate: boolean;
   territoryParentId?: string;
+  userCanEdit: boolean;
 }
 
 export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
@@ -51,6 +53,7 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
   openDetailOnCreate,
   isInsideTemplate,
   territoryParentId,
+  userCanEdit,
 }) => {
   // Documents query
   const {
@@ -150,7 +153,7 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
           const resourceEntity = entities[reference.resource];
 
           return (
-            <>
+            <StyledGrid>
               {resourceEntity ? (
                 <EntityDropzone
                   onSelected={(newSelectedId: string) => {
@@ -161,38 +164,38 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
                   isInsideTemplate={isInsideTemplate}
                   territoryParentId={territoryParentId}
                   excludedActantIds={[resourceEntity.id]}
+                  disabled={disabled}
                 >
-                  <EntityTag
-                    entity={resourceEntity}
-                    fullWidth
-                    unlinkButton={
-                      !disabled && {
-                        onClick: () => {
-                          handleChangeResource(reference.id, "");
-                        },
-                        tooltipLabel: "unlink resource",
+                  <>
+                    <EntityTag
+                      entity={resourceEntity}
+                      fullWidth
+                      unlinkButton={
+                        !disabled && {
+                          onClick: () => {
+                            handleChangeResource(reference.id, "");
+                          },
+                          tooltipLabel: "unlink resource",
+                        }
                       }
-                    }
-                  />
+                    />
+                  </>
                 </EntityDropzone>
               ) : (
-                !disabled && (
-                  <div>
-                    <EntitySuggester
-                      openDetailOnCreate={openDetailOnCreate}
-                      territoryActants={[]}
-                      onSelected={(newSelectedId) => {
-                        handleChangeResource(reference.id, newSelectedId, true);
-                      }}
-                      disableTemplatesAccept
-                      categoryTypes={[EntityEnums.Class.Resource]}
-                      isInsideTemplate={isInsideTemplate}
-                      territoryParentId={territoryParentId}
-                    />
-                  </div>
-                )
+                <EntitySuggester
+                  openDetailOnCreate={openDetailOnCreate}
+                  territoryActants={[]}
+                  onSelected={(newSelectedId) => {
+                    handleChangeResource(reference.id, newSelectedId, true);
+                  }}
+                  disableTemplatesAccept
+                  categoryTypes={[EntityEnums.Class.Resource]}
+                  isInsideTemplate={isInsideTemplate}
+                  territoryParentId={territoryParentId}
+                  disabled={disabled}
+                />
               )}
-            </>
+            </StyledGrid>
           );
         },
       },
@@ -204,7 +207,7 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
           const valueEntity = entities[reference.value];
 
           return (
-            <div style={{ display: "flex", alignItems: "center" }}>
+            <StyledGrid>
               {valueEntity ? (
                 <EntityDropzone
                   onSelected={(newSelectedId: string) => {
@@ -215,6 +218,7 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
                   isInsideTemplate={isInsideTemplate}
                   territoryParentId={territoryParentId}
                   excludedActantIds={[valueEntity.id]}
+                  disabled={disabled}
                 >
                   <EntityTag
                     entity={valueEntity}
@@ -236,24 +240,21 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
                   />
                 </EntityDropzone>
               ) : (
-                !disabled && (
-                  <div>
-                    <EntitySuggester
-                      placeholder={resourceEntity?.data?.partValueLabel}
-                      excludedEntityClasses={excludedSuggesterEntities}
-                      openDetailOnCreate={openDetailOnCreate}
-                      territoryActants={[]}
-                      onSelected={(newSelectedId: string) => {
-                        handleChangeValue(reference.id, newSelectedId, true);
-                      }}
-                      categoryTypes={[EntityEnums.Class.Value]}
-                      isInsideTemplate={isInsideTemplate}
-                      territoryParentId={territoryParentId}
-                    />
-                  </div>
-                )
+                <EntitySuggester
+                  placeholder={resourceEntity?.data?.partValueLabel}
+                  excludedEntityClasses={excludedSuggesterEntities}
+                  openDetailOnCreate={openDetailOnCreate}
+                  territoryActants={[]}
+                  onSelected={(newSelectedId: string) => {
+                    handleChangeValue(reference.id, newSelectedId, true);
+                  }}
+                  categoryTypes={[EntityEnums.Class.Value]}
+                  isInsideTemplate={isInsideTemplate}
+                  territoryParentId={territoryParentId}
+                  disabled={disabled}
+                />
               )}
-            </div>
+            </StyledGrid>
           );
         },
       },
@@ -399,6 +400,7 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
                 updateOrderFn={() => onChange(localReferences, true)}
                 visibleColumns={visibleColumns}
                 hasOrder={rows.length > 1}
+                userCanEdit={userCanEdit}
                 {...row.getRowProps()}
               />
             );

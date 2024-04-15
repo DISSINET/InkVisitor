@@ -64,6 +64,7 @@ export const PropGroupRowType: React.FC<PropGroupRowType> = ({
               isInsideTemplate={isInsideTemplate}
               territoryParentId={territoryParentId}
               excludedActantIds={[propTypeEntity.id]}
+              disabled={!userCanEdit}
             >
               <EntityTag
                 entity={propTypeEntity}

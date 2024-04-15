@@ -24,6 +24,7 @@ import {
   StyledBorderLeft,
   StyledCIGrid,
   StyledExpandedRow,
+  StyledSuggesterWrap,
 } from "../StatementEditorActantTableStyles";
 
 interface StatementEditorActantIdentification {
@@ -87,6 +88,7 @@ export const StatementEditorActantIdentification: React.FC<
             isInsideTemplate={isInsideTemplate}
             excludedActantIds={[entity.id]}
             excludedEntityClasses={excludedSuggesterEntities}
+            disabled={!userCanEdit}
           >
             <EntityTag
               entity={entity}
@@ -111,16 +113,19 @@ export const StatementEditorActantIdentification: React.FC<
             />
           </EntityDropzone>
         ) : (
-          <EntitySuggester
-            categoryTypes={classEntitiesActant}
-            onSelected={(entityId: string) => {
-              handleUpdate({ entityId }, true);
-            }}
-            openDetailOnCreate
-            isInsideTemplate={isInsideTemplate}
-            territoryActants={territoryActants}
-            excludedEntityClasses={excludedSuggesterEntities}
-          />
+          <StyledSuggesterWrap>
+            <EntitySuggester
+              categoryTypes={classEntitiesActant}
+              onSelected={(entityId: string) => {
+                handleUpdate({ entityId }, true);
+              }}
+              openDetailOnCreate
+              isInsideTemplate={isInsideTemplate}
+              territoryActants={territoryActants}
+              excludedEntityClasses={excludedSuggesterEntities}
+              disabled={!userCanEdit}
+            />
+          </StyledSuggesterWrap>
         )}
 
         <LogicButtonGroup

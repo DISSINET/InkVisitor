@@ -20,6 +20,7 @@ interface EntityReferenceTableRow {
   index: number;
   updateOrderFn: () => void;
   moveRow: (dragIndex: number, hoverIndex: number) => void;
+  userCanEdit: boolean;
 }
 
 export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
@@ -29,6 +30,7 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
   index,
   updateOrderFn,
   moveRow,
+  userCanEdit,
 }) => {
   const dropRef = useRef<HTMLTableRowElement>(null);
   const dragRef = useRef<HTMLTableCellElement>(null);
@@ -61,7 +63,7 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
   return (
     <React.Fragment key={index}>
       <StyledTr ref={dropRef} opacity={opacity}>
-        {hasOrder ? (
+        {hasOrder && userCanEdit ? (
           <td ref={dragRef} style={{ cursor: "move" }}>
             <FaGripVertical color={themeContext?.color.black} />
           </td>

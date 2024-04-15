@@ -126,6 +126,7 @@ export const PropGroupRowStatementAttributes: React.FC<
                   bundleEnd: bundleEnd,
                 })
               }
+              disabled={!userCanEdit}
             />
           </StyledAttributesFlexRow>
 

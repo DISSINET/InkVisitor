@@ -35,12 +35,12 @@ export const StyledFlexColumn = styled.div`
   flex-direction: column;
 `;
 interface StyledGridRowThird {
-  onlyTwoLevels: boolean;
+  $onlyTwoLevels: boolean;
 }
 export const StyledGridRowThird = styled.div<StyledGridRowThird>`
   display: grid;
-  grid-template-columns: 1fr ${({ onlyTwoLevels }) =>
-      onlyTwoLevels ? "1fr" : "2fr"};
+  grid-template-columns: 1fr ${({ $onlyTwoLevels }) =>
+      $onlyTwoLevels ? "1fr" : "2fr"};
   width: 100%;
 `;
 export const StyledGridRowHalf = styled.div`

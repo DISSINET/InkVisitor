@@ -117,10 +117,13 @@ export const StyledPropsActantList = styled(StyledGrid)<StyledPropsActantList>`
 `;
 
 // tags
-interface StyledTagsList {}
+interface StyledTagsList {
+  $paddingBottom?: boolean;
+}
 export const StyledTagsList = styled.div<StyledTagsList>`
   display: block;
-  padding-bottom: ${({ theme }) => theme.space[6]};
+  padding-bottom: ${({ theme, $paddingBottom }) =>
+    $paddingBottom ? theme.space[6] : ""};
 `;
 
 interface StyledTagsListItem {}

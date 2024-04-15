@@ -1,6 +1,7 @@
 import { classesAll } from "@shared/dictionaries/entity";
+import { UserEnums } from "@shared/enums";
 import { IBookmarkFolder, IResponseBookmarkFolder } from "@shared/types";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Button, ButtonGroup, Tooltip } from "components";
 import { EntitySuggester } from "components/advanced";
@@ -27,7 +28,6 @@ import {
   StyledFolderWrapperOpenArea,
   StyledIconWrap,
 } from "./EntityBookmarkFolderStyles";
-import { UserEnums } from "@shared/enums";
 
 interface EntityBookmarkFolder {
   bookmarkFolder: IResponseBookmarkFolder;
@@ -112,9 +112,6 @@ export const EntityBookmarkFolder: React.FC<EntityBookmarkFolder> = ({
     drop: (item: DragItem) => {
       addBookmark(bookmarkFolder.id, item.id);
     },
-    hover: (item: DragItem) => {
-      // handleHoverred(item);
-    },
     collect: (monitor: DropTargetMonitor) => ({
       isOver: !!monitor.isOver(),
     }),
@@ -124,22 +121,7 @@ export const EntityBookmarkFolder: React.FC<EntityBookmarkFolder> = ({
     useState<HTMLDivElement | null>(null);
   const [showTooltip, setShowTooltip] = useState(false);
 
-  const userId = localStorage.getItem("userid");
-  const {
-    status: userStatus,
-    data: userData,
-    error: userError,
-    isFetching: userIsFetching,
-  } = useQuery({
-    queryKey: ["user", userId],
-    queryFn: async () => {
-      if (userId) {
-        const res = await api.usersGet(userId);
-        return res.data;
-      }
-    },
-    enabled: api.isLoggedIn() && !!userId,
-  });
+  const userRole = localStorage.getItem("userrole") as UserEnums.Role;
 
   return (
     <StyledFolderWrapper
@@ -220,7 +202,7 @@ export const EntityBookmarkFolder: React.FC<EntityBookmarkFolder> = ({
           <StyledFolderSuggester>
             <EntitySuggester
               disableTemplateInstantiation
-              disableCreate={userData?.role === UserEnums.Role.Viewer}
+              disableCreate={userRole === UserEnums.Role.Viewer}
               openDetailOnCreate
               onSelected={(bookmarkId: string) => {
                 addBookmark(bookmarkFolder.id, bookmarkId);

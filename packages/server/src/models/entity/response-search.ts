@@ -70,7 +70,9 @@ export class SearchQuery {
    * @param entityClass
    * @returns
    */
-  whereClass(entityClass: EntityEnums.Class): SearchQuery {
+  whereClass(
+    entityClass: EntityEnums.Class | EntityEnums.Extension.Any
+  ): SearchQuery {
     this.query = this.query.filter({
       class: entityClass,
     });
@@ -149,19 +151,19 @@ export class SearchQuery {
     return this;
   }
 
-    /**
+  /**
    * adds condition to search for entities which have reference to chosen resource id
    * @returns
    */
-    whereHaveReferenceTo(refId: string): SearchQuery {
-      this.query = this.query.filter(function (row: RDatum) {
-        return row("references").contains(function(ref: RDatum) {
-          return ref("resource").eq(refId)
-        });
+  whereHaveReferenceTo(refId: string): SearchQuery {
+    this.query = this.query.filter(function (row: RDatum) {
+      return row("references").contains(function (ref: RDatum) {
+        return ref("resource").eq(refId);
       });
+    });
 
-      return this;
-    }
+    return this;
+  }
 
   /**
    * adds condition to filter entries with language

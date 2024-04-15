@@ -919,6 +919,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
               territoryParentId={statementTerritoryId}
               entities={statement.entities ?? {}}
               entityId={statement.id}
+              userCanEdit={userCanEdit}
             />
           </StyledEditorSectionContent>
         </StyledEditorSection>
@@ -930,7 +931,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
           </StyledEditorSectionHeader>
 
           <StyledEditorSectionContent>
-            <StyledTagsList>
+            <StyledTagsList $paddingBottom={statement.data.tags.length > 0}>
               {statement.data.tags.map((tag: string, key: number) => {
                 const tagActant = statement?.entities[tag];
                 return (
@@ -940,11 +941,13 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                         entity={tagActant}
                         fullWidth
                         tooltipPosition="left"
-                        unlinkButton={{
-                          onClick: () => {
-                            removeTag(tag);
-                          },
-                        }}
+                        unlinkButton={
+                          userCanEdit && {
+                            onClick: () => {
+                              removeTag(tag);
+                            },
+                          }
+                        }
                       />
                     </StyledTagsListItem>
                   )
