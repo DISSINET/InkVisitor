@@ -66,7 +66,7 @@ class Segment {
   }
 }
 
-interface SegmentPosition {
+export interface SegmentPosition {
   segmentIndex: number;
   lineIndex: number;
   charInLineIndex: number;

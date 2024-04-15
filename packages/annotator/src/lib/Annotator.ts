@@ -1,6 +1,6 @@
 import Viewport from "./Viewport";
 import Cursor from "./Cursor";
-import Text, { Mode } from "./Text";
+import Text, { Mode, SegmentPosition } from "./Text";
 import Scroller from "./Scroller";
 import { Lines } from "./Lines";
 import { start } from "repl";
@@ -17,6 +17,11 @@ export interface DrawingOptions {
   charWidth: number;
   lineHeight: number;
   charsAtLine: number;
+}
+
+export interface Highlighted {
+  text: string;
+  anchors: string[];
 }
 
 /**
@@ -48,7 +53,7 @@ export class Annotator {
   lastHighlightedText = "";
 
   // callbacks
-  onSelectTextCb?: (text: string) => void;
+  onSelectTextCb?: (text: Highlighted) => void;
   onHighlightCb?: (entityId: string) => HighlightSchema | void;
 
   constructor(element: HTMLCanvasElement, inputText: string) {
@@ -86,14 +91,14 @@ export class Annotator {
    * Will be used only if text really changes
    * @param cb
    */
-  onSelectText(cb: (text: string) => void) {
+  onSelectText(cb: (text: Highlighted) => void) {
     this.lastHighlightedText = "";
-    this.onSelectTextCb = (text: string) => {
-      if (text === this.lastHighlightedText) {
+    this.onSelectTextCb = (text: Highlighted) => {
+      if (text.text === this.lastHighlightedText) {
         return;
       }
-      this.lastHighlightedText = text;
-      cb(this.lastHighlightedText);
+      this.lastHighlightedText = text.text;
+      cb(text);
     };
   }
 
@@ -166,8 +171,22 @@ export class Annotator {
         break;
 
       case "Backspace":
+        const segmentBefore = this.text.cursorToIndex(this.viewport, this.cursor)
+        if (segmentBefore?.rawTextIndex === 0) {
+          return
+        }
         this.text.deleteText(this.viewport, this.cursor, 1);
+        const segmentAfter = this.text.cursorToIndex(this.viewport, this.cursor)
+        const xDiff = (segmentAfter?.rawTextIndex || 0) - (segmentBefore?.rawTextIndex || 0)
         this.cursor.move(-1, 0);
+        if (this.cursor.xLine < 0) {
+          this.cursor.xLine = 0;
+          return
+        }
+        if(xDiff > 0) {
+          this.cursor.move(Infinity, -1);
+          this.cursor.move(-xDiff, 0)
+        }
         break;
 
       case "Delete":
@@ -261,34 +280,44 @@ export class Annotator {
     this.lines = new Lines(canvasElement, this.lineHeight, this.charWidth);
   }
 
-  getAnnotations(): string[] {
-    const segmentPosition = this.text.cursorToIndex(this.viewport, this.cursor);
-    if (!segmentPosition) {
-      return [];
-    }
-
+  getAnnotations(startSegment: SegmentPosition, endSegment: SegmentPosition): string[] {
     // remaining opened tags - true = open, false = closed
     const tags: Record<string, boolean> = {};
 
-    for (let i = 0; i <= segmentPosition.segmentIndex; i++) {
-      const segment = this.text.segments[i];
-      if (i !== segmentPosition.segmentIndex) {
-        for (const tag of segment.openingTags) {
-          tags[tag.tag] = true;
+    if (endSegment) {
+      for (let i = 0; i <= endSegment.segmentIndex; i++) {
+        const segment = this.text.segments[i];
+        if (i !== endSegment.segmentIndex) {
+          for (const tag of segment.openingTags) {
+            tags[tag.tag] = true;
+          }
+          for (const tag of segment.closingTags) {
+            tags[tag.tag] = false;
+          }
+        } else {
+          const [segOpened, segClosed] = segment.getTagsForPosition(endSegment);
+          for (const tag of segOpened) {
+            tags[tag.tag] = true;
+          }
+          for (const tag of segClosed) {
+            tags[tag.tag] = false;
+          }
         }
-        for (const tag of segment.closingTags) {
-          tags[tag.tag] = false;
-        }
-      } else {
-        const [segOpened, segClosed] = segment.getTagsForPosition(segmentPosition);
+      }  
+    }
+
+    if (startSegment && endSegment) {
+      for (let i = startSegment.segmentIndex; i < endSegment.segmentIndex; i++) {
+        const [segOpened, segClosed] = this.text.segments[i].getTagsForPosition(startSegment);
         for (const tag of segOpened) {
           tags[tag.tag] = true;
         }
         for (const tag of segClosed) {
-          tags[tag.tag] = false;
+          tags[tag.tag] = true;
         }
-      }
-    }  
+        //  console.log(startSegment, segOpened, segClosed)
+      }  
+    }
 
     return Object.keys(tags).filter(tag => tags[tag])
   }
@@ -351,12 +380,25 @@ export class Annotator {
     if (this.onSelectTextCb && this.cursor.isSelected()) {
       const [start, end] = this.cursor.getSelected();
       if (start && end) {
-        this.onSelectTextCb(this.text.getRangeText(start, end));
+        const startSegment = this.text.getSegmentPosition( start.yLine, start.xLine) as SegmentPosition;
+        const endSegment = this.text.getSegmentPosition( end.yLine, end.xLine) as SegmentPosition;
+        const annotated = this.getAnnotations(startSegment, endSegment);
+        console.log(annotated)
+        this.onSelectTextCb({ text: this.text.getRangeText(start, end), anchors: annotated});
       }
     }
 
     if (this.onHighlightCb) {
-      const annotated = this.getAnnotations();
+      const startSegment: SegmentPosition = {   
+        segmentIndex: 0,
+        lineIndex: 0,
+        charInLineIndex: 0,
+        parsedTextIndex: 0,
+        rawTextIndex: 0
+      };
+      const endSegment = this.text.cursorToIndex(this.viewport, this.cursor) as SegmentPosition;
+     
+      const annotated: string[] = []; //this.getAnnotations(startSegment, endSegment);
       if (annotated.length > 0) {
         const tag = annotated.pop() as string
         const highlight = this.onHighlightCb(tag);
@@ -379,7 +421,6 @@ export class Annotator {
                 }
 
                 if (startLine.yLine === endLine.yLine) {
-                  console.log(endLine.xLine * this.charWidth, yPos)
                   this.ctx.lineTo(endLine.xLine * this.charWidth, yPos);
                 } else if (currentYLine === startLine.yLine) {
                   this.ctx.lineTo(this.charWidth, yPos);

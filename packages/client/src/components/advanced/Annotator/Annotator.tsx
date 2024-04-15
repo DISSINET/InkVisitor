@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import React from "react";
-import { Annotator, example, Mode } from "@inkvisitor/annotator/src/lib";
+import { Annotator, example, Highlighted} from "@inkvisitor/annotator/src/lib";
 import {
   StyledCanvasWrapper,
   StyledHightlightedText,
@@ -18,7 +18,7 @@ export const Canvas = () => {
   const mainCanvas = useRef(null);
   const scroller = useRef(null);
   const lines = useRef(null);
-  const [highlighted, setSelected] = useState("");
+  const [highlighted, setSelected] = useState<Highlighted>();
 
   useEffect(() => {
     if (!mainCanvas.current || !scroller.current || !lines.current) {
@@ -45,6 +45,7 @@ export const Canvas = () => {
 
   return (
     <div style={{ padding: "20px" }}>
+      <textarea />
       <StyledCanvasWrapper>
         <StyledLinesCanvas ref={lines} width="50px" height="400px" />
         <StyledMainCanvas
@@ -57,8 +58,9 @@ export const Canvas = () => {
           <StyledScrollerCursor />
         </StyledScrollerViewport>
       </StyledCanvasWrapper>
-      <div style={{ marginTop: "10px" }}>Highlighted:</div>
-      <StyledHightlightedText>{highlighted}</StyledHightlightedText>
+      {highlighted && false && (
+      <StyledHightlightedText>{highlighted?.text}</StyledHightlightedText>
+      )}
       {annotator && (
         <Button
           label="Toggle raw"
