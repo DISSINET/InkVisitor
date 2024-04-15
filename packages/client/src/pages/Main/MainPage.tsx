@@ -356,6 +356,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
             hideFourthPanelButton(),
           ]}
           onHeaderClick={toggleFourthPanel}
+          disableOpenBoxHeaderClick
         >
           <MemoizedEntitySearchBox />
         </Box>
@@ -370,6 +371,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
             hideFourthPanelButton(),
           ]}
           onHeaderClick={toggleFourthPanel}
+          disableOpenBoxHeaderClick
         >
           <MemoizedEntityBookmarkBox />
         </Box>
@@ -384,6 +386,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
             hideFourthPanelButton(),
           ]}
           onHeaderClick={toggleFourthPanel}
+          disableOpenBoxHeaderClick
         >
           <MemoizedTemplateListBox />
         </Box>
