@@ -46,6 +46,8 @@ interface EntityDetailRelationRow {
   moveRow: (dragIndex: number, hoverIndex: number) => void;
   index: number;
   updateOrderFn: (relationId: string, newOrder: number) => void;
+
+  userCanEdit: boolean;
 }
 export const EntityDetailRelationRow: React.FC<EntityDetailRelationRow> = ({
   relation,
@@ -60,6 +62,7 @@ export const EntityDetailRelationRow: React.FC<EntityDetailRelationRow> = ({
   moveRow,
   index,
   updateOrderFn,
+  userCanEdit,
 }) => {
   const dropRef = useRef<HTMLTableRowElement>(null);
   const dragRef = useRef<HTMLTableCellElement>(null);
@@ -149,9 +152,11 @@ export const EntityDetailRelationRow: React.FC<EntityDetailRelationRow> = ({
                     <EntityTag
                       fullWidth
                       entity={relationEntity}
-                      unlinkButton={{
-                        onClick: () => handleMultiRemove(relation.id),
-                      }}
+                      unlinkButton={
+                        userCanEdit && {
+                          onClick: () => handleMultiRemove(relation.id),
+                        }
+                      }
                     />
                   </StyledGridColumn>
                 </>

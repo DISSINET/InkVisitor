@@ -1,6 +1,8 @@
 import { EntityEnums, RelationEnums, UserEnums } from "@shared/enums";
 import {
+  IAction,
   IBookmarkFolder,
+  IConcept,
   IEntity,
   IProp,
   IReference,
@@ -604,6 +606,52 @@ export const CEntity = (
       entityClass === EntityEnums.Class.Concept
         ? EntityEnums.Status.Pending
         : EntityEnums.Status.Approved,
+    language: userOptions.defaultLanguage,
+    notes: [],
+    props: [],
+    references: [],
+    isTemplate: false,
+  };
+};
+
+export const CAction = (
+  userOptions: UserOptions,
+  label: string,
+  partOfSpeech: EntityEnums.ActionPartOfSpeech,
+  detail?: string
+): IAction => {
+  return {
+    id: uuidv4(),
+    class: EntityEnums.Class.Action,
+    label: label,
+    detail: detail ? detail : "",
+    data: {
+      pos: partOfSpeech,
+      entities: {},
+      valencies: { a1: "", a2: "", s: "" },
+    },
+    status: EntityEnums.Status.Pending,
+    language: userOptions.defaultLanguage,
+    notes: [],
+    props: [],
+    references: [],
+    isTemplate: false,
+  };
+};
+
+export const CConcept = (
+  userOptions: UserOptions,
+  label: string,
+  partOfSpeech: EntityEnums.ConceptPartOfSpeech,
+  detail?: string
+): IConcept => {
+  return {
+    id: uuidv4(),
+    class: EntityEnums.Class.Concept,
+    label: label,
+    detail: detail ? detail : "",
+    data: { pos: partOfSpeech },
+    status: EntityEnums.Status.Pending,
     language: userOptions.defaultLanguage,
     notes: [],
     props: [],

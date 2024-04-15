@@ -23,7 +23,7 @@ export const thirdPanelMinWidth = 450;
 export const percentPanelWidths = [10, 31, 41, 18];
 export const separatorXPercentPosition = 42;
 // BOXES
-export const hiddenBoxHeight = 34;
+export const hiddenBoxHeight = 33;
 export const fourthPanelBoxesHeightThirds = {
   search: 40,
   bookmarks: 27,

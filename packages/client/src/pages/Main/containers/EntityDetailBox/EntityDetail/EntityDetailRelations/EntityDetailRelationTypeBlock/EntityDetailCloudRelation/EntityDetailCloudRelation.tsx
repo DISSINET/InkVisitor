@@ -29,6 +29,7 @@ interface EntityDetailCloudRelation {
     string,
     unknown
   >;
+  userCanEdit: boolean;
 }
 export const EntityDetailCloudRelation: React.FC<EntityDetailCloudRelation> = ({
   relation,
@@ -37,6 +38,7 @@ export const EntityDetailCloudRelation: React.FC<EntityDetailCloudRelation> = ({
   relations,
   relationUpdateMutation,
   relationDeleteMutation,
+  userCanEdit,
 }) => {
   const handleCloudRemove = () => {
     if (relations[0]?.entityIds?.length > 2) {
@@ -60,6 +62,7 @@ export const EntityDetailCloudRelation: React.FC<EntityDetailCloudRelation> = ({
   return (
     <div style={{ display: "grid" }}>
       {relation.entityIds.length > 0 && (
+        // TODO: disable unlink for read mode
         <Cloud onUnlink={() => handleCloudRemove()} originEntity={originEntity}>
           <StyledRelation>
             {relation.entityIds.map((relationEntityId, key) => {

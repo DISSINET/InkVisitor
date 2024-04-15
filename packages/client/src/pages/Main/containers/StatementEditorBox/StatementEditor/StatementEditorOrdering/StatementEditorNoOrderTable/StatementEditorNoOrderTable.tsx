@@ -85,9 +85,6 @@ export const StatementEditorNoOrderTable: React.FC<
     useTable({
       columns,
       data: data,
-      initialState: {
-        hiddenColumns: ["id"],
-      },
     });
 
   return (

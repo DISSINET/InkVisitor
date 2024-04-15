@@ -24,6 +24,12 @@ export const StyledListHeaderColumn = styled.div<StyledListHeaderColumn>`
   font-style: italic;
 `;
 
+export const StyledReferencesListColumn = styled.div`
+  margin: ${({ theme }) => theme.space[1]};
+  display: grid;
+  align-items: center;
+`;
+
 export const StyledReferencesListButtons = styled.div`
   button {
     display: inline-flex;
@@ -57,7 +63,7 @@ export const StyledTr = styled.tr<StyledTr>`
     padding-right: ${({ theme }) => theme.space[2]};
   }
   td:not(:last-child) {
-    width: 1%;
+    /* width: 1%; */
   }
 `;
 export const StyledTd = styled.td`
@@ -66,4 +72,8 @@ export const StyledTd = styled.td`
   padding-bottom: ${({ theme }) => `${theme.space[1]}`};
   padding-left: 0;
   font-size: ${({ theme }) => theme.fontSize["sm"]};
+`;
+export const StyledGrid = styled.div`
+  display: grid;
+  align-items: center;
 `;

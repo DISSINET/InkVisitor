@@ -53,7 +53,7 @@ interface EntitySuggester {
   disableTemplatesAccept?: boolean;
   disableButtons?: boolean;
 
-  // TODO: remove and implement properly disableCreate including enter, but don't block enter on selecting
+  // TODO: disable only for entity create modal => only for view
   disableEnter?: boolean;
   autoFocus?: boolean;
 

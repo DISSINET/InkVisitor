@@ -17,7 +17,7 @@ export const StyledOptions = styled.div`
 export const StyledRow = styled.div`
   position: relative;
   display: grid;
-  grid-template-columns: ${({ theme }) => theme.space["32"]} auto;
+  grid-template-columns: ${({ theme }) => theme.space["32"]} 1fr;
   align-items: center;
   margin-bottom: ${({ theme }) => theme.space[2]};
 `;

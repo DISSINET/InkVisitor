@@ -69,8 +69,10 @@ export const Button: React.FC<ButtonProps> = ({
         ref={setReferenceElement}
         onClick={(e) => {
           e.stopPropagation();
-          hideTooltipOnClick && setShowTooltip(false);
-          onClick(e);
+          if (!disabled) {
+            hideTooltipOnClick && setShowTooltip(false);
+            onClick(e);
+          }
         }}
         $hasIcon={icon && true}
         $color={color}

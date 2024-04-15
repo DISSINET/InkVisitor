@@ -712,6 +712,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
                   relationCreateMutation={relationCreateMutation}
                   relationUpdateMutation={relationUpdateMutation}
                   relationDeleteMutation={relationDeleteMutation}
+                  userCanEdit={userCanEdit}
                 />
               </StyledDetailSectionContent>
             </StyledDetailSection>
@@ -784,6 +785,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
                     updateEntityMutation.mutate({ references: newValues });
                   }}
                   isInsideTemplate={isInsideTemplate}
+                  userCanEdit={userCanEdit}
                 />
               </StyledDetailSectionContent>
             </StyledDetailSection>

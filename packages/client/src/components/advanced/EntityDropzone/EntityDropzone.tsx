@@ -18,6 +18,7 @@ interface EntityDropzone {
   disableTemplatesAccept?: boolean;
 
   children: ReactElement;
+  disabled?: boolean;
 }
 export const EntityDropzone: React.FC<EntityDropzone> = ({
   categoryTypes,
@@ -32,6 +33,7 @@ export const EntityDropzone: React.FC<EntityDropzone> = ({
   disableTemplatesAccept,
 
   children,
+  disabled,
 }) => {
   const [isWrongDropCategory, setIsWrongDropCategory] = useState(false);
 
@@ -93,6 +95,7 @@ export const EntityDropzone: React.FC<EntityDropzone> = ({
       }}
       isInsideTemplate={isInsideTemplate}
       isWrongDropCategory={isWrongDropCategory}
+      disabled={disabled}
     >
       {children}
     </Dropzone>
