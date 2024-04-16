@@ -18,13 +18,11 @@ export const StyledBoxWrap = styled.div<StyledBoxWrap>`
 export const StyledBackground = styled.div`
   display: flex;
   flex-direction: column;
-  overflow: auto;
   margin: 2rem;
   padding: 1rem;
   border: 1px dashed ${({ theme }) => theme.color["black"]};
   background-color: ${({ theme }) => theme.color["white"]};
   box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.3);
-  position: relative;
 `;
 export const StyledGrid = styled.div`
   display: grid;

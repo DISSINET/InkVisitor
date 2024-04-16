@@ -26,7 +26,7 @@ export const TextAnnotator = () => {
 
   const [selectedText, setSelectedText] = useState<string>("");
   const [selectedAnchors, setSelectedAnchors] = useState<string[]>([]);
-  const [entities, setEntities] = useState<Record<string, IEntity | false>>({});
+  const storedEntities = useRef<Record<string, IEntity | false>>({});
 
   const fetchEntity = async (anchor: string) => {
     const entity = await api.entitiesGet(anchor);
@@ -34,10 +34,7 @@ export const TextAnnotator = () => {
   };
 
   const addEntityToStore = (eid: string, entity: IEntity | false) => {
-    setEntities((prevEntities) => ({
-      ...prevEntities,
-      [eid]: entity,
-    }));
+    storedEntities.current[eid] = entity;
   };
 
   const handleTextSelection = async (text: string, anchors: string[]) => {
@@ -46,7 +43,7 @@ export const TextAnnotator = () => {
 
     for (const anchorI in anchors) {
       const anchor = anchors[anchorI];
-      if (!entities[anchor]) {
+      if (!Object.keys(storedEntities.current).includes(anchor)) {
         try {
           const entityRes = await fetchEntity(anchor);
           if (entityRes && entityRes.data) {
@@ -88,12 +85,18 @@ export const TextAnnotator = () => {
     setAnnotator(annotator);
   }, []);
 
+  const topBottomSelection = useMemo<boolean>(() => {
+    const selectedText = annotator?.cursor?.getSelected();
+
+    return (selectedText?.[0]?.yLine ?? 0) < (selectedText?.[1]?.yLine ?? 0);
+  }, [annotator?.cursor?.yLine]);
+
   const menuPositionY = useMemo<number>(() => {
     const yLine = annotator?.cursor?.yLine ?? 0;
     const lineHeight = annotator?.lineHeight ?? 0;
 
-    return yLine * lineHeight;
-  }, [annotator?.cursor?.yLine, annotator?.lineHeight]);
+    return yLine * lineHeight + (topBottomSelection ? 30 : -30);
+  }, [annotator?.cursor?.yLine, annotator?.lineHeight, topBottomSelection]);
 
   return (
     <div style={{ padding: "20px" }}>
@@ -101,9 +104,10 @@ export const TextAnnotator = () => {
         <TextAnnotatorMenu
           anchors={selectedAnchors}
           text={selectedText}
-          entities={entities}
+          entities={storedEntities.current}
           onAnchorAdd={handleAddAnchor}
           yPosition={menuPositionY}
+          topBottomSelection={topBottomSelection}
         />
         <StyledLinesCanvas ref={lines} width="50px" height="400px" />
         <StyledMainCanvas
