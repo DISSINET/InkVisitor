@@ -26,7 +26,6 @@ export const TextAnnotatorMenu = ({
   yPosition,
   topBottomSelection,
 }: TextAnnotatorMenuProps) => {
-  console.log(topBottomSelection);
   return (
     <>
       {text ? (
@@ -40,10 +39,11 @@ export const TextAnnotatorMenu = ({
             <StyledAnnotatorItemTitle>Add new anchor</StyledAnnotatorItemTitle>
             <EntitySuggester
               categoryTypes={classesAll}
+              initTyped={text.length > 20 ? text.substring(0, 20) : text}
               onSelected={(newAnchorId) => {
-                console.log("new anchor", newAnchorId);
                 onAnchorAdd(newAnchorId);
               }}
+              inputWidth={300}
             />
           </StyledAnnotatorItem>
           <StyledAnnotatorItem>

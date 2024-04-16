@@ -233,6 +233,12 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
     onTyped && onTyped("");
   };
 
+  useEffect(() => {
+    if (initTyped && initTyped !== typed) {
+      setTyped(initTyped);
+    }
+  }, [initTyped]);
+
   const queryClient = useQueryClient();
 
   const onMutationSuccess = (entity: IEntity) => {
