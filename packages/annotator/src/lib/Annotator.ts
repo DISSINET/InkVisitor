@@ -1,9 +1,8 @@
-import Viewport from "./Viewport";
 import Cursor from "./Cursor";
-import Text, { Mode, SegmentPosition } from "./Text";
-import Scroller from "./Scroller";
 import { Lines } from "./Lines";
-import { start } from "repl";
+import Scroller from "./Scroller";
+import Text, { Mode, SegmentPosition } from "./Text";
+import Viewport from "./Viewport";
 
 export interface HighlightSchema {
   mode: "background";
