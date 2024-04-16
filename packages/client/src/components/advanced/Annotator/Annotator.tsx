@@ -61,15 +61,23 @@ export const TextAnnotator = () => {
         <StyledHightlightedText>{highlighted?.text}</StyledHightlightedText>
       )}
       {annotator && (
-        <Button
-          label="Toggle raw"
-          onClick={() => {
-            annotator.setMode(
-              annotator.text.mode === "raw" ? "highlight" : "raw"
-            );
-            annotator.draw();
-          }}
-        />
+        <>
+          <Button
+            label="Toggle raw"
+            onClick={() => {
+              annotator.setMode(
+                annotator.text.mode === "raw" ? "highlight" : "raw"
+              );
+              annotator.draw();
+            }}
+          />
+          <Button
+            label="Add tag"
+            onClick={() => {
+              annotator.addAnchor(`T${Math.random().toFixed(2)}`);
+            }}
+          />
+        </>
       )}
     </div>
   );
