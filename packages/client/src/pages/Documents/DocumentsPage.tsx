@@ -16,7 +16,7 @@ import {
 } from "./DocumentsPageStyles";
 import { useSpring } from "@react-spring/web";
 import { springConfig } from "Theme/constants";
-import { Canvas} from "../../components/advanced/Annotator/Annotator"
+import { TextAnnotator } from "../../components/advanced/Annotator/Annotator";
 import AnnotatorProvider from "components/advanced/Annotator/AnnotatorProvider";
 
 type DocumentWithResource = {
@@ -158,9 +158,7 @@ export const DocumentsPage: React.FC = ({}) => {
               )}
             </StyledGrid>
             <AnnotatorProvider>
-            <Canvas
-            
-            />
+              <TextAnnotator />
             </AnnotatorProvider>
             <StyledInputWrap onClick={() => inputRef.current?.click()}>
               Upload document
