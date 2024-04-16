@@ -53,6 +53,4 @@ export const StyledAnnotatorItem = styled.div`
     background: #ccc;
   }
 `;
-export const StyledAnnotatorItemOption = styled.div`
-  cursor: pointer;
-`;
+export const StyledAnnotatorItemTitle = styled.div``;
