@@ -3,7 +3,7 @@ import { IEntity } from "@shared/types";
 import api from "api";
 import { Button } from "components/basic/Button/Button";
 import { ButtonGroup } from "components/basic/ButtonGroup/ButtonGroup";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { FaMarker, FaPen } from "react-icons/fa";
 import { useAnnotator } from "./AnnotatorContext";
 import TextAnnotatorMenu from "./AnnotatorMenu";
@@ -59,6 +59,10 @@ export const TextAnnotator = () => {
     }
   };
 
+  const handleAddAnchor = (entityId: string) => {
+    annotator.addAnchor(entityId);
+  };
+
   useEffect(() => {
     if (!mainCanvas.current || !scroller.current || !lines.current) {
       return;
@@ -79,9 +83,17 @@ export const TextAnnotator = () => {
         },
       };
     });
+
     annotator.draw();
     setAnnotator(annotator);
   }, []);
+
+  const menuPositionY = useMemo<number>(() => {
+    const yLine = annotator?.cursor?.yLine ?? 0;
+    const lineHeight = annotator?.lineHeight ?? 0;
+
+    return yLine * lineHeight;
+  }, [annotator?.cursor?.yLine, annotator?.lineHeight]);
 
   return (
     <div style={{ padding: "20px" }}>
@@ -90,6 +102,8 @@ export const TextAnnotator = () => {
           anchors={selectedAnchors}
           text={selectedText}
           entities={entities}
+          onAnchorAdd={handleAddAnchor}
+          yPosition={menuPositionY}
         />
         <StyledLinesCanvas ref={lines} width="50px" height="400px" />
         <StyledMainCanvas
