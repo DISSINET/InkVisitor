@@ -15,8 +15,8 @@ export interface IRelativeCoordinates extends IAbsCoordinates {}
  */
 export default class Cursor implements IRelativeCoordinates {
   // relative!
-  xLine: number = -1;
-  yLine: number = -1;
+  xLine: number;
+  yLine: number;
 
   // highlighted area must use absolute coordinates - highlighted area stays in position while scrolling
   private selecting: boolean = false;
@@ -24,7 +24,12 @@ export default class Cursor implements IRelativeCoordinates {
   private selectEnd?: IAbsCoordinates;
 
   // Width of cursor point in px
-  static Width = 3;
+  static Width = 3
+  
+  constructor(xLine: number = -1, yLine: number = -1) {
+    this.xLine = xLine;
+    this.yLine = yLine;
+  }
 
   yToLineI(y: number, lineHeight: number): number {
     return Math.floor(y / lineHeight);

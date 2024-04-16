@@ -386,7 +386,6 @@ export class Annotator {
         const startSegment = this.text.getSegmentPosition( start.yLine, start.xLine) as SegmentPosition;
         const endSegment = this.text.getSegmentPosition( end.yLine, end.xLine) as SegmentPosition;
         const annotated = this.getAnnotations(startSegment, endSegment);
-        console.log(annotated)
         this.onSelectTextCb({ text: this.text.getRangeText(start, end), anchors: annotated});
       }
     }
@@ -458,5 +457,20 @@ export class Annotator {
     this.text.mode = mode;
     this.text.prepareSegments();
     this.text.calculateLines();
+  }
+
+  addAnchor(anchor: string) {
+    if(!this.cursor.isSelected()) {
+      return
+    }
+
+    const [start, end] = this.cursor.getSelected();
+    if (start && end) {
+      this.text.insertText(this.viewport, new Cursor(end.xLine, end.yLine - this.viewport.lineStart), `</${anchor}>`)
+      this.text.insertText(this.viewport, new Cursor(start.xLine, start.yLine - this.viewport.lineStart), `<${anchor}>`)
+      this.text.prepareSegments();
+      this.text.calculateLines();
+      this.draw();
+    }
   }
 }
