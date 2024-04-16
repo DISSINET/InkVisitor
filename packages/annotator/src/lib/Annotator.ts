@@ -158,14 +158,18 @@ export class Annotator {
       case "ArrowLeft":
         this.cursor.move(-1, 0);
         if (this.cursor.xLine < 0) {
-          this.cursor.xLine = 0;
+          this.cursor.yLine = Math.max(0, this.cursor.yLine - 1);
+          this.cursor.xLine = Math.floor(this.width / this.charWidth) - 1;
         }
         break;
 
       case "ArrowRight":
         this.cursor.move(1, 0);
+
+        // TODO: check if cursor is at the end of the line
         if (this.cursor.xLine > Math.floor(this.width / this.charWidth)) {
-          this.cursor.xLine--;
+          this.cursor.xLine = 0;
+          this.cursor.yLine++;
         }
         break;
 
