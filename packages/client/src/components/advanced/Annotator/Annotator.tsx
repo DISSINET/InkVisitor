@@ -1,6 +1,12 @@
-import { useEffect, useRef, useState } from "react";
-import React from "react";
-import { Annotator, example, Highlighted } from "@inkvisitor/annotator/src/lib";
+import { Annotator, Highlighted, example } from "@inkvisitor/annotator/src/lib";
+import { IEntity } from "@shared/types";
+import api from "api";
+import { Button } from "components/basic/Button/Button";
+import { ButtonGroup } from "components/basic/ButtonGroup/ButtonGroup";
+import React, { useEffect, useRef, useState } from "react";
+import { FaMarker, FaPen } from "react-icons/fa";
+import { useAnnotator } from "./AnnotatorContext";
+import TextAnnotatorMenu from "./AnnotatorMenu";
 import {
   StyledCanvasWrapper,
   StyledHightlightedText,
@@ -9,11 +15,6 @@ import {
   StyledScrollerCursor,
   StyledScrollerViewport,
 } from "./AnnotatorStyles";
-import { Button } from "components/basic/Button/Button";
-import { useAnnotator } from "./AnnotatorContext";
-import TextAnnotatorMenu from "./AnnotatorMenu";
-import api from "api";
-import { IResponseEntity } from "@shared/types";
 
 export const TextAnnotator = () => {
   const { annotator, setAnnotator } = useAnnotator();
@@ -25,16 +26,14 @@ export const TextAnnotator = () => {
 
   const [selectedText, setSelectedText] = useState<string>("");
   const [selectedAnchors, setSelectedAnchors] = useState<string[]>([]);
-  const [entities, setEntities] = useState<
-    Record<string, IResponseEntity | false>
-  >({});
+  const [entities, setEntities] = useState<Record<string, IEntity | false>>({});
 
   const fetchEntity = async (anchor: string) => {
     const entity = await api.entitiesGet(anchor);
     return entity;
   };
 
-  const addEntityToStore = (eid: string, entity: IResponseEntity | false) => {
+  const addEntityToStore = (eid: string, entity: IEntity | false) => {
     setEntities((prevEntities) => ({
       ...prevEntities,
       [eid]: entity,
@@ -107,15 +106,32 @@ export const TextAnnotator = () => {
         <StyledHightlightedText>{highlighted?.text}</StyledHightlightedText>
       )}
       {annotator && (
-        <Button
-          label="Toggle raw"
-          onClick={() => {
-            annotator.setMode(
-              annotator.text.mode === "raw" ? "highlight" : "raw"
-            );
-            annotator.draw();
-          }}
-        />
+        <ButtonGroup>
+          <Button
+            key="raw"
+            icon={<FaMarker size={11} />}
+            color={annotator.text.mode === "raw" ? "success" : "gray"}
+            label="edit"
+            inverted
+            onClick={() => {
+              annotator.setMode("raw");
+              annotator.draw();
+            }}
+            tooltipLabel="activate edit mode"
+          />
+          <Button
+            key="hl"
+            icon={<FaPen size={11} />}
+            label="highlight"
+            color={annotator.text.mode === "highlight" ? "success" : "gray"}
+            inverted
+            onClick={() => {
+              annotator.setMode("highlight");
+              annotator.draw();
+            }}
+            tooltipLabel="activate syntax higlighting mode"
+          />
+        </ButtonGroup>
       )}
     </div>
   );
