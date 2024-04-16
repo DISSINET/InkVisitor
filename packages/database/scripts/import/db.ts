@@ -1,4 +1,4 @@
-import { r, Connection, } from "rethinkdb-ts";
+import { r, Connection } from "rethinkdb-ts";
 import { getEnv, TableSchema } from "./common";
 import colors from "colors/safe";
 
@@ -9,8 +9,7 @@ export interface IDbConfig {
   password: string;
 }
 
-export
-  class DbHelper {
+export class DbHelper {
   database: string = "";
   conn?: Connection;
   dbConfig: IDbConfig;
@@ -29,7 +28,7 @@ export
    * @returns Connection
    */
   getConnection(): Connection {
-    if(!this.conn) {
+    if (!this.conn) {
       throw new Error("Connection not available");
     }
 
@@ -50,7 +49,7 @@ export
     if (this.dbConfig.name) {
       this.useDb(this.dbConfig.name);
     }
-    console.log("connected")
+    console.log("connected");
   }
 
   /**
@@ -70,7 +69,11 @@ export
       await r.dbDrop(this.dbConfig.name).run(this.conn);
       console.log(colors.green(`Database ${this.dbConfig.name} dropped`));
     } catch (e) {
-      console.log(colors.yellow(`Database not dropped ('${this.dbConfig.name}'). Does is exist?`));
+      console.log(
+        colors.yellow(
+          `Database not dropped ('${this.dbConfig.name}'). Does is exist?`
+        )
+      );
     }
   }
 
@@ -110,10 +113,10 @@ export
   }
 
   /**
-  * Creates table with indexes
-  * @param table TableSchema table collection
-  * @returns Promise<void>
-  */
+   * Creates table with indexes
+   * @param table TableSchema table collection
+   * @returns Promise<void>
+   */
   async createTable(table: TableSchema): Promise<void> {
     await r.tableCreate(table.tableName).run(this.conn);
     if (table.indexes) {
@@ -126,10 +129,10 @@ export
   }
 
   /**
-  * Drops single table
-  * @param table TableSchema table collection
-  * @returns Promise<void>
-  */
+   * Drops single table
+   * @param table TableSchema table collection
+   * @returns Promise<void>
+   */
   async dropTable(table: string): Promise<void> {
     await r.tableDrop(table).run(this.conn);
     console.log(colors.green(`Table ${table} dropped`));
@@ -146,13 +149,22 @@ export
     const step = 200;
     for (let start = 0; start < table.data.length; start += step) {
       const end = Math.min(start + step, table.data.length);
-      const progress = end * step / table.data.length / step * 100;
-      await r.table(table.tableName).insert(table.data.slice(start, end)).run(this.conn);
-      process.stdout.write(`Importing: ${progress.toFixed(2)}%\r`);
+      const progress = ((end * step) / table.data.length / step) * 100;
+      await r
+        .table(table.tableName)
+        .insert(table.data.slice(start, end))
+        .run(this.conn);
+      process.stdout.write(
+        `Importing ${table.tableName}: ${progress.toFixed(2)}%\r`
+      );
     }
     const itemsImported = await r.table(table.tableName).count().run(this.conn);
-    console.log(colors.green(`Imported ${itemsImported}/${table.data.length} entries to table ${table.tableName}`));
+    console.log(
+      colors.green(
+        `Imported ${itemsImported}/${table.data.length} entries to table ${table.tableName}`
+      )
+    );
 
     return;
-  };
+  }
 }
