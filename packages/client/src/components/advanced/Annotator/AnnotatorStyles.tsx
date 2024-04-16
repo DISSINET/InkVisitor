@@ -38,3 +38,21 @@ export const StyledMainCanvas = styled.canvas`
 export const StyledLinesCanvas = styled.canvas`
   outline: none;
 `;
+
+export const StyledAnnotatorMenu = styled.div`
+  position: absolute;
+  background: white;
+  border: 1px solid black;
+  padding: 10px;
+  z-index: 100;
+`;
+
+export const StyledAnnotatorItem = styled.div`
+  padding: 5px;
+  &:hover {
+    background: #ccc;
+  }
+`;
+export const StyledAnnotatorItemOption = styled.div`
+  cursor: pointer;
+`;
