@@ -108,7 +108,7 @@ export const TextAnnotator = ({
     annotator.text;
     annotator.draw();
     setAnnotator(annotator);
-  }, []);
+  }, [initialText]);
 
   const topBottomSelection = useMemo<boolean>(() => {
     const selectedText = annotator?.cursor?.getSelected();
@@ -135,13 +135,13 @@ export const TextAnnotator = ({
           topBottomSelection={topBottomSelection}
         />
         {displayLineNumbers && (
-          <StyledLinesCanvas ref={lines} width={wLineNumbers} height="400px" />
+          <StyledLinesCanvas ref={lines} width={wLineNumbers} height={height} />
         )}
         <StyledMainCanvas
           tabIndex={0}
           ref={mainCanvas}
           width={wTextArea}
-          height="400px"
+          height={height}
         />
         <StyledScrollerViewport
           ref={scroller}
