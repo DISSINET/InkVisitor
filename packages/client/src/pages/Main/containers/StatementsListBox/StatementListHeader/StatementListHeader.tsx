@@ -21,7 +21,7 @@ import { CStatement } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
 import { BiRefresh } from "react-icons/bi";
-import { FaPlus } from "react-icons/fa";
+import { FaHighlighter, FaList, FaPlus } from "react-icons/fa";
 import {
   MdOutlineCheckBox,
   MdOutlineCheckBoxOutlineBlank,
@@ -318,6 +318,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
           <ButtonGroup style={{ marginLeft: "5px" }}>
             <Button
               color="success"
+              icon={<FaList />}
               label="list"
               onClick={() => {
                 handleDisplayModeChange(StatementListDisplayMode.LIST);
@@ -326,6 +327,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
             ></Button>
             <Button
               color="success"
+              icon={<FaHighlighter />}
               label="annotator"
               onClick={() => {
                 handleDisplayModeChange(StatementListDisplayMode.TEXT);

@@ -16,8 +16,22 @@ import {
   StyledScrollerViewport,
 } from "./AnnotatorStyles";
 
-export const TextAnnotator = () => {
+interface TextAnnotatorProps {
+  width: number;
+  height: number;
+  displayLineNumbers: boolean;
+}
+
+export const TextAnnotator = ({
+  width = 400,
+  height = 500,
+  displayLineNumbers = true,
+}: TextAnnotatorProps) => {
   const { annotator, setAnnotator } = useAnnotator();
+
+  const wLineNumbers = displayLineNumbers ? 50 : 0;
+  const wScroll = 20;
+  const wTextArea = width - wLineNumbers - wScroll;
 
   const mainCanvas = useRef(null);
   const scroller = useRef(null);
@@ -61,14 +75,17 @@ export const TextAnnotator = () => {
   };
 
   useEffect(() => {
-    if (!mainCanvas.current || !scroller.current || !lines.current) {
+    if (!mainCanvas.current || !scroller.current) {
       return;
     }
 
     const annotator = new Annotator(mainCanvas.current, example);
-    annotator.setMode("raw");
+    annotator.setMode("highlight");
     annotator.addScroller(scroller.current);
-    annotator.addLines(lines.current);
+
+    if (displayLineNumbers && lines.current) {
+      annotator.addLines(lines.current);
+    }
     annotator.onSelectText(({ text, anchors }) => {
       handleTextSelection(text, anchors);
     });
@@ -99,7 +116,7 @@ export const TextAnnotator = () => {
   }, [annotator?.cursor?.yLine, annotator?.lineHeight, topBottomSelection]);
 
   return (
-    <div style={{ padding: "20px" }}>
+    <div style={{ width: width }}>
       <StyledCanvasWrapper>
         <TextAnnotatorMenu
           anchors={selectedAnchors}
@@ -109,20 +126,19 @@ export const TextAnnotator = () => {
           yPosition={menuPositionY}
           topBottomSelection={topBottomSelection}
         />
-        <StyledLinesCanvas ref={lines} width="50px" height="400px" />
+        {displayLineNumbers && (
+          <StyledLinesCanvas ref={lines} width={wLineNumbers} height="400px" />
+        )}
         <StyledMainCanvas
           tabIndex={0}
           ref={mainCanvas}
-          width="400px"
+          width={wTextArea}
           height="400px"
         />
         <StyledScrollerViewport ref={scroller}>
           <StyledScrollerCursor />
         </StyledScrollerViewport>
       </StyledCanvasWrapper>
-      {highlighted && false && (
-        <StyledHightlightedText>{highlighted?.text}</StyledHightlightedText>
-      )}
       {annotator && (
         <ButtonGroup>
           <Button

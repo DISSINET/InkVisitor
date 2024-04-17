@@ -2,8 +2,10 @@ import { IDocument, IResponseDocument, IResponseEntity } from "@shared/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Loader, Submit } from "components";
+import AnnotatorProvider from "components/advanced/Annotator/AnnotatorProvider";
 import React, { ChangeEvent, useMemo, useRef, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
+import { TextAnnotator } from "../../components/advanced/Annotator/Annotator";
 import { DocumentModal } from "../../components/advanced/DocumentModal/DocumentModal";
 import { DocumentRow } from "./DocumentRow/DocumentRow";
 import {
@@ -14,10 +16,6 @@ import {
   StyledHeading,
   StyledInputWrap,
 } from "./DocumentsPageStyles";
-import { useSpring } from "@react-spring/web";
-import { springConfig } from "Theme/constants";
-import { TextAnnotator } from "../../components/advanced/Annotator/Annotator";
-import AnnotatorProvider from "components/advanced/Annotator/AnnotatorProvider";
 
 type DocumentWithResource = {
   document: IResponseDocument;
@@ -158,7 +156,11 @@ export const DocumentsPage: React.FC = ({}) => {
               )}
             </StyledGrid>
             <AnnotatorProvider>
-              <TextAnnotator />
+              <TextAnnotator
+                width={500}
+                height={500}
+                displayLineNumbers={true}
+              />
             </AnnotatorProvider>
             <StyledInputWrap onClick={() => inputRef.current?.click()}>
               Upload document

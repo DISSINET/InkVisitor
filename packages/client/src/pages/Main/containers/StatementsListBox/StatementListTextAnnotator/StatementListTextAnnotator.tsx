@@ -1,3 +1,4 @@
+import { Annotator } from "@inkvisitor/annotator/src/lib";
 import { UserEnums } from "@shared/enums";
 import {
   IEntity,
@@ -7,10 +8,12 @@ import {
 } from "@shared/types";
 import { UseMutationResult } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
+import TextAnnotator from "components/advanced/Annotator/Annotator";
+import AnnotatorProvider from "components/advanced/Annotator/AnnotatorProvider";
 import { useSearchParams } from "hooks";
 import React from "react";
 import { CellProps } from "react-table";
-import { useAppDispatch } from "redux/hooks";
+import { useAppDispatch, useAppSelector } from "redux/hooks";
 
 type CellType = CellProps<IResponseStatement>;
 
@@ -62,7 +65,25 @@ export const StatementListTextAnnotator: React.FC<
   setSelectedRows,
 }) => {
   const dispatch = useAppDispatch();
+
+  const panelWidths: number[] = useAppSelector(
+    (state) => state.layout.panelWidths
+  );
+
   const { territoryId, setStatementId } = useSearchParams();
 
-  return <div>here comes the annotator</div>;
+  console.log(panelWidths);
+
+  return (
+    <div>
+      <div>First line</div>
+      <AnnotatorProvider>
+        <TextAnnotator
+          width={panelWidths[2]}
+          displayLineNumbers={true}
+          height={500}
+        />
+      </AnnotatorProvider>
+    </div>
+  );
 };
