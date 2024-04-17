@@ -32,6 +32,17 @@ export const StyledMoveToParent = styled.div`
   margin-left: 0.3rem;
   margin-top: 0.3rem;
 `;
+export const StyledModeSwitcher = styled.div`
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
+  font-weight: ${({ theme }) => theme.fontWeight["normal"]};
+  display: flex;
+  align-items: center;
+  float: left;
+  color: ${({ theme }) => theme.color["info"]};
+  margin-bottom: ${({ theme }) => theme.space[2]};
+  margin-left: 0.3rem;
+  margin-top: 0.3rem;
+`;
 export const StyledHeading = styled.span`
   color: ${({ theme }) => theme.color["black"]};
   word-wrap: break-word;

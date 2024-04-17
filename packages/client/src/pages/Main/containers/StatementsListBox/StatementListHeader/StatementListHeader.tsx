@@ -32,6 +32,7 @@ import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { DropdownItem } from "types";
 import { collectTerritoryChildren, searchTree } from "utils/utils";
 import { v4 as uuidv4 } from "uuid";
+import { StatementListDisplayMode } from "../StatementListBox";
 import {
   StyledActionsWrapper,
   StyledCheckboxWrapper,
@@ -42,6 +43,7 @@ import {
   StyledHeaderBreadcrumbRow,
   StyledHeaderRow,
   StyledHeading,
+  StyledModeSwitcher,
   StyledMoveToParent,
   StyledSuggesterRow,
 } from "./StatementListHeaderStyles";
@@ -70,6 +72,9 @@ interface StatementListHeader {
     unknown
   >;
   isFavorited?: boolean;
+
+  displayMode: StatementListDisplayMode;
+  handleDisplayModeChange: (newMode: StatementListDisplayMode) => void;
 
   isAllSelected: boolean;
   selectedRows: string[];
@@ -115,6 +120,9 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
   isAllSelected,
   selectedRows,
   setSelectedRows,
+
+  displayMode,
+  handleDisplayModeChange,
 
   moveStatementsMutation,
   duplicateStatementsMutation,
@@ -305,6 +313,27 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
             : "no territory selected"}
         </StyledHeading>
 
+        <StyledModeSwitcher>
+          {"Mode "}
+          <ButtonGroup style={{ marginLeft: "5px" }}>
+            <Button
+              color="success"
+              label="list"
+              onClick={() => {
+                handleDisplayModeChange(StatementListDisplayMode.LIST);
+              }}
+              inverted={displayMode === StatementListDisplayMode.TEXT}
+            ></Button>
+            <Button
+              color="success"
+              label="annotator"
+              onClick={() => {
+                handleDisplayModeChange(StatementListDisplayMode.TEXT);
+              }}
+              inverted={displayMode === StatementListDisplayMode.LIST}
+            ></Button>
+          </ButtonGroup>
+        </StyledModeSwitcher>
         <StyledMoveToParent>
           {"Move to parent:\xa0"}
           <EntitySuggester
