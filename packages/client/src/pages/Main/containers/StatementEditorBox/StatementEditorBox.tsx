@@ -53,7 +53,6 @@ export const StatementEditorBox: React.FC = () => {
       if (selectedDetailId === statementId) {
         queryClient.invalidateQueries({ queryKey: ["entity"] });
       }
-      dispatch(setDisableStatementListScroll(true));
       queryClient.invalidateQueries({ queryKey: ["statement"] });
       queryClient.invalidateQueries({ queryKey: ["territory"] });
       if (variables.label !== undefined) {
