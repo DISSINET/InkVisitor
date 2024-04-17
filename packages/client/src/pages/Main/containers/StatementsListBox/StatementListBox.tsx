@@ -21,6 +21,7 @@ import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { StatementListHeader } from "./StatementListHeader/StatementListHeader";
 import { StatementListTable } from "./StatementListTable/StatementListTable";
 import { StyledEmptyState, StyledTableWrapper } from "./StatementLitBoxStyles";
+import { setDisableStatementListScroll } from "redux/features/statementList/disableStatementListScrollSlice";
 
 const initialData: {
   statements: IResponseStatement[];
@@ -52,6 +53,10 @@ export const StatementListBox: React.FC = () => {
     removeDetailId,
     appendDetailId,
   } = useSearchParams();
+
+  useEffect(() => {
+    dispatch(setDisableStatementListScroll(false));
+  }, [statementId, territoryId, statementListOpened]);
 
   useEffect(() => {
     if (!detailIdArray.length && !statementListOpened) {
@@ -191,19 +196,20 @@ export const StatementListBox: React.FC = () => {
       setStatementId(variables.id);
       queryClient.invalidateQueries({ queryKey: ["territory"] });
       queryClient.invalidateQueries({ queryKey: ["tree"] });
+      dispatch(setDisableStatementListScroll(false));
     },
   });
 
-  const actantsCreateMutation = useMutation({
+  const statementCreateMutation = useMutation({
     mutationFn: async (newStatement: IStatement) =>
       await api.entityCreate(newStatement),
     onSuccess: (data, variables) => {
-      toast.info(`Statement created!`);
       queryClient.invalidateQueries({
         queryKey: ["territory", "statement-list", territoryId],
       });
       setStatementId(variables.id);
       queryClient.invalidateQueries({ queryKey: ["tree"] });
+      dispatch(setDisableStatementListScroll(false));
     },
     onError: () => {
       toast.error(`Error: Statement not created!`);
@@ -255,7 +261,7 @@ export const StatementListBox: React.FC = () => {
           newStatement.data.territory as { order: number; territoryId: string }
         ).order = newOrder;
 
-        actantsCreateMutation.mutate(newStatement);
+        statementCreateMutation.mutate(newStatement);
       }
     }
   };
@@ -436,7 +442,7 @@ export const StatementListBox: React.FC = () => {
           isFetching ||
           removeStatementMutation.isPending ||
           addStatementAtTheEndMutation.isPending ||
-          actantsCreateMutation.isPending ||
+          statementCreateMutation.isPending ||
           statementUpdateMutation.isPending ||
           moveStatementsMutation.isPending ||
           duplicateStatementsMutation.isPending ||
