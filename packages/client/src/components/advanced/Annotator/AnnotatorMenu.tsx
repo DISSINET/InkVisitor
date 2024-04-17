@@ -43,7 +43,7 @@ export const TextAnnotatorMenu = ({
               onSelected={(newAnchorId) => {
                 onAnchorAdd(newAnchorId);
               }}
-              inputWidth={300}
+              inputWidth={200}
             />
           </StyledAnnotatorItem>
           <StyledAnnotatorItem>

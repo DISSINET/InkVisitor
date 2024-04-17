@@ -160,6 +160,7 @@ export const DocumentsPage: React.FC = ({}) => {
                 width={500}
                 height={500}
                 displayLineNumbers={true}
+                initialText="document"
               />
             </AnnotatorProvider>
             <StyledInputWrap onClick={() => inputRef.current?.click()}>

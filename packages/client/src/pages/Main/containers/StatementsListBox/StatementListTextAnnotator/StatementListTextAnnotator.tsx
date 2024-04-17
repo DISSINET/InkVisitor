@@ -82,6 +82,7 @@ export const StatementListTextAnnotator: React.FC<
           width={panelWidths[2]}
           displayLineNumbers={true}
           height={500}
+          initialText="ahoj"
         />
       </AnnotatorProvider>
     </div>

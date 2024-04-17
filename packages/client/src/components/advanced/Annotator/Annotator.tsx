@@ -1,4 +1,4 @@
-import { Annotator, Highlighted, example } from "@inkvisitor/annotator/src/lib";
+import { Annotator, Highlighted, Mode } from "@inkvisitor/annotator/src/lib";
 import { IEntity } from "@shared/types";
 import api from "api";
 import { Button } from "components/basic/Button/Button";
@@ -20,12 +20,14 @@ interface TextAnnotatorProps {
   width: number;
   height: number;
   displayLineNumbers: boolean;
+  initialText: string;
 }
 
 export const TextAnnotator = ({
   width = 400,
   height = 500,
   displayLineNumbers = true,
+  initialText,
 }: TextAnnotatorProps) => {
   const { annotator, setAnnotator } = useAnnotator();
 
@@ -37,6 +39,8 @@ export const TextAnnotator = ({
   const scroller = useRef(null);
   const lines = useRef(null);
   const [highlighted, setSelected] = useState<Highlighted>();
+
+  const [annotatorMode, setAnnotatorMode] = useState<Mode>("highlight");
 
   const [selectedText, setSelectedText] = useState<string>("");
   const [selectedAnchors, setSelectedAnchors] = useState<string[]>([]);
@@ -79,7 +83,7 @@ export const TextAnnotator = ({
       return;
     }
 
-    const annotator = new Annotator(mainCanvas.current, example);
+    const annotator = new Annotator(mainCanvas.current, initialText);
     annotator.setMode("highlight");
     annotator.addScroller(scroller.current);
 
@@ -98,6 +102,7 @@ export const TextAnnotator = ({
       };
     });
 
+    annotator.text;
     annotator.draw();
     setAnnotator(annotator);
   }, []);
@@ -105,14 +110,14 @@ export const TextAnnotator = ({
   const topBottomSelection = useMemo<boolean>(() => {
     const selectedText = annotator?.cursor?.getSelected();
 
-    return (selectedText?.[0]?.yLine ?? 0) < (selectedText?.[1]?.yLine ?? 0);
+    return (selectedText?.[0]?.yLine ?? 0) > (selectedText?.[1]?.yLine ?? 0);
   }, [annotator?.cursor?.yLine]);
 
   const menuPositionY = useMemo<number>(() => {
     const yLine = annotator?.cursor?.yLine ?? 0;
     const lineHeight = annotator?.lineHeight ?? 0;
 
-    return yLine * lineHeight + (topBottomSelection ? 30 : -30);
+    return yLine * lineHeight + (topBottomSelection ? 50 : -30);
   }, [annotator?.cursor?.yLine, annotator?.lineHeight, topBottomSelection]);
 
   return (
@@ -144,11 +149,12 @@ export const TextAnnotator = ({
           <Button
             key="raw"
             icon={<FaMarker size={11} />}
-            color={annotator.text.mode === "raw" ? "success" : "gray"}
+            color="success"
             label="edit"
-            inverted
+            inverted={annotatorMode !== "raw"}
             onClick={() => {
               annotator.setMode("raw");
+              setAnnotatorMode("raw");
               annotator.draw();
             }}
             tooltipLabel="activate edit mode"
@@ -157,10 +163,11 @@ export const TextAnnotator = ({
             key="hl"
             icon={<FaPen size={11} />}
             label="highlight"
-            color={annotator.text.mode === "highlight" ? "success" : "gray"}
-            inverted
+            color="success"
+            inverted={annotatorMode !== "highlight"}
             onClick={() => {
               annotator.setMode("highlight");
+              setAnnotatorMode("highlight");
               annotator.draw();
             }}
             tooltipLabel="activate syntax higlighting mode"
