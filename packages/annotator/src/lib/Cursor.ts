@@ -18,6 +18,9 @@ export default class Cursor implements IRelativeCoordinates {
   xLine: number;
   yLine: number;
 
+  fillColor: string;
+  fillOpacity: number;
+
   // highlighted area must use absolute coordinates - highlighted area stays in position while scrolling
   private selecting: boolean = false;
   private selectStart?: IAbsCoordinates;
@@ -26,9 +29,18 @@ export default class Cursor implements IRelativeCoordinates {
   // Width of cursor point in px
   static Width = 3
   
-  constructor(xLine: number = -1, yLine: number = -1) {
+  constructor(xLine: number = -1, yLine: number = -1, fillColor = "blue", fillOpacity = 0.2) {
+    this.fillColor = fillColor;
+    this.fillOpacity = fillOpacity;
     this.xLine = xLine;
     this.yLine = yLine;
+  }
+
+  setFillColor(fillColor: string): void {
+    this.fillColor = fillColor
+  }
+  setFillOpacity(fillOpacity: number): void {
+    this.fillOpacity = fillOpacity
   }
 
   yToLineI(y: number, lineHeight: number): number {
@@ -173,8 +185,8 @@ export default class Cursor implements IRelativeCoordinates {
         hStart = hEnd;
         hEnd = tmpSwitch;
       }
-      ctx.fillStyle = "blue";
-      ctx.globalAlpha = 0.2;
+      ctx.fillStyle = this.fillColor;
+      ctx.globalAlpha = this.fillOpacity;
 
       for (let i = 0; i <= viewport.lineEnd - viewport.lineStart; i++) {
         const absY = viewport.lineStart + i;

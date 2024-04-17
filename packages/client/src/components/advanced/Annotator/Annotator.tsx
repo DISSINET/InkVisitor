@@ -15,6 +15,7 @@ import {
   StyledScrollerCursor,
   StyledScrollerViewport,
 } from "./AnnotatorStyles";
+import theme from "Theme/theme";
 
 interface TextAnnotatorProps {
   width: number;
@@ -87,6 +88,8 @@ export const TextAnnotator = ({
     annotator.setMode("highlight");
     annotator.addScroller(scroller.current);
 
+    annotator.cursor.setFillColor(theme.color.success);
+
     if (displayLineNumbers && lines.current) {
       annotator.addLines(lines.current);
     }
@@ -97,7 +100,7 @@ export const TextAnnotator = ({
       return {
         mode: "background",
         style: {
-          color: "pink",
+          color: theme.color.danger,
         },
       };
     });
@@ -140,25 +143,19 @@ export const TextAnnotator = ({
           width={wTextArea}
           height="400px"
         />
-        <StyledScrollerViewport ref={scroller}>
-          <StyledScrollerCursor />
+        <StyledScrollerViewport
+          ref={scroller}
+          style={{
+            background: theme.color.success,
+          }}
+        >
+          <StyledScrollerCursor
+            style={{ backgroundColor: theme.color.primary }}
+          />
         </StyledScrollerViewport>
       </StyledCanvasWrapper>
       {annotator && (
         <ButtonGroup>
-          <Button
-            key="raw"
-            icon={<FaMarker size={11} />}
-            color="success"
-            label="edit"
-            inverted={annotatorMode !== "raw"}
-            onClick={() => {
-              annotator.setMode("raw");
-              setAnnotatorMode("raw");
-              annotator.draw();
-            }}
-            tooltipLabel="activate edit mode"
-          />
           <Button
             key="hl"
             icon={<FaPen size={11} />}
@@ -171,6 +168,19 @@ export const TextAnnotator = ({
               annotator.draw();
             }}
             tooltipLabel="activate syntax higlighting mode"
+          />
+          <Button
+            key="raw"
+            icon={<FaMarker size={11} />}
+            color="success"
+            label="edit"
+            inverted={annotatorMode !== "raw"}
+            onClick={() => {
+              annotator.setMode("raw");
+              setAnnotatorMode("raw");
+              annotator.draw();
+            }}
+            tooltipLabel="activate edit mode"
           />
         </ButtonGroup>
       )}
