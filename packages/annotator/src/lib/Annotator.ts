@@ -283,10 +283,11 @@ export class Annotator {
     this.lines = new Lines(canvasElement, this.lineHeight, this.charWidth);
   }
 
-  getAnnotations(startSegment: SegmentPosition, endSegment: SegmentPosition): string[] {
+  getAnnotations(startSegment: SegmentPosition|null, endSegment: SegmentPosition|null): string[] {
     // remaining opened tags - true = open, false = closed
     const tags: Record<string, boolean> = {};
 
+    // find remaining opened tags from start to end segment (incl)
     if (endSegment) {
       for (let i = 0; i <= endSegment.segmentIndex; i++) {
         const segment = this.text.segments[i];
@@ -309,6 +310,7 @@ export class Annotator {
       }  
     }
 
+    // if this is range based request, add each tag(closing or opening) in this range
     if (startSegment && endSegment) {
       for (let i = startSegment.segmentIndex; i < endSegment.segmentIndex; i++) {
         const [segOpened, segClosed] = this.text.segments[i].getTagsForPosition(startSegment);
@@ -390,17 +392,8 @@ export class Annotator {
       }
     }
 
-    if (this.onHighlightCb) {
-      const startSegment: SegmentPosition = {   
-        segmentIndex: 0,
-        lineIndex: 0,
-        charInLineIndex: 0,
-        parsedTextIndex: 0,
-        rawTextIndex: 0
-      };
-      const endSegment = this.text.cursorToIndex(this.viewport, this.cursor) as SegmentPosition;
-     
-      const annotated: string[] = []; //this.getAnnotations(startSegment, endSegment);
+    if (this.onHighlightCb) {     
+      const annotated = this.getAnnotations(null, this.text.cursorToIndex(this.viewport, this.cursor));
       if (annotated.length > 0) {
         const tag = annotated.pop() as string
         const highlight = this.onHighlightCb(tag);
@@ -450,6 +443,10 @@ export class Annotator {
     }
   }
 
+  /**
+   * change display mode and recalculate drawn lines
+   * @param mode 
+   */
   setMode(mode: Mode) {
     this.element.classList.remove(this.text.mode)
     this.element.classList.add(mode)
