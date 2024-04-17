@@ -41,6 +41,7 @@ import {
   StyledFaStar,
   StyledHeader,
   StyledHeaderBreadcrumbRow,
+  StyledHeaderBreadcrumbRowLeft,
   StyledHeaderRow,
   StyledHeading,
   StyledModeSwitcher,
@@ -292,17 +293,33 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
   return (
     <StyledHeader>
       <StyledHeaderBreadcrumbRow>
-        {selectedTerritoryPath &&
-          selectedTerritoryPath.map((territoryId: string, key: number) => {
-            return (
-              <React.Fragment key={key}>
-                <BreadcrumbItem territoryId={territoryId} />
-              </React.Fragment>
-            );
-          })}
-        <React.Fragment key="this-territory">
-          <BreadcrumbItem territoryId={territoryId} territoryData={data} />
-        </React.Fragment>
+        <StyledHeaderBreadcrumbRowLeft>
+          {selectedTerritoryPath &&
+            selectedTerritoryPath.map((territoryId: string, key: number) => {
+              return (
+                <React.Fragment key={key}>
+                  <BreadcrumbItem territoryId={territoryId} />
+                </React.Fragment>
+              );
+            })}
+          <React.Fragment key="this-territory">
+            <BreadcrumbItem territoryId={territoryId} territoryData={data} />
+          </React.Fragment>
+        </StyledHeaderBreadcrumbRowLeft>
+        <StyledMoveToParent>
+          {"Move:\xa0"}
+          <EntitySuggester
+            disableTemplatesAccept
+            filterEditorRights
+            inputWidth={96}
+            disableCreate
+            categoryTypes={[EntityEnums.Class.Territory]}
+            onSelected={(newSelectedId: string) => {
+              moveTerritoryMutation.mutate(newSelectedId);
+            }}
+            excludedActantIds={excludedMoveTerritories}
+          />
+        </StyledMoveToParent>
       </StyledHeaderBreadcrumbRow>
 
       <StyledHeaderRow>
@@ -336,20 +353,6 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
             ></Button>
           </ButtonGroup>
         </StyledModeSwitcher>
-        <StyledMoveToParent>
-          {"Move to parent:\xa0"}
-          <EntitySuggester
-            disableTemplatesAccept
-            filterEditorRights
-            inputWidth={96}
-            disableCreate
-            categoryTypes={[EntityEnums.Class.Territory]}
-            onSelected={(newSelectedId: string) => {
-              moveTerritoryMutation.mutate(newSelectedId);
-            }}
-            excludedActantIds={excludedMoveTerritories}
-          />
-        </StyledMoveToParent>
       </StyledHeaderRow>
 
       <StyledSuggesterRow>

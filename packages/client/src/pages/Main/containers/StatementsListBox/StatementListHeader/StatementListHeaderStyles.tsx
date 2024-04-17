@@ -8,18 +8,15 @@ export const StyledHeader = styled.div`
   padding: ${({ theme }) => theme.space[3]};
 `;
 export const StyledHeaderBreadcrumbRow = styled.div`
-  display: flex;
+  display: inline-flex;
   align-items: center;
   flex-wrap: wrap;
+  justify-content: space-between;
 `;
-export const StyledHeaderRow = styled.h3`
-  /* overflow: hidden; */
-`;
-export const StyledFaStar = styled(FaStar)`
-  float: left;
-  margin-top: 0.5rem;
-  margin-right: 0.3rem;
-  color: ${({ theme }) => theme.color["warning"]};
+
+export const StyledHeaderBreadcrumbRowLeft = styled.div`
+  display: inline-flex;
+  align-items: center;
 `;
 export const StyledMoveToParent = styled.div`
   font-size: ${({ theme }) => theme.fontSize["sm"]};
@@ -32,12 +29,21 @@ export const StyledMoveToParent = styled.div`
   margin-left: 0.3rem;
   margin-top: 0.3rem;
 `;
+export const StyledHeaderRow = styled.h3`
+  /* overflow: hidden; */
+`;
+export const StyledFaStar = styled(FaStar)`
+  float: left;
+  margin-top: 0.5rem;
+  margin-right: 0.3rem;
+  color: ${({ theme }) => theme.color["warning"]};
+`;
 export const StyledModeSwitcher = styled.div`
   font-size: ${({ theme }) => theme.fontSize["sm"]};
   font-weight: ${({ theme }) => theme.fontWeight["normal"]};
   display: flex;
   align-items: center;
-  float: left;
+  float: right;
   color: ${({ theme }) => theme.color["info"]};
   margin-bottom: ${({ theme }) => theme.space[2]};
   margin-left: 0.3rem;
