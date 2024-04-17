@@ -113,6 +113,19 @@ export class ResponseStatement extends Statement implements IResponseStatement {
     return entity;
   }
 
+  async obtainEntity(entityId: string, req: IRequest): Promise<IEntity> {
+    const storedEntity = this.entities[entityId];
+
+    if (storedEntity) {
+      return storedEntity;
+    }
+
+    const entity = await findEntityById(req.db, entityId);
+
+    this.entities[entityId] = entity;
+    return entity;
+  }
+
   /**
    * Check allowed entity classes for subject / actant1 / actant2 position based on action valencies and adds it to warnings field
    * @param warnings
@@ -162,8 +175,8 @@ export class ResponseStatement extends Statement implements IResponseStatement {
   async getTValidationWarnings(req: IRequest): Promise<IWarning[]> {
     let warnings: IWarning[] = [];
 
-    console.log("");
-    console.log("!!! VALIDATION !!!", this.id);
+    // console.log("");
+    // console.log("!!! VALIDATION !!!", this.id);
 
     const parentTId = this.data.territory?.territoryId as string;
 
@@ -174,9 +187,20 @@ export class ResponseStatement extends Statement implements IResponseStatement {
       ...this.data.actions.map((a) => a.actionId),
     ];
 
+    this.data.actants.forEach((a) => {
+      allEntities.push(...a.classifications.map((c) => c.entityId));
+      allEntities.push(...a.identifications.map((c) => c.entityId));
+      allEntities.push(...a.props.map((c) => c.type.entityId));
+      allEntities.push(...a.props.map((c) => c.value.entityId));
+    });
+    this.data.actions.forEach((a) => {
+      allEntities.push(...a.props.map((c) => c.type.entityId));
+      allEntities.push(...a.props.map((c) => c.value.entityId));
+    });
+
     for (const ai in allEntities) {
       const entityId = allEntities[ai];
-      const entityData = this.getEntity(entityId);
+      const entityData = await this.obtainEntity(entityId, req);
       const entityModel = getEntityClass({ ...entityData });
       const entity = new ResponseEntityDetail(entityModel);
 
@@ -189,7 +213,7 @@ export class ResponseStatement extends Statement implements IResponseStatement {
       const lineageTIds = [parentTId, ...treeCache.tree.idMap[parentTId].path];
 
       for (const tId of lineageTIds) {
-        const tEntity = this.getEntity(tId) as ITerritory;
+        const tEntity = (await this.obtainEntity(tId, req)) as ITerritory;
         const tValidations = tEntity.data.validations;
 
         for (const tValidation of tValidations ?? []) {
@@ -326,7 +350,6 @@ export class ResponseStatement extends Statement implements IResponseStatement {
                     req.db,
                     propValueEntityId
                   );
-                  console.log(allowedClasses, propValueEntity);
                   if (
                     propType?.includes(p.type.entityId) &&
                     !allowedClasses?.includes(propValueEntity.class)
@@ -340,7 +363,6 @@ export class ResponseStatement extends Statement implements IResponseStatement {
               }
               // type is defined, and value entities are defined
               else if (propType?.length && allowedEntities?.length) {
-                console.log(entity.props, propType, allowedEntities);
                 if (
                   !entity.props.some(
                     (p) =>
