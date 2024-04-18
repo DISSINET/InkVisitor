@@ -354,7 +354,6 @@ export const Suggester: React.FC<Suggester> = ({
           <FloatingPortal id="page">
             <StyledSuggesterList
               ref={refs.setFloating}
-              noLeftMargin={categories.length === 1}
               onMouseEnter={() => setIsHovered(true)}
               onMouseLeave={() => setIsHovered(false)}
               style={{

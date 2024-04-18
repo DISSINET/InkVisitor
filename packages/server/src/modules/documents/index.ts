@@ -127,7 +127,9 @@ export default Router()
   .post(
     "/",
     asyncRouteHandler<IResponseGeneric>(async (request: IRequest) => {
+      console.log("before model");
       const model = new Document(request.body as Record<string, unknown>);
+      console.log("after model", model);
 
       if (!model.isValid()) {
         throw new ModelNotValidError("");

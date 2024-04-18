@@ -138,7 +138,7 @@ export const DocumentRow: React.FC<DocumentRow> = ({
           />
         )}
       </StyledReference>
-      <StyledCount>{document.referencedEntityIds.length}</StyledCount>
+      <StyledCount>{document.referencedEntityIds.length} anchors</StyledCount>
     </>
   );
 };
