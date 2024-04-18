@@ -1,33 +1,23 @@
-import { Annotator } from "@inkvisitor/annotator/src/lib";
 import { EntityEnums, UserEnums } from "@shared/enums";
 import {
   IEntity,
   IResource,
-  IResponseDocument,
   IResponseGeneric,
   IResponseStatement,
   IStatement,
 } from "@shared/types";
-import {
-  UseMutationResult,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
-import theme from "Theme/theme";
+import { UseMutationResult, useQuery } from "@tanstack/react-query";
 import api from "api";
 import { AxiosResponse } from "axios";
-import { BaseDropdown, Loader } from "components";
+import { Loader } from "components";
 import { EntitySuggester, EntityTag } from "components/advanced";
 import TextAnnotator from "components/advanced/Annotator/Annotator";
 import AnnotatorProvider from "components/advanced/Annotator/AnnotatorProvider";
-import { useSearchParams } from "hooks";
-import React, { useEffect, useMemo, useState } from "react";
-import { ActionMeta } from "react-select";
+import React, { useMemo, useState } from "react";
+import { TiDocumentText } from "react-icons/ti";
 import { CellProps } from "react-table";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { DropdownItem } from "types";
 import { StyledDocumentTag } from "../StatementLitBoxStyles";
-import { TiDocumentText } from "react-icons/ti";
 
 type CellType = CellProps<IResponseStatement>;
 
@@ -60,12 +50,6 @@ interface StatementListTextAnnotator {
 
   selectedRows: string[];
   setSelectedRows: React.Dispatch<React.SetStateAction<string[]>>;
-}
-
-interface DucumentOption {
-  value: string;
-  label: string;
-  info?: string;
 }
 
 export const StatementListTextAnnotator: React.FC<
@@ -145,6 +129,7 @@ export const StatementListTextAnnotator: React.FC<
           <EntitySuggester
             disableCreate={false}
             categoryTypes={[EntityEnums.Class.Resource]}
+            preSuggestions={resources?.filter((res, ri) => ri < 10)}
             onPicked={(entity) => {
               setSelectedResource(entity as IResource);
             }}

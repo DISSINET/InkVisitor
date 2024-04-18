@@ -65,6 +65,16 @@ export const TextAnnotatorMenu = ({
               })}
             </div>
           </StyledAnnotatorItem>
+          <StyledAnnotatorItem>
+            <StyledAnnotatorItemTitle>
+              Create new Statement
+            </StyledAnnotatorItemTitle>
+          </StyledAnnotatorItem>
+          <StyledAnnotatorItem>
+            <StyledAnnotatorItemTitle>
+              Segmentate to statements
+            </StyledAnnotatorItemTitle>
+          </StyledAnnotatorItem>
         </StyledAnnotatorMenu>
       ) : (
         <></>
