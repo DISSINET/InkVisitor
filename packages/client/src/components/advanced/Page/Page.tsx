@@ -145,6 +145,7 @@ export const Page: React.FC<Page> = ({ children }) => {
                 userRole={userRole || ""}
                 setTempLocation={setTempLocation}
                 tempLocation={tempLocation}
+                userIsFetching={isFetchingUser}
               />
             )}
           </>

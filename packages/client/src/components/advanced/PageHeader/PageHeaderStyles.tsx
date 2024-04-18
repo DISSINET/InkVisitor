@@ -67,7 +67,6 @@ export const StyledThemeSwitcherIcon = styled.div<StyledThemeSwitcherIcon>`
 export const StyledUser = styled.div`
   display: flex;
   align-items: center;
-  margin-right: ${({ theme }) => theme.space[4]};
 `;
 
 export const StyledMenu = styled.div`
@@ -118,4 +117,11 @@ export const StyledSandboxText = styled.div`
 export const StyledSpace = styled.div`
   display: flex;
   flex-grow: 1;
+`;
+export const StyledLoggedAsWrap = styled.div`
+  min-width: 3rem;
+  position: relative;
+  margin-right: 1rem;
+  display: flex;
+  align-items: center;
 `;
