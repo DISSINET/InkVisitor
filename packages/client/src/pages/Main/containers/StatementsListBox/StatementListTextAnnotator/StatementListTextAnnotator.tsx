@@ -135,7 +135,21 @@ export const StatementListTextAnnotator: React.FC<
 
   return (
     <div>
-      <div>
+      <div style={{ alignItems: "center" }}>
+        <div style={{}}>
+          {selectedResource
+            ? "selected resource"
+            : "select resource with document"}{" "}
+        </div>
+        {!selectedResource && (
+          <EntitySuggester
+            disableCreate={false}
+            categoryTypes={[EntityEnums.Class.Resource]}
+            onPicked={(entity) => {
+              setSelectedResource(entity as IResource);
+            }}
+          />
+        )}
         {selectedResource && (
           <EntityTag
             entity={selectedResource}
@@ -146,15 +160,7 @@ export const StatementListTextAnnotator: React.FC<
             }}
           />
         )}
-        {!selectedResource && (
-          <EntitySuggester
-            disableCreate={false}
-            categoryTypes={[EntityEnums.Class.Resource]}
-            onPicked={(entity) => {
-              setSelectedResource(entity as IResource);
-            }}
-          />
-        )}
+
         {!selectedDocumentIsFetching && <Loader />}
         {!selectedDocumentIsFetching && selectedDocument && (
           <StyledDocumentTag>
@@ -170,16 +176,18 @@ export const StatementListTextAnnotator: React.FC<
             </span>
           )}
       </div>
-      <AnnotatorProvider>
-        {selectedDocument && (
-          <TextAnnotator
-            width={panelWidths[1]}
-            displayLineNumbers={true}
-            height={500}
-            initialText={selectedDocument ? selectedDocument.content : ""}
-          />
-        )}
-      </AnnotatorProvider>
+      <div style={{ marginTop: "2px" }}>
+        <AnnotatorProvider>
+          {selectedDocument && (
+            <TextAnnotator
+              width={panelWidths[1]}
+              displayLineNumbers={true}
+              height={500}
+              initialText={selectedDocument ? selectedDocument.content : ""}
+            />
+          )}
+        </AnnotatorProvider>
+      </div>
     </div>
   );
 };

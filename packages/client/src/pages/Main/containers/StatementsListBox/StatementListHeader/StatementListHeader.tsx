@@ -329,30 +329,6 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
             ? `T:\xa0${trimTerritoryLabel(data.label)}`
             : "no territory selected"}
         </StyledHeading>
-
-        <StyledModeSwitcher>
-          {"Mode "}
-          <ButtonGroup style={{ marginLeft: "5px" }}>
-            <Button
-              color="success"
-              icon={<FaList />}
-              label="list"
-              onClick={() => {
-                handleDisplayModeChange(StatementListDisplayMode.LIST);
-              }}
-              inverted={displayMode === StatementListDisplayMode.TEXT}
-            ></Button>
-            <Button
-              color="success"
-              icon={<FaHighlighter />}
-              label="annotator"
-              onClick={() => {
-                handleDisplayModeChange(StatementListDisplayMode.TEXT);
-              }}
-              inverted={displayMode === StatementListDisplayMode.LIST}
-            ></Button>
-          </ButtonGroup>
-        </StyledModeSwitcher>
       </StyledHeaderRow>
 
       <StyledSuggesterRow>
@@ -452,6 +428,31 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
             />
           </ButtonGroup>
         )}
+      </StyledSuggesterRow>
+      <StyledSuggesterRow>
+        <StyledModeSwitcher>
+          {"Mode "}
+          <ButtonGroup style={{ marginLeft: "5px" }}>
+            <Button
+              color="success"
+              icon={<FaList />}
+              label="list"
+              onClick={() => {
+                handleDisplayModeChange(StatementListDisplayMode.LIST);
+              }}
+              inverted={displayMode === StatementListDisplayMode.TEXT}
+            ></Button>
+            <Button
+              color="success"
+              icon={<FaHighlighter />}
+              label="annotator"
+              onClick={() => {
+                handleDisplayModeChange(StatementListDisplayMode.TEXT);
+              }}
+              inverted={displayMode === StatementListDisplayMode.LIST}
+            ></Button>
+          </ButtonGroup>
+        </StyledModeSwitcher>
       </StyledSuggesterRow>
     </StyledHeader>
   );

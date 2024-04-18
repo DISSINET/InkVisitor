@@ -386,7 +386,7 @@ export const StatementListBox: React.FC = () => {
         />
       )}
 
-      {displayMode === "text" && (
+      {data && displayMode === "text" && (
         <StatementListTextAnnotator
           statements={statements}
           handleRowClick={(rowId: string) => {
@@ -404,42 +404,36 @@ export const StatementListBox: React.FC = () => {
           setSelectedRows={setSelectedRows}
         />
       )}
-      {displayMode === "list" &&
-        (statements ? (
-          <StyledTableWrapper id="Statements-box-table">
-            <StatementListTable
-              statements={statements}
-              handleRowClick={(rowId: string) => {
-                dispatch(setShowWarnings(false));
-                setStatementId(rowId);
-              }}
-              actantsUpdateMutation={statementUpdateMutation}
-              entities={entities}
-              right={right}
-              cloneStatementMutation={cloneStatementMutation}
-              setStatementToDelete={setStatementToDelete}
-              setShowSubmit={setShowSubmit}
-              addStatementAtCertainIndex={addStatementAtCertainIndex}
-              selectedRows={selectedRows}
-              setSelectedRows={setSelectedRows}
-            />
-          </StyledTableWrapper>
-        ) : (
-          <>
-            {!territoryId && (
-              <>
-                <StyledEmptyState>
-                  <BsInfoCircle size="23" />
-                </StyledEmptyState>
-                <StyledEmptyState>
-                  {
-                    "No territory selected yet. Pick one from the territory tree"
-                  }
-                </StyledEmptyState>
-              </>
-            )}
-          </>
-        ))}
+      {data && displayMode === "list" && statements && (
+        <StyledTableWrapper id="Statements-box-table">
+          <StatementListTable
+            statements={statements}
+            handleRowClick={(rowId: string) => {
+              dispatch(setShowWarnings(false));
+              setStatementId(rowId);
+            }}
+            actantsUpdateMutation={statementUpdateMutation}
+            entities={entities}
+            right={right}
+            cloneStatementMutation={cloneStatementMutation}
+            setStatementToDelete={setStatementToDelete}
+            setShowSubmit={setShowSubmit}
+            addStatementAtCertainIndex={addStatementAtCertainIndex}
+            selectedRows={selectedRows}
+            setSelectedRows={setSelectedRows}
+          />
+        </StyledTableWrapper>
+      )}
+      {!territoryId && (
+        <>
+          <StyledEmptyState>
+            <BsInfoCircle size="23" />
+          </StyledEmptyState>
+          <StyledEmptyState>
+            {"No territory selected yet. Pick one from the territory tree"}
+          </StyledEmptyState>
+        </>
+      )}
 
       <Submit
         title="Delete statement"
