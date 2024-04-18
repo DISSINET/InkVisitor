@@ -36,7 +36,9 @@ export const TextAnnotatorMenu = ({
           }}
         >
           <StyledAnnotatorItem>
-            <StyledAnnotatorItemTitle>Add new anchor</StyledAnnotatorItemTitle>
+            <StyledAnnotatorItemTitle>
+              Create new anchor
+            </StyledAnnotatorItemTitle>
             <EntitySuggester
               categoryTypes={classesAll}
               initTyped={text.length > 20 ? text.substring(0, 20) : text}
@@ -48,7 +50,7 @@ export const TextAnnotatorMenu = ({
           </StyledAnnotatorItem>
           <StyledAnnotatorItem>
             <StyledAnnotatorItemTitle>
-              Existing anchors
+              Anchors in selection
             </StyledAnnotatorItemTitle>
             <div>
               {anchors.map((anchor) => {
@@ -67,12 +69,12 @@ export const TextAnnotatorMenu = ({
           </StyledAnnotatorItem>
           <StyledAnnotatorItem>
             <StyledAnnotatorItemTitle>
-              Create new Statement
+              Create new Statement from selection
             </StyledAnnotatorItemTitle>
           </StyledAnnotatorItem>
           <StyledAnnotatorItem>
             <StyledAnnotatorItemTitle>
-              Segmentate to statements
+              Segment selection into Statements
             </StyledAnnotatorItemTitle>
           </StyledAnnotatorItem>
         </StyledAnnotatorMenu>
