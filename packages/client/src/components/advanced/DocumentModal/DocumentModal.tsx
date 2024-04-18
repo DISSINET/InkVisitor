@@ -2,19 +2,12 @@ import { IDocument } from "@shared/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import theme, { ThemeFontSize } from "Theme/theme";
 import api from "api";
-import {
-  Modal,
-  ModalContent,
-  ModalFooter,
-  ButtonGroup,
-  Button,
-  Input,
-  ModalHeader,
-} from "components";
-import React, { useEffect, useState } from "react";
-import { FaMinus, FaPlus } from "react-icons/fa";
+import { Modal, ModalContent, ModalFooter, ModalHeader } from "components";
+import React, { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import { getShortLabelByLetterCount } from "utils/utils";
+import TextAnnotator from "../Annotator/Annotator";
+import AnnotatorProvider from "../Annotator/AnnotatorProvider";
 
 interface DocumentModal {
   entityId?: string;
@@ -47,6 +40,22 @@ export const DocumentModal: React.FC<DocumentModal> = ({
 
   const queryClient = useQueryClient();
 
+  const modalBodyRef = useRef(null);
+  const [modalBodyWidth, setModalBodyWidth] = useState<number>(0);
+  const [modalBodyHeight, setModalBodyHeight] = useState<number>(0);
+
+  // set modalBodyWidth and modalBodyHeight based on the ref
+  useEffect(() => {
+    if (modalBodyRef.current) {
+      console.log(modalBodyRef);
+      // @ts-ignore
+      setModalBodyWidth(modalBodyRef.current.offsetWidth);
+      // @ts-ignore
+      setModalBodyHeight(modalBodyRef.current.offsetHeight);
+    }
+  }, [modalBodyRef.current]);
+  console.log(modalBodyWidth, modalBodyHeight);
+
   const updateDocumentMutation = useMutation({
     mutationFn: async (data: { id: string; doc: Partial<IDocument> }) =>
       api.documentUpdate(data.id, data.doc),
@@ -67,22 +76,23 @@ export const DocumentModal: React.FC<DocumentModal> = ({
   const [fontSize, setFontSize] = useState<number>(2);
 
   return (
-    <Modal width={550} showModal={show} onClose={onClose} fullHeight>
+    <Modal width={1000} showModal={show} onClose={onClose} fullHeight>
       <ModalHeader
         title={
           document?.title && getShortLabelByLetterCount(document.title, 90)
         }
       />
-      <ModalContent column>
-        <Input
-          type="textarea"
-          fullHeightTextArea
-          fontSizeTextArea={fontSizeArray[fontSize]}
-          onChangeFn={(value: string) => setLocalContent(value)}
-          value={localContent}
-          cols={120}
-          changeOnType
-        />
+      <ModalContent>
+        <div ref={modalBodyRef} style={{ height: "100%", width: 1000 }}>
+          <AnnotatorProvider>
+            <TextAnnotator
+              width={modalBodyWidth}
+              height={modalBodyHeight}
+              displayLineNumbers={true}
+              initialText={localContent}
+            />
+          </AnnotatorProvider>
+        </div>
       </ModalContent>
       <ModalFooter>
         <div
@@ -91,49 +101,7 @@ export const DocumentModal: React.FC<DocumentModal> = ({
             justifyContent: "space-between",
             width: "100%",
           }}
-        >
-          <ButtonGroup>
-            <Button
-              key="minus"
-              icon={<FaMinus size={11} />}
-              color="success"
-              inverted
-              disabled={fontSize === 0}
-              onClick={() => setFontSize(fontSize - 1)}
-              tooltipLabel="zoom out"
-            />
-            <Button
-              key="plus"
-              icon={<FaPlus size={11} />}
-              color="success"
-              inverted
-              disabled={fontSize > 5}
-              onClick={() => setFontSize(fontSize + 1)}
-              tooltipLabel="zoom in"
-            />
-          </ButtonGroup>
-          <ButtonGroup>
-            <Button
-              key="cancel"
-              label="Cancel"
-              color="greyer"
-              inverted
-              onClick={onClose}
-            />
-            <Button
-              key="submit"
-              label="Save"
-              color="info"
-              disabled={document?.content === localContent}
-              onClick={() => {
-                updateDocumentMutation.mutate({
-                  id: documentId,
-                  doc: { content: localContent },
-                });
-              }}
-            />
-          </ButtonGroup>
-        </div>
+        ></div>
       </ModalFooter>
     </Modal>
   );
