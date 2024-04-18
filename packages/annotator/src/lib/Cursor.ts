@@ -171,6 +171,8 @@ export default class Cursor implements IRelativeCoordinates {
 
     const { charWidth, lineHeight, charsAtLine } = options;
 
+    ctx.fillStyle = options.mode === "highlight" ? "#cccccc" : "blue";
+
     ctx.fillRect(
       this.xLine * charWidth,
       this.yLine * lineHeight + 2,

@@ -74,11 +74,11 @@
         }
       })
       annotator.onSelectText((text) => {
-        document.getElementById("highlight-container").innerHTML = text;
+        console.log(text)
       });
 
       annotator.onHighlight((entity) => {
-        document.getElementById("highlight-container").innerHTML = text;
+        console.log(entity)
       });
 
       document.getElementById("mode").onclick = () => {

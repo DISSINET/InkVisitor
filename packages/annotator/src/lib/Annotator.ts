@@ -16,6 +16,7 @@ export interface DrawingOptions {
   charWidth: number;
   lineHeight: number;
   charsAtLine: number;
+  mode: Mode
 }
 
 export interface Highlighted {
@@ -175,15 +176,16 @@ export class Annotator {
 
       case "Backspace":
         const segmentBefore = this.text.cursorToIndex(this.viewport, this.cursor)
-        if (segmentBefore?.rawTextIndex === 0) {
-          return
-        }
+   
         this.text.deleteText(this.viewport, this.cursor, 1);
-        const segmentAfter = this.text.cursorToIndex(this.viewport, this.cursor)
+       
+
+        const segmentAfter = this.text.cursorToIndex(this.viewport, this.cursor);
         const xDiff = (segmentAfter?.rawTextIndex || 0) - (segmentBefore?.rawTextIndex || 0)
         this.cursor.move(-1, 0);
         if (this.cursor.xLine < 0) {
           this.cursor.xLine = 0;
+          this.draw();
           return
         }
         if(xDiff > 0) {
@@ -379,6 +381,7 @@ export class Annotator {
         lineHeight: this.lineHeight,
         charWidth: this.charWidth,
         charsAtLine: this.text.charsAtLine,
+        mode: this.text.mode
       });
     }
 
