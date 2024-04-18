@@ -1,15 +1,11 @@
 import { EntityEnums } from "@shared/enums";
-import { IEntity, IResponseDetail, IResponseGeneric } from "@shared/types";
-import {
-  ECASTEMOVariant,
-  ITerritoryData,
-  ITerritoryProtocol,
-} from "@shared/types/territory";
+import { IResponseDetail, IResponseGeneric } from "@shared/types";
+import { ITerritoryData, ITerritoryProtocol } from "@shared/types/territory";
 import { UseMutationResult } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
 import { Input } from "components";
-import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
-import React, { useEffect, useState } from "react";
+import { EntitySuggester, EntityTag } from "components/advanced";
+import React, { useEffect } from "react";
 import {
   StyledGrid,
   StyledLabel,
@@ -19,13 +15,12 @@ import {
 
 const initialProtocol: ITerritoryProtocol = {
   project: "",
-  guidelinesVersion: "",
   guidelinesResource: "",
-  variant: ECASTEMOVariant.SumCASTEMO,
   description: "",
   startDate: "",
   endDate: "",
 };
+
 interface EntityDetailProtocol {
   territory: IResponseDetail;
   updateEntityMutation: UseMutationResult<
@@ -61,15 +56,8 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
   if (!protocol) {
     return;
   }
-  const {
-    project,
-    guidelinesVersion,
-    guidelinesResource,
-    variant,
-    description,
-    startDate,
-    endDate,
-  } = protocol;
+  const { project, guidelinesResource, description, startDate, endDate } =
+    protocol;
 
   const updateProtocol = (changes: Partial<ITerritoryProtocol>) => {
     updateEntityMutation.mutate({ data: { protocol: changes } });
@@ -83,16 +71,6 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
           width="full"
           value={project}
           onChangeFn={(text) => updateProtocol({ project: text })}
-          disabled={!userCanEdit}
-        />
-      </StyledValue>
-
-      <StyledLabel>Guidelines version</StyledLabel>
-      <StyledValue>
-        <Input
-          width="full"
-          value={guidelinesVersion}
-          onChangeFn={(text) => updateProtocol({ guidelinesVersion: text })}
           disabled={!userCanEdit}
         />
       </StyledValue>
@@ -121,20 +99,6 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
             disabled={!userCanEdit}
           />
         )}
-      </StyledValue>
-
-      <StyledLabel>Variant</StyledLabel>
-      <StyledValue>
-        <Dropdown.Single.Basic
-          width="full"
-          onChange={(value) => updateProtocol({ variant: value })}
-          value={variant}
-          options={Object.keys(ECASTEMOVariant).map((key) => ({
-            value: ECASTEMOVariant[key as keyof typeof ECASTEMOVariant],
-            label: ECASTEMOVariant[key as keyof typeof ECASTEMOVariant],
-          }))}
-          disabled={!userCanEdit}
-        />
       </StyledValue>
 
       <StyledLabel>Description</StyledLabel>

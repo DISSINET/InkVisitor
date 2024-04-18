@@ -1,39 +1,35 @@
-import { EntityEnums, UserEnums } from "@shared/enums";
-import { ITerritory, IParentTerritory, ITerritoryData } from "@shared/types";
-import { r as rethink, Connection, WriteResult, RDatum } from "rethinkdb-ts";
+import { nonenumerable } from "@common/decorators";
 import { IModel, determineOrder } from "@models/common";
 import Entity from "@models/entity/entity";
+import User from "@models/user/user";
+import { findEntityById } from "@service/shorthands";
+import treeCache from "@service/treeCache";
+import { EntityEnums, UserEnums } from "@shared/enums";
+import { IParentTerritory, ITerritory, ITerritoryData } from "@shared/types";
 import {
   InternalServerError,
   InvalidDeleteError,
   ModelNotValidError,
   TerritoryDoesNotExits,
 } from "@shared/types/errors";
-import User from "@models/user/user";
-import treeCache from "@service/treeCache";
-import { nonenumerable } from "@common/decorators";
 import { ROOT_TERRITORY_ID } from "@shared/types/statement";
-import { ECASTEMOVariant, ITerritoryProtocol } from "@shared/types/territory";
-import { findEntityById } from "@service/shorthands";
 import {
   EProtocolTieType,
+  ITerritoryProtocol,
   ITerritoryValidation,
 } from "@shared/types/territory";
+import { Connection, RDatum, WriteResult, r as rethink } from "rethinkdb-ts";
 
 export class TerritoryProtocol implements ITerritoryProtocol, IModel {
   project: string;
-  guidelinesVersion: string;
   guidelinesResource: string;
-  variant: ECASTEMOVariant;
   description: string;
   startDate: string;
   endDate: string;
 
   constructor(data: Partial<ITerritoryProtocol>) {
     this.project = data?.project as string;
-    this.guidelinesVersion = data?.guidelinesVersion as string;
     this.guidelinesResource = data?.guidelinesResource as string;
-    this.variant = data?.variant as ECASTEMOVariant;
     this.description = data?.description as string;
     this.startDate = data?.startDate as string;
     this.endDate = data?.endDate as string;

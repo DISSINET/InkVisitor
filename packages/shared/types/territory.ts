@@ -19,20 +19,10 @@ export interface IParentTerritory {
 
 export interface ITerritoryProtocol {
   project: string;
-  guidelinesVersion: string;
   guidelinesResource: string; // R class entity
-  variant: ECASTEMOVariant;
   description: string;
   startDate: string; // V class entity
   endDate: string; // V class entity
-}
-
-export enum ECASTEMOVariant {
-  SumCASTEMO = "SumCASTEMO",
-  NoCASTEMO = "NoCASTEMO",
-  SelCASTEMO = "SelCASTEMO",
-  FullCASTEMO = "FullCASTEMO",
-  MGSTEMO = "MGSTEMO",
 }
 
 export interface ITerritoryValidation {
