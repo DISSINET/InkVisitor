@@ -8,6 +8,7 @@ import {
 } from "./TerritoryTreeFilterStyles";
 import { UserEnums } from "@shared/enums";
 import { MdCancel } from "react-icons/md";
+import { FaSearch } from "react-icons/fa";
 
 interface TerritoryTreeFilter {
   filterData: ITerritoryFilter;
@@ -45,9 +46,18 @@ export const TerritoryTreeFilter: React.FC<TerritoryTreeFilter> = ({
             }
           />
         )}
-        <div style={{ position: "relative" }}>
+        <div
+          style={{
+            position: "relative",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "0 4px",
+          }}
+        >
+          <FaSearch />
           <Input
             value={filterData.filter}
+            placeholder="Filter by text"
             onChangeFn={(value: string) => handleFilterChange("filter", value)}
             changeOnType
             width="full"
