@@ -60,6 +60,8 @@ interface EntitySuggester {
   initTyped?: string;
   initCategory?: EntityEnums.Class;
 
+  alwaysShowCreateModal?: boolean;
+
   disabled?: boolean;
 }
 
@@ -93,6 +95,8 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
 
   initTyped,
   initCategory,
+
+  alwaysShowCreateModal,
 
   disabled = false,
 }) => {
@@ -454,6 +458,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
         disabled={disabled}
         showCreateModal={showCreateModal}
         setShowCreateModal={setShowCreateModal}
+        alwaysShowCreateModal={alwaysShowCreateModal}
         disableWildCard={disableWildCard || allCategories.length < 2}
         button={button}
       />
@@ -490,6 +495,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
           }
           closeModal={() => setShowCreateModal(false)}
           onMutationSuccess={(entity) => onMutationSuccess(entity)}
+          allowedEntityClasses={categoryTypes}
         />
       )}
     </>

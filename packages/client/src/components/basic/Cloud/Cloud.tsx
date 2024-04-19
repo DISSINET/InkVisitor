@@ -8,11 +8,13 @@ interface Cloud {
   children: ReactElement;
   onUnlink: () => void;
   originEntity: IEntity | undefined;
+  disabled?: boolean;
 }
 export const Cloud: React.FC<Cloud> = ({
   children,
   onUnlink,
   originEntity,
+  disabled,
 }) => {
   return (
     <StyledCloudWrap>
@@ -26,6 +28,7 @@ export const Cloud: React.FC<Cloud> = ({
           } from the cloud`}
           icon={<FaUnlink />}
           onClick={onUnlink}
+          disabled={disabled}
         />
       </StyledButtonWrap>
     </StyledCloudWrap>

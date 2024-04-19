@@ -754,6 +754,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
                     isInsideTemplate={isInsideTemplate}
                     territoryParentId={getTerritoryId(entity)}
                     lowIdent
+                    alwaysShowCreateModal
                   />
                 </StyledPropGroupWrap>
                 {userCanEdit && (
@@ -786,6 +787,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
                   }}
                   isInsideTemplate={isInsideTemplate}
                   userCanEdit={userCanEdit}
+                  alwaysShowCreateModal
                 />
               </StyledDetailSectionContent>
             </StyledDetailSection>

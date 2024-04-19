@@ -5,6 +5,7 @@ import {
   UnsafePasswordError,
   getErrorByCode,
 } from "@shared/types/errors";
+import { SAFE_PASSWORD_DESCRIPTION } from "Theme/constants";
 import api from "api";
 import {
   Button,
@@ -110,8 +111,7 @@ export const PasswordResetPage: React.FC<PasswordResetPage> = ({}) => {
                     {email}
                   </StyledMail>
                   <StyledDescription>
-                    A safe password: at least 12 characters, a combination of
-                    uppercase letters, lowercase letters, numbers, and symbols.
+                    {SAFE_PASSWORD_DESCRIPTION}
                   </StyledDescription>
                   <form>
                     <ModalInputWrap>

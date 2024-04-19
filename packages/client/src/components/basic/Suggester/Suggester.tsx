@@ -84,6 +84,7 @@ interface Suggester {
 
   showCreateModal: boolean;
   setShowCreateModal: React.Dispatch<React.SetStateAction<boolean>>;
+  alwaysShowCreateModal?: boolean;
   button?: React.ReactNode;
 }
 
@@ -121,6 +122,7 @@ export const Suggester: React.FC<Suggester> = ({
 
   showCreateModal,
   setShowCreateModal,
+  alwaysShowCreateModal,
   button,
 }) => {
   const [selected, setSelected] = useState(-1);
@@ -179,7 +181,8 @@ export const Suggester: React.FC<Suggester> = ({
         if (
           category === dropdownWildCard.value ||
           category === EntityEnums.Class.Statement ||
-          category === EntityEnums.Class.Territory
+          category === EntityEnums.Class.Territory ||
+          alwaysShowCreateModal
         ) {
           setShowCreateModal(true);
         } else {
@@ -216,7 +219,8 @@ export const Suggester: React.FC<Suggester> = ({
       if (
         category === dropdownWildCard.value ||
         category === EntityEnums.Class.Statement ||
-        category === EntityEnums.Class.Territory
+        category === EntityEnums.Class.Territory ||
+        alwaysShowCreateModal
       ) {
         setShowCreateModal(true);
       } else {

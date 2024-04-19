@@ -313,6 +313,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
                 }}
                 excludedActantIds={usedEntityIds}
                 disabled={!userCanEdit}
+                alwaysShowCreateModal
               />
             </StyledSuggesterWrapper>
           )}

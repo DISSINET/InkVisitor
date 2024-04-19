@@ -235,6 +235,7 @@ export const EntityDetailValencySection: React.FC<
             }}
             excludedActantIds={usedEntityIds}
             disabled={!userCanEdit}
+            alwaysShowCreateModal
           />
         </StyledLabelInputWrapper>
         <StyledRelationsWrapper>
