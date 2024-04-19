@@ -1,4 +1,4 @@
-import { EntityEnums, UserEnums } from "@shared/enums";
+import { EntityEnums } from "@shared/enums";
 import { IEntity, IReference } from "@shared/types";
 import { useQuery } from "@tanstack/react-query";
 import { excludedSuggesterEntities } from "Theme/constants";
@@ -13,17 +13,11 @@ import { CReference } from "constructors";
 import update from "immutability-helper";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { FaExternalLinkAlt, FaPlus, FaTrashAlt } from "react-icons/fa";
-import {
-  GrDocument,
-  GrDocumentMissing,
-  GrDocumentVerified,
-} from "react-icons/gr";
 import { CellProps, Column, Row, useTable } from "react-table";
 import { deepCopy, normalizeURL } from "utils/utils";
 import { EntityReferenceTableRow } from "./EntityReferenceTableRow";
 import {
   StyledGrid,
-  StyledReferenceValuePartLabel,
   StyledReferencesListButtons,
   StyledTable,
 } from "./EntityReferenceTableStyles";
@@ -42,6 +36,7 @@ interface EntityReferenceTable {
   isInsideTemplate: boolean;
   territoryParentId?: string;
   userCanEdit: boolean;
+  alwaysShowCreateModal?: boolean;
 }
 
 export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
@@ -54,6 +49,7 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
   isInsideTemplate,
   territoryParentId,
   userCanEdit,
+  alwaysShowCreateModal,
 }) => {
   // Documents query
   const {
@@ -183,6 +179,7 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
                 </EntityDropzone>
               ) : (
                 <EntitySuggester
+                  alwaysShowCreateModal={alwaysShowCreateModal}
                   openDetailOnCreate={openDetailOnCreate}
                   territoryActants={[]}
                   onSelected={(newSelectedId) => {
@@ -241,6 +238,7 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
                 </EntityDropzone>
               ) : (
                 <EntitySuggester
+                  alwaysShowCreateModal={alwaysShowCreateModal}
                   placeholder={resourceEntity?.data?.partValueLabel}
                   excludedEntityClasses={excludedSuggesterEntities}
                   openDetailOnCreate={openDetailOnCreate}

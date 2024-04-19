@@ -40,6 +40,8 @@ interface EntityCreateModal {
   labelTyped?: string;
   categorySelected?: EntityEnums.Class;
   languageSelected?: EntityEnums.Language;
+
+  allowedEntityClasses?: EntityEnums.Class[];
 }
 export const EntityCreateModal: React.FC<EntityCreateModal> = ({
   closeModal,
@@ -47,7 +49,12 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
   labelTyped = "",
   categorySelected,
   languageSelected,
+  allowedEntityClasses,
 }) => {
+  const entityClasses = allowedEntityClasses
+    ? allowedEntityClasses
+    : classesAll;
+
   const [showModal, setShowModal] = useState(false);
   useEffect(() => {
     setShowModal(true);
@@ -56,7 +63,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
   const [label, setLabel] = useState(labelTyped);
   const [detailTyped, setDetailTyped] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<EntityEnums.Class>(
-    categorySelected || classesAll[0]
+    categorySelected || entityClasses[0]
   );
   const [selectedLanguage, setSelectedLanguage] =
     useState<EntityEnums.Language>(
@@ -244,7 +251,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
             <EntitySuggester
               initTyped={label}
               initCategory={selectedCategory}
-              categoryTypes={classesAll}
+              categoryTypes={entityClasses}
               excludedEntityClasses={excludedSuggesterEntities}
               onChangeCategory={(selectedOption) => {
                 // Any not allowed here - this condition makes it type safe

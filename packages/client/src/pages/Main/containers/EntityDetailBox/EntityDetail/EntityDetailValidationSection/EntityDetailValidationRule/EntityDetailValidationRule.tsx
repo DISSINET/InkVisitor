@@ -114,6 +114,7 @@ export const EntityDetailValidationRule: React.FC<
           ))}
           {!(!userCanEdit && classifications.length > 0) && (
             <EntitySuggester
+              alwaysShowCreateModal
               excludedActantIds={classifications}
               categoryTypes={[EntityEnums.Class.Concept]}
               onPicked={(entity) =>
@@ -190,6 +191,7 @@ export const EntityDetailValidationRule: React.FC<
               ))}
               {!(!userCanEdit && propType && propType.length > 0) && (
                 <EntitySuggester
+                  alwaysShowCreateModal
                   categoryTypes={[EntityEnums.Class.Concept]}
                   excludedActantIds={propType}
                   onPicked={(entity) =>
@@ -246,6 +248,7 @@ export const EntityDetailValidationRule: React.FC<
           ))}
           {!(!userCanEdit && allowedEntities && allowedEntities.length > 0) && (
             <EntitySuggester
+              alwaysShowCreateModal
               categoryTypes={allowedEntitiesClasses}
               excludedActantIds={allowedEntities}
               onPicked={(entity) => {

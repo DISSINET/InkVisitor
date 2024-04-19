@@ -112,6 +112,7 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
           </StyledTagWrap>
         ) : (
           <EntitySuggester
+            alwaysShowCreateModal
             onPicked={(newPicked) => {
               updateProtocol({ guidelinesResource: newPicked.id });
             }}
@@ -162,6 +163,7 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
           </StyledTagWrap>
         ) : (
           <EntitySuggester
+            alwaysShowCreateModal
             onPicked={(newPicked) => {
               updateProtocol({ startDate: newPicked.id });
             }}
@@ -188,6 +190,7 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
           </StyledTagWrap>
         ) : (
           <EntitySuggester
+            alwaysShowCreateModal
             onPicked={(newPicked) => {
               updateProtocol({ endDate: newPicked.id });
             }}
