@@ -1,14 +1,16 @@
+import { UserEnums } from "@shared/enums";
 import { Checkbox, Input } from "components";
-import React from "react";
+import React, { useContext } from "react";
+import { FaSearch } from "react-icons/fa";
+import { MdCancel } from "react-icons/md";
+import { ThemeContext } from "styled-components";
 import { ITerritoryFilter } from "types";
 import {
   StyledCancelButton,
   StyledFilterList,
   StyledFilterWrap,
+  StyledInputWrap,
 } from "./TerritoryTreeFilterStyles";
-import { UserEnums } from "@shared/enums";
-import { MdCancel } from "react-icons/md";
-import { FaSearch } from "react-icons/fa";
 
 interface TerritoryTreeFilter {
   filterData: ITerritoryFilter;
@@ -23,6 +25,8 @@ export const TerritoryTreeFilter: React.FC<TerritoryTreeFilter> = ({
   handleFilterChange,
   userRole,
 }) => {
+  const themeContext = useContext(ThemeContext);
+
   return (
     <StyledFilterWrap>
       <StyledFilterList>
@@ -46,15 +50,8 @@ export const TerritoryTreeFilter: React.FC<TerritoryTreeFilter> = ({
             }
           />
         )}
-        <div
-          style={{
-            position: "relative",
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "0 4px",
-          }}
-        >
-          <FaSearch />
+        <StyledInputWrap>
+          <FaSearch color={themeContext?.color.black} />
           <Input
             value={filterData.filter}
             placeholder="Filter by text"
@@ -70,7 +67,7 @@ export const TerritoryTreeFilter: React.FC<TerritoryTreeFilter> = ({
               />
             </StyledCancelButton>
           )}
-        </div>
+        </StyledInputWrap>
       </StyledFilterList>
     </StyledFilterWrap>
   );
