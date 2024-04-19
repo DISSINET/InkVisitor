@@ -62,8 +62,9 @@ export const StyledTr = styled.tr<StyledTr>`
     padding-left: ${({ theme }) => theme.space[1]};
     padding-right: ${({ theme }) => theme.space[2]};
   }
-  td:not(:last-child) {
+  td:not(:last-child):not(:first-child) {
     /* width: 1%; */
+    min-width: 10rem;
   }
 `;
 export const StyledTd = styled.td`

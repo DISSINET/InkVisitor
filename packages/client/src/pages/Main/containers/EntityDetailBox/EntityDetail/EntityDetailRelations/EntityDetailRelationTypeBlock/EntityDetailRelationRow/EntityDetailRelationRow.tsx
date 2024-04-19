@@ -77,6 +77,7 @@ export const EntityDetailRelationRow: React.FC<EntityDetailRelationRow> = ({
   const renderCertainty = (relation: Relation.IIdentification) => (
     <div>
       <Dropdown.Single.Basic
+        disabled={!userCanEdit}
         width={105}
         placeholder="certainty"
         options={certaintyDict}

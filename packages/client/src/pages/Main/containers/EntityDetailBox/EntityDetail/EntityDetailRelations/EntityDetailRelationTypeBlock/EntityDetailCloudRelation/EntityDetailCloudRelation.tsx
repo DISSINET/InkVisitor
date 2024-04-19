@@ -63,7 +63,11 @@ export const EntityDetailCloudRelation: React.FC<EntityDetailCloudRelation> = ({
     <div style={{ display: "grid" }}>
       {relation.entityIds.length > 0 && (
         // TODO: disable unlink for read mode
-        <Cloud onUnlink={() => handleCloudRemove()} originEntity={originEntity}>
+        <Cloud
+          onUnlink={() => handleCloudRemove()}
+          originEntity={originEntity}
+          disabled={!userCanEdit}
+        >
           <StyledRelation>
             {relation.entityIds.map((relationEntityId, key) => {
               const relationEntity = entities[relationEntityId];
