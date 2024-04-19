@@ -187,7 +187,7 @@ export const Suggester: React.FC<Suggester> = ({
           setShowCreateModal(true);
         } else {
           onCreate({
-            label: typed,
+            label: typed.trim(),
             entityClass: category as EntityEnums.Class,
             language: false,
           });
@@ -225,7 +225,7 @@ export const Suggester: React.FC<Suggester> = ({
         setShowCreateModal(true);
       } else {
         onCreate({
-          label: typed,
+          label: typed.trim(),
           entityClass: category as EntityEnums.Class,
           language: false,
         });

@@ -122,7 +122,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
         | EntityEnums.ActionPartOfSpeech
         | EntityEnums.ActionPartOfSpeech;
     } = {
-      label: label,
+      label: label.trim(),
       entityClass: selectedCategory,
       detail: detailTyped,
       language: selectedLanguage,
