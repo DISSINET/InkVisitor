@@ -62,6 +62,7 @@ interface EntityTooltip {
 
   referenceElement: HTMLDivElement | null;
   customTooltipAttributes?: { partLabel?: string };
+  isTemplate?: boolean;
 }
 export const EntityTooltip: React.FC<EntityTooltip> = ({
   // entity
@@ -82,6 +83,7 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
   //
   referenceElement,
   customTooltipAttributes,
+  isTemplate = false,
 }) => {
   const [tooltipData, setTooltipData] = useState<
     EntityTooltipNamespace.IResponse | false
@@ -214,7 +216,8 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
 
       const filteredTypes = getEntityRelationRules(
         entityClass,
-        RelationEnums.TooltipTypes
+        RelationEnums.TooltipTypes,
+        isTemplate
       );
 
       const relationsCount: number[] = filteredTypes.map((t) =>

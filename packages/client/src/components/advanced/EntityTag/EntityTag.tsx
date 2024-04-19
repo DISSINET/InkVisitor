@@ -124,6 +124,7 @@ export const EntityTag: React.FC<EntityTag> = ({
                 ? entity.data.text
                 : undefined
             }
+            isTemplate={entity.isTemplate}
             partOfSpeech={entity.data.pos}
             itemsCount={statementsCount}
             position={tooltipPosition}
