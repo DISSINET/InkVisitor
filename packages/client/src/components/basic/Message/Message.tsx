@@ -185,11 +185,8 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
           <span>
             <b>{`Actant's entity type does not match the Action`}</b>
             {positionName}
-            {entity &&
-              ` - [${entity.class}: ${getShortLabelByLetterCount(
-                entity.label,
-                200
-              )}]`}
+            {" - "}
+            {entity && <EntityTag key={entity.id} entity={entity} />}
           </span>
         );
       case WarningTypeEnums.ANA:
@@ -197,11 +194,8 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
           <span>
             <b>{`This actant position allows no actant`}</b>
             {positionName}
-            {entity &&
-              ` - [${entity.class}: ${getShortLabelByLetterCount(
-                entity.label,
-                200
-              )}]`}
+            {" - "}
+            {entity && <EntityTag key={entity.id} entity={entity} />}
           </span>
         );
       case WarningTypeEnums.WAC:
@@ -216,11 +210,8 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
           <span>
             <b>{`Action valency not defined`}</b>
             {positionName}
-            {entity &&
-              ` - [${entity.class}: ${getShortLabelByLetterCount(
-                entity.label,
-                200
-              )}]`}
+            {" - "}
+            {entity && <EntityTag key={entity.id} entity={entity} />}
           </span>
         );
 

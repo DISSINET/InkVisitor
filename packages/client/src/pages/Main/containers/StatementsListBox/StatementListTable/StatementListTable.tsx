@@ -47,6 +47,7 @@ import {
   StyledTdLastEdit,
   StyledTh,
 } from "./StatementListTableStyles";
+import { getShortLabelByLetterCount } from "utils/utils";
 
 type CellType = CellProps<IResponseStatement>;
 
@@ -311,12 +312,18 @@ export const StatementListTable: React.FC<StatementListTable> = ({
         accessor: "data",
         Cell: ({ row }: CellType) => {
           const { text } = row.original.data;
-          const maxWordsCount = 20;
+          const maxWordsCount = 10;
           const trimmedText = text.split(" ").slice(0, maxWordsCount).join(" ");
           if ((text.match(/(\w+)/g) ?? []).length > maxWordsCount) {
             return <StyledText>{trimmedText}...</StyledText>;
+          } else if (text.length > 20) {
+            return (
+              // TODO: for one long word optimally inline-flex overflow
+              <StyledText>{getShortLabelByLetterCount(text, 20)}</StyledText>
+            );
+          } else {
+            return <StyledText>{trimmedText}</StyledText>;
           }
-          return <StyledText>{trimmedText}</StyledText>;
         },
       },
       {
