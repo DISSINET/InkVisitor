@@ -62,7 +62,10 @@ const theme = {
 
     iconButtonGroupColor: "#C4C4C4",
 
+    treeNodeRead: "#718096",
+    treeNodeWrite: "#2d3748",
     foundByTreeFilter: "#b4c0e8",
+
     tableOpened: "#F2EBFE",
     tableSelection: "#bce5ff",
     tableSelectionHover: "#e0f3ff",

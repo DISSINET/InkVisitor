@@ -102,8 +102,8 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
 
   const symbolColor = useMemo(() => {
     return right === UserEnums.RoleMode.Read
-      ? themeContext?.color.gray[600]
-      : themeContext?.color.gray[800];
+      ? themeContext?.color.treeNodeRead
+      : themeContext?.color.treeNodeWrite;
   }, [right, selectedThemeId]);
 
   useEffect(() => {
