@@ -3,7 +3,7 @@ import { EntityEnums, UserEnums } from "@shared/enums";
 import { IResponseUser, IUserRight } from "@shared/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import { Button, ButtonGroup, Input, Loader, Submit } from "components";
+import { Button, ButtonGroup, Loader, Submit } from "components";
 import {
   AttributeButtonGroup,
   EntitySuggester,
@@ -41,6 +41,7 @@ import {
   StyledUserNameColumnText,
 } from "./UserListStyles";
 import { UserListTableRow } from "./UserListTableRow/UserListTableRow";
+import { UserListUsernameInput } from "./UserListUsernameInput/UserListUsernameInput";
 import { UsersUtils } from "./UsersUtils";
 
 type CellType = CellProps<IResponseUser>;
@@ -52,7 +53,12 @@ export const UserList: React.FC<UserList> = React.memo(() => {
 
   const queryClient = useQueryClient();
 
-  const { status, data, error, isFetching } = useQuery({
+  const {
+    status,
+    data: users,
+    error,
+    isFetching,
+  } = useQuery({
     queryKey: ["users"],
     queryFn: async () => {
       const res = await api.usersGetMore({});
@@ -62,7 +68,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
   });
 
   const removingUser = useMemo(() => {
-    return removingUserId ? data?.find((d) => d.id === removingUserId) : false;
+    return removingUserId ? users?.find((d) => d.id === removingUserId) : false;
   }, [removingUserId]);
 
   const userMutation = useMutation({
@@ -127,6 +133,8 @@ export const UserList: React.FC<UserList> = React.memo(() => {
     return row.id;
   }, []);
 
+  const usernameList = useMemo(() => users?.map((u) => u.name) || [], [users]);
+
   const columns = useMemo<Column<IResponseUser>[]>(
     () => [
       {
@@ -165,18 +173,15 @@ export const UserList: React.FC<UserList> = React.memo(() => {
         Header: "Username",
         id: "Username",
         Cell: ({ row }: CellType) => {
-          const { id, name, email, role, verified } = row.original;
+          const { verified } = row.original;
+
           return (
             <>
               {verified && (
-                <Input
-                  value={name}
-                  onChangeFn={async (newValue: string) => {
-                    userMutation.mutate({
-                      id: id,
-                      name: newValue,
-                    });
-                  }}
+                <UserListUsernameInput
+                  user={row.original}
+                  userMutation={userMutation}
+                  usernameList={usernameList}
                 />
               )}
             </>
@@ -199,7 +204,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
         Header: "Role",
         id: "Role",
         Cell: ({ row }: CellType) => {
-          const { id, name, email, role } = row.original;
+          const { id, role } = row.original;
           return (
             <AttributeButtonGroup
               disabled={id === localStorage.getItem("userid")}
@@ -471,7 +476,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
         },
       },
     ],
-    []
+    [usernameList]
   );
 
   const {
@@ -483,13 +488,13 @@ export const UserList: React.FC<UserList> = React.memo(() => {
     visibleColumns,
   } = useTable({
     columns,
-    data: useMemo(() => data || [], [data]),
+    data: useMemo(() => users || [], [users]),
     getRowId,
   });
 
   return (
     <>
-      {data && (
+      {users && (
         <>
           <StyledTableWrapper>
             <StyledTable {...getTableProps()}>
@@ -519,7 +524,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
             </StyledTable>
           </StyledTableWrapper>
           {/* NEW USER | TEST EMAIL */}
-          <UsersUtils users={data} />
+          <UsersUtils users={users} />
         </>
       )}
 
