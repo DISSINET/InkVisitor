@@ -14,7 +14,7 @@ import api from "api";
 import { AxiosResponse } from "axios";
 import { BaseDropdown, Button, Input, MultiInput, TypeBar } from "components";
 import Dropdown, { AttributeButtonGroup, EntityTag } from "components/advanced";
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { FaRegCopy } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { DropdownItem } from "types";
@@ -94,6 +94,8 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
   const selectedDocumentOption: string = useMemo(() => {
     return entity.data.documentId ?? noDocumentLinkedItem.value;
   }, [documentOptions, entity.data.documentId]);
+
+  const [newLabel, setNewLabel] = useState<string>(entity.label);
 
   return (
     <>
@@ -193,18 +195,29 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
             </StyledDetailContentRow>
           )}
 
+          {/* Label */}
           <StyledDetailContentRow>
             <StyledDetailContentRowLabel>Label</StyledDetailContentRowLabel>
             <StyledDetailContentRowValue>
               <Input
                 disabled={!userCanEdit}
+                changeOnType
                 width="full"
-                value={entity.label}
-                onChangeFn={async (newLabel: string) => {
-                  if (newLabel !== entity.label) {
-                    updateEntityMutation.mutate({
-                      label: newLabel,
-                    });
+                value={newLabel}
+                onChangeFn={(newLabel: string) => setNewLabel(newLabel)}
+                onBlur={() => {
+                  if (
+                    entity.class !== EntityEnums.Class.Statement &&
+                    newLabel.length < 2
+                  ) {
+                    toast.info("fill at least 2 characters");
+                    setNewLabel(entity.label);
+                  } else {
+                    if (newLabel !== entity.label) {
+                      updateEntityMutation.mutate({
+                        label: newLabel,
+                      });
+                    }
                   }
                 }}
               />
