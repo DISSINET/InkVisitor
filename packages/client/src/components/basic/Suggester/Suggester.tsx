@@ -96,7 +96,7 @@ export const Suggester: React.FC<Suggester> = ({
   category,
   categories,
   disabled,
-  inputWidth = 80,
+  inputWidth = 100,
   disableCreate = false,
   disableButtons = false,
 
