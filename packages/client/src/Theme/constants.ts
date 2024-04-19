@@ -40,6 +40,9 @@ export const maxTooltipMultiRelations = 5;
 
 export const tooltipLabelSeparator = " • ";
 
+export const SAFE_PASSWORD_DESCRIPTION =
+  "A safe password: at least 12 characters, a combination of uppercase letters, lowercase letters, numbers, and symbols.";
+
 // animations
 export const springConfig: { [key: string]: {} } = {
   panelExpand: { tension: 195, friction: 31 },

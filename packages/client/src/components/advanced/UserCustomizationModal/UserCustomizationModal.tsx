@@ -34,6 +34,10 @@ import {
   StyledUserRights,
 } from "./UserCustomizationModalStyles";
 import { UserRightItem } from "./UserRightItem/UserRightItem";
+import { isSafePassword } from "utils/utils";
+import { UnsafePasswordError } from "@shared/types/errors";
+import { SAFE_PASSWORD_DESCRIPTION } from "Theme/constants";
+import { StyledDescription } from "pages/AuthModalSharedStyles";
 
 interface DataObject {
   name: string;
@@ -256,6 +260,12 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                   </ModalInputWrap>
                 </ModalInputForm>
 
+                <div style={{ maxWidth: "31rem" }}>
+                  <StyledDescription>
+                    {SAFE_PASSWORD_DESCRIPTION}
+                  </StyledDescription>
+                </div>
+
                 <StyledButtonWrap>
                   <ButtonGroup>
                     <Button
@@ -273,7 +283,12 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                       label="Submit"
                       inverted
                       onClick={() => {
-                        if (newPassword.length >= 8) {
+                        if (
+                          newPassword.length > 0 &&
+                          !isSafePassword(newPassword)
+                        ) {
+                          toast.warning(UnsafePasswordError.message);
+                        } else {
                           if (newPassword === repeatPassword) {
                             passwordUpdateMutation.mutate();
                             setShowPasswordChange(false);
@@ -282,8 +297,6 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                           } else {
                             toast.warning("Passwords are not matching");
                           }
-                        } else {
-                          toast.info("Fill at least 8 characters");
                         }
                       }}
                     />
