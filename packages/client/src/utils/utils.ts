@@ -205,9 +205,28 @@ export const getRelationTreeDepth = (
 
 export const getEntityRelationRules = (
   entityClass: EntityEnums.Class,
-  relationTypes?: RelationEnums.Type[]
+  relationTypes?: RelationEnums.Type[],
+  isTemplate: boolean = false
 ) => {
   const typesToFilter = relationTypes ? relationTypes : RelationEnums.AllTypes;
+
+  // A and C entity classes cannot have any relations, other classes might have only Classification and Related
+  if (isTemplate) {
+    if (
+      entityClass === EntityEnums.Class.Action ||
+      entityClass === EntityEnums.Class.Concept
+    ) {
+      return [];
+    } else {
+      return typesToFilter.filter((rule) => {
+        return (
+          rule === RelationEnums.Type.Classification ||
+          rule === RelationEnums.Type.Related
+        );
+      });
+    }
+  }
+
   return typesToFilter.filter((rule) => {
     if (
       !Relation.RelationRules[rule]?.allowedEntitiesPattern.length &&
