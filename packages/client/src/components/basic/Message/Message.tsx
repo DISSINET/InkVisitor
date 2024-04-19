@@ -87,7 +87,10 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
             const entity = extendedEntities?.[eid];
             if (entity) {
               return (
-                <div style={{ marginRight: "2px", display: "inline-flex" }}>
+                <div
+                  style={{ marginRight: "2px", display: "inline-flex" }}
+                  key={eid}
+                >
                   <EntityTag key={entity.id} entity={entity} />
                 </div>
               );
@@ -115,6 +118,7 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
     entityClasses: string[] | undefined
   ): JSX.Element {
     if (entityClasses) {
+      console.log(entityClasses);
       return (
         <>
           {entityClasses.map((entityClass, index) => {
@@ -247,10 +251,10 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
         );
       case WarningTypeEnums.MAEE:
         return <b>Missing Action/event equivalent</b>;
-      
+
       case WarningTypeEnums.LM:
         return <b>Missing label language attribute</b>;
-        
+
       case WarningTypeEnums.PSM:
         return <b>Missing part of speech attribute</b>;
 
