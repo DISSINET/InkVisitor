@@ -37,6 +37,8 @@ export const DocumentsPage: React.FC = ({}) => {
     enabled: api.isLoggedIn(),
   });
 
+  console.log(documents);
+
   const {
     data: resources,
     error: resourcesError,

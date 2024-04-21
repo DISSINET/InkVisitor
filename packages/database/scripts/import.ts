@@ -324,6 +324,41 @@ const datasets: Record<string, DbSchema> = {
       transform: function () {},
     },
   },
+  production: {
+    users: {
+      tableName: "users",
+      data: require("../datasets/default/users.json"),
+      transform: function () {},
+    },
+    aclPermissions: {
+      tableName: "acl_permissions",
+      data: require("../datasets/default/acl_permissions.json"),
+      transform: function () {},
+    },
+    entities: {
+      tableName: "entities",
+      data: require("../datasets/production/entities.json"),
+      transform: function () {},
+      indexes: entitiesIndexes,
+    },
+    audits: {
+      tableName: "audits",
+      data: require("../datasets/empty/audits.json"),
+      transform: function () {},
+      indexes: auditsIndexes,
+    },
+    relations: {
+      tableName: "relations",
+      data: require("../datasets/production/relations.json"),
+      transform: function () {},
+      indexes: relationsIndexes,
+    },
+    documents: {
+      tableName: "documents",
+      data: require("../datasets/production/documents.json"),
+      transform: function () {},
+    },
+  },
 };
 
 enum MODES {
@@ -556,7 +591,7 @@ class Importer {
     console.log(
       `Datasets: ${[
         "",
-        ...Object.keys(datasets).map((key, i) => `${key} (${i + 1})}`),
+        ...Object.keys(datasets).map((key, i) => `${key} (${i + 1})`),
       ].join("\n- ")}`
     );
 
@@ -583,7 +618,7 @@ class Importer {
         ...Object.keys(jobs).map((key, i) => {
           let jobName = key.replace(/([A-Z])/g, " $1");
           jobName = jobName.charAt(0).toUpperCase() + jobName.slice(1);
-          return `${jobName} (${i + 1})}`;
+          return `${jobName} (${i + 1})`;
         }),
       ].join("\n- ")}`
     );
@@ -652,7 +687,7 @@ class Importer {
 
     const tableList = Object.keys(this.dataset);
     console.log(
-      `Tables: ${["", ...tableList.map((key, i) => `${key} (${i + 1})}`)].join(
+      `Tables: ${["", ...tableList.map((key, i) => `${key} (${i + 1})`)].join(
         "\n- "
       )}`
     );
