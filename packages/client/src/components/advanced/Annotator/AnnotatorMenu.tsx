@@ -2,12 +2,16 @@ import { IEntity } from "@shared/types";
 import React from "react";
 import {
   StyledAnnotatorItem,
+  StyledAnnotatorItemContent,
   StyledAnnotatorItemTitle,
   StyledAnnotatorMenu,
 } from "./AnnotatorStyles";
 import { EntityTag } from "../EntityTag/EntityTag";
 import { EntitySuggester } from "../EntitySuggester/EntitySuggester";
 import { classesAll } from "types";
+import { Button } from "components/basic/Button/Button";
+import { BsSegmentedNav } from "react-icons/bs";
+import { BiSolidMessageSquareAdd } from "react-icons/bi";
 
 interface TextAnnotatorMenuProps {
   text: string;
@@ -36,33 +40,50 @@ export const TextAnnotatorMenu = ({
           }}
         >
           <StyledAnnotatorItem>
+            <StyledAnnotatorItemTitle>Actions</StyledAnnotatorItemTitle>
+            <StyledAnnotatorItemContent>
+              <Button
+                icon={<BiSolidMessageSquareAdd size={15} />}
+                color="primary"
+                paddingX={true}
+                onClick={() => {
+                  console.log("Create new Statement from selection");
+                }}
+                label="Create Statement"
+                tooltipLabel="Create new Statement from selection"
+              />
+              <Button
+                icon={<BsSegmentedNav size={22} />}
+                color="primary"
+                paddingX={true}
+                onClick={() => {
+                  console.log("Segment selection into Statements");
+                }}
+                label={"Segment"}
+                tooltipLabel="Segment selection into Statements"
+              />
+            </StyledAnnotatorItemContent>
+          </StyledAnnotatorItem>
+          <StyledAnnotatorItem>
             <StyledAnnotatorItemTitle>
               Create new anchor
             </StyledAnnotatorItemTitle>
-            <EntitySuggester
-              categoryTypes={classesAll}
-              initTyped={text.length > 30 ? text.substring(0, 30) : text}
-              onSelected={(newAnchorId) => {
-                onAnchorAdd(newAnchorId);
-              }}
-              inputWidth={200}
-            />
-          </StyledAnnotatorItem>
-          <StyledAnnotatorItem>
-            <StyledAnnotatorItemTitle>
-              Create new Statement from selection
-            </StyledAnnotatorItemTitle>
-          </StyledAnnotatorItem>
-          <StyledAnnotatorItem>
-            <StyledAnnotatorItemTitle>
-              Segment selection into Statements
-            </StyledAnnotatorItemTitle>
+            <StyledAnnotatorItemContent>
+              <EntitySuggester
+                categoryTypes={classesAll}
+                initTyped={text.length > 30 ? text.substring(0, 30) : text}
+                onSelected={(newAnchorId) => {
+                  onAnchorAdd(newAnchorId);
+                }}
+                inputWidth={200}
+              />
+            </StyledAnnotatorItemContent>
           </StyledAnnotatorItem>
           <StyledAnnotatorItem>
             <StyledAnnotatorItemTitle>
               Anchors in selection
             </StyledAnnotatorItemTitle>
-            <div style={{ display: "inline-flex", gap: "3px" }}>
+            <StyledAnnotatorItemContent>
               {anchors.map((anchor) => {
                 if (entities[anchor]) {
                   return (
@@ -76,7 +97,7 @@ export const TextAnnotatorMenu = ({
                   return <React.Fragment key={anchor} />;
                 }
               })}
-            </div>
+            </StyledAnnotatorItemContent>
           </StyledAnnotatorItem>
         </StyledAnnotatorMenu>
       ) : (

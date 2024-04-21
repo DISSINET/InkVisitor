@@ -42,18 +42,35 @@ export const StyledLinesCanvas = styled.canvas`
 
 export const StyledAnnotatorMenu = styled.div`
   position: absolute;
-  background: white;
-  border: 1px solid grat;
-  padding: 10px;
+  background: ${({ theme }) => theme.color.gray["300"]};
+  border: ${({ theme }) =>
+    theme.borderWidth["default"] + " solid " + theme.color.gray["300"]};
+  padding: ${({ theme }) => theme.space[2]};
   z-index: 100;
-  border-radius: 5px;
-  box-shadow: 4px 4px 4px 4px gray;
+  border-radius: ${({ theme }) => theme.borderRadius["default"]};
+  box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.4);
+  opacity: 0.9;
+  &:hover {
+    opacity: 1;
+  }
+  transition: opacity 0.5s;
 `;
 
 export const StyledAnnotatorItem = styled.div`
-  padding: 5px;
+  padding: ${({ theme }) => theme.space[2]};
+  background: ${({ theme }) => theme.color.gray["100"]};
+  border: 2px solid ${({ theme }) => theme.color.gray["300"]};
   &:hover {
-    background: #ccc;
+    background: ${({ theme }) => theme.color.gray["200"]};
   }
 `;
-export const StyledAnnotatorItemTitle = styled.div``;
+export const StyledAnnotatorItemContent = styled.div`
+  display: inline-flex;
+  gap: ${({ theme }) => theme.space[2]};
+  margin-top: ${({ theme }) => theme.space[2]};
+  margin-bottom: ${({ theme }) => theme.space[2]};
+`;
+export const StyledAnnotatorItemTitle = styled.div`
+  color: ${({ theme }) => theme.color.gray["700"]};
+  font-size: ${({ theme }) => theme.fontSize["md"]};
+`;
