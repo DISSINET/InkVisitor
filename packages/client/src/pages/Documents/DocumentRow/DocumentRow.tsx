@@ -9,17 +9,26 @@ import api from "api";
 import { AxiosResponse } from "axios";
 import { Button, ButtonGroup, Input } from "components";
 import { EntitySuggester, EntityTag } from "components/advanced";
-import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
+import React, {
+  Dispatch,
+  SetStateAction,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { FaTrash } from "react-icons/fa";
 import { RiFileEditFill } from "react-icons/ri";
 import useResizeObserver from "use-resize-observer";
 import {
   StyledCount,
+  StyledCountTag,
   StyledFaDotCircle,
   StyledReference,
   StyledTitle,
   StyledTitleWrap,
 } from "../DocumentsPageStyles";
+import theme from "Theme/theme";
+import { EntityColors } from "types";
 
 interface DocumentRow {
   document: IResponseDocument;
@@ -50,6 +59,23 @@ export const DocumentRow: React.FC<DocumentRow> = ({
   cancelEditMode,
 }) => {
   const [localTitle, setLocalTitle] = useState<string>("");
+
+  const countTotal = useMemo(() => {
+    let total = 0;
+    Object.keys(document.referencedEntityIds).forEach((key) => {
+      const classEntities =
+        document.referencedEntityIds[
+          key as keyof typeof document.referencedEntityIds
+        ];
+
+      const classNo =
+        classEntities && Array.isArray(classEntities)
+          ? classEntities.length
+          : 0;
+      total += classNo;
+    });
+    return total;
+  }, [document.referencedEntityIds]);
 
   useEffect(() => {
     if (document) {
@@ -138,7 +164,31 @@ export const DocumentRow: React.FC<DocumentRow> = ({
           />
         )}
       </StyledReference>
-      <StyledCount>{document.referencedEntityIds.length} anchors</StyledCount>
+      <StyledCount>
+        {countTotal} anchors
+        {Object.values(EntityEnums.Class)
+          .filter((eClass) => {
+            return document.referencedEntityIds[eClass]?.length;
+          })
+          .map((eClass) => {
+            const classColorName =
+              EntityColors[eClass as keyof typeof EntityColors]?.color ?? "";
+
+            const classColor =
+              (theme.color[
+                classColorName as keyof typeof theme.color
+              ] as string) ?? theme.color.primary;
+
+            return (
+              <StyledCountTag
+                key={eClass}
+                style={{ backgroundColor: classColor }}
+              >
+                {eClass}: {document.referencedEntityIds[eClass]?.length || 0}
+              </StyledCountTag>
+            );
+          })}
+      </StyledCount>
     </>
   );
 };

@@ -66,6 +66,13 @@ export const StyledHeading = styled.div`
 export const StyledCount = styled.div`
   color: ${({ theme }) => theme.color["black"]};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
+  display: inline-flex;
+  gap: 0.5rem;
+`;
+
+export const StyledCountTag = styled.div`
+  padding: 2px 4px;
+  border-radius: ${({ theme }) => theme.borderRadius["default"]};
 `;
 
 export const StyledInputWrap = styled.div`
