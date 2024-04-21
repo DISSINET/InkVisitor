@@ -274,13 +274,58 @@ class Text {
     return out;
   }
 
+  findWordOffsets(text: string, index: number): [number, number] {
+    const wordRegex = /[^\s,.]+/g; // Match any sequence of characters that are not whitespace, comma, or dot
+    let match;
+
+    // Find all matches of words in the text
+    const matches = [];
+    while ((match = wordRegex.exec(text)) !== null) {
+        matches.push({ start: match.index, end: match.index + match[0].length });
+    }
+
+    // Find the word containing the given index
+    let wordIndices;
+    for (let i = 0; i < matches.length; i++) {
+        const { start, end } = matches[i];
+        if (index >= start && index < end) {
+            wordIndices = { start, end };
+            break;
+        }
+    }
+
+    // If no word contains the given index, return default offsets
+    if (!wordIndices) {
+        return [ 0, 0 ]
+    }
+
+    // Calculate offsets relative to the word's start and end indices
+    const startOffset = index - wordIndices.start;
+    const endOffset = wordIndices.end - index;
+
+    return [ -startOffset, endOffset ];
+}
+
   /**
    * getCursorWord returns current word under active cursor
    * @param cursor
    * @returns
    */
-  getCursorWord(cursor?: Cursor): string {
-    return "";
+  getCursorWordOffsets(viewport: Viewport, cursor: Cursor): [number, number] {
+    const position = this.cursorToIndex(viewport, cursor);
+    if (!position) {
+      return [0,0]
+    }
+
+    let text = this.segments[position.segmentIndex].parsed;
+    let textIndex = position.parsedTextIndex;
+
+    if (this.mode === "raw") {
+      text = this.segments[position.segmentIndex].raw;
+      textIndex = position.rawTextIndex;
+    }
+
+    return this.findWordOffsets(text, textIndex);
   }
 
   /**
