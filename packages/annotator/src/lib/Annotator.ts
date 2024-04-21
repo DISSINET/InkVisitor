@@ -200,7 +200,7 @@ export class Annotator {
         break;
 
       default:
-        if (e.ctrlKey) {
+        if (e.ctrlKey || e.metaKey) {
           if (e.key === "c") {
             window.navigator.clipboard.writeText(this.lastHighlightedText);
           }
