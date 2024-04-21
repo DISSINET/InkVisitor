@@ -43,9 +43,11 @@ export const StyledLinesCanvas = styled.canvas`
 export const StyledAnnotatorMenu = styled.div`
   position: absolute;
   background: white;
-  border: 1px solid black;
+  border: 1px solid grat;
   padding: 10px;
   z-index: 100;
+  border-radius: 5px;
+  box-shadow: 4px 4px 4px 4px gray;
 `;
 
 export const StyledAnnotatorItem = styled.div`
