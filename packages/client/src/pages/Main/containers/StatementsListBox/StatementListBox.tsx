@@ -393,6 +393,7 @@ export const StatementListBox: React.FC = () => {
             dispatch(setShowWarnings(false));
             setStatementId(rowId);
           }}
+          territoryId={territoryId}
           actantsUpdateMutation={statementUpdateMutation}
           entities={entities}
           right={right}

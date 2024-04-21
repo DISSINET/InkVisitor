@@ -18,11 +18,13 @@ import { TiDocumentText } from "react-icons/ti";
 import { CellProps } from "react-table";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { StyledDocumentTag } from "../StatementLitBoxStyles";
+import { useSearchParams } from "hooks";
 
 type CellType = CellProps<IResponseStatement>;
 
 interface StatementListTextAnnotator {
   statements: IResponseStatement[];
+  territoryId: string;
   handleRowClick?: (rowId: string) => void;
   actantsUpdateMutation: UseMutationResult<
     AxiosResponse<IResponseGeneric>,
@@ -56,6 +58,7 @@ export const StatementListTextAnnotator: React.FC<
   StatementListTextAnnotator
 > = ({
   statements,
+  territoryId,
   handleRowClick = () => {},
   actantsUpdateMutation,
   entities,
@@ -86,6 +89,19 @@ export const StatementListTextAnnotator: React.FC<
     enabled: api.isLoggedIn(),
   });
 
+  const {
+    data: documents,
+    error,
+    isFetching,
+  } = useQuery({
+    queryKey: ["documents"],
+    queryFn: async () => {
+      const res = await api.documentsGet({});
+      return res.data;
+    },
+    enabled: api.isLoggedIn(),
+  });
+
   const [selectedResource, setSelectedResource] = useState<IResource | false>(
     false
   );
@@ -93,9 +109,28 @@ export const StatementListTextAnnotator: React.FC<
   const selectedDocumentId = useMemo<string | false>(() => {
     if (selectedResource && selectedResource.data.documentId) {
       return selectedResource.data.documentId;
+    } else {
+      // look for all reseources if there is a document attached with the territory id
+      resources?.forEach((resource) => {
+        if (resource.data.documentId) {
+          const document = documents?.find(
+            (d) => d.id === resource.data.documentId
+          );
+          if (document) {
+            const hasThisTAnchor = document.referencedEntityIds.T.find(
+              (t) => t === territoryId
+            );
+            if (hasThisTAnchor) {
+              setSelectedResource(resource as IResource);
+              return resource.data.documentId;
+            }
+          }
+        }
+        return false;
+      });
     }
     return false;
-  }, [selectedResource]);
+  }, [selectedResource, resources, documents, territoryId]);
 
   const {
     data: selectedDocument,
@@ -117,6 +152,22 @@ export const StatementListTextAnnotator: React.FC<
     (state) => state.layout.panelWidths
   );
 
+  const contentHeight = useAppSelector((state) => state.layout.contentHeight);
+
+  // check if detail box is opened
+  const { detailIdArray } = useSearchParams();
+  const detailOpen = detailIdArray.length > 0;
+
+  // Calculate annotator height
+  const annotatorHeight = useMemo<number>(() => {
+    const margin = 270;
+    if (detailOpen) {
+      return contentHeight / 2 - margin;
+    } else {
+      return contentHeight - margin;
+    }
+  }, [detailOpen, contentHeight]);
+
   return (
     <div>
       <div style={{ alignItems: "center" }}>
@@ -129,7 +180,7 @@ export const StatementListTextAnnotator: React.FC<
           <EntitySuggester
             disableCreate={false}
             categoryTypes={[EntityEnums.Class.Resource]}
-            preSuggestions={resources?.filter((res, ri) => ri < 10)}
+            preSuggestions={resources}
             onPicked={(entity) => {
               setSelectedResource(entity as IResource);
             }}
@@ -163,12 +214,12 @@ export const StatementListTextAnnotator: React.FC<
       </div>
       <div style={{ marginTop: "2px" }}>
         <AnnotatorProvider>
-          {selectedDocument && (
+          {selectedDocumentId && (
             <TextAnnotator
               width={panelWidths[1]}
               displayLineNumbers={true}
-              height={500}
-              initialText={selectedDocument ? selectedDocument.content : ""}
+              height={annotatorHeight}
+              documentId={selectedDocumentId}
             />
           )}
         </AnnotatorProvider>
