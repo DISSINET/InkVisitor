@@ -1,10 +1,10 @@
 import { Annotator, Highlighted, Mode } from "@inkvisitor/annotator/src/lib";
-import { IEntity } from "@shared/types";
+import { IDocument, IEntity } from "@shared/types";
 import api from "api";
 import { Button } from "components/basic/Button/Button";
 import { ButtonGroup } from "components/basic/ButtonGroup/ButtonGroup";
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { FaMarker, FaPen } from "react-icons/fa";
+import { FaMarker, FaPen, FaRegSave } from "react-icons/fa";
 import { useAnnotator } from "./AnnotatorContext";
 import TextAnnotatorMenu from "./AnnotatorMenu";
 import {
@@ -16,20 +16,48 @@ import {
   StyledScrollerViewport,
 } from "./AnnotatorStyles";
 import theme from "Theme/theme";
+import { useDebounce } from "hooks";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "react-toastify";
 
 interface TextAnnotatorProps {
   width: number;
   height: number;
   displayLineNumbers: boolean;
-  initialText: string;
+  documentId: string;
 }
 
 export const TextAnnotator = ({
   width = 400,
   height = 500,
   displayLineNumbers = true,
-  initialText,
+  documentId,
 }: TextAnnotatorProps) => {
+  const queryClient = useQueryClient();
+
+  const {
+    data: document,
+    error: documentError,
+    isFetching: documentIsFetching,
+  } = useQuery({
+    queryKey: ["openedDocument", documentId],
+    queryFn: async () => {
+      const res = await api.documentGet(documentId);
+      return res.data;
+    },
+    enabled: api.isLoggedIn(),
+  });
+
+  const updateDocumentMutation = useMutation({
+    mutationFn: async (data: { id: string; doc: Partial<IDocument> }) =>
+      api.documentUpdate(data.id, data.doc),
+    onSuccess: (variables, data) => {
+      queryClient.invalidateQueries({ queryKey: ["openedDocument"] });
+      queryClient.invalidateQueries({ queryKey: ["documents"] });
+      toast.info("Document content saved");
+    },
+  });
+
   const { annotator, setAnnotator } = useAnnotator();
 
   const wLineNumbers = displayLineNumbers ? 50 : 0;
@@ -47,6 +75,25 @@ export const TextAnnotator = ({
   const [selectedAnchors, setSelectedAnchors] = useState<string[]>([]);
   const storedEntities = useRef<Record<string, IEntity | false>>({});
 
+  const [localText, setLocalText] = useState<string>("no text");
+
+  useEffect(() => {
+    console.log("we fetched the document", document);
+    //setLocalText(document?.content ?? "no text");
+  }, [document]);
+
+  const handleSaveNewContent = () => {
+    if (annotator && document?.id) {
+      updateDocumentMutation.mutate({
+        id: document.id,
+        doc: {
+          ...document,
+          ...{ content: localText },
+        },
+      });
+    }
+  };
+
   const fetchEntity = async (anchor: string) => {
     const entity = await api.entitiesGet(anchor);
     return entity;
@@ -57,19 +104,21 @@ export const TextAnnotator = ({
   };
 
   const handleTextSelection = async (text: string, anchors: string[]) => {
-    setSelectedText(text);
-    setSelectedAnchors(anchors);
+    if (annotatorMode === "highlight") {
+      setSelectedText(text);
+      setSelectedAnchors(anchors);
 
-    for (const anchorI in anchors) {
-      const anchor = anchors[anchorI];
-      if (!Object.keys(storedEntities.current).includes(anchor)) {
-        try {
-          const entityRes = await fetchEntity(anchor);
-          if (entityRes && entityRes.data) {
-            addEntityToStore(anchor, entityRes.data);
+      for (const anchorI in anchors) {
+        const anchor = anchors[anchorI];
+        if (!Object.keys(storedEntities.current).includes(anchor)) {
+          try {
+            const entityRes = await fetchEntity(anchor);
+            if (entityRes && entityRes.data) {
+              addEntityToStore(anchor, entityRes.data);
+            }
+          } catch (error) {
+            addEntityToStore(anchor, false);
           }
-        } catch (error) {
-          addEntityToStore(anchor, false);
         }
       }
     }
@@ -84,7 +133,10 @@ export const TextAnnotator = ({
       return;
     }
 
-    const annotator = new Annotator(mainCanvas.current, initialText);
+    const annotator = new Annotator(
+      mainCanvas.current,
+      document?.content ?? "no text"
+    );
     annotator.setMode("highlight");
     annotator.addScroller(scroller.current);
 
@@ -96,6 +148,7 @@ export const TextAnnotator = ({
     annotator.onSelectText(({ text, anchors }) => {
       handleTextSelection(text, anchors);
     });
+
     annotator.onHighlight((entity: string) => {
       return {
         mode: "background",
@@ -105,10 +158,21 @@ export const TextAnnotator = ({
       };
     });
 
-    annotator.text;
+    annotator.onTextChanged((text) => {
+      setLocalText(text);
+    });
+
     annotator.draw();
     setAnnotator(annotator);
-  }, [initialText]);
+  }, [document]);
+
+  useEffect(() => {
+    if (annotator) {
+      console.log("resizing canvas", wTextArea, height);
+      // annotator.resize(wTextArea, height);
+      annotator.draw();
+    }
+  }, [width, height]);
 
   const topBottomSelection = useMemo<boolean>(() => {
     const selectedText = annotator?.cursor?.getSelected();
@@ -126,14 +190,16 @@ export const TextAnnotator = ({
   return (
     <div style={{ width: width }}>
       <StyledCanvasWrapper>
-        <TextAnnotatorMenu
-          anchors={selectedAnchors}
-          text={selectedText}
-          entities={storedEntities.current}
-          onAnchorAdd={handleAddAnchor}
-          yPosition={menuPositionY}
-          topBottomSelection={topBottomSelection}
-        />
+        {annotatorMode === "highlight" && (
+          <TextAnnotatorMenu
+            anchors={selectedAnchors}
+            text={selectedText}
+            entities={storedEntities.current}
+            onAnchorAdd={handleAddAnchor}
+            yPosition={menuPositionY}
+            topBottomSelection={topBottomSelection}
+          />
+        )}
         {displayLineNumbers && (
           <StyledLinesCanvas ref={lines} width={wLineNumbers} height={height} />
         )}
@@ -154,6 +220,7 @@ export const TextAnnotator = ({
           />
         </StyledScrollerViewport>
       </StyledCanvasWrapper>
+
       {annotator && (
         <ButtonGroup>
           <Button
@@ -182,6 +249,16 @@ export const TextAnnotator = ({
             }}
             tooltipLabel="activate edit mode"
           />
+          {annotatorMode === "raw" && (
+            <Button
+              label="save"
+              color="primary"
+              icon={<FaRegSave />}
+              onClick={() => {
+                handleSaveNewContent();
+              }}
+            />
+          )}
         </ButtonGroup>
       )}
     </div>
