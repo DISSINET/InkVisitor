@@ -9,6 +9,7 @@ import { FaUnlink } from "react-icons/fa";
 import { useAppSelector } from "redux/hooks";
 import { DraggedEntityReduxItem, EntityDragItem } from "types";
 import { getEntityLabel, isValidEntityClass } from "utils/utils";
+import { StyledEntityTagWrap } from "./EntityTagStyles";
 
 interface UnlinkButton {
   onClick: () => void;
@@ -34,6 +35,7 @@ interface EntityTag {
   statementsCount?: number;
   isFavorited?: boolean;
   elvlButtonGroup?: ReactNode | false;
+  flexListMargin?: boolean;
 
   unlinkButton?: UnlinkButton | false;
   customTooltipAttributes?: { partLabel?: string };
@@ -58,6 +60,7 @@ export const EntityTag: React.FC<EntityTag> = ({
   isFavorited,
 
   elvlButtonGroup = false,
+  flexListMargin = false,
 
   unlinkButton,
   customTooltipAttributes,
@@ -103,8 +106,8 @@ export const EntityTag: React.FC<EntityTag> = ({
 
   return (
     <>
-      <div
-        style={{ display: "inline-flex", overflow: "hidden" }}
+      <StyledEntityTagWrap
+        $flexListMargin={flexListMargin}
         ref={setReferenceElement}
         onMouseEnter={() => setTagHovered(true)}
         onMouseLeave={() => setTagHovered(false)}
@@ -121,6 +124,8 @@ export const EntityTag: React.FC<EntityTag> = ({
                 ? entity.data.text
                 : undefined
             }
+            isTemplate={entity.isTemplate}
+            partOfSpeech={entity.data.pos}
             itemsCount={statementsCount}
             position={tooltipPosition}
             disabled={
@@ -176,7 +181,7 @@ export const EntityTag: React.FC<EntityTag> = ({
             )
           }
         />
-      </div>
+      </StyledEntityTagWrap>
     </>
   );
 };

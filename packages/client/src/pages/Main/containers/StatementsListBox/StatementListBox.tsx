@@ -15,6 +15,7 @@ import React, { useEffect, useState } from "react";
 import { BsInfoCircle } from "react-icons/bs";
 import { toast } from "react-toastify";
 import { setStatementListOpened } from "redux/features/layout/statementListOpenedSlice";
+import { setShowWarnings } from "redux/features/statementEditor/showWarningsSlice";
 import { setRowsExpanded } from "redux/features/statementList/rowsExpandedSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { StatementListHeader } from "./StatementListHeader/StatementListHeader";
@@ -22,6 +23,8 @@ import { StatementListTable } from "./StatementListTable/StatementListTable";
 import { StyledEmptyState, StyledTableWrapper } from "./StatementLitBoxStyles";
 import { setShowWarnings } from "redux/features/statementEditor/showWarningsSlice";
 import { StatementListTextAnnotator } from "./StatementListTextAnnotator/StatementListTextAnnotator";
+import { setDisableStatementListScroll } from "redux/features/statementList/disableStatementListScrollSlice";
+
 
 export enum StatementListDisplayMode {
   TEXT = "text",
@@ -57,6 +60,11 @@ export const StatementListBox: React.FC = () => {
     removeDetailId,
     appendDetailId,
   } = useSearchParams();
+
+  useEffect(() => {
+    dispatch(
+      (false));
+  }, [statementId, territoryId, statementListOpened]);
 
   useEffect(() => {
     if (!detailIdArray.length && !statementListOpened) {
@@ -206,6 +214,7 @@ export const StatementListBox: React.FC = () => {
       setStatementId(variables.id);
       queryClient.invalidateQueries({ queryKey: ["territory"] });
       queryClient.invalidateQueries({ queryKey: ["tree"] });
+      dispatch(setDisableStatementListScroll(false));
     },
   });
 
@@ -213,12 +222,12 @@ export const StatementListBox: React.FC = () => {
     mutationFn: async (newStatement: IStatement) =>
       await api.entityCreate(newStatement),
     onSuccess: (data, variables) => {
-      toast.info(`Statement created!`);
       queryClient.invalidateQueries({
         queryKey: ["territory", "statement-list", territoryId],
       });
       setStatementId(variables.id);
       queryClient.invalidateQueries({ queryKey: ["tree"] });
+      dispatch(setDisableStatementListScroll(false));
     },
     onError: () => {
       toast.error(`Error: Statement not created!`);
@@ -299,28 +308,6 @@ export const StatementListBox: React.FC = () => {
     },
   });
 
-  const moveTerritoryMutation = useMutation({
-    mutationFn: async (newParentId: string) =>
-      await api.treeMoveTerritory(territoryId, newParentId, 0),
-    onSuccess: (data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["tree"] });
-      queryClient.invalidateQueries({ queryKey: ["territory"] });
-    },
-  });
-
-  const updateTerritoryMutation = useMutation({
-    mutationFn: async (tObject: {
-      territoryId: string;
-      statements: IResponseStatement[];
-    }) =>
-      await api.entityUpdate(tObject.territoryId, {
-        statements: tObject.statements,
-      }),
-    onSuccess: (data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["territory"] });
-    },
-  });
-
   const moveStatementsMutation = useMutation({
     mutationFn: async (data: {
       statements: string[];
@@ -374,7 +361,6 @@ export const StatementListBox: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ["statement"] });
     },
   });
-
   const handleCreateStatement = (
     text: string = "",
     statementId: string | undefined = undefined
@@ -421,6 +407,33 @@ export const StatementListBox: React.FC = () => {
       territoryCreateMutation.mutate(newTerritory);
     }
   };
+  const updateTerritoryMutation = useMutation({
+    mutationFn: async (tObject: {
+      territoryId: string;
+      changes: Partial<ITerritory>;
+    }) => await api.entityUpdate(tObject.territoryId, tObject.changes),
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["tree"] });
+      queryClient.invalidateQueries({ queryKey: ["territory"] });
+    },
+  });
+
+  const duplicateTerritoryMutation = useMutation({
+    mutationFn: async (tObject: {
+      territoryId: string;
+      targets: string[];
+      withChildren: boolean;
+    }) =>
+      await api.territoriesCopy(
+        tObject.territoryId,
+        tObject.targets,
+        tObject.withChildren
+      ),
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["tree"] });
+      queryClient.invalidateQueries({ queryKey: ["territory"] });
+    },
+  });
 
   return (
     <>
@@ -428,9 +441,8 @@ export const StatementListBox: React.FC = () => {
         <StatementListHeader
           data={data}
           handleCreateStatement={handleCreateStatement}
+          territory={data}
           addStatementAtTheEndMutation={addStatementAtTheEndMutation}
-          moveTerritoryMutation={moveTerritoryMutation}
-          updateTerritoryMutation={updateTerritoryMutation}
           isFavorited={isFavorited}
           selectedRows={selectedRows}
           setSelectedRows={setSelectedRows}
@@ -443,6 +455,8 @@ export const StatementListBox: React.FC = () => {
           appendReferencesMutation={appendReferencesMutation}
           displayMode={displayMode}
           handleDisplayModeChange={handleDisplayModeChange}
+          updateTerritoryMutation={updateTerritoryMutation}
+          duplicateTerritoryMutation={duplicateTerritoryMutation}
         />
       )}
 
@@ -520,10 +534,11 @@ export const StatementListBox: React.FC = () => {
           addStatementAtTheEndMutation.isPending ||
           statementCreateMutation.isPending ||
           statementUpdateMutation.isPending ||
-          moveTerritoryMutation.isPending ||
           moveStatementsMutation.isPending ||
           duplicateStatementsMutation.isPending ||
-          cloneStatementMutation.isPending
+          cloneStatementMutation.isPending ||
+          updateTerritoryMutation.isPending ||
+          duplicateTerritoryMutation.isPending
         }
       />
     </>

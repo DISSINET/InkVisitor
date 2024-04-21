@@ -51,10 +51,10 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
   });
 
   const instantiateTemplate = async (territoryParentId?: string) => {
-    let newInstanceId;
+    let newInstance;
     if (entity.class === EntityEnums.Class.Territory) {
       if (territoryParentId) {
-        newInstanceId = await InstTemplate(
+        newInstance = await InstTemplate(
           entity,
           localStorage.getItem("userrole") as UserEnums.Role,
           territoryParentId
@@ -64,14 +64,14 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
         toast.info("Cannot create territory without parent");
       }
     } else {
-      newInstanceId = await InstTemplate(
+      newInstance = await InstTemplate(
         entity,
         localStorage.getItem("userrole") as UserEnums.Role
       );
     }
 
-    if (newInstanceId) {
-      appendDetailId(newInstanceId);
+    if (newInstance) {
+      appendDetailId(newInstance.id);
       toast.info(`Entity instantiated from a template!`);
 
       if (entity.class === EntityEnums.Class.Statement) {

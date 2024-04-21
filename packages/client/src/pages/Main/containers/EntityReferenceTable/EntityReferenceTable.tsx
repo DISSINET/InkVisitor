@@ -13,16 +13,11 @@ import { CReference } from "constructors";
 import update from "immutability-helper";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { FaExternalLinkAlt, FaPlus, FaTrashAlt } from "react-icons/fa";
-import {
-  GrDocument,
-  GrDocumentMissing,
-  GrDocumentVerified,
-} from "react-icons/gr";
 import { CellProps, Column, Row, useTable } from "react-table";
 import { deepCopy, normalizeURL } from "utils/utils";
 import { EntityReferenceTableRow } from "./EntityReferenceTableRow";
 import {
-  StyledReferenceValuePartLabel,
+  StyledGrid,
   StyledReferencesListButtons,
   StyledTable,
 } from "./EntityReferenceTableStyles";
@@ -40,6 +35,8 @@ interface EntityReferenceTable {
   openDetailOnCreate?: boolean;
   isInsideTemplate: boolean;
   territoryParentId?: string;
+  userCanEdit: boolean;
+  alwaysShowCreateModal?: boolean;
 }
 
 export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
@@ -51,6 +48,8 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
   openDetailOnCreate,
   isInsideTemplate,
   territoryParentId,
+  userCanEdit,
+  alwaysShowCreateModal,
 }) => {
   // Documents query
   const {
@@ -150,7 +149,7 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
           const resourceEntity = entities[reference.resource];
 
           return (
-            <>
+            <StyledGrid>
               {resourceEntity ? (
                 <EntityDropzone
                   onSelected={(newSelectedId: string) => {
@@ -161,38 +160,39 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
                   isInsideTemplate={isInsideTemplate}
                   territoryParentId={territoryParentId}
                   excludedActantIds={[resourceEntity.id]}
+                  disabled={disabled}
                 >
-                  <EntityTag
-                    entity={resourceEntity}
-                    fullWidth
-                    unlinkButton={
-                      !disabled && {
-                        onClick: () => {
-                          handleChangeResource(reference.id, "");
-                        },
-                        tooltipLabel: "unlink resource",
+                  <>
+                    <EntityTag
+                      entity={resourceEntity}
+                      fullWidth
+                      unlinkButton={
+                        !disabled && {
+                          onClick: () => {
+                            handleChangeResource(reference.id, "");
+                          },
+                          tooltipLabel: "unlink resource",
+                        }
                       }
-                    }
-                  />
+                    />
+                  </>
                 </EntityDropzone>
               ) : (
-                !disabled && (
-                  <div>
-                    <EntitySuggester
-                      openDetailOnCreate={openDetailOnCreate}
-                      territoryActants={[]}
-                      onSelected={(newSelectedId: string) => {
-                        handleChangeResource(reference.id, newSelectedId, true);
-                      }}
-                      disableTemplatesAccept
-                      categoryTypes={[EntityEnums.Class.Resource]}
-                      isInsideTemplate={isInsideTemplate}
-                      territoryParentId={territoryParentId}
-                    />
-                  </div>
-                )
+                <EntitySuggester
+                  alwaysShowCreateModal={alwaysShowCreateModal}
+                  openDetailOnCreate={openDetailOnCreate}
+                  territoryActants={[]}
+                  onSelected={(newSelectedId) => {
+                    handleChangeResource(reference.id, newSelectedId, true);
+                  }}
+                  disableTemplatesAccept
+                  categoryTypes={[EntityEnums.Class.Resource]}
+                  isInsideTemplate={isInsideTemplate}
+                  territoryParentId={territoryParentId}
+                  disabled={disabled}
+                />
               )}
-            </>
+            </StyledGrid>
           );
         },
       },
@@ -204,7 +204,7 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
           const valueEntity = entities[reference.value];
 
           return (
-            <div style={{ display: "flex", alignItems: "center" }}>
+            <StyledGrid>
               {valueEntity ? (
                 <EntityDropzone
                   onSelected={(newSelectedId: string) => {
@@ -215,6 +215,7 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
                   isInsideTemplate={isInsideTemplate}
                   territoryParentId={territoryParentId}
                   excludedActantIds={[valueEntity.id]}
+                  disabled={disabled}
                 >
                   <EntityTag
                     entity={valueEntity}
@@ -236,77 +237,75 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
                   />
                 </EntityDropzone>
               ) : (
-                !disabled && (
-                  <div>
-                    <EntitySuggester
-                      placeholder={resourceEntity?.data?.partValueLabel}
-                      excludedEntityClasses={excludedSuggesterEntities}
-                      openDetailOnCreate={openDetailOnCreate}
-                      territoryActants={[]}
-                      onSelected={(newSelectedId: string) => {
-                        handleChangeValue(reference.id, newSelectedId, true);
-                      }}
-                      categoryTypes={[EntityEnums.Class.Value]}
-                      isInsideTemplate={isInsideTemplate}
-                      territoryParentId={territoryParentId}
-                    />
-                  </div>
-                )
+                <EntitySuggester
+                  alwaysShowCreateModal={alwaysShowCreateModal}
+                  placeholder={resourceEntity?.data?.partValueLabel}
+                  excludedEntityClasses={excludedSuggesterEntities}
+                  openDetailOnCreate={openDetailOnCreate}
+                  territoryActants={[]}
+                  onSelected={(newSelectedId: string) => {
+                    handleChangeValue(reference.id, newSelectedId, true);
+                  }}
+                  categoryTypes={[EntityEnums.Class.Value]}
+                  isInsideTemplate={isInsideTemplate}
+                  territoryParentId={territoryParentId}
+                  disabled={disabled}
+                />
               )}
-            </div>
+            </StyledGrid>
           );
         },
       },
-      {
-        id: "text reference",
-        Cell: ({ row }: CellType) => {
-          const reference = row.original;
-          const resourceEntity = entities[reference.resource];
+      // {
+      //   id: "text reference",
+      //   Cell: ({ row }: CellType) => {
+      //     const reference = row.original;
+      //     const resourceEntity = entities[reference.resource];
 
-          const document =
-            resourceEntity && documents
-              ? documents.find(
-                  (doc) => doc.id === resourceEntity.data.documentId
-                )
-              : undefined;
+      //     const document =
+      //       resourceEntity && documents
+      //         ? documents.find(
+      //             (doc) => doc.id === resourceEntity.data.documentId
+      //           )
+      //         : undefined;
 
-          return (
-            <>
-              {resourceEntity ? (
-                resourceEntity.data.documentId ? (
-                  document?.referencedEntityIds.includes(entityId) ? (
-                    <Button
-                      tooltipLabel="with entity"
-                      icon={<GrDocumentVerified />}
-                      inverted
-                      color="primary"
-                      noBorder
-                    />
-                  ) : (
-                    <Button
-                      tooltipLabel="no reference in document found"
-                      icon={<GrDocument />}
-                      inverted
-                      color="plain"
-                      noBorder
-                    />
-                  )
-                ) : (
-                  <Button
-                    icon={<GrDocumentMissing />}
-                    tooltipLabel="no document assigned for this resource"
-                    color="danger"
-                    noBorder
-                    inverted
-                  />
-                )
-              ) : (
-                <></>
-              )}
-            </>
-          );
-        },
-      },
+      //     return (
+      //       <>
+      //         {resourceEntity ? (
+      //           resourceEntity.data.documentId ? (
+      //             document?.referencedEntityIds.includes(entityId) ? (
+      //               <Button
+      //                 tooltipLabel="with entity"
+      //                 icon={<GrDocumentVerified />}
+      //                 inverted
+      //                 color="primary"
+      //                 noBorder
+      //               />
+      //             ) : (
+      //               <Button
+      //                 tooltipLabel="no reference in document found"
+      //                 icon={<GrDocument />}
+      //                 inverted
+      //                 color="plain"
+      //                 noBorder
+      //               />
+      //             )
+      //           ) : (
+      //             <Button
+      //               icon={<GrDocumentMissing />}
+      //               tooltipLabel="no document assigned for this resource"
+      //               color="danger"
+      //               noBorder
+      //               inverted
+      //             />
+      //           )
+      //         ) : (
+      //           <></>
+      //         )}
+      //       </>
+      //     );
+      //   },
+      // },
       {
         id: "reference buttons",
         Cell: ({ row }: CellType) => {
@@ -399,6 +398,7 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
                 updateOrderFn={() => onChange(localReferences, true)}
                 visibleColumns={visibleColumns}
                 hasOrder={rows.length > 1}
+                userCanEdit={userCanEdit}
                 {...row.getRowProps()}
               />
             );

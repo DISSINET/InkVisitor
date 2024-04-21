@@ -16,3 +16,10 @@ export const StyledCancelButton = styled.div`
     color: ${({ theme }) => theme.color["danger"]};
   }
 `;
+
+export const StyledInputWrap = styled.div`
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0 4px;
+`;

@@ -13,7 +13,6 @@ import { PropAttributeFilter, classesPropValue } from "types";
 import {
   StyledAttributesFlexColumn,
   StyledAttributesFlexRow,
-  StyledNoEntity,
   StyledTagGrid,
 } from "./PropGroupRowStyles";
 import { partitivityDict, virtualityDict } from "@shared/dictionaries";
@@ -29,6 +28,7 @@ interface PropGroupRowValue {
   isExpanded: boolean;
   disabledAttributes: PropAttributeFilter;
   openDetailOnCreate: boolean;
+  alwaysShowCreateModal?: boolean;
 }
 export const PropGroupRowValue: React.FC<PropGroupRowValue> = ({
   propValueEntity,
@@ -41,6 +41,7 @@ export const PropGroupRowValue: React.FC<PropGroupRowValue> = ({
   isExpanded,
   disabledAttributes,
   openDetailOnCreate,
+  alwaysShowCreateModal,
 }) => {
   return (
     <StyledAttributesFlexColumn>
@@ -65,6 +66,7 @@ export const PropGroupRowValue: React.FC<PropGroupRowValue> = ({
               isInsideTemplate={isInsideTemplate}
               territoryParentId={territoryParentId}
               excludedActantIds={[propValueEntity.id]}
+              disabled={!userCanEdit}
             >
               <EntityTag
                 entity={propValueEntity}
@@ -112,7 +114,7 @@ export const PropGroupRowValue: React.FC<PropGroupRowValue> = ({
               />
             )}
           </>
-        ) : userCanEdit ? (
+        ) : (
           <EntitySuggester
             territoryActants={territoryActants}
             onSelected={(newSelectedId: string) => {
@@ -134,9 +136,9 @@ export const PropGroupRowValue: React.FC<PropGroupRowValue> = ({
             excludedEntityClasses={excludedSuggesterEntities}
             isInsideTemplate={isInsideTemplate}
             territoryParentId={territoryParentId}
+            disabled={!userCanEdit}
+            alwaysShowCreateModal={alwaysShowCreateModal}
           />
-        ) : (
-          <StyledNoEntity>-</StyledNoEntity>
         )}
       </StyledTagGrid>
       {isExpanded && (

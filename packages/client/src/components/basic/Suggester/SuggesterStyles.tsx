@@ -53,6 +53,7 @@ export const StyledSuggestionCancelButton = styled.div<StyledSuggestionCancelBut
 `;
 
 export const StyledSuggesterList = styled.div`
+export const StyledSuggesterList = styled.div`
   z-index: 100;
 `;
 export const StyledRelativePosition = styled.div`
@@ -67,15 +68,15 @@ export const StyledRelativePosition = styled.div`
   min-height: 2.8rem;
 `;
 interface StyledSuggestionRow {
-  twoIcons: boolean;
-  isSelected: boolean;
+  $twoIcons: boolean;
+  $isSelected: boolean;
 }
 export const StyledSuggestionRow = styled.div<StyledSuggestionRow>`
   display: grid;
-  grid-template-columns: ${({ twoIcons }) => (twoIcons ? "4rem" : "2.5rem")} auto 3rem;
+  grid-template-columns: ${({ $twoIcons }) => ($twoIcons ? "4rem" : "2.5rem")} auto 3rem;
   align-items: center;
-  background-color: ${({ theme, isSelected }) =>
-    isSelected ? theme.color["blue"][100] : "transparent"};
+  background-color: ${({ theme, $isSelected }) =>
+    $isSelected ? theme.color["blue"][100] : "transparent"};
 `;
 export const StyledSuggestionLineActions = styled.div<Column>`
   margin-left: ${({ theme }) => theme.space[2]};
@@ -100,4 +101,9 @@ export const StyledTagWrapper = styled.div`
 export const StyledAiOutlineWarning = styled(AiOutlineWarning)`
   margin-top: 0.1rem;
   margin-left: 0.5rem;
+`;
+export const StyledDash = styled.div`
+  font-size: ${({ theme }) => theme.fontSize["base"]};
+  color: ${({ theme }) => theme.color["black"]};
+  padding-left: 0.3rem;
 `;

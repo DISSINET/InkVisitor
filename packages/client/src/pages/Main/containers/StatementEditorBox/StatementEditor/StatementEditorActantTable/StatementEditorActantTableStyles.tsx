@@ -85,11 +85,14 @@ interface StyledBorderLeft {
 export const StyledBorderLeft = styled.div<StyledBorderLeft>`
   border-left: 3px solid
     ${({ theme, $borderColor }) => theme.color.elementType[$borderColor]};
-  $padding-left: ${({ theme, $padding }) => ($padding ? theme.space[1] : "")};
+  padding-left: ${({ theme, $padding }) => ($padding ? theme.space[1] : "")};
   margin-bottom: ${({ theme, $marginBottom }) =>
     $marginBottom ? theme.space[4] : ""};
 `;
 export const StyledFlexStart = styled.div`
   display: flex;
   align-items: flex-start;
+`;
+export const StyledSuggesterWrap = styled.span`
+  min-width: 13rem;
 `;

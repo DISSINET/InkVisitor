@@ -1,12 +1,14 @@
 import { entitiesDictKeys } from "@shared/dictionaries";
 import { EntityEnums, UserEnums } from "@shared/enums";
 import {
+  IEntity,
   IReference,
   IResponseGeneric,
   IResponseStatement,
   IResponseTerritory,
   IResponseTree,
   IStatement,
+  ITerritory,
 } from "@shared/types";
 import {
   UseMutationResult,
@@ -16,7 +18,11 @@ import {
 import api from "api";
 import { AxiosResponse } from "axios";
 import { Button, ButtonGroup } from "components";
-import Dropdown, { BreadcrumbItem, EntitySuggester } from "components/advanced";
+import Dropdown, {
+  BreadcrumbItem,
+  EntitySuggester,
+  TerritoryActionModal,
+} from "components/advanced";
 import { CStatement } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
@@ -48,28 +54,15 @@ import {
   StyledMoveToParent,
   StyledSuggesterRow,
 } from "./StatementListHeaderStyles";
+import { TbHomeMove } from "react-icons/tb";
+import { rootTerritoryId } from "Theme/constants";
 
 interface StatementListHeader {
-  data: IResponseTerritory;
+  territory: IResponseTerritory;
   addStatementAtTheEndMutation: UseMutationResult<
     void,
     unknown,
     IStatement,
-    unknown
-  >;
-  moveTerritoryMutation: UseMutationResult<
-    AxiosResponse<IResponseGeneric>,
-    unknown,
-    string,
-    unknown
-  >;
-  updateTerritoryMutation: UseMutationResult<
-    AxiosResponse<IResponseGeneric>,
-    unknown,
-    {
-      territoryId: string;
-      statements: IResponseStatement[];
-    },
     unknown
   >;
   isFavorited?: boolean;
@@ -81,6 +74,7 @@ interface StatementListHeader {
   selectedRows: string[];
   setSelectedRows: React.Dispatch<React.SetStateAction<string[]>>;
 
+  // Statements batch actions
   moveStatementsMutation: UseMutationResult<
     AxiosResponse<IResponseGeneric>,
     unknown,
@@ -112,11 +106,29 @@ interface StatementListHeader {
     unknown
   >;
   handleCreateStatement: () => void;
+  updateTerritoryMutation: UseMutationResult<
+    AxiosResponse<IResponseGeneric<any>, any>,
+    Error,
+    {
+      territoryId: string;
+      changes: Partial<ITerritory>;
+    },
+    unknown
+  >;
+  duplicateTerritoryMutation: UseMutationResult<
+    AxiosResponse<IResponseGeneric<any>, any>,
+    Error,
+    {
+      territoryId: string;
+      targets: string[];
+      withChildren: boolean;
+    },
+    unknown
+  >;
 }
 export const StatementListHeader: React.FC<StatementListHeader> = ({
-  data,
+  territory,
   addStatementAtTheEndMutation,
-  moveTerritoryMutation,
 
   isFavorited,
   isAllSelected,
@@ -131,6 +143,9 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
   replaceReferencesMutation,
   appendReferencesMutation,
   handleCreateStatement,
+
+  updateTerritoryMutation,
+  duplicateTerritoryMutation,
 }) => {
   const dispatch = useAppDispatch();
   const queryClient = useQueryClient();
@@ -209,7 +224,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
 
   const handleSelectAll = (checked: boolean) =>
     checked
-      ? setSelectedRows(data.statements.map((statement) => statement.id))
+      ? setSelectedRows(territory.statements.map((statement) => statement.id))
       : setSelectedRows([]);
 
   const renderCheckBox = () => {
@@ -247,6 +262,10 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
   };
 
   const [batchAction, setBatchAction] = useState<DropdownItem>(batchOptions[0]);
+  const [showTActionModal, setShowTActionModal] = useState(false);
+  const [moveToParentEntity, setMoveToParentEntity] = useState<IEntity | false>(
+    false
+  );
 
   return (
     <StyledHeader>
@@ -289,86 +308,173 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
         </StyledHeading>
       </StyledHeaderRow>
 
-      <StyledSuggesterRow>
-        <StyledActionsWrapper>
-          <StyledCheckboxWrapper>{renderCheckBox()}</StyledCheckboxWrapper>
+  const userCanEdit = territory.right !== UserEnums.RoleMode.Read;
 
-          {selectedRows.length > 0 && (
-            <StyledCounter>{`${selectedRows.length}/${data.statements.length}`}</StyledCounter>
-          )}
+  return (
+    <>
+      <StyledHeader>
+        <StyledHeaderBreadcrumbRow>
+          {selectedTerritoryPath &&
+            selectedTerritoryPath.map((territoryId: string, key: number) => {
+              return (
+                <React.Fragment key={key}>
+                  <BreadcrumbItem territoryId={territoryId} />
+                </React.Fragment>
+              );
+            })}
+          <React.Fragment key="this-territory">
+            <BreadcrumbItem
+              territoryId={territoryId}
+              territoryData={territory}
+            />
+          </React.Fragment>
+        </StyledHeaderBreadcrumbRow>
 
-          {
-            <>
-              <StyledDropdownWrap>
-                <Dropdown.Single.Basic
-                  width={78}
-                  disabled={selectedRows.length === 0}
-                  value={batchAction.value}
-                  onChange={(selectedOption) =>
-                    setBatchAction(
-                      batchOptions.find((o) => o.value === selectedOption)!
-                    )
-                  }
-                  options={batchOptions}
-                />
-              </StyledDropdownWrap>
+        <StyledHeaderRow>
+          {isFavorited && <StyledFaStar size={18} />}
+          <StyledHeading>
+            {territoryId
+              ? `T:\xa0${trimTerritoryLabel(territory.label)}`
+              : "no territory selected"}
+          </StyledHeading>
+
+          {territory.id !== rootTerritoryId && userCanEdit && (
+            <StyledMoveToParent>
               <EntitySuggester
-                placeholder={
-                  batchAction.info === EntityEnums.Class.Territory
-                    ? "to territory"
-                    : ""
-                }
+                placeholder="new parent"
                 disableTemplatesAccept
-                inputWidth={70}
-                disableCreate
                 filterEditorRights
-                categoryTypes={[
-                  entitiesDictKeys[batchAction.info as EntityEnums.Class].value,
-                ]}
-                onSelected={(newSelectedId: string) => {
-                  switch (batchAction.value) {
-                    case BatchOption.move_S:
-                      moveStatementsMutation.mutate({
-                        statements: selectedRows,
-                        newTerritoryId: newSelectedId,
-                      });
-                      return;
-                    case BatchOption.duplicate_S:
-                      duplicateStatementsMutation.mutate({
-                        statements: selectedRows,
-                        newTerritoryId: newSelectedId,
-                      });
-                      return;
-                    case BatchOption.append_R:
-                      appendReferencesMutation.mutate([
-                        { id: uuidv4(), resource: newSelectedId, value: "" },
-                      ]);
-                      return;
-                    case BatchOption.replace_R:
-                      replaceReferencesMutation.mutate([
-                        { id: uuidv4(), resource: newSelectedId, value: "" },
-                      ]);
-                      return;
-                  }
+                inputWidth={96}
+                disableCreate
+                categoryTypes={[EntityEnums.Class.Territory]}
+                onPicked={(selectedEntity) => {
+                  setMoveToParentEntity(selectedEntity);
+                  setShowTActionModal(true);
                 }}
-                excludedActantIds={[data.id]}
-                disabled={selectedRows.length === 0}
+                excludedActantIds={excludedMoveTerritories}
+                button={
+                  <Button
+                    icon={<TbHomeMove size={14} />}
+                    onClick={() => setShowTActionModal(true)}
+                  />
+                }
               />
-            </>
-          }
-        </StyledActionsWrapper>
+            </StyledMoveToParent>
+          )}
+        </StyledHeaderRow>
 
-        {territoryId && (
-          <ButtonGroup>
-            {data.right !== UserEnums.RoleMode.Read && (
+        <StyledSuggesterRow>
+          {/* BATCH ACTIONS */}
+          <StyledActionsWrapper>
+            {user?.role !== UserEnums.Role.Viewer && (
+              <>
+                <StyledCheckboxWrapper>
+                  {renderCheckBox()}
+                </StyledCheckboxWrapper>
+
+                {selectedRows.length > 0 && (
+                  <StyledCounter>{`${selectedRows.length}/${territory.statements.length}`}</StyledCounter>
+                )}
+
+                {
+                  <>
+                    <StyledDropdownWrap>
+                      <Dropdown.Single.Basic
+                        width={78}
+                        disabled={selectedRows.length === 0}
+                        value={batchAction.value}
+                        onChange={(selectedOption) =>
+                          setBatchAction(
+                            batchOptions.find(
+                              (o) => o.value === selectedOption
+                            )!
+                          )
+                        }
+                        options={batchOptions}
+                      />
+                    </StyledDropdownWrap>
+                    <EntitySuggester
+                      placeholder={
+                        batchAction.info === EntityEnums.Class.Territory
+                          ? "to territory"
+                          : ""
+                      }
+                      disableTemplatesAccept
+                      inputWidth={70}
+                      disableCreate
+                      filterEditorRights
+                      categoryTypes={[
+                        entitiesDictKeys[batchAction.info as EntityEnums.Class]
+                          .value,
+                      ]}
+                      onSelected={(newSelectedId: string) => {
+                        switch (batchAction.value) {
+                          case BatchOption.move_S:
+                            moveStatementsMutation.mutate({
+                              statements: selectedRows,
+                              newTerritoryId: newSelectedId,
+                            });
+                            return;
+                          case BatchOption.duplicate_S:
+                            duplicateStatementsMutation.mutate({
+                              statements: selectedRows,
+                              newTerritoryId: newSelectedId,
+                            });
+                            return;
+                          case BatchOption.append_R:
+                            appendReferencesMutation.mutate([
+                              {
+                                id: uuidv4(),
+                                resource: newSelectedId,
+                                value: "",
+                              },
+                            ]);
+                            return;
+                          case BatchOption.replace_R:
+                            replaceReferencesMutation.mutate([
+                              {
+                                id: uuidv4(),
+                                resource: newSelectedId,
+                                value: "",
+                              },
+                            ]);
+                            return;
+                        }
+                      }}
+                      excludedActantIds={[territory.id]}
+                      disabled={selectedRows.length === 0}
+                    />
+                  </>
+                }
+              </>
+            )}
+          </StyledActionsWrapper>
+
+          {/* NEW STATEMENT / REFRESH */}
+          {territoryId && (
+            <ButtonGroup>
+              {userCanEdit && (
+                <Button
+                  key="add"
+                  icon={<FaPlus />}
+                  tooltipLabel="add new statement at the end of the list"
+                  color="primary"
+                  label="new statement"
+                  onClick={() => {
+                    handleCreateStatement();
+                  }}
+                />
+              )}
               <Button
-                key="add"
-                icon={<FaPlus />}
-                tooltipLabel="add new statement at the end of the list"
+                key="refresh"
+                icon={<BiRefresh size={14} />}
+                tooltipLabel="refresh data"
+                inverted
                 color="primary"
-                label="new statement"
                 onClick={() => {
-                  handleCreateStatement();
+                  queryClient.invalidateQueries({ queryKey: ["territory"] });
+                  queryClient.invalidateQueries({ queryKey: ["statement"] });
+                  queryClient.invalidateQueries({ queryKey: ["user"] });
                 }}
               />
             )}
@@ -411,7 +517,20 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
             ></Button>
           </ButtonGroup>
         </StyledModeSwitcher>
-      </StyledSuggesterRow>
-    </StyledHeader>
+      </StyledHeader>
+
+      {showTActionModal && (
+        <TerritoryActionModal
+          onClose={() => setShowTActionModal(false)}
+          selectedParentEntity={moveToParentEntity}
+          setMoveToParentEntity={setMoveToParentEntity}
+          showModal={showTActionModal}
+          territory={territory}
+          updateTerritoryMutation={updateTerritoryMutation}
+          excludedMoveTerritories={excludedMoveTerritories}
+          duplicateTerritoryMutation={duplicateTerritoryMutation}
+        />
+      )}
+    </>
   );
 };

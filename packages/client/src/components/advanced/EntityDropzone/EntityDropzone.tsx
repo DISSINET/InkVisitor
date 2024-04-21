@@ -18,6 +18,7 @@ interface EntityDropzone {
   disableTemplatesAccept?: boolean;
 
   children: ReactElement;
+  disabled?: boolean;
 }
 export const EntityDropzone: React.FC<EntityDropzone> = ({
   categoryTypes,
@@ -32,18 +33,20 @@ export const EntityDropzone: React.FC<EntityDropzone> = ({
   disableTemplatesAccept,
 
   children,
+  disabled,
 }) => {
   const [isWrongDropCategory, setIsWrongDropCategory] = useState(false);
 
   const handleInstantiateTemplate = async (
     templateToDuplicate: IEntity | IStatement | ITerritory
   ) => {
-    const newEntityId = await InstTemplate(
+    const newEntity = await InstTemplate(
       templateToDuplicate,
       localStorage.getItem("userrole") as UserEnums.Role
     );
-    if (newEntityId) {
-      onSelected(newEntityId);
+    if (newEntity) {
+      onSelected(newEntity.id);
+      onPicked(newEntity);
     }
   };
 
@@ -56,6 +59,9 @@ export const EntityDropzone: React.FC<EntityDropzone> = ({
         newDropped.entity && handleInstantiateTemplate(newDropped.entity);
       } else {
         onSelected(newDropped.id);
+        if (newDropped.entity) {
+          onPicked(newDropped.entity);
+        }
         newDropped.entity && onPicked(newDropped.entity);
       }
     }
@@ -89,6 +95,7 @@ export const EntityDropzone: React.FC<EntityDropzone> = ({
       }}
       isInsideTemplate={isInsideTemplate}
       isWrongDropCategory={isWrongDropCategory}
+      disabled={disabled}
     >
       {children}
     </Dropzone>

@@ -185,7 +185,8 @@ export const TerritoryTreeBox: React.FC = () => {
       <ButtonGroup>
         {userRole === UserEnums.RoleMode.Admin && (
           <Button
-            label="new T"
+            label="new"
+            iconRight={<span style={{ marginLeft: 5 }}>{"\u0054"}</span>}
             icon={<FaPlus />}
             onClick={() => setShowCreate(true)}
             fullWidth

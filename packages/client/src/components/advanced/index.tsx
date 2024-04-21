@@ -23,6 +23,7 @@ import { Menu } from "./Menu/Menu";
 import { Page } from "./Page/Page";
 import { LeftHeader, RightHeader } from "./PageHeader/PageHeader";
 import { PanelSeparator } from "./PanelSeparator/PanelSeparator";
+import { TerritoryActionModal } from "./TerritoryActionModal/TerritoryActionModal";
 import { UserCustomizationModal } from "./UserCustomizationModal/UserCustomizationModal";
 
 const Dropdown = {
@@ -56,6 +57,7 @@ export {
   LeftHeader,
   RightHeader,
   PanelSeparator,
+  TerritoryActionModal,
   UserCustomizationModal,
   ElvlButtonGroup,
   MoodVariantButtonGroup,

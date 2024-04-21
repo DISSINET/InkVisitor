@@ -140,19 +140,19 @@ export default Router()
    */
   .get(
     "/",
-    asyncRouteHandler<IResponseEntity[]>(async (httpRequest: IRequest) => {
-      const req = new RequestSearch(httpRequest.query as IRequestSearch);
-      if (req.label && req.label.length < 2) {
+    asyncRouteHandler<IResponseEntity[]>(async (req: IRequest<unknown, unknown, IRequestSearch>) => {
+      const search = new RequestSearch(req.query);
+      if (search.label && search.label.length < 2) {
         return [];
       }
 
-      const err = req.validate();
+      const err = search.validate();
       if (err) {
         throw err;
       }
 
-      const response = new ResponseSearch(req);
-      return await response.prepare(httpRequest);
+      const response = new ResponseSearch(search);
+      return await response.prepare(req);
     })
   )
   /**

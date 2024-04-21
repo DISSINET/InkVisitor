@@ -2,13 +2,16 @@ import Action from "@models/action/action";
 import Group from "@models/group/group";
 import Location from "@models/location/location";
 import Person from "@models/person/person";
+import { newMockRequest } from "@modules/common.test";
+import { Db } from "@service/rethink";
 import { EntityEnums, StatementEnums, WarningTypeEnums } from "@shared/enums";
-import { IAction, IEntity } from "@shared/types";
+import { IEntity } from "@shared/types";
 import { InternalServerError } from "@shared/types/errors";
 import "ts-jest";
 import { ResponseStatement } from "./response";
-import Statement, { StatementActant, StatementAction } from "./statement";
+import Statement, { StatementActant } from "./statement";
 import { prepareStatement } from "./statement.test";
+import Territory from "@models/territory/territory";
 
 class MockResponse extends ResponseStatement {
   static new(): MockResponse {
@@ -27,15 +30,15 @@ class MockResponse extends ResponseStatement {
       action.data.entities[pos] = map[key];
     }
 
-    this.data.actions.push(new StatementAction({ actionId: action.id }));
+    // this.data.actions.push(new StatementAction({ actionId: action.id }));
     this.entities[action.id] = action;
   }
 
-  addActant(actant: IEntity, pos: EntityEnums.Position) {
+  addActant(actant: IEntity, position: EntityEnums.Position) {
     this.data.actants.push(
       new StatementActant({
         entityId: actant.id,
-        position: pos,
+        position,
       })
     );
     this.entities[actant.id] = actant;
@@ -95,16 +98,21 @@ describe("models/statement/response", function () {
   });
 
   describe("test ResponseStatement.getWarnings", function () {
-    test("not prepared entity should thrown an error", () => {
+    const db = new Db();
+    const request = newMockRequest(db);
+    test("not prepared entity should thrown an error", async () => {
       const [, statement] = prepareStatement();
       const response = new ResponseStatement(statement);
-      expect(() => response.getWarnings()).toThrowError(InternalServerError);
+
+      const warning = await response.getWarnings(request);
+
+      expect(() => warning).toThrowError(InternalServerError);
     });
 
-    test("no action", () => {
+    test("no action", async () => {
       const response = MockResponse.new();
 
-      const warnings = response.getWarnings();
+      const warnings = await response.getWarnings(request);
       expect(warnings.find((w) => w.type === WarningTypeEnums.NA)).toBeTruthy();
     });
 
@@ -736,4 +744,43 @@ describe("models/statement/response", function () {
       });
     });
   });
+
+  // describe("test T-based validations", function () {
+  //   const db = new Db();
+  //   const request = newMockRequest(db);
+  //   test("test TVEC", async () => {
+  //     const territory1 = new Territory({
+  //       id: "T1",
+  //       data: {
+  //         validations: [],
+  //         parent: {
+  //           territoryId: "T2",
+  //           order: 1,
+  //         },
+  //       },
+  //     });
+  //     const territory2 = new Territory({
+  //       id: "T2",
+  //       data: {
+  //         validations: [],
+  //         parent: false,
+  //       },
+  //     });
+
+  //     const statement = new Statement({
+  //       id: "statement",
+  //       data: {
+  //         text: "",
+  //         actions: [],
+  //         actants: [],
+  //         tags: [],
+  //         territory: { territoryId: "T1", order: 1 },
+  //       },
+  //     });
+
+  //     const sResponse = new ResponseStatement(statement);
+
+  //     await sResponse.prepare(request);
+  //   });
+  // });
 });

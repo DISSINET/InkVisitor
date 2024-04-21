@@ -6,9 +6,11 @@ import { Loader } from "components";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
 import { BsInfoCircle } from "react-icons/bs";
+import { toast } from "react-toastify";
+import { useAppDispatch } from "redux/hooks";
 import { StatementEditor } from "./StatementEditor/StatementEditor";
 import { StyledEditorEmptyState } from "./StatementEditorBoxStyles";
-import { toast } from "react-toastify";
+import { setDisableStatementListScroll } from "redux/features/statementList/disableStatementListScrollSlice";
 
 export const StatementEditorBox: React.FC = () => {
   const { statementId, setStatementId, selectedDetailId, setTerritoryId } =
@@ -39,6 +41,8 @@ export const StatementEditorBox: React.FC = () => {
       setStatementId("");
     }
   }, [statementError]);
+
+  const dispatch = useAppDispatch();
 
   // MUTATIONS
   const updateStatementMutation = useMutation({

@@ -1,19 +1,20 @@
 import { animated, config, useSpring } from "@react-spring/web";
 import { entityStatusDict, languageDict } from "@shared/dictionaries";
 import { entitiesDict } from "@shared/dictionaries/entity";
-import { EntityEnums } from "@shared/enums";
+import { EntityEnums, UserEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
 import { IRequestSearch } from "@shared/types/request-search";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { wildCardChar } from "Theme/constants";
 import api from "api";
 import { Button, Input, Loader, TypeBar } from "components";
 import Dropdown, {
   AttributeButtonGroup,
+  EntityCreateModal,
   EntitySuggester,
   EntityTag,
 } from "components/advanced";
-import { useDebounce } from "hooks";
+import { useDebounce, useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
 import { CgOptions } from "react-icons/cg";
 import { IoMdArrowDropdownCircle } from "react-icons/io";
@@ -35,6 +36,7 @@ import {
   StyledRowHeader,
 } from "./EntitySearchBoxStyles";
 import { EntitySearchResults } from "./EntitySearchResults/EntitySearchResults";
+import { FaPlus } from "react-icons/fa";
 
 const initValues: IRequestSearch = {
   label: "",
@@ -66,6 +68,9 @@ const anyTemplate: DropdownItem = {
 const debounceTime: number = 500;
 
 export const EntitySearchBox: React.FC = () => {
+  const queryClient = useQueryClient();
+  const { appendDetailId } = useSearchParams();
+
   const [classOption, setClassOption] = useState<EntityEnums.Class>(
     defaultClassOption.value as EntityEnums.Class
   );
@@ -142,35 +147,21 @@ export const EntitySearchBox: React.FC = () => {
         const res = await api.entitiesSearch(filters);
         return res.data;
       }
-      const res = await api.entitiesSearch(debouncedValues);
+      const labelWithWildCard =
+        debouncedValues.label && debouncedValues.label?.length > 0
+          ? debouncedValues.label + wildCardChar
+          : debouncedValues.label;
+
+      const res = await api.entitiesSearch({
+        ...debouncedValues,
+        label: labelWithWildCard,
+      });
       return res.data;
     },
     enabled: api.isLoggedIn() && validSearch,
   });
 
-  // get all templates for the "limit by template" option
-  const {
-    status: templateStatus,
-    data: templates,
-    error: templateError,
-    isFetching: isFetchingTemplates,
-  } = useQuery({
-    queryKey: ["search-templates", searchData, classOption],
-    queryFn: async () => {
-      const res = await api.entitiesSearch({
-        onlyTemplates: true,
-        class: searchData.class,
-      });
-
-      const templates = res.data;
-
-      templates.sort((a: IEntity, b: IEntity) =>
-        a.label.toLocaleLowerCase() > b.label.toLocaleLowerCase() ? 1 : -1
-      );
-      return templates;
-    },
-    enabled: api.isLoggedIn(),
-  });
+  const [referencedTo, setReferencedTo] = useState<IEntity | false>(false);
 
   const classOptions = entitiesDict.filter(
     (e) => e.value !== EntityEnums.Class.Resource
@@ -215,6 +206,30 @@ export const EntitySearchBox: React.FC = () => {
     return [];
   }, [entities]);
 
+  // get all templates for the "limit by template" option
+  // const {
+  //   status: templateStatus,
+  //   data: templates,
+  //   error: templateError,
+  //   isFetching: isFetchingTemplates,
+  // } = useQuery({
+  //   queryKey: ["search-templates", searchData, classOption],
+  //   queryFn: async () => {
+  //     const res = await api.entitiesSearch({
+  //       onlyTemplates: true,
+  //       class: searchData.class,
+  //     });
+
+  //     const templates = res.data;
+
+  //     templates.sort((a: IEntity, b: IEntity) =>
+  //       a.label.toLocaleLowerCase() > b.label.toLocaleLowerCase() ? 1 : -1
+  //     );
+  //     return templates;
+  //   },
+  //   enabled: api.isLoggedIn(),
+  // });
+
   // RELATED TO UNUSED TEMPLATE DROPDOWN
   // const templateOptions: DropdownItem[] = useMemo(() => {
   //   const options: DropdownItem[] = [anyTemplate];
@@ -248,335 +263,397 @@ export const EntitySearchBox: React.FC = () => {
     }
   }, [showAdvancedOptions]);
 
+  const [showEntityCreateModal, setShowEntityCreateModal] = useState(false);
+
   const rotateOptionsIcon = useSpring({
     transform: showAdvancedOptions ? "rotate(180deg)" : "rotate(0deg)",
     config: config.stiff,
   });
 
+  const userRole = localStorage.getItem("userrole");
+
   return (
-    <StyledBoxContent>
-      <StyledOptions>
-        <StyledRow>
-          <StyledRowHeader>label</StyledRowHeader>
-          <Input
-            width="full"
-            placeholder="(at least 2 characters)"
-            changeOnType
-            onChangeFn={(value: string) => {
-              value.length
-                ? handleChange({ label: value + wildCardChar })
-                : handleChange({ label: value });
-            }}
-          />
-        </StyledRow>
-
-        <StyledAdvancedOptions>
-          <div style={{ height: "100%", width: "100%" }}>
-            <StyledAdvancedOptionsSign>
-              <CgOptions />
-              <i>advanced options</i>
-            </StyledAdvancedOptionsSign>
-          </div>
-          <div>
-            <Button
-              icon={
-                <div style={{ display: "inline-flex", alignItems: "center" }}>
-                  <p style={{ margin: "0 0.3rem" }}>
-                    {showAdvancedOptions ? "hide" : "show"}
-                  </p>
-                  <animated.div style={rotateOptionsIcon}>
-                    <IoMdArrowDropdownCircle size={16} />
-                  </animated.div>
-                </div>
-              }
-              onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}
-              inverted
-            />
-          </div>
-        </StyledAdvancedOptions>
-
-        {showAdvancedOptions && (
-          <>
-            <StyledRow>
-              <StyledRowHeader>class</StyledRowHeader>
-              <div style={{ position: "relative" }}>
-                <Dropdown.Single.Entity
-                  placeholder={""}
-                  width="full"
-                  options={[defaultClassOption].concat(classOptions)}
-                  value={classOption}
-                  onChange={(selectedOption) => {
-                    setClassOption(selectedOption as EntityEnums.Class);
-                    setTemplateOption(defaultClassOption);
-                    handleChange({
-                      class: selectedOption,
-                      usedTemplate: defaultClassOption.value,
-                    });
-                  }}
-                />
-                <TypeBar entityLetter={classOption} />
-              </div>
-            </StyledRow>
-            <StyledRow>
-              <StyledRowHeader>ID</StyledRowHeader>
+    <>
+      <StyledBoxContent>
+        <StyledOptions>
+          <StyledRow>
+            <StyledRowHeader>label</StyledRowHeader>
+            <div
+              style={{
+                display: userRole !== UserEnums.Role.Viewer ? "flex" : "",
+              }}
+            >
               <Input
                 width="full"
-                placeholder="ID"
+                placeholder="(at least 2 characters)"
                 changeOnType
-                onChangeFn={(value: string) =>
-                  handleChange({ entityIds: [value] })
-                }
+                onChangeFn={(value: string) => handleChange({ label: value })}
               />
-            </StyledRow>
-            <StyledRow>
-              <StyledRowHeader>status</StyledRowHeader>
-              <div style={{ position: "relative" }}>
-                <Dropdown.Single.Basic
-                  placeholder={""}
-                  width="full"
-                  options={statusOptions}
-                  value={statusOptionSelected}
-                  onChange={(selectedOption) => {
-                    handleChange({
-                      status: selectedOption,
-                    });
-                  }}
+              {userRole !== UserEnums.Role.Viewer && (
+                <Button
+                  tooltipLabel="create entity"
+                  icon={<FaPlus />}
+                  onClick={() => setShowEntityCreateModal(true)}
                 />
-                <TypeBar entityLetter={classOption} />
-              </div>
-            </StyledRow>
-            <StyledRow>
-              <StyledRowHeader>language</StyledRowHeader>
-              <div style={{ position: "relative" }}>
-                <Dropdown.Single.Basic
-                  placeholder={""}
+              )}
+            </div>
+          </StyledRow>
+
+          <StyledAdvancedOptions>
+            <div style={{ height: "100%", width: "100%" }}>
+              <StyledAdvancedOptionsSign>
+                <CgOptions />
+                <i>advanced options</i>
+              </StyledAdvancedOptionsSign>
+            </div>
+            <div>
+              <Button
+                icon={
+                  <div style={{ display: "inline-flex", alignItems: "center" }}>
+                    <p style={{ margin: "0 0.3rem" }}>
+                      {showAdvancedOptions ? "hide" : "show"}
+                    </p>
+                    <animated.div style={rotateOptionsIcon}>
+                      <IoMdArrowDropdownCircle size={16} />
+                    </animated.div>
+                  </div>
+                }
+                onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}
+                inverted
+              />
+            </div>
+          </StyledAdvancedOptions>
+
+          {showAdvancedOptions && (
+            <>
+              <StyledRow>
+                <StyledRowHeader>class</StyledRowHeader>
+                <div style={{ position: "relative" }}>
+                  <Dropdown.Single.Entity
+                    placeholder={""}
+                    width="full"
+                    options={[defaultClassOption].concat(classOptions)}
+                    value={classOption}
+                    onChange={(selectedOption) => {
+                      setClassOption(selectedOption as EntityEnums.Class);
+                      setTemplateOption(defaultClassOption);
+                      handleChange({
+                        class: selectedOption,
+                        usedTemplate: defaultClassOption.value,
+                      });
+                    }}
+                  />
+                  <TypeBar entityLetter={classOption} />
+                </div>
+              </StyledRow>
+              <StyledRow>
+                <StyledRowHeader>ID</StyledRowHeader>
+                <Input
                   width="full"
-                  options={languageOptions}
-                  value={languageOptionSelected}
-                  onChange={(selectedOption) => {
-                    handleChange({
-                      language: selectedOption,
-                    });
-                  }}
+                  placeholder="ID"
+                  changeOnType
+                  onChangeFn={(value: string) =>
+                    handleChange({ entityIds: [value] })
+                  }
                 />
-                <TypeBar entityLetter={classOption} />
-              </div>
-            </StyledRow>
-            {/* NOT USED NOW */}
-            {/* <StyledRow>
-            <StyledRowHeader>template</StyledRowHeader>
-             <Dropdown.Single.Attribute
-              placeholder={""}
-              width="full"
-              options={[defaultClassOption].concat(templateOptions)}
-              value={templateOption}
-              onChange={(selectedOption) => {
-                setTemplateOption(option);
-                handleChange({ usedTemplate: (selectedOption[0]).value });
-              }}
-            />
-          </StyledRow> */}
-            <StyledRow>
-              <StyledRowHeader>territory</StyledRowHeader>
-              {debouncedValues.territoryId && searchTerritoryEntity ? (
-                <>
-                  <Loader size={26} show={searchTerritoryEntityIsFetching} />
-                  {searchTerritoryEntity && (
-                    <EntityTag
-                      entity={searchTerritoryEntity}
-                      tooltipPosition={"left"}
-                      unlinkButton={{
-                        onClick: () => {
-                          handleChange({
-                            territoryId: "",
-                            subTerritorySearch: undefined,
-                          });
-                        },
-                        color: "danger",
-                        icon: <RiCloseFill />,
+              </StyledRow>
+              <StyledRow>
+                <StyledRowHeader>status</StyledRowHeader>
+                <div style={{ position: "relative" }}>
+                  <Dropdown.Single.Basic
+                    placeholder={""}
+                    width="full"
+                    options={statusOptions}
+                    value={statusOptionSelected}
+                    onChange={(selectedOption) => {
+                      handleChange({
+                        status: selectedOption,
+                      });
+                    }}
+                  />
+                  <TypeBar entityLetter={classOption} />
+                </div>
+              </StyledRow>
+              <StyledRow>
+                <StyledRowHeader>language</StyledRowHeader>
+                <div style={{ position: "relative" }}>
+                  <Dropdown.Single.Basic
+                    placeholder={""}
+                    width="full"
+                    options={languageOptions}
+                    value={languageOptionSelected}
+                    onChange={(selectedOption) => {
+                      handleChange({
+                        language: selectedOption,
+                      });
+                    }}
+                  />
+                  <TypeBar entityLetter={classOption} />
+                </div>
+              </StyledRow>
+              {/* NOT USED NOW */}
+              {/* <StyledRow>
+              <StyledRowHeader>template</StyledRowHeader>
+               <Dropdown.Single.Attribute
+                placeholder={""}
+                width="full"
+                options={[defaultClassOption].concat(templateOptions)}
+                value={templateOption}
+                onChange={(selectedOption) => {
+                  setTemplateOption(option);
+                  handleChange({ usedTemplate: (selectedOption[0]).value });
+                }}
+              />
+            </StyledRow> */}
+              <StyledRow>
+                <StyledRowHeader>territory</StyledRowHeader>
+                {debouncedValues.territoryId && searchTerritoryEntity ? (
+                  <>
+                    <Loader size={26} show={searchTerritoryEntityIsFetching} />
+                    {searchTerritoryEntity && (
+                      <EntityTag
+                        entity={searchTerritoryEntity}
+                        tooltipPosition={"left"}
+                        unlinkButton={{
+                          onClick: () => {
+                            handleChange({
+                              territoryId: "",
+                              subTerritorySearch: undefined,
+                            });
+                          },
+                          color: "danger",
+                          icon: <RiCloseFill />,
+                        }}
+                      />
+                    )}
+                  </>
+                ) : (
+                  <div>
+                    <EntitySuggester
+                      disableTemplatesAccept
+                      categoryTypes={[EntityEnums.Class.Territory]}
+                      onSelected={(newSelectedId: string) => {
+                        handleChange({ territoryId: newSelectedId });
                       }}
+                      placeholder={"territory"}
+                      disableCreate
+                      inputWidth="full"
+                    />
+                  </div>
+                )}
+              </StyledRow>
+              {debouncedValues.territoryId && (
+                <StyledRow>
+                  <StyledRowHeader>Territory children</StyledRowHeader>
+                  {searchTerritoryEntity && (
+                    <AttributeButtonGroup
+                      options={[
+                        {
+                          longValue: "included",
+                          shortValue: "included",
+                          onClick: () => {
+                            handleChange({ subTerritorySearch: true });
+                          },
+                          selected: debouncedValues.subTerritorySearch === true,
+                        },
+                        {
+                          longValue: "not included",
+                          shortValue: "not included",
+                          onClick: () => {
+                            handleChange({ subTerritorySearch: undefined });
+                          },
+                          selected: debouncedValues.subTerritorySearch !== true,
+                        },
+                      ]}
                     />
                   )}
-                </>
-              ) : (
-                <div>
-                  <EntitySuggester
-                    disableTemplatesAccept
-                    categoryTypes={[EntityEnums.Class.Territory]}
-                    onSelected={(newSelectedId: string) => {
-                      handleChange({ territoryId: newSelectedId });
-                    }}
-                    placeholder={"territory"}
-                    disableCreate
-                    inputWidth="full"
-                  />
-                </div>
+                </StyledRow>
               )}
-            </StyledRow>
-            {debouncedValues.territoryId && (
               <StyledRow>
-                <StyledRowHeader>Territory children</StyledRowHeader>
-                {searchTerritoryEntity && (
-                  <AttributeButtonGroup
-                    options={[
-                      {
-                        longValue: "included",
-                        shortValue: "included",
-                        onClick: () => {
-                          handleChange({ subTerritorySearch: true });
-                        },
-                        selected: debouncedValues.subTerritorySearch === true,
+                <StyledRowHeader>co-occurrence</StyledRowHeader>
+                {debouncedValues.cooccurrenceId ? (
+                  <>
+                    <Loader size={26} show={cooccurrenceIsFetching} />
+                    {cooccurrenceEntity && (
+                      <EntityTag
+                        entity={cooccurrenceEntity}
+                        tooltipPosition="left"
+                        unlinkButton={{
+                          onClick: () => {
+                            handleChange({ cooccurrenceId: "" });
+                          },
+                          color: "danger",
+                          icon: <RiCloseFill />,
+                        }}
+                      />
+                    )}
+                  </>
+                ) : (
+                  <div>
+                    <EntitySuggester
+                      disableTemplatesAccept
+                      categoryTypes={[
+                        EntityEnums.Class.Statement,
+                        EntityEnums.Class.Action,
+                        EntityEnums.Class.Territory,
+                        EntityEnums.Class.Resource,
+                        EntityEnums.Class.Person,
+                        EntityEnums.Class.Being,
+                        EntityEnums.Class.Group,
+                        EntityEnums.Class.Object,
+                        EntityEnums.Class.Concept,
+                        EntityEnums.Class.Location,
+                        EntityEnums.Class.Value,
+                        EntityEnums.Class.Event,
+                      ]}
+                      onSelected={(newSelectedId: string) => {
+                        handleChange({ cooccurrenceId: newSelectedId });
+                      }}
+                      placeholder={"entity"}
+                      disableCreate
+                      inputWidth="full"
+                    />
+                  </div>
+                )}
+              </StyledRow>
+              <StyledRow>
+                <StyledRowHeader>referenced to</StyledRowHeader>
+                {referencedTo ? (
+                  <EntityTag
+                    entity={referencedTo}
+                    unlinkButton={{
+                      onClick: () => {
+                        setReferencedTo(false);
+                        handleChange({ haveReferenceTo: undefined });
                       },
-                      {
-                        longValue: "not included",
-                        shortValue: "not included",
-                        onClick: () => {
-                          handleChange({ subTerritorySearch: undefined });
-                        },
-                        selected: debouncedValues.subTerritorySearch !== true,
-                      },
-                    ]}
+                    }}
+                  />
+                ) : (
+                  <EntitySuggester
+                    disableCreate
+                    onPicked={(entity) => {
+                      setReferencedTo(entity);
+                      handleChange({ haveReferenceTo: entity.id });
+                    }}
+                    disableTemplatesAccept
+                    categoryTypes={[EntityEnums.Class.Resource]}
+                    inputWidth="full"
+                    placeholder="resource"
                   />
                 )}
               </StyledRow>
-            )}
-            <StyledRow>
-              <StyledRowHeader>co-occurrence</StyledRowHeader>
-              {debouncedValues.cooccurrenceId ? (
-                <>
-                  <Loader size={26} show={cooccurrenceIsFetching} />
-                  {cooccurrenceEntity && (
-                    <EntityTag
-                      entity={cooccurrenceEntity}
-                      tooltipPosition="left"
-                      unlinkButton={{
-                        onClick: () => {
-                          handleChange({ cooccurrenceId: "" });
-                        },
-                        color: "danger",
-                        icon: <RiCloseFill />,
+              <StyledRow>
+                <StyledRowHeader>created at</StyledRowHeader>
+                {debouncedValues.createdDate ? (
+                  <StyledDateTag>
+                    <StyledDateTagText>
+                      {debouncedValues.createdDate.toDateString()}
+                    </StyledDateTagText>
+                    <StyledDateTagButton
+                      key="d"
+                      icon={<RiCloseFill />}
+                      color="white"
+                      noBorder
+                      noBackground
+                      inverted
+                      tooltipLabel="remove date"
+                      onClick={() => {
+                        handleChange({ createdDate: undefined });
                       }}
                     />
-                  )}
-                </>
-              ) : (
-                <div>
-                  <EntitySuggester
-                    disableTemplatesAccept
-                    categoryTypes={[
-                      EntityEnums.Class.Statement,
-                      EntityEnums.Class.Action,
-                      EntityEnums.Class.Territory,
-                      EntityEnums.Class.Resource,
-                      EntityEnums.Class.Person,
-                      EntityEnums.Class.Being,
-                      EntityEnums.Class.Group,
-                      EntityEnums.Class.Object,
-                      EntityEnums.Class.Concept,
-                      EntityEnums.Class.Location,
-                      EntityEnums.Class.Value,
-                      EntityEnums.Class.Event,
-                    ]}
-                    onSelected={(newSelectedId: string) => {
-                      handleChange({ cooccurrenceId: newSelectedId });
-                    }}
-                    placeholder={"entity"}
-                    disableCreate
-                    inputWidth="full"
-                  />
-                </div>
-              )}
-            </StyledRow>
-            <StyledRow>
-              <StyledRowHeader>created at</StyledRowHeader>
-              {debouncedValues.createdDate ? (
-                <StyledDateTag>
-                  <StyledDateTagText>
-                    {debouncedValues.createdDate.toDateString()}
-                  </StyledDateTagText>
-                  <StyledDateTagButton
-                    key="d"
-                    icon={<RiCloseFill />}
-                    color="white"
-                    noBorder
-                    noBackground
-                    inverted
-                    tooltipLabel="remove date"
-                    onClick={() => {
-                      handleChange({ createdDate: undefined });
+                  </StyledDateTag>
+                ) : (
+                  <StyledDatePicker
+                    type="date"
+                    id="created-date"
+                    width="full"
+                    name="created-date"
+                    onChange={(e) => {
+                      const createdDate = new Date(e.target.value);
+                      handleChange({ createdDate });
                     }}
                   />
-                </StyledDateTag>
-              ) : (
-                <StyledDatePicker
-                  type="date"
-                  id="created-date"
-                  width="full"
-                  name="created-date"
-                  onChange={(e) => {
-                    const createdDate = new Date(e.target.value);
-                    handleChange({ createdDate });
-                  }}
-                />
-              )}
-            </StyledRow>
-            <StyledRow>
-              <StyledRowHeader>udpated at</StyledRowHeader>
-              {debouncedValues.updatedDate ? (
-                <StyledDateTag>
-                  <StyledDateTagText>
-                    {debouncedValues.updatedDate.toDateString()}
-                  </StyledDateTagText>
-                  <StyledDateTagButton
-                    key="d"
-                    icon={<RiCloseFill />}
-                    color="white"
-                    noBorder
-                    noBackground
-                    inverted
-                    tooltipLabel="remove date"
-                    onClick={() => {
-                      handleChange({ updatedDate: undefined });
+                )}
+              </StyledRow>
+              <StyledRow>
+                <StyledRowHeader>udpated at</StyledRowHeader>
+                {debouncedValues.updatedDate ? (
+                  <StyledDateTag>
+                    <StyledDateTagText>
+                      {debouncedValues.updatedDate.toDateString()}
+                    </StyledDateTagText>
+                    <StyledDateTagButton
+                      key="d"
+                      icon={<RiCloseFill />}
+                      color="white"
+                      noBorder
+                      noBackground
+                      inverted
+                      tooltipLabel="remove date"
+                      onClick={() => {
+                        handleChange({ updatedDate: undefined });
+                      }}
+                    />
+                  </StyledDateTag>
+                ) : (
+                  <StyledDatePicker
+                    type="date"
+                    id="updated-date"
+                    width="full"
+                    name="updated-date"
+                    onChange={(e) => {
+                      const updatedDate = new Date(e.target.value);
+                      handleChange({ updatedDate });
                     }}
                   />
-                </StyledDateTag>
-              ) : (
-                <StyledDatePicker
-                  type="date"
-                  id="updated-date"
-                  width="full"
-                  name="updated-date"
-                  onChange={(e) => {
-                    const updatedDate = new Date(e.target.value);
-                    handleChange({ updatedDate });
-                  }}
-                />
-              )}
-            </StyledRow>
-          </>
-        )}
-      </StyledOptions>
+                )}
+              </StyledRow>
+            </>
+          )}
+        </StyledOptions>
 
-      <StyledResultsHeader>
-        {sortedEntities.length > 0 && (
-          <>{`Results (${sortedEntities.length})`}</>
-        )}
-      </StyledResultsHeader>
+        <StyledResultsHeader>
+          {sortedEntities.length > 0 && (
+            <>{`Results (${sortedEntities.length})`}</>
+          )}
+        </StyledResultsHeader>
 
-      {/* StyledResultsWrapper is used to calculate size for infinite scroll, don't put any other components inside! */}
-      <StyledResultsWrapper ref={resultRef}>
-        {/* RESULTS */}
-        {sortedEntities.length > 0 && (
-          <>
-            <EntitySearchResults
-              results={sortedEntities}
-              height={debouncedResultsHeight}
-            />
-          </>
-        )}
-        <Loader show={isFetching} />
-      </StyledResultsWrapper>
-    </StyledBoxContent>
+        {/* StyledResultsWrapper is used to calculate size for infinite scroll, don't put any other components inside! */}
+        <StyledResultsWrapper ref={resultRef}>
+          {/* RESULTS */}
+          {sortedEntities.length > 0 && (
+            <>
+              <EntitySearchResults
+                results={sortedEntities}
+                height={debouncedResultsHeight}
+              />
+            </>
+          )}
+          <Loader show={isFetching} />
+        </StyledResultsWrapper>
+      </StyledBoxContent>
+
+      {showEntityCreateModal && (
+        <EntityCreateModal
+          labelTyped={searchData.label}
+          categorySelected={
+            searchData.class !== EntityEnums.Extension.Any
+              ? searchData.class
+              : classOptions[0].value
+          }
+          languageSelected={searchData.language}
+          closeModal={() => setShowEntityCreateModal(false)}
+          onMutationSuccess={(entity) => {
+            if (entity.class !== EntityEnums.Class.Value) {
+              appendDetailId(entity.id);
+            }
+            if (entity.class === EntityEnums.Class.Territory) {
+              queryClient.invalidateQueries({ queryKey: ["tree"] });
+            }
+          }}
+        />
+      )}
+    </>
   );
 };
 

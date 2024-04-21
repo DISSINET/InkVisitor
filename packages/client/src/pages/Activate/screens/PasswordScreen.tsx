@@ -2,7 +2,15 @@ import {
   PasswordDoesNotMatchError,
   UnsafePasswordError,
 } from "@shared/types/errors";
+import { SAFE_PASSWORD_DESCRIPTION } from "Theme/constants";
 import { Button, Input, ModalInputWrap } from "components";
+import {
+  StyledButtonWrap,
+  StyledDescription,
+  StyledErrorText,
+  StyledInputRow,
+  StyledMail,
+} from "pages/AuthModalSharedStyles";
 import React, { useEffect, useState } from "react";
 import { FaUserPlus } from "react-icons/fa";
 import { TbMailFilled } from "react-icons/tb";
@@ -11,13 +19,6 @@ import {
   StyledTbLockExclamation,
   StyledTbLockPlus,
 } from "./ActivateSreensStyles";
-import {
-  StyledButtonWrap,
-  StyledDescription,
-  StyledErrorText,
-  StyledInputRow,
-  StyledMail,
-} from "pages/AuthModalSharedStyles";
 
 interface PasswordScreen {
   email: string;
@@ -62,10 +63,7 @@ export const PasswordScreen: React.FC<PasswordScreen> = ({
         <TbMailFilled size={14} style={{ marginRight: "0.5rem" }} />
         {email}
       </StyledMail>
-      <StyledDescription>
-        A safe password: at least 12 characters, a combination of uppercase
-        letters, lowercase letters, numbers, and symbols.
-      </StyledDescription>
+      <StyledDescription>{SAFE_PASSWORD_DESCRIPTION}</StyledDescription>
       <form>
         <ModalInputWrap>
           <StyledInputRow>

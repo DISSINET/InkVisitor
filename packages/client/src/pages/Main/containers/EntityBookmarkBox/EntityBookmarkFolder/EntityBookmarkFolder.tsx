@@ -1,5 +1,7 @@
-import { EntityEnums } from "@shared/enums";
+import { classesAll } from "@shared/dictionaries/entity";
+import { UserEnums } from "@shared/enums";
 import { IBookmarkFolder, IResponseBookmarkFolder } from "@shared/types";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Button, ButtonGroup, Tooltip } from "components";
 import { EntitySuggester } from "components/advanced";
@@ -13,7 +15,6 @@ import {
   FaRegFolderOpen,
   FaTrash,
 } from "react-icons/fa";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { DragItem, ItemTypes } from "types";
 import { EntityBookmarkTable } from "../EntityBookmarkTable/EntityBookmarkTable";
 import {
@@ -27,21 +28,6 @@ import {
   StyledFolderWrapperOpenArea,
   StyledIconWrap,
 } from "./EntityBookmarkFolderStyles";
-
-const bookmarkEntities = [
-  EntityEnums.Class.Action,
-  EntityEnums.Class.Person,
-  EntityEnums.Class.Being,
-  EntityEnums.Class.Group,
-  EntityEnums.Class.Object,
-  EntityEnums.Class.Concept,
-  EntityEnums.Class.Location,
-  EntityEnums.Class.Value,
-  EntityEnums.Class.Event,
-  EntityEnums.Class.Statement,
-  EntityEnums.Class.Territory,
-  EntityEnums.Class.Resource,
-];
 
 interface EntityBookmarkFolder {
   bookmarkFolder: IResponseBookmarkFolder;
@@ -121,24 +107,10 @@ export const EntityBookmarkFolder: React.FC<EntityBookmarkFolder> = ({
     }
   };
 
-  const [isWrongDropCategory, setIsWrongDropCategory] = useState(false);
-
-  const handleHoverred = (newHoverred: any) => {
-    const hoverredCategory = newHoverred.category;
-    if (!bookmarkEntities.includes(hoverredCategory)) {
-      setIsWrongDropCategory(true);
-    } else {
-      setIsWrongDropCategory(false);
-    }
-  };
-
   const [{ isOver }, dropRef] = useDrop({
     accept: ItemTypes.TAG,
     drop: (item: DragItem) => {
       addBookmark(bookmarkFolder.id, item.id);
-    },
-    hover: (item: DragItem) => {
-      handleHoverred(item);
     },
     collect: (monitor: DropTargetMonitor) => ({
       isOver: !!monitor.isOver(),
@@ -148,6 +120,8 @@ export const EntityBookmarkFolder: React.FC<EntityBookmarkFolder> = ({
   const [referenceElement, setReferenceElement] =
     useState<HTMLDivElement | null>(null);
   const [showTooltip, setShowTooltip] = useState(false);
+
+  const userRole = localStorage.getItem("userrole") as UserEnums.Role;
 
   return (
     <StyledFolderWrapper
@@ -228,12 +202,14 @@ export const EntityBookmarkFolder: React.FC<EntityBookmarkFolder> = ({
           <StyledFolderSuggester>
             <EntitySuggester
               disableTemplateInstantiation
+              disableCreate={userRole === UserEnums.Role.Viewer}
               openDetailOnCreate
               onSelected={(bookmarkId: string) => {
                 addBookmark(bookmarkFolder.id, bookmarkId);
               }}
-              categoryTypes={bookmarkEntities}
+              categoryTypes={classesAll}
               placeholder={"add new bookmark"}
+              excludedActantIds={bookmarkFolder.entities.map((e) => e.id)}
             />
           </StyledFolderSuggester>
         </StyledFolderContent>

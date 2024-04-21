@@ -28,6 +28,7 @@ import {
   StyledThemeSwitcher,
   StyledThemeSwitcherIcon,
   StyledMenu,
+  StyledLoggedAsWrap,
 } from "./PageHeaderStyles";
 import { setTheme } from "redux/features/themeSlice";
 import { MdDarkMode, MdSunny } from "react-icons/md";
@@ -150,6 +151,7 @@ interface RightHeader {
   tempLocation: string | false;
   setTempLocation: React.Dispatch<React.SetStateAction<string | false>>;
   handleLogOut: () => void;
+  userIsFetching?: boolean;
 }
 
 export const RightHeader: React.FC<RightHeader> = React.memo(
@@ -160,6 +162,7 @@ export const RightHeader: React.FC<RightHeader> = React.memo(
     tempLocation,
     setTempLocation,
     handleLogOut,
+    userIsFetching = false,
   }) => {
     const env = (process.env.ROOT_URL || "").replace(
       /apps\/inkvisitor[-]?/,
@@ -175,6 +178,8 @@ export const RightHeader: React.FC<RightHeader> = React.memo(
       dispatch(setTheme(newTheme));
       localStorage.setItem("theme", newTheme);
     };
+
+    const usernameLoaded = userName.length > 0;
 
     return (
       <>
@@ -210,29 +215,25 @@ export const RightHeader: React.FC<RightHeader> = React.memo(
             </StyledThemeSwitcherIcon>
           </StyledThemeSwitcher>
 
-          {userName.length > 0 ? (
-            <StyledUser>
-              <StyledText>logged as</StyledText>
-              <StyledFaUserAlt
-                size={14}
-                onClick={() => setUserCustomizationOpen(true)}
-              />
-              <StyledUsername onClick={() => setUserCustomizationOpen(true)}>
-                {userName}
-              </StyledUsername>
-            </StyledUser>
-          ) : (
-            <div
-              style={{
-                height: "1rem",
-                width: "1rem",
-                position: "relative",
-                marginRight: "2rem",
-              }}
-            >
-              <Loader size={10} show />
-            </div>
-          )}
+          <StyledLoggedAsWrap>
+            {userName.length > 0 && (
+              <StyledUser>
+                <StyledText>logged as</StyledText>
+                <StyledFaUserAlt
+                  size={14}
+                  onClick={() => setUserCustomizationOpen(true)}
+                />
+                <StyledUsername onClick={() => setUserCustomizationOpen(true)}>
+                  {userName}
+                </StyledUsername>
+              </StyledUser>
+            )}
+
+            {userIsFetching && !usernameLoaded && (
+              <Loader size={16} show noBackground color={"headerTextColor"} />
+            )}
+          </StyledLoggedAsWrap>
+
           <StyledMenu>
             <Menu
               userRole={userRole}

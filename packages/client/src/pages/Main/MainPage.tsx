@@ -1,5 +1,5 @@
-import { EntityEnums } from "@shared/enums";
-import { useQueryClient } from "@tanstack/react-query";
+import { EntityEnums, UserEnums } from "@shared/enums";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   collapsedPanelWidth,
   fourthPanelBoxesHeightThirds,
@@ -27,6 +27,7 @@ import { MemoizedStatementEditorBox } from "./containers/StatementEditorBox/Stat
 import { MemoizedStatementListBox } from "./containers/StatementsListBox/StatementListBox";
 import { MemoizedTemplateListBox } from "./containers/TemplateListBox/TemplateListBox";
 import { MemoizedTerritoryTreeBox } from "./containers/TerritoryTreeBox/TerritoryTreeBox";
+import api from "api";
 
 type FourthPanelBoxes = "search" | "bookmarks" | "templates";
 
@@ -212,6 +213,8 @@ const MainPage: React.FC<MainPage> = ({}) => {
     dispatch(setStatementListOpened(!statementListOpened));
   };
 
+  const userRole = localStorage.getItem("userrole") as UserEnums.Role;
+
   return (
     <>
       <ScrollHandler />
@@ -269,11 +272,15 @@ const MainPage: React.FC<MainPage> = ({}) => {
                 : contentHeight - hiddenBoxHeight
             }
             buttons={[
-              <Button
-                icon={<FaPlus />}
-                label="new entity"
-                onClick={() => setShowEntityCreateModal(true)}
-              />,
+              <>
+                {userRole !== UserEnums.Role.Viewer && (
+                  <Button
+                    icon={<FaPlus />}
+                    label="new entity"
+                    onClick={() => setShowEntityCreateModal(true)}
+                  />
+                )}
+              </>,
               refreshBoxButton(["entity", "user"], false),
               <Button
                 inverted
@@ -349,6 +356,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
             hideFourthPanelButton(),
           ]}
           onHeaderClick={toggleFourthPanel}
+          disableOpenBoxHeaderClick
         >
           <MemoizedEntitySearchBox />
         </Box>
@@ -363,6 +371,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
             hideFourthPanelButton(),
           ]}
           onHeaderClick={toggleFourthPanel}
+          disableOpenBoxHeaderClick
         >
           <MemoizedEntityBookmarkBox />
         </Box>
@@ -377,6 +386,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
             hideFourthPanelButton(),
           ]}
           onHeaderClick={toggleFourthPanel}
+          disableOpenBoxHeaderClick
         >
           <MemoizedTemplateListBox />
         </Box>

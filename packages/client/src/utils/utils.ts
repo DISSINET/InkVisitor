@@ -11,6 +11,21 @@ import {
 import { DropTargetMonitor, XYCoord } from "react-dnd";
 import { DragItem, EntityDragItem } from "types";
 
+export const getEntityLabel = (entity?: IResponseEntity) =>
+  entity?.label || entity?.data.text || "no label";
+
+export const getShortLabelByLetterCount = (
+  label: string,
+  maxLetterCount: number
+) => {
+  const isOversized = label.length > maxLetterCount;
+  return isOversized ? label.slice(0, maxLetterCount).concat("...") : label;
+};
+
+export const isValidEntityClass = (entityClass: EntityEnums.Class) => {
+  return classesAll.includes(entityClass);
+};
+
 // TODO: not used, references not in statement data interface
 export const findPositionInStatement = (
   statement: IStatement,
@@ -175,17 +190,6 @@ export const dndHoverFnHorizontal = (
   item.index = hoverIndex;
 };
 
-export const getEntityLabel = (entity?: IResponseEntity) =>
-  entity?.label || entity?.data.text || "no label";
-
-export const getShortLabelByLetterCount = (
-  label: string,
-  maxLetterCount: number
-) => {
-  const isOversized = label.length > maxLetterCount;
-  return isOversized ? label.slice(0, maxLetterCount).concat("...") : label;
-};
-
 // Returns one more level, because there's always empty subtree array on the deepest level
 export const getRelationTreeDepth = (
   array: EntityTooltip.ISuperclassTree[]
@@ -201,9 +205,28 @@ export const getRelationTreeDepth = (
 
 export const getEntityRelationRules = (
   entityClass: EntityEnums.Class,
-  relationTypes?: RelationEnums.Type[]
+  relationTypes?: RelationEnums.Type[],
+  isTemplate: boolean = false
 ) => {
   const typesToFilter = relationTypes ? relationTypes : RelationEnums.AllTypes;
+
+  // A and C entity classes cannot have any relations, other classes might have only Classification and Related
+  if (isTemplate) {
+    if (
+      entityClass === EntityEnums.Class.Action ||
+      entityClass === EntityEnums.Class.Concept
+    ) {
+      return [];
+    } else {
+      return typesToFilter.filter((rule) => {
+        return (
+          rule === RelationEnums.Type.Classification ||
+          rule === RelationEnums.Type.Related
+        );
+      });
+    }
+  }
+
   return typesToFilter.filter((rule) => {
     if (
       !Relation.RelationRules[rule]?.allowedEntitiesPattern.length &&
@@ -236,10 +259,6 @@ export const getRelationInvertedRules = (
       return rule;
     }
   });
-};
-
-export const isValidEntityClass = (entityClass: EntityEnums.Class) => {
-  return classesAll.includes(entityClass);
 };
 
 export function deepCopy<T>(obj: T): T {

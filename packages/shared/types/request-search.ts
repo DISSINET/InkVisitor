@@ -1,13 +1,9 @@
-/**
- * Deprecated
- */
-
 import { EntityEnums } from "../enums";
 import { EnumValidators } from "../enums/validators";
 import { BadParams } from "./errors";
 
 export interface IRequestSearch {
-  class?: EntityEnums.Class;
+  class?: EntityEnums.Class | EntityEnums.Extension.Any;
   excluded?: EntityEnums.Class[];
   label?: string;
   entityIds?: string[];
@@ -21,10 +17,11 @@ export interface IRequestSearch {
   createdDate?: Date;
   updatedDate?: Date;
   resourceHasDocument?: boolean;
+  haveReferenceTo?: string;
 }
 
 export class RequestSearch {
-  class?: EntityEnums.Class;
+  class?: EntityEnums.Class | EntityEnums.Extension.Any;
   label?: string;
   entityIds?: string[];
   cooccurrenceId?: string;
@@ -38,6 +35,7 @@ export class RequestSearch {
   createdDate?: Date;
   updatedDate?: Date;
   resourceHasDocument?: boolean;
+  haveReferenceTo?: string;
 
   constructor(requestData: IRequestSearch) {
     this.class = requestData.class;
@@ -73,6 +71,7 @@ export class RequestSearch {
     this.language = requestData.language || undefined;
     this.subTerritorySearch = !!requestData.subTerritorySearch;
     this.resourceHasDocument = !!requestData.resourceHasDocument;
+    this.haveReferenceTo = requestData.haveReferenceTo || undefined;
   }
 
   /**
@@ -89,8 +88,10 @@ export class RequestSearch {
       this.excluded.constructor.name !== "Array"
     ) {
       // attempt to fix the string => array with one element
-      if (typeof  this.excluded === "string") {
-        this.excluded = (this.excluded as string).split(",") as EntityEnums.Class[]
+      if (typeof this.excluded === "string") {
+        this.excluded = (this.excluded as string).split(
+          ","
+        ) as EntityEnums.Class[];
       } else {
         return new BadParams("excluded needs to be an array");
       }
@@ -102,7 +103,7 @@ export class RequestSearch {
     ) {
       // attempt to fix the string => array with one element
       if (typeof this.entityIds === "string") {
-        this.entityIds = (this.entityIds as string).split(",")
+        this.entityIds = (this.entityIds as string).split(",");
       } else {
         return new BadParams("entityIds needs to be an array");
       }
@@ -140,7 +141,8 @@ export class RequestSearch {
       !this.language &&
       !this.createdDate &&
       !this.updatedDate &&
-      (this.entityIds === undefined || !this.entityIds.length)
+      (this.entityIds === undefined || !this.entityIds.length) &&
+      !this.haveReferenceTo
     ) {
       return new BadParams("one of the search field has to be set");
     }

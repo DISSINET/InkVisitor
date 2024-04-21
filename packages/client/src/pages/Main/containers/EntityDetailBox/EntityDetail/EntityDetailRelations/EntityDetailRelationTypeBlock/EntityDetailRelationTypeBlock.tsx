@@ -52,6 +52,7 @@ interface EntityDetailRelationTypeBlock {
     unknown
   >;
   entity: IResponseDetail;
+  userCanEdit: boolean;
 }
 export const EntityDetailRelationTypeBlock: React.FC<
   EntityDetailRelationTypeBlock
@@ -63,6 +64,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
   relationUpdateMutation,
   relationDeleteMutation,
   entity,
+  userCanEdit,
 }) => {
   const relationRule = Relation.RelationRules[relationType]!;
   const {
@@ -239,11 +241,14 @@ export const EntityDetailRelationTypeBlock: React.FC<
   };
 
   const hasSuggester = useMemo(() => {
+    if (!userCanEdit && selectedRelations.length > 0) {
+      return false;
+    }
     if (isCloudType) {
       return true;
     }
     return isMultiple || selectedRelations.length < 1;
-  }, [selectedRelations]);
+  }, [selectedRelations, userCanEdit]);
 
   return (
     <StyledRelationBlock>
@@ -269,6 +274,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
                 entities={entities}
                 relationUpdateMutation={relationUpdateMutation}
                 relationDeleteMutation={relationDeleteMutation}
+                userCanEdit={userCanEdit}
               />
             ) : (
               <EntityDetailRelationRow
@@ -284,6 +290,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
                 hasOrder={hasOrder && currentRelations.length > 1}
                 moveRow={moveRow}
                 updateOrderFn={updateOrderFn}
+                userCanEdit={userCanEdit}
               />
             )
           )}
@@ -305,6 +312,8 @@ export const EntityDetailRelationTypeBlock: React.FC<
                   }
                 }}
                 excludedActantIds={usedEntityIds}
+                disabled={!userCanEdit}
+                alwaysShowCreateModal
               />
             </StyledSuggesterWrapper>
           )}

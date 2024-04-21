@@ -7,6 +7,8 @@ import { getEntityRelationRules } from "utils/utils";
 import { EntityDetailInverseRelations } from "./EntityDetailInverseRelations/EntityDetailInverseRelations";
 import { StyledRelationsGrid } from "./EntityDetailRelationsStyles";
 import { EntityDetailRelationTypeBlock } from "./EntityDetailRelationTypeBlock/EntityDetailRelationTypeBlock";
+import { StyledEditorEmptyState } from "pages/Main/containers/StatementEditorBox/StatementEditorBoxStyles";
+import { BsInfoCircle } from "react-icons/bs";
 
 interface EntityDetailRelations {
   entity: IResponseDetail;
@@ -31,6 +33,7 @@ interface EntityDetailRelations {
     string,
     unknown
   >;
+  userCanEdit: boolean;
 }
 
 export const EntityDetailRelations: React.FC<EntityDetailRelations> = ({
@@ -38,6 +41,7 @@ export const EntityDetailRelations: React.FC<EntityDetailRelations> = ({
   relationCreateMutation,
   relationUpdateMutation,
   relationDeleteMutation,
+  userCanEdit,
 }) => {
   const [filteredRelationTypes, setFilteredRelationTypes] = useState<
     RelationEnums.Type[]
@@ -46,7 +50,8 @@ export const EntityDetailRelations: React.FC<EntityDetailRelations> = ({
   useEffect(() => {
     const filteredTypes = getEntityRelationRules(
       entity.class,
-      RelationEnums.EntityDetailTypes
+      RelationEnums.EntityDetailTypes,
+      entity.isTemplate
     );
     setFilteredRelationTypes(filteredTypes);
   }, [entity]);
@@ -56,6 +61,14 @@ export const EntityDetailRelations: React.FC<EntityDetailRelations> = ({
   return (
     <>
       <StyledRelationsGrid>
+        {filteredRelationTypes.length === 0 && (
+          <>
+            <StyledEditorEmptyState>
+              <BsInfoCircle size="20" style={{ marginRight: "5px" }} />
+              This entity cannot have any relations
+            </StyledEditorEmptyState>
+          </>
+        )}
         {filteredRelationTypes.map((relationType, key) => {
           const selectedRelations = relations[relationType]?.connections;
 
@@ -69,6 +82,7 @@ export const EntityDetailRelations: React.FC<EntityDetailRelations> = ({
               relationUpdateMutation={relationUpdateMutation}
               relationDeleteMutation={relationDeleteMutation}
               entity={entity}
+              userCanEdit={userCanEdit}
             />
           );
         })}

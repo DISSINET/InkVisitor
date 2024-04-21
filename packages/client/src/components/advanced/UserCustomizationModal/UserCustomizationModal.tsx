@@ -1,6 +1,6 @@
 import { languageDict, userRoleDict } from "@shared/dictionaries";
 import { EntityEnums, UserEnums } from "@shared/enums";
-import { IResponseUser } from "@shared/types";
+import { IResponseUser, IUser } from "@shared/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import {
@@ -34,6 +34,10 @@ import {
   StyledUserRights,
 } from "./UserCustomizationModalStyles";
 import { UserRightItem } from "./UserRightItem/UserRightItem";
+import { isSafePassword } from "utils/utils";
+import { UnsafePasswordError } from "@shared/types/errors";
+import { SAFE_PASSWORD_DESCRIPTION } from "Theme/constants";
+import { StyledDescription } from "pages/AuthModalSharedStyles";
 
 interface DataObject {
   name: string;
@@ -133,7 +137,8 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
   const queryClient = useQueryClient();
 
   const updateUserMutation = useMutation({
-    mutationFn: async (changes: any) => await api.usersUpdate(user.id, changes),
+    mutationFn: async (changes: Partial<IUser>) =>
+      await api.usersUpdate(user.id, changes),
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["user"] });
       toast.info("User updated!");
@@ -150,7 +155,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
           defaultLanguage: data.defaultLanguage,
           defaultStatementLanguage: data.defaultStatementLanguage,
           searchLanguages: data.searchLanguages.map((sL) => sL),
-          defaultTerritory: data.defaultTerritory,
+          defaultTerritory: data.defaultTerritory || "",
           hideStatementElementsOrderTable: data.hideStatementElementsOrderTable,
         },
       });
@@ -256,6 +261,12 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                   </ModalInputWrap>
                 </ModalInputForm>
 
+                <div style={{ maxWidth: "31rem" }}>
+                  <StyledDescription>
+                    {SAFE_PASSWORD_DESCRIPTION}
+                  </StyledDescription>
+                </div>
+
                 <StyledButtonWrap>
                   <ButtonGroup>
                     <Button
@@ -273,7 +284,12 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                       label="Submit"
                       inverted
                       onClick={() => {
-                        if (newPassword.length >= 8) {
+                        if (
+                          newPassword.length > 0 &&
+                          !isSafePassword(newPassword)
+                        ) {
+                          toast.warning(UnsafePasswordError.message);
+                        } else {
                           if (newPassword === repeatPassword) {
                             passwordUpdateMutation.mutate();
                             setShowPasswordChange(false);
@@ -282,8 +298,6 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                           } else {
                             toast.warning("Passwords are not matching");
                           }
-                        } else {
-                          toast.info("Fill at least 8 characters");
                         }
                       }}
                     />

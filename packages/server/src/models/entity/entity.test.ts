@@ -102,7 +102,7 @@ describe("test Entity.beforeSave", () => {
         props: [
           new Prop({
             type: new PropSpec({
-              entityId: notTpl.id
+              entityId: notTpl.id,
             }),
           }),
         ],
@@ -129,7 +129,7 @@ describe("test Entity.beforeSave", () => {
         props: [
           new Prop({
             type: new PropSpec({
-              entityId: tpl.id
+              entityId: tpl.id,
             }),
           }),
         ],

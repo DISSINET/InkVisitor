@@ -34,6 +34,7 @@ import {
 import { SuggesterKeyPress } from "./SuggesterKeyPress";
 import {
   StyledAiOutlineWarning,
+  StyledDash,
   StyledInputWrapper,
   StyledRelativePosition,
   StyledSuggester,
@@ -83,6 +84,8 @@ interface Suggester {
 
   showCreateModal: boolean;
   setShowCreateModal: React.Dispatch<React.SetStateAction<boolean>>;
+  alwaysShowCreateModal?: boolean;
+  button?: React.ReactNode;
 }
 
 export const Suggester: React.FC<Suggester> = ({
@@ -119,6 +122,8 @@ export const Suggester: React.FC<Suggester> = ({
 
   showCreateModal,
   setShowCreateModal,
+  alwaysShowCreateModal,
+  button,
 }) => {
   const [selected, setSelected] = useState(-1);
   const [isFocused, setIsFocused] = useState(false);
@@ -172,30 +177,35 @@ export const Suggester: React.FC<Suggester> = ({
 
   const handleEnterPress = () => {
     if (selected === -1 && typed.length > 0) {
-      if (
-        category === dropdownWildCard.value ||
-        category === EntityEnums.Class.Statement ||
-        category === EntityEnums.Class.Territory
-      ) {
-        setShowCreateModal(true);
-      } else {
-        onCreate({
-          label: typed,
-          entityClass: category as EntityEnums.Class,
-          language: false,
-        });
+      if (!disableCreate) {
+        if (
+          category === dropdownWildCard.value ||
+          category === EntityEnums.Class.Statement ||
+          category === EntityEnums.Class.Territory ||
+          alwaysShowCreateModal
+        ) {
+          setShowCreateModal(true);
+        } else {
+          onCreate({
+            label: typed.trim(),
+            entityClass: category as EntityEnums.Class,
+            language: false,
+          });
+        }
       }
     } else if (selected > -1) {
-      const entity = suggestions[selected].entity;
-      if (entity.status !== EntityEnums.Status.Discouraged) {
-        if (!entity.isTemplate) {
-          onPick(entity);
-        } else if (entity.isTemplate && !isInsideTemplate) {
-          onPick(entity, true);
-        } else if (entity.isTemplate && isInsideTemplate) {
-          // TODO: open modal to ask use / duplicate
-          // setTempDropItem(entity);
-          setShowTemplateModal(true);
+      if (!disableEnter) {
+        const entity = suggestions[selected].entity;
+        if (entity.status !== EntityEnums.Status.Discouraged) {
+          if (!entity.isTemplate) {
+            onPick(entity);
+          } else if (entity.isTemplate && !isInsideTemplate) {
+            onPick(entity, true);
+          } else if (entity.isTemplate && isInsideTemplate) {
+            // TODO: open modal to ask use / duplicate
+            // setTempDropItem(entity);
+            setShowTemplateModal(true);
+          }
         }
       }
     } else {
@@ -209,12 +219,13 @@ export const Suggester: React.FC<Suggester> = ({
       if (
         category === dropdownWildCard.value ||
         category === EntityEnums.Class.Statement ||
-        category === EntityEnums.Class.Territory
+        category === EntityEnums.Class.Territory ||
+        alwaysShowCreateModal
       ) {
         setShowCreateModal(true);
       } else {
         onCreate({
-          label: typed,
+          label: typed.trim(),
           entityClass: category as EntityEnums.Class,
           language: false,
         });
@@ -260,6 +271,10 @@ export const Suggester: React.FC<Suggester> = ({
   });
 
   const themeContext = useContext(ThemeContext);
+
+  if (disabled) {
+    return <StyledDash>-</StyledDash>;
+  }
 
   return (
     // div is necessary for flex to work and render the clear button properly
@@ -312,11 +327,7 @@ export const Suggester: React.FC<Suggester> = ({
                 setIsFocused(false);
                 setSelected(-1);
               }}
-              onEnterPressFn={() => {
-                if (!disableEnter) {
-                  handleEnterPress();
-                }
-              }}
+              onEnterPressFn={handleEnterPress}
               autoFocus={categories.length === 1 && autoFocus}
               disabled={disabled}
             />
@@ -341,6 +352,7 @@ export const Suggester: React.FC<Suggester> = ({
               />
             </StyledSuggesterButton>
           )}
+          {button}
         </StyledInputWrapper>
 
         {isWrongDropCategory && isOver && (
@@ -366,18 +378,16 @@ export const Suggester: React.FC<Suggester> = ({
                     {renderEntitySuggestions(suggestions)}
                     <Loader size={30} show={isFetching} />
                   </StyledRelativePosition>
-                  {!disableEnter && (
-                    <SuggesterKeyPress
-                      onArrowDown={() => {
-                        if (selected < suggestions.length - 1)
-                          setSelected(selected + 1);
-                      }}
-                      onArrowUp={() => {
-                        if (selected > -1) setSelected(selected - 1);
-                      }}
-                      dependencyArr={[selected]}
-                    />
-                  )}
+                  <SuggesterKeyPress
+                    onArrowDown={() => {
+                      if (selected < suggestions.length - 1)
+                        setSelected(selected + 1);
+                    }}
+                    onArrowUp={() => {
+                      if (selected > -1) setSelected(selected - 1);
+                    }}
+                    dependencyArr={[selected]}
+                  />
                 </>
               ) : null}
 
@@ -388,18 +398,16 @@ export const Suggester: React.FC<Suggester> = ({
                     {renderEntitySuggestions(preSuggestions)}
                     <Loader size={30} show={isFetching} />
                   </StyledRelativePosition>
-                  {!disableEnter && (
-                    <SuggesterKeyPress
-                      onArrowDown={() => {
-                        if (selected < preSuggestions.length - 1)
-                          setSelected(selected + 1);
-                      }}
-                      onArrowUp={() => {
-                        if (selected > -1) setSelected(selected - 1);
-                      }}
-                      dependencyArr={[selected]}
-                    />
-                  )}
+                  <SuggesterKeyPress
+                    onArrowDown={() => {
+                      if (selected < preSuggestions.length - 1)
+                        setSelected(selected + 1);
+                    }}
+                    onArrowUp={() => {
+                      if (selected > -1) setSelected(selected - 1);
+                    }}
+                    dependencyArr={[selected]}
+                  />
                 </>
               ) : null}
             </StyledSuggesterList>

@@ -605,12 +605,18 @@ export default Router()
 
         await req.db.lock();
 
-        if (data.email && (await User.findUserByLogin(req.db, data.email))) {
-          throw new UserNotUnique("email is in use");
+        if (data.email) {
+          const existingEmail = await User.findUserByLogin(req.db, data.email);
+          if (existingEmail && existingEmail.id !== existingUser.id) {
+            throw new UserNotUnique("email is in use");
+          }
         }
 
-        if (data.name && (await User.findUserByLogin(req.db, data.name))) {
-          throw new UserNotUnique("username is already used");
+        if (data.name) {
+          const existingName = await User.findUserByLogin(req.db, data.name);
+          if (existingName && existingName.id !== existingUser.id) {
+            throw new UserNotUnique("username is already used");
+          }
         }
 
         // email changed for non-verified user - regenerate hash & send activation email again

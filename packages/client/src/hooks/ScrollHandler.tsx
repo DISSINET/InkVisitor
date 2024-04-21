@@ -63,11 +63,14 @@ const ScrollHandler = () => {
             });
           }
         }, 200);
-      } else {
-        dispatch(setDisableStatementListScroll(false));
+        dispatch(setDisableStatementListScroll(true));
       }
     }
-  }, [statementId, statementListStatus, isFetchingStatementList]);
+  }, [
+    disableStatementListScroll,
+    statementListStatus,
+    isFetchingStatementList,
+  ]);
 
   useEffect(() => {
     if (treeStatus === "success" && !isFetchingTree) {

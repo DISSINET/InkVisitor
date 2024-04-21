@@ -69,8 +69,10 @@ export const Button: React.FC<ButtonProps> = ({
         ref={setReferenceElement}
         onClick={(e) => {
           e.stopPropagation();
-          hideTooltipOnClick && setShowTooltip(false);
-          onClick(e);
+          if (!disabled) {
+            hideTooltipOnClick && setShowTooltip(false);
+            onClick(e);
+          }
         }}
         $hasIcon={icon && true}
         $color={color}
@@ -81,7 +83,7 @@ export const Button: React.FC<ButtonProps> = ({
         $radiusLeft={radiusLeft}
         $radiusRight={radiusRight}
         $fullWidth={fullWidth}
-        disabled={disabled}
+        $disabled={disabled}
         onMouseEnter={() => setShowTooltip(true)}
         onMouseLeave={() => setShowTooltip(false)}
         onKeyPress={(e: KeyboardEvent<HTMLButtonElement>) => e.preventDefault()}

@@ -23,7 +23,7 @@ export const thirdPanelMinWidth = 450;
 export const percentPanelWidths = [10, 31, 41, 18];
 export const separatorXPercentPosition = 42;
 // BOXES
-export const hiddenBoxHeight = 34;
+export const hiddenBoxHeight = 33;
 export const fourthPanelBoxesHeightThirds = {
   search: 40,
   bookmarks: 27,
@@ -39,6 +39,9 @@ export const maxTooltipTreeForks = 2;
 export const maxTooltipMultiRelations = 5;
 
 export const tooltipLabelSeparator = " • ";
+
+export const SAFE_PASSWORD_DESCRIPTION =
+  "A safe password: at least 12 characters, a combination of uppercase letters, lowercase letters, numbers, and symbols.";
 
 // animations
 export const springConfig: { [key: string]: {} } = {

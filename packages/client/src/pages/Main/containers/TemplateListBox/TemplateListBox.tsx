@@ -1,5 +1,5 @@
 import { entitiesDict } from "@shared/dictionaries";
-import { EntityEnums } from "@shared/enums";
+import { EntityEnums, UserEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
 import { IRequestSearch } from "@shared/types/request-search";
 import api from "api";
@@ -96,19 +96,23 @@ export const TemplateListBox: React.FC<TemplateListBox> = () => {
     }
   }, [removeEntityId]);
 
+  const userRole = localStorage.getItem("userrole") as UserEnums.Role;
+
   return (
     <StyledBoxContent>
       <StyledTemplateSection>
         <StyledTemplateSectionHeader>
-          <Button
-            key="add-statement"
-            icon={<FaPlus />}
-            color="primary"
-            label="new Template"
-            onClick={() => {
-              handleAskCreateTemplate();
-            }}
-          />
+          {userRole !== UserEnums.Role.Viewer && (
+            <Button
+              key="add-template"
+              icon={<FaPlus />}
+              color="primary"
+              label="new Template"
+              onClick={() => {
+                handleAskCreateTemplate();
+              }}
+            />
+          )}
         </StyledTemplateSectionHeader>
 
         <StyledTemplateFilter>
@@ -155,13 +159,15 @@ export const TemplateListBox: React.FC<TemplateListBox> = () => {
                     entity={templateEntity}
                     fullWidth
                     tooltipPosition="left"
-                    unlinkButton={{
-                      onClick: () => {
-                        handleAskRemoveTemplate(templateEntity.id);
-                      },
-                      tooltipLabel: "delete template",
-                      icon: <FaTrash />,
-                    }}
+                    unlinkButton={
+                      userRole !== UserEnums.Role.Viewer && {
+                        onClick: () => {
+                          handleAskRemoveTemplate(templateEntity.id);
+                        },
+                        tooltipLabel: "delete template",
+                        icon: <FaTrash />,
+                      }
+                    }
                   />
                 </React.Fragment>
               );

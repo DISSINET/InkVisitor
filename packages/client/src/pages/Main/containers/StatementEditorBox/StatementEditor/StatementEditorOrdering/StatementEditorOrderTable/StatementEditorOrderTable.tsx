@@ -111,9 +111,6 @@ export const StatementEditorOrderTable: React.FC<StatementEditorOrderTable> = ({
     useTable({
       columns,
       data: data,
-      initialState: {
-        hiddenColumns: ["id"],
-      },
     });
 
   const moveRow = useCallback(

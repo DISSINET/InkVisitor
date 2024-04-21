@@ -1,5 +1,10 @@
 import { Placement } from "@popperjs/core";
-import { certaintyDict, languageDict } from "@shared/dictionaries";
+import {
+  actionPartOfSpeechDict,
+  certaintyDict,
+  conceptPartOfSpeechDict,
+  languageDict,
+} from "@shared/dictionaries";
 import { EntityEnums, RelationEnums } from "@shared/enums";
 import {
   EntityTooltip as EntityTooltipNamespace,
@@ -19,6 +24,7 @@ import { AiOutlineTag } from "react-icons/ai";
 import { BiCommentDetail } from "react-icons/bi";
 import { BsCardText } from "react-icons/bs";
 import { ImListNumbered } from "react-icons/im";
+import { MdOutlineLabel } from "react-icons/md";
 import {
   getEntityRelationRules,
   getShortLabelByLetterCount,
@@ -34,7 +40,6 @@ import {
   StyledRelations,
   StyledRow,
 } from "./EntityTooltipStyles";
-import { MdOutlineLabel } from "react-icons/md";
 
 interface EntityTooltip {
   // entity
@@ -45,6 +50,9 @@ interface EntityTooltip {
   detail?: string;
   text?: string;
   itemsCount?: number;
+  partOfSpeech?:
+    | EntityEnums.ActionPartOfSpeech
+    | EntityEnums.ConceptPartOfSpeech;
   // settings
   position?: Placement;
   color?: keyof ThemeColor;
@@ -54,6 +62,7 @@ interface EntityTooltip {
 
   referenceElement: HTMLDivElement | null;
   customTooltipAttributes?: { partLabel?: string };
+  isTemplate?: boolean;
 }
 export const EntityTooltip: React.FC<EntityTooltip> = ({
   // entity
@@ -64,6 +73,7 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
   detail,
   text,
   itemsCount,
+  partOfSpeech,
   // settings
   position,
   color,
@@ -73,6 +83,7 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
   //
   referenceElement,
   customTooltipAttributes,
+  isTemplate = false,
 }) => {
   const [tooltipData, setTooltipData] = useState<
     EntityTooltipNamespace.IResponse | false
@@ -100,6 +111,12 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
     enabled: api.isLoggedIn() && !!entityId && allowFetch,
   });
 
+  const getActionPartOfSpeech = () =>
+    actionPartOfSpeechDict.find((i) => i.value === partOfSpeech)?.label ?? "";
+
+  const getConceptPartOfSpeech = () =>
+    conceptPartOfSpeechDict.find((i) => i.value === partOfSpeech)?.label ?? "";
+
   const renderEntityInfo = useMemo(
     () => (
       <>
@@ -110,8 +127,19 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
                 <AiOutlineTag />
               </StyledIconWrap>
               <StyledLabel>
-                <StyledBold>{label}</StyledBold>
-                {` (${languageDict.find((l) => l.value === language)?.label})`}
+                <>
+                  <StyledBold>{label}</StyledBold>
+                  {" ("}
+                  {languageDict.find((l) => l.value === language)?.label}
+                  {partOfSpeech ? ", " : ""}
+                  {entityClass === EntityEnums.Class.Action &&
+                    partOfSpeech &&
+                    getActionPartOfSpeech()}
+                  {entityClass === EntityEnums.Class.Concept &&
+                    partOfSpeech &&
+                    getConceptPartOfSpeech()}
+                  {")"}
+                </>
               </StyledLabel>
             </StyledRow>
             {customTooltipAttributes?.partLabel && (
@@ -188,7 +216,8 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
 
       const filteredTypes = getEntityRelationRules(
         entityClass,
-        RelationEnums.TooltipTypes
+        RelationEnums.TooltipTypes,
+        isTemplate
       );
 
       const relationsCount: number[] = filteredTypes.map((t) =>
