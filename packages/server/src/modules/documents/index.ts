@@ -49,7 +49,15 @@ export default Router()
     "/",
     asyncRouteHandler<IResponseDocument[]>(async (request: IRequest) => {
       const docs = await Document.getAll(request.db.connection);
-      return docs.map((d) => new ResponseDocument(d));
+
+      const docResponses = [];
+      for (const d of docs) {
+        const document = new ResponseDocument(d);
+        await document.populateWithEntities(request.db.connection);
+        docResponses.push(document);
+      }
+
+      return docResponses;
     })
   )
   /**
