@@ -387,6 +387,7 @@ export const StatementListBox: React.FC = () => {
           : 1;
         addStatementAtTheEndMutation.mutate(newStatement);
       }
+      toast.info("New Statement created");
     }
   };
 

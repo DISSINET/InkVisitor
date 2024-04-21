@@ -137,6 +137,7 @@ export const TextAnnotator = ({
       mainCanvas.current,
       document?.content ?? "no text"
     );
+
     annotator.setMode("highlight");
     annotator.addScroller(scroller.current);
 
@@ -146,7 +147,7 @@ export const TextAnnotator = ({
       annotator.addLines(lines.current);
     }
     annotator.onSelectText(({ text, anchors }) => {
-      console.log("select", text, anchors);
+      // console.log("select", text, anchors);
       handleTextSelection(text, anchors);
     });
 
