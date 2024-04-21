@@ -363,11 +363,39 @@ export const StatementListBox: React.FC = () => {
     },
   });
 
+  const handleCreateStatement = (text = "") => {
+    if (userData && data) {
+      const newStatement: IStatement = CStatement(
+        localStorage.getItem("userrole") as UserEnums.Role,
+        userData.options,
+        "",
+        "",
+        territoryId
+      );
+      newStatement.data.text = text;
+      const { statements } = data;
+
+      const lastStatement = statements[statements.length - 1];
+      if (!statements.length) {
+        addStatementAtTheEndMutation.mutate(newStatement);
+      } else if (
+        newStatement?.data?.territory &&
+        lastStatement?.data?.territory
+      ) {
+        newStatement.data.territory.order = statements.length
+          ? lastStatement.data.territory.order + 1
+          : 1;
+        addStatementAtTheEndMutation.mutate(newStatement);
+      }
+    }
+  };
+
   return (
     <>
       {data && (
         <StatementListHeader
           data={data}
+          handleCreateStatement={handleCreateStatement}
           addStatementAtTheEndMutation={addStatementAtTheEndMutation}
           moveTerritoryMutation={moveTerritoryMutation}
           updateTerritoryMutation={updateTerritoryMutation}
@@ -393,6 +421,7 @@ export const StatementListBox: React.FC = () => {
             dispatch(setShowWarnings(false));
             setStatementId(rowId);
           }}
+          handleCreateStatement={handleCreateStatement}
           territoryId={territoryId}
           actantsUpdateMutation={statementUpdateMutation}
           entities={entities}

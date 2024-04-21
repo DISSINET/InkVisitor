@@ -19,6 +19,7 @@ import { CellProps } from "react-table";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { StyledDocumentTag } from "../StatementLitBoxStyles";
 import { useSearchParams } from "hooks";
+import { randomUUID } from "crypto";
 
 type CellType = CellProps<IResponseStatement>;
 
@@ -50,6 +51,8 @@ interface StatementListTextAnnotator {
   setShowSubmit: React.Dispatch<React.SetStateAction<boolean>>;
   addStatementAtCertainIndex: (index: number) => Promise<void>;
 
+  handleCreateStatement: (detail?: string) => void;
+
   selectedRows: string[];
   setSelectedRows: React.Dispatch<React.SetStateAction<string[]>>;
 }
@@ -68,6 +71,8 @@ export const StatementListTextAnnotator: React.FC<
   setStatementToDelete,
   setShowSubmit,
   addStatementAtCertainIndex,
+
+  handleCreateStatement,
 
   selectedRows,
   setSelectedRows,
@@ -220,6 +225,10 @@ export const StatementListTextAnnotator: React.FC<
               displayLineNumbers={true}
               height={annotatorHeight}
               documentId={selectedDocumentId}
+              handleCreateStatement={handleCreateStatement}
+              handleCreateTerritory={() => {
+                console.log("Create new Territory from selection");
+              }}
             />
           )}
         </AnnotatorProvider>

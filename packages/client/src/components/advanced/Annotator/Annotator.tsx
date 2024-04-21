@@ -25,6 +25,8 @@ interface TextAnnotatorProps {
   height: number;
   displayLineNumbers: boolean;
   documentId: string;
+  handleCreateStatement?: Function | false;
+  handleCreateTerritory?: Function | false;
 }
 
 export const TextAnnotator = ({
@@ -32,6 +34,8 @@ export const TextAnnotator = ({
   height = 500,
   displayLineNumbers = true,
   documentId,
+  handleCreateStatement = false,
+  handleCreateTerritory = false,
 }: TextAnnotatorProps) => {
   const queryClient = useQueryClient();
 
@@ -196,6 +200,10 @@ export const TextAnnotator = ({
             onAnchorAdd={handleAddAnchor}
             yPosition={menuPositionY}
             topBottomSelection={topBottomSelection}
+            handleCreateTerritory={handleCreateTerritory}
+            handleCreateStatement={() => {
+              handleCreateStatement && handleCreateStatement(selectedText);
+            }}
           />
         )}
         {displayLineNumbers && (

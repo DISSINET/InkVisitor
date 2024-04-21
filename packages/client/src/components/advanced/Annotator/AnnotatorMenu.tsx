@@ -20,6 +20,8 @@ interface TextAnnotatorMenuProps {
   onAnchorAdd: (entityId: string) => void;
   yPosition: number;
   topBottomSelection: boolean;
+  handleCreateStatement: Function | false;
+  handleCreateTerritory: Function | false;
 }
 
 export const TextAnnotatorMenu = ({
@@ -29,6 +31,8 @@ export const TextAnnotatorMenu = ({
   onAnchorAdd,
   yPosition,
   topBottomSelection,
+  handleCreateStatement = false,
+  handleCreateTerritory = false,
 }: TextAnnotatorMenuProps) => {
   return (
     <>
@@ -42,26 +46,31 @@ export const TextAnnotatorMenu = ({
           <StyledAnnotatorItem>
             <StyledAnnotatorItemTitle>Actions</StyledAnnotatorItemTitle>
             <StyledAnnotatorItemContent>
-              <Button
-                icon={<BiSolidMessageSquareAdd size={15} />}
-                color="primary"
-                paddingX={true}
-                onClick={() => {
-                  console.log("Create new Statement from selection");
-                }}
-                label="Create Statement"
-                tooltipLabel="Create new Statement from selection"
-              />
-              <Button
-                icon={<BiSolidBookAdd size={15} />}
-                color="primary"
-                paddingX={true}
-                onClick={() => {
-                  console.log("Create  new sub T");
-                }}
-                label="Create Territory"
-                tooltipLabel="Create new Sub Territory from selection"
-              />
+              {handleCreateStatement && (
+                <Button
+                  icon={<BiSolidMessageSquareAdd size={15} />}
+                  color="primary"
+                  paddingX={true}
+                  onClick={() => {
+                    console.log("Create new Statement from selection");
+                    handleCreateStatement();
+                  }}
+                  label="Create Statement"
+                  tooltipLabel="Create new Statement from selection"
+                />
+              )}
+              {handleCreateTerritory && (
+                <Button
+                  icon={<BiSolidBookAdd size={15} />}
+                  color="primary"
+                  paddingX={true}
+                  onClick={() => {
+                    handleCreateTerritory();
+                  }}
+                  label="Create Territory"
+                  tooltipLabel="Create new Sub Territory from selection"
+                />
+              )}
               <Button
                 icon={<BsSegmentedNav size={22} />}
                 color="primary"
@@ -71,6 +80,7 @@ export const TextAnnotatorMenu = ({
                 }}
                 label={"Segment"}
                 tooltipLabel="Segment selection into Statements"
+                disabled
               />
             </StyledAnnotatorItemContent>
           </StyledAnnotatorItem>

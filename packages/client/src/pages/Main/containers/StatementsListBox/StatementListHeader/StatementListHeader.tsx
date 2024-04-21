@@ -111,6 +111,7 @@ interface StatementListHeader {
     IReference[],
     unknown
   >;
+  handleCreateStatement: () => void;
 }
 export const StatementListHeader: React.FC<StatementListHeader> = ({
   data,
@@ -129,6 +130,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
   duplicateStatementsMutation,
   replaceReferencesMutation,
   appendReferencesMutation,
+  handleCreateStatement,
 }) => {
   const dispatch = useAppDispatch();
   const queryClient = useQueryClient();
@@ -167,24 +169,6 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
     "tree",
   ]);
 
-  // get user data
-  const userId = localStorage.getItem("userid");
-  const {
-    status: statusUser,
-    data: user,
-    error: errorUser,
-    isFetching: isFetchingUser,
-  } = useQuery({
-    queryKey: ["user", userId],
-    queryFn: async () => {
-      if (userId) {
-        const res = await api.usersGet(userId);
-        return res.data;
-      }
-    },
-    enabled: !!userId && api.isLoggedIn(),
-  });
-
   const [excludedMoveTerritories, setExcludedMoveTerritories] = useState<
     string[]
   >([territoryId]);
@@ -214,32 +198,6 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
   const selectedTerritoryPath = useAppSelector(
     (state) => state.territoryTree.selectedTerritoryPath
   );
-
-  const handleCreateStatement = () => {
-    if (user) {
-      const newStatement: IStatement = CStatement(
-        localStorage.getItem("userrole") as UserEnums.Role,
-        user.options,
-        "",
-        "",
-        territoryId
-      );
-      const { statements } = data;
-
-      const lastStatement = statements[statements.length - 1];
-      if (!statements.length) {
-        addStatementAtTheEndMutation.mutate(newStatement);
-      } else if (
-        newStatement?.data?.territory &&
-        lastStatement?.data?.territory
-      ) {
-        newStatement.data.territory.order = statements.length
-          ? lastStatement.data.territory.order + 1
-          : 1;
-        addStatementAtTheEndMutation.mutate(newStatement);
-      }
-    }
-  };
 
   const trimTerritoryLabel = (label: string) => {
     const maxLettersCount = 70;
