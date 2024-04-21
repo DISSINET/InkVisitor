@@ -23,8 +23,8 @@ export default class Cursor implements IRelativeCoordinates {
 
   // highlighted area must use absolute coordinates - highlighted area stays in position while scrolling
   private selecting: boolean = false;
-  private selectStart?: IAbsCoordinates;
-  private selectEnd?: IAbsCoordinates;
+   selectStart?: IAbsCoordinates;
+   selectEnd?: IAbsCoordinates;
 
   // Width of cursor point in px
   static Width = 3

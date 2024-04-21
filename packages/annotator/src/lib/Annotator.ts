@@ -57,6 +57,9 @@ export class Annotator {
   onHighlightCb?: (entityId: string) => HighlightSchema | void;
   onTextChangeCb?: (text: string) => void;
 
+  clickCount: number;
+  clickTimeout?: NodeJS.Timeout;;
+
   constructor(element: HTMLCanvasElement, inputText: string) {
     this.element = element;
     const ctx = this.element.getContext("2d");
@@ -81,6 +84,10 @@ export class Annotator {
     this.element.onmouseup = this.onMouseUp.bind(this);
     this.element.onmousemove = this.onMouseMove.bind(this);
     this.element.onkeydown = this.onKeyDown.bind(this);
+    this.element.onkeydown = this.onKeyDown.bind(this);
+    this.element.addEventListener('dblclick', this.onMouseDoubleClick.bind(this));
+
+    this.clickCount = 0;
   }
 
   onHighlight(cb: (entityId: string) => HighlightSchema | void): void {
@@ -162,20 +169,32 @@ export class Annotator {
         break;
 
       case "ArrowLeft":
-        this.cursor.move(-1, 0);
-        if (this.cursor.xLine < 0) {
-          this.cursor.yLine = Math.max(0, this.cursor.yLine - 1);
-          this.cursor.xLine = Math.floor(this.width / this.charWidth) - 1;
+        if (e.shiftKey) {
+          const [offsetLeft, ] = this.text.getCursorWordOffsets(this.viewport, this.cursor)
+          this.cursor.selectStart = {xLine: this.cursor.xLine + offsetLeft, yLine: this.cursor.yLine }
+          this.cursor.selectEnd = {xLine: this.cursor.xLine, yLine: this.cursor.yLine };
+        } else {
+          this.cursor.move(-1, 0);
+          if (this.cursor.xLine < 0) {
+            this.cursor.yLine = Math.max(0, this.cursor.yLine - 1);
+            this.cursor.xLine = Math.floor(this.width / this.charWidth) - 1;
+          }
         }
         break;
 
       case "ArrowRight":
-        this.cursor.move(1, 0);
+        if (e.shiftKey) {
+          const [, offssetRight ] = this.text.getCursorWordOffsets(this.viewport, this.cursor)
+          this.cursor.selectStart = {xLine: this.cursor.xLine, yLine: this.cursor.yLine }
+          this.cursor.selectEnd = {xLine: this.cursor.xLine + offssetRight, yLine: this.cursor.yLine };
+        } else {
+          this.cursor.move(1, 0);
 
-        // TODO: check if cursor is at the end of the line
-        if (this.cursor.xLine > Math.floor(this.width / this.charWidth)) {
-          this.cursor.xLine = 0;
-          this.cursor.yLine++;
+          // TODO: check if cursor is at the end of the line
+          if (this.cursor.xLine > Math.floor(this.width / this.charWidth)) {
+            this.cursor.xLine = 0;
+            this.cursor.yLine++;
+          }
         }
         break;
 
@@ -285,6 +304,13 @@ export class Annotator {
       this.cursor.selectArea(this.viewport.lineStart);
       this.draw();
     }
+  }
+
+  onMouseDoubleClick(e: MouseEvent) {
+    const [offsetLeft, offssetRight] = this.text.getCursorWordOffsets(this.viewport, this.cursor)
+    this.cursor.selectStart = {xLine: this.cursor.xLine + offsetLeft, yLine: this.cursor.yLine }
+    this.cursor.selectEnd = {xLine: this.cursor.xLine + offssetRight, yLine: this.cursor.yLine }
+    this.draw();
   }
 
   /**
