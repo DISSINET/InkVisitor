@@ -1,58 +1,25 @@
 import { EntityEnums, UserEnums } from "@shared/enums";
-import {
-  IEntity,
-  IResource,
-  IResponseGeneric,
-  IResponseStatement,
-  IStatement,
-} from "@shared/types";
-import { UseMutationResult, useQuery } from "@tanstack/react-query";
+import { IEntity, IResource, IResponseStatement } from "@shared/types";
+import { useQuery } from "@tanstack/react-query";
 import api from "api";
-import { AxiosResponse } from "axios";
 import { Loader } from "components";
 import { EntitySuggester, EntityTag } from "components/advanced";
 import TextAnnotator from "components/advanced/Annotator/Annotator";
 import AnnotatorProvider from "components/advanced/Annotator/AnnotatorProvider";
+import { useSearchParams } from "hooks";
 import React, { useMemo, useState } from "react";
 import { TiDocumentText } from "react-icons/ti";
-import { CellProps } from "react-table";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { StyledDocumentTag } from "../StatementLitBoxStyles";
-import { useSearchParams } from "hooks";
-import { randomUUID } from "crypto";
-
-type CellType = CellProps<IResponseStatement>;
 
 interface StatementListTextAnnotator {
   statements: IResponseStatement[];
   territoryId: string;
-  handleRowClick?: (rowId: string) => void;
-  actantsUpdateMutation: UseMutationResult<
-    AxiosResponse<IResponseGeneric>,
-    unknown,
-    {
-      statementId: string;
-      data: {};
-    },
-    unknown
-  >;
   entities: { [key: string]: IEntity };
   right: UserEnums.RoleMode;
-
-  cloneStatementMutation: UseMutationResult<
-    AxiosResponse<IResponseGeneric<any>>,
-    unknown,
-    string,
-    unknown
-  >;
-  setStatementToDelete: React.Dispatch<
-    React.SetStateAction<IStatement | undefined>
-  >;
   setShowSubmit: React.Dispatch<React.SetStateAction<boolean>>;
   addStatementAtCertainIndex: (index: number) => Promise<void>;
-
   handleCreateStatement: (detail?: string, statementId?: string) => void;
-
   selectedRows: string[];
   setSelectedRows: React.Dispatch<React.SetStateAction<string[]>>;
 }
@@ -62,18 +29,11 @@ export const StatementListTextAnnotator: React.FC<
 > = ({
   statements,
   territoryId,
-  handleRowClick = () => {},
-  actantsUpdateMutation,
   entities,
   right,
-
-  cloneStatementMutation,
-  setStatementToDelete,
   setShowSubmit,
   addStatementAtCertainIndex,
-
   handleCreateStatement,
-
   selectedRows,
   setSelectedRows,
 }) => {

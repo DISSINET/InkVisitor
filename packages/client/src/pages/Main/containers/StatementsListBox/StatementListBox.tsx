@@ -421,17 +421,10 @@ export const StatementListBox: React.FC = () => {
       {data && displayMode === "text" && (
         <StatementListTextAnnotator
           statements={statements}
-          handleRowClick={(rowId: string) => {
-            dispatch(setShowWarnings(false));
-            setStatementId(rowId);
-          }}
           handleCreateStatement={handleCreateStatement}
           territoryId={territoryId}
-          actantsUpdateMutation={statementUpdateMutation}
           entities={entities}
           right={right}
-          cloneStatementMutation={cloneStatementMutation}
-          setStatementToDelete={setStatementToDelete}
           setShowSubmit={setShowSubmit}
           addStatementAtCertainIndex={addStatementAtCertainIndex}
           selectedRows={selectedRows}
