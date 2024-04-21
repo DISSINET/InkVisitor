@@ -16,7 +16,7 @@ export interface DrawingOptions {
   charWidth: number;
   lineHeight: number;
   charsAtLine: number;
-  mode: Mode
+  mode: Mode;
 }
 
 export interface Highlighted {
@@ -55,6 +55,7 @@ export class Annotator {
   // callbacks
   onSelectTextCb?: (text: Highlighted) => void;
   onHighlightCb?: (entityId: string) => HighlightSchema | void;
+  onTextChangeCb?: (text: string) => void;
 
   constructor(element: HTMLCanvasElement, inputText: string) {
     this.element = element;
@@ -84,6 +85,10 @@ export class Annotator {
 
   onHighlight(cb: (entityId: string) => HighlightSchema | void): void {
     this.onHighlightCb = cb;
+  }
+
+  onTextChanged(cb: (text: string) => void): void {
+    this.onTextChangeCb = cb;
   }
 
   /**
@@ -175,22 +180,33 @@ export class Annotator {
         break;
 
       case "Backspace":
-        const segmentBefore = this.text.cursorToIndex(this.viewport, this.cursor)
-   
-        this.text.deleteText(this.viewport, this.cursor, 1);
-       
+        const segmentBefore = this.text.cursorToIndex(
+          this.viewport,
+          this.cursor
+        );
 
-        const segmentAfter = this.text.cursorToIndex(this.viewport, this.cursor);
-        const xDiff = (segmentAfter?.rawTextIndex || 0) - (segmentBefore?.rawTextIndex || 0)
+        this.text.deleteText(this.viewport, this.cursor, 1);
+
+        const segmentAfter = this.text.cursorToIndex(
+          this.viewport,
+          this.cursor
+        );
+        const xDiff =
+          (segmentAfter?.rawTextIndex || 0) -
+          (segmentBefore?.rawTextIndex || 0);
         this.cursor.move(-1, 0);
         if (this.cursor.xLine < 0) {
           this.cursor.xLine = 0;
           this.draw();
-          return
+          return;
         }
-        if(xDiff > 0) {
+        if (xDiff > 0) {
           this.cursor.move(Infinity, -1);
-          this.cursor.move(-xDiff, 0)
+          this.cursor.move(-xDiff, 0);
+        }
+
+        if (this.onTextChangeCb) {
+          this.onTextChangeCb(this.text.value);
         }
         break;
 
@@ -215,10 +231,16 @@ export class Annotator {
 
         if (!nonCharKeys.includes(key)) {
           this.text.insertText(this.viewport, this.cursor, key);
+                  if (this.onTextChangeCb) {
+          this.onTextChangeCb(this.text.value);
+        }
           this.cursor.move(+1, 0);
         }
     }
 
+    if (this.onTextChangeCb) {
+      this.onTextChangeCb(this.text.value);
+    }
     this.draw();
   }
 
@@ -285,7 +307,10 @@ export class Annotator {
     this.lines = new Lines(canvasElement, this.lineHeight, this.charWidth);
   }
 
-  getAnnotations(startSegment: SegmentPosition|null, endSegment: SegmentPosition|null): string[] {
+  getAnnotations(
+    startSegment: SegmentPosition | null,
+    endSegment: SegmentPosition | null
+  ): string[] {
     // remaining opened tags - true = open, false = closed
     const tags: Record<string, boolean> = {};
 
@@ -309,13 +334,18 @@ export class Annotator {
             tags[tag.tag] = false;
           }
         }
-      }  
+      }
     }
 
     // if this is range based request, add each tag(closing or opening) in this range
     if (startSegment && endSegment) {
-      for (let i = startSegment.segmentIndex; i < endSegment.segmentIndex; i++) {
-        const [segOpened, segClosed] = this.text.segments[i].getTagsForPosition(startSegment);
+      for (
+        let i = startSegment.segmentIndex;
+        i < endSegment.segmentIndex;
+        i++
+      ) {
+        const [segOpened, segClosed] =
+          this.text.segments[i].getTagsForPosition(startSegment);
         for (const tag of segOpened) {
           tags[tag.tag] = true;
         }
@@ -323,10 +353,10 @@ export class Annotator {
           tags[tag.tag] = true;
         }
         //  console.log(startSegment, segOpened, segClosed)
-      }  
+      }
     }
 
-    return Object.keys(tags).filter(tag => tags[tag])
+    return Object.keys(tags).filter((tag) => tags[tag]);
   }
 
   /**
@@ -381,37 +411,61 @@ export class Annotator {
         lineHeight: this.lineHeight,
         charWidth: this.charWidth,
         charsAtLine: this.text.charsAtLine,
-        mode: this.text.mode
+        mode: this.text.mode,
       });
     }
 
     if (this.onSelectTextCb && this.cursor.isSelected()) {
       const [start, end] = this.cursor.getSelected();
-      if (start && end && (start.xLine !== end.xLine || start?.yLine !== end?.yLine)) {
-        const startSegment = this.text.getSegmentPosition( start.yLine, start.xLine) as SegmentPosition;
-        const endSegment = this.text.getSegmentPosition( end.yLine, end.xLine) as SegmentPosition;
+      if (
+        start &&
+        end &&
+        (start.xLine !== end.xLine || start?.yLine !== end?.yLine)
+      ) {
+        const startSegment = this.text.getSegmentPosition(
+          start.yLine,
+          start.xLine
+        ) as SegmentPosition;
+        const endSegment = this.text.getSegmentPosition(
+          end.yLine,
+          end.xLine
+        ) as SegmentPosition;
         const annotated = this.getAnnotations(startSegment, endSegment);
-        this.onSelectTextCb({ text: this.text.getRangeText(start, end), anchors: annotated});
+        this.onSelectTextCb({
+          text: this.text.getRangeText(start, end),
+          anchors: annotated,
+        });
       }
     }
 
-    if (this.onHighlightCb) {     
+    if (this.onHighlightCb) {
       const [start, end] = this.cursor.getSelected();
       if (start?.xLine === end?.xLine && start?.yLine === end?.yLine) {
-        const annotated = this.getAnnotations(null, this.text.cursorToIndex(this.viewport, this.cursor));
+        const annotated = this.getAnnotations(
+          null,
+          this.text.cursorToIndex(this.viewport, this.cursor)
+        );
         if (annotated.length > 0) {
-          const tag = annotated.pop() as string
+          const tag = annotated.pop() as string;
           const highlight = this.onHighlightCb(tag);
           if (highlight) {
-            const [startLine, endLine] = this.text.getTagPosition(tag)
+            const [startLine, endLine] = this.text.getTagPosition(tag);
             if (startLine && endLine) {
               this.ctx.strokeStyle = highlight.style.color;
 
-              for (let currentYLine = startLine.yLine; currentYLine <= endLine.yLine; currentYLine++) {
-                if (this.viewport.lineStart <= currentYLine && this.viewport.lineEnd >= currentYLine) {
+              for (
+                let currentYLine = startLine.yLine;
+                currentYLine <= endLine.yLine;
+                currentYLine++
+              ) {
+                if (
+                  this.viewport.lineStart <= currentYLine &&
+                  this.viewport.lineEnd >= currentYLine
+                ) {
                   this.ctx.beginPath();
 
-                  const yPos = currentYLine - this.viewport.lineStart + this.lineHeight;
+                  const yPos =
+                    currentYLine - this.viewport.lineStart + this.lineHeight;
                   if (currentYLine === startLine.yLine) {
                     this.ctx.moveTo(startLine.xLine, yPos);
                   } else if (currentYLine === endLine.yLine) {
@@ -451,11 +505,11 @@ export class Annotator {
 
   /**
    * change display mode and recalculate drawn lines
-   * @param mode 
+   * @param mode
    */
   setMode(mode: Mode) {
-    this.element.classList.remove(this.text.mode)
-    this.element.classList.add(mode)
+    this.element.classList.remove(this.text.mode);
+    this.element.classList.add(mode);
 
     this.text.mode = mode;
     this.text.prepareSegments();
@@ -463,14 +517,22 @@ export class Annotator {
   }
 
   addAnchor(anchor: string) {
-    if(!this.cursor.isSelected()) {
-      return
+    if (!this.cursor.isSelected()) {
+      return;
     }
 
     const [start, end] = this.cursor.getSelected();
     if (start && end) {
-      this.text.insertText(this.viewport, new Cursor(end.xLine, end.yLine - this.viewport.lineStart), `</${anchor}>`)
-      this.text.insertText(this.viewport, new Cursor(start.xLine, start.yLine - this.viewport.lineStart), `<${anchor}>`)
+      this.text.insertText(
+        this.viewport,
+        new Cursor(end.xLine, end.yLine - this.viewport.lineStart),
+        `</${anchor}>`
+      );
+      this.text.insertText(
+        this.viewport,
+        new Cursor(start.xLine, start.yLine - this.viewport.lineStart),
+        `<${anchor}>`
+      );
       this.text.prepareSegments();
       this.text.calculateLines();
       this.draw();
