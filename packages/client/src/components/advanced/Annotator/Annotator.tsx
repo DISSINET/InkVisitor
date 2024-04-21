@@ -202,7 +202,13 @@ export const TextAnnotator = ({
             onAnchorAdd={handleAddAnchor}
             yPosition={menuPositionY}
             topBottomSelection={topBottomSelection}
-            handleCreateTerritory={handleCreateTerritory}
+            handleCreateTerritory={() => {
+              if (handleCreateTerritory && selectedText) {
+                const newTerritoryId = uuidv4();
+                handleAddAnchor(newTerritoryId);
+                handleCreateTerritory(newTerritoryId);
+              }
+            }}
             handleCreateStatement={() => {
               if (handleCreateStatement && selectedText) {
                 const newStatementId = uuidv4();

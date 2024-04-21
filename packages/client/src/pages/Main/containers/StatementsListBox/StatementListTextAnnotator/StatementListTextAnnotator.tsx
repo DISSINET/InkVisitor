@@ -20,6 +20,7 @@ interface StatementListTextAnnotator {
   setShowSubmit: React.Dispatch<React.SetStateAction<boolean>>;
   addStatementAtCertainIndex: (index: number) => Promise<void>;
   handleCreateStatement: (detail?: string, statementId?: string) => void;
+  handleCreateTerritory: (territoryId?: string) => void;
   selectedRows: string[];
   setSelectedRows: React.Dispatch<React.SetStateAction<string[]>>;
 }
@@ -34,6 +35,7 @@ export const StatementListTextAnnotator: React.FC<
   setShowSubmit,
   addStatementAtCertainIndex,
   handleCreateStatement,
+  handleCreateTerritory,
   selectedRows,
   setSelectedRows,
 }) => {
@@ -181,9 +183,7 @@ export const StatementListTextAnnotator: React.FC<
               height={annotatorHeight}
               documentId={selectedDocumentId}
               handleCreateStatement={handleCreateStatement}
-              handleCreateTerritory={() => {
-                console.log("Create new Territory from selection");
-              }}
+              handleCreateTerritory={handleCreateTerritory}
             />
           )}
         </AnnotatorProvider>

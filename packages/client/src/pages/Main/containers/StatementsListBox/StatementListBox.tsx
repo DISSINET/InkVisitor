@@ -4,11 +4,12 @@ import {
   IReference,
   IResponseStatement,
   IStatement,
+  ITerritory,
 } from "@shared/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Loader, Submit, ToastWithLink } from "components";
-import { CStatement } from "constructors";
+import { CStatement, CTerritory } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
 import { BsInfoCircle } from "react-icons/bs";
@@ -208,7 +209,7 @@ export const StatementListBox: React.FC = () => {
     },
   });
 
-  const actantsCreateMutation = useMutation({
+  const statementCreateMutation = useMutation({
     mutationFn: async (newStatement: IStatement) =>
       await api.entityCreate(newStatement),
     onSuccess: (data, variables) => {
@@ -221,6 +222,17 @@ export const StatementListBox: React.FC = () => {
     },
     onError: () => {
       toast.error(`Error: Statement not created!`);
+    },
+  });
+  const territoryCreateMutation = useMutation({
+    mutationFn: async (newTerritory: ITerritory) =>
+      await api.entityCreate(newTerritory),
+    onSuccess: (data, variables) => {
+      toast.info(`Sub Teritory created!`);
+      queryClient.invalidateQueries({ queryKey: ["tree"] });
+    },
+    onError: () => {
+      toast.error(`Error: Sub Territory not created!`);
     },
   });
 
@@ -269,7 +281,7 @@ export const StatementListBox: React.FC = () => {
           newStatement.data.territory as { order: number; territoryId: string }
         ).order = newOrder;
 
-        actantsCreateMutation.mutate(newStatement);
+        statementCreateMutation.mutate(newStatement);
       }
     }
   };
@@ -394,6 +406,22 @@ export const StatementListBox: React.FC = () => {
     }
   };
 
+  const handleCreateTerritory = (newTerritoryId?: string) => {
+    if (userData && data) {
+      const newTerritory: ITerritory = CTerritory(
+        localStorage.getItem("userrole") as UserEnums.Role,
+        userData.options,
+        `subT of ${data.label}`,
+        data.detail,
+        territoryId,
+        Infinity,
+        newTerritoryId
+      );
+
+      territoryCreateMutation.mutate(newTerritory);
+    }
+  };
+
   return (
     <>
       {data && (
@@ -422,6 +450,7 @@ export const StatementListBox: React.FC = () => {
         <StatementListTextAnnotator
           statements={statements}
           handleCreateStatement={handleCreateStatement}
+          handleCreateTerritory={handleCreateTerritory}
           territoryId={territoryId}
           entities={entities}
           right={right}
@@ -489,7 +518,7 @@ export const StatementListBox: React.FC = () => {
           isFetching ||
           removeStatementMutation.isPending ||
           addStatementAtTheEndMutation.isPending ||
-          actantsCreateMutation.isPending ||
+          statementCreateMutation.isPending ||
           statementUpdateMutation.isPending ||
           moveTerritoryMutation.isPending ||
           moveStatementsMutation.isPending ||
