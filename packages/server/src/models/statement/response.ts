@@ -200,13 +200,15 @@ export class ResponseStatement extends Statement implements IResponseStatement {
 
     for (const ai in allEntities) {
       const entityId = allEntities[ai];
-      const entityData = await this.obtainEntity(entityId, req);
-      const entityModel = getEntityClass({ ...entityData });
-      const entity = new ResponseEntityDetail(entityModel);
 
-      await entity.prepare(req);
+      if (entityId) {
+        const entityData = await this.obtainEntity(entityId, req);
+        const entityModel = getEntityClass({ ...entityData });
+        const entity = new ResponseEntityDetail(entityModel);
+        await entity.prepare(req);
 
-      entitiesFull.push(entity);
+        entitiesFull.push(entity);
+      }
     }
 
     if (parentTId) {
