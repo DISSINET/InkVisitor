@@ -11,7 +11,7 @@ import { EntitySuggester } from "../EntitySuggester/EntitySuggester";
 import { classesAll } from "types";
 import { Button } from "components/basic/Button/Button";
 import { BsSegmentedNav } from "react-icons/bs";
-import { BiSolidMessageSquareAdd } from "react-icons/bi";
+import { BiSolidBookAdd, BiSolidMessageSquareAdd } from "react-icons/bi";
 
 interface TextAnnotatorMenuProps {
   text: string;
@@ -51,6 +51,16 @@ export const TextAnnotatorMenu = ({
                 }}
                 label="Create Statement"
                 tooltipLabel="Create new Statement from selection"
+              />
+              <Button
+                icon={<BiSolidBookAdd size={15} />}
+                color="primary"
+                paddingX={true}
+                onClick={() => {
+                  console.log("Create  new sub T");
+                }}
+                label="Create Territory"
+                tooltipLabel="Create new Sub Territory from selection"
               />
               <Button
                 icon={<BsSegmentedNav size={22} />}

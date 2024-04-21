@@ -58,7 +58,7 @@ export const StyledAnnotatorMenu = styled.div`
 
 export const StyledAnnotatorItem = styled.div`
   padding: ${({ theme }) => theme.space[2]};
-  background: ${({ theme }) => theme.color.gray["100"]};
+  background: ${({ theme }) => theme.color.gray["300"]};
   border: 2px solid ${({ theme }) => theme.color.gray["300"]};
   &:hover {
     background: ${({ theme }) => theme.color.gray["200"]};
@@ -73,4 +73,5 @@ export const StyledAnnotatorItemContent = styled.div`
 export const StyledAnnotatorItemTitle = styled.div`
   color: ${({ theme }) => theme.color.gray["700"]};
   font-size: ${({ theme }) => theme.fontSize["md"]};
+  font-weight: ${({ theme }) => theme.fontWeight["medium"]};
 `;
