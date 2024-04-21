@@ -184,7 +184,7 @@ export const DocumentRow: React.FC<DocumentRow> = ({
                 key={eClass}
                 style={{ backgroundColor: classColor }}
               >
-                {eClass}: {document.referencedEntityIds[eClass]?.length || 0}
+                {eClass} {document.referencedEntityIds[eClass]?.length || 0}
               </StyledCountTag>
             );
           })}

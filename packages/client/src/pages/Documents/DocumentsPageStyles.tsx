@@ -71,7 +71,7 @@ export const StyledCount = styled.div`
 `;
 
 export const StyledCountTag = styled.div`
-  padding: 2px 4px;
+  padding: 2px 6px;
   border-radius: ${({ theme }) => theme.borderRadius["default"]};
 `;
 
