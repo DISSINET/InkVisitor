@@ -40,7 +40,7 @@ export const TextAnnotator = ({
     error: documentError,
     isFetching: documentIsFetching,
   } = useQuery({
-    queryKey: ["openedDocument", documentId],
+    queryKey: ["document", documentId],
     queryFn: async () => {
       const res = await api.documentGet(documentId);
       return res.data;
@@ -52,7 +52,7 @@ export const TextAnnotator = ({
     mutationFn: async (data: { id: string; doc: Partial<IDocument> }) =>
       api.documentUpdate(data.id, data.doc),
     onSuccess: (variables, data) => {
-      queryClient.invalidateQueries({ queryKey: ["openedDocument"] });
+      queryClient.invalidateQueries({ queryKey: ["document"] });
       queryClient.invalidateQueries({ queryKey: ["documents"] });
       toast.info("Document content saved");
     },
@@ -75,20 +75,13 @@ export const TextAnnotator = ({
   const [selectedAnchors, setSelectedAnchors] = useState<string[]>([]);
   const storedEntities = useRef<Record<string, IEntity | false>>({});
 
-  const [localText, setLocalText] = useState<string>("no text");
-
-  useEffect(() => {
-    console.log("we fetched the document", document);
-    //setLocalText(document?.content ?? "no text");
-  }, [document]);
-
   const handleSaveNewContent = () => {
     if (annotator && document?.id) {
       updateDocumentMutation.mutate({
         id: document.id,
         doc: {
           ...document,
-          ...{ content: localText },
+          ...{ content: annotator.text.value },
         },
       });
     }
@@ -159,7 +152,8 @@ export const TextAnnotator = ({
     });
 
     annotator.onTextChanged((text) => {
-      setLocalText(text);
+      // console.log("text changed", text);
+      // setLocalText(text);
     });
 
     annotator.draw();
@@ -249,16 +243,15 @@ export const TextAnnotator = ({
             }}
             tooltipLabel="activate edit mode"
           />
-          {annotatorMode === "raw" && (
-            <Button
-              label="save"
-              color="primary"
-              icon={<FaRegSave />}
-              onClick={() => {
-                handleSaveNewContent();
-              }}
-            />
-          )}
+
+          <Button
+            label="save"
+            color="primary"
+            icon={<FaRegSave />}
+            onClick={() => {
+              handleSaveNewContent();
+            }}
+          />
         </ButtonGroup>
       )}
     </div>
