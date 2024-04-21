@@ -19,6 +19,7 @@ import theme from "Theme/theme";
 import { useDebounce } from "hooks";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
+import { v4 as uuidv4 } from "uuid";
 
 interface TextAnnotatorProps {
   width: number;
@@ -203,7 +204,11 @@ export const TextAnnotator = ({
             topBottomSelection={topBottomSelection}
             handleCreateTerritory={handleCreateTerritory}
             handleCreateStatement={() => {
-              handleCreateStatement && handleCreateStatement(selectedText);
+              if (handleCreateStatement && selectedText) {
+                const newStatementId = uuidv4();
+                handleAddAnchor(newStatementId);
+                handleCreateStatement(selectedText, newStatementId);
+              }
             }}
           />
         )}
@@ -261,6 +266,7 @@ export const TextAnnotator = ({
             label="save"
             color="primary"
             icon={<FaRegSave />}
+            disabled={annotator.text.value === document?.content}
             onClick={() => {
               handleSaveNewContent();
             }}

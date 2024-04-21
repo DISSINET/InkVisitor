@@ -363,14 +363,18 @@ export const StatementListBox: React.FC = () => {
     },
   });
 
-  const handleCreateStatement = (text = "") => {
+  const handleCreateStatement = (
+    text: string = "",
+    statementId: string | undefined = undefined
+  ) => {
     if (userData && data) {
       const newStatement: IStatement = CStatement(
         localStorage.getItem("userrole") as UserEnums.Role,
         userData.options,
         "",
         "",
-        territoryId
+        territoryId,
+        statementId
       );
       newStatement.data.text = text;
       const { statements } = data;
@@ -387,7 +391,6 @@ export const StatementListBox: React.FC = () => {
           : 1;
         addStatementAtTheEndMutation.mutate(newStatement);
       }
-      toast.info("New Statement created");
     }
   };
 

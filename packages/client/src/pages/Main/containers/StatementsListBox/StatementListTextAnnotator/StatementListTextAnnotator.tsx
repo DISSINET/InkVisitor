@@ -51,7 +51,7 @@ interface StatementListTextAnnotator {
   setShowSubmit: React.Dispatch<React.SetStateAction<boolean>>;
   addStatementAtCertainIndex: (index: number) => Promise<void>;
 
-  handleCreateStatement: (detail?: string) => void;
+  handleCreateStatement: (detail?: string, statementId?: string) => void;
 
   selectedRows: string[];
   setSelectedRows: React.Dispatch<React.SetStateAction<string[]>>;
@@ -175,12 +175,7 @@ export const StatementListTextAnnotator: React.FC<
 
   return (
     <div>
-      <div style={{ alignItems: "center" }}>
-        <div style={{}}>
-          {selectedResource
-            ? "selected resource"
-            : "select resource with document"}{" "}
-        </div>
+      <div style={{ alignItems: "center", display: "inline-flex" }}>
         {!selectedResource && (
           <EntitySuggester
             disableCreate={false}
