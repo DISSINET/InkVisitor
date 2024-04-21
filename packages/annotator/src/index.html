@@ -74,11 +74,11 @@
         }
       })
       annotator.onSelectText((text) => {
-        console.log(text)
+        console.log("onSelectText", text)
       });
 
       annotator.onHighlight((entity) => {
-        console.log(entity)
+        console.log("entity",entity)
       });
 
       document.getElementById("mode").onclick = () => {

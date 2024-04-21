@@ -387,7 +387,7 @@ export class Annotator {
 
     if (this.onSelectTextCb && this.cursor.isSelected()) {
       const [start, end] = this.cursor.getSelected();
-      if (start && end) {
+      if (start && end && (start.xLine !== end.xLine || start?.yLine !== end?.yLine)) {
         const startSegment = this.text.getSegmentPosition( start.yLine, start.xLine) as SegmentPosition;
         const endSegment = this.text.getSegmentPosition( end.yLine, end.xLine) as SegmentPosition;
         const annotated = this.getAnnotations(startSegment, endSegment);
@@ -396,37 +396,40 @@ export class Annotator {
     }
 
     if (this.onHighlightCb) {     
-      const annotated = this.getAnnotations(null, this.text.cursorToIndex(this.viewport, this.cursor));
-      if (annotated.length > 0) {
-        const tag = annotated.pop() as string
-        const highlight = this.onHighlightCb(tag);
-        if (highlight) {
-          const [startLine, endLine] = this.text.getTagPosition(tag)
-          if (startLine && endLine) {
-            this.ctx.strokeStyle = highlight.style.color;
+      const [start, end] = this.cursor.getSelected();
+      if (start?.xLine === end?.xLine && start?.yLine === end?.yLine) {
+        const annotated = this.getAnnotations(null, this.text.cursorToIndex(this.viewport, this.cursor));
+        if (annotated.length > 0) {
+          const tag = annotated.pop() as string
+          const highlight = this.onHighlightCb(tag);
+          if (highlight) {
+            const [startLine, endLine] = this.text.getTagPosition(tag)
+            if (startLine && endLine) {
+              this.ctx.strokeStyle = highlight.style.color;
 
-            for (let currentYLine = startLine.yLine; currentYLine <= endLine.yLine; currentYLine++) {
-              if (this.viewport.lineStart <= currentYLine && this.viewport.lineEnd >= currentYLine) {
-                this.ctx.beginPath();
+              for (let currentYLine = startLine.yLine; currentYLine <= endLine.yLine; currentYLine++) {
+                if (this.viewport.lineStart <= currentYLine && this.viewport.lineEnd >= currentYLine) {
+                  this.ctx.beginPath();
 
-                const yPos = currentYLine - this.viewport.lineStart + this.lineHeight;
-                if (currentYLine === startLine.yLine) {
-                  this.ctx.moveTo(startLine.xLine, yPos);
-                } else if (currentYLine === endLine.yLine) {
-                  this.ctx.moveTo(endLine.xLine, yPos);
-                } else {
-                  this.ctx.moveTo(0, yPos);
+                  const yPos = currentYLine - this.viewport.lineStart + this.lineHeight;
+                  if (currentYLine === startLine.yLine) {
+                    this.ctx.moveTo(startLine.xLine, yPos);
+                  } else if (currentYLine === endLine.yLine) {
+                    this.ctx.moveTo(endLine.xLine, yPos);
+                  } else {
+                    this.ctx.moveTo(0, yPos);
+                  }
+
+                  if (startLine.yLine === endLine.yLine) {
+                    this.ctx.lineTo(endLine.xLine * this.charWidth, yPos);
+                  } else if (currentYLine === startLine.yLine) {
+                    this.ctx.lineTo(this.charWidth, yPos);
+                  } else if (currentYLine === endLine.yLine) {
+                    this.ctx.lineTo(endLine.xLine * this.charWidth, yPos);
+                  }
+
+                  this.ctx.stroke();
                 }
-
-                if (startLine.yLine === endLine.yLine) {
-                  this.ctx.lineTo(endLine.xLine * this.charWidth, yPos);
-                } else if (currentYLine === startLine.yLine) {
-                  this.ctx.lineTo(this.charWidth, yPos);
-                } else if (currentYLine === endLine.yLine) {
-                  this.ctx.lineTo(endLine.xLine * this.charWidth, yPos);
-                }
-
-                this.ctx.stroke();
               }
             }
           }
