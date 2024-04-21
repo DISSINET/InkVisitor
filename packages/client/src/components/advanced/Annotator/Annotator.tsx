@@ -67,7 +67,6 @@ export const TextAnnotator = ({
   const mainCanvas = useRef(null);
   const scroller = useRef(null);
   const lines = useRef(null);
-  const [highlighted, setSelected] = useState<Highlighted>();
 
   const [annotatorMode, setAnnotatorMode] = useState<Mode>("highlight");
 
@@ -118,7 +117,11 @@ export const TextAnnotator = ({
   };
 
   const handleAddAnchor = (entityId: string) => {
+    toast.info(
+      `Anchor created ${entityId}. Do not forget to save the document.`
+    );
     annotator.addAnchor(entityId);
+    setSelectedText("");
   };
 
   useEffect(() => {
@@ -139,6 +142,7 @@ export const TextAnnotator = ({
       annotator.addLines(lines.current);
     }
     annotator.onSelectText(({ text, anchors }) => {
+      console.log("select", text, anchors);
       handleTextSelection(text, anchors);
     });
 
@@ -184,7 +188,7 @@ export const TextAnnotator = ({
   return (
     <div style={{ width: width }}>
       <StyledCanvasWrapper>
-        {annotatorMode === "highlight" && (
+        {annotatorMode === "highlight" && selectedText && (
           <TextAnnotatorMenu
             anchors={selectedAnchors}
             text={selectedText}

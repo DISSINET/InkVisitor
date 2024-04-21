@@ -68,6 +68,7 @@ export const TextAnnotatorMenu = ({
                   return (
                     <EntityTag
                       key={anchor}
+                      fullWidth
                       entity={entities[anchor] as IEntity}
                     />
                   );

@@ -45,7 +45,6 @@ export default class ResponseDocument
   async populateWithEntities(conn: Connection): Promise<void> {
     for (const entityId of this.entityIds) {
       const entity = await findEntityById(conn, entityId);
-      console.log("populateWithEntities", entityId, entity);
 
       if (entity) {
         const entityClass = entity.class;

@@ -231,9 +231,9 @@ export class Annotator {
 
         if (!nonCharKeys.includes(key)) {
           this.text.insertText(this.viewport, this.cursor, key);
-                  if (this.onTextChangeCb) {
-          this.onTextChangeCb(this.text.value);
-        }
+          if (this.onTextChangeCb) {
+            this.onTextChangeCb(this.text.value);
+          }
           this.cursor.move(+1, 0);
         }
     }
@@ -434,6 +434,11 @@ export class Annotator {
         this.onSelectTextCb({
           text: this.text.getRangeText(start, end),
           anchors: annotated,
+        });
+      } else {
+        this.onSelectTextCb({
+          text: "",
+          anchors: [],
         });
       }
     }
