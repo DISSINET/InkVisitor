@@ -11,7 +11,7 @@ const getWidth = (width?: number | "full") => {
 };
 interface StyledSelectWrapper {
   width?: number | "full";
-  ref?: any;
+  ref?: React.Dispatch<React.SetStateAction<HTMLButtonElement | null>>;
 }
 export const StyledSelectWrapper = styled.div<StyledSelectWrapper>`
   display: inline-flex;

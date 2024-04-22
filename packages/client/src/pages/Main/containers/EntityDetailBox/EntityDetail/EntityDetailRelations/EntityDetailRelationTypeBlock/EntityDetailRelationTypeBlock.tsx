@@ -301,7 +301,6 @@ export const EntityDetailRelationTypeBlock: React.FC<
             <StyledSuggesterWrapper>
               <EntitySuggester
                 excludedEntityClasses={excludedSuggesterEntities}
-                inputWidth={80}
                 disableTemplatesAccept
                 categoryTypes={getCategoryTypes()}
                 onSelected={(selectedId: string) => {

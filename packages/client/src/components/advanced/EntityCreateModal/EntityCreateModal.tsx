@@ -238,7 +238,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
   return (
     <Modal
       showModal={showModal}
-      width="auto"
+      width={300}
       isLoading={entityCreateMutation.isPending}
       onEnterPress={handleCheckOnSubmit}
       onClose={closeModal}
@@ -264,7 +264,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
               disableTemplatesAccept
               disableWildCard
               disableTemplateInstantiation
-              inputWidth={96}
+              inputWidth="full"
               autoFocus
               disableButtons
               disableEnter
@@ -278,6 +278,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
               value={detailTyped}
               onChangeFn={(newType: string) => setDetailTyped(newType)}
               changeOnType
+              width="full"
             />
           </ModalInputWrap>
 

@@ -170,7 +170,7 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
               onChange={(selectedOption) => {
                 setCreateModalEntityClass(selectedOption);
               }}
-              width={100}
+              width="full"
               disableTyping
               autoFocus
             />
