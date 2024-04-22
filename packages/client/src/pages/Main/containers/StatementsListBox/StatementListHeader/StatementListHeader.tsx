@@ -343,88 +343,90 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
         <StyledSuggesterRow>
           {/* BATCH ACTIONS */}
           <StyledActionsWrapper>
-            {user?.role !== UserEnums.Role.Viewer && (
-              <>
-                <StyledCheckboxWrapper>
-                  {renderCheckBox()}
-                </StyledCheckboxWrapper>
+            {user?.role !== UserEnums.Role.Viewer &&
+              displayMode === StatementListDisplayMode.LIST && (
+                <>
+                  <StyledCheckboxWrapper>
+                    {renderCheckBox()}
+                  </StyledCheckboxWrapper>
 
-                {selectedRows.length > 0 && (
-                  <StyledCounter>{`${selectedRows.length}/${territory.statements.length}`}</StyledCounter>
-                )}
+                  {selectedRows.length > 0 && (
+                    <StyledCounter>{`${selectedRows.length}/${territory.statements.length}`}</StyledCounter>
+                  )}
 
-                {
-                  <>
-                    <StyledDropdownWrap>
-                      <Dropdown.Single.Basic
-                        width={78}
+                  {
+                    <>
+                      <StyledDropdownWrap>
+                        <Dropdown.Single.Basic
+                          width={78}
+                          disabled={selectedRows.length === 0}
+                          value={batchAction.value}
+                          onChange={(selectedOption) =>
+                            setBatchAction(
+                              batchOptions.find(
+                                (o) => o.value === selectedOption
+                              )!
+                            )
+                          }
+                          options={batchOptions}
+                        />
+                      </StyledDropdownWrap>
+                      <EntitySuggester
+                        placeholder={
+                          batchAction.info === EntityEnums.Class.Territory
+                            ? "to territory"
+                            : ""
+                        }
+                        disableTemplatesAccept
+                        inputWidth={70}
+                        disableCreate
+                        filterEditorRights
+                        categoryTypes={[
+                          entitiesDictKeys[
+                            batchAction.info as EntityEnums.Class
+                          ].value,
+                        ]}
+                        onSelected={(newSelectedId: string) => {
+                          switch (batchAction.value) {
+                            case BatchOption.move_S:
+                              moveStatementsMutation.mutate({
+                                statements: selectedRows,
+                                newTerritoryId: newSelectedId,
+                              });
+                              return;
+                            case BatchOption.duplicate_S:
+                              duplicateStatementsMutation.mutate({
+                                statements: selectedRows,
+                                newTerritoryId: newSelectedId,
+                              });
+                              return;
+                            case BatchOption.append_R:
+                              appendReferencesMutation.mutate([
+                                {
+                                  id: uuidv4(),
+                                  resource: newSelectedId,
+                                  value: "",
+                                },
+                              ]);
+                              return;
+                            case BatchOption.replace_R:
+                              replaceReferencesMutation.mutate([
+                                {
+                                  id: uuidv4(),
+                                  resource: newSelectedId,
+                                  value: "",
+                                },
+                              ]);
+                              return;
+                          }
+                        }}
+                        excludedActantIds={[territory.id]}
                         disabled={selectedRows.length === 0}
-                        value={batchAction.value}
-                        onChange={(selectedOption) =>
-                          setBatchAction(
-                            batchOptions.find(
-                              (o) => o.value === selectedOption
-                            )!
-                          )
-                        }
-                        options={batchOptions}
                       />
-                    </StyledDropdownWrap>
-                    <EntitySuggester
-                      placeholder={
-                        batchAction.info === EntityEnums.Class.Territory
-                          ? "to territory"
-                          : ""
-                      }
-                      disableTemplatesAccept
-                      inputWidth={70}
-                      disableCreate
-                      filterEditorRights
-                      categoryTypes={[
-                        entitiesDictKeys[batchAction.info as EntityEnums.Class]
-                          .value,
-                      ]}
-                      onSelected={(newSelectedId: string) => {
-                        switch (batchAction.value) {
-                          case BatchOption.move_S:
-                            moveStatementsMutation.mutate({
-                              statements: selectedRows,
-                              newTerritoryId: newSelectedId,
-                            });
-                            return;
-                          case BatchOption.duplicate_S:
-                            duplicateStatementsMutation.mutate({
-                              statements: selectedRows,
-                              newTerritoryId: newSelectedId,
-                            });
-                            return;
-                          case BatchOption.append_R:
-                            appendReferencesMutation.mutate([
-                              {
-                                id: uuidv4(),
-                                resource: newSelectedId,
-                                value: "",
-                              },
-                            ]);
-                            return;
-                          case BatchOption.replace_R:
-                            replaceReferencesMutation.mutate([
-                              {
-                                id: uuidv4(),
-                                resource: newSelectedId,
-                                value: "",
-                              },
-                            ]);
-                            return;
-                        }
-                      }}
-                      excludedActantIds={[territory.id]}
-                      disabled={selectedRows.length === 0}
-                    />
-                  </>
-                }
-              </>
-            )}
+                    </>
+                  }
+                </>
+              )}
           </StyledActionsWrapper>
 
           {/* NEW STATEMENT / REFRESH */}
