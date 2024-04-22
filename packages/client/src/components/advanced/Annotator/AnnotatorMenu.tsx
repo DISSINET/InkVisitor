@@ -42,7 +42,8 @@ export const TextAnnotatorMenu = ({
         <StyledAnnotatorMenu
           $top={yPosition}
           $left={100}
-          $translateY={topBottomSelection ? "0%" : "-100%"}
+          // $translateY={"100%"}
+          $translateY={topBottomSelection ? "-100%" : "100%"}
         >
           <StyledAnnotatorItem>
             <StyledAnnotatorItemTitle>Actions</StyledAnnotatorItemTitle>

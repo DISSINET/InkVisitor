@@ -175,21 +175,25 @@ export const TextAnnotator = ({
     if (annotator) {
       console.log("resizing canvas", wTextArea, height);
       // annotator.resize(wTextArea, height);
-      annotator.draw();
+      setTimeout(() => {
+        annotator.draw();
+      }, 1000);
     }
   }, [width, height]);
 
   const topBottomSelection = useMemo<boolean>(() => {
     const selectedText = annotator?.cursor?.getSelected();
 
-    return (selectedText?.[0]?.yLine ?? 0) > (selectedText?.[1]?.yLine ?? 0);
+    return (selectedText?.[0]?.yLine ?? 0) < (selectedText?.[1]?.yLine ?? 0);
   }, [annotator?.cursor?.yLine]);
+
+  console.log(topBottomSelection);
 
   const menuPositionY = useMemo<number>(() => {
     const yLine = annotator?.cursor?.yLine ?? 0;
     const lineHeight = annotator?.lineHeight ?? 0;
 
-    return yLine * lineHeight + (topBottomSelection ? 50 : -30);
+    return yLine * lineHeight + (topBottomSelection ? 100 : 50);
   }, [annotator?.cursor?.yLine, annotator?.lineHeight, topBottomSelection]);
 
   return (
