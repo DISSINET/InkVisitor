@@ -60,6 +60,34 @@ export default Router()
       return docResponses;
     })
   )
+
+  .post("/export", async (request: IRequest, res: any) => {
+    const id = request.body.documentId;
+    const exportedEntities = request.body.exportedEntities;
+
+    if (!id) {
+      throw new BadParams("document id has to be set");
+    }
+
+    console.log("EXPORTING");
+    console.log(id);
+    console.log(exportedEntities);
+
+    const existing = await Document.findDocumentById(request.db.connection, id);
+
+    if (!existing) {
+      throw DocumentDoesNotExist.forId(id);
+    }
+
+    const document = new ResponseDocument(existing);
+    await document.populateWithEntities(request.db.connection);
+
+    res.setHeader("content-type", "text/plain");
+    res.setHeader("Content-Disposition", `attachment; filename="export.txt"`);
+
+    // TODO: filtering of anchors should happen here
+    res.send(document.content);
+  })
   /**
    * @openapi
    * /documents/{documentId}:

@@ -26,6 +26,7 @@ import {
   StyledExportDocumentClassReference,
   StyledExportDocumentContainer,
 } from "./DocumentModalStyles";
+import api from "api";
 
 interface DocumentModalExportProps {
   document: IResponseDocument | undefined;
@@ -186,11 +187,9 @@ const DocumentModalExport: React.FC<DocumentModalExportProps> = ({
         >
           <Button
             onClick={() => {
-              console.log(
-                "export document with",
-                sumAnchorsToExport,
-                "anchors"
-              );
+              if (document?.id) {
+                api.documentExport(document.id, exportedClasses);
+              }
             }}
             icon={<FaRegSave size={20} style={{ marginRight: "3px" }} />}
             fullWidth

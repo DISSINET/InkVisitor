@@ -1,3 +1,4 @@
+import { EntityEnums } from "@shared/enums";
 import {
   IEntity,
   IResponseEntity,
@@ -756,7 +757,7 @@ class Api {
         `/territories/${territoryId}/copy`,
         {
           targets,
-          withChildren
+          withChildren,
         },
         options
       );
@@ -1034,7 +1035,7 @@ class Api {
   }
 
   /**
-   * Document titles
+   * Document
    */
 
   async documentsGet(
@@ -1096,6 +1097,35 @@ class Api {
         options
       );
       return response;
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+
+  async documentExport(
+    documentId: string,
+    exportedEntities: EntityEnums.Class[]
+  ): Promise<any> {
+    try {
+      const response = await this.connection.post(
+        `/documents/export`,
+        {
+          documentId,
+          exportedEntities,
+        },
+        { responseType: "blob" }
+      );
+
+      const url = window.URL.createObjectURL(response.data);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${documentId}.txt`;
+      document.body.appendChild(a);
+      a.click();
+
+      // Clean up
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
     } catch (err) {
       throw this.handleError(err);
     }
