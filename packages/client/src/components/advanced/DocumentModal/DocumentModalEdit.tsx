@@ -1,15 +1,11 @@
-import { IDocument, IResponseDocument } from "@shared/types";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import theme, { ThemeFontSize } from "Theme/theme";
-import api from "api";
-import { Modal, ModalContent, ModalFooter, ModalHeader } from "components";
 import React, { useEffect, useRef, useState } from "react";
-import { toast } from "react-toastify";
+
+import { Modal, ModalContent, ModalFooter, ModalHeader } from "components";
+import { IResponseDocument } from "@shared/types";
+import { useWindowSize } from "hooks/useWindowSize";
 import { getShortLabelByLetterCount } from "utils/utils";
 import TextAnnotator from "../Annotator/Annotator";
 import AnnotatorProvider from "../Annotator/AnnotatorProvider";
-import { useContainerDimensions } from "hooks/useContainerDimensions";
-import { useWindowSize } from "hooks/useWindowSize";
 
 interface DocumentModal {
   document: IResponseDocument | undefined;
