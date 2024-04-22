@@ -1,5 +1,3 @@
-import { animated } from "@react-spring/web";
-import { FaDotCircle } from "react-icons/fa";
 import styled from "styled-components";
 
 export const StyledContent = styled.div`
@@ -18,13 +16,11 @@ export const StyledBoxWrap = styled.div<StyledBoxWrap>`
 export const StyledBackground = styled.div`
   display: flex;
   flex-direction: column;
-  overflow: auto;
   margin: 2rem;
   padding: 1rem;
   border: 1px dashed ${({ theme }) => theme.color["black"]};
   background-color: ${({ theme }) => theme.color["white"]};
   box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.3);
-  position: relative;
 `;
 export const StyledGrid = styled.div`
   display: grid;
@@ -33,9 +29,6 @@ export const StyledGrid = styled.div`
   overflow: auto;
 `;
 
-export const StyledFaDotCircle = styled(FaDotCircle)`
-  color: ${({ theme }) => theme.color["black"]};
-`;
 export const StyledTitleWrap = styled.div`
   min-width: 18rem;
   cursor: pointer;
@@ -68,6 +61,16 @@ export const StyledHeading = styled.div`
 export const StyledCount = styled.div`
   color: ${({ theme }) => theme.color["black"]};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
+  display: inline-flex;
+  gap: 0.5rem;
+`;
+
+export const StyledCountTag = styled.div`
+  padding: 2px 6px;
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  font-weight: ${({ theme }) => theme.fontWeight["bold"]};
+  border-radius: ${({ theme }) => theme.borderRadius["default"]};
+  cursor: default;
 `;
 
 export const StyledInputWrap = styled.div`

@@ -3,7 +3,8 @@ import { ApplyTemplateModal } from "./ApplyTemplateModal/ApplyTemplateModal";
 import { AttributeButtonGroup } from "./AttributeButtonGroup/AttributeButtonGroup";
 import { AuditTable } from "./AuditTable/AuditTable";
 import { BreadcrumbItem } from "./BreadcrumbItem/BreadcrumbItem";
-import { DocumentModal } from "./DocumentModal/DocumentModal";
+import DocumentModalExport from "./DocumentModal/DocumentModalExport";
+import DocumentModalEdit from "./DocumentModal/DocumentModalEdit";
 import { AttributeMultiDropdown } from "./Dropdowns/AttributeMultiDropdown";
 import { BasicDropdown } from "./Dropdowns/BasicDropdown";
 import { EntityMultiDropdown } from "./Dropdowns/EntityMultiDropdown";
@@ -44,7 +45,8 @@ export {
   AttributeButtonGroup,
   AuditTable,
   BreadcrumbItem,
-  DocumentModal,
+  DocumentModalExport,
+  DocumentModalEdit,
   EmptyTag,
   EntityCreateModal,
   EntityDropzone,

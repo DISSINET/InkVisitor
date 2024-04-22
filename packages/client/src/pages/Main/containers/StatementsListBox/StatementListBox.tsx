@@ -9,20 +9,25 @@ import {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Loader, Submit, ToastWithLink } from "components";
-import { CStatement } from "constructors";
+import { CStatement, CTerritory } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
 import { BsInfoCircle } from "react-icons/bs";
 import { toast } from "react-toastify";
 import { setStatementListOpened } from "redux/features/layout/statementListOpenedSlice";
 import { setShowWarnings } from "redux/features/statementEditor/showWarningsSlice";
+import { setDisableStatementListScroll } from "redux/features/statementList/disableStatementListScrollSlice";
 import { setRowsExpanded } from "redux/features/statementList/rowsExpandedSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { StatementListHeader } from "./StatementListHeader/StatementListHeader";
 import { StatementListTable } from "./StatementListTable/StatementListTable";
+import { StatementListTextAnnotator } from "./StatementListTextAnnotator/StatementListTextAnnotator";
 import { StyledEmptyState, StyledTableWrapper } from "./StatementLitBoxStyles";
-import { setDisableStatementListScroll } from "redux/features/statementList/disableStatementListScrollSlice";
 
+export enum StatementListDisplayMode {
+  TEXT = "text",
+  LIST = "list",
+}
 const initialData: {
   statements: IResponseStatement[];
   entities: { [key: string]: IEntity };
@@ -67,6 +72,16 @@ export const StatementListBox: React.FC = () => {
   const [showSubmit, setShowSubmit] = useState(false);
   const [statementToDelete, setStatementToDelete] = useState<IStatement>();
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
+
+  const [displayMode, setDisplayMode] = useState<StatementListDisplayMode>(
+    StatementListDisplayMode.TEXT
+  );
+
+  const handleDisplayModeChange = (
+    newDisplayMode: StatementListDisplayMode
+  ) => {
+    setDisplayMode(newDisplayMode);
+  };
 
   const { status, data, error, isFetching } = useQuery({
     queryKey: ["territory", "statement-list", territoryId, statementListOpened],
@@ -215,6 +230,17 @@ export const StatementListBox: React.FC = () => {
       toast.error(`Error: Statement not created!`);
     },
   });
+  const territoryCreateMutation = useMutation({
+    mutationFn: async (newTerritory: ITerritory) =>
+      await api.entityCreate(newTerritory),
+    onSuccess: (data, variables) => {
+      toast.info(`Sub Teritory created!`);
+      queryClient.invalidateQueries({ queryKey: ["tree"] });
+    },
+    onError: () => {
+      toast.error(`Error: Sub Territory not created!`);
+    },
+  });
 
   const addStatementAtCertainIndex = async (index: number) => {
     let newOrder: number | false = false;
@@ -332,7 +358,52 @@ export const StatementListBox: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ["statement"] });
     },
   });
+  const handleCreateStatement = (
+    text: string = "",
+    statementId: string | undefined = undefined
+  ) => {
+    if (userData && data) {
+      const newStatement: IStatement = CStatement(
+        localStorage.getItem("userrole") as UserEnums.Role,
+        userData.options,
+        "",
+        "",
+        territoryId,
+        statementId
+      );
+      newStatement.data.text = text;
+      const { statements } = data;
 
+      const lastStatement = statements[statements.length - 1];
+      if (!statements.length) {
+        addStatementAtTheEndMutation.mutate(newStatement);
+      } else if (
+        newStatement?.data?.territory &&
+        lastStatement?.data?.territory
+      ) {
+        newStatement.data.territory.order = statements.length
+          ? lastStatement.data.territory.order + 1
+          : 1;
+        addStatementAtTheEndMutation.mutate(newStatement);
+      }
+    }
+  };
+
+  const handleCreateTerritory = (newTerritoryId?: string) => {
+    if (userData && data) {
+      const newTerritory: ITerritory = CTerritory(
+        localStorage.getItem("userrole") as UserEnums.Role,
+        userData.options,
+        `subT of ${data.label}`,
+        data.detail,
+        territoryId,
+        Infinity,
+        newTerritoryId
+      );
+
+      territoryCreateMutation.mutate(newTerritory);
+    }
+  };
   const updateTerritoryMutation = useMutation({
     mutationFn: async (tObject: {
       territoryId: string;
@@ -365,6 +436,7 @@ export const StatementListBox: React.FC = () => {
     <>
       {data && (
         <StatementListHeader
+          handleCreateStatement={handleCreateStatement}
           territory={data}
           addStatementAtTheEndMutation={addStatementAtTheEndMutation}
           isFavorited={isFavorited}
@@ -377,11 +449,28 @@ export const StatementListBox: React.FC = () => {
           duplicateStatementsMutation={duplicateStatementsMutation}
           replaceReferencesMutation={replaceReferencesMutation}
           appendReferencesMutation={appendReferencesMutation}
+          displayMode={displayMode}
+          handleDisplayModeChange={handleDisplayModeChange}
           updateTerritoryMutation={updateTerritoryMutation}
           duplicateTerritoryMutation={duplicateTerritoryMutation}
         />
       )}
-      {statements ? (
+
+      {data && displayMode === "text" && (
+        <StatementListTextAnnotator
+          statements={statements}
+          handleCreateStatement={handleCreateStatement}
+          handleCreateTerritory={handleCreateTerritory}
+          territoryId={territoryId}
+          entities={entities}
+          right={right}
+          setShowSubmit={setShowSubmit}
+          addStatementAtCertainIndex={addStatementAtCertainIndex}
+          selectedRows={selectedRows}
+          setSelectedRows={setSelectedRows}
+        />
+      )}
+      {data && displayMode === "list" && statements && (
         <StyledTableWrapper id="Statements-box-table">
           <StatementListTable
             statements={statements}
@@ -400,18 +489,15 @@ export const StatementListBox: React.FC = () => {
             setSelectedRows={setSelectedRows}
           />
         </StyledTableWrapper>
-      ) : (
+      )}
+      {!territoryId && (
         <>
-          {!territoryId && (
-            <>
-              <StyledEmptyState>
-                <BsInfoCircle size="23" />
-              </StyledEmptyState>
-              <StyledEmptyState>
-                {"No territory selected yet. Pick one from the territory tree"}
-              </StyledEmptyState>
-            </>
-          )}
+          <StyledEmptyState>
+            <BsInfoCircle size="23" />
+          </StyledEmptyState>
+          <StyledEmptyState>
+            {"No territory selected yet. Pick one from the territory tree"}
+          </StyledEmptyState>
         </>
       )}
 

@@ -44,3 +44,24 @@ export const StyledEmptyState = styled.div`
   align-items: center;
   text-align: center;
 `;
+
+export const StyledDocumentTag = styled.div`
+  display: inline-flex;
+  margin: 0px 6px;
+  background-color: ${({ theme }) => theme.color["blue"][400]};
+  padding: ${({ theme }) => theme.space[1] + " " + theme.space[3]};
+  border-radius: ${({ theme }) => theme.borderRadius["md"]};
+  color: white;
+  font-size: small;
+  align-items: center;
+`;
+
+interface StyledDocumentInfoProps {
+  $color?: string;
+}
+export const StyledDocumentInfo = styled.div<StyledDocumentInfoProps>`
+  display: inline-flex;
+  text-align: center;
+  gap: ${({ theme }) => theme.space[1]};
+  color: ${({ theme, $color }) => theme.color[$color || "black"]};
+`;

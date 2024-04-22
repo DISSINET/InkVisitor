@@ -27,7 +27,7 @@ import { CStatement } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
 import { BiRefresh } from "react-icons/bi";
-import { FaPlus } from "react-icons/fa";
+import { FaHighlighter, FaList, FaPlus } from "react-icons/fa";
 import {
   MdOutlineCheckBox,
   MdOutlineCheckBoxOutlineBlank,
@@ -38,6 +38,7 @@ import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { DropdownItem } from "types";
 import { collectTerritoryChildren, searchTree } from "utils/utils";
 import { v4 as uuidv4 } from "uuid";
+import { StatementListDisplayMode } from "../StatementListBox";
 import {
   StyledActionsWrapper,
   StyledCheckboxWrapper,
@@ -46,8 +47,10 @@ import {
   StyledFaStar,
   StyledHeader,
   StyledHeaderBreadcrumbRow,
+  StyledHeaderBreadcrumbRowLeft,
   StyledHeaderRow,
   StyledHeading,
+  StyledModeSwitcher,
   StyledMoveToParent,
   StyledSuggesterRow,
 } from "./StatementListHeaderStyles";
@@ -63,6 +66,9 @@ interface StatementListHeader {
     unknown
   >;
   isFavorited?: boolean;
+
+  displayMode: StatementListDisplayMode;
+  handleDisplayModeChange: (newMode: StatementListDisplayMode) => void;
 
   isAllSelected: boolean;
   selectedRows: string[];
@@ -99,6 +105,7 @@ interface StatementListHeader {
     IReference[],
     unknown
   >;
+  handleCreateStatement: () => void;
   updateTerritoryMutation: UseMutationResult<
     AxiosResponse<IResponseGeneric<any>, any>,
     Error,
@@ -128,10 +135,14 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
   selectedRows,
   setSelectedRows,
 
+  displayMode,
+  handleDisplayModeChange,
+
   moveStatementsMutation,
   duplicateStatementsMutation,
   replaceReferencesMutation,
   appendReferencesMutation,
+  handleCreateStatement,
 
   updateTerritoryMutation,
   duplicateTerritoryMutation,
@@ -169,10 +180,6 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
     },
   ];
 
-  const treeData: IResponseTree | undefined = queryClient.getQueryData([
-    "tree",
-  ]);
-
   // get user data
   const userId = localStorage.getItem("userid");
   const {
@@ -190,6 +197,10 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
     },
     enabled: !!userId && api.isLoggedIn(),
   });
+
+  const treeData: IResponseTree | undefined = queryClient.getQueryData([
+    "tree",
+  ]);
 
   const [excludedMoveTerritories, setExcludedMoveTerritories] = useState<
     string[]
@@ -220,32 +231,6 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
   const selectedTerritoryPath = useAppSelector(
     (state) => state.territoryTree.selectedTerritoryPath
   );
-
-  const handleCreateStatement = () => {
-    if (user) {
-      const newStatement: IStatement = CStatement(
-        user.role,
-        user.options,
-        "",
-        "",
-        territoryId
-      );
-      const { statements } = territory;
-
-      const lastStatement = statements[statements.length - 1];
-      if (!statements.length) {
-        addStatementAtTheEndMutation.mutate(newStatement);
-      } else if (
-        newStatement?.data?.territory &&
-        lastStatement?.data?.territory
-      ) {
-        newStatement.data.territory.order = statements.length
-          ? lastStatement.data.territory.order + 1
-          : 1;
-        addStatementAtTheEndMutation.mutate(newStatement);
-      }
-    }
-  };
 
   const trimTerritoryLabel = (label: string) => {
     const maxLettersCount = 70;
@@ -358,88 +343,90 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
         <StyledSuggesterRow>
           {/* BATCH ACTIONS */}
           <StyledActionsWrapper>
-            {user?.role !== UserEnums.Role.Viewer && (
-              <>
-                <StyledCheckboxWrapper>
-                  {renderCheckBox()}
-                </StyledCheckboxWrapper>
+            {user?.role !== UserEnums.Role.Viewer &&
+              displayMode === StatementListDisplayMode.LIST && (
+                <>
+                  <StyledCheckboxWrapper>
+                    {renderCheckBox()}
+                  </StyledCheckboxWrapper>
 
-                {selectedRows.length > 0 && (
-                  <StyledCounter>{`${selectedRows.length}/${territory.statements.length}`}</StyledCounter>
-                )}
+                  {selectedRows.length > 0 && (
+                    <StyledCounter>{`${selectedRows.length}/${territory.statements.length}`}</StyledCounter>
+                  )}
 
-                {
-                  <>
-                    <StyledDropdownWrap>
-                      <Dropdown.Single.Basic
-                        width={78}
+                  {
+                    <>
+                      <StyledDropdownWrap>
+                        <Dropdown.Single.Basic
+                          width={78}
+                          disabled={selectedRows.length === 0}
+                          value={batchAction.value}
+                          onChange={(selectedOption) =>
+                            setBatchAction(
+                              batchOptions.find(
+                                (o) => o.value === selectedOption
+                              )!
+                            )
+                          }
+                          options={batchOptions}
+                        />
+                      </StyledDropdownWrap>
+                      <EntitySuggester
+                        placeholder={
+                          batchAction.info === EntityEnums.Class.Territory
+                            ? "to territory"
+                            : ""
+                        }
+                        disableTemplatesAccept
+                        inputWidth={70}
+                        disableCreate
+                        filterEditorRights
+                        categoryTypes={[
+                          entitiesDictKeys[
+                            batchAction.info as EntityEnums.Class
+                          ].value,
+                        ]}
+                        onSelected={(newSelectedId: string) => {
+                          switch (batchAction.value) {
+                            case BatchOption.move_S:
+                              moveStatementsMutation.mutate({
+                                statements: selectedRows,
+                                newTerritoryId: newSelectedId,
+                              });
+                              return;
+                            case BatchOption.duplicate_S:
+                              duplicateStatementsMutation.mutate({
+                                statements: selectedRows,
+                                newTerritoryId: newSelectedId,
+                              });
+                              return;
+                            case BatchOption.append_R:
+                              appendReferencesMutation.mutate([
+                                {
+                                  id: uuidv4(),
+                                  resource: newSelectedId,
+                                  value: "",
+                                },
+                              ]);
+                              return;
+                            case BatchOption.replace_R:
+                              replaceReferencesMutation.mutate([
+                                {
+                                  id: uuidv4(),
+                                  resource: newSelectedId,
+                                  value: "",
+                                },
+                              ]);
+                              return;
+                          }
+                        }}
+                        excludedActantIds={[territory.id]}
                         disabled={selectedRows.length === 0}
-                        value={batchAction.value}
-                        onChange={(selectedOption) =>
-                          setBatchAction(
-                            batchOptions.find(
-                              (o) => o.value === selectedOption
-                            )!
-                          )
-                        }
-                        options={batchOptions}
                       />
-                    </StyledDropdownWrap>
-                    <EntitySuggester
-                      placeholder={
-                        batchAction.info === EntityEnums.Class.Territory
-                          ? "to territory"
-                          : ""
-                      }
-                      disableTemplatesAccept
-                      inputWidth={70}
-                      disableCreate
-                      filterEditorRights
-                      categoryTypes={[
-                        entitiesDictKeys[batchAction.info as EntityEnums.Class]
-                          .value,
-                      ]}
-                      onSelected={(newSelectedId: string) => {
-                        switch (batchAction.value) {
-                          case BatchOption.move_S:
-                            moveStatementsMutation.mutate({
-                              statements: selectedRows,
-                              newTerritoryId: newSelectedId,
-                            });
-                            return;
-                          case BatchOption.duplicate_S:
-                            duplicateStatementsMutation.mutate({
-                              statements: selectedRows,
-                              newTerritoryId: newSelectedId,
-                            });
-                            return;
-                          case BatchOption.append_R:
-                            appendReferencesMutation.mutate([
-                              {
-                                id: uuidv4(),
-                                resource: newSelectedId,
-                                value: "",
-                              },
-                            ]);
-                            return;
-                          case BatchOption.replace_R:
-                            replaceReferencesMutation.mutate([
-                              {
-                                id: uuidv4(),
-                                resource: newSelectedId,
-                                value: "",
-                              },
-                            ]);
-                            return;
-                        }
-                      }}
-                      excludedActantIds={[territory.id]}
-                      disabled={selectedRows.length === 0}
-                    />
-                  </>
-                }
-              </>
-            )}
+                    </>
+                  }
+                </>
+              )}
           </StyledActionsWrapper>
 
           {/* NEW STATEMENT / REFRESH */}
@@ -471,6 +458,31 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
               />
             </ButtonGroup>
           )}
+        </StyledSuggesterRow>
+        <StyledSuggesterRow>
+          <StyledModeSwitcher>
+            {"Mode "}
+            <ButtonGroup style={{ marginLeft: "5px" }}>
+              <Button
+                color="success"
+                icon={<FaList />}
+                label="list"
+                onClick={() => {
+                  handleDisplayModeChange(StatementListDisplayMode.LIST);
+                }}
+                inverted={displayMode === StatementListDisplayMode.TEXT}
+              ></Button>
+              <Button
+                color="success"
+                icon={<FaHighlighter />}
+                label="annotator"
+                onClick={() => {
+                  handleDisplayModeChange(StatementListDisplayMode.TEXT);
+                }}
+                inverted={displayMode === StatementListDisplayMode.LIST}
+              ></Button>
+            </ButtonGroup>
+          </StyledModeSwitcher>
         </StyledSuggesterRow>
       </StyledHeader>
 

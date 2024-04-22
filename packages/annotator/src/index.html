@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Canvas dev</title>
+  </head>
+  <body style="background-color: black;">
+    <div style="padding: 20px;background-color: #ccc;">
+      <div class="textarea" style="display: flex; flex-direction: row">
+        <div
+          class="canvasses-wrapper"
+          style="border: 1px solid black; padding: 2px"
+        >
+          <div style="display: flex">
+            <canvas
+              id="lines"
+              class="lines"
+              width="50px"
+              height="400px"
+              style="outline: none"
+            ></canvas>
+            <canvas
+              tabindex="0"
+              id="canvas"
+              width="400px"
+              height="400px"
+              style="outline: none"
+            >
+            </canvas>
+            <div
+              className="scroller-viewport"
+              id="scroller"
+              style="background: #ccc; position: relative; width: 10px"
+            >
+              <div
+                className="scroller-cursor"
+                style="
+                  cursor: move;
+                  position: absolute;
+                  width: 10px;
+                  background-color: blue;
+                "
+              ></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top: 10px">Selected:</div>
+      <pre
+        id="highlight-container"
+        style="padding: 10px; border: 1px solid black; margin-top: 10px"
+      ></pre>
+      <textarea></textarea>
+      <button id="mode">Switch raw/highlighted</button>
+    </div>
+
+    <script src="bundle.js"></script>
+
+    <script>
+      const annotator = new Annotator(
+        document.getElementById("canvas"),
+        example
+      );
+      annotator.addScroller(document.getElementById("scroller"));
+      annotator.addLines(document.getElementById("lines"));
+      annotator.onHighlight((entityId) => {
+        console.log("highlighted", entityId)
+        return {
+          mode: "background",
+          style: {
+            color: "pink"
+          }
+        }
+      })
+      annotator.onSelectText((text) => {
+        console.log("onSelectText", text)
+      });
+
+      document.getElementById("mode").onclick = () => {
+        annotator.setMode(annotator.text.mode === "raw" ? "highlight" : "raw");
+        annotator.draw();
+      }
+      annotator.draw();
+    </script>
+  </body>
+</html>

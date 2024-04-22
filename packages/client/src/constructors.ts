@@ -527,10 +527,11 @@ export const CStatement = (
   userOptions: UserOptions,
   label?: string,
   detail?: string,
-  territoryId?: string
+  territoryId?: string,
+  id?: string
 ): IStatement => {
   const newStatement: IStatement = {
-    id: uuidv4(),
+    id: id ?? uuidv4(),
     class: EntityEnums.Class.Statement,
     label: label ? label : "",
     detail: detail ? detail : "",
@@ -568,9 +569,10 @@ export const CTerritory = (
   label: string,
   detail: string,
   parentId: string,
-  parentOrder: number
+  parentOrder: number,
+  id?: string
 ): ITerritory => ({
-  id: uuidv4(),
+  id: id ?? uuidv4(),
   class: EntityEnums.Class.Territory,
   label: label,
   detail: detail,

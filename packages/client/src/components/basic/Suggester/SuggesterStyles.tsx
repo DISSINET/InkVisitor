@@ -52,10 +52,10 @@ export const StyledSuggestionCancelButton = styled.div<StyledSuggestionCancelBut
   }
 `;
 
-interface StyledSuggesterList {}
-export const StyledSuggesterList = styled.div<StyledSuggesterList>`
+export const StyledSuggesterList = styled.div`
   z-index: 100;
 `;
+
 export const StyledRelativePosition = styled.div`
   position: relative;
   background-color: ${({ theme }) => theme.color["blue"][50]};

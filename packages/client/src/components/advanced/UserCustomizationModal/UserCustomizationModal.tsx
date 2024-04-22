@@ -311,7 +311,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
             </StyledRightsHeading>
 
             <ModalInputForm>
-              <ModalInputLabel>{"default language"}</ModalInputLabel>
+              <ModalInputLabel>{"entity default language"}</ModalInputLabel>
               <ModalInputWrap width={165}>
                 <Dropdown.Single.Basic
                   width="full"
@@ -322,7 +322,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                   options={languageDict}
                 />
               </ModalInputWrap>
-              <ModalInputLabel>{"statement language"}</ModalInputLabel>
+              <ModalInputLabel>{"statement default language"}</ModalInputLabel>
               <ModalInputWrap width={165}>
                 <Dropdown.Single.Basic
                   width="full"
@@ -473,7 +473,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
 
         <ModalFooter>
           <ButtonGroup>
-            {role === UserEnums.Role.Admin && (
+            {/* {role === UserEnums.Role.Admin && (
               <Button
                 key="reset-password"
                 label="Reset password"
@@ -481,7 +481,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                 color="info"
                 onClick={() => handleResetPassword()}
               />
-            )}
+            )} */}
             <Button
               key="cancel"
               label="Cancel"

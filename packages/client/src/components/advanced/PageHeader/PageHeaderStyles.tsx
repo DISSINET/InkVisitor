@@ -18,7 +18,7 @@ export const StyledHeader = styled.div`
 export const StyledHeaderTag = styled.div`
   cursor: copy;
   font-size: 1.2rem;
-  margin-top: 2.6rem;
+  margin-top: 1.6rem;
   opacity: 0.8;
   padding: ${({ theme }) => theme.space[2]};
   padding-bottom: 0;

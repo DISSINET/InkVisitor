@@ -5,7 +5,7 @@ import { heightHeader } from "Theme/constants";
 
 export const StyledMenuGroupWrapper = styled.div`
   position: absolute;
-  top: ${(heightHeader - 27) / 10}rem;
+  top: ${(heightHeader - 36) / 10}rem;
   right: ${({ theme }) => theme.space[1]};
 
   margin-top: ${({ theme }) => theme.space[1]};

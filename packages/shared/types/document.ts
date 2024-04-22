@@ -1,3 +1,5 @@
+import { EntityEnums } from "@shared/enums";
+
 export interface IDocument {
   id: string;
   content: string;
@@ -12,7 +14,7 @@ export interface IResponseDocument {
   title: string;
   createdAt?: Date;
   updatedAt?: Date;
-  referencedEntityIds: string[];
+  referencedEntityIds: Record<EntityEnums.Class, string[]>;
 }
 
 // detail -> get

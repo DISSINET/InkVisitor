@@ -49,7 +49,15 @@ export default Router()
     "/",
     asyncRouteHandler<IResponseDocument[]>(async (request: IRequest) => {
       const docs = await Document.getAll(request.db.connection);
-      return docs.map((d) => new ResponseDocument(d));
+
+      const docResponses = [];
+      for (const d of docs) {
+        const document = new ResponseDocument(d);
+        await document.populateWithEntities(request.db.connection);
+        docResponses.push(document);
+      }
+
+      return docResponses;
     })
   )
   /**
@@ -99,7 +107,9 @@ export default Router()
         throw DocumentDoesNotExist.forId(id);
       }
 
-      return new ResponseDocument(existing);
+      const document = new ResponseDocument(existing);
+      await document.populateWithEntities(request.db.connection);
+      return document;
     })
   )
   /**
@@ -127,7 +137,9 @@ export default Router()
   .post(
     "/",
     asyncRouteHandler<IResponseGeneric>(async (request: IRequest) => {
+      console.log("before model");
       const model = new Document(request.body as Record<string, unknown>);
+      console.log("after model", model);
 
       if (!model.isValid()) {
         throw new ModelNotValidError("");
