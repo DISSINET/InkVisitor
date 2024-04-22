@@ -219,15 +219,22 @@ export class Annotator {
         if (xDiff < 0) {
           this.cursor.move((xDiff+1)* -1, 0)
         } else if (xDiff > 0) {
-          this.cursor.move(Infinity, -1);
+          if (segmentBefore?.segmentIndex !== segmentAfter?.segmentIndex) {
+      //      console.log(this.text.segments[(segmentAfter as SegmentPosition).segmentIndex])
+            this.cursor.move(0, -1);
+
+            } else {
+
           this.cursor.move(-xDiff, 0);
+            }
         } else {
+
           this.cursor.move(-1, 0);
         }
 
         if (this.cursor.xLine < 0) {
-          this.cursor.xLine = 0;
-          this.cursor.yLine--;
+          this.cursor.move(Infinity, 0);
+
         }
 
         /*const segmentAfter = this.text.cursorToIndex(
