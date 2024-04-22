@@ -205,15 +205,36 @@ export class Annotator {
         );
 
         this.text.deleteText(this.viewport, this.cursor, 1);
-
         const segmentAfter = this.text.cursorToIndex(
           this.viewport,
           this.cursor
         );
+
         const xDiff =
-          (segmentAfter?.rawTextIndex || 0) -
-          (segmentBefore?.rawTextIndex || 0);
-        this.cursor.move(-1, 0);
+        (segmentAfter?.rawTextIndex || 0) -
+        (segmentBefore?.rawTextIndex || 0);
+
+        console.log(segmentBefore, segmentAfter, xDiff)
+
+        if (xDiff < 0) {
+          this.cursor.move((xDiff+1)* -1, 0)
+        } else if (xDiff > 0) {
+          this.cursor.move(Infinity, -1);
+          this.cursor.move(-xDiff, 0);
+        } else {
+          this.cursor.move(-1, 0);
+        }
+
+        if (this.cursor.xLine < 0) {
+          this.cursor.xLine = 0;
+          this.cursor.yLine--;
+        }
+
+        /*const segmentAfter = this.text.cursorToIndex(
+          this.viewport,
+          this.cursor
+        );
+      
         if (this.cursor.xLine < 0) {
           this.cursor.xLine = 0;
           this.draw();
@@ -223,7 +244,7 @@ export class Annotator {
           this.cursor.move(Infinity, -1);
           this.cursor.move(-xDiff, 0);
         }
-
+*/
         if (this.onTextChangeCb) {
           this.onTextChangeCb(this.text.value);
         }
@@ -279,7 +300,7 @@ export class Annotator {
    * @param e
    */
   onMouseDown(e: MouseEvent) {
-    this.cursor.setPosition(e, this.lineHeight, this.charWidth);
+    this.cursor.setPositionFromEvent(e, this.lineHeight, this.charWidth);
     this.cursor.selectArea(this.viewport.lineStart);
     this.draw();
   }
@@ -289,7 +310,7 @@ export class Annotator {
    * @param e
    */
   onMouseUp(e: MouseEvent) {
-    this.cursor.setPosition(e, this.lineHeight, this.charWidth);
+    this.cursor.setPositionFromEvent(e, this.lineHeight, this.charWidth);
     this.cursor.endHighlight();
     this.draw();
   }
@@ -300,7 +321,7 @@ export class Annotator {
    */
   onMouseMove(e: MouseEvent) {
     if (this.cursor.isSelecting()) {
-      this.cursor.setPosition(e, this.lineHeight, this.charWidth);
+      this.cursor.setPositionFromEvent(e, this.lineHeight, this.charWidth);
       this.cursor.selectArea(this.viewport.lineStart);
       this.draw();
     }
@@ -481,7 +502,6 @@ export class Annotator {
           const highlight = this.onHighlightCb(tag);
           if (highlight) {
             const [startLine, endLine] = this.text.getTagPosition(this.viewport, tag);
-            console.log(startLine, endLine)
 
             if (startLine && endLine) {
               this.ctx.strokeStyle = 'green'//highlight.style.color;
