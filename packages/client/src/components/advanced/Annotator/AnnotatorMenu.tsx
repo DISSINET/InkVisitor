@@ -1,5 +1,12 @@
-import { IEntity, IResponseDocument } from "@shared/types";
 import React from "react";
+
+import { IEntity, IResponseDocument } from "@shared/types";
+import { Button } from "components/basic/Button/Button";
+import { BiSolidBookAdd, BiSolidMessageSquareAdd } from "react-icons/bi";
+import { BsSegmentedNav } from "react-icons/bs";
+import { classesAnnotator } from "types";
+import { EntitySuggester } from "../EntitySuggester/EntitySuggester";
+import { EntityTag } from "../EntityTag/EntityTag";
 import {
   StyledAnnotatorAnchorList,
   StyledAnnotatorItem,
@@ -7,12 +14,6 @@ import {
   StyledAnnotatorItemTitle,
   StyledAnnotatorMenu,
 } from "./AnnotatorStyles";
-import { EntityTag } from "../EntityTag/EntityTag";
-import { EntitySuggester } from "../EntitySuggester/EntitySuggester";
-import { classesAll } from "types";
-import { Button } from "components/basic/Button/Button";
-import { BsSegmentedNav } from "react-icons/bs";
-import { BiSolidBookAdd, BiSolidMessageSquareAdd } from "react-icons/bi";
 
 interface TextAnnotatorMenuProps {
   text: string;
@@ -96,7 +97,7 @@ export const TextAnnotatorMenu = ({
                 />
               )}
               <EntitySuggester
-                categoryTypes={classesAll}
+                categoryTypes={classesAnnotator}
                 initTyped={text.length > 30 ? text.substring(0, 30) : text}
                 onSelected={(newAnchorId) => {
                   onAnchorAdd(newAnchorId);
