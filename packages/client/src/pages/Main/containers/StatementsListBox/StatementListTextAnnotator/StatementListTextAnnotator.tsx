@@ -10,7 +10,13 @@ import { useSearchParams } from "hooks";
 import React, { useMemo, useState } from "react";
 import { TiDocumentText } from "react-icons/ti";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { StyledDocumentTag } from "../StatementLitBoxStyles";
+import {
+  StyledDocumentInfo,
+  StyledDocumentTag,
+} from "../StatementLitBoxStyles";
+import { FaCheck } from "react-icons/fa";
+import { BiSolidCommentError } from "react-icons/bi";
+import { GrDocumentMissing } from "react-icons/gr";
 
 interface StatementListTextAnnotator {
   statements: IResponseStatement[];
@@ -135,6 +141,19 @@ export const StatementListTextAnnotator: React.FC<
     }
   }, [detailOpen, contentHeight]);
 
+  const thisTHasAnchor = useMemo<boolean>(() => {
+    if (selectedDocument) {
+      console.log(selectedDocument?.referencedEntityIds, territoryId);
+      return selectedDocument?.referencedEntityIds.T.includes(territoryId);
+    }
+    return false;
+  }, [
+    selectedDocument && selectedDocument?.referencedEntityIds.T,
+    territoryId,
+  ]);
+
+  console.log(thisTHasAnchor);
+
   return (
     <div>
       <div style={{ alignItems: "center", display: "inline-flex" }}>
@@ -166,12 +185,25 @@ export const StatementListTextAnnotator: React.FC<
             {selectedDocument?.title}
           </StyledDocumentTag>
         )}
+        {!selectedDocumentIsFetching && selectedDocument && thisTHasAnchor && (
+          <StyledDocumentInfo $color="success">
+            <FaCheck />
+            <i>Anchor for T created</i>
+          </StyledDocumentInfo>
+        )}
+        {!selectedDocumentIsFetching && selectedDocument && !thisTHasAnchor && (
+          <StyledDocumentInfo $color="danger">
+            <BiSolidCommentError />
+            <i>No Anchor for T</i>
+          </StyledDocumentInfo>
+        )}
         {!selectedDocumentIsFetching &&
           selectedResource !== false &&
           selectedResource.data.documentId === undefined && (
-            <span>
+            <StyledDocumentInfo $color="warning">
+              <GrDocumentMissing />
               <i>This Resource does not have any document</i>
-            </span>
+            </StyledDocumentInfo>
           )}
       </div>
       <div style={{ marginTop: "2px" }}>

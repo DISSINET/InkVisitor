@@ -107,7 +107,9 @@ export default Router()
         throw DocumentDoesNotExist.forId(id);
       }
 
-      return new ResponseDocument(existing);
+      const document = new ResponseDocument(existing);
+      await document.populateWithEntities(request.db.connection);
+      return document;
     })
   )
   /**
