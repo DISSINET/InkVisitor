@@ -60,6 +60,7 @@ export const TextAnnotator = ({
       queryClient.invalidateQueries({ queryKey: ["document"] });
       queryClient.invalidateQueries({ queryKey: ["documents"] });
       toast.info("Document content saved");
+      setAnnotatorMode("highlight");
     },
   });
 
