@@ -480,10 +480,11 @@ export class Annotator {
           const tag = annotated.pop() as string;
           const highlight = this.onHighlightCb(tag);
           if (highlight) {
-            const [startLine, endLine] = this.text.getTagPosition(tag);
-            if (startLine && endLine) {
-              this.ctx.strokeStyle = highlight.style.color;
+            const [startLine, endLine] = this.text.getTagPosition(this.viewport, tag);
+            console.log(startLine, endLine)
 
+            if (startLine && endLine) {
+              this.ctx.strokeStyle = 'green'//highlight.style.color;
               for (
                 let currentYLine = startLine.yLine;
                 currentYLine <= endLine.yLine;
