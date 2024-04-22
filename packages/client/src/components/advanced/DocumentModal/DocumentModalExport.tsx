@@ -1,9 +1,31 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 
+import { EntityEnums } from "@shared/enums";
 import { IResponseDocument } from "@shared/types";
-import { Modal, ModalContent, ModalFooter, ModalHeader } from "components";
+import theme from "Theme/theme";
+import {
+  Button,
+  Modal,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+} from "components";
 import { useWindowSize } from "hooks/useWindowSize";
+import {
+  FaCheckSquare,
+  FaCircle,
+  FaRegSave,
+  FaRegSquare,
+} from "react-icons/fa";
+import { MdLibraryAddCheck } from "react-icons/md";
+import { EntityColors } from "types";
 import { getShortLabelByLetterCount } from "utils/utils";
+import {
+  StyledExportDocumentClassCheckbox,
+  StyledExportDocumentClassLabel,
+  StyledExportDocumentClassReference,
+  StyledExportDocumentContainer,
+} from "./DocumentModalStyles";
 
 interface DocumentModalExportProps {
   document: IResponseDocument | undefined;
@@ -19,12 +41,43 @@ const DocumentModalExport: React.FC<DocumentModalExportProps> = ({
     setShow(true);
   }, []);
 
-  const modalBodyRef = useRef(null);
+  const [exportedClasses, setExportedClasses] = useState<EntityEnums.Class[]>(
+    []
+  );
 
-  const [windowWidth, windowHeight] = useWindowSize();
+  const allClassesSelected =
+    exportedClasses.length === Object.values(EntityEnums.Class).length;
+  const atLeastOneSelected = exportedClasses.length > 0;
+
+  const handleSelectAll = () => {
+    setExportedClasses(Object.values(EntityEnums.Class));
+  };
+
+  const handleUnselectAll = () => {
+    setExportedClasses([]);
+  };
+
+  const handleToggleSelectClass = (entityClass: EntityEnums.Class) => {
+    if (exportedClasses.includes(entityClass)) {
+      setExportedClasses(exportedClasses.filter((c) => c !== entityClass));
+    } else {
+      setExportedClasses([...exportedClasses, entityClass]);
+    }
+  };
+
+  const sumAnchorsToExport = useMemo<number>(() => {
+    return exportedClasses.reduce((acc, entityClass) => {
+      const anchors = document?.referencedEntityIds[entityClass];
+      if (anchors) {
+        return acc + anchors.length;
+      } else {
+        return acc;
+      }
+    }, 0);
+  }, [exportedClasses]);
 
   return (
-    <Modal width={1000} showModal={show} onClose={onClose} fullHeight>
+    <Modal width={500} showModal={show} onClose={onClose}>
       <ModalHeader
         title={`Export ${
           document
@@ -33,8 +86,93 @@ const DocumentModalExport: React.FC<DocumentModalExportProps> = ({
         }`}
       />
       <ModalContent>
-        <div ref={modalBodyRef} style={{ height: "300px", width: "1000px" }}>
-          {document && <div>export</div>}
+        <div>
+          {document && (
+            <div>
+              <StyledExportDocumentContainer>
+                {/* <StyledExportDocumentContainerTH key={"1"}>
+                Entity type
+              </StyledExportDocumentContainerTH>
+              <StyledExportDocumentContainerTH
+                key={"2"}
+              ></StyledExportDocumentContainerTH>
+              <StyledExportDocumentContainerTH key={"3"}>
+                Document Anchors
+              </StyledExportDocumentContainerTH> */}
+
+                {Object.values(EntityEnums.Class).map((entityClassId) => {
+                  const classItem = EntityColors[entityClassId];
+                  const classLabel = classItem?.label || entityClassId;
+
+                  const classColorName = classItem?.color || "black";
+                  const classColor = theme.color[classColorName] as string;
+
+                  const selected = exportedClasses.includes(entityClassId);
+                  const classReferences =
+                    document?.referencedEntityIds[entityClassId];
+
+                  return (
+                    <React.Fragment key={entityClassId}>
+                      <StyledExportDocumentClassCheckbox>
+                        {selected ? (
+                          <FaCheckSquare
+                            size={25}
+                            onClick={() => {
+                              handleToggleSelectClass(entityClassId);
+                            }}
+                          />
+                        ) : (
+                          <FaRegSquare
+                            size={25}
+                            onClick={() => {
+                              handleToggleSelectClass(entityClassId);
+                            }}
+                          />
+                        )}
+                      </StyledExportDocumentClassCheckbox>
+                      <StyledExportDocumentClassLabel
+                        $selected={selected}
+                        onClick={() => {
+                          handleToggleSelectClass(entityClassId);
+                        }}
+                      >
+                        {classLabel}
+                      </StyledExportDocumentClassLabel>
+
+                      <StyledExportDocumentClassReference>
+                        <FaCircle
+                          color={selected ? classColor : "transparent"}
+                          size={16}
+                        />
+                        {classReferences.length}
+                      </StyledExportDocumentClassReference>
+                    </React.Fragment>
+                  );
+                })}
+
+                <React.Fragment>
+                  <MdLibraryAddCheck
+                    onClick={() => {
+                      !allClassesSelected
+                        ? handleSelectAll()
+                        : handleUnselectAll();
+                    }}
+                  />
+                  <StyledExportDocumentClassLabel
+                    $selected={false}
+                    onClick={() => {
+                      !allClassesSelected
+                        ? handleSelectAll()
+                        : handleUnselectAll();
+                    }}
+                  >
+                    {!allClassesSelected ? "Select all" : "Deselect all"}
+                  </StyledExportDocumentClassLabel>
+                </React.Fragment>
+                <span></span>
+              </StyledExportDocumentContainer>
+            </div>
+          )}
           {!document && <div>Document not found</div>}
         </div>
       </ModalContent>
@@ -45,7 +183,21 @@ const DocumentModalExport: React.FC<DocumentModalExportProps> = ({
             justifyContent: "space-between",
             width: "100%",
           }}
-        ></div>
+        >
+          <Button
+            onClick={() => {
+              console.log(
+                "export document with",
+                sumAnchorsToExport,
+                "anchors"
+              );
+            }}
+            icon={<FaRegSave size={20} style={{ marginRight: "3px" }} />}
+            fullWidth
+            label={`export document with ${sumAnchorsToExport} anchors`}
+            color="primary"
+          />
+        </div>
       </ModalFooter>
     </Modal>
   );
