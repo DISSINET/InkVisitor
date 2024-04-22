@@ -187,8 +187,6 @@ export const TextAnnotator = ({
     return (selectedText?.[0]?.yLine ?? 0) < (selectedText?.[1]?.yLine ?? 0);
   }, [annotator?.cursor?.yLine]);
 
-  console.log(topBottomSelection);
-
   const menuPositionY = useMemo<number>(() => {
     const yLine = annotator?.cursor?.yLine ?? 0;
     const lineHeight = annotator?.lineHeight ?? 0;
