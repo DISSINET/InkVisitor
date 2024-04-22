@@ -18,6 +18,38 @@ import colors from "colors/safe";
 import jobs from "./jobs/index";
 
 const datasets: Record<string, DbSchema> = {
+  dissinet_documents: {
+    users: {
+      tableName: "users",
+      data: null,
+      transform: function () {}
+    },
+    aclPermissions: {
+      tableName: "acl_permissions",
+      data: null,
+      transform: function () {}
+    },
+    entities: {
+      tableName: "entities",
+      data: null,
+      transform: function () {}
+    },
+    audits: {
+      tableName: "audits",
+      data: null,
+      transform: function () {}
+    },
+    relations: {
+      tableName: "relations",
+      data: null,
+      transform: function () {}
+    },
+    documents: {
+      tableName: "documents",
+      data: require("../datasets/dissinet-documents/documents.json"),
+      transform: function () {},
+    },
+  },
   empty: {
     users: {
       tableName: "users",
@@ -703,8 +735,8 @@ class Importer {
       ""
     );
 
-    await this.db.dropTable(chosenTable);
-    await this.db.createTable(this.dataset[chosenTable as keyof DbSchema]);
+   // await this.db.dropTable(chosenTable);
+   // await this.db.createTable(this.dataset[chosenTable as keyof DbSchema]);
     await this.db.importData(this.dataset[chosenTable as keyof DbSchema]);
   }
 }
