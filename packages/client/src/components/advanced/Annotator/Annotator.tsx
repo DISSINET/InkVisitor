@@ -194,9 +194,10 @@ export const TextAnnotator = ({
   return (
     <div style={{ width: width }}>
       <StyledCanvasWrapper>
-        {annotatorMode === "highlight" && selectedText && (
+        {document && annotatorMode === "highlight" && selectedText && (
           <TextAnnotatorMenu
             anchors={selectedAnchors}
+            document={document}
             text={selectedText}
             entities={storedEntities.current}
             onAnchorAdd={handleAddAnchor}

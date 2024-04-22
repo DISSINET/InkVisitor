@@ -40,8 +40,17 @@ export const StyledLinesCanvas = styled.canvas`
   outline: none;
 `;
 
-export const StyledAnnotatorMenu = styled.div`
+interface StyledAnnotatorMenuProps {
+  $top: number;
+  $left: number;
+  $translateY: string;
+}
+export const StyledAnnotatorMenu = styled.div<StyledAnnotatorMenuProps>`
   position: absolute;
+  transform: translate(0%, ${({ $translateY }) => $translateY});
+  width: 400px;
+  left: ${({ $left }) => $left + "px"};
+  top: ${({ $top }) => $top + "px"};
   background: ${({ theme }) => theme.color.gray["300"]};
   border: ${({ theme }) =>
     theme.borderWidth["default"] + " solid " + theme.color.gray["300"]};
@@ -69,9 +78,16 @@ export const StyledAnnotatorItemContent = styled.div`
   gap: ${({ theme }) => theme.space[2]};
   margin-top: ${({ theme }) => theme.space[2]};
   margin-bottom: ${({ theme }) => theme.space[2]};
+  flex-wrap: wrap;
 `;
 export const StyledAnnotatorItemTitle = styled.div`
   color: ${({ theme }) => theme.color.gray["700"]};
   font-size: ${({ theme }) => theme.fontSize["md"]};
   font-weight: ${({ theme }) => theme.fontWeight["medium"]};
+`;
+
+export const StyledAnnotatorAnchorList = styled.div`
+  display: flex;
+  gap: ${({ theme }) => theme.space[2]};
+  flex-wrap: wrap;
 `;

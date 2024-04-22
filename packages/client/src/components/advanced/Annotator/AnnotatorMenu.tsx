@@ -1,6 +1,7 @@
-import { IEntity } from "@shared/types";
+import { IEntity, IResponseDocument } from "@shared/types";
 import React from "react";
 import {
+  StyledAnnotatorAnchorList,
   StyledAnnotatorItem,
   StyledAnnotatorItemContent,
   StyledAnnotatorItemTitle,
@@ -15,6 +16,7 @@ import { BiSolidBookAdd, BiSolidMessageSquareAdd } from "react-icons/bi";
 
 interface TextAnnotatorMenuProps {
   text: string;
+  document: IResponseDocument;
   anchors: string[];
   entities: Record<string, IEntity | false>;
   onAnchorAdd: (entityId: string) => void;
@@ -38,39 +40,13 @@ export const TextAnnotatorMenu = ({
     <>
       {text ? (
         <StyledAnnotatorMenu
-          style={{
-            top: `${yPosition}px`,
-            transform: `translate(0%, ${topBottomSelection ? "0%" : "-100%"})`,
-          }}
+          $top={yPosition}
+          $left={100}
+          $translateY={topBottomSelection ? "0%" : "-100%"}
         >
           <StyledAnnotatorItem>
             <StyledAnnotatorItemTitle>Actions</StyledAnnotatorItemTitle>
             <StyledAnnotatorItemContent>
-              {handleCreateStatement && (
-                <Button
-                  icon={<BiSolidMessageSquareAdd size={15} />}
-                  color="primary"
-                  paddingX={true}
-                  onClick={() => {
-                    console.log("Create new Statement from selection");
-                    handleCreateStatement();
-                  }}
-                  label="Create Statement"
-                  tooltipLabel="Create new Statement from selection"
-                />
-              )}
-              {handleCreateTerritory && (
-                <Button
-                  icon={<BiSolidBookAdd size={15} />}
-                  color="primary"
-                  paddingX={true}
-                  onClick={() => {
-                    handleCreateTerritory();
-                  }}
-                  label="Create Territory"
-                  tooltipLabel="Create new Sub Territory from selection"
-                />
-              )}
               <Button
                 icon={<BsSegmentedNav size={22} />}
                 color="primary"
@@ -86,9 +62,39 @@ export const TextAnnotatorMenu = ({
           </StyledAnnotatorItem>
           <StyledAnnotatorItem>
             <StyledAnnotatorItemTitle>
-              Create new anchor
+              Create new anchor from selection
             </StyledAnnotatorItemTitle>
             <StyledAnnotatorItemContent>
+              {handleCreateStatement && (
+                <Button
+                  icon={
+                    <BiSolidMessageSquareAdd
+                      size={15}
+                      style={{ marginRight: 2 }}
+                    />
+                  }
+                  color="primary"
+                  paddingX={true}
+                  onClick={() => {
+                    console.log("Create new Statement from selection");
+                    handleCreateStatement();
+                  }}
+                  label="Territory Statement"
+                  tooltipLabel="Create new Statement from selection"
+                />
+              )}
+              {handleCreateTerritory && (
+                <Button
+                  icon={<BiSolidBookAdd size={15} style={{ marginRight: 2 }} />}
+                  color="primary"
+                  paddingX={true}
+                  onClick={() => {
+                    handleCreateTerritory();
+                  }}
+                  label="Sub Territory"
+                  tooltipLabel="Create new Sub Territory from selection"
+                />
+              )}
               <EntitySuggester
                 categoryTypes={classesAll}
                 initTyped={text.length > 30 ? text.substring(0, 30) : text}
@@ -104,19 +110,20 @@ export const TextAnnotatorMenu = ({
               Anchors in selection
             </StyledAnnotatorItemTitle>
             <StyledAnnotatorItemContent>
-              {anchors.map((anchor) => {
-                if (entities[anchor]) {
-                  return (
-                    <EntityTag
-                      key={anchor}
-                      fullWidth
-                      entity={entities[anchor] as IEntity}
-                    />
-                  );
-                } else {
-                  return <React.Fragment key={anchor} />;
-                }
-              })}
+              <StyledAnnotatorAnchorList>
+                {anchors.map((anchor) => {
+                  if (entities[anchor]) {
+                    return (
+                      <EntityTag
+                        key={anchor}
+                        entity={entities[anchor] as IEntity}
+                      />
+                    );
+                  } else {
+                    return <React.Fragment key={anchor} />;
+                  }
+                })}
+              </StyledAnnotatorAnchorList>
             </StyledAnnotatorItemContent>
           </StyledAnnotatorItem>
         </StyledAnnotatorMenu>
