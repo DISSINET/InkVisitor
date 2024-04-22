@@ -50,8 +50,13 @@ export default class Cursor implements IRelativeCoordinates {
   xToCharI(x: number, charWidth: number): number {
     return Math.floor(x / charWidth);
   }
+  
+  setPosition(lineX: number, lineY: number) {
+    this.xLine = lineX;
+    this.yLine = lineY;
+  }
 
-  setPosition(
+  setPositionFromEvent(
     evt: MouseEvent,
     lineHeight: number,
     charWidth: number

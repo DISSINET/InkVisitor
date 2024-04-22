@@ -47,7 +47,7 @@ export const StyledTitle = styled.div`
 `;
 export const StyledReference = styled.div`
   display: grid;
-  max-width: 16rem;
+  max-width: 17.4rem;
   position: relative;
   padding: 0.2rem 1rem;
 `;

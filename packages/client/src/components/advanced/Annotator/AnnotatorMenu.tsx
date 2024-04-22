@@ -77,7 +77,6 @@ export const TextAnnotatorMenu = ({
                   color="primary"
                   paddingX={true}
                   onClick={() => {
-                    console.log("Create new Statement from selection");
                     handleCreateStatement();
                   }}
                   label="Territory Statement"
