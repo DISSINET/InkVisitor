@@ -7,7 +7,7 @@ import {
 } from "@tanstack/react-query";
 import api from "api";
 import { AxiosResponse } from "axios";
-import { Button, ButtonGroup, Input } from "components";
+import { Button, ButtonGroup, Input, Tooltip } from "components";
 import { EntitySuggester, EntityTag } from "components/advanced";
 import React, {
   Dispatch,
@@ -16,13 +16,12 @@ import React, {
   useMemo,
   useState,
 } from "react";
-import { FaTrash } from "react-icons/fa";
+import { FaSave, FaTrash } from "react-icons/fa";
 import { RiFileEditFill } from "react-icons/ri";
 import useResizeObserver from "use-resize-observer";
 import {
   StyledCount,
   StyledCountTag,
-  StyledFaDotCircle,
   StyledReference,
   StyledTitle,
   StyledTitleWrap,
@@ -117,7 +116,12 @@ export const DocumentRow: React.FC<DocumentRow> = ({
 
   return (
     <>
-      <StyledFaDotCircle size={10} />
+      <Button
+        icon={<FaSave />}
+        color="primary"
+        inverted
+        tooltipLabel="export document"
+      />
       <StyledTitleWrap ref={titleRef} onClick={setEditMode}>
         {editMode ? (
           <Input
@@ -138,12 +142,14 @@ export const DocumentRow: React.FC<DocumentRow> = ({
           color="warning"
           inverted
           onClick={() => handleDocumentClick(document.id)}
+          tooltipLabel="edit document"
         />
         <Button
           icon={<FaTrash />}
           color="danger"
           inverted
           onClick={() => setDocToDelete(document.id)}
+          tooltipLabel="remove document"
         />
       </ButtonGroup>
       {/* reference / suggester */}
@@ -171,21 +177,27 @@ export const DocumentRow: React.FC<DocumentRow> = ({
             return document.referencedEntityIds[eClass]?.length;
           })
           .map((eClass) => {
-            const classColorName =
-              EntityColors[eClass as keyof typeof EntityColors]?.color ?? "";
+            const entityClass =
+              EntityColors[eClass as keyof typeof EntityColors];
+
+            const classColorName = entityClass?.color;
 
             const classColor =
               (theme.color[
                 classColorName as keyof typeof theme.color
               ] as string) ?? theme.color.primary;
 
+            const count = document.referencedEntityIds[eClass]?.length || 0;
+
             return (
-              <StyledCountTag
-                key={eClass}
-                style={{ backgroundColor: classColor }}
-              >
-                {eClass} {document.referencedEntityIds[eClass]?.length || 0}
-              </StyledCountTag>
+              <React.Fragment key={eClass}>
+                <StyledCountTag
+                  style={{ backgroundColor: classColor }}
+                  title={`${count} ${entityClass.label}s anchors`}
+                >
+                  {eClass} {count}
+                </StyledCountTag>
+              </React.Fragment>
             );
           })}
       </StyledCount>
