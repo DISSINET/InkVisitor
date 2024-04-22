@@ -128,6 +128,7 @@ export const DocumentsPage: React.FC = ({}) => {
 
   const handleModalClose = () => {
     setEditedDocumentId(false);
+    setExportedDocumentId(false);
   };
 
   const documentDeleteMutation = useMutation({

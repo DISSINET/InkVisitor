@@ -1,7 +1,8 @@
+import React, { useEffect, useRef, useState } from "react";
+
 import { IResponseDocument } from "@shared/types";
 import { Modal, ModalContent, ModalFooter, ModalHeader } from "components";
 import { useWindowSize } from "hooks/useWindowSize";
-import React, { useEffect, useRef, useState } from "react";
 import { getShortLabelByLetterCount } from "utils/utils";
 
 interface DocumentModalExportProps {
@@ -33,7 +34,8 @@ const DocumentModalExport: React.FC<DocumentModalExportProps> = ({
       />
       <ModalContent>
         <div ref={modalBodyRef} style={{ height: "300px", width: "1000px" }}>
-          <div>{document ? <>exporting</> : <div>Document not found</div>}</div>
+          {document && <div>export</div>}
+          {!document && <div>Document not found</div>}
         </div>
       </ModalContent>
       <ModalFooter>
