@@ -156,7 +156,13 @@ export const StatementListTextAnnotator: React.FC<
 
   return (
     <div>
-      <div style={{ alignItems: "center", display: "inline-flex" }}>
+      <div
+        style={{
+          alignItems: "center",
+          display: "inline-flex",
+          padding: "2px 10px",
+        }}
+      >
         {!selectedResource && (
           <EntitySuggester
             disableCreate={false}
@@ -194,7 +200,7 @@ export const StatementListTextAnnotator: React.FC<
         {!selectedDocumentIsFetching && selectedDocument && !thisTHasAnchor && (
           <StyledDocumentInfo $color="danger">
             <BiSolidCommentError />
-            <i>No Anchor for T</i>
+            <i>No Anchor for this T</i>
           </StyledDocumentInfo>
         )}
         {!selectedDocumentIsFetching &&
