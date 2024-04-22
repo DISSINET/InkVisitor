@@ -298,6 +298,21 @@ export interface PropAttributeGroupDataObject {
   value: AttributeData;
 }
 
+export const classesAnnotator = [
+  EntityEnums.Class.Action,
+  EntityEnums.Class.Concept,
+  EntityEnums.Class.Person,
+  EntityEnums.Class.Group,
+  EntityEnums.Class.Being,
+  EntityEnums.Class.Object,
+  EntityEnums.Class.Location,
+  EntityEnums.Class.Event,
+  EntityEnums.Class.Statement,
+  EntityEnums.Class.Territory,
+  EntityEnums.Class.Resource,
+  EntityEnums.Class.Value,
+];
+
 export const classesAll = [
   EntityEnums.Class.Concept,
   EntityEnums.Class.Person,
