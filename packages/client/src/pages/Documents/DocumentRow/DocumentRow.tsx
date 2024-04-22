@@ -32,7 +32,8 @@ import { EntityColors } from "types";
 interface DocumentRow {
   document: IResponseDocument;
   resource: IResponseEntity | false;
-  handleDocumentClick: (id: string) => void;
+  handleDocumentEdit: (id: string) => void;
+  handleDocumentExport: (id: string) => void;
   setDocToDelete: Dispatch<SetStateAction<string | false>>;
   updateDocumentMutation: UseMutationResult<
     AxiosResponse<IDocument, any>,
@@ -50,7 +51,8 @@ interface DocumentRow {
 export const DocumentRow: React.FC<DocumentRow> = ({
   document,
   resource,
-  handleDocumentClick,
+  handleDocumentEdit,
+  handleDocumentExport,
   setDocToDelete,
   updateDocumentMutation,
   editMode,
@@ -121,6 +123,7 @@ export const DocumentRow: React.FC<DocumentRow> = ({
         color="primary"
         inverted
         tooltipLabel="export document"
+        onClick={() => handleDocumentExport(document.id)}
       />
       <StyledTitleWrap ref={titleRef} onClick={setEditMode}>
         {editMode ? (
@@ -141,7 +144,7 @@ export const DocumentRow: React.FC<DocumentRow> = ({
           icon={<RiFileEditFill />}
           color="warning"
           inverted
-          onClick={() => handleDocumentClick(document.id)}
+          onClick={() => handleDocumentEdit(document.id)}
           tooltipLabel="edit document"
         />
         <Button

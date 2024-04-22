@@ -1,4 +1,4 @@
-import { IDocument } from "@shared/types";
+import { IDocument, IResponseDocument } from "@shared/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import theme, { ThemeFontSize } from "Theme/theme";
 import api from "api";
@@ -12,15 +12,10 @@ import { useContainerDimensions } from "hooks/useContainerDimensions";
 import { useWindowSize } from "hooks/useWindowSize";
 
 interface DocumentModal {
-  entityId?: string;
-  documentId: string;
+  document: IResponseDocument | undefined;
   onClose: () => void;
 }
-export const DocumentModal: React.FC<DocumentModal> = ({
-  onClose,
-  entityId,
-  documentId,
-}) => {
+const DocumentModalEdit: React.FC<DocumentModal> = ({ onClose, document }) => {
   const [show, setShow] = useState(false);
 
   useEffect(() => {
@@ -34,21 +29,27 @@ export const DocumentModal: React.FC<DocumentModal> = ({
   return (
     <Modal width={1000} showModal={show} onClose={onClose} fullHeight>
       <ModalHeader
-        title={
-          document?.title && getShortLabelByLetterCount(document.title, 90)
-        }
+        title={`Export ${
+          document
+            ? getShortLabelByLetterCount(document?.title, 90)
+            : "no label"
+        }`}
       />
       <ModalContent>
         <div ref={modalBodyRef} style={{ height: "300px", width: "1000px" }}>
           <div>
-            <AnnotatorProvider>
-              <TextAnnotator
-                documentId={documentId}
-                width={965}
-                height={windowHeight - 200}
-                displayLineNumbers={true}
-              />
-            </AnnotatorProvider>
+            {document ? (
+              <AnnotatorProvider>
+                <TextAnnotator
+                  documentId={document?.id}
+                  width={965}
+                  height={windowHeight - 200}
+                  displayLineNumbers={true}
+                />
+              </AnnotatorProvider>
+            ) : (
+              <div>Document not found</div>
+            )}
           </div>
         </div>
       </ModalContent>
@@ -64,3 +65,5 @@ export const DocumentModal: React.FC<DocumentModal> = ({
     </Modal>
   );
 };
+
+export default DocumentModalEdit;

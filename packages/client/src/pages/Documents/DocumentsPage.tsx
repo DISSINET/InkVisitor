@@ -5,7 +5,7 @@ import { IDocument, IResponseDocument, IResponseEntity } from "@shared/types";
 import api from "api";
 import { Loader, Submit } from "components";
 import React, { ChangeEvent, useMemo, useRef, useState } from "react";
-import { DocumentModal } from "../../components/advanced/DocumentModal/DocumentModal";
+import { DocumentModalEdit, DocumentModalExport } from "components/advanced";
 import { DocumentRow } from "./DocumentRow/DocumentRow";
 import {
   StyledBackground,
@@ -107,16 +107,27 @@ export const DocumentsPage: React.FC = ({}) => {
     if (inputRef.current) inputRef.current.value = "";
   };
 
-  const [openedDocumentId, setOpenedDocumentId] = useState<string | false>(
+  const [exportedDocumentId, setExportedDocumentId] = useState<string | false>(
     false
   );
+  const exportedDocument = documents?.find(
+    (doc) => doc.id === exportedDocumentId
+  );
 
-  const handleDocumentClick = (id: string) => {
-    setOpenedDocumentId(id);
+  const [editedDocumentId, setEditedDocumentId] = useState<string | false>(
+    false
+  );
+  const editedDocument = documents?.find((doc) => doc.id === editedDocumentId);
+
+  const handleDocumentEdit = (id: string) => {
+    setEditedDocumentId(id);
+  };
+  const handleDocumentExport = (id: string) => {
+    setExportedDocumentId(id);
   };
 
   const handleModalClose = () => {
-    setOpenedDocumentId(false);
+    setEditedDocumentId(false);
   };
 
   const documentDeleteMutation = useMutation({
@@ -145,7 +156,8 @@ export const DocumentsPage: React.FC = ({}) => {
                       key={key}
                       document={documentWithResource.document}
                       resource={documentWithResource.resource}
-                      handleDocumentClick={handleDocumentClick}
+                      handleDocumentEdit={handleDocumentEdit}
+                      handleDocumentExport={handleDocumentExport}
                       setDocToDelete={setDocToDelete}
                       updateDocumentMutation={updateDocumentMutation}
                       editMode={editMode === key}
@@ -173,9 +185,15 @@ export const DocumentsPage: React.FC = ({}) => {
         </StyledBoxWrap>
       </StyledContent>
 
-      {openedDocumentId && (
-        <DocumentModal
-          documentId={openedDocumentId}
+      {editedDocumentId && (
+        <DocumentModalEdit
+          document={editedDocument}
+          onClose={handleModalClose}
+        />
+      )}
+      {exportedDocumentId && (
+        <DocumentModalExport
+          document={exportedDocument}
           onClose={handleModalClose}
         />
       )}
