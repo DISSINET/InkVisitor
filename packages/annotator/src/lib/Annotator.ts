@@ -58,7 +58,7 @@ export class Annotator {
   onTextChangeCb?: (text: string) => void;
 
   clickCount: number;
-  clickTimeout?: NodeJS.Timeout;;
+  clickTimeout?: NodeJS.Timeout;
 
   constructor(element: HTMLCanvasElement, inputText: string) {
     this.element = element;
@@ -85,7 +85,10 @@ export class Annotator {
     this.element.onmousemove = this.onMouseMove.bind(this);
     this.element.onkeydown = this.onKeyDown.bind(this);
     this.element.onkeydown = this.onKeyDown.bind(this);
-    this.element.addEventListener('dblclick', this.onMouseDoubleClick.bind(this));
+    this.element.addEventListener(
+      "dblclick",
+      this.onMouseDoubleClick.bind(this)
+    );
 
     this.clickCount = 0;
   }
@@ -170,9 +173,18 @@ export class Annotator {
 
       case "ArrowLeft":
         if (e.shiftKey) {
-          const [offsetLeft, ] = this.text.getCursorWordOffsets(this.viewport, this.cursor)
-          this.cursor.selectStart = {xLine: this.cursor.xLine + offsetLeft, yLine: this.cursor.yLine }
-          this.cursor.selectEnd = {xLine: this.cursor.xLine, yLine: this.cursor.yLine };
+          const [offsetLeft] = this.text.getCursorWordOffsets(
+            this.viewport,
+            this.cursor
+          );
+          this.cursor.selectStart = {
+            xLine: this.cursor.xLine + offsetLeft,
+            yLine: this.cursor.yLine,
+          };
+          this.cursor.selectEnd = {
+            xLine: this.cursor.xLine,
+            yLine: this.cursor.yLine,
+          };
         } else {
           this.cursor.move(-1, 0);
           if (this.cursor.xLine < 0) {
@@ -184,9 +196,18 @@ export class Annotator {
 
       case "ArrowRight":
         if (e.shiftKey) {
-          const [, offssetRight ] = this.text.getCursorWordOffsets(this.viewport, this.cursor)
-          this.cursor.selectStart = {xLine: this.cursor.xLine, yLine: this.cursor.yLine }
-          this.cursor.selectEnd = {xLine: this.cursor.xLine + offssetRight, yLine: this.cursor.yLine };
+          const [, offssetRight] = this.text.getCursorWordOffsets(
+            this.viewport,
+            this.cursor
+          );
+          this.cursor.selectStart = {
+            xLine: this.cursor.xLine,
+            yLine: this.cursor.yLine,
+          };
+          this.cursor.selectEnd = {
+            xLine: this.cursor.xLine + offssetRight,
+            yLine: this.cursor.yLine,
+          };
         } else {
           this.cursor.move(1, 0);
 
@@ -203,38 +224,46 @@ export class Annotator {
           this.viewport,
           this.cursor
         );
-
+        let upSegmentEmpty = false;
+        if (segmentBefore && segmentBefore.segmentIndex > 0) {
+          upSegmentEmpty =
+            !this.text.segments[segmentBefore?.segmentIndex - 1].raw;
+        }
         this.text.deleteText(this.viewport, this.cursor, 1);
         const segmentAfter = this.text.cursorToIndex(
           this.viewport,
           this.cursor
         );
+        const segmentCountAfter = this.text.segments.length;
 
         const xDiff =
-        (segmentAfter?.rawTextIndex || 0) -
-        (segmentBefore?.rawTextIndex || 0);
+          (segmentAfter?.rawTextIndex || 0) -
+          (segmentBefore?.rawTextIndex || 0);
 
-        console.log(segmentBefore, segmentAfter, xDiff)
+        console.log(segmentBefore, segmentAfter, xDiff);
 
         if (xDiff < 0) {
-          this.cursor.move((xDiff+1)* -1, 0)
+          this.cursor.move((xDiff + 1) * -1, 0);
         } else if (xDiff > 0) {
           if (segmentBefore?.segmentIndex !== segmentAfter?.segmentIndex) {
-      //      console.log(this.text.segments[(segmentAfter as SegmentPosition).segmentIndex])
-            this.cursor.move(0, -1);
-
+            if (upSegmentEmpty) {
+              this.cursor.move(0, -1);
             } else {
-
-          this.cursor.move(-xDiff, 0);
+              this.cursor.move(Infinity, -1);
             }
+          } else {
+            this.cursor.move(-xDiff, 0);
+          }
         } else {
-
-          this.cursor.move(-1, 0);
+          if (segmentAfter!.rawTextIndex > 0) {
+            this.cursor.move(-1, 0);
+          } else {
+            this.cursor.move(-1, -1);
+          }
         }
 
         if (this.cursor.xLine < 0) {
           this.cursor.move(Infinity, 0);
-
         }
 
         /*const segmentAfter = this.text.cursorToIndex(
@@ -335,9 +364,18 @@ export class Annotator {
   }
 
   onMouseDoubleClick(e: MouseEvent) {
-    const [offsetLeft, offssetRight] = this.text.getCursorWordOffsets(this.viewport, this.cursor)
-    this.cursor.selectStart = {xLine: this.cursor.xLine + offsetLeft, yLine: this.cursor.yLine }
-    this.cursor.selectEnd = {xLine: this.cursor.xLine + offssetRight, yLine: this.cursor.yLine }
+    const [offsetLeft, offssetRight] = this.text.getCursorWordOffsets(
+      this.viewport,
+      this.cursor
+    );
+    this.cursor.selectStart = {
+      xLine: this.cursor.xLine + offsetLeft,
+      yLine: this.cursor.yLine,
+    };
+    this.cursor.selectEnd = {
+      xLine: this.cursor.xLine + offssetRight,
+      yLine: this.cursor.yLine,
+    };
     this.draw();
   }
 
@@ -508,10 +546,13 @@ export class Annotator {
           const tag = annotated.pop() as string;
           const highlight = this.onHighlightCb(tag);
           if (highlight) {
-            const [startLine, endLine] = this.text.getTagPosition(this.viewport, tag);
+            const [startLine, endLine] = this.text.getTagPosition(
+              this.viewport,
+              tag
+            );
 
             if (startLine && endLine) {
-              this.ctx.strokeStyle = 'green'//highlight.style.color;
+              this.ctx.strokeStyle = "green"; //highlight.style.color;
               for (
                 let currentYLine = startLine.yLine;
                 currentYLine <= endLine.yLine;
