@@ -180,6 +180,24 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
     },
   ];
 
+  // get user data
+  const userId = localStorage.getItem("userid");
+  const {
+    status: statusUser,
+    data: user,
+    error: errorUser,
+    isFetching: isFetchingUser,
+  } = useQuery({
+    queryKey: ["user", userId],
+    queryFn: async () => {
+      if (userId) {
+        const res = await api.usersGet(userId);
+        return res.data;
+      }
+    },
+    enabled: !!userId && api.isLoggedIn(),
+  });
+
   const treeData: IResponseTree | undefined = queryClient.getQueryData([
     "tree",
   ]);
@@ -266,47 +284,6 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
   const [moveToParentEntity, setMoveToParentEntity] = useState<IEntity | false>(
     false
   );
-
-  return (
-    <StyledHeader>
-      <StyledHeaderBreadcrumbRow>
-        <StyledHeaderBreadcrumbRowLeft>
-          {selectedTerritoryPath &&
-            selectedTerritoryPath.map((territoryId: string, key: number) => {
-              return (
-                <React.Fragment key={key}>
-                  <BreadcrumbItem territoryId={territoryId} />
-                </React.Fragment>
-              );
-            })}
-          <React.Fragment key="this-territory">
-            <BreadcrumbItem territoryId={territoryId} territoryData={data} />
-          </React.Fragment>
-        </StyledHeaderBreadcrumbRowLeft>
-        <StyledMoveToParent>
-          {"Move:\xa0"}
-          <EntitySuggester
-            disableTemplatesAccept
-            filterEditorRights
-            inputWidth={96}
-            disableCreate
-            categoryTypes={[EntityEnums.Class.Territory]}
-            onSelected={(newSelectedId: string) => {
-              moveTerritoryMutation.mutate(newSelectedId);
-            }}
-            excludedActantIds={excludedMoveTerritories}
-          />
-        </StyledMoveToParent>
-      </StyledHeaderBreadcrumbRow>
-
-      <StyledHeaderRow>
-        {isFavorited && <StyledFaStar size={18} />}
-        <StyledHeading>
-          {territoryId
-            ? `T:\xa0${trimTerritoryLabel(data.label)}`
-            : "no territory selected"}
-        </StyledHeading>
-      </StyledHeaderRow>
 
   const userCanEdit = territory.right !== UserEnums.RoleMode.Read;
 
@@ -477,46 +454,34 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
                   queryClient.invalidateQueries({ queryKey: ["user"] });
                 }}
               />
-            )}
-            <Button
-              key="refresh"
-              icon={<BiRefresh size={14} />}
-              tooltipLabel="refresh data"
-              inverted
-              color="primary"
-              onClick={() => {
-                queryClient.invalidateQueries({ queryKey: ["territory"] });
-                queryClient.invalidateQueries({ queryKey: ["statement"] });
-                queryClient.invalidateQueries({ queryKey: ["user"] });
-              }}
-            />
-          </ButtonGroup>
-        )}
-      </StyledSuggesterRow>
-      <StyledSuggesterRow>
-        <StyledModeSwitcher>
-          {"Mode "}
-          <ButtonGroup style={{ marginLeft: "5px" }}>
-            <Button
-              color="success"
-              icon={<FaList />}
-              label="list"
-              onClick={() => {
-                handleDisplayModeChange(StatementListDisplayMode.LIST);
-              }}
-              inverted={displayMode === StatementListDisplayMode.TEXT}
-            ></Button>
-            <Button
-              color="success"
-              icon={<FaHighlighter />}
-              label="annotator"
-              onClick={() => {
-                handleDisplayModeChange(StatementListDisplayMode.TEXT);
-              }}
-              inverted={displayMode === StatementListDisplayMode.LIST}
-            ></Button>
-          </ButtonGroup>
-        </StyledModeSwitcher>
+            </ButtonGroup>
+          )}
+        </StyledSuggesterRow>
+        <StyledSuggesterRow>
+          <StyledModeSwitcher>
+            {"Mode "}
+            <ButtonGroup style={{ marginLeft: "5px" }}>
+              <Button
+                color="success"
+                icon={<FaList />}
+                label="list"
+                onClick={() => {
+                  handleDisplayModeChange(StatementListDisplayMode.LIST);
+                }}
+                inverted={displayMode === StatementListDisplayMode.TEXT}
+              ></Button>
+              <Button
+                color="success"
+                icon={<FaHighlighter />}
+                label="annotator"
+                onClick={() => {
+                  handleDisplayModeChange(StatementListDisplayMode.TEXT);
+                }}
+                inverted={displayMode === StatementListDisplayMode.LIST}
+              ></Button>
+            </ButtonGroup>
+          </StyledModeSwitcher>
+        </StyledSuggesterRow>
       </StyledHeader>
 
       {showTActionModal && (

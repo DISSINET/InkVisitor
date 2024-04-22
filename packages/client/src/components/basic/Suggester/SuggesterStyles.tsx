@@ -53,9 +53,9 @@ export const StyledSuggestionCancelButton = styled.div<StyledSuggestionCancelBut
 `;
 
 export const StyledSuggesterList = styled.div`
-export const StyledSuggesterList = styled.div`
   z-index: 100;
 `;
+
 export const StyledRelativePosition = styled.div`
   position: relative;
   background-color: ${({ theme }) => theme.color["blue"][50]};

@@ -16,15 +16,13 @@ import { BsInfoCircle } from "react-icons/bs";
 import { toast } from "react-toastify";
 import { setStatementListOpened } from "redux/features/layout/statementListOpenedSlice";
 import { setShowWarnings } from "redux/features/statementEditor/showWarningsSlice";
+import { setDisableStatementListScroll } from "redux/features/statementList/disableStatementListScrollSlice";
 import { setRowsExpanded } from "redux/features/statementList/rowsExpandedSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { StatementListHeader } from "./StatementListHeader/StatementListHeader";
 import { StatementListTable } from "./StatementListTable/StatementListTable";
-import { StyledEmptyState, StyledTableWrapper } from "./StatementLitBoxStyles";
-import { setShowWarnings } from "redux/features/statementEditor/showWarningsSlice";
 import { StatementListTextAnnotator } from "./StatementListTextAnnotator/StatementListTextAnnotator";
-import { setDisableStatementListScroll } from "redux/features/statementList/disableStatementListScrollSlice";
-
+import { StyledEmptyState, StyledTableWrapper } from "./StatementLitBoxStyles";
 
 export enum StatementListDisplayMode {
   TEXT = "text",
@@ -62,8 +60,7 @@ export const StatementListBox: React.FC = () => {
   } = useSearchParams();
 
   useEffect(() => {
-    dispatch(
-      (false));
+    dispatch(setDisableStatementListScroll(false));
   }, [statementId, territoryId, statementListOpened]);
 
   useEffect(() => {
@@ -439,7 +436,6 @@ export const StatementListBox: React.FC = () => {
     <>
       {data && (
         <StatementListHeader
-          data={data}
           handleCreateStatement={handleCreateStatement}
           territory={data}
           addStatementAtTheEndMutation={addStatementAtTheEndMutation}
