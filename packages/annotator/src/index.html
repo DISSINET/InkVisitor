@@ -77,10 +77,6 @@
         console.log("onSelectText", text)
       });
 
-      annotator.onHighlight((entity) => {
-        console.log("entity",entity)
-      });
-
       document.getElementById("mode").onclick = () => {
         annotator.setMode(annotator.text.mode === "raw" ? "highlight" : "raw");
         annotator.draw();

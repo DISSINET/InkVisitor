@@ -1,5 +1,6 @@
 import Viewport from "./Viewport";
 import Cursor, { IAbsCoordinates, IRelativeCoordinates } from "./Cursor";
+import { parse } from "path";
 
 export type Mode = "raw" | "highlight";
 
@@ -63,6 +64,34 @@ class Segment {
       }
     }
     return [openedTags, closedTags];
+  }
+
+  findTagParsedPosition(tag: Tag): { x: number, y: number } {
+    // find abs position right after the <tag>
+    console.log(tag)
+    let parsedTextOpenPosition = this.openingTags
+      .filter((t) => t.position < tag.position)
+      .reduce((acc, cur) => {
+        return acc - cur.tag.length - 2;
+      }, tag.position);
+    parsedTextOpenPosition = this.closingTags
+      .filter((t) => t.position < tag.position)
+      .reduce((acc, cur) => {
+        return acc - cur.tag.length - 3;
+      }, parsedTextOpenPosition);
+
+    let y = 0;
+    let x = parsedTextOpenPosition;
+
+    for (const line of this.lines) {
+      if (x - line.length < 0) {
+        break;
+      }
+      x -= -line.length - 1;
+      y++;
+    }
+
+    return { x, y };
   }
 }
 
@@ -281,30 +310,30 @@ class Text {
     // Find all matches of words in the text
     const matches = [];
     while ((match = wordRegex.exec(text)) !== null) {
-        matches.push({ start: match.index, end: match.index + match[0].length });
+      matches.push({ start: match.index, end: match.index + match[0].length });
     }
 
     // Find the word containing the given index
     let wordIndices;
     for (let i = 0; i < matches.length; i++) {
-        const { start, end } = matches[i];
-        if (index >= start && index < end) {
-            wordIndices = { start, end };
-            break;
-        }
+      const { start, end } = matches[i];
+      if (index >= start && index < end) {
+        wordIndices = { start, end };
+        break;
+      }
     }
 
     // If no word contains the given index, return default offsets
     if (!wordIndices) {
-        return [ 0, 0 ]
+      return [0, 0];
     }
 
     // Calculate offsets relative to the word's start and end indices
     const startOffset = index - wordIndices.start;
     const endOffset = wordIndices.end - index;
 
-    return [ -startOffset, endOffset ];
-}
+    return [-startOffset, endOffset];
+  }
 
   /**
    * getCursorWord returns current word under active cursor
@@ -314,7 +343,7 @@ class Text {
   getCursorWordOffsets(viewport: Viewport, cursor: Cursor): [number, number] {
     const position = this.cursorToIndex(viewport, cursor);
     if (!position) {
-      return [0,0]
+      return [0, 0];
     }
 
     let text = this.segments[position.segmentIndex].parsed;
@@ -435,7 +464,6 @@ class Text {
       segment.parseText();
     } else {
       this.prepareSegments();
-
     }
 
     this.calculateLines();
@@ -469,7 +497,7 @@ class Text {
     return rangeLines.join("\n");
   }
 
-  getTagPosition(tag: string): IRelativeCoordinates[] {
+  getTagPosition(viewport: Viewport, tag: string): IRelativeCoordinates[] {
     let openingTag: Tag = { position: -1, tag: "" };
     let openingSegment: Segment | undefined = undefined;
     let closingTag: Tag = { position: -1, tag: "" };
@@ -498,22 +526,7 @@ class Text {
       // throw new Error("opening or closing tag not found..")
     }
 
-    const parsedTextOpenPosition = openingSegment.openingTags
-      .filter((t) => t.position < openingTag.position)
-      .reduce((acc, cur) => {
-        return acc + cur.tag.length + 2;
-      }, 0);
-
-    const parsedTextClosedPosition = closingSegment.closingTags
-      .filter((t) => t.position < closingTag.position)
-      .reduce((acc, cur) => {
-        return acc + cur.tag.length + 3;
-      }, 0);
-
-    //let
-    //for (const line of openingSegment.lines) {
-    //  if (line.length)
-    // }
+    console.log(openingSegment.findTagParsedPosition(openingTag))
 
     return [
       {
