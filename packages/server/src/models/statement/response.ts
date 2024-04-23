@@ -51,6 +51,13 @@ export class ResponseStatement extends Statement implements IResponseStatement {
     this.warnings = await this.getWarnings(req);
   }
 
+  async prepareWithoutWarnings(req: IRequest) {
+    this.right = this.getUserRoleMode(req.getUserOrFail());
+    await this.prepareEntities(req.db.connection);
+    this.elementsOrders = this.prepareElementsOrders();
+    this.warnings = [];
+  }
+
   /**
    * Prepares the entities map
    * @param db
