@@ -14,7 +14,7 @@ import api from "api";
 import { AxiosResponse } from "axios";
 import { BaseDropdown, Button, Input, MultiInput, TypeBar } from "components";
 import Dropdown, { AttributeButtonGroup, EntityTag } from "components/advanced";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { FaRegCopy } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { DropdownItem } from "types";
@@ -96,6 +96,10 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
   }, [documentOptions, entity.data.documentId]);
 
   const [newLabel, setNewLabel] = useState<string>(entity.label);
+
+  useEffect(() => {
+    setNewLabel(entity.label);
+  }, [entity.label]);
 
   return (
     <>
