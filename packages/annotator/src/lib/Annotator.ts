@@ -5,9 +5,10 @@ import Text, { Mode, SegmentPosition } from "./Text";
 import Viewport from "./Viewport";
 
 export interface HighlightSchema {
-  mode: "background";
+  mode: "background" | "stroke";
   style: {
     color: string;
+    opacity: number;
   };
 }
 
@@ -17,6 +18,7 @@ export interface DrawingOptions {
   lineHeight: number;
   charsAtLine: number;
   mode: Mode;
+  schema?: HighlightSchema
 }
 
 export interface Highlighted {
@@ -234,13 +236,10 @@ export class Annotator {
           this.viewport,
           this.cursor
         );
-        const segmentCountAfter = this.text.segments.length;
 
         const xDiff =
           (segmentAfter?.rawTextIndex || 0) -
           (segmentBefore?.rawTextIndex || 0);
-
-        console.log(segmentBefore, segmentAfter, xDiff);
 
         if (xDiff < 0) {
           this.cursor.move((xDiff + 1) * -1, 0);
@@ -543,48 +542,63 @@ export class Annotator {
           this.text.cursorToIndex(this.viewport, this.cursor)
         );
         if (annotated.length > 0) {
-          const tag = annotated.pop() as string;
-          const highlight = this.onHighlightCb(tag);
-          if (highlight) {
-            const [startLine, endLine] = this.text.getTagPosition(
-              this.viewport,
-              tag
-            );
+          for (const tag of annotated){
+            const highlight = this.onHighlightCb(tag);
+            if (highlight) {
+              const [startLine, endLine] = this.text.getTagPosition(
+                this.viewport,
+                tag
+              );
 
-            if (startLine && endLine) {
-              this.ctx.strokeStyle = "green"; //highlight.style.color;
-              for (
-                let currentYLine = startLine.yLine;
-                currentYLine <= endLine.yLine;
-                currentYLine++
-              ) {
-                if (
-                  this.viewport.lineStart <= currentYLine &&
-                  this.viewport.lineEnd >= currentYLine
+              const highlighter = new Cursor(0, 0);
+              highlighter.selectStart = startLine
+              highlighter.selectEnd = endLine
+              highlighter.draw(this.ctx, this.viewport, {
+                lineHeight: this.lineHeight,
+                charWidth: this.charWidth,
+                charsAtLine: this.text.charsAtLine,
+                mode: this.text.mode,
+                schema: highlight,
+              });
+
+              console.log(startLine, endLine)
+              /*
+              if (startLine && endLine) {
+                this.ctx.strokeStyle = "green"; //highlight.style.color;
+                for (
+                  let currentYLine = startLine.yLine;
+                  currentYLine <= endLine.yLine;
+                  currentYLine++
                 ) {
-                  this.ctx.beginPath();
+                  if (
+                    this.viewport.lineStart <= currentYLine &&
+                    this.viewport.lineEnd >= currentYLine
+                  ) {
+                    this.ctx.beginPath();
 
-                  const yPos =
-                    currentYLine - this.viewport.lineStart + this.lineHeight;
-                  if (currentYLine === startLine.yLine) {
-                    this.ctx.moveTo(startLine.xLine, yPos);
-                  } else if (currentYLine === endLine.yLine) {
-                    this.ctx.moveTo(endLine.xLine, yPos);
-                  } else {
-                    this.ctx.moveTo(0, yPos);
+                    const yPos =
+                      currentYLine - this.viewport.lineStart + this.lineHeight;
+                    if (currentYLine === startLine.yLine) {
+                      this.ctx.moveTo(startLine.xLine, yPos);
+                    } else if (currentYLine === endLine.yLine) {
+                      this.ctx.moveTo(endLine.xLine, yPos);
+                    } else {
+                      this.ctx.moveTo(0, yPos);
+                    }
+
+                    if (startLine.yLine === endLine.yLine) {
+                      this.ctx.lineTo(endLine.xLine * this.charWidth, yPos);
+                    } else if (currentYLine === startLine.yLine) {
+                      this.ctx.lineTo(this.charWidth, yPos);
+                    } else if (currentYLine === endLine.yLine) {
+                      this.ctx.lineTo(endLine.xLine * this.charWidth, yPos);
+                    }
+
+                    this.ctx.stroke();
                   }
-
-                  if (startLine.yLine === endLine.yLine) {
-                    this.ctx.lineTo(endLine.xLine * this.charWidth, yPos);
-                  } else if (currentYLine === startLine.yLine) {
-                    this.ctx.lineTo(this.charWidth, yPos);
-                  } else if (currentYLine === endLine.yLine) {
-                    this.ctx.lineTo(endLine.xLine * this.charWidth, yPos);
-                  }
-
-                  this.ctx.stroke();
                 }
               }
+              */
             }
           }
         }

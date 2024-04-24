@@ -150,12 +150,25 @@ export default class Cursor implements IRelativeCoordinates {
   ) {
     const { charWidth, lineHeight } = options;
 
-    ctx.fillRect(
-      xStart * charWidth,
-      relLine * lineHeight,
-      (xEnd - xStart) * charWidth,
-      lineHeight
-    );
+    switch(options.schema?.mode) {
+      case "stroke":
+        ctx.strokeRect(
+          xStart * charWidth,
+          relLine * lineHeight,
+          (xEnd - xStart) * charWidth,
+          1
+        );
+        break;
+
+      default:
+        ctx.fillRect(
+          xStart * charWidth,
+          relLine * lineHeight,
+          (xEnd - xStart) * charWidth,
+          lineHeight
+        );
+      }
+
   }
 
   /**
@@ -178,12 +191,14 @@ export default class Cursor implements IRelativeCoordinates {
 
     ctx.fillStyle = options.mode === "highlight" ? "#cccccc" : "blue";
 
-    ctx.fillRect(
-      this.xLine * charWidth,
-      this.yLine * lineHeight + 2,
-      Cursor.Width,
-      lineHeight
-    );
+    if (!options.schema) {
+      ctx.fillRect(
+        this.xLine * charWidth,
+        this.yLine * lineHeight + 2,
+        Cursor.Width,
+        lineHeight
+      );
+    }
 
     let [hStart, hEnd] = this.getSelected();
     if (hStart && hEnd) {
@@ -192,8 +207,9 @@ export default class Cursor implements IRelativeCoordinates {
         hStart = hEnd;
         hEnd = tmpSwitch;
       }
-      ctx.fillStyle = this.fillColor;
-      ctx.globalAlpha = this.fillOpacity;
+
+      ctx.fillStyle = options.schema?.style.color || this.fillColor;
+      ctx.globalAlpha =  options.schema?.style.opacity || this.fillOpacity;
 
       for (let i = 0; i <= viewport.lineEnd - viewport.lineStart; i++) {
         const absY = viewport.lineStart + i;

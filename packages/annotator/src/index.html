@@ -66,10 +66,12 @@
       annotator.addLines(document.getElementById("lines"));
       annotator.onHighlight((entityId) => {
         console.log("highlighted", entityId)
+        const colors = ["black", "brown", "pink", "green"];
         return {
           mode: "background",
           style: {
-            color: "pink"
+            color: colors[(Math.floor(Math.random() * colors.length))],
+            opacity: 0.7
           }
         }
       })

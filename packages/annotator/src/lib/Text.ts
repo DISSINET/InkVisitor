@@ -1,6 +1,5 @@
 import Viewport from "./Viewport";
 import Cursor, { IAbsCoordinates, IRelativeCoordinates } from "./Cursor";
-import { parse } from "path";
 
 export type Mode = "raw" | "highlight";
 
@@ -68,7 +67,6 @@ class Segment {
 
   findTagParsedPosition(tag: Tag): { x: number, y: number } {
     // find abs position right after the <tag>
-    console.log(tag)
     let parsedTextOpenPosition = this.openingTags
       .filter((t) => t.position < tag.position)
       .reduce((acc, cur) => {
@@ -80,14 +78,13 @@ class Segment {
         return acc - cur.tag.length - 3;
       }, parsedTextOpenPosition);
 
-    let y = 0;
+    let y = this.lineStart;
     let x = parsedTextOpenPosition;
-
     for (const line of this.lines) {
-      if (x - line.length < 0) {
+      if (x - line.length <= 0) {
         break;
       }
-      x -= -line.length - 1;
+      x -= line.length + 1;
       y++;
     }
 
@@ -526,16 +523,16 @@ class Text {
       // throw new Error("opening or closing tag not found..")
     }
 
-    console.log(openingSegment.findTagParsedPosition(openingTag))
-
+    const start = openingSegment.findTagParsedPosition(openingTag)
+    const end = closingSegment.findTagParsedPosition(closingTag)
     return [
       {
-        xLine: 1,
-        yLine: 1,
+        xLine: start.x,
+        yLine: start.y,
       },
       {
-        xLine: 1,
-        yLine: 1,
+        xLine: end.x,
+        yLine: end.y,
       },
     ];
   }
