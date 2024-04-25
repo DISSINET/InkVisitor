@@ -143,6 +143,9 @@ export class Annotator {
 
     switch (e.key) {
       case "Enter":
+        if (this.text.mode === "highlight") {
+          return
+        }
         this.text.insertNewline(this.viewport, this.cursor);
         this.cursor.moveToNewline();
         if (!this.text.cursorToIndex(this.viewport, this.cursor)) {
@@ -224,6 +227,9 @@ export class Annotator {
         break;
 
       case "Backspace":
+        if (this.text.mode === "highlight") {
+          return
+        }
         const segmentBefore = this.text.cursorToIndex(
           this.viewport,
           this.cursor
@@ -288,6 +294,9 @@ export class Annotator {
         break;
 
       case "Delete":
+        if (this.text.mode === "highlight") {
+          return
+        }
         this.text.deleteText(this.viewport, this.cursor, -1);
         this.cursor.move(0, 0);
         break;
@@ -307,6 +316,10 @@ export class Annotator {
         }
 
         if (!nonCharKeys.includes(key)) {
+          if (this.text.mode === "highlight") {
+            return
+          }
+
           this.text.insertText(this.viewport, this.cursor, key);
           if (this.onTextChangeCb) {
             this.onTextChangeCb(this.text.value);
@@ -315,7 +328,7 @@ export class Annotator {
         }
     }
 
-    if (this.onTextChangeCb) {
+    if (this.text.mode === "raw" && this.onTextChangeCb) {
       this.onTextChangeCb(this.text.value);
     }
     this.draw();

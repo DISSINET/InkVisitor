@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Canvas dev</title>
   </head>
-  <body style="background-color: black;">
-    <div style="padding: 20px;background-color: #ccc;">
+  <body style="background-color: black">
+    <div style="padding: 20px; background-color: #ccc">
       <div class="textarea" style="display: flex; flex-direction: row">
         <div
           class="canvasses-wrapper"
@@ -65,26 +65,24 @@
       annotator.addScroller(document.getElementById("scroller"));
       annotator.addLines(document.getElementById("lines"));
       annotator.onHighlight((entityId) => {
-       // const colors = ["black", "brown", "pink", "green"];
-       // const randColor = colors[(Math.floor(Math.random() * colors.length))];
-        if (entityId === "T40-000-001") {
-          return {
+        const colors = ["black", "brown", "pink", "green"];
+        const randColor = colors[Math.floor(Math.random() * colors.length)];
+        return {
           mode: "background",
           style: {
-            color: "brown",
-            opacity: 0.7
-          }
-        }
-        }
-      })
+            color: randColor,
+            opacity: 0.3,
+          },
+        };
+      });
       annotator.onSelectText((text) => {
-        console.log("onSelectText", text)
+        console.log("onSelectText", text);
       });
 
       document.getElementById("mode").onclick = () => {
         annotator.setMode(annotator.text.mode === "raw" ? "highlight" : "raw");
         annotator.draw();
-      }
+      };
       annotator.draw();
     </script>
   </body>
