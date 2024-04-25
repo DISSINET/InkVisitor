@@ -1,4 +1,4 @@
-FROM gplane/pnpm:8.6.0-node16-alpine as build-env
+FROM gplane/pnpm:node18-alpine as build-env
 
 RUN apk add tzdata
 ENV TZ=Europe/Prague
@@ -12,7 +12,7 @@ RUN pnpm install --frozen-lockfile
 RUN pnpm run build
 RUN pnpm prune --prod
 
-FROM gplane/pnpm:8.6.0-node16-alpine
+FROM gplane/pnpm:node18-alpine
 COPY ./packages/client/dist /app/client/dist
 COPY --from=build-env /app/server/dist /app/server/dist
 COPY --from=build-env /app/server/node_modules /app/server/node_modules
