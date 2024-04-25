@@ -65,14 +65,16 @@
       annotator.addScroller(document.getElementById("scroller"));
       annotator.addLines(document.getElementById("lines"));
       annotator.onHighlight((entityId) => {
-        console.log("highlighted", entityId)
-        const colors = ["black", "brown", "pink", "green"];
-        return {
+       // const colors = ["black", "brown", "pink", "green"];
+       // const randColor = colors[(Math.floor(Math.random() * colors.length))];
+        if (entityId === "T40-000-001") {
+          return {
           mode: "background",
           style: {
-            color: colors[(Math.floor(Math.random() * colors.length))],
+            color: "brown",
             opacity: 0.7
           }
+        }
         }
       })
       annotator.onSelectText((text) => {

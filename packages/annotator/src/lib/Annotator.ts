@@ -18,7 +18,7 @@ export interface DrawingOptions {
   lineHeight: number;
   charsAtLine: number;
   mode: Mode;
-  schema?: HighlightSchema
+  schema?: HighlightSchema;
 }
 
 export interface Highlighted {
@@ -50,6 +50,8 @@ export class Annotator {
   text: Text;
   scroller?: Scroller;
   lines?: Lines;
+
+  annotatedPosition: SegmentPosition | null = null;
 
   // to control highlightChangeCb callback
   lastHighlightedText = "";
@@ -337,6 +339,9 @@ export class Annotator {
   onMouseDown(e: MouseEvent) {
     this.cursor.setPositionFromEvent(e, this.lineHeight, this.charWidth);
     this.cursor.selectArea(this.viewport.lineStart);
+
+    this.annotatedPosition = this.text.cursorToIndex(this.viewport, this.cursor)
+
     this.draw();
   }
 
@@ -534,35 +539,36 @@ export class Annotator {
       }
     }
 
-    if (this.onHighlightCb) {
-      const [start, end] = this.cursor.getSelected();
-      if (start?.xLine === end?.xLine && start?.yLine === end?.yLine) {
-        const annotated = this.getAnnotations(
-          null,
-          this.text.cursorToIndex(this.viewport, this.cursor)
-        );
-        if (annotated.length > 0) {
-          for (const tag of annotated){
-            const highlight = this.onHighlightCb(tag);
-            if (highlight) {
-              const [startLine, endLine] = this.text.getTagPosition(
-                this.viewport,
-                tag
-              );
+    if (this.text.mode === "highlight" && this.onHighlightCb && this.annotatedPosition) {
+      console.log(this.annotatedPosition)
+      const annotated = this.getAnnotations(
+        null,
+        this.annotatedPosition
+      );
 
-              const highlighter = new Cursor(0, 0);
-              highlighter.selectStart = startLine
-              highlighter.selectEnd = endLine
-              highlighter.draw(this.ctx, this.viewport, {
-                lineHeight: this.lineHeight,
-                charWidth: this.charWidth,
-                charsAtLine: this.text.charsAtLine,
-                mode: this.text.mode,
-                schema: highlight,
-              });
+      if (annotated.length > 0) {
+        
+        for (const tag of annotated) {
+          const highlight = this.onHighlightCb(tag);
+          if (highlight) {
+            const [startLine, endLine] = this.text.getTagPosition(
+              this.viewport,
+              tag
+            );
 
-              console.log(startLine, endLine)
-              /*
+            const highlighter = new Cursor(0, 0);
+            highlighter.selectStart = startLine;
+            highlighter.selectEnd = endLine;
+            console.log(startLine, endLine, tag)
+            highlighter.draw(this.ctx, this.viewport, {
+              lineHeight: this.lineHeight,
+              charWidth: this.charWidth,
+              charsAtLine: this.text.charsAtLine,
+              mode: this.text.mode,
+              schema: highlight,
+            });
+
+            /*
               if (startLine && endLine) {
                 this.ctx.strokeStyle = "green"; //highlight.style.color;
                 for (
@@ -599,12 +605,12 @@ export class Annotator {
                 }
               }
               */
-            }
           }
         }
       }
     }
 
+    console.log("drawn")
     if (this.scroller) {
       this.scroller.update(
         this.viewport.lineStart,
