@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-20.04
     strategy:
       matrix:
-        node-version: [16]
+        node-version: [18]
     steps:
       - uses: actions/checkout@v3
       - uses: pnpm/action-setup@v2
@@ -36,6 +36,7 @@ jobs:
       - name: Install dependencies
         run: |
           cd packages/client
+          ls 
           pnpm install --frozen-lockfile
           
   build-client-staging:
@@ -43,7 +44,7 @@ jobs:
     runs-on: ubuntu-20.04
     strategy:
       matrix:
-        node-version: [16]
+        node-version: [18]
     steps:
       - uses: actions/checkout@v3
       - uses: pnpm/action-setup@v2
@@ -93,7 +94,7 @@ jobs:
     runs-on: ubuntu-20.04
     strategy:
       matrix:
-        node-version: [16]
+        node-version: [18]
     steps:
       - uses: actions/checkout@v3
       - uses: pnpm/action-setup@v2
@@ -143,7 +144,7 @@ jobs:
     runs-on: ubuntu-20.04
     strategy:
       matrix:
-        node-version: [16]
+        node-version: [18]
     steps:
       - uses: actions/checkout@v3
       - uses: pnpm/action-setup@v2
