@@ -52,7 +52,9 @@
         style="padding: 10px; border: 1px solid black; margin-top: 10px"
       ></pre>
       <textarea></textarea>
-      <button id="mode">Switch raw/highlighted</button>
+      <button id="raw">raw</button>
+      <button id="highlight">highlight</button>
+      <button id="semi">semi</button>
     </div>
 
     <script src="bundle.js"></script>
@@ -79,10 +81,21 @@
         console.log("onSelectText", text);
       });
 
-      document.getElementById("mode").onclick = () => {
-        annotator.setMode(annotator.text.mode === "raw" ? "highlight" : "raw");
+      document.getElementById("raw").onclick = () => {
+        annotator.setMode( "raw");
         annotator.draw();
       };
+
+      document.getElementById("highlight").onclick = () => {
+        annotator.setMode( "highlight");
+        annotator.draw();
+      };
+
+      document.getElementById("semi").onclick = () => {
+        annotator.setMode( "semi");
+        annotator.draw();
+      };
+
       annotator.draw();
     </script>
   </body>

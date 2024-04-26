@@ -328,7 +328,7 @@ export class Annotator {
         }
     }
 
-    if (this.text.mode === "raw" && this.onTextChangeCb) {
+    if (this.text.mode !== "highlight" && this.onTextChangeCb) {
       this.onTextChangeCb(this.text.value);
     }
     this.draw();
@@ -623,7 +623,6 @@ export class Annotator {
       }
     }
 
-    console.log("drawn")
     if (this.scroller) {
       this.scroller.update(
         this.viewport.lineStart,

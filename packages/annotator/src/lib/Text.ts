@@ -1,7 +1,7 @@
 import Viewport from "./Viewport";
 import Cursor, { IAbsCoordinates, IRelativeCoordinates } from "./Cursor";
 
-export type Mode = "raw" | "highlight";
+export type Mode = "raw" | "highlight" | "semi";
 
 export interface Tag {
   position: number;
@@ -160,7 +160,7 @@ class Text {
       segment.lines = [];
 
       let text = segment.raw;
-      if (this.mode === "highlight") {
+      if (this.mode === "highlight" || this.mode === "semi") {
         text = segment.parsed;
       }
       const words = text.split(" ");
@@ -370,7 +370,7 @@ class Text {
       return;
     }
 
-    let indexPosition = segmentPosition.parsedTextIndex;
+    let indexPosition = segmentPosition.rawTextIndex;
     for (let i = 0; i < segmentPosition.segmentIndex; i++) {
       indexPosition++; // each segment should receive +1 character no matter what (newline)
       indexPosition += this.segments[i].raw.length;
@@ -383,10 +383,11 @@ class Text {
 
     const segment = this.segments[segmentPosition.segmentIndex];
     segment.raw =
-      segment.raw.slice(0, segmentPosition.parsedTextIndex) +
+      segment.raw.slice(0, segmentPosition.rawTextIndex) +
       textToInsert +
-      segment.raw.slice(segmentPosition.parsedTextIndex);
+      segment.raw.slice(segmentPosition.rawTextIndex);
 
+    segment.parseText();   
     this.calculateLines();
   }
 
@@ -402,7 +403,7 @@ class Text {
       return;
     }
 
-    let indexPosition = segmentPosition.parsedTextIndex;
+    let indexPosition = segmentPosition.rawTextIndex;
     for (let i = 0; i < segmentPosition.segmentIndex; i++) {
       indexPosition++; // each segment should receive +1 character no matter what (newline)
       indexPosition += this.segments[i].raw.length;
@@ -441,7 +442,7 @@ class Text {
 
     this.dirtySegment = segmentPos.segmentIndex;
 
-    let indexPos = segmentPos.parsedTextIndex;
+    let indexPos = segmentPos.rawTextIndex;
     for (let i = 0; i < segmentPos.segmentIndex; i++) {
       indexPos++; // each segment should receive +1 character no matter what (newline)
       indexPos += this.segments[i].raw.length;
@@ -453,9 +454,9 @@ class Text {
 
     if (!segment.raw) {
       this.prepareSegments();
-    } else if (segmentPos.parsedTextIndex) {
+    } else if (segmentPos.rawTextIndex) {
       const xAlterPos =
-        segmentPos.parsedTextIndex - (charsToDelete > 0 ? 1 : 0);
+        segmentPos.rawTextIndex - (charsToDelete > 0 ? 1 : 0);
       segment.raw =
         segment.raw.slice(0, xAlterPos) + segment.raw.slice(xAlterPos + 1);
       segment.parseText();
