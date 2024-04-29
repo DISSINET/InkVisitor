@@ -170,12 +170,12 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
     },
     {
       value: BatchOption.replace_R,
-      label: `replace R`,
+      label: `replace a referenced Resource`,
       info: EntityEnums.Class.Resource,
     },
     {
       value: BatchOption.append_R,
-      label: `append R`,
+      label: `append a referenced Resource`,
       info: EntityEnums.Class.Resource,
     },
   ];
@@ -358,7 +358,12 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
                     <>
                       <StyledDropdownWrap>
                         <Dropdown.Single.Basic
-                          width={78}
+                          tooltipLabel={
+                            batchAction.info === EntityEnums.Class.Resource
+                              ? batchAction.label
+                              : ""
+                          }
+                          width={98}
                           disabled={selectedRows.length === 0}
                           value={batchAction.value}
                           onChange={(selectedOption) =>
