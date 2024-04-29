@@ -358,6 +358,11 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
                     <>
                       <StyledDropdownWrap>
                         <Dropdown.Single.Basic
+                          tooltipLabel={
+                            batchAction.info === EntityEnums.Class.Resource
+                              ? batchAction.label
+                              : ""
+                          }
                           width={98}
                           disabled={selectedRows.length === 0}
                           value={batchAction.value}
