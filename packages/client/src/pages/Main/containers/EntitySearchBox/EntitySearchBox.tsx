@@ -280,7 +280,9 @@ export const EntitySearchBox: React.FC = () => {
             <StyledRowHeader>label</StyledRowHeader>
             <div
               style={{
-                display: userRole !== UserEnums.Role.Viewer ? "flex" : "",
+                display: "grid",
+                gridTemplateColumns: "1fr auto",
+                width: "100%",
               }}
             >
               <Input
