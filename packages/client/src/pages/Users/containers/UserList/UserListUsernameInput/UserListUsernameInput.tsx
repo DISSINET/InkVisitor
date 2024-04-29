@@ -29,17 +29,21 @@ export const UserListUsernameInput: React.FC<UserListUsernameInput> = ({
       value={localUsername}
       changeOnType
       onBlur={async () => {
-        if (localUsername.length < 4) {
-          toast.warning("Minimum length of username is 4 characters");
-          setLocalUsername(name);
-        } else if (usernameList?.includes(localUsername)) {
-          toast.warning("Username already in use");
-          setLocalUsername(name);
-        } else {
-          userMutation.mutate({
-            id: id,
-            name: localUsername,
-          });
+        if (localUsername !== name) {
+          if (localUsername.length < 4) {
+            toast.warning("Minimum length of username is 4 characters");
+            setLocalUsername(name);
+          } else if (
+            usernameList?.filter((u) => u !== name).includes(localUsername)
+          ) {
+            toast.warning("Username already in use");
+            setLocalUsername(name);
+          } else {
+            userMutation.mutate({
+              id: id,
+              name: localUsername,
+            });
+          }
         }
       }}
       onChangeFn={(value) => {
