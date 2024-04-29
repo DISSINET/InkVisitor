@@ -143,7 +143,7 @@ export const StatementListTextAnnotator: React.FC<
 
   const thisTHasAnchor = useMemo<boolean>(() => {
     if (selectedDocument) {
-      console.log(selectedDocument?.referencedEntityIds, territoryId);
+      // console.log(selectedDocument?.referencedEntityIds, territoryId);
       return selectedDocument?.referencedEntityIds.T.includes(territoryId);
     }
     return false;
@@ -152,7 +152,7 @@ export const StatementListTextAnnotator: React.FC<
     territoryId,
   ]);
 
-  console.log(thisTHasAnchor);
+  // console.log(thisTHasAnchor);
 
   return (
     <div>
@@ -165,7 +165,6 @@ export const StatementListTextAnnotator: React.FC<
       >
         {!selectedResource && (
           <EntitySuggester
-            disableCreate={false}
             categoryTypes={[EntityEnums.Class.Resource]}
             preSuggestions={resources}
             onPicked={(entity) => {

@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect } from "react";
 import useKeypress from "hooks/useKeyPress";
+import React from "react";
 
 interface ModalKeyPress {
   onEnter?: () => void;

@@ -10,7 +10,7 @@ export default function useKeypress(
 
   function downHandler(e: any) {
     if (e.key === targetKey) {
-      if (!ctrlKeyCombo || (ctrlKeyCombo && e.ctrlKey)) {
+      if (!ctrlKeyCombo || (ctrlKeyCombo && (e.ctrlKey || e.metaKey))) {
         handleKeyPress();
       }
     }
