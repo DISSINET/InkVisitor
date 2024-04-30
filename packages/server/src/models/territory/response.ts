@@ -45,7 +45,7 @@ export class ResponseTerritory extends Territory implements IResponseTerritory {
 
     for (const statement of statements) {
       const responseStatement = new ResponseStatement(new Statement(statement));
-      await responseStatement.prepareWithoutWarnings(req);
+      await responseStatement.prepare(req);
       this.statements.push(responseStatement);
     }
   }
