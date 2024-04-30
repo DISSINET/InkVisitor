@@ -40,6 +40,7 @@ import { StatementListContextMenu } from "../StatementListContextMenu/StatementL
 import { StyledText } from "../StatementLitBoxStyles";
 import { StatementListRow } from "./StatementListRow";
 import {
+  StyledAbbreviatedLabel,
   StyledCheckboxWrapper,
   StyledFocusedCircle,
   StyledTHead,
@@ -312,18 +313,11 @@ export const StatementListTable: React.FC<StatementListTable> = ({
         accessor: "data",
         Cell: ({ row }: CellType) => {
           const { text } = row.original.data;
-          const maxWordsCount = 10;
-          const trimmedText = text.split(" ").slice(0, maxWordsCount).join(" ");
-          if ((text.match(/(\w+)/g) ?? []).length > maxWordsCount) {
-            return <StyledText>{trimmedText}...</StyledText>;
-          } else if (text.length > 20) {
-            return (
-              // TODO: for one long word optimally inline-flex overflow
-              <StyledText>{getShortLabelByLetterCount(text, 20)}</StyledText>
-            );
-          } else {
-            return <StyledText>{trimmedText}</StyledText>;
-          }
+          return (
+            <StyledText>
+              <StyledAbbreviatedLabel>{text}</StyledAbbreviatedLabel>
+            </StyledText>
+          );
         },
       },
       {
