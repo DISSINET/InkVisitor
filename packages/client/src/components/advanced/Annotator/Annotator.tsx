@@ -226,6 +226,10 @@ export const TextAnnotator = ({
     return yLine * lineHeight + (topBottomSelection ? -50 : 50);
   }, [annotator?.cursor?.yLine, annotator?.lineHeight, topBottomSelection]);
 
+  const madeAnyChanges = useMemo<boolean>(() => {
+    return annotator?.text?.value !== document?.content;
+  }, [annotator?.text?.value, document?.content]);
+
   return (
     <div style={{ width: width }}>
       <StyledCanvasWrapper>
@@ -323,7 +327,7 @@ export const TextAnnotator = ({
             label="save"
             color="primary"
             icon={<FaRegSave />}
-            disabled={annotator.text.value === document?.content}
+            disabled={madeAnyChanges}
             onClick={() => {
               handleSaveNewContent();
             }}
@@ -332,7 +336,7 @@ export const TextAnnotator = ({
             label="discard changes"
             color="warning"
             icon={<FaTrash />}
-            disabled={annotator.text.value === document?.content}
+            disabled={madeAnyChanges}
             onClick={() => {
               refreshAnnotator();
             }}
