@@ -24,6 +24,8 @@ import {
   StyledScrollerCursor,
   StyledScrollerViewport,
 } from "./AnnotatorStyles";
+import { HiCodeBracket } from "react-icons/hi2";
+import { BsFileTextFill } from "react-icons/bs";
 
 interface TextAnnotatorProps {
   width: number;
@@ -297,10 +299,23 @@ export const TextAnnotator = ({
             tooltipLabel="activate syntax higlighting mode"
           />
           <Button
-            key="raw"
-            icon={<FaMarker size={11} />}
+            key="semi"
+            icon={<BsFileTextFill size={11} />}
             color="success"
-            label="edit"
+            label="text"
+            inverted={annotatorMode !== "semi"}
+            onClick={() => {
+              annotator.setMode("semi");
+              setAnnotatorMode("semi");
+              annotator.draw();
+            }}
+            tooltipLabel="activate semi mode"
+          />
+          <Button
+            key="raw"
+            icon={<HiCodeBracket size={11} />}
+            color="success"
+            label="XML"
             inverted={annotatorMode !== "raw"}
             onClick={() => {
               annotator.setMode("raw");
