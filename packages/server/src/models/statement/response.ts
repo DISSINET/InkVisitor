@@ -200,6 +200,7 @@ export class ResponseStatement extends Statement implements IResponseStatement {
     const allEntities = [
       ...this.data.actants.map((a) => a.entityId),
       ...this.data.actions.map((a) => a.actionId),
+      this.id, // statement itself
     ];
 
     this.data.actants.forEach((a) => {
