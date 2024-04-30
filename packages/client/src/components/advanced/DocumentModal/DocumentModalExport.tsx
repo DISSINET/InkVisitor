@@ -43,7 +43,7 @@ const DocumentModalExport: React.FC<DocumentModalExportProps> = ({
   }, []);
 
   const [exportedClasses, setExportedClasses] = useState<EntityEnums.Class[]>(
-    []
+    Object.values(EntityEnums.Class)
   );
 
   const allClassesSelected =
