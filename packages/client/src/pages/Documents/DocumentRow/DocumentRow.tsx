@@ -118,13 +118,6 @@ export const DocumentRow: React.FC<DocumentRow> = ({
 
   return (
     <>
-      <Button
-        icon={<FaSave />}
-        color="primary"
-        inverted
-        tooltipLabel="export document"
-        onClick={() => handleDocumentExport(document.id)}
-      />
       <StyledTitleWrap ref={titleRef} onClick={setEditMode}>
         {editMode ? (
           <Input
@@ -140,6 +133,13 @@ export const DocumentRow: React.FC<DocumentRow> = ({
         )}
       </StyledTitleWrap>
       <ButtonGroup>
+        <Button
+          icon={<FaSave />}
+          color="primary"
+          inverted
+          tooltipLabel="export document"
+          onClick={() => handleDocumentExport(document.id)}
+        />
         <Button
           icon={<RiFileEditFill />}
           color="warning"

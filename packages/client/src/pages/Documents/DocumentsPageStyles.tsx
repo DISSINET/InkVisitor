@@ -24,7 +24,7 @@ export const StyledBackground = styled.div`
 `;
 export const StyledGrid = styled.div`
   display: grid;
-  grid-template-columns: auto 1fr repeat(3, auto);
+  grid-template-columns: 1fr repeat(3, auto);
   align-items: center;
   overflow: auto;
 `;
