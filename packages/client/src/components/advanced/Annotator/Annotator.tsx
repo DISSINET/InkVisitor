@@ -150,20 +150,6 @@ export const TextAnnotator = ({
       document?.content ?? "no text"
     );
 
-    annotator.draw();
-    setAnnotator(annotator);
-  };
-
-  useEffect(() => {
-    if (!mainCanvas.current || !scroller.current) {
-      return;
-    }
-
-    const annotator = new Annotator(
-      mainCanvas.current,
-      document?.content ?? "no text"
-    );
-
     annotator.setMode("highlight");
     annotator.addScroller(scroller.current);
 
@@ -188,6 +174,10 @@ export const TextAnnotator = ({
 
     annotator.draw();
     setAnnotator(annotator);
+  };
+
+  useEffect(() => {
+    refreshAnnotator();
   }, [document]);
 
   useEffect(() => {
@@ -263,7 +253,9 @@ export const TextAnnotator = ({
               if (handleCreateStatement && selectedText) {
                 const newStatementId = uuidv4();
                 handleAddAnchor(newStatementId);
-                handleCreateStatement(selectedText, newStatementId);
+                // remove linebreaks from text
+                const validatedText = selectedText.replace(/\n/g, " ");
+                handleCreateStatement(validatedText, newStatementId);
               }
             }}
           />
