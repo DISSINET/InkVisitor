@@ -260,7 +260,6 @@ export class ResponseStatement extends Statement implements IResponseStatement {
 
         for (const tValidation of tValidations ?? []) {
           const {
-            detail,
             entityClasses,
             classifications,
             tieType,
@@ -339,7 +338,9 @@ export class ResponseStatement extends Statement implements IResponseStatement {
 
             // REFERENCE TIE
             else if (tieType === EProtocolTieType.Reference) {
-              const eReferences = entity.references;
+              const eReferences = entity.references.filter(
+                (r) => r.resource && r.value
+              );
               // at least one reference (any) needs to be assigned to the E
               if (!allowedEntities || !allowedEntities.length) {
                 if (eReferences.length === 0) {
@@ -359,13 +360,17 @@ export class ResponseStatement extends Statement implements IResponseStatement {
 
             // PROPERTY TIE
             else if (tieType === EProtocolTieType.Property) {
+              const eProps = entity.props.filter(
+                (p) => p.value.entityId && p.type.entityId
+              );
+              console.log(entity.props, eProps);
               // at least one property needs to be assigned to the E
               if (
                 (!allowedClasses || !allowedClasses.length) &&
                 (!allowedEntities || !allowedEntities.length) &&
                 (!propType || !propType.length)
               ) {
-                if (entity.props.length === 0) {
+                if (eProps.length === 0) {
                   addNewValidationWarning(entity.id, WarningTypeEnums.TVEP);
                 }
               }
@@ -376,9 +381,7 @@ export class ResponseStatement extends Statement implements IResponseStatement {
                 !allowedEntities?.length &&
                 !allowedClasses?.length
               ) {
-                if (
-                  !entity.props.some((p) => propType?.includes(p.type.entityId))
-                ) {
+                if (!eProps.some((p) => propType?.includes(p.type.entityId))) {
                   addNewValidationWarning(entity.id, WarningTypeEnums.TVEPT);
                 }
               }
@@ -386,8 +389,8 @@ export class ResponseStatement extends Statement implements IResponseStatement {
               // type is defined, and value classes are defined
               else if (propType?.length && allowedClasses?.length) {
                 let passed = true;
-                for (const pi in entity.props) {
-                  const p = entity.props[pi];
+                for (const pi in eProps) {
+                  const p = eProps[pi];
                   const propValueEntityId = p.value.entityId;
                   const propValueEntity = await findEntityById(
                     req.db,
@@ -404,10 +407,11 @@ export class ResponseStatement extends Statement implements IResponseStatement {
                   addNewValidationWarning(entity.id, WarningTypeEnums.TVEPV);
                 }
               }
+
               // type is defined, and value entities are defined
               else if (propType?.length && allowedEntities?.length) {
                 if (
-                  !entity.props.some(
+                  !eProps.some(
                     (p) =>
                       propType?.includes(p.type.entityId) &&
                       allowedEntities.includes(p.value.entityId)
