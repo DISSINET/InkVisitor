@@ -165,8 +165,29 @@ export const TextAnnotator = ({
       handleTextSelection(text, anchors);
     });
 
-    annotator.onHighlight((entity: string) => {
-      highlightEntity(entity);
+    annotator.onHighlight((entityId: string) => {
+      const entity = storedEntities.current[entityId];
+      if (entity) {
+        const classItem = EntityColors[entity.class];
+        const colorName = classItem?.color ?? "transparent";
+        const color = theme.color[colorName] as string;
+
+        return {
+          mode: "background",
+          style: {
+            fillColor: color,
+            fillOpacity: 0.2,
+          },
+        };
+      } else {
+        return {
+          mode: "background",
+          style: {
+            fillColor: "transparent",
+            fillOpacity: 0,
+          },
+        };
+      }
     });
 
     annotator.onTextChanged((text) => {
@@ -191,33 +212,6 @@ export const TextAnnotator = ({
       }, 1000);
     }
   }, [width, height]);
-
-  const highlightEntity = async (
-    entityId: string
-  ): Promise<HighlightSchema> => {
-    const entity = await obtainEntity(entityId);
-    if (entity) {
-      const classItem = EntityColors[entity.class];
-      const colorName = classItem?.color ?? "transparent";
-      const color = theme.color[colorName] as string;
-
-      return {
-        mode: "background",
-        style: {
-          fillColor: color,
-          fillOpacity: 0.1,
-        },
-      };
-    } else {
-      return {
-        mode: "background",
-        style: {
-          fillColor: "white",
-          fillOpacity: 0,
-        },
-      };
-    }
-  };
 
   const topBottomSelection = useMemo<boolean>(() => {
     const selectedText = annotator?.cursor?.getSelected();
@@ -302,7 +296,7 @@ export const TextAnnotator = ({
             key="semi"
             icon={<BsFileTextFill size={11} />}
             color="success"
-            label="text"
+            label="text edit"
             inverted={annotatorMode !== "semi"}
             onClick={() => {
               annotator.setMode("semi");
