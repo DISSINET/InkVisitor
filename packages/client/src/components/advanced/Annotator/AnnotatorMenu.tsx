@@ -80,7 +80,7 @@ export const TextAnnotatorMenu = ({
                   onClick={() => {
                     handleCreateStatement();
                   }}
-                  label="Territory Statement"
+                  label="Statement"
                   tooltipLabel="Create new Statement from selection"
                 />
               )}
@@ -92,7 +92,7 @@ export const TextAnnotatorMenu = ({
                   onClick={() => {
                     handleCreateTerritory();
                   }}
-                  label="Sub Territory"
+                  label="Territory"
                   tooltipLabel="Create new Sub Territory from selection"
                 />
               )}
