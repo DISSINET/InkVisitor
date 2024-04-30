@@ -72,8 +72,8 @@
         return {
           mode: "background",
           style: {
-            color: randColor,
-            opacity: 0.3,
+            fillColor: randColor,
+            fillOpacity: 0.3,
           },
         };
       });
@@ -82,17 +82,17 @@
       });
 
       document.getElementById("raw").onclick = () => {
-        annotator.setMode( "raw");
+        annotator.setMode("raw");
         annotator.draw();
       };
 
       document.getElementById("highlight").onclick = () => {
-        annotator.setMode( "highlight");
+        annotator.setMode("highlight");
         annotator.draw();
       };
 
       document.getElementById("semi").onclick = () => {
-        annotator.setMode( "semi");
+        annotator.setMode("semi");
         annotator.draw();
       };
 
