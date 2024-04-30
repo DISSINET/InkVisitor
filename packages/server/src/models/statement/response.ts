@@ -190,7 +190,7 @@ export class ResponseStatement extends Statement implements IResponseStatement {
     const parentTId = this.data.territory?.territoryId as string;
 
     const checkItems: {
-      entity: ResponseEntity;
+      entity: Entity;
       classifications: Relation.IConnection<
         Relation.IClassification,
         Relation.ISuperclass
@@ -221,8 +221,7 @@ export class ResponseStatement extends Statement implements IResponseStatement {
       if (entityId) {
         const entityData = await this.obtainEntity(entityId, req);
         const entityModel = getEntityClass({ ...entityData });
-        const entity = new ResponseEntity(entityModel);
-        await entity.prepare(req);
+        const entity = new Entity(entityModel);
 
         const classifications =
           await Classification.getClassificationForwardConnections(
@@ -275,13 +274,7 @@ export class ResponseStatement extends Statement implements IResponseStatement {
 
           const entitiesToCheck = checkItems
             .filter((check) => {
-              // falls under entity Classes
-              if (!entityClasses || !entityClasses.length) {
-                // no entity class condition
-                return true;
-              }
-
-              return entityClasses.includes(check.entity.class);
+              return entityClasses?.includes(check.entity.class);
             })
             .filter((check) => {
               // falls under classification condition
@@ -351,60 +344,76 @@ export class ResponseStatement extends Statement implements IResponseStatement {
               const eProps = entity.props.filter(
                 (p) => p.value.entityId && p.type.entityId
               );
+
               // at least one property needs to be assigned to the E
               if (
-                (!allowedClasses || !allowedClasses.length) &&
-                (!allowedEntities || !allowedEntities.length) &&
-                (!propType || !propType.length)
+                !propType ||
+                (!propType.length &&
+                  !allowedEntities?.length &&
+                  !allowedClasses?.length)
               ) {
                 if (eProps.length === 0) {
                   addNewValidationWarning(entity.id, WarningTypeEnums.TVEP);
                 }
-              }
 
-              // type is defined but value is empty
-              else if (
+                // type is defined but value is empty
+              } else if (
                 propType?.length &&
                 !allowedEntities?.length &&
                 !allowedClasses?.length
               ) {
-                if (!eProps.some((p) => propType?.includes(p.type.entityId))) {
+                if (
+                  eProps.length === 0 ||
+                  !eProps.some((p) => propType?.includes(p.type.entityId))
+                ) {
                   addNewValidationWarning(entity.id, WarningTypeEnums.TVEPT);
                 }
-              }
+              } else if (allowedEntities?.length || allowedClasses?.length) {
+                const validProps = eProps.filter((p) =>
+                  propType?.length ? propType.includes(p.type.entityId) : true
+                );
+                if (!validProps?.length) {
+                  addNewValidationWarning(entity.id, WarningTypeEnums.TVEPV);
+                } else if (allowedClasses?.length) {
+                  // class is required
 
-              // type is defined, and value classes are defined
-              else if (propType?.length && allowedClasses?.length) {
-                let passed = true;
-                for (const pi in eProps) {
-                  const p = eProps[pi];
-                  const propValueEntityId = p.value.entityId;
-                  const propValueEntity = await findEntityById(
-                    req.db,
-                    propValueEntityId
-                  );
-                  if (
-                    propType?.includes(p.type.entityId) &&
-                    !allowedClasses?.includes(propValueEntity.class)
-                  ) {
-                    passed = false;
+                  // no valid props
+                  if (validProps.length === 0) {
+                    addNewValidationWarning(entity.id, WarningTypeEnums.TVEPV);
+                  } else {
+                    let passed = true;
+                    for (const pi in eProps) {
+                      const p = eProps[pi];
+                      const propValueEntityId = p.value.entityId;
+                      const propValueEntity = await findEntityById(
+                        req.db,
+                        propValueEntityId
+                      );
+                      if (
+                        propType?.includes(p.type.entityId) &&
+                        !allowedClasses?.includes(propValueEntity.class)
+                      ) {
+                        passed = false;
+                      }
+                    }
+                    if (!passed) {
+                      addNewValidationWarning(
+                        entity.id,
+                        WarningTypeEnums.TVEPV
+                      );
+                    }
                   }
-                }
-                if (!passed) {
-                  addNewValidationWarning(entity.id, WarningTypeEnums.TVEPV);
-                }
-              }
-
-              // type is defined, and value entities are defined
-              else if (propType?.length && allowedEntities?.length) {
-                if (
-                  !eProps.some(
-                    (p) =>
-                      propType?.includes(p.type.entityId) &&
+                } else if (allowedEntities?.length) {
+                  // entity is required
+                  if (validProps.length === 0) {
+                    addNewValidationWarning(entity.id, WarningTypeEnums.TVEPV);
+                  } else if (
+                    !validProps.some((p) =>
                       allowedEntities.includes(p.value.entityId)
-                  )
-                ) {
-                  addNewValidationWarning(entity.id, WarningTypeEnums.TVEPV);
+                    )
+                  ) {
+                    addNewValidationWarning(entity.id, WarningTypeEnums.TVEPV);
+                  }
                 }
               }
             }
@@ -413,6 +422,7 @@ export class ResponseStatement extends Statement implements IResponseStatement {
       }
     }
 
+    // console.log(warnings);
     return warnings;
   }
 
