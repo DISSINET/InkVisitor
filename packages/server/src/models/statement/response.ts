@@ -6,6 +6,7 @@ import {
   IResponseStatement,
   IStatement,
   ITerritory,
+  Relation,
 } from "@shared/types";
 import { OrderType } from "@shared/types/response-statement";
 import {
@@ -15,21 +16,22 @@ import {
 } from "@shared/types/warning";
 
 import { ActionEntity } from "@models/action/action";
+import { ResponseEntity, ResponseEntityDetail } from "@models/entity/response";
+import { getEntityClass } from "@models/factory";
+import { findEntityById } from "@service/shorthands";
 import treeCache from "@service/treeCache";
 import { WarningTypeEnums } from "@shared/enums";
 import { InternalServerError } from "@shared/types/errors";
+import {
+  EProtocolTieType,
+  ITerritoryValidation,
+} from "@shared/types/territory";
 import { Connection } from "rethinkdb-ts";
 import { IRequest } from "src/custom_typings/request";
 import Entity from "../entity/entity";
 import { PositionRules } from "./PositionRules";
 import Statement from "./statement";
-import {
-  EProtocolTieType,
-  ITerritoryValidation,
-} from "@shared/types/territory";
-import { ResponseEntityDetail } from "@models/entity/response";
-import { getEntityClass } from "@models/factory";
-import { findEntityById } from "@service/shorthands";
+import Classification from "@models/relation/classification";
 
 export class ResponseStatement extends Statement implements IResponseStatement {
   entities: { [key: string]: IEntity };
@@ -187,11 +189,18 @@ export class ResponseStatement extends Statement implements IResponseStatement {
 
     const parentTId = this.data.territory?.territoryId as string;
 
-    const entitiesFull: ResponseEntityDetail[] = [];
+    const checkItems: {
+      entity: Entity;
+      classifications: Relation.IConnection<
+        Relation.IClassification,
+        Relation.ISuperclass
+      >[];
+    }[] = [];
 
     const allEntities = [
       ...this.data.actants.map((a) => a.entityId),
       ...this.data.actions.map((a) => a.actionId),
+      this.id, // statement itself
     ];
 
     this.data.actants.forEach((a) => {
@@ -205,16 +214,27 @@ export class ResponseStatement extends Statement implements IResponseStatement {
       allEntities.push(...a.props.map((c) => c.value.entityId));
     });
 
+    // prepare entities
     for (const ai in allEntities) {
       const entityId = allEntities[ai];
 
       if (entityId) {
         const entityData = await this.obtainEntity(entityId, req);
         const entityModel = getEntityClass({ ...entityData });
-        const entity = new ResponseEntityDetail(entityModel);
-        await entity.prepare(req);
+        const entity = new Entity(entityModel);
 
-        entitiesFull.push(entity);
+        const classifications =
+          await Classification.getClassificationForwardConnections(
+            req.db.connection,
+            entityId,
+            entity.class,
+            1,
+            0
+          );
+        checkItems.push({
+          entity,
+          classifications: classifications,
+        });
       }
     }
 
@@ -227,7 +247,6 @@ export class ResponseStatement extends Statement implements IResponseStatement {
 
         for (const tValidation of tValidations ?? []) {
           const {
-            detail,
             entityClasses,
             classifications,
             tieType,
@@ -253,49 +272,44 @@ export class ResponseStatement extends Statement implements IResponseStatement {
             );
           };
 
-          const entitiesToCheck = entitiesFull
-            .filter((entity) => {
-              // falls under entity Classes
-              if (!entityClasses || !entityClasses.length) {
-                // no entity class condition
-                return true;
-              }
-
-              return entityClasses.includes(entity.class);
+          const entitiesToCheck = checkItems
+            .filter((check) => {
+              return entityClasses?.includes(check.entity.class);
             })
-            .filter((entity) => {
+            .filter((check) => {
               // falls under classification condition
               if (!classifications || !classifications.length) {
                 // there is no classification condition
                 return true;
               }
-              const claEntities = entity.relations.CLA?.connections?.map(
-                (c) => entity.entities[c.entityIds[1]]
-              );
+              const claEntities = check.classifications
+                ?.map((c) => c.entityIds[1])
+                .filter((c) => c);
 
               // at least one required classifications is fullfilled
               return classifications.some((classCondition) =>
-                claEntities?.map((c) => c.id).includes(classCondition)
+                claEntities?.includes(classCondition)
               );
             });
 
           for (const ei in entitiesToCheck) {
-            const entity = entitiesToCheck[ei];
+            const { entity, classifications: eClassifications } =
+              entitiesToCheck[ei];
             // CLASSIFICATION TIE
             if (tieType === EProtocolTieType.Classification) {
               if (!allowedEntities || !allowedEntities.length) {
                 // no condition set, so we need at least one classification
-                if (!entity.relations.CLA?.connections?.length) {
+                if (!eClassifications.length) {
                   addNewValidationWarning(entity.id, WarningTypeEnums.TVEC);
                 }
               } else {
                 // classifications of the entity
-                const claEntities = entity.relations.CLA?.connections?.map(
-                  (c) => entity.entities[c.entityIds[1]]
-                );
+                const claEntities = eClassifications
+                  ?.map((c) => c.entityIds[1])
+                  .filter((c) => c);
                 if (
                   !allowedEntities.some((classCondition) =>
-                    claEntities?.map((c) => c.id).includes(classCondition)
+                    claEntities?.includes(classCondition)
                   )
                 ) {
                   addNewValidationWarning(entity.id, WarningTypeEnums.TVECE);
@@ -305,7 +319,9 @@ export class ResponseStatement extends Statement implements IResponseStatement {
 
             // REFERENCE TIE
             else if (tieType === EProtocolTieType.Reference) {
-              const eReferences = entity.references;
+              const eReferences = entity.references.filter(
+                (r) => r.resource && r.value
+              );
               // at least one reference (any) needs to be assigned to the E
               if (!allowedEntities || !allowedEntities.length) {
                 if (eReferences.length === 0) {
@@ -325,61 +341,79 @@ export class ResponseStatement extends Statement implements IResponseStatement {
 
             // PROPERTY TIE
             else if (tieType === EProtocolTieType.Property) {
+              const eProps = entity.props.filter(
+                (p) => p.value.entityId && p.type.entityId
+              );
+
               // at least one property needs to be assigned to the E
               if (
-                (!allowedClasses || !allowedClasses.length) &&
-                (!allowedEntities || !allowedEntities.length) &&
-                (!propType || !propType.length)
+                !propType ||
+                (!propType.length &&
+                  !allowedEntities?.length &&
+                  !allowedClasses?.length)
               ) {
-                if (entity.props.length === 0) {
+                if (eProps.length === 0) {
                   addNewValidationWarning(entity.id, WarningTypeEnums.TVEP);
                 }
-              }
 
-              // type is defined but value is empty
-              else if (
+                // type is defined but value is empty
+              } else if (
                 propType?.length &&
                 !allowedEntities?.length &&
                 !allowedClasses?.length
               ) {
                 if (
-                  !entity.props.some((p) => propType?.includes(p.type.entityId))
+                  eProps.length === 0 ||
+                  !eProps.some((p) => propType?.includes(p.type.entityId))
                 ) {
                   addNewValidationWarning(entity.id, WarningTypeEnums.TVEPT);
                 }
-              }
+              } else if (allowedEntities?.length || allowedClasses?.length) {
+                const validProps = eProps.filter((p) =>
+                  propType?.length ? propType.includes(p.type.entityId) : true
+                );
+                if (!validProps?.length) {
+                  addNewValidationWarning(entity.id, WarningTypeEnums.TVEPV);
+                } else if (allowedClasses?.length) {
+                  // class is required
 
-              // type is defined, and value classes are defined
-              else if (propType?.length && allowedClasses?.length) {
-                let passed = true;
-                for (const pi in entity.props) {
-                  const p = entity.props[pi];
-                  const propValueEntityId = p.value.entityId;
-                  const propValueEntity = await findEntityById(
-                    req.db,
-                    propValueEntityId
-                  );
-                  if (
-                    propType?.includes(p.type.entityId) &&
-                    !allowedClasses?.includes(propValueEntity.class)
-                  ) {
-                    passed = false;
+                  // no valid props
+                  if (validProps.length === 0) {
+                    addNewValidationWarning(entity.id, WarningTypeEnums.TVEPV);
+                  } else {
+                    let passed = true;
+                    for (const pi in eProps) {
+                      const p = eProps[pi];
+                      const propValueEntityId = p.value.entityId;
+                      const propValueEntity = await findEntityById(
+                        req.db,
+                        propValueEntityId
+                      );
+                      if (
+                        propType?.includes(p.type.entityId) &&
+                        !allowedClasses?.includes(propValueEntity.class)
+                      ) {
+                        passed = false;
+                      }
+                    }
+                    if (!passed) {
+                      addNewValidationWarning(
+                        entity.id,
+                        WarningTypeEnums.TVEPV
+                      );
+                    }
                   }
-                }
-                if (!passed) {
-                  addNewValidationWarning(entity.id, WarningTypeEnums.TVEPV);
-                }
-              }
-              // type is defined, and value entities are defined
-              else if (propType?.length && allowedEntities?.length) {
-                if (
-                  !entity.props.some(
-                    (p) =>
-                      propType?.includes(p.type.entityId) &&
+                } else if (allowedEntities?.length) {
+                  // entity is required
+                  if (validProps.length === 0) {
+                    addNewValidationWarning(entity.id, WarningTypeEnums.TVEPV);
+                  } else if (
+                    !validProps.some((p) =>
                       allowedEntities.includes(p.value.entityId)
-                  )
-                ) {
-                  addNewValidationWarning(entity.id, WarningTypeEnums.TVEPV);
+                    )
+                  ) {
+                    addNewValidationWarning(entity.id, WarningTypeEnums.TVEPV);
+                  }
                 }
               }
             }
@@ -388,6 +422,7 @@ export class ResponseStatement extends Statement implements IResponseStatement {
       }
     }
 
+    // console.log(warnings);
     return warnings;
   }
 

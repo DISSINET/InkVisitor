@@ -1,16 +1,16 @@
-import { WarningTypeEnums } from "@shared/enums";
-import { IEntity, IWarning } from "@shared/types";
-import api from "api";
-import { EntityTag } from "components/advanced";
 import React, { useEffect, useState } from "react";
 import { TiWarningOutline } from "react-icons/ti";
+
+import { WarningTypeEnums } from "@shared/enums";
+import { IEntity, IWarning } from "@shared/types";
+import theme from "Theme/theme";
+import api from "api";
+import { EntityTag } from "components/advanced";
 import { EntityColors } from "types";
-import { getShortLabelByLetterCount } from "utils/utils";
 import {
   StyledMessage,
   StyledMessageTValidationContent,
 } from "./MessageStyles";
-import theme from "Theme/theme";
 
 interface Message {
   warning: IWarning;
@@ -82,22 +82,23 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
   function renderEntityTags(entityIds: (string | undefined)[]): JSX.Element {
     return (
       <>
-        {entityIds.map((eid) => {
-          if (eid) {
-            const entity = extendedEntities?.[eid];
-            if (entity) {
-              return (
-                <div
-                  style={{ marginRight: "2px", display: "inline-flex" }}
-                  key={eid}
-                >
-                  <EntityTag key={entity.id} entity={entity} />
-                </div>
-              );
-            }
-          }
-          return <>{eid}</>;
-        })}
+        {entityIds
+          .filter((eid) => eid !== undefined && extendedEntities?.[eid])
+          .map((eid) => {
+            const entity = extendedEntities[eid as string];
+            return (
+              <div
+                style={{
+                  paddingLeft: "2px",
+                  paddingRight: "2px",
+                  display: "inline-flex",
+                }}
+                key={eid}
+              >
+                <EntityTag key={entity.id} entity={entity} />
+              </div>
+            );
+          })}
       </>
     );
   }
@@ -118,7 +119,6 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
     entityClasses: string[] | undefined
   ): JSX.Element {
     if (entityClasses) {
-      console.log(entityClasses);
       return (
         <>
           {entityClasses.map((entityClass, index) => {
@@ -131,8 +131,8 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
                 <span
                   style={{
                     backgroundColor: color,
-                    paddingLeft: "2px",
-                    paddingRight: "2px",
+                    padding: "1px 2px",
+                    color: "white",
                   }}
                 >
                   {classItem.entityClass}
@@ -260,7 +260,6 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
       case WarningTypeEnums.TVEPT:
         return (
           <StyledMessageTValidationContent>
-            T-based validations:
             {renderEntityTags([warning?.position?.entityId])} is missing a
             required property with type{" "}
             {renderEntityTags(warning.validation?.propType ?? [])}
