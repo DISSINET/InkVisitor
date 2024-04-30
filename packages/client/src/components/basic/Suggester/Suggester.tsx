@@ -7,7 +7,7 @@ import {
 import { dropdownWildCard } from "@shared/dictionaries/entity";
 import { EntityEnums } from "@shared/enums";
 import { IEntity, IUserOptions } from "@shared/types";
-import { scrollOverscanCount } from "Theme/constants";
+import { MIN_LABEL_LENGTH_MESSAGE, scrollOverscanCount } from "Theme/constants";
 import {
   Button,
   Input,
@@ -209,7 +209,7 @@ export const Suggester: React.FC<Suggester> = ({
         }
       }
     } else {
-      toast.info("Fill at least 1 character");
+      toast.info(MIN_LABEL_LENGTH_MESSAGE);
     }
     setSelected(-1);
   };

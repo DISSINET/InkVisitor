@@ -42,6 +42,7 @@ export const tooltipLabelSeparator = " • ";
 
 export const SAFE_PASSWORD_DESCRIPTION =
   "A safe password: at least 12 characters, a combination of uppercase letters, lowercase letters, numbers, and symbols.";
+export const MIN_LABEL_LENGTH_MESSAGE = "Fill in at least one character";
 
 // animations
 export const springConfig: { [key: string]: {} } = {

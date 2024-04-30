@@ -7,7 +7,11 @@ import { classesAll } from "@shared/dictionaries/entity";
 import { EntityEnums, UserEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { excludedSuggesterEntities, rootTerritoryId } from "Theme/constants";
+import {
+  MIN_LABEL_LENGTH_MESSAGE,
+  excludedSuggesterEntities,
+  rootTerritoryId,
+} from "Theme/constants";
 import api from "api";
 import {
   Button,
@@ -217,8 +221,8 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
   });
 
   const handleCheckOnSubmit = () => {
-    if (label.length < 2) {
-      toast.info("fill at least 2 characters");
+    if (label.length < 1) {
+      toast.info(MIN_LABEL_LENGTH_MESSAGE);
     } else if (
       selectedCategory === EntityEnums.Class.Statement &&
       !territoryId

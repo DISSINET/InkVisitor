@@ -287,7 +287,7 @@ export const EntitySearchBox: React.FC = () => {
             >
               <Input
                 width="full"
-                placeholder="(at least 2 characters)"
+                placeholder="type to search"
                 changeOnType
                 onChangeFn={(value: string) => handleChange({ label: value })}
               />

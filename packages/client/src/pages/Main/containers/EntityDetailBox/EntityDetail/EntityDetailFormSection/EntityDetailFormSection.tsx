@@ -8,11 +8,12 @@ import {
 } from "@shared/dictionaries";
 import { EntityEnums } from "@shared/enums";
 import { IActionData, IResponseDetail, IResponseGeneric } from "@shared/types";
+import { IConceptData } from "@shared/types/concept";
 import { UseMutationResult, useQuery } from "@tanstack/react-query";
-import { rootTerritoryId } from "Theme/constants";
+import { MIN_LABEL_LENGTH_MESSAGE, rootTerritoryId } from "Theme/constants";
 import api from "api";
 import { AxiosResponse } from "axios";
-import { BaseDropdown, Button, Input, MultiInput, TypeBar } from "components";
+import { Button, Input, MultiInput, TypeBar } from "components";
 import Dropdown, { AttributeButtonGroup, EntityTag } from "components/advanced";
 import React, { useEffect, useMemo, useState } from "react";
 import { FaRegCopy } from "react-icons/fa";
@@ -28,7 +29,6 @@ import {
   StyledRelativePosition,
   StyledTagWrap,
 } from "../EntityDetailStyles";
-import { IConceptData } from "@shared/types/concept";
 
 interface EntityDetailFormSection {
   entity: IResponseDetail;
@@ -212,9 +212,9 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
                 onBlur={() => {
                   if (
                     entity.class !== EntityEnums.Class.Statement &&
-                    newLabel.length < 2
+                    newLabel.length < 1
                   ) {
-                    toast.info("fill at least 2 characters");
+                    toast.info(MIN_LABEL_LENGTH_MESSAGE);
                     setNewLabel(entity.label);
                   } else {
                     if (newLabel !== entity.label) {
