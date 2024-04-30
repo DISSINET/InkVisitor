@@ -6,6 +6,7 @@ import {
   IResponseStatement,
   IStatement,
   ITerritory,
+  Relation,
 } from "@shared/types";
 import { OrderType } from "@shared/types/response-statement";
 import {
@@ -15,21 +16,22 @@ import {
 } from "@shared/types/warning";
 
 import { ActionEntity } from "@models/action/action";
+import { ResponseEntity, ResponseEntityDetail } from "@models/entity/response";
+import { getEntityClass } from "@models/factory";
+import { findEntityById } from "@service/shorthands";
 import treeCache from "@service/treeCache";
 import { WarningTypeEnums } from "@shared/enums";
 import { InternalServerError } from "@shared/types/errors";
+import {
+  EProtocolTieType,
+  ITerritoryValidation,
+} from "@shared/types/territory";
 import { Connection } from "rethinkdb-ts";
 import { IRequest } from "src/custom_typings/request";
 import Entity from "../entity/entity";
 import { PositionRules } from "./PositionRules";
 import Statement from "./statement";
-import {
-  EProtocolTieType,
-  ITerritoryValidation,
-} from "@shared/types/territory";
-import { ResponseEntityDetail } from "@models/entity/response";
-import { getEntityClass } from "@models/factory";
-import { findEntityById } from "@service/shorthands";
+import Classification from "@models/relation/classification";
 
 export class ResponseStatement extends Statement implements IResponseStatement {
   entities: { [key: string]: IEntity };
@@ -187,7 +189,13 @@ export class ResponseStatement extends Statement implements IResponseStatement {
 
     const parentTId = this.data.territory?.territoryId as string;
 
-    const entitiesFull: ResponseEntityDetail[] = [];
+    const checkItems: {
+      entity: ResponseEntity;
+      classifications: Relation.IConnection<
+        Relation.IClassification,
+        Relation.ISuperclass
+      >[];
+    }[] = [];
 
     const allEntities = [
       ...this.data.actants.map((a) => a.entityId),
@@ -205,19 +213,43 @@ export class ResponseStatement extends Statement implements IResponseStatement {
       allEntities.push(...a.props.map((c) => c.value.entityId));
     });
 
+    // prepare entities
     for (const ai in allEntities) {
+      const t1 = performance.now();
       const entityId = allEntities[ai];
 
       if (entityId) {
+        const t11 = performance.now();
         const entityData = await this.obtainEntity(entityId, req);
-        const entityModel = getEntityClass({ ...entityData });
-        const entity = new ResponseEntityDetail(entityModel);
-        await entity.prepare(req);
+        console.log("Obtain entity", (performance.now() - t11) / 1000);
 
-        entitiesFull.push(entity);
+        const t12 = performance.now();
+        const entityModel = getEntityClass({ ...entityData });
+
+        const entity = new ResponseEntity(entityModel);
+        console.log("Response model", (performance.now() - t12) / 1000);
+
+        const t13 = performance.now();
+        await entity.prepare(req);
+        console.log("Prepare entity", (performance.now() - t13) / 1000);
+
+        const classifications =
+          await Classification.getClassificationForwardConnections(
+            req.db.connection,
+            entityId,
+            entity.class,
+            1,
+            0
+          );
+        checkItems.push({
+          entity,
+          classifications: classifications,
+        });
       }
+      console.log("Time for single entity", (performance.now() - t1) / 1000);
     }
 
+    const t2 = performance.now();
     if (parentTId) {
       const lineageTIds = [parentTId, ...treeCache.tree.idMap[parentTId].path];
 
@@ -253,49 +285,50 @@ export class ResponseStatement extends Statement implements IResponseStatement {
             );
           };
 
-          const entitiesToCheck = entitiesFull
-            .filter((entity) => {
+          const entitiesToCheck = checkItems
+            .filter((check) => {
               // falls under entity Classes
               if (!entityClasses || !entityClasses.length) {
                 // no entity class condition
                 return true;
               }
 
-              return entityClasses.includes(entity.class);
+              return entityClasses.includes(check.entity.class);
             })
-            .filter((entity) => {
+            .filter((check) => {
               // falls under classification condition
               if (!classifications || !classifications.length) {
                 // there is no classification condition
                 return true;
               }
-              const claEntities = entity.relations.CLA?.connections?.map(
-                (c) => entity.entities[c.entityIds[1]]
-              );
+              const claEntities = check.classifications
+                ?.map((c) => c.entityIds[1])
+                .filter((c) => c);
 
               // at least one required classifications is fullfilled
               return classifications.some((classCondition) =>
-                claEntities?.map((c) => c.id).includes(classCondition)
+                claEntities?.includes(classCondition)
               );
             });
 
           for (const ei in entitiesToCheck) {
-            const entity = entitiesToCheck[ei];
+            const { entity, classifications: eClassifications } =
+              entitiesToCheck[ei];
             // CLASSIFICATION TIE
             if (tieType === EProtocolTieType.Classification) {
               if (!allowedEntities || !allowedEntities.length) {
                 // no condition set, so we need at least one classification
-                if (!entity.relations.CLA?.connections?.length) {
+                if (!eClassifications.length) {
                   addNewValidationWarning(entity.id, WarningTypeEnums.TVEC);
                 }
               } else {
                 // classifications of the entity
-                const claEntities = entity.relations.CLA?.connections?.map(
-                  (c) => entity.entities[c.entityIds[1]]
-                );
+                const claEntities = eClassifications
+                  ?.map((c) => c.entityIds[1])
+                  .filter((c) => c);
                 if (
                   !allowedEntities.some((classCondition) =>
-                    claEntities?.map((c) => c.id).includes(classCondition)
+                    claEntities?.includes(classCondition)
                   )
                 ) {
                   addNewValidationWarning(entity.id, WarningTypeEnums.TVECE);
@@ -387,6 +420,7 @@ export class ResponseStatement extends Statement implements IResponseStatement {
         }
       }
     }
+    console.log("Warnings created in", (performance.now() - t2) / 1000);
 
     return warnings;
   }
@@ -489,8 +523,14 @@ export class ResponseStatement extends Statement implements IResponseStatement {
   async getWarnings(req: IRequest): Promise<IWarning[]> {
     let warnings: IWarning[] = [];
 
+    const t1 = performance.now();
+
     const tbasedWarnings = await this.getTValidationWarnings(req);
     warnings = warnings.concat(tbasedWarnings);
+
+    const t2 = performance.now();
+
+    console.log("Time for T based warnings", (t2 - t1) / 1000);
 
     if (!this.data.actions.length) {
       warnings.push(this.newStatementWarning(WarningTypeEnums.NA, {}));
