@@ -82,22 +82,19 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
   function renderEntityTags(entityIds: (string | undefined)[]): JSX.Element {
     return (
       <>
-        {entityIds.map((eid) => {
-          if (eid) {
-            const entity = extendedEntities?.[eid];
-            if (entity) {
-              return (
-                <div
-                  style={{ marginRight: "2px", display: "inline-flex" }}
-                  key={eid}
-                >
-                  <EntityTag key={entity.id} entity={entity} />
-                </div>
-              );
-            }
-          }
-          return <>{eid}</>;
-        })}
+        {entityIds
+          .filter((eid) => eid !== undefined && extendedEntities?.[eid])
+          .map((eid) => {
+            const entity = extendedEntities[eid as string];
+            return (
+              <div
+                style={{ marginRight: "2px", display: "inline-flex" }}
+                key={eid}
+              >
+                <EntityTag key={entity.id} entity={entity} />
+              </div>
+            );
+          })}
       </>
     );
   }
@@ -260,7 +257,6 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
       case WarningTypeEnums.TVEPT:
         return (
           <StyledMessageTValidationContent>
-            T-based validations:
             {renderEntityTags([warning?.position?.entityId])} is missing a
             required property with type{" "}
             {renderEntityTags(warning.validation?.propType ?? [])}
