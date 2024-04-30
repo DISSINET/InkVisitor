@@ -171,9 +171,6 @@ importers:
       babel-plugin-require-context-hook:
         specifier: ^1.0.0
         version: 1.0.0
-      chroma-js:
-        specifier: ^2.4.2
-        version: 2.4.2
       clean-webpack-plugin:
         specifier: ^4.0.0
         version: 4.0.0(webpack@5.90.3(webpack-cli@5.1.4(webpack-dev-server@5.0.3)(webpack@5.90.3)))
@@ -2257,9 +2254,6 @@ packages:
   chokidar@3.6.0:
     resolution: {integrity: sha512-7VT13fmjotKpGipCW9JEQAusEPE+Ei8nl6/g4FBAmIm0GOOLMua9NDDo/DWp0ZAxCr3cPq5ZpBqmPAQgDda2Pw==}
     engines: {node: '>= 8.10.0'}
-
-  chroma-js@2.4.2:
-    resolution: {integrity: sha512-U9eDw6+wt7V8z5NncY2jJfZa+hUH8XEj8FQHgFJTrUFnJfXYf4Ml4adI2vXZOjqRDpFWtYVWypDfZwnJ+HIR4A==}
 
   chrome-launcher@0.15.2:
     resolution: {integrity: sha512-zdLEwNo3aUVzIhKhTtXfxhdvZhUghrnmkvcAq2NoDd+LeOHKf03H5jwZ8T/STsAlzyALkBVK552iaG1fGf1xVQ==}
@@ -8184,8 +8178,6 @@ snapshots:
       readdirp: 3.6.0
     optionalDependencies:
       fsevents: 2.3.3
-
-  chroma-js@2.4.2: {}
 
   chrome-launcher@0.15.2:
     dependencies:

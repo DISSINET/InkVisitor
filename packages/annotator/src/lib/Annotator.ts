@@ -7,8 +7,8 @@ import Viewport from "./Viewport";
 export interface HighlightSchema {
   mode: "background" | "stroke";
   style: {
-    color: string;
-    opacity: number;
+    fillColor: string;
+    fillOpacity: number;
   };
 }
 
@@ -144,7 +144,7 @@ export class Annotator {
     switch (e.key) {
       case "Enter":
         if (this.text.mode === "highlight") {
-          return
+          return;
         }
         this.text.insertNewline(this.viewport, this.cursor);
         this.cursor.moveToNewline();
@@ -228,7 +228,7 @@ export class Annotator {
 
       case "Backspace":
         if (this.text.mode === "highlight") {
-          return
+          return;
         }
         const segmentBefore = this.text.cursorToIndex(
           this.viewport,
@@ -295,7 +295,7 @@ export class Annotator {
 
       case "Delete":
         if (this.text.mode === "highlight") {
-          return
+          return;
         }
         this.text.deleteText(this.viewport, this.cursor, -1);
         this.cursor.move(0, 0);
@@ -317,7 +317,7 @@ export class Annotator {
 
         if (!nonCharKeys.includes(key)) {
           if (this.text.mode === "highlight") {
-            return
+            return;
           }
 
           this.text.insertText(this.viewport, this.cursor, key);
@@ -353,7 +353,10 @@ export class Annotator {
     this.cursor.setPositionFromEvent(e, this.lineHeight, this.charWidth);
     this.cursor.selectArea(this.viewport.lineStart);
 
-    this.annotatedPosition = this.text.cursorToIndex(this.viewport, this.cursor)
+    this.annotatedPosition = this.text.cursorToIndex(
+      this.viewport,
+      this.cursor
+    );
 
     this.draw();
   }
@@ -552,15 +555,15 @@ export class Annotator {
       }
     }
 
-    if (this.text.mode === "highlight" && this.onHighlightCb && this.annotatedPosition) {
-      console.log(this.annotatedPosition)
-      const annotated = this.getAnnotations(
-        null,
-        this.annotatedPosition
-      );
+    if (
+      this.text.mode === "highlight" &&
+      this.onHighlightCb &&
+      this.annotatedPosition
+    ) {
+      //console.log(this.annotatedPosition)
+      const annotated = this.getAnnotations(null, this.annotatedPosition);
 
       if (annotated.length > 0) {
-        
         for (const tag of annotated) {
           const highlight = this.onHighlightCb(tag);
           if (highlight) {
@@ -572,7 +575,7 @@ export class Annotator {
             const highlighter = new Cursor(0, 0);
             highlighter.selectStart = startLine;
             highlighter.selectEnd = endLine;
-            console.log(startLine, endLine, tag)
+            console.log(startLine, endLine, tag);
             highlighter.draw(this.ctx, this.viewport, {
               lineHeight: this.lineHeight,
               charWidth: this.charWidth,

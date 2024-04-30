@@ -1,25 +1,31 @@
-import { Annotator, Highlighted, Mode } from "@inkvisitor/annotator/src/lib";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { FaMarker, FaPen, FaRegSave, FaTrash } from "react-icons/fa";
+import { toast } from "react-toastify";
+import { v4 as uuidv4 } from "uuid";
+
+import {
+  Annotator,
+  HighlightSchema,
+  Mode,
+} from "@inkvisitor/annotator/src/lib";
 import { IDocument, IEntity } from "@shared/types";
+import theme from "Theme/theme";
 import api from "api";
 import { Button } from "components/basic/Button/Button";
 import { ButtonGroup } from "components/basic/ButtonGroup/ButtonGroup";
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { FaMarker, FaPen, FaRegSave } from "react-icons/fa";
+import { EntityColors } from "types";
 import { useAnnotator } from "./AnnotatorContext";
 import TextAnnotatorMenu from "./AnnotatorMenu";
 import {
   StyledCanvasWrapper,
-  StyledHightlightedText,
   StyledLinesCanvas,
   StyledMainCanvas,
   StyledScrollerCursor,
   StyledScrollerViewport,
 } from "./AnnotatorStyles";
-import theme from "Theme/theme";
-import { useDebounce } from "hooks";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { toast } from "react-toastify";
-import { v4 as uuidv4 } from "uuid";
+import { HiCodeBracket } from "react-icons/hi2";
+import { BsFileTextFill } from "react-icons/bs";
 
 interface TextAnnotatorProps {
   width: number;
@@ -101,23 +107,29 @@ export const TextAnnotator = ({
     storedEntities.current[eid] = entity;
   };
 
+  const obtainEntity = async (eid: string) => {
+    if (Object.keys(storedEntities.current).includes(eid)) {
+      return storedEntities.current[eid];
+    } else {
+      try {
+        const entityRes = await fetchEntity(eid);
+        if (entityRes && entityRes.data) {
+          addEntityToStore(eid, entityRes.data);
+          return entityRes.data;
+        }
+      } catch (error) {
+        addEntityToStore(eid, false);
+      }
+    }
+  };
+
   const handleTextSelection = async (text: string, anchors: string[]) => {
     if (annotatorMode === "highlight") {
       setSelectedText(text);
       setSelectedAnchors(anchors);
 
       for (const anchorI in anchors) {
-        const anchor = anchors[anchorI];
-        if (!Object.keys(storedEntities.current).includes(anchor)) {
-          try {
-            const entityRes = await fetchEntity(anchor);
-            if (entityRes && entityRes.data) {
-              addEntityToStore(anchor, entityRes.data);
-            }
-          } catch (error) {
-            addEntityToStore(anchor, false);
-          }
-        }
+        await obtainEntity(anchors[anchorI]);
       }
     }
   };
@@ -130,7 +142,7 @@ export const TextAnnotator = ({
     setSelectedText("");
   };
 
-  useEffect(() => {
+  const refreshAnnotator = () => {
     if (!mainCanvas.current || !scroller.current) {
       return;
     }
@@ -153,13 +165,29 @@ export const TextAnnotator = ({
       handleTextSelection(text, anchors);
     });
 
-    annotator.onHighlight((entity: string) => {
-      return {
-        mode: "background",
-        style: {
-          color: theme.color.danger,
-        },
-      };
+    annotator.onHighlight((entityId: string) => {
+      const entity = storedEntities.current[entityId];
+      if (entity) {
+        const classItem = EntityColors[entity.class];
+        const colorName = classItem?.color ?? "transparent";
+        const color = theme.color[colorName] as string;
+
+        return {
+          mode: "background",
+          style: {
+            fillColor: color,
+            fillOpacity: 0.2,
+          },
+        };
+      } else {
+        return {
+          mode: "background",
+          style: {
+            fillColor: "transparent",
+            fillOpacity: 0,
+          },
+        };
+      }
     });
 
     annotator.onTextChanged((text) => {
@@ -169,6 +197,10 @@ export const TextAnnotator = ({
 
     annotator.draw();
     setAnnotator(annotator);
+  };
+
+  useEffect(() => {
+    refreshAnnotator();
   }, [document]);
 
   useEffect(() => {
@@ -191,8 +223,12 @@ export const TextAnnotator = ({
     const yLine = annotator?.cursor?.yLine ?? 0;
     const lineHeight = annotator?.lineHeight ?? 0;
 
-    return yLine * lineHeight + (topBottomSelection ? 100 : 50);
+    return yLine * lineHeight + (topBottomSelection ? -50 : 50);
   }, [annotator?.cursor?.yLine, annotator?.lineHeight, topBottomSelection]);
+
+  const madeAnyChanges = useMemo<boolean>(() => {
+    return annotator?.text?.value !== document?.content;
+  }, [annotator?.text?.value, document?.content]);
 
   return (
     <div style={{ width: width }}>
@@ -217,7 +253,9 @@ export const TextAnnotator = ({
               if (handleCreateStatement && selectedText) {
                 const newStatementId = uuidv4();
                 handleAddAnchor(newStatementId);
-                handleCreateStatement(selectedText, newStatementId);
+                // remove linebreaks from text
+                const validatedText = selectedText.replace(/\n/g, " ");
+                handleCreateStatement(validatedText, newStatementId);
               }
             }}
           />
@@ -259,10 +297,23 @@ export const TextAnnotator = ({
             tooltipLabel="activate syntax higlighting mode"
           />
           <Button
-            key="raw"
-            icon={<FaMarker size={11} />}
+            key="semi"
+            icon={<BsFileTextFill size={11} />}
             color="success"
-            label="edit"
+            label="text edit"
+            inverted={annotatorMode !== "semi"}
+            onClick={() => {
+              annotator.setMode("semi");
+              setAnnotatorMode("semi");
+              annotator.draw();
+            }}
+            tooltipLabel="activate semi mode"
+          />
+          <Button
+            key="raw"
+            icon={<HiCodeBracket size={11} />}
+            color="success"
+            label="XML"
             inverted={annotatorMode !== "raw"}
             onClick={() => {
               annotator.setMode("raw");
@@ -276,9 +327,18 @@ export const TextAnnotator = ({
             label="save"
             color="primary"
             icon={<FaRegSave />}
-            disabled={annotator.text.value === document?.content}
+            disabled={madeAnyChanges}
             onClick={() => {
               handleSaveNewContent();
+            }}
+          />
+          <Button
+            label="discard changes"
+            color="warning"
+            icon={<FaTrash />}
+            disabled={madeAnyChanges}
+            onClick={() => {
+              refreshAnnotator();
             }}
           />
         </ButtonGroup>

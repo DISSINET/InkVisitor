@@ -23,13 +23,18 @@ export default class Cursor implements IRelativeCoordinates {
 
   // highlighted area must use absolute coordinates - highlighted area stays in position while scrolling
   private selecting: boolean = false;
-   selectStart?: IAbsCoordinates;
-   selectEnd?: IAbsCoordinates;
+  selectStart?: IAbsCoordinates;
+  selectEnd?: IAbsCoordinates;
 
   // Width of cursor point in px
-  static Width = 3
-  
-  constructor(xLine: number = -1, yLine: number = -1, fillColor = "blue", fillOpacity = 0.2) {
+  static Width = 3;
+
+  constructor(
+    xLine: number = -1,
+    yLine: number = -1,
+    fillColor = "blue",
+    fillOpacity = 0.2
+  ) {
     this.fillColor = fillColor;
     this.fillOpacity = fillOpacity;
     this.xLine = xLine;
@@ -37,10 +42,10 @@ export default class Cursor implements IRelativeCoordinates {
   }
 
   setFillColor(fillColor: string): void {
-    this.fillColor = fillColor
+    this.fillColor = fillColor;
   }
   setFillOpacity(fillOpacity: number): void {
-    this.fillOpacity = fillOpacity
+    this.fillOpacity = fillOpacity;
   }
 
   yToLineI(y: number, lineHeight: number): number {
@@ -50,17 +55,13 @@ export default class Cursor implements IRelativeCoordinates {
   xToCharI(x: number, charWidth: number): number {
     return Math.floor(x / charWidth);
   }
-  
+
   setPosition(lineX: number, lineY: number) {
     this.xLine = lineX;
     this.yLine = lineY;
   }
 
-  setPositionFromEvent(
-    evt: MouseEvent,
-    lineHeight: number,
-    charWidth: number
-  ) {
+  setPositionFromEvent(evt: MouseEvent, lineHeight: number, charWidth: number) {
     this.xLine = this.xToCharI(evt.offsetX, charWidth);
     this.yLine = this.yToLineI(evt.offsetY, lineHeight);
   }
@@ -150,7 +151,7 @@ export default class Cursor implements IRelativeCoordinates {
   ) {
     const { charWidth, lineHeight } = options;
 
-    switch(options.schema?.mode) {
+    switch (options.schema?.mode) {
       case "stroke":
         ctx.strokeRect(
           xStart * charWidth,
@@ -167,8 +168,7 @@ export default class Cursor implements IRelativeCoordinates {
           (xEnd - xStart) * charWidth,
           lineHeight
         );
-      }
-
+    }
   }
 
   /**
@@ -208,8 +208,9 @@ export default class Cursor implements IRelativeCoordinates {
         hEnd = tmpSwitch;
       }
 
-      ctx.fillStyle = options.schema?.style.color || this.fillColor;
-      ctx.globalAlpha =  options.schema?.style.opacity || this.fillOpacity;
+      ctx.fillStyle = options.schema?.style.fillColor || this.fillColor;
+      ctx.globalAlpha = options.schema?.style.fillOpacity || this.fillOpacity;
+      ctx.globalCompositeOperation = "multiply";
 
       for (let i = 0; i <= viewport.lineEnd - viewport.lineStart; i++) {
         const absY = viewport.lineStart + i;
