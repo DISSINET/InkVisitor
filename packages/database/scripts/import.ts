@@ -360,7 +360,12 @@ const datasets: Record<string, DbSchema> = {
     users: {
       tableName: "users",
       data: require("../datasets/default/users.json"),
-      transform: function () {},
+      transform: function () {
+        this.data = this.data.map((user: IUser) => {
+          user.password = hashPassword(user.password ? user.password : "");
+          return user;
+        });
+      },
     },
     aclPermissions: {
       tableName: "acl_permissions",
