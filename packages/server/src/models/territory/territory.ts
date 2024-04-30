@@ -22,14 +22,14 @@ import { Connection, RDatum, WriteResult, r as rethink } from "rethinkdb-ts";
 
 export class TerritoryProtocol implements ITerritoryProtocol, IModel {
   project: string;
-  guidelinesResource: string;
+  guidelinesResource: string[];
   description: string;
   startDate: string;
   endDate: string;
 
   constructor(data: Partial<ITerritoryProtocol>) {
     this.project = data?.project as string;
-    this.guidelinesResource = data?.guidelinesResource as string;
+    this.guidelinesResource = data?.guidelinesResource as string[];
     this.description = data?.description as string;
     this.startDate = data?.startDate as string;
     this.endDate = data?.endDate as string;
@@ -384,7 +384,8 @@ class Territory extends Entity implements ITerritory {
     }
 
     if (this.data.protocol) {
-      entityIds.push(this.data.protocol.guidelinesResource);
+      Array.isArray(this.data.protocol.guidelinesResource) &&
+        this.data.protocol.guidelinesResource.forEach((r) => entityIds.push(r));
       entityIds.push(this.data.protocol.startDate);
       entityIds.push(this.data.protocol.endDate);
     }

@@ -6,16 +6,18 @@ import { AxiosResponse } from "axios";
 import { Input } from "components";
 import { EntitySuggester, EntityTag } from "components/advanced";
 import React, { useEffect } from "react";
+import { StyledSuggesterWrapper } from "../EntityDetailRelations/EntityDetailRelationTypeBlock/EntityDetailRelationTypeBlockStyles";
 import {
   StyledGrid,
   StyledLabel,
   StyledTagWrap,
   StyledValue,
 } from "./EntityDetailProtocolStyles";
+import { StyledFlexList } from "../EntityDetailValidationSection/EntityDetailValidationRule/EntityDetailValidationRuleStyles";
 
 const initialProtocol: ITerritoryProtocol = {
   project: "",
-  guidelinesResource: "",
+  guidelinesResource: [],
   description: "",
   startDate: "",
   endDate: "",
@@ -77,29 +79,44 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
 
       <StyledLabel>Guidelines resource</StyledLabel>
       <StyledValue>
-        {guidelinesResource && guidelinesResource.length > 0 ? (
-          <StyledTagWrap>
-            <EntityTag
-              entity={entities[guidelinesResource]}
-              unlinkButton={
-                userCanEdit && {
-                  onClick: () => updateProtocol({ guidelinesResource: "" }),
-                }
-              }
+        <StyledFlexList>
+          {Array.isArray(guidelinesResource) &&
+            guidelinesResource.map((gResourceId) => {
+              return (
+                <StyledTagWrap key={gResourceId}>
+                  <EntityTag
+                    flexListMargin
+                    entity={entities[gResourceId]}
+                    unlinkButton={
+                      userCanEdit && {
+                        onClick: () =>
+                          updateProtocol({
+                            guidelinesResource: guidelinesResource.filter(
+                              (id) => id !== gResourceId
+                            ),
+                          }),
+                      }
+                    }
+                  />
+                </StyledTagWrap>
+              );
+            })}
+          {userCanEdit && (
+            <EntitySuggester
+              alwaysShowCreateModal
+              onPicked={(newPicked) => {
+                updateProtocol({
+                  guidelinesResource: [...guidelinesResource, newPicked.id],
+                });
+              }}
+              excludedActantIds={guidelinesResource}
+              categoryTypes={[EntityEnums.Class.Resource]}
+              territoryParentId={territory.data.parent.territoryId}
+              isInsideTemplate={isInsideTemplate}
+              disabled={!userCanEdit}
             />
-          </StyledTagWrap>
-        ) : (
-          <EntitySuggester
-            alwaysShowCreateModal
-            onPicked={(newPicked) => {
-              updateProtocol({ guidelinesResource: newPicked.id });
-            }}
-            categoryTypes={[EntityEnums.Class.Resource]}
-            territoryParentId={territory.data.parent.territoryId}
-            isInsideTemplate={isInsideTemplate}
-            disabled={!userCanEdit}
-          />
-        )}
+          )}
+        </StyledFlexList>
       </StyledValue>
 
       <StyledLabel>Description</StyledLabel>
