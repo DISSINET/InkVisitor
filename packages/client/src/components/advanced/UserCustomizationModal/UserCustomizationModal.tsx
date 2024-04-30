@@ -102,15 +102,6 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
     });
   };
 
-  const handleResetPassword = async () => {
-    const resetRes = await api.resetMyPassword();
-    if (resetRes.status == 200) {
-      toast.success(
-        `an email with a new pre-generated password has been sent to ${user.email}`
-      );
-    }
-  };
-
   const passwordUpdateMutation = useMutation({
     mutationFn: async () => await api.updatePassword("me", newPassword),
     onSuccess: () => {
@@ -143,6 +134,9 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
       queryClient.invalidateQueries({ queryKey: ["user"] });
       toast.info("User updated!");
       onClose();
+    },
+    onError: (err) => {
+      toast.error("User not updated");
     },
   });
 
