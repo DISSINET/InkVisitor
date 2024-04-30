@@ -1,16 +1,16 @@
-import { WarningTypeEnums } from "@shared/enums";
-import { IEntity, IWarning } from "@shared/types";
-import api from "api";
-import { EntityTag } from "components/advanced";
 import React, { useEffect, useState } from "react";
 import { TiWarningOutline } from "react-icons/ti";
+
+import { WarningTypeEnums } from "@shared/enums";
+import { IEntity, IWarning } from "@shared/types";
+import theme from "Theme/theme";
+import api from "api";
+import { EntityTag } from "components/advanced";
 import { EntityColors } from "types";
-import { getShortLabelByLetterCount } from "utils/utils";
 import {
   StyledMessage,
   StyledMessageTValidationContent,
 } from "./MessageStyles";
-import theme from "Theme/theme";
 
 interface Message {
   warning: IWarning;
@@ -88,7 +88,11 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
             const entity = extendedEntities[eid as string];
             return (
               <div
-                style={{ marginRight: "2px", display: "inline-flex" }}
+                style={{
+                  paddingLeft: "2px",
+                  paddingRight: "2px",
+                  display: "inline-flex",
+                }}
                 key={eid}
               >
                 <EntityTag key={entity.id} entity={entity} />
