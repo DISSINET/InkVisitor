@@ -1,25 +1,29 @@
-import { Annotator, Highlighted, Mode } from "@inkvisitor/annotator/src/lib";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { FaMarker, FaPen, FaRegSave, FaTrash } from "react-icons/fa";
+import { toast } from "react-toastify";
+import { v4 as uuidv4 } from "uuid";
+
+import {
+  Annotator,
+  HighlightSchema,
+  Mode,
+} from "@inkvisitor/annotator/src/lib";
 import { IDocument, IEntity } from "@shared/types";
+import theme from "Theme/theme";
 import api from "api";
 import { Button } from "components/basic/Button/Button";
 import { ButtonGroup } from "components/basic/ButtonGroup/ButtonGroup";
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { FaMarker, FaPen, FaRegSave } from "react-icons/fa";
+import { EntityColors } from "types";
 import { useAnnotator } from "./AnnotatorContext";
 import TextAnnotatorMenu from "./AnnotatorMenu";
 import {
   StyledCanvasWrapper,
-  StyledHightlightedText,
   StyledLinesCanvas,
   StyledMainCanvas,
   StyledScrollerCursor,
   StyledScrollerViewport,
 } from "./AnnotatorStyles";
-import theme from "Theme/theme";
-import { useDebounce } from "hooks";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { toast } from "react-toastify";
-import { v4 as uuidv4 } from "uuid";
 
 interface TextAnnotatorProps {
   width: number;
@@ -101,23 +105,29 @@ export const TextAnnotator = ({
     storedEntities.current[eid] = entity;
   };
 
+  const obtainEntity = async (eid: string) => {
+    if (Object.keys(storedEntities.current).includes(eid)) {
+      return storedEntities.current[eid];
+    } else {
+      try {
+        const entityRes = await fetchEntity(eid);
+        if (entityRes && entityRes.data) {
+          addEntityToStore(eid, entityRes.data);
+          return entityRes.data;
+        }
+      } catch (error) {
+        addEntityToStore(eid, false);
+      }
+    }
+  };
+
   const handleTextSelection = async (text: string, anchors: string[]) => {
     if (annotatorMode === "highlight") {
       setSelectedText(text);
       setSelectedAnchors(anchors);
 
       for (const anchorI in anchors) {
-        const anchor = anchors[anchorI];
-        if (!Object.keys(storedEntities.current).includes(anchor)) {
-          try {
-            const entityRes = await fetchEntity(anchor);
-            if (entityRes && entityRes.data) {
-              addEntityToStore(anchor, entityRes.data);
-            }
-          } catch (error) {
-            addEntityToStore(anchor, false);
-          }
-        }
+        await obtainEntity(anchors[anchorI]);
       }
     }
   };
@@ -128,6 +138,20 @@ export const TextAnnotator = ({
     );
     annotator.addAnchor(entityId);
     setSelectedText("");
+  };
+
+  const refreshAnnotator = () => {
+    if (!mainCanvas.current || !scroller.current) {
+      return;
+    }
+
+    const annotator = new Annotator(
+      mainCanvas.current,
+      document?.content ?? "no text"
+    );
+
+    annotator.draw();
+    setAnnotator(annotator);
   };
 
   useEffect(() => {
@@ -154,12 +178,7 @@ export const TextAnnotator = ({
     });
 
     annotator.onHighlight((entity: string) => {
-      return {
-        mode: "background",
-        style: {
-          color: theme.color.danger,
-        },
-      };
+      highlightEntity(entity);
     });
 
     annotator.onTextChanged((text) => {
@@ -181,6 +200,33 @@ export const TextAnnotator = ({
     }
   }, [width, height]);
 
+  const highlightEntity = async (
+    entityId: string
+  ): Promise<HighlightSchema> => {
+    const entity = await obtainEntity(entityId);
+    if (entity) {
+      const classItem = EntityColors[entity.class];
+      const colorName = classItem?.color ?? "transparent";
+      const color = theme.color[colorName] as string;
+
+      return {
+        mode: "background",
+        style: {
+          fillColor: color,
+          fillOpacity: 0.1,
+        },
+      };
+    } else {
+      return {
+        mode: "background",
+        style: {
+          fillColor: "white",
+          fillOpacity: 0,
+        },
+      };
+    }
+  };
+
   const topBottomSelection = useMemo<boolean>(() => {
     const selectedText = annotator?.cursor?.getSelected();
 
@@ -191,7 +237,7 @@ export const TextAnnotator = ({
     const yLine = annotator?.cursor?.yLine ?? 0;
     const lineHeight = annotator?.lineHeight ?? 0;
 
-    return yLine * lineHeight + (topBottomSelection ? 100 : 50);
+    return yLine * lineHeight + (topBottomSelection ? -50 : 50);
   }, [annotator?.cursor?.yLine, annotator?.lineHeight, topBottomSelection]);
 
   return (
@@ -279,6 +325,15 @@ export const TextAnnotator = ({
             disabled={annotator.text.value === document?.content}
             onClick={() => {
               handleSaveNewContent();
+            }}
+          />
+          <Button
+            label="discard changes"
+            color="warning"
+            icon={<FaTrash />}
+            disabled={annotator.text.value === document?.content}
+            onClick={() => {
+              refreshAnnotator();
             }}
           />
         </ButtonGroup>
