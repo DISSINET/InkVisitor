@@ -1,6 +1,6 @@
 {
   "name": "dissinet.ddb.client",
-  "version": "1.4.0a",
+  "version": "1.4.0b",
   "description": "",
   "main": "index.js",
   "engines": {
