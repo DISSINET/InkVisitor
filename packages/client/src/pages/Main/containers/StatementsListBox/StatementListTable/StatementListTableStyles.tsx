@@ -91,3 +91,11 @@ export const StyledCheckboxWrapper = styled.div`
   color: ${({ theme }) => theme.color["black"]};
   cursor: pointer;
 `;
+
+export const StyledAbbreviatedLabel = styled.div`
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  min-width: 5rem;
+`;
