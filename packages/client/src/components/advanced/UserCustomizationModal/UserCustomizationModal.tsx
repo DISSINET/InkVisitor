@@ -142,7 +142,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["user"] });
       toast.info("User updated!");
-      //onClose();
+      onClose();
     },
   });
 
@@ -185,6 +185,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
         width="auto"
         onEnterPress={handleSubmit}
         onClose={onClose}
+        isLoading={updateUserMutation.isPending}
       >
         <ModalHeader title="User customization" />
         <ModalContent column enableScroll>
