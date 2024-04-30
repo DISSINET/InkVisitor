@@ -216,23 +216,13 @@ export class ResponseStatement extends Statement implements IResponseStatement {
 
     // prepare entities
     for (const ai in allEntities) {
-      const t1 = performance.now();
       const entityId = allEntities[ai];
 
       if (entityId) {
-        const t11 = performance.now();
         const entityData = await this.obtainEntity(entityId, req);
-        console.log("Obtain entity", (performance.now() - t11) / 1000);
-
-        const t12 = performance.now();
         const entityModel = getEntityClass({ ...entityData });
-
         const entity = new ResponseEntity(entityModel);
-        console.log("Response model", (performance.now() - t12) / 1000);
-
-        const t13 = performance.now();
         await entity.prepare(req);
-        console.log("Prepare entity", (performance.now() - t13) / 1000);
 
         const classifications =
           await Classification.getClassificationForwardConnections(
@@ -247,10 +237,8 @@ export class ResponseStatement extends Statement implements IResponseStatement {
           classifications: classifications,
         });
       }
-      console.log("Time for single entity", (performance.now() - t1) / 1000);
     }
 
-    const t2 = performance.now();
     if (parentTId) {
       const lineageTIds = [parentTId, ...treeCache.tree.idMap[parentTId].path];
 
@@ -363,7 +351,6 @@ export class ResponseStatement extends Statement implements IResponseStatement {
               const eProps = entity.props.filter(
                 (p) => p.value.entityId && p.type.entityId
               );
-              console.log(entity.props, eProps);
               // at least one property needs to be assigned to the E
               if (
                 (!allowedClasses || !allowedClasses.length) &&
@@ -425,7 +412,6 @@ export class ResponseStatement extends Statement implements IResponseStatement {
         }
       }
     }
-    console.log("Warnings created in", (performance.now() - t2) / 1000);
 
     return warnings;
   }
@@ -528,14 +514,8 @@ export class ResponseStatement extends Statement implements IResponseStatement {
   async getWarnings(req: IRequest): Promise<IWarning[]> {
     let warnings: IWarning[] = [];
 
-    const t1 = performance.now();
-
     const tbasedWarnings = await this.getTValidationWarnings(req);
     warnings = warnings.concat(tbasedWarnings);
-
-    const t2 = performance.now();
-
-    console.log("Time for T based warnings", (t2 - t1) / 1000);
 
     if (!this.data.actions.length) {
       warnings.push(this.newStatementWarning(WarningTypeEnums.NA, {}));
