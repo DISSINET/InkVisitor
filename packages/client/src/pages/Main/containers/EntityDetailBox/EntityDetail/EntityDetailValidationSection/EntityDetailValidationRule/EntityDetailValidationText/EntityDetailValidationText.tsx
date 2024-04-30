@@ -6,11 +6,11 @@ import {
   ITerritoryValidation,
 } from "@shared/types/territory";
 import React, { useCallback, useMemo } from "react";
+import { getEntityLabel } from "utils/utils";
 import {
   StyledSentence,
   StyledSentenceEntity,
 } from "../EntityDetailValidationRuleStyles";
-import { EntityDetailValidationSentenceEntity } from "./EntityDetailValidationSentenceEntity";
 
 interface EntityDetailValidationText {
   validation: ITerritoryValidation;
@@ -48,12 +48,12 @@ export const EntityDetailValidationText: React.FC<
         const entity = entities[entityId];
         const last: boolean = index === entitiesIdList.length - 1;
         return (
-          <EntityDetailValidationSentenceEntity
-            key={index}
-            entity={entity}
-            entityId={entityId}
-            last={last}
-          />
+          <span key={entityId}>
+            <StyledSentenceEntity>
+              {getEntityLabel(entity)}
+            </StyledSentenceEntity>
+            {!last && " or "}
+          </span>
         );
       });
     },
@@ -92,9 +92,18 @@ export const EntityDetailValidationText: React.FC<
   return (
     <StyledSentence>
       <>
-        {`All entities `}
-        {allowedClasses && allowedClasses.length > 0 && `with type `}
-        {renderEntityClassList(entityClasses)}
+        {allowedClasses && allowedClasses.length > 0 ? (
+          <>
+            {`All entities with type `}
+            {renderEntityClassList(entityClasses)}
+          </>
+        ) : (
+          <>
+            {`All `}
+            {renderEntityClassList(entityClasses)}
+            {` entities `}
+          </>
+        )}
       </>
 
       {classifications.length > 0 && (
@@ -106,11 +115,11 @@ export const EntityDetailValidationText: React.FC<
 
       {tieType === EProtocolTieType.Property && (
         <>
-          <span> must have a property </span>
+          <span> must have a property</span>
           <span>
             {propType && propType.length > 0 && (
               <>
-                {`of type `}
+                {` of type `}
                 {renderEntityList(propType)}
               </>
             )}
@@ -131,7 +140,7 @@ export const EntityDetailValidationText: React.FC<
       )}
       {tieType === EProtocolTieType.Classification && (
         <>
-          <span> must be classified </span>
+          <span> must be classified</span>
           <span>
             {valuesClasssesActive && (
               <>
@@ -150,7 +159,7 @@ export const EntityDetailValidationText: React.FC<
       )}
       {tieType === EProtocolTieType.Reference && (
         <>
-          <span> must have a reference </span>
+          <span> must have a reference</span>
           <span>
             {valuesEntitiesActive && (
               <>
