@@ -89,7 +89,7 @@ const theme = {
     // vyssi kategorie
     entityS: "#ff93ac",
     entityA: "#ed365b",
-    entityT: "hsl(212, 78%, 50%)",
+    entityT: "#2079DF",
     // seda
     entityV: "#BAB0AC",
 
