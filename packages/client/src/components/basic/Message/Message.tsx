@@ -119,7 +119,6 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
     entityClasses: string[] | undefined
   ): JSX.Element {
     if (entityClasses) {
-      console.log(entityClasses);
       return (
         <>
           {entityClasses.map((entityClass, index) => {
@@ -132,8 +131,8 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
                 <span
                   style={{
                     backgroundColor: color,
-                    paddingLeft: "2px",
-                    paddingRight: "2px",
+                    padding: "1px 2px",
+                    color: "white",
                   }}
                 >
                   {classItem.entityClass}
