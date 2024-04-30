@@ -25,7 +25,7 @@ const DocumentModalEdit: React.FC<DocumentModal> = ({ onClose, document }) => {
   return (
     <Modal width={1000} showModal={show} onClose={onClose} fullHeight>
       <ModalHeader
-        title={`Export ${
+        title={`Edit ${
           document
             ? getShortLabelByLetterCount(document?.title, 90)
             : "no label"
