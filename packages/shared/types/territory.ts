@@ -19,7 +19,7 @@ export interface IParentTerritory {
 
 export interface ITerritoryProtocol {
   project: string;
-  guidelinesResource: string; // R class entity
+  guidelinesResource: string[]; // R class entities
   description: string;
   startDate: string; // V class entity
   endDate: string; // V class entity
