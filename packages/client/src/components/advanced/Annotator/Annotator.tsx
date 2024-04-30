@@ -190,10 +190,7 @@ export const TextAnnotator = ({
       }
     });
 
-    annotator.onTextChanged((text) => {
-      // console.log("text changed", text);
-      // setLocalText(text);
-    });
+    annotator.onTextChanged((text) => {});
 
     annotator.draw();
     setAnnotator(annotator);
@@ -327,7 +324,7 @@ export const TextAnnotator = ({
             label="save"
             color="primary"
             icon={<FaRegSave />}
-            disabled={madeAnyChanges}
+            disabled={!madeAnyChanges}
             onClick={() => {
               handleSaveNewContent();
             }}
@@ -336,7 +333,7 @@ export const TextAnnotator = ({
             label="discard changes"
             color="warning"
             icon={<FaTrash />}
-            disabled={madeAnyChanges}
+            disabled={!madeAnyChanges}
             onClick={() => {
               refreshAnnotator();
             }}
