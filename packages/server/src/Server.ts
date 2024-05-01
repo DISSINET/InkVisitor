@@ -57,7 +57,6 @@ if (process.env.NODE_ENV === "production") {
 
 // Health route
 server.get("/health", function (req, res) {
-  console.log("health route");
   res.send("ok");
 });
 
