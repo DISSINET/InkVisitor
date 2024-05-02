@@ -29,8 +29,10 @@ export const StyledMoveToParent = styled.div`
   margin-left: 0.3rem;
   margin-top: 0.3rem;
 `;
-export const StyledHeaderRow = styled.h3`
-  /* overflow: hidden; */
+export const StyledHeaderRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 `;
 export const StyledFaStar = styled(FaStar)`
   float: left;
@@ -51,8 +53,14 @@ export const StyledModeSwitcher = styled.div`
 `;
 export const StyledHeading = styled.span`
   color: ${({ theme }) => theme.color["black"]};
-  word-wrap: break-word;
+  font-weight: bold;
+  font-size: ${({ theme }) => theme.fontSize["lg"]};
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
 `;
+export const StyledHeadingText = styled.div``;
 export const StyledSuggesterRow = styled.div`
   display: flex;
   justify-content: space-between;

@@ -17,7 +17,7 @@ import {
 } from "@tanstack/react-query";
 import api from "api";
 import { AxiosResponse } from "axios";
-import { Button, ButtonGroup } from "components";
+import { Button, ButtonGroup, Tooltip } from "components";
 import Dropdown, {
   BreadcrumbItem,
   EntitySuggester,
@@ -232,14 +232,6 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
     (state) => state.territoryTree.selectedTerritoryPath
   );
 
-  const trimTerritoryLabel = (label: string) => {
-    const maxLettersCount = 70;
-    if (label.length > maxLettersCount) {
-      return `${label.slice(0, maxLettersCount)}...`;
-    }
-    return `${label}`;
-  };
-
   const handleSelectAll = (checked: boolean) =>
     checked
       ? setSelectedRows(territory.statements.map((statement) => statement.id))
@@ -287,8 +279,18 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
 
   const userCanEdit = territory.right !== UserEnums.RoleMode.Read;
 
+  const [headingHovered, setHeadingHovered] = useState(false);
+  const [referenceElement, setReferenceElement] =
+    useState<HTMLSpanElement | null>(null);
+
   return (
     <>
+      <Tooltip
+        label={territory.label}
+        visible={headingHovered}
+        referenceElement={referenceElement}
+      />
+
       <StyledHeader>
         <StyledHeaderBreadcrumbRow>
           {selectedTerritoryPath &&
@@ -309,11 +311,17 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
 
         <StyledHeaderRow>
           {isFavorited && <StyledFaStar size={18} />}
-          <StyledHeading>
-            {territoryId
-              ? `T:\xa0${trimTerritoryLabel(territory.label)}`
-              : "no territory selected"}
-          </StyledHeading>
+          <span>
+            {territoryId ? (
+              <StyledHeading
+                ref={setReferenceElement}
+                onMouseEnter={() => setHeadingHovered(true)}
+                onMouseLeave={() => setHeadingHovered(false)}
+              >{`T:\xa0${territory.label}`}</StyledHeading>
+            ) : (
+              <StyledHeading>{"no territory selected"}</StyledHeading>
+            )}
+          </span>
 
           {territory.id !== rootTerritoryId && userCanEdit && (
             <StyledMoveToParent>
