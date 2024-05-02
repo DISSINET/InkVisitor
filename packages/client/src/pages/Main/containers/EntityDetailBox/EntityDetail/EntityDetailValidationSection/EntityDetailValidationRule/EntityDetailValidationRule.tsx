@@ -85,6 +85,7 @@ export const EntityDetailValidationRule: React.FC<
         {/* Entity classes */}
         <StyledLabel>Entity types</StyledLabel>
         <Dropdown.Multi.Entity
+          disableEmpty
           width="full"
           value={entityClasses}
           onChange={(values) => updateValidationRule({ entityClasses: values })}
@@ -211,6 +212,7 @@ export const EntityDetailValidationRule: React.FC<
           <>
             <StyledLabel>Allowed E types</StyledLabel>
             <Dropdown.Multi.Entity
+              disableEmpty
               width="full"
               value={allowedClasses || []}
               onChange={(values) =>

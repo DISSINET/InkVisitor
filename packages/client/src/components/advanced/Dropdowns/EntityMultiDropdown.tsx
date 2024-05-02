@@ -26,6 +26,8 @@ interface EntityMultiDropdown<T = string> {
   options: { value: T; label: string; info?: string }[];
   placeholder?: string;
   noOptionsMessage?: string;
+
+  disableEmpty?: boolean;
   disableTyping?: boolean;
   disabled?: boolean;
 
@@ -38,6 +40,8 @@ export const EntityMultiDropdown = <T extends string>({
   options,
   placeholder,
   noOptionsMessage,
+
+  disableEmpty = false,
   disableTyping = false,
   disabled,
 
@@ -45,13 +49,15 @@ export const EntityMultiDropdown = <T extends string>({
 }: EntityMultiDropdown<T>) => {
   const getValues = (items: DropdownItem[]) => items.map((i) => i.value as T);
 
+  const generalValues = disableEmpty ? [allEntities] : [empty, allEntities];
+
   return (
     <BaseDropdown
       entityDropdown
       width={width}
       isMulti
-      options={[empty, allEntities, ...options]}
-      value={[empty, allEntities]
+      options={[...generalValues, ...options]}
+      value={generalValues
         .concat(options)
         .filter((o) => value.includes(o.value as T))}
       onChange={(selectedOptions, event) => {
