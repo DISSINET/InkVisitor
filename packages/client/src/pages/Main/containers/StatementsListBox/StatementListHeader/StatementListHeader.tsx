@@ -59,12 +59,12 @@ import { rootTerritoryId } from "Theme/constants";
 
 interface StatementListHeader {
   territory: IResponseTerritory;
-  addStatementAtTheEndMutation: UseMutationResult<
-    void,
-    unknown,
-    IStatement,
-    unknown
-  >;
+  // addStatementAtTheEndMutation: UseMutationResult<
+  //   void,
+  //   unknown,
+  //   IStatement,
+  //   unknown
+  // >;
   isFavorited?: boolean;
 
   displayMode: StatementListDisplayMode;
@@ -128,7 +128,7 @@ interface StatementListHeader {
 }
 export const StatementListHeader: React.FC<StatementListHeader> = ({
   territory,
-  addStatementAtTheEndMutation,
+  // addStatementAtTheEndMutation,
 
   isFavorited,
   isAllSelected,
@@ -310,8 +310,8 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
         </StyledHeaderBreadcrumbRow>
 
         <StyledHeaderRow>
-          {isFavorited && <StyledFaStar size={18} />}
           <span>
+            {isFavorited && <StyledFaStar size={16} />}
             {territoryId ? (
               <StyledHeading
                 ref={setReferenceElement}
@@ -443,7 +443,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
           </StyledActionsWrapper>
 
           {/* NEW STATEMENT / REFRESH */}
-          {territoryId && (
+          {/* {territoryId && (
             <ButtonGroup>
               {userCanEdit && (
                 <Button
@@ -470,9 +470,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
                 }}
               />
             </ButtonGroup>
-          )}
-        </StyledSuggesterRow>
-        <StyledSuggesterRow>
+          )} */}
           <StyledModeSwitcher>
             {"Mode "}
             <ButtonGroup style={{ marginLeft: "5px" }}>

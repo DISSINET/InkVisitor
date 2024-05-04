@@ -48,6 +48,9 @@ export const StatementListBox: React.FC = () => {
   const statementListOpened: boolean = useAppSelector(
     (state) => state.layout.statementListOpened
   );
+  const isLoading: boolean = useAppSelector(
+    (state) => state.statementList.isLoading
+  );
 
   const {
     territoryId,
@@ -438,7 +441,7 @@ export const StatementListBox: React.FC = () => {
         <StatementListHeader
           handleCreateStatement={handleCreateStatement}
           territory={data}
-          addStatementAtTheEndMutation={addStatementAtTheEndMutation}
+          // addStatementAtTheEndMutation={addStatementAtTheEndMutation}
           isFavorited={isFavorited}
           selectedRows={selectedRows}
           setSelectedRows={setSelectedRows}
@@ -534,7 +537,8 @@ export const StatementListBox: React.FC = () => {
           duplicateStatementsMutation.isPending ||
           cloneStatementMutation.isPending ||
           updateTerritoryMutation.isPending ||
-          duplicateTerritoryMutation.isPending
+          duplicateTerritoryMutation.isPending ||
+          isLoading
         }
       />
     </>
