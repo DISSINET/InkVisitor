@@ -427,54 +427,51 @@ export class Annotator {
   }
 
   getAnnotations(
-    startSegment: SegmentPosition | null,
-    endSegment: SegmentPosition | null
+    start: SegmentPosition | null,
+    end: SegmentPosition | null
   ): string[] {
     // remaining opened tags - true = open, false = closed
     const tags: Record<string, boolean> = {};
-
     // find remaining opened tags from start to end segment (incl)
-    if (endSegment) {
-      for (let i = 0; i <= endSegment.segmentIndex; i++) {
+    if (end) {
+      for (let i = 0; i <= end.segmentIndex; i++) {
         const segment = this.text.segments[i];
-        if (i !== endSegment.segmentIndex) {
+        if (i !== end.segmentIndex) {
           for (const tag of segment.openingTags) {
             tags[tag.tag] = true;
           }
           for (const tag of segment.closingTags) {
-            tags[tag.tag] = false;
+            tags[tag.tag] = !!start;
           }
         } else {
-          const [segOpened, segClosed] = segment.getTagsForPosition(endSegment);
+          const [segOpened, segClosed] = segment.getTagsForPosition(end);
           for (const tag of segOpened) {
             tags[tag.tag] = true;
           }
           for (const tag of segClosed) {
-            tags[tag.tag] = false;
+            tags[tag.tag] = !!start;
           }
         }
       }
     }
 
     // if this is range based request, add each tag(closing or opening) in this range
-    if (startSegment && endSegment) {
+    if (start && end) {
       for (
-        let i = startSegment.segmentIndex;
-        i < endSegment.segmentIndex;
+        let i = start.segmentIndex;
+        i <= end.segmentIndex;
         i++
       ) {
         const [segOpened, segClosed] =
-          this.text.segments[i].getTagsForPosition(startSegment);
+          this.text.segments[i].getTagsForPosition(start);
         for (const tag of segOpened) {
           tags[tag.tag] = true;
         }
         for (const tag of segClosed) {
           tags[tag.tag] = true;
         }
-        //  console.log(startSegment, segOpened, segClosed)
       }
     }
-
     return Object.keys(tags).filter((tag) => tags[tag]);
   }
 
@@ -567,68 +564,63 @@ export class Annotator {
       this.onHighlightCb &&
       this.annotatedPosition
     ) {
-      //console.log(this.annotatedPosition)
-      const annotated = this.getAnnotations(null, this.annotatedPosition);
+      const annotated: string[] = this.getAnnotations(null, this.annotatedPosition);
+      for (const tag of annotated) {
+        const highlight = this.onHighlightCb(tag);
+        if (highlight) {
+          const [startLine, endLine] = this.text.getTagPosition(
+            this.viewport,
+            tag
+          );
 
-      if (annotated.length > 0) {
-        for (const tag of annotated) {
-          const highlight = this.onHighlightCb(tag);
-          if (highlight) {
-            const [startLine, endLine] = this.text.getTagPosition(
-              this.viewport,
-              tag
-            );
+          const highlighter = new Cursor(0, 0);
+          highlighter.selectStart = startLine;
+          highlighter.selectEnd = endLine;
+          highlighter.draw(this.ctx, this.viewport, {
+            lineHeight: this.lineHeight,
+            charWidth: this.charWidth,
+            charsAtLine: this.text.charsAtLine,
+            mode: this.text.mode,
+            schema: highlight,
+          });
 
-            const highlighter = new Cursor(0, 0);
-            highlighter.selectStart = startLine;
-            highlighter.selectEnd = endLine;
-            console.log(startLine, endLine, tag);
-            highlighter.draw(this.ctx, this.viewport, {
-              lineHeight: this.lineHeight,
-              charWidth: this.charWidth,
-              charsAtLine: this.text.charsAtLine,
-              mode: this.text.mode,
-              schema: highlight,
-            });
-
-            /*
-              if (startLine && endLine) {
-                this.ctx.strokeStyle = "green"; //highlight.style.color;
-                for (
-                  let currentYLine = startLine.yLine;
-                  currentYLine <= endLine.yLine;
-                  currentYLine++
+          /*
+            if (startLine && endLine) {
+              this.ctx.strokeStyle = "green"; //highlight.style.color;
+              for (
+                let currentYLine = startLine.yLine;
+                currentYLine <= endLine.yLine;
+                currentYLine++
+              ) {
+                if (
+                  this.viewport.lineStart <= currentYLine &&
+                  this.viewport.lineEnd >= currentYLine
                 ) {
-                  if (
-                    this.viewport.lineStart <= currentYLine &&
-                    this.viewport.lineEnd >= currentYLine
-                  ) {
-                    this.ctx.beginPath();
+                  this.ctx.beginPath();
 
-                    const yPos =
-                      currentYLine - this.viewport.lineStart + this.lineHeight;
-                    if (currentYLine === startLine.yLine) {
-                      this.ctx.moveTo(startLine.xLine, yPos);
-                    } else if (currentYLine === endLine.yLine) {
-                      this.ctx.moveTo(endLine.xLine, yPos);
-                    } else {
-                      this.ctx.moveTo(0, yPos);
-                    }
-
-                    if (startLine.yLine === endLine.yLine) {
-                      this.ctx.lineTo(endLine.xLine * this.charWidth, yPos);
-                    } else if (currentYLine === startLine.yLine) {
-                      this.ctx.lineTo(this.charWidth, yPos);
-                    } else if (currentYLine === endLine.yLine) {
-                      this.ctx.lineTo(endLine.xLine * this.charWidth, yPos);
-                    }
-
-                    this.ctx.stroke();
+                  const yPos =
+                    currentYLine - this.viewport.lineStart + this.lineHeight;
+                  if (currentYLine === startLine.yLine) {
+                    this.ctx.moveTo(startLine.xLine, yPos);
+                  } else if (currentYLine === endLine.yLine) {
+                    this.ctx.moveTo(endLine.xLine, yPos);
+                  } else {
+                    this.ctx.moveTo(0, yPos);
                   }
+
+                  if (startLine.yLine === endLine.yLine) {
+                    this.ctx.lineTo(endLine.xLine * this.charWidth, yPos);
+                  } else if (currentYLine === startLine.yLine) {
+                    this.ctx.lineTo(this.charWidth, yPos);
+                  } else if (currentYLine === endLine.yLine) {
+                    this.ctx.lineTo(endLine.xLine * this.charWidth, yPos);
+                  }
+
+                  this.ctx.stroke();
                 }
               }
-              */
-          }
+            }
+            */
         }
       }
     }
