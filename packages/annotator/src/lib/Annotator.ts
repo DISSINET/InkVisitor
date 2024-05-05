@@ -139,6 +139,13 @@ export class Annotator {
       "Enter",
       "Delete",
       "Meta",
+      "CapsLock",
+      "PageUp",
+      "PageDown",
+      "Fn",
+      "FnLock",
+      "NumLock",
+      "ScrollLock"
     ];
 
     switch (e.key) {
