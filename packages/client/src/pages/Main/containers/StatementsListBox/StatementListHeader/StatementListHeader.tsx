@@ -310,7 +310,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
         </StyledHeaderBreadcrumbRow>
 
         <StyledHeaderRow>
-          <span>
+          <span style={{ display: "grid" }}>
             {isFavorited && <StyledFaStar size={16} />}
             {territoryId ? (
               <StyledHeading

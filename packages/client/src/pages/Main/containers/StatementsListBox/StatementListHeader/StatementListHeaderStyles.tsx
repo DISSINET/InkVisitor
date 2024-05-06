@@ -54,10 +54,11 @@ export const StyledHeading = styled.span`
   color: ${({ theme }) => theme.color["black"]};
   font-weight: bold;
   font-size: ${({ theme }) => theme.fontSize["xl"]};
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 1;
+  display: inline-block;
+  vertical-align: middle;
+  white-space: nowrap;
+  overflow: hidden !important;
+  text-overflow: ellipsis;
 `;
 export const StyledHeadingText = styled.div``;
 export const StyledSuggesterRow = styled.div`
