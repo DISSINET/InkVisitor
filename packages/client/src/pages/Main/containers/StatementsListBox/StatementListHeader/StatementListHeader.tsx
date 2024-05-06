@@ -4,10 +4,8 @@ import {
   IEntity,
   IReference,
   IResponseGeneric,
-  IResponseStatement,
   IResponseTerritory,
   IResponseTree,
-  IStatement,
   ITerritory,
 } from "@shared/types";
 import {
@@ -15,6 +13,7 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
+import { rootTerritoryId } from "Theme/constants";
 import api from "api";
 import { AxiosResponse } from "axios";
 import { Button, ButtonGroup, Tooltip } from "components";
@@ -23,22 +22,20 @@ import Dropdown, {
   EntitySuggester,
   TerritoryActionModal,
 } from "components/advanced";
-import { CStatement } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
-import { BiRefresh } from "react-icons/bi";
-import { FaHighlighter, FaList, FaPlus } from "react-icons/fa";
+import { FaHighlighter, FaList } from "react-icons/fa";
 import {
   MdOutlineCheckBox,
   MdOutlineCheckBoxOutlineBlank,
   MdOutlineIndeterminateCheckBox,
 } from "react-icons/md";
+import { TbHomeMove } from "react-icons/tb";
 import { setLastClickedIndex } from "redux/features/statementList/lastClickedIndexSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { DropdownItem } from "types";
+import { DropdownItem, StatementListDisplayMode } from "types";
 import { collectTerritoryChildren, searchTree } from "utils/utils";
 import { v4 as uuidv4 } from "uuid";
-import { StatementListDisplayMode } from "../StatementListBox";
 import {
   StyledActionsWrapper,
   StyledCheckboxWrapper,
@@ -47,24 +44,15 @@ import {
   StyledFaStar,
   StyledHeader,
   StyledHeaderBreadcrumbRow,
-  StyledHeaderBreadcrumbRowLeft,
   StyledHeaderRow,
   StyledHeading,
   StyledModeSwitcher,
   StyledMoveToParent,
   StyledSuggesterRow,
 } from "./StatementListHeaderStyles";
-import { TbHomeMove } from "react-icons/tb";
-import { rootTerritoryId } from "Theme/constants";
 
 interface StatementListHeader {
   territory: IResponseTerritory;
-  // addStatementAtTheEndMutation: UseMutationResult<
-  //   void,
-  //   unknown,
-  //   IStatement,
-  //   unknown
-  // >;
   isFavorited?: boolean;
 
   displayMode: StatementListDisplayMode;
@@ -105,7 +93,6 @@ interface StatementListHeader {
     IReference[],
     unknown
   >;
-  handleCreateStatement: () => void;
   updateTerritoryMutation: UseMutationResult<
     AxiosResponse<IResponseGeneric<any>, any>,
     Error,
@@ -128,7 +115,6 @@ interface StatementListHeader {
 }
 export const StatementListHeader: React.FC<StatementListHeader> = ({
   territory,
-  // addStatementAtTheEndMutation,
 
   isFavorited,
   isAllSelected,
@@ -142,7 +128,6 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
   duplicateStatementsMutation,
   replaceReferencesMutation,
   appendReferencesMutation,
-  handleCreateStatement,
 
   updateTerritoryMutation,
   duplicateTerritoryMutation,
@@ -442,35 +427,6 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
               )}
           </StyledActionsWrapper>
 
-          {/* NEW STATEMENT / REFRESH */}
-          {/* {territoryId && (
-            <ButtonGroup>
-              {userCanEdit && (
-                <Button
-                  key="add"
-                  icon={<FaPlus />}
-                  tooltipLabel="add new statement at the end of the list"
-                  color="primary"
-                  label="new statement"
-                  onClick={() => {
-                    handleCreateStatement();
-                  }}
-                />
-              )}
-              <Button
-                key="refresh"
-                icon={<BiRefresh size={14} />}
-                tooltipLabel="refresh data"
-                inverted
-                color="primary"
-                onClick={() => {
-                  queryClient.invalidateQueries({ queryKey: ["territory"] });
-                  queryClient.invalidateQueries({ queryKey: ["statement"] });
-                  queryClient.invalidateQueries({ queryKey: ["user"] });
-                }}
-              />
-            </ButtonGroup>
-          )} */}
           <StyledModeSwitcher>
             {"Mode "}
             <ButtonGroup style={{ marginLeft: "5px" }}>

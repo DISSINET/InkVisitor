@@ -67,6 +67,7 @@ export const StyledSuggesterRow = styled.div`
   align-items: center;
   color: ${({ theme }) => theme.color["info"]};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
+  height: 2.5rem;
 `;
 export const StyledActionsWrapper = styled.div`
   padding-left: 0.5rem;

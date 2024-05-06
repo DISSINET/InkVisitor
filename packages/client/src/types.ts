@@ -399,3 +399,8 @@ export interface ITerritoryFilter {
 export interface IExtendedResponseTree extends IResponseTree {
   foundByRecursion?: boolean;
 }
+
+export enum StatementListDisplayMode {
+  TEXT = "text",
+  LIST = "list",
+}
