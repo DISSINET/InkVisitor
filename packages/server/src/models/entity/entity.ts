@@ -307,6 +307,10 @@ export default class Entity implements IEntity, IDbModel {
     con: Connection,
     ids: string[]
   ): Promise<IEntity[]> {
+    if (ids.findIndex(id => !id) !== -1) {
+      console.trace("Passed empty id to Entity.findEntitiesByIds");
+    } 
+    
     const data = await rethink
       .table(Entity.table)
       .getAll(rethink.args(ids))
