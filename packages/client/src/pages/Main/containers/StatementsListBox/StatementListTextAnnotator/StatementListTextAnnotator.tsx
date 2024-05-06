@@ -152,8 +152,6 @@ export const StatementListTextAnnotator: React.FC<
     territoryId,
   ]);
 
-  // console.log(thisTHasAnchor);
-
   return (
     <div>
       <div

@@ -23,11 +23,8 @@ import { StatementListHeader } from "./StatementListHeader/StatementListHeader";
 import { StatementListTable } from "./StatementListTable/StatementListTable";
 import { StatementListTextAnnotator } from "./StatementListTextAnnotator/StatementListTextAnnotator";
 import { StyledEmptyState, StyledTableWrapper } from "./StatementLitBoxStyles";
+import { StatementListDisplayMode } from "types";
 
-export enum StatementListDisplayMode {
-  TEXT = "text",
-  LIST = "list",
-}
 const initialData: {
   statements: IResponseStatement[];
   entities: { [key: string]: IEntity };
@@ -47,6 +44,9 @@ export const StatementListBox: React.FC = () => {
   );
   const statementListOpened: boolean = useAppSelector(
     (state) => state.layout.statementListOpened
+  );
+  const isLoading: boolean = useAppSelector(
+    (state) => state.statementList.isLoading
   );
 
   const {
@@ -436,9 +436,7 @@ export const StatementListBox: React.FC = () => {
     <>
       {data && (
         <StatementListHeader
-          handleCreateStatement={handleCreateStatement}
           territory={data}
-          addStatementAtTheEndMutation={addStatementAtTheEndMutation}
           isFavorited={isFavorited}
           selectedRows={selectedRows}
           setSelectedRows={setSelectedRows}
@@ -534,7 +532,8 @@ export const StatementListBox: React.FC = () => {
           duplicateStatementsMutation.isPending ||
           cloneStatementMutation.isPending ||
           updateTerritoryMutation.isPending ||
-          duplicateTerritoryMutation.isPending
+          duplicateTerritoryMutation.isPending ||
+          isLoading
         }
       />
     </>
