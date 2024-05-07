@@ -49,7 +49,7 @@ export const EntityDetailCreateTemplateModal: React.FC<
   const queryClient = useQueryClient();
   const [createTemplateLabel, setCreateTemplateLabel] = useState<string>("");
 
-  const { statementId, selectedDetailId } = useSearchParams();
+  const { statementId, selectedDetailId, appendDetailId } = useSearchParams();
 
   const templateCreateMutation = useMutation({
     mutationFn: async (templateEntity: IEntity) =>
@@ -63,6 +63,8 @@ export const EntityDetailCreateTemplateModal: React.FC<
         queryClient.invalidateQueries({ queryKey: ["entity-templates"] });
       }
       updateEntityMutation.mutate({ usedTemplate: variables.id });
+
+      appendDetailId(variables.id);
 
       setCreateTemplateModal(false);
       setCreateTemplateLabel("");
