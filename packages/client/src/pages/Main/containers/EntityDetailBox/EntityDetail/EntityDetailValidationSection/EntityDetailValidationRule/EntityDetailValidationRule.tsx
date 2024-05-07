@@ -123,7 +123,9 @@ export const EntityDetailValidationRule: React.FC<
                   classifications: [...classifications, entity.id],
                 })
               }
-              disabled={!userCanEdit}
+              disabled={
+                !userCanEdit || tieType === EProtocolTieType.Classification
+              }
             />
           )}
         </StyledFlexList>
@@ -152,6 +154,7 @@ export const EntityDetailValidationRule: React.FC<
                   allowedEntities: [],
                 }),
               selected: tieType === EProtocolTieType.Classification,
+              optionDisabled: classifications.length > 0,
             },
             {
               longValue: EProtocolTieType.Reference,
