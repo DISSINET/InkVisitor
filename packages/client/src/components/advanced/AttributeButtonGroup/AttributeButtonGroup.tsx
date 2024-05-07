@@ -14,6 +14,7 @@ interface AttributeButtonGroup {
     icon?: JSX.Element;
     onClick: () => void;
     selected: boolean;
+    optionDisabled?: boolean;
   }[];
   disabled?: boolean;
   // currently means no horizontal margin
@@ -55,7 +56,9 @@ export const AttributeButtonGroup: React.FC<AttributeButtonGroup> = ({
             return (
               <Button
                 key={oi}
-                disabled={disabled && !option.selected}
+                disabled={
+                  option.optionDisabled || (disabled && !option.selected)
+                }
                 label={
                   option.selected
                     ? option.longValue

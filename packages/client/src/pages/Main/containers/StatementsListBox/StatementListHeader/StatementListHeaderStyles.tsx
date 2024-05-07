@@ -47,8 +47,6 @@ export const StyledModeSwitcher = styled.div`
   align-items: center;
   color: ${({ theme }) => theme.color["info"]};
   margin-left: 0.3rem;
-  /* margin-bottom: ${({ theme }) => theme.space[2]}; */
-  /* margin-top: 0.3rem; */
 `;
 export const StyledHeading = styled.span`
   color: ${({ theme }) => theme.color["black"]};
