@@ -27,9 +27,6 @@ export const StyledActionLabel = styled.div`
   overflow: hidden;
   text-overflow: ellipsis;
 `;
-export const StyledText = styled.p`
-  font-size: ${({ theme }) => theme.fontSize["xs"]};
-`;
 export const StyledTableWrapper = styled.div`
   display: flex;
   flex-direction: column;

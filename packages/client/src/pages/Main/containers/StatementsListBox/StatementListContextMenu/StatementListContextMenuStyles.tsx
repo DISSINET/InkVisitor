@@ -1,7 +1,7 @@
-import styled from "styled-components";
+import { ReferenceType } from "@floating-ui/react";
 import { animated } from "@react-spring/web";
-import { collapsedPanelWidth, heightHeader } from "Theme/constants";
 import { CgMenuBoxed } from "react-icons/cg";
+import styled from "styled-components";
 
 interface StyledCgMenuBoxed {
   $inverted?: boolean;
@@ -18,27 +18,9 @@ export const StyledWrapper = styled.div`
   align-items: center;
   flex-direction: row;
 `;
-interface StyledContextButtonGroup {
-  $clientX: number;
-  $clientY: number;
-  $firstPanelExpanded: boolean;
-  $panelWidths: number[];
-}
-export const StyledContextButtonGroup = styled(
-  animated.div
-)<StyledContextButtonGroup>`
+export const StyledContextBtnGroup = styled(animated.div)`
   display: flex;
   flex-direction: row;
-  position: absolute;
-  top: ${({ $clientY }) => `${($clientY - heightHeader) / 10}rem`};
-  left: ${({ $clientX, $firstPanelExpanded, $panelWidths }) =>
-    `${
-      ($clientX -
-        ($firstPanelExpanded
-          ? $panelWidths[0] + 110
-          : collapsedPanelWidth + 110)) /
-      10
-    }rem`};
   z-index: 100;
   box-shadow: ${({ theme }) => theme.boxShadow["normal"]};
 `;
