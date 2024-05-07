@@ -307,24 +307,33 @@ const MainPage: React.FC<MainPage> = ({}) => {
           }
           buttons={[
             <>
-              {userRole !== UserEnums.Role.Viewer && territoryId && (
-                <Button
-                  key="add"
-                  icon={<FaPlus />}
-                  tooltipLabel="add new statement at the end of the list"
-                  color="primary"
-                  label="new statement"
-                  onClick={() => {
-                    if (user) {
-                      addStatementAtTheEndMutation.mutate(
-                        CStatement(userRole, user.options, "", "", territoryId)
-                      );
-                    }
-                  }}
-                />
-              )}
+              {statementListOpened &&
+                userRole !== UserEnums.Role.Viewer &&
+                territoryId && (
+                  <Button
+                    key="add"
+                    icon={<FaPlus />}
+                    tooltipLabel="add new statement at the end of the list"
+                    color="primary"
+                    label="new statement"
+                    onClick={() => {
+                      if (user) {
+                        addStatementAtTheEndMutation.mutate(
+                          CStatement(
+                            userRole,
+                            user.options,
+                            "",
+                            "",
+                            territoryId
+                          )
+                        );
+                      }
+                    }}
+                  />
+                )}
             </>,
-            territoryId &&
+            statementListOpened &&
+              territoryId &&
               refreshBoxButton(["territory", "statement", "user"], false),
           ]}
         >
