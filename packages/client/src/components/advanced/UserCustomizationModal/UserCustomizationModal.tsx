@@ -1,7 +1,9 @@
 import { languageDict, userRoleDict } from "@shared/dictionaries";
 import { EntityEnums, UserEnums } from "@shared/enums";
 import { IResponseUser, IUser } from "@shared/types";
+import { UnsafePasswordError } from "@shared/types/errors";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { SAFE_PASSWORD_DESCRIPTION } from "Theme/constants";
 import api from "api";
 import {
   Button,
@@ -21,10 +23,11 @@ import Dropdown, {
   EntitySuggester,
   EntityTag,
 } from "components/advanced";
+import { StyledDescription } from "pages/AuthModalSharedStyles";
 import React, { useEffect, useMemo, useState } from "react";
-import { BiHide, BiShow } from "react-icons/bi";
 import { toast } from "react-toastify";
 import { DropdownItem } from "types";
+import { isSafePassword } from "utils/utils";
 import {
   StyledButtonWrap,
   StyledRightsHeading,
@@ -34,10 +37,6 @@ import {
   StyledUserRights,
 } from "./UserCustomizationModalStyles";
 import { UserRightItem } from "./UserRightItem/UserRightItem";
-import { isSafePassword } from "utils/utils";
-import { UnsafePasswordError } from "@shared/types/errors";
-import { SAFE_PASSWORD_DESCRIPTION } from "Theme/constants";
-import { StyledDescription } from "pages/AuthModalSharedStyles";
 
 interface DataObject {
   name: string;
@@ -369,36 +368,6 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                     />
                   </div>
                 )}
-              </ModalInputWrap>
-
-              <ModalInputLabel>{"ordering table in Editor"}</ModalInputLabel>
-
-              <ModalInputWrap width={165}>
-                <AttributeButtonGroup
-                  noMargin
-                  options={[
-                    {
-                      longValue: "display",
-                      shortValue: "",
-                      shortIcon: <BiShow />,
-                      onClick: () => {
-                        handleChange("hideStatementElementsOrderTable", true);
-                      },
-                      selected:
-                        !!data.hideStatementElementsOrderTable &&
-                        data.hideStatementElementsOrderTable,
-                    },
-                    {
-                      longValue: "hide",
-                      shortValue: "",
-                      shortIcon: <BiHide />,
-                      onClick: () => {
-                        handleChange("hideStatementElementsOrderTable", false);
-                      },
-                      selected: !data.hideStatementElementsOrderTable,
-                    },
-                  ]}
-                />
               </ModalInputWrap>
             </ModalInputForm>
 

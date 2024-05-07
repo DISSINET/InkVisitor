@@ -43,6 +43,7 @@ import { TiWarningOutline } from "react-icons/ti";
 import { toast } from "react-toastify";
 import { setShowWarnings } from "redux/features/statementEditor/showWarningsSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
+import { ThemeContext } from "styled-components";
 import { DropdownItem, classesEditorActants, classesEditorTags } from "types";
 import {
   deepCopy,
@@ -72,9 +73,7 @@ import {
 } from "../StatementEditorBoxStyles";
 import { StatementEditorActantTable } from "./StatementEditorActantTable/StatementEditorActantTable";
 import { StatementEditorActionTable } from "./StatementEditorActionTable/StatementEditorActionTable";
-import { StatementEditorOrdering } from "./StatementEditorOrdering/StatementEditorOrdering";
 import { StatementEditorSectionButtons } from "./StatementEditorSectionButtons/StatementEditorSectionButtons";
-import { ThemeContext } from "styled-components";
 
 interface StatementEditor {
   statement: IResponseStatement;
@@ -868,22 +867,6 @@ export const StatementEditor: React.FC<StatementEditor> = ({
             )}
           </StyledEditorSectionContent>
         </StyledEditorSection>
-
-        {/* Ordering */}
-        {statement.elementsOrders.length > 0 &&
-          user &&
-          user.options.hideStatementElementsOrderTable && (
-            <StyledEditorSection>
-              <StyledEditorSectionHeader>Ordering</StyledEditorSectionHeader>
-              <StyledEditorSectionContent>
-                <StatementEditorOrdering
-                  statementId={statementId}
-                  elementsOrders={statement.elementsOrders}
-                  entities={statement.entities}
-                />
-              </StyledEditorSectionContent>
-            </StyledEditorSection>
-          )}
 
         {/* Refs */}
         <StyledEditorSection key="editor-section-refs">
