@@ -69,6 +69,7 @@ export const TerritoryTreeContextMenu: React.FC<TerritoryTreeContextMenu> = ({
               ref={refs.setFloating}
               style={{
                 ...floatingStyles,
+                zIndex: 100,
               }}
             >
               <StyledContextButtonGroup style={animatedMount}>

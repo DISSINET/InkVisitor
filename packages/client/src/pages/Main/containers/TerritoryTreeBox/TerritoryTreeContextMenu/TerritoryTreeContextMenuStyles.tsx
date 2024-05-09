@@ -12,7 +12,6 @@ export const StyledContextButtonGroup = styled(animated.div)`
   display: flex;
   flex-direction: row;
   box-shadow: ${({ theme }) => theme.boxShadow["normal"]};
-  z-index: 500;
 `;
 
 export const StyledCgMenuBoxed = styled(CgMenuBoxed)`
