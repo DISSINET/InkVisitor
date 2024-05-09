@@ -307,7 +307,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
           }
           buttons={[
             <>
-              {userRole !== UserEnums.Role.Viewer && (
+              {userRole !== UserEnums.Role.Viewer && territoryId && (
                 <Button
                   key="add"
                   icon={<FaPlus />}
@@ -324,7 +324,8 @@ const MainPage: React.FC<MainPage> = ({}) => {
                 />
               )}
             </>,
-            refreshBoxButton(["territory", "statement", "user"], false),
+            territoryId &&
+              refreshBoxButton(["territory", "statement", "user"], false),
           ]}
         >
           <MemoizedStatementListBox />
