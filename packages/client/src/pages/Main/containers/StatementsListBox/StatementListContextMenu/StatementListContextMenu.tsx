@@ -5,7 +5,7 @@ import {
   useFloating,
 } from "@floating-ui/react";
 import { config, useSpring } from "@react-spring/web";
-import React, { ReactNode, useState } from "react";
+import React, { ReactNode, useEffect, useState } from "react";
 import {
   StyledCgMenuBoxed,
   StyledContextBtnGroup,
@@ -21,6 +21,34 @@ export const StatementListContextMenu: React.FC<StatementListContextMenu> = ({
   inverted,
 }) => {
   const [showMenu, setShowMenu] = useState(false);
+  const [timeoutId, setTimeoutId] = useState<number | null>(null);
+
+  const handleMouseEnter = () => {
+    setPortalMounted(true);
+    setShowMenu(true);
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+      setTimeoutId(null);
+    }
+  };
+
+  const handleMouseLeave = () => {
+    const id = window.setTimeout(() => {
+      setShowMenu(false);
+    }, 700);
+
+    setTimeoutId(id);
+  };
+
+  const [portalMounted, setPortalMounted] = useState(false);
+
+  useEffect(() => {
+    if (!showMenu && portalMounted) {
+      setTimeout(() => {
+        setPortalMounted(false);
+      }, 300);
+    }
+  }, [showMenu]);
 
   const animatedMount = useSpring({
     opacity: showMenu ? 1 : 0,
@@ -36,19 +64,15 @@ export const StatementListContextMenu: React.FC<StatementListContextMenu> = ({
     <>
       <StyledWrapper
         ref={refs.setReference}
-        onMouseEnter={() => {
-          setShowMenu(true);
-        }}
-        onMouseLeave={() => {
-          setShowMenu(false);
-        }}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
       >
         <StyledCgMenuBoxed
           onClick={(e: React.MouseEvent) => e.stopPropagation()}
           $inverted={inverted}
           size={18}
         />
-        {showMenu && (
+        {portalMounted && (
           <FloatingPortal id="page">
             <div
               ref={refs.setFloating}
