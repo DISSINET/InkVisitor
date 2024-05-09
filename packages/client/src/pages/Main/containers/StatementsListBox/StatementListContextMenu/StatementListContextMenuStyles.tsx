@@ -1,4 +1,3 @@
-import { ReferenceType } from "@floating-ui/react";
 import { animated } from "@react-spring/web";
 import { CgMenuBoxed } from "react-icons/cg";
 import styled from "styled-components";
