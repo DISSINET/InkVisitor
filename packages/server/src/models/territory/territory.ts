@@ -22,17 +22,23 @@ import { Connection, RDatum, WriteResult, r as rethink } from "rethinkdb-ts";
 
 export class TerritoryProtocol implements ITerritoryProtocol, IModel {
   project: string;
-  guidelinesResource: string[];
+  dataCollectionMethods: string[];
   description: string;
+  guidelines: string[];
+  detailedProtocols: string[];
   startDate: string;
   endDate: string;
+  relatedDataPublications: string[];
 
   constructor(data: Partial<ITerritoryProtocol>) {
-    this.project = data?.project as string;
-    this.guidelinesResource = data?.guidelinesResource as string[];
-    this.description = data?.description as string;
-    this.startDate = data?.startDate as string;
-    this.endDate = data?.endDate as string;
+    this.project = data.project as string;
+    this.dataCollectionMethods = data.dataCollectionMethods as string[];
+    this.description = data.description as string;
+    this.guidelines = data.guidelines as string[];
+    this.detailedProtocols = data.detailedProtocols as string[];
+    this.startDate = data.startDate as string;
+    this.endDate = data.endDate as string;
+    this.relatedDataPublications = data.relatedDataPublications as string[];
   }
 
   isValid(): boolean {
@@ -384,8 +390,22 @@ class Territory extends Entity implements ITerritory {
     }
 
     if (this.data.protocol) {
-      Array.isArray(this.data.protocol.guidelinesResource) &&
-        this.data.protocol.guidelinesResource.forEach((r) => entityIds.push(r));
+      Array.isArray(this.data.protocol.guidelines) &&
+        this.data.protocol.guidelines.forEach((e) => entityIds.push(e));
+
+      Array.isArray(this.data.protocol.dataCollectionMethods) &&
+        this.data.protocol.dataCollectionMethods.forEach((e) =>
+          entityIds.push(e)
+        );
+
+      Array.isArray(this.data.protocol.detailedProtocols) &&
+        this.data.protocol.detailedProtocols.forEach((e) => entityIds.push(e));
+
+      Array.isArray(this.data.protocol.relatedDataPublications) &&
+        this.data.protocol.relatedDataPublications.forEach((e) =>
+          entityIds.push(e)
+        );
+
       entityIds.push(this.data.protocol.startDate);
       entityIds.push(this.data.protocol.endDate);
     }
