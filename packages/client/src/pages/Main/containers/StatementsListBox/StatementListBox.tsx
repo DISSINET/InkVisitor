@@ -138,11 +138,7 @@ export const StatementListBox: React.FC = () => {
   }, [error]);
 
   const removeStatementMutation = useMutation({
-    mutationFn: async (sId: string) => {
-      if (statementId === sId) {
-      }
-      await api.entityDelete(sId);
-    },
+    mutationFn: async (sId: string) => await api.entityDelete(sId),
     onSuccess: (data, sId) => {
       toast.info(
         <ToastWithLink
