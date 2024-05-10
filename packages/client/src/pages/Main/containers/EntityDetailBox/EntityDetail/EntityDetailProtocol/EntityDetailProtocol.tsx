@@ -63,13 +63,13 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
   }
   const {
     project,
-    dataCollectionMethods,
+    dataCollectionMethods = [],
     description,
-    guidelines,
-    detailedProtocols,
+    guidelines = [],
+    detailedProtocols = [],
     startDate,
     endDate,
-    relatedDataPublications,
+    relatedDataPublications = [],
   } = protocol;
 
   const updateProtocol = (changes: Partial<ITerritoryProtocol>) => {
@@ -92,7 +92,7 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
       <StyledValue>
         <StyledFlexList>
           {Array.isArray(dataCollectionMethods) &&
-            dataCollectionMethods.map((conceptId) => {
+            dataCollectionMethods?.map((conceptId) => {
               return (
                 <StyledTagWrap key={conceptId}>
                   <EntityTag
