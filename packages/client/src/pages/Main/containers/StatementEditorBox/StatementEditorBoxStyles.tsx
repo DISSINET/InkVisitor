@@ -45,7 +45,6 @@ export const StyledEditorSection = styled.div<StyledEditorSection>`
   padding-right: ${({ $metaSection }) => ($metaSection ? 0 : "")};
   border-bottom-width: ${({ theme }) => theme.borderWidth[1]};
   border-bottom-color: ${({ theme }) => theme.color["gray"][500]};
-  background-color: ${({ theme }) => theme.color["white"]};
   box-shadow: ${({ theme, $firstSection = false }) =>
     $firstSection ? theme.boxShadow["subtle"] : ""};
   border-left: ${({ theme, $firstSection = false }) =>

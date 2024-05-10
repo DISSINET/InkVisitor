@@ -1,19 +1,17 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { FaMarker, FaPen, FaRegSave, FaTrash } from "react-icons/fa";
+import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
+import { FaPen, FaRegSave, FaTrash } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { v4 as uuidv4 } from "uuid";
 
-import {
-  Annotator,
-  HighlightSchema,
-  Mode,
-} from "@inkvisitor/annotator/src/lib";
+import { Annotator, Mode } from "@inkvisitor/annotator/src/lib";
 import { IDocument, IEntity } from "@shared/types";
-import theme from "Theme/theme";
 import api from "api";
 import { Button } from "components/basic/Button/Button";
 import { ButtonGroup } from "components/basic/ButtonGroup/ButtonGroup";
+import { BsFileTextFill } from "react-icons/bs";
+import { HiCodeBracket } from "react-icons/hi2";
+import { ThemeContext } from "styled-components";
 import { EntityColors } from "types";
 import { useAnnotator } from "./AnnotatorContext";
 import TextAnnotatorMenu from "./AnnotatorMenu";
@@ -24,8 +22,6 @@ import {
   StyledScrollerCursor,
   StyledScrollerViewport,
 } from "./AnnotatorStyles";
-import { HiCodeBracket } from "react-icons/hi2";
-import { BsFileTextFill } from "react-icons/bs";
 
 interface TextAnnotatorProps {
   width: number;
@@ -45,6 +41,7 @@ export const TextAnnotator = ({
   handleCreateTerritory = false,
 }: TextAnnotatorProps) => {
   const queryClient = useQueryClient();
+  const theme = useContext(ThemeContext);
 
   const {
     data: document,
@@ -152,13 +149,21 @@ export const TextAnnotator = ({
       document?.content ?? "no text"
     );
 
+    // colors needs to be static as the highlighting would not be working nicely in the dark mode
+    annotator.fontColor = "#383737";
+    annotator.bgColor = "white";
+
     annotator.setMode("highlight");
     annotator.addScroller(scroller.current);
 
-    annotator.cursor.setFillColor(theme.color.success);
+    annotator.cursor.setFillColor(theme?.color.success);
 
     if (displayLineNumbers && lines.current) {
       annotator.addLines(lines.current);
+      if (annotator.lines) {
+        annotator.lines.fontColor = theme?.color.text;
+        annotator.lines.bgColor = theme?.color.white;
+      }
     }
     annotator.onSelectText(({ text, anchors }) => {
       // console.log("select", text, anchors);
@@ -170,7 +175,7 @@ export const TextAnnotator = ({
       if (entity) {
         const classItem = EntityColors[entity.class];
         const colorName = classItem?.color ?? "transparent";
-        const color = theme.color[colorName] as string;
+        const color = theme?.color[colorName] as string;
 
         return {
           mode: "background",
@@ -198,7 +203,7 @@ export const TextAnnotator = ({
 
   useEffect(() => {
     refreshAnnotator();
-  }, [document]);
+  }, [document, theme]);
 
   useEffect(() => {
     if (annotator) {
@@ -269,11 +274,11 @@ export const TextAnnotator = ({
         <StyledScrollerViewport
           ref={scroller}
           style={{
-            background: theme.color.success,
+            background: theme?.color.success,
           }}
         >
           <StyledScrollerCursor
-            style={{ backgroundColor: theme.color.primary }}
+            style={{ backgroundColor: theme?.color.primary }}
           />
         </StyledScrollerViewport>
       </StyledCanvasWrapper>
