@@ -9,9 +9,11 @@ export const StyledGrid = styled.div`
 export const StyledLabel = styled.div`
   display: grid;
   align-items: center;
-  text-align: right;
+  margin-top: 0.5rem;
   color: ${({ theme }) => theme.color["info"]};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
+  text-align: end;
+  align-items: baseline;
 `;
 export const StyledValue = styled.div`
   display: grid;
