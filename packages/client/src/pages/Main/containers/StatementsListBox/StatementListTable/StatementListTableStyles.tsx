@@ -98,4 +98,5 @@ export const StyledAbbreviatedLabel = styled.div`
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
   min-width: 5rem;
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
 `;

@@ -1,9 +1,14 @@
-import React, { ReactNode, useRef, useState } from "react";
-import { useSpring, config } from "@react-spring/web";
-import { useAppSelector } from "redux/hooks";
+import {
+  FloatingPortal,
+  autoUpdate,
+  offset,
+  useFloating,
+} from "@floating-ui/react";
+import { config, useSpring } from "@react-spring/web";
+import React, { ReactNode, useEffect, useState } from "react";
 import {
   StyledCgMenuBoxed,
-  StyledContextButtonGroup,
+  StyledContextBtnGroup,
   StyledWrapper,
 } from "./StatementListContextMenuStyles";
 
@@ -15,72 +20,77 @@ export const StatementListContextMenu: React.FC<StatementListContextMenu> = ({
   buttons,
   inverted,
 }) => {
-  const firstPanelExpanded: boolean = useAppSelector(
-    (state) => state.layout.firstPanelExpanded
-  );
-  const panelWidths: number[] = useAppSelector(
-    (state) => state.layout.panelWidths
-  );
-  const ref = useRef<HTMLDivElement>(null);
-
   const [showMenu, setShowMenu] = useState(false);
-  const [currentPosition, setCurrentPosition] = useState({
-    x: 0,
-    y: 0,
-    height: 0,
-    width: 0,
-  });
+  const [timeoutId, setTimeoutId] = useState<number | null>(null);
 
-  const setDivPosition = () => {
-    if (ref.current) {
-      const rect = ref.current.getBoundingClientRect();
-      setCurrentPosition({
-        x: rect["x"],
-        y: rect["y"],
-        height: rect["height"],
-        width: rect["width"],
-      });
+  const handleMouseEnter = () => {
+    setPortalMounted(true);
+    setShowMenu(true);
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+      setTimeoutId(null);
     }
   };
+
+  const handleMouseLeave = () => {
+    const id = window.setTimeout(() => {
+      setShowMenu(false);
+    }, 700);
+
+    setTimeoutId(id);
+  };
+
+  const [portalMounted, setPortalMounted] = useState(false);
+
+  useEffect(() => {
+    if (!showMenu && portalMounted) {
+      setTimeout(() => {
+        setPortalMounted(false);
+      }, 300);
+    }
+  }, [showMenu]);
 
   const animatedMount = useSpring({
     opacity: showMenu ? 1 : 0,
     config: config.stiff,
   });
 
+  const { refs, floatingStyles } = useFloating({
+    placement: "left",
+    whileElementsMounted: autoUpdate,
+  });
+
   return (
     <>
       <StyledWrapper
-        ref={ref}
-        onMouseEnter={() => {
-          if (!showMenu) {
-            setDivPosition();
-          }
-          setShowMenu(true);
-        }}
-        onMouseLeave={() => {
-          setShowMenu(false);
-        }}
+        ref={refs.setReference}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
       >
         <StyledCgMenuBoxed
           onClick={(e: React.MouseEvent) => e.stopPropagation()}
           $inverted={inverted}
           size={18}
         />
-        {showMenu && (
-          <StyledContextButtonGroup
-            $clientX={currentPosition.x}
-            $clientY={currentPosition.y}
-            $firstPanelExpanded={firstPanelExpanded}
-            $panelWidths={panelWidths}
-            style={animatedMount}
-            onClick={(e: React.MouseEvent) => {
-              e.stopPropagation();
-              setShowMenu(false);
-            }}
-          >
-            {buttons}
-          </StyledContextButtonGroup>
+        {portalMounted && (
+          <FloatingPortal id="page">
+            <div
+              ref={refs.setFloating}
+              style={{
+                ...floatingStyles,
+              }}
+            >
+              <StyledContextBtnGroup
+                style={animatedMount}
+                onClick={(e: React.MouseEvent) => {
+                  e.stopPropagation();
+                  setShowMenu(false);
+                }}
+              >
+                {buttons}
+              </StyledContextBtnGroup>
+            </div>
+          </FloatingPortal>
         )}
       </StyledWrapper>
     </>

@@ -42,8 +42,6 @@ export const StatementEditorBox: React.FC = () => {
     }
   }, [statementError]);
 
-  const dispatch = useAppDispatch();
-
   // MUTATIONS
   const updateStatementMutation = useMutation({
     mutationFn: async (changes: IStatement) => {

@@ -89,12 +89,12 @@ export const StyledReferenceRow = styled.div`
   grid-template-columns: auto auto;
 `;
 interface StyledReferenceColumn {
-  marginRight?: boolean;
+  $marginRight?: boolean;
 }
 export const StyledReferenceColumn = styled.div<StyledReferenceColumn>`
   display: grid;
-  margin-right: ${({ theme, marginRight }) =>
-    marginRight ? theme.space[1] : ""};
+  margin-right: ${({ theme, $marginRight }) =>
+    $marginRight ? theme.space[1] : ""};
 `;
 interface StyledTagWrap {
   $marginRight?: boolean;

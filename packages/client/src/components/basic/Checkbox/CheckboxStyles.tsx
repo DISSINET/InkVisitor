@@ -1,5 +1,4 @@
 import styled from "styled-components";
-import { space1 } from "Theme/constants";
 
 export const StyledCheckbox = styled.div`
   color: ${({ theme }) => theme.color["black"]};

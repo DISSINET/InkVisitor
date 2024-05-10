@@ -1,10 +1,11 @@
+import { FloatingPortal, autoUpdate, useFloating } from "@floating-ui/react";
+import { config, useSpring } from "@react-spring/web";
 import { UserEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
-import { Button } from "components";
-import React, { useRef, useState } from "react";
-import { FaPlus, FaStar, FaTrashAlt } from "react-icons/fa";
 import { UseMutationResult } from "@tanstack/react-query";
-import { useSpring, config } from "@react-spring/web";
+import { Button } from "components";
+import React, { useEffect, useState } from "react";
+import { FaPlus, FaStar, FaTrashAlt } from "react-icons/fa";
 import { ContextMenuNewTerritoryModal } from "../ContextMenuNewTerritoryModal/ContextMenuNewTerritoryModal";
 import { ContextMenuSubmitDelete } from "../ContextMenuSubmitDelete/ContextMenuSubmitDelete";
 import {
@@ -33,43 +34,38 @@ export const TerritoryTreeContextMenu: React.FC<TerritoryTreeContextMenu> = ({
   updateUserMutation,
   isFavorited,
 }) => {
-  const ref = useRef<HTMLDivElement>(null);
-
   const [showMenu, setShowMenu] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
   const [showSubmit, setShowSubmit] = useState(false);
-  const [currentPosition, setCurrentPosition] = useState({
-    x: 0,
-    y: 0,
-    height: 0,
-  });
-
-  const setDivPosition = () => {
-    if (ref.current) {
-      const rect = ref.current.getBoundingClientRect();
-      setCurrentPosition({
-        x: rect["x"],
-        y: rect["y"],
-        height: rect["height"],
-      });
-    }
-  };
 
   const animatedMount = useSpring({
     opacity: showMenu ? 1 : 0,
     config: config.stiff,
   });
 
+  const { refs, floatingStyles } = useFloating({
+    placement: "right",
+    whileElementsMounted: autoUpdate,
+  });
+
+  const [portalMounted, setPortalMounted] = useState(false);
+
+  useEffect(() => {
+    if (!showMenu && portalMounted) {
+      setTimeout(() => {
+        setPortalMounted(false);
+      }, 300);
+    }
+  }, [showMenu]);
+
   return (
     <>
       <StyledWrapper
-        ref={ref}
+        ref={refs.setReference}
         onMouseEnter={() => {
-          if (!showMenu) {
-            setDivPosition();
-          }
           onMenuOpen();
           setShowMenu(true);
+          setPortalMounted(true);
         }}
         onMouseLeave={() => {
           onMenuClose();
@@ -77,76 +73,88 @@ export const TerritoryTreeContextMenu: React.FC<TerritoryTreeContextMenu> = ({
         }}
       >
         <StyledCgMenuBoxed size={18} />
-        {showMenu && (
-          <StyledContextButtonGroup
-            $clientX={currentPosition.x}
-            $clientY={currentPosition.y}
-            height={currentPosition.height}
-            style={animatedMount}
-          >
-            {right !== UserEnums.RoleMode.Read && (
-              <Button
-                key="add"
-                tooltipLabel="add child territory"
-                icon={<FaPlus size={14} />}
-                color="info"
-                onClick={() => {
-                  // add child
-                  setShowCreate(true);
-                  setShowMenu(false);
-                  onMenuClose();
-                }}
-              />
-            )}
-            <Button
-              key="favorites"
-              tooltipLabel={
-                isFavorited ? "remove from favorites" : "add to favorites"
-              }
-              icon={<FaStar size={14} />}
-              color={isFavorited ? "grey" : "warning"}
-              onClick={() => {
-                if (isFavorited) {
-                  // remove from favorites
-                  const index = storedTerritories.indexOf(territoryActant.id);
-                  if (index > -1) {
-                    storedTerritories.splice(index, 1).slice;
-                  }
-                  const newStored = [
-                    ...storedTerritories.map((storedTerritory) => ({
-                      territoryId: storedTerritory,
-                    })),
-                  ];
-                  updateUserMutation.mutate({ storedTerritories: newStored });
-                } else {
-                  // add to favorites
-                  const newStored = [
-                    ...storedTerritories.map((storedTerritory) => ({
-                      territoryId: storedTerritory,
-                    })),
-                    { territoryId: territoryActant.id },
-                  ];
-                  updateUserMutation.mutate({ storedTerritories: newStored });
-                }
-                setShowMenu(false);
-                onMenuClose();
+
+        {portalMounted && (
+          <FloatingPortal id="page">
+            <div
+              ref={refs.setFloating}
+              style={{
+                ...floatingStyles,
+                zIndex: 100,
               }}
-            />
-            {((right === UserEnums.RoleMode.Admin && empty) ||
-              (right === UserEnums.RoleMode.Write && empty)) && (
-              <Button
-                key="delete"
-                tooltipLabel="delete territory"
-                icon={<FaTrashAlt size={14} />}
-                color="danger"
-                onClick={() => {
-                  setShowSubmit(true);
-                  setShowMenu(false);
-                  onMenuClose();
-                }}
-              />
-            )}
-          </StyledContextButtonGroup>
+            >
+              <StyledContextButtonGroup style={animatedMount}>
+                {right !== UserEnums.RoleMode.Read && (
+                  <Button
+                    key="add"
+                    tooltipLabel="add child territory"
+                    icon={<FaPlus size={14} />}
+                    color="info"
+                    onClick={() => {
+                      // add child
+                      setShowCreate(true);
+                      setShowMenu(false);
+                      onMenuClose();
+                    }}
+                  />
+                )}
+                <Button
+                  key="favorites"
+                  tooltipLabel={
+                    isFavorited ? "remove from favorites" : "add to favorites"
+                  }
+                  icon={<FaStar size={14} />}
+                  color={isFavorited ? "grey" : "warning"}
+                  onClick={() => {
+                    if (isFavorited) {
+                      // remove from favorites
+                      const index = storedTerritories.indexOf(
+                        territoryActant.id
+                      );
+                      if (index > -1) {
+                        storedTerritories.splice(index, 1).slice;
+                      }
+                      const newStored = [
+                        ...storedTerritories.map((storedTerritory) => ({
+                          territoryId: storedTerritory,
+                        })),
+                      ];
+                      updateUserMutation.mutate({
+                        storedTerritories: newStored,
+                      });
+                    } else {
+                      // add to favorites
+                      const newStored = [
+                        ...storedTerritories.map((storedTerritory) => ({
+                          territoryId: storedTerritory,
+                        })),
+                        { territoryId: territoryActant.id },
+                      ];
+                      updateUserMutation.mutate({
+                        storedTerritories: newStored,
+                      });
+                    }
+                    setShowMenu(false);
+                    onMenuClose();
+                  }}
+                />
+                {((right === UserEnums.RoleMode.Admin && empty) ||
+                  (right === UserEnums.RoleMode.Write && empty)) && (
+                  <Button
+                    key="delete"
+                    tooltipLabel="delete territory"
+                    icon={<FaTrashAlt size={14} />}
+                    color="danger"
+                    onClick={() => {
+                      setShowSubmit(true);
+                      setShowMenu(false);
+                      onMenuClose();
+                    }}
+                  />
+                )}
+              </StyledContextButtonGroup>
+            </div>
+          </FloatingPortal>
         )}
       </StyledWrapper>
 

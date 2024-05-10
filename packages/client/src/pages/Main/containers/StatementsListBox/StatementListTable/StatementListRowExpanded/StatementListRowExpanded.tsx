@@ -50,7 +50,7 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
     return (
       <StyledReferenceRow key={key}>
         {resourceEntity ? (
-          <StyledReferenceColumn marginRight>
+          <StyledReferenceColumn $marginRight>
             <EntityTag
               entity={resourceEntity}
               tooltipPosition="bottom"
@@ -58,7 +58,7 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
             />
           </StyledReferenceColumn>
         ) : (
-          <StyledReferenceColumn marginRight>
+          <StyledReferenceColumn $marginRight>
             <EmptyTag label="resource" />
           </StyledReferenceColumn>
         )}
@@ -271,7 +271,7 @@ export const StatementListRowExpanded: React.FC<StatementListRowExpanded> = ({
             </StyledReferenceSection>
             <StyledGrid>
               {tagObjects.map((tag, key) => (
-                <StyledPropRow key={key} disableBottomMargin>
+                <StyledPropRow key={key} $disableBottomMargin>
                   <StyledBsArrowReturnRight size="20" />
                   <StyledSpan>&nbsp;&nbsp;(tag)&nbsp;&nbsp;</StyledSpan>
                   {renderListActant(tag.id, key)}

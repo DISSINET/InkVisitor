@@ -37,7 +37,6 @@ import { setLastClickedIndex } from "redux/features/statementList/lastClickedInd
 import { setRowsExpanded } from "redux/features/statementList/rowsExpandedSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { StatementListContextMenu } from "../StatementListContextMenu/StatementListContextMenu";
-import { StyledText } from "../StatementLitBoxStyles";
 import { StatementListRow } from "./StatementListRow";
 import {
   StyledAbbreviatedLabel,
@@ -48,7 +47,6 @@ import {
   StyledTdLastEdit,
   StyledTh,
 } from "./StatementListTableStyles";
-import { getShortLabelByLetterCount } from "utils/utils";
 
 type CellType = CellProps<IResponseStatement>;
 
@@ -313,11 +311,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
         accessor: "data",
         Cell: ({ row }: CellType) => {
           const { text } = row.original.data;
-          return (
-            <StyledText>
-              <StyledAbbreviatedLabel>{text}</StyledAbbreviatedLabel>
-            </StyledText>
-          );
+          return <StyledAbbreviatedLabel>{text}</StyledAbbreviatedLabel>;
         },
       },
       {
