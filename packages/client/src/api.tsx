@@ -652,6 +652,26 @@ class Api {
     }
   }
 
+  async entitiesDelete(
+    entityIds: string[],
+    options?: IApiOptions
+  ): Promise<AxiosResponse<IResponseGeneric>[]> {
+    const out: AxiosResponse<IResponseGeneric>[] = [];
+    for (const entityId of entityIds) {
+      try {
+        const response = await this.connection.delete(
+          `/entities/${entityId}`,
+          options
+        );      
+        out.push(response)
+      } catch (err) {
+        throw this.handleError(err);
+      }
+    }
+
+    return out;
+  }
+
   async entityRestore(
     entityId: string
   ): Promise<AxiosResponse<IResponseGeneric>> {
