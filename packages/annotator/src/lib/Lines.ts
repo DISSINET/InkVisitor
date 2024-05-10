@@ -11,6 +11,10 @@ export class Lines {
 
   // TODO: different font, different sizes
   font: string = "12px Monospace";
+  fontColor: string = "black";
+
+  bgColor: string = "white";
+
   charWidth: number = 0;
   lineHeight: number = 15;
 
@@ -38,7 +42,12 @@ export class Lines {
   draw(viewport: Viewport) {
     // @ts-ignore
     this.ctx.reset();
+
+    this.ctx.fillStyle = this.bgColor;
+    this.ctx.fillRect(0, 0, this.width, this.height);
+
     this.ctx.font = this.font;
+    this.ctx.fillStyle = this.fontColor;
     for (
       let renderLine = 1;
       renderLine <= viewport.lineEnd - viewport.lineStart;

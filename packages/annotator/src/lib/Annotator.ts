@@ -37,6 +37,10 @@ export class Annotator {
 
   // TODO: different font, different sizes
   font: string = "12px Monospace";
+  fontColor: string = "black";
+
+  bgColor: string = "white";
+
   charWidth: number = 0;
   lineHeight: number = 15;
 
@@ -145,7 +149,7 @@ export class Annotator {
       "Fn",
       "FnLock",
       "NumLock",
-      "ScrollLock"
+      "ScrollLock",
     ];
 
     switch (e.key) {
@@ -342,7 +346,7 @@ export class Annotator {
   }
 
   /**
-   * setCharWidth sets the initial size for characted
+   * setCharWidth sets the initial size for characters
    * This is true for monospace font
    * @param txt
    */
@@ -457,11 +461,7 @@ export class Annotator {
 
     // if this is range based request, add each tag(closing or opening) in this range
     if (start && end) {
-      for (
-        let i = start.segmentIndex;
-        i <= end.segmentIndex;
-        i++
-      ) {
+      for (let i = start.segmentIndex; i <= end.segmentIndex; i++) {
         const [segOpened, segClosed] =
           this.text.segments[i].getTagsForPosition(start);
         for (const tag of segOpened) {
@@ -504,7 +504,12 @@ export class Annotator {
   draw() {
     // @ts-ignore
     this.ctx.reset();
+
+    this.ctx.fillStyle = this.bgColor;
+    this.ctx.fillRect(0, 0, this.width, this.height);
+
     this.ctx.font = this.font;
+    this.ctx.fillStyle = this.fontColor;
 
     const textToRender = this.text.getViewportText(this.viewport);
     for (
@@ -564,7 +569,10 @@ export class Annotator {
       this.onHighlightCb &&
       this.annotatedPosition
     ) {
-      const annotated: string[] = this.getAnnotations(null, this.annotatedPosition);
+      const annotated: string[] = this.getAnnotations(
+        null,
+        this.annotatedPosition
+      );
       for (const tag of annotated) {
         const highlight = this.onHighlightCb(tag);
         if (highlight) {

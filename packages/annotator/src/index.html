@@ -64,8 +64,16 @@
         document.getElementById("canvas"),
         example
       );
+
+      annotator.fontColor = "turquoise";
+      annotator.bgColor = "darkblue";
+
       annotator.addScroller(document.getElementById("scroller"));
       annotator.addLines(document.getElementById("lines"));
+
+      annotator.lines.fontColor = "red";
+      annotator.lines.bgColor = "orange";
+
       annotator.onHighlight((entityId) => {
         const colors = ["black", "brown", "pink", "green"];
         const randColor = colors[Math.floor(Math.random() * colors.length)];
