@@ -4,7 +4,7 @@ import { UserEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
 import { UseMutationResult } from "@tanstack/react-query";
 import { Button } from "components";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FaPlus, FaStar, FaTrashAlt } from "react-icons/fa";
 import { ContextMenuNewTerritoryModal } from "../ContextMenuNewTerritoryModal/ContextMenuNewTerritoryModal";
 import { ContextMenuSubmitDelete } from "../ContextMenuSubmitDelete/ContextMenuSubmitDelete";
@@ -48,6 +48,16 @@ export const TerritoryTreeContextMenu: React.FC<TerritoryTreeContextMenu> = ({
     whileElementsMounted: autoUpdate,
   });
 
+  const [portalMounted, setPortalMounted] = useState(false);
+
+  useEffect(() => {
+    if (!showMenu && portalMounted) {
+      setTimeout(() => {
+        setPortalMounted(false);
+      }, 300);
+    }
+  }, [showMenu]);
+
   return (
     <>
       <StyledWrapper
@@ -55,6 +65,7 @@ export const TerritoryTreeContextMenu: React.FC<TerritoryTreeContextMenu> = ({
         onMouseEnter={() => {
           onMenuOpen();
           setShowMenu(true);
+          setPortalMounted(true);
         }}
         onMouseLeave={() => {
           onMenuClose();
@@ -63,7 +74,7 @@ export const TerritoryTreeContextMenu: React.FC<TerritoryTreeContextMenu> = ({
       >
         <StyledCgMenuBoxed size={18} />
 
-        {showMenu && (
+        {portalMounted && (
           <FloatingPortal id="page">
             <div
               ref={refs.setFloating}
