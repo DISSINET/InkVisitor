@@ -310,7 +310,12 @@ export const Suggester: React.FC<Suggester> = ({
           />
           <TypeBar entityLetter={category} />
 
-          <div ref={refs.setReference} style={{ width: "100%" }}>
+          <div
+            ref={refs.setReference}
+            style={{
+              position: "relative",
+            }}
+          >
             <Input
               type="text"
               value={typed}
@@ -331,12 +336,12 @@ export const Suggester: React.FC<Suggester> = ({
               autoFocus={categories.length === 1 && autoFocus}
               disabled={disabled}
             />
+            {typed.length > 0 && (
+              <StyledSuggestionCancelButton>
+                <MdCancel size={16} onClick={() => onCancel()} />
+              </StyledSuggestionCancelButton>
+            )}
           </div>
-          {typed.length > 0 && (
-            <StyledSuggestionCancelButton $hasButton={!disableCreate}>
-              <MdCancel size={16} onClick={() => onCancel()} />
-            </StyledSuggestionCancelButton>
-          )}
 
           {!disableCreate && (
             <StyledSuggesterButton>
