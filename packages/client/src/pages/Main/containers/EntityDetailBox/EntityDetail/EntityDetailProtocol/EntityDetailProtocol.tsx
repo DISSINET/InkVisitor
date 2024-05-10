@@ -17,10 +17,13 @@ import { StyledFlexList } from "../EntityDetailValidationSection/EntityDetailVal
 
 const initialProtocol: ITerritoryProtocol = {
   project: "",
-  guidelinesResource: [],
+  dataCollectionMethods: [],
   description: "",
+  guidelines: [],
+  detailedProtocols: [],
   startDate: "",
   endDate: "",
+  relatedDataPublications: [],
 };
 
 interface EntityDetailProtocol {
@@ -58,8 +61,16 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
   if (!protocol) {
     return;
   }
-  const { project, guidelinesResource, description, startDate, endDate } =
-    protocol;
+  const {
+    project,
+    dataCollectionMethods,
+    description,
+    guidelines,
+    detailedProtocols,
+    startDate,
+    endDate,
+    relatedDataPublications,
+  } = protocol;
 
   const updateProtocol = (changes: Partial<ITerritoryProtocol>) => {
     updateEntityMutation.mutate({ data: { protocol: changes } });
@@ -77,22 +88,22 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
         />
       </StyledValue>
 
-      <StyledLabel>Guidelines resource</StyledLabel>
+      <StyledLabel>Data collection method</StyledLabel>
       <StyledValue>
         <StyledFlexList>
-          {Array.isArray(guidelinesResource) &&
-            guidelinesResource.map((gResourceId) => {
+          {Array.isArray(dataCollectionMethods) &&
+            dataCollectionMethods.map((conceptId) => {
               return (
-                <StyledTagWrap key={gResourceId}>
+                <StyledTagWrap key={conceptId}>
                   <EntityTag
                     flexListMargin
-                    entity={entities[gResourceId]}
+                    entity={entities[conceptId]}
                     unlinkButton={
                       userCanEdit && {
                         onClick: () =>
                           updateProtocol({
-                            guidelinesResource: guidelinesResource.filter(
-                              (id) => id !== gResourceId
+                            dataCollectionMethods: dataCollectionMethods.filter(
+                              (id) => id !== conceptId
                             ),
                           }),
                       }
@@ -106,11 +117,14 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
               alwaysShowCreateModal
               onPicked={(newPicked) => {
                 updateProtocol({
-                  guidelinesResource: [...guidelinesResource, newPicked.id],
+                  dataCollectionMethods: [
+                    ...dataCollectionMethods,
+                    newPicked.id,
+                  ],
                 });
               }}
-              excludedActantIds={guidelinesResource}
-              categoryTypes={[EntityEnums.Class.Resource]}
+              excludedActantIds={dataCollectionMethods}
+              categoryTypes={[EntityEnums.Class.Concept]}
               territoryParentId={territory.data.parent.territoryId}
               isInsideTemplate={isInsideTemplate}
               disabled={!userCanEdit}
@@ -123,10 +137,96 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
       <StyledValue>
         <Input
           width="full"
+          type="textarea"
+          rows={3}
           value={description}
           onChangeFn={(text) => updateProtocol({ description: text })}
           disabled={!userCanEdit}
         />
+      </StyledValue>
+
+      <StyledLabel>Guidelines</StyledLabel>
+      <StyledValue>
+        <StyledFlexList>
+          {Array.isArray(guidelines) &&
+            guidelines.map((guidelineR) => {
+              return (
+                <StyledTagWrap key={guidelineR}>
+                  <EntityTag
+                    flexListMargin
+                    entity={entities[guidelineR]}
+                    unlinkButton={
+                      userCanEdit && {
+                        onClick: () =>
+                          updateProtocol({
+                            guidelines: guidelines.filter(
+                              (id) => id !== guidelineR
+                            ),
+                          }),
+                      }
+                    }
+                  />
+                </StyledTagWrap>
+              );
+            })}
+          {userCanEdit && (
+            <EntitySuggester
+              alwaysShowCreateModal
+              onPicked={(newPicked) => {
+                updateProtocol({
+                  guidelines: [...guidelines, newPicked.id],
+                });
+              }}
+              excludedActantIds={guidelines}
+              categoryTypes={[EntityEnums.Class.Resource]}
+              territoryParentId={territory.data.parent.territoryId}
+              isInsideTemplate={isInsideTemplate}
+              disabled={!userCanEdit}
+            />
+          )}
+        </StyledFlexList>
+      </StyledValue>
+
+      <StyledLabel>Detailed protocol</StyledLabel>
+      <StyledValue>
+        <StyledFlexList>
+          {Array.isArray(detailedProtocols) &&
+            detailedProtocols.map((resourceId) => {
+              return (
+                <StyledTagWrap key={resourceId}>
+                  <EntityTag
+                    flexListMargin
+                    entity={entities[resourceId]}
+                    unlinkButton={
+                      userCanEdit && {
+                        onClick: () =>
+                          updateProtocol({
+                            detailedProtocols: detailedProtocols.filter(
+                              (id) => id !== resourceId
+                            ),
+                          }),
+                      }
+                    }
+                  />
+                </StyledTagWrap>
+              );
+            })}
+          {userCanEdit && (
+            <EntitySuggester
+              alwaysShowCreateModal
+              onPicked={(newPicked) => {
+                updateProtocol({
+                  detailedProtocols: [...detailedProtocols, newPicked.id],
+                });
+              }}
+              excludedActantIds={detailedProtocols}
+              categoryTypes={[EntityEnums.Class.Resource]}
+              territoryParentId={territory.data.parent.territoryId}
+              isInsideTemplate={isInsideTemplate}
+              disabled={!userCanEdit}
+            />
+          )}
+        </StyledFlexList>
       </StyledValue>
 
       <StyledLabel>Start date</StyledLabel>
@@ -181,6 +281,52 @@ export const EntityDetailProtocol: React.FC<EntityDetailProtocol> = ({
             disabled={!userCanEdit}
           />
         )}
+      </StyledValue>
+
+      <StyledLabel>Related data publications</StyledLabel>
+      <StyledValue>
+        <StyledFlexList>
+          {Array.isArray(relatedDataPublications) &&
+            relatedDataPublications.map((resourceId) => {
+              return (
+                <StyledTagWrap key={resourceId}>
+                  <EntityTag
+                    flexListMargin
+                    entity={entities[resourceId]}
+                    unlinkButton={
+                      userCanEdit && {
+                        onClick: () =>
+                          updateProtocol({
+                            relatedDataPublications:
+                              relatedDataPublications.filter(
+                                (id) => id !== resourceId
+                              ),
+                          }),
+                      }
+                    }
+                  />
+                </StyledTagWrap>
+              );
+            })}
+          {userCanEdit && (
+            <EntitySuggester
+              alwaysShowCreateModal
+              onPicked={(newPicked) => {
+                updateProtocol({
+                  relatedDataPublications: [
+                    ...relatedDataPublications,
+                    newPicked.id,
+                  ],
+                });
+              }}
+              excludedActantIds={relatedDataPublications}
+              categoryTypes={[EntityEnums.Class.Resource]}
+              territoryParentId={territory.data.parent.territoryId}
+              isInsideTemplate={isInsideTemplate}
+              disabled={!userCanEdit}
+            />
+          )}
+        </StyledFlexList>
       </StyledValue>
     </StyledGrid>
   );
