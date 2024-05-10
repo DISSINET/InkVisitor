@@ -206,7 +206,7 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
               inverted
               onClick={async () => {
                 await navigator.clipboard.writeText(
-                  `${window.location.host}${window.location.pathname}#selectedDetail=${entity.id}&detail=${entity.id}`
+                  `${window.location.protocol}//${window.location.host}${window.location.pathname}#selectedDetail=${entity.id}&detail=${entity.id}`
                 );
                 toast.info("Link to detail copied to clipboard");
               }}
