@@ -39,13 +39,10 @@ export const StyledInputWrapper = styled.div<InputWrapper>`
 export const StyledSuggesterButton = styled.div`
   border: 1px solid ${({ theme }) => theme.color["primary"]};
 `;
-interface StyledSuggestionCancelButton {
-  $hasButton: boolean;
-}
+interface StyledSuggestionCancelButton {}
 export const StyledSuggestionCancelButton = styled.div<StyledSuggestionCancelButton>`
   position: absolute;
-  right: ${({ theme, $hasButton }) =>
-    $hasButton ? theme.space[10] : theme.space[1]};
+  right: 0.25rem;
   top: 4px;
   svg {
     color: ${({ theme }) => theme.color["danger"]};
@@ -99,6 +96,7 @@ export const StyledTagWrapper = styled.div`
   overflow: hidden;
 `;
 export const StyledAiOutlineWarning = styled(AiOutlineWarning)`
+  /* position: absolute; */
   margin-top: 0.1rem;
   margin-left: 0.5rem;
 `;
