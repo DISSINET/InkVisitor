@@ -19,10 +19,13 @@ export interface IParentTerritory {
 
 export interface ITerritoryProtocol {
   project: string;
-  guidelinesResource: string[]; // R class entities
+  dataCollectionMethods: string[]; // C class entities
   description: string;
+  guidelines: string[]; // R class entities
+  detailedProtocols: string[]; // R class entities
   startDate: string; // V class entity
   endDate: string; // V class entity
+  relatedDataPublications: string[]; // R class entities
 }
 
 export interface ITerritoryValidation {
