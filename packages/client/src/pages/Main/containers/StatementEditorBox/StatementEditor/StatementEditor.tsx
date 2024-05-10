@@ -858,7 +858,6 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 excludedEntityClasses={excludedSuggesterEntities}
                 isInsideTemplate={statement.isTemplate}
                 territoryParentId={statementTerritoryId}
-                excludedActantIds={[statement.id]}
                 isInsideStatement
                 preSuggestions={preSuggestions}
               />
