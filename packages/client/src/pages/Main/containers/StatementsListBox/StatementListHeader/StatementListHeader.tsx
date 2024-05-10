@@ -24,7 +24,7 @@ import Dropdown, {
 } from "components/advanced";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
-import { FaHighlighter, FaList } from "react-icons/fa";
+import { FaHighlighter, FaList, FaTrash } from "react-icons/fa";
 import {
   MdOutlineCheckBox,
   MdOutlineCheckBoxOutlineBlank,
@@ -274,6 +274,22 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
   const [referenceElement, setReferenceElement] =
     useState<HTMLSpanElement | null>(null);
 
+  const handleBatchRemove = async () => {
+    try {
+      await api.entitiesDelete(selectedRows).then(() => {
+        queryClient.invalidateQueries({
+          queryKey: ["tree"],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ["territory"],
+        });
+      });
+    } catch (error) {
+      console.log(error);
+      // toast.error(error.message)
+    }
+  };
+
   return (
     <>
       <Tooltip
@@ -376,6 +392,18 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
                           options={batchOptions}
                         />
                       </StyledDropdownWrap>
+
+                      {/* Batch remove */}
+                      {batchAction.value === BatchOption.remove_S && (
+                        <Button
+                          icon={<FaTrash />}
+                          color="danger"
+                          inverted
+                          onClick={handleBatchRemove}
+                          tooltipLabel="remove selected statements"
+                        />
+                      )}
+
                       {batchAction.info && (
                         <EntitySuggester
                           placeholder={
