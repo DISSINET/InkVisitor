@@ -387,7 +387,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         user &&
         user.options.defaultStatementLanguage
       ) {
-        checkTypeEntityLanguage(propId, changes);
+        checkTypeEntityLanguage(propId, changes, instantUpdate);
       } else {
         applyPropChanges(propId, changes, instantUpdate);
       }
@@ -395,21 +395,19 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   };
 
   // checking if the language is not different from user.options.defaultStatementLanguage -> in that case, switch elvl to EntityEnums.Elvl.Inferential
-  const checkTypeEntityLanguage = (propId: string, changes: any) => {
-    console.log("checking type entity language");
+  const checkTypeEntityLanguage = (
+    propId: string,
+    changes: any,
+    instantUpdate?: boolean
+  ) => {
     if (user) {
       const statementLanguage = user.options.defaultStatementLanguage;
       api.entitiesGet(changes.type.entityId).then((typeEntity) => {
         if (typeEntity.data) {
           const entityLanguage = typeEntity.data.language;
           if (entityLanguage !== statementLanguage) {
-            console.log(
-              `changing elvl of prop type as user language is ${statementLanguage} and entity has language ${entityLanguage}`
-            );
             changes.type.elvl = EntityEnums.Elvl.Inferential;
-            applyPropChanges(propId, {
-              changes,
-            });
+            applyPropChanges(propId, changes, instantUpdate);
             toast.info(
               `The epistemic level of property type's involvement changed to "inferential"`
             );
