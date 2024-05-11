@@ -137,7 +137,7 @@ export default class Entity implements IEntity, IDbModel {
         `Referenced by entity ${usedBy.id}${
           usedBy.label ? "(" + usedBy.label + ")" : ""
         }`
-      );
+      ).withData([usedBy.id]);;
     }
 
     const result = await rethink
