@@ -1,6 +1,6 @@
 {
   "name": "inkvisitor-server",
-  "version": "1.3.3",
+  "version": "1.4.0c",
   "engines": {
     "npm": ">=8.19.2",
     "node": ">=18.0.0"
