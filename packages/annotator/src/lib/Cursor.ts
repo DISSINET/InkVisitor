@@ -1,5 +1,6 @@
 import { DrawingOptions } from "./Annotator";
 import Viewport from "./Viewport";
+import { Modes } from "./constants";
 
 // Absolute coordinates point to virtual position not limited by viewport - first line is first line of input
 export interface IAbsCoordinates {
@@ -87,7 +88,15 @@ export default class Cursor implements IRelativeCoordinates {
    * @returns
    */
   getSelected(): [IAbsCoordinates | undefined, IAbsCoordinates | undefined] {
-    return [this.selectStart, this.selectEnd];
+    if (!this.selectStart || !this.selectEnd) {
+      return [undefined, undefined];
+    }
+
+    if (this.selectStart.yLine < this.selectEnd.yLine || (this.selectStart.yLine === this.selectEnd.yLine && this.selectStart.xLine < this.selectEnd.xLine)) {
+      return [this.selectStart, this.selectEnd];
+    } else {
+      return [this.selectEnd, this.selectStart];
+    }
   }
 
   /**
@@ -189,7 +198,7 @@ export default class Cursor implements IRelativeCoordinates {
 
     const { charWidth, lineHeight, charsAtLine } = options;
 
-    ctx.fillStyle = options.mode === "highlight" ? "#cccccc" : "blue";
+    ctx.fillStyle = options.mode === Modes.HIGHLIGHT ? "#cccccc" : "blue";
 
     if (!options.schema) {
       ctx.fillRect(

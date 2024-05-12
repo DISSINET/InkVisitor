@@ -369,8 +369,8 @@ class Text {
       return;
     }
 
-    console.log("raw  position", segmentPosition.rawTextIndex)
     let indexPosition = segmentPosition.rawTextIndex;
+    const segment = this.segments[segmentPosition.segmentIndex];
     for (let i = 0; i < segmentPosition.segmentIndex; i++) {
       indexPosition++; // each segment should receive +1 character no matter what (newline)
       indexPosition += this.segments[i].raw.length;
@@ -381,7 +381,7 @@ class Text {
       textToInsert +
       this.value.slice(indexPosition);
 
-    const segment = this.segments[segmentPosition.segmentIndex];
+
     segment.raw =
       segment.raw.slice(0, segmentPosition.rawTextIndex) +
       textToInsert +
