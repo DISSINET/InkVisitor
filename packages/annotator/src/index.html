@@ -46,35 +46,47 @@
           </div>
         </div>
       </div>
-      <div style="margin-top: 10px">Selected:</div>
-      <pre
-        id="highlight-container"
-        style="padding: 10px; border: 1px solid black; margin-top: 10px"
-      ></pre>
-      <textarea></textarea>
-      <button id="raw">raw</button>
-      <button id="highlight">highlight</button>
-      <button id="semi">semi</button>
+      <fieldset>
+        <label>mode</label>
+        <select id="mode">
+          <option value="raw">raw</option>
+          <option value="highlight">highlight</option>
+          <option value="semi">semi</option>
+        </select>
+      </fieldset>
+      <fieldset>
+        <label>toggle highlight</label>
+      <input type="checkbox" id="highlightToggle" />
+      </fieldset>
+      <fieldset>
+        <label>add anchor </label>
+        <input type="text" id="anchorText" />
+        <button id="addAnchor">add</button>
+      </fieldset>
     </div>
 
     <script src="bundle.js"></script>
 
     <script>
+      let highlightEnabled = false;
       const annotator = new Annotator(
         document.getElementById("canvas"),
         example
       );
 
-      annotator.fontColor = "turquoise";
-      annotator.bgColor = "darkblue";
+      annotator.fontColor = "black";
+      annotator.bgColor = "transparent";
 
       annotator.addScroller(document.getElementById("scroller"));
       annotator.addLines(document.getElementById("lines"));
 
       annotator.lines.fontColor = "red";
-      annotator.lines.bgColor = "orange";
+      annotator.lines.bgColor = "transparent";
 
       annotator.onHighlight((entityId) => {
+        if (!highlightEnabled) {
+          return null;
+        }
         const colors = ["black", "brown", "pink", "green"];
         const randColor = colors[Math.floor(Math.random() * colors.length)];
         return {
@@ -89,19 +101,17 @@
         console.log("onSelectText", text);
       });
 
-      document.getElementById("raw").onclick = () => {
-        annotator.setMode("raw");
-        annotator.draw();
+      document.getElementById("highlightToggle").onclick = (e) => {
+        highlightEnabled = e.target.checked;
       };
 
-      document.getElementById("highlight").onclick = () => {
-        annotator.setMode("highlight");
-        annotator.draw();
-      };
-
-      document.getElementById("semi").onclick = () => {
-        annotator.setMode("semi");
-        annotator.draw();
+      document.getElementById("mode").onchange = (e) => {
+        annotator.setMode(e.target.value);
+        annotator.draw();  
+      }
+      
+      document.getElementById("addAnchor").onclick = () => {
+        annotator.addAnchor(document.getElementById("anchorText").value);
       };
 
       annotator.draw();
