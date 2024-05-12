@@ -4,7 +4,7 @@ import { FaPen, FaRegSave, FaTrash } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { v4 as uuidv4 } from "uuid";
 
-import { Annotator, Modes } from "@inkvisitor/annotator";
+import { Annotator, Modes } from "@inkvisitor/annotator/src/lib";
 import { IDocument, IEntity } from "@shared/types";
 import api from "api";
 import { Button } from "components/basic/Button/Button";

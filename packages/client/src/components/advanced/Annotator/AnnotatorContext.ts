@@ -1,5 +1,5 @@
 import { createContext, useContext } from 'react';
-import { Annotator } from '@inkvisitor/annotator';
+import { Annotator } from '@inkvisitor/annotator/src/lib';
 
 interface AnnotatorContextType {
   annotator
