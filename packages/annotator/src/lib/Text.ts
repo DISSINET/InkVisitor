@@ -1,7 +1,6 @@
 import Viewport from "./Viewport";
 import Cursor, { IAbsCoordinates, IRelativeCoordinates } from "./Cursor";
-
-export type Mode = "raw" | "highlight" | "semi";
+import { Modes } from "./constants";
 
 export interface Tag {
   position: number;
@@ -104,7 +103,7 @@ export interface SegmentPosition {
  * Text provides more abstract control over the provided raw text
  */
 class Text {
-  mode: Mode = "raw";
+  mode: Modes = Modes.RAW;
   segments: Segment[];
   dirtySegment?: number;
   value: string;
@@ -160,7 +159,7 @@ class Text {
       segment.lines = [];
 
       let text = segment.raw;
-      if (this.mode === "highlight" || this.mode === "semi") {
+      if (this.mode === Modes.HIGHLIGHT || this.mode === Modes.SEMI) {
         text = segment.parsed;
       }
       const words = text.split(" ");
@@ -235,7 +234,7 @@ class Text {
 
     let rawTextIndex = parsedTextIndex;
 
-    if (this.mode !== "raw") {
+    if (this.mode !== Modes.RAW) {
       for (const tag of segment.openingTags) {
         if (tag.position <= rawTextIndex) {
           rawTextIndex += tag.tag.length + 2;
@@ -346,7 +345,7 @@ class Text {
     let text = this.segments[position.segmentIndex].parsed;
     let textIndex = position.parsedTextIndex;
 
-    if (this.mode === "raw") {
+    if (this.mode === Modes.RAW) {
       text = this.segments[position.segmentIndex].raw;
       textIndex = position.rawTextIndex;
     }
@@ -370,6 +369,7 @@ class Text {
       return;
     }
 
+    console.log("raw  position", segmentPosition.rawTextIndex)
     let indexPosition = segmentPosition.rawTextIndex;
     for (let i = 0; i < segmentPosition.segmentIndex; i++) {
       indexPosition++; // each segment should receive +1 character no matter what (newline)

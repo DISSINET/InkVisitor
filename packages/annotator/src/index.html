@@ -56,7 +56,7 @@
       </fieldset>
       <fieldset>
         <label>toggle highlight</label>
-      <input type="checkbox" id="highlightToggle" />
+        <input type="checkbox" id="highlightToggle" />
       </fieldset>
       <fieldset>
         <label>add anchor </label>
@@ -65,13 +65,21 @@
       </fieldset>
     </div>
 
+    <p>Text from textfile.txt:</p>
+    <pre id="text-content"></pre>
+
     <script src="bundle.js"></script>
 
-    <script>
+    <script type="module">
+      const textContentElement = document.getElementById("text-content");
+
+      const exampleResponse = await fetch("example.txt");
+      const exampleTxt = await exampleResponse.text();
+
       let highlightEnabled = false;
       const annotator = new Annotator(
         document.getElementById("canvas"),
-        example
+        exampleTxt
       );
 
       annotator.fontColor = "black";
@@ -107,9 +115,9 @@
 
       document.getElementById("mode").onchange = (e) => {
         annotator.setMode(e.target.value);
-        annotator.draw();  
-      }
-      
+        annotator.draw();
+      };
+
       document.getElementById("addAnchor").onclick = () => {
         annotator.addAnchor(document.getElementById("anchorText").value);
       };

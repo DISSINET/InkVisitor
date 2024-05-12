@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import AnnotatorContext from "./AnnotatorContext";
-import { CanvasLib } from "@inkvisitor/canvas/src/lib";
+import { Annotator } from "@inkvisitor/annotator";
 
 const AnnotatorProvider: React.FC<any> = ({ children }) => {
-  const [annotator, setAnnotator] = useState<CanvasLib | null>(null);
+  const [annotator, setAnnotator] = useState<Annotator | null>(null);
 
   return (
     <AnnotatorContext.Provider value={{ annotator, setAnnotator }}>

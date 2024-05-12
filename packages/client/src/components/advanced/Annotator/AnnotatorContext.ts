@@ -1,10 +1,10 @@
 import { createContext, useContext } from 'react';
-import { CanvasLib } from '@inkvisitor/canvas/src/lib';
+import { Annotator } from '@inkvisitor/annotator';
 
 interface AnnotatorContextType {
   annotator
-  : CanvasLib | null;
-  setAnnotator: (instance: CanvasLib) => void;
+  : Annotator | null;
+  setAnnotator: (instance: Annotator) => void;
 }
 
 const AnnotatorContext = createContext<AnnotatorContextType | null>(null);

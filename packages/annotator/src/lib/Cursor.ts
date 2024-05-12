@@ -238,4 +238,14 @@ export default class Cursor implements IRelativeCoordinates {
       ctx.globalAlpha = 1;
     }
   }
+
+  /**
+   * Reset the cursor properties - removes highlighting / cursor pointer
+   */
+  reset() {
+    this.selectStart = undefined;
+    this.selectEnd = undefined;
+    this.xLine = -1;
+    this.yLine = -1;
+  }
 }

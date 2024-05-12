@@ -1,5 +1,6 @@
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const CopyPlugin = require('copy-webpack-plugin');
 
 module.exports = {
   entry: "./src/lib/index.ts",
@@ -16,7 +17,7 @@ module.exports = {
     rules: [
       {
         test: /\.txt$/,
-        use: 'raw-loader'
+        use: "raw-loader",
       },
       {
         test: /\.ts$/,
@@ -32,6 +33,9 @@ module.exports = {
     hot: true,
   },
   plugins: [
+    new CopyPlugin({
+      patterns: [{ from: "./src/example.txt", to: "example.txt" }],
+    }),
     new HtmlWebpackPlugin({
       template: "./src/index.html",
     }),

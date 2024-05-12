@@ -1,8 +1,9 @@
 import Cursor from "./Cursor";
 import { Lines } from "./Lines";
 import Scroller from "./Scroller";
-import Text, { Mode, SegmentPosition } from "./Text";
+import Text, { SegmentPosition } from "./Text";
 import Viewport from "./Viewport";
+import { Modes } from "./constants";
 
 export interface HighlightSchema {
   mode: "background" | "stroke";
@@ -17,7 +18,7 @@ export interface DrawingOptions {
   charWidth: number;
   lineHeight: number;
   charsAtLine: number;
-  mode: Mode;
+  mode: Modes;
   schema?: HighlightSchema;
 }
 
@@ -154,7 +155,7 @@ export class Annotator {
 
     switch (e.key) {
       case "Enter":
-        if (this.text.mode === "highlight") {
+        if (this.text.mode === Modes.HIGHLIGHT) {
           return;
         }
         this.text.insertNewline(this.viewport, this.cursor);
@@ -238,7 +239,7 @@ export class Annotator {
         break;
 
       case "Backspace":
-        if (this.text.mode === "highlight") {
+        if (this.text.mode === Modes.HIGHLIGHT) {
           return;
         }
         const segmentBefore = this.text.cursorToIndex(
@@ -305,7 +306,7 @@ export class Annotator {
         break;
 
       case "Delete":
-        if (this.text.mode === "highlight") {
+        if (this.text.mode === Modes.HIGHLIGHT) {
           return;
         }
         this.text.deleteText(this.viewport, this.cursor, -1);
@@ -327,7 +328,7 @@ export class Annotator {
         }
 
         if (!nonCharKeys.includes(key)) {
-          if (this.text.mode === "highlight") {
+          if (this.text.mode === Modes.HIGHLIGHT) {
             return;
           }
 
@@ -566,7 +567,7 @@ export class Annotator {
     }
 
     if (
-      this.text.mode === "highlight" &&
+      this.text.mode === Modes.HIGHLIGHT &&
       this.onHighlightCb &&
       this.annotatedPosition
     ) {
@@ -650,11 +651,12 @@ export class Annotator {
    * change display mode and recalculate drawn lines
    * @param mode
    */
-  setMode(mode: Mode) {
+  setMode(mode: Modes) {
     this.element.classList.remove(this.text.mode);
     this.element.classList.add(mode);
 
     this.text.mode = mode;
+    this.cursor.reset();
     this.text.prepareSegments();
     this.text.calculateLines();
   }
@@ -666,6 +668,8 @@ export class Annotator {
 
     const [start, end] = this.cursor.getSelected();
     if (start && end) {
+      console.log(start, end)
+      console.log(this.text)
       this.text.insertText(
         this.viewport,
         new Cursor(end.xLine, end.yLine - this.viewport.lineStart),
@@ -676,8 +680,11 @@ export class Annotator {
         new Cursor(start.xLine, start.yLine - this.viewport.lineStart),
         `<${anchor}>`
       );
+      console.log(this.text)
+
       this.text.prepareSegments();
       this.text.calculateLines();
+      this.cursor.reset();
       this.draw();
     }
   }
