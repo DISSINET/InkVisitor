@@ -143,8 +143,7 @@ class Text {
    */
   calculateLines(): void {
     const time1 = performance.now();
-    let currentLineNumber: number = 0;
-    for (const segmentIndex in this.segments) {
+    for (let segmentIndex = 0; segmentIndex < this.segments.length; segmentIndex++) {
       const segment = this.segments[segmentIndex];
 
       /* if (
@@ -155,41 +154,52 @@ class Text {
         continue;
       }
 */
-      segment.lineStart = currentLineNumber;
+      segment.lineStart = segmentIndex === 0 ? 0 : this.segments[segmentIndex - 1].lineEnd;
       segment.lines = [];
 
       let text = segment.raw;
       if (this.mode === Modes.HIGHLIGHT || this.mode === Modes.SEMI) {
         text = segment.parsed;
       }
+
       const words = text.split(" ");
       let currentLine: string[] = [];
       let currentLineLength = 0;
 
-      for (let i = 0; i < words.length; i++) {
-        const word = words[i];
-        const wordLength = word.length;
-        if (currentLineLength + wordLength > this.charsAtLine) {
-          // Join the current line into a string and push it to lines
-          segment.lines.push(currentLine.join(" "));
-          currentLineNumber++;
+      for (let iWord = 0; iWord < words.length; iWord++) {
+        const word = words[iWord];
+        const regex: RegExp = /(<[^>]+>)|([\w']+)/g;
+        const tokens: string[] = word.match(regex) || [""];
+        
+        for (let iToken = 0; iToken < tokens.length; iToken++) {
+          const token = tokens[iToken];
+          
+          const tokenLength = token.length;
+          if (currentLineLength + tokenLength > this.charsAtLine) {
+            // Join the current line into a string and push it to lines
+            segment.lines.push(currentLine.join(" "));
 
-          currentLine = [word]; // Start a new line with the current word
-          currentLineLength = wordLength + 1; // Reset the length (+1 for the space)
-        } else {
-          currentLine.push(word);
-          currentLineLength += wordLength + 1; // +1 for the space
+            currentLine = [token]; // Start a new line with the current word
+            currentLineLength = tokenLength; // Reset the length (+1 for the space)
+          } else {
+            if (currentLine.length > 0 && iToken > 0) {
+              currentLine[currentLine.length -1] += token;
+              currentLineLength += tokenLength; 
+            } else {
+              currentLine.push(token)
+              currentLineLength += tokenLength + 1;// +1 for the space
+            }
+          }
         }
 
-        if (i + 1 === words.length) {
+        if (iWord + 1 === words.length) {
           // Add the last line if it's not empty
           if (currentLine.length > 0) {
             segment.lines.push(currentLine.join(" "));
-            currentLineNumber++;
           }
         }
       }
-      segment.lineEnd = currentLineNumber;
+      segment.lineEnd = segment.lineStart + segment.lines.length;
     }
 
     const time2 = performance.now();
