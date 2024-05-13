@@ -380,7 +380,7 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
     visibleColumns,
   } = useTable({
     columns,
-    data: useMemo(() => localReferences || [], [localReferences]),
+    data: localReferences,
     getRowId,
   });
 
