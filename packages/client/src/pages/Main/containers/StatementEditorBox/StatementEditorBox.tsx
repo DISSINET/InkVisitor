@@ -88,7 +88,9 @@ export const StatementEditorBox: React.FC = () => {
   const [tempObject, setTempObject] = useState<IResponseStatement>();
 
   useEffect(() => {
-    setTempObject(statement);
+    if (JSON.stringify(statement) !== JSON.stringify(tempObject)) {
+      setTempObject(statement);
+    }
   }, [statement]);
 
   const sendChangesToBackend = (changes: IStatement) => {

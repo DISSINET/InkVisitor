@@ -51,32 +51,40 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
   userCanEdit,
   alwaysShowCreateModal,
 }) => {
-  // Documents query
-  const {
-    status: documentsStatus,
-    data: documents,
-    error: documentsError,
-    isFetching: DocumentsIsFetching,
-  } = useQuery({
-    queryKey: ["documents", references],
-    queryFn: async () => {
-      const documentIds: string[] = [];
+  const [localReferences, setLocalReferences] = useState<IReference[]>([]);
 
-      references
-        .map((ref) => ref.resource)
-        .forEach((ref) => {
-          const refE = entities[ref];
-          if (refE) {
-            if (refE.data.documentId) {
-              documentIds.push(refE.data.documentId);
-            }
-          }
-        });
-      const res = await api.documentsGet({ documentIds: documentIds });
-      return res.data;
-    },
-    enabled: !!entityId && api.isLoggedIn(),
-  });
+  useEffect(() => {
+    if (JSON.stringify(localReferences) !== JSON.stringify(references)) {
+      setLocalReferences(references);
+    }
+  }, [references]);
+
+  // Documents query
+  // const {
+  //   status: documentsStatus,
+  //   data: documents,
+  //   error: documentsError,
+  //   isFetching: DocumentsIsFetching,
+  // } = useQuery({
+  //   queryKey: ["documents", localReferences],
+  //   queryFn: async () => {
+  //     const documentIds: string[] = [];
+
+  //     localReferences
+  //       .map((ref) => ref.resource)
+  //       .forEach((ref) => {
+  //         const refE = entities[ref];
+  //         if (refE) {
+  //           if (refE.data.documentId) {
+  //             documentIds.push(refE.data.documentId);
+  //           }
+  //         }
+  //       });
+  //     const res = await api.documentsGet({ documentIds: documentIds });
+  //     return res.data;
+  //   },
+  //   enabled: !!entityId && api.isLoggedIn(),
+  // });
 
   const handleChangeResource = (
     refId: string,
@@ -119,12 +127,6 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
     onChange(newReferences);
   };
 
-  const [localReferences, setLocalReferences] = useState<IReference[]>([]);
-
-  useEffect(() => {
-    setLocalReferences(references);
-  }, [references]);
-
   const moveRow = useCallback(
     (dragIndex: number, hoverIndex: number) => {
       const dragRecord = localReferences[dragIndex];
@@ -146,7 +148,9 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
         Header: "Resource",
         Cell: ({ row }: CellType) => {
           const reference = row.original;
-          const resourceEntity = entities[reference.resource];
+          const resourceEntity: IEntity | undefined = reference.resource
+            ? entities[reference.resource]
+            : undefined;
 
           return (
             <StyledGrid>
@@ -200,8 +204,12 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
         Header: "Part",
         Cell: ({ row }: CellType) => {
           const reference = row.original;
-          const resourceEntity = entities[reference.resource];
-          const valueEntity = entities[reference.value];
+          const resourceEntity: IEntity | undefined = reference.resource
+            ? entities[reference.resource]
+            : undefined;
+          const valueEntity: IEntity | undefined = reference.value
+            ? entities[reference.value]
+            : undefined;
 
           return (
             <StyledGrid>
@@ -360,10 +368,10 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
     ],
     [
       entities,
-      documents,
       isInsideTemplate,
       territoryParentId,
       openDetailOnCreate,
+      // documents,
     ]
   );
 
@@ -380,7 +388,7 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
     visibleColumns,
   } = useTable({
     columns,
-    data: localReferences,
+    data: useMemo(() => localReferences || [], [localReferences]),
     getRowId,
   });
 
