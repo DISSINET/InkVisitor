@@ -59,7 +59,7 @@ export const Dropzone: React.FC<Dropzone> = ({
   return (
     <>
       {!disabled ? (
-        <span style={{ display: "grid" }}>
+        <span style={{ display: "grid", gridTemplateColumns: "auto 1fr" }}>
           <StyledDropzone ref={dropRef} style={{ opacity: opacity }}>
             {children}
           </StyledDropzone>

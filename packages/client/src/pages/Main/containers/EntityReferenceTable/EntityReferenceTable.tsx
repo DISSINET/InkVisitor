@@ -1,8 +1,6 @@
 import { EntityEnums } from "@shared/enums";
 import { IEntity, IReference } from "@shared/types";
-import { useQuery } from "@tanstack/react-query";
 import { excludedSuggesterEntities } from "Theme/constants";
-import api from "api";
 import { Button } from "components";
 import {
   EntityDropzone,
@@ -91,7 +89,7 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
     newReSourceId: string,
     instantUpdate?: boolean
   ) => {
-    const newReferences = deepCopy(references);
+    const newReferences = deepCopy(localReferences);
     newReferences.forEach((ref: IReference) => {
       if (ref.id === refId) {
         ref.resource = newReSourceId;
@@ -105,7 +103,7 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
     newValueId: string,
     instantUpdate?: boolean
   ) => {
-    const newReferences = deepCopy(references);
+    const newReferences = deepCopy(localReferences);
     newReferences.forEach((ref: IReference) => {
       if (ref.id === refId) {
         ref.value = newValueId;
@@ -115,14 +113,14 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
   };
 
   const handleRemove = (refId: string, instantUpdate?: boolean) => {
-    const newReferences = deepCopy(references).filter(
+    const newReferences = deepCopy(localReferences).filter(
       (ref: IReference) => ref.id !== refId
     );
     onChange(newReferences, instantUpdate);
   };
 
   const handleAdd = () => {
-    const newReferences = deepCopy(references);
+    const newReferences = deepCopy(localReferences);
     newReferences.push(CReference());
     onChange(newReferences);
   };
@@ -378,7 +376,7 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
   const getRowId = useCallback((row: IReference) => {
     return row.id;
   }, []);
-  9;
+
   const {
     getTableProps,
     getTableBodyProps,
