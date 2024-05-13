@@ -371,6 +371,15 @@ class Text {
 
     let indexPosition = segmentPosition.rawTextIndex;
     const segment = this.segments[segmentPosition.segmentIndex];
+
+    if (this.mode !== Modes.RAW) {
+      for (const tag of segment.closingTags) {
+        if (tag.position < segmentPosition.rawTextIndex) {
+          indexPosition -= tag.tag.length + 3
+        }
+      }
+    }
+
     for (let i = 0; i < segmentPosition.segmentIndex; i++) {
       indexPosition++; // each segment should receive +1 character no matter what (newline)
       indexPosition += this.segments[i].raw.length;
