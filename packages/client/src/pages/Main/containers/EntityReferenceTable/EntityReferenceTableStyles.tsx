@@ -49,36 +49,8 @@ export const StyledReferenceValuePartLabel = styled.div`
   color: ${({ theme }) => theme.color.black};
 `;
 
-// export const StyledTable = styled.table`
-//   border-spacing: 0;
-//   border-collapse: collapse;
-// `;
-// interface StyledTr {
-//   opacity: number;
-// }
-// export const StyledTr = styled.tr<StyledTr>`
-//   opacity: ${({ opacity }) => (opacity ? opacity : 1)};
-//   td:first-child {
-//     padding-left: ${({ theme }) => theme.space[1]};
-//     padding-right: ${({ theme }) => theme.space[2]};
-//   }
-//   td:not(:last-child):not(:first-child) {
-//     /* width: 1%; */
-//     min-width: 10rem;
-//   }
-// `;
-// export const StyledTd = styled.td`
-//   padding-top: ${({ theme }) => `${theme.space[1]}`};
-//   padding-right: ${({ theme }) => `${theme.space[2]}`};
-//   padding-bottom: ${({ theme }) => `${theme.space[1]}`};
-//   padding-left: 0;
-//   font-size: ${({ theme }) => theme.fontSize["sm"]};
-// `;
-interface StyledGrid {
-  $opacity: number;
-}
+interface StyledGrid {}
 export const StyledGrid = styled.div<StyledGrid>`
-  opacity: ${({ $opacity }) => $opacity};
   display: grid;
   grid-template-columns: repeat(3, auto) 1fr;
   gap: 0.5rem;

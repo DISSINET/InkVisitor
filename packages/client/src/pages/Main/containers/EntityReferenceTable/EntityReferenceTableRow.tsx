@@ -9,7 +9,7 @@ import {
 } from "react-dnd";
 import { FaExternalLinkAlt, FaGripVertical, FaTrashAlt } from "react-icons/fa";
 import { ThemeContext } from "styled-components";
-import { DragItem, ItemTypes } from "types";
+import { DragItem, Identifier, ItemTypes } from "types";
 import { dndHoverFn, normalizeURL } from "utils/utils";
 import { EntityReferenceTableResource } from "./EntityReferenceTableResource";
 import {
@@ -40,8 +40,6 @@ interface EntityReferenceTableRow {
   alwaysShowCreateModal?: boolean;
   openDetailOnCreate?: boolean;
 
-  // row: Row<IReference>;
-  // visibleColumns: ColumnInstance<IReference>[];
   hasOrder: boolean;
   index: number;
   updateOrderFn: () => void;
@@ -62,8 +60,6 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
   openDetailOnCreate,
   alwaysShowCreateModal,
 
-  // row,
-  // visibleColumns,
   hasOrder,
   index,
   updateOrderFn,
@@ -75,10 +71,19 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
   const dropRef = useRef<HTMLTableRowElement>(null);
   const dragRef = useRef<HTMLTableCellElement>(null);
 
-  const [, drop] = useDrop<DragItem>({
+  const [{ handlerId }, drop] = useDrop<
+    DragItem,
+    void,
+    { handlerId: Identifier | null }
+  >({
     accept: ItemTypes.REFERENCE_ROW,
     hover(item: DragItem, monitor: DropTargetMonitor) {
       dndHoverFn(item, index, monitor, dropRef, moveRow);
+    },
+    collect(monitor) {
+      return {
+        handlerId: monitor.getHandlerId(),
+      };
     },
   });
 
@@ -104,8 +109,8 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
   const valueEntity = entities[reference.value];
 
   return (
-    <React.Fragment key={index}>
-      <StyledGrid ref={dropRef} $opacity={opacity}>
+    <div ref={dropRef} data-handler-id={handlerId} style={{ opacity: opacity }}>
+      <StyledGrid key={reference.id}>
         {hasOrder && userCanEdit ? (
           <span ref={dragRef} style={{ cursor: "move" }}>
             <FaGripVertical color={themeContext?.color.black} />
@@ -173,6 +178,6 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
           </StyledReferencesListButtons>
         </span>
       </StyledGrid>
-    </React.Fragment>
+    </div>
   );
 };

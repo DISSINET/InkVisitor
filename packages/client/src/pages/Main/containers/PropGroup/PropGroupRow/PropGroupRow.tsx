@@ -15,6 +15,7 @@ import {
   DragItem,
   DraggedPropRowCategory,
   DraggedPropRowItem,
+  Identifier,
   ItemTypes,
   PropAttributeFilter,
 } from "types";
@@ -29,8 +30,6 @@ import {
 } from "./PropGroupRowStyles";
 import { PropGroupRowType } from "./PropGroupRowType";
 import { PropGroupRowValue } from "./PropGroupRowValue";
-
-export declare type Identifier = string | symbol;
 
 interface PropGroupRow {
   prop: IProp;

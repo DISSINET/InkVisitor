@@ -183,7 +183,7 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
       {localReferences.map((ref, key) => {
         return (
           <EntityReferenceTableRow
-            key={key}
+            key={ref.id}
             index={key}
             reference={ref}
             entities={entities}
