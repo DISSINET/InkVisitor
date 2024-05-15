@@ -13,7 +13,7 @@ const getBlockWidth = (depth?: number) => {
   }
 };
 interface StyledRelationTypeTreeBlock {
-  depth?: number;
+  $depth?: number;
 }
 export const StyledRelationTypeTreeBlock = styled.div<StyledRelationTypeTreeBlock>`
   display: flex;
@@ -21,7 +21,7 @@ export const StyledRelationTypeTreeBlock = styled.div<StyledRelationTypeTreeBloc
   margin-left: ${({ theme }) => theme.space[2]};
   border: 1px solid;
   border-color: ${({ theme }) => theme.color.tooltipColor};
-  width: ${({ depth }) => getBlockWidth(depth)};
+  width: ${({ $depth }) => getBlockWidth($depth)};
 `;
 export const StyledTreeBlock = styled.div`
   border-bottom: 1px solid;

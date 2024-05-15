@@ -18,7 +18,7 @@ export const EntityTooltipRelationTreeTable: React.FC<
 > = ({ relationTreeArray, entities }) => {
   const treeDepth = getRelationTreeDepth(relationTreeArray) - 1;
   return (
-    <StyledRelationTypeTreeBlock depth={treeDepth}>
+    <StyledRelationTypeTreeBlock $depth={treeDepth}>
       {relationTreeArray
         .slice(0, 2)
         .map((relation: Relation.IConnection<any>, key: number) => {
