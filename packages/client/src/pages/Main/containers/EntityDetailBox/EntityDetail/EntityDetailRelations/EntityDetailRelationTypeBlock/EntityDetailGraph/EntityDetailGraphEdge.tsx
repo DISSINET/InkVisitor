@@ -13,6 +13,7 @@ import { certaintyDict } from "@shared/dictionaries";
 
 import { Relation } from "@shared/types/relation";
 import { RelationEnums } from "@shared/enums";
+import theme from "Theme/theme";
 
 const certaintyStyles: Record<
   EntityEnums.Certainty,
@@ -53,11 +54,22 @@ export const GraphEdge: React.FC<EdgeProps> = ({
 
   const scaleLabel = 0.75;
 
+  const relType =
+    Relation.RelationRules[data.relationType as RelationEnums.Type];
+
+  // if the relation is assymetric, the edge has only one arrow
+  const relAssymetric = relType?.asymmetrical;
+
   const edgeStyle = useMemo(() => {
     if (data.certainty) {
       return certaintyStyles[data.certainty as EntityEnums.Certainty];
     } else {
-      return { strokeOpacity: 1, dashArray: "10 0", width: 3, stroke: "black" };
+      return {
+        strokeOpacity: 1,
+        dashArray: "10 0",
+        width: 3,
+        stroke: theme.color.info,
+      };
     }
   }, [data.certainty]);
 
@@ -71,16 +83,24 @@ export const GraphEdge: React.FC<EdgeProps> = ({
           setTooltipVisible(false);
         }}
       >
+        <defs>
+          <marker
+            id={`arrowhead-${id}`}
+            viewBox="0 0 6 6"
+            refX="6"
+            refY="3"
+            markerUnits="strokeWidth"
+            markerWidth="3"
+            markerHeight="3"
+            orient="auto-start-reverse"
+          >
+            <path d="M 0 0 L 6 3 L 0 6 z" fill={edgeStyle.stroke} />
+          </marker>
+        </defs>
         <Tooltip
           content={
             <>
-              <div>
-                {
-                  Relation.RelationRules[
-                    data.relationType as RelationEnums.Type
-                  ]?.label
-                }{" "}
-              </div>
+              <div>{relType?.label}</div>
 
               {data.certainty && (
                 <div>
@@ -104,6 +124,8 @@ export const GraphEdge: React.FC<EdgeProps> = ({
           strokeWidth={edgeStyle.width}
           stroke={edgeStyle.stroke}
           style={{}}
+          markerEnd={`url(#arrowhead-${id})`}
+          markerStart={relAssymetric ? "none" : `url(#arrowhead-${id})`}
         />
         {/* tooltip interaction path */}
         <path

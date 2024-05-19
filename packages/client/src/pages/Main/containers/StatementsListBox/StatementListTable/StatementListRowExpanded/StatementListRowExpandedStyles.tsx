@@ -22,24 +22,24 @@ const getIndentation = (level: 1 | 2 | 3) => {
   }
 };
 interface StyledPropGridRow {
-  level: 1 | 2 | 3;
-  disableBottomMargin?: boolean;
+  $level: 1 | 2 | 3;
+  $disableBottomMargin?: boolean;
 }
 export const StyledPropGridRow = styled.div<StyledPropGridRow>`
-  margin-left: ${({ level }) => getIndentation(level)};
-  margin-bottom: ${({ theme, disableBottomMargin }) =>
-    disableBottomMargin ? 0 : theme.space[1]};
+  margin-left: ${({ $level }) => getIndentation($level)};
+  margin-bottom: ${({ theme, $disableBottomMargin }) =>
+    $disableBottomMargin ? 0 : theme.space[1]};
   display: grid;
   grid-template-columns: auto auto;
   overflow: hidden;
 `;
 interface StyledPropRow {
-  disableBottomMargin?: boolean;
+  $disableBottomMargin?: boolean;
 }
 export const StyledPropRow = styled.div<StyledPropRow>`
   margin-left: ${({ theme }) => theme.space[5]};
-  margin-bottom: ${({ theme, disableBottomMargin }) =>
-    disableBottomMargin ? 0 : theme.space[1]};
+  margin-bottom: ${({ theme, $disableBottomMargin }) =>
+    $disableBottomMargin ? 0 : theme.space[1]};
   display: inline-flex;
   overflow: hidden;
 `;
@@ -89,21 +89,21 @@ export const StyledReferenceRow = styled.div`
   grid-template-columns: auto auto;
 `;
 interface StyledReferenceColumn {
-  marginRight?: boolean;
+  $marginRight?: boolean;
 }
 export const StyledReferenceColumn = styled.div<StyledReferenceColumn>`
   display: grid;
-  margin-right: ${({ theme, marginRight }) =>
-    marginRight ? theme.space[1] : ""};
+  margin-right: ${({ theme, $marginRight }) =>
+    $marginRight ? theme.space[1] : ""};
 `;
 interface StyledTagWrap {
-  marginRight?: boolean;
+  $marginRight?: boolean;
 }
 export const StyledTagWrap = styled.div<StyledTagWrap>`
   display: inline-flex;
   overflow: hidden;
-  margin-right: ${({ theme, marginRight }) =>
-    marginRight ? theme.space[1] : ""};
+  margin-right: ${({ theme, $marginRight }) =>
+    $marginRight ? theme.space[1] : ""};
 `;
 export const StyledGrid = styled.div`
   display: grid;

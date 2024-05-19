@@ -8,13 +8,14 @@ import {
 } from "@shared/dictionaries";
 import { EntityEnums } from "@shared/enums";
 import { IActionData, IResponseDetail, IResponseGeneric } from "@shared/types";
+import { IConceptData } from "@shared/types/concept";
 import { UseMutationResult, useQuery } from "@tanstack/react-query";
-import { rootTerritoryId } from "Theme/constants";
+import { MIN_LABEL_LENGTH_MESSAGE, rootTerritoryId } from "Theme/constants";
 import api from "api";
 import { AxiosResponse } from "axios";
-import { BaseDropdown, Button, Input, MultiInput, TypeBar } from "components";
+import { Button, Input, MultiInput, TypeBar } from "components";
 import Dropdown, { AttributeButtonGroup, EntityTag } from "components/advanced";
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { FaRegCopy } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { DropdownItem } from "types";
@@ -28,7 +29,6 @@ import {
   StyledRelativePosition,
   StyledTagWrap,
 } from "../EntityDetailStyles";
-import { IConceptData } from "@shared/types/concept";
 
 interface EntityDetailFormSection {
   entity: IResponseDetail;
@@ -67,14 +67,14 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
   isTerritoryWithParent,
   isStatementWithTerritory,
 }) => {
-  const { status: documentsStatus, data: documents } = useQuery(
-    ["documents"],
-    async () => {
+  const { status: documentsStatus, data: documents } = useQuery({
+    queryKey: ["documents"],
+    queryFn: async () => {
       const res = await api.documentsGet({});
       return res.data;
     },
-    { enabled: actantMode === "resource" && api.isLoggedIn() }
-  );
+    enabled: actantMode === "resource" && api.isLoggedIn(),
+  });
 
   const noDocumentLinkedItem: DropdownItem = {
     value: "",
@@ -94,6 +94,12 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
   const selectedDocumentOption: string = useMemo(() => {
     return entity.data.documentId ?? noDocumentLinkedItem.value;
   }, [documentOptions, entity.data.documentId]);
+
+  const [newLabel, setNewLabel] = useState<string>(entity.label);
+
+  useEffect(() => {
+    setNewLabel(entity.label);
+  }, [entity.label]);
 
   return (
     <>
@@ -193,18 +199,29 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
             </StyledDetailContentRow>
           )}
 
+          {/* Label */}
           <StyledDetailContentRow>
             <StyledDetailContentRowLabel>Label</StyledDetailContentRowLabel>
             <StyledDetailContentRowValue>
               <Input
                 disabled={!userCanEdit}
+                changeOnType
                 width="full"
-                value={entity.label}
-                onChangeFn={async (newLabel: string) => {
-                  if (newLabel !== entity.label) {
-                    updateEntityMutation.mutate({
-                      label: newLabel,
-                    });
+                value={newLabel}
+                onChangeFn={(newLabel: string) => setNewLabel(newLabel)}
+                onBlur={() => {
+                  if (
+                    entity.class !== EntityEnums.Class.Statement &&
+                    newLabel.length < 1
+                  ) {
+                    toast.info(MIN_LABEL_LENGTH_MESSAGE);
+                    setNewLabel(entity.label);
+                  } else {
+                    if (newLabel !== entity.label) {
+                      updateEntityMutation.mutate({
+                        label: newLabel,
+                      });
+                    }
                   }
                 }}
               />
@@ -269,6 +286,7 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
             <StyledDetailContentRowLabel>Status</StyledDetailContentRowLabel>
             <StyledDetailContentRowValue>
               <AttributeButtonGroup
+                noMargin
                 disabled={!userCanAdmin}
                 options={entityStatusDict.map((entityStatusOption) => {
                   return {

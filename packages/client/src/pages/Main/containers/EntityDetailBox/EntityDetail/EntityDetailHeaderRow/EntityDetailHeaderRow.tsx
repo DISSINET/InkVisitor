@@ -35,28 +35,26 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
 
   const { setStatementId, setTerritoryId, appendDetailId } = useSearchParams();
 
-  const cloneEntityMutation = useMutation(
-    async (entityId: string) => await api.entityClone(entityId),
-    {
-      onSuccess: (data, variables) => {
-        appendDetailId(data.data.data.id);
-        toast.info(`Entity duplicated!`);
-        queryClient.invalidateQueries(["templates"]);
-        if (data.data.data.class === EntityEnums.Class.Territory) {
-          queryClient.invalidateQueries(["tree"]);
-        }
-      },
-      onError: () => {
-        toast.error(`Error: Entity not duplicated!`);
-      },
-    }
-  );
+  const cloneEntityMutation = useMutation({
+    mutationFn: async (entityId: string) => await api.entityClone(entityId),
+    onSuccess: (data, variables) => {
+      appendDetailId(data.data.data.id);
+      toast.info(`Entity duplicated!`);
+      queryClient.invalidateQueries({ queryKey: ["templates"] });
+      if (data.data.data.class === EntityEnums.Class.Territory) {
+        queryClient.invalidateQueries({ queryKey: ["tree"] });
+      }
+    },
+    onError: () => {
+      toast.error(`Error: Entity not duplicated!`);
+    },
+  });
 
   const instantiateTemplate = async (territoryParentId?: string) => {
-    let newInstanceId;
+    let newInstance;
     if (entity.class === EntityEnums.Class.Territory) {
       if (territoryParentId) {
-        newInstanceId = await InstTemplate(
+        newInstance = await InstTemplate(
           entity,
           localStorage.getItem("userrole") as UserEnums.Role,
           territoryParentId
@@ -66,14 +64,14 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
         toast.info("Cannot create territory without parent");
       }
     } else {
-      newInstanceId = await InstTemplate(
+      newInstance = await InstTemplate(
         entity,
         localStorage.getItem("userrole") as UserEnums.Role
       );
     }
 
-    if (newInstanceId) {
-      appendDetailId(newInstanceId);
+    if (newInstance) {
+      appendDetailId(newInstance.id);
       toast.info(`Entity instantiated from a template!`);
 
       if (entity.class === EntityEnums.Class.Statement) {
@@ -82,7 +80,7 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
         });
       }
       if (entity.class === EntityEnums.Class.Territory) {
-        queryClient.invalidateQueries(["tree"]);
+        queryClient.invalidateQueries({ queryKey: ["tree"] });
       }
     }
   };
@@ -208,7 +206,7 @@ export const EntityDetailHeaderRow: React.FC<EntityDetailHeaderRow> = ({
               inverted
               onClick={async () => {
                 await navigator.clipboard.writeText(
-                  `${window.location.host}${window.location.pathname}#selectedDetail=${entity.id}&detail=${entity.id}`
+                  `${window.location.protocol}//${window.location.host}${window.location.pathname}#selectedDetail=${entity.id}&detail=${entity.id}`
                 );
                 toast.info("Link to detail copied to clipboard");
               }}

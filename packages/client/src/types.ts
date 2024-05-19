@@ -10,6 +10,7 @@ import { ThemeColor } from "Theme/theme";
 interface IEntityColor {
   entityClass: EntityEnums.ExtendedClass;
   color: keyof ThemeColor;
+  label: string;
 }
 
 // Use for colors, for dropdowns use entity.ts dictionary
@@ -17,62 +18,77 @@ export const EntityColors: { [key: string]: IEntityColor } = {
   T: {
     entityClass: EntityEnums.Class.Territory,
     color: "entityT",
+    label: "Territory",
   },
   R: {
     entityClass: EntityEnums.Class.Resource,
     color: "entityR",
+    label: "Resource",
   },
   A: {
     entityClass: EntityEnums.Class.Action,
     color: "entityA",
+    label: "Action",
   },
   S: {
     entityClass: EntityEnums.Class.Statement,
     color: "entityS",
+    label: "Statement",
   },
   C: {
     entityClass: EntityEnums.Class.Concept,
     color: "entityC",
+    label: "Concept",
   },
   E: {
     entityClass: EntityEnums.Class.Event,
     color: "entityE",
+    label: "Event",
   },
   G: {
     entityClass: EntityEnums.Class.Group,
     color: "entityG",
+    label: "Group",
   },
   L: {
     entityClass: EntityEnums.Class.Location,
     color: "entityL",
+    label: "Location",
   },
   O: {
     entityClass: EntityEnums.Class.Object,
     color: "entityO",
+    label: "Object",
   },
   P: {
     entityClass: EntityEnums.Class.Person,
     color: "entityP",
+    label: "Person",
   },
   B: {
     entityClass: EntityEnums.Class.Being,
     color: "entityB",
+    label: "Living Being",
   },
   V: {
     entityClass: EntityEnums.Class.Value,
     color: "entityV",
+    label: "Value",
   },
   X: {
     entityClass: EntityEnums.Extension.NoClass,
     color: "white",
+    label: "No class",
   },
   empty: {
     entityClass: EntityEnums.Extension.Empty,
     color: "white",
+    label: "Empty",
   },
   all: {
     entityClass: EntityEnums.Extension.Any,
     color: "white",
+    label: "Any",
   },
 };
 
@@ -80,14 +96,17 @@ export const ExtentedEntityColors: { [key: string]: IEntityColor } = {
   X: {
     entityClass: EntityEnums.Extension.NoClass,
     color: "white",
+    label: "No class",
   },
   empty: {
     entityClass: EntityEnums.Extension.Empty,
     color: "white",
+    label: "Empty",
   },
   all: {
     entityClass: EntityEnums.Extension.Any,
     color: "white",
+    label: "Any",
   },
 };
 
@@ -279,6 +298,34 @@ export interface PropAttributeGroupDataObject {
   value: AttributeData;
 }
 
+export const classesAnnotator = [
+  EntityEnums.Class.Action,
+  EntityEnums.Class.Concept,
+  EntityEnums.Class.Person,
+  EntityEnums.Class.Group,
+  EntityEnums.Class.Being,
+  EntityEnums.Class.Object,
+  EntityEnums.Class.Location,
+  EntityEnums.Class.Event,
+  EntityEnums.Class.Statement,
+  EntityEnums.Class.Territory,
+  EntityEnums.Class.Resource,
+  EntityEnums.Class.Value,
+];
+
+export const classesAll = [
+  EntityEnums.Class.Concept,
+  EntityEnums.Class.Person,
+  EntityEnums.Class.Group,
+  EntityEnums.Class.Being,
+  EntityEnums.Class.Object,
+  EntityEnums.Class.Location,
+  EntityEnums.Class.Event,
+  EntityEnums.Class.Statement,
+  EntityEnums.Class.Territory,
+  EntityEnums.Class.Resource,
+  EntityEnums.Class.Value,
+];
 export const classesEditorActants = [
   EntityEnums.Class.Concept,
   EntityEnums.Class.Person,
@@ -351,4 +398,9 @@ export interface ITerritoryFilter {
 
 export interface IExtendedResponseTree extends IResponseTree {
   foundByRecursion?: boolean;
+}
+
+export enum StatementListDisplayMode {
+  TEXT = "text",
+  LIST = "list",
 }

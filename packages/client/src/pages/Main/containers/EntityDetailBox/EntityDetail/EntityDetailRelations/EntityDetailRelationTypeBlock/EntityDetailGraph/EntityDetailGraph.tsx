@@ -4,6 +4,7 @@ import ReactFlow, {
   Background,
   Controls,
   Edge,
+  MarkerType,
   Node,
   Position,
   ReactFlowInstance,
@@ -63,7 +64,7 @@ const convertToGraph = (
       edges.push({
         id: String(edges.length),
         type: "relationship",
-        markerEnd: "arrowhead",
+        markerEnd: { type: MarkerType.ArrowClosed },
         data: {
           certainty:
             (
@@ -71,7 +72,7 @@ const convertToGraph = (
                 Relation.IIdentification,
                 Relation.IIdentification
               >
-            ).certainty || undefined,
+            ).certainty ?? undefined,
           relationType: branch.type,
         },
         style: {
@@ -160,7 +161,7 @@ export const EntityDetailRelationGraph: React.FC<EntityDetailRelationGraph> = ({
   entities,
   relations,
 }) => {
-  const nodeW = 150;
+  const nodeW = 200;
   const nodeH = 50;
 
   const [height, setHeight] = useState<number>(0);
@@ -175,7 +176,7 @@ export const EntityDetailRelationGraph: React.FC<EntityDetailRelationGraph> = ({
 
   return (
     <StyledEntityDetailRelationGraph height={height}>
-      <div style={{ position: "absolute", top: 0, left: 0 }}>
+      {/* <div style={{ position: "absolute", top: 0, left: 0 }}>
         <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
           <defs>
             <marker
@@ -184,15 +185,15 @@ export const EntityDetailRelationGraph: React.FC<EntityDetailRelationGraph> = ({
               refX="6"
               refY="3"
               markerUnits="strokeWidth"
-              markerWidth="6"
-              markerHeight="6"
+              markerWidth="3"
+              markerHeight="3"
               orient="auto-start-reverse"
             >
-              <path d="M 0 0 L 6 3 L 0 6 z" fill="black" />
+              <path d="M 0 0 L 6 3 L 0 6 z" fill="currentColor" />
             </marker>
           </defs>
         </svg>
-      </div>
+      </div> */}
 
       {/* {JSON.stringify(relations)} */}
       <ReactFlow
@@ -201,12 +202,14 @@ export const EntityDetailRelationGraph: React.FC<EntityDetailRelationGraph> = ({
         style={{ backgroundColor: "white" }}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
-        nodesDraggable={true}
+        nodesDraggable={false}
         nodesConnectable={false}
         nodesFocusable={false}
         edgesFocusable={false}
         onInit={(reactFlowInstance: ReactFlowInstance) => {
-          reactFlowInstance.fitView();
+          setTimeout(() => {
+            reactFlowInstance.fitView();
+          }, 100);
         }}
         defaultViewport={{ x: 0, y: 0, zoom: 1 }}
       >

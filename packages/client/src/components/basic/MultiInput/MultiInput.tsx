@@ -74,12 +74,15 @@ export const MultiInput: React.FC<MultiInput> = ({
           </StyledRow>
         );
       })}
+
       {!disabled && (
-        <Button
-          icon={<FaPlus />}
-          label={"new note"}
-          onClick={() => handleAdd()}
-        />
+        <div style={{ paddingTop: "1.5rem" }}>
+          <Button
+            icon={<FaPlus />}
+            label={"new note"}
+            onClick={() => handleAdd()}
+          />
+        </div>
       )}
     </>
   );

@@ -23,6 +23,7 @@ import {
   StyledBorderLeft,
   StyledCIGrid,
   StyledExpandedRow,
+  StyledSuggesterWrap,
 } from "../StatementEditorActantTableStyles";
 
 interface StatementEditorActantClassification {
@@ -73,7 +74,7 @@ export const StatementEditorActantClassification: React.FC<
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
-    <StyledBorderLeft borderColor="class" padding marginBottom>
+    <StyledBorderLeft $borderColor="class" $padding $marginBottom>
       <StyledCIGrid>
         {entity ? (
           <EntityDropzone
@@ -83,6 +84,7 @@ export const StatementEditorActantClassification: React.FC<
             }}
             isInsideTemplate={isInsideTemplate}
             excludedActantIds={[entity.id]}
+            disabled={!userCanEdit}
           >
             <EntityTag
               entity={entity}
@@ -107,15 +109,18 @@ export const StatementEditorActantClassification: React.FC<
             />
           </EntityDropzone>
         ) : (
-          <EntitySuggester
-            categoryTypes={[EntityEnums.Class.Concept]}
-            onSelected={(entityId: string) => {
-              handleUpdate({ entityId }, true);
-            }}
-            openDetailOnCreate
-            isInsideTemplate={isInsideTemplate}
-            territoryActants={territoryActants}
-          />
+          <StyledSuggesterWrap>
+            <EntitySuggester
+              categoryTypes={[EntityEnums.Class.Concept]}
+              onSelected={(entityId: string) => {
+                handleUpdate({ entityId }, true);
+              }}
+              openDetailOnCreate
+              isInsideTemplate={isInsideTemplate}
+              territoryActants={territoryActants}
+              disabled={!userCanEdit}
+            />
+          </StyledSuggesterWrap>
         )}
 
         <LogicButtonGroup

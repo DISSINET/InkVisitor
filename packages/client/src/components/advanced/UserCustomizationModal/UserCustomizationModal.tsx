@@ -1,7 +1,9 @@
 import { languageDict, userRoleDict } from "@shared/dictionaries";
 import { EntityEnums, UserEnums } from "@shared/enums";
-import { IResponseUser } from "@shared/types";
+import { IResponseUser, IUser } from "@shared/types";
+import { UnsafePasswordError } from "@shared/types/errors";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { SAFE_PASSWORD_DESCRIPTION } from "Theme/constants";
 import api from "api";
 import {
   Button,
@@ -21,10 +23,11 @@ import Dropdown, {
   EntitySuggester,
   EntityTag,
 } from "components/advanced";
+import { StyledDescription } from "pages/AuthModalSharedStyles";
 import React, { useEffect, useMemo, useState } from "react";
-import { BiHide, BiShow } from "react-icons/bi";
 import { toast } from "react-toastify";
 import { DropdownItem } from "types";
+import { isSafePassword } from "utils/utils";
 import {
   StyledButtonWrap,
   StyledRightsHeading,
@@ -98,54 +101,43 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
     });
   };
 
-  const handleResetPassword = async () => {
-    const resetRes = await api.resetMyPassword();
-    if (resetRes.status == 200) {
-      toast.success(
-        `an email with a new pre-generated password has been sent to ${user.email}`
-      );
-    }
-  };
-
-  const passwordUpdateMutation = useMutation(
-    async () => await api.updatePassword("me", newPassword),
-    {
-      onSuccess: () => {
-        toast.info("Password changed");
-      },
-    }
-  );
+  const passwordUpdateMutation = useMutation({
+    mutationFn: async () => await api.updatePassword("me", newPassword),
+    onSuccess: () => {
+      toast.info("Password changed");
+    },
+  });
 
   const {
     status,
     data: territory,
     error,
     isFetching,
-  } = useQuery(
-    ["territory", data.defaultTerritory],
-    async () => {
+  } = useQuery({
+    queryKey: ["territory", data.defaultTerritory],
+    queryFn: async () => {
       if (data.defaultTerritory) {
         const res = await api.territoryGet(data.defaultTerritory);
         return res.data;
       }
     },
-    {
-      enabled: !!data.defaultTerritory && api.isLoggedIn(),
-    }
-  );
+    enabled: !!data.defaultTerritory && api.isLoggedIn(),
+  });
 
   const queryClient = useQueryClient();
 
-  const updateUserMutation = useMutation(
-    async (changes: any) => await api.usersUpdate(user.id, changes),
-    {
-      onSuccess: (data, variables) => {
-        queryClient.invalidateQueries(["user"]);
-        toast.info("User updated!");
-        //onClose();
-      },
-    }
-  );
+  const updateUserMutation = useMutation({
+    mutationFn: async (changes: Partial<IUser>) =>
+      await api.usersUpdate(user.id, changes),
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["user"] });
+      toast.info("User updated!");
+      onClose();
+    },
+    onError: (err) => {
+      toast.error("User not updated");
+    },
+  });
 
   const handleSubmit = () => {
     if (JSON.stringify(data) !== JSON.stringify(initialValues)) {
@@ -156,7 +148,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
           defaultLanguage: data.defaultLanguage,
           defaultStatementLanguage: data.defaultStatementLanguage,
           searchLanguages: data.searchLanguages.map((sL) => sL),
-          defaultTerritory: data.defaultTerritory,
+          defaultTerritory: data.defaultTerritory || "",
           hideStatementElementsOrderTable: data.hideStatementElementsOrderTable,
         },
       });
@@ -186,6 +178,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
         width="auto"
         onEnterPress={handleSubmit}
         onClose={onClose}
+        isLoading={updateUserMutation.isPending}
       >
         <ModalHeader title="User customization" />
         <ModalContent column enableScroll>
@@ -262,6 +255,12 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                   </ModalInputWrap>
                 </ModalInputForm>
 
+                <div style={{ maxWidth: "31rem" }}>
+                  <StyledDescription>
+                    {SAFE_PASSWORD_DESCRIPTION}
+                  </StyledDescription>
+                </div>
+
                 <StyledButtonWrap>
                   <ButtonGroup>
                     <Button
@@ -279,7 +278,12 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                       label="Submit"
                       inverted
                       onClick={() => {
-                        if (newPassword.length >= 8) {
+                        if (
+                          newPassword.length > 0 &&
+                          !isSafePassword(newPassword)
+                        ) {
+                          toast.warning(UnsafePasswordError.message);
+                        } else {
                           if (newPassword === repeatPassword) {
                             passwordUpdateMutation.mutate();
                             setShowPasswordChange(false);
@@ -288,8 +292,6 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                           } else {
                             toast.warning("Passwords are not matching");
                           }
-                        } else {
-                          toast.info("Fill at least 8 characters");
                         }
                       }}
                     />
@@ -303,7 +305,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
             </StyledRightsHeading>
 
             <ModalInputForm>
-              <ModalInputLabel>{"default language"}</ModalInputLabel>
+              <ModalInputLabel>{"entity default language"}</ModalInputLabel>
               <ModalInputWrap width={165}>
                 <Dropdown.Single.Basic
                   width="full"
@@ -314,7 +316,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                   options={languageDict}
                 />
               </ModalInputWrap>
-              <ModalInputLabel>{"statement language"}</ModalInputLabel>
+              <ModalInputLabel>{"statement default language"}</ModalInputLabel>
               <ModalInputWrap width={165}>
                 <Dropdown.Single.Basic
                   width="full"
@@ -366,36 +368,6 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                     />
                   </div>
                 )}
-              </ModalInputWrap>
-
-              <ModalInputLabel>{"ordering table in Editor"}</ModalInputLabel>
-
-              <ModalInputWrap width={165}>
-                <AttributeButtonGroup
-                  noMargin
-                  options={[
-                    {
-                      longValue: "display",
-                      shortValue: "",
-                      shortIcon: <BiShow />,
-                      onClick: () => {
-                        handleChange("hideStatementElementsOrderTable", true);
-                      },
-                      selected:
-                        !!data.hideStatementElementsOrderTable &&
-                        data.hideStatementElementsOrderTable,
-                    },
-                    {
-                      longValue: "hide",
-                      shortValue: "",
-                      shortIcon: <BiHide />,
-                      onClick: () => {
-                        handleChange("hideStatementElementsOrderTable", false);
-                      },
-                      selected: !data.hideStatementElementsOrderTable,
-                    },
-                  ]}
-                />
               </ModalInputWrap>
             </ModalInputForm>
 
@@ -459,13 +431,13 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
               </StyledUserRightItem>
             </StyledUserRights>
 
-            <Loader show={passwordUpdateMutation.isLoading} />
+            <Loader show={passwordUpdateMutation.isPending} />
           </div>
         </ModalContent>
 
         <ModalFooter>
           <ButtonGroup>
-            {role === UserEnums.Role.Admin && (
+            {/* {role === UserEnums.Role.Admin && (
               <Button
                 key="reset-password"
                 label="Reset password"
@@ -473,7 +445,7 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
                 color="info"
                 onClick={() => handleResetPassword()}
               />
-            )}
+            )} */}
             <Button
               key="cancel"
               label="Cancel"

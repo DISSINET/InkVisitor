@@ -1,9 +1,17 @@
-import { languageDict } from "@shared/dictionaries";
+import {
+  actionPartOfSpeechDict,
+  conceptPartOfSpeechDict,
+  languageDict,
+} from "@shared/dictionaries";
 import { classesAll } from "@shared/dictionaries/entity";
 import { EntityEnums, UserEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { excludedSuggesterEntities, rootTerritoryId } from "Theme/constants";
+import {
+  MIN_LABEL_LENGTH_MESSAGE,
+  excludedSuggesterEntities,
+  rootTerritoryId,
+} from "Theme/constants";
 import api from "api";
 import {
   Button,
@@ -18,7 +26,13 @@ import {
   ModalInputWrap,
 } from "components";
 import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
-import { CEntity, CStatement, CTerritory } from "constructors";
+import {
+  CAction,
+  CConcept,
+  CEntity,
+  CStatement,
+  CTerritory,
+} from "constructors";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { StyledNote } from "./EntityCreateModalStyles";
@@ -29,13 +43,22 @@ interface EntityCreateModal {
 
   labelTyped?: string;
   categorySelected?: EntityEnums.Class;
+  languageSelected?: EntityEnums.Language;
+
+  allowedEntityClasses?: EntityEnums.Class[];
 }
 export const EntityCreateModal: React.FC<EntityCreateModal> = ({
   closeModal,
   onMutationSuccess = () => {},
   labelTyped = "",
   categorySelected,
+  languageSelected,
+  allowedEntityClasses,
 }) => {
+  const entityClasses = allowedEntityClasses
+    ? allowedEntityClasses
+    : classesAll;
+
   const [showModal, setShowModal] = useState(false);
   useEffect(() => {
     setShowModal(true);
@@ -44,11 +67,18 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
   const [label, setLabel] = useState(labelTyped);
   const [detailTyped, setDetailTyped] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<EntityEnums.Class>(
-    categorySelected || classesAll[0]
+    categorySelected || entityClasses[0]
   );
-
   const [selectedLanguage, setSelectedLanguage] =
-    useState<EntityEnums.Language>(EntityEnums.Language.Empty);
+    useState<EntityEnums.Language>(
+      languageSelected || EntityEnums.Language.Empty
+    );
+  const [actionPos, setActionPos] = useState<EntityEnums.ActionPartOfSpeech>(
+    EntityEnums.ActionPartOfSpeech.Verb
+  );
+  const [conceptPos, setConceptPos] = useState<EntityEnums.ConceptPartOfSpeech>(
+    EntityEnums.ConceptPartOfSpeech.Empty
+  );
 
   const userId = localStorage.getItem("userid");
   const {
@@ -56,33 +86,32 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
     data: user,
     error: errorUser,
     isFetching: isFetchingUser,
-  } = useQuery(
-    ["user", userId],
-    async () => {
+  } = useQuery({
+    queryKey: ["user", userId],
+    queryFn: async () => {
       if (userId) {
         const res = await api.usersGet(userId);
         return res.data;
       }
     },
-    { enabled: !!userId && api.isLoggedIn() }
-  );
+    enabled: !!userId && api.isLoggedIn(),
+  });
+
   useEffect(() => {
-    if (user) {
+    if (user && !languageSelected) {
       setSelectedLanguage(user.options.defaultLanguage);
     }
   }, [user]);
 
   const [territoryId, setTerritoryId] = useState<string>("");
 
-  const entityCreateMutation = useMutation(
-    async (newEntity: IEntity) => await api.entityCreate(newEntity),
-    {
-      onSuccess: (data, variables) => {
-        onMutationSuccess(variables);
-        closeModal();
-      },
-    }
-  );
+  const entityCreateMutation = useMutation({
+    mutationFn: async (newEntity: IEntity) => await api.entityCreate(newEntity),
+    onSuccess: (data, variables) => {
+      onMutationSuccess(variables);
+      closeModal();
+    },
+  });
 
   const userRole = localStorage.getItem("userrole") as UserEnums.Role;
 
@@ -93,8 +122,11 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
       detail?: string;
       language: EntityEnums.Language | null;
       territoryId?: string;
+      partOfSpeech?:
+        | EntityEnums.ActionPartOfSpeech
+        | EntityEnums.ActionPartOfSpeech;
     } = {
-      label: label,
+      label: label.trim(),
       entityClass: selectedCategory,
       detail: detailTyped,
       language: selectedLanguage,
@@ -132,6 +164,30 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
           -1
         );
         entityCreateMutation.mutate(newTerritory);
+      } else if (newCreated.entityClass === EntityEnums.Class.Action) {
+        const newAction = CAction(
+          {
+            ...user.options,
+            defaultLanguage:
+              newCreated.language || user.options.defaultLanguage,
+          },
+          newCreated.label,
+          actionPos,
+          newCreated.detail
+        );
+        entityCreateMutation.mutate(newAction);
+      } else if (newCreated.entityClass === EntityEnums.Class.Concept) {
+        const newConcept = CConcept(
+          {
+            ...user.options,
+            defaultLanguage:
+              newCreated.language || user.options.defaultLanguage,
+          },
+          newCreated.label,
+          conceptPos,
+          newCreated.detail
+        );
+        entityCreateMutation.mutate(newConcept);
       } else {
         const newEntity = CEntity(
           {
@@ -153,22 +209,20 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
     data: territory,
     error,
     isFetching,
-  } = useQuery(
-    ["territory", territoryId],
-    async () => {
+  } = useQuery({
+    queryKey: ["territory", territoryId],
+    queryFn: async () => {
       if (territoryId) {
         const res = await api.territoryGet(territoryId);
         return res.data;
       }
     },
-    {
-      enabled: !!territoryId && api.isLoggedIn(),
-    }
-  );
+    enabled: !!territoryId && api.isLoggedIn(),
+  });
 
   const handleCheckOnSubmit = () => {
-    if (label.length < 2) {
-      toast.info("fill at least 2 characters");
+    if (label.length < 1) {
+      toast.info(MIN_LABEL_LENGTH_MESSAGE);
     } else if (
       selectedCategory === EntityEnums.Class.Statement &&
       !territoryId
@@ -188,8 +242,8 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
   return (
     <Modal
       showModal={showModal}
-      width="auto"
-      isLoading={entityCreateMutation.isLoading}
+      width={300}
+      isLoading={entityCreateMutation.isPending}
       onEnterPress={handleCheckOnSubmit}
       onClose={closeModal}
     >
@@ -201,7 +255,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
             <EntitySuggester
               initTyped={label}
               initCategory={selectedCategory}
-              categoryTypes={classesAll}
+              categoryTypes={entityClasses}
               excludedEntityClasses={excludedSuggesterEntities}
               onChangeCategory={(selectedOption) => {
                 // Any not allowed here - this condition makes it type safe
@@ -214,20 +268,25 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
               disableTemplatesAccept
               disableWildCard
               disableTemplateInstantiation
-              inputWidth={96}
+              inputWidth="full"
               autoFocus
               disableButtons
               disableEnter
             />
           </ModalInputWrap>
+
+          {/* Detail */}
           <ModalInputLabel>{"Detail: "}</ModalInputLabel>
           <ModalInputWrap>
             <Input
               value={detailTyped}
               onChangeFn={(newType: string) => setDetailTyped(newType)}
               changeOnType
+              width="full"
             />
           </ModalInputWrap>
+
+          {/* Language */}
           <ModalInputLabel>{"Language: "}</ModalInputLabel>
           <ModalInputWrap>
             <Dropdown.Single.Basic
@@ -235,10 +294,43 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
               options={languageDict}
               value={selectedLanguage}
               onChange={(newValue) => {
-                setSelectedLanguage(newValue as EntityEnums.Language);
+                setSelectedLanguage(newValue);
               }}
             />
           </ModalInputWrap>
+
+          {/* Part of speech */}
+          {selectedCategory === EntityEnums.Class.Action && (
+            <>
+              <ModalInputLabel>{"Part of Speech: "}</ModalInputLabel>
+              <ModalInputWrap>
+                <Dropdown.Single.Basic
+                  width="full"
+                  value={actionPos}
+                  options={actionPartOfSpeechDict}
+                  onChange={(newValue) => {
+                    setActionPos(newValue);
+                  }}
+                />
+              </ModalInputWrap>
+            </>
+          )}
+          {selectedCategory === EntityEnums.Class.Concept && (
+            <>
+              <ModalInputLabel>{"Part of Speech: "}</ModalInputLabel>
+              <ModalInputWrap>
+                <Dropdown.Single.Basic
+                  width="full"
+                  value={conceptPos}
+                  options={conceptPartOfSpeechDict}
+                  onChange={(newValue) => {
+                    setConceptPos(newValue);
+                  }}
+                />
+              </ModalInputWrap>
+            </>
+          )}
+
           {/* Suggester territory */}
           {(selectedCategory === EntityEnums.Class.Territory ||
             selectedCategory === EntityEnums.Class.Statement) && (

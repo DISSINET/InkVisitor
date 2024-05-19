@@ -7,6 +7,7 @@ import {
   IResponseDetail,
   Relation,
 } from "@shared/types";
+import { IWarningPositionSection } from "@shared/types/warning";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Button, Loader, Message, Submit, ToastWithLink } from "components";
@@ -32,6 +33,7 @@ import { PropGroup } from "../../PropGroup/PropGroup";
 import { EntityDetailCreateTemplateModal } from "./EntityDetailCreateTemplateModal/EntityDetailCreateTemplateModal";
 import { EntityDetailFormSection } from "./EntityDetailFormSection/EntityDetailFormSection";
 import { EntityDetailHeaderRow } from "./EntityDetailHeaderRow/EntityDetailHeaderRow";
+import { EntityDetailProtocol } from "./EntityDetailProtocol/EntityDetailProtocol";
 import { EntityDetailRelations } from "./EntityDetailRelations/EntityDetailRelations";
 import {
   StyledDetailSection,
@@ -51,7 +53,8 @@ import { EntityDetailMetaPropsTable } from "./EntityDetailUsedInTable/EntityDeta
 import { EntityDetailStatementPropsTable } from "./EntityDetailUsedInTable/EntityDetailStatementPropsTable/EntityDetailStatementPropsTable";
 import { EntityDetailStatementsTable } from "./EntityDetailUsedInTable/EntityDetailStatementsTable/EntityDetailStatementsTable";
 import { EntityDetailValency } from "./EntityDetailValency/EntityDetailValency";
-import { IWarningPositionSection } from "@shared/types/warning";
+import { EntityDetailValidationSection } from "./EntityDetailValidationSection/EntityDetailValidationSection";
+import { ITerritoryValidation } from "@shared/types/territory";
 
 const allowedEntityChangeClasses = [
   EntityEnums.Class.Value,
@@ -83,14 +86,14 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
     data: entity,
     error,
     isFetching,
-  } = useQuery(
-    ["entity", detailId],
-    async () => {
+  } = useQuery({
+    queryKey: ["entity", detailId],
+    queryFn: async () => {
       const res = await api.detailGet(detailId);
       return res.data;
     },
-    { enabled: !!detailId && api.isLoggedIn() }
-  );
+    enabled: !!detailId && api.isLoggedIn(),
+  });
 
   useEffect(() => {
     if (error && (error as any).message === "unknown class for entity") {
@@ -137,9 +140,9 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
     data: templates,
     error: templateError,
     isFetching: isFetchingTemplates,
-  } = useQuery(
-    ["entity-templates", "templates", entity?.class],
-    async () => {
+  } = useQuery({
+    queryKey: ["entity-templates", "templates", entity?.class],
+    queryFn: async () => {
       if (entity) {
         const res = await api.entitiesSearch({
           onlyTemplates: true,
@@ -153,8 +156,8 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
         return templates;
       }
     },
-    { enabled: !!entity && api.isLoggedIn() }
-  );
+    enabled: !!entity && api.isLoggedIn(),
+  });
 
   const templateOptions: DropdownItem[] = useMemo(() => {
     const options =
@@ -176,19 +179,19 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
     data: audit,
     error: auditError,
     isFetching: isFetchingAudit,
-  } = useQuery(
-    ["audit", detailId],
-    async () => {
+  } = useQuery({
+    queryKey: ["audit", detailId],
+    queryFn: async () => {
       const res = await api.auditGet(detailId);
       return res.data;
     },
-    { enabled: !!detailId && api.isLoggedIn() }
-  );
+    enabled: !!detailId && api.isLoggedIn(),
+  });
 
   // refetch audit when statement changes
   useEffect(() => {
     if (entity !== undefined) {
-      queryClient.invalidateQueries(["audit"]);
+      queryClient.invalidateQueries({ queryKey: ["audit"] });
     }
   }, [entity]);
 
@@ -215,153 +218,150 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
     data: statement,
     error: statementError,
     isFetching: isFetchingStatement,
-  } = useQuery(
-    ["statement", statementId],
-    async () => {
+  } = useQuery({
+    queryKey: ["statement", statementId],
+    queryFn: async () => {
       const res = await api.statementGet(statementId);
       return res.data;
     },
-    { enabled: !!statementId && api.isLoggedIn() }
-  );
+    enabled: !!statementId && api.isLoggedIn(),
+  });
 
-  const updateEntityMutation = useMutation(
-    async (changes: any) => await api.entityUpdate(detailId, changes),
-    {
-      onSuccess: (data, variables) => {
-        queryClient.invalidateQueries(["entity"]);
+  const updateEntityMutation = useMutation({
+    mutationFn: async (changes: any) =>
+      await api.entityUpdate(detailId, changes),
 
-        if (
-          statementId &&
-          (statementId === entity?.id ||
-            (statement?.entities &&
-              entity &&
-              Object.keys(statement.entities).includes(entity.id)))
-        ) {
-          queryClient.invalidateQueries(["statement"]);
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["entity"] });
+
+      if (
+        statementId &&
+        (statementId === entity?.id ||
+          (statement?.entities &&
+            entity &&
+            Object.keys(statement.entities).includes(entity.id)))
+      ) {
+        queryClient.invalidateQueries({ queryKey: ["statement"] });
+      }
+
+      if (
+        variables.references !== undefined ||
+        variables.detail !== undefined ||
+        variables.label !== undefined ||
+        variables.status ||
+        variables.language !== undefined ||
+        variables.data?.logicalType
+      ) {
+        queryClient.invalidateQueries({ queryKey: ["suggestion"] });
+        if (entity?.class === EntityEnums.Class.Territory) {
+          queryClient.invalidateQueries({ queryKey: ["tree"] });
         }
 
-        if (
-          variables.references !== undefined ||
-          variables.detail !== undefined ||
-          variables.label !== undefined ||
-          variables.status ||
-          variables.language !== undefined ||
-          variables.data?.logicalType
-        ) {
-          queryClient.invalidateQueries(["suggestion"]);
-          if (entity?.class === EntityEnums.Class.Territory) {
-            queryClient.invalidateQueries(["tree"]);
-          }
+        queryClient.invalidateQueries({ queryKey: ["territory"] });
+        queryClient.invalidateQueries({ queryKey: ["bookmarks"] });
+      }
+      if (variables.label !== undefined) {
+        queryClient.invalidateQueries({ queryKey: ["detail-tab-entities"] });
+      }
+      if (entity?.isTemplate) {
+        queryClient.invalidateQueries({ queryKey: ["templates"] });
+        queryClient.invalidateQueries({ queryKey: ["entity-templates"] });
+        if (entity?.class === EntityEnums.Class.Statement) {
+          queryClient.invalidateQueries({ queryKey: ["statement-templates"] });
+        }
+      }
+    },
+  });
 
-          queryClient.invalidateQueries(["territory"]);
-          queryClient.invalidateQueries(["bookmarks"]);
-        }
-        if (variables.label !== undefined) {
-          queryClient.invalidateQueries(["detail-tab-entities"]);
-        }
-        if (entity?.isTemplate) {
-          queryClient.invalidateQueries(["templates"]);
-          queryClient.invalidateQueries(["entity-templates"]);
-          if (entity?.class === EntityEnums.Class.Statement) {
-            queryClient.invalidateQueries(["statement-templates"]);
-          }
-        }
-      },
-    }
-  );
-
-  const changeEntityTypeMutation = useMutation(
-    async (newClass: string) =>
+  const changeEntityTypeMutation = useMutation({
+    mutationFn: async (newClass: string) =>
       await api.entityUpdate(detailId, { class: newClass }),
-    {
-      onSuccess: (data, variables) => {
-        setShowTypeSubmit(false);
-        queryClient.invalidateQueries(["entity"]);
-        queryClient.invalidateQueries(["statement"]);
-        if (variables === EntityEnums.Class.Territory) {
-          queryClient.invalidateQueries(["tree"]);
-        }
-        queryClient.invalidateQueries(["territory"]);
-        queryClient.invalidateQueries(["bookmarks"]);
-        if (entity?.isTemplate) {
-          queryClient.invalidateQueries(["templates"]);
-        }
-      },
-    }
-  );
 
-  const deleteEntityMutation = useMutation(
-    (entityId: string) => api.entityDelete(entityId),
-    {
-      onSuccess: async (data, entityId) => {
-        toast.info(
-          <ToastWithLink
-            children={`Entity removed!`}
-            linkText={"Restore"}
-            onLinkClick={async () => {
-              const response = await api.entityRestore(entityId);
-              toast.info("Entity restored");
-              appendDetailId(entityId);
-              queryClient.invalidateQueries(["entity"]);
-              queryClient.invalidateQueries(["statement"]);
-              if (entity?.class === EntityEnums.Class.Territory) {
-                queryClient.invalidateQueries(["tree"]);
-              }
-              queryClient.invalidateQueries(["territory"]);
-              queryClient.invalidateQueries(["bookmarks"]);
-              if (entity?.isTemplate) {
-                queryClient.invalidateQueries(["templates"]);
-              }
-            }}
-          />,
-          {
-            autoClose: 5000,
-          }
-        );
+    onSuccess: (data, variables) => {
+      setShowTypeSubmit(false);
+      queryClient.invalidateQueries({ queryKey: ["entity"] });
+      queryClient.invalidateQueries({ queryKey: ["statement"] });
+      if (variables === EntityEnums.Class.Territory) {
+        queryClient.invalidateQueries({ queryKey: ["tree"] });
+      }
+      queryClient.invalidateQueries({ queryKey: ["territory"] });
+      queryClient.invalidateQueries({ queryKey: ["bookmarks"] });
+      if (entity?.isTemplate) {
+        queryClient.invalidateQueries({ queryKey: ["templates"] });
+      }
+    },
+  });
 
-        // hide selected territory if T removed
-        if (
-          entity &&
-          entity.class == EntityEnums.Class.Territory &&
-          entity.id === territoryId
-        ) {
-          setTerritoryId("");
-        } else {
-          queryClient.invalidateQueries(["territory"]);
+  const deleteEntityMutation = useMutation({
+    mutationFn: (entityId: string) => api.entityDelete(entityId),
+    onSuccess: async (data, entityId) => {
+      toast.info(
+        <ToastWithLink
+          children={`Entity removed!`}
+          linkText={"Restore"}
+          onLinkClick={async () => {
+            const response = await api.entityRestore(entityId);
+            toast.info("Entity restored");
+            appendDetailId(entityId);
+            queryClient.invalidateQueries({ queryKey: ["entity"] });
+            queryClient.invalidateQueries({ queryKey: ["statement"] });
+            if (entity?.class === EntityEnums.Class.Territory) {
+              queryClient.invalidateQueries({ queryKey: ["tree"] });
+            }
+            queryClient.invalidateQueries({ queryKey: ["territory"] });
+            queryClient.invalidateQueries({ queryKey: ["bookmarks"] });
+            if (entity?.isTemplate) {
+              queryClient.invalidateQueries({ queryKey: ["templates"] });
+            }
+          }}
+        />,
+        {
+          autoClose: 5000,
         }
+      );
 
-        // hide editor box if the removed entity was also opened in the editor
-        if (
-          entity &&
-          entity.class == EntityEnums.Class.Statement &&
-          entity.id === statementId
-        ) {
-          setStatementId("");
-        } else {
-          queryClient.invalidateQueries(["statement"]);
-        }
+      // hide selected territory if T removed
+      if (
+        entity &&
+        entity.class == EntityEnums.Class.Territory &&
+        entity.id === territoryId
+      ) {
+        setTerritoryId("");
+      } else {
+        queryClient.invalidateQueries({ queryKey: ["territory"] });
+      }
 
-        queryClient.invalidateQueries(["tree"]);
+      // hide editor box if the removed entity was also opened in the editor
+      if (
+        entity &&
+        entity.class == EntityEnums.Class.Statement &&
+        entity.id === statementId
+      ) {
+        setStatementId("");
+      } else {
+        queryClient.invalidateQueries({ queryKey: ["statement"] });
+      }
 
-        removeDetailId(entityId);
-      },
-      onError: async (error) => {
-        if (
-          (error as any).error === "InvalidDeleteError" &&
-          (error as any).data &&
-          (error as any).data.length > 0
-        ) {
-          const { data } = error as any;
-          toast.info("Click to open conflicting entity in detail", {
-            autoClose: 6000,
-            onClick: () => {
-              appendDetailId(data[0]);
-            },
-          });
-        }
-      },
-    }
-  );
+      queryClient.invalidateQueries({ queryKey: ["tree"] });
+
+      removeDetailId(entityId);
+    },
+    onError: async (error) => {
+      if (
+        (error as any).error === "InvalidDeleteError" &&
+        (error as any).data &&
+        (error as any).data.length > 0
+      ) {
+        const { data } = error as any;
+        toast.info("Click to open conflicting entity in detail", {
+          autoClose: 6000,
+          onClick: () => {
+            appendDetailId(data[0]);
+          },
+        });
+      }
+    },
+  });
 
   // Props handling
 
@@ -555,36 +555,34 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
     }
   };
 
-  const relationCreateMutation = useMutation(
-    async (newRelation: Relation.IRelation) =>
+  const relationCreateMutation = useMutation({
+    mutationFn: async (newRelation: Relation.IRelation) =>
       await api.relationCreate(newRelation),
-    {
-      onSuccess: (data, variables) => {
-        queryClient.invalidateQueries(["entity"]);
-      },
-    }
-  );
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["entity"] });
+    },
+  });
 
-  const relationUpdateMutation = useMutation(
-    async (relationObject: { relationId: string; changes: any }) =>
+  const relationUpdateMutation = useMutation({
+    mutationFn: async (relationObject: { relationId: string; changes: any }) =>
       await api.relationUpdate(
         relationObject.relationId,
         relationObject.changes
       ),
-    {
-      onSuccess: (data, variables) => {
-        queryClient.invalidateQueries(["entity"]);
-      },
-    }
-  );
-  const relationDeleteMutation = useMutation(
-    async (relationId: string) => await api.relationDelete(relationId),
-    {
-      onSuccess: (data, variables) => {
-        queryClient.invalidateQueries(["entity"]);
-      },
-    }
-  );
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["entity"] });
+    },
+  });
+  const relationDeleteMutation = useMutation({
+    mutationFn: async (relationId: string) =>
+      await api.relationDelete(relationId),
+
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["entity"] });
+    },
+  });
+
+  const isInsideTemplate = entity?.isTemplate || false;
 
   return (
     <>
@@ -600,8 +598,19 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
 
           <StyledDetailWrapper>
             {/* form section */}
-            <StyledDetailSection firstSection>
-              <StyledDetailSectionContent firstSection>
+            <StyledDetailSection $firstSection>
+              <StyledDetailSectionContent $firstSection>
+                <StyledDetailWarnings>
+                  {entity.warnings &&
+                    entity.warnings
+                      .filter(
+                        (w) =>
+                          w.position?.section === IWarningPositionSection.Entity
+                      )
+                      .map((warning, key) => {
+                        return <Message key={key} warning={warning} />;
+                      })}
+                </StyledDetailWarnings>
                 <EntityDetailFormSection
                   entity={entity}
                   userCanEdit={userCanEdit}
@@ -619,6 +628,39 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
                 />
               </StyledDetailSectionContent>
             </StyledDetailSection>
+
+            {/* Protocol */}
+            {entity.class === EntityEnums.Class.Territory && (
+              <StyledDetailSection>
+                <StyledDetailSectionHeader>Protocol</StyledDetailSectionHeader>
+                <StyledDetailSectionContent>
+                  <EntityDetailProtocol
+                    territory={entity}
+                    updateEntityMutation={updateEntityMutation}
+                    isInsideTemplate={isInsideTemplate}
+                    userCanEdit={userCanEdit}
+                  />
+                </StyledDetailSectionContent>
+              </StyledDetailSection>
+            )}
+
+            {/* Validation rules */}
+            {entity.class === EntityEnums.Class.Territory && (
+              <StyledDetailSection>
+                <EntityDetailValidationSection
+                  validations={
+                    entity.data.validations as
+                      | ITerritoryValidation[]
+                      | undefined
+                  }
+                  entities={entity.entities}
+                  updateEntityMutation={updateEntityMutation}
+                  userCanEdit={userCanEdit}
+                  isInsideTemplate={isInsideTemplate}
+                  territoryParentId={getTerritoryId(entity)}
+                />
+              </StyledDetailSection>
+            )}
 
             {/* Valency (A) */}
             {entity.class === EntityEnums.Class.Action && (
@@ -670,12 +712,13 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
                   relationCreateMutation={relationCreateMutation}
                   relationUpdateMutation={relationUpdateMutation}
                   relationDeleteMutation={relationDeleteMutation}
+                  userCanEdit={userCanEdit}
                 />
               </StyledDetailSectionContent>
             </StyledDetailSection>
 
             {/* metaprops section */}
-            <StyledDetailSection metaSection>
+            <StyledDetailSection $metaSection>
               <StyledDetailSectionHeader>
                 Metaproperties
               </StyledDetailSectionHeader>
@@ -708,9 +751,10 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
                         value: ["elvl", "logic", "virtuality", "partitivity"],
                       } as PropAttributeFilter
                     }
-                    isInsideTemplate={entity.isTemplate || false}
+                    isInsideTemplate={isInsideTemplate}
                     territoryParentId={getTerritoryId(entity)}
                     lowIdent
+                    alwaysShowCreateModal
                   />
                 </StyledPropGroupWrap>
                 {userCanEdit && (
@@ -741,7 +785,9 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
                   onChange={(newValues: IReference[]) => {
                     updateEntityMutation.mutate({ references: newValues });
                   }}
-                  isInsideTemplate={entity.isTemplate || false}
+                  isInsideTemplate={isInsideTemplate}
+                  userCanEdit={userCanEdit}
+                  alwaysShowCreateModal
                 />
               </StyledDetailSectionContent>
             </StyledDetailSection>
@@ -865,7 +911,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
         }}
         onCancel={() => setShowRemoveSubmit(false)}
         show={showRemoveSubmit}
-        loading={deleteEntityMutation.isLoading}
+        loading={deleteEntityMutation.isPending}
       />
       <Submit
         title="Change entity type"
@@ -883,9 +929,9 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
       <Loader
         show={
           isFetching ||
-          updateEntityMutation.isLoading ||
-          deleteEntityMutation.isLoading ||
-          changeEntityTypeMutation.isLoading
+          updateEntityMutation.isPending ||
+          deleteEntityMutation.isPending ||
+          changeEntityTypeMutation.isPending
         }
       />
 

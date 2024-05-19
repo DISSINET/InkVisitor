@@ -1,6 +1,11 @@
 import { ThemeColor, ThemeFontSize } from "Theme/theme";
 import React, { useEffect, useState } from "react";
-import { Label, StyledInput, StyledTextArea, Wrapper } from "./InputStyles";
+import {
+  Label,
+  StyledInput,
+  StyledTextArea,
+  StyledWrapper,
+} from "./InputStyles";
 
 interface Input {
   label?: string;
@@ -66,7 +71,9 @@ export const Input: React.FC<Input> = ({
   }, [value]);
 
   return (
-    <Wrapper fullHeightTextArea={type === "textarea" && fullHeightTextArea}>
+    <StyledWrapper
+      $fullHeightTextArea={type === "textarea" && fullHeightTextArea}
+    >
       {label && <Label className="label">{label}</Label>}
       {(type === "text" || type === "password") && (
         <StyledInput
@@ -105,16 +112,16 @@ export const Input: React.FC<Input> = ({
             }
             onBlur();
           }}
-          inverted={inverted}
-          suggester={suggester}
+          $inverted={inverted}
+          $suggester={suggester}
           borderColor={borderColor}
-          autocomplete={autocomplete}
+          $autocomplete={autocomplete}
           required={required}
         />
       )}
       {type === "textarea" && (
         <StyledTextArea
-          fullHeightTextArea={fullHeightTextArea}
+          $fullHeightTextArea={fullHeightTextArea}
           disabled={disabled}
           className="value"
           placeholder={placeholder}
@@ -133,18 +140,18 @@ export const Input: React.FC<Input> = ({
             onFocus(event)
           }
           onBlur={() => {
-            if (!changeOnType) {
+            if (displayValue !== value && !changeOnType) {
               onChangeFn(displayValue);
             }
             onBlur();
           }}
-          inverted={inverted}
-          noBorder={noBorder}
-          suggester={suggester}
-          fontSizeTextArea={fontSizeTextArea}
+          $inverted={inverted}
+          $noBorder={noBorder}
+          $suggester={suggester}
+          $fontSizeTextArea={fontSizeTextArea}
           borderColor={borderColor}
         />
       )}
-    </Wrapper>
+    </StyledWrapper>
   );
 };

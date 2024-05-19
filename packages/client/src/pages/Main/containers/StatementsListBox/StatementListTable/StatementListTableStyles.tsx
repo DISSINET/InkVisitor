@@ -25,31 +25,31 @@ export const StyledTh = styled.th`
 `;
 
 interface StyledTr {
-  isOpened?: boolean;
-  isSelected?: boolean;
+  $isOpened?: boolean;
+  $isSelected?: boolean;
   opacity?: number;
 }
 export const StyledTr = styled.tr<StyledTr>`
-  background-color: ${({ theme, isOpened, isSelected }) =>
-    isOpened
+  background-color: ${({ theme, $isOpened, $isSelected }) =>
+    $isOpened
       ? theme.color["tableOpened"]
-      : isSelected
+      : $isSelected
       ? theme.color["tableSelection"]
       : theme.color["white"]};
-  color: ${({ theme, isOpened }) =>
-    isOpened ? theme.color["primary"] : theme.color["black"]};
+  color: ${({ theme, $isOpened }) =>
+    $isOpened ? theme.color["primary"] : theme.color["black"]};
   opacity: ${({ opacity }) => (opacity ? opacity : 1)};
   border-top: 1px solid ${({ theme }) => theme.color["gray"][500]};
-  border-left: ${({ theme, isOpened }) =>
-    isOpened ? "4px solid " + theme.color["success"] : ""};
-  cursor: ${({ isOpened }) => (isOpened ? "default" : "pointer")};
+  border-left: ${({ theme, $isOpened }) =>
+    $isOpened ? "4px solid " + theme.color["success"] : ""};
+  cursor: ${({ $isOpened }) => ($isOpened ? "default" : "pointer")};
   td:first-child {
-    padding-left: ${({ theme, isOpened }) => (isOpened ? "0.9rem" : "")};
+    padding-left: ${({ theme, $isOpened }) => ($isOpened ? "0.9rem" : "")};
     width: 1%;
   }
   :hover {
-    background-color: ${({ theme, isSelected }) =>
-      isSelected
+    background-color: ${({ theme, $isSelected }) =>
+      $isSelected
         ? theme.color["tableSelectionHover"]
         : theme.color["gray"][100]};
   }
@@ -90,4 +90,13 @@ export const StyledCheckboxWrapper = styled.div`
   align-items: center;
   color: ${({ theme }) => theme.color["black"]};
   cursor: pointer;
+`;
+
+export const StyledAbbreviatedLabel = styled.div`
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  min-width: 5rem;
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
 `;

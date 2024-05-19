@@ -14,6 +14,7 @@ export const StyledCloudWrap = styled.div`
   overflow: hidden;
   max-width: 100%;
   align-items: center;
+  padding-bottom: ${({ theme }) => theme.space[1]};
 `;
 export const StyledButtonWrap = styled.div`
   margin-left: ${({ theme }) => theme.space[2]};

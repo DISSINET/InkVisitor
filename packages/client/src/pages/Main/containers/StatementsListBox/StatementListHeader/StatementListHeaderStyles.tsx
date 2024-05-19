@@ -8,40 +8,64 @@ export const StyledHeader = styled.div`
   padding: ${({ theme }) => theme.space[3]};
 `;
 export const StyledHeaderBreadcrumbRow = styled.div`
-  display: flex;
+  display: inline-flex;
   align-items: center;
   flex-wrap: wrap;
+  justify-content: left;
 `;
-export const StyledHeaderRow = styled.h3`
-  /* overflow: hidden; */
-`;
-export const StyledFaStar = styled(FaStar)`
-  float: left;
-  margin-top: 0.5rem;
-  margin-right: 0.3rem;
-  color: ${({ theme }) => theme.color["warning"]};
+
+export const StyledHeaderBreadcrumbRowLeft = styled.div`
+  display: inline-flex;
+  align-items: center;
 `;
 export const StyledMoveToParent = styled.div`
   font-size: ${({ theme }) => theme.fontSize["sm"]};
   font-weight: ${({ theme }) => theme.fontWeight["normal"]};
   display: flex;
   align-items: center;
-  float: right;
+  /* float: right; */
   color: ${({ theme }) => theme.color["info"]};
-  margin-bottom: ${({ theme }) => theme.space[2]};
+  margin-bottom: 0.5rem;
   margin-left: 0.3rem;
   margin-top: 0.3rem;
 `;
+export const StyledHeaderRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+`;
+export const StyledFaStar = styled(FaStar)`
+  float: left;
+  margin-top: 0.4rem;
+  margin-right: 0.5rem;
+  color: ${({ theme }) => theme.color["warning"]};
+`;
+export const StyledModeSwitcher = styled.div`
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
+  font-weight: ${({ theme }) => theme.fontWeight["normal"]};
+  display: flex;
+  align-items: center;
+  color: ${({ theme }) => theme.color["info"]};
+  margin-left: 0.3rem;
+`;
 export const StyledHeading = styled.span`
   color: ${({ theme }) => theme.color["black"]};
-  word-wrap: break-word;
+  font-weight: bold;
+  font-size: ${({ theme }) => theme.fontSize["xl"]};
+  display: inline-block;
+  vertical-align: middle;
+  white-space: nowrap;
+  overflow: hidden !important;
+  text-overflow: ellipsis;
 `;
+export const StyledHeadingText = styled.div``;
 export const StyledSuggesterRow = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
   color: ${({ theme }) => theme.color["info"]};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
+  height: 2.5rem;
 `;
 export const StyledActionsWrapper = styled.div`
   padding-left: 0.5rem;

@@ -59,6 +59,9 @@ const darkTheme = {
     tagSelectedColor: "#f6f6ff",
     tagItalic: "#3b3b3b",
 
+    treeNodeRead: "#718096",
+    treeNodeWrite: "#f7fafc",
+
     tableOpened: "#0b3a59",
     tableSelection: "#4c82a1",
     tableSelectionHover: "#2c638c",

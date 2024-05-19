@@ -1,10 +1,11 @@
-import { IDocument, IResponseDocument, IResponseEntity } from "@shared/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { v4 as uuidv4 } from "uuid";
+
+import { IDocument, IResponseDocument, IResponseEntity } from "@shared/types";
 import api from "api";
 import { Loader, Submit } from "components";
 import React, { ChangeEvent, useMemo, useRef, useState } from "react";
-import { v4 as uuidv4 } from "uuid";
-import { DocumentModal } from "../../components/advanced/DocumentModal/DocumentModal";
+import { DocumentModalEdit, DocumentModalExport } from "components/advanced";
 import { DocumentRow } from "./DocumentRow/DocumentRow";
 import {
   StyledBackground,
@@ -14,8 +15,6 @@ import {
   StyledHeading,
   StyledInputWrap,
 } from "./DocumentsPageStyles";
-import { useSpring } from "@react-spring/web";
-import { springConfig } from "Theme/constants";
 
 type DocumentWithResource = {
   document: IResponseDocument;
@@ -29,33 +28,31 @@ export const DocumentsPage: React.FC = ({}) => {
     data: documents,
     error,
     isFetching,
-  } = useQuery(
-    ["documents"],
-    async () => {
+  } = useQuery({
+    queryKey: ["documents"],
+    queryFn: async () => {
       const res = await api.documentsGet({});
       return res.data;
     },
-    {
-      enabled: api.isLoggedIn(),
-    }
-  );
+    enabled: api.isLoggedIn(),
+  });
+
+  console.log(documents);
 
   const {
     data: resources,
     error: resourcesError,
     isFetching: resourcesIsFetching,
-  } = useQuery(
-    ["resourcesWithDocuments"],
-    async () => {
+  } = useQuery({
+    queryKey: ["resourcesWithDocuments"],
+    queryFn: async () => {
       const res = await api.entitiesSearch({
         resourceHasDocument: true,
       });
       return res.data;
     },
-    {
-      enabled: api.isLoggedIn(),
-    }
-  );
+    enabled: api.isLoggedIn(),
+  });
 
   const documentsWithResources: DocumentWithResource[] = useMemo(() => {
     return documents
@@ -70,25 +67,21 @@ export const DocumentsPage: React.FC = ({}) => {
       : [];
   }, [resources, documents]);
 
-  const uploadDocumentMutation = useMutation(
-    async (doc: IDocument) => api.documentUpload(doc),
-    {
-      onSuccess: (variables, data) => {
-        queryClient.invalidateQueries(["documents"]);
-      },
-    }
-  );
+  const uploadDocumentMutation = useMutation({
+    mutationFn: async (doc: IDocument) => api.documentUpload(doc),
+    onSuccess: (variables, data) => {
+      queryClient.invalidateQueries({ queryKey: ["documents"] });
+    },
+  });
 
-  const updateDocumentMutation = useMutation(
-    async (data: { id: string; doc: Partial<IDocument> }) =>
+  const updateDocumentMutation = useMutation({
+    mutationFn: async (data: { id: string; doc: Partial<IDocument> }) =>
       api.documentUpdate(data.id, data.doc),
-    {
-      onSuccess: (variables, data) => {
-        setEditMode(false);
-        queryClient.invalidateQueries(["documents"]);
-      },
-    }
-  );
+    onSuccess: (variables, data) => {
+      setEditMode(false);
+      queryClient.invalidateQueries({ queryKey: ["documents"] });
+    },
+  });
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -114,31 +107,40 @@ export const DocumentsPage: React.FC = ({}) => {
     if (inputRef.current) inputRef.current.value = "";
   };
 
-  const [openedDocumentId, setOpenedDocumentId] = useState<string | false>(
+  const [exportedDocumentId, setExportedDocumentId] = useState<string | false>(
     false
   );
+  const exportedDocument = documents?.find(
+    (doc) => doc.id === exportedDocumentId
+  );
 
-  const handleDocumentClick = (id: string) => {
-    setOpenedDocumentId(id);
+  const [editedDocumentId, setEditedDocumentId] = useState<string | false>(
+    false
+  );
+  const editedDocument = documents?.find((doc) => doc.id === editedDocumentId);
+
+  const handleDocumentEdit = (id: string) => {
+    setEditedDocumentId(id);
+  };
+  const handleDocumentExport = (id: string) => {
+    setExportedDocumentId(id);
   };
 
   const handleModalClose = () => {
-    setOpenedDocumentId(false);
+    setEditedDocumentId(false);
+    setExportedDocumentId(false);
   };
 
-  const documentDeleteMutation = useMutation(
-    async (id: string) => await api.documentDelete(id),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries(["documents"]);
-        setDocToDelete(false);
-      },
-    }
-  );
+  const documentDeleteMutation = useMutation({
+    mutationFn: async (id: string) => await api.documentDelete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["documents"] });
+      setDocToDelete(false);
+    },
+  });
 
   const [docToDelete, setDocToDelete] = useState<string | false>(false);
   const [editMode, setEditMode] = useState<false | number>(false);
-
   const inputRef = useRef<HTMLInputElement>(null);
 
   return (
@@ -155,7 +157,8 @@ export const DocumentsPage: React.FC = ({}) => {
                       key={key}
                       document={documentWithResource.document}
                       resource={documentWithResource.resource}
-                      handleDocumentClick={handleDocumentClick}
+                      handleDocumentEdit={handleDocumentEdit}
+                      handleDocumentExport={handleDocumentExport}
                       setDocToDelete={setDocToDelete}
                       updateDocumentMutation={updateDocumentMutation}
                       editMode={editMode === key}
@@ -183,9 +186,15 @@ export const DocumentsPage: React.FC = ({}) => {
         </StyledBoxWrap>
       </StyledContent>
 
-      {openedDocumentId && (
-        <DocumentModal
-          documentId={openedDocumentId}
+      {editedDocumentId && (
+        <DocumentModalEdit
+          document={editedDocument}
+          onClose={handleModalClose}
+        />
+      )}
+      {exportedDocumentId && (
+        <DocumentModalExport
+          document={exportedDocument}
           onClose={handleModalClose}
         />
       )}

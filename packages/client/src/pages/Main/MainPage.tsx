@@ -1,5 +1,5 @@
-import { EntityEnums } from "@shared/enums";
-import { useQueryClient } from "@tanstack/react-query";
+import { EntityEnums, UserEnums } from "@shared/enums";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   collapsedPanelWidth,
   fourthPanelBoxesHeightThirds,
@@ -9,7 +9,7 @@ import { Box, Button, Panel } from "components";
 import { EntityCreateModal, PanelSeparator } from "components/advanced";
 import { useSearchParams } from "hooks";
 import ScrollHandler from "hooks/ScrollHandler";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { BiHide, BiRefresh, BiShow } from "react-icons/bi";
 import { BsSquareFill, BsSquareHalf } from "react-icons/bs";
 import { FaPlus } from "react-icons/fa";
@@ -27,14 +27,25 @@ import { MemoizedStatementEditorBox } from "./containers/StatementEditorBox/Stat
 import { MemoizedStatementListBox } from "./containers/StatementsListBox/StatementListBox";
 import { MemoizedTemplateListBox } from "./containers/TemplateListBox/TemplateListBox";
 import { MemoizedTerritoryTreeBox } from "./containers/TerritoryTreeBox/TerritoryTreeBox";
+import api from "api";
+import { IStatement } from "@shared/types";
+import { setDisableStatementListScroll } from "redux/features/statementList/disableStatementListScrollSlice";
+import { CStatement } from "constructors";
+import { setIsLoading } from "redux/features/statementList/isLoadingSlice";
 
 type FourthPanelBoxes = "search" | "bookmarks" | "templates";
 
 interface MainPage {}
 
 const MainPage: React.FC<MainPage> = ({}) => {
-  const { detailIdArray, clearAllDetailIds, selectedDetailId, appendDetailId } =
-    useSearchParams();
+  const {
+    territoryId,
+    detailIdArray,
+    clearAllDetailIds,
+    selectedDetailId,
+    appendDetailId,
+    setStatementId,
+  } = useSearchParams();
 
   const dispatch = useAppDispatch();
 
@@ -43,7 +54,6 @@ const MainPage: React.FC<MainPage> = ({}) => {
   const fourthPanelBoxesOpened: { [key: string]: boolean } = useAppSelector(
     (state) => state.layout.fourthPanelBoxesOpened
   );
-
   const firstPanelExpanded: boolean = useAppSelector(
     (state) => state.layout.firstPanelExpanded
   );
@@ -152,7 +162,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
             icon={<BiRefresh />}
             onClick={() => {
               queriesToRefresh.forEach((queryToRefresh) => {
-                queryClient.invalidateQueries([queryToRefresh]);
+                queryClient.invalidateQueries({ queryKey: [queryToRefresh] });
               });
             }}
           />
@@ -212,6 +222,46 @@ const MainPage: React.FC<MainPage> = ({}) => {
     dispatch(setStatementListOpened(!statementListOpened));
   };
 
+  const userRole = localStorage.getItem("userrole") as UserEnums.Role;
+
+  const addStatementAtTheEndMutation = useMutation({
+    mutationFn: async (newStatement: IStatement) => {
+      await api.entityCreate(newStatement);
+    },
+    onSuccess: (data, variables) => {
+      setStatementId(variables.id);
+      queryClient.invalidateQueries({ queryKey: ["territory"] });
+      queryClient.invalidateQueries({ queryKey: ["tree"] });
+      dispatch(setDisableStatementListScroll(false));
+    },
+  });
+
+  useEffect(() => {
+    if (addStatementAtTheEndMutation.isPending) {
+      dispatch(setIsLoading(true));
+    } else {
+      dispatch(setIsLoading(false));
+    }
+  }, [addStatementAtTheEndMutation.isPending]);
+
+  // get user data
+  const userId = localStorage.getItem("userid");
+  const {
+    status: statusUser,
+    data: user,
+    error: errorUser,
+    isFetching: isFetchingUser,
+  } = useQuery({
+    queryKey: ["user", userId],
+    queryFn: async () => {
+      if (userId) {
+        const res = await api.usersGet(userId);
+        return res.data;
+      }
+    },
+    enabled: !!userId && api.isLoggedIn(),
+  });
+
   return (
     <>
       <ScrollHandler />
@@ -255,6 +305,37 @@ const MainPage: React.FC<MainPage> = ({}) => {
                 : hiddenBoxHeight
               : contentHeight
           }
+          buttons={[
+            <>
+              {statementListOpened &&
+                userRole !== UserEnums.Role.Viewer &&
+                territoryId && (
+                  <Button
+                    key="add"
+                    icon={<FaPlus />}
+                    tooltipLabel="add new statement at the end of the list"
+                    color="primary"
+                    label="new statement"
+                    onClick={() => {
+                      if (user) {
+                        addStatementAtTheEndMutation.mutate(
+                          CStatement(
+                            userRole,
+                            user.options,
+                            "",
+                            "",
+                            territoryId
+                          )
+                        );
+                      }
+                    }}
+                  />
+                )}
+            </>,
+            statementListOpened &&
+              territoryId &&
+              refreshBoxButton(["territory", "statement", "user"], false),
+          ]}
         >
           <MemoizedStatementListBox />
         </Box>
@@ -269,11 +350,15 @@ const MainPage: React.FC<MainPage> = ({}) => {
                 : contentHeight - hiddenBoxHeight
             }
             buttons={[
-              <Button
-                icon={<FaPlus />}
-                label="new entity"
-                onClick={() => setShowEntityCreateModal(true)}
-              />,
+              <>
+                {userRole !== UserEnums.Role.Viewer && (
+                  <Button
+                    icon={<FaPlus />}
+                    label="new entity"
+                    onClick={() => setShowEntityCreateModal(true)}
+                  />
+                )}
+              </>,
               refreshBoxButton(["entity", "user"], false),
               <Button
                 inverted
@@ -313,7 +398,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
                 appendDetailId(entity.id);
               }
               if (entity.class === EntityEnums.Class.Territory) {
-                queryClient.invalidateQueries(["tree"]);
+                queryClient.invalidateQueries({ queryKey: ["tree"] });
               }
             }}
           />
@@ -349,6 +434,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
             hideFourthPanelButton(),
           ]}
           onHeaderClick={toggleFourthPanel}
+          disableOpenBoxHeaderClick
         >
           <MemoizedEntitySearchBox />
         </Box>
@@ -363,6 +449,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
             hideFourthPanelButton(),
           ]}
           onHeaderClick={toggleFourthPanel}
+          disableOpenBoxHeaderClick
         >
           <MemoizedEntityBookmarkBox />
         </Box>
@@ -377,6 +464,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
             hideFourthPanelButton(),
           ]}
           onHeaderClick={toggleFourthPanel}
+          disableOpenBoxHeaderClick
         >
           <MemoizedTemplateListBox />
         </Box>

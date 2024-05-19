@@ -32,6 +32,8 @@ interface PropGroup {
   isInsideTemplate: boolean;
   territoryParentId?: string;
   lowIdent?: boolean;
+
+  alwaysShowCreateModal?: boolean;
 }
 
 export const PropGroup: React.FC<PropGroup> = ({
@@ -53,6 +55,8 @@ export const PropGroup: React.FC<PropGroup> = ({
   isInsideTemplate,
   territoryParentId,
   lowIdent,
+
+  alwaysShowCreateModal,
 }) => {
   // territory query
   const {
@@ -60,9 +64,9 @@ export const PropGroup: React.FC<PropGroup> = ({
     data: territoryActants,
     error,
     isFetching,
-  } = useQuery(
-    ["territoryActants", territoryId],
-    async () => {
+  } = useQuery({
+    queryKey: ["territoryActants", territoryId],
+    queryFn: async () => {
       if (territoryId) {
         const res = await api.entityIdsInTerritory(territoryId);
         return res.data;
@@ -70,11 +74,9 @@ export const PropGroup: React.FC<PropGroup> = ({
         return [];
       }
     },
-    {
-      initialData: [],
-      enabled: !!territoryId && api.isLoggedIn(),
-    }
-  );
+    initialData: [],
+    enabled: !!territoryId && api.isLoggedIn(),
+  });
 
   const renderFirsLevelPropRow = useCallback(
     (
@@ -107,6 +109,7 @@ export const PropGroup: React.FC<PropGroup> = ({
             territoryParentId={territoryParentId}
             hasOrder={hasOrder}
             lowIdent={lowIdent}
+            alwaysShowCreateModal={alwaysShowCreateModal}
           />
           {/* 2nd level */}
           <SecondLevelPropGroup
@@ -153,6 +156,7 @@ export const PropGroup: React.FC<PropGroup> = ({
             territoryParentId={territoryParentId}
             hasOrder={hasOrder}
             lowIdent={lowIdent}
+            alwaysShowCreateModal={alwaysShowCreateModal}
           />
           {/* 3rd level */}
           <ThirdLevelPropGroup
@@ -199,6 +203,7 @@ export const PropGroup: React.FC<PropGroup> = ({
             territoryParentId={territoryParentId}
             hasOrder={hasOrder}
             lowIdent={lowIdent}
+            alwaysShowCreateModal
           />
         </React.Fragment>
       );

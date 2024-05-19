@@ -34,28 +34,27 @@ export const StyledEditorPreSection = styled.div<StyledEditorPreSection>`
   font-size: ${({ theme }) => theme.fontSize["sm"]};
 `;
 interface StyledEditorSection {
-  firstSection?: boolean;
-  lastSection?: boolean;
-  metaSection?: boolean;
-  marginRight?: boolean;
+  $firstSection?: boolean;
+  $lastSection?: boolean;
+  $metaSection?: boolean;
+  $marginRight?: boolean;
 }
 export const StyledEditorSection = styled.div<StyledEditorSection>`
   position: relative;
   padding: ${({ theme }) => theme.space[6]};
-  padding-right: ${({ metaSection }) => (metaSection ? 0 : "")};
+  padding-right: ${({ $metaSection }) => ($metaSection ? 0 : "")};
   border-bottom-width: ${({ theme }) => theme.borderWidth[1]};
   border-bottom-color: ${({ theme }) => theme.color["gray"][500]};
-  background-color: ${({ theme }) => theme.color["white"]};
-  box-shadow: ${({ theme, firstSection = false }) =>
-    firstSection ? theme.boxShadow["subtle"] : ""};
-  border-left: ${({ theme, firstSection = false }) =>
-    firstSection ? "3px solid " + theme.color["success"] : ""};
-  background-color: ${({ theme, firstSection = false }) =>
-    firstSection ? theme.color["white"] : theme.color["gray"][200]};
+  box-shadow: ${({ theme, $firstSection = false }) =>
+    $firstSection ? theme.boxShadow["subtle"] : ""};
+  border-left: ${({ theme, $firstSection = false }) =>
+    $firstSection ? "3px solid " + theme.color["success"] : ""};
+  background-color: ${({ theme, $firstSection = false }) =>
+    $firstSection ? theme.color["white"] : theme.color["gray"][200]};
   border-bottom-style: solid;
-  margin: ${({ theme, firstSection = false }) =>
-    firstSection ? "0 0 0 0.7rem" : "0.2rem 0 0 2rem"};
-  margin-right: ${({ marginRight }) => (marginRight ? "0.5rem" : "")};
+  margin: ${({ theme, $firstSection = false }) =>
+    $firstSection ? "0 0 0 0.7rem" : "0.2rem 0 0 2rem"};
+  margin-right: ${({ $marginRight }) => ($marginRight ? "0.5rem" : "")};
   :hover {
     background-color: ${({ theme }) => theme.color["gray"][100]};
   }
@@ -82,12 +81,12 @@ export const StyledEditorSectionHeading = styled.div`
   display: flex;
 `;
 interface StyledEditorSectionContent {
-  firstSection?: boolean;
+  $firstSection?: boolean;
 }
 interface StyledEditorSectionContent {}
 export const StyledEditorSectionContent = styled.div<StyledEditorSectionContent>`
-  padding-left: ${({ theme, firstSection = false }) =>
-    firstSection ? "" : theme.space[6]};
+  padding-left: ${({ theme, $firstSection = false }) =>
+    $firstSection ? "" : theme.space[6]};
 `;
 
 // Grids
@@ -117,10 +116,13 @@ export const StyledPropsActantList = styled(StyledGrid)<StyledPropsActantList>`
 `;
 
 // tags
-interface StyledTagsList {}
+interface StyledTagsList {
+  $paddingBottom?: boolean;
+}
 export const StyledTagsList = styled.div<StyledTagsList>`
   display: block;
-  padding-bottom: ${({ theme }) => theme.space[6]};
+  padding-bottom: ${({ theme, $paddingBottom }) =>
+    $paddingBottom ? theme.space[6] : ""};
 `;
 
 interface StyledTagsListItem {}

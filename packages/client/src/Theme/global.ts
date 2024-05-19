@@ -78,6 +78,7 @@ const GlobalStyle = createGlobalStyle<GlobalStyle>`
     }
     .react-select__option {
       margin: 0;
+      min-height: 3rem;
     }
     .react-select__option--is-selected {
       font-weight: bold;

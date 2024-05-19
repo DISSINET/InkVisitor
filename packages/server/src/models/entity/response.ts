@@ -158,7 +158,7 @@ export class ResponseEntityDetail
       this.id
     );
 
-    // this was added as a hot fix for #1528, this should be done better
+    // this was added as a hot fix for #1528
     const statementsByActantActions = await Statement.getLinkedEntities(
       conn,
       this.id

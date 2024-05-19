@@ -1,0 +1,36 @@
+{
+  "name": "annotator",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "start": "webpack serve --mode development --open --config webpack.development.js",
+    "build": "tsc && npm run build:types",
+    "build:types": "tsc --declaration"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^20.11.25",
+    "@types/react": "^18.2.64",
+    "@types/react-dom": "^18.2.21",
+    "@typescript-eslint/eslint-plugin": "^6.7.0",
+    "@typescript-eslint/parser": "^6.7.0",
+    "copy-webpack-plugin": "^12.0.2",
+    "html-webpack-plugin": "^5.5.3",
+    "prettier": "^2.8.8",
+    "raw-loader": "^4.0.2",
+    "react-dom": "^18.2.0",
+    "ts-loader": "^9.5.1",
+    "typescript": "^5.3.2",
+    "webpack": "^5.89.0",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^4.15.1"
+  },
+  "dependencies": {
+    "lorem-ipsum": "^2.0.8",
+    "react": "^18.2.0"
+  }
+}

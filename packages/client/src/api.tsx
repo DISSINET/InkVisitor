@@ -1,3 +1,4 @@
+import { EntityEnums } from "@shared/enums";
 import {
   IEntity,
   IResponseEntity,
@@ -212,8 +213,8 @@ class Api {
       (responseData as any).response &&
       (responseData as any).response.data
     ) {
-      out.error = (responseData as Record<string, string>).error;
-      out.message = (responseData as Record<string, string>).message;
+      out.error = (responseData as any).response.data.error;
+      out.message = (responseData as any).response.data.message;
     }
 
     return out;
@@ -745,6 +746,27 @@ class Api {
     }
   }
 
+  async territoriesCopy(
+    territoryId: string,
+    targets: string[],
+    withChildren: boolean,
+    options?: IApiOptions
+  ): Promise<AxiosResponse<IResponseGeneric>> {
+    try {
+      const response = await this.connection.post(
+        `/territories/${territoryId}/copy`,
+        {
+          targets,
+          withChildren,
+        },
+        options
+      );
+      return response;
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+
   /**
    * Tooltips
    */
@@ -1013,7 +1035,7 @@ class Api {
   }
 
   /**
-   * Document titles
+   * Document
    */
 
   async documentsGet(
@@ -1075,6 +1097,45 @@ class Api {
         options
       );
       return response;
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+
+  async documentExport(
+    documentId: string,
+    exportedEntities: EntityEnums.Class[]
+  ): Promise<any> {
+    try {
+      const response = await this.connection.post(
+        `/documents/export`,
+        {
+          documentId,
+          exportedEntities,
+        },
+        { responseType: "blob" }
+      );
+
+      let fileName = `${documentId}-`;
+      if (Object.keys(EntityEnums.Class).length === exportedEntities.length) {
+        fileName += "all_anchors";
+      } else if (exportedEntities.length > 0) {
+        fileName += exportedEntities.join("");
+      } else {
+        fileName += "no_anchors";
+      }
+
+      const url = window.URL.createObjectURL(response.data);
+      const a = document.createElement("a");
+
+      a.href = url;
+      a.download = `${fileName}.txt`;
+      document.body.appendChild(a);
+      a.click();
+
+      // Clean up
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
     } catch (err) {
       throw this.handleError(err);
     }

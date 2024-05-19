@@ -1,40 +1,40 @@
 import { EntityEnums } from "../enums";
 
 export const conceptPartOfSpeechDict = [
-  { value: EntityEnums.ConceptPartOfSpeech.Empty, label: "", infos: "" },
-  { value: EntityEnums.ConceptPartOfSpeech.Noun, label: "noun", infos: "" },
-  { value: EntityEnums.ConceptPartOfSpeech.Adj, label: "adjective", infos: "" },
-  { value: EntityEnums.ConceptPartOfSpeech.Pron, label: "pronoun", infos: "" },
-  { value: EntityEnums.ConceptPartOfSpeech.Adv, label: "adverb", infos: "" },
-  { value: EntityEnums.ConceptPartOfSpeech.Num, label: "numeral", infos: "" },
+  { value: EntityEnums.ConceptPartOfSpeech.Empty, label: "", info: "" },
+  { value: EntityEnums.ConceptPartOfSpeech.Noun, label: "noun", info: "" },
+  { value: EntityEnums.ConceptPartOfSpeech.Adj, label: "adjective", info: "" },
+  { value: EntityEnums.ConceptPartOfSpeech.Pron, label: "pronoun", info: "" },
+  { value: EntityEnums.ConceptPartOfSpeech.Adv, label: "adverb", info: "" },
+  { value: EntityEnums.ConceptPartOfSpeech.Num, label: "numeral", info: "" },
   {
     value: EntityEnums.ConceptPartOfSpeech.Adp,
     label: "adposition",
-    infos: "",
+    info: "",
   },
   {
     value: EntityEnums.ConceptPartOfSpeech.CConj,
     label: "coordinating conjunction",
-    infos: "",
+    info: "",
   },
   {
     value: EntityEnums.ConceptPartOfSpeech.SConj,
     label: "subordinating conjunction",
-    infos: "",
+    info: "",
   },
   {
     value: EntityEnums.ConceptPartOfSpeech.Det,
     label: "determiner",
-    infos: "",
+    info: "",
   },
   {
     value: EntityEnums.ConceptPartOfSpeech.Intj,
     label: "interjection",
-    infos: "",
+    info: "",
   },
-  { value: EntityEnums.ConceptPartOfSpeech.Part, label: "particle", infos: "" },
+  { value: EntityEnums.ConceptPartOfSpeech.Part, label: "particle", info: "" },
 ];
 
 export const actionPartOfSpeechDict = [
-  { value: EntityEnums.ActionPartOfSpeech.Verb, label: "verb", infos: "" },
+  { value: EntityEnums.ActionPartOfSpeech.Verb, label: "verb", info: "" },
 ];

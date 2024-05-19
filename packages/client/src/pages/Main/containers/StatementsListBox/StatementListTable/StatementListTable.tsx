@@ -1,6 +1,5 @@
 import { UserEnums } from "@shared/enums";
 import {
-  IAction,
   IEntity,
   IResponseGeneric,
   IResponseStatement,
@@ -33,13 +32,14 @@ import {
   useRowSelect,
   useTable,
 } from "react-table";
+import { setShowWarnings } from "redux/features/statementEditor/showWarningsSlice";
 import { setLastClickedIndex } from "redux/features/statementList/lastClickedIndexSlice";
 import { setRowsExpanded } from "redux/features/statementList/rowsExpandedSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { StatementListContextMenu } from "../StatementListContextMenu/StatementListContextMenu";
-import { StyledText } from "../StatementLitBoxStyles";
 import { StatementListRow } from "./StatementListRow";
 import {
+  StyledAbbreviatedLabel,
   StyledCheckboxWrapper,
   StyledFocusedCircle,
   StyledTHead,
@@ -47,7 +47,6 @@ import {
   StyledTdLastEdit,
   StyledTh,
 } from "./StatementListTableStyles";
-import { setShowWarnings } from "redux/features/statementEditor/showWarningsSlice";
 
 type CellType = CellProps<IResponseStatement>;
 
@@ -312,12 +311,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
         accessor: "data",
         Cell: ({ row }: CellType) => {
           const { text } = row.original.data;
-          const maxWordsCount = 20;
-          const trimmedText = text.split(" ").slice(0, maxWordsCount).join(" ");
-          if ((text.match(/(\w+)/g) ?? []).length > maxWordsCount) {
-            return <StyledText>{trimmedText}...</StyledText>;
-          }
-          return <StyledText>{trimmedText}</StyledText>;
+          return <StyledAbbreviatedLabel>{text}</StyledAbbreviatedLabel>;
         },
       },
       {

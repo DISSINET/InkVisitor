@@ -58,6 +58,7 @@ interface PropGroupRow {
   isInsideTemplate: boolean;
   territoryParentId?: string;
   lowIdent?: boolean;
+  alwaysShowCreateModal?: boolean;
 }
 
 export const PropGroupRow: React.FC<PropGroupRow> = ({
@@ -82,6 +83,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
   isInsideTemplate = false,
   territoryParentId,
   lowIdent = false,
+  alwaysShowCreateModal,
 }) => {
   const propTypeEntity: IEntity = entities[prop.type.entityId];
   const propValueEntity: IEntity = entities[prop.value.entityId];
@@ -168,9 +170,9 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
       >
         <StyledGrid
           key={level + "|" + index + "|" + id}
-          tempDisabled={tempDisabled && category === draggedPropRow.category}
+          $tempDisabled={tempDisabled && category === draggedPropRow.category}
         >
-          <StyledPropLineColumn level={level} lowIdent={lowIdent}>
+          <StyledPropLineColumn $level={level} $lowIdent={lowIdent}>
             {userCanEdit && hasOrder ? (
               <div ref={dragRef} style={{ width: "2rem" }}>
                 <StyledFaGripVertical />
@@ -179,7 +181,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
               <div style={{ width: "2rem" }} />
             )}
           </StyledPropLineColumn>
-          <StyledPropLineColumn level={level} lowIdent={lowIdent}>
+          <StyledPropLineColumn $level={level} $lowIdent={lowIdent}>
             <StyledBorderLeft>
               <PropGroupRowType
                 propTypeEntity={propTypeEntity}
@@ -192,6 +194,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
                 territoryParentId={territoryParentId}
                 updateProp={updateProp}
                 userCanEdit={userCanEdit}
+                alwaysShowCreateModal={alwaysShowCreateModal}
               />
             </StyledBorderLeft>
           </StyledPropLineColumn>
@@ -207,6 +210,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
               territoryParentId={territoryParentId}
               updateProp={updateProp}
               userCanEdit={userCanEdit}
+              alwaysShowCreateModal={alwaysShowCreateModal}
             />
           </StyledPropLineColumn>
           <StyledPropLineColumn>
@@ -218,7 +222,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
               userCanEdit={userCanEdit}
               buttons={
                 <>
-                  <ButtonGroup height={19} noMarginRight>
+                  <ButtonGroup height={19} $noMarginRight>
                     {userCanEdit && (
                       <Button
                         key="delete"

@@ -7,21 +7,21 @@ export const StyledEditorActantTableWrapper = styled.div`
 `;
 
 interface StyledRow {
-  marginBottom?: boolean;
+  $marginBottom?: boolean;
 }
 export const StyledRow = styled.div<StyledRow>`
-  margin-bottom: ${({ marginBottom }) => (marginBottom ? "2rem" : "")};
+  margin-bottom: ${({ $marginBottom }) => ($marginBottom ? "2rem" : "")};
 `;
 interface StyledGrid {
   tempDisabled?: boolean;
-  hasActant?: boolean;
+  $hasActant?: boolean;
 }
 export const StyledGrid = styled.div<StyledGrid>`
   display: grid;
   align-items: center;
   padding-left: ${({ theme }) => theme.space[0]};
-  grid-template-columns: ${({ hasActant }) =>
-    ` minmax(${hasActant ? "7rem" : "14.5rem"}, auto) repeat(4, auto)`};
+  grid-template-columns: ${({ $hasActant }) =>
+    ` minmax(${$hasActant ? "7rem" : "14.5rem"}, auto) repeat(4, auto)`};
   width: fit-content;
   grid-auto-flow: row;
   padding-bottom: ${({ theme }) => theme.space[1]};
@@ -78,18 +78,21 @@ export const StyledExpandedRow = styled.div`
   font-size: 1.4rem;
 `;
 interface StyledBorderLeft {
-  borderColor: keyof ElementTypeColor;
-  padding?: boolean;
-  marginBottom?: boolean;
+  $borderColor: keyof ElementTypeColor;
+  $padding?: boolean;
+  $marginBottom?: boolean;
 }
 export const StyledBorderLeft = styled.div<StyledBorderLeft>`
   border-left: 3px solid
-    ${({ theme, borderColor }) => theme.color.elementType[borderColor]};
-  padding-left: ${({ theme, padding }) => (padding ? theme.space[1] : "")};
-  margin-bottom: ${({ theme, marginBottom }) =>
-    marginBottom ? theme.space[4] : ""};
+    ${({ theme, $borderColor }) => theme.color.elementType[$borderColor]};
+  padding-left: ${({ theme, $padding }) => ($padding ? theme.space[1] : "")};
+  margin-bottom: ${({ theme, $marginBottom }) =>
+    $marginBottom ? theme.space[4] : ""};
 `;
 export const StyledFlexStart = styled.div`
   display: flex;
   align-items: flex-start;
+`;
+export const StyledSuggesterWrap = styled.span`
+  min-width: 13rem;
 `;

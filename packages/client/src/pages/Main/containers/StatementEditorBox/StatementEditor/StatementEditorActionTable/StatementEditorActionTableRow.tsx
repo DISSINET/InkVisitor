@@ -52,6 +52,7 @@ import {
   StyledGridColumn,
 } from "./StatementEditorActionTableStyles";
 import { ThemeContext } from "styled-components";
+import { StyledSuggesterWrap } from "../StatementEditorActantTable/StatementEditorActantTableStyles";
 
 interface StatementEditorActionTableRow {
   filteredAction: FilteredActionObject;
@@ -164,6 +165,7 @@ export const StatementEditorActionTableRow: React.FC<
         excludedEntityClasses={excludedSuggesterEntities}
         territoryParentId={territoryParentId}
         excludedActantIds={[action.id]}
+        disabled={!userCanEdit}
       >
         <EntityTag
           fullWidth
@@ -191,7 +193,7 @@ export const StatementEditorActionTableRow: React.FC<
         />
       </EntityDropzone>
     ) : (
-      userCanEdit && (
+      <StyledSuggesterWrap>
         <EntitySuggester
           onSelected={(newSelectedId: string) => {
             updateAction(
@@ -210,8 +212,9 @@ export const StatementEditorActionTableRow: React.FC<
           isInsideTemplate={isInsideTemplate}
           territoryParentId={territoryParentId}
           territoryActants={territoryActants}
+          disabled={!userCanEdit}
         />
-      )
+      </StyledSuggesterWrap>
     );
   };
 
@@ -219,7 +222,7 @@ export const StatementEditorActionTableRow: React.FC<
     const { actionId: propOriginId, id: rowId } = sAction;
 
     return (
-      <ButtonGroup noMarginRight height={19}>
+      <ButtonGroup $noMarginRight height={19}>
         {userCanEdit && (
           <Button
             key="d"
@@ -326,7 +329,7 @@ export const StatementEditorActionTableRow: React.FC<
           <StyledGridColumn ref={dragRef} style={{ cursor: "move" }}>
             <FaGripVertical
               style={{ marginTop: "0.3rem" }}
-              color={themeContext.color.black}
+              color={themeContext?.color.black}
             />
           </StyledGridColumn>
         ) : (
@@ -442,6 +445,7 @@ export const StatementEditorActionTableRow: React.FC<
                       bundleEnd: bundleEnd,
                     })
                   }
+                  disabled={!userCanEdit}
                 />
               </div>
               <div>

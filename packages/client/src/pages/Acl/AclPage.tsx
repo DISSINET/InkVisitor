@@ -1,5 +1,5 @@
 import { userRoleDict } from "@shared/dictionaries";
-import { UserEnums } from "@shared/enums";
+import { HttpMethods, UserEnums } from "@shared/enums";
 import { IResponsePermission, RequestPermissionUpdate } from "@shared/types";
 import api from "api";
 import { Box } from "components";
@@ -14,7 +14,9 @@ const initialData: IResponsePermission[] = [
     id: "",
     controller: "",
     route: "",
+    method: HttpMethods.Get, // Assuming a default method for demonstration
     roles: [],
+    public: false,
   },
 ];
 
@@ -22,14 +24,14 @@ const AclPage: React.FC<AclPage> = ({}) => {
   const [currentCtrlName, setCtrl] = useState("");
   const [currentMethod, setMethod] = useState("");
 
-  const { status, data, error, isFetching } = useQuery(
-    ["permissions"],
-    async () => {
+  const { status, data, error, isFetching } = useQuery({
+    queryKey: ["permissions"],
+    queryFn: async () => {
       const res = await api.getAclPermissions();
       return res.data;
     },
-    { initialData: initialData }
-  );
+    initialData: initialData,
+  });
 
   const handleSave = async (
     permissionId: string,

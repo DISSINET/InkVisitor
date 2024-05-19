@@ -64,7 +64,7 @@ const EntityRow: React.FC<EntityRow> = ({ data, index, style }) => {
 
   const renderIcons = () => {
     return (
-      <ButtonGroup noMarginRight>
+      <ButtonGroup $noMarginRight>
         {!entity.isTemplate && (
           <Button
             tooltipLabel="link entity"
@@ -128,8 +128,10 @@ const EntityRow: React.FC<EntityRow> = ({ data, index, style }) => {
     <StyledSuggestionRow
       key={index}
       style={style}
-      twoIcons={entityIsTemplate && isInsideTemplate && !territoryWithoutParent}
-      isSelected={selected === index}
+      $twoIcons={
+        entityIsTemplate && isInsideTemplate && !territoryWithoutParent
+      }
+      $isSelected={selected === index}
     >
       <StyledSuggestionLineActions>
         {!disableButtons && isNotDiscouraged && <>{renderIcons()}</>}

@@ -30,16 +30,14 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
 
   const [entities, setEntities] = useState<IResponseEntity[]>([]);
 
-  const { data, error } = useQuery(
-    ["detail-tab-entities", detailIdArray],
-    async () => {
+  const { data, error } = useQuery({
+    queryKey: ["detail-tab-entities", detailIdArray],
+    queryFn: async () => {
       const res = await api.entitiesSearch({ entityIds: detailIdArray });
       return res.data;
     },
-    {
-      enabled: api.isLoggedIn() && detailIdArray.length > 0,
-    }
-  );
+    enabled: api.isLoggedIn() && detailIdArray.length > 0,
+  });
 
   useEffect(() => {
     if (error && (error as any).message === "unknown class for entity") {

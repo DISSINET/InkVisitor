@@ -140,7 +140,7 @@ export const Tooltip: React.FC<Tooltip> = ({
                   </StyledContent>
                 )}
                 {content && (
-                  <StyledContent $color={color} tagGroup={tagGroup}>
+                  <StyledContent $color={color} $tagGroup={tagGroup}>
                     {content}
                   </StyledContent>
                 )}

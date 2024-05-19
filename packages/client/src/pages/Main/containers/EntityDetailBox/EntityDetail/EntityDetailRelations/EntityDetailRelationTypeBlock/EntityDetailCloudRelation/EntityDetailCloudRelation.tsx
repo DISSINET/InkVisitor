@@ -2,7 +2,7 @@ import { IEntity, IResponseGeneric, Relation } from "@shared/types";
 import { AxiosResponse } from "axios";
 import { Cloud } from "components";
 import { EntityTag } from "components/advanced";
-import React from "react";
+import React, { useMemo } from "react";
 import { UseMutationResult } from "@tanstack/react-query";
 import {
   StyledCloudEntityWrapper,
@@ -29,6 +29,7 @@ interface EntityDetailCloudRelation {
     string,
     unknown
   >;
+  userCanEdit: boolean;
 }
 export const EntityDetailCloudRelation: React.FC<EntityDetailCloudRelation> = ({
   relation,
@@ -37,6 +38,7 @@ export const EntityDetailCloudRelation: React.FC<EntityDetailCloudRelation> = ({
   relations,
   relationUpdateMutation,
   relationDeleteMutation,
+  userCanEdit,
 }) => {
   const handleCloudRemove = () => {
     if (relations[0]?.entityIds?.length > 2) {
@@ -52,18 +54,35 @@ export const EntityDetailCloudRelation: React.FC<EntityDetailCloudRelation> = ({
     }
   };
 
+  // entity for which the relation is shown
+  const originEntity = useMemo<IEntity | undefined>(() => {
+    return entities[entityId];
+  }, [entities, entityId]);
+
   return (
     <div style={{ display: "grid" }}>
       {relation.entityIds.length > 0 && (
-        <Cloud onUnlink={() => handleCloudRemove()}>
+        // TODO: disable unlink for read mode
+        <Cloud
+          onUnlink={() => handleCloudRemove()}
+          originEntity={originEntity}
+          disabled={!userCanEdit}
+        >
           <StyledRelation>
             {relation.entityIds.map((relationEntityId, key) => {
               const relationEntity = entities[relationEntityId];
+
+              const isOrigin = relationEntityId === entityId;
+
               return (
                 <React.Fragment key={key}>
                   {relationEntity && (
                     <StyledCloudEntityWrapper>
-                      <EntityTag fullWidth entity={relationEntity} />
+                      <EntityTag
+                        fullWidth
+                        entity={relationEntity}
+                        isSelected={isOrigin}
+                      />
                     </StyledCloudEntityWrapper>
                   )}
                 </React.Fragment>

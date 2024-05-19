@@ -11,7 +11,7 @@ const getWidth = (width?: number | "full") => {
 };
 interface StyledSelectWrapper {
   width?: number | "full";
-  ref?: any;
+  ref?: React.Dispatch<React.SetStateAction<HTMLButtonElement | null>>;
 }
 export const StyledSelectWrapper = styled.div<StyledSelectWrapper>`
   display: inline-flex;
@@ -111,6 +111,9 @@ export const StyledSelect = styled(Select)<StyledSelect>`
   .react-select__multi-value__remove {
     padding-left: ${({ entityDropdown }) => (entityDropdown ? "0.2rem" : "")};
     padding-right: ${({ entityDropdown }) => (entityDropdown ? "0.2rem" : "")};
+  }
+  .react-select__input-container {
+    color: ${({ theme }) => theme.color["black"]};
   }
   // portal menu style is in global stylesheet
 `;

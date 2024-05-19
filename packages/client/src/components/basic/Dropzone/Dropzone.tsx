@@ -12,11 +12,10 @@ import {
 interface Dropzone {
   onDrop: (item: EntityDragItem, instantiateTemplate?: boolean) => void;
   onHover: (item: EntityDragItem) => void;
-
   isWrongDropCategory?: boolean;
   isInsideTemplate: boolean;
-
   children: ReactElement;
+  disabled?: boolean;
 }
 export const Dropzone: React.FC<Dropzone> = ({
   onDrop,
@@ -24,6 +23,7 @@ export const Dropzone: React.FC<Dropzone> = ({
   children,
   isWrongDropCategory,
   isInsideTemplate = false,
+  disabled,
 }) => {
   const [showTemplateModal, setShowTemplateModal] = useState(false);
   const [tempDropItem, setTempDropItem] = useState<EntityDragItem | false>(
@@ -58,19 +58,23 @@ export const Dropzone: React.FC<Dropzone> = ({
 
   return (
     <>
-      <div style={{ display: "inline-flex", overflow: "hidden" }}>
-        <StyledDropzone ref={dropRef} style={{ opacity: opacity }}>
-          {children}
-        </StyledDropzone>
-        <StyledIconWrap>
-          {isWrongDropCategory && isOver && (
-            <StyledAiOutlineWarning
-              size={22}
-              color={themeContext.color.warning}
-            />
-          )}
-        </StyledIconWrap>
-      </div>
+      {!disabled ? (
+        <span style={{ display: "flex" }}>
+          <StyledDropzone ref={dropRef} style={{ opacity: opacity }}>
+            {children}
+          </StyledDropzone>
+          <StyledIconWrap>
+            {isWrongDropCategory && isOver && (
+              <StyledAiOutlineWarning
+                size={22}
+                color={themeContext?.color.warning}
+              />
+            )}
+          </StyledIconWrap>
+        </span>
+      ) : (
+        <>{children}</>
+      )}
 
       {showTemplateModal && (
         <TemplateActionModal

@@ -1,5 +1,10 @@
 import { EntityEnums, UserEnums } from "@shared/enums";
 import { IEntity, IResponseGeneric } from "@shared/types";
+import {
+  UseMutationResult,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import api from "api";
 import { AxiosResponse } from "axios";
 import {
@@ -11,22 +16,13 @@ import {
   ModalFooter,
   ModalHeader,
   ModalInputForm,
+  ModalInputLabel,
+  ModalInputWrap,
 } from "components";
 import { CTemplateEntity } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useState } from "react";
-import {
-  useMutation,
-  UseMutationResult,
-  useQueryClient,
-} from "@tanstack/react-query";
 import { toast } from "react-toastify";
-import {
-  StyledDetailForm,
-  StyledDetailContentRow,
-  StyledDetailContentRowLabel,
-  StyledDetailContentRowValue,
-} from "../EntityDetailStyles";
 import { getShortLabelByLetterCount } from "utils/utils";
 
 interface EntityDetailCreateTemplateModal {
@@ -53,36 +49,37 @@ export const EntityDetailCreateTemplateModal: React.FC<
   const queryClient = useQueryClient();
   const [createTemplateLabel, setCreateTemplateLabel] = useState<string>("");
 
-  const { statementId, selectedDetailId } = useSearchParams();
+  const { statementId, selectedDetailId, appendDetailId } = useSearchParams();
 
-  const templateCreateMutation = useMutation(
-    async (templateEntity: IEntity) => await api.entityCreate(templateEntity),
-    {
-      onSuccess: (data, variables) => {
-        queryClient.invalidateQueries(["templates"]);
-        if (statementId && variables.class === EntityEnums.Class.Statement) {
-          queryClient.invalidateQueries(["statement-templates"]);
-        }
-        if (selectedDetailId) {
-          queryClient.invalidateQueries(["entity-templates"]);
-        }
-        updateEntityMutation.mutate({ usedTemplate: variables.id });
+  const templateCreateMutation = useMutation({
+    mutationFn: async (templateEntity: IEntity) =>
+      await api.entityCreate(templateEntity),
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["templates"] });
+      if (statementId && variables.class === EntityEnums.Class.Statement) {
+        queryClient.invalidateQueries({ queryKey: ["statement-templates"] });
+      }
+      if (selectedDetailId) {
+        queryClient.invalidateQueries({ queryKey: ["entity-templates"] });
+      }
+      updateEntityMutation.mutate({ usedTemplate: variables.id });
 
-        setCreateTemplateModal(false);
-        setCreateTemplateLabel("");
+      appendDetailId(variables.id);
 
-        toast.info(
-          `Template [${variables.class}]: "${getShortLabelByLetterCount(
-            variables.label,
-            120
-          )}" created from entity "${getShortLabelByLetterCount(
-            entity.label,
-            120
-          )}"`
-        );
-      },
-    }
-  );
+      setCreateTemplateModal(false);
+      setCreateTemplateLabel("");
+
+      toast.info(
+        `Template [${variables.class}]: "${getShortLabelByLetterCount(
+          variables.label,
+          120
+        )}" created from entity "${getShortLabelByLetterCount(
+          entity.label,
+          120
+        )}"`
+      );
+    },
+  });
 
   const handleCreateTemplate = () => {
     // create template as a copy of the entity
@@ -113,23 +110,19 @@ export const EntityDetailCreateTemplateModal: React.FC<
       <ModalHeader title="Create Template" />
       <ModalContent>
         <ModalInputForm>
-          <StyledDetailForm>
-            <StyledDetailContentRow>
-              <StyledDetailContentRowLabel>Label</StyledDetailContentRowLabel>
-              <StyledDetailContentRowValue>
-                <Input
-                  disabled={!userCanEdit}
-                  width="full"
-                  value={createTemplateLabel}
-                  onChangeFn={async (newLabel: string) => {
-                    setCreateTemplateLabel(newLabel);
-                  }}
-                  changeOnType
-                  autoFocus
-                />
-              </StyledDetailContentRowValue>
-            </StyledDetailContentRow>
-          </StyledDetailForm>
+          <ModalInputLabel>Label</ModalInputLabel>
+          <ModalInputWrap>
+            <Input
+              disabled={!userCanEdit}
+              width="full"
+              value={createTemplateLabel}
+              onChangeFn={async (newLabel: string) => {
+                setCreateTemplateLabel(newLabel);
+              }}
+              changeOnType
+              autoFocus
+            />
+          </ModalInputWrap>
         </ModalInputForm>
       </ModalContent>
       <ModalFooter>

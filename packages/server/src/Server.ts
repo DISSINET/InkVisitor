@@ -43,8 +43,8 @@ if (process.env.STATIC_PATH && process.env.STATIC_PATH !== "") {
   );
 }
 
-server.use(express.json());
-server.use(express.urlencoded({ extended: true }));
+server.use(express.json({ limit: "150mb" }));
+server.use(express.urlencoded({ extended: true, limit: "150mb" }));
 
 // Show routes called in console during development
 if (process.env.NODE_ENV === "development") {
@@ -58,7 +58,6 @@ if (process.env.NODE_ENV === "production") {
 
 // Health route
 server.get("/health", function (req, res) {
-  console.log("health route");
   res.send("ok");
 });
 

@@ -18,8 +18,10 @@ You would normally use default `development` environment - run in nodemon contex
 
 ## Test
 
+- create a new `.env.test` file in the `env` folder that
 - `pnpm test` will use `jest` framework to test everything, or
 - `pnpm run test <regexp>` to test only selected functions (regexp should match `describe` or `it` statements)
+- if you are using Visual Studio Code, we recommend installing `Jest Runner` extension
 
 ## Build & run
 

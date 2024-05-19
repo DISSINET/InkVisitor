@@ -7,24 +7,33 @@ import {
 } from "@tanstack/react-query";
 import api from "api";
 import { AxiosResponse } from "axios";
-import { Button, ButtonGroup, Input } from "components";
+import { Button, ButtonGroup, Input, Tooltip } from "components";
 import { EntitySuggester, EntityTag } from "components/advanced";
-import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
-import { FaTrash } from "react-icons/fa";
+import React, {
+  Dispatch,
+  SetStateAction,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+import { FaSave, FaTrash } from "react-icons/fa";
 import { RiFileEditFill } from "react-icons/ri";
 import useResizeObserver from "use-resize-observer";
 import {
   StyledCount,
-  StyledFaDotCircle,
+  StyledCountTag,
   StyledReference,
   StyledTitle,
   StyledTitleWrap,
 } from "../DocumentsPageStyles";
+import theme from "Theme/theme";
+import { EntityColors } from "types";
 
 interface DocumentRow {
   document: IResponseDocument;
   resource: IResponseEntity | false;
-  handleDocumentClick: (id: string) => void;
+  handleDocumentEdit: (id: string) => void;
+  handleDocumentExport: (id: string) => void;
   setDocToDelete: Dispatch<SetStateAction<string | false>>;
   updateDocumentMutation: UseMutationResult<
     AxiosResponse<IDocument, any>,
@@ -42,7 +51,8 @@ interface DocumentRow {
 export const DocumentRow: React.FC<DocumentRow> = ({
   document,
   resource,
-  handleDocumentClick,
+  handleDocumentEdit,
+  handleDocumentExport,
   setDocToDelete,
   updateDocumentMutation,
   editMode,
@@ -50,6 +60,23 @@ export const DocumentRow: React.FC<DocumentRow> = ({
   cancelEditMode,
 }) => {
   const [localTitle, setLocalTitle] = useState<string>("");
+
+  const countTotal = useMemo(() => {
+    let total = 0;
+    Object.keys(document.referencedEntityIds).forEach((key) => {
+      const classEntities =
+        document.referencedEntityIds[
+          key as keyof typeof document.referencedEntityIds
+        ];
+
+      const classNo =
+        classEntities && Array.isArray(classEntities)
+          ? classEntities.length
+          : 0;
+      total += classNo;
+    });
+    return total;
+  }, [document.referencedEntityIds]);
 
   useEffect(() => {
     if (document) {
@@ -70,32 +97,27 @@ export const DocumentRow: React.FC<DocumentRow> = ({
 
   const queryClient = useQueryClient();
 
-  const updateResourceMutation = useMutation(
-    async (resourceId: string) =>
+  const updateResourceMutation = useMutation({
+    mutationFn: async (resourceId: string) =>
       api.entityUpdate(resourceId, { data: { documentId: document.id } }),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries(["resourcesWithDocuments"]);
-      },
-    }
-  );
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["resourcesWithDocuments"] });
+    },
+  });
 
-  const removeResourceMutation = useMutation(
-    async (resourceId: string) =>
+  const removeResourceMutation = useMutation({
+    mutationFn: async (resourceId: string) =>
       api.entityUpdate(resourceId, { data: { documentId: "" } }),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries(["resourcesWithDocuments"]);
-      },
-    }
-  );
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["resourcesWithDocuments"] });
+    },
+  });
 
   const { ref: titleRef, width: titleWidth = 0 } =
     useResizeObserver<HTMLDivElement>();
 
   return (
     <>
-      <StyledFaDotCircle size={10} />
       <StyledTitleWrap ref={titleRef} onClick={setEditMode}>
         {editMode ? (
           <Input
@@ -112,16 +134,25 @@ export const DocumentRow: React.FC<DocumentRow> = ({
       </StyledTitleWrap>
       <ButtonGroup>
         <Button
+          icon={<FaSave />}
+          color="primary"
+          inverted
+          tooltipLabel="export document"
+          onClick={() => handleDocumentExport(document.id)}
+        />
+        <Button
           icon={<RiFileEditFill />}
           color="warning"
           inverted
-          onClick={() => handleDocumentClick(document.id)}
+          onClick={() => handleDocumentEdit(document.id)}
+          tooltipLabel="edit document"
         />
         <Button
           icon={<FaTrash />}
           color="danger"
           inverted
           onClick={() => setDocToDelete(document.id)}
+          tooltipLabel="remove document"
         />
       </ButtonGroup>
       {/* reference / suggester */}
@@ -142,7 +173,37 @@ export const DocumentRow: React.FC<DocumentRow> = ({
           />
         )}
       </StyledReference>
-      <StyledCount>{document.referencedEntityIds.length}</StyledCount>
+      <StyledCount>
+        {countTotal} anchors
+        {Object.values(EntityEnums.Class)
+          .filter((eClass) => {
+            return document.referencedEntityIds[eClass]?.length;
+          })
+          .map((eClass) => {
+            const entityClass =
+              EntityColors[eClass as keyof typeof EntityColors];
+
+            const classColorName = entityClass?.color;
+
+            const classColor =
+              (theme.color[
+                classColorName as keyof typeof theme.color
+              ] as string) ?? theme.color.primary;
+
+            const count = document.referencedEntityIds[eClass]?.length || 0;
+
+            return (
+              <React.Fragment key={eClass}>
+                <StyledCountTag
+                  style={{ backgroundColor: classColor }}
+                  title={`${count} ${entityClass.label}s anchors`}
+                >
+                  {eClass} {count}
+                </StyledCountTag>
+              </React.Fragment>
+            );
+          })}
+      </StyledCount>
     </>
   );
 };

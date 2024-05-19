@@ -18,7 +18,7 @@ export const StyledHeader = styled.div`
 export const StyledHeaderTag = styled.div`
   cursor: copy;
   font-size: 1.2rem;
-  margin-top: 2.6rem;
+  margin-top: 1.6rem;
   opacity: 0.8;
   padding: ${({ theme }) => theme.space[2]};
   padding-bottom: 0;
@@ -67,7 +67,6 @@ export const StyledThemeSwitcherIcon = styled.div<StyledThemeSwitcherIcon>`
 export const StyledUser = styled.div`
   display: flex;
   align-items: center;
-  margin-right: ${({ theme }) => theme.space[4]};
 `;
 
 export const StyledMenu = styled.div`
@@ -83,14 +82,14 @@ export const StyledLoaderWrap = styled.div`
 `;
 
 interface StyledPingColor {
-  pingColor: keyof PingColor;
+  $pingColor: keyof PingColor;
 }
 export const StyledPingColor = styled.div<StyledPingColor>`
   width: 1rem;
   height: 1rem;
   border: 0.5px solid rgba(255, 255, 255, 0.8);
   border-radius: 50%;
-  background-color: ${({ theme, pingColor }) => theme.color.ping[pingColor]};
+  background-color: ${({ theme, $pingColor }) => theme.color.ping[$pingColor]};
   margin-right: 0.3rem;
   margin-left: 0.3rem;
 `;
@@ -118,4 +117,11 @@ export const StyledSandboxText = styled.div`
 export const StyledSpace = styled.div`
   display: flex;
   flex-grow: 1;
+`;
+export const StyledLoggedAsWrap = styled.div`
+  min-width: 3rem;
+  position: relative;
+  margin-right: 1rem;
+  display: flex;
+  align-items: center;
 `;

@@ -44,6 +44,7 @@ interface EntitySuggester {
   isInsideStatement?: boolean;
   territoryParentId?: string;
 
+  button?: React.ReactNode;
   preSuggestions?: IEntity[];
 
   disableCreate?: boolean;
@@ -51,11 +52,15 @@ interface EntitySuggester {
   disableWildCard?: boolean;
   disableTemplatesAccept?: boolean;
   disableButtons?: boolean;
+
+  // TODO: disable only for entity create modal => only for view
   disableEnter?: boolean;
   autoFocus?: boolean;
 
   initTyped?: string;
   initCategory?: EntityEnums.Class;
+
+  alwaysShowCreateModal?: boolean;
 
   disabled?: boolean;
 }
@@ -77,6 +82,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
   isInsideStatement = false,
   territoryParentId,
 
+  button,
   preSuggestions,
 
   disableCreate,
@@ -89,6 +95,8 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
 
   initTyped,
   initCategory,
+
+  alwaysShowCreateModal,
 
   disabled = false,
 }) => {
@@ -135,16 +143,16 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
     data: user,
     error: errorUser,
     isFetching: isFetchingUser,
-  } = useQuery(
-    ["user", userId],
-    async () => {
+  } = useQuery({
+    queryKey: ["user", userId],
+    queryFn: async () => {
       if (userId) {
         const res = await api.usersGet(userId);
         return res.data;
       }
     },
-    { enabled: !!userId && api.isLoggedIn() }
-  );
+    enabled: !!userId && api.isLoggedIn(),
+  });
 
   // Suggesions query
   const {
@@ -152,9 +160,14 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
     data: suggestions,
     error: errorStatement,
     isFetching: isFetchingStatement,
-  } = useQuery(
-    ["suggestion", debouncedTyped, selectedCategory, excludedEntityClasses],
-    async () => {
+  } = useQuery({
+    queryKey: [
+      "suggestion",
+      debouncedTyped,
+      selectedCategory,
+      excludedEntityClasses,
+    ],
+    queryFn: async () => {
       const resSuggestions = await api.entitiesSearch({
         label: debouncedTyped + wildCardChar,
         class:
@@ -168,16 +181,14 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
 
       return filterSuggestions(resSuggestions.data);
     },
-    {
-      enabled:
-        debouncedTyped.length > 1 &&
-        !!selectedCategory &&
-        !excludedEntityClasses
-          .map((key) => key.valueOf())
-          .includes(selectedCategory) &&
-        api.isLoggedIn(),
-    }
-  );
+    enabled:
+      debouncedTyped.length > 1 &&
+      !!selectedCategory &&
+      !excludedEntityClasses
+        .map((key) => key.valueOf())
+        .includes(selectedCategory) &&
+      api.isLoggedIn(),
+  });
 
   const filterSuggestions = (suggestions: IResponseEntity[]) => {
     return (
@@ -230,6 +241,12 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
     onTyped && onTyped("");
   };
 
+  useEffect(() => {
+    if (initTyped && initTyped !== typed) {
+      setTyped(initTyped);
+    }
+  }, [initTyped]);
+
   const queryClient = useQueryClient();
 
   const onMutationSuccess = (entity: IEntity) => {
@@ -240,19 +257,17 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
       appendDetailId(entity.id);
     }
     if (entity.class === EntityEnums.Class.Territory) {
-      queryClient.invalidateQueries(["tree"]);
+      queryClient.invalidateQueries({ queryKey: ["tree"] });
     }
   };
 
-  const entityCreateMutation = useMutation(
-    async (newActant: IEntity | IStatement | ITerritory) =>
+  const entityCreateMutation = useMutation({
+    mutationFn: async (newActant: IEntity | IStatement | ITerritory) =>
       await api.entityCreate(newActant),
-    {
-      onSuccess: (data, variables) => {
-        onMutationSuccess(variables);
-      },
-    }
-  );
+    onSuccess: (data, variables) => {
+      onMutationSuccess(variables);
+    },
+  });
 
   const handleCreate = (newCreated: {
     label: string;
@@ -283,7 +298,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
   const instantiateTerritory = async (
     territoryToInst: ITerritory,
     territoryParentId?: string
-  ): Promise<string | false> => {
+  ): Promise<IEntity | false> => {
     return await InstTemplate(
       territoryToInst,
       localStorage.getItem("userrole") as UserEnums.Role,
@@ -294,10 +309,10 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
   const handleInstantiateTemplate = async (
     templateToDuplicate: IEntity | IStatement | ITerritory
   ) => {
-    let newEntityId: string | false;
+    let newEntity: IEntity | false;
     if (templateToDuplicate.class === EntityEnums.Class.Territory) {
       if (territoryParentId) {
-        newEntityId = await instantiateTerritory(
+        newEntity = await instantiateTerritory(
           templateToDuplicate as ITerritory,
           territoryParentId
         );
@@ -307,22 +322,23 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
         return;
       }
     } else {
-      newEntityId = await InstTemplate(
+      newEntity = await InstTemplate(
         templateToDuplicate,
         localStorage.getItem("userrole") as UserEnums.Role
       );
     }
-    if (newEntityId) {
-      onSelected(newEntityId);
+    if (newEntity) {
+      onSelected(newEntity.id);
+      onPicked(newEntity);
       handleClean();
       if (
         openDetailOnCreate &&
         templateToDuplicate.class !== EntityEnums.Class.Value
       ) {
-        appendDetailId(newEntityId);
+        appendDetailId(newEntity.id);
       }
       if (templateToDuplicate.class === EntityEnums.Class.Territory) {
-        queryClient.invalidateQueries(["tree"]);
+        queryClient.invalidateQueries({ queryKey: ["tree"] });
       }
     }
   };
@@ -448,23 +464,26 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
         disabled={disabled}
         showCreateModal={showCreateModal}
         setShowCreateModal={setShowCreateModal}
+        alwaysShowCreateModal={alwaysShowCreateModal}
         disableWildCard={disableWildCard || allCategories.length < 2}
+        button={button}
       />
       {showAddTerritoryModal && (
         <AddTerritoryModal
           onSubmit={async (territoryId: string) => {
             setShowAddTerritoryModal(false);
-            const newEntityId = await instantiateTerritory(
+            const newEntity = await instantiateTerritory(
               tempTemplateToInstantiate as ITerritory,
               territoryId
             );
-            if (newEntityId) {
-              onSelected(newEntityId);
+            if (newEntity) {
+              onSelected(newEntity.id);
+              onPicked(newEntity);
               handleClean();
               if (openDetailOnCreate) {
-                appendDetailId(newEntityId);
+                appendDetailId(newEntity.id);
               }
-              queryClient.invalidateQueries(["tree"]);
+              queryClient.invalidateQueries({ queryKey: ["tree"] });
             }
             setTempTemplateToInstantiate(false);
           }}
@@ -482,6 +501,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
           }
           closeModal={() => setShowCreateModal(false)}
           onMutationSuccess={(entity) => onMutationSuccess(entity)}
+          allowedEntityClasses={categoryTypes}
         />
       )}
     </>

@@ -52,6 +52,7 @@ interface EntityDetailRelationTypeBlock {
     unknown
   >;
   entity: IResponseDetail;
+  userCanEdit: boolean;
 }
 export const EntityDetailRelationTypeBlock: React.FC<
   EntityDetailRelationTypeBlock
@@ -63,6 +64,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
   relationUpdateMutation,
   relationDeleteMutation,
   entity,
+  userCanEdit,
 }) => {
   const relationRule = Relation.RelationRules[relationType]!;
   const {
@@ -139,9 +141,9 @@ export const EntityDetailRelationTypeBlock: React.FC<
   const [tempCloudEntityId, setTempCloudEntityId] = useState<string | false>(
     false
   );
-  const { isLoading, isFetching } = useQuery(
-    ["relation-entity-temp", tempCloudEntityId],
-    async () => {
+  const { isLoading, isFetching } = useQuery({
+    queryKey: ["relation-entity-temp", tempCloudEntityId],
+    queryFn: async () => {
       if (tempCloudEntityId) {
         const res = await api.detailGet(tempCloudEntityId);
         if (res.data) {
@@ -151,10 +153,8 @@ export const EntityDetailRelationTypeBlock: React.FC<
         return res.data;
       }
     },
-    {
-      enabled: api.isLoggedIn() && !!tempCloudEntityId,
-    }
-  );
+    enabled: api.isLoggedIn() && !!tempCloudEntityId,
+  });
   const addToCloud = (cloudEntity: IResponseDetail) => {
     const selectedEntityRelation =
       cloudEntity.relations[relationType]?.connections;
@@ -241,11 +241,14 @@ export const EntityDetailRelationTypeBlock: React.FC<
   };
 
   const hasSuggester = useMemo(() => {
+    if (!userCanEdit && selectedRelations.length > 0) {
+      return false;
+    }
     if (isCloudType) {
       return true;
     }
     return isMultiple || selectedRelations.length < 1;
-  }, [selectedRelations]);
+  }, [selectedRelations, userCanEdit]);
 
   return (
     <StyledRelationBlock>
@@ -260,7 +263,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
         />
 
         {/* Values column */}
-        <StyledRelationValues hasSuggester={hasSuggester}>
+        <StyledRelationValues $hasSuggester={hasSuggester}>
           {currentRelations.map((relation, key) =>
             isCloudType ? (
               <EntityDetailCloudRelation
@@ -271,6 +274,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
                 entities={entities}
                 relationUpdateMutation={relationUpdateMutation}
                 relationDeleteMutation={relationDeleteMutation}
+                userCanEdit={userCanEdit}
               />
             ) : (
               <EntityDetailRelationRow
@@ -286,6 +290,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
                 hasOrder={hasOrder && currentRelations.length > 1}
                 moveRow={moveRow}
                 updateOrderFn={updateOrderFn}
+                userCanEdit={userCanEdit}
               />
             )
           )}
@@ -296,7 +301,6 @@ export const EntityDetailRelationTypeBlock: React.FC<
             <StyledSuggesterWrapper>
               <EntitySuggester
                 excludedEntityClasses={excludedSuggesterEntities}
-                inputWidth={80}
                 disableTemplatesAccept
                 categoryTypes={getCategoryTypes()}
                 onSelected={(selectedId: string) => {
@@ -307,6 +311,8 @@ export const EntityDetailRelationTypeBlock: React.FC<
                   }
                 }}
                 excludedActantIds={usedEntityIds}
+                disabled={!userCanEdit}
+                alwaysShowCreateModal
               />
             </StyledSuggesterWrapper>
           )}

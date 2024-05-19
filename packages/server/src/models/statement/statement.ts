@@ -397,6 +397,11 @@ class Statement extends Entity implements IStatement {
     db: Connection | undefined,
     updateData: Record<string, unknown>
   ): Promise<WriteResult> {
+    // TODO this is monkeypatch that should not be here, we need better solution
+    if (updateData["entities"]) {
+      delete updateData["entities"];
+    }
+    
     if (
       updateData["data"] &&
       (updateData["data"] as any).territory &&
@@ -500,12 +505,22 @@ class Statement extends Entity implements IStatement {
       });
     });
 
-    if (this.data.territory) {
-      entitiesIds[this.data.territory.territoryId] = null;
+    // append territory lineage to the root T
+    const parentT = this.data.territory?.territoryId;
+    if (parentT) {
+      const treeCacheInstance = treeCache.tree.idMap[parentT];
+      const lineageTIds = [
+        parentT,
+        ...(treeCacheInstance ? treeCacheInstance.path : []),
+      ];
+      if (lineageTIds) {
+        lineageTIds.forEach((tid) => {
+          entitiesIds[tid] = null;
+        });
+      }
     }
 
     this.data.tags.forEach((t) => (entitiesIds[t] = null));
-
     return Object.keys(entitiesIds).filter((id) => !!id);
   }
 

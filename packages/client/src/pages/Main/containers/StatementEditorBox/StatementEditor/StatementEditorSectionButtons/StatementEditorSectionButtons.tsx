@@ -99,7 +99,7 @@ export const StatementEditorSectionButtons: React.FC<
   return (
     <>
       <ButtonGroup
-        height={19}
+      height={19}
         style={{ marginLeft: "0.5rem", marginRight: "1rem" }}
       >
         <Button
@@ -149,7 +149,7 @@ export const StatementEditorSectionButtons: React.FC<
         excludedActantIds={[statement.id]}
         disableTemplatesAccept
         disableCreate
-        inputWidth={65}
+        inputWidth={76}
         placeholder="another S"
       />
     </>

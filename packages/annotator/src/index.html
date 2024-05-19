@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Canvas dev</title>
+  </head>
+  <body style="background-color: black">
+    <div style="padding: 20px; background-color: #ccc">
+      <div class="textarea" style="display: flex; flex-direction: row">
+        <div
+          class="canvasses-wrapper"
+          style="border: 1px solid black; padding: 2px"
+        >
+          <div style="display: flex">
+            <canvas
+              id="lines"
+              class="lines"
+              width="50px"
+              height="400px"
+              style="outline: none"
+            ></canvas>
+            <canvas
+              tabindex="0"
+              id="canvas"
+              width="400px"
+              height="400px"
+              style="outline: none"
+            >
+            </canvas>
+            <div
+              className="scroller-viewport"
+              id="scroller"
+              style="background: #ccc; position: relative; width: 10px"
+            >
+              <div
+                className="scroller-cursor"
+                style="
+                  cursor: move;
+                  position: absolute;
+                  width: 10px;
+                  background-color: blue;
+                "
+              ></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <fieldset>
+        <label>mode</label>
+        <select id="mode">
+          <option value="raw">raw</option>
+          <option value="highlight">highlight</option>
+          <option value="semi">semi</option>
+        </select>
+      </fieldset>
+      <fieldset>
+        <label>toggle highlight</label>
+        <input type="checkbox" id="highlightToggle" />
+      </fieldset>
+      <fieldset>
+        <label>add anchor </label>
+        <input type="text" id="anchorText" />
+        <button id="addAnchor">add</button>
+      </fieldset>
+    </div>
+
+    <p>Text from textfile.txt:</p>
+    <pre id="text-content"></pre>
+
+    <script src="bundle.js"></script>
+
+    <script type="module">
+      const textContentElement = document.getElementById("text-content");
+
+      const exampleResponse = await fetch("example.txt");
+      const exampleTxt = await exampleResponse.text();
+
+      let highlightEnabled = false;
+      const annotator = new Annotator(
+        document.getElementById("canvas"),
+        exampleTxt
+      );
+
+      annotator.fontColor = "black";
+      annotator.bgColor = "transparent";
+
+      annotator.addScroller(document.getElementById("scroller"));
+      annotator.addLines(document.getElementById("lines"));
+
+      annotator.lines.fontColor = "red";
+      annotator.lines.bgColor = "transparent";
+
+      annotator.onHighlight((entityId) => {
+        if (!highlightEnabled) {
+          return null;
+        }
+        const colors = ["black", "brown", "pink", "green"];
+        const randColor = colors[Math.floor(Math.random() * colors.length)];
+        return {
+          mode: "background",
+          style: {
+            fillColor: randColor,
+            fillOpacity: 0.3,
+          },
+        };
+      });
+      annotator.onSelectText((text) => {
+        console.log("onSelectText", text);
+      });
+
+      document.getElementById("highlightToggle").onclick = (e) => {
+        highlightEnabled = e.target.checked;
+      };
+
+      document.getElementById("mode").onchange = (e) => {
+        annotator.setMode(e.target.value);
+        annotator.draw();
+      };
+
+      document.getElementById("addAnchor").onclick = () => {
+        annotator.addAnchor(document.getElementById("anchorText").value);
+      };
+
+      annotator.draw();
+    </script>
+  </body>
+</html>

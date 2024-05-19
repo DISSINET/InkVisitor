@@ -2,10 +2,10 @@ import styled from "styled-components";
 import { heightHeader } from "Theme/constants";
 
 interface StyledPage {
-  layoutWidth: number;
+  $layoutWidth: number;
 }
 export const StyledPage = styled.div<StyledPage>`
-  width: ${({ layoutWidth }) => (layoutWidth > 0 ? layoutWidth : "100%")};
+  width: ${({ $layoutWidth }) => ($layoutWidth > 0 ? $layoutWidth : "100%")};
   height: 100vh;
   display: flex;
   flex-direction: column;

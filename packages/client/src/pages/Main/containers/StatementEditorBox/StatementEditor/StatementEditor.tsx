@@ -43,6 +43,7 @@ import { TiWarningOutline } from "react-icons/ti";
 import { toast } from "react-toastify";
 import { setShowWarnings } from "redux/features/statementEditor/showWarningsSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
+import { ThemeContext } from "styled-components";
 import { DropdownItem, classesEditorActants, classesEditorTags } from "types";
 import {
   deepCopy,
@@ -72,9 +73,7 @@ import {
 } from "../StatementEditorBoxStyles";
 import { StatementEditorActantTable } from "./StatementEditorActantTable/StatementEditorActantTable";
 import { StatementEditorActionTable } from "./StatementEditorActionTable/StatementEditorActionTable";
-import { StatementEditorOrdering } from "./StatementEditorOrdering/StatementEditorOrdering";
 import { StatementEditorSectionButtons } from "./StatementEditorSectionButtons/StatementEditorSectionButtons";
-import { ThemeContext } from "styled-components";
 
 interface StatementEditor {
   statement: IResponseStatement;
@@ -120,14 +119,14 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     data: audit,
     error: auditError,
     isFetching: isFetchingAudit,
-  } = useQuery(
-    ["audit", statementId],
-    async () => {
+  } = useQuery({
+    queryKey: ["audit", statementId],
+    queryFn: async () => {
       const res = await api.auditGet(statementId);
       return res.data;
     },
-    { enabled: !!statementId && api.isLoggedIn() }
-  );
+    enabled: !!statementId && api.isLoggedIn(),
+  });
 
   // user query
   const username: string = useAppSelector((state) => state.username);
@@ -137,16 +136,16 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     data: user,
     error: errorUser,
     isFetching: isFetchingUser,
-  } = useQuery(
-    ["user", userId],
-    async () => {
+  } = useQuery({
+    queryKey: ["user", userId],
+    queryFn: async () => {
       if (userId) {
         const res = await api.usersGet(userId);
         return res.data;
       }
     },
-    { enabled: !!userId && api.isLoggedIn() }
-  );
+    enabled: !!userId && api.isLoggedIn(),
+  });
 
   // territory query
   const {
@@ -154,9 +153,9 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     data: territoryActants,
     error,
     isFetching,
-  } = useQuery(
-    ["territoryActants", statement.data.territory?.territoryId],
-    async () => {
+  } = useQuery({
+    queryKey: ["territoryActants", statement.data.territory?.territoryId],
+    queryFn: async () => {
       if (statement.data.territory?.territoryId) {
         const res = await api.entityIdsInTerritory(
           statement.data.territory.territoryId
@@ -166,11 +165,9 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         return [];
       }
     },
-    {
-      initialData: [],
-      enabled: !!statement.data.territory?.territoryId && api.isLoggedIn(),
-    }
-  );
+    initialData: [],
+    enabled: !!statement.data.territory?.territoryId && api.isLoggedIn(),
+  });
 
   // TEMPLATES
   const [showApplyTemplateModal, setShowApplyTemplateModal] =
@@ -197,9 +194,9 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     data: templates,
     error: templateError,
     isFetching: isFetchingTemplates,
-  } = useQuery(
-    ["statement-templates"],
-    async () => {
+  } = useQuery({
+    queryKey: ["statement-templates"],
+    queryFn: async () => {
       const res = await api.entitiesSearch({
         onlyTemplates: true,
         class: EntityEnums.Class.Statement,
@@ -211,8 +208,8 @@ export const StatementEditor: React.FC<StatementEditor> = ({
       );
       return templates;
     },
-    { enabled: !!statement && api.isLoggedIn() }
-  );
+    enabled: !!statement && api.isLoggedIn(),
+  });
 
   const templateOptions: DropdownItem[] = useMemo(() => {
     const options = templates
@@ -229,7 +226,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
   // refetch audit when statement changes
   useEffect(() => {
-    queryClient.invalidateQueries(["audit"]);
+    queryClient.invalidateQueries({ queryKey: ["audit"] });
   }, [statement]);
 
   // stores territory id
@@ -249,16 +246,14 @@ export const StatementEditor: React.FC<StatementEditor> = ({
     data: territoryData,
     error: territoryError,
     isFetching: isFetchingTerritory,
-  } = useQuery(
-    ["territory", "statement-editor", statementTerritoryId],
-    async () => {
+  } = useQuery({
+    queryKey: ["territory", "statement-editor", statementTerritoryId],
+    queryFn: async () => {
       const res = await api.territoryGet(statementTerritoryId as string);
       return res.data;
     },
-    {
-      enabled: !!statementId && !!statementTerritoryId,
-    }
-  );
+    enabled: !!statementId && !!statementTerritoryId,
+  });
 
   // get data for the previous statement
   const previousStatement: false | IResponseStatement = useMemo(() => {
@@ -392,7 +387,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         user &&
         user.options.defaultStatementLanguage
       ) {
-        checkTypeEntityLanguage(propId, changes);
+        checkTypeEntityLanguage(propId, changes, instantUpdate);
       } else {
         applyPropChanges(propId, changes, instantUpdate);
       }
@@ -400,21 +395,19 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   };
 
   // checking if the language is not different from user.options.defaultStatementLanguage -> in that case, switch elvl to EntityEnums.Elvl.Inferential
-  const checkTypeEntityLanguage = (propId: string, changes: any) => {
-    console.log("checking type entity language");
+  const checkTypeEntityLanguage = (
+    propId: string,
+    changes: any,
+    instantUpdate?: boolean
+  ) => {
     if (user) {
       const statementLanguage = user.options.defaultStatementLanguage;
       api.entitiesGet(changes.type.entityId).then((typeEntity) => {
         if (typeEntity.data) {
           const entityLanguage = typeEntity.data.language;
           if (entityLanguage !== statementLanguage) {
-            console.log(
-              `changing elvl of prop type as user language is ${statementLanguage} and entity has language ${entityLanguage}`
-            );
             changes.type.elvl = EntityEnums.Elvl.Inferential;
-            applyPropChanges(propId, {
-              changes,
-            });
+            applyPropChanges(propId, changes, instantUpdate);
             toast.info(
               `The epistemic level of property type's involvement changed to "inferential"`
             );
@@ -659,7 +652,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                     <div style={{ display: "flex", alignItems: "flex-end" }}>
                       <AiOutlineWarning
                         size={22}
-                        color={themeContext.color.warning}
+                        color={themeContext?.color.warning}
                       />
                       <StyledMissingTerritory>
                         {"missing territory"}
@@ -708,11 +701,11 @@ export const StatementEditor: React.FC<StatementEditor> = ({
           </StyledEditorTemplateSection>
         )}
         <StyledEditorSection
-          firstSection
+          $firstSection
           key="editor-section-summary"
-          marginRight
+          $marginRight
         >
-          <StyledEditorSectionContent firstSection>
+          <StyledEditorSectionContent $firstSection>
             <Input
               type="textarea"
               rows={5}
@@ -770,7 +763,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
         {/* Actions */}
         <StyledEditorSection
-          metaSection
+          $metaSection
           key="editor-section-actions"
           id="action-section"
         >
@@ -820,7 +813,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
         {/* Actants */}
         <StyledEditorSection
-          metaSection
+          $metaSection
           key="editor-section-actants"
           id="actant-section"
         >
@@ -865,29 +858,12 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                 excludedEntityClasses={excludedSuggesterEntities}
                 isInsideTemplate={statement.isTemplate}
                 territoryParentId={statementTerritoryId}
-                excludedActantIds={[statement.id]}
                 isInsideStatement
                 preSuggestions={preSuggestions}
               />
             )}
           </StyledEditorSectionContent>
         </StyledEditorSection>
-
-        {/* Ordering */}
-        {statement.elementsOrders.length > 0 &&
-          user &&
-          user.options.hideStatementElementsOrderTable && (
-            <StyledEditorSection>
-              <StyledEditorSectionHeader>Ordering</StyledEditorSectionHeader>
-              <StyledEditorSectionContent>
-                <StatementEditorOrdering
-                  statementId={statementId}
-                  elementsOrders={statement.elementsOrders}
-                  entities={statement.entities}
-                />
-              </StyledEditorSectionContent>
-            </StyledEditorSection>
-          )}
 
         {/* Refs */}
         <StyledEditorSection key="editor-section-refs">
@@ -923,6 +899,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
               territoryParentId={statementTerritoryId}
               entities={statement.entities ?? {}}
               entityId={statement.id}
+              userCanEdit={userCanEdit}
             />
           </StyledEditorSectionContent>
         </StyledEditorSection>
@@ -934,7 +911,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
           </StyledEditorSectionHeader>
 
           <StyledEditorSectionContent>
-            <StyledTagsList>
+            <StyledTagsList $paddingBottom={statement.data.tags.length > 0}>
               {statement.data.tags.map((tag: string, key: number) => {
                 const tagActant = statement?.entities[tag];
                 return (
@@ -944,11 +921,13 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                         entity={tagActant}
                         fullWidth
                         tooltipPosition="left"
-                        unlinkButton={{
-                          onClick: () => {
-                            removeTag(tag);
-                          },
-                        }}
+                        unlinkButton={
+                          userCanEdit && {
+                            onClick: () => {
+                              removeTag(tag);
+                            },
+                          }
+                        }
                       />
                     </StyledTagsListItem>
                   )
@@ -980,7 +959,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         </StyledEditorSection>
 
         {/* Notes */}
-        <StyledEditorSection key="editor-section-notes" lastSection>
+        <StyledEditorSection key="editor-section-notes" $lastSection>
           <StyledEditorSectionHeader>Notes</StyledEditorSectionHeader>
           <StyledEditorSectionContent>
             <MultiInput
@@ -1032,7 +1011,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
           }
           setShowSubmitSection(false);
         }}
-        loading={updateStatementMutation.isLoading}
+        loading={updateStatementMutation.isPending}
         onCancel={() => setShowSubmitSection(false)}
       />
     </>

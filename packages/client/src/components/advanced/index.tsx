@@ -3,7 +3,8 @@ import { ApplyTemplateModal } from "./ApplyTemplateModal/ApplyTemplateModal";
 import { AttributeButtonGroup } from "./AttributeButtonGroup/AttributeButtonGroup";
 import { AuditTable } from "./AuditTable/AuditTable";
 import { BreadcrumbItem } from "./BreadcrumbItem/BreadcrumbItem";
-import { DocumentModal } from "./DocumentModal/DocumentModal";
+import DocumentModalExport from "./DocumentModal/DocumentModalExport";
+import DocumentModalEdit from "./DocumentModal/DocumentModalEdit";
 import { AttributeMultiDropdown } from "./Dropdowns/AttributeMultiDropdown";
 import { BasicDropdown } from "./Dropdowns/BasicDropdown";
 import { EntityMultiDropdown } from "./Dropdowns/EntityMultiDropdown";
@@ -23,6 +24,7 @@ import { Menu } from "./Menu/Menu";
 import { Page } from "./Page/Page";
 import { LeftHeader, RightHeader } from "./PageHeader/PageHeader";
 import { PanelSeparator } from "./PanelSeparator/PanelSeparator";
+import { TerritoryActionModal } from "./TerritoryActionModal/TerritoryActionModal";
 import { UserCustomizationModal } from "./UserCustomizationModal/UserCustomizationModal";
 
 const Dropdown = {
@@ -43,7 +45,8 @@ export {
   AttributeButtonGroup,
   AuditTable,
   BreadcrumbItem,
-  DocumentModal,
+  DocumentModalExport,
+  DocumentModalEdit,
   EmptyTag,
   EntityCreateModal,
   EntityDropzone,
@@ -56,6 +59,7 @@ export {
   LeftHeader,
   RightHeader,
   PanelSeparator,
+  TerritoryActionModal,
   UserCustomizationModal,
   ElvlButtonGroup,
   MoodVariantButtonGroup,

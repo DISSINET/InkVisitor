@@ -18,6 +18,38 @@ import colors from "colors/safe";
 import jobs from "./jobs/index";
 
 const datasets: Record<string, DbSchema> = {
+  dissinet_documents: {
+    users: {
+      tableName: "users",
+      data: null,
+      transform: function () {}
+    },
+    aclPermissions: {
+      tableName: "acl_permissions",
+      data: null,
+      transform: function () {}
+    },
+    entities: {
+      tableName: "entities",
+      data: null,
+      transform: function () {}
+    },
+    audits: {
+      tableName: "audits",
+      data: null,
+      transform: function () {}
+    },
+    relations: {
+      tableName: "relations",
+      data: null,
+      transform: function () {}
+    },
+    documents: {
+      tableName: "documents",
+      data: require("../datasets/dissinet-documents/documents.json"),
+      transform: function () {},
+    },
+  },
   empty: {
     users: {
       tableName: "users",
@@ -324,6 +356,46 @@ const datasets: Record<string, DbSchema> = {
       transform: function () {},
     },
   },
+  production: {
+    users: {
+      tableName: "users",
+      data: require("../datasets/default/users.json"),
+      transform: function () {
+        this.data = this.data.map((user: IUser) => {
+          user.password = hashPassword(user.password ? user.password : "");
+          return user;
+        });
+      },
+    },
+    aclPermissions: {
+      tableName: "acl_permissions",
+      data: require("../datasets/default/acl_permissions.json"),
+      transform: function () {},
+    },
+    entities: {
+      tableName: "entities",
+      data: require("../datasets/production/entities.json"),
+      transform: function () {},
+      indexes: entitiesIndexes,
+    },
+    audits: {
+      tableName: "audits",
+      data: require("../datasets/empty/audits.json"),
+      transform: function () {},
+      indexes: auditsIndexes,
+    },
+    relations: {
+      tableName: "relations",
+      data: require("../datasets/production/relations.json"),
+      transform: function () {},
+      indexes: relationsIndexes,
+    },
+    documents: {
+      tableName: "documents",
+      data: require("../datasets/production/documents.json"),
+      transform: function () {},
+    },
+  },
 };
 
 enum MODES {
@@ -556,7 +628,7 @@ class Importer {
     console.log(
       `Datasets: ${[
         "",
-        ...Object.keys(datasets).map((key, i) => `${key} (${i + 1})}`),
+        ...Object.keys(datasets).map((key, i) => `${key} (${i + 1})`),
       ].join("\n- ")}`
     );
 
@@ -583,7 +655,7 @@ class Importer {
         ...Object.keys(jobs).map((key, i) => {
           let jobName = key.replace(/([A-Z])/g, " $1");
           jobName = jobName.charAt(0).toUpperCase() + jobName.slice(1);
-          return `${jobName} (${i + 1})}`;
+          return `${jobName} (${i + 1})`;
         }),
       ].join("\n- ")}`
     );
@@ -652,7 +724,7 @@ class Importer {
 
     const tableList = Object.keys(this.dataset);
     console.log(
-      `Tables: ${["", ...tableList.map((key, i) => `${key} (${i + 1})}`)].join(
+      `Tables: ${["", ...tableList.map((key, i) => `${key} (${i + 1})`)].join(
         "\n- "
       )}`
     );
@@ -668,8 +740,8 @@ class Importer {
       ""
     );
 
-    await this.db.dropTable(chosenTable);
-    await this.db.createTable(this.dataset[chosenTable as keyof DbSchema]);
+   // await this.db.dropTable(chosenTable);
+   // await this.db.createTable(this.dataset[chosenTable as keyof DbSchema]);
     await this.db.importData(this.dataset[chosenTable as keyof DbSchema]);
   }
 }

@@ -60,16 +60,16 @@ export const Page: React.FC<Page> = ({ children }) => {
     error: errorUser,
     isFetching: isFetchingUser,
     isPaused,
-  } = useQuery(
-    ["user", userId],
-    async () => {
+  } = useQuery({
+    queryKey: ["user", userId],
+    queryFn: async () => {
       if (userId) {
         const res = await api.usersGet(userId);
         return res.data;
       }
     },
-    { enabled: api.isLoggedIn() && !disableRightHeader }
-  );
+    enabled: api.isLoggedIn() && !disableRightHeader,
+  });
 
   const toastId = React.useRef<Id | null>(null);
   const notify = () =>
@@ -90,7 +90,8 @@ export const Page: React.FC<Page> = ({ children }) => {
     }
   }, [isPaused]);
 
-  const logOutMutation = useMutation(async () => await api.signOut(), {
+  const logOutMutation = useMutation({
+    mutationFn: async () => await api.signOut(),
     onSuccess: (data, variables) => {
       dispatch(setUsername(""));
       queryClient.removeQueries();
@@ -110,21 +111,19 @@ export const Page: React.FC<Page> = ({ children }) => {
 
   useKeyLift("Shift", () => dispatch(setDisableUserSelect(false)));
 
-  useQuery(
-    ["ping"],
-    async () => {
+  useQuery({
+    queryKey: ["ping"],
+    queryFn: async () => {
       const localPing = api.getPing();
       if (localPing) dispatch(setPing(localPing));
       return localPing;
     },
-    {
-      refetchInterval: 5000,
-    }
-  );
+    refetchInterval: 5000,
+  });
 
   return (
     <StyledPage
-      layoutWidth={layoutWidth}
+      $layoutWidth={layoutWidth}
       onClick={() => dispatch(setLastClickedIndex(-1))}
     >
       <Header
@@ -146,6 +145,7 @@ export const Page: React.FC<Page> = ({ children }) => {
                 userRole={userRole || ""}
                 setTempLocation={setTempLocation}
                 tempLocation={tempLocation}
+                userIsFetching={isFetchingUser}
               />
             )}
           </>

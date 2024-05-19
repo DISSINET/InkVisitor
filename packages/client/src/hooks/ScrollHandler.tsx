@@ -25,25 +25,28 @@ const ScrollHandler = () => {
   const dispatch = useAppDispatch();
 
   const { status: statementListStatus, isFetching: isFetchingStatementList } =
-    useQuery(
-      ["territory", "statement-list", territoryId, statementListOpened],
-      async () => {
+    useQuery({
+      queryKey: [
+        "territory",
+        "statement-list",
+        territoryId,
+        statementListOpened,
+      ],
+      queryFn: async () => {
         const res = await api.territoryGet(territoryId);
         return res.data;
       },
-      {
-        enabled: !!territoryId && api.isLoggedIn() && statementListOpened,
-      }
-    );
+      enabled: !!territoryId && api.isLoggedIn() && statementListOpened,
+    });
 
-  const { status: treeStatus, isFetching: isFetchingTree } = useQuery(
-    ["tree"],
-    async () => {
+  const { status: treeStatus, isFetching: isFetchingTree } = useQuery({
+    queryKey: ["tree"],
+    queryFn: async () => {
       const res = await api.treeGet();
       return res.data;
     },
-    { enabled: api.isLoggedIn() }
-  );
+    enabled: api.isLoggedIn(),
+  });
 
   useEffect(() => {
     if (statementListStatus === "success" && !isFetchingStatementList) {
@@ -60,11 +63,14 @@ const ScrollHandler = () => {
             });
           }
         }, 200);
-      } else {
-        dispatch(setDisableStatementListScroll(false));
+        dispatch(setDisableStatementListScroll(true));
       }
     }
-  }, [statementId, statementListStatus, isFetchingStatementList]);
+  }, [
+    disableStatementListScroll,
+    statementListStatus,
+    isFetchingStatementList,
+  ]);
 
   useEffect(() => {
     if (treeStatus === "success" && !isFetchingTree) {

@@ -24,7 +24,7 @@ export const EntityTooltipRelationTreeTable: React.FC<
         .map((relation: Relation.IConnection<any>, key: number) => {
           const entity = entities[relation.entityIds[1]];
           return (
-            <StyledGridRowThird key={key} onlyTwoLevels={treeDepth === 2}>
+            <StyledGridRowThird key={key} $onlyTwoLevels={treeDepth === 2}>
               {/* First level */}
               <StyledTreeBlock>
                 {getShortLabelByLetterCount(entity?.label, 40)}
