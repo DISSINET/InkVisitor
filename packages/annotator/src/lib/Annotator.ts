@@ -666,21 +666,14 @@ export class Annotator {
       return;
     }
 
-    const [start, end] = this.cursor.getSelected();
+    let [start, end] = this.cursor.getSelected();
+
     if (start && end) {
-      console.log(start, end)
-      console.log(this.text)
-      this.text.insertText(
-        this.viewport,
-        new Cursor(end.xLine, end.yLine - this.viewport.lineStart),
-        `</${anchor}>`
-      );
-      this.text.insertText(
-        this.viewport,
-        new Cursor(start.xLine, start.yLine - this.viewport.lineStart),
-        `<${anchor}>`
-      );
-      console.log(this.text)
+      const indexPositionStart = this.text.cursorToAbsIndex(this.viewport, new Cursor(start.xLine, start.yLine - this.viewport.lineStart))
+      const indexPositionEnd = this.text.cursorToAbsIndex(this.viewport, new Cursor(end.xLine, start.yLine - this.viewport.lineStart)) + anchor.length + 2;
+
+      this.text.value = this.text.value.slice(0, indexPositionStart) + `<${anchor}>` + this.text.value.slice(indexPositionStart);
+      this.text.value = this.text.value.slice(0, indexPositionEnd) + `</${anchor}>` + this.text.value.slice(indexPositionEnd);
 
       this.text.prepareSegments();
       this.text.calculateLines();

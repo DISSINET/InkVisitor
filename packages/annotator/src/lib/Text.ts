@@ -220,6 +220,23 @@ class Text {
     return pos;
   }
 
+  cursorToAbsIndex(viewport: Viewport, cursor: Cursor): number {
+    const pos = this.getSegmentPosition(
+      cursor.yLine + viewport.lineStart,
+      cursor.xLine
+    );
+    if (!pos) {
+      return -1;
+    }
+
+    let absIndex = pos.rawTextIndex;
+    for (let i = 0; i < pos.segmentIndex; i++) {
+      absIndex += this.segments[i].raw.length +1;
+    }
+   
+    return absIndex;
+  }
+
   getSegmentPosition(
     absLineIndex: number,
     charInLineIndex: number = 0
@@ -381,6 +398,15 @@ class Text {
 
     let indexPosition = segmentPosition.rawTextIndex;
     const segment = this.segments[segmentPosition.segmentIndex];
+
+    if (this.mode !== Modes.RAW) {
+      for (const tag of segment.closingTags) {
+        if (tag.position < segmentPosition.rawTextIndex) {
+          indexPosition -= tag.tag.length + 3
+        }
+      }
+    }
+
     for (let i = 0; i < segmentPosition.segmentIndex; i++) {
       indexPosition++; // each segment should receive +1 character no matter what (newline)
       indexPosition += this.segments[i].raw.length;
