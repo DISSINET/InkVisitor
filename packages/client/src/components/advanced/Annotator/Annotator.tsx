@@ -205,16 +205,6 @@ export const TextAnnotator = ({
     refreshAnnotator();
   }, [document, theme]);
 
-  useEffect(() => {
-    if (annotator) {
-      console.log("resizing canvas", wTextArea, height);
-      // annotator.resize(wTextArea, height);
-      setTimeout(() => {
-        annotator.draw();
-      }, 1000);
-    }
-  }, [width, height]);
-
   const topBottomSelection = useMemo<boolean>(() => {
     const selectedText = annotator?.cursor?.getSelected();
 
