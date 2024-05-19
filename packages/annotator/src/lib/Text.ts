@@ -125,7 +125,7 @@ class Text {
     return this.segments.reduce<string[]>((a, cur) => a.concat(cur.lines), []);
   }
 
-  updateChartAtLine(charsAtLine: number) {
+  updateCharsAtLine(charsAtLine: number) {
     this.charsAtLine = charsAtLine;
     this.calculateLines();
   }
