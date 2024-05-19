@@ -64,7 +64,7 @@ class Segment {
     return [openedTags, closedTags];
   }
 
-  findTagParsedPosition(tag: Tag): { x: number, y: number } {
+  findTagParsedPosition(tag: Tag): { x: number; y: number } {
     // find abs position right after the <tag>
     let parsedTextOpenPosition = this.openingTags
       .filter((t) => t.position < tag.position)
@@ -123,6 +123,11 @@ class Text {
 
   get lines(): string[] {
     return this.segments.reduce<string[]>((a, cur) => a.concat(cur.lines), []);
+  }
+
+  updateChartAtLine(charsAtLine: number) {
+    this.charsAtLine = charsAtLine;
+    this.calculateLines();
   }
 
   prepareSegments() {
@@ -221,9 +226,9 @@ class Text {
 
     let absIndex = pos.rawTextIndex;
     for (let i = 0; i < pos.segmentIndex; i++) {
-      absIndex += this.segments[i].raw.length +1;
+      absIndex += this.segments[i].raw.length + 1;
     }
-   
+
     return absIndex;
   }
 
@@ -392,7 +397,7 @@ class Text {
     if (this.mode !== Modes.RAW) {
       for (const tag of segment.closingTags) {
         if (tag.position < segmentPosition.rawTextIndex) {
-          indexPosition -= tag.tag.length + 3
+          indexPosition -= tag.tag.length + 3;
         }
       }
     }
@@ -407,13 +412,12 @@ class Text {
       textToInsert +
       this.value.slice(indexPosition);
 
-
     segment.raw =
       segment.raw.slice(0, segmentPosition.rawTextIndex) +
       textToInsert +
       segment.raw.slice(segmentPosition.rawTextIndex);
 
-    segment.parseText();   
+    segment.parseText();
     this.calculateLines();
   }
 
@@ -481,8 +485,7 @@ class Text {
     if (!segment.raw) {
       this.prepareSegments();
     } else if (segmentPos.rawTextIndex) {
-      const xAlterPos =
-        segmentPos.rawTextIndex - (charsToDelete > 0 ? 1 : 0);
+      const xAlterPos = segmentPos.rawTextIndex - (charsToDelete > 0 ? 1 : 0);
       segment.raw =
         segment.raw.slice(0, xAlterPos) + segment.raw.slice(xAlterPos + 1);
       segment.parseText();
@@ -550,8 +553,8 @@ class Text {
       // throw new Error("opening or closing tag not found..")
     }
 
-    const start = openingSegment.findTagParsedPosition(openingTag)
-    const end = closingSegment.findTagParsedPosition(closingTag)
+    const start = openingSegment.findTagParsedPosition(openingTag);
+    const end = closingSegment.findTagParsedPosition(closingTag);
     return [
       {
         xLine: start.x,
