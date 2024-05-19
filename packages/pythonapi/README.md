@@ -24,3 +24,11 @@ python api.py
 ```bash
 curl http://localhost:5000/test
 ```
+
+4. Using the nodejs server, which works like proxy, you can also do request do `pythonapi` [router](../server/src/modules/pythondata/index.ts)
+
+```bash
+curl http://localhost:3000/:path
+```
+
+Replace `:path` with any route that is registered in python app - ie. `test`, so `http://localhost:3000/test` will be routed to the python handler with the same path.
