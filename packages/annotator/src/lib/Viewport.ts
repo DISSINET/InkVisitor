@@ -16,6 +16,14 @@ export default class Viewport {
   }
 
   /**
+   * setting a new lineStart value
+   * @param lineEnd new lineEnd value
+   */
+  updateLineEnd(lineEnd: number) {
+    this.noLines = lineEnd;
+  }
+
+  /**
    * scrollDown moves the viewport window down using step-lines.
    * Constraint is the provided second argument, which should represent last line.
    * @param step

@@ -22,7 +22,7 @@ export interface DrawingOptions {
   schema?: HighlightSchema;
 }
 
-export interface Highlighted {
+export interface Selected {
   text: string;
   anchors: string[];
 }
@@ -45,6 +45,8 @@ export class Annotator {
   charWidth: number = 0;
   lineHeight: number = 15;
 
+  inputText: string = "";
+
   // size for virtual area inside the canvas element
   width: number = 0;
   height: number = 0;
@@ -59,10 +61,10 @@ export class Annotator {
   annotatedPosition: SegmentPosition | null = null;
 
   // to control highlightChangeCb callback
-  lastHighlightedText = "";
+  lastSelectedText = "";
 
   // callbacks
-  onSelectTextCb?: (text: Highlighted) => void;
+  onSelectTextCb?: (text: Selected) => void;
   onHighlightCb?: (entityId: string) => HighlightSchema | void;
   onTextChangeCb?: (text: string) => void;
 
@@ -75,6 +77,11 @@ export class Annotator {
     if (!ctx) {
       throw new Error("Cannot get 2d context");
     }
+
+    // observe canvas element for resize
+    const resizeObserver = new ResizeObserver(this.onCanvasResize.bind(this));
+    resizeObserver.observe(this.element);
+
     this.ctx = ctx;
     this.width = this.element.width;
     this.height = this.element.height;
@@ -86,7 +93,8 @@ export class Annotator {
     this.viewport = new Viewport(0, noLinesViewport);
     this.cursor = new Cursor();
 
-    this.text = new Text(inputText, charsAtLine);
+    this.inputText = inputText;
+    this.text = new Text(this.inputText, charsAtLine);
 
     this.element.onwheel = this.onWheel.bind(this);
     this.element.onmousedown = this.onMouseDown.bind(this);
@@ -100,6 +108,39 @@ export class Annotator {
     );
 
     this.clickCount = 0;
+
+    this.draw();
+  }
+
+  onCanvasResize(entries: ResizeObserverEntry[]) {
+    const entry = entries[0];
+    const { width, height } = entry.contentRect;
+
+    this.width = width;
+    this.height = height;
+    this.setCharWidth("abcdefghijklmnopqrstuvwxyz0123456789");
+
+    const noLinesViewport = Math.ceil(this.height / this.lineHeight) - 1;
+    const charsAtLine = Math.floor(this.width / this.charWidth);
+
+    const positionBeforeRel = this.viewport.lineStart / this.text.noLines;
+
+    // FIXME try to update the cursor position based on the text that was selected before the resize
+    const [start, end] = this.cursor.getSelected();
+    const selectedTextBefore =
+      start && end ? this.text.getRangeText(start, end) : "";
+
+    this.viewport.updateLineEnd(noLinesViewport);
+    this.text.updateCharsAtLine(charsAtLine);
+
+    // this function tries to keep the same relative position of the text even its not perfect
+    // FIXME: Ideally we should find the exact text at the top of the viewport and try to keep it on top after the resize
+    this.viewport.scrollTo(
+      Math.floor(positionBeforeRel * this.text.noLines),
+      this.text.noLines
+    );
+
+    this.draw();
   }
 
   onHighlight(cb: (entityId: string) => HighlightSchema | void): void {
@@ -111,17 +152,17 @@ export class Annotator {
   }
 
   /**
-   * onSelectText stores callback for changed highlighted area
+   * onSelectText stores callback for changed Selected area
    * Will be used only if text really changes
    * @param cb
    */
-  onSelectText(cb: (text: Highlighted) => void) {
-    this.lastHighlightedText = "";
-    this.onSelectTextCb = (text: Highlighted) => {
-      if (text.text === this.lastHighlightedText) {
+  onSelectText(cb: (text: Selected) => void) {
+    this.lastSelectedText = "";
+    this.onSelectTextCb = (text: Selected) => {
+      if (text.text === this.lastSelectedText) {
         return;
       }
-      this.lastHighlightedText = text.text;
+      this.lastSelectedText = text.text;
       cb(text);
     };
   }
@@ -316,7 +357,7 @@ export class Annotator {
       default:
         if (e.ctrlKey || e.metaKey) {
           if (e.key === "c") {
-            window.navigator.clipboard.writeText(this.lastHighlightedText);
+            window.navigator.clipboard.writeText(this.lastSelectedText);
           }
           if (e.key === "v") {
             window.navigator.clipboard.readText().then((clipText: string) => {
@@ -669,11 +710,26 @@ export class Annotator {
     let [start, end] = this.cursor.getSelected();
 
     if (start && end) {
-      const indexPositionStart = this.text.cursorToAbsIndex(this.viewport, new Cursor(start.xLine, start.yLine - this.viewport.lineStart))
-      const indexPositionEnd = this.text.cursorToAbsIndex(this.viewport, new Cursor(end.xLine, start.yLine - this.viewport.lineStart)) + anchor.length + 2;
+      const indexPositionStart = this.text.cursorToAbsIndex(
+        this.viewport,
+        new Cursor(start.xLine, start.yLine - this.viewport.lineStart)
+      );
+      const indexPositionEnd =
+        this.text.cursorToAbsIndex(
+          this.viewport,
+          new Cursor(end.xLine, start.yLine - this.viewport.lineStart)
+        ) +
+        anchor.length +
+        2;
 
-      this.text.value = this.text.value.slice(0, indexPositionStart) + `<${anchor}>` + this.text.value.slice(indexPositionStart);
-      this.text.value = this.text.value.slice(0, indexPositionEnd) + `</${anchor}>` + this.text.value.slice(indexPositionEnd);
+      this.text.value =
+        this.text.value.slice(0, indexPositionStart) +
+        `<${anchor}>` +
+        this.text.value.slice(indexPositionStart);
+      this.text.value =
+        this.text.value.slice(0, indexPositionEnd) +
+        `</${anchor}>` +
+        this.text.value.slice(indexPositionEnd);
 
       this.text.prepareSegments();
       this.text.calculateLines();

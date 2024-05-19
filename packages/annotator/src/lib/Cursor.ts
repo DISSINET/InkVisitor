@@ -92,7 +92,11 @@ export default class Cursor implements IRelativeCoordinates {
       return [undefined, undefined];
     }
 
-    if (this.selectStart.yLine < this.selectEnd.yLine || (this.selectStart.yLine === this.selectEnd.yLine && this.selectStart.xLine < this.selectEnd.xLine)) {
+    if (
+      this.selectStart.yLine < this.selectEnd.yLine ||
+      (this.selectStart.yLine === this.selectEnd.yLine &&
+        this.selectStart.xLine < this.selectEnd.xLine)
+    ) {
       return [this.selectStart, this.selectEnd];
     } else {
       return [this.selectEnd, this.selectStart];
