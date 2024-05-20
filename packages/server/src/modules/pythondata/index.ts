@@ -33,7 +33,27 @@ export default Router()
         return {
           result: false,
           error: "InternalServerError",
-          message: e?.toString()
+          message: e?.toString(),
+        };
+      }
+    })
+  )
+
+  .post(
+    "/segment",
+    asyncRouteHandler<IResponseGeneric>(async (request: IRequest) => {
+      const inputText = request.body.text;
+      try {
+        const res = await pythonClient.segment(inputText);
+        return {
+          result: true,
+          data: res,
+        };
+      } catch (e) {
+        return {
+          result: false,
+          error: "InternalServerError",
+          message: e?.toString(),
         };
       }
     })
