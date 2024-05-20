@@ -20,7 +20,12 @@ import {
 interface PropGroupRowType {
   prop: IProp;
   propTypeEntity?: IEntity;
-  updateProp: (propId: string, changes: any, instantUpdate?: boolean) => void;
+  updateProp: (
+    propId: string,
+    changes: any,
+    instantUpdate?: boolean,
+    languageCheck?: boolean
+  ) => void;
   userCanEdit: boolean;
   isInsideTemplate: boolean;
   territoryParentId?: string;
@@ -58,6 +63,7 @@ export const PropGroupRowType: React.FC<PropGroupRowType> = ({
                       entityId: newSelectedId,
                     },
                   },
+                  true,
                   true
                 );
               }}
@@ -89,12 +95,17 @@ export const PropGroupRowType: React.FC<PropGroupRowType> = ({
                     <ElvlButtonGroup
                       value={prop.type.elvl}
                       onChange={(elvl) =>
-                        updateProp(prop.id, {
-                          type: {
-                            ...prop.type,
-                            elvl: elvl,
+                        updateProp(
+                          prop.id,
+                          {
+                            type: {
+                              ...prop.type,
+                              elvl: elvl,
+                            },
                           },
-                        })
+                          false,
+                          false
+                        )
                       }
                       disabled={!userCanEdit}
                     />
@@ -126,6 +137,7 @@ export const PropGroupRowType: React.FC<PropGroupRowType> = ({
                     entityId: newSelectedId,
                   },
                 },
+                true,
                 true
               );
             }}
