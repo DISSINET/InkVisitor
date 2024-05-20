@@ -79,19 +79,16 @@ export const EntityBookmarkTable: React.FC<EntityBookmarkTable> = ({
     );
   };
 
-  const moveRow = useCallback(
-    (dragIndex: number, hoverIndex: number) => {
-      const dragRecord = folderEntities[dragIndex];
-      const newlySortedEntities = update(folderEntities, {
+  const moveRow = useCallback((dragIndex: number, hoverIndex: number) => {
+    setFolderEntities((prevFolderEntities) =>
+      update(prevFolderEntities, {
         $splice: [
           [dragIndex, 1],
-          [hoverIndex, 0, dragRecord],
+          [hoverIndex, 0, prevFolderEntities[dragIndex]],
         ],
-      });
-      setFolderEntities(newlySortedEntities);
-    },
-    [folderEntities]
-  );
+      })
+    );
+  }, []);
 
   return (
     <StyledTable {...getTableProps()}>

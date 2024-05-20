@@ -484,20 +484,16 @@ export const StatementListTable: React.FC<StatementListTable> = ({
     useRowSelect
   );
 
-  const moveRow = useCallback(
-    (dragIndex: number, hoverIndex: number) => {
-      const dragRecord = statementsLocal[dragIndex];
-      setStatementsLocal(
-        update(statementsLocal, {
-          $splice: [
-            [dragIndex, 1],
-            [hoverIndex, 0, dragRecord],
-          ],
-        })
-      );
-    },
-    [statementsLocal]
-  );
+  const moveRow = useCallback((dragIndex: number, hoverIndex: number) => {
+    setStatementsLocal((prevStatementsLocal) =>
+      update(prevStatementsLocal, {
+        $splice: [
+          [dragIndex, 1],
+          [hoverIndex, 0, prevStatementsLocal[dragIndex]],
+        ],
+      })
+    );
+  }, []);
 
   const moveEndRow = async (statementToMove: IStatement, index: number) => {
     if (statementToMove.data.territory && statements[index].data.territory) {

@@ -174,16 +174,16 @@ export const dndHoverFnHorizontal = (
   }
 
   const hoverBoundingRect = ref.current?.getBoundingClientRect();
-  const hoverMiddleY = (hoverBoundingRect.right - hoverBoundingRect.left) / 2;
+  const hoverMiddleX = (hoverBoundingRect.right - hoverBoundingRect.left) / 2;
   const clientOffset = monitor.getClientOffset();
-  const hoverClientY = (clientOffset as XYCoord).x - hoverBoundingRect.left;
+  const hoverClientX = (clientOffset as XYCoord).x - hoverBoundingRect.left;
   if (hoverIndex === undefined) {
     return;
   }
-  if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) {
+  if (dragIndex < hoverIndex && hoverClientX < hoverMiddleX) {
     return;
   }
-  if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) {
+  if (dragIndex > hoverIndex && hoverClientX > hoverMiddleX) {
     return;
   }
   moveFn(dragIndex, hoverIndex);

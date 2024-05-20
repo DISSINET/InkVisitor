@@ -98,6 +98,7 @@ export const StatementListRow: React.FC<StatementListRow> = ({
           handleClick(row.original.id);
           e.stopPropagation();
         }}
+        // for scrollTo fn
         id={`statement${row.original.id}`}
       >
         {row.cells.map((cell: Cell<IResponseStatement>) => {

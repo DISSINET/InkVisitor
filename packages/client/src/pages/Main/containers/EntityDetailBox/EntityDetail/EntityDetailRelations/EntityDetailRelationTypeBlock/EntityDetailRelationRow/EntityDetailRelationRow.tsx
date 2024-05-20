@@ -12,7 +12,7 @@ import {
   useDrop,
 } from "react-dnd";
 import { FaGripVertical } from "react-icons/fa";
-import { DragItem, ItemTypes } from "types";
+import { DragItem, Identifier, ItemTypes } from "types";
 import { dndHoverFn } from "utils/utils";
 import {
   StyledGrid,
@@ -92,10 +92,19 @@ export const EntityDetailRelationRow: React.FC<EntityDetailRelationRow> = ({
     </div>
   );
 
-  const [, drop] = useDrop<DragItem>({
+  const [{ handlerId }, drop] = useDrop<
+    DragItem,
+    void,
+    { handlerId: Identifier | null }
+  >({
     accept: ItemTypes.MULTI_RELATION,
     hover(item: DragItem, monitor: DropTargetMonitor) {
       dndHoverFn(item, index, monitor, dropRef, moveRow);
+    },
+    collect(monitor) {
+      return {
+        handlerId: monitor.getHandlerId(),
+      };
     },
   });
 
@@ -125,51 +134,54 @@ export const EntityDetailRelationRow: React.FC<EntityDetailRelationRow> = ({
   const themeContext = useContext(ThemeContext);
 
   return (
-    <StyledGrid
-      ref={dropRef}
-      style={{ opacity }}
-      $hasAttribute={relationRule.attributes.length > 0}
-      $hasOrder={hasOrder}
-    >
-      {uniqueRelationIds.map((relationEntityId, key) => {
-        const relationEntity = entities[relationEntityId];
-        return (
-          (relationEntityId !== entityId ||
-            (relationRule.selfLoop && uniqueRelationIds.length === 1)) && (
-            <React.Fragment key={key}>
-              {relationEntity && shouldBeRendered(key) && (
-                <>
-                  {hasOrder && (
-                    <StyledGridColumn
-                      ref={dragRef}
-                      style={{
-                        cursor: "move",
-                      }}
-                    >
-                      <FaGripVertical color={themeContext?.color.black} />
-                    </StyledGridColumn>
-                  )}
-                  <StyledGridColumn key={key}>
-                    <EntityTag
-                      fullWidth
-                      entity={relationEntity}
-                      unlinkButton={
-                        userCanEdit && {
-                          onClick: () => handleMultiRemove(relation.id),
+    <>
+      <StyledGrid
+        data-handler-id={handlerId}
+        ref={dropRef}
+        style={{ opacity: opacity }}
+        $hasAttribute={relationRule.attributes.length > 0}
+        $hasOrder={hasOrder}
+      >
+        {uniqueRelationIds.map((relationEntityId, key) => {
+          const relationEntity = entities[relationEntityId];
+          return (
+            (relationEntityId !== entityId ||
+              (relationRule.selfLoop && uniqueRelationIds.length === 1)) && (
+              <React.Fragment key={key}>
+                {relationEntity && shouldBeRendered(key) && (
+                  <>
+                    {hasOrder && (
+                      <StyledGridColumn
+                        ref={dragRef}
+                        style={{
+                          cursor: "move",
+                        }}
+                      >
+                        <FaGripVertical color={themeContext?.color.black} />
+                      </StyledGridColumn>
+                    )}
+                    <StyledGridColumn key={key}>
+                      <EntityTag
+                        fullWidth
+                        entity={relationEntity}
+                        unlinkButton={
+                          userCanEdit && {
+                            onClick: () => handleMultiRemove(relation.id),
+                          }
                         }
-                      }
-                    />
-                  </StyledGridColumn>
-                </>
-              )}
-            </React.Fragment>
-          )
-        );
-      })}
+                      />
+                    </StyledGridColumn>
+                  </>
+                )}
+              </React.Fragment>
+            )
+          );
+        })}
 
-      {/* Certainty (Identification) */}
-      {relationType === RelationEnums.Type.Identification &&
-        renderCertainty(relation as Relation.IIdentification)}
-    </StyledGrid>
+        {/* Certainty (Identification) */}
+        {relationType === RelationEnums.Type.Identification &&
+          renderCertainty(relation as Relation.IIdentification)}
+      </StyledGrid>
+    </>
   );
 };

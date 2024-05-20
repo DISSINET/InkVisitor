@@ -64,20 +64,16 @@ export const StatementEditorActionTable: React.FC<
     }
   };
 
-  const moveRow = useCallback(
-    (dragIndex: number, hoverIndex: number) => {
-      const dragRecord = filteredActions[dragIndex];
-      setFilteredActions(
-        update(filteredActions, {
-          $splice: [
-            [dragIndex, 1],
-            [hoverIndex, 0, dragRecord],
-          ],
-        })
-      );
-    },
-    [filteredActions]
-  );
+  const moveRow = useCallback((dragIndex: number, hoverIndex: number) => {
+    setFilteredActions((prevFilteredActions) =>
+      update(prevFilteredActions, {
+        $splice: [
+          [dragIndex, 1],
+          [hoverIndex, 0, prevFilteredActions[dragIndex]],
+        ],
+      })
+    );
+  }, []);
 
   return (
     <div style={{ overflow: "auto" }}>
