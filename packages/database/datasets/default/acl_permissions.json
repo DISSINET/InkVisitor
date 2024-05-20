@@ -250,5 +250,17 @@
     "route": "",
     "method": "DELETE",
     "roles": ["*"]
+  },
+  {
+    "controller": "pythondata",
+    "route": "segment",
+    "method": "POST",
+    "roles": ["*"]
+  },
+  {
+    "controller": "pythondata",
+    "route": "",
+    "method": "GET",
+    "roles": ["*"]
   }
 ]
