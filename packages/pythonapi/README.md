@@ -32,3 +32,14 @@ curl http://localhost:3000/:path
 ```
 
 Replace `:path` with any route that is registered in python app - ie. `test`, so `http://localhost:3000/test` will be routed to the python handler with the same path.
+
+5. Update ACL permissions, if creating path `/newpath` in pythonapi router, add additional route 
+
+```json
+  {
+    "controller": "pythondata",
+    "route": "/newpath",
+    "method": "GET",
+    "roles": ["*"]
+  }
+```
