@@ -454,21 +454,22 @@ export const StatementListBox: React.FC = () => {
         />
       )}
 
-      {data && displayMode === "text" && (
-        <StatementListTextAnnotator
-          statements={statements}
-          handleCreateStatement={handleCreateStatement}
-          handleCreateTerritory={handleCreateTerritory}
-          territoryId={territoryId}
-          entities={entities}
-          right={right}
-          setShowSubmit={setShowSubmit}
-          addStatementAtCertainIndex={addStatementAtCertainIndex}
-          selectedRows={selectedRows}
-          setSelectedRows={setSelectedRows}
-        />
-      )}
-      {data && displayMode === "list" && statements && (
+      <div style={{ display: "flex" }}>
+        {data && displayMode === StatementListDisplayMode.TEXT && (
+          <StatementListTextAnnotator
+            statements={statements}
+            handleCreateStatement={handleCreateStatement}
+            handleCreateTerritory={handleCreateTerritory}
+            territoryId={territoryId}
+            entities={entities}
+            right={right}
+            setShowSubmit={setShowSubmit}
+            addStatementAtCertainIndex={addStatementAtCertainIndex}
+            selectedRows={selectedRows}
+            setSelectedRows={setSelectedRows}
+          />
+        )}
+        {/* {data && displayMode === "list" && statements && ( */}
         <StyledTableWrapper id="Statements-box-table">
           <StatementListTable
             statements={statements}
@@ -485,9 +486,12 @@ export const StatementListBox: React.FC = () => {
             addStatementAtCertainIndex={addStatementAtCertainIndex}
             selectedRows={selectedRows}
             setSelectedRows={setSelectedRows}
+            displayMode={displayMode}
           />
         </StyledTableWrapper>
-      )}
+      </div>
+
+      {/* )} */}
       {!territoryId && (
         <>
           <StyledEmptyState>

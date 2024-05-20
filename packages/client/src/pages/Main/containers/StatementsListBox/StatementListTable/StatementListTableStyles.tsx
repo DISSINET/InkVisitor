@@ -1,7 +1,10 @@
 import styled from "styled-components";
 
-export const StyledTable = styled.table`
-  width: 100%;
+interface StyledTable {
+  $expanded?: boolean;
+}
+export const StyledTable = styled.table<StyledTable>`
+  width: ${({ $expanded }) => ($expanded ? "100%" : "3em")};
   border-spacing: 0;
   border-collapse: collapse;
   border-width: ${({ theme }) => theme.borderWidth[1]};
