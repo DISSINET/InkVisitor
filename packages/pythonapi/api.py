@@ -14,7 +14,12 @@ def segment():
     # Extracting text_in from the request
     data = request.json
     text_in = data.get('text_in', '')
-    return jsonify(segment_text(text_in))
+
+    # Call the segment_text function
+    segmented_text = segment_text(text_in)
+
+    # Return the JSON response
+    return jsonify(segmented_text)
 
 
 if __name__ == '__main__':

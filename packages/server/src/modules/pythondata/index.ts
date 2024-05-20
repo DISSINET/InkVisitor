@@ -39,6 +39,31 @@ export default Router()
     })
   )
 
+  /**
+   * @openapi
+   * /pythondata/segment:
+   *  post:
+   *   description: Returns segmented text
+   *  tags:
+   *   - pythondata
+   *  requestBody:
+   *    required: true
+   *  content:
+   *    application/json:
+   *      schema:
+   *        type: object
+   *       properties:
+   *        text:
+   *          type: string
+   *          required: true
+   *   responses:
+   *      200:
+   *        description: Returns IResponseGeneric object for segmented text
+   *        content:
+   *          application/json:
+   *          schema:
+   *            $ref: "#/components/schemas/IResponseGeneric"
+   */
   .post(
     "/segment",
     asyncRouteHandler<IResponseGeneric>(async (request: IRequest) => {
