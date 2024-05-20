@@ -93,9 +93,9 @@ export const StatementEditorBox: React.FC = () => {
     }
   }, [statement]);
 
-  const sendChangesToBackend = (changes: IStatement) => {
-    if (JSON.stringify(statement) !== JSON.stringify(changes)) {
-      updateStatementMutation.mutate(changes);
+  const sendChangesToBackend = (changes: IResponseStatement) => {
+    if (JSON.stringify(statement?.data) !== JSON.stringify(changes.data)) {
+      updateStatementMutation.mutate({ data: changes.data });
     }
   };
 
@@ -113,7 +113,7 @@ export const StatementEditorBox: React.FC = () => {
   }, [tempObject, changesPending]);
 
   const updateChangesAndPendingState = (
-    newData: IStatement,
+    newData: IResponseStatement,
     instantUpdate?: boolean
   ) => {
     if (instantUpdate) {
@@ -149,7 +149,7 @@ export const StatementEditorBox: React.FC = () => {
       queryClient.cancelQueries({
         queryKey: ["statement", statementId],
       });
-      const newData = {
+      const newData: IResponseStatement = {
         ...tempObject,
         data: {
           ...tempObject.data,
