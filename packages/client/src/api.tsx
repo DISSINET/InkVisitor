@@ -1176,7 +1176,7 @@ class Api {
         },
         options
       );
-      return response;
+      return response.data.data;
     } catch (err) {
       throw this.handleError(err);
     }

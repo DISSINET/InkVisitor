@@ -55,9 +55,7 @@ export const TextAnnotatorMenu = ({
                 color="primary"
                 paddingX={true}
                 onClick={async () => {
-                  const segmented = await api.segmentText(
-                    "I saw him cooking a dinner. Why are you here? And what are you doing? Why are we still not eating?"
-                  );
+                  const segmented = await api.segmentText(text);
                   console.log("Segment selection into Statements", segmented);
                 }}
                 label={"Segment"}
