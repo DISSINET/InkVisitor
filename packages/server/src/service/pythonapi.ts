@@ -25,7 +25,6 @@ class PythonAPIClient {
         this.baseUrl + endpoint,
         { text }
       );
-      console.log("Segment endpoint response:", response.data);
       return response.data;
     } catch (error) {
       console.error("Error calling segment endpoint:", error);
