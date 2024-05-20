@@ -11,12 +11,23 @@ def test():
 # Flask route to process the text
 @app.route('/segment', methods=['POST'])
 def segment():
-    # Extracting text_in from the request
+    """
+    Extracting text_in from the request.
+
+    Args:
+        text (text): the text to be segmented
+ 
+    Returns:
+        dict: JSON response with the segmented text and segments
+    """
+
     data = request.json
-    text_in = data.get('text_in', '')
+    print('Request received!', data)
+    text_in = data.get('text', '')
 
     # Call the segment_text function
     segmented_text = segment_text(text_in)
+    print('Segmented', segmented_text)
 
     # Return the JSON response
     return jsonify(segmented_text)
