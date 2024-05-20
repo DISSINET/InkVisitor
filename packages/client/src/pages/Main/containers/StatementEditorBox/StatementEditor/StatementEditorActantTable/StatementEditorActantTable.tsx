@@ -70,20 +70,16 @@ export const StatementEditorActantTable: React.FC<
     }
   };
 
-  const moveRow = useCallback(
-    (dragIndex: number, hoverIndex: number) => {
-      const dragRecord = filteredActants[dragIndex];
-      setFilteredActants(
-        update(filteredActants, {
-          $splice: [
-            [dragIndex, 1],
-            [hoverIndex, 0, dragRecord],
-          ],
-        })
-      );
-    },
-    [filteredActants]
-  );
+  const moveRow = useCallback((dragIndex: number, hoverIndex: number) => {
+    setFilteredActants((prevFilteredActants) =>
+      update(prevFilteredActants, {
+        $splice: [
+          [dragIndex, 1],
+          [hoverIndex, 0, prevFilteredActants[dragIndex]],
+        ],
+      })
+    );
+  }, []);
 
   return (
     <div style={{ overflow: "auto" }}>

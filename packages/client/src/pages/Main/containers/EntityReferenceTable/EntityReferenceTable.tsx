@@ -89,20 +89,16 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
     onChange(newReferences);
   };
 
-  const moveRow = useCallback(
-    (dragIndex: number, hoverIndex: number) => {
-      const dragRecord = localReferences[dragIndex];
-      const newLocalReferences = update(localReferences, {
+  const moveRow = useCallback((dragIndex: number, hoverIndex: number) => {
+    setLocalReferences((prevLocalReferences) =>
+      update(prevLocalReferences, {
         $splice: [
           [dragIndex, 1],
-          [hoverIndex, 0, dragRecord],
+          [hoverIndex, 0, prevLocalReferences[dragIndex]],
         ],
-      });
-
-      setLocalReferences(newLocalReferences);
-    },
-    [localReferences]
-  );
+      })
+    );
+  }, []);
 
   // OLD DOCUMENTS IMPLEMENTATION
   // Documents query

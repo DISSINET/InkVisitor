@@ -109,8 +109,8 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
   const valueEntity = entities[reference.value];
 
   return (
-    <div ref={dropRef} data-handler-id={handlerId} style={{ opacity: opacity }}>
-      <StyledGrid key={reference.id}>
+    <>
+      <StyledGrid ref={dropRef} data-handler-id={handlerId} style={{ opacity }}>
         {hasOrder && userCanEdit ? (
           <span ref={dragRef} style={{ cursor: "move" }}>
             <FaGripVertical color={themeContext?.color.black} />
@@ -178,6 +178,6 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
           </StyledReferencesListButtons>
         </span>
       </StyledGrid>
-    </div>
+    </>
   );
 };

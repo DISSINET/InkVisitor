@@ -77,20 +77,16 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
     removeDetailId(entityId);
   };
 
-  const moveRow = useCallback(
-    (dragIndex: number, hoverIndex: number) => {
-      const dragRecord = entities[dragIndex];
-      const newlySortedEntities = update(entities, {
+  const moveRow = useCallback((dragIndex: number, hoverIndex: number) => {
+    setEntities((prevEntities) =>
+      update(prevEntities, {
         $splice: [
           [dragIndex, 1],
-          [hoverIndex, 0, dragRecord],
+          [hoverIndex, 0, prevEntities[dragIndex]],
         ],
-      });
-
-      setEntities(newlySortedEntities);
-    },
-    [entities]
-  );
+      })
+    );
+  }, []);
 
   return (
     <>
