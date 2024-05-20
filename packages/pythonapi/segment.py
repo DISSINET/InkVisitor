@@ -51,7 +51,7 @@ def clean_text(text):
 
 def dependency_parser(text):
     """
-    Simple dependency parser mock function.
+    Simple dependency parser mock function working with end sentence characters (. , ? !)
  
     Args:
         text (text): the text
@@ -60,26 +60,14 @@ def dependency_parser(text):
         dict: list of segments
     """
 
-    words = text.split()
+    # Split the text into segments
     segments = []
     seg_id = 1
-    
-    # Simulate segmentation based on punctuation as a placeholder
-    seg_text = []
-    for word in words:
-        seg_text.append(word)
-        if word.endswith('.'):
-            segments.append({
-                "id": f"S{seg_id}",
-                "text": ' '.join(seg_text)
-            })
-            seg_id += 1
-            seg_text = []
-
-    if seg_text:
+    for sentence in re.split(r'(?<=[.!?]) +', text):
         segments.append({
-            "id": f"S{seg_id}",
-            "text": ' '.join(seg_text)
+            'id': seg_id,
+            'text': sentence
         })
+        seg_id += 1
 
     return segments
