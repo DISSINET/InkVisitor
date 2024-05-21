@@ -24,6 +24,7 @@ import { StatementListTable } from "./StatementListTable/StatementListTable";
 import { StatementListTextAnnotator } from "./StatementListTextAnnotator/StatementListTextAnnotator";
 import { StyledEmptyState, StyledTableWrapper } from "./StatementLitBoxStyles";
 import { StatementListDisplayMode } from "types";
+import useResizeObserver from "use-resize-observer";
 
 const initialData: {
   statements: IResponseStatement[];
@@ -432,6 +433,12 @@ export const StatementListBox: React.FC = () => {
     },
   });
 
+  const {
+    ref: contentRef,
+    height: contentHeight = 0,
+    width: contentWidth = 0,
+  } = useResizeObserver<HTMLDivElement>();
+
   return (
     <>
       {data && (
@@ -454,9 +461,15 @@ export const StatementListBox: React.FC = () => {
         />
       )}
 
-      <div style={{ display: "flex" }}>
+      {/* TODO: measure statement list header dynamically */}
+      <div
+        style={{ display: "flex", maxHeight: "calc(100% - 101px)" }}
+        ref={contentRef}
+      >
         {data && displayMode === StatementListDisplayMode.TEXT && (
           <StatementListTextAnnotator
+            contentHeight={contentHeight}
+            contentWidth={contentWidth}
             statements={statements}
             handleCreateStatement={handleCreateStatement}
             handleCreateTerritory={handleCreateTerritory}
@@ -469,7 +482,7 @@ export const StatementListBox: React.FC = () => {
             setSelectedRows={setSelectedRows}
           />
         )}
-        {/* {data && displayMode === "list" && statements && ( */}
+
         <StyledTableWrapper id="Statements-box-table">
           <StatementListTable
             statements={statements}
@@ -491,7 +504,6 @@ export const StatementListBox: React.FC = () => {
         </StyledTableWrapper>
       </div>
 
-      {/* )} */}
       {!territoryId && (
         <>
           <StyledEmptyState>

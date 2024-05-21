@@ -4,7 +4,7 @@ interface StyledTable {
   $expanded?: boolean;
 }
 export const StyledTable = styled.table<StyledTable>`
-  width: ${({ $expanded }) => ($expanded ? "100%" : "3em")};
+  width: ${({ $expanded }) => ($expanded ? "100%" : "8rem")};
   border-spacing: 0;
   border-collapse: collapse;
   border-width: ${({ theme }) => theme.borderWidth[1]};

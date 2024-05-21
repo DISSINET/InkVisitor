@@ -29,6 +29,9 @@ interface StatementListTextAnnotator {
   handleCreateTerritory: (territoryId?: string) => void;
   selectedRows: string[];
   setSelectedRows: React.Dispatch<React.SetStateAction<string[]>>;
+
+  contentHeight: number;
+  contentWidth: number;
 }
 
 export const StatementListTextAnnotator: React.FC<
@@ -44,6 +47,9 @@ export const StatementListTextAnnotator: React.FC<
   handleCreateTerritory,
   selectedRows,
   setSelectedRows,
+
+  contentHeight,
+  contentWidth,
 }) => {
   const dispatch = useAppDispatch();
 
@@ -121,25 +127,25 @@ export const StatementListTextAnnotator: React.FC<
     enabled: api.isLoggedIn() && selectedDocumentId !== false,
   });
 
-  const panelWidths: number[] = useAppSelector(
-    (state) => state.layout.panelWidths
-  );
+  // const panelWidths: number[] = useAppSelector(
+  //   (state) => state.layout.panelWidths
+  // );
 
-  const contentHeight = useAppSelector((state) => state.layout.contentHeight);
+  // const contentHeight = useAppSelector((state) => state.layout.contentHeight);
 
   // check if detail box is opened
-  const { detailIdArray } = useSearchParams();
-  const detailOpen = detailIdArray.length > 0;
+  // const { detailIdArray } = useSearchParams();
+  // const detailOpen = detailIdArray.length > 0;
 
   // Calculate annotator height
-  const annotatorHeight = useMemo<number>(() => {
-    const margin = 270;
-    if (detailOpen) {
-      return contentHeight / 2 - margin;
-    } else {
-      return contentHeight - margin;
-    }
-  }, [detailOpen, contentHeight]);
+  // const annotatorHeight = useMemo<number>(() => {
+  //   const margin = 270;
+  //   if (detailOpen) {
+  //     return contentHeight / 2 - margin;
+  //   } else {
+  //     return contentHeight - margin;
+  //   }
+  // }, [detailOpen, contentHeight]);
 
   const thisTHasAnchor = useMemo<boolean>(() => {
     if (selectedDocument) {
@@ -213,9 +219,9 @@ export const StatementListTextAnnotator: React.FC<
         <AnnotatorProvider>
           {selectedDocumentId && (
             <TextAnnotator
-              width={panelWidths[1]}
+              width={contentWidth - 80}
               displayLineNumbers={true}
-              height={annotatorHeight}
+              height={contentHeight - 60}
               documentId={selectedDocumentId}
               handleCreateStatement={handleCreateStatement}
               handleCreateTerritory={handleCreateTerritory}
