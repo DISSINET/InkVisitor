@@ -68,6 +68,11 @@
         <input type="text" id="anchorText" />
         <button id="addAnchor">add</button>
       </fieldset>
+      <fieldset>
+        <label>scroll to anchor </label>
+        <input type="text" id="scrollToAnchorText" />
+        <button id="scrollToAnchor">scroll</button>
+      </fieldset>
     </div>
 
     <p>Text from textfile.txt:</p>
@@ -125,6 +130,10 @@
 
       document.getElementById("addAnchor").onclick = () => {
         annotator.addAnchor(document.getElementById("anchorText").value);
+      };
+
+      document.getElementById("scrollToAnchor").onclick = () => {
+        annotator.scrollToAnchor(document.getElementById("scrollToAnchorText").value, 1);
       };
 
       window.addEventListener("resize", resizeAnnotator);
