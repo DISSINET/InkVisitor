@@ -1,7 +1,7 @@
 import Cursor from "./Cursor";
 import { Lines } from "./Lines";
 import Scroller from "./Scroller";
-import Text, { SegmentPosition } from "./Text";
+import Text, { Segment, SegmentPosition, Tag } from "./Text";
 import Viewport from "./Viewport";
 import { Modes } from "./constants";
 
@@ -619,11 +619,7 @@ export class Annotator {
       for (const tag of annotated) {
         const highlight = this.onHighlightCb(tag);
         if (highlight) {
-          const [startLine, endLine] = this.text.getTagPosition(
-            this.viewport,
-            tag
-          );
-
+          const [startLine, endLine] = this.text.getTagPosition(tag);
           const highlighter = new Cursor(0, 0);
           highlighter.selectStart = startLine;
           highlighter.selectEnd = endLine;
@@ -736,5 +732,16 @@ export class Annotator {
       this.cursor.reset();
       this.draw();
     }
+  }
+
+  scrollToAnchor(tag: string, occurence: number = 1) {
+    const pos = this.text.getTagPosition(tag, occurence);
+    if (pos.length !== 2) {
+      return;
+    }
+
+
+    this.viewport.scrollTo(pos[0].yLine, this.text.noLines);
+    this.draw();
   }
 }
