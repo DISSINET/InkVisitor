@@ -127,26 +127,6 @@ export const StatementListTextAnnotator: React.FC<
     enabled: api.isLoggedIn() && selectedDocumentId !== false,
   });
 
-  // const panelWidths: number[] = useAppSelector(
-  //   (state) => state.layout.panelWidths
-  // );
-
-  // const contentHeight = useAppSelector((state) => state.layout.contentHeight);
-
-  // check if detail box is opened
-  // const { detailIdArray } = useSearchParams();
-  // const detailOpen = detailIdArray.length > 0;
-
-  // Calculate annotator height
-  // const annotatorHeight = useMemo<number>(() => {
-  //   const margin = 270;
-  //   if (detailOpen) {
-  //     return contentHeight / 2 - margin;
-  //   } else {
-  //     return contentHeight - margin;
-  //   }
-  // }, [detailOpen, contentHeight]);
-
   const thisTHasAnchor = useMemo<boolean>(() => {
     if (selectedDocument) {
       // console.log(selectedDocument?.referencedEntityIds, territoryId);
