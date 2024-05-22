@@ -1,10 +1,14 @@
 import styled from "styled-components";
 
+/* width: ${({ $expanded }) => ($expanded ? "100%" : "8rem")}; */
 interface StyledTable {
-  $expanded?: boolean;
+  // $expanded?: boolean;
+  $contentWidth: number;
 }
 export const StyledTable = styled.table<StyledTable>`
-  width: ${({ $expanded }) => ($expanded ? "100%" : "8rem")};
+  /* width: 100%; */
+  width: ${({ $contentWidth }) => $contentWidth};
+  min-width: 8rem;
   border-spacing: 0;
   border-collapse: collapse;
   border-width: ${({ theme }) => theme.borderWidth[1]};
@@ -12,7 +16,8 @@ export const StyledTable = styled.table<StyledTable>`
   border-color: ${({ theme }) => theme.color["gray"][500]};
   box-shadow: ${({ theme }) => theme.boxShadow["subtle"]};
 
-  /* transition: width 0.5s ease; */
+  transition: width 0.4s ease;
+  transition-delay: 100ms;
 `;
 export const StyledTHead = styled.thead`
   border-width: ${({ theme }) => theme.borderWidth[1]};

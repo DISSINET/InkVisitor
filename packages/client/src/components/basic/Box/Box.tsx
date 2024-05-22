@@ -1,6 +1,6 @@
 import { animated, useSpring } from "@react-spring/web";
 import { springConfig } from "Theme/constants";
-import theme, { ThemeColor } from "Theme/theme";
+import { ThemeColor } from "Theme/theme";
 import { ButtonGroup } from "components";
 import React, { ReactNode, useState } from "react";
 import {

@@ -31,6 +31,7 @@ export const StyledTableWrapper = styled.div`
   display: flex;
   flex-direction: column;
   overflow: auto;
+  flex-shrink: 0;
 `;
 export const StyledEmptyState = styled.div`
   padding: ${({ theme }) => theme.space[3]};
@@ -58,7 +59,8 @@ interface StyledDocumentInfoProps {
 }
 export const StyledDocumentInfo = styled.div<StyledDocumentInfoProps>`
   display: inline-flex;
-  text-align: center;
+  align-items: center;
   gap: ${({ theme }) => theme.space[1]};
   color: ${({ theme, $color }) => theme.color[$color || "black"]};
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
 `;

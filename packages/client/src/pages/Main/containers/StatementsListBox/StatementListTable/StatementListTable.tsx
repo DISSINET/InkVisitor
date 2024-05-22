@@ -81,6 +81,7 @@ interface StatementListTable {
   selectedRows: string[];
   setSelectedRows: React.Dispatch<React.SetStateAction<string[]>>;
   displayMode: StatementListDisplayMode;
+  contentWidth: number;
 }
 export const StatementListTable: React.FC<StatementListTable> = ({
   statements,
@@ -97,6 +98,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
   selectedRows,
   setSelectedRows,
   displayMode,
+  contentWidth,
 }) => {
   const dispatch = useAppDispatch();
   const { territoryId, setStatementId } = useSearchParams();
@@ -485,18 +487,21 @@ export const StatementListTable: React.FC<StatementListTable> = ({
       data: statementsLocal,
       getRowId,
       initialState: {
-        hiddenColumns: [
-          "id",
-          "selection",
-          "move",
-          "subject",
-          "actions",
-          "objects",
-          "text",
-          "warnings",
-          "lastEdit",
-          "expander",
-        ],
+        hiddenColumns:
+          displayMode === StatementListDisplayMode.TEXT
+            ? [
+                "id",
+                "selection",
+                "move",
+                "subject",
+                "actions",
+                "objects",
+                "text",
+                "warnings",
+                "lastEdit",
+                "expander",
+              ]
+            : ["id"],
       },
     },
     useExpanded,
@@ -518,7 +523,9 @@ export const StatementListTable: React.FC<StatementListTable> = ({
         "expander",
       ]);
     } else {
-      setHiddenColumns(["id"]);
+      setTimeout(() => {
+        setHiddenColumns(["id"]);
+      }, 500);
     }
   }, [displayMode]);
 
@@ -570,7 +577,10 @@ export const StatementListTable: React.FC<StatementListTable> = ({
   return (
     <StyledTable
       {...getTableProps()}
-      $expanded={displayMode === StatementListDisplayMode.LIST}
+      // $expanded={displayMode === StatementListDisplayMode.LIST}
+      $contentWidth={
+        displayMode === StatementListDisplayMode.LIST ? contentWidth : 80
+      }
     >
       <StyledTHead>
         {headerGroups.map((headerGroup, key) => (

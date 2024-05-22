@@ -466,23 +466,6 @@ export const StatementListBox: React.FC = () => {
         style={{ display: "flex", maxHeight: "calc(100% - 101px)" }}
         ref={contentRef}
       >
-        {data && displayMode === StatementListDisplayMode.TEXT && (
-          <StatementListTextAnnotator
-            contentHeight={contentHeight}
-            contentWidth={contentWidth}
-            statements={statements}
-            handleCreateStatement={handleCreateStatement}
-            handleCreateTerritory={handleCreateTerritory}
-            territoryId={territoryId}
-            entities={entities}
-            right={right}
-            setShowSubmit={setShowSubmit}
-            addStatementAtCertainIndex={addStatementAtCertainIndex}
-            selectedRows={selectedRows}
-            setSelectedRows={setSelectedRows}
-          />
-        )}
-
         <StyledTableWrapper id="Statements-box-table">
           <StatementListTable
             statements={statements}
@@ -500,8 +483,26 @@ export const StatementListBox: React.FC = () => {
             selectedRows={selectedRows}
             setSelectedRows={setSelectedRows}
             displayMode={displayMode}
+            contentWidth={contentWidth}
           />
         </StyledTableWrapper>
+
+        {data && displayMode === StatementListDisplayMode.TEXT && (
+          <StatementListTextAnnotator
+            contentHeight={contentHeight}
+            contentWidth={contentWidth}
+            statements={statements}
+            handleCreateStatement={handleCreateStatement}
+            handleCreateTerritory={handleCreateTerritory}
+            territoryId={territoryId}
+            entities={entities}
+            right={right}
+            setShowSubmit={setShowSubmit}
+            addStatementAtCertainIndex={addStatementAtCertainIndex}
+            selectedRows={selectedRows}
+            setSelectedRows={setSelectedRows}
+          />
+        )}
       </div>
 
       {!territoryId && (
