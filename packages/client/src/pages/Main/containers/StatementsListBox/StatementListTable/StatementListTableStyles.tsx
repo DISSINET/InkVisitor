@@ -1,12 +1,9 @@
 import styled from "styled-components";
 
-/* width: ${({ $expanded }) => ($expanded ? "100%" : "8rem")}; */
 interface StyledTable {
-  // $expanded?: boolean;
   $contentWidth: number;
 }
 export const StyledTable = styled.table<StyledTable>`
-  /* width: 100%; */
   width: ${({ $contentWidth }) => $contentWidth};
   min-width: 8rem;
   border-spacing: 0;

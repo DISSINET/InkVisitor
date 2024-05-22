@@ -13,6 +13,7 @@ import { useAppDispatch, useAppSelector } from "redux/hooks";
 import {
   StyledDocumentInfo,
   StyledDocumentTag,
+  StyledDocumentTitle,
 } from "../StatementLitBoxStyles";
 import { FaCheck } from "react-icons/fa";
 import { BiSolidCommentError } from "react-icons/bi";
@@ -142,9 +143,9 @@ export const StatementListTextAnnotator: React.FC<
     <div>
       <div
         style={{
-          alignItems: "center",
           display: "inline-flex",
-          padding: "2px 10px",
+          alignItems: "center",
+          padding: "0.2rem 1rem",
         }}
       >
         {!selectedResource && (
@@ -170,14 +171,20 @@ export const StatementListTextAnnotator: React.FC<
         {!selectedDocumentIsFetching && <Loader />}
         {!selectedDocumentIsFetching && selectedDocument && (
           <StyledDocumentTag>
-            <TiDocumentText style={{ marginRight: "2px" }} />
-            {selectedDocument?.title}
+            <TiDocumentText
+              style={{ marginRight: "0.2rem", flexShrink: "0" }}
+            />
+            <div style={{ display: "grid" }}>
+              <StyledDocumentTitle>
+                {selectedDocument?.title}
+              </StyledDocumentTitle>
+            </div>
           </StyledDocumentTag>
         )}
         {!selectedDocumentIsFetching && selectedDocument && thisTHasAnchor && (
           <StyledDocumentInfo $color="success">
             <FaCheck />
-            <i>Anchor for T created</i>
+            <i style={{ whiteSpace: "nowrap" }}>Anchor for T created</i>
           </StyledDocumentInfo>
         )}
         {!selectedDocumentIsFetching && selectedDocument && !thisTHasAnchor && (
@@ -195,7 +202,7 @@ export const StatementListTextAnnotator: React.FC<
             </StyledDocumentInfo>
           )}
       </div>
-      <div style={{ marginTop: "2px" }}>
+      <div style={{ marginTop: "0.2rem" }}>
         <AnnotatorProvider>
           {selectedDocumentId && (
             <TextAnnotator

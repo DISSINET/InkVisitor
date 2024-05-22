@@ -45,7 +45,7 @@ export const StyledEmptyState = styled.div`
 
 export const StyledDocumentTag = styled.div`
   display: inline-flex;
-  margin: 0px 6px;
+  margin: 0 0.6rem;
   background-color: ${({ theme }) => theme.color["blue"][400]};
   padding: ${({ theme }) => theme.space[1] + " " + theme.space[3]};
   border-radius: ${({ theme }) => theme.borderRadius["md"]};
@@ -59,8 +59,17 @@ interface StyledDocumentInfoProps {
 }
 export const StyledDocumentInfo = styled.div<StyledDocumentInfoProps>`
   display: inline-flex;
+  flex-shrink: 0;
   align-items: center;
   gap: ${({ theme }) => theme.space[1]};
   color: ${({ theme, $color }) => theme.color[$color || "black"]};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
+`;
+
+export const StyledDocumentTitle = styled.p`
+  display: inline-block;
+  vertical-align: middle;
+  white-space: nowrap;
+  overflow: hidden !important;
+  text-overflow: ellipsis;
 `;
