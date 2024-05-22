@@ -11,6 +11,8 @@ export const StyledTable = styled.table<StyledTable>`
   border-style: solid;
   border-color: ${({ theme }) => theme.color["gray"][500]};
   box-shadow: ${({ theme }) => theme.boxShadow["subtle"]};
+
+  /* transition: width 0.5s ease; */
 `;
 export const StyledTHead = styled.thead`
   border-width: ${({ theme }) => theme.borderWidth[1]};
