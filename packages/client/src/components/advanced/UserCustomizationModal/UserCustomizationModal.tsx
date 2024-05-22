@@ -45,7 +45,6 @@ interface DataObject {
   defaultStatementLanguage: EntityEnums.Language;
   searchLanguages: EntityEnums.Language[];
   defaultTerritory?: string | null;
-  hideStatementElementsOrderTable?: boolean;
 }
 interface UserCustomizationModal {
   user: IResponseUser;
@@ -81,7 +80,6 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
         options.defaultStatementLanguage ?? EntityEnums.Language.Empty,
       searchLanguages: options.searchLanguages,
       defaultTerritory: options.defaultTerritory,
-      hideStatementElementsOrderTable: options.hideStatementElementsOrderTable,
     };
   }, [user]);
 
@@ -149,7 +147,6 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
           defaultStatementLanguage: data.defaultStatementLanguage,
           searchLanguages: data.searchLanguages.map((sL) => sL),
           defaultTerritory: data.defaultTerritory || "",
-          hideStatementElementsOrderTable: data.hideStatementElementsOrderTable,
         },
       });
     }

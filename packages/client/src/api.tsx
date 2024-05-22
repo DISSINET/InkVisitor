@@ -823,23 +823,6 @@ class Api {
     }
   }
 
-  async statementReorderElements(
-    statementId: string,
-    elementIdsWithOrder: string[],
-    options?: IApiOptions
-  ): Promise<AxiosResponse<IResponseGeneric>> {
-    try {
-      const response = await this.connection.put(
-        `/statements/${statementId}/elementsOrders`,
-        elementIdsWithOrder,
-        options
-      );
-      return response;
-    } catch (err) {
-      throw this.handleError(err);
-    }
-  }
-
   async statementsBatchMove(
     statementsIds: string[],
     territoryId: string,
