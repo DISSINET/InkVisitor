@@ -48,6 +48,7 @@ import {
   StyledTh,
 } from "./StatementListTableStyles";
 import { StatementListDisplayMode } from "types";
+import { COLLAPSED_TABLE_WIDTH } from "Theme/constants";
 
 type CellType = CellProps<IResponseStatement>;
 
@@ -525,7 +526,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
     } else {
       setTimeout(() => {
         setHiddenColumns(["id"]);
-      }, 500);
+      }, 450);
     }
   }, [displayMode]);
 
@@ -577,10 +578,12 @@ export const StatementListTable: React.FC<StatementListTable> = ({
   return (
     <StyledTable
       {...getTableProps()}
-      // $expanded={displayMode === StatementListDisplayMode.LIST}
       $contentWidth={
-        displayMode === StatementListDisplayMode.LIST ? contentWidth : 80
+        displayMode === StatementListDisplayMode.LIST
+          ? contentWidth
+          : COLLAPSED_TABLE_WIDTH
       }
+      $isExpanded={displayMode === StatementListDisplayMode.LIST}
     >
       <StyledTHead>
         {headerGroups.map((headerGroup, key) => (

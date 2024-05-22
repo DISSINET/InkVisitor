@@ -463,7 +463,11 @@ export const StatementListBox: React.FC = () => {
 
       {/* TODO: measure statement list header dynamically */}
       <div
-        style={{ display: "flex", maxHeight: "calc(100% - 101px)" }}
+        style={{
+          display: "flex",
+          maxHeight: "calc(100% - 101px)",
+          overflow: "auto",
+        }}
         ref={contentRef}
       >
         <StyledTableWrapper id="Statements-box-table">

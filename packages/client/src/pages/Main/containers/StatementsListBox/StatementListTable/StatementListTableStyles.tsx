@@ -1,11 +1,13 @@
+import { COLLAPSED_TABLE_WIDTH } from "Theme/constants";
 import styled from "styled-components";
 
 interface StyledTable {
   $contentWidth: number;
+  $isExpanded: boolean;
 }
 export const StyledTable = styled.table<StyledTable>`
   width: ${({ $contentWidth }) => $contentWidth};
-  min-width: 8rem;
+  min-width: ${({}) => `${COLLAPSED_TABLE_WIDTH / 10}rem`};
   border-spacing: 0;
   border-collapse: collapse;
   border-width: ${({ theme }) => theme.borderWidth[1]};
@@ -13,7 +15,7 @@ export const StyledTable = styled.table<StyledTable>`
   border-color: ${({ theme }) => theme.color["gray"][500]};
   box-shadow: ${({ theme }) => theme.boxShadow["subtle"]};
 
-  transition: width 0.4s ease;
+  transition: width 0.3s ease;
   transition-delay: 100ms;
 `;
 export const StyledTHead = styled.thead`
