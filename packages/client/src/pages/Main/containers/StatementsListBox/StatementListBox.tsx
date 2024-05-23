@@ -461,6 +461,17 @@ export const StatementListBox: React.FC = () => {
         />
       )}
 
+      {!territoryId && (
+        <>
+          <StyledEmptyState>
+            <BsInfoCircle size="23" />
+          </StyledEmptyState>
+          <StyledEmptyState>
+            {"No territory selected yet. Pick one from the territory tree"}
+          </StyledEmptyState>
+        </>
+      )}
+
       {territoryId &&
         statements.length === 0 &&
         displayMode === StatementListDisplayMode.LIST && (
@@ -522,17 +533,6 @@ export const StatementListBox: React.FC = () => {
           />
         )}
       </div>
-
-      {!territoryId && (
-        <>
-          <StyledEmptyState>
-            <BsInfoCircle size="23" />
-          </StyledEmptyState>
-          <StyledEmptyState>
-            {"No territory selected yet. Pick one from the territory tree"}
-          </StyledEmptyState>
-        </>
-      )}
 
       <Submit
         title="Delete statement"
