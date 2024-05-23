@@ -50,6 +50,17 @@ import {
 import { StatementListDisplayMode } from "types";
 import { COLLAPSED_TABLE_WIDTH } from "Theme/constants";
 
+const MINIFIED_HIDDEN_COLUMNS = [
+  "id",
+  "move",
+  "subject",
+  "actions",
+  "objects",
+  "text",
+  "warnings",
+  "lastEdit",
+  "expander",
+];
 type CellType = CellProps<IResponseStatement>;
 
 interface StatementListTable {
@@ -490,18 +501,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
       initialState: {
         hiddenColumns:
           displayMode === StatementListDisplayMode.TEXT
-            ? [
-                "id",
-                "selection",
-                "move",
-                "subject",
-                "actions",
-                "objects",
-                "text",
-                "warnings",
-                "lastEdit",
-                "expander",
-              ]
+            ? MINIFIED_HIDDEN_COLUMNS
             : ["id"],
       },
     },
@@ -511,18 +511,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
 
   useEffect(() => {
     if (displayMode === StatementListDisplayMode.TEXT) {
-      setHiddenColumns([
-        "id",
-        "selection",
-        "move",
-        "subject",
-        "actions",
-        "objects",
-        "text",
-        "warnings",
-        "lastEdit",
-        "expander",
-      ]);
+      setHiddenColumns(MINIFIED_HIDDEN_COLUMNS);
     } else {
       setTimeout(() => {
         setHiddenColumns(["id"]);

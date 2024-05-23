@@ -18,6 +18,7 @@ import {
 import { FaCheck } from "react-icons/fa";
 import { BiSolidCommentError } from "react-icons/bi";
 import { GrDocumentMissing } from "react-icons/gr";
+import { COLLAPSED_TABLE_WIDTH } from "Theme/constants";
 
 interface StatementListTextAnnotator {
   statements: IResponseStatement[];
@@ -206,7 +207,11 @@ export const StatementListTextAnnotator: React.FC<
         <AnnotatorProvider>
           {selectedDocumentId && (
             <TextAnnotator
-              width={contentWidth - 80}
+              width={
+                statements.length > 0
+                  ? contentWidth - COLLAPSED_TABLE_WIDTH
+                  : contentWidth
+              }
               displayLineNumbers={true}
               height={contentHeight - 60}
               documentId={selectedDocumentId}

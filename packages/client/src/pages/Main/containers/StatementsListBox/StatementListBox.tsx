@@ -10,7 +10,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Loader, Submit, ToastWithLink } from "components";
 import { CStatement, CTerritory } from "constructors";
-import { useSearchParams } from "hooks";
+import { useDebounce, useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
 import { BsInfoCircle } from "react-icons/bs";
 import { toast } from "react-toastify";
@@ -461,34 +461,48 @@ export const StatementListBox: React.FC = () => {
         />
       )}
 
+      {territoryId &&
+        statements.length === 0 &&
+        displayMode === StatementListDisplayMode.LIST && (
+          <>
+            <StyledEmptyState>
+              <BsInfoCircle size="23" />
+            </StyledEmptyState>
+            <StyledEmptyState>{"No statements yet."}</StyledEmptyState>
+          </>
+        )}
+
       {/* TODO: measure statement list header dynamically */}
       <div
         style={{
           display: "flex",
+          height: "100%",
           maxHeight: "calc(100% - 101px)",
           overflow: "auto",
         }}
         ref={contentRef}
       >
         <StyledTableWrapper id="Statements-box-table">
-          <StatementListTable
-            statements={statements}
-            handleRowClick={(rowId: string) => {
-              dispatch(setShowWarnings(false));
-              setStatementId(rowId);
-            }}
-            actantsUpdateMutation={statementUpdateMutation}
-            entities={entities}
-            right={right}
-            cloneStatementMutation={cloneStatementMutation}
-            setStatementToDelete={setStatementToDelete}
-            setShowSubmit={setShowSubmit}
-            addStatementAtCertainIndex={addStatementAtCertainIndex}
-            selectedRows={selectedRows}
-            setSelectedRows={setSelectedRows}
-            displayMode={displayMode}
-            contentWidth={contentWidth}
-          />
+          {statements.length > 0 && (
+            <StatementListTable
+              statements={statements}
+              handleRowClick={(rowId: string) => {
+                dispatch(setShowWarnings(false));
+                setStatementId(rowId);
+              }}
+              actantsUpdateMutation={statementUpdateMutation}
+              entities={entities}
+              right={right}
+              cloneStatementMutation={cloneStatementMutation}
+              setStatementToDelete={setStatementToDelete}
+              setShowSubmit={setShowSubmit}
+              addStatementAtCertainIndex={addStatementAtCertainIndex}
+              selectedRows={selectedRows}
+              setSelectedRows={setSelectedRows}
+              displayMode={displayMode}
+              contentWidth={contentWidth}
+            />
+          )}
         </StyledTableWrapper>
 
         {data && displayMode === StatementListDisplayMode.TEXT && (

@@ -197,8 +197,9 @@ class Text {
       segment.lineEnd = currentLineNumber;
     }
 
-    const time2 = performance.now();
-    console.log(`${time2 - time1} ms `);
+    // Performance check
+    // const time2 = performance.now();
+    // console.log(`${time2 - time1} ms `);
   }
 
   /**

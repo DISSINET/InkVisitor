@@ -337,7 +337,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
           {/* BATCH ACTIONS */}
           <StyledActionsWrapper>
             {user?.role !== UserEnums.Role.Viewer &&
-              displayMode === StatementListDisplayMode.LIST &&
+              // displayMode === StatementListDisplayMode.LIST &&
               territory.statements.length > 0 && (
                 <>
                   <StyledCheckboxWrapper>

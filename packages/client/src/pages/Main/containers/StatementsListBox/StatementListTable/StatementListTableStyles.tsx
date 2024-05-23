@@ -68,6 +68,7 @@ export const StyledTd = styled.td<StyledTd>`
   padding: ${({ theme }) => theme.space[2]};
   padding-left: ${({ theme }) => theme.space[4]};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
+  height: 4rem;
 `;
 export const StyledTdMove = styled.td`
   cursor: move;
