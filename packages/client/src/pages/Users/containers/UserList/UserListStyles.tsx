@@ -164,11 +164,10 @@ export const StyledUtils = styled.div`
   width: 100%;
 `;
 export const StyledNotActiveText = styled.p`
-  display: inline-flex;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
   font-size: ${({ theme }) => theme.fontSize["xs"]};
-  color: ${({ theme }) => theme.color.white};
-  background-color: ${({ theme }) => theme.color.warning};
-  padding: 0.5rem 1rem;
-  border-radius: ${({ theme }) => theme.borderRadius.full};
-  overflow: visible;
+  color: ${({ theme }) => theme.color.warning};
 `;

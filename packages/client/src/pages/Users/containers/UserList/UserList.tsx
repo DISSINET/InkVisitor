@@ -143,6 +143,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
         accessor: "name",
         Cell: ({ row }: CellType) => {
           const { name, email, role, active, verified } = row.original;
+
           let icon = <RiUserSearchFill />;
           if (role === UserEnums.Role.Admin) {
             icon = <RiUserStarFill />;
@@ -158,7 +159,10 @@ export const UserList: React.FC<UserList> = React.memo(() => {
               <StyledUserNameColumnIcon>{icon}</StyledUserNameColumnIcon>
 
               {!verified ? (
-                <StyledNotActiveText>{"not activated"}</StyledNotActiveText>
+                <StyledNotActiveText>
+                  <span>the verification email has been sent to</span>
+                  <b>{email}</b>
+                </StyledNotActiveText>
               ) : (
                 <StyledUserNameColumnText>
                   <b>{name}</b>
@@ -198,9 +202,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
               user={row.original}
               userMutation={userMutation}
             />
-          ) : (
-            <div>{email}</div>
-          );
+          ) : null;
         },
       },
       {
