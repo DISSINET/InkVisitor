@@ -435,7 +435,22 @@ export const UserList: React.FC<UserList> = React.memo(() => {
             rights,
             territoryRights: territoryActants,
             active,
+            verified,
           } = row.original;
+
+          let activateTooltip = "activate user";
+          if (!verified) {
+            activateTooltip = "cannot activate unverified user";
+          } else if (userId === localStorage.getItem("userid")) {
+            activateTooltip = "cannot deactivate yourself";
+          } else if (active) {
+            activateTooltip = "deactivate user";
+          }
+
+          let deleteTooltip = "delete user";
+          if (userId === localStorage.getItem("userid")) {
+            deleteTooltip = "cannot delete yourself";
+          }
 
           return (
             <ButtonGroup $noMarginRight>
@@ -443,7 +458,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                 key="r"
                 icon={<FaTrashAlt size={14} />}
                 color="danger"
-                tooltipLabel="delete"
+                tooltipLabel={deleteTooltip}
                 disabled={userId === localStorage.getItem("userid")}
                 onClick={() => {
                   setRemovingUserId(userId);
@@ -453,6 +468,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                 icon={<FaKey size={14} />}
                 tooltipLabel="reset password"
                 color="warning"
+                disabled={!active || !verified}
                 onClick={() => {
                   resetPasswordMutation.mutate(userId);
                 }}
@@ -461,9 +477,11 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                 icon={
                   active ? <FaToggleOn size={14} /> : <FaToggleOff size={14} />
                 }
-                disabled={userId === localStorage.getItem("userid")}
+                disabled={
+                  !verified || userId === localStorage.getItem("userid")
+                }
                 color={active ? "success" : "danger"}
-                tooltipLabel={active ? "set inactive" : "set active"}
+                tooltipLabel={activateTooltip}
                 onClick={() => {
                   userMutation.mutate({
                     id: userId,
