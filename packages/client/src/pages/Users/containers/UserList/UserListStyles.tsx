@@ -87,9 +87,11 @@ export const StyledTerritoryListItem = styled.div`
   display: inline-block;
 `;
 export const StyledTerritoryListItemMissing = styled.div`
-  padding: ${({ theme }) => theme.space[1]};
+  padding: ${({ theme }) => theme.space[2] + " " + theme.space[3]};
   display: inline-flex;
+  gap: ${({ theme }) => theme.space[0] + " " + theme.space[2]};
   align-items: center;
+  border-radius: ${({ theme }) => theme.borderRadius.default};
   background-color: ${({ theme }) => theme.color.danger};
   color: ${({ theme }) => theme.color.white};
   font-size: ${({ theme }) => theme.fontSize.xxs};

@@ -300,7 +300,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
                           </StyledTerritoryListItem>
                         ) : (
                           <StyledTerritoryListItemMissing key={right.territory}>
-                            invalid T {right.territory}
+                            <div>invalid T {right.territory}</div>
                             <Button
                               key="d"
                               tooltipLabel="remove invalid territory"
