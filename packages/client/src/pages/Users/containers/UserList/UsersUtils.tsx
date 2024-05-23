@@ -57,7 +57,11 @@ export const UsersUtils: React.FC<UsersUtils> = React.memo(({ users }) => {
         <Button
           key="add"
           label="new user"
-          tooltipLabel="create user"
+          tooltipLabel={
+            validNewUserEmail()
+              ? "create a new user with the given mail"
+              : "please enter a valid mail first"
+          }
           disabled={!validNewUserEmail()}
           icon={<FaPlus />}
           color="primary"
