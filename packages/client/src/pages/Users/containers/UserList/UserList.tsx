@@ -160,7 +160,7 @@ export const UserList: React.FC<UserList> = React.memo(() => {
 
               {!verified ? (
                 <StyledNotActiveText>
-                  <span>the verification email has been sent to</span>
+                  <span>Verification email has been sent to</span>
                   <b>{email}</b>
                 </StyledNotActiveText>
               ) : (
