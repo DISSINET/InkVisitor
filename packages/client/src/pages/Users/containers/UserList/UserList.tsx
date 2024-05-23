@@ -192,11 +192,14 @@ export const UserList: React.FC<UserList> = React.memo(() => {
         Header: "Email",
         id: "Email",
         Cell: ({ row }: CellType) => {
-          return (
+          const { verified, email } = row.original;
+          return verified ? (
             <UserListEmailInput
               user={row.original}
               userMutation={userMutation}
             />
+          ) : (
+            <div>{email}</div>
           );
         },
       },
