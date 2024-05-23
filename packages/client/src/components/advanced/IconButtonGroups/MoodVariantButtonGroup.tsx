@@ -4,12 +4,12 @@ import { IconButtonGroup } from "components";
 import React from "react";
 import { FaHeadSideVirus } from "react-icons/fa";
 import { BsBoxSeamFill } from "react-icons/bs";
-import { GiConversation } from "react-icons/gi";
+import { VscCommentDiscussion } from "react-icons/vsc";
 
 const icons = {
   [EntityEnums.MoodVariant.Realis]: <FaHeadSideVirus size={14} />,
   [EntityEnums.MoodVariant.Irrealis]: <BsBoxSeamFill size={14} />,
-  [EntityEnums.MoodVariant.ToBeDecided]: <GiConversation size={14} />,
+  [EntityEnums.MoodVariant.ToBeDecided]: <VscCommentDiscussion size={14} />,
 };
 interface MoodVariantButtonGroup {
   border?: boolean;
