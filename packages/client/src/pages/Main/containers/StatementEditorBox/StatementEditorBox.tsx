@@ -93,7 +93,7 @@ export const StatementEditorBox: React.FC = () => {
 
   const sendChangesToBackend = (changes: IResponseStatement) => {
     if (statement && JSON.stringify(statement) !== JSON.stringify(changes)) {
-      const { entities, warnings, ...newStatement } = changes;
+      const { entities, warnings, right, ...newStatement } = changes;
       updateStatementMutation.mutate(newStatement);
     }
   };
