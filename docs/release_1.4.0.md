@@ -4,6 +4,7 @@
 
 - Integrated full text management of documents, including upload, export, and editing.
 - Created the Annotator package for easier document management and work.
+- Integrated new Python Flast server into the infrastructure
 - Introduced new user administration features, including user registration, improved UX, user verification, and enhanced password management #1920 #1919 #1918 #1917.
 - Implemented a new finely-tuned dark theme.
 - Added new Territory protocols #1960 #2086 #2087.
