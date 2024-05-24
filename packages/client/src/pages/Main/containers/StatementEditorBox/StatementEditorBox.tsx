@@ -45,7 +45,7 @@ export const StatementEditorBox: React.FC = () => {
     mutationFn: async (changes: IStatement) => {
       await api.entityUpdate(statementId, changes);
     },
-    onSuccess: (data, variables: any) => {
+    onSuccess: (data, variables) => {
       if (selectedDetailId === statementId) {
         queryClient.invalidateQueries({ queryKey: ["entity"] });
       }
