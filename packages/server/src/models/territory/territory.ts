@@ -1,18 +1,50 @@
-import { EntityEnums, UserEnums } from "@shared/enums";
-import { ITerritory, IParentTerritory, ITerritoryData } from "@shared/types";
-import { r as rethink, Connection, WriteResult, RDatum } from "rethinkdb-ts";
+import { nonenumerable } from "@common/decorators";
 import { IModel, determineOrder } from "@models/common";
 import Entity from "@models/entity/entity";
+import User from "@models/user/user";
+import { findEntityById } from "@service/shorthands";
+import treeCache from "@service/treeCache";
+import { EntityEnums, UserEnums } from "@shared/enums";
+import { IParentTerritory, ITerritory, ITerritoryData } from "@shared/types";
 import {
   InternalServerError,
   InvalidDeleteError,
   ModelNotValidError,
+  TerritoryDoesNotExits,
 } from "@shared/types/errors";
-import User from "@models/user/user";
-import treeCache from "@service/treeCache";
-import { nonenumerable } from "@common/decorators";
 import { ROOT_TERRITORY_ID } from "@shared/types/statement";
+import {
+  EProtocolTieType,
+  ITerritoryProtocol,
+  ITerritoryValidation,
+} from "@shared/types/territory";
+import { Connection, RDatum, WriteResult, r as rethink } from "rethinkdb-ts";
 
+export class TerritoryProtocol implements ITerritoryProtocol, IModel {
+  project: string;
+  dataCollectionMethods: string[];
+  description: string;
+  guidelines: string[];
+  detailedProtocols: string[];
+  startDate: string;
+  endDate: string;
+  relatedDataPublications: string[];
+
+  constructor(data: Partial<ITerritoryProtocol>) {
+    this.project = data.project as string;
+    this.dataCollectionMethods = data.dataCollectionMethods as string[];
+    this.description = data.description as string;
+    this.guidelines = data.guidelines as string[];
+    this.detailedProtocols = data.detailedProtocols as string[];
+    this.startDate = data.startDate as string;
+    this.endDate = data.endDate as string;
+    this.relatedDataPublications = data.relatedDataPublications as string[];
+  }
+
+  isValid(): boolean {
+    return true;
+  }
+}
 export class TerritoryParent implements IParentTerritory, IModel {
   territoryId: string;
   order: number;
@@ -33,10 +65,20 @@ export class TerritoryParent implements IParentTerritory, IModel {
 
 export class TerritoryData implements ITerritoryData, IModel {
   parent: TerritoryParent | false = false;
+  protocol?: ITerritoryProtocol;
+  validations?: TerritoryValidation[];
 
   constructor(data: Partial<ITerritoryData>) {
     if (data.parent) {
       this.parent = new TerritoryParent(data.parent || {});
+    }
+    if (data.protocol) {
+      this.protocol = new TerritoryProtocol(data.protocol || {});
+      if (data.validations) {
+        this.validations = data.validations.map(
+          (p) => new TerritoryValidation(p)
+        );
+      }
     }
   }
 
@@ -45,6 +87,37 @@ export class TerritoryData implements ITerritoryData, IModel {
       return this.parent.isValid();
     }
 
+    if (this.validations) {
+      if (this.validations.find((p) => !p.isValid())) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+}
+
+export class TerritoryValidation implements ITerritoryValidation {
+  entityClasses: EntityEnums.Class[];
+  classifications: string[];
+  tieType: EProtocolTieType; // default is property
+  propType?: string[]; // relevant only in case of Property is selected as a tie
+  allowedClasses?: EntityEnums.Class[]; // not relevant if allowedEntities is set
+  allowedEntities?: string[]; //
+  detail: string;
+
+  constructor(data: Partial<ITerritoryValidation>) {
+    this.entityClasses = data.entityClasses || [];
+    this.classifications = data.classifications || [];
+    this.tieType = data.tieType || EProtocolTieType.Property;
+
+    this.propType = data.propType;
+    this.allowedClasses = data.allowedClasses;
+    this.allowedEntities = data.allowedEntities;
+    this.detail = data.detail || "";
+  }
+
+  isValid(): boolean {
     return true;
   }
 }
@@ -72,6 +145,32 @@ class Territory extends Entity implements ITerritory {
 
   setSiblings(childsMap: Record<number, ITerritory>) {
     this._siblings = childsMap;
+  }
+
+  /**
+   * Use this method for doing asynchronous operation/checks before the save operation
+   * @param db db connection
+   */
+  async beforeSave(db: Connection): Promise<void> {
+    await super.beforeSave(db);
+
+    // fix protocol if creating new T and if protocol is missing
+    if (this.id || this.data.protocol || !this.data.parent) {
+      return;
+    }
+
+    const parentTerritory = await findEntityById<ITerritory>(
+      db,
+      this.data.parent.territoryId
+    );
+    if (!parentTerritory) {
+      throw new TerritoryDoesNotExits(
+        TerritoryDoesNotExits.title,
+        this.data.parent.territoryId
+      );
+    }
+
+    this.data.protocol = parentTerritory.data.protocol;
   }
 
   /**
@@ -280,6 +379,35 @@ class Territory extends Entity implements ITerritory {
 
     if (this.data.parent) {
       entityIds.push(this.data.parent.territoryId);
+    }
+
+    if (this.data.validations) {
+      this.data.validations.forEach((v) => {
+        entityIds.push.apply(entityIds, v.classifications || []);
+        entityIds.push.apply(entityIds, v.propType || []);
+        entityIds.push.apply(entityIds, v.allowedEntities || []);
+      });
+    }
+
+    if (this.data.protocol) {
+      Array.isArray(this.data.protocol.guidelines) &&
+        this.data.protocol.guidelines.forEach((e) => entityIds.push(e));
+
+      Array.isArray(this.data.protocol.dataCollectionMethods) &&
+        this.data.protocol.dataCollectionMethods.forEach((e) =>
+          entityIds.push(e)
+        );
+
+      Array.isArray(this.data.protocol.detailedProtocols) &&
+        this.data.protocol.detailedProtocols.forEach((e) => entityIds.push(e));
+
+      Array.isArray(this.data.protocol.relatedDataPublications) &&
+        this.data.protocol.relatedDataPublications.forEach((e) =>
+          entityIds.push(e)
+        );
+
+      entityIds.push(this.data.protocol.startDate);
+      entityIds.push(this.data.protocol.endDate);
     }
 
     return entityIds;

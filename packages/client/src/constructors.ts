@@ -1,6 +1,8 @@
 import { EntityEnums, RelationEnums, UserEnums } from "@shared/enums";
 import {
+  IAction,
   IBookmarkFolder,
+  IConcept,
   IEntity,
   IProp,
   IReference,
@@ -124,9 +126,9 @@ export const InstProps: any = async (
 
       if (typeEntityReq && typeEntityReq.data) {
         if (typeEntityReq.data.isTemplate) {
-          const newTypeEId = await InstTemplate(typeEntityReq.data, userRole);
-          if (newTypeEId) {
-            prop.type.entityId = newTypeEId;
+          const newTypeE = await InstTemplate(typeEntityReq.data, userRole);
+          if (newTypeE) {
+            prop.type.entityId = newTypeE.id;
           }
         }
       }
@@ -138,9 +140,9 @@ export const InstProps: any = async (
 
       if (valueEntityReq && valueEntityReq.data) {
         if (valueEntityReq.data.isTemplate) {
-          const newValueEId = await InstTemplate(valueEntityReq.data, userRole);
-          if (newValueEId) {
-            prop.value.entityId = newValueEId;
+          const newValueE = await InstTemplate(valueEntityReq.data, userRole);
+          if (newValueE) {
+            prop.value.entityId = newValueE.id;
           }
         }
       }
@@ -173,10 +175,10 @@ export const InstActant = async (
     const actantE = eReq.data;
 
     if (actantE && actantE.isTemplate) {
-      const instActantId = await InstTemplate(actantE, userRole);
+      const instActant = await InstTemplate(actantE, userRole);
 
-      if (instActantId) {
-        actant.entityId = instActantId;
+      if (instActant) {
+        actant.entityId = instActant.id;
       }
     }
   }
@@ -195,10 +197,10 @@ export const InstAction: any = async (
     const actionE = eReq.data;
 
     if (actionE && actionE.isTemplate) {
-      const instActionId = await InstTemplate(actionE, userRole);
+      const instAction = await InstTemplate(actionE, userRole);
 
-      if (instActionId) {
-        action.actionId = instActionId;
+      if (instAction) {
+        action.actionId = instAction.id;
       }
     }
   }
@@ -212,7 +214,7 @@ export const InstTemplate = async (
   templateEntity: IEntity | IStatement | ITerritory,
   userRole: UserEnums.Role,
   territoryParentId?: string
-): Promise<string | false> => {
+): Promise<IEntity | false> => {
   if (templateEntity.isTemplate) {
     let iEntity: false | IEntity = false;
     if (templateEntity.class === EntityEnums.Class.Statement) {
@@ -258,7 +260,7 @@ export const InstTemplate = async (
 
     const createReq = await api.entityCreate(iEntity);
     if (createReq) {
-      return iEntity.id;
+      return iEntity;
     }
   }
 
@@ -525,10 +527,11 @@ export const CStatement = (
   userOptions: UserOptions,
   label?: string,
   detail?: string,
-  territoryId?: string
+  territoryId?: string,
+  id?: string
 ): IStatement => {
   const newStatement: IStatement = {
-    id: uuidv4(),
+    id: id ?? uuidv4(),
     class: EntityEnums.Class.Statement,
     label: label ? label : "",
     detail: detail ? detail : "",
@@ -566,9 +569,10 @@ export const CTerritory = (
   label: string,
   detail: string,
   parentId: string,
-  parentOrder: number
+  parentOrder: number,
+  id?: string
 ): ITerritory => ({
-  id: uuidv4(),
+  id: id ?? uuidv4(),
   class: EntityEnums.Class.Territory,
   label: label,
   detail: detail,
@@ -604,6 +608,52 @@ export const CEntity = (
       entityClass === EntityEnums.Class.Concept
         ? EntityEnums.Status.Pending
         : EntityEnums.Status.Approved,
+    language: userOptions.defaultLanguage,
+    notes: [],
+    props: [],
+    references: [],
+    isTemplate: false,
+  };
+};
+
+export const CAction = (
+  userOptions: UserOptions,
+  label: string,
+  partOfSpeech: EntityEnums.ActionPartOfSpeech,
+  detail?: string
+): IAction => {
+  return {
+    id: uuidv4(),
+    class: EntityEnums.Class.Action,
+    label: label,
+    detail: detail ? detail : "",
+    data: {
+      pos: partOfSpeech,
+      entities: {},
+      valencies: { a1: "", a2: "", s: "" },
+    },
+    status: EntityEnums.Status.Pending,
+    language: userOptions.defaultLanguage,
+    notes: [],
+    props: [],
+    references: [],
+    isTemplate: false,
+  };
+};
+
+export const CConcept = (
+  userOptions: UserOptions,
+  label: string,
+  partOfSpeech: EntityEnums.ConceptPartOfSpeech,
+  detail?: string
+): IConcept => {
+  return {
+    id: uuidv4(),
+    class: EntityEnums.Class.Concept,
+    label: label,
+    detail: detail ? detail : "",
+    data: { pos: partOfSpeech },
+    status: EntityEnums.Status.Pending,
     language: userOptions.defaultLanguage,
     notes: [],
     props: [],

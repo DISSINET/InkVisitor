@@ -17,6 +17,7 @@ import { mergeDeep } from "@common/functions";
 import { IRequest } from "src/custom_typings/request";
 import Document from "@models/document/document";
 import ResponseDocument from "@models/document/response";
+import { EntityEnums } from "@shared/enums";
 
 export default Router()
   /**
@@ -49,9 +50,68 @@ export default Router()
     "/",
     asyncRouteHandler<IResponseDocument[]>(async (request: IRequest) => {
       const docs = await Document.getAll(request.db.connection);
-      return docs.map((d) => new ResponseDocument(d));
+
+      const docResponses = [];
+      for (const d of docs) {
+        const document = new ResponseDocument(d);
+        await document.populateWithEntities(request.db.connection);
+        docResponses.push(document);
+      }
+
+      return docResponses;
     })
   )
+
+  .post("/export", async (request: IRequest, res: any) => {
+    const id = request.body.documentId;
+    const exportedEntities = request.body
+      .exportedEntities as EntityEnums.Class[];
+
+    if (!id) {
+      throw new BadParams("document id has to be set");
+    }
+
+    console.log("EXPORTING");
+
+    const existing = await Document.findDocumentById(request.db.connection, id);
+
+    if (!existing) {
+      throw DocumentDoesNotExist.forId(id);
+    }
+
+    const document = new ResponseDocument(existing);
+    await document.populateWithEntities(request.db.connection);
+
+    // Search document for anchors <entityId>text</entityId>
+    // Anchors with entityId that are not in exportedEntities should be removed
+    // When removing the anchors, the text between the anchors should be kept
+    //
+    const filteredContent = document.content.replace(/<[^<>]+>/g, (match) => {
+      // remove <, >, and / from the match
+      const entityId = match.slice(1, -1).replace("/", "");
+      let validEntityClass = false;
+      exportedEntities.forEach((entityClass) => {
+        document.referencedEntityIds[entityClass].forEach((id) => {
+          if (id === entityId) {
+            validEntityClass = true;
+          }
+        });
+      });
+
+      if (validEntityClass) {
+        return match;
+      } else {
+        // return the text inbetween the anchors
+        return "";
+      }
+    });
+
+    // TODO: filtering of anchors should happen here
+
+    res.setHeader("content-type", "text/plain");
+    res.setHeader("Content-Disposition", `attachment; filename="export.txt"`);
+    res.send(filteredContent);
+  })
   /**
    * @openapi
    * /documents/{documentId}:
@@ -99,7 +159,9 @@ export default Router()
         throw DocumentDoesNotExist.forId(id);
       }
 
-      return new ResponseDocument(existing);
+      const document = new ResponseDocument(existing);
+      await document.populateWithEntities(request.db.connection);
+      return document;
     })
   )
   /**
@@ -127,7 +189,9 @@ export default Router()
   .post(
     "/",
     asyncRouteHandler<IResponseGeneric>(async (request: IRequest) => {
+      console.log("before model");
       const model = new Document(request.body as Record<string, unknown>);
+      console.log("after model", model);
 
       if (!model.isValid()) {
         throw new ModelNotValidError("");

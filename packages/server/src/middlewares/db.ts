@@ -18,8 +18,8 @@ export default async function dbMiddleware(
   }
 
   res.on("close", async function () {
-    if (req.db.lockInstance) {
-      req.db.lockInstance.onError(new Error("client closed the connection"));
+    if (req.db.lockAwaiter) {
+      req.db.lockAwaiter.onError(new Error("client closed the connection"));
     }
 
     await pool.release(req.db);

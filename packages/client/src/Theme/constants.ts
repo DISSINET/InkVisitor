@@ -3,7 +3,7 @@ import theme from "./theme";
 
 export const defaultPing = -10;
 
-export const DropdownAny = "any";
+// wild card char used in search
 export const wildCardChar = "*";
 
 export const rootTerritoryId = "T0";
@@ -23,12 +23,16 @@ export const thirdPanelMinWidth = 450;
 export const percentPanelWidths = [10, 31, 41, 18];
 export const separatorXPercentPosition = 42;
 // BOXES
-export const hiddenBoxHeight = 34;
+export const hiddenBoxHeight = 33;
 export const fourthPanelBoxesHeightThirds = {
   search: 40,
   bookmarks: 27,
   templates: 33,
 };
+
+// the minimum pixels for the results section height
+export const MIN_SEARCH_RESULT_HEIGHT = 100;
+export const COLLAPSED_TABLE_WIDTH = 90;
 
 // LIMITS
 export const maxTabCount = 10;
@@ -36,6 +40,10 @@ export const maxTooltipTreeForks = 2;
 export const maxTooltipMultiRelations = 5;
 
 export const tooltipLabelSeparator = " • ";
+
+export const SAFE_PASSWORD_DESCRIPTION =
+  "A safe password: at least 12 characters, a combination of uppercase letters, lowercase letters, numbers, and symbols.";
+export const MIN_LABEL_LENGTH_MESSAGE = "Fill in at least one character";
 
 // animations
 export const springConfig: { [key: string]: {} } = {

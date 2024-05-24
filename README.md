@@ -63,7 +63,7 @@ The environment supports three user roles:
 
 Further, admins may grant particular users (editors and viewers) access rights for specified territories. Editor role may be granted by "edit" rights, viewer role has "view" rights.
 
-**Entity Detail** is accessible to all roles. The viewer is not allowed to change any value, while the editor may change label, detail, notes, language and add, remove and edit property statements with the status of "pending." Moreover, all meta props in detail that he creates are getting status "pending." Admin has full access to internal attributes of the entity (status, class) and meta props. All meta props he creates have the status "approved."
+**Entity Detail** is accessible to all roles. The viewer is not allowed to change any value, while the editor may change label, detail, notes, language and add, remove and edit property statements with the status of "pending." Moreover, all metaprops in detail that he creates are getting status "pending." Admin has full access to internal attributes of the entity (status, class) and metaprops. All metaprops he creates have the status "approved."
 
 Only admin and editor with edit rights in the parent **Territory** (T) may edit, add or remove a child T. Editors and viewers do not see T they have no rights to in the T Tree. Only "edit" rights for the T grant the rights to add a new Statement under that particular T, or any other child of that T. That means that the admin has first to create a T and grant edit rights to editors.
 
@@ -89,12 +89,15 @@ Package containing typescript definitions, types and enums, that should be avail
 
 ## Development
 
+### Install
+
 Install `pnpm` version `>=8.6.0`. You can switch the `pnpm` versions by running `corepack prepare pnpm@<version> --activate`.
 Go to all three folders in `packages` (`client`, `server`, `database`) and run `pnpm i` in each of them.
+Before continuing, please ensure that you have database instance setup & running (see deploying with docker below)
 
 ## Deploy
 
-To deploy the Inkvisitor instance, you can use Docker (or Podman) or build and deploy the packages separately.
+To deploy the Inkvisitor instance, you can use Docker (or Podman), host it on Kubernetes cluster, or build and deploy the packages separately.
 
 ### Deploy with Docker
 
@@ -103,34 +106,41 @@ To use docker to deploy the InkVisitor application:
 1.  Install [docker](https://docs.docker.com/get-docker/).
 2.  Install [docker-compose tool](https://docs.docker.com/compose/install/).
 3.  Clone | Fork | Download the Inkvisitor [repository](https://github.com/DISSINET/InkVisitor).
-4.  Prepare `.env` files for servers listed under `env_file` sections. Check the server's [README.md](https://github.com/DISSINET/InkVisitor/blob/dev/packages/server/README.md) and [example.env](https://github.com/DISSINET/InkVisitor/blob/dev/packages/server/env/example.env) files for more information.
-5.  To prepare the necessary configuration files for the client application, you should identify the appropriate environment variables (ENV) under the `build -> args` section and then use them to create the `.env` files. You can see the server's [README.md](https://github.com/DISSINET/InkVisitor/blob/dev/packages/server/README.md) and [example.env](https://github.com/DISSINET/InkVisitor/blob/dev/packages/server/env/example.env) files to ensure you have included all the necessary configuration information.
-6.  Run the database - either as a service or containerized using `docker-compose up -d database`.
+4.  For server - prepare `.env` files for servers listed under `env_file` sections in `docker-compose.yml` file. Check the server's [README.md](https://github.com/DISSINET/InkVisitor/blob/dev/packages/server/README.md) and [example.env](https://github.com/DISSINET/InkVisitor/blob/dev/packages/server/env/example.env) files for more information.
+5.  For client app - prepare `.env.<ENV>` file that should identify the appropriate environment under the `build -> args` section in `docker-compose.yml` file. You can see the client's [README.md](https://github.com/DISSINET/InkVisitor/blob/dev/packages/client/README.md) and [example.env](https://github.com/DISSINET/InkVisitor/blob/dev/packages/client/env/example.env) files to ensure you have included all the necessary configuration information.
+6.  Run the database - either as a service or containerized using `docker-compose up -d database`. If the database is empty, please use the import script (`packages/database`) to create the database structure and (optional) import some testing data by running `pnpm start` and following the information in the prompt. Use at least `empty` dataset - for bare minimum.
 7.  Build app image (will also be done in next step if not available) `docker-compose build inkvisitor` (or `inkvisitor-<env>`).
 8.  Run the containerized application with the command `docker-compose up inkvisitor` (or `inkvisitor-<env>`).
 
+### Kubernetes
+
+See [kube](./kube) directory for examples. Please, check your cluster's capabilities as the setup could differ.
+
 ### Deploy by packages
 
-The InkVisitor codebase consists of three interconnected packages (parts) - the client application, the server, and the database. You can deploy those packages individually if you do not want to use Docker. In each step, make sure to have the appropriate `.env.<env>` file accessible - see the Readme.md file in the package for more information.
+The InkVisitor codebase consists of three interconnected packages (parts) - the client application, the server, and the database (set of tools/import datasets). You can deploy those packages individually if you do not want to use Docker. In each step, make sure to have the appropriate `.env.<env>` file accessible - see the Readme.md file in the package for more information.
 
-#### 1\. Client application
+#### 1\. Database
+
+1. Follow tutorials on the [official page](https://rethinkdb.com/docs/install/) to install RethinkDB on your machine, or simply use `docker compose up -d database`.
+2. Use the import script to create the database structure and (optional) import some testing data by running `pnpm start` and following the information in the prompt. Use at least `empty` dataset - for bare minimum.
+
+#### 2\. Client application
 
 The client application runs on static files - html/css/js + additional assets. These files need to be moved to your HTTP server by:
 
-1.  Build the frontend app by `npm run build-<env>` to create/update the `dist` folder
+1.  Build the frontend app by `pnpm run build-<env>` to create/update the `dist` folder. `<env>` dictates which `.env.<env>` file will be used.
 2.  Copy contents of `dist` folder to the directory used by your HTTP server.
 
-#### 2\. Server
+#### 3\. Server
 
 The server is also built in Javascript, using mainly the Node + Express libraries. You need to first build the application, move the build to your server and run it from there.
 
-1.  Run `yarn run build` to transpile the code.
+1.  Run `pnpm run build` to transpile the code.
 2.  Move the `dist` folder to your server that supports the Node.js environment.
-3.  Do `ENV_FILE=<env> yarn run start` to run the built application with a loaded `.env.<env>` file.
+3.  Do `ENV_FILE=<env> yarn run start:dist` to run the built application with a loaded `.env.<env>` file.
 
-#### 3\. Database
-
-Follow tutorials on the [official page](https://rethinkdb.com/docs/install/) to install RethinkDB on your machine. Then, use the import script to create the database structure and (optional) import some testing data by running \`npm run import\` and following the information in the prompt.
+For quicker use, use can also run the server directly without building using `pnpm start` (this uses `nodemon` tool and `.env.development` environment file).
 
 ### Firewall
 
@@ -140,6 +150,8 @@ Make sure the ports required by each application are not blocked. Required ports
 2.  [firewalld](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/security_guide/sec-using_firewalls): `firewall-cmd --zone=public --permanent --add-port=<port>/tcp`
 
 Setup for additional system specific features (reverse proxies etc) are beyond the scope of this readme.
+You should be able to allow at least the port for server api (default is 3000) and port for serving client files (if using docker image, it would be served by server api).
+You don't need to allow public access to database, however rethinkdb serves monitoring tool on port 8080.
 
 ## ACL - access control list
 

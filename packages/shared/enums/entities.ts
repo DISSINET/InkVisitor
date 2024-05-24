@@ -15,9 +15,12 @@ export namespace EntityEnums {
   };
 
   // Predicate for testing if input value is one of accepted class values
-  export const IsClass = function(input: unknown, ...accepted: Class[]): boolean {
-    return accepted.indexOf(input as Class) !== -1
-  }
+  export const IsClass = function (
+    input: unknown,
+    ...accepted: Class[]
+  ): boolean {
+    return accepted.indexOf(input as Class) !== -1;
+  };
 
   export enum Class {
     Action = "A",
@@ -41,6 +44,10 @@ export namespace EntityEnums {
     Invalid = "?",
   }
 
+<<<<<<< HEAD
+=======
+  export type ExtendedClass = Class | Extension;
+>>>>>>> dev
 
   export const PLOGESTR = [
     Class.Person,
@@ -63,6 +70,7 @@ export namespace EntityEnums {
     Class.Resource,
     Class.Being,
   ];
+<<<<<<< HEAD
   export const ExtendedClasses = [
     Class.Action,
     Class.Territory,
@@ -80,16 +88,41 @@ export namespace EntityEnums {
   ];
 
   export const LOESBV = [
+=======
+  export const PLOGESTRBV = [
+    Class.Person,
+>>>>>>> dev
     Class.Location,
     Class.Object,
+    Class.Group,
     Class.Event,
     Class.Statement,
+    Class.Territory,
+    Class.Resource,
     Class.Being,
     Class.Value,
   ];
+<<<<<<< HEAD
 
 
   export type ExtendedClass = Class | Extension;
+=======
+  export const ExtendedClasses = [
+    Class.Action,
+    Class.Territory,
+    Class.Statement,
+    Class.Resource,
+    Class.Person,
+    Class.Being,
+    Class.Group,
+    Class.Object,
+    Class.Concept,
+    Class.Location,
+    Class.Value,
+    Class.Event,
+    Extension.Empty,
+  ];
+>>>>>>> dev
 
   /**
    * Helper function for testing if input value is valid extended class value
@@ -97,8 +130,11 @@ export namespace EntityEnums {
    * @returns
    */
   export const IsExtendedClass = (input: unknown): boolean => {
-    return Object.values(Class).indexOf(input as any) !== -1 || Object.values(Extension).indexOf(input as any) !== -1
-  }
+    return (
+      Object.values(Class).indexOf(input as any) !== -1 ||
+      Object.values(Extension).indexOf(input as any) !== -1
+    );
+  };
 
   export enum LogicalType {
     Definite = "1",

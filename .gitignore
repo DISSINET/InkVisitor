@@ -32,6 +32,7 @@ import/~$actants.xlsx
 
 # venv
 .env.**
+.env
 
 # docker files
 *.tar

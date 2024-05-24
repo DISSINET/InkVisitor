@@ -23,9 +23,12 @@ import disableTreeScrollSlice from "./features/territoryTree/disableTreeScrollSl
 import filterOpenSlice from "./features/territoryTree/filterOpenSlice";
 import pingSlice from "./features/pingSlice";
 import showWarningsSlice from "./features/statementEditor/showWarningsSlice";
+import themeSlice from "./features/themeSlice";
+import isLoadingSlice from "./features/statementList/isLoadingSlice";
 
 const store: Store = configureStore({
   reducer: {
+    theme: themeSlice,
     username: usernameSlice,
     ping: pingSlice,
     draggedEntity: draggedEntitySlice,
@@ -40,6 +43,7 @@ const store: Store = configureStore({
       draggedRowId: draggedRowIdSlice,
       lastClickedIndex: lastClickedIndexSlice,
       disableStatementListScroll: disableStatementListScrollSlice,
+      isLoading: isLoadingSlice,
     }),
     statementEditor: combineReducers({
       showWarnings: showWarningsSlice,

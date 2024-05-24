@@ -1,4 +1,4 @@
-FROM gplane/pnpm:8.6.0-node16-alpine as build-env
+FROM gplane/pnpm:node18-alpine as build-env
 
 RUN apk add tzdata openssl
 ENV TZ=Europe/Prague
@@ -18,7 +18,7 @@ RUN pnpm prune --prod
 RUN mkdir -p ./secret
 RUN openssl req -x509 -newkey rsa:2048 -nodes -out ./secret/cert.pem -keyout ./secret/key.pem -days 365 -subj "/C=FR/O=krkr/OU=Domain Control Validated/CN=*"
 
-FROM gplane/pnpm:8.6.0-node16-alpine
+FROM gplane/pnpm:node18-alpine 
 
 COPY --from=build-env /app /app
 

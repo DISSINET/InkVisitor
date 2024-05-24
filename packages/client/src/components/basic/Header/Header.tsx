@@ -28,10 +28,10 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <StyledHeader
       $color={color}
-      height={height}
-      paddingX={paddingX}
-      paddingY={paddingY}
-      layoutWidth={layoutWidth}
+      $height={height}
+      $paddingX={paddingX}
+      $paddingY={paddingY}
+      $layoutWidth={layoutWidth}
     >
       <TextLeft>{left}</TextLeft>
       <TextRight>{right}</TextRight>

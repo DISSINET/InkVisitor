@@ -1,14 +1,14 @@
+import { animated, config, useSpring } from "@react-spring/web";
 import { UserEnums } from "@shared/enums";
 import { Button } from "components/basic/Button/Button";
 import React, { useState } from "react";
 import { BiLogOut } from "react-icons/bi";
+import { CgFileDocument } from "react-icons/cg";
 import { FaBars, FaBookOpen, FaInfo, FaUsers } from "react-icons/fa";
-import { useNavigate, useLocation } from "react-router";
-import { animated, config, useSpring } from "@react-spring/web";
+import { useLocation, useNavigate } from "react-router";
 import { IPage } from "types";
 import { MenuItem } from "./MenuItem";
 import { StyledMenuGroup, StyledMenuGroupWrapper } from "./MenuStyles";
-import { GrDocumentText } from "react-icons/gr";
 
 interface Menu {
   userRole: string;
@@ -60,7 +60,7 @@ export const Menu: React.FC<Menu> = ({
       color: "info",
       href: "/documents",
       admin: true,
-      icon: <GrDocumentText />,
+      icon: <CgFileDocument size={18} />,
     },
   ];
 
@@ -75,6 +75,7 @@ export const Menu: React.FC<Menu> = ({
 
   return (
     <div
+      id="#hover-me"
       onClick={() => setMenuOpen(!menuOpen)}
       onMouseLeave={() => setMenuOpen(false)}
       onMouseEnter={() => setMenuOpen(true)}
@@ -82,7 +83,7 @@ export const Menu: React.FC<Menu> = ({
       <Button
         icon={
           <animated.div style={rotateMenuIcon}>
-            <FaBars />
+            <FaBars size={14} />
           </animated.div>
         }
         label="Menu"

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { IEntity, Relation as RelationTypes } from "@shared/types";
 import { Connection } from "rethinkdb-ts";
 import { question } from "scripts/import/prompts";
@@ -98,6 +99,10 @@ class Generator {
     fs.writeFileSync(this.getPath("relations.json"), JSON.stringify(allRelations, null, 4))
   }
 }
+=======
+import { Connection } from "rethinkdb-ts";
+import Generator from "../Generator";
+>>>>>>> dev
 
 const job = async (db: Connection) => {
   const generator = new Generator()

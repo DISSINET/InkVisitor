@@ -1,9 +1,27 @@
 import { DropdownItem } from "types";
 import { EntityEnums } from "../enums";
 
+// for single entity dropdown
+export const dropdownWildCard: {
+  value: EntityEnums.Extension.Any;
+  label: string;
+  info: string;
+} = {
+  value: EntityEnums.Extension.Any,
+  label: "*",
+  info: "",
+};
+
+// currently used in multi entity but also attribute dropdowns
 export const allEntities: DropdownItem = {
   value: EntityEnums.Extension.Any,
   label: "Any",
+  info: "",
+};
+
+export const empty: DropdownItem = {
+  value: EntityEnums.Extension.Empty,
+  label: "Empty",
   info: "",
 };
 
@@ -85,6 +103,4 @@ export const classesAll = [
   EntityEnums.Class.Value,
 ];
 
-export const entitiesDict: DropdownItem[] = classesAll.map(
-  (c) => entitiesDictKeys[c]
-);
+export const entitiesDict = classesAll.map((c) => entitiesDictKeys[c]);

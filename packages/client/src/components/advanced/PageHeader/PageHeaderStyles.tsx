@@ -18,7 +18,7 @@ export const StyledHeader = styled.div`
 export const StyledHeaderTag = styled.div`
   cursor: copy;
   font-size: 1.2rem;
-  margin-top: 2.6rem;
+  margin-top: 1.6rem;
   opacity: 0.8;
   padding: ${({ theme }) => theme.space[2]};
   padding-bottom: 0;
@@ -40,11 +40,40 @@ export const StyledUsername = styled.div`
 export const StyledRightHeader = styled.div`
   display: flex;
 `;
+export const StyledThemeSwitcher = styled.div`
+  display: inline-flex;
+  border-radius: 1.2rem;
+  overflow: hidden;
+  cursor: pointer;
+  margin-right: 1rem;
+  border-width: 0.2rem;
+  border-style: solid;
+  border-color: ${({ theme }) => theme.color.gray["800"]};
+`;
+
+interface StyledThemeSwitcherIcon {
+  selected: boolean;
+}
+export const StyledThemeSwitcherIcon = styled.div<StyledThemeSwitcherIcon>`
+  padding: 0.5rem 0.8rem;
+  font-size: 15px;
+  transition: 0.3s all;
+  background-color: ${({ theme, selected }) =>
+    selected ? theme.color.gray[800] : theme.color.gray[600]};
+  color: ${({ theme, selected }) =>
+    selected ? "white" : theme.color.gray[400]};
+`;
+
 export const StyledUser = styled.div`
   display: flex;
   align-items: center;
-  margin-right: ${({ theme }) => theme.space[4]};
 `;
+
+export const StyledMenu = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
 export const StyledLoaderWrap = styled.div`
   height: 1rem;
   width: 1rem;
@@ -53,14 +82,14 @@ export const StyledLoaderWrap = styled.div`
 `;
 
 interface StyledPingColor {
-  pingColor: keyof PingColor;
+  $pingColor: keyof PingColor;
 }
 export const StyledPingColor = styled.div<StyledPingColor>`
   width: 1rem;
   height: 1rem;
   border: 0.5px solid rgba(255, 255, 255, 0.8);
   border-radius: 50%;
-  background-color: ${({ theme, pingColor }) => theme.color.ping[pingColor]};
+  background-color: ${({ theme, $pingColor }) => theme.color.ping[$pingColor]};
   margin-right: 0.3rem;
   margin-left: 0.3rem;
 `;
@@ -88,4 +117,11 @@ export const StyledSandboxText = styled.div`
 export const StyledSpace = styled.div`
   display: flex;
   flex-grow: 1;
+`;
+export const StyledLoggedAsWrap = styled.div`
+  min-width: 3rem;
+  position: relative;
+  margin-right: 1rem;
+  display: flex;
+  align-items: center;
 `;

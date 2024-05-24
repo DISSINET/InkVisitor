@@ -15,7 +15,7 @@ export class Db {
   static mutex = new Mutex();
 
   // assigned lock for db connection
-  lockInstance?: Awaiter;
+  lockAwaiter?: Awaiter;
 
   // wrapped db sonnection
   connection: Connection = {} as Connection;
@@ -40,16 +40,16 @@ export class Db {
    * Creates awaiter instance and uses it to lock the mutex - if the queue allows it to
    */
   async lock(): Promise<void> {
-    this.lockInstance = new Awaiter();
-    await Db.mutex.lock(this.lockInstance);
+    this.lockAwaiter = new Awaiter();
+    await Db.mutex.lock(this.lockAwaiter);
   }
 
   /**
    * Clears the mutex lock and closes the db connection
    */
   async close() {
-    if (this.lockInstance) {
-      Db.mutex.unlock(this.lockInstance);
+    if (this.lockAwaiter) {
+      Db.mutex.unlock(this.lockAwaiter);
     }
 
     if (this.connection) {

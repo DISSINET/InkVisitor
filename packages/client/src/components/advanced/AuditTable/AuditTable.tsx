@@ -52,16 +52,14 @@ export const AuditTableRow: React.FC<AuditTableRow> = ({
     data: userData,
     error: userError,
     isFetching: isFetchingUser,
-  } = useQuery(
-    ["user", user],
-    async () => {
+  } = useQuery({
+    queryKey: ["user", user],
+    queryFn: async () => {
       const res = await api.withoutToaster().usersGet(user as string);
       return res.data;
     },
-    {
-      enabled: !!user,
-    }
-  );
+    enabled: !!user,
+  });
 
   const changedKeys =
     Object.keys(changes).length === 1 && Object.keys(changes)[0] === "data"
@@ -82,41 +80,39 @@ export const AuditTableRow: React.FC<AuditTableRow> = ({
   const prettyTime = new Date(date).toLocaleTimeString("en-GB");
 
   return (
-    <div>
-      <StyledAuditRow>
-        <StyledAuditColumn>
-          <FaUser />
-          {userData ? userData.name : <i>{"removed user"}</i>}
-        </StyledAuditColumn>
-        <StyledAuditColumn>
-          <FaRegCalendarAlt />
-          {getPrettyDate()}
-        </StyledAuditColumn>
-        <StyledAuditColumn>
-          <RiTimeLine />
-          {prettyTime}
-        </StyledAuditColumn>
-        <StyledAuditColumn $wrap>
-          {mode === "create" ? (
-            <Button
-              icon={<MdAddCircleOutline />}
-              noBackground
-              inverted
-              noBorder
-              tooltipLabel="created"
-            />
-          ) : (
-            <Button
-              icon={<FaExchangeAlt />}
-              noBackground
-              inverted
-              noBorder
-              tooltipLabel="edited"
-            />
-          )}
-          {mode === "create" ? "" : changedKeys.join(", ")}
-        </StyledAuditColumn>
-      </StyledAuditRow>
-    </div>
+    <StyledAuditRow>
+      <StyledAuditColumn>
+        <FaUser />
+        {userData ? userData.name : <i>{"removed user"}</i>}
+      </StyledAuditColumn>
+      <StyledAuditColumn>
+        <FaRegCalendarAlt />
+        {getPrettyDate()}
+      </StyledAuditColumn>
+      <StyledAuditColumn>
+        <RiTimeLine />
+        {prettyTime}
+      </StyledAuditColumn>
+      <StyledAuditColumn $wrap>
+        {mode === "create" ? (
+          <Button
+            icon={<MdAddCircleOutline />}
+            noBackground
+            inverted
+            noBorder
+            tooltipLabel="created"
+          />
+        ) : (
+          <Button
+            icon={<FaExchangeAlt />}
+            noBackground
+            inverted
+            noBorder
+            tooltipLabel="edited"
+          />
+        )}
+        {mode === "create" ? "" : changedKeys.join(", ")}
+      </StyledAuditColumn>
+    </StyledAuditRow>
   );
 };

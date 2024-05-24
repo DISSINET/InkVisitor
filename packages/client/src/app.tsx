@@ -1,18 +1,13 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import { Helmet } from "react-helmet";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { ThemeProvider } from "styled-components";
 
 import api from "api";
-import { SearchParamsProvider } from "hooks/useParamsContext";
 import { useWindowSize } from "hooks/useWindowSize";
-import ActivatePage from "pages/Activate";
-import LoginPage from "pages/Login";
-import UsersPage from "pages/Users";
-
 import {
   heightHeader,
   percentPanelWidths,
@@ -21,20 +16,31 @@ import {
   thirdPanelMinWidth,
 } from "Theme/constants";
 import GlobalStyle from "Theme/global";
+import theme, { ThemeType } from "Theme/theme";
+import { darkTheme } from "Theme/theme-dark";
 import { Page } from "components/advanced";
 import { useDebounce } from "hooks";
-import { AboutPage } from "pages/About";
-import NotFoundPage from "pages/NotFound";
+
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { setContentHeight } from "redux/features/layout/contentHeightSlice";
 import { setLayoutWidth } from "redux/features/layout/layoutWidthSlice";
 import { setPanelWidths } from "redux/features/layout/panelWidthsSlice";
 import { setSeparatorXPosition } from "redux/features/layout/separatorXPositionSlice";
-import theme from "./Theme/theme";
-import AclPage from "./pages/Acl";
-import MainPage from "./pages/MainPage";
-import { DocumentsPage } from "pages/Documents";
+
+import { InterfaceEnums } from "@shared/enums";
+import {
+  LoginPage,
+  ActivatePage,
+  PasswordResetPage,
+  MainPage,
+  AclPage,
+  AboutPage,
+  UsersPage,
+  DocumentsPage,
+  NotFoundPage,
+} from "pages";
+import { SearchParamsProvider } from "hooks/useSearchParamsContext";
 
 const clockPerformance = (
   profilerId: any,
@@ -72,6 +78,8 @@ const queryClient = new QueryClient({
     queries: {
       refetchOnWindowFocus: false,
       retry: false,
+      // turn on for airplane / offline work
+      // networkMode: "always",
     },
   },
 });
@@ -80,6 +88,16 @@ export const App: React.FC = () => {
   const disableUserSelect = useAppSelector(
     (state) => state.layout.disableUserSelect
   );
+  const selectedThemeId: InterfaceEnums.Theme = useAppSelector(
+    (state) => state.theme
+  );
+
+  const themeConfig = useMemo<ThemeType>(() => {
+    if (selectedThemeId === "dark") {
+      return darkTheme;
+    }
+    return theme;
+  }, [selectedThemeId]);
 
   const [debouncedWidth, debouncedHeight] = useDebounce(useWindowSize(), 50);
 
@@ -157,10 +175,16 @@ export const App: React.FC = () => {
         <meta charSet="utf-8" />
         <title>InkVisitor</title>
       </Helmet>
-      <ThemeProvider theme={theme}>
-        <GlobalStyle disableUserSelect={disableUserSelect} />
+      <ThemeProvider theme={themeConfig}>
+        <GlobalStyle
+          theme={themeConfig}
+          disableUserSelect={disableUserSelect}
+        />
         <QueryClientProvider client={queryClient}>
-          <ReactQueryDevtools initialIsOpen={false} />
+          <div style={{ fontSize: "16px" }}>
+            {/* fontSize zooms query devtools to normal size */}
+            <ReactQueryDevtools initialIsOpen={false} />
+          </div>
           <DndProvider backend={HTML5Backend}>
             <BrowserRouter basename={process.env.ROOT_URL}>
               <SearchParamsProvider>
@@ -180,6 +204,14 @@ export const App: React.FC = () => {
                       element={
                         <PublicPath>
                           <ActivatePage />
+                        </PublicPath>
+                      }
+                    />
+                    <Route
+                      path="/password_reset"
+                      element={
+                        <PublicPath>
+                          <PasswordResetPage />
                         </PublicPath>
                       }
                     />
@@ -224,6 +256,7 @@ export const App: React.FC = () => {
                         </RequireAuth>
                       }
                     />
+
                     <Route path="*" element={<NotFoundPage />} />
                   </Routes>
                 </Page>

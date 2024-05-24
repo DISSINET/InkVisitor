@@ -1,3 +1,4 @@
+import { InterfaceEnums } from "./interface";
 import { EntityEnums } from "./entities";
 import { RelationEnums } from "./relations";
 import { UserEnums } from "./users";
@@ -8,6 +9,7 @@ import { StatementEnums } from "./statement";
 import { WarningTypeEnums } from "./warning";
 
 export {
+  InterfaceEnums,
   EntityEnums,
   RelationEnums,
   UserEnums,

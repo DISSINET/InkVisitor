@@ -8,7 +8,8 @@ import React, { ReactNode, useState } from "react";
 import { FaUnlink } from "react-icons/fa";
 import { useAppSelector } from "redux/hooks";
 import { DraggedEntityReduxItem, EntityDragItem } from "types";
-import { getEntityLabel, isValidEntityClass } from "utils";
+import { getEntityLabel, isValidEntityClass } from "utils/utils";
+import { StyledEntityTagWrap } from "./EntityTagStyles";
 
 interface UnlinkButton {
   onClick: () => void;
@@ -19,7 +20,6 @@ interface UnlinkButton {
 interface EntityTag {
   entity: IEntity;
   parentId?: string;
-  mode?: "selected" | "disabled" | "invalid" | false;
   showOnly?: "entity" | "label";
   fullWidth?: boolean;
   button?: ReactNode;
@@ -35,8 +35,10 @@ interface EntityTag {
   statementsCount?: number;
   isFavorited?: boolean;
   elvlButtonGroup?: ReactNode | false;
+  flexListMargin?: boolean;
 
   unlinkButton?: UnlinkButton | false;
+  customTooltipAttributes?: { partLabel?: string };
 }
 
 export const EntityTag: React.FC<EntityTag> = ({
@@ -44,7 +46,6 @@ export const EntityTag: React.FC<EntityTag> = ({
   parentId,
   showOnly,
   fullWidth = false,
-  mode,
   button = false,
   index,
   moveFn,
@@ -59,8 +60,10 @@ export const EntityTag: React.FC<EntityTag> = ({
   isFavorited,
 
   elvlButtonGroup = false,
+  flexListMargin = false,
 
   unlinkButton,
+  customTooltipAttributes,
 }) => {
   const draggedEntity: DraggedEntityReduxItem = useAppSelector(
     (state) => state.draggedEntity
@@ -103,8 +106,8 @@ export const EntityTag: React.FC<EntityTag> = ({
 
   return (
     <>
-      <div
-        style={{ display: "inline-flex", overflow: "hidden" }}
+      <StyledEntityTagWrap
+        $flexListMargin={flexListMargin}
         ref={setReferenceElement}
         onMouseEnter={() => setTagHovered(true)}
         onMouseLeave={() => setTagHovered(false)}
@@ -121,6 +124,8 @@ export const EntityTag: React.FC<EntityTag> = ({
                 ? entity.data.text
                 : undefined
             }
+            isTemplate={entity.isTemplate}
+            partOfSpeech={entity.data.pos}
             itemsCount={statementsCount}
             position={tooltipPosition}
             disabled={
@@ -129,6 +134,7 @@ export const EntityTag: React.FC<EntityTag> = ({
             }
             tagHovered={tagHovered}
             referenceElement={referenceElement}
+            customTooltipAttributes={customTooltipAttributes}
           />
         )}
         <Tag
@@ -146,7 +152,6 @@ export const EntityTag: React.FC<EntityTag> = ({
           }
           moveFn={moveFn}
           entityClass={classId}
-          mode={mode}
           borderStyle="solid"
           invertedLabel={isSelected}
           index={index}
@@ -176,7 +181,7 @@ export const EntityTag: React.FC<EntityTag> = ({
             )
           }
         />
-      </div>
+      </StyledEntityTagWrap>
     </>
   );
 };

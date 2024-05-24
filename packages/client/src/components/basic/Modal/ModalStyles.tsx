@@ -27,10 +27,10 @@ export const StyledBackground = styled(animated.div)`
 `;
 
 interface Card {
-  width: "full" | "fat" | "normal" | "thin" | number;
+  width: "full" | "fat" | "normal" | "auto" | number;
   $fullHeight: boolean;
 }
-const getWidth = (width: "full" | "fat" | "normal" | "thin" | number) => {
+const getWidth = (width: "full" | "fat" | "normal" | "auto" | number) => {
   if (typeof width === "number") {
     return `${width / 10}rem`;
   } else {
@@ -41,7 +41,7 @@ const getWidth = (width: "full" | "fat" | "normal" | "thin" | number) => {
         return "50rem";
       case "fat":
         return "100rem";
-      case "thin":
+      case "auto":
         return "auto";
     }
   }
@@ -79,23 +79,32 @@ export const StyledCardHeader = styled.header<StyledCardHeader>`
   border-bottom-color: ${({ theme }) => theme.color["gray"][400]};
   min-height: ${({ theme }) => theme.space[12]};
 `;
+export const StyledCardIcon = styled.div`
+  font-size: 24;
+  margin-right: 0.5rem;
+`;
 export const StyledCardTitle = styled.h2`
   font-weight: ${({ theme }) => theme.fontWeight["medium"]};
   font-size: ${({ theme }) => theme.fontSize["xl"]};
 `;
 interface StyledCardBody {
-  column?: boolean;
-  enableScroll: boolean;
+  $column?: boolean;
+  $enableScroll: boolean;
+  centered?: boolean;
 }
 export const StyledCardBody = styled.section<StyledCardBody>`
   display: flex;
   height: 100%;
-  flex-direction: ${({ column }) => (column ? "column" : "row")};
+  flex-direction: ${({ $column }) => ($column ? "column" : "row")};
+  align-items: ${({ centered }) => (centered ? "center" : "")};
+  justify-content: ${({ centered }) => (centered ? "center" : "")};
   padding: ${space5} ${space7};
-  overflow: ${({ enableScroll }) => (enableScroll ? "auto" : "initial")};
+  overflow: ${({ $enableScroll }) => ($enableScroll ? "auto" : "initial")};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
 `;
-interface StyledFooter {}
+interface StyledFooter {
+  $column?: boolean;
+}
 export const StyledFooter = styled.div<StyledFooter>`
   border-top-style: solid;
   border-top-width: ${({ theme }) => theme.borderWidth["default"]};
@@ -105,19 +114,20 @@ export const StyledFooter = styled.div<StyledFooter>`
   display: flex;
   flex-shrink: 0;
   justify-content: flex-end;
+  flex-direction: ${({ $column }) => ($column ? "column" : "row")};
   padding: ${({ theme }) => theme.space[4]};
 `;
 
 export const StyledModalInputForm = styled.div`
   display: grid;
   grid-template-columns: auto auto;
+  grid-row-gap: ${({ theme }) => theme.space[1]};
 `;
 export const StyledModalInputLabel = styled.p`
   display: grid;
   justify-content: flex-end;
   align-items: center;
-  margin-right: ${({ theme }) => theme.space[2]};
-  margin-bottom: ${({ theme }) => theme.space[1]};
+  margin-right: ${({ theme }) => theme.space[4]};
 `;
 interface StyledModalInputWrap {
   width?: number;

@@ -4,29 +4,29 @@ import {
   flip,
   useFloating,
 } from "@floating-ui/react";
-import { entitiesDictKeys } from "@shared/dictionaries";
+import { dropdownWildCard } from "@shared/dictionaries/entity";
 import { EntityEnums } from "@shared/enums";
 import { IEntity, IUserOptions } from "@shared/types";
-import { DropdownAny, scrollOverscanCount } from "Theme/constants";
-import theme from "Theme/theme";
+import { MIN_LABEL_LENGTH_MESSAGE, scrollOverscanCount } from "Theme/constants";
 import {
   Button,
-  Dropdown,
   Input,
   Loader,
   TemplateActionModal,
   TypeBar,
 } from "components";
+import Dropdown from "components/advanced";
 import useKeypress from "hooks/useKeyPress";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { DropTargetMonitor, useDrop } from "react-dnd";
 import { FaPlus } from "react-icons/fa";
 import { MdCancel } from "react-icons/md";
 import { toast } from "react-toastify";
 import { FixedSizeList as List } from "react-window";
+import { ThemeContext } from "styled-components";
 import {
-  DropdownItem,
   EntityDragItem,
+  EntitySingleDropdownItem,
   EntitySuggestion,
   ItemTypes,
   SuggesterItemToCreate,
@@ -34,6 +34,7 @@ import {
 import { SuggesterKeyPress } from "./SuggesterKeyPress";
 import {
   StyledAiOutlineWarning,
+  StyledDash,
   StyledInputWrapper,
   StyledRelativePosition,
   StyledSuggester,
@@ -52,17 +53,21 @@ interface Suggester {
   suggestions: EntitySuggestion[];
   placeholder?: string; // text to display when typed === ""
   typed: string; // input value
-  category: DropdownItem; // selected category
-  categories: DropdownItem[]; // all possible categories
+  category: EntityEnums.Class | EntityEnums.Extension.Any; // selected category
+  categories: EntitySingleDropdownItem[]; // all possible categories
   disabled?: boolean; // todo not implemented yet
   inputWidth?: number | "full";
   disableCreate?: boolean;
   disableButtons?: boolean;
   isFetching?: boolean;
 
+  preSuggestions?: EntitySuggestion[];
+
   // events
   onType: (newType: string) => void;
-  onChangeCategory: (selectedOption: DropdownItem[]) => void;
+  onChangeCategory: (
+    selectedOption: EntityEnums.Class | EntityEnums.Extension.Any
+  ) => void;
   onCreate: (item: SuggesterItemToCreate) => void;
   onPick: (entity: IEntity, instantiateTemplate?: boolean) => void;
   onDrop: (item: EntityDragItem, instantiateTemplate?: boolean) => void;
@@ -75,9 +80,12 @@ interface Suggester {
   userOptions?: IUserOptions;
   autoFocus?: boolean;
   disableEnter?: boolean;
+  disableWildCard?: boolean;
 
   showCreateModal: boolean;
   setShowCreateModal: React.Dispatch<React.SetStateAction<boolean>>;
+  alwaysShowCreateModal?: boolean;
+  button?: React.ReactNode;
 }
 
 export const Suggester: React.FC<Suggester> = ({
@@ -88,9 +96,11 @@ export const Suggester: React.FC<Suggester> = ({
   category,
   categories,
   disabled,
-  inputWidth = 80,
+  inputWidth = 100,
   disableCreate = false,
   disableButtons = false,
+
+  preSuggestions,
 
   // events
   onType,
@@ -108,9 +118,12 @@ export const Suggester: React.FC<Suggester> = ({
   userOptions,
   autoFocus,
   disableEnter,
+  disableWildCard,
 
   showCreateModal,
   setShowCreateModal,
+  alwaysShowCreateModal,
+  button,
 }) => {
   const [selected, setSelected] = useState(-1);
   const [isFocused, setIsFocused] = useState(false);
@@ -164,35 +177,39 @@ export const Suggester: React.FC<Suggester> = ({
 
   const handleEnterPress = () => {
     if (selected === -1 && typed.length > 0) {
-      if (
-        category.value === DropdownAny ||
-        category.value === EntityEnums.Class.Statement ||
-        category.value === EntityEnums.Class.Territory
-      ) {
-        setShowCreateModal(true);
-      } else {
-        onCreate({
-          label: typed,
-          entityClass:
-            entitiesDictKeys[category.value as EntityEnums.Class].value,
-          language: false,
-        });
+      if (!disableCreate) {
+        if (
+          category === dropdownWildCard.value ||
+          category === EntityEnums.Class.Statement ||
+          category === EntityEnums.Class.Territory ||
+          alwaysShowCreateModal
+        ) {
+          setShowCreateModal(true);
+        } else {
+          onCreate({
+            label: typed.trim(),
+            entityClass: category as EntityEnums.Class,
+            language: false,
+          });
+        }
       }
     } else if (selected > -1) {
-      const entity = suggestions[selected].entity;
-      if (entity.status !== EntityEnums.Status.Discouraged) {
-        if (!entity.isTemplate) {
-          onPick(entity);
-        } else if (entity.isTemplate && !isInsideTemplate) {
-          onPick(entity, true);
-        } else if (entity.isTemplate && isInsideTemplate) {
-          // TODO: open modal to ask use / duplicate
-          // setTempDropItem(entity);
-          setShowTemplateModal(true);
+      if (!disableEnter) {
+        const entity = suggestions[selected].entity;
+        if (entity.status !== EntityEnums.Status.Discouraged) {
+          if (!entity.isTemplate) {
+            onPick(entity);
+          } else if (entity.isTemplate && !isInsideTemplate) {
+            onPick(entity, true);
+          } else if (entity.isTemplate && isInsideTemplate) {
+            // TODO: open modal to ask use / duplicate
+            // setTempDropItem(entity);
+            setShowTemplateModal(true);
+          }
         }
       }
     } else {
-      toast.info("Fill at least 1 character");
+      toast.info(MIN_LABEL_LENGTH_MESSAGE);
     }
     setSelected(-1);
   };
@@ -200,16 +217,16 @@ export const Suggester: React.FC<Suggester> = ({
   const handleAddBtnClick = () => {
     if (typed.length > 0) {
       if (
-        category.value === DropdownAny ||
-        category.value === EntityEnums.Class.Statement ||
-        category.value === EntityEnums.Class.Territory
+        category === dropdownWildCard.value ||
+        category === EntityEnums.Class.Statement ||
+        category === EntityEnums.Class.Territory ||
+        alwaysShowCreateModal
       ) {
         setShowCreateModal(true);
       } else {
         onCreate({
-          label: typed,
-          entityClass:
-            entitiesDictKeys[category.value as EntityEnums.Class].value,
+          label: typed.trim(),
+          entityClass: category as EntityEnums.Class,
           language: false,
         });
       }
@@ -219,7 +236,7 @@ export const Suggester: React.FC<Suggester> = ({
     setSelected(-1);
   };
 
-  const renderEntitySuggestions = () => {
+  const renderEntitySuggestions = (suggestions: EntitySuggestion[]) => {
     const itemData: SuggestionRowEntityItemData = createItemData(
       suggestions as EntitySuggestion[],
       onPick,
@@ -253,22 +270,34 @@ export const Suggester: React.FC<Suggester> = ({
     middleware: [flip({ padding: 10 })],
   });
 
+  const themeContext = useContext(ThemeContext);
+
+  if (disabled) {
+    return <StyledDash>-</StyledDash>;
+  }
+
   return (
     // div is necessary for flex to work and render the clear button properly
     <div>
-      <StyledSuggester marginTop={marginTop}>
+      <StyledSuggester
+        $marginTop={marginTop}
+        $fullWidth={inputWidth === "full"}
+      >
         <StyledInputWrapper
           ref={dropRef}
-          hasButton={!disableCreate}
-          isOver={isOver}
-          hasText={typed.length > 0}
+          $hasButton={!disableCreate}
+          $isOver={isOver}
+          $hasText={typed.length > 0}
         >
-          <Dropdown
-            value={{ label: category.label, value: category.value }}
-            options={categories}
+          <Dropdown.Single.Entity
+            value={category}
+            options={
+              disableWildCard
+                ? [...categories]
+                : [dropdownWildCard, ...categories]
+            }
             onChange={onChangeCategory}
             width={36}
-            entityDropdown
             onFocus={() => {
               setSelected(-1);
               setIsFocused(true);
@@ -279,16 +308,21 @@ export const Suggester: React.FC<Suggester> = ({
             disabled={disabled}
             autoFocus={categories.length > 1 && autoFocus}
           />
-          <TypeBar entityLetter={category.value} />
+          <TypeBar entityLetter={category} />
 
-          <div ref={refs.setReference}>
+          <div
+            ref={refs.setReference}
+            style={{
+              position: "relative",
+            }}
+          >
             <Input
               type="text"
               value={typed}
               onChangeFn={(newType: string) => onTypeFn(newType)}
               placeholder={placeholder}
               suggester
-              changeOnType={true}
+              changeOnType
               width={inputWidth}
               onFocus={() => {
                 setIsFocused(true);
@@ -298,20 +332,16 @@ export const Suggester: React.FC<Suggester> = ({
                 setIsFocused(false);
                 setSelected(-1);
               }}
-              onEnterPressFn={() => {
-                if (!disableEnter) {
-                  handleEnterPress();
-                }
-              }}
+              onEnterPressFn={handleEnterPress}
               autoFocus={categories.length === 1 && autoFocus}
               disabled={disabled}
             />
+            {typed.length > 0 && (
+              <StyledSuggestionCancelButton>
+                <MdCancel size={16} onClick={() => onCancel()} />
+              </StyledSuggestionCancelButton>
+            )}
           </div>
-          {typed.length > 0 && (
-            <StyledSuggestionCancelButton hasButton={!disableCreate}>
-              <MdCancel size={16} onClick={() => onCancel()} />
-            </StyledSuggestionCancelButton>
-          )}
 
           {!disableCreate && (
             <StyledSuggesterButton>
@@ -327,32 +357,32 @@ export const Suggester: React.FC<Suggester> = ({
               />
             </StyledSuggesterButton>
           )}
+          {button}
         </StyledInputWrapper>
 
         {isWrongDropCategory && isOver && (
-          <StyledAiOutlineWarning size={22} color={theme.color["warning"]} />
+          <StyledAiOutlineWarning
+            size={22}
+            color={themeContext?.color.warning}
+          />
         )}
 
-        {((isFocused || isHovered) &&
-          suggestions.length &&
-          !middlewareData.hide?.referenceHidden) ||
-        (isFetching && isFocused) ? (
-          <>
-            <FloatingPortal id="page">
-              <StyledSuggesterList
-                ref={refs.setFloating}
-                noLeftMargin={categories.length === 1}
-                onMouseEnter={() => setIsHovered(true)}
-                onMouseLeave={() => setIsHovered(false)}
-                style={{
-                  ...floatingStyles,
-                }}
-              >
-                <StyledRelativePosition>
-                  {renderEntitySuggestions()}
-                  <Loader size={30} show={isFetching} />
-                </StyledRelativePosition>
-                {!disableEnter && (
+        {(isFocused || isHovered) && !middlewareData.hide?.referenceHidden && (
+          <FloatingPortal id="page">
+            <StyledSuggesterList
+              ref={refs.setFloating}
+              onMouseEnter={() => setIsHovered(true)}
+              onMouseLeave={() => setIsHovered(false)}
+              style={{
+                ...floatingStyles,
+              }}
+            >
+              {suggestions.length || (isFetching && isFocused) ? (
+                <>
+                  <StyledRelativePosition>
+                    {renderEntitySuggestions(suggestions)}
+                    <Loader size={30} show={isFetching} />
+                  </StyledRelativePosition>
                   <SuggesterKeyPress
                     onArrowDown={() => {
                       if (selected < suggestions.length - 1)
@@ -363,11 +393,31 @@ export const Suggester: React.FC<Suggester> = ({
                     }}
                     dependencyArr={[selected]}
                   />
-                )}
-              </StyledSuggesterList>
-            </FloatingPortal>
-          </>
-        ) : null}
+                </>
+              ) : null}
+
+              {/* PRE-SUGGESTIONS */}
+              {preSuggestions?.length && typed.length === 0 ? (
+                <>
+                  <StyledRelativePosition>
+                    {renderEntitySuggestions(preSuggestions)}
+                    <Loader size={30} show={isFetching} />
+                  </StyledRelativePosition>
+                  <SuggesterKeyPress
+                    onArrowDown={() => {
+                      if (selected < preSuggestions.length - 1)
+                        setSelected(selected + 1);
+                    }}
+                    onArrowUp={() => {
+                      if (selected > -1) setSelected(selected - 1);
+                    }}
+                    dependencyArr={[selected]}
+                  />
+                </>
+              ) : null}
+            </StyledSuggesterList>
+          </FloatingPortal>
+        )}
       </StyledSuggester>
 
       {showTemplateModal && (

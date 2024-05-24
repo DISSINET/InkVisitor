@@ -1,7 +1,7 @@
+import { EntityEnums } from "@shared/enums";
 import {
   IEntity,
   IResponseEntity,
-  IResponseAdministration,
   IResponseAudit,
   IResponseBookmarkFolder,
   IResponseDetail,
@@ -22,6 +22,7 @@ import {
   IResponseDocumentDetail,
 } from "@shared/types";
 import * as errors from "@shared/types/errors";
+import { NetworkError } from "@shared/types/errors";
 import { IRequestSearch } from "@shared/types/request-search";
 import { defaultPing } from "Theme/constants";
 import axios, {
@@ -73,12 +74,10 @@ class Api {
   private ws?: Socket;
   private ping: number;
 
-  constructor() {
-    if (!process.env.APIURL) {
-      throw new Error("APIURL is not set");
-    }
+  private lastError: any = null;
 
-    this.baseUrl = process.env.APIURL;
+  constructor() {
+    this.baseUrl = process.env.APIURL || window.location.origin;
     this.apiUrl = this.baseUrl + "/api/v1";
 
     this.ping = defaultPing;
@@ -165,7 +164,9 @@ class Api {
         if (!error.config.ignoreErrorToast) {
           // Any status codes that falls outside the range of 2xx cause this function to trigger
           // Do something with response error
-          this.showErrorToast(error);
+          if (this.shouldShowErrorToast(error)) {
+            this.showErrorToast(error);
+          }
         }
 
         return Promise.reject(error);
@@ -173,9 +174,28 @@ class Api {
     );
   }
 
+  shouldShowErrorToast(error: any) {
+    if (this.lastError && this.lastError.message === error.message) {
+      // Same error as the last one, debounce it
+      return false;
+    }
+
+    // Update the last error to the current error
+    this.lastError = error;
+    return true;
+  }
+
   getPing() {
     return this.ping;
   }
+
+  handleError = (err: any | AxiosError) => {
+    if (axios.isAxiosError(err)) {
+      return err.response?.data || new NetworkError();
+    } else {
+      return new NetworkError();
+    }
+  };
 
   responseToError(responseData: unknown): errors.IErrorSignature {
     const out = {
@@ -183,29 +203,37 @@ class Api {
       message: "",
     };
 
-    if (responseData instanceof AxiosError && (responseData as AxiosError).code === AxiosError.ERR_NETWORK) {
-      out.error = errors.NetworkError.name
-    } else if (responseData && (responseData as any).response && (responseData as any).response.data) {
-      out.error = (responseData as Record<string, string>).error;
-      out.message = (responseData as Record<string, string>).message;
+    if (
+      responseData instanceof AxiosError &&
+      (responseData as AxiosError).code === AxiosError.ERR_NETWORK
+    ) {
+      out.error = errors.NetworkError.name;
+    } else if (
+      responseData &&
+      (responseData as any).response &&
+      (responseData as any).response.data
+    ) {
+      out.error = (responseData as any).response.data.error;
+      out.message = (responseData as any).response.data.message;
     }
 
     return out;
   }
 
   showErrorToast(err: any) {
-    const hydratedError = errors.getErrorByCode(
-      this.responseToError(err)
-    );
+    const hydratedError = errors.getErrorByCode(this.responseToError(err));
 
-    toast.error(
-      <div>
-        {hydratedError.title}
-        {hydratedError.message ? (
-          <p style={{ fontSize: "1rem" }}>{hydratedError.message}</p>
-        ) : null}
-      </div>
-    );
+    // delay is necessary to resolve toast duplicities before firing the toast
+    setTimeout(() => {
+      toast.error(
+        <div>
+          {hydratedError.title}
+          {hydratedError.message ? (
+            <p style={{ fontSize: "1rem" }}>{hydratedError.message}</p>
+          ) : null}
+        </div>
+      );
+    }, 50);
   }
 
   isLoggedIn = () => {
@@ -260,16 +288,20 @@ class Api {
     return newApi;
   }
 
-  async signIn(username: string, password: string): Promise<any> {
+  async signIn(
+    login: string,
+    password: string,
+    options?: IApiOptions
+  ): Promise<any> {
     try {
-      const response = (await this.connection.post(
+      const response = await this.connection.post(
         "/users/signin",
         {
-          username: username,
-          password: password,
+          login,
+          password,
         },
-        {}
-      )) as AxiosResponse;
+        options
+      );
 
       if (response.status === 200) {
         const parsed = parseJwt(response.data.token);
@@ -282,8 +314,8 @@ class Api {
         toast.success("Logged in");
       }
       return { ...response.data };
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -298,6 +330,61 @@ class Api {
   /**
    * Users
    */
+
+  async passwordChangeRequest(
+    email: string,
+    options?: IApiOptions
+  ): Promise<AxiosResponse<IResponseGeneric>> {
+    try {
+      const response = await this.connection.post(
+        `/users/password_reset`,
+        {
+          email,
+        },
+        options
+      );
+      return response;
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+
+  async passwordSetRequest(
+    hash: string,
+    password: string,
+    passwordRepeat: string,
+    options?: IApiOptions
+  ): Promise<AxiosResponse<IResponseGeneric>> {
+    try {
+      const response = await this.connection.put(
+        `/users/password_reset?hash=${hash}`,
+        {
+          password,
+          passwordRepeat,
+        },
+        options
+      );
+      return response;
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+
+  async passwordResetExists(
+    hash: string,
+    options?: IApiOptions
+  ): Promise<AxiosResponse<IResponseGeneric>> {
+    try {
+      const response = await this.connection.get(
+        `/users/password_reset?hash=${hash}`,
+        options
+      );
+      return response;
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+
   async usersGet(
     userId: string,
     options?: IApiOptions
@@ -305,8 +392,8 @@ class Api {
     try {
       const response = await this.connection.get(`/users/${userId}`, options);
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -316,18 +403,17 @@ class Api {
   ): Promise<AxiosResponse<IResponseUser[]>> {
     try {
       const response = await this.connection.get(
-        `/users?label=${filters.label}`,
+        `/users?label=${filters.label || ""}`,
         options
       );
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
   async usersCreate(
     userData: {
-      name: string;
       email: string;
     },
     options?: IApiOptions
@@ -335,8 +421,8 @@ class Api {
     try {
       const response = await this.connection.post(`/users`, userData, options);
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -352,8 +438,8 @@ class Api {
         options
       );
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -367,8 +453,8 @@ class Api {
         options
       );
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -386,8 +472,8 @@ class Api {
         options
       );
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -409,8 +495,8 @@ class Api {
         options
       );
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -430,26 +516,8 @@ class Api {
         `/users/me/emails/test?email=${testEmail}`
       );
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
-    }
-  }
-
-  /**
-   * Administration
-   * Administration container
-   */
-  async administrationGet(
-    options?: IApiOptions
-  ): Promise<AxiosResponse<IResponseAdministration>> {
-    try {
-      const response = await this.connection.get(
-        `/users/administration`,
-        options
-      );
-      return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -467,8 +535,8 @@ class Api {
         options
       );
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -486,8 +554,8 @@ class Api {
         options
       );
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -504,8 +572,8 @@ class Api {
         params: filter,
       });
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -520,9 +588,8 @@ class Api {
         options
       );
       return response;
-    } catch (err: any | AxiosError) {
-      console.log(err);
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -537,9 +604,8 @@ class Api {
         options
       );
       return response;
-    } catch (err: any | AxiosError) {
-      console.log(err);
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -555,8 +621,8 @@ class Api {
         options
       );
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -570,8 +636,8 @@ class Api {
         options
       );
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -583,8 +649,8 @@ class Api {
         `/entities/${entityId}/restore`
       );
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -602,8 +668,8 @@ class Api {
         options
       );
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -615,8 +681,8 @@ class Api {
     try {
       const response = await this.connection.get(`/tree`, options);
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -637,8 +703,8 @@ class Api {
         options
       );
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -656,8 +722,8 @@ class Api {
         options
       );
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -675,8 +741,29 @@ class Api {
         options
       );
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+
+  async territoriesCopy(
+    territoryId: string,
+    targets: string[],
+    withChildren: boolean,
+    options?: IApiOptions
+  ): Promise<AxiosResponse<IResponseGeneric>> {
+    try {
+      const response = await this.connection.post(
+        `/territories/${territoryId}/copy`,
+        {
+          targets,
+          withChildren,
+        },
+        options
+      );
+      return response;
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -694,8 +781,8 @@ class Api {
         options
       );
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -712,8 +799,8 @@ class Api {
         options
       );
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -731,8 +818,8 @@ class Api {
         options
       );
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -748,8 +835,8 @@ class Api {
         options
       );
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -767,8 +854,8 @@ class Api {
         options
       );
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -787,8 +874,8 @@ class Api {
       );
       // response.data.data should have list of new ids
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -804,8 +891,8 @@ class Api {
         options
       );
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -821,8 +908,8 @@ class Api {
         options
       );
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -836,8 +923,8 @@ class Api {
     try {
       const response = await this.connection.get(`/acls`, options);
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -853,24 +940,46 @@ class Api {
         options
       );
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
-  async activate(
+  async activation(
+    hash: string,
+    password: string,
+    passwordRepeat: string,
+    username: string,
+    options?: IApiOptions
+  ): Promise<AxiosResponse<IResponseGeneric>> {
+    try {
+      const response = await this.connection.post(
+        `/users/activation?hash=${hash}`,
+        {
+          password,
+          passwordRepeat,
+          username,
+        },
+        options
+      );
+      return response;
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+
+  async activationExists(
     hash: string,
     options?: IApiOptions
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
-      const response = await this.connection.patch(
-        `/users/active?hash=${hash}`,
-        undefined,
+      const response = await this.connection.get(
+        `/users/activation?hash=${hash}`,
         options
       );
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -889,8 +998,8 @@ class Api {
         options
       );
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -905,8 +1014,8 @@ class Api {
         options
       );
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -920,13 +1029,13 @@ class Api {
         options
       );
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
   /**
-   * Document titles
+   * Document
    */
 
   async documentsGet(
@@ -939,8 +1048,8 @@ class Api {
         params: filter,
       });
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -954,8 +1063,8 @@ class Api {
         options
       );
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -969,8 +1078,8 @@ class Api {
         options
       );
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -988,8 +1097,47 @@ class Api {
         options
       );
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+
+  async documentExport(
+    documentId: string,
+    exportedEntities: EntityEnums.Class[]
+  ): Promise<any> {
+    try {
+      const response = await this.connection.post(
+        `/documents/export`,
+        {
+          documentId,
+          exportedEntities,
+        },
+        { responseType: "blob" }
+      );
+
+      let fileName = `${documentId}-`;
+      if (Object.keys(EntityEnums.Class).length === exportedEntities.length) {
+        fileName += "all_anchors";
+      } else if (exportedEntities.length > 0) {
+        fileName += exportedEntities.join("");
+      } else {
+        fileName += "no_anchors";
+      }
+
+      const url = window.URL.createObjectURL(response.data);
+      const a = document.createElement("a");
+
+      a.href = url;
+      a.download = `${fileName}.txt`;
+      document.body.appendChild(a);
+      a.click();
+
+      // Clean up
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
@@ -1008,8 +1156,8 @@ class Api {
         options
       );
       return response;
-    } catch (err: any | AxiosError) {
-      throw { ...err.response.data };
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 }

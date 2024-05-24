@@ -10,8 +10,6 @@ import {
   deleteDocuments,
   deleteEntities,
   deleteRelations,
-  deleteUser,
-  deleteUsers,
 } from "@service/shorthands";
 import { EntityEnums } from "@shared/enums";
 import { IResponseGeneric, IStatement, IStatementAction } from "@shared/types";

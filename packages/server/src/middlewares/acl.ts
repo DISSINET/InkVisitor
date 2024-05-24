@@ -39,7 +39,10 @@ class Acl {
    */
   private async getPermissions(req: IRequest): Promise<AclPermission[]> {
     const controller = req.baseUrl.split("/").pop() || "";
-    const route = req.route.path.split("/").filter(part => !!part).join("/")
+    const route = req.route.path
+      .split("/")
+      .filter((part) => !!part)
+      .join("/");
     const method = req.method as HttpMethods;
 
     const permissions = await AclPermission.findByRoute(
@@ -75,13 +78,12 @@ class Acl {
     const permissions = await this.getPermissions(req);
 
     // allow public routes for all
-    if (permissions.find(p => p.public)) {
+    if (permissions.find((p) => p.public)) {
       return null;
     }
 
     // block not logged visitors
     if (!req.user) {
-
       return permissionDeniedErr;
     }
 
@@ -91,7 +93,7 @@ class Acl {
     }
 
     // allow if current role is in permissions
-    if (permissions.find(p => p.isRoleAllowed(req.getUserOrFail().role))) {
+    if (permissions.find((p) => p.isRoleAllowed(req.getUserOrFail().role))) {
       return null;
     }
 

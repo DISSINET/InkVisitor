@@ -69,17 +69,21 @@ const GlobalStyle = createGlobalStyle<GlobalStyle>`
       box-shadow: ${({ theme }) => theme.boxShadow["normal"]};
       width: 100%;
       transform: translate(0, -6px);
+
+      color: ${({ theme }) => theme.color["black"]};
+      background-color: ${({ theme }) => theme.color["white"]};
     }
     .react-select__menu-list {
       max-height: 18rem;
     }
     .react-select__option {
       margin: 0;
+      min-height: 3rem;
     }
     .react-select__option--is-selected {
       font-weight: bold;
-      color: ${({ theme }) => theme.color["primary"]};
-      background-color: white;
+      color: ${({ theme }) => theme.color["black"]};
+      background-color: ${({ theme }) => theme.color["white"]};
       :hover {
         background-color: ${({ theme }) =>
           theme.color["invertedBg"]["primary"]};
@@ -94,7 +98,8 @@ const GlobalStyle = createGlobalStyle<GlobalStyle>`
     .react-select__option {
       padding: 2px;
       padding-left: 0;
-      height: 2.5rem;
+    }
+    .react-select__option--is-selected {
     }
   }
 `;

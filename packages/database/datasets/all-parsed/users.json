@@ -5,6 +5,7 @@
     "email": "import@inkvisitor.com",
     "password": "import",
     "active": false,
+    "verified": true,
     "options": {
       "defaultTerritory": "",
       "defaultLanguage": "",
@@ -20,6 +21,7 @@
     "email": "admin@admin.com",
     "password": "admin",
     "active": true,
+    "verified": true,
     "options": {
       "defaultTerritory": "",
       "defaultLanguage": "",
@@ -40,6 +42,7 @@
     "email": "editor@inkvisitor.com",
     "password": "abc",
     "active": true,
+    "verified": true,
     "options": {
       "defaultTerritory": "",
       "defaultLanguage": "",
@@ -55,6 +58,7 @@
     "email": "editor2@inkvisitor.com",
     "password": "def",
     "active": true,
+    "verified": true,
     "options": {
       "defaultTerritory": "",
       "defaultLanguage": "",
@@ -70,6 +74,7 @@
     "email": "viewer1@inkvisitor.com",
     "password": "viewer",
     "active": true,
+    "verified": true,
     "options": {
       "defaultTerritory": "",
       "defaultLanguage": "",
@@ -85,6 +90,7 @@
     "email": "inactive@inkvisitor.com",
     "password": "inactive",
     "active": false,
+    "verified": true,
     "options": {
       "defaultTerritory": "",
       "defaultLanguage": "",
@@ -100,6 +106,7 @@
     "email": "david.zbiral@mail.muni.cz",
     "password": "test123",
     "active": true,
+    "verified": true,
     "options": {
       "defaultTerritory": "",
       "defaultLanguage": "",
@@ -120,6 +127,7 @@
     "email": "robert.shaw@mail.muni.cz",
     "password": "test123",
     "active": true,
+    "verified": true,
     "options": {
       "defaultTerritory": "",
       "defaultLanguage": "",
@@ -140,6 +148,7 @@
     "email": "davor.salihovic@mail.muni.cz",
     "password": "test123",
     "active": true,
+    "verified": true,
     "options": {
       "defaultTerritory": "",
       "defaultLanguage": "",
@@ -160,6 +169,7 @@
     "email": "katia.riccardo@mail.muni.cz",
     "password": "test123",
     "active": true,
+    "verified": true,
     "options": {
       "defaultTerritory": "",
       "defaultLanguage": "",
@@ -180,6 +190,7 @@
     "email": "kral.jan@mail.muni.cz",
     "password": "test123",
     "active": true,
+    "verified": true,
     "options": {
       "defaultTerritory": "",
       "defaultLanguage": "",
@@ -200,6 +211,7 @@
     "email": "reima.valimaki@gmail.com",
     "password": "test123",
     "active": true,
+    "verified": true,
     "options": {
       "defaultTerritory": "",
       "defaultLanguage": "",
@@ -220,6 +232,7 @@
     "email": "lidhin93@gmail.com",
     "password": "test123",
     "active": true,
+    "verified": true,
     "options": {
       "defaultTerritory": "",
       "defaultLanguage": "",
@@ -240,6 +253,7 @@
     "email": "larissa.lyth@mail.muni.cz",
     "password": "test123",
     "active": true,
+    "verified": true,
     "options": {
       "defaultTerritory": "",
       "defaultLanguage": "",

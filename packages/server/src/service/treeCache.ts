@@ -124,7 +124,10 @@ export class TreeCreator {
 
   static async countStatements(db: Db): Promise<Record<string, number>> {
     const statements = (
-      await getEntitiesDataByClass<IStatement>(db, EntityEnums.Class.Statement)
+      await getEntitiesDataByClass<IStatement>(
+        db.connection,
+        EntityEnums.Class.Statement
+      )
     ).filter((s) => s.data.territory && s.data.territory.territoryId);
     const statementsCountMap: Record<string, number> = {}; // key is territoryid
     for (const statement of statements) {
@@ -164,7 +167,10 @@ export class TreeCache {
     const newTree = new TreeCreator();
 
     const [territoriesData, statementsCountMap] = await Promise.all([
-      getEntitiesDataByClass<ITerritory>(db, EntityEnums.Class.Territory),
+      getEntitiesDataByClass<ITerritory>(
+        db.connection,
+        EntityEnums.Class.Territory
+      ),
       TreeCreator.countStatements(db),
     ]);
 
@@ -286,7 +292,10 @@ export class TreeCache {
     derivedRight = this.findRightInChildTerritory(terId, rights);
     if (derivedRight) {
       // if the right is found - it must be changed to VIEW right
-      return new UserRight({ mode: UserEnums.RoleMode.Read, territory: derivedRight.territory });
+      return new UserRight({
+        mode: UserEnums.RoleMode.Read,
+        territory: derivedRight.territory,
+      });
     }
 
     return undefined;

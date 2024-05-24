@@ -7,7 +7,7 @@ import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { BeatLoader } from "react-spinners";
 import { toast } from "react-toastify";
-import { useAppSelector } from "redux/hooks";
+import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { Menu } from "..";
 import packageJson from "../../../../package.json";
 import {
@@ -25,17 +25,25 @@ import {
   StyledText,
   StyledUser,
   StyledUsername,
+  StyledThemeSwitcher,
+  StyledThemeSwitcherIcon,
+  StyledMenu,
+  StyledLoggedAsWrap,
 } from "./PageHeaderStyles";
+import { setTheme } from "redux/features/themeSlice";
+import { MdDarkMode, MdSunny } from "react-icons/md";
+import { InterfaceEnums } from "@shared/enums";
 
 interface LeftHeader {
   tempLocation: string | false;
 }
 export const LeftHeader: React.FC<LeftHeader> = React.memo(
   ({ tempLocation }) => {
-    const env = (process.env.ROOT_URL || "").replace(
-      /apps\/inkvisitor[-]?/,
-      ""
-    );
+    let env = (process.env.ROOT_URL || "").replace(/apps\/inkvisitor[-]?/, "");
+    if (env === "/") {
+      env = "";
+    }
+
     const versionText = `v. ${packageJson.version}${
       env ? ` | ${env}` : ``
     } | built: ${process.env.BUILD_TIMESTAMP}`;
@@ -127,7 +135,7 @@ export const LeftHeader: React.FC<LeftHeader> = React.memo(
                 color="white"
               />
             )}
-            {ping >= -2 && <StyledPingColor pingColor={pingColor} />}
+            {ping >= -2 && <StyledPingColor $pingColor={pingColor} />}
             {ping >= 0 && <StyledPingText>{ping}ms</StyledPingText>}
           </StyledFlexRow>
         </StyledFlexColumn>
@@ -143,6 +151,7 @@ interface RightHeader {
   tempLocation: string | false;
   setTempLocation: React.Dispatch<React.SetStateAction<string | false>>;
   handleLogOut: () => void;
+  userIsFetching?: boolean;
 }
 
 export const RightHeader: React.FC<RightHeader> = React.memo(
@@ -153,11 +162,24 @@ export const RightHeader: React.FC<RightHeader> = React.memo(
     tempLocation,
     setTempLocation,
     handleLogOut,
+    userIsFetching = false,
   }) => {
     const env = (process.env.ROOT_URL || "").replace(
       /apps\/inkvisitor[-]?/,
       ""
     );
+
+    const dispatch = useAppDispatch();
+    const selectedThemeId: InterfaceEnums.Theme = useAppSelector(
+      (state) => state.theme
+    );
+
+    const handleThemeChange = (newTheme: InterfaceEnums.Theme) => {
+      dispatch(setTheme(newTheme));
+      localStorage.setItem("theme", newTheme);
+    };
+
+    const usernameLoaded = userName.length > 0;
 
     return (
       <>
@@ -172,35 +194,54 @@ export const RightHeader: React.FC<RightHeader> = React.memo(
           </>
         )}
         <StyledRightHeader>
-          {userName.length > 0 ? (
-            <StyledUser>
-              <StyledText>logged as</StyledText>
-              <StyledFaUserAlt
-                size={14}
-                onClick={() => setUserCustomizationOpen(true)}
-              />
-              <StyledUsername onClick={() => setUserCustomizationOpen(true)}>
-                {userName}
-              </StyledUsername>
-            </StyledUser>
-          ) : (
-            <div
-              style={{
-                height: "1rem",
-                width: "1rem",
-                position: "relative",
-                marginRight: "2rem",
-              }}
+          <StyledThemeSwitcher
+            onClick={() => {
+              handleThemeChange(
+                selectedThemeId === InterfaceEnums.Theme.Light
+                  ? InterfaceEnums.Theme.Dark
+                  : InterfaceEnums.Theme.Light
+              );
+            }}
+          >
+            <StyledThemeSwitcherIcon
+              selected={selectedThemeId === InterfaceEnums.Theme.Light}
             >
-              <Loader size={10} show />
-            </div>
-          )}
-          <Menu
-            userRole={userRole}
-            tempLocation={tempLocation}
-            setTempLocation={setTempLocation}
-            handleLogOut={handleLogOut}
-          />
+              <MdSunny />
+            </StyledThemeSwitcherIcon>
+            <StyledThemeSwitcherIcon
+              selected={selectedThemeId === InterfaceEnums.Theme.Dark}
+            >
+              <MdDarkMode />
+            </StyledThemeSwitcherIcon>
+          </StyledThemeSwitcher>
+
+          <StyledLoggedAsWrap>
+            {userName.length > 0 && (
+              <StyledUser>
+                <StyledText>logged as</StyledText>
+                <StyledFaUserAlt
+                  size={14}
+                  onClick={() => setUserCustomizationOpen(true)}
+                />
+                <StyledUsername onClick={() => setUserCustomizationOpen(true)}>
+                  {userName}
+                </StyledUsername>
+              </StyledUser>
+            )}
+
+            {userIsFetching && !usernameLoaded && (
+              <Loader size={16} show noBackground color={"headerTextColor"} />
+            )}
+          </StyledLoggedAsWrap>
+
+          <StyledMenu>
+            <Menu
+              userRole={userRole}
+              tempLocation={tempLocation}
+              setTempLocation={setTempLocation}
+              handleLogOut={handleLogOut}
+            />
+          </StyledMenu>
         </StyledRightHeader>
       </>
     );

@@ -35,7 +35,6 @@ import "@service/mailer";
   });
 
   socketio.on("connection", (socket: Socket) => {
-    console.log("new socket.io connection");
     socket.on("ping", (callback) => {
       callback();
     });

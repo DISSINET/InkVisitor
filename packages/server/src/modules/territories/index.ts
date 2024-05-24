@@ -3,7 +3,12 @@ import { ResponseTerritory } from "@models/territory/response";
 import Territory from "@models/territory/territory";
 import { findEntityById } from "@service/shorthands";
 import { EntityEnums } from "@shared/enums";
-import { IResponseTerritory, IStatement, ITerritory } from "@shared/types";
+import {
+  IResponseGeneric,
+  IResponseTerritory,
+  IStatement,
+  ITerritory,
+} from "@shared/types";
 import {
   BadParams,
   PermissionDeniedError,
@@ -12,6 +17,9 @@ import {
 import { Router } from "express";
 import { IRequest } from "src/custom_typings/request";
 import { asyncRouteHandler } from "..";
+import Entity from "@models/entity/entity";
+import treeCache from "@service/treeCache";
+import tree from "@modules/tree";
 
 export default Router()
   /**
@@ -120,4 +128,93 @@ export default Router()
 
       return Statement.getEntitiesIdsForMany(dependentStatements);
     })
+  )
+  .post(
+    "/:territoryId/copy",
+    asyncRouteHandler<IResponseGeneric>(
+      async (
+        request: IRequest<
+          { territoryId: string },
+          { withChildren?: boolean; targets: string[] }
+        >
+      ) => {
+        const territoryId = request.params.territoryId;
+        if (!territoryId) {
+          throw new BadParams("territoryId has to be set");
+        }
+        if (territoryId === "T0") {
+          throw new BadParams("cannot use root territory");
+        }
+
+        await request.db.lock();
+
+        const territoryData = await findEntityById<ITerritory>(
+          request.db,
+          territoryId
+        );
+        if (!territoryData || territoryData.class !== EntityEnums.Class.Territory) {
+          throw new TerritoryDoesNotExits(
+            `territory ${territoryId} was not found`,
+            territoryId
+          );
+        }
+
+        const territory = new Territory(territoryData);
+
+        const withChildren = !!request.body.withChildren;
+        const targetIds = request.body.targets || [];
+        const tgts = await Entity.findEntitiesByIds(
+          request.db.connection,
+          targetIds
+        );
+        if (!tgts || !tgts.length || tgts.length !== targetIds.length) {
+          throw new TerritoryDoesNotExits(
+            "one or more target territories not found",
+            targetIds.join(",")
+          );
+        }
+
+        const childs = await territory.findChilds(request.db.connection);
+
+        const copyUnderTarget = async (
+          targetId: string,
+          original: ITerritory,
+          childs: Territory[]
+        ) => {
+          const targetT = new Territory({ id: targetId });
+          const targetChilds = await targetT.findChilds(request.db.connection);
+          const lastOrder = Object.keys(targetChilds)
+            .filter((key) => !isNaN(parseInt(key)))
+            .reduce((max, key) => Math.max(max, parseInt(key)), -Infinity);
+
+          const newT = new Territory({
+            ...original,
+            id: undefined,
+            label: `COPY OF ${original.label}`,
+            data: {
+              parent: {
+                order: lastOrder + 1,
+                territoryId: targetId,
+              },
+            },
+          });
+          await newT.save(request.db.connection);
+
+          if (withChildren) {
+            for (const child of childs) {
+              const nestedChilds = await child.findChilds(request.db.connection);
+              await copyUnderTarget(newT.id, child, Object.values(nestedChilds).map(data => new Territory(data)));
+            }
+          }
+        };
+
+        for (const target of tgts) {
+          await copyUnderTarget(target.id, territory, Object.values(childs).map(data => new Territory(data)));
+        }
+
+        return {
+          result: true,
+        };
+      }
+    )
   );

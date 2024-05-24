@@ -13,19 +13,19 @@ const getBlockWidth = (depth?: number) => {
   }
 };
 interface StyledRelationTypeTreeBlock {
-  depth?: number;
+  $depth?: number;
 }
 export const StyledRelationTypeTreeBlock = styled.div<StyledRelationTypeTreeBlock>`
   display: flex;
   flex-direction: column;
   margin-left: ${({ theme }) => theme.space[2]};
   border: 1px solid;
-  border-color: ${({ theme }) => theme.color["white"]};
-  width: ${({ depth }) => getBlockWidth(depth)};
+  border-color: ${({ theme }) => theme.color.tooltipColor};
+  width: ${({ $depth }) => getBlockWidth($depth)};
 `;
 export const StyledTreeBlock = styled.div`
   border-bottom: 1px solid;
-  border-color: ${({ theme }) => theme.color["white"]};
+  border-color: ${({ theme }) => theme.color.tooltipColor};
   width: 100%;
   height: 100%;
   padding: ${({ theme }) => theme.space[1]};
@@ -35,12 +35,12 @@ export const StyledFlexColumn = styled.div`
   flex-direction: column;
 `;
 interface StyledGridRowThird {
-  onlyTwoLevels: boolean;
+  $onlyTwoLevels: boolean;
 }
 export const StyledGridRowThird = styled.div<StyledGridRowThird>`
   display: grid;
-  grid-template-columns: 1fr ${({ onlyTwoLevels }) =>
-      onlyTwoLevels ? "1fr" : "2fr"};
+  grid-template-columns: 1fr ${({ $onlyTwoLevels }) =>
+      $onlyTwoLevels ? "1fr" : "2fr"};
   width: 100%;
 `;
 export const StyledGridRowHalf = styled.div`

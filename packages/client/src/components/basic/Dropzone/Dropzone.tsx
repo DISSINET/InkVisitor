@@ -1,7 +1,7 @@
 import { TemplateActionModal } from "components";
-import React, { ReactElement, useState } from "react";
+import React, { ReactElement, useContext, useState } from "react";
 import { DropTargetMonitor, useDrop } from "react-dnd";
-import theme from "Theme/theme";
+import { ThemeContext } from "styled-components";
 import { EntityDragItem, ItemTypes } from "types";
 import {
   StyledAiOutlineWarning,
@@ -12,11 +12,10 @@ import {
 interface Dropzone {
   onDrop: (item: EntityDragItem, instantiateTemplate?: boolean) => void;
   onHover: (item: EntityDragItem) => void;
-
   isWrongDropCategory?: boolean;
   isInsideTemplate: boolean;
-
   children: ReactElement;
+  disabled?: boolean;
 }
 export const Dropzone: React.FC<Dropzone> = ({
   onDrop,
@@ -24,6 +23,7 @@ export const Dropzone: React.FC<Dropzone> = ({
   children,
   isWrongDropCategory,
   isInsideTemplate = false,
+  disabled,
 }) => {
   const [showTemplateModal, setShowTemplateModal] = useState(false);
   const [tempDropItem, setTempDropItem] = useState<EntityDragItem | false>(
@@ -54,18 +54,27 @@ export const Dropzone: React.FC<Dropzone> = ({
 
   const opacity = isOver ? 0.5 : 1;
 
+  const themeContext = useContext(ThemeContext);
+
   return (
     <>
-      <div style={{ display: "inline-flex", overflow: "hidden" }}>
-        <StyledDropzone ref={dropRef} style={{ opacity: opacity }}>
-          {children}
-        </StyledDropzone>
-        <StyledIconWrap>
-          {isWrongDropCategory && isOver && (
-            <StyledAiOutlineWarning size={22} color={theme.color["warning"]} />
-          )}
-        </StyledIconWrap>
-      </div>
+      {!disabled ? (
+        <span style={{ display: "grid", gridTemplateColumns: "auto 1fr" }}>
+          <StyledDropzone ref={dropRef} style={{ opacity: opacity }}>
+            {children}
+          </StyledDropzone>
+          <StyledIconWrap>
+            {isWrongDropCategory && isOver && (
+              <StyledAiOutlineWarning
+                size={22}
+                color={themeContext?.color.warning}
+              />
+            )}
+          </StyledIconWrap>
+        </span>
+      ) : (
+        <>{children}</>
+      )}
 
       {showTemplateModal && (
         <TemplateActionModal

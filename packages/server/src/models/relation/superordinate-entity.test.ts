@@ -4,7 +4,11 @@ import { EntityEnums } from "@shared/enums";
 import SuperordinateEntity from "./superordinate-entity";
 
 describe("test SuperordinateEntity.validateEntities", function () {
+<<<<<<< HEAD
   test("allows LOESVB - LOESVB", () => {
+=======
+  test("allows LOGESVB - LOGESVB", () => {
+>>>>>>> dev
     const relation = new SuperordinateEntity({ entityIds: ["1", "2"] });
     relation.entities = [
       new Entity({ id: "1", class: EntityEnums.Class.Location }),
@@ -23,6 +27,17 @@ describe("test SuperordinateEntity.validateEntities", function () {
     expect(result).toBeNull();
 
     relation.entities = [
+<<<<<<< HEAD
+=======
+      new Entity({ id: "1", class: EntityEnums.Class.Group }),
+      new Entity({ id: "2", class: EntityEnums.Class.Group }),
+    ];
+
+    result = relation.validateEntities();
+    expect(result).toBeNull();
+
+    relation.entities = [
+>>>>>>> dev
       new Entity({ id: "1", class: EntityEnums.Class.Event }),
       new Entity({ id: "2", class: EntityEnums.Class.Event }),
     ];
@@ -55,6 +70,28 @@ describe("test SuperordinateEntity.validateEntities", function () {
     expect(result).toBeNull();
   });
 
+<<<<<<< HEAD
+=======
+  test("allows E-S, S-E", () => {
+    const relation = new SuperordinateEntity({ entityIds: ["1", "2"] });
+    relation.entities = [
+      new Entity({ id: "1", class: EntityEnums.Class.Event }),
+      new Entity({ id: "2", class: EntityEnums.Class.Statement }),
+    ];
+
+    let result = relation.validateEntities();
+    expect(result).toBeNull();
+
+    relation.entities = [
+      new Entity({ id: "1", class: EntityEnums.Class.Statement }),
+      new Entity({ id: "2", class: EntityEnums.Class.Event }),
+    ];
+
+    result = relation.validateEntities();
+    expect(result).toBeNull();
+  });
+
+>>>>>>> dev
   test("allows combined L-O L-B", () => {
     const relation = new SuperordinateEntity({ entityIds: ["1", "2"] });
     relation.entities = [
@@ -74,14 +111,22 @@ describe("test SuperordinateEntity.validateEntities", function () {
     expect(result).not.toBeNull();
   });
 
+<<<<<<< HEAD
   test("allows combined E-S S-E", () => {
     const relation = new SuperordinateEntity({ entityIds: ["1", "2"] });
     relation.entities = [
       new Entity({ id: "1", class: EntityEnums.Class.Event }),
+=======
+  test("allows combined L-S S-L", () => {
+    const relation = new SuperordinateEntity({ entityIds: ["1", "2"] });
+    relation.entities = [
+      new Entity({ id: "1", class: EntityEnums.Class.Location }),
+>>>>>>> dev
       new Entity({ id: "2", class: EntityEnums.Class.Statement }),
     ];
 
     let result = relation.validateEntities();
+<<<<<<< HEAD
     expect(result).toBeNull();
 
     relation.entities = [
@@ -91,5 +136,16 @@ describe("test SuperordinateEntity.validateEntities", function () {
 
     result = relation.validateEntities();
     expect(result).toBeNull();
+=======
+    expect(result).not.toBeNull();
+
+    relation.entities = [
+      new Entity({ id: "1", class: EntityEnums.Class.Statement }),
+      new Entity({ id: "2", class: EntityEnums.Class.Location }),
+    ];
+
+    result = relation.validateEntities();
+    expect(result).not.toBeNull();
+>>>>>>> dev
   });
 });

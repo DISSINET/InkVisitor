@@ -2625,5 +2625,43 @@
     "data": {
       "pos": "verb"
     }
+  },
+  {
+    "class": "C",
+    "data": {
+      "pos": ""
+    },
+    "detail": "in general - who gives advice",
+    "id": "2bcbd37a-34ff-4b92-bd76-152d5797cf89",
+    "isTemplate": null,
+    "label": "advisor",
+    "language": "eng",
+    "legacyId": "C1449",
+    "notes": ["Import batch [January2023] 2023-01-21 18:58:21.366042"],
+    "props": [],
+    "references": [
+      {
+        "id": "005bccb4-8eff-45db-b1e8-661dc1b58133",
+        "resource": "dissinet-resource",
+        "value": "2bcbd37a-34ff-4b92-bd76-152d5797cf89"
+      }
+    ],
+    "status": "1"
+  },
+  {
+    "id": "dissinet-resource",
+    "class": "R",
+    "status": "1",
+    "data": {
+      "url": "https://dissinet.cz/",
+      "partValueLabel": "",
+      "partValueBaseURL": ""
+    },
+    "label": "DISSINET Database (DDB1)",
+    "detail": "",
+    "language": "eng",
+    "notes": [],
+    "props": [],
+    "references": []
   }
 ]

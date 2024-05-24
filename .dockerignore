@@ -10,3 +10,5 @@ logo
 packages/database
 **/README.md
 **/Dockerfile*
+*.tar
+*.tar.gz

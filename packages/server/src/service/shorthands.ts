@@ -10,18 +10,15 @@ import Relation from "@models/relation/relation";
 import Audit from "@models/audit/audit";
 import Document from "@models/document/document";
 
-export async function deleteUser(db: Db, userId: string): Promise<WriteResult> {
-  return rethink.table(User.table).get(userId).delete().run(db.connection);
-}
-
 export async function getEntitiesDataByClass<T>(
-  db: Db,
+  db: Connection,
   entityClass: EntityEnums.Class
 ): Promise<T[]> {
+  const connection = db instanceof Db ? db.connection : db;
   return rethink
     .table(Entity.table)
     .getAll(entityClass, { index: DbEnums.Indexes.Class })
-    .run(db.connection);
+    .run(connection);
 }
 
 export async function findEntityById<T extends IEntity>(

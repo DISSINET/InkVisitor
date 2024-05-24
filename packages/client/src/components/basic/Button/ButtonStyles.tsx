@@ -2,17 +2,29 @@ import styled from "styled-components";
 import { space1, space2 } from "Theme/constants";
 import { ThemeColor } from "Theme/theme";
 
+const getRadius = ($radiusLeft?: boolean, $radiusRight?: boolean) => {
+  if ($radiusLeft && $radiusRight) {
+    return "7px";
+  } else if ($radiusLeft) {
+    return "7px 0 0 7px";
+  } else if ($radiusRight) {
+    return "0 7px 7px 0";
+  } else {
+    return "0";
+  }
+};
 interface IButtonStyle {
-  hasIcon?: boolean;
-  fullWidth?: boolean;
-  noBorder?: boolean;
-  noBackground?: boolean;
-  textRegular?: boolean;
-  inverted: boolean;
+  $hasIcon?: boolean;
+  $fullWidth?: boolean;
+  $noBorder?: boolean;
+  $noBackground?: boolean;
+  $textRegular?: boolean;
+  $inverted: boolean;
   $color: keyof ThemeColor;
-  disabled?: boolean;
-  radiusLeft?: boolean;
-  radiusRight?: boolean;
+  $disabled?: boolean;
+  $radiusLeft?: boolean;
+  $radiusRight?: boolean;
+  $paddingX: boolean;
 }
 export const StyledButton = styled.button.attrs(({ ref }) => ({
   ref: ref,
@@ -20,32 +32,34 @@ export const StyledButton = styled.button.attrs(({ ref }) => ({
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: ${({ fullWidth }) => (fullWidth ? "100%" : "auto")};
+  width: ${({ $fullWidth }) => ($fullWidth ? "100%" : "auto")};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
-  font-weight: ${({ disabled, textRegular }) =>
-    disabled ? 400 : textRegular ? 500 : 900};
-  padding: ${space1} ${({ hasIcon }) => (hasIcon ? space1 : space2)};
-  border-color: ${({ theme, disabled, $color }) =>
-    disabled ? theme.color["gray"][400] : theme.color[$color]};
-  border-width: ${({ noBorder }) => (noBorder ? 0 : "thin")};
+  font-weight: ${({ $disabled, $textRegular }) =>
+    $disabled ? 400 : $textRegular ? 500 : 900};
+  padding: ${space1} ${({ $hasIcon }) => ($hasIcon ? space1 : space2)};
+  padding-left: ${({ $paddingX }) => ($paddingX ? "0.5rem" : "")};
+  padding-right: ${({ $paddingX }) => ($paddingX ? "0.5rem" : "")};
+  border-color: ${({ theme, $disabled, $color }) =>
+    $disabled ? theme.color["gray"][400] : theme.color[$color]};
+  border-width: ${({ $noBorder }) => ($noBorder ? 0 : "thin")};
   border-style: solid;
-  border-radius: ${({ radiusLeft, radiusRight }) =>
-    radiusLeft ? "7px 0 0 7px" : radiusRight ? "0 7px 7px 0" : 0};
-  color: ${({ theme, disabled, $color, inverted }) =>
-    disabled
+  border-radius: ${({ $radiusLeft, $radiusRight }) =>
+    getRadius($radiusLeft, $radiusRight)};
+  color: ${({ theme, $disabled, $color, $inverted }) =>
+    $disabled
       ? theme.color["gray"][800]
-      : inverted
+      : $inverted
       ? theme.color[$color]
       : theme.color["white"]};
-  background: ${({ theme, noBackground, disabled, $color, inverted }) =>
-    noBackground
+  background: ${({ theme, $noBackground, $disabled, $color, $inverted }) =>
+    $noBackground
       ? "none"
-      : disabled
-      ? "repeating-linear-gradient(-45deg,#cbd5e0,#cbd5e0,1px,#fff 1px,#fff 12px)"
-      : inverted
+      : $disabled
+      ? theme.background["stripes"]
+      : $inverted
       ? theme.color["invertedBg"][$color]
       : theme.color[$color]};
-  cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
+  cursor: ${({ $disabled }) => ($disabled ? "not-allowed" : "pointer")};
   white-space: nowrap;
 
   transition: border-color 0.2s, color 0.2s, background-color 0.2s;
@@ -55,9 +69,10 @@ export const StyledButton = styled.button.attrs(({ ref }) => ({
 `;
 
 export const StyledButtonLabel = styled.span<{
-  hasIcon?: boolean;
-  noIconMargin?: boolean;
+  $hasIcon?: boolean;
+  $noIconMargin?: boolean;
 }>`
-  margin-left: ${({ theme, hasIcon = false, noIconMargin = false }) =>
-    hasIcon ? (noIconMargin ? 0 : "0.3rem") : 0};
+  margin-left: ${({ theme, $hasIcon = false, $noIconMargin = false }) =>
+    $hasIcon ? ($noIconMargin ? 0 : "0.3rem") : 0};
+  text-transform: lowercase;
 `;
