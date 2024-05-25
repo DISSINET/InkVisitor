@@ -2,7 +2,7 @@ import Viewport from "./Viewport";
 import Cursor, { IAbsCoordinates, IRelativeCoordinates } from "./Cursor";
 import { Modes } from "./constants";
 
-export interface Tag {
+export interface ITag {
   position: number;
   tag: string;
 }
@@ -12,8 +12,8 @@ export class Segment {
   lineEnd: number = -1; // incl.
   raw: string;
   parsed: string = "";
-  openingTags: Tag[] = [];
-  closingTags: Tag[] = [];
+  openingTags: ITag[] = [];
+  closingTags: ITag[] = [];
   lines: string[] = [];
 
   constructor(text: string) {
@@ -48,9 +48,9 @@ export class Segment {
     this.parsed = this.raw.replace(/<\/?[^<>]+?>/g, "");
   }
 
-  getTagsForPosition(pos: SegmentPosition): [Tag[], Tag[]] {
-    const openedTags: Tag[] = [];
-    const closedTags: Tag[] = [];
+  getTagsForPosition(pos: SegmentPosition): [ITag[], ITag[]] {
+    const openedTags: ITag[] = [];
+    const closedTags: ITag[] = [];
     for (const tag of this.openingTags) {
       if (tag.position < pos.rawTextIndex) {
         openedTags.push(tag);
@@ -64,7 +64,7 @@ export class Segment {
     return [openedTags, closedTags];
   }
 
-  findTagParsedPosition(tag: Tag): { x: number; y: number } {
+  findTagParsedPosition(tag: ITag): { x: number; y: number } {
     // find abs position right after the <tag>
     let parsedTextOpenPosition = this.openingTags
       .filter((t) => t.position < tag.position)
@@ -167,40 +167,28 @@ class Text {
         text = segment.parsed;
       }
 
-      const words = text.split(" ");
+      const regex: RegExp = /(<[^>]+>)|([\w']+)/g;
+      const tokens = text.split(regex).filter(t => !!t)
       let currentLine: string[] = [];
       let currentLineLength = 0;
 
-      for (let iWord = 0; iWord < words.length; iWord++) {
-        const word = words[iWord];
-        const regex: RegExp = /(<[^>]+>)|([\w']+)/g;
-        const tokens: string[] = word.match(regex) || [""];
-        
-        for (let iToken = 0; iToken < tokens.length; iToken++) {
-          const token = tokens[iToken];
-          
-          const tokenLength = token.length;
-          if (currentLineLength + tokenLength > this.charsAtLine) {
-            // Join the current line into a string and push it to lines
-            segment.lines.push(currentLine.join(" "));
-
-            currentLine = [token]; // Start a new line with the current word
-            currentLineLength = tokenLength; // Reset the length (+1 for the space)
-          } else {
-            if (currentLine.length > 0 && iToken > 0) {
-              currentLine[currentLine.length -1] += token;
-              currentLineLength += tokenLength; 
-            } else {
-              currentLine.push(token)
-              currentLineLength += tokenLength + 1;// +1 for the space
-            }
-          }
+      for (let iToken = 0; iToken < tokens.length; iToken++) {
+        const token = tokens[iToken];
+        const tokenLength = token.length;
+        if (currentLineLength + tokenLength > this.charsAtLine) {
+          // Join the current line into a string and push it to lines
+          segment.lines.push(currentLine.join(""));
+          currentLine = [token]; // Start a new line with the current word
+          currentLineLength = tokenLength; // Reset the length (+1 for the space)
+        } else {
+            currentLine.push(token)
+            currentLineLength += tokenLength;// +1 for the space
         }
 
-        if (iWord + 1 === words.length) {
+        if (iToken + 1 === tokens.length) {
           // Add the last line if it's not empty
           if (currentLine.length > 0) {
-            segment.lines.push(currentLine.join(" "));
+            segment.lines.push(currentLine.join(""));
           }
         }
       }
@@ -262,7 +250,7 @@ class Text {
     );
     let parsedTextIndex = charInLineIndex;
     for (let i = 0; i < lineIndex; i++) {
-      parsedTextIndex += segment.lines[i].length + 1;
+      parsedTextIndex += segment.lines[i].length;
     }
 
     let rawTextIndex = parsedTextIndex;
@@ -536,8 +524,8 @@ class Text {
   }
 
   getTagPosition(tag: string, occurence: number = 1): IAbsCoordinates[] {
-    let openingTags: {tag: Tag, segment: Segment}[] = [];
-    let closingTags: {tag: Tag, segment: Segment}[] = [];
+    let openingTags: {tag: ITag, segment: Segment}[] = [];
+    let closingTags: {tag: ITag, segment: Segment}[] = [];
     
     for (const segment of this.segments) {
       for (const openingTag of segment.openingTags) {

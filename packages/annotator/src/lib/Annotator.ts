@@ -1,7 +1,7 @@
 import Cursor from "./Cursor";
 import { Lines } from "./Lines";
 import Scroller from "./Scroller";
-import Text, { Segment, SegmentPosition, Tag } from "./Text";
+import Text, { Segment, SegmentPosition, ITag } from "./Text";
 import Viewport from "./Viewport";
 import { Modes } from "./constants";
 
