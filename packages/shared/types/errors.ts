@@ -127,6 +127,7 @@ class UserNotActiveError extends CustomError {
   public static code = 403;
   public static title = "Inactive user";
   public static message = "User $1 is not active";
+  public static messageVerified = "User $1 is not verified";
 
   constructor(m: string, userId: string) {
     super(m);

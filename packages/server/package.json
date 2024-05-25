@@ -1,6 +1,6 @@
 {
   "name": "inkvisitor-server",
-  "version": "1.4.0c",
+  "version": "1.4.0",
   "engines": {
     "npm": ">=8.19.2",
     "node": ">=18.0.0"
@@ -36,6 +36,7 @@
   "dependencies": {
     "@sendgrid/mail": "^7.7.0",
     "@types/cli-color": "^2.0.2",
+    "axios": "^1.6.8",
     "bcrypt": "^5.0.0",
     "cli-color": "^2.0.3",
     "compression": "^1.7.4",

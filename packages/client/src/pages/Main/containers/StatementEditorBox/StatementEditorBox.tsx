@@ -7,10 +7,8 @@ import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
 import { BsInfoCircle } from "react-icons/bs";
 import { toast } from "react-toastify";
-import { useAppDispatch } from "redux/hooks";
 import { StatementEditor } from "./StatementEditor/StatementEditor";
 import { StyledEditorEmptyState } from "./StatementEditorBoxStyles";
-import { setDisableStatementListScroll } from "redux/features/statementList/disableStatementListScrollSlice";
 
 export const StatementEditorBox: React.FC = () => {
   const { statementId, setStatementId, selectedDetailId, setTerritoryId } =
@@ -47,7 +45,7 @@ export const StatementEditorBox: React.FC = () => {
     mutationFn: async (changes: IStatement) => {
       await api.entityUpdate(statementId, changes);
     },
-    onSuccess: (data, variables: any) => {
+    onSuccess: (data, variables) => {
       if (selectedDetailId === statementId) {
         queryClient.invalidateQueries({ queryKey: ["entity"] });
       }
@@ -88,12 +86,15 @@ export const StatementEditorBox: React.FC = () => {
   const [tempObject, setTempObject] = useState<IResponseStatement>();
 
   useEffect(() => {
-    setTempObject(statement);
+    if (JSON.stringify(statement) !== JSON.stringify(tempObject)) {
+      setTempObject(statement);
+    }
   }, [statement]);
 
-  const sendChangesToBackend = (changes: IStatement) => {
-    if (JSON.stringify(statement) !== JSON.stringify(changes)) {
-      updateStatementMutation.mutate(changes);
+  const sendChangesToBackend = (changes: IResponseStatement) => {
+    if (statement && JSON.stringify(statement) !== JSON.stringify(changes)) {
+      const { entities, warnings, right, ...newStatement } = changes;
+      updateStatementMutation.mutate(newStatement);
     }
   };
 
@@ -111,7 +112,7 @@ export const StatementEditorBox: React.FC = () => {
   }, [tempObject, changesPending]);
 
   const updateChangesAndPendingState = (
-    newData: IStatement,
+    newData: IResponseStatement,
     instantUpdate?: boolean
   ) => {
     if (instantUpdate) {
@@ -147,7 +148,7 @@ export const StatementEditorBox: React.FC = () => {
       queryClient.cancelQueries({
         queryKey: ["statement", statementId],
       });
-      const newData = {
+      const newData: IResponseStatement = {
         ...tempObject,
         data: {
           ...tempObject.data,

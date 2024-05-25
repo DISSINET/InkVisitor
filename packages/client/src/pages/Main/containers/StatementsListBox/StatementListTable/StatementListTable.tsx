@@ -47,7 +47,20 @@ import {
   StyledTdLastEdit,
   StyledTh,
 } from "./StatementListTableStyles";
+import { StatementListDisplayMode } from "types";
+import { COLLAPSED_TABLE_WIDTH } from "Theme/constants";
 
+const MINIFIED_HIDDEN_COLUMNS = [
+  "id",
+  "move",
+  "subject",
+  "actions",
+  "objects",
+  "text",
+  "warnings",
+  "lastEdit",
+  "expander",
+];
 type CellType = CellProps<IResponseStatement>;
 
 interface StatementListTable {
@@ -79,6 +92,8 @@ interface StatementListTable {
 
   selectedRows: string[];
   setSelectedRows: React.Dispatch<React.SetStateAction<string[]>>;
+  displayMode: StatementListDisplayMode;
+  contentWidth: number;
 }
 export const StatementListTable: React.FC<StatementListTable> = ({
   statements,
@@ -94,6 +109,8 @@ export const StatementListTable: React.FC<StatementListTable> = ({
 
   selectedRows,
   setSelectedRows,
+  displayMode,
+  contentWidth,
 }) => {
   const dispatch = useAppDispatch();
   const { territoryId, setStatementId } = useSearchParams();
@@ -229,14 +246,15 @@ export const StatementListTable: React.FC<StatementListTable> = ({
         },
       },
       {
+        id: "statement",
         Header: "",
-        id: "Statement",
         Cell: ({ row }: CellType) => {
           const statement = row.original;
           return <EntityTag entity={statement as IEntity} showOnly="entity" />;
         },
       },
       {
+        id: "subject",
         Header: "Subj.",
         Cell: ({ row }: CellType) => {
           const subjectIds: string[] = row.original.data?.actants
@@ -261,6 +279,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
         },
       },
       {
+        id: "actions",
         Header: "Actions",
         Cell: ({ row }: CellType) => {
           const actionIds = row.original.data?.actions
@@ -283,6 +302,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
         },
       },
       {
+        id: "objects",
         Header: "Objects",
         Cell: ({ row }: CellType) => {
           const actantIds = row.original.data?.actants
@@ -307,6 +327,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
         },
       },
       {
+        id: "text",
         Header: "Text",
         accessor: "data",
         Cell: ({ row }: CellType) => {
@@ -315,8 +336,8 @@ export const StatementListTable: React.FC<StatementListTable> = ({
         },
       },
       {
-        Header: "Warn.",
         id: "warnings",
+        Header: "Warn.",
         Cell: ({ row }: CellType) => {
           const { warnings } = row.original;
 
@@ -463,6 +484,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
   );
 
   const {
+    setHiddenColumns,
     getTableProps,
     getTableBodyProps,
     headerGroups,
@@ -477,27 +499,36 @@ export const StatementListTable: React.FC<StatementListTable> = ({
       data: statementsLocal,
       getRowId,
       initialState: {
-        hiddenColumns: ["id"],
+        hiddenColumns:
+          displayMode === StatementListDisplayMode.TEXT
+            ? MINIFIED_HIDDEN_COLUMNS
+            : ["id"],
       },
     },
     useExpanded,
     useRowSelect
   );
 
-  const moveRow = useCallback(
-    (dragIndex: number, hoverIndex: number) => {
-      const dragRecord = statementsLocal[dragIndex];
-      setStatementsLocal(
-        update(statementsLocal, {
-          $splice: [
-            [dragIndex, 1],
-            [hoverIndex, 0, dragRecord],
-          ],
-        })
-      );
-    },
-    [statementsLocal]
-  );
+  useEffect(() => {
+    if (displayMode === StatementListDisplayMode.TEXT) {
+      setHiddenColumns(MINIFIED_HIDDEN_COLUMNS);
+    } else {
+      setTimeout(() => {
+        setHiddenColumns(["id"]);
+      }, 450);
+    }
+  }, [displayMode]);
+
+  const moveRow = useCallback((dragIndex: number, hoverIndex: number) => {
+    setStatementsLocal((prevStatementsLocal) =>
+      update(prevStatementsLocal, {
+        $splice: [
+          [dragIndex, 1],
+          [hoverIndex, 0, prevStatementsLocal[dragIndex]],
+        ],
+      })
+    );
+  }, []);
 
   const moveEndRow = async (statementToMove: IStatement, index: number) => {
     if (statementToMove.data.territory && statements[index].data.territory) {
@@ -534,7 +565,15 @@ export const StatementListTable: React.FC<StatementListTable> = ({
   };
 
   return (
-    <StyledTable {...getTableProps()}>
+    <StyledTable
+      {...getTableProps()}
+      $contentWidth={
+        displayMode === StatementListDisplayMode.LIST
+          ? contentWidth
+          : COLLAPSED_TABLE_WIDTH
+      }
+      $isExpanded={displayMode === StatementListDisplayMode.LIST}
+    >
       <StyledTHead>
         {headerGroups.map((headerGroup, key) => (
           <tr {...headerGroup.getHeaderGroupProps()} key={key}>

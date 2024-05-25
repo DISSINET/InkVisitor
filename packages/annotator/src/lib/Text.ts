@@ -7,7 +7,7 @@ export interface Tag {
   tag: string;
 }
 
-class Segment {
+export class Segment {
   lineStart: number = -1; // incl.
   lineEnd: number = -1; // incl.
   raw: string;
@@ -64,7 +64,7 @@ class Segment {
     return [openedTags, closedTags];
   }
 
-  findTagParsedPosition(tag: Tag): { x: number, y: number } {
+  findTagParsedPosition(tag: Tag): { x: number; y: number } {
     // find abs position right after the <tag>
     let parsedTextOpenPosition = this.openingTags
       .filter((t) => t.position < tag.position)
@@ -123,6 +123,11 @@ class Text {
 
   get lines(): string[] {
     return this.segments.reduce<string[]>((a, cur) => a.concat(cur.lines), []);
+  }
+
+  updateCharsAtLine(charsAtLine: number) {
+    this.charsAtLine = charsAtLine;
+    this.calculateLines();
   }
 
   prepareSegments() {
@@ -202,8 +207,9 @@ class Text {
       segment.lineEnd = segment.lineStart + segment.lines.length;
     }
 
-    const time2 = performance.now();
-    console.log(`${time2 - time1} ms `);
+    // Performance check
+    // const time2 = performance.now();
+    // console.log(`${time2 - time1} ms `);
   }
 
   /**
@@ -231,9 +237,9 @@ class Text {
 
     let absIndex = pos.rawTextIndex;
     for (let i = 0; i < pos.segmentIndex; i++) {
-      absIndex += this.segments[i].raw.length +1;
+      absIndex += this.segments[i].raw.length + 1;
     }
-   
+
     return absIndex;
   }
 
@@ -402,7 +408,7 @@ class Text {
     if (this.mode !== Modes.RAW) {
       for (const tag of segment.closingTags) {
         if (tag.position < segmentPosition.rawTextIndex) {
-          indexPosition -= tag.tag.length + 3
+          indexPosition -= tag.tag.length + 3;
         }
       }
     }
@@ -417,13 +423,12 @@ class Text {
       textToInsert +
       this.value.slice(indexPosition);
 
-
     segment.raw =
       segment.raw.slice(0, segmentPosition.rawTextIndex) +
       textToInsert +
       segment.raw.slice(segmentPosition.rawTextIndex);
 
-    segment.parseText();   
+    segment.parseText();
     this.calculateLines();
   }
 
@@ -491,8 +496,7 @@ class Text {
     if (!segment.raw) {
       this.prepareSegments();
     } else if (segmentPos.rawTextIndex) {
-      const xAlterPos =
-        segmentPos.rawTextIndex - (charsToDelete > 0 ? 1 : 0);
+      const xAlterPos = segmentPos.rawTextIndex - (charsToDelete > 0 ? 1 : 0);
       segment.raw =
         segment.raw.slice(0, xAlterPos) + segment.raw.slice(xAlterPos + 1);
       segment.parseText();
@@ -531,37 +535,48 @@ class Text {
     return rangeLines.join("\n");
   }
 
-  getTagPosition(viewport: Viewport, tag: string): IRelativeCoordinates[] {
-    let openingTag: Tag = { position: -1, tag: "" };
-    let openingSegment: Segment | undefined = undefined;
-    let closingTag: Tag = { position: -1, tag: "" };
-    let closingSegment: Segment | undefined = undefined;
-
+  getTagPosition(tag: string, occurence: number = 1): IAbsCoordinates[] {
+    let openingTags: {tag: Tag, segment: Segment}[] = [];
+    let closingTags: {tag: Tag, segment: Segment}[] = [];
+    
     for (const segment of this.segments) {
-      const foundOpeningTag = segment.openingTags.find((t) => t.tag === tag);
-      if (foundOpeningTag) {
-        openingTag = foundOpeningTag;
-        openingSegment = segment;
+      for (const openingTag of segment.openingTags) {
+        if (openingTag.tag === tag) {
+          openingTags.push({ tag: openingTag, segment})
+          if (openingTags.length >= occurence) {
+            break
+          }
+        }
+      }
+
+      if (openingTags.length >= occurence) {
         break;
       }
     }
 
     for (const segment of this.segments) {
-      const foundClosingTag = segment.closingTags.find((t) => t.tag === tag);
-      if (foundClosingTag) {
-        closingTag = foundClosingTag;
-        closingSegment = segment;
+      for (const closingTag of segment.closingTags) {
+        if (closingTag.tag === tag) {
+          closingTags.push({ tag: closingTag, segment})
+          if (closingTags.length >= occurence) {
+            break
+          }
+        }
+      }
+
+      if (closingTags.length >= occurence) {
         break;
       }
     }
 
-    if (!openingTag || !closingTag || !openingSegment || !closingSegment) {
+    if (!openingTags.length || !closingTags.length) {
       return [];
       // throw new Error("opening or closing tag not found..")
     }
 
-    const start = openingSegment.findTagParsedPosition(openingTag)
-    const end = closingSegment.findTagParsedPosition(closingTag)
+    const start = openingTags[openingTags.length - 1].segment.findTagParsedPosition(openingTags[openingTags.length - 1].tag);
+    const end = closingTags[closingTags.length - 1].segment.findTagParsedPosition(closingTags[closingTags.length - 1].tag);
+
     return [
       {
         xLine: start.x,

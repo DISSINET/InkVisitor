@@ -95,9 +95,11 @@ export default class Entity implements IEntity, IDbModel {
    * @param db db connection
    */
   async beforeSave(db: Connection): Promise<void> {
-    const linkedEntities = await Entity.findEntitiesByIds(db, this.getEntitiesIds())
-    if (linkedEntities.find(e => e.isTemplate)) {
-      throw new ModelNotValidError("cannot use template in entity instance")
+    if (!this.isTemplate) {
+      const linkedEntities = await Entity.findEntitiesByIds(db, this.getEntitiesIds())
+      if (linkedEntities.find(e => e.isTemplate)) {
+        throw new ModelNotValidError("cannot use template in entity instance")
+      }
     }
   }
 

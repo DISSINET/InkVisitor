@@ -348,6 +348,10 @@ export default Router()
         throw new UserNotActiveError(UserNotActiveError.message, user.email);
       }
 
+      if (!user.verified) {
+        throw new UserNotActiveError(UserNotActiveError.messageVerified, user.email);
+      }
+
       if (!checkPassword(rawPassword, user.password || "")) {
         throw new BadCredentialsError("wrong password");
       }

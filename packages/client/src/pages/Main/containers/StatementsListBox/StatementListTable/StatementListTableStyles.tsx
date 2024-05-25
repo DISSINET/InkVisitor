@@ -1,13 +1,22 @@
+import { COLLAPSED_TABLE_WIDTH } from "Theme/constants";
 import styled from "styled-components";
 
-export const StyledTable = styled.table`
-  width: 100%;
+interface StyledTable {
+  $contentWidth: number;
+  $isExpanded: boolean;
+}
+export const StyledTable = styled.table<StyledTable>`
+  width: ${({ $contentWidth }) => $contentWidth};
+  min-width: ${({}) => `${COLLAPSED_TABLE_WIDTH / 10}rem`};
   border-spacing: 0;
   border-collapse: collapse;
   border-width: ${({ theme }) => theme.borderWidth[1]};
   border-style: solid;
   border-color: ${({ theme }) => theme.color["gray"][500]};
   box-shadow: ${({ theme }) => theme.boxShadow["subtle"]};
+
+  transition: width 0.3s ease;
+  transition-delay: 100ms;
 `;
 export const StyledTHead = styled.thead`
   border-width: ${({ theme }) => theme.borderWidth[1]};
@@ -59,6 +68,7 @@ export const StyledTd = styled.td<StyledTd>`
   padding: ${({ theme }) => theme.space[2]};
   padding-left: ${({ theme }) => theme.space[4]};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
+  height: 4rem;
 `;
 export const StyledTdMove = styled.td`
   cursor: move;

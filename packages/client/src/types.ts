@@ -404,3 +404,6 @@ export enum StatementListDisplayMode {
   TEXT = "text",
   LIST = "list",
 }
+
+// identifier for DnD useDrop
+export declare type Identifier = string | symbol;

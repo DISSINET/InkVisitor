@@ -15,6 +15,7 @@ import {
   DragItem,
   DraggedPropRowCategory,
   DraggedPropRowItem,
+  Identifier,
   ItemTypes,
   PropAttributeFilter,
 } from "types";
@@ -30,15 +31,18 @@ import {
 import { PropGroupRowType } from "./PropGroupRowType";
 import { PropGroupRowValue } from "./PropGroupRowValue";
 
-export declare type Identifier = string | symbol;
-
 interface PropGroupRow {
   prop: IProp;
   entities: { [key: string]: IEntity };
   level: 1 | 2 | 3;
   hasOrder: boolean;
 
-  updateProp: (propId: string, changes: any, instantUpdate?: boolean) => void;
+  updateProp: (
+    propId: string,
+    changes: any,
+    instantUpdate?: boolean,
+    languageCheck?: boolean
+  ) => void;
   removeProp: (propId: string) => void;
   addProp: (originId: string) => void;
   moveProp: (dragIndex: number, hoverIndex: number) => void;
@@ -85,8 +89,8 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
   lowIdent = false,
   alwaysShowCreateModal,
 }) => {
-  const propTypeEntity: IEntity = entities[prop.type.entityId];
-  const propValueEntity: IEntity = entities[prop.value.entityId];
+  const propTypeEntity: IEntity | undefined = entities[prop.type.entityId];
+  const propValueEntity: IEntity | undefined = entities[prop.value.entityId];
 
   const draggedPropRow: DraggedPropRowItem = useAppSelector(
     (state) => state.rowDnd.draggedPropRow

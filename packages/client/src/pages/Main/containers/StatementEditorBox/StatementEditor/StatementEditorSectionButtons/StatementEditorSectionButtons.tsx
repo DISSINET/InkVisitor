@@ -99,7 +99,7 @@ export const StatementEditorSectionButtons: React.FC<
   return (
     <>
       <ButtonGroup
-      height={19}
+        height={19}
         style={{ marginLeft: "0.5rem", marginRight: "1rem" }}
       >
         <Button

@@ -20,7 +20,12 @@ interface PropGroup {
   territoryId: string;
   boxEntity: IResponseStatement | IResponseDetail;
 
-  updateProp: (propId: string, changes: any, instantUpdate?: boolean) => void;
+  updateProp: (
+    propId: string,
+    changes: any,
+    instantUpdate?: boolean,
+    languageCheck?: boolean
+  ) => void;
   removeProp: (propId: string) => void;
   addProp: (originId: string) => void;
   movePropToIndex: (propId: string, oldIndex: number, newIndex: number) => void;

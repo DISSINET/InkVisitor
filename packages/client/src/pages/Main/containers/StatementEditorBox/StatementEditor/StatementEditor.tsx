@@ -377,10 +377,12 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   const updateProp = (
     propId: string,
     changes: any,
-    instantUpdate?: boolean
+    instantUpdate?: boolean,
+    languageCheck?: boolean
   ) => {
     if (propId) {
       if (
+        languageCheck &&
         changes.type &&
         changes.type.entityId &&
         changes.type.elvl !== EntityEnums.Elvl.Inferential &&

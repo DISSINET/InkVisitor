@@ -1,4 +1,4 @@
-import fetch from 'node-fetch';
+import axios, { AxiosResponse } from 'axios';
 
 class PythonAPIClient {
     private baseUrl: string;
@@ -7,17 +7,16 @@ class PythonAPIClient {
         this.baseUrl = baseUrl;
     }
 
-    async test(): Promise<void> {
+    async test(): Promise<unknown> {
         const endpoint = '/test';
         try {
-            const response = await fetch(this.baseUrl + endpoint);
-            if (!response.ok) {
-                throw new Error(`Failed to fetch ${endpoint}: ${response.statusText}`);
-            }
-            const data = await response.json();
-            console.log('Test endpoint response:', data);
+            const response: AxiosResponse = await axios.get(this.baseUrl + endpoint);
+            console.log('Test endpoint response:', response.data);
+            return response.data
         } catch (error) {
             console.error('Error calling test endpoint:', error);
         }
     }
 }
+
+export default new PythonAPIClient(process.env.PYTHON_API_HOST || "")
