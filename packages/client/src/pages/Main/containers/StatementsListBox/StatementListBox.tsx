@@ -137,12 +137,12 @@ export const StatementListBox: React.FC = () => {
     }
   }, [error]);
 
-  const removeStatementMutation = useMutation({
+  const deleteStatementMutation = useMutation({
     mutationFn: async (sId: string) => await api.entityDelete(sId),
     onSuccess: (data, sId) => {
       toast.info(
         <ToastWithLink
-          children={`Statement removed!`}
+          children={`Statement deleted!`}
           linkText={"Restore"}
           onLinkClick={async () => {
             const response = await api.entityRestore(sId);
@@ -417,6 +417,27 @@ export const StatementListBox: React.FC = () => {
     },
   });
 
+  const statementsDeleteMutation = useMutation({
+    mutationFn: async () => api.entitiesDelete(selectedRows),
+    onSuccess: (variables, data) => {
+      queryClient.invalidateQueries({
+        queryKey: ["tree"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["territory"],
+      });
+    },
+    onError: (err) => {
+      toast.error(err.message);
+      queryClient.invalidateQueries({
+        queryKey: ["tree"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["territory"],
+      });
+    },
+  });
+
   const {
     ref: contentRef,
     height: contentHeight = 0,
@@ -442,6 +463,7 @@ export const StatementListBox: React.FC = () => {
           handleDisplayModeChange={handleDisplayModeChange}
           updateTerritoryMutation={updateTerritoryMutation}
           duplicateTerritoryMutation={duplicateTerritoryMutation}
+          statementsDeleteMutation={statementsDeleteMutation}
         />
       )}
 
@@ -533,17 +555,18 @@ export const StatementListBox: React.FC = () => {
         }}
         onSubmit={() => {
           if (statementToDelete) {
-            removeStatementMutation.mutate(statementToDelete.id);
+            deleteStatementMutation.mutate(statementToDelete.id);
             setShowSubmit(false);
             setStatementToDelete(undefined);
           }
         }}
-        loading={removeStatementMutation.isPending}
+        loading={deleteStatementMutation.isPending}
       />
       <Loader
         show={
           isFetching ||
-          removeStatementMutation.isPending ||
+          isLoading ||
+          deleteStatementMutation.isPending ||
           addStatementAtTheEndMutation.isPending ||
           statementCreateMutation.isPending ||
           statementUpdateMutation.isPending ||
@@ -552,7 +575,7 @@ export const StatementListBox: React.FC = () => {
           cloneStatementMutation.isPending ||
           updateTerritoryMutation.isPending ||
           duplicateTerritoryMutation.isPending ||
-          isLoading
+          statementsDeleteMutation.isPending
         }
       />
     </>

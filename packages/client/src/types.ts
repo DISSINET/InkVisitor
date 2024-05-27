@@ -407,3 +407,9 @@ export enum StatementListDisplayMode {
 
 // identifier for DnD useDrop
 export declare type Identifier = string | symbol;
+
+export interface ErrorResponse {
+  error: true;
+  message: string;
+  details: any;
+}

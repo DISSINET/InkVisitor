@@ -10,13 +10,14 @@ import {
 } from "@shared/types";
 import {
   UseMutationResult,
+  useMutation,
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
 import { rootTerritoryId } from "Theme/constants";
 import api from "api";
 import { AxiosResponse } from "axios";
-import { Button, ButtonGroup, Tooltip } from "components";
+import { Button, ButtonGroup, Submit, Tooltip } from "components";
 import Dropdown, {
   BreadcrumbItem,
   EntitySuggester,
@@ -33,7 +34,7 @@ import {
 import { TbHomeMove } from "react-icons/tb";
 import { setLastClickedIndex } from "redux/features/statementList/lastClickedIndexSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { DropdownItem, StatementListDisplayMode } from "types";
+import { DropdownItem, ErrorResponse, StatementListDisplayMode } from "types";
 import { collectTerritoryChildren, searchTree } from "utils/utils";
 import { v4 as uuidv4 } from "uuid";
 import {
@@ -50,6 +51,7 @@ import {
   StyledMoveToParent,
   StyledSuggesterRow,
 } from "./StatementListHeaderStyles";
+import { toast } from "react-toastify";
 
 interface StatementListHeader {
   territory: IResponseTerritory;
@@ -112,6 +114,12 @@ interface StatementListHeader {
     },
     unknown
   >;
+  statementsDeleteMutation: UseMutationResult<
+    (AxiosResponse<IResponseGeneric<any>, any> | ErrorResponse)[],
+    Error,
+    void,
+    unknown
+  >;
 }
 export const StatementListHeader: React.FC<StatementListHeader> = ({
   territory,
@@ -131,6 +139,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
 
   updateTerritoryMutation,
   duplicateTerritoryMutation,
+  statementsDeleteMutation,
 }) => {
   const dispatch = useAppDispatch();
   const queryClient = useQueryClient();
@@ -141,7 +150,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
     duplicate_S = "duplicate_S",
     replace_R = "replace_R",
     append_R = "append_R",
-    remove_S = "remove_S",
+    delete_S = "delete_S",
   }
   const batchOptions = [
     {
@@ -155,8 +164,8 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
       info: EntityEnums.Class.Territory,
     },
     {
-      value: BatchOption.remove_S,
-      label: `remove`,
+      value: BatchOption.delete_S,
+      label: `delete`,
       info: "",
     },
     {
@@ -273,22 +282,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
   const [headingHovered, setHeadingHovered] = useState(false);
   const [referenceElement, setReferenceElement] =
     useState<HTMLSpanElement | null>(null);
-
-  const handleBatchRemove = async () => {
-    try {
-      await api.entitiesDelete(selectedRows).then(() => {
-        queryClient.invalidateQueries({
-          queryKey: ["tree"],
-        });
-        queryClient.invalidateQueries({
-          queryKey: ["territory"],
-        });
-      });
-    } catch (error) {
-      console.log(error);
-      // toast.error(error.message)
-    }
-  };
+  const [showSubmit, setShowSubmit] = useState(false);
 
   return (
     <>
@@ -359,7 +353,6 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
           {/* BATCH ACTIONS */}
           <StyledActionsWrapper>
             {user?.role !== UserEnums.Role.Viewer &&
-              // displayMode === StatementListDisplayMode.LIST &&
               territory.statements.length > 0 && (
                 <>
                   <StyledCheckboxWrapper>
@@ -393,14 +386,14 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
                         />
                       </StyledDropdownWrap>
 
-                      {/* Batch remove */}
-                      {batchAction.value === BatchOption.remove_S && (
+                      {/* Batch delete */}
+                      {batchAction.value === BatchOption.delete_S && (
                         <Button
                           icon={<FaTrash />}
                           color="danger"
                           inverted
-                          onClick={handleBatchRemove}
-                          tooltipLabel="remove selected statements"
+                          onClick={() => setShowSubmit(true)}
+                          tooltipLabel="delete selected statements"
                         />
                       )}
 
@@ -502,6 +495,18 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
           duplicateTerritoryMutation={duplicateTerritoryMutation}
         />
       )}
+      <Submit
+        show={showSubmit}
+        title="Delete entities"
+        text={`Do you really want to delete ${selectedRows.length} statements?`}
+        submitLabel="Delete"
+        loading={statementsDeleteMutation.isPending}
+        onSubmit={() => {
+          statementsDeleteMutation.mutate();
+          setShowSubmit(false);
+        }}
+        onCancel={() => setShowSubmit(false)}
+      />
     </>
   );
 };

@@ -340,7 +340,6 @@ class RelationDoesNotExist extends CustomError {
   }
 }
 
-
 /**
  * RelationAsymetricalPathExist will be thrown when attempting to add asymetrical relation while there could already be path from A -> B
  */
@@ -437,6 +436,15 @@ class InvalidEmailError extends CustomError {
 }
 
 /**
+ * Will be thrown when statements with dependency deleted
+ */
+class InvalidDeleteStatementsError extends CustomError {
+  public static code = 400;
+  public static title = "Invalid delete";
+  public static message = "Some statements are not possible to delete";
+}
+
+/**
  * UnknownError works as a backup
  */
 class UnknownError extends CustomError {
@@ -488,6 +496,7 @@ const allErrors: Record<string, any> = {
   UsernameTooShortError,
   UsernameTooLongError,
   InvalidEmailError,
+  InvalidDeleteStatementsError,
 };
 
 export interface IErrorSignature {
@@ -537,4 +546,5 @@ export {
   UsernameTooShortError,
   UsernameTooLongError,
   InvalidEmailError,
+  InvalidDeleteStatementsError,
 };

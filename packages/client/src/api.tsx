@@ -34,6 +34,7 @@ import axios, {
 import React from "react";
 import { toast } from "react-toastify";
 import io, { Socket } from "socket.io-client";
+import { ErrorResponse } from "types";
 
 interface IApiOptions extends AxiosRequestConfig<any> {
   ignoreErrorToast: boolean;
@@ -655,18 +656,29 @@ class Api {
   async entitiesDelete(
     entityIds: string[],
     options?: IApiOptions
-  ): Promise<AxiosResponse<IResponseGeneric>[]> {
-    const out: AxiosResponse<IResponseGeneric>[] = [];
+  ): Promise<(AxiosResponse<IResponseGeneric> | ErrorResponse)[]> {
+    const out: (AxiosResponse<IResponseGeneric> | ErrorResponse)[] = [];
     for (const entityId of entityIds) {
       try {
         const response = await this.connection.delete(
           `/entities/${entityId}`,
           options
-        );      
-        out.push(response)
+        );
+        out.push(response);
       } catch (err) {
-        throw this.handleError(err);
+        out.push({
+          error: true,
+          message: `Failed to delete entity ${entityId}`,
+          details: this.handleError(err),
+        });
       }
+    }
+    console.log(out);
+
+    const hasError = out.some((result) => result.error);
+
+    if (hasError) {
+      throw errors.InvalidDeleteStatementsError;
     }
 
     return out;
