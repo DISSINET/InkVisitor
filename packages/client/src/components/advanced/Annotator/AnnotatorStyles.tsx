@@ -28,12 +28,7 @@ export const StyledCanvasWrapper = styled.div`
 
 export const StyledMainCanvas = styled.canvas`
   outline: none;
-  &.raw {
-    cursor: text;
-  }
-  &.highlight {
-    cursor: hand;
-  }
+  cursor: text;
 `;
 
 export const StyledLinesCanvas = styled.canvas`
