@@ -676,7 +676,6 @@ export class Annotator {
 
     const textToRender = this.text.getViewportText(this.viewport);
 
-    console.log(textToRender);
     for (
       let renderLine = 0;
       renderLine <= this.viewport.lineEnd - this.viewport.lineStart;
