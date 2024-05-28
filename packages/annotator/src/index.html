@@ -23,7 +23,11 @@
               class="lines annotator-element"
               width="50px"
               height="400px"
-              style="outline: none"
+              style="
+                outline: none;
+                color: rgb(21, 47, 46);
+                background-color: yellowgreen;
+              "
             ></canvas>
             <canvas
               tabindex="0"
@@ -102,9 +106,6 @@
 
       annotator.addScroller(document.getElementById("scroller"));
       annotator.addLines(document.getElementById("lines"));
-
-      annotator.lines.fontColor = "red";
-      annotator.lines.bgColor = "transparent";
 
       annotator.onHighlight((entityId) => {
         if (!highlightEnabled) {
