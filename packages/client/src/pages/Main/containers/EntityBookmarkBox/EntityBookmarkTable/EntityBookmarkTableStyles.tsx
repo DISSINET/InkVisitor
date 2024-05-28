@@ -16,7 +16,7 @@ export const StyledTh = styled.th`
 `;
 
 interface StyledTr {
-  isOdd?: boolean;
+  $isOdd?: boolean;
   isSelected?: boolean;
   opacity?: number;
 }
