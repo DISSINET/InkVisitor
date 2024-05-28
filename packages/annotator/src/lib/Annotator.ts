@@ -112,6 +112,90 @@ export class Annotator {
     this.draw();
   }
 
+  /**
+   * removeAnchorFromSelection removes anchor from selected text
+   * @param anchor
+   */
+  removeAnchorFromSelection(anchor: string) {
+    const [start, end] = this.cursor.getSelected();
+
+    if (start && end) {
+      this.text.getSegmentPosition(start.yLine, start.xLine) as SegmentPosition;
+
+      const startSegment = this.text.getSegmentPosition(
+        start.yLine,
+        start.xLine
+      ) as SegmentPosition;
+
+      const endSegment = this.text.getSegmentPosition(
+        end.yLine,
+        end.xLine
+      ) as SegmentPosition;
+
+      const anchors = this.getAnnotations(startSegment, endSegment);
+
+      if (anchors.includes(anchor)) {
+        // find if open tag for given anchor is part of selection, otherwise find the last occurence of that anchor in the text before the selection
+        const openTagSegment = this.text.segments
+          .slice(0, endSegment.segmentIndex + 1)
+          .reverse()
+          .find((segment) =>
+            segment.openingTags.find((tag) => tag.tag === anchor)
+          );
+
+        // replace open tag with empty string in the openTagSegment
+        if (openTagSegment) {
+          const openTag = openTagSegment.openingTags.find(
+            (tag) => tag.tag === anchor
+          );
+          if (openTag) {
+            const openTagsSegmentI = this.text.segments.findIndex(
+              (i) =>
+                i.lineStart === openTagSegment.lineStart &&
+                i.lineEnd === openTagSegment.lineEnd
+            );
+
+            this.text.segments[openTagsSegmentI].raw =
+              openTagSegment.raw.replace(`<${anchor}>`, "");
+            // this.text.segments[openTagsSegmentI].parseText();
+          }
+        }
+
+        // do similar for close tag
+        const closeTagSegment = this.text.segments
+          .slice(startSegment.segmentIndex, this.text.segments.length)
+          .find((segment) =>
+            segment.closingTags.find((tag) => tag.tag === anchor)
+          );
+
+        if (closeTagSegment) {
+          const closeTag = closeTagSegment.closingTags.find(
+            (tag) => tag.tag === anchor
+          );
+          if (closeTag) {
+            const closeTagsSegmentI =
+              this.text.segments.findIndex(
+                (i) =>
+                  i.lineStart === closeTagSegment.lineStart &&
+                  i.lineEnd === closeTagSegment.lineEnd
+              ) || 0;
+
+            this.text.segments[closeTagsSegmentI].raw =
+              closeTagSegment.raw.replace(`</${anchor}>`, "");
+
+            // this.text.segments[closeTagsSegmentI].parseText();
+          }
+        }
+
+        this.text.assignValueFromSegments();
+
+        // update annotator
+        // this.text.prepareSegments();
+        this.draw();
+      }
+    }
+  }
+
   onCanvasResize(entries: ResizeObserverEntry[]) {
     const entry = entries[0];
     const { width, height } = entry.contentRect;
@@ -739,7 +823,6 @@ export class Annotator {
     if (pos.length !== 2) {
       return;
     }
-
 
     this.viewport.scrollTo(pos[0].yLine, this.text.noLines);
     this.draw();

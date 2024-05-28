@@ -69,6 +69,11 @@
         <button id="addAnchor">add</button>
       </fieldset>
       <fieldset>
+        <label>remove anchor from selection </label>
+        <input type="text" id="removeAnchorText" />
+        <button id="removeAnchor">remove</button>
+      </fieldset>
+      <fieldset>
         <label>scroll to anchor </label>
         <input type="text" id="scrollToAnchorText" />
         <button id="scrollToAnchor">scroll</button>
@@ -132,8 +137,17 @@
         annotator.addAnchor(document.getElementById("anchorText").value);
       };
 
+      document.getElementById("removeAnchor").onclick = () => {
+        annotator.removeAnchorFromSelection(
+          document.getElementById("removeAnchorText").value
+        );
+      };
+
       document.getElementById("scrollToAnchor").onclick = () => {
-        annotator.scrollToAnchor(document.getElementById("scrollToAnchorText").value, 1);
+        annotator.scrollToAnchor(
+          document.getElementById("scrollToAnchorText").value,
+          1
+        );
       };
 
       window.addEventListener("resize", resizeAnnotator);
