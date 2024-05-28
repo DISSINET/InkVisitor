@@ -62,7 +62,7 @@ export const EntityBookmarkTableRow: React.FC<EntityBookmarkTableRow> = ({
 
   return (
     <React.Fragment key={index}>
-      <StyledTr ref={dropRef} opacity={opacity} isOdd={Boolean(index % 2)}>
+      <StyledTr ref={dropRef} opacity={opacity} $isOdd={Boolean(index % 2)}>
         {hasOrder ? (
           <td ref={dragRef} style={{ cursor: "move" }}>
             <FaGripVertical color={themeContext?.color.black} />

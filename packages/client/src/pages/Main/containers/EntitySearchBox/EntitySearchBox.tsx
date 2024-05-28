@@ -163,10 +163,6 @@ export const EntitySearchBox: React.FC = () => {
 
   const [referencedTo, setReferencedTo] = useState<IEntity | false>(false);
 
-  const classOptions = entitiesDict.filter(
-    (e) => e.value !== EntityEnums.Class.Resource
-  );
-
   // apply changes to search parameters
   const handleChange = (changes: {
     [key: string]:
@@ -334,7 +330,7 @@ export const EntitySearchBox: React.FC = () => {
                   <Dropdown.Single.Entity
                     placeholder={""}
                     width="full"
-                    options={[defaultClassOption].concat(classOptions)}
+                    options={[defaultClassOption].concat(entitiesDict)}
                     value={classOption}
                     onChange={(selectedOption) => {
                       setClassOption(selectedOption as EntityEnums.Class);
@@ -641,7 +637,7 @@ export const EntitySearchBox: React.FC = () => {
           categorySelected={
             searchData.class !== EntityEnums.Extension.Any
               ? searchData.class
-              : classOptions[0].value
+              : entitiesDict[0].value
           }
           languageSelected={searchData.language}
           closeModal={() => setShowEntityCreateModal(false)}

@@ -295,7 +295,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
         </StyledHeaderBreadcrumbRow>
 
         <StyledHeaderRow>
-          <span style={{ display: "grid" }}>
+          <span style={{ display: "grid", gridTemplateColumns: "auto auto" }}>
             {isFavorited && <StyledFaStar size={16} />}
             {territoryId ? (
               <StyledHeading
