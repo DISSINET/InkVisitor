@@ -5,6 +5,7 @@ import { IResponseDocument } from "@shared/types";
 import theme from "Theme/theme";
 import {
   Button,
+  ButtonGroup,
   Modal,
   ModalContent,
   ModalFooter,
@@ -25,6 +26,7 @@ import {
   StyledExportDocumentClassLabel,
   StyledExportDocumentClassReference,
   StyledExportDocumentContainer,
+  StyledExportStatsSection,
 } from "./DocumentModalStyles";
 import api from "api";
 
@@ -80,11 +82,11 @@ const DocumentModalExport: React.FC<DocumentModalExportProps> = ({
   return (
     <Modal width={500} showModal={show} onClose={onClose}>
       <ModalHeader
-        title={`Export ${
+        title={`Export document "${
           document
             ? getShortLabelByLetterCount(document?.title, 90)
             : "no label"
-        }`}
+        }"`}
       />
       <ModalContent>
         <div>
@@ -170,21 +172,28 @@ const DocumentModalExport: React.FC<DocumentModalExportProps> = ({
                     {!allClassesSelected ? "Select all" : "Deselect all"}
                   </StyledExportDocumentClassLabel>
                 </React.Fragment>
+
                 <span></span>
               </StyledExportDocumentContainer>
             </div>
           )}
+          <StyledExportStatsSection>
+            <b>{sumAnchorsToExport}</b> anchors will be exported
+          </StyledExportStatsSection>
           {!document && <div>Document not found</div>}
         </div>
       </ModalContent>
       <ModalFooter>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            width: "100%",
-          }}
-        >
+        <ButtonGroup>
+          <Button
+            key="cancel"
+            label="Cancel"
+            color="greyer"
+            inverted
+            onClick={() => {
+              onClose();
+            }}
+          />
           <Button
             onClick={() => {
               if (document?.id) {
@@ -192,11 +201,10 @@ const DocumentModalExport: React.FC<DocumentModalExportProps> = ({
               }
             }}
             icon={<FaRegSave size={20} style={{ marginRight: "3px" }} />}
-            fullWidth
-            label={`export document with ${sumAnchorsToExport} anchors`}
+            label={`export`}
             color="primary"
           />
-        </div>
+        </ButtonGroup>
       </ModalFooter>
     </Modal>
   );
