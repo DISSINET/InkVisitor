@@ -250,6 +250,10 @@ export const TextAnnotator = ({
                 handleCreateStatement(validatedText, newStatementId);
               }
             }}
+            handleRemoveAnchor={(anchor: string) => {
+              annotator?.removeAnchorFromSelection(anchor);
+              handleSaveNewContent();
+            }}
           />
         )}
         {displayLineNumbers && (

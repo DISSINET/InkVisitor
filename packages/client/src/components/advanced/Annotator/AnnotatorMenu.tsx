@@ -25,6 +25,7 @@ interface TextAnnotatorMenuProps {
   topBottomSelection: boolean;
   handleCreateStatement: Function | false;
   handleCreateTerritory: Function | false;
+  handleRemoveAnchor: Function | false;
 }
 
 export const TextAnnotatorMenu = ({
@@ -36,6 +37,7 @@ export const TextAnnotatorMenu = ({
   topBottomSelection,
   handleCreateStatement = false,
   handleCreateTerritory = false,
+  handleRemoveAnchor = false,
 }: TextAnnotatorMenuProps) => {
   return (
     <>
@@ -116,6 +118,13 @@ export const TextAnnotatorMenu = ({
                   if (entities[anchor]) {
                     return (
                       <EntityTag
+                        unlinkButton={{
+                          onClick: () => {
+                            if (handleRemoveAnchor) {
+                              handleRemoveAnchor(anchor);
+                            }
+                          },
+                        }}
                         key={anchor}
                         entity={entities[anchor] as IEntity}
                       />
