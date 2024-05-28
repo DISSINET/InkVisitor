@@ -94,15 +94,11 @@ export const EntityDetailValidationText: React.FC<
       <>
         {allowedClasses && allowedClasses.length > 0 ? (
           <>
-            {`All entities with type `}
+            {`Any `}
             {renderEntityClassList(entityClasses)}
           </>
         ) : (
-          <>
-            {`All `}
-            {renderEntityClassList(entityClasses)}
-            {` entities `}
-          </>
+          <>{`Any entity`}</>
         )}
       </>
 
