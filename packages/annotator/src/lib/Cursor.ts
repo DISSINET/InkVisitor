@@ -19,6 +19,8 @@ export default class Cursor implements IRelativeCoordinates {
   xLine: number;
   yLine: number;
 
+  ratio: number;
+
   fillColor: string;
   fillOpacity: number;
 
@@ -31,6 +33,7 @@ export default class Cursor implements IRelativeCoordinates {
   static Width = 3;
 
   constructor(
+    ratio: number,
     xLine: number = -1,
     yLine: number = -1,
     fillColor = "blue",
@@ -38,6 +41,8 @@ export default class Cursor implements IRelativeCoordinates {
   ) {
     this.fillColor = fillColor;
     this.fillOpacity = fillOpacity;
+
+    this.ratio = ratio;
     this.xLine = xLine;
     this.yLine = yLine;
   }
@@ -50,11 +55,11 @@ export default class Cursor implements IRelativeCoordinates {
   }
 
   yToLineI(y: number, lineHeight: number): number {
-    return Math.floor(y / lineHeight);
+    return Math.floor((y / lineHeight) * this.ratio);
   }
 
   xToCharI(x: number, charWidth: number): number {
-    return Math.floor(x / charWidth);
+    return Math.floor((x / charWidth) * this.ratio);
   }
 
   setPosition(lineX: number, lineY: number) {

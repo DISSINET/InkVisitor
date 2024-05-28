@@ -146,7 +146,8 @@ export const TextAnnotator = ({
 
     const annotator = new Annotator(
       mainCanvas.current,
-      document?.content ?? "no text"
+      document?.content ?? "no text",
+      2
     );
 
     annotator.setMode(Modes.HIGHLIGHT);
@@ -262,9 +263,9 @@ export const TextAnnotator = ({
         <StyledMainCanvas
           tabIndex={0}
           ref={mainCanvas}
-          width={wTextArea}
-          height={height}
           style={{
+            height: height,
+            width: wTextArea,
             backgroundColor: theme?.color.white,
             color: theme?.color.text,
           }}
