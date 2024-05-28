@@ -618,6 +618,7 @@ export class Annotator {
           100) *
           percentage
       );
+
       // console.log(
       //   this.text.noLines,
       //   this.viewport.lineEnd,
