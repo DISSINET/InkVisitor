@@ -75,6 +75,7 @@ class Api {
   private ping: number;
 
   private lastError: any = null;
+  private errorTimeout: any;
 
   constructor() {
     this.baseUrl = process.env.APIURL || window.location.origin;
@@ -176,12 +177,22 @@ class Api {
 
   shouldShowErrorToast(error: any) {
     if (this.lastError && this.lastError.message === error.message) {
-      // Same error as the last one, debounce it
+      // Same error as the last one, don't show the toast
       return false;
     }
 
     // Update the last error to the current error
     this.lastError = error;
+
+    // Clear the previous timeout if it exists
+    if (this.errorTimeout) {
+      clearTimeout(this.errorTimeout);
+    }
+
+    this.errorTimeout = setTimeout(() => {
+      this.lastError = null;
+    }, 500);
+
     return true;
   }
 
