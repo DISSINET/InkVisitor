@@ -527,8 +527,9 @@ export const CStatement = (
   userOptions: UserOptions,
   label?: string,
   detail?: string,
-  territoryId?: string,
-  id?: string
+  territoryId: string | undefined = undefined,
+  id: string | undefined = undefined,
+  lastInT: boolean = true
 ): IStatement => {
   const newStatement: IStatement = {
     id: id ?? uuidv4(),
@@ -552,12 +553,9 @@ export const CStatement = (
     isTemplate: false,
   };
   if (territoryId) {
-    newStatement.data = {
-      ...newStatement.data,
-      territory: {
-        territoryId: territoryId,
-        order: -1,
-      },
+    newStatement.data.territory = {
+      territoryId: territoryId,
+      order: lastInT ? EntityEnums.Order.Last : EntityEnums.Order.First,
     };
   }
   return newStatement;
