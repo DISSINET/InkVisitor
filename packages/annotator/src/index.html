@@ -33,8 +33,9 @@
               tabindex="0"
               id="canvas"
               class="annotator-element"
-              height="400px"
               style="
+                height: 400px;
+                width: 100px;
                 outline: none;
                 background-color: white;
                 border: 1px solid black;
@@ -96,6 +97,9 @@
     <script src="bundle.js"></script>
 
     <script type="module">
+      const ratio = 4;
+      const mainCanvasEl = document.getElementById("canvas");
+
       const textContentElement = document.getElementById("text-content");
 
       const exampleResponse = await fetch("example.txt");
@@ -104,7 +108,8 @@
       let highlightEnabled = false;
       const annotator = new Annotator(
         document.getElementById("canvas"),
-        exampleTxt
+        exampleTxt,
+        ratio
       );
 
       annotator.fontColor = "black";
@@ -161,7 +166,9 @@
 
       function resizeAnnotator() {
         const newW = document.body.clientWidth;
-        document.getElementById("canvas").width = newW - 50 - 40 - 10 - 6;
+        const canvasW = `${newW - 50 - 40 - 10 - 6}px`;
+
+        document.getElementById("canvas").style.width = canvasW;
       }
 
       resizeAnnotator();
