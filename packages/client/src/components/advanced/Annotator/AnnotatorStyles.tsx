@@ -4,6 +4,8 @@ export const StyledScrollerViewport = styled.div`
   background: #ccc;
   position: relative;
   width: 10px;
+  bordertop: 2px solid;
+  borderbottom: 2px solid;
 `;
 
 export const StyledScrollerCursor = styled.div`

@@ -618,6 +618,13 @@ export class Annotator {
           100) *
           percentage
       );
+      // console.log(
+      //   this.text.noLines,
+      //   this.viewport.lineEnd,
+      //   this.viewport.lineStart,
+      //   percentage,
+      //   toLine
+      // );
       this.viewport.scrollTo(toLine, this.text.noLines);
       this.draw();
     });

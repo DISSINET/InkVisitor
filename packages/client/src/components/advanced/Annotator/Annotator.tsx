@@ -272,11 +272,14 @@ export const TextAnnotator = ({
         <StyledScrollerViewport
           ref={scroller}
           style={{
-            background: theme?.color.success,
+            background: theme?.color.white,
           }}
         >
           <StyledScrollerCursor
-            style={{ backgroundColor: theme?.color.primary }}
+            style={{
+              backgroundColor: theme?.color.primary,
+              borderColor: theme?.color.primary,
+            }}
           />
         </StyledScrollerViewport>
       </StyledCanvasWrapper>

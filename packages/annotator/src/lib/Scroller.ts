@@ -68,11 +68,11 @@ class Scroller {
       return;
     }
 
+    // number of px runner moved
     let move: number;
 
     if (e.target !== this.element) {
-      const dragDiff = e.clientY - this.runnerDragStart + this.runnerDragOffset;
-      move = this.runner.clientHeight * dragDiff;
+      move = (e.clientY - this.runnerDragStart + this.runnerDragOffset) * 100;
     } else {
       move = e.offsetY * 100;
     }
