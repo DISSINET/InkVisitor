@@ -62,6 +62,7 @@ export class Annotator {
 
   // to control highlightChangeCb callback
   lastSelectedText = "";
+  ratio: number = 1;
 
   // callbacks
   onSelectTextCb?: (text: Selected) => void;
@@ -71,27 +72,43 @@ export class Annotator {
   clickCount: number;
   clickTimeout?: NodeJS.Timeout;
 
-  constructor(element: HTMLCanvasElement, inputText: string) {
+  constructor(
+    element: HTMLCanvasElement,
+    inputText: string,
+    ratio: number = 1
+  ) {
     this.element = element;
     const ctx = this.element.getContext("2d");
     if (!ctx) {
       throw new Error("Cannot get 2d context");
     }
 
+    this.ratio = ratio;
+    this.font = `${12 * this.ratio}px Monospace`;
+
+    this.lineHeight = 15 * this.ratio;
+
     // observe canvas element for resize
     const resizeObserver = new ResizeObserver(this.onCanvasResize.bind(this));
     resizeObserver.observe(this.element);
 
     this.ctx = ctx;
-    this.width = this.element.width;
-    this.height = this.element.height;
+    this.width =
+      Number(this.element.style.width.replace("px", "")) * this.ratio;
+    this.height =
+      Number(this.element.style.height.replace("px", "")) * this.ratio;
+
+    this.element.width = this.width;
+    this.element.height = this.height;
+
     this.setCharWidth("abcdefghijklmnopqrstuvwxyz0123456789");
 
     const charsAtLine = Math.floor(this.width / this.charWidth);
 
     const noLinesViewport = Math.ceil(this.height / this.lineHeight) - 1;
+
     this.viewport = new Viewport(0, noLinesViewport);
-    this.cursor = new Cursor();
+    this.cursor = new Cursor(this.ratio, 0, 0);
 
     this.inputText = inputText;
     this.text = new Text(this.inputText, charsAtLine);
@@ -200,11 +217,14 @@ export class Annotator {
   }
 
   onCanvasResize(entries: ResizeObserverEntry[]) {
-    const entry = entries[0];
-    const { width, height } = entry.contentRect;
+    this.width =
+      Number(this.element.style.width.replace("px", "")) * this.ratio;
+    this.height =
+      Number(this.element.style.height.replace("px", "")) * this.ratio;
 
-    this.width = width;
-    this.height = height;
+    this.element.width = this.width;
+    this.element.height = this.height;
+
     this.setCharWidth("abcdefghijklmnopqrstuvwxyz0123456789");
 
     const noLinesViewport = Math.ceil(this.height / this.lineHeight) - 1;
@@ -557,7 +577,12 @@ export class Annotator {
   }
 
   addLines(canvasElement: HTMLCanvasElement): void {
-    this.lines = new Lines(canvasElement, this.lineHeight, this.charWidth);
+    this.lines = new Lines(
+      canvasElement,
+      this.ratio,
+      this.lineHeight,
+      this.charWidth
+    );
   }
 
   getAnnotations(
@@ -650,6 +675,8 @@ export class Annotator {
     this.ctx.fillStyle = this.fontColor;
 
     const textToRender = this.text.getViewportText(this.viewport);
+
+    console.log(textToRender);
     for (
       let renderLine = 0;
       renderLine <= this.viewport.lineEnd - this.viewport.lineStart;
@@ -715,7 +742,7 @@ export class Annotator {
         const highlight = this.onHighlightCb(tag);
         if (highlight) {
           const [startLine, endLine] = this.text.getTagPosition(tag);
-          const highlighter = new Cursor(0, 0);
+          const highlighter = new Cursor(this.ratio, 0, 0);
           highlighter.selectStart = startLine;
           highlighter.selectEnd = endLine;
           highlighter.draw(this.ctx, this.viewport, {
