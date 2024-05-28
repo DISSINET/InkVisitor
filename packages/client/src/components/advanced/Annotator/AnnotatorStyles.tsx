@@ -3,16 +3,16 @@ import styled from "styled-components";
 export const StyledScrollerViewport = styled.div`
   background: #ccc;
   position: relative;
-  width: 10px;
-  bordertop: 2px solid;
-  borderbottom: 2px solid;
+  width: 14px;
+  border-radius: ${({ theme }) => theme.borderRadius["default"]};
 `;
 
 export const StyledScrollerCursor = styled.div`
   cursor: move;
   position: absolute;
   width: 10px;
-  background-color: blue;
+  margin-left: ${({ theme }) => theme.space[1]};
+  border-radius: ${({ theme }) => theme.borderRadius["default"]};
 `;
 
 export const StyledHightlightedText = styled.pre`
