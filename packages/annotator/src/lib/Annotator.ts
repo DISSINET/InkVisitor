@@ -38,8 +38,8 @@ export class Annotator {
 
   // TODO: different font, different sizes
   font: string = "12px Monospace";
-  fontColor: string = "black";
 
+  fontColor: string = "black";
   bgColor: string = "white";
 
   charWidth: number = 0;
@@ -95,6 +95,9 @@ export class Annotator {
 
     this.inputText = inputText;
     this.text = new Text(this.inputText, charsAtLine);
+
+    this.bgColor = this.element.style.backgroundColor || "white";
+    this.fontColor = this.element.style.color || "black";
 
     this.element.onwheel = this.onWheel.bind(this);
     this.element.onmousedown = this.onMouseDown.bind(this);

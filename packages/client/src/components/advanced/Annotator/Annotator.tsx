@@ -149,10 +149,6 @@ export const TextAnnotator = ({
       document?.content ?? "no text"
     );
 
-    // colors needs to be static as the highlighting would not be working nicely in the dark mode
-    annotator.fontColor = "#383737";
-    annotator.bgColor = "white";
-
     annotator.setMode(Modes.HIGHLIGHT);
     annotator.addScroller(scroller.current);
 
@@ -160,10 +156,6 @@ export const TextAnnotator = ({
 
     if (displayLineNumbers && lines.current) {
       annotator.addLines(lines.current);
-      if (annotator.lines) {
-        annotator.lines.fontColor = theme?.color.text;
-        annotator.lines.bgColor = theme?.color.white;
-      }
     }
     annotator.onSelectText(({ text, anchors }) => {
       // console.log("select", text, anchors);
@@ -257,13 +249,25 @@ export const TextAnnotator = ({
           />
         )}
         {displayLineNumbers && (
-          <StyledLinesCanvas ref={lines} width={wLineNumbers} height={height} />
+          <StyledLinesCanvas
+            ref={lines}
+            width={wLineNumbers}
+            height={height}
+            style={{
+              backgroundColor: theme?.color.white,
+              color: theme?.color.plain,
+            }}
+          />
         )}
         <StyledMainCanvas
           tabIndex={0}
           ref={mainCanvas}
           width={wTextArea}
           height={height}
+          style={{
+            backgroundColor: theme?.color.white,
+            color: theme?.color.text,
+          }}
         />
         <StyledScrollerViewport
           ref={scroller}
