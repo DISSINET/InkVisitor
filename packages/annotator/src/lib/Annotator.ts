@@ -753,7 +753,7 @@ export class Annotator {
     if (this.text.mode === Modes.HIGHLIGHT && this.onHighlightCb) {
       const startPos = this.text.getSegmentPosition(this.viewport.lineStart, 0);
       const endPos = this.text.getSegmentPosition(
-         this.viewport.lineEnd,
+        this.viewport.lineEnd,
         this.text.charsAtLine
       );
 
@@ -851,12 +851,20 @@ export class Annotator {
     if (start && end) {
       const indexPositionStart = this.text.cursorToAbsIndex(
         this.viewport,
-        new Cursor(start.xLine, start.yLine - this.viewport.lineStart)
+        new Cursor(
+          this.ratio,
+          start.xLine,
+          start.yLine - this.viewport.lineStart
+        )
       );
       const indexPositionEnd =
         this.text.cursorToAbsIndex(
           this.viewport,
-          new Cursor(end.xLine, start.yLine - this.viewport.lineStart)
+          new Cursor(
+            this.ratio,
+            end.xLine,
+            start.yLine - this.viewport.lineStart
+          )
         ) +
         anchor.length +
         2;
