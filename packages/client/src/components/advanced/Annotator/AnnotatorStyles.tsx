@@ -22,7 +22,6 @@ export const StyledHightlightedText = styled.pre`
 `;
 
 export const StyledCanvasWrapper = styled.div`
-  position: relative;
   border: 1px solid black;
   padding: 2px;
   display: flex;

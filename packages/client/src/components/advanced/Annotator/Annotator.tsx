@@ -22,6 +22,7 @@ import {
   StyledScrollerCursor,
   StyledScrollerViewport,
 } from "./AnnotatorStyles";
+import { EntityEnums } from "@shared/enums";
 
 interface TextAnnotatorProps {
   width: number;
@@ -182,9 +183,16 @@ export const TextAnnotator = ({
     });
 
     annotator.onHighlight((entityId: string) => {
-      const entity = storedEntities.current[entityId];
-      if (entity) {
-        const classItem = EntityColors[entity.class];
+      const entityClass = document?.referencedEntityIds
+        ? Object.keys(document?.referencedEntityIds).find((key) =>
+            document?.referencedEntityIds?.[key as EntityEnums.Class].includes(
+              entityId
+            )
+          )
+        : undefined;
+
+      if (entityClass) {
+        const classItem = EntityColors[entityClass];
         const colorName = classItem?.color ?? "transparent";
         const color = theme?.color[colorName] as string;
 
@@ -192,7 +200,7 @@ export const TextAnnotator = ({
           mode: "background",
           style: {
             fillColor: color,
-            fillOpacity: 0.2,
+            fillOpacity: 0.3,
           },
         };
       } else {
@@ -276,6 +284,7 @@ export const TextAnnotator = ({
             width={wLineNumbers}
             height={height}
             style={{
+              outline: "none",
               backgroundColor: theme?.color.white,
               color: theme?.color.plain,
             }}
@@ -289,6 +298,7 @@ export const TextAnnotator = ({
             width: wTextArea,
             backgroundColor: theme?.color.white,
             color: theme?.color.text,
+            outline: "none",
           }}
         />
         <StyledScrollerViewport
