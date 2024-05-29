@@ -23,20 +23,29 @@
               class="lines annotator-element"
               width="50px"
               height="400px"
-              style="outline: none"
+              style="
+                outline: none;
+                color: rgb(21, 47, 46);
+                background-color: yellowgreen;
+              "
             ></canvas>
             <canvas
               tabindex="0"
               id="canvas"
               class="annotator-element"
-              height="400px"
-              style="outline: none"
+              style="
+                height: 400px;
+                width: 100px;
+                outline: none;
+                background-color: white;
+                border: 1px solid black;
+              "
             >
             </canvas>
             <div
               class="scroller-viewport annotator-element"
               id="scroller"
-              style="background: #ccc; position: relative; width: 10px"
+              style="background: limegreen; position: relative; width: 14px"
             >
               <div
                 class="scroller-cursor"
@@ -44,7 +53,8 @@
                   cursor: move;
                   position: absolute;
                   width: 10px;
-                  background-color: blue;
+                  background-color: white;
+                  margin-left: 2px;
                 "
               ></div>
             </div>
@@ -69,6 +79,11 @@
         <button id="addAnchor">add</button>
       </fieldset>
       <fieldset>
+        <label>remove anchor from selection </label>
+        <input type="text" id="removeAnchorText" />
+        <button id="removeAnchor">remove</button>
+      </fieldset>
+      <fieldset>
         <label>scroll to anchor </label>
         <input type="text" id="scrollToAnchorText" />
         <button id="scrollToAnchor">scroll</button>
@@ -81,6 +96,9 @@
     <script src="bundle.js"></script>
 
     <script type="module">
+      const ratio = 2;
+      const mainCanvasEl = document.getElementById("canvas");
+
       const textContentElement = document.getElementById("text-content");
 
       const exampleResponse = await fetch("example.txt");
@@ -89,7 +107,8 @@
       let highlightEnabled = false;
       const annotator = new Annotator(
         document.getElementById("canvas"),
-        exampleTxt
+        exampleTxt,
+        ratio
       );
 
       annotator.fontColor = "black";
@@ -98,19 +117,25 @@
       annotator.addScroller(document.getElementById("scroller"));
       annotator.addLines(document.getElementById("lines"));
 
-      annotator.lines.fontColor = "red";
-      annotator.lines.bgColor = "transparent";
-
       annotator.onHighlight((entityId) => {
         if (!highlightEnabled) {
           return null;
         }
-        const colors = ["black", "brown", "pink", "green"];
-        const randColor = colors[Math.floor(Math.random() * colors.length)];
+        let color = "black";
+        if (entityId[0] === "a") {
+          color = "red";
+        } else if (entityId[0] === "b") {
+          color = "blue";
+        } else if (entityId[0] === "c") {
+          color = "green";
+        } else if (entityId[0] === "d") {
+          color = "yellow";
+        }
+
         return {
           mode: "background",
           style: {
-            fillColor: randColor,
+            fillColor: color,
             fillOpacity: 0.3,
           },
         };
@@ -132,15 +157,26 @@
         annotator.addAnchor(document.getElementById("anchorText").value);
       };
 
+      document.getElementById("removeAnchor").onclick = () => {
+        annotator.removeAnchorFromSelection(
+          document.getElementById("removeAnchorText").value
+        );
+      };
+
       document.getElementById("scrollToAnchor").onclick = () => {
-        annotator.scrollToAnchor(document.getElementById("scrollToAnchorText").value, 1);
+        annotator.scrollToAnchor(
+          document.getElementById("scrollToAnchorText").value,
+          1
+        );
       };
 
       window.addEventListener("resize", resizeAnnotator);
 
       function resizeAnnotator() {
         const newW = document.body.clientWidth;
-        document.getElementById("canvas").width = newW - 50 - 40 - 10 - 6;
+        const canvasW = `${newW - 50 - 40 - 10 - 6}px`;
+
+        document.getElementById("canvas").style.width = canvasW;
       }
 
       resizeAnnotator();

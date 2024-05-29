@@ -22,6 +22,7 @@ import {
   StyledScrollerCursor,
   StyledScrollerViewport,
 } from "./AnnotatorStyles";
+import { EntityEnums } from "@shared/enums";
 
 interface TextAnnotatorProps {
   width: number;
@@ -66,6 +67,14 @@ export const TextAnnotator = ({
       setAnnotatorMode(Modes.HIGHLIGHT);
     },
   });
+  const updateDocumentMutationQuiet = useMutation({
+    mutationFn: async (data: { id: string; doc: Partial<IDocument> }) =>
+      api.documentUpdate(data.id, data.doc),
+    onSuccess: (variables, data) => {
+      queryClient.invalidateQueries({ queryKey: ["document"] });
+      queryClient.invalidateQueries({ queryKey: ["documents"] });
+    },
+  });
 
   const { annotator, setAnnotator } = useAnnotator();
 
@@ -83,15 +92,25 @@ export const TextAnnotator = ({
   const [selectedAnchors, setSelectedAnchors] = useState<string[]>([]);
   const storedEntities = useRef<Record<string, IEntity | false>>({});
 
-  const handleSaveNewContent = () => {
+  const handleSaveNewContent = (quiet: boolean) => {
     if (annotator && document?.id) {
-      updateDocumentMutation.mutate({
-        id: document.id,
-        doc: {
-          ...document,
-          ...{ content: annotator.text.value },
-        },
-      });
+      if (quiet) {
+        updateDocumentMutationQuiet.mutate({
+          id: document.id,
+          doc: {
+            ...document,
+            ...{ content: annotator.text.value },
+          },
+        });
+      } else {
+        updateDocumentMutation.mutate({
+          id: document.id,
+          doc: {
+            ...document,
+            ...{ content: annotator.text.value },
+          },
+        });
+      }
     }
   };
 
@@ -146,12 +165,9 @@ export const TextAnnotator = ({
 
     const annotator = new Annotator(
       mainCanvas.current,
-      document?.content ?? "no text"
+      document?.content ?? "no text",
+      2
     );
-
-    // colors needs to be static as the highlighting would not be working nicely in the dark mode
-    annotator.fontColor = "#383737";
-    annotator.bgColor = "white";
 
     annotator.setMode(Modes.HIGHLIGHT);
     annotator.addScroller(scroller.current);
@@ -160,10 +176,6 @@ export const TextAnnotator = ({
 
     if (displayLineNumbers && lines.current) {
       annotator.addLines(lines.current);
-      if (annotator.lines) {
-        annotator.lines.fontColor = theme?.color.text;
-        annotator.lines.bgColor = theme?.color.white;
-      }
     }
     annotator.onSelectText(({ text, anchors }) => {
       // console.log("select", text, anchors);
@@ -171,9 +183,16 @@ export const TextAnnotator = ({
     });
 
     annotator.onHighlight((entityId: string) => {
-      const entity = storedEntities.current[entityId];
-      if (entity) {
-        const classItem = EntityColors[entity.class];
+      const entityClass = document?.referencedEntityIds
+        ? Object.keys(document?.referencedEntityIds).find((key) =>
+            document?.referencedEntityIds?.[key as EntityEnums.Class].includes(
+              entityId
+            )
+          )
+        : undefined;
+
+      if (entityClass) {
+        const classItem = EntityColors[entityClass];
         const colorName = classItem?.color ?? "transparent";
         const color = theme?.color[colorName] as string;
 
@@ -181,7 +200,7 @@ export const TextAnnotator = ({
           mode: "background",
           style: {
             fillColor: color,
-            fillOpacity: 0.2,
+            fillOpacity: 0.3,
           },
         };
       } else {
@@ -208,12 +227,15 @@ export const TextAnnotator = ({
   const topBottomSelection = useMemo<boolean>(() => {
     const selectedText = annotator?.cursor?.getSelected();
 
-    return (selectedText?.[0]?.yLine ?? 0) < (selectedText?.[1]?.yLine ?? 0);
+    // FIX ME: this is a hack to determine if the selection is from top to bottom
+
+    // return (selectedText?.[0]?.yLine ?? 0) < (selectedText?.[1]?.yLine ?? 0);
+    return true;
   }, [annotator?.cursor?.yLine]);
 
   const menuPositionY = useMemo<number>(() => {
     const yLine = annotator?.cursor?.yLine ?? 0;
-    const lineHeight = annotator?.lineHeight ?? 0;
+    const lineHeight = (annotator?.lineHeight ?? 0) / 2;
 
     return yLine * lineHeight + (topBottomSelection ? -50 : 50);
   }, [annotator?.cursor?.yLine, annotator?.lineHeight, topBottomSelection]);
@@ -223,7 +245,7 @@ export const TextAnnotator = ({
   }, [annotator?.text?.value, document?.content]);
 
   return (
-    <div style={{ width: width }}>
+    <div style={{ width: width, position: "absolute" }}>
       <StyledCanvasWrapper>
         {document && annotatorMode === Modes.HIGHLIGHT && selectedText && (
           <TextAnnotatorMenu
@@ -250,25 +272,45 @@ export const TextAnnotator = ({
                 handleCreateStatement(validatedText, newStatementId);
               }
             }}
+            handleRemoveAnchor={(anchor: string) => {
+              annotator?.removeAnchorFromSelection(anchor);
+              handleSaveNewContent(true);
+            }}
           />
         )}
         {displayLineNumbers && (
-          <StyledLinesCanvas ref={lines} width={wLineNumbers} height={height} />
+          <StyledLinesCanvas
+            ref={lines}
+            width={wLineNumbers}
+            height={height}
+            style={{
+              outline: "none",
+              backgroundColor: theme?.color.white,
+              color: theme?.color.plain,
+            }}
+          />
         )}
         <StyledMainCanvas
           tabIndex={0}
           ref={mainCanvas}
-          width={wTextArea}
-          height={height}
+          style={{
+            height: height,
+            width: wTextArea,
+            backgroundColor: theme?.color.white,
+            color: theme?.color.text,
+            outline: "none",
+          }}
         />
         <StyledScrollerViewport
           ref={scroller}
           style={{
-            background: theme?.color.success,
+            background: theme?.color.grey,
           }}
         >
           <StyledScrollerCursor
-            style={{ backgroundColor: theme?.color.primary }}
+            style={{
+              backgroundColor: theme?.color.primary,
+            }}
           />
         </StyledScrollerViewport>
       </StyledCanvasWrapper>
@@ -321,7 +363,7 @@ export const TextAnnotator = ({
             icon={<FaRegSave />}
             disabled={!madeAnyChanges}
             onClick={() => {
-              handleSaveNewContent();
+              handleSaveNewContent(false);
             }}
           />
           <Button

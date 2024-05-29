@@ -359,6 +359,7 @@ export const StatementListBox: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ["statement"] });
     },
   });
+
   const handleCreateStatement = (
     text: string = "",
     statementId: string | undefined = undefined
@@ -373,20 +374,7 @@ export const StatementListBox: React.FC = () => {
         statementId
       );
       newStatement.data.text = text;
-      const { statements } = data;
-
-      const lastStatement = statements[statements.length - 1];
-      if (!statements.length) {
-        addStatementAtTheEndMutation.mutate(newStatement);
-      } else if (
-        newStatement?.data?.territory &&
-        lastStatement?.data?.territory
-      ) {
-        newStatement.data.territory.order = statements.length
-          ? lastStatement.data.territory.order + 1
-          : 1;
-        addStatementAtTheEndMutation.mutate(newStatement);
-      }
+      addStatementAtTheEndMutation.mutate(newStatement);
     }
   };
 

@@ -295,7 +295,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
         </StyledHeaderBreadcrumbRow>
 
         <StyledHeaderRow>
-          <span style={{ display: "grid" }}>
+          <span style={{ display: "grid", gridTemplateColumns: "auto auto" }}>
             {isFavorited && <StyledFaStar size={16} />}
             {territoryId ? (
               <StyledHeading
@@ -434,7 +434,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
               <Button
                 color="success"
                 icon={<FaList />}
-                label="list"
+                label={`list (${territory.statements.length})`}
                 onClick={() => {
                   handleDisplayModeChange(StatementListDisplayMode.LIST);
                 }}

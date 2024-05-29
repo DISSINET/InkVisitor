@@ -53,8 +53,6 @@ export const StatementListTextAnnotator: React.FC<
   contentHeight,
   contentWidth,
 }) => {
-  const dispatch = useAppDispatch();
-
   const {
     data: resources,
     error: resourcesError,

@@ -274,7 +274,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
               />
             ) : (
               <EntityDetailRelationRow
-                key={entity.id}
+                key={relation.id}
                 index={key}
                 relation={relation}
                 entities={entities}

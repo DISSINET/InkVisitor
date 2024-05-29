@@ -7,10 +7,8 @@ import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
 import { BsInfoCircle } from "react-icons/bs";
 import { toast } from "react-toastify";
-import { useAppDispatch } from "redux/hooks";
 import { StatementEditor } from "./StatementEditor/StatementEditor";
 import { StyledEditorEmptyState } from "./StatementEditorBoxStyles";
-import { setDisableStatementListScroll } from "redux/features/statementList/disableStatementListScrollSlice";
 
 export const StatementEditorBox: React.FC = () => {
   const { statementId, setStatementId, selectedDetailId, setTerritoryId } =
@@ -47,7 +45,7 @@ export const StatementEditorBox: React.FC = () => {
     mutationFn: async (changes: IStatement) => {
       await api.entityUpdate(statementId, changes);
     },
-    onSuccess: (data, variables: any) => {
+    onSuccess: (data, variables) => {
       if (selectedDetailId === statementId) {
         queryClient.invalidateQueries({ queryKey: ["entity"] });
       }
@@ -94,8 +92,9 @@ export const StatementEditorBox: React.FC = () => {
   }, [statement]);
 
   const sendChangesToBackend = (changes: IResponseStatement) => {
-    if (JSON.stringify(statement?.data) !== JSON.stringify(changes.data)) {
-      updateStatementMutation.mutate({ data: changes.data });
+    if (statement && JSON.stringify(statement) !== JSON.stringify(changes)) {
+      const { entities, warnings, right, ...newStatement } = changes;
+      updateStatementMutation.mutate(newStatement);
     }
   };
 
