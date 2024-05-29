@@ -45,7 +45,7 @@
             <div
               class="scroller-viewport annotator-element"
               id="scroller"
-              style="background: limegreen; position: relative; width: 10px"
+              style="background: limegreen; position: relative; width: 14px"
             >
               <div
                 class="scroller-cursor"
@@ -54,8 +54,7 @@
                   position: absolute;
                   width: 10px;
                   background-color: white;
-                  border-top: 2px solid white;
-                  border-bottom: 2px solid white;
+                  margin-left: 2px;
                 "
               ></div>
             </div>
@@ -97,7 +96,7 @@
     <script src="bundle.js"></script>
 
     <script type="module">
-      const ratio = 4;
+      const ratio = 2;
       const mainCanvasEl = document.getElementById("canvas");
 
       const textContentElement = document.getElementById("text-content");
@@ -122,12 +121,21 @@
         if (!highlightEnabled) {
           return null;
         }
-        const colors = ["black", "brown", "pink", "green"];
-        const randColor = colors[Math.floor(Math.random() * colors.length)];
+        let color = "black";
+        if (entityId[0] === "a") {
+          color = "red";
+        } else if (entityId[0] === "b") {
+          color = "blue";
+        } else if (entityId[0] === "c") {
+          color = "green";
+        } else if (entityId[0] === "d") {
+          color = "yellow";
+        }
+
         return {
           mode: "background",
           style: {
-            fillColor: randColor,
+            fillColor: color,
             fillOpacity: 0.3,
           },
         };
