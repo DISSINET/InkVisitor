@@ -138,7 +138,8 @@ export const StatementListBox: React.FC = () => {
   }, [error]);
 
   const deleteStatementMutation = useMutation({
-    mutationFn: async (sId: string) => await api.entityDelete(sId),
+    mutationFn: async (sId: string) =>
+      await api.entityDelete(sId, { ignoreErrorToast: true }),
     onSuccess: (data, sId) => {
       toast.info(
         <ToastWithLink
@@ -176,12 +177,17 @@ export const StatementListBox: React.FC = () => {
         (error as any).data.length > 0
       ) {
         const { data } = error as any;
-        toast.info("Click to open conflicting entity in detail", {
-          autoClose: 6000,
-          onClick: () => {
-            appendDetailId(data[0]);
-          },
-        });
+        toast.warning(
+          "Statement cannot be deleted, click to open the conflicting entity in detail",
+          {
+            autoClose: 6000,
+            onClick: () => {
+              appendDetailId(data[0]);
+            },
+          }
+        );
+      } else {
+        toast.error((error as any).message);
       }
     },
   });
