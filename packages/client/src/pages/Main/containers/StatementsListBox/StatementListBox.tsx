@@ -418,7 +418,8 @@ export const StatementListBox: React.FC = () => {
   });
 
   const statementsDeleteMutation = useMutation({
-    mutationFn: async () => api.entitiesDelete(selectedRows),
+    mutationFn: async () =>
+      api.entitiesDelete(selectedRows, { ignoreErrorToast: true }),
     onSuccess: (variables, data) => {
       queryClient.invalidateQueries({
         queryKey: ["tree"],

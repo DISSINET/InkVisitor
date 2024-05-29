@@ -675,10 +675,11 @@ class Api {
     }
     console.log(out);
 
+    const errorCount = out.filter((item) => item.error).length;
     const hasError = out.some((result) => result.error);
 
     if (hasError) {
-      throw errors.InvalidDeleteStatementsError;
+      throw errors.InvalidDeleteStatementsError.forCount(errorCount);
     }
 
     return out;

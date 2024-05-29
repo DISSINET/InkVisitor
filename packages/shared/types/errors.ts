@@ -441,7 +441,16 @@ class InvalidEmailError extends CustomError {
 class InvalidDeleteStatementsError extends CustomError {
   public static code = 400;
   public static title = "Invalid delete";
-  public static message = "Some statements are not possible to delete";
+  public static message = "Some statements ($1) are not possible to delete";
+
+  static forCount(statementsCount: number): InvalidDeleteStatementsError {
+    return new InvalidDeleteStatementsError(
+      InvalidDeleteStatementsError.message.replace(
+        "$1",
+        statementsCount.toString()
+      )
+    );
+  }
 }
 
 /**
