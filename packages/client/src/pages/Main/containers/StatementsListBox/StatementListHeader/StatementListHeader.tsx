@@ -114,7 +114,7 @@ interface StatementListHeader {
     },
     unknown
   >;
-  statementsDeleteMutation: UseMutationResult<
+  deleteStatementsMutation: UseMutationResult<
     (AxiosResponse<IResponseGeneric<any>, any> | ErrorResponse)[],
     Error,
     void,
@@ -139,7 +139,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
 
   updateTerritoryMutation,
   duplicateTerritoryMutation,
-  statementsDeleteMutation,
+  deleteStatementsMutation,
 }) => {
   const dispatch = useAppDispatch();
   const queryClient = useQueryClient();
@@ -500,9 +500,9 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
         title="Delete entities"
         text={`Do you really want to delete ${selectedRows.length} statements?`}
         submitLabel="Delete"
-        loading={statementsDeleteMutation.isPending}
+        loading={deleteStatementsMutation.isPending}
         onSubmit={() => {
-          statementsDeleteMutation.mutate();
+          deleteStatementsMutation.mutate();
           setShowSubmit(false);
         }}
         onCancel={() => setShowSubmit(false)}

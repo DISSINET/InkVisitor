@@ -23,8 +23,9 @@ import { StatementListHeader } from "./StatementListHeader/StatementListHeader";
 import { StatementListTable } from "./StatementListTable/StatementListTable";
 import { StatementListTextAnnotator } from "./StatementListTextAnnotator/StatementListTextAnnotator";
 import { StyledEmptyState, StyledTableWrapper } from "./StatementLitBoxStyles";
-import { StatementListDisplayMode } from "types";
+import { ErrorResponse, StatementListDisplayMode } from "types";
 import useResizeObserver from "use-resize-observer";
+import { InvalidDeleteStatementsError } from "@shared/types/errors";
 
 const initialData: {
   statements: IResponseStatement[];
@@ -171,6 +172,7 @@ export const StatementListBox: React.FC = () => {
       setSelectedRows(selectedRows.filter((r) => r !== sId));
     },
     onError: (error) => {
+      console.log(error);
       if (
         (error as any).error === "InvalidDeleteError" &&
         (error as any).data &&
@@ -423,10 +425,30 @@ export const StatementListBox: React.FC = () => {
     },
   });
 
-  const statementsDeleteMutation = useMutation({
+  const deleteStatementsMutation = useMutation({
     mutationFn: async () =>
       api.entitiesDelete(selectedRows, { ignoreErrorToast: true }),
-    onSuccess: (variables, data) => {
+    onSuccess: (data, variables) => {
+      // TODO: handle remove of opened statement
+
+      const hasError = data.some((result) => (result as any).error);
+
+      if (hasError) {
+        const errorCount = data.filter((item) => (item as any).error).length;
+
+        const errorRows = data.filter((row) => (row as any).error);
+        // can be retyped to ErrorResponse when row.error: true
+        const errorEntityIds = (errorRows as ErrorResponse[]).map(
+          (row) => row.entityId
+        );
+
+        setSelectedRows(selectedRows.filter((r) => errorEntityIds.includes(r)));
+
+        throw InvalidDeleteStatementsError.forCount(errorCount);
+      } else {
+        setSelectedRows([]);
+      }
+
       queryClient.invalidateQueries({
         queryKey: ["tree"],
       });
@@ -434,7 +456,8 @@ export const StatementListBox: React.FC = () => {
         queryKey: ["territory"],
       });
     },
-    onError: (err) => {
+    onError: (err, variables) => {
+      // Momentarily unused
       toast.error(err.message);
       queryClient.invalidateQueries({
         queryKey: ["tree"],
@@ -442,6 +465,18 @@ export const StatementListBox: React.FC = () => {
       queryClient.invalidateQueries({
         queryKey: ["territory"],
       });
+
+      // console.log(err);
+      // if ((err as any).data) {
+      //   const error = err as any;
+      //   const deletedRows = error
+      //     .filter((row) => !row.data.error)
+      //     .map((row) => row.details.data);
+
+      //   console.log("deletedRows", deletedRows);
+
+      //   setSelectedRows(selectedRows.filter((r) => deletedRows.includes(r)));
+      // }
     },
   });
 
@@ -470,7 +505,7 @@ export const StatementListBox: React.FC = () => {
           handleDisplayModeChange={handleDisplayModeChange}
           updateTerritoryMutation={updateTerritoryMutation}
           duplicateTerritoryMutation={duplicateTerritoryMutation}
-          statementsDeleteMutation={statementsDeleteMutation}
+          deleteStatementsMutation={deleteStatementsMutation}
         />
       )}
 
@@ -582,7 +617,7 @@ export const StatementListBox: React.FC = () => {
           cloneStatementMutation.isPending ||
           updateTerritoryMutation.isPending ||
           duplicateTerritoryMutation.isPending ||
-          statementsDeleteMutation.isPending
+          deleteStatementsMutation.isPending
         }
       />
     </>

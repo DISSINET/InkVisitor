@@ -22,7 +22,10 @@ import {
   IResponseDocumentDetail,
 } from "@shared/types";
 import * as errors from "@shared/types/errors";
-import { NetworkError } from "@shared/types/errors";
+import {
+  InvalidDeleteStatementsError,
+  NetworkError,
+} from "@shared/types/errors";
 import { IRequestSearch } from "@shared/types/request-search";
 import { defaultPing } from "Theme/constants";
 import axios, {
@@ -669,18 +672,20 @@ class Api {
         out.push({
           error: true,
           message: `Failed to delete entity ${entityId}`,
+          entityId: entityId,
           details: this.handleError(err),
         });
       }
     }
-    console.log(out);
 
-    const errorCount = out.filter((item) => item.error).length;
-    const hasError = out.some((result) => result.error);
+    // const errorCount = out.filter((item) => item.error).length;
+    // const hasError = out.some((result) => result.error);
 
-    if (hasError) {
-      throw errors.InvalidDeleteStatementsError.forCount(errorCount);
-    }
+    // if (hasError) {
+    //   throw errors.InvalidDeleteStatementsError.forCount(errorCount).withData(
+    //     out
+    //   );
+    // }
 
     return out;
   }
