@@ -6,11 +6,12 @@ import {
   IStatement,
   ITerritory,
 } from "@shared/types";
+import { InvalidDeleteStatementsError } from "@shared/types/errors";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Loader, Submit, ToastWithLink } from "components";
 import { CStatement, CTerritory } from "constructors";
-import { useDebounce, useSearchParams } from "hooks";
+import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
 import { BsInfoCircle } from "react-icons/bs";
 import { toast } from "react-toastify";
@@ -19,13 +20,12 @@ import { setShowWarnings } from "redux/features/statementEditor/showWarningsSlic
 import { setDisableStatementListScroll } from "redux/features/statementList/disableStatementListScrollSlice";
 import { setRowsExpanded } from "redux/features/statementList/rowsExpandedSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
+import { EntitiesDeleteErrorResponse, StatementListDisplayMode } from "types";
+import useResizeObserver from "use-resize-observer";
 import { StatementListHeader } from "./StatementListHeader/StatementListHeader";
 import { StatementListTable } from "./StatementListTable/StatementListTable";
 import { StatementListTextAnnotator } from "./StatementListTextAnnotator/StatementListTextAnnotator";
 import { StyledEmptyState, StyledTableWrapper } from "./StatementLitBoxStyles";
-import { ErrorResponse, StatementListDisplayMode } from "types";
-import useResizeObserver from "use-resize-observer";
-import { InvalidDeleteStatementsError } from "@shared/types/errors";
 
 const initialData: {
   statements: IResponseStatement[];
@@ -429,22 +429,27 @@ export const StatementListBox: React.FC = () => {
     mutationFn: async () =>
       api.entitiesDelete(selectedRows, { ignoreErrorToast: true }),
     onSuccess: (data, variables) => {
-      // TODO: handle remove of opened statement
+      console.log(data);
+      const currentStatementRowDeleted = data.find(
+        (row) => row.entityId === statementId
+      );
+      if (
+        currentStatementRowDeleted &&
+        !(currentStatementRowDeleted as any).error
+      ) {
+        setStatementId("");
+      }
 
-      const hasError = data.some((result) => (result as any).error);
-
-      if (hasError) {
-        const errorCount = data.filter((item) => (item as any).error).length;
-
-        const errorRows = data.filter((row) => (row as any).error);
-        // can be retyped to ErrorResponse when row.error: true
-        const errorEntityIds = (errorRows as ErrorResponse[]).map(
+      const errorRows = data.filter((row) => (row as any).error);
+      if (errorRows.length > 0) {
+        // can be retyped to EntitiesDeleteErrorResponse when row.error: true
+        const errorEntityIds = (errorRows as EntitiesDeleteErrorResponse[]).map(
           (row) => row.entityId
         );
 
         setSelectedRows(selectedRows.filter((r) => errorEntityIds.includes(r)));
 
-        throw InvalidDeleteStatementsError.forCount(errorCount);
+        throw InvalidDeleteStatementsError.forCount(errorRows.length);
       } else {
         setSelectedRows([]);
       }
@@ -465,18 +470,6 @@ export const StatementListBox: React.FC = () => {
       queryClient.invalidateQueries({
         queryKey: ["territory"],
       });
-
-      // console.log(err);
-      // if ((err as any).data) {
-      //   const error = err as any;
-      //   const deletedRows = error
-      //     .filter((row) => !row.data.error)
-      //     .map((row) => row.details.data);
-
-      //   console.log("deletedRows", deletedRows);
-
-      //   setSelectedRows(selectedRows.filter((r) => deletedRows.includes(r)));
-      // }
     },
   });
 

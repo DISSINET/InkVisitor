@@ -10,7 +10,6 @@ import {
 } from "@shared/types";
 import {
   UseMutationResult,
-  useMutation,
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
@@ -34,7 +33,12 @@ import {
 import { TbHomeMove } from "react-icons/tb";
 import { setLastClickedIndex } from "redux/features/statementList/lastClickedIndexSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { DropdownItem, ErrorResponse, StatementListDisplayMode } from "types";
+import {
+  DropdownItem,
+  EntitiesDeleteErrorResponse,
+  EntitiesDeleteSuccessResponse,
+  StatementListDisplayMode,
+} from "types";
 import { collectTerritoryChildren, searchTree } from "utils/utils";
 import { v4 as uuidv4 } from "uuid";
 import {
@@ -51,7 +55,6 @@ import {
   StyledMoveToParent,
   StyledSuggesterRow,
 } from "./StatementListHeaderStyles";
-import { toast } from "react-toastify";
 
 interface StatementListHeader {
   territory: IResponseTerritory;
@@ -115,7 +118,7 @@ interface StatementListHeader {
     unknown
   >;
   deleteStatementsMutation: UseMutationResult<
-    (AxiosResponse<IResponseGeneric<any>, any> | ErrorResponse)[],
+    (EntitiesDeleteSuccessResponse | EntitiesDeleteErrorResponse)[],
     Error,
     void,
     unknown

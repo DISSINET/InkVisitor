@@ -37,7 +37,10 @@ import axios, {
 import React from "react";
 import { toast } from "react-toastify";
 import io, { Socket } from "socket.io-client";
-import { ErrorResponse } from "types";
+import {
+  EntitiesDeleteErrorResponse,
+  EntitiesDeleteSuccessResponse,
+} from "types";
 
 interface IApiOptions extends AxiosRequestConfig<any> {
   ignoreErrorToast: boolean;
@@ -656,18 +659,20 @@ class Api {
     }
   }
 
+  // This fn always outputs array of success / errors => errors are handled in the area of use
   async entitiesDelete(
     entityIds: string[],
     options?: IApiOptions
-  ): Promise<(AxiosResponse<IResponseGeneric> | ErrorResponse)[]> {
-    const out: (AxiosResponse<IResponseGeneric> | ErrorResponse)[] = [];
+  ): Promise<(EntitiesDeleteSuccessResponse | EntitiesDeleteErrorResponse)[]> {
+    const out: (EntitiesDeleteSuccessResponse | EntitiesDeleteErrorResponse)[] =
+      [];
     for (const entityId of entityIds) {
       try {
         const response = await this.connection.delete(
           `/entities/${entityId}`,
           options
         );
-        out.push(response);
+        out.push({ entityId: entityId, details: response });
       } catch (err) {
         out.push({
           error: true,
@@ -677,15 +682,6 @@ class Api {
         });
       }
     }
-
-    // const errorCount = out.filter((item) => item.error).length;
-    // const hasError = out.some((result) => result.error);
-
-    // if (hasError) {
-    //   throw errors.InvalidDeleteStatementsError.forCount(errorCount).withData(
-    //     out
-    //   );
-    // }
 
     return out;
   }

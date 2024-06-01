@@ -1,11 +1,13 @@
 import { EntityEnums } from "@shared/enums";
 import {
   IEntity,
+  IResponseGeneric,
   IResponseTree,
   IStatementActant,
   IStatementAction,
 } from "@shared/types";
 import { ThemeColor } from "Theme/theme";
+import { AxiosResponse } from "axios";
 
 interface IEntityColor {
   entityClass: EntityEnums.ExtendedClass;
@@ -408,7 +410,11 @@ export enum StatementListDisplayMode {
 // identifier for DnD useDrop
 export declare type Identifier = string | symbol;
 
-export interface ErrorResponse {
+export interface EntitiesDeleteSuccessResponse {
+  details: AxiosResponse<IResponseGeneric>;
+  entityId: string;
+}
+export interface EntitiesDeleteErrorResponse {
   error: true;
   message: string;
   details: any;
