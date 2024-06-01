@@ -172,7 +172,6 @@ export const StatementListBox: React.FC = () => {
       setSelectedRows(selectedRows.filter((r) => r !== sId));
     },
     onError: (error) => {
-      console.log(error);
       if (
         (error as any).error === "InvalidDeleteError" &&
         (error as any).data &&
@@ -429,7 +428,6 @@ export const StatementListBox: React.FC = () => {
     mutationFn: async () =>
       api.entitiesDelete(selectedRows, { ignoreErrorToast: true }),
     onSuccess: (data, variables) => {
-      console.log(data);
       const currentStatementRowDeleted = data.find(
         (row) => row.entityId === statementId
       );
@@ -449,20 +447,20 @@ export const StatementListBox: React.FC = () => {
 
         setSelectedRows(selectedRows.filter((r) => errorEntityIds.includes(r)));
 
+        // throw continues to onError
         throw InvalidDeleteStatementsError.forCount(errorRows.length);
       } else {
         setSelectedRows([]);
+        queryClient.invalidateQueries({
+          queryKey: ["tree"],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ["territory"],
+        });
       }
-
-      queryClient.invalidateQueries({
-        queryKey: ["tree"],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["territory"],
-      });
     },
-    onError: (err, variables) => {
-      // Momentarily unused
+    onError: (err) => {
+      // chained to the onSuccess method, reacts to throw InvalidDeleteStatementsError
       toast.error(err.message);
       queryClient.invalidateQueries({
         queryKey: ["tree"],
