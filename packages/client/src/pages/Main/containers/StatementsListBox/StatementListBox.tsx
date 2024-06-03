@@ -425,8 +425,9 @@ export const StatementListBox: React.FC = () => {
   });
 
   const deleteStatementsMutation = useMutation({
-    mutationFn: async () =>
-      api.entitiesDelete(selectedRows, { ignoreErrorToast: true }),
+    mutationFn: async () => {
+      return api.entitiesDelete(selectedRows, { ignoreErrorToast: true });
+    },
     onSuccess: (data, variables) => {
       const currentStatementRowDeleted = data.find(
         (row) => row.entityId === statementId
@@ -447,21 +448,12 @@ export const StatementListBox: React.FC = () => {
 
         setSelectedRows(selectedRows.filter((r) => errorEntityIds.includes(r)));
 
-        // throw continues to onError
-        throw InvalidDeleteStatementsError.forCount(errorRows.length);
+        toast.error(
+          `Some statements ${errorRows.length} are not possible to delete`
+        );
       } else {
         setSelectedRows([]);
-        queryClient.invalidateQueries({
-          queryKey: ["tree"],
-        });
-        queryClient.invalidateQueries({
-          queryKey: ["territory"],
-        });
       }
-    },
-    onError: (err) => {
-      // chained to the onSuccess method, reacts to throw InvalidDeleteStatementsError
-      toast.error(err.message);
       queryClient.invalidateQueries({
         queryKey: ["tree"],
       });
