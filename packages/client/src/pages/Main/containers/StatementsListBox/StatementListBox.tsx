@@ -59,6 +59,8 @@ export const StatementListBox: React.FC = () => {
     detailIdArray,
     removeDetailId,
     appendDetailId,
+    annotatorOpened,
+    setAnnotatorOpened,
   } = useSearchParams();
 
   useEffect(() => {
@@ -75,14 +77,14 @@ export const StatementListBox: React.FC = () => {
   const [statementToDelete, setStatementToDelete] = useState<IStatement>();
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
 
-  const [displayMode, setDisplayMode] = useState<StatementListDisplayMode>(
-    StatementListDisplayMode.TEXT
-  );
+  const displayMode = annotatorOpened
+    ? StatementListDisplayMode.TEXT
+    : StatementListDisplayMode.LIST;
 
   const handleDisplayModeChange = (
     newDisplayMode: StatementListDisplayMode
   ) => {
-    setDisplayMode(newDisplayMode);
+    setAnnotatorOpened(newDisplayMode === StatementListDisplayMode.TEXT);
   };
 
   const { status, data, error, isFetching } = useQuery({

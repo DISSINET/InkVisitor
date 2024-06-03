@@ -91,8 +91,9 @@ export const SearchParamsProvider = ({
     } else if (string.toLowerCase() === "false") {
       return false;
     } else {
-      // throw new Error("Invalid boolean string");
       console.log("Invalid url params boolean string");
+      params.set("annotatorOpened", "true");
+      return true;
     }
   };
 
