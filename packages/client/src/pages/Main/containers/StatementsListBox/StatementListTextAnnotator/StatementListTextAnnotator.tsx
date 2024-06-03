@@ -7,7 +7,7 @@ import { EntitySuggester, EntityTag } from "components/advanced";
 import TextAnnotator from "components/advanced/Annotator/Annotator";
 import AnnotatorProvider from "components/advanced/Annotator/AnnotatorProvider";
 import { useSearchParams } from "hooks";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { TiDocumentText } from "react-icons/ti";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import {
@@ -19,6 +19,7 @@ import { FaCheck } from "react-icons/fa";
 import { BiSolidCommentError } from "react-icons/bi";
 import { GrDocumentMissing } from "react-icons/gr";
 import { COLLAPSED_TABLE_WIDTH } from "Theme/constants";
+import { animated, useSpring } from "@react-spring/web";
 
 interface StatementListTextAnnotator {
   statements: IResponseStatement[];
@@ -53,6 +54,16 @@ export const StatementListTextAnnotator: React.FC<
   contentHeight,
   contentWidth,
 }) => {
+  const [showAnnotator, setShowAnnotator] = useState(false);
+  useEffect(() => {
+    setShowAnnotator(true);
+  }, []);
+
+  const animatedStyle = useSpring({
+    opacity: showAnnotator ? 1 : 0,
+    delay: 300,
+  });
+
   const {
     data: resources,
     error: resourcesError,
@@ -139,7 +150,7 @@ export const StatementListTextAnnotator: React.FC<
   ]);
 
   return (
-    <div>
+    <animated.div style={animatedStyle}>
       <div
         style={{
           display: "inline-flex",
@@ -219,6 +230,6 @@ export const StatementListTextAnnotator: React.FC<
           )}
         </AnnotatorProvider>
       </div>
-    </div>
+    </animated.div>
   );
 };
