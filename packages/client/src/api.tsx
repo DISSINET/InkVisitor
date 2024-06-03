@@ -22,7 +22,10 @@ import {
   IResponseDocumentDetail,
 } from "@shared/types";
 import * as errors from "@shared/types/errors";
-import { NetworkError } from "@shared/types/errors";
+import {
+  InvalidDeleteStatementsError,
+  NetworkError,
+} from "@shared/types/errors";
 import { IRequestSearch } from "@shared/types/request-search";
 import { defaultPing } from "Theme/constants";
 import axios, {
@@ -34,6 +37,10 @@ import axios, {
 import React from "react";
 import { toast } from "react-toastify";
 import io, { Socket } from "socket.io-client";
+import {
+  EntitiesDeleteErrorResponse,
+  EntitiesDeleteSuccessResponse,
+} from "types";
 
 interface IApiOptions extends AxiosRequestConfig<any> {
   ignoreErrorToast: boolean;
@@ -650,6 +657,33 @@ class Api {
     } catch (err) {
       throw this.handleError(err);
     }
+  }
+
+  // This fn always outputs array of success / errors => errors are handled in the area of use
+  async entitiesDelete(
+    entityIds: string[],
+    options?: IApiOptions
+  ): Promise<(EntitiesDeleteSuccessResponse | EntitiesDeleteErrorResponse)[]> {
+    const out: (EntitiesDeleteSuccessResponse | EntitiesDeleteErrorResponse)[] =
+      [];
+    for (const entityId of entityIds) {
+      try {
+        const response = await this.connection.delete(
+          `/entities/${entityId}`,
+          options
+        );
+        out.push({ entityId: entityId, details: response });
+      } catch (err) {
+        out.push({
+          error: true,
+          message: `Failed to delete entity ${entityId}`,
+          entityId: entityId,
+          details: this.handleError(err),
+        });
+      }
+    }
+
+    return out;
   }
 
   async entityRestore(

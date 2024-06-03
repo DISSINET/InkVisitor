@@ -6,11 +6,12 @@ import {
   IStatement,
   ITerritory,
 } from "@shared/types";
+import { InvalidDeleteStatementsError } from "@shared/types/errors";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Loader, Submit, ToastWithLink } from "components";
 import { CStatement, CTerritory } from "constructors";
-import { useDebounce, useSearchParams } from "hooks";
+import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
 import { BsInfoCircle } from "react-icons/bs";
 import { toast } from "react-toastify";
@@ -19,12 +20,12 @@ import { setShowWarnings } from "redux/features/statementEditor/showWarningsSlic
 import { setDisableStatementListScroll } from "redux/features/statementList/disableStatementListScrollSlice";
 import { setRowsExpanded } from "redux/features/statementList/rowsExpandedSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
+import { EntitiesDeleteErrorResponse, StatementListDisplayMode } from "types";
+import useResizeObserver from "use-resize-observer";
 import { StatementListHeader } from "./StatementListHeader/StatementListHeader";
 import { StatementListTable } from "./StatementListTable/StatementListTable";
 import { StatementListTextAnnotator } from "./StatementListTextAnnotator/StatementListTextAnnotator";
 import { StyledEmptyState, StyledTableWrapper } from "./StatementLitBoxStyles";
-import { StatementListDisplayMode } from "types";
-import useResizeObserver from "use-resize-observer";
 
 const initialData: {
   statements: IResponseStatement[];
@@ -137,16 +138,13 @@ export const StatementListBox: React.FC = () => {
     }
   }, [error]);
 
-  const removeStatementMutation = useMutation({
-    mutationFn: async (sId: string) => {
-      if (statementId === sId) {
-      }
-      await api.entityDelete(sId);
-    },
+  const deleteStatementMutation = useMutation({
+    mutationFn: async (sId: string) =>
+      await api.entityDelete(sId, { ignoreErrorToast: true }),
     onSuccess: (data, sId) => {
       toast.info(
         <ToastWithLink
-          children={`Statement removed!`}
+          children={`Statement deleted!`}
           linkText={"Restore"}
           onLinkClick={async () => {
             const response = await api.entityRestore(sId);
@@ -180,12 +178,17 @@ export const StatementListBox: React.FC = () => {
         (error as any).data.length > 0
       ) {
         const { data } = error as any;
-        toast.info("Click to open conflicting entity in detail", {
-          autoClose: 6000,
-          onClick: () => {
-            appendDetailId(data[0]);
-          },
-        });
+        toast.warning(
+          "Statement cannot be deleted, click to open the conflicting entity in detail",
+          {
+            autoClose: 6000,
+            onClick: () => {
+              appendDetailId(data[0]);
+            },
+          }
+        );
+      } else {
+        toast.error((error as any).message);
       }
     },
   });
@@ -421,6 +424,45 @@ export const StatementListBox: React.FC = () => {
     },
   });
 
+  const deleteStatementsMutation = useMutation({
+    mutationFn: async () => {
+      return api.entitiesDelete(selectedRows, { ignoreErrorToast: true });
+    },
+    onSuccess: (data, variables) => {
+      const currentStatementRowDeleted = data.find(
+        (row) => row.entityId === statementId
+      );
+      if (
+        currentStatementRowDeleted &&
+        !(currentStatementRowDeleted as any).error
+      ) {
+        setStatementId("");
+      }
+
+      const errorRows = data.filter((row) => (row as any).error);
+      if (errorRows.length > 0) {
+        // can be retyped to EntitiesDeleteErrorResponse when row.error: true
+        const errorEntityIds = (errorRows as EntitiesDeleteErrorResponse[]).map(
+          (row) => row.entityId
+        );
+
+        setSelectedRows(selectedRows.filter((r) => errorEntityIds.includes(r)));
+
+        toast.error(
+          `Some statements ${errorRows.length} are not possible to delete`
+        );
+      } else {
+        setSelectedRows([]);
+      }
+      queryClient.invalidateQueries({
+        queryKey: ["tree"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["territory"],
+      });
+    },
+  });
+
   const {
     ref: contentRef,
     height: contentHeight = 0,
@@ -446,6 +488,7 @@ export const StatementListBox: React.FC = () => {
           handleDisplayModeChange={handleDisplayModeChange}
           updateTerritoryMutation={updateTerritoryMutation}
           duplicateTerritoryMutation={duplicateTerritoryMutation}
+          deleteStatementsMutation={deleteStatementsMutation}
         />
       )}
 
@@ -537,17 +580,18 @@ export const StatementListBox: React.FC = () => {
         }}
         onSubmit={() => {
           if (statementToDelete) {
-            removeStatementMutation.mutate(statementToDelete.id);
+            deleteStatementMutation.mutate(statementToDelete.id);
             setShowSubmit(false);
             setStatementToDelete(undefined);
           }
         }}
-        loading={removeStatementMutation.isPending}
+        loading={deleteStatementMutation.isPending}
       />
       <Loader
         show={
           isFetching ||
-          removeStatementMutation.isPending ||
+          isLoading ||
+          deleteStatementMutation.isPending ||
           addStatementAtTheEndMutation.isPending ||
           statementCreateMutation.isPending ||
           statementUpdateMutation.isPending ||
@@ -556,7 +600,7 @@ export const StatementListBox: React.FC = () => {
           cloneStatementMutation.isPending ||
           updateTerritoryMutation.isPending ||
           duplicateTerritoryMutation.isPending ||
-          isLoading
+          deleteStatementsMutation.isPending
         }
       />
     </>

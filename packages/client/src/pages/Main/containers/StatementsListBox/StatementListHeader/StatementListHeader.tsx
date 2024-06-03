@@ -16,7 +16,7 @@ import {
 import { rootTerritoryId } from "Theme/constants";
 import api from "api";
 import { AxiosResponse } from "axios";
-import { Button, ButtonGroup, Tooltip } from "components";
+import { Button, ButtonGroup, Submit, Tooltip } from "components";
 import Dropdown, {
   BreadcrumbItem,
   EntitySuggester,
@@ -24,7 +24,7 @@ import Dropdown, {
 } from "components/advanced";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
-import { FaHighlighter, FaList } from "react-icons/fa";
+import { FaHighlighter, FaList, FaTrash } from "react-icons/fa";
 import {
   MdOutlineCheckBox,
   MdOutlineCheckBoxOutlineBlank,
@@ -33,7 +33,12 @@ import {
 import { TbHomeMove } from "react-icons/tb";
 import { setLastClickedIndex } from "redux/features/statementList/lastClickedIndexSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { DropdownItem, StatementListDisplayMode } from "types";
+import {
+  DropdownItem,
+  EntitiesDeleteErrorResponse,
+  EntitiesDeleteSuccessResponse,
+  StatementListDisplayMode,
+} from "types";
 import { collectTerritoryChildren, searchTree } from "utils/utils";
 import { v4 as uuidv4 } from "uuid";
 import {
@@ -112,6 +117,12 @@ interface StatementListHeader {
     },
     unknown
   >;
+  deleteStatementsMutation: UseMutationResult<
+    (EntitiesDeleteSuccessResponse | EntitiesDeleteErrorResponse)[],
+    Error,
+    void,
+    unknown
+  >;
 }
 export const StatementListHeader: React.FC<StatementListHeader> = ({
   territory,
@@ -131,6 +142,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
 
   updateTerritoryMutation,
   duplicateTerritoryMutation,
+  deleteStatementsMutation,
 }) => {
   const dispatch = useAppDispatch();
   const queryClient = useQueryClient();
@@ -141,6 +153,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
     duplicate_S = "duplicate_S",
     replace_R = "replace_R",
     append_R = "append_R",
+    delete_S = "delete_S",
   }
   const batchOptions = [
     {
@@ -152,6 +165,11 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
       value: BatchOption.duplicate_S,
       label: `duplicate`,
       info: EntityEnums.Class.Territory,
+    },
+    {
+      value: BatchOption.delete_S,
+      label: `delete`,
+      info: "",
     },
     {
       value: BatchOption.replace_R,
@@ -267,6 +285,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
   const [headingHovered, setHeadingHovered] = useState(false);
   const [referenceElement, setReferenceElement] =
     useState<HTMLSpanElement | null>(null);
+  const [showSubmit, setShowSubmit] = useState(false);
 
   return (
     <>
@@ -337,7 +356,6 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
           {/* BATCH ACTIONS */}
           <StyledActionsWrapper>
             {user?.role !== UserEnums.Role.Viewer &&
-              // displayMode === StatementListDisplayMode.LIST &&
               territory.statements.length > 0 && (
                 <>
                   <StyledCheckboxWrapper>
@@ -370,58 +388,72 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
                           options={batchOptions}
                         />
                       </StyledDropdownWrap>
-                      <EntitySuggester
-                        placeholder={
-                          batchAction.info === EntityEnums.Class.Territory
-                            ? "to territory"
-                            : ""
-                        }
-                        disableTemplatesAccept
-                        inputWidth={70}
-                        disableCreate
-                        filterEditorRights
-                        categoryTypes={[
-                          entitiesDictKeys[
-                            batchAction.info as EntityEnums.Class
-                          ].value,
-                        ]}
-                        onSelected={(newSelectedId: string) => {
-                          switch (batchAction.value) {
-                            case BatchOption.move_S:
-                              moveStatementsMutation.mutate({
-                                statements: selectedRows,
-                                newTerritoryId: newSelectedId,
-                              });
-                              return;
-                            case BatchOption.duplicate_S:
-                              duplicateStatementsMutation.mutate({
-                                statements: selectedRows,
-                                newTerritoryId: newSelectedId,
-                              });
-                              return;
-                            case BatchOption.append_R:
-                              appendReferencesMutation.mutate([
-                                {
-                                  id: uuidv4(),
-                                  resource: newSelectedId,
-                                  value: "",
-                                },
-                              ]);
-                              return;
-                            case BatchOption.replace_R:
-                              replaceReferencesMutation.mutate([
-                                {
-                                  id: uuidv4(),
-                                  resource: newSelectedId,
-                                  value: "",
-                                },
-                              ]);
-                              return;
+
+                      {/* Batch delete */}
+                      {batchAction.value === BatchOption.delete_S && (
+                        <Button
+                          icon={<FaTrash />}
+                          color="danger"
+                          inverted
+                          onClick={() => setShowSubmit(true)}
+                          tooltipLabel="delete selected statements"
+                        />
+                      )}
+
+                      {batchAction.info && (
+                        <EntitySuggester
+                          placeholder={
+                            batchAction.info === EntityEnums.Class.Territory
+                              ? "to territory"
+                              : ""
                           }
-                        }}
-                        excludedActantIds={[territory.id]}
-                        disabled={selectedRows.length === 0}
-                      />
+                          disableTemplatesAccept
+                          inputWidth={70}
+                          disableCreate
+                          filterEditorRights
+                          categoryTypes={[
+                            entitiesDictKeys[
+                              batchAction.info as EntityEnums.Class
+                            ].value,
+                          ]}
+                          onSelected={(newSelectedId: string) => {
+                            switch (batchAction.value) {
+                              case BatchOption.move_S:
+                                moveStatementsMutation.mutate({
+                                  statements: selectedRows,
+                                  newTerritoryId: newSelectedId,
+                                });
+                                return;
+                              case BatchOption.duplicate_S:
+                                duplicateStatementsMutation.mutate({
+                                  statements: selectedRows,
+                                  newTerritoryId: newSelectedId,
+                                });
+                                return;
+                              case BatchOption.append_R:
+                                appendReferencesMutation.mutate([
+                                  {
+                                    id: uuidv4(),
+                                    resource: newSelectedId,
+                                    value: "",
+                                  },
+                                ]);
+                                return;
+                              case BatchOption.replace_R:
+                                replaceReferencesMutation.mutate([
+                                  {
+                                    id: uuidv4(),
+                                    resource: newSelectedId,
+                                    value: "",
+                                  },
+                                ]);
+                                return;
+                            }
+                          }}
+                          excludedActantIds={[territory.id]}
+                          disabled={selectedRows.length === 0}
+                        />
+                      )}
                     </>
                   }
                 </>
@@ -466,6 +498,18 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
           duplicateTerritoryMutation={duplicateTerritoryMutation}
         />
       )}
+      <Submit
+        show={showSubmit}
+        title="Delete entities"
+        text={`Do you really want to delete ${selectedRows.length} statements?`}
+        submitLabel="Delete"
+        loading={deleteStatementsMutation.isPending}
+        onSubmit={() => {
+          deleteStatementsMutation.mutate();
+          setShowSubmit(false);
+        }}
+        onCancel={() => setShowSubmit(false)}
+      />
     </>
   );
 };
