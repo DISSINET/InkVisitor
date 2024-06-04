@@ -7,6 +7,7 @@ import {
   IResponseTerritory,
   IResponseTree,
   ITerritory,
+  Relation,
 } from "@shared/types";
 import {
   UseMutationResult,
@@ -151,9 +152,11 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
   enum BatchOption {
     move_S = "move_S",
     duplicate_S = "duplicate_S",
+    delete_S = "delete_S",
     replace_R = "replace_R",
     append_R = "append_R",
-    delete_S = "delete_S",
+    relate_to_SOE = "relate_to_SOE",
+    classify_as = "classify_as",
   }
   const batchOptions = [
     {
@@ -181,7 +184,70 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
       label: `append a referenced Resource`,
       info: EntityEnums.Class.Resource,
     },
+    {
+      value: BatchOption.relate_to_SOE,
+      label: `relate to superordinate event`,
+      info: EntityEnums.Class.Event,
+    },
+    {
+      value: BatchOption.classify_as,
+      label: `classify as`,
+      info: EntityEnums.Class.Concept,
+    },
   ];
+
+  const handleOnSelected = (newSelectedId: string) => {
+    switch (batchAction.value) {
+      case BatchOption.move_S:
+        moveStatementsMutation.mutate({
+          statements: selectedRows,
+          newTerritoryId: newSelectedId,
+        });
+        return;
+      case BatchOption.duplicate_S:
+        duplicateStatementsMutation.mutate({
+          statements: selectedRows,
+          newTerritoryId: newSelectedId,
+        });
+        return;
+      case BatchOption.append_R:
+        appendReferencesMutation.mutate([
+          {
+            id: uuidv4(),
+            resource: newSelectedId,
+            value: "",
+          },
+        ]);
+        return;
+      case BatchOption.replace_R:
+        replaceReferencesMutation.mutate([
+          {
+            id: uuidv4(),
+            resource: newSelectedId,
+            value: "",
+          },
+        ]);
+        return;
+      case BatchOption.relate_to_SOE:
+        // TODO: multi request for each statement
+        // const newRelation: Relation.IRelation = {
+        //   id: uuidv4(),
+        //   entityIds: [entity.id, selectedId],
+        //   type: relationType,
+        // };
+        // relationCreateMutation.mutate(newRelation);
+        return;
+      case BatchOption.classify_as:
+        // TODO: multi request CLA
+        // const newRelation: Relation.IRelation = {
+        //   id: uuidv4(),
+        //   entityIds: [entity.id, selectedId],
+        //   type: relationType,
+        // };
+        // relationCreateMutation.mutate(newRelation);
+        return;
+    }
+  };
 
   // get user data
   const userId = localStorage.getItem("userid");
@@ -416,40 +482,9 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
                               batchAction.info as EntityEnums.Class
                             ].value,
                           ]}
-                          onSelected={(newSelectedId: string) => {
-                            switch (batchAction.value) {
-                              case BatchOption.move_S:
-                                moveStatementsMutation.mutate({
-                                  statements: selectedRows,
-                                  newTerritoryId: newSelectedId,
-                                });
-                                return;
-                              case BatchOption.duplicate_S:
-                                duplicateStatementsMutation.mutate({
-                                  statements: selectedRows,
-                                  newTerritoryId: newSelectedId,
-                                });
-                                return;
-                              case BatchOption.append_R:
-                                appendReferencesMutation.mutate([
-                                  {
-                                    id: uuidv4(),
-                                    resource: newSelectedId,
-                                    value: "",
-                                  },
-                                ]);
-                                return;
-                              case BatchOption.replace_R:
-                                replaceReferencesMutation.mutate([
-                                  {
-                                    id: uuidv4(),
-                                    resource: newSelectedId,
-                                    value: "",
-                                  },
-                                ]);
-                                return;
-                            }
-                          }}
+                          onSelected={(newSelectedId: string) =>
+                            handleOnSelected(newSelectedId)
+                          }
                           excludedActantIds={[territory.id]}
                           disabled={selectedRows.length === 0}
                         />
