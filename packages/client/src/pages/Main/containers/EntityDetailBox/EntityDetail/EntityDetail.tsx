@@ -68,8 +68,16 @@ const allowedEntityChangeClasses = [
 
 interface EntityDetail {
   detailId: string;
+  entity: IResponseDetail;
+  error: Error | null;
+  isFetching: boolean;
 }
-export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
+export const EntityDetail: React.FC<EntityDetail> = ({
+  detailId,
+  entity,
+  error,
+  isFetching,
+}) => {
   const {
     statementId,
     setStatementId,
@@ -82,31 +90,17 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
     selectedDetailId,
   } = useSearchParams();
 
-  const {
-    status,
-    data: entity,
-    error,
-    isFetching,
-  } = useQuery({
-    queryKey: ["entity", detailId],
-    queryFn: async () => {
-      const res = await api.detailGet(detailId);
-      return res.data;
-    },
-    enabled: !!detailId && api.isLoggedIn(),
-  });
-
   useEffect(() => {
     if (error && (error as any).message === "unknown class for entity") {
       removeDetailId(detailId);
     }
   }, [error]);
 
+  const [selectedEntityType, setSelectedEntityType] =
+    useState<EntityEnums.Class>();
   const [createTemplateModal, setCreateTemplateModal] =
     useState<boolean>(false);
   const [showRemoveSubmit, setShowRemoveSubmit] = useState<boolean>(false);
-  const [selectedEntityType, setSelectedEntityType] =
-    useState<EntityEnums.Class>();
   const [showTypeSubmit, setShowTypeSubmit] = useState(false);
   const [showApplyTemplateModal, setShowApplyTemplateModal] =
     useState<boolean>(false);

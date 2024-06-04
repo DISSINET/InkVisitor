@@ -6,12 +6,11 @@ import {
   IStatement,
   ITerritory,
 } from "@shared/types";
-import { InvalidDeleteStatementsError } from "@shared/types/errors";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Loader, Submit, ToastWithLink } from "components";
 import { CStatement, CTerritory } from "constructors";
-import { useSearchParams } from "hooks";
+import { useDebounce, useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
 import { BsInfoCircle } from "react-icons/bs";
 import { toast } from "react-toastify";
@@ -471,8 +470,8 @@ export const StatementListBox: React.FC = () => {
     width: contentWidth = 0,
   } = useResizeObserver<HTMLDivElement>();
 
+  // delay of show content for fluent animation on open
   const [showStatementList, setShowStatementList] = useState(true);
-
   useEffect(() => {
     if (statementListOpened) {
       setTimeout(() => {
