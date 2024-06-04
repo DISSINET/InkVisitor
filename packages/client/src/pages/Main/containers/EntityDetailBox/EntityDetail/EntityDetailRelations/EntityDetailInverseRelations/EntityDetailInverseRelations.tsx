@@ -34,7 +34,7 @@ export const EntityDetailInverseRelations: React.FC<
     <>
       {filteredRelationTypes.length > 0 && atLeastOneNonEmpty && (
         <>
-          <StyledDetailSectionHeader secondary>
+          <StyledDetailSectionHeader $secondary>
             Inverse relations
           </StyledDetailSectionHeader>
           <StyledDetailSectionContent>

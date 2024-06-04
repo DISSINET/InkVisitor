@@ -6,12 +6,11 @@ import {
   IStatement,
   ITerritory,
 } from "@shared/types";
-import { InvalidDeleteStatementsError } from "@shared/types/errors";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Loader, Submit, ToastWithLink } from "components";
 import { CStatement, CTerritory } from "constructors";
-import { useSearchParams } from "hooks";
+import { useDebounce, useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
 import { BsInfoCircle } from "react-icons/bs";
 import { toast } from "react-toastify";
@@ -59,6 +58,8 @@ export const StatementListBox: React.FC = () => {
     detailIdArray,
     removeDetailId,
     appendDetailId,
+    annotatorOpened,
+    setAnnotatorOpened,
   } = useSearchParams();
 
   useEffect(() => {
@@ -75,14 +76,14 @@ export const StatementListBox: React.FC = () => {
   const [statementToDelete, setStatementToDelete] = useState<IStatement>();
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
 
-  const [displayMode, setDisplayMode] = useState<StatementListDisplayMode>(
-    StatementListDisplayMode.TEXT
-  );
+  const displayMode = annotatorOpened
+    ? StatementListDisplayMode.TEXT
+    : StatementListDisplayMode.LIST;
 
   const handleDisplayModeChange = (
     newDisplayMode: StatementListDisplayMode
   ) => {
-    setDisplayMode(newDisplayMode);
+    setAnnotatorOpened(newDisplayMode === StatementListDisplayMode.TEXT);
   };
 
   const { status, data, error, isFetching } = useQuery({
@@ -469,124 +470,143 @@ export const StatementListBox: React.FC = () => {
     width: contentWidth = 0,
   } = useResizeObserver<HTMLDivElement>();
 
+  // delay of show content for fluent animation on open
+  const [showStatementList, setShowStatementList] = useState(true);
+  useEffect(() => {
+    if (statementListOpened) {
+      setTimeout(() => {
+        setShowStatementList(true);
+      }, 500);
+    } else {
+      setShowStatementList(false);
+    }
+  }, [statementListOpened]);
+
   return (
     <>
-      {data && (
-        <StatementListHeader
-          territory={data}
-          isFavorited={isFavorited}
-          selectedRows={selectedRows}
-          setSelectedRows={setSelectedRows}
-          isAllSelected={
-            statements.length > 0 && selectedRows.length === statements.length
-          }
-          moveStatementsMutation={moveStatementsMutation}
-          duplicateStatementsMutation={duplicateStatementsMutation}
-          replaceReferencesMutation={replaceReferencesMutation}
-          appendReferencesMutation={appendReferencesMutation}
-          displayMode={displayMode}
-          handleDisplayModeChange={handleDisplayModeChange}
-          updateTerritoryMutation={updateTerritoryMutation}
-          duplicateTerritoryMutation={duplicateTerritoryMutation}
-          deleteStatementsMutation={deleteStatementsMutation}
-        />
-      )}
-
-      {!territoryId && (
+      {showStatementList && (
         <>
-          <StyledEmptyState>
-            <BsInfoCircle size="23" />
-          </StyledEmptyState>
-          <StyledEmptyState>
-            {"No territory selected yet. Pick one from the territory tree"}
-          </StyledEmptyState>
-        </>
-      )}
-
-      {territoryId &&
-        statements.length === 0 &&
-        displayMode === StatementListDisplayMode.LIST && (
-          <>
-            <StyledEmptyState>
-              <BsInfoCircle size="23" />
-            </StyledEmptyState>
-            <StyledEmptyState>{"No statements yet."}</StyledEmptyState>
-          </>
-        )}
-
-      {/* TODO: measure statement list header dynamically */}
-      <div
-        style={{
-          display: "flex",
-          height: "100%",
-          maxHeight: "calc(100% - 101px)",
-          overflow: "auto",
-        }}
-        ref={contentRef}
-      >
-        <StyledTableWrapper id="Statements-box-table">
-          {statements.length > 0 && (
-            <StatementListTable
-              statements={statements}
-              handleRowClick={(rowId: string) => {
-                dispatch(setShowWarnings(false));
-                setStatementId(rowId);
-              }}
-              actantsUpdateMutation={statementUpdateMutation}
-              entities={entities}
-              right={right}
-              cloneStatementMutation={cloneStatementMutation}
-              setStatementToDelete={setStatementToDelete}
-              setShowSubmit={setShowSubmit}
-              addStatementAtCertainIndex={addStatementAtCertainIndex}
+          {data && (
+            <StatementListHeader
+              territory={data}
+              isFavorited={isFavorited}
               selectedRows={selectedRows}
               setSelectedRows={setSelectedRows}
+              isAllSelected={
+                statements.length > 0 &&
+                selectedRows.length === statements.length
+              }
+              moveStatementsMutation={moveStatementsMutation}
+              duplicateStatementsMutation={duplicateStatementsMutation}
+              replaceReferencesMutation={replaceReferencesMutation}
+              appendReferencesMutation={appendReferencesMutation}
               displayMode={displayMode}
-              contentWidth={contentWidth}
+              handleDisplayModeChange={handleDisplayModeChange}
+              updateTerritoryMutation={updateTerritoryMutation}
+              duplicateTerritoryMutation={duplicateTerritoryMutation}
+              deleteStatementsMutation={deleteStatementsMutation}
             />
           )}
-        </StyledTableWrapper>
 
-        {data && displayMode === StatementListDisplayMode.TEXT && (
-          <StatementListTextAnnotator
-            contentHeight={contentHeight}
-            contentWidth={contentWidth}
-            statements={statements}
-            handleCreateStatement={handleCreateStatement}
-            handleCreateTerritory={handleCreateTerritory}
-            territoryId={territoryId}
-            entities={entities}
-            right={right}
-            setShowSubmit={setShowSubmit}
-            addStatementAtCertainIndex={addStatementAtCertainIndex}
-            selectedRows={selectedRows}
-            setSelectedRows={setSelectedRows}
+          {!territoryId && (
+            <>
+              <StyledEmptyState>
+                <BsInfoCircle size="23" />
+              </StyledEmptyState>
+              <StyledEmptyState>
+                {"No territory selected yet. Pick one from the territory tree"}
+              </StyledEmptyState>
+            </>
+          )}
+
+          {territoryId &&
+            statements.length === 0 &&
+            displayMode === StatementListDisplayMode.LIST &&
+            statementListOpened &&
+            !isFetching && (
+              <>
+                <StyledEmptyState>
+                  <BsInfoCircle size="23" />
+                </StyledEmptyState>
+                <StyledEmptyState>{"No statements yet."}</StyledEmptyState>
+              </>
+            )}
+
+          {/* TODO: measure statement list header dynamically */}
+          <div
+            style={{
+              display: "flex",
+              height: "100%",
+              maxHeight: "calc(100% - 101px)",
+              overflow: "auto",
+            }}
+            ref={contentRef}
+          >
+            <StyledTableWrapper id="Statements-box-table">
+              {statements.length > 0 && (
+                <StatementListTable
+                  statements={statements}
+                  handleRowClick={(rowId: string) => {
+                    dispatch(setShowWarnings(false));
+                    setStatementId(rowId);
+                  }}
+                  actantsUpdateMutation={statementUpdateMutation}
+                  entities={entities}
+                  right={right}
+                  cloneStatementMutation={cloneStatementMutation}
+                  setStatementToDelete={setStatementToDelete}
+                  setShowSubmit={setShowSubmit}
+                  addStatementAtCertainIndex={addStatementAtCertainIndex}
+                  selectedRows={selectedRows}
+                  setSelectedRows={setSelectedRows}
+                  displayMode={displayMode}
+                  contentWidth={contentWidth}
+                />
+              )}
+            </StyledTableWrapper>
+
+            {data && displayMode === StatementListDisplayMode.TEXT && (
+              <StatementListTextAnnotator
+                contentHeight={contentHeight}
+                contentWidth={contentWidth}
+                statements={statements}
+                handleCreateStatement={handleCreateStatement}
+                handleCreateTerritory={handleCreateTerritory}
+                territoryId={territoryId}
+                entities={entities}
+                right={right}
+                setShowSubmit={setShowSubmit}
+                addStatementAtCertainIndex={addStatementAtCertainIndex}
+                selectedRows={selectedRows}
+                setSelectedRows={setSelectedRows}
+              />
+            )}
+          </div>
+
+          <Submit
+            title="Delete statement"
+            text={`Do you really want to delete statement [${
+              statementToDelete?.label
+                ? statementToDelete.label
+                : statementToDelete?.id
+            }]?`}
+            show={showSubmit}
+            entityToSubmit={statementToDelete}
+            onCancel={() => {
+              setShowSubmit(false);
+              setStatementToDelete(undefined);
+            }}
+            onSubmit={() => {
+              if (statementToDelete) {
+                deleteStatementMutation.mutate(statementToDelete.id);
+                setShowSubmit(false);
+                setStatementToDelete(undefined);
+              }
+            }}
+            loading={deleteStatementMutation.isPending}
           />
-        )}
-      </div>
-
-      <Submit
-        title="Delete statement"
-        text={`Do you really want to delete statement [${
-          statementToDelete?.label
-            ? statementToDelete.label
-            : statementToDelete?.id
-        }]?`}
-        show={showSubmit}
-        entityToSubmit={statementToDelete}
-        onCancel={() => {
-          setShowSubmit(false);
-          setStatementToDelete(undefined);
-        }}
-        onSubmit={() => {
-          if (statementToDelete) {
-            deleteStatementMutation.mutate(statementToDelete.id);
-            setShowSubmit(false);
-            setStatementToDelete(undefined);
-          }
-        }}
-        loading={deleteStatementMutation.isPending}
-      />
+        </>
+      )}
       <Loader
         show={
           isFetching ||
@@ -600,7 +620,8 @@ export const StatementListBox: React.FC = () => {
           cloneStatementMutation.isPending ||
           updateTerritoryMutation.isPending ||
           duplicateTerritoryMutation.isPending ||
-          deleteStatementsMutation.isPending
+          deleteStatementsMutation.isPending ||
+          (statementListOpened && !showStatementList)
         }
       />
     </>

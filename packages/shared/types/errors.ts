@@ -436,24 +436,6 @@ class InvalidEmailError extends CustomError {
 }
 
 /**
- * Will be thrown when statements with dependency deleted
- */
-class InvalidDeleteStatementsError extends CustomError {
-  public static code = 400;
-  public static title = "Invalid delete";
-  public static message = "Some statements ($1) are not possible to delete";
-
-  static forCount(statementsCount: number): InvalidDeleteStatementsError {
-    return new InvalidDeleteStatementsError(
-      InvalidDeleteStatementsError.message.replace(
-        "$1",
-        statementsCount.toString()
-      )
-    );
-  }
-}
-
-/**
  * UnknownError works as a backup
  */
 class UnknownError extends CustomError {
@@ -505,7 +487,6 @@ const allErrors: Record<string, any> = {
   UsernameTooShortError,
   UsernameTooLongError,
   InvalidEmailError,
-  InvalidDeleteStatementsError,
 };
 
 export interface IErrorSignature {
@@ -555,5 +536,4 @@ export {
   UsernameTooShortError,
   UsernameTooLongError,
   InvalidEmailError,
-  InvalidDeleteStatementsError,
 };

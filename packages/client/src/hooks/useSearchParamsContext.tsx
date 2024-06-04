@@ -28,6 +28,9 @@ const INITIAL_CONTEXT = {
   removeDetailId: UNINITIALISED,
   clearAllDetailIds: UNINITIALISED,
   cleanAllParams: UNINITIALISED,
+
+  annotatorOpened: true,
+  setAnnotatorOpened: UNINITIALISED,
 };
 interface SearchParamsContext {
   territoryId: string;
@@ -43,6 +46,9 @@ interface SearchParamsContext {
   removeDetailId: (id: string) => void;
   clearAllDetailIds: () => void;
   cleanAllParams: () => void;
+
+  annotatorOpened: boolean;
+  setAnnotatorOpened: (opened: boolean) => void;
 }
 const SearchParamsContext = createContext<SearchParamsContext>(INITIAL_CONTEXT);
 
@@ -77,6 +83,24 @@ export const SearchParamsProvider = ({
 
   const [detailId, setDetailId] = useState<string>(
     typeof parsedParams.detail === "string" ? parsedParams.detail : ""
+  );
+
+  const stringToBoolean = (string: string) => {
+    if (string.toLowerCase() === "true") {
+      return true;
+    } else if (string.toLowerCase() === "false") {
+      return false;
+    } else {
+      console.log("Invalid url params boolean string");
+      params.set("annotatorOpened", "true");
+      return true;
+    }
+  };
+
+  const [annotatorOpened, setAnnotatorOpened] = useState(
+    parsedParams.annotatorOpened
+      ? stringToBoolean(parsedParams.annotatorOpened)
+      : INITIAL_CONTEXT.annotatorOpened
   );
 
   const [disablePush, setDisablePush] = useState(false);
@@ -215,30 +239,35 @@ export const SearchParamsProvider = ({
         ? params.set("selectedDetail", selectedDetailId)
         : params.delete("selectedDetail");
       detailId ? params.set("detail", detailId) : params.delete("detail");
+
+      annotatorOpened
+        ? params.set("annotatorOpened", "true")
+        : params.set("annotatorOpened", "false");
+
       handleHistoryPush();
     }
-  }, [territoryId, statementId, selectedDetailId, detailId]);
+  }, [territoryId, statementId, selectedDetailId, detailId, annotatorOpened]);
 
-  const handleLocationChange = (location: any) => {
-    const paramsTemp = new URLSearchParams(location.hash.substring(1));
-    const parsedParamsTemp = Object.fromEntries(paramsTemp);
+  // const handleLocationChange = (location: any) => {
+  //   const paramsTemp = new URLSearchParams(location.hash.substring(1));
+  //   const parsedParamsTemp = Object.fromEntries(paramsTemp);
 
-    parsedParamsTemp.territory
-      ? setTerritoryId(parsedParamsTemp.territory)
-      : setTerritoryId("");
+  //   parsedParamsTemp.territory
+  //     ? setTerritoryId(parsedParamsTemp.territory)
+  //     : setTerritoryId("");
 
-    parsedParamsTemp.statement
-      ? setStatementId(parsedParamsTemp.statement)
-      : setStatementId("");
+  //   parsedParamsTemp.statement
+  //     ? setStatementId(parsedParamsTemp.statement)
+  //     : setStatementId("");
 
-    parsedParamsTemp.selectedDetail
-      ? setSelectedDetailId(parsedParamsTemp.selectedDetail)
-      : setSelectedDetailId("");
+  //   parsedParamsTemp.selectedDetail
+  //     ? setSelectedDetailId(parsedParamsTemp.selectedDetail)
+  //     : setSelectedDetailId("");
 
-    parsedParamsTemp.detail
-      ? setDetailId(parsedParamsTemp.detail)
-      : setDetailId("");
-  };
+  //   parsedParamsTemp.detail
+  //     ? setDetailId(parsedParamsTemp.detail)
+  //     : setDetailId("");
+  // };
 
   // useEffect(() => {
   // Should be only change from the url => add state to switch of listener
@@ -267,6 +296,9 @@ export const SearchParamsProvider = ({
         removeDetailId,
         clearAllDetailIds,
         cleanAllParams,
+
+        annotatorOpened,
+        setAnnotatorOpened,
       }}
     >
       {children}
