@@ -1,31 +1,28 @@
 import { EntityEnums } from "@shared/enums";
 import {
+  EntityTooltip,
+  IDocument,
   IEntity,
-  IResponseEntity,
+  IReference,
   IResponseAudit,
   IResponseBookmarkFolder,
   IResponseDetail,
+  IResponseDocument,
+  IResponseDocumentDetail,
+  IResponseEntity,
   IResponseGeneric,
   IResponsePermission,
   IResponseStatement,
   IResponseTerritory,
   IResponseTree,
   IResponseUser,
-  RequestPermissionUpdate,
   IStatement,
   ITerritory,
   Relation,
-  EntityTooltip,
-  IReference,
-  IResponseDocument,
-  IDocument,
-  IResponseDocumentDetail,
+  RequestPermissionUpdate,
 } from "@shared/types";
 import * as errors from "@shared/types/errors";
-import {
-  InvalidDeleteStatementsError,
-  NetworkError,
-} from "@shared/types/errors";
+import { NetworkError } from "@shared/types/errors";
 import { IRequestSearch } from "@shared/types/request-search";
 import { defaultPing } from "Theme/constants";
 import axios, {
@@ -198,7 +195,7 @@ class Api {
 
     this.errorTimeout = setTimeout(() => {
       this.lastError = null;
-    }, 500);
+    }, 600);
 
     return true;
   }

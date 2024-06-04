@@ -88,6 +88,13 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
     );
   }, []);
 
+  const [showContent, setShowContent] = useState(false);
+  useEffect(() => {
+    setTimeout(() => {
+      setShowContent(true);
+    }, 400);
+  }, []);
+
   return (
     <>
       <StyledTabGroup>
@@ -108,7 +115,10 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
             />
           ))}
       </StyledTabGroup>
-      {selectedDetailId && <EntityDetail detailId={selectedDetailId} />}
+
+      {selectedDetailId && showContent && (
+        <EntityDetail detailId={selectedDetailId} />
+      )}
     </>
   );
 };

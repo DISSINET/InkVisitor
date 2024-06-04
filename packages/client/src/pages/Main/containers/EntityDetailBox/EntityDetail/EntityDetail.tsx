@@ -81,6 +81,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
     detailIdArray,
     selectedDetailId,
   } = useSearchParams();
+
   const {
     status,
     data: entity,
