@@ -1,5 +1,5 @@
 import { entitiesDictKeys } from "@shared/dictionaries";
-import { EntityEnums, UserEnums } from "@shared/enums";
+import { EntityEnums, RelationEnums, UserEnums } from "@shared/enums";
 import {
   IEntity,
   IReference,
@@ -38,6 +38,8 @@ import {
   DropdownItem,
   EntitiesDeleteErrorResponse,
   EntitiesDeleteSuccessResponse,
+  RelationsCreateErrorResponse,
+  RelationsCreateSuccessResponse,
   StatementListDisplayMode,
 } from "types";
 import { collectTerritoryChildren, searchTree } from "utils/utils";
@@ -124,6 +126,12 @@ interface StatementListHeader {
     void,
     unknown
   >;
+  relationsCreateMutation: UseMutationResult<
+    (RelationsCreateSuccessResponse | RelationsCreateErrorResponse)[],
+    Error,
+    Relation.IRelation[],
+    unknown
+  >;
 }
 export const StatementListHeader: React.FC<StatementListHeader> = ({
   territory,
@@ -143,7 +151,9 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
 
   updateTerritoryMutation,
   duplicateTerritoryMutation,
+
   deleteStatementsMutation,
+  relationsCreateMutation,
 }) => {
   const dispatch = useAppDispatch();
   const queryClient = useQueryClient();
@@ -229,22 +239,26 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
         ]);
         return;
       case BatchOption.relate_to_SOE:
-        // TODO: multi request for each statement
-        // const newRelation: Relation.IRelation = {
-        //   id: uuidv4(),
-        //   entityIds: [entity.id, selectedId],
-        //   type: relationType,
-        // };
-        // relationCreateMutation.mutate(newRelation);
+        const newRelations = [];
+        for (const statementId of selectedRows) {
+          newRelations.push({
+            id: uuidv4(),
+            entityIds: [statementId, newSelectedId],
+            type: RelationEnums.Type.SuperordinateEntity,
+          } as Relation.IRelation);
+        }
+        relationsCreateMutation.mutate(newRelations);
         return;
       case BatchOption.classify_as:
-        // TODO: multi request CLA
-        // const newRelation: Relation.IRelation = {
-        //   id: uuidv4(),
-        //   entityIds: [entity.id, selectedId],
-        //   type: relationType,
-        // };
-        // relationCreateMutation.mutate(newRelation);
+        const newRelationsCla = [];
+        for (const statementId of selectedRows) {
+          newRelationsCla.push({
+            id: uuidv4(),
+            entityIds: [statementId, newSelectedId],
+            type: RelationEnums.Type.Classification,
+          } as Relation.IRelation);
+        }
+        relationsCreateMutation.mutate(newRelationsCla);
         return;
     }
   };
@@ -468,14 +482,13 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
 
                       {batchAction.info && (
                         <EntitySuggester
+                          inputWidth={70}
                           placeholder={
                             batchAction.info === EntityEnums.Class.Territory
                               ? "to territory"
                               : ""
                           }
                           disableTemplatesAccept
-                          inputWidth={70}
-                          disableCreate
                           filterEditorRights
                           categoryTypes={[
                             entitiesDictKeys[

@@ -37,6 +37,8 @@ import io, { Socket } from "socket.io-client";
 import {
   EntitiesDeleteErrorResponse,
   EntitiesDeleteSuccessResponse,
+  RelationsCreateErrorResponse,
+  RelationsCreateSuccessResponse,
 } from "types";
 
 interface IApiOptions extends AxiosRequestConfig<any> {
@@ -1059,6 +1061,35 @@ class Api {
     } catch (err) {
       throw this.handleError(err);
     }
+  }
+
+  async relationsCreate(
+    newRelations: Relation.IRelation[],
+    options?: IApiOptions
+  ): Promise<
+    (RelationsCreateSuccessResponse | RelationsCreateErrorResponse)[]
+  > {
+    const out = [];
+
+    for (const newRelation of newRelations) {
+      try {
+        const response = await this.connection.post(
+          `/relations`,
+          newRelation,
+          options
+        );
+        out.push({ relation: newRelation, details: response });
+      } catch (err) {
+        out.push({
+          error: true,
+          message: `Failed to create relation ${newRelation.id}`,
+          relation: newRelation,
+          details: this.handleError(err),
+        });
+      }
+    }
+
+    return out;
   }
 
   async relationDelete(
