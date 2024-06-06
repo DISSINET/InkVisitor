@@ -355,7 +355,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
                   <EntitySuggester
                     disableTemplatesAccept
                     filterEditorRights
-                    inputWidth={96}
+                    inputWidth="full"
                     disableCreate
                     categoryTypes={[EntityEnums.Class.Territory]}
                     onSelected={(newSelectedId: string) => {
