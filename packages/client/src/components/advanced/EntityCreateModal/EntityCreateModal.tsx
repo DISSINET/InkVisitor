@@ -79,6 +79,9 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
   const [conceptPos, setConceptPos] = useState<EntityEnums.ConceptPartOfSpeech>(
     EntityEnums.ConceptPartOfSpeech.Empty
   );
+  const [territoryEntity, setTerritoryEntity] = useState<false | IEntity>(
+    false
+  );
 
   const userId = localStorage.getItem("userid");
   const {
@@ -102,8 +105,6 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
       setSelectedLanguage(user.options.defaultLanguage);
     }
   }, [user]);
-
-  const [territoryId, setTerritoryId] = useState<string>("");
 
   const entityCreateMutation = useMutation({
     mutationFn: async (newEntity: IEntity) => await api.entityCreate(newEntity),
@@ -130,7 +131,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
       entityClass: selectedCategory,
       detail: detailTyped,
       language: selectedLanguage,
-      territoryId: territoryId,
+      territoryId: territoryEntity ? territoryEntity.id : undefined,
     };
 
     if (user) {
@@ -204,33 +205,17 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
     }
   };
 
-  const {
-    status,
-    data: territory,
-    error,
-    isFetching,
-  } = useQuery({
-    queryKey: ["territory", territoryId],
-    queryFn: async () => {
-      if (territoryId) {
-        const res = await api.territoryGet(territoryId);
-        return res.data;
-      }
-    },
-    enabled: !!territoryId && api.isLoggedIn(),
-  });
-
   const handleCheckOnSubmit = () => {
     if (label.length < 1) {
       toast.info(MIN_LABEL_LENGTH_MESSAGE);
     } else if (
       selectedCategory === EntityEnums.Class.Statement &&
-      !territoryId
+      !territoryEntity
     ) {
       toast.warning("Territory is required!");
     } else if (
       selectedCategory === EntityEnums.Class.Territory &&
-      !territoryId &&
+      !territoryEntity &&
       userRole !== UserEnums.Role.Admin
     ) {
       toast.warning("Parent territory is required!");
@@ -341,13 +326,13 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
                   : "Territory: "}
               </ModalInputLabel>
               <ModalInputWrap>
-                {territory ? (
+                {territoryEntity ? (
                   <EntityTag
-                    entity={territory}
+                    entity={territoryEntity}
                     tooltipPosition="left"
                     unlinkButton={{
                       onClick: () => {
-                        setTerritoryId("");
+                        setTerritoryEntity(false);
                       },
                     }}
                   />
@@ -358,8 +343,8 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
                     inputWidth="full"
                     disableCreate
                     categoryTypes={[EntityEnums.Class.Territory]}
-                    onSelected={(newSelectedId: string) => {
-                      setTerritoryId(newSelectedId);
+                    onPicked={(entity: IEntity) => {
+                      setTerritoryEntity(entity);
                     }}
                   />
                 )}
@@ -370,7 +355,7 @@ export const EntityCreateModal: React.FC<EntityCreateModal> = ({
         {userRole === UserEnums.Role.Admin && (
           <>
             {selectedCategory === EntityEnums.Class.Territory &&
-            !territoryId ? (
+            !territoryEntity ? (
               <StyledNote>
                 {"Territory will be added under root"}
                 <br />
