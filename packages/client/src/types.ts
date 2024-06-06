@@ -5,6 +5,7 @@ import {
   IResponseTree,
   IStatementActant,
   IStatementAction,
+  Relation,
 } from "@shared/types";
 import { ThemeColor } from "Theme/theme";
 import { AxiosResponse } from "axios";
@@ -419,4 +420,15 @@ export interface EntitiesDeleteErrorResponse {
   message: string;
   details: any;
   entityId: string;
+}
+
+export interface RelationsCreateSuccessResponse {
+  relation: Relation.IRelation;
+  details: AxiosResponse<any, any>;
+}
+export interface RelationsCreateErrorResponse {
+  error: boolean;
+  message: string;
+  relation: Relation.IRelation;
+  details: any;
 }

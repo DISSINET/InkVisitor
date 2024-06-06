@@ -5,6 +5,7 @@ import {
   IResponseStatement,
   IStatement,
   ITerritory,
+  Relation,
 } from "@shared/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
@@ -19,7 +20,11 @@ import { setShowWarnings } from "redux/features/statementEditor/showWarningsSlic
 import { setDisableStatementListScroll } from "redux/features/statementList/disableStatementListScrollSlice";
 import { setRowsExpanded } from "redux/features/statementList/rowsExpandedSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { EntitiesDeleteErrorResponse, StatementListDisplayMode } from "types";
+import {
+  EntitiesDeleteErrorResponse,
+  RelationsCreateErrorResponse,
+  StatementListDisplayMode,
+} from "types";
 import useResizeObserver from "use-resize-observer";
 import { StatementListHeader } from "./StatementListHeader/StatementListHeader";
 import { StatementListTable } from "./StatementListTable/StatementListTable";
@@ -426,9 +431,8 @@ export const StatementListBox: React.FC = () => {
   });
 
   const deleteStatementsMutation = useMutation({
-    mutationFn: async () => {
-      return api.entitiesDelete(selectedRows, { ignoreErrorToast: true });
-    },
+    mutationFn: () =>
+      api.entitiesDelete(selectedRows, { ignoreErrorToast: true }),
     onSuccess: (data, variables) => {
       const currentStatementRowDeleted = data.find(
         (row) => row.entityId === statementId
@@ -460,6 +464,27 @@ export const StatementListBox: React.FC = () => {
       });
       queryClient.invalidateQueries({
         queryKey: ["territory"],
+      });
+    },
+  });
+
+  const relationsCreateMutation = useMutation({
+    mutationFn: async (newRelations: Relation.IRelation[]) =>
+      api.relationsCreate(newRelations),
+    onSuccess: (data, variables) => {
+      const errorRows = data.filter((row) => (row as any).error);
+      if (errorRows.length > 0) {
+        toast.error(
+          `Some relaions ${errorRows.length} were not possible to create`
+        );
+      } else {
+        toast.success(`${data.length} relations created`);
+      }
+      queryClient.invalidateQueries({
+        queryKey: ["territory"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["entity"],
       });
     },
   });
@@ -505,6 +530,7 @@ export const StatementListBox: React.FC = () => {
               updateTerritoryMutation={updateTerritoryMutation}
               duplicateTerritoryMutation={duplicateTerritoryMutation}
               deleteStatementsMutation={deleteStatementsMutation}
+              relationsCreateMutation={relationsCreateMutation}
             />
           )}
 
@@ -621,6 +647,7 @@ export const StatementListBox: React.FC = () => {
           updateTerritoryMutation.isPending ||
           duplicateTerritoryMutation.isPending ||
           deleteStatementsMutation.isPending ||
+          relationsCreateMutation.isPending ||
           (statementListOpened && !showStatementList)
         }
       />
