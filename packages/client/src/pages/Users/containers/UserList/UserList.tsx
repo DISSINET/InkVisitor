@@ -1,6 +1,6 @@
 import { userRoleDict } from "@shared/dictionaries";
 import { EntityEnums, UserEnums } from "@shared/enums";
-import { IResponseUser, IUserRight } from "@shared/types";
+import { IResponseUser, IUser, IUserRight } from "@shared/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Button, ButtonGroup, Loader, Submit } from "components";
@@ -72,8 +72,9 @@ export const UserList: React.FC<UserList> = React.memo(() => {
   }, [removingUserId]);
 
   const userMutation = useMutation({
-    mutationFn: async (userChanges: any) =>
-      await api.usersUpdate(userChanges.id, userChanges),
+    mutationFn: async (
+      userChanges: Partial<Omit<IUser, "id">> & { id: IUser["id"] }
+    ) => await api.usersUpdate(userChanges.id, userChanges),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["users"] });
     },
