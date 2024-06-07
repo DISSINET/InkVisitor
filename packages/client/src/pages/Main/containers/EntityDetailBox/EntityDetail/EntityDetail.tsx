@@ -559,7 +559,10 @@ export const EntityDetail: React.FC<EntityDetail> = ({
   });
 
   const relationUpdateMutation = useMutation({
-    mutationFn: async (relationObject: { relationId: string; changes: any }) =>
+    mutationFn: async (relationObject: {
+      relationId: string;
+      changes: Partial<Relation.IRelation>;
+    }) =>
       await api.relationUpdate(
         relationObject.relationId,
         relationObject.changes

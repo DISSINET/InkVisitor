@@ -1033,7 +1033,7 @@ class Api {
    */
   async relationUpdate(
     relationId: string,
-    changes: object,
+    changes: Partial<Relation.IRelation>,
     options?: IApiOptions
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
