@@ -84,18 +84,18 @@ export const EntitySearchBox: React.FC = () => {
   const debouncedResultsHeight = useDebounce(height, 20);
 
   const statusOptionSelected: EntityEnums.Status = useMemo(() => {
-    if (!!debouncedValues.status) {
-      return debouncedValues.status || defaultStatusOption.value;
+    if (!!searchData.status) {
+      return searchData.status || defaultStatusOption.value;
     }
     return defaultStatusOption.value;
-  }, [debouncedValues.status]);
+  }, [searchData.status]);
 
   const languageOptionSelected: EntityEnums.Language = useMemo(() => {
-    if (!!debouncedValues.language) {
-      return debouncedValues.language || defaultLanguageOption.value;
+    if (!!searchData.language) {
+      return searchData.language || defaultLanguageOption.value;
     }
     return defaultLanguageOption.value;
-  }, [debouncedValues.language]);
+  }, [searchData.language]);
 
   // check whether the search should be executed
   const validSearch = useMemo(() => {
@@ -104,34 +104,6 @@ export const EntitySearchBox: React.FC = () => {
         .length > 0
     );
   }, [debouncedValues]);
-
-  // get the co-occurence entity
-  const { data: cooccurrenceEntity, isFetching: cooccurrenceIsFetching } =
-    useQuery({
-      queryKey: ["search-cooccurrence", searchData.cooccurrenceId],
-      queryFn: async () => {
-        if (searchData?.cooccurrenceId) {
-          const res = await api.entitiesGet(searchData.cooccurrenceId);
-          return res.data;
-        }
-      },
-      enabled: !!searchData?.cooccurrenceId,
-    });
-
-  // get the searchByTerritory entity
-  const {
-    data: searchTerritoryEntity,
-    isFetching: searchTerritoryEntityIsFetching,
-  } = useQuery({
-    queryKey: ["search-territory", searchData.territoryId],
-    queryFn: async () => {
-      if (searchData?.territoryId) {
-        const res = await api.entitiesGet(searchData.territoryId);
-        return res.data;
-      }
-    },
-    enabled: !!searchData?.territoryId,
-  });
 
   const {
     status,
@@ -161,6 +133,12 @@ export const EntitySearchBox: React.FC = () => {
     enabled: api.isLoggedIn() && validSearch,
   });
 
+  const [territoryEntity, setTerritoryEntity] = useState<IEntity | false>(
+    false
+  );
+  const [cooccurrenceEntity, setCooccurrenceEntity] = useState<IEntity | false>(
+    false
+  );
   const [referencedTo, setReferencedTo] = useState<IEntity | false>(false);
 
   // apply changes to search parameters
@@ -405,12 +383,11 @@ export const EntitySearchBox: React.FC = () => {
             </StyledRow> */}
               <StyledRow>
                 <StyledRowHeader>territory</StyledRowHeader>
-                {debouncedValues.territoryId && searchTerritoryEntity ? (
+                {territoryEntity ? (
                   <>
-                    <Loader size={26} show={searchTerritoryEntityIsFetching} />
-                    {searchTerritoryEntity && (
+                    {territoryEntity && (
                       <EntityTag
-                        entity={searchTerritoryEntity}
+                        entity={territoryEntity}
                         tooltipPosition={"left"}
                         unlinkButton={{
                           onClick: () => {
@@ -418,6 +395,7 @@ export const EntitySearchBox: React.FC = () => {
                               territoryId: "",
                               subTerritorySearch: undefined,
                             });
+                            setTerritoryEntity(false);
                           },
                           color: "danger",
                           icon: <RiCloseFill />,
@@ -430,8 +408,9 @@ export const EntitySearchBox: React.FC = () => {
                     <EntitySuggester
                       disableTemplatesAccept
                       categoryTypes={[EntityEnums.Class.Territory]}
-                      onSelected={(newSelectedId: string) => {
-                        handleChange({ territoryId: newSelectedId });
+                      onPicked={(entity: IEntity) => {
+                        handleChange({ territoryId: entity.id });
+                        setTerritoryEntity(entity);
                       }}
                       placeholder={"territory"}
                       disableCreate
@@ -440,52 +419,46 @@ export const EntitySearchBox: React.FC = () => {
                   </div>
                 )}
               </StyledRow>
-              {debouncedValues.territoryId && (
+              {territoryEntity && (
                 <StyledRow>
                   <StyledRowHeader>Territory children</StyledRowHeader>
-                  {searchTerritoryEntity && (
-                    <AttributeButtonGroup
-                      options={[
-                        {
-                          longValue: "included",
-                          shortValue: "included",
-                          onClick: () => {
-                            handleChange({ subTerritorySearch: true });
-                          },
-                          selected: debouncedValues.subTerritorySearch === true,
+                  <AttributeButtonGroup
+                    options={[
+                      {
+                        longValue: "included",
+                        shortValue: "included",
+                        onClick: () => {
+                          handleChange({ subTerritorySearch: true });
                         },
-                        {
-                          longValue: "not included",
-                          shortValue: "not included",
-                          onClick: () => {
-                            handleChange({ subTerritorySearch: undefined });
-                          },
-                          selected: debouncedValues.subTerritorySearch !== true,
+                        selected: searchData.subTerritorySearch === true,
+                      },
+                      {
+                        longValue: "not included",
+                        shortValue: "not included",
+                        onClick: () => {
+                          handleChange({ subTerritorySearch: undefined });
                         },
-                      ]}
-                    />
-                  )}
+                        selected: searchData.subTerritorySearch !== true,
+                      },
+                    ]}
+                  />
                 </StyledRow>
               )}
               <StyledRow>
                 <StyledRowHeader>co-occurrence</StyledRowHeader>
-                {debouncedValues.cooccurrenceId ? (
-                  <>
-                    <Loader size={26} show={cooccurrenceIsFetching} />
-                    {cooccurrenceEntity && (
-                      <EntityTag
-                        entity={cooccurrenceEntity}
-                        tooltipPosition="left"
-                        unlinkButton={{
-                          onClick: () => {
-                            handleChange({ cooccurrenceId: "" });
-                          },
-                          color: "danger",
-                          icon: <RiCloseFill />,
-                        }}
-                      />
-                    )}
-                  </>
+                {cooccurrenceEntity ? (
+                  <EntityTag
+                    entity={cooccurrenceEntity}
+                    tooltipPosition="left"
+                    unlinkButton={{
+                      onClick: () => {
+                        handleChange({ cooccurrenceId: "" });
+                        setCooccurrenceEntity(false);
+                      },
+                      color: "danger",
+                      icon: <RiCloseFill />,
+                    }}
+                  />
                 ) : (
                   <div>
                     <EntitySuggester
@@ -504,8 +477,9 @@ export const EntitySearchBox: React.FC = () => {
                         EntityEnums.Class.Value,
                         EntityEnums.Class.Event,
                       ]}
-                      onSelected={(newSelectedId: string) => {
-                        handleChange({ cooccurrenceId: newSelectedId });
+                      onPicked={(entity: IEntity) => {
+                        handleChange({ cooccurrenceId: entity.id });
+                        setCooccurrenceEntity(entity);
                       }}
                       placeholder={"entity"}
                       disableCreate
@@ -521,9 +495,11 @@ export const EntitySearchBox: React.FC = () => {
                     entity={referencedTo}
                     unlinkButton={{
                       onClick: () => {
-                        setReferencedTo(false);
                         handleChange({ haveReferenceTo: undefined });
+                        setReferencedTo(false);
                       },
+                      color: "danger",
+                      icon: <RiCloseFill />,
                     }}
                   />
                 ) : (
@@ -542,10 +518,10 @@ export const EntitySearchBox: React.FC = () => {
               </StyledRow>
               <StyledRow>
                 <StyledRowHeader>created at</StyledRowHeader>
-                {debouncedValues.createdDate ? (
+                {searchData.createdDate ? (
                   <StyledDateTag>
                     <StyledDateTagText>
-                      {debouncedValues.createdDate.toDateString()}
+                      {searchData.createdDate.toDateString()}
                     </StyledDateTagText>
                     <StyledDateTagButton
                       key="d"
@@ -566,7 +542,7 @@ export const EntitySearchBox: React.FC = () => {
                     id="created-date"
                     width="full"
                     name="created-date"
-                    onChange={(e) => {
+                    onBlur={(e) => {
                       const createdDate = new Date(e.target.value);
                       handleChange({ createdDate });
                     }}
@@ -575,10 +551,10 @@ export const EntitySearchBox: React.FC = () => {
               </StyledRow>
               <StyledRow>
                 <StyledRowHeader>udpated at</StyledRowHeader>
-                {debouncedValues.updatedDate ? (
+                {searchData.updatedDate ? (
                   <StyledDateTag>
                     <StyledDateTagText>
-                      {debouncedValues.updatedDate.toDateString()}
+                      {searchData.updatedDate.toDateString()}
                     </StyledDateTagText>
                     <StyledDateTagButton
                       key="d"
@@ -599,7 +575,7 @@ export const EntitySearchBox: React.FC = () => {
                     id="updated-date"
                     width="full"
                     name="updated-date"
-                    onChange={(e) => {
+                    onBlur={(e) => {
                       const updatedDate = new Date(e.target.value);
                       handleChange({ updatedDate });
                     }}

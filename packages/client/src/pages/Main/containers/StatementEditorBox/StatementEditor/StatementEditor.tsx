@@ -944,7 +944,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                   if (!statement.data.tags.find((t) => t === newSelectedId)) {
                     addTag(newSelectedId);
                   } else {
-                    toast.info("Tag already added!");
+                    toast.info("Tag already added");
                   }
                 }}
                 disableTemplatesAccept
