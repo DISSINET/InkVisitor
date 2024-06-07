@@ -997,7 +997,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         </StyledEditorSection>
       </React.Fragment>
 
-      <ApplyTemplateModal<EntityEnums.Class.Statement>
+      <ApplyTemplateModal
         showModal={showApplyTemplateModal}
         setShowApplyTemplateModal={setShowApplyTemplateModal}
         updateEntityMutation={updateStatementMutation}

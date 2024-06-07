@@ -16,62 +16,54 @@ import React from "react";
 import { UseMutationResult } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { getShortLabelByLetterCount } from "utils/utils";
+import { entitiesDictKeys } from "@shared/dictionaries";
 
-type EntityDataType<T extends EntityEnums.Class> =
-  T extends EntityEnums.Class.Statement ? IStatementData : any; // Add more mappings if needed
-
-type EntityUpdate<T extends EntityEnums.Class> = Omit<
-  IEntity,
-  "data" | "class"
-> & { data: Partial<EntityDataType<T>>; class: T };
-
-interface ApplyTemplateModal<T extends EntityEnums.Class> {
+interface ApplyTemplateModal {
   showModal: boolean;
   setShowApplyTemplateModal: React.Dispatch<React.SetStateAction<boolean>>;
   entity: IEntity;
   updateEntityMutation: UseMutationResult<
     void | AxiosResponse<IResponseGeneric>,
     unknown,
-    EntityUpdate<T>,
+    // can be any entity class, thus this needs to create type to partially match with all data objects
+    any,
     unknown
   >;
   templateToApply: false | IEntity;
   setTemplateToApply: React.Dispatch<React.SetStateAction<false | IEntity>>;
 }
-export const ApplyTemplateModal = <T extends EntityEnums.Class>({
+export const ApplyTemplateModal: React.FC<ApplyTemplateModal> = ({
   showModal,
   setShowApplyTemplateModal,
   entity,
   updateEntityMutation,
   templateToApply,
   setTemplateToApply,
-}: ApplyTemplateModal<T>) => {
+}) => {
   const handleApplyTemplate = async () => {
     if (templateToApply) {
-      const entityAfterTemplateApplied: IEntity = await applyTemplate(
-        templateToApply,
-        entity,
-        localStorage.getItem("userrole") as UserEnums.Role
-      );
+      try {
+        const entityAfterTemplateApplied: IEntity = await applyTemplate(
+          templateToApply,
+          entity,
+          localStorage.getItem("userrole") as UserEnums.Role
+        );
 
-      // TODO: optimally react with toast only to succesfull creation
-      toast.info(
-        `Template "${getShortLabelByLetterCount(
-          templateToApply.label,
-          120
-        )}" applied to Statement "${getShortLabelByLetterCount(
-          entity.label,
-          120
-        )}"`
-      );
+        if (entityAfterTemplateApplied) {
+          toast.info(
+            `Template "${getShortLabelByLetterCount(
+              templateToApply.label,
+              120
+            )}" applied to ${
+              entitiesDictKeys[entity.class].label
+            } "${getShortLabelByLetterCount(entity.label, 120)}"`
+          );
 
-      const entityUpdate: EntityUpdate<T> = {
-        ...entityAfterTemplateApplied,
-        data: entityAfterTemplateApplied.data as Partial<EntityDataType<T>>,
-        class: entityAfterTemplateApplied.class as T,
-      };
-
-      updateEntityMutation.mutate(entityUpdate);
+          updateEntityMutation.mutate(entityAfterTemplateApplied);
+        }
+      } catch (e) {
+        toast.error("Template was not applied");
+      }
     }
     setTemplateToApply(false);
   };
