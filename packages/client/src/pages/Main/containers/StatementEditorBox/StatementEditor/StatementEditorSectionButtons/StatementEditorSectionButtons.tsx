@@ -142,7 +142,6 @@ export const StatementEditorSectionButtons: React.FC<
       </ButtonGroup>
       <EntitySuggester
         categoryTypes={[EntityEnums.Class.Statement]}
-        onSelected={(id: string) => {}}
         onPicked={(entity: IEntity) =>
           handleCopyFromStatement(entity as IStatement, section, replaceSection)
         }

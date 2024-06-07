@@ -141,7 +141,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
   const [tempCloudEntityId, setTempCloudEntityId] = useState<string | false>(
     false
   );
-  const { isLoading, isFetching } = useQuery({
+  const {} = useQuery({
     queryKey: ["relation-entity-temp", tempCloudEntityId],
     queryFn: async () => {
       if (tempCloudEntityId) {
