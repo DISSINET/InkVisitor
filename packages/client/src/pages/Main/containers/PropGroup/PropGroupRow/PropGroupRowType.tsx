@@ -22,7 +22,7 @@ interface PropGroupRowType {
   propTypeEntity?: IEntity;
   updateProp: (
     propId: string,
-    changes: any,
+    changes: Partial<IProp>,
     instantUpdate?: boolean,
     languageCheck?: boolean
   ) => void;

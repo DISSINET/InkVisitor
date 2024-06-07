@@ -1,4 +1,5 @@
 import {
+  IProp,
   IResponseStatement,
   IStatementAction,
   IStatementData,
@@ -13,7 +14,7 @@ interface StatementEditorActionTable {
   statement: IResponseStatement;
   userCanEdit?: boolean;
   addProp: (originId: string) => void;
-  updateProp: (propId: string, changes: any) => void;
+  updateProp: (propId: string, changes: Partial<IProp>) => void;
   removeProp: (propId: string) => void;
   movePropToIndex: (propId: string, oldIndex: number, newIndex: number) => void;
   territoryParentId?: string;

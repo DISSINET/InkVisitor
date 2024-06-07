@@ -18,6 +18,7 @@ import {
   IResponseUser,
   IStatement,
   ITerritory,
+  IUser,
   Relation,
   RequestPermissionUpdate,
 } from "@shared/types";
@@ -445,7 +446,7 @@ class Api {
 
   async usersUpdate(
     userId: string,
-    changes: object,
+    changes: Partial<IUser>,
     options?: IApiOptions
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
@@ -628,7 +629,7 @@ class Api {
 
   async entityUpdate(
     entityId: string,
-    changes: object,
+    changes: Partial<IEntity>,
     options?: IApiOptions
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
@@ -1032,7 +1033,7 @@ class Api {
    */
   async relationUpdate(
     relationId: string,
-    changes: object,
+    changes: Partial<Relation.IRelation>,
     options?: IApiOptions
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {

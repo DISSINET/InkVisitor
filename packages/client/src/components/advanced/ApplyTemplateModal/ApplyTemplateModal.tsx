@@ -1,5 +1,5 @@
-import { UserEnums } from "@shared/enums";
-import { IEntity, IResponseGeneric } from "@shared/types";
+import { EntityEnums, UserEnums } from "@shared/enums";
+import { IEntity, IResponseGeneric, IStatementData } from "@shared/types";
 import { AxiosResponse } from "axios";
 import {
   Button,
@@ -16,15 +16,16 @@ import React from "react";
 import { UseMutationResult } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { getShortLabelByLetterCount } from "utils/utils";
+import { entitiesDictKeys } from "@shared/dictionaries";
 
 interface ApplyTemplateModal {
   showModal: boolean;
   setShowApplyTemplateModal: React.Dispatch<React.SetStateAction<boolean>>;
   entity: IEntity;
-  // TODO: check consistency of mutations from different containers
   updateEntityMutation: UseMutationResult<
     void | AxiosResponse<IResponseGeneric>,
     unknown,
+    // can be any entity class, thus this needs to create type to partially match with all data objects
     any,
     unknown
   >;
@@ -41,24 +42,28 @@ export const ApplyTemplateModal: React.FC<ApplyTemplateModal> = ({
 }) => {
   const handleApplyTemplate = async () => {
     if (templateToApply) {
-      const entityAfterTemplateApplied = await applyTemplate(
-        templateToApply,
-        entity,
-        localStorage.getItem("userrole") as UserEnums.Role
-      );
+      try {
+        const entityAfterTemplateApplied: IEntity = await applyTemplate(
+          templateToApply,
+          entity,
+          localStorage.getItem("userrole") as UserEnums.Role
+        );
 
-      // TODO: optimally react with toast only to succesfull creation
-      toast.info(
-        `Template "${getShortLabelByLetterCount(
-          templateToApply.label,
-          120
-        )}" applied to Statement "${getShortLabelByLetterCount(
-          entity.label,
-          120
-        )}"`
-      );
+        if (entityAfterTemplateApplied) {
+          toast.info(
+            `Template "${getShortLabelByLetterCount(
+              templateToApply.label,
+              120
+            )}" applied to ${
+              entitiesDictKeys[entity.class].label
+            } "${getShortLabelByLetterCount(entity.label, 120)}"`
+          );
 
-      updateEntityMutation.mutate(entityAfterTemplateApplied);
+          updateEntityMutation.mutate(entityAfterTemplateApplied);
+        }
+      } catch (e) {
+        toast.error("Template was not applied");
+      }
     }
     setTemplateToApply(false);
   };

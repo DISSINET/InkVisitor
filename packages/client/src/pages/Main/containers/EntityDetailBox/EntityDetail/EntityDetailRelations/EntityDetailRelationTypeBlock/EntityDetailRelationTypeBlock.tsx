@@ -41,7 +41,7 @@ interface EntityDetailRelationTypeBlock {
     unknown,
     {
       relationId: string;
-      changes: any;
+      changes: Partial<Relation.IRelation>;
     },
     unknown
   >;
