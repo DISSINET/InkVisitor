@@ -223,7 +223,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
   });
 
   const updateEntityMutation = useMutation({
-    mutationFn: async (changes: any) =>
+    mutationFn: async (changes: Partial<IEntity>) =>
       await api.entityUpdate(detailId, changes),
 
     onSuccess: (data, variables) => {
@@ -269,7 +269,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
   });
 
   const changeEntityTypeMutation = useMutation({
-    mutationFn: async (newClass: string) =>
+    mutationFn: async (newClass: EntityEnums.Class) =>
       await api.entityUpdate(detailId, { class: newClass }),
 
     onSuccess: (data, variables) => {

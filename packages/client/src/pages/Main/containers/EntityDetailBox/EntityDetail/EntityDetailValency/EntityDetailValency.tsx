@@ -1,5 +1,10 @@
 import { RelationEnums } from "@shared/enums";
-import { IResponseDetail, IResponseGeneric, Relation } from "@shared/types";
+import {
+  IEntity,
+  IResponseDetail,
+  IResponseGeneric,
+  Relation,
+} from "@shared/types";
 import { UseMutationResult } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
 import React from "react";
@@ -13,7 +18,7 @@ interface EntityDetailValency {
   updateEntityMutation: UseMutationResult<
     AxiosResponse<IResponseGeneric>,
     unknown,
-    any,
+    Partial<IEntity>,
     unknown
   >;
   relationCreateMutation: UseMutationResult<

@@ -1,5 +1,5 @@
-import { UserEnums } from "@shared/enums";
-import { IEntity, IResponseGeneric } from "@shared/types";
+import { EntityEnums, UserEnums } from "@shared/enums";
+import { IEntity, IResponseGeneric, IStatementData } from "@shared/types";
 import { AxiosResponse } from "axios";
 import {
   Button,
@@ -17,7 +17,15 @@ import { UseMutationResult } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { getShortLabelByLetterCount } from "utils/utils";
 
-interface ApplyTemplateModal {
+type EntityDataType<T extends EntityEnums.Class> =
+  T extends EntityEnums.Class.Statement ? IStatementData : any; // Add more mappings if needed
+
+type EntityUpdate<T extends EntityEnums.Class> = Omit<
+  IEntity,
+  "data" | "class"
+> & { data: Partial<EntityDataType<T>>; class: T };
+
+interface ApplyTemplateModal<T extends EntityEnums.Class> {
   showModal: boolean;
   setShowApplyTemplateModal: React.Dispatch<React.SetStateAction<boolean>>;
   entity: IEntity;
@@ -25,23 +33,23 @@ interface ApplyTemplateModal {
   updateEntityMutation: UseMutationResult<
     void | AxiosResponse<IResponseGeneric>,
     unknown,
-    any,
+    EntityUpdate<T>,
     unknown
   >;
   templateToApply: false | IEntity;
   setTemplateToApply: React.Dispatch<React.SetStateAction<false | IEntity>>;
 }
-export const ApplyTemplateModal: React.FC<ApplyTemplateModal> = ({
+const ApplyTemplateModal = <T extends EntityEnums.Class>({
   showModal,
   setShowApplyTemplateModal,
   entity,
   updateEntityMutation,
   templateToApply,
   setTemplateToApply,
-}) => {
+}: ApplyTemplateModal<T>) => {
   const handleApplyTemplate = async () => {
     if (templateToApply) {
-      const entityAfterTemplateApplied = await applyTemplate(
+      const entityAfterTemplateApplied: IEntity = await applyTemplate(
         templateToApply,
         entity,
         localStorage.getItem("userrole") as UserEnums.Role
@@ -58,7 +66,13 @@ export const ApplyTemplateModal: React.FC<ApplyTemplateModal> = ({
         )}"`
       );
 
-      updateEntityMutation.mutate(entityAfterTemplateApplied);
+      const entityUpdate: EntityUpdate<T> = {
+        ...entityAfterTemplateApplied,
+        data: entityAfterTemplateApplied.data as Partial<EntityDataType<T>>,
+        class: entityAfterTemplateApplied.class as T,
+      };
+
+      updateEntityMutation.mutate(entityUpdate);
     }
     setTemplateToApply(false);
   };

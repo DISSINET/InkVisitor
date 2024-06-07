@@ -2,6 +2,7 @@ import { entitiesDict } from "@shared/dictionaries";
 import { EntityEnums, RelationEnums } from "@shared/enums";
 import {
   IAction,
+  IEntity,
   IResponseDetail,
   IResponseGeneric,
   Relation,
@@ -35,7 +36,7 @@ interface EntityDetailValencySection {
   updateEntityMutation: UseMutationResult<
     AxiosResponse<IResponseGeneric>,
     unknown,
-    any,
+    Partial<IEntity>,
     unknown
   >;
   relationCreateMutation: UseMutationResult<

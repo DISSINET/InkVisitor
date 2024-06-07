@@ -629,7 +629,7 @@ class Api {
 
   async entityUpdate(
     entityId: string,
-    changes: object,
+    changes: Partial<IEntity>,
     options?: IApiOptions
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
