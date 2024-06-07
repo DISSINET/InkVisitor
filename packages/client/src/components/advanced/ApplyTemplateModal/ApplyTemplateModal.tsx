@@ -29,7 +29,6 @@ interface ApplyTemplateModal<T extends EntityEnums.Class> {
   showModal: boolean;
   setShowApplyTemplateModal: React.Dispatch<React.SetStateAction<boolean>>;
   entity: IEntity;
-  // TODO: check consistency of mutations from different containers
   updateEntityMutation: UseMutationResult<
     void | AxiosResponse<IResponseGeneric>,
     unknown,
@@ -39,7 +38,7 @@ interface ApplyTemplateModal<T extends EntityEnums.Class> {
   templateToApply: false | IEntity;
   setTemplateToApply: React.Dispatch<React.SetStateAction<false | IEntity>>;
 }
-const ApplyTemplateModal = <T extends EntityEnums.Class>({
+export const ApplyTemplateModal = <T extends EntityEnums.Class>({
   showModal,
   setShowApplyTemplateModal,
   entity,

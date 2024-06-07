@@ -20,7 +20,11 @@ import { partitivityDict, virtualityDict } from "@shared/dictionaries";
 interface PropGroupRowValue {
   propValueEntity: IEntity;
   prop: IProp;
-  updateProp: (propId: string, changes: any, instantUpdate?: true) => void;
+  updateProp: (
+    propId: string,
+    changes: Partial<IProp>,
+    instantUpdate?: true
+  ) => void;
   userCanEdit: boolean;
   isInsideTemplate: boolean;
   territoryParentId?: string;

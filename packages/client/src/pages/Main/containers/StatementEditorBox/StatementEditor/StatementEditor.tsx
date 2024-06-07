@@ -1,6 +1,7 @@
 import { EntityEnums, UserEnums } from "@shared/enums";
 import {
   IEntity,
+  IProp,
   IReference,
   IResponseStatement,
   IStatement,
@@ -376,7 +377,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
   const updateProp = (
     propId: string,
-    changes: any,
+    changes: Partial<IProp>,
     instantUpdate?: boolean,
     languageCheck?: boolean
   ) => {
@@ -389,7 +390,11 @@ export const StatementEditor: React.FC<StatementEditor> = ({
         user &&
         user.options.defaultStatementLanguage
       ) {
-        checkTypeEntityLanguage(propId, changes, instantUpdate);
+        checkTypeEntityLanguage(
+          propId,
+          changes as Partial<Omit<IProp, "type">> & { type: IProp["type"] },
+          instantUpdate
+        );
       } else {
         applyPropChanges(propId, changes, instantUpdate);
       }
@@ -399,7 +404,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   // checking if the language is not different from user.options.defaultStatementLanguage -> in that case, switch elvl to EntityEnums.Elvl.Inferential
   const checkTypeEntityLanguage = (
     propId: string,
-    changes: any,
+    changes: Partial<Omit<IProp, "type">> & { type: IProp["type"] },
     instantUpdate?: boolean
   ) => {
     if (user) {
@@ -422,7 +427,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
   const applyPropChanges = (
     propId: string,
-    changes: any,
+    changes: Partial<IProp>,
     instantUpdate?: boolean
   ) => {
     const newStatementData = deepCopy(statement.data);

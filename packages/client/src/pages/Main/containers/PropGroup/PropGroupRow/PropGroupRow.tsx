@@ -39,7 +39,7 @@ interface PropGroupRow {
 
   updateProp: (
     propId: string,
-    changes: any,
+    changes: Partial<IProp>,
     instantUpdate?: boolean,
     languageCheck?: boolean
   ) => void;

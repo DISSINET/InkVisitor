@@ -387,7 +387,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
     }
   };
 
-  const updateProp = (propId: string, changes: any) => {
+  const updateProp = (propId: string, changes: Partial<IProp>) => {
     if (entity !== undefined) {
       const newProps = [...entity.props];
 
