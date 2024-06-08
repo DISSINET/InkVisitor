@@ -289,10 +289,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
   // actions
   const addAction = (newActionId: string) => {
-    const newStatementAction = CStatementAction(
-      newActionId,
-      statement.elementsOrders.length
-    );
+    const newStatementAction = CStatementAction(newActionId);
     const newData = {
       actions: [...statement.data.actions, newStatementAction],
     };
@@ -300,10 +297,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   };
 
   const addActant = (newStatementActantId: string) => {
-    const newStatementActant = CStatementActant(
-      newStatementActantId,
-      statement.elementsOrders.length
-    );
+    const newStatementActant = CStatementActant(newStatementActantId);
     const newData = {
       actants: [...statement.data.actants, newStatementActant],
     };
@@ -312,7 +306,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
   // Props handling
   const addProp = (rowId: string) => {
-    const newProp = CProp(statement.elementsOrders.length);
+    const newProp = CProp();
     const newStatementData = deepCopy(statement.data);
 
     [...newStatementData.actants, ...newStatementData.actions].forEach(
@@ -349,7 +343,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   };
 
   const addClassification = (rowId: string) => {
-    const newClassification = CClassification(statement.elementsOrders.length);
+    const newClassification = CClassification();
 
     const newStatementData = deepCopy(statement.data);
 
@@ -363,7 +357,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   };
 
   const addIdentification = (rowId: string) => {
-    const newIdentification = CIdentification(statement.elementsOrders.length);
+    const newIdentification = CIdentification();
     const newStatementData = deepCopy(statement.data);
 
     [...newStatementData.actants].forEach((actant: IStatementActant) => {

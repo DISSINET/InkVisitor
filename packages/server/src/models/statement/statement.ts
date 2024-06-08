@@ -12,12 +12,10 @@ import {
   determineOrder,
 } from "@models/common";
 import { EntityEnums, UserEnums, DbEnums } from "@shared/enums";
-
 import Entity from "@models/entity/entity";
 import { r as rethink, Connection, RDatum, WriteResult } from "rethinkdb-ts";
 import { InternalServerError } from "@shared/types/errors";
 import User from "@models/user/user";
-import { EventMapSingle, EventTypes } from "@models/events/types";
 import treeCache from "@service/treeCache";
 import Prop from "@models/prop/prop";
 import {
@@ -36,13 +34,10 @@ export class StatementClassification implements IStatementClassification {
   certainty: EntityEnums.Certainty = EntityEnums.Certainty.AlmostCertain;
   mood: EntityEnums.Mood[];
   moodvariant: EntityEnums.MoodVariant = EntityEnums.MoodVariant.Irrealis;
-  statementOrder: number | false = false;
 
   constructor(data: Partial<IStatementClassification>) {
     fillFlatObject(this, data);
     this.mood = data.mood ? data.mood : [];
-    this.statementOrder =
-      data.statementOrder !== undefined ? data.statementOrder : false;
   }
 }
 
@@ -54,13 +49,10 @@ export class StatementIdentification implements IStatementClassification {
   certainty: EntityEnums.Certainty = EntityEnums.Certainty.AlmostCertain;
   mood: EntityEnums.Mood[];
   moodvariant: EntityEnums.MoodVariant = EntityEnums.MoodVariant.Irrealis;
-  statementOrder: number | false = false;
 
   constructor(data: Partial<IStatementClassification>) {
     fillFlatObject(this, data);
     this.mood = data.mood || [EntityEnums.Mood.Indication];
-    this.statementOrder =
-      data.statementOrder !== undefined ? data.statementOrder : false;
   }
 }
 
@@ -76,7 +68,6 @@ export class StatementActant implements IStatementActant, IModel {
   bundleStart = false;
   bundleEnd = false;
   props: Prop[] = [];
-  statementOrder: number | false = false;
 
   classifications: StatementClassification[] = [];
   identifications: StatementIdentification[] = [];
@@ -94,8 +85,6 @@ export class StatementActant implements IStatementActant, IModel {
       StatementIdentification,
       data.identifications
     );
-    this.statementOrder =
-      data.statementOrder !== undefined ? data.statementOrder : false;
   }
 
   /**
@@ -157,14 +146,11 @@ export class StatementAction implements IStatementAction {
   bundleStart = false;
   bundleEnd = false;
   props: Prop[] = [];
-  statementOrder: number | false = false;
 
   constructor(data: Partial<IStatementAction>) {
     fillFlatObject(this, data);
     this.mood = data.mood || [EntityEnums.Mood.Indication];
     fillArray<Prop>(this.props, Prop, data.props);
-    this.statementOrder =
-      data.statementOrder !== undefined ? data.statementOrder : false;
   }
 
   /**
@@ -401,7 +387,7 @@ class Statement extends Entity implements IStatement {
     if (updateData["entities"]) {
       delete updateData["entities"];
     }
-    
+
     if (
       updateData["data"] &&
       (updateData["data"] as any).territory &&
