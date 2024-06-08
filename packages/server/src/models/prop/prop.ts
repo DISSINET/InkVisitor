@@ -36,16 +36,11 @@ export default class Prop implements IProp, IModel {
   type: PropSpec;
   value: PropSpec;
 
-  statementOrder?: number | false;
-
   constructor(data: Partial<IProp>) {
     fillFlatObject(this, data);
     this.type = new PropSpec(data.type || {});
     this.value = new PropSpec(data.value || {});
     this.mood = data.mood || [EntityEnums.Mood.Indication];
-    this.statementOrder =
-      data.statementOrder !== undefined ? data.statementOrder : false;
-
     fillArray<Prop>(this.children, Prop, data.children);
   }
 

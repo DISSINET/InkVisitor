@@ -43,7 +43,6 @@ import {
   EntityOrder,
   IdentificationOrder,
   IResponseStatement,
-  OrderType,
   PropOrder,
 } from "./response-statement";
 import { IResponseTerritory } from "./response-territory";
@@ -70,12 +69,10 @@ import {
 
 import {
   IRequestPasswordReset,
-  IRequestPasswordResetData
-} from "./request-password-reset"
+  IRequestPasswordResetData,
+} from "./request-password-reset";
 
-import {
-  IRequestActivationData
-} from "./request-activation"
+import { IRequestActivationData } from "./request-activation";
 
 export type {
   IAudit,
@@ -132,7 +129,6 @@ export type {
   IResponsePermission,
   IResponseStats,
   EntityTooltip,
-  OrderType,
   EntityOrder,
   PropOrder,
   IWarning,
