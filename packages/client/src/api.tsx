@@ -1,25 +1,26 @@
 import { EntityEnums } from "@shared/enums";
 import {
+  EntityTooltip,
+  IDocument,
   IEntity,
-  IResponseEntity,
+  IReference,
   IResponseAudit,
   IResponseBookmarkFolder,
   IResponseDetail,
+  IResponseDocument,
+  IResponseDocumentDetail,
+  IResponseEntity,
   IResponseGeneric,
   IResponsePermission,
   IResponseStatement,
   IResponseTerritory,
   IResponseTree,
   IResponseUser,
-  RequestPermissionUpdate,
   IStatement,
   ITerritory,
+  IUser,
   Relation,
-  EntityTooltip,
-  IReference,
-  IResponseDocument,
-  IDocument,
-  IResponseDocumentDetail,
+  RequestPermissionUpdate,
 } from "@shared/types";
 import * as errors from "@shared/types/errors";
 import { NetworkError } from "@shared/types/errors";
@@ -34,6 +35,12 @@ import axios, {
 import React from "react";
 import { toast } from "react-toastify";
 import io, { Socket } from "socket.io-client";
+import {
+  EntitiesDeleteErrorResponse,
+  EntitiesDeleteSuccessResponse,
+  RelationsCreateErrorResponse,
+  RelationsCreateSuccessResponse,
+} from "types";
 
 interface IApiOptions extends AxiosRequestConfig<any> {
   ignoreErrorToast: boolean;
@@ -75,6 +82,7 @@ class Api {
   private ping: number;
 
   private lastError: any = null;
+  private errorTimeout: any;
 
   constructor() {
     this.baseUrl = process.env.APIURL || window.location.origin;
@@ -176,12 +184,22 @@ class Api {
 
   shouldShowErrorToast(error: any) {
     if (this.lastError && this.lastError.message === error.message) {
-      // Same error as the last one, debounce it
+      // Same error as the last one, don't show the toast
       return false;
     }
 
     // Update the last error to the current error
     this.lastError = error;
+
+    // Clear the previous timeout if it exists
+    if (this.errorTimeout) {
+      clearTimeout(this.errorTimeout);
+    }
+
+    this.errorTimeout = setTimeout(() => {
+      this.lastError = null;
+    }, 600);
+
     return true;
   }
 
@@ -428,7 +446,7 @@ class Api {
 
   async usersUpdate(
     userId: string,
-    changes: object,
+    changes: Partial<IUser>,
     options?: IApiOptions
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
@@ -611,7 +629,7 @@ class Api {
 
   async entityUpdate(
     entityId: string,
-    changes: object,
+    changes: Partial<IEntity>,
     options?: IApiOptions
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
@@ -639,6 +657,33 @@ class Api {
     } catch (err) {
       throw this.handleError(err);
     }
+  }
+
+  // This fn always outputs array of success / errors => errors are handled in the area of use
+  async entitiesDelete(
+    entityIds: string[],
+    options?: IApiOptions
+  ): Promise<(EntitiesDeleteSuccessResponse | EntitiesDeleteErrorResponse)[]> {
+    const out: (EntitiesDeleteSuccessResponse | EntitiesDeleteErrorResponse)[] =
+      [];
+    for (const entityId of entityIds) {
+      try {
+        const response = await this.connection.delete(
+          `/entities/${entityId}`,
+          options
+        );
+        out.push({ entityId: entityId, details: response });
+      } catch (err) {
+        out.push({
+          error: true,
+          message: `Failed to delete entity ${entityId}`,
+          entityId: entityId,
+          details: this.handleError(err),
+        });
+      }
+    }
+
+    return out;
   }
 
   async entityRestore(
@@ -971,7 +1016,7 @@ class Api {
    */
   async relationUpdate(
     relationId: string,
-    changes: object,
+    changes: Partial<Relation.IRelation>,
     options?: IApiOptions
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
@@ -1000,6 +1045,35 @@ class Api {
     } catch (err) {
       throw this.handleError(err);
     }
+  }
+
+  async relationsCreate(
+    newRelations: Relation.IRelation[],
+    options?: IApiOptions
+  ): Promise<
+    (RelationsCreateSuccessResponse | RelationsCreateErrorResponse)[]
+  > {
+    const out = [];
+
+    for (const newRelation of newRelations) {
+      try {
+        const response = await this.connection.post(
+          `/relations`,
+          newRelation,
+          options
+        );
+        out.push({ relation: newRelation, details: response });
+      } catch (err) {
+        out.push({
+          error: true,
+          message: `Failed to create relation ${newRelation.id}`,
+          relation: newRelation,
+          details: this.handleError(err),
+        });
+      }
+    }
+
+    return out;
   }
 
   async relationDelete(

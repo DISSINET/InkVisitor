@@ -1,7 +1,7 @@
 import Cursor from "./Cursor";
 import { Lines } from "./Lines";
 import Scroller from "./Scroller";
-import Text, { Segment, SegmentPosition, Tag } from "./Text";
+import Text, { Segment, SegmentPosition, ITag } from "./Text";
 import Viewport from "./Viewport";
 import { Modes } from "./constants";
 
@@ -38,8 +38,8 @@ export class Annotator {
 
   // TODO: different font, different sizes
   font: string = "12px Monospace";
-  fontColor: string = "black";
 
+  fontColor: string = "black";
   bgColor: string = "white";
 
   charWidth: number = 0;
@@ -62,6 +62,7 @@ export class Annotator {
 
   // to control highlightChangeCb callback
   lastSelectedText = "";
+  ratio: number = 1;
 
   // callbacks
   onSelectTextCb?: (text: Selected) => void;
@@ -71,30 +72,49 @@ export class Annotator {
   clickCount: number;
   clickTimeout?: NodeJS.Timeout;
 
-  constructor(element: HTMLCanvasElement, inputText: string) {
+  constructor(
+    element: HTMLCanvasElement,
+    inputText: string,
+    ratio: number = 1
+  ) {
     this.element = element;
     const ctx = this.element.getContext("2d");
     if (!ctx) {
       throw new Error("Cannot get 2d context");
     }
 
+    this.ratio = ratio;
+    this.font = `${12 * this.ratio}px Monospace`;
+
+    this.lineHeight = 15 * this.ratio;
+
     // observe canvas element for resize
     const resizeObserver = new ResizeObserver(this.onCanvasResize.bind(this));
     resizeObserver.observe(this.element);
 
     this.ctx = ctx;
-    this.width = this.element.width;
-    this.height = this.element.height;
+    this.width =
+      Number(this.element.style.width.replace("px", "")) * this.ratio;
+    this.height =
+      Number(this.element.style.height.replace("px", "")) * this.ratio;
+
+    this.element.width = this.width;
+    this.element.height = this.height;
+
     this.setCharWidth("abcdefghijklmnopqrstuvwxyz0123456789");
 
     const charsAtLine = Math.floor(this.width / this.charWidth);
 
     const noLinesViewport = Math.ceil(this.height / this.lineHeight) - 1;
+
     this.viewport = new Viewport(0, noLinesViewport);
-    this.cursor = new Cursor();
+    this.cursor = new Cursor(this.ratio, 0, 0);
 
     this.inputText = inputText;
     this.text = new Text(this.inputText, charsAtLine);
+
+    this.bgColor = this.element.style.backgroundColor || "white";
+    this.fontColor = this.element.style.color || "black";
 
     this.element.onwheel = this.onWheel.bind(this);
     this.element.onmousedown = this.onMouseDown.bind(this);
@@ -112,12 +132,99 @@ export class Annotator {
     this.draw();
   }
 
-  onCanvasResize(entries: ResizeObserverEntry[]) {
-    const entry = entries[0];
-    const { width, height } = entry.contentRect;
+  /**
+   * removeAnchorFromSelection removes anchor from selected text
+   * @param anchor
+   */
+  removeAnchorFromSelection(anchor: string) {
+    const [start, end] = this.cursor.getSelected();
 
-    this.width = width;
-    this.height = height;
+    if (start && end) {
+      this.text.getSegmentPosition(start.yLine, start.xLine) as SegmentPosition;
+
+      const startSegment = this.text.getSegmentPosition(
+        start.yLine,
+        start.xLine
+      ) as SegmentPosition;
+
+      const endSegment = this.text.getSegmentPosition(
+        end.yLine,
+        end.xLine
+      ) as SegmentPosition;
+
+      const anchors = this.getAnnotations(startSegment, endSegment);
+
+      if (anchors.includes(anchor)) {
+        // find if open tag for given anchor is part of selection, otherwise find the last occurence of that anchor in the text before the selection
+        const openTagSegment = this.text.segments
+          .slice(0, endSegment.segmentIndex + 1)
+          .reverse()
+          .find((segment) =>
+            segment.openingTags.find((tag) => tag.tag === anchor)
+          );
+
+        // replace open tag with empty string in the openTagSegment
+        if (openTagSegment) {
+          const openTag = openTagSegment.openingTags.find(
+            (tag) => tag.tag === anchor
+          );
+          if (openTag) {
+            const openTagsSegmentI = this.text.segments.findIndex(
+              (i) =>
+                i.lineStart === openTagSegment.lineStart &&
+                i.lineEnd === openTagSegment.lineEnd
+            );
+
+            this.text.segments[openTagsSegmentI].raw =
+              openTagSegment.raw.replace(`<${anchor}>`, "");
+            // this.text.segments[openTagsSegmentI].parseText();
+          }
+        }
+
+        // do similar for close tag
+        const closeTagSegment = this.text.segments
+          .slice(startSegment.segmentIndex, this.text.segments.length)
+          .find((segment) =>
+            segment.closingTags.find((tag) => tag.tag === anchor)
+          );
+
+        if (closeTagSegment) {
+          const closeTag = closeTagSegment.closingTags.find(
+            (tag) => tag.tag === anchor
+          );
+          if (closeTag) {
+            const closeTagsSegmentI =
+              this.text.segments.findIndex(
+                (i) =>
+                  i.lineStart === closeTagSegment.lineStart &&
+                  i.lineEnd === closeTagSegment.lineEnd
+              ) || 0;
+
+            this.text.segments[closeTagsSegmentI].raw =
+              closeTagSegment.raw.replace(`</${anchor}>`, "");
+
+            // this.text.segments[closeTagsSegmentI].parseText();
+          }
+        }
+
+        this.text.assignValueFromSegments();
+
+        // update annotator
+        // this.text.prepareSegments();
+        this.draw();
+      }
+    }
+  }
+
+  onCanvasResize(entries: ResizeObserverEntry[]) {
+    this.width =
+      Number(this.element.style.width.replace("px", "")) * this.ratio;
+    this.height =
+      Number(this.element.style.height.replace("px", "")) * this.ratio;
+
+    this.element.width = this.width;
+    this.element.height = this.height;
+
     this.setCharWidth("abcdefghijklmnopqrstuvwxyz0123456789");
 
     const noLinesViewport = Math.ceil(this.height / this.lineHeight) - 1;
@@ -470,7 +577,12 @@ export class Annotator {
   }
 
   addLines(canvasElement: HTMLCanvasElement): void {
-    this.lines = new Lines(canvasElement, this.lineHeight, this.charWidth);
+    this.lines = new Lines(
+      canvasElement,
+      this.ratio,
+      this.lineHeight,
+      this.charWidth
+    );
   }
 
   getAnnotations(
@@ -478,44 +590,66 @@ export class Annotator {
     end: SegmentPosition | null
   ): string[] {
     // remaining opened tags - true = open, false = closed
-    const tags: Record<string, boolean> = {};
-    // find remaining opened tags from start to end segment (incl)
-    if (end) {
-      for (let i = 0; i <= end.segmentIndex; i++) {
+    const tagsUpToEnd: Record<string, boolean> = {};
+    const tagsUpToStart: Record<string, boolean> = {};
+
+    if (start) {
+      // find still opened tags up to the end position - point based check
+      for (let i = 0; i < start.segmentIndex; i++) {
         const segment = this.text.segments[i];
-        if (i !== end.segmentIndex) {
-          for (const tag of segment.openingTags) {
-            tags[tag.tag] = true;
-          }
-          for (const tag of segment.closingTags) {
-            tags[tag.tag] = !!start;
-          }
-        } else {
-          const [segOpened, segClosed] = segment.getTagsForPosition(end);
-          for (const tag of segOpened) {
-            tags[tag.tag] = true;
-          }
-          for (const tag of segClosed) {
-            tags[tag.tag] = !!start;
-          }
+        for (const tag of segment.openingTags) {
+          tagsUpToStart[tag.tag] = true;
         }
+        for (const tag of segment.closingTags) {
+          tagsUpToStart[tag.tag] = false;
+        }
+      }
+
+      const startSegment = this.text.segments[start.segmentIndex];
+      const [segOpened, segClosed] = startSegment.getTagsForPosition(start);
+      for (const tag of segOpened) {
+        tagsUpToStart[tag.tag] = true;
+      }
+      for (const tag of segClosed) {
+        tagsUpToStart[tag.tag] = false;
       }
     }
 
-    // if this is range based request, add each tag(closing or opening) in this range
-    if (start && end) {
-      for (let i = start.segmentIndex; i <= end.segmentIndex; i++) {
-        const [segOpened, segClosed] =
-          this.text.segments[i].getTagsForPosition(start);
-        for (const tag of segOpened) {
-          tags[tag.tag] = true;
+    if (end) {
+      // find still opened tags up to the end position - point based check
+      for (let i = start?.segmentIndex || 0; i < end.segmentIndex; i++) {
+        const segment = this.text.segments[i];
+        for (const tag of segment.openingTags) {
+          tagsUpToEnd[tag.tag] = true;
         }
-        for (const tag of segClosed) {
-          tags[tag.tag] = true;
+        for (const tag of segment.closingTags) {
+          tagsUpToEnd[tag.tag] = false;
         }
       }
+
+      const endSegment = this.text.segments[end.segmentIndex];
+      const [segOpened, segClosed] = endSegment.getTagsForPosition(end);
+      for (const tag of segOpened) {
+        tagsUpToEnd[tag.tag] = true;
+      }
+      for (const tag of segClosed) {
+        tagsUpToEnd[tag.tag] = false;
+      }
     }
-    return Object.keys(tags).filter((tag) => tags[tag]);
+
+    const final: Record<string, boolean> = {};
+    for (const tag of Object.keys(tagsUpToStart)) {
+      if (tagsUpToStart[tag]) {
+        final[tag] = true;
+      }
+    }
+    for (const tag of Object.keys(tagsUpToEnd)) {
+      if (tagsUpToStart[tag] === undefined) {
+        final[tag] = true;
+      }
+    }
+
+    return Object.keys(final);
   }
 
   /**
@@ -531,6 +665,14 @@ export class Annotator {
           100) *
           percentage
       );
+
+      // console.log(
+      //   this.text.noLines,
+      //   this.viewport.lineEnd,
+      //   this.viewport.lineStart,
+      //   percentage,
+      //   toLine
+      // );
       this.viewport.scrollTo(toLine, this.text.noLines);
       this.draw();
     });
@@ -555,6 +697,7 @@ export class Annotator {
     this.ctx.fillStyle = this.fontColor;
 
     const textToRender = this.text.getViewportText(this.viewport);
+
     for (
       let renderLine = 0;
       renderLine <= this.viewport.lineEnd - this.viewport.lineStart;
@@ -607,20 +750,20 @@ export class Annotator {
       }
     }
 
-    if (
-      this.text.mode === Modes.HIGHLIGHT &&
-      this.onHighlightCb &&
-      this.annotatedPosition
-    ) {
-      const annotated: string[] = this.getAnnotations(
-        null,
-        this.annotatedPosition
+    if (this.text.mode === Modes.HIGHLIGHT && this.onHighlightCb) {
+      const startPos = this.text.getSegmentPosition(this.viewport.lineStart, 0);
+      const endPos = this.text.getSegmentPosition(
+        this.viewport.lineEnd,
+        this.text.charsAtLine
       );
+
+      const annotated: string[] = this.getAnnotations(startPos, endPos);
+
       for (const tag of annotated) {
         const highlight = this.onHighlightCb(tag);
         if (highlight) {
           const [startLine, endLine] = this.text.getTagPosition(tag);
-          const highlighter = new Cursor(0, 0);
+          const highlighter = new Cursor(this.ratio, 0, 0);
           highlighter.selectStart = startLine;
           highlighter.selectEnd = endLine;
           highlighter.draw(this.ctx, this.viewport, {
@@ -708,12 +851,20 @@ export class Annotator {
     if (start && end) {
       const indexPositionStart = this.text.cursorToAbsIndex(
         this.viewport,
-        new Cursor(start.xLine, start.yLine - this.viewport.lineStart)
+        new Cursor(
+          this.ratio,
+          start.xLine,
+          start.yLine - this.viewport.lineStart
+        )
       );
       const indexPositionEnd =
         this.text.cursorToAbsIndex(
           this.viewport,
-          new Cursor(end.xLine, start.yLine - this.viewport.lineStart)
+          new Cursor(
+            this.ratio,
+            end.xLine,
+            start.yLine - this.viewport.lineStart
+          )
         ) +
         anchor.length +
         2;
@@ -739,7 +890,6 @@ export class Annotator {
     if (pos.length !== 2) {
       return;
     }
-
 
     this.viewport.scrollTo(pos[0].yLine, this.text.noLines);
     this.draw();

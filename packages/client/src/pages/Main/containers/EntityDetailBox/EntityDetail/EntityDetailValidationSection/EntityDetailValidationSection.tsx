@@ -32,7 +32,7 @@ interface EntityDetailValidationSection {
   updateEntityMutation: UseMutationResult<
     AxiosResponse<IResponseGeneric<any>, any>,
     Error,
-    any,
+    Partial<IEntity>,
     unknown
   >;
   userCanEdit: boolean;

@@ -5,12 +5,13 @@ import {
   IResponseStatement,
   IStatement,
   ITerritory,
+  Relation,
 } from "@shared/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Loader, Submit, ToastWithLink } from "components";
 import { CStatement, CTerritory } from "constructors";
-import { useSearchParams } from "hooks";
+import { useDebounce, useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
 import { BsInfoCircle } from "react-icons/bs";
 import { toast } from "react-toastify";
@@ -19,11 +20,16 @@ import { setShowWarnings } from "redux/features/statementEditor/showWarningsSlic
 import { setDisableStatementListScroll } from "redux/features/statementList/disableStatementListScrollSlice";
 import { setRowsExpanded } from "redux/features/statementList/rowsExpandedSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
+import {
+  EntitiesDeleteErrorResponse,
+  RelationsCreateErrorResponse,
+  StatementListDisplayMode,
+} from "types";
+import useResizeObserver from "use-resize-observer";
 import { StatementListHeader } from "./StatementListHeader/StatementListHeader";
 import { StatementListTable } from "./StatementListTable/StatementListTable";
 import { StatementListTextAnnotator } from "./StatementListTextAnnotator/StatementListTextAnnotator";
 import { StyledEmptyState, StyledTableWrapper } from "./StatementLitBoxStyles";
-import { StatementListDisplayMode } from "types";
 
 const initialData: {
   statements: IResponseStatement[];
@@ -57,6 +63,8 @@ export const StatementListBox: React.FC = () => {
     detailIdArray,
     removeDetailId,
     appendDetailId,
+    annotatorOpened,
+    setAnnotatorOpened,
   } = useSearchParams();
 
   useEffect(() => {
@@ -73,14 +81,14 @@ export const StatementListBox: React.FC = () => {
   const [statementToDelete, setStatementToDelete] = useState<IStatement>();
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
 
-  const [displayMode, setDisplayMode] = useState<StatementListDisplayMode>(
-    StatementListDisplayMode.TEXT
-  );
+  const displayMode = annotatorOpened
+    ? StatementListDisplayMode.TEXT
+    : StatementListDisplayMode.LIST;
 
   const handleDisplayModeChange = (
     newDisplayMode: StatementListDisplayMode
   ) => {
-    setDisplayMode(newDisplayMode);
+    setAnnotatorOpened(newDisplayMode === StatementListDisplayMode.TEXT);
   };
 
   const { status, data, error, isFetching } = useQuery({
@@ -136,16 +144,13 @@ export const StatementListBox: React.FC = () => {
     }
   }, [error]);
 
-  const removeStatementMutation = useMutation({
-    mutationFn: async (sId: string) => {
-      if (statementId === sId) {
-      }
-      await api.entityDelete(sId);
-    },
+  const deleteStatementMutation = useMutation({
+    mutationFn: async (sId: string) =>
+      await api.entityDelete(sId, { ignoreErrorToast: true }),
     onSuccess: (data, sId) => {
       toast.info(
         <ToastWithLink
-          children={`Statement removed!`}
+          children={`Statement deleted!`}
           linkText={"Restore"}
           onLinkClick={async () => {
             const response = await api.entityRestore(sId);
@@ -179,12 +184,17 @@ export const StatementListBox: React.FC = () => {
         (error as any).data.length > 0
       ) {
         const { data } = error as any;
-        toast.info("Click to open conflicting entity in detail", {
-          autoClose: 6000,
-          onClick: () => {
-            appendDetailId(data[0]);
-          },
-        });
+        toast.warning(
+          "Statement cannot be deleted, click to open the conflicting entity in detail",
+          {
+            autoClose: 6000,
+            onClick: () => {
+              appendDetailId(data[0]);
+            },
+          }
+        );
+      } else {
+        toast.error((error as any).message);
       }
     },
   });
@@ -358,6 +368,7 @@ export const StatementListBox: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ["statement"] });
     },
   });
+
   const handleCreateStatement = (
     text: string = "",
     statementId: string | undefined = undefined
@@ -372,20 +383,7 @@ export const StatementListBox: React.FC = () => {
         statementId
       );
       newStatement.data.text = text;
-      const { statements } = data;
-
-      const lastStatement = statements[statements.length - 1];
-      if (!statements.length) {
-        addStatementAtTheEndMutation.mutate(newStatement);
-      } else if (
-        newStatement?.data?.territory &&
-        lastStatement?.data?.territory
-      ) {
-        newStatement.data.territory.order = statements.length
-          ? lastStatement.data.territory.order + 1
-          : 1;
-        addStatementAtTheEndMutation.mutate(newStatement);
-      }
+      addStatementAtTheEndMutation.mutate(newStatement);
     }
   };
 
@@ -432,99 +430,214 @@ export const StatementListBox: React.FC = () => {
     },
   });
 
+  const deleteStatementsMutation = useMutation({
+    mutationFn: () =>
+      api.entitiesDelete(selectedRows, { ignoreErrorToast: true }),
+    onSuccess: (data, variables) => {
+      const currentStatementRowDeleted = data.find(
+        (row) => row.entityId === statementId
+      );
+      if (
+        currentStatementRowDeleted &&
+        !(currentStatementRowDeleted as any).error
+      ) {
+        setStatementId("");
+      }
+
+      const errorRows = data.filter((row) => (row as any).error);
+      if (errorRows.length > 0) {
+        // can be retyped to EntitiesDeleteErrorResponse when row.error: true
+        const errorEntityIds = (errorRows as EntitiesDeleteErrorResponse[]).map(
+          (row) => row.entityId
+        );
+
+        setSelectedRows(selectedRows.filter((r) => errorEntityIds.includes(r)));
+
+        toast.error(
+          `Some statements ${errorRows.length} are not possible to delete`
+        );
+      } else {
+        setSelectedRows([]);
+      }
+      queryClient.invalidateQueries({
+        queryKey: ["tree"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["territory"],
+      });
+    },
+  });
+
+  const relationsCreateMutation = useMutation({
+    mutationFn: async (newRelations: Relation.IRelation[]) =>
+      api.relationsCreate(newRelations),
+    onSuccess: (data, variables) => {
+      const errorRows = data.filter((row) => (row as any).error);
+      if (errorRows.length > 0) {
+        toast.error(
+          `Some relaions ${errorRows.length} were not possible to create`
+        );
+      } else {
+        toast.success(`${data.length} relations created`);
+      }
+      queryClient.invalidateQueries({
+        queryKey: ["territory"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["entity"],
+      });
+    },
+  });
+
+  const {
+    ref: contentRef,
+    height: contentHeight = 0,
+    width: contentWidth = 0,
+  } = useResizeObserver<HTMLDivElement>();
+
+  // delay of show content for fluent animation on open
+  const [showStatementList, setShowStatementList] = useState(true);
+  useEffect(() => {
+    if (statementListOpened) {
+      setTimeout(() => {
+        setShowStatementList(true);
+      }, 500);
+    } else {
+      setShowStatementList(false);
+    }
+  }, [statementListOpened]);
+
   return (
     <>
-      {data && (
-        <StatementListHeader
-          territory={data}
-          isFavorited={isFavorited}
-          selectedRows={selectedRows}
-          setSelectedRows={setSelectedRows}
-          isAllSelected={
-            statements.length > 0 && selectedRows.length === statements.length
-          }
-          moveStatementsMutation={moveStatementsMutation}
-          duplicateStatementsMutation={duplicateStatementsMutation}
-          replaceReferencesMutation={replaceReferencesMutation}
-          appendReferencesMutation={appendReferencesMutation}
-          displayMode={displayMode}
-          handleDisplayModeChange={handleDisplayModeChange}
-          updateTerritoryMutation={updateTerritoryMutation}
-          duplicateTerritoryMutation={duplicateTerritoryMutation}
-        />
-      )}
-
-      {data && displayMode === "text" && (
-        <StatementListTextAnnotator
-          statements={statements}
-          handleCreateStatement={handleCreateStatement}
-          handleCreateTerritory={handleCreateTerritory}
-          territoryId={territoryId}
-          entities={entities}
-          right={right}
-          setShowSubmit={setShowSubmit}
-          addStatementAtCertainIndex={addStatementAtCertainIndex}
-          selectedRows={selectedRows}
-          setSelectedRows={setSelectedRows}
-        />
-      )}
-      {data && displayMode === "list" && statements && (
-        <StyledTableWrapper id="Statements-box-table">
-          <StatementListTable
-            statements={statements}
-            handleRowClick={(rowId: string) => {
-              dispatch(setShowWarnings(false));
-              setStatementId(rowId);
-            }}
-            actantsUpdateMutation={statementUpdateMutation}
-            entities={entities}
-            right={right}
-            cloneStatementMutation={cloneStatementMutation}
-            setStatementToDelete={setStatementToDelete}
-            setShowSubmit={setShowSubmit}
-            addStatementAtCertainIndex={addStatementAtCertainIndex}
-            selectedRows={selectedRows}
-            setSelectedRows={setSelectedRows}
-          />
-        </StyledTableWrapper>
-      )}
-      {!territoryId && (
+      {showStatementList && (
         <>
-          <StyledEmptyState>
-            <BsInfoCircle size="23" />
-          </StyledEmptyState>
-          <StyledEmptyState>
-            {"No territory selected yet. Pick one from the territory tree"}
-          </StyledEmptyState>
+          {data && (
+            <StatementListHeader
+              territory={data}
+              isFavorited={isFavorited}
+              selectedRows={selectedRows}
+              setSelectedRows={setSelectedRows}
+              isAllSelected={
+                statements.length > 0 &&
+                selectedRows.length === statements.length
+              }
+              moveStatementsMutation={moveStatementsMutation}
+              duplicateStatementsMutation={duplicateStatementsMutation}
+              replaceReferencesMutation={replaceReferencesMutation}
+              appendReferencesMutation={appendReferencesMutation}
+              displayMode={displayMode}
+              handleDisplayModeChange={handleDisplayModeChange}
+              updateTerritoryMutation={updateTerritoryMutation}
+              duplicateTerritoryMutation={duplicateTerritoryMutation}
+              deleteStatementsMutation={deleteStatementsMutation}
+              relationsCreateMutation={relationsCreateMutation}
+            />
+          )}
+
+          {!territoryId && (
+            <>
+              <StyledEmptyState>
+                <BsInfoCircle size="23" />
+              </StyledEmptyState>
+              <StyledEmptyState>
+                {"No territory selected yet. Pick one from the territory tree"}
+              </StyledEmptyState>
+            </>
+          )}
+
+          {territoryId &&
+            statements.length === 0 &&
+            displayMode === StatementListDisplayMode.LIST &&
+            statementListOpened &&
+            !isFetching && (
+              <>
+                <StyledEmptyState>
+                  <BsInfoCircle size="23" />
+                </StyledEmptyState>
+                <StyledEmptyState>{"No statements yet."}</StyledEmptyState>
+              </>
+            )}
+
+          {/* TODO: measure statement list header dynamically */}
+          <div
+            style={{
+              display: "flex",
+              height: "100%",
+              maxHeight: "calc(100% - 101px)",
+              overflow: "auto",
+            }}
+            ref={contentRef}
+          >
+            <StyledTableWrapper id="Statements-box-table">
+              {statements.length > 0 && (
+                <StatementListTable
+                  statements={statements}
+                  handleRowClick={(rowId: string) => {
+                    dispatch(setShowWarnings(false));
+                    setStatementId(rowId);
+                  }}
+                  actantsUpdateMutation={statementUpdateMutation}
+                  entities={entities}
+                  right={right}
+                  cloneStatementMutation={cloneStatementMutation}
+                  setStatementToDelete={setStatementToDelete}
+                  setShowSubmit={setShowSubmit}
+                  addStatementAtCertainIndex={addStatementAtCertainIndex}
+                  selectedRows={selectedRows}
+                  setSelectedRows={setSelectedRows}
+                  displayMode={displayMode}
+                  contentWidth={contentWidth}
+                />
+              )}
+            </StyledTableWrapper>
+
+            {data && displayMode === StatementListDisplayMode.TEXT && (
+              <StatementListTextAnnotator
+                contentHeight={contentHeight}
+                contentWidth={contentWidth}
+                statements={statements}
+                handleCreateStatement={handleCreateStatement}
+                handleCreateTerritory={handleCreateTerritory}
+                territoryId={territoryId}
+                entities={entities}
+                right={right}
+                setShowSubmit={setShowSubmit}
+                addStatementAtCertainIndex={addStatementAtCertainIndex}
+                selectedRows={selectedRows}
+                setSelectedRows={setSelectedRows}
+              />
+            )}
+          </div>
+
+          <Submit
+            title="Delete statement"
+            text={`Do you really want to delete statement [${
+              statementToDelete?.label
+                ? statementToDelete.label
+                : statementToDelete?.id
+            }]?`}
+            show={showSubmit}
+            entityToSubmit={statementToDelete}
+            onCancel={() => {
+              setShowSubmit(false);
+              setStatementToDelete(undefined);
+            }}
+            onSubmit={() => {
+              if (statementToDelete) {
+                deleteStatementMutation.mutate(statementToDelete.id);
+                setShowSubmit(false);
+                setStatementToDelete(undefined);
+              }
+            }}
+            loading={deleteStatementMutation.isPending}
+          />
         </>
       )}
-
-      <Submit
-        title="Delete statement"
-        text={`Do you really want to delete statement [${
-          statementToDelete?.label
-            ? statementToDelete.label
-            : statementToDelete?.id
-        }]?`}
-        show={showSubmit}
-        entityToSubmit={statementToDelete}
-        onCancel={() => {
-          setShowSubmit(false);
-          setStatementToDelete(undefined);
-        }}
-        onSubmit={() => {
-          if (statementToDelete) {
-            removeStatementMutation.mutate(statementToDelete.id);
-            setShowSubmit(false);
-            setStatementToDelete(undefined);
-          }
-        }}
-        loading={removeStatementMutation.isPending}
-      />
       <Loader
         show={
           isFetching ||
-          removeStatementMutation.isPending ||
+          isLoading ||
+          deleteStatementMutation.isPending ||
           addStatementAtTheEndMutation.isPending ||
           statementCreateMutation.isPending ||
           statementUpdateMutation.isPending ||
@@ -533,7 +646,9 @@ export const StatementListBox: React.FC = () => {
           cloneStatementMutation.isPending ||
           updateTerritoryMutation.isPending ||
           duplicateTerritoryMutation.isPending ||
-          isLoading
+          deleteStatementsMutation.isPending ||
+          relationsCreateMutation.isPending ||
+          (statementListOpened && !showStatementList)
         }
       />
     </>

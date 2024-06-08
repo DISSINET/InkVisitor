@@ -31,7 +31,7 @@ interface StatementEditorActantClassification {
   classification: IStatementClassification;
   updateActant: (
     statementActantId: string,
-    changes: any,
+    changes: Partial<IStatementActant>,
     instantUpdate?: boolean
   ) => void;
   statement: IResponseStatement;

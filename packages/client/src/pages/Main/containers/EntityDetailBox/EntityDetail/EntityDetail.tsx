@@ -68,8 +68,16 @@ const allowedEntityChangeClasses = [
 
 interface EntityDetail {
   detailId: string;
+  entity: IResponseDetail;
+  error: Error | null;
+  isFetching: boolean;
 }
-export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
+export const EntityDetail: React.FC<EntityDetail> = ({
+  detailId,
+  entity,
+  error,
+  isFetching,
+}) => {
   const {
     statementId,
     setStatementId,
@@ -81,19 +89,6 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
     detailIdArray,
     selectedDetailId,
   } = useSearchParams();
-  const {
-    status,
-    data: entity,
-    error,
-    isFetching,
-  } = useQuery({
-    queryKey: ["entity", detailId],
-    queryFn: async () => {
-      const res = await api.detailGet(detailId);
-      return res.data;
-    },
-    enabled: !!detailId && api.isLoggedIn(),
-  });
 
   useEffect(() => {
     if (error && (error as any).message === "unknown class for entity") {
@@ -101,11 +96,11 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
     }
   }, [error]);
 
+  const [selectedEntityType, setSelectedEntityType] =
+    useState<EntityEnums.Class>();
   const [createTemplateModal, setCreateTemplateModal] =
     useState<boolean>(false);
   const [showRemoveSubmit, setShowRemoveSubmit] = useState<boolean>(false);
-  const [selectedEntityType, setSelectedEntityType] =
-    useState<EntityEnums.Class>();
   const [showTypeSubmit, setShowTypeSubmit] = useState(false);
   const [showApplyTemplateModal, setShowApplyTemplateModal] =
     useState<boolean>(false);
@@ -228,7 +223,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
   });
 
   const updateEntityMutation = useMutation({
-    mutationFn: async (changes: any) =>
+    mutationFn: async (changes: Partial<IEntity>) =>
       await api.entityUpdate(detailId, changes),
 
     onSuccess: (data, variables) => {
@@ -274,7 +269,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
   });
 
   const changeEntityTypeMutation = useMutation({
-    mutationFn: async (newClass: string) =>
+    mutationFn: async (newClass: EntityEnums.Class) =>
       await api.entityUpdate(detailId, { class: newClass }),
 
     onSuccess: (data, variables) => {
@@ -392,7 +387,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
     }
   };
 
-  const updateProp = (propId: string, changes: any) => {
+  const updateProp = (propId: string, changes: Partial<IProp>) => {
     if (entity !== undefined) {
       const newProps = [...entity.props];
 
@@ -564,7 +559,10 @@ export const EntityDetail: React.FC<EntityDetail> = ({ detailId }) => {
   });
 
   const relationUpdateMutation = useMutation({
-    mutationFn: async (relationObject: { relationId: string; changes: any }) =>
+    mutationFn: async (relationObject: {
+      relationId: string;
+      changes: Partial<Relation.IRelation>;
+    }) =>
       await api.relationUpdate(
         relationObject.relationId,
         relationObject.changes

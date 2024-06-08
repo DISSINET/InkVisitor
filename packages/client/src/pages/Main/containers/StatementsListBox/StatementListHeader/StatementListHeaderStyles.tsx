@@ -23,7 +23,6 @@ export const StyledMoveToParent = styled.div`
   font-weight: ${({ theme }) => theme.fontWeight["normal"]};
   display: flex;
   align-items: center;
-  /* float: right; */
   color: ${({ theme }) => theme.color["info"]};
   margin-bottom: 0.5rem;
   margin-left: 0.3rem;

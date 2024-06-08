@@ -26,12 +26,12 @@ export const StyledDetailSection = styled.div<StyledDetailSection>`
 `;
 
 interface StyledDetailSectionHeader {
-  secondary?: boolean;
+  $secondary?: boolean;
 }
 export const StyledDetailSectionHeader = styled.div<StyledDetailSectionHeader>`
-  font-size: ${({ theme, secondary }) =>
-    secondary ? theme.fontSize["base"] : theme.fontSize.lg};
-  margin-top: ${({ theme, secondary }) => (secondary ? theme.space[12] : "")};
+  font-size: ${({ theme, $secondary }) =>
+    $secondary ? theme.fontSize["base"] : theme.fontSize.lg};
+  margin-top: ${({ theme, $secondary }) => ($secondary ? theme.space[12] : "")};
   margin-bottom: ${({ theme }) => theme.space[4]};
   color: ${({ theme }) => theme.color["primary"]};
 `;

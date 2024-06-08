@@ -77,7 +77,7 @@ interface StatementEditorActantTableRow {
   userCanEdit?: boolean;
   updateOrderFn: () => void;
   addProp: (originId: string) => void;
-  updateProp: (propId: string, changes: any) => void;
+  updateProp: (propId: string, changes: Partial<IProp>) => void;
   removeProp: (propId: string) => void;
   movePropToIndex: (propId: string, oldIndex: number, newIndex: number) => void;
   statement: IResponseStatement;
@@ -179,7 +179,7 @@ export const StatementEditorActantTableRow: React.FC<
 
   const updateActant = (
     statementActantId: string,
-    changes: any,
+    changes: Partial<IStatementActant>,
     instantUpdate?: boolean
   ) => {
     if (statement && statementActantId) {

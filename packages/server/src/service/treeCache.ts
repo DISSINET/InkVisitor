@@ -1,10 +1,10 @@
 import Territory from "@models/territory/territory";
 import User, { UserRight } from "@models/user/user";
-import { Db } from "@service/rethink";
 import { getEntitiesDataByClass } from "@service/shorthands";
 import { EntityEnums, UserEnums } from "@shared/enums";
 import { IResponseTree, IStatement, ITerritory } from "@shared/types";
 import { TerritoriesBrokenError } from "@shared/types/errors";
+import { Connection } from "rethinkdb-ts";
 
 export class TreeCreator {
   parentMap: Record<string, Territory[]>; // map of rootId -> childs
@@ -122,10 +122,10 @@ export class TreeCreator {
     );
   }
 
-  static async countStatements(db: Db): Promise<Record<string, number>> {
+  static async countStatements(db: Connection): Promise<Record<string, number>> {
     const statements = (
       await getEntitiesDataByClass<IStatement>(
-        db.connection,
+        db,
         EntityEnums.Class.Statement
       )
     ).filter((s) => s.data.territory && s.data.territory.territoryId);
@@ -146,6 +146,7 @@ export class TreeCreator {
 
 export class TreeCache {
   tree: TreeCreator;
+  db: Connection | undefined;
 
   constructor() {
     this.tree = new TreeCreator();
@@ -156,22 +157,24 @@ export class TreeCache {
       return;
     }
 
-    const db = new Db();
-    await db.initDb();
+    if (!this.db) {
+      console.error("No Db in TreeCache");
+      return;
+    }
 
-    this.tree = await this.createTree(db);
+    this.tree = await this.createTree();
     console.log("[TreeCache.initialize]: done");
   }
 
-  async createTree(db: Db): Promise<TreeCreator> {
+  async createTree(): Promise<TreeCreator> {
     const newTree = new TreeCreator();
 
     const [territoriesData, statementsCountMap] = await Promise.all([
       getEntitiesDataByClass<ITerritory>(
-        db.connection,
+        this.db as Connection,
         EntityEnums.Class.Territory
       ),
-      TreeCreator.countStatements(db),
+      TreeCreator.countStatements(this.db as Connection),
     ]);
 
     newTree.createParentMap(
@@ -305,6 +308,7 @@ export class TreeCache {
 const treeCache: TreeCache = new TreeCache();
 export default treeCache;
 
-export async function prepareTreeCache() {
+export async function prepareTreeCache(db: Connection) {
+  treeCache.db = db;
   await treeCache.initialize();
 }

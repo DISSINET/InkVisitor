@@ -1,6 +1,7 @@
 import { AttributeIcon } from "components";
 import React from "react";
 import { StyledIconWrap, StyledRow } from "./TooltipBooleanRowStyles";
+import { attributeIconsKeys } from "components/basic/AttributeIcon/AttributeIcon";
 
 interface TooltipBooleanRow {
   attributeName: string;
@@ -17,7 +18,9 @@ export const TooltipBooleanRow: React.FC<TooltipBooleanRow> = ({
       {show && (
         <StyledRow>
           <StyledIconWrap>
-            <AttributeIcon attributeName={attributeName} />
+            <AttributeIcon
+              attributeName={attributeName as keyof typeof attributeIconsKeys}
+            />
           </StyledIconWrap>
           {label}
         </StyledRow>

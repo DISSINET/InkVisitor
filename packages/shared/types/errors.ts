@@ -340,7 +340,6 @@ class RelationDoesNotExist extends CustomError {
   }
 }
 
-
 /**
  * RelationAsymetricalPathExist will be thrown when attempting to add asymetrical relation while there could already be path from A -> B
  */

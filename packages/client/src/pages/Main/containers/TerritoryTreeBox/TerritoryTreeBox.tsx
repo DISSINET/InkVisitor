@@ -1,5 +1,5 @@
 import { UserEnums } from "@shared/enums";
-import { IResponseTree } from "@shared/types";
+import { IResponseTree, IUser } from "@shared/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { rootTerritoryId } from "Theme/constants";
 import api from "api";
@@ -76,7 +76,7 @@ export const TerritoryTreeBox: React.FC = () => {
   }, [userData?.storedTerritories]);
 
   const updateUserMutation = useMutation({
-    mutationFn: async (changes: object) => {
+    mutationFn: async (changes: Partial<IUser>) => {
       if (userId) {
         await api.usersUpdate(userId, changes);
       }

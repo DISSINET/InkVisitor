@@ -62,7 +62,7 @@ const ScrollHandler = () => {
               top: statementInTable ? statementInTable.offsetTop - 34 : 0,
             });
           }
-        }, 200);
+        }, 300);
         dispatch(setDisableStatementListScroll(true));
       }
     }

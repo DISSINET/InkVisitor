@@ -24,6 +24,7 @@ export class Lines {
 
   constructor(
     element: HTMLCanvasElement,
+    ratio: number,
     lineHeight: number,
     charWidth: number
   ) {
@@ -35,8 +36,12 @@ export class Lines {
     this.ctx = ctx;
     this.width = this.element.width;
     this.height = this.element.height;
+
+    this.bgColor = this.element.style.backgroundColor || "white";
+    this.fontColor = this.element.style.color || "black";
+
     this.charWidth = charWidth;
-    this.lineHeight = lineHeight;
+    this.lineHeight = lineHeight / ratio;
   }
 
   draw(viewport: Viewport) {

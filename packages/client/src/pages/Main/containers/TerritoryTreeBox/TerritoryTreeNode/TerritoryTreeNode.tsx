@@ -1,6 +1,6 @@
 import { animated, config, useSpring } from "@react-spring/web";
 import { InterfaceEnums, UserEnums } from "@shared/enums";
-import { ITerritory } from "@shared/types";
+import { ITerritory, IUser } from "@shared/types";
 import { IParentTerritory } from "@shared/types/territory";
 import {
   UseMutationResult,
@@ -58,7 +58,7 @@ interface TerritoryTreeNode {
   foundByRecursion?: boolean;
   right: UserEnums.RoleMode;
   storedTerritories: string[];
-  updateUserMutation: UseMutationResult<void, unknown, object, unknown>;
+  updateUserMutation: UseMutationResult<void, unknown, Partial<IUser>, unknown>;
 }
 export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
   territory,

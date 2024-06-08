@@ -29,5 +29,5 @@
   },
   "files": ["src/custom_typings/request.d.ts"],
   "include": ["src/**/*.ts"],
-  "exclude": ["src/public/"]
+  "exclude": ["src/public/", "node_modules", "build"]
 }

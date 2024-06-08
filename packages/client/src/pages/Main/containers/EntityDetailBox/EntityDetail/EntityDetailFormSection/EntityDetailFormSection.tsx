@@ -7,7 +7,12 @@ import {
   languageDict,
 } from "@shared/dictionaries";
 import { EntityEnums } from "@shared/enums";
-import { IActionData, IResponseDetail, IResponseGeneric } from "@shared/types";
+import {
+  IActionData,
+  IEntity,
+  IResponseDetail,
+  IResponseGeneric,
+} from "@shared/types";
 import { IConceptData } from "@shared/types/concept";
 import { UseMutationResult, useQuery } from "@tanstack/react-query";
 import { MIN_LABEL_LENGTH_MESSAGE, rootTerritoryId } from "Theme/constants";
@@ -36,7 +41,7 @@ interface EntityDetailFormSection {
   updateEntityMutation: UseMutationResult<
     AxiosResponse<IResponseGeneric>,
     unknown,
-    any,
+    Partial<IEntity>,
     unknown
   >;
   actantMode: string;

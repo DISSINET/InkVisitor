@@ -7,16 +7,19 @@ import { EntitySuggester, EntityTag } from "components/advanced";
 import TextAnnotator from "components/advanced/Annotator/Annotator";
 import AnnotatorProvider from "components/advanced/Annotator/AnnotatorProvider";
 import { useSearchParams } from "hooks";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { TiDocumentText } from "react-icons/ti";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import {
   StyledDocumentInfo,
   StyledDocumentTag,
+  StyledDocumentTitle,
 } from "../StatementLitBoxStyles";
 import { FaCheck } from "react-icons/fa";
 import { BiSolidCommentError } from "react-icons/bi";
 import { GrDocumentMissing } from "react-icons/gr";
+import { COLLAPSED_TABLE_WIDTH } from "Theme/constants";
+import { animated, useSpring } from "@react-spring/web";
 
 interface StatementListTextAnnotator {
   statements: IResponseStatement[];
@@ -29,6 +32,9 @@ interface StatementListTextAnnotator {
   handleCreateTerritory: (territoryId?: string) => void;
   selectedRows: string[];
   setSelectedRows: React.Dispatch<React.SetStateAction<string[]>>;
+
+  contentHeight: number;
+  contentWidth: number;
 }
 
 export const StatementListTextAnnotator: React.FC<
@@ -44,8 +50,19 @@ export const StatementListTextAnnotator: React.FC<
   handleCreateTerritory,
   selectedRows,
   setSelectedRows,
+
+  contentHeight,
+  contentWidth,
 }) => {
-  const dispatch = useAppDispatch();
+  const [showAnnotator, setShowAnnotator] = useState(false);
+  useEffect(() => {
+    setShowAnnotator(true);
+  }, []);
+
+  const animatedStyle = useSpring({
+    opacity: showAnnotator ? 1 : 0,
+    delay: 300,
+  });
 
   const {
     data: resources,
@@ -121,26 +138,6 @@ export const StatementListTextAnnotator: React.FC<
     enabled: api.isLoggedIn() && selectedDocumentId !== false,
   });
 
-  const panelWidths: number[] = useAppSelector(
-    (state) => state.layout.panelWidths
-  );
-
-  const contentHeight = useAppSelector((state) => state.layout.contentHeight);
-
-  // check if detail box is opened
-  const { detailIdArray } = useSearchParams();
-  const detailOpen = detailIdArray.length > 0;
-
-  // Calculate annotator height
-  const annotatorHeight = useMemo<number>(() => {
-    const margin = 270;
-    if (detailOpen) {
-      return contentHeight / 2 - margin;
-    } else {
-      return contentHeight - margin;
-    }
-  }, [detailOpen, contentHeight]);
-
   const thisTHasAnchor = useMemo<boolean>(() => {
     if (selectedDocument) {
       // console.log(selectedDocument?.referencedEntityIds, territoryId);
@@ -153,12 +150,12 @@ export const StatementListTextAnnotator: React.FC<
   ]);
 
   return (
-    <div>
+    <animated.div style={animatedStyle}>
       <div
         style={{
-          alignItems: "center",
           display: "inline-flex",
-          padding: "2px 10px",
+          alignItems: "center",
+          padding: "0.2rem 1rem",
         }}
       >
         {!selectedResource && (
@@ -184,14 +181,20 @@ export const StatementListTextAnnotator: React.FC<
         {!selectedDocumentIsFetching && <Loader />}
         {!selectedDocumentIsFetching && selectedDocument && (
           <StyledDocumentTag>
-            <TiDocumentText style={{ marginRight: "2px" }} />
-            {selectedDocument?.title}
+            <TiDocumentText
+              style={{ marginRight: "0.2rem", flexShrink: "0" }}
+            />
+            <div style={{ display: "grid" }}>
+              <StyledDocumentTitle>
+                {selectedDocument?.title}
+              </StyledDocumentTitle>
+            </div>
           </StyledDocumentTag>
         )}
         {!selectedDocumentIsFetching && selectedDocument && thisTHasAnchor && (
           <StyledDocumentInfo $color="success">
             <FaCheck />
-            <i>Anchor for T created</i>
+            <i style={{ whiteSpace: "nowrap" }}>Anchor for T created</i>
           </StyledDocumentInfo>
         )}
         {!selectedDocumentIsFetching && selectedDocument && !thisTHasAnchor && (
@@ -209,13 +212,17 @@ export const StatementListTextAnnotator: React.FC<
             </StyledDocumentInfo>
           )}
       </div>
-      <div style={{ marginTop: "2px" }}>
+      <div style={{ marginTop: "0.2rem" }}>
         <AnnotatorProvider>
           {selectedDocumentId && (
             <TextAnnotator
-              width={panelWidths[1]}
+              width={
+                statements.length > 0
+                  ? contentWidth - COLLAPSED_TABLE_WIDTH
+                  : contentWidth
+              }
               displayLineNumbers={true}
-              height={annotatorHeight}
+              height={contentHeight - 60}
               documentId={selectedDocumentId}
               handleCreateStatement={handleCreateStatement}
               handleCreateTerritory={handleCreateTerritory}
@@ -223,6 +230,6 @@ export const StatementListTextAnnotator: React.FC<
           )}
         </AnnotatorProvider>
       </div>
-    </div>
+    </animated.div>
   );
 };

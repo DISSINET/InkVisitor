@@ -99,7 +99,7 @@ export const StatementEditorSectionButtons: React.FC<
   return (
     <>
       <ButtonGroup
-      height={19}
+        height={19}
         style={{ marginLeft: "0.5rem", marginRight: "1rem" }}
       >
         <Button
@@ -142,7 +142,6 @@ export const StatementEditorSectionButtons: React.FC<
       </ButtonGroup>
       <EntitySuggester
         categoryTypes={[EntityEnums.Class.Statement]}
-        onSelected={(id: string) => {}}
         onPicked={(entity: IEntity) =>
           handleCopyFromStatement(entity as IStatement, section, replaceSection)
         }

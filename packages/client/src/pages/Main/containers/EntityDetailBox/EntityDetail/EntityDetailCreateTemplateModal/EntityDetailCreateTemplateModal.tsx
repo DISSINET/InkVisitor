@@ -33,7 +33,7 @@ interface EntityDetailCreateTemplateModal {
   updateEntityMutation: UseMutationResult<
     AxiosResponse<IResponseGeneric>,
     unknown,
-    any,
+    Partial<IEntity>,
     unknown
   >;
 }

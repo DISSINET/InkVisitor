@@ -7,9 +7,12 @@ import { Server as SocketIO, Socket } from "socket.io";
 import server from "./Server";
 import { prepareTreeCache } from "@service/treeCache";
 import "@service/mailer";
+import { Db } from "@service/rethink";
 
 (async () => {
-  await prepareTreeCache();
+  const db = new Db();
+  await db.initDb();
+  await prepareTreeCache(db.connection);
   const port = Number(process.env.PORT || 3000);
   const useHttps = process.env.HTTPS === "1";
 

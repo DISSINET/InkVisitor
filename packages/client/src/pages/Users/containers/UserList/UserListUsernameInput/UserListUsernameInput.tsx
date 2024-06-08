@@ -1,4 +1,4 @@
-import { IResponseGeneric, IResponseUser } from "@shared/types";
+import { IResponseGeneric, IResponseUser, IUser } from "@shared/types";
 import { UseMutationResult } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
 import { Input } from "components";
@@ -12,7 +12,7 @@ interface UserListUsernameInput {
   userMutation: UseMutationResult<
     AxiosResponse<IResponseGeneric<any>, any>,
     Error,
-    any,
+    Partial<Omit<IUser, "id">> & { id: IUser["id"] },
     unknown
   >;
 }

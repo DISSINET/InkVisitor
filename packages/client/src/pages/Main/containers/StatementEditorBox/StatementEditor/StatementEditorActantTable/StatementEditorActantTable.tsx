@@ -1,5 +1,6 @@
 import { EntityEnums } from "@shared/enums";
 import {
+  IProp,
   IResponseStatement,
   IStatementActant,
   IStatementData,
@@ -15,7 +16,7 @@ interface StatementEditorActantTable {
   userCanEdit?: boolean;
   classEntitiesActant: EntityEnums.Class[];
   addProp: (originId: string) => void;
-  updateProp: (propId: string, changes: any) => void;
+  updateProp: (propId: string, changes: Partial<IProp>) => void;
   removeProp: (propId: string) => void;
   movePropToIndex: (propId: string, oldIndex: number, newIndex: number) => void;
   territoryParentId?: string;

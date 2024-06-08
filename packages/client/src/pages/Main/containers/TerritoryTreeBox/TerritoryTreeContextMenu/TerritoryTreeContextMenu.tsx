@@ -1,7 +1,7 @@
 import { FloatingPortal, autoUpdate, useFloating } from "@floating-ui/react";
 import { config, useSpring } from "@react-spring/web";
 import { UserEnums } from "@shared/enums";
-import { IEntity } from "@shared/types";
+import { IEntity, IUser } from "@shared/types";
 import { UseMutationResult } from "@tanstack/react-query";
 import { Button } from "components";
 import React, { useEffect, useState } from "react";
@@ -21,7 +21,7 @@ interface TerritoryTreeContextMenu {
   onMenuOpen: () => void;
   onMenuClose: () => void;
   storedTerritories: string[];
-  updateUserMutation: UseMutationResult<void, unknown, object, unknown>;
+  updateUserMutation: UseMutationResult<void, unknown, Partial<IUser>, unknown>;
   isFavorited?: boolean;
 }
 export const TerritoryTreeContextMenu: React.FC<TerritoryTreeContextMenu> = ({

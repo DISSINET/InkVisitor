@@ -399,7 +399,7 @@ export class SearchQuery {
     if (req.haveReferenceTo) {
       this.whereHaveReferenceTo(req.haveReferenceTo);
     }
-    console.log(this.query.toString());
+  //  console.log(this.query.toString());
   }
 
   /**

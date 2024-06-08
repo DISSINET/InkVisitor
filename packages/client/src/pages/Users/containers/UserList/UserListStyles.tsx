@@ -87,9 +87,11 @@ export const StyledTerritoryListItem = styled.div`
   display: inline-block;
 `;
 export const StyledTerritoryListItemMissing = styled.div`
-  padding: ${({ theme }) => theme.space[1]};
+  padding: ${({ theme }) => theme.space[2] + " " + theme.space[3]};
   display: inline-flex;
+  gap: ${({ theme }) => theme.space[0] + " " + theme.space[2]};
   align-items: center;
+  border-radius: ${({ theme }) => theme.borderRadius.default};
   background-color: ${({ theme }) => theme.color.danger};
   color: ${({ theme }) => theme.color.white};
   font-size: ${({ theme }) => theme.fontSize.xxs};
@@ -162,10 +164,10 @@ export const StyledUtils = styled.div`
   width: 100%;
 `;
 export const StyledNotActiveText = styled.p`
-  display: inline-flex;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
   font-size: ${({ theme }) => theme.fontSize["xs"]};
-  color: ${({ theme }) => theme.color.white};
-  background-color: ${({ theme }) => theme.color.warning};
-  padding: 0.5rem 1rem;
-  border-radius: ${({ theme }) => theme.borderRadius.full};
+  color: ${({ theme }) => theme.color.warning};
 `;

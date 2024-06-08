@@ -12,8 +12,8 @@ class Scroller {
   dragging: boolean = false;
   // mouse position when drag started
   runnerDragStart: number = 0;
-  // offset of runner element when drag started
-  runnerDragOffset: number = 0;
+
+  runnerClickRelPosition: number = 0;
 
   constructor(element: HTMLDivElement) {
     this.element = element;
@@ -22,14 +22,24 @@ class Scroller {
       throw new Error("Runner for Scroller not found");
     }
     this.runner = runner as HTMLDivElement;
+
     this.element.onmousedown = this.onMouseDown.bind(this);
-    this.element.onmousemove = this.onMouseMove.bind(this);
     this.runner.onmousedown = this.onRunnerMouseDown.bind(this);
-    window.addEventListener("mouseup", this.onRunnerMouseUp.bind(this));
+
+    // this.element.onmousemove = this.onMouseMove.bind(this);
+    // window.addEventListener("mouseup", this.onRunnerMouseUp.bind(this));
   }
 
   setRunnerSize(percentSize: number): void {
     this.runner.style.height = `${Math.min(100, percentSize)}%`;
+  }
+
+  // convert px value to percentage considering the available height of the runner
+  pxToPercentage(px: number) {
+    const availableHeight = this.element.clientHeight;
+    const runnerHeight = this.runner.clientHeight;
+    const newPosition = px / (availableHeight - runnerHeight);
+    return newPosition * 100;
   }
 
   /**
@@ -41,6 +51,7 @@ class Scroller {
   update(startLine: number, endLine: number, totalLines: number) {
     const viewportLines = endLine - startLine + 1;
     const percentage = (startLine * 100) / (totalLines - viewportLines);
+
     const availableHeight =
       this.element.clientHeight - this.runner.clientHeight;
     this.runner.style["top"] = `${(availableHeight / 100) * percentage}px`;
@@ -55,7 +66,14 @@ class Scroller {
     this.dragging = true;
     document.body.style.cursor = "move";
     this.runnerDragStart = e.clientY;
-    this.runnerDragOffset = this.runner.offsetTop;
+
+    this.runnerClickRelPosition =
+      e.clientY - this.runner.getBoundingClientRect().top;
+
+    document.addEventListener("mousemove", this.onMouseMove.bind(this));
+    document.addEventListener("mouseup", this.onRunnerMouseUp.bind(this), {
+      once: true,
+    });
   }
 
   /**
@@ -68,17 +86,40 @@ class Scroller {
       return;
     }
 
-    let move: number;
-
-    if (e.target !== this.element) {
-      const dragDiff = e.clientY - this.runnerDragStart + this.runnerDragOffset;
-      move = this.runner.clientHeight * dragDiff;
-    } else {
-      move = e.offsetY * 100;
-    }
-
     if (this.onChangeCb) {
-      this.onChangeCb(move / this.element.clientHeight);
+      // this.onChangeCb(newPosition);
+      if (e.target !== this.runner && e.target !== this.element) {
+        // outside the runner and scroller
+
+        this.onChangeCb(
+          this.pxToPercentage(
+            e.clientY -
+              this.runnerClickRelPosition -
+              this.element.getBoundingClientRect().top
+          )
+        );
+      } else if (e.target === this.runner) {
+        // clicking inside runner
+
+        const moveD = e.offsetY - this.runnerClickRelPosition;
+
+        this.onChangeCb(
+          this.pxToPercentage(
+            this.runner.getBoundingClientRect().top +
+              moveD -
+              this.element.getBoundingClientRect().top
+          )
+        );
+      } else {
+        // clicking in the scroller
+        this.onChangeCb(
+          this.pxToPercentage(
+            e.clientY -
+              this.runnerClickRelPosition -
+              this.element.getBoundingClientRect().top
+          )
+        );
+      }
     }
   }
 
@@ -94,6 +135,8 @@ class Scroller {
 
     this.dragging = false;
     document.body.style.cursor = "initial";
+
+    document.removeEventListener("mousemove", this.onMouseMove.bind(this));
   }
 
   /**

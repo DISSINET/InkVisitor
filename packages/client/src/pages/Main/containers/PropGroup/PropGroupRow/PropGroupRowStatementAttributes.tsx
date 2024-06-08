@@ -15,7 +15,7 @@ import {
 
 interface PropGroupRowStatementAttributes {
   prop: IProp;
-  updateProp: (propId: string, changes: any) => void;
+  updateProp: (propId: string, changes: Partial<IProp>) => void;
   isExpanded: boolean;
   disabledAttributes: PropAttributeFilter;
   userCanEdit: boolean;

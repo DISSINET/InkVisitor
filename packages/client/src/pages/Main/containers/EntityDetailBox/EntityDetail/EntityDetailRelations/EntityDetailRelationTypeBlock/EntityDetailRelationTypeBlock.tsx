@@ -41,7 +41,7 @@ interface EntityDetailRelationTypeBlock {
     unknown,
     {
       relationId: string;
-      changes: any;
+      changes: Partial<Relation.IRelation>;
     },
     unknown
   >;
@@ -141,7 +141,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
   const [tempCloudEntityId, setTempCloudEntityId] = useState<string | false>(
     false
   );
-  const { isLoading, isFetching } = useQuery({
+  const {} = useQuery({
     queryKey: ["relation-entity-temp", tempCloudEntityId],
     queryFn: async () => {
       if (tempCloudEntityId) {
@@ -274,7 +274,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
               />
             ) : (
               <EntityDetailRelationRow
-                key={entity.id}
+                key={relation.id}
                 index={key}
                 relation={relation}
                 entities={entities}

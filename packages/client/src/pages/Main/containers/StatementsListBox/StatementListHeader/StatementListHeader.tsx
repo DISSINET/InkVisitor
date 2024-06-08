@@ -1,5 +1,5 @@
 import { entitiesDictKeys } from "@shared/dictionaries";
-import { EntityEnums, UserEnums } from "@shared/enums";
+import { EntityEnums, RelationEnums, UserEnums } from "@shared/enums";
 import {
   IEntity,
   IReference,
@@ -7,6 +7,7 @@ import {
   IResponseTerritory,
   IResponseTree,
   ITerritory,
+  Relation,
 } from "@shared/types";
 import {
   UseMutationResult,
@@ -16,7 +17,7 @@ import {
 import { rootTerritoryId } from "Theme/constants";
 import api from "api";
 import { AxiosResponse } from "axios";
-import { Button, ButtonGroup, Tooltip } from "components";
+import { Button, ButtonGroup, Submit, Tooltip } from "components";
 import Dropdown, {
   BreadcrumbItem,
   EntitySuggester,
@@ -24,7 +25,7 @@ import Dropdown, {
 } from "components/advanced";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
-import { FaHighlighter, FaList } from "react-icons/fa";
+import { FaHighlighter, FaList, FaTrash } from "react-icons/fa";
 import {
   MdOutlineCheckBox,
   MdOutlineCheckBoxOutlineBlank,
@@ -33,7 +34,14 @@ import {
 import { TbHomeMove } from "react-icons/tb";
 import { setLastClickedIndex } from "redux/features/statementList/lastClickedIndexSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { DropdownItem, StatementListDisplayMode } from "types";
+import {
+  DropdownItem,
+  EntitiesDeleteErrorResponse,
+  EntitiesDeleteSuccessResponse,
+  RelationsCreateErrorResponse,
+  RelationsCreateSuccessResponse,
+  StatementListDisplayMode,
+} from "types";
 import { collectTerritoryChildren, searchTree } from "utils/utils";
 import { v4 as uuidv4 } from "uuid";
 import {
@@ -112,6 +120,18 @@ interface StatementListHeader {
     },
     unknown
   >;
+  deleteStatementsMutation: UseMutationResult<
+    (EntitiesDeleteSuccessResponse | EntitiesDeleteErrorResponse)[],
+    Error,
+    void,
+    unknown
+  >;
+  relationsCreateMutation: UseMutationResult<
+    (RelationsCreateSuccessResponse | RelationsCreateErrorResponse)[],
+    Error,
+    Relation.IRelation[],
+    unknown
+  >;
 }
 export const StatementListHeader: React.FC<StatementListHeader> = ({
   territory,
@@ -131,6 +151,9 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
 
   updateTerritoryMutation,
   duplicateTerritoryMutation,
+
+  deleteStatementsMutation,
+  relationsCreateMutation,
 }) => {
   const dispatch = useAppDispatch();
   const queryClient = useQueryClient();
@@ -139,8 +162,11 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
   enum BatchOption {
     move_S = "move_S",
     duplicate_S = "duplicate_S",
+    delete_S = "delete_S",
     replace_R = "replace_R",
     append_R = "append_R",
+    relate_to_SOE = "relate_to_SOE",
+    classify_as = "classify_as",
   }
   const batchOptions = [
     {
@@ -154,6 +180,11 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
       info: EntityEnums.Class.Territory,
     },
     {
+      value: BatchOption.delete_S,
+      label: `delete`,
+      info: "",
+    },
+    {
       value: BatchOption.replace_R,
       label: `replace a referenced Resource`,
       info: EntityEnums.Class.Resource,
@@ -163,7 +194,74 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
       label: `append a referenced Resource`,
       info: EntityEnums.Class.Resource,
     },
+    {
+      value: BatchOption.relate_to_SOE,
+      label: `relate to superordinate event`,
+      info: EntityEnums.Class.Event,
+    },
+    {
+      value: BatchOption.classify_as,
+      label: `classify as`,
+      info: EntityEnums.Class.Concept,
+    },
   ];
+
+  const handleOnSelected = (newSelectedId: string) => {
+    switch (batchAction.value) {
+      case BatchOption.move_S:
+        moveStatementsMutation.mutate({
+          statements: selectedRows,
+          newTerritoryId: newSelectedId,
+        });
+        return;
+      case BatchOption.duplicate_S:
+        duplicateStatementsMutation.mutate({
+          statements: selectedRows,
+          newTerritoryId: newSelectedId,
+        });
+        return;
+      case BatchOption.append_R:
+        appendReferencesMutation.mutate([
+          {
+            id: uuidv4(),
+            resource: newSelectedId,
+            value: "",
+          },
+        ]);
+        return;
+      case BatchOption.replace_R:
+        replaceReferencesMutation.mutate([
+          {
+            id: uuidv4(),
+            resource: newSelectedId,
+            value: "",
+          },
+        ]);
+        return;
+      case BatchOption.relate_to_SOE:
+        const newRelations = [];
+        for (const statementId of selectedRows) {
+          newRelations.push({
+            id: uuidv4(),
+            entityIds: [statementId, newSelectedId],
+            type: RelationEnums.Type.SuperordinateEntity,
+          } as Relation.IRelation);
+        }
+        relationsCreateMutation.mutate(newRelations);
+        return;
+      case BatchOption.classify_as:
+        const newRelationsCla = [];
+        for (const statementId of selectedRows) {
+          newRelationsCla.push({
+            id: uuidv4(),
+            entityIds: [statementId, newSelectedId],
+            type: RelationEnums.Type.Classification,
+          } as Relation.IRelation);
+        }
+        relationsCreateMutation.mutate(newRelationsCla);
+        return;
+    }
+  };
 
   // get user data
   const userId = localStorage.getItem("userid");
@@ -267,6 +365,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
   const [headingHovered, setHeadingHovered] = useState(false);
   const [referenceElement, setReferenceElement] =
     useState<HTMLSpanElement | null>(null);
+  const [showSubmit, setShowSubmit] = useState(false);
 
   return (
     <>
@@ -295,7 +394,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
         </StyledHeaderBreadcrumbRow>
 
         <StyledHeaderRow>
-          <span style={{ display: "grid" }}>
+          <span style={{ display: "grid", gridTemplateColumns: "auto auto" }}>
             {isFavorited && <StyledFaStar size={16} />}
             {territoryId ? (
               <StyledHeading
@@ -337,7 +436,6 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
           {/* BATCH ACTIONS */}
           <StyledActionsWrapper>
             {user?.role !== UserEnums.Role.Viewer &&
-              displayMode === StatementListDisplayMode.LIST &&
               territory.statements.length > 0 && (
                 <>
                   <StyledCheckboxWrapper>
@@ -370,58 +468,40 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
                           options={batchOptions}
                         />
                       </StyledDropdownWrap>
-                      <EntitySuggester
-                        placeholder={
-                          batchAction.info === EntityEnums.Class.Territory
-                            ? "to territory"
-                            : ""
-                        }
-                        disableTemplatesAccept
-                        inputWidth={70}
-                        disableCreate
-                        filterEditorRights
-                        categoryTypes={[
-                          entitiesDictKeys[
-                            batchAction.info as EntityEnums.Class
-                          ].value,
-                        ]}
-                        onSelected={(newSelectedId: string) => {
-                          switch (batchAction.value) {
-                            case BatchOption.move_S:
-                              moveStatementsMutation.mutate({
-                                statements: selectedRows,
-                                newTerritoryId: newSelectedId,
-                              });
-                              return;
-                            case BatchOption.duplicate_S:
-                              duplicateStatementsMutation.mutate({
-                                statements: selectedRows,
-                                newTerritoryId: newSelectedId,
-                              });
-                              return;
-                            case BatchOption.append_R:
-                              appendReferencesMutation.mutate([
-                                {
-                                  id: uuidv4(),
-                                  resource: newSelectedId,
-                                  value: "",
-                                },
-                              ]);
-                              return;
-                            case BatchOption.replace_R:
-                              replaceReferencesMutation.mutate([
-                                {
-                                  id: uuidv4(),
-                                  resource: newSelectedId,
-                                  value: "",
-                                },
-                              ]);
-                              return;
+
+                      {/* Batch delete */}
+                      {batchAction.value === BatchOption.delete_S && (
+                        <Button
+                          icon={<FaTrash />}
+                          color="danger"
+                          inverted
+                          onClick={() => setShowSubmit(true)}
+                          tooltipLabel="delete selected statements"
+                        />
+                      )}
+
+                      {batchAction.info && (
+                        <EntitySuggester
+                          inputWidth={70}
+                          placeholder={
+                            batchAction.info === EntityEnums.Class.Territory
+                              ? "to territory"
+                              : ""
                           }
-                        }}
-                        excludedActantIds={[territory.id]}
-                        disabled={selectedRows.length === 0}
-                      />
+                          disableTemplatesAccept
+                          filterEditorRights
+                          categoryTypes={[
+                            entitiesDictKeys[
+                              batchAction.info as EntityEnums.Class
+                            ].value,
+                          ]}
+                          onSelected={(newSelectedId: string) =>
+                            handleOnSelected(newSelectedId)
+                          }
+                          excludedActantIds={[territory.id]}
+                          disabled={selectedRows.length === 0}
+                        />
+                      )}
                     </>
                   }
                 </>
@@ -434,7 +514,7 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
               <Button
                 color="success"
                 icon={<FaList />}
-                label="list"
+                label={`list (${territory.statements.length})`}
                 onClick={() => {
                   handleDisplayModeChange(StatementListDisplayMode.LIST);
                 }}
@@ -466,6 +546,18 @@ export const StatementListHeader: React.FC<StatementListHeader> = ({
           duplicateTerritoryMutation={duplicateTerritoryMutation}
         />
       )}
+      <Submit
+        show={showSubmit}
+        title="Delete entities"
+        text={`Do you really want to delete ${selectedRows.length} statements?`}
+        submitLabel="Delete"
+        loading={deleteStatementsMutation.isPending}
+        onSubmit={() => {
+          deleteStatementsMutation.mutate();
+          setShowSubmit(false);
+        }}
+        onCancel={() => setShowSubmit(false)}
+      />
     </>
   );
 };
