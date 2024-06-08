@@ -59,7 +59,7 @@ export default class Cursor implements IRelativeCoordinates {
   }
 
   xToCharI(x: number, charWidth: number): number {
-    return Math.floor((x / charWidth) * this.ratio);
+    return Math.floor((Math.max(x, 0) / charWidth) * this.ratio);
   }
 
   setPosition(lineX: number, lineY: number) {
