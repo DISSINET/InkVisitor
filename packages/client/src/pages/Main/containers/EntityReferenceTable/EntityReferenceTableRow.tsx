@@ -116,7 +116,7 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
             <FaGripVertical color={themeContext?.color.black} />
           </span>
         ) : (
-          <span style={{ width: "2rem" }} />
+          <span style={{ width: "1.5rem" }} />
         )}
         <EntityReferenceTableResource
           reference={reference}

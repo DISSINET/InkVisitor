@@ -1,15 +1,16 @@
+import { EntityEnums } from "@shared/enums";
 import { IEntity, IReference } from "@shared/types";
+import { excludedSuggesterEntities } from "Theme/constants";
 import { Button } from "components";
+import { EntitySuggester } from "components/advanced";
 import { CReference } from "constructors";
 import update from "immutability-helper";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { FaExternalLinkAlt, FaPlus, FaTrashAlt } from "react-icons/fa";
-import { CellProps, Column } from "react-table";
-import { deepCopy, normalizeURL } from "utils/utils";
-import { EntityReferenceTableResource } from "./EntityReferenceTableResource";
+import React, { useCallback, useEffect, useState } from "react";
+import { FaPlus } from "react-icons/fa";
+import { CellProps } from "react-table";
+import { deepCopy } from "utils/utils";
+import { v4 as uuidv4 } from "uuid";
 import { EntityReferenceTableRow } from "./EntityReferenceTableRow";
-import { StyledReferencesListButtons } from "./EntityReferenceTableStyles";
-import { EntityReferenceTableValue } from "./EntityReferenceTableValue";
 
 type CellType = CellProps<IReference>;
 
@@ -198,6 +199,54 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
           />
         );
       })}
+
+      <div
+        style={{
+          display: "flex",
+          gap: ".5rem",
+          marginTop: "3rem",
+          marginLeft: "2rem",
+        }}
+      >
+        <EntitySuggester
+          alwaysShowCreateModal={alwaysShowCreateModal}
+          openDetailOnCreate={openDetailOnCreate}
+          territoryActants={[]}
+          onSelected={(newSelectedId) => {
+            onChange(
+              [
+                ...references,
+                { id: uuidv4(), resource: newSelectedId, value: "" },
+              ],
+              true
+            );
+          }}
+          disableTemplatesAccept
+          categoryTypes={[EntityEnums.Class.Resource]}
+          isInsideTemplate={isInsideTemplate}
+          territoryParentId={territoryParentId}
+          disabled={disabled}
+        />
+        <EntitySuggester
+          alwaysShowCreateModal={alwaysShowCreateModal}
+          excludedEntityClasses={excludedSuggesterEntities}
+          openDetailOnCreate={openDetailOnCreate}
+          territoryActants={[]}
+          onSelected={(newSelectedId: string) => {
+            onChange(
+              [
+                ...references,
+                { id: uuidv4(), resource: "", value: newSelectedId },
+              ],
+              true
+            );
+          }}
+          categoryTypes={[EntityEnums.Class.Value]}
+          isInsideTemplate={isInsideTemplate}
+          territoryParentId={territoryParentId}
+          disabled={disabled}
+        />
+      </div>
 
       <div style={{ marginTop: "1.5rem" }}>
         {!disabled && (
