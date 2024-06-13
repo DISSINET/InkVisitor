@@ -200,6 +200,7 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
         );
       })}
 
+      {/* Entity reference spare row */}
       <div
         style={{
           display: "flex",
@@ -226,6 +227,7 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
           isInsideTemplate={isInsideTemplate}
           territoryParentId={territoryParentId}
           disabled={disabled}
+          onTyped={(typed) => console.log(typed)}
         />
         <EntitySuggester
           alwaysShowCreateModal={alwaysShowCreateModal}
@@ -245,6 +247,7 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
           isInsideTemplate={isInsideTemplate}
           territoryParentId={territoryParentId}
           disabled={disabled}
+          onTyped={(typed) => console.log(typed)}
         />
       </div>
 
