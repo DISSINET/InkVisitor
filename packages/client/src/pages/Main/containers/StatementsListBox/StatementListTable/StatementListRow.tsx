@@ -16,7 +16,7 @@ import { FaGripVertical } from "react-icons/fa";
 import { Cell, ColumnInstance, Row } from "react-table";
 import { setDraggedRowId } from "redux/features/statementList/draggedRowIdSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { DragItem, ItemTypes } from "types";
+import { DragItem, ItemTypes, StatementListDisplayMode } from "types";
 import { dndHoverFn } from "utils/utils";
 import { StatementListRowExpanded } from "./StatementListRowExpanded/StatementListRowExpanded";
 import { StyledTd, StyledTdMove, StyledTr } from "./StatementListTableStyles";
@@ -31,6 +31,7 @@ interface StatementListRow {
   visibleColumns: ColumnInstance<IResponseStatement>[];
   entities: { [key: string]: IEntity };
   isSelected: boolean;
+  displayMode: StatementListDisplayMode;
 }
 
 export const StatementListRow: React.FC<StatementListRow> = ({
@@ -42,10 +43,11 @@ export const StatementListRow: React.FC<StatementListRow> = ({
   visibleColumns,
   entities,
   isSelected,
+  displayMode,
 }) => {
   const dispatch = useAppDispatch();
 
-  const rowsExpanded: { [key: string]: boolean } = useAppSelector(
+  const rowsExpanded: string[] = useAppSelector(
     (state) => state.statementList.rowsExpanded
   );
   const draggedRowId: string = useAppSelector(
@@ -121,7 +123,9 @@ export const StatementListRow: React.FC<StatementListRow> = ({
           }
         })}
       </StyledTr>
-      {rowsExpanded[row.original.id] && !draggedRowId ? (
+      {rowsExpanded.includes(row.original.id) &&
+      !draggedRowId &&
+      displayMode === StatementListDisplayMode.LIST ? (
         <StatementListRowExpanded
           row={row}
           visibleColumns={visibleColumns}

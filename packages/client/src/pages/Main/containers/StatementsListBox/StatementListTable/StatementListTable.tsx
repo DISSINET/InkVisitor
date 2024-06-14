@@ -114,7 +114,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
 }) => {
   const dispatch = useAppDispatch();
   const { territoryId, setStatementId } = useSearchParams();
-  const rowsExpanded: { [key: string]: boolean } = useAppSelector(
+  const rowsExpanded: string[] = useAppSelector(
     (state) => state.statementList.rowsExpanded
   );
   const lastClickedIndex: number = useAppSelector(
@@ -462,14 +462,17 @@ export const StatementListTable: React.FC<StatementListTable> = ({
                 }}
                 onClick={(e: React.MouseEvent) => {
                   e.stopPropagation();
-                  const newObject = {
-                    ...rowsExpanded,
-                    [row.original.id]: !rowsExpanded[row.original.id],
-                  };
-                  dispatch(setRowsExpanded(newObject));
+                  const rowId = row.original.id;
+                  if (!rowsExpanded.includes(rowId)) {
+                    dispatch(setRowsExpanded(rowsExpanded.concat(rowId)));
+                  } else {
+                    dispatch(
+                      setRowsExpanded(rowsExpanded.filter((r) => r !== rowId))
+                    );
+                  }
                 }}
               >
-                {rowsExpanded[row.original.id] ? (
+                {rowsExpanded.includes(row.original.id) ? (
                   <FaChevronCircleUp />
                 ) : (
                   <FaChevronCircleDown />
@@ -602,6 +605,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
               visibleColumns={visibleColumns}
               entities={entities}
               isSelected={selectedRows.includes(row.id)}
+              displayMode={displayMode}
               {...row.getRowProps()}
             />
           );
