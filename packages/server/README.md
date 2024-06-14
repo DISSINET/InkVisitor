@@ -32,15 +32,14 @@ The `build` process transpiles typescript files to javascript.
 
 Make sure to have appropriate `.env.<ENV_FILE>` file accessible (e.g., running `ENV_FILE=production pnpm start:dist` will need `env.production`). You can use the `example.env` file as a template for creating your own `env` file, just check and modify the values here if needed:
 
-- `NODE_ENV` =
-- `DOMAIN` =
-- `STATIC_PATH` =
-- `SWAGGER_FILE` =
-- `PORT` =
-- `SECRET` =
-- `NODEMAILER_API_KEY` =
-- `MAILER_SENDER` =
-- `PYTHON_API_HOST` =
+- `NODE_ENV` = environment - production/development (security vs logging)
+- `DOMAIN` = identify the instance - points to the domain where the ui should be accessible (used in emails)
+- `STATIC_PATH` = http relative path to client files served by the server, use '/' for files hosted in root path
+- `PORT` = port which should be used for this app
+- `SECRET` = for signing jwt token
+- `SENDGRID_API_KEY` = for sendgrid (mails) api integration
+- `MAILER_SENDER` = default address of the mail sender
+- `PYTHON_API_HOST` = custom analytics api, optional
 
 ## API docs
 
