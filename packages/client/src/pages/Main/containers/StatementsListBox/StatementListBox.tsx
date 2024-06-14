@@ -20,11 +20,7 @@ import { setShowWarnings } from "redux/features/statementEditor/showWarningsSlic
 import { setDisableStatementListScroll } from "redux/features/statementList/disableStatementListScrollSlice";
 import { setRowsExpanded } from "redux/features/statementList/rowsExpandedSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import {
-  EntitiesDeleteErrorResponse,
-  EntitiesDeleteSuccessResponse,
-  StatementListDisplayMode,
-} from "types";
+import { EntitiesDeleteSuccessResponse, StatementListDisplayMode } from "types";
 import useResizeObserver from "use-resize-observer";
 import { StatementListHeader } from "./StatementListHeader/StatementListHeader";
 import { StatementListTable } from "./StatementListTable/StatementListTable";

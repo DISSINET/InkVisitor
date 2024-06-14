@@ -1,6 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-// const initialState: { [key: string]: boolean } = {};
 const initialState: string[] = [];
 
 const rowsExpandedSlice = createSlice({

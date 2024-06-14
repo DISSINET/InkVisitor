@@ -1,9 +1,4 @@
-import {
-  IEntity,
-  IResponseAudit,
-  IResponseStatement,
-  IStatement,
-} from "@shared/types";
+import { IEntity, IResponseStatement, IStatement } from "@shared/types";
 import { useSearchParams } from "hooks";
 import React, { useContext, useEffect, useRef } from "react";
 import {
@@ -16,11 +11,11 @@ import { FaGripVertical } from "react-icons/fa";
 import { Cell, ColumnInstance, Row } from "react-table";
 import { setDraggedRowId } from "redux/features/statementList/draggedRowIdSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
+import { ThemeContext } from "styled-components";
 import { DragItem, ItemTypes, StatementListDisplayMode } from "types";
 import { dndHoverFn } from "utils/utils";
 import { StatementListRowExpanded } from "./StatementListRowExpanded/StatementListRowExpanded";
 import { StyledTd, StyledTdMove, StyledTr } from "./StatementListTableStyles";
-import { ThemeContext } from "styled-components";
 
 interface StatementListRow {
   row: Row<IResponseStatement>;
