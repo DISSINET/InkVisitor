@@ -25,12 +25,22 @@ You would normally use default `development` environment - run in nodemon contex
 
 ## Build & run
 
-Build transpiles typescript files to javascript.
+The `build` process transpiles typescript files to javascript.
 
 1. `pnpm build`
 2. `ENV_FILE=<env> pnpm start:dist` to run the built application with loaded `.env.<ENV_FILE>` file.
 
-Make sure to have appropriate `.env.<ENV_FILE>` file accessible.
+Make sure to have appropriate `.env.<ENV_FILE>` file accessible (e.g., running `ENV_FILE=production pnpm start:dist` will need `env.production`). You can use the `example.env` file as a template for creating your own `env` file, just check and modify the values here if needed:
+
+- `NODE_ENV` =
+- `DOMAIN` =
+- `STATIC_PATH` =
+- `SWAGGER_FILE` =
+- `PORT` =
+- `SECRET` =
+- `NODEMAILER_API_KEY` =
+- `MAILER_SENDER` =
+- `PYTHON_API_HOST` =
 
 ## API docs
 
