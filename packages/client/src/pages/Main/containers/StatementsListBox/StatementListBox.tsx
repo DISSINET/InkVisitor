@@ -11,7 +11,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Loader, Submit, ToastWithLink } from "components";
 import { CStatement, CTerritory } from "constructors";
-import { useDebounce, useSearchParams } from "hooks";
+import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
 import { BsInfoCircle } from "react-icons/bs";
 import { toast } from "react-toastify";
@@ -22,7 +22,7 @@ import { setRowsExpanded } from "redux/features/statementList/rowsExpandedSlice"
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import {
   EntitiesDeleteErrorResponse,
-  RelationsCreateErrorResponse,
+  EntitiesDeleteSuccessResponse,
   StatementListDisplayMode,
 } from "types";
 import useResizeObserver from "use-resize-observer";
@@ -45,7 +45,7 @@ export const StatementListBox: React.FC = () => {
   const queryClient = useQueryClient();
 
   const dispatch = useAppDispatch();
-  const rowsExpanded: { [key: string]: boolean } = useAppSelector(
+  const rowsExpanded: string[] = useAppSelector(
     (state) => state.statementList.rowsExpanded
   );
   const statementListOpened: boolean = useAppSelector(
@@ -103,12 +103,8 @@ export const StatementListBox: React.FC = () => {
   const { statements, entities, right } = data || initialData;
 
   useEffect(() => {
-    if (statements.length !== Object.keys(rowsExpanded).length) {
-      const arrayWithIds = statements.map((s, key) => [s.id, false]);
-      const arrayWithKeys = Object.fromEntries(arrayWithIds);
-      dispatch(setRowsExpanded(arrayWithKeys));
-    }
-  }, [statements, rowsExpanded]);
+    dispatch(setRowsExpanded([]));
+  }, [territoryId]);
 
   // get user
   const userId = localStorage.getItem("userid");
@@ -171,6 +167,7 @@ export const StatementListBox: React.FC = () => {
         removeDetailId(sId);
         queryClient.invalidateQueries({ queryKey: ["detail-tab-entities"] });
       }
+      dispatch(setRowsExpanded(rowsExpanded.filter((r) => r !== sId)));
       queryClient.invalidateQueries({ queryKey: ["tree"] });
       queryClient.invalidateQueries({ queryKey: ["territory"] }).then(() => {
         setStatementId("");
@@ -433,8 +430,8 @@ export const StatementListBox: React.FC = () => {
   const deleteStatementsMutation = useMutation({
     mutationFn: () =>
       api.entitiesDelete(selectedRows, { ignoreErrorToast: true }),
-    onSuccess: (data, variables) => {
-      const currentStatementRowDeleted = data.find(
+    onSuccess: (responseArray, variables) => {
+      const currentStatementRowDeleted = responseArray.find(
         (row) => row.entityId === statementId
       );
       if (
@@ -444,21 +441,24 @@ export const StatementListBox: React.FC = () => {
         setStatementId("");
       }
 
-      const errorRows = data.filter((row) => (row as any).error);
-      if (errorRows.length > 0) {
-        // can be retyped to EntitiesDeleteErrorResponse when row.error: true
-        const errorEntityIds = (errorRows as EntitiesDeleteErrorResponse[]).map(
-          (row) => row.entityId
-        );
+      const deletedRows = responseArray.filter((row) => !(row as any).error);
+      const deletedIds = (deletedRows as EntitiesDeleteSuccessResponse[]).map(
+        (row) => row.entityId
+      );
 
-        setSelectedRows(selectedRows.filter((r) => errorEntityIds.includes(r)));
-
+      if (deletedIds.length < selectedRows.length) {
         toast.error(
-          `Some statements ${errorRows.length} are not possible to delete`
+          `Some statements ${
+            selectedRows.length - deletedIds.length
+          } are not possible to delete`
         );
-      } else {
-        setSelectedRows([]);
       }
+
+      setSelectedRows(selectedRows.filter((r) => !deletedIds.includes(r)));
+      dispatch(
+        setRowsExpanded(rowsExpanded.filter((r) => !deletedIds.includes(r)))
+      );
+
       queryClient.invalidateQueries({
         queryKey: ["tree"],
       });

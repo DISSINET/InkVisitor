@@ -47,7 +47,7 @@ export const StatementListRow: React.FC<StatementListRow> = ({
 }) => {
   const dispatch = useAppDispatch();
 
-  const rowsExpanded: { [key: string]: boolean } = useAppSelector(
+  const rowsExpanded: string[] = useAppSelector(
     (state) => state.statementList.rowsExpanded
   );
   const draggedRowId: string = useAppSelector(
@@ -123,7 +123,7 @@ export const StatementListRow: React.FC<StatementListRow> = ({
           }
         })}
       </StyledTr>
-      {rowsExpanded[row.original.id] &&
+      {rowsExpanded.includes(row.original.id) &&
       !draggedRowId &&
       displayMode === StatementListDisplayMode.LIST ? (
         <StatementListRowExpanded
