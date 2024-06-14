@@ -48,13 +48,6 @@ Make sure to have appropriate `.env.<ENV_FILE>` file accessible (e.g., running `
 
 Please refer to exported [postman collection](./postman/inkvisitor_api.postman_collection.json) file to explore the api and available endpoints.
 
-### Swagger
-
-- generate swagger file wihch `pnpm swagger`. A `swagger.json` file will be generated in server directory
-- provide path to this file in `.env` file using `SWAGGER_FILE` env variable
-- start the server ie. `pnpm start`
-- visit `http://localhost:3000/api-docs` (or otherwise configured host/port)
-
 ## Authorization
 
 Api uses JWT tokens to authenticate the user. With this the session is controlled by token which makes the development faster, makes api easier for testing but exposes several problems, mainly token expiration question and/or session invalidation. As mentioned avove, the jwt should be replaced by cookie session in the future. Token based authorization, hovewer, should still be available.
