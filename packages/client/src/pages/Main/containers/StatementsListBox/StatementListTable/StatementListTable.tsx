@@ -602,6 +602,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
               visibleColumns={visibleColumns}
               entities={entities}
               isSelected={selectedRows.includes(row.id)}
+              displayMode={displayMode}
               {...row.getRowProps()}
             />
           );
