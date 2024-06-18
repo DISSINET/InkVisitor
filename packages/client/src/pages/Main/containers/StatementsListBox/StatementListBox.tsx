@@ -77,9 +77,12 @@ export const StatementListBox: React.FC = () => {
   const [statementToDelete, setStatementToDelete] = useState<IStatement>();
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
 
-  const displayMode = annotatorOpened
-    ? StatementListDisplayMode.TEXT
-    : StatementListDisplayMode.LIST;
+  const displayMode =
+    annotatorOpened === null
+      ? StatementListDisplayMode.TEXT
+      : annotatorOpened
+      ? StatementListDisplayMode.TEXT
+      : StatementListDisplayMode.LIST;
 
   const handleDisplayModeChange = (
     newDisplayMode: StatementListDisplayMode

@@ -77,6 +77,8 @@ class Api {
   private apiUrl: string;
   private headers: object;
   private connection: AxiosInstance;
+  // unique token key for each environment
+  private tokenKey: string;
   private token: string;
   private ws?: Socket;
   private ping: number;
@@ -102,7 +104,11 @@ class Api {
       headers: this.headers,
     });
 
+    this.tokenKey = `${process.env.NODE_ENV}-token`;
     this.token = "";
+
+    // TODO: remove after release - only needed once to clean up previous localStorage token usage
+    localStorage.removeItem("token");
   }
 
   /**
@@ -255,17 +261,16 @@ class Api {
   }
 
   isLoggedIn = () => {
-    let storedToken = localStorage.getItem("token");
+    let storedToken = localStorage.getItem(this.tokenKey);
     let storedUsername = localStorage.getItem("username");
     return storedToken && storedUsername ? true : false;
-    // return {username: storedUsername ,token: storedToken};
   };
 
   /**
    * Authentication
    */
   checkLogin() {
-    let storedToken = localStorage.getItem("token");
+    let storedToken = localStorage.getItem(this.tokenKey);
     let storedUsername = localStorage.getItem("username");
     let storedUserId = localStorage.getItem("userid");
 
@@ -288,7 +293,7 @@ class Api {
     newUserId: string,
     newUserRole: string
   ) {
-    localStorage.setItem("token", newToken);
+    localStorage.setItem(this.tokenKey, newToken);
     localStorage.setItem("username", newUserName);
     localStorage.setItem("userid", newUserId);
     localStorage.setItem("userrole", newUserRole);
@@ -338,7 +343,7 @@ class Api {
   }
 
   async signOut() {
-    localStorage.setItem("token", "");
+    localStorage.setItem(this.tokenKey, "");
     localStorage.setItem("username", "");
 
     this.token = "";
