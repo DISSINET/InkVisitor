@@ -43,9 +43,28 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
 }) => {
   const [localReferences, setLocalReferences] = useState<IReference[]>([]);
 
+  // Attempts to move typed from one suggester to another
+  const [tempResourceTyped, setTempResourceTyped] = useState("");
+  const [tempValueTyped, setTempValueTyped] = useState("");
+  const [fieldToUpdate, setFieldToUpdate] = useState<
+    false | "resource" | "value"
+  >(false);
+
+  const [refResource, setRefResource] = useState("");
+  const [refValue, setRefValue] = useState("");
+
   useEffect(() => {
     if (JSON.stringify(localReferences) !== JSON.stringify(references)) {
       setLocalReferences(references);
+      if (fieldToUpdate === "resource") {
+        // TODO: add to resource input
+        setRefResource(tempResourceTyped);
+        setTempResourceTyped("");
+      } else if (fieldToUpdate === "value") {
+        // TODO: add to value input
+        setRefValue(tempValueTyped);
+        setTempValueTyped("");
+      }
     }
   }, [references]);
 
@@ -196,6 +215,12 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
             disabled={disabled}
             openDetailOnCreate={openDetailOnCreate}
             territoryParentId={territoryParentId}
+            initResourceTyped={
+              localReferences.length === key + 1 ? refResource : undefined
+            }
+            initValueTyped={
+              localReferences.length === key + 1 ? refValue : undefined
+            }
           />
         );
       })}
@@ -209,6 +234,7 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
           marginLeft: "2rem",
         }}
       >
+        {/* RESOURCE */}
         <EntitySuggester
           alwaysShowCreateModal={alwaysShowCreateModal}
           openDetailOnCreate={openDetailOnCreate}
@@ -221,14 +247,19 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
               ],
               true
             );
+            if (tempValueTyped.length) {
+              setFieldToUpdate("value");
+            }
           }}
           disableTemplatesAccept
           categoryTypes={[EntityEnums.Class.Resource]}
           isInsideTemplate={isInsideTemplate}
           territoryParentId={territoryParentId}
           disabled={disabled}
-          onTyped={(typed) => console.log(typed)}
+          onTyped={(typed) => setTempResourceTyped(typed)}
+          initTyped={tempResourceTyped}
         />
+        {/* VALUE */}
         <EntitySuggester
           alwaysShowCreateModal={alwaysShowCreateModal}
           excludedEntityClasses={excludedSuggesterEntities}
@@ -242,12 +273,16 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
               ],
               true
             );
+            if (tempResourceTyped.length) {
+              setFieldToUpdate("resource");
+            }
           }}
           categoryTypes={[EntityEnums.Class.Value]}
           isInsideTemplate={isInsideTemplate}
           territoryParentId={territoryParentId}
           disabled={disabled}
-          onTyped={(typed) => console.log(typed)}
+          onTyped={(typed) => setTempValueTyped(typed)}
+          initTyped={tempValueTyped}
         />
       </div>
 

@@ -426,9 +426,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
         typed={typed} // input value
         category={selectedCategory} // selected category
         categories={allCategories} // all possible categories
-        onCancel={() => {
-          handleClean();
-        }}
+        onCancel={handleClean}
         onType={(newType: string) => {
           setTyped(newType);
           onTyped && onTyped(newType);

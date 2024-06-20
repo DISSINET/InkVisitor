@@ -22,6 +22,7 @@ interface EntityReferenceTableValue {
   territoryParentId?: string;
   alwaysShowCreateModal?: boolean;
   openDetailOnCreate?: boolean;
+  initValueTyped?: string;
 
   disabled?: boolean;
 }
@@ -34,6 +35,7 @@ export const EntityReferenceTableValue: React.FC<EntityReferenceTableValue> = ({
   territoryParentId,
   alwaysShowCreateModal,
   openDetailOnCreate,
+  initValueTyped,
 
   disabled,
 }) => {
@@ -83,6 +85,7 @@ export const EntityReferenceTableValue: React.FC<EntityReferenceTableValue> = ({
           categoryTypes={[EntityEnums.Class.Value]}
           isInsideTemplate={isInsideTemplate}
           territoryParentId={territoryParentId}
+          initTyped={initValueTyped}
           disabled={disabled}
         />
       )}

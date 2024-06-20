@@ -45,6 +45,9 @@ interface EntityReferenceTableRow {
   updateOrderFn: () => void;
   moveRow: (dragIndex: number, hoverIndex: number) => void;
 
+  initResourceTyped?: string;
+  initValueTyped?: string;
+
   userCanEdit: boolean;
   disabled?: boolean;
 }
@@ -64,6 +67,9 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
   index,
   updateOrderFn,
   moveRow,
+
+  initResourceTyped,
+  initValueTyped,
 
   userCanEdit,
   disabled,
@@ -126,6 +132,7 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
           territoryParentId={territoryParentId}
           openDetailOnCreate={openDetailOnCreate}
           alwaysShowCreateModal={alwaysShowCreateModal}
+          initResourceTyped={initResourceTyped}
           disabled={disabled}
         />
         <EntityReferenceTableValue
@@ -137,6 +144,7 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
           isInsideTemplate={isInsideTemplate}
           openDetailOnCreate={openDetailOnCreate}
           territoryParentId={territoryParentId}
+          initValueTyped={initValueTyped}
           disabled={disabled}
         />
         <span>
