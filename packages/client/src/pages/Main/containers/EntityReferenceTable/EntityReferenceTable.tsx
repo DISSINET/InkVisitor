@@ -11,6 +11,7 @@ import { CellProps } from "react-table";
 import { deepCopy } from "utils/utils";
 import { v4 as uuidv4 } from "uuid";
 import { EntityReferenceTableRow } from "./EntityReferenceTableRow";
+import { StyledSpareRow } from "./EntityReferenceTableStyles";
 
 type CellType = CellProps<IReference>;
 
@@ -43,28 +44,28 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
 }) => {
   const [localReferences, setLocalReferences] = useState<IReference[]>([]);
 
-  // Attempts to move typed from one suggester to another
+  // this states are part of the spare row functionality
   const [tempResourceTyped, setTempResourceTyped] = useState("");
   const [tempValueTyped, setTempValueTyped] = useState("");
   const [fieldToUpdate, setFieldToUpdate] = useState<
     false | "resource" | "value"
   >(false);
-
-  const [refResource, setRefResource] = useState("");
-  const [refValue, setRefValue] = useState("");
+  const [refResourceTyped, setRefResourceTyped] = useState("");
+  const [refValueTyped, setRefValueTyped] = useState("");
 
   useEffect(() => {
     if (JSON.stringify(localReferences) !== JSON.stringify(references)) {
       setLocalReferences(references);
       if (fieldToUpdate === "resource") {
-        // TODO: add to resource input
-        setRefResource(tempResourceTyped);
+        setRefResourceTyped(tempResourceTyped);
+        setRefValueTyped("");
         setTempResourceTyped("");
       } else if (fieldToUpdate === "value") {
-        // TODO: add to value input
-        setRefValue(tempValueTyped);
+        setRefValueTyped(tempValueTyped);
+        setRefResourceTyped("");
         setTempValueTyped("");
       }
+      setFieldToUpdate(false);
     }
   }, [references]);
 
@@ -216,24 +217,17 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
             openDetailOnCreate={openDetailOnCreate}
             territoryParentId={territoryParentId}
             initResourceTyped={
-              localReferences.length === key + 1 ? refResource : undefined
+              localReferences.length === key + 1 ? refResourceTyped : undefined
             }
             initValueTyped={
-              localReferences.length === key + 1 ? refValue : undefined
+              localReferences.length === key + 1 ? refValueTyped : undefined
             }
           />
         );
       })}
 
       {/* Entity reference spare row */}
-      <div
-        style={{
-          display: "flex",
-          gap: ".5rem",
-          marginTop: "3rem",
-          marginLeft: "2rem",
-        }}
-      >
+      <StyledSpareRow $marginTop={localReferences.length > 0}>
         {/* RESOURCE */}
         <EntitySuggester
           alwaysShowCreateModal={alwaysShowCreateModal}
@@ -257,7 +251,7 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
           territoryParentId={territoryParentId}
           disabled={disabled}
           onTyped={(typed) => setTempResourceTyped(typed)}
-          initTyped={tempResourceTyped}
+          externalTyped={tempResourceTyped}
         />
         {/* VALUE */}
         <EntitySuggester
@@ -282,9 +276,9 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
           territoryParentId={territoryParentId}
           disabled={disabled}
           onTyped={(typed) => setTempValueTyped(typed)}
-          initTyped={tempValueTyped}
+          externalTyped={tempValueTyped}
         />
-      </div>
+      </StyledSpareRow>
 
       <div style={{ marginTop: "1.5rem" }}>
         {!disabled && (

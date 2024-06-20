@@ -58,6 +58,8 @@ interface EntitySuggester {
 
   initTyped?: string;
   initCategory?: EntityEnums.Class;
+  // not necessary to base functionality, use wisely
+  externalTyped?: string;
 
   alwaysShowCreateModal?: boolean;
 
@@ -94,6 +96,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
 
   initTyped,
   initCategory,
+  externalTyped,
 
   alwaysShowCreateModal,
 
@@ -106,6 +109,12 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
   >();
   const [allCategories, setAllCategories] =
     useState<EntitySingleDropdownItem[]>();
+
+  useEffect(() => {
+    if (externalTyped !== undefined) {
+      setTyped(externalTyped);
+    }
+  }, [externalTyped]);
 
   // initial load of categories
   useEffect(() => {
