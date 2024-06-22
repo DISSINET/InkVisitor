@@ -38,20 +38,28 @@ describe("Users delete", function () {
     });
   });
   describe("ok data", () => {
-    it("should return a 200 code with successful response", async () => {
-      const db = new Db();
+    const testUserId = Math.random().toString();
+    const db = new Db();
+
+    beforeAll(async () => {
       await db.initDb();
-      const testUserId = Math.random().toString();
 
       const user = new User({ id: testUserId });
       await user.save(db.connection);
+    })
 
+    it("should return a 200 code with successful response", async () => {
       await request(app)
         .delete(`${apiPath}/users/${testUserId}`)
         .set("authorization", "Bearer " + supertestConfig.token)
         .expect("Content-Type", /json/)
         .expect(successfulGenericResponse)
         .expect(200);
+    });
+
+    it("should not return this user after delete operation", async () => {
+      const user = await User.findUserById(db.connection, testUserId)
+      expect(user).toBeNull();
     });
   });
 });
