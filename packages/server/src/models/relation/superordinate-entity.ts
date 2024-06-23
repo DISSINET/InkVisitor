@@ -33,9 +33,9 @@ export default class SuperordinateEntity
     }
 
     const relations: RelationTypes.ISuperordinateEntity[] =
-      await Relation.findForEntity(
+      await Relation.findForEntities(
         conn,
-        parentId,
+        [parentId],
         RelationEnums.Type.SuperordinateEntity,
         0
       );
@@ -77,9 +77,9 @@ export default class SuperordinateEntity
   ): Promise<RelationTypes.ISuperordinateEntity[]> {
     let out: RelationTypes.ISuperordinateEntity[] = [];
 
-    out = await Relation.findForEntity(
+    out = await Relation.findForEntities(
       conn,
-      parentId,
+      [parentId],
       RelationEnums.Type.SuperordinateEntity,
       1
     );

@@ -236,7 +236,7 @@ export default Router()
   .post(
     "/:entityId/clone",
     asyncRouteHandler<IResponseGeneric<IEntity>>(async (request: IRequest) => {
-      const originalId = request.params.entityId;
+      const originalId = request.params.entityId as string;
       const original = await findEntityById(request.db, originalId);
       if (!original) {
         throw new EntityDoesNotExist(
@@ -269,7 +269,7 @@ export default Router()
       }
 
       const rels = (
-        await Relation.findForEntity(request.db.connection, originalId)
+        await Relation.findForEntities(request.db.connection, [originalId])
       ).filter((rel) => {
         const relType = RelationType.RelationRules[rel.type];
         if (!relType?.asymmetrical) {
@@ -473,9 +473,9 @@ export default Router()
       }
 
       // if relations are linked to this entity, the delete should not be allowed
-      const [entityIds, relIds] = await Relation.getLinkedForEntity(
+      const [entityIds, relIds] = await Relation.getLinkedForEntities(
         request,
-        entityId
+        [entityId]
       );
       if (relIds.length) {
         throw new InvalidDeleteError(

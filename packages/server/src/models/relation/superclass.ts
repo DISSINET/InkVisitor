@@ -36,16 +36,16 @@ export default class Superclass
     if (
       Entities.IsClass(asClass, Entities.Class.Concept, Entities.Class.Action)
     ) {
-      relations = await Relation.findForEntity(
+      relations = await Relation.findForEntities(
         conn,
-        parentId,
+        [parentId],
         RelationEnums.Type.Superclass,
         0
       );
     } else if (Entities.IsPLOGESTR(asClass)) {
-      relations = await Relation.findForEntity(
+      relations = await Relation.findForEntities(
         conn,
-        parentId,
+        [parentId],
         RelationEnums.Type.Classification,
         0
       );
@@ -88,9 +88,9 @@ export default class Superclass
     if (
       Entities.IsClass(asClass, Entities.Class.Action, Entities.Class.Concept)
     ) {
-      out = await Relation.findForEntity(
+      out = await Relation.findForEntities(
         conn,
-        parentId,
+        [parentId],
         RelationEnums.Type.Superclass,
         1
       );
