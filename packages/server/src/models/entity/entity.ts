@@ -7,6 +7,7 @@ import {
   InternalServerError,
   InvalidDeleteError,
   ModelNotValidError,
+  PermissionDeniedError,
 } from "@shared/types/errors";
 import User from "@models/user/user";
 import Prop from "@models/prop/prop";
@@ -15,6 +16,9 @@ import { IRequest } from "../../custom_typings/request";
 import { sanitizeText } from "@common/functions";
 import Reference from "./reference";
 import { link } from "fs";
+import { getEntityClass } from "@models/factory";
+import Relation from "@models/relation/relation";
+import Audit from "@models/audit/audit";
 
 export default class Entity implements IEntity, IDbModel {
   static table = "entities";
@@ -132,7 +136,8 @@ export default class Entity implements IEntity, IDbModel {
         "delete called on entity with undefined id"
       );
     }
-
+    
+    // find other entities dependend on this one
     const usedBy = await this.getUsedByEntity(db);
     if (usedBy) {
       throw new InvalidDeleteError(
@@ -140,6 +145,12 @@ export default class Entity implements IEntity, IDbModel {
           usedBy.label ? "(" + usedBy.label + ")" : ""
         }`
       ).withData([usedBy.id]);;
+    }
+
+    // if bookmarks are linked to this entity, the bookmarks should be removed also
+    await User.removeBookmarkedEntity(db, this.id);
+    if (this.class === EntityEnums.Class.Territory) {
+      await User.removeStoredTerritory(db, this.id);
     }
 
     const result = await rethink

@@ -664,31 +664,21 @@ class Api {
     }
   }
 
-  // This fn always outputs array of success / errors => errors are handled in the area of use
   async entitiesDelete(
     entityIds: string[],
     options?: IApiOptions
-  ): Promise<(EntitiesDeleteSuccessResponse | EntitiesDeleteErrorResponse)[]> {
-    const out: (EntitiesDeleteSuccessResponse | EntitiesDeleteErrorResponse)[] =
-      [];
-    for (const entityId of entityIds) {
-      try {
-        const response = await this.connection.delete(
-          `/entities/${entityId}`,
-          options
-        );
-        out.push({ entityId: entityId, details: response });
-      } catch (err) {
-        out.push({
-          error: true,
-          message: `Failed to delete entity ${entityId}`,
-          entityId: entityId,
-          details: this.handleError(err),
-        });
-      }
+  ): Promise<AxiosResponse<IResponseGeneric>> {
+    try {
+      const response = await this.connection.delete(`/entities/`, {
+        data: {
+          entityIds,
+        },
+        ...options,
+      });
+      return response;
+    } catch (err) {
+      throw this.handleError(err);
     }
-
-    return out;
   }
 
   async entityRestore(

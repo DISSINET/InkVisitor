@@ -429,18 +429,16 @@ export const StatementListBox: React.FC = () => {
   const deleteStatementsMutation = useMutation({
     mutationFn: () =>
       api.entitiesDelete(selectedRows, { ignoreErrorToast: true }),
-    onSuccess: (responseArray, variables) => {
-      const currentStatementRowDeleted = responseArray.find(
-        (row) => row.entityId === statementId
-      );
+    onSuccess: (response, variables) => {
       if (
-        currentStatementRowDeleted &&
-        !(currentStatementRowDeleted as any).error
+        response.data.result &&
+        !response.data.error
       ) {
         setStatementId("");
       }
 
-      const deletedRows = responseArray.filter((row) => !(row as any).error);
+      console.log(response);
+     /* const deletedRows = responseArray.filter((row) => !(row as any).error);
       const deletedIds = (deletedRows as EntitiesDeleteSuccessResponse[]).map(
         (row) => row.entityId
       );
@@ -457,13 +455,17 @@ export const StatementListBox: React.FC = () => {
       dispatch(
         setRowsExpanded(rowsExpanded.filter((r) => !deletedIds.includes(r)))
       );
-
+*/
       queryClient.invalidateQueries({
         queryKey: ["tree"],
       });
       queryClient.invalidateQueries({
         queryKey: ["territory"],
       });
+
+    },
+    onError(error, variables, context) {
+      console.log(error)
     },
   });
 
