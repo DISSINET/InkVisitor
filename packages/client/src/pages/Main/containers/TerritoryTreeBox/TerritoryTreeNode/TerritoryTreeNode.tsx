@@ -75,12 +75,12 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
     IExtendedResponseTree[]
   >([]);
 
-  // const animatedStyle = useSpring({
-  //   opacity: contextMenuOpen ? 0.6 : 1,
-  //   display: "inline-flex",
-  //   overflow: "hidden",
-  //   config: config.stiff,
-  // });
+  const animatedStyle = useSpring({
+    opacity: contextMenuOpen ? 0.6 : 1,
+    display: "inline-flex",
+    overflow: "hidden",
+    config: config.stiff,
+  });
 
   const themeContext = useContext(ThemeContext);
 
@@ -106,20 +106,16 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
     }
   }, [treeInitialized, initExpandedNodes]);
 
-  const moveChildFn = useCallback(
-    (dragIndex: number, hoverIndex: number) => {
-      const dragCard = childTerritories[dragIndex];
-      setChildTerritories(
-        update(childTerritories, {
-          $splice: [
-            [dragIndex, 1],
-            [hoverIndex, 0, dragCard],
-          ],
-        })
-      );
-    },
-    [childTerritories]
-  );
+  const moveChildFn = useCallback((dragIndex: number, hoverIndex: number) => {
+    setChildTerritories((childTerritories) =>
+      update(childTerritories, {
+        $splice: [
+          [dragIndex, 1],
+          [hoverIndex, 0, childTerritories[dragIndex]],
+        ],
+      })
+    );
+  }, []);
 
   const moveTerritoryMutation = useMutation({
     mutationFn: async (item: EntityDragItem) => {
@@ -133,11 +129,6 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
       queryClient.invalidateQueries({ queryKey: ["tree"] });
     },
   });
-
-  const onCaretClick = (id: string) => {
-    setTerritoryId(id);
-    setIsExpanded(!isExpanded);
-  };
 
   const draggedEntity: DraggedEntityReduxItem = useAppSelector(
     (state) => state.draggedEntity
@@ -183,10 +174,9 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
   }, []);
 
   const handleIconClick = useCallback(() => {
+    setTerritoryId(territory.id);
     if (hasChildren) {
-      onCaretClick(territoryId);
-    } else {
-      setTerritoryId(territoryId);
+      setIsExpanded((prevIsExpanded) => !prevIsExpanded);
     }
   }, [hasChildren, territoryId]);
 
@@ -200,6 +190,7 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
               backgroundColor: foundByRecursion
                 ? themeContext?.color.foundByTreeFilter
                 : "",
+              opacity: animatedStyle.opacity,
             }}
           >
             <StyledIconWrap onClick={handleIconClick}>
