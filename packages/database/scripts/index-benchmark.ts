@@ -1,11 +1,6 @@
 const { performance } = require("perf_hooks");
-import {
-  IEntity,
-} from "../../shared/types";
-import {
-  EntityEnums,
-  DbEnums,
-} from "../../shared/enums";
+import { IEntity } from "../../shared/types";
+import { EntityEnums, DbEnums } from "../../shared/enums";
 const fs = require("fs");
 import { Connection, r, RDatum, WriteResult } from "rethinkdb-ts";
 
@@ -29,7 +24,7 @@ const config = {
   db: envData.DB_NAME,
   host: envData.DB_HOST,
   port: envData.DB_PORT,
-  password: process.env.DB_AUTH,
+  password: process.env.DB_PASS,
 };
 
 const testClass = async () => {
@@ -40,7 +35,8 @@ const testClass = async () => {
     .run(conn);
   let end = performance.now();
   console.log(
-    `testClass(${indexedTable}) took ${end - start} milliseconds. Found ${(items as any).length
+    `testClass(${indexedTable}) took ${end - start} milliseconds. Found ${
+      (items as any).length
     } items.`
   );
 
@@ -53,7 +49,8 @@ const testClass = async () => {
     .run(conn);
   end = performance.now();
   console.log(
-    `testClass(${indexedTable}) took ${end - start} milliseconds. Found ${(items as any).length
+    `testClass(${indexedTable}) took ${end - start} milliseconds. Found ${
+      (items as any).length
     } items.`
   );
 };
@@ -75,7 +72,8 @@ const testActantsActant = async () => {
 
   let end = performance.now();
   console.log(
-    `Indexed took ${end - start} milliseconds. Found ${foundInIndex ? (foundInIndex as any[]).length : 0
+    `Indexed took ${end - start} milliseconds. Found ${
+      foundInIndex ? (foundInIndex as any[]).length : 0
     } items`
   );
 
@@ -92,7 +90,8 @@ const testActantsActant = async () => {
 
   end = performance.now();
   console.log(
-    `Unindexed took ${end - start} milliseconds. Found ${foundInNotIndex ? (foundInNotIndex as any[]).length : 0
+    `Unindexed took ${end - start} milliseconds. Found ${
+      foundInNotIndex ? (foundInNotIndex as any[]).length : 0
     } items`
   );
 };
@@ -156,7 +155,8 @@ const testPropsRecursive = async () => {
 
   let end = performance.now();
   console.log(
-    `Indexed took ${end - start} milliseconds. Found ${foundInIndex ? (foundInIndex as any[]).length : 0
+    `Indexed took ${end - start} milliseconds. Found ${
+      foundInIndex ? (foundInIndex as any[]).length : 0
     } items`
   );
 
@@ -166,7 +166,8 @@ const testPropsRecursive = async () => {
 
   end = performance.now();
   console.log(
-    `Unindexed took ${end - start} milliseconds. Found ${foundInNotIndex ? (foundInNotIndex as any[]).length : 0
+    `Unindexed took ${end - start} milliseconds. Found ${
+      foundInNotIndex ? (foundInNotIndex as any[]).length : 0
     } items`
   );
 };
@@ -214,7 +215,8 @@ const testActantOrActionStatement = async () => {
 
   let end = performance.now();
   console.log(
-    `testActantOrActionStatement(${indexedTable}) took ${end - start
+    `testActantOrActionStatement(${indexedTable}) took ${
+      end - start
     } milliseconds.`
   );
 
@@ -241,7 +243,8 @@ const testActantOrActionStatement = async () => {
 
   end = performance.now();
   console.log(
-    `testActantOrActionStatement(${indexedTable}) took ${end - start
+    `testActantOrActionStatement(${indexedTable}) took ${
+      end - start
     } milliseconds.`
   );
 };
@@ -255,7 +258,8 @@ const testPrimaryKey = async () => {
 
   let end = performance.now();
   console.log(
-    `testPrimaryKey(${indexedTable}) took ${end - start} milliseconds. Found ${found ? 1 : 0
+    `testPrimaryKey(${indexedTable}) took ${end - start} milliseconds. Found ${
+      found ? 1 : 0
     } items.`
   );
 
@@ -265,7 +269,8 @@ const testPrimaryKey = async () => {
 
   end = performance.now();
   console.log(
-    `testPrimaryKey(${indexedTable}) took ${end - start} milliseconds. Found ${(found as any).length
+    `testPrimaryKey(${indexedTable}) took ${end - start} milliseconds. Found ${
+      (found as any).length
     } items.`
   );
 };
@@ -291,7 +296,8 @@ const testTerritoryId = async () => {
 
   let end = performance.now();
   console.log(
-    `testTerritoryId(${indexedTable}) took ${end - start} milliseconds. Found ${(found as any).length
+    `testTerritoryId(${indexedTable}) took ${end - start} milliseconds. Found ${
+      (found as any).length
     } items.`
   );
 
@@ -308,7 +314,8 @@ const testTerritoryId = async () => {
 
   end = performance.now();
   console.log(
-    `testTerritoryId(${indexedTable}) took ${end - start} milliseconds. Found ${(found as any).length
+    `testTerritoryId(${indexedTable}) took ${end - start} milliseconds. Found ${
+      (found as any).length
     } items.`
   );
 };
@@ -356,7 +363,8 @@ const testStatementEntities = async () => {
 
   let end = performance.now();
   console.log(
-    `testStatementEntities(${indexedTable}) took ${end - start
+    `testStatementEntities(${indexedTable}) took ${
+      end - start
     } milliseconds. Found ${(found as any).length} items.`
   );
 
@@ -366,7 +374,8 @@ const testStatementEntities = async () => {
 
   end = performance.now();
   console.log(
-    `testStatementEntities(${indexedTable}) took ${end - start
+    `testStatementEntities(${indexedTable}) took ${
+      end - start
     } milliseconds. Found ${(foundInNotIndex as any).length} items.`
   );
 };

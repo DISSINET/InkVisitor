@@ -47,7 +47,7 @@ interface SearchParamsContext {
   clearAllDetailIds: () => void;
   cleanAllParams: () => void;
 
-  annotatorOpened: boolean;
+  annotatorOpened: boolean | null;
   setAnnotatorOpened: (opened: boolean) => void;
 }
 const SearchParamsContext = createContext<SearchParamsContext>(INITIAL_CONTEXT);
@@ -92,12 +92,11 @@ export const SearchParamsProvider = ({
       return false;
     } else {
       console.log("Invalid url params boolean string");
-      params.set("annotatorOpened", "true");
-      return true;
+      return null;
     }
   };
 
-  const [annotatorOpened, setAnnotatorOpened] = useState(
+  const [annotatorOpened, setAnnotatorOpened] = useState<boolean | null>(
     parsedParams.annotatorOpened
       ? stringToBoolean(parsedParams.annotatorOpened)
       : INITIAL_CONTEXT.annotatorOpened
@@ -218,6 +217,7 @@ export const SearchParamsProvider = ({
     clearAllDetailIds();
     setStatementId("");
     setTerritoryId("");
+    setAnnotatorOpened(null);
   };
 
   const hasSearchParams = useMemo(
@@ -240,9 +240,11 @@ export const SearchParamsProvider = ({
         : params.delete("selectedDetail");
       detailId ? params.set("detail", detailId) : params.delete("detail");
 
-      annotatorOpened
-        ? params.set("annotatorOpened", "true")
-        : params.set("annotatorOpened", "false");
+      annotatorOpened !== null
+        ? annotatorOpened
+          ? params.set("annotatorOpened", "true")
+          : params.set("annotatorOpened", "false")
+        : params.delete("annotatorOpened");
 
       handleHistoryPush();
     }

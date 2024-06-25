@@ -114,6 +114,8 @@ export default class User implements IUser, IDbModel {
 
   hash?: string = "";
 
+  deletedAt?: Date;
+
   static table = "users";
 
   constructor(data: Partial<IUser>) {
@@ -162,8 +164,15 @@ export default class User implements IUser, IDbModel {
       .run(dbInstance);
   }
 
+  /**
+   * Soft delete operation - set deletedAt to current date, value indicated deleted user
+   * @param dbInstance 
+   * @returns 
+   */
   delete(dbInstance: Connection): Promise<WriteResult> {
-    return rethink.table(User.table).get(this.id).delete().run(dbInstance);
+    return rethink.table(User.table).get(this.id).update({
+      deletedAt: new Date()
+    }).run(dbInstance);
   }
 
   isValid(): boolean {
@@ -211,24 +220,42 @@ export default class User implements IUser, IDbModel {
     return this.hash;
   }
 
+  /**
+   * Finds user by 'id' field
+   * Ignores thrashed entries
+   * @param dbInstance 
+   * @param id 
+   * @returns 
+   */
   static async findUserById(
     dbInstance: Connection | undefined,
     id: string
   ): Promise<User | null> {
     const data = await rethink.table(User.table).get(id).run(dbInstance);
-    if (data) {
-      delete data.password;
-      return new User(data);
+    if (!data || (data as IUser).deletedAt) {
+      return null;
     }
-    return null;
+
+    delete data.password;
+    return new User(data);
   }
 
+  /**
+   * Finds user identified by 'email' field
+   * Ignores thrashed entries
+   * @param dbInstance 
+   * @param email 
+   * @returns 
+   */
   static async getUserByEmail(
     dbInstance: Connection | undefined,
     email: string
   ): Promise<User | null> {
     const data = await rethink
       .table(User.table)
+      .filter(function(user: any) {
+        return rethink.not(user.hasFields("deletedAt"))
+      })
       .filter({ email })
       .limit(1)
       .run(dbInstance);
@@ -238,12 +265,22 @@ export default class User implements IUser, IDbModel {
     return null;
   }
 
+  /**
+   * Finds user identified by 'hash' field
+   * Ignores thrashed entries
+   * @param dbInstance 
+   * @param hash 
+   * @returns 
+   */
   static async getUserByHash(
     dbInstance: Connection | undefined,
     hash: string
   ): Promise<User | null> {
     const data = await rethink
       .table(User.table)
+      .filter(function(user: any) {
+        return rethink.not(user.hasFields("deletedAt"))
+      })
       .filter({ hash })
       .run(dbInstance);
     if (data && data.length) {
@@ -252,29 +289,48 @@ export default class User implements IUser, IDbModel {
     return null;
   }
 
+  /**
+   * Returns all users
+   * Ignores thrashed entries
+   * @param dbInstance 
+   * @returns 
+   */
   static async findAllUsers(
     dbInstance: Connection | undefined
   ): Promise<User[]> {
     const data = await rethink
       .table(User.table)
+      .filter(function(user: any) {
+        return rethink.not(user.hasFields("deletedAt"))
+      })
       .orderBy(rethink.asc("role"), rethink.asc("name"))
       .run(dbInstance);
     return data.map((d) => new User(d));
   }
 
   /**
-   * Method searches for user by email or username (login)
+   * Method searches for user by email or username (login).
+   * Optionally includes also thrashed entries (for keeping uniqueness across emails/logins)
    * @param dbInstance
    * @param label
+   * @param includeThrashed
    * @returns
    */
   static async findUserByLogin(
     dbInstance: Db,
-    login: string
+    login: string,
+    includeThrashed: boolean
   ): Promise<User | null> {
-    const data = await rethink
-      .table(User.table)
-      .filter(function (user: any) {
+    let req = await rethink
+      .table(User.table);
+
+    if (!includeThrashed) {
+      req = req.filter(function(user: any) {
+        return rethink.not(user.hasFields("deletedAt"))
+      });
+    }
+
+    const data = await req.filter(function (user: any) {
         return rethink.or(
           rethink.row("name").eq(login),
           rethink.row("email").eq(login)
@@ -282,35 +338,31 @@ export default class User implements IUser, IDbModel {
       })
       .limit(1)
       .run(dbInstance.connection);
+
     return data.length == 0 ? null : new User(data[0]);
   }
 
+  /**
+   * Returns users by cleaned label (for name / email).
+   * Does not return thrashed users.
+   * @param dbInstance 
+   * @param label 
+   * @returns 
+   */
   static async findUsersByLabel(
     dbInstance: Connection | undefined,
     label: string
   ): Promise<User[]> {
     const data = await rethink
       .table(User.table)
-      .filter(function (user: any) {
-        return rethink.or(
-          rethink
-            .row("name")
-            .downcase()
-            .match(`${regExpEscape(label.toLowerCase())}`)
-            .or(),
-          rethink
-            .row("email")
-            .downcase()
-            .match(`${regExpEscape(label.toLowerCase())}`)
-            .or()
-        );
-      })
+     
       .run(dbInstance);
-    return data.map((d) => new User(d));
+    return (data as IUser[]).map((d) => new User(d));
   }
 
   /**
    * Searches for users associated with bookmarked entity
+   * Returns also thrashed users
    * @param db
    * @param entityId
    * @returns array of IUser interfaces
@@ -333,6 +385,7 @@ export default class User implements IUser, IDbModel {
 
   /**
    * Searches for users associated with stored territory
+   * Returns also thrashed users
    * @param db
    * @param territoryId
    * @returns array of IUser interfaces
@@ -356,6 +409,7 @@ export default class User implements IUser, IDbModel {
 
   /**
    * Removed bookmarks with entityId from all users
+   * Uses findByBookmarkedEntity which returns also thrashed users
    * @param db
    * @param entityId
    */
@@ -373,6 +427,7 @@ export default class User implements IUser, IDbModel {
 
   /**
    * Removed stored territory with territoryId from all users
+   * Uses findByStoredTerritory which returns also thrashed users
    * @param db
    * @param territoryId
    */
