@@ -219,7 +219,7 @@ config = {
   "db": envData['DB_NAME'],
   "host": envData['DB_HOST'],
   "port": envData['DB_PORT'],
-  "password": envData['DB_AUTH'] or ""
+  "password": envData['DB_PASS'] or ""
 }
 
 conn = None
