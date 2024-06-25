@@ -1,5 +1,5 @@
 import { animated, config, useSpring } from "@react-spring/web";
-import { InterfaceEnums, UserEnums } from "@shared/enums";
+import { UserEnums } from "@shared/enums";
 import { ITerritory, IUser } from "@shared/types";
 import { IParentTerritory } from "@shared/types/territory";
 import {
@@ -12,38 +12,24 @@ import api from "api";
 import { EntityTag } from "components/advanced";
 import { useSearchParams } from "hooks";
 import update from "immutability-helper";
-import React, {
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
-import {
-  BsCaretDown,
-  BsCaretDownFill,
-  BsCaretRight,
-  BsCaretRightFill,
-} from "react-icons/bs";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import { setDisableTreeScroll } from "redux/features/territoryTree/disableTreeScrollSlice";
 import { setTreeInitialized } from "redux/features/territoryTree/treeInitializeSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
+import { ThemeContext } from "styled-components";
 import {
   DraggedEntityReduxItem,
   EntityDragItem,
   IExtendedResponseTree,
 } from "types";
 import { TerritoryTreeContextMenu } from "../TerritoryTreeContextMenu/TerritoryTreeContextMenu";
+import TerritoryTreeNodeArrowIcon from "./TerritoryTreeNodeArrowIcon";
 import {
   StyledChildrenWrap,
   StyledDisabledTag,
-  StyledFaCircle,
-  StyledFaDotCircle,
   StyledIconWrap,
   StyledTerritoryTagWrap,
 } from "./TerritoryTreeNodeStyles";
-import { ThemeContext, useTheme } from "styled-components";
-import { ThemeType } from "Theme/theme";
 
 interface TerritoryTreeNode {
   territory: ITerritory;
@@ -88,23 +74,15 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
   const [childTerritories, setChildTerritories] = useState<
     IExtendedResponseTree[]
   >([]);
-  const animatedStyle = useSpring({
-    opacity: contextMenuOpen ? 0.6 : 1,
-    display: "inline-flex",
-    overflow: "hidden",
-    config: config.stiff,
-  });
 
-  const selectedThemeId: InterfaceEnums.Theme = useAppSelector(
-    (state) => state.theme
-  );
+  // const animatedStyle = useSpring({
+  //   opacity: contextMenuOpen ? 0.6 : 1,
+  //   display: "inline-flex",
+  //   overflow: "hidden",
+  //   config: config.stiff,
+  // });
+
   const themeContext = useContext(ThemeContext);
-
-  const symbolColor = useMemo(() => {
-    return right === UserEnums.RoleMode.Read
-      ? themeContext?.color.treeNodeRead
-      : themeContext?.color.treeNodeWrite;
-  }, [right, selectedThemeId]);
 
   useEffect(() => {
     setChildTerritories(children);
@@ -161,70 +139,6 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
     setIsExpanded(!isExpanded);
   };
 
-  const renderArrowIcon = () => {
-    const { id } = territory;
-    if (!empty) {
-      // filled
-      return (
-        <>
-          {isExpanded ? (
-            <BsCaretDownFill
-              size={14}
-              onClick={() => onCaretClick(id)}
-              color={symbolColor}
-              style={{
-                strokeWidth: "2",
-                strokeLinejoin: "bevel",
-                marginRight: "2px",
-              }}
-            />
-          ) : (
-            <BsCaretRightFill
-              size={14}
-              onClick={() => onCaretClick(id)}
-              color={symbolColor}
-              style={{
-                strokeWidth: "2",
-                strokeLinejoin: "bevel",
-                marginRight: "2px",
-              }}
-            />
-          )}
-        </>
-      );
-    } else {
-      // bordered
-      return (
-        <>
-          {isExpanded ? (
-            <BsCaretDown
-              size={14}
-              onClick={() => onCaretClick(id)}
-              color={symbolColor}
-              style={{
-                strokeWidth: "2",
-                strokeLinejoin: "bevel",
-
-                marginRight: "2px",
-              }}
-            />
-          ) : (
-            <BsCaretRight
-              size={14}
-              onClick={() => onCaretClick(id)}
-              color={symbolColor}
-              style={{
-                strokeWidth: "2",
-                strokeLinejoin: "bevel",
-                marginRight: "2px",
-              }}
-            />
-          )}
-        </>
-      );
-    }
-  };
-
   const draggedEntity: DraggedEntityReduxItem = useAppSelector(
     (state) => state.draggedEntity
   );
@@ -255,13 +169,29 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
     }
   }, [draggedEntity]);
 
-  const renderTreeNode = () => {
-    const hasChildren = children.length > 0;
-    const { id, data } = territory;
-    const parent = data.parent as IParentTerritory;
-    const isFavorited = storedTerritories?.includes(id);
+  const hasChildren = children.length > 0;
+  const { id, data } = territory;
+  const parent = data.parent as IParentTerritory;
+  const isFavorited = storedTerritories?.includes(id);
 
-    return (
+  const handleMenuOpen = useCallback(() => {
+    setContextMenuOpen(true);
+  }, []);
+
+  const handleMenuClose = useCallback(() => {
+    setContextMenuOpen(false);
+  }, []);
+
+  const handleIconClick = useCallback(() => {
+    if (hasChildren) {
+      onCaretClick(territoryId);
+    } else {
+      setTerritoryId(territoryId);
+    }
+  }, [hasChildren, territoryId]);
+
+  return (
+    <>
       <>
         {!tempDisabled ? (
           <StyledTerritoryTagWrap
@@ -272,51 +202,34 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
                 : "",
             }}
           >
-            <StyledIconWrap>
-              {hasChildren ? (
-                <>{renderArrowIcon()}</>
-              ) : (
-                <>
-                  {statementsCount > 0 ? (
-                    <StyledFaCircle
-                      size={11}
-                      color={symbolColor}
-                      onClick={() => {
-                        setTerritoryId(id);
-                      }}
-                    />
-                  ) : (
-                    <StyledFaDotCircle
-                      size={11}
-                      color={symbolColor}
-                      onClick={() => {
-                        setTerritoryId(id);
-                      }}
-                    />
-                  )}
-                </>
-              )}
-            </StyledIconWrap>
-            <animated.div style={animatedStyle}>
-              <EntityTag
-                entity={territory}
-                parentId={parent.territoryId}
-                lvl={lvl}
-                isSelected={isSelected}
-                index={index}
-                fullWidth
-                moveFn={moveFn}
-                updateOrderFn={moveTerritoryMutation.mutate}
+            <StyledIconWrap onClick={handleIconClick}>
+              <TerritoryTreeNodeArrowIcon
+                territoryId={id}
+                isExpanded={isExpanded}
+                empty={empty ?? false}
+                hasChildren={hasChildren}
                 statementsCount={statementsCount}
-                isFavorited={isFavorited}
-                showOnly="label"
-                tooltipPosition="right"
+                right={right}
               />
-            </animated.div>
+            </StyledIconWrap>
+            <EntityTag
+              entity={territory}
+              parentId={parent.territoryId}
+              lvl={lvl}
+              isSelected={isSelected}
+              index={index}
+              fullWidth
+              moveFn={moveFn}
+              updateOrderFn={moveTerritoryMutation.mutate}
+              statementsCount={statementsCount}
+              isFavorited={isFavorited}
+              showOnly="label"
+              tooltipPosition="right"
+            />
             <TerritoryTreeContextMenu
               territoryActant={territory}
-              onMenuOpen={() => setContextMenuOpen(true)}
-              onMenuClose={() => setContextMenuOpen(false)}
+              onMenuOpen={handleMenuOpen}
+              onMenuClose={handleMenuClose}
               right={right}
               empty={(empty && !children.length) || false}
               storedTerritories={storedTerritories}
@@ -328,18 +241,12 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
           <StyledDisabledTag />
         )}
       </>
-    );
-  };
-
-  return (
-    <>
-      {renderTreeNode()}
 
       <StyledChildrenWrap>
         {!hideChildTerritories &&
           isExpanded &&
           childTerritories.map((child: IExtendedResponseTree, key: number) => (
-            <TerritoryTreeNode
+            <MemoizedTerritoryTreeNode
               key={key}
               index={key}
               propId={child.territory.id}
@@ -360,3 +267,5 @@ export const TerritoryTreeNode: React.FC<TerritoryTreeNode> = ({
     </>
   );
 };
+
+export const MemoizedTerritoryTreeNode = React.memo(TerritoryTreeNode);
