@@ -7,11 +7,21 @@ import {
 import api from "api";
 import React, { useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { DraggedPropRowCategory, ItemTypes, PropAttributeFilter } from "types";
+import {
+  DraggedPropRowCategory,
+  ItemTypes,
+  PropAttributeFilter,
+  classesAll,
+} from "types";
 import { FirstLevelPropGroup } from "./FirstLevelPropGroup/FirstLevelPropGroup";
 import { PropGroupRow } from "./PropGroupRow/PropGroupRow";
 import { SecondLevelPropGroup } from "./SecondLevelPropGroup/SecondLevelPropGroup";
 import { ThirdLevelPropGroup } from "./ThirdLevelPropGroup/ThirdLevelPropGroup";
+import { EntitySuggester } from "components/advanced";
+import { StyledSpareRow } from "./PropGroupStyles";
+import { EntityEnums } from "@shared/enums";
+import { allEntities } from "@shared/dictionaries/entity";
+import { excludedSuggesterEntities } from "Theme/constants";
 
 interface PropGroup {
   originId: string;
@@ -225,6 +235,60 @@ export const PropGroup: React.FC<PropGroup> = ({
             props={props}
             renderFirsLevelPropRow={renderFirsLevelPropRow}
           />
+
+          {/* First level meta props spare row */}
+          <StyledSpareRow $marginTop={props.length > 0}>
+            {/* RESOURCE */}
+            <EntitySuggester
+              alwaysShowCreateModal={alwaysShowCreateModal}
+              openDetailOnCreate={openDetailOnCreate}
+              territoryActants={[]}
+              onSelected={(newSelectedId) => {
+                // onChange(
+                //   [
+                //     ...references,
+                //     { id: uuidv4(), resource: newSelectedId, value: "" },
+                //   ],
+                //   true
+                // );
+                // if (tempValueTyped.length) {
+                //   setFieldToUpdate("value");
+                // }
+              }}
+              disableTemplatesAccept
+              categoryTypes={[EntityEnums.Class.Concept]}
+              isInsideTemplate={isInsideTemplate}
+              territoryParentId={territoryParentId}
+              // disabled={disabled}
+              // onTyped={(typed) => setTempResourceTyped(typed)}
+              // externalTyped={tempResourceTyped}
+            />
+            {/* VALUE */}
+            <EntitySuggester
+              alwaysShowCreateModal={alwaysShowCreateModal}
+              excludedEntityClasses={excludedSuggesterEntities}
+              openDetailOnCreate={openDetailOnCreate}
+              territoryActants={[]}
+              onSelected={(newSelectedId: string) => {
+                // onChange(
+                //   [
+                //     ...references,
+                //     { id: uuidv4(), resource: "", value: newSelectedId },
+                //   ],
+                //   true
+                // );
+                // if (tempResourceTyped.length) {
+                //   setFieldToUpdate("resource");
+                // }
+              }}
+              categoryTypes={classesAll}
+              isInsideTemplate={isInsideTemplate}
+              territoryParentId={territoryParentId}
+              // disabled={disabled}
+              // onTyped={(typed) => setTempValueTyped(typed)}
+              // externalTyped={tempValueTyped}
+            />
+          </StyledSpareRow>
         </React.Fragment>
       )}
     </>

@@ -13,8 +13,6 @@ import { v4 as uuidv4 } from "uuid";
 import { EntityReferenceTableRow } from "./EntityReferenceTableRow";
 import { StyledSpareRow } from "./EntityReferenceTableStyles";
 
-type CellType = CellProps<IReference>;
-
 interface EntityReferenceTable {
   entityId: string;
   entities: {
