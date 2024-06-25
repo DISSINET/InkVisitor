@@ -8,18 +8,18 @@ export interface IRequestStats {
   timeUnit: TimeUnit;
   eventType: EventType;
   aggregateBy: Aggregation;
-  activities: {
-    entities: boolean;
-    relationsMeta: boolean;
-    relationsStatement: boolean;
-    PropsMeta: boolean;
-    PropsStatement: boolean;
-    References: boolean;
-    Tags: boolean;
-  };
   filter: {
     userIds: string[] | "all";
-    entityTypes: EntityEnums.Class[] | "all";
-    relationTypes: RelationEnums.Type[] | "all";
+    activities: {
+      entities: boolean; // handling entities
+      relationsMeta: boolean; // relations inside entities
+      relationsStatement: boolean; // in-statment relations
+      propsMeta: boolean; // properties inside entities
+      propsStatement: boolean; // in-statement properties
+      references: boolean; // references for statements and entities
+      tags: boolean; // tags for statements and entities
+    };
+    entityTypes: EntityEnums.Class[] | "all"; // what entities are involved
+    relationTypes: RelationEnums.Type[] | "all"; // what relations are involved
   };
 }
