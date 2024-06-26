@@ -340,7 +340,6 @@ export default Router()
       }
 
       const user = await User.findUserByLogin(request.db, login, false);
-      console.log(user)
       if (!user) {
         throw new BadCredentialsError("wrong email / username");
       }
