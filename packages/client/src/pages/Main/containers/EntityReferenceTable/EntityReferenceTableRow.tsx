@@ -1,6 +1,6 @@
 import { IEntity, IReference } from "@shared/types";
 import { Button } from "components";
-import React, { useContext, useRef } from "react";
+import React, { useContext, useEffect, useRef } from "react";
 import {
   DragSourceMonitor,
   DropTargetMonitor,
@@ -47,6 +47,7 @@ interface EntityReferenceTableRow {
 
   initResourceTyped?: string;
   initValueTyped?: string;
+  onClearAfterInitTyped: () => void;
 
   userCanEdit: boolean;
   disabled?: boolean;
@@ -70,10 +71,16 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
 
   initResourceTyped,
   initValueTyped,
+  onClearAfterInitTyped,
 
   userCanEdit,
   disabled,
 }) => {
+  // clears the temporary input data after moving them from spare row to the suggester input
+  useEffect(() => {
+    onClearAfterInitTyped();
+  }, []);
+
   const dropRef = useRef<HTMLTableRowElement>(null);
   const dragRef = useRef<HTMLTableCellElement>(null);
 

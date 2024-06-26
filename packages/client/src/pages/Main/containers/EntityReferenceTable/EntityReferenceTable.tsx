@@ -45,9 +45,11 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
   // this states are part of the spare row functionality
   const [tempResourceTyped, setTempResourceTyped] = useState("");
   const [tempValueTyped, setTempValueTyped] = useState("");
+
   const [fieldToUpdate, setFieldToUpdate] = useState<
     false | "resource" | "value"
   >(false);
+
   const [refResourceTyped, setRefResourceTyped] = useState("");
   const [refValueTyped, setRefValueTyped] = useState("");
 
@@ -58,10 +60,12 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
         setRefResourceTyped(tempResourceTyped);
         setRefValueTyped("");
         setTempResourceTyped("");
+        setFieldToUpdate(false);
       } else if (fieldToUpdate === "value") {
         setRefValueTyped(tempValueTyped);
         setRefResourceTyped("");
         setTempValueTyped("");
+        setFieldToUpdate(false);
       }
       setFieldToUpdate(false);
     }
@@ -220,6 +224,10 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
             initValueTyped={
               localReferences.length === key + 1 ? refValueTyped : undefined
             }
+            onClearAfterInitTyped={() => {
+              setRefResourceTyped("");
+              setRefValueTyped("");
+            }}
           />
         );
       })}
