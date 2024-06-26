@@ -45,25 +45,23 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
   // this states are part of the spare row functionality
   const [tempResourceTyped, setTempResourceTyped] = useState("");
   const [tempValueTyped, setTempValueTyped] = useState("");
-
   const [fieldToUpdate, setFieldToUpdate] = useState<
     false | "resource" | "value"
   >(false);
-
-  const [refResourceTyped, setRefResourceTyped] = useState("");
-  const [refValueTyped, setRefValueTyped] = useState("");
+  const [initResourceTyped, setInitResourceTyped] = useState("");
+  const [initValueTyped, setInitValueTyped] = useState("");
 
   useEffect(() => {
     if (JSON.stringify(localReferences) !== JSON.stringify(references)) {
       setLocalReferences(references);
       if (fieldToUpdate === "resource") {
-        setRefResourceTyped(tempResourceTyped);
-        setRefValueTyped("");
+        setInitResourceTyped(tempResourceTyped);
+        setInitValueTyped("");
         setTempResourceTyped("");
         setFieldToUpdate(false);
       } else if (fieldToUpdate === "value") {
-        setRefValueTyped(tempValueTyped);
-        setRefResourceTyped("");
+        setInitValueTyped(tempValueTyped);
+        setInitResourceTyped("");
         setTempValueTyped("");
         setFieldToUpdate(false);
       }
@@ -219,14 +217,14 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
             openDetailOnCreate={openDetailOnCreate}
             territoryParentId={territoryParentId}
             initResourceTyped={
-              localReferences.length === key + 1 ? refResourceTyped : undefined
+              localReferences.length === key + 1 ? initResourceTyped : undefined
             }
             initValueTyped={
-              localReferences.length === key + 1 ? refValueTyped : undefined
+              localReferences.length === key + 1 ? initValueTyped : undefined
             }
             onClearAfterInitTyped={() => {
-              setRefResourceTyped("");
-              setRefValueTyped("");
+              setInitResourceTyped("");
+              setInitValueTyped("");
             }}
           />
         );
