@@ -16,7 +16,6 @@ export const StyledTable = styled.table<StyledTable>`
   box-shadow: ${({ theme }) => theme.boxShadow["subtle"]};
 
   transition: width 0.3s ease;
-  transition-delay: 100ms;
 `;
 export const StyledTHead = styled.thead`
   border-width: ${({ theme }) => theme.borderWidth[1]};
