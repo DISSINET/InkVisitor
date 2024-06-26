@@ -412,7 +412,7 @@ export enum StatementListDisplayMode {
 export declare type Identifier = string | symbol;
 
 export interface EntitiesDeleteSuccessResponse {
-  details: AxiosResponse<IResponseGeneric>;
+  details: any;
   entityId: string;
 }
 export interface EntitiesDeleteErrorResponse {

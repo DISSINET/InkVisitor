@@ -667,7 +667,8 @@ class Api {
   async entitiesDelete(
     entityIds: string[],
     options?: IApiOptions
-  ): Promise<AxiosResponse<IResponseGeneric>> {
+  ): Promise<(EntitiesDeleteSuccessResponse | EntitiesDeleteErrorResponse)[]> {
+    const out: (EntitiesDeleteSuccessResponse | EntitiesDeleteErrorResponse)[] = [];
     try {
       const response = await this.connection.delete(`/entities/`, {
         data: {
@@ -675,10 +676,28 @@ class Api {
         },
         ...options,
       });
-      return response;
+      const data = (response.data as IResponseGeneric<Record<string, errors.CustomError | true>>).data;
+      if (data) {
+        for (const errorEntityId of Object.keys(data)) {
+          if (data[errorEntityId] === true) {
+            out.push({ entityId: errorEntityId, details: data[errorEntityId] });
+          } else {
+            out.push({ entityId: errorEntityId, error: true, details: data[errorEntityId] });
+          }
+        }
+      }
     } catch (err) {
-      throw this.handleError(err);
+      for (const entityId of entityIds) {
+        out.push({
+          error: true,
+          message: `Failed to delete entity ${entityId}`,
+          entityId: entityId,
+          details: this.handleError(err),
+        });
+      }
     }
+
+    return out;
   }
 
   async entityRestore(

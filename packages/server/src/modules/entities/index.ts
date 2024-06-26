@@ -19,6 +19,7 @@ import {
   PermissionDeniedError,
   AuditDoesNotExist,
   InvalidDeleteError,
+  CustomError,
 } from "@shared/types/errors";
 import { Router } from "express";
 import { asyncRouteHandler } from "../index";
@@ -450,7 +451,7 @@ export default Router()
    */
   .delete(
     "/:entityId?",
-    asyncRouteHandler<IResponseGeneric<string[]>>(
+    asyncRouteHandler<IResponseGeneric<Record<string, CustomError | true>>>(
       async (
         req: IRequest<{ entityId?: string }, { entityIds?: string[] }>
       ) => {
@@ -467,22 +468,18 @@ export default Router()
 
         await req.db.lock();
 
-        // if relations are linked to this entity, the delete should not be allowed
-        const [linkIds, relIds] = await Relation.getLinkedForEntities(req, ids);
-        if (relIds.length) {
-          throw new InvalidDeleteError(
-            `Cannot be deleted while linked to relations (${
-              relIds[0] +
-              (relIds.length > 1 ? " + " + (relIds.length - 1) + " others" : "")
-            })`
-          ).withData(linkIds);
-        }
+        const out: IResponseGeneric<Record<string, CustomError | true>> = {
+          result: true,
+        };
+
+        out.data = {};
 
         // entity should exist
         const existing = await Entity.findEntitiesByIds(req.db.connection, ids);
         for (const wantedId of ids) {
           if (!existing.find((e) => e.id === wantedId)) {
-            throw new EntityDoesNotExist(
+           out.result = false;
+           out.data[wantedId] = new EntityDoesNotExist(
               `entity with id ${wantedId} does not exist`,
               wantedId
             );
@@ -491,21 +488,44 @@ export default Router()
 
         // final removal process called on constructed instance
         for (const entity of existing) {
+          // if relations are linked to this entity, the delete should not be allowed
+          const [linkIds, relIds] = await Relation.getLinkedForEntities(req, [entity.id]);
+          if (relIds.length) {
+            out.result = false;
+            out.data[entity.id] = new InvalidDeleteError(
+              `Cannot be deleted while linked to relations (${
+                relIds[0] +
+                (relIds.length > 1 ? " + " + (relIds.length - 1) + " others" : "")
+              })`
+            ).withData(linkIds);
+            continue;
+          }
+
           const model = getEntityClass(entity);
           if (!model.canBeDeletedByUser(req.getUserOrFail())) {
-            throw new PermissionDeniedError(
+            out.result = false;
+            out.data[entity.id] = new PermissionDeniedError(
               "entity cannot be deleted by current user"
             );
           }
 
-          if ((await model.delete(req.db.connection)).deleted !== 1) {
-            throw new InternalServerError(`cannot delete entity ${entity.id}`);
+          try {
+            if ((await model.delete(req.db.connection)).deleted !== 1) {
+              throw new InternalServerError(`cannot delete entity ${entity.id}`);
+            }
+            out.data[entity.id] = true
+          } catch (e) {
+            out.result = false;
+            out.data[entity.id] = e as CustomError
           }
         }
 
-        return {
-          result: true,
-        };
+        // throw basic error if deleting single entity
+        if (ids.length === 1 && !out.result) {
+          throw out.data[Object.keys(out.data)[0]]
+        }
+
+        return out;
       }
     )
   )
