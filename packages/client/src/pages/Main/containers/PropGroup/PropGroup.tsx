@@ -9,7 +9,7 @@ import { useQuery } from "@tanstack/react-query";
 import { excludedSuggesterEntities } from "Theme/constants";
 import api from "api";
 import { EntitySuggester } from "components/advanced";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   DraggedPropRowCategory,
   ItemTypes,
@@ -38,6 +38,10 @@ interface PropGroup {
   removeProp: (propId: string) => void;
   addProp: (originId: string) => void;
   movePropToIndex: (propId: string, oldIndex: number, newIndex: number) => void;
+  addPropWithEntityId: (variables: {
+    typeEntityId?: string;
+    valueEntityId?: string;
+  }) => void;
 
   userCanEdit: boolean;
   openDetailOnCreate: boolean;
@@ -61,6 +65,7 @@ export const PropGroup: React.FC<PropGroup> = ({
   removeProp,
   addProp,
   movePropToIndex,
+  addPropWithEntityId,
 
   userCanEdit,
   openDetailOnCreate = false,
@@ -92,13 +97,43 @@ export const PropGroup: React.FC<PropGroup> = ({
     enabled: !!territoryId && api.isLoggedIn(),
   });
 
+  // this states are part of the spare row functionality
+  const [tempTypeTyped, setTempTypeTyped] = useState("");
+  const [tempValueTyped, setTempValueTyped] = useState("");
+  const [fieldToUpdate, setFieldToUpdate] = useState<false | "type" | "value">(
+    false
+  );
+  const [initTypeTyped, setInitTypeTyped] = useState("");
+  const [initValueTyped, setInitValueTyped] = useState("");
+
+  useEffect(() => {
+    if (fieldToUpdate === "type") {
+      setInitTypeTyped(tempTypeTyped);
+      setInitValueTyped("");
+      setTempTypeTyped("");
+      setFieldToUpdate(false);
+    } else if (fieldToUpdate === "value") {
+      setInitValueTyped(tempValueTyped);
+      setInitTypeTyped("");
+      setTempValueTyped("");
+      setFieldToUpdate(false);
+    }
+  }, [props]);
+
+  // TODO: make component outside of this component in this file to use useEffect
   const renderFirsLevelPropRow = useCallback(
     (
       prop1: IProp,
       pi1: number,
       moveProp: (dragIndex: number, hoverIndex: number) => void,
-      hasOrder: boolean
+      hasOrder: boolean,
+      isLast: boolean
     ) => {
+      // useEffect(() => {
+      //   setInitTypeTyped("");
+      //   setInitValueTyped("");
+      // }, []);
+
       return (
         <React.Fragment key={prop1.id}>
           <PropGroupRow
@@ -124,6 +159,8 @@ export const PropGroup: React.FC<PropGroup> = ({
             hasOrder={hasOrder}
             lowIdent={lowIdent}
             alwaysShowCreateModal={alwaysShowCreateModal}
+            initTypeTyped={isLast ? initTypeTyped : undefined}
+            initValueTyped={isLast ? initValueTyped : undefined}
           />
           {/* 2nd level */}
           <SecondLevelPropGroup
@@ -135,7 +172,7 @@ export const PropGroup: React.FC<PropGroup> = ({
         </React.Fragment>
       );
     },
-    [entities, boxEntity]
+    [entities, boxEntity, initTypeTyped, initValueTyped]
   );
 
   const renderSecondLevelPropRow = useCallback(
@@ -225,15 +262,6 @@ export const PropGroup: React.FC<PropGroup> = ({
     [entities, boxEntity]
   );
 
-  // this states are part of the spare row functionality
-  const [tempTypeTyped, setTempTypeTyped] = useState("");
-  const [tempValueTyped, setTempValueTyped] = useState("");
-  const [fieldToUpdate, setFieldToUpdate] = useState<false | "type" | "value">(
-    false
-  );
-  const [initTypeTyped, setInitTypeTyped] = useState("");
-  const [initValueTyped, setInitValueTyped] = useState("");
-
   return (
     <>
       {props.length > 0 && (
@@ -247,23 +275,17 @@ export const PropGroup: React.FC<PropGroup> = ({
       )}
       {/* First level meta props spare row */}
       <StyledSpareRow $marginTop={props.length > 0}>
-        {/* RESOURCE */}
+        {/* TYPE */}
         <EntitySuggester
           placeholder="type"
           alwaysShowCreateModal={alwaysShowCreateModal}
           openDetailOnCreate={openDetailOnCreate}
           territoryActants={[]}
           onSelected={(newSelectedId) => {
-            // onChange(
-            //   [
-            //     ...references,
-            //     { id: uuidv4(), resource: newSelectedId, value: "" },
-            //   ],
-            //   true
-            // );
-            // if (tempValueTyped.length) {
-            //   setFieldToUpdate("value");
-            // }
+            addPropWithEntityId({ typeEntityId: newSelectedId });
+            if (tempValueTyped.length) {
+              setFieldToUpdate("value");
+            }
           }}
           disableTemplatesAccept
           categoryTypes={[EntityEnums.Class.Concept]}
@@ -281,16 +303,10 @@ export const PropGroup: React.FC<PropGroup> = ({
           openDetailOnCreate={openDetailOnCreate}
           territoryActants={[]}
           onSelected={(newSelectedId: string) => {
-            // onChange(
-            //   [
-            //     ...references,
-            //     { id: uuidv4(), resource: "", value: newSelectedId },
-            //   ],
-            //   true
-            // );
-            // if (tempResourceTyped.length) {
-            //   setFieldToUpdate("resource");
-            // }
+            addPropWithEntityId({ valueEntityId: newSelectedId });
+            if (tempTypeTyped.length) {
+              setFieldToUpdate("type");
+            }
           }}
           categoryTypes={classesAll}
           isInsideTemplate={isInsideTemplate}

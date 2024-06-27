@@ -65,7 +65,6 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
         setTempValueTyped("");
         setFieldToUpdate(false);
       }
-      setFieldToUpdate(false);
     }
   }, [references]);
 

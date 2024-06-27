@@ -63,6 +63,9 @@ interface PropGroupRow {
   territoryParentId?: string;
   lowIdent?: boolean;
   alwaysShowCreateModal?: boolean;
+
+  initTypeTyped?: string;
+  initValueTyped?: string;
 }
 
 export const PropGroupRow: React.FC<PropGroupRow> = ({
@@ -88,6 +91,9 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
   territoryParentId,
   lowIdent = false,
   alwaysShowCreateModal,
+
+  initTypeTyped,
+  initValueTyped,
 }) => {
   const propTypeEntity: IEntity | undefined = entities[prop.type.entityId];
   const propValueEntity: IEntity | undefined = entities[prop.value.entityId];
@@ -199,6 +205,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
                 updateProp={updateProp}
                 userCanEdit={userCanEdit}
                 alwaysShowCreateModal={alwaysShowCreateModal}
+                initTypeTyped={initTypeTyped}
               />
             </StyledBorderLeft>
           </StyledPropLineColumn>
@@ -215,6 +222,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
               updateProp={updateProp}
               userCanEdit={userCanEdit}
               alwaysShowCreateModal={alwaysShowCreateModal}
+              initValueTyped={initValueTyped}
             />
           </StyledPropLineColumn>
           <StyledPropLineColumn>

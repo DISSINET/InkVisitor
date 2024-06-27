@@ -8,7 +8,8 @@ interface FirstLevelPropGroup {
     prop1: IProp,
     pi1: number,
     moveProp: (dragIndex: number, hoverIndex: number) => void,
-    hasOrder: boolean
+    hasOrder: boolean,
+    isLast: boolean
   ) => JSX.Element;
 }
 export const FirstLevelPropGroup: React.FC<FirstLevelPropGroup> = ({
@@ -35,7 +36,13 @@ export const FirstLevelPropGroup: React.FC<FirstLevelPropGroup> = ({
   return (
     <>
       {firstLevelProps.map((prop1: IProp, pi1: number) =>
-        renderFirsLevelPropRow(prop1, pi1, moveProp, firstLevelProps.length > 1)
+        renderFirsLevelPropRow(
+          prop1,
+          pi1,
+          moveProp,
+          firstLevelProps.length > 1,
+          firstLevelProps.length === pi1 + 1
+        )
       )}
     </>
   );
