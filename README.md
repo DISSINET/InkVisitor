@@ -145,7 +145,7 @@ For quicker use, use can also run the server directly without building using `pn
 
 ### SSL
 
-The app does not support ssl internally, it should be handled in upper layer, ie. `nginx`. Please adjust variables in `.env` files if required (api path).
+The app does not support ssl internally, it should be handled in upper layer, ie. [nginx](https://docs.nginx.com/nginx/admin-guide/security-controls/securing-http-traffic-upstream/). Please adjust `APIURL` variable in client's `.env` file to use `https` instead of `http`.
 
 ### Firewall
 
