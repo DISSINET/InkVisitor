@@ -39,7 +39,7 @@ interface PropGroup {
   removeProp: (propId: string) => void;
   addProp: (originId: string) => void;
   movePropToIndex: (propId: string, oldIndex: number, newIndex: number) => void;
-  addPropWithEntityId: (variables: {
+  addPropWithEntityId?: (variables: {
     typeEntityId?: string;
     valueEntityId?: string;
   }) => void;
@@ -53,6 +53,7 @@ interface PropGroup {
   lowIdent?: boolean;
 
   alwaysShowCreateModal?: boolean;
+  disableSpareRow?: boolean;
 }
 
 export const PropGroup: React.FC<PropGroup> = ({
@@ -77,6 +78,7 @@ export const PropGroup: React.FC<PropGroup> = ({
   lowIdent,
 
   alwaysShowCreateModal,
+  disableSpareRow,
 }) => {
   // territory query
   const {
@@ -269,7 +271,7 @@ export const PropGroup: React.FC<PropGroup> = ({
         </React.Fragment>
       )}
       {/* First level meta props spare row */}
-      {userCanEdit && (
+      {userCanEdit && !disableSpareRow && (
         <StyledSpareRow $marginTop={props.length > 0}>
           {/* TYPE */}
           <EntitySuggester
@@ -278,9 +280,11 @@ export const PropGroup: React.FC<PropGroup> = ({
             openDetailOnCreate={openDetailOnCreate}
             territoryActants={[]}
             onSelected={(newSelectedId) => {
-              addPropWithEntityId({ typeEntityId: newSelectedId });
-              if (tempValueTyped.length) {
-                setFieldToUpdate("value");
+              if (addPropWithEntityId) {
+                addPropWithEntityId({ typeEntityId: newSelectedId });
+                if (tempValueTyped.length) {
+                  setFieldToUpdate("value");
+                }
               }
             }}
             disableTemplatesAccept
@@ -299,9 +303,12 @@ export const PropGroup: React.FC<PropGroup> = ({
             openDetailOnCreate={openDetailOnCreate}
             territoryActants={[]}
             onSelected={(newSelectedId: string) => {
-              addPropWithEntityId({ valueEntityId: newSelectedId });
-              if (tempTypeTyped.length) {
-                setFieldToUpdate("type");
+              if (addPropWithEntityId) {
+                addPropWithEntityId &&
+                  addPropWithEntityId({ valueEntityId: newSelectedId });
+                if (tempTypeTyped.length) {
+                  setFieldToUpdate("type");
+                }
               }
             }}
             categoryTypes={classesAll}

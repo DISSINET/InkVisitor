@@ -19,7 +19,7 @@ interface FirstLevelPropGroupRow {
   removeProp: (propId: string) => void;
   addProp: (originId: string) => void;
   movePropToIndex: (propId: string, oldIndex: number, newIndex: number) => void;
-  addPropWithEntityId: (variables: {
+  addPropWithEntityId?: (variables: {
     typeEntityId?: string;
     valueEntityId?: string;
   }) => void;

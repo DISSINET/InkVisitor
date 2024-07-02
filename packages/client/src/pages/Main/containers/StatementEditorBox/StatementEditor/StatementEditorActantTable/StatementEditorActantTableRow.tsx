@@ -380,6 +380,7 @@ export const StatementEditorActantTableRow: React.FC<
             category={category}
             isInsideTemplate={isInsideTemplate}
             territoryParentId={territoryParentId}
+            disableSpareRow
           />
         );
       }
