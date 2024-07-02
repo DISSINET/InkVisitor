@@ -21,6 +21,8 @@ interface EntityReferenceTableResource {
   alwaysShowCreateModal?: boolean;
   openDetailOnCreate?: boolean;
 
+  initResourceTyped?: string;
+
   disabled?: boolean;
 }
 export const EntityReferenceTableResource: React.FC<
@@ -33,6 +35,8 @@ export const EntityReferenceTableResource: React.FC<
   territoryParentId,
   alwaysShowCreateModal,
   openDetailOnCreate,
+
+  initResourceTyped,
 
   disabled,
 }) => {
@@ -78,6 +82,7 @@ export const EntityReferenceTableResource: React.FC<
           isInsideTemplate={isInsideTemplate}
           territoryParentId={territoryParentId}
           disabled={disabled}
+          initTyped={initResourceTyped}
         />
       )}
     </StyledGridValue>

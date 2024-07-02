@@ -312,6 +312,7 @@ export const StatementEditorActionTableRow: React.FC<
             category={category}
             isInsideTemplate={isInsideTemplate}
             territoryParentId={territoryParentId}
+            disableSpareRow
           />
         );
       }
