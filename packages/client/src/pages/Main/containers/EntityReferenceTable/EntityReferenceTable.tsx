@@ -230,58 +230,60 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
       })}
 
       {/* Entity reference spare row */}
-      <StyledSpareRow $marginTop={localReferences.length > 0}>
-        {/* RESOURCE */}
-        <EntitySuggester
-          alwaysShowCreateModal={alwaysShowCreateModal}
-          openDetailOnCreate={openDetailOnCreate}
-          territoryActants={[]}
-          onSelected={(newSelectedId) => {
-            onChange(
-              [
-                ...references,
-                { id: uuidv4(), resource: newSelectedId, value: "" },
-              ],
-              true
-            );
-            if (tempValueTyped.length) {
-              setFieldToUpdate("value");
-            }
-          }}
-          disableTemplatesAccept
-          categoryTypes={[EntityEnums.Class.Resource]}
-          isInsideTemplate={isInsideTemplate}
-          territoryParentId={territoryParentId}
-          disabled={disabled}
-          onTyped={(typed) => setTempResourceTyped(typed)}
-          externalTyped={tempResourceTyped}
-        />
-        {/* VALUE */}
-        <EntitySuggester
-          alwaysShowCreateModal={alwaysShowCreateModal}
-          excludedEntityClasses={excludedSuggesterEntities}
-          openDetailOnCreate={openDetailOnCreate}
-          territoryActants={[]}
-          onSelected={(newSelectedId: string) => {
-            onChange(
-              [
-                ...references,
-                { id: uuidv4(), resource: "", value: newSelectedId },
-              ],
-              true
-            );
-            if (tempResourceTyped.length) {
-              setFieldToUpdate("resource");
-            }
-          }}
-          categoryTypes={[EntityEnums.Class.Value]}
-          isInsideTemplate={isInsideTemplate}
-          territoryParentId={territoryParentId}
-          disabled={disabled}
-          onTyped={(typed) => setTempValueTyped(typed)}
-          externalTyped={tempValueTyped}
-        />
-      </StyledSpareRow>
+      {userCanEdit && (
+        <StyledSpareRow $marginTop={localReferences.length > 0}>
+          {/* RESOURCE */}
+          <EntitySuggester
+            alwaysShowCreateModal={alwaysShowCreateModal}
+            openDetailOnCreate={openDetailOnCreate}
+            territoryActants={[]}
+            onSelected={(newSelectedId) => {
+              onChange(
+                [
+                  ...references,
+                  { id: uuidv4(), resource: newSelectedId, value: "" },
+                ],
+                true
+              );
+              if (tempValueTyped.length) {
+                setFieldToUpdate("value");
+              }
+            }}
+            disableTemplatesAccept
+            categoryTypes={[EntityEnums.Class.Resource]}
+            isInsideTemplate={isInsideTemplate}
+            territoryParentId={territoryParentId}
+            disabled={disabled}
+            onTyped={(typed) => setTempResourceTyped(typed)}
+            externalTyped={tempResourceTyped}
+          />
+          {/* VALUE */}
+          <EntitySuggester
+            alwaysShowCreateModal={alwaysShowCreateModal}
+            excludedEntityClasses={excludedSuggesterEntities}
+            openDetailOnCreate={openDetailOnCreate}
+            territoryActants={[]}
+            onSelected={(newSelectedId: string) => {
+              onChange(
+                [
+                  ...references,
+                  { id: uuidv4(), resource: "", value: newSelectedId },
+                ],
+                true
+              );
+              if (tempResourceTyped.length) {
+                setFieldToUpdate("resource");
+              }
+            }}
+            categoryTypes={[EntityEnums.Class.Value]}
+            isInsideTemplate={isInsideTemplate}
+            territoryParentId={territoryParentId}
+            disabled={disabled}
+            onTyped={(typed) => setTempValueTyped(typed)}
+            externalTyped={tempValueTyped}
+          />
+        </StyledSpareRow>
+      )}
 
       <div style={{ marginTop: "1.5rem" }}>
         {!disabled && (

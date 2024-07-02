@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useState } from "react";
 
 interface FirstLevelPropGroup {
   props: IProp[];
-  renderFirsLevelPropRow: (
+  renderFirstLevelPropRow: (
     prop1: IProp,
     pi1: number,
     moveProp: (dragIndex: number, hoverIndex: number) => void,
@@ -14,7 +14,7 @@ interface FirstLevelPropGroup {
 }
 export const FirstLevelPropGroup: React.FC<FirstLevelPropGroup> = ({
   props,
-  renderFirsLevelPropRow,
+  renderFirstLevelPropRow,
 }) => {
   useEffect(() => {
     setFirstLevelProps(props);
@@ -36,7 +36,7 @@ export const FirstLevelPropGroup: React.FC<FirstLevelPropGroup> = ({
   return (
     <>
       {firstLevelProps.map((prop1: IProp, pi1: number) =>
-        renderFirsLevelPropRow(
+        renderFirstLevelPropRow(
           prop1,
           pi1,
           moveProp,
