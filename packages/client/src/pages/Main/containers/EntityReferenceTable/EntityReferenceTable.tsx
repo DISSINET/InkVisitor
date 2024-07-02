@@ -7,7 +7,6 @@ import { CReference } from "constructors";
 import update from "immutability-helper";
 import React, { useCallback, useEffect, useState } from "react";
 import { FaPlus } from "react-icons/fa";
-import { CellProps } from "react-table";
 import { deepCopy } from "utils/utils";
 import { v4 as uuidv4 } from "uuid";
 import { EntityReferenceTableRow } from "./EntityReferenceTableRow";

@@ -1,8 +1,7 @@
 import { IEntity, IProp } from "@shared/types";
 import React, { useEffect } from "react";
-import { PropGroupRow } from "../PropGroupRow/PropGroupRow";
 import { DraggedPropRowCategory, ItemTypes, PropAttributeFilter } from "types";
-import { SecondLevelPropGroup } from "../SecondLevelPropGroup/SecondLevelPropGroup";
+import { PropGroupRow } from "../PropGroupRow/PropGroupRow";
 
 interface FirstLevelPropGroupRow {
   prop1: IProp;
