@@ -1,5 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { FaPen, FaRegSave, FaTrash } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { v4 as uuidv4 } from "uuid";
@@ -16,6 +23,7 @@ import { EntityColors } from "types";
 import { useAnnotator } from "./AnnotatorContext";
 import TextAnnotatorMenu from "./AnnotatorMenu";
 import {
+  StyledAnnotatorMenu,
   StyledCanvasWrapper,
   StyledLinesCanvas,
   StyledMainCanvas,
@@ -67,6 +75,7 @@ export const TextAnnotator = ({
       setAnnotatorMode(Modes.HIGHLIGHT);
     },
   });
+
   const updateDocumentMutationQuiet = useMutation({
     mutationFn: async (data: { id: string; doc: Partial<IDocument> }) =>
       api.documentUpdate(data.id, data.doc),
@@ -225,12 +234,14 @@ export const TextAnnotator = ({
   }, [document, theme]);
 
   const topBottomSelection = useMemo<boolean>(() => {
-    const selectedText = annotator?.cursor?.getSelected();
+    const yStart = annotator?.cursor?.selectStart?.yLine;
+    const yEnd = annotator?.cursor?.selectEnd?.yLine;
 
-    // FIX ME: this is a hack to determine if the selection is from top to bottom
-
-    // return (selectedText?.[0]?.yLine ?? 0) < (selectedText?.[1]?.yLine ?? 0);
-    return true;
+    if (!yStart || !yEnd) {
+      return false;
+    } else {
+      return yStart < yEnd;
+    }
   }, [annotator?.cursor?.yLine]);
 
   const menuPositionY = useMemo<number>(() => {
@@ -244,40 +255,54 @@ export const TextAnnotator = ({
     return annotator?.text?.value !== document?.content;
   }, [annotator?.text?.value, document?.content]);
 
+  const onCreateTerritory = useCallback(() => {
+    if (handleCreateTerritory && selectedText) {
+      const newTerritoryId = uuidv4();
+      handleAddAnchor(newTerritoryId);
+      handleCreateTerritory(newTerritoryId);
+    }
+  }, [handleCreateTerritory, selectedText]);
+
+  const onCreateStatement = useCallback(() => {
+    if (handleCreateStatement && selectedText) {
+      const newStatementId = uuidv4();
+      handleAddAnchor(newStatementId);
+      // remove linebreaks from text
+      const validatedText = selectedText.replace(/\n/g, " ");
+      handleCreateStatement(validatedText, newStatementId);
+    }
+  }, [handleCreateStatement, selectedText]);
+
+  const onRemoveAnchor = useCallback(() => {
+    (anchor: string) => {
+      annotator?.removeAnchorFromSelection(anchor);
+      handleSaveNewContent(true);
+    };
+  }, []);
+
   return (
     <div style={{ width: width, position: "absolute" }}>
       <StyledCanvasWrapper>
         {document && annotatorMode === Modes.HIGHLIGHT && selectedText && (
-          <TextAnnotatorMenu
-            anchors={selectedAnchors}
-            document={document}
-            text={selectedText}
-            entities={storedEntities.current}
-            onAnchorAdd={handleAddAnchor}
-            yPosition={menuPositionY}
-            topBottomSelection={topBottomSelection}
-            handleCreateTerritory={() => {
-              if (handleCreateTerritory && selectedText) {
-                const newTerritoryId = uuidv4();
-                handleAddAnchor(newTerritoryId);
-                handleCreateTerritory(newTerritoryId);
-              }
-            }}
-            handleCreateStatement={() => {
-              if (handleCreateStatement && selectedText) {
-                const newStatementId = uuidv4();
-                handleAddAnchor(newStatementId);
-                // remove linebreaks from text
-                const validatedText = selectedText.replace(/\n/g, " ");
-                handleCreateStatement(validatedText, newStatementId);
-              }
-            }}
-            handleRemoveAnchor={(anchor: string) => {
-              annotator?.removeAnchorFromSelection(anchor);
-              handleSaveNewContent(true);
-            }}
-          />
+          <StyledAnnotatorMenu
+            $top={menuPositionY}
+            $left={100}
+            // $translateY={"100%"}
+            $translateY={topBottomSelection ? "-100%" : "0%"}
+          >
+            <TextAnnotatorMenu
+              anchors={selectedAnchors}
+              document={document}
+              text={selectedText}
+              entities={storedEntities.current}
+              onAnchorAdd={handleAddAnchor}
+              handleCreateTerritory={onCreateTerritory}
+              handleCreateStatement={onCreateStatement}
+              handleRemoveAnchor={onRemoveAnchor}
+            />
+          </StyledAnnotatorMenu>
         )}
+
         {displayLineNumbers && (
           <StyledLinesCanvas
             ref={lines}

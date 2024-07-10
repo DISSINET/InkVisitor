@@ -75,7 +75,10 @@ export const CIdentification = (): IStatementIdentification => ({
   moodvariant: EntityEnums.MoodVariant.Realis,
 });
 
-export const CMetaProp = (): IProp => ({
+export const CMetaProp = (variables?: {
+  typeEntityId?: string;
+  valueEntityId?: string;
+}): IProp => ({
   id: uuidv4(),
   elvl: EntityEnums.Elvl.Inferential,
   certainty: EntityEnums.Certainty.Empty,
@@ -88,14 +91,14 @@ export const CMetaProp = (): IProp => ({
   children: [],
 
   type: {
-    entityId: "",
+    entityId: variables?.typeEntityId ? variables.typeEntityId : "",
     elvl: EntityEnums.Elvl.Inferential,
     logic: EntityEnums.Logic.Positive,
     virtuality: EntityEnums.Virtuality.Reality,
     partitivity: EntityEnums.Partitivity.Unison,
   },
   value: {
-    entityId: "",
+    entityId: variables?.valueEntityId ? variables.valueEntityId : "",
     elvl: EntityEnums.Elvl.Inferential,
     logic: EntityEnums.Logic.Positive,
     virtuality: EntityEnums.Virtuality.Reality,

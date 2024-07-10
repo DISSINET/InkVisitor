@@ -33,6 +33,8 @@ interface PropGroupRowValue {
   disabledAttributes: PropAttributeFilter;
   openDetailOnCreate: boolean;
   alwaysShowCreateModal?: boolean;
+
+  initValueTyped?: string;
 }
 export const PropGroupRowValue: React.FC<PropGroupRowValue> = ({
   propValueEntity,
@@ -46,6 +48,8 @@ export const PropGroupRowValue: React.FC<PropGroupRowValue> = ({
   disabledAttributes,
   openDetailOnCreate,
   alwaysShowCreateModal,
+
+  initValueTyped,
 }) => {
   return (
     <StyledAttributesFlexColumn>
@@ -142,6 +146,7 @@ export const PropGroupRowValue: React.FC<PropGroupRowValue> = ({
             territoryParentId={territoryParentId}
             disabled={!userCanEdit}
             alwaysShowCreateModal={alwaysShowCreateModal}
+            initTyped={initValueTyped}
           />
         )}
       </StyledTagGrid>

@@ -5,29 +5,31 @@
     "esModuleInterop": true,
     "experimentalDecorators": true,
     "importHelpers": true,
+    "incremental": true,
     "module": "commonjs",
+    "moduleResolution": "node",
     "outDir": "build",
+    "paths": {
+      "@common/*": ["src/common/*"],
+      "@middlewares/*": ["src/middlewares/*"],
+      "@models/*": ["src/models/*"],
+      "@modules/*": ["src/modules/*"],
+      "@service/*": ["src/service/*"],
+      "@shared/*": ["./../shared/*"]
+    },
     "removeComments": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
     "sourceMap": true,
     "strict": true,
     "target": "es6",
-    "moduleResolution": "node",
-    "resolveJsonModule": true,
-    "paths": {
-      "@common/*": ["src/common/*"],
-      "@shared/*": ["./../shared/*"],
-      "@modules/*": ["src/modules/*"],
-      "@service/*": ["src/service/*"],
-      "@models/*": ["src/models/*"],
-      "@middlewares/*": ["src/middlewares/*"]
-    },
-    "types": ["node", "jest"],
-    "typeRoots": ["node_modules/@types"]
+    "typeRoots": ["node_modules/@types"],
+    "types": ["node", "jest"]
   },
-  "ts-node": {
-    "files": true
-  },
+  "exclude": ["src/public/", "node_modules", "build"],
   "files": ["src/custom_typings/request.d.ts"],
   "include": ["src/**/*.ts"],
-  "exclude": ["src/public/", "node_modules", "build"]
+  "ts-node": {
+    "files": true
+  }
 }
