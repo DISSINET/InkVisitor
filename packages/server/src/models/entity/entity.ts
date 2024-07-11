@@ -7,7 +7,6 @@ import {
   InternalServerError,
   InvalidDeleteError,
   ModelNotValidError,
-  PermissionDeniedError,
 } from "@shared/types/errors";
 import User from "@models/user/user";
 import Prop from "@models/prop/prop";
@@ -15,10 +14,6 @@ import { findEntityById } from "@service/shorthands";
 import { IRequest } from "../../custom_typings/request";
 import { sanitizeText } from "@common/functions";
 import Reference from "./reference";
-import { link } from "fs";
-import { getEntityClass } from "@models/factory";
-import Relation from "@models/relation/relation";
-import Audit from "@models/audit/audit";
 
 export default class Entity implements IEntity, IDbModel {
   static table = "entities";
@@ -115,19 +110,20 @@ export default class Entity implements IEntity, IDbModel {
     return rethink.table(Entity.table).get(this.id).update(updateData).run(db);
   }
 
-  async getUsedByEntity(db: Connection): Promise<IEntity | null> {
+  async getUsedByEntity(db: Connection): Promise<IEntity[]> {
+    const out: Record<string, IEntity> = {};
     for (const index of DbEnums.EntityIdReferenceIndexes) {
       const entities: IEntity[] = await rethink
         .table(Entity.table)
         .getAll(this.id, { index })
         .run(db);
 
-      if (entities.length) {
-        return entities[0];
+      for (const entity of entities) {
+        out[entity.id] = entity;
       }
     }
 
-    return null;
+    return Object.values(out);
   }
 
   async delete(db: Connection): Promise<WriteResult> {
@@ -137,16 +133,6 @@ export default class Entity implements IEntity, IDbModel {
       );
     }
     
-    // find other entities dependend on this one
-    const usedBy = await this.getUsedByEntity(db);
-    if (usedBy) {
-      throw new InvalidDeleteError(
-        `Referenced by entity ${usedBy.id}${
-          usedBy.label ? "(" + usedBy.label + ")" : ""
-        }`
-      ).withData([usedBy.id]);;
-    }
-
     // if bookmarks are linked to this entity, the bookmarks should be removed also
     await User.removeBookmarkedEntity(db, this.id);
     if (this.class === EntityEnums.Class.Territory) {
