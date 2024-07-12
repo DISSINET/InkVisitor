@@ -486,7 +486,20 @@ export default Router()
           }
         }
 
-        // final removal process called on constructed instance
+        // key is id of entity, that depends on entities, that will be deleted (value array)
+        let dependencyMap: Record<string, string[]> = {};
+        // function will remove removedId as dependency from possible waiting entries
+        const removeDependency = (removedId: string) => {
+          for (const entityId of Object.keys(dependencyMap)) {
+            const index = dependencyMap[entityId].indexOf(removedId);
+            if (index !== -1) {
+              dependencyMap[entityId].splice(index, 1); 
+            }
+          }
+          delete dependencyMap[removedId];
+        }
+
+        // check for any blocking reasons for not deleting the entity + construct dependency map
         for (const entity of existing) {
           // if relations are linked to this entity, the delete should not be allowed
           const [linkIds, relIds] = await Relation.getLinkedForEntities(req, [entity.id]);
@@ -507,18 +520,41 @@ export default Router()
             out.data[entity.id] = new PermissionDeniedError(
               "entity cannot be deleted by current user"
             );
+            continue;
           }
 
-          try {
-            if ((await model.delete(req.db.connection)).deleted !== 1) {
-              throw new InternalServerError(`cannot delete entity ${entity.id}`);
-            }
-            out.data[entity.id] = true
-          } catch (e) {
+          dependencyMap[entity.id] = [];
+
+          // find other entities dependend on this one
+          const usedBy = await model.getUsedByEntity(req.db.connection);
+          if (usedBy.length) {
             out.result = false;
-            out.data[entity.id] = e as CustomError
+            out.data[entity.id] = new InvalidDeleteError(`Referenced by other entities`).withData(usedBy.map(e => e.id));
+            dependencyMap[entity.id] = usedBy.map(e => e.id)
+            continue;
           }
         }
+
+        let removedCount: number;
+        do {
+          removedCount = 0;
+          for (const entityId of Object.keys(dependencyMap)) {
+            if (dependencyMap[entityId].length === 0) {
+              try {
+                const model = getEntityClass(existing.find(e => e.id === entityId));
+                if ((await model.delete(req.db.connection)).deleted !== 1) {
+                  throw new InternalServerError(`cannot delete entity ${entityId}`);
+                }
+                out.data[entityId] = true;
+                removeDependency(entityId);
+                removedCount++;
+              } catch (e) {
+                out.result = false;
+                out.data[entityId] = e as CustomError
+              }
+            }
+          }
+        } while (removedCount > 0);
 
         // throw basic error if deleting single entity
         if (ids.length === 1 && !out.result) {
