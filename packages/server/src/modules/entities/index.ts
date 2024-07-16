@@ -478,8 +478,8 @@ export default Router()
         const existing = await Entity.findEntitiesByIds(req.db.connection, ids);
         for (const wantedId of ids) {
           if (!existing.find((e) => e.id === wantedId)) {
-           out.result = false;
-           out.data[wantedId] = new EntityDoesNotExist(
+            out.result = false;
+            out.data[wantedId] = new EntityDoesNotExist(
               `entity with id ${wantedId} does not exist`,
               wantedId
             );
@@ -493,7 +493,7 @@ export default Router()
           for (const entityId of Object.keys(dependencyMap)) {
             const index = dependencyMap[entityId].indexOf(removedId);
             if (index !== -1) {
-              dependencyMap[entityId].splice(index, 1); 
+              dependencyMap[entityId].splice(index, 1);
             }
           }
           delete dependencyMap[removedId];
@@ -506,9 +506,8 @@ export default Router()
           if (relIds.length) {
             out.result = false;
             out.data[entity.id] = new InvalidDeleteError(
-              `Cannot be deleted while linked to relations (${
-                relIds[0] +
-                (relIds.length > 1 ? " + " + (relIds.length - 1) + " others" : "")
+              `Cannot be deleted while linked to relations (${relIds[0] +
+              (relIds.length > 1 ? " + " + (relIds.length - 1) + " others" : "")
               })`
             ).withData(linkIds);
             continue;
@@ -555,6 +554,8 @@ export default Router()
             }
           }
         } while (removedCount > 0);
+
+        out.result = Object.keys(out.data).reduce<boolean>((acc, c) => acc && !!out.data && out.data[c] === true, true)
 
         // throw basic error if deleting single entity
         if (ids.length === 1 && !out.result) {
