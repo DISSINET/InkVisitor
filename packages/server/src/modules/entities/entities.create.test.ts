@@ -199,7 +199,7 @@ describe("Entities create", function () {
       });
 
       it("new entity should have copied relations (Cla/Rel)", async () => {
-        const rels = await Relation.findForEntity(db.connection, newEntity.id);
+        const rels = await Relation.findForEntities(db.connection, [newEntity.id]);
         expect(rels.length).toEqual(3); // cla + 2x rel
         expect(rels.find((r) => r.id === classif.id)).toBeFalsy();
         expect(rels.find((r) => r.id === related1.id)).toBeFalsy();

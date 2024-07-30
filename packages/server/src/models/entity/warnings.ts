@@ -102,9 +102,9 @@ export default class EntityWarnings {
       return null;
     }
 
-    const scls = await Relation.findForEntity(
+    const scls = await Relation.findForEntities(
       conn,
-      this.entityId,
+      [this.entityId],
       RelationEnums.Type.Superclass
     );
 
@@ -129,9 +129,9 @@ export default class EntityWarnings {
       return null;
     }
 
-    const synonym = await Relation.findForEntity(
+    const synonym = await Relation.findForEntities(
       conn,
-      this.entityId,
+      [this.entityId],
       RelationEnums.Type.Synonym
     );
 
@@ -227,7 +227,7 @@ export default class EntityWarnings {
     }
 
     const relations = (
-      await Relation.findForEntity(conn, this.entityId)
+      await Relation.findForEntities(conn, [this.entityId])
     ).filter(
       (r) =>
         [
@@ -300,9 +300,9 @@ export default class EntityWarnings {
     }
 
     // get AEE relation for entityId (entityId has AEE)
-    const aee = await Relation.findForEntity(
+    const aee = await Relation.findForEntities(
       conn,
-      this.entityId,
+      [this.entityId],
       RelationEnums.Type.ActionEventEquivalent,
       0
     );

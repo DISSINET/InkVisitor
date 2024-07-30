@@ -42,9 +42,9 @@ export default class ActionEventEquivalent
     let relations: RelationTypes.IActionEventEquivalent[] = [];
 
     if (asClass === EntityEnums.Class.Action) {
-      relations = await Relation.findForEntity(
+      relations = await Relation.findForEntities(
         conn,
-        entityId,
+        [entityId],
         RelationEnums.Type.ActionEventEquivalent,
         0
       );
@@ -82,9 +82,9 @@ export default class ActionEventEquivalent
     let out: RelationTypes.IActionEventEquivalent[] = [];
 
     if (asClass === EntityEnums.Class.Concept) {
-      out = await Relation.findForEntity(
+      out = await Relation.findForEntities(
         conn,
-        parentId,
+        [parentId],
         RelationEnums.Type.ActionEventEquivalent,
         1
       );

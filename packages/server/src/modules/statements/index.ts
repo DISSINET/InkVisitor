@@ -8,7 +8,6 @@ import {
 } from "@shared/types/errors";
 import { asyncRouteHandler } from "..";
 import {
-  IProp,
   IReference,
   IResponseGeneric,
   IResponseStatement,
@@ -268,7 +267,7 @@ export default Router()
         const newId = model.id;
 
         const rels = (
-          await Relation.findForEntity(req.db.connection, origId)
+          await Relation.findForEntities(req.db.connection, [origId])
         ).map((r) => getRelationClass(r));
         if (
           (await Relation.copyMany(req, rels, origId, newId)) !== rels.length

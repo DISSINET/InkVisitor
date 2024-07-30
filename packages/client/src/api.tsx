@@ -664,21 +664,30 @@ class Api {
     }
   }
 
-  // This fn always outputs array of success / errors => errors are handled in the area of use
   async entitiesDelete(
     entityIds: string[],
     options?: IApiOptions
   ): Promise<(EntitiesDeleteSuccessResponse | EntitiesDeleteErrorResponse)[]> {
-    const out: (EntitiesDeleteSuccessResponse | EntitiesDeleteErrorResponse)[] =
-      [];
-    for (const entityId of entityIds) {
-      try {
-        const response = await this.connection.delete(
-          `/entities/${entityId}`,
-          options
-        );
-        out.push({ entityId: entityId, details: response });
-      } catch (err) {
+    const out: (EntitiesDeleteSuccessResponse | EntitiesDeleteErrorResponse)[] = [];
+    try {
+      const response = await this.connection.delete(`/entities/`, {
+        data: {
+          entityIds,
+        },
+        ...options,
+      });
+      const data = (response.data as IResponseGeneric<Record<string, errors.CustomError | true>>).data;
+      if (data) {
+        for (const errorEntityId of Object.keys(data)) {
+          if (data[errorEntityId] === true) {
+            out.push({ entityId: errorEntityId, details: data[errorEntityId] });
+          } else {
+            out.push({ entityId: errorEntityId, error: true, details: data[errorEntityId] });
+          }
+        }
+      }
+    } catch (err) {
+      for (const entityId of entityIds) {
         out.push({
           error: true,
           message: `Failed to delete entity ${entityId}`,
