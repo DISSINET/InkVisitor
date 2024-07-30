@@ -447,9 +447,9 @@ export const StatementListBox: React.FC = () => {
 
       if (deletedIds.length < selectedRows.length) {
         toast.error(
-          `Some statements ${
+          `Some statements (${
             selectedRows.length - deletedIds.length
-          } are not possible to delete`
+          }) are not possible to delete`
         );
       }
 
