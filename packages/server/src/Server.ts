@@ -35,6 +35,7 @@ server.use(
 server.use(cors());
 
 if (!!process.env.STATIC_PATH) {
+  if (process.env.STATIC_PATH === "/") {
     server.use((req, res, next) => {
       // allow all requests not starting with /api and that are pointed to wanted static path 
       // relative to the root like domain.com/<static path>/...
@@ -51,6 +52,12 @@ if (!!process.env.STATIC_PATH) {
         next();
       }
     });
+  } else if (process.env.STATIC_PATH !== "") {
+    server.use(
+      process.env.STATIC_PATH as string,
+      express.static("../client/dist")
+    );
+  }
 }
 
 server.use(express.json({ limit: "150mb" }));
