@@ -17,7 +17,7 @@ export default class ActionEventEquivalent
     this.type = RelationEnums.Type.ActionEventEquivalent;
   }
 
-  static async getForwardConnections(
+  static async getActionEventEquivalentForwardConnections(
     conn: Connection,
     entityId: string,
     asClass: EntityEnums.Class,
@@ -59,7 +59,7 @@ export default class ActionEventEquivalent
         subtrees: [],
       };
 
-      connection.subtrees = await Superclass.getForwardConnections(
+      connection.subtrees = await Superclass.getSuperclassForwardConnections(
         conn,
         subparentId,
         EntityEnums.Class.Concept,
@@ -73,7 +73,7 @@ export default class ActionEventEquivalent
     return out;
   }
 
-  static async getInverseConnections(
+  static async getActionEventEquivalentInverseConnections(
     conn: Connection,
     parentId: string,
     asClass: EntityEnums.Class

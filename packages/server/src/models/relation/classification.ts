@@ -47,7 +47,7 @@ export default class Classification
     return null;
   }
 
-  static async getForwardConnections(
+  static async getClassificationForwardConnections(
     conn: Connection,
     entityId: string,
     asClass: EntityEnums.Class,
@@ -96,7 +96,7 @@ export default class Classification
         subtrees: [],
       };
 
-      connection.subtrees = await Superclass.getForwardConnections(
+      connection.subtrees = await Superclass.getSuperclassForwardConnections(
         conn,
         subparentId,
         EntityEnums.Class.Concept,
@@ -109,7 +109,7 @@ export default class Classification
     return out;
   }
 
-  static async getInverseConnections(
+  static async getClassificationInverseConnections(
     conn: Connection,
     parentId: string
   ): Promise<RelationTypes.IClassification[]> {

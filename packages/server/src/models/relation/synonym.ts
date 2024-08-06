@@ -75,7 +75,7 @@ export default class Synonym
     }
   }
 
-  static async getForwardConnections(
+  static async getSynonymForwardConnections(
     conn: Connection,
     entityId: string,
     asClass: EntityEnums.Class

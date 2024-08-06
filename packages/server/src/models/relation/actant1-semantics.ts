@@ -19,7 +19,7 @@ export default class Actant1Semantics
     this.order = data.order === undefined ? EntityEnums.Order.Last : data.order;
   }
 
-  static async getForwardConnections(
+  static async getActant1SemanticsForwardConnections(
     conn: Connection,
     entityId: string,
     asClass: EntityEnums.Class
@@ -45,7 +45,7 @@ export default class Actant1Semantics
     return out;
   }
 
-  static async getInverseConnections(
+  static async getActant1SemanticsInverseConnections(
     conn: Connection,
     parentId: string,
     asClass: EntityEnums.Class

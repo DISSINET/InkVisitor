@@ -18,7 +18,7 @@ export default class SubjectSemantics
     this.order = data.order === undefined ? EntityEnums.Order.Last : data.order;
   }
 
-  static async getForwardConnections(
+  static async getSubjectSemanticsForwardConnections(
     conn: Connection,
     entityId: string,
     asClass: EntityEnums.Class
@@ -44,7 +44,7 @@ export default class SubjectSemantics
     return out;
   }
 
-  static async getInverseConnections(
+  static async getSubjectSemanticsInverseConnections(
     conn: Connection,
     parentId: string,
     asClass: EntityEnums.Class

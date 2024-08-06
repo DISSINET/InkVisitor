@@ -18,7 +18,7 @@ export default class Implication
     this.order = data.order === undefined ? EntityEnums.Order.Last : data.order;
   }
 
-  static async getForwardConnections(
+  static async getImplicationForwardConnections(
     conn: Connection,
     entityId: string,
     asClass: EntityEnums.Class
@@ -44,7 +44,7 @@ export default class Implication
     return out;
   }
 
-  static async getInverseConnections(
+  static async getImplicationInverseConnections(
     conn: Connection,
     parentId: string,
     asClass: EntityEnums.Class

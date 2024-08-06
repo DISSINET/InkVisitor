@@ -18,7 +18,7 @@ export default class Holonym
     this.order = data.order === undefined ? EntityEnums.Order.Last : data.order;
   }
 
-  static async getForwardConnections(
+  static async getHolonymForwardConnections(
     conn: Connection,
     entityId: string,
     asClass: EntityEnums.Class
@@ -44,7 +44,7 @@ export default class Holonym
     return out;
   }
 
-  static async getInverseConnections(
+  static async getHolonymInverseConnections(
     conn: Connection,
     entityId: string,
     asClass: EntityEnums.Class
