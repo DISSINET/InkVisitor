@@ -285,7 +285,10 @@ export class UsedRelations implements RelationTypes.IUsedRelations {
 
   async prepareRelateds(dbConn: Connection): Promise<void> {
     this[RelationEnums.Type.Related] = {
-      connections: await Related.getForwardConnections(dbConn, this.entityId),
+      connections: await Related.getRelatedForwardConnections(
+        dbConn,
+        this.entityId
+      ),
     };
   }
 

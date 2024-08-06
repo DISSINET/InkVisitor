@@ -49,7 +49,7 @@ export default class Related
     return null;
   }
 
-  static async getForwardConnections(
+  static async getRelatedForwardConnections(
     conn: Connection,
     parentId: string
   ): Promise<RelationTypes.IRelated[]> {
