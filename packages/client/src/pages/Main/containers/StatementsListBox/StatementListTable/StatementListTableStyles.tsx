@@ -73,11 +73,7 @@ export const StyledTdMove = styled.td`
   cursor: move;
   width: 1%;
 `;
-export const StyledTdLastEdit = styled.p`
-  padding: ${({ theme }) => theme.space[2]};
-  padding-left: ${({ theme }) => theme.space[4]};
-  font-size: ${({ theme }) => theme.fontSize["xxs"]};
-`;
+
 interface StyledFocusedCircle {
   checked: boolean;
 }
