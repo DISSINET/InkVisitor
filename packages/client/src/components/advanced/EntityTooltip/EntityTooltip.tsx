@@ -1,11 +1,22 @@
 import { Placement } from "@popperjs/core";
-import { certaintyDict, languageDict } from "@shared/dictionaries";
+import {
+  actionPartOfSpeechDict,
+  certaintyDict,
+  conceptPartOfSpeechDict,
+  languageDict,
+} from "@shared/dictionaries";
 import { EntityEnums, RelationEnums } from "@shared/enums";
 import {
   EntityTooltip as EntityTooltipNamespace,
   IEntity,
   Relation,
 } from "@shared/types";
+import { useQuery } from "@tanstack/react-query";
+import {
+  maxTooltipMultiRelations,
+  tooltipLabelSeparator,
+} from "Theme/constants";
+import { ThemeColor } from "Theme/theme";
 import api from "api";
 import { LetterIcon, Tooltip } from "components";
 import React, { useEffect, useMemo, useState } from "react";
@@ -13,13 +24,11 @@ import { AiOutlineTag } from "react-icons/ai";
 import { BiCommentDetail } from "react-icons/bi";
 import { BsCardText } from "react-icons/bs";
 import { ImListNumbered } from "react-icons/im";
-import { useQuery } from "react-query";
+import { MdOutlineLabel } from "react-icons/md";
 import {
-  maxTooltipMultiRelations,
-  tooltipLabelSeparator,
-} from "Theme/constants";
-import { Colors } from "types";
-import { getEntityRelationRules, getShortLabelByLetterCount } from "utils";
+  getEntityRelationRules,
+  getShortLabelByLetterCount,
+} from "utils/utils";
 import { EntityTooltipRelationTreeTable } from "./EntityTooltipRelationTreeTable/EntityTooltipRelationTreeTable";
 import {
   StyledBold,
@@ -27,8 +36,8 @@ import {
   StyledIconWrap,
   StyledLabel,
   StyledLetterIconWrap,
-  StyledRelations,
   StyledRelationTypeBlock,
+  StyledRelations,
   StyledRow,
 } from "./EntityTooltipStyles";
 
@@ -36,19 +45,24 @@ interface EntityTooltip {
   // entity
   entityId: string;
   entityClass: EntityEnums.Class;
-  label?: string;
+  label?: string | JSX.Element;
   language: EntityEnums.Language;
   detail?: string;
   text?: string;
   itemsCount?: number;
+  partOfSpeech?:
+    | EntityEnums.ActionPartOfSpeech
+    | EntityEnums.ConceptPartOfSpeech;
   // settings
   position?: Placement;
-  color?: typeof Colors[number];
+  color?: keyof ThemeColor;
   disabled?: boolean;
 
   tagHovered: boolean;
 
   referenceElement: HTMLDivElement | null;
+  customTooltipAttributes?: { partLabel?: string };
+  isTemplate?: boolean;
 }
 export const EntityTooltip: React.FC<EntityTooltip> = ({
   // entity
@@ -59,6 +73,7 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
   detail,
   text,
   itemsCount,
+  partOfSpeech,
   // settings
   position,
   color,
@@ -67,6 +82,8 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
   tagHovered,
   //
   referenceElement,
+  customTooltipAttributes,
+  isTemplate = false,
 }) => {
   const [tooltipData, setTooltipData] = useState<
     EntityTooltipNamespace.IResponse | false
@@ -84,17 +101,21 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
     }
   }, [tagHovered]);
 
-  const { data, isFetching, isSuccess } = useQuery(
-    ["tooltip", entityId, allowFetch],
-    async () => {
+  const { data, isFetching, isSuccess } = useQuery({
+    queryKey: ["tooltip", entityId, allowFetch],
+    queryFn: async () => {
       const res = await api.tooltipGet(entityId);
       setTooltipData(res.data);
       return res.data;
     },
-    {
-      enabled: api.isLoggedIn() && !!entityId && allowFetch,
-    }
-  );
+    enabled: api.isLoggedIn() && !!entityId && allowFetch,
+  });
+
+  const getActionPartOfSpeech = () =>
+    actionPartOfSpeechDict.find((i) => i.value === partOfSpeech)?.label ?? "";
+
+  const getConceptPartOfSpeech = () =>
+    conceptPartOfSpeechDict.find((i) => i.value === partOfSpeech)?.label ?? "";
 
   const renderEntityInfo = useMemo(
     () => (
@@ -106,10 +127,29 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
                 <AiOutlineTag />
               </StyledIconWrap>
               <StyledLabel>
-                <StyledBold>{label}</StyledBold>
-                {` (${languageDict.find((l) => l.value === language)?.label})`}
+                <>
+                  <StyledBold>{label}</StyledBold>
+                  {" ("}
+                  {languageDict.find((l) => l.value === language)?.label}
+                  {partOfSpeech ? ", " : ""}
+                  {entityClass === EntityEnums.Class.Action &&
+                    partOfSpeech &&
+                    getActionPartOfSpeech()}
+                  {entityClass === EntityEnums.Class.Concept &&
+                    partOfSpeech &&
+                    getConceptPartOfSpeech()}
+                  {")"}
+                </>
               </StyledLabel>
             </StyledRow>
+            {customTooltipAttributes?.partLabel && (
+              <StyledRow>
+                <StyledIconWrap>
+                  <MdOutlineLabel />
+                </StyledIconWrap>
+                <StyledDetail>{customTooltipAttributes.partLabel}</StyledDetail>
+              </StyledRow>
+            )}
             {text && (
               <StyledRow>
                 <StyledIconWrap>{<BsCardText />}</StyledIconWrap>
@@ -176,14 +216,14 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
 
       const filteredTypes = getEntityRelationRules(
         entityClass,
-        RelationEnums.TooltipTypes
+        RelationEnums.TooltipTypes,
+        isTemplate
       );
 
       const relationsCount: number[] = filteredTypes.map((t) =>
         relations[t]?.connections ? relations[t]!.connections.length : 0
       );
       const hasRelations = relationsCount.some((count) => count > 0);
-      // => some relations has non related connections in data-import
 
       return (
         <>
@@ -203,7 +243,10 @@ export const EntityTooltip: React.FC<EntityTooltip> = ({
                     {hasConnection && (
                       <>
                         <StyledLetterIconWrap>
-                          <LetterIcon color="white" letter={relationType} />
+                          <LetterIcon
+                            color="tooltipColor"
+                            letter={relationType}
+                          />
                         </StyledLetterIconWrap>
                         {relationRule.cloudType &&
                         currentRelations[0]?.entityIds ? (

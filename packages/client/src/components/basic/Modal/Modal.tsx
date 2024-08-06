@@ -1,13 +1,14 @@
+import { config, useSpring } from "@react-spring/web";
+import { ThemeColor } from "Theme/theme";
 import { Loader } from "components";
 import React, { FC, ReactNode } from "react";
-import { config, useSpring } from "react-spring";
-import { Colors } from "types";
 import { ModalKeyPress } from "./ModalKeyPress";
 import {
   StyledBackground,
   StyledCard,
   StyledCardBody,
   StyledCardHeader,
+  StyledCardIcon,
   StyledCardTitle,
   StyledFooter,
   StyledModalInputForm,
@@ -22,10 +23,11 @@ interface Modal {
   onEnterPress?: () => void;
   showModal: boolean;
   disableBgClick?: boolean;
-  width?: "full" | "fat" | "normal" | "thin" | number;
+  width?: "full" | "fat" | "normal" | "auto" | number;
   disableEscapeClose?: boolean;
   disableBackground?: boolean;
   isLoading?: boolean;
+  fullHeight?: boolean;
 }
 export const Modal: FC<Modal> = ({
   children,
@@ -37,6 +39,7 @@ export const Modal: FC<Modal> = ({
   disableEscapeClose = false,
   disableBackground = false,
   isLoading = false,
+  fullHeight = false,
 }) => {
   const animatedMount = useSpring({
     opacity: showModal ? 1 : 0,
@@ -58,6 +61,7 @@ export const Modal: FC<Modal> = ({
               animatedMount={animatedMount}
               width={width}
               isLoading={isLoading}
+              fullHeight={fullHeight}
             >
               {children}
             </ModalCard>
@@ -74,18 +78,20 @@ export const Modal: FC<Modal> = ({
 
 interface ModalCard {
   children?: ReactNode;
-  width: "full" | "fat" | "normal" | "thin" | number;
+  width: "full" | "fat" | "normal" | "auto" | number;
   animatedMount: any;
   isLoading?: boolean;
+  fullHeight: boolean;
 }
 export const ModalCard: FC<ModalCard> = ({
   children,
   width,
   animatedMount,
   isLoading,
+  fullHeight,
 }) => {
   return (
-    <StyledCard style={animatedMount} width={width}>
+    <StyledCard style={animatedMount} width={width} $fullHeight={fullHeight}>
       {children}
       <Loader show={isLoading} />
     </StyledCard>
@@ -94,12 +100,14 @@ export const ModalCard: FC<ModalCard> = ({
 
 interface ModalHeader {
   title?: string | React.ReactElement;
-  color?: typeof Colors[number];
+  color?: keyof ThemeColor;
+  icon?: React.ReactNode;
 }
-export const ModalHeader: FC<ModalHeader> = ({ title, color }) => {
+export const ModalHeader: FC<ModalHeader> = ({ title, color, icon }) => {
   return (
     <>
-      <StyledCardHeader color={color}>
+      <StyledCardHeader $color={color}>
+        {icon && <StyledCardIcon>{icon}</StyledCardIcon>}
         <StyledCardTitle>{title}</StyledCardTitle>
       </StyledCardHeader>
     </>
@@ -110,14 +118,20 @@ interface ModalContent {
   column?: boolean;
   children?: ReactNode;
   enableScroll?: boolean;
+  centered?: boolean;
 }
 export const ModalContent: FC<ModalContent> = ({
   children,
   column,
   enableScroll = false,
+  centered,
 }) => {
   return (
-    <StyledCardBody column={column} enableScroll={enableScroll}>
+    <StyledCardBody
+      $column={column}
+      $enableScroll={enableScroll}
+      centered={centered}
+    >
       {children}
     </StyledCardBody>
   );
@@ -125,9 +139,10 @@ export const ModalContent: FC<ModalContent> = ({
 
 interface ModalFooter {
   children?: ReactNode;
+  column?: boolean;
 }
-export const ModalFooter: FC<ModalFooter> = ({ children }) => {
-  return <StyledFooter>{children}</StyledFooter>;
+export const ModalFooter: FC<ModalFooter> = ({ children, column = false }) => {
+  return <StyledFooter $column={column}>{children}</StyledFooter>;
 };
 
 // Input form helpers

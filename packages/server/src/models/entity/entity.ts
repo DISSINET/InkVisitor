@@ -5,14 +5,15 @@ import { DbEnums, EntityEnums, UserEnums } from "@shared/enums";
 import {
   EntityDoesNotExist,
   InternalServerError,
+  InvalidDeleteError,
   ModelNotValidError,
 } from "@shared/types/errors";
 import User from "@models/user/user";
-import emitter from "@models/events/emitter";
-import { EventTypes } from "@models/events/types";
 import Prop from "@models/prop/prop";
 import { findEntityById } from "@service/shorthands";
-import { IRequest } from "src/custom_typings/request";
+import { IRequest } from "../../custom_typings/request";
+import { sanitizeText } from "@common/functions";
+import Reference from "./reference";
 
 export default class Entity implements IEntity, IDbModel {
   static table = "entities";
@@ -24,10 +25,10 @@ export default class Entity implements IEntity, IDbModel {
   data: any = {};
   label = "";
   detail = "";
-  language: EntityEnums.Language = EntityEnums.Language.Latin;
+  language: EntityEnums.Language = EntityEnums.Language.Empty;
   notes: string[] = [];
   props: Prop[] = [];
-  references: IReference[] = [];
+  references: Reference[] = [];
 
   isTemplate?: boolean;
   usedTemplate?: string;
@@ -38,12 +39,14 @@ export default class Entity implements IEntity, IDbModel {
 
   constructor(data: Partial<IEntity>) {
     fillFlatObject(this, { ...data, data: undefined });
-    fillArray(this.references, Object, data.references);
-    fillArray(this.notes, String, data.notes);
+    fillArray<Reference>(this.references, Reference, data.references);
     fillArray<Prop>(this.props, Prop, data.props);
 
+    if (data.notes !== undefined) {
+      this.notes = data.notes.map(sanitizeText);
+    }
     if (data.legacyId !== undefined) {
-      this.legacyId = data.legacyId;
+      // this.legacyId = data.legacyId;
     }
     if (data.isTemplate !== undefined) {
       this.isTemplate = data.isTemplate;
@@ -86,6 +89,19 @@ export default class Entity implements IEntity, IDbModel {
     return result.inserted === 1;
   }
 
+  /**
+   * Use this method for doing asynchronous operation/checks before the save operation
+   * @param db db connection
+   */
+  async beforeSave(db: Connection): Promise<void> {
+    if (!this.isTemplate) {
+      const linkedEntities = await Entity.findEntitiesByIds(db, this.getEntitiesIds())
+      if (linkedEntities.find(e => e.isTemplate)) {
+        throw new ModelNotValidError("cannot use template in entity instance")
+      }
+    }
+  }
+
   update(
     db: Connection | undefined,
     updateData: Partial<IEntity>
@@ -94,15 +110,33 @@ export default class Entity implements IEntity, IDbModel {
     return rethink.table(Entity.table).get(this.id).update(updateData).run(db);
   }
 
-  async delete(db: Connection | undefined): Promise<WriteResult> {
+  async getUsedByEntity(db: Connection): Promise<IEntity[]> {
+    const out: Record<string, IEntity> = {};
+    for (const index of DbEnums.EntityIdReferenceIndexes) {
+      const entities: IEntity[] = await rethink
+        .table(Entity.table)
+        .getAll(this.id, { index })
+        .run(db);
+
+      for (const entity of entities) {
+        out[entity.id] = entity;
+      }
+    }
+
+    return Object.values(out);
+  }
+
+  async delete(db: Connection): Promise<WriteResult> {
     if (!this.id) {
       throw new InternalServerError(
         "delete called on entity with undefined id"
       );
     }
-
-    if (db) {
-      await emitter.emit(EventTypes.BEFORE_ENTITY_DELETE, db, this.id);
+    
+    // if bookmarks are linked to this entity, the bookmarks should be removed also
+    await User.removeBookmarkedEntity(db, this.id);
+    if (this.class === EntityEnums.Class.Territory) {
+      await User.removeStoredTerritory(db, this.id);
     }
 
     const result = await rethink
@@ -110,10 +144,6 @@ export default class Entity implements IEntity, IDbModel {
       .get(this.id)
       .delete()
       .run(db);
-
-    if (result.deleted && db) {
-      await emitter.emit(EventTypes.AFTER_ENTITY_DELETE, db, this.id);
-    }
 
     return result;
   }
@@ -201,11 +231,6 @@ export default class Entity implements IEntity, IDbModel {
   getEntitiesIds(): string[] {
     const entityIds: Record<string, null> = {};
 
-    // get usedTemplate entity
-    if (this.usedTemplate) {
-      entityIds[this.usedTemplate] = null;
-    }
-
     Entity.extractIdsFromProps(this.props).forEach((element) => {
       if (element) {
         entityIds[element] = null;
@@ -281,6 +306,10 @@ export default class Entity implements IEntity, IDbModel {
     con: Connection,
     ids: string[]
   ): Promise<IEntity[]> {
+    if (ids.findIndex(id => !id) !== -1) {
+      console.trace("Passed empty id to Entity.findEntitiesByIds");
+    } 
+    
     const data = await rethink
       .table(Entity.table)
       .getAll(rethink.args(ids))
@@ -304,5 +333,15 @@ export default class Entity implements IEntity, IDbModel {
       .run(db);
 
     return data;
+  }
+
+  /**
+   * Resets IDs of nested objects
+   */
+  resetIds() {
+    // make sure the id will be created anew
+    this.id = "";
+    this.props.forEach((p) => p.resetIds());
+    this.references.forEach((p) => p.resetIds());
   }
 }

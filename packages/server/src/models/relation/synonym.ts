@@ -1,9 +1,9 @@
 import { EntityEnums, RelationEnums } from "@shared/enums";
 import Relation from "./relation";
 import { Relation as RelationTypes } from "@shared/types";
-import { IRequest } from "src/custom_typings/request";
 import { nonenumerable } from "@common/decorators";
 import { Connection } from "rethinkdb-ts";
+import { IRequest } from "../../custom_typings/request";
 
 export default class Synonym
   extends Relation
@@ -29,9 +29,9 @@ export default class Synonym
     this.siblingRelations = [];
 
     for (const entityId of this.entityIds) {
-      const relations = await Relation.findForEntity(
+      const relations = await Relation.findForEntities(
         request.db.connection,
-        entityId,
+        [entityId],
         type
       );
       for (const relation of relations) {
@@ -86,9 +86,9 @@ export default class Synonym
       asClass === EntityEnums.Class.Concept ||
       asClass === EntityEnums.Class.Action
     ) {
-      out = await Relation.findForEntity(
+      out = await Relation.findForEntities(
         conn,
-        entityId,
+        [entityId],
         RelationEnums.Type.Synonym
       );
       const mapped: Record<

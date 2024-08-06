@@ -1,88 +1,41 @@
 version: "3.6"
 
+x-logging: &logging
+  logging:
+    options:
+      max-size: "10m"
+      max-file: "2"
+
 services:
   database:
     image: rethinkdb
     container_name: "inkvisitor-database"
     restart: always
-    logging:
-      options:
-        max-size: "10m"
-        max-file: "2"
+    <<: *logging
     volumes:
       - ./database_data:/data
     networks:
       - inkvisitor
     ports:
-      - "8080:8080" # required only for public access
+      - "8080:8080" # db port - required only for public access
       - "28015:28015" # dashboard - required only for public access
 
-  inkvisitor-production:
+  inkvisitor:
     build:
       context: .
       dockerfile: Dockerfile
       args:
-        ENV: production
-    image: inkvisitor:production
-    container_name: inkvisitor-production
+        ENV: latest
+    image: inkvisitor:latest
+    container_name: inkvisitor
     restart: always
-    logging:
-      options:
-        max-size: "10m"
-        max-file: "2"
-    # needs to be present when building
-    # env_file:
-    #  - ./packages/server/env/.env.production
+    <<: *logging
+    env_file:
+      - ./packages/server/env/.env # make sure the file is present, fill from example
+    environment:
+      - DB_HOST=database
     ports:
       - "3000:3000"
-    volumes:
-      - ./inkvisitor-production-client:/app/client/dist
-    networks:
-      - inkvisitor
-
-  inkvisitor-staging:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        ENV: staging
-    image: inkvisitor:staging
-    container_name: inkvisitor-staging
-    restart: always
-    logging:
-      options:
-        max-size: "10m"
-        max-file: "2"
-    # needs to be present when building
-    # env_file:
-    #  - ./packages/server/env/.env.staging
-    ports:
-      - "3011:3000"
-    volumes:
-      - ./inkvisitor-staging-client:/app/client/dist
-    networks:
-      - inkvisitor
-
-  inkvisitor-data-import:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        ENV: data-import
-    image: inkvisitor:data-import
-    container_name: inkvisitor-data-import
-    restart: always
-    logging:
-      options:
-        max-size: "10m"
-        max-file: "2"
-    # needs to be present when building
-    # env_file:
-    #  - ./packages/server/env/.env.data-import
-    ports:
-      - "3011:3000"
-    volumes:
-      - ./inkvisitor-data-import-client:/app/client/dist
     networks:
       - inkvisitor
 

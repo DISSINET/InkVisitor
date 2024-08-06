@@ -2,46 +2,39 @@
   "name": "database",
   "version": "0.1.0",
   "description": "",
-  "main": "index.js",
+  "engines": {
+    "npm": ">=8.19.2",
+    "node": ">=18.0.0"
+  },
   "scripts": {
     "start": "npx ts-node -r tsconfig-paths/register scripts/import.ts",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "parse": "ts-node scripts/parse.ts",
-    "create-audits": "ts-node scripts/create-audits.ts",
-    "fix-t-orders": "npx ts-node scripts/fix-t-order.ts",
-    "benchmark": "npx ts-node -r tsconfig-paths/register scripts/index-benchmark.ts",
-    "import-remote": "npx ts-node -r tsconfig-paths/register scripts/import.ts all production",
-    "import-remote-sandbox": "npx ts-node -r tsconfig-paths/register scripts/import.ts all sandbox",
-    "import-remote-staging": "npx ts-node -r tsconfig-paths/register scripts/import.ts all staging",
-    "import-remote-data-import": "npx ts-node -r tsconfig-paths/register scripts/import.ts all importdata",
-    "import-remote-data-import-parsed": "npx ts-node -r tsconfig-paths/register scripts/import.ts allparsed importdata",
-    "import-local": "npx ts-node -r tsconfig-paths/register scripts/import.ts all local",
-    "import-local-parsed": "npx ts-node -r tsconfig-paths/register scripts/import.ts allparsed local",
-    "import-local-empty": "npx ts-node -r tsconfig-paths/register scripts/import.ts empty local",
-    "import-local-relationstest": "npx ts-node -r tsconfig-paths/register scripts/import.ts relationstest local"
+    "benchmark": "npx ts-node -r tsconfig-paths/register scripts/index-benchmark.ts"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@types/uuid": "^9.0.7",
     "colors": "^1.4.0",
-    "dotenv": "^10.0.0",
-    "googleapis": "^85.0.0",
+    "dotenv": "^16.1.3",
+    "googleapis": "^118.0.0",
     "readline": "^1.3.0",
     "readline-sync": "^1.4.10",
     "rethinkdb": "^2.4.2",
-    "rethinkdb-ts": "^2.4.18",
-    "ts-json-schema-generator": "^1.1.2",
-    "ts-node": "^10.2.1",
-    "tslib": "^2.4.0",
-    "tunnel-ssh": "^4.1.4",
-    "typescript": "^4.8.4",
-    "uuid": "^8.3.2"
+    "rethinkdb-ts": "^2.5.4",
+    "ssh2": "^1.13.0",
+    "ts-json-schema-generator": "^1.2.0",
+    "ts-node": "^10.9.1",
+    "tslib": "^2.5.3",
+    "tunnel-ssh": "^5.0.5",
+    "typescript": "^5.1.3",
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
-    "@types/node": "^16.7.10",
-    "@types/tunnel-ssh": "^4.1.1",
+    "@types/node": "^20.2.5",
+    "@types/ssh2": "^1.11.11",
+    "@types/tunnel-ssh": "^5.0.0",
     "install": "^0.13.0",
-    "npm": "^8.11.0",
-    "tsconfig-paths": "^3.14.1"
+    "npm": "^9.6.7",
+    "tsconfig-paths": "^4.2.0"
   }
 }

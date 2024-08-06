@@ -3,8 +3,7 @@
 The application located in /packages/server is the api for inkVisitor project.
 It uses express + express router as a base.
 
-Server supports different enviroments - supported by `.env-<env>` files and appropriade `yarn` scripts.
-Production build expects environment variables to be passed in container context, but you can override this by setting variable `ENV_FILE`.
+Server supports different enviroments - supported by `.env-<ENV_FILE>` files, which are governed by `ENV_FILE` environmental variable.
 
 ### Env variables
 
@@ -12,24 +11,35 @@ See [example.env](./env/example.env) file for description of variables.
 
 ## Development
 
-You should normally use `development` environment - run in nodemon context for livereload.
+You would normally use default `development` environment - run in nodemon context for livereload using default `start` command for consistency across packages.
 
-1. `yarn`
-2. `yarn run start:development`
+1. `pnpm install`
+2. `pnpm start`
 
 ## Test
 
-- `yarn run test` will use `jest` framework to test everything, or
-- `yarn run test <regexp>` to test only selected functions (regexp should match `describe` or `it` statements)
+- create a new `.env.test` file in the `env` folder that
+- `pnpm test` will use `jest` framework to test everything, or
+- `pnpm run test <regexp>` to test only selected functions (regexp should match `describe` or `it` statements)
+- if you are using Visual Studio Code, we recommend installing `Jest Runner` extension
 
 ## Build & run
 
-Build transpiles typescript files to javascript.
+The `build` process transpiles typescript files to javascript.
 
-1. `yarn run build`
-2. `ENV_FILE=<env> yarn run start` to run the built application with loaded `.env.<env>` file.
+1. `pnpm build`
+2. `ENV_FILE=<env> pnpm start:dist` to run the built application with loaded `.env.<ENV_FILE>` file.
 
-Make sure to have appropriate `.env.<env>` file accessible.
+Make sure to have appropriate `.env.<ENV_FILE>` file accessible (e.g., running `ENV_FILE=production pnpm start:dist` will need `env.production`). You can use the `example.env` file as a template for creating your own `env` file, just check and modify the values here if needed:
+
+- `NODE_ENV` = environment - production/development (security vs logging)
+- `DOMAIN` = identify the instance - points to the domain where the ui should be accessible (used in emails)
+- `STATIC_PATH` = http relative path to client files served by the server, use '/' for files hosted in root path
+- `PORT` = port which should be used for this app
+- `SECRET` = for signing jwt token
+- `SENDGRID_API_KEY` = for sendgrid (mails) api integration
+- `MAILER_SENDER` = default address of the mail sender
+- `PYTHON_API_HOST` = custom analytics api, optional
 
 ## API docs
 
@@ -37,20 +47,13 @@ Make sure to have appropriate `.env.<env>` file accessible.
 
 Please refer to exported [postman collection](./postman/inkvisitor_api.postman_collection.json) file to explore the api and available endpoints.
 
-### Swagger
-
-- generate swagger file wihch `yarn swagger`. A `swagger.json` file will be generated in server directory
-- provide path to this file in `.env` file using `SWAGGER_FILE` env variable
-- start the server ie. `yarn start:development`
-- visit `http://localhost:3000/api-docs` (or otherwise configured host/port)
-
 ## Authorization
 
 Api uses JWT tokens to authenticate the user. With this the session is controlled by token which makes the development faster, makes api easier for testing but exposes several problems, mainly token expiration question and/or session invalidation. As mentioned avove, the jwt should be replaced by cookie session in the future. Token based authorization, hovewer, should still be available.
 
 Utility script for generating new jwt tokens:
 
-`yarn run jwt`
+`pnpm run jwt`
 
 ## Errors
 

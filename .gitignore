@@ -32,6 +32,7 @@ import/~$actants.xlsx
 
 # venv
 .env.**
+.env
 
 # docker files
 *.tar
@@ -45,5 +46,3 @@ import/~$actants.xlsx
 /packages/database/scripts/DDDproject-cd7d53f52e07.json
 
 database_data
-
-swagger.json

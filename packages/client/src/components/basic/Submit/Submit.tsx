@@ -1,17 +1,19 @@
+import { IEntity } from "@shared/types";
 import {
   Button,
   ButtonGroup,
-  Loader,
   Modal,
   ModalContent,
   ModalFooter,
   ModalHeader,
 } from "components";
+import { EntityTag } from "components/advanced";
 import React from "react";
 
 interface Submit {
   title?: string;
   text?: string;
+  entityToSubmit?: IEntity | false;
   show: boolean;
   onSubmit: () => void;
   onCancel: () => void;
@@ -21,6 +23,7 @@ interface Submit {
 export const Submit: React.FC<Submit> = ({
   title,
   text,
+  entityToSubmit,
   show,
   onSubmit,
   onCancel,
@@ -35,10 +38,20 @@ export const Submit: React.FC<Submit> = ({
         showModal={show}
         disableBgClick
         isLoading={loading}
+        width="auto"
       >
         <ModalHeader title={title} />
         <ModalContent>
-          <p>{text}</p>
+          <div>
+            {text}{" "}
+            {entityToSubmit && (
+              <EntityTag
+                entity={entityToSubmit}
+                disableDoubleClick
+                disableDrag
+              />
+            )}
+          </div>
         </ModalContent>
         <ModalFooter>
           <ButtonGroup>

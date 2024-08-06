@@ -1,7 +1,7 @@
 import api from "api";
 import { useSearchParams } from "hooks";
 import { useEffect } from "react";
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 import { setDisableStatementListScroll } from "redux/features/statementList/disableStatementListScrollSlice";
 import { setDisableTreeScroll } from "redux/features/territoryTree/disableTreeScrollSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
@@ -18,29 +18,35 @@ const ScrollHandler = () => {
   const disableTreeScroll: boolean = useAppSelector(
     (state) => state.territoryTree.disableTreeScroll
   );
+  const treeFilterOpen: boolean = useAppSelector(
+    (state) => state.territoryTree.filterOpen
+  );
 
   const dispatch = useAppDispatch();
 
   const { status: statementListStatus, isFetching: isFetchingStatementList } =
-    useQuery(
-      ["territory", "statement-list", territoryId, statementListOpened],
-      async () => {
+    useQuery({
+      queryKey: [
+        "territory",
+        "statement-list",
+        territoryId,
+        statementListOpened,
+      ],
+      queryFn: async () => {
         const res = await api.territoryGet(territoryId);
         return res.data;
       },
-      {
-        enabled: !!territoryId && api.isLoggedIn() && statementListOpened,
-      }
-    );
+      enabled: !!territoryId && api.isLoggedIn() && statementListOpened,
+    });
 
-  const { status: treeStatus, isFetching: isFetchingTree } = useQuery(
-    ["tree"],
-    async () => {
+  const { status: treeStatus, isFetching: isFetchingTree } = useQuery({
+    queryKey: ["tree"],
+    queryFn: async () => {
       const res = await api.treeGet();
       return res.data;
     },
-    { enabled: api.isLoggedIn() }
-  );
+    enabled: api.isLoggedIn(),
+  });
 
   useEffect(() => {
     if (statementListStatus === "success" && !isFetchingStatementList) {
@@ -56,12 +62,15 @@ const ScrollHandler = () => {
               top: statementInTable ? statementInTable.offsetTop - 34 : 0,
             });
           }
-        }, 200);
-      } else {
-        dispatch(setDisableStatementListScroll(false));
+        }, 300);
+        dispatch(setDisableStatementListScroll(true));
       }
     }
-  }, [statementId, statementListStatus, isFetchingStatementList]);
+  }, [
+    disableStatementListScroll,
+    statementListStatus,
+    isFetchingStatementList,
+  ]);
 
   useEffect(() => {
     if (treeStatus === "success" && !isFetchingTree) {
@@ -74,10 +83,13 @@ const ScrollHandler = () => {
             `Territories-box-content`
           );
 
+          // TODO: filter opened to choose scroll offset
           if (territoryBox && territoryInTree) {
             territoryBox?.scrollTo({
               behavior: territoryInTree ? "smooth" : "auto",
-              top: territoryInTree ? territoryInTree.offsetTop - 103 : 0,
+              top: territoryInTree
+                ? territoryInTree.offsetTop - (treeFilterOpen ? 165 : 104)
+                : 0,
             });
           }
         }, 200);
@@ -85,7 +97,7 @@ const ScrollHandler = () => {
         dispatch(setDisableTreeScroll(false));
       }
     }
-  }, [territoryId, treeStatus, isFetchingTree]);
+  }, [territoryId, treeStatus, isFetchingTree, treeFilterOpen]);
 
   return null;
 };

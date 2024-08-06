@@ -1,9 +1,12 @@
 import "ts-jest";
 import Territory, { TerritoryParent } from "./territory";
-import { Db } from "@service/RethinkDB";
+import { Db } from "@service/rethink";
 import { clean, getITerritoryMock } from "@modules/common.test";
 import { findEntityById, deleteEntities } from "@service/shorthands";
 import { IParentTerritory, ITerritory } from "@shared/types";
+import { EntityEnums } from "@shared/enums";
+import { ECASTEMOVariant } from "@shared/types/territory";
+import { randomUUID } from "crypto";
 
 describe("models/territory", function () {
   describe("Territory constructor test", function () {
@@ -76,9 +79,11 @@ describe("models/territory", function () {
         const db = new Db();
         await db.initDb();
 
-        const root = new Territory({});
+        const root = new Territory({ id: `root-${randomUUID()}` });
         await root.save(db.connection);
-        const child = new Territory({ data: { parent: { territoryId: root.id, order: 0 } } });
+        const child = new Territory({
+          data: { parent: { territoryId: root.id, order: 0 } },
+        });
         await child.save(db.connection);
 
         await expect(root.delete(db.connection)).rejects.toThrow(Error);
@@ -92,9 +97,11 @@ describe("models/territory", function () {
         const db = new Db();
         await db.initDb();
 
-        const root = new Territory({});
+        const root = new Territory({ id: `root-${randomUUID()}` });
         await root.save(db.connection);
-        const child = new Territory({ data: { parent: { territoryId: root.id, order: 0 } } });
+        const child = new Territory({
+          data: { parent: { territoryId: root.id, order: 0 } },
+        });
         await child.save(db.connection);
 
         await expect(child.delete(db.connection)).resolves.not.toBeNull();
@@ -164,11 +171,17 @@ describe("models/territory", function () {
         });
         await territory2.save(db.connection);
 
-        const createdData1 = await findEntityById<ITerritory>(db, territory1.id);
+        const createdData1 = await findEntityById<ITerritory>(
+          db,
+          territory1.id
+        );
         expect(createdData1.data.parent).toEqual(territory1.data.parent);
         expect((createdData1.data.parent as any).order).toEqual(0);
 
-        const createdData2 = await findEntityById<ITerritory>(db, territory2.id);
+        const createdData2 = await findEntityById<ITerritory>(
+          db,
+          territory2.id
+        );
         expect(createdData2.data.parent).toEqual(territory2.data.parent);
         expect((createdData2.data.parent as any).order).toEqual(1);
 
@@ -192,17 +205,26 @@ describe("models/territory", function () {
         await territory3.save(db.connection);
 
         // first territory's order is altered - no sibling -> use always 0
-        const createdData1 = await findEntityById<ITerritory>(db, territory1.id);
+        const createdData1 = await findEntityById<ITerritory>(
+          db,
+          territory1.id
+        );
         expect(createdData1.data.parent).toEqual(territory1.data.parent);
         expect((createdData1.data.parent as any).order).toEqual(0);
 
         // 0 order takes from 1. entry -> use 0 + 1
-        const createdData2 = await findEntityById<ITerritory>(db, territory2.id);
+        const createdData2 = await findEntityById<ITerritory>(
+          db,
+          territory2.id
+        );
         expect(createdData2.data.parent).toEqual(territory2.data.parent);
         expect((createdData2.data.parent as any).order).toEqual(1);
 
         // third territory's order is not set -> use it
-        const createdData3 = await findEntityById<ITerritory>(db, territory3.id);
+        const createdData3 = await findEntityById<ITerritory>(
+          db,
+          territory3.id
+        );
         expect(createdData3.data.parent).toEqual(territory3.data.parent);
         expect((createdData3.data.parent as any).order).toEqual(3);
 
@@ -247,13 +269,17 @@ describe("models/territory", function () {
         const territory = new Territory({ id: "T0" });
         await territory.save(db.connection);
         await territory.update(db.connection, {
-          data: { parent: { territoryId: "new", order: 0 } as IParentTerritory },
+          data: {
+            parent: { territoryId: "new", order: 0 } as IParentTerritory,
+          },
         });
 
         const createdData = await findEntityById<ITerritory>(db, territory.id);
         expect(createdData.data.parent).toEqual(territory.data.parent);
         expect((createdData.data.parent as IParentTerritory).order).toEqual(0);
-        expect((createdData.data.parent as IParentTerritory).territoryId).toEqual("new");
+        expect(
+          (createdData.data.parent as IParentTerritory).territoryId
+        ).toEqual("new");
 
         done();
       });
@@ -261,40 +287,172 @@ describe("models/territory", function () {
 
     describe("update territory so it is sibling to existing one", () => {
       it("should have order set to wanted value", async (done) => {
-        const parent = new TerritoryParent({ territoryId: "parent" })
+        const parent = new TerritoryParent({ territoryId: "parent" });
         const territory1 = new Territory({});
-        territory1.data.parent = parent
+        territory1.data.parent = parent;
         const territory2 = new Territory({});
-        territory2.data.parent = parent
+        territory2.data.parent = parent;
 
         await territory1.save(db.connection);
         await territory2.save(db.connection);
 
-        const wantedOrder = 90
+        const wantedOrder = 90;
         await territory2.update(db.connection, {
-          data: { parent: { territoryId: parent.territoryId, order: wantedOrder } },
+          data: {
+            parent: { territoryId: parent.territoryId, order: wantedOrder },
+          },
         });
 
-        const updatedTerritory = await findEntityById<ITerritory>(db, territory2.id);
+        const updatedTerritory = await findEntityById<ITerritory>(
+          db,
+          territory2.id
+        );
         expect(updatedTerritory.data.parent).toEqual(territory2.data.parent);
-        expect((updatedTerritory.data.parent as IParentTerritory).order).toEqual(wantedOrder);
-        expect((updatedTerritory.data.parent as IParentTerritory).territoryId).toEqual(parent.territoryId);
+        expect(
+          (updatedTerritory.data.parent as IParentTerritory).order
+        ).toEqual(wantedOrder);
+        expect(
+          (updatedTerritory.data.parent as IParentTerritory).territoryId
+        ).toEqual(parent.territoryId);
 
         done();
       });
     });
   });
+
+  describe("Territory - beforeSave", function () {
+    let db: Db;
+    let t0: Territory;
+    let twithoutProtocol: Territory;
+    let twithProtocol: Territory;
+
+    beforeAll(async () => {
+      db = new Db();
+      await db.initDb();
+    });
+
+    beforeEach(async () => {
+      await deleteEntities(db);
+      t0 = new Territory({
+        id: "T0",
+        data: {
+          parent: false,
+          protocol: {
+            project: "T0",
+            description: "",
+            endDate: "",
+            guidelinesResource: "",
+            guidelinesVersion: "",
+            startDate: "",
+            variant: ECASTEMOVariant.FullCASTEMO,
+          },
+        },
+      });
+      twithoutProtocol = new Territory({
+        id: "twithoutProtocol",
+        data: {
+          parent: {
+            order: 0,
+            territoryId: "T0",
+          },
+        },
+      });
+      twithProtocol = new Territory({
+        id: "twithProtocol",
+        data: {
+          parent: {
+            order: 1,
+            territoryId: "T0",
+          },
+          protocol: {
+            project: "twithProtocol",
+            description: "",
+            endDate: "",
+            guidelinesResource: "",
+            guidelinesVersion: "",
+            startDate: "",
+            variant: ECASTEMOVariant.FullCASTEMO,
+          },
+        },
+      });
+      await t0.save(db.connection);
+      await twithoutProtocol.save(db.connection);
+      await twithProtocol.save(db.connection);
+    });
+
+    afterAll(async () => {
+      await db.close();
+    });
+
+    describe("territory should receive protocol from parent", () => {
+      it("should have filled protocol from twithProtocol", async () => {
+        const tNew = new Territory({
+          data: {
+            parent: {
+              order: 0,
+              territoryId: twithProtocol.id,
+            },
+          },
+        });
+        await tNew.beforeSave(db.connection);
+        expect(tNew.data.protocol?.project).toEqual(
+          twithProtocol.data.protocol?.project
+        );
+      });
+    });
+
+    describe("territory should retain protocol", () => {
+      it("should have original protocol", async () => {
+        const customProject = "dont change";
+        const tNew = new Territory({
+          data: {
+            parent: {
+              order: 0,
+              territoryId: twithProtocol.id,
+            },
+            protocol: {
+              description: "",
+              endDate: "",
+              guidelinesResource: "",
+              guidelinesVersion: "",
+              project: customProject,
+              startDate: "",
+              variant: ECASTEMOVariant.FullCASTEMO,
+            },
+          },
+        });
+        await tNew.beforeSave(db.connection);
+        expect(tNew.data.protocol?.project).toEqual(customProject);
+      });
+    });
+
+    describe("territory should receive empty protocol if parent has none", () => {
+      it("should have empty protocol", async () => {
+        const tNew = new Territory({
+          data: {
+            parent: {
+              order: 0,
+              territoryId: twithoutProtocol.id,
+            },
+          },
+        });
+        await tNew.beforeSave(db.connection);
+        expect(tNew.data.protocol).toEqual(undefined);
+      });
+    });
+  });
+
   /*
   describe("Territory - test getClosestRight", function () {
     describe("no input rights", () => {
       it("should return undefined as no closest right found", async (done) => {
         const territory = new Territory(undefined);
-  
+
         expect(territory.getClosestRight([])).toEqual(undefined);
         done();
       });
     });
-  
+
     describe("right with equal id", () => {
       it("should return the right object", async (done) => {
         const territory = new Territory({ id: "this" });
@@ -306,7 +464,7 @@ describe("models/territory", function () {
         done();
       });
     });
-  
+
     describe("right defined for parent territory", () => {
       it("should return the same right object as was defined for the parent", async (done) => {
         const territory = new Territory({ id: "thisthat" });
@@ -318,7 +476,7 @@ describe("models/territory", function () {
         done();
       });
     });
-  
+
     describe("right defined for child territory", () => {
       it("should return undefined", async (done) => {
         const territory = new Territory({ id: "that" });

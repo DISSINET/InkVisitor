@@ -2,7 +2,6 @@ import { Router } from "express";
 import { findEntityById } from "@service/shorthands";
 import {
   BadParams,
-  InternalServerError,
   PermissionDeniedError,
   StatementDoesNotExits,
   TerritoryDoesNotExits,
@@ -19,8 +18,6 @@ import Statement, { StatementTerritory } from "@models/statement/statement";
 import { ResponseStatement } from "@models/statement/response";
 import { EntityEnums } from "@shared/enums";
 import { IRequest } from "src/custom_typings/request";
-import { StatementObject } from "@shared/types/statement";
-import Audit from "@models/audit/audit";
 import Entity from "@models/entity/entity";
 import Reference from "@models/entity/reference";
 import Relation from "@models/relation/relation";
@@ -83,106 +80,6 @@ export default Router()
       await response.prepare(request);
 
       return response;
-    })
-  )
-  /**
-   * @openapi
-   * /statements/{statementId}/elementsOrders:
-   *   put:
-   *     description: Update statementOrder value in all statement objects according to provided input list of element ids
-   *     tags:
-   *       - entities
-   *     parameters:
-   *       - in: path
-   *         name: statementId
-   *         schema:
-   *           type: string
-   *         required: true
-   *         description: ID of the statement-entity entry
-   *     requestBody:
-   *       description: list of sorted ids
-   *       content:
-   *         application/json:
-   *           type: array
-   *           items:
-   *             type: string
-   *     responses:
-   *       200:
-   *         description: Returns generic response
-   *         content:
-   *           application/json:
-   *             schema:
-   *               $ref: "#/components/schemas/IResponseGeneric"
-   */
-  .put(
-    "/:statementId/elementsOrders",
-    asyncRouteHandler<IResponseGeneric>(async (request: IRequest) => {
-      const statementId = request.params.statementId;
-      const elementIds = request.body as string[]; // list of ids
-      if (elementIds.length === undefined) {
-        throw new BadParams("list of ids must be provided");
-      }
-
-      if (!statementId) {
-        throw new BadParams("statement id has to be set");
-      }
-
-      const statementData = await findEntityById<IStatement>(
-        request.db,
-        statementId
-      );
-
-      if (
-        !statementData ||
-        statementData.class !== EntityEnums.Class.Statement
-      ) {
-        throw new StatementDoesNotExits(
-          `statement ${statementId} was not found`,
-          statementId
-        );
-      }
-
-      const model = new Statement({ ...statementData });
-      if (!model.canBeEditedByUser(request.getUserOrFail())) {
-        throw new PermissionDeniedError("entity cannot be saved");
-      }
-
-      // update indexes, or set to false if order value not provided
-      model.walkObjects((object: StatementObject) => {
-        const index = (elementIds || []).findIndex(
-          (elementId) => elementId === object.id
-        );
-
-        if (index !== -1) {
-          object.statementOrder = index;
-        } else {
-          object.statementOrder = false;
-        }
-      });
-
-      await request.db.lock();
-
-      // update only the required fields
-      const result = await model.update(request.db.connection, {
-        data: model.data,
-        props: model.props,
-      });
-      const newData = await findEntityById(request.db, model.id);
-      if (!newData) {
-        throw new InternalServerError(
-          `cannot retrieve updated statement ${model.id}`
-        );
-      }
-
-      if (result.replaced || result.unchanged) {
-        await Audit.createNew(request, model.id, newData);
-
-        return {
-          result: true,
-        };
-      } else {
-        throw new InternalServerError(`cannot update statement ${model.id}`);
-      }
     })
   )
   /**
@@ -355,12 +252,14 @@ export default Router()
 
       for (const stmtData of statements) {
         const model = new Statement({ ...(stmtData as IStatement) });
+
         //update territory
         model.data.territory = new StatementTerritory({
           territoryId: newTerritoryId,
         });
-        // make sure the id will be created anew
-        model.id = "";
+
+        model.resetIds();
+
         await model.save(req.db.connection);
         newIds.push(model.id);
 
@@ -368,7 +267,7 @@ export default Router()
         const newId = model.id;
 
         const rels = (
-          await Relation.findForEntity(req.db.connection, origId)
+          await Relation.findForEntities(req.db.connection, [origId])
         ).map((r) => getRelationClass(r));
         if (
           (await Relation.copyMany(req, rels, origId, newId)) !== rels.length
@@ -377,7 +276,7 @@ export default Router()
         }
       }
 
-      let msg = `${statementsCount} statements has been copied under '${territory.label}'`;
+      let msg = `${statementsCount} statements have been copied under '${territory.label}'`;
       if (relsErr) {
         msg += ", but without complete relations";
       }

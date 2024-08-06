@@ -1,25 +1,25 @@
 import { Placement } from "@popperjs/core";
 import { EntityEnums } from "@shared/enums";
 import { IEntity } from "@shared/types";
+import { ThemeColor } from "Theme/theme";
 import { Button, Tag } from "components";
 import { EntityTooltip } from "components/advanced";
-import React, { ReactNode, useState } from "react";
+import React, { ReactNode, useCallback, useState } from "react";
 import { FaUnlink } from "react-icons/fa";
 import { useAppSelector } from "redux/hooks";
-import { Colors, DraggedEntityReduxItem, EntityDragItem } from "types";
-import { getEntityLabel, isValidEntityClass } from "utils";
+import { DraggedEntityReduxItem, EntityDragItem } from "types";
+import { getEntityLabel, isValidEntityClass } from "utils/utils";
+import { StyledEntityTagWrap } from "./EntityTagStyles";
 
 interface UnlinkButton {
   onClick: () => void;
-  color?: typeof Colors[number];
+  color?: keyof ThemeColor;
   tooltipLabel?: string;
   icon?: JSX.Element;
 }
 interface EntityTag {
   entity: IEntity;
-  tooltipText?: string;
   parentId?: string;
-  mode?: "selected" | "disabled" | "invalid" | false;
   showOnly?: "entity" | "label";
   fullWidth?: boolean;
   button?: ReactNode;
@@ -34,17 +34,18 @@ interface EntityTag {
   lvl?: number;
   statementsCount?: number;
   isFavorited?: boolean;
+  elvlButtonGroup?: ReactNode | false;
+  flexListMargin?: boolean;
 
   unlinkButton?: UnlinkButton | false;
+  customTooltipAttributes?: { partLabel?: string };
 }
 
 export const EntityTag: React.FC<EntityTag> = ({
   entity,
-  tooltipText,
   parentId,
   showOnly,
   fullWidth = false,
-  mode,
   button = false,
   index,
   moveFn,
@@ -58,7 +59,11 @@ export const EntityTag: React.FC<EntityTag> = ({
   statementsCount,
   isFavorited,
 
+  elvlButtonGroup = false,
+  flexListMargin = false,
+
   unlinkButton,
+  customTooltipAttributes,
 }) => {
   const draggedEntity: DraggedEntityReduxItem = useAppSelector(
     (state) => state.draggedEntity
@@ -66,23 +71,35 @@ export const EntityTag: React.FC<EntityTag> = ({
 
   const classId = entity.class;
   const [buttonHovered, setButtonHovered] = useState(false);
+  const [elvlHovered, setElvlHovered] = useState(false);
 
   const [referenceElement, setReferenceElement] =
     useState<HTMLDivElement | null>(null);
   const [tagHovered, setTagHovered] = useState(false);
 
-  const renderUnlinkButton = (unlinkButton: UnlinkButton) => (
-    <Button
-      key="d"
-      tooltipLabel={
-        unlinkButton.tooltipLabel ? unlinkButton.tooltipLabel : "unlink entity"
-      }
-      icon={unlinkButton.icon ? unlinkButton.icon : <FaUnlink />}
-      color={unlinkButton.color ? unlinkButton.color : "plain"}
-      inverted
-      onClick={unlinkButton.onClick}
-    />
+  const handleSetReferenceElement = useCallback(
+    (node: HTMLDivElement | null) => {
+      setReferenceElement(node);
+    },
+    []
   );
+
+  const renderUnlinkButton = useCallback((unlinkButton: UnlinkButton) => {
+    return (
+      <Button
+        key="d"
+        tooltipLabel={
+          unlinkButton.tooltipLabel
+            ? unlinkButton.tooltipLabel
+            : "unlink entity"
+        }
+        icon={unlinkButton.icon ? unlinkButton.icon : <FaUnlink />}
+        color={unlinkButton.color ? unlinkButton.color : "plain"}
+        inverted
+        onClick={unlinkButton.onClick}
+      />
+    );
+  }, []);
 
   if (!isValidEntityClass(entity.class)) {
     return (
@@ -91,37 +108,57 @@ export const EntityTag: React.FC<EntityTag> = ({
         entityClass={EntityEnums.Extension.Invalid}
         label={getEntityLabel(entity)}
         labelItalic={entity.label === ""}
-        button={unlinkButton && renderUnlinkButton(unlinkButton)}
+        // button={unlinkButton && renderUnlinkButton(unlinkButton)}
         disableDrag
         disableDoubleClick
       />
     );
   }
 
+  const handleTagHovered = useCallback(() => {
+    setTagHovered(true);
+  }, []);
+
+  const handleTagUnhovered = useCallback(() => {
+    setTagHovered(false);
+  }, []);
+
+  const handleBtnClick = useCallback(() => {
+    setButtonHovered(false);
+    setTagHovered(false);
+  }, []);
+
   return (
     <>
-      <div
-        style={{ display: "inline-flex", overflow: "hidden" }}
-        ref={setReferenceElement}
-        onMouseEnter={() => setTagHovered(true)}
-        onMouseLeave={() => setTagHovered(false)}
+      <StyledEntityTagWrap
+        $flexListMargin={flexListMargin}
+        ref={handleSetReferenceElement}
+        onMouseEnter={handleTagHovered}
+        onMouseLeave={handleTagUnhovered}
       >
         {tagHovered && !disableTooltip && (
           <EntityTooltip
             entityId={entity.id}
             entityClass={entity.class}
-            label={getEntityLabel(entity)}
+            label={entity.label || <i>{"no label"}</i>}
             language={entity.language}
             detail={entity.detail}
-            text={tooltipText}
+            text={
+              entity.class === EntityEnums.Class.Statement
+                ? entity.data.text
+                : undefined
+            }
+            isTemplate={entity.isTemplate}
+            partOfSpeech={entity.data.pos}
             itemsCount={statementsCount}
             position={tooltipPosition}
             disabled={
-              (button !== null && buttonHovered) ||
+              (button !== null && (buttonHovered || elvlHovered)) ||
               Object.keys(draggedEntity).length !== 0
             }
             tagHovered={tagHovered}
             referenceElement={referenceElement}
+            customTooltipAttributes={customTooltipAttributes}
           />
         )}
         <Tag
@@ -139,7 +176,6 @@ export const EntityTag: React.FC<EntityTag> = ({
           }
           moveFn={moveFn}
           entityClass={classId}
-          mode={mode}
           borderStyle="solid"
           invertedLabel={isSelected}
           index={index}
@@ -150,14 +186,23 @@ export const EntityTag: React.FC<EntityTag> = ({
           lvl={lvl}
           fullWidth={fullWidth}
           isFavorited={isFavorited}
-          onButtonOver={() => setButtonHovered(true)}
-          onButtonOut={() => setButtonHovered(false)}
-          onBtnClick={() => {
-            setButtonHovered(false);
-            setTagHovered(false);
-          }}
+          onButtonOver={handleTagHovered}
+          onButtonOut={handleTagUnhovered}
+          onBtnClick={handleBtnClick}
+          elvlButtonGroup={
+            elvlButtonGroup ? (
+              <div
+                onMouseOver={() => setElvlHovered(true)}
+                onMouseOut={() => setElvlHovered(false)}
+              >
+                {elvlButtonGroup}
+              </div>
+            ) : (
+              false
+            )
+          }
         />
-      </div>
+      </StyledEntityTagWrap>
     </>
   );
 };

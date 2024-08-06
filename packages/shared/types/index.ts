@@ -1,3 +1,4 @@
+import { IWarning, IWarningPosition } from "./warning";
 import { IAudit } from "./audit";
 import { ILabel } from "./label";
 import { IReference } from "./reference";
@@ -28,7 +29,6 @@ import { RequestPermissionUpdate } from "./request-permission";
 import { RequestSearch } from "./request-search";
 import { IResource, IResourceData } from "./resource";
 
-import { IResponseAdministration } from "./response-administration";
 import { IResponseAudit } from "./response-audit";
 import { IResponseBookmarkFolder } from "./response-bookmarks";
 import {
@@ -43,7 +43,6 @@ import {
   EntityOrder,
   IResponseStatement,
   IdentificationOrder,
-  OrderType,
   PropOrder,
 } from "./response-statement";
 import { IResponseTerritory } from "./response-territory";
@@ -62,6 +61,18 @@ import {
   IUserOptions,
   IUserRight,
 } from "./user";
+import {
+  IDocument,
+  IResponseDocument,
+  IResponseDocumentDetail,
+} from "./document";
+
+import {
+  IRequestPasswordReset,
+  IRequestPasswordResetData,
+} from "./request-password-reset";
+
+import { IRequestActivationData } from "./request-activation";
 
 import { Search } from "./search";
 
@@ -110,7 +121,6 @@ export type {
   IResponseUsedInMetaProp,
   IResponseUsedInStatement,
   IResponseBookmarkFolder,
-  IResponseAdministration,
   IResponseStatement,
   IResponseTerritory,
   IResponseTree,
@@ -121,10 +131,17 @@ export type {
   IResponsePermission,
   IResponseStats,
   EntityTooltip,
-  OrderType,
   EntityOrder,
   PropOrder,
+  IWarning,
+  IWarningPosition,
   ClassificationOrder,
   IdentificationOrder,
+  IDocument,
+  IResponseDocument,
+  IResponseDocumentDetail,
+  IRequestPasswordReset,
+  IRequestPasswordResetData,
+  IRequestActivationData,
 };
 export { RequestSearch, RequestPermissionUpdate, Relation, Search };

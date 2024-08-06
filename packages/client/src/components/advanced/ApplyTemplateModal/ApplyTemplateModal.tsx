@@ -1,5 +1,5 @@
-import { UserEnums } from "@shared/enums";
-import { IEntity, IResponseGeneric } from "@shared/types";
+import { EntityEnums, UserEnums } from "@shared/enums";
+import { IEntity, IResponseGeneric, IStatementData } from "@shared/types";
 import { AxiosResponse } from "axios";
 import {
   Button,
@@ -13,17 +13,19 @@ import {
 import { EntityTag } from "components/advanced";
 import { applyTemplate } from "constructors";
 import React from "react";
-import { UseMutationResult } from "react-query";
+import { UseMutationResult } from "@tanstack/react-query";
 import { toast } from "react-toastify";
+import { getShortLabelByLetterCount } from "utils/utils";
+import { entitiesDictKeys } from "@shared/dictionaries";
 
 interface ApplyTemplateModal {
   showModal: boolean;
   setShowApplyTemplateModal: React.Dispatch<React.SetStateAction<boolean>>;
-  entity?: IEntity;
-  // TODO: check consistency of mutations from different containers
+  entity: IEntity;
   updateEntityMutation: UseMutationResult<
     void | AxiosResponse<IResponseGeneric>,
     unknown,
+    // can be any entity class, thus this needs to create type to partially match with all data objects
     any,
     unknown
   >;
@@ -39,18 +41,29 @@ export const ApplyTemplateModal: React.FC<ApplyTemplateModal> = ({
   setTemplateToApply,
 }) => {
   const handleApplyTemplate = async () => {
-    if (templateToApply && entity) {
-      const entityAfterTemplateApplied = await applyTemplate(
-        templateToApply,
-        entity,
-        localStorage.getItem("userrole") as UserEnums.Role
-      );
+    if (templateToApply) {
+      try {
+        const entityAfterTemplateApplied: IEntity = await applyTemplate(
+          templateToApply,
+          entity,
+          localStorage.getItem("userrole") as UserEnums.Role
+        );
 
-      toast.info(
-        `Template "${templateToApply.label}" applied to Statement "${entity.label}"`
-      );
+        if (entityAfterTemplateApplied) {
+          toast.info(
+            `Template "${getShortLabelByLetterCount(
+              templateToApply.label,
+              120
+            )}" applied to ${
+              entitiesDictKeys[entity.class].label
+            } "${getShortLabelByLetterCount(entity.label, 120)}"`
+          );
 
-      updateEntityMutation.mutate(entityAfterTemplateApplied);
+          updateEntityMutation.mutate(entityAfterTemplateApplied);
+        }
+      } catch (e) {
+        toast.error("Template was not applied");
+      }
     }
     setTemplateToApply(false);
   };
@@ -58,7 +71,7 @@ export const ApplyTemplateModal: React.FC<ApplyTemplateModal> = ({
   return (
     <Modal
       showModal={showModal}
-      width="thin"
+      width="auto"
       onEnterPress={() => {
         setShowApplyTemplateModal(false);
         handleApplyTemplate();

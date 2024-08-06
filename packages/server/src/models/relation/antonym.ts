@@ -23,9 +23,9 @@ export default class Antonym
     entityId: string
   ): Promise<RelationTypes.IConnection<RelationTypes.IAntonym>[]> {
     const out: RelationTypes.IConnection<RelationTypes.IAntonym>[] =
-      await Relation.findForEntity<RelationTypes.IAntonym>(
+      await Relation.findForEntities<RelationTypes.IAntonym>(
         conn,
-        entityId,
+        [entityId],
         RelationEnums.Type.Antonym
       );
 

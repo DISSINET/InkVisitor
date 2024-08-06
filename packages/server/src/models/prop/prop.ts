@@ -2,9 +2,10 @@ import { EntityEnums } from "@shared/enums";
 import { IProp } from "@shared/types";
 import { IPropSpec } from "@shared/types";
 import { fillArray, fillFlatObject, IModel } from "@models/common";
+import { randomUUID } from "crypto";
 
 export class PropSpec implements IPropSpec, IModel {
-  entityId: string = "";
+  entityId = "";
   elvl: EntityEnums.Elvl = EntityEnums.Elvl.Textual;
   logic: EntityEnums.Logic = EntityEnums.Logic.Positive;
   virtuality: EntityEnums.Virtuality = EntityEnums.Virtuality.Reality;
@@ -27,28 +28,33 @@ export default class Prop implements IProp, IModel {
   mood: EntityEnums.Mood[];
   moodvariant: EntityEnums.MoodVariant = EntityEnums.MoodVariant.Realis;
   bundleOperator: EntityEnums.Operator = EntityEnums.Operator.And;
-  bundleStart: boolean = false;
-  bundleEnd: boolean = false;
+  bundleStart = false;
+  bundleEnd = false;
 
   children: Prop[] = [];
 
   type: PropSpec;
   value: PropSpec;
 
-  statementOrder?: number | false;
-
   constructor(data: Partial<IProp>) {
     fillFlatObject(this, data);
     this.type = new PropSpec(data.type || {});
     this.value = new PropSpec(data.value || {});
     this.mood = data.mood || [EntityEnums.Mood.Indication];
-    this.statementOrder =
-      data.statementOrder !== undefined ? data.statementOrder : false;
-
     fillArray<Prop>(this.children, Prop, data.children);
   }
 
   isValid(): boolean {
     return true; // always true - no rules yet
+  }
+
+  /**
+   * Resets IDs of nested objects
+   */
+  resetIds() {
+    this.id = randomUUID();
+    if (this.children && this.children.length) {
+      this.children.forEach((p) => p.resetIds());
+    }
   }
 }

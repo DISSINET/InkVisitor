@@ -10,7 +10,7 @@ export namespace EnumValidators {
     return (
       [
         RelationEnums.Type.Superclass,
-        RelationEnums.Type.SuperordinateLocation,
+        RelationEnums.Type.SuperordinateEntity,
         RelationEnums.Type.Synonym,
         RelationEnums.Type.Antonym,
         RelationEnums.Type.PropertyReciprocal,
@@ -33,7 +33,9 @@ export namespace EnumValidators {
    * @param input
    * @returns
    */
-  export function IsValidEntityClass(input: EntityEnums.Class): boolean {
+  export function IsValidEntityClass(
+    input: EntityEnums.Class | EntityEnums.Extension.Any
+  ): boolean {
     return (
       [
         EntityEnums.Class.Action,
@@ -48,6 +50,7 @@ export namespace EnumValidators {
         EntityEnums.Class.Location,
         EntityEnums.Class.Value,
         EntityEnums.Class.Event,
+        EntityEnums.Extension.Any,
       ].indexOf(input) !== -1
     );
   }

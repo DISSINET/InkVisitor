@@ -20,21 +20,33 @@ import disableUserSelectSlice from "./features/layout/disableUserSelectSlice";
 import lastClickedIndexSlice from "./features/statementList/lastClickedIndexSlice";
 import disableStatementListScrollSlice from "./features/statementList/disableStatementListScrollSlice";
 import disableTreeScrollSlice from "./features/territoryTree/disableTreeScrollSlice";
+import filterOpenSlice from "./features/territoryTree/filterOpenSlice";
+import pingSlice from "./features/pingSlice";
+import showWarningsSlice from "./features/statementEditor/showWarningsSlice";
+import themeSlice from "./features/themeSlice";
+import isLoadingSlice from "./features/statementList/isLoadingSlice";
 
 const store: Store = configureStore({
   reducer: {
+    theme: themeSlice,
     username: usernameSlice,
+    ping: pingSlice,
     draggedEntity: draggedEntitySlice,
     territoryTree: combineReducers({
       selectedTerritoryPath: selectedTerritoryPathSlice,
       treeInitialized: treeInitializeSlice,
       disableTreeScroll: disableTreeScrollSlice,
+      filterOpen: filterOpenSlice,
     }),
     statementList: combineReducers({
       rowsExpanded: rowsExpandedSlice,
       draggedRowId: draggedRowIdSlice,
       lastClickedIndex: lastClickedIndexSlice,
       disableStatementListScroll: disableStatementListScrollSlice,
+      isLoading: isLoadingSlice,
+    }),
+    statementEditor: combineReducers({
+      showWarnings: showWarningsSlice,
     }),
     rowDnd: combineReducers({
       draggedPropRow: draggedPropRowSlice,

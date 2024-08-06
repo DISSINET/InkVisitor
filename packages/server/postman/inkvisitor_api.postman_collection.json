@@ -2047,45 +2047,7 @@
 						}
 					},
 					"response": []
-				},
-				{
-					"name": "update orders",
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiMSIsImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIiwibmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwiYWN0aXZlIjp0cnVlLCJvcHRpb25zIjp7ImRlZmF1bHRUZXJyaXRvcnkiOiIiLCJkZWZhdWx0TGFuZ3VhZ2UiOiIiLCJzZWFyY2hMYW5ndWFnZXMiOltdfSwiYm9va21hcmtzIjpbXSwic3RvcmVkVGVycml0b3JpZXMiOltdLCJyaWdodHMiOlt7InRlcnJpdG9yeSI6IlQwIiwibW9kZSI6ImFkbWluIn1dfSwiZXhwIjoxNjgzMDU2MTUxLCJpYXQiOjE2NTE1MjAxNTF9.M8VjoBvF_kauPZg5hMQevwhJm1KrvH9qvS1a4IdeOZw",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "[\"xxx\", \"s3_a2\"]",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "http://localhost:3000/api/v1/statements/s3/elementsOrders",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "3000",
-							"path": [
-								"api",
-								"v1",
-								"statements",
-								"s3",
-								"elementsOrders"
-							]
-						}
-					},
-					"response": []
-				}
+				}		
 			]
 		}
 	]

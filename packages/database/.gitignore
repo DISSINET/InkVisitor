@@ -1,2 +1,4 @@
 sheetcache
 rethinkdb_data
+.env
+.cmd.*

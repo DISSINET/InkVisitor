@@ -1,9 +1,8 @@
+import { animated, useSpring } from "@react-spring/web";
+import { springConfig } from "Theme/constants";
+import { ThemeColor } from "Theme/theme";
 import { ButtonGroup } from "components";
 import React, { ReactNode, useState } from "react";
-import { animated, useSpring } from "react-spring";
-import { springConfig } from "Theme/constants";
-import theme from "Theme/theme";
-import { Colors } from "types";
 import {
   StyledBox,
   StyledButtonWrap,
@@ -13,36 +12,39 @@ import {
   StyledVerticalText,
 } from "./BoxStyles";
 
-interface BoxProps {
+interface Box {
   label?: string;
-  color?: typeof Colors[number];
-  borderColor?: typeof Colors[number];
+  color?: keyof ThemeColor;
+  borderColor?: keyof ThemeColor;
   height?: number;
   noPadding?: boolean;
   isExpanded?: boolean;
-  button?: ReactNode[];
+  buttons?: ReactNode[];
   children?: ReactNode;
+  onHeaderClick?: () => void;
+  disableOpenBoxHeaderClick?: boolean;
 }
 
-export const Box: React.FC<BoxProps> = ({
+export const Box: React.FC<Box> = ({
   label = "",
-  color = "",
-  borderColor = "",
+  color,
+  borderColor,
   height = 0,
   noPadding = false,
   isExpanded = true,
-  button,
+  buttons,
   children,
+  onHeaderClick,
+  disableOpenBoxHeaderClick = false,
 }) => {
   const [hideContent, setHideContent] = useState<boolean>(false);
-  const [showContentLabel, setShowContentLabel] = useState<boolean>(false);
+  const [showContentLabel, setShowContentLabel] = useState<boolean>(
+    !isExpanded
+  );
 
   const animatedExpand = useSpring({
     opacity: isExpanded ? 1 : 0,
     contentLabelOpacity: isExpanded ? 0 : 1,
-    contentBackgroundColor: isExpanded
-      ? theme.color["gray"]["200"]
-      : theme.color["gray"]["300"],
     boxHeight: `${height / 10}rem`,
     onRest: () => {
       isExpanded ? setShowContentLabel(false) : setHideContent(true);
@@ -57,20 +59,30 @@ export const Box: React.FC<BoxProps> = ({
     <StyledBox
       style={{ height: animatedExpand.boxHeight as any }}
       height={height}
+      onClick={() => !isExpanded && onHeaderClick && onHeaderClick()}
+      $isClickable={!isExpanded && onHeaderClick !== undefined}
     >
       <StyledHead
         $borderColor={borderColor}
         $isExpanded={isExpanded}
-        color={color}
+        $color={color}
         $noPadding={noPadding}
+        $hasHeaderClick={
+          onHeaderClick !== undefined &&
+          !disableOpenBoxHeaderClick &&
+          isExpanded
+        }
+        onClick={() =>
+          !disableOpenBoxHeaderClick && onHeaderClick && onHeaderClick()
+        }
       >
         {!hideContent && (
           <animated.div style={animatedExpand}>{label}</animated.div>
         )}
         <StyledButtonWrap>
-          {button && (
+          {buttons && (
             <ButtonGroup>
-              {button.map((b, key) => (
+              {buttons.map((b, key) => (
                 <React.Fragment key={key}>{b}</React.Fragment>
               ))}
             </ButtonGroup>
@@ -78,13 +90,11 @@ export const Box: React.FC<BoxProps> = ({
         </StyledButtonWrap>
       </StyledHead>
       <StyledContent
-        color={color}
+        id={`box-content-${label.toLowerCase()}`}
+        $color={color}
         $borderColor={borderColor}
         $noPadding={noPadding}
         $isExpanded={isExpanded}
-        style={{
-          backgroundColor: animatedExpand.contentBackgroundColor as any,
-        }}
       >
         <StyledContentAnimationWrap
           $hideContent={hideContent}

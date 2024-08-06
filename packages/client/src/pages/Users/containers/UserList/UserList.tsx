@@ -1,8 +1,9 @@
 import { userRoleDict } from "@shared/dictionaries";
 import { EntityEnums, UserEnums } from "@shared/enums";
 import { IResponseUser, IUser, IUserRight } from "@shared/types";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import { Button, ButtonGroup, Input, Loader, Submit } from "components";
+import { Button, ButtonGroup, Loader, Submit } from "components";
 import {
   AttributeButtonGroup,
   EntitySuggester,
@@ -10,21 +11,23 @@ import {
 } from "components/advanced";
 import React, { useCallback, useMemo, useState } from "react";
 import {
+  FaEnvelopeOpenText,
   FaKey,
   FaToggleOff,
   FaToggleOn,
   FaTrashAlt,
-  FaUnlink,
 } from "react-icons/fa";
 import {
   RiUserSearchFill,
   RiUserSettingsFill,
   RiUserStarFill,
 } from "react-icons/ri";
-import { useMutation, useQuery, useQueryClient } from "react-query";
-import { Cell, Column, Row, useTable } from "react-table";
+import { CellProps, Column, Row, useTable } from "react-table";
 import { toast } from "react-toastify";
+import { UserListEmailInput } from "./UserListEmailInput/UserListEmailInput";
 import {
+  StyledNotActiveText,
+  StyledTHead,
   StyledTable,
   StyledTableWrapper,
   StyledTerritoryColumn,
@@ -33,119 +36,115 @@ import {
   StyledTerritoryListItem,
   StyledTerritoryListItemMissing,
   StyledTh,
-  StyledTHead,
   StyledUserNameColumn,
   StyledUserNameColumnIcon,
   StyledUserNameColumnText,
 } from "./UserListStyles";
 import { UserListTableRow } from "./UserListTableRow/UserListTableRow";
+import { UserListUsernameInput } from "./UserListUsernameInput/UserListUsernameInput";
 import { UsersUtils } from "./UsersUtils";
 
-interface UserList {
-  heightContent?: number;
-}
+type CellType = CellProps<IResponseUser>;
 
-export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
+interface UserList {}
+
+export const UserList: React.FC<UserList> = React.memo(() => {
   const [removingUserId, setRemovingUserId] = useState<false | string>("");
 
   const queryClient = useQueryClient();
 
-  const { status, data, error, isFetching } = useQuery(
-    ["users"],
-    async () => {
-      const res = await api.administrationGet();
-      return res.data.users.sort((a, b) => (a.id > b.id ? 1 : -1));
+  const {
+    status,
+    data: users,
+    error,
+    isFetching,
+  } = useQuery({
+    queryKey: ["users"],
+    queryFn: async () => {
+      const res = await api.usersGetMore({});
+      return res.data.sort((a, b) => (a.id > b.id ? 1 : -1));
     },
-    { enabled: api.isLoggedIn() }
-  );
+    enabled: api.isLoggedIn(),
+  });
 
   const removingUser = useMemo(() => {
-    return removingUserId ? data?.find((d) => d.id === removingUserId) : false;
+    return removingUserId ? users?.find((d) => d.id === removingUserId) : false;
   }, [removingUserId]);
 
-  const userMutation = useMutation(
-    async (userChanges: any) =>
-      await api.usersUpdate(userChanges.id, userChanges),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries(["users"]);
-      },
-    }
-  );
+  const userMutation = useMutation({
+    mutationFn: async (
+      userChanges: Partial<Omit<IUser, "id">> & { id: IUser["id"] }
+    ) => await api.usersUpdate(userChanges.id, userChanges),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+    },
+  });
 
-  const resetPasswordMutation = useMutation(
-    async (userId: string) => await api.resetPassword(userId),
-    {
-      onSuccess: (data, variables) => {
-        const { message } = data.data;
+  const resetPasswordMutation = useMutation({
+    mutationFn: async (userId: string) => await api.resetPassword(userId),
+    onSuccess: (data, variables) => {
+      const { message } = data.data;
 
-        toast.info(message, {
-          autoClose: 6000,
-          pauseOnHover: true,
-          closeOnClick: false,
-          onClick: () => {
-            navigator.clipboard.writeText(message ? message.split("'")[1] : "");
-            toast.info("Password copied to clipboard");
-          },
-          closeButton: true,
-          draggable: false,
-        });
-      },
-    }
-  );
+      toast.info(message, {
+        autoClose: 6000,
+        closeOnClick: false,
+        onClick: () => {
+          navigator.clipboard.writeText(message ? message.split("'")[1] : "");
+          toast.info("Password copied to clipboard");
+        },
+        closeButton: true,
+        draggable: false,
+      });
+    },
+  });
 
-  const removeUser = async () => {
-    if (removingUser) {
-      const res: any = await api.usersDelete(removingUser.id);
-      if (res.status === 200) {
-        toast.warning(`User ${removingUser.name} removed!`);
-        queryClient.invalidateQueries("users");
-        setRemovingUserId(false);
-      }
-    }
-  };
+  const removeUserMutation = useMutation({
+    mutationFn: async (user: IResponseUser) => await api.usersDelete(user.id),
+    onSuccess: (data, variables) => {
+      toast.warning(`User ${variables.name} removed!`);
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      setRemovingUserId(false);
+    },
+  });
 
   const addRightToUser = (
-    userId: string,
+    user: IResponseUser,
     territoryId: string,
     mode: "read" | "write"
   ) => {
-    const oldUser = data?.find((u: IResponseUser) => u.id === userId);
-    if (oldUser) {
-      // remove this territory from the list if it was added before
-      const newRights: IUserRight[] = [
-        ...oldUser.rights.filter((right) => right.territory !== territoryId),
-      ];
-      newRights.push({
-        territory: territoryId,
-        mode: mode as UserEnums.RoleMode,
-      });
-      userMutation.mutate({ id: userId, rights: newRights });
-    }
+    // remove this territory from the list if it was added before
+    const newRights: IUserRight[] = [
+      ...user.rights.filter((right) => right.territory !== territoryId),
+    ];
+    newRights.push({
+      territory: territoryId,
+      mode: mode as UserEnums.RoleMode,
+    });
+    userMutation.mutate({ id: user.id, rights: newRights });
   };
 
-  const removeRightFromUser = (userId: string, territoryId: string) => {
-    const oldUser = data?.find((u: IResponseUser) => u.id === userId);
-    if (oldUser) {
-      const newRights: IUserRight[] = [
-        ...oldUser.rights.filter((right) => right.territory !== territoryId),
-      ];
-      userMutation.mutate({ id: userId, rights: newRights });
-    }
+  const removeRightFromUser = (user: IResponseUser, territoryId: string) => {
+    const newRights: IUserRight[] = [
+      ...user.rights.filter((right) => right.territory !== territoryId),
+    ];
+    userMutation.mutate({ id: user.id, rights: newRights });
   };
 
-  const getRowId = useCallback((row) => {
+  const getRowId = useCallback((row: IResponseUser) => {
     return row.id;
   }, []);
 
-  const columns: Column<{}>[] = useMemo(() => {
-    return [
+  const usernameList = useMemo(() => users?.map((u) => u.name) || [], [users]);
+
+  const columns = useMemo<Column<IResponseUser>[]>(
+    () => [
       {
         Header: "",
         id: "Name",
         accessor: "name",
-        Cell: ({ row }: Cell) => {
-          const { name, email, role } = row.original as any;
+        Cell: ({ row }: CellType) => {
+          const { name, email, role, active, verified } = row.original;
+
           let icon = <RiUserSearchFill />;
           if (role === UserEnums.Role.Admin) {
             icon = <RiUserStarFill />;
@@ -153,13 +152,24 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
           if (role === UserEnums.Role.Editor) {
             icon = <RiUserSettingsFill />;
           }
+          if (!verified) {
+            icon = <FaEnvelopeOpenText size={16} />;
+          }
           return (
-            <StyledUserNameColumn>
+            <StyledUserNameColumn $active={active} $verified={verified}>
               <StyledUserNameColumnIcon>{icon}</StyledUserNameColumnIcon>
-              <StyledUserNameColumnText>
-                <b>{name}</b>
-                <span>{email}</span>
-              </StyledUserNameColumnText>
+
+              {!verified ? (
+                <StyledNotActiveText>
+                  <span>Verification email has been sent to</span>
+                  <b>{email}</b>
+                </StyledNotActiveText>
+              ) : (
+                <StyledUserNameColumnText>
+                  <b>{name}</b>
+                  <span>{email}</span>
+                </StyledUserNameColumnText>
+              )}
             </StyledUserNameColumn>
           );
         },
@@ -167,44 +177,40 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
       {
         Header: "Username",
         id: "Username",
-        Cell: ({ row }: Cell) => {
-          const { id, name, email, role } = row.original as any;
+        Cell: ({ row }: CellType) => {
+          const { verified } = row.original;
+
           return (
-            <Input
-              value={name}
-              onChangeFn={async (newValue: string) => {
-                userMutation.mutate({
-                  id: id,
-                  name: newValue,
-                });
-              }}
-            />
+            <>
+              {verified && (
+                <UserListUsernameInput
+                  user={row.original}
+                  userMutation={userMutation}
+                  usernameList={usernameList}
+                />
+              )}
+            </>
           );
         },
       },
       {
         Header: "Email",
         id: "Email",
-        Cell: ({ row }: Cell) => {
-          const { id, name, email, role } = row.original as any;
-          return (
-            <Input
-              value={email}
-              onChangeFn={async (newValue: string) => {
-                userMutation.mutate({
-                  id: id,
-                  email: newValue,
-                });
-              }}
+        Cell: ({ row }: CellType) => {
+          const { verified, email } = row.original;
+          return verified ? (
+            <UserListEmailInput
+              user={row.original}
+              userMutation={userMutation}
             />
-          );
+          ) : null;
         },
       },
       {
         Header: "Role",
         id: "Role",
-        Cell: ({ row }: Cell) => {
-          const { id, name, email, role } = row.original as any;
+        Cell: ({ row }: CellType) => {
+          const { id, role } = row.original;
           return (
             <AttributeButtonGroup
               disabled={id === localStorage.getItem("userid")}
@@ -250,13 +256,13 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
       {
         Header: "Read Territories",
         id: "territories-read",
-        Cell: ({ row }: Cell) => {
+        Cell: ({ row }: CellType) => {
           const {
             id: userId,
             rights,
             territoryRights: territoryActants,
             role: userRole,
-          } = row.original as any;
+          } = row.original;
 
           const readTerritories = rights.filter(
             (r: IUserRight) => r.mode === "read"
@@ -270,16 +276,17 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
                     disableTemplatesAccept
                     disableCreate
                     onSelected={(newSelectedId: string) => {
-                      addRightToUser(userId, newSelectedId, "read");
+                      addRightToUser(row.original, newSelectedId, "read");
                     }}
                     categoryTypes={[EntityEnums.Class.Territory]}
                     placeholder={"assign a territory"}
+                    excludedActantIds={readTerritories.map((r) => r.territory)}
                   />
                   <StyledTerritoryList>
                     {readTerritories.length && territoryActants ? (
                       readTerritories.map((right: IUserRight) => {
                         const territoryActant = territoryActants.find(
-                          (t: any) => t.territory.id === right.territory
+                          (t) => t.territory.id === right.territory
                         );
 
                         return territoryActant && territoryActant.territory ? (
@@ -288,7 +295,10 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
                               entity={territoryActant.territory}
                               unlinkButton={{
                                 onClick: () => {
-                                  removeRightFromUser(userId, right.territory);
+                                  removeRightFromUser(
+                                    row.original,
+                                    right.territory
+                                  );
                                 },
                                 tooltipLabel: "remove territory from rights",
                               }}
@@ -296,7 +306,7 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
                           </StyledTerritoryListItem>
                         ) : (
                           <StyledTerritoryListItemMissing key={right.territory}>
-                            invalid T {right.territory}
+                            <div>invalid T {right.territory}</div>
                             <Button
                               key="d"
                               tooltipLabel="remove invalid territory"
@@ -304,7 +314,10 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
                               color="danger"
                               noBorder
                               onClick={() => {
-                                removeRightFromUser(userId, right.territory);
+                                removeRightFromUser(
+                                  row.original,
+                                  right.territory
+                                );
                               }}
                             />
                           </StyledTerritoryListItemMissing>
@@ -327,13 +340,13 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
       {
         Header: "Write Territories",
         id: "territories-write",
-        Cell: ({ row }: Cell) => {
+        Cell: ({ row }: CellType) => {
           const {
             id: userId,
             rights,
             territoryRights: territoryActants,
             role: userRole,
-          } = row.original as any;
+          } = row.original;
 
           const writeTerritories = rights.filter(
             (r: IUserRight) => r.mode === "write"
@@ -348,16 +361,19 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
                       disableTemplatesAccept
                       disableCreate
                       onSelected={(newSelectedId: string) => {
-                        addRightToUser(userId, newSelectedId, "write");
+                        addRightToUser(row.original, newSelectedId, "write");
                       }}
                       categoryTypes={[EntityEnums.Class.Territory]}
                       placeholder={"assign a territory"}
+                      excludedActantIds={writeTerritories.map(
+                        (r) => r.territory
+                      )}
                     />
                     <StyledTerritoryList>
                       {writeTerritories.length && territoryActants ? (
                         writeTerritories.map((right: IUserRight) => {
                           const territoryActant = territoryActants.find(
-                            (t: any) => t.territory.id === right.territory
+                            (t) => t.territory.id === right.territory
                           );
 
                           return territoryActant &&
@@ -368,7 +384,7 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
                                 unlinkButton={{
                                   onClick: () => {
                                     removeRightFromUser(
-                                      userId,
+                                      row.original,
                                       right.territory
                                     );
                                   },
@@ -388,7 +404,10 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
                                 color="danger"
                                 noBorder
                                 onClick={() => {
-                                  removeRightFromUser(userId, right.territory);
+                                  removeRightFromUser(
+                                    row.original,
+                                    right.territory
+                                  );
                                 }}
                               />
                             </StyledTerritoryListItemMissing>
@@ -416,21 +435,36 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
       {
         Header: "",
         id: "actions",
-        accessor: "actions",
-        Cell: ({ row }: Cell) => {
+        Cell: ({ row }: CellType) => {
           const {
             id: userId,
             rights,
             territoryRights: territoryActants,
-          } = row.original as any;
-          const active = (row.original as IUser).active;
+            active,
+            verified,
+          } = row.original;
+
+          let activateTooltip = "activate user";
+          if (!verified) {
+            activateTooltip = "cannot activate unverified user";
+          } else if (userId === localStorage.getItem("userid")) {
+            activateTooltip = "cannot deactivate yourself";
+          } else if (active) {
+            activateTooltip = "deactivate user";
+          }
+
+          let deleteTooltip = "delete user";
+          if (userId === localStorage.getItem("userid")) {
+            deleteTooltip = "cannot delete yourself";
+          }
+
           return (
-            <ButtonGroup noMarginRight>
+            <ButtonGroup $noMarginRight>
               <Button
                 key="r"
                 icon={<FaTrashAlt size={14} />}
                 color="danger"
-                tooltipLabel="delete"
+                tooltipLabel={deleteTooltip}
                 disabled={userId === localStorage.getItem("userid")}
                 onClick={() => {
                   setRemovingUserId(userId);
@@ -440,6 +474,7 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
                 icon={<FaKey size={14} />}
                 tooltipLabel="reset password"
                 color="warning"
+                disabled={!active || !verified}
                 onClick={() => {
                   resetPasswordMutation.mutate(userId);
                 }}
@@ -448,9 +483,11 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
                 icon={
                   active ? <FaToggleOn size={14} /> : <FaToggleOff size={14} />
                 }
-                disabled={userId === localStorage.getItem("userid")}
+                disabled={
+                  !verified || userId === localStorage.getItem("userid")
+                }
                 color={active ? "success" : "danger"}
-                tooltipLabel={active ? "set inactive" : "set active"}
+                tooltipLabel={activateTooltip}
                 onClick={() => {
                   userMutation.mutate({
                     id: userId,
@@ -462,8 +499,9 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
           );
         },
       },
-    ];
-  }, [data]);
+    ],
+    [usernameList]
+  );
 
   const {
     getTableProps,
@@ -474,16 +512,13 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
     visibleColumns,
   } = useTable({
     columns,
-    data: data || [],
+    data: useMemo(() => users || [], [users]),
     getRowId,
-    initialState: {
-      hiddenColumns: ["id"],
-    },
   });
 
   return (
     <>
-      {data && (
+      {users && (
         <>
           <StyledTableWrapper>
             <StyledTable {...getTableProps()}>
@@ -499,7 +534,7 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
                 ))}
               </StyledTHead>
               <tbody {...getTableBodyProps()}>
-                {rows.map((row: Row, i: number) => {
+                {rows.map((row: Row<IResponseUser>, i: number) => {
                   prepareRow(row);
                   return (
                     <UserListTableRow
@@ -512,23 +547,22 @@ export const UserList: React.FC<UserList> = React.memo(({ heightContent }) => {
               </tbody>
             </StyledTable>
           </StyledTableWrapper>
-          <UsersUtils />
+          {/* NEW USER | TEST EMAIL */}
+          <UsersUtils users={users} />
         </>
       )}
 
       <Submit
-        title={`Delete User ${removingUser ? removingUser.name : ""}`}
-        text={`Do you really want do delete User ${
+        title={`Deleting user ${removingUser ? removingUser.name : ""}`}
+        text={`Do you really want to delete the user ${
           removingUser ? removingUser.name : ""
         }?`}
         show={removingUser != false}
-        onSubmit={() => {
-          removeUser();
-        }}
+        onSubmit={() => removingUser && removeUserMutation.mutate(removingUser)}
         onCancel={() => {
           setRemovingUserId(false);
         }}
-        loading={false}
+        loading={removeUserMutation.isPending}
       />
       <Loader show={isFetching} />
     </>

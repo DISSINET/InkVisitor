@@ -25,9 +25,9 @@ export default class PropertyReciprocal
       [];
 
     if (asClass === EntityEnums.Class.Concept) {
-      out = await Relation.findForEntity<RelationTypes.IPropertyReciprocal>(
+      out = await Relation.findForEntities<RelationTypes.IPropertyReciprocal>(
         conn,
-        entityId,
+        [entityId],
         RelationEnums.Type.PropertyReciprocal
       );
     }

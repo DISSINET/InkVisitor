@@ -63,7 +63,7 @@ The environment supports three user roles:
 
 Further, admins may grant particular users (editors and viewers) access rights for specified territories. Editor role may be granted by "edit" rights, viewer role has "view" rights.
 
-**Entity Detail** is accessible to all roles. The viewer is not allowed to change any value, while the editor may change label, detail, notes, language and add, remove and edit property statements with the status of "pending." Moreover, all meta props in detail that he creates are getting status "pending." Admin has full access to internal attributes of the entity (status, class) and meta props. All meta props he creates have the status "approved."
+**Entity Detail** is accessible to all roles. The viewer is not allowed to change any value, while the editor may change label, detail, notes, language and add, remove and edit property statements with the status of "pending." Moreover, all metaprops in detail that he creates are getting status "pending." Admin has full access to internal attributes of the entity (status, class) and metaprops. All metaprops he creates have the status "approved."
 
 Only admin and editor with edit rights in the parent **Territory** (T) may edit, add or remove a child T. Editors and viewers do not see T they have no rights to in the T Tree. Only "edit" rights for the T grant the rights to add a new Statement under that particular T, or any other child of that T. That means that the admin has first to create a T and grant edit rights to editors.
 
@@ -87,32 +87,76 @@ For more information see [database package](./packages/database)
 
 Package containing typescript definitions, types and enums, that should be available to both client & server.
 
+## Development
+
+### Install
+
+Install `pnpm` version `>=8.6.0`. You can switch the `pnpm` versions by running `corepack prepare pnpm@<version> --activate`.
+Go to all three folders in `packages` (`client`, `server`, `database`) and run `pnpm i` in each of them.
+Before continuing, please ensure that you have database instance setup & running (see deploying with docker below)
+
 ## Deploy
 
-For standalone deployment of each package, please refer to respective `README.md` files. No matter the approach, the database should be started first.
+To deploy the Inkvisitor instance, you can use Docker (or Podman), host it on Kubernetes cluster, or build and deploy the packages separately.
 
-### Docker
+### Deploy with Docker
 
-1. Install [docker](https://docs.docker.com/get-docker/).
-2. Install [docker-compose tool](https://docs.docker.com/compose/install/)
-3. Prepare `.env` files for servers listed under `env_file` sections. Check server's [README.md](./packages/server/README.md) and [example.env](./packages/server/env/example.env) files.
-4. Prepare `.env` files for clients identified by `ENV` variable under `build -> args` section. Check server's [README.md](./packages/server/README.md) files and [example.env](./packages/server/env/example.env) files.
-4. Run the database - either as a service or containerized using `docker-compose up -d database`
-5. Build app image (will be done also in next step if not available) `docker-compose build inkvisitor` (or `inkvisitor-<env>`)
-6. Run the containerized app `docker-compose up inkvisitor` (or `inkvisitor-<env>`)
+To use docker to deploy the InkVisitor application:
+
+1.  Install [docker](https://docs.docker.com/get-docker/), [docker-compose tool](https://docs.docker.com/compose/install/).
+2.  Install [pnpm](https://pnpm.io/).
+3.  Clone | Fork | Download the Inkvisitor [repository](https://github.com/DISSINET/InkVisitor).
+4.  For server - prepare `.env` files for servers listed under `env_file` sections in `docker-compose.yml` file. Check the server's [README.md](https://github.com/DISSINET/InkVisitor/blob/dev/packages/server/README.md) and [example.env](https://github.com/DISSINET/InkVisitor/blob/dev/packages/server/env/example.env) files for more information. Install server dependencies by `pnpm i` 
+5.  For client app - prepare `.env.<ENV>` file that should identify the appropriate environment under the `build -> args` section in `docker-compose.yml` file. You can see the client's [README.md](https://github.com/DISSINET/InkVisitor/blob/dev/packages/client/README.md) and [example.env](https://github.com/DISSINET/InkVisitor/blob/dev/packages/client/env/example.env) files to ensure you have included all the necessary configuration information.
+6.  Run the database - first, prepare `.env` file according to the documentation. Then, run either as a standalone service or containerized using `docker-compose up -d database`. Now, you have to create a database `inkvisitor` - one option is to navigate to `http://localhost:8080/#dataexplorer` and run query `r.dbCreate("inkvisitor")`.
+7.  The database will be now empty, so to set up the database structure and import some testing data, go to `packages/database` and run `pnpm start` (`pnpm i` might be needed as well). Following the information in the prompt - first, choose database `inkvisitor` by pressing the `L` key, then pick a dataset to import using the `D` key. We recommend to use the `empty` dataset for the first run. Then, press `X` to process the import. Navigate to `http://localhost:8080/#dataexplorer` and enter query `r.db('inkvisitor').table('entities')` to check if the import went fine.
+8.  Build app image (will also be done in next step if not available) by running `docker-compose build inkvisitor` (or `docker-compose build inkvisitor-<env>`).
+9.  Run the containerized application with the command `docker-compose up inkvisitor` (or `inkvisitor-<env>`).
+
+### Kubernetes
+ 
+See [kube](./kube) directory for examples. Please, check your cluster's capabilities as the setup could differ.
+
+### Deploy by packages
+
+The InkVisitor codebase consists of three interconnected packages (parts) - the client application, the server, and the database (set of tools/import datasets). You can deploy those packages individually if you do not want to use Docker. In each step, make sure to have the appropriate `.env.<env>` file accessible - see the Readme.md file in the package for more information.
+
+#### 1\. Database
+
+1. Follow tutorials on the [official page](https://rethinkdb.com/docs/install/) to install RethinkDB on your machine, or simply use `docker compose up -d database`.
+2. Use the import script to create the database structure and (optional) import some testing data by running `pnpm start` and following the information in the prompt. Use at least `empty` dataset - for bare minimum.
+
+#### 2\. Client application
+
+The client application runs on static files - html/css/js + additional assets. These files need to be moved to your HTTP server by:
+
+1.  Build the frontend app by `pnpm run build-<env>` to create/update the `dist` folder. `<env>` dictates which `.env.<env>` file will be used.
+2.  Copy contents of `dist` folder to the directory used by your HTTP server.
+
+#### 3\. Server
+
+The server is also built in Javascript, using mainly the Node + Express libraries. You need to first build the application, move the build to your server and run it from there.
+
+1.  Run `pnpm run build` to transpile the code.
+2.  Move the `dist` folder to your server that supports the Node.js environment.
+3.  Do `ENV_FILE=<env> yarn run start:dist` to run the built application with a loaded `.env.<env>` file.
+
+For quicker use, use can also run the server directly without building using `pnpm start` (this uses `nodemon` tool and `.env.development` environment file).
+
+### SSL
+
+The app does not support ssl internally, it should be handled in upper layer, ie. [nginx](https://docs.nginx.com/nginx/admin-guide/security-controls/securing-http-traffic-upstream/). Please adjust `APIURL` variable in client's `.env` file to use `https` instead of `http`.
 
 ### Firewall
 
-Make sure the ports required by each application are not blocked. Required ports are listed in [docker-compose.yml](./docker-compose.yml). Examples:
+Make sure the ports required by each application are not blocked. Required ports are listed in [docker-compose.yml](https://github.com/DISSINET/InkVisitor/blob/dev/docker-compose.yml). Examples:
 
-1. [ufw](https://help.ubuntu.com/community/UFW): `ufw allow <port>`
-2. [firewalld](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/security_guide/sec-using_firewalls): `firewall-cmd --zone=public --permanent --add-port=<port>/tcp`
+1.  [ufw](https://help.ubuntu.com/community/UFW): `ufw allow <port>`
+2.  [firewalld](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/security_guide/sec-using_firewalls): `firewall-cmd --zone=public --permanent --add-port=<port>/tcp`
 
 Setup for additional system specific features (reverse proxies etc) are beyond the scope of this readme.
-
-## Wiki
-
-For more in-depth description for models etc, please visit our [wiki page](https://github.com/DISSINET/InkVisitor/wiki)
+You should be able to allow at least the port for server api (default is 3000) and port for serving client files (if using docker image, it would be served by server api).
+You don't need to allow public access to database, however rethinkdb serves monitoring tool on port 8080.
 
 ## ACL - access control list
 

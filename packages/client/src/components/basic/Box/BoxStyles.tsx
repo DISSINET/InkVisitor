@@ -1,25 +1,30 @@
-import { animated } from "react-spring";
+import { animated } from "@react-spring/web";
+import { ThemeColor } from "Theme/theme";
 import styled from "styled-components";
 
 interface StyledBox {
   height?: number;
+  $isClickable?: boolean;
 }
 export const StyledBox = styled(animated.div)<StyledBox>`
   position: relative;
   display: flex;
   flex-direction: column;
   height: ${({ height }) => (height ? `${height / 10}rem` : "100%")};
+  cursor: ${({ $isClickable }) => ($isClickable ? "pointer" : "")};
 `;
 
 interface StyledHead {
-  color: string;
-  $borderColor: string;
+  $color?: keyof ThemeColor;
+  $borderColor?: keyof ThemeColor;
   $noPadding: boolean;
   $isExpanded: boolean;
+  $hasHeaderClick: boolean;
 }
 export const StyledHead = styled(animated.div)<StyledHead>`
   height: 3.2rem;
-  background-color: ${({ theme, color }) => (color ? color : "")};
+  background-color: ${({ theme, $color }) =>
+    $color ? theme.color[$color] : ""};
   color: ${({ theme }) => theme.color["gray"]["600"]};
   padding: ${({ theme }) => theme.space[2]};
   font-size: ${({ theme }) => theme.fontSize["base"]};
@@ -36,6 +41,7 @@ export const StyledHead = styled(animated.div)<StyledHead>`
   border-right-style: solid;
   border-width: ${({ theme, $noPadding, $isExpanded }) =>
     $noPadding || !$isExpanded ? theme.borderWidth[1] : theme.borderWidth[4]};
+  cursor: ${({ $hasHeaderClick }) => ($hasHeaderClick ? "pointer" : "")};
 `;
 interface StyledButtonWrap {}
 export const StyledButtonWrap = styled.div<StyledButtonWrap>`
@@ -45,8 +51,8 @@ export const StyledButtonWrap = styled.div<StyledButtonWrap>`
 `;
 interface StyledContent {
   $noPadding: boolean;
-  color: string;
-  $borderColor?: string;
+  $color?: keyof ThemeColor;
+  $borderColor?: keyof ThemeColor;
   $isExpanded: boolean;
 }
 export const StyledContent = styled(animated.div)<StyledContent>`
@@ -62,7 +68,7 @@ export const StyledContent = styled(animated.div)<StyledContent>`
       ? $borderColor
         ? theme.color[$borderColor]
         : theme.color["gray"]["200"]
-      : theme.color["grey"]};
+      : ""};
   border-style: ${({ $isExpanded }) => ($isExpanded ? "solid" : "")};
   border-width: ${({ theme, $noPadding, $isExpanded }) =>
     $noPadding || !$isExpanded ? theme.borderWidth[1] : theme.borderWidth[4]};

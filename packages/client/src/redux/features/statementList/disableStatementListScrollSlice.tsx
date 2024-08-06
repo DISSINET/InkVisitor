@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-const initialState: boolean = false;
+const initialState: boolean = true;
 
 const disableStatementListScrollSlice = createSlice({
   name: "disableStatementListScroll",

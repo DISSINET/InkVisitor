@@ -4,12 +4,16 @@ import { IResource, IResourceData } from "@shared/types/resource";
 import Entity from "@models/entity/entity";
 
 class ResourceData implements IResourceData, IModel {
-  url: string = "";
-  partValueLabel: string = "";
-  partValueBaseURL: string = "";
+  url = "";
+  partValueLabel = "";
+  partValueBaseURL = "";
+  documentId?: string;
 
   constructor(data: Partial<IResourceData>) {
     fillFlatObject(this, data);
+    if (data.documentId) {
+      this.documentId = data.documentId;
+    }
   }
 
   isValid(): boolean {

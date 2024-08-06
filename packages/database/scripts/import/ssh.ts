@@ -1,4 +1,6 @@
-import tunnel from "tunnel-ssh";
+import {createTunnel} from "tunnel-ssh";
+import * as ssh2 from 'ssh2';
+
 import { Server } from "net";
 
 export interface ISshConfig {
@@ -12,6 +14,7 @@ export interface ISshConfig {
 export class SshHelper {
   sshConfig: ISshConfig;
   server?: Server;
+  client?: ssh2.Client;
 
   constructor(config: ISshConfig) {
     this.sshConfig = config;
@@ -24,25 +27,31 @@ export class SshHelper {
  * @returns Promise<void>
  */
   async startSshTunnel(): Promise<void> {
-    this.server = await new Promise<Server>((resolve, reject) => {
-      const tnl = tunnel(
-        {
-          host: this.sshConfig.sshIp,
-          dstPort: this.sshConfig.dstPort, // using the same port as db
-          localPort: this.sshConfig.localPort,  // using the same port as db
-          username: this.sshConfig.sshUsername,
-          password: this.sshConfig.sshPassword,
-        },
-        async (error: Error, srv: Server) => {
-          resolve(srv);
-        }
-      );
+    const tunnelOptions = {
+      autoClose:true
+    };
+    const serverOptions = {
+      port: this.sshConfig.localPort
+    };
+    const sshOptions = {
+      host: this.sshConfig.sshIp,
+      port: 22,
+      username: this.sshConfig.sshUsername,
+      password: this.sshConfig.sshPassword,
+    };
+    const forwardOptions = {
+      srcAddr:'127.0.0.1',
+      srcPort: this.sshConfig.localPort,  // using the same port as db
+      dstAddr:'127.0.0.1',
+      dstPort: this.sshConfig.dstPort, // using the same port as db
+    };
 
-      tnl.on("error", function (err) {
-        console.error("SSH connection error:", err);
-        process.exit(1);
-      });
-    });
+    try{
+      ([this.server, this.client] = await  createTunnel(tunnelOptions, serverOptions,  sshOptions, forwardOptions))
+    } catch(e) {
+      console.warn(e)
+    }
+
   };
 
   /**

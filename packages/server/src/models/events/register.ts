@@ -1,4 +1,3 @@
-import Statement from "@models/statement/statement";
 import emitter from "./emitter";
 import { EventTypes, EventMapSingle } from "./types";
 
@@ -7,7 +6,7 @@ export interface EmittableModel {
 }
 
 // sorry about this
-const hookers: EmittableModel[] = [Statement];
+const hookers: EmittableModel[] = [];
 
 let registered = false;
 const registerHooks = () => {

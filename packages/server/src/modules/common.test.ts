@@ -3,14 +3,13 @@ import "@models/events/register";
 import Statement, { StatementData } from "@models/statement/statement";
 import Territory from "@models/territory/territory";
 import User from "@models/user/user";
-import { Db } from "@service/RethinkDB";
+import { Db } from "@service/rethink";
 import {
   createEntity,
   deleteAudits,
+  deleteDocuments,
   deleteEntities,
   deleteRelations,
-  deleteUser,
-  deleteUsers,
 } from "@service/shorthands";
 import { EntityEnums } from "@shared/enums";
 import { IResponseGeneric, IStatement, IStatementAction } from "@shared/types";
@@ -94,7 +93,6 @@ export function getIStatementActionMock(): IStatementAction {
     moodvariant: EntityEnums.MoodVariant.Irrealis,
     bundleOperator: EntityEnums.Operator.And,
     props: [],
-    statementOrder: false,
   };
 }
 
@@ -236,6 +234,7 @@ export async function clean(db: Db): Promise<void> {
   await deleteAudits(db);
   await deleteRelations(db);
   //await deleteUsers(db);
+  await deleteDocuments(db);
 
   await db.close();
 }

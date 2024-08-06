@@ -10,4 +10,11 @@ export namespace DbEnums {
         PropsRecursive = "props.recursive",
         RelationsEntityIds = "entityIds"
     }
+
+    export const EntityIdReferenceIndexes = [
+      Indexes.PropsRecursive,
+      Indexes.StatementDataProps,
+      Indexes.StatementEntities,
+      Indexes.StatementActantsCI,
+    ]
 }

@@ -1,19 +1,25 @@
 import { EntityEnums } from "@shared/enums";
+import { ThemeColor } from "Theme/theme";
 import { Tooltip } from "components";
 import React, {
+  KeyboardEvent,
   MouseEventHandler,
   ReactElement,
   useState,
-  KeyboardEvent,
 } from "react";
-import { Colors } from "types";
 import { StyledButton, StyledButtonLabel } from "./ButtonStyles";
+import {
+  AutoPlacement,
+  BasePlacement,
+  VariationPlacement,
+} from "@popperjs/core";
 
 interface ButtonProps {
   tooltipLabel?: string;
   tooltipContent?: ReactElement[] | ReactElement;
   label?: string;
   icon?: JSX.Element | EntityEnums.Operator;
+  iconRight?: JSX.Element | EntityEnums.Operator;
   noIconMargin?: boolean;
   noBackground?: boolean;
   inverted?: boolean;
@@ -22,9 +28,12 @@ interface ButtonProps {
   radiusLeft?: boolean;
   radiusRight?: boolean;
   disabled?: boolean;
-  color?: typeof Colors[number];
+  color?: keyof ThemeColor;
   onClick?: MouseEventHandler<HTMLElement>;
   fullWidth?: boolean;
+  tooltipPosition?: AutoPlacement | BasePlacement | VariationPlacement;
+  hideTooltipOnClick?: boolean;
+  paddingX?: boolean;
 }
 
 export const Button: React.FC<ButtonProps> = ({
@@ -32,6 +41,7 @@ export const Button: React.FC<ButtonProps> = ({
   tooltipContent,
   label = "",
   icon,
+  iconRight,
   noIconMargin = false,
   inverted = false,
   noBorder = false,
@@ -45,50 +55,58 @@ export const Button: React.FC<ButtonProps> = ({
     // do nothing
   },
   fullWidth = false,
+  tooltipPosition = "bottom",
+  hideTooltipOnClick = false,
+  paddingX = false,
 }) => {
   const [referenceElement, setReferenceElement] =
     useState<HTMLButtonElement | null>(null);
   const [showTooltip, setShowTooltip] = useState(false);
 
-  const renderButton = () => {
-    return (
+  return (
+    <>
       <StyledButton
         ref={setReferenceElement}
-        onClick={onClick}
-        hasIcon={icon && true}
-        color={color}
-        inverted={inverted}
-        textRegular={textRegular}
-        noBorder={noBorder}
-        noBackground={noBackground}
-        radiusLeft={radiusLeft}
-        radiusRight={radiusRight}
-        fullWidth={fullWidth}
-        disabled={disabled}
+        onClick={(e) => {
+          e.stopPropagation();
+          if (!disabled) {
+            hideTooltipOnClick && setShowTooltip(false);
+            onClick(e);
+          }
+        }}
+        $hasIcon={icon && true}
+        $color={color}
+        $inverted={inverted}
+        $textRegular={textRegular}
+        $noBorder={noBorder}
+        $noBackground={noBackground}
+        $radiusLeft={radiusLeft}
+        $radiusRight={radiusRight}
+        $fullWidth={fullWidth}
+        $disabled={disabled}
         onMouseEnter={() => setShowTooltip(true)}
         onMouseLeave={() => setShowTooltip(false)}
         onKeyPress={(e: KeyboardEvent<HTMLButtonElement>) => e.preventDefault()}
+        $paddingX={paddingX}
       >
         {icon}
         {label && (
-          <StyledButtonLabel hasIcon={!!icon} noIconMargin={noIconMargin}>
+          <StyledButtonLabel $hasIcon={!!icon} $noIconMargin={noIconMargin}>
             {label}
           </StyledButtonLabel>
         )}
+        {iconRight}
       </StyledButton>
-    );
-  };
-  return tooltipLabel || tooltipContent ? (
-    <>
-      <Tooltip
-        label={tooltipLabel}
-        content={tooltipContent}
-        visible={showTooltip}
-        referenceElement={referenceElement}
-      />
-      {renderButton()}
+
+      {(tooltipLabel || tooltipContent) && (
+        <Tooltip
+          label={tooltipLabel}
+          content={tooltipContent}
+          visible={showTooltip}
+          referenceElement={referenceElement}
+          position={tooltipPosition}
+        />
+      )}
     </>
-  ) : (
-    renderButton()
   );
 };

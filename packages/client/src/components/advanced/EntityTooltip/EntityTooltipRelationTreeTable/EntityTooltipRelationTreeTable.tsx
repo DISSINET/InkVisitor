@@ -1,6 +1,6 @@
 import { IEntity, Relation } from "@shared/types";
 import React from "react";
-import { getRelationTreeDepth, getShortLabelByLetterCount } from "utils";
+import { getRelationTreeDepth, getShortLabelByLetterCount } from "utils/utils";
 import {
   StyledFlexColumn,
   StyledGridRowHalf,
@@ -18,13 +18,13 @@ export const EntityTooltipRelationTreeTable: React.FC<
 > = ({ relationTreeArray, entities }) => {
   const treeDepth = getRelationTreeDepth(relationTreeArray) - 1;
   return (
-    <StyledRelationTypeTreeBlock depth={treeDepth}>
+    <StyledRelationTypeTreeBlock $depth={treeDepth}>
       {relationTreeArray
         .slice(0, 2)
         .map((relation: Relation.IConnection<any>, key: number) => {
           const entity = entities[relation.entityIds[1]];
           return (
-            <StyledGridRowThird key={key} onlyTwoLevels={treeDepth === 2}>
+            <StyledGridRowThird key={key} $onlyTwoLevels={treeDepth === 2}>
               {/* First level */}
               <StyledTreeBlock>
                 {getShortLabelByLetterCount(entity?.label, 40)}

@@ -1,12 +1,15 @@
 import { languageDict, userRoleDict } from "@shared/dictionaries";
 import { EntityEnums, UserEnums } from "@shared/enums";
-import { IResponseUser } from "@shared/types";
+import { IResponseUser, IUser } from "@shared/types";
+import { UnsafePasswordError } from "@shared/types/errors";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { SAFE_PASSWORD_DESCRIPTION } from "Theme/constants";
 import api from "api";
 import {
   Button,
   ButtonGroup,
-  Dropdown,
   Input,
+  Loader,
   Modal,
   ModalContent,
   ModalFooter,
@@ -14,27 +17,19 @@ import {
   ModalInputForm,
   ModalInputLabel,
   ModalInputWrap,
-  Tag,
 } from "components";
-import {
+import Dropdown, {
   AttributeButtonGroup,
   EntitySuggester,
   EntityTag,
 } from "components/advanced";
-import React, { useMemo, useState } from "react";
-import { BiHide, BiShow } from "react-icons/bi";
-import { FaUnlink } from "react-icons/fa";
-import {
-  notifyManager,
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "react-query";
-import { Switch } from "react-router";
-import { OptionTypeBase, ValueType } from "react-select";
+import { StyledDescription } from "pages/AuthModalSharedStyles";
+import React, { useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
-import theme from "Theme/theme";
+import { DropdownItem } from "types";
+import { isSafePassword } from "utils/utils";
 import {
+  StyledButtonWrap,
   StyledRightsHeading,
   StyledRightsWrap,
   StyledUserRightHeading,
@@ -46,21 +41,10 @@ import { UserRightItem } from "./UserRightItem/UserRightItem";
 interface DataObject {
   name: string;
   email: string;
-  defaultLanguage: {
-    label: string;
-    value: EntityEnums.Language;
-  } | null;
-  searchLanguages:
-    | (
-        | {
-            label: string;
-            value: EntityEnums.Language;
-          }
-        | undefined
-      )[]
-    | null;
-  defaultTerritory: string | null;
-  hideStatementElementsOrderTable?: boolean;
+  defaultLanguage: EntityEnums.Language;
+  defaultStatementLanguage: EntityEnums.Language;
+  searchLanguages: EntityEnums.Language[];
+  defaultTerritory?: string | null;
 }
 interface UserCustomizationModal {
   user: IResponseUser;
@@ -70,32 +54,44 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
   user,
   onClose = () => {},
 }) => {
-  const { options, name, email, role, rights } = useMemo(() => user, [user]);
+  const [showModal, setShowModal] = useState(false);
+  useEffect(() => {
+    setShowModal(true);
+  }, []);
 
-  const initialValues = useMemo(() => {
-    const defaultLanguageObject = languageDict.find(
-      (i: any) => i.value === options.defaultLanguage
-    );
-    const searchLanguagesObject = options.searchLanguages.map((sL) => {
-      return languageDict.find((i: any) => i.value === sL);
-    });
+  const initialValues: DataObject = useMemo(() => {
+    const { options, name, email } = user;
+
+    // const defaultLanguageObject =
+    //   languageDict.find((i) => i.value === options.defaultLanguage) ??
+    //   {label: , value: EntityEnums.Language.Empty};
+    // const defaultStatementLanguageObject =
+    //   languageDict.find((i) => i.value === options.defaultStatementLanguage) ??
+    //   {label: , value: EntityEnums.Language.Empty};
+    // const searchLanguagesObject = options.searchLanguages.map((sL) => {
+    //   return languageDict.find((i) => i.value === sL);
+    // });
 
     return {
       name: name,
       email: email,
-      defaultLanguage: defaultLanguageObject ? defaultLanguageObject : null,
-      searchLanguages:
-        searchLanguagesObject.length > 0 ? searchLanguagesObject : null,
+      defaultLanguage: options.defaultLanguage ?? EntityEnums.Language.Empty,
+      defaultStatementLanguage:
+        options.defaultStatementLanguage ?? EntityEnums.Language.Empty,
+      searchLanguages: options.searchLanguages,
       defaultTerritory: options.defaultTerritory,
-      hideStatementElementsOrderTable: options.hideStatementElementsOrderTable,
     };
   }, [user]);
 
   const [data, setData] = useState<DataObject>(initialValues);
 
+  useEffect(() => {
+    setData(initialValues);
+  }, [initialValues]);
+
   const handleChange = (
     key: string,
-    value: string | true | false | ValueType<OptionTypeBase, any>
+    value: string | true | false | DropdownItem
   ) => {
     setData({
       ...data,
@@ -103,45 +99,43 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
     });
   };
 
-  const handleResetPassword = async () => {
-    const resetRes = await api.resetMyPassword();
-    if (resetRes.status == 200) {
-      toast.success(
-        `an email with a new pre-generated password has been sent to ${user.email}`
-      );
-    }
-  };
+  const passwordUpdateMutation = useMutation({
+    mutationFn: async () => await api.updatePassword("me", newPassword),
+    onSuccess: () => {
+      toast.info("Password changed");
+    },
+  });
 
   const {
     status,
     data: territory,
     error,
     isFetching,
-  } = useQuery(
-    ["territory", data.defaultTerritory],
-    async () => {
+  } = useQuery({
+    queryKey: ["territory", data.defaultTerritory],
+    queryFn: async () => {
       if (data.defaultTerritory) {
         const res = await api.territoryGet(data.defaultTerritory);
         return res.data;
       }
     },
-    {
-      enabled: !!data.defaultTerritory && api.isLoggedIn(),
-    }
-  );
+    enabled: !!data.defaultTerritory && api.isLoggedIn(),
+  });
 
   const queryClient = useQueryClient();
 
-  const updateUserMutation = useMutation(
-    async (changes: any) => await api.usersUpdate(user.id, changes),
-    {
-      onSuccess: (data, variables) => {
-        queryClient.invalidateQueries(["user"]);
-        toast.info("User updated!");
-        onClose();
-      },
-    }
-  );
+  const updateUserMutation = useMutation({
+    mutationFn: async (changes: Partial<IUser>) =>
+      await api.usersUpdate(user.id, changes),
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["user"] });
+      toast.info("User updated!");
+      onClose();
+    },
+    onError: (err) => {
+      toast.error("User not updated");
+    },
+  });
 
   const handleSubmit = () => {
     if (JSON.stringify(data) !== JSON.stringify(initialValues)) {
@@ -149,15 +143,17 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
         name: data.name,
         email: data.email,
         options: {
-          defaultLanguage:
-            data.defaultLanguage?.value || EntityEnums.Language.Empty,
-          searchLanguages: data.searchLanguages?.map((sL) => sL?.value),
-          defaultTerritory: data.defaultTerritory,
-          hideStatementElementsOrderTable: data.hideStatementElementsOrderTable,
+          defaultLanguage: data.defaultLanguage,
+          defaultStatementLanguage: data.defaultStatementLanguage,
+          searchLanguages: data.searchLanguages.map((sL) => sL),
+          defaultTerritory: data.defaultTerritory || "",
         },
       });
     }
   };
+
+  const { role, rights } = user;
+  const { name, email, defaultLanguage, defaultStatementLanguage } = data;
 
   const readRights = useMemo(
     () => rights.filter((r) => r.mode === UserEnums.RoleMode.Read),
@@ -168,204 +164,297 @@ export const UserCustomizationModal: React.FC<UserCustomizationModal> = ({
     [rights]
   );
 
+  const [showPasswordChange, setShowPasswordChange] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [repeatPassword, setRepeatPassword] = useState("");
+
   return (
     <div>
       <Modal
-        showModal={true}
-        width="thin"
-        onEnterPress={() => handleSubmit()}
-        onClose={() => onClose()}
+        showModal={showModal}
+        width="auto"
+        onEnterPress={handleSubmit}
+        onClose={onClose}
+        isLoading={updateUserMutation.isPending}
       >
         <ModalHeader title="User customization" />
-        <ModalContent column>
-          <StyledRightsHeading>
-            <b>{"User information"}</b>
-          </StyledRightsHeading>
-          <ModalInputForm>
-            <ModalInputLabel>{"name"}</ModalInputLabel>
-            <ModalInputWrap width={165}>
-              <Input
-                width="full"
-                changeOnType
-                value={name}
-                onChangeFn={(value: string) => handleChange("name", value)}
-              />
-            </ModalInputWrap>
-            <ModalInputLabel>{"email"}</ModalInputLabel>
-            <ModalInputWrap width={165}>
-              <Input
-                width="full"
-                changeOnType
-                value={email}
-                onChangeFn={(value: string) => handleChange("email", value)}
-              />
-            </ModalInputWrap>
-          </ModalInputForm>
-
-          <StyledRightsHeading>
-            <b>{"Customization"}</b>
-          </StyledRightsHeading>
-
-          <ModalInputForm>
-            <ModalInputLabel>{"default language"}</ModalInputLabel>
-            <ModalInputWrap width={165}>
-              <Dropdown
-                width="full"
-                value={data.defaultLanguage}
-                onChange={(selectedOption) =>
-                  handleChange("defaultLanguage", selectedOption)
-                }
-                options={languageDict}
-              />
-            </ModalInputWrap>
-            {/* <ModalInputLabel>{"search languages"}</ModalInputLabel>
-            <ModalInputWrap width={165}>
-              <Dropdown
-                value={data.searchLanguages}
-                width="full"
-                isMulti
-                onChange={(selectedOption) =>
-                  handleChange("searchLanguages", selectedOption)
-                }
-                options={languageDict.filter(
-                  (lang) => lang.value !== EntityEnums.Language.Empty
-                )}
-              />
-            </ModalInputWrap> */}
-            <ModalInputLabel>{"default territory"}</ModalInputLabel>
-            <ModalInputWrap width={165}>
-              {territory ? (
-                <EntityTag
-                  entity={territory}
-                  tooltipPosition="left"
-                  unlinkButton={{
-                    onClick: () => {
-                      handleChange("defaultTerritory", "");
-                    },
-                    color: "danger",
-                  }}
+        <ModalContent column enableScroll>
+          <div style={{ position: "relative" }}>
+            <StyledRightsHeading>
+              <b>{"User information"}</b>
+            </StyledRightsHeading>
+            <ModalInputForm>
+              <ModalInputLabel>{"name"}</ModalInputLabel>
+              <ModalInputWrap width={165}>
+                <Input
+                  width="full"
+                  changeOnType
+                  value={name}
+                  onChangeFn={(value: string) => handleChange("name", value)}
                 />
-              ) : (
-                <div>
-                  <EntitySuggester
-                    categoryTypes={[EntityEnums.Class.Territory]}
-                    onSelected={(selected: string) =>
-                      handleChange("defaultTerritory", selected)
-                    }
-                    inputWidth={104}
-                    disableTemplatesAccept
-                  />
-                </div>
-              )}
-            </ModalInputWrap>
+              </ModalInputWrap>
+              <ModalInputLabel>{"email"}</ModalInputLabel>
+              <ModalInputWrap width={165}>
+                <Input
+                  width="full"
+                  changeOnType
+                  value={email}
+                  onChangeFn={(value: string) => handleChange("email", value)}
+                />
+              </ModalInputWrap>
+            </ModalInputForm>
 
-            <ModalInputLabel>{"ordering table in Editor"}</ModalInputLabel>
-            <ModalInputWrap width={165}>
-              <AttributeButtonGroup
-                noMargin
-                options={[
-                  {
-                    longValue: "display",
-                    shortValue: "",
-                    shortIcon: <BiShow />,
-                    onClick: () => {
-                      handleChange("hideStatementElementsOrderTable", true);
-                    },
-                    selected:
-                      !!data.hideStatementElementsOrderTable &&
-                      data.hideStatementElementsOrderTable,
-                  },
-                  {
-                    longValue: "hide",
-                    shortValue: "",
-                    shortIcon: <BiHide />,
-                    onClick: () => {
-                      handleChange("hideStatementElementsOrderTable", false);
-                    },
-                    selected: !data.hideStatementElementsOrderTable,
-                  },
-                ]}
-              />
-            </ModalInputWrap>
-          </ModalInputForm>
-
-          <StyledRightsHeading>
-            <b>{"User rights"}</b>
-          </StyledRightsHeading>
-          <StyledUserRights>
-            <StyledUserRightHeading>{"role"}</StyledUserRightHeading>
-            <StyledUserRightItem>
-              <div>
-                <AttributeButtonGroup
-                  disabled
-                  options={[
-                    {
-                      longValue: userRoleDict[0].label,
-                      shortValue: userRoleDict[0].label,
-                      selected: role === userRoleDict[0].value,
-                      onClick: () => {},
-                    },
-                    {
-                      longValue: userRoleDict[1].label,
-                      shortValue: userRoleDict[1].label,
-                      selected: role === userRoleDict[1].value,
-                      onClick: () => {},
-                    },
-                    {
-                      longValue: userRoleDict[2].label,
-                      shortValue: userRoleDict[2].label,
-                      selected: role === userRoleDict[2].value,
-                      onClick: () => {},
-                    },
-                  ]}
+            {!showPasswordChange && (
+              <div
+                style={{
+                  display: "flex",
+                  width: "100%",
+                  justifyContent: "center",
+                }}
+              >
+                <Button
+                  label="change password"
+                  noBorder
+                  color="warning"
+                  inverted
+                  noBackground
+                  onClick={() => setShowPasswordChange(!showPasswordChange)}
                 />
               </div>
-            </StyledUserRightItem>
-            <StyledUserRightHeading>{"read"}</StyledUserRightHeading>
-            <StyledUserRightItem>
-              <StyledRightsWrap>
-                {role !== UserEnums.Role.Admin
-                  ? readRights.map((right, key) => (
-                      <UserRightItem key={key} territoryId={right.territory} />
-                    ))
-                  : "all"}
-              </StyledRightsWrap>
-            </StyledUserRightItem>
-            <StyledUserRightHeading>{"write"}</StyledUserRightHeading>
-            <StyledUserRightItem>
-              <StyledRightsWrap>
-                {role !== UserEnums.Role.Admin
-                  ? writeRights.map((right, key) => (
-                      <UserRightItem key={key} territoryId={right.territory} />
-                    ))
-                  : "all"}
-              </StyledRightsWrap>
-            </StyledUserRightItem>
-          </StyledUserRights>
+            )}
+
+            {showPasswordChange && (
+              <>
+                <StyledRightsHeading>
+                  <b>{"Change password"}</b>
+                </StyledRightsHeading>
+
+                <ModalInputForm>
+                  <ModalInputLabel>{"new password"}</ModalInputLabel>
+                  <ModalInputWrap width={165}>
+                    <Input
+                      type="password"
+                      width="full"
+                      changeOnType
+                      value={newPassword}
+                      onChangeFn={(value: string) => setNewPassword(value)}
+                    />
+                  </ModalInputWrap>
+                  <ModalInputLabel>{"repeat password"}</ModalInputLabel>
+                  <ModalInputWrap width={165}>
+                    <Input
+                      type="password"
+                      width="full"
+                      changeOnType
+                      value={repeatPassword}
+                      onChangeFn={(value: string) => setRepeatPassword(value)}
+                    />
+                  </ModalInputWrap>
+                </ModalInputForm>
+
+                <div style={{ maxWidth: "31rem" }}>
+                  <StyledDescription>
+                    {SAFE_PASSWORD_DESCRIPTION}
+                  </StyledDescription>
+                </div>
+
+                <StyledButtonWrap>
+                  <ButtonGroup>
+                    <Button
+                      color="warning"
+                      label="Cancel"
+                      inverted
+                      onClick={() => {
+                        setShowPasswordChange(false);
+                        setNewPassword("");
+                        setRepeatPassword("");
+                      }}
+                    />
+                    <Button
+                      color="danger"
+                      label="Submit"
+                      inverted
+                      onClick={() => {
+                        if (
+                          newPassword.length > 0 &&
+                          !isSafePassword(newPassword)
+                        ) {
+                          toast.warning(UnsafePasswordError.message);
+                        } else {
+                          if (newPassword === repeatPassword) {
+                            passwordUpdateMutation.mutate();
+                            setShowPasswordChange(false);
+                            setNewPassword("");
+                            setRepeatPassword("");
+                          } else {
+                            toast.warning("Passwords are not matching");
+                          }
+                        }
+                      }}
+                    />
+                  </ButtonGroup>
+                </StyledButtonWrap>
+              </>
+            )}
+
+            <StyledRightsHeading>
+              <b>{"Customization"}</b>
+            </StyledRightsHeading>
+
+            <ModalInputForm>
+              <ModalInputLabel>{"entity default language"}</ModalInputLabel>
+              <ModalInputWrap width={165}>
+                <Dropdown.Single.Basic
+                  width="full"
+                  value={defaultLanguage}
+                  onChange={(newValue) =>
+                    handleChange("defaultLanguage", newValue)
+                  }
+                  options={languageDict}
+                />
+              </ModalInputWrap>
+              <ModalInputLabel>{"statement default language"}</ModalInputLabel>
+              <ModalInputWrap width={165}>
+                <Dropdown.Single.Basic
+                  width="full"
+                  value={defaultStatementLanguage}
+                  onChange={(newValue) =>
+                    handleChange("defaultStatementLanguage", newValue)
+                  }
+                  options={languageDict}
+                />
+              </ModalInputWrap>
+
+              {/* NOT USED NOW */}
+              {/* <ModalInputLabel>{"search languages"}</ModalInputLabel>
+                <ModalInputWrap width={165}>
+                  <Dropdown.Multi.Attribute
+                    value={data.searchLanguages}
+                    width="full"
+                    onChange={(selectedOption) =>
+                      handleChange("searchLanguages", selectedOption)
+                    }
+                    options={languageDict.filter(
+                      (lang) => lang.value !== EntityEnums.Language.Empty
+                    )}
+                  />
+                </ModalInputWrap> */}
+
+              <ModalInputLabel>{"default territory"}</ModalInputLabel>
+              <ModalInputWrap width={165}>
+                {territory ? (
+                  <EntityTag
+                    entity={territory}
+                    tooltipPosition="left"
+                    unlinkButton={{
+                      onClick: () => {
+                        handleChange("defaultTerritory", "");
+                      },
+                      color: "danger",
+                    }}
+                  />
+                ) : (
+                  <div>
+                    <EntitySuggester
+                      categoryTypes={[EntityEnums.Class.Territory]}
+                      onSelected={(selected: string) =>
+                        handleChange("defaultTerritory", selected)
+                      }
+                      inputWidth={104}
+                      disableTemplatesAccept
+                    />
+                  </div>
+                )}
+              </ModalInputWrap>
+            </ModalInputForm>
+
+            <StyledRightsHeading>
+              <b>{"User rights"}</b>
+            </StyledRightsHeading>
+            <StyledUserRights>
+              <StyledUserRightHeading>{"role"}</StyledUserRightHeading>
+              <StyledUserRightItem>
+                <div>
+                  <AttributeButtonGroup
+                    disabled
+                    options={[
+                      {
+                        longValue: userRoleDict[0].label,
+                        shortValue: userRoleDict[0].label,
+                        selected: role === userRoleDict[0].value,
+                        onClick: () => {},
+                      },
+                      {
+                        longValue: userRoleDict[1].label,
+                        shortValue: userRoleDict[1].label,
+                        selected: role === userRoleDict[1].value,
+                        onClick: () => {},
+                      },
+                      {
+                        longValue: userRoleDict[2].label,
+                        shortValue: userRoleDict[2].label,
+                        selected: role === userRoleDict[2].value,
+                        onClick: () => {},
+                      },
+                    ]}
+                  />
+                </div>
+              </StyledUserRightItem>
+              <StyledUserRightHeading>{"read"}</StyledUserRightHeading>
+              <StyledUserRightItem>
+                <StyledRightsWrap>
+                  {role !== UserEnums.Role.Admin
+                    ? readRights.map((right, key) => (
+                        <UserRightItem
+                          key={key}
+                          territoryId={right.territory}
+                        />
+                      ))
+                    : "all"}
+                </StyledRightsWrap>
+              </StyledUserRightItem>
+              <StyledUserRightHeading>{"write"}</StyledUserRightHeading>
+              <StyledUserRightItem>
+                <StyledRightsWrap>
+                  {role !== UserEnums.Role.Admin
+                    ? writeRights.map((right, key) => (
+                        <UserRightItem
+                          key={key}
+                          territoryId={right.territory}
+                        />
+                      ))
+                    : "all"}
+                </StyledRightsWrap>
+              </StyledUserRightItem>
+            </StyledUserRights>
+
+            <Loader show={passwordUpdateMutation.isPending} />
+          </div>
         </ModalContent>
+
         <ModalFooter>
           <ButtonGroup>
-            <Button
-              key="reset-password"
-              label="Reset password"
-              tooltipLabel={`Generate a new password and send it to ${user.email}`}
-              color="info"
-              onClick={() => handleResetPassword()}
-            />
+            {/* {role === UserEnums.Role.Admin && (
+              <Button
+                key="reset-password"
+                label="Reset password"
+                tooltipLabel={`Generate a new password and send it to ${user.email}`}
+                color="info"
+                onClick={() => handleResetPassword()}
+              />
+            )} */}
             <Button
               key="cancel"
               label="Cancel"
               color="warning"
-              onClick={() => {
-                onClose();
-              }}
+              onClick={onClose}
             />
             <Button
               disabled={JSON.stringify(data) === JSON.stringify(initialValues)}
               key="submit"
               label="Submit"
               color="primary"
-              onClick={() => handleSubmit()}
+              onClick={handleSubmit}
             />
           </ButtonGroup>
         </ModalFooter>

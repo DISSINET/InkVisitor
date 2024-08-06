@@ -1,24 +1,23 @@
 import { Button, Loader } from "components";
 import React, { ReactNode } from "react";
 import { Column, usePagination, useSortBy, useTable } from "react-table";
-import { ThemeColor } from "Theme/theme";
 import {
   StyledHeading,
   StyledPageNumber,
   StyledPagination,
+  StyledTHead,
   StyledTable,
   StyledTableContainer,
   StyledTableHeader,
   StyledTd,
   StyledTh,
-  StyledTHead,
   StyledTr,
   StyledUsedInTitle,
 } from "./TableStyles";
 
-interface Table {
-  data: any[];
-  columns: Column<{}>[];
+interface Table<TData extends object> {
+  data: TData[];
+  columns: Column<TData>[];
   isLoading?: boolean;
   entityTitle?: { singular: string; plural: string };
   perPage?: number;
@@ -33,7 +32,7 @@ interface Table {
   lastColumnMinWidth?: boolean;
 }
 
-export const Table: React.FC<Table> = ({
+export const Table: React.FC<Table<any>> = ({
   data,
   columns,
   isLoading,
@@ -77,10 +76,7 @@ export const Table: React.FC<Table> = ({
   );
 
   const renderPagination = (position: "top" | "bottom"): ReactNode => (
-    <StyledTableHeader
-      position={position}
-      pagingUseless={pageSize > data.length}
-    >
+    <StyledTableHeader $position={position}>
       {!disableHeading && position === "top" && (
         <StyledHeading>
           {
@@ -139,9 +135,9 @@ export const Table: React.FC<Table> = ({
     <>
       {!disablePaging && renderPagination("top")}
       <StyledTableContainer>
-        <StyledTable {...getTableProps()} noBorder={noBorder}>
+        <StyledTable {...getTableProps()} $noBorder={noBorder}>
           {!disableHeader && data.length > 0 && (
-            <StyledTHead noBorder={noBorder}>
+            <StyledTHead $noBorder={noBorder}>
               {headerGroups.map((headerGroup, key) => (
                 <tr {...headerGroup.getHeaderGroupProps()} key={key}>
                   {headerGroup.headers.map((column, key) => (
@@ -171,17 +167,17 @@ export const Table: React.FC<Table> = ({
                 <StyledTr
                   {...row.getRowProps()}
                   key={key}
-                  noBorder={noBorder}
-                  fullWidthColumn={fullWidthColumn}
-                  firstColumnMinWidth={firstColumnMinWidth}
-                  lastColumnMinWidth={lastColumnMinWidth}
+                  $noBorder={noBorder}
+                  $fullWidthColumn={fullWidthColumn}
+                  $firstColumnMinWidth={firstColumnMinWidth}
+                  $lastColumnMinWidth={lastColumnMinWidth}
                 >
                   {row.cells.map((cell, key) => {
                     return (
                       <StyledTd
                         {...cell.getCellProps()}
                         key={key}
-                        noBorder={noBorder}
+                        $noBorder={noBorder}
                       >
                         {cell.render("Cell")}
                       </StyledTd>

@@ -1,32 +1,19 @@
 import { EntityEnums } from "@shared/enums";
-import { IEntity, IStatementActant, IStatementAction } from "@shared/types";
-
-export const Colors = [
-  "black",
-  "white",
-  "grey",
-  "primary",
-  "success",
-  "warning",
-  "danger",
-  "info",
-  "text",
-  "entityT",
-  "entityR",
-  "entityA",
-  "entityS",
-  "entityC",
-  "entityE",
-  "entityG",
-  "entityL",
-  "entityO",
-  "entityP",
-  "entityV",
-];
+import {
+  IEntity,
+  IResponseGeneric,
+  IResponseTree,
+  IStatementActant,
+  IStatementAction,
+  Relation,
+} from "@shared/types";
+import { ThemeColor } from "Theme/theme";
+import { AxiosResponse } from "axios";
 
 interface IEntityColor {
   entityClass: EntityEnums.ExtendedClass;
-  color: typeof Colors[number];
+  color: keyof ThemeColor;
+  label: string;
 }
 
 // Use for colors, for dropdowns use entity.ts dictionary
@@ -34,69 +21,102 @@ export const EntityColors: { [key: string]: IEntityColor } = {
   T: {
     entityClass: EntityEnums.Class.Territory,
     color: "entityT",
+    label: "Territory",
   },
   R: {
     entityClass: EntityEnums.Class.Resource,
     color: "entityR",
+    label: "Resource",
   },
   A: {
     entityClass: EntityEnums.Class.Action,
     color: "entityA",
+    label: "Action",
   },
   S: {
     entityClass: EntityEnums.Class.Statement,
     color: "entityS",
+    label: "Statement",
   },
   C: {
     entityClass: EntityEnums.Class.Concept,
     color: "entityC",
+    label: "Concept",
   },
   E: {
     entityClass: EntityEnums.Class.Event,
     color: "entityE",
+    label: "Event",
   },
   G: {
     entityClass: EntityEnums.Class.Group,
     color: "entityG",
+    label: "Group",
   },
   L: {
     entityClass: EntityEnums.Class.Location,
     color: "entityL",
+    label: "Location",
   },
   O: {
     entityClass: EntityEnums.Class.Object,
     color: "entityO",
+    label: "Object",
   },
   P: {
     entityClass: EntityEnums.Class.Person,
     color: "entityP",
+    label: "Person",
   },
   B: {
     entityClass: EntityEnums.Class.Being,
     color: "entityB",
+    label: "Living Being",
   },
   V: {
     entityClass: EntityEnums.Class.Value,
     color: "entityV",
+    label: "Value",
   },
   X: {
     entityClass: EntityEnums.Extension.NoClass,
     color: "white",
+    label: "No class",
   },
   empty: {
     entityClass: EntityEnums.Extension.Empty,
     color: "white",
+    label: "Empty",
   },
   all: {
     entityClass: EntityEnums.Extension.Any,
     color: "white",
+    label: "Any",
+  },
+};
+
+export const ExtentedEntityColors: { [key: string]: IEntityColor } = {
+  X: {
+    entityClass: EntityEnums.Extension.NoClass,
+    color: "white",
+    label: "No class",
+  },
+  empty: {
+    entityClass: EntityEnums.Extension.Empty,
+    color: "white",
+    label: "Empty",
+  },
+  all: {
+    entityClass: EntityEnums.Extension.Any,
+    color: "white",
+    label: "Any",
   },
 };
 
 export type EntityKeys = keyof typeof EntityColors;
 
 export interface IPage {
-  id: "main" | "users" | "acl" | "about";
+  id: "main" | "users" | "acl" | "about" | "documents";
   label: string;
   color: "info" | "success" | "danger" | "warning";
   href: string;
@@ -113,8 +133,6 @@ export enum ItemTypes {
   TAG = "TAG",
   STATEMENT_ROW = "STATEMENT_ROW",
   STATEMENT_ORDER_ROW = "STATEMENT_ORDER_ROW",
-
-  // should be removed
   ACTANT_ROW = "ACTANT_ROW",
   ENTITY_ROW = "ENTITY_ROW",
   ACTION_ROW = "ACTION_ROW",
@@ -122,13 +140,14 @@ export enum ItemTypes {
   PROP_ROW1 = "PROP_ROW1",
   PROP_ROW2 = "PROP_ROW2",
   PROP_ROW3 = "PROP_ROW3",
+  REFERENCE_ROW = "REFERENCE_ROW",
   MULTI_RELATION = "MULTI_RELATION",
+  DETAIL_TAB = "DETAIL_TAB",
 }
 
 export type DragItem = {
   index: number;
   id: string;
-  type: ItemTypes;
 };
 export interface EntityDragItem extends DragItem {
   entity: IEntity | false;
@@ -175,7 +194,7 @@ export interface IRequestSearchEntity {
   status?: EntityEnums.Status; // izy
   language?: EntityEnums.Language; //izy
   logicalType?: EntityEnums.LogicalType;
-  hasProps?: IEntityHasProps[]; //this should be checked within meta props and within all statements where the entity is used as the prop origin
+  hasProps?: IEntityHasProps[]; //this should be checked within metaprops and within all statements where the entity is used as the prop origin
   usedInTerritories?: IEntityUsedInTerritory[]; // this is probably little bit complicated
   usedInStatements?: IEntityUsedInStatementWith[]; // and this is supposed to be complicated as well
 }
@@ -227,6 +246,17 @@ interface IUsedEntityStatement {
 
 export type DropdownItem = { value: string; label: string; info?: string };
 
+export interface EntitySingleDropdownItem extends DropdownItem {
+  value: EntityEnums.Class;
+}
+
+export interface EntityMultiDropdownItem extends DropdownItem {
+  value:
+    | EntityEnums.Class
+    | EntityEnums.Extension.Any
+    | EntityEnums.Extension.Empty;
+}
+
 export type SearchParams = {
   territory?: string;
   statement?: string;
@@ -271,6 +301,34 @@ export interface PropAttributeGroupDataObject {
   value: AttributeData;
 }
 
+export const classesAnnotator = [
+  EntityEnums.Class.Action,
+  EntityEnums.Class.Concept,
+  EntityEnums.Class.Person,
+  EntityEnums.Class.Group,
+  EntityEnums.Class.Being,
+  EntityEnums.Class.Object,
+  EntityEnums.Class.Location,
+  EntityEnums.Class.Event,
+  EntityEnums.Class.Statement,
+  EntityEnums.Class.Territory,
+  EntityEnums.Class.Resource,
+  EntityEnums.Class.Value,
+];
+
+export const classesAll = [
+  EntityEnums.Class.Concept,
+  EntityEnums.Class.Person,
+  EntityEnums.Class.Group,
+  EntityEnums.Class.Being,
+  EntityEnums.Class.Object,
+  EntityEnums.Class.Location,
+  EntityEnums.Class.Event,
+  EntityEnums.Class.Statement,
+  EntityEnums.Class.Territory,
+  EntityEnums.Class.Resource,
+  EntityEnums.Class.Value,
+];
 export const classesEditorActants = [
   EntityEnums.Class.Concept,
   EntityEnums.Class.Person,
@@ -322,7 +380,7 @@ export interface SuggesterItemToCreate {
   entityClass: EntityEnums.Class;
   detail?: string;
   territoryId?: string;
-  language?: EntityEnums.Language;
+  language: EntityEnums.Language | false;
 }
 
 export interface FilteredActantObject {
@@ -332,4 +390,45 @@ export interface FilteredActantObject {
 export interface FilteredActionObject {
   id: number;
   data: { action?: IEntity; sAction: IStatementAction };
+}
+
+export interface ITerritoryFilter {
+  nonEmpty: boolean;
+  starred: boolean;
+  editorRights: boolean;
+  filter: string;
+}
+
+export interface IExtendedResponseTree extends IResponseTree {
+  foundByRecursion?: boolean;
+}
+
+export enum StatementListDisplayMode {
+  TEXT = "text",
+  LIST = "list",
+}
+
+// identifier for DnD useDrop
+export declare type Identifier = string | symbol;
+
+export interface EntitiesDeleteSuccessResponse {
+  details: any;
+  entityId: string;
+}
+export interface EntitiesDeleteErrorResponse {
+  error: true;
+  message: string;
+  details: any;
+  entityId: string;
+}
+
+export interface RelationsCreateSuccessResponse {
+  relation: Relation.IRelation;
+  details: AxiosResponse<any, any>;
+}
+export interface RelationsCreateErrorResponse {
+  error: boolean;
+  message: string;
+  relation: Relation.IRelation;
+  details: any;
 }

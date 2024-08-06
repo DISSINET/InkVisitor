@@ -26,4 +26,21 @@ export const StyledToastContainer = styled(ToastContainer)`
   .Toastify__toast--error {
     background-color: ${({ theme }) => theme.color["danger"]};
   }
+  .Toastify__toast-icon svg {
+    fill: ${({ theme }) => theme.color.white};
+  }
+`;
+
+export const StyledLink = styled.a`
+  color: ${({ theme }) => theme.color["blue"][50]};
+  margin-left: 0.5rem;
+
+  display: flex;
+  flex-grow: 1;
+  justify-content: flex-end;
+  align-items: center;
+  white-space: nowrap;
+`;
+export const StyledWrap = styled.div`
+  display: flex;
 `;

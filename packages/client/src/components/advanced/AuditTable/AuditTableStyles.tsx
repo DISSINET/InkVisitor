@@ -2,6 +2,7 @@ import styled from "styled-components";
 
 export const StyledAuditTable = styled.div`
   display: table;
+  color: ${({ theme }) => theme.color["black"]};
 `;
 export const StyledAuditRow = styled.div`
   display: table-row;

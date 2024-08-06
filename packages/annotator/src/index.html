@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Canvas dev</title>
+  </head>
+  <style>
+    fieldset {
+      margin: 0px;
+    }
+    .annotator-element {
+      border: 1px solid black;
+    }
+  </style>
+  <body style="background-color: black">
+    <div style="padding: 20px; background-color: #ccc">
+      <div style="display: flex; flex-direction: row">
+        <div class="canvasses-wrapper">
+          <div style="display: flex">
+            <canvas
+              id="lines"
+              class="lines annotator-element"
+              width="50px"
+              height="400px"
+              style="
+                outline: none;
+                color: rgb(21, 47, 46);
+                background-color: yellowgreen;
+              "
+            ></canvas>
+            <canvas
+              tabindex="0"
+              id="canvas"
+              class="annotator-element"
+              style="
+                height: 400px;
+                width: 100px;
+                outline: none;
+                background-color: white;
+                border: 1px solid black;
+              "
+            >
+            </canvas>
+            <div
+              class="scroller-viewport annotator-element"
+              id="scroller"
+              style="background: limegreen; position: relative; width: 14px"
+            >
+              <div
+                class="scroller-cursor"
+                style="
+                  cursor: move;
+                  position: absolute;
+                  width: 10px;
+                  background-color: white;
+                  margin-left: 2px;
+                "
+              ></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <fieldset>
+        <label>mode</label>
+        <select id="mode">
+          <option value="raw">raw</option>
+          <option value="highlight">highlight</option>
+          <option value="semi">semi</option>
+        </select>
+      </fieldset>
+      <fieldset>
+        <label>toggle highlight</label>
+        <input type="checkbox" id="highlightToggle" />
+      </fieldset>
+      <fieldset>
+        <label>add anchor </label>
+        <input type="text" id="anchorText" />
+        <button id="addAnchor">add</button>
+      </fieldset>
+      <fieldset>
+        <label>remove anchor from selection </label>
+        <input type="text" id="removeAnchorText" />
+        <button id="removeAnchor">remove</button>
+      </fieldset>
+      <fieldset>
+        <label>scroll to anchor </label>
+        <input type="text" id="scrollToAnchorText" />
+        <button id="scrollToAnchor">scroll</button>
+      </fieldset>
+    </div>
+
+    <p>Text from textfile.txt:</p>
+    <pre id="text-content"></pre>
+
+    <script src="bundle.js"></script>
+
+    <script type="module">
+      const ratio = 2;
+      const mainCanvasEl = document.getElementById("canvas");
+
+      const textContentElement = document.getElementById("text-content");
+
+      const exampleResponse = await fetch("example.txt");
+      const exampleTxt = await exampleResponse.text();
+
+      let highlightEnabled = false;
+      const annotator = new Annotator(
+        document.getElementById("canvas"),
+        exampleTxt,
+        ratio
+      );
+
+      annotator.fontColor = "black";
+      annotator.bgColor = "transparent";
+
+      annotator.addScroller(document.getElementById("scroller"));
+      annotator.addLines(document.getElementById("lines"));
+
+      annotator.onHighlight((entityId) => {
+        if (!highlightEnabled) {
+          return null;
+        }
+        let color = "black";
+        if (entityId[0] === "a") {
+          color = "red";
+        } else if (entityId[0] === "b") {
+          color = "blue";
+        } else if (entityId[0] === "c") {
+          color = "green";
+        } else if (entityId[0] === "d") {
+          color = "yellow";
+        }
+
+        return {
+          mode: "background",
+          style: {
+            fillColor: color,
+            fillOpacity: 0.3,
+          },
+        };
+      });
+      annotator.onSelectText((text) => {
+        console.log("onSelectText", text);
+      });
+
+      document.getElementById("highlightToggle").onclick = (e) => {
+        highlightEnabled = e.target.checked;
+      };
+
+      document.getElementById("mode").onchange = (e) => {
+        annotator.setMode(e.target.value);
+        annotator.draw();
+      };
+
+      document.getElementById("addAnchor").onclick = () => {
+        annotator.addAnchor(document.getElementById("anchorText").value);
+      };
+
+      document.getElementById("removeAnchor").onclick = () => {
+        annotator.removeAnchorFromSelection(
+          document.getElementById("removeAnchorText").value
+        );
+      };
+
+      document.getElementById("scrollToAnchor").onclick = () => {
+        annotator.scrollToAnchor(
+          document.getElementById("scrollToAnchorText").value,
+          1
+        );
+      };
+
+      window.addEventListener("resize", resizeAnnotator);
+
+      function resizeAnnotator() {
+        const newW = document.body.clientWidth;
+        const canvasW = `${newW - 50 - 40 - 10 - 6}px`;
+
+        document.getElementById("canvas").style.width = canvasW;
+      }
+
+      resizeAnnotator();
+    </script>
+  </body>
+</html>

@@ -9,6 +9,7 @@ export interface DbSchema {
   entities: TableSchema;
   audits: TableSchema;
   relations: TableSchema;
+  documents: TableSchema;
 }
 
 export interface TableSchema {

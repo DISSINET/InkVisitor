@@ -2,7 +2,7 @@ import { StatementTerritory } from "@models/statement/statement";
 import { prepareStatement } from "@models/statement/statement.test";
 import Territory, { TerritoryParent } from "@models/territory/territory";
 import entities from "@modules/entities";
-import { Db } from "@service/RethinkDB";
+import { Db } from "@service/rethink";
 import { deleteEntities } from "@service/shorthands";
 import { EntityEnums } from "@shared/enums";
 import { IEntity, RequestSearch } from "@shared/types";
@@ -81,7 +81,10 @@ describe("models/response-search", function () {
       st1a.data.territory = new StatementTerritory({ territoryId: childT1.id });
       st2a.data.territory = new StatementTerritory({ territoryId: childT2.id });
 
-      const req = new RequestSearch({ territoryId: parentT.id, subTerritorySearch: true });
+      const req = new RequestSearch({
+        territoryId: parentT.id,
+        subTerritorySearch: true,
+      });
 
       it("entity ids should have all ids from st1a and st2a", async () => {
         await parentT.save(db.connection);
@@ -93,7 +96,9 @@ describe("models/response-search", function () {
 
         const query = new SearchQuery(db.connection);
         await query.fromRequest(req);
-        expect(req.entityIds).toEqual(st1a.getEntitiesIds().concat(st2a.getEntitiesIds()));
+        expect(req.entityIds).toEqual(
+          st1a.getEntitiesIds().concat(st2a.getEntitiesIds())
+        );
       });
     });
   });
@@ -257,16 +262,16 @@ describe("models/response-search", function () {
     });
   });
 
-  describe("search by language", function() {
+  describe("search by language", function () {
     let db: Db;
     const rand = Math.random().toString();
 
     const [, entity1] = prepareEntity();
-    entity1.language = EntityEnums.Language.Czech
+    entity1.language = EntityEnums.Language.Czech;
     const [, entity2] = prepareEntity();
-    entity2.language = EntityEnums.Language.German
+    entity2.language = EntityEnums.Language.German;
     const [, entity3] = prepareEntity();
-    entity3.language = EntityEnums.Language.Czech
+    entity3.language = EntityEnums.Language.Czech;
 
     beforeAll(async () => {
       db = new Db();
@@ -284,43 +289,45 @@ describe("models/response-search", function () {
 
     describe("search for non existing language", () => {
       it("should return empty list", async () => {
-          const entities = await new SearchQuery(db.connection)
-            .whereLanguage(EntityEnums.Language.Hungarian)
-            .do();
-          try {
-            expect(entities).toHaveLength(0);
-          } catch (e) {
-            throw new Error(`non-existing language not satisfied`);
-          }
+        const entities = await new SearchQuery(db.connection)
+          .whereLanguage(EntityEnums.Language.Hungarian)
+          .do();
+        try {
+          expect(entities).toHaveLength(0);
+        } catch (e) {
+          throw new Error("non-existing language not satisfied");
+        }
       });
     });
 
     describe("search for existing language present in 2 entities", () => {
       it("should return list of 2 results", async () => {
-          const entities = await new SearchQuery(db.connection)
-            .whereLanguage(EntityEnums.Language.Czech)
-            .do();
-          try {
-            expect(entities).toHaveLength(2);
-          } catch (e) {
-            throw new Error(`existing language present in 2 entities not satisfied`);
-          }
+        const entities = await new SearchQuery(db.connection)
+          .whereLanguage(EntityEnums.Language.Czech)
+          .do();
+        try {
+          expect(entities).toHaveLength(2);
+        } catch (e) {
+          throw new Error(
+            "existing language present in 2 entities not satisfied"
+          );
+        }
       });
     });
-  })
+  });
 
-  describe("search by classes", function() {
+  describe("search by classes", function () {
     let db: Db;
     const rand = Math.random().toString();
 
     const [, entity1] = prepareEntity();
-    entity1.class = EntityEnums.Class.Action
+    entity1.class = EntityEnums.Class.Action;
     const [, entity2] = prepareEntity();
-    entity2.class = EntityEnums.Class.Group
+    entity2.class = EntityEnums.Class.Group;
     const [, entity3] = prepareEntity();
-    entity3.class = EntityEnums.Class.Location
+    entity3.class = EntityEnums.Class.Location;
     const [, entity4] = prepareEntity();
-    entity4.class = EntityEnums.Class.Location
+    entity4.class = EntityEnums.Class.Location;
 
     beforeAll(async () => {
       db = new Db();
@@ -339,39 +346,39 @@ describe("models/response-search", function () {
 
     describe("search for entities by evading a class values", () => {
       it("should return empty list if not wanting any of stored classes", async () => {
-          const entities = await new SearchQuery(db.connection)
-            .whereNotClass([entity1, entity2, entity3].map(e => e.class))
-            .do();
-          try {
-            expect(entities).toHaveLength(0);
-          } catch (e) {
-            throw new Error(`whereNotClass (1) not satisfied`);
-          }
+        const entities = await new SearchQuery(db.connection)
+          .whereNotClass([entity1, entity2, entity3].map((e) => e.class))
+          .do();
+        try {
+          expect(entities).toHaveLength(0);
+        } catch (e) {
+          throw new Error("whereNotClass (1) not satisfied");
+        }
       });
 
       it("should return entities which does not have particular classes", async () => {
         const entities = await new SearchQuery(db.connection)
-          .whereNotClass([entity1, entity2].map(e => e.class))
+          .whereNotClass([entity1, entity2].map((e) => e.class))
           .do();
         try {
           expect(entities).toHaveLength(2);
-          expect(entities.find(e => e.id === entity4.id)).toBeTruthy();
+          expect(entities.find((e) => e.id === entity4.id)).toBeTruthy();
         } catch (e) {
-          throw new Error(`whereNotClass (2) not satisfied`);
+          throw new Error("whereNotClass (2) not satisfied");
         }
-    });
+      });
     });
 
     describe("search for specific class", () => {
       it("should return list of 2 results if there are 2 entities with the same class", async () => {
-          const entities = await new SearchQuery(db.connection)
+        const entities = await new SearchQuery(db.connection)
           .whereClass(entity3.class)
-            .do();
-          try {
-            expect(entities).toHaveLength(2);
-          } catch (e) {
-            throw new Error(`existing class for two locations not satisfied`);
-          }
+          .do();
+        try {
+          expect(entities).toHaveLength(2);
+        } catch (e) {
+          throw new Error("existing class for two locations not satisfied");
+        }
       });
 
       it("should return list of 1 result if there is only one entity with the class", async () => {
@@ -381,24 +388,24 @@ describe("models/response-search", function () {
         try {
           expect(entities).toHaveLength(1);
         } catch (e) {
-          throw new Error(`existing class for one class entry not satisfied`);
+          throw new Error("existing class for one class entry not satisfied");
         }
+      });
     });
-    });
-  })
+  });
 
-  describe("search by grouped conditions", function() {
+  describe("search by grouped conditions", function () {
     let db: Db;
     const rand = Math.random().toString();
 
     const [, entity1] = prepareEntity();
-    entity1.class = EntityEnums.Class.Action
+    entity1.class = EntityEnums.Class.Action;
     const [, entity2] = prepareEntity();
-    entity2.class = EntityEnums.Class.Group
+    entity2.class = EntityEnums.Class.Group;
     const [, entity3] = prepareEntity();
-    entity3.class = EntityEnums.Class.Location
+    entity3.class = EntityEnums.Class.Location;
     const [, entity4] = prepareEntity();
-    entity4.class = EntityEnums.Class.Location
+    entity4.class = EntityEnums.Class.Location;
 
     beforeAll(async () => {
       db = new Db();
@@ -417,30 +424,34 @@ describe("models/response-search", function () {
 
     describe("search for class while restricting results by id", () => {
       it("should return empty list if class-entity does not have provided id", async () => {
-          const entities = await new SearchQuery(db.connection)
-            .whereEntityIds([entity2.id, entity3.id, entity4.id])
-            .whereClass(entity1.class)
-            .do();
-          try {
-            expect(entities).toHaveLength(0);
-          } catch (e) {
-            throw new Error(`whereClass + whereEntityIds without match not satisfied`);
-          }
+        const entities = await new SearchQuery(db.connection)
+          .whereEntityIds([entity2.id, entity3.id, entity4.id])
+          .whereClass(entity1.class)
+          .do();
+        try {
+          expect(entities).toHaveLength(0);
+        } catch (e) {
+          throw new Error(
+            "whereClass + whereEntityIds without match not satisfied"
+          );
+        }
       });
 
       it("should return entities that match both filters", async () => {
         const entities = await new SearchQuery(db.connection)
-          .whereEntityIds([entity1, entity2, entity3, entity4].map(e => e.id))
+          .whereEntityIds([entity1, entity2, entity3, entity4].map((e) => e.id))
           .whereClass(entity3.class)
           .do();
         try {
           expect(entities).toHaveLength(2);
-          expect(entities.find(e => e.id === entity3.id)).toBeTruthy();
-          expect(entities.find(e => e.id === entity4.id)).toBeTruthy();
+          expect(entities.find((e) => e.id === entity3.id)).toBeTruthy();
+          expect(entities.find((e) => e.id === entity4.id)).toBeTruthy();
         } catch (e) {
-          throw new Error(`whereClass + whereEntityIds with match not satisfied`);
+          throw new Error(
+            "whereClass + whereEntityIds with match not satisfied"
+          );
         }
       });
     });
-  })
+  });
 });

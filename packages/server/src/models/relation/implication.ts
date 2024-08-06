@@ -26,9 +26,9 @@ export default class Implication
     let out: RelationTypes.IImplication[] = [];
 
     if (asClass === EntityEnums.Class.Action) {
-      out = await Relation.findForEntity(
+      out = await Relation.findForEntities(
         conn,
-        entityId,
+        [entityId],
         RelationEnums.Type.Implication,
         0
       );
@@ -52,9 +52,9 @@ export default class Implication
     let out: RelationTypes.IImplication[] = [];
 
     if (asClass === EntityEnums.Class.Action) {
-      out = await Relation.findForEntity(
+      out = await Relation.findForEntities(
         conn,
-        parentId,
+        [parentId],
         RelationEnums.Type.Implication,
         1
       );

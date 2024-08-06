@@ -1,7 +1,10 @@
 const tsconfig = require("./tsconfig.json");
 
 const dotenv = require("dotenv");
-dotenv.config({ path: "./env/.env.test" });
+const dotenvResult = dotenv.config({ path: "./env/.env.test" });
+if (dotenvResult.error) {
+  throw dotenvResult.error
+}
 
 const paths = Object.keys(tsconfig.compilerOptions.paths).reduce(
   (prev, curr) => {

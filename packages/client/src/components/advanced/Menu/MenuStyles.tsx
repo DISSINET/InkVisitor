@@ -1,10 +1,11 @@
-import { animated } from "react-spring";
+import { animated } from "@react-spring/web";
+import { GrDocumentText } from "react-icons/gr";
 import styled from "styled-components";
 import { heightHeader } from "Theme/constants";
 
 export const StyledMenuGroupWrapper = styled.div`
   position: absolute;
-  top: ${(heightHeader - 27) / 10}rem;
+  top: ${(heightHeader - 36) / 10}rem;
   right: ${({ theme }) => theme.space[1]};
 
   margin-top: ${({ theme }) => theme.space[1]};
@@ -17,13 +18,14 @@ export const StyledMenuGroupWrapper = styled.div`
 export const StyledMenuGroup = styled.div`
   border: ${({ theme }) => "3px solid " + theme.color["primary"]};
 
-  box-shadow: ${({ theme }) => "-5px 5px 5px " + theme.color["black"]};
+  box-shadow: ${({ theme }) => "-5px 5px 5px " + theme.color.menuShadow};
   border-radius: ${({ theme }) => theme.space[2]};
 `;
 
 interface StyledMenuItem {}
 export const StyledMenuItem = styled(animated.div)<StyledMenuItem>`
   padding: ${({ theme }) => theme.space[3]};
+  cursor: pointer;
   svg {
     margin-right: ${({ theme }) => theme.space[2]};
     vertical-align: middle;

@@ -1,6 +1,7 @@
 import { IResponseGeneric } from "@shared/types";
 import { getErrorByCode, IErrorSignature } from "@shared/types/errors";
 import { Response, Request, NextFunction } from "express";
+import { IRequest } from "src/custom_typings/request";
 
 /**
  * Wrapper around each api route - handles explicitly thrown errors which could not be handled
@@ -11,7 +12,7 @@ import { Response, Request, NextFunction } from "express";
  * @param fn - the function handler for each route
  */
 export function asyncRouteHandler<T = unknown>(
-  fn: (req: Request) => Promise<T>
+  fn: (req: IRequest) => Promise<T>
 ): (req: Request, res: Response, next: NextFunction) => void {
   return async (req: Request, res: Response, next: NextFunction) => {
     if (req.acl) {

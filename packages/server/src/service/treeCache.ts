@@ -1,10 +1,10 @@
 import Territory from "@models/territory/territory";
 import User, { UserRight } from "@models/user/user";
-import { Db } from "@service/RethinkDB";
 import { getEntitiesDataByClass } from "@service/shorthands";
 import { EntityEnums, UserEnums } from "@shared/enums";
 import { IResponseTree, IStatement, ITerritory } from "@shared/types";
 import { TerritoriesBrokenError } from "@shared/types/errors";
+import { Connection } from "rethinkdb-ts";
 
 export class TreeCreator {
   parentMap: Record<string, Territory[]>; // map of rootId -> childs
@@ -122,9 +122,12 @@ export class TreeCreator {
     );
   }
 
-  static async countStatements(db: Db): Promise<Record<string, number>> {
+  static async countStatements(db: Connection): Promise<Record<string, number>> {
     const statements = (
-      await getEntitiesDataByClass<IStatement>(db, EntityEnums.Class.Statement)
+      await getEntitiesDataByClass<IStatement>(
+        db,
+        EntityEnums.Class.Statement
+      )
     ).filter((s) => s.data.territory && s.data.territory.territoryId);
     const statementsCountMap: Record<string, number> = {}; // key is territoryid
     for (const statement of statements) {
@@ -143,6 +146,7 @@ export class TreeCreator {
 
 export class TreeCache {
   tree: TreeCreator;
+  db: Connection | undefined;
 
   constructor() {
     this.tree = new TreeCreator();
@@ -153,19 +157,24 @@ export class TreeCache {
       return;
     }
 
-    const db = new Db();
-    await db.initDb();
+    if (!this.db) {
+      console.error("No Db in TreeCache");
+      return;
+    }
 
-    this.tree = await this.createTree(db);
+    this.tree = await this.createTree();
     console.log("[TreeCache.initialize]: done");
   }
 
-  async createTree(db: Db): Promise<TreeCreator> {
+  async createTree(): Promise<TreeCreator> {
     const newTree = new TreeCreator();
 
     const [territoriesData, statementsCountMap] = await Promise.all([
-      getEntitiesDataByClass<ITerritory>(db, EntityEnums.Class.Territory),
-      TreeCreator.countStatements(db),
+      getEntitiesDataByClass<ITerritory>(
+        this.db as Connection,
+        EntityEnums.Class.Territory
+      ),
+      TreeCreator.countStatements(this.db as Connection),
     ]);
 
     newTree.createParentMap(
@@ -225,9 +234,9 @@ export class TreeCache {
   /**
    * Attemts to find closest right for child subtrees.
    * This method uses leftmost tree search.
-   * @param terId 
-   * @param rights 
-   * @returns 
+   * @param terId
+   * @param rights
+   * @returns
    */
   findRightInChildTerritory(
     terId: string,
@@ -262,9 +271,9 @@ export class TreeCache {
 
   /**
    * Attempts to find closest right applicable to territory
-   * @param terId 
-   * @param rights 
-   * @returns 
+   * @param terId
+   * @param rights
+   * @returns
    */
   getRightForTerritory(
     terId: string,
@@ -282,11 +291,14 @@ export class TreeCache {
       return derivedRight;
     }
 
-    // searching for right derived from some child territory 
+    // searching for right derived from some child territory
     derivedRight = this.findRightInChildTerritory(terId, rights);
     if (derivedRight) {
       // if the right is found - it must be changed to VIEW right
-      return new UserRight({ mode: UserEnums.RoleMode.Read, territory: derivedRight.territory });
+      return new UserRight({
+        mode: UserEnums.RoleMode.Read,
+        territory: derivedRight.territory,
+      });
     }
 
     return undefined;
@@ -296,6 +308,7 @@ export class TreeCache {
 const treeCache: TreeCache = new TreeCache();
 export default treeCache;
 
-export async function prepareTreeCache() {
+export async function prepareTreeCache(db: Connection) {
+  treeCache.db = db;
   await treeCache.initialize();
 }

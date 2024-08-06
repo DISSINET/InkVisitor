@@ -1,3 +1,4 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Header, Loader, Toast } from "components";
 import {
@@ -8,15 +9,16 @@ import {
 import { useSearchParams } from "hooks";
 import useKeyLift from "hooks/useKeyLift";
 import useKeypress from "hooks/useKeyPress";
-import React, { useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "react-query";
-import { useLocation, useHistory } from "react-router";
-import { toast } from "react-toastify";
+import React, { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router";
+import { Id, toast } from "react-toastify";
 import { setDisableUserSelect } from "redux/features/layout/disableUserSelectSlice";
+import { setPing } from "redux/features/pingSlice";
 import { setLastClickedIndex } from "redux/features/statementList/lastClickedIndexSlice";
 import { setUsername } from "redux/features/usernameSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { StyledPageContent, StyledPage } from "./PageStyles";
+import { StyledPage, StyledPageContent } from "./PageStyles";
+import { ThemeColor } from "Theme/theme";
 
 interface Page {
   children?: React.ReactNode;
@@ -36,39 +38,60 @@ export const Page: React.FC<Page> = ({ children }) => {
     (state) => state.layout.contentHeight
   );
 
-  const environmentName = (process.env.ROOT_URL || "").replace(
+  let environmentName = (process.env.ROOT_URL || "").replace(
     /apps\/inkvisitor[-]?/,
     ""
   );
+  if (environmentName === "/") {
+    environmentName = "";
+  }
 
   const location = useLocation();
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const disableRightHeader: boolean =
-    location.pathname !== "/users" &&
-    location.pathname !== "/acl" &&
-    location.pathname !== "/about" &&
-    location.pathname !== "/";
+    location.pathname === "/login" ||
+    location.pathname === "/activate" ||
+    location.pathname === "/password_reset";
 
   const {
     status: statusUser,
     data: user,
     error: errorUser,
     isFetching: isFetchingUser,
-  } = useQuery(
-    ["user", username],
-    async () => {
+    isPaused,
+  } = useQuery({
+    queryKey: ["user", userId],
+    queryFn: async () => {
       if (userId) {
         const res = await api.usersGet(userId);
         return res.data;
-      } else {
-        return false;
       }
     },
-    { enabled: !!userId && api.isLoggedIn() && !disableRightHeader }
-  );
+    enabled: api.isLoggedIn() && !disableRightHeader,
+  });
 
-  const logOutMutation = useMutation(async () => await api.signOut(), {
+  const toastId = React.useRef<Id | null>(null);
+  const notify = () =>
+    (toastId.current = toast.dark("you're offline", { autoClose: false }));
+  const dismiss = () => {
+    if (toastId.current) {
+      toast.dismiss(toastId.current);
+    }
+  };
+
+  useEffect(() => {
+    if (isPaused) {
+      notify();
+    } else {
+      if (toastId.current && toast.isActive(toastId.current)) {
+        dismiss();
+      }
+    }
+  }, [isPaused]);
+
+  const logOutMutation = useMutation({
+    mutationFn: async () => await api.signOut(),
     onSuccess: (data, variables) => {
       dispatch(setUsername(""));
       queryClient.removeQueries();
@@ -76,7 +99,7 @@ export const Page: React.FC<Page> = ({ children }) => {
       //
       cleanAllParams();
 
-      history.push("/");
+      navigate("/login");
     },
   });
 
@@ -88,9 +111,19 @@ export const Page: React.FC<Page> = ({ children }) => {
 
   useKeyLift("Shift", () => dispatch(setDisableUserSelect(false)));
 
+  useQuery({
+    queryKey: ["ping"],
+    queryFn: async () => {
+      const localPing = api.getPing();
+      if (localPing) dispatch(setPing(localPing));
+      return localPing;
+    },
+    refetchInterval: 5000,
+  });
+
   return (
     <StyledPage
-      layoutWidth={layoutWidth}
+      $layoutWidth={layoutWidth}
       onClick={() => dispatch(setLastClickedIndex(-1))}
     >
       <Header
@@ -98,20 +131,21 @@ export const Page: React.FC<Page> = ({ children }) => {
         paddingX={10}
         color={
           ["production", ""].indexOf(environmentName) === -1
-            ? environmentName
-            : "primary"
+            ? (environmentName as keyof ThemeColor)
+            : "muni"
         }
         left={<LeftHeader tempLocation={tempLocation} />}
         right={
           <>
             {!disableRightHeader && (
               <RightHeader
-                setUserCustomizationOpen={() => setUserCustomizationOpen(true)}
+                setUserCustomizationOpen={setUserCustomizationOpen}
                 handleLogOut={logOutMutation.mutate}
                 userName={user ? user.name : ""}
                 userRole={userRole || ""}
                 setTempLocation={setTempLocation}
                 tempLocation={tempLocation}
+                userIsFetching={isFetchingUser}
               />
             )}
           </>

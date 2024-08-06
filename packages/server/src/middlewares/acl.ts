@@ -34,12 +34,15 @@ class Acl {
   /**
    * Returns Acl entries that match current route.
    * If route does not exist, it is created with empty roles field and then returned as a match.
-   * @param req 
-   * @returns 
+   * @param req
+   * @returns
    */
   private async getPermissions(req: IRequest): Promise<AclPermission[]> {
     const controller = req.baseUrl.split("/").pop() || "";
-    const route = req.route.path.split("/").filter(part => !!part).join("/")
+    const route = req.route.path
+      .split("/")
+      .filter((part) => !!part)
+      .join("/");
     const method = req.method as HttpMethods;
 
     const permissions = await AclPermission.findByRoute(
@@ -66,16 +69,16 @@ class Acl {
   }
 
   /**
-   * Determine if the request should be blocked or allowed. 
+   * Determine if the request should be blocked or allowed.
    * Block is represented by returned PermissionDeniedError error.
-   * @param req 
-   * @returns 
+   * @param req
+   * @returns
    */
   public async validate(req: IRequest): Promise<CustomError | null> {
     const permissions = await this.getPermissions(req);
 
     // allow public routes for all
-    if (permissions.find(p => p.public)) {
+    if (permissions.find((p) => p.public)) {
       return null;
     }
 
@@ -90,7 +93,7 @@ class Acl {
     }
 
     // allow if current role is in permissions
-    if (permissions.find(p => p.isRoleAllowed(req.getUserOrFail().role))) {
+    if (permissions.find((p) => p.isRoleAllowed(req.getUserOrFail().role))) {
       return null;
     }
 

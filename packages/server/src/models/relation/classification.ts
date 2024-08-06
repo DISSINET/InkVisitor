@@ -70,10 +70,10 @@ export default class Classification
 
     let relations: RelationTypes.IClassification[] = [];
 
-    if (nestLvl === 0 && EntityEnums.PLOGESTRB.indexOf(asClass) !== -1) {
-      relations = await Relation.findForEntity(
+    if (nestLvl === 0 && EntityEnums.PLOGESTRBV.indexOf(asClass) !== -1) {
+      relations = await Relation.findForEntities(
         conn,
-        entityId,
+        [entityId],
         RelationEnums.Type.Classification,
         0
       );
@@ -113,9 +113,9 @@ export default class Classification
     conn: Connection,
     parentId: string
   ): Promise<RelationTypes.IClassification[]> {
-    const out: RelationTypes.IClassification[] = await Relation.findForEntity(
+    const out: RelationTypes.IClassification[] = await Relation.findForEntities(
       conn,
-      parentId,
+      [parentId],
       RelationEnums.Type.Classification,
       1
     );

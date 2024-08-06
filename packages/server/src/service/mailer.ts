@@ -1,15 +1,18 @@
+import { domainName, hostUrl } from "@common/functions";
 import sendgrid from "@sendgrid/mail";
 
 // ids for sendgrid templates
 export enum TplIds {
-  UserCreated = "d-5b941a639a544c848f11240dfc3fc565",
-  PasswordReset = "d-a67dbe3a40234b6b8dc929f559553fe3",
+  AccountCreated = "d-5b941a639a544c848f11240dfc3fc565",
+  PasswordAdminReset = "d-a67dbe3a40234b6b8dc929f559553fe3",
+  PasswordResetRequest = "d-9a386304d7eb45b6beba7fe1becba08d",
   Test = "d-382f8760c7be4ec4aba6bd8caf252eed",
 }
 
 // codenames for email subjects
 export enum EmailSubject {
   Test = "Test mail",
+  PasswordResetRequest = "Password reset request",
   PasswordReset = "Password reset",
   AccountCreated = "Account created",
 }
@@ -20,43 +23,74 @@ interface DynamicTplRequest {
   subject: EmailSubject;
 }
 
-export function userCreatedTemplate(
-  username: string,
-  domain: string,
+/**
+ * Template which should be sent to the new user email after registration
+ * @param email
+ * @param link
+ * @returns
+ */
+export function accountCreatedTemplate(
+  email: string,
   link: string
 ): DynamicTplRequest {
   return {
-    id: TplIds.UserCreated,
+    id: TplIds.AccountCreated,
     data: {
-      username,
-      domain,
-      link,
+      email,
+      domain: domainName(),
+      link: `${hostUrl()}${link}`,
     },
     subject: EmailSubject.AccountCreated,
   };
 }
 
-export function passwordResetTemplate(
-  username: string,
-  domain: string,
-  rawPassword: string
+/**
+ * Template which should be sent to the email which requested new password
+ * @param email
+ * @param link
+ * @returns
+ */
+export function passwordResetRequestTemplate(
+  email: string,
+  link: string
 ): DynamicTplRequest {
   return {
-    id: TplIds.PasswordReset,
+    id: TplIds.PasswordResetRequest,
     data: {
-      username,
-      domain,
-      rawPassword,
+      email,
+      link: `${hostUrl()}${link}`,
+      domain: domainName(),
     },
     subject: EmailSubject.PasswordReset,
   };
 }
 
-export function testTemplate(domain: string): DynamicTplRequest {
+/**
+ * Template which should be sent to the user for which an admin reset their password
+ * @param username
+ * @param rawPassword
+ * @returns
+ */
+export function passwordAdminResetTemplate(
+  username: string,
+  rawPassword: string
+): DynamicTplRequest {
+  return {
+    id: TplIds.PasswordAdminReset,
+    data: {
+      username,
+      rawPassword,
+      domain: domainName(),
+    },
+    subject: EmailSubject.PasswordReset,
+  };
+}
+
+export function testTemplate(): DynamicTplRequest {
   return {
     id: TplIds.Test,
     data: {
-      domain,
+      domain: domainName(),
     },
     subject: EmailSubject.Test,
   };
@@ -65,14 +99,14 @@ export function testTemplate(domain: string): DynamicTplRequest {
 class Mailer {
   lastEmailSubject?: string;
   lastEmailData?: any;
-  devMode: boolean = true;
+  devMode = true;
 
   constructor() {
-    if (process.env.NODEMAILER_API_KEY && process.env.MAILER_SENDER) {
+    if (process.env.SENDGRID_API_KEY && process.env.MAILER_SENDER) {
       this.devMode = false;
     }
 
-    sendgrid.setApiKey(process.env.NODEMAILER_API_KEY || "");
+    sendgrid.setApiKey(process.env.SENDGRID_API_KEY || "");
 
     console.log(`[Mailer]: prepared${this.devMode ? " (dev mode)" : ""}`);
   }

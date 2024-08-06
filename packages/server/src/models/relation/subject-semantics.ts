@@ -26,9 +26,9 @@ export default class SubjectSemantics
     let out: RelationTypes.ISubjectSemantics[] = [];
 
     if (asClass === EntityEnums.Class.Action) {
-      out = await Relation.findForEntity(
+      out = await Relation.findForEntities(
         conn,
-        entityId,
+        [entityId],
         RelationEnums.Type.SubjectSemantics,
         0
       );
@@ -52,9 +52,9 @@ export default class SubjectSemantics
     let out: RelationTypes.ISubjectSemantics[] = [];
 
     if (asClass === EntityEnums.Class.Concept) {
-      out = await Relation.findForEntity(
+      out = await Relation.findForEntities(
         conn,
-        parentId,
+        [parentId],
         RelationEnums.Type.SubjectSemantics,
         1
       );

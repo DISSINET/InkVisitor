@@ -8,8 +8,9 @@
 export class CustomError extends Error {
   public static code: number = 400; // html code
   public loggable: boolean = false; // errors could be logged into console as warn messages
-  public log: string = ""; // same as first constructor argument - wont be thrown in realtime, but it will be printed as warning
+  public log: string = ""; // same as first constructor argument - wont be thrown as API response, but it will be printed as warning
   public title: string = ""; // represents the error class in readable form
+  public data: any; // arbitrary data
 
   // the following is commented, it should be inherited from base Error
   //public name: string = ""; // Stands for class name, replaces default 'Error' string from parent constructor
@@ -31,6 +32,11 @@ export class CustomError extends Error {
 
   shouldLog(): boolean {
     return this.loggable;
+  }
+
+  withData(data: any): CustomError {
+    this.data = data;
+    return this;
   }
 }
 
@@ -96,17 +102,46 @@ class UserDoesNotExits extends CustomError {
 }
 
 /**
- * UserDoesNotExits will be thrown when attempting to remove/update the user entry, which does not exist
+ * UserAlreadyActivated will be thrown when attempting to activate user, that has been already activated or the hash which governs the activation does not exist
+ */
+class UserAlreadyActivated extends CustomError {
+  public static code = 400;
+  public static title = "User already activated user";
+  public static message = "User already activated or activation link expired";
+}
+
+/**
+ * UserBadActivationHash will be thrown if searching for invalid activation hash
+ */
+class UserBadActivationHash extends CustomError {
+  public static code = 400;
+  public static title = "Invalid activation hash";
+  public static message =
+    "User activation unsuccessful. Please verify the validity of the activation link and try again. If the problem persists, contact our support team for assistance.";
+}
+
+/**
+ * UserNotActiveError
  */
 class UserNotActiveError extends CustomError {
   public static code = 403;
   public static title = "Inactive user";
   public static message = "User $1 is not active";
+  public static messageVerified = "User $1 is not verified";
 
   constructor(m: string, userId: string) {
     super(m);
     this.message = this.message.replace("$1", userId);
   }
+}
+
+/**
+ * UserNotUnique will be thrown when attempting to add/update the user entry to login, which is already in the db
+ */
+class UserNotUnique extends CustomError {
+  public static code = 409;
+  public static title = "User with this login already exists";
+  public static message = "Either email or username is already used";
 }
 
 /**
@@ -116,6 +151,42 @@ class EntityDoesNotExist extends CustomError {
   public static code = 400;
   public static title = "Missing entity";
   public static message = "Entity $1 does not exist";
+
+  constructor(m: string, entityId?: string) {
+    super(m);
+    if (entityId) {
+      this.message = this.message.replace("$1", entityId);
+    } else {
+      this.message = this.message.replace(" $1 ", " ");
+    }
+  }
+}
+
+/**
+ * EntityDoesExist will be thrown when attempting to restore the entity entry, which still does exist
+ */
+class EntityDoesExist extends CustomError {
+  public static code = 400;
+  public static title = "Entity still exists";
+  public static message = "Entity $1 does exist";
+
+  constructor(m: string, entityId?: string) {
+    super(m);
+    if (entityId) {
+      this.message = this.message.replace("$1", entityId);
+    } else {
+      this.message = this.message.replace(" $1 ", " ");
+    }
+  }
+}
+
+/**
+ * AuditDoesNotExist will be thrown when attempting to retrieve entry by id, which does not exist
+ */
+class AuditDoesNotExist extends CustomError {
+  public static code = 400;
+  public static title = "Missing audit";
+  public static message = "Audit $1 does not exist";
 
   constructor(m: string, entityId?: string) {
     super(m);
@@ -278,6 +349,100 @@ class SearchEdgeTypesInvalid extends CustomError {
   public static message = "Bad edge type(s)";
 }
 
+/**
+ * RelationAsymetricalPathExist will be thrown when attempting to add asymetrical relation while there could already be path from A -> B
+ */
+class RelationAsymetricalPathExist extends CustomError {
+  public static code = 400;
+  public static title = "Asymetrical constraint check failed";
+  public static message = "Relation cannot be created";
+
+  static forId(id: string): RelationAsymetricalPathExist {
+    return new RelationAsymetricalPathExist(
+      RelationAsymetricalPathExist.message.replace("$1", id)
+    );
+  }
+}
+
+/**
+ * DocumentDoesNotExist will be thrown when attempting to retrieve document by id, which does not exist
+ */
+class DocumentDoesNotExist extends CustomError {
+  public static code = 400;
+  public static title = "Cannot get Document entry";
+  public static message = "Document $1 does not exist";
+
+  static forId(id: string): DocumentDoesNotExist {
+    return new DocumentDoesNotExist(
+      DocumentDoesNotExist.message.replace("$1", id)
+    );
+  }
+}
+
+/**
+ * Will be thrown when passwords is not safe
+ */
+class UnsafePasswordError extends CustomError {
+  public static code = 400;
+  public static title = "Unsafe password";
+  public static message = "The entered password is not safe.";
+}
+
+/**
+ * Will be thrown when passwords don't match
+ */
+class PasswordDoesNotMatchError extends CustomError {
+  public static code = 400;
+  public static title = "Unsafe password";
+  public static message = "Passwords do not match.";
+}
+
+/**
+ * Will be thrown when activation is unsuccessful due to invalid hash
+ */
+class ActivationHashInvalidError extends CustomError {
+  public static code = 400;
+  public static title = "Invalid hash";
+  public static message =
+    "User activation unsuccessful. Please verify the validity of the actionation link and try again. If the problem persists, contact our support team for assistance.";
+}
+
+/**
+ * Will be thrown when password reset is unsuccessful due to invalid hash
+ */
+class PasswordResetHashError extends CustomError {
+  public static code = 400;
+  public static title = "Invalid link";
+  public static message =
+    "Password reset unsuccessful. Please verify the validity of the recovery link and try again. If the problem persists, contact our support team for assistance.";
+}
+
+/**
+ * Will be thrown when username is too short
+ */
+class UsernameTooShortError extends CustomError {
+  public static code = 400;
+  public static title = "Username too short";
+  public static message = "Username is too short. Please select a new one.";
+}
+
+/**
+ * Will be thrown when username is too short
+ */
+class UsernameTooLongError extends CustomError {
+  public static code = 400;
+  public static title = "Username too long";
+  public static message = "Username is too long. Please select a new one.";
+}
+
+/**
+ * Will be thrown when username is too short
+ */
+class InvalidEmailError extends CustomError {
+  public static code = 400;
+  public static title = "Invalid email";
+  public static message = "Invalid email entered";
+}
 
 /**
  * UnknownError works as a backup
@@ -286,6 +451,13 @@ class UnknownError extends CustomError {
   public static code = 500;
   public static title = "Unknown error";
   public static message = "Mysterious";
+}
+
+class NetworkError extends CustomError {
+  public static code = 500;
+  public static title = "Connection to server lost";
+  public static message =
+    "Please check your network connection. Otherwise contact the administrator.";
 }
 
 const allErrors: Record<string, any> = {
@@ -298,8 +470,13 @@ const allErrors: Record<string, any> = {
   NotFound,
   BadParams,
   UserDoesNotExits,
+  UserAlreadyActivated,
+  UserBadActivationHash,
+  UserNotUnique,
   UserNotActiveError,
   EntityDoesNotExist,
+  EntityDoesExist,
+  AuditDoesNotExist,
   AuditsDoNotExist,
   StatementDoesNotExits,
   PermissionDoesNotExits,
@@ -310,6 +487,16 @@ const allErrors: Record<string, any> = {
   EmailError,
   RelationDoesNotExist,
   SearchEdgeTypesInvalid,
+  RelationAsymetricalPathExist,
+  DocumentDoesNotExist,
+  NetworkError,
+  UnsafePasswordError,
+  PasswordDoesNotMatchError,
+  PasswordResetHashError,
+  ActivationHashInvalidError,
+  UsernameTooShortError,
+  UsernameTooLongError,
+  InvalidEmailError,
 };
 
 export interface IErrorSignature {
@@ -320,7 +507,7 @@ export interface IErrorSignature {
 export function getErrorByCode(errSig: IErrorSignature): CustomError {
   return allErrors[errSig.error]
     ? new allErrors[errSig.error](errSig.message)
-    : new UnknownError(errSig.message || "Something bad happened");
+    : new UnknownError(errSig.message || "Unknown error occured");
 }
 
 export {
@@ -333,8 +520,13 @@ export {
   NotFound,
   BadParams,
   UserDoesNotExits,
+  UserAlreadyActivated,
+  UserBadActivationHash,
+  UserNotUnique,
   UserNotActiveError,
   EntityDoesNotExist,
+  EntityDoesExist,
+  AuditDoesNotExist,
   AuditsDoNotExist,
   StatementDoesNotExits,
   PermissionDoesNotExits,
@@ -344,5 +536,15 @@ export {
   StatementInvalidMove,
   EmailError,
   RelationDoesNotExist,
-  SearchEdgeTypesInvalid
+  SearchEdgeTypesInvalid,
+  RelationAsymetricalPathExist,
+  DocumentDoesNotExist,
+  NetworkError,
+  UnsafePasswordError,
+  PasswordDoesNotMatchError,
+  PasswordResetHashError,
+  ActivationHashInvalidError,
+  UsernameTooShortError,
+  UsernameTooLongError,
+  InvalidEmailError,
 };

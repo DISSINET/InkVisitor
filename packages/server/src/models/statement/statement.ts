@@ -12,12 +12,10 @@ import {
   determineOrder,
 } from "@models/common";
 import { EntityEnums, UserEnums, DbEnums } from "@shared/enums";
-
 import Entity from "@models/entity/entity";
 import { r as rethink, Connection, RDatum, WriteResult } from "rethinkdb-ts";
 import { InternalServerError } from "@shared/types/errors";
 import User from "@models/user/user";
-import { EventMapSingle, EventTypes } from "@models/events/types";
 import treeCache from "@service/treeCache";
 import Prop from "@models/prop/prop";
 import {
@@ -26,6 +24,7 @@ import {
   ROOT_TERRITORY_ID,
   StatementObject,
 } from "@shared/types/statement";
+import { randomUUID } from "crypto";
 
 export class StatementClassification implements IStatementClassification {
   id = "";
@@ -35,13 +34,10 @@ export class StatementClassification implements IStatementClassification {
   certainty: EntityEnums.Certainty = EntityEnums.Certainty.AlmostCertain;
   mood: EntityEnums.Mood[];
   moodvariant: EntityEnums.MoodVariant = EntityEnums.MoodVariant.Irrealis;
-  statementOrder: number | false = false;
 
   constructor(data: Partial<IStatementClassification>) {
     fillFlatObject(this, data);
     this.mood = data.mood ? data.mood : [];
-    this.statementOrder =
-      data.statementOrder !== undefined ? data.statementOrder : false;
   }
 }
 
@@ -53,13 +49,10 @@ export class StatementIdentification implements IStatementClassification {
   certainty: EntityEnums.Certainty = EntityEnums.Certainty.AlmostCertain;
   mood: EntityEnums.Mood[];
   moodvariant: EntityEnums.MoodVariant = EntityEnums.MoodVariant.Irrealis;
-  statementOrder: number | false = false;
 
   constructor(data: Partial<IStatementClassification>) {
     fillFlatObject(this, data);
     this.mood = data.mood || [EntityEnums.Mood.Indication];
-    this.statementOrder =
-      data.statementOrder !== undefined ? data.statementOrder : false;
   }
 }
 
@@ -75,7 +68,6 @@ export class StatementActant implements IStatementActant, IModel {
   bundleStart = false;
   bundleEnd = false;
   props: Prop[] = [];
-  statementOrder: number | false = false;
 
   classifications: StatementClassification[] = [];
   identifications: StatementIdentification[] = [];
@@ -93,8 +85,6 @@ export class StatementActant implements IStatementActant, IModel {
       StatementIdentification,
       data.identifications
     );
-    this.statementOrder =
-      data.statementOrder !== undefined ? data.statementOrder : false;
   }
 
   /**
@@ -103,6 +93,20 @@ export class StatementActant implements IStatementActant, IModel {
    */
   isValid(): boolean {
     return true;
+  }
+
+  /**
+   * Resets IDs of nested objects
+   */
+  resetIds() {
+    this.id = randomUUID();
+    this.props.forEach((p) => p.resetIds());
+    this.identifications.forEach((i) => {
+      i.id = randomUUID();
+    });
+    this.classifications.forEach((c) => {
+      c.id = randomUUID();
+    });
   }
 }
 
@@ -142,14 +146,11 @@ export class StatementAction implements IStatementAction {
   bundleStart = false;
   bundleEnd = false;
   props: Prop[] = [];
-  statementOrder: number | false = false;
 
   constructor(data: Partial<IStatementAction>) {
     fillFlatObject(this, data);
     this.mood = data.mood || [EntityEnums.Mood.Indication];
     fillArray<Prop>(this.props, Prop, data.props);
-    this.statementOrder =
-      data.statementOrder !== undefined ? data.statementOrder : false;
   }
 
   /**
@@ -163,6 +164,14 @@ export class StatementAction implements IStatementAction {
     }
 
     return true;
+  }
+
+  /**
+   * Resets IDs of nested objects
+   */
+  resetIds() {
+    this.id = randomUUID();
+    this.props.forEach((p) => p.resetIds());
   }
 }
 
@@ -374,6 +383,11 @@ class Statement extends Entity implements IStatement {
     db: Connection | undefined,
     updateData: Record<string, unknown>
   ): Promise<WriteResult> {
+    // TODO this is monkeypatch that should not be here, we need better solution
+    if (updateData["entities"]) {
+      delete updateData["entities"];
+    }
+
     if (
       updateData["data"] &&
       (updateData["data"] as any).territory &&
@@ -401,7 +415,7 @@ class Statement extends Entity implements IStatement {
     return result;
   }
 
-  async delete(db: Connection | undefined): Promise<WriteResult> {
+  async delete(db: Connection): Promise<WriteResult> {
     const result = await super.delete(db);
 
     await treeCache.initialize();
@@ -477,12 +491,22 @@ class Statement extends Entity implements IStatement {
       });
     });
 
-    if (this.data.territory) {
-      entitiesIds[this.data.territory.territoryId] = null;
+    // append territory lineage to the root T
+    const parentT = this.data.territory?.territoryId;
+    if (parentT) {
+      const treeCacheInstance = treeCache.tree.idMap[parentT];
+      const lineageTIds = [
+        parentT,
+        ...(treeCacheInstance ? treeCacheInstance.path : []),
+      ];
+      if (lineageTIds) {
+        lineageTIds.forEach((tid) => {
+          entitiesIds[tid] = null;
+        });
+      }
     }
 
     this.data.tags.forEach((t) => (entitiesIds[t] = null));
-
     return Object.keys(entitiesIds).filter((id) => !!id);
   }
 
@@ -728,52 +752,15 @@ class Statement extends Entity implements IStatement {
     });
   }
 
-  static events: EventMapSingle = {
-    [EventTypes.BEFORE_ENTITY_DELETE]: async (
-      db: Connection,
-      actantId: string
-    ): Promise<void> => {
-      const linkedToActant = await rethink
-        .table(Entity.table)
-        .filter({ class: EntityEnums.Class.Statement })
-        .filter((row: any) => {
-          return row("data")("actants").contains((actantElement: any) =>
-            actantElement("entityId").eq(actantId)
-          );
-        })
-        .run(db);
+  /**
+   * Resets IDs of nested objects
+   */
+  resetIds() {
+    super.resetIds();
 
-      for (const stData of linkedToActant) {
-        const st = new Statement({ ...stData });
-        await st.unlinkActantId(db, actantId);
-      }
-
-      const linkedToProps = await rethink
-        .table(Entity.table)
-        .filter({ class: EntityEnums.Class.Statement })
-        .filter((row: any) => {
-          return row("data")("props").contains((actantElement: any) =>
-            actantElement("origin").eq(actantId)
-          );
-        })
-        .run(db);
-
-      const linkedToActions = await rethink
-        .table(Entity.table)
-        .filter({ class: EntityEnums.Class.Statement })
-        .filter((row: any) => {
-          return row("data")("actions").contains((actantElement: any) =>
-            actantElement("actionId").eq(actantId)
-          );
-        })
-        .run(db);
-
-      for (const stData of linkedToActions) {
-        const st = new Statement({ ...stData });
-        await st.unlinkActionId(db, actantId);
-      }
-    },
-  };
+    this.data.actants.forEach((a) => a.resetIds());
+    this.data.actions.forEach((a) => a.resetIds());
+  }
 }
 
 export default Statement;

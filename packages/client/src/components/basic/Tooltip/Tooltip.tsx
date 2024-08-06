@@ -1,14 +1,14 @@
+import { FloatingPortal } from "@floating-ui/react";
 import {
   AutoPlacement,
   BasePlacement,
   VariationPlacement,
   VirtualElement,
 } from "@popperjs/core";
+import { useSpring } from "@react-spring/web";
+import { ThemeColor } from "Theme/theme";
 import React, { ReactElement, useEffect, useState } from "react";
-import ReactDOM from "react-dom";
 import { usePopper } from "react-popper";
-import { useSpring } from "react-spring";
-import { Colors } from "types";
 import {
   StyledArrow,
   StyledContainer,
@@ -26,7 +26,7 @@ interface Tooltip {
   content?: ReactElement[] | ReactElement;
   tagGroup?: boolean;
   // style
-  color?: typeof Colors[number];
+  color?: keyof ThemeColor;
   position?: AutoPlacement | BasePlacement | VariationPlacement;
   noArrow?: boolean;
   offsetX?: number;
@@ -45,7 +45,7 @@ export const Tooltip: React.FC<Tooltip> = ({
   content,
   tagGroup = false,
   // style
-  color = "black",
+  color = "tooltipBackground",
   position = "bottom",
   noArrow = false,
   offsetX = 0,
@@ -55,8 +55,9 @@ export const Tooltip: React.FC<Tooltip> = ({
   disableAutoPosition = false,
   onMouseLeave = () => {},
 }) => {
-  const [popperElement, setPopperElement] =
-    useState<HTMLDivElement | null>(null);
+  const [popperElement, setPopperElement] = useState<HTMLDivElement | null>(
+    null
+  );
   const [arrowElement, setArrowElement] = useState<HTMLDivElement | null>(null);
   const { styles, attributes, update, state, forceUpdate } = usePopper(
     referenceElement,
@@ -108,11 +109,11 @@ export const Tooltip: React.FC<Tooltip> = ({
     <>
       {!disabled && (showTooltip || tooltipHovered) && (
         <>
-          {ReactDOM.createPortal(
+          <FloatingPortal id="page">
             <StyledContainer
               ref={setPopperElement}
               style={{ ...styles.popper, ...animatedTooltip }}
-              color={color}
+              $color={color}
               onMouseLeave={() => {
                 onMouseLeave();
                 setTooltipHovered(false);
@@ -132,21 +133,20 @@ export const Tooltip: React.FC<Tooltip> = ({
               )}
               <div>
                 {label && (
-                  <StyledContent color={color}>
+                  <StyledContent $color={color}>
                     <StyledRow>
                       <StyledLabel>{label}</StyledLabel>
                     </StyledRow>
                   </StyledContent>
                 )}
                 {content && (
-                  <StyledContent color={color} tagGroup={tagGroup}>
+                  <StyledContent $color={color} $tagGroup={tagGroup}>
                     {content}
                   </StyledContent>
                 )}
               </div>
-            </StyledContainer>,
-            document.getElementById("page")!
-          )}
+            </StyledContainer>
+          </FloatingPortal>
         </>
       )}
     </>

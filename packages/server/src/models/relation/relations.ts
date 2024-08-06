@@ -1,6 +1,6 @@
 import { nonenumerable } from "@common/decorators";
 import { EntityEnums, RelationEnums } from "@shared/enums";
-import { Relation as RelationTypes } from "@shared/types";
+import { IWarning, Relation as RelationTypes } from "@shared/types";
 import { Connection } from "rethinkdb-ts";
 import { IRequest } from "src/custom_typings/request";
 import Actant1Semantics from "./actant1-semantics";
@@ -16,11 +16,11 @@ import Related from "./related";
 import SubjectActant1Reciprocal from "./subject-actant1-reciprocal";
 import SubjectSemantics from "./subject-semantics";
 import Superclass from "./superclass";
-import SuperordinateLocation from "./superordinate-location";
 import Synonym from "./synonym";
+import SuperordinateEntity from "./superordinate-entity";
 
 type ISuperclass = RelationTypes.ISuperclass;
-type ISuperordinateLocation = RelationTypes.ISuperordinateLocation;
+type ISuperordinateEntity = RelationTypes.ISuperordinateEntity;
 type ISynonym = RelationTypes.ISynonym;
 type IAntonym = RelationTypes.IAntonym;
 type IHolonym = RelationTypes.IHolonym;
@@ -47,7 +47,7 @@ export class UsedRelations implements RelationTypes.IUsedRelations {
 
   [RelationEnums.Type.Superclass]?: RelationTypes.IDetailType<ISuperclass>;
   [RelationEnums.Type
-    .SuperordinateLocation]?: RelationTypes.IDetailType<ISuperordinateLocation>;
+    .SuperordinateEntity]?: RelationTypes.IDetailType<ISuperordinateEntity>;
   [RelationEnums.Type.Synonym]?: RelationTypes.IDetailType<ISynonym>;
   [RelationEnums.Type.Antonym]?: RelationTypes.IDetailType<IAntonym>;
   [RelationEnums.Type.Holonym]?: RelationTypes.IDetailType<IHolonym>;
@@ -73,10 +73,12 @@ export class UsedRelations implements RelationTypes.IUsedRelations {
   [RelationEnums.Type
     .Actant2Semantics]?: RelationTypes.IDetailType<IActant2Semantics>;
   [RelationEnums.Type.Related]?: RelationTypes.IDetailType<IRelated>;
+  warnings: IWarning[];
 
   constructor(forEntityId: string, forEntityClass: EntityEnums.Class) {
     this.entityId = forEntityId;
     this.entityClass = forEntityClass;
+    this.warnings = [];
   }
 
   async prepareSuperclasses(dbConn: Connection): Promise<void> {
@@ -96,20 +98,22 @@ export class UsedRelations implements RelationTypes.IUsedRelations {
     };
   }
 
-  async prepareSuperordinateLocations(dbConn: Connection): Promise<void> {
-    this[RelationEnums.Type.SuperordinateLocation] = {
-      connections: await SuperordinateLocation.getForwardConnections(
-        dbConn,
-        this.entityId,
-        this.entityClass,
-        this.maxNestLvl,
-        0
-      ),
-      iConnections: await SuperordinateLocation.getInverseConnections(
-        dbConn,
-        this.entityId,
-        this.entityClass
-      ),
+  async prepareSuperordinateEntitys(dbConn: Connection): Promise<void> {
+    this[RelationEnums.Type.SuperordinateEntity] = {
+      connections:
+        await SuperordinateEntity.getSuperordinateEntityForwardConnections(
+          dbConn,
+          this.entityId,
+          this.entityClass,
+          this.maxNestLvl,
+          0
+        ),
+      iConnections:
+        await SuperordinateEntity.getSuperordinateEntityInverseConnections(
+          dbConn,
+          this.entityId,
+          this.entityClass
+        ),
     };
   }
 
@@ -202,9 +206,9 @@ export class UsedRelations implements RelationTypes.IUsedRelations {
       connections: await Identification.getForwardConnections(
         dbConn,
         this.entityId,
-        EntityEnums.Certainty.Empty,
         this.maxNestLvl,
-        0
+        0,
+        []
       ),
     };
   }
@@ -280,8 +284,8 @@ export class UsedRelations implements RelationTypes.IUsedRelations {
       await this.prepareSuperclasses(req.db.connection);
     }
 
-    if (types.indexOf(RelationEnums.Type.SuperordinateLocation) != -1) {
-      await this.prepareSuperordinateLocations(req.db.connection);
+    if (types.indexOf(RelationEnums.Type.SuperordinateEntity) != -1) {
+      await this.prepareSuperordinateEntitys(req.db.connection);
     }
 
     if (types.indexOf(RelationEnums.Type.Synonym) != -1) {

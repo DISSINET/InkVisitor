@@ -1,17 +1,9 @@
-import { animated } from "react-spring";
+import { animated } from "@react-spring/web";
 import styled from "styled-components";
-import {
-  space1,
-  space2,
-  space3,
-  space4,
-  space5,
-  space6,
-  space7,
-} from "Theme/constants";
-import { Colors } from "types";
+import { space2, space4, space5, space6, space7 } from "Theme/constants";
+import { ThemeColor } from "Theme/theme";
 
-interface ModalWrap { }
+interface ModalWrap {}
 export const StyledModalWrap = styled.div<ModalWrap>`
   display: flex;
   flex-direction: column;
@@ -35,29 +27,32 @@ export const StyledBackground = styled(animated.div)`
 `;
 
 interface Card {
-  width: "full" | "fat" | "normal" | "thin" | number;
+  width: "full" | "fat" | "normal" | "auto" | number;
+  $fullHeight: boolean;
 }
-const getWidth = (width: "full" | "fat" | "normal" | "thin" | number) => {
+const getWidth = (width: "full" | "fat" | "normal" | "auto" | number) => {
   if (typeof width === "number") {
     return `${width / 10}rem`;
   } else {
     switch (width) {
       case "full":
-        return "calc(100vw - 40px)";
+        return "calc(100vw - 4rem)";
       case "normal":
         return "50rem";
       case "fat":
         return "100rem";
-      case "thin":
+      case "auto":
         return "auto";
     }
   }
 };
-export const StyledCard = styled(animated.div) <Card>`
+export const StyledCard = styled(animated.div)<Card>`
   width: ${({ width }) => getWidth(width)};
+  height: ${({ $fullHeight }) => ($fullHeight ? "100%" : "")};
   display: flex;
   flex-direction: column;
-  max-height: calc(100vh - 40px);
+  margin: ${({ theme }) => `0 ${theme.space[8]}`};
+  max-height: calc(100vh - 8rem);
   z-index: 50;
   background-color: ${({ theme }) => theme.color["gray"][100]};
   color: ${({ theme }) => theme.color["black"]};
@@ -66,7 +61,7 @@ export const StyledCard = styled(animated.div) <Card>`
 `;
 
 interface StyledCardHeader {
-  color?: typeof Colors[number];
+  $color?: keyof ThemeColor;
 }
 export const StyledCardHeader = styled.header<StyledCardHeader>`
   display: flex;
@@ -84,25 +79,32 @@ export const StyledCardHeader = styled.header<StyledCardHeader>`
   border-bottom-color: ${({ theme }) => theme.color["gray"][400]};
   min-height: ${({ theme }) => theme.space[12]};
 `;
+export const StyledCardIcon = styled.div`
+  font-size: 24;
+  margin-right: 0.5rem;
+`;
 export const StyledCardTitle = styled.h2`
   font-weight: ${({ theme }) => theme.fontWeight["medium"]};
   font-size: ${({ theme }) => theme.fontSize["xl"]};
 `;
 interface StyledCardBody {
-  column?: boolean;
-  enableScroll: boolean;
+  $column?: boolean;
+  $enableScroll: boolean;
+  centered?: boolean;
 }
 export const StyledCardBody = styled.section<StyledCardBody>`
   display: flex;
-  flex-direction: ${({ column }) => (column ? "column" : "row")};
+  height: 100%;
+  flex-direction: ${({ $column }) => ($column ? "column" : "row")};
+  align-items: ${({ centered }) => (centered ? "center" : "")};
+  justify-content: ${({ centered }) => (centered ? "center" : "")};
   padding: ${space5} ${space7};
-  overflow: ${({ enableScroll }) => (enableScroll ? "auto" : "initial")};
+  overflow: ${({ $enableScroll }) => ($enableScroll ? "auto" : "initial")};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
-  * {
-    user-select: text;
-  };
 `;
-interface StyledFooter { }
+interface StyledFooter {
+  $column?: boolean;
+}
 export const StyledFooter = styled.div<StyledFooter>`
   border-top-style: solid;
   border-top-width: ${({ theme }) => theme.borderWidth["default"]};
@@ -112,19 +114,21 @@ export const StyledFooter = styled.div<StyledFooter>`
   display: flex;
   flex-shrink: 0;
   justify-content: flex-end;
+  flex-direction: ${({ $column }) => ($column ? "column" : "row")};
   padding: ${({ theme }) => theme.space[4]};
 `;
 
 export const StyledModalInputForm = styled.div`
   display: grid;
   grid-template-columns: auto auto;
+  grid-row-gap: ${({ theme }) => theme.space[1]};
 `;
 export const StyledModalInputLabel = styled.p`
   display: grid;
   justify-content: flex-end;
   align-items: center;
-  margin-right: ${({ theme }) => theme.space[2]};
-  margin-bottom: ${({ theme }) => theme.space[1]};
+  margin-right: ${({ theme }) => theme.space[4]};
+  white-space: nowrap;
 `;
 interface StyledModalInputWrap {
   width?: number;

@@ -53,9 +53,9 @@ export default class Related
     conn: Connection,
     parentId: string
   ): Promise<RelationTypes.IRelated[]> {
-    const out: RelationTypes.IRelated[] = await Relation.findForEntity(
+    const out: RelationTypes.IRelated[] = await Relation.findForEntities(
       conn,
-      parentId,
+      [parentId],
       RelationEnums.Type.Related
     );
 
