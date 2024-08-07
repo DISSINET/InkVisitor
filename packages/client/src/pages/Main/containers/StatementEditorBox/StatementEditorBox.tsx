@@ -31,6 +31,23 @@ export const StatementEditorBox: React.FC = () => {
     enabled: !!statementId && api.isLoggedIn(),
   });
 
+  const { data: dataActions, error: errorActions } = useQuery({
+    queryKey: ["statement-actions", statementId],
+    queryFn: async () => {
+      const actionIds = statement?.data.actions.map((a) => a.actionId);
+      if (actionIds === undefined) {
+        return [];
+      }
+      const actions = [];
+      for (const actionId of actionIds) {
+        const res = await api.entitiesGet(actionId);
+        actions.push(res.data);
+      }
+      return actions;
+    },
+    enabled: statement !== undefined && !!statementId && api.isLoggedIn(),
+  });
+
   useEffect(() => {
     if (
       statementError &&
@@ -140,7 +157,91 @@ export const StatementEditorBox: React.FC = () => {
     }
   };
 
-  const handleDataAttributeChange = (
+  const checkValidActantPosition = async (
+    changes: Partial<IStatementData>
+  ): Promise<Partial<IStatementData>> => {
+    const oldActants = statement?.data.actants ?? [];
+
+    // check only the actantId that was added
+    const newActant = changes.actants?.find((newA, newAI) => {
+      //check if the actant is completely new
+      if (!newA.entityId) {
+        return false;
+      }
+      if (oldActants[newAI]) {
+        return newA.entityId !== oldActants[newAI].entityId;
+      } else {
+        return true;
+      }
+    });
+
+    if (newActant === undefined) {
+      return changes;
+    } else {
+      const newActantEntity = await api.entitiesGet(newActant.entityId);
+
+      const actantPosition = newActant.position;
+
+      // check what entity types are allowed for actions
+      const allowedSTypes = dataActions
+        ?.map((action) => {
+          return action.data.entities.s;
+        })
+        .flat();
+
+      const allowedA1Types = dataActions
+        ?.map((action) => {
+          return action.data.entities.a1;
+        })
+        .flat();
+
+      const allowedA2Types = dataActions
+        ?.map((action) => {
+          return action.data.entities.a2;
+        })
+        .flat();
+
+      const allowedS = allowedSTypes?.includes(newActantEntity.data.class);
+      const allowedA1 = allowedA1Types?.includes(newActantEntity.data.class);
+      const allowedA2 = allowedA2Types?.includes(newActantEntity.data.class);
+
+      let newPosition: false | EntityEnums.Position = false;
+
+      if (actantPosition === EntityEnums.Position.Subject && !allowedS) {
+        if (allowedA1) {
+          newPosition = EntityEnums.Position.Actant1;
+        } else if (allowedA2) {
+          newPosition = EntityEnums.Position.Actant2;
+        } else {
+          newPosition = EntityEnums.Position.PseudoActant;
+        }
+      } else if (
+        actantPosition === EntityEnums.Position.Actant1 &&
+        !allowedA1
+      ) {
+        if (allowedA2) {
+          newPosition = EntityEnums.Position.Actant2;
+        } else {
+          newPosition = EntityEnums.Position.PseudoActant;
+        }
+      } else if (
+        actantPosition === EntityEnums.Position.Actant2 &&
+        !allowedA2
+      ) {
+        newPosition = EntityEnums.Position.PseudoActant;
+      }
+
+      if (newPosition !== false) {
+        toast.info(
+          `Statement Actions valency rules do not allow Actant position "${actantPosition}" for ${newActantEntity.data.label}. It was moved to "${newPosition}".`
+        );
+        newActant.position = newPosition;
+      }
+      return changes;
+    }
+  };
+
+  const handleDataAttributeChange = async (
     changes: Partial<IStatementData>,
     instantUpdate?: boolean
   ) => {
@@ -148,11 +249,14 @@ export const StatementEditorBox: React.FC = () => {
       queryClient.cancelQueries({
         queryKey: ["statement", statementId],
       });
+
+      const validatedData = await checkValidActantPosition(changes);
+
       const newData: IResponseStatement = {
         ...tempObject,
         data: {
           ...tempObject.data,
-          ...changes,
+          ...validatedData,
         },
       };
       setTempObject(newData);
