@@ -943,12 +943,12 @@ export const EntityDetail: React.FC<EntityDetail> = ({
         text="Do you really want to delete all metaprops from this entity?"
         submitLabel="Delete"
         onSubmit={() => {
-          // TODO: mutation for delete props
+          updateEntityMutation.mutate({ props: [] });
           setShowBatchRemovePropSubmit(false);
         }}
         onCancel={() => setShowBatchRemovePropSubmit(false)}
         show={showBatchRemovePropSubmit}
-        // loading={propsDeleteMutation.isPending}
+        loading={updateEntityMutation.isPending}
       />
       <Submit
         title="Change entity type"
