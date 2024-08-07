@@ -3,7 +3,6 @@ import {
   IEntity,
   IProp,
   IReference,
-  IResponseEntity,
   IResponseStatement,
   IStatement,
   IStatementActant,
@@ -114,20 +113,6 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
   const queryClient = useQueryClient();
   const themeContext = useContext(ThemeContext);
-
-  const { data: dataActions, error: errorActions } = useQuery({
-    queryKey: ["statement-actions", statementId],
-    queryFn: async () => {
-      const actionIds = statement.data.actions.map((a) => a.actionId);
-      const actions = [];
-      for (const actionId of actionIds) {
-        const res = await api.entitiesGet(actionId);
-        actions.push(res.data);
-      }
-      return actions;
-    },
-    enabled: !!statementId && api.isLoggedIn(),
-  });
 
   // Audit query
   const {
