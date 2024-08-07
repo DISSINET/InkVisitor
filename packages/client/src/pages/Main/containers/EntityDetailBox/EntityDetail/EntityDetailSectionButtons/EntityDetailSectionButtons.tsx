@@ -5,7 +5,7 @@ import React, { useState } from "react";
 import { FaPlus, FaTrashAlt } from "react-icons/fa";
 import { TbReplace } from "react-icons/tb";
 import { StyledSectionButtonsBorder } from "./EntityDetailSectionButtonsStyles";
-import { classesAll } from "types";
+import { classesAll } from "@shared/dictionaries/entity";
 
 interface EntityDetailSectionButtons {
   props: IProp[];

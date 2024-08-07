@@ -18,7 +18,7 @@ import {
   EntityTag,
   JSONExplorer,
 } from "components/advanced";
-import { CMetaProp } from "constructors";
+import { CMetaProp, DProps } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
 import { FaPlus } from "react-icons/fa";
@@ -732,14 +732,21 @@ export const EntityDetail: React.FC<EntityDetail> = ({
                     entityId={entity.id}
                     setShowSubmit={setShowBatchRemovePropSubmit}
                     handleCopyFromEntity={(pickedEntity, replace) => {
-                      if (replace) {
-                        updateEntityMutation.mutate({
-                          props: pickedEntity.props,
-                        });
+                      if (pickedEntity.props.length === 0) {
+                        toast.info("no metaprops");
                       } else {
-                        updateEntityMutation.mutate({
-                          props: [...entity.props, ...pickedEntity.props],
-                        });
+                        if (replace) {
+                          updateEntityMutation.mutate({
+                            props: DProps(pickedEntity.props),
+                          });
+                        } else {
+                          updateEntityMutation.mutate({
+                            props: [
+                              ...entity.props,
+                              ...DProps(pickedEntity.props),
+                            ],
+                          });
+                        }
                       }
                     }}
                   />
