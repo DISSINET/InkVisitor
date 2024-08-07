@@ -93,7 +93,7 @@ export const EntityDetailValidationText: React.FC<
   return (
     <StyledSentence $active={active}>
       <>
-        {allowedClasses && allowedClasses.length > 0 ? (
+        {entityClasses && entityClasses.length > 0 ? (
           <>
             {`Any `}
             {renderEntityClassList(entityClasses)}
