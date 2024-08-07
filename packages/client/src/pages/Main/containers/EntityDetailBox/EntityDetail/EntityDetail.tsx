@@ -732,7 +732,15 @@ export const EntityDetail: React.FC<EntityDetail> = ({
                     entityId={entity.id}
                     setShowSubmit={setShowBatchRemovePropSubmit}
                     handleCopyFromEntity={(pickedEntity, replace) => {
-                      console.log(pickedEntity);
+                      if (replace) {
+                        updateEntityMutation.mutate({
+                          props: pickedEntity.props,
+                        });
+                      } else {
+                        updateEntityMutation.mutate({
+                          props: [...entity.props, ...pickedEntity.props],
+                        });
+                      }
                     }}
                   />
                 )}
