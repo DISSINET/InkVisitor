@@ -45,20 +45,28 @@ export const StyledButton = styled.button.attrs(({ ref }) => ({
   border-style: solid;
   border-radius: ${({ $radiusLeft, $radiusRight }) =>
     getRadius($radiusLeft, $radiusRight)};
-  color: ${({ theme, $disabled, $color, $inverted }) =>
-    $disabled
-      ? theme.color["gray"][800]
-      : $inverted
-      ? theme.color[$color]
-      : theme.color["white"]};
-  background: ${({ theme, $noBackground, $disabled, $color, $inverted }) =>
-    $noBackground
-      ? "none"
-      : $disabled
-      ? theme.background["stripes"]
-      : $inverted
-      ? theme.color["invertedBg"][$color]
-      : theme.color[$color]};
+  color: ${({ theme, $disabled, $color, $inverted }) => {
+    if ($disabled) {
+      return theme.color["gray"][800];
+    }
+    if ($inverted) {
+      return theme.color[$color];
+    }
+    return theme.color["white"];
+  }};
+  background: ${({ theme, $noBackground, $disabled, $color, $inverted }) => {
+    if ($noBackground) {
+      return "none";
+    }
+    if ($disabled) {
+      return theme.background["stripes"];
+    }
+    if ($inverted) {
+      return theme.color["invertedBg"][$color];
+    }
+
+    return theme.color[$color];
+  }};
   cursor: ${({ $disabled }) => ($disabled ? "not-allowed" : "pointer")};
   white-space: nowrap;
 
