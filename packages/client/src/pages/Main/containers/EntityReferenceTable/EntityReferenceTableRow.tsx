@@ -1,6 +1,6 @@
 import { IEntity, IReference } from "@shared/types";
 import { Button } from "components";
-import React, { useContext, useRef } from "react";
+import React, { useContext, useEffect, useRef } from "react";
 import {
   DragSourceMonitor,
   DropTargetMonitor,
@@ -45,6 +45,10 @@ interface EntityReferenceTableRow {
   updateOrderFn: () => void;
   moveRow: (dragIndex: number, hoverIndex: number) => void;
 
+  initResourceTyped?: string;
+  initValueTyped?: string;
+  onClearAfterInitTyped: () => void;
+
   userCanEdit: boolean;
   disabled?: boolean;
 }
@@ -65,9 +69,18 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
   updateOrderFn,
   moveRow,
 
+  initResourceTyped,
+  initValueTyped,
+  onClearAfterInitTyped,
+
   userCanEdit,
   disabled,
 }) => {
+  // clears the temporary input data after moving them from spare row to the suggester input
+  useEffect(() => {
+    onClearAfterInitTyped();
+  }, []);
+
   const dropRef = useRef<HTMLTableRowElement>(null);
   const dragRef = useRef<HTMLTableCellElement>(null);
 
@@ -116,7 +129,7 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
             <FaGripVertical color={themeContext?.color.black} />
           </span>
         ) : (
-          <span style={{ width: "2rem" }} />
+          <span style={{ width: "1.5rem" }} />
         )}
         <EntityReferenceTableResource
           reference={reference}
@@ -126,6 +139,7 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
           territoryParentId={territoryParentId}
           openDetailOnCreate={openDetailOnCreate}
           alwaysShowCreateModal={alwaysShowCreateModal}
+          initResourceTyped={initResourceTyped}
           disabled={disabled}
         />
         <EntityReferenceTableValue
@@ -137,6 +151,7 @@ export const EntityReferenceTableRow: React.FC<EntityReferenceTableRow> = ({
           isInsideTemplate={isInsideTemplate}
           openDetailOnCreate={openDetailOnCreate}
           territoryParentId={territoryParentId}
+          initValueTyped={initValueTyped}
           disabled={disabled}
         />
         <span>

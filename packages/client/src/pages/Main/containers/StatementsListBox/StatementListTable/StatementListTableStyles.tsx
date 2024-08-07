@@ -16,7 +16,6 @@ export const StyledTable = styled.table<StyledTable>`
   box-shadow: ${({ theme }) => theme.boxShadow["subtle"]};
 
   transition: width 0.3s ease;
-  transition-delay: 100ms;
 `;
 export const StyledTHead = styled.thead`
   border-width: ${({ theme }) => theme.borderWidth[1]};
@@ -74,11 +73,7 @@ export const StyledTdMove = styled.td`
   cursor: move;
   width: 1%;
 `;
-export const StyledTdLastEdit = styled.p`
-  padding: ${({ theme }) => theme.space[2]};
-  padding-left: ${({ theme }) => theme.space[4]};
-  font-size: ${({ theme }) => theme.fontSize["xxs"]};
-`;
+
 interface StyledFocusedCircle {
   checked: boolean;
 }

@@ -8,6 +8,7 @@ import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
 import { BsFilter } from "react-icons/bs";
 import { FaPlus } from "react-icons/fa";
+import { setFilterOpen } from "redux/features/territoryTree/filterOpenSlice";
 import { setSelectedTerritoryPath } from "redux/features/territoryTree/selectedTerritoryPathSlice";
 import { setTreeInitialized } from "redux/features/territoryTree/treeInitializeSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
@@ -23,8 +24,7 @@ import {
   filterTreeWithWriteRights,
   markNodesWithFilters,
 } from "./TerritoryTreeFilterUtils";
-import { TerritoryTreeNode } from "./TerritoryTreeNode/TerritoryTreeNode";
-import { setFilterOpen } from "redux/features/territoryTree/filterOpenSlice";
+import { MemoizedTerritoryTreeNode } from "./TerritoryTreeNode/TerritoryTreeNode";
 
 const initFilterSettings: ITerritoryFilter = {
   nonEmpty: false,
@@ -224,7 +224,7 @@ export const TerritoryTreeBox: React.FC = () => {
 
       <StyledTreeWrapper id="Territories-box-content">
         {filteredTreeData && (
-          <TerritoryTreeNode
+          <MemoizedTerritoryTreeNode
             right={filteredTreeData.right}
             territory={filteredTreeData.territory}
             children={filteredTreeData.children}

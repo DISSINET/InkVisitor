@@ -1,17 +1,16 @@
+import { EntityEnums } from "@shared/enums";
 import { IEntity, IReference } from "@shared/types";
+import { excludedSuggesterEntities } from "Theme/constants";
 import { Button } from "components";
+import { EntitySuggester } from "components/advanced";
 import { CReference } from "constructors";
 import update from "immutability-helper";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { FaExternalLinkAlt, FaPlus, FaTrashAlt } from "react-icons/fa";
-import { CellProps, Column } from "react-table";
-import { deepCopy, normalizeURL } from "utils/utils";
-import { EntityReferenceTableResource } from "./EntityReferenceTableResource";
+import React, { useCallback, useEffect, useState } from "react";
+import { FaPlus } from "react-icons/fa";
+import { deepCopy } from "utils/utils";
+import { v4 as uuidv4 } from "uuid";
 import { EntityReferenceTableRow } from "./EntityReferenceTableRow";
-import { StyledReferencesListButtons } from "./EntityReferenceTableStyles";
-import { EntityReferenceTableValue } from "./EntityReferenceTableValue";
-
-type CellType = CellProps<IReference>;
+import { StyledSpareRow } from "./EntityReferenceTableStyles";
 
 interface EntityReferenceTable {
   entityId: string;
@@ -42,9 +41,29 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
 }) => {
   const [localReferences, setLocalReferences] = useState<IReference[]>([]);
 
+  // this states are part of the spare row functionality
+  const [tempResourceTyped, setTempResourceTyped] = useState("");
+  const [tempValueTyped, setTempValueTyped] = useState("");
+  const [fieldToUpdate, setFieldToUpdate] = useState<
+    false | "resource" | "value"
+  >(false);
+  const [initResourceTyped, setInitResourceTyped] = useState("");
+  const [initValueTyped, setInitValueTyped] = useState("");
+
   useEffect(() => {
     if (JSON.stringify(localReferences) !== JSON.stringify(references)) {
       setLocalReferences(references);
+      if (fieldToUpdate === "resource") {
+        setInitResourceTyped(tempResourceTyped);
+        setInitValueTyped("");
+        setTempResourceTyped("");
+        setFieldToUpdate(false);
+      } else if (fieldToUpdate === "value") {
+        setInitValueTyped(tempValueTyped);
+        setInitResourceTyped("");
+        setTempValueTyped("");
+        setFieldToUpdate(false);
+      }
     }
   }, [references]);
 
@@ -195,9 +214,75 @@ export const EntityReferenceTable: React.FC<EntityReferenceTable> = ({
             disabled={disabled}
             openDetailOnCreate={openDetailOnCreate}
             territoryParentId={territoryParentId}
+            initResourceTyped={
+              localReferences.length === key + 1 ? initResourceTyped : undefined
+            }
+            initValueTyped={
+              localReferences.length === key + 1 ? initValueTyped : undefined
+            }
+            onClearAfterInitTyped={() => {
+              setInitResourceTyped("");
+              setInitValueTyped("");
+            }}
           />
         );
       })}
+
+      {/* Entity reference spare row */}
+      {userCanEdit && (
+        <StyledSpareRow $marginTop={localReferences.length > 0}>
+          {/* RESOURCE */}
+          <EntitySuggester
+            alwaysShowCreateModal={alwaysShowCreateModal}
+            openDetailOnCreate={openDetailOnCreate}
+            territoryActants={[]}
+            onSelected={(newSelectedId) => {
+              onChange(
+                [
+                  ...references,
+                  { id: uuidv4(), resource: newSelectedId, value: "" },
+                ],
+                true
+              );
+              if (tempValueTyped.length) {
+                setFieldToUpdate("value");
+              }
+            }}
+            disableTemplatesAccept
+            categoryTypes={[EntityEnums.Class.Resource]}
+            isInsideTemplate={isInsideTemplate}
+            territoryParentId={territoryParentId}
+            disabled={disabled}
+            onTyped={(typed) => setTempResourceTyped(typed)}
+            externalTyped={tempResourceTyped}
+          />
+          {/* VALUE */}
+          <EntitySuggester
+            alwaysShowCreateModal={alwaysShowCreateModal}
+            excludedEntityClasses={excludedSuggesterEntities}
+            openDetailOnCreate={openDetailOnCreate}
+            territoryActants={[]}
+            onSelected={(newSelectedId: string) => {
+              onChange(
+                [
+                  ...references,
+                  { id: uuidv4(), resource: "", value: newSelectedId },
+                ],
+                true
+              );
+              if (tempResourceTyped.length) {
+                setFieldToUpdate("resource");
+              }
+            }}
+            categoryTypes={[EntityEnums.Class.Value]}
+            isInsideTemplate={isInsideTemplate}
+            territoryParentId={territoryParentId}
+            disabled={disabled}
+            onTyped={(typed) => setTempValueTyped(typed)}
+            externalTyped={tempValueTyped}
+          />
+        </StyledSpareRow>
+      )}
 
       <div style={{ marginTop: "1.5rem" }}>
         {!disabled && (

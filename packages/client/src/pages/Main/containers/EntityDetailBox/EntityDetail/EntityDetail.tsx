@@ -7,6 +7,7 @@ import {
   IResponseDetail,
   Relation,
 } from "@shared/types";
+import { ITerritoryValidation } from "@shared/types/territory";
 import { IWarningPositionSection } from "@shared/types/warning";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
@@ -54,7 +55,6 @@ import { EntityDetailStatementPropsTable } from "./EntityDetailUsedInTable/Entit
 import { EntityDetailStatementsTable } from "./EntityDetailUsedInTable/EntityDetailStatementsTable/EntityDetailStatementsTable";
 import { EntityDetailValency } from "./EntityDetailValency/EntityDetailValency";
 import { EntityDetailValidationSection } from "./EntityDetailValidationSection/EntityDetailValidationSection";
-import { ITerritoryValidation } from "@shared/types/territory";
 
 const allowedEntityChangeClasses = [
   EntityEnums.Class.Value,
@@ -731,6 +731,15 @@ export const EntityDetail: React.FC<EntityDetail> = ({
                     updateProp={updateProp}
                     removeProp={removeProp}
                     addProp={addMetaProp}
+                    addPropWithEntityId={(variables: {
+                      typeEntityId?: string;
+                      valueEntityId?: string;
+                    }) => {
+                      const newProp = CMetaProp(variables);
+                      updateEntityMutation.mutate({
+                        props: [...entity.props, newProp],
+                      });
+                    }}
                     userCanEdit={userCanEdit}
                     openDetailOnCreate={false}
                     movePropToIndex={(propId, oldIndex, newIndex) => {
@@ -760,11 +769,11 @@ export const EntityDetail: React.FC<EntityDetail> = ({
                     color="primary"
                     label="new metaproperty"
                     icon={<FaPlus />}
-                    onClick={async () => {
+                    onClick={() => {
                       const newProp = CMetaProp();
-                      const newActant = { ...entity };
-                      newActant.props.push(newProp);
-                      updateEntityMutation.mutate({ props: newActant.props });
+                      updateEntityMutation.mutate({
+                        props: [...entity.props, newProp],
+                      });
                     }}
                   />
                 )}

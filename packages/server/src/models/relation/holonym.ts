@@ -26,9 +26,9 @@ export default class Holonym
     let out: RelationTypes.IConnection<RelationTypes.IHolonym>[] = [];
 
     if (asClass === EntityEnums.Class.Concept) {
-      out = await Relation.findForEntity<RelationTypes.IHolonym>(
+      out = await Relation.findForEntities<RelationTypes.IHolonym>(
         conn,
-        entityId,
+        [entityId],
         RelationEnums.Type.Holonym,
         0
       );
@@ -52,9 +52,9 @@ export default class Holonym
     let out: RelationTypes.IConnection<RelationTypes.IHolonym>[] = [];
 
     if (asClass === EntityEnums.Class.Concept) {
-      out = await Relation.findForEntity<RelationTypes.IHolonym>(
+      out = await Relation.findForEntities<RelationTypes.IHolonym>(
         conn,
-        entityId,
+        [entityId],
         RelationEnums.Type.Holonym,
         1
       );
