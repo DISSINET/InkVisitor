@@ -312,10 +312,6 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   };
 
   const addActant = (newStatementActantId: string) => {
-    console.log("adding new actant", newStatementActantId);
-
-    console.log(statement.entities);
-
     const newStatementActant = CStatementActant(newStatementActantId);
     const newData = {
       actants: [...statement.data.actants, newStatementActant],
@@ -864,79 +860,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
               addClassification={addClassification}
               addIdentification={addIdentification}
               territoryActants={territoryActants}
-              handleDataAttributeChange={async (changes) => {
-                console.log(changes.actants);
-                const oldActants = statement.data.actants;
-
-                // check only the actantId that was added
-                const newActant = changes.actants?.find((newA, newAI) => {
-                  //check if the actant is completely new
-                  if (!newA.entityId) {
-                    return false;
-                  }
-                  if (oldActants[newAI]) {
-                    return newA.entityId !== oldActants[newAI].entityId;
-                  } else {
-                    return true;
-                  }
-                });
-
-                console.log("old", statement.data.actants);
-                console.log("new", changes.actants);
-                console.log(newActant);
-
-                if (newActant) {
-                  const newActantEntity = await api.entitiesGet(
-                    newActant.entityId
-                  );
-
-                  const actantPosition = newActant.position;
-
-                  // check what entity types are allowed for actions
-                  const allowedS = dataActions
-                    ?.map((action) => {
-                      return action.data.entities.s;
-                    })
-                    .flat();
-
-                  const allowedA1 = dataActions
-                    ?.map((action) => {
-                      return action.data.entities.a1;
-                    })
-                    .flat();
-
-                  const allowedA2 = dataActions
-                    ?.map((action) => {
-                      return action.data.entities.a2;
-                    })
-                    .flat();
-
-                  // TODO FIX logic
-                  if (
-                    actantPosition === EntityEnums.Position.Subject &&
-                    !allowedS?.includes(newActantEntity.data.class)
-                  ) {
-                    toast.info("Actant position is changing to Actant1");
-                    newActant.position = EntityEnums.Position.Actant1;
-                  }
-                  if (
-                    actantPosition === EntityEnums.Position.Actant1 &&
-                    !allowedA1?.includes(newActantEntity.data.class)
-                  ) {
-                    toast.info("Actant position is changing to Actant2");
-                    newActant.position = EntityEnums.Position.Actant2;
-                  }
-                  if (
-                    actantPosition === EntityEnums.Position.Actant2 &&
-                    !allowedA2?.includes(newActantEntity.data.class)
-                  ) {
-                    toast.info("Actant position is changing to Pseudoactant");
-                    newActant.position = EntityEnums.Position.PseudoActant;
-                  }
-                }
-
-                handleDataAttributeChange(changes);
-              }}
+              handleDataAttributeChange={handleDataAttributeChange}
             />
             {userCanEdit && (
               <EntitySuggester
