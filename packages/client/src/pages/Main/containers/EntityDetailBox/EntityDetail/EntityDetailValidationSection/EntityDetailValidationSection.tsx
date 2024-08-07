@@ -104,22 +104,20 @@ export const EntityDetailValidationSection: React.FC<
                     const validationsCopy = deepCopy(
                       validations as ITerritoryValidation[]
                     );
-                    if (validationsCopy[key]) {
-                      const updatedObject: ITerritoryValidation = {
-                        ...validationsCopy[key],
-                        ...changes,
-                      };
-                      const newArray = [
-                        ...validationsCopy.slice(0, key),
-                        updatedObject,
-                        ...validationsCopy.slice(key + 1),
-                      ];
-                      updateEntityMutation.mutate({
-                        data: {
-                          validations: newArray,
-                        },
-                      });
-                    }
+                    const updatedObject: ITerritoryValidation = {
+                      ...validationsCopy[key],
+                      ...changes,
+                    };
+                    const newValidation = [
+                      ...validationsCopy.slice(0, key),
+                      updatedObject,
+                      ...validationsCopy.slice(key + 1),
+                    ];
+                    updateEntityMutation.mutate({
+                      data: {
+                        validations: newValidation,
+                      },
+                    });
                   }}
                   removeValidationRule={() => setTempIndexToRemove(key)}
                   isInsideTemplate={isInsideTemplate}

@@ -6,7 +6,7 @@ import {
   EProtocolTieType,
   ITerritoryValidation,
 } from "@shared/types/territory";
-import { Button, Input } from "components";
+import { Button, Checkbox, Input } from "components";
 import Dropdown, {
   AttributeButtonGroup,
   EntitySuggester,
@@ -19,6 +19,7 @@ import {
   StyledFlexList,
   StyledGrid,
   StyledLabel,
+  StyledNotActiveTag,
 } from "./EntityDetailValidationRuleStyles";
 import { EntityDetailValidationText } from "./EntityDetailValidationText/EntityDetailValidationText";
 
@@ -66,19 +67,24 @@ export const EntityDetailValidationRule: React.FC<
     return classesAll;
   }, [tieType]);
 
+  const active: boolean = useMemo<boolean>(() => {
+    return validation.active !== false;
+  }, [validation.active]);
+
   return (
-    <StyledBorderLeft>
+    <StyledBorderLeft $active={active}>
       <div
         style={{
-          display: "flex",
           width: "100%",
           paddingTop: "0.2rem",
           paddingBottom: "1.5rem",
         }}
       >
+        {!active && <StyledNotActiveTag>rule not activated</StyledNotActiveTag>}
         <EntityDetailValidationText
           validation={validation}
           entities={entities}
+          active={active}
         />
       </div>
       <StyledGrid>
@@ -283,8 +289,17 @@ export const EntityDetailValidationRule: React.FC<
           style={{
             paddingTop: "1.5rem",
             paddingBottom: ".5rem",
+            display: "flex",
+            gap: "1rem",
+            alignItems: "center",
           }}
         >
+          <Button
+            color={active ? "greyer" : "primary"}
+            onClick={() => updateValidationRule({ active: !active })}
+            inverted
+            label={active ? "deactivate rule" : "activate rule"}
+          />
           <Button
             color="danger"
             icon={<FaTrashAlt />}
