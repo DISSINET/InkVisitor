@@ -230,7 +230,9 @@ export class ResponseStatement extends Statement implements IResponseStatement {
 
       for (const tId of lineageTIds) {
         const tEntity = (await this.obtainEntity(tId, req)) as ITerritory;
-        const tValidations = tEntity.data.validations;
+        const tValidations = tEntity.data.validations?.filter(
+          (v) => v.active === false
+        );
 
         for (const tValidation of tValidations ?? []) {
           const {

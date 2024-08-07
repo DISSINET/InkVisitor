@@ -105,6 +105,7 @@ export class TerritoryValidation implements ITerritoryValidation {
   allowedClasses?: EntityEnums.Class[]; // not relevant if allowedEntities is set
   allowedEntities?: string[]; //
   detail: string;
+  active?: boolean;
 
   constructor(data: Partial<ITerritoryValidation>) {
     this.entityClasses = data.entityClasses || [];
@@ -115,6 +116,8 @@ export class TerritoryValidation implements ITerritoryValidation {
     this.allowedClasses = data.allowedClasses;
     this.allowedEntities = data.allowedEntities;
     this.detail = data.detail || "";
+
+    this.active = data.active;
   }
 
   isValid(): boolean {
