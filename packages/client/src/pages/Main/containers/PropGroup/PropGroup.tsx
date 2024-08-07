@@ -10,18 +10,14 @@ import { excludedSuggesterEntities } from "Theme/constants";
 import api from "api";
 import { EntitySuggester } from "components/advanced";
 import React, { useCallback, useEffect, useState } from "react";
-import {
-  DraggedPropRowCategory,
-  ItemTypes,
-  PropAttributeFilter,
-  classesAll,
-} from "types";
+import { DraggedPropRowCategory, ItemTypes, PropAttributeFilter } from "types";
 import { FirstLevelPropGroup } from "./FirstLevelPropGroup/FirstLevelPropGroup";
 import { PropGroupRow } from "./PropGroupRow/PropGroupRow";
 import { StyledSpareRow } from "./PropGroupStyles";
 import { SecondLevelPropGroup } from "./SecondLevelPropGroup/SecondLevelPropGroup";
 import { ThirdLevelPropGroup } from "./ThirdLevelPropGroup/ThirdLevelPropGroup";
 import { FirstLevelPropGroupRow } from "./FirstLevelPropGroupRow/FirstLevelPropGroupRow";
+import { classesAll } from "@shared/dictionaries/entity";
 
 interface PropGroup {
   originId: string;

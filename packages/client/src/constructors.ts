@@ -19,6 +19,7 @@ import {
   IStatementIdentification,
 } from "@shared/types/statement";
 import api from "api";
+import { deepCopy } from "utils/utils";
 import { v4 as uuidv4 } from "uuid";
 
 export const CBookmarkFolder = (bookmarkName: string): IBookmarkFolder => ({
@@ -467,7 +468,7 @@ export const DTerritory = (
 };
 
 export const DProps = (oldProps: IProp[]): IProp[] => {
-  const newProps = [...oldProps];
+  const newProps = deepCopy(oldProps);
   newProps.forEach((p, pi) => {
     newProps[pi].id = uuidv4();
     newProps[pi].children.forEach((pp, pii) => {
