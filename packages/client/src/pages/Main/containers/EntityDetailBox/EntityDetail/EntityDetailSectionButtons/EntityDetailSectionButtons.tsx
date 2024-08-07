@@ -58,7 +58,6 @@ export const EntityDetailSectionButtons: React.FC<
           handleCopyFromEntity(entity, replaceSection)
         }
         excludedActantIds={[entityId]}
-        disableTemplatesAccept
         disableCreate
         inputWidth={90}
         placeholder="another Entity"
