@@ -41,7 +41,7 @@ interface EntityDetailRelationTypeBlock {
     unknown,
     {
       relationId: string;
-      changes: any;
+      changes: Partial<Relation.IRelation>;
     },
     unknown
   >;
@@ -141,7 +141,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
   const [tempCloudEntityId, setTempCloudEntityId] = useState<string | false>(
     false
   );
-  const { isLoading, isFetching } = useQuery({
+  const {} = useQuery({
     queryKey: ["relation-entity-temp", tempCloudEntityId],
     queryFn: async () => {
       if (tempCloudEntityId) {
@@ -198,20 +198,16 @@ export const EntityDetailRelationTypeBlock: React.FC<
     Relation.IRelation[]
   >([]);
 
-  const moveRow = useCallback(
-    (dragIndex: number, hoverIndex: number) => {
-      const dragRecord = currentRelations[dragIndex];
-      setCurrentRelations(
-        update(currentRelations, {
-          $splice: [
-            [dragIndex, 1],
-            [hoverIndex, 0, dragRecord],
-          ],
-        })
-      );
-    },
-    [currentRelations]
-  );
+  const moveRow = useCallback((dragIndex: number, hoverIndex: number) => {
+    setCurrentRelations((prevRelations) =>
+      update(prevRelations, {
+        $splice: [
+          [dragIndex, 1],
+          [hoverIndex, 0, prevRelations[dragIndex]],
+        ],
+      })
+    );
+  }, []);
 
   const updateOrderFn = (relationId: string, newOrder: number) => {
     let allOrders: number[] = selectedRelations.map((relation, key) =>
@@ -278,7 +274,7 @@ export const EntityDetailRelationTypeBlock: React.FC<
               />
             ) : (
               <EntityDetailRelationRow
-                key={key}
+                key={relation.id}
                 index={key}
                 relation={relation}
                 entities={entities}

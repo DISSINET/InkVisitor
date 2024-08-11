@@ -1,6 +1,7 @@
 import { EntityEnums, UserEnums } from "@shared/enums";
 import {
   IEntity,
+  IProp,
   IReference,
   IResponseStatement,
   IStatement,
@@ -288,10 +289,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
   // actions
   const addAction = (newActionId: string) => {
-    const newStatementAction = CStatementAction(
-      newActionId,
-      statement.elementsOrders.length
-    );
+    const newStatementAction = CStatementAction(newActionId);
     const newData = {
       actions: [...statement.data.actions, newStatementAction],
     };
@@ -299,10 +297,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   };
 
   const addActant = (newStatementActantId: string) => {
-    const newStatementActant = CStatementActant(
-      newStatementActantId,
-      statement.elementsOrders.length
-    );
+    const newStatementActant = CStatementActant(newStatementActantId);
     const newData = {
       actants: [...statement.data.actants, newStatementActant],
     };
@@ -311,7 +306,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
   // Props handling
   const addProp = (rowId: string) => {
-    const newProp = CProp(statement.elementsOrders.length);
+    const newProp = CProp();
     const newStatementData = deepCopy(statement.data);
 
     [...newStatementData.actants, ...newStatementData.actions].forEach(
@@ -348,7 +343,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   };
 
   const addClassification = (rowId: string) => {
-    const newClassification = CClassification(statement.elementsOrders.length);
+    const newClassification = CClassification();
 
     const newStatementData = deepCopy(statement.data);
 
@@ -362,7 +357,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   };
 
   const addIdentification = (rowId: string) => {
-    const newIdentification = CIdentification(statement.elementsOrders.length);
+    const newIdentification = CIdentification();
     const newStatementData = deepCopy(statement.data);
 
     [...newStatementData.actants].forEach((actant: IStatementActant) => {
@@ -376,18 +371,24 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
   const updateProp = (
     propId: string,
-    changes: any,
-    instantUpdate?: boolean
+    changes: Partial<IProp>,
+    instantUpdate?: boolean,
+    languageCheck?: boolean
   ) => {
     if (propId) {
       if (
+        languageCheck &&
         changes.type &&
         changes.type.entityId &&
         changes.type.elvl !== EntityEnums.Elvl.Inferential &&
         user &&
         user.options.defaultStatementLanguage
       ) {
-        checkTypeEntityLanguage(propId, changes, instantUpdate);
+        checkTypeEntityLanguage(
+          propId,
+          changes as Partial<Omit<IProp, "type">> & { type: IProp["type"] },
+          instantUpdate
+        );
       } else {
         applyPropChanges(propId, changes, instantUpdate);
       }
@@ -397,7 +398,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
   // checking if the language is not different from user.options.defaultStatementLanguage -> in that case, switch elvl to EntityEnums.Elvl.Inferential
   const checkTypeEntityLanguage = (
     propId: string,
-    changes: any,
+    changes: Partial<Omit<IProp, "type">> & { type: IProp["type"] },
     instantUpdate?: boolean
   ) => {
     if (user) {
@@ -420,7 +421,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
 
   const applyPropChanges = (
     propId: string,
-    changes: any,
+    changes: Partial<IProp>,
     instantUpdate?: boolean
   ) => {
     const newStatementData = deepCopy(statement.data);
@@ -850,9 +851,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
               <EntitySuggester
                 territoryActants={territoryActants}
                 openDetailOnCreate
-                onSelected={(newSelectedId: string) => {
-                  addActant(newSelectedId);
-                }}
+                onSelected={addActant}
                 categoryTypes={classesEditorActants}
                 placeholder={"add actant"}
                 excludedEntityClasses={excludedSuggesterEntities}
@@ -942,7 +941,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
                   if (!statement.data.tags.find((t) => t === newSelectedId)) {
                     addTag(newSelectedId);
                   } else {
-                    toast.info("Tag already added!");
+                    toast.info("Tag already added");
                   }
                 }}
                 disableTemplatesAccept

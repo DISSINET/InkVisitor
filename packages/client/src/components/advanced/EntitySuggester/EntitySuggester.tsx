@@ -53,12 +53,13 @@ interface EntitySuggester {
   disableTemplatesAccept?: boolean;
   disableButtons?: boolean;
 
-  // TODO: disable only for entity create modal => only for view
   disableEnter?: boolean;
   autoFocus?: boolean;
 
   initTyped?: string;
   initCategory?: EntityEnums.Class;
+  // not necessary to base functionality, use wisely
+  externalTyped?: string;
 
   alwaysShowCreateModal?: boolean;
 
@@ -95,6 +96,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
 
   initTyped,
   initCategory,
+  externalTyped,
 
   alwaysShowCreateModal,
 
@@ -107,6 +109,12 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
   >();
   const [allCategories, setAllCategories] =
     useState<EntitySingleDropdownItem[]>();
+
+  useEffect(() => {
+    if (externalTyped !== undefined) {
+      setTyped(externalTyped);
+    }
+  }, [externalTyped]);
 
   // initial load of categories
   useEffect(() => {
@@ -427,9 +435,7 @@ export const EntitySuggester: React.FC<EntitySuggester> = ({
         typed={typed} // input value
         category={selectedCategory} // selected category
         categories={allCategories} // all possible categories
-        onCancel={() => {
-          handleClean();
-        }}
+        onCancel={handleClean}
         onType={(newType: string) => {
           setTyped(newType);
           onTyped && onTyped(newType);

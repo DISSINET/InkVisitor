@@ -36,6 +36,8 @@ import { setShowWarnings } from "redux/features/statementEditor/showWarningsSlic
 import { setLastClickedIndex } from "redux/features/statementList/lastClickedIndexSlice";
 import { setRowsExpanded } from "redux/features/statementList/rowsExpandedSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
+import { COLLAPSED_TABLE_WIDTH } from "Theme/constants";
+import { StatementListDisplayMode } from "types";
 import { StatementListContextMenu } from "../StatementListContextMenu/StatementListContextMenu";
 import { StatementListRow } from "./StatementListRow";
 import {
@@ -44,10 +46,20 @@ import {
   StyledFocusedCircle,
   StyledTHead,
   StyledTable,
-  StyledTdLastEdit,
   StyledTh,
 } from "./StatementListTableStyles";
 
+const MINIFIED_HIDDEN_COLUMNS = [
+  "id",
+  "move",
+  "subject",
+  "actions",
+  "objects",
+  "text",
+  "warnings",
+  "lastEdit",
+  "expander",
+];
 type CellType = CellProps<IResponseStatement>;
 
 interface StatementListTable {
@@ -79,6 +91,8 @@ interface StatementListTable {
 
   selectedRows: string[];
   setSelectedRows: React.Dispatch<React.SetStateAction<string[]>>;
+  displayMode: StatementListDisplayMode;
+  contentWidth: number;
 }
 export const StatementListTable: React.FC<StatementListTable> = ({
   statements,
@@ -94,10 +108,12 @@ export const StatementListTable: React.FC<StatementListTable> = ({
 
   selectedRows,
   setSelectedRows,
+  displayMode,
+  contentWidth,
 }) => {
   const dispatch = useAppDispatch();
   const { territoryId, setStatementId } = useSearchParams();
-  const rowsExpanded: { [key: string]: boolean } = useAppSelector(
+  const rowsExpanded: string[] = useAppSelector(
     (state) => state.statementList.rowsExpanded
   );
   const lastClickedIndex: number = useAppSelector(
@@ -229,14 +245,15 @@ export const StatementListTable: React.FC<StatementListTable> = ({
         },
       },
       {
+        id: "statement",
         Header: "",
-        id: "Statement",
         Cell: ({ row }: CellType) => {
           const statement = row.original;
           return <EntityTag entity={statement as IEntity} showOnly="entity" />;
         },
       },
       {
+        id: "subject",
         Header: "Subj.",
         Cell: ({ row }: CellType) => {
           const subjectIds: string[] = row.original.data?.actants
@@ -261,6 +278,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
         },
       },
       {
+        id: "actions",
         Header: "Actions",
         Cell: ({ row }: CellType) => {
           const actionIds = row.original.data?.actions
@@ -283,6 +301,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
         },
       },
       {
+        id: "objects",
         Header: "Objects",
         Cell: ({ row }: CellType) => {
           const actantIds = row.original.data?.actants
@@ -298,7 +317,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
           return (
             <>
               {definedObjects ? (
-                <TagGroup definedEntities={definedObjects} oversizeLimit={4} />
+                <TagGroup definedEntities={definedObjects} oversizeLimit={3} />
               ) : (
                 <div />
               )}
@@ -307,6 +326,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
         },
       },
       {
+        id: "text",
         Header: "Text",
         accessor: "data",
         Cell: ({ row }: CellType) => {
@@ -315,8 +335,8 @@ export const StatementListTable: React.FC<StatementListTable> = ({
         },
       },
       {
-        Header: "Warn.",
         id: "warnings",
+        Header: "Warn.",
         Cell: ({ row }: CellType) => {
           const { warnings } = row.original;
 
@@ -339,37 +359,6 @@ export const StatementListTable: React.FC<StatementListTable> = ({
               )}
             </>
           );
-        },
-      },
-      {
-        id: "lastEdit",
-        Header: "Edited",
-        Cell: ({ row }: CellType) => {
-          const { updatedAt, createdAt } = row.original;
-          const lastEditDate: Date | undefined = updatedAt || createdAt;
-          if (!lastEditDate) {
-            return "";
-          }
-          const today = new Date().setHours(0, 0, 0, 0);
-          const lastEditDay = new Date(lastEditDate).setHours(0, 0, 0, 0);
-
-          if (today === lastEditDay) {
-            return (
-              <StyledTdLastEdit>
-                {"today " +
-                  new Date(lastEditDate).toLocaleTimeString("en-GB", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-              </StyledTdLastEdit>
-            );
-          } else {
-            return (
-              <StyledTdLastEdit>
-                {new Date(lastEditDate).toLocaleDateString("en-GB")}
-              </StyledTdLastEdit>
-            );
-          }
         },
       },
       {
@@ -441,14 +430,17 @@ export const StatementListTable: React.FC<StatementListTable> = ({
                 }}
                 onClick={(e: React.MouseEvent) => {
                   e.stopPropagation();
-                  const newObject = {
-                    ...rowsExpanded,
-                    [row.original.id]: !rowsExpanded[row.original.id],
-                  };
-                  dispatch(setRowsExpanded(newObject));
+                  const rowId = row.original.id;
+                  if (!rowsExpanded.includes(rowId)) {
+                    dispatch(setRowsExpanded(rowsExpanded.concat(rowId)));
+                  } else {
+                    dispatch(
+                      setRowsExpanded(rowsExpanded.filter((r) => r !== rowId))
+                    );
+                  }
                 }}
               >
-                {rowsExpanded[row.original.id] ? (
+                {rowsExpanded.includes(row.original.id) ? (
                   <FaChevronCircleUp />
                 ) : (
                   <FaChevronCircleDown />
@@ -463,6 +455,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
   );
 
   const {
+    setHiddenColumns,
     getTableProps,
     getTableBodyProps,
     headerGroups,
@@ -477,27 +470,36 @@ export const StatementListTable: React.FC<StatementListTable> = ({
       data: statementsLocal,
       getRowId,
       initialState: {
-        hiddenColumns: ["id"],
+        hiddenColumns:
+          displayMode === StatementListDisplayMode.TEXT
+            ? MINIFIED_HIDDEN_COLUMNS
+            : ["id"],
       },
     },
     useExpanded,
     useRowSelect
   );
 
-  const moveRow = useCallback(
-    (dragIndex: number, hoverIndex: number) => {
-      const dragRecord = statementsLocal[dragIndex];
-      setStatementsLocal(
-        update(statementsLocal, {
-          $splice: [
-            [dragIndex, 1],
-            [hoverIndex, 0, dragRecord],
-          ],
-        })
-      );
-    },
-    [statementsLocal]
-  );
+  useEffect(() => {
+    if (displayMode === StatementListDisplayMode.TEXT) {
+      setHiddenColumns(MINIFIED_HIDDEN_COLUMNS);
+    } else {
+      setTimeout(() => {
+        setHiddenColumns(["id"]);
+      }, 450);
+    }
+  }, [displayMode]);
+
+  const moveRow = useCallback((dragIndex: number, hoverIndex: number) => {
+    setStatementsLocal((prevStatementsLocal) =>
+      update(prevStatementsLocal, {
+        $splice: [
+          [dragIndex, 1],
+          [hoverIndex, 0, prevStatementsLocal[dragIndex]],
+        ],
+      })
+    );
+  }, []);
 
   const moveEndRow = async (statementToMove: IStatement, index: number) => {
     if (statementToMove.data.territory && statements[index].data.territory) {
@@ -534,7 +536,15 @@ export const StatementListTable: React.FC<StatementListTable> = ({
   };
 
   return (
-    <StyledTable {...getTableProps()}>
+    <StyledTable
+      {...getTableProps()}
+      $contentWidth={
+        displayMode === StatementListDisplayMode.LIST
+          ? contentWidth
+          : COLLAPSED_TABLE_WIDTH
+      }
+      $isExpanded={displayMode === StatementListDisplayMode.LIST}
+    >
       <StyledTHead>
         {headerGroups.map((headerGroup, key) => (
           <tr {...headerGroup.getHeaderGroupProps()} key={key}>
@@ -563,6 +573,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
               visibleColumns={visibleColumns}
               entities={entities}
               isSelected={selectedRows.includes(row.id)}
+              displayMode={displayMode}
               {...row.getRowProps()}
             />
           );

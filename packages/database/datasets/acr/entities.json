@@ -3896,7 +3896,6 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
         "type": {
           "elvl": "3",
           "entityId": "59d99bb8-9bb5-4f89-adb0-52ce2bb12538",
@@ -13691,8 +13690,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "73004b4f-8f1e-4891-900d-a950265de027",
           "logic": "1",
@@ -20229,8 +20227,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "3a04830f-c2a6-4730-8229-42c902ac4194",
           "logic": "1",
@@ -27044,8 +27041,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "52bbf6e6-304b-4c9b-b646-f0bd2f3cd1a0",
           "logic": "1",
@@ -27071,8 +27067,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "882adf32-9f67-438f-a5c0-ef9bacddb9fa",
           "logic": "1",
@@ -27098,8 +27093,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "3f4c633a-e41b-45be-9961-95197905fade",
           "logic": "1",
@@ -27125,8 +27119,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "5f01e516-7637-49e5-bd6b-d7d922f76d03",
           "logic": "1",
@@ -27152,8 +27145,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "79aa2099-65cb-4c1e-bb09-f3e097bbb7cc",
           "logic": "1",
@@ -28639,8 +28631,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "eabcf674-e6e5-4be0-adaf-95cc192ad813",
           "logic": "1",
@@ -30954,8 +30945,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "3c55f17b-54f4-41f7-96d5-3a72b6720dd1",
           "logic": "1",
@@ -31290,8 +31280,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "0e6c3830-e4d3-4a30-a54d-759f5a59474e",
           "logic": "1",
@@ -31736,8 +31725,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "50131f3b-2a6f-4cd4-8e8a-2107a50940b3",
           "logic": "1",
@@ -31763,8 +31751,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "3c55f17b-54f4-41f7-96d5-3a72b6720dd1",
           "logic": "1",
@@ -31790,8 +31777,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "a9108c1f-e881-485c-8cf6-fa7ec323073d",
           "logic": "1",
@@ -31840,8 +31826,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "0e6c3830-e4d3-4a30-a54d-759f5a59474e",
           "logic": "1",
@@ -36389,8 +36374,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "0e6c3830-e4d3-4a30-a54d-759f5a59474e",
           "logic": "1",
@@ -37245,8 +37229,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "5e11a33b-8a31-450f-8da6-7f87739ab9be",
           "logic": "1",
@@ -38071,8 +38054,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "b260bddd-1451-4a26-8d63-79d2035a8e6c",
           "logic": "1",
@@ -38143,8 +38125,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "0e6c3830-e4d3-4a30-a54d-759f5a59474e",
           "logic": "1",
@@ -44458,8 +44439,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "0e6c3830-e4d3-4a30-a54d-759f5a59474e",
           "logic": "1",
@@ -46420,8 +46400,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "daeeabd0-9c90-451d-9555-47c92a4a8dc6",
           "logic": "1",
@@ -47953,8 +47932,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "0e6c3830-e4d3-4a30-a54d-759f5a59474e",
           "logic": "1",
@@ -51588,8 +51566,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "50131f3b-2a6f-4cd4-8e8a-2107a50940b3",
           "logic": "1",
@@ -51615,8 +51592,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "3c55f17b-54f4-41f7-96d5-3a72b6720dd1",
           "logic": "1",
@@ -51642,8 +51618,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "a9108c1f-e881-485c-8cf6-fa7ec323073d",
           "logic": "1",
@@ -52355,8 +52330,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "73004b4f-8f1e-4891-900d-a950265de027",
           "logic": "1",
@@ -52382,8 +52356,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "73004b4f-8f1e-4891-900d-a950265de027",
           "logic": "1",
@@ -53605,8 +53578,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "422e54d7-eef1-4a9d-b0e6-aa07f1c41ac8",
           "logic": "1",
@@ -53632,8 +53604,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "425c70d3-ca1a-4494-b364-e89a0c88b7ab",
           "logic": "1",
@@ -56654,8 +56625,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "82f65869-6bf3-41a2-beb3-94cf798e6c05",
           "logic": "1",
@@ -56681,8 +56651,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "82f65869-6bf3-41a2-beb3-94cf798e6c05",
           "logic": "1",
@@ -58024,8 +57993,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "967bc209-3b10-450a-848a-8f3a6b9503fd",
           "logic": "1",
@@ -59036,8 +59004,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "0e6c3830-e4d3-4a30-a54d-759f5a59474e",
           "logic": "1",
@@ -59891,8 +59858,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "a53a2018-0c83-48ea-9f56-d0dadc27044c",
           "logic": "1",
@@ -61034,8 +61000,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "0e6c3830-e4d3-4a30-a54d-759f5a59474e",
           "logic": "1",
@@ -61104,8 +61069,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "0e6c3830-e4d3-4a30-a54d-759f5a59474e",
           "logic": "1",
@@ -62839,8 +62803,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "0e6c3830-e4d3-4a30-a54d-759f5a59474e",
           "logic": "1",
@@ -65829,8 +65792,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "46e8ac41-5964-430f-bb83-8820ab92ddbd",
           "logic": "1",
@@ -65922,8 +65884,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "65975ba3-2bdb-449e-8355-f3b221037145",
           "logic": "1",
@@ -66981,8 +66942,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "0e6c3830-e4d3-4a30-a54d-759f5a59474e",
           "logic": "1",
@@ -67655,8 +67615,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "b8bdafe1-7f78-4f1b-89ab-88b722de6153",
           "logic": "1",
@@ -67682,8 +67641,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "b8bdafe1-7f78-4f1b-89ab-88b722de6153",
           "logic": "1",
@@ -68049,8 +68007,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "eec5ad41-0fb2-4669-a48c-89930130963a",
           "logic": "1",
@@ -68308,8 +68265,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "0e6c3830-e4d3-4a30-a54d-759f5a59474e",
           "logic": "1",
@@ -70959,8 +70915,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "59d99bb8-9bb5-4f89-adb0-52ce2bb12538",
           "logic": "1",
@@ -70986,8 +70941,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "59d99bb8-9bb5-4f89-adb0-52ce2bb12538",
           "logic": "1",
@@ -74049,8 +74003,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "a53a2018-0c83-48ea-9f56-d0dadc27044c",
           "logic": "1",
@@ -76486,8 +76439,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "b260bddd-1451-4a26-8d63-79d2035a8e6c",
           "logic": "1",
@@ -77758,8 +77710,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "7af0a652-af7c-4fce-b828-7406d883d58f",
           "logic": "1",
@@ -78310,8 +78261,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "0e6c3830-e4d3-4a30-a54d-759f5a59474e",
           "logic": "1",
@@ -79165,8 +79115,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "0e6c3830-e4d3-4a30-a54d-759f5a59474e",
           "logic": "1",
@@ -81331,8 +81280,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "eec5ad41-0fb2-4669-a48c-89930130963a",
           "logic": "1",
@@ -81963,8 +81911,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "a9f909a1-682f-403e-9669-6bd1de21ef2c",
           "logic": "1",
@@ -83218,8 +83165,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "0e6c3830-e4d3-4a30-a54d-759f5a59474e",
           "logic": "1",
@@ -85071,8 +85017,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "6f56cbc5-2a1b-45e8-a59f-23c28ebd1bd8",
           "logic": "1",
@@ -86637,8 +86582,7 @@
             "logic": "1",
             "mood": ["1"],
             "moodvariant": "1",
-            "statementOrder": false,
-            "type": {
+                        "type": {
               "elvl": "3",
               "entityId": "704cc800-d46e-4ab4-ae78-cb78a5c8fa55",
               "logic": "1",
@@ -86664,8 +86608,7 @@
             "logic": "1",
             "mood": ["1"],
             "moodvariant": "1",
-            "statementOrder": false,
-            "type": {
+                        "type": {
               "elvl": "3",
               "entityId": "704cc800-d46e-4ab4-ae78-cb78a5c8fa55",
               "logic": "1",
@@ -86691,8 +86634,7 @@
             "logic": "1",
             "mood": ["1"],
             "moodvariant": "1",
-            "statementOrder": false,
-            "type": {
+                        "type": {
               "elvl": "3",
               "entityId": "704cc800-d46e-4ab4-ae78-cb78a5c8fa55",
               "logic": "1",
@@ -86713,8 +86655,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "1fb9c31d-a58f-4720-b298-7ce2e56c6b39",
           "logic": "1",
@@ -88117,8 +88058,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "425c70d3-ca1a-4494-b364-e89a0c88b7ab",
           "logic": "1",
@@ -88693,8 +88633,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "0e6c3830-e4d3-4a30-a54d-759f5a59474e",
           "logic": "1",
@@ -89179,8 +89118,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "50131f3b-2a6f-4cd4-8e8a-2107a50940b3",
           "logic": "1",
@@ -89206,8 +89144,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "a9108c1f-e881-485c-8cf6-fa7ec323073d",
           "logic": "1",
@@ -89233,8 +89170,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "a9108c1f-e881-485c-8cf6-fa7ec323073d",
           "logic": "1",
@@ -89260,8 +89196,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "9270f936-e180-42a2-980a-c219b3695746",
           "logic": "1",
@@ -95418,8 +95353,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "421ad6ac-358d-4fb4-85c1-c66ed6e8a85e",
           "logic": "1",
@@ -96096,8 +96030,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "0e6c3830-e4d3-4a30-a54d-759f5a59474e",
           "logic": "1",
@@ -97383,8 +97316,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "78acff75-5d74-42c3-a852-d7de6010b98a",
           "logic": "1",
@@ -99367,8 +99299,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "50131f3b-2a6f-4cd4-8e8a-2107a50940b3",
           "logic": "1",
@@ -100111,8 +100042,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "0e6c3830-e4d3-4a30-a54d-759f5a59474e",
           "logic": "1",
@@ -100358,8 +100288,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "425c70d3-ca1a-4494-b364-e89a0c88b7ab",
           "logic": "1",
@@ -100385,8 +100314,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "a88e9ce0-834a-4f20-a1e7-25e7a93a4cab",
           "logic": "1",
@@ -100412,8 +100340,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "a88e9ce0-834a-4f20-a1e7-25e7a93a4cab",
           "logic": "1",
@@ -100439,8 +100366,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "a88e9ce0-834a-4f20-a1e7-25e7a93a4cab",
           "logic": "1",
@@ -101978,8 +101904,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "0e6c3830-e4d3-4a30-a54d-759f5a59474e",
           "logic": "1",
@@ -102724,8 +102649,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "0e6c3830-e4d3-4a30-a54d-759f5a59474e",
           "logic": "1",
@@ -104357,8 +104281,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "0e6c3830-e4d3-4a30-a54d-759f5a59474e",
           "logic": "1",
@@ -107363,8 +107286,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "0e6c3830-e4d3-4a30-a54d-759f5a59474e",
           "logic": "1",
@@ -108001,8 +107923,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "0e6c3830-e4d3-4a30-a54d-759f5a59474e",
           "logic": "1",
@@ -108140,8 +108061,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "40cbd809-fa9a-4a9d-85fb-e72bed138312",
           "logic": "1",
@@ -108167,8 +108087,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "1b3594df-47ac-43af-a895-7dc9f262bea9",
           "logic": "1",
@@ -109000,8 +108919,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "0e6c3830-e4d3-4a30-a54d-759f5a59474e",
           "logic": "1",
@@ -110517,8 +110435,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "ed64a7d1-4e49-42b5-b27a-2097cf4bc857",
           "logic": "1",
@@ -111686,8 +111603,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "3c55f17b-54f4-41f7-96d5-3a72b6720dd1",
           "logic": "1",
@@ -111713,8 +111629,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "3c55f17b-54f4-41f7-96d5-3a72b6720dd1",
           "logic": "1",
@@ -111740,8 +111655,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "3c55f17b-54f4-41f7-96d5-3a72b6720dd1",
           "logic": "1",
@@ -111767,8 +111681,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "50131f3b-2a6f-4cd4-8e8a-2107a50940b3",
           "logic": "1",
@@ -111794,8 +111707,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "a9108c1f-e881-485c-8cf6-fa7ec323073d",
           "logic": "1",
@@ -116303,8 +116215,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "0e6c3830-e4d3-4a30-a54d-759f5a59474e",
           "logic": "1",
@@ -116450,8 +116361,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "0e6c3830-e4d3-4a30-a54d-759f5a59474e",
           "logic": "1",
@@ -120060,8 +119970,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "73238f30-0d57-4642-8586-960c1aff19f9",
           "logic": "1",
@@ -121491,8 +121400,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "50131f3b-2a6f-4cd4-8e8a-2107a50940b3",
           "logic": "1",
@@ -121518,8 +121426,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "3c55f17b-54f4-41f7-96d5-3a72b6720dd1",
           "logic": "1",
@@ -121545,8 +121452,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "a9108c1f-e881-485c-8cf6-fa7ec323073d",
           "logic": "1",
@@ -122957,8 +122863,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "0e6c3830-e4d3-4a30-a54d-759f5a59474e",
           "logic": "1",
@@ -124800,8 +124705,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "0e6c3830-e4d3-4a30-a54d-759f5a59474e",
           "logic": "1",
@@ -125759,8 +125663,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "0e6c3830-e4d3-4a30-a54d-759f5a59474e",
           "logic": "1",
@@ -125809,8 +125712,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "0e6c3830-e4d3-4a30-a54d-759f5a59474e",
           "logic": "1",
@@ -129417,8 +129319,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "7174c857-82c9-4dec-8b23-08709e4d17b7",
           "logic": "1",
@@ -131458,8 +131359,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "50131f3b-2a6f-4cd4-8e8a-2107a50940b3",
           "logic": "1",
@@ -131485,8 +131385,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "a9108c1f-e881-485c-8cf6-fa7ec323073d",
           "logic": "1",
@@ -134574,8 +134473,7 @@
         "logic": "1",
         "mood": ["1"],
         "moodvariant": "1",
-        "statementOrder": false,
-        "type": {
+                "type": {
           "elvl": "3",
           "entityId": "0e6c3830-e4d3-4a30-a54d-759f5a59474e",
           "logic": "1",

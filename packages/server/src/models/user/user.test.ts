@@ -16,9 +16,10 @@ const prepareUserData = (): IUser => {
     options: {
       defaultLanguage: EntityEnums.Language.English,
       defaultTerritory: "",
-      hideStatementElementsOrderTable: false,
+      defaultStatementLanguage: EntityEnums.Language.English,
       searchLanguages: [],
     },
+    verified: true,
     rights: [],
     role: UserEnums.Role.Viewer,
     storedTerritories: [],
@@ -212,6 +213,34 @@ describe("models/user", function () {
         );
         expect(user2After?.storedTerritories).toHaveLength(0);
       });
+    });
+  });
+
+  describe("User.delete", function () {
+    let db: Db;
+    const user1 = prepareUser();
+
+    beforeAll(async () => {
+      db = new Db();
+      await db.initDb();
+      await user1.save(db.connection);
+    });
+
+    afterAll(async () => {
+      await clean(db);
+    });
+
+    it("should set deletedAt to current date", async () => {
+      const result = await user1.delete(db.connection)
+      expect(result.replaced).toBe(1);
+
+      // deleted
+      const user1After = await User.findUserById(db.connection, user1.id);
+      expect(user1After).toBeFalsy();
+
+      const thrashedUser1 = await User.findUserByLogin(db.connection, user1.email, false)
+      expect(thrashedUser1).not.toBeNull();
+      expect(thrashedUser1!.deletedAt).toBeTruthy();
     });
   });
 });

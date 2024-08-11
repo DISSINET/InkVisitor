@@ -128,6 +128,7 @@ export const StyledModalInputLabel = styled.p`
   justify-content: flex-end;
   align-items: center;
   margin-right: ${({ theme }) => theme.space[4]};
+  white-space: nowrap;
 `;
 interface StyledModalInputWrap {
   width?: number;

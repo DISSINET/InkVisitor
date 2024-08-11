@@ -95,7 +95,7 @@ export default Router()
           throw new UserAlreadyActivated();
         }
 
-        if (await User.findUserByLogin(request.db, username)) {
+        if (await User.findUserByLogin(request.db, username, true)) {
           throw new UserNotUnique(
             "Username is already used. Please select a new one."
           );
@@ -339,13 +339,17 @@ export default Router()
         throw new BadParams("login and password have to be set");
       }
 
-      const user = await User.findUserByLogin(request.db, login);
+      const user = await User.findUserByLogin(request.db, login, false);
       if (!user) {
         throw new BadCredentialsError("wrong email / username");
       }
 
       if (!user.active) {
         throw new UserNotActiveError(UserNotActiveError.message, user.email);
+      }
+
+      if (!user.verified) {
+        throw new UserNotActiveError(UserNotActiveError.messageVerified, user.email);
       }
 
       if (!checkPassword(rawPassword, user.password || "")) {
@@ -510,11 +514,11 @@ export default Router()
 
         await request.db.lock();
 
-        if (await User.findUserByLogin(request.db, userData.email)) {
+        if (await User.findUserByLogin(request.db, userData.email, true)) {
           throw new UserNotUnique("email is in use");
         }
         if (userData.name) {
-          if (await User.findUserByLogin(request.db, userData.name)) {
+          if (await User.findUserByLogin(request.db, userData.name, true)) {
             throw new UserNotUnique("username is aready used");
           }
         }
@@ -606,14 +610,14 @@ export default Router()
         await req.db.lock();
 
         if (data.email) {
-          const existingEmail = await User.findUserByLogin(req.db, data.email);
+          const existingEmail = await User.findUserByLogin(req.db, data.email, true);
           if (existingEmail && existingEmail.id !== existingUser.id) {
             throw new UserNotUnique("email is in use");
           }
         }
 
         if (data.name) {
-          const existingName = await User.findUserByLogin(req.db, data.name);
+          const existingName = await User.findUserByLogin(req.db, data.name, true);
           if (existingName && existingName.id !== existingUser.id) {
             throw new UserNotUnique("username is already used");
           }
@@ -704,8 +708,8 @@ export default Router()
         }
 
         const result = await existingUser.delete(request.db.connection);
-        if (!result.deleted) {
-          throw new InternalServerError(`user ${userId} could not be removed`);
+        if (!result.replaced) {
+          throw new InternalServerError(`user ${userId} could not be deleted`);
         }
 
         return {

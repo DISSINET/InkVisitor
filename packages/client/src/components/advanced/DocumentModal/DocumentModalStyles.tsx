@@ -60,3 +60,8 @@ export const StyledExportDocumentButton = styled.div`
   justify-content: center;
   padding: 1rem;
 `;
+
+export const StyledExportStatsSection = styled.div`
+  padding: 1rem;
+  font-style: italic;
+`;

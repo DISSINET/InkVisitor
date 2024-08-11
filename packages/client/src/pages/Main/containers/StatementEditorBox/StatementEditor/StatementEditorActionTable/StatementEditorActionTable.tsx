@@ -1,4 +1,5 @@
 import {
+  IProp,
   IResponseStatement,
   IStatementAction,
   IStatementData,
@@ -13,7 +14,7 @@ interface StatementEditorActionTable {
   statement: IResponseStatement;
   userCanEdit?: boolean;
   addProp: (originId: string) => void;
-  updateProp: (propId: string, changes: any) => void;
+  updateProp: (propId: string, changes: Partial<IProp>) => void;
   removeProp: (propId: string) => void;
   movePropToIndex: (propId: string, oldIndex: number, newIndex: number) => void;
   territoryParentId?: string;
@@ -64,20 +65,16 @@ export const StatementEditorActionTable: React.FC<
     }
   };
 
-  const moveRow = useCallback(
-    (dragIndex: number, hoverIndex: number) => {
-      const dragRecord = filteredActions[dragIndex];
-      setFilteredActions(
-        update(filteredActions, {
-          $splice: [
-            [dragIndex, 1],
-            [hoverIndex, 0, dragRecord],
-          ],
-        })
-      );
-    },
-    [filteredActions]
-  );
+  const moveRow = useCallback((dragIndex: number, hoverIndex: number) => {
+    setFilteredActions((prevFilteredActions) =>
+      update(prevFilteredActions, {
+        $splice: [
+          [dragIndex, 1],
+          [hoverIndex, 0, prevFilteredActions[dragIndex]],
+        ],
+      })
+    );
+  }, []);
 
   return (
     <div style={{ overflow: "auto" }}>

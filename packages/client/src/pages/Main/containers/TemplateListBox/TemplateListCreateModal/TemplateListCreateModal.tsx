@@ -104,8 +104,7 @@ export const TemplateListCreateModal: React.FC<TemplateListCreateModal> = ({
         localStorage.getItem("userrole") as UserEnums.Role,
         user.options,
         createModalEntityLabel,
-        createModalEntityDetail,
-        undefined
+        createModalEntityDetail
       );
       return newTemplate;
     } else {

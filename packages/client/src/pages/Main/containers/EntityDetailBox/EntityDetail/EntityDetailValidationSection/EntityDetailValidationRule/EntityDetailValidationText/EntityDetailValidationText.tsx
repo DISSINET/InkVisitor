@@ -15,11 +15,12 @@ import {
 interface EntityDetailValidationText {
   validation: ITerritoryValidation;
   entities: Record<string, IEntity>;
+  active: boolean;
 }
 
 export const EntityDetailValidationText: React.FC<
   EntityDetailValidationText
-> = ({ validation, entities }) => {
+> = ({ validation, entities, active }) => {
   const {
     detail,
     entityClasses,
@@ -90,19 +91,15 @@ export const EntityDetailValidationText: React.FC<
   );
 
   return (
-    <StyledSentence>
+    <StyledSentence $active={active}>
       <>
-        {allowedClasses && allowedClasses.length > 0 ? (
+        {entityClasses && entityClasses.length > 0 ? (
           <>
-            {`All entities with type `}
+            {`Any `}
             {renderEntityClassList(entityClasses)}
           </>
         ) : (
-          <>
-            {`All `}
-            {renderEntityClassList(entityClasses)}
-            {` entities `}
-          </>
+          <>{`Any entity`}</>
         )}
       </>
 

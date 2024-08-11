@@ -2,6 +2,7 @@ import { entitiesDict } from "@shared/dictionaries";
 import { EntityEnums, RelationEnums } from "@shared/enums";
 import {
   IAction,
+  IEntity,
   IResponseDetail,
   IResponseGeneric,
   Relation,
@@ -35,7 +36,7 @@ interface EntityDetailValencySection {
   updateEntityMutation: UseMutationResult<
     AxiosResponse<IResponseGeneric>,
     unknown,
-    any,
+    Partial<IEntity>,
     unknown
   >;
   relationCreateMutation: UseMutationResult<
@@ -49,7 +50,7 @@ interface EntityDetailValencySection {
     unknown,
     {
       relationId: string;
-      changes: any;
+      changes: Partial<Relation.IRelation>;
     },
     unknown
   >;
@@ -107,20 +108,16 @@ export const EntityDetailValencySection: React.FC<
     Relation.IRelation[]
   >([]);
 
-  const moveRow = useCallback(
-    (dragIndex: number, hoverIndex: number) => {
-      const dragRecord = currentRelations[dragIndex];
-      setCurrentRelations(
-        update(currentRelations, {
-          $splice: [
-            [dragIndex, 1],
-            [hoverIndex, 0, dragRecord],
-          ],
-        })
-      );
-    },
-    [currentRelations]
-  );
+  const moveRow = useCallback((dragIndex: number, hoverIndex: number) => {
+    setCurrentRelations((prevRelations) =>
+      update(prevRelations, {
+        $splice: [
+          [dragIndex, 1],
+          [hoverIndex, 0, prevRelations[dragIndex]],
+        ],
+      })
+    );
+  }, []);
 
   const updateOrderFn = (relationId: string, newOrder: number) => {
     let allOrders: number[] = selectedRelations.map((relation, key) =>

@@ -20,7 +20,11 @@ import { partitivityDict, virtualityDict } from "@shared/dictionaries";
 interface PropGroupRowValue {
   propValueEntity: IEntity;
   prop: IProp;
-  updateProp: (propId: string, changes: any, instantUpdate?: true) => void;
+  updateProp: (
+    propId: string,
+    changes: Partial<IProp>,
+    instantUpdate?: true
+  ) => void;
   userCanEdit: boolean;
   isInsideTemplate: boolean;
   territoryParentId?: string;
@@ -29,6 +33,8 @@ interface PropGroupRowValue {
   disabledAttributes: PropAttributeFilter;
   openDetailOnCreate: boolean;
   alwaysShowCreateModal?: boolean;
+
+  initValueTyped?: string;
 }
 export const PropGroupRowValue: React.FC<PropGroupRowValue> = ({
   propValueEntity,
@@ -42,6 +48,8 @@ export const PropGroupRowValue: React.FC<PropGroupRowValue> = ({
   disabledAttributes,
   openDetailOnCreate,
   alwaysShowCreateModal,
+
+  initValueTyped,
 }) => {
   return (
     <StyledAttributesFlexColumn>
@@ -138,6 +146,7 @@ export const PropGroupRowValue: React.FC<PropGroupRowValue> = ({
             territoryParentId={territoryParentId}
             disabled={!userCanEdit}
             alwaysShowCreateModal={alwaysShowCreateModal}
+            initTyped={initValueTyped}
           />
         )}
       </StyledTagGrid>

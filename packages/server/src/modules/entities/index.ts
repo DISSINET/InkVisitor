@@ -10,9 +10,6 @@ import {
   IResponseGeneric,
   RequestSearch,
   EntityTooltip,
-  IProp,
-  IStatementActant,
-  IStatementAction,
 } from "@shared/types";
 import {
   EntityDoesNotExist,
@@ -22,6 +19,7 @@ import {
   PermissionDeniedError,
   AuditDoesNotExist,
   InvalidDeleteError,
+  CustomError,
 } from "@shared/types/errors";
 import { Router } from "express";
 import { asyncRouteHandler } from "../index";
@@ -31,11 +29,10 @@ import { getAuditByEntityId } from "@modules/audits";
 import { ResponseTooltip } from "@models/entity/response-tooltip";
 import { IRequest } from "src/custom_typings/request";
 import Relation from "@models/relation/relation";
-import User from "@models/user/user";
-import { EntityEnums, RelationEnums } from "@shared/enums";
+import { RelationEnums } from "@shared/enums";
 import { Relation as RelationType } from "@shared/types";
 import { copyRelations } from "@models/relation/functions";
-import { randomUUID } from "crypto";
+import Entity from "@models/entity/entity";
 
 export default Router()
   /**
@@ -62,32 +59,34 @@ export default Router()
    */
   .get(
     "/:entityId",
-    asyncRouteHandler<IResponseEntity>(async (request: IRequest) => {
-      const entityId = request.params.entityId;
+    asyncRouteHandler<IResponseEntity>(
+      async (request: IRequest<{ entityId: string }>) => {
+        const entityId = request.params.entityId;
 
-      if (!entityId) {
-        throw new BadParams("entityId has to be set");
-      }
+        if (!entityId) {
+          throw new BadParams("entityId has to be set");
+        }
 
-      const entityData = await findEntityById<IEntity>(
-        request.db,
-        entityId as string
-      );
-
-      if (!entityData) {
-        throw new EntityDoesNotExist(
-          `entity ${entityId} was not found`,
-          entityId
+        const entityData = await findEntityById<IEntity>(
+          request.db,
+          entityId as string
         );
+
+        if (!entityData) {
+          throw new EntityDoesNotExist(
+            `entity ${entityId} was not found`,
+            entityId
+          );
+        }
+        const entity = getEntityClass({ ...entityData });
+
+        const response = new ResponseEntity(entity);
+
+        await response.prepare(request);
+
+        return response;
       }
-      const entity = getEntityClass({ ...entityData });
-
-      const response = new ResponseEntity(entity);
-
-      await response.prepare(request);
-
-      return response;
-    })
+    )
   )
   /**
    * @openapi
@@ -140,20 +139,22 @@ export default Router()
    */
   .get(
     "/",
-    asyncRouteHandler<IResponseEntity[]>(async (req: IRequest<unknown, unknown, IRequestSearch>) => {
-      const search = new RequestSearch(req.query);
-      if (search.label && search.label.length < 2) {
-        return [];
-      }
+    asyncRouteHandler<IResponseEntity[]>(
+      async (req: IRequest<unknown, unknown, IRequestSearch>) => {
+        const search = new RequestSearch(req.query);
+        if (search.label && search.label.length < 2) {
+          return [];
+        }
 
-      const err = search.validate();
-      if (err) {
-        throw err;
-      }
+        const err = search.validate();
+        if (err) {
+          throw err;
+        }
 
-      const response = new ResponseSearch(search);
-      return await response.prepare(req);
-    })
+        const response = new ResponseSearch(search);
+        return await response.prepare(req);
+      }
+    )
   )
   /**
    * @openapi
@@ -193,7 +194,7 @@ export default Router()
       await request.db.lock();
 
       await model.beforeSave(request.db.connection);
-      
+
       const saved = await model.save(request.db.connection);
       if (!saved) {
         throw new InternalServerError("cannot create entity");
@@ -235,67 +236,69 @@ export default Router()
    */
   .post(
     "/:entityId/clone",
-    asyncRouteHandler<IResponseGeneric<IEntity>>(async (request: IRequest) => {
-      const originalId = request.params.entityId;
-      const original = await findEntityById(request.db, originalId);
-      if (!original) {
-        throw new EntityDoesNotExist(
-          "cannot copy entity - does not exist",
-          originalId
-        );
-      }
-
-      // clone the entry without id and with recreated ids - should be created anew
-      const clone = getEntityClass({
-        ...original,
-        id: "",
-        legacyId: undefined,
-      } as Partial<IEntity>);
-      if (!clone.isValid()) {
-        throw new ModelNotValidError("");
-      }
-
-      if (!clone.canBeCreatedByUser(request.getUserOrFail())) {
-        throw new PermissionDeniedError("entity cannot be copied");
-      }
-
-      clone.resetIds();
-
-      await request.db.lock();
-
-      const saved = await clone.save(request.db.connection);
-      if (!saved) {
-        throw new InternalServerError("cannot copy entity");
-      }
-
-      const rels = (
-        await Relation.findForEntity(request.db.connection, originalId)
-      ).filter((rel) => {
-        const relType = RelationType.RelationRules[rel.type];
-        if (!relType?.asymmetrical) {
-          return true;
-        } else {
-          return rel.entityIds.indexOf(originalId) === 0;
+    asyncRouteHandler<IResponseGeneric<IEntity>>(
+      async (request: IRequest<{ entityId: string }>) => {
+        const originalId = request.params.entityId as string;
+        const original = await findEntityById(request.db, originalId);
+        if (!original) {
+          throw new EntityDoesNotExist(
+            "cannot copy entity - does not exist",
+            originalId
+          );
         }
-      });
 
-      const relsWithClas = rels.map((r) => getRelationClass(r));
-      const relsCopied = await Relation.copyMany(
-        request,
-        relsWithClas,
-        originalId,
-        clone.id
-      );
+        // clone the entry without id and with recreated ids - should be created anew
+        const clone = getEntityClass({
+          ...original,
+          id: "",
+          legacyId: undefined,
+        } as Partial<IEntity>);
+        if (!clone.isValid()) {
+          throw new ModelNotValidError("");
+        }
 
-      return {
-        result: true,
-        message:
-          relsCopied !== relsWithClas.length
-            ? "There has been at least one conflict while copying relations"
-            : undefined,
-        data: clone,
-      };
-    })
+        if (!clone.canBeCreatedByUser(request.getUserOrFail())) {
+          throw new PermissionDeniedError("entity cannot be copied");
+        }
+
+        clone.resetIds();
+
+        await request.db.lock();
+
+        const saved = await clone.save(request.db.connection);
+        if (!saved) {
+          throw new InternalServerError("cannot copy entity");
+        }
+
+        const rels = (
+          await Relation.findForEntities(request.db.connection, [originalId])
+        ).filter((rel) => {
+          const relType = RelationType.RelationRules[rel.type];
+          if (!relType?.asymmetrical) {
+            return true;
+          } else {
+            return rel.entityIds.indexOf(originalId) === 0;
+          }
+        });
+
+        const relsWithClas = rels.map((r) => getRelationClass(r));
+        const relsCopied = await Relation.copyMany(
+          request,
+          relsWithClas,
+          originalId,
+          clone.id
+        );
+
+        return {
+          result: true,
+          message:
+            relsCopied !== relsWithClas.length
+              ? "There has been at least one conflict while copying relations"
+              : undefined,
+          data: clone,
+        };
+      }
+    )
   )
   .post(
     "/:entityId/restore",
@@ -370,57 +373,59 @@ export default Router()
    */
   .put(
     "/:entityId",
-    asyncRouteHandler<IResponseGeneric>(async (request: IRequest) => {
-      const entityId = request.params.entityId;
-      const entityData = request.body as Record<string, unknown>;
+    asyncRouteHandler<IResponseGeneric>(
+      async (request: IRequest<{ entityId: string }>) => {
+        const entityId = request.params.entityId;
+        const entityData = request.body as Record<string, unknown>;
 
-      // not validation, just required data for this operation
-      if (!entityId || !entityData || Object.keys(entityData).length === 0) {
-        throw new BadParams("entity id and data have to be set");
+        // not validation, just required data for this operation
+        if (!entityId || !entityData || Object.keys(entityData).length === 0) {
+          throw new BadParams("entity id and data have to be set");
+        }
+
+        await request.db.lock();
+
+        // entityId must be already in the db
+        const existingEntity = await findEntityById(request.db, entityId);
+        if (!existingEntity) {
+          throw new EntityDoesNotExist(
+            `entity with id ${entityId} does not exist`,
+            entityId
+          );
+        }
+
+        // get correct IDbModel implementation
+        const model = getEntityClass({
+          ...mergeDeep(existingEntity, entityData),
+          class: existingEntity.class,
+          id: entityId,
+        });
+
+        // checking the validity of the final model (already has updated data)
+        if (!model.isValid()) {
+          throw new ModelNotValidError("");
+        }
+
+        if (!model.canBeEditedByUser(request.getUserOrFail())) {
+          throw new PermissionDeniedError("entity cannot be saved");
+        }
+
+        await model.beforeSave(request.db.connection);
+
+        // update only the required fields
+        const result = await model.update(request.db.connection, entityData);
+
+        if (result.replaced || result.unchanged) {
+          await Audit.createNew(request, entityId, entityData);
+
+          return {
+            result: true,
+          };
+        } else {
+          throw new InternalServerError(`cannot update entity ${entityId}`);
+        }
       }
-
-      await request.db.lock();
-
-      // entityId must be already in the db
-      const existingEntity = await findEntityById(request.db, entityId);
-      if (!existingEntity) {
-        throw new EntityDoesNotExist(
-          `entity with id ${entityId} does not exist`,
-          entityId
-        );
-      }
-
-      // get correct IDbModel implementation
-      const model = getEntityClass({
-        ...mergeDeep(existingEntity, entityData),
-        class: existingEntity.class,
-        id: entityId,
-      });
-
-      // checking the validity of the final model (already has updated data)
-      if (!model.isValid()) {
-        throw new ModelNotValidError("");
-      }
-
-      if (!model.canBeEditedByUser(request.getUserOrFail())) {
-        throw new PermissionDeniedError("entity cannot be saved");
-      }
-
-      await model.beforeSave(request.db.connection);
-
-      // update only the required fields
-      const result = await model.update(request.db.connection, entityData);
-
-      if (result.replaced || result.unchanged) {
-        await Audit.createNew(request, entityId, entityData);
-
-        return {
-          result: true,
-        };
-      } else {
-        throw new InternalServerError(`cannot update entity ${entityId}`);
-      }
-    })
+    )
   )
   /**
    * @openapi
@@ -445,64 +450,121 @@ export default Router()
    *               $ref: "#/components/schemas/IResponseGeneric"
    */
   .delete(
-    "/:entityId",
-    asyncRouteHandler<IResponseGeneric<string[]>>(async (request: IRequest) => {
-      const entityId = request.params.entityId;
+    "/:entityId?",
+    asyncRouteHandler<IResponseGeneric<Record<string, CustomError | true>>>(
+      async (
+        req: IRequest<{ entityId?: string }, { entityIds?: string[] }>
+      ) => {
+        let ids: string[] | undefined;
+        if (req.params.entityId) {
+          ids = [req.params.entityId];
+        } else if (req.body.entityIds) {
+          ids = req.body.entityIds;
+        }
 
-      if (!entityId) {
-        throw new BadParams("entity id has to be set");
-      }
+        if (!ids || ids.length === 0) {
+          throw new BadParams("at least one entity id needs to be provided");
+        }
 
-      await request.db.lock();
+        await req.db.lock();
 
-      // entityId must be already in the db
-      const existingEntity = await findEntityById(request.db, entityId);
-      if (!existingEntity) {
-        throw new EntityDoesNotExist(
-          `entity with id ${entityId} does not exist`,
-          entityId
-        );
-      }
-
-      // get correct IDbModel implementation
-      const model = getEntityClass(existingEntity);
-      if (!model.canBeDeletedByUser(request.getUserOrFail())) {
-        throw new PermissionDeniedError(
-          "entity cannot be deleted by current user"
-        );
-      }
-
-      // if relations are linked to this entity, the delete should not be allowed
-      const [entityIds, relIds] = await Relation.getLinkedForEntity(
-        request,
-        entityId
-      );
-      if (relIds.length) {
-        throw new InvalidDeleteError(
-          `Cannot be deleted while linked to relations (${
-            relIds[0] +
-            (relIds.length > 1 ? " + " + (relIds.length - 1) + " others" : "")
-          })`
-        ).withData(entityIds);
-      }
-
-      // if bookmarks are linked to this entity, the bookmarks should be removed also
-      await User.removeBookmarkedEntity(request.db.connection, entityId);
-      if (model.class === EntityEnums.Class.Territory) {
-        await User.removeStoredTerritory(request.db.connection, entityId);
-      }
-
-      // create last audit snapshot
-      await Audit.createNew(request, model.id, model);
-
-      if ((await model.delete(request.db.connection)).deleted === 1) {
-        return {
+        const out: IResponseGeneric<Record<string, CustomError | true>> = {
           result: true,
         };
-      } else {
-        throw new InternalServerError(`cannot delete entity ${entityId}`);
+
+        out.data = {};
+
+        // entity should exist
+        const existing = await Entity.findEntitiesByIds(req.db.connection, ids);
+        for (const wantedId of ids) {
+          if (!existing.find((e) => e.id === wantedId)) {
+            out.result = false;
+            out.data[wantedId] = new EntityDoesNotExist(
+              `entity with id ${wantedId} does not exist`,
+              wantedId
+            );
+          }
+        }
+
+        // key is id of entity, that depends on entities, that will be deleted (value array)
+        let dependencyMap: Record<string, string[]> = {};
+        // function will remove removedId as dependency from possible waiting entries
+        const removeDependency = (removedId: string) => {
+          for (const entityId of Object.keys(dependencyMap)) {
+            const index = dependencyMap[entityId].indexOf(removedId);
+            if (index !== -1) {
+              dependencyMap[entityId].splice(index, 1);
+            }
+          }
+          delete dependencyMap[removedId];
+        }
+
+        // check for any blocking reasons for not deleting the entity + construct dependency map
+        for (const entity of existing) {
+          // if relations are linked to this entity, the delete should not be allowed
+          const [linkIds, relIds] = await Relation.getLinkedForEntities(req, [entity.id]);
+          if (relIds.length) {
+            out.result = false;
+            out.data[entity.id] = new InvalidDeleteError(
+              `Cannot be deleted while linked to relations (${relIds[0] +
+              (relIds.length > 1 ? " + " + (relIds.length - 1) + " others" : "")
+              })`
+            ).withData(linkIds);
+            continue;
+          }
+
+          const model = getEntityClass(entity);
+          if (!model.canBeDeletedByUser(req.getUserOrFail())) {
+            out.result = false;
+            out.data[entity.id] = new PermissionDeniedError(
+              "entity cannot be deleted by current user"
+            );
+            continue;
+          }
+
+          dependencyMap[entity.id] = [];
+
+          // find other entities dependend on this one
+          const usedBy = await model.getUsedByEntity(req.db.connection);
+          if (usedBy.length) {
+            out.result = false;
+            out.data[entity.id] = new InvalidDeleteError(`Referenced by other entities`).withData(usedBy.map(e => e.id));
+            dependencyMap[entity.id] = usedBy.map(e => e.id)
+            continue;
+          }
+        }
+
+        let removedCount: number;
+        do {
+          removedCount = 0;
+          for (const entityId of Object.keys(dependencyMap)) {
+            if (dependencyMap[entityId].length === 0) {
+              try {
+                const model = getEntityClass(existing.find(e => e.id === entityId));
+                if ((await model.delete(req.db.connection)).deleted !== 1) {
+                  throw new InternalServerError(`cannot delete entity ${entityId}`);
+                }
+                out.data[entityId] = true;
+                removeDependency(entityId);
+                removedCount++;
+              } catch (e) {
+                out.result = false;
+                out.data[entityId] = e as CustomError
+              }
+            }
+          }
+        } while (removedCount > 0);
+
+        out.result = Object.keys(out.data).reduce<boolean>((acc, c) => acc && !!out.data && out.data[c] === true, true)
+
+        // throw basic error if deleting single entity
+        if (ids.length === 1 && !out.result) {
+          throw out.data[Object.keys(out.data)[0]]
+        }
+
+        return out;
       }
-    })
+    )
   )
   /**
    * @openapi

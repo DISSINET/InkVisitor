@@ -20,7 +20,12 @@ import {
 interface PropGroupRowType {
   prop: IProp;
   propTypeEntity?: IEntity;
-  updateProp: (propId: string, changes: any, instantUpdate?: boolean) => void;
+  updateProp: (
+    propId: string,
+    changes: Partial<IProp>,
+    instantUpdate?: boolean,
+    languageCheck?: boolean
+  ) => void;
   userCanEdit: boolean;
   isInsideTemplate: boolean;
   territoryParentId?: string;
@@ -29,6 +34,7 @@ interface PropGroupRowType {
   disabledAttributes: PropAttributeFilter;
   openDetailOnCreate: boolean;
   alwaysShowCreateModal?: boolean;
+  initTypeTyped?: string;
 }
 export const PropGroupRowType: React.FC<PropGroupRowType> = ({
   propTypeEntity,
@@ -42,6 +48,8 @@ export const PropGroupRowType: React.FC<PropGroupRowType> = ({
   disabledAttributes,
   openDetailOnCreate,
   alwaysShowCreateModal,
+
+  initTypeTyped,
 }) => {
   return (
     <StyledAttributesFlexColumn>
@@ -58,6 +66,7 @@ export const PropGroupRowType: React.FC<PropGroupRowType> = ({
                       entityId: newSelectedId,
                     },
                   },
+                  true,
                   true
                 );
               }}
@@ -89,12 +98,17 @@ export const PropGroupRowType: React.FC<PropGroupRowType> = ({
                     <ElvlButtonGroup
                       value={prop.type.elvl}
                       onChange={(elvl) =>
-                        updateProp(prop.id, {
-                          type: {
-                            ...prop.type,
-                            elvl: elvl,
+                        updateProp(
+                          prop.id,
+                          {
+                            type: {
+                              ...prop.type,
+                              elvl: elvl,
+                            },
                           },
-                        })
+                          false,
+                          false
+                        )
                       }
                       disabled={!userCanEdit}
                     />
@@ -126,6 +140,7 @@ export const PropGroupRowType: React.FC<PropGroupRowType> = ({
                     entityId: newSelectedId,
                   },
                 },
+                true,
                 true
               );
             }}
@@ -138,6 +153,7 @@ export const PropGroupRowType: React.FC<PropGroupRowType> = ({
             territoryParentId={territoryParentId}
             disabled={!userCanEdit}
             alwaysShowCreateModal={alwaysShowCreateModal}
+            initTyped={initTypeTyped}
           />
         )}
       </StyledTagGrid>

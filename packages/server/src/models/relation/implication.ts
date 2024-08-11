@@ -2,7 +2,6 @@ import { EntityEnums, RelationEnums } from "@shared/enums";
 import Relation from "./relation";
 import { Relation as RelationTypes } from "@shared/types";
 import { Connection } from "rethinkdb-ts";
-import { ModelNotValidError } from "@shared/types/errors";
 
 export default class Implication
   extends Relation
@@ -27,9 +26,9 @@ export default class Implication
     let out: RelationTypes.IImplication[] = [];
 
     if (asClass === EntityEnums.Class.Action) {
-      out = await Relation.findForEntity(
+      out = await Relation.findForEntities(
         conn,
-        entityId,
+        [entityId],
         RelationEnums.Type.Implication,
         0
       );
@@ -53,9 +52,9 @@ export default class Implication
     let out: RelationTypes.IImplication[] = [];
 
     if (asClass === EntityEnums.Class.Action) {
-      out = await Relation.findForEntity(
+      out = await Relation.findForEntities(
         conn,
-        parentId,
+        [parentId],
         RelationEnums.Type.Implication,
         1
       );

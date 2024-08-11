@@ -93,7 +93,6 @@ export function getIStatementActionMock(): IStatementAction {
     moodvariant: EntityEnums.MoodVariant.Irrealis,
     bundleOperator: EntityEnums.Operator.And,
     props: [],
-    statementOrder: false,
   };
 }
 

@@ -7,8 +7,7 @@ import {
   FaQuestionCircle,
   FaRegObjectGroup,
 } from "react-icons/fa";
-import { MdMood } from "react-icons/md";
-import { SiRealm } from "react-icons/si";
+import { MdMood, MdWaves } from "react-icons/md";
 import { TiPlus } from "react-icons/ti";
 import { VscDebugDisconnect } from "react-icons/vsc";
 
@@ -17,7 +16,7 @@ export const attributeIconsKeys = {
   ["elvl"]: <FaBook />,
   ["logic"]: <TiPlus />,
   ["mood"]: <MdMood />,
-  ["moodvariant"]: <SiRealm />,
+  ["moodvariant"]: <MdWaves />,
   ["virtuality"]: <FaRegObjectGroup />,
   ["partitivity"]: <AiOutlineApartment />,
   ["bundleOperator"]: <VscDebugDisconnect />,

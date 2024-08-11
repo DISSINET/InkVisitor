@@ -1,11 +1,14 @@
 import { EntityEnums } from "@shared/enums";
 import {
   IEntity,
+  IResponseGeneric,
   IResponseTree,
   IStatementActant,
   IStatementAction,
+  Relation,
 } from "@shared/types";
 import { ThemeColor } from "Theme/theme";
+import { AxiosResponse } from "axios";
 
 interface IEntityColor {
   entityClass: EntityEnums.ExtendedClass;
@@ -312,20 +315,6 @@ export const classesAnnotator = [
   EntityEnums.Class.Resource,
   EntityEnums.Class.Value,
 ];
-
-export const classesAll = [
-  EntityEnums.Class.Concept,
-  EntityEnums.Class.Person,
-  EntityEnums.Class.Group,
-  EntityEnums.Class.Being,
-  EntityEnums.Class.Object,
-  EntityEnums.Class.Location,
-  EntityEnums.Class.Event,
-  EntityEnums.Class.Statement,
-  EntityEnums.Class.Territory,
-  EntityEnums.Class.Resource,
-  EntityEnums.Class.Value,
-];
 export const classesEditorActants = [
   EntityEnums.Class.Concept,
   EntityEnums.Class.Person,
@@ -403,4 +392,29 @@ export interface IExtendedResponseTree extends IResponseTree {
 export enum StatementListDisplayMode {
   TEXT = "text",
   LIST = "list",
+}
+
+// identifier for DnD useDrop
+export declare type Identifier = string | symbol;
+
+export interface EntitiesDeleteSuccessResponse {
+  details: any;
+  entityId: string;
+}
+export interface EntitiesDeleteErrorResponse {
+  error: true;
+  message: string;
+  details: any;
+  entityId: string;
+}
+
+export interface RelationsCreateSuccessResponse {
+  relation: Relation.IRelation;
+  details: AxiosResponse<any, any>;
+}
+export interface RelationsCreateErrorResponse {
+  error: boolean;
+  message: string;
+  relation: Relation.IRelation;
+  details: any;
 }

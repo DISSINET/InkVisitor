@@ -3,7 +3,7 @@
  */
 
 import { IEntity, IStatement, IWarning } from ".";
-import { StatementEnums, UserEnums, WarningTypeEnums } from "../enums";
+import { StatementEnums, UserEnums } from "../enums";
 
 export interface EntityOrder {
   type: StatementEnums.ElementType.Actant | StatementEnums.ElementType.Action;
@@ -33,19 +33,8 @@ export interface IdentificationOrder {
   elementId: string; // identification.id
 }
 
-export type OrderType = (
-  | EntityOrder
-  | PropOrder
-  | ClassificationOrder
-  | IdentificationOrder
-) & {
-  order: number | false;
-  type: StatementEnums.ElementType;
-};
-
 export interface IResponseStatement extends IStatement {
   entities: { [key: string]: IEntity }; // all entities (IEntity) used in actions/actants, actions/actants.props.type/value, territory, references, tags, actant identifications and classifications
-  elementsOrders: OrderType[];
   // usedIn?: IStatement[];
   warnings: IWarning[];
   right?: UserEnums.RoleMode;

@@ -1,5 +1,6 @@
 import { EntityEnums } from "@shared/enums";
 import {
+  IProp,
   IResponseStatement,
   IStatementActant,
   IStatementData,
@@ -15,7 +16,7 @@ interface StatementEditorActantTable {
   userCanEdit?: boolean;
   classEntitiesActant: EntityEnums.Class[];
   addProp: (originId: string) => void;
-  updateProp: (propId: string, changes: any) => void;
+  updateProp: (propId: string, changes: Partial<IProp>) => void;
   removeProp: (propId: string) => void;
   movePropToIndex: (propId: string, oldIndex: number, newIndex: number) => void;
   territoryParentId?: string;
@@ -70,20 +71,16 @@ export const StatementEditorActantTable: React.FC<
     }
   };
 
-  const moveRow = useCallback(
-    (dragIndex: number, hoverIndex: number) => {
-      const dragRecord = filteredActants[dragIndex];
-      setFilteredActants(
-        update(filteredActants, {
-          $splice: [
-            [dragIndex, 1],
-            [hoverIndex, 0, dragRecord],
-          ],
-        })
-      );
-    },
-    [filteredActants]
-  );
+  const moveRow = useCallback((dragIndex: number, hoverIndex: number) => {
+    setFilteredActants((prevFilteredActants) =>
+      update(prevFilteredActants, {
+        $splice: [
+          [dragIndex, 1],
+          [hoverIndex, 0, prevFilteredActants[dragIndex]],
+        ],
+      })
+    );
+  }, []);
 
   return (
     <div style={{ overflow: "auto" }}>

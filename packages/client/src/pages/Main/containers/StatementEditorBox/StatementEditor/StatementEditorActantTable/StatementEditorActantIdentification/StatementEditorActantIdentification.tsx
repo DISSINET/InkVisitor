@@ -32,7 +32,7 @@ interface StatementEditorActantIdentification {
   identification: IStatementIdentification;
   updateActant: (
     statementActantId: string,
-    changes: any,
+    changes: Partial<IStatementActant>,
     instantUpdate?: boolean
   ) => void;
   statement: IResponseStatement;

@@ -1,6 +1,11 @@
 import { certaintyDict, moodDict, operatorDict } from "@shared/dictionaries";
 import { EntityEnums } from "@shared/enums";
-import { IProp, IResponseStatement, IStatementData } from "@shared/types";
+import {
+  IProp,
+  IResponseStatement,
+  IStatementAction,
+  IStatementData,
+} from "@shared/types";
 import { excludedSuggesterEntities } from "Theme/constants";
 import {
   AttributeIcon,
@@ -36,6 +41,7 @@ import { FaGripVertical, FaPlus, FaTrashAlt } from "react-icons/fa";
 import { TbSettingsAutomation, TbSettingsFilled } from "react-icons/tb";
 import { setDraggedActantRow } from "redux/features/rowDnd/draggedActantRowSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
+import { ThemeContext } from "styled-components";
 import {
   DragItem,
   DraggedActantRowItem,
@@ -44,6 +50,7 @@ import {
   ItemTypes,
 } from "types";
 import { dndHoverFn } from "utils/utils";
+import { StyledSuggesterWrap } from "../StatementEditorActantTable/StatementEditorActantTableStyles";
 import {
   StyledBorderLeft,
   StyledExpandedRow,
@@ -51,8 +58,6 @@ import {
   StyledGrid,
   StyledGridColumn,
 } from "./StatementEditorActionTableStyles";
-import { ThemeContext } from "styled-components";
-import { StyledSuggesterWrap } from "../StatementEditorActantTable/StatementEditorActantTableStyles";
 
 interface StatementEditorActionTableRow {
   filteredAction: FilteredActionObject;
@@ -62,7 +67,7 @@ interface StatementEditorActionTableRow {
   userCanEdit?: boolean;
   updateOrderFn: () => void;
   addProp: (originId: string) => void;
-  updateProp: (propId: string, changes: any) => void;
+  updateProp: (propId: string, changes: Partial<IProp>) => void;
   removeProp: (propId: string) => void;
   movePropToIndex: (propId: string, oldIndex: number, newIndex: number) => void;
   territoryParentId?: string;
@@ -103,7 +108,7 @@ export const StatementEditorActionTableRow: React.FC<
 
   const updateAction = (
     statementActionId: string,
-    changes: any,
+    changes: Partial<IStatementAction>,
     instantUpdate?: boolean
   ) => {
     if (statement && statementActionId) {
@@ -307,6 +312,7 @@ export const StatementEditorActionTableRow: React.FC<
             category={category}
             isInsideTemplate={isInsideTemplate}
             territoryParentId={territoryParentId}
+            disableSpareRow
           />
         );
       }

@@ -19,6 +19,7 @@ import {
   IStatementIdentification,
 } from "@shared/types/statement";
 import api from "api";
+import { deepCopy } from "utils/utils";
 import { v4 as uuidv4 } from "uuid";
 
 export const CBookmarkFolder = (bookmarkName: string): IBookmarkFolder => ({
@@ -27,7 +28,7 @@ export const CBookmarkFolder = (bookmarkName: string): IBookmarkFolder => ({
   entityIds: [],
 });
 
-export const CProp = (newStatementOrder?: number | false): IProp => ({
+export const CProp = (): IProp => ({
   id: uuidv4(),
   elvl: EntityEnums.Elvl.Textual,
   certainty: EntityEnums.Certainty.Empty,
@@ -38,7 +39,6 @@ export const CProp = (newStatementOrder?: number | false): IProp => ({
   bundleStart: false,
   bundleEnd: false,
   children: [],
-  statementOrder: newStatementOrder,
 
   type: {
     entityId: "",
@@ -56,9 +56,7 @@ export const CProp = (newStatementOrder?: number | false): IProp => ({
   },
 });
 
-export const CClassification = (
-  newStatementOrder: number | false
-): IStatementClassification => ({
+export const CClassification = (): IStatementClassification => ({
   id: uuidv4(),
   entityId: "",
   elvl: EntityEnums.Elvl.Textual,
@@ -66,12 +64,9 @@ export const CClassification = (
   certainty: EntityEnums.Certainty.Empty,
   mood: [EntityEnums.Mood.Indication],
   moodvariant: EntityEnums.MoodVariant.Realis,
-  statementOrder: newStatementOrder,
 });
 
-export const CIdentification = (
-  newStatementOrder: number | false
-): IStatementIdentification => ({
+export const CIdentification = (): IStatementIdentification => ({
   id: uuidv4(),
   entityId: "",
   elvl: EntityEnums.Elvl.Textual,
@@ -79,10 +74,12 @@ export const CIdentification = (
   certainty: EntityEnums.Certainty.Empty,
   mood: [EntityEnums.Mood.Indication],
   moodvariant: EntityEnums.MoodVariant.Realis,
-  statementOrder: newStatementOrder,
 });
 
-export const CMetaProp = (): IProp => ({
+export const CMetaProp = (variables?: {
+  typeEntityId?: string;
+  valueEntityId?: string;
+}): IProp => ({
   id: uuidv4(),
   elvl: EntityEnums.Elvl.Inferential,
   certainty: EntityEnums.Certainty.Empty,
@@ -95,14 +92,14 @@ export const CMetaProp = (): IProp => ({
   children: [],
 
   type: {
-    entityId: "",
+    entityId: variables?.typeEntityId ? variables.typeEntityId : "",
     elvl: EntityEnums.Elvl.Inferential,
     logic: EntityEnums.Logic.Positive,
     virtuality: EntityEnums.Virtuality.Reality,
     partitivity: EntityEnums.Partitivity.Unison,
   },
   value: {
-    entityId: "",
+    entityId: variables?.valueEntityId ? variables.valueEntityId : "",
     elvl: EntityEnums.Elvl.Inferential,
     logic: EntityEnums.Logic.Positive,
     virtuality: EntityEnums.Virtuality.Reality,
@@ -471,7 +468,7 @@ export const DTerritory = (
 };
 
 export const DProps = (oldProps: IProp[]): IProp[] => {
-  const newProps = [...oldProps];
+  const newProps = deepCopy(oldProps);
   newProps.forEach((p, pi) => {
     newProps[pi].id = uuidv4();
     newProps[pi].children.forEach((pp, pii) => {
@@ -484,10 +481,7 @@ export const DProps = (oldProps: IProp[]): IProp[] => {
   return newProps;
 };
 
-export const CStatementActant = (
-  entityId: string,
-  newStatementOrder: number | false
-): IStatementActant => ({
+export const CStatementActant = (entityId: string): IStatementActant => ({
   id: uuidv4(),
   entityId: entityId,
   position: EntityEnums.Position.Subject,
@@ -501,13 +495,9 @@ export const CStatementActant = (
   props: [],
   classifications: [],
   identifications: [],
-  statementOrder: newStatementOrder,
 });
 
-export const CStatementAction = (
-  actionId: string,
-  newStatementOrder: number | false
-): IStatementAction => ({
+export const CStatementAction = (actionId: string): IStatementAction => ({
   id: uuidv4(),
   actionId: actionId,
   certainty: EntityEnums.Certainty.Empty,
@@ -519,7 +509,6 @@ export const CStatementAction = (
   bundleStart: false,
   bundleEnd: false,
   props: [],
-  statementOrder: newStatementOrder,
 });
 
 export const CStatement = (
@@ -527,8 +516,9 @@ export const CStatement = (
   userOptions: UserOptions,
   label?: string,
   detail?: string,
-  territoryId?: string,
-  id?: string
+  territoryId: string | undefined = undefined,
+  id: string | undefined = undefined,
+  lastInT: boolean = true
 ): IStatement => {
   const newStatement: IStatement = {
     id: id ?? uuidv4(),
@@ -552,12 +542,9 @@ export const CStatement = (
     isTemplate: false,
   };
   if (territoryId) {
-    newStatement.data = {
-      ...newStatement.data,
-      territory: {
-        territoryId: territoryId,
-        order: -1,
-      },
+    newStatement.data.territory = {
+      territoryId: territoryId,
+      order: lastInT ? EntityEnums.Order.Last : EntityEnums.Order.First,
     };
   }
   return newStatement;

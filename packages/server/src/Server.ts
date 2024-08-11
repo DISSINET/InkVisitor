@@ -21,10 +21,8 @@ import profilerMiddleware from "@middlewares/profiler";
 import errorsMiddleware, { catchAll } from "@middlewares/errors";
 import { validateJwt } from "@common/auth";
 import compression from "compression";
-import * as swaggerUi from "swagger-ui-express";
-
+import * as path from "path";
 import "@models/events/register";
-import { readFileSync } from "fs";
 
 const server = express();
 
@@ -36,11 +34,30 @@ server.use(
 
 server.use(cors());
 
-if (process.env.STATIC_PATH && process.env.STATIC_PATH !== "") {
-  server.use(
-    process.env.STATIC_PATH as string,
-    express.static("../client/dist")
-  );
+if (!!process.env.STATIC_PATH) {
+  if (process.env.STATIC_PATH === "/") {
+    server.use((req, res, next) => {
+      // allow all requests not starting with /api and that are pointed to wanted static path 
+      // relative to the root like domain.com/<static path>/...
+      if (!req.path.startsWith('/api') && req.path.startsWith(process.env.STATIC_PATH as string)) {
+        if (req.path.indexOf(".") === -1) {
+          // replacement for react(client) router that should process only pages alone (/, /login etc)
+          res.sendFile(path.join(__dirname, "..", "..", "..", "..", "client/dist/index.html"));
+        } else {
+          // everythink else will go here
+          express.static("../client/dist")(req, res, next);
+        }
+      } else {
+        // fallback to handlers below
+        next();
+      }
+    });
+  } else if (process.env.STATIC_PATH !== "") {
+    server.use(
+      process.env.STATIC_PATH as string,
+      express.static("../client/dist")
+    );
+  }
 }
 
 server.use(express.json({ limit: "150mb" }));
@@ -60,24 +77,6 @@ if (process.env.NODE_ENV === "production") {
 server.get("/health", function (req, res) {
   res.send("ok");
 });
-
-// Swagger UI
-if (process.env.SWAGGER_FILE) {
-  const swaggerFileData = readFileSync(process.env.SWAGGER_FILE);
-  if (!swaggerFileData) {
-    throw new Error(
-      `Cannot load swagger file from '${process.env.SWAGGER_FILE}'`
-    );
-  }
-  console.info(
-    `[Server] serving swagger file from '${process.env.SWAGGER_FILE}'`
-  );
-  server.use("/api-docs", swaggerUi.serve);
-  server.get(
-    "/api-docs",
-    swaggerUi.setup(JSON.parse(swaggerFileData.toString()))
-  );
-}
 
 server.use(profilerMiddleware);
 

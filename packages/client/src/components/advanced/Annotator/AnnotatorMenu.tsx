@@ -20,23 +20,25 @@ interface TextAnnotatorMenuProps {
   text: string;
   document: IResponseDocument;
   anchors: string[];
-  entities: Record<string, IEntity | false>;
-  onAnchorAdd: (entityId: string) => void;
   yPosition: number;
   topBottomSelection: boolean;
+  entities: Record<string, IEntity | false>;
+  onAnchorAdd: (entityId: string) => void;
   handleCreateStatement: Function | false;
   handleCreateTerritory: Function | false;
+  handleRemoveAnchor: Function | false;
 }
 
 export const TextAnnotatorMenu = ({
   text,
   anchors,
   entities,
-  onAnchorAdd,
   yPosition,
   topBottomSelection,
+  onAnchorAdd,
   handleCreateStatement = false,
   handleCreateTerritory = false,
+  handleRemoveAnchor = false,
 }: TextAnnotatorMenuProps) => {
   return (
     <>
@@ -60,6 +62,7 @@ export const TextAnnotatorMenu = ({
                 }}
                 label={"Segment"}
                 tooltipLabel="Segment selection into Statements"
+                disabled
               />
             </StyledAnnotatorItemContent>
           </StyledAnnotatorItem>
@@ -117,6 +120,13 @@ export const TextAnnotatorMenu = ({
                   if (entities[anchor]) {
                     return (
                       <EntityTag
+                        unlinkButton={{
+                          onClick: () => {
+                            if (handleRemoveAnchor) {
+                              handleRemoveAnchor(anchor);
+                            }
+                          },
+                        }}
                         key={anchor}
                         entity={entities[anchor] as IEntity}
                       />

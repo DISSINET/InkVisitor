@@ -1,25 +1,26 @@
 import { EntityEnums } from "@shared/enums";
 import {
+  EntityTooltip,
+  IDocument,
   IEntity,
-  IResponseEntity,
+  IReference,
   IResponseAudit,
   IResponseBookmarkFolder,
   IResponseDetail,
+  IResponseDocument,
+  IResponseDocumentDetail,
+  IResponseEntity,
   IResponseGeneric,
   IResponsePermission,
   IResponseStatement,
   IResponseTerritory,
   IResponseTree,
   IResponseUser,
-  RequestPermissionUpdate,
   IStatement,
   ITerritory,
+  IUser,
   Relation,
-  EntityTooltip,
-  IReference,
-  IResponseDocument,
-  IDocument,
-  IResponseDocumentDetail,
+  RequestPermissionUpdate,
 } from "@shared/types";
 import * as errors from "@shared/types/errors";
 import { NetworkError } from "@shared/types/errors";
@@ -34,6 +35,12 @@ import axios, {
 import React from "react";
 import { toast } from "react-toastify";
 import io, { Socket } from "socket.io-client";
+import {
+  EntitiesDeleteErrorResponse,
+  EntitiesDeleteSuccessResponse,
+  RelationsCreateErrorResponse,
+  RelationsCreateSuccessResponse,
+} from "types";
 
 interface IApiOptions extends AxiosRequestConfig<any> {
   ignoreErrorToast: boolean;
@@ -70,11 +77,14 @@ class Api {
   private apiUrl: string;
   private headers: object;
   private connection: AxiosInstance;
+  // unique token key for each environment
+  private tokenKey: string;
   private token: string;
   private ws?: Socket;
   private ping: number;
 
   private lastError: any = null;
+  private errorTimeout: any;
 
   constructor() {
     this.baseUrl = process.env.APIURL || window.location.origin;
@@ -94,7 +104,11 @@ class Api {
       headers: this.headers,
     });
 
+    this.tokenKey = `${process.env.NODE_ENV}-token`;
     this.token = "";
+
+    // TODO: remove after release - only needed once to clean up previous localStorage token usage
+    localStorage.removeItem("token");
   }
 
   /**
@@ -176,12 +190,22 @@ class Api {
 
   shouldShowErrorToast(error: any) {
     if (this.lastError && this.lastError.message === error.message) {
-      // Same error as the last one, debounce it
+      // Same error as the last one, don't show the toast
       return false;
     }
 
     // Update the last error to the current error
     this.lastError = error;
+
+    // Clear the previous timeout if it exists
+    if (this.errorTimeout) {
+      clearTimeout(this.errorTimeout);
+    }
+
+    this.errorTimeout = setTimeout(() => {
+      this.lastError = null;
+    }, 600);
+
     return true;
   }
 
@@ -237,17 +261,16 @@ class Api {
   }
 
   isLoggedIn = () => {
-    let storedToken = localStorage.getItem("token");
+    let storedToken = localStorage.getItem(this.tokenKey);
     let storedUsername = localStorage.getItem("username");
     return storedToken && storedUsername ? true : false;
-    // return {username: storedUsername ,token: storedToken};
   };
 
   /**
    * Authentication
    */
   checkLogin() {
-    let storedToken = localStorage.getItem("token");
+    let storedToken = localStorage.getItem(this.tokenKey);
     let storedUsername = localStorage.getItem("username");
     let storedUserId = localStorage.getItem("userid");
 
@@ -270,7 +293,7 @@ class Api {
     newUserId: string,
     newUserRole: string
   ) {
-    localStorage.setItem("token", newToken);
+    localStorage.setItem(this.tokenKey, newToken);
     localStorage.setItem("username", newUserName);
     localStorage.setItem("userid", newUserId);
     localStorage.setItem("userrole", newUserRole);
@@ -320,7 +343,7 @@ class Api {
   }
 
   async signOut() {
-    localStorage.setItem("token", "");
+    localStorage.setItem(this.tokenKey, "");
     localStorage.setItem("username", "");
 
     this.token = "";
@@ -428,7 +451,7 @@ class Api {
 
   async usersUpdate(
     userId: string,
-    changes: object,
+    changes: Partial<IUser>,
     options?: IApiOptions
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
@@ -611,7 +634,7 @@ class Api {
 
   async entityUpdate(
     entityId: string,
-    changes: object,
+    changes: Partial<IEntity>,
     options?: IApiOptions
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
@@ -639,6 +662,42 @@ class Api {
     } catch (err) {
       throw this.handleError(err);
     }
+  }
+
+  async entitiesDelete(
+    entityIds: string[],
+    options?: IApiOptions
+  ): Promise<(EntitiesDeleteSuccessResponse | EntitiesDeleteErrorResponse)[]> {
+    const out: (EntitiesDeleteSuccessResponse | EntitiesDeleteErrorResponse)[] = [];
+    try {
+      const response = await this.connection.delete(`/entities/`, {
+        data: {
+          entityIds,
+        },
+        ...options,
+      });
+      const data = (response.data as IResponseGeneric<Record<string, errors.CustomError | true>>).data;
+      if (data) {
+        for (const errorEntityId of Object.keys(data)) {
+          if (data[errorEntityId] === true) {
+            out.push({ entityId: errorEntityId, details: data[errorEntityId] });
+          } else {
+            out.push({ entityId: errorEntityId, error: true, details: data[errorEntityId] });
+          }
+        }
+      }
+    } catch (err) {
+      for (const entityId of entityIds) {
+        out.push({
+          error: true,
+          message: `Failed to delete entity ${entityId}`,
+          entityId: entityId,
+          details: this.handleError(err),
+        });
+      }
+    }
+
+    return out;
   }
 
   async entityRestore(
@@ -823,23 +882,6 @@ class Api {
     }
   }
 
-  async statementReorderElements(
-    statementId: string,
-    elementIdsWithOrder: string[],
-    options?: IApiOptions
-  ): Promise<AxiosResponse<IResponseGeneric>> {
-    try {
-      const response = await this.connection.put(
-        `/statements/${statementId}/elementsOrders`,
-        elementIdsWithOrder,
-        options
-      );
-      return response;
-    } catch (err) {
-      throw this.handleError(err);
-    }
-  }
-
   async statementsBatchMove(
     statementsIds: string[],
     territoryId: string,
@@ -988,7 +1030,7 @@ class Api {
    */
   async relationUpdate(
     relationId: string,
-    changes: object,
+    changes: Partial<Relation.IRelation>,
     options?: IApiOptions
   ): Promise<AxiosResponse<IResponseGeneric>> {
     try {
@@ -1017,6 +1059,35 @@ class Api {
     } catch (err) {
       throw this.handleError(err);
     }
+  }
+
+  async relationsCreate(
+    newRelations: Relation.IRelation[],
+    options?: IApiOptions
+  ): Promise<
+    (RelationsCreateSuccessResponse | RelationsCreateErrorResponse)[]
+  > {
+    const out = [];
+
+    for (const newRelation of newRelations) {
+      try {
+        const response = await this.connection.post(
+          `/relations`,
+          newRelation,
+          options
+        );
+        out.push({ relation: newRelation, details: response });
+      } catch (err) {
+        out.push({
+          error: true,
+          message: `Failed to create relation ${newRelation.id}`,
+          relation: newRelation,
+          details: this.handleError(err),
+        });
+      }
+    }
+
+    return out;
   }
 
   async relationDelete(

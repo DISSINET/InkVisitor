@@ -1,5 +1,5 @@
 import { EntityEnums } from "@shared/enums";
-import { IResponseDetail, IResponseGeneric } from "@shared/types";
+import { IEntity, IResponseDetail, IResponseGeneric } from "@shared/types";
 import { ITerritoryData, ITerritoryProtocol } from "@shared/types/territory";
 import { UseMutationResult } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
@@ -31,7 +31,7 @@ interface EntityDetailProtocol {
   updateEntityMutation: UseMutationResult<
     AxiosResponse<IResponseGeneric<any>, any>,
     Error,
-    any,
+    Partial<IEntity>,
     unknown
   >;
   isInsideTemplate: boolean;

@@ -7,6 +7,7 @@ import { EntityDetail } from "./EntityDetail/EntityDetail";
 import { StyledTabGroup } from "./EntityDetailBoxStyles";
 import { EntityDetailTab } from "./EntityDetailTab/EntityDetailTab";
 import update from "immutability-helper";
+import { Loader } from "components";
 
 interface EntityDetailBox {}
 export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
@@ -77,42 +78,72 @@ export const EntityDetailBox: React.FC<EntityDetailBox> = ({}) => {
     removeDetailId(entityId);
   };
 
-  const moveRow = useCallback(
-    (dragIndex: number, hoverIndex: number) => {
-      const dragRecord = entities[dragIndex];
-      const newlySortedEntities = update(entities, {
+  const moveRow = useCallback((dragIndex: number, hoverIndex: number) => {
+    setEntities((prevEntities) =>
+      update(prevEntities, {
         $splice: [
           [dragIndex, 1],
-          [hoverIndex, 0, dragRecord],
+          [hoverIndex, 0, prevEntities[dragIndex]],
         ],
-      });
+      })
+    );
+  }, []);
 
-      setEntities(newlySortedEntities);
+  // delay of show content for fluent animation on open
+  const [showContent, setShowContent] = useState(false);
+  useEffect(() => {
+    setTimeout(() => {
+      setShowContent(true);
+    }, 800);
+  }, []);
+
+  const {
+    status,
+    data: entity,
+    error: entityError,
+    isFetching,
+  } = useQuery({
+    queryKey: ["entity", selectedDetailId],
+    queryFn: async () => {
+      const res = await api.detailGet(selectedDetailId);
+      return res.data;
     },
-    [entities]
-  );
+    enabled: !!selectedDetailId && api.isLoggedIn(),
+  });
 
   return (
     <>
-      <StyledTabGroup>
-        {entities &&
-          entities.length > 0 &&
-          entities?.map((entity, key) => (
-            <EntityDetailTab
-              key={key}
-              index={key}
-              entity={entity}
-              onClick={() => setSelectedDetailId(entity.id)}
-              onClose={() => handleClose(entity.id)}
-              isSelected={selectedDetailId === entity.id}
-              moveRow={moveRow}
-              onDragEnd={() => {
-                replaceDetailIds(entities.map((e) => e.id));
-              }}
-            />
-          ))}
-      </StyledTabGroup>
-      {selectedDetailId && <EntityDetail detailId={selectedDetailId} />}
+      {showContent && (
+        <StyledTabGroup>
+          {entities &&
+            entities.length > 0 &&
+            entities?.map((entity, key) => (
+              <EntityDetailTab
+                key={key}
+                index={key}
+                entity={entity}
+                onClick={() => setSelectedDetailId(entity.id)}
+                onClose={() => handleClose(entity.id)}
+                isSelected={selectedDetailId === entity.id}
+                moveRow={moveRow}
+                onDragEnd={() => {
+                  replaceDetailIds(entities.map((e) => e.id));
+                }}
+              />
+            ))}
+        </StyledTabGroup>
+      )}
+
+      {selectedDetailId && showContent && entity ? (
+        <EntityDetail
+          detailId={selectedDetailId}
+          entity={entity}
+          error={entityError}
+          isFetching={isFetching}
+        />
+      ) : (
+        <Loader show />
+      )}
     </>
   );
 };

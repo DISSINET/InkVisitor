@@ -15,6 +15,7 @@ import {
   DragItem,
   DraggedPropRowCategory,
   DraggedPropRowItem,
+  Identifier,
   ItemTypes,
   PropAttributeFilter,
 } from "types";
@@ -30,15 +31,18 @@ import {
 import { PropGroupRowType } from "./PropGroupRowType";
 import { PropGroupRowValue } from "./PropGroupRowValue";
 
-export declare type Identifier = string | symbol;
-
 interface PropGroupRow {
   prop: IProp;
   entities: { [key: string]: IEntity };
   level: 1 | 2 | 3;
   hasOrder: boolean;
 
-  updateProp: (propId: string, changes: any, instantUpdate?: boolean) => void;
+  updateProp: (
+    propId: string,
+    changes: Partial<IProp>,
+    instantUpdate?: boolean,
+    languageCheck?: boolean
+  ) => void;
   removeProp: (propId: string) => void;
   addProp: (originId: string) => void;
   moveProp: (dragIndex: number, hoverIndex: number) => void;
@@ -59,6 +63,9 @@ interface PropGroupRow {
   territoryParentId?: string;
   lowIdent?: boolean;
   alwaysShowCreateModal?: boolean;
+
+  initTypeTyped?: string;
+  initValueTyped?: string;
 }
 
 export const PropGroupRow: React.FC<PropGroupRow> = ({
@@ -84,9 +91,12 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
   territoryParentId,
   lowIdent = false,
   alwaysShowCreateModal,
+
+  initTypeTyped,
+  initValueTyped,
 }) => {
-  const propTypeEntity: IEntity = entities[prop.type.entityId];
-  const propValueEntity: IEntity = entities[prop.value.entityId];
+  const propTypeEntity: IEntity | undefined = entities[prop.type.entityId];
+  const propValueEntity: IEntity | undefined = entities[prop.value.entityId];
 
   const draggedPropRow: DraggedPropRowItem = useAppSelector(
     (state) => state.rowDnd.draggedPropRow
@@ -195,6 +205,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
                 updateProp={updateProp}
                 userCanEdit={userCanEdit}
                 alwaysShowCreateModal={alwaysShowCreateModal}
+                initTypeTyped={initTypeTyped}
               />
             </StyledBorderLeft>
           </StyledPropLineColumn>
@@ -211,6 +222,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
               updateProp={updateProp}
               userCanEdit={userCanEdit}
               alwaysShowCreateModal={alwaysShowCreateModal}
+              initValueTyped={initValueTyped}
             />
           </StyledPropLineColumn>
           <StyledPropLineColumn>

@@ -102,11 +102,11 @@ class Mailer {
   devMode = true;
 
   constructor() {
-    if (process.env.NODEMAILER_API_KEY && process.env.MAILER_SENDER) {
+    if (process.env.SENDGRID_API_KEY && process.env.MAILER_SENDER) {
       this.devMode = false;
     }
 
-    sendgrid.setApiKey(process.env.NODEMAILER_API_KEY || "");
+    sendgrid.setApiKey(process.env.SENDGRID_API_KEY || "");
 
     console.log(`[Mailer]: prepared${this.devMode ? " (dev mode)" : ""}`);
   }

@@ -29,6 +29,7 @@ export interface ITerritoryProtocol {
 }
 
 export interface ITerritoryValidation {
+  active?: boolean;
   entityClasses: EntityEnums.Class[];
   classifications: string[];
   tieType: EProtocolTieType; // default is property

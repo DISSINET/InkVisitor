@@ -24,9 +24,9 @@ export const getActionEventNodes = async (
 
   if (asClass === EntityEnums.Class.Action) {
     const relations: RelationTypes.IActionEventEquivalent[] =
-      await Relation.findForEntity(
+      await Relation.findForEntities(
         conn,
-        parentId,
+        [parentId],
         RelationEnums.Type.ActionEventEquivalent,
         0
       );
@@ -76,16 +76,16 @@ export const getSuperclassTrees = async (
     [EntityEnums.Class.Concept, EntityEnums.Class.Action].indexOf(asClass) !==
     -1
   ) {
-    relations = await Relation.findForEntity(
+    relations = await Relation.findForEntities(
       conn,
-      parentId,
+      [parentId],
       RelationEnums.Type.Superclass,
       0
     );
   } else if (EntityEnums.PLOGESTR.indexOf(asClass) !== -1) {
-    relations = await Relation.findForEntity(
+    relations = await Relation.findForEntities(
       conn,
-      parentId,
+      [parentId],
       RelationEnums.Type.Classification,
       0
     );
@@ -124,9 +124,9 @@ export const getSynonymCloud = async (
     asClass === EntityEnums.Class.Concept ||
     asClass === EntityEnums.Class.Action
   ) {
-    const synonyms = await Relation.findForEntity<RelationTypes.ISynonym>(
+    const synonyms = await Relation.findForEntities<RelationTypes.ISynonym>(
       conn,
-      entityId,
+      [entityId],
       RelationEnums.Type.Synonym
     );
 
@@ -151,9 +151,9 @@ export const getIdentifications = async (
   const out: EntityTooltip.IIdentification[] = [];
 
   const identifications =
-    await Relation.findForEntity<RelationTypes.IIdentification>(
+    await Relation.findForEntities<RelationTypes.IIdentification>(
       conn,
-      entityId,
+      [entityId],
       RelationEnums.Type.Identification
     );
 
@@ -186,9 +186,9 @@ export const getSuperordinateEntityTree = async (
 
   if (asClass === EntityEnums.Class.Location) {
     const locations: RelationTypes.ISuperordinateEntity[] =
-      await Relation.findForEntity(
+      await Relation.findForEntities(
         conn,
-        parentId,
+        [parentId],
         RelationEnums.Type.SuperordinateEntity,
         0
       );
@@ -233,9 +233,9 @@ export const copyRelations = async (
   targetEntity: string,
   types: RelationEnums.Type[]
 ): Promise<void> => {
-  const relations = await Relation.findForEntity(
+  const relations = await Relation.findForEntities(
     request.db.connection,
-    originalEntity
+    [originalEntity]
   );
 
   for (let i = 0; i < relations.length; i++) {

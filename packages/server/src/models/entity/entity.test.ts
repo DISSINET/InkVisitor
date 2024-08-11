@@ -169,7 +169,7 @@ describe("test Entity.update", function () {
   });
 
   describe("if providing only part of nested data", () => {
-    it("should update it as merge operation", async (done) => {
+    it("should update it as merge operation", async () => {
       const entity = new Statement({});
       entity.data.tags = ["origtag1", "origtag2"];
       entity.data.text = "jea";
@@ -213,7 +213,6 @@ describe("test Entity.update", function () {
       expect(existingEntityData.data.tags).toEqual(newTagsValue);
 
       await clean(db);
-      done();
     });
   });
 
@@ -237,9 +236,38 @@ describe("test Entity.delete", function () {
   describe("one referenced, one free entity", () => {
     const db = new Db();
     const entity = new Entity({ id: Math.random().toString() });
+
+    beforeAll(async () => {
+      await db.initDb();
+      await entity.save(db.connection);
+    });
+
+    afterAll(async () => {
+      await clean(db);
+    });
+
+    it("should correctly allow delete call", async () => {
+      await expect(entity.delete(db.connection)).resolves.toBeTruthy();
+
+      const afterDelete = await findEntityById(db.connection, entity.id);
+      expect(afterDelete).toBeFalsy();
+    });
+  });
+});
+
+describe("test Entity.getUsedByEntity", function () {
+  describe("one referenced, one not referenced entity", () => {
+    const db = new Db();
+    const entity = new Entity({ id: Math.random().toString() });
     const freeEntity = new Entity({ id: Math.random().toString() });
-    const statement = new Statement({});
-    statement.data.actants.push(
+    const statement1 = new Statement({});
+    statement1.data.actants.push(
+      new StatementActant({
+        entityId: entity.id,
+      })
+    );
+    const statement2 = new Statement({});
+    statement2.data.actants.push(
       new StatementActant({
         entityId: entity.id,
       })
@@ -249,24 +277,23 @@ describe("test Entity.delete", function () {
       await db.initDb();
       await entity.save(db.connection);
       await freeEntity.save(db.connection);
-      await statement.save(db.connection);
+      await statement1.save(db.connection);
+      await statement2.save(db.connection);
     });
 
     afterAll(async () => {
       await clean(db);
     });
 
-    it("should correctly issue error when trying to remove entity still referenced in statement's data.actants", async () => {
-      await expect(entity.delete(db.connection)).rejects.toThrowError(
-        InvalidDeleteError
-      );
+    it("should find dependencies(2) for referenced entity", async () => {
+      const dependencies = await entity.getUsedByEntity(db.connection);
+      expect(dependencies).toHaveLength(2) // two statements
+      expect(dependencies.find(e => e.id === statement1.id)).toBeTruthy();
+      expect(dependencies.find(e => e.id === statement2.id)).toBeTruthy();
     });
 
-    it("should correctly allow delete call for not referenced entity", async () => {
-      await expect(freeEntity.delete(db.connection)).resolves.toBeTruthy();
-
-      const afterDelete = await findEntityById(db.connection, freeEntity.id);
-      expect(afterDelete).toBeFalsy();
+    it("should find zero dependent entities for free entity", async () => {
+      await expect(freeEntity.getUsedByEntity(db.connection)).resolves.toHaveLength(0);
     });
   });
 });

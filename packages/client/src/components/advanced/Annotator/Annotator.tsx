@@ -1,5 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { FaPen, FaRegSave, FaTrash } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { v4 as uuidv4 } from "uuid";
@@ -16,12 +23,14 @@ import { EntityColors } from "types";
 import { useAnnotator } from "./AnnotatorContext";
 import TextAnnotatorMenu from "./AnnotatorMenu";
 import {
+  StyledAnnotatorMenu,
   StyledCanvasWrapper,
   StyledLinesCanvas,
   StyledMainCanvas,
   StyledScrollerCursor,
   StyledScrollerViewport,
 } from "./AnnotatorStyles";
+import { EntityEnums } from "@shared/enums";
 
 interface TextAnnotatorProps {
   width: number;
@@ -67,6 +76,15 @@ export const TextAnnotator = ({
     },
   });
 
+  const updateDocumentMutationQuiet = useMutation({
+    mutationFn: async (data: { id: string; doc: Partial<IDocument> }) =>
+      api.documentUpdate(data.id, data.doc),
+    onSuccess: (variables, data) => {
+      queryClient.invalidateQueries({ queryKey: ["document"] });
+      queryClient.invalidateQueries({ queryKey: ["documents"] });
+    },
+  });
+
   const { annotator, setAnnotator } = useAnnotator();
 
   const wLineNumbers = displayLineNumbers ? 50 : 0;
@@ -83,15 +101,25 @@ export const TextAnnotator = ({
   const [selectedAnchors, setSelectedAnchors] = useState<string[]>([]);
   const storedEntities = useRef<Record<string, IEntity | false>>({});
 
-  const handleSaveNewContent = () => {
+  const handleSaveNewContent = (quiet: boolean) => {
     if (annotator && document?.id) {
-      updateDocumentMutation.mutate({
-        id: document.id,
-        doc: {
-          ...document,
-          ...{ content: annotator.text.value },
-        },
-      });
+      if (quiet) {
+        updateDocumentMutationQuiet.mutate({
+          id: document.id,
+          doc: {
+            ...document,
+            ...{ content: annotator.text.value },
+          },
+        });
+      } else {
+        updateDocumentMutation.mutate({
+          id: document.id,
+          doc: {
+            ...document,
+            ...{ content: annotator.text.value },
+          },
+        });
+      }
     }
   };
 
@@ -146,12 +174,9 @@ export const TextAnnotator = ({
 
     const annotator = new Annotator(
       mainCanvas.current,
-      document?.content ?? "no text"
+      document?.content ?? "no text",
+      2
     );
-
-    // colors needs to be static as the highlighting would not be working nicely in the dark mode
-    annotator.fontColor = "#383737";
-    annotator.bgColor = "white";
 
     annotator.setMode(Modes.HIGHLIGHT);
     annotator.addScroller(scroller.current);
@@ -160,10 +185,6 @@ export const TextAnnotator = ({
 
     if (displayLineNumbers && lines.current) {
       annotator.addLines(lines.current);
-      if (annotator.lines) {
-        annotator.lines.fontColor = theme?.color.text;
-        annotator.lines.bgColor = theme?.color.white;
-      }
     }
     annotator.onSelectText(({ text, anchors }) => {
       // console.log("select", text, anchors);
@@ -171,9 +192,16 @@ export const TextAnnotator = ({
     });
 
     annotator.onHighlight((entityId: string) => {
-      const entity = storedEntities.current[entityId];
-      if (entity) {
-        const classItem = EntityColors[entity.class];
+      const entityClass = document?.referencedEntityIds
+        ? Object.keys(document?.referencedEntityIds).find((key) =>
+            document?.referencedEntityIds?.[key as EntityEnums.Class].includes(
+              entityId
+            )
+          )
+        : undefined;
+
+      if (entityClass) {
+        const classItem = EntityColors[entityClass];
         const colorName = classItem?.color ?? "transparent";
         const color = theme?.color[colorName] as string;
 
@@ -181,7 +209,7 @@ export const TextAnnotator = ({
           mode: "background",
           style: {
             fillColor: color,
-            fillOpacity: 0.2,
+            fillOpacity: 0.3,
           },
         };
       } else {
@@ -206,14 +234,19 @@ export const TextAnnotator = ({
   }, [document, theme]);
 
   const topBottomSelection = useMemo<boolean>(() => {
-    const selectedText = annotator?.cursor?.getSelected();
+    const yStart = annotator?.cursor?.selectStart?.yLine;
+    const yEnd = annotator?.cursor?.selectEnd?.yLine;
 
-    return (selectedText?.[0]?.yLine ?? 0) < (selectedText?.[1]?.yLine ?? 0);
+    if (!yStart || !yEnd) {
+      return false;
+    } else {
+      return yStart < yEnd;
+    }
   }, [annotator?.cursor?.yLine]);
 
   const menuPositionY = useMemo<number>(() => {
     const yLine = annotator?.cursor?.yLine ?? 0;
-    const lineHeight = annotator?.lineHeight ?? 0;
+    const lineHeight = (annotator?.lineHeight ?? 0) / 2;
 
     return yLine * lineHeight + (topBottomSelection ? -50 : 50);
   }, [annotator?.cursor?.yLine, annotator?.lineHeight, topBottomSelection]);
@@ -222,53 +255,87 @@ export const TextAnnotator = ({
     return annotator?.text?.value !== document?.content;
   }, [annotator?.text?.value, document?.content]);
 
+  const onCreateTerritory = useCallback(() => {
+    if (handleCreateTerritory && selectedText) {
+      const newTerritoryId = uuidv4();
+      handleAddAnchor(newTerritoryId);
+      handleCreateTerritory(newTerritoryId);
+    }
+  }, [handleCreateTerritory, selectedText]);
+
+  const onCreateStatement = useCallback(() => {
+    if (handleCreateStatement && selectedText) {
+      const newStatementId = uuidv4();
+      handleAddAnchor(newStatementId);
+      // remove linebreaks from text
+      const validatedText = selectedText.replace(/\n/g, " ");
+      handleCreateStatement(validatedText, newStatementId);
+    }
+  }, [handleCreateStatement, selectedText]);
+
+  const onRemoveAnchor = useCallback(() => {
+    (anchor: string) => {
+      annotator?.removeAnchorFromSelection(anchor);
+      handleSaveNewContent(true);
+    };
+  }, []);
+
   return (
-    <div style={{ width: width }}>
+    <div style={{ width: width, position: "absolute" }}>
       <StyledCanvasWrapper>
         {document && annotatorMode === Modes.HIGHLIGHT && selectedText && (
-          <TextAnnotatorMenu
-            anchors={selectedAnchors}
-            document={document}
-            text={selectedText}
-            entities={storedEntities.current}
-            onAnchorAdd={handleAddAnchor}
-            yPosition={menuPositionY}
-            topBottomSelection={topBottomSelection}
-            handleCreateTerritory={() => {
-              if (handleCreateTerritory && selectedText) {
-                const newTerritoryId = uuidv4();
-                handleAddAnchor(newTerritoryId);
-                handleCreateTerritory(newTerritoryId);
-              }
-            }}
-            handleCreateStatement={() => {
-              if (handleCreateStatement && selectedText) {
-                const newStatementId = uuidv4();
-                handleAddAnchor(newStatementId);
-                // remove linebreaks from text
-                const validatedText = selectedText.replace(/\n/g, " ");
-                handleCreateStatement(validatedText, newStatementId);
-              }
+          <StyledAnnotatorMenu
+            $top={menuPositionY}
+            $left={100}
+            // $translateY={"100%"}
+            $translateY={topBottomSelection ? "-100%" : "0%"}
+          >
+            <TextAnnotatorMenu
+              anchors={selectedAnchors}
+              document={document}
+              text={selectedText}
+              entities={storedEntities.current}
+              onAnchorAdd={handleAddAnchor}
+              handleCreateTerritory={onCreateTerritory}
+              handleCreateStatement={onCreateStatement}
+              handleRemoveAnchor={onRemoveAnchor}
+            />
+          </StyledAnnotatorMenu>
+        )}
+
+        {displayLineNumbers && (
+          <StyledLinesCanvas
+            ref={lines}
+            width={wLineNumbers}
+            height={height}
+            style={{
+              outline: "none",
+              backgroundColor: theme?.color.white,
+              color: theme?.color.plain,
             }}
           />
-        )}
-        {displayLineNumbers && (
-          <StyledLinesCanvas ref={lines} width={wLineNumbers} height={height} />
         )}
         <StyledMainCanvas
           tabIndex={0}
           ref={mainCanvas}
-          width={wTextArea}
-          height={height}
+          style={{
+            height: height,
+            width: wTextArea,
+            backgroundColor: theme?.color.white,
+            color: theme?.color.text,
+            outline: "none",
+          }}
         />
         <StyledScrollerViewport
           ref={scroller}
           style={{
-            background: theme?.color.success,
+            background: theme?.color.grey,
           }}
         >
           <StyledScrollerCursor
-            style={{ backgroundColor: theme?.color.primary }}
+            style={{
+              backgroundColor: theme?.color.primary,
+            }}
           />
         </StyledScrollerViewport>
       </StyledCanvasWrapper>
@@ -321,7 +388,7 @@ export const TextAnnotator = ({
             icon={<FaRegSave />}
             disabled={!madeAnyChanges}
             onClick={() => {
-              handleSaveNewContent();
+              handleSaveNewContent(false);
             }}
           />
           <Button
