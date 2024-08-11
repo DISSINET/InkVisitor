@@ -1,3 +1,5 @@
+import * as crypto from "crypto"
+
 export const getRandomInt = () => {
   return Math.floor(Math.random() * 1_000_000_000_000);
 };
@@ -73,4 +75,29 @@ export function sanitizeText(inStr: string): string {
   inStr = inStr.replace(/\\xa0/gi, " ");
   inStr = inStr.replace(/\xa0/gi, " ");
   return inStr;
+}
+
+export function generatePassword(length = 12): string {
+  const upperCase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const lowerCase = 'abcdefghijklmnopqrstuvwxyz';
+  const digits = '0123456789';
+  const symbols = '!@#$%^&*()-_=+[]{}|;:,.<>?';
+
+  const allChars = upperCase + lowerCase + digits + symbols;
+
+  let password = '';
+  password += upperCase[Math.floor(Math.random() * upperCase.length)];
+  password += lowerCase[Math.floor(Math.random() * lowerCase.length)];
+  password += digits[Math.floor(Math.random() * digits.length)];
+  password += symbols[Math.floor(Math.random() * symbols.length)];
+
+  for (let i = 4; i < length; i++) {
+      const randomByte = crypto.randomBytes(1)[0];
+      password += allChars[randomByte % allChars.length];
+  }
+
+  // Shuffle the password to make sure the characters are not in the same order
+  password = password.split('').sort(() => 0.5 - Math.random()).join('');
+
+  return password;
 }
