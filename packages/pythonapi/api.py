@@ -1,5 +1,11 @@
 from flask import Flask, request, jsonify
-from segment import segment_text
+
+import re
+from segmentor.lib import parse
+from segmentor.lib import spcy
+
+ps = parse.Parse()
+sp = spcy.Spacy()
 
 app = Flask(__name__)
 
@@ -25,8 +31,13 @@ def segment():
     print('Request received!', data)
     text_in = data.get('text', '')
 
+    newline_positions = [m.start() for m in re.finditer('\n', text_in)]
+    text_in = re.sub(r'\s+', ' ', text_in)
+    text_in = re.sub(r'\n+', '\n', text_in)
+    text_in = text_in.strip()
+
     # Call the segment_text function
-    segmented_text = segment_text(text_in)
+    segmented_text = ps.parse_text(text_in, newline_positions)
     print('Segmented', segmented_text)
 
     # Return the JSON response

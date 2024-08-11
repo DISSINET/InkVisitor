@@ -1,0 +1,8 @@
+/.idea
+*.log
+*.tmp
+*.txt
+*.xml
+upload.py
+upload2.py
+__pycache__
