@@ -10,7 +10,7 @@ import { IDbModel, fillArray, fillFlatObject } from "@models/common";
 import { EntityEnums, UserEnums } from "@shared/enums";
 import { ModelNotValidError } from "@shared/types/errors";
 import { generateRandomString, generateUuid, hashPassword } from "@common/auth";
-import { regExpEscape } from "@common/functions";
+import { generatePassword, regExpEscape } from "@common/functions";
 import { nonenumerable } from "@common/decorators";
 import { Db } from "@service/rethink";
 
@@ -205,7 +205,7 @@ export default class User implements IUser, IDbModel {
   }
 
   generatePassword(): string {
-    const raw = generateRandomString(10);
+    const raw = generatePassword(12);
     return this.setPassword(raw);
   }
 
