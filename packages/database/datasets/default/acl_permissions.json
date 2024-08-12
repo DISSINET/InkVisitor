@@ -181,7 +181,7 @@
   },
   {
     "controller": "entities",
-    "route": ":entityId",
+    "route": ":entityId?",
     "method": "DELETE",
     "roles": ["*"]
   },

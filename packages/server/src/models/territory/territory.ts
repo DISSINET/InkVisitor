@@ -369,7 +369,19 @@ class Territory extends Entity implements ITerritory {
       return true;
     }
 
-    return false;
+    const closestRight = treeCache.getRightForTerritory(
+      this.id,
+      user.rights
+    );
+
+    if (!closestRight) {
+      return false;
+    }
+
+    return (
+      closestRight.mode === UserEnums.RoleMode.Admin ||
+      closestRight.mode === UserEnums.RoleMode.Write
+    );
   }
 
   /**
