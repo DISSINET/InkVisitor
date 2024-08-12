@@ -51,3 +51,11 @@ Replace `:path` with any route that is registered in python app - ie. `test`, so
   "roles": ["*"]
 }
 ```
+
+### Test
+
+To test the `/segment` path, you can send this curl command
+
+```bash
+curl -X POST localhost:5000/segment -H "Content-Type: application/json" -d '{"text": "Item dixit dicta Flox quod dicta soror Mayfreda dixit sibi quod dicta Guillelma post suam ascensionem debebat dimittere dictam sororem Mayfredam suam vicariam in terra, sicut Christus dimisit beatum Petrum apostolum suum vicarium. Item dixit quod dicta soror Mayfreda dicebat sibi quod Franceschinus Malcolçatus, filius quondam domini Beltrami Malcolçati, debebat cantare primo missam ad sepulcrum Spiritus sancti, idest ipsius Guillelme, et ipsa soror Mayfreda debebat cantare secundam. Actum Mediolani in domo fratrum Predicatorum, in camera ubi fit officium inquisitionis heretice pravitatis, coram suprascripto fratre Guidone inquisitore. Interfuerunt ibi testes, vocati et rogati, frater Petrus de Marcellinis et frater Guillelmus de Carcano et frater Anselminus de Castano, omnes ordinis fratrum Predicatorum, .MCCC., die mercurii .XX. mensis iulii, indictione tertiadecima. Traditum per Beltramum Salvagnium, communis Mediolani, Porte Nove, notarium officii inquisitionis."}'
+```
