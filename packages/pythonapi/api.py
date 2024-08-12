@@ -1,8 +1,7 @@
 from flask import Flask, request, jsonify
 
 import re
-from segmentor.lib import parse
-from segmentor.lib import spcy
+from corpus_nlp import parse, spcy
 
 ps = parse.Parse()
 sp = spcy.Spacy()
