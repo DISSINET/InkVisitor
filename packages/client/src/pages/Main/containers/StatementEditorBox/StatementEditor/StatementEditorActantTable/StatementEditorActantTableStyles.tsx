@@ -63,11 +63,12 @@ export const StyledCIHeading = styled.p`
 export const StyledCIGrid = styled.div`
   margin-bottom: 0.5rem;
   display: grid;
-  grid-template-columns: repeat(4, auto);
-  grid-column-gap: 1rem;
+  grid-template-columns: repeat(5, auto);
+  grid-column-gap: 0.5rem;
   width: fit-content;
   max-width: 100%;
   align-items: center;
+  padding-right: 0.5rem;
 `;
 
 export const StyledExpandedRow = styled.div`

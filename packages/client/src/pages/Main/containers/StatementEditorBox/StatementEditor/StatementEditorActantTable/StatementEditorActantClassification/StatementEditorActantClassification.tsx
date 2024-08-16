@@ -130,34 +130,16 @@ export const StatementEditorActantClassification: React.FC<
           disabled={!userCanEdit}
         />
 
-        <ButtonGroup>
-          {userCanEdit && (
-            <Button
-              key="d"
-              icon={<FaTrashAlt />}
-              color="plain"
-              inverted
-              tooltipLabel="remove classification row"
-              onClick={() => {
-                updateActant(sActant.id, {
-                  classifications: classifications.filter(
-                    (c) => c.id !== classification.id
-                  ),
-                });
-              }}
-            />
-          )}
-          {classification.logic === "2" && (
-            <Button
-              key="neg"
-              tooltipLabel="Negative logic"
-              color="danger"
-              inverted
-              noBorder
-              icon={<AttributeIcon attributeName={"negation"} />}
-            />
-          )}
-        </ButtonGroup>
+        {classification.logic === "2" && (
+          <Button
+            key="neg"
+            tooltipLabel="Negative logic"
+            color="danger"
+            inverted
+            noBorder
+            icon={<AttributeIcon attributeName={"negation"} />}
+          />
+        )}
         <Button
           inverted
           onClick={() => setIsExpanded(!isExpanded)}
@@ -183,6 +165,22 @@ export const StatementEditorActantClassification: React.FC<
             />
           }
         />
+        {userCanEdit && (
+          <Button
+            key="d"
+            icon={<FaTrashAlt />}
+            color="plain"
+            inverted
+            tooltipLabel="remove classification row"
+            onClick={() => {
+              updateActant(sActant.id, {
+                classifications: classifications.filter(
+                  (c) => c.id !== classification.id
+                ),
+              });
+            }}
+          />
+        )}
       </StyledCIGrid>
 
       {/* Expanded Row */}
