@@ -12,11 +12,12 @@ export const StyledGrid = styled.div<StyledGrid>`
   display: grid;
   align-items: center;
   padding-left: ${({ theme }) => theme.space[0]};
-  grid-template-columns: repeat(6, auto);
+  padding-bottom: ${({ theme }) => theme.space[1]};
+  padding-right: ${({ theme }) => theme.space[2]};
+  grid-template-columns: repeat(7, auto);
   width: fit-content;
   grid-template-rows: auto;
   grid-auto-flow: row;
-  padding-bottom: ${({ theme }) => theme.space[1]};
   max-width: 100%;
 
   opacity: ${({ tempDisabled }) => (tempDisabled ? 0.2 : 1)};

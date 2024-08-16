@@ -225,7 +225,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
               initValueTyped={initValueTyped}
             />
           </StyledPropLineColumn>
-          <StyledPropLineColumn>
+          <StyledPropLineColumn style={{ paddingRight: "0.5rem" }}>
             <PropGroupRowStatementAttributes
               prop={prop}
               updateProp={updateProp}
@@ -235,18 +235,6 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
               buttons={
                 <>
                   <ButtonGroup height={19} $noMarginRight>
-                    {userCanEdit && (
-                      <Button
-                        key="delete"
-                        icon={<FaTrashAlt />}
-                        tooltipLabel="remove prop row"
-                        color="plain"
-                        inverted
-                        onClick={() => {
-                          removeProp(prop.id);
-                        }}
-                      />
-                    )}
                     {(level === 1 || level === 2) && userCanEdit && (
                       <Button
                         key="add"
@@ -330,6 +318,18 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
                       />
                     }
                   />
+                  {userCanEdit && (
+                    <Button
+                      key="delete"
+                      icon={<FaTrashAlt />}
+                      tooltipLabel="remove prop row"
+                      color="plain"
+                      inverted
+                      onClick={() => {
+                        removeProp(prop.id);
+                      }}
+                    />
+                  )}
                 </>
               }
             />
