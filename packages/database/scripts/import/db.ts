@@ -150,10 +150,10 @@ export class DbHelper {
     for (let start = 0; start < table.data.length; start += step) {
       const end = Math.min(start + step, table.data.length);
       const progress = ((end * step) / table.data.length / step) * 100;
-      await r
-        .table(table.tableName)
-        .insert(table.data.slice(start, end))
-        .run(this.conn);
+
+      const slicedData = table.data.slice(start, end);
+
+      await r.table(table.tableName).insert(slicedData).run(this.conn);
       process.stdout.write(
         `Importing ${table.tableName}: ${progress.toFixed(2)}%\r`
       );
