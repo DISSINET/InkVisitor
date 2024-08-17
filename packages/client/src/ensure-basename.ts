@@ -1,6 +1,4 @@
 export const ensureBasename = () => {
-  console.log("checking basename");
-
   if (process.env.ROOT_URL) {
     if (!window.location.pathname.includes(process.env.ROOT_URL)) {
       window.history.replaceState(
