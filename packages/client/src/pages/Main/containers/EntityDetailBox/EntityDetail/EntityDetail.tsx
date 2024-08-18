@@ -661,6 +661,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
                   userCanEdit={userCanEdit}
                   isInsideTemplate={isInsideTemplate}
                   territoryParentId={getTerritoryId(entity)}
+                  entity={entity}
                 />
               </StyledDetailSection>
             )}
@@ -728,9 +729,10 @@ export const EntityDetail: React.FC<EntityDetail> = ({
                 </StyledDetailSectionHeading>
                 {userCanEdit && (
                   <EntityDetailSectionButtons
-                    props={entity.props}
                     entityId={entity.id}
                     setShowSubmit={setShowBatchRemovePropSubmit}
+                    removeBtnTooltip="remove all metaprops from entity"
+                    removeBtnDisabled={!entity.props.length}
                     handleCopyFromEntity={(pickedEntity, replace) => {
                       if (pickedEntity.props.length === 0) {
                         toast.info("no metaprops");

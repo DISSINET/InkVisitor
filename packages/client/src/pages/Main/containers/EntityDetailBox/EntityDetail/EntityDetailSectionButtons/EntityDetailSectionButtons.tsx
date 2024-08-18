@@ -6,16 +6,26 @@ import { FaPlus, FaTrashAlt } from "react-icons/fa";
 import { TbReplace } from "react-icons/tb";
 import { StyledSectionButtonsBorder } from "./EntityDetailSectionButtonsStyles";
 import { classesAll } from "@shared/dictionaries/entity";
+import { EntityEnums } from "@shared/enums";
 
 interface EntityDetailSectionButtons {
-  props: IProp[];
   setShowSubmit: (value: React.SetStateAction<boolean>) => void;
   entityId: string;
   handleCopyFromEntity: (pickedEntity: IEntity, replace: boolean) => void;
+  suggesterCategoryTypes?: EntityEnums.Class[];
+  removeBtnTooltip: string;
+  removeBtnDisabled: boolean;
 }
 export const EntityDetailSectionButtons: React.FC<
   EntityDetailSectionButtons
-> = ({ props, setShowSubmit, entityId, handleCopyFromEntity }) => {
+> = ({
+  setShowSubmit,
+  entityId,
+  handleCopyFromEntity,
+  suggesterCategoryTypes = classesAll,
+  removeBtnTooltip,
+  removeBtnDisabled,
+}) => {
   const [replaceSection, setReplaceSection] = useState(false);
 
   return (
@@ -25,11 +35,11 @@ export const EntityDetailSectionButtons: React.FC<
         style={{ marginLeft: "0.5rem", marginRight: "1rem" }}
       >
         <Button
-          disabled={!props.length}
+          disabled={removeBtnDisabled}
           icon={<FaTrashAlt />}
           inverted
           color="danger"
-          tooltipLabel={`remove all metaprops from entity`}
+          tooltipLabel={removeBtnTooltip}
           onClick={() => setShowSubmit(true)}
         />
         <StyledSectionButtonsBorder />
@@ -53,7 +63,7 @@ export const EntityDetailSectionButtons: React.FC<
         />
       </ButtonGroup>
       <EntitySuggester
-        categoryTypes={classesAll}
+        categoryTypes={suggesterCategoryTypes}
         onPicked={(entity: IEntity) =>
           handleCopyFromEntity(entity, replaceSection)
         }

@@ -1,6 +1,7 @@
-import { IEntity, IResponseGeneric } from "@shared/types";
+import { IEntity, IResponseDetail, IResponseGeneric } from "@shared/types";
 import {
   EProtocolTieType,
+  ITerritory,
   ITerritoryValidation,
 } from "@shared/types/territory";
 import { UseMutationResult } from "@tanstack/react-query";
@@ -12,9 +13,15 @@ import { deepCopy } from "utils/utils";
 import {
   StyledBlockSeparator,
   StyledDetailSectionHeader,
+  StyledDetailSectionHeading,
   StyledValidationList,
 } from "../EntityDetailStyles";
 import { EntityDetailValidationRule } from "./EntityDetailValidationRule/EntityDetailValidationRule";
+import { EntityDetailSectionButtons } from "../EntityDetailSectionButtons/EntityDetailSectionButtons";
+import { toast } from "react-toastify";
+import { DProps } from "constructors";
+import { EntityEnums } from "@shared/enums";
+import api from "api";
 
 const initValidation: ITerritoryValidation = {
   detail: "",
@@ -38,6 +45,7 @@ interface EntityDetailValidationSection {
   userCanEdit: boolean;
   isInsideTemplate: boolean;
   territoryParentId: string | undefined;
+  entity: IResponseDetail;
 }
 export const EntityDetailValidationSection: React.FC<
   EntityDetailValidationSection
@@ -48,6 +56,7 @@ export const EntityDetailValidationSection: React.FC<
   userCanEdit,
   isInsideTemplate,
   territoryParentId,
+  entity,
 }) => {
   const [tempIndexToRemove, setTempIndexToRemove] = useState<false | number>(
     false
@@ -73,6 +82,8 @@ export const EntityDetailValidationSection: React.FC<
     setTempIndexToRemove(false);
   };
 
+  const [showBatchRemoveSubmit, setShowBatchRemoveSubmit] = useState(false);
+
   return (
     <>
       <StyledDetailSectionHeader>
@@ -86,6 +97,46 @@ export const EntityDetailValidationSection: React.FC<
               onClick={initValidationRule}
             />
           </span>
+        )}
+        {userCanEdit && (
+          <EntityDetailSectionButtons
+            entityId={entity.id}
+            suggesterCategoryTypes={[EntityEnums.Class.Territory]}
+            setShowSubmit={setShowBatchRemoveSubmit}
+            removeBtnTooltip="remove all validations from entity"
+            removeBtnDisabled={!entity.data.validations.length}
+            handleCopyFromEntity={(pickedEntity, replace) => {
+              api.detailGet(pickedEntity.id).then((data) => {
+                const otherValidations = (data.data as ITerritory).data
+                  .validations;
+                if (otherValidations && otherValidations.length > 0) {
+                  if (replace) {
+                    updateEntityMutation.mutate({
+                      data: {
+                        validations: otherValidations,
+                      },
+                    });
+                  } else {
+                    if (validations) {
+                      updateEntityMutation.mutate({
+                        data: {
+                          validations: [...validations, ...otherValidations],
+                        },
+                      });
+                    } else {
+                      updateEntityMutation.mutate({
+                        data: {
+                          validations: otherValidations,
+                        },
+                      });
+                    }
+                  }
+                } else {
+                  toast.info("no validations");
+                }
+              });
+            }}
+          />
         )}
       </StyledDetailSectionHeader>
 
@@ -140,6 +191,20 @@ export const EntityDetailValidationSection: React.FC<
             removeValidationRule(tempIndexToRemove);
         }}
         onCancel={() => setTempIndexToRemove(false)}
+      />
+      <Submit
+        show={showBatchRemoveSubmit}
+        title="Remove validation rules"
+        text="Do you really want to remove all validation rules?"
+        onSubmit={() => {
+          updateEntityMutation.mutate({
+            data: {
+              validations: [],
+            },
+          });
+          setShowBatchRemoveSubmit(false);
+        }}
+        onCancel={() => setShowBatchRemoveSubmit(false)}
       />
     </>
   );
