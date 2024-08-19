@@ -586,6 +586,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
 
   const [showBatchRemovePropSubmit, setShowBatchRemovePropSubmit] =
     useState(false);
+  const [loadingValidations, setLoadingValidations] = useState(false);
 
   return (
     <>
@@ -661,6 +662,8 @@ export const EntityDetail: React.FC<EntityDetail> = ({
                   userCanEdit={userCanEdit}
                   isInsideTemplate={isInsideTemplate}
                   territoryParentId={getTerritoryId(entity)}
+                  entity={entity}
+                  setLoadingValidations={setLoadingValidations}
                 />
               </StyledDetailSection>
             )}
@@ -728,9 +731,10 @@ export const EntityDetail: React.FC<EntityDetail> = ({
                 </StyledDetailSectionHeading>
                 {userCanEdit && (
                   <EntityDetailSectionButtons
-                    props={entity.props}
                     entityId={entity.id}
                     setShowSubmit={setShowBatchRemovePropSubmit}
+                    removeBtnTooltip="remove all metaproperties from entity"
+                    removeBtnDisabled={!entity.props.length}
                     handleCopyFromEntity={(pickedEntity, replace) => {
                       if (pickedEntity.props.length === 0) {
                         toast.info("no metaprops");
@@ -983,7 +987,8 @@ export const EntityDetail: React.FC<EntityDetail> = ({
           isFetching ||
           updateEntityMutation.isPending ||
           deleteEntityMutation.isPending ||
-          changeEntityTypeMutation.isPending
+          changeEntityTypeMutation.isPending ||
+          loadingValidations
         }
       />
 

@@ -1,14 +1,19 @@
-import { IEntity, IResponseGeneric } from "@shared/types";
+import { EntityEnums } from "@shared/enums";
+import { IEntity, IResponseDetail, IResponseGeneric } from "@shared/types";
 import {
   EProtocolTieType,
+  ITerritory,
   ITerritoryValidation,
 } from "@shared/types/territory";
 import { UseMutationResult } from "@tanstack/react-query";
+import api from "api";
 import { AxiosResponse } from "axios";
 import { Button, Submit } from "components";
 import React, { useState } from "react";
 import { FaPlus } from "react-icons/fa";
+import { toast } from "react-toastify";
 import { deepCopy } from "utils/utils";
+import { EntityDetailSectionButtons } from "../EntityDetailSectionButtons/EntityDetailSectionButtons";
 import {
   StyledBlockSeparator,
   StyledDetailSectionHeader,
@@ -38,6 +43,8 @@ interface EntityDetailValidationSection {
   userCanEdit: boolean;
   isInsideTemplate: boolean;
   territoryParentId: string | undefined;
+  entity: IResponseDetail;
+  setLoadingValidations: React.Dispatch<React.SetStateAction<boolean>>;
 }
 export const EntityDetailValidationSection: React.FC<
   EntityDetailValidationSection
@@ -48,6 +55,8 @@ export const EntityDetailValidationSection: React.FC<
   userCanEdit,
   isInsideTemplate,
   territoryParentId,
+  entity,
+  setLoadingValidations,
 }) => {
   const [tempIndexToRemove, setTempIndexToRemove] = useState<false | number>(
     false
@@ -64,7 +73,6 @@ export const EntityDetailValidationSection: React.FC<
   };
 
   const removeValidationRule = (indexToRemove: number) => {
-    console.log(indexToRemove);
     updateEntityMutation.mutate({
       data: {
         validations: validations?.filter((_, index) => index !== indexToRemove),
@@ -73,19 +81,63 @@ export const EntityDetailValidationSection: React.FC<
     setTempIndexToRemove(false);
   };
 
+  const [showBatchRemoveSubmit, setShowBatchRemoveSubmit] = useState(false);
+
   return (
     <>
       <StyledDetailSectionHeader>
         Validation rules
         {userCanEdit && (
-          <span style={{ marginLeft: "1rem" }}>
+          <span style={{ marginLeft: "1rem", marginRight: "1rem" }}>
             <Button
               color="primary"
-              label="new validation rule"
+              label="rule"
               icon={<FaPlus />}
               onClick={initValidationRule}
             />
           </span>
+        )}
+        {userCanEdit && (
+          <EntityDetailSectionButtons
+            entityId={entity.id}
+            suggesterCategoryTypes={[EntityEnums.Class.Territory]}
+            setShowSubmit={setShowBatchRemoveSubmit}
+            removeBtnTooltip="remove all validations from entity"
+            removeBtnDisabled={!entity.data.validations.length}
+            handleCopyFromEntity={(pickedEntity, replace) => {
+              setLoadingValidations(true);
+              api.detailGet(pickedEntity.id).then((data) => {
+                setLoadingValidations(false);
+                const otherValidations = (data.data as ITerritory).data
+                  .validations;
+                if (otherValidations && otherValidations.length > 0) {
+                  if (replace) {
+                    updateEntityMutation.mutate({
+                      data: {
+                        validations: otherValidations,
+                      },
+                    });
+                  } else {
+                    if (validations) {
+                      updateEntityMutation.mutate({
+                        data: {
+                          validations: [...validations, ...otherValidations],
+                        },
+                      });
+                    } else {
+                      updateEntityMutation.mutate({
+                        data: {
+                          validations: otherValidations,
+                        },
+                      });
+                    }
+                  }
+                } else {
+                  toast.info("no validations");
+                }
+              });
+            }}
+          />
         )}
       </StyledDetailSectionHeader>
 
@@ -140,6 +192,20 @@ export const EntityDetailValidationSection: React.FC<
             removeValidationRule(tempIndexToRemove);
         }}
         onCancel={() => setTempIndexToRemove(false)}
+      />
+      <Submit
+        show={showBatchRemoveSubmit}
+        title="Remove validation rules"
+        text="Do you really want to remove all validation rules?"
+        onSubmit={() => {
+          updateEntityMutation.mutate({
+            data: {
+              validations: [],
+            },
+          });
+          setShowBatchRemoveSubmit(false);
+        }}
+        onCancel={() => setShowBatchRemoveSubmit(false)}
       />
     </>
   );
