@@ -39,6 +39,7 @@ import {
   UsersPage,
   DocumentsPage,
   NotFoundPage,
+  AdvancedSearchPage,
 } from "pages";
 import { SearchParamsProvider } from "hooks/useSearchParamsContext";
 
@@ -253,6 +254,14 @@ export const App: React.FC = () => {
                       element={
                         <RequireAuth>
                           <DocumentsPage />
+                        </RequireAuth>
+                      }
+                    />
+                    <Route
+                      path="/advanced-search"
+                      element={
+                        <RequireAuth>
+                          <AdvancedSearchPage />
                         </RequireAuth>
                       }
                     />
