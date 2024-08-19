@@ -586,6 +586,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
 
   const [showBatchRemovePropSubmit, setShowBatchRemovePropSubmit] =
     useState(false);
+  const [loadingValidations, setLoadingValidations] = useState(false);
 
   return (
     <>
@@ -662,6 +663,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
                   isInsideTemplate={isInsideTemplate}
                   territoryParentId={getTerritoryId(entity)}
                   entity={entity}
+                  setLoadingValidations={setLoadingValidations}
                 />
               </StyledDetailSection>
             )}
@@ -985,7 +987,8 @@ export const EntityDetail: React.FC<EntityDetail> = ({
           isFetching ||
           updateEntityMutation.isPending ||
           deleteEntityMutation.isPending ||
-          changeEntityTypeMutation.isPending
+          changeEntityTypeMutation.isPending ||
+          loadingValidations
         }
       />
 

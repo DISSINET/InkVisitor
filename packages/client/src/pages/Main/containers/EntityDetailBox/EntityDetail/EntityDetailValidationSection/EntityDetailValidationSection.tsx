@@ -46,6 +46,7 @@ interface EntityDetailValidationSection {
   isInsideTemplate: boolean;
   territoryParentId: string | undefined;
   entity: IResponseDetail;
+  setLoadingValidations: React.Dispatch<React.SetStateAction<boolean>>;
 }
 export const EntityDetailValidationSection: React.FC<
   EntityDetailValidationSection
@@ -57,6 +58,7 @@ export const EntityDetailValidationSection: React.FC<
   isInsideTemplate,
   territoryParentId,
   entity,
+  setLoadingValidations,
 }) => {
   const [tempIndexToRemove, setTempIndexToRemove] = useState<false | number>(
     false
@@ -73,7 +75,6 @@ export const EntityDetailValidationSection: React.FC<
   };
 
   const removeValidationRule = (indexToRemove: number) => {
-    console.log(indexToRemove);
     updateEntityMutation.mutate({
       data: {
         validations: validations?.filter((_, index) => index !== indexToRemove),
@@ -89,7 +90,7 @@ export const EntityDetailValidationSection: React.FC<
       <StyledDetailSectionHeader>
         Validation rules
         {userCanEdit && (
-          <span style={{ marginLeft: "1rem" }}>
+          <span style={{ marginLeft: "1rem", marginRight: "1rem" }}>
             <Button
               color="primary"
               label="new validation rule"
@@ -106,7 +107,9 @@ export const EntityDetailValidationSection: React.FC<
             removeBtnTooltip="remove all validations from entity"
             removeBtnDisabled={!entity.data.validations.length}
             handleCopyFromEntity={(pickedEntity, replace) => {
+              setLoadingValidations(true);
               api.detailGet(pickedEntity.id).then((data) => {
+                setLoadingValidations(false);
                 const otherValidations = (data.data as ITerritory).data
                   .validations;
                 if (otherValidations && otherValidations.length > 0) {
