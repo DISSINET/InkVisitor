@@ -28,9 +28,9 @@ export default class SubjectActant1Reciprocal
 
     if (asClass === EntityEnums.Class.Action) {
       out =
-        await Relation.findForEntity<RelationTypes.ISubjectActant1Reciprocal>(
+        await Relation.findForEntities<RelationTypes.ISubjectActant1Reciprocal>(
           conn,
-          entityId,
+          [entityId],
           RelationEnums.Type.SubjectActant1Reciprocal
         );
     }

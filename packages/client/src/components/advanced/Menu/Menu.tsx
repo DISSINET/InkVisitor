@@ -93,7 +93,6 @@ export const Menu: React.FC<Menu> = ({
           <StyledMenuGroup>
             {pages
               .filter((p) => !p.admin || userRole === UserEnums.Role.Admin)
-              .filter((p) => location.pathname !== p.href)
               .map((page, key) => (
                 <MenuItem
                   key={key}

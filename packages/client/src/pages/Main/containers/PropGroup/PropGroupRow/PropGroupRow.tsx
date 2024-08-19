@@ -63,6 +63,9 @@ interface PropGroupRow {
   territoryParentId?: string;
   lowIdent?: boolean;
   alwaysShowCreateModal?: boolean;
+
+  initTypeTyped?: string;
+  initValueTyped?: string;
 }
 
 export const PropGroupRow: React.FC<PropGroupRow> = ({
@@ -88,6 +91,9 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
   territoryParentId,
   lowIdent = false,
   alwaysShowCreateModal,
+
+  initTypeTyped,
+  initValueTyped,
 }) => {
   const propTypeEntity: IEntity | undefined = entities[prop.type.entityId];
   const propValueEntity: IEntity | undefined = entities[prop.value.entityId];
@@ -199,6 +205,7 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
                 updateProp={updateProp}
                 userCanEdit={userCanEdit}
                 alwaysShowCreateModal={alwaysShowCreateModal}
+                initTypeTyped={initTypeTyped}
               />
             </StyledBorderLeft>
           </StyledPropLineColumn>
@@ -215,9 +222,10 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
               updateProp={updateProp}
               userCanEdit={userCanEdit}
               alwaysShowCreateModal={alwaysShowCreateModal}
+              initValueTyped={initValueTyped}
             />
           </StyledPropLineColumn>
-          <StyledPropLineColumn>
+          <StyledPropLineColumn style={{ paddingRight: "0.5rem" }}>
             <PropGroupRowStatementAttributes
               prop={prop}
               updateProp={updateProp}
@@ -227,18 +235,6 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
               buttons={
                 <>
                   <ButtonGroup height={19} $noMarginRight>
-                    {userCanEdit && (
-                      <Button
-                        key="delete"
-                        icon={<FaTrashAlt />}
-                        tooltipLabel="remove prop row"
-                        color="plain"
-                        inverted
-                        onClick={() => {
-                          removeProp(prop.id);
-                        }}
-                      />
-                    )}
                     {(level === 1 || level === 2) && userCanEdit && (
                       <Button
                         key="add"
@@ -322,6 +318,18 @@ export const PropGroupRow: React.FC<PropGroupRow> = ({
                       />
                     }
                   />
+                  {userCanEdit && (
+                    <Button
+                      key="delete"
+                      icon={<FaTrashAlt />}
+                      tooltipLabel="remove prop row"
+                      color="plain"
+                      inverted
+                      onClick={() => {
+                        removeProp(prop.id);
+                      }}
+                    />
+                  )}
                 </>
               }
             />

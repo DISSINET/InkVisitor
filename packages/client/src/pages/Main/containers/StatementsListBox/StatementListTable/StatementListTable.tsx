@@ -36,6 +36,8 @@ import { setShowWarnings } from "redux/features/statementEditor/showWarningsSlic
 import { setLastClickedIndex } from "redux/features/statementList/lastClickedIndexSlice";
 import { setRowsExpanded } from "redux/features/statementList/rowsExpandedSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
+import { COLLAPSED_TABLE_WIDTH } from "Theme/constants";
+import { StatementListDisplayMode } from "types";
 import { StatementListContextMenu } from "../StatementListContextMenu/StatementListContextMenu";
 import { StatementListRow } from "./StatementListRow";
 import {
@@ -44,11 +46,8 @@ import {
   StyledFocusedCircle,
   StyledTHead,
   StyledTable,
-  StyledTdLastEdit,
   StyledTh,
 } from "./StatementListTableStyles";
-import { StatementListDisplayMode } from "types";
-import { COLLAPSED_TABLE_WIDTH } from "Theme/constants";
 
 const MINIFIED_HIDDEN_COLUMNS = [
   "id",
@@ -318,7 +317,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
           return (
             <>
               {definedObjects ? (
-                <TagGroup definedEntities={definedObjects} oversizeLimit={4} />
+                <TagGroup definedEntities={definedObjects} oversizeLimit={3} />
               ) : (
                 <div />
               )}
@@ -360,37 +359,6 @@ export const StatementListTable: React.FC<StatementListTable> = ({
               )}
             </>
           );
-        },
-      },
-      {
-        id: "lastEdit",
-        Header: "Edited",
-        Cell: ({ row }: CellType) => {
-          const { updatedAt, createdAt } = row.original;
-          const lastEditDate: Date | undefined = updatedAt || createdAt;
-          if (!lastEditDate) {
-            return "";
-          }
-          const today = new Date().setHours(0, 0, 0, 0);
-          const lastEditDay = new Date(lastEditDate).setHours(0, 0, 0, 0);
-
-          if (today === lastEditDay) {
-            return (
-              <StyledTdLastEdit>
-                {"today " +
-                  new Date(lastEditDate).toLocaleTimeString("en-GB", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-              </StyledTdLastEdit>
-            );
-          } else {
-            return (
-              <StyledTdLastEdit>
-                {new Date(lastEditDate).toLocaleDateString("en-GB")}
-              </StyledTdLastEdit>
-            );
-          }
         },
       },
       {

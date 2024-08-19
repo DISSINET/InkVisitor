@@ -5,29 +5,30 @@
     "esModuleInterop": true,
     "experimentalDecorators": true,
     "importHelpers": true,
+    "incremental": true,
     "module": "commonjs",
+    "moduleResolution": "node",
     "outDir": "build",
+    "paths": {
+      "@common/*": ["./../server/src/common/*"],
+      "@models/*": ["./../server/src/models/*"],
+      "@service/*": ["./../server/src/service/*"],
+      "@shared/*": ["./../shared/*"]
+    },
     "removeComments": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
     "sourceMap": true,
     "strict": true,
     "target": "es6",
-    "moduleResolution": "node",
-    "resolveJsonModule": true,
-    "paths": {
-      "@shared/*": ["./../shared/*"],
-      "@models/*": ["./../server/src/models/*"],
-      "@service/*": ["./../server/src/service/*"],
-      "@common/*": ["./../server/src/common/*"]
-    },
-    "types": ["node"],
-    "typeRoots": ["node_modules/@types"]
+    "typeRoots": ["node_modules/@types"],
+    "types": ["node"]
   },
+  "exclude": ["node_modules", "build"],
   "files": ["./../server/src/custom_typings/request.d.ts"],
   "include": [
     "./../server/src/custom_typings/**/*",
-    "./types/**/*",
-    "./scripts/**/*",
+    "./scripts/**/*.ts",
     "./datasets/**/*.ts"
-  ],
-  "exclude": ["node_modules", "build"]
+  ]
 }

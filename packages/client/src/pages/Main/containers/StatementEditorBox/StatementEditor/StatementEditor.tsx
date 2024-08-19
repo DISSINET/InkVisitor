@@ -851,9 +851,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
               <EntitySuggester
                 territoryActants={territoryActants}
                 openDetailOnCreate
-                onSelected={(newSelectedId: string) => {
-                  addActant(newSelectedId);
-                }}
+                onSelected={addActant}
                 categoryTypes={classesEditorActants}
                 placeholder={"add actant"}
                 excludedEntityClasses={excludedSuggesterEntities}

@@ -315,20 +315,6 @@ export const classesAnnotator = [
   EntityEnums.Class.Resource,
   EntityEnums.Class.Value,
 ];
-
-export const classesAll = [
-  EntityEnums.Class.Concept,
-  EntityEnums.Class.Person,
-  EntityEnums.Class.Group,
-  EntityEnums.Class.Being,
-  EntityEnums.Class.Object,
-  EntityEnums.Class.Location,
-  EntityEnums.Class.Event,
-  EntityEnums.Class.Statement,
-  EntityEnums.Class.Territory,
-  EntityEnums.Class.Resource,
-  EntityEnums.Class.Value,
-];
 export const classesEditorActants = [
   EntityEnums.Class.Concept,
   EntityEnums.Class.Person,
@@ -412,7 +398,7 @@ export enum StatementListDisplayMode {
 export declare type Identifier = string | symbol;
 
 export interface EntitiesDeleteSuccessResponse {
-  details: AxiosResponse<IResponseGeneric>;
+  details: any;
   entityId: string;
 }
 export interface EntitiesDeleteErrorResponse {

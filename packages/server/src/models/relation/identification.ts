@@ -2,7 +2,6 @@ import { EntityEnums, RelationEnums } from "@shared/enums";
 import { EnumValidators } from "@shared/enums";
 import Relation from "./relation";
 import { Relation as RelationTypes } from "@shared/types";
-import { ModelNotValidError } from "@shared/types/errors";
 import { Connection } from "rethinkdb-ts";
 
 export default class Identification
@@ -50,9 +49,9 @@ export default class Identification
     }
 
     const relations: RelationTypes.IIdentification[] =
-      await Relation.findForEntity(
+      await Relation.findForEntities(
         conn,
-        entityId,
+        [entityId],
         RelationEnums.Type.Identification
       );
 

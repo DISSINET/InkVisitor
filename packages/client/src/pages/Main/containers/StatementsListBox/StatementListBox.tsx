@@ -11,7 +11,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
 import { Loader, Submit, ToastWithLink } from "components";
 import { CStatement, CTerritory } from "constructors";
-import { useSearchParams } from "hooks";
+import { useDebounce, useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
 import { BsInfoCircle } from "react-icons/bs";
 import { toast } from "react-toastify";
@@ -447,9 +447,9 @@ export const StatementListBox: React.FC = () => {
 
       if (deletedIds.length < selectedRows.length) {
         toast.error(
-          `Some statements ${
+          `Some statements (${
             selectedRows.length - deletedIds.length
-          } are not possible to delete`
+          }) are not possible to delete`
         );
       }
 
@@ -493,6 +493,8 @@ export const StatementListBox: React.FC = () => {
     height: contentHeight = 0,
     width: contentWidth = 0,
   } = useResizeObserver<HTMLDivElement>();
+
+  const debouncedWidth = useDebounce(contentWidth, 100);
 
   // delay of show content for fluent animation on open
   const [showStatementList, setShowStatementList] = useState(true);
@@ -557,7 +559,6 @@ export const StatementListBox: React.FC = () => {
               </>
             )}
 
-          {/* TODO: measure statement list header dynamically */}
           <div
             style={{
               display: "flex",
@@ -585,7 +586,7 @@ export const StatementListBox: React.FC = () => {
                   selectedRows={selectedRows}
                   setSelectedRows={setSelectedRows}
                   displayMode={displayMode}
-                  contentWidth={contentWidth}
+                  contentWidth={debouncedWidth}
                 />
               )}
             </StyledTableWrapper>

@@ -143,6 +143,10 @@ The server is also built in Javascript, using mainly the Node + Express librarie
 
 For quicker use, use can also run the server directly without building using `pnpm start` (this uses `nodemon` tool and `.env.development` environment file).
 
+### SSL
+
+The app does not support ssl internally, it should be handled in upper layer, ie. [nginx](https://docs.nginx.com/nginx/admin-guide/security-controls/securing-http-traffic-upstream/). Please adjust `APIURL` variable in client's `.env` file to use `https` instead of `http`.
+
 ### Firewall
 
 Make sure the ports required by each application are not blocked. Required ports are listed in [docker-compose.yml](https://github.com/DISSINET/InkVisitor/blob/dev/docker-compose.yml). Examples:

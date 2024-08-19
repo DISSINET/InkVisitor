@@ -103,9 +103,9 @@ describe("Entities clone", function () {
       expect(clone.label).toEqual(entity.label);
       expect(clone.legacyId).toBeFalsy();
 
-      const clonedRelations = await Relation.findForEntity(
+      const clonedRelations = await Relation.findForEntities(
         db.connection,
-        clone.id
+        [clone.id]
       );
       expect(clonedRelations).toHaveLength(1);
       expect(clonedRelations[0].id).not.toEqual(relation.id);

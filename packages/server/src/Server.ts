@@ -21,7 +21,7 @@ import profilerMiddleware from "@middlewares/profiler";
 import errorsMiddleware, { catchAll } from "@middlewares/errors";
 import { validateJwt } from "@common/auth";
 import compression from "compression";
-
+import * as path from "path";
 import "@models/events/register";
 
 const server = express();
@@ -34,11 +34,30 @@ server.use(
 
 server.use(cors());
 
-if (process.env.STATIC_PATH && process.env.STATIC_PATH !== "") {
-  server.use(
-    process.env.STATIC_PATH as string,
-    express.static("../client/dist")
-  );
+if (!!process.env.STATIC_PATH) {
+  if (process.env.STATIC_PATH === "/") {
+    server.use((req, res, next) => {
+      // allow all requests not starting with /api and that are pointed to wanted static path 
+      // relative to the root like domain.com/<static path>/...
+      if (!req.path.startsWith('/api') && req.path.startsWith(process.env.STATIC_PATH as string)) {
+        if (req.path.indexOf(".") === -1) {
+          // replacement for react(client) router that should process only pages alone (/, /login etc)
+          res.sendFile(path.join(__dirname, "..", "..", "..", "..", "client/dist/index.html"));
+        } else {
+          // everythink else will go here
+          express.static("../client/dist")(req, res, next);
+        }
+      } else {
+        // fallback to handlers below
+        next();
+      }
+    });
+  } else if (process.env.STATIC_PATH !== "") {
+    server.use(
+      process.env.STATIC_PATH as string,
+      express.static("../client/dist")
+    );
+  }
 }
 
 server.use(express.json({ limit: "150mb" }));

@@ -293,18 +293,6 @@ export const StatementEditorActantTableRow: React.FC<
       <ButtonGroup $noMarginRight height={19}>
         {userCanEdit && (
           <Button
-            key="d"
-            icon={<FaTrashAlt />}
-            color="plain"
-            inverted
-            tooltipLabel="remove actant row"
-            onClick={() => {
-              removeActant(filteredActant.data.sActant.id);
-            }}
-          />
-        )}
-        {userCanEdit && (
-          <Button
             key="a"
             icon={<FaPlus />}
             noIconMargin
@@ -380,6 +368,7 @@ export const StatementEditorActantTableRow: React.FC<
             category={category}
             isInsideTemplate={isInsideTemplate}
             territoryParentId={territoryParentId}
+            disableSpareRow
           />
         );
       }
@@ -465,6 +454,20 @@ export const StatementEditorActantTableRow: React.FC<
                   />
                 }
               />
+            </StyledGridColumn>
+            <StyledGridColumn>
+              {userCanEdit && (
+                <Button
+                  key="d"
+                  icon={<FaTrashAlt />}
+                  color="plain"
+                  inverted
+                  tooltipLabel="remove actant row"
+                  onClick={() => {
+                    removeActant(filteredActant.data.sActant.id);
+                  }}
+                />
+              )}
             </StyledGridColumn>
           </StyledGrid>
 

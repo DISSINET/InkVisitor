@@ -34,6 +34,7 @@ interface PropGroupRowType {
   disabledAttributes: PropAttributeFilter;
   openDetailOnCreate: boolean;
   alwaysShowCreateModal?: boolean;
+  initTypeTyped?: string;
 }
 export const PropGroupRowType: React.FC<PropGroupRowType> = ({
   propTypeEntity,
@@ -47,6 +48,8 @@ export const PropGroupRowType: React.FC<PropGroupRowType> = ({
   disabledAttributes,
   openDetailOnCreate,
   alwaysShowCreateModal,
+
+  initTypeTyped,
 }) => {
   return (
     <StyledAttributesFlexColumn>
@@ -150,6 +153,7 @@ export const PropGroupRowType: React.FC<PropGroupRowType> = ({
             territoryParentId={territoryParentId}
             disabled={!userCanEdit}
             alwaysShowCreateModal={alwaysShowCreateModal}
+            initTyped={initTypeTyped}
           />
         )}
       </StyledTagGrid>

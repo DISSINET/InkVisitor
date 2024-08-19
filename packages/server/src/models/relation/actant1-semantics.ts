@@ -27,9 +27,9 @@ export default class Actant1Semantics
     let out: RelationTypes.IActant1Semantics[] = [];
 
     if (asClass === EntityEnums.Class.Action) {
-      out = await Relation.findForEntity(
+      out = await Relation.findForEntities(
         conn,
-        entityId,
+        [entityId],
         RelationEnums.Type.Actant1Semantics,
         0
       );
@@ -53,9 +53,9 @@ export default class Actant1Semantics
     let out: RelationTypes.IActant1Semantics[] = [];
 
     if (asClass === EntityEnums.Class.Concept) {
-      out = await Relation.findForEntity(
+      out = await Relation.findForEntities(
         conn,
-        parentId,
+        [parentId],
         RelationEnums.Type.Actant1Semantics,
         1
       );

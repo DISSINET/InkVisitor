@@ -228,9 +228,9 @@ export default class Relation implements IRelationModel {
    * @returns  list of relations
    */
   async getSiblings(db: Connection): Promise<RelationTypes.IRelation[]> {
-    const childs = await Relation.findForEntity(
+    const childs = await Relation.findForEntities(
       db,
-      this.entityIds[0],
+      [this.entityIds[0]],
       this.type
     );
     return childs.filter((ch) => ch.id !== this.id);
@@ -387,32 +387,6 @@ export default class Relation implements IRelationModel {
     return data ? new Relation(data) : null;
   }
 
-  /**
-   * Searches for relations assigned for entityId, filtered by optional relation type
-   * @param db
-   * @param entityId
-   * @param relType
-   * @param position - position in entityIds
-   * @returns array of relation interfaces
-   */
-  static async findForEntity<T extends RelationTypes.IRelation>(
-    db: Connection,
-    entityId: string,
-    relType?: RelationEnums.Type,
-    position?: number
-  ): Promise<T[]> {
-    const items: T[] = await rethink
-      .table(Relation.table)
-      .getAll(entityId, { index: DbEnums.Indexes.RelationsEntityIds })
-      .filter(relType ? { type: relType } : {})
-      .run(db);
-
-    if (position !== undefined) {
-      return items.filter((d) => d.entityIds[position] === entityId);
-    }
-    return items;
-  }
-
   static async getByType<T extends RelationTypes.IRelation>(db: Connection, relType: RelationEnums.Type): Promise<T[]> {
     const items: T[] = await rethink
       .table(Relation.table)
@@ -423,39 +397,39 @@ export default class Relation implements IRelationModel {
   }
 
   /**
-   * searches for relations with specific entity id and returns both relation ids and connected entity ids
+   * searches for relations with specific entity ids and returns both relation ids and connected entity ids
    * @param request IRequest
-   * @param entityId string
+   * @param entityIds string[]
    * @returns promise with both entity/relation ids
    */
-  static async getLinkedForEntity(
+  static async getLinkedForEntities(
     request: IRequest,
-    entityId: string
+    entityIds: string[]
   ): Promise<[string[], string[]]> {
-    const linkedRelations = await Relation.findForEntity(
+    const linkedRelations = await Relation.findForEntities(
       request.db.connection,
-      entityId
+      entityIds
     );
-    let entityIds: string[], linkedRelationIds: string[];
+    let linkedEntitiyIds: string[], linkedRelationIds: string[];
 
     if (linkedRelations && linkedRelations.length) {
-      entityIds = Array.from(
+      linkedEntitiyIds = Array.from(
         new Set(
           linkedRelations.reduce<string[]>((acc, r) => {
             acc = acc.concat(r.entityIds);
             return acc;
           }, [])
         )
-      ).filter((id) => id != entityId);
+      ).filter((id) => entityIds.indexOf(id) === -1);
       linkedRelationIds = Array.from(new Set(linkedRelations.map((r) => r.id)));
     } else {
-      entityIds = [];
+      linkedEntitiyIds = [];
       linkedRelationIds = [];
     }
 
-    return [entityIds, linkedRelationIds];
+    return [linkedEntitiyIds, linkedRelationIds];
   }
-
+  
   /**
    * Searches for relations assigned for multiple entity ids, filtered by optional relation type
    * @param db

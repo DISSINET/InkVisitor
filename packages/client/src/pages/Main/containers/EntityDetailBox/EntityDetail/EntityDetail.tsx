@@ -7,6 +7,7 @@ import {
   IResponseDetail,
   Relation,
 } from "@shared/types";
+import { ITerritoryValidation } from "@shared/types/territory";
 import { IWarningPositionSection } from "@shared/types/warning";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
@@ -17,7 +18,7 @@ import {
   EntityTag,
   JSONExplorer,
 } from "components/advanced";
-import { CMetaProp } from "constructors";
+import { CMetaProp, DProps } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
 import { FaPlus } from "react-icons/fa";
@@ -41,6 +42,7 @@ import {
   StyledDetailSectionContentUsedIn,
   StyledDetailSectionEntityList,
   StyledDetailSectionHeader,
+  StyledDetailSectionHeading,
   StyledDetailWarnings,
   StyledDetailWrapper,
   StyledPropGroupWrap,
@@ -54,7 +56,7 @@ import { EntityDetailStatementPropsTable } from "./EntityDetailUsedInTable/Entit
 import { EntityDetailStatementsTable } from "./EntityDetailUsedInTable/EntityDetailStatementsTable/EntityDetailStatementsTable";
 import { EntityDetailValency } from "./EntityDetailValency/EntityDetailValency";
 import { EntityDetailValidationSection } from "./EntityDetailValidationSection/EntityDetailValidationSection";
-import { ITerritoryValidation } from "@shared/types/territory";
+import { EntityDetailSectionButtons } from "./EntityDetailSectionButtons/EntityDetailSectionButtons";
 
 const allowedEntityChangeClasses = [
   EntityEnums.Class.Value,
@@ -582,6 +584,9 @@ export const EntityDetail: React.FC<EntityDetail> = ({
 
   const isInsideTemplate = entity?.isTemplate || false;
 
+  const [showBatchRemovePropSubmit, setShowBatchRemovePropSubmit] =
+    useState(false);
+
   return (
     <>
       {entity && (
@@ -718,8 +723,36 @@ export const EntityDetail: React.FC<EntityDetail> = ({
             {/* metaprops section */}
             <StyledDetailSection $metaSection>
               <StyledDetailSectionHeader>
-                Metaproperties
+                <StyledDetailSectionHeading>
+                  Metaproperties
+                </StyledDetailSectionHeading>
+                {userCanEdit && (
+                  <EntityDetailSectionButtons
+                    props={entity.props}
+                    entityId={entity.id}
+                    setShowSubmit={setShowBatchRemovePropSubmit}
+                    handleCopyFromEntity={(pickedEntity, replace) => {
+                      if (pickedEntity.props.length === 0) {
+                        toast.info("no metaprops");
+                      } else {
+                        if (replace) {
+                          updateEntityMutation.mutate({
+                            props: DProps(pickedEntity.props),
+                          });
+                        } else {
+                          updateEntityMutation.mutate({
+                            props: [
+                              ...entity.props,
+                              ...DProps(pickedEntity.props),
+                            ],
+                          });
+                        }
+                      }
+                    }}
+                  />
+                )}
               </StyledDetailSectionHeader>
+
               <StyledDetailSectionContent>
                 <StyledPropGroupWrap>
                   <PropGroup
@@ -731,6 +764,15 @@ export const EntityDetail: React.FC<EntityDetail> = ({
                     updateProp={updateProp}
                     removeProp={removeProp}
                     addProp={addMetaProp}
+                    addPropWithEntityId={(variables: {
+                      typeEntityId?: string;
+                      valueEntityId?: string;
+                    }) => {
+                      const newProp = CMetaProp(variables);
+                      updateEntityMutation.mutate({
+                        props: [...entity.props, newProp],
+                      });
+                    }}
                     userCanEdit={userCanEdit}
                     openDetailOnCreate={false}
                     movePropToIndex={(propId, oldIndex, newIndex) => {
@@ -760,11 +802,11 @@ export const EntityDetail: React.FC<EntityDetail> = ({
                     color="primary"
                     label="new metaproperty"
                     icon={<FaPlus />}
-                    onClick={async () => {
+                    onClick={() => {
                       const newProp = CMetaProp();
-                      const newActant = { ...entity };
-                      newActant.props.push(newProp);
-                      updateEntityMutation.mutate({ props: newActant.props });
+                      updateEntityMutation.mutate({
+                        props: [...entity.props, newProp],
+                      });
                     }}
                   />
                 )}
@@ -910,6 +952,18 @@ export const EntityDetail: React.FC<EntityDetail> = ({
         onCancel={() => setShowRemoveSubmit(false)}
         show={showRemoveSubmit}
         loading={deleteEntityMutation.isPending}
+      />
+      <Submit
+        title="Delete metaprops"
+        text="Do you really want to delete all metaprops from this entity?"
+        submitLabel="Delete"
+        onSubmit={() => {
+          updateEntityMutation.mutate({ props: [] });
+          setShowBatchRemovePropSubmit(false);
+        }}
+        onCancel={() => setShowBatchRemovePropSubmit(false)}
+        show={showBatchRemovePropSubmit}
+        loading={updateEntityMutation.isPending}
       />
       <Submit
         title="Change entity type"

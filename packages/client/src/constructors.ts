@@ -19,6 +19,7 @@ import {
   IStatementIdentification,
 } from "@shared/types/statement";
 import api from "api";
+import { deepCopy } from "utils/utils";
 import { v4 as uuidv4 } from "uuid";
 
 export const CBookmarkFolder = (bookmarkName: string): IBookmarkFolder => ({
@@ -75,7 +76,10 @@ export const CIdentification = (): IStatementIdentification => ({
   moodvariant: EntityEnums.MoodVariant.Realis,
 });
 
-export const CMetaProp = (): IProp => ({
+export const CMetaProp = (variables?: {
+  typeEntityId?: string;
+  valueEntityId?: string;
+}): IProp => ({
   id: uuidv4(),
   elvl: EntityEnums.Elvl.Inferential,
   certainty: EntityEnums.Certainty.Empty,
@@ -88,14 +92,14 @@ export const CMetaProp = (): IProp => ({
   children: [],
 
   type: {
-    entityId: "",
+    entityId: variables?.typeEntityId ? variables.typeEntityId : "",
     elvl: EntityEnums.Elvl.Inferential,
     logic: EntityEnums.Logic.Positive,
     virtuality: EntityEnums.Virtuality.Reality,
     partitivity: EntityEnums.Partitivity.Unison,
   },
   value: {
-    entityId: "",
+    entityId: variables?.valueEntityId ? variables.valueEntityId : "",
     elvl: EntityEnums.Elvl.Inferential,
     logic: EntityEnums.Logic.Positive,
     virtuality: EntityEnums.Virtuality.Reality,
@@ -464,7 +468,7 @@ export const DTerritory = (
 };
 
 export const DProps = (oldProps: IProp[]): IProp[] => {
-  const newProps = [...oldProps];
+  const newProps = deepCopy(oldProps);
   newProps.forEach((p, pi) => {
     newProps[pi].id = uuidv4();
     newProps[pi].children.forEach((pp, pii) => {
