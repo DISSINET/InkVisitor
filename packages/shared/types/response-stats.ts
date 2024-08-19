@@ -6,6 +6,6 @@ export interface IResponseStats {
   timeUnit: TimeUnit;
 
   aggregateBy: Aggregation;
-  // aggregated entries for date in yyyy-dd-mm format
-  values: Record<string, number>;
+  // the first key is the date (yyyy-dd-mm format), the second is the aggregation group
+  values: Record<string, Record<string, number>>;
 }
