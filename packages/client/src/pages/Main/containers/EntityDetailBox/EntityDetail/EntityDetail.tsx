@@ -733,7 +733,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
                   <EntityDetailSectionButtons
                     entityId={entity.id}
                     setShowSubmit={setShowBatchRemovePropSubmit}
-                    removeBtnTooltip="remove all metaprops from entity"
+                    removeBtnTooltip="remove all metaproperties from entity"
                     removeBtnDisabled={!entity.props.length}
                     handleCopyFromEntity={(pickedEntity, replace) => {
                       if (pickedEntity.props.length === 0) {

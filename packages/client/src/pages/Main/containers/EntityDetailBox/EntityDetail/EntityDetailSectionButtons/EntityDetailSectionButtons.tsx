@@ -1,12 +1,13 @@
-import { IEntity, IProp } from "@shared/types";
+import { classesAll } from "@shared/dictionaries/entity";
+import { EntityEnums } from "@shared/enums";
+import { IEntity } from "@shared/types";
 import { Button, ButtonGroup } from "components";
 import { AttributeButtonGroup, EntitySuggester } from "components/advanced";
 import React, { useState } from "react";
-import { FaPlus, FaTrashAlt } from "react-icons/fa";
+import { FaPlus } from "react-icons/fa";
+import { MdDeleteSweep } from "react-icons/md";
 import { TbReplace } from "react-icons/tb";
 import { StyledSectionButtonsBorder } from "./EntityDetailSectionButtonsStyles";
-import { classesAll } from "@shared/dictionaries/entity";
-import { EntityEnums } from "@shared/enums";
 
 interface EntityDetailSectionButtons {
   setShowSubmit: (value: React.SetStateAction<boolean>) => void;
@@ -32,11 +33,11 @@ export const EntityDetailSectionButtons: React.FC<
     <>
       <ButtonGroup
         height={19}
-        style={{ marginLeft: "0.5rem", marginRight: "1rem" }}
+        style={{ marginLeft: "0.5rem", marginRight: "0.5rem" }}
       >
         <Button
           disabled={removeBtnDisabled}
-          icon={<FaTrashAlt />}
+          icon={<MdDeleteSweep size={18} />}
           inverted
           color="danger"
           tooltipLabel={removeBtnTooltip}

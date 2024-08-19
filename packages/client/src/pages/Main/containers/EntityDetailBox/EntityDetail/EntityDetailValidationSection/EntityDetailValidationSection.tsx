@@ -1,3 +1,4 @@
+import { EntityEnums } from "@shared/enums";
 import { IEntity, IResponseDetail, IResponseGeneric } from "@shared/types";
 import {
   EProtocolTieType,
@@ -5,23 +6,20 @@ import {
   ITerritoryValidation,
 } from "@shared/types/territory";
 import { UseMutationResult } from "@tanstack/react-query";
+import api from "api";
 import { AxiosResponse } from "axios";
 import { Button, Submit } from "components";
 import React, { useState } from "react";
 import { FaPlus } from "react-icons/fa";
+import { toast } from "react-toastify";
 import { deepCopy } from "utils/utils";
+import { EntityDetailSectionButtons } from "../EntityDetailSectionButtons/EntityDetailSectionButtons";
 import {
   StyledBlockSeparator,
   StyledDetailSectionHeader,
-  StyledDetailSectionHeading,
   StyledValidationList,
 } from "../EntityDetailStyles";
 import { EntityDetailValidationRule } from "./EntityDetailValidationRule/EntityDetailValidationRule";
-import { EntityDetailSectionButtons } from "../EntityDetailSectionButtons/EntityDetailSectionButtons";
-import { toast } from "react-toastify";
-import { DProps } from "constructors";
-import { EntityEnums } from "@shared/enums";
-import api from "api";
 
 const initValidation: ITerritoryValidation = {
   detail: "",
@@ -93,7 +91,7 @@ export const EntityDetailValidationSection: React.FC<
           <span style={{ marginLeft: "1rem", marginRight: "1rem" }}>
             <Button
               color="primary"
-              label="new validation rule"
+              label="rule"
               icon={<FaPlus />}
               onClick={initValidationRule}
             />
