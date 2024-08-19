@@ -5,7 +5,7 @@ import { ResponseStats } from "@models/stats/response";
 import { IRequest } from "src/custom_typings/request";
 import { IRequestStats } from "@shared/types/request-stats";
 
-export default Router().get(
+export default Router().post(
   "/",
   asyncRouteHandler<IResponseStats>(async (request: IRequest<unknown, IRequestStats>) => {
     const resp = new ResponseStats(request.body);

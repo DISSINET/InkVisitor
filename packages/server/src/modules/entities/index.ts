@@ -33,6 +33,7 @@ import { RelationEnums } from "@shared/enums";
 import { Relation as RelationType } from "@shared/types";
 import { copyRelations } from "@models/relation/functions";
 import Entity from "@models/entity/entity";
+import { EventType } from "@shared/types/stats";
 
 export default Router()
   /**
@@ -214,7 +215,7 @@ export default Router()
         }
       }
 
-      await Audit.createNew(request, model.id, request.body);
+      await Audit.createNew(request, model.id, request.body, EventType.CREATE);
 
       return out;
     })
@@ -269,6 +270,8 @@ export default Router()
         if (!saved) {
           throw new InternalServerError("cannot copy entity");
         }
+
+        await Audit.createNew(request, clone.id, clone, EventType.CREATE);
 
         const rels = (
           await Relation.findForEntities(request.db.connection, [originalId])
@@ -416,7 +419,7 @@ export default Router()
         const result = await model.update(request.db.connection, entityData);
 
         if (result.replaced || result.unchanged) {
-          await Audit.createNew(request, entityId, entityData);
+          await Audit.createNew(request, entityId, entityData, EventType.EDIT);
 
           return {
             result: true,
