@@ -10,7 +10,7 @@ export class ResponseStats implements IResponseStats {
   toDate: number;
   timeUnit: TimeUnit;
   aggregateBy: Aggregation;
-  values: Record<string, number>;
+  values: Record<string, Record<string, number>>;
 
   constructor(request: IRequestStats) {
     this.fromDate = request.fromDate || this.getStartOfCurrentMonth().getTime();
@@ -73,6 +73,6 @@ export class ResponseStats implements IResponseStats {
       .between(new Date(this.fromDate), new Date(this.toDate), { index: 'date' })
       .run(req.db.connection);
 
-    this.values = this.aggregateByTimeUnit(result as IAudit[])
+    this.values[Aggregation.ACTIVITY_TYPE] = this.aggregateByTimeUnit(result as IAudit[])
   }
 }
