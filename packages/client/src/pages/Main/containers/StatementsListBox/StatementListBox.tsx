@@ -15,7 +15,7 @@ import { useDebounce, useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
 import { BsInfoCircle } from "react-icons/bs";
 import { toast } from "react-toastify";
-import { setStatementListOpened } from "redux/features/layout/statementListOpenedSlice";
+import { setStatementListOpened } from "redux/features/layout/mainPage/statementListOpenedSlice";
 import { setShowWarnings } from "redux/features/statementEditor/showWarningsSlice";
 import { setDisableStatementListScroll } from "redux/features/statementList/disableStatementListScrollSlice";
 import { setRowsExpanded } from "redux/features/statementList/rowsExpandedSlice";

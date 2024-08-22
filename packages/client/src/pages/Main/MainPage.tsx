@@ -1,12 +1,19 @@
 import { EntityEnums, UserEnums } from "@shared/enums";
+import { IStatement } from "@shared/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   collapsedPanelWidth,
   fourthPanelBoxesHeightThirds,
   hiddenBoxHeight,
+  INIT_PERCENT_PANEL_WIDTHS,
+  secondPanelMinWidth,
+  SEPARATOR_X_PERCENT_POSITION,
+  thirdPanelMinWidth,
 } from "Theme/constants";
+import api from "api";
 import { Box, Button, Panel } from "components";
 import { EntityCreateModal, PanelSeparator } from "components/advanced";
+import { CStatement } from "constructors";
 import { useSearchParams } from "hooks";
 import ScrollHandler from "hooks/ScrollHandler";
 import React, { useEffect, useState } from "react";
@@ -15,10 +22,13 @@ import { BsSquareFill, BsSquareHalf } from "react-icons/bs";
 import { FaPlus } from "react-icons/fa";
 import { RiMenuFoldFill, RiMenuUnfoldFill } from "react-icons/ri";
 import { VscCloseAll } from "react-icons/vsc";
-import { setFirstPanelExpanded } from "redux/features/layout/firstPanelExpandedSlice";
-import { setFourthPanelBoxesOpened } from "redux/features/layout/fourthPanelBoxesOpenedSlice";
-import { setFourthPanelExpanded } from "redux/features/layout/fourthPanelExpandedSlice";
-import { setStatementListOpened } from "redux/features/layout/statementListOpenedSlice";
+import { setFirstPanelExpanded } from "redux/features/layout/mainPage/firstPanelExpandedSlice";
+import { setFourthPanelBoxesOpened } from "redux/features/layout/mainPage/fourthPanelBoxesOpenedSlice";
+import { setFourthPanelExpanded } from "redux/features/layout/mainPage/fourthPanelExpandedSlice";
+import { setPanelWidths } from "redux/features/layout/mainPage/panelWidthsSlice";
+import { setStatementListOpened } from "redux/features/layout/mainPage/statementListOpenedSlice";
+import { setDisableStatementListScroll } from "redux/features/statementList/disableStatementListScrollSlice";
+import { setIsLoading } from "redux/features/statementList/isLoadingSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { MemoizedEntityBookmarkBox } from "./containers/EntityBookmarkBox/EntityBookmarkBox";
 import { MemoizedEntityDetailBox } from "./containers/EntityDetailBox/EntityDetailBox";
@@ -27,11 +37,6 @@ import { MemoizedStatementEditorBox } from "./containers/StatementEditorBox/Stat
 import { MemoizedStatementListBox } from "./containers/StatementsListBox/StatementListBox";
 import { MemoizedTemplateListBox } from "./containers/TemplateListBox/TemplateListBox";
 import { MemoizedTerritoryTreeBox } from "./containers/TerritoryTreeBox/TerritoryTreeBox";
-import api from "api";
-import { IStatement } from "@shared/types";
-import { setDisableStatementListScroll } from "redux/features/statementList/disableStatementListScrollSlice";
-import { CStatement } from "constructors";
-import { setIsLoading } from "redux/features/statementList/isLoadingSlice";
 
 type FourthPanelBoxes = "search" | "bookmarks" | "templates";
 
@@ -51,6 +56,15 @@ const MainPage: React.FC<MainPage> = ({}) => {
 
   const queryClient = useQueryClient();
 
+  const layoutWidth: number = useAppSelector(
+    (state) => state.layout.layoutWidth
+  );
+  const contentHeight: number = useAppSelector(
+    (state) => state.layout.contentHeight
+  );
+  const panelWidths: number[] = useAppSelector(
+    (state) => state.layout.panelWidths
+  );
   const fourthPanelBoxesOpened: { [key: string]: boolean } = useAppSelector(
     (state) => state.layout.fourthPanelBoxesOpened
   );
@@ -59,15 +73,6 @@ const MainPage: React.FC<MainPage> = ({}) => {
   );
   const fourthPanelExpanded: boolean = useAppSelector(
     (state) => state.layout.fourthPanelExpanded
-  );
-  const contentHeight: number = useAppSelector(
-    (state) => state.layout.contentHeight
-  );
-  const panelWidths: number[] = useAppSelector(
-    (state) => state.layout.panelWidths
-  );
-  const separatorXPosition: number = useAppSelector(
-    (state) => state.layout.separatorXPosition
   );
   const statementListOpened: boolean = useAppSelector(
     (state) => state.layout.statementListOpened
@@ -172,7 +177,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
   };
 
   const getFourthPanelBoxHeight = (box: FourthPanelBoxes): number => {
-    const onePercent = contentHeight / 100;
+    const onePercentOfLayoutWidth = contentHeight / 100;
 
     const isThisBoxHidden = !fourthPanelBoxesOpened[box];
     const openBoxesCount = Object.values(fourthPanelBoxesOpened).filter(
@@ -186,7 +191,7 @@ const MainPage: React.FC<MainPage> = ({}) => {
       return hiddenBoxHeight;
     } else {
       if (openBoxesCount.length === 3) {
-        return fourthPanelBoxesHeightThirds[box] * onePercent;
+        return fourthPanelBoxesHeightThirds[box] * onePercentOfLayoutWidth;
       } else if (openBoxesCount.length === 2) {
         return (contentHeight - hiddenBoxHeight) / 2;
       } else {
@@ -262,213 +267,364 @@ const MainPage: React.FC<MainPage> = ({}) => {
     enabled: !!userId && api.isLoggedIn(),
   });
 
+  const onePercentOfLayoutWidth = layoutWidth / 100;
+  const floorNumberToOneDecimal = (numberToFloor: number) => {
+    return Math.floor(numberToFloor * 10) / 10;
+  };
+
+  const localStorageSeparatorXPosition = localStorage.getItem(
+    "mainPageSeparatorXPosition"
+  );
+  const [mainPageSeparatorXPosition, setMainPageSeparatorXPosition] =
+    useState<number>(
+      (localStorageSeparatorXPosition
+        ? Number(localStorageSeparatorXPosition)
+        : SEPARATOR_X_PERCENT_POSITION) * onePercentOfLayoutWidth
+    );
+  // const [mainPageSeparatorXPosition, setMainPageSeparatorXPosition] =
+  //   useState<number>(
+  //     floorNumberToOneDecimal(
+  //       SEPARATOR_X_PERCENT_POSITION * onePercentOfLayoutWidth
+  //     )
+  //   );
+
+  // useEffect(() => {
+  //   const onePercentOfLayoutWidth = layoutWidth / 100;
+  //   const separatorXPercentPosition =
+  //     Math.floor((mainPageSeparatorXPosition / onePercentOfLayoutWidth) * 10) / 10;
+  //   localStorage.setItem(
+  //     "mainPageSeparatorXPosition",
+  //     separatorXPercentPosition.toString()
+  //   );
+
+  //   dispatch(
+  //     setPanelWidths([
+  //       panelWidths[0],
+  //       mainPageSeparatorXPosition - panelWidths[0],
+  //       layoutWidth - panelWidths[3] - mainPageSeparatorXPosition,
+  //       panelWidths[3],
+  //     ])
+  //   );
+  // }, [mainPageSeparatorXPosition]);
+
+  useEffect(() => {
+    if (!panelWidths.length && !localStorageSeparatorXPosition) {
+    }
+  }, []);
+
+  useEffect(() => {
+    if (layoutWidth > 0) {
+      if (!panelWidths.length) {
+        const panelWidthsPx = INIT_PERCENT_PANEL_WIDTHS.map((percentWidth) => {
+          return floorNumberToOneDecimal(
+            percentWidth * onePercentOfLayoutWidth
+          );
+        });
+
+        if (!localStorageSeparatorXPosition) {
+          console.log("first layout init");
+          // first layout INIT
+          dispatch(setPanelWidths(panelWidthsPx));
+        } else {
+          if (
+            INIT_PERCENT_PANEL_WIDTHS[0] + INIT_PERCENT_PANEL_WIDTHS[1] ===
+            Number(localStorageSeparatorXPosition)
+          ) {
+            console.log("separator equals panel widths");
+            dispatch(setPanelWidths(panelWidthsPx));
+          } else {
+            console.log("separator changes panel widths");
+            // layout init with saved separator
+            dispatch(
+              setPanelWidths([
+                panelWidthsPx[0],
+                mainPageSeparatorXPosition - panelWidthsPx[0],
+                mainPageSeparatorXPosition + panelWidthsPx[3] - layoutWidth,
+                panelWidthsPx[3],
+              ])
+            );
+          }
+        }
+      } else {
+        // panelWidths initialized
+      }
+
+      const separatorXPercentPosition = floorNumberToOneDecimal(
+        mainPageSeparatorXPosition / onePercentOfLayoutWidth
+      );
+
+      // FIRST
+      const firstPanel = floorNumberToOneDecimal(
+        onePercentOfLayoutWidth * INIT_PERCENT_PANEL_WIDTHS[0]
+      );
+
+      // SECOND
+      const secondPanelPx = floorNumberToOneDecimal(
+        onePercentOfLayoutWidth *
+          (separatorXPercentPosition - INIT_PERCENT_PANEL_WIDTHS[0])
+      );
+      const isSecondPanelUndersized = secondPanelPx < secondPanelMinWidth;
+      let secondPanel = isSecondPanelUndersized
+        ? secondPanelMinWidth
+        : secondPanelPx;
+
+      // THIRD
+      const thirdPanelPx = floorNumberToOneDecimal(
+        layoutWidth -
+          onePercentOfLayoutWidth *
+            (separatorXPercentPosition + INIT_PERCENT_PANEL_WIDTHS[3])
+      );
+      const isThirdPanelUndersized = thirdPanelPx < thirdPanelMinWidth;
+      let thirdPanel = isThirdPanelUndersized
+        ? thirdPanelMinWidth
+        : thirdPanelPx;
+
+      // FOURTH
+      const fourthPanel = floorNumberToOneDecimal(
+        onePercentOfLayoutWidth * INIT_PERCENT_PANEL_WIDTHS[3]
+      );
+
+      if (!isSecondPanelUndersized && isThirdPanelUndersized) {
+        const undersizeDifference = thirdPanelMinWidth - thirdPanelPx;
+        secondPanel = secondPanel - undersizeDifference;
+      }
+
+      const panels = [firstPanel, secondPanel, thirdPanel, fourthPanel];
+      dispatch(setPanelWidths(panels));
+      setMainPageSeparatorXPosition(panels[0] + panels[1]);
+      localStorage.setItem(
+        "mainPageSeparatorXPosition",
+        separatorXPercentPosition.toString()
+      );
+    }
+  }, [layoutWidth]);
+
   return (
     <>
-      <ScrollHandler />
-      {separatorXPosition > 0 && <PanelSeparator />}
+      {panelWidths.length && (
+        <>
+          <ScrollHandler />
+          {mainPageSeparatorXPosition > 0 && (
+            <PanelSeparator
+              leftSideMinWidth={secondPanelMinWidth + panelWidths[0]}
+              leftSideMaxWidth={
+                layoutWidth - panelWidths[3] - thirdPanelMinWidth
+              }
+              separatorXPosition={mainPageSeparatorXPosition}
+              setSeparatorXPosition={(xPosition) =>
+                setMainPageSeparatorXPosition(xPosition)
+              }
+            />
+          )}
 
-      {/* FIRST PANEL */}
-      <Panel width={firstPanelExpanded ? panelWidths[0] : collapsedPanelWidth}>
-        <Box
-          height={contentHeight}
-          label="Territories"
-          isExpanded={firstPanelExpanded}
-          buttons={[
-            refreshBoxButton(["tree", "user"], !firstPanelExpanded),
-            firstPanelButton(),
-          ]}
-          noPadding
-          onHeaderClick={toggleFirstPanel}
-        >
-          <MemoizedTerritoryTreeBox />
-        </Box>
-      </Panel>
-
-      {/* SECOND PANEL */}
-      <Panel
-        width={
-          firstPanelExpanded
-            ? panelWidths[1]
-            : panelWidths[1] + panelWidths[0] - collapsedPanelWidth
-        }
-      >
-        <Box
-          label="Statements"
-          borderColor="white"
-          onHeaderClick={
-            !statementListOpened ? toggleStatementListOpen : undefined
-          }
-          height={
-            detailIdArray.length
-              ? statementListOpened
-                ? contentHeight / 2 - 20
-                : hiddenBoxHeight
-              : contentHeight
-          }
-          buttons={[
-            <>
-              {statementListOpened &&
-                userRole !== UserEnums.Role.Viewer &&
-                territoryId && (
-                  <Button
-                    key="add"
-                    icon={<FaPlus />}
-                    tooltipLabel="add new statement at the end of the list"
-                    color="primary"
-                    label="new statement"
-                    onClick={() => {
-                      if (user) {
-                        addStatementAtTheEndMutation.mutate(
-                          CStatement(
-                            userRole,
-                            user.options,
-                            "",
-                            "",
-                            territoryId
-                          )
-                        );
-                      }
-                    }}
-                  />
-                )}
-            </>,
-            statementListOpened &&
-              territoryId &&
-              refreshBoxButton(["territory", "statement", "user"], false),
-          ]}
-        >
-          <MemoizedStatementListBox />
-        </Box>
-        {(selectedDetailId || detailIdArray.length > 0) && (
-          <Box
-            label="Detail"
-            borderColor="white"
-            onHeaderClick={toggleStatementListOpen}
-            height={
-              statementListOpened
-                ? contentHeight / 2 + 20
-                : contentHeight - hiddenBoxHeight
-            }
-            buttons={[
-              <>
-                {userRole !== UserEnums.Role.Viewer && (
-                  <Button
-                    icon={<FaPlus />}
-                    label="new entity"
-                    onClick={() => setShowEntityCreateModal(true)}
-                  />
-                )}
-              </>,
-              refreshBoxButton(["entity", "user"], false),
-              <Button
-                inverted
-                tooltipLabel={
-                  statementListOpened
-                    ? "maximize detail box"
-                    : "shrink detail box"
-                }
-                icon={
-                  statementListOpened ? (
-                    <BsSquareFill />
-                  ) : (
-                    <BsSquareHalf style={{ transform: "rotate(270deg)" }} />
-                  )
-                }
-                onClick={toggleStatementListOpen}
-              />,
-              <Button
-                inverted
-                tooltipLabel="close all tabs"
-                icon={<VscCloseAll style={{ transform: "scale(1.3)" }} />}
-                onClick={() => {
-                  clearAllDetailIds();
-                  dispatch(setStatementListOpened(true));
-                }}
-              />,
-            ]}
+          {/* FIRST PANEL */}
+          <Panel
+            width={firstPanelExpanded ? panelWidths[0] : collapsedPanelWidth}
           >
-            <MemoizedEntityDetailBox />
-          </Box>
-        )}
-        {showEntityCreateModal && (
-          <EntityCreateModal
-            closeModal={() => setShowEntityCreateModal(false)}
-            onMutationSuccess={(entity) => {
-              if (entity.class !== EntityEnums.Class.Value) {
-                appendDetailId(entity.id);
-              }
-              if (entity.class === EntityEnums.Class.Territory) {
-                queryClient.invalidateQueries({ queryKey: ["tree"] });
-              }
-            }}
-          />
-        )}
-      </Panel>
+            <Box
+              height={contentHeight}
+              label="Territories"
+              isExpanded={firstPanelExpanded}
+              buttons={[
+                refreshBoxButton(["tree", "user"], !firstPanelExpanded),
+                firstPanelButton(),
+              ]}
+              noPadding
+              onHeaderClick={toggleFirstPanel}
+            >
+              <MemoizedTerritoryTreeBox />
+            </Box>
+          </Panel>
 
-      {/* THIRD PANEL */}
-      <Panel
-        width={
-          fourthPanelExpanded
-            ? panelWidths[2]
-            : panelWidths[2] + panelWidths[3] - collapsedPanelWidth
-        }
-      >
-        <Box borderColor="white" height={contentHeight} label="Editor">
-          <MemoizedStatementEditorBox />
-        </Box>
-      </Panel>
+          {/* SECOND PANEL */}
+          <Panel
+            width={
+              firstPanelExpanded
+                ? panelWidths[1]
+                : panelWidths[1] + panelWidths[0] - collapsedPanelWidth
+            }
+          >
+            <Box
+              label="Statements"
+              borderColor="white"
+              onHeaderClick={
+                !statementListOpened ? toggleStatementListOpen : undefined
+              }
+              height={
+                detailIdArray.length
+                  ? statementListOpened
+                    ? contentHeight / 2 - 20
+                    : hiddenBoxHeight
+                  : contentHeight
+              }
+              buttons={[
+                <>
+                  {statementListOpened &&
+                    userRole !== UserEnums.Role.Viewer &&
+                    territoryId && (
+                      <Button
+                        key="add"
+                        icon={<FaPlus />}
+                        tooltipLabel="add new statement at the end of the list"
+                        color="primary"
+                        label="new statement"
+                        onClick={() => {
+                          if (user) {
+                            addStatementAtTheEndMutation.mutate(
+                              CStatement(
+                                userRole,
+                                user.options,
+                                "",
+                                "",
+                                territoryId
+                              )
+                            );
+                          }
+                        }}
+                      />
+                    )}
+                </>,
+                statementListOpened &&
+                  territoryId &&
+                  refreshBoxButton(["territory", "statement", "user"], false),
+              ]}
+            >
+              <MemoizedStatementListBox />
+            </Box>
+            {(selectedDetailId || detailIdArray.length > 0) && (
+              <Box
+                label="Detail"
+                borderColor="white"
+                onHeaderClick={toggleStatementListOpen}
+                height={
+                  statementListOpened
+                    ? contentHeight / 2 + 20
+                    : contentHeight - hiddenBoxHeight
+                }
+                buttons={[
+                  <>
+                    {userRole !== UserEnums.Role.Viewer && (
+                      <Button
+                        icon={<FaPlus />}
+                        label="new entity"
+                        onClick={() => setShowEntityCreateModal(true)}
+                      />
+                    )}
+                  </>,
+                  refreshBoxButton(["entity", "user"], false),
+                  <Button
+                    inverted
+                    tooltipLabel={
+                      statementListOpened
+                        ? "maximize detail box"
+                        : "shrink detail box"
+                    }
+                    icon={
+                      statementListOpened ? (
+                        <BsSquareFill />
+                      ) : (
+                        <BsSquareHalf style={{ transform: "rotate(270deg)" }} />
+                      )
+                    }
+                    onClick={toggleStatementListOpen}
+                  />,
+                  <Button
+                    inverted
+                    tooltipLabel="close all tabs"
+                    icon={<VscCloseAll style={{ transform: "scale(1.3)" }} />}
+                    onClick={() => {
+                      clearAllDetailIds();
+                      dispatch(setStatementListOpened(true));
+                    }}
+                  />,
+                ]}
+              >
+                <MemoizedEntityDetailBox />
+              </Box>
+            )}
+            {showEntityCreateModal && (
+              <EntityCreateModal
+                closeModal={() => setShowEntityCreateModal(false)}
+                onMutationSuccess={(entity) => {
+                  if (entity.class !== EntityEnums.Class.Value) {
+                    appendDetailId(entity.id);
+                  }
+                  if (entity.class === EntityEnums.Class.Territory) {
+                    queryClient.invalidateQueries({ queryKey: ["tree"] });
+                  }
+                }}
+              />
+            )}
+          </Panel>
 
-      {/* FOURTH PANEL */}
-      <Panel width={fourthPanelExpanded ? panelWidths[3] : collapsedPanelWidth}>
-        <Box
-          height={getFourthPanelBoxHeight("search")}
-          label="Search"
-          color="white"
-          isExpanded={fourthPanelExpanded}
-          buttons={[
-            refreshBoxButton(
-              ["search-templates", "search"],
-              !fourthPanelExpanded
-            ),
-            hideBoxButton("search"),
-            hideFourthPanelButton(),
-          ]}
-          onHeaderClick={toggleFourthPanel}
-          disableOpenBoxHeaderClick
-        >
-          <MemoizedEntitySearchBox />
-        </Box>
-        <Box
-          height={getFourthPanelBoxHeight("bookmarks")}
-          label="Bookmarks"
-          color="white"
-          isExpanded={fourthPanelExpanded}
-          buttons={[
-            refreshBoxButton(["bookmarks"], !fourthPanelExpanded),
-            hideBoxButton("bookmarks"),
-            hideFourthPanelButton(),
-          ]}
-          onHeaderClick={toggleFourthPanel}
-          disableOpenBoxHeaderClick
-        >
-          <MemoizedEntityBookmarkBox />
-        </Box>
-        <Box
-          height={getFourthPanelBoxHeight("templates")}
-          label="Templates"
-          color="white"
-          isExpanded={fourthPanelExpanded}
-          buttons={[
-            refreshBoxButton(["templates"], !fourthPanelExpanded),
-            hideBoxButton("templates"),
-            hideFourthPanelButton(),
-          ]}
-          onHeaderClick={toggleFourthPanel}
-          disableOpenBoxHeaderClick
-        >
-          <MemoizedTemplateListBox />
-        </Box>
-      </Panel>
+          {/* THIRD PANEL */}
+          <Panel
+            width={
+              fourthPanelExpanded
+                ? panelWidths[2]
+                : panelWidths[2] + panelWidths[3] - collapsedPanelWidth
+            }
+          >
+            <Box borderColor="white" height={contentHeight} label="Editor">
+              <MemoizedStatementEditorBox />
+            </Box>
+          </Panel>
+
+          {/* FOURTH PANEL */}
+          <Panel
+            width={fourthPanelExpanded ? panelWidths[3] : collapsedPanelWidth}
+          >
+            <Box
+              height={getFourthPanelBoxHeight("search")}
+              label="Search"
+              color="white"
+              isExpanded={fourthPanelExpanded}
+              buttons={[
+                refreshBoxButton(
+                  ["search-templates", "search"],
+                  !fourthPanelExpanded
+                ),
+                hideBoxButton("search"),
+                hideFourthPanelButton(),
+              ]}
+              onHeaderClick={toggleFourthPanel}
+              disableOpenBoxHeaderClick
+            >
+              <MemoizedEntitySearchBox />
+            </Box>
+            <Box
+              height={getFourthPanelBoxHeight("bookmarks")}
+              label="Bookmarks"
+              color="white"
+              isExpanded={fourthPanelExpanded}
+              buttons={[
+                refreshBoxButton(["bookmarks"], !fourthPanelExpanded),
+                hideBoxButton("bookmarks"),
+                hideFourthPanelButton(),
+              ]}
+              onHeaderClick={toggleFourthPanel}
+              disableOpenBoxHeaderClick
+            >
+              <MemoizedEntityBookmarkBox />
+            </Box>
+            <Box
+              height={getFourthPanelBoxHeight("templates")}
+              label="Templates"
+              color="white"
+              isExpanded={fourthPanelExpanded}
+              buttons={[
+                refreshBoxButton(["templates"], !fourthPanelExpanded),
+                hideBoxButton("templates"),
+                hideFourthPanelButton(),
+              ]}
+              onHeaderClick={toggleFourthPanel}
+              disableOpenBoxHeaderClick
+            >
+              <MemoizedTemplateListBox />
+            </Box>
+          </Panel>
+        </>
+      )}
     </>
   );
 };

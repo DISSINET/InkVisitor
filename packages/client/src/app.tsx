@@ -7,41 +7,32 @@ import { useAppDispatch, useAppSelector } from "redux/hooks";
 import { ThemeProvider } from "styled-components";
 
 import api from "api";
+import { Page } from "components/advanced";
+import { useDebounce } from "hooks";
 import { useWindowSize } from "hooks/useWindowSize";
-import {
-  heightHeader,
-  percentPanelWidths,
-  secondPanelMinWidth,
-  separatorXPercentPosition,
-  thirdPanelMinWidth,
-} from "Theme/constants";
+import { heightHeader } from "Theme/constants";
 import GlobalStyle from "Theme/global";
 import theme, { ThemeType } from "Theme/theme";
 import { darkTheme } from "Theme/theme-dark";
-import { Page } from "components/advanced";
-import { useDebounce } from "hooks";
 
+import { InterfaceEnums } from "@shared/enums";
+import { SearchParamsProvider } from "hooks/useSearchParamsContext";
+import {
+  AboutPage,
+  AclPage,
+  ActivatePage,
+  AdvancedSearchPage,
+  DocumentsPage,
+  LoginPage,
+  MainPage,
+  NotFoundPage,
+  PasswordResetPage,
+  UsersPage,
+} from "pages";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { setContentHeight } from "redux/features/layout/contentHeightSlice";
 import { setLayoutWidth } from "redux/features/layout/layoutWidthSlice";
-import { setPanelWidths } from "redux/features/layout/panelWidthsSlice";
-import { setSeparatorXPosition } from "redux/features/layout/separatorXPositionSlice";
-
-import { InterfaceEnums } from "@shared/enums";
-import {
-  LoginPage,
-  ActivatePage,
-  PasswordResetPage,
-  MainPage,
-  AclPage,
-  AboutPage,
-  UsersPage,
-  DocumentsPage,
-  NotFoundPage,
-  AdvancedSearchPage,
-} from "pages";
-import { SearchParamsProvider } from "hooks/useSearchParamsContext";
 
 const clockPerformance = (
   profilerId: any,
@@ -113,60 +104,6 @@ export const App: React.FC = () => {
     if (debouncedWidth > 0) {
       const layoutWidth = debouncedWidth;
       dispatch(setLayoutWidth(layoutWidth));
-      const onePercent = layoutWidth / 100;
-
-      const separatorXStoragePosition =
-        localStorage.getItem("separatorXPosition");
-      const separatorPercentPosition: number = separatorXStoragePosition
-        ? Number(separatorXStoragePosition)
-        : separatorXPercentPosition;
-
-      if (!separatorXStoragePosition) {
-        localStorage.setItem(
-          "separatorXPosition",
-          separatorPercentPosition.toString()
-        );
-      }
-
-      // FIRST
-      const firstPanel =
-        Math.floor(onePercent * percentPanelWidths[0] * 10) / 10;
-
-      // SECOND
-      const secondPanelPx = Math.floor(
-        (onePercent * (separatorPercentPosition - percentPanelWidths[0]) * 10) /
-          10
-      );
-      const isSecondPanelUndersized = secondPanelPx < secondPanelMinWidth;
-      let secondPanel = isSecondPanelUndersized
-        ? secondPanelMinWidth
-        : secondPanelPx;
-
-      // THIRD
-      const thirdPanelPx = Math.floor(
-        layoutWidth -
-          (onePercent *
-            (separatorPercentPosition + percentPanelWidths[3]) *
-            10) /
-            10
-      );
-      const isThirdPanelUndersized = thirdPanelPx < thirdPanelMinWidth;
-      let thirdPanel = isThirdPanelUndersized
-        ? thirdPanelMinWidth
-        : thirdPanelPx;
-
-      // FOURTH
-      const fourthPanel =
-        Math.floor(onePercent * percentPanelWidths[3] * 10) / 10;
-
-      if (!isSecondPanelUndersized && isThirdPanelUndersized) {
-        const undersizeDifference = thirdPanelMinWidth - thirdPanelPx;
-        secondPanel = secondPanel - undersizeDifference;
-      }
-
-      const panels = [firstPanel, secondPanel, thirdPanel, fourthPanel];
-      dispatch(setPanelWidths(panels));
-      dispatch(setSeparatorXPosition(panels[0] + panels[1]));
     }
   }, [debouncedWidth]);
 

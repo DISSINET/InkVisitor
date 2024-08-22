@@ -20,8 +20,9 @@ export const collapsedPanelWidth = 31;
 export const secondPanelMinWidth = 480;
 export const thirdPanelMinWidth = 450;
 // % PERCENT PANEL WIDTHS
-export const percentPanelWidths = [10, 31, 41, 18];
-export const separatorXPercentPosition = 42;
+export const INIT_PERCENT_PANEL_WIDTHS = [10, 31, 41, 18];
+// TODO: should be calculated from PERCENT_PANEL_WIDTHS
+export const SEPARATOR_X_PERCENT_POSITION = 46;
 // BOXES
 export const hiddenBoxHeight = 33;
 export const fourthPanelBoxesHeightThirds = {

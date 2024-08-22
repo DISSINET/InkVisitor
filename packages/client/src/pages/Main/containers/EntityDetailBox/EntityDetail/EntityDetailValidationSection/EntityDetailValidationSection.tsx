@@ -103,7 +103,7 @@ export const EntityDetailValidationSection: React.FC<
             suggesterCategoryTypes={[EntityEnums.Class.Territory]}
             setShowSubmit={setShowBatchRemoveSubmit}
             removeBtnTooltip="remove all validations from entity"
-            removeBtnDisabled={!entity.data.validations.length}
+            removeBtnDisabled={!entity.data.validations?.length}
             handleCopyFromEntity={(pickedEntity, replace) => {
               setLoadingValidations(true);
               api.detailGet(pickedEntity.id).then((data) => {
