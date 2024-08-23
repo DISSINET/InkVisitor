@@ -494,7 +494,7 @@ export const StatementListBox: React.FC = () => {
     width: contentWidth = 0,
   } = useResizeObserver<HTMLDivElement>();
 
-  const debouncedWidth = useDebounce(contentWidth, 100);
+  const debouncedWidth = useDebounce(contentWidth, 50);
 
   // delay of show content for fluent animation on open
   const [showStatementList, setShowStatementList] = useState(true);

@@ -24,6 +24,7 @@ import selectedTerritoryPathSlice from "./features/territoryTree/selectedTerrito
 import treeInitializeSlice from "./features/territoryTree/treeInitializeSlice";
 import themeSlice from "./features/themeSlice";
 import usernameSlice from "./features/usernameSlice";
+import panelWidthsPercentSlice from "./features/layout/mainPage/panelWidthsPercentSlice";
 
 const store: Store = configureStore({
   reducer: {
@@ -58,6 +59,7 @@ const store: Store = configureStore({
 
       // mainPage: combineReducers({
       panelWidths: panelWidthsSlice,
+      panelWidthsPercent: panelWidthsPercentSlice,
       firstPanelExpanded: firstPanelExpandedSlice,
       fourthPanelExpanded: fourthPanelExpandedSlice,
       fourthPanelBoxesOpened: fourthPanelBoxesOpenedSlice,
