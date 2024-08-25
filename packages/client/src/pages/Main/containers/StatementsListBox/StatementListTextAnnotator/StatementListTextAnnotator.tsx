@@ -1,11 +1,6 @@
 import { animated, useSpring } from "@react-spring/web";
 import { EntityEnums, UserEnums } from "@shared/enums";
-import {
-  IEntity,
-  IResource,
-  IResponseEntity,
-  IResponseStatement,
-} from "@shared/types";
+import { IEntity, IResponseEntity, IResponseStatement } from "@shared/types";
 import { useQuery } from "@tanstack/react-query";
 import api from "api";
 import { Loader } from "components";
@@ -57,6 +52,7 @@ export const StatementListTextAnnotator: React.FC<
   contentHeight,
   contentWidth,
 }) => {
+  const [isInitialized, setIsInitialized] = useState<boolean>(false);
   const [showAnnotator, setShowAnnotator] = useState(false);
   useEffect(() => {
     setShowAnnotator(true);
@@ -100,27 +96,37 @@ export const StatementListTextAnnotator: React.FC<
   );
 
   // if no resource is selected, select the document with this territoryId in document references
-  useEffect(() => {
-    if (selectedResourceId === false && resources && documents) {
-      resources.forEach((resource) => {
+  const loadDefaultResource = () => {
+    if (resources && documents && isInitialized === false) {
+      const resourceWithAnchor = resources.find((resource) => {
         if (resource.data.documentId) {
           const document = documents.find(
             (d) => d.id === resource.data.documentId
           );
           if (document) {
-            const hasThisTAnchor = document.referencedEntityIds.T.find(
-              (t) => t === territoryId
-            );
-            if (hasThisTAnchor) {
-              setSelectedResourceId(resource.id);
-            }
+            return document.referencedEntityIds.T.includes(territoryId);
           }
         }
+        return false;
       });
-    } else {
-      setSelectedResourceId(false);
+
+      if (resourceWithAnchor) {
+        setSelectedResourceId(resourceWithAnchor.id);
+      } else {
+        setSelectedResourceId(false);
+      }
+
+      setIsInitialized(true);
     }
-  }, [resources, territoryId]);
+  };
+
+  useEffect(() => {
+    setIsInitialized(false);
+  }, [territoryId]);
+
+  useEffect(() => {
+    loadDefaultResource();
+  }, [resources, documents, isInitialized, territoryId]);
 
   const selectedResource = useMemo<IResponseEntity | false>(() => {
     if (selectedResourceId && resources) {

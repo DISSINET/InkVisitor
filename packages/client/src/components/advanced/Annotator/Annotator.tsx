@@ -56,6 +56,8 @@ export const TextAnnotator = ({
   const queryClient = useQueryClient();
   const theme = useContext(ThemeContext);
 
+  const [isInitialized, setIsInitialized] = useState<boolean>(false);
+
   const {
     data: document,
     error: documentError,
@@ -107,6 +109,7 @@ export const TextAnnotator = ({
 
   const handleSaveNewContent = (quiet: boolean) => {
     const scrollBeforeUpdate = annotator?.viewport?.lineStart;
+
     if (annotator && document?.id) {
       if (quiet) {
         updateDocumentMutationQuiet.mutate(
@@ -120,10 +123,15 @@ export const TextAnnotator = ({
           {
             onSuccess: () => {
               if (scrollBeforeUpdate) {
-                annotator.viewport.scrollTo(
+                console.log(
+                  "going to scroll",
                   scrollBeforeUpdate,
                   annotator.text.lines.length
                 );
+                // annotator.viewport.scrollTo(
+                //   scrollBeforeUpdate,
+                //   annotator.text.lines.length
+                // );
               }
             },
           }
@@ -139,12 +147,12 @@ export const TextAnnotator = ({
           },
           {
             onSuccess: () => {
-              if (scrollBeforeUpdate) {
-                annotator.viewport.scrollTo(
-                  scrollBeforeUpdate,
-                  annotator.text.lines.length
-                );
-              }
+              // if (scrollBeforeUpdate) {
+              //   annotator.viewport.scrollTo(
+              //     scrollBeforeUpdate,
+              //     annotator.text.lines.length
+              //   );
+              // }
             },
           }
         );
@@ -276,15 +284,27 @@ export const TextAnnotator = ({
 
     annotator.draw();
 
-    if (initialScrollEntityId) {
-      annotator.scrollToAnchor(initialScrollEntityId);
-    }
     setAnnotator(annotator);
+
+    if (annotator && annotator.viewport) {
+      if (!isInitialized) {
+        if (initialScrollEntityId) {
+          console.log("scrolling to", initialScrollEntityId);
+          annotator.scrollToAnchor(initialScrollEntityId);
+        }
+        setIsInitialized(true);
+      }
+    }
   };
 
   useEffect(() => {
     refreshAnnotator();
   }, [document, theme]);
+
+  useEffect(() => {
+    setIsInitialized(false);
+    refreshAnnotator();
+  }, [initialScrollEntityId]);
 
   const topBottomSelection = useMemo<boolean>(() => {
     const yStart = annotator?.cursor?.selectStart?.yLine;

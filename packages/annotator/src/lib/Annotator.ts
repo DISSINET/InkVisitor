@@ -897,6 +897,7 @@ export class Annotator {
 
   scrollToAnchor(tag: string, occurence: number = 1) {
     const pos = this.text.getTagPosition(tag, occurence);
+
     if (pos.length !== 2) {
       return;
     }

@@ -51,11 +51,12 @@ export default class Viewport {
    * @param textLine
    * @param maxLines
    */
-  scrollTo(textLine: number, maxLines: number) {
-    if (textLine > this.lineStart) {
-      this.scrollDown(textLine - this.lineStart, maxLines);
-    } else if (textLine < this.lineStart) {
-      this.scrollUp(this.lineStart - textLine);
+  scrollTo(lineTo: number, maxLines: number) {
+    const lineFrom = this.lineStart;
+    if (lineTo > this.lineStart) {
+      this.scrollDown(lineTo - lineFrom, maxLines);
+    } else if (lineTo < lineFrom) {
+      this.scrollUp(lineFrom - lineTo);
     }
   }
 }
