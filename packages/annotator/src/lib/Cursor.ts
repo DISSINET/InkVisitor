@@ -1,3 +1,4 @@
+import { text } from "stream/consumers";
 import { DrawingOptions } from "./Annotator";
 import Viewport from "./Viewport";
 import { Modes } from "./constants";
@@ -18,11 +19,9 @@ export default class Cursor implements IRelativeCoordinates {
   // relative!
   xLine: number;
   yLine: number;
-
   ratio: number;
 
-  fillColor: string;
-  fillOpacity: number;
+  style: Record<string, string | number>;
 
   // highlighted area must use absolute coordinates - highlighted area stays in position while scrolling
   private selecting: boolean = false;
@@ -36,11 +35,12 @@ export default class Cursor implements IRelativeCoordinates {
     ratio: number,
     xLine: number = -1,
     yLine: number = -1,
-    fillColor = "blue",
-    fillOpacity = 0.2
+    style: Record<string, string | number> = {
+      fillColor: "blue",
+      fillOpacity: 0.2,
+    }
   ) {
-    this.fillColor = fillColor;
-    this.fillOpacity = fillOpacity;
+    this.style = style;
 
     this.ratio = ratio;
     this.xLine = xLine;
@@ -48,10 +48,10 @@ export default class Cursor implements IRelativeCoordinates {
   }
 
   setFillColor(fillColor: string): void {
-    this.fillColor = fillColor;
+    this.style.fillColor = fillColor;
   }
   setFillOpacity(fillOpacity: number): void {
-    this.fillOpacity = fillOpacity;
+    this.style.fillOpacity = fillOpacity;
   }
 
   yToLineI(y: number, lineHeight: number): number {
@@ -136,12 +136,22 @@ export default class Cursor implements IRelativeCoordinates {
    * @returns
    */
   move(xDelta: number, yDelta: number) {
-    if ((this.xLine === -1 && this.yLine === -1) || (!xDelta && !yDelta)) {
+    if (!xDelta && !yDelta) {
       return;
     }
 
-    this.xLine += xDelta;
-    this.yLine += yDelta;
+    let newX = this.xLine + xDelta;
+    let newY = this.yLine + yDelta;
+
+    if (newX < 0) {
+      newX = 0;
+    }
+    if (newY < 0) {
+      newY = 0;
+    }
+
+    this.xLine = newX;
+    this.yLine = newY;
   }
 
   /**
@@ -226,8 +236,10 @@ export default class Cursor implements IRelativeCoordinates {
         hEnd = tmpSwitch;
       }
 
-      ctx.fillStyle = options.schema?.style.fillColor || this.fillColor;
-      ctx.globalAlpha = options.schema?.style.fillOpacity || this.fillOpacity;
+      ctx.fillStyle =
+        options.schema?.style.fillColor || (this.style.fillColor as string);
+      ctx.globalAlpha =
+        options.schema?.style.fillOpacity || (this.style.fillOpacity as number);
       ctx.globalCompositeOperation = "multiply";
 
       for (let i = 0; i <= viewport.lineEnd - viewport.lineStart; i++) {
