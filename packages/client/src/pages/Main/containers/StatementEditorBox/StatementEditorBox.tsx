@@ -9,12 +9,18 @@ import { BsInfoCircle } from "react-icons/bs";
 import { toast } from "react-toastify";
 import { StatementEditor } from "./StatementEditor/StatementEditor";
 import { StyledEditorEmptyState } from "./StatementEditorBoxStyles";
+import Scrollbar from "react-scrollbars-custom";
+import { useAppSelector } from "redux/hooks";
 
 export const StatementEditorBox: React.FC = () => {
   const { statementId, setStatementId, selectedDetailId, setTerritoryId } =
     useSearchParams();
 
   const queryClient = useQueryClient();
+
+  const contentHeight: number = useAppSelector(
+    (state) => state.layout.contentHeight
+  );
 
   // Statement query
   const {
@@ -267,18 +273,26 @@ export const StatementEditorBox: React.FC = () => {
   return (
     <>
       {tempObject ? (
-        <div
-          onMouseLeave={() => sendChangesToBackend(tempObject)}
-          style={{ marginBottom: "4rem" }}
+        <Scrollbar
+          style={{ height: contentHeight }}
+          disableTracksWidthCompensation={true}
+          removeTrackXWhenNotUsed={true}
+          removeTrackYWhenNotUsed={true}
+          permanentTracks={false}
         >
-          <StatementEditor
-            statement={tempObject}
-            updateStatementMutation={updateStatementMutation}
-            moveStatementMutation={moveStatementMutation}
-            handleAttributeChange={handleAttributeChange}
-            handleDataAttributeChange={handleDataAttributeChange}
-          />
-        </div>
+          <div
+            onMouseLeave={() => sendChangesToBackend(tempObject)}
+            style={{ marginBottom: "4rem", marginRight: "2rem" }}
+          >
+            <StatementEditor
+              statement={tempObject}
+              updateStatementMutation={updateStatementMutation}
+              moveStatementMutation={moveStatementMutation}
+              handleAttributeChange={handleAttributeChange}
+              handleDataAttributeChange={handleDataAttributeChange}
+            />
+          </div>
+        </Scrollbar>
       ) : (
         <>
           <StyledEditorEmptyState>

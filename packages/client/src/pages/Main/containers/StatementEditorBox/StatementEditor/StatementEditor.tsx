@@ -665,6 +665,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
             </StyledBreadcrumbWrap>
           )}
         </StyledEditorPreSection>
+
         {userCanEdit && !statement.isTemplate && (
           <StyledEditorPreSection>
             {"Move to territory: "}
@@ -701,6 +702,7 @@ export const StatementEditor: React.FC<StatementEditor> = ({
             </StyledEditorContentRow>
           </StyledEditorTemplateSection>
         )}
+
         <StyledEditorSection
           $firstSection
           key="editor-section-summary"

@@ -57,6 +57,7 @@ import { EntityDetailStatementsTable } from "./EntityDetailUsedInTable/EntityDet
 import { EntityDetailValency } from "./EntityDetailValency/EntityDetailValency";
 import { EntityDetailValidationSection } from "./EntityDetailValidationSection/EntityDetailValidationSection";
 import { EntityDetailSectionButtons } from "./EntityDetailSectionButtons/EntityDetailSectionButtons";
+import Scrollbar from "react-scrollbars-custom";
 
 const allowedEntityChangeClasses = [
   EntityEnums.Class.Value,
@@ -591,357 +592,370 @@ export const EntityDetail: React.FC<EntityDetail> = ({
   return (
     <>
       {entity && (
-        <>
-          <EntityDetailHeaderRow
-            entity={entity}
-            userCanEdit={userCanEdit}
-            mayBeRemoved={mayBeRemoved}
-            setShowRemoveSubmit={setShowRemoveSubmit}
-            setCreateTemplateModal={setCreateTemplateModal}
-          />
+        <Scrollbar
+          style={{ width: "100%" }}
+          disableTracksWidthCompensation={false}
+          removeTrackXWhenNotUsed={true}
+          removeTrackYWhenNotUsed={true}
+          permanentTracks={false}
+        >
+          <>
+            <EntityDetailHeaderRow
+              entity={entity}
+              userCanEdit={userCanEdit}
+              mayBeRemoved={mayBeRemoved}
+              setShowRemoveSubmit={setShowRemoveSubmit}
+              setCreateTemplateModal={setCreateTemplateModal}
+            />
 
-          <StyledDetailWrapper>
-            {/* form section */}
-            <StyledDetailSection $firstSection>
-              <StyledDetailSectionContent $firstSection>
-                <StyledDetailWarnings>
-                  {entity.warnings &&
-                    entity.warnings
-                      .filter(
-                        (w) =>
-                          w.position?.section === IWarningPositionSection.Entity
-                      )
-                      .map((warning, key) => {
-                        return <Message key={key} warning={warning} />;
-                      })}
-                </StyledDetailWarnings>
-                <EntityDetailFormSection
-                  entity={entity}
-                  userCanEdit={userCanEdit}
-                  userCanAdmin={userCanAdmin}
-                  actantMode={actantMode}
-                  isStatementWithTerritory={isStatementWithTerritory}
-                  isClassChangeable={isClassChangeable || false}
-                  isTerritoryWithParent={isTerritoryWithParent}
-                  allowedEntityChangeClasses={allowedEntityChangeClasses}
-                  handleAskForTemplateApply={handleAskForTemplateApply}
-                  setSelectedEntityType={setSelectedEntityType}
-                  setShowTypeSubmit={setShowTypeSubmit}
-                  templateOptions={templateOptions}
-                  updateEntityMutation={updateEntityMutation}
-                />
-              </StyledDetailSectionContent>
-            </StyledDetailSection>
-
-            {/* Protocol */}
-            {entity.class === EntityEnums.Class.Territory && (
-              <StyledDetailSection>
-                <StyledDetailSectionHeader>Protocol</StyledDetailSectionHeader>
-                <StyledDetailSectionContent>
-                  <EntityDetailProtocol
-                    territory={entity}
-                    updateEntityMutation={updateEntityMutation}
-                    isInsideTemplate={isInsideTemplate}
+            <StyledDetailWrapper>
+              {/* form section */}
+              <StyledDetailSection $firstSection>
+                <StyledDetailSectionContent $firstSection>
+                  <StyledDetailWarnings>
+                    {entity.warnings &&
+                      entity.warnings
+                        .filter(
+                          (w) =>
+                            w.position?.section ===
+                            IWarningPositionSection.Entity
+                        )
+                        .map((warning, key) => {
+                          return <Message key={key} warning={warning} />;
+                        })}
+                  </StyledDetailWarnings>
+                  <EntityDetailFormSection
+                    entity={entity}
                     userCanEdit={userCanEdit}
+                    userCanAdmin={userCanAdmin}
+                    actantMode={actantMode}
+                    isStatementWithTerritory={isStatementWithTerritory}
+                    isClassChangeable={isClassChangeable || false}
+                    isTerritoryWithParent={isTerritoryWithParent}
+                    allowedEntityChangeClasses={allowedEntityChangeClasses}
+                    handleAskForTemplateApply={handleAskForTemplateApply}
+                    setSelectedEntityType={setSelectedEntityType}
+                    setShowTypeSubmit={setShowTypeSubmit}
+                    templateOptions={templateOptions}
+                    updateEntityMutation={updateEntityMutation}
                   />
                 </StyledDetailSectionContent>
               </StyledDetailSection>
-            )}
 
-            {/* Validation rules */}
-            {entity.class === EntityEnums.Class.Territory && (
-              <StyledDetailSection>
-                <EntityDetailValidationSection
-                  validations={
-                    entity.data.validations as
-                      | ITerritoryValidation[]
-                      | undefined
-                  }
-                  entities={entity.entities}
-                  updateEntityMutation={updateEntityMutation}
-                  userCanEdit={userCanEdit}
-                  isInsideTemplate={isInsideTemplate}
-                  territoryParentId={getTerritoryId(entity)}
-                  entity={entity}
-                  setLoadingValidations={setLoadingValidations}
-                />
-              </StyledDetailSection>
-            )}
+              {/* Protocol */}
+              {entity.class === EntityEnums.Class.Territory && (
+                <StyledDetailSection>
+                  <StyledDetailSectionHeader>
+                    Protocol
+                  </StyledDetailSectionHeader>
+                  <StyledDetailSectionContent>
+                    <EntityDetailProtocol
+                      territory={entity}
+                      updateEntityMutation={updateEntityMutation}
+                      isInsideTemplate={isInsideTemplate}
+                      userCanEdit={userCanEdit}
+                    />
+                  </StyledDetailSectionContent>
+                </StyledDetailSection>
+              )}
 
-            {/* Valency (A) */}
-            {entity.class === EntityEnums.Class.Action && (
+              {/* Validation rules */}
+              {entity.class === EntityEnums.Class.Territory && (
+                <StyledDetailSection>
+                  <EntityDetailValidationSection
+                    validations={
+                      entity.data.validations as
+                        | ITerritoryValidation[]
+                        | undefined
+                    }
+                    entities={entity.entities}
+                    updateEntityMutation={updateEntityMutation}
+                    userCanEdit={userCanEdit}
+                    isInsideTemplate={isInsideTemplate}
+                    territoryParentId={getTerritoryId(entity)}
+                    entity={entity}
+                    setLoadingValidations={setLoadingValidations}
+                  />
+                </StyledDetailSection>
+              )}
+
+              {/* Valency (A) */}
+              {entity.class === EntityEnums.Class.Action && (
+                <StyledDetailSection>
+                  <StyledDetailSectionHeader>Valency</StyledDetailSectionHeader>
+                  <StyledDetailWarnings>
+                    {entity.warnings &&
+                      entity.warnings
+                        .filter(
+                          (w) =>
+                            w.position?.section ===
+                            IWarningPositionSection.Valencies
+                        )
+                        .map((warning, key) => {
+                          return <Message key={key} warning={warning} />;
+                        })}
+                  </StyledDetailWarnings>
+                  <StyledDetailSectionContent>
+                    <EntityDetailValency
+                      entity={entity}
+                      userCanEdit={userCanEdit}
+                      updateEntityMutation={updateEntityMutation}
+                      relationCreateMutation={relationCreateMutation}
+                      relationUpdateMutation={relationUpdateMutation}
+                      relationDeleteMutation={relationDeleteMutation}
+                    />
+                  </StyledDetailSectionContent>
+                </StyledDetailSection>
+              )}
+
+              {/* Relations */}
               <StyledDetailSection>
-                <StyledDetailSectionHeader>Valency</StyledDetailSectionHeader>
+                <StyledDetailSectionHeader>Relations</StyledDetailSectionHeader>
                 <StyledDetailWarnings>
                   {entity.warnings &&
                     entity.warnings
                       .filter(
                         (w) =>
                           w.position?.section ===
-                          IWarningPositionSection.Valencies
+                          IWarningPositionSection.Relations
                       )
                       .map((warning, key) => {
                         return <Message key={key} warning={warning} />;
                       })}
                 </StyledDetailWarnings>
                 <StyledDetailSectionContent>
-                  <EntityDetailValency
+                  <EntityDetailRelations
                     entity={entity}
-                    userCanEdit={userCanEdit}
-                    updateEntityMutation={updateEntityMutation}
                     relationCreateMutation={relationCreateMutation}
                     relationUpdateMutation={relationUpdateMutation}
                     relationDeleteMutation={relationDeleteMutation}
+                    userCanEdit={userCanEdit}
                   />
                 </StyledDetailSectionContent>
               </StyledDetailSection>
-            )}
 
-            {/* Relations */}
-            <StyledDetailSection>
-              <StyledDetailSectionHeader>Relations</StyledDetailSectionHeader>
-              <StyledDetailWarnings>
-                {entity.warnings &&
-                  entity.warnings
-                    .filter(
-                      (w) =>
-                        w.position?.section ===
-                        IWarningPositionSection.Relations
-                    )
-                    .map((warning, key) => {
-                      return <Message key={key} warning={warning} />;
-                    })}
-              </StyledDetailWarnings>
-              <StyledDetailSectionContent>
-                <EntityDetailRelations
-                  entity={entity}
-                  relationCreateMutation={relationCreateMutation}
-                  relationUpdateMutation={relationUpdateMutation}
-                  relationDeleteMutation={relationDeleteMutation}
-                  userCanEdit={userCanEdit}
-                />
-              </StyledDetailSectionContent>
-            </StyledDetailSection>
-
-            {/* metaprops section */}
-            <StyledDetailSection $metaSection>
-              <StyledDetailSectionHeader>
-                <StyledDetailSectionHeading>
-                  Metaproperties
-                </StyledDetailSectionHeading>
-                {userCanEdit && (
-                  <EntityDetailSectionButtons
-                    entityId={entity.id}
-                    setShowSubmit={setShowBatchRemovePropSubmit}
-                    removeBtnTooltip="remove all metaproperties from entity"
-                    removeBtnDisabled={!entity.props.length}
-                    handleCopyFromEntity={(pickedEntity, replace) => {
-                      if (pickedEntity.props.length === 0) {
-                        toast.info("no metaprops");
-                      } else {
-                        if (replace) {
-                          updateEntityMutation.mutate({
-                            props: DProps(pickedEntity.props),
-                          });
+              {/* metaprops section */}
+              <StyledDetailSection $metaSection>
+                <StyledDetailSectionHeader>
+                  <StyledDetailSectionHeading>
+                    Metaproperties
+                  </StyledDetailSectionHeading>
+                  {userCanEdit && (
+                    <EntityDetailSectionButtons
+                      entityId={entity.id}
+                      setShowSubmit={setShowBatchRemovePropSubmit}
+                      removeBtnTooltip="remove all metaproperties from entity"
+                      removeBtnDisabled={!entity.props.length}
+                      handleCopyFromEntity={(pickedEntity, replace) => {
+                        if (pickedEntity.props.length === 0) {
+                          toast.info("no metaprops");
                         } else {
-                          updateEntityMutation.mutate({
-                            props: [
-                              ...entity.props,
-                              ...DProps(pickedEntity.props),
-                            ],
-                          });
+                          if (replace) {
+                            updateEntityMutation.mutate({
+                              props: DProps(pickedEntity.props),
+                            });
+                          } else {
+                            updateEntityMutation.mutate({
+                              props: [
+                                ...entity.props,
+                                ...DProps(pickedEntity.props),
+                              ],
+                            });
+                          }
                         }
-                      }
-                    }}
-                  />
-                )}
-              </StyledDetailSectionHeader>
+                      }}
+                    />
+                  )}
+                </StyledDetailSectionHeader>
 
-              <StyledDetailSectionContent>
-                <StyledPropGroupWrap>
-                  <PropGroup
-                    boxEntity={entity}
-                    originId={entity.id}
+                <StyledDetailSectionContent>
+                  <StyledPropGroupWrap>
+                    <PropGroup
+                      boxEntity={entity}
+                      originId={entity.id}
+                      entities={entity.entities}
+                      props={entity.props}
+                      territoryId={territoryId}
+                      updateProp={updateProp}
+                      removeProp={removeProp}
+                      addProp={addMetaProp}
+                      addPropWithEntityId={(variables: {
+                        typeEntityId?: string;
+                        valueEntityId?: string;
+                      }) => {
+                        const newProp = CMetaProp(variables);
+                        updateEntityMutation.mutate({
+                          props: [...entity.props, newProp],
+                        });
+                      }}
+                      userCanEdit={userCanEdit}
+                      openDetailOnCreate={false}
+                      movePropToIndex={(propId, oldIndex, newIndex) => {
+                        movePropToIndex(propId, oldIndex, newIndex);
+                      }}
+                      category={DraggedPropRowCategory.META_PROP}
+                      disabledAttributes={
+                        {
+                          statement: [
+                            "elvl",
+                            "moodvariant",
+                            "mood",
+                            "bundleOperator",
+                          ],
+                          type: ["elvl", "logic", "virtuality", "partitivity"],
+                          value: ["elvl", "logic", "virtuality", "partitivity"],
+                        } as PropAttributeFilter
+                      }
+                      isInsideTemplate={isInsideTemplate}
+                      territoryParentId={getTerritoryId(entity)}
+                      lowIdent
+                      alwaysShowCreateModal
+                    />
+                  </StyledPropGroupWrap>
+                  {userCanEdit && (
+                    <Button
+                      color="primary"
+                      label="new metaproperty"
+                      icon={<FaPlus />}
+                      onClick={() => {
+                        const newProp = CMetaProp();
+                        updateEntityMutation.mutate({
+                          props: [...entity.props, newProp],
+                        });
+                      }}
+                    />
+                  )}
+                </StyledDetailSectionContent>
+              </StyledDetailSection>
+
+              {/* reference section */}
+              <StyledDetailSection>
+                <StyledDetailSectionHeader>
+                  References
+                </StyledDetailSectionHeader>
+                <StyledDetailSectionContent>
+                  <EntityReferenceTable
+                    disabled={!userCanEdit}
+                    references={entity.references ?? []}
                     entities={entity.entities}
-                    props={entity.props}
-                    territoryId={territoryId}
-                    updateProp={updateProp}
-                    removeProp={removeProp}
-                    addProp={addMetaProp}
-                    addPropWithEntityId={(variables: {
-                      typeEntityId?: string;
-                      valueEntityId?: string;
-                    }) => {
-                      const newProp = CMetaProp(variables);
-                      updateEntityMutation.mutate({
-                        props: [...entity.props, newProp],
-                      });
+                    entityId={entity.id}
+                    onChange={(newValues: IReference[]) => {
+                      updateEntityMutation.mutate({ references: newValues });
                     }}
-                    userCanEdit={userCanEdit}
-                    openDetailOnCreate={false}
-                    movePropToIndex={(propId, oldIndex, newIndex) => {
-                      movePropToIndex(propId, oldIndex, newIndex);
-                    }}
-                    category={DraggedPropRowCategory.META_PROP}
-                    disabledAttributes={
-                      {
-                        statement: [
-                          "elvl",
-                          "moodvariant",
-                          "mood",
-                          "bundleOperator",
-                        ],
-                        type: ["elvl", "logic", "virtuality", "partitivity"],
-                        value: ["elvl", "logic", "virtuality", "partitivity"],
-                      } as PropAttributeFilter
-                    }
                     isInsideTemplate={isInsideTemplate}
-                    territoryParentId={getTerritoryId(entity)}
-                    lowIdent
+                    userCanEdit={userCanEdit}
                     alwaysShowCreateModal
                   />
-                </StyledPropGroupWrap>
-                {userCanEdit && (
-                  <Button
-                    color="primary"
-                    label="new metaproperty"
-                    icon={<FaPlus />}
-                    onClick={() => {
-                      const newProp = CMetaProp();
-                      updateEntityMutation.mutate({
-                        props: [...entity.props, newProp],
-                      });
+                </StyledDetailSectionContent>
+              </StyledDetailSection>
+
+              <StyledDetailSection>
+                <StyledDetailSectionHeader>Used in:</StyledDetailSectionHeader>
+
+                {/* used as template */}
+                {entity.isTemplate && entity.usedAsTemplate && (
+                  <StyledDetailSectionContentUsedIn key="as template">
+                    <StyledUsedAsHeading>
+                      <StyledUsedAsTitle>
+                        <b>{entity.usedAsTemplate.length}</b> As a template
+                      </StyledUsedAsTitle>
+                    </StyledUsedAsHeading>
+                    <StyledDetailSectionEntityList>
+                      {entity.usedAsTemplate.map((entityId) => (
+                        <React.Fragment key={entityId}>
+                          <div style={{ display: "inline-grid" }}>
+                            <EntityTag
+                              entity={entity.entities[entityId]}
+                              fullWidth
+                            />
+                          </div>
+                        </React.Fragment>
+                      ))}
+                    </StyledDetailSectionEntityList>
+                  </StyledDetailSectionContentUsedIn>
+                )}
+
+                {/* usedIn props */}
+                {!entity.isTemplate && (
+                  <EntityDetailMetaPropsTable
+                    title={{
+                      singular: "Metaproperty",
+                      plural: "Metaproperties",
                     }}
+                    entities={entity.entities}
+                    useCases={entity.usedInMetaProps}
+                    key="MetaProp"
                   />
                 )}
-              </StyledDetailSectionContent>
-            </StyledDetailSection>
 
-            {/* reference section */}
-            <StyledDetailSection>
-              <StyledDetailSectionHeader>References</StyledDetailSectionHeader>
-              <StyledDetailSectionContent>
-                <EntityReferenceTable
-                  disabled={!userCanEdit}
-                  references={entity.references ?? []}
-                  entities={entity.entities}
-                  entityId={entity.id}
-                  onChange={(newValues: IReference[]) => {
-                    updateEntityMutation.mutate({ references: newValues });
-                  }}
-                  isInsideTemplate={isInsideTemplate}
-                  userCanEdit={userCanEdit}
-                  alwaysShowCreateModal
-                />
-              </StyledDetailSectionContent>
-            </StyledDetailSection>
+                {/* usedIn statements */}
+                {!entity.isTemplate && (
+                  <EntityDetailStatementsTable
+                    title={{ singular: "Statement", plural: "Statements" }}
+                    entities={entity.entities}
+                    useCases={entity.usedInStatements}
+                    key="Statement"
+                  />
+                )}
 
-            <StyledDetailSection>
-              <StyledDetailSectionHeader>Used in:</StyledDetailSectionHeader>
+                {/* usedIn statement props */}
+                {!entity.isTemplate && (
+                  <EntityDetailStatementPropsTable
+                    title={{
+                      singular: "In-statement Property",
+                      plural: "In-statement Properties",
+                    }}
+                    entities={entity.entities}
+                    useCases={entity.usedInStatementProps}
+                    key="StatementProp"
+                  />
+                )}
 
-              {/* used as template */}
-              {entity.isTemplate && entity.usedAsTemplate && (
-                <StyledDetailSectionContentUsedIn key="as template">
-                  <StyledUsedAsHeading>
-                    <StyledUsedAsTitle>
-                      <b>{entity.usedAsTemplate.length}</b> As a template
-                    </StyledUsedAsTitle>
-                  </StyledUsedAsHeading>
-                  <StyledDetailSectionEntityList>
-                    {entity.usedAsTemplate.map((entityId) => (
-                      <React.Fragment key={entityId}>
-                        <div style={{ display: "inline-grid" }}>
-                          <EntityTag
-                            entity={entity.entities[entityId]}
-                            fullWidth
-                          />
-                        </div>
-                      </React.Fragment>
-                    ))}
-                  </StyledDetailSectionEntityList>
-                </StyledDetailSectionContentUsedIn>
-              )}
+                {/* usedIn statement identification */}
+                {!entity.isTemplate && (
+                  <EntityDetailIdentificationTable
+                    title={{
+                      singular: "In-statement Identification",
+                      plural: "In-statement Identifications",
+                    }}
+                    entities={entity.entities}
+                    useCases={entity.usedInStatementIdentifications}
+                    key="StatementIdentification"
+                  />
+                )}
 
-              {/* usedIn props */}
-              {!entity.isTemplate && (
-                <EntityDetailMetaPropsTable
-                  title={{
-                    singular: "Metaproperty",
-                    plural: "Metaproperties",
-                  }}
-                  entities={entity.entities}
-                  useCases={entity.usedInMetaProps}
-                  key="MetaProp"
-                />
-              )}
+                {/* usedIn statement classification */}
+                {!entity.isTemplate && (
+                  <EntityDetailClassificationTable
+                    title={{
+                      singular: "In-statement Classification",
+                      plural: "In-statement Classifications",
+                    }}
+                    entities={entity.entities}
+                    useCases={entity.usedInStatementClassifications}
+                    key="StatementClassification"
+                  />
+                )}
+              </StyledDetailSection>
 
-              {/* usedIn statements */}
-              {!entity.isTemplate && (
-                <EntityDetailStatementsTable
-                  title={{ singular: "Statement", plural: "Statements" }}
-                  entities={entity.entities}
-                  useCases={entity.usedInStatements}
-                  key="Statement"
-                />
-              )}
+              {/* Audits */}
+              <StyledDetailSection key="editor-section-audits">
+                <StyledDetailSectionHeader>Audits</StyledDetailSectionHeader>
+                <StyledDetailSectionContent>
+                  {audit && <AuditTable {...audit} />}
+                </StyledDetailSectionContent>
+              </StyledDetailSection>
 
-              {/* usedIn statement props */}
-              {!entity.isTemplate && (
-                <EntityDetailStatementPropsTable
-                  title={{
-                    singular: "In-statement Property",
-                    plural: "In-statement Properties",
-                  }}
-                  entities={entity.entities}
-                  useCases={entity.usedInStatementProps}
-                  key="StatementProp"
-                />
-              )}
-
-              {/* usedIn statement identification */}
-              {!entity.isTemplate && (
-                <EntityDetailIdentificationTable
-                  title={{
-                    singular: "In-statement Identification",
-                    plural: "In-statement Identifications",
-                  }}
-                  entities={entity.entities}
-                  useCases={entity.usedInStatementIdentifications}
-                  key="StatementIdentification"
-                />
-              )}
-
-              {/* usedIn statement classification */}
-              {!entity.isTemplate && (
-                <EntityDetailClassificationTable
-                  title={{
-                    singular: "In-statement Classification",
-                    plural: "In-statement Classifications",
-                  }}
-                  entities={entity.entities}
-                  useCases={entity.usedInStatementClassifications}
-                  key="StatementClassification"
-                />
-              )}
-            </StyledDetailSection>
-
-            {/* Audits */}
-            <StyledDetailSection key="editor-section-audits">
-              <StyledDetailSectionHeader>Audits</StyledDetailSectionHeader>
-              <StyledDetailSectionContent>
-                {audit && <AuditTable {...audit} />}
-              </StyledDetailSectionContent>
-            </StyledDetailSection>
-
-            {/* JSON */}
-            <StyledDetailSection key="editor-section-json">
-              <StyledDetailSectionHeader>JSON</StyledDetailSectionHeader>
-              <StyledDetailSectionContent>
-                {entity && <JSONExplorer data={entity} />}
-              </StyledDetailSectionContent>
-            </StyledDetailSection>
-          </StyledDetailWrapper>
-        </>
+              {/* JSON */}
+              <StyledDetailSection key="editor-section-json">
+                <StyledDetailSectionHeader>JSON</StyledDetailSectionHeader>
+                <StyledDetailSectionContent>
+                  {entity && <JSONExplorer data={entity} />}
+                </StyledDetailSectionContent>
+              </StyledDetailSection>
+            </StyledDetailWrapper>
+          </>
+        </Scrollbar>
       )}
 
       <Submit
