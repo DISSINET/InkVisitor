@@ -248,6 +248,10 @@ export class Annotator {
       this.text.noLines
     );
 
+    this.scroller?.setRunnerSize(
+      (this.viewport.noLines / this.text.noLines) * 100
+    );
+
     this.draw();
   }
 
