@@ -1,4 +1,3 @@
-import { text } from "stream/consumers";
 import { DrawingOptions } from "./Annotator";
 import Viewport from "./Viewport";
 import { Modes } from "./constants";
@@ -8,6 +7,28 @@ export interface IAbsCoordinates {
   xLine: number;
   yLine: number;
 }
+
+export interface CursorStyle {
+  selection: {
+    fill: string;
+    fillOpacity: number;
+  };
+  cursor: {
+    highlightFill: string;
+    defaultFill: string;
+  };
+}
+
+const defaultStyle: CursorStyle = {
+  selection: {
+    fill: "blue",
+    fillOpacity: 0.2,
+  },
+  cursor: {
+    highlightFill: "black",
+    defaultFill: "blue",
+  },
+};
 
 // Relative coordinates point to position relative to viewport - first line is topmost rendered line
 export interface IRelativeCoordinates extends IAbsCoordinates {}
@@ -21,7 +42,7 @@ export default class Cursor implements IRelativeCoordinates {
   yLine: number;
   ratio: number;
 
-  style: Record<string, string | number>;
+  style: CursorStyle;
 
   // highlighted area must use absolute coordinates - highlighted area stays in position while scrolling
   private selecting: boolean = false;
@@ -35,23 +56,21 @@ export default class Cursor implements IRelativeCoordinates {
     ratio: number,
     xLine: number = -1,
     yLine: number = -1,
-    style: Record<string, string | number> = {
-      fillColor: "blue",
-      fillOpacity: 0.2,
-    }
+    style: Partial<CursorStyle> = defaultStyle
   ) {
-    this.style = style;
+    this.style = { ...defaultStyle, ...style };
 
     this.ratio = ratio;
     this.xLine = xLine;
     this.yLine = yLine;
   }
 
-  setFillColor(fillColor: string): void {
-    this.style.fillColor = fillColor;
-  }
-  setFillOpacity(fillOpacity: number): void {
-    this.style.fillOpacity = fillOpacity;
+  /**
+   * @param style
+   * sets the style of the cursor
+   */
+  setStyle(style: Partial<CursorStyle>) {
+    this.style = { ...this.style, ...style };
   }
 
   yToLineI(y: number, lineHeight: number): number {
@@ -217,7 +236,10 @@ export default class Cursor implements IRelativeCoordinates {
 
     const { charWidth, lineHeight, charsAtLine } = options;
 
-    ctx.fillStyle = options.mode === Modes.HIGHLIGHT ? "#cccccc" : "blue";
+    ctx.fillStyle =
+      options.mode === Modes.HIGHLIGHT
+        ? this.style.cursor.highlightFill
+        : this.style.cursor.defaultFill;
 
     if (!options.schema) {
       ctx.fillRect(
@@ -237,9 +259,11 @@ export default class Cursor implements IRelativeCoordinates {
       }
 
       ctx.fillStyle =
-        options.schema?.style.fillColor || (this.style.fillColor as string);
+        options.schema?.style.fillColor ||
+        (this.style.selection.fill as string);
       ctx.globalAlpha =
-        options.schema?.style.fillOpacity || (this.style.fillOpacity as number);
+        options.schema?.style.fillOpacity ||
+        (this.style.selection.fillOpacity as number);
       ctx.globalCompositeOperation = "multiply";
 
       for (let i = 0; i <= viewport.lineEnd - viewport.lineStart; i++) {
