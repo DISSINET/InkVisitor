@@ -20,3 +20,22 @@ export interface IEntity {
   createdAt?: Date;
   updatedAt?: Date;
 }
+
+export const entityAllowedFields: Record<keyof IEntity, boolean> = {
+  id: true,
+  legacyId: true,
+  class: true,
+  status: true,
+  data: true,
+  label: true,
+  detail: true,
+  language: true,
+  notes: true,
+  props: true,
+  references: true,
+  isTemplate: true,
+  usedTemplate: true,
+  templateData: true,
+  createdAt: true,
+  updatedAt: true,
+};

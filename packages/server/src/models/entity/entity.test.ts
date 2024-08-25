@@ -211,8 +211,6 @@ describe("test Entity.update", function () {
       expect(existingEntityData.data.actants).toHaveLength(1);
       expect(existingEntityData.data.actants[0].id).toEqual(newEntityId);
       expect(existingEntityData.data.tags).toEqual(newTagsValue);
-
-      await clean(db);
     });
   });
 
@@ -228,6 +226,26 @@ describe("test Entity.update", function () {
     it("updateAt should be renewed after second update", () => {
       expect(after2Update).not.toBeUndefined();
       expect(after1Update?.getTime()).not.toEqual(after2Update?.getTime());
+    });
+  });
+
+  describe("unwanted data", () => {
+    it("should not have unwanted field in final object", async () => {
+      const entity = new Statement({});
+      await entity.save(db.connection);
+      const updateData = { unwanted: 1, label: "newtitle", legacyId: "legacy" };
+      await entity.update(db.connection, { ...updateData });
+
+      const updatedEntity = await findEntityById<
+        IStatement & { unwanted?: string }
+      >(db, entity.id);
+
+      // required field
+      expect(updatedEntity.label).toEqual(updateData.label);
+      // optional field
+      expect(updatedEntity.legacyId).toEqual(updateData.legacyId);
+      // unwanted field
+      expect(updatedEntity.unwanted).toBeUndefined();
     });
   });
 });
@@ -287,13 +305,15 @@ describe("test Entity.getUsedByEntity", function () {
 
     it("should find dependencies(2) for referenced entity", async () => {
       const dependencies = await entity.getUsedByEntity(db.connection);
-      expect(dependencies).toHaveLength(2) // two statements
-      expect(dependencies.find(e => e.id === statement1.id)).toBeTruthy();
-      expect(dependencies.find(e => e.id === statement2.id)).toBeTruthy();
+      expect(dependencies).toHaveLength(2); // two statements
+      expect(dependencies.find((e) => e.id === statement1.id)).toBeTruthy();
+      expect(dependencies.find((e) => e.id === statement2.id)).toBeTruthy();
     });
 
     it("should find zero dependent entities for free entity", async () => {
-      await expect(freeEntity.getUsedByEntity(db.connection)).resolves.toHaveLength(0);
+      await expect(
+        freeEntity.getUsedByEntity(db.connection)
+      ).resolves.toHaveLength(0);
     });
   });
 });
