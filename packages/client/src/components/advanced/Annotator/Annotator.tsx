@@ -10,10 +10,10 @@ import React, {
 import { FaPen, FaRegSave, FaTrash } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { v4 as uuidv4 } from "uuid";
+import api from "api";
 
 import { Annotator, Modes } from "@inkvisitor/annotator/src/lib";
 import { IDocument, IEntity } from "@shared/types";
-import api from "api";
 import { Button } from "components/basic/Button/Button";
 import { ButtonGroup } from "components/basic/ButtonGroup/ButtonGroup";
 import { BsFileTextFill } from "react-icons/bs";
@@ -40,6 +40,7 @@ interface TextAnnotatorProps {
   handleCreateStatement?: Function | false;
   handleCreateTerritory?: Function | false;
   initialScrollEntityId?: false | string;
+  thisTerritoryEntityId?: false | string;
 }
 
 export const TextAnnotator = ({
@@ -50,6 +51,7 @@ export const TextAnnotator = ({
   handleCreateStatement = false,
   handleCreateTerritory = false,
   initialScrollEntityId = false,
+  thisTerritoryEntityId = false,
 }: TextAnnotatorProps) => {
   const queryClient = useQueryClient();
   const theme = useContext(ThemeContext);
@@ -228,6 +230,19 @@ export const TextAnnotator = ({
     });
 
     annotator.onHighlight((entityId: string) => {
+      console.log("highlight", entityId);
+
+      if (entityId === thisTerritoryEntityId) {
+        console.log("here we have the territory entity id", entityId);
+        return {
+          mode: "background",
+          style: {
+            fillColor: theme?.color.primary,
+            fillOpacity: 0.6,
+          },
+        };
+      }
+
       const entityClass = document?.referencedEntityIds
         ? Object.keys(document?.referencedEntityIds).find((key) =>
             document?.referencedEntityIds?.[key as EntityEnums.Class].includes(
