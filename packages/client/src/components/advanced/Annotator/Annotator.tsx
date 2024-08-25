@@ -194,6 +194,7 @@ export const TextAnnotator = ({
     );
     annotator?.addAnchor(entityId);
     setSelectedText("");
+    handleSaveNewContent(true);
   };
 
   const refreshAnnotator = () => {
@@ -212,7 +213,7 @@ export const TextAnnotator = ({
 
     annotator.cursor.setStyle({
       selection: {
-        fill: theme?.color.primary,
+        fill: theme?.color.success,
         fillOpacity: 0.3,
       },
       cursor: {
@@ -230,15 +231,12 @@ export const TextAnnotator = ({
     });
 
     annotator.onHighlight((entityId: string) => {
-      console.log("highlight", entityId);
-
       if (entityId === thisTerritoryEntityId) {
-        console.log("here we have the territory entity id", entityId);
         return {
           mode: "background",
           style: {
-            fillColor: theme?.color.primary,
-            fillOpacity: 0.6,
+            fillColor: theme?.color.warning,
+            fillOpacity: 0.8,
           },
         };
       }
@@ -315,6 +313,7 @@ export const TextAnnotator = ({
       const newTerritoryId = uuidv4();
       handleAddAnchor(newTerritoryId);
       handleCreateTerritory(newTerritoryId);
+      handleSaveNewContent(true);
     }
   }, [handleCreateTerritory, selectedText]);
 
@@ -325,6 +324,7 @@ export const TextAnnotator = ({
       // remove linebreaks from text
       const validatedText = selectedText.replace(/\n/g, " ");
       handleCreateStatement(validatedText, newStatementId);
+      handleSaveNewContent(true);
     }
   }, [handleCreateStatement, selectedText]);
 
