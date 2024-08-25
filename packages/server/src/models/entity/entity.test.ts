@@ -240,8 +240,11 @@ describe("test Entity.update", function () {
         IStatement & { unwanted?: string }
       >(db, entity.id);
 
+      // required field
       expect(updatedEntity.label).toEqual(updateData.label);
+      // optional field
       expect(updatedEntity.legacyId).toEqual(updateData.legacyId);
+      // unwanted field
       expect(updatedEntity.unwanted).toBeUndefined();
     });
   });

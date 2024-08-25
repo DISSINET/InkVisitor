@@ -14,6 +14,7 @@ import { findEntityById } from "@service/shorthands";
 import { IRequest } from "../../custom_typings/request";
 import { sanitizeText } from "@common/functions";
 import Reference from "./reference";
+import { entityAllowedFields } from "@shared/types/entity";
 
 export default class Entity implements IEntity, IDbModel {
   static table = "entities";
@@ -114,7 +115,8 @@ export default class Entity implements IEntity, IDbModel {
 
     // replace AND remove unwanted fields in passed object
     Object.keys(updateData).forEach(
-      (key) => !(key in this) && delete updateData[key as keyof IEntity]
+      (key) =>
+        !(key in entityAllowedFields) && delete updateData[key as keyof IEntity]
     );
 
     return rethink.table(Entity.table).get(this.id).update(updateData).run(db);
