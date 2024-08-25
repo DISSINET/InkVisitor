@@ -101,12 +101,10 @@ class Scroller {
       } else if (e.target === this.runner) {
         // clicking inside runner
 
-        const moveD = e.offsetY - this.runnerClickRelPosition;
-
         this.onChangeCb(
           this.pxToPercentage(
-            this.runner.getBoundingClientRect().top +
-              moveD -
+            e.clientY -
+              this.runnerClickRelPosition -
               this.element.getBoundingClientRect().top
           )
         );
