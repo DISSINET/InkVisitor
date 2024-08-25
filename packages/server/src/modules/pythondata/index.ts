@@ -33,7 +33,52 @@ export default Router()
         return {
           result: false,
           error: "InternalServerError",
-          message: e?.toString()
+          message: e?.toString(),
+        };
+      }
+    })
+  )
+
+  /**
+   * @openapi
+   * /pythondata/segment:
+   *  post:
+   *   description: Returns segmented text
+   *  tags:
+   *   - pythondata
+   *  requestBody:
+   *    required: true
+   *  content:
+   *    application/json:
+   *      schema:
+   *        type: object
+   *       properties:
+   *        text:
+   *          type: string
+   *          required: true
+   *   responses:
+   *      200:
+   *        description: Returns IResponseGeneric object for segmented text
+   *        content:
+   *          application/json:
+   *          schema:
+   *            $ref: "#/components/schemas/IResponseGeneric"
+   */
+  .post(
+    "/segment",
+    asyncRouteHandler<IResponseGeneric>(async (request: IRequest) => {
+      const inputText = request.body.text;
+      try {
+        const res = await pythonClient.segment(inputText);
+        return {
+          result: true,
+          data: res,
+        };
+      } catch (e) {
+        return {
+          result: false,
+          error: "InternalServerError",
+          message: e?.toString(),
         };
       }
     })

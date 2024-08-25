@@ -12,7 +12,9 @@ import {
   StyledAnnotatorItem,
   StyledAnnotatorItemContent,
   StyledAnnotatorItemTitle,
+  StyledAnnotatorMenu,
 } from "./AnnotatorStyles";
+import api from "api";
 
 interface TextAnnotatorMenuProps {
   text: string;
@@ -43,8 +45,9 @@ export const TextAnnotatorMenu = ({
             icon={<BsSegmentedNav size={22} />}
             color="primary"
             paddingX={true}
-            onClick={() => {
-              console.log("Segment selection into Statements");
+            onClick={async () => {
+              const segmented = await api.segmentText(text);
+              console.log("Segment selection into Statements", segmented);
             }}
             label={"Segment"}
             tooltipLabel="Segment selection into Statements"

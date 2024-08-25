@@ -1231,6 +1231,37 @@ class Api {
       throw this.handleError(err);
     }
   }
+
+  /**
+   * Segment text
+   */
+  async segmentText(
+    text: string,
+    options?: IApiOptions
+  ): Promise<AxiosResponse<IResponseGeneric>> {
+    try {
+      const response = await this.connection.post(
+        `/pythondata/segment`,
+        {
+          text,
+        },
+        options
+      );
+      return response.data.data;
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+}
+
+interface ISegmentTextResponse {
+  text_out: string;
+  segments: ISegment[];
+}
+
+interface ISegment {
+  id: string;
+  text: string;
 }
 
 const apiSingleton = new Api();
