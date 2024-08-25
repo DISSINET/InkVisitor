@@ -108,10 +108,11 @@ export class Annotator {
     const noLinesViewport = Math.ceil(this.height / this.lineHeight) - 1;
 
     this.viewport = new Viewport(0, noLinesViewport);
-    this.cursor = new Cursor(this.ratio, 0, 0);
 
     this.inputText = inputText;
     this.text = new Text(this.inputText, charsAtLine);
+
+    this.cursor = new Cursor(this.ratio, 0, 0, {});
 
     this.bgColor = this.element.style.backgroundColor || "white";
     this.fontColor = this.element.style.color || "black";
@@ -292,7 +293,6 @@ export class Annotator {
       "Enter",
       "Delete",
       "Meta",
-      "CapsLock",
       "PageUp",
       "PageDown",
       "Fn",
@@ -451,6 +451,14 @@ export class Annotator {
         if (this.onTextChangeCb) {
           this.onTextChangeCb(this.text.value);
         }
+        break;
+
+      case "PageUp":
+        this.viewport.scrollUp(10);
+        break;
+
+      case "PageDown":
+        this.viewport.scrollDown(10, this.text.noLines);
         break;
 
       case "Delete":
@@ -763,7 +771,7 @@ export class Annotator {
         const highlight = this.onHighlightCb(tag);
         if (highlight) {
           const [startLine, endLine] = this.text.getTagPosition(tag);
-          const highlighter = new Cursor(this.ratio, 0, 0);
+          const highlighter = new Cursor(this.ratio, 0, 0, {});
           highlighter.selectStart = startLine;
           highlighter.selectEnd = endLine;
           highlighter.draw(this.ctx, this.viewport, {
@@ -854,7 +862,8 @@ export class Annotator {
         new Cursor(
           this.ratio,
           start.xLine,
-          start.yLine - this.viewport.lineStart
+          start.yLine - this.viewport.lineStart,
+          {}
         )
       );
       const indexPositionEnd =
@@ -863,7 +872,8 @@ export class Annotator {
           new Cursor(
             this.ratio,
             end.xLine,
-            start.yLine - this.viewport.lineStart
+            start.yLine - this.viewport.lineStart,
+            {}
           )
         ) +
         anchor.length +

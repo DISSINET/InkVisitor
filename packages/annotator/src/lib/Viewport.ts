@@ -30,7 +30,7 @@ export default class Viewport {
    * @param maxLines
    */
   scrollDown(step: number, maxLines: number) {
-    this.lineStart += Math.min(step, maxLines - this.lineStart -this.noLines);
+    this.lineStart += Math.min(step, maxLines - this.lineStart - this.noLines);
   }
 
   /**
@@ -41,6 +41,8 @@ export default class Viewport {
   scrollUp(step: number) {
     if (this.lineStart - step >= 0) {
       this.lineStart -= step;
+    } else {
+      this.lineStart = 0;
     }
   }
 

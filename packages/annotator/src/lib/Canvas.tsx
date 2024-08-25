@@ -18,7 +18,7 @@ export const Canvas = () => {
     customWrapper.onSelectText((text) => {
       (
         document.getElementById("highlight-container") as HTMLElement
-      ).innerHTML = text;
+      ).innerHTML = text.text;
     });
     customWrapper.draw();
   }, []);

@@ -181,7 +181,16 @@ export const TextAnnotator = ({
     annotator.setMode(Modes.HIGHLIGHT);
     annotator.addScroller(scroller.current);
 
-    annotator.cursor.setFillColor(theme?.color.success);
+    annotator.cursor.setStyle({
+      selection: {
+        fill: theme?.color.primary,
+        fillOpacity: 0.3,
+      },
+      cursor: {
+        highlightFill: theme?.color.primary,
+        defaultFill: theme?.color.primary,
+      },
+    });
 
     if (displayLineNumbers && lines.current) {
       annotator.addLines(lines.current);
