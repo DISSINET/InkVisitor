@@ -115,54 +115,23 @@ export const TextAnnotator = ({
     const scrollBeforeUpdate = annotator?.viewport?.lineStart;
     setScrollAfterRefresh(scrollBeforeUpdate);
 
-    console.log("scrollBeforeUpdate", scrollBeforeUpdate);
-
     if (annotator && document?.id) {
       if (quiet) {
-        updateDocumentMutationQuiet.mutate(
-          {
-            id: document.id,
-            doc: {
-              ...document,
-              ...{ content: annotator.text.value },
-            },
-          }
-          // {
-          //   onSuccess: () => {
-          //     if (scrollBeforeUpdate) {
-          //       console.log(
-          //         "going to scroll",
-          //         scrollBeforeUpdate,
-          //         annotator.text.lines.length
-          //       );
-          //       annotator.viewport.scrollTo(
-          //         scrollBeforeUpdate,
-          //         annotator.text.lines.length
-          //       );
-          //     }
-          //   },
-          // }
-        );
+        updateDocumentMutationQuiet.mutate({
+          id: document.id,
+          doc: {
+            ...document,
+            ...{ content: annotator.text.value },
+          },
+        });
       } else {
-        updateDocumentMutation.mutate(
-          {
-            id: document.id,
-            doc: {
-              ...document,
-              ...{ content: annotator.text.value },
-            },
-          }
-          // {
-          //   onSuccess: () => {
-          //     if (scrollBeforeUpdate) {
-          //       annotator.viewport.scrollTo(
-          //         scrollBeforeUpdate,
-          //         annotator.text.lines.length
-          //       );
-          //     }
-          //   },
-          // }
-        );
+        updateDocumentMutation.mutate({
+          id: document.id,
+          doc: {
+            ...document,
+            ...{ content: annotator.text.value },
+          },
+        });
       }
     }
   };
