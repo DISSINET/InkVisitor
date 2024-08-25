@@ -107,8 +107,15 @@ export const TextAnnotator = ({
   const [selectedAnchors, setSelectedAnchors] = useState<string[]>([]);
   const storedEntities = useRef<Record<string, IEntity | false>>({});
 
+  const [scrollAfterRefresh, setScrollAfterRefresh] = useState<
+    number | undefined
+  >(undefined);
+
   const handleSaveNewContent = (quiet: boolean) => {
     const scrollBeforeUpdate = annotator?.viewport?.lineStart;
+    setScrollAfterRefresh(scrollBeforeUpdate);
+
+    console.log("scrollBeforeUpdate", scrollBeforeUpdate);
 
     if (annotator && document?.id) {
       if (quiet) {
@@ -119,22 +126,22 @@ export const TextAnnotator = ({
               ...document,
               ...{ content: annotator.text.value },
             },
-          },
-          {
-            onSuccess: () => {
-              if (scrollBeforeUpdate) {
-                console.log(
-                  "going to scroll",
-                  scrollBeforeUpdate,
-                  annotator.text.lines.length
-                );
-                // annotator.viewport.scrollTo(
-                //   scrollBeforeUpdate,
-                //   annotator.text.lines.length
-                // );
-              }
-            },
           }
+          // {
+          //   onSuccess: () => {
+          //     if (scrollBeforeUpdate) {
+          //       console.log(
+          //         "going to scroll",
+          //         scrollBeforeUpdate,
+          //         annotator.text.lines.length
+          //       );
+          //       annotator.viewport.scrollTo(
+          //         scrollBeforeUpdate,
+          //         annotator.text.lines.length
+          //       );
+          //     }
+          //   },
+          // }
         );
       } else {
         updateDocumentMutation.mutate(
@@ -144,17 +151,17 @@ export const TextAnnotator = ({
               ...document,
               ...{ content: annotator.text.value },
             },
-          },
-          {
-            onSuccess: () => {
-              // if (scrollBeforeUpdate) {
-              //   annotator.viewport.scrollTo(
-              //     scrollBeforeUpdate,
-              //     annotator.text.lines.length
-              //   );
-              // }
-            },
           }
+          // {
+          //   onSuccess: () => {
+          //     if (scrollBeforeUpdate) {
+          //       annotator.viewport.scrollTo(
+          //         scrollBeforeUpdate,
+          //         annotator.text.lines.length
+          //       );
+          //     }
+          //   },
+          // }
         );
       }
     }
@@ -289,11 +296,18 @@ export const TextAnnotator = ({
     if (annotator && annotator.viewport) {
       if (!isInitialized) {
         if (initialScrollEntityId) {
-          console.log("scrolling to", initialScrollEntityId);
           annotator.scrollToAnchor(initialScrollEntityId);
         }
         setIsInitialized(true);
       }
+    }
+
+    if (scrollAfterRefresh) {
+      annotator.viewport.scrollTo(
+        scrollAfterRefresh,
+        annotator.text.lines.length
+      );
+      setScrollAfterRefresh(undefined);
     }
   };
 
