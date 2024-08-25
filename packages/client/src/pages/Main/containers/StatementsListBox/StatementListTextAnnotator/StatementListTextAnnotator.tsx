@@ -1,25 +1,28 @@
+import { animated, useSpring } from "@react-spring/web";
 import { EntityEnums, UserEnums } from "@shared/enums";
-import { IEntity, IResource, IResponseStatement } from "@shared/types";
+import {
+  IEntity,
+  IResource,
+  IResponseEntity,
+  IResponseStatement,
+} from "@shared/types";
 import { useQuery } from "@tanstack/react-query";
 import api from "api";
 import { Loader } from "components";
 import { EntitySuggester, EntityTag } from "components/advanced";
 import TextAnnotator from "components/advanced/Annotator/Annotator";
 import AnnotatorProvider from "components/advanced/Annotator/AnnotatorProvider";
-import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
+import { BiSolidCommentError } from "react-icons/bi";
+import { FaCheck } from "react-icons/fa";
+import { GrDocumentMissing } from "react-icons/gr";
 import { TiDocumentText } from "react-icons/ti";
-import { useAppDispatch, useAppSelector } from "redux/hooks";
+import { COLLAPSED_TABLE_WIDTH } from "Theme/constants";
 import {
   StyledDocumentInfo,
   StyledDocumentTag,
   StyledDocumentTitle,
 } from "../StatementLitBoxStyles";
-import { FaCheck } from "react-icons/fa";
-import { BiSolidCommentError } from "react-icons/bi";
-import { GrDocumentMissing } from "react-icons/gr";
-import { COLLAPSED_TABLE_WIDTH } from "Theme/constants";
-import { animated, useSpring } from "@react-spring/web";
 
 interface StatementListTextAnnotator {
   statements: IResponseStatement[];
@@ -92,18 +95,16 @@ export const StatementListTextAnnotator: React.FC<
     enabled: api.isLoggedIn(),
   });
 
-  const [selectedResource, setSelectedResource] = useState<IResource | false>(
+  const [selectedResourceId, setSelectedResourceId] = useState<string | false>(
     false
   );
 
-  const selectedDocumentId = useMemo<string | false>(() => {
-    if (selectedResource && selectedResource.data.documentId) {
-      return selectedResource.data.documentId;
-    } else {
-      // look for all reseources if there is a document attached with the territory id
-      resources?.forEach((resource) => {
+  // if no resource is selected, select the document with this territoryId in document references
+  useEffect(() => {
+    if (selectedResourceId === false && resources && documents) {
+      resources.forEach((resource) => {
         if (resource.data.documentId) {
-          const document = documents?.find(
+          const document = documents.find(
             (d) => d.id === resource.data.documentId
           );
           if (document) {
@@ -111,16 +112,29 @@ export const StatementListTextAnnotator: React.FC<
               (t) => t === territoryId
             );
             if (hasThisTAnchor) {
-              setSelectedResource(resource as IResource);
-              return resource.data.documentId;
+              setSelectedResourceId(resource.id);
             }
           }
         }
-        return false;
       });
+    } else {
+      setSelectedResourceId(false);
+    }
+  }, [resources, territoryId]);
+
+  const selectedResource = useMemo<IResponseEntity | false>(() => {
+    if (selectedResourceId && resources) {
+      return resources?.find((r) => r.id === selectedResourceId) ?? false;
     }
     return false;
-  }, [selectedResource, resources, documents, territoryId]);
+  }, [selectedResourceId, resources]);
+
+  const selectedDocumentId = useMemo<string | false>(() => {
+    if (selectedResource) {
+      return selectedResource.data.documentId;
+    }
+    return false;
+  }, [selectedResource]);
 
   const {
     data: selectedDocument,
@@ -135,19 +149,15 @@ export const StatementListTextAnnotator: React.FC<
       }
       return false;
     },
-    enabled: api.isLoggedIn() && selectedDocumentId !== false,
+    enabled: api.isLoggedIn(),
   });
 
   const thisTHasAnchor = useMemo<boolean>(() => {
     if (selectedDocument) {
-      // console.log(selectedDocument?.referencedEntityIds, territoryId);
       return selectedDocument?.referencedEntityIds.T.includes(territoryId);
     }
     return false;
-  }, [
-    selectedDocument && selectedDocument?.referencedEntityIds.T,
-    territoryId,
-  ]);
+  }, [selectedDocument, territoryId]);
 
   return (
     <animated.div style={animatedStyle}>
@@ -163,7 +173,7 @@ export const StatementListTextAnnotator: React.FC<
             categoryTypes={[EntityEnums.Class.Resource]}
             preSuggestions={resources}
             onPicked={(entity) => {
-              setSelectedResource(entity as IResource);
+              setSelectedResourceId(entity.id);
             }}
           />
         )}
@@ -172,7 +182,7 @@ export const StatementListTextAnnotator: React.FC<
             entity={selectedResource}
             unlinkButton={{
               onClick: () => {
-                setSelectedResource(false);
+                setSelectedResourceId(false);
               },
             }}
           />
@@ -192,15 +202,15 @@ export const StatementListTextAnnotator: React.FC<
           </StyledDocumentTag>
         )}
         {!selectedDocumentIsFetching && selectedDocument && thisTHasAnchor && (
-          <StyledDocumentInfo $color="success">
+          <StyledDocumentInfo $color="text" $backgroundColor="warning">
             <FaCheck />
-            <i style={{ whiteSpace: "nowrap" }}>Anchor for T created</i>
+            <span style={{ whiteSpace: "nowrap" }}>T anchor exists</span>
           </StyledDocumentInfo>
         )}
         {!selectedDocumentIsFetching && selectedDocument && !thisTHasAnchor && (
           <StyledDocumentInfo $color="danger">
             <BiSolidCommentError />
-            <i>No Anchor for this T</i>
+            <i>No Anchor for T</i>
           </StyledDocumentInfo>
         )}
         {!selectedDocumentIsFetching &&
@@ -221,6 +231,8 @@ export const StatementListTextAnnotator: React.FC<
                   ? contentWidth - COLLAPSED_TABLE_WIDTH
                   : contentWidth
               }
+              thisTerritoryEntityId={territoryId}
+              initialScrollEntityId={territoryId}
               displayLineNumbers={true}
               height={contentHeight - 60}
               documentId={selectedDocumentId}

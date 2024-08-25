@@ -10,10 +10,10 @@ import React, {
 import { FaPen, FaRegSave, FaTrash } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { v4 as uuidv4 } from "uuid";
+import api from "api";
 
 import { Annotator, Modes } from "@inkvisitor/annotator/src/lib";
 import { IDocument, IEntity } from "@shared/types";
-import api from "api";
 import { Button } from "components/basic/Button/Button";
 import { ButtonGroup } from "components/basic/ButtonGroup/ButtonGroup";
 import { BsFileTextFill } from "react-icons/bs";
@@ -39,6 +39,8 @@ interface TextAnnotatorProps {
   documentId: string;
   handleCreateStatement?: Function | false;
   handleCreateTerritory?: Function | false;
+  initialScrollEntityId?: false | string;
+  thisTerritoryEntityId?: false | string;
 }
 
 export const TextAnnotator = ({
@@ -48,6 +50,8 @@ export const TextAnnotator = ({
   documentId,
   handleCreateStatement = false,
   handleCreateTerritory = false,
+  initialScrollEntityId = false,
+  thisTerritoryEntityId = false,
 }: TextAnnotatorProps) => {
   const queryClient = useQueryClient();
   const theme = useContext(ThemeContext);
@@ -102,23 +106,48 @@ export const TextAnnotator = ({
   const storedEntities = useRef<Record<string, IEntity | false>>({});
 
   const handleSaveNewContent = (quiet: boolean) => {
+    const scrollBeforeUpdate = annotator?.viewport?.lineStart;
     if (annotator && document?.id) {
       if (quiet) {
-        updateDocumentMutationQuiet.mutate({
-          id: document.id,
-          doc: {
-            ...document,
-            ...{ content: annotator.text.value },
+        updateDocumentMutationQuiet.mutate(
+          {
+            id: document.id,
+            doc: {
+              ...document,
+              ...{ content: annotator.text.value },
+            },
           },
-        });
+          {
+            onSuccess: () => {
+              if (scrollBeforeUpdate) {
+                annotator.viewport.scrollTo(
+                  scrollBeforeUpdate,
+                  annotator.text.lines.length
+                );
+              }
+            },
+          }
+        );
       } else {
-        updateDocumentMutation.mutate({
-          id: document.id,
-          doc: {
-            ...document,
-            ...{ content: annotator.text.value },
+        updateDocumentMutation.mutate(
+          {
+            id: document.id,
+            doc: {
+              ...document,
+              ...{ content: annotator.text.value },
+            },
           },
-        });
+          {
+            onSuccess: () => {
+              if (scrollBeforeUpdate) {
+                annotator.viewport.scrollTo(
+                  scrollBeforeUpdate,
+                  annotator.text.lines.length
+                );
+              }
+            },
+          }
+        );
       }
     }
   };
@@ -165,6 +194,7 @@ export const TextAnnotator = ({
     );
     annotator?.addAnchor(entityId);
     setSelectedText("");
+    handleSaveNewContent(true);
   };
 
   const refreshAnnotator = () => {
@@ -183,7 +213,7 @@ export const TextAnnotator = ({
 
     annotator.cursor.setStyle({
       selection: {
-        fill: theme?.color.primary,
+        fill: theme?.color.success,
         fillOpacity: 0.3,
       },
       cursor: {
@@ -201,6 +231,16 @@ export const TextAnnotator = ({
     });
 
     annotator.onHighlight((entityId: string) => {
+      if (entityId === thisTerritoryEntityId) {
+        return {
+          mode: "background",
+          style: {
+            fillColor: theme?.color.warning,
+            fillOpacity: 0.8,
+          },
+        };
+      }
+
       const entityClass = document?.referencedEntityIds
         ? Object.keys(document?.referencedEntityIds).find((key) =>
             document?.referencedEntityIds?.[key as EntityEnums.Class].includes(
@@ -235,6 +275,10 @@ export const TextAnnotator = ({
     annotator.onTextChanged((text) => {});
 
     annotator.draw();
+
+    if (initialScrollEntityId) {
+      annotator.scrollToAnchor(initialScrollEntityId);
+    }
     setAnnotator(annotator);
   };
 
@@ -269,6 +313,7 @@ export const TextAnnotator = ({
       const newTerritoryId = uuidv4();
       handleAddAnchor(newTerritoryId);
       handleCreateTerritory(newTerritoryId);
+      handleSaveNewContent(true);
     }
   }, [handleCreateTerritory, selectedText]);
 
@@ -279,15 +324,14 @@ export const TextAnnotator = ({
       // remove linebreaks from text
       const validatedText = selectedText.replace(/\n/g, " ");
       handleCreateStatement(validatedText, newStatementId);
+      handleSaveNewContent(true);
     }
   }, [handleCreateStatement, selectedText]);
 
-  const onRemoveAnchor = useCallback(() => {
-    (anchor: string) => {
-      annotator?.removeAnchorFromSelection(anchor);
-      handleSaveNewContent(true);
-    };
-  }, []);
+  const onRemoveAnchor = (anchor: string) => {
+    annotator?.removeAnchorFromSelection(anchor);
+    handleSaveNewContent(true);
+  };
 
   return (
     <div style={{ width: width, position: "absolute" }}>
