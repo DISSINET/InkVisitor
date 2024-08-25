@@ -343,19 +343,28 @@ export class Annotator {
         break;
 
       case "ArrowLeft":
-        if (e.shiftKey) {
-          const [offsetLeft] = this.text.getCursorWordOffsets(
-            this.viewport,
-            this.cursor
-          );
+        if (e.shiftKey && e.ctrlKey) {
+          let offsetLeft = 0,
+            offsetRight = 0;
+          while (!offsetLeft) {
+            [offsetLeft, offsetRight] = this.text.getCursorWordOffsets(
+              this.viewport,
+              this.cursor
+            );
+
+            if (offsetLeft === -0) {
+              this.cursor.move(-1, 0);
+              if (this.cursor.xLine <= 0) {
+                this.cursor.yLine = Math.max(0, this.cursor.yLine - 1);
+                this.cursor.xLine = Math.floor(this.width / this.charWidth) - 1;
+              }
+            }
+          }
           this.cursor.selectStart = {
             xLine: this.cursor.xLine + offsetLeft,
             yLine: this.cursor.yLine,
           };
-          this.cursor.selectEnd = {
-            xLine: this.cursor.xLine,
-            yLine: this.cursor.yLine,
-          };
+          this.cursor.move(offsetLeft, 0);
         } else {
           this.cursor.move(-1, 0);
           if (this.cursor.xLine < 0) {
@@ -366,19 +375,33 @@ export class Annotator {
         break;
 
       case "ArrowRight":
-        if (e.shiftKey) {
-          const [, offssetRight] = this.text.getCursorWordOffsets(
-            this.viewport,
-            this.cursor
-          );
-          this.cursor.selectStart = {
-            xLine: this.cursor.xLine,
-            yLine: this.cursor.yLine,
-          };
+        if (e.shiftKey && e.ctrlKey) {
+          let offsetRight, offsetLeft;
+          while (!offsetRight) {
+            [offsetLeft, offsetRight] = this.text.getCursorWordOffsets(
+              this.viewport,
+              this.cursor
+            );
+            if (!offsetRight) {
+              this.cursor.move(1, 0);
+              if (this.cursor.xLine > Math.floor(this.width / this.charWidth)) {
+                this.cursor.xLine = 0;
+                this.cursor.yLine++;
+              }
+            } else if (
+              offsetRight + this.cursor.xLine >
+              Math.floor(this.width / this.charWidth)
+            ) {
+              this.cursor.xLine = 0;
+              this.cursor.yLine++;
+            }
+          }
+
           this.cursor.selectEnd = {
-            xLine: this.cursor.xLine + offssetRight,
+            xLine: this.cursor.xLine + offsetRight,
             yLine: this.cursor.yLine,
           };
+          this.cursor.move(offsetRight, 0);
         } else {
           this.cursor.move(1, 0);
 
