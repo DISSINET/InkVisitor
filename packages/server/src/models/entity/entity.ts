@@ -95,9 +95,12 @@ export default class Entity implements IEntity, IDbModel {
    */
   async beforeSave(db: Connection): Promise<void> {
     if (!this.isTemplate) {
-      const linkedEntities = await Entity.findEntitiesByIds(db, this.getEntitiesIds())
-      if (linkedEntities.find(e => e.isTemplate)) {
-        throw new ModelNotValidError("cannot use template in entity instance")
+      const linkedEntities = await Entity.findEntitiesByIds(
+        db,
+        this.getEntitiesIds()
+      );
+      if (linkedEntities.find((e) => e.isTemplate)) {
+        throw new ModelNotValidError("cannot use template in entity instance");
       }
     }
   }
@@ -106,7 +109,14 @@ export default class Entity implements IEntity, IDbModel {
     db: Connection | undefined,
     updateData: Partial<IEntity>
   ): Promise<WriteResult> {
+    // update timestamp
     this.updatedAt = updateData.updatedAt = new Date();
+
+    // replace AND remove unwanted fields in passed object
+    Object.keys(updateData).forEach(
+      (key) => !(key in this) && delete updateData[key as keyof IEntity]
+    );
+
     return rethink.table(Entity.table).get(this.id).update(updateData).run(db);
   }
 
@@ -132,7 +142,7 @@ export default class Entity implements IEntity, IDbModel {
         "delete called on entity with undefined id"
       );
     }
-    
+
     // if bookmarks are linked to this entity, the bookmarks should be removed also
     await User.removeBookmarkedEntity(db, this.id);
     if (this.class === EntityEnums.Class.Territory) {
@@ -306,10 +316,10 @@ export default class Entity implements IEntity, IDbModel {
     con: Connection,
     ids: string[]
   ): Promise<IEntity[]> {
-    if (ids.findIndex(id => !id) !== -1) {
+    if (ids.findIndex((id) => !id) !== -1) {
       console.trace("Passed empty id to Entity.findEntitiesByIds");
-    } 
-    
+    }
+
     const data = await rethink
       .table(Entity.table)
       .getAll(rethink.args(ids))
