@@ -19,12 +19,13 @@ interface StyledGrid {
 export const StyledGrid = styled.div<StyledGrid>`
   display: grid;
   align-items: center;
-  padding-left: ${({ theme }) => theme.space[0]};
   grid-template-columns: ${({ $hasActant }) =>
-    ` minmax(${$hasActant ? "7rem" : "14.5rem"}, auto) repeat(4, auto)`};
+    ` minmax(${$hasActant ? "7rem" : "14.5rem"}, auto) repeat(5, auto)`};
   width: fit-content;
   grid-auto-flow: row;
+  padding-left: ${({ theme }) => theme.space[0]};
   padding-bottom: ${({ theme }) => theme.space[1]};
+  padding-right: ${({ theme }) => theme.space[2]};
   max-width: 100%;
 
   opacity: ${({ tempDisabled }) => (tempDisabled ? 0.2 : 1)};
@@ -62,11 +63,12 @@ export const StyledCIHeading = styled.p`
 export const StyledCIGrid = styled.div`
   margin-bottom: 0.5rem;
   display: grid;
-  grid-template-columns: repeat(4, auto);
-  grid-column-gap: 1rem;
+  grid-template-columns: repeat(5, auto);
+  grid-column-gap: 0.5rem;
   width: fit-content;
   max-width: 100%;
   align-items: center;
+  padding-right: 0.5rem;
 `;
 
 export const StyledExpandedRow = styled.div`

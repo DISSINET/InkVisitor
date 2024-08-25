@@ -57,7 +57,7 @@ export const StyledPropLineColumn = styled.div<StyledPropLineColumn>`
   align-items: center;
   margin-left: ${({ $level = 0, $lowIdent = false }) =>
     getIndentation($level, $lowIdent)};
-  padding-right: 3px;
+  padding-right: 0.3rem;
 `;
 
 export const StyledFaGripVertical = styled(FaGripVertical)`
