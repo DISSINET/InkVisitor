@@ -39,6 +39,7 @@ interface TextAnnotatorProps {
   documentId: string;
   handleCreateStatement?: Function | false;
   handleCreateTerritory?: Function | false;
+  initialScrollEntityId?: false | string;
 }
 
 export const TextAnnotator = ({
@@ -48,6 +49,7 @@ export const TextAnnotator = ({
   documentId,
   handleCreateStatement = false,
   handleCreateTerritory = false,
+  initialScrollEntityId = false,
 }: TextAnnotatorProps) => {
   const queryClient = useQueryClient();
   const theme = useContext(ThemeContext);
@@ -102,23 +104,48 @@ export const TextAnnotator = ({
   const storedEntities = useRef<Record<string, IEntity | false>>({});
 
   const handleSaveNewContent = (quiet: boolean) => {
+    const scrollBeforeUpdate = annotator?.viewport?.lineStart;
     if (annotator && document?.id) {
       if (quiet) {
-        updateDocumentMutationQuiet.mutate({
-          id: document.id,
-          doc: {
-            ...document,
-            ...{ content: annotator.text.value },
+        updateDocumentMutationQuiet.mutate(
+          {
+            id: document.id,
+            doc: {
+              ...document,
+              ...{ content: annotator.text.value },
+            },
           },
-        });
+          {
+            onSuccess: () => {
+              if (scrollBeforeUpdate) {
+                annotator.viewport.scrollTo(
+                  scrollBeforeUpdate,
+                  annotator.text.lines.length
+                );
+              }
+            },
+          }
+        );
       } else {
-        updateDocumentMutation.mutate({
-          id: document.id,
-          doc: {
-            ...document,
-            ...{ content: annotator.text.value },
+        updateDocumentMutation.mutate(
+          {
+            id: document.id,
+            doc: {
+              ...document,
+              ...{ content: annotator.text.value },
+            },
           },
-        });
+          {
+            onSuccess: () => {
+              if (scrollBeforeUpdate) {
+                annotator.viewport.scrollTo(
+                  scrollBeforeUpdate,
+                  annotator.text.lines.length
+                );
+              }
+            },
+          }
+        );
       }
     }
   };
@@ -235,6 +262,10 @@ export const TextAnnotator = ({
     annotator.onTextChanged((text) => {});
 
     annotator.draw();
+
+    if (initialScrollEntityId) {
+      annotator.scrollToAnchor(initialScrollEntityId);
+    }
     setAnnotator(annotator);
   };
 
@@ -282,12 +313,10 @@ export const TextAnnotator = ({
     }
   }, [handleCreateStatement, selectedText]);
 
-  const onRemoveAnchor = useCallback(() => {
-    (anchor: string) => {
-      annotator?.removeAnchorFromSelection(anchor);
-      handleSaveNewContent(true);
-    };
-  }, []);
+  const onRemoveAnchor = (anchor: string) => {
+    annotator?.removeAnchorFromSelection(anchor);
+    handleSaveNewContent(true);
+  };
 
   return (
     <div style={{ width: width, position: "absolute" }}>

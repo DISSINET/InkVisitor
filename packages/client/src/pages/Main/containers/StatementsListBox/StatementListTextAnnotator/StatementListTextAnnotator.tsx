@@ -221,6 +221,7 @@ export const StatementListTextAnnotator: React.FC<
                   ? contentWidth - COLLAPSED_TABLE_WIDTH
                   : contentWidth
               }
+              initialScrollEntityId={territoryId}
               displayLineNumbers={true}
               height={contentHeight - 60}
               documentId={selectedDocumentId}
