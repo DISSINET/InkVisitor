@@ -18,7 +18,7 @@ import {
   EntityTag,
   JSONExplorer,
 } from "components/advanced";
-import { CMetaProp } from "constructors";
+import { CMetaProp, DProps } from "constructors";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
 import { FaPlus } from "react-icons/fa";
@@ -42,6 +42,7 @@ import {
   StyledDetailSectionContentUsedIn,
   StyledDetailSectionEntityList,
   StyledDetailSectionHeader,
+  StyledDetailSectionHeading,
   StyledDetailWarnings,
   StyledDetailWrapper,
   StyledPropGroupWrap,
@@ -55,6 +56,7 @@ import { EntityDetailStatementPropsTable } from "./EntityDetailUsedInTable/Entit
 import { EntityDetailStatementsTable } from "./EntityDetailUsedInTable/EntityDetailStatementsTable/EntityDetailStatementsTable";
 import { EntityDetailValency } from "./EntityDetailValency/EntityDetailValency";
 import { EntityDetailValidationSection } from "./EntityDetailValidationSection/EntityDetailValidationSection";
+import { EntityDetailSectionButtons } from "./EntityDetailSectionButtons/EntityDetailSectionButtons";
 
 const allowedEntityChangeClasses = [
   EntityEnums.Class.Value,
@@ -582,6 +584,10 @@ export const EntityDetail: React.FC<EntityDetail> = ({
 
   const isInsideTemplate = entity?.isTemplate || false;
 
+  const [showBatchRemovePropSubmit, setShowBatchRemovePropSubmit] =
+    useState(false);
+  const [loadingValidations, setLoadingValidations] = useState(false);
+
   return (
     <>
       {entity && (
@@ -656,6 +662,8 @@ export const EntityDetail: React.FC<EntityDetail> = ({
                   userCanEdit={userCanEdit}
                   isInsideTemplate={isInsideTemplate}
                   territoryParentId={getTerritoryId(entity)}
+                  entity={entity}
+                  setLoadingValidations={setLoadingValidations}
                 />
               </StyledDetailSection>
             )}
@@ -718,8 +726,37 @@ export const EntityDetail: React.FC<EntityDetail> = ({
             {/* metaprops section */}
             <StyledDetailSection $metaSection>
               <StyledDetailSectionHeader>
-                Metaproperties
+                <StyledDetailSectionHeading>
+                  Metaproperties
+                </StyledDetailSectionHeading>
+                {userCanEdit && (
+                  <EntityDetailSectionButtons
+                    entityId={entity.id}
+                    setShowSubmit={setShowBatchRemovePropSubmit}
+                    removeBtnTooltip="remove all metaproperties from entity"
+                    removeBtnDisabled={!entity.props.length}
+                    handleCopyFromEntity={(pickedEntity, replace) => {
+                      if (pickedEntity.props.length === 0) {
+                        toast.info("no metaprops");
+                      } else {
+                        if (replace) {
+                          updateEntityMutation.mutate({
+                            props: DProps(pickedEntity.props),
+                          });
+                        } else {
+                          updateEntityMutation.mutate({
+                            props: [
+                              ...entity.props,
+                              ...DProps(pickedEntity.props),
+                            ],
+                          });
+                        }
+                      }
+                    }}
+                  />
+                )}
               </StyledDetailSectionHeader>
+
               <StyledDetailSectionContent>
                 <StyledPropGroupWrap>
                   <PropGroup
@@ -921,6 +958,18 @@ export const EntityDetail: React.FC<EntityDetail> = ({
         loading={deleteEntityMutation.isPending}
       />
       <Submit
+        title="Delete metaprops"
+        text="Do you really want to delete all metaprops from this entity?"
+        submitLabel="Delete"
+        onSubmit={() => {
+          updateEntityMutation.mutate({ props: [] });
+          setShowBatchRemovePropSubmit(false);
+        }}
+        onCancel={() => setShowBatchRemovePropSubmit(false)}
+        show={showBatchRemovePropSubmit}
+        loading={updateEntityMutation.isPending}
+      />
+      <Submit
         title="Change entity type"
         text={`Changing entity type to: [${selectedEntityTypeLabel}]. You may loose some values. Do you want to continue?`}
         submitLabel="Continue"
@@ -938,7 +987,8 @@ export const EntityDetail: React.FC<EntityDetail> = ({
           isFetching ||
           updateEntityMutation.isPending ||
           deleteEntityMutation.isPending ||
-          changeEntityTypeMutation.isPending
+          changeEntityTypeMutation.isPending ||
+          loadingValidations
         }
       />
 

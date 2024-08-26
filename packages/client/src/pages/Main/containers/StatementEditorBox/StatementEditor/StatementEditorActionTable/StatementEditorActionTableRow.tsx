@@ -230,18 +230,6 @@ export const StatementEditorActionTableRow: React.FC<
       <ButtonGroup $noMarginRight height={19}>
         {userCanEdit && (
           <Button
-            key="d"
-            icon={<FaTrashAlt />}
-            color="plain"
-            inverted
-            tooltipLabel="remove action row"
-            onClick={() => {
-              removeAction(filteredAction.data.sAction.id);
-            }}
-          />
-        )}
-        {userCanEdit && (
-          <Button
             key="a"
             icon={<FaPlus />}
             noIconMargin
@@ -415,6 +403,20 @@ export const StatementEditorActionTableRow: React.FC<
                   />
                 }
               />
+            </StyledGridColumn>
+            <StyledGridColumn>
+              {userCanEdit && (
+                <Button
+                  key="d"
+                  icon={<FaTrashAlt />}
+                  color="plain"
+                  inverted
+                  tooltipLabel="remove action row"
+                  onClick={() => {
+                    removeAction(filteredAction.data.sAction.id);
+                  }}
+                />
+              )}
             </StyledGridColumn>
           </StyledGrid>
 

@@ -16,6 +16,7 @@ import React, { useState } from "react";
 import { FaClone, FaPlus, FaTrashAlt } from "react-icons/fa";
 import { TbReplace } from "react-icons/tb";
 import { StyledSectionButtonsBorder } from "./StatementEditorSectionButtonsStyles";
+import { MdDeleteSweep } from "react-icons/md";
 
 interface StatementEditorSectionButtons {
   section: "actions" | "actants" | "references";
@@ -104,7 +105,7 @@ export const StatementEditorSectionButtons: React.FC<
       >
         <Button
           disabled={!hasEntities()}
-          icon={<FaTrashAlt />}
+          icon={<MdDeleteSweep size={17} />}
           inverted
           color="danger"
           tooltipLabel={`remove all ${section} from statement`}
@@ -146,7 +147,6 @@ export const StatementEditorSectionButtons: React.FC<
           handleCopyFromStatement(entity as IStatement, section, replaceSection)
         }
         excludedActantIds={[statement.id]}
-        disableTemplatesAccept
         disableCreate
         inputWidth={76}
         placeholder="another S"

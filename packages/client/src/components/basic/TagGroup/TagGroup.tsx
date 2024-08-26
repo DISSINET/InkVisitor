@@ -32,7 +32,7 @@ export const TagGroup: React.FC<TagGroup> = ({
     <div style={{ display: "flex" }}>
       <StyledTagGroup>
         {definedEntities
-          .slice(0, 2)
+          .slice(0, oversizeLimit)
           .map((action: IEntity, key: number) => renderListActant(action, key))}
       </StyledTagGroup>
       {isOversized && (
@@ -51,7 +51,7 @@ export const TagGroup: React.FC<TagGroup> = ({
             content={
               <StyledTagGroup>
                 {definedEntities
-                  .slice(2)
+                  .slice(oversizeLimit)
                   .map((action: IEntity, key: number) =>
                     renderListActant(action, key)
                   )}

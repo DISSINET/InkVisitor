@@ -29,11 +29,20 @@ interface StyledDetailSectionHeader {
   $secondary?: boolean;
 }
 export const StyledDetailSectionHeader = styled.div<StyledDetailSectionHeader>`
+  display: flex;
+  align-items: center;
+  font-weight: ${({ theme }) => theme.fontWeight.regular};
   font-size: ${({ theme, $secondary }) =>
     $secondary ? theme.fontSize["base"] : theme.fontSize.lg};
   margin-top: ${({ theme, $secondary }) => ($secondary ? theme.space[12] : "")};
   margin-bottom: ${({ theme }) => theme.space[4]};
   color: ${({ theme }) => theme.color["primary"]};
+`;
+
+export const StyledDetailSectionHeading = styled.div`
+  margin-right: ${({ theme }) => theme.space[2]};
+  align-items: center;
+  display: flex;
 `;
 
 export const StyledDetailWarnings = styled.div`

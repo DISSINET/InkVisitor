@@ -10,10 +10,10 @@ import React, {
 import { FaPen, FaRegSave, FaTrash } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { v4 as uuidv4 } from "uuid";
+import api from "api";
 
 import { Annotator, Modes } from "@inkvisitor/annotator/src/lib";
 import { IDocument, IEntity } from "@shared/types";
-import api from "api";
 import { Button } from "components/basic/Button/Button";
 import { ButtonGroup } from "components/basic/ButtonGroup/ButtonGroup";
 import { BsFileTextFill } from "react-icons/bs";
@@ -39,6 +39,8 @@ interface TextAnnotatorProps {
   documentId: string;
   handleCreateStatement?: Function | false;
   handleCreateTerritory?: Function | false;
+  initialScrollEntityId?: false | string;
+  thisTerritoryEntityId?: false | string;
 }
 
 export const TextAnnotator = ({
@@ -48,9 +50,13 @@ export const TextAnnotator = ({
   documentId,
   handleCreateStatement = false,
   handleCreateTerritory = false,
+  initialScrollEntityId = false,
+  thisTerritoryEntityId = false,
 }: TextAnnotatorProps) => {
   const queryClient = useQueryClient();
   const theme = useContext(ThemeContext);
+
+  const [isInitialized, setIsInitialized] = useState<boolean>(false);
 
   const {
     data: document,
@@ -101,7 +107,14 @@ export const TextAnnotator = ({
   const [selectedAnchors, setSelectedAnchors] = useState<string[]>([]);
   const storedEntities = useRef<Record<string, IEntity | false>>({});
 
+  const [scrollAfterRefresh, setScrollAfterRefresh] = useState<
+    number | undefined
+  >(undefined);
+
   const handleSaveNewContent = (quiet: boolean) => {
+    const scrollBeforeUpdate = annotator?.viewport?.lineStart;
+    setScrollAfterRefresh(scrollBeforeUpdate);
+
     if (annotator && document?.id) {
       if (quiet) {
         updateDocumentMutationQuiet.mutate({
@@ -165,6 +178,7 @@ export const TextAnnotator = ({
     );
     annotator?.addAnchor(entityId);
     setSelectedText("");
+    handleSaveNewContent(true);
   };
 
   const refreshAnnotator = () => {
@@ -181,7 +195,16 @@ export const TextAnnotator = ({
     annotator.setMode(Modes.HIGHLIGHT);
     annotator.addScroller(scroller.current);
 
-    annotator.cursor.setFillColor(theme?.color.success);
+    annotator.cursor.setStyle({
+      selection: {
+        fill: theme?.color.success,
+        fillOpacity: 0.3,
+      },
+      cursor: {
+        highlightFill: theme?.color.primary,
+        defaultFill: theme?.color.primary,
+      },
+    });
 
     if (displayLineNumbers && lines.current) {
       annotator.addLines(lines.current);
@@ -192,6 +215,16 @@ export const TextAnnotator = ({
     });
 
     annotator.onHighlight((entityId: string) => {
+      if (entityId === thisTerritoryEntityId) {
+        return {
+          mode: "background",
+          style: {
+            fillColor: theme?.color.warning,
+            fillOpacity: 0.8,
+          },
+        };
+      }
+
       const entityClass = document?.referencedEntityIds
         ? Object.keys(document?.referencedEntityIds).find((key) =>
             document?.referencedEntityIds?.[key as EntityEnums.Class].includes(
@@ -226,12 +259,35 @@ export const TextAnnotator = ({
     annotator.onTextChanged((text) => {});
 
     annotator.draw();
+
     setAnnotator(annotator);
+
+    if (annotator && annotator.viewport) {
+      if (!isInitialized) {
+        if (initialScrollEntityId) {
+          annotator.scrollToAnchor(initialScrollEntityId);
+        }
+        setIsInitialized(true);
+      }
+    }
+
+    if (scrollAfterRefresh) {
+      annotator.viewport.scrollTo(
+        scrollAfterRefresh,
+        annotator.text.lines.length
+      );
+      setScrollAfterRefresh(undefined);
+    }
   };
 
   useEffect(() => {
     refreshAnnotator();
   }, [document, theme]);
+
+  useEffect(() => {
+    setIsInitialized(false);
+    refreshAnnotator();
+  }, [initialScrollEntityId]);
 
   const topBottomSelection = useMemo<boolean>(() => {
     const yStart = annotator?.cursor?.selectStart?.yLine;
@@ -260,6 +316,7 @@ export const TextAnnotator = ({
       const newTerritoryId = uuidv4();
       handleAddAnchor(newTerritoryId);
       handleCreateTerritory(newTerritoryId);
+      handleSaveNewContent(true);
     }
   }, [handleCreateTerritory, selectedText]);
 
@@ -270,15 +327,14 @@ export const TextAnnotator = ({
       // remove linebreaks from text
       const validatedText = selectedText.replace(/\n/g, " ");
       handleCreateStatement(validatedText, newStatementId);
+      handleSaveNewContent(true);
     }
   }, [handleCreateStatement, selectedText]);
 
-  const onRemoveAnchor = useCallback(() => {
-    (anchor: string) => {
-      annotator?.removeAnchorFromSelection(anchor);
-      handleSaveNewContent(true);
-    };
-  }, []);
+  const onRemoveAnchor = (anchor: string) => {
+    annotator?.removeAnchorFromSelection(anchor);
+    handleSaveNewContent(true);
+  };
 
   return (
     <div style={{ width: width, position: "absolute" }}>

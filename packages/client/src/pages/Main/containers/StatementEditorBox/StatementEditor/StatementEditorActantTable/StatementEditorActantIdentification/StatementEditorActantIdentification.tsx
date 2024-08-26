@@ -135,34 +135,16 @@ export const StatementEditorActantIdentification: React.FC<
           disabled={!userCanEdit}
         />
 
-        <ButtonGroup>
-          {userCanEdit && (
-            <Button
-              key="d"
-              icon={<FaTrashAlt />}
-              color="plain"
-              inverted
-              tooltipLabel="remove identification row"
-              onClick={() => {
-                updateActant(sActant.id, {
-                  identifications: identifications.filter(
-                    (c) => c.id !== identification.id
-                  ),
-                });
-              }}
-            />
-          )}
-          {identification.logic === "2" && (
-            <Button
-              key="neg"
-              tooltipLabel="Negative logic"
-              color="danger"
-              inverted
-              noBorder
-              icon={<AttributeIcon attributeName={"negation"} />}
-            />
-          )}
-        </ButtonGroup>
+        {identification.logic === "2" && (
+          <Button
+            key="neg"
+            tooltipLabel="Negative logic"
+            color="danger"
+            inverted
+            noBorder
+            icon={<AttributeIcon attributeName={"negation"} />}
+          />
+        )}
         <Button
           inverted
           onClick={() => setIsExpanded(!isExpanded)}
@@ -188,6 +170,22 @@ export const StatementEditorActantIdentification: React.FC<
             />
           }
         />
+        {userCanEdit && (
+          <Button
+            key="d"
+            icon={<FaTrashAlt />}
+            color="plain"
+            inverted
+            tooltipLabel="remove identification row"
+            onClick={() => {
+              updateActant(sActant.id, {
+                identifications: identifications.filter(
+                  (c) => c.id !== identification.id
+                ),
+              });
+            }}
+          />
+        )}
       </StyledCIGrid>
 
       {/* Expanded Row */}
