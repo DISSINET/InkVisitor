@@ -1,8 +1,7 @@
-import { EntityEnums, RelationEnums } from "@shared/enums";
-import { EnumValidators } from "@shared/enums";
-import Relation from "./relation";
+import { EntityEnums, EnumValidators, RelationEnums } from "@shared/enums";
 import { Relation as RelationTypes } from "@shared/types";
 import { Connection } from "rethinkdb-ts";
+import Relation from "./relation";
 
 export default class Identification
   extends Relation

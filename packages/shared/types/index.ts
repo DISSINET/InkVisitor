@@ -41,8 +41,8 @@ import { IResponsePermission } from "./response-permission";
 import {
   ClassificationOrder,
   EntityOrder,
-  IdentificationOrder,
   IResponseStatement,
+  IdentificationOrder,
   PropOrder,
 } from "./response-statement";
 import { IResponseTerritory } from "./response-territory";
@@ -73,6 +73,8 @@ import {
 } from "./request-password-reset";
 
 import { IRequestActivationData } from "./request-activation";
+
+import { Search } from "./search";
 
 export type {
   IAudit,
@@ -142,5 +144,4 @@ export type {
   IRequestPasswordResetData,
   IRequestActivationData,
 };
-
-export { RequestSearch, RequestPermissionUpdate, Relation };
+export { RequestSearch, RequestPermissionUpdate, Relation, Search };

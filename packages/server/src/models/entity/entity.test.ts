@@ -21,6 +21,7 @@ export const prepareEntity = (
   const id = Math.random().toString();
 
   const ent = new Entity({ id, class: classValue });
+  ent.label = `${ent.id}-label`;
   ent.props.push(new Prop({ id: `${id}-props[0].id` }));
 
   ent.props[0].children.push(new Prop({ id: `${id}-props[0].children[0].id` }));
