@@ -1,7 +1,8 @@
 import { Box, Panel } from "components";
 import { PanelSeparator } from "components/advanced";
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useAppSelector } from "redux/hooks";
+import { floorNumberToOneDecimal } from "utils/utils";
 
 interface AdvancedSearchPage {}
 export const AdvancedSearchPage: React.FC<AdvancedSearchPage> = ({}) => {
@@ -12,16 +13,62 @@ export const AdvancedSearchPage: React.FC<AdvancedSearchPage> = ({}) => {
     (state) => state.layout.contentHeight
   );
 
+  const onePercentOfLayoutWidth = useMemo(
+    () => layoutWidth / 100,
+    [layoutWidth]
+  );
+
+  const handleSeparatorXPositionChange = (xPosition: number) => {
+    if (advancedSearchSeparatorXPosition !== xPosition) {
+      setAdvancedSearchSeparatorXPosition(xPosition);
+
+      const separatorXPercentPosition = floorNumberToOneDecimal(
+        xPosition / onePercentOfLayoutWidth
+      );
+      localStorage.setItem(
+        "advancedSearchSeparatorXPosition",
+        separatorXPercentPosition.toString()
+      );
+    }
+  };
+
+  const localStorageSeparatorXPosition = localStorage.getItem(
+    "advancedSearchSeparatorXPosition"
+  );
+  const [
+    advancedSearchSeparatorXPosition,
+    setAdvancedSearchSeparatorXPosition,
+  ] = useState<number>(
+    localStorageSeparatorXPosition
+      ? Number(localStorageSeparatorXPosition) * onePercentOfLayoutWidth
+      : layoutWidth / 2
+  );
+
+  useEffect(() => {
+    const separatorXPercentPosition = floorNumberToOneDecimal(
+      advancedSearchSeparatorXPosition / onePercentOfLayoutWidth
+    );
+  }, [layoutWidth]);
+
   return (
     <>
-      {/* {separatorXPosition > 0 && <PanelSeparator />} */}
+      {advancedSearchSeparatorXPosition > 0 && (
+        <PanelSeparator
+          leftSideMinWidth={50}
+          leftSideMaxWidth={1400}
+          separatorXPosition={advancedSearchSeparatorXPosition}
+          setSeparatorXPosition={(xPosition) =>
+            handleSeparatorXPositionChange(xPosition)
+          }
+        />
+      )}
 
-      <Panel width={layoutWidth / 3}>
+      <Panel width={advancedSearchSeparatorXPosition}>
         <Box borderColor="white" height={contentHeight} label="Search">
           {/* <MemoizedAdvancedSearchBox /> */}
         </Box>
       </Panel>
-      <Panel width={(layoutWidth / 3) * 2}>
+      <Panel width={layoutWidth - advancedSearchSeparatorXPosition}>
         <Box borderColor="white" height={contentHeight} label="Explorer">
           {/* <MemoizedExplorerBox /> */}
         </Box>

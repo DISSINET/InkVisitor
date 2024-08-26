@@ -7,7 +7,7 @@ import {
   hiddenBoxHeight,
   INIT_PERCENT_PANEL_WIDTHS,
   SECOND_PANEL_MIN_WIDTH,
-  SEPARATOR_X_PERCENT_POSITION,
+  MAIN_PAGE_SEPARATOR_X_PERCENT_POSITION,
   THIRD_PANEL_MIN_WIDTH,
 } from "Theme/constants";
 import api from "api";
@@ -38,6 +38,7 @@ import { MemoizedStatementEditorBox } from "./containers/StatementEditorBox/Stat
 import { MemoizedStatementListBox } from "./containers/StatementsListBox/StatementListBox";
 import { MemoizedTemplateListBox } from "./containers/TemplateListBox/TemplateListBox";
 import { MemoizedTerritoryTreeBox } from "./containers/TerritoryTreeBox/TerritoryTreeBox";
+import { floorNumberToOneDecimal } from "utils/utils";
 
 type FourthPanelBoxes = "search" | "bookmarks" | "templates";
 
@@ -271,10 +272,6 @@ const MainPage: React.FC<MainPage> = ({}) => {
     enabled: !!userId && api.isLoggedIn(),
   });
 
-  const floorNumberToOneDecimal = (numberToFloor: number) => {
-    return Math.floor(numberToFloor * 10) / 10;
-  };
-
   const onePercentOfLayoutWidth = useMemo(
     () => layoutWidth / 100,
     [layoutWidth]
@@ -286,8 +283,8 @@ const MainPage: React.FC<MainPage> = ({}) => {
   const [mainPageSeparatorXPosition, setMainPageSeparatorXPosition] =
     useState<number>(
       (localStorageSeparatorXPosition
-        ? Number(localStorageSeparatorXPosition)
-        : SEPARATOR_X_PERCENT_POSITION) * onePercentOfLayoutWidth
+        ? Number(localStorageSeparatorXPosition) * onePercentOfLayoutWidth
+        : MAIN_PAGE_SEPARATOR_X_PERCENT_POSITION) * onePercentOfLayoutWidth
     );
 
   const handleSeparatorXPositionChange = (xPosition: number) => {

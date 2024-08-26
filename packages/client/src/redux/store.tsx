@@ -6,6 +6,7 @@ import layoutWidthSlice from "./features/layout/layoutWidthSlice";
 import firstPanelExpandedSlice from "./features/layout/mainPage/firstPanelExpandedSlice";
 import fourthPanelBoxesOpenedSlice from "./features/layout/mainPage/fourthPanelBoxesOpenedSlice";
 import fourthPanelExpandedSlice from "./features/layout/mainPage/fourthPanelExpandedSlice";
+import panelWidthsPercentSlice from "./features/layout/mainPage/panelWidthsPercentSlice";
 import panelWidthsSlice from "./features/layout/mainPage/panelWidthsSlice";
 import statementListOpenedSlice from "./features/layout/mainPage/statementListOpenedSlice";
 import pingSlice from "./features/pingSlice";
@@ -24,7 +25,6 @@ import selectedTerritoryPathSlice from "./features/territoryTree/selectedTerrito
 import treeInitializeSlice from "./features/territoryTree/treeInitializeSlice";
 import themeSlice from "./features/themeSlice";
 import usernameSlice from "./features/usernameSlice";
-import panelWidthsPercentSlice from "./features/layout/mainPage/panelWidthsPercentSlice";
 
 const store: Store = configureStore({
   reducer: {
