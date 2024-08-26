@@ -41,7 +41,7 @@ export const PanelSeparator: React.FC<PanelSeparator> = ({
   }, [separatorXPosition]);
 
   useEffect(() => {
-    if (!dragging) {
+    if (!dragging && leftWidth !== separatorXPosition) {
       setSeparatorXPosition(leftWidth);
     }
   }, [leftWidth, dragging]);
