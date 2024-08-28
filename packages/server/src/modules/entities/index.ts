@@ -34,6 +34,9 @@ import { Relation as RelationType } from "@shared/types";
 import { copyRelations } from "@models/relation/functions";
 import Entity from "@models/entity/entity";
 import { EventType } from "@shared/types/stats";
+import { IRequestQuery } from "@shared/types/request-query";
+import { IResponseQuery } from "@shared/types/response-query";
+import AdvancedSearch from "@service/query/search";
 
 export default Router()
   /**
@@ -688,4 +691,15 @@ export default Router()
 
       return response;
     })
+  )
+  .get(
+    "/query",
+    asyncRouteHandler<IResponseQuery>(
+      async (request: IRequest<undefined, IRequestQuery>) => {
+        const querySearch = new AdvancedSearch(request.body);
+        const results = await querySearch.run(request.db.connection);
+
+        return { ...request.body, entities: results.items || [] };
+      }
+    )
   );
