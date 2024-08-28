@@ -80,7 +80,7 @@ export const TextAnnotatorMenu = ({
                 handleCreateTerritory();
               }}
               label="Territory"
-              tooltipLabel="Create new Sub Territory from selection"
+              tooltipLabel="Create new sub-territory from selection"
             />
           )}
           <EntitySuggester

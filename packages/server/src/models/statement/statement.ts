@@ -383,11 +383,6 @@ class Statement extends Entity implements IStatement {
     db: Connection | undefined,
     updateData: Record<string, unknown>
   ): Promise<WriteResult> {
-    // TODO this is monkeypatch that should not be here, we need better solution
-    if (updateData["entities"]) {
-      delete updateData["entities"];
-    }
-
     if (
       updateData["data"] &&
       (updateData["data"] as any).territory &&

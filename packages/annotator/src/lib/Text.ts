@@ -533,61 +533,59 @@ class Text {
     return rangeLines.join("\n");
   }
 
-  getTagPosition(tag: string, occurence: number = 1): IAbsCoordinates[] {
-    let openingTags: { tag: ITag; segment: Segment }[] = [];
-    let closingTags: { tag: ITag; segment: Segment }[] = [];
+  getTagPosition(tag: string, occurrence: number = 1): IAbsCoordinates[] {
+    let openingTagMatch: { tag: ITag; segment: Segment } | null = null;
+    let closingTagMatch: { tag: ITag; segment: Segment } | null = null;
 
+    let openingTagCount = 0;
+    let closingTagCount = 0;
+
+    // Search for the opening tag
     for (const segment of this.segments) {
       for (const openingTag of segment.openingTags) {
         if (openingTag.tag === tag) {
-          openingTags.push({ tag: openingTag, segment });
-          if (openingTags.length >= occurence) {
+          openingTagCount++;
+          if (openingTagCount === occurrence) {
+            openingTagMatch = { tag: openingTag, segment };
             break;
           }
         }
       }
-
-      if (openingTags.length >= occurence) {
-        break;
-      }
+      if (openingTagMatch) break;
     }
 
+    // Search for the closing tag
     for (const segment of this.segments) {
       for (const closingTag of segment.closingTags) {
         if (closingTag.tag === tag) {
-          closingTags.push({ tag: closingTag, segment });
-          if (closingTags.length >= occurence) {
+          closingTagCount++;
+          if (closingTagCount === occurrence) {
+            closingTagMatch = { tag: closingTag, segment };
             break;
           }
         }
       }
-
-      if (closingTags.length >= occurence) {
-        break;
-      }
+      if (closingTagMatch) break;
     }
 
-    if (!openingTags.length || !closingTags.length) {
+    // Check if both tags were found
+    if (!openingTagMatch || !closingTagMatch) {
+      // console.warn(`Tag "${tag}" with occurrence ${occurrence} not found.`);
       return [];
-      // throw new Error("opening or closing tag not found..")
     }
 
-    const start = openingTags[
-      openingTags.length - 1
-    ].segment.findTagParsedPosition(openingTags[openingTags.length - 1].tag);
-    const end = closingTags[
-      closingTags.length - 1
-    ].segment.findTagParsedPosition(closingTags[closingTags.length - 1].tag);
+    // Calculate the parsed positions of the opening and closing tags
+    const start = openingTagMatch.segment.findTagParsedPosition(
+      openingTagMatch.tag
+    );
+    const end = closingTagMatch.segment.findTagParsedPosition(
+      closingTagMatch.tag
+    );
 
+    // Return the coordinates
     return [
-      {
-        xLine: start.x,
-        yLine: start.y,
-      },
-      {
-        xLine: end.x,
-        yLine: end.y,
-      },
+      { xLine: start.x, yLine: start.y },
+      { xLine: end.x, yLine: end.y },
     ];
   }
 }

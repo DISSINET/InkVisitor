@@ -23,7 +23,7 @@ class Scroller {
     }
     this.runner = runner as HTMLDivElement;
 
-    this.element.onmousedown = this.onMouseDown.bind(this);
+    this.element.onmousedown = this.onBarDown.bind(this);
     this.runner.onmousedown = this.onRunnerMouseDown.bind(this);
 
     // this.element.onmousemove = this.onMouseMove.bind(this);
@@ -101,12 +101,10 @@ class Scroller {
       } else if (e.target === this.runner) {
         // clicking inside runner
 
-        const moveD = e.offsetY - this.runnerClickRelPosition;
-
         this.onChangeCb(
           this.pxToPercentage(
-            this.runner.getBoundingClientRect().top +
-              moveD -
+            e.clientY -
+              this.runnerClickRelPosition -
               this.element.getBoundingClientRect().top
           )
         );
@@ -144,10 +142,31 @@ class Scroller {
    * Clicking on the wrapper outside the runner triggers scroll event which triggers Scroller.update call.
    * @param e
    */
-  onMouseDown(e: MouseEvent) {
-    const availableHeight = this.element.clientHeight;
+  onBarDown(e: MouseEvent) {
     if (this.onChangeCb) {
-      this.onChangeCb((e.offsetY * 100) / availableHeight);
+      const dPercents = 5;
+
+      if (e.clientY < this.runner.getBoundingClientRect().top) {
+        this.onChangeCb(
+          Math.max(
+            0,
+            this.pxToPercentage(
+              this.runner.getBoundingClientRect().top -
+                this.element.getBoundingClientRect().top
+            ) - dPercents
+          )
+        );
+      } else {
+        this.onChangeCb(
+          Math.min(
+            100,
+            this.pxToPercentage(
+              this.runner.getBoundingClientRect().top -
+                this.element.getBoundingClientRect().top
+            ) + dPercents
+          )
+        );
+      }
     }
   }
 

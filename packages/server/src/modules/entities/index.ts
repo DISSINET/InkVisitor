@@ -33,6 +33,7 @@ import { RelationEnums } from "@shared/enums";
 import { Relation as RelationType } from "@shared/types";
 import { copyRelations } from "@models/relation/functions";
 import Entity from "@models/entity/entity";
+import { EventType } from "@shared/types/stats";
 
 export default Router()
   /**
@@ -214,7 +215,7 @@ export default Router()
         }
       }
 
-      await Audit.createNew(request, model.id, request.body);
+      await Audit.createNew(request, model.id, request.body, EventType.CREATE);
 
       return out;
     })
@@ -269,6 +270,8 @@ export default Router()
         if (!saved) {
           throw new InternalServerError("cannot copy entity");
         }
+
+        await Audit.createNew(request, clone.id, clone, EventType.CREATE);
 
         const rels = (
           await Relation.findForEntities(request.db.connection, [originalId])
@@ -416,7 +419,7 @@ export default Router()
         const result = await model.update(request.db.connection, entityData);
 
         if (result.replaced || result.unchanged) {
-          await Audit.createNew(request, entityId, entityData);
+          await Audit.createNew(request, entityId, entityData, EventType.EDIT);
 
           return {
             result: true,
@@ -497,17 +500,22 @@ export default Router()
             }
           }
           delete dependencyMap[removedId];
-        }
+        };
 
         // check for any blocking reasons for not deleting the entity + construct dependency map
         for (const entity of existing) {
           // if relations are linked to this entity, the delete should not be allowed
-          const [linkIds, relIds] = await Relation.getLinkedForEntities(req, [entity.id]);
+          const [linkIds, relIds] = await Relation.getLinkedForEntities(req, [
+            entity.id,
+          ]);
           if (relIds.length) {
             out.result = false;
             out.data[entity.id] = new InvalidDeleteError(
-              `Cannot be deleted while linked to relations (${relIds[0] +
-              (relIds.length > 1 ? " + " + (relIds.length - 1) + " others" : "")
+              `Cannot be deleted while linked to relations (${
+                relIds[0] +
+                (relIds.length > 1
+                  ? " + " + (relIds.length - 1) + " others"
+                  : "")
               })`
             ).withData(linkIds);
             continue;
@@ -528,8 +536,10 @@ export default Router()
           const usedBy = await model.getUsedByEntity(req.db.connection);
           if (usedBy.length) {
             out.result = false;
-            out.data[entity.id] = new InvalidDeleteError(`Referenced by other entities`).withData(usedBy.map(e => e.id));
-            dependencyMap[entity.id] = usedBy.map(e => e.id)
+            out.data[entity.id] = new InvalidDeleteError(
+              `Referenced by other entities`
+            ).withData(usedBy.map((e) => e.id));
+            dependencyMap[entity.id] = usedBy.map((e) => e.id);
             continue;
           }
         }
@@ -540,26 +550,33 @@ export default Router()
           for (const entityId of Object.keys(dependencyMap)) {
             if (dependencyMap[entityId].length === 0) {
               try {
-                const model = getEntityClass(existing.find(e => e.id === entityId));
+                const model = getEntityClass(
+                  existing.find((e) => e.id === entityId)
+                );
                 if ((await model.delete(req.db.connection)).deleted !== 1) {
-                  throw new InternalServerError(`cannot delete entity ${entityId}`);
+                  throw new InternalServerError(
+                    `cannot delete entity ${entityId}`
+                  );
                 }
                 out.data[entityId] = true;
                 removeDependency(entityId);
                 removedCount++;
               } catch (e) {
                 out.result = false;
-                out.data[entityId] = e as CustomError
+                out.data[entityId] = e as CustomError;
               }
             }
           }
         } while (removedCount > 0);
 
-        out.result = Object.keys(out.data).reduce<boolean>((acc, c) => acc && !!out.data && out.data[c] === true, true)
+        out.result = Object.keys(out.data).reduce<boolean>(
+          (acc, c) => acc && !!out.data && out.data[c] === true,
+          true
+        );
 
         // throw basic error if deleting single entity
         if (ids.length === 1 && !out.result) {
-          throw out.data[Object.keys(out.data)[0]]
+          throw out.data[Object.keys(out.data)[0]];
         }
 
         return out;

@@ -1,9 +1,10 @@
-import { IDbModel, UnknownObject, fillFlatObject } from "@models/common";
+import { IDbModel, fillFlatObject } from "@models/common";
 import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
 import { IAudit } from "@shared/types";
 import { InternalServerError } from "@shared/types/errors";
 import { IRequest } from "../../custom_typings/request";
 import { DbEnums } from "@shared/enums";
+import { EventType } from "@shared/types/stats";
 
 export default class Audit implements IAudit, IDbModel {
   static table = "audits";
@@ -13,8 +14,9 @@ export default class Audit implements IAudit, IDbModel {
   user = "";
   date: Date = new Date();
   changes: object = {};
+  type: EventType = EventType.EDIT;
 
-  constructor(data: UnknownObject) {
+  constructor(data: Partial<IAudit>) {
     if (!data) {
       return;
     }
@@ -82,12 +84,14 @@ export default class Audit implements IAudit, IDbModel {
   static async createNew(
     req: IRequest,
     entityId: string,
-    updateData: object
+    updateData: object,
+    type: EventType,
   ): Promise<boolean> {
     const entry = new Audit({
       entityId,
       user: req.getUserOrFail().id,
       changes: updateData,
+      type: type,
     });
     return entry.save(req.db.connection);
   }
@@ -185,7 +189,7 @@ export default class Audit implements IAudit, IDbModel {
       if (
         firstAudit &&
         firstAudit.date.toISOString().split("T")[0] ===
-          audit.date.toISOString().split("T")[0]
+        audit.date.toISOString().split("T")[0]
       ) {
         withValidDate.push(firstAudit);
       }
@@ -223,7 +227,7 @@ export default class Audit implements IAudit, IDbModel {
       if (
         firstAudit &&
         firstAudit.date.toISOString().split("T")[0] ===
-          audit.date.toISOString().split("T")[0]
+        audit.date.toISOString().split("T")[0]
       ) {
         withValidDate.push(firstAudit);
       }
