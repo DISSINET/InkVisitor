@@ -57,14 +57,14 @@ const store: Store = configureStore({
       contentHeight: contentHeightSlice,
       disableUserSelect: disableUserSelectSlice,
 
-      // mainPage: combineReducers({
-      panelWidths: panelWidthsSlice,
-      panelWidthsPercent: panelWidthsPercentSlice,
-      firstPanelExpanded: firstPanelExpandedSlice,
-      fourthPanelExpanded: fourthPanelExpandedSlice,
-      fourthPanelBoxesOpened: fourthPanelBoxesOpenedSlice,
-      statementListOpened: statementListOpenedSlice,
-      // }),
+      mainPage: combineReducers({
+        panelWidths: panelWidthsSlice,
+        panelWidthsPercent: panelWidthsPercentSlice,
+        firstPanelExpanded: firstPanelExpandedSlice,
+        fourthPanelExpanded: fourthPanelExpandedSlice,
+        fourthPanelBoxesOpened: fourthPanelBoxesOpenedSlice,
+        statementListOpened: statementListOpenedSlice,
+      }),
     }),
   },
 });

@@ -45,7 +45,7 @@ export const StatementListBox: React.FC = () => {
     (state) => state.statementList.rowsExpanded
   );
   const statementListOpened: boolean = useAppSelector(
-    (state) => state.layout.statementListOpened
+    (state) => state.layout.mainPage.statementListOpened
   );
   const isLoading: boolean = useAppSelector(
     (state) => state.statementList.isLoading

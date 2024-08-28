@@ -65,22 +65,22 @@ const MainPage: React.FC<MainPage> = ({}) => {
     (state) => state.layout.contentHeight
   );
   const panelWidths: number[] = useAppSelector(
-    (state) => state.layout.panelWidths
+    (state) => state.layout.mainPage.panelWidths
   );
   const panelWidthsPercent: number[] = useAppSelector(
-    (state) => state.layout.panelWidthsPercent
+    (state) => state.layout.mainPage.panelWidthsPercent
   );
   const fourthPanelBoxesOpened: { [key: string]: boolean } = useAppSelector(
-    (state) => state.layout.fourthPanelBoxesOpened
+    (state) => state.layout.mainPage.fourthPanelBoxesOpened
   );
   const firstPanelExpanded: boolean = useAppSelector(
-    (state) => state.layout.firstPanelExpanded
+    (state) => state.layout.mainPage.firstPanelExpanded
   );
   const fourthPanelExpanded: boolean = useAppSelector(
-    (state) => state.layout.fourthPanelExpanded
+    (state) => state.layout.mainPage.fourthPanelExpanded
   );
   const statementListOpened: boolean = useAppSelector(
-    (state) => state.layout.statementListOpened
+    (state) => state.layout.mainPage.statementListOpened
   );
 
   const toggleFirstPanel = () => {
