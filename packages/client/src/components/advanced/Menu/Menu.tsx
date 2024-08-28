@@ -4,7 +4,13 @@ import { Button } from "components/basic/Button/Button";
 import React, { useState } from "react";
 import { BiLogOut } from "react-icons/bi";
 import { CgFileDocument } from "react-icons/cg";
-import { FaBars, FaBookOpen, FaInfo, FaUsers } from "react-icons/fa";
+import {
+  FaBars,
+  FaBookOpen,
+  FaInfo,
+  FaSearchengin,
+  FaUsers,
+} from "react-icons/fa";
 import { useLocation, useNavigate } from "react-router";
 import { IPage } from "types";
 import { MenuItem } from "./MenuItem";
@@ -61,6 +67,14 @@ export const Menu: React.FC<Menu> = ({
       href: "/documents",
       admin: true,
       icon: <CgFileDocument size={18} />,
+    },
+    {
+      id: "advanced-search",
+      label: "Advanced Search",
+      color: "info",
+      href: "/advanced-search",
+      admin: true,
+      icon: <FaSearchengin />,
     },
   ];
 

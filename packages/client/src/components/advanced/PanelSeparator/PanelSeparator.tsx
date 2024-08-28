@@ -1,31 +1,24 @@
-import React, { useEffect, useState } from "react";
 import { useSpring } from "@react-spring/web";
+import React, { useEffect, useState } from "react";
 import { setDisableUserSelect } from "redux/features/layout/disableUserSelectSlice";
-import { setPanelWidths } from "redux/features/layout/panelWidthsSlice";
-import { setSeparatorXPosition } from "redux/features/layout/separatorXPositionSlice";
-import { useAppDispatch, useAppSelector } from "redux/hooks";
-import {
-  secondPanelMinWidth,
-  springConfig,
-  thirdPanelMinWidth,
-} from "Theme/constants";
+import { useAppDispatch } from "redux/hooks";
+import { springConfig } from "Theme/constants";
 import { StyledPanelSeparator } from "./PanelSeparatorStyles";
 
-interface PanelSeparator {}
-export const PanelSeparator: React.FC<PanelSeparator> = ({}) => {
+interface PanelSeparator {
+  leftSideMinWidth: number;
+  leftSideMaxWidth: number;
+  // set custom one related to specific page
+  separatorXPosition: number;
+  setSeparatorXPosition: (xPosition: number) => void;
+}
+export const PanelSeparator: React.FC<PanelSeparator> = ({
+  leftSideMinWidth,
+  leftSideMaxWidth,
+  separatorXPosition,
+  setSeparatorXPosition,
+}) => {
   const dispatch = useAppDispatch();
-  const panelWidths: number[] = useAppSelector(
-    (state) => state.layout.panelWidths
-  );
-  const layoutWidth: number = useAppSelector(
-    (state) => state.layout.layoutWidth
-  );
-  const separatorXPosition: number = useAppSelector(
-    (state) => state.layout.separatorXPosition
-  );
-
-  const LEFT_SIDE_MIN_WIDTH = secondPanelMinWidth + panelWidths[0];
-  const LEFT_SIDE_MAX_WIDTH = layoutWidth - panelWidths[3] - thirdPanelMinWidth;
 
   const [separatorXTempPosition, setSeparatorXTempPosition] = useState<
     undefined | number
@@ -40,31 +33,16 @@ export const PanelSeparator: React.FC<PanelSeparator> = ({}) => {
   });
 
   useEffect(() => {
-    setLeftWidth(separatorXPosition);
+    if (leftWidth !== separatorXPosition) {
+      setLeftWidth(separatorXPosition);
+    }
 
     window.getSelection()?.removeAllRanges();
-
-    const onePercent = layoutWidth / 100;
-    const separatorXPercentPosition =
-      Math.floor((separatorXPosition / onePercent) * 10) / 10;
-    localStorage.setItem(
-      "separatorXPosition",
-      separatorXPercentPosition.toString()
-    );
-
-    dispatch(
-      setPanelWidths([
-        panelWidths[0],
-        separatorXPosition - panelWidths[0],
-        layoutWidth - panelWidths[3] - separatorXPosition,
-        panelWidths[3],
-      ])
-    );
   }, [separatorXPosition]);
 
   useEffect(() => {
-    if (!dragging) {
-      dispatch(setSeparatorXPosition(leftWidth));
+    if (!dragging && leftWidth !== separatorXPosition) {
+      setSeparatorXPosition(leftWidth);
     }
   }, [leftWidth, dragging]);
 
@@ -78,13 +56,13 @@ export const PanelSeparator: React.FC<PanelSeparator> = ({}) => {
     if (dragging && leftWidth && separatorXTempPosition) {
       const newLeftWidth = leftWidth + clientX - separatorXTempPosition;
       setSeparatorXTempPosition(clientX);
-      if (newLeftWidth < LEFT_SIDE_MIN_WIDTH) {
-        setLeftWidth(LEFT_SIDE_MIN_WIDTH);
+      if (newLeftWidth < leftSideMinWidth) {
+        setLeftWidth(leftSideMinWidth);
         return;
       }
 
-      if (newLeftWidth > LEFT_SIDE_MAX_WIDTH) {
-        setLeftWidth(LEFT_SIDE_MAX_WIDTH);
+      if (newLeftWidth > leftSideMaxWidth) {
+        setLeftWidth(leftSideMaxWidth);
         return;
       }
       setLeftWidth(newLeftWidth);
