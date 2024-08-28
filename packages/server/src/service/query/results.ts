@@ -16,7 +16,8 @@ export default class Results<T extends { id: string }> {
     for (const finalItem of this.items) {
       for (const newItem of results) {
         if (finalItem.id === newItem.id) {
-          newFinals.push(newItem);
+          newFinals.push(finalItem);
+          break;
         }
       }
     }
@@ -29,22 +30,6 @@ export default class Results<T extends { id: string }> {
    * @param results
    */
   addOr(results: T[]) {
-    if (!this.items) {
-      this.items = results;
-    }
-
-    for (const newItem of results) {
-      let alreadyInFinal = false;
-      for (const finalItem of this.items) {
-        if (finalItem.id === newItem.id) {
-          alreadyInFinal = true;
-          break;
-        }
-      }
-
-      if (!alreadyInFinal) {
-        this.items.push(newItem);
-      }
-    }
+    this.items = Array.from(new Set((this.items || []).concat(results)));
   }
 }

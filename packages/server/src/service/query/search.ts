@@ -1,13 +1,13 @@
 import { IEntity } from "@shared/types";
 import { SearchEdgeTypesInvalid } from "@shared/types/errors";
-import { Search } from "@shared/types/search";
+import { Query } from "@shared/types/query";
 import { Connection } from "rethinkdb-ts";
 import { Results, SearchEdge, SearchNode } from ".";
 
 export default class AdvancedSearch {
   root: SearchNode;
 
-  constructor(data: Partial<Search.INode>) {
+  constructor(data: Partial<Query.INode>) {
     this.root = new SearchNode(data);
   }
 
@@ -26,7 +26,7 @@ export default class AdvancedSearch {
    * Shorthand for addEdge of root node
    * @param edgeData
    */
-  addEdge(edgeData: Partial<Search.IEdge>): SearchEdge {
+  addEdge(edgeData: Partial<Query.IEdge>): SearchEdge {
     return this.root.addEdge(edgeData);
   }
 }

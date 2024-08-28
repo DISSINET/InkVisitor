@@ -1,29 +1,21 @@
 import Relation from "@models/relation/relation";
-import { Search } from "@shared/types/search";
-import {
-  Connection,
-  RTable,
-  r,
-  RDatum,
-  RStream,
-  RValue,
-  RQuery,
-} from "rethinkdb-ts";
+import { Query } from "@shared/types/query";
+import { r, RDatum, RStream } from "rethinkdb-ts";
 import { SearchNode } from ".";
 import { IEntity, Relation as RelationTypes } from "@shared/types";
 import { DbEnums, RelationEnums } from "@shared/enums";
 import { InternalServerError } from "@shared/types/errors";
 
-export default class SearchEdge implements Search.IEdge {
-  type: Search.EdgeType;
-  params: Search.IEdgeParams;
-  logic: Search.EdgeLogic;
+export default class SearchEdge implements Query.IEdge {
+  type: Query.EdgeType;
+  params: Query.IEdgeParams;
+  logic: Query.EdgeLogic;
   node: SearchNode;
 
-  constructor(data: Partial<Search.IEdge>) {
-    this.type = data.type || ("" as Search.EdgeType);
+  constructor(data: Partial<Query.IEdge>) {
+    this.type = data.type || ("" as Query.EdgeType);
     this.params = data.params || {};
-    this.logic = data.logic || Search.EdgeLogic.Positive;
+    this.logic = data.logic || Query.EdgeLogic.Positive;
     this.node = new SearchNode(data?.node || {});
   }
 
@@ -33,9 +25,9 @@ export default class SearchEdge implements Search.IEdge {
 }
 
 export class EdgeHasClassification extends SearchEdge {
-  constructor(data: Partial<Search.IEdge>) {
+  constructor(data: Partial<Query.IEdge>) {
     super(data);
-    this.type = Search.EdgeType.XHasClassification;
+    this.type = Query.EdgeType.XHasClassification;
   }
 
   run(q: RStream): RStream {
@@ -49,17 +41,17 @@ export class EdgeHasClassification extends SearchEdge {
         .filter(function (relation: RDatum<RelationTypes.IRelation>) {
           return relation("entityIds").nth(0).eq(entity("id"));
         })
-        .map(function () {
-          return entity;
+        .map(function (relation) {
+          return relation("entityIds").nth(0);
         });
     });
   }
 }
 
 export class EdgeSUnderT extends SearchEdge {
-  constructor(data: Partial<Search.IEdge>) {
+  constructor(data: Partial<Query.IEdge>) {
     super(data);
-    this.type = Search.EdgeType.SUnderT;
+    this.type = Query.EdgeType.SUnderT;
   }
 
   run(q: RStream): RStream {
@@ -68,9 +60,9 @@ export class EdgeSUnderT extends SearchEdge {
 }
 
 export class EdgeHasRelation extends SearchEdge {
-  constructor(data: Partial<Search.IEdge>) {
+  constructor(data: Partial<Query.IEdge>) {
     super(data);
-    this.type = Search.EdgeType.XHasRelation;
+    this.type = Query.EdgeType.XHasRelation;
   }
 
   run(q: RStream): RStream {
@@ -79,21 +71,44 @@ export class EdgeHasRelation extends SearchEdge {
         .table(Relation.table)
         .getAll(entity("id"), { index: DbEnums.Indexes.RelationsEntityIds })
         .map(function () {
+          return entity("id");
+        });
+    });
+  }
+}
+
+export class EdgeHasPropType extends SearchEdge {
+  constructor(data: Partial<Query.IEdge>) {
+    super(data);
+    this.type = Query.EdgeType.XHasPropType;
+  }
+
+  run(q: RStream): RStream {
+    return q.concatMap(function (entity: RDatum<IEntity>) {
+      return r
+        .table(Relation.table)
+        .getAll(entity("id"), { index: DbEnums.Indexes.PropsRecursive })
+        .filter(function (propEntity: RDatum<IEntity>) {
+          return true;
+        })
+        .map(function () {
           return entity;
         });
     });
   }
 }
 
-export function getEdgeInstance(data: Partial<Search.IEdge>) {
+export function getEdgeInstance(data: Partial<Query.IEdge>) {
   switch (data.type) {
-    case Search.EdgeType.XHasClassification:
+    case Query.EdgeType.XHasPropType:
+      return new EdgeHasPropType(data);
+    case Query.EdgeType.XHasClassification:
       return new EdgeHasClassification(data);
-    case Search.EdgeType.XHasRelation:
+    case Query.EdgeType.XHasRelation:
       return new EdgeHasRelation(data);
-    case Search.EdgeType.SUnderT:
+    case Query.EdgeType.SUnderT:
       return new EdgeSUnderT(data);
     default:
-      throw new InternalServerError("unknown edge type");
+      throw new InternalServerError(`unknown edge type: ${data.type}`);
   }
 }

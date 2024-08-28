@@ -1,5 +1,5 @@
 import { EntityEnums } from "@shared/enums";
-import { Search } from "@shared/types";
+import { Query } from "@shared/types";
 
 const exampleSearch: Search.INode = {
   type: Search.NodeType.X,

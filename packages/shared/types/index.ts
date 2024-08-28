@@ -74,7 +74,7 @@ import {
 
 import { IRequestActivationData } from "./request-activation";
 
-import { Search } from "./search";
+import { Query } from "./query";
 
 export type {
   IAudit,
@@ -144,4 +144,4 @@ export type {
   IRequestPasswordResetData,
   IRequestActivationData,
 };
-export { RequestSearch, RequestPermissionUpdate, Relation, Search };
+export { RequestSearch, RequestPermissionUpdate, Relation, Query };

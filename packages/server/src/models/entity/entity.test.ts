@@ -13,7 +13,7 @@ import Prop, { PropSpec } from "@models/prop/prop";
 import { EntityEnums } from "@shared/enums";
 import { getEntityClass } from "@models/factory";
 import Reference from "./reference";
-import { InvalidDeleteError, ModelNotValidError } from "@shared/types/errors";
+import { ModelNotValidError } from "@shared/types/errors";
 
 export const prepareEntity = (
   classValue: EntityEnums.Class = EntityEnums.Class.Concept

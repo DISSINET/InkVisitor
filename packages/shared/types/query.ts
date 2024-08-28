@@ -1,6 +1,6 @@
-import { EntityEnums } from "./../enums";
+import { EntityEnums } from "../enums";
 
-export namespace Search {
+export namespace Query {
   export interface INode {
     type: NodeType;
     params: INodeParams;
