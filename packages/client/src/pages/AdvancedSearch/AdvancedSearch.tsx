@@ -49,9 +49,9 @@ export const AdvancedSearchPage: React.FC<AdvancedSearchPage> = ({}) => {
   const [currentLayoutWidth, setcurrentLayoutWidth] = useState(layoutWidth);
 
   useEffect(() => {
-    const onePercentOfCurrentLayoutWidth = currentLayoutWidth / 100;
+    const onePercentOfLastLayoutWidth = currentLayoutWidth / 100;
     const separatorXPercentPosition = floorNumberToOneDecimal(
-      advancedSearchSeparatorXPosition / onePercentOfCurrentLayoutWidth
+      advancedSearchSeparatorXPosition / onePercentOfLastLayoutWidth
     );
     setAdvancedSearchSeparatorXPosition(
       separatorXPercentPosition * onePercentOfLayoutWidth
@@ -67,8 +67,8 @@ export const AdvancedSearchPage: React.FC<AdvancedSearchPage> = ({}) => {
     <>
       {advancedSearchSeparatorXPosition > 0 && (
         <PanelSeparator
-          leftSideMinWidth={50}
-          leftSideMaxWidth={1400}
+          leftSideMinWidth={400}
+          leftSideMaxWidth={layoutWidth - 400}
           separatorXPosition={advancedSearchSeparatorXPosition}
           setSeparatorXPosition={(xPosition) =>
             handleSeparatorXPositionChange(xPosition)
