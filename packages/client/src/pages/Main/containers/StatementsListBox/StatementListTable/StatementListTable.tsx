@@ -44,6 +44,7 @@ import {
   StyledAbbreviatedLabel,
   StyledCheckboxWrapper,
   StyledFocusedCircle,
+  StyledScrollbar,
   StyledTHead,
   StyledTable,
   StyledTh,
@@ -542,7 +543,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
       : COLLAPSED_TABLE_WIDTH;
 
   return (
-    <Scrollbar
+    <StyledScrollbar
       style={{ width }}
       disableTracksWidthCompensation={false}
       removeTrackXWhenNotUsed={true}
@@ -551,7 +552,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
     >
       <StyledTable
         {...getTableProps()}
-        $contentWidth={width}
+        $contentWidth={width - 10}
         $isExpanded={displayMode === StatementListDisplayMode.LIST}
       >
         <StyledTHead>
@@ -589,6 +590,6 @@ export const StatementListTable: React.FC<StatementListTable> = ({
           })}
         </tbody>
       </StyledTable>
-    </Scrollbar>
+    </StyledScrollbar>
   );
 };

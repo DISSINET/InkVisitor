@@ -1,5 +1,4 @@
 import styled from "styled-components";
-import { ThemeColor } from "Theme/theme";
 
 interface StyledTable {
   $noBorder: boolean;

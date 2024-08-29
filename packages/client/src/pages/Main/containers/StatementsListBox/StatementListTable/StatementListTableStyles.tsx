@@ -1,4 +1,5 @@
 import { COLLAPSED_TABLE_WIDTH } from "Theme/constants";
+import Scrollbar from "react-scrollbars-custom";
 import styled from "styled-components";
 
 interface StyledTable {
@@ -108,4 +109,14 @@ export const StyledAbbreviatedLabel = styled.div`
   -webkit-line-clamp: 2;
   min-width: 5rem;
   font-size: ${({ theme }) => theme.fontSize["xs"]};
+`;
+
+export const StyledScrollbar = styled(Scrollbar)`
+  .ScrollbarsCustom-Wrapper {
+    .ScrollbarsCustom-Scroller {
+      margin-right: 0 !important;
+      margin-bottom: 0 !important;
+      padding-bottom: 6px !important;
+    }
+  }
 `;

@@ -33,6 +33,7 @@ export const StyledTableWrapper = styled.div`
   overflow: auto;
   flex-shrink: 0;
 `;
+
 export const StyledEmptyState = styled.div`
   padding: ${({ theme }) => theme.space[3]};
   color: ${({ theme }) => theme.color["gray"][600]};
