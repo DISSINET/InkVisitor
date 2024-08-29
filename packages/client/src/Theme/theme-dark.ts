@@ -44,7 +44,7 @@ const darkTheme = {
     grey: "#6b6b6b",
     greyer: "#b5b5b5",
     text: "#c7c7c7",
-    primary: "#f6f6ff",
+    primary: "#D1DAEF",
     success: "#9eaad7",
     warning: "#e5d088",
     danger: "#ee8fa4",
@@ -53,7 +53,7 @@ const darkTheme = {
     primaryTransparent: "rgba(9,16,52,0.2)",
     modalBg: "rgba(9,16,52,0.5)",
 
-    tagBackground: "#f6f6ff",
+    tagBackground: "#D1DAEF",
     tagColor: "#060c26",
     tagSelectedBackground: "#060c26",
     tagSelectedColor: "#f6f6ff",
