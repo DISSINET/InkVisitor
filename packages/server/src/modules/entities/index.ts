@@ -692,7 +692,7 @@ export default Router()
       return response;
     })
   )
-  .get(
+  .post(
     "/query",
     asyncRouteHandler<IResponseQuery>(
       async (request: IRequest<undefined, IRequestQuery>) => {

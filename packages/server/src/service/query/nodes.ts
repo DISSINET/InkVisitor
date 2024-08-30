@@ -64,21 +64,25 @@ export default class SearchNode implements Query.INode {
    */
   async run(db: Connection): Promise<Results<IEntity>> {
     if (!this.edges.length) {
-      await this.runSingleBatch(db);
+      await this.runSingleBatch(db, this);
     } else {
       for (const edge of this.edges) {
-        await this.runSingleBatch(db, edge);
+        await this.runSingleBatch(db, edge.node, edge);
       }
     }
 
     return this.results;
   }
 
-  async runSingleBatch(db: Connection, edge?: SearchEdge): Promise<void> {
+  async runSingleBatch(
+    db: Connection,
+    node: SearchNode,
+    edge?: SearchEdge
+  ): Promise<void> {
     let q: RStream = r.table(Entity.table);
-    if (edge && edge.node.params.classes?.length) {
+    if (node.params.classes?.length) {
       q = q.filter(function (row: RDatum) {
-        return r.expr(edge.node.params.classes).contains(row("class"));
+        return r.expr(node.params.classes).contains(row("class"));
       });
     }
 
