@@ -58,3 +58,28 @@ export namespace Query {
     Negative = "negative",
   }
 }
+
+export namespace Explore {
+  export interface IExplore {
+    view: IView; // information about the presentation form
+    columns: IExploreColumn[];
+    filters: IExploreColumnFilter[];
+    sort: IExploreColumnSort | undefined;
+    inspect: string; // id of the entity which row is expanded
+    limit: number;
+    offset: number;
+  }
+
+  export interface IView {}
+  export interface IExploreColumnFilter {}
+  export type IExploreColumnSort = "asc" | "desc";
+  export interface IExploreColumn {
+    id: string;
+    name: string;
+    params: IExploreColumnParams<IExploreColumnType>;
+  }
+  export type IExploreColumnType = "default"; // TODO add
+  export interface IExploreColumnParams<T = IExploreColumnType> {
+    type: T;
+  }
+}

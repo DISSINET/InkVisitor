@@ -35,8 +35,12 @@ import { copyRelations } from "@models/relation/functions";
 import Entity from "@models/entity/entity";
 import { EventType } from "@shared/types/stats";
 import { IRequestQuery } from "@shared/types/request-query";
-import { IResponseQuery } from "@shared/types/response-query";
+import {
+  IResponseQuery,
+  IResponseQueryEntity,
+} from "@shared/types/response-query";
 import AdvancedSearch from "@service/query/search";
+import { Explore } from "@shared/types/query";
 
 export default Router()
   /**
@@ -698,8 +702,17 @@ export default Router()
       async (request: IRequest<undefined, IRequestQuery>) => {
         const querySearch = new AdvancedSearch(request.body);
         const results = await querySearch.run(request.db.connection);
+        const entities =
+          results.items?.map<IResponseQueryEntity>((e) => ({
+            entity: e,
+            columnData: {},
+          })) || [];
 
-        return { ...request.body, entities: results.items || [] };
+        return {
+          query: { ...request.body },
+          entities,
+          explore: {} as Explore.IExplore,
+        };
       }
     )
   );
