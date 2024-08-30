@@ -17,6 +17,15 @@ export default class AdvancedSearch {
     if (!this.root.type) {
       throw new BadParams();
     }
+
+    if (
+      !this.root.edges.length &&
+      !(this.root.params.classes || []).length &&
+      !this.root.params.id &&
+      !this.root.params.label
+    ) {
+      throw new BadParams("Too loose conditions");
+    }
   }
 
   /**
