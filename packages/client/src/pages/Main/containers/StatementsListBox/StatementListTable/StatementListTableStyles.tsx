@@ -114,9 +114,9 @@ export const StyledAbbreviatedLabel = styled.div`
 export const StyledScrollbar = styled(Scrollbar)`
   .ScrollbarsCustom-Wrapper {
     .ScrollbarsCustom-Scroller {
-      margin-right: 0 !important;
-      margin-bottom: 0 !important;
-      padding-bottom: 6px !important;
+      /* margin-right: 0 !important; */
+      /* margin-bottom: 0 !important; */
+      /* padding-bottom: 6px !important; */
     }
   }
 `;
