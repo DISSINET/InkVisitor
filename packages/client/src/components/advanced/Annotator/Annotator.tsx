@@ -1,13 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import React, {
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { FaPen, FaRegSave, FaTrash } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { v4 as uuidv4 } from "uuid";
@@ -31,16 +24,17 @@ import {
   StyledScrollerCursor,
   StyledScrollerViewport,
 } from "./AnnotatorStyles";
+import { annotatorHighlight } from "./highlight";
 
 interface TextAnnotatorProps {
   width: number;
   height: number;
   displayLineNumbers: boolean;
   documentId: string;
-  handleCreateStatement?: Function | false;
-  handleCreateTerritory?: Function | false;
-  initialScrollEntityId?: false | string;
-  thisTerritoryEntityId?: false | string;
+  handleCreateStatement?: Function | undefined;
+  handleCreateTerritory?: Function | undefined;
+  initialScrollEntityId?: string | undefined;
+  thisTerritoryEntityId?: string | undefined;
 }
 
 const W_SCROLL = 20;
@@ -51,10 +45,10 @@ export const TextAnnotator = ({
   height = 500,
   displayLineNumbers = true,
   documentId,
-  handleCreateStatement = false,
-  handleCreateTerritory = false,
-  initialScrollEntityId = false,
-  thisTerritoryEntityId = false,
+  handleCreateStatement = undefined,
+  handleCreateTerritory = undefined,
+  initialScrollEntityId = undefined,
+  thisTerritoryEntityId = undefined,
 }: TextAnnotatorProps) => {
   const queryClient = useQueryClient();
   const theme = useContext(ThemeContext);
@@ -189,16 +183,16 @@ export const TextAnnotator = ({
       return;
     }
 
-    const annotator = new Annotator(
+    const newAnnotator = new Annotator(
       mainCanvas.current,
       document?.content ?? "no text",
       RATIO
     );
 
-    annotator.setMode(Modes.HIGHLIGHT);
-    annotator.addScroller(scroller.current);
+    newAnnotator.setMode(Modes.HIGHLIGHT);
+    newAnnotator.addScroller(scroller.current);
 
-    annotator.cursor.setStyle({
+    newAnnotator.cursor.setStyle({
       selection: {
         fill: theme?.color.success,
         fillOpacity: 0.3,
@@ -210,73 +204,43 @@ export const TextAnnotator = ({
     });
 
     if (displayLineNumbers && lines.current) {
-      annotator.addLines(lines.current);
+      newAnnotator.addLines(lines.current);
     }
-    annotator.onSelectText(({ text, anchors }) => {
+    newAnnotator.onSelectText(({ text, anchors }) => {
       handleTextSelection(text, anchors);
     });
 
-    annotator.onHighlight((entityId: string) => {
-      if (entityId === thisTerritoryEntityId) {
-        return {
-          mode: "background",
-          style: {
-            fillColor: theme?.color.warning,
-            fillOpacity: 0.8,
+    newAnnotator.onHighlight((entityId) => {
+      if (document) {
+        return annotatorHighlight(
+          entityId,
+          {
+            thisTerritoryEntityId,
+            document,
           },
-        };
-      }
-
-      const entityClass = document?.referencedEntityIds
-        ? Object.keys(document?.referencedEntityIds).find((key) =>
-            document?.referencedEntityIds?.[key as EntityEnums.Class].includes(
-              entityId
-            )
-          )
-        : undefined;
-
-      if (entityClass) {
-        const classItem = EntityColors[entityClass];
-        const colorName = classItem?.color ?? "transparent";
-        const color = theme?.color[colorName] as string;
-
-        return {
-          mode: "background",
-          style: {
-            fillColor: color,
-            fillOpacity: 0.3,
-          },
-        };
-      } else {
-        return {
-          mode: "background",
-          style: {
-            fillColor: "transparent",
-            fillOpacity: 0,
-          },
-        };
+          theme
+        );
       }
     });
 
-    annotator.onTextChanged((text) => {});
+    newAnnotator.onTextChanged((text) => {});
+    newAnnotator.draw();
 
-    annotator.draw();
+    setAnnotator(newAnnotator);
 
-    setAnnotator(annotator);
-
-    if (annotator && annotator.viewport) {
+    if (newAnnotator && newAnnotator.viewport) {
       if (!isInitialized) {
         if (initialScrollEntityId) {
-          annotator.scrollToAnchor(initialScrollEntityId);
+          newAnnotator.scrollToAnchor(initialScrollEntityId);
         }
         setIsInitialized(true);
       }
     }
 
     if (scrollAfterRefresh) {
-      annotator.viewport.scrollTo(
+      newAnnotator.viewport.scrollTo(
         scrollAfterRefresh,
-        annotator.text.lines.length
+        newAnnotator.text.lines.length
       );
       setScrollAfterRefresh(undefined);
     }
@@ -323,13 +287,14 @@ export const TextAnnotator = ({
 
     const menuYD = isTopSelection ? 2 * lineHeight : -lineHeight;
 
+    // if the selection is top-down or bottom-up
     const isEndAfterStart = yEnd && yStart && yEnd >= yStart;
 
     // if end is before start + isTopSelection is true, then the menu should be above the cursor...
-    // end > start + isTopSelection => menu below end
-    // end > start + !isTopSelection => menu above start
-    // end < start + isTopSelection => menu below start
-    // end < start + !isTopSelection => menu above end
+    // top-down + top => menu below end
+    // top-down + bottom => menu above start
+    // bottom-up + top => menu below start
+    // bottom-up + bottom => menu above end
 
     if (isEndAfterStart) {
       if (isTopSelection) {
@@ -350,16 +315,16 @@ export const TextAnnotator = ({
     return annotator?.text?.value !== document?.content;
   }, [annotator?.text?.value, document?.content]);
 
-  const onCreateTerritory = useCallback(() => {
+  const onCreateTerritory = () => {
     if (handleCreateTerritory && selectedText) {
       const newTerritoryId = uuidv4();
       handleAddAnchor(newTerritoryId);
       handleCreateTerritory(newTerritoryId);
       handleSaveNewContent(true);
     }
-  }, [handleCreateTerritory, selectedText]);
+  };
 
-  const onCreateStatement = useCallback(() => {
+  const onCreateStatement = () => {
     if (handleCreateStatement && selectedText) {
       const newStatementId = uuidv4();
       handleAddAnchor(newStatementId);
@@ -368,7 +333,7 @@ export const TextAnnotator = ({
       handleCreateStatement(validatedText, newStatementId);
       handleSaveNewContent(true);
     }
-  }, [handleCreateStatement, selectedText]);
+  };
 
   const onRemoveAnchor = (anchor: string) => {
     annotator?.removeAnchorFromSelection(anchor);
@@ -383,6 +348,14 @@ export const TextAnnotator = ({
       document !== undefined
     );
   }, [annotatorMode, selectedText, isSelectingText, document]);
+
+  if (documentError) {
+    return <div>Error loading document: {documentError.message}</div>;
+  }
+
+  if (documentIsFetching) {
+    return <div>Loading document...</div>;
+  }
 
   return (
     <div style={{ width: width, position: "absolute" }}>
@@ -459,7 +432,7 @@ export const TextAnnotator = ({
               setAnnotatorMode(Modes.HIGHLIGHT);
               annotator.draw();
             }}
-            tooltipLabel="activate syntax higlighting mode"
+            tooltipLabel="activate syntax highlighting mode"
           />
           <Button
             key={Modes.SEMI}
@@ -489,7 +462,7 @@ export const TextAnnotator = ({
           />
 
           <Button
-            label="save"
+            label="save edits"
             color="primary"
             icon={<FaRegSave />}
             disabled={!isChangeMade}
