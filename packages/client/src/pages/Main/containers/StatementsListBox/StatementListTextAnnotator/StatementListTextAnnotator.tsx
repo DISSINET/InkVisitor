@@ -135,11 +135,11 @@ export const StatementListTextAnnotator: React.FC<
     return false;
   }, [selectedResourceId, resources]);
 
-  const selectedDocumentId = useMemo<string | false>(() => {
+  const selectedDocumentId = useMemo<string | undefined>(() => {
     if (selectedResource) {
       return selectedResource.data.documentId;
     }
-    return false;
+    return undefined;
   }, [selectedResource]);
 
   const {
@@ -149,7 +149,7 @@ export const StatementListTextAnnotator: React.FC<
   } = useQuery({
     queryKey: ["document", selectedDocumentId],
     queryFn: async () => {
-      if (selectedDocumentId !== false) {
+      if (selectedDocumentId !== undefined) {
         const res = await api.documentGet(selectedDocumentId);
         return res.data;
       }
