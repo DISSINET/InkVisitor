@@ -316,7 +316,13 @@ export const Message: React.FC<Message> = ({ warning, entities }) => {
         return (
           <StyledMessageTValidationContent>
             {renderEntityTags([warning?.position?.entityId])} is not referenced
-            to a valid entity {renderValidationLabel(warning)}
+            to
+            {renderEntityTags(
+              warning?.validation?.allowedEntities
+                ? warning?.validation?.allowedEntities
+                : []
+            )}{" "}
+            {renderValidationLabel(warning)}
           </StyledMessageTValidationContent>
         );
       default:
