@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import api from "api";
 import React, {
   useCallback,
   useContext,
@@ -10,10 +11,10 @@ import React, {
 import { FaPen, FaRegSave, FaTrash } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { v4 as uuidv4 } from "uuid";
-import api from "api";
 
 import { Annotator, Modes } from "@inkvisitor/annotator/src/lib";
-import { IDocument, IEntity } from "@shared/types";
+import { EntityEnums } from "@shared/enums";
+import { IDocument, IEntity, IResponseDocumentDetail } from "@shared/types";
 import { Button } from "components/basic/Button/Button";
 import { ButtonGroup } from "components/basic/ButtonGroup/ButtonGroup";
 import { BsFileTextFill } from "react-icons/bs";
@@ -30,7 +31,6 @@ import {
   StyledScrollerCursor,
   StyledScrollerViewport,
 } from "./AnnotatorStyles";
-import { EntityEnums } from "@shared/enums";
 
 interface TextAnnotatorProps {
   width: number;
@@ -42,6 +42,9 @@ interface TextAnnotatorProps {
   initialScrollEntityId?: false | string;
   thisTerritoryEntityId?: false | string;
 }
+
+const W_SCROLL = 20;
+const RATIO = 2;
 
 export const TextAnnotator = ({
   width = 400,
@@ -56,7 +59,7 @@ export const TextAnnotator = ({
   const queryClient = useQueryClient();
   const theme = useContext(ThemeContext);
 
-  const [isInitialized, setIsInitialized] = useState<boolean>(false);
+  const { annotator, setAnnotator } = useAnnotator();
 
   const {
     data: document,
@@ -91,11 +94,11 @@ export const TextAnnotator = ({
     },
   });
 
-  const { annotator, setAnnotator } = useAnnotator();
-
   const wLineNumbers = displayLineNumbers ? 50 : 0;
-  const wScroll = 20;
-  const wTextArea = width - wLineNumbers - wScroll;
+  const wTextArea = width - wLineNumbers - W_SCROLL;
+
+  const [isInitialized, setIsInitialized] = useState<boolean>(false);
+  const [isSelectingText, setIsSelectingText] = useState<boolean>(false);
 
   const mainCanvas = useRef(null);
   const scroller = useRef(null);
@@ -189,7 +192,7 @@ export const TextAnnotator = ({
     const annotator = new Annotator(
       mainCanvas.current,
       document?.content ?? "no text",
-      2
+      RATIO
     );
 
     annotator.setMode(Modes.HIGHLIGHT);
@@ -210,7 +213,6 @@ export const TextAnnotator = ({
       annotator.addLines(lines.current);
     }
     annotator.onSelectText(({ text, anchors }) => {
-      // console.log("select", text, anchors);
       handleTextSelection(text, anchors);
     });
 
@@ -289,25 +291,62 @@ export const TextAnnotator = ({
     refreshAnnotator();
   }, [initialScrollEntityId]);
 
-  const topBottomSelection = useMemo<boolean>(() => {
-    const yStart = annotator?.cursor?.selectStart?.yLine;
+  // check if the selection is in the first half of the viewportr
+  const isTopSelection = useMemo<boolean>(() => {
     const yEnd = annotator?.cursor?.selectEnd?.yLine;
+    const yStart = annotator?.cursor?.selectStart?.yLine;
 
-    if (!yStart || !yEnd) {
-      return false;
-    } else {
-      return yStart < yEnd;
+    if (!yEnd || !yStart) {
+      return true;
     }
-  }, [annotator?.cursor?.yLine]);
+
+    const allLines = annotator?.viewport.noLines;
+
+    const yCenter = yStart && yEnd ? (yStart + yEnd) / 2 : 0;
+    const viewportMiddle = allLines / 2;
+
+    return yCenter < viewportMiddle;
+  }, [
+    annotator?.cursor?.selectEnd?.yLine,
+    annotator?.cursor?.selectStart?.yLine,
+    annotator?.viewport.noLines,
+  ]);
 
   const menuPositionY = useMemo<number>(() => {
-    const yLine = annotator?.cursor?.yLine ?? 0;
-    const lineHeight = (annotator?.lineHeight ?? 0) / 2;
+    const yStart = annotator?.cursor?.selectStart?.yLine;
+    const yEnd = annotator?.cursor?.selectEnd?.yLine;
+    if (!yEnd || !yStart) {
+      return 0;
+    }
 
-    return yLine * lineHeight + (topBottomSelection ? -50 : 50);
-  }, [annotator?.cursor?.yLine, annotator?.lineHeight, topBottomSelection]);
+    const lineHeight = (annotator?.lineHeight ?? 0) / RATIO;
 
-  const madeAnyChanges = useMemo<boolean>(() => {
+    const menuYD = isTopSelection ? 2 * lineHeight : -lineHeight;
+
+    const isEndAfterStart = yEnd && yStart && yEnd >= yStart;
+
+    // if end is before start + isTopSelection is true, then the menu should be above the cursor...
+    // end > start + isTopSelection => menu below end
+    // end > start + !isTopSelection => menu above start
+    // end < start + isTopSelection => menu below start
+    // end < start + !isTopSelection => menu above end
+
+    if (isEndAfterStart) {
+      if (isTopSelection) {
+        return yEnd * lineHeight + menuYD;
+      } else {
+        return yStart * lineHeight + menuYD;
+      }
+    } else {
+      if (isTopSelection) {
+        return yStart * lineHeight + menuYD;
+      } else {
+        return yEnd * lineHeight + menuYD;
+      }
+    }
+  }, [annotator?.cursor?.yLine, annotator?.lineHeight, isTopSelection]);
+
+  const isChangeMade = useMemo<boolean>(() => {
     return annotator?.text?.value !== document?.content;
   }, [annotator?.text?.value, document?.content]);
 
@@ -336,19 +375,28 @@ export const TextAnnotator = ({
     handleSaveNewContent(true);
   };
 
+  const isMenuDisplayed = useMemo<boolean>(() => {
+    return (
+      annotatorMode === Modes.HIGHLIGHT &&
+      selectedText !== "" &&
+      !isSelectingText &&
+      document !== undefined
+    );
+  }, [annotatorMode, selectedText, isSelectingText, document]);
+
   return (
     <div style={{ width: width, position: "absolute" }}>
       <StyledCanvasWrapper>
-        {document && annotatorMode === Modes.HIGHLIGHT && selectedText && (
+        {isMenuDisplayed && (
           <StyledAnnotatorMenu
             $top={menuPositionY}
             $left={100}
             // $translateY={"100%"}
-            $translateY={topBottomSelection ? "-100%" : "0%"}
+            $translateY={isTopSelection ? "0%" : "-100%"}
           >
             <TextAnnotatorMenu
               anchors={selectedAnchors}
-              document={document}
+              document={document as IResponseDocumentDetail}
               text={selectedText}
               entities={storedEntities.current}
               onAnchorAdd={handleAddAnchor}
@@ -372,6 +420,8 @@ export const TextAnnotator = ({
           />
         )}
         <StyledMainCanvas
+          onMouseDown={() => setIsSelectingText(true)}
+          onMouseUp={() => setIsSelectingText(false)}
           tabIndex={0}
           ref={mainCanvas}
           style={{
@@ -442,7 +492,7 @@ export const TextAnnotator = ({
             label="save"
             color="primary"
             icon={<FaRegSave />}
-            disabled={!madeAnyChanges}
+            disabled={!isChangeMade}
             onClick={() => {
               handleSaveNewContent(false);
             }}
@@ -451,7 +501,7 @@ export const TextAnnotator = ({
             label="discard changes"
             color="warning"
             icon={<FaTrash />}
-            disabled={!madeAnyChanges}
+            disabled={!isChangeMade}
             onClick={() => {
               refreshAnnotator();
             }}
