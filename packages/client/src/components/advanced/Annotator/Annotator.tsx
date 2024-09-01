@@ -35,7 +35,7 @@ interface TextAnnotatorProps {
   thisTerritoryEntityId?: string | undefined;
 
   storedAnnotatorScroll: number;
-  setStoredAnnotatorScroll: React.Dispatch<React.SetStateAction<number>>;
+  setStoredAnnotatorScroll?: React.Dispatch<React.SetStateAction<number>>;
 }
 
 const W_SCROLL = 20;
@@ -52,7 +52,7 @@ export const TextAnnotator = ({
   thisTerritoryEntityId = undefined,
 
   storedAnnotatorScroll,
-  setStoredAnnotatorScroll,
+  setStoredAnnotatorScroll = () => {},
 }: TextAnnotatorProps) => {
   const queryClient = useQueryClient();
   const theme = useContext(ThemeContext);

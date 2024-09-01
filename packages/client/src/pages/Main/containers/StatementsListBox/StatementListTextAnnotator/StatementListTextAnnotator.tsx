@@ -32,11 +32,11 @@ interface StatementListTextAnnotator {
   setSelectedRows: React.Dispatch<React.SetStateAction<string[]>>;
 
   storedAnnotatorResourceId: string | false;
-  setStoredAnnotatorResourceId: React.Dispatch<
+  setStoredAnnotatorResourceId?: React.Dispatch<
     React.SetStateAction<string | false>
   >;
   storedAnnotatorScroll: number;
-  setStoredAnnotatorScroll: React.Dispatch<React.SetStateAction<number>>;
+  setStoredAnnotatorScroll?: React.Dispatch<React.SetStateAction<number>>;
 
   contentHeight: number;
   contentWidth: number;
@@ -57,10 +57,10 @@ export const StatementListTextAnnotator: React.FC<
   setSelectedRows,
 
   storedAnnotatorResourceId,
-  setStoredAnnotatorResourceId,
+  setStoredAnnotatorResourceId = () => {},
 
   storedAnnotatorScroll,
-  setStoredAnnotatorScroll,
+  setStoredAnnotatorScroll = () => {},
 
   contentHeight,
   contentWidth,
