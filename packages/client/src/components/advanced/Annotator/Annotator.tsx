@@ -6,14 +6,12 @@ import { toast } from "react-toastify";
 import { v4 as uuidv4 } from "uuid";
 
 import { Annotator, Modes } from "@inkvisitor/annotator/src/lib";
-import { EntityEnums } from "@shared/enums";
 import { IDocument, IEntity, IResponseDocumentDetail } from "@shared/types";
 import { Button } from "components/basic/Button/Button";
 import { ButtonGroup } from "components/basic/ButtonGroup/ButtonGroup";
 import { BsFileTextFill } from "react-icons/bs";
 import { HiCodeBracket } from "react-icons/hi2";
 import { ThemeContext } from "styled-components";
-import { EntityColors } from "types";
 import { useAnnotator } from "./AnnotatorContext";
 import TextAnnotatorMenu from "./AnnotatorMenu";
 import {
@@ -35,6 +33,9 @@ interface TextAnnotatorProps {
   handleCreateTerritory?: Function | undefined;
   initialScrollEntityId?: string | undefined;
   thisTerritoryEntityId?: string | undefined;
+
+  storedAnnotatorScroll: number;
+  setStoredAnnotatorScroll?: React.Dispatch<React.SetStateAction<number>>;
 }
 
 const W_SCROLL = 20;
@@ -49,6 +50,9 @@ export const TextAnnotator = ({
   handleCreateTerritory = undefined,
   initialScrollEntityId = undefined,
   thisTerritoryEntityId = undefined,
+
+  storedAnnotatorScroll,
+  setStoredAnnotatorScroll = () => {},
 }: TextAnnotatorProps) => {
   const queryClient = useQueryClient();
   const theme = useContext(ThemeContext);
@@ -56,9 +60,9 @@ export const TextAnnotator = ({
   const { annotator, setAnnotator } = useAnnotator();
 
   const {
-    data: document,
-    error: documentError,
-    isFetching: documentIsFetching,
+    data: dataDocument,
+    error: errorDocument,
+    isFetching: isFetchingDocument,
   } = useQuery({
     queryKey: ["document", documentId],
     queryFn: async () => {
@@ -94,9 +98,9 @@ export const TextAnnotator = ({
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
   const [isSelectingText, setIsSelectingText] = useState<boolean>(false);
 
-  const mainCanvas = useRef(null);
-  const scroller = useRef(null);
-  const lines = useRef(null);
+  const mainCanvas = useRef<HTMLCanvasElement>(null);
+  const scroller = useRef<HTMLDivElement>(null);
+  const lines = useRef<HTMLCanvasElement>(null);
 
   const [annotatorMode, setAnnotatorMode] = useState<Modes>(Modes.HIGHLIGHT);
 
@@ -112,20 +116,20 @@ export const TextAnnotator = ({
     const scrollBeforeUpdate = annotator?.viewport?.lineStart;
     setScrollAfterRefresh(scrollBeforeUpdate);
 
-    if (annotator && document?.id) {
+    if (annotator && documentId) {
       if (quiet) {
         updateDocumentMutationQuiet.mutate({
-          id: document.id,
+          id: documentId,
           doc: {
-            ...document,
+            ...{ document: dataDocument },
             ...{ content: annotator.text.value },
           },
         });
       } else {
         updateDocumentMutation.mutate({
-          id: document.id,
+          id: documentId,
           doc: {
-            ...document,
+            ...{ document: dataDocument },
             ...{ content: annotator.text.value },
           },
         });
@@ -179,18 +183,22 @@ export const TextAnnotator = ({
   };
 
   const refreshAnnotator = () => {
-    if (!mainCanvas.current || !scroller.current) {
+    if (!mainCanvas.current) {
       return;
     }
 
     const newAnnotator = new Annotator(
-      mainCanvas.current,
-      document?.content ?? "no text",
+      mainCanvas?.current,
+      dataDocument?.content ?? "no text",
       RATIO
     );
 
+    newAnnotator.scrollToLine(0);
+
     newAnnotator.setMode(Modes.HIGHLIGHT);
-    newAnnotator.addScroller(scroller.current);
+    if (scroller?.current) {
+      newAnnotator.addScroller(scroller.current);
+    }
 
     newAnnotator.cursor.setStyle({
       selection: {
@@ -211,12 +219,12 @@ export const TextAnnotator = ({
     });
 
     newAnnotator.onHighlight((entityId) => {
-      if (document) {
+      if (dataDocument) {
         return annotatorHighlight(
           entityId,
           {
             thisTerritoryEntityId,
-            document,
+            dataDocument,
           },
           theme
         );
@@ -230,12 +238,23 @@ export const TextAnnotator = ({
 
     if (newAnnotator && newAnnotator.viewport) {
       if (!isInitialized) {
+        newAnnotator?.scrollToLine(storedAnnotatorScroll);
         if (initialScrollEntityId) {
           newAnnotator.scrollToAnchor(initialScrollEntityId);
+
+          // rescroll if the scroll stored
+          if (storedAnnotatorScroll) {
+            newAnnotator?.scrollToLine(storedAnnotatorScroll);
+          }
         }
+
         setIsInitialized(true);
       }
     }
+
+    newAnnotator.onScroll(() => {
+      setStoredAnnotatorScroll(newAnnotator.viewport.lineStart);
+    });
 
     if (scrollAfterRefresh) {
       newAnnotator.viewport.scrollTo(
@@ -247,8 +266,10 @@ export const TextAnnotator = ({
   };
 
   useEffect(() => {
-    refreshAnnotator();
-  }, [document, theme]);
+    if (!isFetchingDocument) {
+      refreshAnnotator();
+    }
+  }, [isFetchingDocument, dataDocument, theme]);
 
   useEffect(() => {
     setIsInitialized(false);
@@ -257,14 +278,11 @@ export const TextAnnotator = ({
 
   // check if the selection is in the first half of the viewportr
   const isTopSelection = useMemo<boolean>(() => {
-    const yEnd = annotator?.cursor?.selectEnd?.yLine;
-    const yStart = annotator?.cursor?.selectStart?.yLine;
+    const vStart = annotator?.viewport?.lineStart ?? 0;
+    const yEnd = (annotator?.cursor?.selectEnd?.yLine ?? 0) - vStart;
+    const yStart = (annotator?.cursor?.selectStart?.yLine ?? 0) - vStart;
 
-    if (!yEnd || !yStart) {
-      return true;
-    }
-
-    const allLines = annotator?.viewport.noLines;
+    const allLines = annotator?.viewport.noLines ?? 0;
 
     const yCenter = yStart && yEnd ? (yStart + yEnd) / 2 : 0;
     const viewportMiddle = allLines / 2;
@@ -277,11 +295,10 @@ export const TextAnnotator = ({
   ]);
 
   const menuPositionY = useMemo<number>(() => {
-    const yStart = annotator?.cursor?.selectStart?.yLine;
-    const yEnd = annotator?.cursor?.selectEnd?.yLine;
-    if (!yEnd || !yStart) {
-      return 0;
-    }
+    const vStart = annotator?.viewport?.lineStart ?? 0;
+
+    const yStart = (annotator?.cursor?.selectStart?.yLine ?? 0) - vStart;
+    const yEnd = (annotator?.cursor?.selectEnd?.yLine ?? 0) - vStart;
 
     const lineHeight = (annotator?.lineHeight ?? 0) / RATIO;
 
@@ -312,8 +329,8 @@ export const TextAnnotator = ({
   }, [annotator?.cursor?.yLine, annotator?.lineHeight, isTopSelection]);
 
   const isChangeMade = useMemo<boolean>(() => {
-    return annotator?.text?.value !== document?.content;
-  }, [annotator?.text?.value, document?.content]);
+    return annotator?.text?.value !== dataDocument?.content;
+  }, [annotator?.text?.value, dataDocument?.content]);
 
   const onCreateTerritory = () => {
     if (handleCreateTerritory && selectedText) {
@@ -345,15 +362,15 @@ export const TextAnnotator = ({
       annotatorMode === Modes.HIGHLIGHT &&
       selectedText !== "" &&
       !isSelectingText &&
-      document !== undefined
+      dataDocument !== undefined
     );
-  }, [annotatorMode, selectedText, isSelectingText, document]);
+  }, [annotatorMode, selectedText, isSelectingText, dataDocument]);
 
-  if (documentError) {
-    return <div>Error loading document: {documentError.message}</div>;
+  if (errorDocument) {
+    return <div>Error loading document: {errorDocument.message}</div>;
   }
 
-  if (documentIsFetching) {
+  if (isFetchingDocument) {
     return <div>Loading document...</div>;
   }
 
@@ -369,7 +386,7 @@ export const TextAnnotator = ({
           >
             <TextAnnotatorMenu
               anchors={selectedAnchors}
-              document={document as IResponseDocumentDetail}
+              documentData={dataDocument as IResponseDocumentDetail}
               text={selectedText}
               entities={storedEntities.current}
               onAnchorAdd={handleAddAnchor}
@@ -397,6 +414,7 @@ export const TextAnnotator = ({
           onMouseUp={() => setIsSelectingText(false)}
           tabIndex={0}
           ref={mainCanvas}
+          id="statement-list-annotator-mainCanvas"
           style={{
             height: height,
             width: wTextArea,

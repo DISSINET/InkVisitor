@@ -16,7 +16,7 @@ import {
 
 interface TextAnnotatorMenuProps {
   text: string;
-  document: IResponseDocument;
+  documentData: IResponseDocument;
   anchors: string[];
   entities: Record<string, IEntity | false>;
   onAnchorAdd: (entityId: string) => void;
