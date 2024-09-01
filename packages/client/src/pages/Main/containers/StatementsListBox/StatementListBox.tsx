@@ -12,7 +12,7 @@ import api from "api";
 import { Loader, Submit, ToastWithLink } from "components";
 import { CStatement, CTerritory } from "constructors";
 import { useDebounce, useSearchParams } from "hooks";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { BsInfoCircle } from "react-icons/bs";
 import { toast } from "react-toastify";
 import { setStatementListOpened } from "redux/features/layout/statementListOpenedSlice";
@@ -496,6 +496,24 @@ export const StatementListBox: React.FC = () => {
 
   const debouncedWidth = useDebounce(contentWidth, 100);
 
+  const [storedAnnotatorResourceId, setStoredAnnotatorResourceId] = useState<
+    string | false
+  >(false);
+  const [storedAnnotatorScroll, setStoredAnnotatorScroll] = useState<number>(0);
+
+  // so the annotator jumps to the anchor
+  useEffect(() => {
+    setStoredAnnotatorResourceId(false);
+    setStoredAnnotatorScroll(0);
+  }, [territoryId]);
+
+  // its needed as the scroll event is executed even when the annotator is not active
+  useEffect(() => {
+    if (!storedAnnotatorResourceId) {
+      setStoredAnnotatorScroll(0);
+    }
+  }, [storedAnnotatorResourceId]);
+
   // delay of show content for fluent animation on open
   const [showStatementList, setShowStatementList] = useState(true);
   useEffect(() => {
@@ -593,12 +611,21 @@ export const StatementListBox: React.FC = () => {
 
             {data && displayMode === StatementListDisplayMode.TEXT && (
               <StatementListTextAnnotator
+                key={territoryId}
                 contentHeight={contentHeight}
                 contentWidth={contentWidth}
                 statements={statements}
                 handleCreateStatement={handleCreateStatement}
                 handleCreateTerritory={handleCreateTerritory}
                 territoryId={territoryId}
+                storedAnnotatorResourceId={storedAnnotatorResourceId}
+                setStoredAnnotatorResourceId={setStoredAnnotatorResourceId}
+                storedAnnotatorScroll={storedAnnotatorScroll}
+                setStoredAnnotatorScroll={(newScroll) => {
+                  if (storedAnnotatorResourceId) {
+                    setStoredAnnotatorScroll(newScroll);
+                  }
+                }}
                 entities={entities}
                 right={right}
                 setShowSubmit={setShowSubmit}

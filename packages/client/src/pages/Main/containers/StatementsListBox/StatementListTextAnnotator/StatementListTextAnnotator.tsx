@@ -7,7 +7,7 @@ import { Loader } from "components";
 import { EntitySuggester, EntityTag } from "components/advanced";
 import TextAnnotator from "components/advanced/Annotator/Annotator";
 import AnnotatorProvider from "components/advanced/Annotator/AnnotatorProvider";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { BiSolidCommentError } from "react-icons/bi";
 import { FaCheck } from "react-icons/fa";
 import { GrDocumentMissing } from "react-icons/gr";
@@ -31,6 +31,13 @@ interface StatementListTextAnnotator {
   selectedRows: string[];
   setSelectedRows: React.Dispatch<React.SetStateAction<string[]>>;
 
+  storedAnnotatorResourceId: string | false;
+  setStoredAnnotatorResourceId: React.Dispatch<
+    React.SetStateAction<string | false>
+  >;
+  storedAnnotatorScroll: number;
+  setStoredAnnotatorScroll: React.Dispatch<React.SetStateAction<number>>;
+
   contentHeight: number;
   contentWidth: number;
 }
@@ -48,6 +55,12 @@ export const StatementListTextAnnotator: React.FC<
   handleCreateTerritory,
   selectedRows,
   setSelectedRows,
+
+  storedAnnotatorResourceId,
+  setStoredAnnotatorResourceId,
+
+  storedAnnotatorScroll,
+  setStoredAnnotatorScroll,
 
   contentHeight,
   contentWidth,
@@ -92,12 +105,23 @@ export const StatementListTextAnnotator: React.FC<
   });
 
   const [selectedResourceId, setSelectedResourceId] = useState<string | false>(
-    false
+    storedAnnotatorResourceId
   );
+
+  useEffect(() => {
+    if (selectedResourceId) {
+      setStoredAnnotatorResourceId(selectedResourceId);
+    }
+  }, [selectedResourceId]);
 
   // if no resource is selected, select the document with this territoryId in document references
   const loadDefaultResource = () => {
-    if (resources && documents && isInitialized === false) {
+    if (
+      resources &&
+      documents &&
+      isInitialized === false &&
+      storedAnnotatorResourceId === false
+    ) {
       const resourceWithAnchor = resources.find((resource) => {
         if (resource.data.documentId) {
           const document = documents.find(
@@ -244,6 +268,8 @@ export const StatementListTextAnnotator: React.FC<
               documentId={selectedDocumentId}
               handleCreateStatement={handleCreateStatement}
               handleCreateTerritory={handleCreateTerritory}
+              storedAnnotatorScroll={storedAnnotatorScroll}
+              setStoredAnnotatorScroll={setStoredAnnotatorScroll}
             />
           )}
         </AnnotatorProvider>

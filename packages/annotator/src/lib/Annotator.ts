@@ -64,10 +64,13 @@ export class Annotator {
   lastSelectedText = "";
   ratio: number = 1;
 
+  previousRenderViewportLineStart: number;
+
   // callbacks
   onSelectTextCb?: (text: Selected) => void;
   onHighlightCb?: (entityId: string) => HighlightSchema | void;
   onTextChangeCb?: (text: string) => void;
+  onScrollCb?: (line: number) => void;
 
   clickCount: number;
   clickTimeout?: NodeJS.Timeout;
@@ -129,6 +132,8 @@ export class Annotator {
     );
 
     this.clickCount = 0;
+
+    this.previousRenderViewportLineStart = 0;
 
     this.draw();
   }
@@ -277,6 +282,10 @@ export class Annotator {
       this.lastSelectedText = text.text;
       cb(text);
     };
+  }
+
+  onScroll(cb: (line: number) => void) {
+    this.onScrollCb = cb;
   }
 
   /**
@@ -837,6 +846,12 @@ export class Annotator {
     if (this.lines) {
       this.lines.draw(this.viewport);
     }
+
+    const thisRenderVieportLineStart = this.viewport.lineStart;
+    if (this.previousRenderViewportLineStart !== thisRenderVieportLineStart) {
+      this.onScrollCb?.(thisRenderVieportLineStart);
+      this.previousRenderViewportLineStart = thisRenderVieportLineStart;
+    }
   }
 
   /**
@@ -907,6 +922,11 @@ export class Annotator {
     }
 
     this.viewport.scrollTo(pos[0].yLine, this.text.noLines);
+    this.draw();
+  }
+
+  scrollToLine(line: number) {
+    this.viewport.scrollTo(line, this.text.noLines);
     this.draw();
   }
 }

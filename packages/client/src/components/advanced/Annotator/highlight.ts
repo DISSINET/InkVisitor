@@ -6,16 +6,17 @@ import { EntityColors } from "types";
 
 interface annotatorHighlightData {
   thisTerritoryEntityId: string | undefined;
-  document: IResponseDocumentDetail;
+  dataDocument: IResponseDocumentDetail;
 }
 
 export const annotatorHighlight = (
   entityId: string,
   data: annotatorHighlightData,
   theme: DefaultTheme | undefined
-): HighlightSchema => {
+): HighlightSchema | undefined => {
   const dReferenceEntityIds: Record<EntityEnums.Class, string[]> =
-    data.document?.referencedEntityIds ?? {};
+    data.dataDocument?.referencedEntityIds ?? {};
+
   if (entityId === data.thisTerritoryEntityId) {
     return {
       mode: "background",
@@ -42,13 +43,7 @@ export const annotatorHighlight = (
         fillOpacity: 0.3,
       },
     };
-  } else {
-    return {
-      mode: "background",
-      style: {
-        fillColor: "transparent",
-        fillOpacity: 0,
-      },
-    };
   }
+
+  return undefined;
 };
