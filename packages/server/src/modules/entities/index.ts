@@ -700,7 +700,10 @@ export default Router()
     "/query",
     asyncRouteHandler<IResponseQuery>(
       async (request: IRequest<undefined, IRequestQuery>) => {
-        const querySearch = new AdvancedSearch(request.body);
+        const querySearch = new AdvancedSearch(
+          request.body.query,
+          request.body.explore
+        );
         const results = await querySearch.run(request.db.connection);
         const entities =
           results.items?.map<IResponseQueryEntity>((e) => ({

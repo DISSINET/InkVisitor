@@ -65,21 +65,38 @@ export namespace Explore {
     columns: IExploreColumn[];
     filters: IExploreColumnFilter[];
     sort: IExploreColumnSort | undefined;
-    inspect: string; // id of the entity which row is expanded
     limit: number;
     offset: number;
   }
 
   export interface IView {}
+
   export interface IExploreColumnFilter {}
   export type IExploreColumnSort = "asc" | "desc";
+
   export interface IExploreColumn {
     id: string;
     name: string;
-    params: IExploreColumnParams<IExploreColumnType>;
+    type: EExploreColumnType;
+    params: IExploreColumnParams<EExploreColumnType>;
   }
-  export type IExploreColumnType = "default"; // TODO add
-  export interface IExploreColumnParams<T = IExploreColumnType> {
+
+  export enum EExploreColumnType {
+    ER = "ER",
+    EPV = "EPV",
+    EPT = "EPT",
+    ERR = "ERR",
+    ERV = "ERV",
+    ES = "ES",
+    CPV = "CPV",
+    CPO = "CPO",
+    EUC = "EUC",
+    EUE = "EUE",
+    EUEN = "EUEN",
+    EDC = "EDC",
+  }
+
+  export interface IExploreColumnParams<T = EExploreColumnType> {
     type: T;
   }
 }

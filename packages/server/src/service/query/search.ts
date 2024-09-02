@@ -4,15 +4,17 @@ import {
   CustomError,
   SearchEdgeTypesInvalid,
 } from "@shared/types/errors";
-import { Query } from "@shared/types/query";
+import { Explore, Query } from "@shared/types/query";
 import { Connection } from "rethinkdb-ts";
 import { Results, SearchEdge, SearchNode } from ".";
 
 export default class AdvancedSearch {
   root: SearchNode;
+  explore: Explore.IExplore;
 
-  constructor(data: Partial<Query.INode>) {
-    this.root = new SearchNode(data);
+  constructor(query: Query.INode, explore: Explore.IExplore) {
+    this.root = new SearchNode(query);
+    this.explore = explore;
 
     if (!this.root.type) {
       throw new BadParams();
