@@ -1,3 +1,5 @@
+import Entity from "@models/entity/entity";
+import { IEntity, IUser } from "@shared/types";
 import { Explore } from "@shared/types/query";
 
 export default class Results<T extends { id: string }> {
@@ -48,5 +50,39 @@ export default class Results<T extends { id: string }> {
     );
 
     return this.items.slice(exploreData.offset, endIndex);
+  }
+
+  columns(
+    entity: IEntity,
+    columnsData: Explore.IExploreColumn[]
+  ): Record<
+    string,
+    | IEntity
+    | IEntity[]
+    | number
+    | number[]
+    | string
+    | string[]
+    | IUser
+    | IUser[]
+  > {
+    const out: Record<
+      string,
+      | IEntity
+      | IEntity[]
+      | number
+      | number[]
+      | string
+      | string[]
+      | IUser
+      | IUser[]
+    > = {};
+    for (const column of columnsData) {
+      if (typeof entity[column.id as keyof IEntity] !== "undefined") {
+        out[column.id] = entity[column.id as keyof IEntity];
+      }
+    }
+
+    return out;
   }
 }

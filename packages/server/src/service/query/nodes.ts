@@ -99,10 +99,11 @@ export default class SearchNode implements Query.INode {
     }
 
     const edgeResults = await q.distinct().run(db);
+    const entities = await Entity.findEntitiesByIds(db, edgeResults);
     if (this.operator === Query.NodeOperator.And) {
-      this.results.addAnd(edgeResults);
+      this.results.addAnd(entities);
     } else {
-      this.results.addOr(edgeResults);
+      this.results.addOr(entities);
     }
   }
 

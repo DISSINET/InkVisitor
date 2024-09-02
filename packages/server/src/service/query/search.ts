@@ -7,6 +7,7 @@ import {
 import { Explore, Query } from "@shared/types/query";
 import { Connection } from "rethinkdb-ts";
 import { Results, SearchEdge, SearchNode } from ".";
+import { IResponseQueryEntity } from "@shared/types/response-query";
 
 export default class AdvancedSearch {
   static MAX_LIMIT = 100;
@@ -31,6 +32,9 @@ export default class AdvancedSearch {
       this.explore.offset = 0;
     }
 
+    if (!this.explore.columns) {
+      this.explore.columns = [];
+    }
     this.results = null;
 
     if (!this.root.type) {
@@ -55,8 +59,20 @@ export default class AdvancedSearch {
     if (!this.root.isValid()) {
       throw new SearchEdgeTypesInvalid();
     }
-    const results = await this.root.run(db);
-    return results.filter(this.explore);
+    this.results = await this.root.run(db);
+    return this.results.items || [];
+  }
+
+  getResults(): IResponseQueryEntity[] {
+    if (!this.results) {
+      return [];
+    }
+
+    const filtered = this.results.filter(this.explore);
+    return filtered.map((e) => ({
+      entity: e,
+      columnData: this.results!.columns(e, this.explore.columns),
+    }));
   }
 
   /**

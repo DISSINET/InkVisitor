@@ -9,12 +9,22 @@ import { prepareEntity } from "@models/entity/entity.test";
 import { prepareRelation } from "@models/relation/relation.test";
 
 const mockSearch = (rootType: Query.NodeType): AdvancedSearch => {
-  return new AdvancedSearch({
-    edges: [],
-    operator: Query.NodeOperator.And,
-    params: {},
-    type: rootType,
-  });
+  return new AdvancedSearch(
+    {
+      edges: [],
+      operator: Query.NodeOperator.And,
+      params: {},
+      type: rootType,
+    },
+    {
+      view: {},
+      columns: [],
+      filters: [],
+      sort: undefined,
+      limit: 0,
+      offset: 0,
+    }
+  );
 };
 
 describe("test AdvancedSearch", () => {
@@ -100,12 +110,12 @@ describe("test AdvancedSearch", () => {
       const search = mockSearch(Query.NodeType.A);
       search.root.params.classes = [wantedClass];
       const results = await search.run(db.connection);
-      expect(results.items).toBeTruthy();
-      if (!results.items) {
+      expect(results).toBeTruthy();
+      if (!results) {
         return;
       }
       const raw = await getEntitiesDataByClass(db.connection, wantedClass);
-      expect(raw.length).toEqual(results.items.length);
+      expect(raw.length).toEqual(results.length);
     });
 
     it("should return only 1 prepared entity when searching by all params", async () => {
@@ -116,12 +126,12 @@ describe("test AdvancedSearch", () => {
         label: entity1.label,
       };
       const results = await search.run(db.connection);
-      expect(results.items).toBeTruthy();
-      if (!results.items) {
+      expect(results).toBeTruthy();
+      if (!results) {
         return;
       }
-      expect(results.items.length).toEqual(1);
-      expect(results.items[0].id).toEqual(entity1.id);
+      expect(results.length).toEqual(1);
+      expect(results[0].id).toEqual(entity1.id);
     });
   });
 
@@ -186,11 +196,11 @@ describe("test AdvancedSearch", () => {
       search.root.params.label = entity2.label;
 
       const results = await search.run(db.connection);
-      expect(results.items).toBeTruthy();
-      if (!results.items) {
+      expect(results).toBeTruthy();
+      if (!results) {
         return;
       }
-      expect(results.items).toHaveLength(1);
+      expect(results).toHaveLength(1);
     });
   });
 
@@ -236,11 +246,11 @@ describe("test AdvancedSearch", () => {
         }),
       });
       const results = await search.run(db.connection);
-      expect(results.items).toBeTruthy();
-      if (!results.items) {
+      expect(results).toBeTruthy();
+      if (!results) {
         return;
       }
-      expect(results.items).toHaveLength(2);
+      expect(results).toHaveLength(2);
     });
 
     it("should return merged results (OR) from two edges", async () => {
@@ -261,11 +271,11 @@ describe("test AdvancedSearch", () => {
         }),
       });
       const results = await search.run(db.connection);
-      expect(results.items).toBeTruthy();
-      if (!results.items) {
+      expect(results).toBeTruthy();
+      if (!results) {
         return;
       }
-      expect(results.items).toHaveLength(4);
+      expect(results).toHaveLength(4);
     });
   });
 });

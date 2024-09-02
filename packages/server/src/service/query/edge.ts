@@ -123,7 +123,6 @@ export class EdgeHasPropType extends SearchEdge {
 }
 
 export function getEdgeInstance(data: Partial<Query.IEdge>): SearchEdge {
-  console.log(data.type);
   switch (data.type) {
     case Query.EdgeType.XHasPropType:
       return new EdgeHasPropType(data);
