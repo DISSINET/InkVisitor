@@ -12,7 +12,7 @@ import api from "api";
 import { CustomScrollbar, Loader, Submit, ToastWithLink } from "components";
 import { CStatement, CTerritory } from "constructors";
 import { useDebounce, useSearchParams } from "hooks";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { BsInfoCircle } from "react-icons/bs";
 import { toast } from "react-toastify";
 import { setStatementListOpened } from "redux/features/layout/statementListOpenedSlice";
@@ -26,6 +26,7 @@ import { StatementListHeader } from "./StatementListHeader/StatementListHeader";
 import { StatementListTable } from "./StatementListTable/StatementListTable";
 import { StatementListTextAnnotator } from "./StatementListTextAnnotator/StatementListTextAnnotator";
 import { StyledEmptyState, StyledTableWrapper } from "./StatementLitBoxStyles";
+import { COLLAPSED_TABLE_WIDTH } from "Theme/constants";
 
 const initialData: {
   statements: IResponseStatement[];
@@ -508,6 +509,14 @@ export const StatementListBox: React.FC = () => {
     }
   }, [statementListOpened]);
 
+  const width = useMemo(
+    () =>
+      displayMode === StatementListDisplayMode.LIST
+        ? debouncedWidth
+        : COLLAPSED_TABLE_WIDTH,
+    [displayMode, debouncedWidth]
+  );
+
   return (
     <>
       {showStatementList && (
@@ -568,7 +577,7 @@ export const StatementListBox: React.FC = () => {
             }}
             ref={contentRef}
           >
-            <CustomScrollbar>
+            <CustomScrollbar width={width + 10}>
               <StyledTableWrapper id="Statements-box-table">
                 {statements.length > 0 && (
                   <StatementListTable
@@ -587,7 +596,7 @@ export const StatementListBox: React.FC = () => {
                     selectedRows={selectedRows}
                     setSelectedRows={setSelectedRows}
                     displayMode={displayMode}
-                    contentWidth={debouncedWidth}
+                    contentWidth={width}
                   />
                 )}
               </StyledTableWrapper>
@@ -596,7 +605,7 @@ export const StatementListBox: React.FC = () => {
             {data && displayMode === StatementListDisplayMode.TEXT && (
               <StatementListTextAnnotator
                 contentHeight={contentHeight}
-                contentWidth={contentWidth}
+                contentWidth={contentWidth - 10}
                 statements={statements}
                 handleCreateStatement={handleCreateStatement}
                 handleCreateTerritory={handleCreateTerritory}
