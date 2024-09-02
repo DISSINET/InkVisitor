@@ -3,7 +3,7 @@ import { IResponseTree, IUser } from "@shared/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { rootTerritoryId } from "Theme/constants";
 import api from "api";
-import { Button, ButtonGroup, Loader } from "components";
+import { Button, ButtonGroup, CustomScrollbar, Loader } from "components";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
 import { BsFilter } from "react-icons/bs";
@@ -25,7 +25,6 @@ import {
   markNodesWithFilters,
 } from "./TerritoryTreeFilterUtils";
 import { MemoizedTerritoryTreeNode } from "./TerritoryTreeNode/TerritoryTreeNode";
-import Scrollbar from "react-scrollbars-custom";
 
 const initFilterSettings: ITerritoryFilter = {
   nonEmpty: false,
@@ -223,13 +222,7 @@ export const TerritoryTreeBox: React.FC = () => {
         />
       )}
 
-      <Scrollbar
-        style={{ width: "100%" }}
-        disableTracksWidthCompensation={false}
-        removeTrackXWhenNotUsed={true}
-        removeTrackYWhenNotUsed={true}
-        permanentTracks={false}
-      >
+      <CustomScrollbar>
         <StyledTreeWrapper id="Territories-box-content">
           {filteredTreeData && (
             <MemoizedTerritoryTreeNode
@@ -250,7 +243,7 @@ export const TerritoryTreeBox: React.FC = () => {
             <StyledNoResults>{"No results"}</StyledNoResults>
           )}
         </StyledTreeWrapper>
-      </Scrollbar>
+      </CustomScrollbar>
 
       {showCreate && (
         <ContextMenuNewTerritoryModal

@@ -9,7 +9,7 @@ import {
 } from "@shared/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import { Loader, Submit, ToastWithLink } from "components";
+import { CustomScrollbar, Loader, Submit, ToastWithLink } from "components";
 import { CStatement, CTerritory } from "constructors";
 import { useDebounce, useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
@@ -568,28 +568,30 @@ export const StatementListBox: React.FC = () => {
             }}
             ref={contentRef}
           >
-            <StyledTableWrapper id="Statements-box-table">
-              {statements.length > 0 && (
-                <StatementListTable
-                  statements={statements}
-                  handleRowClick={(rowId: string) => {
-                    dispatch(setShowWarnings(false));
-                    setStatementId(rowId);
-                  }}
-                  actantsUpdateMutation={statementUpdateMutation}
-                  entities={entities}
-                  right={right}
-                  cloneStatementMutation={cloneStatementMutation}
-                  setStatementToDelete={setStatementToDelete}
-                  setShowSubmit={setShowSubmit}
-                  addStatementAtCertainIndex={addStatementAtCertainIndex}
-                  selectedRows={selectedRows}
-                  setSelectedRows={setSelectedRows}
-                  displayMode={displayMode}
-                  contentWidth={debouncedWidth}
-                />
-              )}
-            </StyledTableWrapper>
+            <CustomScrollbar>
+              <StyledTableWrapper id="Statements-box-table">
+                {statements.length > 0 && (
+                  <StatementListTable
+                    statements={statements}
+                    handleRowClick={(rowId: string) => {
+                      dispatch(setShowWarnings(false));
+                      setStatementId(rowId);
+                    }}
+                    actantsUpdateMutation={statementUpdateMutation}
+                    entities={entities}
+                    right={right}
+                    cloneStatementMutation={cloneStatementMutation}
+                    setStatementToDelete={setStatementToDelete}
+                    setShowSubmit={setShowSubmit}
+                    addStatementAtCertainIndex={addStatementAtCertainIndex}
+                    selectedRows={selectedRows}
+                    setSelectedRows={setSelectedRows}
+                    displayMode={displayMode}
+                    contentWidth={debouncedWidth}
+                  />
+                )}
+              </StyledTableWrapper>
+            </CustomScrollbar>
 
             {data && displayMode === StatementListDisplayMode.TEXT && (
               <StatementListTextAnnotator

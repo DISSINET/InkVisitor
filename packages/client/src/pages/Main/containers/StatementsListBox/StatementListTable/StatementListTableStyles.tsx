@@ -110,13 +110,3 @@ export const StyledAbbreviatedLabel = styled.div`
   min-width: 5rem;
   font-size: ${({ theme }) => theme.fontSize["xs"]};
 `;
-
-export const StyledScrollbar = styled(Scrollbar)`
-  .ScrollbarsCustom-Wrapper {
-    .ScrollbarsCustom-Scroller {
-      /* margin-right: 0 !important; */
-      /* margin-bottom: 0 !important; */
-      /* padding-bottom: 6px !important; */
-    }
-  }
-`;

@@ -44,12 +44,10 @@ import {
   StyledAbbreviatedLabel,
   StyledCheckboxWrapper,
   StyledFocusedCircle,
-  StyledScrollbar,
   StyledTHead,
   StyledTable,
   StyledTh,
 } from "./StatementListTableStyles";
-import { Scrollbar } from "react-scrollbars-custom";
 
 const MINIFIED_HIDDEN_COLUMNS = [
   "id",
@@ -543,53 +541,45 @@ export const StatementListTable: React.FC<StatementListTable> = ({
       : COLLAPSED_TABLE_WIDTH;
 
   return (
-    <StyledScrollbar
-      style={{ width }}
-      disableTracksWidthCompensation={false}
-      removeTrackXWhenNotUsed={true}
-      removeTrackYWhenNotUsed={true}
-      permanentTracks={false}
+    <StyledTable
+      {...getTableProps()}
+      $contentWidth={width - 10}
+      $isExpanded={displayMode === StatementListDisplayMode.LIST}
     >
-      <StyledTable
-        {...getTableProps()}
-        $contentWidth={width - 10}
-        $isExpanded={displayMode === StatementListDisplayMode.LIST}
-      >
-        <StyledTHead>
-          {headerGroups.map((headerGroup, key) => (
-            <tr {...headerGroup.getHeaderGroupProps()} key={key}>
-              {headerGroup.headers.map((column, key) =>
-                key < 6 ? (
-                  <StyledTh {...column.getHeaderProps()} key={key}>
-                    {column.render("Header")}
-                  </StyledTh>
-                ) : (
-                  <th key={key}></th>
-                )
-              )}
-            </tr>
-          ))}
-        </StyledTHead>
-        <tbody {...getTableBodyProps()}>
-          {rows.map((row, i) => {
-            prepareRow(row);
-            return (
-              <StatementListRow
-                index={i}
-                handleClick={handleRowClick}
-                row={row}
-                moveRow={moveRow}
-                moveEndRow={moveEndRow}
-                visibleColumns={visibleColumns}
-                entities={entities}
-                isSelected={selectedRows.includes(row.id)}
-                displayMode={displayMode}
-                {...row.getRowProps()}
-              />
-            );
-          })}
-        </tbody>
-      </StyledTable>
-    </StyledScrollbar>
+      <StyledTHead>
+        {headerGroups.map((headerGroup, key) => (
+          <tr {...headerGroup.getHeaderGroupProps()} key={key}>
+            {headerGroup.headers.map((column, key) =>
+              key < 6 ? (
+                <StyledTh {...column.getHeaderProps()} key={key}>
+                  {column.render("Header")}
+                </StyledTh>
+              ) : (
+                <th key={key}></th>
+              )
+            )}
+          </tr>
+        ))}
+      </StyledTHead>
+      <tbody {...getTableBodyProps()}>
+        {rows.map((row, i) => {
+          prepareRow(row);
+          return (
+            <StatementListRow
+              index={i}
+              handleClick={handleRowClick}
+              row={row}
+              moveRow={moveRow}
+              moveEndRow={moveEndRow}
+              visibleColumns={visibleColumns}
+              entities={entities}
+              isSelected={selectedRows.includes(row.id)}
+              displayMode={displayMode}
+              {...row.getRowProps()}
+            />
+          );
+        })}
+      </tbody>
+    </StyledTable>
   );
 };

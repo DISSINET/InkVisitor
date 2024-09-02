@@ -11,7 +11,14 @@ import { ITerritoryValidation } from "@shared/types/territory";
 import { IWarningPositionSection } from "@shared/types/warning";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import { Button, Loader, Message, Submit, ToastWithLink } from "components";
+import {
+  Button,
+  CustomScrollbar,
+  Loader,
+  Message,
+  Submit,
+  ToastWithLink,
+} from "components";
 import {
   ApplyTemplateModal,
   AuditTable,
@@ -592,13 +599,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
   return (
     <>
       {entity && (
-        <Scrollbar
-          style={{ width: "100%" }}
-          disableTracksWidthCompensation={false}
-          removeTrackXWhenNotUsed={true}
-          removeTrackYWhenNotUsed={true}
-          permanentTracks={false}
-        >
+        <CustomScrollbar>
           <>
             <EntityDetailHeaderRow
               entity={entity}
@@ -955,7 +956,7 @@ export const EntityDetail: React.FC<EntityDetail> = ({
               </StyledDetailSection>
             </StyledDetailWrapper>
           </>
-        </Scrollbar>
+        </CustomScrollbar>
       )}
 
       <Submit

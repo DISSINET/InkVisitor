@@ -32,6 +32,7 @@ export const StyledTableWrapper = styled.div`
   flex-direction: column;
   overflow: auto;
   flex-shrink: 0;
+  padding-right: 0.1rem;
 `;
 
 export const StyledEmptyState = styled.div`

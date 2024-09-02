@@ -2,7 +2,7 @@ import { EntityEnums } from "@shared/enums";
 import { IResponseStatement, IStatement, IStatementData } from "@shared/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import { Loader } from "components";
+import { CustomScrollbar, Loader } from "components";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
 import { BsInfoCircle } from "react-icons/bs";
@@ -273,17 +273,8 @@ export const StatementEditorBox: React.FC = () => {
   return (
     <>
       {tempObject ? (
-        <Scrollbar
-          style={{ height: contentHeight }}
-          disableTracksWidthCompensation={true}
-          removeTrackXWhenNotUsed={true}
-          removeTrackYWhenNotUsed={true}
-          permanentTracks={false}
-        >
-          <div
-            onMouseLeave={() => sendChangesToBackend(tempObject)}
-            style={{ marginBottom: "4rem", marginRight: "2rem" }}
-          >
+        <CustomScrollbar>
+          <div onMouseLeave={() => sendChangesToBackend(tempObject)}>
             <StatementEditor
               statement={tempObject}
               updateStatementMutation={updateStatementMutation}
@@ -292,7 +283,7 @@ export const StatementEditorBox: React.FC = () => {
               handleDataAttributeChange={handleDataAttributeChange}
             />
           </div>
-        </Scrollbar>
+        </CustomScrollbar>
       ) : (
         <>
           <StyledEditorEmptyState>
