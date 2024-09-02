@@ -77,6 +77,30 @@ export class EdgeHasRelation extends SearchEdge {
   }
 }
 
+export class EdgeHasSuperclass extends SearchEdge {
+  constructor(data: Partial<Query.IEdge>) {
+    super(data);
+    this.type = Query.EdgeType.XHasSuperclass;
+  }
+
+  run(q: RStream): RStream {
+    return q.concatMap(function (entity: RDatum<IEntity>) {
+      return r
+        .table(Relation.table)
+        .getAll(entity("id"), { index: DbEnums.Indexes.RelationsEntityIds })
+        .filter({
+          type: RelationEnums.Type.Superclass,
+        })
+        .filter(function (relation: RDatum<RelationTypes.IRelation>) {
+          return relation("entityIds").nth(0).eq(entity("id")); // first element is specific class, second is super class
+        })
+        .map(function (relation) {
+          return relation("entityIds").nth(0);
+        });
+    });
+  }
+}
+
 export class EdgeHasPropType extends SearchEdge {
   constructor(data: Partial<Query.IEdge>) {
     super(data);
@@ -98,7 +122,8 @@ export class EdgeHasPropType extends SearchEdge {
   }
 }
 
-export function getEdgeInstance(data: Partial<Query.IEdge>) {
+export function getEdgeInstance(data: Partial<Query.IEdge>): SearchEdge {
+  console.log(data.type);
   switch (data.type) {
     case Query.EdgeType.XHasPropType:
       return new EdgeHasPropType(data);
@@ -106,6 +131,8 @@ export function getEdgeInstance(data: Partial<Query.IEdge>) {
       return new EdgeHasClassification(data);
     case Query.EdgeType.XHasRelation:
       return new EdgeHasRelation(data);
+    case Query.EdgeType.XHasSuperclass:
+      return new EdgeHasSuperclass(data);
     case Query.EdgeType.SUnderT:
       return new EdgeSUnderT(data);
     default:

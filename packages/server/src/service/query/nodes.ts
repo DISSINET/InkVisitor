@@ -41,7 +41,7 @@ export default class SearchNode implements Query.INode {
     this.params = data.params || {};
     this.operator = data.operator || Query.NodeOperator.And;
     this.edges = data.edges
-      ? data.edges.map((edgeData) => new SearchEdge(edgeData))
+      ? data.edges.map((edgeData) => getEdgeInstance(edgeData))
       : [];
     this.results = new Results();
   }
@@ -113,7 +113,6 @@ export default class SearchNode implements Query.INode {
   isValid(): boolean {
     for (const edge of this.edges) {
       const rule = validationRules[edge.type];
-
       if (!rule) {
         return false;
       }
