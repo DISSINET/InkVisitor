@@ -15,7 +15,7 @@ import { useDebounce, useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
 import { BsInfoCircle } from "react-icons/bs";
 import { toast } from "react-toastify";
-import { setStatementListOpened } from "redux/features/layout/statementListOpenedSlice";
+import { setStatementListOpened } from "redux/features/layout/mainPage/statementListOpenedSlice";
 import { setShowWarnings } from "redux/features/statementEditor/showWarningsSlice";
 import { setDisableStatementListScroll } from "redux/features/statementList/disableStatementListScrollSlice";
 import { setRowsExpanded } from "redux/features/statementList/rowsExpandedSlice";
@@ -45,7 +45,7 @@ export const StatementListBox: React.FC = () => {
     (state) => state.statementList.rowsExpanded
   );
   const statementListOpened: boolean = useAppSelector(
-    (state) => state.layout.statementListOpened
+    (state) => state.layout.mainPage.statementListOpened
   );
   const isLoading: boolean = useAppSelector(
     (state) => state.statementList.isLoading
@@ -494,7 +494,7 @@ export const StatementListBox: React.FC = () => {
     width: contentWidth = 0,
   } = useResizeObserver<HTMLDivElement>();
 
-  const debouncedWidth = useDebounce(contentWidth, 100);
+  const debouncedWidth = useDebounce(contentWidth, 80);
 
   // delay of show content for fluent animation on open
   const [showStatementList, setShowStatementList] = useState(true);
