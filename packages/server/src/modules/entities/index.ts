@@ -704,16 +704,16 @@ export default Router()
           request.body.query,
           request.body.explore
         );
-        const results = await querySearch.run(request.db.connection);
-        const entities =
-          results.items?.map<IResponseQueryEntity>((e) => ({
+        const entities = await querySearch.run(request.db.connection);
+        const entitiesWithColumns =
+          entities.map<IResponseQueryEntity>((e) => ({
             entity: e,
             columnData: {},
           })) || [];
 
         return {
           query: { ...request.body },
-          entities,
+          entities: entitiesWithColumns,
           explore: {} as Explore.IExplore,
         };
       }
