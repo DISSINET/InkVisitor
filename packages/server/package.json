@@ -59,7 +59,7 @@
     "socket.io": "^4.7.5",
     "ts-node": "^10.9.1",
     "tsconfig-paths": "^3.9.0",
-    "tslib": "^2.4.0",
+    "tslib": "^2.7.0",
     "uuid": "^8.3.2"
   },
   "devDependencies": {
