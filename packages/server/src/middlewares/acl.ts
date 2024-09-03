@@ -23,7 +23,7 @@ class Acl {
   }
 
   public assignRoutes(router: Router): void {
-    this.layers = router.stack as RouterLayer[];
+    this.layers = router.stack as unknown as RouterLayer[];
   }
 
   public authorize(req: Request, res: Response, next: NextFunction): void {
