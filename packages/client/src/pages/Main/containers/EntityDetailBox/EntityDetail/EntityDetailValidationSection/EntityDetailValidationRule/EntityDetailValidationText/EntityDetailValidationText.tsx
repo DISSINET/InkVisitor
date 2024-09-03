@@ -139,15 +139,9 @@ export const EntityDetailValidationText: React.FC<
         <>
           <span> must be classified</span>
           <span>
-            {valuesClasssesActive && (
-              <>
-                {` with values of entity type `}
-                {renderEntityClassList(allowedClasses ?? [])}
-              </>
-            )}
             {valuesEntitiesActive && (
               <>
-                {` with value `}
+                {` with property type `}
                 {renderEntityList(allowedEntities ?? [])}
               </>
             )}

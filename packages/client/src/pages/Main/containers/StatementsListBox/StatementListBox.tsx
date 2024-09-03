@@ -20,13 +20,13 @@ import { setShowWarnings } from "redux/features/statementEditor/showWarningsSlic
 import { setDisableStatementListScroll } from "redux/features/statementList/disableStatementListScrollSlice";
 import { setRowsExpanded } from "redux/features/statementList/rowsExpandedSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
+import { COLLAPSED_TABLE_WIDTH } from "Theme/constants";
 import { EntitiesDeleteSuccessResponse, StatementListDisplayMode } from "types";
 import useResizeObserver from "use-resize-observer";
 import { StatementListHeader } from "./StatementListHeader/StatementListHeader";
 import { StatementListTable } from "./StatementListTable/StatementListTable";
 import { StatementListTextAnnotator } from "./StatementListTextAnnotator/StatementListTextAnnotator";
 import { StyledEmptyState, StyledTableWrapper } from "./StatementLitBoxStyles";
-import { COLLAPSED_TABLE_WIDTH } from "Theme/constants";
 
 const initialData: {
   statements: IResponseStatement[];
@@ -497,6 +497,24 @@ export const StatementListBox: React.FC = () => {
 
   const debouncedWidth = useDebounce(contentWidth, 100);
 
+  const [storedAnnotatorResourceId, setStoredAnnotatorResourceId] = useState<
+    string | false
+  >(false);
+  const [storedAnnotatorScroll, setStoredAnnotatorScroll] = useState<number>(0);
+
+  // so the annotator jumps to the anchor
+  useEffect(() => {
+    setStoredAnnotatorResourceId(false);
+    setStoredAnnotatorScroll(0);
+  }, [territoryId]);
+
+  // its needed as the scroll event is executed even when the annotator is not active
+  useEffect(() => {
+    if (!storedAnnotatorResourceId) {
+      setStoredAnnotatorScroll(0);
+    }
+  }, [storedAnnotatorResourceId]);
+
   // delay of show content for fluent animation on open
   const [showStatementList, setShowStatementList] = useState(true);
   useEffect(() => {
@@ -610,12 +628,21 @@ export const StatementListBox: React.FC = () => {
 
             {data && displayMode === StatementListDisplayMode.TEXT && (
               <StatementListTextAnnotator
+                key={territoryId}
                 contentHeight={contentHeight}
                 contentWidth={width - 10}
                 statements={statements}
                 handleCreateStatement={handleCreateStatement}
                 handleCreateTerritory={handleCreateTerritory}
                 territoryId={territoryId}
+                storedAnnotatorResourceId={storedAnnotatorResourceId}
+                setStoredAnnotatorResourceId={setStoredAnnotatorResourceId}
+                storedAnnotatorScroll={storedAnnotatorScroll}
+                setStoredAnnotatorScroll={(newScroll) => {
+                  if (storedAnnotatorResourceId) {
+                    setStoredAnnotatorScroll(newScroll);
+                  }
+                }}
                 entities={entities}
                 right={right}
                 setShowSubmit={setShowSubmit}

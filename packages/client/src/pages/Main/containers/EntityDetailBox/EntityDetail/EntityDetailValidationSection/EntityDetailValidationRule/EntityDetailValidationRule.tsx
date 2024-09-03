@@ -71,6 +71,24 @@ export const EntityDetailValidationRule: React.FC<
     return validation.active !== false;
   }, [validation.active]);
 
+  const isAllowedEntitiesSuggesterVisible = useMemo<boolean>(() => {
+    if (!userCanEdit) {
+      return false;
+    }
+
+    if (!allowedEntities) {
+      return false;
+    }
+
+    if (tieType === EProtocolTieType.Reference) {
+      // we do not want to allow multiple resources
+      // should be fixed in the future by introducing logic
+      return allowedEntities?.length !== 1;
+    } else {
+      return true;
+    }
+  }, [tieType, allowedEntities, userCanEdit]);
+
   return (
     <StyledBorderLeft $active={active}>
       <div
@@ -146,7 +164,12 @@ export const EntityDetailValidationRule: React.FC<
               longValue: EProtocolTieType.Property,
               shortValue: EProtocolTieType.Property,
               onClick: () =>
-                updateValidationRule({ tieType: EProtocolTieType.Property }),
+                updateValidationRule({
+                  tieType: EProtocolTieType.Property,
+                  propType: [],
+                  allowedClasses: [],
+                  allowedEntities: [],
+                }),
               selected: tieType === EProtocolTieType.Property,
             },
             {
@@ -257,14 +280,15 @@ export const EntityDetailValidationRule: React.FC<
               }
             />
           ))}
-          {!(!userCanEdit && allowedEntities && allowedEntities.length > 0) && (
+
+          {isAllowedEntitiesSuggesterVisible && (
             <EntitySuggester
               alwaysShowCreateModal
               categoryTypes={allowedEntitiesClasses}
               excludedActantIds={allowedEntities}
               onPicked={(entity) => {
                 updateValidationRule({
-                  allowedEntities: [...(allowedEntities || []), entity.id],
+                  allowedEntities: [...(allowedEntities ?? []), entity.id],
                   allowedClasses: [],
                 });
               }}

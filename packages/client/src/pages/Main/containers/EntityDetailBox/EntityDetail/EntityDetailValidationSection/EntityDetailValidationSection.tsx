@@ -81,6 +81,27 @@ export const EntityDetailValidationSection: React.FC<
     setTempIndexToRemove(false);
   };
 
+  const handleUpdateValidation = (
+    key: number,
+    changes: Partial<ITerritoryValidation>
+  ) => {
+    const validationsCopy = deepCopy(validations as ITerritoryValidation[]);
+    const updatedObject: ITerritoryValidation = {
+      ...validationsCopy[key],
+      ...changes,
+    };
+    const newValidation = [
+      ...validationsCopy.slice(0, key),
+      updatedObject,
+      ...validationsCopy.slice(key + 1),
+    ];
+    updateEntityMutation.mutate({
+      data: {
+        validations: newValidation,
+      },
+    });
+  };
+
   const [showBatchRemoveSubmit, setShowBatchRemoveSubmit] = useState(false);
 
   return (
@@ -157,23 +178,7 @@ export const EntityDetailValidationSection: React.FC<
                   updateValidationRule={(
                     changes: Partial<ITerritoryValidation>
                   ) => {
-                    const validationsCopy = deepCopy(
-                      validations as ITerritoryValidation[]
-                    );
-                    const updatedObject: ITerritoryValidation = {
-                      ...validationsCopy[key],
-                      ...changes,
-                    };
-                    const newValidation = [
-                      ...validationsCopy.slice(0, key),
-                      updatedObject,
-                      ...validationsCopy.slice(key + 1),
-                    ];
-                    updateEntityMutation.mutate({
-                      data: {
-                        validations: newValidation,
-                      },
-                    });
+                    handleUpdateValidation(key, changes);
                   }}
                   removeValidationRule={() => setTempIndexToRemove(key)}
                   isInsideTemplate={isInsideTemplate}

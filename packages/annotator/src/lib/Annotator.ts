@@ -1,7 +1,7 @@
 import Cursor from "./Cursor";
 import { Lines } from "./Lines";
 import Scroller from "./Scroller";
-import Text, { Segment, SegmentPosition, ITag } from "./Text";
+import Text, { SegmentPosition } from "./Text";
 import Viewport from "./Viewport";
 import { Modes } from "./constants";
 
@@ -64,10 +64,13 @@ export class Annotator {
   lastSelectedText = "";
   ratio: number = 1;
 
+  previousRenderViewportLineStart: number;
+
   // callbacks
   onSelectTextCb?: (text: Selected) => void;
   onHighlightCb?: (entityId: string) => HighlightSchema | void;
   onTextChangeCb?: (text: string) => void;
+  onScrollCb?: (line: number) => void;
 
   clickCount: number;
   clickTimeout?: NodeJS.Timeout;
@@ -129,6 +132,8 @@ export class Annotator {
     );
 
     this.clickCount = 0;
+
+    this.previousRenderViewportLineStart = 0;
 
     this.draw();
   }
@@ -252,6 +257,10 @@ export class Annotator {
       (this.viewport.noLines / this.text.noLines) * 100
     );
 
+    this.scroller?.setViewportSize(
+      Math.min(100, (this.viewport.noLines / this.text.noLines) * 100)
+    );
+
     this.draw();
   }
 
@@ -277,6 +286,10 @@ export class Annotator {
       this.lastSelectedText = text.text;
       cb(text);
     };
+  }
+
+  onScroll(cb: (line: number) => void) {
+    this.onScrollCb = cb;
   }
 
   /**
@@ -458,11 +471,11 @@ export class Annotator {
         break;
 
       case "PageUp":
-        this.viewport.scrollUp(10);
+        this.viewport.scrollUp(this.viewport.noLines);
         break;
 
       case "PageDown":
-        this.viewport.scrollDown(10, this.text.noLines);
+        this.viewport.scrollDown(this.viewport.noLines, this.text.noLines);
         break;
 
       case "Delete":
@@ -691,6 +704,9 @@ export class Annotator {
     this.scroller?.setRunnerSize(
       (this.viewport.noLines / this.text.noLines) * 100
     );
+
+    const viewportSize = this.viewport.noLines / this.text.noLines;
+    this.scroller?.setViewportSize(Math.min(100, viewportSize * 100));
   }
 
   /**
@@ -837,6 +853,12 @@ export class Annotator {
     if (this.lines) {
       this.lines.draw(this.viewport);
     }
+
+    const thisRenderVieportLineStart = this.viewport.lineStart;
+    if (this.previousRenderViewportLineStart !== thisRenderVieportLineStart) {
+      this.onScrollCb?.(thisRenderVieportLineStart);
+      this.previousRenderViewportLineStart = thisRenderVieportLineStart;
+    }
   }
 
   /**
@@ -907,6 +929,11 @@ export class Annotator {
     }
 
     this.viewport.scrollTo(pos[0].yLine, this.text.noLines);
+    this.draw();
+  }
+
+  scrollToLine(line: number) {
+    this.viewport.scrollTo(line, this.text.noLines);
     this.draw();
   }
 }
