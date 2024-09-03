@@ -9,10 +9,10 @@ import {
 } from "@shared/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import { Loader, Submit, ToastWithLink } from "components";
+import { CustomScrollbar, Loader, Submit, ToastWithLink } from "components";
 import { CStatement, CTerritory } from "constructors";
 import { useDebounce, useSearchParams } from "hooks";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { BsInfoCircle } from "react-icons/bs";
 import { toast } from "react-toastify";
 import { setStatementListOpened } from "redux/features/layout/statementListOpenedSlice";
@@ -20,6 +20,7 @@ import { setShowWarnings } from "redux/features/statementEditor/showWarningsSlic
 import { setDisableStatementListScroll } from "redux/features/statementList/disableStatementListScrollSlice";
 import { setRowsExpanded } from "redux/features/statementList/rowsExpandedSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
+import { COLLAPSED_TABLE_WIDTH } from "Theme/constants";
 import { EntitiesDeleteSuccessResponse, StatementListDisplayMode } from "types";
 import useResizeObserver from "use-resize-observer";
 import { StatementListHeader } from "./StatementListHeader/StatementListHeader";
@@ -526,6 +527,14 @@ export const StatementListBox: React.FC = () => {
     }
   }, [statementListOpened]);
 
+  const width = useMemo(
+    () =>
+      displayMode === StatementListDisplayMode.LIST
+        ? debouncedWidth
+        : COLLAPSED_TABLE_WIDTH,
+    [displayMode, debouncedWidth]
+  );
+
   return (
     <>
       {showStatementList && (
@@ -586,34 +595,42 @@ export const StatementListBox: React.FC = () => {
             }}
             ref={contentRef}
           >
-            <StyledTableWrapper id="Statements-box-table">
-              {statements.length > 0 && (
-                <StatementListTable
-                  statements={statements}
-                  handleRowClick={(rowId: string) => {
-                    dispatch(setShowWarnings(false));
-                    setStatementId(rowId);
-                  }}
-                  actantsUpdateMutation={statementUpdateMutation}
-                  entities={entities}
-                  right={right}
-                  cloneStatementMutation={cloneStatementMutation}
-                  setStatementToDelete={setStatementToDelete}
-                  setShowSubmit={setShowSubmit}
-                  addStatementAtCertainIndex={addStatementAtCertainIndex}
-                  selectedRows={selectedRows}
-                  setSelectedRows={setSelectedRows}
-                  displayMode={displayMode}
-                  contentWidth={debouncedWidth}
-                />
-              )}
-            </StyledTableWrapper>
+            <CustomScrollbar
+              scrollerId="Statements"
+              elementId="Statements-box-table"
+              contentWidth={width + 10}
+            >
+              <StyledTableWrapper
+              // id="Statements-box-table"
+              >
+                {statements.length > 0 && (
+                  <StatementListTable
+                    statements={statements}
+                    handleRowClick={(rowId: string) => {
+                      dispatch(setShowWarnings(false));
+                      setStatementId(rowId);
+                    }}
+                    actantsUpdateMutation={statementUpdateMutation}
+                    entities={entities}
+                    right={right}
+                    cloneStatementMutation={cloneStatementMutation}
+                    setStatementToDelete={setStatementToDelete}
+                    setShowSubmit={setShowSubmit}
+                    addStatementAtCertainIndex={addStatementAtCertainIndex}
+                    selectedRows={selectedRows}
+                    setSelectedRows={setSelectedRows}
+                    displayMode={displayMode}
+                    contentWidth={width}
+                  />
+                )}
+              </StyledTableWrapper>
+            </CustomScrollbar>
 
             {data && displayMode === StatementListDisplayMode.TEXT && (
               <StatementListTextAnnotator
                 key={territoryId}
                 contentHeight={contentHeight}
-                contentWidth={contentWidth}
+                contentWidth={width - 10}
                 statements={statements}
                 handleCreateStatement={handleCreateStatement}
                 handleCreateTerritory={handleCreateTerritory}

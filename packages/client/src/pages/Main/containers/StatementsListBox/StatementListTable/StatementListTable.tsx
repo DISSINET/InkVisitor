@@ -36,7 +36,6 @@ import { setShowWarnings } from "redux/features/statementEditor/showWarningsSlic
 import { setLastClickedIndex } from "redux/features/statementList/lastClickedIndexSlice";
 import { setRowsExpanded } from "redux/features/statementList/rowsExpandedSlice";
 import { useAppDispatch, useAppSelector } from "redux/hooks";
-import { COLLAPSED_TABLE_WIDTH } from "Theme/constants";
 import { StatementListDisplayMode } from "types";
 import { StatementListContextMenu } from "../StatementListContextMenu/StatementListContextMenu";
 import { StatementListRow } from "./StatementListRow";
@@ -538,11 +537,7 @@ export const StatementListTable: React.FC<StatementListTable> = ({
   return (
     <StyledTable
       {...getTableProps()}
-      $contentWidth={
-        displayMode === StatementListDisplayMode.LIST
-          ? contentWidth
-          : COLLAPSED_TABLE_WIDTH
-      }
+      $contentWidth={contentWidth - 10}
       $isExpanded={displayMode === StatementListDisplayMode.LIST}
     >
       <StyledTHead>

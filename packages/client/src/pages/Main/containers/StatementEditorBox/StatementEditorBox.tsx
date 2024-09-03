@@ -2,19 +2,25 @@ import { EntityEnums } from "@shared/enums";
 import { IResponseStatement, IStatement, IStatementData } from "@shared/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "api";
-import { Loader } from "components";
+import { CustomScrollbar, Loader } from "components";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
 import { BsInfoCircle } from "react-icons/bs";
 import { toast } from "react-toastify";
 import { StatementEditor } from "./StatementEditor/StatementEditor";
 import { StyledEditorEmptyState } from "./StatementEditorBoxStyles";
+import Scrollbar from "react-scrollbars-custom";
+import { useAppSelector } from "redux/hooks";
 
 export const StatementEditorBox: React.FC = () => {
   const { statementId, setStatementId, selectedDetailId, setTerritoryId } =
     useSearchParams();
 
   const queryClient = useQueryClient();
+
+  const contentHeight: number = useAppSelector(
+    (state) => state.layout.contentHeight
+  );
 
   // Statement query
   const {
@@ -267,18 +273,17 @@ export const StatementEditorBox: React.FC = () => {
   return (
     <>
       {tempObject ? (
-        <div
-          onMouseLeave={() => sendChangesToBackend(tempObject)}
-          style={{ marginBottom: "4rem" }}
-        >
-          <StatementEditor
-            statement={tempObject}
-            updateStatementMutation={updateStatementMutation}
-            moveStatementMutation={moveStatementMutation}
-            handleAttributeChange={handleAttributeChange}
-            handleDataAttributeChange={handleDataAttributeChange}
-          />
-        </div>
+        <CustomScrollbar>
+          <div onMouseLeave={() => sendChangesToBackend(tempObject)}>
+            <StatementEditor
+              statement={tempObject}
+              updateStatementMutation={updateStatementMutation}
+              moveStatementMutation={moveStatementMutation}
+              handleAttributeChange={handleAttributeChange}
+              handleDataAttributeChange={handleDataAttributeChange}
+            />
+          </div>
+        </CustomScrollbar>
       ) : (
         <>
           <StyledEditorEmptyState>
