@@ -577,7 +577,7 @@ export const StatementListBox: React.FC = () => {
             }}
             ref={contentRef}
           >
-            <CustomScrollbar width={width + 10}>
+            <CustomScrollbar contentWidth={width + 10}>
               <StyledTableWrapper id="Statements-box-table">
                 {statements.length > 0 && (
                   <StatementListTable
@@ -605,7 +605,7 @@ export const StatementListBox: React.FC = () => {
             {data && displayMode === StatementListDisplayMode.TEXT && (
               <StatementListTextAnnotator
                 contentHeight={contentHeight}
-                contentWidth={contentWidth - 10}
+                contentWidth={width - 10}
                 statements={statements}
                 handleCreateStatement={handleCreateStatement}
                 handleCreateTerritory={handleCreateTerritory}

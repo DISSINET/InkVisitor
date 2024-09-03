@@ -2,12 +2,12 @@ import React from "react";
 import { StyledScrollbar } from "./CustomScrollbarStyles";
 
 interface CustomScrollbar {
-  width?: number;
+  contentWidth?: number;
 
   children: React.ReactNode;
 }
 export const CustomScrollbar: React.FC<CustomScrollbar> = ({
-  width,
+  contentWidth,
   children,
 }) => {
   return (
@@ -16,7 +16,7 @@ export const CustomScrollbar: React.FC<CustomScrollbar> = ({
       removeTrackXWhenNotUsed={true}
       removeTrackYWhenNotUsed={true}
       permanentTracks={false}
-      style={{ width }}
+      style={{ width: contentWidth }}
     >
       {children}
     </StyledScrollbar>
