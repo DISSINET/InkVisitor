@@ -21,7 +21,7 @@ import { AxiosResponse } from "axios";
 import { Button, Input, MultiInput, TypeBar } from "components";
 import Dropdown, { AttributeButtonGroup, EntityTag } from "components/advanced";
 import React, { useEffect, useMemo, useState } from "react";
-import { FaRegCopy } from "react-icons/fa";
+import { FaExternalLinkAlt, FaRegCopy } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { DropdownItem } from "types";
 import {
@@ -459,22 +459,40 @@ export const EntityDetailFormSection: React.FC<EntityDetailFormSection> = ({
               <StyledDetailContentRow>
                 <StyledDetailContentRowLabel>URL</StyledDetailContentRowLabel>
                 <StyledDetailContentRowValue>
-                  <Input
-                    disabled={!userCanEdit}
-                    value={entity.data.url}
-                    width="full"
-                    onChangeFn={async (newValue: string) => {
-                      const oldData = { ...entity.data };
-                      updateEntityMutation.mutate({
-                        data: {
-                          ...oldData,
-                          ...{
-                            url: newValue,
-                          },
-                        },
-                      });
+                  <span
+                    style={{
+                      display: "flex",
+                      flexDirection: "row",
+                      gap: "0.5rem",
+                      alignItems: "center",
                     }}
-                  />
+                  >
+                    <Input
+                      disabled={!userCanEdit}
+                      value={entity.data.url}
+                      width="full"
+                      onChangeFn={async (newValue: string) => {
+                        const oldData = { ...entity.data };
+                        updateEntityMutation.mutate({
+                          data: {
+                            ...oldData,
+                            ...{
+                              url: newValue,
+                            },
+                          },
+                        });
+                      }}
+                    />
+                    <div>
+                      <Button
+                        icon={<FaExternalLinkAlt />}
+                        onClick={() => window.open(entity.data.url, "_blank")}
+                        inverted
+                        disabled={!entity.data.url}
+                        tooltipLabel="open in new tab"
+                      />
+                    </div>
+                  </span>
                 </StyledDetailContentRowValue>
               </StyledDetailContentRow>
 
