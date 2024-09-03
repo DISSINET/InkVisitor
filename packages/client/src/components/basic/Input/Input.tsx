@@ -72,6 +72,7 @@ export const Input: React.FC<Input> = ({
 
   return (
     <StyledWrapper
+      width={width}
       $fullHeightTextArea={type === "textarea" && fullHeightTextArea}
     >
       {label && <Label className="label">{label}</Label>}
