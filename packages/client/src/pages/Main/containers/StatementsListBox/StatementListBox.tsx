@@ -598,7 +598,7 @@ export const StatementListBox: React.FC = () => {
             <CustomScrollbar
               scrollerId="Statements"
               elementId="Statements-box-table"
-              contentWidth={width + 10}
+              contentWidth={statements.length > 0 ? width + 10 : 0}
             >
               <StyledTableWrapper
               // id="Statements-box-table"
@@ -630,7 +630,7 @@ export const StatementListBox: React.FC = () => {
               <StatementListTextAnnotator
                 key={territoryId}
                 contentHeight={contentHeight}
-                contentWidth={width - 10}
+                contentWidth={contentWidth - 10}
                 statements={statements}
                 handleCreateStatement={handleCreateStatement}
                 handleCreateTerritory={handleCreateTerritory}
