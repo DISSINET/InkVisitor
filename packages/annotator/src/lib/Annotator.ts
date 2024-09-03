@@ -257,6 +257,10 @@ export class Annotator {
       (this.viewport.noLines / this.text.noLines) * 100
     );
 
+    this.scroller?.setViewportSize(
+      Math.min(100, (this.viewport.noLines / this.text.noLines) * 100)
+    );
+
     this.draw();
   }
 
@@ -467,11 +471,11 @@ export class Annotator {
         break;
 
       case "PageUp":
-        this.viewport.scrollUp(10);
+        this.viewport.scrollUp(this.viewport.noLines);
         break;
 
       case "PageDown":
-        this.viewport.scrollDown(10, this.text.noLines);
+        this.viewport.scrollDown(this.viewport.noLines, this.text.noLines);
         break;
 
       case "Delete":
@@ -700,6 +704,9 @@ export class Annotator {
     this.scroller?.setRunnerSize(
       (this.viewport.noLines / this.text.noLines) * 100
     );
+
+    const viewportSize = this.viewport.noLines / this.text.noLines;
+    this.scroller?.setViewportSize(Math.min(100, viewportSize * 100));
   }
 
   /**

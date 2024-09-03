@@ -15,6 +15,8 @@ class Scroller {
 
   runnerClickRelPosition: number = 0;
 
+  viewPortSize: number = 0;
+
   constructor(element: HTMLDivElement) {
     this.element = element;
     const runner = element.firstElementChild;
@@ -30,6 +32,9 @@ class Scroller {
     // window.addEventListener("mouseup", this.onRunnerMouseUp.bind(this));
   }
 
+  setViewportSize(percentSize: number): void {
+    this.viewPortSize = percentSize;
+  }
   setRunnerSize(percentSize: number): void {
     this.runner.style.height = `${Math.min(100, percentSize)}%`;
   }
@@ -144,7 +149,7 @@ class Scroller {
    */
   onBarDown(e: MouseEvent) {
     if (this.onChangeCb) {
-      const dPercents = 5;
+      const dPercents = this.viewPortSize;
 
       if (e.clientY < this.runner.getBoundingClientRect().top) {
         this.onChangeCb(
