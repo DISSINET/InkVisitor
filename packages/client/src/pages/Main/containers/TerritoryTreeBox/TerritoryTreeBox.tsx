@@ -222,8 +222,13 @@ export const TerritoryTreeBox: React.FC = () => {
         />
       )}
 
-      <CustomScrollbar>
-        <StyledTreeWrapper id="Territories-box-content">
+      <CustomScrollbar
+        scrollerId="Territories"
+        elementId="Territories-box-content"
+      >
+        <StyledTreeWrapper
+        // id="Territories-box-content"
+        >
           {filteredTreeData && (
             <MemoizedTerritoryTreeNode
               right={filteredTreeData.right}

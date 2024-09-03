@@ -577,8 +577,14 @@ export const StatementListBox: React.FC = () => {
             }}
             ref={contentRef}
           >
-            <CustomScrollbar contentWidth={width + 10}>
-              <StyledTableWrapper id="Statements-box-table">
+            <CustomScrollbar
+              scrollerId="Statements"
+              elementId="Statements-box-table"
+              contentWidth={width + 10}
+            >
+              <StyledTableWrapper
+              // id="Statements-box-table"
+              >
                 {statements.length > 0 && (
                   <StatementListTable
                     statements={statements}
