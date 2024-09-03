@@ -21,7 +21,7 @@ import {
   AboutPage,
   AclPage,
   ActivatePage,
-  AdvancedSearchPage,
+  QueryPage,
   DocumentsPage,
   LoginPage,
   MainPage,
@@ -195,10 +195,10 @@ export const App: React.FC = () => {
                       }
                     />
                     <Route
-                      path="/advanced-search"
+                      path="/query"
                       element={
                         <RequireAuth>
-                          <AdvancedSearchPage />
+                          <QueryPage />
                         </RequireAuth>
                       }
                     />

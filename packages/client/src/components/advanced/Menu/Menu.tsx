@@ -69,10 +69,10 @@ export const Menu: React.FC<Menu> = ({
       icon: <CgFileDocument size={18} />,
     },
     {
-      id: "advanced-search",
-      label: "Advanced Search",
+      id: "query",
+      label: "Query",
       color: "info",
-      href: "/advanced-search",
+      href: "/query",
       admin: true,
       icon: <FaSearchengin />,
     },

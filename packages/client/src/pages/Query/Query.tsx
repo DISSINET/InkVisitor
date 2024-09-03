@@ -4,8 +4,8 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useAppSelector } from "redux/hooks";
 import { floorNumberToOneDecimal } from "utils/utils";
 
-interface AdvancedSearchPage {}
-export const AdvancedSearchPage: React.FC<AdvancedSearchPage> = ({}) => {
+interface QueryPage {}
+export const QueryPage: React.FC<QueryPage> = ({}) => {
   const layoutWidth: number = useAppSelector(
     (state) => state.layout.layoutWidth
   );
@@ -14,14 +14,14 @@ export const AdvancedSearchPage: React.FC<AdvancedSearchPage> = ({}) => {
   );
 
   const handleSeparatorXPositionChange = (xPosition: number) => {
-    if (advancedSearchSeparatorXPosition !== xPosition) {
-      setAdvancedSearchSeparatorXPosition(xPosition);
+    if (querySeparatorXPosition !== xPosition) {
+      setquerySeparatorXPosition(xPosition);
 
       const separatorXPercentPosition = floorNumberToOneDecimal(
         xPosition / onePercentOfLayoutWidth
       );
       localStorage.setItem(
-        "advancedSearchSeparatorXPosition",
+        "querySeparatorXPosition",
         separatorXPercentPosition.toString()
       );
     }
@@ -33,31 +33,29 @@ export const AdvancedSearchPage: React.FC<AdvancedSearchPage> = ({}) => {
   );
 
   const localStorageSeparatorXPosition = localStorage.getItem(
-    "advancedSearchSeparatorXPosition"
+    "querySeparatorXPosition"
   );
-  const [
-    advancedSearchSeparatorXPosition,
-    setAdvancedSearchSeparatorXPosition,
-  ] = useState<number>(
-    localStorageSeparatorXPosition
-      ? floorNumberToOneDecimal(
-          Number(localStorageSeparatorXPosition) * onePercentOfLayoutWidth
-        )
-      : layoutWidth / 2
-  );
+  const [querySeparatorXPosition, setquerySeparatorXPosition] =
+    useState<number>(
+      localStorageSeparatorXPosition
+        ? floorNumberToOneDecimal(
+            Number(localStorageSeparatorXPosition) * onePercentOfLayoutWidth
+          )
+        : layoutWidth / 2
+    );
 
   const [currentLayoutWidth, setcurrentLayoutWidth] = useState(layoutWidth);
 
   useEffect(() => {
     const onePercentOfLastLayoutWidth = currentLayoutWidth / 100;
     const separatorXPercentPosition = floorNumberToOneDecimal(
-      advancedSearchSeparatorXPosition / onePercentOfLastLayoutWidth
+      querySeparatorXPosition / onePercentOfLastLayoutWidth
     );
-    setAdvancedSearchSeparatorXPosition(
+    setquerySeparatorXPosition(
       separatorXPercentPosition * onePercentOfLayoutWidth
     );
     localStorage.setItem(
-      "advancedSearchSeparatorXPosition",
+      "querySeparatorXPosition",
       separatorXPercentPosition.toString()
     );
     setcurrentLayoutWidth(layoutWidth);
@@ -65,23 +63,23 @@ export const AdvancedSearchPage: React.FC<AdvancedSearchPage> = ({}) => {
 
   return (
     <>
-      {advancedSearchSeparatorXPosition > 0 && (
+      {querySeparatorXPosition > 0 && (
         <PanelSeparator
           leftSideMinWidth={400}
           leftSideMaxWidth={layoutWidth - 400}
-          separatorXPosition={advancedSearchSeparatorXPosition}
+          separatorXPosition={querySeparatorXPosition}
           setSeparatorXPosition={(xPosition) =>
             handleSeparatorXPositionChange(xPosition)
           }
         />
       )}
 
-      <Panel width={advancedSearchSeparatorXPosition}>
+      <Panel width={querySeparatorXPosition}>
         <Box borderColor="white" height={contentHeight} label="Search">
-          {/* <MemoizedAdvancedSearchBox /> */}
+          {/* <MemoizedQueryBox /> */}
         </Box>
       </Panel>
-      <Panel width={layoutWidth - advancedSearchSeparatorXPosition}>
+      <Panel width={layoutWidth - querySeparatorXPosition}>
         <Box borderColor="white" height={contentHeight} label="Explorer">
           {/* <MemoizedExplorerBox /> */}
         </Box>
