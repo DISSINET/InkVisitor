@@ -4,7 +4,8 @@
   "description": "",
   "engines": {
     "npm": ">=8.19.2",
-    "node": ">=18.0.0"
+    "node": ">=18.0.0",
+    "pnpm": ">=8.15.0"
   },
   "scripts": {
     "start": "npx ts-node -r tsconfig-paths/register scripts/import.ts",
