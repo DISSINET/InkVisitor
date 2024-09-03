@@ -6,7 +6,7 @@
   "engines": {
     "npm": ">=8.19.2",
     "node": ">=18.0.0",
-    "pnpm": ">=8.6.0"
+    "pnpm": ">=8.15.0"
   },
   "sideEffects": false,
   "scripts": {
