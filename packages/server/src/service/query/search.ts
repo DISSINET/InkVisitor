@@ -9,7 +9,7 @@ import { Connection } from "rethinkdb-ts";
 import { Results, SearchEdge, SearchNode } from ".";
 import { IResponseQueryEntity } from "@shared/types/response-query";
 
-export default class AdvancedSearch {
+export default class QuerySearch {
   static MAX_LIMIT = 100;
   static DEFAULT_LIMIT = 10;
 
@@ -20,10 +20,10 @@ export default class AdvancedSearch {
   constructor(query: Query.INode, explore: Explore.IExplore) {
     this.root = new SearchNode(query);
     this.explore = explore;
-    if (this.explore.limit > AdvancedSearch.MAX_LIMIT) {
-      this.explore.limit = AdvancedSearch.MAX_LIMIT;
+    if (this.explore.limit > QuerySearch.MAX_LIMIT) {
+      this.explore.limit = QuerySearch.MAX_LIMIT;
     } else if (!this.explore.limit) {
-      this.explore.limit = AdvancedSearch.DEFAULT_LIMIT;
+      this.explore.limit = QuerySearch.DEFAULT_LIMIT;
     }
 
     if (!this.explore.offset) {
@@ -40,15 +40,6 @@ export default class AdvancedSearch {
     if (!this.root.type) {
       throw new BadParams();
     }
-
-    if (
-      !this.root.edges.length &&
-      !(this.root.params.classes || []).length &&
-      !this.root.params.id &&
-      !this.root.params.label
-    ) {
-      throw new BadParams("Too loose conditions");
-    }
   }
 
   /**
@@ -58,6 +49,14 @@ export default class AdvancedSearch {
   async run(db: Connection): Promise<IEntity[]> {
     if (!this.root.isValid()) {
       throw new SearchEdgeTypesInvalid();
+    }
+    if (
+      !this.root.edges.length &&
+      !(this.root.params.classes || []).length &&
+      !this.root.params.id &&
+      !this.root.params.label
+    ) {
+      return [];
     }
     this.results = await this.root.run(db);
     return this.results.items || [];

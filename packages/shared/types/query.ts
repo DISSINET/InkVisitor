@@ -72,7 +72,12 @@ export namespace Explore {
   export interface IView {}
 
   export interface IExploreColumnFilter {}
-  export type IExploreColumnSort = "asc" | "desc";
+
+  export type IExploreColumnSort = {
+    columnId: string;
+    direction: IExploreColumnSortDirection;
+  };
+  export type IExploreColumnSortDirection = "asc" | "desc";
 
   export interface IExploreColumn {
     id: string;

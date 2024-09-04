@@ -21,6 +21,8 @@ import {
   IUser,
   Relation,
   RequestPermissionUpdate,
+  IRequestQuery,
+  IResponseQuery,
 } from "@shared/types";
 import * as errors from "@shared/types/errors";
 import { NetworkError } from "@shared/types/errors";
@@ -745,6 +747,25 @@ class Api {
   async treeGet(options?: IApiOptions): Promise<AxiosResponse<IResponseTree>> {
     try {
       const response = await this.connection.get(`/tree`, options);
+      return response;
+    } catch (err) {
+      throw this.handleError(err);
+    }
+  }
+
+  /**
+   * Query
+   */
+  async query(
+    queryData: IRequestQuery,
+    options?: IApiOptions
+  ): Promise<AxiosResponse<IResponseQuery>> {
+    try {
+      const response = await this.connection.post(
+        `/entities/query`,
+        queryData,
+        options
+      );
       return response;
     } catch (err) {
       throw this.handleError(err);
