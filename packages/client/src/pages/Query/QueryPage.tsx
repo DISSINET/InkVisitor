@@ -1,77 +1,21 @@
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import React, { useEffect, useMemo, useReducer, useRef, useState } from "react";
+
 import { Query } from "@shared/types";
 import { Explore } from "@shared/types/query";
-import { useQuery } from "@tanstack/react-query";
 import api from "api";
 import { Box, Panel } from "components";
 import { PanelSeparator } from "components/advanced";
-import React, { useEffect, useMemo, useReducer, useState } from "react";
 import { useAppSelector } from "redux/hooks";
 import { floorNumberToOneDecimal } from "utils/utils";
-
-const initialQuery: Query.INode = {
-  type: Query.NodeType.X,
-  params: {
-    classes: [],
-    label: "",
-  },
-  edges: [],
-  operator: Query.NodeOperator.And,
-};
-
-interface QueryAction {
-  type: QueryActionType;
-  payload: any;
-}
-enum QueryActionType {
-  addNode,
-  removeNode,
-  addEdge,
-  removeEdge,
-}
-
-const queryReducer = (state: Query.INode, action: QueryAction) => {
-  switch (action.type) {
-    case QueryActionType.addNode:
-      return state;
-    case QueryActionType.removeNode:
-      return state;
-    case QueryActionType.addEdge:
-      return state;
-    case QueryActionType.removeEdge:
-      return state;
-    default:
-      return state;
-  }
-};
-
-const initialExplore: Explore.IExplore = {
-  view: {},
-  columns: [],
-  sort: undefined,
-  filters: [],
-  limit: 100,
-  offset: 0,
-};
-
-interface ExploreAction {
-  type: ExploreActionType;
-  payload: any;
-}
-enum ExploreActionType {
-  addColumn,
-  removeColumn,
-}
-
-const explorerReducer = (state: Explore.IExplore, action: ExploreAction) => {
-  switch (action.type) {
-    case ExploreActionType.addColumn:
-      return state;
-    case ExploreActionType.removeColumn:
-      return state;
-    default:
-      return state;
-  }
-};
+import { MemoizedExplorerBox } from "./Explorer/ExplorerBox";
+import {
+  exploreDiff,
+  exploreReducer,
+  exploreStateInitial,
+} from "./Explorer/state";
+import { MemoizedQueryBox } from "./Query/QueryBox";
+import { queryDiff, queryReducer, queryStateInitial } from "./Query/state";
 
 interface QueryPage {}
 export const QueryPage: React.FC<QueryPage> = ({}) => {
@@ -82,22 +26,47 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
     (state) => state.layout.contentHeight
   );
 
-  const [queryState, queryDispatch] = useReducer(queryReducer, initialQuery);
+  const queryClient = useQueryClient();
 
-  const [exploreState, exploreDispatch] = useReducer(
-    explorerReducer,
-    initialExplore
+  const [queryState, queryStateDispatch] = useReducer(
+    queryReducer,
+    queryStateInitial
   );
 
-  const queryId = 1;
-  const exploreId = 1;
+  const [exploreState, exploreStateDispatch] = useReducer(
+    exploreReducer,
+    exploreStateInitial
+  );
+
+  const prevQueryState = useRef<Query.INode>(queryState);
+  const prevExploreState = useRef<Explore.IExplore>(exploreState);
+
+  useEffect(() => {
+    if (queryDiff(prevQueryState.current, queryState)) {
+      invalidateQuery();
+      prevQueryState.current = queryState;
+    }
+  }, [queryState]);
+
+  useEffect(() => {
+    if (exploreDiff(prevExploreState.current, exploreState)) {
+      invalidateQuery();
+      prevExploreState.current = exploreState;
+    }
+  }, [exploreState]);
+
+  const invalidateQuery = () => {
+    queryClient.invalidateQueries({
+      queryKey: ["query"],
+    });
+  };
 
   const {
     data: queryData,
     error: queryError,
     isFetching: queryIsFetching,
   } = useQuery({
-    queryKey: ["query", { queryId, exploreId }],
+    queryKey: ["query"],
     queryFn: async () => {
       const res = await api.query({
         query: queryState,
@@ -173,12 +142,24 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
 
       <Panel width={querySeparatorXPosition}>
         <Box borderColor="white" height={contentHeight} label="Search">
-          {/* <MemoizedQueryBox /> */}
+          <MemoizedQueryBox
+            state={queryState}
+            dispatch={queryStateDispatch}
+            data={queryData}
+            isQueryFetching={queryIsFetching}
+            queryError={queryError}
+          />
         </Box>
       </Panel>
       <Panel width={layoutWidth - querySeparatorXPosition}>
         <Box borderColor="white" height={contentHeight} label="Explorer">
-          {/* <MemoizedExplorerBox /> */}
+          <MemoizedExplorerBox
+            state={exploreState}
+            dispatch={exploreStateDispatch}
+            data={queryData}
+            isQueryFetching={queryIsFetching}
+            queryError={queryError}
+          />
         </Box>
       </Panel>
     </>

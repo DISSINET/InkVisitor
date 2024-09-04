@@ -14,7 +14,7 @@ export interface IResponseQueryEntity {
     | string[]
     | IUser
     | IUser[]
-  >; // additional data for the display
+  >;
 }
 
 export interface IResponseQuery {
