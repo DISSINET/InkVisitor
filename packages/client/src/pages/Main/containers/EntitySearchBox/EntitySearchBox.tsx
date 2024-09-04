@@ -17,6 +17,7 @@ import Dropdown, {
 import { useDebounce, useSearchParams } from "hooks";
 import React, { useEffect, useMemo, useState } from "react";
 import { CgOptions } from "react-icons/cg";
+import { FaPlus } from "react-icons/fa";
 import { IoMdArrowDropdownCircle } from "react-icons/io";
 import { RiCloseFill } from "react-icons/ri";
 import { DropdownItem } from "types";
@@ -36,7 +37,6 @@ import {
   StyledRowHeader,
 } from "./EntitySearchBoxStyles";
 import { EntitySearchResults } from "./EntitySearchResults/EntitySearchResults";
-import { FaPlus } from "react-icons/fa";
 
 const initValues: IRequestSearch = {
   label: "",
@@ -593,6 +593,7 @@ export const EntitySearchBox: React.FC = () => {
         </StyledResultsHeader>
 
         {/* StyledResultsWrapper is used to calculate size for infinite scroll, don't put any other components inside! */}
+
         <StyledResultsWrapper ref={resultRef}>
           {/* RESULTS */}
           {sortedEntities.length > 0 && (

@@ -55,6 +55,9 @@ export const StyledTr = styled.tr<StyledTr>`
     padding-left: ${({ theme, $isOpened }) => ($isOpened ? "0.9rem" : "")};
     width: 1%;
   }
+  td:last-child {
+    padding-right: ${({ theme }) => theme.space[4]};
+  }
   :hover {
     background-color: ${({ theme, $isSelected }) =>
       $isSelected
@@ -62,6 +65,7 @@ export const StyledTr = styled.tr<StyledTr>`
         : theme.color["gray"][100]};
   }
 `;
+
 interface StyledTd {}
 export const StyledTd = styled.td<StyledTd>`
   padding: ${({ theme }) => theme.space[2]};

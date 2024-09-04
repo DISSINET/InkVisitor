@@ -3,7 +3,7 @@ import { IResponseTree, IUser } from "@shared/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { rootTerritoryId } from "Theme/constants";
 import api from "api";
-import { Button, ButtonGroup, Loader } from "components";
+import { Button, ButtonGroup, CustomScrollbar, Loader } from "components";
 import { useSearchParams } from "hooks";
 import React, { useEffect, useState } from "react";
 import { BsFilter } from "react-icons/bs";
@@ -222,26 +222,33 @@ export const TerritoryTreeBox: React.FC = () => {
         />
       )}
 
-      <StyledTreeWrapper id="Territories-box-content">
-        {filteredTreeData && (
-          <MemoizedTerritoryTreeNode
-            right={filteredTreeData.right}
-            territory={filteredTreeData.territory}
-            children={filteredTreeData.children}
-            lvl={filteredTreeData.lvl}
-            statementsCount={filteredTreeData.statementsCount}
-            initExpandedNodes={selectedTerritoryPath}
-            empty={filteredTreeData.empty}
-            storedTerritories={storedTerritoryIds ? storedTerritoryIds : []}
-            updateUserMutation={updateUserMutation}
-          />
-        )}
+      <CustomScrollbar
+        scrollerId="Territories"
+        elementId="Territories-box-content"
+      >
+        <StyledTreeWrapper
+        // id="Territories-box-content"
+        >
+          {filteredTreeData && (
+            <MemoizedTerritoryTreeNode
+              right={filteredTreeData.right}
+              territory={filteredTreeData.territory}
+              children={filteredTreeData.children}
+              lvl={filteredTreeData.lvl}
+              statementsCount={filteredTreeData.statementsCount}
+              initExpandedNodes={selectedTerritoryPath}
+              empty={filteredTreeData.empty}
+              storedTerritories={storedTerritoryIds ? storedTerritoryIds : []}
+              updateUserMutation={updateUserMutation}
+            />
+          )}
 
-        {/* No results */}
-        {treeFilterOpen && !filteredTreeData && (
-          <StyledNoResults>{"No results"}</StyledNoResults>
-        )}
-      </StyledTreeWrapper>
+          {/* No results */}
+          {treeFilterOpen && !filteredTreeData && (
+            <StyledNoResults>{"No results"}</StyledNoResults>
+          )}
+        </StyledTreeWrapper>
+      </CustomScrollbar>
 
       {showCreate && (
         <ContextMenuNewTerritoryModal
