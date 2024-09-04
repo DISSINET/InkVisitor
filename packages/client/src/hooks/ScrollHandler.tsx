@@ -92,7 +92,7 @@ const ScrollHandler = () => {
                 : 0,
             });
           }
-        }, 200);
+        }, 300);
       } else {
         dispatch(setDisableTreeScroll(false));
       }

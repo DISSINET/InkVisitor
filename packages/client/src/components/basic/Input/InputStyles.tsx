@@ -20,10 +20,12 @@ const getWidth = (width?: number | "full") => {
 };
 interface StyledWrapper {
   $fullHeightTextArea: boolean;
+  width?: number | "full";
 }
 export const StyledWrapper = styled.div<StyledWrapper>`
   display: flex;
   height: ${({ $fullHeightTextArea }) => ($fullHeightTextArea ? "100%" : "")};
+  flex-grow: ${({ width }) => (width === "full" ? 1 : "")};
 `;
 export const Label = styled.span`
   text-align: right;
