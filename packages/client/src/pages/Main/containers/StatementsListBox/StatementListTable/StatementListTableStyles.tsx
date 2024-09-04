@@ -1,5 +1,4 @@
 import { COLLAPSED_TABLE_WIDTH } from "Theme/constants";
-import Scrollbar from "react-scrollbars-custom";
 import styled from "styled-components";
 
 interface StyledTable {

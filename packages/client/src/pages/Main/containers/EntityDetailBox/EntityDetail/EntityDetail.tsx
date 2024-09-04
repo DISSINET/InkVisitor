@@ -43,6 +43,7 @@ import { EntityDetailFormSection } from "./EntityDetailFormSection/EntityDetailF
 import { EntityDetailHeaderRow } from "./EntityDetailHeaderRow/EntityDetailHeaderRow";
 import { EntityDetailProtocol } from "./EntityDetailProtocol/EntityDetailProtocol";
 import { EntityDetailRelations } from "./EntityDetailRelations/EntityDetailRelations";
+import { EntityDetailSectionButtons } from "./EntityDetailSectionButtons/EntityDetailSectionButtons";
 import {
   StyledDetailSection,
   StyledDetailSectionContent,
@@ -63,8 +64,6 @@ import { EntityDetailStatementPropsTable } from "./EntityDetailUsedInTable/Entit
 import { EntityDetailStatementsTable } from "./EntityDetailUsedInTable/EntityDetailStatementsTable/EntityDetailStatementsTable";
 import { EntityDetailValency } from "./EntityDetailValency/EntityDetailValency";
 import { EntityDetailValidationSection } from "./EntityDetailValidationSection/EntityDetailValidationSection";
-import { EntityDetailSectionButtons } from "./EntityDetailSectionButtons/EntityDetailSectionButtons";
-import Scrollbar from "react-scrollbars-custom";
 
 const allowedEntityChangeClasses = [
   EntityEnums.Class.Value,
