@@ -99,7 +99,7 @@ export const SearchParamsProvider = ({
   const [annotatorOpened, setAnnotatorOpened] = useState<boolean | null>(
     parsedParams.annotatorOpened
       ? stringToBoolean(parsedParams.annotatorOpened)
-      : INITIAL_CONTEXT.annotatorOpened
+      : null
   );
 
   const [disablePush, setDisablePush] = useState(false);

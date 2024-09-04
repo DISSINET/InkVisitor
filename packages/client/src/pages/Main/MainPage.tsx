@@ -338,7 +338,6 @@ const MainPage: React.FC<MainPage> = ({}) => {
         } else {
           // layout init with saved separator
           console.log("init load - separator determines panel widths");
-          console.log(mainPageSeparatorXPosition);
           let secondPanel = mainPageSeparatorXPosition - panelWidthsPx[0];
           let thirdPanel =
             layoutWidth - (mainPageSeparatorXPosition + panelWidthsPx[3]);
