@@ -3,6 +3,7 @@ import { PanelSeparator } from "components/advanced";
 import React, { useEffect, useMemo, useState } from "react";
 import { useAppSelector } from "redux/hooks";
 import { floorNumberToOneDecimal } from "utils/utils";
+import { MemoizedExplorerBox } from "./containers/ExplorerBox/ExplorerBoxOld";
 
 interface QueryPage {}
 export const QueryPage: React.FC<QueryPage> = ({}) => {
@@ -81,7 +82,7 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
       </Panel>
       <Panel width={layoutWidth - querySeparatorXPosition}>
         <Box borderColor="white" height={contentHeight} label="Explorer">
-          {/* <MemoizedExplorerBox /> */}
+          <MemoizedExplorerBox />
         </Box>
       </Panel>
     </>
