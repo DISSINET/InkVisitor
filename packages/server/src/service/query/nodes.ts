@@ -67,7 +67,7 @@ export default class SearchNode implements Query.INode {
       await this.runSingleBatch(db, this);
     } else {
       for (const edge of this.edges) {
-        await this.runSingleBatch(db, edge.node, edge);
+        await this.runSingleBatch(db, this, edge);
       }
     }
 
@@ -98,12 +98,14 @@ export default class SearchNode implements Query.INode {
       q = edge.run(q);
     }
 
+    console.log(q.toString());
+
     const edgeResults = await q.distinct().run(db);
-    const entities = await Entity.findEntitiesByIds(db, edgeResults);
+
     if (this.operator === Query.NodeOperator.And) {
-      this.results.addAnd(entities);
+      this.results.addAnd(edgeResults);
     } else {
-      this.results.addOr(entities);
+      this.results.addOr(edgeResults);
     }
   }
 

@@ -702,10 +702,11 @@ export default Router()
         );
 
         await querySearch.run(request.db.connection);
+        const results = await querySearch.getResults(request.db.connection);
 
         return {
           query: request.body.query,
-          entities: querySearch.getResults(),
+          entities: results,
           explore: querySearch.explore,
         };
       }
