@@ -15,6 +15,7 @@ const mockSearch = (rootType: Query.NodeType): QuerySearch => {
       operator: Query.NodeOperator.And,
       params: {},
       type: rootType,
+      id: "root",
     },
     {
       view: {},
@@ -46,12 +47,15 @@ describe("test QuerySearch", () => {
         type: Query.NodeType.A,
         params: {},
         operator: Query.NodeOperator.And,
+        id: "1",
         edges: [
           {
             logic: Query.EdgeLogic.Negative,
             type: Query.EdgeType.XHasPropType,
             params: {},
+            id: "2",
             node: {
+              id: "3",
               operator: Query.NodeOperator.And,
               type: Query.NodeType.A,
               edges: [],
@@ -142,7 +146,7 @@ describe("test QuerySearch", () => {
         return;
       }
       expect(results.length).toEqual(1);
-      expect(results[0].id).toEqual(entity1.id);
+      expect(results[0]).toEqual(entity1.id);
     });
   });
 

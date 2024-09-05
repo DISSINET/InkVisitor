@@ -33,6 +33,7 @@ export default class SearchNode implements Query.INode {
   type: Query.NodeType;
   params: Query.INodeParams;
   operator: Query.NodeOperator;
+  id: string;
   edges: Edge[];
   results: Results<IEntity>;
 
@@ -43,6 +44,7 @@ export default class SearchNode implements Query.INode {
     this.edges = data.edges
       ? data.edges.map((edgeData) => getEdgeInstance(edgeData))
       : [];
+    this.id = data.id || "";
     this.results = new Results();
   }
 

@@ -1,16 +1,16 @@
 import Relation from "@models/relation/relation";
+import { DbEnums, RelationEnums } from "@shared/enums";
+import { IEntity, Relation as RelationTypes } from "@shared/types";
+import { InternalServerError } from "@shared/types/errors";
 import { Query } from "@shared/types/query";
 import { r, RDatum, RStream } from "rethinkdb-ts";
 import { SearchNode } from ".";
-import { IEntity, Relation as RelationTypes } from "@shared/types";
-import { DbEnums, RelationEnums } from "@shared/enums";
-import { InternalServerError } from "@shared/types/errors";
-import Entity from "@models/entity/entity";
 
 export default class SearchEdge implements Query.IEdge {
   type: Query.EdgeType;
   params: Query.IEdgeParams;
   logic: Query.EdgeLogic;
+  id: string;
   node: SearchNode;
 
   constructor(data: Partial<Query.IEdge>) {
@@ -18,6 +18,7 @@ export default class SearchEdge implements Query.IEdge {
     this.params = data.params || {};
     this.logic = data.logic || Query.EdgeLogic.Positive;
     this.node = new SearchNode(data?.node || {});
+    this.id = data.id || "";
   }
 
   run(q: RStream): RStream {

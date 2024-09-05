@@ -2,12 +2,15 @@ import { IResponseQuery, Query } from "@shared/types";
 import { useQueryClient } from "@tanstack/react-query";
 import React, { useMemo } from "react";
 import { useAppSelector } from "redux/hooks";
+import { QueryGridEdge } from "./components/QueryGridEdge";
 import { QueryGridNode } from "./components/QueryGridNode";
+import { QueryAction } from "./state";
 import { INodeItem, QUERY_GRID_HEIGHT, QUERY_GRID_WIDTH } from "./types";
+import { getAllEdges, getAllNodes } from "./utils";
 
 interface QueryBoxProps {
   state: Query.INode;
-  dispatch: React.Dispatch<any>;
+  dispatch: React.Dispatch<QueryAction>;
   data: IResponseQuery | undefined;
   isQueryFetching: boolean;
   queryError: Error | null;
@@ -42,6 +45,9 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
     return maxNodeDepth;
   }, [state]);
 
+  const allEdges = getAllEdges(state);
+  const allNodes = getAllNodes(state);
+
   const nodeItems = useMemo<INodeItem[]>(() => {
     const nodeItems: INodeItem[] = [];
 
@@ -60,9 +66,15 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
 
   return (
     <div>
-      <div id="query-header"></div>
+      <div
+        id="query-header"
+        style={{
+          height: "50px",
+        }}
+      ></div>
       <div
         style={{
+          padding: "10px",
           display: "grid",
           gridTemplateColumns: `repeat(${
             gridWeight + 1
@@ -72,14 +84,44 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
       >
         {[...Array(gridWeight + 1).keys()].map((wi) => {
           return [...Array(nodeItems.length).keys()].map((hi) => {
-            const nodeItem = nodeItems.find(
+            const nextCellNode = nodeItems.find(
+              (node) => node.gridX === wi + 1 && node.gridY === hi
+            );
+            const thisCellNode = nodeItems.find(
               (node) => node.gridX === wi && node.gridY === hi
             );
+            const associatedEdge =
+              thisCellNode &&
+              allEdges.find((edge) => edge.node.id === thisCellNode.id);
+
+            const nextCellAssociatedEdge =
+              nextCellNode &&
+              allEdges.find((edge) => edge.node.id === nextCellNode.id);
 
             return (
-              <div key={`${wi}-${hi}`}>
-                {nodeItem && <QueryGridNode item={nodeItem} />}
-                {!nodeItem && <div>nic</div>}
+              <div
+                key={`${wi}-${hi}`}
+                style={{
+                  gridColumn: wi + 1,
+                  gridRow: hi + 1,
+                  width: QUERY_GRID_WIDTH,
+                  height: QUERY_GRID_HEIGHT,
+                }}
+              >
+                {thisCellNode && (
+                  <QueryGridNode
+                    node={thisCellNode}
+                    dispatch={dispatch}
+                    edge={associatedEdge}
+                  />
+                )}
+                {nextCellAssociatedEdge && (
+                  <QueryGridEdge
+                    node={nextCellNode}
+                    dispatch={dispatch}
+                    edge={nextCellAssociatedEdge}
+                  />
+                )}
               </div>
             );
           });
