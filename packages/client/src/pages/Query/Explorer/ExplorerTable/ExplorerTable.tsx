@@ -1,11 +1,10 @@
+import React from "react";
+
+import { IResponseQuery } from "@shared/types";
+import { Explore } from "@shared/types/query";
 import { Button } from "components";
-import React, { useState } from "react";
-import {
-  StyledGrid,
-  StyledGridColumn,
-  StyledGridHeader,
-} from "./ExplorerBoxOldStyles";
 import { TbColumnInsertRight } from "react-icons/tb";
+import { StyledGrid, StyledGridHeader } from "./ExplorerTableStyles";
 
 interface Column {
   header: string;
@@ -21,7 +20,7 @@ const intialColumns: Column[] = [
     accessor: "label",
   },
 ];
-const data = [
+const dataTemp = [
   {
     id: "asdad-aswead-xxx",
     class: "concept",
@@ -39,33 +38,47 @@ const data = [
   },
 ];
 
-interface ExplorerBox {}
-export const ExplorerBox: React.FC<ExplorerBox> = ({}) => {
-  const [columns, setColumns] = useState<Column[]>(intialColumns);
+interface ExplorerTable {
+  state: Explore.IExplore;
+  dispatch: React.Dispatch<any>;
+  data: IResponseQuery;
+  isQueryFetching: boolean;
+  queryError: Error | null;
+}
+export const ExplorerTable: React.FC<ExplorerTable> = ({
+  state,
+  dispatch,
+  data,
+  isQueryFetching,
+  queryError,
+}) => {
+  const { entities, explore, query } = data;
+  const { columns } = explore;
 
   return (
-    <div>
+    <>
       <StyledGrid $columns={columns.length + 1}>
         {/* HEADER */}
         {columns.map((column, key) => {
-          return <StyledGridHeader key={key}>{column.header}</StyledGridHeader>;
+          return <StyledGridHeader key={key}>{column.name}</StyledGridHeader>;
         })}
         <StyledGridHeader>
           <span>
             <Button
               icon={<TbColumnInsertRight size={17} />}
               label="new column"
-              onClick={() =>
-                setColumns([
-                  ...columns,
-                  { header: "Status", accessor: "status" },
-                ])
+              onClick={
+                () => {}
+                // setColumns([
+                //   ...columns,
+                //   { header: "Status", accessor: "status" },
+                // ])
               }
             />
           </span>
         </StyledGridHeader>
 
-        {data.map((record, key) => {
+        {/* {dataTemp.map((record, key) => {
           return (
             // ROW
             <React.Fragment key={key}>
@@ -75,17 +88,14 @@ export const ExplorerBox: React.FC<ExplorerBox> = ({}) => {
                     {record[column.accessor]
                       ? record[column.accessor]
                       : "empty"}
-                    {/* {"record[column.attr[key]]"} */}
                   </StyledGridColumn>
                 );
               })}
               <StyledGridColumn></StyledGridColumn>
             </React.Fragment>
           );
-        })}
+        })} */}
       </StyledGrid>
-    </div>
+    </>
   );
 };
-
-export const MemoizedExplorerBox = React.memo(ExplorerBox);

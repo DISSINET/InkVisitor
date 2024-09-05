@@ -7,7 +7,8 @@ export const StyledGrid = styled.div<StyledGrid>`
   display: grid;
   grid-template-columns: ${({ $columns }) => `repeat(${$columns}, auto)`};
   color: ${({ theme }) => theme.color["black"]};
-  width: 50%;
+  padding-right: 1rem;
+  /* width: 50%; */
 `;
 export const StyledGridColumn = styled.div`
   display: grid;
