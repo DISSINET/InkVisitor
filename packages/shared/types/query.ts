@@ -72,7 +72,12 @@ export namespace Explore {
   export interface IView {}
 
   export interface IExploreColumnFilter {}
-  export type IExploreColumnSort = "asc" | "desc";
+
+  export type IExploreColumnSort = {
+    columnId: string;
+    direction: IExploreColumnSortDirection;
+  };
+  export type IExploreColumnSortDirection = "asc" | "desc";
 
   export interface IExploreColumn {
     id: string;
@@ -97,6 +102,19 @@ export namespace Explore {
   }
 
   export interface IExploreColumnParams<T = EExploreColumnType> {
-    type: T;
+    [EExploreColumnType.ER]: {};
+    [EExploreColumnType.EPV]: {
+      propertyType: string;
+    };
+    [EExploreColumnType.EPT]: {};
+    [EExploreColumnType.ERR]: {};
+    [EExploreColumnType.ERV]: {};
+    [EExploreColumnType.ES]: {};
+    [EExploreColumnType.CPV]: {};
+    [EExploreColumnType.CPO]: {};
+    [EExploreColumnType.EUC]: {};
+    [EExploreColumnType.EUE]: {};
+    [EExploreColumnType.EUEN]: {};
+    [EExploreColumnType.EDC]: {};
   }
 }

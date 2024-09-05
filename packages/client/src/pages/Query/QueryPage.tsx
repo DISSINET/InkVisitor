@@ -1,9 +1,21 @@
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import React, { useEffect, useMemo, useReducer, useRef, useState } from "react";
+
+import { Query } from "@shared/types";
+import { Explore } from "@shared/types/query";
+import api from "api";
 import { Box, Panel } from "components";
 import { PanelSeparator } from "components/advanced";
-import React, { useEffect, useMemo, useState } from "react";
 import { useAppSelector } from "redux/hooks";
 import { floorNumberToOneDecimal } from "utils/utils";
-import { MemoizedExplorerBox } from "./containers/ExplorerBox/ExplorerBoxOld";
+import { MemoizedExplorerBox } from "./Explorer/ExplorerBox";
+import {
+  exploreDiff,
+  exploreReducer,
+  exploreStateInitial,
+} from "./Explorer/state";
+import { MemoizedQueryBox } from "./Query/QueryBox";
+import { queryDiff, queryReducer, queryStateInitial } from "./Query/state";
 
 interface QueryPage {}
 export const QueryPage: React.FC<QueryPage> = ({}) => {
@@ -13,6 +25,59 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
   const contentHeight: number = useAppSelector(
     (state) => state.layout.contentHeight
   );
+
+  const queryClient = useQueryClient();
+
+  const [queryState, queryStateDispatch] = useReducer(
+    queryReducer,
+    queryStateInitial
+  );
+
+  const [exploreState, exploreStateDispatch] = useReducer(
+    exploreReducer,
+    exploreStateInitial
+  );
+
+  const prevQueryState = useRef<Query.INode>(queryState);
+  const prevExploreState = useRef<Explore.IExplore>(exploreState);
+
+  useEffect(() => {
+    if (queryDiff(prevQueryState.current, queryState)) {
+      invalidateQuery();
+      prevQueryState.current = queryState;
+    }
+  }, [queryState]);
+
+  useEffect(() => {
+    if (exploreDiff(prevExploreState.current, exploreState)) {
+      invalidateQuery();
+      prevExploreState.current = exploreState;
+    }
+  }, [exploreState]);
+
+  const invalidateQuery = () => {
+    queryClient.invalidateQueries({
+      queryKey: ["query"],
+    });
+  };
+
+  const {
+    data: queryData,
+    error: queryError,
+    isFetching: queryIsFetching,
+  } = useQuery({
+    queryKey: ["query"],
+    queryFn: async () => {
+      const res = await api.query({
+        query: queryState,
+        explore: exploreState,
+      });
+      return res.data;
+    },
+    enabled: api.isLoggedIn(),
+  });
+
+  console.log(queryData);
 
   const handleSeparatorXPositionChange = (xPosition: number) => {
     if (querySeparatorXPosition !== xPosition) {
@@ -77,12 +142,24 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
 
       <Panel width={querySeparatorXPosition}>
         <Box borderColor="white" height={contentHeight} label="Search">
-          {/* <MemoizedQueryBox /> */}
+          <MemoizedQueryBox
+            state={queryState}
+            dispatch={queryStateDispatch}
+            data={queryData}
+            isQueryFetching={queryIsFetching}
+            queryError={queryError}
+          />
         </Box>
       </Panel>
       <Panel width={layoutWidth - querySeparatorXPosition}>
         <Box borderColor="white" height={contentHeight} label="Explorer">
-          <MemoizedExplorerBox />
+          <MemoizedExplorerBox
+            state={exploreState}
+            dispatch={exploreStateDispatch}
+            data={queryData}
+            isQueryFetching={queryIsFetching}
+            queryError={queryError}
+          />
         </Box>
       </Panel>
     </>
