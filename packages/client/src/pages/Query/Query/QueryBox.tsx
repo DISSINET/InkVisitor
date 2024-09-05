@@ -26,7 +26,6 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
     (state) => state.layout.contentHeight
   );
 
-
   const gridWeight = useMemo<number>(() => {
     let maxNodeDepth = 1;
 
@@ -72,26 +71,7 @@ export const QueryBox: React.FC<QueryBoxProps> = ({
         }}
       >
         {[...Array(gridWeight + 1).keys()].map((wi) => {
-          return [...Array(nodexport class EdgeHasPropType extends SearchEdge {
-            constructor(data: Partial<Query.IEdge>) {
-              super(data);
-              this.type = Query.EdgeType.XHasPropType;
-            }
-          
-            run(q: RStream): RStream {
-              return q.concatMap(function (entity: RDatum<IEntity>) {
-                return r
-                  .table(Entity.table)
-                  .getAll(entity("id"))
-                  .filter(function (e: RDatum<IEntity>) {
-                    // some of the e.[props].type.entityId is entity.id
-                    return e("props").filter(function (prop) {
-                      return prop("type")("entityId").eq(data.node.params.id );
-                    });
-                  });
-              });
-            }
-          }eItems.length).keys()].map((hi) => {
+          return [...Array(nodeItems.length).keys()].map((hi) => {
             const nodeItem = nodeItems.find(
               (node) => node.gridX === wi && node.gridY === hi
             );
