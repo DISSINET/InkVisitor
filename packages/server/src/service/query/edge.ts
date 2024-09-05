@@ -5,6 +5,7 @@ import { SearchNode } from ".";
 import { IEntity, Relation as RelationTypes } from "@shared/types";
 import { DbEnums, RelationEnums } from "@shared/enums";
 import { InternalServerError } from "@shared/types/errors";
+import Entity from "@models/entity/entity";
 
 export default class SearchEdge implements Query.IEdge {
   type: Query.EdgeType;
@@ -108,15 +109,18 @@ export class EdgeHasPropType extends SearchEdge {
   }
 
   run(q: RStream): RStream {
+    const that = this;
     return q.concatMap(function (entity: RDatum<IEntity>) {
       return r
-        .table(Relation.table)
-        .getAll(entity("id"), { index: DbEnums.Indexes.PropsRecursive })
-        .filter(function (propEntity: RDatum<IEntity>) {
-          return true;
+        .table(Entity.table)
+        .filter(function (e: RDatum<IEntity>) {
+          // some of the e.[props].type.entityId is entity.id
+          return e("props").filter(function (prop) {
+            return prop("type")("entityId").eq(that.node.params.id);
+          });
         })
         .map(function () {
-          return entity;
+          return entity("id");
         });
     });
   }

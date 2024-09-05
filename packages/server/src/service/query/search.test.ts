@@ -1,6 +1,6 @@
 import "ts-jest";
 import { Db } from "@service/rethink";
-import AdvancedSearch from "./search";
+import QuerySearch from "./search";
 import { Query } from "@shared/types/query";
 import { EntityEnums, RelationEnums } from "@shared/enums";
 import { SearchEdge, SearchNode } from ".";
@@ -8,8 +8,8 @@ import { deleteEntities, getEntitiesDataByClass } from "@service/shorthands";
 import { prepareEntity } from "@models/entity/entity.test";
 import { prepareRelation } from "@models/relation/relation.test";
 
-const mockSearch = (rootType: Query.NodeType): AdvancedSearch => {
-  return new AdvancedSearch(
+const mockSearch = (rootType: Query.NodeType): QuerySearch => {
+  return new QuerySearch(
     {
       edges: [],
       operator: Query.NodeOperator.And,
@@ -27,7 +27,7 @@ const mockSearch = (rootType: Query.NodeType): AdvancedSearch => {
   );
 };
 
-describe("test AdvancedSearch", () => {
+describe("test QuerySearch", () => {
   let db: Db;
 
   beforeAll(async () => {
@@ -41,23 +41,34 @@ describe("test AdvancedSearch", () => {
   });
 
   test("Search constructor", async () => {
-    const s = new AdvancedSearch({
-      operator: Query.NodeOperator.And,
-      type: Query.NodeType.A,
-      edges: [
-        {
-          logic: Query.EdgeLogic.Negative,
-          type: Query.EdgeType.XHasPropType,
-          params: {},
-          node: {
-            operator: Query.NodeOperator.And,
-            type: Query.NodeType.A,
-            edges: [],
+    const s = new QuerySearch(
+      {
+        type: Query.NodeType.A,
+        params: {},
+        operator: Query.NodeOperator.And,
+        edges: [
+          {
+            logic: Query.EdgeLogic.Negative,
+            type: Query.EdgeType.XHasPropType,
             params: {},
+            node: {
+              operator: Query.NodeOperator.And,
+              type: Query.NodeType.A,
+              edges: [],
+              params: {},
+            },
           },
-        },
-      ],
-    });
+        ],
+      },
+      {
+        view: {},
+        columns: [],
+        filters: [],
+        sort: undefined,
+        limit: 0,
+        offset: 0,
+      }
+    );
   });
 
   describe("Test isValid", () => {
@@ -176,12 +187,12 @@ describe("test AdvancedSearch", () => {
         }),
       });
       const results = await search.run(db.connection);
-      expect(results.items).toBeTruthy();
-      if (!results.items) {
+      expect(results).toBeTruthy();
+      if (!results) {
         return;
       }
-      console.log(results.items);
-      expect(results.items).toHaveLength(2);
+      console.log(results);
+      expect(results).toHaveLength(2);
     });
 
     it("should return one entity for XHasClassification edge + node param", async () => {
