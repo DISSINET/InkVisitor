@@ -7,8 +7,8 @@ export const StyledGrid = styled.div<StyledGrid>`
   display: grid;
   grid-template-columns: ${({ $columns }) => `repeat(${$columns}, auto)`};
   color: ${({ theme }) => theme.color["black"]};
-  padding-right: 1rem;
-  /* width: 50%; */
+  width: 100%;
+  /* padding-right: 0.5rem; */
 `;
 export const StyledGridColumn = styled.div`
   display: grid;
@@ -17,7 +17,41 @@ export const StyledGridColumn = styled.div`
   padding: 0.3rem;
   padding-left: 1rem;
 `;
-export const StyledGridHeader = styled(StyledGridColumn)`
-  background-color: ${({ theme }) => theme.color["blue"][400]};
+
+interface StyledGridHeader {
+  $greyBackground?: boolean;
+}
+export const StyledGridHeader = styled(StyledGridColumn)<StyledGridHeader>`
+  background-color: ${({ theme, $greyBackground }) =>
+    $greyBackground ? theme.color["gray"][400] : theme.color["success"]};
   border: none;
+  height: 3rem;
+  color: ${({ theme }) => theme.color["black"]};
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+  font-weight: ${({ theme }) => theme.fontWeight["bold"]};
+`;
+
+export const StyledNewColumn = styled.div`
+  width: 38rem;
+  display: flex;
+  flex-direction: column;
+  border-left: 2px solid ${({ theme }) => theme.color["gray"][400]};
+`;
+export const StyledNewColumnGrid = styled.div`
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: repeat(4, 2.5rem);
+  gap: 1rem;
+  padding: 1rem;
+`;
+export const StyledNewColumnLabel = styled.div`
+  display: grid;
+  align-items: center;
+  white-space: nowrap;
+  color: ${({ theme }) => theme.color["black"]};
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
+`;
+export const StyledNewColumnValue = styled.div`
+  display: grid;
+  align-items: center;
 `;
