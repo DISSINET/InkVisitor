@@ -2,6 +2,7 @@ import { EntityEnums } from "../enums";
 
 export namespace Query {
   export interface INode {
+    id: string;
     type: NodeType;
     params: INodeParams;
     operator: NodeOperator;
@@ -9,6 +10,7 @@ export namespace Query {
   }
 
   export interface IEdge {
+    id: string;
     type: EdgeType;
     params: IEdgeParams;
     logic: EdgeLogic;

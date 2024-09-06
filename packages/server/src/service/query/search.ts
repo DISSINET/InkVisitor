@@ -8,6 +8,7 @@ import { Explore, Query } from "@shared/types/query";
 import { Connection } from "rethinkdb-ts";
 import { Results, SearchEdge, SearchNode } from ".";
 import { IResponseQueryEntity } from "@shared/types/response-query";
+import Entity from "@models/entity/entity";
 
 export default class QuerySearch {
   static MAX_LIMIT = 100;
@@ -46,7 +47,7 @@ export default class QuerySearch {
    * Calls the whole search tree with additional validation
    * @param db Connection
    */
-  async run(db: Connection): Promise<IEntity[]> {
+  async run(db: Connection): Promise<string[]> {
     if (!this.root.isValid()) {
       throw new SearchEdgeTypesInvalid();
     }
@@ -62,12 +63,14 @@ export default class QuerySearch {
     return this.results.items || [];
   }
 
-  getResults(): IResponseQueryEntity[] {
+  async getResults(db: Connection): Promise<IResponseQueryEntity[]> {
     if (!this.results) {
       return [];
     }
 
-    const filtered = this.results.filter(this.explore);
+    const filteredIds = this.results.filter(this.explore);
+    console.log("fitlred", filteredIds.length);
+    const filtered = await Entity.findEntitiesByIds(db, filteredIds);
     return filtered.map((e) => ({
       entity: e,
       columnData: this.results!.columns(e, this.explore.columns),

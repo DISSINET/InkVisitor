@@ -77,7 +77,7 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
     enabled: api.isLoggedIn(),
   });
 
-  console.log(queryData);
+  console.log("response", queryData);
 
   const handleSeparatorXPositionChange = (xPosition: number) => {
     if (querySeparatorXPosition !== xPosition) {
