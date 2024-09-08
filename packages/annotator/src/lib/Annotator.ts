@@ -370,10 +370,15 @@ export class Annotator {
             yLine: this.cursor.yLine,
           };
         } else {
-          this.cursor.move(-1, 0);
-          if (this.cursor.xLine < 0) {
-            this.cursor.yLine = Math.max(0, this.cursor.yLine - 1);
-            this.cursor.xLine = Math.floor(this.width / this.charWidth) - 1;
+          // go 1 line up if at the start
+          if (this.cursor.xLine === 0) {
+            // only if there is a way to go up
+            if (this.cursor.yLine > 0) {
+              this.cursor.yLine = Math.max(0, this.cursor.yLine - 1);
+              this.cursor.xLine = Math.floor(this.width / this.charWidth) - 1;
+            }
+          } else {
+            this.cursor.move(-1, 0);
           }
         }
         break;
@@ -395,10 +400,25 @@ export class Annotator {
         } else {
           this.cursor.move(1, 0);
 
-          // TODO: check if cursor is at the end of the line
-          if (this.cursor.xLine > Math.floor(this.width / this.charWidth)) {
-            this.cursor.xLine = 0;
-            this.cursor.yLine++;
+          // check if we are at the end of the line -> move to next line
+          const segment = this.text.cursorToIndex(this.viewport, this.cursor);
+
+          if (segment) {
+            const line =
+              this.text.segments[segment.segmentIndex].lines[segment.lineIndex];
+            let backupXLine = this.cursor.xLine;
+            let backupYLine = this.cursor.yLine;
+
+            if (line.length < this.cursor.xLine) {
+              this.cursor.xLine = 0;
+              this.cursor.yLine++;
+            }
+
+            // revert if end of the document reached
+            if (!this.text.cursorToIndex(this.viewport, this.cursor)) {
+              this.cursor.xLine = backupXLine - 1;
+              this.cursor.yLine = backupYLine;
+            }
           }
         }
         break;
