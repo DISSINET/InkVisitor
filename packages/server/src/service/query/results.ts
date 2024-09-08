@@ -1,4 +1,6 @@
+import Audit from "@models/audit/audit";
 import Entity from "@models/entity/entity";
+import User from "@models/user/user";
 import { IEntity, IUser } from "@shared/types";
 import { Explore } from "@shared/types/query";
 import { Connection } from "rethinkdb-ts";
@@ -83,7 +85,7 @@ export default class Results<T extends { id: string }> {
     > = {};
     for (const column of columnsData) {
       switch (column.type) {
-        case Explore.EExploreColumnType.EPV:
+        case Explore.EExploreColumnType.EPV: {
           const params =
             column.params as Explore.IExploreColumnParams<Explore.EExploreColumnType.EPV>;
           const entityIds: Record<string, null> = {};
@@ -97,9 +99,17 @@ export default class Results<T extends { id: string }> {
             Object.keys(entityIds)
           );
           break;
-      }
-      if (typeof entity[column.id as keyof IEntity] !== "undefined") {
-        out[column.id] = entity[column.id as keyof IEntity];
+        }
+        case Explore.EExploreColumnType.EUC: {
+          const audit = await Audit.getFirstForEntity(db, entity.id);
+          if (audit && audit.user) {
+            const user = await User.findUserById(db, audit?.user);
+            if (user) {
+              out[column.id] = user;
+            }
+          }
+          break;
+        }
       }
     }
 
