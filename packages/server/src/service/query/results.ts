@@ -89,11 +89,13 @@ export default class Results<T extends { id: string }> {
           const params =
             column.params as Explore.IExploreColumnParams<Explore.EExploreColumnType.EPV>;
           const entityIds: Record<string, null> = {};
-          Entity.extractIdsFromProps(entity.props).forEach((element) => {
-            if (element) {
-              entityIds[element] = null;
+          Entity.extractIdsFromProps(entity.props, params.propertyType).forEach(
+            (e) => {
+              if (e) {
+                entityIds[e] = null;
+              }
             }
-          });
+          );
           out[column.id] = await Entity.findEntitiesByIds(
             db,
             Object.keys(entityIds)
