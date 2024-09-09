@@ -69,12 +69,20 @@ export default class QuerySearch {
     }
 
     const filteredIds = this.results.filter(this.explore);
-    console.log("fitlred", filteredIds.length);
     const filtered = await Entity.findEntitiesByIds(db, filteredIds);
-    return filtered.map((e) => ({
-      entity: e,
-      columnData: this.results!.columns(e, this.explore.columns),
-    }));
+    const out: IResponseQueryEntity[] = [];
+    for (const entity of filtered) {
+      out.push({
+        entity,
+        columnData: await this.results!.columns(
+          db,
+          entity,
+          this.explore.columns
+        ),
+      });
+    }
+
+    return out;
   }
 
   /**

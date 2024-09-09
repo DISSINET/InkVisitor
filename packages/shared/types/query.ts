@@ -89,25 +89,23 @@ export namespace Explore {
   }
 
   export enum EExploreColumnType {
-    ER = "ER",
-    EPV = "EPV",
-    EPT = "EPT",
-    ERR = "ERR",
-    ERV = "ERV",
-    ES = "ES",
-    CPV = "CPV",
-    CPO = "CPO",
-    EUC = "EUC",
-    EUE = "EUE",
-    EUEN = "EUEN",
-    EDC = "EDC",
+    ER = "ER", // Entity Relations
+    EPV = "EPV", // Entity Property value
+    EPT = "EPT", // Entity Property types
+    ERR = "ERR", // Entity Reference Resources
+    ERV = "ERV", // Entity Reference Values
+    ES = "ES", // Entity Statements
+    CPV = "CPV", // Property values
+    CPO = "CPO", // Property type origins
+    EUC = "EUC", // Created by
+    EUE = "EUE", // Edited by
+    EUEN = "EUEN", // Number of edits
+    EDC = "EDC", // Creation date
   }
 
-  export interface IExploreColumnParams<T = EExploreColumnType> {
+  export type ExploreColumnParamsMap = {
     [EExploreColumnType.ER]: {};
-    [EExploreColumnType.EPV]: {
-      propertyType: string;
-    };
+    [EExploreColumnType.EPV]: { propertyType: string };
     [EExploreColumnType.EPT]: {};
     [EExploreColumnType.ERR]: {};
     [EExploreColumnType.ERV]: {};
@@ -118,5 +116,9 @@ export namespace Explore {
     [EExploreColumnType.EUE]: {};
     [EExploreColumnType.EUEN]: {};
     [EExploreColumnType.EDC]: {};
-  }
+  };
+
+  export type IExploreColumnParams<
+    T extends EExploreColumnType = EExploreColumnType
+  > = ExploreColumnParamsMap[T];
 }

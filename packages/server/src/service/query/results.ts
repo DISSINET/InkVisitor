@@ -1,6 +1,9 @@
+import Audit from "@models/audit/audit";
 import Entity from "@models/entity/entity";
+import User from "@models/user/user";
 import { IEntity, IUser } from "@shared/types";
 import { Explore } from "@shared/types/query";
+import { Connection } from "rethinkdb-ts";
 
 export default class Results<T extends { id: string }> {
   items: string[] | null = null;
@@ -52,19 +55,22 @@ export default class Results<T extends { id: string }> {
     return this.items.slice(exploreData.offset, endIndex);
   }
 
-  columns(
+  async columns(
+    db: Connection,
     entity: IEntity,
     columnsData: Explore.IExploreColumn[]
-  ): Record<
-    string,
-    | IEntity
-    | IEntity[]
-    | number
-    | number[]
-    | string
-    | string[]
-    | IUser
-    | IUser[]
+  ): Promise<
+    Record<
+      string,
+      | IEntity
+      | IEntity[]
+      | number
+      | number[]
+      | string
+      | string[]
+      | IUser
+      | IUser[]
+    >
   > {
     const out: Record<
       string,
@@ -78,8 +84,32 @@ export default class Results<T extends { id: string }> {
       | IUser[]
     > = {};
     for (const column of columnsData) {
-      if (typeof entity[column.id as keyof IEntity] !== "undefined") {
-        out[column.id] = entity[column.id as keyof IEntity];
+      switch (column.type) {
+        case Explore.EExploreColumnType.EPV: {
+          const params =
+            column.params as Explore.IExploreColumnParams<Explore.EExploreColumnType.EPV>;
+          const entityIds: Record<string, null> = {};
+          Entity.extractIdsFromProps(entity.props).forEach((element) => {
+            if (element) {
+              entityIds[element] = null;
+            }
+          });
+          out[column.id] = await Entity.findEntitiesByIds(
+            db,
+            Object.keys(entityIds)
+          );
+          break;
+        }
+        case Explore.EExploreColumnType.EUC: {
+          const audit = await Audit.getFirstForEntity(db, entity.id);
+          if (audit && audit.user) {
+            const user = await User.findUserById(db, audit?.user);
+            if (user) {
+              out[column.id] = user;
+            }
+          }
+          break;
+        }
       }
     }
 
