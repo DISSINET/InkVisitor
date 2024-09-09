@@ -22,10 +22,11 @@ interface StyledGridHeader {
 }
 export const StyledGridHeader = styled(StyledGridColumn)<StyledGridHeader>`
   background-color: ${({ theme, $greyBackground }) =>
-    $greyBackground ? theme.color["gray"][400] : theme.color["success"]};
+    $greyBackground ? theme.color["gray"][600] : theme.color["success"]};
+  color: ${({ theme, $greyBackground }) =>
+    $greyBackground ? theme.color["white"] : theme.color["black"]};
   border: none;
   height: 3rem;
-  color: ${({ theme }) => theme.color["black"]};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   font-weight: ${({ theme }) => theme.fontWeight["bold"]};
   align-items: end;

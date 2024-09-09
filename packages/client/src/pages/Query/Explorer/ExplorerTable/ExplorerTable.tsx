@@ -46,11 +46,14 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   const getNewColumn = () => {
     return {
       id: uuidv4(),
-      name: columnName,
+      name: columnName.length
+        ? columnName
+        : Explore.EExploreColumnTypeLabels[columnType],
       type: columnType,
       editable: editable,
-      // TODO: only for EExploreColumnType.EPV
-      // propertyType: propertyType,
+      params: {
+        [Explore.EExploreColumnType.EPV]: { propertyType: propertyType },
+      },
     };
   };
 
