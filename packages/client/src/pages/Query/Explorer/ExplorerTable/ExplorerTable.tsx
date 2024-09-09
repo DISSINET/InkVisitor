@@ -5,7 +5,10 @@ import { IEntity, IResponseQuery } from "@shared/types";
 import { Explore } from "@shared/types/query";
 import { Button, ButtonGroup, Checkbox, Input } from "components";
 import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
+import { FaTrashAlt } from "react-icons/fa";
 import { TbColumnInsertRight } from "react-icons/tb";
+import { v4 as uuidv4 } from "uuid";
+import { ExploreAction, ExploreActionType } from "../state";
 import {
   StyledGrid,
   StyledGridHeader,
@@ -15,41 +18,9 @@ import {
   StyledNewColumnValue,
 } from "./ExplorerTableStyles";
 
-interface Column {
-  header: string;
-  accessor: string;
-}
-const intialColumns: Column[] = [
-  {
-    header: "Class",
-    accessor: "class",
-  },
-  {
-    header: "Label",
-    accessor: "label",
-  },
-];
-const dataTemp = [
-  {
-    id: "asdad-aswead-xxx",
-    class: "concept",
-    label: "jedna",
-  },
-  {
-    id: "asdad-aswead-yyy",
-    class: "action",
-    label: "dva",
-  },
-  {
-    id: "asdad-aswead-zzz",
-    class: "person",
-    label: "tri",
-  },
-];
-
 interface ExplorerTable {
   state: Explore.IExplore;
-  dispatch: React.Dispatch<any>;
+  dispatch: React.Dispatch<ExploreAction>;
   data: IResponseQuery;
   isQueryFetching: boolean;
   queryError: Error | null;
@@ -61,35 +32,79 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   isQueryFetching,
   queryError,
 }) => {
+  console.log(state.columns);
   const { entities, explore, query } = data;
-  const { columns } = explore;
+  const { columns, filters, limit, offset, sort, view } = state;
+
+  const [showNewColumn, setShowNewColumn] = useState(true);
 
   const [columnName, setColumnName] = useState("");
   const [columnType, setColumnType] = useState(Explore.EExploreColumnType.ER);
-  const [propertyType, setPropertyType] = useState<IEntity>();
+  const [propertyType, setPropertyType] = useState<IEntity | false>(false);
   const [editable, setEditable] = useState(false);
 
-  const [showNewColumn, setShowNewColumn] = useState(true);
+  const getNewColumn = () => {
+    return {
+      id: uuidv4(),
+      name: columnName,
+      type: columnType,
+      editable: editable,
+      // TODO: only for EExploreColumnType.EPV
+      // propertyType: propertyType,
+    };
+  };
+
+  const handleClearLocalState = () => {
+    setColumnName("");
+    setColumnType(Explore.EExploreColumnType.ER);
+    setPropertyType(false);
+    setEditable(false);
+  };
+
+  const handleCreateColumn = () => {
+    dispatch({
+      type: ExploreActionType.addColumn,
+      payload: getNewColumn(),
+    });
+    handleClearLocalState();
+    // setShowNewColumn(false);
+  };
 
   return (
     <div style={{ display: "flex", padding: "1rem" }}>
       <StyledGrid $columns={columns.length + 1}>
         {/* HEADER */}
         {columns.map((column, key) => {
-          return <StyledGridHeader key={key}>{column.name}</StyledGridHeader>;
+          return (
+            <StyledGridHeader key={key}>
+              <div style={{ display: "flex", alignItems: "center" }}>
+                {column.name}
+                <span style={{ marginLeft: "0.5rem" }}>
+                  <Button
+                    noBorder
+                    noBackground
+                    inverted
+                    icon={<FaTrashAlt />}
+                    onClick={() =>
+                      dispatch({
+                        type: ExploreActionType.removeColumn,
+                        payload: { id: column.id },
+                      })
+                    }
+                    tooltipLabel="remove column"
+                  />
+                </span>
+              </div>
+            </StyledGridHeader>
+          );
         })}
         <StyledGridHeader>
           <span>
             <Button
               icon={<TbColumnInsertRight size={17} />}
               label="new column"
-              onClick={
-                () => setShowNewColumn(true)
-                // setColumns([
-                //   ...columns,
-                //   { header: "Status", accessor: "status" },
-                // ])
-              }
+              onClick={() => setShowNewColumn(true)}
+              disabled={showNewColumn}
             />
           </span>
         </StyledGridHeader>
@@ -171,14 +186,22 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
             </StyledNewColumnValue>
           </StyledNewColumnGrid>
 
-          <ButtonGroup style={{ marginLeft: "1rem", marginTop: "1rem" }}>
-            <Button label="create column" />
-            <Button
-              color="warning"
-              label="cancel"
-              onClick={() => setShowNewColumn(false)}
-            />
-          </ButtonGroup>
+          <span
+            style={{
+              width: "100%",
+              display: "flex",
+              justifyContent: "flex-end",
+            }}
+          >
+            <ButtonGroup style={{ marginLeft: "1rem", marginTop: "1rem" }}>
+              <Button
+                color="warning"
+                label="cancel"
+                onClick={() => setShowNewColumn(false)}
+              />
+              <Button label="create column" onClick={handleCreateColumn} />
+            </ButtonGroup>
+          </span>
         </StyledNewColumn>
       )}
     </div>

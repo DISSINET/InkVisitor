@@ -5,10 +5,11 @@ import { Explore } from "@shared/types/query";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAppSelector } from "redux/hooks";
 import { ExplorerTable } from "./ExplorerTable/ExplorerTable";
+import { ExploreAction } from "./state";
 
 interface ExplorerBoxProps {
   state: Explore.IExplore;
-  dispatch: React.Dispatch<any>;
+  dispatch: React.Dispatch<ExploreAction>;
   data: IResponseQuery | undefined;
   isQueryFetching: boolean;
   queryError: Error | null;

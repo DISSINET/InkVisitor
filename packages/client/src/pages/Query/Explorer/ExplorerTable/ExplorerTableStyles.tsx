@@ -8,7 +8,6 @@ export const StyledGrid = styled.div<StyledGrid>`
   grid-template-columns: ${({ $columns }) => `repeat(${$columns}, auto)`};
   color: ${({ theme }) => theme.color["black"]};
   width: 100%;
-  /* padding-right: 0.5rem; */
 `;
 export const StyledGridColumn = styled.div`
   display: grid;
@@ -29,6 +28,8 @@ export const StyledGridHeader = styled(StyledGridColumn)<StyledGridHeader>`
   color: ${({ theme }) => theme.color["black"]};
   font-size: ${({ theme }) => theme.fontSize["xs"]};
   font-weight: ${({ theme }) => theme.fontWeight["bold"]};
+  align-items: end;
+  padding-bottom: 0.5rem;
 `;
 
 export const StyledNewColumn = styled.div`
