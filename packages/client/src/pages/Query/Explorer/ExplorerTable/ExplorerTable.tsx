@@ -33,7 +33,6 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   isQueryFetching,
   queryError,
 }) => {
-  console.log(state.columns);
   const { entities, explore, query } = data;
   const { columns, filters, limit, offset, sort, view } = state;
 
@@ -123,9 +122,19 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
               {columns.map((column, key) => {
                 return (
                   <StyledGridColumn key={key}>
-                    {/* {record[column.accessor]
-                      ? record[column.accessor]
-                      : "empty"} */}
+                    {record.columnData[column.id]
+                      ? (record.columnData[column.id] as Array<IEntity>).map(
+                          (entity, key) => {
+                            return (
+                              <React.Fragment key={key}>
+                                <span>
+                                  <EntityTag entity={entity} />
+                                </span>
+                              </React.Fragment>
+                            );
+                          }
+                        )
+                      : "empty"}
                   </StyledGridColumn>
                 );
               })}
