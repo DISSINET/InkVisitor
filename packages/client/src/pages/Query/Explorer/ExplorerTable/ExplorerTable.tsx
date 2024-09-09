@@ -11,6 +11,7 @@ import { v4 as uuidv4 } from "uuid";
 import { ExploreAction, ExploreActionType } from "../state";
 import {
   StyledGrid,
+  StyledGridColumn,
   StyledGridHeader,
   StyledNewColumn,
   StyledNewColumnGrid,
@@ -72,8 +73,9 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
 
   return (
     <div style={{ display: "flex", padding: "1rem" }}>
-      <StyledGrid $columns={columns.length + 1}>
+      <StyledGrid $columns={columns.length + 2}>
         {/* HEADER */}
+        <StyledGridHeader>entities</StyledGridHeader>
         {columns.map((column, key) => {
           return (
             <StyledGridHeader key={key}>
@@ -109,23 +111,28 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
           </span>
         </StyledGridHeader>
 
-        {/* {dataTemp.map((record, key) => {
+        {entities.map((record, key) => {
           return (
             // ROW
             <React.Fragment key={key}>
+              <StyledGridColumn>
+                <span>
+                  <EntityTag entity={record.entity} />
+                </span>
+              </StyledGridColumn>
               {columns.map((column, key) => {
                 return (
                   <StyledGridColumn key={key}>
-                    {record[column.accessor]
+                    {/* {record[column.accessor]
                       ? record[column.accessor]
-                      : "empty"}
+                      : "empty"} */}
                   </StyledGridColumn>
                 );
               })}
               <StyledGridColumn></StyledGridColumn>
             </React.Fragment>
           );
-        })} */}
+        })}
       </StyledGrid>
       {showNewColumn && (
         <StyledNewColumn>
@@ -166,17 +173,21 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                 onChange={(value) => setColumnType(value)}
               />
             </StyledNewColumnValue>
-            <StyledNewColumnLabel>Property type</StyledNewColumnLabel>
-            <StyledNewColumnValue>
-              {propertyType ? (
-                <EntityTag fullWidth entity={propertyType} />
-              ) : (
-                <EntitySuggester
-                  categoryTypes={[EntityEnums.Class.Concept]}
-                  onPicked={(entity) => setPropertyType(entity)}
-                />
-              )}
-            </StyledNewColumnValue>
+            {columnType === Explore.EExploreColumnType.EPV && (
+              <>
+                <StyledNewColumnLabel>Property type</StyledNewColumnLabel>
+                <StyledNewColumnValue>
+                  {propertyType ? (
+                    <EntityTag fullWidth entity={propertyType} />
+                  ) : (
+                    <EntitySuggester
+                      categoryTypes={[EntityEnums.Class.Concept]}
+                      onPicked={(entity) => setPropertyType(entity)}
+                    />
+                  )}
+                </StyledNewColumnValue>
+              </>
+            )}
             <StyledNewColumnLabel>Editable</StyledNewColumnLabel>
             <StyledNewColumnValue>
               <Checkbox
