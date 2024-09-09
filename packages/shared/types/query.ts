@@ -103,6 +103,21 @@ export namespace Explore {
     EDC = "EDC", // Creation date
   }
 
+  export const EExploreColumnTypeLabels: Record<EExploreColumnType, string> = {
+    [EExploreColumnType.ER]: "Entity Relations",
+    [EExploreColumnType.EPV]: "Entity Property value",
+    [EExploreColumnType.EPT]: "Entity Property types",
+    [EExploreColumnType.ERR]: "Entity Reference Resources",
+    [EExploreColumnType.ERV]: "Entity Reference Values",
+    [EExploreColumnType.ES]: "Entity Statements",
+    [EExploreColumnType.CPV]: "Property values",
+    [EExploreColumnType.CPO]: "Property type origins",
+    [EExploreColumnType.EUC]: "Created by",
+    [EExploreColumnType.EUE]: "Edited by",
+    [EExploreColumnType.EUEN]: "Number of edits",
+    [EExploreColumnType.EDC]: "Creation date",
+  };
+
   export type ExploreColumnParamsMap = {
     [EExploreColumnType.ER]: {};
     [EExploreColumnType.EPV]: { propertyType: string };

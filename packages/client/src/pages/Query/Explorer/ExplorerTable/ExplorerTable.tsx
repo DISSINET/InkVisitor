@@ -176,7 +176,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                   .map((value) => {
                     return {
                       value: value,
-                      label: value,
+                      label: Explore.EExploreColumnTypeLabels[value],
                     };
                   })}
                 onChange={(value) => setColumnType(value)}
