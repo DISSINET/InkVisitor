@@ -285,8 +285,10 @@ export const StatementListTextAnnotator: React.FC<
             </span>
 
             <Button
-              icon={<TiRadar />}
-              label="localize"
+              icon={<TiRadar size={18} />}
+              tooltipLabel="localize anchor in document"
+              inverted
+              noIconMargin
               onClick={() => {
                 annotator?.scrollToAnchor(territoryId);
               }}
