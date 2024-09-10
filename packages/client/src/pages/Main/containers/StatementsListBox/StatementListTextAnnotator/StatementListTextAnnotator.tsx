@@ -3,13 +3,13 @@ import { EntityEnums, UserEnums } from "@shared/enums";
 import { IEntity, IResponseEntity, IResponseStatement } from "@shared/types";
 import { useQuery } from "@tanstack/react-query";
 import api from "api";
-import { Loader } from "components";
+import { Button, IconButtonGroup, Loader } from "components";
 import { EntitySuggester, EntityTag } from "components/advanced";
 import TextAnnotator from "components/advanced/Annotator/Annotator";
 import AnnotatorProvider from "components/advanced/Annotator/AnnotatorProvider";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { BiSolidCommentError } from "react-icons/bi";
-import { FaCheck } from "react-icons/fa";
+import { FaCheck, FaUnlink } from "react-icons/fa";
 import { GrDocumentMissing } from "react-icons/gr";
 import { TiDocumentText } from "react-icons/ti";
 import { COLLAPSED_TABLE_WIDTH } from "Theme/constants";
@@ -208,14 +208,24 @@ export const StatementListTextAnnotator: React.FC<
           />
         )}
         {selectedResource && (
-          <EntityTag
-            entity={selectedResource}
-            unlinkButton={{
-              onClick: () => {
-                setSelectedResourceId(false);
-              },
+          <div
+            style={{
+              display: "flex",
+              gap: "0.2rem",
             }}
-          />
+          >
+            <EntityTag entity={selectedResource} />
+            <Button
+              key="d"
+              tooltipLabel={"use different resource"}
+              icon={<FaUnlink />}
+              color={"warning"}
+              inverted
+              onClick={() => {
+                setSelectedResourceId(false);
+              }}
+            />
+          </div>
         )}
 
         {!selectedDocumentIsFetching && <Loader />}
