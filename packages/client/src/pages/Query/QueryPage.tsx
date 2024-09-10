@@ -185,8 +185,8 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
           <MemoizedExplorerBox
             state={exploreState.explore}
             dispatch={exploreStateDispatch}
-            entities={exploreState.entities}
-            // data={queryData}
+            // entities={exploreState.entities}
+            data={queryData}
             isQueryFetching={queryIsFetching}
             queryError={queryError}
           />

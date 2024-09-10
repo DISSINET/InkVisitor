@@ -10,16 +10,16 @@ import { ExploreAction } from "./state";
 interface ExplorerBoxProps {
   state: Explore.IExplore;
   dispatch: React.Dispatch<ExploreAction>;
-  entities: IResponseQueryEntity[];
-  // data: IResponseQuery | undefined;
+  // entities: IResponseQueryEntity[];
+  data: IResponseQuery | undefined;
   isQueryFetching: boolean;
   queryError: Error | null;
 }
 export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
   state,
   dispatch,
-  entities,
-  // data,
+  // entities,
+  data,
   isQueryFetching,
   queryError,
 }) => {
@@ -31,11 +31,12 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
 
   return (
     <div>
-      {entities ? (
+      {data ? (
         <ExplorerTable
           state={state}
           dispatch={dispatch}
-          entities={entities}
+          // entities={entities}
+          data={data}
           isQueryFetching={isQueryFetching}
           queryError={queryError}
         />

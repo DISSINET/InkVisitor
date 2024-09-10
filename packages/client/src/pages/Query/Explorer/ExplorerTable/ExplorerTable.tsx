@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useMemo, useState } from "react";
 
 import { EntityEnums } from "@shared/enums";
 import { IEntity, IResponseQuery, IResponseQueryEntity } from "@shared/types";
@@ -38,21 +38,23 @@ const initialState: {
 interface ExplorerTable {
   state: Explore.IExplore;
   dispatch: React.Dispatch<ExploreAction>;
-  entities: IResponseQueryEntity[];
-  // data: IResponseQuery;
+  // entities: IResponseQueryEntity[];
+  data: IResponseQuery;
   isQueryFetching: boolean;
   queryError: Error | null;
 }
 export const ExplorerTable: React.FC<ExplorerTable> = ({
   state,
   dispatch,
-  entities,
-  // data,
+  // entities,
+  data,
   isQueryFetching,
   queryError,
 }) => {
-  // const { entities, explore, query } = data;
+  const { entities, explore, query } = data;
   const { columns, filters, limit, offset, sort, view } = state;
+
+  // const entities = useMemo(() => data.entities, [data]);
 
   const [columnName, setColumnName] = useState(initialState.name);
   const [columnType, setColumnType] = useState(initialState.type);
