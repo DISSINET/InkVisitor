@@ -4,18 +4,20 @@ import React, { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { Query } from "@shared/types";
 import { Explore } from "@shared/types/query";
 import api from "api";
-import { Box, Panel } from "components";
+import { Box, Button, Panel } from "components";
 import { PanelSeparator } from "components/advanced";
 import { useAppSelector } from "redux/hooks";
 import { floorNumberToOneDecimal } from "utils/utils";
 import { MemoizedExplorerBox } from "./Explorer/ExplorerBox";
 import {
+  ExploreActionType,
   exploreDiff,
   exploreReducer,
   exploreStateInitial,
 } from "./Explorer/state";
 import { MemoizedQueryBox } from "./Query/QueryBox";
 import { queryDiff, queryReducer, queryStateInitial } from "./Query/state";
+import { TbColumnInsertRight } from "react-icons/tb";
 
 interface QueryPage {}
 export const QueryPage: React.FC<QueryPage> = ({}) => {
@@ -66,7 +68,7 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
     error: queryError,
     isFetching: queryIsFetching,
   } = useQuery({
-    queryKey: ["query", queryState, exploreState],
+    queryKey: ["query", queryState, exploreState.columns],
     queryFn: async () => {
       const res = await api.query({
         query: queryState,
@@ -152,7 +154,27 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
         </Box>
       </Panel>
       <Panel width={layoutWidth - querySeparatorXPosition}>
-        <Box borderColor="white" height={contentHeight} label="Explorer">
+        <Box
+          borderColor="white"
+          height={contentHeight}
+          label="Explorer"
+          buttons={[
+            <Button
+              icon={<TbColumnInsertRight size={17} />}
+              label="new column"
+              color={exploreState.view.showNewColumn ? "info" : "primary"}
+              onClick={() =>
+                exploreState.view.showNewColumn
+                  ? exploreStateDispatch({
+                      type: ExploreActionType.hideNewColumn,
+                    })
+                  : exploreStateDispatch({
+                      type: ExploreActionType.showNewColumn,
+                    })
+              }
+            />,
+          ]}
+        >
           <MemoizedExplorerBox
             state={exploreState}
             dispatch={exploreStateDispatch}

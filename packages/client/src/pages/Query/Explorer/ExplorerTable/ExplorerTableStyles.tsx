@@ -24,7 +24,7 @@ export const StyledGridHeader = styled(StyledGridColumn)<StyledGridHeader>`
   background-color: ${({ theme, $greyBackground }) =>
     $greyBackground ? theme.color["gray"][600] : theme.color["success"]};
   color: ${({ theme, $greyBackground }) =>
-    $greyBackground ? theme.color["white"] : theme.color["black"]};
+    $greyBackground ? theme.color["white"] : "white"};
   border: none;
   height: 3rem;
   font-size: ${({ theme }) => theme.fontSize["xs"]};
@@ -47,7 +47,7 @@ export const StyledNewColumnGrid = styled.div`
   padding: 1rem;
 `;
 export const StyledNewColumnLabel = styled.div`
-  display: grid;
+  display: flex;
   align-items: center;
   white-space: nowrap;
   color: ${({ theme }) => theme.color["black"]};
@@ -56,4 +56,9 @@ export const StyledNewColumnLabel = styled.div`
 export const StyledNewColumnValue = styled.div`
   display: grid;
   align-items: center;
+`;
+export const StyledTableHeader = styled.div`
+  display: flex;
+  color: ${({ theme }) => theme.color["black"]};
+  font-size: ${({ theme }) => theme.fontSize["sm"]};
 `;

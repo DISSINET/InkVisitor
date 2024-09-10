@@ -71,7 +71,9 @@ export namespace Explore {
     offset: number;
   }
 
-  export interface IView {}
+  export interface IView {
+    showNewColumn: boolean;
+  }
 
   export interface IExploreColumnFilter {}
 
@@ -85,6 +87,7 @@ export namespace Explore {
     id: string;
     name: string;
     type: EExploreColumnType;
+    editable?: boolean;
     params: IExploreColumnParams<EExploreColumnType>;
   }
 

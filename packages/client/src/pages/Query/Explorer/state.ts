@@ -1,7 +1,9 @@
 import { Explore } from "@shared/types/query";
 
 const exploreStateInitial: Explore.IExplore = {
-  view: {},
+  view: {
+    showNewColumn: true,
+  },
   columns: [],
   sort: undefined,
   filters: [],
@@ -11,11 +13,13 @@ const exploreStateInitial: Explore.IExplore = {
 
 interface ExploreAction {
   type: ExploreActionType;
-  payload: any;
+  payload?: any;
 }
 enum ExploreActionType {
   addColumn,
   removeColumn,
+  showNewColumn,
+  hideNewColumn,
 }
 
 const exploreReducer = (
@@ -37,6 +41,23 @@ const exploreReducer = (
         ),
       };
 
+    case ExploreActionType.showNewColumn:
+      return {
+        ...state,
+        view: {
+          ...state.view,
+          showNewColumn: true,
+        },
+      };
+
+    case ExploreActionType.hideNewColumn:
+      return {
+        ...state,
+        view: {
+          ...state.view,
+          showNewColumn: false,
+        },
+      };
     default:
       return state;
   }
