@@ -57,23 +57,6 @@ export const StyledDocumentTag = styled.div`
   align-items: center;
 `;
 
-interface StyledDocumentInfoProps {
-  $color?: string;
-  $backgroundColor?: string;
-}
-export const StyledDocumentInfo = styled.div<StyledDocumentInfoProps>`
-  display: inline-flex;
-  flex-shrink: 0;
-  align-items: center;
-  padding: ${({ theme }) => theme.space[1] + " " + theme.space[2]};
-
-  gap: ${({ theme }) => theme.space[1]};
-  color: ${({ theme, $color }) => theme.color[$color || "black"]};
-  font-size: ${({ theme }) => theme.fontSize["sm"]};
-  background-color: ${({ theme, $backgroundColor }) =>
-    theme.color[$backgroundColor || "transparent"]};
-`;
-
 export const StyledDocumentTitle = styled.p`
   display: inline-block;
   vertical-align: middle;
