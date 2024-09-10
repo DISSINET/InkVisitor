@@ -9,16 +9,15 @@ import { EntitySuggester, EntityTag } from "components/advanced";
 import TextAnnotator from "components/advanced/Annotator/Annotator";
 import AnnotatorProvider from "components/advanced/Annotator/AnnotatorProvider";
 import React, { useEffect, useMemo, useState } from "react";
-import { BiSolidCommentError } from "react-icons/bi";
-import { FaAnchor, FaCheck, FaUnlink } from "react-icons/fa";
+import { FaUnlink } from "react-icons/fa";
 import { GrDocumentMissing } from "react-icons/gr";
+import { TbAnchor, TbAnchorOff } from "react-icons/tb";
 import { TiDocumentText, TiRadar } from "react-icons/ti";
 import { COLLAPSED_TABLE_WIDTH } from "Theme/constants";
 import {
   StyledDocumentTag,
   StyledDocumentTitle,
 } from "../StatementLitBoxStyles";
-import { TbAnchor, TbAnchorOff } from "react-icons/tb";
 
 interface StatementListTextAnnotator {
   statements: IResponseStatement[];

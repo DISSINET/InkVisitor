@@ -181,9 +181,8 @@ export const TextAnnotator = ({
   };
 
   const handleAddAnchor = (entityId: string) => {
-    toast.info(
-      `Anchor created ${entityId}. Do not forget to save the document.`
-    );
+    toast.info(`Anchor created ${entityId}.`);
+
     annotator?.addAnchor(entityId);
     setSelectedText("");
     handleSaveNewContent(true);
