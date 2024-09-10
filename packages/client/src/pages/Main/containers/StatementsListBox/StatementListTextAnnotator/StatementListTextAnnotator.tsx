@@ -1,20 +1,20 @@
+import { Annotator } from "@inkvisitor/annotator/src/lib";
 import { animated, useSpring } from "@react-spring/web";
 import { EntityEnums, UserEnums } from "@shared/enums";
 import { IEntity, IResponseEntity, IResponseStatement } from "@shared/types";
 import { useQuery } from "@tanstack/react-query";
 import api from "api";
-import { Button, IconButtonGroup, Loader } from "components";
+import { Button, Loader } from "components";
 import { EntitySuggester, EntityTag } from "components/advanced";
 import TextAnnotator from "components/advanced/Annotator/Annotator";
 import AnnotatorProvider from "components/advanced/Annotator/AnnotatorProvider";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { BiSolidCommentError } from "react-icons/bi";
-import { FaCheck, FaUnlink } from "react-icons/fa";
+import { FaUnlink } from "react-icons/fa";
 import { GrDocumentMissing } from "react-icons/gr";
-import { TiDocumentText } from "react-icons/ti";
+import { TiDocumentText, TiRadar } from "react-icons/ti";
 import { COLLAPSED_TABLE_WIDTH } from "Theme/constants";
 import {
-  StyledDocumentInfo,
   StyledDocumentTag,
   StyledDocumentTitle,
 } from "../StatementLitBoxStyles";
@@ -70,6 +70,8 @@ export const StatementListTextAnnotator: React.FC<
   useEffect(() => {
     setShowAnnotator(true);
   }, []);
+
+  const [annotator, setAnnotator] = useState<Annotator | undefined>(undefined);
 
   const animatedStyle = useSpring({
     opacity: showAnnotator ? 1 : 0,
@@ -189,6 +191,13 @@ export const StatementListTextAnnotator: React.FC<
     return false;
   }, [selectedDocument, territoryId]);
 
+  const activeTHasAnchor = useMemo<boolean>(() => {
+    if (selectedDocument) {
+      return selectedDocument?.referencedEntityIds.T.includes(territoryId);
+    }
+    return false;
+  }, [selectedDocument, territoryId]);
+
   return (
     <animated.div style={animatedStyle}>
       <div
@@ -228,39 +237,50 @@ export const StatementListTextAnnotator: React.FC<
           </div>
         )}
 
-        {!selectedDocumentIsFetching && <Loader />}
-        {!selectedDocumentIsFetching && selectedDocument && (
-          <StyledDocumentTag>
-            <TiDocumentText
-              style={{ marginRight: "0.2rem", flexShrink: "0" }}
-            />
-            <div style={{ display: "grid" }}>
-              <StyledDocumentTitle>
-                {selectedDocument?.title}
-              </StyledDocumentTitle>
-            </div>
-          </StyledDocumentTag>
+        {selectedDocumentIsFetching && <Loader />}
+
+        {!selectedDocumentIsFetching && (
+          <>
+            {selectedDocument && (
+              <>
+                <StyledDocumentTag>
+                  <TiDocumentText
+                    style={{ marginRight: "0.2rem", flexShrink: "0" }}
+                  />
+                  <div style={{ display: "grid" }}>
+                    <StyledDocumentTitle>
+                      {selectedDocument?.title}
+                    </StyledDocumentTitle>
+                  </div>
+                </StyledDocumentTag>
+                {activeTHasAnchor ? (
+                  <Button
+                    icon={<TiRadar />}
+                    label="localize territory anchor"
+                    onClick={() => {
+                      annotator?.scrollToAnchor(territoryId);
+                    }}
+                    color="warning"
+                  />
+                ) : (
+                  <>
+                    <BiSolidCommentError />
+                    <i>No Anchor for T</i>
+                  </>
+                )}
+              </>
+            )}
+
+            {!selectedDocumentIsFetching &&
+              selectedResource !== false &&
+              selectedResource.data.documentId === undefined && (
+                <>
+                  <GrDocumentMissing />
+                  <i>This Resource does not have any document</i>
+                </>
+              )}
+          </>
         )}
-        {!selectedDocumentIsFetching && selectedDocument && thisTHasAnchor && (
-          <StyledDocumentInfo $color="text" $backgroundColor="warning">
-            <FaCheck />
-            <span style={{ whiteSpace: "nowrap" }}>T anchor exists</span>
-          </StyledDocumentInfo>
-        )}
-        {!selectedDocumentIsFetching && selectedDocument && !thisTHasAnchor && (
-          <StyledDocumentInfo $color="danger">
-            <BiSolidCommentError />
-            <i>No Anchor for T</i>
-          </StyledDocumentInfo>
-        )}
-        {!selectedDocumentIsFetching &&
-          selectedResource !== false &&
-          selectedResource.data.documentId === undefined && (
-            <StyledDocumentInfo $color="warning">
-              <GrDocumentMissing />
-              <i>This Resource does not have any document</i>
-            </StyledDocumentInfo>
-          )}
       </div>
       <div style={{ marginTop: "0.2rem" }}>
         <AnnotatorProvider>
@@ -271,6 +291,9 @@ export const StatementListTextAnnotator: React.FC<
                   ? contentWidth - COLLAPSED_TABLE_WIDTH
                   : contentWidth
               }
+              forwardAnnotator={(newAnnotator) => {
+                setAnnotator(newAnnotator);
+              }}
               thisTerritoryEntityId={territoryId}
               initialScrollEntityId={territoryId}
               displayLineNumbers={true}

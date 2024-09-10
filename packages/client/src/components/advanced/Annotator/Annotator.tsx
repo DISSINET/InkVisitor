@@ -34,6 +34,8 @@ interface TextAnnotatorProps {
   initialScrollEntityId?: string | undefined;
   thisTerritoryEntityId?: string | undefined;
 
+  forwardAnnotator?: (annotator: Annotator | undefined) => void;
+
   storedAnnotatorScroll: number;
   setStoredAnnotatorScroll?: React.Dispatch<React.SetStateAction<number>>;
 }
@@ -52,12 +54,17 @@ export const TextAnnotator = ({
   thisTerritoryEntityId = undefined,
 
   storedAnnotatorScroll,
+  forwardAnnotator = (undefined) => {},
   setStoredAnnotatorScroll = () => {},
 }: TextAnnotatorProps) => {
   const queryClient = useQueryClient();
   const theme = useContext(ThemeContext);
 
   const { annotator, setAnnotator } = useAnnotator();
+
+  useEffect(() => {
+    return forwardAnnotator(undefined);
+  }, []);
 
   const {
     data: dataDocument,
@@ -235,6 +242,7 @@ export const TextAnnotator = ({
     newAnnotator.draw();
 
     setAnnotator(newAnnotator);
+    forwardAnnotator(newAnnotator);
 
     if (newAnnotator && newAnnotator.viewport) {
       if (!isInitialized) {
