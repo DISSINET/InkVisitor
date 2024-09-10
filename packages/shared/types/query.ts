@@ -134,7 +134,7 @@ export namespace Explore {
     [EExploreColumnType.ES]: { disabled: true },
     [EExploreColumnType.CPV]: { disabled: true },
     [EExploreColumnType.CPO]: { disabled: true },
-    [EExploreColumnType.EUC]: { disabled: true },
+    [EExploreColumnType.EUC]: { disabled: false },
     [EExploreColumnType.EUE]: { disabled: true },
     [EExploreColumnType.EUEN]: { disabled: true },
     [EExploreColumnType.EDC]: { disabled: true },
