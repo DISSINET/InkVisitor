@@ -1,14 +1,22 @@
+import { IResponseQueryEntity } from "@shared/types";
 import { Explore } from "@shared/types/query";
 
-const exploreStateInitial: Explore.IExplore = {
-  view: {
-    showNewColumn: true,
+export interface ExploreState {
+  entities: IResponseQueryEntity[];
+  explore: Explore.IExplore;
+}
+const exploreStateInitial: ExploreState = {
+  entities: [],
+  explore: {
+    view: {
+      showNewColumn: true,
+    },
+    columns: [],
+    sort: undefined,
+    filters: [],
+    limit: 100,
+    offset: 0,
   },
-  columns: [],
-  sort: undefined,
-  filters: [],
-  limit: 100,
-  offset: 0,
 };
 
 interface ExploreAction {
@@ -20,53 +28,70 @@ enum ExploreActionType {
   removeColumn,
   showNewColumn,
   hideNewColumn,
+  setEntities,
 }
 
 const exploreReducer = (
-  state: Explore.IExplore,
+  state: ExploreState,
   action: ExploreAction
-): Explore.IExplore => {
+): ExploreState => {
   switch (action.type) {
     case ExploreActionType.addColumn:
       return {
         ...state,
-        columns: [...state.columns, action.payload],
+        explore: {
+          ...state.explore,
+          columns: [...state.explore.columns, action.payload],
+        },
       };
 
     case ExploreActionType.removeColumn:
       return {
         ...state,
-        columns: state.columns.filter(
-          (column) => column.id !== action.payload.id
-        ),
+        explore: {
+          ...state.explore,
+          columns: state.explore.columns.filter(
+            (column) => column.id !== action.payload.id
+          ),
+        },
       };
 
     case ExploreActionType.showNewColumn:
       return {
         ...state,
-        view: {
-          ...state.view,
-          showNewColumn: true,
+        explore: {
+          ...state.explore,
+          view: {
+            ...state.explore.view,
+            showNewColumn: true,
+          },
         },
       };
 
     case ExploreActionType.hideNewColumn:
       return {
         ...state,
-        view: {
-          ...state.view,
-          showNewColumn: false,
+        explore: {
+          ...state.explore,
+          view: {
+            ...state.explore.view,
+            showNewColumn: false,
+          },
         },
       };
+
+    case ExploreActionType.setEntities:
+      return {
+        ...state,
+        entities: action.payload,
+      };
+
     default:
       return state;
   }
 };
 
-const exploreDiff = (
-  state1: Explore.IExplore,
-  state2: Explore.IExplore
-): boolean => {
+const exploreDiff = (state1: ExploreState, state2: ExploreState): boolean => {
   return JSON.stringify(state1) !== JSON.stringify(state2);
 };
 

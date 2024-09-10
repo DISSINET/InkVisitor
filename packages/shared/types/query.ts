@@ -1,4 +1,5 @@
 import { EntityEnums } from "../enums";
+import { IResponseQueryEntity } from "./response-query";
 
 export namespace Query {
   export interface INode {

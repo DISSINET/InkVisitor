@@ -13,6 +13,7 @@ import {
   ExploreActionType,
   exploreDiff,
   exploreReducer,
+  ExploreState,
   exploreStateInitial,
 } from "./Explorer/state";
 import { MemoizedQueryBox } from "./Query/QueryBox";
@@ -41,7 +42,7 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
   );
 
   const prevQueryState = useRef<Query.INode>(queryState);
-  const prevExploreState = useRef<Explore.IExplore>(exploreState);
+  const prevExploreState = useRef<ExploreState>(exploreState);
 
   useEffect(() => {
     if (queryDiff(prevQueryState.current, queryState)) {
@@ -55,7 +56,7 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
       invalidateQuery();
       prevExploreState.current = exploreState;
     }
-  }, [exploreState]);
+  }, [exploreState.explore]);
 
   const invalidateQuery = () => {
     queryClient.invalidateQueries({
@@ -68,11 +69,15 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
     error: queryError,
     isFetching: queryIsFetching,
   } = useQuery({
-    queryKey: ["query", queryState, exploreState.columns],
+    queryKey: ["query", queryState, exploreState.explore.columns],
     queryFn: async () => {
       const res = await api.query({
         query: queryState,
-        explore: exploreState,
+        explore: exploreState.explore,
+      });
+      exploreStateDispatch({
+        type: ExploreActionType.setEntities,
+        payload: res.data.entities,
       });
       return res.data;
     },
@@ -162,9 +167,11 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
             <Button
               icon={<TbColumnInsertRight size={17} />}
               label="new column"
-              color={exploreState.view.showNewColumn ? "info" : "primary"}
+              color={
+                exploreState.explore.view.showNewColumn ? "info" : "primary"
+              }
               onClick={() =>
-                exploreState.view.showNewColumn
+                exploreState.explore.view.showNewColumn
                   ? exploreStateDispatch({
                       type: ExploreActionType.hideNewColumn,
                     })
@@ -176,9 +183,10 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
           ]}
         >
           <MemoizedExplorerBox
-            state={exploreState}
+            state={exploreState.explore}
             dispatch={exploreStateDispatch}
-            data={queryData}
+            entities={exploreState.entities}
+            // data={queryData}
             isQueryFetching={queryIsFetching}
             queryError={queryError}
           />

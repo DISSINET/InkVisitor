@@ -1,7 +1,7 @@
 import React, { useContext, useState } from "react";
 
 import { EntityEnums } from "@shared/enums";
-import { IEntity, IResponseQuery } from "@shared/types";
+import { IEntity, IResponseQuery, IResponseQueryEntity } from "@shared/types";
 import { Explore } from "@shared/types/query";
 import { Button, ButtonGroup, Checkbox, Input } from "components";
 import Dropdown, { EntitySuggester, EntityTag } from "components/advanced";
@@ -11,6 +11,7 @@ import { TbColumnInsertRight } from "react-icons/tb";
 import { v4 as uuidv4 } from "uuid";
 import { ExploreAction, ExploreActionType } from "../state";
 import {
+  StyledEmpty,
   StyledGrid,
   StyledGridColumn,
   StyledGridHeader,
@@ -21,28 +22,44 @@ import {
   StyledTableHeader,
 } from "./ExplorerTableStyles";
 import { ThemeContext } from "styled-components";
+import { classesAll } from "@shared/dictionaries/entity";
 
+const initialState: {
+  name: string;
+  type: Explore.EExploreColumnType;
+  editable: boolean;
+  propertyType: false | IEntity;
+} = {
+  name: "",
+  type: Explore.EExploreColumnType.EPV,
+  editable: false,
+  propertyType: false,
+};
 interface ExplorerTable {
   state: Explore.IExplore;
   dispatch: React.Dispatch<ExploreAction>;
-  data: IResponseQuery;
+  entities: IResponseQueryEntity[];
+  // data: IResponseQuery;
   isQueryFetching: boolean;
   queryError: Error | null;
 }
 export const ExplorerTable: React.FC<ExplorerTable> = ({
   state,
   dispatch,
-  data,
+  entities,
+  // data,
   isQueryFetching,
   queryError,
 }) => {
-  const { entities, explore, query } = data;
+  // const { entities, explore, query } = data;
   const { columns, filters, limit, offset, sort, view } = state;
 
-  const [columnName, setColumnName] = useState("");
-  const [columnType, setColumnType] = useState(Explore.EExploreColumnType.EPV);
-  const [propertyType, setPropertyType] = useState<IEntity | false>(false);
-  const [editable, setEditable] = useState(false);
+  const [columnName, setColumnName] = useState(initialState.name);
+  const [columnType, setColumnType] = useState(initialState.type);
+  const [propertyType, setPropertyType] = useState<IEntity | false>(
+    initialState.propertyType
+  );
+  const [editable, setEditable] = useState(initialState.editable);
 
   const getNewColumn = () => {
     return {
@@ -59,10 +76,10 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   };
 
   const handleClearLocalState = () => {
-    setColumnName("");
-    setColumnType(Explore.EExploreColumnType.ER);
-    setPropertyType(false);
-    setEditable(false);
+    setColumnName(initialState.name);
+    setColumnType(initialState.type);
+    setEditable(initialState.editable);
+    setPropertyType(initialState.propertyType);
   };
 
   const handleCreateColumn = () => {
@@ -77,9 +94,11 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   const themeContext = useContext(ThemeContext);
 
   return (
-    <>
+    <div style={{ padding: "1rem" }}>
       <StyledTableHeader>
-        records: {entities.length}
+        <span style={{ marginRight: "1rem" }}>records: {entities.length}</span>
+        <span style={{ marginRight: "1rem" }}>offset: {state.offset}</span>
+        <span style={{ marginRight: "1rem" }}>limit: {state.limit}</span>
         {state.limit < entities.length && (
           <span>
             <Button
@@ -120,7 +139,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
           </span>
         )}
       </StyledTableHeader>
-      <div style={{ display: "flex", padding: "1rem" }}>
+      <div style={{ display: "flex", overflow: "auto" }}>
         <StyledGrid $columns={columns.length + 1}>
           {/* HEADER */}
           <StyledGridHeader>{/* entities */}</StyledGridHeader>
@@ -167,19 +186,35 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                 {columns.map((column, key) => {
                   return (
                     <StyledGridColumn key={key}>
-                      {record.columnData[column.id]
-                        ? (record.columnData[column.id] as Array<IEntity>).map(
-                            (entity, key) => {
-                              return (
-                                <React.Fragment key={key}>
-                                  <span>
-                                    <EntityTag entity={entity} />
-                                  </span>
-                                </React.Fragment>
-                              );
-                            }
-                          )
-                        : "empty"}
+                      {record.columnData[column.id] ? (
+                        (record.columnData[column.id] as Array<IEntity>).map(
+                          (entity, key) => {
+                            return (
+                              <React.Fragment key={key}>
+                                <span>
+                                  <EntityTag
+                                    entity={entity}
+                                    // TODO: unlink from explore state
+                                    // unlinkButton={editable && {
+                                    //   onClick: () =>
+                                    // }}
+                                  />
+                                </span>
+                              </React.Fragment>
+                            );
+                          }
+                        )
+                      ) : (
+                        <StyledEmpty>{"empty"}</StyledEmpty>
+                      )}
+
+                      {column.editable && (
+                        <EntitySuggester
+                          categoryTypes={classesAll}
+                          // TODO: add to explore state
+                          // onPicked={}
+                        />
+                      )}
                     </StyledGridColumn>
                   );
                 })}
@@ -289,6 +324,6 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
           </StyledNewColumn>
         )}
       </div>
-    </>
+    </div>
   );
 };

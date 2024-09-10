@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-import { IResponseQuery } from "@shared/types";
+import { IResponseQuery, IResponseQueryEntity } from "@shared/types";
 import { Explore } from "@shared/types/query";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAppSelector } from "redux/hooks";
@@ -10,14 +10,16 @@ import { ExploreAction } from "./state";
 interface ExplorerBoxProps {
   state: Explore.IExplore;
   dispatch: React.Dispatch<ExploreAction>;
-  data: IResponseQuery | undefined;
+  entities: IResponseQueryEntity[];
+  // data: IResponseQuery | undefined;
   isQueryFetching: boolean;
   queryError: Error | null;
 }
 export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
   state,
   dispatch,
-  data,
+  entities,
+  // data,
   isQueryFetching,
   queryError,
 }) => {
@@ -29,11 +31,11 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
 
   return (
     <div>
-      {data ? (
+      {entities ? (
         <ExplorerTable
           state={state}
           dispatch={dispatch}
-          data={data}
+          entities={entities}
           isQueryFetching={isQueryFetching}
           queryError={queryError}
         />

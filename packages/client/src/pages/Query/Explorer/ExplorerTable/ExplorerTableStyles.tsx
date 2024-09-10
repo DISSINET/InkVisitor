@@ -34,8 +34,9 @@ export const StyledGridHeader = styled(StyledGridColumn)<StyledGridHeader>`
 `;
 
 export const StyledNewColumn = styled.div`
-  width: 38rem;
+  width: 27rem;
   display: flex;
+  flex-shrink: 0;
   flex-direction: column;
   border-left: 2px solid ${({ theme }) => theme.color["gray"][400]};
 `;
@@ -61,4 +62,7 @@ export const StyledTableHeader = styled.div`
   display: flex;
   color: ${({ theme }) => theme.color["black"]};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
+`;
+export const StyledEmpty = styled.span`
+  font-size: ${({ theme }) => theme.fontSize["xs"]};
 `;
