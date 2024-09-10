@@ -244,7 +244,12 @@ interface IUsedEntityStatement {
   bundleEnd?: boolean; // false on default and may be implemented in 1.4.0
 }
 
-export type DropdownItem = { value: string; label: string; info?: string };
+export type DropdownItem = {
+  value: string;
+  label: string;
+  isDisabled?: boolean;
+  info?: string;
+};
 
 export interface EntitySingleDropdownItem extends DropdownItem {
   value: EntityEnums.Class;

@@ -92,6 +92,9 @@ const GlobalStyle = createGlobalStyle<GlobalStyle>`
     .react-select__option--is-focused {
       background-color: ${({ theme }) => theme.color["invertedBg"]["primary"]};
     }
+    .react-select__option--is-disabled {
+      color: ${({ theme }) => theme.color["gray"][500]};
+    }
   }
 
   .react-select__entity-dropdown {

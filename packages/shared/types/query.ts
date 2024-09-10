@@ -118,6 +118,24 @@ export namespace Explore {
     [EExploreColumnType.EDC]: "Creation date",
   };
 
+  export const EExploreColumnTypeDisabled: Record<
+    EExploreColumnType,
+    { disabled: boolean }
+  > = {
+    [EExploreColumnType.ER]: { disabled: true },
+    [EExploreColumnType.EPV]: { disabled: false },
+    [EExploreColumnType.EPT]: { disabled: true },
+    [EExploreColumnType.ERR]: { disabled: true },
+    [EExploreColumnType.ERV]: { disabled: true },
+    [EExploreColumnType.ES]: { disabled: true },
+    [EExploreColumnType.CPV]: { disabled: true },
+    [EExploreColumnType.CPO]: { disabled: true },
+    [EExploreColumnType.EUC]: { disabled: true },
+    [EExploreColumnType.EUE]: { disabled: true },
+    [EExploreColumnType.EUEN]: { disabled: true },
+    [EExploreColumnType.EDC]: { disabled: true },
+  };
+
   export type ExploreColumnParamsMap = {
     [EExploreColumnType.ER]: {};
     [EExploreColumnType.EPV]: { propertyType: string };

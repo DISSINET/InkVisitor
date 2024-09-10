@@ -39,7 +39,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   const [showNewColumn, setShowNewColumn] = useState(true);
 
   const [columnName, setColumnName] = useState("");
-  const [columnType, setColumnType] = useState(Explore.EExploreColumnType.ER);
+  const [columnType, setColumnType] = useState(Explore.EExploreColumnType.EPV);
   const [propertyType, setPropertyType] = useState<IEntity | false>(false);
   const [editable, setEditable] = useState(false);
 
@@ -77,7 +77,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     <div style={{ display: "flex", padding: "1rem" }}>
       <StyledGrid $columns={columns.length + 2}>
         {/* HEADER */}
-        <StyledGridHeader>entities</StyledGridHeader>
+        <StyledGridHeader></StyledGridHeader>
         {columns.map((column, key) => {
           return (
             <StyledGridHeader key={key}>
@@ -180,6 +180,8 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                     return {
                       value: value,
                       label: Explore.EExploreColumnTypeLabels[value],
+                      isDisabled:
+                        Explore.EExploreColumnTypeDisabled[value].disabled,
                     };
                   })}
                 onChange={(value) => setColumnType(value)}

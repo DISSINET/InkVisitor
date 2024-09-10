@@ -121,6 +121,9 @@ export const BaseDropdown: React.FC<BaseDropdown> = ({
           isMulti={isMulti}
           isDisabled={disabled || isOneOptionSingleEntitySelect}
           isOneOptionSingleEntitySelect={isOneOptionSingleEntitySelect}
+          isOptionDisabled={(option) =>
+            (option as DropdownItem).isDisabled ? true : false
+          }
           attributeDropdown={attributeDropdown}
           entityDropdown={entityDropdown}
           wildCardChar={
