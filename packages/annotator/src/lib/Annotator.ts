@@ -912,27 +912,35 @@ export class Annotator {
           {}
         )
       );
-      const indexPositionEnd =
-        this.text.cursorToAbsIndex(
-          this.viewport,
-          new Cursor(
-            this.ratio,
-            end.xLine,
-            end.yLine - this.viewport.lineStart,
-            {}
-          )
-        ) +
-        anchor.length +
-        2;
+      const indexPositionEnd = this.text.cursorToAbsIndex(
+        this.viewport,
+        new Cursor(
+          this.ratio,
+          end.xLine,
+          end.yLine - this.viewport.lineStart,
+          {}
+        )
+      );
+
+      // this.text.value =
+      //   this.text.value.slice(0, indexPositionStart) +
+      //   `<${anchor}>` +
+      //   this.text.value.slice(indexPositionStart);
+
+      // this.text.value =
+      //   this.text.value.slice(0, indexPositionEnd) +
+      //   `</${anchor}>` +
+      //   this.text.value.slice(indexPositionEnd);
+
+      const beforeText = this.text.value.slice(0, indexPositionStart);
+      const afterText = this.text.value.slice(indexPositionEnd);
+      const insideText = this.text.value.slice(
+        indexPositionStart,
+        indexPositionEnd
+      );
 
       this.text.value =
-        this.text.value.slice(0, indexPositionStart) +
-        `<${anchor}>` +
-        this.text.value.slice(indexPositionStart);
-      this.text.value =
-        this.text.value.slice(0, indexPositionEnd) +
-        `</${anchor}>` +
-        this.text.value.slice(indexPositionEnd);
+        beforeText + `<${anchor}>` + insideText + `</${anchor}>` + afterText;
 
       this.text.prepareSegments();
       this.text.calculateLines();
