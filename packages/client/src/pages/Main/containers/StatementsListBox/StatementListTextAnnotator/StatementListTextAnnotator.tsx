@@ -10,7 +10,7 @@ import TextAnnotator from "components/advanced/Annotator/Annotator";
 import AnnotatorProvider from "components/advanced/Annotator/AnnotatorProvider";
 import React, { useEffect, useMemo, useState } from "react";
 import { BiSolidCommentError } from "react-icons/bi";
-import { FaUnlink } from "react-icons/fa";
+import { FaAnchor, FaCheck, FaUnlink } from "react-icons/fa";
 import { GrDocumentMissing } from "react-icons/gr";
 import { TiDocumentText, TiRadar } from "react-icons/ti";
 import { COLLAPSED_TABLE_WIDTH } from "Theme/constants";
@@ -18,6 +18,7 @@ import {
   StyledDocumentTag,
   StyledDocumentTitle,
 } from "../StatementLitBoxStyles";
+import { TbAnchor, TbAnchorOff } from "react-icons/tb";
 
 interface StatementListTextAnnotator {
   statements: IResponseStatement[];
@@ -202,7 +203,7 @@ export const StatementListTextAnnotator: React.FC<
     <animated.div style={animatedStyle}>
       <div
         style={{
-          display: "inline-flex",
+          display: "flex",
           alignItems: "center",
           padding: "0.2rem 1rem",
         }}
@@ -253,35 +254,55 @@ export const StatementListTextAnnotator: React.FC<
                     </StyledDocumentTitle>
                   </div>
                 </StyledDocumentTag>
-                {activeTHasAnchor ? (
-                  <Button
-                    icon={<TiRadar />}
-                    label="localize territory anchor"
-                    onClick={() => {
-                      annotator?.scrollToAnchor(territoryId);
-                    }}
-                    color="warning"
-                  />
-                ) : (
-                  <>
-                    <BiSolidCommentError />
-                    <i>No Anchor for T</i>
-                  </>
-                )}
               </>
             )}
-
-            {!selectedDocumentIsFetching &&
-              selectedResource !== false &&
-              selectedResource.data.documentId === undefined && (
-                <>
-                  <GrDocumentMissing />
-                  <i>This Resource does not have any document</i>
-                </>
-              )}
           </>
         )}
+
+        {!selectedDocumentIsFetching &&
+          selectedResource !== false &&
+          selectedResource.data.documentId === undefined && (
+            <>
+              <GrDocumentMissing />
+              <i>This Resource does not have any document</i>
+            </>
+          )}
       </div>
+
+      {/* T anchor line */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          padding: "0.2rem 1rem",
+          gap: "0.6rem",
+        }}
+      >
+        {activeTHasAnchor ? (
+          <>
+            <span style={{ display: "flex", gap: "0.4rem" }}>
+              <TbAnchor />
+              <span>T Anchor created</span>
+            </span>
+
+            <Button
+              icon={<TiRadar />}
+              label="localize"
+              onClick={() => {
+                annotator?.scrollToAnchor(territoryId);
+              }}
+              color="warning"
+            />
+          </>
+        ) : (
+          <span style={{ display: "flex", gap: "0.4rem" }}>
+            <TbAnchorOff />
+            <i>No Anchor for T</i>
+          </span>
+        )}
+      </div>
+
+      {/* Annotator */}
       <div style={{ marginTop: "0.2rem" }}>
         <AnnotatorProvider>
           {selectedDocumentId && (
