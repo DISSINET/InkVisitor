@@ -1,4 +1,5 @@
 import { EntityEnums } from "../enums";
+import { PropSpecKind } from "./prop";
 
 export namespace Query {
   export interface INode {
@@ -105,7 +106,7 @@ export namespace Explore {
 
   export type ExploreColumnParamsMap = {
     [EExploreColumnType.ER]: {};
-    [EExploreColumnType.EPV]: { propertyType: string };
+    [EExploreColumnType.EPV]: { propertyType: PropSpecKind };
     [EExploreColumnType.EPT]: {};
     [EExploreColumnType.ERR]: {};
     [EExploreColumnType.ERV]: {};
