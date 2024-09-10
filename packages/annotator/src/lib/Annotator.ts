@@ -918,7 +918,7 @@ export class Annotator {
           new Cursor(
             this.ratio,
             end.xLine,
-            start.yLine - this.viewport.lineStart,
+            end.yLine - this.viewport.lineStart,
             {}
           )
         ) +
