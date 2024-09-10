@@ -2,6 +2,7 @@ import Audit from "@models/audit/audit";
 import Entity from "@models/entity/entity";
 import User from "@models/user/user";
 import { IEntity, IUser } from "@shared/types";
+import { PropSpecKind } from "@shared/types/prop";
 import { Explore } from "@shared/types/query";
 import { Connection } from "rethinkdb-ts";
 
@@ -88,14 +89,18 @@ export default class Results<T extends { id: string }> {
         case Explore.EExploreColumnType.EPV: {
           const params =
             column.params as Explore.IExploreColumnParams<Explore.EExploreColumnType.EPV>;
+
+          const propertyTypeId = params.propertyType;
           const entityIds: Record<string, null> = {};
-          Entity.extractIdsFromProps(entity.props, params.propertyType).forEach(
-            (e) => {
-              if (e) {
-                entityIds[e] = null;
+
+          entity.props
+            .filter((a) => a.type.entityId === propertyTypeId)
+            .forEach((prop) => {
+              if (prop.value && prop.value.entityId) {
+                entityIds[prop.value.entityId] = null;
               }
-            }
-          );
+            });
+
           out[column.id] = await Entity.findEntitiesByIds(
             db,
             Object.keys(entityIds)

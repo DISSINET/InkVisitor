@@ -2,7 +2,22 @@ import { Explore } from "@shared/types/query";
 
 const exploreStateInitial: Explore.IExplore = {
   view: {},
-  columns: [],
+  columns: [
+    {
+      id: "sex_value",
+      name: "Column 1",
+      type: Explore.EExploreColumnType.EPV,
+      params: {
+        propertyType: "4ce5e669-d421-40c9-b1ce-f476fdd171fe",
+      },
+    },
+    {
+      id: "editor",
+      name: "Column 2",
+      type: Explore.EExploreColumnType.EUC,
+      params: {},
+    },
+  ],
   sort: undefined,
   filters: [],
   limit: 100,

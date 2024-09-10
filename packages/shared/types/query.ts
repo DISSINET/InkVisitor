@@ -106,7 +106,7 @@ export namespace Explore {
 
   export type ExploreColumnParamsMap = {
     [EExploreColumnType.ER]: {};
-    [EExploreColumnType.EPV]: { propertyType: PropSpecKind };
+    [EExploreColumnType.EPV]: { propertyType: string };
     [EExploreColumnType.EPT]: {};
     [EExploreColumnType.ERR]: {};
     [EExploreColumnType.ERV]: {};
