@@ -177,6 +177,10 @@ export const TextAnnotator = ({
       for (const anchorI in anchors) {
         await obtainEntity(anchors[anchorI]);
       }
+
+      if (thisTerritoryEntityId) {
+        await obtainEntity(thisTerritoryEntityId);
+      }
     }
   };
 
@@ -448,6 +452,7 @@ export const TextAnnotator = ({
               handleCreateTerritory={onCreateTerritory}
               handleCreateStatement={onCreateStatement}
               handleRemoveAnchor={onRemoveAnchor}
+              thisTerritoryEntityId={thisTerritoryEntityId}
             />
           </StyledAnnotatorMenu>
         )}

@@ -13,6 +13,8 @@ import {
   StyledAnnotatorItemContent,
   StyledAnnotatorItemTitle,
 } from "./AnnotatorStyles";
+import { TbAnchor } from "react-icons/tb";
+import { FaPlus } from "react-icons/fa";
 
 interface TextAnnotatorMenuProps {
   text: string;
@@ -23,6 +25,7 @@ interface TextAnnotatorMenuProps {
   handleCreateStatement: Function | false;
   handleCreateTerritory: Function | false;
   handleRemoveAnchor: Function | false;
+  thisTerritoryEntityId: string | undefined;
 }
 
 export const TextAnnotatorMenu = ({
@@ -33,6 +36,7 @@ export const TextAnnotatorMenu = ({
   handleCreateStatement = false,
   handleCreateTerritory = false,
   handleRemoveAnchor = false,
+  thisTerritoryEntityId,
 }: TextAnnotatorMenuProps) => {
   return (
     <>
@@ -53,14 +57,34 @@ export const TextAnnotatorMenu = ({
         </StyledAnnotatorItemContent>
       </StyledAnnotatorItem>
       <StyledAnnotatorItem>
-        <StyledAnnotatorItemTitle>
-          Create new anchor from selection
-        </StyledAnnotatorItemTitle>
         <StyledAnnotatorItemContent>
+          {thisTerritoryEntityId && entities[thisTerritoryEntityId] && (
+            <div>
+              <Button
+                icon={
+                  <>
+                    <TbAnchor size={15} style={{ marginRight: 2 }} />
+                    <EntityTag
+                      entity={entities[thisTerritoryEntityId] as IEntity}
+                    />
+                  </>
+                }
+                color="primary"
+                paddingX={true}
+                onClick={() => {
+                  onAnchorAdd(thisTerritoryEntityId);
+                }}
+                tooltipLabel="Create anchor for this territory"
+              />
+            </div>
+          )}
           {handleCreateStatement && (
             <Button
               icon={
-                <BiSolidMessageSquareAdd size={15} style={{ marginRight: 2 }} />
+                <>
+                  <FaPlus size={12} style={{}} />
+                  <TbAnchor size={15} style={{ marginRight: 2 }} />
+                </>
               }
               color="primary"
               paddingX={true}
@@ -73,7 +97,12 @@ export const TextAnnotatorMenu = ({
           )}
           {handleCreateTerritory && (
             <Button
-              icon={<BiSolidBookAdd size={15} style={{ marginRight: 2 }} />}
+              icon={
+                <>
+                  <FaPlus size={12} style={{}} />
+                  <TbAnchor size={15} style={{ marginRight: 2 }} />
+                </>
+              }
               color="primary"
               paddingX={true}
               onClick={() => {
