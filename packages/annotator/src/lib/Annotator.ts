@@ -375,7 +375,7 @@ export class Annotator {
           }
           this.cursor.selectStart = {
             xLine: this.cursor.xLine + offsetLeft,
-            yLine: this.cursor.yLine,
+            yLine: this.viewport.lineStart + this.cursor.yLine,
           };
           this.cursor.move(offsetLeft, 0);
         } else {
@@ -388,6 +388,19 @@ export class Annotator {
             }
           } else {
             this.cursor.move(-1, 0);
+          }
+
+          if (e.shiftKey) {
+            this.cursor.selectStart = {
+              xLine: this.cursor.xLine,
+              yLine: this.viewport.lineStart + this.cursor.yLine,
+            };
+          } else {
+            this.cursor.selectStart = {
+              xLine: this.cursor.xLine,
+              yLine: this.viewport.lineStart + this.cursor.yLine,
+            };
+            this.cursor.selectEnd = this.cursor.selectStart;
           }
         }
         break;
@@ -417,7 +430,7 @@ export class Annotator {
 
           this.cursor.selectEnd = {
             xLine: this.cursor.xLine + offsetRight,
-            yLine: this.cursor.yLine,
+            yLine: this.viewport.lineStart + this.cursor.yLine,
           };
           this.cursor.move(offsetRight, 0);
         } else {
@@ -442,6 +455,19 @@ export class Annotator {
               this.cursor.xLine = backupXLine - 1;
               this.cursor.yLine = backupYLine;
             }
+          }
+
+          if (e.shiftKey) {
+            this.cursor.selectEnd = {
+              xLine: this.cursor.xLine,
+              yLine: this.viewport.lineStart + this.cursor.yLine,
+            };
+          } else {
+            this.cursor.selectEnd = {
+              xLine: this.cursor.xLine,
+              yLine: this.viewport.lineStart + this.cursor.yLine,
+            };
+            this.cursor.selectStart = this.cursor.selectEnd;
           }
         }
         break;
@@ -820,7 +846,6 @@ export class Annotator {
         });
       }
     }
-
     if (this.text.mode === Modes.HIGHLIGHT && this.onHighlightCb) {
       const startPos = this.text.getSegmentPosition(this.viewport.lineStart, 0);
       const endPos = this.text.getSegmentPosition(
