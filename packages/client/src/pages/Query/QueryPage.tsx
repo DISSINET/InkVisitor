@@ -10,7 +10,6 @@ import { useAppSelector } from "redux/hooks";
 import { floorNumberToOneDecimal } from "utils/utils";
 import { MemoizedExplorerBox } from "./Explorer/ExplorerBox";
 import {
-  ExploreActionType,
   exploreDiff,
   exploreReducer,
   exploreStateInitial,
@@ -73,10 +72,6 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
       const res = await api.query({
         query: queryState,
         explore: exploreState,
-      });
-      exploreStateDispatch({
-        type: ExploreActionType.setEntities,
-        payload: res.data.entities,
       });
       return res.data;
     },

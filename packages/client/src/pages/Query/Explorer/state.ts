@@ -1,4 +1,3 @@
-import { IResponseQueryEntity } from "@shared/types";
 import { Explore } from "@shared/types/query";
 
 const exploreStateInitial: Explore.IExplore = {
@@ -34,9 +33,6 @@ interface ExploreAction {
 enum ExploreActionType {
   addColumn,
   removeColumn,
-  showNewColumn,
-  hideNewColumn,
-  setEntities,
 }
 
 const exploreReducer = (
@@ -48,7 +44,7 @@ const exploreReducer = (
       const newColumn: Explore.IExploreColumn = action.payload;
       return {
         ...state,
-        ...{ columns: [...state.columns, action.payload] },
+        ...{ columns: [...state.columns, newColumn] },
       };
 
     case ExploreActionType.removeColumn:
@@ -57,7 +53,7 @@ const exploreReducer = (
         ...state,
         ...{
           columns: state.columns.filter(
-            (column) => column.id !== action.payload.id
+            (column) => column.id !== removedColumnId
           ),
         },
       };

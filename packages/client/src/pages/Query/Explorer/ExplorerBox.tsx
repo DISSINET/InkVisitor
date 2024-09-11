@@ -10,7 +10,6 @@ import { ExploreAction } from "./state";
 interface ExplorerBoxProps {
   state: Explore.IExplore;
   dispatch: React.Dispatch<ExploreAction>;
-  // entities: IResponseQueryEntity[];
   data: IResponseQuery | undefined;
   isQueryFetching: boolean;
   queryError: Error | null;
@@ -18,7 +17,6 @@ interface ExplorerBoxProps {
 export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
   state,
   dispatch,
-  // entities,
   data,
   isQueryFetching,
   queryError,
@@ -34,7 +32,6 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
       <ExplorerTable
         state={state}
         dispatch={dispatch}
-        // entities={entities}
         data={data}
         isQueryFetching={isQueryFetching}
         queryError={queryError}
