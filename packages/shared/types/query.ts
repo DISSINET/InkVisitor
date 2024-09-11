@@ -1,5 +1,4 @@
 import { EntityEnums } from "../enums";
-import { PropSpecKind } from "./prop";
 
 export namespace Query {
   export interface INode {
@@ -72,7 +71,13 @@ export namespace Explore {
     offset: number;
   }
 
-  export interface IView {}
+  export enum EViewMode {
+    Table = "table",
+  }
+
+  export interface IView {
+    mode: EViewMode;
+  }
 
   export interface IExploreColumnFilter {}
 
@@ -86,6 +91,7 @@ export namespace Explore {
     id: string;
     name: string;
     type: EExploreColumnType;
+    editable: boolean;
     params: IExploreColumnParams<EExploreColumnType>;
   }
 
@@ -103,6 +109,39 @@ export namespace Explore {
     EUEN = "EUEN", // Number of edits
     EDC = "EDC", // Creation date
   }
+
+  export const EExploreColumnTypeLabels: Record<EExploreColumnType, string> = {
+    [EExploreColumnType.ER]: "Entity Relations",
+    [EExploreColumnType.EPV]: "Entity Property value",
+    [EExploreColumnType.EPT]: "Entity Property types",
+    [EExploreColumnType.ERR]: "Entity Reference Resources",
+    [EExploreColumnType.ERV]: "Entity Reference Values",
+    [EExploreColumnType.ES]: "Entity Statements",
+    [EExploreColumnType.CPV]: "Property values",
+    [EExploreColumnType.CPO]: "Property type origins",
+    [EExploreColumnType.EUC]: "Created by",
+    [EExploreColumnType.EUE]: "Edited by",
+    [EExploreColumnType.EUEN]: "Number of edits",
+    [EExploreColumnType.EDC]: "Creation date",
+  };
+
+  export const EExploreColumnTypeDisabled: Record<
+    EExploreColumnType,
+    { disabled: boolean }
+  > = {
+    [EExploreColumnType.ER]: { disabled: true },
+    [EExploreColumnType.EPV]: { disabled: false },
+    [EExploreColumnType.EPT]: { disabled: true },
+    [EExploreColumnType.ERR]: { disabled: true },
+    [EExploreColumnType.ERV]: { disabled: true },
+    [EExploreColumnType.ES]: { disabled: true },
+    [EExploreColumnType.CPV]: { disabled: true },
+    [EExploreColumnType.CPO]: { disabled: true },
+    [EExploreColumnType.EUC]: { disabled: false },
+    [EExploreColumnType.EUE]: { disabled: true },
+    [EExploreColumnType.EUEN]: { disabled: true },
+    [EExploreColumnType.EDC]: { disabled: true },
+  };
 
   export type ExploreColumnParamsMap = {
     [EExploreColumnType.ER]: {};

@@ -1,19 +1,21 @@
 import { Explore } from "@shared/types/query";
 
 const exploreStateInitial: Explore.IExplore = {
-  view: {},
+  view: { mode: Explore.EViewMode.Table },
   columns: [
     {
       id: "sex_value",
-      name: "Column 1",
+      name: "Sex",
       type: Explore.EExploreColumnType.EPV,
+      editable: true,
       params: {
         propertyType: "4ce5e669-d421-40c9-b1ce-f476fdd171fe",
       },
     },
     {
       id: "editor",
-      name: "Column 2",
+      name: "Editor",
+      editable: false,
       type: Explore.EExploreColumnType.EUC,
       params: {},
     },
@@ -26,26 +28,46 @@ const exploreStateInitial: Explore.IExplore = {
 
 interface ExploreAction {
   type: ExploreActionType;
-  payload: any;
+  payload?: any;
 }
 enum ExploreActionType {
   addColumn,
   removeColumn,
 }
 
-const exploreReducer = (state: Explore.IExplore, action: ExploreAction) => {
+const exploreReducer = (
+  state: Explore.IExplore,
+  action: ExploreAction
+): Explore.IExplore => {
   switch (action.type) {
     case ExploreActionType.addColumn:
-      return state;
+      const newColumn: Explore.IExploreColumn = action.payload;
+      return {
+        ...state,
+        ...{ columns: [...state.columns, newColumn] },
+      };
+
     case ExploreActionType.removeColumn:
-      return state;
+      const removedColumnId = action.payload.id;
+      return {
+        ...state,
+        ...{
+          columns: state.columns.filter(
+            (column) => column.id !== removedColumnId
+          ),
+        },
+      };
+
     default:
       return state;
   }
 };
 
-const exploreDiff = (state1: Explore.IExplore, state2: Explore.IExplore) => {
-  return true;
+const exploreDiff = (
+  state1: Explore.IExplore,
+  state2: Explore.IExplore
+): boolean => {
+  return JSON.stringify(state1) !== JSON.stringify(state2);
 };
 
 export {
