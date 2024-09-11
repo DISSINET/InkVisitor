@@ -104,6 +104,8 @@ const theme = {
 
     menuShadow: "rgba(0, 0, 0, 0.3)",
 
+    closeBtnBackground: "rgba(130, 130, 130, 0.1)",
+
     elementType: {
       action: "#EB6B6B",
       actant: "#7E9BFF",

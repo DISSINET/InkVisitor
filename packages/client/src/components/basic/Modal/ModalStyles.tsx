@@ -151,7 +151,7 @@ export const StyledCloseIconWrap = styled.span`
   transition: 0.3s;
 
   &:hover {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: ${({ theme }) => theme.color.closeBtnBackground};
   }
 `;
 export const StyledIoClose = styled(IoClose)`
