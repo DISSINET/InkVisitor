@@ -62,6 +62,9 @@ export const StyledTableHeader = styled.div`
   display: flex;
   color: ${({ theme }) => theme.color["black"]};
   font-size: ${({ theme }) => theme.fontSize["sm"]};
+  padding: ${({ theme }) => theme.space[2]};
+  align-items: center;
+  justify-content: space-between;
 `;
 export const StyledEmpty = styled.span`
   font-size: ${({ theme }) => theme.fontSize["xs"]};

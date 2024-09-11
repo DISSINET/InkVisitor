@@ -31,18 +31,14 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
 
   return (
     <div>
-      {data ? (
-        <ExplorerTable
-          state={state}
-          dispatch={dispatch}
-          // entities={entities}
-          data={data}
-          isQueryFetching={isQueryFetching}
-          queryError={queryError}
-        />
-      ) : (
-        "no data yet"
-      )}
+      <ExplorerTable
+        state={state}
+        dispatch={dispatch}
+        // entities={entities}
+        data={data}
+        isQueryFetching={isQueryFetching}
+        queryError={queryError}
+      />
     </div>
   );
 };

@@ -1,4 +1,4 @@
-import React, { useContext, useMemo, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 
 import { EntityEnums } from "@shared/enums";
 import { IEntity, IResponseQuery, IResponseQueryEntity } from "@shared/types";
@@ -24,46 +24,53 @@ import {
 import { ThemeContext } from "styled-components";
 import { classesAll } from "@shared/dictionaries/entity";
 
-const initialState: {
-  name: string;
-  type: Explore.EExploreColumnType;
-  editable: boolean;
-  propertyType: false | IEntity;
-} = {
+const initialNewColumn: Explore.IExploreColumn = {
+  id: uuidv4(),
   name: "",
   type: Explore.EExploreColumnType.EPV,
   editable: false,
-  propertyType: false,
+  params: {},
 };
 interface ExplorerTable {
   state: Explore.IExplore;
   dispatch: React.Dispatch<ExploreAction>;
-  // entities: IResponseQueryEntity[];
-  data: IResponseQuery;
+  data: IResponseQuery | undefined;
   isQueryFetching: boolean;
   queryError: Error | null;
 }
 export const ExplorerTable: React.FC<ExplorerTable> = ({
   state,
   dispatch,
-  // entities,
   data,
   isQueryFetching,
   queryError,
 }) => {
-  const { entities, explore, query } = data;
+  const { entities: incomingEntities } = data ?? { entities: [] };
   const { columns, filters, limit, offset, sort, view } = state;
 
-  // const entities = useMemo(() => data.entities, [data]);
+  const [entities, setEntities] = useState<IResponseQueryEntity[]>([]);
 
-  const [columnName, setColumnName] = useState(initialState.name);
-  const [columnType, setColumnType] = useState(initialState.type);
-  const [propertyType, setPropertyType] = useState<IEntity | false>(
-    initialState.propertyType
+  useEffect(() => {
+    if (!isQueryFetching) {
+      console.log("setting new entities", incomingEntities);
+      setEntities(incomingEntities);
+    }
+  }, [incomingEntities, isQueryFetching]);
+
+  const [columnName, setColumnName] = useState(initialNewColumn.name);
+  const [columnType, setColumnType] = useState(initialNewColumn.type);
+  const [editable, setEditable] = useState<boolean>(initialNewColumn?.editable);
+
+  const [propertyType, setPropertyType] = useState<IEntity | undefined>(
+    undefined
   );
-  const [editable, setEditable] = useState(initialState.editable);
+  const propertyTypeId = useMemo<string>(() => {
+    return propertyType?.id || "";
+  }, [propertyType]);
 
-  const getNewColumn = () => {
+  const [isNewColumnDisplayed, setIsNewColumnDisplayed] = useState(true);
+
+  const getNewColumn = (): Explore.IExploreColumn => {
     return {
       id: uuidv4(),
       name: columnName.length
@@ -71,17 +78,15 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
         : Explore.EExploreColumnTypeLabels[columnType],
       type: columnType,
       editable: editable,
-      params: {
-        [Explore.EExploreColumnType.EPV]: { propertyType: propertyType },
-      },
+      params: { propertyType: propertyTypeId },
     };
   };
 
   const handleClearLocalState = () => {
-    setColumnName(initialState.name);
-    setColumnType(initialState.type);
-    setEditable(initialState.editable);
-    setPropertyType(initialState.propertyType);
+    setColumnName(initialNewColumn.name);
+    setColumnType(initialNewColumn.type);
+    setEditable(initialNewColumn.editable);
+    setPropertyType(undefined);
   };
 
   const handleCreateColumn = () => {
@@ -98,48 +103,60 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   return (
     <div style={{ padding: "1rem" }}>
       <StyledTableHeader>
-        <span style={{ marginRight: "1rem" }}>records: {entities.length}</span>
-        <span style={{ marginRight: "1rem" }}>offset: {state.offset}</span>
-        <span style={{ marginRight: "1rem" }}>limit: {state.limit}</span>
-        {state.limit < entities.length && (
-          <span>
-            <Button
-              // onClick={(): void => gotoPage(0)}
-              // disabled={!canPreviousPage}
-              label={"<<"}
-              inverted
-              color="greyer"
-            />
-
-            <Button
-              // onClick={(): void => previousPage()}
-              // disabled={!canPreviousPage}
-              label={"<"}
-              inverted
-              color="greyer"
-            />
-
-            {/* <StyledPageNumber>
-              {pageIndex + 1}/{pageOptions.length}
-            </StyledPageNumber> */}
-
-            <Button
-              // onClick={(): void => nextPage()}
-              // disabled={!canNextPage}
-              label={">"}
-              inverted
-              color="greyer"
-            />
-
-            <Button
-              // onClick={(): void => gotoPage(pageCount - 1)}
-              // disabled={!canNextPage}
-              label={">>"}
-              inverted
-              color="greyer"
-            />
+        <div>
+          <span style={{ marginRight: "1rem" }}>
+            records: {entities.length}
           </span>
-        )}
+          <span style={{ marginRight: "1rem" }}>offset: {state.offset}</span>
+          <span style={{ marginRight: "1rem" }}>limit: {state.limit}</span>
+          {state.limit < entities.length && (
+            <span>
+              <Button
+                // onClick={(): void => gotoPage(0)}
+                // disabled={!canPreviousPage}
+                label={"<<"}
+                inverted
+                color="greyer"
+              />
+
+              <Button
+                // onClick={(): void => previousPage()}
+                // disabled={!canPreviousPage}
+                label={"<"}
+                inverted
+                color="greyer"
+              />
+
+              {/* <StyledPageNumber>
+              {pageIndex + 1}/{pageOptions.length}
+              </StyledPageNumber> */}
+
+              <Button
+                // onClick={(): void => nextPage()}
+                // disabled={!canNextPage}
+                label={">"}
+                inverted
+                color="greyer"
+              />
+
+              <Button
+                // onClick={(): void => gotoPage(pageCount - 1)}
+                // disabled={!canNextPage}
+                label={">>"}
+                inverted
+                color="greyer"
+              />
+            </span>
+          )}
+        </div>
+        <div>
+          <Button
+            icon={<TbColumnInsertRight size={17} />}
+            label="new column"
+            color={isNewColumnDisplayed ? "info" : "primary"}
+            onClick={() => setIsNewColumnDisplayed(!isNewColumnDisplayed)}
+          />
+        </div>
       </StyledTableHeader>
       <div style={{ display: "flex", overflow: "auto" }}>
         <StyledGrid $columns={columns.length + 1}>
@@ -224,8 +241,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
             );
           })}
         </StyledGrid>
-
-        {state.view.showNewColumn && (
+        {isNewColumnDisplayed && (
           <StyledNewColumn>
             <StyledGridHeader $greyBackground>
               <span style={{ display: "flex", alignItems: "center" }}>
@@ -274,7 +290,9 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                       <EntityTag
                         fullWidth
                         entity={propertyType}
-                        unlinkButton={{ onClick: () => setPropertyType(false) }}
+                        unlinkButton={{
+                          onClick: () => setPropertyType(undefined),
+                        }}
                       />
                     ) : (
                       <EntitySuggester
@@ -308,9 +326,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                 <Button
                   color="warning"
                   label="cancel"
-                  onClick={() =>
-                    dispatch({ type: ExploreActionType.hideNewColumn })
-                  }
+                  onClick={() => setIsNewColumnDisplayed(false)}
                 />
                 <Button
                   label="create column"
@@ -318,7 +334,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                   disabled={
                     !columnName.length ||
                     (columnType === Explore.EExploreColumnType.EPV &&
-                      !propertyType)
+                      !propertyTypeId)
                   }
                 />
               </ButtonGroup>

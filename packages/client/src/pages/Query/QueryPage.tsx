@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { Query } from "@shared/types";
 import { Explore } from "@shared/types/query";
 import api from "api";
-import { Box, Button, Panel } from "components";
+import { Box, Panel } from "components";
 import { PanelSeparator } from "components/advanced";
 import { useAppSelector } from "redux/hooks";
 import { floorNumberToOneDecimal } from "utils/utils";
@@ -13,12 +13,10 @@ import {
   ExploreActionType,
   exploreDiff,
   exploreReducer,
-  ExploreState,
   exploreStateInitial,
 } from "./Explorer/state";
 import { MemoizedQueryBox } from "./Query/QueryBox";
 import { queryDiff, queryReducer, queryStateInitial } from "./Query/state";
-import { TbColumnInsertRight } from "react-icons/tb";
 
 interface QueryPage {}
 export const QueryPage: React.FC<QueryPage> = ({}) => {
@@ -42,10 +40,11 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
   );
 
   const prevQueryState = useRef<Query.INode>(queryState);
-  const prevExploreState = useRef<ExploreState>(exploreState);
+  const prevExploreState = useRef<Explore.IExplore>(exploreState);
 
   useEffect(() => {
     if (queryDiff(prevQueryState.current, queryState)) {
+      console.log("invalidating query");
       invalidateQuery();
       prevQueryState.current = queryState;
     }
@@ -56,7 +55,7 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
       invalidateQuery();
       prevExploreState.current = exploreState;
     }
-  }, [exploreState.explore]);
+  }, [exploreState]);
 
   const invalidateQuery = () => {
     queryClient.invalidateQueries({
@@ -69,11 +68,11 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
     error: queryError,
     isFetching: queryIsFetching,
   } = useQuery({
-    queryKey: ["query", queryState, exploreState.explore.columns],
+    queryKey: ["query", queryState, exploreState.columns],
     queryFn: async () => {
       const res = await api.query({
         query: queryState,
-        explore: exploreState.explore,
+        explore: exploreState,
       });
       exploreStateDispatch({
         type: ExploreActionType.setEntities,
@@ -159,33 +158,10 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
         </Box>
       </Panel>
       <Panel width={layoutWidth - querySeparatorXPosition}>
-        <Box
-          borderColor="white"
-          height={contentHeight}
-          label="Explorer"
-          buttons={[
-            <Button
-              icon={<TbColumnInsertRight size={17} />}
-              label="new column"
-              color={
-                exploreState.explore.view.showNewColumn ? "info" : "primary"
-              }
-              onClick={() =>
-                exploreState.explore.view.showNewColumn
-                  ? exploreStateDispatch({
-                      type: ExploreActionType.hideNewColumn,
-                    })
-                  : exploreStateDispatch({
-                      type: ExploreActionType.showNewColumn,
-                    })
-              }
-            />,
-          ]}
-        >
+        <Box borderColor="white" height={contentHeight} label="Explorer">
           <MemoizedExplorerBox
-            state={exploreState.explore}
+            state={exploreState}
             dispatch={exploreStateDispatch}
-            // entities={exploreState.entities}
             data={queryData}
             isQueryFetching={queryIsFetching}
             queryError={queryError}
