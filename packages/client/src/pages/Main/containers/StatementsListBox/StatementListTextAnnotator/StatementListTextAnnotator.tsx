@@ -269,39 +269,45 @@ export const StatementListTextAnnotator: React.FC<
       </div>
 
       {/* T anchor line */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          padding: "0.2rem 1rem",
-          gap: "0.6rem",
-        }}
-      >
-        {activeTHasAnchor ? (
-          <>
-            <span style={{ display: "flex", gap: "0.4rem" }}>
-              <TbAnchor />
-              <span>T Anchor created</span>
-            </span>
+      {selectedResource !== false && selectedResource?.data?.documentId && (
+        <div
+          style={{
+            display: "flex",
+            alignItems: "end",
+            padding: "0.2rem 1rem",
+            gap: "0.2rem",
+          }}
+        >
+          {activeTHasAnchor ? (
+            <>
+              <span style={{ display: "flex", gap: "0.4rem" }}>
+                <span>Territory</span>
+                <TbAnchor />
+                <span>found</span>
+              </span>
 
-            <Button
-              icon={<TiRadar size={18} />}
-              tooltipLabel="localize anchor in document"
-              inverted
-              noIconMargin
-              onClick={() => {
-                annotator?.scrollToAnchor(territoryId);
-              }}
-              color="warning"
-            />
-          </>
-        ) : (
-          <span style={{ display: "flex", gap: "0.4rem" }}>
-            <TbAnchorOff />
-            <i>No Anchor for T</i>
-          </span>
-        )}
-      </div>
+              <Button
+                icon={<TiRadar size={22} />}
+                tooltipLabel="localize anchor in document"
+                inverted
+                noIconMargin
+                noBorder
+                noBackground
+                onClick={() => {
+                  annotator?.scrollToAnchor(territoryId);
+                }}
+                color="warning"
+              />
+            </>
+          ) : (
+            <span style={{ display: "flex", gap: "0.4rem" }}>
+              <i>No </i>
+              <TbAnchorOff />
+              <i>for Territory</i>
+            </span>
+          )}
+        </div>
+      )}
 
       {/* Annotator */}
       <div style={{ marginTop: "0.2rem" }}>
@@ -319,7 +325,7 @@ export const StatementListTextAnnotator: React.FC<
               thisTerritoryEntityId={territoryId}
               initialScrollEntityId={territoryId}
               displayLineNumbers={true}
-              height={contentHeight - 60}
+              height={contentHeight - 100}
               documentId={selectedDocumentId}
               handleCreateStatement={handleCreateStatement}
               handleCreateTerritory={handleCreateTerritory}

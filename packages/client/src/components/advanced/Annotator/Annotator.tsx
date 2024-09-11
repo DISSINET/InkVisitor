@@ -453,6 +453,11 @@ export const TextAnnotator = ({
               handleCreateStatement={onCreateStatement}
               handleRemoveAnchor={onRemoveAnchor}
               thisTerritoryEntityId={thisTerritoryEntityId}
+              canCreateActiveTAnchor={
+                !dataDocument?.referencedEntityIds.T.includes(
+                  thisTerritoryEntityId ?? ""
+                )
+              }
             />
           </StyledAnnotatorMenu>
         )}

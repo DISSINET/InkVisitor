@@ -15,6 +15,7 @@ import {
 } from "./AnnotatorStyles";
 import { TbAnchor } from "react-icons/tb";
 import { FaPlus } from "react-icons/fa";
+import theme from "Theme/theme";
 
 interface TextAnnotatorMenuProps {
   text: string;
@@ -26,6 +27,7 @@ interface TextAnnotatorMenuProps {
   handleCreateTerritory: Function | false;
   handleRemoveAnchor: Function | false;
   thisTerritoryEntityId: string | undefined;
+  canCreateActiveTAnchor: boolean;
 }
 
 export const TextAnnotatorMenu = ({
@@ -37,6 +39,7 @@ export const TextAnnotatorMenu = ({
   handleCreateTerritory = false,
   handleRemoveAnchor = false,
   thisTerritoryEntityId,
+  canCreateActiveTAnchor,
 }: TextAnnotatorMenuProps) => {
   return (
     <>
@@ -58,26 +61,31 @@ export const TextAnnotatorMenu = ({
       </StyledAnnotatorItem>
       <StyledAnnotatorItem>
         <StyledAnnotatorItemContent>
-          {thisTerritoryEntityId && entities[thisTerritoryEntityId] && (
-            <div>
-              <Button
-                icon={
-                  <>
-                    <TbAnchor size={15} style={{ marginRight: 2 }} />
-                    <EntityTag
-                      entity={entities[thisTerritoryEntityId] as IEntity}
-                    />
-                  </>
-                }
-                color="primary"
-                paddingX={true}
-                onClick={() => {
-                  onAnchorAdd(thisTerritoryEntityId);
-                }}
-                tooltipLabel="Create anchor for this territory"
-              />
-            </div>
-          )}
+          {canCreateActiveTAnchor &&
+            thisTerritoryEntityId &&
+            entities[thisTerritoryEntityId] && (
+              <div style={{ display: "flex", gap: theme.space[2] }}>
+                <Button
+                  icon={
+                    <>
+                      <TbAnchor size={15} style={{ marginRight: 2 }} />
+                      Active territory
+                    </>
+                  }
+                  color="primary"
+                  paddingX={true}
+                  onClick={() => {
+                    onAnchorAdd(thisTerritoryEntityId);
+                  }}
+                  tooltipLabel="Create anchor for active territory"
+                />
+                <EntityTag
+                  entity={entities[thisTerritoryEntityId] as IEntity}
+                />
+              </div>
+            )}
+        </StyledAnnotatorItemContent>
+        <StyledAnnotatorItemContent>
           {handleCreateStatement && (
             <Button
               icon={
