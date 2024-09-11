@@ -23,6 +23,12 @@ import {
 } from "./ExplorerTableStyles";
 import { ThemeContext } from "styled-components";
 import { classesAll } from "@shared/dictionaries/entity";
+import {
+  LuChevronFirst,
+  LuChevronLast,
+  LuChevronLeft,
+  LuChevronRight,
+} from "react-icons/lu";
 
 const initialNewColumn: Explore.IExploreColumn = {
   id: uuidv4(),
@@ -109,21 +115,31 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
           <span style={{ marginRight: "1rem" }}>offset: {state.offset}</span>
           <span style={{ marginRight: "1rem" }}>limit: {state.limit}</span>
           {/* {state.limit < entities.length && ( */}
-          <span>
+          <span
+            style={{
+              display: "inline-grid",
+              gap: "0.5rem",
+              gridTemplateColumns: "repeat(4,auto)",
+            }}
+          >
             <Button
               // onClick={(): void => gotoPage(0)}
               // disabled={!canPreviousPage}
-              label={"<<"}
+              icon={<LuChevronFirst size={12} />}
               inverted
               color="greyer"
+              radiusLeft
+              radiusRight
             />
 
             <Button
               // onClick={(): void => previousPage()}
               // disabled={!canPreviousPage}
-              label={"<"}
+              icon={<LuChevronLeft size={12} />}
               inverted
               color="greyer"
+              radiusLeft
+              radiusRight
             />
 
             {/* <StyledPageNumber>
@@ -133,17 +149,21 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
             <Button
               // onClick={(): void => nextPage()}
               // disabled={!canNextPage}
-              label={">"}
+              icon={<LuChevronRight size={12} />}
               inverted
               color="greyer"
+              radiusLeft
+              radiusRight
             />
 
             <Button
               // onClick={(): void => gotoPage(pageCount - 1)}
               // disabled={!canNextPage}
-              label={">>"}
+              icon={<LuChevronLast size={12} />}
               inverted
               color="greyer"
+              radiusLeft
+              radiusRight
             />
           </span>
           {/* )} */}
