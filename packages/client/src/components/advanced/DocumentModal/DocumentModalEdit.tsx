@@ -18,8 +18,6 @@ const DocumentModalEdit: React.FC<DocumentModal> = ({ onClose, document }) => {
     setShow(true);
   }, []);
 
-  const modalBodyRef = useRef(null);
-
   const [windowWidth, windowHeight] = useWindowSize();
 
   return (
@@ -30,26 +28,24 @@ const DocumentModalEdit: React.FC<DocumentModal> = ({ onClose, document }) => {
             ? getShortLabelByLetterCount(document?.title, 90)
             : "no label"
         }`}
+        onClose={onClose}
       />
+
       <ModalContent>
-        <div ref={modalBodyRef} style={{ height: "300px", width: "1000px" }}>
-          <div>
-            {document ? (
-              <AnnotatorProvider>
-                <TextAnnotator
-                  documentId={document?.id}
-                  width={965}
-                  height={windowHeight - 200}
-                  displayLineNumbers={true}
-                />
-              </AnnotatorProvider>
-            ) : (
-              <div>Document not found</div>
-            )}
-          </div>
-        </div>
+        {document ? (
+          <AnnotatorProvider>
+            <TextAnnotator
+              documentId={document?.id}
+              width={965}
+              height={windowHeight - 180}
+              displayLineNumbers={true}
+            />
+          </AnnotatorProvider>
+        ) : (
+          <div>Document not found</div>
+        )}
       </ModalContent>
-      <ModalFooter>
+      {/* <ModalFooter>
         <div
           style={{
             display: "flex",
@@ -57,7 +53,7 @@ const DocumentModalEdit: React.FC<DocumentModal> = ({ onClose, document }) => {
             width: "100%",
           }}
         ></div>
-      </ModalFooter>
+      </ModalFooter> */}
     </Modal>
   );
 };

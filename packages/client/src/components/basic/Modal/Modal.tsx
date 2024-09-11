@@ -10,7 +10,9 @@ import {
   StyledCardHeader,
   StyledCardIcon,
   StyledCardTitle,
+  StyledCloseIconWrap,
   StyledFooter,
+  StyledIoClose,
   StyledModalInputForm,
   StyledModalInputLabel,
   StyledModalInputWrap,
@@ -102,13 +104,24 @@ interface ModalHeader {
   title?: string | React.ReactElement;
   color?: keyof ThemeColor;
   icon?: React.ReactNode;
+  onClose?: () => void;
 }
-export const ModalHeader: FC<ModalHeader> = ({ title, color, icon }) => {
+export const ModalHeader: FC<ModalHeader> = ({
+  title,
+  color,
+  icon,
+  onClose,
+}) => {
   return (
     <>
       <StyledCardHeader $color={color}>
         {icon && <StyledCardIcon>{icon}</StyledCardIcon>}
         <StyledCardTitle>{title}</StyledCardTitle>
+        {onClose && (
+          <StyledCloseIconWrap onClick={onClose}>
+            <StyledIoClose size={20} />
+          </StyledCloseIconWrap>
+        )}
       </StyledCardHeader>
     </>
   );
