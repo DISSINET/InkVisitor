@@ -177,6 +177,10 @@ export const TextAnnotator = ({
       for (const anchorI in anchors) {
         await obtainEntity(anchors[anchorI]);
       }
+
+      if (thisTerritoryEntityId) {
+        await obtainEntity(thisTerritoryEntityId);
+      }
     }
   };
 
@@ -284,7 +288,7 @@ export const TextAnnotator = ({
   }, [initialScrollEntityId]);
 
   // check if the selection is in the first half of the viewportr
-  const isTopSelection = useMemo<boolean>(() => {
+  const menuSelectionPosition = useMemo<"top" | "bottom" | "both">(() => {
     const vStart = annotator?.viewport?.lineStart ?? 0;
     const yEnd = (annotator?.cursor?.selectEnd?.yLine ?? 0) - vStart;
     const yStart = (annotator?.cursor?.selectStart?.yLine ?? 0) - vStart;
@@ -294,12 +298,45 @@ export const TextAnnotator = ({
     const yCenter = yStart && yEnd ? (yStart + yEnd) / 2 : 0;
     const viewportMiddle = allLines / 2;
 
-    return yCenter < viewportMiddle;
+    // if the selection is spanning through both halves of the viewport
+    if (
+      (yStart < viewportMiddle && yEnd > viewportMiddle) ||
+      (yEnd < viewportMiddle && yStart > viewportMiddle)
+    ) {
+      return "both";
+    }
+
+    return yCenter < viewportMiddle ? "top" : "bottom";
   }, [
     annotator?.cursor?.selectEnd?.yLine,
     annotator?.cursor?.selectStart?.yLine,
     annotator?.viewport.noLines,
   ]);
+
+  const isSelectionTopDown = useMemo<boolean>(() => {
+    const vStart = annotator?.viewport?.lineStart ?? 0;
+    const yEnd = (annotator?.cursor?.selectEnd?.yLine ?? 0) - vStart;
+    const yStart = (annotator?.cursor?.selectStart?.yLine ?? 0) - vStart;
+
+    return yEnd >= yStart;
+  }, [
+    annotator?.cursor?.selectEnd?.yLine,
+    annotator?.cursor?.selectStart?.yLine,
+  ]);
+
+  const translateMenu = useMemo<string>(() => {
+    if (menuSelectionPosition === "top") {
+      return "0%";
+    } else if (menuSelectionPosition === "bottom") {
+      return "-100%";
+    } else {
+      if (isSelectionTopDown) {
+        return "-100%";
+      } else {
+        return "0%%";
+      }
+    }
+  }, [menuSelectionPosition, isSelectionTopDown]);
 
   const menuPositionY = useMemo<number>(() => {
     const vStart = annotator?.viewport?.lineStart ?? 0;
@@ -309,31 +346,46 @@ export const TextAnnotator = ({
 
     const lineHeight = (annotator?.lineHeight ?? 0) / RATIO;
 
-    const menuYD = isTopSelection ? 2 * lineHeight : -lineHeight;
-
+    let menuYD = 0;
+    if (menuSelectionPosition === "top") {
+      menuYD = 2 * lineHeight;
+    } else if (menuSelectionPosition === "bottom") {
+      menuYD = -lineHeight;
+    } else {
+      if (isSelectionTopDown) {
+        menuYD = -lineHeight;
+      } else {
+        menuYD = 4 * lineHeight;
+      }
+    }
+    // large
     // if the selection is top-down or bottom-up
-    const isEndAfterStart = yEnd && yStart && yEnd >= yStart;
 
-    // if end is before start + isTopSelection is true, then the menu should be above the cursor...
+    // if end is before start + menuSelectionPosition is true, then the menu should be above the cursor...
+    // top-down + large => menu below end
     // top-down + top => menu below end
     // top-down + bottom => menu above start
     // bottom-up + top => menu below start
     // bottom-up + bottom => menu above end
 
-    if (isEndAfterStart) {
-      if (isTopSelection) {
+    if (isSelectionTopDown) {
+      if (menuSelectionPosition === "top") {
         return yEnd * lineHeight + menuYD;
-      } else {
+      } else if (menuSelectionPosition === "bottom") {
         return yStart * lineHeight + menuYD;
+      } else {
+        return yEnd * lineHeight;
       }
     } else {
-      if (isTopSelection) {
+      if (menuSelectionPosition === "top") {
         return yStart * lineHeight + menuYD;
+      } else if (menuSelectionPosition === "bottom") {
+        return yEnd * lineHeight + menuYD;
       } else {
         return yEnd * lineHeight + menuYD;
       }
     }
-  }, [annotator?.cursor?.yLine, annotator?.lineHeight, isTopSelection]);
+  }, [annotator?.cursor?.yLine, annotator?.lineHeight, menuSelectionPosition]);
 
   const isChangeMade = useMemo<boolean>(() => {
     return annotator?.text?.value !== dataDocument?.content;
@@ -389,7 +441,7 @@ export const TextAnnotator = ({
             $top={menuPositionY}
             $left={100}
             // $translateY={"100%"}
-            $translateY={isTopSelection ? "0%" : "-100%"}
+            $translateY={translateMenu}
           >
             <TextAnnotatorMenu
               anchors={selectedAnchors}
@@ -400,6 +452,12 @@ export const TextAnnotator = ({
               handleCreateTerritory={onCreateTerritory}
               handleCreateStatement={onCreateStatement}
               handleRemoveAnchor={onRemoveAnchor}
+              thisTerritoryEntityId={thisTerritoryEntityId}
+              canCreateActiveTAnchor={
+                !dataDocument?.referencedEntityIds.T.includes(
+                  thisTerritoryEntityId ?? ""
+                )
+              }
             />
           </StyledAnnotatorMenu>
         )}
