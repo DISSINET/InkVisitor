@@ -1,4 +1,5 @@
 import { animated } from "@react-spring/web";
+import { IoClose } from "react-icons/io5";
 import styled from "styled-components";
 import { space2, space4, space5, space6, space7 } from "Theme/constants";
 import { ThemeColor } from "Theme/theme";
@@ -64,6 +65,7 @@ interface StyledCardHeader {
   $color?: keyof ThemeColor;
 }
 export const StyledCardHeader = styled.header<StyledCardHeader>`
+  position: relative;
   display: flex;
   justify-content: flex-start;
   align-items: center;
@@ -138,4 +140,20 @@ export const StyledModalInputWrap = styled.div<StyledModalInputWrap>`
   display: grid;
   position: relative;
   margin-bottom: ${({ theme }) => theme.space[1]};
+`;
+
+export const StyledCloseIconWrap = styled.span`
+  position: absolute;
+  right: 1rem;
+  padding: 0.3rem;
+  cursor: pointer;
+  border-radius: 5rem;
+  transition: 0.3s;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+`;
+export const StyledIoClose = styled(IoClose)`
+  color: ${({ theme }) => theme.color["gray"][500]};
 `;
