@@ -1,5 +1,4 @@
 import { EntityEnums } from "../enums";
-import { IResponseQueryEntity } from "./response-query";
 
 export namespace Query {
   export interface INode {
@@ -72,8 +71,12 @@ export namespace Explore {
     offset: number;
   }
 
+  export enum EViewMode {
+    Table = "table",
+  }
+
   export interface IView {
-    showNewColumn: boolean;
+    mode: EViewMode;
   }
 
   export interface IExploreColumnFilter {}
@@ -88,7 +91,7 @@ export namespace Explore {
     id: string;
     name: string;
     type: EExploreColumnType;
-    editable?: boolean;
+    editable: boolean;
     params: IExploreColumnParams<EExploreColumnType>;
   }
 
