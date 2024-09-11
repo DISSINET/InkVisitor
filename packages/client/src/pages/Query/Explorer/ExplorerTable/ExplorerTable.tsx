@@ -52,7 +52,6 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
 
   useEffect(() => {
     if (!isQueryFetching) {
-      console.log("setting new entities", incomingEntities);
       setEntities(incomingEntities);
     }
   }, [incomingEntities, isQueryFetching]);
@@ -109,45 +108,45 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
           </span>
           <span style={{ marginRight: "1rem" }}>offset: {state.offset}</span>
           <span style={{ marginRight: "1rem" }}>limit: {state.limit}</span>
-          {state.limit < entities.length && (
-            <span>
-              <Button
-                // onClick={(): void => gotoPage(0)}
-                // disabled={!canPreviousPage}
-                label={"<<"}
-                inverted
-                color="greyer"
-              />
+          {/* {state.limit < entities.length && ( */}
+          <span>
+            <Button
+              // onClick={(): void => gotoPage(0)}
+              // disabled={!canPreviousPage}
+              label={"<<"}
+              inverted
+              color="greyer"
+            />
 
-              <Button
-                // onClick={(): void => previousPage()}
-                // disabled={!canPreviousPage}
-                label={"<"}
-                inverted
-                color="greyer"
-              />
+            <Button
+              // onClick={(): void => previousPage()}
+              // disabled={!canPreviousPage}
+              label={"<"}
+              inverted
+              color="greyer"
+            />
 
-              {/* <StyledPageNumber>
+            {/* <StyledPageNumber>
               {pageIndex + 1}/{pageOptions.length}
               </StyledPageNumber> */}
 
-              <Button
-                // onClick={(): void => nextPage()}
-                // disabled={!canNextPage}
-                label={">"}
-                inverted
-                color="greyer"
-              />
+            <Button
+              // onClick={(): void => nextPage()}
+              // disabled={!canNextPage}
+              label={">"}
+              inverted
+              color="greyer"
+            />
 
-              <Button
-                // onClick={(): void => gotoPage(pageCount - 1)}
-                // disabled={!canNextPage}
-                label={">>"}
-                inverted
-                color="greyer"
-              />
-            </span>
-          )}
+            <Button
+              // onClick={(): void => gotoPage(pageCount - 1)}
+              // disabled={!canNextPage}
+              label={">>"}
+              inverted
+              color="greyer"
+            />
+          </span>
+          {/* )} */}
         </div>
         <div>
           <Button
@@ -213,10 +212,11 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                                 <span>
                                   <EntityTag
                                     entity={entity}
-                                    // TODO: unlink from explore state
-                                    // unlinkButton={editable && {
-                                    //   onClick: () =>
-                                    // }}
+                                    unlinkButton={{
+                                      onClick: () => {
+                                        // TODO: unlink on BE
+                                      },
+                                    }}
                                   />
                                 </span>
                               </React.Fragment>
@@ -230,8 +230,9 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                       {column.editable && (
                         <EntitySuggester
                           categoryTypes={classesAll}
-                          // TODO: add to explore state
-                          // onPicked={}
+                          onPicked={(entity) => {
+                            // TODO: add to explore state
+                          }}
                         />
                       )}
                     </StyledGridColumn>
