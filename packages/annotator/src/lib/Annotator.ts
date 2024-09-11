@@ -356,19 +356,28 @@ export class Annotator {
         break;
 
       case "ArrowLeft":
-        if (e.shiftKey) {
-          const [offsetLeft] = this.text.getCursorWordOffsets(
-            this.viewport,
-            this.cursor
-          );
+        if (e.shiftKey && e.ctrlKey) {
+          let offsetLeft = 0,
+            offsetRight = 0;
+          while (!offsetLeft) {
+            [offsetLeft, offsetRight] = this.text.getCursorWordOffsets(
+              this.viewport,
+              this.cursor
+            );
+
+            if (offsetLeft === -0) {
+              this.cursor.move(-1, 0);
+              if (this.cursor.xLine <= 0) {
+                this.cursor.yLine = Math.max(0, this.cursor.yLine - 1);
+                this.cursor.xLine = Math.floor(this.width / this.charWidth) - 1;
+              }
+            }
+          }
           this.cursor.selectStart = {
             xLine: this.cursor.xLine + offsetLeft,
-            yLine: this.cursor.yLine,
+            yLine: this.viewport.lineStart + this.cursor.yLine,
           };
-          this.cursor.selectEnd = {
-            xLine: this.cursor.xLine,
-            yLine: this.cursor.yLine,
-          };
+          this.cursor.move(offsetLeft, 0);
         } else {
           // go 1 line up if at the start
           if (this.cursor.xLine === 0) {
@@ -380,23 +389,50 @@ export class Annotator {
           } else {
             this.cursor.move(-1, 0);
           }
+
+          if (e.shiftKey) {
+            this.cursor.selectStart = {
+              xLine: this.cursor.xLine,
+              yLine: this.viewport.lineStart + this.cursor.yLine,
+            };
+          } else {
+            this.cursor.selectStart = {
+              xLine: this.cursor.xLine,
+              yLine: this.viewport.lineStart + this.cursor.yLine,
+            };
+            this.cursor.selectEnd = this.cursor.selectStart;
+          }
         }
         break;
 
       case "ArrowRight":
-        if (e.shiftKey) {
-          const [, offssetRight] = this.text.getCursorWordOffsets(
-            this.viewport,
-            this.cursor
-          );
-          this.cursor.selectStart = {
-            xLine: this.cursor.xLine,
-            yLine: this.cursor.yLine,
-          };
+        if (e.shiftKey && e.ctrlKey) {
+          let offsetRight, offsetLeft;
+          while (!offsetRight) {
+            [offsetLeft, offsetRight] = this.text.getCursorWordOffsets(
+              this.viewport,
+              this.cursor
+            );
+            if (!offsetRight) {
+              this.cursor.move(1, 0);
+              if (this.cursor.xLine > Math.floor(this.width / this.charWidth)) {
+                this.cursor.xLine = 0;
+                this.cursor.yLine++;
+              }
+            } else if (
+              offsetRight + this.cursor.xLine >
+              Math.floor(this.width / this.charWidth)
+            ) {
+              this.cursor.xLine = 0;
+              this.cursor.yLine++;
+            }
+          }
+
           this.cursor.selectEnd = {
-            xLine: this.cursor.xLine + offssetRight,
-            yLine: this.cursor.yLine,
+            xLine: this.cursor.xLine + offsetRight,
+            yLine: this.viewport.lineStart + this.cursor.yLine,
           };
+          this.cursor.move(offsetRight, 0);
         } else {
           this.cursor.move(1, 0);
 
@@ -419,6 +455,19 @@ export class Annotator {
               this.cursor.xLine = backupXLine - 1;
               this.cursor.yLine = backupYLine;
             }
+          }
+
+          if (e.shiftKey) {
+            this.cursor.selectEnd = {
+              xLine: this.cursor.xLine,
+              yLine: this.viewport.lineStart + this.cursor.yLine,
+            };
+          } else {
+            this.cursor.selectEnd = {
+              xLine: this.cursor.xLine,
+              yLine: this.viewport.lineStart + this.cursor.yLine,
+            };
+            this.cursor.selectStart = this.cursor.selectEnd;
           }
         }
         break;
@@ -798,7 +847,6 @@ export class Annotator {
         });
       }
     }
-
     if (this.text.mode === Modes.HIGHLIGHT && this.onHighlightCb) {
       const startPos = this.text.getSegmentPosition(this.viewport.lineStart, 0);
       const endPos = this.text.getSegmentPosition(
