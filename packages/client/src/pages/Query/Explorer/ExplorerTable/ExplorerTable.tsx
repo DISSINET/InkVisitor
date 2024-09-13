@@ -51,16 +51,21 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   isQueryFetching,
   queryError,
 }) => {
-  const { entities: incomingEntities } = data ?? { entities: [] };
+  const { entities: incomingEntities, total: incomingTotal } = data ?? {
+    entities: [],
+    total: 0,
+  };
   const { columns, filters, limit, offset, sort, view } = state;
 
   const [entities, setEntities] = useState<IResponseQueryEntity[]>([]);
+  const [total, setTotal] = useState(0);
 
   useEffect(() => {
     if (!isQueryFetching) {
       setEntities(incomingEntities);
+      setTotal(incomingTotal);
     }
-  }, [incomingEntities, isQueryFetching]);
+  }, [incomingEntities, total, isQueryFetching]);
 
   const [columnName, setColumnName] = useState(initialNewColumn.name);
   const [columnType, setColumnType] = useState(initialNewColumn.type);
@@ -103,70 +108,108 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     // setShowNewColumn(false);
   };
 
-  const themeContext = useContext(ThemeContext);
+  const totalPages = useMemo(() => Math.ceil(total / limit), [total, limit]);
+
+  const handleFirstPage = () => {
+    dispatch({ type: ExploreActionType.setOffset, payload: 0 });
+  };
+
+  const handleLastPage = () => {
+    const lastPageOffset = Math.floor((total - 1) / limit) * limit;
+    dispatch({ type: ExploreActionType.setOffset, payload: lastPageOffset });
+  };
+
+  const handleNextPage = () => {
+    if (offset + limit < total) {
+      dispatch({ type: ExploreActionType.setOffset, payload: offset + limit });
+    }
+  };
+
+  const handlePreviousPage = () => {
+    if (offset - limit >= 0) {
+      dispatch({ type: ExploreActionType.setOffset, payload: offset - limit });
+    }
+  };
+
+  const handleChangeLimit = (newLimit: number) => {
+    dispatch({ type: ExploreActionType.setLimit, payload: newLimit });
+    dispatch({ type: ExploreActionType.setOffset, payload: 0 });
+  };
+
+  const startRecord = offset + 1;
+  const endRecord = Math.min(offset + limit, total);
+  const pageNumber = Math.floor(offset / limit + 1);
+  const canGoToPreviousPage = offset > 0;
+  const canGoToNextPage = offset + limit < total;
 
   return (
     <div style={{ padding: "1rem" }}>
       <StyledTableHeader>
         <div>
-          <span style={{ marginRight: "1rem" }}>
-            records: {entities.length}
-          </span>
-          <span style={{ marginRight: "1rem" }}>offset: {state.offset}</span>
-          <span style={{ marginRight: "1rem" }}>limit: {state.limit}</span>
-          {/* {state.limit < entities.length && ( */}
           <span
-            style={{
-              display: "inline-grid",
-              gap: "0.5rem",
-              gridTemplateColumns: "repeat(4,auto)",
-            }}
-          >
-            <Button
-              // onClick={(): void => gotoPage(0)}
-              // disabled={!canPreviousPage}
-              icon={<LuChevronFirst size={12} />}
-              inverted
-              color="greyer"
-              radiusLeft
-              radiusRight
-            />
-
-            <Button
-              // onClick={(): void => previousPage()}
-              // disabled={!canPreviousPage}
-              icon={<LuChevronLeft size={12} />}
-              inverted
-              color="greyer"
-              radiusLeft
-              radiusRight
-            />
-
-            {/* <StyledPageNumber>
-              {pageIndex + 1}/{pageOptions.length}
-              </StyledPageNumber> */}
-
-            <Button
-              // onClick={(): void => nextPage()}
-              // disabled={!canNextPage}
-              icon={<LuChevronRight size={12} />}
-              inverted
-              color="greyer"
-              radiusLeft
-              radiusRight
-            />
-
-            <Button
-              // onClick={(): void => gotoPage(pageCount - 1)}
-              // disabled={!canNextPage}
-              icon={<LuChevronLast size={12} />}
-              inverted
-              color="greyer"
-              radiusLeft
-              radiusRight
-            />
-          </span>
-          {/* )} */}
+            style={{ marginRight: "1rem" }}
+          >{`page ${pageNumber} of ${totalPages}`}</span>
+          <span
+            style={{ marginRight: "1rem" }}
+          >{`records ${startRecord}-${endRecord} of ${total}`}</span>
+          {state.limit < total && (
+            <span
+              style={{
+                display: "inline-grid",
+                gap: "0.5rem",
+                gridTemplateColumns: "repeat(4,auto)",
+                marginRight: "1rem",
+              }}
+            >
+              <Button
+                onClick={handleFirstPage}
+                disabled={!canGoToPreviousPage}
+                icon={<LuChevronFirst size={13} />}
+                inverted
+                color="greyer"
+                radiusLeft
+                radiusRight
+              />
+              <Button
+                onClick={handlePreviousPage}
+                disabled={!canGoToPreviousPage}
+                icon={<LuChevronLeft size={13} />}
+                inverted
+                color="greyer"
+                radiusLeft
+                radiusRight
+              />
+              <Button
+                onClick={handleNextPage}
+                disabled={!canGoToNextPage}
+                icon={<LuChevronRight size={13} />}
+                inverted
+                color="greyer"
+                radiusLeft
+                radiusRight
+              />
+              <Button
+                onClick={handleLastPage}
+                disabled={!canGoToNextPage}
+                icon={<LuChevronLast size={13} />}
+                inverted
+                color="greyer"
+                radiusLeft
+                radiusRight
+              />
+            </span>
+          )}
+          <Dropdown.Single.Basic
+            width={50}
+            value={limit.toString()}
+            options={[5, 10, 20, 50, 100].map((number) => {
+              return {
+                value: number.toString(),
+                label: number.toString(),
+              };
+            })}
+            onChange={(value) => handleChangeLimit(Number(value))}
+          />
         </div>
         <div>
           <Button

@@ -33,6 +33,8 @@ interface ExploreAction {
 enum ExploreActionType {
   addColumn,
   removeColumn,
+  setOffset,
+  setLimit,
 }
 
 const exploreReducer = (
@@ -55,6 +57,22 @@ const exploreReducer = (
           columns: state.columns.filter(
             (column) => column.id !== removedColumnId
           ),
+        },
+      };
+
+    case ExploreActionType.setOffset:
+      return {
+        ...state,
+        ...{
+          offset: action.payload,
+        },
+      };
+
+    case ExploreActionType.setLimit:
+      return {
+        ...state,
+        ...{
+          limit: action.payload,
         },
       };
 
