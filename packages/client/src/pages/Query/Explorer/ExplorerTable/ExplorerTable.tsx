@@ -215,7 +215,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
           {entities.map((record, key) => {
             return (
               // ROW
-              <React.Fragment key={key}>
+              <div style={{ display: "contents" }} key={key}>
                 <StyledGridColumn>
                   <span>
                     <EntityTag entity={record.entity} />
@@ -258,7 +258,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                     </StyledGridColumn>
                   );
                 })}
-              </React.Fragment>
+              </div>
             );
           })}
         </StyledGrid>
