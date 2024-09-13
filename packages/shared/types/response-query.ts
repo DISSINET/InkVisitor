@@ -21,4 +21,5 @@ export interface IResponseQuery {
   query: Query.INode;
   explore: Explore.IExplore;
   entities: IResponseQueryEntity[];
+  total: number;
 }

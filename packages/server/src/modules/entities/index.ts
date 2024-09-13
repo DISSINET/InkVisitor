@@ -701,13 +701,14 @@ export default Router()
           request.body.explore
         );
 
-        await querySearch.run(request.db.connection);
+        const ids = await querySearch.run(request.db.connection);
         const results = await querySearch.getResults(request.db.connection);
 
         return {
           query: request.body.query,
           entities: results,
           explore: querySearch.explore,
+          total: ids.length
         };
       }
     )
