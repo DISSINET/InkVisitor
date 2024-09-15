@@ -11,6 +11,7 @@ export default class Document implements IDocument, IDbModel {
   id = "";
   title: string;
   content: string;
+  entityIds: string[] = [];
   createdAt?: Date;
   updatedAt?: Date;
 
@@ -22,6 +23,26 @@ export default class Document implements IDocument, IDbModel {
     if (data.updatedAt !== undefined) {
       this.updatedAt = data.updatedAt;
     }
+    this.entityIds = this.findEntities();
+  }
+
+  /**
+   * Parses the raw content and finds tags - entity ids
+   * @returns
+   */
+  findEntities(): string[] {
+    const regex = /<([\w-]+)>/g;
+    let match;
+
+    const entities = [];
+
+    while ((match = regex.exec(this.content)) !== null) {
+      entities.push(match[1]);
+    }
+
+    const uEntities = [...new Set(entities)];
+
+    return uEntities;
   }
 
   /**

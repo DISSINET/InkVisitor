@@ -4,6 +4,7 @@ export interface IDocument {
   id: string;
   content: string;
   title: string;
+  entityIds: string[];
   createdAt?: Date;
   updatedAt?: Date;
 }
