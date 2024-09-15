@@ -1,5 +1,5 @@
 import { IDbModel } from "@models/common";
-import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
+import { r as rethink, Connection, WriteResult, RDatum } from "rethinkdb-ts";
 import { IDocument } from "@shared/types";
 import { UserEnums } from "@shared/enums";
 import { InternalServerError, ModelNotValidError } from "@shared/types/errors";
@@ -186,6 +186,20 @@ export default class Document implements IDocument, IDbModel {
     const entries = await rethink
       .table(Document.table)
       .getAll(documentIds)
+      .run(db);
+
+    return entries && entries.length ? entries.map((d) => new Document(d)) : [];
+  }
+
+  static async findByEntityId(
+    db: Connection,
+    entityId: string
+  ): Promise<Document[]> {
+    const entries = await rethink
+      .table(Document.table)
+      .filter(function (row: RDatum) {
+        return row("entityIds").contains(entityId);
+      })
       .run(db);
 
     return entries && entries.length ? entries.map((d) => new Document(d)) : [];
