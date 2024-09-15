@@ -50,6 +50,7 @@ export namespace Query {
     XHasRelation = "X_has_relation",
     XHasClassification = "X_has_classification",
     CHasSuperclass = "C_has_superclass",
+    CHasClassification = "C_has_classification",
   }
   export enum NodeOperator {
     And = "and",

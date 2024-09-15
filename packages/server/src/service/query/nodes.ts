@@ -27,6 +27,7 @@ const validationRules: Validation = {
   [Query.EdgeType.XHasRelation]: [Query.NodeType.X, Query.NodeType.X],
   [Query.EdgeType.XHasClassification]: [Query.NodeType.X, Query.NodeType.C],
   [Query.EdgeType.CHasSuperclass]: [Query.NodeType.C, Query.NodeType.C],
+  [Query.EdgeType.CHasClassification]: [Query.NodeType.C, Query.NodeType.C],
 };
 
 export default class SearchNode implements Query.INode {

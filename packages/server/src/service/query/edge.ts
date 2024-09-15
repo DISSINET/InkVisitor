@@ -26,10 +26,34 @@ export default class SearchEdge implements Query.IEdge {
   }
 }
 
-export class EdgeHasClassification extends SearchEdge {
+export class EdgeXHasClassification extends SearchEdge {
   constructor(data: Partial<Query.IEdge>) {
     super(data);
     this.type = Query.EdgeType.XHasClassification;
+  }
+
+  run(q: RStream): RStream {
+    return q.concatMap(function (entity: RDatum<IEntity>) {
+      return r
+        .table(Relation.table)
+        .getAll(entity("id"), { index: DbEnums.Indexes.RelationsEntityIds })
+        .filter({
+          type: RelationEnums.Type.Classification,
+        })
+        .filter(function (relation: RDatum<RelationTypes.IRelation>) {
+          return relation("entityIds").nth(0).eq(entity("id"));
+        })
+        .map(function (relation) {
+          return relation("entityIds").nth(0);
+        });
+    });
+  }
+}
+
+export class EdgeCHasClassification extends SearchEdge {
+  constructor(data: Partial<Query.IEdge>) {
+    super(data);
+    this.type = Query.EdgeType.CHasClassification;
   }
 
   run(q: RStream): RStream {
@@ -79,10 +103,10 @@ export class EdgeHasRelation extends SearchEdge {
   }
 }
 
-export class EdgeHasSuperclass extends SearchEdge {
+export class EdgeCHasSuperclass extends SearchEdge {
   constructor(data: Partial<Query.IEdge>) {
     super(data);
-    this.type = Query.EdgeType.XHasSuperclass;
+    this.type = Query.EdgeType.CHasSuperclass;
   }
 
   run(q: RStream): RStream {
@@ -129,11 +153,13 @@ export function getEdgeInstance(data: Partial<Query.IEdge>): SearchEdge {
     case Query.EdgeType.XHasPropType:
       return new EdgeHasPropType(data);
     case Query.EdgeType.XHasClassification:
-      return new EdgeHasClassification(data);
+      return new EdgeXHasClassification(data);
+    case Query.EdgeType.CHasClassification:
+      return new EdgeCHasClassification(data);
     case Query.EdgeType.XHasRelation:
       return new EdgeHasRelation(data);
-    case Query.EdgeType.XHasSuperclass:
-      return new EdgeHasSuperclass(data);
+    case Query.EdgeType.CHasSuperclass:
+      return new EdgeCHasSuperclass(data);
     case Query.EdgeType.SUnderT:
       return new EdgeSUnderT(data);
     default:
