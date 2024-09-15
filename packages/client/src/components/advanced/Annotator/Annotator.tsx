@@ -54,8 +54,8 @@ export const TextAnnotator = ({
   thisTerritoryEntityId = undefined,
 
   storedAnnotatorScroll,
-  forwardAnnotator = (undefined) => {},
-  setStoredAnnotatorScroll = () => {},
+  forwardAnnotator = (undefined) => { },
+  setStoredAnnotatorScroll = () => { },
 }: TextAnnotatorProps) => {
   const queryClient = useQueryClient();
   const theme = useContext(ThemeContext);
@@ -241,7 +241,7 @@ export const TextAnnotator = ({
       }
     });
 
-    newAnnotator.onTextChanged((text) => {});
+    newAnnotator.onTextChanged((text) => { });
     newAnnotator.draw();
 
     setAnnotator(newAnnotator);
