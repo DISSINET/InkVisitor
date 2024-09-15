@@ -48,8 +48,8 @@ export namespace Query {
     XHasSIdentification = "X_has_S_identification",
     XHasSClassification = "X_has_S_classification",
     XHasRelation = "X_has_relation",
-    XHasSuperclass = "X_has_superclass",
     XHasClassification = "X_has_classification",
+    CHasSuperclass = "C_has_superclass",
   }
   export enum NodeOperator {
     And = "and",
