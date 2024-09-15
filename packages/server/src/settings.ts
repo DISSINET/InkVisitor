@@ -1,4 +1,13 @@
 import dotenv from "dotenv";
+const fs = require("fs");
+const path = require("path");
+
+// try the build env vars first
+console.log(
+  dotenv.config({
+    path: `.build_env`,
+  })
+);
 
 // will load .env.${ENV_FILE} if set
 if (process.env.ENV_FILE) {

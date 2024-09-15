@@ -46,6 +46,15 @@ export function checkPassword(
 
 const defaultJwtAlgo = "HS256";
 
+let secret = (process.env.SECRET as string) || "";
+if (process.argv.length > 3) {
+  secret += process.argv[3];
+} else if (process.env.BUILD_TIMESTAMP) {
+  secret += process.env.BUILD_TIMESTAMP;
+}
+
+console.log(`SECRET set to ${secret}`);
+
 /**
  * Function thats creates signed jwt token for user
  * @param user
@@ -58,7 +67,7 @@ export function generateAccessToken(user: IUser, expDays = 30): string {
       user,
       exp: Math.floor(Date.now() / 1000) + 86400 * expDays,
     },
-    process.env.SECRET as string,
+    secret,
     {
       algorithm: defaultJwtAlgo,
     }
@@ -72,11 +81,11 @@ export function generateAccessToken(user: IUser, expDays = 30): string {
  */
 export function validateJwt() {
   return expressjwt({
-    secret: process.env.SECRET || "",
+    secret: secret,
     algorithms: [defaultJwtAlgo],
     requestProperty: "user",
     isRevoked: async (req, tokenn) => {
-      return false
+      return false;
     },
     getToken: (req: Request): string | Promise<string> | undefined => {
       if (
