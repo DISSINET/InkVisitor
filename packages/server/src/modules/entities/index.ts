@@ -31,6 +31,7 @@ import { IRequest } from "src/custom_typings/request";
 import Relation from "@models/relation/relation";
 import { RelationEnums } from "@shared/enums";
 import { Relation as RelationType } from "@shared/types";
+import Document from "@models/document/document";
 import { copyRelations } from "@models/relation/functions";
 import Entity from "@models/entity/entity";
 import { EventType } from "@shared/types/stats";
@@ -518,6 +519,23 @@ export default Router()
                   : "")
               })`
             ).withData(linkIds);
+            continue;
+          }
+
+          const docsIds = await Document.findByEntityId(
+            req.db.connection,
+            entity.id
+          );
+          if (docsIds.length) {
+            out.result = false;
+            out.data[entity.id] = new InvalidDeleteError(
+              `Cannot be deleted while anchored to documents (${
+                docsIds[0].id +
+                (docsIds.length > 1
+                  ? " + " + (docsIds.length - 1) + " others"
+                  : "")
+              })`
+            ).withData(docsIds.map((d) => d.id));
             continue;
           }
 
