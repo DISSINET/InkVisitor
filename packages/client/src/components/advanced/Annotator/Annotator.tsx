@@ -128,16 +128,16 @@ export const TextAnnotator = ({
         updateDocumentMutationQuiet.mutate({
           id: documentId,
           doc: {
-            ...{ document: dataDocument },
-            ...{ content: annotator.text.value },
+            ...dataDocument,
+            content: annotator.text.value,
           },
         });
       } else {
         updateDocumentMutation.mutate({
           id: documentId,
           doc: {
-            ...{ document: dataDocument },
-            ...{ content: annotator.text.value },
+            ...dataDocument,
+            content: annotator.text.value,
           },
         });
       }
