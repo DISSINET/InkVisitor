@@ -659,10 +659,11 @@ export class Annotator {
    * @param e
    */
   onWheel(e: WheelEvent) {
-    const up = e.deltaY < 0 ? false : true;
-    if (up) {
+    const down = e.deltaY < 0 ? false : true;
+
+    if (down) {
       this.viewport.scrollDown(1, this.text.noLines);
-    } else if (!up) {
+    } else if (!down) {
       this.viewport.scrollUp(1);
     }
 
