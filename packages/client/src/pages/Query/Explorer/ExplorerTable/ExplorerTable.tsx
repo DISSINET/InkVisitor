@@ -315,7 +315,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                           (entity, key) => {
                             return (
                               <React.Fragment key={key}>
-                                <span>
+                                <span style={{ marginBottom: "0.3rem" }}>
                                   <EntityTag
                                     entity={entity}
                                     unlinkButton={{
