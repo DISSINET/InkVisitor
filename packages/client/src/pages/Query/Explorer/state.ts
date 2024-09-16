@@ -35,6 +35,7 @@ enum ExploreActionType {
   removeColumn,
   setOffset,
   setLimit,
+  sort,
 }
 
 const exploreReducer = (
@@ -73,6 +74,22 @@ const exploreReducer = (
         ...state,
         ...{
           limit: action.payload,
+        },
+      };
+
+    case ExploreActionType.setLimit:
+      return {
+        ...state,
+        ...{
+          limit: action.payload,
+        },
+      };
+
+    case ExploreActionType.sort:
+      return {
+        ...state,
+        ...{
+          sort: action.payload,
         },
       };
 

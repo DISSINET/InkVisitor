@@ -21,7 +21,7 @@ import {
   StyledNewColumnValue,
   StyledTableHeader,
 } from "./ExplorerTableStyles";
-import { ThemeContext } from "styled-components";
+import { FaSort, FaSortDown, FaSortUp } from "react-icons/fa6";
 import { classesAll } from "@shared/dictionaries/entity";
 import {
   LuChevronFirst,
@@ -142,6 +142,14 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   const canGoToPreviousPage = offset > 0;
   const canGoToNextPage = offset + limit < total;
 
+  const toggleSortDirection = (columnId: string) => {
+    if (sort && sort.columnId === columnId) {
+      if (sort.direction === "asc") return "desc";
+      if (sort.direction === "desc") return undefined; // No sort
+    }
+    return "asc";
+  };
+
   return (
     <div style={{ padding: "1rem" }}>
       <StyledTableHeader>
@@ -220,6 +228,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
           />
         </div>
       </StyledTableHeader>
+
       <div style={{ display: "flex", overflow: "auto" }}>
         <StyledGrid $columns={columns.length + 1}>
           {/* HEADER */}
@@ -235,6 +244,40 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                     />
                   )}
                   {column.name}
+                  <span style={{ marginLeft: "0.5rem" }}>
+                    <Button
+                      noBorder
+                      noBackground
+                      inverted
+                      icon={
+                        sort && sort.columnId === column.id ? (
+                          sort.direction === "asc" ? (
+                            <FaSortUp color={"white"} />
+                          ) : sort.direction === "desc" ? (
+                            <FaSortDown color={"white"} />
+                          ) : (
+                            <FaSort color={"white"} />
+                          )
+                        ) : (
+                          <FaSort color={"white"} />
+                        )
+                      }
+                      onClick={() => {
+                        const newDirection = toggleSortDirection(column.id);
+                        dispatch({
+                          type: ExploreActionType.sort,
+                          payload:
+                            newDirection === undefined
+                              ? undefined
+                              : {
+                                  columnId: column.id,
+                                  direction: newDirection,
+                                },
+                        });
+                      }}
+                      tooltipLabel="sort"
+                    />
+                  </span>
                   <span style={{ marginLeft: "0.5rem" }}>
                     <Button
                       noBorder
