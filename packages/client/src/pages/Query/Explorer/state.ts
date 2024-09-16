@@ -1,3 +1,4 @@
+import { IEntity } from "@shared/types";
 import { Explore } from "@shared/types/query";
 
 const exploreStateInitial: Explore.IExplore = {

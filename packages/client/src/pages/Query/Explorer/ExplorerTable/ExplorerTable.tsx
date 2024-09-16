@@ -244,7 +244,8 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                     />
                   )}
                   {column.name}
-                  <span style={{ marginLeft: "0.5rem" }}>
+                  {/* SORT */}
+                  {/* <span style={{ marginLeft: "0.5rem" }}>
                     <Button
                       noBorder
                       noBackground
@@ -277,7 +278,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                       }}
                       tooltipLabel="sort"
                     />
-                  </span>
+                  </span> */}
                   <span style={{ marginLeft: "0.5rem" }}>
                     <Button
                       noBorder
