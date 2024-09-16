@@ -43,7 +43,6 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
 
   useEffect(() => {
     if (queryDiff(prevQueryState.current, queryState)) {
-      console.log("invalidating query");
       invalidateQuery();
       prevQueryState.current = queryState;
     }
@@ -67,8 +66,9 @@ export const QueryPage: React.FC<QueryPage> = ({}) => {
     error: queryError,
     isFetching: queryIsFetching,
   } = useQuery({
-    queryKey: ["query", queryState, exploreState.columns],
+    queryKey: ["query", queryState, exploreState],
     queryFn: async () => {
+      console.log("sort", exploreState.sort);
       const res = await api.query({
         query: queryState,
         explore: exploreState,

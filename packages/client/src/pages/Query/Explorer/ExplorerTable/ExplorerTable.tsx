@@ -21,8 +21,14 @@ import {
   StyledNewColumnValue,
   StyledTableHeader,
 } from "./ExplorerTableStyles";
-import { ThemeContext } from "styled-components";
+import { FaSort, FaSortDown, FaSortUp } from "react-icons/fa6";
 import { classesAll } from "@shared/dictionaries/entity";
+import {
+  LuChevronFirst,
+  LuChevronLast,
+  LuChevronLeft,
+  LuChevronRight,
+} from "react-icons/lu";
 
 const initialNewColumn: Explore.IExploreColumn = {
   id: uuidv4(),
@@ -45,17 +51,21 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
   isQueryFetching,
   queryError,
 }) => {
-  const { entities: incomingEntities } = data ?? { entities: [] };
+  const { entities: incomingEntities, total: incomingTotal } = data ?? {
+    entities: [],
+    total: 0,
+  };
   const { columns, filters, limit, offset, sort, view } = state;
 
   const [entities, setEntities] = useState<IResponseQueryEntity[]>([]);
+  const [total, setTotal] = useState(0);
 
   useEffect(() => {
     if (!isQueryFetching) {
-      console.log("setting new entities", incomingEntities);
       setEntities(incomingEntities);
+      setTotal(incomingTotal);
     }
-  }, [incomingEntities, isQueryFetching]);
+  }, [incomingEntities, total, isQueryFetching]);
 
   const [columnName, setColumnName] = useState(initialNewColumn.name);
   const [columnType, setColumnType] = useState(initialNewColumn.type);
@@ -98,56 +108,116 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
     // setShowNewColumn(false);
   };
 
-  const themeContext = useContext(ThemeContext);
+  const totalPages = useMemo(() => Math.ceil(total / limit), [total, limit]);
+
+  const handleFirstPage = () => {
+    dispatch({ type: ExploreActionType.setOffset, payload: 0 });
+  };
+
+  const handleLastPage = () => {
+    const lastPageOffset = Math.floor((total - 1) / limit) * limit;
+    dispatch({ type: ExploreActionType.setOffset, payload: lastPageOffset });
+  };
+
+  const handleNextPage = () => {
+    if (offset + limit < total) {
+      dispatch({ type: ExploreActionType.setOffset, payload: offset + limit });
+    }
+  };
+
+  const handlePreviousPage = () => {
+    if (offset - limit >= 0) {
+      dispatch({ type: ExploreActionType.setOffset, payload: offset - limit });
+    }
+  };
+
+  const handleChangeLimit = (newLimit: number) => {
+    dispatch({ type: ExploreActionType.setLimit, payload: newLimit });
+    dispatch({ type: ExploreActionType.setOffset, payload: 0 });
+  };
+
+  const startRecord = offset + 1;
+  const endRecord = Math.min(offset + limit, total);
+  const pageNumber = Math.floor(offset / limit + 1);
+  const canGoToPreviousPage = offset > 0;
+  const canGoToNextPage = offset + limit < total;
+
+  const toggleSortDirection = (columnId: string) => {
+    if (sort && sort.columnId === columnId) {
+      if (sort.direction === "asc") return "desc";
+      if (sort.direction === "desc") return undefined; // No sort
+    }
+    return "asc";
+  };
 
   return (
     <div style={{ padding: "1rem" }}>
       <StyledTableHeader>
         <div>
-          <span style={{ marginRight: "1rem" }}>
-            records: {entities.length}
-          </span>
-          <span style={{ marginRight: "1rem" }}>offset: {state.offset}</span>
-          <span style={{ marginRight: "1rem" }}>limit: {state.limit}</span>
-          {state.limit < entities.length && (
-            <span>
+          <span
+            style={{ marginRight: "1rem" }}
+          >{`page ${pageNumber} of ${totalPages}`}</span>
+          <span
+            style={{ marginRight: "1rem" }}
+          >{`records ${startRecord}-${endRecord} of ${total}`}</span>
+          {state.limit < total && (
+            <span
+              style={{
+                display: "inline-grid",
+                gap: "0.5rem",
+                gridTemplateColumns: "repeat(4,auto)",
+                marginRight: "1rem",
+              }}
+            >
               <Button
-                // onClick={(): void => gotoPage(0)}
-                // disabled={!canPreviousPage}
-                label={"<<"}
+                onClick={handleFirstPage}
+                disabled={!canGoToPreviousPage}
+                icon={<LuChevronFirst size={13} />}
                 inverted
                 color="greyer"
+                radiusLeft
+                radiusRight
               />
-
               <Button
-                // onClick={(): void => previousPage()}
-                // disabled={!canPreviousPage}
-                label={"<"}
+                onClick={handlePreviousPage}
+                disabled={!canGoToPreviousPage}
+                icon={<LuChevronLeft size={13} />}
                 inverted
                 color="greyer"
+                radiusLeft
+                radiusRight
               />
-
-              {/* <StyledPageNumber>
-              {pageIndex + 1}/{pageOptions.length}
-              </StyledPageNumber> */}
-
               <Button
-                // onClick={(): void => nextPage()}
-                // disabled={!canNextPage}
-                label={">"}
+                onClick={handleNextPage}
+                disabled={!canGoToNextPage}
+                icon={<LuChevronRight size={13} />}
                 inverted
                 color="greyer"
+                radiusLeft
+                radiusRight
               />
-
               <Button
-                // onClick={(): void => gotoPage(pageCount - 1)}
-                // disabled={!canNextPage}
-                label={">>"}
+                onClick={handleLastPage}
+                disabled={!canGoToNextPage}
+                icon={<LuChevronLast size={13} />}
                 inverted
                 color="greyer"
+                radiusLeft
+                radiusRight
               />
             </span>
           )}
+          <Dropdown.Single.Basic
+            width={50}
+            value={limit.toString()}
+            options={[5, 10, 20, 50, 100].map((number) => {
+              return {
+                value: number.toString(),
+                label: number.toString(),
+              };
+            })}
+            onChange={(value) => handleChangeLimit(Number(value))}
+          />
         </div>
         <div>
           <Button
@@ -158,6 +228,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
           />
         </div>
       </StyledTableHeader>
+
       <div style={{ display: "flex", overflow: "auto" }}>
         <StyledGrid $columns={columns.length + 1}>
           {/* HEADER */}
@@ -173,6 +244,41 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                     />
                   )}
                   {column.name}
+                  {/* SORT */}
+                  {/* <span style={{ marginLeft: "0.5rem" }}>
+                    <Button
+                      noBorder
+                      noBackground
+                      inverted
+                      icon={
+                        sort && sort.columnId === column.id ? (
+                          sort.direction === "asc" ? (
+                            <FaSortUp color={"white"} />
+                          ) : sort.direction === "desc" ? (
+                            <FaSortDown color={"white"} />
+                          ) : (
+                            <FaSort color={"white"} />
+                          )
+                        ) : (
+                          <FaSort color={"white"} />
+                        )
+                      }
+                      onClick={() => {
+                        const newDirection = toggleSortDirection(column.id);
+                        dispatch({
+                          type: ExploreActionType.sort,
+                          payload:
+                            newDirection === undefined
+                              ? undefined
+                              : {
+                                  columnId: column.id,
+                                  direction: newDirection,
+                                },
+                        });
+                      }}
+                      tooltipLabel="sort"
+                    />
+                  </span> */}
                   <span style={{ marginLeft: "0.5rem" }}>
                     <Button
                       noBorder
@@ -196,7 +302,7 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
           {entities.map((record, key) => {
             return (
               // ROW
-              <React.Fragment key={key}>
+              <div style={{ display: "contents" }} key={key}>
                 <StyledGridColumn>
                   <span>
                     <EntityTag entity={record.entity} />
@@ -210,13 +316,14 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                           (entity, key) => {
                             return (
                               <React.Fragment key={key}>
-                                <span>
+                                <span style={{ marginBottom: "0.3rem" }}>
                                   <EntityTag
                                     entity={entity}
-                                    // TODO: unlink from explore state
-                                    // unlinkButton={editable && {
-                                    //   onClick: () =>
-                                    // }}
+                                    unlinkButton={{
+                                      onClick: () => {
+                                        // TODO: unlink on BE
+                                      },
+                                    }}
                                   />
                                 </span>
                               </React.Fragment>
@@ -230,14 +337,15 @@ export const ExplorerTable: React.FC<ExplorerTable> = ({
                       {column.editable && (
                         <EntitySuggester
                           categoryTypes={classesAll}
-                          // TODO: add to explore state
-                          // onPicked={}
+                          onPicked={(entity) => {
+                            // TODO: add to explore state
+                          }}
                         />
                       )}
                     </StyledGridColumn>
                   );
                 })}
-              </React.Fragment>
+              </div>
             );
           })}
         </StyledGrid>

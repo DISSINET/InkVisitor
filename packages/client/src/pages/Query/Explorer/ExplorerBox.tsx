@@ -21,8 +21,6 @@ export const ExplorerBox: React.FC<ExplorerBoxProps> = ({
   isQueryFetching,
   queryError,
 }) => {
-  const queryClient = useQueryClient();
-
   const contentHeight: number = useAppSelector(
     (state) => state.layout.contentHeight
   );

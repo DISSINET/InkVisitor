@@ -1,3 +1,4 @@
+import { IEntity } from "@shared/types";
 import { Explore } from "@shared/types/query";
 
 const exploreStateInitial: Explore.IExplore = {
@@ -22,7 +23,7 @@ const exploreStateInitial: Explore.IExplore = {
   ],
   sort: undefined,
   filters: [],
-  limit: 100,
+  limit: 20,
   offset: 0,
 };
 
@@ -33,6 +34,9 @@ interface ExploreAction {
 enum ExploreActionType {
   addColumn,
   removeColumn,
+  setOffset,
+  setLimit,
+  sort,
 }
 
 const exploreReducer = (
@@ -55,6 +59,38 @@ const exploreReducer = (
           columns: state.columns.filter(
             (column) => column.id !== removedColumnId
           ),
+        },
+      };
+
+    case ExploreActionType.setOffset:
+      return {
+        ...state,
+        ...{
+          offset: action.payload,
+        },
+      };
+
+    case ExploreActionType.setLimit:
+      return {
+        ...state,
+        ...{
+          limit: action.payload,
+        },
+      };
+
+    case ExploreActionType.setLimit:
+      return {
+        ...state,
+        ...{
+          limit: action.payload,
+        },
+      };
+
+    case ExploreActionType.sort:
+      return {
+        ...state,
+        ...{
+          sort: action.payload,
         },
       };
 
