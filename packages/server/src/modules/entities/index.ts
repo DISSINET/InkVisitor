@@ -32,7 +32,9 @@ import {
 } from "@shared/types/errors";
 import { IRequestQuery } from "@shared/types/request-query";
 import { IRequestSearch } from "@shared/types/request-search";
+import Document from "@models/document/document";
 import { IResponseQuery } from "@shared/types/response-query";
+
 import { EventType } from "@shared/types/stats";
 import { Router } from "express";
 import { IRequest } from "src/custom_typings/request";
@@ -524,6 +526,23 @@ export default Router()
             continue;
           }
 
+          const docsIds = await Document.findByEntityId(
+            req.db.connection,
+            entity.id
+          );
+          if (docsIds.length) {
+            out.result = false;
+            out.data[entity.id] = new InvalidDeleteError(
+              `Cannot be deleted while anchored to documents (${
+                docsIds[0].id +
+                (docsIds.length > 1
+                  ? " + " + (docsIds.length - 1) + " others"
+                  : "")
+              })`
+            ).withData(docsIds.map((d) => d.id));
+            continue;
+          }
+
           const model = getEntityClass(entity);
           if (!model.canBeDeletedByUser(req.getUserOrFail())) {
             out.result = false;
@@ -708,7 +727,7 @@ export default Router()
           query: request.body.query,
           entities: results,
           explore: querySearch.explore,
-          total: ids.length
+          total: ids.length,
         };
       }
     )

@@ -283,8 +283,7 @@ export default Router()
         throw new PermissionDeniedError("document cannot be saved");
       }
 
-      // update only the required fields
-      const result = await model.update(request.db.connection, documentData);
+      const result = await model.update(request.db.connection, model);
 
       if (result.replaced || result.unchanged) {
         return {

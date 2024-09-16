@@ -1,5 +1,5 @@
 import { IDbModel } from "@models/common";
-import { r as rethink, Connection, WriteResult } from "rethinkdb-ts";
+import { r as rethink, Connection, WriteResult, RDatum } from "rethinkdb-ts";
 import { IDocument } from "@shared/types";
 import { UserEnums } from "@shared/enums";
 import { InternalServerError, ModelNotValidError } from "@shared/types/errors";
@@ -11,6 +11,7 @@ export default class Document implements IDocument, IDbModel {
   id = "";
   title: string;
   content: string;
+  entityIds: string[] = [];
   createdAt?: Date;
   updatedAt?: Date;
 
@@ -22,6 +23,26 @@ export default class Document implements IDocument, IDbModel {
     if (data.updatedAt !== undefined) {
       this.updatedAt = data.updatedAt;
     }
+    this.entityIds = this.findEntities();
+  }
+
+  /**
+   * Parses the raw content and finds tags - entity ids
+   * @returns
+   */
+  findEntities(): string[] {
+    const regex = /<([\w-]+)>/g;
+    let match;
+
+    const entities = [];
+
+    while ((match = regex.exec(this.content)) !== null) {
+      entities.push(match[1]);
+    }
+
+    const uEntities = [...new Set(entities)];
+
+    return uEntities;
   }
 
   /**
@@ -165,6 +186,20 @@ export default class Document implements IDocument, IDbModel {
     const entries = await rethink
       .table(Document.table)
       .getAll(documentIds)
+      .run(db);
+
+    return entries && entries.length ? entries.map((d) => new Document(d)) : [];
+  }
+
+  static async findByEntityId(
+    db: Connection,
+    entityId: string
+  ): Promise<Document[]> {
+    const entries = await rethink
+      .table(Document.table)
+      .filter(function (row: RDatum) {
+        return row("entityIds").contains(entityId);
+      })
       .run(db);
 
     return entries && entries.length ? entries.map((d) => new Document(d)) : [];

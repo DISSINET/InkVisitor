@@ -27,21 +27,6 @@ export default class ResponseDocument
     this.referencedEntityIds = referencedEntityIds;
   }
 
-  findEntities(): string[] {
-    const regex = /<([\w-]+)>/g;
-    let match;
-
-    const entities = [];
-
-    while ((match = regex.exec(this.content)) !== null) {
-      entities.push(match[1]);
-    }
-
-    const uEntities = [...new Set(entities)];
-
-    return uEntities;
-  }
-
   async populateWithEntities(conn: Connection): Promise<void> {
     for (const entityId of this.entityIds) {
       const entity = await findEntityById(conn, entityId);
