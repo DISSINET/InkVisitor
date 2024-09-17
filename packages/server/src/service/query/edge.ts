@@ -50,30 +50,6 @@ export class EdgeXHasClassification extends SearchEdge {
   }
 }
 
-export class EdgeCHasClassification extends SearchEdge {
-  constructor(data: Partial<Query.IEdge>) {
-    super(data);
-    this.type = Query.EdgeType.CHasClassification;
-  }
-
-  run(q: RStream): RStream {
-    return q.concatMap(function (entity: RDatum<IEntity>) {
-      return r
-        .table(Relation.table)
-        .getAll(entity("id"), { index: DbEnums.Indexes.RelationsEntityIds })
-        .filter({
-          type: RelationEnums.Type.Classification,
-        })
-        .filter(function (relation: RDatum<RelationTypes.IRelation>) {
-          return relation("entityIds").nth(0).eq(entity("id"));
-        })
-        .map(function (relation) {
-          return relation("entityIds").nth(0);
-        });
-    });
-  }
-}
-
 export class EdgeSUnderT extends SearchEdge {
   constructor(data: Partial<Query.IEdge>) {
     super(data);
@@ -154,8 +130,6 @@ export function getEdgeInstance(data: Partial<Query.IEdge>): SearchEdge {
       return new EdgeHasPropType(data);
     case Query.EdgeType.XHasClassification:
       return new EdgeXHasClassification(data);
-    case Query.EdgeType.CHasClassification:
-      return new EdgeCHasClassification(data);
     case Query.EdgeType.XHasRelation:
       return new EdgeHasRelation(data);
     case Query.EdgeType.CHasSuperclass:

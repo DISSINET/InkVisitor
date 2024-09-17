@@ -41,6 +41,7 @@ export namespace Query {
     XIsActant1InS = "X_is_actant_1_in_S",
     XIsActant2InS = "X_is_actant_2_in_S",
     SUnderT = "S_under_T",
+    SUnderChildrenT = "S_under_children_T",
     XHasReferenceR = "X_has_reference_R",
     THasChildT = "T_has_child_T",
     XHasSPropTypeC = "X_has_S_proptype_C",
@@ -50,7 +51,6 @@ export namespace Query {
     XHasRelation = "X_has_relation",
     XHasClassification = "X_has_classification",
     CHasSuperclass = "C_has_superclass",
-    CHasClassification = "C_has_classification",
   }
   export enum NodeOperator {
     And = "and",
